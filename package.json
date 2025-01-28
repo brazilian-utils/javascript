@@ -63,7 +63,7 @@
     "@types/jest": "^26.0.23",
     "cz-conventional-changelog": "^3.3.0",
     "docsify-cli": "^4.4.2",
-    "husky": "^6.0.0",
+    "husky": "^9.1.7",
     "lint-staged": "^11.0.0",
     "node-fetch": "^2.6.1",
     "prettier": "^2.3.1",
