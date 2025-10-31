@@ -59,6 +59,19 @@ const STATE = {
   TO,
 };
 
+/**
+ * Validates a Brazilian state registration number (Inscrição Estadual).
+ * 
+ * @param uf - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
+ * @param inscricaoEstadual - The state registration number to validate
+ * @returns `true` if the state registration number is valid, `false` otherwise
+ * 
+ * @example
+ * ```typescript
+ * isValid('SP', '110042490114'); // returns true
+ * isValid('RJ', '12345'); // returns false
+ * ```
+ */
 export function isValid(uf: State, inscricaoEstadual: string) {
   const digits = onlyNumbers(inscricaoEstadual);
   const state = new STATE[uf]();

@@ -60,7 +60,7 @@
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "@release-it/conventional-changelog": "^1.1.4",
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^30.0.0",
     "cz-conventional-changelog": "^3.3.0",
     "docsify-cli": "^4.4.2",
     "husky": "^6.0.0",
@@ -70,6 +70,6 @@
     "prismjs": "^1.23.0",
     "release-it": "^14.8.0",
     "tsdx": "^0.14.1",
-    "typescript": "^4.1.2"
+    "typescript": "^5.9.3"
   }
 }
