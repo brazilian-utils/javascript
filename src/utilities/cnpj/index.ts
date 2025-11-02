@@ -1,4 +1,4 @@
-import { isLastChar, onlyNumbers, generateChecksum, generateRandomNumber } from '../../helpers';
+import { isLastChar, generateChecksum, generateRandomNumber } from '../../helpers';
 
 export const LENGTH = 14;
 
@@ -25,25 +25,37 @@ export const CHECK_DIGITS_INDEXES = [12, 13];
 
 export const FIRST_CHECK_DIGIT_WEIGHTS = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
-export const SECOND_CHECK_DIGIT_WEIGHTS = [6].concat(FIRST_CHECK_DIGIT_WEIGHTS);
+export const SECOND_CHECK_DIGIT_WEIGHTS = [6, ...FIRST_CHECK_DIGIT_WEIGHTS];
+
+export const VALID_CNPJ_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+export const CNPJ_FORMAT_REGEX = /^[0-9A-Z]{2}\.?[0-9A-Z]{3}\.?[0-9A-Z]{3}\/?[0-9A-Z]{4}-?[0-9]{2}$/;
+
+export const NUMERIC_CNPJ_REGEX = /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/;
 
 export interface FormatCnpjOptions {
   pad?: boolean;
 }
 
-/**
- * Formats a CNPJ (Cadastro Nacional da Pessoa Jurídica) number according to Brazilian standards.
- *
- * The function removes all non-numeric characters from the input, optionally pads the number to the required length,
- * and inserts formatting characters (dots, slashes, hyphens) at the appropriate positions.
- *
- * @param cnpj - The CNPJ number to format, as a string or number.
- * @param options - Optional formatting options.
- *   @property pad - If true, pads the CNPJ with leading zeros to the required length.
- * @returns The formatted CNPJ string.
- */
+export function charToCnpjValue(char: string): number {
+  return char.charCodeAt(0) - 48;
+}
+
+export function cleanCnpj(cnpj: string): string {
+  return cnpj.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+}
+
+export function isNumericCnpj(cnpj: string): boolean {
+  return /^\d+$/.test(cleanCnpj(cnpj));
+}
+
+export function isAlphanumericCnpj(cnpj: string): boolean {
+  const cleaned = cleanCnpj(cnpj);
+  return cleaned.length === LENGTH && /[A-Z]/.test(cleaned);
+}
+
 export function format(cnpj: string | number, options: FormatCnpjOptions = {}): string {
-  let digits = onlyNumbers(cnpj);
+  let digits = cleanCnpj(cnpj.toString());
 
   if (options.pad) {
     digits = digits.padStart(LENGTH, '0');
@@ -65,12 +77,22 @@ export function format(cnpj: string | number, options: FormatCnpjOptions = {}): 
     }, '');
 }
 
-/**
- * Generates a valid CNPJ (Cadastro Nacional da Pessoa Jurídica) number as a string.
- * The generated CNPJ includes both check digits calculated according to official rules.
- *
- * @returns {string} A valid CNPJ number as a string.
- */
+export function generateRandomCnpjChar(): string {
+  return VALID_CNPJ_CHARS[Math.floor(Math.random() * VALID_CNPJ_CHARS.length)];
+}
+
+export function generateAlphanumericCnpjBase(): string {
+  let base = '';
+  for (let i = 0; i < 12; i++) {
+    base += generateRandomCnpjChar();
+  }
+  return base;
+}
+
+export function generateAlphanumericChecksum(cnpj: string, weights: number[]): number {
+  return cnpj.split('').reduce((sum, char, idx) => sum + charToCnpjValue(char) * weights[idx], 0);
+}
+
 export function generate(): string {
   const baseCNPJ = generateRandomNumber(LENGTH - 2);
 
@@ -83,45 +105,56 @@ export function generate(): string {
   return `${baseCNPJ}${firstCheckDigit}${secondCheckDigit}`;
 }
 
-/**
- * Checks if the provided CNPJ string matches the valid format.
- *
- * The valid format is: `NN.NNN.NNN/NNNN-NN` where `N` is a digit.
- * Dots, slashes, and hyphens are optional.
- *
- * @param cnpj - The CNPJ string to validate.
- * @returns `true` if the CNPJ matches the expected format, otherwise `false`.
- */
-export function isValidFormat(cnpj: string): boolean {
-  return /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/.test(cnpj);
+export function generateAlphanumeric(): string {
+  const baseCNPJ = generateAlphanumericCnpjBase();
+
+  const firstCheckDigitMod = generateAlphanumericChecksum(baseCNPJ, FIRST_CHECK_DIGIT_WEIGHTS) % 11;
+  const firstCheckDigit = (firstCheckDigitMod < 2 ? 0 : 11 - firstCheckDigitMod).toString();
+
+  const secondCheckDigitMod = generateAlphanumericChecksum(baseCNPJ + firstCheckDigit, SECOND_CHECK_DIGIT_WEIGHTS) % 11;
+  const secondCheckDigit = (secondCheckDigitMod < 2 ? 0 : 11 - secondCheckDigitMod).toString();
+
+  return `${baseCNPJ}${firstCheckDigit}${secondCheckDigit}`;
 }
 
-/**
- * Checks if the given CPF number is a reserved number.
- *
- * Reserved numbers are typically sequences of repeated digits (e.g., "00000000000", "11111111111", etc.)
- * that are not valid for real CPF registrations.
- *
- * @param cpf - The CPF number as a string to be checked.
- * @returns `true` if the CPF is a reserved number, otherwise `false`.
- */
-export function isReservedNumber(cpf: string): boolean {
-  return RESERVED_NUMBERS.indexOf(cpf) >= 0;
+export function isValidFormat(cnpj: string): boolean {
+  return CNPJ_FORMAT_REGEX.test(cnpj);
+}
+
+export function isValidNumericFormat(cnpj: string): boolean {
+  return NUMERIC_CNPJ_REGEX.test(cnpj);
+}
+
+export function isReservedNumber(cnpj: string): boolean {
+  const cleaned = cleanCnpj(cnpj);
+  return RESERVED_NUMBERS.indexOf(cleaned) >= 0;
+}
+
+export function isValidAlphanumericChecksum(cnpj: string): boolean {
+  const cleaned = cleanCnpj(cnpj);
+  const weights = [...FIRST_CHECK_DIGIT_WEIGHTS];
+
+  return CHECK_DIGITS_INDEXES.every((i) => {
+    if (i === CHECK_DIGITS_INDEXES[CHECK_DIGITS_INDEXES.length - 1]) {
+      weights.unshift(6);
+    }
+
+    const mod =
+      generateAlphanumericChecksum(
+        cleaned
+          .slice(0, i)
+          .split('')
+          .reduce((acc, digit) => acc + digit, ''),
+        weights
+      ) % 11;
+
+    return cleaned[i] === String(mod < 2 ? 0 : 11 - mod);
+  });
 }
 
 // TODO: move to checksum helper
-/**
- * Checks if the provided CNPJ string has a valid checksum according to Brazilian CNPJ rules.
- *
- * The function uses predefined weights and indexes to calculate and validate the check digits.
- * It iterates through the check digit indexes, adjusts the weights as needed, and compares
- * the calculated check digit with the corresponding digit in the CNPJ.
- *
- * @param cnpj - The CNPJ string to validate.
- * @returns `true` if the CNPJ has a valid checksum, `false` otherwise.
- */
 export function isValidChecksum(cnpj: string): boolean {
-  const weights = FIRST_CHECK_DIGIT_WEIGHTS.slice();
+  const weights = [...FIRST_CHECK_DIGIT_WEIGHTS];
 
   return CHECK_DIGITS_INDEXES.every((i) => {
     if (i === CHECK_DIGITS_INDEXES[CHECK_DIGITS_INDEXES.length - 1]) {
@@ -141,22 +174,18 @@ export function isValidChecksum(cnpj: string): boolean {
   });
 }
 
-/**
- * Checks if a given CNPJ (Cadastro Nacional da Pessoa Jurídica) string is valid.
- *
- * The validation includes:
- * - Ensuring the input is a non-empty string.
- * - Verifying the format of the CNPJ.
- * - Checking that the CNPJ is not a reserved number.
- * - Validating the checksum digits.
- *
- * @param cnpj - The CNPJ string to validate.
- * @returns `true` if the CNPJ is valid, otherwise `false`.
- */
 export function isValid(cnpj: string): boolean {
   if (!cnpj || typeof cnpj !== 'string') return false;
 
-  const numbers = onlyNumbers(cnpj);
+  const cleaned = cleanCnpj(cnpj);
 
-  return isValidFormat(cnpj) && !isReservedNumber(numbers) && isValidChecksum(numbers);
+  if (isNumericCnpj(cleaned)) {
+    return isValidNumericFormat(cnpj) && !isReservedNumber(cleaned) && isValidChecksum(cleaned);
+  }
+
+  if (isAlphanumericCnpj(cleaned)) {
+    return isValidFormat(cnpj) && isValidAlphanumericChecksum(cleaned);
+  }
+
+  return false;
 }
