@@ -12,8 +12,9 @@ Por favor, fiquem à vontade para abrir issues ou iniciar discussions. Vamos con
 
 ---
 
+![Logo do Brazilian Utils](https://github.com/brazilian-utils/brand/raw/main/github-hero/github-hero-js.png)
+
 <div align="center">
-<h1>🇧🇷 Brazilian Utils</h1>
 
 <p>Utils library for Brazilian-specific businesses.</p>
 

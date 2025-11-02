@@ -1,6 +1,6 @@
-const fetch = require('node-fetch');
-const fs = require('fs');
-const path = require('path');
+const fetch = require("node-fetch");
+const fs = require("fs");
+const path = require("path");
 
 // type City = {
 //   id: number,
@@ -26,26 +26,29 @@ const path = require('path');
 // };
 
 const writeFile = (cities) =>
-  fs.writeFileSync(
-    path.resolve(__dirname, '..', 'src/common/cities.ts'),
-    `export const CITIES_DATA = ${JSON.stringify(cities, null, 2)}`
-  );
+	fs.writeFileSync(
+		path.resolve(__dirname, "..", "src/common/cities.ts"),
+		`export const CITIES_DATA = ${JSON.stringify(cities, null, 2)}`,
+	);
 
 /**
  * https://servicodados.ibge.gov.br/api/docs/localidades?versao=1
  */
-fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios')
-  .then((res) => res.json())
-  .then((json) => {
-    const cities = json
-      .sort((cityA, cityB) => (cityA.nome > cityB.nome ? 1 : -1))
-      .reduce((acc, city) => {
-        const stateInitials = city.microrregiao.mesorregiao.UF.sigla;
-        if (!acc[stateInitials]) {
-          acc[stateInitials] = [];
-        }
-        acc[stateInitials].push(city.nome);
-        return acc;
-      }, {});
-    writeFile(cities);
-  });
+fetch("https://servicodados.ibge.gov.br/api/v1/localidades/municipios")
+	.then((res) => res.json())
+	.then((json) => {
+		const cities = json
+			.sort((cityA, cityB) => (cityA.nome > cityB.nome ? 1 : -1))
+			.reduce((acc, city) => {
+				const stateInitials = city.microrregiao?.mesorregiao?.UF?.sigla;
+
+				if (!stateInitials) return acc;
+
+				if (!acc[stateInitials]) {
+					acc[stateInitials] = [];
+				}
+				acc[stateInitials].push(city.nome);
+				return acc;
+			}, {});
+		writeFile(cities);
+	});
