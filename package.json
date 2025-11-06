@@ -57,7 +57,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@commitlint/cli": "^12.1.4",
+    "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^12.1.4",
     "@release-it/conventional-changelog": "^1.1.4",
     "@types/jest": "^30.0.0",
