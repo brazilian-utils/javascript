@@ -68,7 +68,7 @@
     "node-fetch": "^2.6.1",
     "prettier": "^3.6.2",
     "prismjs": "^1.23.0",
-    "release-it": "^14.8.0",
+    "release-it": "^19.0.6",
     "tsdx": "^0.14.1",
     "typescript": "^5.9.3"
   }
