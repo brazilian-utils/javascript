@@ -59,7 +59,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^12.1.4",
-    "@release-it/conventional-changelog": "^1.1.4",
+    "@release-it/conventional-changelog": "^10.0.2",
     "@types/jest": "^30.0.0",
     "cz-conventional-changelog": "^3.3.0",
     "docsify-cli": "^4.4.2",
