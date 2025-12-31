@@ -69,7 +69,7 @@
     "prettier": "^3.6.2",
     "prismjs": "^1.23.0",
     "release-it": "^19.0.6",
-    "tsdx": "^0.14.1",
+    "tsdx": "^2.0.0",
     "typescript": "^5.9.3"
   }
 }
