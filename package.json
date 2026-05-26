@@ -52,7 +52,7 @@
 		"vite-plugin-dts": "4.5.4",
 		"vite-plus": "0.1.19",
 		"vitest": "npm:@voidzero-dev/vite-plus-test@0.1.16",
-		"webdriverio": "9.27.0"
+		"webdriverio": "9.27.2"
 	},
 	"engines": {
 		"node": "^20.19.0 || >=22.12.0"
