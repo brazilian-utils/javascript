@@ -50,7 +50,7 @@
 		"release-it": "20.0.1",
 		"vite": "npm:@voidzero-dev/vite-plus-core@0.1.16",
 		"vite-plugin-dts": "4.5.4",
-		"vite-plus": "0.1.19",
+		"vite-plus": "0.1.23",
 		"vitest": "npm:@voidzero-dev/vite-plus-test@0.1.16",
 		"webdriverio": "9.27.0"
 	},
