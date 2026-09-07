@@ -73,5 +73,20 @@ describe("generateCnpj", () => {
 				expect(isValidCnpj(formatted, { version: 2 })).toBe(true);
 			}
 		});
+
+		test("should generate alphanumeric CNPJs spanning the full A-Z alphabet", () => {
+			const usedChars = new Set<string>();
+			for (let i = 0; i < 1000; i++) {
+				for (const char of generateCnpj(2)) {
+					usedChars.add(char);
+				}
+			}
+			// E, O, T and U were previously excluded by a restricted alphabet, even
+			// though isValidCnpj accepts them: the RFB alphanumeric CNPJ uses the full
+			// [A-Z0-9] base (official example "12.ABC.345/01DE-35" contains an "E").
+			for (const char of ["E", "O", "T", "U"]) {
+				expect(usedChars.has(char)).toBe(true);
+			}
+		});
 	});
 });
