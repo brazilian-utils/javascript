@@ -2,7 +2,7 @@
  * Portuguese (pt-BR) number-to-words tables, shared by `numberToWords` and by every public
  * "por extenso" formatter (`convertNumberToWords`, `convertCurrencyToWords`, `convertDateToWords`).
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  * "catorze" (not "quatorze") is used for 14, matching num2words pt_BR and brutils.
  */
 

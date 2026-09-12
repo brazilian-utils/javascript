@@ -9,6 +9,7 @@ import {
 	ZERO_WORD,
 } from "../constants/number-words";
 
+/** The grammatical gender `convertNumberToWords` agrees the number it writes out with. */
 export type NumberToWordsGender = "masculine" | "feminine";
 
 /**
@@ -44,11 +45,8 @@ const groupToWords = (value: number, gender?: NumberToWordsGender): string => {
 	const segments: string[] = [];
 
 	if (hundredsDigit > 0) {
-		segments.push(
-			value === 100
-				? HUNDRED_EXACT
-				: (gender === "feminine" ? HUNDREDS_FEMININE : HUNDREDS_MASCULINE)[hundredsDigit],
-		);
+		const hundreds = gender === "feminine" ? HUNDREDS_FEMININE : HUNDREDS_MASCULINE;
+		segments.push(value === 100 ? HUNDRED_EXACT : hundreds[hundredsDigit]);
 	}
 
 	if (remainder > 0) {
@@ -64,6 +62,19 @@ const groupToWords = (value: number, gender?: NumberToWordsGender): string => {
 	}
 
 	return segments.join(" e ");
+};
+
+const scaledGroupToWords = (
+	groupValue: number,
+	scale: number,
+	gender: NumberToWordsGender | undefined,
+): string => {
+	const scaleWord = SCALE_WORDS[scale];
+
+	if (scale === 0) return groupToWords(groupValue, gender);
+	if (scale === 1 && groupValue === 1) return scaleWord.singular;
+
+	return `${groupToWords(groupValue, gender)} ${groupValue === 1 ? scaleWord.singular : scaleWord.plural}`;
 };
 
 const isRoundHundred = (value: number): boolean => value % 100 === 0;
@@ -103,7 +114,7 @@ const isRoundHundred = (value: number): boolean => value % 100 === 0;
  * numberToWords(2000, { gender: "feminine" }); // "duas mil"
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
 export const numberToWords = (value: number, options?: NumberToWordsOptions): string => {
 	if (value === 0) return ZERO_WORD;
@@ -126,16 +137,7 @@ export const numberToWords = (value: number, options?: NumberToWordsOptions): st
 		if (groupValue === 0) continue;
 
 		const scale = highestScale - index;
-		const scaleWord = SCALE_WORDS[scale];
-
-		const groupGender = scale >= 2 ? undefined : gender;
-
-		const groupText =
-			scale === 1 && groupValue === 1
-				? scaleWord.singular
-				: scale === 0
-					? groupToWords(groupValue, groupGender)
-					: `${groupToWords(groupValue, groupGender)} ${groupValue === 1 ? scaleWord.singular : scaleWord.plural}`;
+		const groupText = scaledGroupToWords(groupValue, scale, scale >= 2 ? undefined : gender);
 
 		if (result === "") {
 			result = groupText;

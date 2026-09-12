@@ -1,10 +1,12 @@
+import * as fc from "fast-check";
+
 import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
 import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
-import { generatePixPayload } from "./generate-pix-payload";
+import { type GeneratePixPayloadParams, generatePixPayload } from "./generate-pix-payload";
 
 const BASE = {
 	key: "123e4567-e12b-12d1-a456-426655440000",
@@ -400,5 +402,118 @@ describe("generatePixPayload", () => {
 				expect(parsePixPayload(payload)).toEqual({ ...params, pointOfInitiation: "dynamic" });
 			}
 		});
+	});
+
+	describe("properties", () => {
+		const names = fc.stringMatching(/^[A-Za-z][A-Za-z0-9]{0,24}$/);
+
+		const cities = fc.stringMatching(/^[A-Za-z][A-Za-z0-9]{0,14}$/);
+
+		const urls = fc.stringMatching(/^[a-z]{2,8}\.[a-z]{2,6}\/[a-z0-9]{1,20}$/);
+
+		const txids = fc.stringMatching(/^[A-Za-z0-9]{1,25}$/);
+
+		const cents = fc.integer({ min: 1, max: 9_999_999 });
+
+		test("should round-trip a static payload through parsePixPayload", () => {
+			fc.assert(
+				fc.property(names, cities, (merchantName, merchantCity) => {
+					const key = generateCpf();
+					const payload = generatePixPayload({ key, merchantName, merchantCity });
+					const parsed = parsePixPayload(payload ?? "");
+
+					expect(isValidPixPayload(payload ?? "")).toBe(true);
+					expect(parsed?.key).toBe(key);
+					expect(parsed?.merchantName).toBe(merchantName);
+					expect(parsed?.merchantCity).toBe(merchantCity);
+					expect(parsed?.amount).toBeUndefined();
+					expect(parsed?.txid).toBeUndefined();
+				}),
+			);
+		});
+
+		test("should carry the amount and the txid it was given", () => {
+			fc.assert(
+				fc.property(names, cents, txids, (merchantName, amountInCents, txid) => {
+					const amount = amountInCents / 100;
+					const key = generateCnpj();
+					const payload = generatePixPayload({
+						key,
+						merchantName,
+						merchantCity: "BRASILIA",
+						amount,
+						txid,
+					});
+					const parsed = parsePixPayload(payload ?? "");
+
+					expect(parsed?.amount).toBe(Number(amount.toFixed(2)));
+					expect(parsed?.txid).toBe(txid);
+				}),
+			);
+		});
+
+		test("should round-trip a dynamic payload", () => {
+			fc.assert(
+				fc.property(names, urls, (merchantName, url) => {
+					const payload = generatePixPayload({ url, merchantName, merchantCity: "BRASILIA" });
+					const parsed = parsePixPayload(payload ?? "");
+
+					expect(parsed?.url).toBe(url);
+					expect(parsed?.pointOfInitiation).toBe("dynamic");
+					expect(parsed?.key).toBeUndefined();
+				}),
+			);
+		});
+
+		test("should return null unless exactly one of the key and the url is given", () => {
+			fc.assert(
+				fc.property(names, urls, (merchantName, url) => {
+					const key = generateCpf();
+					const merchantCity = "BRASILIA";
+
+					expect(generatePixPayload({ key, url, merchantName, merchantCity })).toBeNull();
+					expect(generatePixPayload({ merchantName, merchantCity })).toBeNull();
+				}),
+			);
+		});
+
+		test("should fold the merchant name and city down to the lengths the BR Code allows", () => {
+			fc.assert(
+				fc.property(
+					fc.string({ minLength: 1, unit: "grapheme" }),
+					fc.string({ minLength: 1, unit: "grapheme" }),
+					(merchantName, merchantCity) => {
+						const key = generateCpf();
+						const payload = generatePixPayload({ key, merchantName, merchantCity });
+
+						fc.pre(payload !== null);
+
+						const parsed = parsePixPayload(payload ?? "");
+
+						expect(/^[\u0020-\u007E]{1,25}$/.test(parsed?.merchantName ?? "")).toBe(true);
+						expect(/^[\u0020-\u007E]{1,15}$/.test(parsed?.merchantCity ?? "")).toBe(true);
+					},
+				),
+			);
+		});
+	});
+});
+
+describe("generatePixPayload types", () => {
+	test("should take Pix payload params and return a string or null", () => {
+		expectTypeOf(generatePixPayload).parameter(0).toEqualTypeOf<GeneratePixPayloadParams>();
+		expectTypeOf(generatePixPayload).returns.toEqualTypeOf<string | null>();
+	});
+
+	test("should restrict the params to the documented fields", () => {
+		expectTypeOf<GeneratePixPayloadParams>().toEqualTypeOf<{
+			key?: string;
+			url?: string;
+			merchantName: string;
+			merchantCity: string;
+			amount?: number;
+			txid?: string;
+			description?: string;
+		}>();
 	});
 });

@@ -1,4 +1,4 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
@@ -25,10 +25,11 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  * @example
  * ```typescript
  * generateCpf(); // "12345678909"
- * generateCpf("SP"); // "12345678909" (with SP state code in 9th digit)
+ * generateCpf("SP"); // "12345678810" (with the SP state code, 8, in the 9th digit)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
  */
 export const generateCpf = (state?: StateCode): string => {
 	let base = generateRandomNumber(BASE_LENGTH) + getStateCode(state);

@@ -1,5 +1,9 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCreditCard } from "./is-valid-credit-card";
+
+const LUHN_DIGITS = Array.from({ length: 10 }, (_, digit) => String(digit));
 
 describe("isValidCreditCard", () => {
 	describe("should return true", () => {
@@ -95,5 +99,56 @@ describe("isValidCreditCard", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidCreditCard([])).toBe(false);
 		});
+	});
+
+	describe("properties", () => {
+		test("should accept exactly one Luhn check digit for any base", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{11,18}$/), (base) => {
+					const accepted = LUHN_DIGITS.filter((digit) => isValidCreditCard(`${base}${digit}`));
+
+					expect(accepted.length).toBe(1);
+				}),
+			);
+		});
+
+		test("should ignore the spaces and hyphens between the digits", () => {
+			fc.assert(
+				fc.property(
+					fc.stringMatching(/^[0-9]{12,19}$/),
+					fc.constantFrom(" ", "-"),
+					(card, separator) => {
+						const masked = card.replaceAll(/(\d{4})(?=\d)/g, `$1${separator}`);
+
+						expect(isValidCreditCard(masked)).toBe(isValidCreditCard(card));
+					},
+				),
+			);
+		});
+
+		test("should reject any card number outside the ISO 7812 digit range", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,25}$/), (value) => {
+					fc.pre(value.length < 12 || value.length > 19);
+
+					expect(isValidCreditCard(value)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a card number with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidCreditCard(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCreditCard types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCreditCard).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCreditCard).returns.toEqualTypeOf<boolean>();
 	});
 });

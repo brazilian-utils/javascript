@@ -1,9 +1,13 @@
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { PATTERN } from "./constants";
 
-export type FormatCnoOptions = Pick<FormatParams, "pad">;
+/** Options of `formatCno`. */
+export type FormatCnoOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
+};
 
 /**
  * Formats a CNO (Cadastro Nacional de Obras) number according to the official mask.

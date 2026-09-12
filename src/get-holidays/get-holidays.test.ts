@@ -1,6 +1,15 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
+import { DATA as STATES, type StateCode } from "../_internals/constants/states";
+import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { isBusinessDay } from "../is-business-day/is-business-day";
 import { STATE_HOLIDAYS } from "./constants";
-import { getHolidays } from "./get-holidays";
+import { getHolidays, type GetHolidaysOptions, type Holiday } from "./get-holidays";
+
+function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
+	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
+}
 
 describe("getHolidays", () => {
 	test("should return fixed holidays for the given year", () => {
@@ -399,36 +408,73 @@ describe("getHolidays", () => {
 		expect(rjHolidays.some((h) => h.name === "São Sebastião")).toBe(false);
 	});
 
-	test("should throw when a state holiday entry defines neither easterOffset nor both day and month", () => {
-		const entries = STATE_HOLIDAYS.AC ?? [];
-		entries.push({ name: "Feriado estadual sem data" });
+	describe("properties", () => {
+		const yearArbitrary = fc.integer({ min: HOLIDAYS_MIN_YEAR, max: HOLIDAYS_MAX_YEAR });
+		const stateCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.code));
 
-		try {
-			expect(() => getHolidays({ year: 2098, stateCode: "AC" })).toThrow(
-				"State holiday entry must define either `easterOffset` or both `day` and `month`",
+		test("should place every holiday within the requested year", () => {
+			fc.assert(
+				fc.property(yearArbitrary, fc.option(stateCodeArbitrary), (year, stateCode) => {
+					const holidays = getHolidaysFor(year, stateCode);
+
+					for (const holiday of holidays) {
+						expect(holiday.date.getFullYear()).toBe(year);
+					}
+				}),
 			);
-		} finally {
-			entries.pop();
-		}
+		});
+
+		test("should return holidays sorted by date, ascending", () => {
+			fc.assert(
+				fc.property(yearArbitrary, fc.option(stateCodeArbitrary), (year, stateCode) => {
+					const holidays = getHolidaysFor(year, stateCode);
+					const timestamps = holidays.map((holiday) => holiday.date.getTime());
+					const sorted = [...timestamps].sort((a, b) => a - b);
+
+					expect(timestamps).toEqual(sorted);
+				}),
+			);
+		});
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(() => getHolidays(value as never)).not.toThrow();
+				}),
+			);
+		});
+	});
+});
+
+describe("getHolidays types", () => {
+	test("should accept a year and return an array of Holiday", () => {
+		expectTypeOf(getHolidays(2024)).toEqualTypeOf<Holiday[]>();
 	});
 
-	test("should throw when a state holiday entry defines only one of day/month, without easterOffset", () => {
-		const incompleteEntries = [
-			{ name: "Feriado com apenas o mês", month: 5 },
-			{ name: "Feriado com apenas o dia", day: 10 },
-		];
+	test("should accept a GetHolidaysOptions and return an array of Holiday", () => {
+		expectTypeOf<GetHolidaysOptions>().toEqualTypeOf<{ year: number; stateCode?: StateCode }>();
+		expectTypeOf(getHolidays({ year: 2024, stateCode: "SP" })).toEqualTypeOf<Holiday[]>();
+	});
 
-		for (const entry of incompleteEntries) {
-			const entries = STATE_HOLIDAYS.AC ?? [];
-			entries.push(entry);
+	test("should shape Holiday as name, date and type", () => {
+		expectTypeOf<Holiday>().toEqualTypeOf<{
+			name: string;
+			date: Date;
+			type: "national" | "state" | "optional" | "religious";
+		}>();
+	});
+});
 
-			try {
-				expect(() => getHolidays({ year: 2097, stateCode: "AC" })).toThrow(
-					"State holiday entry must define either `easterOffset` or both `day` and `month`",
-				);
-			} finally {
-				entries.pop();
-			}
-		}
+describe("getHolidays benchmarks", () => {
+	bench("getHolidays, national", () => {
+		getHolidays({ year: 2026 });
+	});
+
+	bench("getHolidays, with state", () => {
+		getHolidays({ year: 2026, stateCode: "SP" });
+	});
+
+	bench("isBusinessDay", () => {
+		isBusinessDay(new Date(2026, 6, 9), { stateCode: "SP" });
 	});
 });

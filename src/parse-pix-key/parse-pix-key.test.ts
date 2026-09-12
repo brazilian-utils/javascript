@@ -1,10 +1,29 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { formatCnpj } from "../format-cnpj/format-cnpj";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePhone } from "../generate-phone/generate-phone";
-import { parsePixKey } from "./parse-pix-key";
+import { type PixKey, type PixKeyType, parsePixKey } from "./parse-pix-key";
 
 const AMBIGUOUS = "51998259765";
+
+const PIX_KEY_KINDS = ["cpf", "cnpj", "email", "evp", "phone"] as const;
+
+const maskCnpj = (cnpj: string): string => {
+	const head = `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}`;
+
+	return `${head}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
+};
+
+const buildPixKey = (kind: (typeof PIX_KEY_KINDS)[number], email: string, evp: string): string => {
+	if (kind === "cpf") return generateCpf();
+	if (kind === "cnpj") return maskCnpj(generateCnpj());
+	if (kind === "phone") return `+55${generatePhone("mobile")}`;
+
+	return kind === "email" ? email : evp;
+};
 
 describe("parsePixKey", () => {
 	describe("should return null", () => {
@@ -255,8 +274,70 @@ describe("parsePixKey", () => {
 			for (let index = 0; index < 200; index++) {
 				const cnpj = generateCnpj();
 
-				expect(parsePixKey(cnpj)).toEqual({ type: "cnpj", value: cnpj });
+				expect(parsePixKey(formatCnpj(cnpj))).toEqual({ type: "cnpj", value: cnpj });
 			}
 		});
+	});
+
+	describe("properties", () => {
+		const emails = fc.stringMatching(/^[a-z0-9]{1,10}@[a-z0-9]{1,10}\.com$/);
+
+		const keys = fc.tuple(fc.constantFrom(...PIX_KEY_KINDS), emails, fc.uuid());
+
+		test("should recognize every kind of key the DICT defines", () => {
+			fc.assert(
+				fc.property(keys, ([kind, email, evp]) => {
+					const parsed = parsePixKey(buildPixKey(kind, email, evp));
+
+					expect(parsed?.type).toBe(kind);
+				}),
+			);
+		});
+
+		test("should return a canonical value that parses back to itself", () => {
+			fc.assert(
+				fc.property(keys, ([kind, email, evp]) => {
+					const parsed = parsePixKey(buildPixKey(kind, email, evp));
+					const again = parsePixKey(parsed?.value ?? "");
+
+					expect(again?.type).toBe(parsed?.type);
+					expect(again?.value).toBe(parsed?.value);
+				}),
+			);
+		});
+
+		test("should normalize the case and the spacing of a key", () => {
+			fc.assert(
+				fc.property(keys, ([kind, email, evp]) => {
+					const key = buildPixKey(kind, email, evp);
+					const parsed = parsePixKey(key);
+					const shouted = parsePixKey(`  ${key.toUpperCase()}  `);
+
+					expect(shouted?.value).toBe(parsed?.value);
+				}),
+			);
+		});
+
+		test("should never throw and always return a Pix key or null", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const parsed = parsePixKey(value as string);
+
+					expect(parsed === null || typeof parsed.value === "string").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("parsePixKey types", () => {
+	test("should take a string and return a Pix key or null", () => {
+		expectTypeOf(parsePixKey).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(parsePixKey).returns.toEqualTypeOf<PixKey | null>();
+	});
+
+	test("should restrict the Pix key shape and its type", () => {
+		expectTypeOf<PixKey>().toEqualTypeOf<{ type: PixKeyType; value: string }>();
+		expectTypeOf<PixKeyType>().toEqualTypeOf<"cpf" | "cnpj" | "email" | "phone" | "evp">();
 	});
 });

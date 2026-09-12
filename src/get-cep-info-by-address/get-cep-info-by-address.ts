@@ -2,6 +2,7 @@ import { DATA as STATES, type StateCode } from "../_internals/constants/states";
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
 import { removeAccents } from "../remove-accents/remove-accents";
 
+/** Base class of every error `getCepInfoByAddress` rejects with. */
 export class GetCepInfoByAddressError extends Error {
 	public constructor(message: string) {
 		super(message);
@@ -9,6 +10,7 @@ export class GetCepInfoByAddressError extends Error {
 	}
 }
 
+/** Thrown by `getCepInfoByAddress` when the state, city or street given is missing or invalid. */
 export class GetCepInfoByAddressValidationError extends GetCepInfoByAddressError {
 	public constructor(message: string) {
 		super(message);
@@ -16,6 +18,7 @@ export class GetCepInfoByAddressValidationError extends GetCepInfoByAddressError
 	}
 }
 
+/** Thrown by `getCepInfoByAddress` when no address matches the query. */
 export class GetCepInfoByAddressNotFoundError extends GetCepInfoByAddressError {
 	public constructor(message: string) {
 		super(message);
@@ -23,6 +26,7 @@ export class GetCepInfoByAddressNotFoundError extends GetCepInfoByAddressError {
 	}
 }
 
+/** One address returned by `getCepInfoByAddress`, under the field names ViaCEP itself uses. */
 export type CepAddressInfo = {
 	/** The CEP, masked as "00000-000" the way ViaCEP returns it. */
 	cep: string;
@@ -46,6 +50,7 @@ export type CepAddressInfo = {
 	siafi?: string;
 };
 
+/** The address `getCepInfoByAddress` looks up. */
 export type GetCepInfoByAddressOptions = {
 	/** Two letter state code, e.g. "SP". */
 	federalUnit: string;

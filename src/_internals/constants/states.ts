@@ -1,3 +1,77 @@
+/** The two letter code of each Brazilian state, as published by the IBGE. */
+export type StateCode =
+	| "AC"
+	| "AL"
+	| "AP"
+	| "AM"
+	| "BA"
+	| "CE"
+	| "DF"
+	| "ES"
+	| "GO"
+	| "MA"
+	| "MT"
+	| "MS"
+	| "MG"
+	| "PA"
+	| "PB"
+	| "PR"
+	| "PE"
+	| "PI"
+	| "RJ"
+	| "RN"
+	| "RS"
+	| "RO"
+	| "RR"
+	| "SC"
+	| "SP"
+	| "SE"
+	| "TO";
+
+/** The name of each Brazilian state, as published by the IBGE. */
+export type StateName =
+	| "Acre"
+	| "Alagoas"
+	| "Amapá"
+	| "Amazonas"
+	| "Bahia"
+	| "Ceará"
+	| "Distrito Federal"
+	| "Espírito Santo"
+	| "Goiás"
+	| "Maranhão"
+	| "Mato Grosso"
+	| "Mato Grosso do Sul"
+	| "Minas Gerais"
+	| "Pará"
+	| "Paraíba"
+	| "Paraná"
+	| "Pernambuco"
+	| "Piauí"
+	| "Rio de Janeiro"
+	| "Rio Grande do Norte"
+	| "Rio Grande do Sul"
+	| "Rondônia"
+	| "Roraima"
+	| "Santa Catarina"
+	| "São Paulo"
+	| "Sergipe"
+	| "Tocantins";
+
+/** One Brazilian state, as returned by `getStates`, `getStateByIbgeCode` and the other state utils. */
+export type State = {
+	/** The two letter code of the state, e.g. `"SP"`. */
+	readonly code: StateCode;
+	/** The full name of the state, e.g. `"São Paulo"`. */
+	readonly name: StateName;
+	/** The code of the region the state belongs to, e.g. `"SE"`. */
+	readonly regionCode: "N" | "NE" | "CO" | "SE" | "S";
+	/** The full name of the region the state belongs to, e.g. `"Sudeste"`. */
+	readonly regionName: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
+	/** The 2 digit IBGE code of the Federative Unit ("cUF"), e.g. `35`. */
+	readonly ibgeCode: number;
+};
+
 /**
  * Brazilian states published by the IBGE, sorted by name with `localeCompare` in the "pt-BR"
  * locale. `ibgeCode` is the 2-digit IBGE code of the Federative Unit ("cUF"), the same code
@@ -5,7 +79,7 @@
  *
  * @see https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const DATA = [
+export const DATA: readonly State[] = [
 	{ code: "AC", name: "Acre", regionCode: "N", regionName: "Norte", ibgeCode: 12 },
 	{ code: "AL", name: "Alagoas", regionCode: "NE", regionName: "Nordeste", ibgeCode: 27 },
 	{ code: "AP", name: "Amapá", regionCode: "N", regionName: "Norte", ibgeCode: 16 },
@@ -51,10 +125,4 @@ export const DATA = [
 	{ code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35 },
 	{ code: "SE", name: "Sergipe", regionCode: "NE", regionName: "Nordeste", ibgeCode: 28 },
 	{ code: "TO", name: "Tocantins", regionCode: "N", regionName: "Norte", ibgeCode: 17 },
-] as const;
-
-export type State = (typeof DATA)[number];
-
-export type StateName = (typeof DATA)[number]["name"];
-
-export type StateCode = (typeof DATA)[number]["code"];
+];

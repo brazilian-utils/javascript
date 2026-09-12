@@ -1,6 +1,6 @@
 declare const Deno: {
 	readonly env: {
-		get(key: string): string | undefined;
+		get: (key: string) => string | undefined;
 	};
 	readonly test: (options: {
 		name: string;
@@ -11,6 +11,12 @@ declare const Deno: {
 		sanitizeExit?: boolean;
 	}) => void;
 };
+
+interface ImportMeta {
+	readonly env: {
+		readonly MODE: string;
+	};
+}
 
 declare global {
 	var RUN_LIVE_CEP_TESTS: string | number | undefined;

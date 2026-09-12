@@ -1,4 +1,4 @@
-import type { WordsCase } from "../number-to-words/number-to-words";
+import { type WordsCase } from "../number-to-words/number-to-words";
 
 /**
  * Applies a `WordsCase` to a "por extenso" string already written out in lowercase.

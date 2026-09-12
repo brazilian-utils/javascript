@@ -9,6 +9,7 @@ import {
 	type RegistroProfissionalCouncil,
 } from "./constants";
 
+/** The options `isValidRegistroProfissional` takes: the professional council and, optionally, the UF the registration must belong to. */
 export type IsValidRegistroProfissionalOptions = {
 	/** The professional council that issued the registration number. */
 	council: RegistroProfissionalCouncil;

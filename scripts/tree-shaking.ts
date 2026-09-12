@@ -12,12 +12,19 @@
  *   node scripts/tree-shaking.ts --json <path>
  *     Also write `{ full: {bytes,gzip}, exports: { name: {bytes,gzip} } }` to `<path>`.
  *
+ *   node scripts/tree-shaking.ts --json <path> --surviving <head.json>
+ *     Also measure the bundle that imports only the exports listed in `<head.json>` (a
+ *     snapshot of the other side of a comparison) and store it as `surviving`, so that the
+ *     comparison below weighs the same export set on both sides.
+ *
  *   node scripts/tree-shaking.ts --compare <base.json>
  *     Diff the current build against a snapshot produced by a previous `--json` run, print a
  *     Markdown report, and fail (exit 1) when a pre-existing export grew by more than
  *     REGRESSION_PERCENT_THRESHOLD and more than REGRESSION_BYTES_THRESHOLD, or when the
  *     bundle importing every export that already existed on the base grew by more than
- *     FULL_IMPORT_PERCENT_THRESHOLD (new exports never count as a regression).
+ *     FULL_IMPORT_PERCENT_THRESHOLD (new exports never count as a regression). Exit code 1
+ *     means a regression; exit code 2 means the comparison itself could not run (invalid
+ *     snapshot, measurement failure).
  *
  *   node scripts/tree-shaking.ts --markdown <path>
  *     With `--compare`, also write the Markdown report to `<path>` (for posting as a PR comment).
@@ -55,10 +62,12 @@ type Measurement = {
 type Snapshot = {
 	full: Measurement;
 	exports: Record<string, Measurement>;
+	surviving?: Measurement;
 };
 
 type Args = {
 	json: string | undefined;
+	surviving: string | undefined;
 	compare: string | undefined;
 	markdown: string | undefined;
 	dist: string | undefined;
@@ -83,13 +92,29 @@ type CompareResult = {
 	fullImportRegressed: boolean;
 };
 
+const OPTION_FLAGS = new Map<string, keyof Args>([
+	["--json", "json"],
+	["--surviving", "surviving"],
+	["--compare", "compare"],
+	["--markdown", "markdown"],
+	["--dist", "dist"],
+]);
+
 const parseArgs = (argv: string[]): Args => {
-	const args: Args = { json: undefined, compare: undefined, markdown: undefined, dist: undefined };
+	const args: Args = {
+		json: undefined,
+		surviving: undefined,
+		compare: undefined,
+		markdown: undefined,
+		dist: undefined,
+	};
 	for (let i = 0; i < argv.length; i++) {
-		if (argv[i] === "--json") args.json = argv[++i];
-		else if (argv[i] === "--compare") args.compare = argv[++i];
-		else if (argv[i] === "--markdown") args.markdown = argv[++i];
-		else if (argv[i] === "--dist") args.dist = argv[++i];
+		const option = OPTION_FLAGS.get(argv[i]);
+
+		if (option === undefined) continue;
+
+		i += 1;
+		args[option] = argv[i];
 	}
 	return args;
 };
@@ -103,7 +128,8 @@ const mapWithConcurrency = async <T, R>(
 	let cursor = 0;
 
 	const worker = async (): Promise<void> => {
-		const index = cursor++;
+		const index = cursor;
+		cursor += 1;
 
 		if (index >= items.length) return;
 
@@ -316,8 +342,9 @@ const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement)
 
 	changed.sort((a, b) => Math.abs(b.deltaBytes) - Math.abs(a.deltaBytes));
 
-	const fullDeltaBytes = existing.bytes - base.full.bytes;
-	const fullDeltaPercent = base.full.bytes === 0 ? 0 : fullDeltaBytes / base.full.bytes;
+	const baseExisting = base.surviving ?? base.full;
+	const fullDeltaBytes = existing.bytes - baseExisting.bytes;
+	const fullDeltaPercent = baseExisting.bytes === 0 ? 0 : fullDeltaBytes / baseExisting.bytes;
 
 	const regressions = changed.filter(
 		(row) =>
@@ -341,64 +368,172 @@ const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement)
 const formatPercent = (value: number): string =>
 	`${value >= 0 ? "+" : ""}${(value * 100).toFixed(1)}%`;
 
+const formatBytes = (bytes: number): string =>
+	Math.abs(bytes) < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
+
+const formatDelta = (bytes: number, percent: number): string => {
+	if (bytes === 0) return "0 B";
+	const sign = bytes > 0 ? "+" : "-";
+	return `${sign}${formatBytes(Math.abs(bytes))} (${formatPercent(percent)})`;
+};
+
+const plural = (count: number, word: string): string => `${count} ${word}${count === 1 ? "" : "s"}`;
+
+const formatCount = (value: number): string => (value > 0 ? `+${value}` : String(value));
+
+const MAX_VISIBLE_ROWS = 20;
+
+const renderTable = (header: string[], rows: string[]): string[] => [
+	`| ${header.join(" | ")} |`,
+	`| ${header.map((_column, index) => (index === 0 ? "---" : "---:")).join(" | ")} |`,
+	...rows,
+];
+
+const renderCollapsed = (title: string, header: string[], rows: string[]): string[] => {
+	if (rows.length === 0) return [];
+	return [
+		`<details><summary>${title}</summary>`,
+		"",
+		...renderTable(header, rows),
+		"",
+		"</details>",
+		"",
+	];
+};
+
+const renderRows = (title: string, header: string[], rows: string[]): string[] => {
+	if (rows.length === 0) return [];
+	const visible = rows.slice(0, MAX_VISIBLE_ROWS);
+	const hidden = rows.slice(MAX_VISIBLE_ROWS);
+	const lines = [`### ${title} (${rows.length})`, "", ...renderTable(header, visible), ""];
+	if (hidden.length > 0) {
+		lines.push(...renderCollapsed(`Show the other ${hidden.length}`, header, hidden));
+	}
+	return lines;
+};
+
+const EXPORT_COLUMNS = ["Export", "Base", "Head", "Δ", "gzip"];
+
+const formatRowDelta = (base: Measurement | null, head: Measurement | null): string => {
+	if (base === null) return "new";
+	if (head === null) return "removed";
+	const deltaBytes = head.bytes - base.bytes;
+	return formatDelta(deltaBytes, base.bytes === 0 ? 0 : deltaBytes / base.bytes);
+};
+
+const renderExportRow = (
+	marker: string,
+	name: string,
+	base: Measurement | null,
+	head: Measurement | null,
+): string => {
+	const baseSize = base === null ? "—" : formatBytes(base.bytes);
+	const headSize = head === null ? "—" : formatBytes(head.bytes);
+	const gzip = formatBytes((head ?? base)?.gzip ?? 0);
+	return `| ${marker} \`${name}\` | ${baseSize} | ${headSize} | ${formatRowDelta(base, head)} | ${gzip} |`;
+};
+
+const changeMarker = (row: CompareRow, result: CompareResult): string => {
+	if (result.regressions.includes(row)) return "🔴";
+	return row.deltaBytes > 0 ? "🟡" : "🟢";
+};
+
+const allExportsMarker = (
+	row: CompareRow | undefined,
+	base: Measurement | undefined,
+	head: Measurement | undefined,
+	result: CompareResult,
+): string => {
+	if (row !== undefined) return changeMarker(row, result);
+	if (base === undefined) return "🆕";
+	return head === undefined ? "🗑️" : "⚪";
+};
+
+const describeCounts = (result: CompareResult): string => {
+	const grown = result.changed.filter((row) => row.deltaBytes > 0).length;
+	const shrunk = result.changed.length - grown;
+	return [
+		grown > 0 ? `${grown} grew` : "",
+		shrunk > 0 ? `${shrunk} shrank` : "",
+		result.added.length > 0 ? `${result.added.length} new` : "",
+		result.removed.length > 0 ? `${result.removed.length} removed` : "",
+	]
+		.filter((part) => part !== "")
+		.join(", ");
+};
+
 const renderMarkdown = (
 	base: Snapshot,
 	head: Snapshot,
 	existing: Measurement,
 	result: CompareResult,
 ): string => {
-	const lines: string[] = [
-		"## Tree-shaking report",
-		"",
-		`Fails when a pre-existing export grows more than ${REGRESSION_PERCENT_THRESHOLD * 100}% and more than ` +
-			`${REGRESSION_BYTES_THRESHOLD} B, or when importing every export that already existed on the base ` +
-			`grows more than ${FULL_IMPORT_PERCENT_THRESHOLD * 100}%. New exports never count as a regression.`,
-		"",
-		`Pre-existing exports: ${base.full.bytes} B to ${existing.bytes} B (${formatPercent(result.fullDeltaPercent)}, ` +
-			`gzip ${existing.gzip} B)${result.fullImportRegressed ? ", REGRESSION" : ""}. ` +
-			`Full import on head: ${head.full.bytes} B (gzip ${head.full.gzip} B).`,
-		"",
-	];
+	const measured = Object.keys(head.exports).length;
+	const regressionCount = result.regressions.length + (result.fullImportRegressed ? 1 : 0);
+	const noImpact =
+		result.changed.length === 0 &&
+		result.added.length === 0 &&
+		result.removed.length === 0 &&
+		result.fullDeltaBytes === 0;
 
-	if (result.changed.length > 0) {
+	const lines: string[] = ["## Tree-shaking report", ""];
+
+	if (noImpact) {
 		lines.push(
-			"| name | base | head | delta bytes | delta % | gzip head |",
-			"| --- | --- | --- | --- | --- | --- |",
-		);
-		for (const row of result.changed) {
-			const flag = result.regressions.includes(row) ? " (REGRESSION)" : "";
-			lines.push(
-				`| ${row.name}${flag} | ${row.base.bytes} | ${row.head.bytes} | ` +
-					`${row.deltaBytes > 0 ? "+" : ""}${row.deltaBytes} | ${formatPercent(row.deltaPercent)} | ${row.head.gzip} |`,
-			);
-		}
-		lines.push("");
-	}
-
-	if (result.added.length > 0) {
-		lines.push("**New exports**", "");
-		for (const item of result.added)
-			lines.push(`- ${item.name}: ${item.bytes} B (gzip ${item.gzip} B)`);
-		lines.push("");
-	}
-
-	if (result.removed.length > 0) {
-		lines.push("**Removed exports**", "");
-		for (const item of result.removed) lines.push(`- ${item.name}: was ${item.bytes} B`);
-		lines.push("");
-	}
-
-	if (result.unchanged.length > 0) {
-		lines.push(
-			`<details><summary>Unchanged exports (${result.unchanged.length})</summary>`,
+			`✅ **No bundle size impact.** All ${measured} exports are the same size as on the base branch (full import ${formatBytes(head.full.bytes)}, gzip ${formatBytes(head.full.gzip)}).`,
 			"",
-			"| name | bytes | gzip |",
-			"| --- | --- | --- |",
 		);
-		for (const row of result.unchanged)
-			lines.push(`| ${row.name} | ${row.head.bytes} | ${row.head.gzip} |`);
-		lines.push("", "</details>");
+	} else {
+		const status =
+			regressionCount === 0
+				? "✅ **No size regression.**"
+				: `❌ **${plural(regressionCount, "size regression")}.**`;
+		const counts = describeCounts(result);
+		const scope =
+			counts === "" ? `${measured} exports measured` : `${counts} out of ${measured} exports`;
+		lines.push(
+			`${status} ${scope}.`,
+			"",
+			"| | Base | Head | Δ |",
+			"| --- | ---: | ---: | ---: |",
+			`| Pre-existing exports, all imported | ${formatBytes((base.surviving ?? base.full).bytes)} | ${formatBytes(existing.bytes)} (gzip ${formatBytes(existing.gzip)}) | ${result.fullImportRegressed ? "🔴 " : ""}${formatDelta(result.fullDeltaBytes, result.fullDeltaPercent)} |`,
+			`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatDelta(head.full.bytes - base.full.bytes, base.full.bytes === 0 ? 0 : (head.full.bytes - base.full.bytes) / base.full.bytes)} |`,
+			`| Exports | ${Object.keys(base.exports).length} | ${measured} | ${formatCount(measured - Object.keys(base.exports).length)} |`,
+			"",
+			...renderRows("What changed", EXPORT_COLUMNS, [
+				...result.changed.map((row) =>
+					renderExportRow(changeMarker(row, result), row.name, row.base, row.head),
+				),
+				...result.added.map((item) => renderExportRow("🆕", item.name, null, item)),
+				...result.removed.map((item) => renderExportRow("🗑️", item.name, item, null)),
+			]),
+		);
 	}
+
+	const everyName = [
+		...new Set([...Object.keys(base.exports), ...Object.keys(head.exports)]),
+	].sort();
+	const changedByName = new Map(result.changed.map((row) => [row.name, row]));
+	lines.push(
+		...renderCollapsed(
+			`All exports (${everyName.length})`,
+			EXPORT_COLUMNS,
+			everyName.map((name) => {
+				const row = changedByName.get(name);
+				const baseMeasurement: Measurement | undefined = base.exports[name];
+				const headMeasurement: Measurement | undefined = head.exports[name];
+				const marker = allExportsMarker(row, baseMeasurement, headMeasurement, result);
+				return renderExportRow(marker, name, baseMeasurement ?? null, headMeasurement ?? null);
+			}),
+		),
+		"<details><summary>How this is measured</summary>",
+		"",
+		"Every export is imported alone into an esbuild consumer bundle (minified, tree-shaken) built from the head and from the base of this pull request; the sizes are the resulting bundles, gzip is their gzipped size. " +
+			`🔴 marks a regression: a pre-existing export that grew more than ${REGRESSION_PERCENT_THRESHOLD * 100}% and more than ${REGRESSION_BYTES_THRESHOLD} B, or the bundle importing every pre-existing export growing more than ${FULL_IMPORT_PERCENT_THRESHOLD * 100}%. ` +
+			"🟡 is growth under the threshold, 🟢 a decrease, ⚪ no change, 🆕 an export that does not exist on the base (never a regression), 🗑️ an export that was removed. An intentional increase is accepted with the `tree-shaking: accepted` label.",
+		"",
+		"</details>",
+	);
 
 	return lines.join("\n");
 };
@@ -418,7 +553,20 @@ const isSnapshot = (value: unknown): value is Snapshot =>
 	isMeasurement(value.full) &&
 	"exports" in value &&
 	isRecord(value.exports) &&
+	(!("surviving" in value) || value.surviving === undefined || isMeasurement(value.surviving)) &&
 	Object.values(value.exports).every((entry) => isMeasurement(entry));
+
+const readSnapshot = async (path: string): Promise<Snapshot> => {
+	const parsed: unknown = JSON.parse(await readFile(path, "utf8"));
+
+	if (!isSnapshot(parsed)) {
+		throw new Error(`${path} is not a valid tree-shaking snapshot`);
+	}
+
+	return parsed;
+};
+
+const COMPARISON_ERROR_EXIT_CODE = 2;
 
 const main = async (): Promise<void> => {
 	const args = parseArgs(process.argv.slice(2));
@@ -429,19 +577,20 @@ const main = async (): Promise<void> => {
 
 	if (args.json !== undefined && args.json !== "") {
 		const snapshot: Snapshot = { full, exports: exportsMap };
+
+		if (args.surviving !== undefined && args.surviving !== "") {
+			const other = await readSnapshot(resolve(process.cwd(), args.surviving));
+			const survivingNames = Object.keys(exportsMap)
+				.filter((name) => name in other.exports && !aliasOf.has(name))
+				.sort();
+			snapshot.surviving = await measureNames(survivingNames, resolveDir);
+		}
+
 		await writeFile(resolve(process.cwd(), args.json), `${JSON.stringify(snapshot, null, "\t")}\n`);
 	}
 
 	if (args.compare !== undefined && args.compare !== "") {
-		const comparePath = resolve(process.cwd(), args.compare);
-		const compareContents = await readFile(comparePath, "utf8");
-		const parsedBase: unknown = JSON.parse(compareContents);
-
-		if (!isSnapshot(parsedBase)) {
-			throw new Error(`${comparePath} is not a valid tree-shaking snapshot`);
-		}
-
-		const base = parsedBase;
+		const base = await readSnapshot(resolve(process.cwd(), args.compare));
 		const head: Snapshot = { full, exports: exportsMap };
 		const existingNames = Object.keys(base.exports)
 			.filter((name) => name in exportsMap && !aliasOf.has(name))
@@ -468,4 +617,9 @@ const main = async (): Promise<void> => {
 	printTable(full, exportsMap, aliasOf);
 };
 
-await main();
+try {
+	await main();
+} catch (error) {
+	console.error(error instanceof Error ? error.message : String(error));
+	process.exit(COMPARISON_ERROR_EXIT_CODE);
+}

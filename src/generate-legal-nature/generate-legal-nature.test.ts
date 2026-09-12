@@ -1,4 +1,6 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
 import { generateLegalNature } from "./generate-legal-nature";
 
@@ -19,5 +21,29 @@ describe("generateLegalNature", () => {
 		} finally {
 			Math.random = originalRandom;
 		}
+	});
+
+	describe("properties", () => {
+		const batchSize = fc.integer({ min: 1, max: 20 });
+
+		test("should only draw 4 digit codes its own validator accepts", () => {
+			fc.assert(
+				fc.property(batchSize, (size) => {
+					for (let index = 0; index < size; index++) {
+						const code = generateLegalNature();
+
+						expect(code).toMatch(/^\d{4}$/);
+						expect(isValidLegalNature(code)).toBe(true);
+					}
+				}),
+			);
+		});
+	});
+});
+
+describe("generateLegalNature types", () => {
+	test("should take no parameters and return a string", () => {
+		expectTypeOf(generateLegalNature).parameters.toEqualTypeOf<[]>();
+		expectTypeOf(generateLegalNature).returns.toEqualTypeOf<string>();
 	});
 });

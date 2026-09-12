@@ -14,6 +14,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * ```
  *
  * @see Official: https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/pis.py
  */
 export const parsePis = (value: string | number): string =>
 	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, PIS_LENGTH);

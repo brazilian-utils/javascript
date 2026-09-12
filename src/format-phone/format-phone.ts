@@ -7,20 +7,15 @@ import {
 import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
+import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { stripPhoneCountryCode } from "../_internals/strip-phone-country-code/strip-phone-country-code";
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
-import {
-	INTERNATIONAL_MASK,
-	INTERNATIONAL_PREFIX,
-	LENGTH,
-	MASK,
-	type NationalMask,
-	SERVICE_MASK,
-} from "./constants";
+import { INTERNATIONAL_MASK, INTERNATIONAL_PREFIX, LENGTH, MASK, SERVICE_MASK } from "./constants";
 
-export type PhoneMask = "auto" | "e164" | "international" | "service" | NationalMask;
+/** The masks `formatPhone` can apply. */
+export type PhoneMask = "auto" | "e164" | "international" | "service" | "sn" | "nanp";
 
+/** Options of `formatPhone`. */
 export type FormatPhoneOptions = {
 	/** Which mask to apply, or `"auto"` to pick one from the value (default: `"sn"`). */
 	mask?: PhoneMask;
@@ -96,7 +91,8 @@ const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMa
  * `"e164"` and `"international"` drop the country code from `value` first, under the rule
  * documented in `parsePhone`. A service number has no E.164 form, it is not reachable from
  * abroad, so both international masks fall back to the `"service"` presentation for it, which
- * is how such numbers are printed in Brazil.
+ * is how such numbers are printed in Brazil. The service-number check itself reads `value`
+ * under the same rule, so `"5508001234567"` is the `0800` number, not a `+55 08` one.
  *
  * If `value` includes a DDD (area code), pass `{ mask: "auto" }` (or `"nanp"`) explicitly,
  * do not rely on the default, since the default `"sn"` mask assumes no DDD is present.
@@ -112,6 +108,7 @@ const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMa
  * formatPhone("11987654321", { mask: "auto" }); // "(11) 98765-4321"
  * formatPhone("5511987654321", { mask: "auto" }); // "+55 11 98765-4321"
  * formatPhone("08001234567", { mask: "auto" }); // "0800 123 4567"
+ * formatPhone("5508001234567", { mask: "auto" }); // "0800 123 4567"
  * formatPhone("11987654321", { mask: "e164" }); // "+5511987654321"
  * formatPhone("11987654321", { mask: "international" }); // "+55 11 98765-4321"
  * formatPhone("40041234", { mask: "service" }); // "4004-1234"
@@ -126,7 +123,7 @@ export const formatPhone = (value: string | number, options?: FormatPhoneOptions
 
 	const enhancedValue = sanitizeToDigits(value);
 
-	const serviceDigits = stripPhoneCountryCode(value);
+	const serviceDigits = resolveServicePhoneDigits(value);
 	const requested = options?.mask ?? "sn";
 	const mask = requested === "auto" ? resolveAutoMask(enhancedValue, serviceDigits) : requested;
 

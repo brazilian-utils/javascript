@@ -1,6 +1,6 @@
 import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-first-digit/calculate-voter-id-first-digit";
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
 
@@ -15,7 +15,7 @@ import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
  *
  * @example
  * ```typescript
- * generateVoterId(); // "123456782897" (abroad, UF "28")
+ * generateVoterId(); // "123456782895" (abroad, UF "28")
  * generateVoterId("SP"); // "123456780191" (UF "01")
  * generateVoterId("XX" as StateCode); // falls back to "ZZ" instead of throwing
  * ```

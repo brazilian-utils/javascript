@@ -1,4 +1,6 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidNfeKey } from "./is-valid-nfe-key";
 
 const VALID_A = "35120859597245000190550000000095831710040056";
@@ -6,6 +8,10 @@ const VALID_B = "35170458716523000119550010000000121000123458";
 const VALID_C = "35170358716523000119550010000000301000000300";
 const VALID_D = "43160472202112000136550000000010571048440722";
 const INVALID_TYPE = "42100484684182000157550010000000020108042108";
+
+const NFE_CHECK_DIGITS = Array.from({ length: 10 }, (_, digit) => String(digit));
+
+const NFE_KEY = "35170458716523000119550010000000121000123458";
 
 describe("isValidNfeKey", () => {
 	describe("should return true", () => {
@@ -164,5 +170,55 @@ describe("isValidNfeKey", () => {
 				expect(isValidNfeKey(key)).toBe(expected);
 			});
 		}
+	});
+
+	describe("properties", () => {
+		test("should accept at most one check digit for any 43 digit base", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{43}$/), (base) => {
+					const accepted = NFE_CHECK_DIGITS.filter((digit) => isValidNfeKey(`${base}${digit}`));
+
+					expect(accepted.length).toBeLessThanOrEqual(1);
+				}),
+			);
+		});
+
+		test("should ignore whitespace anywhere between the digits", () => {
+			fc.assert(
+				fc.property(fc.integer({ min: 1, max: 43 }), (index) => {
+					const masked = `${NFE_KEY.slice(0, index)} ${NFE_KEY.slice(index)}`;
+
+					expect(isValidNfeKey(masked)).toBe(true);
+					expect(isValidNfeKey(`NFe${masked}`)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject a key whose state code belongs to no state", () => {
+			fc.assert(
+				fc.property(
+					fc.stringMatching(/^[0-9]{42}$/),
+					fc.constantFrom("00", "01", "89", "99"),
+					(rest, uf) => {
+						expect(isValidNfeKey(`${uf}${rest}`)).toBe(false);
+					},
+				),
+			);
+		});
+
+		test("should never throw and always judge an access key with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidNfeKey(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidNfeKey types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidNfeKey).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidNfeKey).returns.toEqualTypeOf<boolean>();
 	});
 });

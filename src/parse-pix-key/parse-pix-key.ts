@@ -9,8 +9,10 @@ import { isValidPhone } from "../is-valid-phone/is-valid-phone";
 import { parseCnpj } from "../parse-cnpj/parse-cnpj";
 import { EMAIL_MAX_LENGTH, EVP_REGEX, PHONE_HINT_REGEX } from "./constants";
 
+/** The kinds of Pix key `parsePixKey` recognizes. */
 export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
 
+/** A Pix key recognized by `parsePixKey`, normalized to the canonical DICT form of its kind. */
 export type PixKey = {
 	/** Which kind of Pix key the value was recognized as. */
 	type: PixKeyType;

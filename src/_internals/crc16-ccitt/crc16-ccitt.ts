@@ -28,8 +28,8 @@ export const crc16Ccitt = (value: string): string => {
 
 	let crc = INITIAL_VALUE;
 
-	for (let index = 0; index < bytes.length; index++) {
-		crc ^= bytes[index] << 8;
+	for (const byte of bytes) {
+		crc ^= byte << 8;
 
 		for (let bit = 0; bit < 8; bit++) {
 			crc = (crc & 0x80_00) === 0 ? (crc << 1) & MASK : ((crc << 1) ^ POLYNOMIAL) & MASK;

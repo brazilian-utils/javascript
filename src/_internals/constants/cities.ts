@@ -1,4 +1,4 @@
-import type { StateCode } from "./states";
+import { type StateCode } from "./states";
 
 /**
  * Brazilian municipalities by state, published by the IBGE. `DATA` holds, for each state, a

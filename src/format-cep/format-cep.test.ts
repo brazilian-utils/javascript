@@ -1,6 +1,14 @@
 import { CEP_LENGTH } from "../_internals/constants/cep";
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatCep } from "./format-cep";
+import { anyValue, digits, digitsUpTo } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectMatchesPattern,
+	expectPadsToLength,
+	expectRoundTrip,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { parseCep } from "../parse-cep/parse-cep";
+import { formatCep, type FormatCepOptions } from "./format-cep";
 
 describe("formatCep", () => {
 	it("should format CEP with mask", () => {
@@ -28,5 +36,37 @@ describe("formatCep", () => {
 		expect(formatCep(null)).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatCep()).toBe("");
+	});
+
+	describe("properties", () => {
+		const upToACep = digitsUpTo(8);
+
+		test("should only add the mask, never change the digits", () => {
+			expectRoundTrip(formatCep, parseCep, upToACep);
+		});
+
+		test("should produce the documented mask shape for a full CEP", () => {
+			expectMatchesPattern(formatCep, /^\d{5}-\d{3}$/, digits(8));
+		});
+
+		test("should left pad a shorter value up to the CEP length", () => {
+			expectPadsToLength(formatCep, parseCep, upToACep, CEP_LENGTH);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(formatCep, "string", anyValue);
+		});
+	});
+});
+
+describe("formatCep types", () => {
+	test("should take a string or number value and options and return a string", () => {
+		expectTypeOf(formatCep).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCep).parameter(1).toEqualTypeOf<FormatCepOptions | undefined>();
+		expectTypeOf(formatCep).returns.toEqualTypeOf<string>();
+	});
+
+	test("should type the pad option as an optional boolean", () => {
+		expectTypeOf<FormatCepOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

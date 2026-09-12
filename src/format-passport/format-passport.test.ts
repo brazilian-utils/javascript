@@ -1,4 +1,11 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import { anyText, anyValue, asciiAlphanumericText } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectCaseInsensitive,
+	expectIdempotent,
+	expectMatchesPattern,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { formatPassport } from "./format-passport";
 
 describe("formatPassport", () => {
@@ -45,5 +52,30 @@ describe("formatPassport", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(formatPassport(123)).toBe("");
 		});
+	});
+
+	describe("properties", () => {
+		test("should always return at most 8 uppercase alphanumeric characters", () => {
+			expectMatchesPattern(formatPassport, /^[0-9A-Z]{0,8}$/, anyText);
+		});
+
+		test("should be idempotent", () => {
+			expectIdempotent(formatPassport, anyText);
+		});
+
+		test("should ignore the case of an ascii alphanumeric value", () => {
+			expectCaseInsensitive(formatPassport, asciiAlphanumericText);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(formatPassport, "string", anyValue);
+		});
+	});
+});
+
+describe("formatPassport types", () => {
+	test("should take a string and return a string", () => {
+		expectTypeOf(formatPassport).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(formatPassport).returns.toEqualTypeOf<string>();
 	});
 });

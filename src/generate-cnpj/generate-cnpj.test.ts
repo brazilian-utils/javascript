@@ -1,5 +1,7 @@
+import * as fc from "fast-check";
+
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
 import { generateCnpj } from "./generate-cnpj";
 
@@ -24,7 +26,11 @@ describe("generateCnpj", () => {
 			const originalRandom = Math.random;
 			let call = 0;
 
-			Math.random = () => (digits[call++] + 0.5) / 10;
+			Math.random = () => {
+				const digit = digits[call];
+				call += 1;
+				return (digit + 0.5) / 10;
+			};
 
 			try {
 				const cnpj = generateCnpj(1);
@@ -96,5 +102,44 @@ describe("generateCnpj", () => {
 				expect(usedChars.has(char)).toBe(true);
 			}
 		});
+	});
+
+	describe("properties", () => {
+		const batchSize = fc.integer({ min: 1, max: 10 });
+
+		test("should generate numeric CNPJs both versions accept", () => {
+			fc.assert(
+				fc.property(batchSize, (size) => {
+					for (let index = 0; index < size; index++) {
+						const cnpj = generateCnpj(1);
+
+						expect(cnpj).toMatch(/^\d{14}$/);
+						expect(isValidCnpj(cnpj)).toBe(true);
+						expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
+					}
+				}),
+			);
+		});
+
+		test("should generate alphanumeric CNPJs with numeric check digits", () => {
+			fc.assert(
+				fc.property(batchSize, (size) => {
+					for (let index = 0; index < size; index++) {
+						const cnpj = generateCnpj(2);
+
+						expect(cnpj).toHaveLength(CNPJ_LENGTH);
+						expect(cnpj).toMatch(/^[0-9A-Z]{12}\d{2}$/);
+						expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
+					}
+				}),
+			);
+		});
+	});
+});
+
+describe("generateCnpj types", () => {
+	test("should take an optional version and return a string", () => {
+		expectTypeOf(generateCnpj).parameter(0).toEqualTypeOf<1 | 2 | undefined>();
+		expectTypeOf(generateCnpj).returns.toEqualTypeOf<string>();
 	});
 });

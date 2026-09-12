@@ -1,9 +1,13 @@
 import { CERTIDAO_PATTERN } from "../_internals/constants/certidao";
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
-export type FormatCertidaoOptions = Pick<FormatParams, "pad">;
+/** Options of `formatCertidao`. */
+export type FormatCertidaoOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
+};
 
 /**
  * Formats the matrícula of a certidão de registro civil into the printed mask of the
@@ -26,7 +30,10 @@ export type FormatCertidaoOptions = Pick<FormatParams, "pad">;
  * // "000000 01 55 2010 1 00020 112 0000120 87"
  * ```
  *
- * @see Official: Provimento CNJ 46/2015, art. 1º and Anexo (Código Nacional de Serventias).
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310 Provimento CNJ nº 3, de 17/11/2009,
+ * which instituted the modelo único de certidão and its 32 digit matrícula.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311 Provimento CNJ nº 2, de 27/04/2009,
+ * which instituted the Código Nacional de Serventias (CNS).
  * @see Based on: http://ghiorzi.org/DVnew.htm Worked example of the two check digits
  * (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts

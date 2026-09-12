@@ -3,6 +3,7 @@ import { DATA, type State, type StateCode, type StateName } from "../_internals/
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
+/** The state, and the region it belongs to, that `getAreaCodeInfo` returns for a DDD. */
 export type AreaCodeInfo = {
 	/** The DDD (area code) as a number, e.g. `11`. */
 	areaCode: number;

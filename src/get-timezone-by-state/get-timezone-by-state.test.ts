@@ -1,4 +1,8 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { stateCodes } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getTimezoneByState } from "./get-timezone-by-state";
 
 describe("getTimezoneByState", () => {
@@ -109,5 +113,30 @@ describe("getTimezoneByState", () => {
 		expect(getTimezoneByState("constructor")).toBeNull();
 		expect(getTimezoneByState("toString")).toBeNull();
 		expect(getTimezoneByState("__proto__")).toBeNull();
+	});
+
+	describe("properties", () => {
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(getTimezoneByState, fc.anything());
+		});
+
+		test("should resolve every known state code regardless of case or padding", () => {
+			fc.assert(
+				fc.property(stateCodes, fc.boolean(), fc.boolean(), (stateCode, upper, pad) => {
+					const cased = upper ? stateCode.toUpperCase() : stateCode.toLowerCase();
+					const padded = pad ? `  ${cased}  ` : cased;
+
+					expect(getTimezoneByState(padded)).toBe(getTimezoneByState(stateCode));
+					expect(getTimezoneByState(padded)).not.toBeNull();
+				}),
+			);
+		});
+	});
+});
+
+describe("getTimezoneByState types", () => {
+	test("should take a string and return a string or null", () => {
+		expectTypeOf(getTimezoneByState).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(getTimezoneByState).returns.toEqualTypeOf<string | null>();
 	});
 });

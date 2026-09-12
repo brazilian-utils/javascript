@@ -1,6 +1,14 @@
 import { PIS_LENGTH } from "../_internals/constants/pis";
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatPis } from "./format-pis";
+import { anyValue, digits, digitsUpTo } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectMatchesPattern,
+	expectPadsToLength,
+	expectRoundTrip,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { parsePis } from "../parse-pis/parse-pis";
+import { formatPis, type FormatPisOptions } from "./format-pis";
 
 describe("formatPis", () => {
 	it("when it is a no formatted string", () => {
@@ -81,5 +89,37 @@ describe("formatPis", () => {
 		expect(formatPis(null)).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatPis()).toBe("");
+	});
+
+	describe("properties", () => {
+		const upToAPis = digitsUpTo(11);
+
+		test("should only add the mask, never change the digits", () => {
+			expectRoundTrip(formatPis, parsePis, upToAPis);
+		});
+
+		test("should produce the documented mask shape for a full PIS", () => {
+			expectMatchesPattern(formatPis, /^\d{3}\.\d{5}\.\d{2}-\d$/, digits(11));
+		});
+
+		test("should left pad a shorter value up to the PIS length", () => {
+			expectPadsToLength(formatPis, parsePis, upToAPis, PIS_LENGTH);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(formatPis, "string", anyValue);
+		});
+	});
+});
+
+describe("formatPis types", () => {
+	test("should take a string or number value and options and return a string", () => {
+		expectTypeOf(formatPis).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatPis).parameter(1).toEqualTypeOf<FormatPisOptions | undefined>();
+		expectTypeOf(formatPis).returns.toEqualTypeOf<string>();
+	});
+
+	test("should type the pad option as an optional boolean", () => {
+		expectTypeOf<FormatPisOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

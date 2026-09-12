@@ -3,6 +3,7 @@ import { LENGTH } from "../parse-license-plate/constants";
 import { parseLicensePlate } from "../parse-license-plate/parse-license-plate";
 import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
 
+/** The Brazilian license plate formats `getFormatLicensePlate` can identify: the old `LLLNNNN` and the Mercosul `LLLNLNN`. */
 export type LicensePlateFormat = "LLLNNNN" | "LLLNLNN";
 
 /**

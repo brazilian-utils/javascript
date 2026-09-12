@@ -1,5 +1,10 @@
+import * as fc from "fast-check";
+
 import { DATA } from "../_internals/constants/cities";
-import { describe, expect, it } from "../_internals/test/runtime";
+import { type StateCode } from "../_internals/constants/states";
+import { anyGarbage, stateCodes } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getStates } from "../get-states/get-states";
 import { getCities } from "./get-cities";
 
@@ -96,5 +101,30 @@ describe("getCities", () => {
 
 		expect(getCities()).not.toContain("Cidade Inexistente");
 		expect(getCities()).toHaveLength(first.length - 1);
+	});
+
+	describe("properties", () => {
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(getCities, anyGarbage);
+		});
+
+		test("should return, for every state, only cities that are also in the combined list", () => {
+			const allCities = new Set(getCities());
+
+			fc.assert(
+				fc.property(stateCodes, (stateCode) => {
+					for (const city of getCities(stateCode)) {
+						expect(allCities.has(city)).toBe(true);
+					}
+				}),
+			);
+		});
+	});
+});
+
+describe("getCities types", () => {
+	test("should take an optional StateCode and return an array of strings", () => {
+		expectTypeOf(getCities).parameter(0).toEqualTypeOf<StateCode | undefined>();
+		expectTypeOf(getCities).returns.toEqualTypeOf<string[]>();
 	});
 });

@@ -192,7 +192,7 @@ export { type ParseCurrencyOptions, parseCurrency } from "./parse-currency/parse
 export { type Iban, parseIban } from "./parse-iban/parse-iban";
 export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
-export { type NfeKey, parseNfeKey } from "./parse-nfe-key/parse-nfe-key";
+export { type NfeKey, type NfeKeyModel, parseNfeKey } from "./parse-nfe-key/parse-nfe-key";
 export { parsePassport } from "./parse-passport/parse-passport";
 export { parsePhone } from "./parse-phone/parse-phone";
 export { parsePis } from "./parse-pis/parse-pis";
@@ -206,7 +206,12 @@ export { parseProcessoJuridico } from "./parse-processo-juridico/parse-processo-
 export { parseVoterId } from "./parse-voter-id/parse-voter-id";
 export { removeAccents } from "./remove-accents/remove-accents";
 
-/** @deprecated Use `IsValidBankAccountOptions` instead. */
+/**
+ * The bank account `isValidBankAccount` checks: the bank, the agency and the account with its
+ * check digit.
+ *
+ * @deprecated Use `IsValidBankAccountOptions` instead.
+ */
 export type { IsValidBankAccountParams } from "./is-valid-bank-account/is-valid-bank-account";
 /** @deprecated Use `formatCep` instead. */
 export { formatCep as formatCEP } from "./format-cep/format-cep";

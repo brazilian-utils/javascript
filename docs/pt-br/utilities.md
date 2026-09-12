@@ -696,7 +696,7 @@ getBankByCode('999'); // null
 
 ## getBankByIspb
 
-Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 dígitos publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Diferente do código COMPE (`getBankByCode`), todo participante do SPB tem um ISPB, incluindo instituições sem código COMPE próprio. Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse ISPB.
+Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 dígitos publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Todo participante do SPB tem um ISPB, mas este conjunto de dados só traz as instituições que também têm código COMPE, então um ISPB cuja instituição não tem código COMPE próprio retorna `null`. Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse ISPB.
 
 ```javascript
 import { getBankByIspb } from '@brazilian-utils/brazilian-utils';
@@ -1140,7 +1140,7 @@ Gera um número de processo jurídico válido de acordo com a definição do [CN
 ```javascript
 import { generateProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
-generateProcessoJuridico(); // '00020802520125150049'
+generateProcessoJuridico(); // '89478643020269670326'
 generateProcessoJuridico({ year: 2026, court: 5 }); // string | null
 generateProcessoJuridico({ year: 10000 }); // null (ano fora do intervalo)
 ```
@@ -1289,7 +1289,7 @@ Gera um PIS válido aleatório.
 ```javascript
 import { generatePis } from '@brazilian-utils/brazilian-utils';
 
-generatePis(); // '12345678901'
+generatePis(); // '91077906857'
 ```
 
 ## getMunicipality
@@ -1425,7 +1425,7 @@ differenceInBusinessDays({ from: new Date('not a date'), to: new Date() }); // n
 
 ## convertDateToWords
 
-Formata uma data por extenso em português do Brasil, ex.: `"01/01/2024"` vira `"primeiro de janeiro de dois mil e vinte e quatro"`. Aceita um `Date` (lido pela sua data de calendário local, a mesma convenção usada por `isHoliday`) ou uma string no formato `"dd/mm/yyyy"` ou ISO `"yyyy-mm-dd"`. Com o `options.style` padrão `"full"`, o dia 1 é escrito como "primeiro" e os demais dias usam o número cardinal; com `"month"`, só o nome do mês é escrito por extenso e o dia/ano ficam em dígitos (o dia 1 como `"1º"`, ex.: `"2 de março de 2024"`, `"1º de janeiro de 2024"`). Os nomes dos meses ficam em minúsculo. No estilo `"full"` o ano é escrito por extenso sem a vírgula de milhar que `convertNumberToWords`/`convertCurrencyToWords` usam (`1999` vira `"mil novecentos e noventa e nove"`, não `"mil, novecentos e noventa e nove"`), do jeito que uma data é lida em voz alta. `options.weekday` (padrão `false`) prefixa o nome do dia da semana em pt-BR minúsculo seguido de vírgula (`"sábado, dois de março de dois mil e vinte e quatro"`), calculado a partir da data de calendário resolvida. `options.case` define a caixa de todo o resultado: `"lower"` (padrão), `"sentence"` (só a primeira letra em maiúscula) ou `"upper"` (tudo em maiúscula, preservando os acentos). Valores inválidos de `case`/`style` são ignorados e o padrão é usado; a antiga opção booleana `capitalize` foi removida em favor de `case: "sentence"`. O dia 29 de fevereiro é aceito nos anos bissextos do calendário gregoriano proléptico (divisíveis por 4, exceto séculos não divisíveis por 400). Retorna `""` para um `Date` inválido, uma string malformada, um dia/mês que não existe ou uma data anterior ao ano 1.
+Formata uma data por extenso em português do Brasil, ex.: `"01/01/2024"` vira `"primeiro de janeiro de dois mil e vinte e quatro"`. Aceita um `Date` (lido pela sua data de calendário local, a mesma convenção usada por `isHoliday`) ou uma string no formato `"dd/mm/yyyy"` ou ISO `"yyyy-mm-dd"`. Com o `options.style` padrão `"full"`, o dia 1 é escrito como "primeiro" e os demais dias usam o número cardinal; com `"month"`, só o nome do mês é escrito por extenso e o dia/ano ficam em dígitos (o dia 1 como `"1º"`, ex.: `"2 de março de 2024"`, `"1º de janeiro de 2024"`). Os nomes dos meses ficam em minúsculo. No estilo `"full"` o ano é escrito por extenso sem a vírgula de milhar que `convertNumberToWords`/`convertCurrencyToWords` usam (`1999` vira `"mil novecentos e noventa e nove"`, não `"mil, novecentos e noventa e nove"`), do jeito que uma data é lida em voz alta. `options.weekday` (padrão `false`) prefixa o nome do dia da semana em pt-BR minúsculo seguido de vírgula (`"sábado, dois de março de dois mil e vinte e quatro"`), calculado a partir da data de calendário resolvida. `options.case` define a caixa de todo o resultado: `"lower"` (padrão), `"sentence"` (só a primeira letra em maiúscula) ou `"upper"` (tudo em maiúscula, preservando os acentos). Valores inválidos de `case`/`style` são ignorados e o padrão é usado. O dia 29 de fevereiro é aceito nos anos bissextos do calendário gregoriano proléptico (divisíveis por 4, exceto séculos não divisíveis por 400). Retorna `""` para um `Date` inválido, uma string malformada, um dia/mês que não existe ou uma data anterior ao ano 1.
 
 ```javascript
 import { convertDateToWords } from '@brazilian-utils/brazilian-utils';
@@ -1445,7 +1445,7 @@ convertDateToWords('29/02/1900'); // "" (1900 não é bissexto)
 
 ## formatVoterId
 
-Formata um título de eleitor. Usa por padrão o agrupamento de 12 dígitos `0000 0000 00 00`; quando o valor sanitizado tem 13 dígitos (títulos de São Paulo/Minas Gerais podem ter um número sequencial de 9 dígitos) é usado o agrupamento `0000 0000 0 00 00`.
+Formata um título de eleitor. Usa por padrão o agrupamento de 12 dígitos `0000 0000 00 00`; o agrupamento de 13 dígitos `0000 0000 0 00 00` só é usado quando o valor sanitizado tem mais de 12 dígitos **e** o código de unidade federativa (o 10º e o 11º dígitos) é `01` (São Paulo) ou `02` (Minas Gerais), os dois estados cujos títulos podem ter um número sequencial de 9 dígitos.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
@@ -1496,7 +1496,7 @@ Verifica se um número de CNS (Cartão Nacional de Saúde) é válido, o identif
 ```javascript
 import { isValidCns } from '@brazilian-utils/brazilian-utils';
 
-isValidCns('123456789010001'); // true (definitivo)
+isValidCns('123456789010000'); // true (definitivo)
 isValidCns('700000000000005'); // true (provisório)
 isValidCns('12345678901'); // false (tamanho inválido)
 ```
@@ -1515,7 +1515,7 @@ formatCns('89010001', { pad: true }); // '000 0000 8901 0001'
 
 ## isValidCertidao
 
-Verifica se a matrícula de uma certidão de registro civil (nascimento, casamento, óbito e os demais atos mantidos por uma serventia de registro civil das pessoas naturais) é válida. A matrícula tem 32 dígitos distribuídos em 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), e os dois dígitos verificadores usam módulo 11 com pesos ciclando de 2 a 10 e voltando por 0. Aceita os caracteres de máscara usuais e espaços entre e ao redor dos grupos. O layout e os dois dígitos verificadores seguem o Provimento CNJ 46/2015, detalhado em [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e implementado pelo [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) e pelo [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
+Verifica se a matrícula de uma certidão de registro civil (nascimento, casamento, óbito e os demais atos mantidos por uma serventia de registro civil das pessoas naturais) é válida. A matrícula tem 32 dígitos distribuídos em 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), e os dois dígitos verificadores usam módulo 11 com pesos ciclando de 2 a 10 e voltando por 0. Aceita os caracteres de máscara usuais e espaços entre e ao redor dos grupos. O layout e os dois dígitos verificadores seguem o [Provimento CNJ nº 3/2009](https://atos.cnj.jus.br/atos/detalhar/1310), cujo CNS da serventia vem do [Provimento CNJ nº 2/2009](https://atos.cnj.jus.br/atos/detalhar/1311), detalhado em [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e implementado pelo [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) e pelo [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
 
 `options.accept` (parte de `IsValidCertidaoOptions`) restringe quais tipos de livro (o mesmo `CertidaoType` retornado por `parseCertidao`) contam como válidos; quando informado, o dígito do tipo de livro precisa corresponder a um dos tipos listados. O padrão é aceitar todos os tipos.
 
@@ -1532,7 +1532,7 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] 
 
 ## parseCertidao
 
-Extrai os campos da matrícula de uma certidão de registro civil, retornando `null` quando a matrícula é inválida ou quando o código do livro não é um dos nove livros definidos pelo Provimento. Os nove livros e seus códigos são os definidos pelo Provimento CNJ 46/2015, conforme listados em [ghiorzi.org](http://ghiorzi.org/DVnew.htm).
+Extrai os campos da matrícula de uma certidão de registro civil, retornando `null` quando a matrícula é inválida ou quando o código do livro não é um dos nove livros definidos pelo Provimento. Os nove livros e seus códigos são os definidos pelo [Provimento CNJ nº 3/2009](https://atos.cnj.jus.br/atos/detalhar/1310), conforme listados em [ghiorzi.org](http://ghiorzi.org/DVnew.htm).
 
 ```javascript
 import { parseCertidao } from '@brazilian-utils/brazilian-utils';
@@ -1571,7 +1571,7 @@ O resultado `Certidao` traz:
 
 ## formatCertidao
 
-Formata a matrícula de uma certidão de registro civil na máscara impressa do Provimento, os 32 dígitos agrupados em 6 2 2 4 1 5 3 7 2 e separados por espaços. `options.pad` (parte de `FormatCertidaoOptions`) preenche o valor com zeros à esquerda até 32 dígitos. A máscara é a impressa no Provimento CNJ 46/2015.
+Formata a matrícula de uma certidão de registro civil na máscara impressa do Provimento, os 32 dígitos agrupados em 6 2 2 4 1 5 3 7 2 e separados por espaços. `options.pad` (parte de `FormatCertidaoOptions`) preenche o valor com zeros à esquerda até 32 dígitos. A máscara é a impressa no [Provimento CNJ nº 3/2009](https://atos.cnj.jus.br/atos/detalhar/1310).
 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
@@ -1816,7 +1816,7 @@ isValidCst('999'); // false (não existe em nenhuma tabela)
 
 ## isValidCsosn
 
-Valida se um código de CSOSN (Código de Situação da Operação no Simples Nacional) é um dos 10 códigos definidos pelo Convênio ICMS 92/2015: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` ou `900`.
+Valida se um código de CSOSN (Código de Situação da Operação no Simples Nacional) é um dos 10 códigos definidos pelo Ajuste SINIEF 03/2010: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` ou `900`.
 
 ```javascript
 import { isValidCsosn } from '@brazilian-utils/brazilian-utils';

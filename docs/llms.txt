@@ -60,7 +60,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidNcm](https://brazilian-utils.com.br/utilities.md#isvalidncm): Check if an NCM (Nomenclatura Comum do Mercosul) code exists in the current table published by Siscomex/MDIC.
 - [isValidCfop](https://brazilian-utils.com.br/utilities.md#isvalidcfop): Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table (Ajuste SINIEF 07/2001 and updates).
 - [isValidCst](https://brazilian-utils.com.br/utilities.md#isvalidcst): Check if a CST (Código de Situação Tributária) code is valid for a given tax.
-- [isValidCsosn](https://brazilian-utils.com.br/utilities.md#isvalidcsosn): Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes defined by Convênio ICMS 92/2015: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
+- [isValidCsosn](https://brazilian-utils.com.br/utilities.md#isvalidcsosn): Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes defined by Ajuste SINIEF 03/2010: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
 
 ## Formatters (format*)
 

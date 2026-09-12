@@ -1,7 +1,19 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { formatIban } from "../format-iban/format-iban";
 import { isValidIban } from "../is-valid-iban/is-valid-iban";
-import { parseIban } from "./parse-iban";
+import { parseIban, type Iban } from "./parse-iban";
+
+const findBrazilianIban = (body: string): string => {
+	for (let pair = 0; pair < 97; pair++) {
+		const candidate = `BR${String(pair).padStart(2, "0")}${body}`;
+
+		if (isValidIban(candidate)) return candidate;
+	}
+
+	return "";
+};
 
 describe("parseIban", () => {
 	describe("should return the parsed iban", () => {
@@ -127,5 +139,56 @@ describe("parseIban", () => {
 				expect(formatIban(iban)).toBe(formatIban(iban.toUpperCase()));
 			});
 		}
+	});
+
+	describe("properties", () => {
+		const bodies = fc.stringMatching(/^[0-9]{23}[CP][A-Z0-9]$/);
+
+		test("should split an IBAN into fields that spell it back", () => {
+			fc.assert(
+				fc.property(bodies, (body) => {
+					const iban = findBrazilianIban(body);
+					const parsed = parseIban(formatIban(iban));
+					const account = `${parsed?.bankIspb}${parsed?.branch}${parsed?.account}`;
+					const owner = `${parsed?.accountType}${parsed?.owner}`;
+
+					expect(`${parsed?.countryCode}${parsed?.checkDigits}${account}${owner}`).toBe(iban);
+				}),
+			);
+		});
+
+		test("should return a value exactly when the IBAN is valid", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					expect(parseIban(value) !== null).toBe(isValidIban(value));
+				}),
+			);
+		});
+
+		test("should never throw and always return an IBAN or null", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const parsed = parseIban(value as string);
+
+					expect(parsed === null || parsed.countryCode === "BR").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("parseIban types", () => {
+	test("should take a string and return an Iban or null", () => {
+		expectTypeOf(parseIban).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(parseIban).returns.toEqualTypeOf<Iban | null>();
+		expectTypeOf<Iban>().toEqualTypeOf<{
+			countryCode: "BR";
+			checkDigits: string;
+			bankIspb: string;
+			branch: string;
+			account: string;
+			accountType: "C" | "P";
+			owner: string;
+		}>();
 	});
 });

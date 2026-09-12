@@ -1,6 +1,15 @@
+import * as fc from "fast-check";
+
 import { CPF_LENGTH } from "../_internals/constants/cpf";
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatCpf } from "./format-cpf";
+import { anyValue, digits, digitsUpTo } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectPadsToLength,
+	expectRoundTrip,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { parseCpf } from "../parse-cpf/parse-cpf";
+import { formatCpf, type FormatCpfOptions } from "./format-cpf";
 
 describe("formatCpf", () => {
 	it("should return an empty string for null or undefined", () => {
@@ -94,5 +103,46 @@ describe("formatCpf", () => {
 		expect(formatCpf("94389575104", { obfuscate: false })).toBe("943.895.751-04");
 		expect(formatCpf("94389575104")).toBe("943.895.751-04");
 		expect(formatCpf("943", { pad: true, obfuscate: false })).toBe("000.000.009-43");
+	});
+
+	describe("properties", () => {
+		const upToACpf = digitsUpTo(11);
+		const fullCpf = digits(11);
+
+		test("should only add the mask, never change the digits", () => {
+			expectRoundTrip(formatCpf, parseCpf, upToACpf);
+		});
+
+		test("should produce the documented mask shape for a full CPF", () => {
+			fc.assert(
+				fc.property(fullCpf, (value) => {
+					const obfuscated = formatCpf(value, { obfuscate: true });
+
+					expect(formatCpf(value)).toMatch(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/);
+					expect(obfuscated).toMatch(/^\*{3}\.\d{3}\.\d{3}-\*{2}$/);
+				}),
+			);
+		});
+
+		test("should left pad a shorter value up to the CPF length", () => {
+			expectPadsToLength(formatCpf, parseCpf, upToACpf, CPF_LENGTH);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(formatCpf, "string", anyValue);
+		});
+	});
+});
+
+describe("formatCpf types", () => {
+	test("should take a string or number value and options and return a string", () => {
+		expectTypeOf(formatCpf).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCpf).parameter(1).toEqualTypeOf<FormatCpfOptions | undefined>();
+		expectTypeOf(formatCpf).returns.toEqualTypeOf<string>();
+	});
+
+	test("should type the pad and obfuscate options as optional booleans", () => {
+		expectTypeOf<FormatCpfOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf<FormatCpfOptions["obfuscate"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

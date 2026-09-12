@@ -28,24 +28,24 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 
 ### Useful scripts
 
-| Command                                                                                                   | What it does                                                                                                                     |
-| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `npm check`                                                                                               | Runs `vp check`: format check, lint and type-check together. Run this before opening a PR.                                       |
-| `npm check:fix`                                                                                           | Same as above, but auto-fixes what it can.                                                                                       |
-| `npm format` / `npm format:check`                                                                         | Formats the codebase / checks formatting with `vp fmt`.                                                                          |
-| `npm lint` / `npm lint:fix`                                                                               | Lints the codebase with `vp lint`.                                                                                               |
-| `npm test`                                                                                                | Runs the unit test suite with `vp test`.                                                                                         |
-| `npm test:coverage`                                                                                       | Runs tests with coverage (`vp test run --coverage`).                                                                             |
-| `npm test:bun`                                                                                            | Runs the test suite on [Bun](https://bun.sh) (`bun test src`).                                                                   |
-| `npm test:deno`                                                                                           | Runs the test suite on [Deno](https://deno.com) (`deno test`).                                                                   |
-| `npm test:chrome-browser`, `npm test:firefox-browser`, `npm test:edge-browser`, `npm test:safari-browser` | Runs the test suite in real browsers via `vp test --browser.enabled`.                                                            |
-| `npm build`                                                                                               | Builds the library with `vp build`.                                                                                              |
-| `npm run check:duplication`                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                  |
-| `npm run check:unused`                                                                                    | Runs [knip](https://knip.dev): unused files, exports, types and dependencies fail.                                               |
-| `npm run test:mutation`                                                                                   | Runs [Stryker](https://stryker-mutator.io) mutation tests (`stryker run`); pass `-- --mutate src/<util>/<util>.ts` for one file. |
-| `npm run check:api`                                                                                       | Builds the public API report (`api/brazilian-utils.api.md`) with API Extractor; commit the updated file.                         |
-| `npm run check:commits`                                                                                   | Checks the commit messages since `origin/main` with commitlint (Conventional Commits).                                           |
-| `npm run check:lockfile`                                                                                  | Checks `package-lock.json` only resolves to the npm registry over HTTPS with integrity hashes (lockfile-lint).                   |
+| Command                                                                                                   | What it does                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm check`                                                                                               | Runs `vp check`: format check, lint and type-check together. Run this before opening a PR.                                                                             |
+| `npm check:fix`                                                                                           | Same as above, but auto-fixes what it can.                                                                                                                             |
+| `npm format` / `npm format:check`                                                                         | Formats the codebase / checks formatting with `vp fmt`.                                                                                                                |
+| `npm lint` / `npm lint:fix`                                                                               | Lints the codebase with `vp lint`.                                                                                                                                     |
+| `npm test`                                                                                                | Runs the unit test suite with `vp test`.                                                                                                                               |
+| `npm test:coverage`                                                                                       | Runs tests with coverage (`vp test run --coverage`).                                                                                                                   |
+| `npm test:bun`                                                                                            | Runs the test suite on [Bun](https://bun.sh) (`bun test src`).                                                                                                         |
+| `npm test:deno`                                                                                           | Runs the test suite on [Deno](https://deno.com) (`deno test`).                                                                                                         |
+| `npm test:chrome-browser`, `npm test:firefox-browser`, `npm test:edge-browser`, `npm test:safari-browser` | Runs the test suite in real browsers via `vp test --browser.enabled`.                                                                                                  |
+| `npm build`                                                                                               | Builds the library with `vp build`.                                                                                                                                    |
+| `npm run check:duplication`                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                                                        |
+| `npm run check:unused`                                                                                    | Runs [knip](https://knip.dev): unused files, exports, types and dependencies fail.                                                                                     |
+| `npm run test:mutation`                                                                                   | Runs [Stryker](https://stryker-mutator.io) mutation tests (`stryker run`); pass `-- --mutate src/<util>/<util>.ts` for one file.                                       |
+| `npm run check:api`                                                                                       | Builds the package and runs API Extractor over `dist/brazilian-utils.d.ts`: a public type without a doc comment, or a type the API refers to without exporting, fails. |
+| `npm run check:commits`                                                                                   | Checks the commit messages since `origin/main` with commitlint (Conventional Commits).                                                                                 |
+| `npm run check:lockfile`                                                                                  | Checks `package-lock.json` only resolves to the npm registry over HTTPS with integrity hashes (lockfile-lint).                                                         |
 
 Before opening a pull request, make sure `npm check` and `npm test` both pass locally. If your
 change touches runtime behavior, also consider running the Bun/Deno scripts above. The library is
@@ -76,7 +76,16 @@ example `formatSomething`):
    or `src/is-valid-service-phone/is-valid-service-phone.ts` for examples).
 3. Add tests alongside it in `src/format-something/format-something.test.ts`. Cover valid input,
    invalid/edge-case input, and options, if any. Tests must pass on Node, Bun and Deno (see
-   `npm test:bun` / `npm test:deno` under Useful scripts).
+   `npm test:bun` / `npm test:deno` under Useful scripts). Expectations are hand-written literals,
+   never values computed by the code under test. Close the file with a `describe("properties")`
+   block of [fast-check](https://fast-check.dev) properties that hold by specification (a
+   generated value is valid, format/parse round-trip, masks never change the verdict, arbitrary
+   input never throws) and a `describe("<name> types")` block that pins the public signature with
+   `expectTypeOf` (parameters, options and return type; `vp check` fails on a wrong assertion). A
+   hot path may also get a `describe("<name> benchmarks")` block of `bench` cases: they are todo
+   entries in a normal run and execute with `npx vp test bench --run`. `describe`, `test`,
+   `expect`, `expectTypeOf` and `bench` all come from `src/_internals/test/runtime`, which maps
+   them to vitest, Bun or Deno.
 4. Export the new function (and any exported types) from `src/index.ts`, keeping the existing
    alphabetical ordering. Then add the function name to the `PUBLIC` list and the type(s) to the
    `publicTypes` map in `src/index.test.ts`, alphabetically. These two make up the package's
@@ -113,8 +122,11 @@ duplicating logic (e.g. `src/_internals/format/format.ts`,
 above for every function the package exports, by building a one-import consumer bundle per
 export with esbuild and printing its size. There is no committed budgets file: instead, the
 `tree-shaking` job in CI measures every export's single-import bundle size on the PR's base
-branch and on the PR head, then comments a Markdown diff on the PR (sorted by absolute delta,
-with new and removed exports called out and unchanged exports collapsed). The check fails the PR
+branch and on the PR head, then comments a Markdown report on the PR that leads with the impact:
+a single "no bundle size impact" line when every export is the same size, otherwise the bundle
+totals plus a "What changed" table listing only the exports that grew, shrank, appeared or
+disappeared (sorted by absolute delta); the full per-export list is always there, collapsed. The
+check fails the PR
 when a pre-existing export grows by more than 20% and more than 256 bytes, or when a bundle
 importing every export that already existed on the base grows by more than 5% (new exports
 never count as a regression); those thresholds live as constants at the top of
@@ -132,9 +144,29 @@ categories as errors, the `import`, `jsdoc` and `promise` plugins, and a curated
 on every function, no `console` outside `scripts/`, no `forEach`, no parameter reassignment, no
 non-null assertions, no unsafe type assertions, JSDoc `@param`/`@returns` with types on exported
 functions, `type` over `interface`, `T[]` over `Array<T>`, and no default exports outside the
-config files. Test files relax the rules that only make sense for production code (return types,
-JSDoc, the `unsafe-*` family, since the multi-runtime `expect` shim is untyped) and every
-`@ts-expect-error` must carry a description.
+config files. On top of the categories, about two hundred `style`/`restriction` rules that
+have a clear quality payoff are switched on one by one (inline `type` import specifiers,
+`startsWith` over `slice` comparisons, negative indexes, no `reduce`, `await` over `then`, no
+`Array#apply`, `max-params` of 4, kebab-case file names, the `promise` invariants, the `jsdoc`
+tag checks and the `vitest` matcher preferences, among others); whole categories such as
+`no-magic-numbers`, `no-null`, `one-var` or `no-plusplus` stay off because they fight the
+check-digit code and the `null`-returning API on purpose. Test files relax the rules that only
+make sense for production code (return types, JSDoc, the `unsafe-*` family, since the
+multi-runtime `expect` shim is untyped) and every `@ts-expect-error` must carry a description.
+
+[SonarJS](https://github.com/SonarSource/SonarJS) runs as an
+oxlint JS plugin (`lint.jsPlugins` in `vite.config.ts`) with every rule as an error, minus a
+short list that is off on purpose right below the spread: formatting and naming rules that
+`vp fmt` owns, the complexity/duplication rules already gated by `eslint/complexity` and jscpd,
+`no-reference-error` (it reports TypeScript utility types), `max-union-size` and `pseudo-random`
+(the 27 state codes and the generators' `Math.random` are intentional), `redundant-type-aliases`
+(deprecated aliases kept for compatibility) and `todo-tag` (`test.todo` is a shim feature). It
+adds what the Rust plugins do not have: cognitive complexity (25), regex complexity (25) and
+regex bug patterns (anchor precedence, super-linear backtracking), nested ternaries and template
+literals, redundant assignments and optional markers, and the test smells (hooks after test
+cases, disabled or exclusive tests, assertions outside tests). Its type-aware rules are inert,
+since oxlint does not hand ESLint plugins a type checker. The plugin adds about three seconds to
+`vp check`.
 
 `tsconfig.json` is `strict` plus `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters` and
 `noPropertyAccessFromIndexSignature`. `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
@@ -176,13 +208,14 @@ pull request so the CI result is not a surprise.
   `// Stryker disable next-line <MutatorName>: <reason>` right above the line; that is the one
   place an inline comment is accepted in this codebase.
 
-## Public API report
+## Public API validation
 
-`api/brazilian-utils.api.md` is generated by [API Extractor](https://api-extractor.com) from the
-bundled `dist/brazilian-utils.d.ts` and lists every exported function, type and overload of the
-package. CI rebuilds it and fails when the committed file is stale, so any change to a public
-signature shows up as a diff in the pull request, which is how "no breaking changes" is reviewed
-mechanically. After changing anything exported, run `npm run check:api` and commit the report.
+[API Extractor](https://api-extractor.com) runs over the bundled `dist/brazilian-utils.d.ts` in CI
+(`npm run check:api`). It fails when a type the public API refers to is not itself exported (a
+consumer could not name it) and when an exported function, type or class has no doc comment. The
+report it writes lands in the ignored `reports/api/` folder and is not committed: the public
+signatures are pinned by the `describe("<name> types")` blocks in the tests, and the
+`src/index.test.ts` export map catches an export that goes missing.
 
 ## Supply chain
 
@@ -191,7 +224,15 @@ mechanically. After changing anything exported, run `npm run check:api` and comm
 - The `Security` workflow lints the workflows themselves with
   [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor)
   and scans `package-lock.json` with [OSV-Scanner](https://google.github.io/osv-scanner/); the
-  `Check` workflow runs `audit-ci` and lockfile-lint on top.
+  `Check` workflow runs `audit-ci` and lockfile-lint on top. The same workflow runs the
+  [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript) on
+  every push to `main` and weekly: it grades the repository configuration (pinned actions, token
+  permissions, branch protection, code review, dependency updates, SAST) rather than the code,
+  publishes the score and uploads the findings to the Security tab.
+- Every GitHub release carries `brazilian-utils.cdx.json`, a CycloneDX SBOM of the published
+  package generated with `npm sbom` from the release tag. The package has no runtime dependencies,
+  so the document describes the package itself; it exists for consumers whose supply-chain policy
+  requires one.
 - Commit messages are checked with commitlint on every pull request, since release-please derives
   the version bump and the changelog from them.
 - The `Links` workflow checks every URL in the Markdown files and in the `@see` tags of the source

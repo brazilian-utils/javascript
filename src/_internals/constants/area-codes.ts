@@ -1,4 +1,4 @@
-import type { StateCode } from "./states";
+import { type StateCode } from "./states";
 
 /**
  * Brazilian DDD (area code) data under the Plano Geral de Numeração. `VALID_AREA_CODES` is kept

@@ -1,12 +1,29 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "../_internals/test/runtime";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	expectTypeOf,
+	it,
+	vi,
+} from "../_internals/test/runtime";
 import {
 	type AddressInfo,
+	type CepProvider,
+	type GetAddressInfoByCepOptions,
 	GetAddressInfoByCepError,
 	GetAddressInfoByCepNotFoundError,
 	GetAddressInfoByCepServiceError,
 	GetAddressInfoByCepValidationError,
 	getAddressInfoByCep,
 } from "./get-address-info-by-cep";
+
+type FetchInput = string | URL | Request;
+
+const requestUrl = (input: FetchInput): string => {
+	if (typeof input === "string") return input;
+	return input instanceof URL ? input.href : input.url;
+};
 
 type MockResponse = {
 	ok: boolean;
@@ -56,8 +73,8 @@ function setupFetchMock(
 	fetchMock: ReturnType<typeof vi.fn>,
 	overrides?: Partial<Record<"brasilapi" | "viacep" | "widenet", Error | MockResponse>>,
 ) {
-	fetchMock.mockImplementation((input: string | URL | Request) => {
-		const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+	fetchMock.mockImplementation((input: FetchInput) => {
+		const url = requestUrl(input);
 
 		if (url.includes("viacep.com.br")) {
 			if (overrides?.viacep instanceof Error) {
@@ -252,8 +269,8 @@ describe("getAddressInfoByCep", () => {
 
 				expectDefaultAddress(result);
 
-				const requestedUrls = fetchMock.mock.calls.map(([input]: [string | URL | Request]) =>
-					typeof input === "string" ? input : input instanceof URL ? input.href : input.url,
+				const requestedUrls = fetchMock.mock.calls.map(([input]: [FetchInput]) =>
+					requestUrl(input),
 				);
 				expect(requestedUrls.some((url: string) => url.includes("widenet"))).toBe(false);
 			});
@@ -733,5 +750,33 @@ describe("getAddressInfoByCep", () => {
 			},
 			LIVE_TEST_TIMEOUT,
 		);
+	});
+});
+
+describe("getAddressInfoByCep types", () => {
+	it("should take a string or number CEP, optional providers, and resolve to an AddressInfo", () => {
+		expectTypeOf(getAddressInfoByCep).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getAddressInfoByCep)
+			.parameter(1)
+			.toEqualTypeOf<GetAddressInfoByCepOptions | undefined>();
+		expectTypeOf<GetAddressInfoByCepOptions["providers"]>().toEqualTypeOf<
+			CepProvider[] | undefined
+		>();
+		expectTypeOf<CepProvider>().toEqualTypeOf<"viacep" | "widenet" | "brasilapi">();
+		expectTypeOf(getAddressInfoByCep).returns.resolves.toEqualTypeOf<AddressInfo>();
+		expectTypeOf<AddressInfo>().toEqualTypeOf<{
+			cep: string;
+			state: string;
+			city: string;
+			neighborhood: string;
+			street: string;
+		}>();
+	});
+
+	it("should expose error classes that extend the base error", () => {
+		expectTypeOf(new GetAddressInfoByCepNotFoundError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepServiceError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepValidationError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepError("m")).toExtend<Error>();
 	});
 });

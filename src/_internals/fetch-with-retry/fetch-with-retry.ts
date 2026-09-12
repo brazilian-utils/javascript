@@ -64,13 +64,17 @@ const wait = (ms: number): Promise<void> =>
 				setTimeout(resolve, ms);
 			});
 
+type Attempt = {
+	retries: number;
+	retryDelayMs: number;
+	attempt: number;
+	lastError?: unknown;
+};
+
 const attemptFetch = async (
 	input: string | URL | Request,
 	init: RequestInit,
-	retries: number,
-	retryDelayMs: number,
-	attempt: number,
-	lastError?: unknown,
+	{ retries, retryDelayMs, attempt, lastError }: Attempt,
 ): Promise<Response> => {
 	if (attempt > retries) {
 		throw lastError;
@@ -85,7 +89,12 @@ const attemptFetch = async (
 
 		await wait(retryDelayMs * (attempt + 1));
 
-		return attemptFetch(input, init, retries, retryDelayMs, attempt + 1, error);
+		return attemptFetch(input, init, {
+			retries,
+			retryDelayMs,
+			attempt: attempt + 1,
+			lastError: error,
+		});
 	}
 };
 
@@ -108,4 +117,4 @@ const attemptFetch = async (
 export const fetchWithRetry = (
 	input: string | URL | Request,
 	{ retries = 2, retryDelayMs = 250, ...init }: FetchWithRetryOptions = {},
-): Promise<Response> => attemptFetch(input, init, retries, retryDelayMs, 0);
+): Promise<Response> => attemptFetch(input, init, { retries, retryDelayMs, attempt: 0 });

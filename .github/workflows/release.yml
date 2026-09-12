@@ -108,3 +108,33 @@ jobs:
 
       - name: Stage on npm
         run: npm stage publish --provenance --access public
+
+  sbom:
+    name: Attach the SBOM to the release
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout the release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Generate the CycloneDX SBOM of the published package
+        # The package has no runtime dependencies, so the SBOM describes the package itself;
+        # --package-lock-only reads the lockfile instead of installing anything.
+        run: npm sbom --sbom-format cyclonedx --omit dev --package-lock-only > brazilian-utils.cdx.json
+
+      - name: Upload the SBOM as a release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
+        run: gh release upload "$TAG_NAME" brazilian-utils.cdx.json --clobber

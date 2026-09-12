@@ -1,6 +1,8 @@
+import * as fc from "fast-check";
+
 import { CPF_LENGTH } from "../_internals/constants/cpf";
-import { DATA } from "../_internals/constants/states";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { DATA, type StateCode } from "../_internals/constants/states";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 import { STATE_CODES } from "./constants";
 import { generateCpf } from "./generate-cpf";
@@ -21,7 +23,11 @@ describe("generateCpf", () => {
 		const originalRandom = Math.random;
 		let call = 0;
 
-		Math.random = () => (digits[call++] + 0.5) / 10;
+		Math.random = () => {
+			const digit = digits[call];
+			call += 1;
+			return (digit + 0.5) / 10;
+		};
 
 		try {
 			const cpf = generateCpf();
@@ -54,5 +60,43 @@ describe("generateCpf", () => {
 		const cpf = generateCpf("XX");
 		expect(cpf).toHaveLength(CPF_LENGTH);
 		expect(isValidCpf(cpf)).toBe(true);
+	});
+
+	describe("properties", () => {
+		const stateCode = fc.constantFrom(...DATA.map((state) => state.code));
+		const batchSize = fc.integer({ min: 1, max: 10 });
+
+		test("should generate a valid CPF carrying the state digit of every state", () => {
+			fc.assert(
+				fc.property(stateCode, (state) => {
+					const cpf = generateCpf(state);
+
+					expect(cpf).toHaveLength(CPF_LENGTH);
+					expect(cpf[8]).toBe(STATE_CODES[state]);
+					expect(isValidCpf(cpf)).toBe(true);
+				}),
+			);
+		});
+
+		test("should never draw a base made of a single repeated digit", () => {
+			fc.assert(
+				fc.property(batchSize, (size) => {
+					for (let index = 0; index < size; index++) {
+						const cpf = generateCpf();
+
+						expect(cpf).toMatch(/^\d{11}$/);
+						expect(/^(\d)\1{8}/.test(cpf)).toBe(false);
+						expect(isValidCpf(cpf)).toBe(true);
+					}
+				}),
+			);
+		});
+	});
+});
+
+describe("generateCpf types", () => {
+	test("should take an optional state code and return a string", () => {
+		expectTypeOf(generateCpf).parameter(0).toEqualTypeOf<StateCode | undefined>();
+		expectTypeOf(generateCpf).returns.toEqualTypeOf<string>();
 	});
 });

@@ -1,4 +1,4 @@
-import type { StateCode } from "./states";
+import { type StateCode } from "./states";
 
 /**
  * IBGE code of the Federative Unit ("cUF"), keyed by the 2 digit code found in the first

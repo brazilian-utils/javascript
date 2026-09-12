@@ -1,5 +1,6 @@
 import { PREPOSITIONS, SEPARATOR_REGEX, WHITESPACE_REGEX } from "./constants";
 
+/** Options of `capitalize`. */
 export type CapitalizeOptions = {
 	/** Words to keep in lower case when they are not the first word (default: the Portuguese prepositions). */
 	lowerCaseWords?: string[];

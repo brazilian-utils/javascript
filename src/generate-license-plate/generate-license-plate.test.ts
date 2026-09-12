@@ -1,6 +1,9 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
 import { isValidLicensePlate } from "../is-valid-license-plate/is-valid-license-plate";
-import { generateLicensePlate } from "./generate-license-plate";
+import { type GenerateLicensePlateFormat, generateLicensePlate } from "./generate-license-plate";
 
 const runWithForcedRandom = (forced: number, run: () => void) => {
 	const originalRandom = Math.random;
@@ -42,5 +45,42 @@ describe("generateLicensePlate", () => {
 		runWithForcedRandom(0.5, () => {
 			expect(generateLicensePlate("LLLNLNN")).toBe("NNN5N55");
 		});
+	});
+
+	describe("properties", () => {
+		const formats = ["LLLNNNN", "LLLNLNN"] as const;
+
+		test("should always generate a plate of the requested format", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...formats), (format) => {
+					const plate = generateLicensePlate(format);
+
+					expect(plate.length).toBe(7);
+					expect(getFormatLicensePlate(plate)).toBe(format);
+					expect(isValidLicensePlate(plate)).toBe(true);
+				}),
+			);
+		});
+
+		test("should always generate a Mercosul plate when no format is given", () => {
+			fc.assert(
+				fc.property(fc.constant(null), () => {
+					expect(getFormatLicensePlate(generateLicensePlate())).toBe("LLLNLNN");
+				}),
+			);
+		});
+	});
+});
+
+describe("generateLicensePlate types", () => {
+	test("should take an optional format and return a string", () => {
+		expectTypeOf(generateLicensePlate)
+			.parameter(0)
+			.toEqualTypeOf<GenerateLicensePlateFormat | undefined>();
+		expectTypeOf(generateLicensePlate).returns.toEqualTypeOf<string>();
+	});
+
+	test("should restrict the format to the supported license plate formats", () => {
+		expectTypeOf<GenerateLicensePlateFormat>().toEqualTypeOf<"LLLNNNN" | "LLLNLNN">();
 	});
 });

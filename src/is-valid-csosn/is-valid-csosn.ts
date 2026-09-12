@@ -10,7 +10,8 @@ import { CSOSN_CODES } from "./constants";
  * @param {string|number} value - The CSOSN code to be validated.
  * @returns {boolean} True when the code is a known CSOSN code, false otherwise.
  *
- * @see Official: https://www.confaz.fazenda.gov.br/legislacao/convenios/2015/CV092_15
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2010/aj_003_10 Ajuste
+ * SINIEF 03/2010, which instituted the CSOSN table.
  *
  * @example
  * ```typescript

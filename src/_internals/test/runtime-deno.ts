@@ -415,7 +415,7 @@ function createExpect(actual: unknown): ExpectResult {
 					name,
 					(...args: unknown[]): void => {
 						try {
-							matcher.apply(undefined, args);
+							matcher(...args);
 						} catch {
 							return;
 						}
@@ -439,7 +439,7 @@ function createExpect(actual: unknown): ExpectResult {
 						);
 						const matcher = matcherEntry?.[1];
 
-						return matcher?.apply(undefined, args);
+						return matcher?.(...args);
 					},
 				]),
 			);
@@ -475,13 +475,13 @@ function currentSuiteChain(): Suite[] {
 	return [...suiteStack];
 }
 
-type DescribeFunction = ((name: string, callback: TestCallback) => void) & {
-	skip: (name: string, callback: TestCallback) => void;
+type DescribeFunction = ((name: string, callback: () => void) => void) & {
+	skip: (name: string, callback: () => void) => void;
 };
 
 let skipDepth = 0;
 
-const runSuite = (name: string, callback: TestCallback): void => {
+const runSuite = (name: string, callback: () => void): void => {
 	suiteStack.push({
 		afterEach: [],
 		beforeEach: [],
@@ -489,9 +489,7 @@ const runSuite = (name: string, callback: TestCallback): void => {
 	});
 
 	try {
-		Promise.resolve(callback()).catch((error: unknown) => {
-			throw error;
-		});
+		callback();
 	} finally {
 		suiteStack.pop();
 	}
@@ -567,3 +565,4 @@ export const vi = {
 };
 
 export { describe };
+export { bench, expectTypeOf } from "./noop";

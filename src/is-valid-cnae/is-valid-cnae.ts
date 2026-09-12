@@ -1,6 +1,4 @@
-import { CNAE_SUBCLASSES } from "../_internals/constants/cnae";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { getCnae } from "../get-cnae/get-cnae";
 
 /**
  * Validates if a CNAE (Classificação Nacional de Atividades Econômicas) subclass code
@@ -15,15 +13,10 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * isValidCnae("6201-5/01"); // true
  * isValidCnae("6201501"); // true
  * isValidCnae(6201501); // true
+ * isValidCnae(111301); // true (a number is padded to 7 digits, so this is "0111301")
  * isValidCnae("0000000"); // false
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/v2/cnae/subclasses
  */
-export const isValidCnae = (value: string | number): boolean => {
-	if (isNullish(value)) return false;
-
-	const digits = sanitizeToDigits(value);
-
-	return digits in CNAE_SUBCLASSES;
-};
+export const isValidCnae = (value: string | number): boolean => getCnae(value) !== null;

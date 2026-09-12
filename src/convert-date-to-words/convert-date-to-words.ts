@@ -2,6 +2,7 @@ import { applyWordsCase } from "../_internals/apply-words-case/apply-words-case"
 import { MONTH_NAMES, WEEKDAY_NAMES } from "../_internals/constants/number-words";
 import { numberToWords, type WordsCase } from "../_internals/number-to-words/number-to-words";
 
+/** Options of `convertDateToWords`. */
 export type ConvertDateToWordsOptions = {
 	/** Letter case applied to the result: `"lower"` (unchanged), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Defaults to `"lower"`; an invalid value is ignored and `"lower"` is used instead. */
 	case?: WordsCase;
@@ -26,6 +27,11 @@ const getWeekdayIndex = (year: number, month: number, day: number): number => {
 	const date = new Date(0);
 	date.setUTCFullYear(year, month - 1, day);
 	return date.getUTCDay();
+};
+
+const dayToWords = (day: number, monthStyle: boolean): string => {
+	if (monthStyle) return day === 1 ? "1º" : String(day);
+	return day === 1 ? "primeiro" : numberToWords(day);
 };
 
 /**
@@ -68,7 +74,7 @@ const getWeekdayIndex = (year: number, month: number, day: number): number => {
  * convertDateToWords("invalid"); // ""
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/date_utils.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/date_utils.py
  */
 export const convertDateToWords = (
 	value: Date | string,
@@ -110,9 +116,8 @@ export const convertDateToWords = (
 	const monthName = MONTH_NAMES[month - 1];
 	const isMonthStyle = options?.style === "month";
 
-	const dateWords = isMonthStyle
-		? `${day === 1 ? "1º" : day} de ${monthName} de ${year}`
-		: `${day === 1 ? "primeiro" : numberToWords(day)} de ${monthName} de ${numberToWords(year).replaceAll(", ", " ")}`;
+	const yearWords = isMonthStyle ? String(year) : numberToWords(year).replaceAll(", ", " ");
+	const dateWords = `${dayToWords(day, isMonthStyle)} de ${monthName} de ${yearWords}`;
 
 	const result =
 		options?.weekday === true

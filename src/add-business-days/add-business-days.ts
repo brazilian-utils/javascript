@@ -1,8 +1,9 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isBusinessDay } from "../is-business-day/is-business-day";
 
+/** The parameters `addBusinessDays` takes: the date to count from, how many business days to add and which holidays count. */
 export type AddBusinessDaysParams = {
 	/** The date to count from. Never mutated: a new `Date` is returned. */
 	date: Date;
@@ -83,7 +84,7 @@ export const addBusinessDays = (params: AddBusinessDaysParams): Date | null => {
 
 	if (!isSupportedYear(date)) return null;
 
-	const result = new Date(date.getTime());
+	const result = new Date(date);
 
 	const hours = result.getHours();
 	// Stryker disable next-line EqualityOperator: when days is 0, remaining is 0 below and the loop never reads step, so > vs >= here is unobservable

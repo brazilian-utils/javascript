@@ -1,4 +1,6 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { formatIban } from "./format-iban";
 
 describe("formatIban", () => {
@@ -49,5 +51,45 @@ describe("formatIban", () => {
 		expect(formatIban({})).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatIban([])).toBe("");
+	});
+
+	describe("properties", () => {
+		const values = fc.stringMatching(/^[A-Za-z0-9]{0,40}$/);
+
+		test("should uppercase and group in blocks of four, keeping every character", () => {
+			fc.assert(
+				fc.property(values, (value) => {
+					const formatted = formatIban(value);
+
+					expect(/^(?:[A-Z0-9]{4} )*[A-Z0-9]{0,4}$/.test(formatted)).toBe(true);
+					expect(formatted.replaceAll(" ", "")).toBe(value.toUpperCase().slice(0, 29));
+				}),
+			);
+		});
+
+		test("should be stable under its own output", () => {
+			fc.assert(
+				fc.property(values, (value) => {
+					const formatted = formatIban(value);
+
+					expect(formatIban(formatted)).toBe(formatted);
+				}),
+			);
+		});
+
+		test("should never throw and always return the IBAN as a string", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof formatIban(value as string)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatIban types", () => {
+	test("should take a string and return a string", () => {
+		expectTypeOf(formatIban).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(formatIban).returns.toEqualTypeOf<string>();
 	});
 });

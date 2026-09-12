@@ -24,6 +24,7 @@ const calculateCheckDigit = (base: string): string => {
  * ```
  *
  * @see Official: https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/pis.py
  */
 export const generatePis = (): string => {
 	let base = generateRandomNumber(10);

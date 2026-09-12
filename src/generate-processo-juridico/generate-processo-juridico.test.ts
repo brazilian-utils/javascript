@@ -1,7 +1,12 @@
+import * as fc from "fast-check";
+
 import { PROCESSO_JURIDICO_LENGTH } from "../_internals/constants/processo-juridico";
-import { describe, expect, it } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidProcessoJuridico } from "../is-valid-processo-juridico/is-valid-processo-juridico";
-import { generateProcessoJuridico } from "./generate-processo-juridico";
+import {
+	generateProcessoJuridico,
+	type GenerateProcessoJuridicoOptions,
+} from "./generate-processo-juridico";
 
 const currentYear = new Date().getFullYear();
 
@@ -76,5 +81,63 @@ describe("generateProcessoJuridico", () => {
 		} finally {
 			Math.random = originalRandom;
 		}
+	});
+
+	describe("properties", () => {
+		const year = fc.integer({ min: currentYear, max: 9999 });
+		const court = fc.integer({ min: 1, max: 9 });
+
+		test("should embed every accepted year and court in a valid number", () => {
+			fc.assert(
+				fc.property(year, court, (chosenYear, chosenCourt) => {
+					const value = generateProcessoJuridico({
+						year: chosenYear,
+						court: chosenCourt,
+					}) as string;
+
+					expect(value).toHaveLength(PROCESSO_JURIDICO_LENGTH);
+					expect(value.slice(9, 13)).toBe(String(chosenYear));
+					expect(value.charAt(13)).toBe(String(chosenCourt));
+					expect(isValidProcessoJuridico(value)).toBe(true);
+				}),
+			);
+		});
+
+		test("should return null for every year outside the accepted range", () => {
+			const tooEarly = fc.integer({ min: -9999, max: currentYear - 1 });
+			const tooLate = fc.integer({ min: 10_000, max: 999_999 });
+
+			fc.assert(
+				fc.property(fc.oneof(tooEarly, tooLate), (invalidYear) => {
+					expect(generateProcessoJuridico({ year: invalidYear })).toBe(null);
+				}),
+			);
+		});
+
+		test("should return null for every court outside 1 to 9", () => {
+			const invalidCourts = fc
+				.integer({ min: -100, max: 100 })
+				.filter((value) => value < 1 || value > 9);
+
+			fc.assert(
+				fc.property(invalidCourts, (invalidCourt) => {
+					expect(generateProcessoJuridico({ court: invalidCourt })).toBe(null);
+				}),
+			);
+		});
+	});
+});
+
+describe("generateProcessoJuridico types", () => {
+	test("should take options and return a string or null", () => {
+		expectTypeOf(generateProcessoJuridico)
+			.parameter(0)
+			.toEqualTypeOf<GenerateProcessoJuridicoOptions | undefined>();
+		expectTypeOf(generateProcessoJuridico).returns.toEqualTypeOf<string | null>();
+	});
+
+	test("should type the year and court options as optional numbers", () => {
+		expectTypeOf<GenerateProcessoJuridicoOptions["year"]>().toEqualTypeOf<number | undefined>();
+		expectTypeOf<GenerateProcessoJuridicoOptions["court"]>().toEqualTypeOf<number | undefined>();
 	});
 });

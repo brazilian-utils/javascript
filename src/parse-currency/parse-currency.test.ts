@@ -1,6 +1,10 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { twoDecimalAmounts } from "../_internals/test/arbitraries";
+import { expectRoundTrip } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { formatCurrency } from "../format-currency/format-currency";
-import { parseCurrency } from "./parse-currency";
+import { parseCurrency, type ParseCurrencyOptions } from "./parse-currency";
 
 describe("parseCurrency", () => {
 	describe("should return correct values", () => {
@@ -120,5 +124,30 @@ describe("parseCurrency", () => {
 				1_000_000.001,
 			);
 		});
+	});
+
+	describe("properties", () => {
+		test("should never throw and always return a finite number, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const result = parseCurrency(value as never);
+
+					expect(Number.isFinite(result)).toBe(true);
+				}),
+			);
+		});
+
+		test("should round-trip with formatCurrency for any value with 2 decimals", () => {
+			expectRoundTrip(formatCurrency, parseCurrency, twoDecimalAmounts);
+		});
+	});
+});
+
+describe("parseCurrency types", () => {
+	test("should take a string, options, and return a number", () => {
+		expectTypeOf(parseCurrency).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(parseCurrency).parameter(1).toEqualTypeOf<ParseCurrencyOptions | undefined>();
+		expectTypeOf<ParseCurrencyOptions["precision"]>().toEqualTypeOf<number | undefined>();
+		expectTypeOf(parseCurrency).returns.toEqualTypeOf<number>();
 	});
 });

@@ -1,5 +1,8 @@
+import * as fc from "fast-check";
+
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generateBoleto } from "../generate-boleto/generate-boleto";
 import { isValidBoleto } from "./is-valid-boleto";
 
 describe("isValidBoleto", () => {
@@ -117,5 +120,55 @@ describe("isValidBoleto", () => {
 				expect(isValidBoleto(`${FEBRABAN_LINE}0`)).toBe(false);
 			});
 		});
+	});
+
+	describe("properties", () => {
+		const types = ["bancario", "arrecadacao"] as const;
+
+		const digitString = fc.string({ unit: fc.constantFrom("0", "1", "2", "7", "9") });
+
+		test("should accept every generated bank slip", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...types), (type) => {
+					expect(isValidBoleto(generateBoleto({ type }))).toBe(true);
+				}),
+			);
+		});
+
+		test("should ignore the mask characters of a generated bank slip", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...types), (type) => {
+					const value = generateBoleto({ type });
+					const masked = `${value.slice(0, 5)}. ${value.slice(5, 20)}-${value.slice(20)}`;
+
+					expect(isValidBoleto(masked)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject every digit string that has no bank slip length", () => {
+			fc.assert(
+				fc.property(digitString, (value) => {
+					fc.pre(value.length !== BOLETO_LENGTH);
+
+					expect(isValidBoleto(value)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a bank slip with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidBoleto(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidBoleto types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidBoleto).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidBoleto).returns.toEqualTypeOf<boolean>();
 	});
 });

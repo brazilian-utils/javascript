@@ -1,5 +1,12 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { getCnae } from "./get-cnae";
+import * as fc from "fast-check";
+
+import { CNAE_SUBCLASSES } from "../_internals/constants/cnae";
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { formatCnae } from "../format-cnae/format-cnae";
+import { isValidCnae } from "../is-valid-cnae/is-valid-cnae";
+import { getCnae, type Cnae } from "./get-cnae";
 
 describe("getCnae", () => {
 	it("should return the CNAE entry for a known code as a string", () => {
@@ -51,5 +58,33 @@ describe("getCnae", () => {
 		expect(getCnae(null)).toBeNull();
 		// @ts-expect-error not a string or number
 		expect(getCnae()).toBeNull();
+	});
+
+	describe("properties", () => {
+		const codeArbitrary = fc.constantFrom(...Object.keys(CNAE_SUBCLASSES));
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(getCnae, anyGarbage);
+		});
+
+		test("should resolve every known code, as a string or a number, and agree with formatCnae and isValidCnae", () => {
+			fc.assert(
+				fc.property(codeArbitrary, (code) => {
+					const expected = { code: formatCnae(code), description: CNAE_SUBCLASSES[code] };
+
+					expect(getCnae(code)).toEqual(expected);
+					expect(getCnae(Number(code))).toEqual(expected);
+					expect(isValidCnae(code)).toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("getCnae types", () => {
+	test("should take a string or number and return a Cnae or null", () => {
+		expectTypeOf(getCnae).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getCnae).returns.toEqualTypeOf<Cnae | null>();
+		expectTypeOf<Cnae>().toEqualTypeOf<{ code: string; description: string }>();
 	});
 });

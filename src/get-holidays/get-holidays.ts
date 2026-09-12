@@ -1,16 +1,18 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { resolveStateHolidayDate } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
 import {
 	CONSCIENCIA_NEGRA_HOLIDAY_NAME,
 	CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 	FIXED_HOLIDAYS,
-	type StateHolidayEntry,
 	STATE_HOLIDAYS,
 } from "./constants";
 
+/** How a holiday returned by `getHolidays` is observed. */
 export type HolidayType = "national" | "state" | "optional" | "religious";
 
+/** One holiday returned by `getHolidays`. */
 export type Holiday = {
 	/** The holiday name in Brazilian Portuguese, e.g. `"Sexta-feira Santa"`. */
 	name: string;
@@ -20,56 +22,13 @@ export type Holiday = {
 	type: HolidayType;
 };
 
+/** The options form `getHolidays` accepts, naming the year to list and, optionally, the state whose holidays are added. */
 export type GetHolidaysOptions = {
 	/** The four digit year to list holidays for. Must be an integer between 1900 and 2099. */
 	year: number;
 	/** Two letter state code whose state holidays are added to the national ones (default: national holidays only). */
 	stateCode?: StateCode;
 };
-
-function calculateEaster(year: number): Date {
-	const a = year % 19;
-	const b = Math.floor(year / 100);
-	const c = year % 100;
-	const d = Math.floor(b / 4);
-	const e = b % 4;
-	const f = Math.floor((b + 8) / 25);
-	const g = Math.floor((b - f + 1) / 3);
-	const h = (19 * a + b - d - g + 15) % 30;
-	const i = Math.floor(c / 4);
-	const k = c % 4;
-	const l = (32 + 2 * e + 2 * i - h - k) % 7;
-	const m = Math.floor((a + 11 * h + 22 * l) / 451);
-
-	const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
-	const day = ((h + l - 7 * m + 114) % 31) + 1;
-
-	return new Date(year, month, day);
-}
-
-function calculateHolidayFromEaster(year: number, offset: number): Date {
-	const easterDate = calculateEaster(year);
-	const holidayDate = new Date(easterDate);
-	holidayDate.setDate(easterDate.getDate() + offset);
-	return holidayDate;
-}
-
-function resolveStateHolidayDate(
-	year: number,
-	{ day, month, easterOffset }: Pick<StateHolidayEntry, "day" | "month" | "easterOffset">,
-): Date {
-	if (easterOffset !== undefined) {
-		return calculateHolidayFromEaster(year, easterOffset);
-	}
-
-	if (day !== undefined && month !== undefined) {
-		return new Date(year, month - 1, day);
-	}
-
-	throw new Error(
-		"State holiday entry must define either `easterOffset` or both `day` and `month`",
-	);
-}
 
 let cache: Map<string, Holiday[]> | undefined;
 
@@ -95,17 +54,17 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		});
 	}
 
-	const easterDate = calculateEaster(year);
+	const easterDate = resolveStateHolidayDate(year, { easterOffset: 0 });
 
 	holidays.push(
 		{
 			name: "Carnaval (terça-feira)",
-			date: calculateHolidayFromEaster(year, -47),
+			date: resolveStateHolidayDate(year, { easterOffset: -47 }),
 			type: "optional",
 		},
 		{
 			name: "Sexta-feira Santa",
-			date: calculateHolidayFromEaster(year, -2),
+			date: resolveStateHolidayDate(year, { easterOffset: -2 }),
 			type: "national",
 		},
 		{
@@ -115,7 +74,7 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		},
 		{
 			name: "Corpus Christi",
-			date: calculateHolidayFromEaster(year, 60),
+			date: resolveStateHolidayDate(year, { easterOffset: 60 }),
 			type: "optional",
 		},
 	);
@@ -180,6 +139,13 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * some state holidays where no official law text was located (see constants.ts for which).
  */
 export function getHolidays(year: number): Holiday[];
+/**
+ * Retrieves all Brazilian holidays for a given year, optionally including the holidays of a
+ * state. See the overload taking a year for the full documentation.
+ *
+ * @param {GetHolidaysOptions} options - The year to list holidays for and, optionally, the state whose holidays are added
+ * @returns {Holiday[]} An array of holidays sorted by date
+ */
 export function getHolidays(options: GetHolidaysOptions): Holiday[];
 export function getHolidays(yearOrOptions: number | GetHolidaysOptions): Holiday[] {
 	let year: number;

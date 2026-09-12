@@ -1,4 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generatePhone } from "../generate-phone/generate-phone";
 import { isValidLandlinePhone } from "./is-valid-landline-phone";
 
 describe("isValidLandlinePhone", () => {
@@ -56,5 +59,43 @@ describe("isValidLandlinePhone", () => {
 		expect(isValidLandlinePhone("1162654321")).toBe(true);
 		expect(isValidLandlinePhone("(11) 6265-4321")).toBe(true);
 		expect(isValidLandlinePhone("1172654321")).toBe(false);
+	});
+
+	describe("properties", () => {
+		test("should accept every generated landline number, masked or not", () => {
+			fc.assert(
+				fc.property(fc.constant("landline" as const), (type) => {
+					const phone = generatePhone(type);
+					const masked = `(${phone.slice(0, 2)}) ${phone.slice(2, 6)}-${phone.slice(6)}`;
+
+					expect(isValidLandlinePhone(phone)).toBe(true);
+					expect(isValidLandlinePhone(masked)).toBe(true);
+					expect(isValidLandlinePhone(`+55 ${masked}`)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject every generated mobile number", () => {
+			fc.assert(
+				fc.property(fc.constant("mobile" as const), (type) => {
+					expect(isValidLandlinePhone(generatePhone(type))).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a landline number with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidLandlinePhone(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidLandlinePhone types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidLandlinePhone).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidLandlinePhone).returns.toEqualTypeOf<boolean>();
 	});
 });

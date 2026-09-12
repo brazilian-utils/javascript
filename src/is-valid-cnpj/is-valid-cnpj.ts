@@ -6,6 +6,7 @@ import {
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { RESERVED_NUMBERS } from "./constants";
 
+/** Options of `isValidCnpj`. */
 export type IsValidCnpjOptions = {
 	/** Which CNPJ format to accept: `1` numeric only, `2` alphanumeric (default: `1`). */
 	version?: 1 | 2;
@@ -85,6 +86,7 @@ const isValidChecksum = (cnpj: string): boolean => {
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
+ * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
 export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean => {

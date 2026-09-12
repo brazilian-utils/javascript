@@ -5,6 +5,7 @@ import {
 	type WordsCase,
 } from "../_internals/number-to-words/number-to-words";
 
+/** Options of `convertCurrencyToWords`. */
 export type ConvertCurrencyToWordsOptions = {
 	/** Letter case applied to the result: `"lower"` (unchanged), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Defaults to `"lower"`; an invalid value is ignored and `"lower"` is used instead. */
 	case?: WordsCase;
@@ -47,7 +48,7 @@ const endsInMillionScale = (words: string): boolean =>
  * convertCurrencyToWords(1000, { case: "upper" }); // "MIL REAIS"
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
 export const convertCurrencyToWords = (
 	value: number,

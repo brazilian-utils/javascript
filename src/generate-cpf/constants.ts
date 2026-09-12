@@ -1,4 +1,4 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 
 export const BASE_LENGTH = 8;
 

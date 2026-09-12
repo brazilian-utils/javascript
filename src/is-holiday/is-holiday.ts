@@ -1,7 +1,8 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { getHolidays } from "../get-holidays/get-holidays";
 
+/** The options `isHoliday` takes: the date to check and, optionally, the state whose holidays also count. */
 export type IsHolidayOptions = {
 	/** The date to check, read by its local calendar day. */
 	targetDate: Date;
@@ -54,10 +55,9 @@ export const isHoliday = (options?: IsHolidayOptions): boolean => {
 	}
 
 	const year = targetDate.getFullYear();
-	return getHolidays({ year, stateCode }).some((holiday) => {
-		return (
+	return getHolidays({ year, stateCode }).some(
+		(holiday) =>
 			holiday.date.getMonth() === targetDate.getMonth() &&
-			holiday.date.getDate() === targetDate.getDate()
-		);
-	});
+			holiday.date.getDate() === targetDate.getDate(),
+	);
 };

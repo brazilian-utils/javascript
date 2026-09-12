@@ -5,8 +5,9 @@ import {
 } from "../_internals/constants/certidao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CERTIDAO_TYPES } from "../parse-certidao/constants";
-import type { CertidaoType } from "../parse-certidao/parse-certidao";
+import { type CertidaoType } from "../parse-certidao/parse-certidao";
 
+/** Options of `isValidCertidao`. */
 export type IsValidCertidaoOptions = {
 	/** Kinds of certidão (book types) that count as valid (default: all of them). */
 	accept?: CertidaoType[];
@@ -18,7 +19,7 @@ const getCheckDigit = (value: string): number => {
 
 	for (let i = 0; i < value.length; i++) {
 		sum += (value.charCodeAt(i) - 48) * weight;
-		weight = weight + 1;
+		weight += 1;
 	}
 
 	const remainder = sum % 11;
@@ -59,7 +60,10 @@ const getCheckDigit = (value: string): number => {
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: ["death"] }); // false
  * ```
  *
- * @see Official: Provimento CNJ 46/2015, art. 1º and Anexo (Código Nacional de Serventias).
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310 Provimento CNJ nº 3, de 17/11/2009,
+ * which instituted the modelo único de certidão and its 32 digit matrícula.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311 Provimento CNJ nº 2, de 27/04/2009,
+ * which instituted the Código Nacional de Serventias (CNS).
  * @see Based on: http://ghiorzi.org/DVnew.htm Worked example of the two check digits
  * (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts

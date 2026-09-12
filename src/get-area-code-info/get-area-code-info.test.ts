@@ -1,5 +1,12 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { getAreaCodeInfo } from "./get-area-code-info";
+import * as fc from "fast-check";
+
+import { VALID_AREA_CODES } from "../_internals/constants/area-codes";
+import { type StateCode, type StateName } from "../_internals/constants/states";
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getAreaCodesByState } from "../get-area-codes-by-state/get-area-codes-by-state";
+import { getAreaCodeInfo, type AreaCodeInfo } from "./get-area-code-info";
 
 describe("getAreaCodeInfo", () => {
 	it("should resolve DDD 11 to São Paulo, Sudeste, from a string", () => {
@@ -93,5 +100,45 @@ describe("getAreaCodeInfo", () => {
 	it("should return null for undefined", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(getAreaCodeInfo()).toBeNull();
+	});
+
+	describe("properties", () => {
+		const areaCodeArbitrary = fc.constantFrom(...VALID_AREA_CODES);
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(getAreaCodeInfo, anyGarbage);
+		});
+
+		test("should resolve every valid DDD back to a state that lists it", () => {
+			fc.assert(
+				fc.property(areaCodeArbitrary, (areaCode) => {
+					const info = getAreaCodeInfo(areaCode);
+
+					expect(info).not.toBeNull();
+					expect(getAreaCodesByState(info?.stateCode ?? "")).toContain(areaCode);
+				}),
+			);
+		});
+
+		test("should resolve the same DDD whether given as a string or a number", () => {
+			fc.assert(
+				fc.property(areaCodeArbitrary, (areaCode) => {
+					expect(getAreaCodeInfo(String(areaCode))).toEqual(getAreaCodeInfo(areaCode));
+				}),
+			);
+		});
+	});
+});
+
+describe("getAreaCodeInfo types", () => {
+	test("should take a string or number and return an AreaCodeInfo or null", () => {
+		expectTypeOf(getAreaCodeInfo).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getAreaCodeInfo).returns.toEqualTypeOf<AreaCodeInfo | null>();
+		expectTypeOf<AreaCodeInfo>().toEqualTypeOf<{
+			areaCode: number;
+			stateCode: StateCode;
+			stateName: StateName;
+			region: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
+		}>();
 	});
 });

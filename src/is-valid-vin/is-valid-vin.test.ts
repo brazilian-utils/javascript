@@ -1,5 +1,11 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidVin } from "./is-valid-vin";
+
+const VIN_CHECK_CHARACTERS = Array.from({ length: 11 }, (_, index) =>
+	index === 10 ? "X" : String(index),
+);
 
 describe("isValidVin", () => {
 	describe("should return true", () => {
@@ -104,5 +110,62 @@ describe("isValidVin", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidVin([])).toBe(false);
 		});
+	});
+
+	describe("properties", () => {
+		const bodies = fc.stringMatching(/^[0-9A-HJ-NPR-Z]{16}$/);
+
+		const vins = fc.stringMatching(/^[0-9A-HJ-NPR-Z]{17}$/);
+
+		test("should accept exactly one check character for any body", () => {
+			fc.assert(
+				fc.property(bodies, (body) => {
+					const candidates = VIN_CHECK_CHARACTERS.map(
+						(character) => `${body.slice(0, 8)}${character}${body.slice(8)}`,
+					);
+					const accepted = candidates.filter((candidate) => isValidVin(candidate));
+
+					expect(accepted.length).toBe(1);
+				}),
+			);
+		});
+
+		test("should ignore the case and the surrounding whitespace", () => {
+			fc.assert(
+				fc.property(vins, (vin) => {
+					expect(isValidVin(` ${vin.toLowerCase()} `)).toBe(isValidVin(vin));
+				}),
+			);
+		});
+
+		test("should reject a chassis containing the excluded letters", () => {
+			fc.assert(
+				fc.property(
+					vins,
+					fc.integer({ min: 0, max: 16 }),
+					fc.constantFrom("I", "O", "Q"),
+					(vin, index, letter) => {
+						expect(isValidVin(`${vin.slice(0, index)}${letter}${vin.slice(index + 1)}`)).toBe(
+							false,
+						);
+					},
+				),
+			);
+		});
+
+		test("should never throw and always judge a chassis with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidVin(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidVin types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidVin).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidVin).returns.toEqualTypeOf<boolean>();
 	});
 });

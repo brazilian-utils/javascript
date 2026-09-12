@@ -2,8 +2,9 @@ import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import type { FormatCnpjOptions } from "../format-cnpj/format-cnpj";
+import { type FormatCnpjOptions } from "../format-cnpj/format-cnpj";
 
+/** Options of `parseCnpj`. */
 export type ParseCnpjOptions = Pick<FormatCnpjOptions, "version">;
 
 const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]): string => {
@@ -29,6 +30,7 @@ const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
+ * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
 export const parseCnpj = (value: string | number, options?: ParseCnpjOptions): string =>

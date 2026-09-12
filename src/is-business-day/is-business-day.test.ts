@@ -1,5 +1,15 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { isBusinessDay } from "./is-business-day";
+import * as fc from "fast-check";
+
+import { type StateCode } from "../_internals/constants/states";
+import { holidayYears, monthDays, monthIndexes, stateCodes } from "../_internals/test/arbitraries";
+import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getHolidays, type Holiday } from "../get-holidays/get-holidays";
+import { isBusinessDay, type IsBusinessDayOptions } from "./is-business-day";
+
+function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
+	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
+}
 
 describe("isBusinessDay", () => {
 	it("should return true for a plain weekday that is not a holiday (noon, DST-safe)", () => {
@@ -94,10 +104,65 @@ describe("isBusinessDay", () => {
 
 	it("should not mutate the input Date", () => {
 		const value = new Date(2024, 0, 6, 12);
-		const original = new Date(value.getTime());
+		const original = new Date(value);
 
 		isBusinessDay(value, { stateCode: "SP" });
 
 		expect(value.getTime()).toBe(original.getTime());
+	});
+
+	describe("properties", () => {
+		const stateAndOptionalArbitrary = fc.tuple(fc.option(stateCodes), fc.boolean());
+
+		test("should return false for every Saturday and Sunday", () => {
+			fc.assert(
+				fc.property(holidayYears, monthIndexes, monthDays, (year, month, day) => {
+					const date = new Date(year, month, day);
+
+					if (date.getDay() === 0 || date.getDay() === 6) {
+						expect(isBusinessDay(date)).toBe(false);
+					}
+				}),
+			);
+		});
+
+		test("should agree with getHolidays and the weekend rule", () => {
+			fc.assert(
+				fc.property(
+					holidayYears,
+					monthIndexes,
+					monthDays,
+					stateAndOptionalArbitrary,
+					(year, month, day, [stateCode, includeOptional]) => {
+						const date = new Date(year, month, day);
+						const holidays = getHolidaysFor(year, stateCode);
+						const isHolidayMatch = holidays.some(
+							(holiday) =>
+								(includeOptional || holiday.type !== "optional") &&
+								holiday.date.getMonth() === month &&
+								holiday.date.getDate() === day,
+						);
+						const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+						const options = { stateCode: stateCode ?? undefined, includeOptional };
+
+						expect(isBusinessDay(date, options)).toBe(!isWeekend && !isHolidayMatch);
+					},
+				),
+			);
+		});
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrowsWithOptions(isBusinessDay, fc.anything(), fc.anything());
+		});
+	});
+});
+
+describe("isBusinessDay types", () => {
+	test("should take a Date, options, and return a boolean", () => {
+		expectTypeOf(isBusinessDay).parameter(0).toEqualTypeOf<Date>();
+		expectTypeOf(isBusinessDay).parameter(1).toEqualTypeOf<IsBusinessDayOptions | undefined>();
+		expectTypeOf<IsBusinessDayOptions["stateCode"]>().toEqualTypeOf<StateCode | undefined>();
+		expectTypeOf<IsBusinessDayOptions["includeOptional"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(isBusinessDay).returns.toEqualTypeOf<boolean>();
 	});
 });

@@ -1,4 +1,4 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
@@ -23,7 +23,7 @@ const checkLength = (ie: string, length: number | number[]): boolean => {
 };
 
 const startsWithAny = (ie: string, prefixes: readonly string[]): boolean =>
-	prefixes.some((prefix) => ie.slice(0, prefix.length) === prefix);
+	prefixes.some((prefix) => ie.startsWith(prefix));
 
 const startsWith = (ie: string, prefix: string): boolean => startsWithAny(ie, [prefix]);
 
@@ -134,7 +134,6 @@ const validateAP: IeValidator = (ie: string) => {
 
 	if (bodyInt >= 3_000_001 && bodyInt <= 3_017_000) {
 		p = 5;
-		d = 0;
 	} else if (bodyInt >= 3_017_001 && bodyInt <= 3_019_022) {
 		p = 9;
 		d = 1;
@@ -169,7 +168,7 @@ const validateBA: IeValidator = (ie: string) => {
 	const charAt = Number.parseInt(ie.slice(pos, pos + 1), 10);
 	const mod = BA_MOD_10_DIGITS.includes(charAt) ? 10 : 11;
 
-	const body = ie.slice(0, ie.length - 2);
+	const body = ie.slice(0, -2);
 	const firstSum = calcWeightedSum({
 		source: ie,
 		length: body.length,
@@ -518,6 +517,35 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  * ```
  *
  * @see Official: http://www.sintegra.gov.br/insc_est.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AC.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AL.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AM.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AP.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_BA.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_CE.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_DF.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MA.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MG.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MS.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PA.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PB.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PE.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PI.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PR.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RJ.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RN.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RO.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RR.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RS.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SC.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SE.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SP.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_TO.html
+ * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
+ * SEFAZ-GO's roteiro de crítica, the source of the Goiás prefixes and special ranges.
  */
 export const isValidIe = (stateCode: StateCode, ie: string): boolean => {
 	if (!stateCode || typeof stateCode !== "string") return false;

@@ -1,8 +1,9 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isBusinessDay } from "../is-business-day/is-business-day";
 
+/** The parameters `differenceInBusinessDays` takes: the two dates to count between and which holidays count. */
 export type DifferenceInBusinessDaysParams = {
 	/** The date to count from. Counted as a business day when it is one; never mutated. */
 	from: Date;

@@ -1,6 +1,10 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import type { GetMunicipalityByNameOptions } from "./get-municipality";
-import { getMunicipality } from "./get-municipality";
+import { describe, expect, expectTypeOf, it } from "../_internals/test/runtime";
+import {
+	type GetMunicipalityByCodeOptions,
+	type GetMunicipalityByNameOptions,
+	type GetMunicipalityOptions,
+	getMunicipality,
+} from "./get-municipality";
 
 describe("getMunicipality", () => {
 	it("should get municipality code by name", async () => {
@@ -162,5 +166,22 @@ describe("getMunicipality", () => {
 				getMunicipality({ municipalityName: "São Paulo", uf: "RJ" }),
 			).resolves.toBeNull();
 		});
+	});
+});
+
+describe("getMunicipality types", () => {
+	it("should take a code or a name plus uf and resolve to a pair, a name or null", () => {
+		expectTypeOf(getMunicipality).parameter(0).toEqualTypeOf<GetMunicipalityOptions>();
+		expectTypeOf<GetMunicipalityOptions>().toEqualTypeOf<
+			GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions
+		>();
+		expectTypeOf<GetMunicipalityByCodeOptions>().toEqualTypeOf<{ code: string }>();
+		expectTypeOf<GetMunicipalityByNameOptions>().toEqualTypeOf<{
+			municipalityName: string;
+			uf: string;
+		}>();
+		expectTypeOf(getMunicipality).returns.resolves.toEqualTypeOf<
+			[string, string] | string | null
+		>();
 	});
 });

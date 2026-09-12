@@ -30,8 +30,10 @@ import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
 import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
 import { type TlvFields, parseTlv } from "../_internals/parse-tlv/parse-tlv";
 
+/** Whether a Pix BR Code may be paid many times (`"static"`) or only once (`"dynamic"`). */
 export type PixPointOfInitiation = "static" | "dynamic";
 
+/** The fields `parsePixPayload` reads out of a Pix BR Code. */
 export type PixPayload = {
 	/** The Pix key of the receiver, present in a static payload. */
 	key?: string;
@@ -106,9 +108,9 @@ const isValidAmount = (amount: string | undefined): boolean =>
 	(AMOUNT_REGEX.test(amount) && amount.length <= PIX_TRANSACTION_AMOUNT_MAX_LENGTH);
 
 type MerchantKeyInfo = {
-	key?: string | undefined;
-	url?: string | undefined;
-	description?: string | undefined;
+	key?: string;
+	url?: string;
+	description?: string;
 };
 
 const resolveMerchantKeyInfo = (fields: TlvFields): MerchantKeyInfo | null => {
@@ -140,12 +142,12 @@ const resolveTxid = (fields: TlvFields): string | undefined | null => {
 };
 
 type OptionalPixFields = {
-	key?: string | undefined;
-	url?: string | undefined;
-	description?: string | undefined;
-	amount?: string | undefined;
-	txid?: string | undefined;
-	pointOfInitiation?: string | undefined;
+	key?: string;
+	url?: string;
+	description?: string;
+	amount?: string;
+	txid?: string;
+	pointOfInitiation?: string;
 };
 
 const buildPixPayload = (

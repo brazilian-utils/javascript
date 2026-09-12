@@ -1,4 +1,10 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import { anyGarbage, digits } from "../_internals/test/arbitraries";
+import {
+	expectIdempotent,
+	expectMatchesPattern,
+	expectNeverThrows,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { formatNcm } from "./format-ncm";
 
 describe("formatNcm", () => {
@@ -37,5 +43,28 @@ describe("formatNcm", () => {
 		expect(formatNcm(null)).toBe("");
 		// @ts-expect-error not a string or number
 		expect(formatNcm()).toBe("");
+	});
+
+	describe("properties", () => {
+		const eightDigitArbitrary = digits(8);
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(formatNcm, anyGarbage);
+		});
+
+		test("should format every 8 digit value in the NNNN.NN.NN pattern", () => {
+			expectMatchesPattern(formatNcm, /^\d{4}\.\d{2}\.\d{2}$/, eightDigitArbitrary);
+		});
+
+		test("should be idempotent on a full 8 digit code", () => {
+			expectIdempotent(formatNcm, eightDigitArbitrary);
+		});
+	});
+});
+
+describe("formatNcm types", () => {
+	test("should take a string or number and return a string", () => {
+		expectTypeOf(formatNcm).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatNcm).returns.toEqualTypeOf<string>();
 	});
 });

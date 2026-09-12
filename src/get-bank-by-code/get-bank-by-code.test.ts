@@ -1,4 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { BANKS, type Bank } from "../_internals/constants/banks";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { getBankByCode } from "./get-bank-by-code";
 
 describe("getBankByCode", () => {
@@ -103,5 +106,47 @@ describe("getBankByCode", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(getBankByCode([1])).toBeNull();
 		});
+	});
+
+	describe("properties", () => {
+		const banks = fc.constantFrom(...BANKS);
+
+		test("should find every bank of the table by its COMPE code", () => {
+			fc.assert(
+				fc.property(banks, (bank) => {
+					expect(getBankByCode(bank.code)?.code).toBe(bank.code);
+					expect(getBankByCode(Number(bank.code))?.code).toBe(bank.code);
+				}),
+			);
+		});
+
+		test("should hand out a copy that cannot change the table", () => {
+			fc.assert(
+				fc.property(banks, (bank) => {
+					const found = getBankByCode(bank.code);
+
+					expect(found).not.toBe(bank);
+					expect(found?.name).toBe(bank.name);
+				}),
+			);
+		});
+
+		test("should never throw and always return a bank or null for a code", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const found = getBankByCode(value as string);
+
+					expect(found === null || typeof found.code === "string").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("getBankByCode types", () => {
+	test("should take a string or number and return a bank or null", () => {
+		expectTypeOf(getBankByCode).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getBankByCode).returns.toEqualTypeOf<Bank | null>();
+		expectTypeOf<Bank>().toEqualTypeOf<{ code: string; ispb: string; name: string }>();
 	});
 });

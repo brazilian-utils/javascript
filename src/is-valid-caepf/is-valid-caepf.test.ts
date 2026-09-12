@@ -1,5 +1,12 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCaepf } from "./is-valid-caepf";
+
+const CHECK_DIGIT_PAIRS = Array.from({ length: 100 }, (_, pair) => String(pair).padStart(2, "0"));
+
+const findCaepf = (base: string): string =>
+	CHECK_DIGIT_PAIRS.map((pair) => `${base}${pair}`).find((value) => isValidCaepf(value)) ?? "";
 
 describe("isValidCaepf", () => {
 	describe("should return false", () => {
@@ -80,5 +87,46 @@ describe("isValidCaepf", () => {
 		test("for a whitespace mask and surrounding whitespace", () => {
 			expect(isValidCaepf(" 293 118 610 001 84 ")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const bases = fc.stringMatching(/^[0-9]{12}$/);
+
+		test("should accept exactly one pair of check digits for any CPF base", () => {
+			fc.assert(
+				fc.property(bases, (base) => {
+					const accepted = CHECK_DIGIT_PAIRS.filter((pair) => isValidCaepf(`${base}${pair}`));
+
+					expect(accepted.length).toBe(1);
+				}),
+			);
+		});
+
+		test("should read the same registration with and without the official mask", () => {
+			fc.assert(
+				fc.property(bases, (base) => {
+					const value = findCaepf(base);
+					const cpf = `${value.slice(0, 3)}.${value.slice(3, 6)}.${value.slice(6, 9)}`;
+					const masked = `${cpf}/${value.slice(9, 12)}-${value.slice(12)}`;
+
+					expect(isValidCaepf(masked)).toBe(true);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a CAEPF number with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidCaepf(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCaepf types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCaepf).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCaepf).returns.toEqualTypeOf<boolean>();
 	});
 });

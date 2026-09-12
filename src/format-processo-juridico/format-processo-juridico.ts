@@ -1,8 +1,12 @@
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
-export type FormatProcessoJuridicoOptions = Pick<FormatParams, "pad">;
+/** Options of `formatProcessoJuridico`. */
+export type FormatProcessoJuridicoOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
+};
 
 /**
  * Formats a legal process number (processo jurídico) according to a specific pattern.

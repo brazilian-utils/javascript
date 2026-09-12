@@ -1,5 +1,21 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCns } from "./is-valid-cns";
+
+const CARD_DIGITS = Array.from({ length: 10 }, (_, digit) => String(digit));
+
+const findCns = (base: string): string => {
+	for (const suffix of ["000", "001"]) {
+		const card = CARD_DIGITS.map((digit) => `${base}${suffix}${digit}`).find((value) =>
+			isValidCns(value),
+		);
+
+		if (card !== undefined) return card;
+	}
+
+	return "";
+};
 
 describe("isValidCns", () => {
 	describe("should return false", () => {
@@ -108,5 +124,61 @@ describe("isValidCns", () => {
 		test("for a provisional CNS whose base 11 digits would NOT be a valid definitive checksum", () => {
 			expect(isValidCns("712345678901236")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const bases = fc.stringMatching(/^[12][0-9]{10}$/);
+
+		test("should accept exactly one check digit for a definitive card", () => {
+			fc.assert(
+				fc.property(bases, (base) => {
+					const card = findCns(base);
+					const others = CARD_DIGITS.filter((digit) => digit !== card.slice(14));
+
+					expect(card).not.toBe("");
+
+					for (const digit of others) {
+						expect(isValidCns(`${card.slice(0, 14)}${digit}`)).toBe(false);
+					}
+				}),
+			);
+		});
+
+		test("should ignore the display groups of a card number", () => {
+			fc.assert(
+				fc.property(bases, (base) => {
+					const card = findCns(base);
+					const head = `${card.slice(0, 3)} ${card.slice(3, 7)}`;
+					const tail = `${card.slice(7, 11)} ${card.slice(11)}`;
+
+					expect(isValidCns(`${head} ${tail}`)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject any value that is not fifteen digits long", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,20}$/), (value) => {
+					fc.pre(value.length !== 15);
+
+					expect(isValidCns(value)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a health card with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidCns(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCns types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCns).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCns).returns.toEqualTypeOf<boolean>();
 	});
 });

@@ -6,6 +6,7 @@ import {
 	type WordsCase,
 } from "../_internals/number-to-words/number-to-words";
 
+/** Options of `convertNumberToWords`. */
 export type ConvertNumberToWordsOptions = {
 	/** Grammatical gender used to agree "um/dois" and the hundreds group ("duzentos/duzentas", etc.) with the noun the number qualifies. Defaults to `"masculine"`. */
 	gender?: NumberToWordsGender;
@@ -41,7 +42,7 @@ export type ConvertNumberToWordsOptions = {
  * convertNumberToWords(NaN); // ""
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
 export const convertNumberToWords = (
 	value: number,

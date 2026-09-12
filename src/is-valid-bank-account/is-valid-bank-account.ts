@@ -15,6 +15,7 @@ import {
 	VERHOEFF_PERMUTATION,
 } from "./constants";
 
+/** The bank account `isValidBankAccount` checks: the bank, the agency and the account with its check digit. */
 export type IsValidBankAccountOptions = {
 	/** Three digit bank code (COMPE), e.g. "001" for Banco do Brasil. */
 	bankCode: string;
@@ -26,7 +27,12 @@ export type IsValidBankAccountOptions = {
 	digit: string;
 };
 
-/** @deprecated Use `IsValidBankAccountOptions` instead. */
+/**
+ * The bank account `isValidBankAccount` checks: the bank, the agency and the account with its
+ * check digit.
+ *
+ * @deprecated Use `IsValidBankAccountOptions` instead.
+ */
 export type IsValidBankAccountParams = IsValidBankAccountOptions;
 
 type BankAccountDigits = (agency: string, account: string) => string[];

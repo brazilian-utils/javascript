@@ -2,11 +2,13 @@ import { DATA as CITIES_DATA } from "../_internals/constants/cities";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { removeAccents } from "../remove-accents/remove-accents";
 
+/** The `getMunicipality` query by IBGE municipality code. */
 export type GetMunicipalityByCodeOptions = {
 	/** The 7 digit IBGE municipality code. */
 	code: string;
 };
 
+/** The `getMunicipality` query by municipality name and state code. */
 export type GetMunicipalityByNameOptions = {
 	/** The municipality name, accents and casing ignored. */
 	municipalityName: string;
@@ -14,6 +16,7 @@ export type GetMunicipalityByNameOptions = {
 	uf: string;
 };
 
+/** The two ways `getMunicipality` can be queried: by IBGE code, or by municipality name and state code. */
 export type GetMunicipalityOptions = GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions;
 
 let codeIndex: Map<string, [string, string]> | undefined;

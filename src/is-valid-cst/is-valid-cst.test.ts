@@ -1,5 +1,10 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { isValidCst } from "./is-valid-cst";
+import * as fc from "fast-check";
+
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { ICMS_CST_CODES, IPI_CST_CODES, PIS_COFINS_CST_CODES } from "./constants";
+import { isValidCst, type IsValidCstOptions } from "./is-valid-cst";
 
 describe("isValidCst", () => {
 	describe("icms", () => {
@@ -126,5 +131,56 @@ describe("isValidCst", () => {
 
 	it("should sanitize whitespace and mask characters", () => {
 		expect(isValidCst(" 1-10 ", { tax: "icms" })).toBe(true);
+	});
+
+	describe("properties", () => {
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrowsWithOptions(isValidCst, anyGarbage, anyGarbage);
+		});
+
+		test("should validate every origin digit 0-8 combined with a known icms code", () => {
+			fc.assert(
+				fc.property(
+					fc.integer({ min: 0, max: 8 }),
+					fc.constantFrom(...ICMS_CST_CODES),
+					(origin, code) => {
+						expect(isValidCst(`${origin}${code}`, { tax: "icms" })).toBe(true);
+					},
+				),
+			);
+		});
+
+		test("should reject origin digit 9 for icms, regardless of the code", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...ICMS_CST_CODES), (code) => {
+					expect(isValidCst(`9${code}`, { tax: "icms" })).toBe(false);
+				}),
+			);
+		});
+
+		test("should validate every known ipi, pis and cofins code", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...IPI_CST_CODES), (code) => {
+					expect(isValidCst(code, { tax: "ipi" })).toBe(true);
+				}),
+			);
+			fc.assert(
+				fc.property(fc.constantFrom(...PIS_COFINS_CST_CODES), (code) => {
+					expect(isValidCst(code, { tax: "pis" })).toBe(true);
+					expect(isValidCst(code, { tax: "cofins" })).toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCst types", () => {
+	test("should take a string or number, options, and return a boolean", () => {
+		expectTypeOf(isValidCst).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCst).parameter(1).toEqualTypeOf<IsValidCstOptions | undefined>();
+		expectTypeOf<IsValidCstOptions["tax"]>().toEqualTypeOf<
+			"icms" | "ipi" | "pis" | "cofins" | undefined
+		>();
+		expectTypeOf(isValidCst).returns.toEqualTypeOf<boolean>();
 	});
 });

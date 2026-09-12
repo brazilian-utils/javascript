@@ -1,4 +1,8 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { type Municipality } from "../_internals/constants/cities";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getMunicipalities } from "../get-municipalities/get-municipalities";
 import { getMunicipalityByCode } from "./get-municipality-by-code";
 
 describe("getMunicipalityByCode", () => {
@@ -73,5 +77,33 @@ describe("getMunicipalityByCode", () => {
 			name: "São Paulo",
 			stateCode: "SP",
 		});
+	});
+
+	describe("properties", () => {
+		const municipalityArbitrary = fc.constantFrom(...getMunicipalities());
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(() => getMunicipalityByCode(value as never)).not.toThrow();
+				}),
+			);
+		});
+
+		test("should resolve every known municipality code, as a string or as a number", () => {
+			fc.assert(
+				fc.property(municipalityArbitrary, (municipality) => {
+					expect(getMunicipalityByCode(municipality.code)).toEqual(municipality);
+					expect(getMunicipalityByCode(Number(municipality.code))).toEqual(municipality);
+				}),
+			);
+		});
+	});
+});
+
+describe("getMunicipalityByCode types", () => {
+	test("should take a string or number and return a Municipality or null", () => {
+		expectTypeOf(getMunicipalityByCode).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getMunicipalityByCode).returns.toEqualTypeOf<Municipality | null>();
 	});
 });

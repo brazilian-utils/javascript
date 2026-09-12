@@ -1,5 +1,11 @@
-import { NUMBER_TO_WORDS_MAX_VALUE } from "../_internals/number-to-words/number-to-words";
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import {
+	NUMBER_TO_WORDS_MAX_VALUE,
+	type NumberToWordsGender,
+	type WordsCase,
+} from "../_internals/number-to-words/number-to-words";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { convertNumberToWords, type ConvertNumberToWordsOptions } from "./convert-number-to-words";
 
 function expectWords(
@@ -556,5 +562,67 @@ describe("convertNumberToWords", () => {
 
 			expectWords(cases, { gender: "feminine" });
 		});
+	});
+
+	describe("properties", () => {
+		const inRangeIntegerArbitrary = fc.integer({
+			min: -NUMBER_TO_WORDS_MAX_VALUE,
+			max: NUMBER_TO_WORDS_MAX_VALUE,
+		});
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.double(), (value) => {
+					expect(() => convertNumberToWords(value)).not.toThrow();
+				}),
+			);
+		});
+
+		test("should return a non-empty string for every integer within the supported range", () => {
+			fc.assert(
+				fc.property(inRangeIntegerArbitrary, (value) => {
+					expect(convertNumberToWords(value)).not.toBe("");
+				}),
+			);
+		});
+
+		test("should return an empty string outside the supported range", () => {
+			const outOfRangeArbitrary = fc.oneof(
+				fc.integer({ min: NUMBER_TO_WORDS_MAX_VALUE + 1, max: Number.MAX_SAFE_INTEGER }),
+				fc.integer({ min: -Number.MAX_SAFE_INTEGER, max: -NUMBER_TO_WORDS_MAX_VALUE - 1 }),
+			);
+
+			fc.assert(
+				fc.property(outOfRangeArbitrary, (value) => {
+					expect(convertNumberToWords(value)).toBe("");
+				}),
+			);
+		});
+
+		test("should uppercase the result the same way as the lower case result, for the 'upper' case option", () => {
+			fc.assert(
+				fc.property(inRangeIntegerArbitrary, (value) => {
+					const lower = convertNumberToWords(value);
+
+					expect(convertNumberToWords(value, { case: "upper" })).toBe(
+						lower.toLocaleUpperCase("pt-BR"),
+					);
+				}),
+			);
+		});
+	});
+});
+
+describe("convertNumberToWords types", () => {
+	test("should take a number, options, and return a string", () => {
+		expectTypeOf(convertNumberToWords).parameter(0).toEqualTypeOf<number>();
+		expectTypeOf(convertNumberToWords)
+			.parameter(1)
+			.toEqualTypeOf<ConvertNumberToWordsOptions | undefined>();
+		expectTypeOf<ConvertNumberToWordsOptions["gender"]>().toEqualTypeOf<
+			NumberToWordsGender | undefined
+		>();
+		expectTypeOf<ConvertNumberToWordsOptions["case"]>().toEqualTypeOf<WordsCase | undefined>();
+		expectTypeOf(convertNumberToWords).returns.toEqualTypeOf<string>();
 	});
 });

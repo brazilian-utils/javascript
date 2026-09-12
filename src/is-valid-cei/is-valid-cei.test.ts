@@ -1,5 +1,12 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCei } from "./is-valid-cei";
+
+const LAST_DIGITS = Array.from({ length: 10 }, (_, digit) => String(digit));
+
+const findCei = (base: string): string =>
+	LAST_DIGITS.map((digit) => `${base}${digit}`).find((value) => isValidCei(value)) ?? "";
 
 describe("isValidCei", () => {
 	describe("should return false", () => {
@@ -84,5 +91,56 @@ describe("isValidCei", () => {
 		test("for a whitespace mask and surrounding whitespace", () => {
 			expect(isValidCei(" 11 583 00249 85 ")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const bases = fc.stringMatching(/^[0-9]{11}$/);
+
+		test("should accept at most one check digit for any base", () => {
+			fc.assert(
+				fc.property(bases, (base) => {
+					const accepted = LAST_DIGITS.filter((digit) => isValidCei(`${base}${digit}`));
+
+					expect(accepted.length).toBeLessThanOrEqual(1);
+				}),
+			);
+		});
+
+		test("should read the same number with and without the official mask", () => {
+			fc.assert(
+				fc.property(bases, (base) => {
+					const value = findCei(base);
+
+					fc.pre(value !== "");
+
+					const masked = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 10)}/${value.slice(10)}`;
+
+					expect(isValidCei(masked)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject a number made of a single repeated digit", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...LAST_DIGITS), (digit) => {
+					expect(isValidCei(digit.repeat(12))).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a CEI number with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidCei(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCei types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCei).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCei).returns.toEqualTypeOf<boolean>();
 	});
 });

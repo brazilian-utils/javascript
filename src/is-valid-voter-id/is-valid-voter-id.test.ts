@@ -1,4 +1,8 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { generateVoterId } from "../generate-voter-id/generate-voter-id";
 import { isValidVoterId } from "./is-valid-voter-id";
 
@@ -86,5 +90,33 @@ describe("isValidVoterId", () => {
 	it("should accept the UF code boundaries 1 and 28", () => {
 		expect(isValidVoterId("000000010191")).toBe(true);
 		expect(isValidVoterId("000000002801")).toBe(true);
+	});
+
+	describe("properties", () => {
+		test("should accept a generated voter id whatever mask surrounds its digits", () => {
+			fc.assert(
+				fc.property(maskSeparators([".", "-", "/", " "], 3, 3), (separators) => {
+					const voterId = generateVoterId();
+					const head = `${separators[0]}${voterId.slice(0, 8)}${separators[1]}`;
+
+					expect(isValidVoterId(`${head}${voterId.slice(8)}${separators[2]}`)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject any digits only value that is neither 12 nor 13 digits long", () => {
+			expectRejected(isValidVoterId, digitsOfOtherLength(26, [12, 13]));
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidVoterId, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidVoterId types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidVoterId).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidVoterId).returns.toEqualTypeOf<boolean>();
 	});
 });

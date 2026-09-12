@@ -1,7 +1,11 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
-import { isValidPixKey } from "./is-valid-pix-key";
+import { generatePhone } from "../generate-phone/generate-phone";
+import { type PixKeyType, parsePixKey } from "../parse-pix-key/parse-pix-key";
+import { type IsValidPixKeyOptions, isValidPixKey } from "./is-valid-pix-key";
 
 describe("isValidPixKey", () => {
 	describe("should return false", () => {
@@ -94,5 +98,60 @@ describe("isValidPixKey", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixKey("123.456.789-09", null)).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const emails = fc.stringMatching(/^[a-z0-9]{1,10}@[a-z0-9]{1,10}\.com$/);
+
+		test("should accept every kind of key the DICT defines", () => {
+			fc.assert(
+				fc.property(emails, fc.uuid(), (email, evp) => {
+					const phone = `+55${generatePhone("mobile")}`;
+
+					for (const key of [generateCpf(), generateCnpj(), email, evp, phone]) {
+						expect(isValidPixKey(key)).toBe(true);
+					}
+				}),
+			);
+		});
+
+		test("should honour the kinds of key it was told to accept", () => {
+			fc.assert(
+				fc.property(emails, fc.uuid(), (email, evp) => {
+					expect(isValidPixKey(email, { accept: ["email"] })).toBe(true);
+					expect(isValidPixKey(email, { accept: ["evp", "cpf"] })).toBe(false);
+					expect(isValidPixKey(evp, { accept: ["evp"] })).toBe(true);
+					expect(isValidPixKey(evp, { accept: [] })).toBe(false);
+				}),
+			);
+		});
+
+		test("should agree with parsePixKey on every value", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					expect(isValidPixKey(value)).toBe(parsePixKey(value) !== null);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a Pix key with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidPixKey(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidPixKey types", () => {
+	test("should take a string, optional options, and return a boolean", () => {
+		expectTypeOf(isValidPixKey).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidPixKey).parameter(1).toEqualTypeOf<IsValidPixKeyOptions | undefined>();
+		expectTypeOf(isValidPixKey).returns.toEqualTypeOf<boolean>();
+	});
+
+	test("should restrict accept to an array of Pix key types", () => {
+		expectTypeOf<IsValidPixKeyOptions["accept"]>().toEqualTypeOf<PixKeyType[] | undefined>();
 	});
 });

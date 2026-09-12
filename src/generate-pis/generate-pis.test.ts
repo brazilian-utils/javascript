@@ -1,4 +1,6 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidPis } from "../is-valid-pis/is-valid-pis";
 import { generatePis } from "./generate-pis";
 
@@ -19,7 +21,11 @@ describe("generatePis", () => {
 		const originalRandom = Math.random;
 		let call = 0;
 
-		Math.random = () => (digits[call++] + 0.5) / 10;
+		Math.random = () => {
+			const digit = digits[call];
+			call += 1;
+			return (digit + 0.5) / 10;
+		};
 
 		try {
 			const pis = generatePis();
@@ -29,5 +35,30 @@ describe("generatePis", () => {
 		} finally {
 			Math.random = originalRandom;
 		}
+	});
+
+	describe("properties", () => {
+		const batchSize = fc.integer({ min: 1, max: 20 });
+
+		test("should generate 11 digit PIS numbers its own validator accepts", () => {
+			fc.assert(
+				fc.property(batchSize, (size) => {
+					for (let index = 0; index < size; index++) {
+						const pis = generatePis();
+
+						expect(pis).toMatch(/^\d{11}$/);
+						expect(/^(\d)\1{9}/.test(pis)).toBe(false);
+						expect(isValidPis(pis)).toBe(true);
+					}
+				}),
+			);
+		});
+	});
+});
+
+describe("generatePis types", () => {
+	test("should take no parameters and return a string", () => {
+		expectTypeOf(generatePis).parameters.toEqualTypeOf<[]>();
+		expectTypeOf(generatePis).returns.toEqualTypeOf<string>();
 	});
 });

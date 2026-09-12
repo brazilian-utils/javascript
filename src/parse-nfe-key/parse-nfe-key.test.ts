@@ -1,9 +1,18 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { parseNfeKey } from "./parse-nfe-key";
+import * as fc from "fast-check";
+
+import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
+import { type StateCode } from "../_internals/constants/states";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { parseNfeKey, type NfeKey, type NfeKeyModel } from "./parse-nfe-key";
 
 const KEY_SP = "35170458716523000119550010000000121000123458";
 const KEY_RS = "43160472202112000136550000000010571048440722";
 const KEY_CPF_PADDED = "35170400040364478829550010000000121000123457";
+
+const CHECK_DIGITS = Array.from({ length: 10 }, (_, digit) => String(digit));
+
+const buildNfeKey = (base: string): string =>
+	CHECK_DIGITS.map((digit) => `${base}${digit}`).find((key) => parseNfeKey(key) !== null) ?? "";
 
 describe("parseNfeKey", () => {
 	describe("should return null", () => {
@@ -91,5 +100,72 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey("35170458716523000119580010000000121000123459")?.model).toBe("58");
 			expect(parseNfeKey("35170458716523000119650010000000121000123450")?.model).toBe("65");
 		});
+	});
+
+	describe("properties", () => {
+		const parts = fc.tuple(
+			fc.constantFrom(...Object.keys(IBGE_UF_CODES)),
+			fc.stringMatching(/^[0-9]{2}$/),
+			fc.integer({ min: 1, max: 12 }),
+			fc.stringMatching(/^[0-9]{14}$/),
+			fc.constantFrom("55", "57", "58", "65"),
+			fc.stringMatching(/^[0-9]{3}$/),
+			fc.integer({ min: 1, max: 999_999_999 }),
+			fc.integer({ min: 1, max: 9 }),
+			fc.stringMatching(/^[0-9]{8}$/),
+		);
+
+		test("should give back every field of a well-formed access key", () => {
+			fc.assert(
+				fc.property(parts, (fields) => {
+					const [uf, year, month, taxId, model, series, number, emissionType, code] = fields;
+					const issuer = `${uf}${year}${String(month).padStart(2, "0")}${taxId}`;
+					const document = `${model}${series}${String(number).padStart(9, "0")}`;
+					const key = buildNfeKey(`${issuer}${document}${emissionType}${code}`);
+					const parsed = parseNfeKey(key);
+
+					expect(parsed?.state).toBe(IBGE_UF_CODES[uf]);
+					expect(parsed?.year).toBe(2000 + Number(year));
+					expect(parsed?.month).toBe(month);
+					expect(parsed?.taxId).toBe(taxId);
+					expect(parsed?.model).toBe(model);
+					expect(parsed?.series).toBe(Number(series));
+					expect(parsed?.number).toBe(number);
+					expect(parsed?.emissionType).toBe(emissionType);
+					expect(parsed?.code).toBe(code);
+					expect(parsed?.checkDigit).toBe(Number(key.charAt(43)));
+				}),
+			);
+		});
+
+		test("should never throw and always return an access key or null", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const parsed = parseNfeKey(value as string);
+
+					expect(parsed === null || typeof parsed.taxId === "string").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("parseNfeKey types", () => {
+	test("should take a string and return an NfeKey or null", () => {
+		expectTypeOf(parseNfeKey).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(parseNfeKey).returns.toEqualTypeOf<NfeKey | null>();
+		expectTypeOf<NfeKey>().toEqualTypeOf<{
+			state: StateCode;
+			year: number;
+			month: number;
+			taxId: string;
+			model: NfeKeyModel;
+			series: number;
+			number: number;
+			emissionType: number;
+			code: string;
+			checkDigit: number;
+		}>();
+		expectTypeOf<NfeKeyModel>().toEqualTypeOf<"55" | "57" | "58" | "65">();
 	});
 });

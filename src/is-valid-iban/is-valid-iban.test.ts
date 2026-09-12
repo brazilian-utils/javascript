@@ -1,5 +1,12 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidIban } from "./is-valid-iban";
+
+const CHECK_DIGITS = Array.from({ length: 97 }, (_, index) => String(index).padStart(2, "0"));
+
+const findIban = (body: string): string =>
+	CHECK_DIGITS.map((pair) => `BR${pair}${body}`).find((iban) => isValidIban(iban)) ?? "";
 
 describe("isValidIban", () => {
 	describe("should return true", () => {
@@ -96,5 +103,58 @@ describe("isValidIban", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidIban([])).toBe(false);
 		});
+	});
+
+	describe("properties", () => {
+		const bodies = fc.stringMatching(/^[0-9]{23}[CP][A-Z0-9]$/);
+
+		test("should accept exactly one pair of check digits for any account", () => {
+			fc.assert(
+				fc.property(bodies, (body) => {
+					const accepted = CHECK_DIGITS.filter((pair) => isValidIban(`BR${pair}${body}`));
+
+					expect(accepted.length).toBe(1);
+				}),
+			);
+		});
+
+		test("should ignore the grouping spaces and the case of an IBAN", () => {
+			fc.assert(
+				fc.property(bodies, (body) => {
+					const iban = findIban(body);
+					const grouped = iban.replaceAll(/(.{4})(?=.)/g, "$1 ");
+
+					expect(isValidIban(grouped)).toBe(true);
+					expect(isValidIban(grouped.toLowerCase())).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject an IBAN of any other country", () => {
+			fc.assert(
+				fc.property(bodies, fc.stringMatching(/^[A-Z]{2}$/), (body, countryCode) => {
+					fc.pre(countryCode !== "BR");
+
+					const iban = findIban(body);
+
+					expect(isValidIban(`${countryCode}${iban.slice(2)}`)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge an IBAN with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidIban(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidIban types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidIban).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidIban).returns.toEqualTypeOf<boolean>();
 	});
 });

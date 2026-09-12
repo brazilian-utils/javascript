@@ -1,10 +1,13 @@
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { OBFUSCATED_PATTERN, PATTERN } from "./constants";
 
-export type FormatCnpjOptions = Pick<FormatParams, "pad"> & {
+/** Options of `formatCnpj`. */
+export type FormatCnpjOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
 	/** Which CNPJ format to read: `1` numeric only, `2` alphanumeric (default: `1`). */
 	version?: 1 | 2;
 	/** Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`). */
@@ -40,6 +43,7 @@ const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
+ * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
 export const formatCnpj = (value: string | number, options?: FormatCnpjOptions): string => {

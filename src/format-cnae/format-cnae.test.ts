@@ -1,4 +1,10 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import { anyGarbage, digits } from "../_internals/test/arbitraries";
+import {
+	expectIdempotent,
+	expectMatchesPattern,
+	expectNeverThrows,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { formatCnae } from "./format-cnae";
 
 describe("formatCnae", () => {
@@ -32,5 +38,28 @@ describe("formatCnae", () => {
 		expect(formatCnae(null)).toBe("");
 		// @ts-expect-error not a string or number
 		expect(formatCnae()).toBe("");
+	});
+
+	describe("properties", () => {
+		const sevenDigitArbitrary = digits(7);
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(formatCnae, anyGarbage);
+		});
+
+		test("should format every 7 digit value in the NNNN-N/NN pattern", () => {
+			expectMatchesPattern(formatCnae, /^\d{4}-\d\/\d{2}$/, sevenDigitArbitrary);
+		});
+
+		test("should be idempotent on a full 7 digit code", () => {
+			expectIdempotent(formatCnae, sevenDigitArbitrary);
+		});
+	});
+});
+
+describe("formatCnae types", () => {
+	test("should take a string or number and return a string", () => {
+		expectTypeOf(formatCnae).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCnae).returns.toEqualTypeOf<string>();
 	});
 });

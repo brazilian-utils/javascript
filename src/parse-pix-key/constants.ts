@@ -13,4 +13,4 @@ export const EVP_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a
  * international prefix (`+55` or `0055`) or a DDD wrapped in parentheses. A CPF mask uses only
  * dots and a dash, so it never matches.
  */
-export const PHONE_HINT_REGEX = /^(?:\+|00)\s*55|[()]/;
+export const PHONE_HINT_REGEX = /(?:^(?:\+|00)\s*55)|[()]/;

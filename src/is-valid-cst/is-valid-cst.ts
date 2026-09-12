@@ -48,8 +48,16 @@ const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): 
  * @returns {boolean} True when the code is valid for the given tax (or for any tax, when
  * `options.tax` is omitted), false otherwise.
  *
- * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2001/aj007_01
- * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=15304
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/1994/aj_003_94 Ajuste
+ * SINIEF 03/1994, which instituted the ICMS CST as the two digit code AB.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2000/aj_006_00 Ajuste
+ * SINIEF 06/2000, which gives the current Tabela B (the tributação pelo ICMS digits).
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2012/aj_020_12 Ajuste
+ * SINIEF 20/2012, which gives Tabela A (origem da mercadoria, 0 to 7).
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2013/aj_015_13 Ajuste
+ * SINIEF 15/2013, which added origem 8 to Tabela A.
+ * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=15974
+ * Instrução Normativa RFB nº 1.009/2010, Tabelas I to III (CST-IPI, CST-PIS and CST-COFINS).
  *
  * @example
  * ```typescript

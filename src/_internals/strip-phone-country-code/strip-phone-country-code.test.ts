@@ -17,6 +17,8 @@ describe("stripPhoneCountryCode", () => {
 
 	test("should only sanitize a value without a prefix", () => {
 		expect(stripPhoneCountryCode("(11) 98765-4321")).toBe("11987654321");
+		expect(stripPhoneCountryCode("11 3000 5500")).toBe("1130005500");
+		expect(stripPhoneCountryCode("11 98765-4321 +55")).toBe("1198765432155");
 		expect(stripPhoneCountryCode(190)).toBe("190");
 		expect(stripPhoneCountryCode("")).toBe("");
 	});

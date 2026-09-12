@@ -12,11 +12,8 @@ type UtilSection = {
 	description: string;
 };
 
-const SLUG_STRIP_PATTERN = new RegExp(
-	"[\\u2000-\\u206F\\u2E00-\\u2E7F\\\\'!\"#$%&()*+,./:;<=>?@\\[\\]^`{|}~]",
-	"g",
-);
-const VARIATION_SELECTOR_PATTERN = new RegExp("\\uFE0F", "g");
+const SLUG_STRIP_PATTERN = /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g;
+const VARIATION_SELECTOR_PATTERN = /\uFE0F/g;
 const EMOJI_PATTERN = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
 
 /**
@@ -69,7 +66,7 @@ function firstSentence(paragraph: string): string {
 		/\b(e\.g|i\.e)\./gi,
 		(_match, abbr: string) => `${abbr}${ABBREVIATION_PLACEHOLDER}`,
 	);
-	const match = protectedText.match(/[\s\S]*?[.!?](?=\s|$)/);
+	const match = /[\s\S]*?[.!?](?=\s|$)/.exec(protectedText);
 	const sentence = match ? match[0] : protectedText;
 
 	return sentence.split(ABBREVIATION_PLACEHOLDER).join(".").trim();

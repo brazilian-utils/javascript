@@ -1,4 +1,8 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { CSOSN_CODES } from "./constants";
 import { isValidCsosn } from "./is-valid-csosn";
 
@@ -42,5 +46,29 @@ describe("isValidCsosn", () => {
 
 	it("should return false for a non numeric string", () => {
 		expect(isValidCsosn("abc")).toBe(false);
+	});
+
+	describe("properties", () => {
+		const codeArbitrary = fc.constantFrom(...CSOSN_CODES);
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(isValidCsosn, anyGarbage);
+		});
+
+		test("should validate every known code, as a string or a number", () => {
+			fc.assert(
+				fc.property(codeArbitrary, (code) => {
+					expect(isValidCsosn(code)).toBe(true);
+					expect(isValidCsosn(Number(code))).toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCsosn types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCsosn).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCsosn).returns.toEqualTypeOf<boolean>();
 	});
 });

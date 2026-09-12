@@ -14,7 +14,11 @@ const EMAIL_REGEX =
  * isValidEmail("test@domain.co.uk"); // true
  * ```
  *
- * @see Official: https://www.rfc-editor.org/rfc/rfc5322
+ * @see Based on: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address The
+ * WHATWG HTML "valid e-mail address" definition, narrowed further: the local part is limited to
+ * letters, digits and `_'+-.`, it may not start with a dot or contain two dots in a row, and the
+ * domain must carry at least one dot and end in an alphabetic label of two or more letters. It is
+ * a practical subset, not RFC 5322: quoted local parts and address literals are rejected.
  */
 export const isValidEmail = (value: string): boolean => {
 	if (typeof value !== "string") return false;

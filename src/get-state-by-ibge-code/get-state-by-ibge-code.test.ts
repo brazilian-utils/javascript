@@ -1,4 +1,9 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { DATA as STATES, type State } from "../_internals/constants/states";
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getStateByIbgeCode } from "./get-state-by-ibge-code";
 
 describe("getStateByIbgeCode", () => {
@@ -66,5 +71,36 @@ describe("getStateByIbgeCode", () => {
 
 	it("should ignore non-digit characters around the code", () => {
 		expect(getStateByIbgeCode(" 35 ")?.code).toBe("SP");
+	});
+
+	describe("properties", () => {
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(getStateByIbgeCode, anyGarbage);
+		});
+
+		test("should resolve every known ibgeCode regardless of surrounding non-digit noise", () => {
+			const knownIbgeCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.ibgeCode));
+			const noiseArbitrary = fc
+				.array(fc.constantFrom(" ", "-", ".", "/", "R", "$", "a", "Z"))
+				.map((characters) => characters.join(""));
+
+			fc.assert(
+				fc.property(
+					knownIbgeCodeArbitrary,
+					noiseArbitrary,
+					noiseArbitrary,
+					(ibgeCode, prefix, suffix) => {
+						expect(getStateByIbgeCode(`${prefix}${ibgeCode}${suffix}`)?.ibgeCode).toBe(ibgeCode);
+					},
+				),
+			);
+		});
+	});
+});
+
+describe("getStateByIbgeCode types", () => {
+	test("should take a string or number and return a State or null", () => {
+		expectTypeOf(getStateByIbgeCode).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getStateByIbgeCode).returns.toEqualTypeOf<State | null>();
 	});
 });

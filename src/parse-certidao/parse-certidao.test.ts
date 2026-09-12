@@ -1,5 +1,18 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { parseCertidao } from "./parse-certidao";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { CERTIDAO_TYPES } from "./constants";
+import { parseCertidao, type Certidao, type CertidaoType } from "./parse-certidao";
+
+const findMatricula = (base: string): string => {
+	for (let pair = 0; pair < 100; pair++) {
+		const value = `${base}${String(pair).padStart(2, "0")}`;
+
+		if (parseCertidao(value) !== null) return value;
+	}
+
+	return "";
+};
 
 describe("parseCertidao", () => {
 	describe("should return null", () => {
@@ -107,5 +120,80 @@ describe("parseCertidao", () => {
 				checkDigits: "18",
 			});
 		});
+	});
+
+	describe("properties", () => {
+		const parts = fc.tuple(
+			fc.stringMatching(/^[0-9]{6}$/),
+			fc.stringMatching(/^[0-9]{2}$/),
+			fc.stringMatching(/^[0-9]{2}$/),
+			fc.integer({ min: 1000, max: 9999 }),
+			fc.integer({ min: 1, max: 9 }),
+			fc.stringMatching(/^[0-9]{5}$/),
+			fc.stringMatching(/^[0-9]{3}$/),
+			fc.stringMatching(/^[0-9]{7}$/),
+		);
+
+		test("should give back every field of a valid matrícula", () => {
+			fc.assert(
+				fc.property(parts, (fields) => {
+					const [registryCns, acervo, service, year, typeCode, book, page, term] = fields;
+					const registry = `${registryCns}${acervo}${service}${year}${typeCode}`;
+					const value = findMatricula(`${registry}${book}${page}${term}`);
+					const parsed = parseCertidao(value);
+
+					expect(parsed?.registryCns).toBe(registryCns);
+					expect(parsed?.acervo).toBe(acervo);
+					expect(parsed?.service).toBe(service);
+					expect(parsed?.year).toBe(year);
+					expect(parsed?.typeCode).toBe(typeCode);
+					expect(parsed?.book).toBe(book);
+					expect(parsed?.page).toBe(page);
+					expect(parsed?.term).toBe(term);
+					expect(parsed?.checkDigits).toBe(value.slice(30));
+					expect(parsed?.type).toBe(CERTIDAO_TYPES[typeCode - 1]);
+				}),
+			);
+		});
+
+		test("should never throw and always return a matrícula or null", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const parsed = parseCertidao(value as string);
+
+					expect(parsed === null || typeof parsed.registryCns === "string").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("parseCertidao types", () => {
+	test("should take a string or number and return a Certidao or null", () => {
+		expectTypeOf(parseCertidao).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(parseCertidao).returns.toEqualTypeOf<Certidao | null>();
+		expectTypeOf<Certidao>().toEqualTypeOf<{
+			registryCns: string;
+			acervo: string;
+			service: string;
+			year: number;
+			type: CertidaoType;
+			typeCode: number;
+			book: string;
+			page: string;
+			term: string;
+			checkDigits: string;
+		}>();
+		expectTypeOf<CertidaoType>().toEqualTypeOf<
+			| "birth"
+			| "marriage"
+			| "religious-marriage"
+			| "death"
+			| "stillbirth"
+			| "banns"
+			| "other"
+			| "emancipation"
+			| "interdiction"
+		>();
 	});
 });

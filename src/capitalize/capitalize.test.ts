@@ -1,5 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { capitalize } from "./capitalize";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { capitalize, type CapitalizeOptions } from "./capitalize";
 
 describe("capitalize", () => {
 	describe("should capitalize", () => {
@@ -79,5 +81,43 @@ describe("capitalize", () => {
 		expect(capitalize()).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(capitalize(123)).toBe("");
+	});
+
+	describe("properties", () => {
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(() => capitalize(value as never)).not.toThrow();
+				}),
+			);
+		});
+
+		test("should be idempotent on its own output", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					const once = capitalize(value);
+
+					expect(capitalize(once)).toBe(once);
+				}),
+			);
+		});
+
+		test("should never produce leading, trailing or doubled whitespace", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					expect(capitalize(value)).not.toMatch(/^\s|\s$|\s{2}/);
+				}),
+			);
+		});
+	});
+});
+
+describe("capitalize types", () => {
+	test("should take a string and options and return a string", () => {
+		expectTypeOf(capitalize).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(capitalize).parameter(1).toEqualTypeOf<CapitalizeOptions | undefined>();
+		expectTypeOf<CapitalizeOptions["lowerCaseWords"]>().toEqualTypeOf<string[] | undefined>();
+		expectTypeOf<CapitalizeOptions["upperCaseWords"]>().toEqualTypeOf<string[] | undefined>();
+		expectTypeOf(capitalize).returns.toEqualTypeOf<string>();
 	});
 });

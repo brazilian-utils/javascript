@@ -1,6 +1,15 @@
+import * as fc from "fast-check";
+
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatCnpj } from "./format-cnpj";
+import { anyValue, digits, digitsUpTo } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectPadsToLength,
+	expectRoundTrip,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { parseCnpj } from "../parse-cnpj/parse-cnpj";
+import { formatCnpj, type FormatCnpjOptions } from "./format-cnpj";
 
 describe("formatCnpj", () => {
 	it("should return an empty string for null or undefined", () => {
@@ -137,5 +146,60 @@ describe("formatCnpj", () => {
 		expect(formatCnpj("q0SLFMBD7VX439", { version: 2, obfuscate: false })).toBe(
 			"Q0.SLF.MBD/7VX4-39",
 		);
+	});
+
+	describe("properties", () => {
+		const upToACnpj = digitsUpTo(14);
+		const fullCnpj = digits(14);
+		const alphanumericCnpj = fc.stringMatching(/^[0-9A-Z]{14}$/);
+
+		test("should only add the mask, never change the digits", () => {
+			expectRoundTrip(formatCnpj, parseCnpj, upToACnpj);
+		});
+
+		test("should produce the documented mask shape for a full CNPJ", () => {
+			fc.assert(
+				fc.property(fullCnpj, (value) => {
+					const obfuscated = formatCnpj(value, { obfuscate: true });
+
+					expect(formatCnpj(value)).toMatch(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/);
+					expect(obfuscated).toMatch(/^\*{2}\.\d{3}\.\d{3}\/\d{4}-\*{2}$/);
+				}),
+			);
+		});
+
+		test("should uppercase and keep every character of an alphanumeric CNPJ", () => {
+			fc.assert(
+				fc.property(alphanumericCnpj, (value) => {
+					const formatted = formatCnpj(value.toLowerCase(), { version: 2 });
+					const shape = /^[\dA-Z]{2}\.[\dA-Z]{3}\.[\dA-Z]{3}\/[\dA-Z]{4}-[\dA-Z]{2}$/;
+
+					expect(formatted).toMatch(shape);
+					expect(parseCnpj(formatted, { version: 2 })).toBe(value);
+				}),
+			);
+		});
+
+		test("should left pad a shorter value up to the CNPJ length", () => {
+			expectPadsToLength(formatCnpj, parseCnpj, upToACnpj, CNPJ_LENGTH);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(formatCnpj, "string", anyValue);
+		});
+	});
+});
+
+describe("formatCnpj types", () => {
+	test("should take a string or number value and options and return a string", () => {
+		expectTypeOf(formatCnpj).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCnpj).parameter(1).toEqualTypeOf<FormatCnpjOptions | undefined>();
+		expectTypeOf(formatCnpj).returns.toEqualTypeOf<string>();
+	});
+
+	test("should type the pad, version and obfuscate options", () => {
+		expectTypeOf<FormatCnpjOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf<FormatCnpjOptions["version"]>().toEqualTypeOf<1 | 2 | undefined>();
+		expectTypeOf<FormatCnpjOptions["obfuscate"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

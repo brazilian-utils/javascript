@@ -1,11 +1,16 @@
-import { DATA } from "../_internals/constants/cities";
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { DATA, type Municipality } from "../_internals/constants/cities";
+import { type StateCode } from "../_internals/constants/states";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getCities } from "../get-cities/get-cities";
+import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
 import { getStates } from "../get-states/get-states";
 import { getMunicipalities } from "./get-municipalities";
 
 const NUMBER_OF_BRAZILIAN_MUNICIPALITIES = 5571;
 
-const KNOWN_STATE_MUNICIPALITY_COUNTS: Record<string, number> = {
+const KNOWN_STATE_MUNICIPALITY_COUNTS: Partial<Record<StateCode, number>> = {
 	MG: 853,
 	MT: 142,
 	RS: 497,
@@ -35,7 +40,7 @@ describe("getMunicipalities", () => {
 
 	it("should filter municipalities by state", () => {
 		for (const [stateCode, expectedCount] of Object.entries(KNOWN_STATE_MUNICIPALITY_COUNTS)) {
-			expect(getMunicipalities(stateCode).length).toBe(expectedCount);
+			expect(getMunicipalities(stateCode as StateCode).length).toBe(expectedCount);
 		}
 	});
 
@@ -50,11 +55,14 @@ describe("getMunicipalities", () => {
 	});
 
 	it("should return an empty array for an unknown state", () => {
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalities("ZZ")).toEqual([]);
 	});
 
 	it("should return an empty array for inherited Object property names instead of throwing", () => {
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalities("toString")).toEqual([]);
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalities("constructor")).toEqual([]);
 	});
 
@@ -98,5 +106,49 @@ describe("getMunicipalities", () => {
 				expect(getMunicipalities(code)).toEqual(expected);
 			});
 		}
+	});
+
+	describe("properties", () => {
+		const stateCodeArbitrary = fc.constantFrom(...getStates().map((state) => state.code));
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(() => getMunicipalities(value as never)).not.toThrow();
+				}),
+			);
+		});
+
+		test("should list, for every state, the same names and order as getCities", () => {
+			fc.assert(
+				fc.property(stateCodeArbitrary, (stateCode) => {
+					const names = getMunicipalities(stateCode).map((municipality) => municipality.name);
+
+					expect(names).toEqual(getCities(stateCode));
+				}),
+			);
+		});
+
+		test("should have every municipality resolve back to itself through getMunicipalityByCode", () => {
+			const municipalityArbitrary = fc.constantFrom(...getMunicipalities());
+
+			fc.assert(
+				fc.property(municipalityArbitrary, (municipality) => {
+					expect(getMunicipalityByCode(municipality.code)).toEqual(municipality);
+				}),
+			);
+		});
+	});
+});
+
+describe("getMunicipalities types", () => {
+	test("should take an optional string and return an array of Municipality", () => {
+		expectTypeOf(getMunicipalities).parameter(0).toEqualTypeOf<StateCode | undefined>();
+		expectTypeOf(getMunicipalities).returns.toEqualTypeOf<Municipality[]>();
+		expectTypeOf<Municipality>().toEqualTypeOf<{
+			code: string;
+			name: string;
+			stateCode: StateCode;
+		}>();
 	});
 });

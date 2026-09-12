@@ -1,4 +1,8 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generateCpf } from "../generate-cpf/generate-cpf";
+import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";
 import { isValidPixPayload } from "./is-valid-pix-payload";
 
 const BACEN_STATIC =
@@ -186,5 +190,53 @@ describe("isValidPixPayload", () => {
 			expect(isValidPixPayload("10491443385511900000200000000141325230000093423")).toBe(false);
 			expect(isValidPixPayload("pix copia e cola")).toBe(false);
 		});
+	});
+
+	describe("properties", () => {
+		const names = fc.stringMatching(/^[A-Za-z][A-Za-z0-9]{0,24}$/);
+
+		const cities = fc.stringMatching(/^[A-Za-z][A-Za-z0-9]{0,14}$/);
+
+		test("should accept every generated payload", () => {
+			fc.assert(
+				fc.property(names, cities, (merchantName, merchantCity) => {
+					const key = generateCpf();
+					const payload = generatePixPayload({ key, merchantName, merchantCity });
+
+					expect(isValidPixPayload(payload ?? "")).toBe(true);
+					expect(isValidPixPayload(`  ${payload}\n`)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject a payload whose text was changed", () => {
+			fc.assert(
+				fc.property(names, fc.nat(), (merchantName, offset) => {
+					const key = generateCpf();
+					const payload = generatePixPayload({ key, merchantName, merchantCity: "BRASILIA" });
+					const text = payload ?? "";
+					const index = offset % (text.length - 4);
+					const replacement = text.charAt(index) === "0" ? "1" : "0";
+					const changed = `${text.slice(0, index)}${replacement}${text.slice(index + 1)}`;
+
+					expect(isValidPixPayload(changed)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a BR Code with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidPixPayload(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidPixPayload types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidPixPayload).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidPixPayload).returns.toEqualTypeOf<boolean>();
 	});
 });

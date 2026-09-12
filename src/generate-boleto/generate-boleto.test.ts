@@ -1,11 +1,13 @@
+import * as fc from "fast-check";
+
 import { ARRECADACAO_LINE_LENGTH } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { formatBoleto } from "../format-boleto/format-boleto";
 import { getBoletoInfo } from "../get-boleto-info/get-boleto-info";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
 import { parseBoleto } from "../parse-boleto/parse-boleto";
-import { generateBoleto } from "./generate-boleto";
+import { type GenerateBoletoOptions, generateBoleto } from "./generate-boleto";
 
 const drawArrecadacaoSegment = (): number =>
 	getBoletoInfo(generateBoleto({ type: "arrecadacao" }))?.segment ?? 0;
@@ -104,5 +106,58 @@ describe("generateBoleto", () => {
 				Math.random = originalRandom;
 			}
 		});
+	});
+
+	describe("properties", () => {
+		const types = ["bancario", "arrecadacao"] as const;
+
+		test("should always generate a bank slip its own validator accepts", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...types), (type) => {
+					const value = generateBoleto({ type });
+					const length = type === "arrecadacao" ? ARRECADACAO_LINE_LENGTH : BOLETO_LENGTH;
+
+					expect(value.length).toBe(length);
+					expect(isValidBoleto(value)).toBe(true);
+				}),
+			);
+		});
+
+		test("should always generate a bank slip that survives formatting and parsing", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...types), (type) => {
+					const value = generateBoleto({ type });
+					const formatted = formatBoleto(value);
+
+					expect(parseBoleto(formatted)).toBe(value);
+					expect(isValidBoleto(formatted)).toBe(true);
+				}),
+			);
+		});
+
+		test("should always generate a bank slip getBoletoInfo can read", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...types), (type) => {
+					const value = generateBoleto({ type });
+					const info = getBoletoInfo(value);
+
+					expect(info).toBeDefined();
+					expect(info?.bankCode).toBe(type === "arrecadacao" ? "" : value.slice(0, 3));
+				}),
+			);
+		});
+	});
+});
+
+describe("generateBoleto types", () => {
+	test("should take optional options and return a string", () => {
+		expectTypeOf(generateBoleto).parameter(0).toEqualTypeOf<GenerateBoletoOptions | undefined>();
+		expectTypeOf(generateBoleto).returns.toEqualTypeOf<string>();
+	});
+
+	test("should restrict type to the supported boleto kinds", () => {
+		expectTypeOf<GenerateBoletoOptions["type"]>().toEqualTypeOf<
+			"bancario" | "arrecadacao" | undefined
+		>();
 	});
 });

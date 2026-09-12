@@ -1,5 +1,8 @@
+import * as fc from "fast-check";
+
 import { MONTH_NAMES, WEEKDAY_NAMES } from "../_internals/constants/number-words";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { type WordsCase } from "../_internals/number-to-words/number-to-words";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { convertDateToWords, type ConvertDateToWordsOptions } from "./convert-date-to-words";
 
 function expectDates(
@@ -11,6 +14,13 @@ function expectDates(
 	);
 
 	expect(mismatches).toEqual([]);
+}
+
+function toBrDateString(date: Date): string {
+	const day = String(date.getDate()).padStart(2, "0");
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+
+	return `${day}/${month}/${date.getFullYear()}`;
 }
 
 describe("convertDateToWords", () => {
@@ -413,5 +423,55 @@ describe("convertDateToWords", () => {
 			];
 			expectDates(cases);
 		});
+	});
+
+	describe("properties", () => {
+		const dateArbitrary = fc.date({
+			min: new Date(2000, 0, 1),
+			max: new Date(2100, 11, 31),
+			noInvalidDate: true,
+		});
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(() => convertDateToWords(value as never)).not.toThrow();
+				}),
+			);
+		});
+
+		test("should give the same result for a Date and its equivalent 'dd/mm/yyyy' string", () => {
+			fc.assert(
+				fc.property(dateArbitrary, (date) => {
+					expect(convertDateToWords(date)).toBe(convertDateToWords(toBrDateString(date)));
+				}),
+			);
+		});
+
+		test("should prefix the pt-BR weekday name when 'weekday' is true", () => {
+			fc.assert(
+				fc.property(dateArbitrary, (date) => {
+					const plain = convertDateToWords(date);
+					const withWeekday = convertDateToWords(date, { weekday: true });
+
+					expect(withWeekday).toBe(`${WEEKDAY_NAMES[date.getDay()]}, ${plain}`);
+				}),
+			);
+		});
+	});
+});
+
+describe("convertDateToWords types", () => {
+	test("should take a Date or string, options, and return a string", () => {
+		expectTypeOf(convertDateToWords).parameter(0).toEqualTypeOf<Date | string>();
+		expectTypeOf(convertDateToWords)
+			.parameter(1)
+			.toEqualTypeOf<ConvertDateToWordsOptions | undefined>();
+		expectTypeOf<ConvertDateToWordsOptions["case"]>().toEqualTypeOf<WordsCase | undefined>();
+		expectTypeOf<ConvertDateToWordsOptions["style"]>().toEqualTypeOf<
+			"full" | "month" | undefined
+		>();
+		expectTypeOf<ConvertDateToWordsOptions["weekday"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(convertDateToWords).returns.toEqualTypeOf<string>();
 	});
 });

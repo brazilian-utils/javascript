@@ -39,14 +39,14 @@ const inflateStreams = (pdf: Buffer): string[] => {
 
 	while (cursor < pdf.length) {
 		const start = pdf.indexOf("stream", cursor);
-		if (start < 0) break;
+		if (start === -1) break;
 
 		let contentStart = start + "stream".length;
 		if (pdf[contentStart] === 0x0d) contentStart += 1;
 		if (pdf[contentStart] === 0x0a) contentStart += 1;
 
 		const end = pdf.indexOf("endstream", contentStart);
-		if (end < 0) break;
+		if (end === -1) break;
 
 		try {
 			streams.push(inflateSync(pdf.subarray(contentStart, end)).toString("latin1"));
@@ -151,7 +151,7 @@ const parseLegalNatures = (lines: string[]): Record<string, string> => {
 	const legalNatures: Record<string, string> = {};
 
 	for (const line of lines) {
-		const match = line.match(/^\s*(\d{3})-(\d)\s*-\s*(.+?)\s*$/);
+		const match = /^\s*(\d{3})-(\d)\s*-\s*(.+?)\s*$/.exec(line);
 		if (!match) continue;
 
 		const [, codePrefix, codeSuffix, rawDescription] = match;
