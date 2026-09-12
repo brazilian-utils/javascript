@@ -1,6 +1,5 @@
 import { describe, expect, it } from "../_internals/test/runtime";
-import type { GetMunicipalityByNameOptions } from "./get-municipality";
-import { getMunicipality } from "./get-municipality";
+import { type GetMunicipalityByNameOptions, getMunicipality } from "./get-municipality";
 
 describe("getMunicipality", () => {
 	it("should get municipality code by name", async () => {

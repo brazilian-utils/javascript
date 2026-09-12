@@ -127,13 +127,16 @@ describe("fetchWithRetry", () => {
 			"ETIMEDOUT",
 		];
 
-		await RETRYABLE_CODES.reduce(async (previous, code) => {
-			await previous;
+		const expectEachRetries = async ([code, ...rest]: string[]): Promise<void> => {
+			if (code === undefined) return;
 
 			const error = Object.assign(new Error("boom"), { code });
 
 			await expectRetrySucceeds(mockFetchRejectingOnceWith(error));
-		}, Promise.resolve());
+			await expectEachRetries(rest);
+		};
+
+		await expectEachRetries(RETRYABLE_CODES);
 	});
 
 	it("does not retry when the error code is unknown", async () => {

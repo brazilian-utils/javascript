@@ -46,7 +46,7 @@ const main = async (): Promise<void> => {
 			const data: Record<string, string> = {};
 
 			for (const line of csv.split("\n")) {
-				const match = line.match(/^(\d{4});"(.*)"\s*$/);
+				const match = /^(\d{4});"(.*)"\s*$/.exec(line);
 
 				if (!match) continue;
 

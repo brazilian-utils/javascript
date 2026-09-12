@@ -54,7 +54,9 @@ describe("fetchSortedRecord", () => {
 			async (response) => {
 				const entries: Record<string, string> = {};
 
-				for (const line of (await response.text()).split("\n")) {
+				const body = await response.text();
+
+				for (const line of body.split("\n")) {
 					const [key, value] = line.split(";");
 
 					expect(key).toBeDefined();

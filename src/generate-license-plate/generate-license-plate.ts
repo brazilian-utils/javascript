@@ -1,9 +1,10 @@
-import type { LicensePlateFormat } from "../get-format-license-plate/get-format-license-plate";
+import { type LicensePlateFormat } from "../get-format-license-plate/get-format-license-plate";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const DEFAULT_FORMAT = "LLLNLNN";
 
+/** The license plate formats `generateLicensePlate` can generate. */
 export type GenerateLicensePlateFormat = LicensePlateFormat;
 
 const randomLetter = (): string => LETTERS.charAt(Math.floor(Math.random() * LETTERS.length));

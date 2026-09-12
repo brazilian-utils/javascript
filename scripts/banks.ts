@@ -72,13 +72,17 @@ const fetchFromBacen = async (): Promise<BankRow[]> => {
 		throw new Error(`Bacen STR participants request failed with status ${response.status}`);
 	}
 
-	const text = (await response.text()).replace(/^\uFEFF/, "");
+	const body = await response.text();
+	const text = body.replace(/^\uFEFF/, "");
 	const [, ...rows] = text.split(/\r\n|\n/).filter((line) => line.length > 0);
 
 	const banks: BankRow[] = [];
 
 	for (const row of rows) {
-		const [ispb, , code, , , name] = parseCsvLine(row);
+		const fields = parseCsvLine(row);
+		const ispb = fields[0];
+		const code = fields[2];
+		const name = fields[5];
 
 		if (
 			ispb === undefined ||

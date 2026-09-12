@@ -217,12 +217,14 @@ export const getAddressInfoByCep = async (
 	}
 
 	let notFound = false;
-	const providerPromises = providersToUse.map((provider) =>
-		providerMap[provider](cepString).catch((error: unknown) => {
+	const providerPromises = providersToUse.map(async (provider) => {
+		try {
+			return await providerMap[provider](cepString);
+		} catch (error) {
 			if (error instanceof GetAddressInfoByCepNotFoundError) notFound = true;
 			throw error;
-		}),
-	);
+		}
+	});
 
 	try {
 		return await Promise.any(providerPromises);
