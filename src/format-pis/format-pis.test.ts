@@ -75,4 +75,11 @@ describe("formatPis", () => {
 		expect(formatPis("00000000000000")).toBe("000.00000.00-0");
 		expect(formatPis("000000000000000")).toBe("000.00000.00-0");
 	});
+
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(formatPis(null)).toBe("");
+		// @ts-expect-error
+		expect(formatPis(undefined)).toBe("");
+	});
 });

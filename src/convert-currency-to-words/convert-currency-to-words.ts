@@ -53,7 +53,7 @@ export const convertCurrencyToWords = (
 	value: number,
 	options?: ConvertCurrencyToWordsOptions,
 ): string => {
-	if (typeof value !== "number" || !Number.isFinite(value)) return "";
+	if (!Number.isFinite(value)) return "";
 
 	const absolute = Math.abs(value);
 	const hasExactCents = absolute * 100 <= Number.MAX_SAFE_INTEGER;
@@ -80,6 +80,7 @@ export const convertCurrencyToWords = (
 	if (reais === 0 && centavos === 0) return applyWordsCase("zero reais", options?.case);
 
 	const joined = parts.join(" ");
+	// Stryker disable next-line EqualityOperator: equivalent, value is never exactly 0 here (reais === 0 && centavos === 0 already returned above)
 	const result = value < 0 ? `menos ${joined}` : joined;
 
 	return applyWordsCase(result, options?.case);

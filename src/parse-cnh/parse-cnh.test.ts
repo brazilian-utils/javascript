@@ -13,4 +13,9 @@ describe("parseCnh", () => {
 	it("should ignore digits after the CNH length", () => {
 		expect(parseCnh("00000000119123")).toBe("00000000119");
 	});
+
+	it("should return an empty string for null", () => {
+		// @ts-expect-error not a string or number
+		expect(parseCnh(null)).toBe("");
+	});
 });

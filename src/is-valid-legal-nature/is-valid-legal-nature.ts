@@ -1,4 +1,4 @@
-import { CODE_REGEX, LEGAL_NATURE, MASK_REGEX } from "./constants";
+import { LEGAL_NATURE, MASK_REGEX } from "./constants";
 
 /**
  * Validates if a Brazilian legal nature (natureza jurídica) code exists.
@@ -21,9 +21,9 @@ import { CODE_REGEX, LEGAL_NATURE, MASK_REGEX } from "./constants";
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
  */
 export const isValidLegalNature = (code: string): boolean => {
-	if (typeof code !== "string" || code === "") return false;
+	if (typeof code !== "string") return false;
 
 	const normalized = code.replace(MASK_REGEX, "");
 
-	return CODE_REGEX.test(normalized) && normalized in LEGAL_NATURE;
+	return normalized in LEGAL_NATURE;
 };

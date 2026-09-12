@@ -26,5 +26,10 @@ describe("parsePassport", () => {
 		test("when there are extra characters after the passport length", () => {
 			expect(parsePassport("AB123456789")).toBe("AB123456");
 		});
+
+		test("when it is a non-string value", () => {
+			// @ts-expect-error not a string
+			expect(parsePassport(null)).toBe("");
+		});
 	});
 });

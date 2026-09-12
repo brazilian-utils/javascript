@@ -17,4 +17,9 @@ describe("parseProcessoJuridico", () => {
 	it("should ignore digits after the processo juridico length", () => {
 		expect(parseProcessoJuridico("00020802520125150049123")).toBe("00020802520125150049");
 	});
+
+	it("should return an empty string for null", () => {
+		// @ts-expect-error not a string or number
+		expect(parseProcessoJuridico(null)).toBe("");
+	});
 });

@@ -30,11 +30,11 @@ export type Cfop = {
  * Community-maintained CSV mirror of the official CFOP table used to build `CFOP_TABLE`.
  */
 export const getCfop = (value: string | number): Cfop | null => {
-	if (isNullish(value) || value === "") return null;
+	if (isNullish(value)) return null;
 
 	const digits = sanitizeToDigits(value);
 
-	if (digits.length !== 4 || !(digits in CFOP_TABLE)) return null;
+	if (!(digits in CFOP_TABLE)) return null;
 
 	return { code: digits, description: CFOP_TABLE[digits] };
 };

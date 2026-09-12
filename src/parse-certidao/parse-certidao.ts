@@ -61,7 +61,7 @@ export const parseCertidao = (value: string | number): Certidao | null => {
 	const digits = sanitizeToDigits(value);
 	const typeCode = digits.charCodeAt(14) - 48;
 
-	if (typeCode < 1 || typeCode > CERTIDAO_TYPES.length) return null;
+	if (typeCode < 1) return null;
 
 	return {
 		registryCns: digits.slice(0, 6),

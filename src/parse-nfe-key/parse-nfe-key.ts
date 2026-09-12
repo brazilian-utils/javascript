@@ -1,13 +1,11 @@
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
 import { NFE_KEY_LENGTH } from "../_internals/constants/nfe-key";
 import type { StateCode } from "../_internals/constants/states";
+import { mod11 } from "../_internals/mod11/mod11";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { isValidNfeKey } from "../is-valid-nfe-key/is-valid-nfe-key";
+import { ABSENT_NUMBER, FORMAT_REGEX, NUMBER_END, NUMBER_START, VALID_MODELS } from "./constants";
 
-export type NfeKeyModel = "55" | "57" | "58" | "65";
-
-const isNfeKeyModel = (value: string): value is NfeKeyModel =>
-	value === "55" || value === "57" || value === "58" || value === "65";
+export type NfeKeyModel = (typeof VALID_MODELS)[number];
 
 export type NfeKey = {
 	/** Two letter code of the issuing state, read from the IBGE UF code. */
@@ -60,25 +58,45 @@ export type NfeKey = {
  * ```
  */
 export const parseNfeKey = (value: string): NfeKey | null => {
-	if (!isValidNfeKey(value)) return null;
+	if (typeof value !== "string" || !FORMAT_REGEX.test(value.trim())) return null;
 
-	const digits = sanitizeToDigits(value).slice(0, NFE_KEY_LENGTH);
+	const digits = sanitizeToDigits(value);
 
-	const model = digits.slice(20, 22);
+	if (digits.length !== NFE_KEY_LENGTH) return null;
 
-	/* v8 ignore next */
-	if (!isNfeKeyModel(model)) return null;
+	const uf = digits.slice(0, 2);
+
+	if (!Object.hasOwn(IBGE_UF_CODES, uf)) return null;
+
+	const month = Number(digits.slice(4, 6));
+
+	if (month < 1 || month > 12) return null;
+
+	const modelDigits = digits.slice(20, 22);
+	const model = VALID_MODELS.find((candidate) => candidate === modelDigits);
+
+	if (model === undefined) return null;
+
+	if (digits.slice(NUMBER_START, NUMBER_END) === ABSENT_NUMBER) return null;
+
+	const emissionType = Number(digits[34]);
+
+	if (emissionType < 1) return null;
+
+	const checkDigit = Number(digits[43]);
+
+	if (mod11(digits.slice(0, 43), { variant: "arrecadacao" }) !== checkDigit) return null;
 
 	return {
-		state: IBGE_UF_CODES[digits.slice(0, 2)],
+		state: IBGE_UF_CODES[uf],
 		year: 2000 + Number(digits.slice(2, 4)),
-		month: Number(digits.slice(4, 6)),
+		month,
 		taxId: digits.slice(6, 20),
 		model,
 		series: Number(digits.slice(22, 25)),
-		number: Number(digits.slice(25, 34)),
-		emissionType: Number(digits[34]),
+		number: Number(digits.slice(NUMBER_START, NUMBER_END)),
+		emissionType,
 		code: digits.slice(35, 43),
-		checkDigit: Number(digits[43]),
+		checkDigit,
 	};
 };

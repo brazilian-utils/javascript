@@ -118,6 +118,13 @@ describe("formatBoleto", () => {
 		expect(formatBoleto("")).toBe("");
 	});
 
+	test("should return an empty string when the value is nullish", () => {
+		// @ts-expect-error
+		expect(formatBoleto(null)).toBe("");
+		// @ts-expect-error
+		expect(formatBoleto(undefined)).toBe("");
+	});
+
 	describe("arrecadação", () => {
 		test("should use the arrecadação mask when it starts with 8", () => {
 			expect(formatBoleto("846100000005246100291102005460339004695895061080")).toBe(

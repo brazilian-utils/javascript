@@ -1,4 +1,3 @@
-import { CPF_LENGTH } from "../_internals/constants/cpf";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { RESERVED_NUMBERS } from "./constants";
 
@@ -42,11 +41,9 @@ const isValidChecksum = (cpf: string): boolean => {
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
  */
 export const isValidCpf = (cpf: string): boolean => {
-	if (typeof cpf !== "string" || cpf === "") return false;
+	if (typeof cpf !== "string") return false;
 
 	const digits = sanitizeToDigits(cpf);
-
-	if (digits.length !== CPF_LENGTH) return false;
 
 	if (!FORMAT_REGEX.test(cpf.trim())) return false;
 

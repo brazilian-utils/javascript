@@ -28,7 +28,7 @@ const isValidLandlineFirstNumber = (value: string): boolean => {
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidLandlinePhone = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const digits = normalizePhone(value);
 

@@ -6,8 +6,6 @@ import {
 	VIN_WEIGHTS,
 } from "./constants";
 
-const CHECK_DIGIT_REGEX = /^[0-9X]$/;
-
 /**
  * Validates a VIN (Vehicle Identification Number / chassi) under ISO 3779.
  *
@@ -33,12 +31,13 @@ const CHECK_DIGIT_REGEX = /^[0-9X]$/;
  * @see Based on: https://vpic.nhtsa.dot.gov/api/ NHTSA vPIC VIN decoding API and WMI table.
  */
 export const isValidVin = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const vin = value.trim().toUpperCase();
 
 	if (vin.length !== VIN_LENGTH) return false;
 
+	// Stryker disable next-line StringLiteral: generateChecksum strips this to digits, so it's inert.
 	let translitDigits = "";
 
 	for (let i = 0; i < VIN_LENGTH; i++) {
@@ -50,8 +49,6 @@ export const isValidVin = (value: string): boolean => {
 	}
 
 	const checkDigit = vin[VIN_CHECK_DIGIT_POSITION];
-
-	if (!CHECK_DIGIT_REGEX.test(checkDigit)) return false;
 
 	const remainder = generateChecksum({ base: translitDigits, weight: [...VIN_WEIGHTS] }) % 11;
 	const expected = remainder === 10 ? "X" : String(remainder);

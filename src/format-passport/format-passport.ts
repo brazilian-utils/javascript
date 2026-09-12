@@ -16,6 +16,6 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  */
 export const formatPassport = (passport: string): string => {
-	if (typeof passport !== "string" || passport === "") return "";
+	if (typeof passport !== "string") return "";
 	return sanitizeToAlphanumeric(passport).slice(0, PASSPORT_LENGTH);
 };

@@ -29,6 +29,25 @@ describe("getMunicipality", () => {
 		await expect(getMunicipality({ code: "2402600" })).resolves.toEqual(["Ceará-Mirim", "RN"]);
 	});
 
+	it("should trim whitespace from the municipality name before matching", async () => {
+		await expect(getMunicipality({ municipalityName: "  São Paulo  ", uf: "SP" })).resolves.toBe(
+			"3550308",
+		);
+	});
+
+	it("should trim and uppercase a uf with surrounding whitespace and lowercase letters", async () => {
+		await expect(getMunicipality({ municipalityName: "São Paulo", uf: " sp " })).resolves.toBe(
+			"3550308",
+		);
+	});
+
+	it("should return the same cached tuple instance across repeated calls with the same code", async () => {
+		const first = await getMunicipality({ code: "3550308" });
+		const second = await getMunicipality({ code: "3550308" });
+
+		expect(first).toBe(second);
+	});
+
 	it("should resolve a known Boa Esperança do Norte/MT lookup", async () => {
 		await expect(getMunicipality({ code: "5101837" })).resolves.toEqual([
 			"Boa Esperança do Norte",

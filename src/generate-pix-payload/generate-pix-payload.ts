@@ -162,6 +162,7 @@ export const generatePixPayload = (params: GeneratePixPayloadParams): string | n
 
 	if (pointOfInitiation !== undefined && (amount !== undefined || txid !== undefined)) return null;
 
+	// Stryker disable next-line EqualityOperator: amount <= 0 differs from amount < 0 only at 0 (or -0), and both format to "0.00", which the "rounds to 0.00" check below always rejects anyway
 	if (amount !== undefined && (!Number.isFinite(amount) || amount <= 0)) return null;
 
 	const formattedAmount = amount === undefined ? "" : amount.toFixed(AMOUNT_DECIMAL_PLACES);

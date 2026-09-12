@@ -1,4 +1,4 @@
-import { CODE_REGEX, LEGAL_NATURE, MASK_REGEX } from "../is-valid-legal-nature/constants";
+import { LEGAL_NATURE, MASK_REGEX } from "../is-valid-legal-nature/constants";
 
 /**
  * A Brazilian legal nature (natureza jurídica) entry.
@@ -11,7 +11,7 @@ export type LegalNature = {
 };
 
 const lookUp = (code: string): LegalNature | null => {
-	if (!CODE_REGEX.test(code) || !Object.hasOwn(LEGAL_NATURE, code)) return null;
+	if (!Object.hasOwn(LEGAL_NATURE, code)) return null;
 
 	return { code, description: LEGAL_NATURE[code] };
 };

@@ -51,6 +51,7 @@ export type PixPayload = {
 	pointOfInitiation?: PixPointOfInitiation;
 };
 
+// Stryker disable next-line Regex: this is only ever tested against `checksum`, a slice of exactly PIX_CRC_LENGTH (4) characters, so dropping either anchor cannot change whether it matches
 const CRC_VALUE_REGEX = /^[0-9a-f]{4}$/i;
 
 const AMOUNT_REGEX = /^\d+(?:\.\d{1,2})?$/;
@@ -79,6 +80,8 @@ const isValidCrc = (payload: string): boolean => {
 	const checksum = payload.slice(-PIX_CRC_LENGTH);
 
 	if (payload.slice(-CRC_TAG_LENGTH, -PIX_CRC_LENGTH) !== PIX_CRC_TAG) return false;
+
+	// Stryker disable next-line ConditionalExpression: a checksum that fails this hex check can never equal crc16Ccitt's always-hex output, so the final comparison below already rejects it on its own
 	if (!CRC_VALUE_REGEX.test(checksum)) return false;
 
 	return crc16Ccitt(payload.slice(0, -PIX_CRC_LENGTH)) === checksum.toUpperCase();
@@ -132,6 +135,7 @@ export const parsePixPayload = (value: string): PixPayload | null => {
 
 	const payload = value.trim();
 
+	// Stryker disable next-line ConditionalExpression,EqualityOperator: a payload this short has no room left for any of the mandatory fields checked below, so it can never parse to a non-null result even without this guard
 	if (payload.length <= CRC_TAG_LENGTH || !isValidCrc(payload)) return null;
 
 	const fields = parseTlv(payload);

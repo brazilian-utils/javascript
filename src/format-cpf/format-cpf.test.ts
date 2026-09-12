@@ -3,6 +3,13 @@ import { describe, expect, it } from "../_internals/test/runtime";
 import { formatCpf } from "./format-cpf";
 
 describe("formatCpf", () => {
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(formatCpf(null)).toBe("");
+		// @ts-expect-error
+		expect(formatCpf(undefined)).toBe("");
+	});
+
 	it("should format CPF with mask", () => {
 		expect(formatCpf("")).toBe("");
 		expect(formatCpf("9")).toBe("9");

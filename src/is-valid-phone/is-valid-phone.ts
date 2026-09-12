@@ -28,7 +28,7 @@ export type IsValidPhoneOptions = {
  *
  * `options.accept` picks which kinds of number count as valid and defaults to
  * `["mobile", "landline"]`, i.e. geographic numbers only. Add `"service"` to also accept the
- * non-geographic numbers recognised by `isValidServicePhone`; pass `[]` to accept none.
+ * non-geographic numbers recognized by `isValidServicePhone`; pass `[]` to accept none.
  *
  * @param {string} value - The phone number to validate.
  * @param {IsValidPhoneOptions} options - Optional validation options.
@@ -50,7 +50,7 @@ export type IsValidPhoneOptions = {
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidPhone = (value: string, options?: IsValidPhoneOptions): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const requested = options?.accept;
 	const accept: PhoneType[] = Array.isArray(requested) ? requested : DEFAULT_ACCEPT;
@@ -63,6 +63,7 @@ export const isValidPhone = (value: string, options?: IsValidPhoneOptions): bool
 		return isValidLandlinePhone(value);
 	}
 
+	// Stryker disable next-line ConditionalExpression: isValidMobilePhone re-derives the same digits from value and rejects any length other than PHONE_NATIONAL_MAX_LENGTH itself, so calling it with the wrong length here still correctly returns false
 	if (accept.includes("mobile") && digits.length === PHONE_NATIONAL_MAX_LENGTH) {
 		return isValidMobilePhone(value, options);
 	}

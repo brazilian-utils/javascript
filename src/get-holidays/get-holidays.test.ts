@@ -34,16 +34,16 @@ describe("getHolidays", () => {
 		).toBeUndefined();
 	});
 
-	test("should calculate Easter-related holidays correctly, including Corpus Christi 60 days after Easter Sunday (not 70, so Thu 2024-05-30)", () => {
-		const year = 2024;
+	test("should calculate Easter-related holidays correctly, including Corpus Christi 60 days after Easter Sunday (independently verified: Easter 2031 is Sun 2031-04-13)", () => {
+		const year = 2031;
 		const holidays = getHolidays(year);
 
-		const easterDate = new Date(2024, 2, 31);
+		const easterDate = new Date(2031, 3, 13);
 		const expectedHolidays = [
 			{ name: "Páscoa", date: easterDate, type: "religious" },
-			{ name: "Carnaval (terça-feira)", date: new Date(2024, 1, 13), type: "optional" },
-			{ name: "Sexta-feira Santa", date: new Date(2024, 2, 29), type: "national" },
-			{ name: "Corpus Christi", date: new Date(2024, 4, 30), type: "optional" },
+			{ name: "Carnaval (terça-feira)", date: new Date(2031, 1, 25), type: "optional" },
+			{ name: "Sexta-feira Santa", date: new Date(2031, 3, 11), type: "national" },
+			{ name: "Corpus Christi", date: new Date(2031, 5, 12), type: "optional" },
 		];
 
 		expectedHolidays.forEach((holiday) => {
@@ -56,6 +56,98 @@ describe("getHolidays", () => {
 		const holidays = getHolidays(year);
 
 		expect(holidays.length).toBe(13);
+	});
+
+	test("should calculate Easter Sunday correctly across widely spaced years (independently verified via the Anonymous Gregorian algorithm: 1900-04-15, 1954-04-18, 2075-04-07)", () => {
+		const easterSundays = [
+			{ year: 1900, month: 3, day: 15 },
+			{ year: 1954, month: 3, day: 18 },
+			{ year: 2075, month: 3, day: 7 },
+		];
+
+		easterSundays.forEach(({ year, month, day }) => {
+			expect(getHolidays(year)).toContainEqual({
+				name: "Páscoa",
+				date: new Date(year, month, day),
+				type: "religious",
+			});
+		});
+	});
+
+	test("should compute holidays for the inclusive boundary years 1900 and 2099", () => {
+		expect(getHolidays(1900)).toContainEqual({
+			name: "Ano novo",
+			date: new Date(1900, 0, 1),
+			type: "national",
+		});
+		expect(getHolidays(2099)).toContainEqual({
+			name: "Ano novo",
+			date: new Date(2099, 0, 1),
+			type: "national",
+		});
+	});
+
+	test("should return holidays sorted in ascending chronological order, not fixed-holiday insertion order (Dia da Consciência Negra, pushed after Natal, sorts before it)", () => {
+		const holidays = getHolidays({ year: 2024, stateCode: "SP" });
+
+		expect(holidays.length).toBeGreaterThan(1);
+
+		for (let index = 1; index < holidays.length; index += 1) {
+			expect(holidays[index].date.getTime()).toBeGreaterThanOrEqual(
+				holidays[index - 1].date.getTime(),
+			);
+		}
+	});
+
+	test("should return an empty array when called with null instead of a year or options object", () => {
+		// @ts-expect-error
+		expect(getHolidays(null)).toEqual([]);
+	});
+
+	test('should return an empty array when called with a function, even one carrying a year property (typeof yearOrOptions !== "object" must reject it, not just isNullish)', () => {
+		const fakeOptions = Object.assign(() => {}, { year: 2024 });
+
+		expect(getHolidays(fakeOptions)).toEqual([]);
+	});
+
+	test("should return an empty array for a year that is not a valid supported integer", () => {
+		const invalidYears = ["2024", 2024.5, 1899, 2100, Number.NaN];
+
+		invalidYears.forEach((year) => {
+			// @ts-expect-error
+			expect(getHolidays({ year })).toEqual([]);
+		});
+	});
+
+	test("should ignore a non-primitive (String object) stateCode and return national-only holidays", () => {
+		const nationalHolidays = getHolidays(2024);
+		// @ts-expect-error
+		const holidays = getHolidays({ year: 2024, stateCode: new String("SP") });
+
+		expect(holidays).toEqual(nationalHolidays);
+	});
+
+	test("should compute independent results per year instead of colliding on a shared cache key", () => {
+		const first = getHolidays(2081);
+		const second = getHolidays(2082);
+
+		expect(second[0].date.getFullYear()).toBe(2082);
+		expect(second).not.toEqual(first);
+	});
+
+	test("should serve a second identical call from the cache without recomputing (verified by corrupting the state holiday data in between; recomputing would throw)", () => {
+		const year = 2085;
+		const stateCode = "AC" as const;
+		const first = getHolidays({ year, stateCode });
+		const acEntries = STATE_HOLIDAYS.AC ?? [];
+
+		acEntries.push({ name: "Feriado inválido para checar o cache" });
+
+		try {
+			expect(getHolidays({ year, stateCode })).toEqual(first);
+		} finally {
+			acEntries.pop();
+		}
 	});
 
 	test("should work for leap years, computing Easter Sunday 2020 correctly", () => {
@@ -289,5 +381,25 @@ describe("getHolidays", () => {
 		} finally {
 			entries.pop();
 		}
+	});
+
+	test("should throw when a state holiday entry defines only one of day/month, without easterOffset", () => {
+		const incompleteEntries = [
+			{ name: "Feriado com apenas o mês", month: 5 },
+			{ name: "Feriado com apenas o dia", day: 10 },
+		];
+
+		incompleteEntries.forEach((entry) => {
+			const entries = STATE_HOLIDAYS.AC ?? [];
+			entries.push(entry);
+
+			try {
+				expect(() => getHolidays({ year: 2097, stateCode: "AC" })).toThrow(
+					"State holiday entry must define either `easterOffset` or both `day` and `month`",
+				);
+			} finally {
+				entries.pop();
+			}
+		});
 	});
 });

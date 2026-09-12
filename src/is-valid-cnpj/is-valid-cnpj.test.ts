@@ -61,6 +61,15 @@ describe("isValidCnpj", () => {
 
 		test("when an alphanumeric CNPJ has an invalid check digit", () => {
 			expect(isValidCnpj("12.ABC.345/01DE-99")).toBe(false);
+			expect(isValidCnpj("Q0SLFMBD7VX400", { version: 2 })).toBe(false);
+		});
+
+		test("when it has letters but no version option is given (defaults to numeric-only)", () => {
+			expect(isValidCnpj("Q0SLFMBD7VX439")).toBe(false);
+		});
+
+		test("when it is a reserved number under version 2, even though its raw checksum happens to be valid", () => {
+			expect(isValidCnpj("00000000000000", { version: 2 })).toBe(false);
 		});
 
 		test("when an alphanumeric CNPJ is too short", () => {
@@ -69,6 +78,22 @@ describe("isValidCnpj", () => {
 
 		test("when an alphanumeric CNPJ is too long", () => {
 			expect(isValidCnpj("AB.1C2.D3E/4F5G-356")).toBe(false);
+		});
+
+		test("when there is garbage before the digits, since the numeric format is anchored at the start", () => {
+			expect(isValidCnpj("!13723705000189")).toBe(false);
+		});
+
+		test("when there is garbage after the digits, since the numeric format is anchored at the end", () => {
+			expect(isValidCnpj("13723705000189!")).toBe(false);
+		});
+
+		test("when there is garbage before an otherwise valid alphanumeric CNPJ, since the alphanumeric format is anchored at the start", () => {
+			expect(isValidCnpj("!1Z000000000039", { version: 2 })).toBe(false);
+		});
+
+		test("when there is garbage after an otherwise valid alphanumeric CNPJ, since the alphanumeric format is anchored at the end", () => {
+			expect(isValidCnpj("1Z000000000039!", { version: 2 })).toBe(false);
 		});
 
 		test("should return false quickly for a 1MB garbage string", () => {
@@ -92,8 +117,20 @@ describe("isValidCnpj", () => {
 			expect(isValidCnpj("11 222 333 0001 81")).toBe(true);
 		});
 
+		test("when it has real leading and trailing whitespace (not just an internal mask)", () => {
+			expect(isValidCnpj(" 13723705000189 ")).toBe(true);
+		});
+
+		test("when an alphanumeric CNPJ uses a whitespace separator at every group boundary", () => {
+			expect(isValidCnpj("1Z 000 000 0000 39", { version: 2 })).toBe(true);
+		});
+
 		test("when is a lowercase alphanumeric CNPJ", () => {
 			expect(isValidCnpj("q0slfmbd7vx439", { version: 2 })).toBe(true);
+		});
+
+		test("when the lowercase letter is exactly the boundary z, which must still be uppercased and counted", () => {
+			expect(isValidCnpj("1z000000000039", { version: 2 })).toBe(true);
 		});
 
 		for (let i = 0; i < 100; i++) {

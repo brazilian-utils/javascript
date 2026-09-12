@@ -14,6 +14,13 @@ describe("parseBoleto", () => {
 		);
 	});
 
+	it("should return an empty string when the value is nullish", () => {
+		// @ts-expect-error
+		expect(parseBoleto(null)).toBe("");
+		// @ts-expect-error
+		expect(parseBoleto(undefined)).toBe("");
+	});
+
 	it("should ignore digits after the boleto length", () => {
 		expect(parseBoleto("10491443385511900000200000000141325230000093423123")).toBe(
 			"10491443385511900000200000000141325230000093423",

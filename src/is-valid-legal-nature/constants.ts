@@ -111,5 +111,3 @@ export const LEGAL_NATURE: Record<string, string> = {
 };
 
 export const MASK_REGEX = /[-.\s]/g;
-
-export const CODE_REGEX = /^\d{4}$/;

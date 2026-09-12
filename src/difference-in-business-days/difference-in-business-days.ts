@@ -87,8 +87,7 @@ export const differenceInBusinessDays = (params: DifferenceInBusinessDaysParams)
 	const fromDay = toLocalDayTimestamp(from);
 	const toDay = toLocalDayTimestamp(to);
 
-	if (fromDay === toDay) return 0;
-
+	// Stryker disable next-line EqualityOperator: when fromDay equals toDay, the loop below never runs (movingDate already equals toDay), so < vs <= here is unobservable
 	const step = fromDay < toDay ? 1 : -1;
 	const movingDate = new Date(from.getFullYear(), from.getMonth(), from.getDate());
 
@@ -99,5 +98,5 @@ export const differenceInBusinessDays = (params: DifferenceInBusinessDaysParams)
 		movingDate.setDate(movingDate.getDate() + step);
 	}
 
-	return result === 0 ? 0 : result;
+	return result;
 };

@@ -22,4 +22,11 @@ describe("formatCep", () => {
 	it("should remove all non numeric characters", () => {
 		expect(formatCep("a0.10cr01?00#ab0")).toBe("01001-000");
 	});
+
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(formatCep(null)).toBe("");
+		// @ts-expect-error
+		expect(formatCep(undefined)).toBe("");
+	});
 });

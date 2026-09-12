@@ -11,4 +11,9 @@ describe("parseLicensePlate", () => {
 		expect(parseLicensePlate("abc123456")).toBe("ABC1234");
 		expect(parseLicensePlate("abc1d23xyz")).toBe("ABC1D23");
 	});
+
+	it("should return an empty string for a non-string value", () => {
+		// @ts-expect-error not a string
+		expect(parseLicensePlate(null)).toBe("");
+	});
 });

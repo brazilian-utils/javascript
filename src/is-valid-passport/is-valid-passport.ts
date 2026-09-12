@@ -24,7 +24,7 @@ import { PASSPORT_REGEX } from "./constants";
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  */
 export const isValidPassport = (passport: string | number): boolean => {
-	if (isNullish(passport) || passport === "") return false;
+	if (isNullish(passport)) return false;
 
 	return PASSPORT_REGEX.test(sanitizeToAlphanumeric(passport));
 };

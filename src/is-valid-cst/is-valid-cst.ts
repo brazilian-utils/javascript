@@ -15,10 +15,7 @@ export type IsValidCstOptions = {
 };
 
 const isValidIcmsCst = (digits: string): boolean =>
-	digits.length === 3 &&
-	digits.charAt(0) >= "0" &&
-	digits.charAt(0) <= "8" &&
-	(ICMS_CST_CODES as readonly string[]).includes(digits.slice(1));
+	digits.charAt(0) <= "8" && (ICMS_CST_CODES as readonly string[]).includes(digits.slice(1));
 
 const isValidForTax = (
 	digits: string,
@@ -73,7 +70,7 @@ const isValidForTax = (
  * ```
  */
 export const isValidCst = (value: string | number, options?: IsValidCstOptions): boolean => {
-	if (isNullish(value) || value === "") return false;
+	if (isNullish(value)) return false;
 	if (options !== undefined && (options === null || typeof options !== "object")) return false;
 
 	const digits = sanitizeToDigits(value);

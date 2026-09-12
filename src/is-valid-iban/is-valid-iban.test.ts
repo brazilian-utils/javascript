@@ -22,6 +22,14 @@ describe("isValidIban", () => {
 		test("for a valid IBAN with a corrente (C) account type", () => {
 			expect(isValidIban("BR3860701190000010000012345C1")).toBe(true);
 		});
+
+		test("for a valid IBAN whose owner indicator is the letter A (the LETTER_CODE_A boundary)", () => {
+			expect(isValidIban("BR4500000000000010000012345CA")).toBe(true);
+		});
+
+		test("for a valid IBAN whose owner indicator is the letter Z (the highest transliterated letter)", () => {
+			expect(isValidIban("BR4900000000000010000012345CZ")).toBe(true);
+		});
 	});
 
 	describe("should return false", () => {
@@ -43,6 +51,10 @@ describe("isValidIban", () => {
 
 		test("when the account type is not C or P", () => {
 			expect(isValidIban("BR1500000000000010932840814X2")).toBe(false);
+		});
+
+		test("when a digit position holds a letter instead, even if the check digits happen to match", () => {
+			expect(isValidIban("BR170000000A000010000012345C2")).toBe(false);
 		});
 
 		test("when it is an empty string", () => {

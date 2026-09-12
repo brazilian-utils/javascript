@@ -30,9 +30,9 @@ const getCache = (): Set<string> => {
  * @see Official: https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json
  */
 export const isValidNcm = (value: string | number): boolean => {
-	if (isNullish(value) || value === "") return false;
+	if (isNullish(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 
-	return digits.length === 8 && getCache().has(digits);
+	return getCache().has(digits);
 };

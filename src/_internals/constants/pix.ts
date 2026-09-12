@@ -71,8 +71,6 @@ export const PIX_CRC_TAG = "6304";
 
 export const PIX_CRC_LENGTH = 4;
 
-export const PIX_KEY_MAX_LENGTH = 77;
-
 export const PIX_URL_MAX_LENGTH = 77;
 
 export const PIX_DESCRIPTION_MAX_LENGTH = 72;

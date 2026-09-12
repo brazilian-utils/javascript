@@ -28,6 +28,23 @@ describe("isValidEmail", () => {
 		test("when it is missing user", () => {
 			expect(isValidEmail("@domain.com")).toBe(false);
 		});
+
+		test("when it is a non-string that stringifies to a valid email", () => {
+			// @ts-expect-error not a string
+			expect(isValidEmail(["user@example.com"])).toBe(false);
+		});
+
+		test("when there is garbage before an otherwise valid email", () => {
+			expect(isValidEmail("!!!user@example.com")).toBe(false);
+		});
+
+		test("when there is garbage after an otherwise valid email", () => {
+			expect(isValidEmail("user@example.com!!!")).toBe(false);
+		});
+
+		test("when the local part has consecutive dots that are not at the very start", () => {
+			expect(isValidEmail("ab..c@example.com")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {

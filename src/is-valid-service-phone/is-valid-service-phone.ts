@@ -44,7 +44,7 @@ const UTILITY_CODES: readonly string[] = SERVICE_PHONE_UTILITY_CODES;
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidServicePhone = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const digits = sanitizeToDigits(value);
 
@@ -58,6 +58,7 @@ export const isValidServicePhone = (value: string): boolean => {
 		return ABBREVIATED_ROOTS.includes(digits.slice(0, SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH));
 	}
 
+	// Stryker disable next-line ConditionalExpression: UTILITY_CODES.includes(digits) only ever matches an exact 3 character code, so a digits value of any other length already correctly fails this check on its own
 	if (digits.length === SERVICE_PHONE_UTILITY_LENGTH) {
 		return UTILITY_CODES.includes(digits);
 	}

@@ -28,6 +28,7 @@ export type FormatPhoneOptions = {
 
 const matchesPrefix = (digits: string, prefixes: readonly string[]): boolean =>
 	prefixes.some((prefix) =>
+		// Stryker disable next-line ConditionalExpression,EqualityOperator,MethodExpression: every prefix list used here shares one prefix length, and both service masks only emit their first separator once the value is longer than that shared length, so this "still typing" branch can never change formatService's output, and the boundary (digits.length === prefix.length) reduces to the same string equality either way
 		digits.length < prefix.length ? prefix.startsWith(digits) : digits.startsWith(prefix),
 	);
 
@@ -38,6 +39,7 @@ const formatService = (digits: string): string => {
 
 	if (
 		matchesPrefix(
+			// Stryker disable next-line MethodExpression: digits.startsWith(prefix) already holds for the full digits if and only if it holds for digits.slice(0, ROOT_LENGTH), since a root is only ever matched at its own length
 			digits.slice(0, SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH),
 			SERVICE_PHONE_ABBREVIATED_ROOTS,
 		)

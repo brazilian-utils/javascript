@@ -4,7 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
+import { fetchSortedRecord } from "../src/_internals/fetch-sorted-record/fetch-sorted-record.ts";
 
 const scriptsDir = dirname(fileURLToPath(import.meta.url));
 
@@ -14,30 +14,25 @@ type CboEntry = {
 };
 
 const main = async () => {
-	const response = await fetchWithRetry(
+	const sorted = await fetchSortedRecord(
 		"https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json",
+		"CBO mirror",
+		async (response) => {
+			const json: CboEntry[] = await response.json();
+
+			const data: Record<string, string> = {};
+
+			for (const entry of json) {
+				const code = /^\d{5}$/.test(entry.cbo) ? `0${entry.cbo}` : entry.cbo;
+
+				if (!/^\d{6}$/.test(code)) continue;
+
+				data[code] = entry.descricao;
+			}
+
+			return data;
+		},
 	);
-
-	if (!response.ok) {
-		throw new Error(`CBO mirror request failed with status ${response.status}`);
-	}
-
-	const json: CboEntry[] = await response.json();
-
-	const data: Record<string, string> = {};
-
-	for (const entry of json) {
-		const code = /^\d{5}$/.test(entry.cbo) ? `0${entry.cbo}` : entry.cbo;
-
-		if (!/^\d{6}$/.test(code)) continue;
-
-		data[code] = entry.descricao;
-	}
-
-	const sorted: Record<string, string> = {};
-	for (const code of Object.keys(data).sort()) {
-		sorted[code] = data[code];
-	}
 
 	await writeFile(
 		resolve(scriptsDir, "..", "./src/_internals/constants/cbo.ts"),

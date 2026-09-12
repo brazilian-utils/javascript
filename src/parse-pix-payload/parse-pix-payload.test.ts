@@ -40,6 +40,64 @@ const buildPayload = (merchantAccountInformation: string, additionalData?: strin
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
 
+const MERCHANT_ACCOUNT_INFORMATION = tlv("00", "br.gov.bcb.pix") + tlv("01", "12345678909");
+
+const buildPayloadWithMerchantAccountInformationTag = (tag: string): string => {
+	const withoutCrc =
+		tlv("00", "01") +
+		tlv(tag, MERCHANT_ACCOUNT_INFORMATION) +
+		tlv("52", "0000") +
+		tlv("53", "986") +
+		tlv("58", "BR") +
+		tlv("59", "Fulano de Tal") +
+		tlv("60", "BRASILIA") +
+		"6304";
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
+
+const buildPayloadWithoutCountryCode = (): string => {
+	const withoutCrc =
+		tlv("00", "01") +
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
+		tlv("52", "0000") +
+		tlv("53", "986") +
+		tlv("59", "Fulano de Tal") +
+		tlv("60", "BRASILIA") +
+		"6304";
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
+
+const buildPayloadWithCrcTag = (crcTag: string): string => {
+	const withoutCrc =
+		tlv("00", "01") +
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
+		tlv("52", "0000") +
+		tlv("53", "986") +
+		tlv("58", "BR") +
+		tlv("59", "Fulano de Tal") +
+		tlv("60", "BRASILIA") +
+		crcTag;
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
+
+const buildPayloadWithAmount = (amount: string): string => {
+	const withoutCrc =
+		tlv("00", "01") +
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
+		tlv("52", "0000") +
+		tlv("53", "986") +
+		tlv("54", amount) +
+		tlv("58", "BR") +
+		tlv("59", "Fulano de Tal") +
+		tlv("60", "BRASILIA") +
+		"6304";
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
+
 describe("parsePixPayload", () => {
 	describe("should return null", () => {
 		test("when it is an empty or blank string", () => {
@@ -122,6 +180,26 @@ describe("parsePixPayload", () => {
 
 			expect(parsePixPayload(buildPayload(merchantAccountInformation, "9"))).toBeNull();
 		});
+
+		test("when a merchant account information template is malformed TLV, without throwing", () => {
+			expect(parsePixPayload(buildPayload("XY"))).toBeNull();
+		});
+
+		test("when a merchant account information template is well-formed but carries no GUI, without throwing", () => {
+			expect(parsePixPayload(buildPayload(tlv("01", "12345678909")))).toBeNull();
+		});
+
+		test("when the country code field is entirely absent, without throwing", () => {
+			expect(parsePixPayload(buildPayloadWithoutCountryCode())).toBeNull();
+		});
+
+		test("when the CRC tag id is not 6304, even with an otherwise self-consistent checksum", () => {
+			expect(parsePixPayload(buildPayloadWithCrcTag("9904"))).toBeNull();
+		});
+
+		test("when the transaction amount is longer than 13 characters", () => {
+			expect(parsePixPayload(buildPayloadWithAmount("99999999999.99"))).toBeNull();
+		});
 	});
 
 	describe("should parse a static payload", () => {
@@ -168,6 +246,36 @@ describe("parsePixPayload", () => {
 				amount: 123.45,
 				txid: "RP12345678-2019",
 			});
+		});
+
+		test("when the merchant account information sits at the last valid id (51), not just at the usual 26", () => {
+			expect(parsePixPayload(buildPayloadWithMerchantAccountInformationTag("51"))).toEqual({
+				key: "12345678909",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+			});
+		});
+
+		test("accepting a transaction amount whose length is exactly 13 characters", () => {
+			expect(parsePixPayload(buildPayloadWithAmount("9999999999.99"))?.amount).toBe(9999999999.99);
+		});
+
+		test("accepting a transaction amount written as a whole number, with no decimal point", () => {
+			expect(parsePixPayload(buildPayloadWithAmount("100"))?.amount).toBe(100);
+		});
+
+		test("without a key property when the payload is dynamic (carries a url instead)", () => {
+			expect(parsePixPayload(BACEN_DYNAMIC)).not.toHaveProperty("key");
+		});
+
+		test("without a url property when the payload is static (carries a key instead)", () => {
+			expect(parsePixPayload(BACEN_STATIC)).not.toHaveProperty("url");
+		});
+
+		test("without a txid property when the payload carries no additional data template at all", () => {
+			expect(parsePixPayload(buildPayload(MERCHANT_ACCOUNT_INFORMATION))).not.toHaveProperty(
+				"txid",
+			);
 		});
 
 		test("with a description", () => {

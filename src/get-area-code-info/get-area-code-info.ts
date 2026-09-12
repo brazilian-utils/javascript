@@ -40,8 +40,6 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 
 	const digits = sanitizeToDigits(areaCode);
 
-	if (digits === "") return null;
-
 	const numericAreaCode = Number(digits);
 
 	if (!(numericAreaCode in AREA_CODE_STATES)) return null;

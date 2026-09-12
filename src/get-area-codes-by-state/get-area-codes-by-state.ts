@@ -27,13 +27,11 @@ export const getAreaCodesByState = (stateCode: string): number[] => {
 
 	const normalized = stateCode.trim().toUpperCase();
 
-	if (normalized === "") return [];
-
 	const areaCodes: number[] = [];
 
 	for (const [areaCode, code] of Object.entries(AREA_CODE_STATES)) {
 		if (code === normalized) areaCodes.push(Number(areaCode));
 	}
 
-	return areaCodes.sort((a, b) => a - b);
+	return areaCodes;
 };

@@ -34,6 +34,9 @@ const getErrorCode = (error: unknown): string | undefined => {
 
 	const causeCode = "code" in cause ? cause.code : undefined;
 
+	// Stryker disable next-line ConditionalExpression: RETRYABLE_ERROR_CODES.includes() only ever
+	// matches an exact string, so a non-string causeCode reaching that check behaves identically to
+	// undefined; the type check below exists only to satisfy the string | undefined return type.
 	return typeof causeCode === "string" ? causeCode : undefined;
 };
 

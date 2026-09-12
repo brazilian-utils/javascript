@@ -38,6 +38,10 @@ describe("isValidNfeKey", () => {
 				true,
 			);
 		});
+
+		test("when it has leading whitespace before the NFe prefix, which is trimmed before the format check", () => {
+			expect(isValidNfeKey(` NFe${VALID_B}`)).toBe(true);
+		});
 	});
 
 	describe("should return false", () => {
@@ -106,5 +110,59 @@ describe("isValidNfeKey", () => {
 			const brokenDv = `${VALID_B.slice(0, 43)}${VALID_B.at(-1) === "8" ? "7" : "8"}`;
 			expect(isValidNfeKey(brokenDv)).toBe(false);
 		});
+
+		test("when there is garbage before the digits, since the format is anchored at the start", () => {
+			expect(isValidNfeKey(`xx${VALID_B}`)).toBe(false);
+		});
+
+		test("when there is garbage after the digits, since the format is anchored at the end", () => {
+			expect(isValidNfeKey(`${VALID_B}xx`)).toBe(false);
+		});
+	});
+
+	describe("with every field valid except one and the check digit recalculated for it", () => {
+		const CASES: Array<{ name: string; key: string; expected: boolean }> = [
+			{
+				name: "an unmapped cUF (99)",
+				key: "99200600000000000000550010000000011000000005",
+				expected: false,
+			},
+			{
+				name: "month 00, below the valid range",
+				key: "35200000000000000000550010000000011000000006",
+				expected: false,
+			},
+			{
+				name: "month 01, the lower boundary",
+				key: "35200100000000000000550010000000011000000000",
+				expected: true,
+			},
+			{
+				name: "month 12, the upper boundary",
+				key: "35201200000000000000550010000000011000000006",
+				expected: true,
+			},
+			{
+				name: "month 13, above the valid range",
+				key: "35201300000000000000550010000000011000000000",
+				expected: false,
+			},
+			{
+				name: "a model not in VALID_MODELS (99)",
+				key: "35200600000000000000990010000000011000000003",
+				expected: false,
+			},
+			{
+				name: "tpEmis 9, the upper boundary",
+				key: "35200600000000000000550010000000019000000003",
+				expected: true,
+			},
+		];
+
+		for (const { name, key, expected } of CASES) {
+			test(`returns ${expected} for ${name}`, () => {
+				expect(isValidNfeKey(key)).toBe(expected);
+			});
+		}
 	});
 });

@@ -17,7 +17,7 @@ const EMAIL_REGEX =
  * @see Official: https://www.rfc-editor.org/rfc/rfc5322
  */
 export const isValidEmail = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	return EMAIL_REGEX.test(value);
 };

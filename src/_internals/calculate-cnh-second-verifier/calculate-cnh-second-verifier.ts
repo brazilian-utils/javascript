@@ -29,9 +29,7 @@ export const calculateCnhSecondVerifier = ({
 		sum += (base.charCodeAt(i) - 48) * (i + 1);
 	}
 
-	let secondVerifier = (sum % 11) - decrement;
-
-	if (secondVerifier < 0) secondVerifier += 11;
+	let secondVerifier = ((sum % 11) - decrement + 11) % 11;
 
 	if (secondVerifier >= 10) secondVerifier = 0;
 

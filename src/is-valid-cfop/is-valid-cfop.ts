@@ -21,9 +21,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Community-maintained CSV mirror of the official CFOP table used to build `CFOP_TABLE`.
  */
 export const isValidCfop = (value: string | number): boolean => {
-	if (isNullish(value) || value === "") return false;
+	if (isNullish(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 
-	return digits.length === 4 && digits in CFOP_TABLE;
+	return digits in CFOP_TABLE;
 };

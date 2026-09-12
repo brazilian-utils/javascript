@@ -90,6 +90,11 @@ describe("formatPhone", () => {
 		expect(formatPhone("190", { mask: "service" })).toBe("190");
 	});
 
+	it("should not apply the abbreviated mask to a number that matches neither the non-geographic nor the abbreviated roots", () => {
+		expect(formatPhone("55555", { mask: "service" })).toBe("55555");
+		expect(formatPhone("12345678", { mask: "service" })).toBe("12345678");
+	});
+
 	it("should service format phone while it is being typed", () => {
 		expect(formatPhone("0", { mask: "service" })).toBe("0");
 		expect(formatPhone("0800", { mask: "service" })).toBe("0800");

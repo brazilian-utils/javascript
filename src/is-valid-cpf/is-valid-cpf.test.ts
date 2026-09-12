@@ -43,7 +43,7 @@ describe("isValidCpf", () => {
 			expect(isValidCpf([])).toBe(false);
 		});
 
-		test(`when dont match with CPF length (${CPF_LENGTH})`, () => {
+		test(`when it does not match the CPF length (${CPF_LENGTH})`, () => {
 			expect(isValidCpf("123456")).toBe(false);
 		});
 
@@ -57,6 +57,18 @@ describe("isValidCpf", () => {
 
 		test("when is a CPF invalid test numbers with letters", () => {
 			expect(isValidCpf("foo391.838.38test0-66")).toBe(false);
+		});
+
+		test("when there is garbage before the digits, since the format is anchored at the start", () => {
+			expect(isValidCpf("!40364478829")).toBe(false);
+		});
+
+		test("when there is garbage after the digits, since the format is anchored at the end", () => {
+			expect(isValidCpf("40364478829!")).toBe(false);
+		});
+
+		test("when only the first check digit is wrong, even though the second would then match", () => {
+			expect(isValidCpf("40364478837")).toBe(false);
 		});
 	});
 

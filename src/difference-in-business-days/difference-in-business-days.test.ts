@@ -59,6 +59,15 @@ describe("differenceInBusinessDays", () => {
 				differenceInBusinessDays({ from: new Date(1899, 11, 29), to: new Date(1900, 0, 2) }),
 			).toBeNull();
 		});
+
+		it("should accept the inclusive boundary years 1900 and 2099 (same-day range, so the result is 0 rather than null)", () => {
+			expect(
+				differenceInBusinessDays({ from: new Date(1900, 0, 2), to: new Date(1900, 0, 2) }),
+			).toBe(0);
+			expect(
+				differenceInBusinessDays({ from: new Date(2099, 0, 2), to: new Date(2099, 0, 2) }),
+			).toBe(0);
+		});
 	});
 
 	describe("negative results", () => {
@@ -149,6 +158,15 @@ describe("differenceInBusinessDays", () => {
 		it("should return null when params is not an object", () => {
 			// @ts-expect-error
 			expect(differenceInBusinessDays("2024-01-02")).toBeNull();
+		});
+
+		it('should return null when params is a function, even one carrying from/to properties (typeof params !== "object" must reject it, not just isNullish)', () => {
+			const fakeParams = Object.assign(() => {}, {
+				from: new Date(2024, 0, 2),
+				to: new Date(2024, 0, 3),
+			});
+
+			expect(differenceInBusinessDays(fakeParams)).toBeNull();
 		});
 
 		it("should return null when from is an invalid Date", () => {

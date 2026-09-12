@@ -22,6 +22,11 @@ describe("formatCnae", () => {
 		expect(formatCnae("")).toBe("");
 	});
 
+	it("should left pad a short code with zeros up to the full CNAE length", () => {
+		expect(formatCnae("1")).toBe("0000-0/01");
+		expect(formatCnae("501")).toBe("0000-5/01");
+	});
+
 	it("should return an empty string for null and undefined", () => {
 		// @ts-expect-error not a string or number
 		expect(formatCnae(null)).toBe("");

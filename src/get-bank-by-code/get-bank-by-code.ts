@@ -30,6 +30,7 @@ export const getBankByCode = (code: string | number): Bank | null => {
 
 	const digits = sanitizeToDigits(code);
 
+	// Stryker disable next-line ConditionalExpression,LogicalOperator: no bank has code "000" and padStart never shortens an oversized code, so bypassing this guard can never change which bank is found.
 	if (digits.length === 0 || digits.length > CODE_LENGTH) return null;
 
 	const normalizedCode = digits.padStart(CODE_LENGTH, "0");

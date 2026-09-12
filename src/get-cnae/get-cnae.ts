@@ -31,12 +31,12 @@ export type Cnae = {
  * @see Official: https://servicodados.ibge.gov.br/api/v2/cnae/subclasses
  */
 export const getCnae = (value: string | number): Cnae | null => {
-	if (isNullish(value) || value === "") return null;
+	if (isNullish(value)) return null;
 
 	const digits =
 		typeof value === "number" ? String(value).padStart(7, "0") : sanitizeToDigits(value);
 
-	if (digits.length !== 7 || !(digits in CNAE_SUBCLASSES)) return null;
+	if (!(digits in CNAE_SUBCLASSES)) return null;
 
 	return { code: formatCnae(digits), description: CNAE_SUBCLASSES[digits] };
 };

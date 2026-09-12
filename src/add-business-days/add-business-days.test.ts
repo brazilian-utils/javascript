@@ -33,6 +33,19 @@ describe("addBusinessDays", () => {
 		it("should return null instead of looping when the date is the maximum representable Date", () => {
 			expect(addBusinessDays({ date: new Date(8.64e15), days: 1 })).toBeNull();
 		});
+
+		it("should accept the inclusive boundary years 1900 and 2099", () => {
+			expect(addBusinessDays({ date: new Date(1900, 0, 2), days: 0 })).toEqual(
+				new Date(1900, 0, 2),
+			);
+			expect(addBusinessDays({ date: new Date(2099, 0, 2), days: 0 })).toEqual(
+				new Date(2099, 0, 2),
+			);
+		});
+
+		it("should return null for a date outside the supported range even when days is 0", () => {
+			expect(addBusinessDays({ date: new Date(2150, 0, 1), days: 0 })).toBeNull();
+		});
 	});
 
 	describe("national holidays and year boundaries", () => {
@@ -131,6 +144,12 @@ describe("addBusinessDays", () => {
 		it("should return null when params is not an object", () => {
 			// @ts-expect-error
 			expect(addBusinessDays("2024-01-02")).toBeNull();
+		});
+
+		it('should return null when params is a function, even one carrying date/days properties (typeof params !== "object" must reject it, not just isNullish)', () => {
+			const fakeParams = Object.assign(() => {}, { date: new Date(2024, 0, 2), days: 1 });
+
+			expect(addBusinessDays(fakeParams)).toBeNull();
 		});
 
 		it("should return null when date is an invalid Date", () => {

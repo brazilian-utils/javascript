@@ -2,11 +2,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 
 const RENAVAM_LENGTH = 11;
 
-const padLeft = (input: string, padLength: number): string => {
-	const currentLength = input.length;
-	if (currentLength >= padLength) return input;
-	return "0".repeat(padLength - currentLength) + input;
-};
+const padLeft = (input: string, padLength: number): string =>
+	"0".repeat(padLength - input.length) + input;
 
 /**
  * Validates if a RENAVAM (Registro Nacional de Veículos Automotores) is valid.

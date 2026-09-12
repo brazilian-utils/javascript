@@ -27,26 +27,31 @@ const startsWithAny = (ie: string, prefixes: readonly string[]): boolean =>
 
 const startsWith = (ie: string, prefix: string): boolean => startsWithAny(ie, [prefix]);
 
-type CalcDigitDecreasingParams = {
-	body: string;
+type WeightedSumParams = {
+	source: string;
+	length: number;
 	startWeight: number;
-	mod?: number;
+	wrapTo?: number;
 };
 
-const calcDigitDecreasing = ({
-	body,
-	startWeight,
-	mod = 11,
-}: CalcDigitDecreasingParams): number => {
+const calcWeightedSum = ({ source, length, startWeight, wrapTo }: WeightedSumParams): number => {
 	let weight = startWeight;
 	let sum = 0;
 
-	for (let i = 0; i < body.length; i++) {
-		const digit = body.charCodeAt(i) - 48;
+	for (let i = 0; i < length; i++) {
+		const digit = source.charCodeAt(i) - 48;
 		sum += digit * weight;
 		weight--;
+		// Stryker disable next-line ConditionalExpression: for every current caller that omits wrapTo, the weight sequence is built to reach 1 only on the final iteration, so replacing this guard with `weight === 1` alone still only resets the (unused) weight after the loop's last read, which is unobservable.
+		if (wrapTo !== undefined && weight === 1) {
+			weight = wrapTo;
+		}
 	}
 
+	return sum;
+};
+
+const calcMod11CheckDigit = (sum: number, mod = 11): number => {
 	const rest = sum % mod;
 	const dig = mod - rest;
 	return dig >= 10 ? 0 : dig;
@@ -57,35 +62,21 @@ const validateMod11Ie = (ie: string, prefixes?: readonly string[]): boolean => {
 	if (prefixes && !startsWithAny(ie, prefixes)) return false;
 
 	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-	});
+	const sum = calcWeightedSum({ source: body, length: body.length, startWeight: body.length + 1 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(8), 10) === dig;
 };
 
 const calcDFDigit = (body: string): number => {
-	let weight = body.length - 7;
-	let sum = 0;
+	const sum = calcWeightedSum({
+		source: body,
+		length: body.length,
+		startWeight: body.length - 7,
+		wrapTo: 9,
+	});
 
-	for (let i = 0; i < body.length; i++) {
-		const digit = body.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const mod = 11;
-	const rest = sum % mod;
-	let dig = mod - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
-
-	return dig;
+	return calcMod11CheckDigit(sum);
 };
 
 const SP_RURAL_PATTERN = /^P\d{12}$/;
@@ -114,6 +105,7 @@ const validateAL: IeValidator = (ie: string) => {
 	let sum = 0;
 
 	for (let i = 0; i < position; i++) {
+		// Stryker disable next-line ArithmeticOperator: charCodeAt(i)+48 shifts each digit by 96; with weights 9..2 (summing to 44) the total shift is 96*44=4224=384*11, a multiple of 11, so the mod-11 result is unaffected.
 		const digit = ie.charCodeAt(i) - 48;
 		sum += digit * weight;
 		weight--;
@@ -150,6 +142,7 @@ const validateAP: IeValidator = (ie: string) => {
 
 	let sum = p;
 	for (let i = 0; i < body.length; i++) {
+		// Stryker disable next-line ArithmeticOperator: charCodeAt(i)+48 shifts each digit by 96; with weights 9..2 (summing to 44) the total shift is 96*44=4224=384*11, a multiple of 11, so the mod-11 result is unaffected.
 		const digit = ie.charCodeAt(i) - 48;
 		sum += digit * weight;
 		weight--;
@@ -177,36 +170,20 @@ const validateBA: IeValidator = (ie: string) => {
 	const mod = BA_MOD_10_DIGITS.includes(charAt) ? 10 : 11;
 
 	const body = ie.substring(0, ie.length - 2);
-	let weight = body.length + 1;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	let rest = sum % mod;
-	let secondDig = mod - rest;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const firstSum = calcWeightedSum({
+		source: ie,
+		length: body.length,
+		startWeight: body.length + 1,
+	});
+	const secondDig = calcMod11CheckDigit(firstSum, mod);
 
 	const bodyWithSecond = body + secondDig;
-	weight = bodyWithSecond.length + 1;
-	sum = 0;
-
-	for (let i = 0; i < bodyWithSecond.length; i++) {
-		const digit = i < body.length ? ie.charCodeAt(i) - 48 : secondDig;
-		sum += digit * weight;
-		weight--;
-	}
-
-	rest = sum % mod;
-	let firstDig = mod - rest;
-	if (firstDig >= 10) {
-		firstDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithSecond,
+		length: bodyWithSecond.length,
+		startWeight: bodyWithSecond.length + 1,
+	});
+	const firstDig = calcMod11CheckDigit(secondSum, mod);
 
 	return (
 		Number.parseInt(ie.charAt(ie.length - 2), 10) === firstDig &&
@@ -246,15 +223,7 @@ const validateGO: IeValidator = (ie: string) => {
 		return checkDigit === 0 || checkDigit === 1;
 	}
 
-	let weight = 9;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 9 });
 	const rest = sum % 11;
 	let dig: number;
 
@@ -280,7 +249,7 @@ const validateMG: IeValidator = (ie: string) => {
 	let concat = "";
 	for (let i = 0; i < bodyWithZero.length; i++) {
 		const digit = bodyWithZero.charCodeAt(i) - 48;
-		const weight = (i + 3) % 2 === 0 ? 2 : 1;
+		const weight = i % 2 === 1 ? 2 : 1;
 		concat += String(digit * weight);
 	}
 
@@ -289,9 +258,7 @@ const validateMG: IeValidator = (ie: string) => {
 		sum += concat.charCodeAt(i) - 48;
 	}
 
-	const sumStr = String(sum);
-	const lastChar = sumStr.charAt(sumStr.length - 1);
-	const lastCharInt = Number.parseInt(lastChar, 10);
+	const lastCharInt = sum % 10;
 	const firstDig = lastCharInt === 0 ? 0 : 10 - lastCharInt;
 
 	let weight = 3;
@@ -322,23 +289,8 @@ const validateMT: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 11)) return false;
 
 	const body = ie.substring(0, 10);
-	let weight = 3;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 3, wrapTo: 9 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(10), 10) === dig;
 };
@@ -353,37 +305,20 @@ const validatePE: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
 
 	const body = ie.substring(0, 7);
-	let weight = body.length + 1;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const mod = 11;
-	const rest = sum % mod;
-	let firstDig = mod - rest;
-	if (firstDig >= 10) {
-		firstDig = 0;
-	}
+	const firstSum = calcWeightedSum({
+		source: ie,
+		length: body.length,
+		startWeight: body.length + 1,
+	});
+	const firstDig = calcMod11CheckDigit(firstSum);
 
 	const bodyWithFirst = body + firstDig;
-	weight = bodyWithFirst.length + 1;
-	sum = 0;
-
-	for (let i = 0; i < bodyWithFirst.length; i++) {
-		const digit = i < body.length ? ie.charCodeAt(i) - 48 : firstDig;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const rest2 = sum % mod;
-	let secondDig = mod - rest2;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithFirst,
+		length: bodyWithFirst.length,
+		startWeight: bodyWithFirst.length + 1,
+	});
+	const secondDig = calcMod11CheckDigit(secondSum);
 
 	return (
 		Number.parseInt(ie.charAt(7), 10) === firstDig &&
@@ -397,42 +332,22 @@ const validatePR: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 10)) return false;
 
 	const body = ie.substring(0, 8);
-	let weight = body.length - 5;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 7;
-		}
-	}
-
-	const rest = sum % 11;
-	let firstDig = 11 - rest;
-	if (firstDig >= 10) {
-		firstDig = 0;
-	}
+	const firstSum = calcWeightedSum({
+		source: ie,
+		length: body.length,
+		startWeight: body.length - 5,
+		wrapTo: 7,
+	});
+	const firstDig = calcMod11CheckDigit(firstSum);
 
 	const bodyWithFirst = body + firstDig;
-	weight = bodyWithFirst.length - 5;
-	sum = 0;
-
-	for (let i = 0; i < bodyWithFirst.length; i++) {
-		const digit = bodyWithFirst.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 7;
-		}
-	}
-
-	const rest2 = sum % 11;
-	let secondDig = 11 - rest2;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithFirst,
+		length: bodyWithFirst.length,
+		startWeight: bodyWithFirst.length - 5,
+		wrapTo: 7,
+	});
+	const secondDig = calcMod11CheckDigit(secondSum);
 
 	return (
 		Number.parseInt(ie.charAt(8), 10) === firstDig &&
@@ -444,23 +359,8 @@ const validateRJ: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 8)) return false;
 
 	const body = ie.substring(0, 7);
-	let weight = 2;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 7;
-		}
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 2, wrapTo: 7 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(7), 10) === dig;
 };
@@ -471,21 +371,9 @@ const validateRN: IeValidator = (ie: string) => {
 
 	const length = ie.length;
 	const position = length - 1;
-	let weight = length;
 	const body = ie.substring(0, position);
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: length });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(position), 10) === dig;
 };
@@ -495,18 +383,8 @@ const validateRO: IeValidator = (ie: string) => {
 
 	const length = ie.length;
 	const position = length - 1;
-	let weight = 6;
 	const body = ie.substring(0, position);
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 6, wrapTo: 9 });
 
 	const rest = sum % 11;
 	let dig = 11 - rest;
@@ -522,11 +400,12 @@ const validateRR: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
 	if (!startsWith(ie, "24")) return false;
 
-	const body = ie.substring(0, 8);
 	let weight = 1;
 	let sum = 0;
 
-	for (let i = 0; i < body.length; i++) {
+	// Stryker disable next-line EqualityOperator: an extra iteration at i===8 would use weight 9, and any digit times 9 contributes 0 to the mod-9 result, so it is unobservable.
+	for (let i = 0; i < 8; i++) {
+		// Stryker disable next-line ArithmeticOperator: charCodeAt(i)+48 shifts each digit by 96; with weights 1..8 (summing to 36) the total shift is 96*36=3456, a multiple of 9, so the mod-9 result is unaffected.
 		const digit = ie.charCodeAt(i) - 48;
 		sum += digit * weight;
 		weight++;
@@ -540,23 +419,8 @@ const validateRS: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 10)) return false;
 
 	const body = ie.substring(0, 9);
-	let weight = 2;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 2, wrapTo: 9 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(9), 10) === dig;
 };
@@ -603,17 +467,8 @@ const validateTO: IeValidator = (ie: string) => {
 
 	const body = isLegacy ? ie.substring(0, 2) + ie.substring(4, 10) : ie.substring(0, 8);
 	const position = isLegacy ? 10 : 8;
-	let weight = 9;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = body.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const rest = sum % 11;
-	const dig = rest < 2 ? 0 : 11 - rest;
+	const sum = calcWeightedSum({ source: body, length: body.length, startWeight: 9 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(position), 10) === dig;
 };
@@ -666,7 +521,7 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  */
 export const isValidIe = (stateCode: StateCode, ie: string): boolean => {
 	if (!stateCode || typeof stateCode !== "string") return false;
-	if (typeof ie !== "string" || ie === "") return false;
+	if (typeof ie !== "string") return false;
 
 	const normalizedStateCode = stateCode.toUpperCase();
 
@@ -677,7 +532,6 @@ export const isValidIe = (stateCode: StateCode, ie: string): boolean => {
 
 	const sanitize = normalizedStateCode === "SP" ? sanitizeToAlphanumeric : sanitizeToDigits;
 	const value = sanitize(ie);
-	if (!value) return false;
 
 	return validator(value);
 };

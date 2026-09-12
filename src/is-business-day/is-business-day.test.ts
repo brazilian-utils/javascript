@@ -65,6 +65,10 @@ describe("isBusinessDay", () => {
 		it("should return false for 2025-01-01 (Ano novo, next year)", () => {
 			expect(isBusinessDay(new Date(2025, 0, 1, 12))).toBe(false);
 		});
+
+		it("should treat the inclusive boundary year 1900 as supported (1900-01-02 was a Tuesday, not Ano novo)", () => {
+			expect(isBusinessDay(new Date(1900, 0, 2, 12))).toBe(true);
+		});
 	});
 
 	describe("invalid input", () => {

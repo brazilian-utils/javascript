@@ -22,11 +22,7 @@ import { removeAccents } from "../remove-accents/remove-accents";
  * ```
  */
 export const getStateCodeByName = (name: string): StateCode | null => {
-	if (typeof name !== "string") return null;
-
 	const normalized = removeAccents(name).trim().toLowerCase();
-
-	if (normalized === "") return null;
 
 	const state = DATA.find((entry) => removeAccents(entry.name).toLowerCase() === normalized);
 

@@ -32,8 +32,6 @@ export const getStateByIbgeCode = (code: string | number): State | null => {
 
 	const digits = sanitizeToDigits(code);
 
-	if (digits === "") return null;
-
 	const numericCode = Number(digits);
 
 	const state = DATA.find((entry) => entry.ibgeCode === numericCode);

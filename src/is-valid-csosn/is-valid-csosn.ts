@@ -20,7 +20,7 @@ import { CSOSN_CODES } from "./constants";
  * ```
  */
 export const isValidCsosn = (value: string | number): boolean => {
-	if (isNullish(value) || value === "") return false;
+	if (isNullish(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 

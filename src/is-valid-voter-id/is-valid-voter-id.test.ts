@@ -67,4 +67,24 @@ describe("isValidVoterId", () => {
 		expect(isValidVoterId(123456780124)).toBe(false);
 		expect(isValidVoterId("")).toBe(false);
 	});
+
+	it("should reject a valid voter id passed as a number instead of a string", () => {
+		// @ts-expect-error
+		expect(isValidVoterId(102385010671)).toBe(false);
+	});
+
+	it("should reject a value whose length is neither 12 nor 13, even when its checksum would otherwise match", () => {
+		expect(isValidVoterId("000010191")).toBe(false);
+		expect(isValidVoterId("1234567890370")).toBe(false);
+	});
+
+	it("should reject the UF code boundaries 0 and 29, even when the checksum would otherwise match", () => {
+		expect(isValidVoterId("000000000000")).toBe(false);
+		expect(isValidVoterId("000000002909")).toBe(false);
+	});
+
+	it("should accept the UF code boundaries 1 and 28", () => {
+		expect(isValidVoterId("000000010191")).toBe(true);
+		expect(isValidVoterId("000000002801")).toBe(true);
+	});
 });

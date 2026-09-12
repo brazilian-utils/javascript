@@ -13,4 +13,9 @@ describe("parseCpf", () => {
 	it("should ignore digits after the CPF length", () => {
 		expect(parseCpf("94389575104123")).toBe("94389575104");
 	});
+
+	it("should return an empty string for null", () => {
+		// @ts-expect-error not a string or number
+		expect(parseCpf(null)).toBe("");
+	});
 });

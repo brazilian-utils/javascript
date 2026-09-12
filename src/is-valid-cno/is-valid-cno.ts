@@ -1,7 +1,4 @@
-import { calculateCeiCheckDigit } from "../_internals/calculate-cei-check-digit/calculate-cei-check-digit";
-import { CEI_BASE_LENGTH, CEI_FORMAT_REGEX, CEI_LENGTH } from "../_internals/constants/cei";
-import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-valid-cei-cno-number";
 
 /**
  * Validates a CNO (Cadastro Nacional de Obras) number, the registration of a construction work
@@ -31,19 +28,4 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @see Based on: https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php
  * PHP reference implementation of the CEI check digit.
  */
-export const isValidCno = (value: string | number): boolean => {
-	if (typeof value !== "string" && typeof value !== "number") return false;
-
-	const digits = sanitizeToDigits(value);
-
-	if (digits.length !== CEI_LENGTH) return false;
-
-	if (!CEI_FORMAT_REGEX.test(String(value).trim())) return false;
-
-	if (isRepeatedDigits(digits)) return false;
-
-	return (
-		calculateCeiCheckDigit(digits.slice(0, CEI_BASE_LENGTH)) ===
-		digits.charCodeAt(CEI_BASE_LENGTH) - 48
-	);
-};
+export const isValidCno = (value: string | number): boolean => isValidCeiCnoNumber(value);

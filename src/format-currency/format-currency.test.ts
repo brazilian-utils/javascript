@@ -110,6 +110,10 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(undefined)).toBe("");
 	});
 
+	it("should read as many fraction digits as the requested precision allows, not just the default 2, when reading a string", () => {
+		expect(formatCurrency("1234,12345", { precision: 5 })).toBe("1.234,12345");
+	});
+
 	it("should replace the non-breaking space", () => {
 		expect(formatCurrency(1234.56, { symbol: true })).toBe("R$ 1.234,56");
 		expect(formatCurrency(1234.56, { symbol: true })).not.toContain("\u00a0");

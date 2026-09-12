@@ -58,6 +58,18 @@ describe("isValidCns", () => {
 		test("when a provisional card's weighted sum is not a multiple of 11", () => {
 			expect(isValidCns("700000000000001")).toBe(false);
 		});
+
+		test("when it does not have 15 digits, even though a provisional-style weighted sum over the given digits would be a multiple of 11", () => {
+			expect(isValidCns("70000000000008")).toBe(false);
+		});
+
+		test("when the first digit is not 1 or 2, even though a 1 or 2 appears later and the rest forms a valid definitive checksum", () => {
+			expect(isValidCns("012345678900006")).toBe(false);
+		});
+
+		test("when the first digit is not 7, 8 or 9, even though one of them appears later and the rest forms a valid provisional checksum", () => {
+			expect(isValidCns("070000000000001")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -91,6 +103,10 @@ describe("isValidCns", () => {
 
 		test("for a provisional CNS starting with 9", () => {
 			expect(isValidCns("900000000000008")).toBe(true);
+		});
+
+		test("for a provisional CNS whose base 11 digits would NOT be a valid definitive checksum", () => {
+			expect(isValidCns("712345678901236")).toBe(true);
 		});
 	});
 });

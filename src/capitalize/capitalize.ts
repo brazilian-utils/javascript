@@ -40,6 +40,7 @@ export type CapitalizeOptions = {
 export const capitalize = (value: string, options?: CapitalizeOptions): string => {
 	if (typeof value !== "string") return "";
 
+	// Stryker disable next-line ArrayDeclaration: the default is never compared against multi-word placeholder content, so any non-empty placeholder array stays unmatched and behaviorally identical
 	const { lowerCaseWords = PREPOSITIONS, upperCaseWords = [] } = options ?? {};
 
 	const lowerCaseSet = new Set(lowerCaseWords.map((word) => word.toLocaleLowerCase("pt-BR")));
@@ -51,9 +52,7 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 	let result = "";
 	let wordIndex = 0;
 
-	for (let i = 0, len = tokens.length; i < len; i++) {
-		const token = tokens[i];
-
+	for (const token of tokens) {
 		if (!token) continue;
 
 		if (WHITESPACE_REGEX.test(token)) {

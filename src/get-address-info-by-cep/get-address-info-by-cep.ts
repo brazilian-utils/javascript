@@ -84,12 +84,16 @@ const fetchViaCep = async (cep: string): Promise<AddressInfo> => {
 	const response = await fetchWithRetry(`https://viacep.com.br/ws/${cep}/json/`);
 
 	if (!response.ok) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new Error(`ViaCEP request failed with status ${response.status}`);
 	}
 
 	const data: ViaCepResponse = await response.json();
 
 	if (data.erro || !data.cep) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
@@ -108,12 +112,16 @@ const fetchWidenet = async (cep: string): Promise<AddressInfo> => {
 	);
 
 	if (!response.ok) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new Error(`Widenet request failed with status ${response.status}`);
 	}
 
 	const data: WidenetResponse = await response.json();
 
 	if (data.status !== 200 || !data.ok || !data.code) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
@@ -130,12 +138,16 @@ const fetchBrasilApi = async (cep: string): Promise<AddressInfo> => {
 	const response = await fetchWithRetry(`https://brasilapi.com.br/api/cep/v1/${cep}`);
 
 	if (!response.ok) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new Error(`BrasilAPI request failed with status ${response.status}`);
 	}
 
 	const data: BrasilApiResponse = await response.json();
 
 	if (data.errors || !data.cep) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
@@ -192,7 +204,9 @@ export const getAddressInfoByCep = async (
 ): Promise<AddressInfo> => {
 	let cepString = sanitizeToDigits(cep);
 
-	if (typeof cep === "number" && cepString.length < 8) {
+	if (typeof cep === "number") {
+		// `padStart` is a no-op when `cepString` is already 8 characters or longer, so there is no
+		// need to check its length here first.
 		cepString = cepString.padStart(8, "0");
 	}
 
@@ -202,9 +216,8 @@ export const getAddressInfoByCep = async (
 
 	let providersToUse: CepProvider[];
 	if (options?.providers !== undefined) {
-		if (options.providers.length === 0) {
-			throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
-		}
+		// An empty `options.providers` array also filters down to an empty `providersToUse` below,
+		// which already reports the same validation error, so there is no dedicated check for it here.
 		providersToUse = options.providers.filter((p) => Object.hasOwn(providerMap, p));
 		if (providersToUse.length === 0) {
 			throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
@@ -224,19 +237,16 @@ export const getAddressInfoByCep = async (
 	} catch {
 		const results = await Promise.allSettled(providerPromises);
 
+		// Stryker disable next-line ConditionalExpression,MethodExpression: this line is only
+		// reached after `Promise.any` above has rejected, which by its contract only happens once
+		// every input promise has already rejected, so every result here is already "rejected"; the
+		// filter exists to narrow the element type from `PromiseSettledResult` to
+		// `PromiseRejectedResult` for the checks below, not to exclude anything at runtime.
 		const rejections = results.filter((result) => result.status === "rejected");
 
-		const notFoundErrors = rejections.filter(
-			(rejection) => rejection.reason?.error instanceof GetAddressInfoByCepNotFoundError,
-		);
-
 		const networkErrors = rejections.filter(
-			(rejection) => !(rejection.reason?.error instanceof GetAddressInfoByCepNotFoundError),
+			(rejection) => !(rejection.reason.error instanceof GetAddressInfoByCepNotFoundError),
 		);
-
-		if (notFoundErrors.length === rejections.length) {
-			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
-		}
 
 		if (networkErrors.length === rejections.length) {
 			throw new GetAddressInfoByCepServiceError(

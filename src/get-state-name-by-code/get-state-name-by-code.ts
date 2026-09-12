@@ -25,8 +25,6 @@ export const getStateNameByCode = (code: string): StateName | null => {
 
 	const normalized = code.trim().toUpperCase();
 
-	if (normalized === "") return null;
-
 	const state = DATA.find((entry) => entry.code === normalized);
 
 	return state ? state.name : null;

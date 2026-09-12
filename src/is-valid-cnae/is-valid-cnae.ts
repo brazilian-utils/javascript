@@ -21,9 +21,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @see Official: https://servicodados.ibge.gov.br/api/v2/cnae/subclasses
  */
 export const isValidCnae = (value: string | number): boolean => {
-	if (isNullish(value) || value === "") return false;
+	if (isNullish(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 
-	return digits.length === 7 && digits in CNAE_SUBCLASSES;
+	return digits in CNAE_SUBCLASSES;
 };

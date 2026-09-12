@@ -22,7 +22,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @see Official: https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json
  */
 export const formatNcm = (value: string | number): string =>
-	isNullish(value) || value === ""
+	isNullish(value)
 		? ""
 		: format({
 				value: sanitizeToDigits(value),

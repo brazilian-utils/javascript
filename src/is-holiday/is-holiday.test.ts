@@ -35,9 +35,19 @@ describe("isHoliday", () => {
 		expect(isHoliday({ targetDate: "2024-01-01" })).toBe(false);
 	});
 
+	it('should return false when options is a function, even one carrying a targetDate property (typeof options !== "object" must reject it, not just isNullish)', () => {
+		const fakeOptions = Object.assign(() => {}, { targetDate: new Date(2024, 0, 1) });
+
+		expect(isHoliday(fakeOptions)).toBe(false);
+	});
+
 	it("should return false when stateCode is not a string", () => {
 		// @ts-expect-error
 		expect(isHoliday({ targetDate: new Date(2024, 0, 1), stateCode: 123 })).toBe(false);
+	});
+
+	it("should return false for a day-of-month that matches a holiday's day but falls in a different month (Feb 1 shares its day-of-month with Ano novo, Jan 1)", () => {
+		expect(isHoliday({ targetDate: new Date(2024, 1, 1) })).toBe(false);
 	});
 
 	it("should ignore an unknown stateCode and fall back to national holidays", () => {

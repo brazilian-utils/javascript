@@ -1,8 +1,7 @@
-import { BR_IBAN_LENGTH, BR_IBAN_REGEX } from "../_internals/constants/iban";
+import { BR_IBAN_REGEX } from "../_internals/constants/iban";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 
 const LETTER_CODE_A = 65;
-const LETTER_CODE_Z = 90;
 const LETTER_OFFSET = 55;
 
 const hasValidCheckDigits = (iban: string): boolean => {
@@ -12,8 +11,7 @@ const hasValidCheckDigits = (iban: string): boolean => {
 
 	for (let i = 0; i < rearranged.length; i++) {
 		const code = rearranged.charCodeAt(i);
-		numeric +=
-			code >= LETTER_CODE_A && code <= LETTER_CODE_Z ? String(code - LETTER_OFFSET) : rearranged[i];
+		numeric += code >= LETTER_CODE_A ? String(code - LETTER_OFFSET) : rearranged[i];
 	}
 
 	return BigInt(numeric) % 97n === 1n;
@@ -44,11 +42,10 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * @see Based on: https://www.iban.com/structure Used to cross check the Brazil IBAN example.
  */
 export const isValidIban = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const sanitized = sanitizeToAlphanumeric(value);
 
-	if (sanitized.length !== BR_IBAN_LENGTH) return false;
 	if (!BR_IBAN_REGEX.test(sanitized)) return false;
 
 	return hasValidCheckDigits(sanitized);

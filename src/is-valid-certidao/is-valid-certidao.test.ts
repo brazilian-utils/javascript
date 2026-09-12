@@ -97,6 +97,10 @@ describe("isValidCertidao", () => {
 		test("for the dotted mask of the Provimento", () => {
 			expect(isValidCertidao("104539.01.55.2013.1.00012.021.0000123-21")).toBe(true);
 		});
+
+		test("for the ghiorzi.org example with leading and trailing whitespace", () => {
+			expect(isValidCertidao(" 104539 01 55 2013 1 00012 021 0000123 21 ")).toBe(true);
+		});
 	});
 
 	describe("options.accept", () => {
@@ -144,6 +148,15 @@ describe("isValidCertidao", () => {
 
 		test("should return false when the matrícula itself is invalid, regardless of accept", () => {
 			expect(isValidCertidao("123456", { accept: ["birth"] })).toBe(false);
+		});
+
+		test("should return false for book code 0 even if accept improperly lists undefined", () => {
+			expect(
+				isValidCertidao("10453901552013000012021000012387", {
+					// @ts-expect-error not a real CertidaoType
+					accept: [undefined],
+				}),
+			).toBe(false);
 		});
 	});
 });

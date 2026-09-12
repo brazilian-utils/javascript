@@ -9,35 +9,30 @@ export type GenerateBoletoOptions = {
 };
 
 const generateBancario = (): string => {
-	const line = Array.from<string>({ length: 47 });
-
 	const p1Base = generateRandomNumber(9);
-	for (let i = 0; i < 9; i++) line[i] = p1Base[i];
-	line[9] = mod10(p1Base).toString();
-
 	const p2Base = generateRandomNumber(10);
-	for (let i = 0; i < 10; i++) line[10 + i] = p2Base[i];
-	line[20] = mod10(p2Base).toString();
-
 	const p3Base = generateRandomNumber(10);
-	for (let i = 0; i < 10; i++) line[21 + i] = p3Base[i];
-	line[31] = mod10(p3Base).toString();
-
 	const lastDigits = generateRandomNumber(15);
-	for (let i = 0; i < 15; i++) line[32 + i] = lastDigits[i];
+
+	const line =
+		p1Base +
+		mod10(p1Base).toString() +
+		p2Base +
+		mod10(p2Base).toString() +
+		p3Base +
+		mod10(p3Base).toString() +
+		lastDigits;
 
 	const boletoWithoutCheck =
-		line.slice(0, 4).join("") +
-		line.slice(33, 47).join("") +
-		line.slice(4, 9).join("") +
-		line.slice(10, 20).join("") +
-		line.slice(21, 31).join("");
+		line.slice(0, 4) +
+		line.slice(33, 47) +
+		line.slice(4, 9) +
+		line.slice(10, 20) +
+		line.slice(21, 31);
 
 	const mainCheck = mod11(boletoWithoutCheck);
 
-	line[32] = mainCheck.toString();
-
-	return line.join("");
+	return line.slice(0, 32) + mainCheck.toString() + line.slice(33);
 };
 
 const generateArrecadacao = (): string => {

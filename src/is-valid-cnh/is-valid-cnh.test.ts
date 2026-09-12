@@ -20,6 +20,10 @@ describe("isValidCnh", () => {
 		expect(isValidCnh("00000000129")).toBe(false);
 	});
 
+	it("should return false when it sanitizes to more than 11 digits, even if the first 11 match a valid CNH", () => {
+		expect(isValidCnh("0000000011900")).toBe(false);
+	});
+
 	it("should return false for falsy or non-string values", () => {
 		expect(isValidCnh("")).toBe(false);
 		// @ts-expect-error

@@ -33,16 +33,11 @@ const getCheckDigitAlgorithm = (barcode: string): ((value: string) => number) | 
 	return null;
 };
 
-const lineToBarcode = (line: string): string => {
-	let barcode = "";
-
-	for (let block = 0; block < ARRECADACAO_BLOCKS; block++) {
+const lineToBarcode = (line: string): string =>
+	Array.from({ length: ARRECADACAO_BLOCKS }, (_, block) => {
 		const start = block * (ARRECADACAO_BLOCK_LENGTH + 1);
-		barcode += line.slice(start, start + ARRECADACAO_BLOCK_LENGTH);
-	}
-
-	return barcode;
-};
+		return line.slice(start, start + ARRECADACAO_BLOCK_LENGTH);
+	}).join("");
 
 /**
  * Validates an arrecadação bank slip and returns its parsed information.

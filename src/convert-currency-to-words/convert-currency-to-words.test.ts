@@ -2,6 +2,14 @@ import { NUMBER_TO_WORDS_MAX_VALUE } from "../_internals/number-to-words/number-
 import { describe, expect, test } from "../_internals/test/runtime";
 import { convertCurrencyToWords } from "./convert-currency-to-words";
 
+function expectAmounts(cases: ReadonlyArray<readonly [number, string]>): void {
+	const failures = cases
+		.map(([amount, expected]) => ({ amount, actual: convertCurrencyToWords(amount), expected }))
+		.filter(({ actual, expected }) => actual !== expected);
+
+	expect(failures).toEqual([]);
+}
+
 describe("convertCurrencyToWords", () => {
 	test("should return 'zero reais' for 0", () => {
 		expect(convertCurrencyToWords(0)).toBe("zero reais");
@@ -100,6 +108,10 @@ describe("convertCurrencyToWords", () => {
 
 		test("should still report cents just below that limit", () => {
 			expect(convertCurrencyToWords(9_007_199_254_740.99)).toContain("noventa e nove centavos");
+		});
+
+		test("should still report cents exactly at the Number.MAX_SAFE_INTEGER cents boundary", () => {
+			expect(convertCurrencyToWords(90_071_992_547_409.9)).toContain("noventa e um centavos");
 		});
 	});
 
@@ -287,14 +299,8 @@ describe("convertCurrencyToWords", () => {
 				[148, "um real e quarenta e oito centavos"],
 				[149, "um real e quarenta e nove centavos"],
 			];
-			const failures: Array<{ cents: number; actual: string; expected: string }> = [];
 
-			for (const [cents, expected] of cases) {
-				const actual = convertCurrencyToWords(cents / 100);
-				if (actual !== expected) failures.push({ cents, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectAmounts(cases.map(([cents, expected]) => [cents / 100, expected]));
 		});
 
 		test("should match a hand-written string at reais boundaries, scale words and truncation cases", () => {
@@ -323,14 +329,7 @@ describe("convertCurrencyToWords", () => {
 				[1000000000000, "um trilhão de reais"],
 				[2000000000000, "dois trilhões de reais"],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertCurrencyToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectAmounts(cases);
 		});
 
 		test("should reproduce every published brutils 'convert_real_to_text' example (tests/test_currency.py, lowercase here because brutils capitalizes and this library leaves casing to the caller)", () => {
@@ -370,14 +369,7 @@ describe("convertCurrencyToWords", () => {
 					"nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais e noventa e nove centavos",
 				],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertCurrencyToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectAmounts(cases);
 		});
 
 		test("should prefix 'menos' to a hand-written string for negative amounts", () => {
@@ -391,14 +383,7 @@ describe("convertCurrencyToWords", () => {
 				[-0.001, "zero reais"],
 				[-0.009, "zero reais"],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertCurrencyToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectAmounts(cases);
 		});
 	});
 });

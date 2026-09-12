@@ -23,6 +23,14 @@ describe("isValidIe", () => {
 		test("should return false when the length is bigger than 13", () => {
 			expect(isValidIe("AC", "01018763458064")).toBe(false);
 		});
+
+		test("should return false when only the first verifier digit is wrong, even though the second still matches its recomputed value", () => {
+			expect(isValidIe("AC", "0108368143116")).toBe(false);
+		});
+
+		test("should return false when the length is 14, even though the verifier digits still sit at the valid positions", () => {
+			expect(isValidIe("AC", "01083681431069")).toBe(false);
+		});
 	});
 
 	describe("AL", () => {
@@ -44,6 +52,10 @@ describe("isValidIe", () => {
 
 		test("should return false when the length is more than 9", () => {
 			expect(isValidIe("AL", "2486597584")).toBe(false);
+		});
+
+		test("should return true for another valid IE", () => {
+			expect(isValidIe("AL", "240000005")).toBe(true);
 		});
 	});
 
@@ -69,6 +81,26 @@ describe("isValidIe", () => {
 		test("should return false when the IE does not start with 03", () => {
 			expect(isValidIe("AP", "003060292")).toBe(false);
 		});
+
+		test("should return true when the inscricao is exactly 3000000, one below the special range starting at 3000001", () => {
+			expect(isValidIe("AP", "030000009")).toBe(true);
+		});
+
+		test("should return true when the inscricao is exactly 3019023, one above the special range ending at 3019022", () => {
+			expect(isValidIe("AP", "030190231")).toBe(true);
+		});
+
+		test("should return true when the inscricao is exactly 3000001, the inclusive lower bound of the first special range", () => {
+			expect(isValidIe("AP", "030000012")).toBe(true);
+		});
+
+		test("should return true when the inscricao is exactly 3017000, the inclusive upper bound of the first special range", () => {
+			expect(isValidIe("AP", "030170007")).toBe(true);
+		});
+
+		test("should return true when the inscricao is exactly 3019022, the inclusive upper bound of the second special range", () => {
+			expect(isValidIe("AP", "030190225")).toBe(true);
+		});
 	});
 
 	describe("AM", () => {
@@ -85,6 +117,10 @@ describe("isValidIe", () => {
 
 		test("should return false when the length is more than 9 digits", () => {
 			expect(isValidIe("AM", "0036029572")).toBe(false);
+		});
+
+		test("should return false when the length is 10, even though the first eight digits alone would form a valid checksum", () => {
+			expect(isValidIe("AM", "0468938309")).toBe(false);
 		});
 	});
 
@@ -135,6 +171,14 @@ describe("isValidIe", () => {
 		test("should return false when the length is more than 9 digits", () => {
 			expect(isValidIe("BA", "0012345636")).toBe(false);
 		});
+
+		test("should return false when the length is 10, even though the digits would satisfy the checksum formula for that length", () => {
+			expect(isValidIe("BA", "1234567804")).toBe(false);
+		});
+
+		test("should return false when only the second verifier digit is wrong, even though the first still matches its recomputed value", () => {
+			expect(isValidIe("BA", "778514740")).toBe(false);
+		});
 	});
 
 	describe("CE", () => {
@@ -170,6 +214,10 @@ describe("isValidIe", () => {
 
 		test("should return false when the digit is incorrect", () => {
 			expect(isValidIe("DF", "0754002000175")).toBe(false);
+		});
+
+		test("should return false when only the first verifier digit is wrong, even though the second still matches its recomputed value", () => {
+			expect(isValidIe("DF", "0754002000186")).toBe(false);
 		});
 	});
 
@@ -234,6 +282,26 @@ describe("isValidIe", () => {
 			expect(isValidIe("GO", "100000071")).toBe(false);
 			expect(isValidIe("GO", "100000070")).toBe(true);
 		});
+
+		test("should return false when the length is 10, even though the first eight digits alone would form a valid checksum", () => {
+			expect(isValidIe("GO", "1091617930")).toBe(false);
+		});
+
+		test("should return false for IE 11094402 when the digit is neither 0 nor 1", () => {
+			expect(isValidIe("GO", "110944022")).toBe(false);
+		});
+
+		test("should return true when the remainder is 1 and the inscricao (10103086) falls just below the special range 10103105..10119997, so the digit is 0", () => {
+			expect(isValidIe("GO", "101030860")).toBe(true);
+		});
+
+		test("should return true when the remainder is 1 and the inscricao (10120003) falls just above the special range 10103105..10119997, so the digit is 0", () => {
+			expect(isValidIe("GO", "101200030")).toBe(true);
+		});
+
+		test("should return true when the remainder is 1 and the inscricao is exactly 10119997, the inclusive upper bound of the special range", () => {
+			expect(isValidIe("GO", "101199971")).toBe(true);
+		});
 	});
 
 	describe("MA", () => {
@@ -287,6 +355,10 @@ describe("isValidIe", () => {
 		test("should return false when the second verified digit is incorrect", () => {
 			expect(isValidIe("MG", "4333908330176")).toBe(false);
 		});
+
+		test("should return false when the length is 14, even though the verifier digits still sit at the valid positions", () => {
+			expect(isValidIe("MG", "43339083301770")).toBe(false);
+		});
 	});
 
 	describe("MT", () => {
@@ -300,6 +372,10 @@ describe("isValidIe", () => {
 
 		test("should return false when the length is different from 11", () => {
 			expect(isValidIe("MT", "1234567890112")).toBe(false);
+		});
+
+		test("should return false when the length is 12, even though the first ten digits alone would form a valid checksum", () => {
+			expect(isValidIe("MT", "604741204699")).toBe(false);
 		});
 	});
 
@@ -401,6 +477,18 @@ describe("isValidIe", () => {
 		test("should return false when the digit is incorrect", () => {
 			expect(isValidIe("PE", "925870101")).toBe(false);
 		});
+
+		test("should return true for a valid IE whose first verifier digit is not zero", () => {
+			expect(isValidIe("PE", "123456797")).toBe(true);
+		});
+
+		test("should return false when only the second verifier digit is wrong, even though the first still matches", () => {
+			expect(isValidIe("PE", "123456790")).toBe(false);
+		});
+
+		test("should return false when only the first verifier digit is wrong, even though the second still matches", () => {
+			expect(isValidIe("PE", "123456787")).toBe(false);
+		});
 	});
 
 	describe("PI", () => {
@@ -429,6 +517,18 @@ describe("isValidIe", () => {
 		test("should return false when the digit is incorrect", () => {
 			expect(isValidIe("PR", "4447953640")).toBe(false);
 		});
+
+		test("should return false when the length is 11, even though the verifier digits still sit at the valid positions", () => {
+			expect(isValidIe("PR", "44479536044")).toBe(false);
+		});
+
+		test("should return false when only the second verifier digit is wrong, even though the first still matches", () => {
+			expect(isValidIe("PR", "4447953600")).toBe(false);
+		});
+
+		test("should return false when only the first verifier digit is wrong, even though the second still matches", () => {
+			expect(isValidIe("PR", "4447953614")).toBe(false);
+		});
 	});
 
 	describe("RJ", () => {
@@ -450,6 +550,10 @@ describe("isValidIe", () => {
 
 		test("should return false when the length is different from 8", () => {
 			expect(isValidIe("RJ", "020441623")).toBe(false);
+		});
+
+		test("should return false when the length is 9, even though the verifier digit still sits at the valid position", () => {
+			expect(isValidIe("RJ", "625453720")).toBe(false);
 		});
 	});
 
@@ -499,6 +603,10 @@ describe("isValidIe", () => {
 		test("should return false when the length is different from 14", () => {
 			expect(isValidIe("RO", "001078042249627")).toBe(false);
 		});
+
+		test("should return true for another valid IE that exercises the wrap-around weight", () => {
+			expect(isValidIe("RO", "12345678901231")).toBe(true);
+		});
 	});
 
 	describe("RR", () => {
@@ -516,6 +624,10 @@ describe("isValidIe", () => {
 
 		test("should return false when the IE does not start with 24", () => {
 			expect(isValidIe("RR", "024006150")).toBe(false);
+		});
+
+		test("should return true for another valid IE with a non-zero check digit", () => {
+			expect(isValidIe("RR", "240000001")).toBe(true);
 		});
 	});
 
@@ -538,6 +650,10 @@ describe("isValidIe", () => {
 
 		test("should return false when the length is different from 10", () => {
 			expect(isValidIe("RS", "02007693230")).toBe(false);
+		});
+
+		test("should return false when the length is 11, even though the verifier digit still sits at the valid position", () => {
+			expect(isValidIe("RS", "03051691499")).toBe(false);
 		});
 	});
 
@@ -587,6 +703,18 @@ describe("isValidIe", () => {
 		test("should return false when a letter appears in a position that must be a digit", () => {
 			expect(isValidIe("SP", "11004249011A")).toBe(false);
 		});
+
+		test("should return false when a company IE has an extra trailing digit, even though the first twelve digits alone would form a valid checksum", () => {
+			expect(isValidIe("SP", "1100424901149")).toBe(false);
+		});
+
+		test("should return false when a 'P' followed by twelve digits appears at the end of a longer string, instead of at the very start", () => {
+			expect(isValidIe("SP", "0011004243P000000000000")).toBe(false);
+		});
+
+		test("should return false when a produtor rural IE has an extra trailing digit, even though the verifier digit still sits at the valid position", () => {
+			expect(isValidIe("SP", "P0110042430029")).toBe(false);
+		});
 	});
 
 	describe("TO", () => {
@@ -621,6 +749,10 @@ describe("isValidIe", () => {
 		test("should return false for a new-rule IE with an incorrect verified digit", () => {
 			expect(isValidIe("TO", "294467690")).toBe(false);
 		});
+
+		test("should return false when the length is 10, even though the first eight digits alone would form a valid checksum", () => {
+			expect(isValidIe("TO", "2944676960")).toBe(false);
+		});
 	});
 
 	describe("state code lookup", () => {
@@ -653,6 +785,15 @@ describe("isValidIe", () => {
 
 		test("should return false when the sanitized IE is empty", () => {
 			expect(isValidIe("RJ", "----")).toBe(false);
+		});
+
+		test("should return false when the IE is not a string, even though its digits alone would form a valid checksum", () => {
+			// @ts-expect-error
+			expect(isValidIe("RJ", 62_545_372)).toBe(false);
+		});
+
+		test("should strip letters from a non-SP IE before validating it", () => {
+			expect(isValidIe("RJ", "625X45372")).toBe(true);
 		});
 	});
 });

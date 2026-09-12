@@ -2,6 +2,7 @@ export type TlvFields = Record<string, string | undefined>;
 
 const SEGMENT_LENGTH = 2;
 
+// Stryker disable next-line Regex: id and length are always sliced to at most SEGMENT_LENGTH (2) characters, so dropping either anchor cannot change whether this matches
 const SEGMENT_REGEX = /^\d{2}$/;
 
 /**

@@ -1,4 +1,4 @@
-export type Mod11Variant = "boleto" | "arrecadacao" | "bank";
+type Mod11Variant = "boleto" | "arrecadacao" | "bank";
 
 export type Mod11Options = {
 	/** Which modulo 11 rule to apply (default: `"boleto"`). */

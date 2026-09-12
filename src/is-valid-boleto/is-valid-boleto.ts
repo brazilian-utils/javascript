@@ -50,7 +50,7 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
  */
 export const isValidBoleto = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const digits = sanitizeToDigits(value);
 

@@ -1,8 +1,8 @@
 export const DEFAULT_PRECISION = 2;
 
-export const MIN_PRECISION = 0;
+const MIN_PRECISION = 0;
 
-export const MAX_PRECISION = 20;
+const MAX_PRECISION = 20;
 
 /**
  * Clamps a fraction-digits precision into the range accepted by `Intl.NumberFormat`.
@@ -25,7 +25,9 @@ export const MAX_PRECISION = 20;
  * ```
  */
 export const clampPrecision = (precision?: number): number => {
-	if (typeof precision !== "number" || !Number.isFinite(precision)) return DEFAULT_PRECISION;
+	const safePrecision = precision ?? Number.NaN;
 
-	return Math.min(MAX_PRECISION, Math.max(MIN_PRECISION, Math.trunc(precision)));
+	if (!Number.isFinite(safePrecision)) return DEFAULT_PRECISION;
+
+	return Math.min(MAX_PRECISION, Math.max(MIN_PRECISION, Math.trunc(safePrecision)));
 };

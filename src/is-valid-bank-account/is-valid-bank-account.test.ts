@@ -3,6 +3,13 @@ import { describe, expect, test } from "../_internals/test/runtime";
 import { COMPE_CODES } from "./constants";
 import { isValidBankAccount } from "./is-valid-bank-account";
 
+const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
+	bankCode: "001",
+	agency: "123456",
+	account: "12345678",
+	digit: "5",
+};
+
 describe("isValidBankAccount", () => {
 	describe("should return false", () => {
 		test("when params is null", () => {
@@ -132,14 +139,7 @@ describe("isValidBankAccount", () => {
 		});
 
 		test("when agency length is greater than 5", () => {
-			expect(
-				isValidBankAccount({
-					bankCode: "001",
-					agency: "123456",
-					account: "12345678",
-					digit: "5",
-				}),
-			).toBe(false);
+			expect(isValidBankAccount(BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS)).toBe(false);
 		});
 
 		test("when account length is less than 1", () => {
@@ -248,14 +248,7 @@ describe("isValidBankAccount", () => {
 			});
 
 			test("when agency length is greater than 5", () => {
-				expect(
-					isValidBankAccount({
-						bankCode: "001",
-						agency: "123456",
-						account: "12345678",
-						digit: "5",
-					}),
-				).toBe(false);
+				expect(isValidBankAccount(BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS)).toBe(false);
 			});
 
 			test("when account length is less than 8", () => {
@@ -1274,6 +1267,246 @@ describe("isValidBankAccount", () => {
 					digit: "1",
 				}),
 			).toBe(false);
+		});
+	});
+
+	describe("type coercion and structural edge cases", () => {
+		test("should return false when bankCode is a truthy number that stringifies to a listed code", () => {
+			expect(
+				isValidBankAccount({
+					// @ts-expect-error
+					bankCode: 246,
+					agency: "1234",
+					account: "123456",
+					digit: "6",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when agency is a truthy number matching a real agency", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					// @ts-expect-error
+					agency: 1234,
+					account: "123456",
+					digit: "6",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when account is a truthy number matching a real account", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "1234",
+					// @ts-expect-error
+					account: 123456,
+					digit: "6",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when digit is a truthy number", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "1234",
+					account: "123456",
+					// @ts-expect-error
+					digit: 6,
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when params is a function carrying otherwise valid fields as own properties", () => {
+			const params = Object.assign(() => {}, {
+				bankCode: "001",
+				agency: "1584",
+				account: "00210169",
+				digit: "6",
+			});
+
+			expect(isValidBankAccount(params)).toBe(false);
+		});
+
+		test("should return false when the bank code has 2 digits, even one that prefixes a listed code", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "24",
+					agency: "1234",
+					account: "123456",
+					digit: "6",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when the agency sanitizes to 0 digits for a bank with no agency-specific rule", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "abc",
+					account: "123456",
+					digit: "6",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when the account sanitizes to 0 digits, even though mod10('') would match the digit", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "1234",
+					account: "xyz",
+					digit: "0",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when the account has 14 digits, even with its real mod10 check digit (mod10 of the 14 digit account is 7)", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "1234",
+					account: "12345678901234",
+					digit: "7",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when the Bradesco agency is longer than its 4 digit rule, even though bradescoDigits ignores the agency", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "237",
+					agency: "12345",
+					account: "0238069",
+					digit: "2",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when the Bradesco account is longer than its 7 digit rule, even with its own real check digit (mod11 bank variant, maxWeight 7, over '02380695' is 9)", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "237",
+					agency: "1234",
+					account: "02380695",
+					digit: "9",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when the agency has 6 digits for a bank with no agency-specific rule, even with the correct account check digit", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "123456",
+					account: "123456",
+					digit: "6",
+				}),
+			).toBe(false);
+		});
+
+		test("should return true when the agency has exactly 5 digits for a bank with no agency-specific rule", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "12345",
+					account: "123456",
+					digit: "6",
+				}),
+			).toBe(true);
+		});
+
+		test("should return true when the account has exactly 13 digits for a bank with no account-specific rule (mod10 of the 13 digit account is 7)", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "1234",
+					account: "1234567890123",
+					digit: "7",
+				}),
+			).toBe(true);
+		});
+
+		test("should return false when the check digit has 3 characters that sanitize down to 1, even for a structure-only bank", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "077",
+					agency: "0001",
+					account: "123456789",
+					digit: "px1",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when a structure-only account is longer than 13 digits", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "077",
+					agency: "0001",
+					account: "123456789012345",
+					digit: "0",
+				}),
+			).toBe(false);
+		});
+
+		test("should return false when a structure-only digit has 2 characters that sanitize down to 1", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "077",
+					agency: "0001",
+					account: "123456789",
+					digit: "P5",
+				}),
+			).toBe(false);
+		});
+
+		test("should sanitize a hyphen out of the Banco do Brasil check digit (-6 sanitizes to 6, the correct digit)", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "001",
+					agency: "1584",
+					account: "00210169",
+					digit: "-6",
+				}),
+			).toBe(true);
+		});
+
+		test("should return false for generic validation when the digit matches neither mod10 nor either mod11 variant (123456 gives 6, 1 and 0)", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "1234",
+					account: "123456",
+					digit: "9",
+				}),
+			).toBe(false);
+		});
+
+		test("should return true for the two digit generic check when the second digit is a plain digit, not 0 or 10 (mod10('123457') = 4, mod11 bank variant over '1234574' = 1)", () => {
+			expect(
+				isValidBankAccount({
+					bankCode: "246",
+					agency: "1234",
+					account: "123457",
+					digit: "41",
+				}),
+			).toBe(true);
+		});
+
+		test("should accept the last bank code of COMPE_CODES, which an endsWith based scan would never reach", () => {
+			expect(COMPE_CODES.endsWith("757")).toBe(true);
+			expect(BANKS.some((bank) => bank.code === "757")).toBe(true);
+
+			expect(
+				isValidBankAccount({
+					bankCode: "757",
+					agency: "1234",
+					account: "123456",
+					digit: "6",
+				}),
+			).toBe(true);
 		});
 	});
 

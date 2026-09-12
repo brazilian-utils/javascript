@@ -25,7 +25,7 @@ import { GROUP_SIZE } from "./constants";
  * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Circular&numero=3625 Circular BCB nº 3.625/2013 (Diretrizes de Implementação do IBAN no Brasil)
  */
 export const formatIban = (value: string): string => {
-	if (typeof value !== "string" || value === "") return "";
+	if (typeof value !== "string") return "";
 
 	const sanitized = sanitizeToAlphanumeric(value).slice(0, BR_IBAN_LENGTH);
 

@@ -9,8 +9,6 @@
  * Second, independent reference implementation agreeing with the first.
  */
 
-export const CEI_LENGTH = 12;
-
 export const CEI_BASE_LENGTH = 11;
 
 export const CEI_WEIGHTS = [7, 4, 1, 8, 5, 2, 1, 6, 3, 7, 4];

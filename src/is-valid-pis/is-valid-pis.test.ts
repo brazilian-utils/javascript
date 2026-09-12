@@ -42,7 +42,16 @@ describe("isValidPis", () => {
 			expect(isValidPis([])).toBe(false);
 		});
 
-		test(`when dont match with PIS length (${PIS_LENGTH})`, () => {
+		test("when it is a non-string that stringifies to a valid PIS", () => {
+			// @ts-expect-error not a string
+			expect(isValidPis([12056412847])).toBe(false);
+		});
+
+		test("when it sanitizes to more digits than the PIS length, even if the first 11 match a valid PIS", () => {
+			expect(isValidPis("1205641284799")).toBe(false);
+		});
+
+		test(`when it does not match the PIS length (${PIS_LENGTH})`, () => {
 			expect(isValidPis("123456")).toBe(false);
 		});
 

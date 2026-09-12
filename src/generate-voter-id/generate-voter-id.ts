@@ -23,7 +23,10 @@ import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2003/resolucao-no-21-538-de-14-de-outubro-de-2003
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
  */
-export const generateVoterId = (state: StateCode | "ZZ" = "ZZ"): string => {
+export const generateVoterId = (
+	// Stryker disable next-line StringLiteral: any default other than a valid key still falls through the ?? UF_TO_VOTER_ID_CODE.ZZ lookup below, so the literal default value is unobservable.
+	state: StateCode | "ZZ" = "ZZ",
+): string => {
 	const federativeUnion = UF_TO_VOTER_ID_CODE[state] ?? UF_TO_VOTER_ID_CODE.ZZ;
 	const sequentialNumber = generateRandomNumber(8);
 	const digit1 = calculateVoterIdFirstDigit({ sequentialNumber, federativeUnion });

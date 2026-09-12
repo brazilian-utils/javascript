@@ -1,16 +1,13 @@
 import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-first-digit/calculate-voter-id-first-digit";
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
-import { NINE_DIGIT_FEDERATIVE_UNIONS } from "../_internals/constants/voter-id";
+import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 const isValidLength = (value: string): boolean => {
 	if (value.length === 12) return true;
 
 	const federativeUnion = value.slice(-4, -2);
-	return (
-		value.length === 13 &&
-		(NINE_DIGIT_FEDERATIVE_UNIONS as readonly string[]).includes(federativeUnion)
-	);
+	return value.length === 13 && NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion);
 };
 
 /**
@@ -35,7 +32,7 @@ const isValidLength = (value: string): boolean => {
  * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/voter_id.py (13-digit São Paulo and Minas Gerais ids)
  */
 export const isValidVoterId = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const digits = sanitizeToDigits(value);
 
@@ -48,7 +45,7 @@ export const isValidVoterId = (value: string): boolean => {
 
 	const ufCode = Number(federativeUnion);
 
-	if (!Number.isInteger(ufCode) || ufCode < 1 || ufCode > 28) return false;
+	if (ufCode < 1 || ufCode > 28) return false;
 
 	const digit1 = calculateVoterIdFirstDigit({ sequentialNumber, federativeUnion });
 	const digit2 = calculateVoterIdSecondDigit({ federativeUnion, firstDigit: digit1 });

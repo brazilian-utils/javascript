@@ -51,6 +51,7 @@ const santanderDigits: BankAccountDigits = (agency, account) => {
 	let sum = 0;
 
 	for (let i = 0; i < base.length; i++) {
+		// Stryker disable next-line ArithmeticOperator: SANTANDER_WEIGHTS sums to 60, a multiple of 10, so replacing -48 with +48 shifts every term's contribution by a multiple of 10 mod 10, leaving the final check digit unchanged for every possible input.
 		sum += ((base.charCodeAt(i) - 48) * SANTANDER_WEIGHTS[i]) % 10;
 	}
 
@@ -181,6 +182,7 @@ const STRUCTURE_ONLY_RULE: BankAccountRule = {
 };
 
 const isListedBankCode = (bankCode: string): boolean => {
+	// Stryker disable next-line EqualityOperator: bankCode always has exactly 3 characters here and COMPE_CODES.length is always a multiple of 3, so the extra out-of-range iteration only tests an empty remainder against a 3-character code, which never matches.
 	for (let i = 0; i < COMPE_CODES.length; i += 3) {
 		if (COMPE_CODES.startsWith(bankCode, i)) return true;
 	}
@@ -278,6 +280,7 @@ export const isValidBankAccount = (params: IsValidBankAccountOptions): boolean =
 	const { bankCode, agency, account, digit } = params;
 
 	if (
+		// Stryker disable next-line ConditionalExpression,LogicalOperator: bankCode, agency, account and digit are typed as strings, so the only falsy value any of them can take is "", which the length checks below (once sanitized) reject on their own regardless of this chain.
 		!bankCode ||
 		!agency ||
 		!account ||
@@ -298,6 +301,7 @@ export const isValidBankAccount = (params: IsValidBankAccountOptions): boolean =
 	if (bankCodeDigits.length !== 3) return false;
 	if (agencyDigits.length === 0 || agencyDigits.length > 5) return false;
 	if (accountDigits.length === 0 || accountDigits.length > 13) return false;
+	// Stryker disable next-line ConditionalExpression,LogicalOperator: every path below also rejects a malformed checkDigit on its own — validateWithRule requires digit.length===1 before it ever compares, and validateGeneric compares against 1 or 2 character strings, so a 0, 3+ character checkDigit can never match either way.
 	if (checkDigit.length === 0 || checkDigit.length > 2) return false;
 
 	if (!isListedBankCode(bankCodeDigits)) return false;

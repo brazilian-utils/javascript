@@ -23,8 +23,6 @@ import { DIGIT_TO_MERCOSUL_LETTER } from "./constants";
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/denatran (Resolução CONTRAN 780/2019, anexo)
  */
 export const convertLicensePlateToMercosul = (value: string): string => {
-	if (typeof value !== "string" || value === "") return "";
-
 	if (getFormatLicensePlate(value) !== "LLLNNNN") return "";
 
 	const parsed = parseLicensePlate(value);

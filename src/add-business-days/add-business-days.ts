@@ -77,9 +77,7 @@ export const addBusinessDays = (params: AddBusinessDaysParams): Date | null => {
 
 	if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
 
-	if (typeof days !== "number" || !Number.isFinite(days) || !Number.isInteger(days)) {
-		return null;
-	}
+	if (!Number.isInteger(days)) return null;
 
 	if (stateCode !== undefined && typeof stateCode !== "string") return null;
 
@@ -87,9 +85,8 @@ export const addBusinessDays = (params: AddBusinessDaysParams): Date | null => {
 
 	const result = new Date(date.getTime());
 
-	if (days === 0) return result;
-
 	const hours = result.getHours();
+	// Stryker disable next-line EqualityOperator: when days is 0, remaining is 0 below and the loop never reads step, so > vs >= here is unobservable
 	const step = days > 0 ? 1 : -1;
 	let remaining = Math.abs(days);
 

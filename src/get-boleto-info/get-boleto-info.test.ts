@@ -107,6 +107,12 @@ describe("getBoletoInfo", () => {
 			).toStrictEqual(new Date(2015, 10, 16));
 		});
 
+		test("should accept a factor whose difference from the reference date is exactly RANGE_AFTER (5500 days), even though the other cycle candidate (3500 days before the reference, on the other side) is numerically closer", () => {
+			expect(
+				getBoletoInfo(withFactor["1000"], { referenceDate: new Date(1985, 5, 12) })?.expirationDate,
+			).toStrictEqual(new Date(2000, 6, 3));
+		});
+
 		test("should default the reference date to now", () => {
 			const now = new Date();
 

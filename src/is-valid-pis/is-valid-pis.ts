@@ -21,7 +21,7 @@ import { RESERVED_NUMBERS } from "./constants";
  * @see Official: https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao
  */
 export const isValidPis = (pis: string): boolean => {
-	if (typeof pis !== "string" || pis === "") return false;
+	if (typeof pis !== "string") return false;
 
 	const hasInvalidChars = /[^0-9\s().,*/-]/.test(pis);
 

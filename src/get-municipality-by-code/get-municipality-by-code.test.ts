@@ -47,6 +47,13 @@ describe("getMunicipalityByCode", () => {
 		expect(getMunicipalityByCode("")).toBeNull();
 	});
 
+	it("should return null for an object even if its string representation looks like a valid code", () => {
+		expect(
+			// @ts-expect-error
+			getMunicipalityByCode({ toString: () => "3550308" }),
+		).toBeNull();
+	});
+
 	it("should return null for a non-string, non-number value", () => {
 		// @ts-expect-error
 		expect(getMunicipalityByCode(null)).toBeNull();

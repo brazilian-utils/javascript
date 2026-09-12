@@ -21,4 +21,15 @@ describe("parseVoterId", () => {
 	it("should ignore digits after the 13-digit voter id length for SP/MG", () => {
 		expect(parseVoterId("123456788019199")).toBe("1234567880191");
 	});
+
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(parseVoterId(null)).toBe("");
+		// @ts-expect-error
+		expect(parseVoterId(undefined)).toBe("");
+	});
+
+	it("should ignore digits after the 12-digit length when the 9th/10th digits are not SP/MG, even with extra digits", () => {
+		expect(parseVoterId("12345678905999")).toBe("123456789059");
+	});
 });

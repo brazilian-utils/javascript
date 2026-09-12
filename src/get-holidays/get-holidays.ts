@@ -121,12 +121,15 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		type: "optional",
 	});
 
+	// Stryker disable next-line ConditionalExpression: when stateCode is undefined, STATE_HOLIDAYS[stateCode] resolves to undefined too, so the inner `if (stateHolidays)` already no-ops either way
 	if (stateCode !== undefined) {
 		const stateHolidays = STATE_HOLIDAYS[stateCode];
 		if (stateHolidays) {
 			for (const entry of stateHolidays) {
 				const { name, type, since, until } = entry;
+				// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
 				if (since !== undefined && year < since) continue;
+				// Stryker disable next-line ConditionalExpression: `until` is undefined for most entries, and `year >= undefined` is already always false, so the explicit `until !== undefined` guard never changes the outcome
 				if (until !== undefined && year >= until) continue;
 
 				holidays.push({
@@ -186,24 +189,23 @@ export function getHolidays(yearOrOptions: number | GetHolidaysOptions): Holiday
 	if (typeof yearOrOptions === "number") {
 		year = yearOrOptions;
 		stateCode = undefined;
-	} else if (isNullish(yearOrOptions) || typeof yearOrOptions !== "object") {
-		return [];
 	} else {
-		year = yearOrOptions.year;
-		stateCode = yearOrOptions.stateCode;
+		// Stryker disable next-line BlockStatement: an empty block here still falls through to the `!Number.isInteger(year)` guard below, which returns [] anyway since `year` stays unassigned (undefined)
+		if (isNullish(yearOrOptions) || typeof yearOrOptions !== "object") {
+			return [];
+		} else {
+			year = yearOrOptions.year;
+			stateCode = yearOrOptions.stateCode;
+		}
 	}
 
-	if (
-		typeof year !== "number" ||
-		!Number.isInteger(year) ||
-		year < HOLIDAYS_MIN_YEAR ||
-		year > HOLIDAYS_MAX_YEAR
-	) {
+	if (!Number.isInteger(year) || year < HOLIDAYS_MIN_YEAR || year > HOLIDAYS_MAX_YEAR) {
 		return [];
 	}
 
 	const normalizedStateCode = typeof stateCode === "string" ? stateCode : undefined;
 
+	// Stryker disable next-line StringLiteral: the exact fallback text is never observable outside this module; it only has to be a value no real StateCode equals, which any fixed string satisfies
 	const cacheKey = `${year}|${normalizedStateCode ?? ""}`;
 
 	cache ??= new Map<string, Holiday[]>();

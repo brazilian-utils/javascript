@@ -40,4 +40,11 @@ describe("formatProcessoJuridico", () => {
 			"0002080-25.2012.5.15.0049",
 		);
 	});
+
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(formatProcessoJuridico(null)).toBe("");
+		// @ts-expect-error
+		expect(formatProcessoJuridico(undefined)).toBe("");
+	});
 });

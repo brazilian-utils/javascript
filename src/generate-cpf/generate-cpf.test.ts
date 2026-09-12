@@ -2,6 +2,7 @@ import { CPF_LENGTH } from "../_internals/constants/cpf";
 import { DATA } from "../_internals/constants/states";
 import { describe, expect, test } from "../_internals/test/runtime";
 import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
+import { STATE_CODES } from "./constants";
 import { generateCpf } from "./generate-cpf";
 
 describe("generateCpf", () => {
@@ -40,5 +41,18 @@ describe("generateCpf", () => {
 				expect(cpf.length).toBe(CPF_LENGTH);
 			});
 		}
+	});
+
+	test("should embed the literal STATE_CODES digit at the 9th position, not a random one", () => {
+		for (let i = 0; i < 20; i++) {
+			expect(generateCpf("SP")[8]).toBe(STATE_CODES.SP);
+		}
+	});
+
+	test("should fall back to a random digit instead of looking up an unknown state code", () => {
+		// @ts-expect-error
+		const cpf = generateCpf("XX");
+		expect(cpf).toHaveLength(CPF_LENGTH);
+		expect(isValidCpf(cpf)).toBe(true);
 	});
 });

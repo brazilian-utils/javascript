@@ -23,9 +23,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Community mirror of the official table used to build `CBO_TITLES`.
  */
 export const isValidCbo = (value: string | number): boolean => {
-	if (isNullish(value) || value === "") return false;
+	if (isNullish(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 
-	return digits.length === 6 && digits in CBO_TITLES;
+	return digits in CBO_TITLES;
 };

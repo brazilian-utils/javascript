@@ -7,6 +7,9 @@ import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
 import { parseBoleto } from "../parse-boleto/parse-boleto";
 import { generateBoleto } from "./generate-boleto";
 
+const drawArrecadacaoSegment = (): number =>
+	getBoletoInfo(generateBoleto({ type: "arrecadacao" }))?.segment ?? 0;
+
 describe("generateBoleto", () => {
 	test("should generate a valid boleto", () => {
 		const boleto = generateBoleto();
@@ -76,6 +79,30 @@ describe("generateBoleto", () => {
 		test("should keep generating bancário bank slips by default", () => {
 			expect(generateBoleto({})).toHaveLength(BOLETO_LENGTH);
 			expect(generateBoleto({ type: "bancario" })).toHaveLength(BOLETO_LENGTH);
+		});
+
+		test("should vary the segment across many draws, retrying with extra draws on the astronomically unlikely case they all collide", () => {
+			let segments = new Set(Array.from({ length: 200 }, drawArrecadacaoSegment));
+
+			if (segments.size === 1) {
+				segments = new Set(Array.from({ length: 200 }, drawArrecadacaoSegment));
+			}
+
+			expect(segments.size).toBeGreaterThan(1);
+		});
+
+		test("should pick the value identifier (position 3) from the same Math.random() draw that selects the check digit algorithm, modulo 11 below 0.5 ('8') and modulo 10 at or above 0.5 ('6')", () => {
+			const originalRandom = Math.random;
+
+			try {
+				Math.random = () => 0.3;
+				expect(generateBoleto({ type: "arrecadacao" })[2]).toBe("8");
+
+				Math.random = () => 0.5;
+				expect(generateBoleto({ type: "arrecadacao" })[2]).toBe("6");
+			} finally {
+				Math.random = originalRandom;
+			}
 		});
 	});
 });

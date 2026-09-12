@@ -3,8 +3,6 @@ import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { getStates } from "../get-states/get-states";
 
-const CODE_LENGTH = 7;
-
 /**
  * Looks up a Brazilian municipality by its 7 digit IBGE code, published by the IBGE.
  *
@@ -26,8 +24,8 @@ export const getMunicipalityByCode = (code: string | number): Municipality | nul
 
 	const digits = sanitizeToDigits(code);
 
-	if (digits.length !== CODE_LENGTH) return null;
-
+	// Every real municipality code is exactly 7 digits, so a `digits` of the wrong length simply
+	// finds no match in the loop below; there is no need to pre-validate its length here first.
 	for (const state of getStates()) {
 		const match = CITIES_DATA[state.code].find(
 			([, municipalityCode]) => municipalityCode === digits,

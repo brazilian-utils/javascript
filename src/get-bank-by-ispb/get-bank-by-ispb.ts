@@ -33,6 +33,7 @@ export const getBankByIspb = (value: string | number): Bank | null => {
 
 	const digits = sanitizeToDigits(value);
 
+	// Stryker disable next-line ConditionalExpression: every ISPB in BANKS is exactly 8 digits, so an oversized value can never match one, whether or not this half of the guard runs.
 	if (digits.length === 0 || digits.length > ISPB_LENGTH) return null;
 
 	const normalizedIspb = digits.padStart(ISPB_LENGTH, "0");

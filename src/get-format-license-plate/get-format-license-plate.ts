@@ -31,7 +31,7 @@ export type LicensePlateFormat = "LLLNNNN" | "LLLNLNN";
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  */
 export const getFormatLicensePlate = (value: string): LicensePlateFormat | null => {
-	if (typeof value !== "string" || value === "") return null;
+	if (typeof value !== "string") return null;
 
 	if (sanitizeToAlphanumeric(value).length !== LENGTH) return null;
 

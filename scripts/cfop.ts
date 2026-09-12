@@ -4,7 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
+import { fetchSortedRecord } from "../src/_internals/fetch-sorted-record/fetch-sorted-record.ts";
 
 const scriptsDir = dirname(fileURLToPath(import.meta.url));
 
@@ -35,36 +35,31 @@ const splitEmbeddedEntries = (code: string, description: string): [string, strin
 };
 
 const main = async () => {
-	const response = await fetchWithRetry(
+	const sorted = await fetchSortedRecord(
 		"https://raw.githubusercontent.com/jansenfelipe/cfop/master/cfop.csv",
+		"CFOP mirror",
+		async (response) => {
+			const csv = await response.text();
+
+			const data: Record<string, string> = {};
+
+			for (const line of csv.split("\n")) {
+				const match = line.match(/^(\d{4});"(.*)"\s*$/);
+
+				if (!match) continue;
+
+				const [, code, description] = match;
+
+				for (const [entryCode, entryDescription] of splitEmbeddedEntries(code, description)) {
+					if (entryCode.endsWith("00")) continue;
+
+					data[entryCode] = entryDescription;
+				}
+			}
+
+			return data;
+		},
 	);
-
-	if (!response.ok) {
-		throw new Error(`CFOP mirror request failed with status ${response.status}`);
-	}
-
-	const csv = await response.text();
-
-	const data: Record<string, string> = {};
-
-	for (const line of csv.split("\n")) {
-		const match = line.match(/^(\d{4});"(.*)"\s*$/);
-
-		if (!match) continue;
-
-		const [, code, description] = match;
-
-		for (const [entryCode, entryDescription] of splitEmbeddedEntries(code, description)) {
-			if (entryCode.endsWith("00")) continue;
-
-			data[entryCode] = entryDescription;
-		}
-	}
-
-	const sorted: Record<string, string> = {};
-	for (const code of Object.keys(data).sort()) {
-		sorted[code] = data[code];
-	}
 
 	await writeFile(
 		resolve(scriptsDir, "..", "./src/_internals/constants/cfop.ts"),

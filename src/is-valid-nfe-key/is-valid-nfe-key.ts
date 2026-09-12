@@ -1,16 +1,4 @@
-import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
-import { NFE_KEY_LENGTH } from "../_internals/constants/nfe-key";
-import { mod11 } from "../_internals/mod11/mod11";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { VALID_MODELS } from "./constants";
-
-const MODELS: readonly string[] = VALID_MODELS;
-
-const NUMBER_START = 25;
-const NUMBER_END = 34;
-const ABSENT_NUMBER = "000000000";
-
-const FORMAT_REGEX = /^(?:nfe)?[\d\s]+$/i;
+import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
 
 /**
  * Validates a DF-e (Documento Fiscal eletrônico) access key (chave de acesso).
@@ -43,30 +31,4 @@ const FORMAT_REGEX = /^(?:nfe)?[\d\s]+$/i;
  * isValidNfeKey("35170458716523000119010010000000121000123450"); // false (invalid mod)
  * ```
  */
-export const isValidNfeKey = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
-
-	if (!FORMAT_REGEX.test(value.trim())) return false;
-
-	const digits = sanitizeToDigits(value);
-
-	if (digits.length !== NFE_KEY_LENGTH) return false;
-
-	if (!(digits.slice(0, 2) in IBGE_UF_CODES)) return false;
-
-	const month = Number(digits.slice(4, 6));
-
-	if (month < 1 || month > 12) return false;
-
-	if (!MODELS.includes(digits.slice(20, 22))) return false;
-
-	if (digits.slice(NUMBER_START, NUMBER_END) === ABSENT_NUMBER) return false;
-
-	const emissionType = Number(digits[34]);
-
-	if (emissionType < 1 || emissionType > 9) return false;
-
-	const checkDigit = Number(digits[43]);
-
-	return mod11(digits.slice(0, 43), { variant: "arrecadacao" }) === checkDigit;
-};
+export const isValidNfeKey = (value: string): boolean => parseNfeKey(value) !== null;

@@ -29,27 +29,25 @@ export type ParseDecimalOptions = {
  * ```
  */
 export const parseDecimal = (value: string, options?: ParseDecimalOptions): number => {
-	if (typeof value !== "string" || value === "") return 0;
+	if (typeof value !== "string") return 0;
 
 	const minorUnits = options?.minorUnits ?? 0;
 	const maxFractionDigits = options?.maxFractionDigits ?? 2;
 
-	const firstDigitIndex = value.search(/\d/);
-	const prefix = firstDigitIndex === -1 ? value : value.slice(0, firstDigitIndex);
+	const [prefix] = value.split(/\d/, 1);
 	const sign = prefix.includes("-") ? -1 : 1;
 
 	const cleaned = value.replace(/[^\d.,]/g, "");
 	const separatorIndex = Math.max(cleaned.lastIndexOf(","), cleaned.lastIndexOf("."));
-	const fraction = separatorIndex === -1 ? "" : cleaned.slice(separatorIndex + 1);
-	const isDecimal = fraction.length >= 1 && fraction.length <= maxFractionDigits;
 
 	if (separatorIndex === -1) {
-		const digits = cleaned || "0";
-
-		return sign * (Number.parseInt(digits, 10) / 10 ** minorUnits) || 0;
+		return sign * (Number.parseInt(cleaned, 10) / 10 ** minorUnits) || 0;
 	}
 
+	const fraction = cleaned.slice(separatorIndex + 1);
+	const isDecimal = fraction.length <= maxFractionDigits;
 	const integerPart = (isDecimal ? cleaned.slice(0, separatorIndex) : cleaned).replace(/\D/g, "");
+	const numeric = isDecimal ? `${integerPart}.${fraction}` : integerPart;
 
-	return sign * Number.parseFloat(`${integerPart || "0"}.${isDecimal ? fraction : "0"}`) || 0;
+	return sign * Number.parseFloat(numeric) || 0;
 };

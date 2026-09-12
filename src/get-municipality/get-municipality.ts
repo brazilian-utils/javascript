@@ -18,11 +18,13 @@ export type GetMunicipalityOptions = GetMunicipalityByCodeOptions | GetMunicipal
 
 let codeIndex: Map<string, [string, string]> | undefined;
 
+// Stryker disable next-line MethodExpression: normalizeName is only ever used to compare two
+// values against each other (never returned or displayed), and every name in the dataset is
+// plain ASCII Latin letters once accents are stripped, so folding to upper or lower case is
+// symmetric and cannot change which names are considered equal.
 const normalizeName = (value: string): string => removeAccents(value).trim().toUpperCase();
 
 const getMunicipalityByCode = (code: string): [string, string] | null => {
-	if (typeof code !== "string" || !/^\d{7}$/.test(code)) return null;
-
 	if (!codeIndex) {
 		codeIndex = new Map();
 
@@ -33,6 +35,8 @@ const getMunicipalityByCode = (code: string): [string, string] | null => {
 		}
 	}
 
+	// `Map#get` never throws and simply misses for a key of the wrong shape or type (a malformed,
+	// too short/long, or non-string code), so there is no need to pre-validate `code` here first.
 	return codeIndex.get(code) ?? null;
 };
 
@@ -40,17 +44,19 @@ const getMunicipalityCodeByName = ({
 	municipalityName,
 	uf,
 }: GetMunicipalityByNameOptions): string | null => {
-	if (typeof municipalityName !== "string" || municipalityName === "") return null;
 	if (typeof uf !== "string") return null;
 
 	const normalizedUf = uf.trim().toUpperCase();
 
-	if (!/^[A-Z]{2}$/.test(normalizedUf)) return null;
-
+	// Every real state code is exactly 2 uppercase letters, so a malformed `normalizedUf` (wrong
+	// length, digits, ...) simply finds no match below; there is no need to pre-validate its shape.
 	const stateEntry = Object.entries(CITIES_DATA).find(([code]) => code === normalizedUf);
 
 	if (!stateEntry) return null;
 
+	// `removeAccents` (and so `normalizeName`) already folds a non-string or empty
+	// `municipalityName` down to `""`, which no real municipality name normalizes to, so there is
+	// no need to pre-validate `municipalityName` here first.
 	const normalizedName = normalizeName(municipalityName);
 	const match = stateEntry[1].find(([name]) => normalizeName(name) === normalizedName);
 

@@ -1,4 +1,3 @@
-import { CEI_LENGTH } from "../_internals/constants/cei";
 import { type FormatParams, format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -33,7 +32,7 @@ export const formatCei = (value: string | number, options?: FormatCeiOptions): s
 
 	return format({
 		pad: options?.pad,
-		value: sanitizeToDigits(value).slice(0, CEI_LENGTH),
+		value: sanitizeToDigits(value),
 		pattern: PATTERN,
 	});
 };

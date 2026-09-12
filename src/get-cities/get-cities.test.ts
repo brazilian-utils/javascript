@@ -14,6 +14,14 @@ const KNOWN_STATE_CITY_COUNTS: Record<string, number> = {
 };
 
 describe("getCities", () => {
+	it("should match a hand-written list of city names at the start and end of the sorted list", () => {
+		const cities = getCities();
+
+		expect(cities.slice(0, 3)).toEqual(["Abadia de Goiás", "Abadia dos Dourados", "Abadiânia"]);
+		expect(cities.slice(-3)).toEqual(["Zacarias", "Zé Doca", "Zortéa"]);
+		expect(cities).toContain("São Paulo");
+	});
+
 	it("should return cities of all states", () => {
 		expect(getCities().length).toEqual(NUMBER_OF_BRAZILIAN_CITIES);
 	});
@@ -75,5 +83,18 @@ describe("getCities", () => {
 				expect(getCities(code)).toEqual(stateCityNames);
 			});
 		}
+	});
+
+	it("should return a fresh copy of the cached combined list on every call", () => {
+		const first = getCities();
+		const second = getCities();
+
+		expect(second).toEqual(first);
+		expect(second).not.toBe(first);
+
+		first.push("Cidade Inexistente");
+
+		expect(getCities()).not.toContain("Cidade Inexistente");
+		expect(getCities()).toHaveLength(first.length - 1);
 	});
 });

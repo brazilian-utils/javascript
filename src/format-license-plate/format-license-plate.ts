@@ -1,4 +1,3 @@
-import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
 import { parseLicensePlate } from "../parse-license-plate/parse-license-plate";
 import { OLD_FORMAT_SEPARATOR_INDEX } from "./constants";
 
@@ -24,16 +23,6 @@ import { OLD_FORMAT_SEPARATOR_INDEX } from "./constants";
  */
 export const formatLicensePlate = (value: string): string => {
 	const parsed = parseLicensePlate(value);
-
-	if (!parsed) return "";
-
-	const format = getFormatLicensePlate(parsed);
-
-	if (format === "LLLNNNN") {
-		return `${parsed.slice(0, OLD_FORMAT_SEPARATOR_INDEX)}-${parsed.slice(OLD_FORMAT_SEPARATOR_INDEX)}`;
-	}
-
-	if (format) return parsed;
 
 	if (!/^[A-Z]{1,3}$/.test(parsed.slice(0, Math.min(parsed.length, OLD_FORMAT_SEPARATOR_INDEX)))) {
 		return "";

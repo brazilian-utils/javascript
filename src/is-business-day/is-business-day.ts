@@ -74,10 +74,6 @@ export const isBusinessDay = (value: Date, options?: IsBusinessDayOptions): bool
 	return !getHolidays({ year, stateCode }).some((holiday) => {
 		if (!includeOptional && holiday.type === "optional") return false;
 
-		return (
-			holiday.date.getFullYear() === year &&
-			holiday.date.getMonth() === month &&
-			holiday.date.getDate() === date
-		);
+		return holiday.date.getMonth() === month && holiday.date.getDate() === date;
 	});
 };

@@ -60,6 +60,7 @@ export const parsePixKey = (value: string): PixKey | null => {
 
 	const trimmed = value.trim();
 
+	// Stryker disable next-line ConditionalExpression: an empty trimmed value never matches the EVP regex, never contains "@", normalizes to no valid phone, is never a valid CNPJ, and has no CPF-length digits, so every branch below already falls through to null on its own
 	if (!trimmed) return null;
 
 	if (EVP_REGEX.test(trimmed)) return { type: "evp", value: trimmed.toLowerCase() };
@@ -85,6 +86,7 @@ export const parsePixKey = (value: string): PixKey | null => {
 
 	const digits = sanitizeToDigits(trimmed);
 
+	// Stryker disable next-line ConditionalExpression: isValidCpf already rejects any digits whose length is not CPF_LENGTH on its own, so this length check can never change the outcome
 	if (digits.length === CPF_LENGTH && isValidCpf(digits)) return { type: "cpf", value: digits };
 
 	return phone;

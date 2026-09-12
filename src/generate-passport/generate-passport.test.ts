@@ -8,4 +8,16 @@ describe("generatePassport", () => {
 			expect(isValidPassport(generatePassport())).toBe(true);
 		}
 	});
+
+	test("should map a forced random value to the hand-computed letters and digits", () => {
+		const originalRandom = Math.random;
+
+		Math.random = () => 0.5;
+
+		try {
+			expect(generatePassport()).toBe("NN555555");
+		} finally {
+			Math.random = originalRandom;
+		}
+	});
 });

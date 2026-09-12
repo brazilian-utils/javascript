@@ -126,6 +126,25 @@ describe("generatePixPayload", () => {
 			).toBeNull();
 		});
 
+		test('when it is a function, since a function is not typeof "object" even when it carries key/merchantName/merchantCity properties of its own', () => {
+			const impostor = Object.assign(() => {}, {
+				key: "12345678909",
+				merchantName: "Fulano",
+				merchantCity: "Brasilia",
+			});
+
+			expect(generatePixPayload(impostor)).toBeNull();
+		});
+
+		test("when url is not a string, even when its length and stringified form would otherwise pass validation", () => {
+			const impostor = { length: 5, toString: () => "pix.example.com/x" };
+
+			expect(
+				// @ts-expect-error
+				generatePixPayload({ url: impostor, merchantName: "Fulano", merchantCity: "Brasilia" }),
+			).toBeNull();
+		});
+
 		test("when the merchant name is missing or empty after folding", () => {
 			// @ts-expect-error
 			expect(generatePixPayload({ key: EVP, merchantCity: "Brasilia" })).toBeNull();
@@ -156,6 +175,12 @@ describe("generatePixPayload", () => {
 
 		test("when the amount does not fit in 13 characters", () => {
 			expect(generatePixPayload({ ...BASE, amount: 12_345_678_901_2 })).toBeNull();
+		});
+
+		test("but accept an amount whose formatted length is exactly 13 characters", () => {
+			expect(generatePixPayload({ ...BASE, amount: 9_999_999_999.99 })).toContain(
+				"54139999999999.99",
+			);
 		});
 
 		test("when the txid is not alphanumeric or is too long", () => {
@@ -253,6 +278,14 @@ describe("generatePixPayload", () => {
 			).toMatchObject({
 				merchantName: "Jose Antonio",
 			});
+		});
+
+		test("trimming trailing whitespace introduced by truncating to the maximum length", () => {
+			const pix = parsePixPayload(
+				generatePixPayload({ ...BASE, merchantName: `${"A".repeat(24)} B` }) ?? "",
+			);
+
+			expect(pix?.merchantName).toBe("A".repeat(24));
 		});
 
 		test("truncating the merchant name to 25 characters", () => {

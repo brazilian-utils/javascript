@@ -18,7 +18,7 @@ const getCheckDigit = (value: string): number => {
 
 	for (let i = 0; i < value.length; i++) {
 		sum += (value.charCodeAt(i) - 48) * weight;
-		weight = weight < 10 ? weight + 1 : 0;
+		weight = weight + 1;
 	}
 
 	const remainder = sum % 11;
@@ -71,13 +71,11 @@ export const isValidCertidao = (
 	value: string | number,
 	options?: IsValidCertidaoOptions,
 ): boolean => {
-	if (typeof value !== "string" && typeof value !== "number") return false;
+	if (typeof value !== "string") return false;
 
 	const digits = sanitizeToDigits(value);
 
-	if (digits.length !== CERTIDAO_LENGTH) return false;
-
-	if (!CERTIDAO_FORMAT_REGEX.test(String(value).trim())) return false;
+	if (!CERTIDAO_FORMAT_REGEX.test(value.trim())) return false;
 
 	const base = digits.slice(0, CERTIDAO_BASE_LENGTH);
 	const first = getCheckDigit(base);

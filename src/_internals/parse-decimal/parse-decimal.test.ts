@@ -34,6 +34,11 @@ describe("parseDecimal", () => {
 		expect(parseDecimal("-1234")).toBe(-1234);
 	});
 
+	test("should ignore a minus sign written after the first digit", () => {
+		expect(parseDecimal("R1-")).toBe(1);
+		expect(parseDecimal("100-")).toBe(100);
+	});
+
 	test("should normalize negative zero", () => {
 		expect(Object.is(parseDecimal("-0,00"), 0)).toBe(true);
 		expect(Object.is(parseDecimal("-0"), 0)).toBe(true);

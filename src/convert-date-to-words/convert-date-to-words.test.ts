@@ -1,6 +1,17 @@
 import { MONTH_NAMES, WEEKDAY_NAMES } from "../_internals/constants/number-words";
 import { describe, expect, test } from "../_internals/test/runtime";
-import { convertDateToWords } from "./convert-date-to-words";
+import { convertDateToWords, type ConvertDateToWordsOptions } from "./convert-date-to-words";
+
+function expectDates(
+	cases: ReadonlyArray<readonly [string, string]>,
+	options?: ConvertDateToWordsOptions,
+): void {
+	const mismatches = cases.filter(
+		([input, expected]) => convertDateToWords(input, options) !== expected,
+	);
+
+	expect(mismatches).toEqual([]);
+}
 
 describe("convertDateToWords", () => {
 	test("should return 'primeiro' for day 1", () => {
@@ -167,14 +178,8 @@ describe("convertDateToWords", () => {
 				["08/03/2024", "sexta-feira, oito de março de dois mil e vinte e quatro"],
 				["02/03/2024", "sábado, dois de março de dois mil e vinte e quatro"],
 			];
-			const failures: Array<{ input: string; actual: string; expected: string }> = [];
 
-			for (const [input, expected] of cases) {
-				const actual = convertDateToWords(input, { weekday: true });
-				if (actual !== expected) failures.push({ input, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectDates(cases, { weekday: true });
 		});
 
 		test("should compute the weekday from a Date's local calendar date", () => {
@@ -219,6 +224,23 @@ describe("convertDateToWords", () => {
 			// @ts-expect-error
 			expect(convertDateToWords(20240101)).toBe("");
 		});
+
+		test("should return '' for a non-Date/non-string value even when it stringifies to a valid date", () => {
+			const trojan = { toString: () => "01/01/2024" };
+
+			// @ts-expect-error
+			expect(convertDateToWords(trojan)).toBe("");
+		});
+
+		test("should reject a 'dd/mm/yyyy' match that is not anchored to the whole string", () => {
+			expect(convertDateToWords("01/01/2024xyz")).toBe("");
+			expect(convertDateToWords("xyz01/01/2024")).toBe("");
+		});
+
+		test("should reject an ISO 'yyyy-mm-dd' match that is not anchored to the whole string", () => {
+			expect(convertDateToWords("2024-01-02xyz")).toBe("");
+			expect(convertDateToWords("xyz2024-01-02")).toBe("");
+		});
 	});
 
 	describe("years outside the calendar", () => {
@@ -232,6 +254,10 @@ describe("convertDateToWords", () => {
 			beforeYearOne.setFullYear(-500);
 
 			expect(convertDateToWords(beforeYearOne)).toBe("");
+		});
+
+		test("should accept year 1, the earliest year with a year to write out", () => {
+			expect(convertDateToWords("01/01/0001")).toBe("primeiro de janeiro de um");
 		});
 	});
 
@@ -305,14 +331,7 @@ describe("convertDateToWords", () => {
 				["01/12/2024", "primeiro de dezembro de dois mil e vinte e quatro"],
 				["15/12/2024", "quinze de dezembro de dois mil e vinte e quatro"],
 			];
-			const failures: Array<{ input: string; actual: string; expected: string }> = [];
-
-			for (const [input, expected] of cases) {
-				const actual = convertDateToWords(input);
-				if (actual !== expected) failures.push({ input, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectDates(cases);
 		});
 
 		test("should match a hand-written string for every day of a 31 day month", () => {
@@ -349,14 +368,7 @@ describe("convertDateToWords", () => {
 				["30/03/2024", "trinta de março de dois mil e vinte e quatro"],
 				["31/03/2024", "trinta e um de março de dois mil e vinte e quatro"],
 			];
-			const failures: Array<{ input: string; actual: string; expected: string }> = [];
-
-			for (const [input, expected] of cases) {
-				const actual = convertDateToWords(input);
-				if (actual !== expected) failures.push({ input, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectDates(cases);
 		});
 
 		test("should reproduce every published brutils 'convert_date_to_text' example (tests/test_date_utils.py, lowercase here because brutils always capitalizes and this library exposes that as case: 'sentence')", () => {
@@ -367,14 +379,7 @@ describe("convertDateToWords", () => {
 				["29/02/2020", "vinte e nove de fevereiro de dois mil e vinte"],
 				["01/01/1900", "primeiro de janeiro de mil e novecentos"],
 			];
-			const failures: Array<{ input: string; actual: string; expected: string }> = [];
-
-			for (const [input, expected] of cases) {
-				const actual = convertDateToWords(input);
-				if (actual !== expected) failures.push({ input, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectDates(cases);
 		});
 
 		test("should match a hand-written string for day 31 and for the leap day", () => {
@@ -382,14 +387,7 @@ describe("convertDateToWords", () => {
 				["31/01/2024", "trinta e um de janeiro de dois mil e vinte e quatro"],
 				["29/02/2024", "vinte e nove de fevereiro de dois mil e vinte e quatro"],
 			];
-			const failures: Array<{ input: string; actual: string; expected: string }> = [];
-
-			for (const [input, expected] of cases) {
-				const actual = convertDateToWords(input);
-				if (actual !== expected) failures.push({ input, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectDates(cases);
 		});
 
 		test("should render the year without the thousands comma for 1900, 1999, 2000, 2001, 2024 and 2100", () => {
@@ -405,14 +403,7 @@ describe("convertDateToWords", () => {
 				["01/01/2100", "primeiro de janeiro de dois mil e cem"],
 				["10/05/1999", "dez de maio de mil novecentos e noventa e nove"],
 			];
-			const failures: Array<{ input: string; actual: string; expected: string }> = [];
-
-			for (const [input, expected] of cases) {
-				const actual = convertDateToWords(input);
-				if (actual !== expected) failures.push({ input, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectDates(cases);
 		});
 
 		test("should give the same hand-written result for the 'dd/mm/yyyy' and the ISO form", () => {
@@ -420,14 +411,7 @@ describe("convertDateToWords", () => {
 				["2024-01-02", "dois de janeiro de dois mil e vinte e quatro"],
 				["1999-05-10", "dez de maio de mil novecentos e noventa e nove"],
 			];
-			const failures: Array<{ input: string; actual: string; expected: string }> = [];
-
-			for (const [input, expected] of cases) {
-				const actual = convertDateToWords(input);
-				if (actual !== expected) failures.push({ input, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectDates(cases);
 		});
 	});
 });

@@ -118,10 +118,7 @@ export const numberToWords = (value: number, options?: NumberToWordsOptions): st
 	}
 
 	const highestScale = groups.length - 1;
-	let lastNonZeroIndex = -1;
-	for (let i = 0; i < groups.length; i++) {
-		if (groups[i] > 0) lastNonZeroIndex = i;
-	}
+	const lastNonZeroIndex = groups.findLastIndex((groupValue) => groupValue > 0);
 
 	let result = "";
 
@@ -145,6 +142,7 @@ export const numberToWords = (value: number, options?: NumberToWordsOptions): st
 		}
 
 		const connector =
+			// Stryker disable next-line EqualityOperator: equivalent, groupValue === 100 already satisfies isRoundHundred(groupValue)
 			index === lastNonZeroIndex && (groupValue < 100 || isRoundHundred(groupValue)) ? " e " : ", ";
 
 		result += connector + groupText;

@@ -79,5 +79,13 @@ describe("isValidRenavam", () => {
 		test("when is a RENAVAM valid with mixed characters that sanitize to a valid RENAVAM", () => {
 			expect(isValidRenavam("639884962abc")).toBe(true);
 		});
+
+		test("when the multiplier cycle wraps from 9 back to 2 on non-zero digits", () => {
+			expect(isValidRenavam("12345678900")).toBe(true);
+		});
+
+		test("when the checksum remainder is exactly 1 (expected digit 0, not 10)", () => {
+			expect(isValidRenavam("00000000060")).toBe(true);
+		});
 	});
 });

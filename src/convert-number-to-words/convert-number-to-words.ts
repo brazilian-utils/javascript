@@ -47,7 +47,7 @@ export const convertNumberToWords = (
 	value: number,
 	options?: ConvertNumberToWordsOptions,
 ): string => {
-	if (typeof value !== "number" || !Number.isFinite(value)) return "";
+	if (!Number.isFinite(value)) return "";
 
 	const truncated = Math.trunc(value);
 

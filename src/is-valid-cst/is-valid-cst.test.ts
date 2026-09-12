@@ -100,6 +100,11 @@ describe("isValidCst", () => {
 		expect(isValidCst("00", null)).toBe(false);
 	});
 
+	it("should return false when options is a non-null, non-object value (e.g. a string)", () => {
+		// @ts-expect-error not an options object
+		expect(isValidCst("00", "foo")).toBe(false);
+	});
+
 	it("should return false for an empty string", () => {
 		expect(isValidCst("", { tax: "icms" })).toBe(false);
 	});

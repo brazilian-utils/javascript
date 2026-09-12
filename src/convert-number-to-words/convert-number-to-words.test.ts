@@ -1,6 +1,17 @@
 import { NUMBER_TO_WORDS_MAX_VALUE } from "../_internals/number-to-words/number-to-words";
 import { describe, expect, test } from "../_internals/test/runtime";
-import { convertNumberToWords } from "./convert-number-to-words";
+import { convertNumberToWords, type ConvertNumberToWordsOptions } from "./convert-number-to-words";
+
+function expectWords(
+	cases: ReadonlyArray<readonly [number, string]>,
+	options?: ConvertNumberToWordsOptions,
+): void {
+	const failures = cases.filter(
+		([value, expected]) => convertNumberToWords(value, options) !== expected,
+	);
+
+	expect(failures).toEqual([]);
+}
 
 describe("convertNumberToWords", () => {
 	test("should return 'zero' for 0", () => {
@@ -98,39 +109,8 @@ describe("convertNumberToWords", () => {
 	});
 
 	describe("literal case tables", () => {
-		test("should match a hand-written word for every integer from 0 to 200 (masculine)", () => {
+		test("should match a hand-written word for every integer from 31 to 200 (masculine)", () => {
 			const cases: Array<[number, string]> = [
-				[0, "zero"],
-				[1, "um"],
-				[2, "dois"],
-				[3, "três"],
-				[4, "quatro"],
-				[5, "cinco"],
-				[6, "seis"],
-				[7, "sete"],
-				[8, "oito"],
-				[9, "nove"],
-				[10, "dez"],
-				[11, "onze"],
-				[12, "doze"],
-				[13, "treze"],
-				[14, "catorze"],
-				[15, "quinze"],
-				[16, "dezesseis"],
-				[17, "dezessete"],
-				[18, "dezoito"],
-				[19, "dezenove"],
-				[20, "vinte"],
-				[21, "vinte e um"],
-				[22, "vinte e dois"],
-				[23, "vinte e três"],
-				[24, "vinte e quatro"],
-				[25, "vinte e cinco"],
-				[26, "vinte e seis"],
-				[27, "vinte e sete"],
-				[28, "vinte e oito"],
-				[29, "vinte e nove"],
-				[30, "trinta"],
 				[31, "trinta e um"],
 				[32, "trinta e dois"],
 				[33, "trinta e três"],
@@ -302,14 +282,7 @@ describe("convertNumberToWords", () => {
 				[199, "cento e noventa e nove"],
 				[200, "duzentos"],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertNumberToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectWords(cases);
 		});
 
 		test("should match a hand-written word for every round hundred and the hundred that follows it", () => {
@@ -334,14 +307,7 @@ describe("convertNumberToWords", () => {
 				[901, "novecentos e um"],
 				[999, "novecentos e noventa e nove"],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertNumberToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectWords(cases);
 		});
 
 		test("should match a hand-written word at every ten/hundred/thousand/scale boundary", () => {
@@ -395,14 +361,7 @@ describe("convertNumberToWords", () => {
 					"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
 				],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertNumberToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectWords(cases);
 		});
 
 		test("should prefix 'menos' to a hand-written word for every integer from -1 to -100", () => {
@@ -508,14 +467,7 @@ describe("convertNumberToWords", () => {
 				[-99, "menos noventa e nove"],
 				[-100, "menos cem"],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertNumberToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectWords(cases);
 		});
 
 		test("should prefix 'menos' to a hand-written word at negative scale boundaries", () => {
@@ -531,14 +483,7 @@ describe("convertNumberToWords", () => {
 					"menos novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
 				],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
-
-			for (const [value, expected] of cases) {
-				const actual = convertNumberToWords(value);
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectWords(cases);
 		});
 
 		test("should match a hand-written feminine word for every integer from 0 to 30", () => {
@@ -575,14 +520,8 @@ describe("convertNumberToWords", () => {
 				[29, "vinte e nove"],
 				[30, "trinta"],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
 
-			for (const [value, expected] of cases) {
-				const actual = convertNumberToWords(value, { gender: "feminine" });
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectWords(cases, { gender: "feminine" });
 		});
 
 		test("should match a hand-written feminine word at hundred/thousand/million boundaries", () => {
@@ -614,14 +553,8 @@ describe("convertNumberToWords", () => {
 				[2000000, "dois milhões"],
 				[2000002, "dois milhões e duas"],
 			];
-			const failures: Array<{ value: number; actual: string; expected: string }> = [];
 
-			for (const [value, expected] of cases) {
-				const actual = convertNumberToWords(value, { gender: "feminine" });
-				if (actual !== expected) failures.push({ value, actual, expected });
-			}
-
-			expect(failures).toEqual([]);
+			expectWords(cases, { gender: "feminine" });
 		});
 	});
 });

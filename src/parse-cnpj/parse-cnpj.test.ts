@@ -21,4 +21,9 @@ describe("parseCnpj", () => {
 	it("should ignore characters after the CNPJ length for version 2", () => {
 		expect(parseCnpj("Q0.SLF.MBD/7VX4-39ABC", { version: 2 })).toBe("Q0SLFMBD7VX439");
 	});
+
+	it("should return an empty string for null", () => {
+		// @ts-expect-error not a string or number
+		expect(parseCnpj(null)).toBe("");
+	});
 });

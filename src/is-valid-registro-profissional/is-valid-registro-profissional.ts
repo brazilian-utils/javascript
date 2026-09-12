@@ -71,7 +71,7 @@ export const isValidRegistroProfissional = (
 	value: string,
 	options: IsValidRegistroProfissionalOptions,
 ): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	if (typeof options !== "object" || options === null) return false;
 

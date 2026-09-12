@@ -20,4 +20,11 @@ describe("formatCnh", () => {
 	it("should remove non numeric characters", () => {
 		expect(formatCnh("000.000.001-19")).toBe("000000001-19");
 	});
+
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(formatCnh(null)).toBe("");
+		// @ts-expect-error
+		expect(formatCnh(undefined)).toBe("");
+	});
 });

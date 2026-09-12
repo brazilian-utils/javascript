@@ -53,6 +53,14 @@ describe("isValidCreditCard", () => {
 			expect(isValidCreditCard("12345678901234567850")).toBe(false);
 		});
 
+		test("when it has more than 19 digits and would still pass the Luhn check on its own", () => {
+			expect(isValidCreditCard("00000000000000000000")).toBe(false);
+		});
+
+		test("when it has fewer than 12 digits and would still pass the Luhn check on its own", () => {
+			expect(isValidCreditCard("0")).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidCreditCard("")).toBe(false);
 		});

@@ -61,5 +61,23 @@ describe("capitalize", () => {
 			expect(capitalize("rio-de-janeiro")).toBe("Rio-de-Janeiro");
 			expect(capitalize("a - b")).toBe("A - B");
 		});
+
+		test("when a leading hyphen or slash is not itself counted as a word, so the preposition right after it is still the first word and keeps its capital", () => {
+			expect(capitalize("-de paula")).toBe("-De Paula");
+			expect(capitalize("/de paula")).toBe("/De Paula");
+		});
+
+		test("when consecutive separators produce an empty token, which must not be counted as a word either", () => {
+			expect(capitalize("--de paula")).toBe("--De Paula");
+		});
+	});
+
+	test("should return an empty string when the value is not a string", () => {
+		// @ts-expect-error
+		expect(capitalize(null)).toBe("");
+		// @ts-expect-error
+		expect(capitalize(undefined)).toBe("");
+		// @ts-expect-error
+		expect(capitalize(123)).toBe("");
 	});
 });

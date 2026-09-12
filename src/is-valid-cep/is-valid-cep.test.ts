@@ -22,6 +22,11 @@ describe("isValidCep", () => {
 			expect(isValidCep({})).toBe(false);
 		});
 
+		test("when it is an array, even one that stringifies to a valid CEP", () => {
+			// @ts-expect-error not a string or number
+			expect(isValidCep(["01310100"])).toBe(false);
+		});
+
 		test("when length is less than 8", () => {
 			expect(isValidCep("12345")).toBe(false);
 		});

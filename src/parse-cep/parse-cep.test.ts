@@ -13,4 +13,9 @@ describe("parseCep", () => {
 	it("should ignore digits after the CEP length", () => {
 		expect(parseCep("01001000123")).toBe("01001000");
 	});
+
+	it("should return an empty string for null", () => {
+		// @ts-expect-error not a string or number
+		expect(parseCep(null)).toBe("");
+	});
 });

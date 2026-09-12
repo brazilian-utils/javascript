@@ -16,6 +16,6 @@ import { LENGTH } from "./constants";
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  */
 export const parseLicensePlate = (value: string): string => {
-	if (typeof value !== "string" || value === "") return "";
+	if (typeof value !== "string") return "";
 	return sanitizeToAlphanumeric(value).slice(0, LENGTH);
 };

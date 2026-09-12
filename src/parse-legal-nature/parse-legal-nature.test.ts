@@ -9,4 +9,9 @@ describe("parseLegalNature", () => {
 	it("should ignore digits after the legal nature length", () => {
 		expect(parseLegalNature("206299")).toBe("2062");
 	});
+
+	it("should return an empty string for null", () => {
+		// @ts-expect-error not a string or number
+		expect(parseLegalNature(null)).toBe("");
+	});
 });

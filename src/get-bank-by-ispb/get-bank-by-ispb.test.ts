@@ -102,5 +102,10 @@ describe("getBankByIspb", () => {
 			// @ts-expect-error
 			expect(getBankByIspb([])).toBeNull();
 		});
+
+		test("when it is an array whose string form would otherwise resolve to a real ispb", () => {
+			// @ts-expect-error
+			expect(getBankByIspb([0])).toBeNull();
+		});
 	});
 });

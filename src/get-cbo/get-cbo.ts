@@ -32,12 +32,12 @@ export type Cbo = {
  * Community mirror of the official table used to build `CBO_TITLES`.
  */
 export const getCbo = (value: string | number): Cbo | null => {
-	if (isNullish(value) || value === "") return null;
+	if (isNullish(value)) return null;
 
 	const digits =
 		typeof value === "number" ? String(value).padStart(6, "0") : sanitizeToDigits(value);
 
-	if (digits.length !== 6 || !(digits in CBO_TITLES)) return null;
+	if (!(digits in CBO_TITLES)) return null;
 
 	return { code: digits, title: CBO_TITLES[digits] };
 };

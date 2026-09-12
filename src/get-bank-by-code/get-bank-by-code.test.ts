@@ -98,5 +98,10 @@ describe("getBankByCode", () => {
 			// @ts-expect-error
 			expect(getBankByCode([])).toBeNull();
 		});
+
+		test("when it is an array whose string form would otherwise resolve to a real code", () => {
+			// @ts-expect-error
+			expect(getBankByCode([1])).toBeNull();
+		});
 	});
 });

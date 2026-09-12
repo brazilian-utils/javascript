@@ -19,7 +19,7 @@ const COMBINING_MARKS_REGEX = /\p{M}/gu;
  * ```
  */
 export const removeAccents = (value: string): string => {
-	if (typeof value !== "string" || value === "") return "";
+	if (typeof value !== "string") return "";
 
 	return value.normalize("NFD").replace(COMBINING_MARKS_REGEX, "");
 };

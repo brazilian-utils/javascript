@@ -8,4 +8,16 @@ describe("generateLegalNature", () => {
 			expect(isValidLegalNature(generateLegalNature())).toBe(true);
 		}
 	});
+
+	it("should map a forced random value to the hand-computed code at that index, not always the first entry", () => {
+		const originalRandom = Math.random;
+
+		Math.random = () => 0.5;
+
+		try {
+			expect(generateLegalNature()).toBe("2216");
+		} finally {
+			Math.random = originalRandom;
+		}
+	});
 });

@@ -21,6 +21,14 @@ describe("isValidProcessoJuridico", () => {
 		test(`when length is less than ${PROCESSO_JURIDICO_LENGTH}`, () => {
 			expect(isValidProcessoJuridico("123")).toBe(false);
 		});
+
+		test("when it sanitizes to more digits than the expected length, even if the check digit still matches", () => {
+			expect(isValidProcessoJuridico("0002080252012515004999")).toBe(false);
+		});
+
+		test("when it is a 20 digit value with a mismatched check digit", () => {
+			expect(isValidProcessoJuridico("00020802520125150050")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {

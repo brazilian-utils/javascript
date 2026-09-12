@@ -21,12 +21,13 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/
  */
 export const isValidCnh = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const digits = sanitizeToDigits(value);
 
 	if (digits.length !== 11 || isRepeatedDigits(digits)) return false;
 
+	// Stryker disable next-line MethodExpression: the verifier helpers only read indices 0-8.
 	const base = digits.slice(0, 9);
 
 	const { firstVerifier, decrement } = calculateCnhFirstVerifier(base);

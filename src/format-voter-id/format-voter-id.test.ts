@@ -31,4 +31,11 @@ describe("formatVoterId", () => {
 		expect(formatVoterId("123456788")).toBe("1234 5678 8");
 		expect(formatVoterId("123456788019")).toBe("1234 5678 80 19");
 	});
+
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(formatVoterId(null)).toBe("");
+		// @ts-expect-error
+		expect(formatVoterId(undefined)).toBe("");
+	});
 });

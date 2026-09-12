@@ -3,6 +3,13 @@ import { describe, expect, it } from "../_internals/test/runtime";
 import { formatCnpj } from "./format-cnpj";
 
 describe("formatCnpj", () => {
+	it("should return an empty string for null or undefined", () => {
+		// @ts-expect-error
+		expect(formatCnpj(null)).toBe("");
+		// @ts-expect-error
+		expect(formatCnpj(undefined)).toBe("");
+	});
+
 	it("should format cnpj with mask", () => {
 		expect(formatCnpj("")).toBe("");
 		expect(formatCnpj("4")).toBe("4");

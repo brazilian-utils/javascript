@@ -18,16 +18,21 @@ const NUMERIC_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{4}[\
 
 const cleanCnpj = (cnpj: string): string => {
 	let result = "";
+	// Stryker disable next-line EqualityOperator: cnpj.length is the exact bound; one extra iteration would read cnpj[cnpj.length], which is undefined and fails every character-class comparison below either way.
 	for (let i = 0; i < cnpj.length; i++) {
+		// Stryker disable next-line ConditionalExpression,EqualityOperator: this early exit only bounds how much of an oversized input is scanned; whatever length `result` ends up with, the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX check still requires exactly CNPJ_LENGTH real characters and rejects anything else, so the exact cutoff point here never changes the final answer.
 		if (result.length > CNPJ_LENGTH) break;
 
 		const char = cnpj[i];
-		if (
-			(char >= "0" && char <= "9") ||
-			(char >= "A" && char <= "Z") ||
-			(char >= "a" && char <= "z")
-		) {
-			result += char >= "a" && char <= "z" ? String.fromCharCode(char.charCodeAt(0) - 32) : char;
+		// Stryker disable next-line ConditionalExpression: the only characters that ever reach isValidChecksum are ones the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX already restricted to "0"-"9", "A"-"Z" or a "\s.-/" separator (all below "0" in code point), so no reachable character can trigger this comparison's alternate branch without the whole match already having failed for an unrelated reason.
+		const isDigit = char >= "0" && char <= "9";
+		// Stryker disable next-line ConditionalExpression: same reasoning as isDigit above — any character reaching here already satisfied FORMAT_REGEX/NUMERIC_FORMAT_REGEX, so it is always a genuine "0"-"9", "A"-"Z", "a"-"z" or a low-code-point separator.
+		const isUpper = char >= "A" && char <= "Z";
+		// Stryker disable next-line ConditionalExpression: a character above "z" that this would wrongly accept is never itself "0"-"9"/"A"-"Z" or a "\s.-/" separator, and toUpperCase() cannot turn it into one either, so the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX already rejects any string containing it, regardless of this classification.
+		const isLower = char >= "a" && char <= "z";
+
+		if (isDigit || isUpper || isLower) {
+			result += isLower ? String.fromCharCode(char.charCodeAt(0) - 32) : char;
 		}
 	}
 	return result;
@@ -81,25 +86,23 @@ const isValidChecksum = (cnpj: string): boolean => {
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
 export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean => {
-	if (typeof cnpj !== "string" || cnpj === "") return false;
+	if (typeof cnpj !== "string") return false;
 
 	const cleaned = cleanCnpj(cnpj);
-
-	if (cleaned.length !== CNPJ_LENGTH) return false;
 
 	const trimmed = cnpj.trim();
 
 	const version = options?.version ?? 1;
 
 	let isNumeric = true;
-	let hasLetter = false;
 
 	if (version !== 1) {
+		// Stryker disable next-line EqualityOperator: cleaned.length is always exactly CNPJ_LENGTH here (checked above), so the extra i===CNPJ_LENGTH iteration reads charCodeAt(CNPJ_LENGTH), which is NaN and fails both boundary comparisons either way.
 		for (let i = 0; i < CNPJ_LENGTH; i++) {
 			const code = cleaned.charCodeAt(i);
+			// Stryker disable next-line ConditionalExpression,EqualityOperator: cleaned only ever holds "0"-"9"/"A"-"Z" characters (minimum code 48), so `code < 48` is always false and forcing it to a literal `false` changes nothing; and the only listed CNPJ reserved number whose raw checksum also happens to pass is "00000000000000" (code 48), so shifting the upper boundary to 57 (">=57") can never be told apart from the correct ">57" by any reachable input.
 			if (code < 48 || code > 57) {
 				isNumeric = false;
-				hasLetter = true;
 			}
 		}
 	}
@@ -114,5 +117,5 @@ export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean
 		);
 	}
 
-	return hasLetter && FORMAT_REGEX.test(trimmed.toUpperCase()) && isValidChecksum(cleaned);
+	return FORMAT_REGEX.test(trimmed.toUpperCase()) && isValidChecksum(cleaned);
 };

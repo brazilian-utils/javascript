@@ -51,7 +51,7 @@ const verifyCheckDigit = (value: string): boolean => {
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119 Resolução CNJ nº 65/2008
  */
 export const isValidProcessoJuridico = (value: string): boolean => {
-	if (typeof value !== "string" || value === "") return false;
+	if (typeof value !== "string") return false;
 
 	const digits = sanitizeToDigits(value);
 

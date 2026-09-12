@@ -30,6 +30,10 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey(`${KEY_SP.slice(0, 43)}9`)).toBeNull();
 		});
 
+		test("when the model is not 55, 57, 58 or 65 (model 99 with a matching check digit)", () => {
+			expect(parseNfeKey("35170458716523000119990010000000121000123453")).toBeNull();
+		});
+
 		test("when the document number is zero", () => {
 			expect(parseNfeKey("35170458716523000119550010000000001000123457")).toBeNull();
 		});

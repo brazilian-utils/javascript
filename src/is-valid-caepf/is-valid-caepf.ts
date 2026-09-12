@@ -1,12 +1,10 @@
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
-import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
 	CAEPF_BASE_LENGTH,
 	CAEPF_CHECK_DIGITS_OFFSET,
 	CAEPF_FIRST_WEIGHTS,
 	CAEPF_FORMAT_REGEX,
-	CAEPF_LENGTH,
 	CAEPF_SECOND_WEIGHTS,
 } from "./constants";
 
@@ -48,11 +46,7 @@ export const isValidCaepf = (value: string | number): boolean => {
 
 	const digits = sanitizeToDigits(value);
 
-	if (digits.length !== CAEPF_LENGTH) return false;
-
 	if (!CAEPF_FORMAT_REGEX.test(String(value).trim())) return false;
-
-	if (isRepeatedDigits(digits)) return false;
 
 	const base = digits.slice(0, CAEPF_BASE_LENGTH);
 	const first = getCheckDigit(base, CAEPF_FIRST_WEIGHTS);

@@ -33,6 +33,10 @@ describe("isValidVin", () => {
 			expect(isValidVin("1HGCM8263IA004352")).toBe(false);
 		});
 
+		test("when the excluded letter I replaces a non-check-digit position that would otherwise still checksum correctly", () => {
+			expect(isValidVin("1HICM82633A004352")).toBe(false);
+		});
+
 		test("when it contains the excluded letter O", () => {
 			expect(isValidVin("1HGCM8263OA004352")).toBe(false);
 		});

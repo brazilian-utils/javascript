@@ -28,6 +28,12 @@ describe("isValidMobilePhone", () => {
 			expect(isValidMobilePhone("+55 11 3000-0000")).toBe(false);
 			expect(isValidMobilePhone("+1 415 555 2671")).toBe(false);
 		});
+
+		test("when version 2 is requested but the first number digit is a version-1-only value (6, 7 or 8)", () => {
+			expect(isValidMobilePhone("11712345678", { version: 2 })).toBe(false);
+			expect(isValidMobilePhone("11612345678", { version: 2 })).toBe(false);
+			expect(isValidMobilePhone("11812345678", { version: 2 })).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {

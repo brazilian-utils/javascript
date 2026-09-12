@@ -1,4 +1,4 @@
-import { NINE_DIGIT_FEDERATIVE_UNIONS } from "../_internals/constants/voter-id";
+import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { EXTENDED_LENGTH, LENGTH } from "./constants";
@@ -28,11 +28,9 @@ export const parseVoterId = (value: string | number): string => {
 
 	const federativeUnion = digits.slice(9, 11);
 
-	const maxLength =
-		digits.length > LENGTH &&
-		(NINE_DIGIT_FEDERATIVE_UNIONS as readonly string[]).includes(federativeUnion)
-			? EXTENDED_LENGTH
-			: LENGTH;
+	const maxLength = NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion)
+		? EXTENDED_LENGTH
+		: LENGTH;
 
 	return digits.slice(0, maxLength);
 };

@@ -35,4 +35,15 @@ describe("formatPassport", () => {
 			expect(formatPassport("AB123456789")).toBe("AB123456");
 		});
 	});
+
+	describe("should return an empty string", () => {
+		test("when passport is not a string", () => {
+			// @ts-expect-error
+			expect(formatPassport(null)).toBe("");
+			// @ts-expect-error
+			expect(formatPassport(undefined)).toBe("");
+			// @ts-expect-error
+			expect(formatPassport(123)).toBe("");
+		});
+	});
 });

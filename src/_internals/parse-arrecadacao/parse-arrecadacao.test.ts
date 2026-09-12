@@ -37,6 +37,18 @@ describe("parseArrecadacao", () => {
 			const broken = `${FEBRABAN_LINE.slice(0, 11)}9${FEBRABAN_LINE.slice(12)}`;
 			expect(parseArrecadacao(broken)).toBeNull();
 		});
+
+		test("when it does not start with 8, even at a valid barcode length with a checksum that would otherwise match (segment '4', identifier '6', mod10 general check digit recomputed by hand for this fixture)", () => {
+			expect(parseArrecadacao("14610000000000000000000000000000000000000000")).toBeNull();
+		});
+
+		test("when the length is neither 44 nor 48, even starting with 8 with a checksum that would otherwise match (segment '4', identifier '6', mod10 general check digit recomputed by hand for this 46 digit fixture)", () => {
+			expect(parseArrecadacao("8466000000000000000000000000000000000000000000")).toBeNull();
+		});
+
+		test("when the identifier is not 6, 7, 8 or 9, even with a checksum that would otherwise match modulo 11 (segment '4', identifier '0', mod11 'arrecadacao' general check digit recomputed by hand for this fixture)", () => {
+			expect(parseArrecadacao("84010000000246100291100054603390069589506108")).toBeNull();
+		});
 	});
 
 	describe("should parse a modulo 10 bank slip (FEBRABAN 'Layout Padrão de Arrecadação' §11 example, position 3 = '6')", () => {
