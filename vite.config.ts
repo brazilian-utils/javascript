@@ -141,6 +141,10 @@ export default defineConfig({
 		useTabs: true,
 	},
 	lint: {
+		options: {
+			typeAware: true,
+			typeCheck: true,
+		},
 		categories: {
 			correctness: "error",
 			suspicious: "error",
@@ -197,6 +201,12 @@ export default defineConfig({
 				"src/_internals/constants/**",
 				"src/index.ts",
 			],
+			thresholds: {
+				statements: 100,
+				branches: 100,
+				functions: 100,
+				lines: 100,
+			},
 		},
 	},
 	pack: [
