@@ -12,12 +12,19 @@
  *   node scripts/tree-shaking.ts --json <path>
  *     Also write `{ full: {bytes,gzip}, exports: { name: {bytes,gzip} } }` to `<path>`.
  *
+ *   node scripts/tree-shaking.ts --json <path> --surviving <head.json>
+ *     Also measure the bundle that imports only the exports listed in `<head.json>` (a
+ *     snapshot of the other side of a comparison) and store it as `surviving`, so that the
+ *     comparison below weighs the same export set on both sides.
+ *
  *   node scripts/tree-shaking.ts --compare <base.json>
  *     Diff the current build against a snapshot produced by a previous `--json` run, print a
  *     Markdown report, and fail (exit 1) when a pre-existing export grew by more than
  *     REGRESSION_PERCENT_THRESHOLD and more than REGRESSION_BYTES_THRESHOLD, or when the
  *     bundle importing every export that already existed on the base grew by more than
- *     FULL_IMPORT_PERCENT_THRESHOLD (new exports never count as a regression).
+ *     FULL_IMPORT_PERCENT_THRESHOLD (new exports never count as a regression). Exit code 1
+ *     means a regression; exit code 2 means the comparison itself could not run (invalid
+ *     snapshot, measurement failure).
  *
  *   node scripts/tree-shaking.ts --markdown <path>
  *     With `--compare`, also write the Markdown report to `<path>` (for posting as a PR comment).
@@ -55,10 +62,12 @@ type Measurement = {
 type Snapshot = {
 	full: Measurement;
 	exports: Record<string, Measurement>;
+	surviving?: Measurement;
 };
 
 type Args = {
 	json: string | undefined;
+	surviving: string | undefined;
 	compare: string | undefined;
 	markdown: string | undefined;
 	dist: string | undefined;
@@ -84,9 +93,16 @@ type CompareResult = {
 };
 
 const parseArgs = (argv: string[]): Args => {
-	const args: Args = { json: undefined, compare: undefined, markdown: undefined, dist: undefined };
+	const args: Args = {
+		json: undefined,
+		surviving: undefined,
+		compare: undefined,
+		markdown: undefined,
+		dist: undefined,
+	};
 	for (let i = 0; i < argv.length; i++) {
 		if (argv[i] === "--json") args.json = argv[++i];
+		else if (argv[i] === "--surviving") args.surviving = argv[++i];
 		else if (argv[i] === "--compare") args.compare = argv[++i];
 		else if (argv[i] === "--markdown") args.markdown = argv[++i];
 		else if (argv[i] === "--dist") args.dist = argv[++i];
@@ -316,8 +332,9 @@ const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement)
 
 	changed.sort((a, b) => Math.abs(b.deltaBytes) - Math.abs(a.deltaBytes));
 
-	const fullDeltaBytes = existing.bytes - base.full.bytes;
-	const fullDeltaPercent = base.full.bytes === 0 ? 0 : fullDeltaBytes / base.full.bytes;
+	const baseExisting = base.surviving ?? base.full;
+	const fullDeltaBytes = existing.bytes - baseExisting.bytes;
+	const fullDeltaPercent = baseExisting.bytes === 0 ? 0 : fullDeltaBytes / baseExisting.bytes;
 
 	const regressions = changed.filter(
 		(row) =>
@@ -418,7 +435,7 @@ const renderMarkdown = (
 		"",
 		"| | Base | Head | Δ |",
 		"| --- | ---: | ---: | ---: |",
-		`| Pre-existing exports, all imported | ${formatBytes(base.full.bytes)} | ${formatBytes(existing.bytes)} (gzip ${formatBytes(existing.gzip)}) | ${result.fullImportRegressed ? "🔴 " : ""}${formatDelta(result.fullDeltaBytes, result.fullDeltaPercent)} |`,
+		`| Pre-existing exports, all imported | ${formatBytes((base.surviving ?? base.full).bytes)} | ${formatBytes(existing.bytes)} (gzip ${formatBytes(existing.gzip)}) | ${result.fullImportRegressed ? "🔴 " : ""}${formatDelta(result.fullDeltaBytes, result.fullDeltaPercent)} |`,
 		`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatDelta(head.full.bytes - base.full.bytes, base.full.bytes === 0 ? 0 : (head.full.bytes - base.full.bytes) / base.full.bytes)} |`,
 		`| Exports | ${Object.keys(base.exports).length} | ${Object.keys(head.exports).length} | ${formatCount(Object.keys(head.exports).length - Object.keys(base.exports).length)} |`,
 		"",
@@ -477,7 +494,20 @@ const isSnapshot = (value: unknown): value is Snapshot =>
 	isMeasurement(value.full) &&
 	"exports" in value &&
 	isRecord(value.exports) &&
+	(!("surviving" in value) || value.surviving === undefined || isMeasurement(value.surviving)) &&
 	Object.values(value.exports).every((entry) => isMeasurement(entry));
+
+const readSnapshot = async (path: string): Promise<Snapshot> => {
+	const parsed: unknown = JSON.parse(await readFile(path, "utf8"));
+
+	if (!isSnapshot(parsed)) {
+		throw new Error(`${path} is not a valid tree-shaking snapshot`);
+	}
+
+	return parsed;
+};
+
+const COMPARISON_ERROR_EXIT_CODE = 2;
 
 const main = async (): Promise<void> => {
 	const args = parseArgs(process.argv.slice(2));
@@ -488,19 +518,20 @@ const main = async (): Promise<void> => {
 
 	if (args.json !== undefined && args.json !== "") {
 		const snapshot: Snapshot = { full, exports: exportsMap };
+
+		if (args.surviving !== undefined && args.surviving !== "") {
+			const other = await readSnapshot(resolve(process.cwd(), args.surviving));
+			const survivingNames = Object.keys(exportsMap)
+				.filter((name) => name in other.exports && !aliasOf.has(name))
+				.sort();
+			snapshot.surviving = await measureNames(survivingNames, resolveDir);
+		}
+
 		await writeFile(resolve(process.cwd(), args.json), `${JSON.stringify(snapshot, null, "\t")}\n`);
 	}
 
 	if (args.compare !== undefined && args.compare !== "") {
-		const comparePath = resolve(process.cwd(), args.compare);
-		const compareContents = await readFile(comparePath, "utf8");
-		const parsedBase: unknown = JSON.parse(compareContents);
-
-		if (!isSnapshot(parsedBase)) {
-			throw new Error(`${comparePath} is not a valid tree-shaking snapshot`);
-		}
-
-		const base = parsedBase;
+		const base = await readSnapshot(resolve(process.cwd(), args.compare));
 		const head: Snapshot = { full, exports: exportsMap };
 		const existingNames = Object.keys(base.exports)
 			.filter((name) => name in exportsMap && !aliasOf.has(name))
@@ -527,4 +558,9 @@ const main = async (): Promise<void> => {
 	printTable(full, exportsMap, aliasOf);
 };
 
-await main();
+try {
+	await main();
+} catch (error) {
+	console.error(error instanceof Error ? error.message : String(error));
+	process.exit(COMPARISON_ERROR_EXIT_CODE);
+}
