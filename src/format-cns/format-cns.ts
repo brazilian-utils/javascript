@@ -25,6 +25,8 @@ export type FormatCnsOptions = {
  * ```
  *
  * @see Official: https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/
+ * @see Based on: https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html
+ * e-SUS APS documentation of the same DATASUS algorithm, reachable without a browser.
  */
 export const formatCns = (value: string | number, options?: FormatCnsOptions): string =>
 	isNullish(value)

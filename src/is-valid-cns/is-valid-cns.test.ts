@@ -86,6 +86,19 @@ describe("isValidCns", () => {
 		test("when the first digit is not 7, 8 or 9, even though one of them appears later and the rest forms a valid provisional checksum", () => {
 			expect(isValidCns("070000000000001")).toBe(false);
 		});
+
+		test("when letters are wrapped around the digits of a valid card", () => {
+			expect(isValidCns("abc123456789010000")).toBe(false);
+			expect(isValidCns("123456789010000abc")).toBe(false);
+		});
+
+		test("when letters are mixed in between the digits of a valid card", () => {
+			expect(isValidCns("1a2b3c456789010000")).toBe(false);
+		});
+
+		test("when the 15 digits are grouped outside the printed 3-4-4-4 mask", () => {
+			expect(isValidCns("1234 5678 9010 000")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -103,6 +116,14 @@ describe("isValidCns", () => {
 
 		test("for a definitive CNS with a whitespace mask", () => {
 			expect(isValidCns("123 4567 8901 0000")).toBe(true);
+		});
+
+		test("for a definitive CNS with a dotted mask", () => {
+			expect(isValidCns("123.4567.8901.0000")).toBe(true);
+		});
+
+		test("for a definitive CNS with leading and trailing whitespace", () => {
+			expect(isValidCns(" 123456789010000 ")).toBe(true);
 		});
 
 		test("for a definitive CNS whose raw check digit is 10 (base 10000000006, weighted sum 45): sum raised to 47, digit 8, suffix 001", () => {
