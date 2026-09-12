@@ -13,8 +13,12 @@ export type Iban = {
 	branch: string;
 	/** The 10 digit account (conta) number, zero-padded. */
 	account: string;
-	/** The account type: `"C"` for conta corrente, `"P"` for conta poupança. */
-	accountType: "C" | "P";
+	/**
+	 * The 1 letter account type, as published in the "Dicionário de Tipos" of the Catálogo de
+	 * Mensagens e de Arquivos do SFN. `"C"` (conta corrente) and `"P"` (conta poupança) are the
+	 * usual values, but any letter is allowed.
+	 */
+	accountType: string;
 	/** The 1 character alphanumeric owner indicator, distinguishing co-owners of the same account. */
 	owner: string;
 };
@@ -37,9 +41,10 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * Parses a Brazilian IBAN (International Bank Account Number) into its fields.
  *
  * The 29 character Brazilian IBAN is laid out as 2 (country code, always `BR`) + 2 (ISO 7064
- * MOD 97-10 check digits) + 8 (ISPB) + 5 (branch) + 10 (account) + 1 (account type, `C` or `P`)
- * + 1 (owner indicator). Only Brazilian IBANs are supported: the field layout of the other ISO
- * 13616 countries is out of scope, so a well-formed non `BR` IBAN also returns `null`.
+ * MOD 97-10 check digits) + 8 (ISPB) + 5 (branch) + 10 (account) + 1 (account type, any letter,
+ * usually `C` for conta corrente or `P` for conta poupança) + 1 (owner indicator). Only
+ * Brazilian IBANs are supported: the field layout of the other ISO 13616 countries is out of
+ * scope, so a well-formed non `BR` IBAN also returns `null`.
  *
  * Accepts the same input forms as `isValidIban` (grouping spaces, lowercase) and returns `null`
  * whenever `isValidIban` would return `false`.
@@ -65,8 +70,10 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * parseIban("BR1500000000000010932840814P3"); // null (bad check digits)
  * ```
  *
- * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Circular&numero=3625 Circular BCB nº 3.625/2013 (Diretrizes de Implementação do IBAN no Brasil)
- * @see Official: https://www.iso.org/standard/81090.html ISO/IEC 7064 (MOD 97-10 check digit algorithm)
+ * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf Diretrizes de Implementação do IBAN no Brasil
+ * @see Official: https://www.iso.org/standard/81090.html ISO 13616-1:2020 (IBAN structure)
+ * @see Official: https://www.iso.org/standard/31531.html ISO/IEC 7064:2003 (MOD 97-10 check digit algorithm)
  */
 export const parseIban = (value: string): Iban | null => {
 	if (!isValidIban(value)) return null;
@@ -79,7 +86,7 @@ export const parseIban = (value: string): Iban | null => {
 		bankIspb: sanitized.slice(CHECK_DIGITS_END, ISPB_END),
 		branch: sanitized.slice(ISPB_END, BRANCH_END),
 		account: sanitized.slice(BRANCH_END, ACCOUNT_END),
-		accountType: sanitized.charAt(ACCOUNT_END) === "C" ? "C" : "P",
+		accountType: sanitized.charAt(ACCOUNT_END),
 		owner: sanitized.slice(ACCOUNT_TYPE_END),
 	};
 };

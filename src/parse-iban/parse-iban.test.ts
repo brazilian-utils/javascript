@@ -76,6 +76,18 @@ describe("parseIban", () => {
 				owner: "2",
 			});
 		});
+
+		test("for a valid IBAN with an account type letter other than C or P", () => {
+			expect(parseIban("BR5400000000000010932840814D2")).toEqual({
+				countryCode: "BR",
+				checkDigits: "54",
+				bankIspb: "00000000",
+				branch: "00001",
+				account: "0932840814",
+				accountType: "D",
+				owner: "2",
+			});
+		});
 	});
 
 	describe("should return null", () => {
@@ -95,7 +107,11 @@ describe("parseIban", () => {
 			expect(parseIban("BR1500000000000010932840814P2000")).toBeNull();
 		});
 
-		test("when the account type is not C or P", () => {
+		test("when the account type is not a letter", () => {
+			expect(parseIban("BR150000000000001093284081412")).toBeNull();
+		});
+
+		test("when the account type letter does not match the check digits", () => {
 			expect(parseIban("BR1500000000000010932840814X2")).toBeNull();
 		});
 
@@ -124,6 +140,7 @@ describe("parseIban", () => {
 			"BR1500000000000010932840814P2",
 			"BR3860701190000010000012345C1",
 			"BR1460746948000020001234567P2",
+			"BR5400000000000010932840814D2",
 		];
 
 		for (const iban of IBANS) {
@@ -142,7 +159,7 @@ describe("parseIban", () => {
 	});
 
 	describe("properties", () => {
-		const bodies = fc.stringMatching(/^[0-9]{23}[CP][A-Z0-9]$/);
+		const bodies = fc.stringMatching(/^[0-9]{23}[A-Z][A-Z0-9]$/);
 
 		test("should split an IBAN into fields that spell it back", () => {
 			fc.assert(
@@ -187,7 +204,7 @@ describe("parseIban types", () => {
 			bankIspb: string;
 			branch: string;
 			account: string;
-			accountType: "C" | "P";
+			accountType: string;
 			owner: string;
 		}>();
 	});

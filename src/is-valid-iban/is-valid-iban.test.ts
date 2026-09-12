@@ -30,6 +30,11 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR3860701190000010000012345C1")).toBe(true);
 		});
 
+		test("for a valid IBAN whose account type is a letter other than C or P", () => {
+			expect(isValidIban("BR5400000000000010932840814D2")).toBe(true);
+			expect(isValidIban("BR7800000000000010932840814S2")).toBe(true);
+		});
+
 		test("for a valid IBAN whose owner indicator is the letter A (the LETTER_CODE_A boundary)", () => {
 			expect(isValidIban("BR4500000000000010000012345CA")).toBe(true);
 		});
@@ -56,7 +61,11 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR1500000000000010932840814P2000")).toBe(false);
 		});
 
-		test("when the account type is not C or P", () => {
+		test("when the account type is not a letter", () => {
+			expect(isValidIban("BR150000000000001093284081412")).toBe(false);
+		});
+
+		test("when the account type letter does not match the check digits", () => {
 			expect(isValidIban("BR1500000000000010932840814X2")).toBe(false);
 		});
 
@@ -106,7 +115,7 @@ describe("isValidIban", () => {
 	});
 
 	describe("properties", () => {
-		const bodies = fc.stringMatching(/^[0-9]{23}[CP][A-Z0-9]$/);
+		const bodies = fc.stringMatching(/^[0-9]{23}[A-Z][A-Z0-9]$/);
 
 		test("should accept exactly one pair of check digits for any account", () => {
 			fc.assert(
