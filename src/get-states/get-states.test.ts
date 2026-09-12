@@ -1,8 +1,15 @@
-import { DATA } from "../_internals/constants/states";
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { DATA, type State, type StateCode, type StateName } from "../_internals/constants/states";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getStateByIbgeCode } from "../get-state-by-ibge-code/get-state-by-ibge-code";
+import { getStateCodeByName } from "../get-state-code-by-name/get-state-code-by-name";
+import { getStateNameByCode } from "../get-state-name-by-code/get-state-name-by-code";
 import { getStates } from "./get-states";
 
 const NUMBER_OF_BRAZILIAN_STATES = 27;
+
+const stateArbitrary = (): fc.Arbitrary<State> => fc.constantFrom(...getStates());
 
 describe("getStates", () => {
 	it(`should return an array with ${DATA.length} states`, () => {
@@ -63,5 +70,38 @@ describe("getStates", () => {
 
 		expect(second.at(0)?.name).not.toBe("X");
 		expect(second).toEqual(DATA.map((state) => Object.assign({}, state)));
+	});
+
+	describe("properties", () => {
+		test("should have a code and name that are inverses of each other", () => {
+			fc.assert(
+				fc.property(stateArbitrary(), (state) => {
+					expect(getStateCodeByName(state.name)).toBe(state.code);
+					expect(getStateNameByCode(state.code)).toBe(state.name);
+				}),
+			);
+		});
+
+		test("should have an ibgeCode that resolves back to the same state", () => {
+			fc.assert(
+				fc.property(stateArbitrary(), (state) => {
+					expect(getStateByIbgeCode(state.ibgeCode)).toEqual(state);
+				}),
+			);
+		});
+	});
+});
+
+describe("getStates types", () => {
+	test("should take no arguments and return an array of State", () => {
+		expectTypeOf(getStates).parameter(0).toBeUndefined();
+		expectTypeOf(getStates).returns.toEqualTypeOf<State[]>();
+		expectTypeOf<State>().toEqualTypeOf<{
+			readonly code: StateCode;
+			readonly name: StateName;
+			readonly regionCode: "N" | "NE" | "CO" | "SE" | "S";
+			readonly regionName: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
+			readonly ibgeCode: number;
+		}>();
 	});
 });

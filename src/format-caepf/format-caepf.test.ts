@@ -1,5 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { formatCaepf } from "./format-caepf";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { formatCaepf, type FormatCaepfOptions } from "./format-caepf";
 
 describe("formatCaepf", () => {
 	test("should format a full 14 digit value", () => {
@@ -47,5 +49,43 @@ describe("formatCaepf", () => {
 	test("should return an empty string for undefined", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(formatCaepf()).toBe("");
+	});
+
+	describe("properties", () => {
+		test("should print a full registration in the official mask", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{14}$/), (value) => {
+					expect(/^\d{3}\.\d{3}\.\d{3}\/\d{3}-\d{2}$/.test(formatCaepf(value))).toBe(true);
+				}),
+			);
+		});
+
+		test("should keep only the digits of the registration it formats", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					const digits = value.replaceAll(/\D/g, "").slice(0, 14);
+
+					expect(formatCaepf(value).replaceAll(/\D/g, "")).toBe(digits);
+				}),
+			);
+		});
+
+		test("should never throw and always return the CAEPF number as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatCaepf(text)).toBe("string");
+					expect(typeof formatCaepf(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatCaepf types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatCaepf).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCaepf).parameter(1).toEqualTypeOf<FormatCaepfOptions | undefined>();
+		expectTypeOf<FormatCaepfOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(formatCaepf).returns.toEqualTypeOf<string>();
 	});
 });

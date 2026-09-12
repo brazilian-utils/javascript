@@ -112,6 +112,7 @@
 		"@vitest/browser-webdriverio": "4.1.11",
 		"@vitest/coverage-v8": "4.1.11",
 		"esbuild": "0.27.2",
+		"fast-check": "4.10.0",
 		"jscpd": "5.2.0",
 		"knip": "6.35.1",
 		"lockfile-lint": "5.0.1",

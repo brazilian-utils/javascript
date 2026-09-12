@@ -1,5 +1,14 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatCurrency } from "./format-currency";
+import * as fc from "fast-check";
+
+import { anyGarbage, twoDecimalAmounts } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectNeverThrowsWithOptions,
+	expectRoundTrip,
+} from "../_internals/test/properties";
+import { bench, describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { parseCurrency } from "../parse-currency/parse-currency";
+import { formatCurrency, type FormatCurrencyOptions } from "./format-currency";
 
 describe("formatCurrency", () => {
 	it("should formatCurrency positive currency into BRL", () => {
@@ -117,5 +126,47 @@ describe("formatCurrency", () => {
 	it("should replace the non-breaking space", () => {
 		expect(formatCurrency(1234.56, { symbol: true })).toBe("R$ 1.234,56");
 		expect(formatCurrency(1234.56, { symbol: true })).not.toContain("\u00A0");
+	});
+
+	describe("properties", () => {
+		const optionsArbitrary = fc
+			.option(fc.record({ symbol: fc.boolean(), precision: fc.double() }, { requiredKeys: [] }))
+			.map((options) => options ?? undefined);
+
+		test("should round-trip with parseCurrency for any value with 2 decimals", () => {
+			expectRoundTrip(formatCurrency, parseCurrency, twoDecimalAmounts);
+		});
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrowsWithOptions(formatCurrency, anyGarbage, optionsArbitrary);
+		});
+
+		test("should always return a string", () => {
+			expectAlwaysReturnsType(formatCurrency, "string", anyGarbage);
+		});
+	});
+});
+
+describe("formatCurrency types", () => {
+	test("should take a string or number, options, and return a string", () => {
+		expectTypeOf(formatCurrency).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCurrency).parameter(1).toEqualTypeOf<FormatCurrencyOptions | undefined>();
+		expectTypeOf<FormatCurrencyOptions["symbol"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf<FormatCurrencyOptions["precision"]>().toEqualTypeOf<number | undefined>();
+		expectTypeOf(formatCurrency).returns.toEqualTypeOf<string>();
+	});
+});
+
+describe("formatCurrency benchmarks", () => {
+	bench("formatCurrency(number)", () => {
+		formatCurrency(1_234_567.89);
+	});
+
+	bench("formatCurrency(string with separators)", () => {
+		formatCurrency("1.234.567,89");
+	});
+
+	bench("parseCurrency", () => {
+		parseCurrency("R$ 1.234.567,89");
 	});
 });

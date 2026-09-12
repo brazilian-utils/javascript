@@ -414,7 +414,7 @@ export default defineConfig({
 				},
 			},
 			{
-				files: ["**/*.test.ts", "**/*.test-d.ts", "**/*.bench.ts"],
+				files: ["**/*.test.ts", "src/_internals/test/**"],
 				rules: {
 					"@typescript-eslint/no-explicit-any": "off",
 					"@typescript-eslint/no-unsafe-type-assertion": "off",
@@ -448,6 +448,10 @@ export default defineConfig({
 	},
 	test: {
 		exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**", "**/reports/**"],
+		benchmark: {
+			include: ["src/**/*.test.ts"],
+			exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**", "**/reports/**"],
+		},
 		browser: {
 			provider: webdriverio(),
 			connectTimeout: 120_000,

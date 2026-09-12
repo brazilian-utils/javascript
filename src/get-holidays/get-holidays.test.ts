@@ -1,6 +1,15 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
+import { DATA as STATES, type StateCode } from "../_internals/constants/states";
+import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { isBusinessDay } from "../is-business-day/is-business-day";
 import { STATE_HOLIDAYS } from "./constants";
-import { getHolidays } from "./get-holidays";
+import { getHolidays, type GetHolidaysOptions, type Holiday } from "./get-holidays";
+
+function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
+	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
+}
 
 describe("getHolidays", () => {
 	test("should return fixed holidays for the given year", () => {
@@ -430,5 +439,75 @@ describe("getHolidays", () => {
 				entries.pop();
 			}
 		}
+	});
+
+	describe("properties", () => {
+		const yearArbitrary = fc.integer({ min: HOLIDAYS_MIN_YEAR, max: HOLIDAYS_MAX_YEAR });
+		const stateCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.code));
+
+		test("should place every holiday within the requested year", () => {
+			fc.assert(
+				fc.property(yearArbitrary, fc.option(stateCodeArbitrary), (year, stateCode) => {
+					const holidays = getHolidaysFor(year, stateCode);
+
+					for (const holiday of holidays) {
+						expect(holiday.date.getFullYear()).toBe(year);
+					}
+				}),
+			);
+		});
+
+		test("should return holidays sorted by date, ascending", () => {
+			fc.assert(
+				fc.property(yearArbitrary, fc.option(stateCodeArbitrary), (year, stateCode) => {
+					const holidays = getHolidaysFor(year, stateCode);
+					const timestamps = holidays.map((holiday) => holiday.date.getTime());
+					const sorted = [...timestamps].sort((a, b) => a - b);
+
+					expect(timestamps).toEqual(sorted);
+				}),
+			);
+		});
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(() => getHolidays(value as never)).not.toThrow();
+				}),
+			);
+		});
+	});
+});
+
+describe("getHolidays types", () => {
+	test("should accept a year and return an array of Holiday", () => {
+		expectTypeOf(getHolidays(2024)).toEqualTypeOf<Holiday[]>();
+	});
+
+	test("should accept a GetHolidaysOptions and return an array of Holiday", () => {
+		expectTypeOf<GetHolidaysOptions>().toEqualTypeOf<{ year: number; stateCode?: StateCode }>();
+		expectTypeOf(getHolidays({ year: 2024, stateCode: "SP" })).toEqualTypeOf<Holiday[]>();
+	});
+
+	test("should shape Holiday as name, date and type", () => {
+		expectTypeOf<Holiday>().toEqualTypeOf<{
+			name: string;
+			date: Date;
+			type: "national" | "state" | "optional" | "religious";
+		}>();
+	});
+});
+
+describe("getHolidays benchmarks", () => {
+	bench("getHolidays, national", () => {
+		getHolidays({ year: 2026 });
+	});
+
+	bench("getHolidays, with state", () => {
+		getHolidays({ year: 2026, stateCode: "SP" });
+	});
+
+	bench("isBusinessDay", () => {
+		isBusinessDay(new Date(2026, 6, 9), { stateCode: "SP" });
 	});
 });

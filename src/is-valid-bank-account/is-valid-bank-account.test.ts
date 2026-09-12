@@ -1,7 +1,9 @@
+import * as fc from "fast-check";
+
 import { BANKS } from "../_internals/constants/banks";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { COMPE_CODES } from "./constants";
-import { isValidBankAccount } from "./is-valid-bank-account";
+import { isValidBankAccount, type IsValidBankAccountOptions } from "./is-valid-bank-account";
 
 const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
 	bankCode: "001",
@@ -9,6 +11,14 @@ const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
 	account: "12345678",
 	digit: "5",
 };
+
+const LISTED_CODES = new Set(
+	Array.from({ length: COMPE_CODES.length / 3 }, (_, index) =>
+		COMPE_CODES.slice(index * 3, index * 3 + 3),
+	),
+);
+
+const CHECK_CHARACTERS = [...Array.from({ length: 10 }, (_, digit) => String(digit)), "X", "P"];
 
 describe("isValidBankAccount", () => {
 	describe("should return false", () => {
@@ -1539,5 +1549,96 @@ describe("isValidBankAccount", () => {
 				}),
 			).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const rules = fc.constantFrom(
+			{ bankCode: "001", accountLength: 8 },
+			{ bankCode: "033", accountLength: 8 },
+			{ bankCode: "041", accountLength: 9 },
+			{ bankCode: "104", accountLength: 11 },
+			{ bankCode: "237", accountLength: 7 },
+			{ bankCode: "260", accountLength: 7 },
+			{ bankCode: "341", accountLength: 5 },
+			{ bankCode: "399", accountLength: 6 },
+			{ bankCode: "745", accountLength: 10 },
+		);
+
+		const agencies = fc.stringMatching(/^[0-9]{4}$/);
+
+		const accounts = fc.stringMatching(/^[0-9]{13}$/);
+
+		test("should accept one check digit per account of a bank with a published rule", () => {
+			fc.assert(
+				fc.property(rules, agencies, accounts, (rule, agency, pool) => {
+					const account = pool.slice(0, rule.accountLength);
+					const accepted = CHECK_CHARACTERS.filter((digit) =>
+						isValidBankAccount({ bankCode: rule.bankCode, agency, account, digit }),
+					);
+
+					if (accepted.length === 1) return;
+
+					expect(rule.bankCode).toBe("237");
+					expect(accepted).toEqual(["0", "P"]);
+				}),
+			);
+		});
+
+		test("should accept any single digit for a bank validated by structure only", () => {
+			const structureOnly = fc.constantFrom("077", "085", "197", "290", "336", "748", "756");
+
+			fc.assert(
+				fc.property(structureOnly, agencies, accounts, (bankCode, agency, pool) => {
+					const account = pool.slice(0, 6);
+
+					expect(isValidBankAccount({ bankCode, agency, account, digit: "7" })).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject a bank that is not in the participants table", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{3}$/), agencies, (bankCode, agency) => {
+					fc.pre(!LISTED_CODES.has(bankCode));
+
+					expect(isValidBankAccount({ bankCode, agency, account: "00210169", digit: "6" })).toBe(
+						false,
+					);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a bank account with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidBankAccount(value as never)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidBankAccount types", () => {
+	test("should take required bank account options and return a boolean", () => {
+		expectTypeOf(isValidBankAccount).parameter(0).toEqualTypeOf<IsValidBankAccountOptions>();
+		expectTypeOf<IsValidBankAccountOptions["bankCode"]>().toEqualTypeOf<string>();
+		expectTypeOf<IsValidBankAccountOptions["agency"]>().toEqualTypeOf<string>();
+		expectTypeOf<IsValidBankAccountOptions["account"]>().toEqualTypeOf<string>();
+		expectTypeOf<IsValidBankAccountOptions["digit"]>().toEqualTypeOf<string>();
+		expectTypeOf(isValidBankAccount).returns.toEqualTypeOf<boolean>();
+	});
+});
+
+describe("isValidBankAccount benchmarks", () => {
+	bench("Banco do Brasil", () => {
+		isValidBankAccount({ bankCode: "001", agency: "1584", account: "00210169", digit: "6" });
+	});
+
+	bench("Bradesco", () => {
+		isValidBankAccount({ bankCode: "237", agency: "1234", account: "0238069", digit: "2" });
+	});
+
+	bench("unknown bank code", () => {
+		isValidBankAccount({ bankCode: "999", agency: "1234", account: "123456", digit: "0" });
 	});
 });

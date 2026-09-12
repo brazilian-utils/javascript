@@ -1,5 +1,14 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { isValidRegistroProfissional } from "./is-valid-registro-profissional";
+import * as fc from "fast-check";
+
+import { DATA, type StateCode } from "../_internals/constants/states";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { type RegistroProfissionalCouncil } from "./constants";
+import {
+	isValidRegistroProfissional,
+	type IsValidRegistroProfissionalOptions,
+} from "./is-valid-registro-profissional";
+
+const STATE_CODES = DATA.map((state) => state.code);
 
 describe("isValidRegistroProfissional", () => {
 	describe("should return false", () => {
@@ -85,5 +94,78 @@ describe("isValidRegistroProfissional", () => {
 		test("for a valid CRC number of a técnico em contabilidade", () => {
 			expect(isValidRegistroProfissional("RJ-654321/T-9", { council: "CRC" })).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const states = fc.constantFrom(...STATE_CODES);
+
+		const numbers = fc.integer({ min: 1000, max: 999_999 });
+
+		test("should accept a well-formed number for every council", () => {
+			fc.assert(
+				fc.property(states, numbers, (stateCode, number) => {
+					for (const council of ["OAB", "CRM", "CRO"] as const) {
+						expect(isValidRegistroProfissional(`${number}/${stateCode}`, { council })).toBe(true);
+						expect(
+							isValidRegistroProfissional(`${number}-${stateCode}`, { council, stateCode }),
+						).toBe(true);
+					}
+
+					expect(isValidRegistroProfissional(`06/${number}`, { council: "CRP" })).toBe(true);
+					expect(
+						isValidRegistroProfissional(`${stateCode}-${number}/O-3`, { council: "CRC" }),
+					).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject a registration whose UF is not the expected one", () => {
+			fc.assert(
+				fc.property(states, states, numbers, (stateCode, other, number) => {
+					fc.pre(stateCode !== other);
+
+					const value = `${number}/${other}`;
+
+					expect(isValidRegistroProfissional(value, { council: "OAB", stateCode })).toBe(false);
+				}),
+			);
+		});
+
+		test("should reject a number that carries no UF at all", () => {
+			fc.assert(
+				fc.property(numbers, (number) => {
+					expect(isValidRegistroProfissional(`${number}`, { council: "CRM" })).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a registration with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), fc.anything(), (value, options) => {
+					const result = isValidRegistroProfissional(value as string, options as never);
+
+					expect(typeof result).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidRegistroProfissional types", () => {
+	test("should take a string, required options, and return a boolean", () => {
+		expectTypeOf(isValidRegistroProfissional).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidRegistroProfissional)
+			.parameter(1)
+			.toEqualTypeOf<IsValidRegistroProfissionalOptions>();
+		expectTypeOf<
+			IsValidRegistroProfissionalOptions["council"]
+		>().toEqualTypeOf<RegistroProfissionalCouncil>();
+		expectTypeOf<IsValidRegistroProfissionalOptions["stateCode"]>().toEqualTypeOf<
+			StateCode | undefined
+		>();
+		expectTypeOf<RegistroProfissionalCouncil>().toEqualTypeOf<
+			"OAB" | "CRM" | "CRO" | "CRP" | "CRC"
+		>();
+		expectTypeOf(isValidRegistroProfissional).returns.toEqualTypeOf<boolean>();
 	});
 });

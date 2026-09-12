@@ -1,5 +1,15 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { differenceInBusinessDays } from "./difference-in-business-days";
+import * as fc from "fast-check";
+
+import { type StateCode } from "../_internals/constants/states";
+import { businessDayDates } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { addBusinessDays } from "../add-business-days/add-business-days";
+import { isBusinessDay } from "../is-business-day/is-business-day";
+import {
+	differenceInBusinessDays,
+	type DifferenceInBusinessDaysParams,
+} from "./difference-in-business-days";
 
 describe("differenceInBusinessDays", () => {
 	it("should return 0 for the same calendar day", () => {
@@ -216,5 +226,50 @@ describe("differenceInBusinessDays", () => {
 
 			expect(result).toBe(1);
 		});
+	});
+
+	describe("properties", () => {
+		const daysArbitrary = fc.integer({ min: -100, max: 100 });
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(differenceInBusinessDays, fc.anything());
+		});
+
+		test("should return 0 for the same calendar day", () => {
+			fc.assert(
+				fc.property(businessDayDates, (date) => {
+					expect(differenceInBusinessDays({ from: date, to: date })).toBe(0);
+				}),
+			);
+		});
+
+		test("should undo addBusinessDays when starting from a business day", () => {
+			fc.assert(
+				fc.property(businessDayDates, daysArbitrary, (from, days) => {
+					if (!isBusinessDay(from)) return;
+
+					const to = addBusinessDays({ date: from, days });
+
+					if (to === null) return;
+
+					expect(differenceInBusinessDays({ from, to })).toBe(days);
+				}),
+			);
+		});
+	});
+});
+
+describe("differenceInBusinessDays types", () => {
+	test("should take a DifferenceInBusinessDaysParams and return a number or null", () => {
+		expectTypeOf(differenceInBusinessDays)
+			.parameter(0)
+			.toEqualTypeOf<DifferenceInBusinessDaysParams>();
+		expectTypeOf<DifferenceInBusinessDaysParams>().toEqualTypeOf<{
+			from: Date;
+			to: Date;
+			stateCode?: StateCode;
+			includeOptional?: boolean;
+		}>();
+		expectTypeOf(differenceInBusinessDays).returns.toEqualTypeOf<number | null>();
 	});
 });

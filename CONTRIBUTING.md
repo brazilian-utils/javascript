@@ -76,7 +76,16 @@ example `formatSomething`):
    or `src/is-valid-service-phone/is-valid-service-phone.ts` for examples).
 3. Add tests alongside it in `src/format-something/format-something.test.ts`. Cover valid input,
    invalid/edge-case input, and options, if any. Tests must pass on Node, Bun and Deno (see
-   `npm test:bun` / `npm test:deno` under Useful scripts).
+   `npm test:bun` / `npm test:deno` under Useful scripts). Expectations are hand-written literals,
+   never values computed by the code under test. Close the file with a `describe("properties")`
+   block of [fast-check](https://fast-check.dev) properties that hold by specification (a
+   generated value is valid, format/parse round-trip, masks never change the verdict, arbitrary
+   input never throws) and a `describe("<name> types")` block that pins the public signature with
+   `expectTypeOf` (parameters, options and return type; `vp check` fails on a wrong assertion). A
+   hot path may also get a `describe("<name> benchmarks")` block of `bench` cases: they are todo
+   entries in a normal run and execute with `npx vp test bench --run`. `describe`, `test`,
+   `expect`, `expectTypeOf` and `bench` all come from `src/_internals/test/runtime`, which maps
+   them to vitest, Bun or Deno.
 4. Export the new function (and any exported types) from `src/index.ts`, keeping the existing
    alphabetical ordering. Then add the function name to the `PUBLIC` list and the type(s) to the
    `publicTypes` map in `src/index.test.ts`, alphabetically. These two make up the package's

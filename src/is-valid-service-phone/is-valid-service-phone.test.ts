@@ -1,4 +1,8 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { SERVICE_PHONE_UTILITY_CODES } from "../_internals/constants/service-phone";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generatePhone } from "../generate-phone/generate-phone";
 import { isValidServicePhone } from "./is-valid-service-phone";
 
 describe("isValidServicePhone", () => {
@@ -101,5 +105,49 @@ describe("isValidServicePhone", () => {
 			expect(isValidServicePhone("193")).toBe(true);
 			expect(isValidServicePhone("199")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		test("should accept every generated service number", () => {
+			fc.assert(
+				fc.property(fc.constant("service" as const), (type) => {
+					const phone = generatePhone(type);
+
+					expect(isValidServicePhone(phone)).toBe(true);
+					expect([8, 11].includes(phone.length)).toBe(true);
+				}),
+			);
+		});
+
+		test("should accept every utility code Anatel designated", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...SERVICE_PHONE_UTILITY_CODES), (code) => {
+					expect(isValidServicePhone(code)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject every generated geographic number", () => {
+			fc.assert(
+				fc.property(fc.constantFrom("mobile", "landline"), (type) => {
+					expect(isValidServicePhone(generatePhone(type))).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a service number with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidServicePhone(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidServicePhone types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidServicePhone).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidServicePhone).returns.toEqualTypeOf<boolean>();
 	});
 });

@@ -1,4 +1,9 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { CFOP_TABLE } from "../_internals/constants/cfop";
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCfop } from "./is-valid-cfop";
 
 describe("isValidCfop", () => {
@@ -53,5 +58,29 @@ describe("isValidCfop", () => {
 
 	it("should return false for a non numeric string", () => {
 		expect(isValidCfop("abcd")).toBe(false);
+	});
+
+	describe("properties", () => {
+		const codeArbitrary = fc.constantFrom(...Object.keys(CFOP_TABLE));
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(isValidCfop, anyGarbage);
+		});
+
+		test("should validate every known code, as a string or a number", () => {
+			fc.assert(
+				fc.property(codeArbitrary, (code) => {
+					expect(isValidCfop(code)).toBe(true);
+					expect(isValidCfop(Number(code))).toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCfop types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCfop).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCfop).returns.toEqualTypeOf<boolean>();
 	});
 });

@@ -1,4 +1,7 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { generatePhone } from "../generate-phone/generate-phone";
 import { parsePhone } from "./parse-phone";
 
 describe("parsePhone", () => {
@@ -49,5 +52,56 @@ describe("parsePhone", () => {
 
 	it("should accept numbers", () => {
 		expect(parsePhone(11_988_887_777)).toBe("11988887777");
+	});
+
+	describe("properties", () => {
+		test("should only ever return at most eleven digits", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					const parsed = parsePhone(value);
+
+					expect(/^\d*$/.test(parsed)).toBe(true);
+					expect(parsed.length).toBeLessThanOrEqual(11);
+				}),
+			);
+		});
+
+		test("should be idempotent over the phone digits", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					const parsed = parsePhone(value);
+
+					expect(parsePhone(parsed)).toBe(parsed);
+				}),
+			);
+		});
+
+		test("should drop the country code of a generated number however it is written", () => {
+			fc.assert(
+				fc.property(fc.constantFrom("mobile", "landline"), (type) => {
+					const phone = generatePhone(type);
+
+					expect(parsePhone(phone)).toBe(phone);
+					expect(parsePhone(`+55 ${phone}`)).toBe(phone);
+					expect(parsePhone(`0055${phone}`)).toBe(phone);
+				}),
+			);
+		});
+
+		test("should never throw and always return the phone digits as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof parsePhone(text)).toBe("string");
+					expect(typeof parsePhone(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("parsePhone types", () => {
+	test("should take a string or number and return a string", () => {
+		expectTypeOf(parsePhone).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(parsePhone).returns.toEqualTypeOf<string>();
 	});
 });

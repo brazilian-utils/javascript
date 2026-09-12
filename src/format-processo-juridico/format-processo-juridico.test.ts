@@ -1,6 +1,17 @@
 import { PROCESSO_JURIDICO_LENGTH } from "../_internals/constants/processo-juridico";
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatProcessoJuridico } from "./format-processo-juridico";
+import { anyValue, digits, digitsUpTo } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectMatchesPattern,
+	expectPadsToLength,
+	expectRoundTrip,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { parseProcessoJuridico } from "../parse-processo-juridico/parse-processo-juridico";
+import {
+	formatProcessoJuridico,
+	type FormatProcessoJuridicoOptions,
+} from "./format-processo-juridico";
 
 describe("formatProcessoJuridico", () => {
 	it("should format processo juridico with mask", () => {
@@ -46,5 +57,46 @@ describe("formatProcessoJuridico", () => {
 		expect(formatProcessoJuridico(null)).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatProcessoJuridico()).toBe("");
+	});
+
+	describe("properties", () => {
+		const upToANumber = digitsUpTo(20);
+
+		test("should only add the mask, never change the digits", () => {
+			expectRoundTrip(formatProcessoJuridico, parseProcessoJuridico, upToANumber);
+		});
+
+		test("should produce the documented mask shape for a full number", () => {
+			const shape = /^\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}$/;
+
+			expectMatchesPattern(formatProcessoJuridico, shape, digits(20));
+		});
+
+		test("should left pad a shorter value up to the documented length", () => {
+			expectPadsToLength(
+				formatProcessoJuridico,
+				parseProcessoJuridico,
+				upToANumber,
+				PROCESSO_JURIDICO_LENGTH,
+			);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(formatProcessoJuridico, "string", anyValue);
+		});
+	});
+});
+
+describe("formatProcessoJuridico types", () => {
+	test("should take a string or number value and options and return a string", () => {
+		expectTypeOf(formatProcessoJuridico).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatProcessoJuridico)
+			.parameter(1)
+			.toEqualTypeOf<FormatProcessoJuridicoOptions | undefined>();
+		expectTypeOf(formatProcessoJuridico).returns.toEqualTypeOf<string>();
+	});
+
+	test("should type the pad option as an optional boolean", () => {
+		expectTypeOf<FormatProcessoJuridicoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

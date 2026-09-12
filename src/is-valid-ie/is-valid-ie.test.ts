@@ -1,4 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { DATA as STATES, type StateCode } from "../_internals/constants/states";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidIe } from "./is-valid-ie";
 
 describe("isValidIe", () => {
@@ -795,5 +798,50 @@ describe("isValidIe", () => {
 		test("should strip letters from a non-SP IE before validating it", () => {
 			expect(isValidIe("RJ", "625X45372")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const stateCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.code));
+
+		test("should never throw and always return a boolean, for any state code and any input", () => {
+			fc.assert(
+				fc.property(fc.anything(), fc.anything(), (stateCode, ie) => {
+					let result: unknown;
+
+					expect(() => {
+						result = isValidIe(stateCode as never, ie as never);
+					}).not.toThrow();
+					expect(typeof result).toBe("boolean");
+				}),
+			);
+		});
+
+		test("should never throw and always return a boolean, for every known state code and arbitrary text", () => {
+			fc.assert(
+				fc.property(stateCodeArbitrary, fc.string({ unit: "grapheme" }), (stateCode, ie) => {
+					expect(typeof isValidIe(stateCode, ie)).toBe("boolean");
+				}),
+			);
+		});
+
+		test("should return false for a state code that does not exist", () => {
+			const unknownStateCodeArbitrary = fc
+				.string()
+				.filter((code) => !STATES.some((state) => state.code === code.toUpperCase()));
+
+			fc.assert(
+				fc.property(unknownStateCodeArbitrary, fc.string(), (stateCode, ie) => {
+					expect(isValidIe(stateCode as never, ie)).toBe(false);
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidIe types", () => {
+	test("should take a StateCode and a string and return a boolean", () => {
+		expectTypeOf(isValidIe).parameter(0).toEqualTypeOf<StateCode>();
+		expectTypeOf(isValidIe).parameter(1).toEqualTypeOf<string>();
+		expectTypeOf(isValidIe).returns.toEqualTypeOf<boolean>();
 	});
 });

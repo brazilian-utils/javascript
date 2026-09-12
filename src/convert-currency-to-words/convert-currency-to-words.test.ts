@@ -1,6 +1,14 @@
-import { NUMBER_TO_WORDS_MAX_VALUE } from "../_internals/number-to-words/number-to-words";
-import { describe, expect, test } from "../_internals/test/runtime";
-import { convertCurrencyToWords } from "./convert-currency-to-words";
+import * as fc from "fast-check";
+
+import {
+	NUMBER_TO_WORDS_MAX_VALUE,
+	type WordsCase,
+} from "../_internals/number-to-words/number-to-words";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import {
+	convertCurrencyToWords,
+	type ConvertCurrencyToWordsOptions,
+} from "./convert-currency-to-words";
 
 function expectAmounts(cases: readonly (readonly [number, string])[]): void {
 	const failures = cases
@@ -385,5 +393,49 @@ describe("convertCurrencyToWords", () => {
 			];
 			expectAmounts(cases);
 		});
+	});
+
+	describe("properties", () => {
+		const safeCentsArbitrary = fc.integer({ min: -100_000_000_000, max: 100_000_000_000 });
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.double(), (value) => {
+					expect(() => convertCurrencyToWords(value)).not.toThrow();
+				}),
+			);
+		});
+
+		test("should never return an empty string for a finite amount within the supported range", () => {
+			fc.assert(
+				fc.property(safeCentsArbitrary, (cents) => {
+					expect(convertCurrencyToWords(cents / 100)).not.toBe("");
+				}),
+			);
+		});
+
+		test("should uppercase the result the same way as the lower case result, for the 'upper' case option", () => {
+			fc.assert(
+				fc.property(safeCentsArbitrary, (cents) => {
+					const value = cents / 100;
+					const lower = convertCurrencyToWords(value);
+
+					expect(convertCurrencyToWords(value, { case: "upper" })).toBe(
+						lower.toLocaleUpperCase("pt-BR"),
+					);
+				}),
+			);
+		});
+	});
+});
+
+describe("convertCurrencyToWords types", () => {
+	test("should take a number, options, and return a string", () => {
+		expectTypeOf(convertCurrencyToWords).parameter(0).toEqualTypeOf<number>();
+		expectTypeOf(convertCurrencyToWords)
+			.parameter(1)
+			.toEqualTypeOf<ConvertCurrencyToWordsOptions | undefined>();
+		expectTypeOf<ConvertCurrencyToWordsOptions["case"]>().toEqualTypeOf<WordsCase | undefined>();
+		expectTypeOf(convertCurrencyToWords).returns.toEqualTypeOf<string>();
 	});
 });

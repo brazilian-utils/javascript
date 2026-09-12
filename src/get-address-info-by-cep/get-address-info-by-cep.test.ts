@@ -1,6 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "../_internals/test/runtime";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	expectTypeOf,
+	it,
+	vi,
+} from "../_internals/test/runtime";
 import {
 	type AddressInfo,
+	type CepProvider,
+	type GetAddressInfoByCepOptions,
 	GetAddressInfoByCepError,
 	GetAddressInfoByCepNotFoundError,
 	GetAddressInfoByCepServiceError,
@@ -733,5 +743,33 @@ describe("getAddressInfoByCep", () => {
 			},
 			LIVE_TEST_TIMEOUT,
 		);
+	});
+});
+
+describe("getAddressInfoByCep types", () => {
+	it("should take a string or number CEP, optional providers, and resolve to an AddressInfo", () => {
+		expectTypeOf(getAddressInfoByCep).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getAddressInfoByCep)
+			.parameter(1)
+			.toEqualTypeOf<GetAddressInfoByCepOptions | undefined>();
+		expectTypeOf<GetAddressInfoByCepOptions["providers"]>().toEqualTypeOf<
+			CepProvider[] | undefined
+		>();
+		expectTypeOf<CepProvider>().toEqualTypeOf<"viacep" | "widenet" | "brasilapi">();
+		expectTypeOf(getAddressInfoByCep).returns.resolves.toEqualTypeOf<AddressInfo>();
+		expectTypeOf<AddressInfo>().toEqualTypeOf<{
+			cep: string;
+			state: string;
+			city: string;
+			neighborhood: string;
+			street: string;
+		}>();
+	});
+
+	it("should expose error classes that extend the base error", () => {
+		expectTypeOf(new GetAddressInfoByCepNotFoundError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepServiceError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepValidationError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepError("m")).toExtend<Error>();
 	});
 });

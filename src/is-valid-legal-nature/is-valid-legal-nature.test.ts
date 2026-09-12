@@ -1,4 +1,9 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { anyValue, maskedValues } from "../_internals/test/arbitraries";
+import { expectAccepted, expectAlwaysReturnsType } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { LEGAL_NATURE } from "./constants";
 import { isValidLegalNature } from "./is-valid-legal-nature";
 
 describe("isValidLegalNature", () => {
@@ -46,5 +51,34 @@ describe("isValidLegalNature", () => {
 		expect(isValidLegalNature("constructor")).toBe(false);
 		expect(isValidLegalNature("toString")).toBe(false);
 		expect(isValidLegalNature("__proto__")).toBe(false);
+	});
+
+	describe("properties", () => {
+		const knownCode = fc.constantFrom(...Object.keys(LEGAL_NATURE));
+
+		test("should accept every code of the table however its mask is spread", () => {
+			expectAccepted(isValidLegalNature, maskedValues(knownCode, [".", "-", " "], 2));
+		});
+
+		test("should reject a known code as soon as a character that is not a mask is added", () => {
+			const extra = fc.stringMatching(/^[0-9A-Za-z]{1,3}$/);
+
+			fc.assert(
+				fc.property(knownCode, extra, (code, suffix) => {
+					expect(isValidLegalNature(`${code}${suffix}`)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidLegalNature, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidLegalNature types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidLegalNature).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidLegalNature).returns.toEqualTypeOf<boolean>();
 	});
 });

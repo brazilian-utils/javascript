@@ -1,4 +1,9 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generateLicensePlate } from "../generate-license-plate/generate-license-plate";
+import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
+import { DIGIT_TO_MERCOSUL_LETTER } from "./constants";
 import { convertLicensePlateToMercosul } from "./convert-license-plate-to-mercosul";
 
 describe("convertLicensePlateToMercosul", () => {
@@ -60,5 +65,46 @@ describe("convertLicensePlateToMercosul", () => {
 		test("for a plate with the old format hyphen mask", () => {
 			expect(convertLicensePlateToMercosul("ABC-1234")).toBe("ABC1C34");
 		});
+	});
+
+	describe("properties", () => {
+		test("should turn every old format plate into a Mercosul one", () => {
+			fc.assert(
+				fc.property(fc.constant("LLLNNNN" as const), (format) => {
+					const plate = generateLicensePlate(format);
+					const converted = convertLicensePlateToMercosul(plate);
+
+					expect(getFormatLicensePlate(converted)).toBe("LLLNLNN");
+					expect(converted.slice(0, 4)).toBe(plate.slice(0, 4));
+					expect(converted.charAt(4)).toBe(DIGIT_TO_MERCOSUL_LETTER[plate.charAt(4)]);
+					expect(converted.slice(5)).toBe(plate.slice(5));
+				}),
+			);
+		});
+
+		test("should convert a plate only once", () => {
+			fc.assert(
+				fc.property(fc.constantFrom("LLLNNNN", "LLLNLNN"), (format) => {
+					const converted = convertLicensePlateToMercosul(generateLicensePlate(format));
+
+					expect(convertLicensePlateToMercosul(converted)).toBe("");
+				}),
+			);
+		});
+
+		test("should never throw and always return the converted plate as a string", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof convertLicensePlateToMercosul(value as string)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("convertLicensePlateToMercosul types", () => {
+	test("should take a string and return a string", () => {
+		expectTypeOf(convertLicensePlateToMercosul).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(convertLicensePlateToMercosul).returns.toEqualTypeOf<string>();
 	});
 });

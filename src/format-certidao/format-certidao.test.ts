@@ -1,5 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { formatCertidao } from "./format-certidao";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { formatCertidao, type FormatCertidaoOptions } from "./format-certidao";
 
 describe("formatCertidao", () => {
 	describe("should return an empty string", () => {
@@ -62,5 +64,55 @@ describe("formatCertidao", () => {
 		test("for a value short enough to be an exact integer", () => {
 			expect(formatCertidao(104_539_015_520)).toBe("104539 01 55 20");
 		});
+	});
+
+	describe("properties", () => {
+		test("should print a full matrícula in the groups of the Provimento", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{32}$/), (value) => {
+					const mask = /^\d{6} \d{2} \d{2} \d{4} \d \d{5} \d{3} \d{7} \d{2}$/;
+
+					expect(mask.test(formatCertidao(value))).toBe(true);
+				}),
+			);
+		});
+
+		test("should keep only the digits of the matrícula it formats", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					const digits = value.replaceAll(/\D/g, "").slice(0, 32);
+
+					expect(formatCertidao(value).replaceAll(/\D/g, "")).toBe(digits);
+				}),
+			);
+		});
+
+		test("should left pad a shorter value up to the matrícula length", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,32}$/), (value) => {
+					const padded = formatCertidao(value, { pad: true }).replaceAll(/\D/g, "");
+
+					expect(padded).toBe(value.padStart(32, "0"));
+				}),
+			);
+		});
+
+		test("should never throw and always return the matrícula as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatCertidao(text)).toBe("string");
+					expect(typeof formatCertidao(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatCertidao types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatCertidao).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCertidao).parameter(1).toEqualTypeOf<FormatCertidaoOptions | undefined>();
+		expectTypeOf<FormatCertidaoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(formatCertidao).returns.toEqualTypeOf<string>();
 	});
 });

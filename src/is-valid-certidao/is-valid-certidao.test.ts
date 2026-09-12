@@ -1,5 +1,14 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { isValidCertidao } from "./is-valid-certidao";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { CERTIDAO_TYPES } from "../parse-certidao/constants";
+import { type CertidaoType } from "../parse-certidao/parse-certidao";
+import { isValidCertidao, type IsValidCertidaoOptions } from "./is-valid-certidao";
+
+const CHECK_DIGIT_PAIRS = Array.from({ length: 100 }, (_, index) => String(index).padStart(2, "0"));
+
+const findCertidao = (base: string): string =>
+	CHECK_DIGIT_PAIRS.map((pair) => `${base}${pair}`).find((value) => isValidCertidao(value)) ?? "";
 
 describe("isValidCertidao", () => {
 	describe("should return false", () => {
@@ -158,5 +167,65 @@ describe("isValidCertidao", () => {
 				}),
 			).toBe(false);
 		});
+	});
+
+	describe("properties", () => {
+		const bases = fc.stringMatching(/^[0-9]{30}$/);
+
+		const books = fc.tuple(
+			fc.stringMatching(/^[0-9]{14}$/),
+			fc.integer({ min: 1, max: 9 }),
+			fc.stringMatching(/^[0-9]{15}$/),
+		);
+
+		test("should accept exactly one pair of check digits for any base", () => {
+			fc.assert(
+				fc.property(bases, (base) => {
+					const accepted = CHECK_DIGIT_PAIRS.filter((pair) => isValidCertidao(`${base}${pair}`));
+
+					expect(accepted.length).toBe(1);
+				}),
+			);
+		});
+
+		test("should read the same matrícula however it is punctuated", () => {
+			fc.assert(
+				fc.property(bases, fc.constantFrom(".", "-", "/", " "), (base, separator) => {
+					const value = findCertidao(base);
+					const masked = `${value.slice(0, 6)}${separator}${value.slice(6, 15)}${separator}${value.slice(15)}`;
+
+					expect(isValidCertidao(masked)).toBe(true);
+				}),
+			);
+		});
+
+		test("should honour the books it was told to accept", () => {
+			fc.assert(
+				fc.property(books, ([head, typeCode, tail]) => {
+					const value = findCertidao(`${head}${typeCode}${tail}`);
+					const type = CERTIDAO_TYPES[typeCode - 1];
+
+					expect(isValidCertidao(value, { accept: [type] })).toBe(true);
+					expect(isValidCertidao(value, { accept: [] })).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a matrícula with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidCertidao(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCertidao types", () => {
+	test("should take a string or number, optional options, and return a boolean", () => {
+		expectTypeOf(isValidCertidao).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCertidao).parameter(1).toEqualTypeOf<IsValidCertidaoOptions | undefined>();
+		expectTypeOf<IsValidCertidaoOptions["accept"]>().toEqualTypeOf<CertidaoType[] | undefined>();
+		expectTypeOf(isValidCertidao).returns.toEqualTypeOf<boolean>();
 	});
 });

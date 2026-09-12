@@ -1,8 +1,10 @@
+import * as fc from "fast-check";
+
 import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";
-import { parsePixPayload } from "./parse-pix-payload";
+import { type PixPayload, type PixPointOfInitiation, parsePixPayload } from "./parse-pix-payload";
 
 const BACEN_STATIC =
 	"00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D";
@@ -385,5 +387,67 @@ describe("parsePixPayload", () => {
 				expect(parsePixPayload(generatePixPayload(pix) ?? "")).toEqual(pix);
 			}
 		});
+	});
+
+	describe("properties", () => {
+		const names = fc.stringMatching(/^[A-Za-z][A-Za-z0-9]{0,24}$/);
+
+		test("should read back every key a generated payload can carry", () => {
+			fc.assert(
+				fc.property(names, fc.uuid(), (merchantName, key) => {
+					const payload = generatePixPayload({ key, merchantName, merchantCity: "BRASILIA" });
+					const parsed = parsePixPayload(payload ?? "");
+
+					expect(parsed?.merchantName).toBe(merchantName);
+					expect(parsed?.merchantCity).toBe("BRASILIA");
+					expect(parsed?.key).toBe(key);
+				}),
+			);
+		});
+
+		test("should return null when the CRC does not match the payload", () => {
+			fc.assert(
+				fc.property(names, fc.integer({ min: 0, max: 3 }), (merchantName, index) => {
+					const key = generateCpf();
+					const payload = generatePixPayload({ key, merchantName, merchantCity: "BRASILIA" });
+					const crc = (payload ?? "").slice(-4);
+					const replacement = crc.charAt(index) === "0" ? "1" : "0";
+					const broken = `${(payload ?? "").slice(0, -4)}${crc.slice(0, index)}${replacement}${crc.slice(index + 1)}`;
+
+					expect(parsePixPayload(broken)).toBeNull();
+				}),
+			);
+		});
+
+		test("should never throw and always return a BR Code or null", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const parsed = parsePixPayload(value as string);
+
+					expect(parsed === null || typeof parsed.merchantName === "string").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("parsePixPayload types", () => {
+	test("should take a string and return a Pix payload or null", () => {
+		expectTypeOf(parsePixPayload).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(parsePixPayload).returns.toEqualTypeOf<PixPayload | null>();
+	});
+
+	test("should restrict the Pix payload shape and its point of initiation", () => {
+		expectTypeOf<PixPayload>().toEqualTypeOf<{
+			key?: string;
+			url?: string;
+			description?: string;
+			merchantName: string;
+			merchantCity: string;
+			amount?: number;
+			txid?: string;
+			pointOfInitiation?: PixPointOfInitiation;
+		}>();
+		expectTypeOf<PixPointOfInitiation>().toEqualTypeOf<"static" | "dynamic">();
 	});
 });

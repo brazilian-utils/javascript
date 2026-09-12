@@ -1,5 +1,9 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatPhone } from "./format-phone";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { generatePhone } from "../generate-phone/generate-phone";
+import { parsePhone } from "../parse-phone/parse-phone";
+import { type FormatPhoneOptions, type PhoneMask, formatPhone } from "./format-phone";
 
 describe("formatPhone", () => {
 	it("should format a service number written with an explicit country code", () => {
@@ -146,5 +150,71 @@ describe("formatPhone", () => {
 		expect(formatPhone(null, { mask: "e164" })).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatPhone(undefined, { mask: "service" })).toBe("");
+	});
+
+	describe("properties", () => {
+		const geographic = ["mobile", "landline"] as const;
+
+		test("should print a generated number in E.164 and read it back", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...geographic), (type) => {
+					const phone = generatePhone(type);
+					const formatted = formatPhone(phone, { mask: "e164" });
+
+					expect(formatted).toBe(`+55${phone}`);
+					expect(parsePhone(formatted)).toBe(phone);
+				}),
+			);
+		});
+
+		test("should keep every digit of a generated number under the auto mask", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...geographic), (type) => {
+					const phone = generatePhone(type);
+					const international = formatPhone(phone, { mask: "international" });
+
+					expect(parsePhone(formatPhone(phone, { mask: "auto" }))).toBe(phone);
+					expect(international.startsWith("+55 ")).toBe(true);
+					expect(parsePhone(international)).toBe(phone);
+				}),
+			);
+		});
+
+		test("should keep the digits a national mask has room for", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					const digits = value.replaceAll(/\D/g, "");
+
+					expect(formatPhone(value).replaceAll(/\D/g, "")).toBe(digits.slice(0, 9));
+					expect(formatPhone(value, { mask: "nanp" }).replaceAll(/\D/g, "")).toBe(
+						digits.slice(0, 11),
+					);
+				}),
+			);
+		});
+
+		test("should never throw and always return the phone number as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatPhone(text)).toBe("string");
+					expect(typeof formatPhone(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatPhone types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatPhone).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatPhone).parameter(1).toEqualTypeOf<FormatPhoneOptions | undefined>();
+		expectTypeOf(formatPhone).returns.toEqualTypeOf<string>();
+	});
+
+	test("should restrict mask to the supported phone masks", () => {
+		expectTypeOf<FormatPhoneOptions["mask"]>().toEqualTypeOf<PhoneMask | undefined>();
+		expectTypeOf<PhoneMask>().toEqualTypeOf<
+			"auto" | "e164" | "international" | "service" | "sn" | "nanp"
+		>();
 	});
 });

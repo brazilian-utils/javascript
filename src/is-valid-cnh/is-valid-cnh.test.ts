@@ -1,4 +1,9 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { generateCnh } from "../generate-cnh/generate-cnh";
 import { isValidCnh } from "./is-valid-cnh";
 
 describe("isValidCnh", () => {
@@ -30,5 +35,33 @@ describe("isValidCnh", () => {
 		expect(isValidCnh(null)).toBe(false);
 		// @ts-expect-error: intentionally invalid input
 		expect(isValidCnh()).toBe(false);
+	});
+
+	describe("properties", () => {
+		test("should accept a generated CNH whatever mask characters surround its digits", () => {
+			fc.assert(
+				fc.property(maskSeparators([".", "-", "/", " "], 3, 3), (separators) => {
+					const cnh = generateCnh();
+					const base = `${separators[0]}${cnh.slice(0, 9)}${separators[1]}`;
+
+					expect(isValidCnh(`${base}${cnh.slice(9)}${separators[2]}`)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject any digits only value that is not 11 digits long", () => {
+			expectRejected(isValidCnh, digitsOfOtherLength(22, [11]));
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidCnh, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidCnh types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidCnh).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidCnh).returns.toEqualTypeOf<boolean>();
 	});
 });

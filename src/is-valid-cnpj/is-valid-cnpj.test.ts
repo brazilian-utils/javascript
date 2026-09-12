@@ -1,8 +1,11 @@
+import * as fc from "fast-check";
+
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { RESERVED_NUMBERS } from "./constants";
-import { isValidCnpj } from "./is-valid-cnpj";
+import { isValidCnpj, type IsValidCnpjOptions } from "./is-valid-cnpj";
 
 describe("isValidCnpj", () => {
 	describe("should return false", () => {
@@ -138,5 +141,71 @@ describe("isValidCnpj", () => {
 			const cnpj = generateCnpj(version);
 			expect(isValidCnpj(cnpj, { version })).toBe(true);
 		}
+	});
+
+	describe("properties", () => {
+		const masks = maskSeparators([".", "-", "/", " "], 4, 3);
+		const version = fc.constantFrom(1 as const, 2 as const);
+
+		test("should accept a generated CNPJ written with any of the documented masks", () => {
+			fc.assert(
+				fc.property(version, masks, (currentVersion, separators) => {
+					const cnpj = generateCnpj(currentVersion);
+					const head = `${cnpj.slice(0, 2)}${separators[0]}${cnpj.slice(2, 5)}`;
+					const body = `${separators[1]}${cnpj.slice(5, 8)}${separators[2]}`;
+					const tail = `${cnpj.slice(8, 12)}${separators[3]}${cnpj.slice(12)}`;
+					const masked = `${head}${body}${tail}`;
+
+					expect(isValidCnpj(masked, { version: currentVersion })).toBe(true);
+					expect(isValidCnpj(masked.toLowerCase(), { version: 2 })).toBe(true);
+				}),
+			);
+		});
+
+		test(`should reject any digits only value that is not ${CNPJ_LENGTH} digits long`, () => {
+			const wrongLength = digitsOfOtherLength(28, [CNPJ_LENGTH]);
+
+			fc.assert(
+				fc.property(wrongLength, version, (value, currentVersion) => {
+					expect(isValidCnpj(value, { version: currentVersion })).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always return a boolean", () => {
+			fc.assert(
+				fc.property(anyValue, version, (value, currentVersion) => {
+					const result = isValidCnpj(value as string, { version: currentVersion });
+
+					expect(typeof result).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCnpj types", () => {
+	test("should take a string and options and return a boolean", () => {
+		expectTypeOf(isValidCnpj).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidCnpj).parameter(1).toEqualTypeOf<IsValidCnpjOptions | undefined>();
+		expectTypeOf(isValidCnpj).returns.toEqualTypeOf<boolean>();
+	});
+
+	test("should type the version option as an optional 1 or 2", () => {
+		expectTypeOf<IsValidCnpjOptions["version"]>().toEqualTypeOf<1 | 2 | undefined>();
+	});
+});
+
+describe("isValidCnpj benchmarks", () => {
+	bench("valid numeric, masked", () => {
+		isValidCnpj("11.444.777/0001-61");
+	});
+
+	bench("valid alphanumeric", () => {
+		isValidCnpj("12ABC34501DE35");
+	});
+
+	bench("invalid check digit", () => {
+		isValidCnpj("11444777000162");
 	});
 });

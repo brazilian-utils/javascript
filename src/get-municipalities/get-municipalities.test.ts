@@ -1,6 +1,10 @@
-import { DATA } from "../_internals/constants/cities";
+import * as fc from "fast-check";
+
+import { DATA, type Municipality } from "../_internals/constants/cities";
 import { type StateCode } from "../_internals/constants/states";
-import { describe, expect, it } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getCities } from "../get-cities/get-cities";
+import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
 import { getStates } from "../get-states/get-states";
 import { getMunicipalities } from "./get-municipalities";
 
@@ -102,5 +106,49 @@ describe("getMunicipalities", () => {
 				expect(getMunicipalities(code)).toEqual(expected);
 			});
 		}
+	});
+
+	describe("properties", () => {
+		const stateCodeArbitrary = fc.constantFrom(...getStates().map((state) => state.code));
+
+		test("should never throw, regardless of the input", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(() => getMunicipalities(value as never)).not.toThrow();
+				}),
+			);
+		});
+
+		test("should list, for every state, the same names and order as getCities", () => {
+			fc.assert(
+				fc.property(stateCodeArbitrary, (stateCode) => {
+					const names = getMunicipalities(stateCode).map((municipality) => municipality.name);
+
+					expect(names).toEqual(getCities(stateCode));
+				}),
+			);
+		});
+
+		test("should have every municipality resolve back to itself through getMunicipalityByCode", () => {
+			const municipalityArbitrary = fc.constantFrom(...getMunicipalities());
+
+			fc.assert(
+				fc.property(municipalityArbitrary, (municipality) => {
+					expect(getMunicipalityByCode(municipality.code)).toEqual(municipality);
+				}),
+			);
+		});
+	});
+});
+
+describe("getMunicipalities types", () => {
+	test("should take an optional string and return an array of Municipality", () => {
+		expectTypeOf(getMunicipalities).parameter(0).toEqualTypeOf<StateCode | undefined>();
+		expectTypeOf(getMunicipalities).returns.toEqualTypeOf<Municipality[]>();
+		expectTypeOf<Municipality>().toEqualTypeOf<{
+			code: string;
+			name: string;
+			stateCode: StateCode;
+		}>();
 	});
 });
