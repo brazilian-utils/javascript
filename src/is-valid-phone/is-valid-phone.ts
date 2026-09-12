@@ -3,7 +3,7 @@ import {
 	PHONE_NATIONAL_MIN_LENGTH,
 } from "../_internals/constants/phone";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
-import { stripPhoneCountryCode } from "../_internals/strip-phone-country-code/strip-phone-country-code";
+import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { isValidLandlinePhone } from "../is-valid-landline-phone/is-valid-landline-phone";
 import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-phone";
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
@@ -58,7 +58,8 @@ export const isValidPhone = (value: string, options?: IsValidPhoneOptions): bool
 	const requested = options?.accept;
 	const accept: PhoneType[] = Array.isArray(requested) ? requested : DEFAULT_ACCEPT;
 
-	if (accept.includes("service") && isValidServicePhone(stripPhoneCountryCode(value))) return true;
+	if (accept.includes("service") && isValidServicePhone(resolveServicePhoneDigits(value)))
+		return true;
 
 	const digits = normalizePhone(value);
 

@@ -14,6 +14,12 @@ describe("isValidPhone", () => {
 		test("should accept an explicit country code before a service number", () => {
 			expect(isValidPhone("+55 0800 123 4567", { accept: ["service"] })).toBe(true);
 			expect(isValidPhone("0055 4004-1234", { accept: ["service"] })).toBe(true);
+		});
+
+		test("should accept a bare 55 before a service number, as parsePhone reads it", () => {
+			expect(isValidPhone("5508001234567", { accept: ["service"] })).toBe(true);
+			expect(isValidPhone("55 0300 123 4567", { accept: ["service"] })).toBe(true);
+			expect(isValidPhone("5508001234567")).toBe(false);
 			expect(isValidPhone("+55 0800 123 4567")).toBe(false);
 		});
 	});
