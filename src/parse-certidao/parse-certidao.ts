@@ -7,6 +7,11 @@ import { CERTIDAO_TYPES } from "./constants";
  * The nine books (tipo do livro) a matrícula de registro civil can point to, in the order of the
  * codes 1 to 9. `parseCertidao` names the book of a matrícula with one of these, and
  * `isValidCertidao` accepts a list of them.
+ *
+ * The in-force art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça
+ * lists only the codes 1 to 7. The codes 8 (`"emancipation"`) and 9 (`"interdiction"`) come from
+ * the Anexo IV of the revoked Provimento CNJ nº 63/2017 and are kept because matrículas issued
+ * under it are still in circulation.
  */
 export type CertidaoType =
 	| "birth"
@@ -47,10 +52,13 @@ export type Certidao = {
  * Parses the matrícula of a certidão de registro civil into its fields.
  *
  * Accepts the same input forms as `isValidCertidao` and returns `null` when the matrícula is
- * not valid or when its book code is not one of the nine books defined by the Provimento, since
- * an unknown book cannot be named.
+ * not valid, which includes a book code that is not one of the nine books defined by the
+ * Provimento, since an unknown book cannot be named.
  *
- * @param {string|number} value - The matrícula value to be parsed.
+ * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
+ * hold, so a numeric argument always gives `null` instead of being read as a rounded value.
+ *
+ * @param {string} value - The matrícula value to be parsed.
  * @returns {Certidao | null} The parsed matrícula, or `null` when it is not valid.
  *
  * @example
@@ -62,10 +70,12 @@ export type Certidao = {
  * parseCertidao("invalid"); // null
  * ```
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310 Provimento CNJ nº 3, de 17/11/2009,
- * which instituted the modelo único de certidão and its 32 digit matrícula.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243 Código Nacional de Normas da
+ * Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento CNJ nº 149/2023), art. 473
+ * in the wording of the Provimento CN nº 182, de 17/09/2024: the in-force layout of the 32
+ * digit matrícula.
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311 Provimento CNJ nº 2, de 27/04/2009,
- * which instituted the Código Nacional de Serventias (CNS).
+ * which instituted the modelos únicos de certidão and the matrícula (revoked; historical).
  * @see Based on: http://ghiorzi.org/DVnew.htm Worked example of the two check digits
  * (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts
@@ -73,15 +83,12 @@ export type Certidao = {
  * @see Based on: https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php
  * Third reference implementation agreeing on the weights and on the remainder of 10 read as 1.
  */
-export const parseCertidao = (value: string | number): Certidao | null => {
+export const parseCertidao = (value: string): Certidao | null => {
 	if (!isValidCertidao(value)) return null;
 
 	const digits = sanitizeToDigits(value);
 	const typeCode = digits.charCodeAt(14) - 48;
-
-	const type: CertidaoType | undefined = CERTIDAO_TYPES[typeCode - 1];
-
-	if (type === undefined) return null;
+	const type = CERTIDAO_TYPES[typeCode - 1];
 
 	return {
 		registryCns: digits.slice(0, 6),

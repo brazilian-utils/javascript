@@ -61,7 +61,12 @@ describe("isValidCertidao", () => {
 		});
 
 		test("when it is a number, which cannot carry the 32 significant digits of a matrícula", () => {
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCertidao(1_045_390_155)).toBe(false);
+		});
+
+		test("when the book code is 0, outside the nine books, even with matching check digits", () => {
+			expect(isValidCertidao("10453901552013000012021000012387")).toBe(false);
 		});
 	});
 
@@ -145,14 +150,21 @@ describe("isValidCertidao", () => {
 			).toBe(true);
 		});
 
-		test("should return true when the check digits match and accept is not given, book code 0", () => {
-			expect(isValidCertidao("10453901552013000012021000012387")).toBe(true);
-		});
-
 		test("should return false when the book code is 0, outside the nine books of the Provimento, and accept is given", () => {
 			expect(isValidCertidao("10453901552013000012021000012387", { accept: ["birth"] })).toBe(
 				false,
 			);
+		});
+
+		test("should fall back to accepting every book type when accept is not an array", () => {
+			expect(
+				// @ts-expect-error: intentionally invalid input
+				isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: "birth" }),
+			).toBe(true);
+			expect(
+				// @ts-expect-error: intentionally invalid input
+				isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: {} }),
+			).toBe(true);
 		});
 
 		test("should return false when the matrícula itself is invalid, regardless of accept", () => {
@@ -170,7 +182,7 @@ describe("isValidCertidao", () => {
 	});
 
 	describe("properties", () => {
-		const bases = fc.stringMatching(/^[0-9]{30}$/);
+		const bases = fc.stringMatching(/^[0-9]{14}[1-9][0-9]{15}$/);
 
 		const books = fc.tuple(
 			fc.stringMatching(/^[0-9]{14}$/),
@@ -222,8 +234,8 @@ describe("isValidCertidao", () => {
 });
 
 describe("isValidCertidao types", () => {
-	test("should take a string or number, optional options, and return a boolean", () => {
-		expectTypeOf(isValidCertidao).parameter(0).toEqualTypeOf<string | number>();
+	test("should take a string, optional options, and return a boolean", () => {
+		expectTypeOf(isValidCertidao).parameter(0).toEqualTypeOf<string>();
 		expectTypeOf(isValidCertidao).parameter(1).toEqualTypeOf<IsValidCertidaoOptions | undefined>();
 		expectTypeOf<IsValidCertidaoOptions["accept"]>().toEqualTypeOf<CertidaoType[] | undefined>();
 		expectTypeOf(isValidCertidao).returns.toEqualTypeOf<boolean>();
