@@ -1,21 +1,26 @@
 /**
  * Structural format of each supported professional council registration number.
  *
- * @see Official: https://www.oab.org.br/ Ordem dos Advogados do Brasil (OAB): "número de inscrição" + "seccional" (UF).
- * @see Official: https://portal.cfm.org.br/ Conselho Federal de Medicina (CRM): registration number + UF.
- * @see Official: https://cfo.org.br/ Conselho Federal de Odontologia (CRO): registration number + UF.
- * @see Official: https://cfp.org.br/ Conselho Federal de Psicologia (CRP): 2 digit regional code + registration number.
- * @see Official: https://cfc.org.br/ Conselho Federal de Contabilidade (CRC): UF + registration number + category (O/T) + check digit.
+ * The citations for these shapes live on the JSDoc of `isValidRegistroProfissional`, which is
+ * also where the councils that publish no number format at all are named.
  */
 
 export type RegistroProfissionalCouncil = "OAB" | "CRM" | "CRO" | "CRP" | "CRC";
 
-export const OAB_REGEX = /^(?<number>\d{4,6})(?<uf>[A-Z]{2})$/;
-
-export const CRM_REGEX = /^(?<number>\d{4,6})(?<uf>[A-Z]{2})$/;
+/**
+ * Registration number followed by the UF of the seccional (OAB) or of the regional (CRM), the
+ * same shape for both councils.
+ */
+export const PROFESSIONAL_NUMBER_UF_REGEX = /^(?<number>\d{4,6})(?<uf>[A-Z]{2})$/;
 
 export const CRO_REGEX = /^(?<number>\d{3,6})(?<uf>[A-Z]{2})$/;
 
 export const CRP_REGEX = /^(?<region>\d{2})(?<number>\d{4,6})$/;
 
-export const CRC_REGEX = /^(?<uf>[A-Z]{2})(?<number>\d{4,6})(?<category>[OT])(?<checkDigit>\d)$/;
+export const CRC_REGEX = /^(?<uf>[A-Z]{2})(?<number>\d{6})(?<category>[OPT])(?<checkDigit>\d)$/;
+
+/** Lowest regional code of the CFP system, CRP-01. */
+export const CRP_MIN_REGION = 1;
+
+/** Highest regional code of the CFP system, CRP-24. */
+export const CRP_MAX_REGION = 24;
