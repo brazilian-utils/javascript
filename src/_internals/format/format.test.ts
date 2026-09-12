@@ -56,6 +56,13 @@ describe("format", () => {
 		expect(format({ value: "", pattern: "***.000.000-**" })).toBe("");
 	});
 
+	it("should pad for any truthy pad value and skip padding for any falsy one", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(format({ value: "12", pattern: "00-00-00", pad: 1 })).toBe("00-00-12");
+		// @ts-expect-error: intentionally invalid input
+		expect(format({ value: "12", pattern: "00-00-00", pad: 0 })).toBe("12");
+	});
+
 	it("should count * as a slot when padding", () => {
 		expect(format({ value: "123", pattern: "***.000.000-**", pad: true })).toBe("***.000.001-**");
 	});
