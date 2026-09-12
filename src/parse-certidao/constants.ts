@@ -5,7 +5,10 @@
  * (proclamas), Livro E (demais atos), Livro E desdobrado para emancipações and Livro E
  * desdobrado para interdições.
  *
- * @see Official: Provimento CNJ 46/2015, art. 1º and Anexo (Código Nacional de Serventias).
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310 Provimento CNJ nº 3, de 17/11/2009,
+ * which instituted the modelo único de certidão and its 32 digit matrícula.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311 Provimento CNJ nº 2, de 27/04/2009,
+ * which instituted the Código Nacional de Serventias (CNS).
  * @see Based on: http://ghiorzi.org/DVnew.htm Description of the nine books and their codes.
  * @see Based on: https://github.com/Casilhero/brazilian-validators/blob/main/src/Support/CertidaoInfo.php
  * Reference implementation agreeing on the same nine books, in the same order.

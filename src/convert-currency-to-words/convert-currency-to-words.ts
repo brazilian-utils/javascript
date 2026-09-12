@@ -48,7 +48,7 @@ const endsInMillionScale = (words: string): boolean =>
  * convertCurrencyToWords(1000, { case: "upper" }); // "MIL REAIS"
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
 export const convertCurrencyToWords = (
 	value: number,

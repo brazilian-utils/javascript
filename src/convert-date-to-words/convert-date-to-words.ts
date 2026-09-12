@@ -69,7 +69,7 @@ const getWeekdayIndex = (year: number, month: number, day: number): number => {
  * convertDateToWords("invalid"); // ""
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/date_utils.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/date_utils.py
  */
 export const convertDateToWords = (
 	value: Date | string,

@@ -25,10 +25,11 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  * @example
  * ```typescript
  * generateCpf(); // "12345678909"
- * generateCpf("SP"); // "12345678909" (with SP state code in 9th digit)
+ * generateCpf("SP"); // "12345678810" (with the SP state code, 8, in the 9th digit)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
  */
 export const generateCpf = (state?: StateCode): string => {
 	let base = generateRandomNumber(BASE_LENGTH) + getStateCode(state);

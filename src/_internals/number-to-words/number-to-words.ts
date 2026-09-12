@@ -104,7 +104,7 @@ const isRoundHundred = (value: number): boolean => value % 100 === 0;
  * numberToWords(2000, { gender: "feminine" }); // "duas mil"
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
 export const numberToWords = (value: number, options?: NumberToWordsOptions): string => {
 	if (value === 0) return ZERO_WORD;

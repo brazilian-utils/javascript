@@ -8,7 +8,7 @@ export type { PhoneVersion } from "../is-valid-phone/is-valid-phone";
 
 /** Options of `isValidMobilePhone`. */
 export type IsValidMobilePhoneOptions = {
-	/** Numbering rule to enforce: `1` the pre-2016 8 digit rule, `2` the 9 digit one (default: `2`). */
+	/** Numbering rule to enforce over the 11 digit number: `1` (default) accepts 6, 7, 8 or 9 as the first number digit, `2` requires 9. */
 	version?: PhoneVersion;
 };
 

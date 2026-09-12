@@ -73,6 +73,9 @@ const generateArrecadacao = (): string => {
  * ```
  *
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * @see Official: https://portal.febraban.org.br/pagina/3166/33/pt-br/layout-cobranca FEBRABAN,
+ * "Layout Padrão de Cobrança / Especificações Técnicas para Cobrança", the cobrança bancária
+ * layout behind the 47 digit linha digitável and its fator de vencimento.
  */
 export const generateBoleto = (options?: GenerateBoletoOptions): string =>
 	options?.type === "arrecadacao" ? generateArrecadacao() : generateBancario();

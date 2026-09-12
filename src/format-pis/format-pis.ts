@@ -24,6 +24,7 @@ export type FormatPisOptions = {
  * ```
  *
  * @see Official: https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/pis.py
  */
 export const formatPis = (value: string | number, options?: FormatPisOptions): string =>
 	isNullish(value)

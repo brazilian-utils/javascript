@@ -15,7 +15,7 @@ import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
  *
  * @example
  * ```typescript
- * generateVoterId(); // "123456782897" (abroad, UF "28")
+ * generateVoterId(); // "123456782895" (abroad, UF "28")
  * generateVoterId("SP"); // "123456780191" (UF "01")
  * generateVoterId("XX" as StateCode); // falls back to "ZZ" instead of throwing
  * ```

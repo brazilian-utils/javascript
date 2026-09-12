@@ -7,9 +7,9 @@ const ISPB_LENGTH = 8;
 /**
  * Looks up a Brazilian bank by its ISPB (Identificador do Sistema de Pagamentos Brasileiro),
  * the 8 digit code that identifies every participant of the SPB, published by Banco Central do
- * Brasil in the STR (Sistema de Transferência de Reservas) participants list. Unlike the COMPE
- * code (`getBankByCode`), every SPB participant has an ISPB, including institutions with no
- * COMPE code of their own.
+ * Brasil in the STR (Sistema de Transferência de Reservas) participants list. Every SPB
+ * participant has an ISPB, but this dataset only carries the institutions that also have a
+ * COMPE code, so an ISPB whose institution has no COMPE code of its own returns `null`.
  *
  * @param {string|number} value - The bank's ISPB, with or without leading zeros.
  * @returns {Bank|null} A fresh copy of the matching bank, or `null` when no bank has that ISPB.
