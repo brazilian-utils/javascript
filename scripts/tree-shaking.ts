@@ -341,64 +341,123 @@ const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement)
 const formatPercent = (value: number): string =>
 	`${value >= 0 ? "+" : ""}${(value * 100).toFixed(1)}%`;
 
+const formatBytes = (bytes: number): string =>
+	Math.abs(bytes) < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
+
+const formatDelta = (bytes: number, percent: number): string =>
+	bytes === 0
+		? "0 B"
+		: `${bytes > 0 ? "+" : "-"}${formatBytes(Math.abs(bytes))} (${formatPercent(percent)})`;
+
+const formatCount = (value: number): string => (value > 0 ? `+${value}` : String(value));
+
+const MAX_VISIBLE_ROWS = 20;
+
+const renderRows = (title: string, header: string[], rows: string[]): string[] => {
+	if (rows.length === 0) return [];
+	const table = [
+		`| ${header.join(" | ")} |`,
+		`| ${header.map((_column, index) => (index === 0 ? "---" : "---:")).join(" | ")} |`,
+	];
+	const visible = rows.slice(0, MAX_VISIBLE_ROWS);
+	const hidden = rows.slice(MAX_VISIBLE_ROWS);
+	const lines = [`### ${title} (${rows.length})`, "", ...table, ...visible, ""];
+	if (hidden.length > 0) {
+		lines.push(
+			`<details><summary>Show the other ${hidden.length}</summary>`,
+			"",
+			...table,
+			...hidden,
+			"",
+			"</details>",
+			"",
+		);
+	}
+	return lines;
+};
+
+const renderCollapsed = (title: string, header: string[], rows: string[]): string[] => {
+	if (rows.length === 0) return [];
+	return [
+		`<details><summary>${title} (${rows.length})</summary>`,
+		"",
+		`| ${header.join(" | ")} |`,
+		`| ${header.map((_column, index) => (index === 0 ? "---" : "---:")).join(" | ")} |`,
+		...rows,
+		"",
+		"</details>",
+		"",
+	];
+};
+
 const renderMarkdown = (
 	base: Snapshot,
 	head: Snapshot,
 	existing: Measurement,
 	result: CompareResult,
 ): string => {
+	const grown = result.changed.filter((row) => row.deltaBytes > 0).length;
+	const shrunk = result.changed.length - grown;
+	const regressionCount = result.regressions.length + (result.fullImportRegressed ? 1 : 0);
+	const status =
+		regressionCount === 0
+			? "✅ **No size regression.**"
+			: `❌ **${regressionCount} size regression${regressionCount === 1 ? "" : "s"}.**`;
+	const counts = [
+		`${Object.keys(head.exports).length} exports measured`,
+		grown > 0 ? `${grown} grew` : "",
+		shrunk > 0 ? `${shrunk} shrank` : "",
+		result.added.length > 0 ? `${result.added.length} new` : "",
+		result.removed.length > 0 ? `${result.removed.length} removed` : "",
+	].filter((part) => part !== "");
+
 	const lines: string[] = [
 		"## Tree-shaking report",
 		"",
-		`Fails when a pre-existing export grows more than ${REGRESSION_PERCENT_THRESHOLD * 100}% and more than ` +
-			`${REGRESSION_BYTES_THRESHOLD} B, or when importing every export that already existed on the base ` +
-			`grows more than ${FULL_IMPORT_PERCENT_THRESHOLD * 100}%. New exports never count as a regression.`,
+		`${status} ${counts.join(", ")}.`,
 		"",
-		`Pre-existing exports: ${base.full.bytes} B to ${existing.bytes} B (${formatPercent(result.fullDeltaPercent)}, ` +
-			`gzip ${existing.gzip} B)${result.fullImportRegressed ? ", REGRESSION" : ""}. ` +
-			`Full import on head: ${head.full.bytes} B (gzip ${head.full.gzip} B).`,
+		"| | Base | Head | Δ |",
+		"| --- | ---: | ---: | ---: |",
+		`| Pre-existing exports, all imported | ${formatBytes(base.full.bytes)} | ${formatBytes(existing.bytes)} (gzip ${formatBytes(existing.gzip)}) | ${result.fullImportRegressed ? "🔴 " : ""}${formatDelta(result.fullDeltaBytes, result.fullDeltaPercent)} |`,
+		`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatDelta(head.full.bytes - base.full.bytes, base.full.bytes === 0 ? 0 : (head.full.bytes - base.full.bytes) / base.full.bytes)} |`,
+		`| Exports | ${Object.keys(base.exports).length} | ${Object.keys(head.exports).length} | ${formatCount(Object.keys(head.exports).length - Object.keys(base.exports).length)} |`,
 		"",
 	];
 
-	if (result.changed.length > 0) {
-		lines.push(
-			"| name | base | head | delta bytes | delta % | gzip head |",
-			"| --- | --- | --- | --- | --- | --- |",
-		);
-		for (const row of result.changed) {
-			const flag = result.regressions.includes(row) ? " (REGRESSION)" : "";
-			lines.push(
-				`| ${row.name}${flag} | ${row.base.bytes} | ${row.head.bytes} | ` +
-					`${row.deltaBytes > 0 ? "+" : ""}${row.deltaBytes} | ${formatPercent(row.deltaPercent)} | ${row.head.gzip} |`,
-			);
-		}
-		lines.push("");
-	}
-
-	if (result.added.length > 0) {
-		lines.push("**New exports**", "");
-		for (const item of result.added)
-			lines.push(`- ${item.name}: ${item.bytes} B (gzip ${item.gzip} B)`);
-		lines.push("");
-	}
-
-	if (result.removed.length > 0) {
-		lines.push("**Removed exports**", "");
-		for (const item of result.removed) lines.push(`- ${item.name}: was ${item.bytes} B`);
-		lines.push("");
-	}
-
-	if (result.unchanged.length > 0) {
-		lines.push(
-			`<details><summary>Unchanged exports (${result.unchanged.length})</summary>`,
-			"",
-			"| name | bytes | gzip |",
-			"| --- | --- | --- |",
-		);
-		for (const row of result.unchanged)
-			lines.push(`| ${row.name} | ${row.head.bytes} | ${row.head.gzip} |`);
-		lines.push("", "</details>");
-	}
+	const changedRows = result.changed.map((row) => {
+		const marker = result.regressions.includes(row) ? "🔴" : row.deltaBytes > 0 ? "🟡" : "🟢";
+		return `| ${marker} \`${row.name}\` | ${formatBytes(row.base.bytes)} | ${formatBytes(row.head.bytes)} | ${formatDelta(row.deltaBytes, row.deltaPercent)} | ${formatBytes(row.head.gzip)} |`;
+	});
+	lines.push(
+		...renderRows("Changed exports", ["Export", "Base", "Head", "Δ", "gzip"], changedRows),
+		...renderCollapsed(
+			"New exports",
+			["Export", "Size", "gzip"],
+			result.added.map(
+				(item) => `| \`${item.name}\` | ${formatBytes(item.bytes)} | ${formatBytes(item.gzip)} |`,
+			),
+		),
+		...renderCollapsed(
+			"Removed exports",
+			["Export", "Was"],
+			result.removed.map((item) => `| \`${item.name}\` | ${formatBytes(item.bytes)} |`),
+		),
+		...renderCollapsed(
+			"Unchanged exports",
+			["Export", "Size", "gzip"],
+			result.unchanged.map(
+				(row) =>
+					`| \`${row.name}\` | ${formatBytes(row.head.bytes)} | ${formatBytes(row.head.gzip)} |`,
+			),
+		),
+		"<details><summary>How this is measured</summary>",
+		"",
+		"Every export is imported alone into an esbuild consumer bundle (minified, tree-shaken) built from the head and from the base of this pull request; the sizes are the resulting bundles, gzip is their gzipped size. " +
+			`🔴 marks a regression: a pre-existing export that grew more than ${REGRESSION_PERCENT_THRESHOLD * 100}% and more than ${REGRESSION_BYTES_THRESHOLD} B, or the bundle importing every pre-existing export growing more than ${FULL_IMPORT_PERCENT_THRESHOLD * 100}%. ` +
+			"🟡 is growth under the threshold and 🟢 is a decrease. New exports never count as a regression. An intentional increase is accepted with the `tree-shaking: accepted` label.",
+		"",
+		"</details>",
+	);
 
 	return lines.join("\n");
 };
