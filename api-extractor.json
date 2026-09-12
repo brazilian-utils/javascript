@@ -5,8 +5,8 @@
 	"newlineKind": "lf",
 	"apiReport": {
 		"enabled": true,
-		"reportFolder": "<projectFolder>/api/",
-		"reportTempFolder": "<projectFolder>/reports/api/",
+		"reportFolder": "<projectFolder>/reports/api/",
+		"reportTempFolder": "<projectFolder>/reports/api/temp/",
 		"reportFileName": "brazilian-utils.api.md"
 	},
 	"docModel": {
@@ -21,18 +21,22 @@
 	"messages": {
 		"compilerMessageReporting": {
 			"default": {
-				"logLevel": "warning"
+				"logLevel": "error"
 			}
 		},
 		"extractorMessageReporting": {
 			"default": {
-				"logLevel": "warning"
+				"logLevel": "error"
 			},
 			"ae-missing-release-tag": {
 				"logLevel": "none"
 			},
 			"ae-forgotten-export": {
-				"logLevel": "none",
+				"logLevel": "error",
+				"addToApiReportFile": false
+			},
+			"ae-undocumented": {
+				"logLevel": "error",
 				"addToApiReportFile": false
 			}
 		},
