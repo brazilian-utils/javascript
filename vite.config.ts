@@ -135,7 +135,7 @@ const sharedPack = {
 
 export default defineConfig({
 	fmt: {
-		ignorePatterns: ["dist", "coverage", "docs", ".claude"],
+		ignorePatterns: ["dist", "coverage", "docs", "api", ".claude"],
 		singleQuote: false,
 		sortImports: true,
 		useTabs: true,
@@ -172,6 +172,7 @@ export default defineConfig({
 		],
 	},
 	test: {
+		exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**", "**/reports/**"],
 		browser: {
 			provider: webdriverio(),
 			connectTimeout: 120_000,

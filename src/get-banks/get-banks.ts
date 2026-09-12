@@ -14,7 +14,7 @@ import { BANKS, type Bank } from "../_internals/constants/banks";
  * getBanks()[0]; // { code: "001", ispb: "00000000", name: "Banco do Brasil S.A." }
  * ```
  *
- * @see Official: https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
  * @see Based on: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
  * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */

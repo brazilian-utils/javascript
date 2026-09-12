@@ -8,7 +8,8 @@ import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-re
 
 const scriptsDir = dirname(fileURLToPath(import.meta.url));
 
-const BACEN_CSV_URL = "https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv";
+const BACEN_CSV_URL =
+	"https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv";
 
 const BRASIL_API_URL = "https://brasilapi.com.br/api/banks/v1";
 

@@ -1,0 +1,7 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"entry": ["src/index.ts", "src/*/*.ts!", "scripts/*.ts", "stryker.config.json"],
+	"project": ["src/**/*.ts", "scripts/**/*.ts"],
+	"ignore": ["src/_internals/test/runtime-deno.ts"],
+	"ignoreDependencies": ["@arethetypeswrong/core", "publint"]
+}

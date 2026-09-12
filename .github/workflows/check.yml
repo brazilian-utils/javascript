@@ -21,8 +21,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup
@@ -30,6 +31,25 @@ jobs:
 
       - name: Run checks
         run: vp check
+
+      - name: Check commit messages
+        if: ${{ github.event_name == 'pull_request' }}
+        run: npx commitlint --from "${{ github.event.pull_request.base.sha }}" --to HEAD --verbose
+
+      - name: Check the package has no runtime dependencies
+        run: npm run check:dependencies
+
+      - name: Check the lockfile
+        run: npm run check:lockfile
+
+      - name: Check for duplicated code
+        run: npm run check:duplication
+
+      - name: Check for unused files, exports and dependencies
+        run: npm run check:unused
+
+      - name: Check the public API report is up to date
+        run: npm run build && npx api-extractor run --verbose
 
       - name: Check llms.txt/llms-full.txt are up to date
         run: npm run build:llms && git diff --exit-code -- docs/llms.txt docs/llms-full.txt

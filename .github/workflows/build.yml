@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -32,7 +32,7 @@ jobs:
         run: vp run build
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist
           path: dist
@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout head
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Checkout base
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: base
           ref: ${{ github.event.pull_request.base.sha }}
@@ -91,9 +91,9 @@ jobs:
               echo
               echo "No base measurement available (the base branch has no \`scripts/tree-shaking.ts\`, or an incompatible version). Showing head sizes only."
               echo
-              echo '```'
+              printf '%s\n' "\`\`\`"
               node scripts/tree-shaking.ts
-              echo '```'
+              printf '%s\n' "\`\`\`"
             } > tree-shaking.md
           fi
 
@@ -106,15 +106,15 @@ jobs:
           sed -i '1i<!-- tree-shaking-report -->' tree-shaking.md
           if [ "${{ steps.compare.outcome }}" = "failure" ]; then
             if [ "${{ contains(github.event.pull_request.labels.*.name, 'tree-shaking: accepted') }}" = "true" ]; then
-              printf '\n> Regression accepted through the `tree-shaking: accepted` label.\n' >> tree-shaking.md
+              printf '\n> Regression accepted through the "tree-shaking: accepted" label.\n' >> tree-shaking.md
             else
-              printf '\n> To accept an intentional size increase, add the `tree-shaking: accepted` label to this pull request.\n' >> tree-shaking.md
+              printf '\n> To accept an intentional size increase, add the "tree-shaking: accepted" label to this pull request.\n' >> tree-shaking.md
             fi
           fi
 
       - name: Find existing comment
         if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork }}
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
         id: find-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -123,7 +123,7 @@ jobs:
 
       - name: Post or update comment
         if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork }}
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -144,7 +144,7 @@ jobs:
           {
             echo "## Tree-shaking report"
             echo
-            echo '```'
+            printf '%s\n' "\`\`\`"
             node scripts/tree-shaking.ts
-            echo '```'
+            printf '%s\n' "\`\`\`"
           } >> "$GITHUB_STEP_SUMMARY"

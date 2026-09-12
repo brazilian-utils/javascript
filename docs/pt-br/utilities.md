@@ -522,7 +522,7 @@ const address = await getAddressInfoByCep(1310100);
 
 ## isValidProcessoJuridico
 
-Valida o número do processo jurídico de acordo com definição do [CNJ](https://www.conjur.com.br/dl/resolucao-65-cnj.pdf).
+Valida o número do processo jurídico de acordo com definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119).
 
 ```javascript
 import { isValidProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -532,7 +532,7 @@ isValidProcessoJuridico('00020802520125150049'); // true
 
 ## formatProcessoJuridico
 
-Formata um número no formato definido pelo [CNJ](https://www.conjur.com.br/dl/resolucao-65-cnj.pdf) (máscara `NNNNNNN-DD.AAAA.J.TR.OOOO`).
+Formata um número no formato definido pelo [CNJ](https://atos.cnj.jus.br/atos/detalhar/119) (máscara `NNNNNNN-DD.AAAA.J.TR.OOOO`).
 
 ```javascript
 import { formatProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -668,7 +668,7 @@ isValidBankAccount({
 
 ## getBanks
 
-Obtém todos os bancos brasileiros com código de compensação (COMPE), publicados pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv). Cada banco (tipado como `Bank`) tem um `code` (COMPE, 3 dígitos), um `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 dígitos) e um `name`. Cada chamada retorna um novo array com novos objetos, então alterar o resultado nunca afeta chamadas seguintes.
+Obtém todos os bancos brasileiros com código de compensação (COMPE), publicados pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Cada banco (tipado como `Bank`) tem um `code` (COMPE, 3 dígitos), um `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 dígitos) e um `name`. Cada chamada retorna um novo array com novos objetos, então alterar o resultado nunca afeta chamadas seguintes.
 
 ```javascript
 import { getBanks } from '@brazilian-utils/brazilian-utils';
@@ -684,7 +684,7 @@ getBanks();
 
 ## getBankByCode
 
-Busca um banco brasileiro pelo seu código de compensação (COMPE), publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv). Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse código.
+Busca um banco brasileiro pelo seu código de compensação (COMPE), publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse código.
 
 ```javascript
 import { getBankByCode } from '@brazilian-utils/brazilian-utils';
@@ -696,7 +696,7 @@ getBankByCode('999'); // null
 
 ## getBankByIspb
 
-Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 dígitos publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv). Diferente do código COMPE (`getBankByCode`), todo participante do SPB tem um ISPB, incluindo instituições sem código COMPE próprio. Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse ISPB.
+Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 dígitos publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Diferente do código COMPE (`getBankByCode`), todo participante do SPB tem um ISPB, incluindo instituições sem código COMPE próprio. Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse ISPB.
 
 ```javascript
 import { getBankByIspb } from '@brazilian-utils/brazilian-utils';
@@ -1135,7 +1135,7 @@ const ceps = await getCepInfoByAddress({
 
 ## generateProcessoJuridico
 
-Gera um número de processo jurídico válido de acordo com a definição do [CNJ](https://www.conjur.com.br/dl/resolucao-65-cnj.pdf). `year` deve estar entre o ano atual e 9999, `court` entre 1 e 9; valores fora do intervalo retornam `null`. Usa `Math.random()` internamente, então não é criptograficamente seguro.
+Gera um número de processo jurídico válido de acordo com a definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119). `year` deve estar entre o ano atual e 9999, `court` entre 1 e 9; valores fora do intervalo retornam `null`. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateProcessoJuridico } from '@brazilian-utils/brazilian-utils';

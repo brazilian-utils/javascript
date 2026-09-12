@@ -1,0 +1,29 @@
+name: Links
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "**/*.md"
+      - "src/**/*.ts"
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: Check links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --no-progress --accept 200..299,403,429 --timeout 45 --retry-wait-time 5 --max-retries 2 --root-dir docs --exclude-path node_modules --exclude-path dist --exclude-path CHANGELOG.md --exclude-path docs/llms.txt --exclude-path docs/llms-full.txt --exclude-path docs/_navbar.md --exclude-path docs/_sidebar.md --exclude-path docs/_coverpage.md --exclude-path docs/pt-br/_navbar.md --exclude-path docs/pt-br/_sidebar.md --exclude-path docs/pt-br/_coverpage.md '**/*.md' 'src/**/*.ts'
+          fail: true

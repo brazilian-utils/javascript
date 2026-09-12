@@ -6,3 +6,5 @@ node_modules
 .rts2_cache_umd
 dist
 coverage
+.stryker-tmp
+reports

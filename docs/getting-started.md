@@ -2,6 +2,15 @@
 
 Brazilian Utils is a library focused on solving problems that we face daily in the development of applications for the Brazilian business.
 
+## Why Brazilian Utils
+
+- **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
+- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs under 1 KB; every util is also its own subpath entry (`@brazilian-utils/brazilian-utils/get-cities`) for the heavy ones.
+- **Runs everywhere.** Node.js 20+, Bun, Deno and evergreen browsers, tested in CI on every one of them.
+- **Written in TypeScript.** Types ship with the package; the public API is tracked by an API report so nothing changes silently.
+- **Validated against the official rules.** Every validator cites the specification, law or dataset it implements (`@see` in the docs), and the test suite is mutation-tested, not just covered.
+- **Documented in English and Portuguese**, with an `llms.txt` for AI assistants.
+
 ## Installation
 
 You can install **Brazilian Utils** in a few ways:

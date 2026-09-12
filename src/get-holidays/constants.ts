@@ -67,7 +67,7 @@ export const LEGACY_CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Consciência Negra";
  * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual de RR, Criação do Estado de Roraima
  * @see https://pt.wikipedia.org/wiki/Santa_Catarina Lei SC nº 16.719/2015 (consolida e revoga as Leis nº 10.306/1996 e 12.906/2004), Criação da Capitania de Santa Catarina
  * @see https://pt.wikipedia.org/wiki/Santa_Catarina Lei SC nº 16.719/2015, Dia de Santa Catarina de Alexandria
- * @see https://www.al.sp.gov.br/repositorio/legislacao/lei/1995/lei-710-25.04.1995.html Lei SP nº 710/1995, Revolução Constitucionalista
+ * @see https://www.al.sp.gov.br/documentacao/estudos-e-manuais/feriado-9-julho/artigo.htm Lei SP nº 9.497/1997 (PL 710/1995), Revolução Constitucionalista
  * @see https://www.al.sp.gov.br/repositorio/legislacao/lei/2023/lei-17746-12.09.2023.html Lei SP nº 17.746/2023, Dia da Consciência Negra (state holiday in 2023, national since 2024)
  * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual de SE, Emancipação Política de Sergipe
  * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei TO nº 960/1998, Autonomia do Estado do Tocantins

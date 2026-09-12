@@ -522,7 +522,7 @@ const address = await getAddressInfoByCep(1310100);
 
 ## isValidProcessoJuridico
 
-Validate the processo jurídico number according to [CNJ's definition](https://www.conjur.com.br/dl/resolucao-65-cnj.pdf).
+Validate the processo jurídico number according to [CNJ's definition](https://atos.cnj.jus.br/atos/detalhar/119).
 
 ```javascript
 import { isValidProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -532,7 +532,7 @@ isValidProcessoJuridico('00020802520125150049'); // true
 
 ## formatProcessoJuridico
 
-Format the processo jurídico number according to [CNJ's definition](https://www.conjur.com.br/dl/resolucao-65-cnj.pdf) (mask `NNNNNNN-DD.AAAA.J.TR.OOOO`).
+Format the processo jurídico number according to [CNJ's definition](https://atos.cnj.jus.br/atos/detalhar/119) (mask `NNNNNNN-DD.AAAA.J.TR.OOOO`).
 
 ```javascript
 import { formatProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -668,7 +668,7 @@ isValidBankAccount({
 
 ## getBanks
 
-Get every Brazilian bank with a compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv). Each bank (typed as `Bank`) has a `code` (COMPE, 3 digits), an `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 digits) and a `name`. Each call returns a fresh array of fresh objects, so mutating the result never affects subsequent calls.
+Get every Brazilian bank with a compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Each bank (typed as `Bank`) has a `code` (COMPE, 3 digits), an `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 digits) and a `name`. Each call returns a fresh array of fresh objects, so mutating the result never affects subsequent calls.
 
 ```javascript
 import { getBanks } from '@brazilian-utils/brazilian-utils';
@@ -684,7 +684,7 @@ getBanks();
 
 ## getBankByCode
 
-Look a Brazilian bank up by its compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv). Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that code.
+Look a Brazilian bank up by its compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that code.
 
 ```javascript
 import { getBankByCode } from '@brazilian-utils/brazilian-utils';
@@ -696,7 +696,7 @@ getBankByCode('999'); // null
 
 ## getBankByIspb
 
-Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv). Unlike the COMPE code (`getBankByCode`), every SPB participant has an ISPB, including institutions with no COMPE code of their own. Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
+Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Unlike the COMPE code (`getBankByCode`), every SPB participant has an ISPB, including institutions with no COMPE code of their own. Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
 
 ```javascript
 import { getBankByIspb } from '@brazilian-utils/brazilian-utils';
@@ -1135,7 +1135,7 @@ const ceps = await getCepInfoByAddress({
 
 ## generateProcessoJuridico
 
-Generate a valid random processo jurídico number according to [CNJ's definition](https://www.conjur.com.br/dl/resolucao-65-cnj.pdf). `year` must be between the current year and 9999, `court` between 1 and 9; out-of-range values return `null`. Uses `Math.random()` internally, so it is not cryptographically secure.
+Generate a valid random processo jurídico number according to [CNJ's definition](https://atos.cnj.jus.br/atos/detalhar/119). `year` must be between the current year and 9999, `court` between 1 and 9; out-of-range values return `null`. Uses `Math.random()` internally, so it is not cryptographically secure.
 
 ```javascript
 import { generateProcessoJuridico } from '@brazilian-utils/brazilian-utils';

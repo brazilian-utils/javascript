@@ -18,7 +18,7 @@ const CODE_LENGTH = 3;
  * getBankByCode("999"); // null
  * ```
  *
- * @see Official: https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
  * @see Based on: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
  * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */

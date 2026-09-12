@@ -436,6 +436,6 @@ getCities('SP'); // Retorna ordenado alfabeticamente
 
 Se você encontrar problemas durante a migração, por favor:
 
-1. Verifique a [documentação de utilitários](pt-br/utilities.md) para as assinaturas corretas das funções
+1. Verifique a [documentação de utilitários](/pt-br/utilities.md) para as assinaturas corretas das funções
 2. Revise os exemplos neste guia de migração
 3. Abra uma issue no [repositório GitHub](https://github.com/brazilian-utils/brazilian-utils) se encontrar um bug

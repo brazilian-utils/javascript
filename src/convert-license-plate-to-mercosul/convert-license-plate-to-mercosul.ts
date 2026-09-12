@@ -20,7 +20,7 @@ import { DIGIT_TO_MERCOSUL_LETTER } from "./constants";
  * convertLicensePlateToMercosul("invalid"); // ""
  * ```
  *
- * @see Official: https://www.gov.br/transportes/pt-br/assuntos/denatran (Resolução CONTRAN 780/2019, anexo)
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito (Resolução CONTRAN 780/2019, anexo)
  */
 export const convertLicensePlateToMercosul = (value: string): string => {
 	if (getFormatLicensePlate(value) !== "LLLNNNN") return "";

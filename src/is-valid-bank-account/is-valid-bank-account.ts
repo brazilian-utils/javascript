@@ -267,7 +267,7 @@ const sanitizeCheckDigit = (value: string): string => value.toUpperCase().replac
  * regenerated weekly by the datasets workflow, so a bank created after the release becomes valid
  * on the next release.
  *
- * @see Official: https://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
  * @see Based on: https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf
  * Icatu Seguros compendium of per bank agency/account check digit rules.
  * @see Based on: https://github.com/ajmiciano/banktools-br/tree/master/lib/banktools-br/banks

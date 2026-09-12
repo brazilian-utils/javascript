@@ -28,18 +28,24 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 
 ### Useful scripts
 
-| Command                                                                                                   | What it does                                                                               |
-| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `npm check`                                                                                               | Runs `vp check`: format check, lint and type-check together. Run this before opening a PR. |
-| `npm check:fix`                                                                                           | Same as above, but auto-fixes what it can.                                                 |
-| `npm format` / `npm format:check`                                                                         | Formats the codebase / checks formatting with `vp fmt`.                                    |
-| `npm lint` / `npm lint:fix`                                                                               | Lints the codebase with `vp lint`.                                                         |
-| `npm test`                                                                                                | Runs the unit test suite with `vp test`.                                                   |
-| `npm test:coverage`                                                                                       | Runs tests with coverage (`vp test run --coverage`).                                       |
-| `npm test:bun`                                                                                            | Runs the test suite on [Bun](https://bun.sh) (`bun test src`).                             |
-| `npm test:deno`                                                                                           | Runs the test suite on [Deno](https://deno.com) (`deno test`).                             |
-| `npm test:chrome-browser`, `npm test:firefox-browser`, `npm test:edge-browser`, `npm test:safari-browser` | Runs the test suite in real browsers via `vp test --browser.enabled`.                      |
-| `npm build`                                                                                               | Builds the library with `vp build`.                                                        |
+| Command                                                                                                   | What it does                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `npm check`                                                                                               | Runs `vp check`: format check, lint and type-check together. Run this before opening a PR.                                       |
+| `npm check:fix`                                                                                           | Same as above, but auto-fixes what it can.                                                                                       |
+| `npm format` / `npm format:check`                                                                         | Formats the codebase / checks formatting with `vp fmt`.                                                                          |
+| `npm lint` / `npm lint:fix`                                                                               | Lints the codebase with `vp lint`.                                                                                               |
+| `npm test`                                                                                                | Runs the unit test suite with `vp test`.                                                                                         |
+| `npm test:coverage`                                                                                       | Runs tests with coverage (`vp test run --coverage`).                                                                             |
+| `npm test:bun`                                                                                            | Runs the test suite on [Bun](https://bun.sh) (`bun test src`).                                                                   |
+| `npm test:deno`                                                                                           | Runs the test suite on [Deno](https://deno.com) (`deno test`).                                                                   |
+| `npm test:chrome-browser`, `npm test:firefox-browser`, `npm test:edge-browser`, `npm test:safari-browser` | Runs the test suite in real browsers via `vp test --browser.enabled`.                                                            |
+| `npm build`                                                                                               | Builds the library with `vp build`.                                                                                              |
+| `npm run check:duplication`                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                  |
+| `npm run check:unused`                                                                                    | Runs [knip](https://knip.dev): unused files, exports, types and dependencies fail.                                               |
+| `npm run test:mutation`                                                                                   | Runs [Stryker](https://stryker-mutator.io) mutation tests (`stryker run`); pass `-- --mutate src/<util>/<util>.ts` for one file. |
+| `npm run check:api`                                                                                       | Builds the public API report (`api/brazilian-utils.api.md`) with API Extractor; commit the updated file.                         |
+| `npm run check:commits`                                                                                   | Checks the commit messages since `origin/main` with commitlint (Conventional Commits).                                           |
+| `npm run check:lockfile`                                                                                  | Checks `package-lock.json` only resolves to the npm registry over HTTPS with integrity hashes (lockfile-lint).                   |
 
 Before opening a pull request, make sure `npm check` and `npm test` both pass locally. If your
 change touches runtime behavior, also consider running the Bun/Deno scripts above. The library is
@@ -118,6 +124,55 @@ request: the report is still posted, but the check no longer fails. Run `node sc
 or `node scripts/tree-shaking.ts --json before.json` before a change and
 `node scripts/tree-shaking.ts --compare before.json` after it to preview the same diff.
 
+## Code quality gates
+
+Three extra gates run in CI next to lint, types and coverage; run them locally before opening a
+pull request so the CI result is not a surprise.
+
+- **Duplicated code** (`npm run check:duplication`, [jscpd](https://jscpd.dev), config in
+  `.jscpd.json`): scans `src` and `scripts`, tests included, and fails on any clone of at least
+  5 lines and 50 tokens. Generated tables under `src/_internals/constants` are ignored. Fix a
+  clone by extracting the shared code into an `_internals` helper (production code) or into a
+  small local helper or a table-driven test (test code); expectations in tests stay hand-written
+  literals either way.
+- **Unused code** (`npm run check:unused`, [knip](https://knip.dev), config in `knip.json`): the
+  entry points are `src/index.ts`, every `src/<util>/<util>.ts` subpath entry, the scripts and the
+  config files. It fails on unused files, exports, exported types, duplicate exports and unused
+  dependencies. `publint` and `@arethetypeswrong/core` are listed in `ignoreDependencies` because
+  `vp pack` invokes them itself, and `src/_internals/test/runtime-deno.ts` is ignored because its
+  `it`/`test` aliases mirror the vitest API on purpose.
+- **Mutation testing** (`npm run test:mutation`, [Stryker](https://stryker-mutator.io), config in
+  `stryker.config.json`): mutates every source file except tests, constants and the test
+  runtime shims, and runs the vitest suite against each mutant. The score must stay at or above
+  the `thresholds.break` value in the config. The `Mutation tests` workflow runs the whole suite on
+  every pull request and on every push to `main`, like the other checks (about 3 minutes); the
+  HTML report is attached to the run as the `mutation-report` artifact. A surviving mutant
+  means a test is missing (add one, with a literal expectation) or the code has a branch that can
+  never matter (simplify it). Only when a mutant is truly equivalent, use
+  `// Stryker disable next-line <MutatorName>: <reason>` right above the line; that is the one
+  place an inline comment is accepted in this codebase.
+
+## Public API report
+
+`api/brazilian-utils.api.md` is generated by [API Extractor](https://api-extractor.com) from the
+bundled `dist/brazilian-utils.d.ts` and lists every exported function, type and overload of the
+package. CI rebuilds it and fails when the committed file is stale, so any change to a public
+signature shows up as a diff in the pull request, which is how "no breaking changes" is reviewed
+mechanically. After changing anything exported, run `npm run check:api` and commit the report.
+
+## Supply chain
+
+- Every GitHub Action is pinned to a full commit SHA with the version in a trailing comment
+  (Dependabot updates both). Checkouts use `persist-credentials: false`.
+- The `Security` workflow lints the workflows themselves with
+  [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor)
+  and scans `package-lock.json` with [OSV-Scanner](https://google.github.io/osv-scanner/); the
+  `Check` workflow runs `audit-ci` and lockfile-lint on top.
+- Commit messages are checked with commitlint on every pull request, since release-please derives
+  the version bump and the changelog from them.
+- The `Links` workflow checks every URL in the Markdown files and in the `@see` tags of the source
+  with [lychee](https://lychee.cli.rs) when a pull request touches them.
+
 ## Zero runtime dependencies
 
 Brazilian Utils ships with **zero runtime dependencies**. This is a deliberate, load-bearing
@@ -192,7 +247,9 @@ No local `npm login`/`npm publish` or tagging is ever needed to cut a release.
 3. Add or update tests. PRs without tests for new behavior will not be merged.
 4. Update `docs/utilities.md` and `docs/pt-br/utilities.md` if you added or changed a utility's
    public behavior.
-5. Run `npm check` and `npm test` and make sure both pass.
+5. Run `npm check`, `npm test`, `npm run check:duplication` and `npm run check:unused` and make
+   sure all of them pass; run `npm run test:mutation -- --mutate <files you touched>` when you
+   changed production code.
 6. Open a pull request against `main` using a Conventional Commit-style title. Fill in the pull
    request template checklist.
 
