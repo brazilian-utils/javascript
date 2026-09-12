@@ -91,7 +91,8 @@ const fetchFromBacen = async (): Promise<BankRow[]> => {
 			code === "" ||
 			name === undefined ||
 			name === "" ||
-			!/^\d{1,3}$/.test(code)
+			!/^\d{1,3}$/.test(code) ||
+			Number(code) === 0
 		) {
 			continue;
 		}
