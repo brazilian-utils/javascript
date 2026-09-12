@@ -44,15 +44,15 @@ describe("formatPis", () => {
 		expect(formatPis(10)).toBe("10");
 		expect(formatPis(100)).toBe("100");
 		expect(formatPis(1000)).toBe("100.0");
-		expect(formatPis(10000)).toBe("100.00");
-		expect(formatPis(100000)).toBe("100.000");
-		expect(formatPis(1000000)).toBe("100.0000");
-		expect(formatPis(10000000)).toBe("100.00000");
-		expect(formatPis(100000000)).toBe("100.00000.0");
-		expect(formatPis(1000000000)).toBe("100.00000.00");
-		expect(formatPis(10000000000)).toBe("100.00000.00-0");
-		expect(formatPis(100000000000)).toBe("100.00000.00-0");
-		expect(formatPis(1000000000000)).toBe("100.00000.00-0");
+		expect(formatPis(10_000)).toBe("100.00");
+		expect(formatPis(100_000)).toBe("100.000");
+		expect(formatPis(1_000_000)).toBe("100.0000");
+		expect(formatPis(10_000_000)).toBe("100.00000");
+		expect(formatPis(100_000_000)).toBe("100.00000.0");
+		expect(formatPis(1_000_000_000)).toBe("100.00000.00");
+		expect(formatPis(10_000_000_000)).toBe("100.00000.00-0");
+		expect(formatPis(100_000_000_000)).toBe("100.00000.00-0");
+		expect(formatPis(1_000_000_000_000)).toBe("100.00000.00-0");
 	});
 
 	it("when it is a float number", () => {
@@ -77,9 +77,9 @@ describe("formatPis", () => {
 	});
 
 	it("should return an empty string for null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatPis(null)).toBe("");
-		// @ts-expect-error
-		expect(formatPis(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatPis()).toBe("");
 	});
 });

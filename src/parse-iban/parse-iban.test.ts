@@ -92,18 +92,18 @@ describe("parseIban", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parseIban(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(parseIban(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parseIban()).toBeNull();
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
-			expect(parseIban(150000000000)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parseIban(150_000_000_000)).toBeNull();
 		});
 	});
 

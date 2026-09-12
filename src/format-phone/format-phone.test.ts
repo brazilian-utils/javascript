@@ -64,7 +64,7 @@ describe("formatPhone", () => {
 		expect(formatPhone("+55 0800 123 4567", { mask: "e164" })).toBe("0800 123 4567");
 		expect(formatPhone("+55 0800 123 4567", { mask: "international" })).toBe("0800 123 4567");
 		expect(formatPhone("55988887777", { mask: "e164" })).toBe("+5555988887777");
-		expect(formatPhone(11988887777, { mask: "e164" })).toBe("+5511988887777");
+		expect(formatPhone(11_988_887_777, { mask: "e164" })).toBe("+5511988887777");
 	});
 
 	it("should international format phone", () => {
@@ -138,13 +138,13 @@ describe("formatPhone", () => {
 	});
 
 	it("should return an empty string for nullish values", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatPhone(null)).toBe("");
-		// @ts-expect-error
-		expect(formatPhone(undefined)).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
+		expect(formatPhone()).toBe("");
+		// @ts-expect-error: intentionally invalid input
 		expect(formatPhone(null, { mask: "e164" })).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatPhone(undefined, { mask: "service" })).toBe("");
 	});
 });

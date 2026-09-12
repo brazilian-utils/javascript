@@ -8,17 +8,17 @@ const KEY_CPF_PADDED = "35170400040364478829550010000000121000123457";
 describe("parseNfeKey", () => {
 	describe("should return null", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parseNfeKey(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(parseNfeKey(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parseNfeKey()).toBeNull();
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parseNfeKey(123)).toBeNull();
 		});
 

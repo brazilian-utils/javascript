@@ -78,5 +78,5 @@ export const formatCurrency = (value: string | number, options?: FormatCurrencyO
 
 	return getFormatter(Boolean(options?.symbol), precision)
 		.format(enhancedValue)
-		.replace("\u00a0", " ");
+		.replace("\u00A0", " ");
 };

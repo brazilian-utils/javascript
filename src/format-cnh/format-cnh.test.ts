@@ -22,9 +22,9 @@ describe("formatCnh", () => {
 	});
 
 	it("should return an empty string for null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatCnh(null)).toBe("");
-		// @ts-expect-error
-		expect(formatCnh(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCnh()).toBe("");
 	});
 });

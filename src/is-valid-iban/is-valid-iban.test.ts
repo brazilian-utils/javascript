@@ -66,34 +66,34 @@ describe("isValidIban", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIban(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidIban(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIban()).toBe(false);
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
-			expect(isValidIban(1500000000000)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIban(1_500_000_000_000)).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIban(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIban(false)).toBe(false);
 		});
 
 		test("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIban({})).toBe(false);
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIban([])).toBe(false);
 		});
 	});

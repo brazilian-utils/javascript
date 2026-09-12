@@ -11,26 +11,26 @@ describe("isValidPixKey", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixKey(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidPixKey(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPixKey()).toBe(false);
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
-			expect(isValidPixKey(12345678909)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPixKey(12_345_678_909)).toBe(false);
 		});
 
 		test("when it is a boolean, an object or an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixKey(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixKey({})).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixKey([])).toBe(false);
 		});
 
@@ -89,9 +89,9 @@ describe("isValidPixKey", () => {
 
 		test("accepting every kind when the option is absent or not a list", () => {
 			expect(isValidPixKey("123.456.789-09", {})).toBe(true);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixKey("123.456.789-09", { accept: "cpf" })).toBe(true);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixKey("123.456.789-09", null)).toBe(true);
 		});
 	});

@@ -38,7 +38,9 @@ const generateBancario = (): string => {
 const generateArrecadacao = (): string => {
 	const segment = ARRECADACAO_SEGMENTS[Math.floor(Math.random() * ARRECADACAO_SEGMENTS.length)];
 	const useMod11 = Math.random() < 0.5;
-	const checkDigit = useMod11 ? (value: string) => mod11(value, { variant: "arrecadacao" }) : mod10;
+	const checkDigit = useMod11
+		? (value: string): number => mod11(value, { variant: "arrecadacao" })
+		: mod10;
 
 	const body = generateRandomNumber(40);
 	const head = `${ARRECADACAO_PRODUCT}${segment}${useMod11 ? "8" : "6"}`;

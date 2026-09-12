@@ -86,12 +86,12 @@ describe("getAreaCodeInfo", () => {
 	});
 
 	it("should return null for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getAreaCodeInfo(null)).toBeNull();
 	});
 
 	it("should return null for undefined", () => {
-		// @ts-expect-error
-		expect(getAreaCodeInfo(undefined)).toBeNull();
+		// @ts-expect-error: intentionally invalid input
+		expect(getAreaCodeInfo()).toBeNull();
 	});
 });

@@ -1,6 +1,6 @@
-const COMBINING_MARKS_REGEX = /[\u0300-\u036f]/g;
+const COMBINING_MARKS_REGEX = /[\u0300-\u036F]/g;
 
-const NON_PRINTABLE_ASCII_REGEX = /[^\u0020-\u007e]/g;
+const NON_PRINTABLE_ASCII_REGEX = /[^\u0020-\u007E]/g;
 
 const WHITESPACE_REGEX = /\s+/g;
 

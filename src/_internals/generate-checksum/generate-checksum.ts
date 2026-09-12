@@ -1,11 +1,11 @@
 import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
 
-export interface GenerateChecksumParams {
+export type GenerateChecksumParams = {
 	/** The digits the checksum is computed over. */
 	base: string | number;
 	/** A starting weight that decreases along the digits, or the explicit weight of each digit. */
 	weight: number | number[];
-}
+};
 
 /**
  * Sums every digit of a base value multiplied by its weight, the shared first step of the

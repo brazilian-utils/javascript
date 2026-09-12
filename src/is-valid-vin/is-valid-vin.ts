@@ -40,9 +40,7 @@ export const isValidVin = (value: string): boolean => {
 	// Stryker disable next-line StringLiteral: generateChecksum strips this to digits, so it's inert.
 	let translitDigits = "";
 
-	for (let i = 0; i < VIN_LENGTH; i++) {
-		const char = vin[i];
-
+	for (const char of vin) {
 		if (!(char in VIN_TRANSLITERATION)) return false;
 
 		translitDigits += VIN_TRANSLITERATION[char];

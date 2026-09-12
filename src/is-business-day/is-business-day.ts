@@ -9,7 +9,7 @@ export type IsBusinessDayOptions = {
 	includeOptional?: boolean;
 };
 
-const WEEKEND_DAYS = [0, 6];
+const WEEKEND_DAYS = new Set([0, 6]);
 
 /**
  * Checks whether a given date is a Brazilian business day (dia útil).
@@ -63,7 +63,7 @@ export const isBusinessDay = (value: Date, options?: IsBusinessDayOptions): bool
 
 	if (year < HOLIDAYS_MIN_YEAR || year > HOLIDAYS_MAX_YEAR) return false;
 
-	if (WEEKEND_DAYS.includes(value.getDay())) return false;
+	if (WEEKEND_DAYS.has(value.getDay())) return false;
 
 	const stateCode = options?.stateCode;
 	const includeOptional = options?.includeOptional ?? true;

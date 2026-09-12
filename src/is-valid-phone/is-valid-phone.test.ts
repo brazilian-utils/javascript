@@ -16,15 +16,15 @@ describe("isValidPhone", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPhone(null)).toBe(false);
 		});
 
 		test("when it is undefined or a number", () => {
-			// @ts-expect-error
-			expect(isValidPhone(undefined)).toBe(false);
-			// @ts-expect-error
-			expect(isValidPhone(11987654321)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPhone()).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPhone(11_987_654_321)).toBe(false);
 		});
 
 		test("when length is invalid", () => {

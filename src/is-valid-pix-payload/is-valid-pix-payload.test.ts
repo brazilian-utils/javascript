@@ -62,26 +62,26 @@ describe("isValidPixPayload", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixPayload(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidPixPayload(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPixPayload()).toBe(false);
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
-			expect(isValidPixPayload(20250101)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPixPayload(20_250_101)).toBe(false);
 		});
 
 		test("when it is a boolean, an object or an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixPayload(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixPayload({})).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPixPayload([])).toBe(false);
 		});
 

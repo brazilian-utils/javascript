@@ -26,7 +26,7 @@ describe("generateProcessoJuridico", () => {
 		const value = generateProcessoJuridico({ year: currentYear, court: 5 });
 
 		expect(value).not.toBe(null);
-		expect((value as string).substring(9, 13)).toBe(String(currentYear));
+		expect((value as string).slice(9, 13)).toBe(String(currentYear));
 		expect((value as string).charAt(13)).toBe("5");
 		expect(isValidProcessoJuridico(value as string)).toBe(true);
 	});
@@ -57,9 +57,9 @@ describe("generateProcessoJuridico", () => {
 	});
 
 	it("should return null when options is not an object", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(generateProcessoJuridico("invalid")).toBe(null);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(generateProcessoJuridico(42)).toBe(null);
 	});
 

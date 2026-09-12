@@ -3,9 +3,10 @@ import { generateRandomNumber } from "../_internals/generate-random-number/gener
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
 const calculateCheckDigit = (base: string): string => {
-	const sum = base
-		.split("")
-		.reduce((acc, digit, index) => acc + Number(digit) * PIS_WEIGHTS[index], 0);
+	const sum = PIS_WEIGHTS.reduce(
+		(acc, weight, index) => acc + Number(base.charAt(index)) * weight,
+		0,
+	);
 	const digit = 11 - (sum % 11);
 	return digit >= 10 ? "0" : digit.toString();
 };

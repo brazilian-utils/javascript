@@ -4,13 +4,13 @@ import { convertLicensePlateToMercosul } from "./convert-license-plate-to-mercos
 describe("convertLicensePlateToMercosul", () => {
 	describe("should return an empty string", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertLicensePlateToMercosul(null)).toBe("");
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(convertLicensePlateToMercosul(undefined)).toBe("");
+			// @ts-expect-error: intentionally invalid input
+			expect(convertLicensePlateToMercosul()).toBe("");
 		});
 
 		test("when it is an empty string", () => {

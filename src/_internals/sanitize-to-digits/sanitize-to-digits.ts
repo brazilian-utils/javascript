@@ -13,4 +13,4 @@
  * ```
  */
 export const sanitizeToDigits = (value: string | number): string =>
-	value.toString().replace(/\D/g, "");
+	value.toString().replaceAll(/\D/g, "");

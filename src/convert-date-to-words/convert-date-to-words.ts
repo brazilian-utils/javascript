@@ -114,9 +114,10 @@ export const convertDateToWords = (
 		? `${day === 1 ? "1º" : day} de ${monthName} de ${year}`
 		: `${day === 1 ? "primeiro" : numberToWords(day)} de ${monthName} de ${numberToWords(year).replaceAll(", ", " ")}`;
 
-	const result = options?.weekday
-		? `${WEEKDAY_NAMES[getWeekdayIndex(year, month, day)]}, ${dateWords}`
-		: dateWords;
+	const result =
+		options?.weekday === true
+			? `${WEEKDAY_NAMES[getWeekdayIndex(year, month, day)]}, ${dateWords}`
+			: dateWords;
 
 	return applyWordsCase(result, options?.case);
 };

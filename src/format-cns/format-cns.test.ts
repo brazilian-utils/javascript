@@ -12,7 +12,7 @@ describe("formatCns", () => {
 	});
 
 	it("should format a number CNS with the space mask", () => {
-		expect(formatCns(123456789010001)).toBe("123 4567 8901 0001");
+		expect(formatCns(123_456_789_010_001)).toBe("123 4567 8901 0001");
 	});
 
 	it("should pad the value with leading zeros when pad is true", () => {
@@ -29,9 +29,9 @@ describe("formatCns", () => {
 	});
 
 	it("should return an empty string when the value is null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatCns(null)).toBe("");
-		// @ts-expect-error
-		expect(formatCns(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCns()).toBe("");
 	});
 });

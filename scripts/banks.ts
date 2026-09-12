@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 import { readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 const BACEN_CSV_URL =
 	"https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv";
@@ -25,6 +24,14 @@ type BrasilApiBank = {
 	name?: string;
 	fullName?: string;
 };
+
+const isBrasilApiBank = (value: unknown): value is BrasilApiBank =>
+	typeof value === "object" &&
+	value !== null &&
+	(!("ispb" in value) || typeof value.ispb === "string") &&
+	(!("code" in value) || typeof value.code === "number") &&
+	(!("name" in value) || typeof value.name === "string") &&
+	(!("fullName" in value) || typeof value.fullName === "string");
 
 const parseCsvLine = (line: string): string[] => {
 	const fields: string[] = [];
@@ -73,7 +80,17 @@ const fetchFromBacen = async (): Promise<BankRow[]> => {
 	for (const row of rows) {
 		const [ispb, , code, , , name] = parseCsvLine(row);
 
-		if (!ispb || !code || !name || !/^\d{1,3}$/.test(code)) continue;
+		if (
+			ispb === undefined ||
+			ispb === "" ||
+			code === undefined ||
+			code === "" ||
+			name === undefined ||
+			name === "" ||
+			!/^\d{1,3}$/.test(code)
+		) {
+			continue;
+		}
 
 		banks.push({ code: code.padStart(3, "0"), ispb, name: name.trim() });
 	}
@@ -88,31 +105,33 @@ const fetchFromBrasilApi = async (): Promise<BankRow[]> => {
 		throw new Error(`BrasilAPI banks request failed with status ${response.status}`);
 	}
 
-	const json: BrasilApiBank[] = await response.json();
+	const json: unknown = await response.json();
+
+	if (!Array.isArray(json)) {
+		throw new TypeError("BrasilAPI banks payload is not an array");
+	}
 
 	const banks: BankRow[] = [];
 
-	for (const bank of json) {
-		if (
-			typeof bank.code !== "number" ||
-			!Number.isInteger(bank.code) ||
-			bank.code < 0 ||
-			bank.code > 999 ||
-			!bank.ispb
-		)
-			continue;
+	for (const entry of json) {
+		if (!isBrasilApiBank(entry) || typeof entry.code !== "number") continue;
+		if (!Number.isInteger(entry.code) || entry.code < 0 || entry.code > 999) continue;
 
-		const name = (bank.fullName ?? bank.name ?? "").trim();
+		const ispb = entry.ispb;
 
-		if (!name) continue;
+		if (ispb === undefined || ispb === "") continue;
 
-		banks.push({ code: String(bank.code).padStart(3, "0"), ispb: bank.ispb, name });
+		const name = (entry.fullName ?? entry.name ?? "").trim();
+
+		if (name === "") continue;
+
+		banks.push({ code: String(entry.code).padStart(3, "0"), ispb, name });
 	}
 
 	return banks;
 };
 
-const main = async () => {
+const main = async (): Promise<void> => {
 	let banks: BankRow[];
 	let source: string;
 

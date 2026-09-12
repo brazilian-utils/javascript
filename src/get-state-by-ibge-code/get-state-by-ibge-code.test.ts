@@ -55,13 +55,13 @@ describe("getStateByIbgeCode", () => {
 	});
 
 	it("should return null for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getStateByIbgeCode(null)).toBeNull();
 	});
 
 	it("should return null for undefined", () => {
-		// @ts-expect-error
-		expect(getStateByIbgeCode(undefined)).toBeNull();
+		// @ts-expect-error: intentionally invalid input
+		expect(getStateByIbgeCode()).toBeNull();
 	});
 
 	it("should ignore non-digit characters around the code", () => {

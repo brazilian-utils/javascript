@@ -16,5 +16,6 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
  */
 export const generateLegalNature = (): string => {
 	const legalNatureCodes = Object.keys(LEGAL_NATURE);
+
 	return legalNatureCodes[Math.floor(Math.random() * legalNatureCodes.length)];
 };

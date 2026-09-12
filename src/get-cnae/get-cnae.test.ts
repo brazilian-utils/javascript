@@ -10,7 +10,7 @@ describe("getCnae", () => {
 	});
 
 	it("should return the CNAE entry for a known code as a number", () => {
-		expect(getCnae(6201501)).toEqual({
+		expect(getCnae(6_201_501)).toEqual({
 			code: "6201-5/01",
 			description: "DESENVOLVIMENTO DE PROGRAMAS DE COMPUTADOR SOB ENCOMENDA",
 		});
@@ -24,7 +24,7 @@ describe("getCnae", () => {
 	});
 
 	it("should pad a number to seven digits so codes starting with zero resolve (0111-3/01, cultivo de arroz)", () => {
-		expect(getCnae(111301)).toEqual({ code: "0111-3/01", description: "CULTIVO DE ARROZ" });
+		expect(getCnae(111_301)).toEqual({ code: "0111-3/01", description: "CULTIVO DE ARROZ" });
 		expect(getCnae("111301")).toBeNull();
 	});
 
@@ -50,6 +50,6 @@ describe("getCnae", () => {
 		// @ts-expect-error not a string or number
 		expect(getCnae(null)).toBeNull();
 		// @ts-expect-error not a string or number
-		expect(getCnae(undefined)).toBeNull();
+		expect(getCnae()).toBeNull();
 	});
 });

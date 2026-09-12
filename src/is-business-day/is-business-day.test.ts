@@ -38,7 +38,7 @@ describe("isBusinessDay", () => {
 		});
 
 		it("should ignore an unknown stateCode and fall back to national holidays", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: "XX" })).toBe(true);
 		});
 	});
@@ -77,18 +77,18 @@ describe("isBusinessDay", () => {
 		});
 
 		it("should return false for a non-Date value", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isBusinessDay("2024-01-02")).toBe(false);
 		});
 
 		it("should return false for null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isBusinessDay(null)).toBe(false);
 		});
 
 		it("should return false for undefined", () => {
-			// @ts-expect-error
-			expect(isBusinessDay(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isBusinessDay()).toBe(false);
 		});
 	});
 

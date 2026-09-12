@@ -3,7 +3,7 @@ import { describe, expect, test } from "../_internals/test/runtime";
 import { convertNumberToWords, type ConvertNumberToWordsOptions } from "./convert-number-to-words";
 
 function expectWords(
-	cases: ReadonlyArray<readonly [number, string]>,
+	cases: readonly (readonly [number, string])[],
 	options?: ConvertNumberToWordsOptions,
 ): void {
 	const failures = cases.filter(
@@ -66,12 +66,12 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should return '' for a non-number value", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertNumberToWords("123")).toBe("");
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertNumberToWords(null)).toBe("");
-			// @ts-expect-error
-			expect(convertNumberToWords(undefined)).toBe("");
+			// @ts-expect-error: intentionally invalid input
+			expect(convertNumberToWords()).toBe("");
 		});
 	});
 
@@ -103,14 +103,14 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should ignore an invalid case value and fall back to 'lower'", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertNumberToWords(123, { case: "invalid" })).toBe("cento e vinte e três");
 		});
 	});
 
 	describe("literal case tables", () => {
 		test("should match a hand-written word for every integer from 31 to 200 (masculine)", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[31, "trinta e um"],
 				[32, "trinta e dois"],
 				[33, "trinta e três"],
@@ -286,7 +286,7 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should match a hand-written word for every round hundred and the hundred that follows it", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[100, "cem"],
 				[101, "cento e um"],
 				[200, "duzentos"],
@@ -311,7 +311,7 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should match a hand-written word at every ten/hundred/thousand/scale boundary", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[999, "novecentos e noventa e nove"],
 				[1000, "mil"],
 				[1001, "mil e um"],
@@ -325,39 +325,39 @@ describe("convertNumberToWords", () => {
 				[2001, "dois mil e um"],
 				[5000, "cinco mil"],
 				[9999, "nove mil, novecentos e noventa e nove"],
-				[10000, "dez mil"],
-				[21000, "vinte e um mil"],
-				[100000, "cem mil"],
-				[101000, "cento e um mil"],
-				[200000, "duzentos mil"],
-				[300000, "trezentos mil"],
-				[999999, "novecentos e noventa e nove mil, novecentos e noventa e nove"],
-				[1000000, "um milhão"],
-				[1000001, "um milhão e um"],
-				[1000100, "um milhão e cem"],
-				[1000230, "um milhão, duzentos e trinta"],
-				[1045678, "um milhão, quarenta e cinco mil, seiscentos e setenta e oito"],
-				[1100000, "um milhão e cem mil"],
-				[1200000, "um milhão e duzentos mil"],
-				[1230000, "um milhão, duzentos e trinta mil"],
-				[1230045, "um milhão, duzentos e trinta mil e quarenta e cinco"],
-				[1230456, "um milhão, duzentos e trinta mil, quatrocentos e cinquenta e seis"],
-				[2000000, "dois milhões"],
-				[1000000000, "um bilhão"],
-				[1000000001, "um bilhão e um"],
-				[2000000000, "dois bilhões"],
+				[10_000, "dez mil"],
+				[21_000, "vinte e um mil"],
+				[100_000, "cem mil"],
+				[101_000, "cento e um mil"],
+				[200_000, "duzentos mil"],
+				[300_000, "trezentos mil"],
+				[999_999, "novecentos e noventa e nove mil, novecentos e noventa e nove"],
+				[1_000_000, "um milhão"],
+				[1_000_001, "um milhão e um"],
+				[1_000_100, "um milhão e cem"],
+				[1_000_230, "um milhão, duzentos e trinta"],
+				[1_045_678, "um milhão, quarenta e cinco mil, seiscentos e setenta e oito"],
+				[1_100_000, "um milhão e cem mil"],
+				[1_200_000, "um milhão e duzentos mil"],
+				[1_230_000, "um milhão, duzentos e trinta mil"],
+				[1_230_045, "um milhão, duzentos e trinta mil e quarenta e cinco"],
+				[1_230_456, "um milhão, duzentos e trinta mil, quatrocentos e cinquenta e seis"],
+				[2_000_000, "dois milhões"],
+				[1_000_000_000, "um bilhão"],
+				[1_000_000_001, "um bilhão e um"],
+				[2_000_000_000, "dois bilhões"],
 				[
-					1234567890,
+					1_234_567_890,
 					"um bilhão, duzentos e trinta e quatro milhões, quinhentos e sessenta e sete mil, oitocentos e noventa",
 				],
 				[
-					999999999999,
+					999_999_999_999,
 					"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
 				],
-				[1000000000000, "um trilhão"],
-				[2000000000000, "dois trilhões"],
+				[1_000_000_000_000, "um trilhão"],
+				[2_000_000_000_000, "dois trilhões"],
 				[
-					999999999999999,
+					999_999_999_999_999,
 					"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
 				],
 			];
@@ -365,7 +365,7 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should prefix 'menos' to a hand-written word for every integer from -1 to -100", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[-1, "menos um"],
 				[-2, "menos dois"],
 				[-3, "menos três"],
@@ -471,15 +471,15 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should prefix 'menos' to a hand-written word at negative scale boundaries", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[-200, "menos duzentos"],
 				[-999, "menos novecentos e noventa e nove"],
 				[-1000, "menos mil"],
 				[-1001, "menos mil e um"],
 				[-2000, "menos dois mil"],
-				[-1000000, "menos um milhão"],
+				[-1_000_000, "menos um milhão"],
 				[
-					-999999999999999,
+					-999_999_999_999_999,
 					"menos novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
 				],
 			];
@@ -487,7 +487,7 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should match a hand-written feminine word for every integer from 0 to 30", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[0, "zero"],
 				[1, "uma"],
 				[2, "duas"],
@@ -525,7 +525,7 @@ describe("convertNumberToWords", () => {
 		});
 
 		test("should match a hand-written feminine word at hundred/thousand/million boundaries", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[100, "cem"],
 				[101, "cento e uma"],
 				[200, "duzentas"],
@@ -544,14 +544,14 @@ describe("convertNumberToWords", () => {
 				[2000, "duas mil"],
 				[2002, "duas mil e duas"],
 				[3000, "três mil"],
-				[21000, "vinte e uma mil"],
-				[100000, "cem mil"],
-				[200000, "duzentas mil"],
-				[300000, "trezentas mil"],
-				[1000000, "um milhão"],
-				[1000001, "um milhão e uma"],
-				[2000000, "dois milhões"],
-				[2000002, "dois milhões e duas"],
+				[21_000, "vinte e uma mil"],
+				[100_000, "cem mil"],
+				[200_000, "duzentas mil"],
+				[300_000, "trezentas mil"],
+				[1_000_000, "um milhão"],
+				[1_000_001, "um milhão e uma"],
+				[2_000_000, "dois milhões"],
+				[2_000_002, "dois milhões e duas"],
 			];
 
 			expectWords(cases, { gender: "feminine" });

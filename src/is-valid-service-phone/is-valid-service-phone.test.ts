@@ -8,12 +8,12 @@ describe("isValidServicePhone", () => {
 		});
 
 		test("when it is null, undefined or a number", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidServicePhone(null)).toBe(false);
-			// @ts-expect-error
-			expect(isValidServicePhone(undefined)).toBe(false);
-			// @ts-expect-error
-			expect(isValidServicePhone(8001234567)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidServicePhone()).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidServicePhone(8_001_234_567)).toBe(false);
 		});
 
 		test("when it is a geographic number", () => {

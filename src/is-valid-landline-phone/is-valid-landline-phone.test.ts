@@ -16,12 +16,12 @@ describe("isValidLandlinePhone", () => {
 		});
 
 		test("when it is null, undefined or a number", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidLandlinePhone(null)).toBe(false);
-			// @ts-expect-error
-			expect(isValidLandlinePhone(undefined)).toBe(false);
-			// @ts-expect-error
-			expect(isValidLandlinePhone(1130000000)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidLandlinePhone()).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidLandlinePhone(1_130_000_000)).toBe(false);
 		});
 
 		test("when the country code leaves an invalid number", () => {

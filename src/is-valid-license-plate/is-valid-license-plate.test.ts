@@ -8,29 +8,29 @@ describe("isValidLicensePlate", () => {
 		});
 
 		it("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidLicensePlate(null)).toBe(false);
 		});
 
 		it("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidLicensePlate(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidLicensePlate()).toBe(false);
 		});
 
 		it("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidLicensePlate(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidLicensePlate(false)).toBe(false);
 		});
 
 		it("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidLicensePlate({})).toBe(false);
 		});
 
 		it("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidLicensePlate([])).toBe(false);
 		});
 

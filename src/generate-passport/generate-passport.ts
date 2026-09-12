@@ -6,7 +6,7 @@ import { ALPHABET_LENGTH, CHAR_CODE_A, DIGITS_LENGTH, LETTERS_LENGTH } from "./c
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @returns A random valid passport number string (e.g. "RY393097").
+ * @returns {string} A random valid passport number string (e.g. "RY393097").
  *
  * @example
  * generatePassport() // "RY393097"

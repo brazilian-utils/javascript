@@ -122,11 +122,12 @@ export const numberToWords = (value: number, options?: NumberToWordsOptions): st
 
 	let result = "";
 
-	groups.forEach((groupValue, index) => {
-		if (groupValue === 0) return;
+	for (const [index, groupValue] of groups.entries()) {
+		if (groupValue === 0) continue;
 
 		const scale = highestScale - index;
 		const scaleWord = SCALE_WORDS[scale];
+
 		const groupGender = scale >= 2 ? undefined : gender;
 
 		const groupText =
@@ -138,7 +139,7 @@ export const numberToWords = (value: number, options?: NumberToWordsOptions): st
 
 		if (result === "") {
 			result = groupText;
-			return;
+			continue;
 		}
 
 		const connector =
@@ -146,7 +147,7 @@ export const numberToWords = (value: number, options?: NumberToWordsOptions): st
 			index === lastNonZeroIndex && (groupValue < 100 || isRoundHundred(groupValue)) ? " e " : ", ";
 
 		result += connector + groupText;
-	});
+	}
 
 	return result;
 };

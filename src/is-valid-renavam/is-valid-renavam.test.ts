@@ -8,29 +8,29 @@ describe("isValidRenavam", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRenavam(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidRenavam(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidRenavam()).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRenavam(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRenavam(false)).toBe(false);
 		});
 
 		test("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRenavam({})).toBe(false);
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRenavam([])).toBe(false);
 		});
 
@@ -73,7 +73,7 @@ describe("isValidRenavam", () => {
 		});
 
 		test("when is a RENAVAM valid as number", () => {
-			expect(isValidRenavam(639884962)).toBe(true);
+			expect(isValidRenavam(639_884_962)).toBe(true);
 		});
 
 		test("when is a RENAVAM valid with mixed characters that sanitize to a valid RENAVAM", () => {

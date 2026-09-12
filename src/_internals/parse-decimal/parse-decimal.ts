@@ -37,7 +37,7 @@ export const parseDecimal = (value: string, options?: ParseDecimalOptions): numb
 	const [prefix] = value.split(/\d/, 1);
 	const sign = prefix.includes("-") ? -1 : 1;
 
-	const cleaned = value.replace(/[^\d.,]/g, "");
+	const cleaned = value.replaceAll(/[^\d.,]/g, "");
 	const separatorIndex = Math.max(cleaned.lastIndexOf(","), cleaned.lastIndexOf("."));
 
 	if (separatorIndex === -1) {
@@ -46,7 +46,10 @@ export const parseDecimal = (value: string, options?: ParseDecimalOptions): numb
 
 	const fraction = cleaned.slice(separatorIndex + 1);
 	const isDecimal = fraction.length <= maxFractionDigits;
-	const integerPart = (isDecimal ? cleaned.slice(0, separatorIndex) : cleaned).replace(/\D/g, "");
+	const integerPart = (isDecimal ? cleaned.slice(0, separatorIndex) : cleaned).replaceAll(
+		/\D/g,
+		"",
+	);
 	const numeric = isDecimal ? `${integerPart}.${fraction}` : integerPart;
 
 	return sign * Number.parseFloat(numeric) || 0;

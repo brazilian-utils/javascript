@@ -27,7 +27,7 @@ const padLeft = (input: string, padLength: number): string =>
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm
  */
 export const isValidRenavam = (renavam: string | number): boolean => {
-	if (!renavam) return false;
+	if (typeof renavam !== "string" && typeof renavam !== "number") return false;
 
 	const digits = sanitizeToDigits(renavam);
 
@@ -35,14 +35,18 @@ export const isValidRenavam = (renavam: string | number): boolean => {
 
 	const paddedDigits = padLeft(digits, RENAVAM_LENGTH);
 
-	const renavamWithoutDigit = paddedDigits.substring(0, 10);
+	const renavamWithoutDigit = paddedDigits.slice(0, 10);
 
-	const reversedRenavam = renavamWithoutDigit.split("").reverse().join("");
+	let reversedRenavam = "";
+
+	for (const char of renavamWithoutDigit) {
+		reversedRenavam = char + reversedRenavam;
+	}
 
 	let sum = 0;
 	let multiplier = 2;
-	for (let i = 0; i < 10; i++) {
-		const digit = Number.parseInt(reversedRenavam[i], 10);
+	for (const char of reversedRenavam) {
+		const digit = Number.parseInt(char, 10);
 		sum += digit * multiplier;
 
 		multiplier = multiplier >= 9 ? 2 : multiplier + 1;
@@ -52,7 +56,7 @@ export const isValidRenavam = (renavam: string | number): boolean => {
 
 	const expectedDigit = mod11 <= 1 ? 0 : 11 - mod11;
 
-	const actualDigit = Number.parseInt(paddedDigits[10], 10);
+	const actualDigit = Number.parseInt(paddedDigits.charAt(10), 10);
 
 	return expectedDigit === actualDigit;
 };

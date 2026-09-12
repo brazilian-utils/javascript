@@ -4,17 +4,17 @@ import { isValidCertidao } from "./is-valid-certidao";
 describe("isValidCertidao", () => {
 	describe("should return false", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCertidao(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidCertidao(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCertidao()).toBe(false);
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCertidao([])).toBe(false);
 		});
 
@@ -52,7 +52,7 @@ describe("isValidCertidao", () => {
 		});
 
 		test("when it is a number, which cannot carry the 32 significant digits of a matrícula", () => {
-			expect(isValidCertidao(1045390155)).toBe(false);
+			expect(isValidCertidao(1_045_390_155)).toBe(false);
 		});
 	});
 

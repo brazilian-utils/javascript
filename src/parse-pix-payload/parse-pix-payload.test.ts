@@ -34,7 +34,7 @@ const buildPayload = (merchantAccountInformation: string, additionalData?: strin
 		tlv("58", "BR") +
 		tlv("59", "Fulano de Tal") +
 		tlv("60", "BRASILIA") +
-		(additionalData !== undefined ? tlv("62", additionalData) : "") +
+		(additionalData === undefined ? "" : tlv("62", additionalData)) +
 		"6304";
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
@@ -69,16 +69,18 @@ const buildPayloadWithoutCountryCode = (): string => {
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
 
+const buildPayloadBody = (merchantCity: string, crcTag: string): string =>
+	tlv("00", "01") +
+	tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
+	tlv("52", "0000") +
+	tlv("53", "986") +
+	tlv("58", "BR") +
+	tlv("59", "Fulano de Tal") +
+	tlv("60", merchantCity) +
+	crcTag;
+
 const buildPayloadWithCrcTag = (crcTag: string): string => {
-	const withoutCrc =
-		tlv("00", "01") +
-		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
-		tlv("52", "0000") +
-		tlv("53", "986") +
-		tlv("58", "BR") +
-		tlv("59", "Fulano de Tal") +
-		tlv("60", "BRASILIA") +
-		crcTag;
+	const withoutCrc = buildPayloadBody("BRASILIA", crcTag);
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
@@ -98,6 +100,26 @@ const buildPayloadWithAmount = (amount: string): string => {
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
 
+const buildPayloadWithMerchantName = (merchantName: string): string => {
+	const withoutCrc =
+		tlv("00", "01") +
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
+		tlv("52", "0000") +
+		tlv("53", "986") +
+		tlv("58", "BR") +
+		tlv("59", merchantName) +
+		tlv("60", "BRASILIA") +
+		"6304";
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
+
+const buildPayloadWithMerchantCity = (merchantCity: string): string => {
+	const withoutCrc = buildPayloadBody(merchantCity, "6304");
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
+
 describe("parsePixPayload", () => {
 	describe("should return null", () => {
 		test("when it is an empty or blank string", () => {
@@ -106,26 +128,26 @@ describe("parsePixPayload", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixPayload(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(parsePixPayload(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parsePixPayload()).toBeNull();
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
-			expect(parsePixPayload(20250101)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parsePixPayload(20_250_101)).toBeNull();
 		});
 
 		test("when it is a boolean, an object or an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixPayload(true)).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixPayload({})).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixPayload([])).toBeNull();
 		});
 
@@ -186,7 +208,9 @@ describe("parsePixPayload", () => {
 		});
 
 		test("when a merchant account information template is well-formed but carries no GUI, without throwing", () => {
-			expect(parsePixPayload(buildPayload(tlv("01", "12345678909")))).toBeNull();
+			const merchantAccountInformation = tlv("01", "12345678909");
+
+			expect(parsePixPayload(buildPayload(merchantAccountInformation))).toBeNull();
 		});
 
 		test("when the country code field is entirely absent, without throwing", () => {
@@ -199,6 +223,14 @@ describe("parsePixPayload", () => {
 
 		test("when the transaction amount is longer than 13 characters", () => {
 			expect(parsePixPayload(buildPayloadWithAmount("99999999999.99"))).toBeNull();
+		});
+
+		test("when the merchant name is present but empty", () => {
+			expect(parsePixPayload(buildPayloadWithMerchantName(""))).toBeNull();
+		});
+
+		test("when the merchant city is present but empty", () => {
+			expect(parsePixPayload(buildPayloadWithMerchantCity(""))).toBeNull();
 		});
 	});
 
@@ -257,7 +289,9 @@ describe("parsePixPayload", () => {
 		});
 
 		test("accepting a transaction amount whose length is exactly 13 characters", () => {
-			expect(parsePixPayload(buildPayloadWithAmount("9999999999.99"))?.amount).toBe(9999999999.99);
+			expect(parsePixPayload(buildPayloadWithAmount("9999999999.99"))?.amount).toBe(
+				9_999_999_999.99,
+			);
 		});
 
 		test("accepting a transaction amount written as a whole number, with no decimal point", () => {

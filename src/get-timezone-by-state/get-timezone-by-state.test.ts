@@ -91,17 +91,17 @@ describe("getTimezoneByState", () => {
 	});
 
 	it("should return null for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getTimezoneByState(null)).toBeNull();
 	});
 
 	it("should return null for undefined", () => {
-		// @ts-expect-error
-		expect(getTimezoneByState(undefined)).toBeNull();
+		// @ts-expect-error: intentionally invalid input
+		expect(getTimezoneByState()).toBeNull();
 	});
 
 	it("should return null for a number", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getTimezoneByState(35)).toBeNull();
 	});
 

@@ -7,7 +7,7 @@ describe("formatCnae", () => {
 	});
 
 	it("should format a CNAE code given as a number", () => {
-		expect(formatCnae(6201501)).toBe("6201-5/01");
+		expect(formatCnae(6_201_501)).toBe("6201-5/01");
 	});
 
 	it("should format a CNAE code that already has the mask", () => {
@@ -31,6 +31,6 @@ describe("formatCnae", () => {
 		// @ts-expect-error not a string or number
 		expect(formatCnae(null)).toBe("");
 		// @ts-expect-error not a string or number
-		expect(formatCnae(undefined)).toBe("");
+		expect(formatCnae()).toBe("");
 	});
 });

@@ -41,4 +41,10 @@ describe("isValidLegalNature", () => {
 		expect(isValidLegalNature(" 206-2 ")).toBe(true);
 		expect(isValidLegalNature("206.2")).toBe(true);
 	});
+
+	it("should return false for names inherited from Object.prototype", () => {
+		expect(isValidLegalNature("constructor")).toBe(false);
+		expect(isValidLegalNature("toString")).toBe(false);
+		expect(isValidLegalNature("__proto__")).toBe(false);
+	});
 });

@@ -4,13 +4,13 @@ import { parseCertidao } from "./parse-certidao";
 describe("parseCertidao", () => {
 	describe("should return null", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parseCertidao(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(parseCertidao(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parseCertidao()).toBeNull();
 		});
 
 		test("when it is an empty string", () => {

@@ -34,7 +34,7 @@ describe("generateLicensePlate", () => {
 	});
 
 	it("should fall back to the mercosul format when the argument is not a string", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(generateLicensePlate(123)).toMatch(/^[A-Z]{3}\d[A-Z]\d{2}$/);
 	});
 

@@ -1,13 +1,12 @@
 import { existsSync, readdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { transform } from "esbuild";
 import { defineConfig } from "vite-plus";
 import type { PackUserConfig } from "vite-plus/pack";
 import { webdriverio } from "vite-plus/test/browser-webdriverio";
 
-const rootDir = dirname(fileURLToPath(import.meta.url));
+const rootDir = import.meta.dirname;
 const srcDir = resolve(rootDir, "src");
 
 type PackPlugin = Extract<NonNullable<PackUserConfig["plugins"]>, unknown[]>[number];
@@ -17,12 +16,13 @@ type PackPlugin = Extract<NonNullable<PackUserConfig["plugins"]>, unknown[]>[num
  * twin (that only happens for the `cjs` format). The bundled declaration has no
  * format-specific syntax, so a same-content copy keeps CommonJS consumers off TypeScript's
  * "masquerading as ESM" error under `moduleResolution: node16`/`nodenext`.
+ * @returns {PackPlugin} The pack plugin that emits the `.d.cts` twin.
  */
 const emitCjsDtsTwin = (): PackPlugin => ({
 	name: "brazilian-utils:emit-cjs-dts-twin",
 	generateBundle(_options, bundle) {
-		const dts = bundle["brazilian-utils.d.ts"];
-		if (!dts) return;
+		const dts: (typeof bundle)[string] | undefined = bundle["brazilian-utils.d.ts"];
+		if (dts === undefined) return;
 		this.emitFile({
 			type: "asset",
 			fileName: "brazilian-utils.d.cts",
@@ -35,6 +35,7 @@ const emitCjsDtsTwin = (): PackPlugin => ({
  * The UMD bundle is consumed as-is from a CDN `<script>` tag, where no consumer bundler will
  * ever tree-shake it, so it can take the full `compress` pass (see the `minify` note below for
  * why the ESM bundle cannot). rolldown composes the source map returned here with its own.
+ * @returns {PackPlugin} The pack plugin that minifies the UMD chunk.
  */
 const minifyUmdChunk = (): PackPlugin => ({
 	name: "brazilian-utils:minify-umd",
@@ -71,7 +72,7 @@ const sharedPack = {
 	outDir: "dist",
 	sourcemap: true,
 	dts: true,
-	outExtensions: ({ format }) => ({
+	outExtensions: ({ format }: { format: string }): { js: string } => ({
 		js: format === "es" ? ".js" : ".cjs",
 	}),
 	// `compress: false` is intentional: tsdown's default oxc-minify `compress`
@@ -145,22 +146,84 @@ export default defineConfig({
 			typeAware: true,
 			typeCheck: true,
 		},
+		plugins: ["oxc", "typescript", "unicorn", "import", "jsdoc", "promise", "vitest"],
 		categories: {
 			correctness: "error",
 			suspicious: "error",
+			perf: "error",
+			pedantic: "error",
 		},
-		ignorePatterns: ["dist", "coverage", "docs", ".claude"],
+		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude"],
 		rules: {
+			"eslint/complexity": ["error", { max: 20 }],
+			"eslint/max-lines": "off",
+			"eslint/max-lines-per-function": [
+				"error",
+				{ max: 120, skipBlankLines: true, skipComments: true },
+			],
+			"eslint/no-console": "error",
+			"eslint/no-empty": "error",
+			"import/no-unassigned-import": ["error", { allow: ["**/*.d.ts"] }],
+			"eslint/max-classes-per-file": "off",
+			"eslint/no-empty-function": "error",
+			"eslint/no-param-reassign": "error",
+			"eslint/no-use-before-define": "error",
+			"eslint/no-void": "error",
+			"eslint/require-unicode-regexp": "off",
+			"typescript/prefer-readonly-parameter-types": "off",
+			"unicorn/prefer-code-point": "off",
+			"unicorn/prefer-number-coercion": "off",
+			"import/no-cycle": "error",
+			"import/no-default-export": "error",
+			"import/no-duplicates": "error",
+			"jsdoc/check-tag-names": "error",
+			"jsdoc/require-param": "error",
+			"jsdoc/require-returns": "error",
+			"typescript/array-type": ["error", { default: "array" }],
+			"typescript/ban-ts-comment": ["error", { "ts-expect-error": "allow-with-description" }],
+			"typescript/consistent-type-definitions": ["error", "type"],
+			"typescript/explicit-function-return-type": "error",
+			"typescript/explicit-member-accessibility": "error",
+			"typescript/explicit-module-boundary-types": "error",
+			"typescript/no-non-null-assertion": "error",
+			"unicorn/max-nested-calls": "error",
+			"unicorn/no-array-for-each": "error",
 			"unicorn/no-array-reverse": "off",
 			"unicorn/no-array-sort": "off",
+			"unicorn/no-nested-ternary": "off",
+			"unicorn/no-zero-fractions": "error",
+			"unicorn/number-literal-case": "off",
+			"unicorn/numeric-separators-style": "error",
+			"unicorn/prefer-export-from": "error",
+			"unicorn/prefer-spread": "error",
+			"unicorn/switch-case-braces": "error",
 		},
 		overrides: [
 			{
-				files: ["**/*.test.ts", "**/*.spec.ts"],
-				plugins: ["oxc", "typescript", "unicorn", "vitest"],
+				files: ["src/index.ts", "src/index.test.ts"],
+				rules: {
+					"typescript/no-deprecated": "off",
+				},
+			},
+			{
+				files: ["**/*.test.ts", "**/*.test-d.ts", "**/*.bench.ts"],
 				rules: {
 					"@typescript-eslint/no-explicit-any": "off",
 					"@typescript-eslint/no-unsafe-type-assertion": "off",
+					"typescript/no-unsafe-argument": "off",
+					"typescript/no-unsafe-assignment": "off",
+					"typescript/no-unsafe-call": "off",
+					"typescript/no-unsafe-member-access": "off",
+					"typescript/no-unsafe-return": "off",
+					"vitest/no-conditional-in-test": "off",
+					"unicorn/new-for-builtins": "off",
+					"eslint/no-new-wrappers": "off",
+					"vitest/no-conditional-expect": "off",
+					"eslint/max-lines-per-function": "off",
+					"typescript/explicit-function-return-type": "off",
+					"typescript/explicit-module-boundary-types": "off",
+					"jsdoc/require-param": "off",
+					"jsdoc/require-returns": "off",
 				},
 			},
 			{
@@ -168,6 +231,10 @@ export default defineConfig({
 					node: true,
 				},
 				files: ["scripts/**/*.ts", "vite.config.ts"],
+				rules: {
+					"eslint/no-console": "off",
+					"import/no-default-export": "off",
+				},
 			},
 		],
 	},

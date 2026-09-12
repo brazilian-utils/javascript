@@ -37,17 +37,17 @@ describe("formatIban", () => {
 	});
 
 	it("should return an empty string when the value is not a string", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatIban(null)).toBe("");
-		// @ts-expect-error
-		expect(formatIban(undefined)).toBe("");
-		// @ts-expect-error
-		expect(formatIban(1500000000000)).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
+		expect(formatIban()).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatIban(1_500_000_000_000)).toBe("");
+		// @ts-expect-error: intentionally invalid input
 		expect(formatIban(true)).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatIban({})).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatIban([])).toBe("");
 	});
 });

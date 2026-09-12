@@ -20,11 +20,11 @@ export type CapitalizeOptions = {
  *   comparison ignores the case of the words given in both lists.
  * - All other words will be capitalized (first letter upper case, rest lower case).
  *
- * @param value - The input string to be capitalized.
- * @param options - Optional configuration for capitalization.
- * @param options.lowerCaseWords - Array of words to keep in lower case (default: `PREPOSITIONS`).
- * @param options.upperCaseWords - Array of words to keep in upper case (default: `[]`).
- * @returns The capitalized string according to the specified rules.
+ * @param {string} value - The input string to be capitalized.
+ * @param {CapitalizeOptions} [options] - Optional configuration for capitalization.
+ * @param {string[]} [options.lowerCaseWords] - Array of words to keep in lower case (default: `PREPOSITIONS`).
+ * @param {string[]} [options.upperCaseWords] - Array of words to keep in upper case (default: `[]`).
+ * @returns {string} The capitalized string according to the specified rules.
  *
  * @example
  * ```typescript

@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { DATA as STATES } from "../src/_internals/constants/states.ts";
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 const STATE_CODES = STATES.map((state) => state.code);
 
@@ -47,7 +46,17 @@ type City = {
 	};
 };
 
-const main = async () => {
+const isCity = (value: unknown): value is City =>
+	typeof value === "object" &&
+	value !== null &&
+	"id" in value &&
+	typeof value.id === "number" &&
+	"nome" in value &&
+	typeof value.nome === "string" &&
+	"microrregiao" in value &&
+	"regiao-imediata" in value;
+
+const main = async (): Promise<void> => {
 	const response = await fetchWithRetry(
 		"https://servicodados.ibge.gov.br/api/v1/localidades/municipios",
 	);
@@ -56,21 +65,23 @@ const main = async () => {
 		throw new Error(`IBGE municipalities request failed with status ${response.status}`);
 	}
 
-	const json: City[] = await response.json();
+	const json: unknown = await response.json();
+
+	if (!Array.isArray(json) || !json.every((entry) => isCity(entry))) {
+		throw new Error("IBGE municipalities payload is not an array of city entries");
+	}
 
 	const byState = json.reduce(
 		(acc, city) => {
 			const stateInitials =
-				city?.microrregiao?.mesorregiao?.UF?.sigla ??
-				city?.["regiao-imediata"]?.["regiao-intermediaria"]?.UF?.sigla;
+				city.microrregiao?.mesorregiao?.UF?.sigla ??
+				city["regiao-imediata"]?.["regiao-intermediaria"]?.UF?.sigla;
 
-			if (!stateInitials) return acc;
+			if (stateInitials === undefined || stateInitials === "") return acc;
 
-			if (!acc[stateInitials]) {
-				acc[stateInitials] = [];
-			}
+			const cityNames = (acc[stateInitials] ??= []);
 
-			acc[stateInitials].push([city.nome, String(city.id)]);
+			cityNames.push([city.nome, String(city.id)]);
 
 			return acc;
 		},
@@ -91,7 +102,7 @@ const main = async () => {
 		})
 		.join("\n");
 
-	const missingStates = STATE_CODES.filter((code) => !byState[code]);
+	const missingStates = STATE_CODES.filter((code) => !Object.hasOwn(byState, code));
 
 	if (missingStates.length > 0) {
 		throw new Error(`IBGE response is missing municipalities for: ${missingStates.join(", ")}`);

@@ -4,7 +4,7 @@ import { mod11 } from "./mod11";
 const mod11Arrecadacao = (value: string) => mod11(value, { variant: "arrecadacao" });
 
 const mod11Bank = (value: string, maxWeight?: number) =>
-	mod11(value, { variant: "bank", maxWeight });
+	mod11(value, maxWeight === undefined ? { variant: "bank" } : { variant: "bank", maxWeight });
 
 describe("mod11", () => {
 	describe("default variant (boleto)", () => {

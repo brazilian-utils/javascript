@@ -8,17 +8,17 @@ describe("isValidCep", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCep(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidCep(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCep()).toBe(false);
 		});
 
 		test("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCep({})).toBe(false);
 		});
 
@@ -51,7 +51,7 @@ describe("isValidCep", () => {
 		});
 
 		test("when is a CEP valid as a number", () => {
-			expect(isValidCep(20040020)).toBe(true);
+			expect(isValidCep(20_040_020)).toBe(true);
 		});
 
 		test("when is a CEP valid with leading/trailing whitespace", () => {

@@ -27,7 +27,7 @@ export const convertLicensePlateToMercosul = (value: string): string => {
 
 	const parsed = parseLicensePlate(value);
 
-	const letter = DIGIT_TO_MERCOSUL_LETTER[parsed[4]];
+	const letter = DIGIT_TO_MERCOSUL_LETTER[parsed.charAt(4)];
 
 	return `${parsed.slice(0, 4)}${letter}${parsed.slice(5)}`;
 };

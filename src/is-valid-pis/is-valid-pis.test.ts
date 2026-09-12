@@ -16,35 +16,35 @@ describe("isValidPis", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidPis(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPis()).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis(false)).toBe(false);
 		});
 
 		test("when is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis({})).toBe(false);
 		});
 
 		test("when is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis([])).toBe(false);
 		});
 
 		test("when it is a non-string that stringifies to a valid PIS", () => {
 			// @ts-expect-error not a string
-			expect(isValidPis([12056412847])).toBe(false);
+			expect(isValidPis([12_056_412_847])).toBe(false);
 		});
 
 		test("when it sanitizes to more digits than the PIS length, even if the first 11 match a valid PIS", () => {

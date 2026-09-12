@@ -1,24 +1,35 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { fetchSortedRecord } from "../src/_internals/fetch-sorted-record/fetch-sorted-record.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 type CboEntry = {
 	cbo: string;
 	descricao: string;
 };
 
-const main = async () => {
+const isCboEntry = (value: unknown): value is CboEntry =>
+	typeof value === "object" &&
+	value !== null &&
+	"cbo" in value &&
+	typeof value.cbo === "string" &&
+	"descricao" in value &&
+	typeof value.descricao === "string";
+
+const main = async (): Promise<void> => {
 	const sorted = await fetchSortedRecord(
 		"https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json",
 		"CBO mirror",
 		async (response) => {
-			const json: CboEntry[] = await response.json();
+			const json: unknown = await response.json();
+
+			if (!Array.isArray(json) || !json.every((entry) => isCboEntry(entry))) {
+				throw new Error("CBO mirror payload is not an array of cbo and descricao entries");
+			}
 
 			const data: Record<string, string> = {};
 

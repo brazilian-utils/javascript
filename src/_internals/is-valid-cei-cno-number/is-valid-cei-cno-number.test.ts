@@ -4,17 +4,17 @@ import { isValidCeiCnoNumber } from "./is-valid-cei-cno-number";
 describe("isValidCeiCnoNumber", () => {
 	describe("should return false", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCeiCnoNumber(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidCeiCnoNumber(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCeiCnoNumber()).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCeiCnoNumber(true)).toBe(false);
 		});
 
@@ -76,11 +76,11 @@ describe("isValidCeiCnoNumber", () => {
 
 		test("for 401800097960, whose check digit is 0 (Receita Federal CNO open dataset, Frutal/MG)", () => {
 			expect(isValidCeiCnoNumber("401800097960")).toBe(true);
-			expect(isValidCeiCnoNumber(401800097960)).toBe(true);
+			expect(isValidCeiCnoNumber(401_800_097_960)).toBe(true);
 		});
 
 		test("for a number input", () => {
-			expect(isValidCeiCnoNumber(249859674386)).toBe(true);
+			expect(isValidCeiCnoNumber(249_859_674_386)).toBe(true);
 		});
 
 		test("for a whitespace mask and surrounding whitespace", () => {

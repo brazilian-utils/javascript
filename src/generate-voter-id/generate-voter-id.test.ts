@@ -14,9 +14,9 @@ describe("generateVoterId", () => {
 	});
 
 	it("should fall back to the default UF instead of throwing for an unknown state", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(() => generateVoterId("XX")).not.toThrow();
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		const voterId = generateVoterId("XX");
 		expect(voterId.slice(8, 10)).toBe("28");
 		expect(isValidVoterId(voterId)).toBe(true);

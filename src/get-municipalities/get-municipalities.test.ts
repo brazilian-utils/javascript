@@ -64,10 +64,17 @@ describe("getMunicipalities", () => {
 
 		expect(getMunicipalities().length).toBe(NUMBER_OF_BRAZILIAN_MUNICIPALITIES);
 
-		const spMunicipalities = getMunicipalities("SP");
-		spMunicipalities[0].name = "MUTATED";
+		const firstSpMunicipality = getMunicipalities("SP").at(0);
 
-		expect(getMunicipalities("SP")[0].name).not.toBe("MUTATED");
+		expect(firstSpMunicipality).toBeDefined();
+
+		if (firstSpMunicipality === undefined) {
+			return;
+		}
+
+		firstSpMunicipality.name = "MUTATED";
+
+		expect(getMunicipalities("SP").at(0)?.name).not.toBe("MUTATED");
 	});
 
 	describe("data integrity (IBGE, https://servicodados.ibge.gov.br/api/docs/localidades)", () => {

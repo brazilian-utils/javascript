@@ -79,32 +79,32 @@ describe("getBankByIspb", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByIspb(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(getBankByIspb(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(getBankByIspb()).toBeNull();
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByIspb(true)).toBeNull();
 		});
 
 		test("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByIspb({})).toBeNull();
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByIspb([])).toBeNull();
 		});
 
 		test("when it is an array whose string form would otherwise resolve to a real ispb", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByIspb([0])).toBeNull();
 		});
 	});

@@ -10,6 +10,8 @@ const PIX_URL_REGEX = new RegExp(
  * a host name with at least one dot, optionally followed by a path, written without a scheme,
  * whitespace or characters outside the URL unreserved and sub-delimiter sets.
  *
+ * @param {string} value - The value to check.
+ * @returns {boolean} True if `value` is a valid Pix PSP location.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
  */
 export const isValidPixUrl = (value: string): boolean => PIX_URL_REGEX.test(value);

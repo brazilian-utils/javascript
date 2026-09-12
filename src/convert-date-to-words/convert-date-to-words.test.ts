@@ -3,7 +3,7 @@ import { describe, expect, test } from "../_internals/test/runtime";
 import { convertDateToWords, type ConvertDateToWordsOptions } from "./convert-date-to-words";
 
 function expectDates(
-	cases: ReadonlyArray<readonly [string, string]>,
+	cases: readonly (readonly [string, string])[],
 	options?: ConvertDateToWordsOptions,
 ): void {
 	const mismatches = cases.filter(
@@ -93,7 +93,7 @@ describe("convertDateToWords", () => {
 
 		test("should ignore an invalid case value and fall back to 'lower'", () => {
 			expect(
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				convertDateToWords("01/01/2024", { case: "invalid" }),
 			).toBe("primeiro de janeiro de dois mil e vinte e quatro");
 		});
@@ -111,13 +111,13 @@ describe("convertDateToWords", () => {
 
 		test("should ignore an invalid style value and fall back to 'full'", () => {
 			expect(
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				convertDateToWords("02/03/2024", { style: "invalid" }),
 			).toBe("dois de março de dois mil e vinte e quatro");
 		});
 
 		test("should match a hand-written string for every month in both styles", () => {
-			const cases: Array<[string, string, string]> = [
+			const cases: [string, string, string][] = [
 				["02/01/2024", "dois de janeiro de dois mil e vinte e quatro", "2 de janeiro de 2024"],
 				["02/02/2024", "dois de fevereiro de dois mil e vinte e quatro", "2 de fevereiro de 2024"],
 				["02/03/2024", "dois de março de dois mil e vinte e quatro", "2 de março de 2024"],
@@ -131,13 +131,13 @@ describe("convertDateToWords", () => {
 				["02/11/2024", "dois de novembro de dois mil e vinte e quatro", "2 de novembro de 2024"],
 				["02/12/2024", "dois de dezembro de dois mil e vinte e quatro", "2 de dezembro de 2024"],
 			];
-			const failures: Array<{
+			const failures: {
 				input: string;
 				actualFull: string;
 				expectedFull: string;
 				actualMonth: string;
 				expectedMonth: string;
-			}> = [];
+			}[] = [];
 
 			for (const [input, expectedFull, expectedMonth] of cases) {
 				const actualFull = convertDateToWords(input, { style: "full" });
@@ -169,7 +169,7 @@ describe("convertDateToWords", () => {
 		});
 
 		test("should prefix the pt-BR weekday and a comma for 7 consecutive known dates", () => {
-			const cases: Array<[string, string]> = [
+			const cases: [string, string][] = [
 				["03/03/2024", "domingo, três de março de dois mil e vinte e quatro"],
 				["04/03/2024", "segunda-feira, quatro de março de dois mil e vinte e quatro"],
 				["05/03/2024", "terça-feira, cinco de março de dois mil e vinte e quatro"],
@@ -217,18 +217,18 @@ describe("convertDateToWords", () => {
 		});
 
 		test("should return '' for a non-Date/non-string value", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertDateToWords(null)).toBe("");
-			// @ts-expect-error
-			expect(convertDateToWords(undefined)).toBe("");
-			// @ts-expect-error
-			expect(convertDateToWords(20240101)).toBe("");
+			// @ts-expect-error: intentionally invalid input
+			expect(convertDateToWords()).toBe("");
+			// @ts-expect-error: intentionally invalid input
+			expect(convertDateToWords(20_240_101)).toBe("");
 		});
 
 		test("should return '' for a non-Date/non-string value even when it stringifies to a valid date", () => {
 			const trojan = { toString: () => "01/01/2024" };
 
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertDateToWords(trojan)).toBe("");
 		});
 
@@ -305,7 +305,7 @@ describe("convertDateToWords", () => {
 
 	describe("literal case tables", () => {
 		test("should match a hand-written string for the 1st and the 15th of every month", () => {
-			const cases: Array<[string, string]> = [
+			const cases: [string, string][] = [
 				["01/01/2024", "primeiro de janeiro de dois mil e vinte e quatro"],
 				["15/01/2024", "quinze de janeiro de dois mil e vinte e quatro"],
 				["01/02/2024", "primeiro de fevereiro de dois mil e vinte e quatro"],
@@ -335,7 +335,7 @@ describe("convertDateToWords", () => {
 		});
 
 		test("should match a hand-written string for every day of a 31 day month", () => {
-			const cases: Array<[string, string]> = [
+			const cases: [string, string][] = [
 				["01/03/2024", "primeiro de março de dois mil e vinte e quatro"],
 				["02/03/2024", "dois de março de dois mil e vinte e quatro"],
 				["03/03/2024", "três de março de dois mil e vinte e quatro"],
@@ -372,7 +372,7 @@ describe("convertDateToWords", () => {
 		});
 
 		test("should reproduce every published brutils 'convert_date_to_text' example (tests/test_date_utils.py, lowercase here because brutils always capitalizes and this library exposes that as case: 'sentence')", () => {
-			const cases: Array<[string, string]> = [
+			const cases: [string, string][] = [
 				["15/08/2024", "quinze de agosto de dois mil e vinte e quatro"],
 				["01/01/2000", "primeiro de janeiro de dois mil"],
 				["31/12/1999", "trinta e um de dezembro de mil novecentos e noventa e nove"],
@@ -383,7 +383,7 @@ describe("convertDateToWords", () => {
 		});
 
 		test("should match a hand-written string for day 31 and for the leap day", () => {
-			const cases: Array<[string, string]> = [
+			const cases: [string, string][] = [
 				["31/01/2024", "trinta e um de janeiro de dois mil e vinte e quatro"],
 				["29/02/2024", "vinte e nove de fevereiro de dois mil e vinte e quatro"],
 			];
@@ -391,7 +391,7 @@ describe("convertDateToWords", () => {
 		});
 
 		test("should render the year without the thousands comma for 1900, 1999, 2000, 2001, 2024 and 2100", () => {
-			const cases: Array<[string, string]> = [
+			const cases: [string, string][] = [
 				["01/01/1101", "primeiro de janeiro de mil cento e um"],
 				["01/01/1200", "primeiro de janeiro de mil e duzentos"],
 				["01/01/1500", "primeiro de janeiro de mil e quinhentos"],
@@ -407,7 +407,7 @@ describe("convertDateToWords", () => {
 		});
 
 		test("should give the same hand-written result for the 'dd/mm/yyyy' and the ISO form", () => {
-			const cases: Array<[string, string]> = [
+			const cases: [string, string][] = [
 				["2024-01-02", "dois de janeiro de dois mil e vinte e quatro"],
 				["1999-05-10", "dez de maio de mil novecentos e noventa e nove"],
 			];

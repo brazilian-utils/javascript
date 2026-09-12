@@ -74,10 +74,10 @@ describe("getMunicipality", () => {
 		});
 
 		it("should return null for a non-string code", async () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality({ code: null })).resolves.toBeNull();
-			// @ts-expect-error
-			await expect(getMunicipality({ code: 3550308 })).resolves.toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality({ code: 3_550_308 })).resolves.toBeNull();
 		});
 
 		it("should return null for a code with the wrong number of digits", async () => {
@@ -92,26 +92,26 @@ describe("getMunicipality", () => {
 
 	describe("options validation (non-object input)", () => {
 		it("should return null for null", async () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality(null)).resolves.toBeNull();
 		});
 
 		it("should return null for undefined", async () => {
-			// @ts-expect-error
-			await expect(getMunicipality(undefined)).resolves.toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality()).resolves.toBeNull();
 		});
 
 		it("should return null for a primitive", async () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality("3550308")).resolves.toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality(123)).resolves.toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality(true)).resolves.toBeNull();
 		});
 
 		it("should return null for an array", async () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality([])).resolves.toBeNull();
 		});
 	});
@@ -122,12 +122,12 @@ describe("getMunicipality", () => {
 		});
 
 		it("should return null for a non-string municipality name", async () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality({ municipalityName: null, uf: "SP" })).resolves.toBeNull();
 		});
 
 		it("should return null for a non-string uf", async () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			const options: GetMunicipalityByNameOptions = { municipalityName: "São Paulo", uf: null };
 
 			await expect(getMunicipality(options)).resolves.toBeNull();

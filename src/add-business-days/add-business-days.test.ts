@@ -132,22 +132,22 @@ describe("addBusinessDays", () => {
 
 	describe("invalid input", () => {
 		it("should return null when params is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(addBusinessDays(null)).toBeNull();
 		});
 
 		it("should return null when params is undefined", () => {
-			// @ts-expect-error
-			expect(addBusinessDays(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(addBusinessDays()).toBeNull();
 		});
 
 		it("should return null when params is not an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(addBusinessDays("2024-01-02")).toBeNull();
 		});
 
 		it('should return null when params is a function, even one carrying date/days properties (typeof params !== "object" must reject it, not just isNullish)', () => {
-			const fakeParams = Object.assign(() => {}, { date: new Date(2024, 0, 2), days: 1 });
+			const fakeParams = Object.assign(() => null, { date: new Date(2024, 0, 2), days: 1 });
 
 			expect(addBusinessDays(fakeParams)).toBeNull();
 		});
@@ -157,7 +157,7 @@ describe("addBusinessDays", () => {
 		});
 
 		it("should return null when date is not a Date", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(addBusinessDays({ date: "2024-01-02", days: 1 })).toBeNull();
 		});
 
@@ -176,13 +176,13 @@ describe("addBusinessDays", () => {
 		});
 
 		it("should return null when days is not a number", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(addBusinessDays({ date: new Date(2024, 0, 2), days: "1" })).toBeNull();
 		});
 
 		it("should return null when stateCode is not a string", () => {
 			expect(
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				addBusinessDays({ date: new Date(2024, 0, 2), days: 1, stateCode: 123 }),
 			).toBeNull();
 		});

@@ -30,7 +30,7 @@ describe("getBoletoInfo", () => {
 	describe("should return boleto info", () => {
 		test("when boleto is valid without mask", () => {
 			expect(getBoletoInfo("00190000090114971860168524522114675860000102656")).toStrictEqual({
-				amount: 102656,
+				amount: 102_656,
 				expirationDate: new Date(2018, 6, 15),
 				bankCode: "001",
 			});
@@ -38,7 +38,7 @@ describe("getBoletoInfo", () => {
 
 		test("when boleto is valid with mask", () => {
 			expect(getBoletoInfo("0019000009 01149.718601 68524.522114 6 75860000102656")).toStrictEqual({
-				amount: 102656,
+				amount: 102_656,
 				expirationDate: new Date(2018, 6, 15),
 				bankCode: "001",
 			});

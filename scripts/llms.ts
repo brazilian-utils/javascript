@@ -6,11 +6,11 @@ const DOCS_DIR = join(ROOT, "docs");
 const SITE = "https://brazilian-utils.com.br";
 const REPO = "https://github.com/brazilian-utils/javascript";
 
-interface UtilSection {
+type UtilSection = {
 	name: string;
 	slug: string;
 	description: string;
-}
+};
 
 const SLUG_STRIP_PATTERN = new RegExp(
 	"[\\u2000-\\u206F\\u2E00-\\u2E7F\\\\'!\"#$%&()*+,./:;<=>?@\\[\\]^`{|}~]",
@@ -20,23 +20,12 @@ const VARIATION_SELECTOR_PATTERN = new RegExp("\\uFE0F", "g");
 const EMOJI_PATTERN = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
 
 /**
- * Reproduces docsify's heading-to-anchor slug algorithm (see
- * `src/core/render/slugify.js` in the docsify source) so links into
- * `utilities.md`/`getting-started.md` resolve to the same anchors docsify
- * renders at runtime.
+ * Removes every match of `pattern` repeatedly until nothing changes, so nested or overlapping
+ * matches cannot survive a single pass.
+ * @param {string} value - The string to strip matches from.
+ * @param {RegExp} pattern - The pattern to remove, repeatedly.
+ * @returns {string} `value` with every match of `pattern` removed.
  */
-function slugify(heading: string): string {
-	return removeUntilStable(heading.trim().normalize("NFC"), /<[^>]+>/g)
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-		.replace(VARIATION_SELECTOR_PATTERN, "")
-		.replace(EMOJI_PATTERN, "")
-		.replace(/[A-Z]+/g, (match) => match.toLowerCase())
-		.replace(SLUG_STRIP_PATTERN, "")
-		.replace(/\s/g, "-")
-		.replace(/^(\d)/, "_$1");
-}
-
-/** Removes every match of `pattern` repeatedly until nothing changes, so nested or overlapping matches cannot survive a single pass. */
 function removeUntilStable(value: string, pattern: RegExp): string {
 	let current = value;
 	let previous = "";
@@ -47,15 +36,36 @@ function removeUntilStable(value: string, pattern: RegExp): string {
 	return current;
 }
 
+/**
+ * Reproduces docsify's heading-to-anchor slug algorithm (see
+ * `src/core/render/slugify.js` in the docsify source) so links into
+ * `utilities.md`/`getting-started.md` resolve to the same anchors docsify
+ * renders at runtime.
+ * @param {string} heading - The Markdown heading text to slugify.
+ * @returns {string} The docsify-compatible anchor slug for `heading`.
+ */
+function slugify(heading: string): string {
+	return removeUntilStable(heading.trim().normalize("NFC"), /<[^>]+>/g)
+		.replaceAll(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+		.replace(VARIATION_SELECTOR_PATTERN, "")
+		.replace(EMOJI_PATTERN, "")
+		.replaceAll(/[A-Z]+/g, (match) => match.toLowerCase())
+		.replace(SLUG_STRIP_PATTERN, "")
+		.replaceAll(/\s/g, "-")
+		.replace(/^(\d)/, "_$1");
+}
+
 const ABBREVIATION_PLACEHOLDER = String.fromCharCode(1);
 
 /**
  * Extracts the first sentence of a paragraph, treating `e.g.`/`i.e.` as
  * abbreviations rather than sentence boundaries.
+ * @param {string} paragraph - The paragraph to extract the first sentence from.
+ * @returns {string} The first sentence of `paragraph`.
  */
 function firstSentence(paragraph: string): string {
-	const withoutLinks = paragraph.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
-	const protectedText = withoutLinks.replace(
+	const withoutLinks = paragraph.replaceAll(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+	const protectedText = withoutLinks.replaceAll(
 		/\b(e\.g|i\.e)\./gi,
 		(_match, abbr: string) => `${abbr}${ABBREVIATION_PLACEHOLDER}`,
 	);
@@ -65,7 +75,11 @@ function firstSentence(paragraph: string): string {
 	return sentence.split(ABBREVIATION_PLACEHOLDER).join(".").trim();
 }
 
-/** Parses every `## <fn>` section of `utilities.md` into name/slug/description. */
+/**
+ * Parses every `## <fn>` section of `utilities.md` into name/slug/description.
+ * @param {string} utilitiesMd - The full contents of `utilities.md`.
+ * @returns {UtilSection[]} One entry per `## <fn>` section, in document order.
+ */
 function parseUtilities(utilitiesMd: string): UtilSection[] {
 	const sections = utilitiesMd.split(/^## /m).slice(1);
 
@@ -73,7 +87,8 @@ function parseUtilities(utilitiesMd: string): UtilSection[] {
 		const newlineIndex = section.indexOf("\n");
 		const name = section.slice(0, newlineIndex).trim();
 		const body = section.slice(newlineIndex + 1);
-		const firstParagraph = body.split(/\n\s*\n/)[0].trim();
+		const [firstParagraphRaw = ""] = body.split(/\n\s*\n/);
+		const firstParagraph = firstParagraphRaw.trim();
 
 		return {
 			name,
@@ -91,7 +106,7 @@ const PREFIX_GROUPS: { title: string; test: (name: string) => boolean }[] = [
 	{ title: "Getters (get*)", test: (name) => name.startsWith("get") },
 ];
 
-function groupUtilities(utils: UtilSection[]) {
+function groupUtilities(utils: UtilSection[]): { title: string; utils: UtilSection[] }[] {
 	const groups: { title: string; utils: UtilSection[] }[] = PREFIX_GROUPS.map((group) => ({
 		title: group.title,
 		utils: [],
@@ -100,11 +115,12 @@ function groupUtilities(utils: UtilSection[]) {
 
 	for (const util of utils) {
 		const groupIndex = PREFIX_GROUPS.findIndex((group) => group.test(util.name));
+		const matchedGroup = groupIndex === -1 ? undefined : groups[groupIndex];
 
-		if (groupIndex === -1) {
+		if (matchedGroup === undefined) {
 			other.push(util);
 		} else {
-			groups[groupIndex].utils.push(util);
+			matchedGroup.utils.push(util);
 		}
 	}
 
@@ -161,16 +177,30 @@ ${groupSections}
 `;
 }
 
-/** Strips docsify-only markdown syntax (`?id=` anchors, HTML comments) so the content reads as plain Markdown. */
+/**
+ * Strips docsify-only markdown syntax (`?id=` anchors, HTML comments) so the content reads as
+ * plain Markdown.
+ * @param {string} markdown - The docsify-flavored Markdown to strip.
+ * @returns {string} `markdown` with docsify-only syntax removed.
+ */
 function stripDocsifySyntax(markdown: string): string {
 	return removeUntilStable(markdown, /<!--[\s\S]*?-->/g)
-		.replace(/\]\(([^)]+)\?id=([^)]+)\)/g, (_match, path: string, id: string) => `](${path}#${id})`)
+		.replaceAll(
+			/\]\(([^)]+)\?id=([^)]+)\)/g,
+			(_match, path: string, id: string) => `](${path}#${id})`,
+		)
 		.trimEnd();
 }
 
-/** Demotes every markdown heading in `markdown` by `levels` (adds `#`s), so it nests under a higher-level heading. */
+/**
+ * Demotes every markdown heading in `markdown` by `levels` (adds `#`s), so it nests under a
+ * higher-level heading.
+ * @param {string} markdown - The Markdown whose headings should be demoted.
+ * @param {number} levels - How many `#`s to add to each heading.
+ * @returns {string} `markdown` with every heading demoted by `levels`.
+ */
 function demoteHeadings(markdown: string, levels: number): string {
-	return markdown.replace(
+	return markdown.replaceAll(
 		/^(#{1,5})(\s)/gm,
 		(_match, hashes: string, space: string) => `${"#".repeat(hashes.length + levels)}${space}`,
 	);

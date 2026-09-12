@@ -50,7 +50,7 @@ describe("generateCpf", () => {
 	});
 
 	test("should fall back to a random digit instead of looking up an unknown state code", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		const cpf = generateCpf("XX");
 		expect(cpf).toHaveLength(CPF_LENGTH);
 		expect(isValidCpf(cpf)).toBe(true);

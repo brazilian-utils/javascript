@@ -3,8 +3,10 @@ import { isNullish } from "./is-nullish";
 
 describe("isNullish", () => {
 	test("should return true for null and undefined", () => {
+		const isNullishWithoutArgument = isNullish as unknown as () => boolean;
+
 		expect(isNullish(null)).toBe(true);
-		expect(isNullish(undefined)).toBe(true);
+		expect(isNullishWithoutArgument()).toBe(true);
 	});
 
 	test("should return false for every other value, including falsy ones", () => {

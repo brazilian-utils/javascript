@@ -49,17 +49,17 @@ describe("getStateCodeByName", () => {
 	});
 
 	it("should return null for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getStateCodeByName(null)).toBeNull();
 	});
 
 	it("should return null for undefined", () => {
-		// @ts-expect-error
-		expect(getStateCodeByName(undefined)).toBeNull();
+		// @ts-expect-error: intentionally invalid input
+		expect(getStateCodeByName()).toBeNull();
 	});
 
 	it("should return null for a number", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getStateCodeByName(35)).toBeNull();
 	});
 });

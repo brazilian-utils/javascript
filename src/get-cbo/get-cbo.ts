@@ -37,7 +37,9 @@ export const getCbo = (value: string | number): Cbo | null => {
 	const digits =
 		typeof value === "number" ? String(value).padStart(6, "0") : sanitizeToDigits(value);
 
-	if (!(digits in CBO_TITLES)) return null;
+	const title = CBO_TITLES[digits];
 
-	return { code: digits, title: CBO_TITLES[digits] };
+	if (title === undefined) return null;
+
+	return { code: digits, title };
 };

@@ -757,29 +757,29 @@ describe("isValidIe", () => {
 
 	describe("state code lookup", () => {
 		test("should not resolve properties from the prototype chain", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("constructor", "110042490114")).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("toString", "110042490114")).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("__proto__", "110042490114")).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("valueOf", "110042490114")).toBe(false);
 		});
 
 		test("should accept lowercase state codes", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("sp", "110042490114")).toBe(true);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("go", "109161793")).toBe(true);
 		});
 
 		test("should return false for missing arguments", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe(null, "110042490114")).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe(1, "110042490114")).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("SP", null)).toBe(false);
 		});
 
@@ -788,7 +788,7 @@ describe("isValidIe", () => {
 		});
 
 		test("should return false when the IE is not a string, even though its digits alone would form a valid checksum", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe("RJ", 62_545_372)).toBe(false);
 		});
 

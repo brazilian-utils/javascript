@@ -31,13 +31,13 @@
 import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 
 import { build } from "esbuild";
 
-const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const rootDir = resolve(import.meta.dirname, "..");
 const packageName = "@brazilian-utils/brazilian-utils";
 
 const CONCURRENCY = 16;
@@ -102,12 +102,21 @@ const mapWithConcurrency = async <T, R>(
 	const results: R[] = Array.from({ length: items.length });
 	let cursor = 0;
 
-	const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-		while (cursor < items.length) {
-			const index = cursor++;
-			results[index] = await fn(items[index]);
+	const worker = async (): Promise<void> => {
+		const index = cursor++;
+
+		if (index >= items.length) return;
+
+		const item = items[index];
+
+		if (item !== undefined) {
+			results[index] = await fn(item);
 		}
-	});
+
+		await worker();
+	};
+
+	const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
 
 	await Promise.all(workers);
 	return results;
@@ -131,7 +140,13 @@ const bundleSource = async (
 		write: false,
 		logLevel: "error",
 	});
-	return result.outputFiles[0].contents;
+	const outputFile = result.outputFiles[0];
+
+	if (outputFile === undefined) {
+		throw new Error(`esbuild produced no output for ${sourcefile}`);
+	}
+
+	return outputFile.contents;
 };
 
 const measure = async (
@@ -147,10 +162,18 @@ const measure = async (
 	};
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null;
+
 const loadExports = async (
 	distEntry: string,
 ): Promise<{ testable: string[]; aliasOf: Map<string, string> }> => {
-	const mod: Record<string, unknown> = await import(pathToFileURL(distEntry).href);
+	const mod: unknown = await import(pathToFileURL(distEntry).href);
+
+	if (!isRecord(mod)) {
+		throw new Error(`Unexpected default export shape for ${distEntry}`);
+	}
+
 	const functionExports = Object.keys(mod)
 		.filter((name) => typeof mod[name] === "function")
 		.sort();
@@ -167,7 +190,10 @@ const loadExports = async (
 	for (const group of groups.values()) {
 		if (group.length < 2) continue;
 		const sorted = [...group].sort();
-		const target = sorted[sorted.length - 1];
+		const target = sorted.at(-1);
+
+		if (target === undefined) continue;
+
 		for (const name of sorted.slice(0, -1)) aliasOf.set(name, target);
 	}
 
@@ -213,17 +239,27 @@ const measureExports = async (
 		({ name, names }) => measure(name, importSource(names), resolveDir),
 	);
 
+	if (full === undefined) {
+		throw new Error("No measurements produced");
+	}
+
 	const exportsMap: Record<string, Measurement> = {};
 	for (const m of measurements) exportsMap[m.name] = { bytes: m.bytes, gzip: m.gzip };
 	for (const [alias, target] of aliasOf) {
-		const targetMeasurement = exportsMap[target];
-		if (targetMeasurement) exportsMap[alias] = targetMeasurement;
+		const targetMeasurement: Measurement | undefined = exportsMap[target];
+		if (targetMeasurement !== undefined) exportsMap[alias] = targetMeasurement;
 	}
 
 	return { full: { bytes: full.bytes, gzip: full.gzip }, exports: exportsMap, aliasOf, resolveDir };
 };
 
-/** Bundles one named import of every name in `names` at once, the way a consumer using that whole API surface would. */
+/**
+ * Bundles one named import of every name in `names` at once, the way a consumer using that whole
+ * API surface would.
+ * @param {string[]} names - The export names to bundle together.
+ * @param {string} resolveDir - The directory esbuild resolves the bundled import from.
+ * @returns {Promise<Measurement>} The bundled size, in bytes and gzip bytes.
+ */
 const measureNames = async (names: string[], resolveDir: string): Promise<Measurement> => {
 	if (names.length === 0) return { bytes: 0, gzip: 0 };
 	const { bytes, gzip } = await measure("__existing__", importSource(names), resolveDir);
@@ -254,13 +290,14 @@ const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement)
 	const removed: (Measurement & { name: string })[] = [];
 
 	for (const name of [...names].sort()) {
-		const baseMeasurement = base.exports[name];
-		const headMeasurement = head.exports[name];
-		if (!baseMeasurement) {
+		const baseMeasurement: Measurement | undefined = base.exports[name];
+		const headMeasurement: Measurement | undefined = head.exports[name];
+		if (baseMeasurement === undefined) {
+			if (headMeasurement === undefined) continue;
 			added.push({ name, ...headMeasurement });
 			continue;
 		}
-		if (!headMeasurement) {
+		if (headMeasurement === undefined) {
 			removed.push({ name, ...baseMeasurement });
 			continue;
 		}
@@ -310,25 +347,24 @@ const renderMarkdown = (
 	existing: Measurement,
 	result: CompareResult,
 ): string => {
-	const lines: string[] = [];
-	lines.push("## Tree-shaking report");
-	lines.push("");
-	lines.push(
+	const lines: string[] = [
+		"## Tree-shaking report",
+		"",
 		`Fails when a pre-existing export grows more than ${REGRESSION_PERCENT_THRESHOLD * 100}% and more than ` +
 			`${REGRESSION_BYTES_THRESHOLD} B, or when importing every export that already existed on the base ` +
 			`grows more than ${FULL_IMPORT_PERCENT_THRESHOLD * 100}%. New exports never count as a regression.`,
-	);
-	lines.push("");
-	lines.push(
+		"",
 		`Pre-existing exports: ${base.full.bytes} B to ${existing.bytes} B (${formatPercent(result.fullDeltaPercent)}, ` +
 			`gzip ${existing.gzip} B)${result.fullImportRegressed ? ", REGRESSION" : ""}. ` +
 			`Full import on head: ${head.full.bytes} B (gzip ${head.full.gzip} B).`,
-	);
-	lines.push("");
+		"",
+	];
 
 	if (result.changed.length > 0) {
-		lines.push("| name | base | head | delta bytes | delta % | gzip head |");
-		lines.push("| --- | --- | --- | --- | --- | --- |");
+		lines.push(
+			"| name | base | head | delta bytes | delta % | gzip head |",
+			"| --- | --- | --- | --- | --- | --- |",
+		);
 		for (const row of result.changed) {
 			const flag = result.regressions.includes(row) ? " (REGRESSION)" : "";
 			lines.push(
@@ -340,47 +376,72 @@ const renderMarkdown = (
 	}
 
 	if (result.added.length > 0) {
-		lines.push("**New exports**");
-		lines.push("");
+		lines.push("**New exports**", "");
 		for (const item of result.added)
 			lines.push(`- ${item.name}: ${item.bytes} B (gzip ${item.gzip} B)`);
 		lines.push("");
 	}
 
 	if (result.removed.length > 0) {
-		lines.push("**Removed exports**");
-		lines.push("");
+		lines.push("**Removed exports**", "");
 		for (const item of result.removed) lines.push(`- ${item.name}: was ${item.bytes} B`);
 		lines.push("");
 	}
 
 	if (result.unchanged.length > 0) {
-		lines.push(`<details><summary>Unchanged exports (${result.unchanged.length})</summary>`);
-		lines.push("");
-		lines.push("| name | bytes | gzip |");
-		lines.push("| --- | --- | --- |");
+		lines.push(
+			`<details><summary>Unchanged exports (${result.unchanged.length})</summary>`,
+			"",
+			"| name | bytes | gzip |",
+			"| --- | --- | --- |",
+		);
 		for (const row of result.unchanged)
 			lines.push(`| ${row.name} | ${row.head.bytes} | ${row.head.gzip} |`);
-		lines.push("");
-		lines.push("</details>");
+		lines.push("", "</details>");
 	}
 
 	return lines.join("\n");
 };
 
+const isMeasurement = (value: unknown): value is Measurement =>
+	typeof value === "object" &&
+	value !== null &&
+	"bytes" in value &&
+	typeof value.bytes === "number" &&
+	"gzip" in value &&
+	typeof value.gzip === "number";
+
+const isSnapshot = (value: unknown): value is Snapshot =>
+	typeof value === "object" &&
+	value !== null &&
+	"full" in value &&
+	isMeasurement(value.full) &&
+	"exports" in value &&
+	isRecord(value.exports) &&
+	Object.values(value.exports).every((entry) => isMeasurement(entry));
+
 const main = async (): Promise<void> => {
 	const args = parseArgs(process.argv.slice(2));
-	const packageRoot = args.dist ? resolve(process.cwd(), args.dist) : rootDir;
+	const packageRoot =
+		args.dist === undefined || args.dist === "" ? rootDir : resolve(process.cwd(), args.dist);
 
 	const { full, exports: exportsMap, aliasOf, resolveDir } = await measureExports(packageRoot);
 
-	if (args.json) {
+	if (args.json !== undefined && args.json !== "") {
 		const snapshot: Snapshot = { full, exports: exportsMap };
 		await writeFile(resolve(process.cwd(), args.json), `${JSON.stringify(snapshot, null, "\t")}\n`);
 	}
 
-	if (args.compare) {
-		const base: Snapshot = JSON.parse(await readFile(resolve(process.cwd(), args.compare), "utf8"));
+	if (args.compare !== undefined && args.compare !== "") {
+		const comparePath = resolve(process.cwd(), args.compare);
+		const compareContents = await readFile(comparePath, "utf8");
+		const parsedBase: unknown = JSON.parse(compareContents);
+
+		if (!isSnapshot(parsedBase)) {
+			throw new Error(`${comparePath} is not a valid tree-shaking snapshot`);
+		}
+
+		const base = parsedBase;
 		const head: Snapshot = { full, exports: exportsMap };
 		const existingNames = Object.keys(base.exports)
 			.filter((name) => name in exportsMap && !aliasOf.has(name))
@@ -390,7 +451,9 @@ const main = async (): Promise<void> => {
 		const markdown = renderMarkdown(base, head, existing, result);
 
 		console.log(markdown);
-		if (args.markdown) await writeFile(resolve(process.cwd(), args.markdown), `${markdown}\n`);
+		if (args.markdown !== undefined && args.markdown !== "") {
+			await writeFile(resolve(process.cwd(), args.markdown), `${markdown}\n`);
+		}
 
 		if (result.regressions.length > 0 || result.fullImportRegressed) {
 			console.error(

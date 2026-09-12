@@ -48,7 +48,7 @@ describe("isValidCfop", () => {
 
 	it("should return false for undefined", () => {
 		// @ts-expect-error not a string or number
-		expect(isValidCfop(undefined)).toBe(false);
+		expect(isValidCfop()).toBe(false);
 	});
 
 	it("should return false for a non numeric string", () => {

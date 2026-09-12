@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { fetchSortedRecord } from "../src/_internals/fetch-sorted-record/fetch-sorted-record.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 const EMBEDDED_ENTRY_REGEX = /\s+(\d)\.(\d{3})\s+-\s+/g;
 
@@ -14,6 +13,9 @@ const EMBEDDED_ENTRY_REGEX = /\s+(\d)\.(\d{3})\s+-\s+/g;
  * Some rows of the mirror glue the next code into the description, e.g.
  * `1305;"... energia elétrica 1.306 - Aquisição de serviço ..."`, which both corrupts the
  * `1305` description and drops `1306`. Splits such a row into one entry per code.
+ * @param {string} code - The CFOP code the row started with.
+ * @param {string} description - The row description, possibly containing embedded codes.
+ * @returns {[string, string][]} One `[code, description]` entry per code found in the row.
  */
 const splitEmbeddedEntries = (code: string, description: string): [string, string][] => {
 	const entries: [string, string][] = [];
@@ -23,18 +25,18 @@ const splitEmbeddedEntries = (code: string, description: string): [string, strin
 	for (const match of description.matchAll(EMBEDDED_ENTRY_REGEX)) {
 		entries.push([
 			currentCode,
-			description.slice(lastIndex, match.index).replace(/\s+/g, " ").trim(),
+			description.slice(lastIndex, match.index).replaceAll(/\s+/g, " ").trim(),
 		]);
 		currentCode = `${match[1]}${match[2]}`;
 		lastIndex = match.index + match[0].length;
 	}
 
-	entries.push([currentCode, description.slice(lastIndex).replace(/\s+/g, " ").trim()]);
+	entries.push([currentCode, description.slice(lastIndex).replaceAll(/\s+/g, " ").trim()]);
 
 	return entries;
 };
 
-const main = async () => {
+const main = async (): Promise<void> => {
 	const sorted = await fetchSortedRecord(
 		"https://raw.githubusercontent.com/jansenfelipe/cfop/master/cfop.csv",
 		"CFOP mirror",
@@ -49,6 +51,8 @@ const main = async () => {
 				if (!match) continue;
 
 				const [, code, description] = match;
+
+				if (code === undefined || description === undefined) continue;
 
 				for (const [entryCode, entryDescription] of splitEmbeddedEntries(code, description)) {
 					if (entryCode.endsWith("00")) continue;

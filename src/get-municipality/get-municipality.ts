@@ -84,16 +84,16 @@ const getMunicipalityCodeByName = ({
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const getMunicipality = async (
+export const getMunicipality = (
 	options: GetMunicipalityOptions,
 ): Promise<[string, string] | null | string> => {
 	if (isNullish(options) || typeof options !== "object" || Array.isArray(options)) {
-		return null;
+		return Promise.resolve(null);
 	}
 
 	if ("code" in options) {
-		return getMunicipalityByCode(options.code);
+		return Promise.resolve(getMunicipalityByCode(options.code));
 	}
 
-	return getMunicipalityCodeByName(options);
+	return Promise.resolve(getMunicipalityCodeByName(options));
 };

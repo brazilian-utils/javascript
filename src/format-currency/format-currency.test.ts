@@ -11,9 +11,9 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(10.01)).toBe("10,01");
 		expect(formatCurrency(100.01)).toBe("100,01");
 		expect(formatCurrency(1000.01)).toBe("1.000,01");
-		expect(formatCurrency(10000.01)).toBe("10.000,01");
-		expect(formatCurrency(100000.01)).toBe("100.000,01");
-		expect(formatCurrency(1000000.01)).toBe("1.000.000,01");
+		expect(formatCurrency(10_000.01)).toBe("10.000,01");
+		expect(formatCurrency(100_000.01)).toBe("100.000,01");
+		expect(formatCurrency(1_000_000.01)).toBe("1.000.000,01");
 	});
 
 	it("should formatCurrency negative currency into BRL", () => {
@@ -25,9 +25,9 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(-10.01)).toBe("-10,01");
 		expect(formatCurrency(-100.01)).toBe("-100,01");
 		expect(formatCurrency(-1000.01)).toBe("-1.000,01");
-		expect(formatCurrency(-10000.01)).toBe("-10.000,01");
-		expect(formatCurrency(-100000.01)).toBe("-100.000,01");
-		expect(formatCurrency(-1000000.01)).toBe("-1.000.000,01");
+		expect(formatCurrency(-10_000.01)).toBe("-10.000,01");
+		expect(formatCurrency(-100_000.01)).toBe("-100.000,01");
+		expect(formatCurrency(-1_000_000.01)).toBe("-1.000.000,01");
 	});
 
 	it("should formatCurrency positive currency into BRL with currency sign", () => {
@@ -39,9 +39,9 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(10.01, { symbol: true })).toBe("R$ 10,01");
 		expect(formatCurrency(100.01, { symbol: true })).toBe("R$ 100,01");
 		expect(formatCurrency(1000.01, { symbol: true })).toBe("R$ 1.000,01");
-		expect(formatCurrency(10000.01, { symbol: true })).toBe("R$ 10.000,01");
-		expect(formatCurrency(100000.01, { symbol: true })).toBe("R$ 100.000,01");
-		expect(formatCurrency(1000000.01, { symbol: true })).toBe("R$ 1.000.000,01");
+		expect(formatCurrency(10_000.01, { symbol: true })).toBe("R$ 10.000,01");
+		expect(formatCurrency(100_000.01, { symbol: true })).toBe("R$ 100.000,01");
+		expect(formatCurrency(1_000_000.01, { symbol: true })).toBe("R$ 1.000.000,01");
 	});
 
 	it("should formatCurrency negative currency into BRL with currency sign", () => {
@@ -53,9 +53,9 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(-10.01, { symbol: true })).toBe("-R$ 10,01");
 		expect(formatCurrency(-100.01, { symbol: true })).toBe("-R$ 100,01");
 		expect(formatCurrency(-1000.01, { symbol: true })).toBe("-R$ 1.000,01");
-		expect(formatCurrency(-10000.01, { symbol: true })).toBe("-R$ 10.000,01");
-		expect(formatCurrency(-100000.01, { symbol: true })).toBe("-R$ 100.000,01");
-		expect(formatCurrency(-1000000.01, { symbol: true })).toBe("-R$ 1.000.000,01");
+		expect(formatCurrency(-10_000.01, { symbol: true })).toBe("-R$ 10.000,01");
+		expect(formatCurrency(-100_000.01, { symbol: true })).toBe("-R$ 100.000,01");
+		expect(formatCurrency(-1_000_000.01, { symbol: true })).toBe("-R$ 1.000.000,01");
 	});
 
 	it("should formatCurrency with different precision", () => {
@@ -67,9 +67,9 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(10.001, { precision: 3 })).toBe("10,001");
 		expect(formatCurrency(100.001, { precision: 3 })).toBe("100,001");
 		expect(formatCurrency(1000.001, { precision: 3 })).toBe("1.000,001");
-		expect(formatCurrency(10000.001, { precision: 3 })).toBe("10.000,001");
-		expect(formatCurrency(100000.001, { precision: 3 })).toBe("100.000,001");
-		expect(formatCurrency(1000000.001, { precision: 3 })).toBe("1.000.000,001");
+		expect(formatCurrency(10_000.001, { precision: 3 })).toBe("10.000,001");
+		expect(formatCurrency(100_000.001, { precision: 3 })).toBe("100.000,001");
+		expect(formatCurrency(1_000_000.001, { precision: 3 })).toBe("1.000.000,001");
 	});
 
 	it("should read the separators of string inputs", () => {
@@ -106,8 +106,8 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(Number.POSITIVE_INFINITY)).toBe("");
 		expect(formatCurrency(Number.NEGATIVE_INFINITY)).toBe("");
 		expect(formatCurrency(Number.NaN, { symbol: true })).toBe("");
-		// @ts-expect-error
-		expect(formatCurrency(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency()).toBe("");
 	});
 
 	it("should read as many fraction digits as the requested precision allows, not just the default 2, when reading a string", () => {
@@ -116,6 +116,6 @@ describe("formatCurrency", () => {
 
 	it("should replace the non-breaking space", () => {
 		expect(formatCurrency(1234.56, { symbol: true })).toBe("R$ 1.234,56");
-		expect(formatCurrency(1234.56, { symbol: true })).not.toContain("\u00a0");
+		expect(formatCurrency(1234.56, { symbol: true })).not.toContain("\u00A0");
 	});
 });

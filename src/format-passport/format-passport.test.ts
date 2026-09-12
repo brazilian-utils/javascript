@@ -38,11 +38,11 @@ describe("formatPassport", () => {
 
 	describe("should return an empty string", () => {
 		test("when passport is not a string", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(formatPassport(null)).toBe("");
-			// @ts-expect-error
-			expect(formatPassport(undefined)).toBe("");
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
+			expect(formatPassport()).toBe("");
+			// @ts-expect-error: intentionally invalid input
 			expect(formatPassport(123)).toBe("");
 		});
 	});

@@ -8,17 +8,17 @@ describe("isValidPassport", () => {
 		});
 
 		test("when passport is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPassport(null)).toBe(false);
 		});
 
 		test("when passport is undefined", () => {
-			// @ts-expect-error
-			expect(isValidPassport(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPassport()).toBe(false);
 		});
 
 		test("when passport is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPassport({})).toBe(false);
 		});
 

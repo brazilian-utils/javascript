@@ -146,22 +146,22 @@ describe("differenceInBusinessDays", () => {
 
 	describe("invalid input", () => {
 		it("should return null when params is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(differenceInBusinessDays(null)).toBeNull();
 		});
 
 		it("should return null when params is undefined", () => {
-			// @ts-expect-error
-			expect(differenceInBusinessDays(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(differenceInBusinessDays()).toBeNull();
 		});
 
 		it("should return null when params is not an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(differenceInBusinessDays("2024-01-02")).toBeNull();
 		});
 
 		it('should return null when params is a function, even one carrying from/to properties (typeof params !== "object" must reject it, not just isNullish)', () => {
-			const fakeParams = Object.assign(() => {}, {
+			const fakeParams = Object.assign(() => null, {
 				from: new Date(2024, 0, 2),
 				to: new Date(2024, 0, 3),
 			});
@@ -183,14 +183,14 @@ describe("differenceInBusinessDays", () => {
 
 		it("should return null when from is not a Date", () => {
 			expect(
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				differenceInBusinessDays({ from: "2024-01-02", to: new Date(2024, 0, 3) }),
 			).toBeNull();
 		});
 
 		it("should return null when to is not a Date", () => {
 			expect(
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				differenceInBusinessDays({ from: new Date(2024, 0, 2), to: "2024-01-03" }),
 			).toBeNull();
 		});
@@ -200,7 +200,7 @@ describe("differenceInBusinessDays", () => {
 				differenceInBusinessDays({
 					from: new Date(2024, 0, 2),
 					to: new Date(2024, 0, 3),
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					stateCode: 11,
 				}),
 			).toBeNull();
@@ -210,7 +210,7 @@ describe("differenceInBusinessDays", () => {
 			const result = differenceInBusinessDays({
 				from: new Date(2024, 0, 2),
 				to: new Date(2024, 0, 3),
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				stateCode: "XX",
 			});
 

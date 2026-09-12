@@ -124,6 +124,30 @@ request: the report is still posted, but the check no longer fails. Run `node sc
 or `node scripts/tree-shaking.ts --json before.json` before a change and
 `node scripts/tree-shaking.ts --compare before.json` after it to preview the same diff.
 
+## Lint and type strictness
+
+`npm check` runs oxlint through Vite+ with the `correctness`, `suspicious`, `perf` and `pedantic`
+categories as errors, the `import`, `jsdoc` and `promise` plugins, and a curated set of
+`restriction`/`style` rules on top (see `lint.rules` in `vite.config.ts`): explicit return types
+on every function, no `console` outside `scripts/`, no `forEach`, no parameter reassignment, no
+non-null assertions, no unsafe type assertions, JSDoc `@param`/`@returns` with types on exported
+functions, `type` over `interface`, `T[]` over `Array<T>`, and no default exports outside the
+config files. Test files relax the rules that only make sense for production code (return types,
+JSDoc, the `unsafe-*` family, since the multi-runtime `expect` shim is untyped) and every
+`@ts-expect-error` must carry a description.
+
+`tsconfig.json` is `strict` plus `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters` and
+`noPropertyAccessFromIndexSignature`. `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
+stay off on purpose: the lookup tables are indexed by digits the code has already validated, so
+those flags only add unreachable fallbacks, and every unreachable branch shows up as missing
+coverage and as an equivalent mutant. Fix a type error with a real check that returns the same
+value the code returned before, never with `!` or `as`.
+
+Two pedantic rules stay off on purpose: `require-unicode-regexp` (the `u` flag changes what a
+few escapes mean) and `prefer-code-point`/`prefer-number-coercion` (the digit arithmetic on
+`charCodeAt` and `parseInt` is deliberate, and `codePointAt` would add a nullable branch to every
+check-digit loop).
+
 ## Code quality gates
 
 Three extra gates run in CI next to lint, types and coverage; run them locally before opening a

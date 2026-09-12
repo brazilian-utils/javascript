@@ -23,7 +23,7 @@ const checkLength = (ie: string, length: number | number[]): boolean => {
 };
 
 const startsWithAny = (ie: string, prefixes: readonly string[]): boolean =>
-	prefixes.some((prefix) => ie.substring(0, prefix.length) === prefix);
+	prefixes.some((prefix) => ie.slice(0, prefix.length) === prefix);
 
 const startsWith = (ie: string, prefix: string): boolean => startsWithAny(ie, [prefix]);
 
@@ -61,7 +61,7 @@ const validateMod11Ie = (ie: string, prefixes?: readonly string[]): boolean => {
 	if (!checkLength(ie, 9)) return false;
 	if (prefixes && !startsWithAny(ie, prefixes)) return false;
 
-	const body = ie.substring(0, 8);
+	const body = ie.slice(0, 8);
 	const sum = calcWeightedSum({ source: body, length: body.length, startWeight: body.length + 1 });
 	const dig = calcMod11CheckDigit(sum);
 
@@ -86,7 +86,7 @@ const validateAC: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 13)) return false;
 	if (!startsWith(ie, "01")) return false;
 
-	const body = ie.substring(0, 11);
+	const body = ie.slice(0, 11);
 	const firstDig = calcDFDigit(body);
 	const secondDig = calcDFDigit(body + firstDig);
 
@@ -127,7 +127,7 @@ const validateAP: IeValidator = (ie: string) => {
 	const length = ie.length;
 	const position = length - 1;
 	let weight = length;
-	const body = ie.substring(0, position);
+	const body = ie.slice(0, position);
 	const bodyInt = Number.parseInt(body, 10);
 	let p = 0;
 	let d = 0;
@@ -166,10 +166,10 @@ const validateBA: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [8, 9])) return false;
 
 	const pos = ie.length === 9 ? 1 : 0;
-	const charAt = Number.parseInt(ie.substring(pos, pos + 1), 10);
+	const charAt = Number.parseInt(ie.slice(pos, pos + 1), 10);
 	const mod = BA_MOD_10_DIGITS.includes(charAt) ? 10 : 11;
 
-	const body = ie.substring(0, ie.length - 2);
+	const body = ie.slice(0, ie.length - 2);
 	const firstSum = calcWeightedSum({
 		source: ie,
 		length: body.length,
@@ -186,8 +186,8 @@ const validateBA: IeValidator = (ie: string) => {
 	const firstDig = calcMod11CheckDigit(secondSum, mod);
 
 	return (
-		Number.parseInt(ie.charAt(ie.length - 2), 10) === firstDig &&
-		Number.parseInt(ie.charAt(ie.length - 1), 10) === secondDig
+		Number.parseInt(ie.slice(-2, -1), 10) === firstDig &&
+		Number.parseInt(ie.slice(-1), 10) === secondDig
 	);
 };
 
@@ -198,7 +198,7 @@ const validateDF: IeValidator = (ie: string) => {
 	if (!startsWith(ie, "07")) return false;
 
 	const length = ie.length;
-	const body = ie.substring(0, length - 2);
+	const body = ie.slice(0, length - 2);
 
 	const firstDig = calcDFDigit(body);
 	const secondDig = calcDFDigit(body + firstDig);
@@ -215,7 +215,7 @@ const validateGO: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
 	if (!startsWithAny(ie, GO_PREFIXES)) return false;
 
-	const body = ie.substring(0, 8);
+	const body = ie.slice(0, 8);
 	const bodyInt = Number.parseInt(body, 10);
 	const checkDigit = Number.parseInt(ie.charAt(8), 10);
 
@@ -243,8 +243,8 @@ const validateMA: IeValidator = (ie) => validateMod11Ie(ie, MA_PREFIXES);
 const validateMG: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 13)) return false;
 
-	const body = ie.substring(0, 11);
-	const bodyWithZero = `${body.substring(0, 3)}0${body.substring(3)}`;
+	const body = ie.slice(0, 11);
+	const bodyWithZero = `${body.slice(0, 3)}0${body.slice(3)}`;
 
 	let concat = "";
 	for (let i = 0; i < bodyWithZero.length; i++) {
@@ -288,7 +288,7 @@ const validateMG: IeValidator = (ie: string) => {
 const validateMT: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 11)) return false;
 
-	const body = ie.substring(0, 10);
+	const body = ie.slice(0, 10);
 	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 3, wrapTo: 9 });
 	const dig = calcMod11CheckDigit(sum);
 
@@ -304,7 +304,7 @@ const validatePB: IeValidator = (ie) => validateMod11Ie(ie);
 const validatePE: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
 
-	const body = ie.substring(0, 7);
+	const body = ie.slice(0, 7);
 	const firstSum = calcWeightedSum({
 		source: ie,
 		length: body.length,
@@ -331,7 +331,7 @@ const validatePI: IeValidator = (ie) => validateMod11Ie(ie);
 const validatePR: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 10)) return false;
 
-	const body = ie.substring(0, 8);
+	const body = ie.slice(0, 8);
 	const firstSum = calcWeightedSum({
 		source: ie,
 		length: body.length,
@@ -358,7 +358,7 @@ const validatePR: IeValidator = (ie: string) => {
 const validateRJ: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 8)) return false;
 
-	const body = ie.substring(0, 7);
+	const body = ie.slice(0, 7);
 	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 2, wrapTo: 7 });
 	const dig = calcMod11CheckDigit(sum);
 
@@ -371,7 +371,7 @@ const validateRN: IeValidator = (ie: string) => {
 
 	const length = ie.length;
 	const position = length - 1;
-	const body = ie.substring(0, position);
+	const body = ie.slice(0, position);
 	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: length });
 	const dig = calcMod11CheckDigit(sum);
 
@@ -383,7 +383,7 @@ const validateRO: IeValidator = (ie: string) => {
 
 	const length = ie.length;
 	const position = length - 1;
-	const body = ie.substring(0, position);
+	const body = ie.slice(0, position);
 	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 6, wrapTo: 9 });
 
 	const rest = sum % 11;
@@ -418,7 +418,7 @@ const validateRR: IeValidator = (ie: string) => {
 const validateRS: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 10)) return false;
 
-	const body = ie.substring(0, 9);
+	const body = ie.slice(0, 9);
 	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 2, wrapTo: 9 });
 	const dig = calcMod11CheckDigit(sum);
 
@@ -441,7 +441,7 @@ const calcSPDigit = (body: string, weights: readonly number[]): number => {
 
 const validateSP: IeValidator = (ie: string) => {
 	if (SP_RURAL_PATTERN.test(ie)) {
-		const body = ie.substring(1, 9);
+		const body = ie.slice(1, 9);
 		const dig = calcSPDigit(body, SP_FIRST_WEIGHTS);
 
 		return Number.parseInt(ie.charAt(9), 10) === dig;
@@ -449,8 +449,8 @@ const validateSP: IeValidator = (ie: string) => {
 
 	if (!SP_COMPANY_PATTERN.test(ie)) return false;
 
-	const firstDig = calcSPDigit(ie.substring(0, 8), SP_FIRST_WEIGHTS);
-	const secondDig = calcSPDigit(ie.substring(0, 11), SP_SECOND_WEIGHTS);
+	const firstDig = calcSPDigit(ie.slice(0, 8), SP_FIRST_WEIGHTS);
+	const secondDig = calcSPDigit(ie.slice(0, 11), SP_SECOND_WEIGHTS);
 
 	return (
 		Number.parseInt(ie.charAt(8), 10) === firstDig &&
@@ -463,9 +463,9 @@ const validateTO: IeValidator = (ie: string) => {
 
 	const isLegacy = ie.length === 11;
 
-	if (isLegacy && !TO_TYPES.includes(ie.substring(2, 4))) return false;
+	if (isLegacy && !TO_TYPES.includes(ie.slice(2, 4))) return false;
 
-	const body = isLegacy ? ie.substring(0, 2) + ie.substring(4, 10) : ie.substring(0, 8);
+	const body = isLegacy ? ie.slice(0, 2) + ie.slice(4, 10) : ie.slice(0, 8);
 	const position = isLegacy ? 10 : 8;
 	const sum = calcWeightedSum({ source: body, length: body.length, startWeight: 9 });
 	const dig = calcMod11CheckDigit(sum);

@@ -50,29 +50,29 @@ describe("isValidNfeKey", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidNfeKey(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidNfeKey(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidNfeKey()).toBe(false);
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidNfeKey(123)).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidNfeKey(true)).toBe(false);
 		});
 
 		test("when it is an object or an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidNfeKey({})).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidNfeKey([])).toBe(false);
 		});
 
@@ -121,7 +121,7 @@ describe("isValidNfeKey", () => {
 	});
 
 	describe("with every field valid except one and the check digit recalculated for it", () => {
-		const CASES: Array<{ name: string; key: string; expected: boolean }> = [
+		const CASES: { name: string; key: string; expected: boolean }[] = [
 			{
 				name: "an unmapped cUF (99)",
 				key: "99200600000000000000550010000000011000000005",

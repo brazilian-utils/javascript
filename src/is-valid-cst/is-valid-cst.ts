@@ -17,21 +17,15 @@ export type IsValidCstOptions = {
 const isValidIcmsCst = (digits: string): boolean =>
 	digits.charAt(0) <= "8" && (ICMS_CST_CODES as readonly string[]).includes(digits.slice(1));
 
-const isValidForTax = (
-	digits: string,
-	tax: "icms" | "ipi" | "pis" | "cofins" | undefined,
-): boolean => {
-	switch (tax) {
-		case "icms":
-			return isValidIcmsCst(digits);
-		case "ipi":
-			return (IPI_CST_CODES as readonly string[]).includes(digits);
-		case "pis":
-		case "cofins":
-			return (PIS_COFINS_CST_CODES as readonly string[]).includes(digits);
-		default:
-			return false;
+const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): boolean => {
+	if (tax === "icms") return isValidIcmsCst(digits);
+	if (tax === "ipi") return (IPI_CST_CODES as readonly string[]).includes(digits);
+
+	if (tax === "pis" || tax === "cofins") {
+		return (PIS_COFINS_CST_CODES as readonly string[]).includes(digits);
 	}
+
+	return false;
 };
 
 /**

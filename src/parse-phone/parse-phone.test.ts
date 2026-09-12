@@ -41,13 +41,13 @@ describe("parsePhone", () => {
 	});
 
 	it("should return an empty string for nullish values", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(parsePhone(null)).toBe("");
-		// @ts-expect-error
-		expect(parsePhone(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(parsePhone()).toBe("");
 	});
 
 	it("should accept numbers", () => {
-		expect(parsePhone(11988887777)).toBe("11988887777");
+		expect(parsePhone(11_988_887_777)).toBe("11988887777");
 	});
 });

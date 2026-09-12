@@ -42,9 +42,9 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 
 	const numericAreaCode = Number(digits);
 
-	if (!(numericAreaCode in AREA_CODE_STATES)) return null;
-
 	const stateCode = AREA_CODE_STATES[numericAreaCode];
+
+	if (stateCode === undefined) return null;
 
 	const statesByCode: Record<string, State> = {};
 	for (const entry of DATA) statesByCode[entry.code] = entry;

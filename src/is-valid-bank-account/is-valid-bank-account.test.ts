@@ -13,17 +13,17 @@ const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
 describe("isValidBankAccount", () => {
 	describe("should return false", () => {
 		test("when params is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBankAccount(null)).toBe(false);
 		});
 
 		test("when params is undefined", () => {
-			// @ts-expect-error
-			expect(isValidBankAccount(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidBankAccount()).toBe(false);
 		});
 
 		test("when params is not an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBankAccount("001")).toBe(false);
 		});
 
@@ -74,7 +74,7 @@ describe("isValidBankAccount", () => {
 		test("when bankCode is null", () => {
 			expect(
 				isValidBankAccount({
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					bankCode: null,
 					agency: "1234",
 					account: "12345678",
@@ -86,7 +86,7 @@ describe("isValidBankAccount", () => {
 		test("when bankCode is undefined", () => {
 			expect(
 				isValidBankAccount({
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					bankCode: undefined,
 					agency: "1234",
 					account: "12345678",
@@ -98,7 +98,7 @@ describe("isValidBankAccount", () => {
 		test("when bankCode is not a string", () => {
 			expect(
 				isValidBankAccount({
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					bankCode: 123,
 					agency: "1234",
 					account: "12345678",
@@ -1274,7 +1274,7 @@ describe("isValidBankAccount", () => {
 		test("should return false when bankCode is a truthy number that stringifies to a listed code", () => {
 			expect(
 				isValidBankAccount({
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					bankCode: 246,
 					agency: "1234",
 					account: "123456",
@@ -1287,7 +1287,7 @@ describe("isValidBankAccount", () => {
 			expect(
 				isValidBankAccount({
 					bankCode: "246",
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					agency: 1234,
 					account: "123456",
 					digit: "6",
@@ -1300,8 +1300,8 @@ describe("isValidBankAccount", () => {
 				isValidBankAccount({
 					bankCode: "246",
 					agency: "1234",
-					// @ts-expect-error
-					account: 123456,
+					// @ts-expect-error: intentionally invalid input
+					account: 123_456,
 					digit: "6",
 				}),
 			).toBe(false);
@@ -1313,14 +1313,14 @@ describe("isValidBankAccount", () => {
 					bankCode: "246",
 					agency: "1234",
 					account: "123456",
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					digit: 6,
 				}),
 			).toBe(false);
 		});
 
 		test("should return false when params is a function carrying otherwise valid fields as own properties", () => {
-			const params = Object.assign(() => {}, {
+			const params = Object.assign(() => null, {
 				bankCode: "001",
 				agency: "1584",
 				account: "00210169",

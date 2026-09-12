@@ -19,9 +19,9 @@ describe("getHolidays", () => {
 			{ name: "Natal", date: new Date(year, 11, 25), type: "national" },
 		];
 
-		fixedHolidays.forEach((holiday) => {
+		for (const holiday of fixedHolidays) {
 			expect(holidays).toContainEqual(holiday);
-		});
+		}
 	});
 
 	test("should not include Dia da Consciência Negra as a national holiday before 2024 (Lei nº 14.759/2023 made it national only from 2024 onward)", () => {
@@ -46,9 +46,9 @@ describe("getHolidays", () => {
 			{ name: "Corpus Christi", date: new Date(2031, 5, 12), type: "optional" },
 		];
 
-		expectedHolidays.forEach((holiday) => {
+		for (const holiday of expectedHolidays) {
 			expect(holidays).toContainEqual(holiday);
-		});
+		}
 	});
 
 	test("should return 13 holidays for 2024: 9 fixed holidays (including Consciência Negra) plus 4 Easter-related holidays", () => {
@@ -65,13 +65,13 @@ describe("getHolidays", () => {
 			{ year: 2075, month: 3, day: 7 },
 		];
 
-		easterSundays.forEach(({ year, month, day }) => {
+		for (const { year, month, day } of easterSundays) {
 			expect(getHolidays(year)).toContainEqual({
 				name: "Páscoa",
 				date: new Date(year, month, day),
 				type: "religious",
 			});
-		});
+		}
 	});
 
 	test("should compute holidays for the inclusive boundary years 1900 and 2099", () => {
@@ -93,19 +93,27 @@ describe("getHolidays", () => {
 		expect(holidays.length).toBeGreaterThan(1);
 
 		for (let index = 1; index < holidays.length; index += 1) {
-			expect(holidays[index].date.getTime()).toBeGreaterThanOrEqual(
-				holidays[index - 1].date.getTime(),
-			);
+			const current = holidays.at(index);
+			const previous = holidays.at(index - 1);
+
+			expect(current).toBeDefined();
+			expect(previous).toBeDefined();
+
+			if (current === undefined || previous === undefined) {
+				continue;
+			}
+
+			expect(current.date.getTime()).toBeGreaterThanOrEqual(previous.date.getTime());
 		}
 	});
 
 	test("should return an empty array when called with null instead of a year or options object", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getHolidays(null)).toEqual([]);
 	});
 
 	test('should return an empty array when called with a function, even one carrying a year property (typeof yearOrOptions !== "object" must reject it, not just isNullish)', () => {
-		const fakeOptions = Object.assign(() => {}, { year: 2024 });
+		const fakeOptions = Object.assign(() => null, { year: 2024 });
 
 		expect(getHolidays(fakeOptions)).toEqual([]);
 	});
@@ -113,15 +121,15 @@ describe("getHolidays", () => {
 	test("should return an empty array for a year that is not a valid supported integer", () => {
 		const invalidYears = ["2024", 2024.5, 1899, 2100, Number.NaN];
 
-		invalidYears.forEach((year) => {
-			// @ts-expect-error
+		for (const year of invalidYears) {
+			// @ts-expect-error: intentionally invalid input
 			expect(getHolidays({ year })).toEqual([]);
-		});
+		}
 	});
 
 	test("should ignore a non-primitive (String object) stateCode and return national-only holidays", () => {
 		const nationalHolidays = getHolidays(2024);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		const holidays = getHolidays({ year: 2024, stateCode: new String("SP") });
 
 		expect(holidays).toEqual(nationalHolidays);
@@ -130,8 +138,15 @@ describe("getHolidays", () => {
 	test("should compute independent results per year instead of colliding on a shared cache key", () => {
 		const first = getHolidays(2081);
 		const second = getHolidays(2082);
+		const firstOfSecond = second.at(0);
 
-		expect(second[0].date.getFullYear()).toBe(2082);
+		expect(firstOfSecond).toBeDefined();
+
+		if (firstOfSecond === undefined) {
+			return;
+		}
+
+		expect(firstOfSecond.date.getFullYear()).toBe(2082);
 		expect(second).not.toEqual(first);
 	});
 
@@ -240,9 +255,9 @@ describe("getHolidays", () => {
 		const nationalHolidays = getHolidays(2024);
 		const spHolidays = getHolidays({ year: 2024, stateCode: "SP" });
 
-		nationalHolidays.forEach((nationalHoliday) => {
+		for (const nationalHoliday of nationalHolidays) {
 			expect(spHolidays).toContainEqual(nationalHoliday);
-		});
+		}
 
 		expect(spHolidays.length).toBeGreaterThan(nationalHolidays.length);
 	});
@@ -258,7 +273,7 @@ describe("getHolidays", () => {
 
 	test("should ignore an unknown stateCode and return national-only holidays", () => {
 		const nationalHolidays = getHolidays(2024);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		const holidays = getHolidays({ year: 2024, stateCode: "XX" });
 
 		expect(holidays).toEqual(nationalHolidays);
@@ -266,20 +281,34 @@ describe("getHolidays", () => {
 
 	test("should ignore a non-string stateCode and return national-only holidays", () => {
 		const nationalHolidays = getHolidays(2024);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		const holidays = getHolidays({ year: 2024, stateCode: 123 });
 
 		expect(holidays).toEqual(nationalHolidays);
 	});
 
 	test("should return a fresh copy on every call so mutation cannot leak between calls", () => {
-		const first = getHolidays(2024);
-		first[0].name = "MUTATED";
-		first[0].date.setFullYear(1900);
+		const firstHoliday = getHolidays(2024).at(0);
 
-		const second = getHolidays(2024);
-		expect(second[0].name).not.toBe("MUTATED");
-		expect(second[0].date.getFullYear()).toBe(2024);
+		expect(firstHoliday).toBeDefined();
+
+		if (firstHoliday === undefined) {
+			return;
+		}
+
+		firstHoliday.name = "MUTATED";
+		firstHoliday.date.setFullYear(1900);
+
+		const secondHoliday = getHolidays(2024).at(0);
+
+		expect(secondHoliday).toBeDefined();
+
+		if (secondHoliday === undefined) {
+			return;
+		}
+
+		expect(secondHoliday.name).not.toBe("MUTATED");
+		expect(secondHoliday.date.getFullYear()).toBe(2024);
 	});
 	test("should keep Nossa Senhora da Conceição for AM as an optional day, as the state calendar decree does", () => {
 		const holiday = getHolidays({ year: 2024, stateCode: "AM" }).find(
@@ -389,7 +418,7 @@ describe("getHolidays", () => {
 			{ name: "Feriado com apenas o dia", day: 10 },
 		];
 
-		incompleteEntries.forEach((entry) => {
+		for (const entry of incompleteEntries) {
 			const entries = STATE_HOLIDAYS.AC ?? [];
 			entries.push(entry);
 
@@ -400,6 +429,6 @@ describe("getHolidays", () => {
 			} finally {
 				entries.pop();
 			}
-		});
+		}
 	});
 });

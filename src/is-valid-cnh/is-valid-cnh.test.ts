@@ -26,9 +26,9 @@ describe("isValidCnh", () => {
 
 	it("should return false for falsy or non-string values", () => {
 		expect(isValidCnh("")).toBe(false);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(isValidCnh(null)).toBe(false);
-		// @ts-expect-error
-		expect(isValidCnh(undefined)).toBe(false);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidCnh()).toBe(false);
 	});
 });

@@ -33,9 +33,9 @@ describe("formatVoterId", () => {
 	});
 
 	it("should return an empty string for null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatVoterId(null)).toBe("");
-		// @ts-expect-error
-		expect(formatVoterId(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatVoterId()).toBe("");
 	});
 });

@@ -49,10 +49,12 @@ const santanderDigits: BankAccountDigits = (agency, account) => {
 	const base = `${agency}00${account}`;
 
 	let sum = 0;
+	let position = 0;
 
-	for (let i = 0; i < base.length; i++) {
+	for (const weight of SANTANDER_WEIGHTS) {
 		// Stryker disable next-line ArithmeticOperator: SANTANDER_WEIGHTS sums to 60, a multiple of 10, so replacing -48 with +48 shifts every term's contribution by a multiple of 10 mod 10, leaving the final check digit unchanged for every possible input.
-		sum += ((base.charCodeAt(i) - 48) * SANTANDER_WEIGHTS[i]) % 10;
+		sum += ((base.charCodeAt(position) - 48) * weight) % 10;
+		position++;
 	}
 
 	return [String((10 - (sum % 10)) % 10)];
@@ -229,7 +231,8 @@ const validateGeneric = (account: string, digit: string): boolean => {
 	);
 };
 
-const sanitizeCheckDigit = (value: string): string => value.toUpperCase().replace(/[^\dPX]/g, "");
+const sanitizeCheckDigit = (value: string): string =>
+	value.toUpperCase().replaceAll(/[^\dPX]/g, "");
 
 /**
  * Validates a Brazilian bank account. The bank code must belong to the Banco Central do Brasil

@@ -18,12 +18,10 @@ const NUMERIC_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{4}[\
 
 const cleanCnpj = (cnpj: string): string => {
 	let result = "";
-	// Stryker disable next-line EqualityOperator: cnpj.length is the exact bound; one extra iteration would read cnpj[cnpj.length], which is undefined and fails every character-class comparison below either way.
-	for (let i = 0; i < cnpj.length; i++) {
+	for (const char of cnpj) {
 		// Stryker disable next-line ConditionalExpression,EqualityOperator: this early exit only bounds how much of an oversized input is scanned; whatever length `result` ends up with, the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX check still requires exactly CNPJ_LENGTH real characters and rejects anything else, so the exact cutoff point here never changes the final answer.
 		if (result.length > CNPJ_LENGTH) break;
 
-		const char = cnpj[i];
 		// Stryker disable next-line ConditionalExpression: the only characters that ever reach isValidChecksum are ones the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX already restricted to "0"-"9", "A"-"Z" or a "\s.-/" separator (all below "0" in code point), so no reachable character can trigger this comparison's alternate branch without the whole match already having failed for an unrelated reason.
 		const isDigit = char >= "0" && char <= "9";
 		// Stryker disable next-line ConditionalExpression: same reasoning as isDigit above — any character reaching here already satisfied FORMAT_REGEX/NUMERIC_FORMAT_REGEX, so it is always a genuine "0"-"9", "A"-"Z", "a"-"z" or a low-code-point separator.
@@ -40,16 +38,20 @@ const cleanCnpj = (cnpj: string): string => {
 
 const isValidChecksum = (cnpj: string): boolean => {
 	let sum = 0;
-	for (let i = 0; i < 12; i++) {
-		sum += (cnpj.charCodeAt(i) - 48) * CNPJ_FIRST_DIGIT_WEIGHTS[i];
+	let position = 0;
+	for (const weight of CNPJ_FIRST_DIGIT_WEIGHTS) {
+		sum += (cnpj.charCodeAt(position) - 48) * weight;
+		position++;
 	}
 	let mod = sum % 11;
 	const expected1 = mod < 2 ? 48 : 48 + 11 - mod;
 	if (cnpj.charCodeAt(12) !== expected1) return false;
 
 	sum = 0;
-	for (let i = 0; i < 13; i++) {
-		sum += (cnpj.charCodeAt(i) - 48) * CNPJ_SECOND_DIGIT_WEIGHTS[i];
+	position = 0;
+	for (const weight of CNPJ_SECOND_DIGIT_WEIGHTS) {
+		sum += (cnpj.charCodeAt(position) - 48) * weight;
+		position++;
 	}
 	mod = sum % 11;
 	const expected2 = mod < 2 ? 48 : 48 + 11 - mod;

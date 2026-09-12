@@ -17,21 +17,21 @@ const EVP = "71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d";
 describe("generatePixPayload", () => {
 	describe("should return null", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(generatePixPayload(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(generatePixPayload()).toBeNull();
 		});
 
 		test("when it is not an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload("12345678909")).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload(123)).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload(true)).toBeNull();
 		});
 
@@ -62,7 +62,7 @@ describe("generatePixPayload", () => {
 
 		test("when url is not a string", () => {
 			expect(
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				generatePixPayload({ url: 123, merchantName: "Fulano", merchantCity: "Brasilia" }),
 			).toBeNull();
 		});
@@ -127,7 +127,7 @@ describe("generatePixPayload", () => {
 		});
 
 		test('when it is a function, since a function is not typeof "object" even when it carries key/merchantName/merchantCity properties of its own', () => {
-			const impostor = Object.assign(() => {}, {
+			const impostor = Object.assign(() => null, {
 				key: "12345678909",
 				merchantName: "Fulano",
 				merchantCity: "Brasilia",
@@ -140,13 +140,13 @@ describe("generatePixPayload", () => {
 			const impostor = { length: 5, toString: () => "pix.example.com/x" };
 
 			expect(
-				// @ts-expect-error
+				// @ts-expect-error: intentionally invalid input
 				generatePixPayload({ url: impostor, merchantName: "Fulano", merchantCity: "Brasilia" }),
 			).toBeNull();
 		});
 
 		test("when the merchant name is missing or empty after folding", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload({ key: EVP, merchantCity: "Brasilia" })).toBeNull();
 			expect(
 				generatePixPayload({ key: EVP, merchantName: "   ", merchantCity: "Brasilia" }),
@@ -157,7 +157,7 @@ describe("generatePixPayload", () => {
 		});
 
 		test("when the merchant city is missing or empty after folding", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload({ key: EVP, merchantName: "Fulano" })).toBeNull();
 			expect(
 				generatePixPayload({ key: EVP, merchantName: "Fulano", merchantCity: " " }),
@@ -169,12 +169,12 @@ describe("generatePixPayload", () => {
 			expect(generatePixPayload({ ...BASE, amount: -1 })).toBeNull();
 			expect(generatePixPayload({ ...BASE, amount: Number.NaN })).toBeNull();
 			expect(generatePixPayload({ ...BASE, amount: Number.POSITIVE_INFINITY })).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload({ ...BASE, amount: "10" })).toBeNull();
 		});
 
 		test("when the amount does not fit in 13 characters", () => {
-			expect(generatePixPayload({ ...BASE, amount: 12_345_678_901_2 })).toBeNull();
+			expect(generatePixPayload({ ...BASE, amount: 123_456_789_012 })).toBeNull();
 		});
 
 		test("but accept an amount whose formatted length is exactly 13 characters", () => {
@@ -187,7 +187,7 @@ describe("generatePixPayload", () => {
 			expect(generatePixPayload({ ...BASE, txid: "Um-Id-Qualquer" })).toBeNull();
 			expect(generatePixPayload({ ...BASE, txid: "" })).toBeNull();
 			expect(generatePixPayload({ ...BASE, txid: "a".repeat(26) })).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(generatePixPayload({ ...BASE, txid: 123 })).toBeNull();
 		});
 	});
@@ -314,9 +314,11 @@ describe("generatePixPayload", () => {
 			expect(
 				parsePixPayload(generatePixPayload({ ...BASE, key: " Fulano@Example.COM " }) ?? "")?.key,
 			).toBe("fulano@example.com");
-			expect(
-				parsePixPayload(generatePixPayload({ ...BASE, key: EVP.toUpperCase() }) ?? "")?.key,
-			).toBe(EVP);
+			const upperCaseEvp = EVP.toUpperCase();
+
+			expect(parsePixPayload(generatePixPayload({ ...BASE, key: upperCaseEvp }) ?? "")?.key).toBe(
+				EVP,
+			);
 		});
 
 		test("truncating the description to what the 99 character template leaves", () => {

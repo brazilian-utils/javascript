@@ -73,11 +73,11 @@ describe("capitalize", () => {
 	});
 
 	test("should return an empty string when the value is not a string", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(capitalize(null)).toBe("");
-		// @ts-expect-error
-		expect(capitalize(undefined)).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
+		expect(capitalize()).toBe("");
+		// @ts-expect-error: intentionally invalid input
 		expect(capitalize(123)).toBe("");
 	});
 });

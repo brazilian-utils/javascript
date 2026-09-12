@@ -1,8 +1,8 @@
-const POLYNOMIAL = 0x1021;
+const POLYNOMIAL = 0x10_21;
 
-const INITIAL_VALUE = 0xffff;
+const INITIAL_VALUE = 0xff_ff;
 
-const MASK = 0xffff;
+const MASK = 0xff_ff;
 
 const HEX_LENGTH = 4;
 
@@ -32,7 +32,7 @@ export const crc16Ccitt = (value: string): string => {
 		crc ^= bytes[index] << 8;
 
 		for (let bit = 0; bit < 8; bit++) {
-			crc = (crc & 0x8000) === 0 ? (crc << 1) & MASK : ((crc << 1) ^ POLYNOMIAL) & MASK;
+			crc = (crc & 0x80_00) === 0 ? (crc << 1) & MASK : ((crc << 1) ^ POLYNOMIAL) & MASK;
 		}
 	}
 

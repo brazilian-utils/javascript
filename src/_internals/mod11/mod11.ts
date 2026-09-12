@@ -46,6 +46,5 @@ export const mod11 = (value: string, options?: Mod11Options): number => {
 	}
 
 	const remainder = sum % 11;
-
 	return remainder in overrides ? overrides[remainder] : 11 - remainder;
 };

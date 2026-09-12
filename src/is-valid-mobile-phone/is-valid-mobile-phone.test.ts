@@ -16,12 +16,12 @@ describe("isValidMobilePhone", () => {
 		});
 
 		test("when it is null, undefined or a number", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidMobilePhone(null)).toBe(false);
-			// @ts-expect-error
-			expect(isValidMobilePhone(undefined)).toBe(false);
-			// @ts-expect-error
-			expect(isValidMobilePhone(11987654321)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidMobilePhone()).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidMobilePhone(11_987_654_321)).toBe(false);
 		});
 
 		test("when the country code leaves an invalid number", () => {

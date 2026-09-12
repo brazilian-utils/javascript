@@ -36,7 +36,9 @@ export const getCnae = (value: string | number): Cnae | null => {
 	const digits =
 		typeof value === "number" ? String(value).padStart(7, "0") : sanitizeToDigits(value);
 
-	if (!(digits in CNAE_SUBCLASSES)) return null;
+	const description = CNAE_SUBCLASSES[digits];
 
-	return { code: formatCnae(digits), description: CNAE_SUBCLASSES[digits] };
+	if (description === undefined) return null;
+
+	return { code: formatCnae(digits), description };
 };

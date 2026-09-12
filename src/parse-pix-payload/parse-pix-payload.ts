@@ -87,6 +87,92 @@ const isValidCrc = (payload: string): boolean => {
 	return crc16Ccitt(payload.slice(0, -PIX_CRC_LENGTH)) === checksum.toUpperCase();
 };
 
+const resolvePointOfInitiation = (fields: TlvFields): string | undefined | null => {
+	const pointOfInitiation = fields[PIX_POINT_OF_INITIATION_ID];
+
+	if (
+		pointOfInitiation !== undefined &&
+		pointOfInitiation !== PIX_STATIC_POINT_OF_INITIATION &&
+		pointOfInitiation !== PIX_DYNAMIC_POINT_OF_INITIATION
+	) {
+		return null;
+	}
+
+	return pointOfInitiation;
+};
+
+const isValidAmount = (amount: string | undefined): boolean =>
+	amount === undefined ||
+	(AMOUNT_REGEX.test(amount) && amount.length <= PIX_TRANSACTION_AMOUNT_MAX_LENGTH);
+
+type MerchantKeyInfo = {
+	key?: string | undefined;
+	url?: string | undefined;
+	description?: string | undefined;
+};
+
+const resolveMerchantKeyInfo = (fields: TlvFields): MerchantKeyInfo | null => {
+	const merchantAccountInformation = findMerchantAccountInformation(fields);
+
+	if (!merchantAccountInformation) return null;
+
+	const key = merchantAccountInformation[PIX_KEY_ID];
+	const url = merchantAccountInformation[PIX_URL_ID];
+	const description = merchantAccountInformation[PIX_DESCRIPTION_ID];
+
+	if ((key === undefined) === (url === undefined)) return null;
+	if (key !== undefined && !key) return null;
+	if (url !== undefined && !isValidPixUrl(url)) return null;
+
+	return { key, url, description };
+};
+
+const resolveTxid = (fields: TlvFields): string | undefined | null => {
+	const additionalData = fields[PIX_ADDITIONAL_DATA_ID];
+
+	if (additionalData === undefined) return undefined;
+
+	const objects = parseTlv(additionalData);
+
+	if (!objects) return null;
+
+	return objects[PIX_TXID_ID];
+};
+
+type OptionalPixFields = {
+	key?: string | undefined;
+	url?: string | undefined;
+	description?: string | undefined;
+	amount?: string | undefined;
+	txid?: string | undefined;
+	pointOfInitiation?: string | undefined;
+};
+
+const buildPixPayload = (
+	merchantName: string,
+	merchantCity: string,
+	optional: OptionalPixFields,
+): PixPayload => {
+	const { key, url, description, amount, txid, pointOfInitiation } = optional;
+	const pix: PixPayload = { merchantName, merchantCity };
+
+	if (key !== undefined) pix.key = key;
+	if (url !== undefined) pix.url = url;
+	if (description !== undefined) pix.description = description;
+
+	const isDynamic = pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION;
+
+	if (amount !== undefined && !isDynamic) pix.amount = Number(amount);
+	if (txid !== undefined && txid !== PIX_ABSENT_TXID && !isDynamic) pix.txid = txid;
+
+	if (pointOfInitiation !== undefined) {
+		pix.pointOfInitiation =
+			pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION ? "dynamic" : "static";
+	}
+
+	return pix;
+};
+
 /**
  * Parses a Pix BR Code payload, the string behind a Pix QR Code and behind "Pix copia e cola".
  *
@@ -144,15 +230,9 @@ export const parsePixPayload = (value: string): PixPayload | null => {
 
 	if (fields[PIX_PAYLOAD_FORMAT_INDICATOR_ID] !== PIX_PAYLOAD_FORMAT_INDICATOR) return null;
 
-	const pointOfInitiation = fields[PIX_POINT_OF_INITIATION_ID];
+	const pointOfInitiation = resolvePointOfInitiation(fields);
 
-	if (
-		pointOfInitiation !== undefined &&
-		pointOfInitiation !== PIX_STATIC_POINT_OF_INITIATION &&
-		pointOfInitiation !== PIX_DYNAMIC_POINT_OF_INITIATION
-	) {
-		return null;
-	}
+	if (pointOfInitiation === null) return null;
 
 	if (fields[PIX_MERCHANT_CATEGORY_CODE_ID] === undefined) return null;
 	if (fields[PIX_TRANSACTION_CURRENCY_ID] !== PIX_TRANSACTION_CURRENCY) return null;
@@ -160,59 +240,28 @@ export const parsePixPayload = (value: string): PixPayload | null => {
 
 	const merchantName = fields[PIX_MERCHANT_NAME_ID];
 
-	if (!merchantName) return null;
+	if (merchantName === undefined || merchantName === "") return null;
 
 	const merchantCity = fields[PIX_MERCHANT_CITY_ID];
 
-	if (!merchantCity) return null;
+	if (merchantCity === undefined || merchantCity === "") return null;
 
 	const amount = fields[PIX_TRANSACTION_AMOUNT_ID];
 
-	if (
-		amount !== undefined &&
-		(!AMOUNT_REGEX.test(amount) || amount.length > PIX_TRANSACTION_AMOUNT_MAX_LENGTH)
-	) {
-		return null;
-	}
+	if (!isValidAmount(amount)) return null;
 
-	const merchantAccountInformation = findMerchantAccountInformation(fields);
+	const merchantKeyInfo = resolveMerchantKeyInfo(fields);
 
-	if (!merchantAccountInformation) return null;
+	if (!merchantKeyInfo) return null;
 
-	const key = merchantAccountInformation[PIX_KEY_ID];
-	const url = merchantAccountInformation[PIX_URL_ID];
-	const description = merchantAccountInformation[PIX_DESCRIPTION_ID];
+	const txid = resolveTxid(fields);
 
-	if ((key === undefined) === (url === undefined)) return null;
-	if (key !== undefined && !key) return null;
-	if (url !== undefined && !isValidPixUrl(url)) return null;
+	if (txid === null) return null;
 
-	const additionalData = fields[PIX_ADDITIONAL_DATA_ID];
-
-	let txid: string | undefined;
-
-	if (additionalData !== undefined) {
-		const objects = parseTlv(additionalData);
-
-		if (!objects) return null;
-
-		txid = objects[PIX_TXID_ID];
-	}
-
-	const pix: PixPayload = { merchantName, merchantCity };
-
-	if (key !== undefined) pix.key = key;
-	if (url !== undefined) pix.url = url;
-	if (description !== undefined) pix.description = description;
-	const isDynamic = pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION;
-
-	if (amount !== undefined && !isDynamic) pix.amount = Number(amount);
-	if (txid !== undefined && txid !== PIX_ABSENT_TXID && !isDynamic) pix.txid = txid;
-
-	if (pointOfInitiation !== undefined) {
-		pix.pointOfInitiation =
-			pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION ? "dynamic" : "static";
-	}
-
-	return pix;
+	return buildPixPayload(merchantName, merchantCity, {
+		...merchantKeyInfo,
+		amount,
+		txid,
+		pointOfInitiation,
+	});
 };

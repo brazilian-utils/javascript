@@ -42,9 +42,9 @@ describe("formatProcessoJuridico", () => {
 	});
 
 	it("should return an empty string for null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatProcessoJuridico(null)).toBe("");
-		// @ts-expect-error
-		expect(formatProcessoJuridico(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatProcessoJuridico()).toBe("");
 	});
 });

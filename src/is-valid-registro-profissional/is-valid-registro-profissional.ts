@@ -75,9 +75,9 @@ export const isValidRegistroProfissional = (
 
 	if (typeof options !== "object" || options === null) return false;
 
-	const regex = REGEX_BY_COUNCIL[options.council];
+	if (!Object.hasOwn(REGEX_BY_COUNCIL, options.council)) return false;
 
-	if (!regex) return false;
+	const regex = REGEX_BY_COUNCIL[options.council];
 
 	const match = regex.exec(sanitizeToAlphanumeric(value));
 
@@ -85,7 +85,7 @@ export const isValidRegistroProfissional = (
 
 	const { uf } = match.groups;
 
-	if (!uf) return true;
+	if (uf === undefined) return true;
 
 	if (!isKnownStateCode(uf)) return false;
 

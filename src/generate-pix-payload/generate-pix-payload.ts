@@ -62,6 +62,57 @@ export type GeneratePixPayloadParams = {
 const toAsciiField = (value: unknown, maxLength: number): string =>
 	typeof value === "string" ? sanitizeToAscii(value).slice(0, maxLength).trim() : "";
 
+type PixIdentifier = {
+	identifierId: string;
+	identifierValue: string;
+	pointOfInitiation: string | undefined;
+};
+
+const resolveIdentifier = (
+	keyInput: string | undefined,
+	urlInput: string | undefined,
+): PixIdentifier | null => {
+	if (keyInput === undefined) {
+		const url = urlInput;
+
+		if (typeof url !== "string" || url.length > PIX_URL_MAX_LENGTH || !isValidPixUrl(url))
+			return null;
+
+		return {
+			identifierId: PIX_URL_ID,
+			identifierValue: url,
+			pointOfInitiation: PIX_DYNAMIC_POINT_OF_INITIATION,
+		};
+	}
+
+	const key = parsePixKey(keyInput);
+
+	if (!key) return null;
+
+	return { identifierId: PIX_KEY_ID, identifierValue: key.value, pointOfInitiation: undefined };
+};
+
+const resolveFormattedAmount = (
+	amount: number | undefined,
+	txid: string | undefined,
+	pointOfInitiation: string | undefined,
+): string | null => {
+	if (pointOfInitiation !== undefined && (amount !== undefined || txid !== undefined)) return null;
+
+	// Stryker disable next-line EqualityOperator: amount <= 0 differs from amount < 0 only at 0 (or -0), and both format to "0.00", which the "rounds to 0.00" check below always rejects anyway
+	if (amount !== undefined && (!Number.isFinite(amount) || amount <= 0)) return null;
+
+	const formattedAmount = amount === undefined ? "" : amount.toFixed(AMOUNT_DECIMAL_PLACES);
+
+	if (formattedAmount.length > PIX_TRANSACTION_AMOUNT_MAX_LENGTH) return null;
+
+	if (amount !== undefined && Number(formattedAmount) === 0) return null;
+
+	if (txid !== undefined && (typeof txid !== "string" || !TXID_REGEX.test(txid))) return null;
+
+	return formattedAmount;
+};
+
 /**
  * Generates the payload of a Pix BR Code, the string behind a Pix QR Code and behind "Pix
  * copia e cola".
@@ -128,27 +179,11 @@ export const generatePixPayload = (params: GeneratePixPayloadParams): string | n
 
 	if ((keyInput !== undefined) === (urlInput !== undefined)) return null;
 
-	let identifierId: string;
-	let identifierValue: string;
-	let pointOfInitiation: string | undefined;
+	const identifier = resolveIdentifier(keyInput, urlInput);
 
-	if (keyInput !== undefined) {
-		const key = parsePixKey(keyInput);
+	if (identifier === null) return null;
 
-		if (!key) return null;
-
-		identifierId = PIX_KEY_ID;
-		identifierValue = key.value;
-	} else {
-		const url = urlInput;
-
-		if (typeof url !== "string" || url.length > PIX_URL_MAX_LENGTH || !isValidPixUrl(url))
-			return null;
-
-		identifierId = PIX_URL_ID;
-		identifierValue = url;
-		pointOfInitiation = PIX_DYNAMIC_POINT_OF_INITIATION;
-	}
+	const { identifierId, identifierValue, pointOfInitiation } = identifier;
 
 	const merchantName = toAsciiField(params.merchantName, PIX_MERCHANT_NAME_MAX_LENGTH);
 
@@ -160,18 +195,9 @@ export const generatePixPayload = (params: GeneratePixPayloadParams): string | n
 
 	const { amount, txid } = params;
 
-	if (pointOfInitiation !== undefined && (amount !== undefined || txid !== undefined)) return null;
+	const formattedAmount = resolveFormattedAmount(amount, txid, pointOfInitiation);
 
-	// Stryker disable next-line EqualityOperator: amount <= 0 differs from amount < 0 only at 0 (or -0), and both format to "0.00", which the "rounds to 0.00" check below always rejects anyway
-	if (amount !== undefined && (!Number.isFinite(amount) || amount <= 0)) return null;
-
-	const formattedAmount = amount === undefined ? "" : amount.toFixed(AMOUNT_DECIMAL_PLACES);
-
-	if (formattedAmount.length > PIX_TRANSACTION_AMOUNT_MAX_LENGTH) return null;
-
-	if (amount !== undefined && Number(formattedAmount) === 0) return null;
-
-	if (txid !== undefined && (typeof txid !== "string" || !TXID_REGEX.test(txid))) return null;
+	if (formattedAmount === null) return null;
 
 	const gui = formatTlv({ id: PIX_GUI_ID, value: PIX_GUI });
 	const identifierObject = formatTlv({ id: identifierId, value: identifierValue });
@@ -191,9 +217,9 @@ export const generatePixPayload = (params: GeneratePixPayloadParams): string | n
 
 	const payload =
 		formatTlv({ id: PIX_PAYLOAD_FORMAT_INDICATOR_ID, value: PIX_PAYLOAD_FORMAT_INDICATOR }) +
-		(pointOfInitiation
-			? formatTlv({ id: PIX_POINT_OF_INITIATION_ID, value: pointOfInitiation })
-			: "") +
+		(pointOfInitiation === undefined
+			? ""
+			: formatTlv({ id: PIX_POINT_OF_INITIATION_ID, value: pointOfInitiation })) +
 		formatTlv({ id: PIX_MERCHANT_ACCOUNT_INFORMATION_ID, value: merchantAccountInformation }) +
 		formatTlv({ id: PIX_MERCHANT_CATEGORY_CODE_ID, value: PIX_MERCHANT_CATEGORY_CODE }) +
 		formatTlv({ id: PIX_TRANSACTION_CURRENCY_ID, value: PIX_TRANSACTION_CURRENCY }) +

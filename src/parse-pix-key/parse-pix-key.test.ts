@@ -14,26 +14,26 @@ describe("parsePixKey", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixKey(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(parsePixKey(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parsePixKey()).toBeNull();
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
-			expect(parsePixKey(12345678909)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(parsePixKey(12_345_678_909)).toBeNull();
 		});
 
 		test("when it is a boolean, an object or an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixKey(true)).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixKey({})).toBeNull();
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePixKey([])).toBeNull();
 		});
 

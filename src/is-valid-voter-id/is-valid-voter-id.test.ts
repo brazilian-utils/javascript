@@ -59,18 +59,18 @@ describe("isValidVoterId", () => {
 	});
 
 	it("should return false for null, undefined, a number or an empty string", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(isValidVoterId(null)).toBe(false);
-		// @ts-expect-error
-		expect(isValidVoterId(undefined)).toBe(false);
-		// @ts-expect-error
-		expect(isValidVoterId(123456780124)).toBe(false);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidVoterId()).toBe(false);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidVoterId(123_456_780_124)).toBe(false);
 		expect(isValidVoterId("")).toBe(false);
 	});
 
 	it("should reject a valid voter id passed as a number instead of a string", () => {
-		// @ts-expect-error
-		expect(isValidVoterId(102385010671)).toBe(false);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidVoterId(102_385_010_671)).toBe(false);
 	});
 
 	it("should reject a value whose length is neither 12 nor 13, even when its checksum would otherwise match", () => {

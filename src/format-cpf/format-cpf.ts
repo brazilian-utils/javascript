@@ -33,6 +33,6 @@ export const formatCpf = (value: string | number, options?: FormatCpfOptions): s
 	return format({
 		pad: options?.pad,
 		value: sanitizeToDigits(value),
-		pattern: options?.obfuscate ? OBFUSCATED_PATTERN : PATTERN,
+		pattern: options?.obfuscate === true ? OBFUSCATED_PATTERN : PATTERN,
 	});
 };

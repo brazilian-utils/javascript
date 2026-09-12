@@ -7,7 +7,7 @@ describe("formatNcm", () => {
 	});
 
 	it("should format an NCM code given as a number", () => {
-		expect(formatNcm(84713012)).toBe("8471.30.12");
+		expect(formatNcm(84_713_012)).toBe("8471.30.12");
 	});
 
 	it("should format an NCM code that already has the mask", () => {
@@ -36,6 +36,6 @@ describe("formatNcm", () => {
 		// @ts-expect-error not a string or number
 		expect(formatNcm(null)).toBe("");
 		// @ts-expect-error not a string or number
-		expect(formatNcm(undefined)).toBe("");
+		expect(formatNcm()).toBe("");
 	});
 });

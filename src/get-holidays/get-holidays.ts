@@ -97,29 +97,28 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 
 	const easterDate = calculateEaster(year);
 
-	holidays.push({
-		name: "Carnaval (terça-feira)",
-		date: calculateHolidayFromEaster(year, -47),
-		type: "optional",
-	});
-
-	holidays.push({
-		name: "Sexta-feira Santa",
-		date: calculateHolidayFromEaster(year, -2),
-		type: "national",
-	});
-
-	holidays.push({
-		name: "Páscoa",
-		date: easterDate,
-		type: "religious",
-	});
-
-	holidays.push({
-		name: "Corpus Christi",
-		date: calculateHolidayFromEaster(year, 60),
-		type: "optional",
-	});
+	holidays.push(
+		{
+			name: "Carnaval (terça-feira)",
+			date: calculateHolidayFromEaster(year, -47),
+			type: "optional",
+		},
+		{
+			name: "Sexta-feira Santa",
+			date: calculateHolidayFromEaster(year, -2),
+			type: "national",
+		},
+		{
+			name: "Páscoa",
+			date: easterDate,
+			type: "religious",
+		},
+		{
+			name: "Corpus Christi",
+			date: calculateHolidayFromEaster(year, 60),
+			type: "optional",
+		},
+	);
 
 	// Stryker disable next-line ConditionalExpression: when stateCode is undefined, STATE_HOLIDAYS[stateCode] resolves to undefined too, so the inner `if (stateHolidays)` already no-ops either way
 	if (stateCode !== undefined) {
@@ -193,10 +192,9 @@ export function getHolidays(yearOrOptions: number | GetHolidaysOptions): Holiday
 		// Stryker disable next-line BlockStatement: an empty block here still falls through to the `!Number.isInteger(year)` guard below, which returns [] anyway since `year` stays unassigned (undefined)
 		if (isNullish(yearOrOptions) || typeof yearOrOptions !== "object") {
 			return [];
-		} else {
-			year = yearOrOptions.year;
-			stateCode = yearOrOptions.stateCode;
 		}
+		year = yearOrOptions.year;
+		stateCode = yearOrOptions.stateCode;
 	}
 
 	if (!Number.isInteger(year) || year < HOLIDAYS_MIN_YEAR || year > HOLIDAYS_MAX_YEAR) {

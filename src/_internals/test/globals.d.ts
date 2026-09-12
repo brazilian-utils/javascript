@@ -14,10 +14,17 @@ declare const Deno: {
 
 declare global {
 	var RUN_LIVE_CEP_TESTS: string | number | undefined;
-	interface GlobalThis {
-		RUN_LIVE_CEP_TESTS?: string | number;
-	}
 }
+
+type BunJestMockFunction = ((...args: unknown[]) => unknown) & {
+	mock: { calls: unknown[][] };
+	mockClear: () => void;
+	mockResolvedValue: (value: unknown) => BunJestMockFunction;
+	mockResolvedValueOnce: (value: unknown) => BunJestMockFunction;
+	mockRejectedValue: (value: unknown) => BunJestMockFunction;
+	mockRejectedValueOnce: (value: unknown) => BunJestMockFunction;
+	mockImplementation: (implementation: (...args: unknown[]) => unknown) => BunJestMockFunction;
+};
 
 declare module "bun:test" {
 	export const describe: any;
@@ -26,5 +33,8 @@ declare module "bun:test" {
 	export const test: any;
 	export const beforeEach: any;
 	export const afterEach: any;
-	export const jest: any;
+	export const jest: {
+		fn: (implementation?: (...args: unknown[]) => unknown) => BunJestMockFunction;
+		restoreAllMocks: () => void;
+	};
 }

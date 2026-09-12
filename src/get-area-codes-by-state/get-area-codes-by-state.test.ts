@@ -43,17 +43,17 @@ describe("getAreaCodesByState", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getAreaCodesByState(null)).toEqual([]);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(getAreaCodesByState(undefined)).toEqual([]);
+			// @ts-expect-error: intentionally invalid input
+			expect(getAreaCodesByState()).toEqual([]);
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getAreaCodesByState(11)).toEqual([]);
 		});
 	});

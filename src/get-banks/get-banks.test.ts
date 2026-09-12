@@ -28,8 +28,16 @@ describe("getBanks", () => {
 	});
 
 	it("should return fresh objects that do not affect subsequent calls when mutated", () => {
-		const banks = getBanks();
-		banks[0].name = "mutated";
-		expect(getBanks()[0].name).not.toBe("mutated");
+		const firstBank = getBanks().at(0);
+
+		expect(firstBank).toBeDefined();
+
+		if (firstBank === undefined) {
+			return;
+		}
+
+		firstBank.name = "mutated";
+
+		expect(getBanks().at(0)?.name).not.toBe("mutated");
 	});
 });

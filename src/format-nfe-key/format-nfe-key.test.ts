@@ -27,20 +27,20 @@ describe("formatNfeKey", () => {
 	});
 
 	test("should return an empty string for nullish input", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey(null)).toBe("");
-		// @ts-expect-error
-		expect(formatNfeKey(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey()).toBe("");
 	});
 
 	test("should not throw for other bad input types", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey(123)).toBe("123");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey({})).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey([])).toBe("");
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey(true)).toBe("");
 	});
 });

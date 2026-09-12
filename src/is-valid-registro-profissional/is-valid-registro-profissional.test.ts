@@ -4,7 +4,7 @@ import { isValidRegistroProfissional } from "./is-valid-registro-profissional";
 describe("isValidRegistroProfissional", () => {
 	describe("should return false", () => {
 		test("when value is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRegistroProfissional(null, { council: "OAB" })).toBe(false);
 		});
 
@@ -13,12 +13,12 @@ describe("isValidRegistroProfissional", () => {
 		});
 
 		test("when options is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRegistroProfissional("123456/SP", null)).toBe(false);
 		});
 
 		test("when the council is not supported (e.g. CREA)", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidRegistroProfissional("1234567890", { council: "CREA" })).toBe(false);
 		});
 

@@ -61,14 +61,16 @@ export const parseCertidao = (value: string | number): Certidao | null => {
 	const digits = sanitizeToDigits(value);
 	const typeCode = digits.charCodeAt(14) - 48;
 
-	if (typeCode < 1) return null;
+	const type: CertidaoType | undefined = CERTIDAO_TYPES[typeCode - 1];
+
+	if (type === undefined) return null;
 
 	return {
 		registryCns: digits.slice(0, 6),
 		acervo: digits.slice(6, 8),
 		service: digits.slice(8, 10),
 		year: Number(digits.slice(10, 14)),
-		type: CERTIDAO_TYPES[typeCode - 1],
+		type,
 		typeCode,
 		book: digits.slice(15, 20),
 		page: digits.slice(20, 23),

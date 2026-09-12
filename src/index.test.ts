@@ -225,7 +225,7 @@ const PUBLIC = [
 
 const NETWORK_ENTRY_POINTS = new Set(["getAddressInfoByCep", "getCepInfoByAddress"]);
 
-const BAD_INPUTS: Array<[string, unknown]> = [
+const BAD_INPUTS: [string, unknown][] = [
 	["null", null],
 	["undefined", undefined],
 	["a number", 123],
@@ -336,7 +336,7 @@ describe("Public API contract: never throws on bad input", () => {
 	const entries = Object.entries(brazilianUtils).filter(
 		([name, value]) =>
 			typeof value === "function" && !isErrorClass(name) && !NETWORK_ENTRY_POINTS.has(name),
-	) as Array<[string, (...args: unknown[]) => unknown]>;
+	) as [string, (...args: unknown[]) => unknown][];
 
 	for (const [name, fn] of entries) {
 		for (const [label, value] of BAD_INPUTS) {

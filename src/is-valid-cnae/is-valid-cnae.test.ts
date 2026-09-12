@@ -11,7 +11,7 @@ describe("isValidCnae", () => {
 	});
 
 	it("should validate a CNAE code given as a number", () => {
-		expect(isValidCnae(6201501)).toBe(true);
+		expect(isValidCnae(6_201_501)).toBe(true);
 	});
 
 	it("should validate a CNAE code with surrounding whitespace", () => {
@@ -35,7 +35,7 @@ describe("isValidCnae", () => {
 		// @ts-expect-error not a string or number
 		expect(isValidCnae(null)).toBe(false);
 		// @ts-expect-error not a string or number
-		expect(isValidCnae(undefined)).toBe(false);
+		expect(isValidCnae()).toBe(false);
 	});
 
 	it("should return false for whitespace only", () => {

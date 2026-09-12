@@ -49,6 +49,10 @@ describe("isValidVin", () => {
 			expect(isValidVin("1HGCM82633A00435")).toBe(false);
 		});
 
+		test("when it has 16 characters whose weighted sum coincidentally matches its own 9th character", () => {
+			expect(isValidVin("Z92D746W7W5N6SFH")).toBe(false);
+		});
+
 		test("when it has more than 17 characters", () => {
 			expect(isValidVin("1HGCM82633A0043522")).toBe(false);
 		});
@@ -70,34 +74,34 @@ describe("isValidVin", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidVin(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidVin(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidVin()).toBe(false);
 		});
 
 		test("when it is a number", () => {
-			// @ts-expect-error
-			expect(isValidVin(12345678901234)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidVin(12_345_678_901_234)).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidVin(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidVin(false)).toBe(false);
 		});
 
 		test("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidVin({})).toBe(false);
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidVin([])).toBe(false);
 		});
 	});

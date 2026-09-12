@@ -34,14 +34,14 @@ describe("getCities", () => {
 	});
 
 	it("should return empty array if state does not exist", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getCities("ACC")).toEqual([]);
 	});
 
 	it("should return empty array for inherited Object property names instead of throwing", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getCities("toString")).toEqual([]);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getCities("constructor")).toEqual([]);
 	});
 
@@ -54,7 +54,7 @@ describe("getCities", () => {
 		const spCities = getCities("SP");
 		spCities.push("MUTATED CITY");
 
-		expect(getCities("SP").length).toEqual(KNOWN_STATE_CITY_COUNTS.SP);
+		expect(getCities("SP").length).toEqual(KNOWN_STATE_CITY_COUNTS["SP"]);
 	});
 
 	describe("data integrity (IBGE 2022, https://cidades.ibge.gov.br/brasil/panorama)", () => {

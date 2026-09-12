@@ -54,7 +54,7 @@ describe("getCepInfoByAddress", () => {
 	};
 
 	const mockAddressListOnce = (addresses: unknown[]) =>
-		fetchMock.mockResolvedValueOnce({ json: async () => addresses, ok: true });
+		fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(addresses), ok: true });
 
 	it("should validate UF before fetching", async () => {
 		await expect(
@@ -87,14 +87,14 @@ describe("getCepInfoByAddress", () => {
 	it("should build the URL from a trimmed, accent-stripped city and street", async () => {
 		fetchMock.mockResolvedValueOnce({
 			ok: true,
-			json: async () => [],
+			json: () => Promise.resolve([]),
 		});
 
 		await getCepInfoByAddress({
 			federalUnit: "SP",
 			city: "  São Paulo  ",
 			street: "  Àvenida Paulista  ",
-		}).catch(() => undefined);
+		}).catch(() => null);
 
 		const [url] = fetchMock.mock.calls[0];
 		expect(url).toBe(
@@ -136,7 +136,7 @@ describe("getCepInfoByAddress", () => {
 
 	it("should throw specifically GetCepInfoByAddressError (not a subclass) when the response is not ok", async () => {
 		fetchMock.mockResolvedValueOnce({
-			json: async () => ({}),
+			json: () => Promise.resolve({}),
 			ok: false,
 			status: 500,
 		});
@@ -146,7 +146,9 @@ describe("getCepInfoByAddress", () => {
 			city: "São Paulo",
 			street: "Avenida Paulista",
 		}).then(
-			() => undefined,
+			() => {
+				throw new Error("expected the request to reject");
+			},
 			(error: unknown) => error,
 		);
 

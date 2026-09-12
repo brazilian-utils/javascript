@@ -2,7 +2,7 @@ import { NUMBER_TO_WORDS_MAX_VALUE } from "../_internals/number-to-words/number-
 import { describe, expect, test } from "../_internals/test/runtime";
 import { convertCurrencyToWords } from "./convert-currency-to-words";
 
-function expectAmounts(cases: ReadonlyArray<readonly [number, string]>): void {
+function expectAmounts(cases: readonly (readonly [number, string])[]): void {
 	const failures = cases
 		.map(([amount, expected]) => ({ amount, actual: convertCurrencyToWords(amount), expected }))
 		.filter(({ actual, expected }) => actual !== expected);
@@ -20,7 +20,7 @@ describe("convertCurrencyToWords", () => {
 	});
 
 	test("should return 'um real' for 1.00", () => {
-		expect(convertCurrencyToWords(1.0)).toBe("um real");
+		expect(convertCurrencyToWords(1)).toBe("um real");
 	});
 
 	test("should return 'um real e um centavo' for 1.01", () => {
@@ -28,11 +28,11 @@ describe("convertCurrencyToWords", () => {
 	});
 
 	test("should insert 'de' before 'reais' for a round million (1000000.00, brutils 'convert_real_to_text')", () => {
-		expect(convertCurrencyToWords(1000000.0)).toBe("um milhão de reais");
+		expect(convertCurrencyToWords(1_000_000)).toBe("um milhão de reais");
 	});
 
 	test("should pluralize the 'de' connector for two round million (2000000.00)", () => {
-		expect(convertCurrencyToWords(2000000.0)).toBe("dois milhões de reais");
+		expect(convertCurrencyToWords(2_000_000)).toBe("dois milhões de reais");
 	});
 
 	test("should join reais and centavos with 'e' (1523.45, brutils 'convert_real_to_text' example)", () => {
@@ -42,7 +42,7 @@ describe("convertCurrencyToWords", () => {
 	});
 
 	test("should not insert 'de' when a mil/hundred group follows the million group", () => {
-		expect(convertCurrencyToWords(1000230.0)).toBe("um milhão, duzentos e trinta reais");
+		expect(convertCurrencyToWords(1_000_230)).toBe("um milhão, duzentos e trinta reais");
 	});
 
 	test("should return only the centavos when the reais part is zero", () => {
@@ -50,7 +50,7 @@ describe("convertCurrencyToWords", () => {
 	});
 
 	test("should return only the reais when the centavos part is zero", () => {
-		expect(convertCurrencyToWords(100.0)).toBe("cem reais");
+		expect(convertCurrencyToWords(100)).toBe("cem reais");
 	});
 
 	test("should truncate (not round) to 2 decimal places", () => {
@@ -77,12 +77,12 @@ describe("convertCurrencyToWords", () => {
 		});
 
 		test("should return '' for a non-number value", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertCurrencyToWords("1523.45")).toBe("");
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertCurrencyToWords(null)).toBe("");
-			// @ts-expect-error
-			expect(convertCurrencyToWords(undefined)).toBe("");
+			// @ts-expect-error: intentionally invalid input
+			expect(convertCurrencyToWords()).toBe("");
 		});
 	});
 
@@ -140,14 +140,14 @@ describe("convertCurrencyToWords", () => {
 		});
 
 		test("should ignore an invalid case value and fall back to 'lower'", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(convertCurrencyToWords(1000, { case: "invalid" })).toBe("mil reais");
 		});
 	});
 
 	describe("literal case tables", () => {
 		test("should match a hand-written string for every amount from R$ 0.00 to R$ 1.49, cent by cent", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[0, "zero reais"],
 				[1, "um centavo"],
 				[2, "dois centavos"],
@@ -304,68 +304,68 @@ describe("convertCurrencyToWords", () => {
 		});
 
 		test("should match a hand-written string at reais boundaries, scale words and truncation cases", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[1000, "mil reais"],
 				[1000.01, "mil reais e um centavo"],
 				[1101, "mil, cento e um reais"],
 				[1101.01, "mil, cento e um reais e um centavo"],
 				[1523.45, "mil, quinhentos e vinte e três reais e quarenta e cinco centavos"],
-				[1000000, "um milhão de reais"],
-				[1000000.01, "um milhão de reais e um centavo"],
-				[2000000, "dois milhões de reais"],
-				[1000001, "um milhão e um reais"],
+				[1_000_000, "um milhão de reais"],
+				[1_000_000.01, "um milhão de reais e um centavo"],
+				[2_000_000, "dois milhões de reais"],
+				[1_000_001, "um milhão e um reais"],
 				[
-					999999999999999,
+					999_999_999_999_999,
 					"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais",
 				],
 				[1.999, "um real e noventa e nove centavos"],
 				[100.5, "cem reais e cinquenta centavos"],
 				[2, "dois reais"],
 				[10.5, "dez reais e cinquenta centavos"],
-				[999999, "novecentos e noventa e nove mil, novecentos e noventa e nove reais"],
+				[999_999, "novecentos e noventa e nove mil, novecentos e noventa e nove reais"],
 				[100, "cem reais"],
-				[1000000000, "um bilhão de reais"],
-				[2000000000, "dois bilhões de reais"],
-				[1000000000000, "um trilhão de reais"],
-				[2000000000000, "dois trilhões de reais"],
+				[1_000_000_000, "um bilhão de reais"],
+				[2_000_000_000, "dois bilhões de reais"],
+				[1_000_000_000_000, "um trilhão de reais"],
+				[2_000_000_000_000, "dois trilhões de reais"],
 			];
 			expectAmounts(cases);
 		});
 
 		test("should reproduce every published brutils 'convert_real_to_text' example (tests/test_currency.py, lowercase here because brutils capitalizes and this library leaves casing to the caller)", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[0, "zero reais"],
 				[0.01, "um centavo"],
 				[0.5, "cinquenta centavos"],
 				[1, "um real"],
 				[-50.25, "menos cinquenta reais e vinte e cinco centavos"],
 				[1523.45, "mil, quinhentos e vinte e três reais e quarenta e cinco centavos"],
-				[1000000, "um milhão de reais"],
-				[2000000, "dois milhões de reais"],
-				[1000000000, "um bilhão de reais"],
-				[2000000000, "dois bilhões de reais"],
-				[1000000000000, "um trilhão de reais"],
-				[2000000000000, "dois trilhões de reais"],
-				[1000000.45, "um milhão de reais e quarenta e cinco centavos"],
-				[2000000000.99, "dois bilhões de reais e noventa e nove centavos"],
+				[1_000_000, "um milhão de reais"],
+				[2_000_000, "dois milhões de reais"],
+				[1_000_000_000, "um bilhão de reais"],
+				[2_000_000_000, "dois bilhões de reais"],
+				[1_000_000_000_000, "um trilhão de reais"],
+				[2_000_000_000_000, "dois trilhões de reais"],
+				[1_000_000.45, "um milhão de reais e quarenta e cinco centavos"],
+				[2_000_000_000.99, "dois bilhões de reais e noventa e nove centavos"],
 				[
-					1234567890.5,
+					1_234_567_890.5,
 					"um bilhão, duzentos e trinta e quatro milhões, quinhentos e sessenta e sete mil, oitocentos e noventa reais e cinquenta centavos",
 				],
 				[0.001, "zero reais"],
 				[0.009, "zero reais"],
-				[-1000000, "menos um milhão de reais"],
-				[-2000000.5, "menos dois milhões de reais e cinquenta centavos"],
-				[1000000000.01, "um bilhão de reais e um centavo"],
-				[1000000000.99, "um bilhão de reais e noventa e nove centavos"],
+				[-1_000_000, "menos um milhão de reais"],
+				[-2_000_000.5, "menos dois milhões de reais e cinquenta centavos"],
+				[1_000_000_000.01, "um bilhão de reais e um centavo"],
+				[1_000_000_000.99, "um bilhão de reais e noventa e nove centavos"],
 				[
-					999999999999.99,
+					999_999_999_999.99,
 					"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais e noventa e nove centavos",
 				],
-				[1000000000000.01, "um trilhão de reais e um centavo"],
-				[1000000000000.99, "um trilhão de reais e noventa e nove centavos"],
+				[1_000_000_000_000.01, "um trilhão de reais e um centavo"],
+				[1_000_000_000_000.99, "um trilhão de reais e noventa e nove centavos"],
 				[
-					9999999999999.99,
+					9_999_999_999_999.99,
 					"nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais e noventa e nove centavos",
 				],
 			];
@@ -373,13 +373,13 @@ describe("convertCurrencyToWords", () => {
 		});
 
 		test("should prefix 'menos' to a hand-written string for negative amounts", () => {
-			const cases: Array<[number, string]> = [
+			const cases: [number, string][] = [
 				[-0.01, "menos um centavo"],
 				[-1, "menos um real"],
 				[-1.5, "menos um real e cinquenta centavos"],
 				[-5.5, "menos cinco reais e cinquenta centavos"],
 				[-100, "menos cem reais"],
-				[-1000000, "menos um milhão de reais"],
+				[-1_000_000, "menos um milhão de reais"],
 				[-0.001, "zero reais"],
 				[-0.009, "zero reais"],
 			];

@@ -3,28 +3,28 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
 
 export class GetAddressInfoByCepError extends Error {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepError";
 	}
 }
 
 export class GetAddressInfoByCepValidationError extends GetAddressInfoByCepError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepValidationError";
 	}
 }
 
 export class GetAddressInfoByCepNotFoundError extends GetAddressInfoByCepError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepNotFoundError";
 	}
 }
 
 export class GetAddressInfoByCepServiceError extends GetAddressInfoByCepError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepServiceError";
 	}
@@ -50,34 +50,14 @@ export type GetAddressInfoByCepOptions = {
 	providers?: CepProvider[];
 };
 
-type ViaCepResponse = {
-	cep?: string;
-	logradouro?: string;
-	complemento?: string;
-	bairro?: string;
-	localidade?: string;
-	uf?: string;
-	erro?: boolean;
-};
+type ProviderPayload = Record<string, unknown>;
 
-type WidenetResponse = {
-	code?: string;
-	status?: number;
-	ok?: boolean;
-	state?: string;
-	city?: string;
-	district?: string;
-	address?: string;
-	message?: string;
-};
+const asString = (value: unknown): string => (typeof value === "string" ? value : "");
 
-type BrasilApiResponse = {
-	cep?: string;
-	state?: string;
-	city?: string;
-	neighborhood?: string;
-	street?: string;
-	errors?: Array<{ message: string }>;
+const readPayload = async (response: Response): Promise<ProviderPayload> => {
+	const data: unknown = await response.json();
+
+	return Object.assign<ProviderPayload, unknown>({}, data);
 };
 
 const fetchViaCep = async (cep: string): Promise<AddressInfo> => {
@@ -89,20 +69,21 @@ const fetchViaCep = async (cep: string): Promise<AddressInfo> => {
 		throw new Error(`ViaCEP request failed with status ${response.status}`);
 	}
 
-	const data: ViaCepResponse = await response.json();
+	const record = await readPayload(response);
+	const cepValue = asString(record["cep"]);
 
-	if (data.erro || !data.cep) {
+	if (Boolean(record["erro"]) || cepValue === "") {
 		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
 		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
 	return {
-		cep: data.cep.replace(/\D/g, ""),
-		state: data.uf || "",
-		city: data.localidade || "",
-		neighborhood: data.bairro || "",
-		street: data.logradouro || "",
+		cep: cepValue.replaceAll(/\D/g, ""),
+		state: asString(record["uf"]),
+		city: asString(record["localidade"]),
+		neighborhood: asString(record["bairro"]),
+		street: asString(record["logradouro"]),
 	};
 };
 
@@ -117,20 +98,21 @@ const fetchWidenet = async (cep: string): Promise<AddressInfo> => {
 		throw new Error(`Widenet request failed with status ${response.status}`);
 	}
 
-	const data: WidenetResponse = await response.json();
+	const record = await readPayload(response);
+	const codeValue = asString(record["code"]);
 
-	if (data.status !== 200 || !data.ok || !data.code) {
+	if (record["status"] !== 200 || record["ok"] !== true || codeValue === "") {
 		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
 		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
 	return {
-		cep: data.code.replace(/\D/g, ""),
-		state: data.state || "",
-		city: data.city || "",
-		neighborhood: data.district || "",
-		street: data.address || "",
+		cep: codeValue.replaceAll(/\D/g, ""),
+		state: asString(record["state"]),
+		city: asString(record["city"]),
+		neighborhood: asString(record["district"]),
+		street: asString(record["address"]),
 	};
 };
 
@@ -143,20 +125,21 @@ const fetchBrasilApi = async (cep: string): Promise<AddressInfo> => {
 		throw new Error(`BrasilAPI request failed with status ${response.status}`);
 	}
 
-	const data: BrasilApiResponse = await response.json();
+	const record = await readPayload(response);
+	const cepValue = asString(record["cep"]);
 
-	if (data.errors || !data.cep) {
+	if (Boolean(record["errors"]) || cepValue === "") {
 		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
 		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
 	return {
-		cep: data.cep.replace(/\D/g, ""),
-		state: data.state || "",
-		city: data.city || "",
-		neighborhood: data.neighborhood || "",
-		street: data.street || "",
+		cep: cepValue.replaceAll(/\D/g, ""),
+		state: asString(record["state"]),
+		city: asString(record["city"]),
+		neighborhood: asString(record["neighborhood"]),
+		street: asString(record["street"]),
 	};
 };
 
@@ -215,45 +198,34 @@ export const getAddressInfoByCep = async (
 	}
 
 	let providersToUse: CepProvider[];
-	if (options?.providers !== undefined) {
+	if (options?.providers === undefined) {
+		providersToUse = ["viacep", "brasilapi"] as CepProvider[];
+	} else {
 		// An empty `options.providers` array also filters down to an empty `providersToUse` below,
 		// which already reports the same validation error, so there is no dedicated check for it here.
 		providersToUse = options.providers.filter((p) => Object.hasOwn(providerMap, p));
 		if (providersToUse.length === 0) {
 			throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
 		}
-	} else {
-		providersToUse = ["viacep", "brasilapi"] as CepProvider[];
 	}
 
+	let notFound = false;
 	const providerPromises = providersToUse.map((provider) =>
-		providerMap[provider](cepString).catch((error) => {
-			return Promise.reject({ provider, error });
+		providerMap[provider](cepString).catch((error: unknown) => {
+			if (error instanceof GetAddressInfoByCepNotFoundError) notFound = true;
+			throw error;
 		}),
 	);
 
 	try {
 		return await Promise.any(providerPromises);
 	} catch {
-		const results = await Promise.allSettled(providerPromises);
-
-		// Stryker disable next-line ConditionalExpression,MethodExpression: this line is only
-		// reached after `Promise.any` above has rejected, which by its contract only happens once
-		// every input promise has already rejected, so every result here is already "rejected"; the
-		// filter exists to narrow the element type from `PromiseSettledResult` to
-		// `PromiseRejectedResult` for the checks below, not to exclude anything at runtime.
-		const rejections = results.filter((result) => result.status === "rejected");
-
-		const networkErrors = rejections.filter(
-			(rejection) => !(rejection.reason.error instanceof GetAddressInfoByCepNotFoundError),
-		);
-
-		if (networkErrors.length === rejections.length) {
-			throw new GetAddressInfoByCepServiceError(
-				"Todos os serviços estão fora de serviço ou indisponíveis",
-			);
+		if (notFound) {
+			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
 		}
 
-		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
+		throw new GetAddressInfoByCepServiceError(
+			"Todos os serviços estão fora de serviço ou indisponíveis",
+		);
 	}
 };

@@ -7,7 +7,7 @@ export type FetchWithRetryOptions = RequestInit & {
 	retryDelayMs?: number;
 };
 
-const RETRYABLE_ERROR_CODES = [
+const RETRYABLE_ERROR_CODES = new Set([
 	"UND_ERR_SOCKET",
 	"UND_ERR_CONNECT_TIMEOUT",
 	"UND_ERR_HEADERS_TIMEOUT",
@@ -17,7 +17,7 @@ const RETRYABLE_ERROR_CODES = [
 	"EHOSTUNREACH",
 	"ENETUNREACH",
 	"ETIMEDOUT",
-];
+]);
 
 const getErrorCode = (error: unknown): string | undefined => {
 	if (isNullish(error) || typeof error !== "object") return undefined;
@@ -43,7 +43,10 @@ const getErrorCode = (error: unknown): string | undefined => {
 const isRetryableFetchError = (error: unknown): boolean => {
 	const code = getErrorCode(error);
 
-	if (code && RETRYABLE_ERROR_CODES.includes(code)) {
+	// Stryker disable next-line ConditionalExpression: RETRYABLE_ERROR_CODES.has() only ever
+	// matches an exact string, so an undefined code reaching that check behaves identically to
+	// skipping it; the undefined check below exists only to satisfy Set<string>#has's parameter type.
+	if (code !== undefined && RETRYABLE_ERROR_CODES.has(code)) {
 		return true;
 	}
 
@@ -55,7 +58,36 @@ const isRetryableFetchError = (error: unknown): boolean => {
 };
 
 const wait = (ms: number): Promise<void> =>
-	ms <= 0 ? Promise.resolve() : new Promise((resolve) => setTimeout(resolve, ms));
+	ms <= 0
+		? Promise.resolve()
+		: new Promise((resolve) => {
+				setTimeout(resolve, ms);
+			});
+
+const attemptFetch = async (
+	input: string | URL | Request,
+	init: RequestInit,
+	retries: number,
+	retryDelayMs: number,
+	attempt: number,
+	lastError?: unknown,
+): Promise<Response> => {
+	if (attempt > retries) {
+		throw lastError;
+	}
+
+	try {
+		return await fetch(input, init);
+	} catch (error) {
+		if (attempt === retries || !isRetryableFetchError(error)) {
+			throw error;
+		}
+
+		await wait(retryDelayMs * (attempt + 1));
+
+		return attemptFetch(input, init, retries, retryDelayMs, attempt + 1, error);
+	}
+};
 
 /**
  * Performs a `fetch` retrying transient network failures with a linear backoff.
@@ -73,25 +105,7 @@ const wait = (ms: number): Promise<void> =>
  * await fetchWithRetry("https://viacep.com.br/ws/01001000/json/", { retries: 1, retryDelayMs: 0 });
  * ```
  */
-export const fetchWithRetry = async (
+export const fetchWithRetry = (
 	input: string | URL | Request,
 	{ retries = 2, retryDelayMs = 250, ...init }: FetchWithRetryOptions = {},
-): Promise<Response> => {
-	let lastError: unknown;
-
-	for (let attempt = 0; attempt <= retries; attempt += 1) {
-		try {
-			return await fetch(input, init);
-		} catch (error) {
-			lastError = error;
-
-			if (attempt === retries || !isRetryableFetchError(error)) {
-				throw error;
-			}
-
-			await wait(retryDelayMs * (attempt + 1));
-		}
-	}
-
-	throw lastError;
-};
+): Promise<Response> => attemptFetch(input, init, retries, retryDelayMs, 0);

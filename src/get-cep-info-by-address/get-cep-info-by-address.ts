@@ -3,21 +3,21 @@ import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry"
 import { removeAccents } from "../remove-accents/remove-accents";
 
 export class GetCepInfoByAddressError extends Error {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetCepInfoByAddressError";
 	}
 }
 
 export class GetCepInfoByAddressValidationError extends GetCepInfoByAddressError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetCepInfoByAddressValidationError";
 	}
 }
 
 export class GetCepInfoByAddressNotFoundError extends GetCepInfoByAddressError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetCepInfoByAddressNotFoundError";
 	}
@@ -59,6 +59,10 @@ const isStateCode = (value: string): value is StateCode =>
 	STATES.some((state) => state.code === value);
 
 const normalizeAddressPart = (value: string): string => removeAccents(value).trim();
+
+// The ViaCEP response shape is trusted structurally (as the original implementation always
+// was): every element the array holds is assumed to already match `CepAddressInfo`.
+const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Array.isArray(value);
 
 /**
  * Looks every CEP of a Brazilian street up on the ViaCEP API.
@@ -105,9 +109,9 @@ export const getCepInfoByAddress = async ({
 		throw new GetCepInfoByAddressError(`ViaCEP request failed with status ${response.status}`);
 	}
 
-	const data: CepAddressInfo[] = await response.json();
+	const data: unknown = await response.json();
 
-	if (!Array.isArray(data) || data.length === 0) {
+	if (!isCepAddressInfoArray(data) || data.length === 0) {
 		throw new GetCepInfoByAddressNotFoundError(`${normalizedUf} - ${city} - ${street}`);
 	}
 

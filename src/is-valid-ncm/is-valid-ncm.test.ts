@@ -11,7 +11,7 @@ describe("isValidNcm", () => {
 	});
 
 	it("should validate an NCM code given as a number", () => {
-		expect(isValidNcm(22030000)).toBe(true);
+		expect(isValidNcm(22_030_000)).toBe(true);
 	});
 
 	it("should validate a leading zero NCM code (cavalos reprodutores de raça pura)", () => {
@@ -20,7 +20,7 @@ describe("isValidNcm", () => {
 	});
 
 	it("should return false for a number that lost a leading zero (1012100 is not 01012100)", () => {
-		expect(isValidNcm(1012100)).toBe(false);
+		expect(isValidNcm(1_012_100)).toBe(false);
 	});
 
 	it("should validate an NCM code with surrounding whitespace", () => {
@@ -44,7 +44,7 @@ describe("isValidNcm", () => {
 		// @ts-expect-error not a string or number
 		expect(isValidNcm(null)).toBe(false);
 		// @ts-expect-error not a string or number
-		expect(isValidNcm(undefined)).toBe(false);
+		expect(isValidNcm()).toBe(false);
 	});
 
 	it("should return false for whitespace only", () => {

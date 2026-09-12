@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 type NcmEntry = {
 	Codigo: string;
@@ -17,7 +16,22 @@ type NcmResponse = {
 	Nomenclaturas: NcmEntry[];
 };
 
-const main = async () => {
+const isNcmEntry = (value: unknown): value is NcmEntry =>
+	typeof value === "object" &&
+	value !== null &&
+	"Codigo" in value &&
+	typeof value.Codigo === "string" &&
+	"Data_Fim" in value &&
+	typeof value.Data_Fim === "string";
+
+const isNcmResponse = (value: unknown): value is NcmResponse =>
+	typeof value === "object" &&
+	value !== null &&
+	"Nomenclaturas" in value &&
+	Array.isArray(value.Nomenclaturas) &&
+	value.Nomenclaturas.every((entry) => isNcmEntry(entry));
+
+const main = async (): Promise<void> => {
 	const response = await fetchWithRetry(
 		"https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json?perfil=PUBLICO",
 	);
@@ -26,15 +40,19 @@ const main = async () => {
 		throw new Error(`Siscomex NCM request failed with status ${response.status}`);
 	}
 
-	const json: NcmResponse = await response.json();
+	const json: unknown = await response.json();
+
+	if (!isNcmResponse(json)) {
+		throw new Error("Siscomex NCM payload is not a Nomenclaturas response");
+	}
 
 	const codes = json.Nomenclaturas.filter(
 		(entry) => entry.Data_Fim === "31/12/9999" && /^[\d.]{10}$/.test(entry.Codigo),
 	)
-		.map((entry) => entry.Codigo.replace(/\D/g, ""))
+		.map((entry) => entry.Codigo.replaceAll(/\D/g, ""))
 		.filter((code) => code.length === 8);
 
-	const uniqueSortedCodes = Array.from(new Set(codes)).sort();
+	const uniqueSortedCodes = [...new Set(codes)].sort();
 
 	await writeFile(
 		resolve(scriptsDir, "..", "./src/is-valid-ncm/constants.ts"),

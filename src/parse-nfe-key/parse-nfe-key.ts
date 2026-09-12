@@ -66,7 +66,9 @@ export const parseNfeKey = (value: string): NfeKey | null => {
 
 	const uf = digits.slice(0, 2);
 
-	if (!Object.hasOwn(IBGE_UF_CODES, uf)) return null;
+	const state = IBGE_UF_CODES[uf];
+
+	if (state === undefined) return null;
 
 	const month = Number(digits.slice(4, 6));
 
@@ -88,7 +90,7 @@ export const parseNfeKey = (value: string): NfeKey | null => {
 	if (mod11(digits.slice(0, 43), { variant: "arrecadacao" }) !== checkDigit) return null;
 
 	return {
-		state: IBGE_UF_CODES[uf],
+		state,
 		year: 2000 + Number(digits.slice(2, 4)),
 		month,
 		taxId: digits.slice(6, 20),

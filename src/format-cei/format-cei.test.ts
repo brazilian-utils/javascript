@@ -7,7 +7,7 @@ describe("formatCei", () => {
 	});
 
 	test("should format a number input", () => {
-		expect(formatCei(249859674386)).toBe("24.985.96743/86");
+		expect(formatCei(249_859_674_386)).toBe("24.985.96743/86");
 	});
 
 	test("should format progressively as digits are typed", () => {
@@ -36,12 +36,12 @@ describe("formatCei", () => {
 	});
 
 	test("should return an empty string for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatCei(null)).toBe("");
 	});
 
 	test("should return an empty string for undefined", () => {
-		// @ts-expect-error
-		expect(formatCei(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCei()).toBe("");
 	});
 });

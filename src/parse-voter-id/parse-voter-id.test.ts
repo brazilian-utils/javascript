@@ -23,10 +23,10 @@ describe("parseVoterId", () => {
 	});
 
 	it("should return an empty string for null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(parseVoterId(null)).toBe("");
-		// @ts-expect-error
-		expect(parseVoterId(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(parseVoterId()).toBe("");
 	});
 
 	it("should ignore digits after the 12-digit length when the 9th/10th digits are not SP/MG, even with extra digits", () => {

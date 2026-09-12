@@ -11,9 +11,9 @@ describe("formatLegalNature", () => {
 	});
 
 	it("should return an empty string for null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatLegalNature(null)).toBe("");
-		// @ts-expect-error
-		expect(formatLegalNature(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatLegalNature()).toBe("");
 	});
 });

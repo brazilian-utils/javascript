@@ -4,17 +4,17 @@ import { isValidCaepf } from "./is-valid-caepf";
 describe("isValidCaepf", () => {
 	describe("should return false", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCaepf(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidCaepf(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCaepf()).toBe(false);
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCaepf([])).toBe(false);
 		});
 
@@ -74,7 +74,7 @@ describe("isValidCaepf", () => {
 		});
 
 		test("for a number input", () => {
-			expect(isValidCaepf(29311861000184)).toBe(true);
+			expect(isValidCaepf(29_311_861_000_184)).toBe(true);
 		});
 
 		test("for a whitespace mask and surrounding whitespace", () => {

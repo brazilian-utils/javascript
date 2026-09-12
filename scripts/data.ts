@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 const run = (command: string, args: string[]): Promise<number | null> =>
 	new Promise((resolveExit) => {
@@ -12,8 +11,12 @@ const run = (command: string, args: string[]): Promise<number | null> =>
 			stdio: "inherit",
 		});
 
-		child.on("close", (code) => resolveExit(code));
-		child.on("error", () => resolveExit(1));
+		child.on("close", (code) => {
+			resolveExit(code);
+		});
+		child.on("error", () => {
+			resolveExit(1);
+		});
 	});
 
 const generators = [

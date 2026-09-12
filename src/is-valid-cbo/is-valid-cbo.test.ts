@@ -11,7 +11,7 @@ describe("isValidCbo", () => {
 	});
 
 	it("should validate a CBO code given as a number", () => {
-		expect(isValidCbo(212405)).toBe(true);
+		expect(isValidCbo(212_405)).toBe(true);
 	});
 
 	it("should validate a CBO code with surrounding whitespace", () => {
@@ -35,7 +35,7 @@ describe("isValidCbo", () => {
 		// @ts-expect-error not a string or number
 		expect(isValidCbo(null)).toBe(false);
 		// @ts-expect-error not a string or number
-		expect(isValidCbo(undefined)).toBe(false);
+		expect(isValidCbo()).toBe(false);
 	});
 
 	it("should return false for whitespace only", () => {

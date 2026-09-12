@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { inflateSync } from "node:zlib";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 const SOURCE_URL =
 	"https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf";
@@ -51,7 +50,9 @@ const inflateStreams = (pdf: Buffer): string[] => {
 
 		try {
 			streams.push(inflateSync(pdf.subarray(contentStart, end)).toString("latin1"));
-		} catch {}
+		} catch (error) {
+			if (!(error instanceof Error)) throw error;
+		}
 
 		cursor = end + "endstream".length;
 	}
@@ -60,38 +61,72 @@ const inflateStreams = (pdf: Buffer): string[] => {
 };
 
 const unescapePdfString = (value: string): string =>
-	value.replace(/\\([0-7]{1,3})|\\(.)/g, (_match, octal?: string, char?: string) => {
-		if (octal) return String.fromCharCode(Number.parseInt(octal, 8));
+	value.replaceAll(/\\([0-7]{1,3})|\\(.)/g, (_match, octal?: string, char?: string) => {
+		if (octal !== undefined) return String.fromCharCode(Number.parseInt(octal, 8));
 		if (char === "n") return "\n";
 		if (char === "r") return "\r";
 		if (char === "t") return "\t";
 		return char ?? "";
 	});
 
+const extractBracketText = (body: string): string => {
+	let text = "";
+
+	for (const array of body.matchAll(/\[((?:[^[\]\\]|\\.)*)\]\s*TJ/g)) {
+		const arrayContent = array[1];
+
+		if (arrayContent === undefined) continue;
+
+		for (const chunk of arrayContent.matchAll(/\(((?:[^()\\]|\\.)*)\)/g)) {
+			const chunkText = chunk[1];
+
+			if (chunkText === undefined) continue;
+
+			text += unescapePdfString(chunkText);
+		}
+	}
+
+	return text;
+};
+
+const extractParenthesizedText = (body: string): string => {
+	let text = "";
+
+	for (const chunk of body.matchAll(/\(((?:[^()\\]|\\.)*)\)\s*Tj/g)) {
+		const chunkText = chunk[1];
+
+		if (chunkText === undefined) continue;
+
+		text += unescapePdfString(chunkText);
+	}
+
+	return text;
+};
+
 const extractLines = (streams: string[]): string[] => {
 	const lines: string[] = [];
 
 	for (const stream of streams) {
-		const rows = new Map<number, Array<[number, string]>>();
+		const rows = new Map<number, [number, string][]>();
 
 		for (const block of stream.matchAll(/BT([\s\S]*?)ET/g)) {
 			const body = block[1];
+
+			if (body === undefined) continue;
+
 			const matrix = [...body.matchAll(/([-\d.]+)\s+([-\d.]+)\s+Tm/g)].pop();
 			if (!matrix) continue;
 
-			let text = "";
-			for (const array of body.matchAll(/\[((?:[^[\]\\]|\\.)*)\]\s*TJ/g)) {
-				for (const chunk of array[1].matchAll(/\(((?:[^()\\]|\\.)*)\)/g)) {
-					text += unescapePdfString(chunk[1]);
-				}
-			}
-			for (const chunk of body.matchAll(/\(((?:[^()\\]|\\.)*)\)\s*Tj/g)) {
-				text += unescapePdfString(chunk[1]);
-			}
+			const [, rawX, rawY] = matrix;
+
+			if (rawX === undefined || rawY === undefined) continue;
+
+			const text = extractBracketText(body) + extractParenthesizedText(body);
+
 			if (!text) continue;
 
-			const x = Number.parseFloat(matrix[1]);
-			const y = Math.round(Number.parseFloat(matrix[2]) * 10) / 10;
+			const x = Number.parseFloat(rawX);
+			const y = Math.round(Number.parseFloat(rawY) * 10) / 10;
 
 			const row = rows.get(y) ?? [];
 			row.push([x, text]);
@@ -119,8 +154,14 @@ const parseLegalNatures = (lines: string[]): Record<string, string> => {
 		const match = line.match(/^\s*(\d{3})-(\d)\s*-\s*(.+?)\s*$/);
 		if (!match) continue;
 
-		const code = `${match[1]}${match[2]}`;
-		const description = match[3].replace(/\s+/g, " ").trim();
+		const [, codePrefix, codeSuffix, rawDescription] = match;
+
+		if (codePrefix === undefined || codeSuffix === undefined || rawDescription === undefined) {
+			continue;
+		}
+
+		const code = `${codePrefix}${codeSuffix}`;
+		const description = rawDescription.replaceAll(/\s+/g, " ").trim();
 
 		legalNatures[code] = TYPO_FIXES[description] ?? description;
 	}
@@ -133,7 +174,7 @@ const stringifyEntries = (entries: Record<string, string>): string =>
 		.map(([code, description]) => `\t${JSON.stringify(code)}: ${JSON.stringify(description)},`)
 		.join("\n");
 
-const main = async () => {
+const main = async (): Promise<void> => {
 	const response = await fetchWithRetry(SOURCE_URL);
 
 	if (!response.ok) {

@@ -4,17 +4,17 @@ import { isValidCno } from "./is-valid-cno";
 describe("isValidCno", () => {
 	describe("should return false", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCno(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidCno(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCno()).toBe(false);
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCno([])).toBe(false);
 		});
 
@@ -65,7 +65,7 @@ describe("isValidCno", () => {
 
 		test("for 401800097960, whose check digit is 0 (Receita Federal CNO open dataset, Frutal/MG)", () => {
 			expect(isValidCno("401800097960")).toBe(true);
-			expect(isValidCno(401800097960)).toBe(true);
+			expect(isValidCno(401_800_097_960)).toBe(true);
 		});
 
 		test("for 512070915160, whose check digit is 0 (Receita Federal CNO open dataset, Capitólio/MG)", () => {

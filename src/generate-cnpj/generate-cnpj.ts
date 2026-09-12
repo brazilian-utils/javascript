@@ -8,7 +8,7 @@ const BASE_LENGTH = 12;
 const VALID_CNPJ_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const generateRandomCnpjChar = (): string =>
-	VALID_CNPJ_CHARS[Math.floor(Math.random() * VALID_CNPJ_CHARS.length)];
+	VALID_CNPJ_CHARS.charAt(Math.floor(Math.random() * VALID_CNPJ_CHARS.length));
 
 const generateAlphanumericCnpjBase = (): string => {
 	let base = "";
@@ -28,13 +28,8 @@ const generateNonRepeatedBase = (generate: () => string): string => {
 
 const charToCnpjValue = (char: string): number => char.charCodeAt(0) - 48;
 
-const generateAlphanumericChecksum = (cnpj: string, weights: number[]): number => {
-	let sum = 0;
-	for (let i = 0; i < cnpj.length; i++) {
-		sum += charToCnpjValue(cnpj[i]) * weights[i];
-	}
-	return sum;
-};
+const generateAlphanumericChecksum = (cnpj: string, weights: number[]): number =>
+	weights.reduce((sum, weight, index) => sum + charToCnpjValue(cnpj.charAt(index)) * weight, 0);
 
 const calculateCheckDigit = (base: string, weights: number[]): string => {
 	const mod = generateChecksum({ base, weight: weights }) % 11;

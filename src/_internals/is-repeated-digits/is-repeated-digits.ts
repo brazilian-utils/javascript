@@ -11,5 +11,8 @@
  * isRepeatedDigits(""); // false
  * ```
  */
-export const isRepeatedDigits = (value: string): boolean =>
-	value.length > 0 && value === value[0].repeat(value.length);
+export const isRepeatedDigits = (value: string): boolean => {
+	const firstChar = value[0];
+
+	return firstChar !== undefined && value === firstChar.repeat(value.length);
+};

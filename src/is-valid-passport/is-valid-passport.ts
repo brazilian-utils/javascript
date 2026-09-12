@@ -11,8 +11,8 @@ import { PASSPORT_REGEX } from "./constants";
  * This function does not verify if the input is a real passport number,
  * as there are no checksums for the Brazilian passport.
  *
- * @param passport - The string containing the passport number to be checked.
- * @returns True if the passport number is valid (2 letters followed by 6 digits).
+ * @param {string|number} passport - The string containing the passport number to be checked.
+ * @returns {boolean} True if the passport number is valid (2 letters followed by 6 digits).
  *
  * @example
  * isValidPassport("AB123456") // true

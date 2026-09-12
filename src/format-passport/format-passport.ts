@@ -5,8 +5,8 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * Formats a Brazilian passport number for display.
  * Converts to uppercase and removes all non-alphanumeric characters.
  *
- * @param passport - A Brazilian passport number (any case, possibly with symbols).
- * @returns The formatted passport number (uppercase, no symbols), or an empty string if invalid.
+ * @param {string} passport - A Brazilian passport number (any case, possibly with symbols).
+ * @returns {string} The formatted passport number (uppercase, no symbols), or an empty string if invalid.
  *
  * @example
  * formatPassport("ab123456") // "AB123456"

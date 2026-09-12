@@ -4,13 +4,13 @@ import { formatCertidao } from "./format-certidao";
 describe("formatCertidao", () => {
 	describe("should return an empty string", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(formatCertidao(null)).toBe("");
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(formatCertidao(undefined)).toBe("");
+			// @ts-expect-error: intentionally invalid input
+			expect(formatCertidao()).toBe("");
 		});
 
 		test("when it is an empty string", () => {
@@ -60,7 +60,7 @@ describe("formatCertidao", () => {
 
 	describe("should accept a number", () => {
 		test("for a value short enough to be an exact integer", () => {
-			expect(formatCertidao(104539015520)).toBe("104539 01 55 20");
+			expect(formatCertidao(104_539_015_520)).toBe("104539 01 55 20");
 		});
 	});
 });

@@ -31,18 +31,18 @@ describe("isHoliday", () => {
 	});
 
 	it("should return false when targetDate is a string instead of a Date", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(isHoliday({ targetDate: "2024-01-01" })).toBe(false);
 	});
 
 	it('should return false when options is a function, even one carrying a targetDate property (typeof options !== "object" must reject it, not just isNullish)', () => {
-		const fakeOptions = Object.assign(() => {}, { targetDate: new Date(2024, 0, 1) });
+		const fakeOptions = Object.assign(() => null, { targetDate: new Date(2024, 0, 1) });
 
 		expect(isHoliday(fakeOptions)).toBe(false);
 	});
 
 	it("should return false when stateCode is not a string", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(isHoliday({ targetDate: new Date(2024, 0, 1), stateCode: 123 })).toBe(false);
 	});
 
@@ -51,9 +51,9 @@ describe("isHoliday", () => {
 	});
 
 	it("should ignore an unknown stateCode and fall back to national holidays", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(isHoliday({ targetDate: new Date(2024, 0, 1), stateCode: "XX" })).toBe(true);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(isHoliday({ targetDate: new Date(2024, 5, 10), stateCode: "XX" })).toBe(false);
 	});
 

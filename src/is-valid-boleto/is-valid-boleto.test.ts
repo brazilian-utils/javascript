@@ -9,13 +9,13 @@ describe("isValidBoleto", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidBoleto(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidBoleto()).toBe(false);
 		});
 
 		test(`when length is less than ${BOLETO_LENGTH}`, () => {
@@ -23,19 +23,19 @@ describe("isValidBoleto", () => {
 		});
 
 		test("when is array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto([])).toBe(false);
 		});
 
 		test("when is object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto({})).toBe(false);
 		});
 
 		test("when is boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto(false)).toBe(false);
 		});
 

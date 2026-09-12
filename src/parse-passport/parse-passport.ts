@@ -4,8 +4,8 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
 /**
  * Removes non-alphanumeric characters from a passport number, uppercases it, and caps it to 8 characters.
  *
- * @param passport - The string containing a passport number.
- * @returns The normalized passport number.
+ * @param {string} passport - The string containing a passport number.
+ * @returns {string} The normalized passport number.
  *
  * @example
  * parsePassport("Ab123456") // "AB123456"

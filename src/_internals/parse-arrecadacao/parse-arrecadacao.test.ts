@@ -72,7 +72,7 @@ describe("parseArrecadacao", () => {
 				barcode: MOD11_BARCODE,
 				segment: 5,
 				hasEffectiveValue: true,
-				amount: 4605246,
+				amount: 4_605_246,
 			});
 		});
 

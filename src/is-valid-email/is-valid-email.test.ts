@@ -8,13 +8,13 @@ describe("isValidEmail", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidEmail(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidEmail(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidEmail()).toBe(false);
 		});
 
 		test("when it is missing @", () => {

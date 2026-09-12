@@ -8,7 +8,7 @@ import { CHECK_DIGIT_POSITION, CONVERT_POSITIONS, PARTIALS } from "./constants";
 
 const isValidPartials = (digits: string): boolean => {
 	for (const { start, end, checkIdx } of PARTIALS) {
-		const partial = digits.substring(start, end);
+		const partial = digits.slice(start, end);
 		const expected = mod10(partial);
 		if (digits.charCodeAt(checkIdx) - 48 !== expected) return false;
 	}
@@ -18,14 +18,14 @@ const isValidPartials = (digits: string): boolean => {
 const parseToBoleto = (digits: string): string => {
 	let result = "";
 	for (const [start, end] of CONVERT_POSITIONS) {
-		result += digits.substring(start, end);
+		result += digits.slice(start, end);
 	}
 	return result;
 };
 
 const isValidCheckDigit = (boleto: string): boolean => {
 	const withoutCheckDigit =
-		boleto.substring(0, CHECK_DIGIT_POSITION) + boleto.substring(CHECK_DIGIT_POSITION + 1);
+		boleto.slice(0, CHECK_DIGIT_POSITION) + boleto.slice(CHECK_DIGIT_POSITION + 1);
 	const expected = mod11(withoutCheckDigit);
 	return boleto.charCodeAt(CHECK_DIGIT_POSITION) - 48 === expected;
 };

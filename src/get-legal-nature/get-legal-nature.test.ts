@@ -57,6 +57,6 @@ describe("getLegalNature", () => {
 
 	it("should return null for undefined", () => {
 		// @ts-expect-error not a string or number
-		expect(getLegalNature(undefined)).toBeNull();
+		expect(getLegalNature()).toBeNull();
 	});
 });

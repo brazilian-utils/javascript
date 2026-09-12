@@ -25,5 +25,5 @@ export const isValidLegalNature = (code: string): boolean => {
 
 	const normalized = code.replace(MASK_REGEX, "");
 
-	return normalized in LEGAL_NATURE;
+	return Object.hasOwn(LEGAL_NATURE, normalized);
 };

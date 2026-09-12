@@ -33,7 +33,7 @@ export const isValidPis = (pis: string): boolean => {
 
 	if (RESERVED_NUMBERS.includes(digits)) return false;
 
-	const base = digits.substring(0, PIS_LENGTH - 1);
+	const base = digits.slice(0, PIS_LENGTH - 1);
 	const checkDigit = digits.charCodeAt(PIS_LENGTH - 1) - 48;
 
 	const weightedChecksum = generateChecksum({ base, weight: PIS_WEIGHTS });

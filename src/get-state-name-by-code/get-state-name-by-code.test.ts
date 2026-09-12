@@ -36,17 +36,17 @@ describe("getStateNameByCode", () => {
 	});
 
 	it("should return null for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getStateNameByCode(null)).toBeNull();
 	});
 
 	it("should return null for undefined", () => {
-		// @ts-expect-error
-		expect(getStateNameByCode(undefined)).toBeNull();
+		// @ts-expect-error: intentionally invalid input
+		expect(getStateNameByCode()).toBeNull();
 	});
 
 	it("should return null for a number", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getStateNameByCode(11)).toBeNull();
 	});
 });

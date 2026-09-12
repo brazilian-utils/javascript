@@ -9,13 +9,13 @@ import {
 
 const verifyCheckDigit = (value: string): boolean => {
 	const verificationDigits = Number.parseInt(
-		value.substring(CHECK_DIGIT_START_POSITION, CHECK_DIGIT_START_POSITION + CHECK_DIGIT_LENGTH),
+		value.slice(CHECK_DIGIT_START_POSITION, CHECK_DIGIT_START_POSITION + CHECK_DIGIT_LENGTH),
 		10,
 	);
 
 	const withoutCheck =
-		value.substring(0, CHECK_DIGIT_START_POSITION) +
-		value.substring(CHECK_DIGIT_START_POSITION + CHECK_DIGIT_LENGTH);
+		value.slice(0, CHECK_DIGIT_START_POSITION) +
+		value.slice(CHECK_DIGIT_START_POSITION + CHECK_DIGIT_LENGTH);
 
 	let digits1to11 = 0;
 	for (let i = 0; i < 11; i++) {

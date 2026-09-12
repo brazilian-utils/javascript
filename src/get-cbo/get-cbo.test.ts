@@ -17,14 +17,14 @@ describe("getCbo", () => {
 	});
 
 	it("should return the occupation for a code given as a number", () => {
-		expect(getCbo(212405)).toEqual({
+		expect(getCbo(212_405)).toEqual({
 			code: "212405",
 			title: "Analista de desenvolvimento de sistemas",
 		});
 	});
 
 	it("should pad a number to six digits so codes starting with zero resolve (0102-05, Oficial da Aeronáutica)", () => {
-		expect(getCbo(10205)).toEqual({ code: "010205", title: "Oficial da Aeronáutica" });
+		expect(getCbo(10_205)).toEqual({ code: "010205", title: "Oficial da Aeronáutica" });
 		expect(getCbo("10205")).toBeNull();
 	});
 
@@ -51,7 +51,7 @@ describe("getCbo", () => {
 		// @ts-expect-error not a string or number
 		expect(getCbo(null)).toBeNull();
 		// @ts-expect-error not a string or number
-		expect(getCbo(undefined)).toBeNull();
+		expect(getCbo()).toBeNull();
 	});
 
 	it("should return null for whitespace only", () => {

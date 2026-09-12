@@ -65,6 +65,11 @@ describe("isValidCst", () => {
 		expect(isValidCst("00", { tax: "iss" })).toBe(false);
 	});
 
+	it("should return false for an unknown tax even when the code is a valid pis/cofins code", () => {
+		// @ts-expect-error not a valid tax
+		expect(isValidCst("07", { tax: "iss" })).toBe(false);
+	});
+
 	describe("without options (tax omitted)", () => {
 		it("should return true when the code is a valid icms combination", () => {
 			expect(isValidCst("110")).toBe(true);
@@ -83,7 +88,7 @@ describe("isValidCst", () => {
 		});
 
 		it("should return true when options is undefined", () => {
-			expect(isValidCst("110", undefined)).toBe(true);
+			expect(isValidCst("110")).toBe(true);
 		});
 
 		it("should return true when options.tax is undefined", () => {

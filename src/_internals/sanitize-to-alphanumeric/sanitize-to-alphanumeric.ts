@@ -14,5 +14,5 @@
 export const sanitizeToAlphanumeric = (value: string | number): string =>
 	value
 		.toString()
-		.replace(/[^A-Za-z0-9]/g, "")
+		.replaceAll(/[^A-Za-z0-9]/g, "")
 		.toUpperCase();

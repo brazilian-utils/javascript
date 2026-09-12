@@ -6,7 +6,7 @@ const DEFAULT_FORMAT = "LLLNLNN";
 
 export type GenerateLicensePlateFormat = LicensePlateFormat;
 
-const randomLetter = (): string => LETTERS[Math.floor(Math.random() * LETTERS.length)];
+const randomLetter = (): string => LETTERS.charAt(Math.floor(Math.random() * LETTERS.length));
 
 const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
 
@@ -34,8 +34,11 @@ export const generateLicensePlate = (
 ): string => {
 	const safeFormat = typeof format === "string" ? format : DEFAULT_FORMAT;
 
-	return safeFormat
-		.split("")
-		.map((char) => (char === "L" ? randomLetter() : randomDigit()))
-		.join("");
+	let plate = "";
+
+	for (let i = 0; i < safeFormat.length; i++) {
+		plate += safeFormat.charAt(i) === "L" ? randomLetter() : randomDigit();
+	}
+
+	return plate;
 };

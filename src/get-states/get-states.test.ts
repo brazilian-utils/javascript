@@ -49,12 +49,19 @@ describe("getStates", () => {
 	});
 
 	it("should return unique deep copies so mutating the result does not leak between calls", () => {
-		const first = getStates();
+		const firstState = getStates().at(0);
 
-		Object.assign(first[0], { name: "X" });
+		expect(firstState).toBeDefined();
+
+		if (firstState === undefined) {
+			return;
+		}
+
+		Object.assign(firstState, { name: "X" });
 
 		const second = getStates();
-		expect(second[0].name).not.toBe("X");
-		expect(second).toEqual(DATA.map((state) => ({ ...state })));
+
+		expect(second.at(0)?.name).not.toBe("X");
+		expect(second).toEqual(DATA.map((state) => Object.assign({}, state)));
 	});
 });

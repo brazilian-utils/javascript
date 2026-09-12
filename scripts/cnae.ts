@@ -1,26 +1,37 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 type CnaeSubclass = {
 	id: string;
 	descricao: string;
 };
 
-const main = async () => {
+const isCnaeSubclass = (value: unknown): value is CnaeSubclass =>
+	typeof value === "object" &&
+	value !== null &&
+	"id" in value &&
+	typeof value.id === "string" &&
+	"descricao" in value &&
+	typeof value.descricao === "string";
+
+const main = async (): Promise<void> => {
 	const response = await fetchWithRetry("https://servicodados.ibge.gov.br/api/v2/cnae/subclasses");
 
 	if (!response.ok) {
 		throw new Error(`IBGE CNAE request failed with status ${response.status}`);
 	}
 
-	const json: CnaeSubclass[] = await response.json();
+	const json: unknown = await response.json();
+
+	if (!Array.isArray(json) || !json.every((entry) => isCnaeSubclass(entry))) {
+		throw new Error("IBGE CNAE payload is not an array of subclass entries");
+	}
 
 	const entries = json
 		.filter((subclass) => /^\d{7}$/.test(subclass.id))

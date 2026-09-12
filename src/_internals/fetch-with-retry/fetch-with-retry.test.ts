@@ -75,9 +75,9 @@ describe("fetchWithRetry", () => {
 	});
 
 	it("retries when a top level error code is transient", async () => {
-		await expectRetrySucceeds(
-			mockFetchRejectingOnceWith(Object.assign(new Error("boom"), { code: "ECONNRESET" })),
-		);
+		const error = Object.assign(new Error("boom"), { code: "ECONNRESET" });
+
+		await expectRetrySucceeds(mockFetchRejectingOnceWith(error));
 	});
 
 	it("retries when the error message says fetch failed", async () => {
@@ -89,7 +89,9 @@ describe("fetchWithRetry", () => {
 		globalThis.fetch = fetchMock;
 
 		const rejection = await fetchWithRetry("https://example.com", { retryDelayMs: 0 }).then(
-			() => undefined,
+			() => {
+				throw new Error("expected the fetch to reject");
+			},
 			(error: unknown) => error,
 		);
 
@@ -102,7 +104,9 @@ describe("fetchWithRetry", () => {
 		globalThis.fetch = fetchMock;
 
 		const rejection = await fetchWithRetry("https://example.com", { retries: -1 }).then(
-			() => undefined,
+			() => {
+				throw new Error("expected the fetch to reject");
+			},
 			(error: unknown) => error,
 		);
 
@@ -123,11 +127,13 @@ describe("fetchWithRetry", () => {
 			"ETIMEDOUT",
 		];
 
-		for (const code of RETRYABLE_CODES) {
-			await expectRetrySucceeds(
-				mockFetchRejectingOnceWith(Object.assign(new Error("boom"), { code })),
-			);
-		}
+		await RETRYABLE_CODES.reduce(async (previous, code) => {
+			await previous;
+
+			const error = Object.assign(new Error("boom"), { code });
+
+			await expectRetrySucceeds(mockFetchRejectingOnceWith(error));
+		}, Promise.resolve());
 	});
 
 	it("does not retry when the error code is unknown", async () => {
@@ -138,11 +144,9 @@ describe("fetchWithRetry", () => {
 	});
 
 	it("checks the cause code when the top level code is not a string", async () => {
-		await expectRetrySucceeds(
-			mockFetchRejectingOnceWith(
-				Object.assign(new Error("boom"), { code: 123, cause: { code: "ECONNRESET" } }),
-			),
-		);
+		const error = Object.assign(new Error("boom"), { code: 123, cause: { code: "ECONNRESET" } });
+
+		await expectRetrySucceeds(mockFetchRejectingOnceWith(error));
 	});
 
 	it("propagates the original error when the cause is present but null", async () => {
@@ -168,9 +172,9 @@ describe("fetchWithRetry", () => {
 		globalThis.setTimeout = setTimeoutSpy;
 
 		try {
-			await expectRetrySucceeds(
-				mockFetchRejectingOnceWith(Object.assign(new Error("boom"), { code: "ECONNRESET" })),
-			);
+			const error = Object.assign(new Error("boom"), { code: "ECONNRESET" });
+
+			await expectRetrySucceeds(mockFetchRejectingOnceWith(error));
 		} finally {
 			globalThis.setTimeout = originalSetTimeout;
 		}

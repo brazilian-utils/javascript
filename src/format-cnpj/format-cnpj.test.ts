@@ -4,10 +4,10 @@ import { formatCnpj } from "./format-cnpj";
 
 describe("formatCnpj", () => {
 	it("should return an empty string for null or undefined", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatCnpj(null)).toBe("");
-		// @ts-expect-error
-		expect(formatCnpj(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCnpj()).toBe("");
 	});
 
 	it("should format cnpj with mask", () => {
@@ -33,16 +33,16 @@ describe("formatCnpj", () => {
 		expect(formatCnpj(46)).toBe("46");
 		expect(formatCnpj(468)).toBe("46.8");
 		expect(formatCnpj(4684)).toBe("46.84");
-		expect(formatCnpj(46843)).toBe("46.843");
-		expect(formatCnpj(468434)).toBe("46.843.4");
-		expect(formatCnpj(4684348)).toBe("46.843.48");
-		expect(formatCnpj(46843485)).toBe("46.843.485");
-		expect(formatCnpj(468434850)).toBe("46.843.485/0");
-		expect(formatCnpj(4684348500)).toBe("46.843.485/00");
-		expect(formatCnpj(46843485000)).toBe("46.843.485/000");
-		expect(formatCnpj(468434850001)).toBe("46.843.485/0001");
-		expect(formatCnpj(4684348500018)).toBe("46.843.485/0001-8");
-		expect(formatCnpj(46843485000186)).toBe("46.843.485/0001-86");
+		expect(formatCnpj(46_843)).toBe("46.843");
+		expect(formatCnpj(468_434)).toBe("46.843.4");
+		expect(formatCnpj(4_684_348)).toBe("46.843.48");
+		expect(formatCnpj(46_843_485)).toBe("46.843.485");
+		expect(formatCnpj(468_434_850)).toBe("46.843.485/0");
+		expect(formatCnpj(4_684_348_500)).toBe("46.843.485/00");
+		expect(formatCnpj(46_843_485_000)).toBe("46.843.485/000");
+		expect(formatCnpj(468_434_850_001)).toBe("46.843.485/0001");
+		expect(formatCnpj(4_684_348_500_018)).toBe("46.843.485/0001-8");
+		expect(formatCnpj(46_843_485_000_186)).toBe("46.843.485/0001-86");
 	});
 
 	it("should format cnpj with mask filling zeroes", () => {
@@ -68,16 +68,16 @@ describe("formatCnpj", () => {
 		expect(formatCnpj(46, { pad: true })).toBe("00.000.000/0000-46");
 		expect(formatCnpj(468, { pad: true })).toBe("00.000.000/0004-68");
 		expect(formatCnpj(4684, { pad: true })).toBe("00.000.000/0046-84");
-		expect(formatCnpj(46843, { pad: true })).toBe("00.000.000/0468-43");
-		expect(formatCnpj(468434, { pad: true })).toBe("00.000.000/4684-34");
-		expect(formatCnpj(4684348, { pad: true })).toBe("00.000.004/6843-48");
-		expect(formatCnpj(46843485, { pad: true })).toBe("00.000.046/8434-85");
-		expect(formatCnpj(468434850, { pad: true })).toBe("00.000.468/4348-50");
-		expect(formatCnpj(4684348500, { pad: true })).toBe("00.004.684/3485-00");
-		expect(formatCnpj(46843485000, { pad: true })).toBe("00.046.843/4850-00");
-		expect(formatCnpj(468434850001, { pad: true })).toBe("00.468.434/8500-01");
-		expect(formatCnpj(4684348500018, { pad: true })).toBe("04.684.348/5000-18");
-		expect(formatCnpj(46843485000186, { pad: true })).toBe("46.843.485/0001-86");
+		expect(formatCnpj(46_843, { pad: true })).toBe("00.000.000/0468-43");
+		expect(formatCnpj(468_434, { pad: true })).toBe("00.000.000/4684-34");
+		expect(formatCnpj(4_684_348, { pad: true })).toBe("00.000.004/6843-48");
+		expect(formatCnpj(46_843_485, { pad: true })).toBe("00.000.046/8434-85");
+		expect(formatCnpj(468_434_850, { pad: true })).toBe("00.000.468/4348-50");
+		expect(formatCnpj(4_684_348_500, { pad: true })).toBe("00.004.684/3485-00");
+		expect(formatCnpj(46_843_485_000, { pad: true })).toBe("00.046.843/4850-00");
+		expect(formatCnpj(468_434_850_001, { pad: true })).toBe("00.468.434/8500-01");
+		expect(formatCnpj(4_684_348_500_018, { pad: true })).toBe("04.684.348/5000-18");
+		expect(formatCnpj(46_843_485_000_186, { pad: true })).toBe("46.843.485/0001-86");
 	});
 
 	it(`should NOT add digits after the CNPJ length (${CNPJ_LENGTH})`, () => {
@@ -118,7 +118,7 @@ describe("formatCnpj", () => {
 
 	it("should hide the first 2 digits and the 2 check digits when obfuscate is true", () => {
 		expect(formatCnpj("46843485000186", { obfuscate: true })).toBe("**.843.485/0001-**");
-		expect(formatCnpj(46843485000186, { obfuscate: true })).toBe("**.843.485/0001-**");
+		expect(formatCnpj(46_843_485_000_186, { obfuscate: true })).toBe("**.843.485/0001-**");
 	});
 
 	it("should pad before obfuscating", () => {

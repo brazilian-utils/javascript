@@ -70,6 +70,6 @@ describe("getCfop", () => {
 
 	it("should return null for undefined", () => {
 		// @ts-expect-error not a string or number
-		expect(getCfop(undefined)).toBeNull();
+		expect(getCfop()).toBeNull();
 	});
 });

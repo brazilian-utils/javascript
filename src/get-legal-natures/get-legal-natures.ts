@@ -12,15 +12,4 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
  *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
  */
-export const getLegalNatures = (): Record<string, string> => {
-	const entries = Object.entries(LEGAL_NATURE);
-
-	const result: Record<string, string> = {};
-
-	for (let i = 0; i < entries.length; i++) {
-		const [code, description] = entries[i];
-		result[code] = description;
-	}
-
-	return result;
-};
+export const getLegalNatures = (): Record<string, string> => ({ ...LEGAL_NATURE });

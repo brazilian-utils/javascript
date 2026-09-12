@@ -22,8 +22,8 @@ describe("parseCurrency", () => {
 		});
 
 		test("when parsing large values", () => {
-			expect(parseCurrency("R$ 10.000,00")).toBe(10000);
-			expect(parseCurrency("1.000.000,50")).toBe(1000000.5);
+			expect(parseCurrency("R$ 10.000,00")).toBe(10_000);
+			expect(parseCurrency("1.000.000,50")).toBe(1_000_000.5);
 		});
 	});
 
@@ -33,13 +33,13 @@ describe("parseCurrency", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(parseCurrency(null)).toBe(0);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(parseCurrency(undefined)).toBe(0);
+			// @ts-expect-error: intentionally invalid input
+			expect(parseCurrency()).toBe(0);
 		});
 
 		test("should transform a formatted value into a float", () => {
@@ -50,9 +50,9 @@ describe("parseCurrency", () => {
 			expect(parseCurrency("R$ 10,01")).toBe(10.01);
 			expect(parseCurrency("R$ 100,01")).toBe(100.01);
 			expect(parseCurrency("R$ 1.000,01")).toBe(1000.01);
-			expect(parseCurrency("R$ 10.000,01")).toBe(10000.01);
-			expect(parseCurrency("R$ 100.000,01")).toBe(100000.01);
-			expect(parseCurrency("R$ 1.000.000,01")).toBe(1000000.01);
+			expect(parseCurrency("R$ 10.000,01")).toBe(10_000.01);
+			expect(parseCurrency("R$ 100.000,01")).toBe(100_000.01);
+			expect(parseCurrency("R$ 1.000.000,01")).toBe(1_000_000.01);
 		});
 	});
 
@@ -81,7 +81,7 @@ describe("parseCurrency", () => {
 
 		test("when there is only a thousands separator", () => {
 			expect(parseCurrency("R$ 1.234")).toBe(1234);
-			expect(parseCurrency("R$ 1.000.000")).toBe(1000000);
+			expect(parseCurrency("R$ 1.000.000")).toBe(1_000_000);
 			expect(parseCurrency("1,5")).toBe(1.5);
 			expect(parseCurrency("1.059")).toBe(1059);
 		});
@@ -116,8 +116,8 @@ describe("parseCurrency", () => {
 
 		test("when using a custom precision", () => {
 			expect(parseCurrency(formatCurrency(1.001, { precision: 3 }), { precision: 3 })).toBe(1.001);
-			expect(parseCurrency(formatCurrency(1000000.001, { precision: 3 }), { precision: 3 })).toBe(
-				1000000.001,
+			expect(parseCurrency(formatCurrency(1_000_000.001, { precision: 3 }), { precision: 3 })).toBe(
+				1_000_000.001,
 			);
 		});
 	});

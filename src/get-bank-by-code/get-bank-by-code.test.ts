@@ -75,32 +75,32 @@ describe("getBankByCode", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByCode(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(getBankByCode(undefined)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(getBankByCode()).toBeNull();
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByCode(true)).toBeNull();
 		});
 
 		test("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByCode({})).toBeNull();
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByCode([])).toBeNull();
 		});
 
 		test("when it is an array whose string form would otherwise resolve to a real code", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(getBankByCode([1])).toBeNull();
 		});
 	});

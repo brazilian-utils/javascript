@@ -18,4 +18,4 @@ import { BANKS, type Bank } from "../_internals/constants/banks";
  * @see Based on: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
  * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */
-export const getBanks = (): Bank[] => BANKS.map((bank) => ({ ...bank }));
+export const getBanks = (): Bank[] => BANKS.map((bank) => Object.assign({}, bank));

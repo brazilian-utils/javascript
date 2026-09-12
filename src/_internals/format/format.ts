@@ -34,18 +34,19 @@ export type FormatParams = {
 export const format = ({ pad, value, pattern }: FormatParams): string => {
 	let formatted = "";
 	let valueIndex = 0;
+	let paddedValue = value;
 
-	if (pad) {
-		const separatorsLength = pattern.replace(/[0*]/g, "").length;
-		value = value.padStart(pattern.length - separatorsLength, "0");
+	if (pad === true) {
+		const separatorsLength = pattern.replaceAll(/[0*]/g, "").length;
+		paddedValue = value.padStart(pattern.length - separatorsLength, "0");
 	}
 
 	for (const char of pattern) {
 		if (char === "0" || char === "*") {
-			if (valueIndex >= value.length) break;
-			formatted += char === "*" ? "*" : value[valueIndex];
+			if (valueIndex >= paddedValue.length) break;
+			formatted += char === "*" ? "*" : paddedValue[valueIndex];
 			valueIndex++;
-		} else if (valueIndex < value.length) {
+		} else if (valueIndex < paddedValue.length) {
 			formatted += char;
 		}
 	}

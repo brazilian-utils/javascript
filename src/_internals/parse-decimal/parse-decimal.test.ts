@@ -11,7 +11,7 @@ describe("parseDecimal", () => {
 
 	test("should read a long run after the separator as thousands", () => {
 		expect(parseDecimal("R$ 1.234")).toBe(1234);
-		expect(parseDecimal("1.000.000")).toBe(1000000);
+		expect(parseDecimal("1.000.000")).toBe(1_000_000);
 	});
 
 	test("should read a value without separators as whole units by default", () => {
@@ -46,7 +46,7 @@ describe("parseDecimal", () => {
 
 	test("should return 0 when there is nothing to read", () => {
 		expect(parseDecimal("")).toBe(0);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(parseDecimal(null)).toBe(0);
 		expect(parseDecimal("R$")).toBe(0);
 		expect(parseDecimal("-")).toBe(0);

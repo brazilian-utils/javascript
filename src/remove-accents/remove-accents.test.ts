@@ -44,17 +44,17 @@ describe("removeAccents", () => {
 	});
 
 	it("should return an empty string when given null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(removeAccents(null)).toBe("");
 	});
 
 	it("should return an empty string when given undefined", () => {
-		// @ts-expect-error
-		expect(removeAccents(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(removeAccents()).toBe("");
 	});
 
 	it("should return an empty string when given a number", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(removeAccents(123)).toBe("");
 	});
 });

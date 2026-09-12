@@ -53,7 +53,8 @@ export const isHoliday = (options?: IsHolidayOptions): boolean => {
 		return false;
 	}
 
-	return getHolidays({ year: targetDate.getFullYear(), stateCode }).some((holiday) => {
+	const year = targetDate.getFullYear();
+	return getHolidays({ year, stateCode }).some((holiday) => {
 		return (
 			holiday.date.getMonth() === targetDate.getMonth() &&
 			holiday.date.getDate() === targetDate.getDate()

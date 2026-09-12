@@ -11,7 +11,7 @@ describe("getMunicipalityByCode", () => {
 	});
 
 	it("should return the municipality for a known code (number)", () => {
-		expect(getMunicipalityByCode(3550308)).toEqual({
+		expect(getMunicipalityByCode(3_550_308)).toEqual({
 			code: "3550308",
 			name: "São Paulo",
 			stateCode: "SP",
@@ -49,21 +49,21 @@ describe("getMunicipalityByCode", () => {
 
 	it("should return null for an object even if its string representation looks like a valid code", () => {
 		expect(
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			getMunicipalityByCode({ toString: () => "3550308" }),
 		).toBeNull();
 	});
 
 	it("should return null for a non-string, non-number value", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalityByCode(null)).toBeNull();
-		// @ts-expect-error
-		expect(getMunicipalityByCode(undefined)).toBeNull();
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
+		expect(getMunicipalityByCode()).toBeNull();
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalityByCode(true)).toBeNull();
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalityByCode({})).toBeNull();
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalityByCode([])).toBeNull();
 	});
 

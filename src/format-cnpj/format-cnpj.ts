@@ -11,7 +11,7 @@ export type FormatCnpjOptions = Pick<FormatParams, "pad"> & {
 	obfuscate?: boolean;
 };
 
-const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]) => {
+const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]): string => {
 	if (version === 2) {
 		return sanitizeToAlphanumeric(value);
 	}
@@ -48,6 +48,6 @@ export const formatCnpj = (value: string | number, options?: FormatCnpjOptions):
 	return format({
 		pad: options?.pad,
 		value: sanitize(value, options?.version),
-		pattern: options?.obfuscate ? OBFUSCATED_PATTERN : PATTERN,
+		pattern: options?.obfuscate === true ? OBFUSCATED_PATTERN : PATTERN,
 	});
 };

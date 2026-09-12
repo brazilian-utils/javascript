@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = dirname(fileURLToPath(import.meta.url));
+const scriptsDir = import.meta.dirname;
 
 type State = {
 	id: number;
@@ -36,7 +35,7 @@ const isState = (value: unknown): value is State =>
 	"nome" in value.regiao &&
 	typeof value.regiao.nome === "string";
 
-const main = async () => {
+const main = async (): Promise<void> => {
 	const response = await fetchWithRetry(
 		"https://servicodados.ibge.gov.br/api/v1/localidades/estados",
 	);
@@ -47,7 +46,7 @@ const main = async () => {
 
 	const json: unknown = await response.json();
 
-	if (!Array.isArray(json) || json.length === 0 || !json.every(isState)) {
+	if (!Array.isArray(json) || json.length === 0 || !json.every((entry) => isState(entry))) {
 		throw new Error(
 			"IBGE states payload is not an array of states with id, sigla, nome and regiao",
 		);

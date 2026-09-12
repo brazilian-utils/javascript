@@ -119,10 +119,10 @@ describe("formatBoleto", () => {
 	});
 
 	test("should return an empty string when the value is nullish", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatBoleto(null)).toBe("");
-		// @ts-expect-error
-		expect(formatBoleto(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatBoleto()).toBe("");
 	});
 
 	describe("arrecadação", () => {

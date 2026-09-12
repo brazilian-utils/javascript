@@ -21,4 +21,4 @@ import { DATA, type State } from "../_internals/constants/states";
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const getStates = (): State[] => DATA.map((state) => ({ ...state }));
+export const getStates = (): State[] => DATA.map((state) => Object.assign({}, state));

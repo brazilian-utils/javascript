@@ -34,7 +34,9 @@ export const getCfop = (value: string | number): Cfop | null => {
 
 	const digits = sanitizeToDigits(value);
 
-	if (!(digits in CFOP_TABLE)) return null;
+	const description = CFOP_TABLE[digits];
 
-	return { code: digits, description: CFOP_TABLE[digits] };
+	if (description === undefined) return null;
+
+	return { code: digits, description };
 };

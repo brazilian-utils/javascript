@@ -7,7 +7,7 @@ describe("formatCaepf", () => {
 	});
 
 	test("should format a number input", () => {
-		expect(formatCaepf(41142260000101)).toBe("411.422.600/001-01");
+		expect(formatCaepf(41_142_260_000_101)).toBe("411.422.600/001-01");
 	});
 
 	test("should format progressively as digits are typed", () => {
@@ -40,12 +40,12 @@ describe("formatCaepf", () => {
 	});
 
 	test("should return an empty string for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatCaepf(null)).toBe("");
 	});
 
 	test("should return an empty string for undefined", () => {
-		// @ts-expect-error
-		expect(formatCaepf(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCaepf()).toBe("");
 	});
 });

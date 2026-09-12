@@ -4,7 +4,7 @@ import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import type { PhoneVersion } from "../is-valid-phone/is-valid-phone";
 import { MOBILE_VALID_FIRST_NUMBERS_V1, MOBILE_VALID_FIRST_NUMBERS_V2 } from "./constants";
 
-export type { PhoneVersion };
+export type { PhoneVersion } from "../is-valid-phone/is-valid-phone";
 
 export type IsValidMobilePhoneOptions = {
 	/** Numbering rule to enforce: `1` the pre-2016 8 digit rule, `2` the 9 digit one (default: `2`). */

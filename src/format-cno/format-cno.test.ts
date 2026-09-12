@@ -7,7 +7,7 @@ describe("formatCno", () => {
 	});
 
 	test("should format a number input", () => {
-		expect(formatCno(401800097960)).toBe("40.180.00979/60");
+		expect(formatCno(401_800_097_960)).toBe("40.180.00979/60");
 	});
 
 	test("should format progressively as digits are typed", () => {
@@ -36,12 +36,12 @@ describe("formatCno", () => {
 	});
 
 	test("should return an empty string for null", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(formatCno(null)).toBe("");
 	});
 
 	test("should return an empty string for undefined", () => {
-		// @ts-expect-error
-		expect(formatCno(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCno()).toBe("");
 	});
 });

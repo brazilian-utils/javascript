@@ -15,10 +15,10 @@ describe("parseBoleto", () => {
 	});
 
 	it("should return an empty string when the value is nullish", () => {
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(parseBoleto(null)).toBe("");
-		// @ts-expect-error
-		expect(parseBoleto(undefined)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(parseBoleto()).toBe("");
 	});
 
 	it("should ignore digits after the boleto length", () => {

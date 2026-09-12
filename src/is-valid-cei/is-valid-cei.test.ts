@@ -4,17 +4,17 @@ import { isValidCei } from "./is-valid-cei";
 describe("isValidCei", () => {
 	describe("should return false", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCei(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidCei(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCei()).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCei(true)).toBe(false);
 		});
 
@@ -78,7 +78,7 @@ describe("isValidCei", () => {
 		});
 
 		test("for a number input", () => {
-			expect(isValidCei(249859674386)).toBe(true);
+			expect(isValidCei(249_859_674_386)).toBe(true);
 		});
 
 		test("for a whitespace mask and surrounding whitespace", () => {

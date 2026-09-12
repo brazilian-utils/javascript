@@ -4,13 +4,13 @@ import { clampPrecision } from "./clamp-precision";
 describe("clampPrecision", () => {
 	test("should default to 2", () => {
 		expect(clampPrecision()).toBe(2);
-		expect(clampPrecision(undefined)).toBe(2);
+		expect(clampPrecision()).toBe(2);
 	});
 
 	test("should default to 2 when it is not a finite number", () => {
 		expect(clampPrecision(Number.NaN)).toBe(2);
 		expect(clampPrecision(Number.POSITIVE_INFINITY)).toBe(2);
-		// @ts-expect-error
+		// @ts-expect-error: intentionally invalid input
 		expect(clampPrecision("3")).toBe(2);
 	});
 

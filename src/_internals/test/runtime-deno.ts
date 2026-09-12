@@ -32,7 +32,7 @@ function hasLength(value: unknown): value is { length: number } {
 		return true;
 	}
 
-	return isRecord(value) && typeof value.length === "number";
+	return isRecord(value) && typeof value["length"] === "number";
 }
 
 function createAssertionError(message: string): Error {
@@ -99,6 +99,7 @@ function objectMatches(
 function createMock(implementation?: MockImplementation): MockFunction {
 	const queue: MockImplementation[] = [];
 	const calls: unknown[][] = [];
+	let currentImplementation = implementation;
 
 	const baseFn = (...args: unknown[]): unknown => {
 		calls.push(args);
@@ -106,11 +107,13 @@ function createMock(implementation?: MockImplementation): MockFunction {
 		if (queue.length > 0) {
 			const nextImplementation = queue.shift();
 
-			return nextImplementation!(...args);
+			if (nextImplementation !== undefined) {
+				return nextImplementation(...args);
+			}
 		}
 
-		if (implementation) {
-			return implementation(...args);
+		if (currentImplementation) {
+			return currentImplementation(...args);
 		}
 
 		return undefined;
@@ -118,32 +121,40 @@ function createMock(implementation?: MockImplementation): MockFunction {
 
 	const mockFn: MockFunction = Object.assign(baseFn, {
 		mock: { calls },
-		mockClear: () => {
+		mockClear: (): void => {
 			queue.length = 0;
 			calls.length = 0;
 		},
-		mockResolvedValueOnce: (value: unknown) => {
+		mockResolvedValueOnce: (value: unknown): MockFunction => {
 			queue.push(() => Promise.resolve(value));
 
 			return mockFn;
 		},
-		mockRejectedValueOnce: (value: unknown) => {
-			queue.push(() => Promise.reject(value));
+		mockRejectedValueOnce: (value: unknown): MockFunction => {
+			queue.push(async () => {
+				await Promise.resolve();
+
+				throw value;
+			});
 
 			return mockFn;
 		},
-		mockResolvedValue: (value: unknown) => {
-			implementation = () => Promise.resolve(value);
+		mockResolvedValue: (value: unknown): MockFunction => {
+			currentImplementation = (): Promise<unknown> => Promise.resolve(value);
 
 			return mockFn;
 		},
-		mockRejectedValue: (value: unknown) => {
-			implementation = () => Promise.reject(value);
+		mockRejectedValue: (value: unknown): MockFunction => {
+			currentImplementation = async (): Promise<unknown> => {
+				await Promise.resolve();
+
+				throw value;
+			};
 
 			return mockFn;
 		},
-		mockImplementation: (nextImplementation: MockImplementation) => {
-			implementation = nextImplementation;
+		mockImplementation: (nextImplementation: MockImplementation): MockFunction => {
+			currentImplementation = nextImplementation;
 
 			return mockFn;
 		},
@@ -197,185 +208,214 @@ function isMockFunction(value: unknown): value is MockFunction {
 		return false;
 	}
 
-	return isRecord(value.mock) && Array.isArray(value.mock.calls);
+	return isRecord(value.mock) && Array.isArray(value.mock["calls"]);
 }
 
-function createMatchers(actual: unknown) {
+type Matcher = (...args: any[]) => void;
+
+type Matchers = Record<string, Matcher>;
+
+const isCallable = (value: unknown): value is (...args: unknown[]) => unknown =>
+	typeof value === "function";
+
+const createEqualityMatchers = (actual: unknown): Matchers => ({
+	toBe(expected: unknown): void {
+		if (!Object.is(actual, expected)) {
+			throw createAssertionError(`Expected ${String(actual)} to be ${String(expected)}`);
+		}
+	},
+	toEqual(expected: unknown): void {
+		if (!deepEqual(actual, expected)) {
+			throw createAssertionError("Expected values to be deeply equal");
+		}
+	},
+	toStrictEqual(expected: unknown): void {
+		if (!deepEqual(actual, expected)) {
+			throw createAssertionError("Expected values to be strictly equal");
+		}
+	},
+	toBeDefined(): void {
+		if (actual === undefined || actual === null) {
+			throw createAssertionError("Expected value to be defined");
+		}
+	},
+	toBeUndefined(): void {
+		if (actual !== undefined) {
+			throw createAssertionError(`Expected ${describeValue(actual)} to be undefined`);
+		}
+	},
+	toBeTruthy(): void {
+		const isTruthy = Boolean(actual);
+
+		if (isTruthy) return;
+
+		throw createAssertionError(`Expected ${String(actual)} to be truthy`);
+	},
+	toBeNull(): void {
+		if (actual !== null) {
+			throw createAssertionError(`Expected ${describeValue(actual)} to be null`);
+		}
+	},
+	toBeInstanceOf(expected: new (...args: any[]) => unknown): void {
+		if (!(actual instanceof expected)) {
+			throw createAssertionError(`Expected value to be instance of ${expected.name}`);
+		}
+	},
+});
+
+const createComparisonMatchers = (actual: unknown): Matchers => ({
+	toBeGreaterThan(expected: number): void {
+		if (!(typeof actual === "number" && actual > expected)) {
+			throw createAssertionError(`Expected ${String(actual)} to be greater than ${expected}`);
+		}
+	},
+	toBeGreaterThanOrEqual(expected: number): void {
+		if (!(typeof actual === "number" && actual >= expected)) {
+			throw createAssertionError(
+				`Expected ${String(actual)} to be greater than or equal to ${expected}`,
+			);
+		}
+	},
+	toBeLessThanOrEqual(expected: number): void {
+		if (!(typeof actual === "number" && actual <= expected)) {
+			throw createAssertionError(
+				`Expected ${String(actual)} to be less than or equal to ${expected}`,
+			);
+		}
+	},
+	toBeLessThan(expected: number): void {
+		if (!(typeof actual === "number" && actual < expected)) {
+			throw createAssertionError(`Expected ${String(actual)} to be less than ${expected}`);
+		}
+	},
+});
+
+const createCollectionMatchers = (actual: unknown): Matchers => ({
+	toContain(expected: unknown): void {
+		if (typeof actual === "string") {
+			if (!actual.includes(String(expected))) {
+				throw createAssertionError(`Expected ${actual} to contain ${String(expected)}`);
+			}
+
+			return;
+		}
+
+		if (!Array.isArray(actual) || !actual.includes(expected)) {
+			throw createAssertionError(`Expected value to contain ${String(expected)}`);
+		}
+	},
+	toMatch(expected: RegExp | string): void {
+		if (typeof actual !== "string") {
+			throw createAssertionError("Expected value to be a string");
+		}
+
+		if (expected instanceof RegExp) {
+			if (!expected.test(actual)) {
+				throw createAssertionError(`Expected ${actual} to match ${String(expected)}`);
+			}
+
+			return;
+		}
+
+		if (!actual.includes(expected)) {
+			throw createAssertionError(`Expected ${actual} to contain ${expected}`);
+		}
+	},
+	toContainEqual(expected: unknown): void {
+		if (!Array.isArray(actual)) {
+			throw createAssertionError("Expected value to be an array");
+		}
+
+		if (!actual.some((value) => deepEqual(value, expected))) {
+			throw createAssertionError("Expected array to contain a deeply equal value");
+		}
+	},
+	toHaveProperty(property: string): void {
+		if (!isRecord(actual) || !(property in actual)) {
+			throw createAssertionError(`Expected object to have property ${property}`);
+		}
+	},
+	toHaveLength(expected: number): void {
+		if (!hasLength(actual)) {
+			throw createAssertionError("Expected value to have a length");
+		}
+
+		if (actual.length !== expected) {
+			throw createAssertionError(`Expected length ${actual.length} to be ${expected}`);
+		}
+	},
+	toMatchObject(expected: Record<string, unknown>): void {
+		if (!isRecord(actual) || !objectMatches(actual, expected)) {
+			throw createAssertionError("Expected object to match");
+		}
+	},
+});
+
+const createBehaviorMatchers = (actual: unknown): Matchers => ({
+	toThrow(expected?: ThrowExpectation): void {
+		if (!isCallable(actual)) {
+			throw createAssertionError("Expected value to be a function");
+		}
+
+		try {
+			actual();
+		} catch (error) {
+			assertThrown(error, expected);
+
+			return;
+		}
+
+		throw createAssertionError("Expected function to throw");
+	},
+	toHaveBeenCalled(): void {
+		if (!isMockFunction(actual)) {
+			throw createAssertionError("Expected value to be a mock function");
+		}
+
+		if (actual.mock.calls.length === 0) {
+			throw createAssertionError("Expected mock function to have been called");
+		}
+	},
+	toHaveBeenCalledTimes(expected: number): void {
+		if (!isMockFunction(actual)) {
+			throw createAssertionError("Expected value to be a mock function");
+		}
+
+		if (actual.mock.calls.length !== expected) {
+			throw createAssertionError(
+				`Expected mock function to have been called ${expected} times, but it was called ${actual.mock.calls.length} times`,
+			);
+		}
+	},
+});
+
+function createMatchers(actual?: unknown): Matchers {
 	return {
-		toBe(expected: unknown) {
-			if (!Object.is(actual, expected)) {
-				throw createAssertionError(`Expected ${String(actual)} to be ${String(expected)}`);
-			}
-		},
-		toEqual(expected: unknown) {
-			if (!deepEqual(actual, expected)) {
-				throw createAssertionError("Expected values to be deeply equal");
-			}
-		},
-		toStrictEqual(expected: unknown) {
-			if (!deepEqual(actual, expected)) {
-				throw createAssertionError("Expected values to be strictly equal");
-			}
-		},
-		toContain(expected: unknown) {
-			if (typeof actual === "string") {
-				if (!actual.includes(String(expected))) {
-					throw createAssertionError(`Expected ${actual} to contain ${String(expected)}`);
-				}
-
-				return;
-			}
-
-			if (!Array.isArray(actual) || !actual.includes(expected)) {
-				throw createAssertionError(`Expected value to contain ${String(expected)}`);
-			}
-		},
-		toMatch(expected: RegExp | string) {
-			if (typeof actual !== "string") {
-				throw createAssertionError("Expected value to be a string");
-			}
-
-			if (expected instanceof RegExp) {
-				if (!expected.test(actual)) {
-					throw createAssertionError(`Expected ${actual} to match ${String(expected)}`);
-				}
-
-				return;
-			}
-
-			if (!actual.includes(expected)) {
-				throw createAssertionError(`Expected ${actual} to contain ${expected}`);
-			}
-		},
-		toContainEqual(expected: unknown) {
-			if (!Array.isArray(actual)) {
-				throw createAssertionError("Expected value to be an array");
-			}
-
-			if (!actual.some((value) => deepEqual(value, expected))) {
-				throw createAssertionError("Expected array to contain a deeply equal value");
-			}
-		},
-		toHaveProperty(property: string) {
-			if (!isRecord(actual) || !(property in actual)) {
-				throw createAssertionError(`Expected object to have property ${property}`);
-			}
-		},
-		toHaveLength(expected: number) {
-			if (!hasLength(actual)) {
-				throw createAssertionError("Expected value to have a length");
-			}
-
-			if (actual.length !== expected) {
-				throw createAssertionError(`Expected length ${actual.length} to be ${expected}`);
-			}
-		},
-		toBeDefined() {
-			if (actual === undefined || actual === null) {
-				throw createAssertionError("Expected value to be defined");
-			}
-		},
-		toBeUndefined() {
-			if (actual !== undefined) {
-				throw createAssertionError(`Expected ${describeValue(actual)} to be undefined`);
-			}
-		},
-		toBeTruthy() {
-			if (!actual) {
-				throw createAssertionError(`Expected ${String(actual)} to be truthy`);
-			}
-		},
-		toBeInstanceOf(expected: new (...args: any[]) => unknown) {
-			if (!(actual instanceof expected)) {
-				throw createAssertionError(`Expected value to be instance of ${expected.name}`);
-			}
-		},
-		toBeGreaterThan(expected: number) {
-			if (!(typeof actual === "number" && actual > expected)) {
-				throw createAssertionError(`Expected ${String(actual)} to be greater than ${expected}`);
-			}
-		},
-		toBeGreaterThanOrEqual(expected: number) {
-			if (!(typeof actual === "number" && actual >= expected)) {
-				throw createAssertionError(
-					`Expected ${String(actual)} to be greater than or equal to ${expected}`,
-				);
-			}
-		},
-		toBeLessThanOrEqual(expected: number) {
-			if (!(typeof actual === "number" && actual <= expected)) {
-				throw createAssertionError(
-					`Expected ${String(actual)} to be less than or equal to ${expected}`,
-				);
-			}
-		},
-		toBeNull() {
-			if (actual !== null) {
-				throw createAssertionError(`Expected ${describeValue(actual)} to be null`);
-			}
-		},
-		toBeLessThan(expected: number) {
-			if (!(typeof actual === "number" && actual < expected)) {
-				throw createAssertionError(`Expected ${String(actual)} to be less than ${expected}`);
-			}
-		},
-		toThrow(expected?: ThrowExpectation) {
-			if (typeof actual !== "function") {
-				throw createAssertionError("Expected value to be a function");
-			}
-
-			try {
-				actual();
-			} catch (error) {
-				assertThrown(error, expected);
-
-				return;
-			}
-
-			throw createAssertionError("Expected function to throw");
-		},
-		toHaveBeenCalled() {
-			if (!isMockFunction(actual)) {
-				throw createAssertionError("Expected value to be a mock function");
-			}
-
-			if (actual.mock.calls.length === 0) {
-				throw createAssertionError("Expected mock function to have been called");
-			}
-		},
-		toHaveBeenCalledTimes(expected: number) {
-			if (!isMockFunction(actual)) {
-				throw createAssertionError("Expected value to be a mock function");
-			}
-
-			if (actual.mock.calls.length !== expected) {
-				throw createAssertionError(
-					`Expected mock function to have been called ${expected} times, but it was called ${actual.mock.calls.length} times`,
-				);
-			}
-		},
-		toMatchObject(expected: Record<string, unknown>) {
-			if (!isRecord(actual) || !objectMatches(actual, expected)) {
-				throw createAssertionError("Expected object to match");
-			}
-		},
+		...createEqualityMatchers(actual),
+		...createComparisonMatchers(actual),
+		...createCollectionMatchers(actual),
+		...createBehaviorMatchers(actual),
 	};
 }
 
-function createExpect(actual: unknown) {
+type ExpectResult = Record<string, unknown> & {
+	readonly not: Matchers;
+	readonly resolves: Record<string, (...args: unknown[]) => Promise<unknown>>;
+	readonly rejects: { toThrow: (expected?: ThrowExpectation) => Promise<void> };
+};
+
+function createExpect(actual: unknown): ExpectResult {
 	const matchers = createMatchers(actual);
 
 	return {
 		...matchers,
-		get not() {
+		get not(): Matchers {
 			return Object.fromEntries(
 				Object.entries(matchers).map(([name, matcher]) => [
 					name,
-					(...args: unknown[]) => {
-						const fn: Function = matcher;
-
+					(...args: unknown[]): void => {
 						try {
-							fn.apply(undefined, args);
+							matcher.apply(undefined, args);
 						} catch {
 							return;
 						}
@@ -385,28 +425,28 @@ function createExpect(actual: unknown) {
 				]),
 			);
 		},
-		get resolves() {
+		get resolves(): Record<string, (...args: unknown[]) => Promise<unknown>> {
 			const promise = Promise.resolve(actual);
 
 			return Object.fromEntries(
-				Object.entries(createMatchers(undefined)).map(([name]) => [
+				Object.entries(createMatchers()).map(([name]) => [
 					name,
-					async (...args: unknown[]) => {
+					async (...args: unknown[]): Promise<unknown> => {
 						const resolved = await promise;
 						const resolvedMatchers = createMatchers(resolved);
 						const matcherEntry = Object.entries(resolvedMatchers).find(
 							([entryName]) => entryName === name,
 						);
-						const fn: Function | undefined = matcherEntry?.[1];
+						const matcher = matcherEntry?.[1];
 
-						return fn?.apply(undefined, args);
+						return matcher?.apply(undefined, args);
 					},
 				]),
 			);
 		},
-		get rejects() {
+		get rejects(): { toThrow: (expected?: ThrowExpectation) => Promise<void> } {
 			return {
-				async toThrow(expected?: ThrowExpectation) {
+				async toThrow(expected?: ThrowExpectation): Promise<void> {
 					try {
 						await actual;
 					} catch (error) {
@@ -422,13 +462,16 @@ function createExpect(actual: unknown) {
 	};
 }
 
-async function runHooks(hooks: TestCallback[]) {
-	for (const hook of hooks) {
-		await hook();
-	}
+async function runHooks(hooks: TestCallback[]): Promise<void> {
+	const [hook, ...rest] = hooks;
+
+	if (hook === undefined) return;
+
+	await hook();
+	await runHooks(rest);
 }
 
-function currentSuiteChain() {
+function currentSuiteChain(): Suite[] {
 	return [...suiteStack];
 }
 
@@ -438,7 +481,7 @@ type DescribeFunction = ((name: string, callback: TestCallback) => void) & {
 
 let skipDepth = 0;
 
-const runSuite = (name: string, callback: TestCallback) => {
+const runSuite = (name: string, callback: TestCallback): void => {
 	suiteStack.push({
 		afterEach: [],
 		beforeEach: [],
@@ -446,17 +489,19 @@ const runSuite = (name: string, callback: TestCallback) => {
 	});
 
 	try {
-		void callback();
+		Promise.resolve(callback()).catch((error: unknown) => {
+			throw error;
+		});
 	} finally {
 		suiteStack.pop();
 	}
 };
 
-const describe: DescribeFunction = (name, callback) => {
+const describe: DescribeFunction = (name, callback): void => {
 	runSuite(name, callback);
 };
 
-describe.skip = (name, callback) => {
+describe.skip = (name, callback): void => {
 	skipDepth += 1;
 
 	try {
@@ -466,7 +511,7 @@ describe.skip = (name, callback) => {
 	}
 };
 
-export function beforeEach(callback: TestCallback) {
+export function beforeEach(callback: TestCallback): void {
 	const currentSuite = suiteStack.at(-1);
 
 	if (!currentSuite) {
@@ -476,7 +521,7 @@ export function beforeEach(callback: TestCallback) {
 	currentSuite.beforeEach.push(callback);
 }
 
-export function afterEach(callback: TestCallback) {
+export function afterEach(callback: TestCallback): void {
 	const currentSuite = suiteStack.at(-1);
 
 	if (!currentSuite) {
@@ -486,7 +531,7 @@ export function afterEach(callback: TestCallback) {
 	currentSuite.afterEach.push(callback);
 }
 
-export function it(name: string, callback: TestCallback, timeout?: number) {
+export function it(name: string, callback: TestCallback, timeout?: number): void {
 	const suites = currentSuiteChain();
 	const testName = [...suites.map((suite) => suite.name), name].join(" > ");
 
@@ -504,7 +549,7 @@ export function it(name: string, callback: TestCallback, timeout?: number) {
 		name: testName,
 		sanitizeOps: false,
 		sanitizeResources: false,
-		...(timeout ? { sanitizeExit: false } : {}),
+		...(timeout !== undefined && timeout !== 0 ? { sanitizeExit: false } : {}),
 	});
 }
 
@@ -514,7 +559,7 @@ export const expect = createExpect;
 
 export const vi = {
 	fn: createMock,
-	restoreAllMocks: () => {
+	restoreAllMocks: (): void => {
 		for (const mockFn of registeredMocks) {
 			mockFn.mockClear();
 		}

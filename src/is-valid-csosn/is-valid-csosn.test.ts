@@ -37,7 +37,7 @@ describe("isValidCsosn", () => {
 
 	it("should return false for undefined", () => {
 		// @ts-expect-error not a string or number
-		expect(isValidCsosn(undefined)).toBe(false);
+		expect(isValidCsosn()).toBe(false);
 	});
 
 	it("should return false for a non numeric string", () => {

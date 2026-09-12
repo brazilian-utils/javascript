@@ -4,27 +4,27 @@ import { isValidCns } from "./is-valid-cns";
 describe("isValidCns", () => {
 	describe("should return false", () => {
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCns(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidCns(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCns()).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCns(true)).toBe(false);
 		});
 
 		test("when it is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCns({})).toBe(false);
 		});
 
 		test("when it is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidCns([])).toBe(false);
 		});
 
@@ -82,7 +82,7 @@ describe("isValidCns", () => {
 		});
 
 		test("for a definitive CNS as a number", () => {
-			expect(isValidCns(123456789010000)).toBe(true);
+			expect(isValidCns(123_456_789_010_000)).toBe(true);
 		});
 
 		test("for a definitive CNS with a whitespace mask", () => {
