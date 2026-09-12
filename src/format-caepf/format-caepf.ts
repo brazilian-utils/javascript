@@ -31,6 +31,8 @@ export type FormatCaepfOptions = {
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
+ * The registry's own page at the Receita Federal, which describes the cadastro but does not
+ * print the mask; the mask below is the one the sources cited by `isValidCaepf` agree on.
  */
 export const formatCaepf = (value: string | number, options?: FormatCaepfOptions): string => {
 	if (isNullish(value)) return "";

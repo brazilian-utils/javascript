@@ -21,6 +21,9 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * with a remainder of 10 read as 0. The pair is then shifted by 12, wrapping around 100, so a
  * CAEPF whose plain modulus 11 digits would be 72 is printed with 84.
  *
+ * The Receita Federal does not publish the check digit rule of the CAEPF, the shift of 12
+ * included, so the calculation follows the reference implementations cited below.
+ *
  * @param {string|number} value - The CAEPF value to be validated.
  * @returns {boolean} True if the CAEPF is valid, false otherwise.
  *
@@ -34,6 +37,8 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
+ * The registry's own page at the Receita Federal, which describes the cadastro but publishes
+ * neither the 14 digit layout nor the check digit rule.
  * @see Based on: http://ghiorzi.org/DVnew.htm Description of the CAEPF layout and of the
  * shift of 12 applied to the check digit pair.
  * @see Based on: https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts

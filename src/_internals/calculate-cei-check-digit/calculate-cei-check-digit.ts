@@ -9,6 +9,10 @@ import { generateChecksum } from "../generate-checksum/generate-checksum";
  * The tens part and the units part of that sum are added together and the check digit is the
  * complement of the units digit of the result to 10, with 10 mapped back to 0.
  *
+ * The Receita Federal does not publish the check digit rule of the CEI/CNO numbering, so the
+ * calculation follows the reference implementations cited below, cross-checked against the CNO
+ * open data of the Receita Federal.
+ *
  * @param {string} base - The 11 digits that precede the check digit.
  * @returns {number} The check digit, 0 to 9.
  *
@@ -19,9 +23,12 @@ import { generateChecksum } from "../generate-checksum/generate-checksum";
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno
- * @see Official: Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: the
- * 38432 works registered in Minas Gerais confirm the rule, and their check digits of 0 are
- * what shows that a computed 10 maps back to 0, which neither reference implementation does.
+ * The registry's own page at the Receita Federal, which describes the cadastro but publishes
+ * neither the mask nor the check digit rule.
+ * @see Official: https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno
+ * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: the 38432 works
+ * registered in Minas Gerais confirm the rule, and their check digits of 0 are what shows
+ * that a computed 10 maps back to 0, which neither reference implementation does.
  * @see Based on: https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php
  * PHP reference implementation of the CEI check digit.
  * @see Based on: https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs

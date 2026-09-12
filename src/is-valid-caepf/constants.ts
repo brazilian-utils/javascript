@@ -3,14 +3,17 @@
  * "000.000.000/000-00", the first 9 being the CPF base of the holder, the next 3 the sequence
  * of the holder's registrations and the last 2 the check digits.
  *
+ * The Receita Federal does not publish the check digit rule of the CAEPF, the shift of 12
+ * included, so the calculation follows the reference implementations cited below.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
+ * The registry's own page at the Receita Federal, which describes the cadastro but publishes
+ * neither the 14 digit layout nor the check digit rule.
  * @see Based on: http://ghiorzi.org/DVnew.htm Description of the CAEPF layout and of the
  * shift of 12 applied to the check digit pair.
  * @see Based on: https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts
  * Reference implementation agreeing on the weights and on the shift.
  */
-
-export const CAEPF_LENGTH = 14;
 
 export const CAEPF_BASE_LENGTH = 12;
 
