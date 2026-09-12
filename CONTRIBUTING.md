@@ -224,7 +224,11 @@ signatures are pinned by the `describe("<name> types")` blocks in the tests, and
 - The `Security` workflow lints the workflows themselves with
   [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor)
   and scans `package-lock.json` with [OSV-Scanner](https://google.github.io/osv-scanner/); the
-  `Check` workflow runs `audit-ci` and lockfile-lint on top.
+  `Check` workflow runs `audit-ci` and lockfile-lint on top. The same workflow runs the
+  [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript) on
+  every push to `main` and weekly: it grades the repository configuration (pinned actions, token
+  permissions, branch protection, code review, dependency updates, SAST) rather than the code,
+  publishes the score and uploads the findings to the Security tab.
 - Commit messages are checked with commitlint on every pull request, since release-please derives
   the version bump and the changelog from them.
 - The `Links` workflow checks every URL in the Markdown files and in the `@see` tags of the source
