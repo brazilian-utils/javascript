@@ -1,6 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "../_internals/test/runtime";
 import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	expectTypeOf,
+	it,
+	vi,
+} from "../_internals/test/runtime";
+import {
+	type CepAddressInfo,
 	GetCepInfoByAddressError,
+	type GetCepInfoByAddressOptions,
 	GetCepInfoByAddressNotFoundError,
 	GetCepInfoByAddressValidationError,
 	getCepInfoByAddress,
@@ -204,5 +214,23 @@ describe("getCepInfoByAddress", () => {
 			}),
 		).rejects.toThrow(TypeError);
 		expect(fetchMock).toHaveBeenCalledTimes(3);
+	});
+});
+
+describe("getCepInfoByAddress types", () => {
+	it("should take the address options and resolve to a list of CepAddressInfo", () => {
+		expectTypeOf(getCepInfoByAddress).parameter(0).toEqualTypeOf<GetCepInfoByAddressOptions>();
+		expectTypeOf<GetCepInfoByAddressOptions>().toEqualTypeOf<{
+			federalUnit: string;
+			city: string;
+			street: string;
+		}>();
+		expectTypeOf(getCepInfoByAddress).returns.resolves.toEqualTypeOf<CepAddressInfo[]>();
+	});
+
+	it("should expose error classes that extend the base error", () => {
+		expectTypeOf(new GetCepInfoByAddressNotFoundError("m")).toExtend<GetCepInfoByAddressError>();
+		expectTypeOf(new GetCepInfoByAddressValidationError("m")).toExtend<GetCepInfoByAddressError>();
+		expectTypeOf(new GetCepInfoByAddressError("m")).toExtend<Error>();
 	});
 });

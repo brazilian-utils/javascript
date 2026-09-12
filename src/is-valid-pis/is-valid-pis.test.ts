@@ -1,5 +1,10 @@
+import * as fc from "fast-check";
+
 import { PIS_LENGTH } from "../_internals/constants/pis";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generatePis } from "../generate-pis/generate-pis";
 import { RESERVED_NUMBERS } from "./constants";
 import { isValidPis } from "./is-valid-pis";
 
@@ -90,5 +95,36 @@ describe("isValidPis", () => {
 			expect(isValidPis("120.1213.266-0")).toBe(true);
 			expect(isValidPis("120.7041.469-0")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		test("should accept a generated PIS written with any of the accepted mask characters", () => {
+			const masks = maskSeparators([".", "-", "/", " ", "(", ")", ",", "*"], 4, 3);
+
+			fc.assert(
+				fc.property(masks, (separators) => {
+					const pis = generatePis();
+					const head = `${separators[0]}${pis.slice(0, 3)}${separators[1]}`;
+					const tail = `${pis.slice(3, 8)}${separators[2]}${pis.slice(8)}`;
+
+					expect(isValidPis(`${head}${tail}${separators[3]}`)).toBe(true);
+				}),
+			);
+		});
+
+		test(`should reject any digits only value that is not ${PIS_LENGTH} digits long`, () => {
+			expectRejected(isValidPis, digitsOfOtherLength(22, [PIS_LENGTH]));
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidPis, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidPis types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidPis).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidPis).returns.toEqualTypeOf<boolean>();
 	});
 });

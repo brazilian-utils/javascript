@@ -1,5 +1,9 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { getBoletoInfo } from "./get-boleto-info";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generateBoleto } from "../generate-boleto/generate-boleto";
+import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
+import { type BoletoInfo, type GetBoletoInfoOptions, getBoletoInfo } from "./get-boleto-info";
 
 const withFactor = {
 	"0000": "00190000090114971860168524522114100000000102656",
@@ -154,5 +158,75 @@ describe("getBoletoInfo", () => {
 				getBoletoInfo("847900000005246100291102005460339004695895061080")?.hasEffectiveValue,
 			).toBe(false);
 		});
+	});
+
+	describe("properties", () => {
+		test("should read the bank code and the amount of a generated bank slip", () => {
+			fc.assert(
+				fc.property(fc.date({ noInvalidDate: true }), (referenceDate) => {
+					const value = generateBoleto();
+					const info = getBoletoInfo(value, { referenceDate });
+
+					expect(info?.bankCode).toBe(value.slice(0, 3));
+					expect(info?.amount).toBe(Number(value.slice(37, 47)));
+					expect(info?.type).toBeUndefined();
+				}),
+			);
+		});
+
+		test("should describe a generated arrecadação bank slip", () => {
+			fc.assert(
+				fc.property(fc.constant("arrecadacao" as const), (type) => {
+					const info = getBoletoInfo(generateBoleto({ type }));
+
+					expect(info?.type).toBe("arrecadacao");
+					expect(info?.bankCode).toBe("");
+					expect(info?.expirationDate).toBeNull();
+					expect(info?.value).toBe((info?.amount ?? 0) / 100);
+				}),
+			);
+		});
+
+		test("should return a value exactly when the bank slip is valid", () => {
+			fc.assert(
+				fc.property(fc.string(), (value) => {
+					expect(getBoletoInfo(value) !== undefined).toBe(isValidBoleto(value));
+				}),
+			);
+		});
+
+		test("should never throw and always return an object or undefined", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const info = getBoletoInfo(value as string);
+
+					expect(info === undefined || typeof info === "object").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("getBoletoInfo types", () => {
+	test("should take a string, optional options, and return boleto info or undefined", () => {
+		expectTypeOf(getBoletoInfo).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(getBoletoInfo).parameter(1).toEqualTypeOf<GetBoletoInfoOptions | undefined>();
+		expectTypeOf(getBoletoInfo).returns.toEqualTypeOf<BoletoInfo | undefined>();
+	});
+
+	test("should restrict referenceDate to a Date", () => {
+		expectTypeOf<GetBoletoInfoOptions["referenceDate"]>().toEqualTypeOf<Date | undefined>();
+	});
+
+	test("should restrict the boleto info shape", () => {
+		expectTypeOf<BoletoInfo>().toEqualTypeOf<{
+			amount: number;
+			expirationDate: Date | null;
+			bankCode: string;
+			type?: "arrecadacao";
+			segment?: number;
+			value?: number;
+			hasEffectiveValue?: boolean;
+		}>();
 	});
 });

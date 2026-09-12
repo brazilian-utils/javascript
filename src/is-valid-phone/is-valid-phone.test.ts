@@ -1,5 +1,13 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { isValidPhone } from "./is-valid-phone";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generatePhone } from "../generate-phone/generate-phone";
+import {
+	type IsValidPhoneOptions,
+	type PhoneType,
+	type PhoneVersion,
+	isValidPhone,
+} from "./is-valid-phone";
 
 describe("isValidPhone", () => {
 	describe("service numbers written with a country code", () => {
@@ -89,5 +97,65 @@ describe("isValidPhone", () => {
 			expect(isValidPhone("11987654321", { accept: ["mobile", "landline", "service"] })).toBe(true);
 			expect(isValidPhone("08001234567", { accept: ["mobile", "landline", "service"] })).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		const geographic = ["mobile", "landline"] as const;
+
+		test("should accept every generated geographic number, masked or not", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...geographic), (type) => {
+					const phone = generatePhone(type);
+					const masked = `(${phone.slice(0, 2)}) ${phone.slice(2, -4)}-${phone.slice(-4)}`;
+
+					expect(isValidPhone(phone)).toBe(true);
+					expect(isValidPhone(masked)).toBe(true);
+					expect(isValidPhone(`+55 ${masked}`)).toBe(true);
+					expect(isValidPhone(`0055${phone}`)).toBe(true);
+				}),
+			);
+		});
+
+		test("should only accept a generated service number when asked to", () => {
+			fc.assert(
+				fc.property(fc.constant("service" as const), (type) => {
+					const phone = generatePhone(type);
+
+					expect(isValidPhone(phone)).toBe(false);
+					expect(isValidPhone(phone, { accept: ["service"] })).toBe(true);
+				}),
+			);
+		});
+
+		test("should accept nothing when no kind of number is accepted", () => {
+			fc.assert(
+				fc.property(fc.constantFrom("mobile", "landline", "service"), (type) => {
+					expect(isValidPhone(generatePhone(type), { accept: [] })).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a phone number with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidPhone(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidPhone types", () => {
+	test("should take a string, optional options, and return a boolean", () => {
+		expectTypeOf(isValidPhone).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidPhone).parameter(1).toEqualTypeOf<IsValidPhoneOptions | undefined>();
+		expectTypeOf(isValidPhone).returns.toEqualTypeOf<boolean>();
+	});
+
+	test("should restrict version and accept to the documented values", () => {
+		expectTypeOf<IsValidPhoneOptions["version"]>().toEqualTypeOf<PhoneVersion | undefined>();
+		expectTypeOf<IsValidPhoneOptions["accept"]>().toEqualTypeOf<PhoneType[] | undefined>();
+		expectTypeOf<PhoneVersion>().toEqualTypeOf<1 | 2>();
+		expectTypeOf<PhoneType>().toEqualTypeOf<"mobile" | "landline" | "service">();
 	});
 });

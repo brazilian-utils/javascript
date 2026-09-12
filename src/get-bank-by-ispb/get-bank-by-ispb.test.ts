@@ -1,4 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { BANKS, type Bank } from "../_internals/constants/banks";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { getBankByIspb } from "./get-bank-by-ispb";
 
 describe("getBankByIspb", () => {
@@ -107,5 +110,44 @@ describe("getBankByIspb", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(getBankByIspb([0])).toBeNull();
 		});
+	});
+
+	describe("properties", () => {
+		const banks = fc.constantFrom(...BANKS);
+
+		test("should find a participant for the ISPB of every bank of the table", () => {
+			fc.assert(
+				fc.property(banks, (bank) => {
+					expect(getBankByIspb(bank.ispb)?.ispb).toBe(bank.ispb);
+					expect(getBankByIspb(Number(bank.ispb))?.ispb).toBe(bank.ispb);
+				}),
+			);
+		});
+
+		test("should return null for an ISPB longer than the eight digits of the register", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{9,20}$/), (value) => {
+					expect(getBankByIspb(value)).toBeNull();
+				}),
+			);
+		});
+
+		test("should never throw and always return a bank or null for an ISPB", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					const found = getBankByIspb(value as string);
+
+					expect(found === null || typeof found.ispb === "string").toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("getBankByIspb types", () => {
+	test("should take a string or number and return a bank or null", () => {
+		expectTypeOf(getBankByIspb).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getBankByIspb).returns.toEqualTypeOf<Bank | null>();
+		expectTypeOf<Bank>().toEqualTypeOf<{ code: string; ispb: string; name: string }>();
 	});
 });

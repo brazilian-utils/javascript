@@ -1,5 +1,9 @@
+import * as fc from "fast-check";
+
 import { CPF_LENGTH } from "../_internals/constants/cpf";
-import { describe, expect, test } from "../_internals/test/runtime";
+import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
+import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { RESERVED_NUMBERS } from "./constants";
 import { isValidCpf } from "./is-valid-cpf";
@@ -95,5 +99,51 @@ describe("isValidCpf", () => {
 				expect(isValidCpf(generateCpf())).toBe(true);
 			}
 		});
+	});
+
+	describe("properties", () => {
+		const masks = maskSeparators([".", "-", "/", " "], 3, 3);
+		const spaces = fc.string({ unit: fc.constantFrom(" ", "\t", "\n"), maxLength: 2 });
+
+		test("should accept a generated CPF written with any of the documented masks", () => {
+			fc.assert(
+				fc.property(masks, spaces, spaces, (separators, before, after) => {
+					const cpf = generateCpf();
+					const body = `${cpf.slice(0, 3)}${separators[0]}${cpf.slice(3, 6)}${separators[1]}${cpf.slice(6, 9)}${separators[2]}${cpf.slice(9)}`;
+
+					expect(isValidCpf(`${before}${body}${after}`)).toBe(isValidCpf(cpf));
+					expect(isValidCpf(`${before}${body}${after}`)).toBe(true);
+				}),
+			);
+		});
+
+		test(`should reject any digits only value that is not ${CPF_LENGTH} digits long`, () => {
+			expectRejected(isValidCpf, digitsOfOtherLength(22, [CPF_LENGTH]));
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidCpf, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidCpf types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidCpf).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidCpf).returns.toEqualTypeOf<boolean>();
+	});
+});
+
+describe("isValidCpf benchmarks", () => {
+	bench("valid, digits only", () => {
+		isValidCpf("15503516030");
+	});
+
+	bench("valid, masked", () => {
+		isValidCpf("155.035.160-30");
+	});
+
+	bench("invalid check digit", () => {
+		isValidCpf("15503516031");
 	});
 });

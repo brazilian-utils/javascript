@@ -565,3 +565,4 @@ export const vi = {
 };
 
 export { describe };
+export { bench, expectTypeOf } from "./noop";

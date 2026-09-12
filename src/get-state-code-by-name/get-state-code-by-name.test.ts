@@ -1,4 +1,8 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { DATA as STATES, type StateCode } from "../_internals/constants/states";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getStateCodeByName } from "./get-state-code-by-name";
 
 describe("getStateCodeByName", () => {
@@ -61,5 +65,31 @@ describe("getStateCodeByName", () => {
 	it("should return null for a number", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(getStateCodeByName(35)).toBeNull();
+	});
+
+	describe("properties", () => {
+		const stateArbitrary = fc.constantFrom(...STATES);
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(getStateCodeByName, fc.anything());
+		});
+
+		test("should resolve every known state name regardless of case, accents or padding", () => {
+			fc.assert(
+				fc.property(stateArbitrary, fc.boolean(), fc.boolean(), (state, upper, pad) => {
+					const cased = upper ? state.name.toUpperCase() : state.name.toLowerCase();
+					const padded = pad ? `  ${cased}  ` : cased;
+
+					expect(getStateCodeByName(padded)).toBe(state.code);
+				}),
+			);
+		});
+	});
+});
+
+describe("getStateCodeByName types", () => {
+	test("should take a string and return a StateCode or null", () => {
+		expectTypeOf(getStateCodeByName).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(getStateCodeByName).returns.toEqualTypeOf<StateCode | null>();
 	});
 });

@@ -1,5 +1,9 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidRenavam } from "./is-valid-renavam";
+
+const RENAVAM_DIGITS = Array.from({ length: 10 }, (_, digit) => String(digit));
 
 describe("isValidRenavam", () => {
 	describe("should return false", () => {
@@ -87,5 +91,53 @@ describe("isValidRenavam", () => {
 		test("when the checksum remainder is exactly 1 (expected digit 0, not 10)", () => {
 			expect(isValidRenavam("00000000060")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		test("should accept exactly one check digit for any base", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{10}$/), (base) => {
+					const accepted = RENAVAM_DIGITS.filter((digit) => isValidRenavam(`${base}${digit}`));
+
+					expect(accepted.length).toBe(1);
+				}),
+			);
+		});
+
+		test("should read a nine digit registration as its zero padded form", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{9}$/), (value) => {
+					const masked = `${value.slice(0, 4)}.${value.slice(4)}`;
+
+					expect(isValidRenavam(`00${value}`)).toBe(isValidRenavam(value));
+					expect(isValidRenavam(masked)).toBe(isValidRenavam(value));
+				}),
+			);
+		});
+
+		test("should reject any value whose length is neither nine nor eleven", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,16}$/), (value) => {
+					fc.pre(value.length !== 9 && value.length !== 11);
+
+					expect(isValidRenavam(value)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a RENAVAM with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidRenavam(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidRenavam types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidRenavam).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidRenavam).returns.toEqualTypeOf<boolean>();
 	});
 });

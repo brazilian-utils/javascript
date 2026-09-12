@@ -1,4 +1,7 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { isValidCei } from "../is-valid-cei/is-valid-cei";
 import { isValidCno } from "./is-valid-cno";
 
 describe("isValidCno", () => {
@@ -79,5 +82,46 @@ describe("isValidCno", () => {
 		test("for a whitespace mask and surrounding whitespace", () => {
 			expect(isValidCno(" 11 084 01680 62 ")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		test("should agree with isValidCei, whose numbering the CNO kept", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,14}$/), (value) => {
+					expect(isValidCno(value)).toBe(isValidCei(value));
+				}),
+			);
+		});
+
+		test("should accept a registration written with its mask", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{11}$/), (base) => {
+					const candidates = Array.from({ length: 10 }, (_, digit) => `${base}${digit}`);
+					const accepted = candidates.filter((value) => isValidCno(value));
+
+					fc.pre(accepted.length === 1);
+
+					const value = accepted[0];
+					const masked = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 10)}/${value.slice(10)}`;
+
+					expect(isValidCno(masked)).toBe(true);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a CNO number with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidCno(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCno types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCno).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCno).returns.toEqualTypeOf<boolean>();
 	});
 });

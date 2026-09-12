@@ -1,4 +1,10 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import { anyText, anyValue } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectIdempotent,
+	expectMatchesPattern,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { parseProcessoJuridico } from "./parse-processo-juridico";
 
 describe("parseProcessoJuridico", () => {
@@ -21,5 +27,26 @@ describe("parseProcessoJuridico", () => {
 	it("should return an empty string for null", () => {
 		// @ts-expect-error not a string or number
 		expect(parseProcessoJuridico(null)).toBe("");
+	});
+
+	describe("properties", () => {
+		test("should return at most the digits of a processo juridico", () => {
+			expectMatchesPattern(parseProcessoJuridico, /^\d{0,20}$/, anyText);
+		});
+
+		test("should be idempotent", () => {
+			expectIdempotent(parseProcessoJuridico, anyText);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(parseProcessoJuridico, "string", anyValue);
+		});
+	});
+});
+
+describe("parseProcessoJuridico types", () => {
+	test("should take a string or number value and return a string", () => {
+		expectTypeOf(parseProcessoJuridico).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(parseProcessoJuridico).returns.toEqualTypeOf<string>();
 	});
 });

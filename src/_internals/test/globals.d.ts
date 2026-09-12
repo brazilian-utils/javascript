@@ -12,6 +12,12 @@ declare const Deno: {
 	}) => void;
 };
 
+interface ImportMeta {
+	readonly env: {
+		readonly MODE: string;
+	};
+}
+
 declare global {
 	var RUN_LIVE_CEP_TESTS: string | number | undefined;
 }

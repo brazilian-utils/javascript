@@ -61,6 +61,7 @@ import {
 	type LicensePlateFormat,
 	type Municipality,
 	type NfeKey,
+	type NfeKeyModel,
 	type NumberToWordsGender,
 	type ParseCnpjOptions,
 	type ParseCurrencyOptions,
@@ -311,6 +312,7 @@ describe("Public API", () => {
 			LicensePlateFormat: LicensePlateFormat;
 			Municipality: Municipality;
 			NfeKey: NfeKey;
+			NfeKeyModel: NfeKeyModel;
 			NumberToWordsGender: NumberToWordsGender;
 			ParseCnpjOptions: ParseCnpjOptions;
 			ParseCurrencyOptions: ParseCurrencyOptions;

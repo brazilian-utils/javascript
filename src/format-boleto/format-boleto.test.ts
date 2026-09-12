@@ -1,7 +1,10 @@
+import * as fc from "fast-check";
+
 import { ARRECADACAO_LINE_LENGTH } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
-import { describe, expect, test } from "../_internals/test/runtime";
-import { formatBoleto } from "./format-boleto";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generateBoleto } from "../generate-boleto/generate-boleto";
+import { type FormatBoletoOptions, formatBoleto } from "./format-boleto";
 
 describe("formatBoleto", () => {
 	test("should format boleto with mask", () => {
@@ -159,5 +162,65 @@ describe("formatBoleto", () => {
 				"84610000000-5 24610029110-2 00546033900-4 69589506108-0",
 			);
 		});
+	});
+
+	describe("properties", () => {
+		const bancarioMask = /^\d{5}\.\d{5} \d{5}\.\d{6} \d{5}\.\d{6} \d \d{14}$/;
+
+		const arrecadacaoMask = /^\d{11}-\d \d{11}-\d \d{11}-\d \d{11}-\d$/;
+
+		test("should print a generated bank slip in the mask of its kind", () => {
+			fc.assert(
+				fc.property(fc.constantFrom("bancario", "arrecadacao"), (type) => {
+					const value = generateBoleto({ type });
+					const mask = type === "arrecadacao" ? arrecadacaoMask : bancarioMask;
+
+					expect(mask.test(formatBoleto(value))).toBe(true);
+				}),
+			);
+		});
+
+		test("should never emit a digit it was not given", () => {
+			fc.assert(
+				fc.property(fc.string(), (value) => {
+					const digits = value.replaceAll(/\D/g, "");
+					const formatted = formatBoleto(value).replaceAll(/\D/g, "");
+
+					expect(digits.startsWith(formatted)).toBe(true);
+					expect(formatted.length).toBeLessThanOrEqual(ARRECADACAO_LINE_LENGTH);
+				}),
+			);
+		});
+
+		test("should pad a short value up to the bank slip length", () => {
+			fc.assert(
+				fc.property(fc.integer({ min: 0, max: 999_999 }), (value) => {
+					const padded = formatBoleto(value, { pad: true }).replaceAll(/\D/g, "");
+
+					expect(padded.length).toBe(BOLETO_LENGTH);
+				}),
+			);
+		});
+
+		test("should never throw and always return the bank slip as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatBoleto(text)).toBe("string");
+					expect(typeof formatBoleto(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatBoleto types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatBoleto).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatBoleto).parameter(1).toEqualTypeOf<FormatBoletoOptions | undefined>();
+		expectTypeOf(formatBoleto).returns.toEqualTypeOf<string>();
+	});
+
+	test("should restrict pad to a boolean", () => {
+		expectTypeOf<FormatBoletoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

@@ -1,5 +1,7 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { formatCns } from "./format-cns";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { formatCns, type FormatCnsOptions } from "./format-cns";
 
 describe("formatCns", () => {
 	it("should format a CNS with the 3-4-4-4 space mask", () => {
@@ -33,5 +35,43 @@ describe("formatCns", () => {
 		expect(formatCns(null)).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatCns()).toBe("");
+	});
+
+	describe("properties", () => {
+		test("should print a full card number in groups of three, four, four and four", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{15}$/), (value) => {
+					expect(/^\d{3} \d{4} \d{4} \d{4}$/.test(formatCns(value))).toBe(true);
+				}),
+			);
+		});
+
+		test("should left pad a shorter value up to the card length", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,15}$/), (value) => {
+					const padded = formatCns(value, { pad: true }).replaceAll(" ", "");
+
+					expect(padded).toBe(value.padStart(15, "0"));
+				}),
+			);
+		});
+
+		test("should never throw and always return the health card as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatCns(text)).toBe("string");
+					expect(typeof formatCns(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatCns types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatCns).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCns).parameter(1).toEqualTypeOf<FormatCnsOptions | undefined>();
+		expectTypeOf<FormatCnsOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(formatCns).returns.toEqualTypeOf<string>();
 	});
 });

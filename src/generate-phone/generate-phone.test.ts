@@ -1,9 +1,12 @@
-import { describe, expect, it } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { VALID_AREA_CODES } from "../_internals/constants/area-codes";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidLandlinePhone } from "../is-valid-landline-phone/is-valid-landline-phone";
 import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-phone";
 import { isValidPhone } from "../is-valid-phone/is-valid-phone";
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
-import { generatePhone } from "./generate-phone";
+import { type GeneratePhoneType, generatePhone } from "./generate-phone";
 
 const drawAreaCode = (): string => generatePhone("mobile").slice(0, 2);
 
@@ -103,5 +106,67 @@ describe("generatePhone", () => {
 
 		expect(lengths.has(11)).toBe(true);
 		expect(lengths.has(10)).toBe(true);
+	});
+
+	describe("properties", () => {
+		test("should always generate a mobile number with a valid area code", () => {
+			fc.assert(
+				fc.property(fc.constant("mobile" as const), (type) => {
+					const phone = generatePhone(type);
+
+					const areaCode = Number(phone.slice(0, 2));
+
+					expect(phone.length).toBe(11);
+					expect(phone.charAt(2)).toBe("9");
+					expect(VALID_AREA_CODES.includes(areaCode)).toBe(true);
+					expect(isValidMobilePhone(phone, { version: 2 })).toBe(true);
+				}),
+			);
+		});
+
+		test("should always generate a landline number with a valid area code", () => {
+			fc.assert(
+				fc.property(fc.constant("landline" as const), (type) => {
+					const phone = generatePhone(type);
+
+					const areaCode = Number(phone.slice(0, 2));
+
+					expect(phone.length).toBe(10);
+					expect(/^[2-6]$/.test(phone.charAt(2))).toBe(true);
+					expect(VALID_AREA_CODES.includes(areaCode)).toBe(true);
+					expect(isValidLandlinePhone(phone)).toBe(true);
+				}),
+			);
+		});
+
+		test("should never generate a service number unless asked to", () => {
+			fc.assert(
+				fc.property(fc.constant(null), () => {
+					const phone = generatePhone();
+
+					expect(isValidPhone(phone)).toBe(true);
+					expect(isValidServicePhone(phone)).toBe(false);
+				}),
+			);
+		});
+
+		test("should always generate a service number its own validator accepts", () => {
+			fc.assert(
+				fc.property(fc.constant("service" as const), (type) => {
+					expect(isValidServicePhone(generatePhone(type))).toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("generatePhone types", () => {
+	test("should take an optional phone type and return a string", () => {
+		expectTypeOf(generatePhone).parameter(0).toEqualTypeOf<GeneratePhoneType | undefined>();
+		expectTypeOf(generatePhone).returns.toEqualTypeOf<string>();
+	});
+
+	test("should restrict the type to the supported phone kinds", () => {
+		expectTypeOf<GeneratePhoneType>().toEqualTypeOf<"mobile" | "landline" | "service">();
 	});
 });

@@ -1,4 +1,15 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import {
+	anyValue,
+	digits,
+	digitsOfOtherLength,
+	maskedValues,
+} from "../_internals/test/arbitraries";
+import {
+	expectAccepted,
+	expectAlwaysReturnsType,
+	expectRejected,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCep } from "./is-valid-cep";
 
 describe("isValidCep", () => {
@@ -63,5 +74,26 @@ describe("isValidCep", () => {
 			expect(isValidCep("013 10 100")).toBe(true);
 			expect(isValidCep("01310.100")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		test("should ignore dots, hyphens and spaces wherever they appear", () => {
+			expectAccepted(isValidCep, maskedValues(digits(8), [".", "-", " "], 2));
+		});
+
+		test("should reject any digits only value that is not 8 digits long", () => {
+			expectRejected(isValidCep, digitsOfOtherLength(16, [8]));
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidCep, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidCep types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidCep).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCep).returns.toEqualTypeOf<boolean>();
 	});
 });

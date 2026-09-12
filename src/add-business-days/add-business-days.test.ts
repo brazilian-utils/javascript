@@ -1,5 +1,11 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { addBusinessDays } from "./add-business-days";
+import * as fc from "fast-check";
+
+import { type StateCode } from "../_internals/constants/states";
+import { businessDayDates } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { isBusinessDay } from "../is-business-day/is-business-day";
+import { addBusinessDays, type AddBusinessDaysParams } from "./add-business-days";
 
 describe("addBusinessDays", () => {
 	it("should match the date-fns addBusinessDays example (10 business days from 2014-09-01 lands on 2014-09-15, https://date-fns.org/docs/addBusinessDays)", () => {
@@ -204,5 +210,58 @@ describe("addBusinessDays", () => {
 		expect(result?.getMinutes()).toBe(30);
 		expect(result?.getSeconds()).toBe(15);
 		expect(result?.getMilliseconds()).toBe(500);
+	});
+
+	describe("properties", () => {
+		const daysArbitrary = fc.integer({ min: -200, max: 200 });
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(addBusinessDays, fc.anything());
+		});
+
+		test("should land on a business day whenever a non-zero number of days is requested", () => {
+			fc.assert(
+				fc.property(businessDayDates, daysArbitrary, (date, days) => {
+					if (days === 0) return;
+
+					const result = addBusinessDays({ date, days });
+
+					if (result !== null) {
+						expect(isBusinessDay(result)).toBe(true);
+					}
+				}),
+			);
+		});
+
+		test("should move the date forward for positive days and backward for negative days", () => {
+			fc.assert(
+				fc.property(businessDayDates, daysArbitrary, (date, days) => {
+					const result = addBusinessDays({ date, days });
+
+					if (result === null) return;
+
+					if (days > 0) {
+						expect(result.getTime()).toBeGreaterThan(date.getTime());
+					} else if (days < 0) {
+						expect(result.getTime()).toBeLessThan(date.getTime());
+					} else {
+						expect(result.getTime()).toBe(date.getTime());
+					}
+				}),
+			);
+		});
+	});
+});
+
+describe("addBusinessDays types", () => {
+	test("should take an AddBusinessDaysParams and return a Date or null", () => {
+		expectTypeOf(addBusinessDays).parameter(0).toEqualTypeOf<AddBusinessDaysParams>();
+		expectTypeOf<AddBusinessDaysParams>().toEqualTypeOf<{
+			date: Date;
+			days: number;
+			stateCode?: StateCode;
+			includeOptional?: boolean;
+		}>();
+		expectTypeOf(addBusinessDays).returns.toEqualTypeOf<Date | null>();
 	});
 });

@@ -1,5 +1,15 @@
-import { describe, expect, it } from "../_internals/test/runtime";
-import { isHoliday } from "./is-holiday";
+import * as fc from "fast-check";
+
+import { type StateCode } from "../_internals/constants/states";
+import { holidayYears, monthDays, monthIndexes, stateCodes } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getHolidays, type Holiday } from "../get-holidays/get-holidays";
+import { isHoliday, type IsHolidayOptions } from "./is-holiday";
+
+function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
+	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
+}
 
 describe("isHoliday", () => {
 	it("should return true for a national holiday built from local date components", () => {
@@ -68,5 +78,40 @@ describe("isHoliday", () => {
 		it("should return true when the date is built from local components instead", () => {
 			expect(isHoliday({ targetDate: new Date(2024, 11, 25) })).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		test("should agree with getHolidays for the same year and state", () => {
+			fc.assert(
+				fc.property(
+					holidayYears,
+					monthIndexes,
+					monthDays,
+					fc.option(stateCodes),
+					(year, month, day, stateCode) => {
+						const targetDate = new Date(year, month, day);
+						const holidays = getHolidaysFor(year, stateCode);
+						const expected = holidays.some(
+							(holiday) => holiday.date.getMonth() === month && holiday.date.getDate() === day,
+						);
+						const options = stateCode === null ? { targetDate } : { targetDate, stateCode };
+
+						expect(isHoliday(options)).toBe(expected);
+					},
+				),
+			);
+		});
+
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrows(isHoliday, fc.anything());
+		});
+	});
+});
+
+describe("isHoliday types", () => {
+	test("should take an options object and return a boolean", () => {
+		expectTypeOf(isHoliday).parameter(0).toEqualTypeOf<IsHolidayOptions | undefined>();
+		expectTypeOf<IsHolidayOptions>().toEqualTypeOf<{ targetDate: Date; stateCode?: StateCode }>();
+		expectTypeOf(isHoliday).returns.toEqualTypeOf<boolean>();
 	});
 });

@@ -1,4 +1,11 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import { anyText, anyValue, asciiAlphanumericText } from "../_internals/test/arbitraries";
+import {
+	expectAlwaysReturnsType,
+	expectCaseInsensitive,
+	expectIdempotent,
+	expectMatchesPattern,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { parsePassport } from "./parse-passport";
 
 describe("parsePassport", () => {
@@ -31,5 +38,30 @@ describe("parsePassport", () => {
 			// @ts-expect-error not a string
 			expect(parsePassport(null)).toBe("");
 		});
+	});
+
+	describe("properties", () => {
+		test("should always return at most 8 uppercase alphanumeric characters", () => {
+			expectMatchesPattern(parsePassport, /^[0-9A-Z]{0,8}$/, anyText);
+		});
+
+		test("should be idempotent", () => {
+			expectIdempotent(parsePassport, anyText);
+		});
+
+		test("should ignore the case of an ascii alphanumeric value", () => {
+			expectCaseInsensitive(parsePassport, asciiAlphanumericText);
+		});
+
+		test("should never throw and always return a string", () => {
+			expectAlwaysReturnsType(parsePassport, "string", anyValue);
+		});
+	});
+});
+
+describe("parsePassport types", () => {
+	test("should take a string and return a string", () => {
+		expectTypeOf(parsePassport).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(parsePassport).returns.toEqualTypeOf<string>();
 	});
 });

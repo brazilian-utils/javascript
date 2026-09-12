@@ -1,5 +1,8 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { formatCno } from "./format-cno";
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { formatCei } from "../format-cei/format-cei";
+import { formatCno, type FormatCnoOptions } from "./format-cno";
 
 describe("formatCno", () => {
 	test("should format a full 12 digit value", () => {
@@ -43,5 +46,34 @@ describe("formatCno", () => {
 	test("should return an empty string for undefined", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(formatCno()).toBe("");
+	});
+
+	describe("properties", () => {
+		test("should print what formatCei prints, since both share the mask", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,16}$/), (value) => {
+					expect(formatCno(value)).toBe(formatCei(value));
+					expect(formatCno(value, { pad: true })).toBe(formatCei(value, { pad: true }));
+				}),
+			);
+		});
+
+		test("should never throw and always return the CNO number as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatCno(text)).toBe("string");
+					expect(typeof formatCno(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatCno types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatCno).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCno).parameter(1).toEqualTypeOf<FormatCnoOptions | undefined>();
+		expectTypeOf<FormatCnoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(formatCno).returns.toEqualTypeOf<string>();
 	});
 });
