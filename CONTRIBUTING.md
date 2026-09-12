@@ -229,6 +229,10 @@ signatures are pinned by the `describe("<name> types")` blocks in the tests, and
   every push to `main` and weekly: it grades the repository configuration (pinned actions, token
   permissions, branch protection, code review, dependency updates, SAST) rather than the code,
   publishes the score and uploads the findings to the Security tab.
+- Every GitHub release carries `brazilian-utils.cdx.json`, a CycloneDX SBOM of the published
+  package generated with `npm sbom` from the release tag. The package has no runtime dependencies,
+  so the document describes the package itself; it exists for consumers whose supply-chain policy
+  requires one.
 - Commit messages are checked with commitlint on every pull request, since release-please derives
   the version bump and the changelog from them.
 - The `Links` workflow checks every URL in the Markdown files and in the `@see` tags of the source
