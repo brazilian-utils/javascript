@@ -29,6 +29,7 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
+ * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/educacao-fiscal/educacao_fiscal/folhetos-orientativos/cadastros-dig.pdf
  * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
  */
 export const generateCpf = (state?: StateCode): string => {
