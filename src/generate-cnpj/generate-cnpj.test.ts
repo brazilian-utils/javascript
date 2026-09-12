@@ -3,6 +3,29 @@ import { describe, expect, test } from "../_internals/test/runtime";
 import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
 import { generateCnpj } from "./generate-cnpj";
 
+const REMAINDER_TWO_DRAWS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+
+const generateWithForcedDraws = (
+	draws: number[],
+	alphabetSize: number,
+	generate: () => string,
+): string => {
+	const originalRandom = Math.random;
+	let call = 0;
+
+	Math.random = () => {
+		const draw = draws[call];
+		call += 1;
+		return (draw + 0.5) / alphabetSize;
+	};
+
+	try {
+		return generate();
+	} finally {
+		Math.random = originalRandom;
+	}
+};
+
 describe("generateCnpj", () => {
 	describe("version 1 (numeric)", () => {
 		test("should generate a valid numeric CNPJ", () => {
@@ -34,6 +57,20 @@ describe("generateCnpj", () => {
 			} finally {
 				Math.random = originalRandom;
 			}
+		});
+
+		test("should compute the first check digit as 9 when the weighted sum leaves remainder 2", () => {
+			const cnpj = generateWithForcedDraws(REMAINDER_TWO_DRAWS, 10, () => generateCnpj(1));
+
+			expect(cnpj).toBe("00000000000191");
+			expect(isValidCnpj(cnpj)).toBe(true);
+		});
+
+		test("should compute the alphanumeric check digits the same way when the remainder is 2", () => {
+			const cnpj = generateWithForcedDraws(REMAINDER_TWO_DRAWS, 36, () => generateCnpj(2));
+
+			expect(cnpj).toBe("00000000000191");
+			expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
 		});
 
 		test("should generate different numeric CNPJs on multiple calls, retrying more draws on the rare chance of a collision", () => {
