@@ -38,8 +38,12 @@ const isValidChecksum = (cpf: string): boolean => {
  * isValidCpf("12345678900"); // false (invalid checksum)
  * ```
  *
+ * The check digit rule (`REGRA_VALIDA_CPF`) is specified, with a worked example
+ * (`280012389-38`), in the Receita Federal's Manual e-Financeira, Anexo II.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
- * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
+ * @see Official: http://sped.rfb.gov.br/arquivo/show/8231
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const isValidCpf = (cpf: string): boolean => {
 	if (typeof cpf !== "string") return false;

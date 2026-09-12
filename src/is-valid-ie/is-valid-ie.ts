@@ -505,6 +505,24 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
 /**
  * Validates a Brazilian state tax registration number (IE).
  *
+ * Per state notes, all of them deliberate and unchanged since 2.3.0:
+ * - DF: the SINTEGRA page is published but empty, and no SEFAZ-DF roteiro is published either,
+ *   so DF follows the 13 digit AC rule under the prefix 07.
+ * - GO: the SINTEGRA page is superseded by the SEFAZ-GO roteiro, which is the source of the
+ *   prefixes 10, 11 and 15, of the 10103105 to 10119997 range and of the dual digit
+ *   registration 11094402.
+ * - RJ: the SINTEGRA page publishes only the modulus rule; the 8 digit length and the weights
+ *   2, 7, 6, 5, 4, 3 and 2 come from the SINTEGRA validator itself, not from the page.
+ * - SP: characters other than "P" and digits are rejected on purpose, a deliberate deviation
+ *   from the Regra Geral of the SINTEGRA page, which ignores them instead.
+ * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
+ * - PE: only the current 9 digit eFisco format is accepted; the old 14 digit CACEPE format
+ *   documented on the same page is not.
+ * - An all zero registration is accepted for every state whose published formula yields a
+ *   check digit of 0 for it (AM, BA with 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC,
+ *   SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which reject repeated
+ *   digits.
+ *
  * @param {StateCode} stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
  * @param {string} ie - The state registration number to validate
  * @returns {boolean} True if the state registration number is valid, false otherwise
@@ -524,8 +542,13 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_BA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_CE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_DF.html
+ * The page is published but empty: it carries no format, no weights and no worked example,
+ * and no SEFAZ-DF roteiro is published either, so DF follows the 13 digit AC rule under the
+ * prefix 07.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
+ * Superseded for Goiás by the SEFAZ-GO roteiro below: this page still gives the prefixes as
+ * 10, 11 or 20 to 29 and knows nothing of the special ranges.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MG.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MS.html
@@ -536,6 +559,8 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PI.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PR.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RJ.html
+ * Publishes only the modulus rule: the 8 digit length and the weights 2, 7, 6, 5, 4, 3 and 2
+ * come from the SINTEGRA validator itself, not from this page.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RN.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RO.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RR.html

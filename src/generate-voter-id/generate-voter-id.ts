@@ -20,7 +20,11 @@ import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
  * generateVoterId("XX" as StateCode); // falls back to "ZZ" instead of throwing
  * ```
  *
- * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2003/resolucao-no-21-538-de-14-de-outubro-de-2003
+ * Resolução TSE nº 23.659/2021, art. 36, parágrafo único, confirms the federative union table and
+ * the two-step módulo 11 structure; the weights themselves are not published by the TSE and follow
+ * the community reference cited as `Based on:`.
+ *
+ * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
  */
 export const generateVoterId = (

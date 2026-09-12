@@ -19,6 +19,7 @@ import { LEGAL_NATURE, MASK_REGEX } from "./constants";
  * ```
  *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
+ * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const isValidLegalNature = (code: string): boolean => {
 	if (typeof code !== "string") return false;

@@ -15,7 +15,7 @@ import { BANKS, type Bank } from "../_internals/constants/banks";
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
- * @see Based on: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
+ * @see Official: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
  * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */
 export const getBanks = (): Bank[] => BANKS.map((bank) => Object.assign({}, bank));

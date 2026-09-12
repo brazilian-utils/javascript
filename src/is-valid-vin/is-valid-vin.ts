@@ -7,12 +7,15 @@ import {
 } from "./constants";
 
 /**
- * Validates a VIN (Vehicle Identification Number / chassi) under ISO 3779.
+ * Validates a VIN (Vehicle Identification Number / chassi).
  *
- * Checks the length (17 characters), the excluded letters (`I`, `O`, `Q` are never valid) and
- * the check digit at the 9th position, calculated with the ISO 3779 transliteration table and
- * a weighted MOD 11 sum, mandatory for vehicles manufactured in or imported into Brazil under
- * Resolução CONTRAN nº 27/1998. Case-insensitive and trims surrounding whitespace.
+ * Checks the length (17 characters), the excluded letters (`I`, `O`, `Q` are never valid; ISO
+ * 3779:2009 structure) and the check digit at the 9th position, with the check digit and
+ * transliteration computed per 49 CFR 565.15. That 9th-position check digit is a North-American
+ * requirement (49 CFR 565.15 / SAE J853): Resolução CONTRAN nº 24/1998 and ABNT NBR 6066 define
+ * the Brazilian VIN structure but do not mandate it, so many Brazilian-built VINs do not carry
+ * a matching check digit. This function is therefore a North-American-style structural check,
+ * not a universal validator of Brazilian VINs. Case-insensitive and trims surrounding whitespace.
  *
  * @param {string} value - The VIN to be validated.
  * @returns {boolean} True when `value` is a 17 character VIN with a matching check digit.
@@ -27,8 +30,10 @@ import {
  * isValidVin("1HGCM82633A00435"); // false (16 characters)
  * ```
  *
- * @see Official: https://www.iso.org/standard/52200.html ISO 3779:2009 (VIN content and structure)
- * @see Based on: https://vpic.nhtsa.dot.gov/api/ NHTSA vPIC VIN decoding API and WMI table.
+ * @see Official: https://www.iso.org/standard/52200.html
+ * @see Official: https://www.ecfr.gov/current/title-49/section-565.15
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/resolucoes-contran
+ * @see Based on: https://vpic.nhtsa.dot.gov/api/
  */
 export const isValidVin = (value: string): boolean => {
 	if (typeof value !== "string") return false;

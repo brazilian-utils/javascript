@@ -52,7 +52,7 @@ const toNumber = (value: unknown, precision: number): number =>
  * A value that is not a finite number, such as `NaN`, `Infinity` or `-Infinity`, formats as
  * an empty string.
  *
- * The precision is clamped to the `0..100` range accepted by `Intl.NumberFormat`.
+ * The precision is clamped to `0-20`, the range Node's `Intl.NumberFormat` accepts.
  *
  * @param {string|number} value - The value to be formatted. Can be a string or a number.
  * @param {FormatCurrencyOptions} [options] - Optional formatting options.

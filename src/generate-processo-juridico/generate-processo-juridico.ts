@@ -38,7 +38,9 @@ const calculateCheckDigits = (base: string): string => {
  * generateProcessoJuridico({ year: 10000 }); // null
  * ```
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/119 Resolução CNJ nº 65/2008
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits.
+ *
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */
 export const generateProcessoJuridico = (
 	options: GenerateProcessoJuridicoOptions = {},

@@ -26,7 +26,12 @@ const LENGTH = 12;
  * formatVoterId("1234567880191"); // "1234 5678 8 01 91"
  * ```
  *
- * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2003/resolucao-no-21-538-de-14-de-outubro-de-2003
+ * The 13-digit São Paulo/Minas Gerais grouping is brutils parity, not published by the TSE. A
+ * 14-or-more-digit input is read the same way as a 13-digit one: it is grouped as a São Paulo or
+ * Minas Gerais id whenever its 10th and 11th digits are "01"/"02", extra trailing digits included.
+ *
+ * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const formatVoterId = (value: string | number): string => {
 	if (isNullish(value)) return "";

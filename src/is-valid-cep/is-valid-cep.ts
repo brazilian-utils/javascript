@@ -22,6 +22,7 @@ const CEP_REGEX = /^\d{8}$/;
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
+ * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/guia-de-enderecamento/guia-de-enderecamento
  */
 export const isValidCep = (cep: string | number): boolean => {
 	if (typeof cep !== "string" && typeof cep !== "number") return false;

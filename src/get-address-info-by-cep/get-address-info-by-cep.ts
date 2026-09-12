@@ -185,8 +185,8 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
- * @see Based on: https://viacep.com.br/ Default `"viacep"` provider.
- * @see Based on: https://brasilapi.com.br/docs#tag/CEP Default `"brasilapi"` provider.
+ * @see Official: https://viacep.com.br/ Default `"viacep"` provider.
+ * @see Official: https://brasilapi.com.br/docs#tag/CEP Default `"brasilapi"` provider.
  */
 export const getAddressInfoByCep = async (
 	cep: string | number,

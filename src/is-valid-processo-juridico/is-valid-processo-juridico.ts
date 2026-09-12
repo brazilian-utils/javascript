@@ -48,7 +48,9 @@ const verifyCheckDigit = (value: string): boolean => {
  * isValidProcessoJuridico("0002080-25.2012.5.15.0049"); // true
  * ```
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/119 Resolução CNJ nº 65/2008
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits.
+ *
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */
 export const isValidProcessoJuridico = (value: string): boolean => {
 	if (typeof value !== "string") return false;

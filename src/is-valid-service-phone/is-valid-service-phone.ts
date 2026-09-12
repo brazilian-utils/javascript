@@ -25,7 +25,8 @@ const UTILITY_CODES: readonly string[] = SERVICE_PHONE_UTILITY_CODES;
  * - the abbreviated `300X` and `400X` numbers, followed by 4 digits, e.g. `3003-1234`. Anatel
  *   publishes no allocation for these, so the accepted roots are the conventional ones;
  * - the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated,
- *   e.g. `190` and `192`. Undesignated codes in the `1XX` range are rejected.
+ *   e.g. `190` and `192`. Undesignated codes in the `1XX` range are rejected. `112` and `911`
+ *   are accepted too: Anatel lists them alongside the `1XX` codes as mobile-only aliases of `190`.
  *
  * Only the structure is checked: the number does not have to be assigned to anyone, and the
  * `0500` rule that encodes a donation amount in the last two digits is not enforced.

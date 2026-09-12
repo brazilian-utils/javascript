@@ -19,7 +19,12 @@ import { EXTENDED_LENGTH, LENGTH } from "./constants";
  * parseVoterId("1234 5678 8 01 91"); // "1234567880191"
  * ```
  *
- * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2003/resolucao-no-21-538-de-14-de-outubro-de-2003
+ * The 13-digit São Paulo/Minas Gerais cap is brutils parity, not published by the TSE. A
+ * 14-or-more-digit input whose 10th and 11th digits are "01"/"02" is read as a 13-digit São Paulo
+ * or Minas Gerais id and capped at 13 digits, discarding anything past that.
+ *
+ * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const parseVoterId = (value: string | number): string => {
 	if (isNullish(value)) return "";

@@ -22,7 +22,11 @@ export type FormatCnhOptions = {
  * formatCnh("8900", { pad: true }); // "000000089-00"
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm
+ * Resolução CONTRAN nº 886/2021, art. 4º I, defines the CNH registry number as 9 characters plus
+ * 2 security check digits, which is the layout this mask reproduces; no official text publishes
+ * the check-digit weights used to compute them.
+ *
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf
  */
 export const formatCnh = (value: string | number, options?: FormatCnhOptions): string =>
 	isNullish(value)

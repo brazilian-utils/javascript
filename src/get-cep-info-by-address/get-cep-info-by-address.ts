@@ -89,7 +89,7 @@ const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Arr
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
- * @see Based on: https://viacep.com.br/
+ * @see Official: https://viacep.com.br/
  */
 export const getCepInfoByAddress = async ({
 	federalUnit,

@@ -47,10 +47,13 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * isValidBoleto("846100000005246100291102005460339004695895061080"); // true (arrecadação)
  * ```
  *
+ * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields, the módulo 11 check
+ * digit (using 1 for remainders 0, 10 and 1) and the fator de vencimento behind the 47 digit
+ * cobrança bancária slip; the FEBRABAN layout index covers the arrecadação slip.
+ *
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
- * @see Official: https://portal.febraban.org.br/pagina/3166/33/pt-br/layout-cobranca FEBRABAN,
- * "Layout Padrão de Cobrança / Especificações Técnicas para Cobrança", the cobrança bancária
- * layout behind the 47 digit linha digitável and its fator de vencimento.
+ * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
+ * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const isValidBoleto = (value: string): boolean => {
 	if (typeof value !== "string") return false;

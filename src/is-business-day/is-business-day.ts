@@ -6,7 +6,7 @@ import { getHolidays } from "../get-holidays/get-holidays";
 export type IsBusinessDayOptions = {
 	/** Two letter state code whose state holidays are also treated as non-business days (default: national holidays only). */
 	stateCode?: StateCode;
-	/** Whether optional-type holidays (`Holiday.type === "optional"`, e.g. Carnaval, Corpus Christi) count as non-business days (default: `true`, matching Brazilian banking practice, where these days are not settlement days). */
+	/** Whether optional-type holidays (`Holiday.type === "optional"`, e.g. Carnaval, Corpus Christi) count as non-business days (default: `true`). */
 	includeOptional?: boolean;
 };
 
@@ -23,10 +23,9 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * specific local day, for the same reason documented in `isHoliday`.
  *
  * `options.includeOptional` defaults to `true`: holidays whose `Holiday.type` is
- * `"optional"` (Carnaval and Corpus Christi) are treated as non-business days, matching
- * the Brazilian banking calendar (FEBRABAN/CMN), where these days are not settlement days
- * even though they are not statutory holidays. Pass `false` to only treat statutory
- * (`"national"` and `"state"`) holidays as non-business days.
+ * `"optional"` (Carnaval and Corpus Christi) are treated as non-business days even though
+ * they are not statutory holidays. Pass `false` to only treat statutory (`"national"` and
+ * `"state"`) holidays as non-business days.
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored
  * and only national holidays are considered (same behavior as `getHolidays`/`isHoliday`).
@@ -47,7 +46,7 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * isBusinessDay(new Date(2024, 0, 2)); // true (Tuesday, not a holiday)
  * isBusinessDay(new Date(2024, 0, 1)); // false (Ano novo)
  * isBusinessDay(new Date(2024, 0, 6)); // false (Saturday)
- * isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, optional holiday, banking practice)
+ * isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, optional holiday, counted by default)
  * isBusinessDay(new Date(2024, 1, 13), { includeOptional: false }); // true
  * isBusinessDay(new Date(2024, 6, 9), { stateCode: "SP" }); // false (Revolução Constitucionalista)
  * isBusinessDay(new Date(2024, 6, 9)); // true (state holiday ignored without stateCode)
@@ -55,7 +54,19 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * isBusinessDay(new Date(2100, 0, 4)); // false (a Monday, but 2100 is outside the supported range)
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
+ * The underlying holidays are the ones `getHolidays` computes; see its JSDoc (and
+ * `src/get-holidays/constants.ts` for state holidays) for the full set of laws behind them.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm Lei 662/1949, the base
+ * national holidays law.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm Lei 10.607/2002,
+ * added Tiradentes and Finados.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm Lei 6.802/1980, declared
+ * Nossa Senhora Aparecida a national holiday.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm Lei
+ * 14.759/2023, nationalized Dia da Consciência Negra from 2024.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm Lei 9.093/1995, the
+ * framework law authorizing state and municipal holidays.
  */
 export const isBusinessDay = (value: Date, options?: IsBusinessDayOptions): boolean => {
 	if (!(value instanceof Date) || Number.isNaN(value.getTime())) return false;

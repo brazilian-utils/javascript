@@ -31,48 +31,48 @@ export const LEGACY_CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Consciência Negra";
 /**
  * Feriados estaduais por lei estadual, um por UF (uma UF pode ter mais de um `@see`).
  *
- * @see https://pt.wikipedia.org/wiki/Acre Lei AC nº 1.538/2004, Dia do Evangélico
- * @see https://pt.wikipedia.org/wiki/Acre Lei AC nº 1.411/2001, Dia Internacional da Mulher
- * @see https://pt.wikipedia.org/wiki/Acre Lei AC nº 14/1964, Aniversário do Acre
- * @see https://pt.wikipedia.org/wiki/Acre Lei AC nº 1.526/2004, Dia da Amazônia
- * @see https://pt.wikipedia.org/wiki/Acre Lei AC nº 57/1965, Assinatura do Tratado de Petrópolis
- * @see https://pt.wikipedia.org/wiki/Alagoas Lei AL nº 5.508/1993, São João
- * @see https://pt.wikipedia.org/wiki/Alagoas Lei AL nº 5.509/1993, São Pedro
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Decreto AL nº 68.782/2019 (ponto facultativo), Emancipação Política de Alagoas
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei AP nº 667/2002, Dia de São José
- * @see https://pt.wikipedia.org/wiki/Amap%C3%A1 Constituição Estadual do AP, Criação do Território Federal do Amapá
- * @see https://pt.wikipedia.org/wiki/Dia_Nacional_de_Zumbi_e_da_Consci%C3%AAncia_Negra Lei AP nº 1.169/2007, Dia Estadual da Consciência Negra (state holiday until it became national in 2024)
- * @see https://sapl.al.am.leg.br/norma/8919 Lei AM nº 25/1977, Elevação do Amazonas à categoria de Província (05/09)
- * @see https://sapl.al.am.leg.br/norma/2873 Lei AM nº 84/2010, Dia da Consciência Negra (state holiday until it became national in 2024)
- * @see https://www.legisweb.com.br/legislacao/?id=316229 Decreto AM de 02/02/2016 (calendário oficial), Nossa Senhora da Conceição (08/12): ponto facultativo estadual; feriado apenas no Município de Manaus (Lei Municipal nº 496/1999)
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual da BA, Independência da Bahia
- * @see https://pt.wikipedia.org/wiki/Cear%C3%A1 Constituição Estadual do CE (Data Magna), Abolição da Escravidão no Ceará
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei Distrital nº 963/1995, Dia do Evangélico (DF)
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Fundação de Brasília (21/4, Lei Orgânica do DF)
- * @see https://pt.wikipedia.org/wiki/Esp%C3%ADrito_Santo_(estado) Lei ES nº 11.010/2019, Nossa Senhora da Penha (padroeira do estado, 8º dia após a Páscoa)
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei MA nº 2.457/1964, Adesão do Maranhão à Independência
- * @see https://pt.wikipedia.org/wiki/Mato_Grosso Lei MT nº 1.587/2002, Dia da Consciência Negra (state holiday until it became national in 2024)
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei MS nº 10/1979, Criação do Estado de Mato Grosso do Sul
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei PA nº 5.999/1996, Adesão do Pará à Independência
- * @see https://pt.wikipedia.org/wiki/Para%C3%ADba Lei PB nº 10.601/2015, Fundação do Estado e Dia de Nossa Senhora das Neves
- * @see https://pt.wikipedia.org/wiki/Para%C3%ADba Lei PB nº 3.489/1967, art. 2º, Morte de João Pessoa
- * @see https://pt.wikipedia.org/wiki/Paran%C3%A1 Lei PR nº 18.384/2014 (ponto facultativo), Emancipação Política do Paraná
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei PE nº 13.835/2009, Revolução Pernambucana
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei PI nº 176/1937, Dia do Piauí
- * @see http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/c8aa0900025feef6032564ec0060dfff/1baf90ca125ff96f8325740a00776600 Lei RJ nº 5.198/2008, São Jorge
- * @see http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/69d90307244602bb032567e800668618/80a541c3a5a9d63183256c7d0057bf25 Lei RJ nº 4.007/2002, Dia da Consciência Negra (state holiday until it became national in 2024; ADI 4.131 pending at the STF)
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei RN nº 8.913/2006, Mártires de Cunhaú e Uruaçu
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual do RS, Revolução Farroupilha
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei RO nº 3.170/2013, Criação do Estado de Rondônia
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual de RR, Criação do Estado de Roraima
- * @see https://pt.wikipedia.org/wiki/Santa_Catarina Lei SC nº 16.719/2015 (consolida e revoga as Leis nº 10.306/1996 e 12.906/2004), Criação da Capitania de Santa Catarina
- * @see https://pt.wikipedia.org/wiki/Santa_Catarina Lei SC nº 16.719/2015, Dia de Santa Catarina de Alexandria
- * @see https://www.al.sp.gov.br/documentacao/estudos-e-manuais/feriado-9-julho/artigo.htm Lei SP nº 9.497/1997 (PL 710/1995), Revolução Constitucionalista
- * @see https://www.al.sp.gov.br/repositorio/legislacao/lei/2023/lei-17746-12.09.2023.html Lei SP nº 17.746/2023, Dia da Consciência Negra (state holiday in 2023, national since 2024)
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual de SE, Emancipação Política de Sergipe
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei TO nº 960/1998, Autonomia do Estado do Tocantins
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei TO nº 627/1993, Padroeira do Estado (Nossa Senhora da Natividade)
- * @see https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei TO nº 98/1989, Criação do Estado do Tocantins
+ * @see Based on: https://pt.wikipedia.org/wiki/Acre Lei AC nº 1.538/2004, Dia do Evangélico
+ * @see Based on: https://pt.wikipedia.org/wiki/Acre Lei AC nº 1.411/2001, Dia Internacional da Mulher
+ * @see Based on: https://pt.wikipedia.org/wiki/Acre Lei AC nº 14/1964, Aniversário do Acre
+ * @see Based on: https://pt.wikipedia.org/wiki/Acre Lei AC nº 1.526/2004, Dia da Amazônia
+ * @see Based on: https://pt.wikipedia.org/wiki/Acre Lei AC nº 57/1965, Assinatura do Tratado de Petrópolis
+ * @see Based on: https://pt.wikipedia.org/wiki/Alagoas Lei AL nº 5.508/1993, São João
+ * @see Based on: https://pt.wikipedia.org/wiki/Alagoas Lei AL nº 5.509/1993, São Pedro
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Decreto AL nº 68.782/2019 (ponto facultativo), Emancipação Política de Alagoas
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei AP nº 667/2002, Dia de São José
+ * @see Based on: https://pt.wikipedia.org/wiki/Amap%C3%A1 Constituição Estadual do AP, Criação do Território Federal do Amapá
+ * @see Based on: https://pt.wikipedia.org/wiki/Dia_Nacional_de_Zumbi_e_da_Consci%C3%AAncia_Negra Lei AP nº 1.169/2007, Dia Estadual da Consciência Negra (state holiday until it became national in 2024)
+ * @see Official: https://sapl.al.am.leg.br/norma/8919 Lei AM nº 25/1977, Elevação do Amazonas à categoria de Província (05/09)
+ * @see Official: https://sapl.al.am.leg.br/norma/2873 Lei AM nº 84/2010, Dia da Consciência Negra (state holiday until it became national in 2024)
+ * @see Based on: https://www.legisweb.com.br/legislacao/?id=316229 Decreto AM de 02/02/2016 (calendário oficial), Nossa Senhora da Conceição (08/12): ponto facultativo estadual; feriado apenas no Município de Manaus (Lei Municipal nº 496/1999)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual da BA, Independência da Bahia
+ * @see Based on: https://pt.wikipedia.org/wiki/Cear%C3%A1 Constituição Estadual do CE (Data Magna), Abolição da Escravidão no Ceará
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei Distrital nº 963/1995, Dia do Evangélico (DF)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Fundação de Brasília (21/4, Lei Orgânica do DF)
+ * @see Based on: https://pt.wikipedia.org/wiki/Esp%C3%ADrito_Santo_(estado) Lei ES nº 11.010/2019, Nossa Senhora da Penha (padroeira do estado, 8º dia após a Páscoa)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei MA nº 2.457/1964, Adesão do Maranhão à Independência
+ * @see Official: https://www.al.mt.gov.br/norma-juridica/urn:lex:br;mato.grosso:estadual:lei.ordinaria:2002-12-27;7879 Lei MT nº 7.879/2002, Dia da Consciência Negra (state holiday until it became national in 2024)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei MS nº 10/1979, Criação do Estado de Mato Grosso do Sul
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei PA nº 5.999/1996, Adesão do Pará à Independência
+ * @see Based on: https://pt.wikipedia.org/wiki/Para%C3%ADba Lei PB nº 10.601/2015, Fundação do Estado e Dia de Nossa Senhora das Neves
+ * @see Based on: https://pt.wikipedia.org/wiki/Para%C3%ADba Lei PB nº 3.489/1967, art. 2º, Morte de João Pessoa
+ * @see Based on: https://pt.wikipedia.org/wiki/Paran%C3%A1 Lei PR nº 18.384/2014 (ponto facultativo), Emancipação Política do Paraná
+ * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?ano=2017&complemento=0&numero=16059&tipo=&tiponorma=1&url= Lei PE nº 16.059/2017, Revolução Pernambucana (Data Magna, fixed 6 March; supersedes the movable "primeiro domingo de março" date set by Lei PE nº 13.835/2009)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei PI nº 176/1937, Dia do Piauí
+ * @see Official: http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/c8aa0900025feef6032564ec0060dfff/1baf90ca125ff96f8325740a00776600 Lei RJ nº 5.198/2008, São Jorge
+ * @see Official: http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/69d90307244602bb032567e800668618/80a541c3a5a9d63183256c7d0057bf25 Lei RJ nº 4.007/2002, Dia da Consciência Negra (state holiday until it became national in 2024; ADI 4.131 pending at the STF)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei RN nº 8.913/2006, Mártires de Cunhaú e Uruaçu
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual do RS, Revolução Farroupilha
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei RO nº 3.170/2013, Criação do Estado de Rondônia
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual de RR, Criação do Estado de Roraima
+ * @see Based on: https://pt.wikipedia.org/wiki/Santa_Catarina Lei SC nº 16.719/2015 (consolida e revoga as Leis nº 10.306/1996 e 12.906/2004), Criação da Capitania de Santa Catarina
+ * @see Based on: https://pt.wikipedia.org/wiki/Santa_Catarina Lei SC nº 16.719/2015, Dia de Santa Catarina de Alexandria
+ * @see Official: https://www.al.sp.gov.br/documentacao/estudos-e-manuais/feriado-9-julho/artigo.htm Lei SP nº 9.497/1997 (PL 710/1995), Revolução Constitucionalista
+ * @see Official: https://www.al.sp.gov.br/repositorio/legislacao/lei/2023/lei-17746-12.09.2023.html Lei SP nº 17.746/2023, Dia da Consciência Negra (state holiday in 2023, national since 2024)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Constituição Estadual de SE, Emancipação Política de Sergipe
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei TO nº 960/1998, Autonomia do Estado do Tocantins
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei TO nº 627/1993, Padroeira do Estado (Nossa Senhora da Natividade)
+ * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Lei TO nº 98/1989, Criação do Estado do Tocantins
  */
 export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	AC: [
