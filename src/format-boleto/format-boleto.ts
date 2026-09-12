@@ -1,10 +1,14 @@
 import { ARRECADACAO_LINE_LENGTH, ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { ARRECADACAO_PATTERN, BANCARIO_PATTERN } from "./constants";
 
-export type FormatBoletoOptions = Pick<FormatParams, "pad">;
+/** Options of `formatBoleto`. */
+export type FormatBoletoOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
+};
 
 /**
  * Formats a given value as a Brazilian boleto.

@@ -6,6 +6,7 @@ import {
 	type WordsCase,
 } from "../_internals/number-to-words/number-to-words";
 
+/** Options of `convertNumberToWords`. */
 export type ConvertNumberToWordsOptions = {
 	/** Grammatical gender used to agree "um/dois" and the hundreds group ("duzentos/duzentas", etc.) with the noun the number qualifies. Defaults to `"masculine"`. */
 	gender?: NumberToWordsGender;

@@ -6,6 +6,7 @@ import {
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { RESERVED_NUMBERS } from "./constants";
 
+/** Options of `isValidCnpj`. */
 export type IsValidCnpjOptions = {
 	/** Which CNPJ format to accept: `1` numeric only, `2` alphanumeric (default: `1`). */
 	version?: 1 | 2;

@@ -2,8 +2,9 @@ import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import type { FormatCnpjOptions } from "../format-cnpj/format-cnpj";
+import { type FormatCnpjOptions } from "../format-cnpj/format-cnpj";
 
+/** Options of `parseCnpj`. */
 export type ParseCnpjOptions = Pick<FormatCnpjOptions, "version">;
 
 const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]): string => {

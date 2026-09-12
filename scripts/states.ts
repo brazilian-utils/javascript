@@ -35,6 +35,9 @@ const isState = (value: unknown): value is State =>
 	"nome" in value.regiao &&
 	typeof value.regiao.nome === "string";
 
+const union = (values: string[]): string =>
+	values.map((value) => `| ${JSON.stringify(value)}`).join(" ");
+
 const main = async (): Promise<void> => {
 	const response = await fetchWithRetry(
 		"https://servicodados.ibge.gov.br/api/v1/localidades/estados",
@@ -64,20 +67,34 @@ const main = async (): Promise<void> => {
 
 	await writeFile(
 		resolve(scriptsDir, "..", "./src/_internals/constants/states.ts"),
-		`/**
+		`/** The two letter code of each Brazilian state, as published by the IBGE. */
+export type StateCode = ${union(states.map((state) => state.code))};
+
+/** The name of each Brazilian state, as published by the IBGE. */
+export type StateName = ${union(states.map((state) => state.name))};
+
+/** One Brazilian state, as returned by \`getStates\`, \`getStateByIbgeCode\` and the other state utils. */
+export type State = {
+	/** The two letter code of the state, e.g. \`"SP"\`. */
+	readonly code: StateCode;
+	/** The full name of the state, e.g. \`"São Paulo"\`. */
+	readonly name: StateName;
+	/** The code of the region the state belongs to, e.g. \`"SE"\`. */
+	readonly regionCode: "N" | "NE" | "CO" | "SE" | "S";
+	/** The full name of the region the state belongs to, e.g. \`"Sudeste"\`. */
+	readonly regionName: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
+	/** The 2 digit IBGE code of the Federative Unit ("cUF"), e.g. \`35\`. */
+	readonly ibgeCode: number;
+};
+
+/**
  * Brazilian states published by the IBGE, sorted by name with \`localeCompare\` in the "pt-BR"
  * locale. \`ibgeCode\` is the 2-digit IBGE code of the Federative Unit ("cUF"), the same code
  * found in the first field of every DF-e access key (chave de acesso).
  *
  * @see https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const DATA = ${JSON.stringify(states)} as const
-
-export type State = (typeof DATA)[number];
-
-export type StateName = (typeof DATA)[number]["name"];
-
-export type StateCode = (typeof DATA)[number]["code"];`,
+export const DATA: readonly State[] = ${JSON.stringify(states)};`,
 	);
 };
 

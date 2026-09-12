@@ -3,6 +3,7 @@ import { generateRandomNumber } from "../_internals/generate-random-number/gener
 import { mod10 } from "../_internals/mod10/mod10";
 import { mod11 } from "../_internals/mod11/mod11";
 
+/** Options of `generateBoleto`. */
 export type GenerateBoletoOptions = {
 	/** Which kind of bank slip to generate (default: `"bancario"`). */
 	type?: "bancario" | "arrecadacao";

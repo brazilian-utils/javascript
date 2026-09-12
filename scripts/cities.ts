@@ -71,22 +71,18 @@ const main = async (): Promise<void> => {
 		throw new Error("IBGE municipalities payload is not an array of city entries");
 	}
 
-	const byState = json.reduce(
-		(acc, city) => {
-			const stateInitials =
-				city.microrregiao?.mesorregiao?.UF?.sigla ??
-				city["regiao-imediata"]?.["regiao-intermediaria"]?.UF?.sigla;
+	const byState: Record<string, [string, string][]> = {};
 
-			if (stateInitials === undefined || stateInitials === "") return acc;
+	for (const city of json) {
+		const stateInitials =
+			city.microrregiao?.mesorregiao?.UF?.sigla ??
+			city["regiao-imediata"]?.["regiao-intermediaria"]?.UF?.sigla;
 
-			const cityNames = (acc[stateInitials] ??= []);
+		if (stateInitials === undefined || stateInitials === "") continue;
 
-			cityNames.push([city.nome, String(city.id)]);
-
-			return acc;
-		},
-		{} as Record<string, [string, string][]>,
-	);
+		byState[stateInitials] ??= [];
+		byState[stateInitials].push([city.nome, String(city.id)]);
+	}
 
 	const sortedEntries = Object.entries(byState)
 		.sort(([a], [b]) => a.localeCompare(b))

@@ -1,4 +1,4 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 
 export const UF_TO_VOTER_ID_CODE: Record<StateCode | "ZZ", string> = {
 	SP: "01",

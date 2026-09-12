@@ -74,8 +74,5 @@ const generateAlphanumericCnpj = (): string => {
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
  */
-export const generateCnpj = (version?: 1 | 2): string => {
-	const versionToUse = version ?? 1;
-	if (versionToUse === 1) return generateNumericCnpj();
-	return generateAlphanumericCnpj();
-};
+export const generateCnpj = (version: 1 | 2 = 1): string =>
+	version === 1 ? generateNumericCnpj() : generateAlphanumericCnpj();

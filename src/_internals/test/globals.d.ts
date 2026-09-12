@@ -1,6 +1,6 @@
 declare const Deno: {
 	readonly env: {
-		get(key: string): string | undefined;
+		get: (key: string) => string | undefined;
 	};
 	readonly test: (options: {
 		name: string;

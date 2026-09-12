@@ -9,6 +9,7 @@ import {
 	ZERO_WORD,
 } from "../constants/number-words";
 
+/** The grammatical gender `convertNumberToWords` agrees the number it writes out with. */
 export type NumberToWordsGender = "masculine" | "feminine";
 
 /**

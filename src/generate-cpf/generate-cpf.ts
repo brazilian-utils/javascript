@@ -1,4 +1,4 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";

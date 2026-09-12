@@ -1,9 +1,13 @@
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { PATTERN } from "./constants";
 
-export type FormatCaepfOptions = Pick<FormatParams, "pad">;
+/** Options of `formatCaepf`. */
+export type FormatCaepfOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
+};
 
 /**
  * Formats a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number according to the

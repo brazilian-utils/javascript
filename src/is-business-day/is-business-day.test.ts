@@ -94,7 +94,7 @@ describe("isBusinessDay", () => {
 
 	it("should not mutate the input Date", () => {
 		const value = new Date(2024, 0, 6, 12);
-		const original = new Date(value.getTime());
+		const original = new Date(value);
 
 		isBusinessDay(value, { stateCode: "SP" });
 

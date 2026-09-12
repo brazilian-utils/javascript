@@ -26,16 +26,17 @@ const tlv = (id: string, value: string): string =>
 	`${id}${value.length.toString().padStart(2, "0")}${value}`;
 
 const buildPayload = (merchantAccountInformation: string, additionalData?: string): string => {
-	const withoutCrc =
-		tlv("00", "01") +
-		tlv("26", merchantAccountInformation) +
-		tlv("52", "0000") +
-		tlv("53", "986") +
-		tlv("58", "BR") +
-		tlv("59", "Fulano de Tal") +
-		tlv("60", "BRASILIA") +
-		(additionalData === undefined ? "" : tlv("62", additionalData)) +
-		"6304";
+	const withoutCrc = [
+		tlv("00", "01"),
+		tlv("26", merchantAccountInformation),
+		tlv("52", "0000"),
+		tlv("53", "986"),
+		tlv("58", "BR"),
+		tlv("59", "Fulano de Tal"),
+		tlv("60", "BRASILIA"),
+		additionalData === undefined ? "" : tlv("62", additionalData),
+		"6304",
+	].join("");
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
@@ -43,28 +44,30 @@ const buildPayload = (merchantAccountInformation: string, additionalData?: strin
 const MERCHANT_ACCOUNT_INFORMATION = tlv("00", "br.gov.bcb.pix") + tlv("01", "12345678909");
 
 const buildPayloadWithMerchantAccountInformationTag = (tag: string): string => {
-	const withoutCrc =
-		tlv("00", "01") +
-		tlv(tag, MERCHANT_ACCOUNT_INFORMATION) +
-		tlv("52", "0000") +
-		tlv("53", "986") +
-		tlv("58", "BR") +
-		tlv("59", "Fulano de Tal") +
-		tlv("60", "BRASILIA") +
-		"6304";
+	const withoutCrc = [
+		tlv("00", "01"),
+		tlv(tag, MERCHANT_ACCOUNT_INFORMATION),
+		tlv("52", "0000"),
+		tlv("53", "986"),
+		tlv("58", "BR"),
+		tlv("59", "Fulano de Tal"),
+		tlv("60", "BRASILIA"),
+		"6304",
+	].join("");
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
 
 const buildPayloadWithoutCountryCode = (): string => {
-	const withoutCrc =
-		tlv("00", "01") +
-		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
-		tlv("52", "0000") +
-		tlv("53", "986") +
-		tlv("59", "Fulano de Tal") +
-		tlv("60", "BRASILIA") +
-		"6304";
+	const withoutCrc = [
+		tlv("00", "01"),
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION),
+		tlv("52", "0000"),
+		tlv("53", "986"),
+		tlv("59", "Fulano de Tal"),
+		tlv("60", "BRASILIA"),
+		"6304",
+	].join("");
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
@@ -86,30 +89,32 @@ const buildPayloadWithCrcTag = (crcTag: string): string => {
 };
 
 const buildPayloadWithAmount = (amount: string): string => {
-	const withoutCrc =
-		tlv("00", "01") +
-		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
-		tlv("52", "0000") +
-		tlv("53", "986") +
-		tlv("54", amount) +
-		tlv("58", "BR") +
-		tlv("59", "Fulano de Tal") +
-		tlv("60", "BRASILIA") +
-		"6304";
+	const withoutCrc = [
+		tlv("00", "01"),
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION),
+		tlv("52", "0000"),
+		tlv("53", "986"),
+		tlv("54", amount),
+		tlv("58", "BR"),
+		tlv("59", "Fulano de Tal"),
+		tlv("60", "BRASILIA"),
+		"6304",
+	].join("");
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
 
 const buildPayloadWithMerchantName = (merchantName: string): string => {
-	const withoutCrc =
-		tlv("00", "01") +
-		tlv("26", MERCHANT_ACCOUNT_INFORMATION) +
-		tlv("52", "0000") +
-		tlv("53", "986") +
-		tlv("58", "BR") +
-		tlv("59", merchantName) +
-		tlv("60", "BRASILIA") +
-		"6304";
+	const withoutCrc = [
+		tlv("00", "01"),
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION),
+		tlv("52", "0000"),
+		tlv("53", "986"),
+		tlv("58", "BR"),
+		tlv("59", merchantName),
+		tlv("60", "BRASILIA"),
+		"6304",
+	].join("");
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };

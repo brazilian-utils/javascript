@@ -1,11 +1,12 @@
 import { DATA } from "../_internals/constants/cities";
+import { type StateCode } from "../_internals/constants/states";
 import { describe, expect, it } from "../_internals/test/runtime";
 import { getStates } from "../get-states/get-states";
 import { getMunicipalities } from "./get-municipalities";
 
 const NUMBER_OF_BRAZILIAN_MUNICIPALITIES = 5571;
 
-const KNOWN_STATE_MUNICIPALITY_COUNTS: Record<string, number> = {
+const KNOWN_STATE_MUNICIPALITY_COUNTS: Partial<Record<StateCode, number>> = {
 	MG: 853,
 	MT: 142,
 	RS: 497,
@@ -35,7 +36,7 @@ describe("getMunicipalities", () => {
 
 	it("should filter municipalities by state", () => {
 		for (const [stateCode, expectedCount] of Object.entries(KNOWN_STATE_MUNICIPALITY_COUNTS)) {
-			expect(getMunicipalities(stateCode).length).toBe(expectedCount);
+			expect(getMunicipalities(stateCode as StateCode).length).toBe(expectedCount);
 		}
 	});
 
@@ -50,11 +51,14 @@ describe("getMunicipalities", () => {
 	});
 
 	it("should return an empty array for an unknown state", () => {
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalities("ZZ")).toEqual([]);
 	});
 
 	it("should return an empty array for inherited Object property names instead of throwing", () => {
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalities("toString")).toEqual([]);
+		// @ts-expect-error: intentionally invalid input
 		expect(getMunicipalities("constructor")).toEqual([]);
 	});
 

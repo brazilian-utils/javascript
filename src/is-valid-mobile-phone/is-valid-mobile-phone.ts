@@ -1,11 +1,12 @@
 import { PHONE_NATIONAL_MAX_LENGTH } from "../_internals/constants/phone";
 import { isValidDDD } from "../_internals/is-valid-ddd/is-valid-ddd";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
-import type { PhoneVersion } from "../is-valid-phone/is-valid-phone";
+import { type PhoneVersion } from "../is-valid-phone/is-valid-phone";
 import { MOBILE_VALID_FIRST_NUMBERS_V1, MOBILE_VALID_FIRST_NUMBERS_V2 } from "./constants";
 
 export type { PhoneVersion } from "../is-valid-phone/is-valid-phone";
 
+/** Options of `isValidMobilePhone`. */
 export type IsValidMobilePhoneOptions = {
 	/** Numbering rule to enforce: `1` the pre-2016 8 digit rule, `2` the 9 digit one (default: `2`). */
 	version?: PhoneVersion;

@@ -1,6 +1,4 @@
-import { CBO_TITLES } from "../_internals/constants/cbo";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { getCbo } from "../get-cbo/get-cbo";
 
 /**
  * Validates if a CBO (Classificação Brasileira de Ocupações) code exists in the official
@@ -15,6 +13,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * isValidCbo("2124-05"); // true
  * isValidCbo("212405"); // true
  * isValidCbo(212405); // true
+ * isValidCbo(10205); // true (a number is padded to 6 digits, so this is "010205")
  * isValidCbo("999999"); // false
  * ```
  *
@@ -22,10 +21,4 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
  * Community mirror of the official table used to build `CBO_TITLES`.
  */
-export const isValidCbo = (value: string | number): boolean => {
-	if (isNullish(value)) return false;
-
-	const digits = sanitizeToDigits(value);
-
-	return digits in CBO_TITLES;
-};
+export const isValidCbo = (value: string | number): boolean => getCbo(value) !== null;

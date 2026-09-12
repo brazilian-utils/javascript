@@ -6,16 +6,16 @@ import { resolve } from "node:path";
 const scriptsDir = import.meta.dirname;
 
 const run = (command: string, args: string[]): Promise<number | null> =>
-	new Promise((resolveExit) => {
+	new Promise((_resolve) => {
 		const child = spawn(command, args, {
 			stdio: "inherit",
 		});
 
 		child.on("close", (code) => {
-			resolveExit(code);
+			_resolve(code);
 		});
 		child.on("error", () => {
-			resolveExit(1);
+			_resolve(1);
 		});
 	});
 

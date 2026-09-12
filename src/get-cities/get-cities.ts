@@ -1,5 +1,7 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/cities";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
+
+let allCitiesCache: string[] | undefined;
 
 /**
  * Returns a list of city names for a given Brazilian state, or all cities if no state is specified.
@@ -10,8 +12,8 @@ import type { StateCode } from "../_internals/constants/states";
  * expects them (the combined, sorted list is computed once and cached; every call returns
  * a fresh copy).
  *
- * @param state - The code of the Brazilian state to filter cities by. Optional.
- * @returns An array of city names, sorted alphabetically. Returns an empty array if the state is not found.
+ * @param {StateCode} [state] - The code of the Brazilian state to filter cities by. Optional.
+ * @returns {string[]} An array of city names, sorted alphabetically. Returns an empty array if the state is not found.
  *
  * @example
  * ```typescript
@@ -21,8 +23,6 @@ import type { StateCode } from "../_internals/constants/states";
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-let allCitiesCache: string[] | undefined;
-
 export const getCities = (state?: StateCode): string[] => {
 	if (!state) {
 		allCitiesCache ??= Object.values(CITIES_DATA)

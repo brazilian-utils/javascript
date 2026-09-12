@@ -5,8 +5,9 @@ import {
 } from "../_internals/constants/certidao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CERTIDAO_TYPES } from "../parse-certidao/constants";
-import type { CertidaoType } from "../parse-certidao/parse-certidao";
+import { type CertidaoType } from "../parse-certidao/parse-certidao";
 
+/** Options of `isValidCertidao`. */
 export type IsValidCertidaoOptions = {
 	/** Kinds of certidão (book types) that count as valid (default: all of them). */
 	accept?: CertidaoType[];
@@ -18,7 +19,7 @@ const getCheckDigit = (value: string): number => {
 
 	for (let i = 0; i < value.length; i++) {
 		sum += (value.charCodeAt(i) - 48) * weight;
-		weight = weight + 1;
+		weight += 1;
 	}
 
 	const remainder = sum % 11;

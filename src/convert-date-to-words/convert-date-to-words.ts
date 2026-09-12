@@ -2,6 +2,7 @@ import { applyWordsCase } from "../_internals/apply-words-case/apply-words-case"
 import { MONTH_NAMES, WEEKDAY_NAMES } from "../_internals/constants/number-words";
 import { numberToWords, type WordsCase } from "../_internals/number-to-words/number-to-words";
 
+/** Options of `convertDateToWords`. */
 export type ConvertDateToWordsOptions = {
 	/** Letter case applied to the result: `"lower"` (unchanged), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Defaults to `"lower"`; an invalid value is ignored and `"lower"` is used instead. */
 	case?: WordsCase;

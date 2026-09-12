@@ -1,4 +1,4 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
@@ -23,7 +23,7 @@ const checkLength = (ie: string, length: number | number[]): boolean => {
 };
 
 const startsWithAny = (ie: string, prefixes: readonly string[]): boolean =>
-	prefixes.some((prefix) => ie.slice(0, prefix.length) === prefix);
+	prefixes.some((prefix) => ie.startsWith(prefix));
 
 const startsWith = (ie: string, prefix: string): boolean => startsWithAny(ie, [prefix]);
 
@@ -169,7 +169,7 @@ const validateBA: IeValidator = (ie: string) => {
 	const charAt = Number.parseInt(ie.slice(pos, pos + 1), 10);
 	const mod = BA_MOD_10_DIGITS.includes(charAt) ? 10 : 11;
 
-	const body = ie.slice(0, ie.length - 2);
+	const body = ie.slice(0, -2);
 	const firstSum = calcWeightedSum({
 		source: ie,
 		length: body.length,

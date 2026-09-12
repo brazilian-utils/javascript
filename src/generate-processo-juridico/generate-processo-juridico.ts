@@ -1,6 +1,7 @@
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 
+/** Options of `generateProcessoJuridico`. */
 export type GenerateProcessoJuridicoOptions = {
 	/** Filing year, from the current year to 9999 (default: the current year). */
 	year?: number;

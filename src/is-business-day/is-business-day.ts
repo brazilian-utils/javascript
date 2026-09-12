@@ -1,7 +1,8 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { getHolidays } from "../get-holidays/get-holidays";
 
+/** Options of `isBusinessDay`. */
 export type IsBusinessDayOptions = {
 	/** Two letter state code whose state holidays are also treated as non-business days (default: national holidays only). */
 	stateCode?: StateCode;
