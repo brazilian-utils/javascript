@@ -163,6 +163,16 @@ describe("isValidNfeKey", () => {
 				key: "35200600000000000000550010000000019000000003",
 				expected: true,
 			},
+			{
+				name: "tpEmis 8, a code the MOC does not assign",
+				key: "35170458716523000119550010000000128000123455",
+				expected: false,
+			},
+			{
+				name: "tpEmis 9, the off-line NFC-e contingency",
+				key: "35170458716523000119550010000000129000123453",
+				expected: true,
+			},
 		];
 
 		for (const { name, key, expected } of CASES) {

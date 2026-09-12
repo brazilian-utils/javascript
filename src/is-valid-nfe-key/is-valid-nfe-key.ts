@@ -9,6 +9,7 @@ import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
  * document's XML (e.g. `Id="NFe3517...`), which is stripped before validation.
  *
  * The key is `cUF(2) AAMM(4) CNPJ/CPF(14) mod(2) serie(3) nNF(9) tpEmis(1) cNF(8) cDV(1)`.
+ * `tpEmis` must be one of the codes the MOC assigns, 1 to 7 or 9; 8 is not assigned.
  * The check digit (`cDV`) is a modulus 11 over the first 43 digits, weights 2-9 cycling from
  * the right, where a remainder of 0 or 1 maps to check digit 0.
  *
