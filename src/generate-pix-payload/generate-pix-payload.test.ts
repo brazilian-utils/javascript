@@ -333,14 +333,14 @@ describe("generatePixPayload", () => {
 			expect(parsePixPayload(payload ?? "")?.description).toBe("y".repeat(62));
 		});
 
-		test("truncating the description to what a phone key leaves", () => {
+		test("truncating the description to what a mobile phone key leaves", () => {
 			const payload = generatePixPayload({
 				...BASE,
-				key: "1130000000",
+				key: "11987654321",
 				description: "y".repeat(90),
 			});
 
-			expect(parsePixPayload(payload ?? "")?.description).toBe("y".repeat(60));
+			expect(parsePixPayload(payload ?? "")?.description).toBe("y".repeat(59));
 		});
 
 		test("leaving room for the description on a long key", () => {

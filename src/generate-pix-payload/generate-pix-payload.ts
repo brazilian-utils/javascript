@@ -133,6 +133,10 @@ const resolveFormattedAmount = (
  * template within its 99 character limit together with the `br.gov.bcb.pix` GUI. `parsePixPayload`
  * already parses both shapes, so `parsePixPayload(generatePixPayload({ url, ... }))` round-trips.
  *
+ * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
+ * composto" of Pix Automático (Pix recorrente) does, are out of scope: the location is always
+ * written in the "Merchant Account Information" template.
+ *
  * The merchant name, the merchant city and the description are folded to printable ASCII
  * (accents are dropped) and truncated to the lengths the BR Code allows, the description to
  * whatever is left of the 99 characters the "Merchant Account Information" template holds.
@@ -169,9 +173,10 @@ const resolveFormattedAmount = (
  * generatePixPayload({ key: "123.456.789-09", url: "pix.example.com/qr/v2/1234", merchantName: "Fulano", merchantCity: "Brasília" }); // null (both key and url)
  * ```
  *
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Based on: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
- * @see Based on: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
  */
 export const generatePixPayload = (params: GeneratePixPayloadParams): string | null => {
 	if (isNullish(params) || typeof params !== "object") return null;

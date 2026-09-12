@@ -84,6 +84,12 @@ describe("parsePixKey", () => {
 			expect(parsePixKey("(00) 98765-4321")).toBeNull();
 		});
 
+		test("when the phone is a landline, since the manual registers a mobile number", () => {
+			expect(parsePixKey("(11) 3000-0000")).toBeNull();
+			expect(parsePixKey("+551130000000")).toBeNull();
+			expect(parsePixKey("1130000000")).toBeNull();
+		});
+
 		test("when it is free text", () => {
 			expect(parsePixKey("chave pix")).toBeNull();
 			expect(parsePixKey("---")).toBeNull();
@@ -134,8 +140,15 @@ describe("parsePixKey", () => {
 			expect(parsePixKey("00.551.760/8718-13")).toEqual({ type: "cnpj", value: "00551760871813" });
 		});
 
-		test("should still read a 0055 prefixed value that is not a valid CNPJ as a phone", () => {
-			expect(parsePixKey("00551133334444")).toEqual({ type: "phone", value: "+551133334444" });
+		test("should still read a 0055 prefixed mobile number as a phone", () => {
+			expect(parsePixKey("005511987654321")).toEqual({
+				type: "phone",
+				value: "+5511987654321",
+			});
+		});
+
+		test("should return null for a 0055 prefixed value that is neither a valid CNPJ nor a mobile number", () => {
+			expect(parsePixKey("00551133334444")).toBeNull();
 		});
 	});
 
@@ -196,13 +209,9 @@ describe("parsePixKey", () => {
 			});
 		});
 
-		test("when it is a landline", () => {
-			expect(parsePixKey("(11) 3000-0000")).toEqual({ type: "phone", value: "+551130000000" });
-		});
-
 		test("and never exceed the 14 characters of the E.164 form", () => {
 			for (let index = 0; index < 200; index++) {
-				const key = parsePixKey(`+55${generatePhone()}`);
+				const key = parsePixKey(`+55${generatePhone("mobile")}`);
 
 				expect(key?.type).toBe("phone");
 				expect(key?.value.length).toBeLessThanOrEqual(14);
