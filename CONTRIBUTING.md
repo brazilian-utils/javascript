@@ -132,9 +132,15 @@ categories as errors, the `import`, `jsdoc` and `promise` plugins, and a curated
 on every function, no `console` outside `scripts/`, no `forEach`, no parameter reassignment, no
 non-null assertions, no unsafe type assertions, JSDoc `@param`/`@returns` with types on exported
 functions, `type` over `interface`, `T[]` over `Array<T>`, and no default exports outside the
-config files. Test files relax the rules that only make sense for production code (return types,
-JSDoc, the `unsafe-*` family, since the multi-runtime `expect` shim is untyped) and every
-`@ts-expect-error` must carry a description.
+config files. On top of the categories, about two hundred `style`/`restriction` rules that
+have a clear quality payoff are switched on one by one (inline `type` import specifiers,
+`startsWith` over `slice` comparisons, negative indexes, no `reduce`, `await` over `then`, no
+`Array#apply`, `max-params` of 4, kebab-case file names, the `promise` invariants, the `jsdoc`
+tag checks and the `vitest` matcher preferences, among others); whole categories such as
+`no-magic-numbers`, `no-null`, `one-var` or `no-plusplus` stay off because they fight the
+check-digit code and the `null`-returning API on purpose. Test files relax the rules that only
+make sense for production code (return types, JSDoc, the `unsafe-*` family, since the
+multi-runtime `expect` shim is untyped) and every `@ts-expect-error` must carry a description.
 
 `tsconfig.json` is `strict` plus `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters` and
 `noPropertyAccessFromIndexSignature`. `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
