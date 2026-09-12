@@ -370,41 +370,72 @@ const formatCount = (value: number): string => (value > 0 ? `+${value}` : String
 
 const MAX_VISIBLE_ROWS = 20;
 
-const renderRows = (title: string, header: string[], rows: string[]): string[] => {
-	if (rows.length === 0) return [];
-	const table = [
-		`| ${header.join(" | ")} |`,
-		`| ${header.map((_column, index) => (index === 0 ? "---" : "---:")).join(" | ")} |`,
-	];
-	const visible = rows.slice(0, MAX_VISIBLE_ROWS);
-	const hidden = rows.slice(MAX_VISIBLE_ROWS);
-	const lines = [`### ${title} (${rows.length})`, "", ...table, ...visible, ""];
-	if (hidden.length > 0) {
-		lines.push(
-			`<details><summary>Show the other ${hidden.length}</summary>`,
-			"",
-			...table,
-			...hidden,
-			"",
-			"</details>",
-			"",
-		);
-	}
-	return lines;
-};
+const renderTable = (header: string[], rows: string[]): string[] => [
+	`| ${header.join(" | ")} |`,
+	`| ${header.map((_column, index) => (index === 0 ? "---" : "---:")).join(" | ")} |`,
+	...rows,
+];
 
 const renderCollapsed = (title: string, header: string[], rows: string[]): string[] => {
 	if (rows.length === 0) return [];
 	return [
-		`<details><summary>${title} (${rows.length})</summary>`,
+		`<details><summary>${title}</summary>`,
 		"",
-		`| ${header.join(" | ")} |`,
-		`| ${header.map((_column, index) => (index === 0 ? "---" : "---:")).join(" | ")} |`,
-		...rows,
+		...renderTable(header, rows),
 		"",
 		"</details>",
 		"",
 	];
+};
+
+const renderRows = (title: string, header: string[], rows: string[]): string[] => {
+	if (rows.length === 0) return [];
+	const visible = rows.slice(0, MAX_VISIBLE_ROWS);
+	const hidden = rows.slice(MAX_VISIBLE_ROWS);
+	const lines = [`### ${title} (${rows.length})`, "", ...renderTable(header, visible), ""];
+	if (hidden.length > 0) {
+		lines.push(...renderCollapsed(`Show the other ${hidden.length}`, header, hidden));
+	}
+	return lines;
+};
+
+const EXPORT_COLUMNS = ["Export", "Base", "Head", "Δ", "gzip"];
+
+const renderExportRow = (
+	marker: string,
+	name: string,
+	base: Measurement | null,
+	head: Measurement | null,
+): string => {
+	const baseSize = base === null ? "—" : formatBytes(base.bytes);
+	const headSize = head === null ? "—" : formatBytes(head.bytes);
+	const gzip = formatBytes((head ?? base)?.gzip ?? 0);
+	const delta =
+		base === null
+			? "new"
+			: head === null
+				? "removed"
+				: formatDelta(
+						head.bytes - base.bytes,
+						base.bytes === 0 ? 0 : (head.bytes - base.bytes) / base.bytes,
+					);
+	return `| ${marker} \`${name}\` | ${baseSize} | ${headSize} | ${delta} | ${gzip} |`;
+};
+
+const changeMarker = (row: CompareRow, result: CompareResult): string =>
+	result.regressions.includes(row) ? "🔴" : row.deltaBytes > 0 ? "🟡" : "🟢";
+
+const describeCounts = (result: CompareResult): string => {
+	const grown = result.changed.filter((row) => row.deltaBytes > 0).length;
+	const shrunk = result.changed.length - grown;
+	return [
+		grown > 0 ? `${grown} grew` : "",
+		shrunk > 0 ? `${shrunk} shrank` : "",
+		result.added.length > 0 ? `${result.added.length} new` : "",
+		result.removed.length > 0 ? `${result.removed.length} removed` : "",
+	]
+		.filter((part) => part !== "")
+		.join(", ");
 };
 
 const renderMarkdown = (
@@ -413,65 +444,74 @@ const renderMarkdown = (
 	existing: Measurement,
 	result: CompareResult,
 ): string => {
-	const grown = result.changed.filter((row) => row.deltaBytes > 0).length;
-	const shrunk = result.changed.length - grown;
+	const measured = Object.keys(head.exports).length;
 	const regressionCount = result.regressions.length + (result.fullImportRegressed ? 1 : 0);
-	const status =
-		regressionCount === 0
-			? "✅ **No size regression.**"
-			: `❌ **${regressionCount} size regression${regressionCount === 1 ? "" : "s"}.**`;
-	const counts = [
-		`${Object.keys(head.exports).length} exports measured`,
-		grown > 0 ? `${grown} grew` : "",
-		shrunk > 0 ? `${shrunk} shrank` : "",
-		result.added.length > 0 ? `${result.added.length} new` : "",
-		result.removed.length > 0 ? `${result.removed.length} removed` : "",
-	].filter((part) => part !== "");
+	const noImpact =
+		result.changed.length === 0 &&
+		result.added.length === 0 &&
+		result.removed.length === 0 &&
+		result.fullDeltaBytes === 0;
 
-	const lines: string[] = [
-		"## Tree-shaking report",
-		"",
-		`${status} ${counts.join(", ")}.`,
-		"",
-		"| | Base | Head | Δ |",
-		"| --- | ---: | ---: | ---: |",
-		`| Pre-existing exports, all imported | ${formatBytes((base.surviving ?? base.full).bytes)} | ${formatBytes(existing.bytes)} (gzip ${formatBytes(existing.gzip)}) | ${result.fullImportRegressed ? "🔴 " : ""}${formatDelta(result.fullDeltaBytes, result.fullDeltaPercent)} |`,
-		`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatDelta(head.full.bytes - base.full.bytes, base.full.bytes === 0 ? 0 : (head.full.bytes - base.full.bytes) / base.full.bytes)} |`,
-		`| Exports | ${Object.keys(base.exports).length} | ${Object.keys(head.exports).length} | ${formatCount(Object.keys(head.exports).length - Object.keys(base.exports).length)} |`,
-		"",
-	];
+	const lines: string[] = ["## Tree-shaking report", ""];
 
-	const changedRows = result.changed.map((row) => {
-		const marker = result.regressions.includes(row) ? "🔴" : row.deltaBytes > 0 ? "🟡" : "🟢";
-		return `| ${marker} \`${row.name}\` | ${formatBytes(row.base.bytes)} | ${formatBytes(row.head.bytes)} | ${formatDelta(row.deltaBytes, row.deltaPercent)} | ${formatBytes(row.head.gzip)} |`;
-	});
+	if (noImpact) {
+		lines.push(
+			`✅ **No bundle size impact.** All ${measured} exports are the same size as on the base branch (full import ${formatBytes(head.full.bytes)}, gzip ${formatBytes(head.full.gzip)}).`,
+			"",
+		);
+	} else {
+		const status =
+			regressionCount === 0
+				? "✅ **No size regression.**"
+				: `❌ **${regressionCount} size regression${regressionCount === 1 ? "" : "s"}.**`;
+		const counts = describeCounts(result);
+		lines.push(
+			`${status} ${counts === "" ? `${measured} exports measured` : `${counts} out of ${measured} exports`}.`,
+			"",
+			"| | Base | Head | Δ |",
+			"| --- | ---: | ---: | ---: |",
+			`| Pre-existing exports, all imported | ${formatBytes((base.surviving ?? base.full).bytes)} | ${formatBytes(existing.bytes)} (gzip ${formatBytes(existing.gzip)}) | ${result.fullImportRegressed ? "🔴 " : ""}${formatDelta(result.fullDeltaBytes, result.fullDeltaPercent)} |`,
+			`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatDelta(head.full.bytes - base.full.bytes, base.full.bytes === 0 ? 0 : (head.full.bytes - base.full.bytes) / base.full.bytes)} |`,
+			`| Exports | ${Object.keys(base.exports).length} | ${measured} | ${formatCount(measured - Object.keys(base.exports).length)} |`,
+			"",
+			...renderRows("What changed", EXPORT_COLUMNS, [
+				...result.changed.map((row) =>
+					renderExportRow(changeMarker(row, result), row.name, row.base, row.head),
+				),
+				...result.added.map((item) => renderExportRow("🆕", item.name, null, item)),
+				...result.removed.map((item) => renderExportRow("🗑️", item.name, item, null)),
+			]),
+		);
+	}
+
+	const everyName = [
+		...new Set([...Object.keys(base.exports), ...Object.keys(head.exports)]),
+	].sort();
+	const changedByName = new Map(result.changed.map((row) => [row.name, row]));
 	lines.push(
-		...renderRows("Changed exports", ["Export", "Base", "Head", "Δ", "gzip"], changedRows),
 		...renderCollapsed(
-			"New exports",
-			["Export", "Size", "gzip"],
-			result.added.map(
-				(item) => `| \`${item.name}\` | ${formatBytes(item.bytes)} | ${formatBytes(item.gzip)} |`,
-			),
-		),
-		...renderCollapsed(
-			"Removed exports",
-			["Export", "Was"],
-			result.removed.map((item) => `| \`${item.name}\` | ${formatBytes(item.bytes)} |`),
-		),
-		...renderCollapsed(
-			"Unchanged exports",
-			["Export", "Size", "gzip"],
-			result.unchanged.map(
-				(row) =>
-					`| \`${row.name}\` | ${formatBytes(row.head.bytes)} | ${formatBytes(row.head.gzip)} |`,
-			),
+			`All exports (${everyName.length})`,
+			EXPORT_COLUMNS,
+			everyName.map((name) => {
+				const row = changedByName.get(name);
+				const baseMeasurement: Measurement | undefined = base.exports[name];
+				const headMeasurement: Measurement | undefined = head.exports[name];
+				const marker =
+					row === undefined
+						? baseMeasurement === undefined
+							? "🆕"
+							: headMeasurement === undefined
+								? "🗑️"
+								: "⚪"
+						: changeMarker(row, result);
+				return renderExportRow(marker, name, baseMeasurement ?? null, headMeasurement ?? null);
+			}),
 		),
 		"<details><summary>How this is measured</summary>",
 		"",
 		"Every export is imported alone into an esbuild consumer bundle (minified, tree-shaken) built from the head and from the base of this pull request; the sizes are the resulting bundles, gzip is their gzipped size. " +
 			`🔴 marks a regression: a pre-existing export that grew more than ${REGRESSION_PERCENT_THRESHOLD * 100}% and more than ${REGRESSION_BYTES_THRESHOLD} B, or the bundle importing every pre-existing export growing more than ${FULL_IMPORT_PERCENT_THRESHOLD * 100}%. ` +
-			"🟡 is growth under the threshold and 🟢 is a decrease. New exports never count as a regression. An intentional increase is accepted with the `tree-shaking: accepted` label.",
+			"🟡 is growth under the threshold, 🟢 a decrease, ⚪ no change, 🆕 an export that does not exist on the base (never a regression), 🗑️ an export that was removed. An intentional increase is accepted with the `tree-shaking: accepted` label.",
 		"",
 		"</details>",
 	);

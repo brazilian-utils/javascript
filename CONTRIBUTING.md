@@ -122,8 +122,11 @@ duplicating logic (e.g. `src/_internals/format/format.ts`,
 above for every function the package exports, by building a one-import consumer bundle per
 export with esbuild and printing its size. There is no committed budgets file: instead, the
 `tree-shaking` job in CI measures every export's single-import bundle size on the PR's base
-branch and on the PR head, then comments a Markdown diff on the PR (sorted by absolute delta,
-with new and removed exports called out and unchanged exports collapsed). The check fails the PR
+branch and on the PR head, then comments a Markdown report on the PR that leads with the impact:
+a single "no bundle size impact" line when every export is the same size, otherwise the bundle
+totals plus a "What changed" table listing only the exports that grew, shrank, appeared or
+disappeared (sorted by absolute delta); the full per-export list is always there, collapsed. The
+check fails the PR
 when a pre-existing export grows by more than 20% and more than 256 bytes, or when a bundle
 importing every export that already existed on the base grows by more than 5% (new exports
 never count as a regression); those thresholds live as constants at the top of
