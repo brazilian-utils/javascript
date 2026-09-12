@@ -50,7 +50,8 @@ describe("formatPassport", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(formatPassport()).toBe("");
 			// @ts-expect-error: intentionally invalid input
-			expect(formatPassport(123)).toBe("");
+			expect(formatPassport(123_456)).toBe("");
+			expect(formatPassport(Object.create(null))).toBe("");
 		});
 	});
 

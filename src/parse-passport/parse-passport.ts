@@ -5,7 +5,8 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * Removes non-alphanumeric characters from a passport number, uppercases it, and caps it to 8 characters.
  *
  * @param {string} passport - The string containing a passport number.
- * @returns {string} The normalized passport number.
+ * @returns {string} The normalized passport number, or an empty string when the value is not
+ * a string (a number is never a passport number: the series is two letters).
  *
  * @example
  * parsePassport("Ab123456") // "AB123456"
@@ -14,7 +15,5 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  *
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  */
-export const parsePassport = (passport: string): string => {
-	if (typeof passport !== "string") return "";
-	return sanitizeToAlphanumeric(passport).slice(0, PASSPORT_LENGTH);
-};
+export const parsePassport = (passport: string): string =>
+	typeof passport === "string" ? sanitizeToAlphanumeric(passport).slice(0, PASSPORT_LENGTH) : "";
