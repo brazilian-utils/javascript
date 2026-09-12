@@ -1,11 +1,12 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/cities";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { removeAccents } from "../remove-accents/remove-accents";
 
 /** The `getMunicipality` query by IBGE municipality code. */
 export type GetMunicipalityByCodeOptions = {
-	/** The 7 digit IBGE municipality code. */
-	code: string;
+	/** The 7 digit IBGE municipality code, as a string or a number. */
+	code: string | number;
 };
 
 /** The `getMunicipality` query by municipality name and state code. */
@@ -27,7 +28,7 @@ let codeIndex: Map<string, [string, string]> | undefined;
 // symmetric and cannot change which names are considered equal.
 const normalizeName = (value: string): string => removeAccents(value).trim().toUpperCase();
 
-const getMunicipalityByCode = (code: string): [string, string] | null => {
+const getMunicipalityByCode = (code: string | number): [string, string] | null => {
 	if (!codeIndex) {
 		codeIndex = new Map();
 
@@ -38,9 +39,11 @@ const getMunicipalityByCode = (code: string): [string, string] | null => {
 		}
 	}
 
-	// `Map#get` never throws and simply misses for a key of the wrong shape or type (a malformed,
-	// too short/long, or non-string code), so there is no need to pre-validate `code` here first.
-	return codeIndex.get(code) ?? null;
+	if (typeof code !== "string" && typeof code !== "number") return null;
+
+	// `Map#get` never throws and simply misses for a key of the wrong shape (a malformed, too
+	// short or too long code), so there is no need to pre-validate `code` any further.
+	return codeIndex.get(sanitizeToDigits(code)) ?? null;
 };
 
 const getMunicipalityCodeByName = ({
@@ -82,6 +85,7 @@ const getMunicipalityCodeByName = ({
  * @example
  * ```typescript
  * await getMunicipality({ code: "3550308" }); // ["São Paulo", "SP"]
+ * await getMunicipality({ code: 3550308 }); // ["São Paulo", "SP"]
  * await getMunicipality({ municipalityName: "sao paulo", uf: "sp" }); // "3550308"
  * ```
  *
