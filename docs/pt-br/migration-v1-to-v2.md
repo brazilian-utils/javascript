@@ -6,9 +6,9 @@ Este guia irá ajudá-lo a migrar do Brazilian Utils v1.x para v2.0.0.
 
 **Boas notícias!** A v2.x mantém compatibilidade para a maioria das mudanças quebradoras:
 
-✅ **Você pode atualizar para v2.x sem alterar seu código** - nomes antigos de funções como `formatCPF`, `isValidCNPJ`, etc. ainda funcionam
-⚠️ **Você receberá avisos de deprecação** - encorajando você a migrar para os novos nomes
-🗑️ **Nomes antigos serão removidos na v3.0.0** - então migre gradualmente
+**Você pode atualizar para v2.x sem alterar seu código** - nomes antigos de funções como `formatCPF`, `isValidCNPJ`, etc. ainda funcionam
+**Você receberá avisos de deprecação** - encorajando você a migrar para os novos nomes
+**Nomes antigos serão removidos na v3.0.0** - então migre gradualmente
 
 **Porém**, você deve remover o uso dessas funções helper antes de atualizar:
 - `onlyNumbers` → use `string.replace(/\D/g, '')`
@@ -20,7 +20,7 @@ Este guia irá ajudá-lo a migrar do Brazilian Utils v1.x para v2.0.0.
 
 A versão 2.0.0 traz melhorias significativas em arquitetura, ferramentas e experiência do desenvolvedor:
 
-### 🎯 Melhor Tree Shaking
+### Melhor Tree Shaking
 
 A biblioteca agora usa exports de módulos ES modernos com o campo `exports` adequado no `package.json`, permitindo melhor tree shaking em bundlers modernos. Você pode importar apenas o que precisa:
 
@@ -29,7 +29,7 @@ A biblioteca agora usa exports de módulos ES modernos com o campo `exports` ade
 import { isValidCpf, formatCpf } from '@brazilian-utils/brazilian-utils';
 ```
 
-### 📁 Estrutura Mais Simples
+### Estrutura Mais Simples
 
 O código foi reorganizado para melhor manutenibilidade:
 - **v1**: Estrutura complexa com diretórios separados `utilities/` e `helpers/`
@@ -37,7 +37,7 @@ O código foi reorganizado para melhor manutenibilidade:
 - Cada utilitário é autocontido em seu próprio diretório
 - Caminhos de importação mais limpos e melhor organização do código
 
-### 🔧 Ferramentas Modernas
+### Ferramentas Modernas
 
 Atualizado para ferramentas modernas e mais rápidas:
 - **Build**: Migrado de `tsdx` para uma stack com **Vite+** para builds e scripts mais rápidos
@@ -45,7 +45,7 @@ Atualizado para ferramentas modernas e mais rápidas:
 - **Linting/Formatação**: Migrado de `prettier` + `eslint` para **Biome** (mais rápido, tudo-em-um)
 - **TypeScript**: Configuração moderna otimizada para bundlers
 
-### 🌐 Testes em Browsers
+### Testes em Browsers
 
 Agora inclui suporte para testes cross-browser:
 - Testes rodam em browsers reais (Chrome, Firefox, Safari, Edge)
@@ -60,7 +60,7 @@ npm run test:safari-browser
 npm run test:edge-browser
 ```
 
-### 📦 Menos Dependências
+### Menos Dependências
 
 Redução de dependências de desenvolvimento mantendo zero dependências de runtime:
 - **v1**: Múltiplas ferramentas (tsdx, jest, prettier, eslint, husky, lint-staged, commitlint, etc.)
@@ -68,7 +68,7 @@ Redução de dependências de desenvolvimento mantendo zero dependências de run
 - Manutenção mais simples e pipelines CI/CD mais rápidos
 - Zero dependências de runtime (mantido)
 
-### ✨ Novas Funções & Recursos
+### Novas Funções e Recursos
 
 Adicionadas novas utilitários úteis:
 - `getHolidays` - Obtém feriados brasileiros (nacionais e estaduais)
@@ -101,7 +101,7 @@ isValidCnpj("12.345.678/0001-95", { version: 1 }); // true (explícito)
 
 **Importante**: Por padrão, `isValidCnpj()` valida apenas CNPJs numéricos (versão 1). Para validar CNPJs alfanuméricos, você deve passar explicitamente `{ version: 2 }`.
 
-### 📈 Melhor Suporte TypeScript
+### Melhor Suporte TypeScript
 
 - Configuração TypeScript moderna otimizada para bundlers
 - Melhor inferência de tipos e exports
@@ -113,13 +113,13 @@ isValidCnpj("12.345.678/0001-95", { version: 1 }); // true (explícito)
 
 Todos os nomes de funções foram alterados de PascalCase para camelCase para seguir as convenções de nomenclatura JavaScript.
 
-**⚠️ Importante: Compatibilidade com Versões Anteriores**
+**Importante: Compatibilidade com Versões Anteriores**
 
 Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCase como aliases deprecated**. Isso significa:
 
-- ✅ Seu código existente usando `formatCPF`, `isValidCNPJ`, etc. continuará funcionando na v2.x
-- ⚠️ Você receberá avisos de deprecação no seu IDE/TypeScript
-- 🗑️ Os nomes antigos serão **removidos na v3.0.0**
+- Seu código existente usando `formatCPF`, `isValidCNPJ`, etc. continuará funcionando na v2.x
+- Você receberá avisos de deprecação no seu IDE/TypeScript
+- Os nomes antigos serão **removidos na v3.0.0**
 
 **Recomendação:** Embora você possa atualizar para v2.x sem alterar seu código imediatamente, recomendamos migrar para os novos nomes em camelCase o quanto antes para se preparar para a v3.0.0.
 
@@ -162,7 +162,7 @@ Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCa
 | `generateCNPJ` | `generateCnpj` |
 | `generateBoleto` | `generateBoleto` (inalterado) |
 
-**⚠️ Nota sobre o comportamento do `generateCnpj`:**
+**Nota sobre o comportamento do `generateCnpj`:**
 
 Na v2.x, `generateCnpj()` sem argumentos retorna por padrão a versão 1 (CNPJ numérico). Na v3.0.0, este comportamento mudará para selecionar aleatoriamente entre versão 1 (numérico) e versão 2 (alfanumérico) para melhor aleatoriedade. Se você precisa de uma versão específica, sempre passe o parâmetro de versão explicitamente:
 
@@ -209,7 +209,7 @@ const cnpj = generateCnpj();
 
 As seguintes funções helper não são mais exportadas na API pública. Estas eram utilitários internos que não deveriam ter sido expostos.
 
-**⚠️ Nota:** Diferentemente das funções renomeadas acima, esses helpers **NÃO** possuem aliases de compatibilidade. Você deve migrar para longe deles antes de atualizar para a v2.x.
+**Nota:** Diferentemente das funções renomeadas acima, esses helpers **NÃO** possuem aliases de compatibilidade. Você deve migrar para longe deles antes de atualizar para a v2.x.
 
 #### `onlyNumbers`
 Esta função foi removida da API pública. Agora é um utilitário interno chamado `sanitizeToDigits`.

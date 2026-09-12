@@ -31,5 +31,8 @@ jobs:
       - name: Run checks
         run: vp check
 
+      - name: Check llms.txt/llms-full.txt are up to date
+        run: npm run build:llms && git diff --exit-code -- docs/llms.txt docs/llms-full.txt
+
       - name: Audit dependencies
         run: npx --yes audit-ci@7.1.0 --high --allowlist GHSA-jmr9-qjv8-65gv GHSA-7pqw-9j4j-h8q3

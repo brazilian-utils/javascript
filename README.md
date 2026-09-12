@@ -5,7 +5,7 @@
 
 [📖 Documentation](https://brazilian-utils.com.br/#/getting-started)
 
-[![Build Status](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml?query=branch%3Amain) [![Coverage Status](https://codecov.io/gh/brazilian-utils/javascript/graph/badge.svg?branch=main)](https://codecov.io/gh/brazilian-utils/javascript?branch=main) [![Known Vulnerabilities](https://snyk.io/test/github/brazilian-utils/javascript/badge.svg?targetFile=package.json)](https://snyk.io/test/github/brazilian-utils/javascript?targetFile=package.json) [![Maintainability](https://api.codeclimate.com/v1/badges/05d3cd8492ed438bf51d/maintainability)](https://codeclimate.com/github/brazilian-utils/javascript/maintainability)
+[![Build Status](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml?query=branch%3Amain) [![codecov](https://codecov.io/gh/brazilian-utils/javascript/branch/main/graph/badge.svg)](https://codecov.io/gh/brazilian-utils/javascript)
 [![Downloads per month](https://img.shields.io/npm/dm/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![License: MIT](https://img.shields.io/github/license/brazilian-utils/javascript.svg)](LICENSE)
 
 </div>
@@ -29,7 +29,7 @@ Brazilian Utils is a library focused on solving problems that we face daily in t
 
 ## Installation
 
-Using **Brazilian Utils** is quite simple and you can use it in some ways:
+You can install **Brazilian Utils** in a few ways:
 
 as npm package:
 
@@ -43,15 +43,31 @@ with yarn package manager:
 yarn add @brazilian-utils/brazilian-utils
 ```
 
-or `<script>` tag (global `brazilianUtils`):
+with pnpm:
+
+```bash
+pnpm add @brazilian-utils/brazilian-utils
+```
+
+with bun:
+
+```bash
+bun add @brazilian-utils/brazilian-utils
+```
+
+or `<script>` tag (global `BrazilianUtils`):
 
 ```html
-<script src="https://unpkg.com/@brazilian-utils/brazilian-utils/dist/brazilian-utils.cjs.production.min.js"></script>
+<script src="https://unpkg.com/@brazilian-utils/brazilian-utils/dist/brazilian-utils.umd.cjs"></script>
 ```
+
+### Runtime support
+
+Node `^20.19.0 || >=22.12.0`, Bun, Deno, and modern browsers.
 
 ## Usage
 
-To use one of our utilities you just need to import the required function as in the example below:
+To use a utility, import the required function, as shown below:
 
 ```javascript
 import { isValidCpf } from "@brazilian-utils/brazilian-utils";
@@ -60,6 +76,8 @@ isValidCpf("1232454233345"); // false
 ```
 
 You can check a list of utilities [by clicking here](https://brazilian-utils.com.br/#/utilities).
+
+- The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](docs/getting-started.md#bundle-size).
 
 ## Development
 
@@ -127,8 +145,8 @@ Our "thank you" goes to these wonderful people ([emoji key](https://github.com/k
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/vicentevendramin"><img src="https://github.com/vicentevendramin.png?size=100" width="100px;" alt=""/><br /><sub><b>Vicente Vendramin</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=vicentevendramin" title="Code">💻</a></td>
-    <td></td>
-    <td></td>
+    <td align="center"><a href="https://github.com/joaopedroassad"><img src="https://github.com/joaopedroassad.png?size=100" width="100px;" alt=""/><br /><sub><b>Joao Assad</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/JanderSilv"><img src="https://github.com/JanderSilv.png?size=100" width="100px;" alt=""/><br /><sub><b>Jander Silva</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=JanderSilv" title="Code">💻</a></td>
     <td></td>
     <td></td>
     <td></td>
