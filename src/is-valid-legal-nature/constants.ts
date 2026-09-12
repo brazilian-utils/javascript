@@ -109,3 +109,7 @@ export const LEGAL_NATURE: Record<string, string> = {
 	"3123": "Partido Político",
 	"5002": "Organização Internacional e Outras Instituições Extraterritoriais",
 };
+
+export const MASK_REGEX = /[-.\s]/g;
+
+export const CODE_REGEX = /^\d{4}$/;

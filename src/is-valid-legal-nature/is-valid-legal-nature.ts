@@ -1,8 +1,4 @@
-import { LEGAL_NATURE } from "./constants";
-
-const MASK_REGEX = /[-.\s]/g;
-
-const CODE_REGEX = /^\d{4}$/;
+import { CODE_REGEX, LEGAL_NATURE, MASK_REGEX } from "./constants";
 
 /**
  * Validates if a Brazilian legal nature (natureza jurídica) code exists.
