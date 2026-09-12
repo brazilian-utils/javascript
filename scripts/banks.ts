@@ -80,7 +80,7 @@ const fetchFromBacen = async (): Promise<BankRow[]> => {
 
 	for (const row of rows) {
 		const fields = parseCsvLine(row);
-		const ispb = fields[0];
+		const [ispb] = fields;
 		const code = fields[2];
 		const name = fields[5];
 

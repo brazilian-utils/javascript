@@ -17,6 +17,19 @@ import {
 } from "./get-cep-info-by-address";
 
 describe("getCepInfoByAddress", () => {
+	const fetchMock = vi.fn();
+	const originalFetch = globalThis.fetch;
+
+	beforeEach(() => {
+		globalThis.fetch = fetchMock as typeof fetch;
+		fetchMock.mockClear();
+	});
+
+	afterEach(() => {
+		globalThis.fetch = originalFetch;
+		vi.restoreAllMocks();
+	});
+
 	describe("error class names", () => {
 		it("should set name to GetCepInfoByAddressError", () => {
 			expect(new GetCepInfoByAddressError("message").name).toBe("GetCepInfoByAddressError");
@@ -33,19 +46,6 @@ describe("getCepInfoByAddress", () => {
 
 			expect(error.name).toBe("GetCepInfoByAddressNotFoundError");
 		});
-	});
-
-	const fetchMock = vi.fn();
-	const originalFetch = globalThis.fetch;
-
-	beforeEach(() => {
-		globalThis.fetch = fetchMock as typeof fetch;
-		fetchMock.mockClear();
-	});
-
-	afterEach(() => {
-		globalThis.fetch = originalFetch;
-		vi.restoreAllMocks();
 	});
 
 	const mockSocketFailureOnce = () =>

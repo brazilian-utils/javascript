@@ -29,6 +29,11 @@ const getWeekdayIndex = (year: number, month: number, day: number): number => {
 	return date.getUTCDay();
 };
 
+const dayToWords = (day: number, monthStyle: boolean): string => {
+	if (monthStyle) return day === 1 ? "1º" : String(day);
+	return day === 1 ? "primeiro" : numberToWords(day);
+};
+
 /**
  * Formats a date as its Brazilian Portuguese "por extenso" textual representation, e.g.
  * `"01/01/2024"` becomes `"primeiro de janeiro de dois mil e vinte e quatro"`.
@@ -111,9 +116,8 @@ export const convertDateToWords = (
 	const monthName = MONTH_NAMES[month - 1];
 	const isMonthStyle = options?.style === "month";
 
-	const dateWords = isMonthStyle
-		? `${day === 1 ? "1º" : day} de ${monthName} de ${year}`
-		: `${day === 1 ? "primeiro" : numberToWords(day)} de ${monthName} de ${numberToWords(year).replaceAll(", ", " ")}`;
+	const yearWords = isMonthStyle ? String(year) : numberToWords(year).replaceAll(", ", " ");
+	const dateWords = `${dayToWords(day, isMonthStyle)} de ${monthName} de ${yearWords}`;
 
 	const result =
 		options?.weekday === true

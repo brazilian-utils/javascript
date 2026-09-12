@@ -154,6 +154,20 @@ check-digit code and the `null`-returning API on purpose. Test files relax the r
 make sense for production code (return types, JSDoc, the `unsafe-*` family, since the
 multi-runtime `expect` shim is untyped) and every `@ts-expect-error` must carry a description.
 
+[SonarJS](https://github.com/SonarSource/SonarJS) runs as an
+oxlint JS plugin (`lint.jsPlugins` in `vite.config.ts`) with every rule as an error, minus a
+short list that is off on purpose right below the spread: formatting and naming rules that
+`vp fmt` owns, the complexity/duplication rules already gated by `eslint/complexity` and jscpd,
+`no-reference-error` (it reports TypeScript utility types), `max-union-size` and `pseudo-random`
+(the 27 state codes and the generators' `Math.random` are intentional), `redundant-type-aliases`
+(deprecated aliases kept for compatibility) and `todo-tag` (`test.todo` is a shim feature). It
+adds what the Rust plugins do not have: cognitive complexity (25), regex complexity (25) and
+regex bug patterns (anchor precedence, super-linear backtracking), nested ternaries and template
+literals, redundant assignments and optional markers, and the test smells (hooks after test
+cases, disabled or exclusive tests, assertions outside tests). Its type-aware rules are inert,
+since oxlint does not hand ESLint plugins a type checker. The plugin adds about three seconds to
+`vp check`.
+
 `tsconfig.json` is `strict` plus `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters` and
 `noPropertyAccessFromIndexSignature`. `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
 stay off on purpose: the lookup tables are indexed by digits the code has already validated, so

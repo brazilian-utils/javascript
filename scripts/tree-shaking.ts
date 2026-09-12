@@ -92,6 +92,14 @@ type CompareResult = {
 	fullImportRegressed: boolean;
 };
 
+const OPTION_FLAGS = new Map<string, keyof Args>([
+	["--json", "json"],
+	["--surviving", "surviving"],
+	["--compare", "compare"],
+	["--markdown", "markdown"],
+	["--dist", "dist"],
+]);
+
 const parseArgs = (argv: string[]): Args => {
 	const args: Args = {
 		json: undefined,
@@ -101,11 +109,12 @@ const parseArgs = (argv: string[]): Args => {
 		dist: undefined,
 	};
 	for (let i = 0; i < argv.length; i++) {
-		if (argv[i] === "--json") args.json = argv[++i];
-		else if (argv[i] === "--surviving") args.surviving = argv[++i];
-		else if (argv[i] === "--compare") args.compare = argv[++i];
-		else if (argv[i] === "--markdown") args.markdown = argv[++i];
-		else if (argv[i] === "--dist") args.dist = argv[++i];
+		const option = OPTION_FLAGS.get(argv[i]);
+
+		if (option === undefined) continue;
+
+		i += 1;
+		args[option] = argv[i];
 	}
 	return args;
 };
@@ -119,7 +128,8 @@ const mapWithConcurrency = async <T, R>(
 	let cursor = 0;
 
 	const worker = async (): Promise<void> => {
-		const index = cursor++;
+		const index = cursor;
+		cursor += 1;
 
 		if (index >= items.length) return;
 
@@ -361,10 +371,13 @@ const formatPercent = (value: number): string =>
 const formatBytes = (bytes: number): string =>
 	Math.abs(bytes) < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
 
-const formatDelta = (bytes: number, percent: number): string =>
-	bytes === 0
-		? "0 B"
-		: `${bytes > 0 ? "+" : "-"}${formatBytes(Math.abs(bytes))} (${formatPercent(percent)})`;
+const formatDelta = (bytes: number, percent: number): string => {
+	if (bytes === 0) return "0 B";
+	const sign = bytes > 0 ? "+" : "-";
+	return `${sign}${formatBytes(Math.abs(bytes))} (${formatPercent(percent)})`;
+};
+
+const plural = (count: number, word: string): string => `${count} ${word}${count === 1 ? "" : "s"}`;
 
 const formatCount = (value: number): string => (value > 0 ? `+${value}` : String(value));
 
@@ -401,6 +414,13 @@ const renderRows = (title: string, header: string[], rows: string[]): string[] =
 
 const EXPORT_COLUMNS = ["Export", "Base", "Head", "Δ", "gzip"];
 
+const formatRowDelta = (base: Measurement | null, head: Measurement | null): string => {
+	if (base === null) return "new";
+	if (head === null) return "removed";
+	const deltaBytes = head.bytes - base.bytes;
+	return formatDelta(deltaBytes, base.bytes === 0 ? 0 : deltaBytes / base.bytes);
+};
+
 const renderExportRow = (
 	marker: string,
 	name: string,
@@ -410,20 +430,24 @@ const renderExportRow = (
 	const baseSize = base === null ? "—" : formatBytes(base.bytes);
 	const headSize = head === null ? "—" : formatBytes(head.bytes);
 	const gzip = formatBytes((head ?? base)?.gzip ?? 0);
-	const delta =
-		base === null
-			? "new"
-			: head === null
-				? "removed"
-				: formatDelta(
-						head.bytes - base.bytes,
-						base.bytes === 0 ? 0 : (head.bytes - base.bytes) / base.bytes,
-					);
-	return `| ${marker} \`${name}\` | ${baseSize} | ${headSize} | ${delta} | ${gzip} |`;
+	return `| ${marker} \`${name}\` | ${baseSize} | ${headSize} | ${formatRowDelta(base, head)} | ${gzip} |`;
 };
 
-const changeMarker = (row: CompareRow, result: CompareResult): string =>
-	result.regressions.includes(row) ? "🔴" : row.deltaBytes > 0 ? "🟡" : "🟢";
+const changeMarker = (row: CompareRow, result: CompareResult): string => {
+	if (result.regressions.includes(row)) return "🔴";
+	return row.deltaBytes > 0 ? "🟡" : "🟢";
+};
+
+const allExportsMarker = (
+	row: CompareRow | undefined,
+	base: Measurement | undefined,
+	head: Measurement | undefined,
+	result: CompareResult,
+): string => {
+	if (row !== undefined) return changeMarker(row, result);
+	if (base === undefined) return "🆕";
+	return head === undefined ? "🗑️" : "⚪";
+};
 
 const describeCounts = (result: CompareResult): string => {
 	const grown = result.changed.filter((row) => row.deltaBytes > 0).length;
@@ -463,10 +487,12 @@ const renderMarkdown = (
 		const status =
 			regressionCount === 0
 				? "✅ **No size regression.**"
-				: `❌ **${regressionCount} size regression${regressionCount === 1 ? "" : "s"}.**`;
+				: `❌ **${plural(regressionCount, "size regression")}.**`;
 		const counts = describeCounts(result);
+		const scope =
+			counts === "" ? `${measured} exports measured` : `${counts} out of ${measured} exports`;
 		lines.push(
-			`${status} ${counts === "" ? `${measured} exports measured` : `${counts} out of ${measured} exports`}.`,
+			`${status} ${scope}.`,
 			"",
 			"| | Base | Head | Δ |",
 			"| --- | ---: | ---: | ---: |",
@@ -496,14 +522,7 @@ const renderMarkdown = (
 				const row = changedByName.get(name);
 				const baseMeasurement: Measurement | undefined = base.exports[name];
 				const headMeasurement: Measurement | undefined = head.exports[name];
-				const marker =
-					row === undefined
-						? baseMeasurement === undefined
-							? "🆕"
-							: headMeasurement === undefined
-								? "🗑️"
-								: "⚪"
-						: changeMarker(row, result);
+				const marker = allExportsMarker(row, baseMeasurement, headMeasurement, result);
 				return renderExportRow(marker, name, baseMeasurement ?? null, headMeasurement ?? null);
 			}),
 		),

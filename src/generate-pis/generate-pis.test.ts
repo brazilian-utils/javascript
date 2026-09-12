@@ -21,7 +21,11 @@ describe("generatePis", () => {
 		const originalRandom = Math.random;
 		let call = 0;
 
-		Math.random = () => (digits[call++] + 0.5) / 10;
+		Math.random = () => {
+			const digit = digits[call];
+			call += 1;
+			return (digit + 0.5) / 10;
+		};
 
 		try {
 			const pis = generatePis();

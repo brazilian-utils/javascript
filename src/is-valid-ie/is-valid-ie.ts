@@ -134,7 +134,6 @@ const validateAP: IeValidator = (ie: string) => {
 
 	if (bodyInt >= 3_000_001 && bodyInt <= 3_017_000) {
 		p = 5;
-		d = 0;
 	} else if (bodyInt >= 3_017_001 && bodyInt <= 3_019_022) {
 		p = 9;
 		d = 1;
