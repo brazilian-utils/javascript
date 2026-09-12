@@ -37,6 +37,7 @@ import { sanitizeToAscii } from "../_internals/sanitize-to-ascii/sanitize-to-asc
 import { parsePixKey } from "../parse-pix-key/parse-pix-key";
 import { AMOUNT_DECIMAL_PLACES, TLV_OVERHEAD, TXID_REGEX } from "./constants";
 
+/** The parameters `generatePixPayload` takes to build a Pix BR Code. */
 export type GeneratePixPayloadParams = {
 	/** The Pix key of the receiver, in any accepted form. Required unless `url` is given. */
 	key?: string;

@@ -10,17 +10,12 @@ import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { stripPhoneCountryCode } from "../_internals/strip-phone-country-code/strip-phone-country-code";
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
-import {
-	INTERNATIONAL_MASK,
-	INTERNATIONAL_PREFIX,
-	LENGTH,
-	MASK,
-	type NationalMask,
-	SERVICE_MASK,
-} from "./constants";
+import { INTERNATIONAL_MASK, INTERNATIONAL_PREFIX, LENGTH, MASK, SERVICE_MASK } from "./constants";
 
-export type PhoneMask = "auto" | "e164" | "international" | "service" | NationalMask;
+/** The masks `formatPhone` can apply. */
+export type PhoneMask = "auto" | "e164" | "international" | "service" | "sn" | "nanp";
 
+/** Options of `formatPhone`. */
 export type FormatPhoneOptions = {
 	/** Which mask to apply, or `"auto"` to pick one from the value (default: `"sn"`). */
 	mask?: PhoneMask;

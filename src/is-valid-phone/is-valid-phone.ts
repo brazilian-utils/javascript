@@ -9,10 +9,13 @@ import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-pho
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
 import { DEFAULT_ACCEPT } from "./constants";
 
+/** The Brazilian mobile numbering rule to enforce: `1` the pre-2016 8 digit one, `2` the current 9 digit one. */
 export type PhoneVersion = 1 | 2;
 
+/** The kinds of Brazilian phone number `isValidPhone` can accept. */
 export type PhoneType = "mobile" | "landline" | "service";
 
+/** Options of `isValidPhone`. */
 export type IsValidPhoneOptions = {
 	/** Mobile numbering rule to enforce, see `isValidMobilePhone` (default: `2`). */
 	version?: PhoneVersion;

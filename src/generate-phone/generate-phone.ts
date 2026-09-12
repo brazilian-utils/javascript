@@ -9,6 +9,7 @@ import {
 } from "../_internals/constants/service-phone";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 
+/** The kinds of phone number `generatePhone` can generate. */
 export type GeneratePhoneType = "mobile" | "landline" | "service";
 
 const randomFrom = <Item>(list: readonly Item[]): Item =>

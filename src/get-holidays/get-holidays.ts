@@ -1,5 +1,5 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import {
 	CONSCIENCIA_NEGRA_HOLIDAY_NAME,
@@ -9,8 +9,10 @@ import {
 	STATE_HOLIDAYS,
 } from "./constants";
 
+/** How a holiday returned by `getHolidays` is observed. */
 export type HolidayType = "national" | "state" | "optional" | "religious";
 
+/** One holiday returned by `getHolidays`. */
 export type Holiday = {
 	/** The holiday name in Brazilian Portuguese, e.g. `"Sexta-feira Santa"`. */
 	name: string;
@@ -20,6 +22,7 @@ export type Holiday = {
 	type: HolidayType;
 };
 
+/** The options form `getHolidays` accepts, naming the year to list and, optionally, the state whose holidays are added. */
 export type GetHolidaysOptions = {
 	/** The four digit year to list holidays for. Must be an integer between 1900 and 2099. */
 	year: number;
@@ -180,6 +183,13 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * some state holidays where no official law text was located (see constants.ts for which).
  */
 export function getHolidays(year: number): Holiday[];
+/**
+ * Retrieves all Brazilian holidays for a given year, optionally including the holidays of a
+ * state. See the overload taking a year for the full documentation.
+ *
+ * @param {GetHolidaysOptions} options - The year to list holidays for and, optionally, the state whose holidays are added
+ * @returns {Holiday[]} An array of holidays sorted by date
+ */
 export function getHolidays(options: GetHolidaysOptions): Holiday[];
 export function getHolidays(yearOrOptions: number | GetHolidaysOptions): Holiday[] {
 	let year: number;

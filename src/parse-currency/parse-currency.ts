@@ -1,6 +1,7 @@
 import { DEFAULT_PRECISION, clampPrecision } from "../_internals/clamp-precision/clamp-precision";
 import { parseDecimal } from "../_internals/parse-decimal/parse-decimal";
 
+/** Options of `parseCurrency`. */
 export type ParseCurrencyOptions = {
 	/** Number of decimal places used as the minor unit scale. Fractions accept up to two digits, or `precision` digits when it is greater. Defaults to 2, clamped to 0-20. */
 	precision?: number;

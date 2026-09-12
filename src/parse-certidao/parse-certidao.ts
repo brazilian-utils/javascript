@@ -3,8 +3,23 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 import { isValidCertidao } from "../is-valid-certidao/is-valid-certidao";
 import { CERTIDAO_TYPES } from "./constants";
 
-export type CertidaoType = (typeof CERTIDAO_TYPES)[number];
+/**
+ * The nine books (tipo do livro) a matrícula de registro civil can point to, in the order of the
+ * codes 1 to 9. `parseCertidao` names the book of a matrícula with one of these, and
+ * `isValidCertidao` accepts a list of them.
+ */
+export type CertidaoType =
+	| "birth"
+	| "marriage"
+	| "religious-marriage"
+	| "death"
+	| "stillbirth"
+	| "banns"
+	| "other"
+	| "emancipation"
+	| "interdiction";
 
+/** The fields `parseCertidao` reads out of the matrícula of a certidão de registro civil. */
 export type Certidao = {
 	/** The 6 digit CNS (Código Nacional de Serventia) of the serventia that issued the act. */
 	registryCns: string;

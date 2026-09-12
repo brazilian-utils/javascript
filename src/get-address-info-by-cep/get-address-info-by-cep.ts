@@ -2,6 +2,7 @@ import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry"
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
 
+/** Base class of every error `getAddressInfoByCep` rejects with. */
 export class GetAddressInfoByCepError extends Error {
 	public constructor(message: string) {
 		super(message);
@@ -9,6 +10,7 @@ export class GetAddressInfoByCepError extends Error {
 	}
 }
 
+/** Thrown by `getAddressInfoByCep` when the value given is not a valid CEP. */
 export class GetAddressInfoByCepValidationError extends GetAddressInfoByCepError {
 	public constructor(message: string) {
 		super(message);
@@ -16,6 +18,7 @@ export class GetAddressInfoByCepValidationError extends GetAddressInfoByCepError
 	}
 }
 
+/** Thrown by `getAddressInfoByCep` when no CEP service knows the CEP. */
 export class GetAddressInfoByCepNotFoundError extends GetAddressInfoByCepError {
 	public constructor(message: string) {
 		super(message);
@@ -23,6 +26,7 @@ export class GetAddressInfoByCepNotFoundError extends GetAddressInfoByCepError {
 	}
 }
 
+/** Thrown by `getAddressInfoByCep` when every CEP service failed to answer. */
 export class GetAddressInfoByCepServiceError extends GetAddressInfoByCepError {
 	public constructor(message: string) {
 		super(message);
@@ -30,6 +34,7 @@ export class GetAddressInfoByCepServiceError extends GetAddressInfoByCepError {
 	}
 }
 
+/** The address `getAddressInfoByCep` returns for a CEP. */
 export type AddressInfo = {
 	/** The 8 digit CEP, no mask. */
 	cep: string;
@@ -43,8 +48,10 @@ export type AddressInfo = {
 	street: string;
 };
 
+/** The CEP services `getAddressInfoByCep` can query. */
 export type CepProvider = "viacep" | "widenet" | "brasilapi";
 
+/** Options of `getAddressInfoByCep`. */
 export type GetAddressInfoByCepOptions = {
 	/** Which CEP services to race, in the order given (default: all of them). */
 	providers?: CepProvider[];

@@ -1,5 +1,5 @@
 import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/cities";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { getStates } from "../get-states/get-states";
 
 const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
@@ -12,7 +12,7 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  * omitted, every municipality of every state is returned, sorted with `localeCompare` in the
  * "pt-BR" locale so accented names land where a Brazilian reader expects them.
  *
- * @param {string} [stateCode] - The two letter code of the Brazilian state to filter by.
+ * @param {StateCode} [stateCode] - The two letter code of the Brazilian state to filter by.
  * @returns {Municipality[]} A fresh array of fresh `Municipality` objects. Empty when
  * `stateCode` is not a known state.
  *
@@ -25,7 +25,7 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const getMunicipalities = (stateCode?: string): Municipality[] => {
+export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 	if (stateCode === undefined) {
 		return getStates()
 			.flatMap((state) => buildMunicipalities(state.code))

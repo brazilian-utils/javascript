@@ -1,6 +1,7 @@
 import { DEFAULT_PRECISION, clampPrecision } from "../_internals/clamp-precision/clamp-precision";
 import { parseDecimal } from "../_internals/parse-decimal/parse-decimal";
 
+/** Options of `formatCurrency`. */
 export type FormatCurrencyOptions = {
 	/** Whether to prefix the result with the "R$" currency symbol (default: `false`). */
 	symbol?: boolean;

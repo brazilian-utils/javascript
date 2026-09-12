@@ -1,12 +1,14 @@
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
 import { NFE_KEY_LENGTH } from "../_internals/constants/nfe-key";
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { mod11 } from "../_internals/mod11/mod11";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { ABSENT_NUMBER, FORMAT_REGEX, NUMBER_END, NUMBER_START, VALID_MODELS } from "./constants";
 
-export type NfeKeyModel = (typeof VALID_MODELS)[number];
+/** The document models a DF-e access key can carry: `"55"` NF-e, `"57"` CT-e, `"58"` MDF-e and `"65"` NFC-e. */
+export type NfeKeyModel = "55" | "57" | "58" | "65";
 
+/** The fields `parseNfeKey` reads out of a DF-e access key (chave de acesso). */
 export type NfeKey = {
 	/** Two letter code of the issuing state, read from the IBGE UF code. */
 	state: StateCode;

@@ -1,8 +1,12 @@
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
-export type FormatCnhOptions = Pick<FormatParams, "pad">;
+/** Options of `formatCnh`. */
+export type FormatCnhOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
+};
 
 /**
  * Formats a Brazilian CNH (Carteira Nacional de Habilitação) number.

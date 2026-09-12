@@ -30,8 +30,10 @@ import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
 import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
 import { type TlvFields, parseTlv } from "../_internals/parse-tlv/parse-tlv";
 
+/** Whether a Pix BR Code may be paid many times (`"static"`) or only once (`"dynamic"`). */
 export type PixPointOfInitiation = "static" | "dynamic";
 
+/** The fields `parsePixPayload` reads out of a Pix BR Code. */
 export type PixPayload = {
 	/** The Pix key of the receiver, present in a static payload. */
 	key?: string;

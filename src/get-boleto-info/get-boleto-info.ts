@@ -12,6 +12,7 @@ import {
 	RANGE_BEFORE,
 } from "./constants";
 
+/** The fields `getBoletoInfo` reads out of a bank slip (boleto). */
 export type BoletoInfo = {
 	/** Amount in cents. */
 	amount: number;
@@ -69,6 +70,7 @@ const getExpirationDate = (factor: number, referenceDate: Date): Date | null => 
 	return dateFromBase(closest);
 };
 
+/** Options of `getBoletoInfo`. */
 export type GetBoletoInfoOptions = {
 	/** Date used to resolve the 9000 day "fator de vencimento" cycle (default: now). */
 	referenceDate?: Date;

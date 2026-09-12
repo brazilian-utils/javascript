@@ -1,5 +1,6 @@
 import { type PixKeyType, parsePixKey } from "../parse-pix-key/parse-pix-key";
 
+/** Options of `isValidPixKey`. */
 export type IsValidPixKeyOptions = {
 	/** Kinds of Pix key that count as valid (default: all of them). */
 	accept?: PixKeyType[];

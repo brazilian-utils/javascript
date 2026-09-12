@@ -1,6 +1,7 @@
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { isValidIban } from "../is-valid-iban/is-valid-iban";
 
+/** The fields `parseIban` reads out of a Brazilian IBAN. */
 export type Iban = {
 	/** ISO 3166-1 alpha-2 country code. Always `"BR"`, the only country this parser supports. */
 	countryCode: "BR";
