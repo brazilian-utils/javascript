@@ -11,8 +11,10 @@ const withFactor = {
 	"1000": "00190000090114971860168524522114210000000102656",
 	"1001": "00190000090114971860168524522114810010000102656",
 	"5000": "00190000090114971860168524522114350000000102656",
+	"7000": "00190000090114971860168524522114970000000102656",
 	"7586": "00190000090114971860168524522114675860000102656",
 	"7654": "00190000090114971860168524522114576540000102656",
+	"8841": "00190000090114971860168524522114488410000102656",
 	"8999": "00190000090114971860168524522114489990000102656",
 	"9999": "00190000090114971860168524522114799990000102656",
 };
@@ -117,10 +119,36 @@ describe("getBoletoInfo", () => {
 			).toStrictEqual(new Date(2015, 10, 16));
 		});
 
-		test("should accept a factor whose difference from the reference date is exactly RANGE_AFTER (5500 days), even though the other cycle candidate (3500 days before the reference, on the other side) is numerically closer", () => {
+		test("should prefer the candidate inside the control range over the closest one (factor 1000 with referenceDate 16/06/2011: the old cycle date 03/07/2000 is 4000 days back, past RANGE_BEFORE, while the new cycle date 22/02/2025 is 5000 days ahead, inside RANGE_AFTER)", () => {
+			expect(
+				getBoletoInfo(withFactor["1000"], { referenceDate: new Date(2011, 5, 16) })?.expirationDate,
+			).toStrictEqual(new Date(2025, 1, 22));
+		});
+
+		test("should accept a factor whose difference from the reference date is exactly RANGE_AFTER (5500 days)", () => {
 			expect(
 				getBoletoInfo(withFactor["1000"], { referenceDate: new Date(1985, 5, 12) })?.expirationDate,
 			).toStrictEqual(new Date(2000, 6, 3));
+		});
+
+		test("should never resolve a factor to a date before the 07/10/1997 base date, even when the reference date predates the scheme: the cycle search is clamped to the first cycle, so each factor below gives the single date it is able to denote", () => {
+			const preSchemeReference = new Date(2000, 0, 1);
+
+			expect(
+				getBoletoInfo(withFactor["7000"], { referenceDate: preSchemeReference })?.expirationDate,
+			).toStrictEqual(new Date(2016, 11, 6));
+			expect(
+				getBoletoInfo(withFactor["8841"], { referenceDate: preSchemeReference })?.expirationDate,
+			).toStrictEqual(new Date(2021, 11, 21));
+			expect(
+				getBoletoInfo(withFactor["9999"], { referenceDate: preSchemeReference })?.expirationDate,
+			).toStrictEqual(new Date(2025, 1, 21));
+		});
+
+		test("should keep the clamped answer stable while the reference date is still before the first cycle", () => {
+			expect(
+				getBoletoInfo(withFactor["8841"], { referenceDate: new Date(2003, 0, 1) })?.expirationDate,
+			).toStrictEqual(new Date(2021, 11, 21));
 		});
 
 		test("should default the reference date to now", () => {

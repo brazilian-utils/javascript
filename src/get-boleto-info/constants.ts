@@ -27,6 +27,15 @@ export const BASE_DATE_DAY = 7;
 
 export const CYCLE_LENGTH = 9000;
 
+/**
+ * The earliest cycle the two candidate search may consider. The factor only started carrying
+ * 1000 on 03/07/2000, so the base date is the oldest day the field can denote: a negative cycle
+ * would place a factor before 07/10/1997, a date no fator de vencimento can express (and one the
+ * same function already refuses to read out of a literal factor below `MIN_FACTOR`). A
+ * `referenceDate` early enough to make the arithmetic yield a negative cycle is clamped here.
+ */
+export const FIRST_CYCLE = 0;
+
 export const MIN_FACTOR = 1000;
 
 export const RANGE_BEFORE = 3000;

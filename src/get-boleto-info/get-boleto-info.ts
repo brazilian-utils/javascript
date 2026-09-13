@@ -7,6 +7,7 @@ import {
 	BASE_DATE_YEAR,
 	CYCLE_LENGTH,
 	DAY_IN_MS,
+	FIRST_CYCLE,
 	MIN_FACTOR,
 	RANGE_AFTER,
 	RANGE_BEFORE,
@@ -43,7 +44,10 @@ const getExpirationDate = (factor: number, referenceDate: Date): Date | null => 
 	if (!Number.isFinite(factor) || factor < MIN_FACTOR) return null;
 
 	const reference = toDayNumber(referenceDate);
-	const cycle = Math.floor((reference - getBaseDayNumber() - factor) / CYCLE_LENGTH);
+	const cycle = Math.max(
+		FIRST_CYCLE,
+		Math.floor((reference - getBaseDayNumber() - factor) / CYCLE_LENGTH),
+	);
 
 	let closest = 0;
 	let closestDistance = Number.POSITIVE_INFINITY;
@@ -90,7 +94,9 @@ export type GetBoletoInfoOptions = {
  * vencimento from a new cycle one, so every factor resolves to either of two dates 9000 days
  * apart. `referenceDate` (now by default) picks between them through the library's own safety
  * windows, which means the same slip can resolve to the other candidate as time passes: pass
- * `referenceDate` explicitly whenever the answer has to stay stable.
+ * `referenceDate` explicitly whenever the answer has to stay stable. The search never goes below
+ * the first cycle, so a `referenceDate` older than the scheme itself still resolves a factor to
+ * the oldest date that factor can denote rather than to one before the 07/10/1997 base date.
  *
  * @param {string} value - The boleto digitable line (can be with or without mask).
  * @param {GetBoletoInfoOptions} [options] - Optional options.
