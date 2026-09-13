@@ -17,6 +17,14 @@ const withFactor = {
 	"9999": "00190000090114971860168524522114799990000102656",
 };
 
+const REFERENCE_DATE = new Date(2025, 5, 15);
+
+const CANONICAL_INFO = {
+	amount: 102_656,
+	expirationDate: new Date(2018, 6, 15),
+	bankCode: "001",
+};
+
 const ARRECADACAO_LINE = "846100000005246100291102005460339004695895061080";
 const ARRECADACAO_BARCODE = "84610000000246100291100054603390069589506108";
 
@@ -33,19 +41,17 @@ describe("getBoletoInfo", () => {
 
 	describe("should return boleto info", () => {
 		test("when boleto is valid without mask", () => {
-			expect(getBoletoInfo("00190000090114971860168524522114675860000102656")).toStrictEqual({
-				amount: 102_656,
-				expirationDate: new Date(2018, 6, 15),
-				bankCode: "001",
-			});
+			const info = getBoletoInfo(withFactor["7586"], { referenceDate: REFERENCE_DATE });
+
+			expect(info).toStrictEqual(CANONICAL_INFO);
 		});
 
 		test("when boleto is valid with mask", () => {
-			expect(getBoletoInfo("0019000009 01149.718601 68524.522114 6 75860000102656")).toStrictEqual({
-				amount: 102_656,
-				expirationDate: new Date(2018, 6, 15),
-				bankCode: "001",
-			});
+			const masked = "0019000009 01149.718601 68524.522114 6 75860000102656";
+
+			expect(getBoletoInfo(masked, { referenceDate: REFERENCE_DATE })).toStrictEqual(
+				CANONICAL_INFO,
+			);
 		});
 
 		test("when the amount field is all zeros (same fixture as the 'valid without mask' boleto, amount positions 37-46 zeroed and the main check digit recalculated)", () => {
@@ -54,7 +60,7 @@ describe("getBoletoInfo", () => {
 	});
 
 	describe("fator de vencimento (fixtures share a banco 001, R$ 1.026,56 slip with only the factor and check digits changed; FEBRABAN restarted the factor at 1000 on 22/02/2025 right after it reached 9999 on 21/02/2025, so the same factor can map to two dates 9000 days apart, and referenceDate pins which cycle wins)", () => {
-		const referenceDate = new Date(2025, 5, 15);
+		const referenceDate = REFERENCE_DATE;
 
 		test("should return null when there is no fator de vencimento", () => {
 			expect(getBoletoInfo(withFactor["0000"], { referenceDate })?.expirationDate).toBeNull();
@@ -103,7 +109,7 @@ describe("getBoletoInfo", () => {
 			).toStrictEqual(new Date(2000, 6, 3));
 		});
 
-		test("should resolve a factor inside the safety range to its closest candidate (fixture '7586' with the factor changed to 6614 and the main check digit recalculated: with referenceDate 15/06/2025 neither cycle candidate falls inside the accepted control range, landing in the 'range de segurança' the FEBRABAN manual describes, so the closest one is used anyway)", () => {
+		test("should resolve a factor inside the safety range to its closest candidate (fixture '7586' with the factor changed to 6614 and the main check digit recalculated: with referenceDate 15/06/2025 neither cycle candidate falls inside the accepted control range, landing in the safety window RANGE_BEFORE/RANGE_AFTER define, which is a heuristic of this library rather than a published FEBRABAN rule, so the closest one is used anyway)", () => {
 			expect(
 				getBoletoInfo("00190000090114971860168524522114466140000102656", {
 					referenceDate,

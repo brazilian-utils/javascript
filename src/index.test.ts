@@ -1,10 +1,10 @@
 import { describe, expect, test } from "./_internals/test/runtime";
 import {
-	type AddBusinessDaysParams,
 	type AddressInfo,
 	type AreaCodeInfo,
 	type Bank,
 	type BoletoInfo,
+	type BusinessDayOptions,
 	type CapitalizeOptions,
 	type Cbo,
 	type CepAddressInfo,
@@ -13,21 +13,21 @@ import {
 	type CertidaoType,
 	type Cfop,
 	type Cnae,
-	type ConvertCurrencyToWordsOptions,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
-	type DifferenceInBusinessDaysParams,
 	type FormatBoletoOptions,
 	type FormatCaepfOptions,
 	type FormatCeiOptions,
 	type FormatCepOptions,
 	type FormatCertidaoOptions,
+	type FormatCnaeOptions,
 	type FormatCnhOptions,
 	type FormatCnoOptions,
 	type FormatCnpjOptions,
 	type FormatCnsOptions,
 	type FormatCpfOptions,
 	type FormatCurrencyOptions,
+	type FormatNcmOptions,
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
@@ -46,7 +46,6 @@ import {
 	type Holiday,
 	type HolidayType,
 	type Iban,
-	type IsBusinessDayOptions,
 	type IsHolidayOptions,
 	type IsValidBankAccountOptions,
 	type IsValidBankAccountParams,
@@ -76,7 +75,6 @@ import {
 	type State,
 	type StateCode,
 	type StateName,
-	type WordsCase,
 } from "./index";
 import * as brazilianUtils from "./index";
 
@@ -222,6 +220,7 @@ const PUBLIC = [
 	"parseProcessoJuridico",
 	"parseVoterId",
 	"removeAccents",
+	"subBusinessDays",
 ].sort();
 
 const NETWORK_ENTRY_POINTS = new Set(["getAddressInfoByCep", "getCepInfoByAddress"]);
@@ -251,11 +250,11 @@ describe("Public API", () => {
 
 	test("should export every documented public type", () => {
 		const publicTypes: Partial<{
-			AddBusinessDaysParams: AddBusinessDaysParams;
 			AddressInfo: AddressInfo;
 			AreaCodeInfo: AreaCodeInfo;
 			Bank: Bank;
 			BoletoInfo: BoletoInfo;
+			BusinessDayOptions: BusinessDayOptions;
 			CapitalizeOptions: CapitalizeOptions;
 			Cbo: Cbo;
 			CepAddressInfo: CepAddressInfo;
@@ -264,21 +263,21 @@ describe("Public API", () => {
 			CertidaoType: CertidaoType;
 			Cfop: Cfop;
 			Cnae: Cnae;
-			ConvertCurrencyToWordsOptions: ConvertCurrencyToWordsOptions;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
-			DifferenceInBusinessDaysParams: DifferenceInBusinessDaysParams;
 			FormatBoletoOptions: FormatBoletoOptions;
 			FormatCaepfOptions: FormatCaepfOptions;
 			FormatCeiOptions: FormatCeiOptions;
 			FormatCepOptions: FormatCepOptions;
 			FormatCertidaoOptions: FormatCertidaoOptions;
+			FormatCnaeOptions: FormatCnaeOptions;
 			FormatCnhOptions: FormatCnhOptions;
 			FormatCnoOptions: FormatCnoOptions;
 			FormatCnpjOptions: FormatCnpjOptions;
 			FormatCnsOptions: FormatCnsOptions;
 			FormatCpfOptions: FormatCpfOptions;
 			FormatCurrencyOptions: FormatCurrencyOptions;
+			FormatNcmOptions: FormatNcmOptions;
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
@@ -297,7 +296,6 @@ describe("Public API", () => {
 			Holiday: Holiday;
 			HolidayType: HolidayType;
 			Iban: Iban;
-			IsBusinessDayOptions: IsBusinessDayOptions;
 			IsHolidayOptions: IsHolidayOptions;
 			IsValidBankAccountOptions: IsValidBankAccountOptions;
 			IsValidBankAccountParams: IsValidBankAccountParams;
@@ -327,7 +325,6 @@ describe("Public API", () => {
 			State: State;
 			StateCode: StateCode;
 			StateName: StateName;
-			WordsCase: WordsCase;
 		}> = {};
 
 		expect(publicTypes).toEqual({});

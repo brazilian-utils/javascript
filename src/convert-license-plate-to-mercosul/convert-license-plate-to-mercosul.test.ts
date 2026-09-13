@@ -26,7 +26,7 @@ describe("convertLicensePlateToMercosul", () => {
 			expect(convertLicensePlateToMercosul("ABC1D23")).toBe("");
 		});
 
-		test("when it is a Mercosul motorcycle plate", () => {
+		test("when it is the withdrawn LLLNNLN sequence", () => {
 			expect(convertLicensePlateToMercosul("ABC12D3")).toBe("");
 		});
 

@@ -2,7 +2,7 @@
 
 Aqui você encontrará todos os utilitários disponíveis para uso.
 
-> **Tratamento de entrada:** nenhuma função pública síncrona lança exceção com `null`/`undefined` ou um valor de tipo incorreto; as duas funções de rede, `getAddressInfoByCep` e `getCepInfoByAddress`, rejeitam com seus erros tipados (veja as seções delas). Os validadores (`isValid*`) retornam `false`; `isHoliday` retorna `false`; `getHolidays` retorna `[]`; `generateProcessoJuridico` retorna `null`; `getMunicipality` retorna `null` para uma busca malformada/sem correspondência. Todas as demais funções `format*`/`parse*` (incluindo `capitalize`) retornam um valor vazio do seu tipo de retorno: `""` para strings, `0` para `parseCurrency`. `formatCurrency` retorna `""` para um número não finito.
+> **Tratamento de entrada:** nenhuma função pública síncrona lança exceção com `null`/`undefined` ou um valor de tipo incorreto; as duas funções de rede, `getAddressInfoByCep` e `getCepInfoByAddress`, rejeitam com seus erros tipados (veja as seções delas). Os validadores (`isValid*`) retornam `false`; `isHoliday` retorna `false`; `getHolidays` retorna `[]`; `generateProcessoJuridico` retorna `null`; `getMunicipality` retorna `null` para uma busca malformada/sem correspondência. Todas as demais funções `format*`/`parse*` (incluindo `capitalize`) retornam um valor vazio do seu tipo de retorno: `""` para strings, `0` para `parseCurrency`. `formatCurrency` retorna `""` para um número não finito e para um valor que não pode ser convertido em número (um symbol, um objeto simples, um objeto sem protótipo); `null`, arrays e booleanos passam por `Number()` como no 2.3.0. A única exceção à promessa acima: um objeto criado com `Object.create(null)` não tem `toString`, então as funções `format*`/`parse*` que leem a entrada como texto ainda lançam um `TypeError` para ele, exatamente como na 2.3.0.
 
 ## isValidCpf
 
@@ -39,7 +39,7 @@ parseCpf('746.506.880-00'); // 74650688000
 
 ## generateCpf
 
-Gera um CPF válido aleatório.
+Gera um CPF válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateCpf } from '@brazilian-utils/brazilian-utils'
@@ -85,7 +85,7 @@ parseCnpj('12.OUT.345/0001-99', { version: 2 }); // 12OUT345000199
 
 ## isValidCep
 
-Valida se o CEP é válido. Aceita entrada como `string` ou `number`; espaços, pontos e hífens ao redor/entre os 8 dígitos são ignorados, mas qualquer outro caractere, uma letra em especial, invalida o valor.
+Valida se o CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) é válido. Aceita entrada como `string` ou `number`; espaços, pontos e hífens ao redor/entre os 8 dígitos são ignorados, mas qualquer outro caractere, uma letra em especial, invalida o valor.
 
 ```javascript
 import { isValidCep } from '@brazilian-utils/brazilian-utils';
@@ -112,7 +112,7 @@ generateCnpj(2); // CNPJ alfanumérico, ex. 'Q0SLFMBD7VX439'
 
 ## isValidBoleto
 
-Valida se o boleto é válido. Suporta tanto o boleto de "cobrança bancária" de 47 dígitos quanto o "boleto de arrecadação" (convênio/tributos): seja a linha digitável de 48 dígitos, seja o código de barras de 44 dígitos, ambos iniciados com `8`.
+Valida se o boleto ([meio de pagamento brasileiro](https://pt.wikipedia.org/wiki/Boleto_banc%C3%A1rio)) é válido. Suporta tanto o boleto de "cobrança bancária" de 47 dígitos quanto o "boleto de arrecadação" (convênio/tributos): seja a linha digitável de 48 dígitos, seja o código de barras de 44 dígitos, ambos iniciados com `8`. Uma tolerância é mantida desde a 2.3.0: o código de moeda na posição 4 do código de barras da cobrança bancária não é verificado, embora a Carta-Circular BCB nº 2.926/2000 o fixe em `9` (real), então um boleto com qualquer outro dígito de moeda continua válido.
 
 ```javascript
 import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
@@ -146,7 +146,7 @@ parseBoleto('00190.00009 01149.718601 68524.522114 6 75860000102656'); // 001900
 
 ## generateBoleto
 
-Gera um boleto válido aleatório. Informe `{ type: "arrecadacao" }` (tipado como `GenerateBoletoOptions`) para gerar um boleto de arrecadação em vez do tipo padrão "bancario" (cobrança bancária).
+Gera um boleto válido aleatório. Informe `{ type: "arrecadacao" }` (tipado como `GenerateBoletoOptions`) para gerar um boleto de arrecadação em vez do tipo padrão "bancario" (cobrança bancária). Um boleto de arrecadação sorteia o segmento entre 1 e 7 (o segmento 9 é de uso dos próprios bancos) e o identificador de valor entre os quatro valores possíveis, `6` e `8` para valor efetivo e `7` e `9` para quantidade de moeda, de modo que os dois ramos de `hasEffectiveValue` do `getBoletoInfo` sejam alcançáveis.
 
 ```javascript
 import { generateBoleto } from '@brazilian-utils/brazilian-utils';
@@ -157,7 +157,7 @@ generateBoleto({ type: 'arrecadacao' }); // "84610000000524610029110200546033900
 
 ## getBoletoInfo
 
-Extrai informações de um boleto (valor, data de vencimento, código do banco). Aceita opcionalmente `{ referenceDate }` (tipado como `GetBoletoInfoOptions`) para resolver o ciclo do "fator de vencimento" a partir de uma data específica em vez de agora (o ciclo do fator reiniciou em 22/02/2025, segundo a FEBRABAN). Para um boleto de arrecadação, o resultado, tipado como `BoletoInfo`, não tem `bankCode`/`expirationDate` e traz em vez disso `type: "arrecadacao"`, `segment`, `value` e `hasEffectiveValue`.
+Extrai informações de um boleto (valor, data de vencimento, código do banco). Aceita opcionalmente `{ referenceDate }` (tipado como `GetBoletoInfoOptions`) para resolver o ciclo do "fator de vencimento" a partir de uma data específica em vez de agora (o ciclo do fator reiniciou em 22/02/2025, segundo a FEBRABAN). Nem a FEBRABAN nem o Banco Central publicam uma forma de distinguir um fator do ciclo antigo de um do ciclo novo, então todo fator resolve para uma de duas datas separadas por 9000 dias e o `referenceDate` escolhe entre elas por meio das janelas de segurança da própria biblioteca: o mesmo boleto pode passar a resolver para a outra candidata com o tempo, então informe `referenceDate` explicitamente sempre que a resposta precisar ser estável. Para um boleto de arrecadação, o resultado, tipado como `BoletoInfo`, não tem `bankCode`/`expirationDate` e traz em vez disso `type: "arrecadacao"`, `segment`, `value` e `hasEffectiveValue`.
 
 ```javascript
 import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
@@ -209,7 +209,7 @@ parsePixKey('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
 
 ## isValidPixPayload
 
-Valida se um payload de BR Code Pix (a string por trás de um QR Code Pix e do "Pix copia e cola") é válido: estrutura TLV bem formada, objetos obrigatórios presentes, um dos templates "Merchant Account Information" carregando o GUI `br.gov.bcb.pix` junto com uma chave ou uma URL, um objeto "Point of Initiation Method" (`01`) coerente com ele (uma chave exige um payload estático, com `01` ausente ou `"11"`; uma URL exige um dinâmico, com `01` igual a `"12"`), um valor (`54`) maior que zero em um payload estático, e um CRC-16 que confere. A chave em si não é validada contra os formatos do DICT, use `isValidPixKey` para isso. Payloads que trazem a localização em um Unreserved Template (IDs 80 a 99), como o "QR Code composto" do Pix Automático (Pix recorrente), estão fora de escopo e são considerados inválidos.
+Valida se um payload de BR Code Pix (a string por trás de um QR Code Pix e do "Pix copia e cola") é válido: estrutura TLV bem formada, objetos obrigatórios presentes, um dos templates "Merchant Account Information" carregando o GUI `br.gov.bcb.pix` junto com uma chave ou uma URL, e um CRC-16 que confere. O objeto "Point of Initiation Method" (`01`) é informativo: o Manual do BR Code o marca como opcional e só atribui significado ao valor `"12"` ("só pode ser utilizado uma vez"), então ele pode estar ausente em qualquer um dos formatos e apenas um valor fora de `{"11", "12"}` torna o payload inválido. Quando um payload construído em torno de uma chave traz um valor (`54`), esse valor precisa ser maior que zero, a menos que o payload seja um BR Code de Pix Saque, ou seja, a menos que traga o ISPB do facilitador de serviço de saque no subobjeto 26-03 (`fss`) como prescreve o §2.6 do manual do Pix; rejeitar `"0"`/`"0.00"` sem o `fss` é uma restrição deliberada desta biblioteca, não uma regra do manual. A chave em si não é validada contra os formatos do DICT, use `isValidPixKey` para isso. Payloads que trazem a localização em um Unreserved Template (IDs 80 a 99), como o "QR Code composto" do Pix Automático (Pix recorrente), estão fora de escopo e são considerados inválidos.
 
 ```javascript
 import { isValidPixPayload } from '@brazilian-utils/brazilian-utils';
@@ -224,7 +224,7 @@ isValidPixPayload('00020126580014br.gov.bcb.pix...'); // false (CRC quebrado)
 
 ## parsePixPayload
 
-Interpreta um payload de BR Code Pix e retorna seus campos. O payload é validado pelo `isValidPixPayload` primeiro, então uma estrutura malformada, um CRC quebrado ou um objeto obrigatório ausente retornam `null` em vez de um resultado parcial. Um payload estático vem com `key`, um dinâmico com `url`. O resultado é tipado como `PixPayload`; `pointOfInitiation` é tipado como `PixPointOfInitiation` (`"static"` ou `"dynamic"`). As informações da conta do recebedor devem trazer exatamente uma chave ou uma `url` (verificada com a mesma regra de localização de PSP do `generatePixPayload`), e o objeto "Point of Initiation Method" (`01`) precisa ser coerente com isso: uma chave pertence a um payload estático (`01` ausente ou `"11"`) e uma `url` a um dinâmico (`01` igual a `"12"`), então qualquer outra combinação retorna `null`. Um payload estático que informa um valor precisa informar um valor maior que zero (`54` igual a `0.00` é reservado ao BR Code de Pix Saque/Troco, que está fora de escopo), e em um payload dinâmico o valor e o `txid` são ignorados, como o manual determina. Payloads cuja localização fica em um Unreserved Template (IDs 80 a 99, Pix Automático) estão fora de escopo e retornam `null`.
+Interpreta um payload de BR Code Pix e retorna seus campos. O payload é validado pelo `isValidPixPayload` primeiro, então uma estrutura malformada, um CRC quebrado ou um objeto obrigatório ausente retornam `null` em vez de um resultado parcial. Um payload estático vem com `key`, um dinâmico com `url`. O resultado é tipado como `PixPayload`; `pointOfInitiation` está sempre presente e é tipado como `PixPointOfInitiation`, `"dynamic"` quando o payload traz uma localização de PSP ou quando o objeto "Point of Initiation Method" (`01`) é `"12"`, e `"static"` nos demais casos. As informações da conta do recebedor devem trazer exatamente uma chave ou uma `url` (verificada com a mesma regra de localização de PSP do `generatePixPayload`); o próprio `01` é informativo, então pode estar ausente em qualquer um dos formatos e apenas um valor fora de `{"11", "12"}` retorna `null`. Quando um payload construído em torno de uma chave traz um valor, esse valor precisa ser maior que zero, a menos que o payload seja um BR Code de Pix Saque: o §2.6 do manual do Pix coloca o ISPB do facilitador de serviço de saque no subobjeto 26-03 (`fss`), devolvido como `withdrawalFacilitator`, e `54` igual a `"0"` ou `"0.00"` é aceito junto dele. Rejeitar um valor zero sem o `fss` é uma restrição deliberada desta biblioteca, não uma regra do manual. Quando o payload traz uma localização de PSP, o valor e o `txid` são ignorados, como o manual determina. Payloads cuja localização fica em um Unreserved Template (IDs 80 a 99, Pix Automático) estão fora de escopo e retornam `null`.
 
 ```javascript
 import { parsePixPayload } from '@brazilian-utils/brazilian-utils';
@@ -236,13 +236,14 @@ parsePixPayload(
 // {
 //   key: '123e4567-e12b-12d1-a456-426655440000',
 //   merchantName: 'Fulano de Tal',
-//   merchantCity: 'BRASILIA'
+//   merchantCity: 'BRASILIA',
+//   pointOfInitiation: 'static'
 // }
 ```
 
 ## generatePixPayload
 
-Gera o payload de um BR Code Pix. Exatamente um entre `params.key` e `params.url` deve ser informado (parte de `GeneratePixPayloadParams`); `null` é retornado quando ambos ou nenhum são informados. `url` deve ser uma localização de PSP como o manual do Bacen define: um host com caminho, sem esquema (`pix.example.com/qr/v2/1234`); um payload dinâmico não pode carregar `amount` nem `txid`, que pertencem à localização do PSP, e um `amount` que arredonda para `0.00` é rejeitado.
+Gera o payload de um BR Code Pix. Exatamente um entre `params.key` e `params.url` deve ser informado (parte de `GeneratePixPayloadParams`); `null` é retornado quando ambos ou nenhum são informados. `url` deve ser uma localização de PSP como o manual do Bacen define: um host com caminho, sem esquema (`pix.example.com/qr/v2/1234`); um payload dinâmico não pode carregar `amount` nem `txid`, que pertencem à localização do PSP. O valor é escrito com as duas casas decimais que o BR Code aceita, então tanto um que arredonda para `0.00` quanto um que não sobrevive a esse round-trip (`0.005`, `123.456`) são rejeitados, em vez de escritos como uma quantia diferente. O BR Code de Pix Saque, que anuncia o `fss` do subobjeto 26-03, é interpretado pelo `parsePixPayload`, mas não é gerado aqui.
 
 Quando `params.key` é informado, ela é normalizada para a forma canônica do DICT pelo `parsePixKey` e o payload é estático. Quando `params.url` é informado no lugar (a localização do PSP, sem o esquema da URL, ex.: `"pix.example.com/qr/v2/1234"`), o payload é dinâmico conforme o Manual de Padrões para Iniciação do Pix: a URL ocupa o lugar da chave no template "Merchant Account Information" e o objeto "Point of Initiation Method" é definido como dinâmico (`12`); `params.url` pode ter no máximo 77 caracteres. `merchantName`, `merchantCity` e `description` são convertidos para ASCII imprimível (acentos removidos) e truncados ao que o BR Code permite. O `parsePixPayload` já interpreta os dois formatos, então `parsePixPayload(generatePixPayload({ url, ... }))` forma um round-trip.
 
@@ -269,21 +270,25 @@ generatePixPayload({ merchantName: 'Fulano', merchantCity: 'Brasília' }); // nu
 
 ## isValidNfeKey
 
-Valida se uma chave de acesso de DF-e (Documento Fiscal eletrônico) é válida. Cobre todos os documentos que compartilham o mesmo layout de 44 dígitos: NF-e (modelo 55), NFC-e (modelo 65), CT-e (modelo 57), MDF-e (modelo 58) e CT-e OS (modelo 67, o Conhecimento de Transporte Eletrônico para Outros Serviços do [Ajuste SINIEF 09/07](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/aj_009_07)). Aceita espaços entre os grupos de dígitos (a máscara de exibição usual) e o prefixo `NFe` encontrado no atributo `Id` do XML do documento. A forma de emissão (`tpEmis`) precisa ser um dos códigos atribuídos pelo MOC, de 1 a 7 ou 9; o 8 não é atribuído e torna a chave inválida.
+Valida se uma chave de acesso de DF-e (Documento Fiscal eletrônico) é válida. Cobre todos os documentos cuja chave de acesso é a mesma string de 44 dígitos: NF-e (modelo 55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67, o Conhecimento de Transporte Eletrônico para Outros Serviços do [Ajuste SINIEF 09/07](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/AJ_009_07)), GTV-e (64, o CT-e Guia de Transporte de Valores), BP-e (63), NF3e (66) e NFCom (62). O CF-e-SAT (59) fica de fora: sua "chave de consulta" de 44 posições é composta de outro jeito. Aceita espaços entre os grupos de dígitos (a máscara de exibição usual) e os prefixos `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` e `NFCom` encontrados no atributo `Id` do XML do documento.
+
+A forma de emissão (`tpEmis`) é conferida contra os códigos que o MOC daquele modelo atribui, então o conjunto aceito muda com o modelo: de 1 a 7 e 9 para NF-e e NFC-e, `{1, 3, 4, 5, 7, 8}` para o CT-e, `{1, 5, 7, 8}` para o CT-e OS, `{1, 2, 7, 8}` para a GTV-e, `{1, 2, 3}` para o MDF-e e `{1, 2}` para o BP-e, a NF3e e a NFCom. O código 8, a autorização pela SVC-SP, é atribuído somente pelo [MOC do CT-e 4.00](https://www.cte.fazenda.gov.br/portal/listaManuais.aspx?tipoConteudo=manuais), nunca pelo da NF-e; os domínios do [BP-e](https://dfe-portal.svrs.rs.gov.br/BPE/Documentos), da [NF3e](https://dfe-portal.svrs.rs.gov.br/NF3e/Documentos) e da [NFCom](https://dfe-portal.svrs.rs.gov.br/NFCOM/Documentos) vêm dos manuais deles. Para NF-e e NFC-e o código numérico também é conferido contra a regra B03-10 do MOC da NF-e, que proíbe os vinte valores repetidos e sequenciais de `cNF` que ela lista e um `cNF` igual ao número do documento. Já rejeitar um número de documento todo zerado é uma escolha desta biblioteca: nenhuma regra de MOC foi encontrada proibindo isso.
 
 ```javascript
 import { isValidNfeKey } from '@brazilian-utils/brazilian-utils';
 
 isValidNfeKey('35170458716523000119550010000000121000123458'); // true (NF-e, SP)
 isValidNfeKey('NFe35170458716523000119550010000000121000123458'); // true (prefixo Id do XML)
+isValidNfeKey('CTe35170458716523000119570010000000128000123452'); // true (CT-e autorizado pela SVC-SP)
 isValidNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'); // true (com máscara)
 isValidNfeKey('99170458716523000119550010000000121000123458'); // false (cUF inválido)
-isValidNfeKey('35170458716523000119550010000000128000123455'); // false (tpEmis 8 não é atribuído)
+isValidNfeKey('35170458716523000119550010000000128000123455'); // false (o MOC da NF-e não atribui tpEmis 8)
+isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 00000000, regra B03-10)
 ```
 
 ## formatNfeKey
 
-Formata uma chave de acesso de DF-e (NF-e, NFC-e, CT-e, MDF-e ou CT-e OS) em grupos de 4 dígitos separados por espaço, a forma de exibição usual impressa na DANFE.
+Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 dígitos separados por espaço, a forma em que todo documento auxiliar a imprime: o DANFE da NF-e e da NFC-e, o DACTE do CT-e, do CT-e OS e da GTV-e, o DAMDFE do MDF-e, o DABPE do BP-e, o DANF3E da NF3e e o DANFE-COM da NFCom.
 
 ```javascript
 import { formatNfeKey } from '@brazilian-utils/brazilian-utils';
@@ -294,7 +299,7 @@ formatNfeKey('35170458716523000119550010000000121000123458');
 
 ## parseNfeKey
 
-Interpreta uma chave de acesso de DF-e e retorna seus campos (state, year, month, taxId, model, series, number, emissionType, code, checkDigit). Aceita as mesmas formas de entrada do `isValidNfeKey` e retorna `null` quando a chave não é válida. O resultado é tipado como `NfeKey`.
+Interpreta uma chave de acesso de DF-e e retorna seus campos (state, year, month, taxId, model, series, number, emissionType, code, checkDigit). Aceita as mesmas formas de entrada do `isValidNfeKey` e retorna `null` quando a chave não é válida. O resultado é tipado como `NfeKey`, cujo `model` é um `NfeKeyModel`. A NFCom (`'62'`) e a NF3e (`'66'`) gastam a posição 36 da chave com o `nSiteAutoriz`, o site do autorizador que recebeu o documento, então para esses dois modelos o resultado também traz `authorizationSite` e o `code` tem 7 dígitos em vez de 8.
 
 ```javascript
 import { parseNfeKey } from '@brazilian-utils/brazilian-utils';
@@ -302,6 +307,10 @@ import { parseNfeKey } from '@brazilian-utils/brazilian-utils';
 parseNfeKey('35170458716523000119550010000000121000123458');
 // { state: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '55',
 //   series: 1, number: 12, emissionType: 1, code: '00012345', checkDigit: 8 }
+
+parseNfeKey('35170458716523000119620010000000121000123450');
+// { state: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
+//   series: 1, number: 12, emissionType: 1, authorizationSite: 0, code: '0012345', checkDigit: 0 }
 
 parseNfeKey('invalid'); // null
 ```
@@ -332,7 +341,7 @@ isValidPhone('11900000000', { accept: [] }); // false
 
 ## formatPhone
 
-Formata número de telefone de acordo com padrões brasileiros. `options.mask` (tipado como `PhoneMask`) aceita `"sn"` (padrão, apenas o número assinante, 9 dígitos, sem DDD), `"nanp"` (DDD + número assinante, 11 dígitos), `"e164"` (`"+5511987654321"`), `"international"` (`"+55 11 98765-4321"`, a forma como um número brasileiro é exibido para quem liga do exterior), `"service"` (`"0800 123 4567"` ou `"4004-1234"`, os agrupamentos convencionais para números de serviço) ou `"auto"`. O `"auto"` usa `"international"` quando `value` traz um código de país brasileiro (`+55`, `0055` ou um `55` seguido de 10 ou 11 dígitos), `"service"` quando `value` é um número de serviço e, nos demais casos, decide pela quantidade de dígitos: `"nanp"` quando `value` tem mais dígitos que um número assinante isolado, `"sn"` quando não tem. `"e164"` e `"international"` removem antes o código de país (regra documentada em `parsePhone`) e recaem para a apresentação `"service"` no caso de um número de serviço, já que esses não têm forma E.164. Se `value` incluir o DDD, informe `{ mask: 'auto' }` (ou `'nanp'`) explicitamente, já que a máscara padrão `"sn"` assume que não há DDD e trunca silenciosamente um DDD presente.
+Formata número de telefone de acordo com padrões brasileiros. `options.mask` (tipado como `PhoneMask`) aceita `"sn"` (padrão, apenas o número assinante, 9 dígitos, sem DDD), `"nanp"` (DDD + número assinante, `"(00) 00000-0000"` para os 11 dígitos de um celular e `"(00) 0000-0000"` para os 10 dígitos de um fixo, mantendo o agrupamento de 11 dígitos em qualquer outro tamanho), `"e164"` (`"+5511987654321"`), `"international"` (`"+55 11 98765-4321"`, a forma como um número brasileiro é exibido para quem liga do exterior), `"service"` (`"0800 123 4567"` ou `"4004-1234"`, os agrupamentos convencionais para números de serviço) ou `"auto"`. O `"auto"` usa `"international"` quando `value` traz um código de país brasileiro (`+55`, `0055` ou um `55` seguido de 10 ou 11 dígitos), `"service"` quando `value` é um número de serviço e, nos demais casos, decide pela quantidade de dígitos: `"nanp"` quando `value` tem mais dígitos que um número assinante isolado, `"sn"` quando não tem. `"e164"` e `"international"` removem antes o código de país (regra documentada em `parsePhone`) e recaem para a apresentação `"service"` no caso de um número de serviço, já que esses não têm forma E.164. Se `value` incluir o DDD, informe `{ mask: 'auto' }` (ou `'nanp'`) explicitamente, já que a máscara padrão `"sn"` assume que não há DDD e trunca silenciosamente um DDD presente. Uma `mask` fora da união recai para o padrão `"sn"` em vez de lançar erro.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -340,6 +349,8 @@ import { formatPhone } from '@brazilian-utils/brazilian-utils';
 formatPhone('987654321'); // 98765-4321 (padrão "sn", sem DDD)
 formatPhone('11900000000', { mask: 'nanp' }); // (11) 90000-0000
 formatPhone('11900000000', { mask: 'auto' }); // (11) 90000-0000
+formatPhone('1130000000', { mask: 'nanp' }); // (11) 3000-0000 (fixo de 10 dígitos)
+formatPhone('1130000000', { mask: 'auto' }); // (11) 3000-0000 (fixo de 10 dígitos)
 formatPhone('11987654321', { mask: 'e164' }); // +5511987654321
 formatPhone('+5511987654321', { mask: 'international' }); // +55 11 98765-4321
 formatPhone('08001234567', { mask: 'service' }); // 0800 123 4567
@@ -363,7 +374,7 @@ parsePhone('55987654321'); // 55987654321 (DDD 55, não confundido com o código
 
 ## isValidMobilePhone
 
-Valida se o número de telefone celular é válido. `options.version` (tipado como `PhoneVersion`) controla qual regra de numeração celular é aplicada: `1` (padrão) é o formato anterior à Resolução Anatel 749/2022, mantido por compatibilidade com a 2.3.0, cujo primeiro dígito do número (após o DDD) pode ser 6, 7, 8 ou 9; `2` exige apenas 9, um subconjunto mais restrito do art. 12 I da resolução (Serviço Móvel Pessoal).
+Valida se o número de telefone celular é válido. `options.version` (tipado como `PhoneVersion`) controla qual regra de numeração celular é aplicada: `1` (padrão) é o formato anterior à Resolução Anatel 749/2022, mantido por compatibilidade com a 2.3.0, cujo primeiro dígito do número (após o DDD) pode ser 6, 7, 8 ou 9; `2` exige apenas 9, um subconjunto mais restrito do art. 12 I da resolução (Serviço Móvel Pessoal). A versão `1` também não exclui o prefixo `700`, que o art. 12 II reserva ao Serviço Móvel Global por Satélite e não ao SMP, então `isValidMobilePhone('11700123456')` é `true` para um número fora do SMP; a versão `2` o rejeita.
 
 ```javascript
 import { isValidMobilePhone } from '@brazilian-utils/brazilian-utils';
@@ -385,7 +396,7 @@ isValidLandlinePhone('1130000000'); // true
 
 ## isValidServicePhone
 
-Valida se um número de telefone é um número de serviço brasileiro válido, discado sem DDD: os Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` e `0900` (11 dígitos no total), os números abreviados `300X`/`400X` (8 dígitos), e os códigos de 3 dígitos dos Códigos de Acesso a Serviços de Utilidade Pública designados pela Anatel (ex.: `190`, `192`; `112` e `911` também são aceitos, como aliases exclusivos de celular do `190` que a Anatel lista junto aos demais códigos de 3 dígitos). Apenas a estrutura é verificada, o número não precisa estar atribuído a ninguém.
+Valida se um número de telefone é um número de serviço brasileiro válido, discado sem DDD: os Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` e `0900` (11 dígitos no total), os números abreviados `300X`/`400X` (8 dígitos), e os códigos de 3 dígitos dos Códigos de Acesso a Serviços de Utilidade Pública designados pela Anatel (ex.: `190`, `192`; `112` e `911` também são aceitos, como aliases exclusivos de celular do `190` que a Anatel lista junto aos demais códigos de 3 dígitos). Apenas a estrutura é verificada, o número não precisa estar atribuído a ninguém. A Anatel não publica alocação para os números abreviados, então apenas as raízes convencionais `300X` e `400X` são reconhecidas: outros prefixos de "Número Único" usados no mercado, como `4020` e `4062`, estão fora de escopo e são rejeitados.
 
 ```javascript
 import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
@@ -453,14 +464,17 @@ isValidLicensePlate('ABC1234EXTRA'); // false (caracteres em excesso)
 
 ## isValidRenavam
 
-Valida se o RENAVAM (Registro Nacional de Veículos Automotores) é válido. Suporta tanto o formato antigo (9 dígitos) quanto o novo formato (11 dígitos).
+Valida se o RENAVAM (Registro Nacional de Veículos Automotores) é válido. Suporta tanto o formato antigo (9 dígitos) quanto o novo formato (11 dígitos). Espaços, pontos e hífens ao redor/entre os dígitos são ignorados, mas qualquer outro caractere, uma letra em especial, invalida o valor. Um registro com todos os dígitos iguais também é rejeitado.
 
 ```javascript
 import { isValidRenavam } from '@brazilian-utils/brazilian-utils';
 
 isValidRenavam('639884962'); // true (9 dígitos, formato antigo)
 isValidRenavam('00639884962'); // true (11 dígitos, formato novo)
+isValidRenavam('0063988.4962'); // true (pontos e hífens são ignorados)
 isValidRenavam('12345678901'); // false (checksum inválido)
+isValidRenavam('00000000000'); // false (dígitos repetidos)
+isValidRenavam('ab00639884962'); // false (letras são rejeitadas)
 ```
 
 ## isValidPis
@@ -475,7 +489,7 @@ isValidPis('12056412547'); // false
 
 ## formatPis
 
-Formata número de PIS.
+Formata número de PIS. `options.pad` (parte de `FormatPisOptions`) completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara.
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
@@ -496,12 +510,13 @@ parsePis('123.45678.90-1'); // 12345678901
 
 ## formatCep
 
-Formata o CEP.
+Formata o CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)). `options.pad` (parte de `FormatCepOptions`) completa o valor com zeros à esquerda até os 8 dígitos antes de aplicar a máscara.
 
 ```javascript
 import { formatCep } from '@brazilian-utils/brazilian-utils';
 
 formatCep('92500000'); // 92500-000
+formatCep('9250000', { pad: true }); // 09250-000
 ```
 
 ## parseCep
@@ -516,7 +531,7 @@ parseCep('92500-000'); // 92500000
 
 ## getAddressInfoByCep
 
-Busca informações de endereço para um CEP usando múltiplos provedores. O padrão é `['viacep', 'brasilapi']`. O provedor `'widenet'` está descontinuado (seu endpoint não responde mais) e foi excluído da lista padrão, mas ainda pode ser solicitado explicitamente via `options.providers` (tipado como `CepProvider[]`). O endereço retornado é tipado como `AddressInfo`.
+Busca informações de endereço para um CEP usando múltiplos provedores. O padrão é `['viacep', 'brasilapi']`. O provedor `'widenet'` está descontinuado (seu endpoint não responde mais) e foi excluído da lista padrão, mas ainda pode ser solicitado explicitamente via `options.providers` (tipado como `CepProvider[]`). O endereço retornado é tipado como `AddressInfo`. Uma falha transitória de rede é repetida duas vezes por provedor, com backoff linear de 250 ms (250 ms e depois 500 ms), então um provedor que continua falhando é tentado até 3 vezes e acrescenta cerca de 750 ms antes de o próximo provedor ser consultado; um status de erro HTTP ou uma falha não recuperável não é repetida.
 
 ```javascript
 import { getAddressInfoByCep } from '@brazilian-utils/brazilian-utils';
@@ -536,22 +551,25 @@ const address = await getAddressInfoByCep(1310100);
 
 ## isValidProcessoJuridico
 
-Valida o número do processo jurídico de acordo com definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119).
+Valida o número do processo jurídico de acordo com definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119). Os separadores da máscara do CNJ (espaços, `.` e `-`) são aceitos entre os campos `NNNNNNN-DD.AAAA.J.TR.OOOO`, mas qualquer outro caractere, uma letra em especial, invalida o valor.
 
 ```javascript
 import { isValidProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
 isValidProcessoJuridico('00020802520125150049'); // true
+isValidProcessoJuridico('0002080-25.2012.5.15.0049'); // true (máscara do CNJ)
+isValidProcessoJuridico('ab00020802520125150049'); // false (letras são rejeitadas)
 ```
 
 ## formatProcessoJuridico
 
-Formata um número no formato definido pelo [CNJ](https://atos.cnj.jus.br/atos/detalhar/119) (máscara `NNNNNNN-DD.AAAA.J.TR.OOOO`).
+Formata um número no formato definido pelo [CNJ](https://atos.cnj.jus.br/atos/detalhar/119) (máscara `NNNNNNN-DD.AAAA.J.TR.OOOO`). `options.pad` (parte de `FormatProcessoJuridicoOptions`) completa o valor com zeros à esquerda até os 20 dígitos antes de aplicar a máscara.
 
 ```javascript
 import { formatProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
 formatProcessoJuridico('00020802520125150049'); // 0002080-25.2012.5.15.0049
+formatProcessoJuridico('20802520125150049', { pad: true }); // 0002080-25.2012.5.15.0049
 ```
 
 ## parseProcessoJuridico
@@ -566,7 +584,7 @@ parseProcessoJuridico('0002080-25.2012.5.15.0049'); // 00020802520125150049
 
 ## isValidIe
 
-Valida se a inscrição estadual de um estado é válida. A UF é case-insensitive. Regras notáveis por estado: GO aceita os prefixos `10`, `11` e `15`; PA aceita `15` e `75`-`79`; MS aceita `28` e `50`; SP tem o padrão de produtor rural `P0MMMSSSSD000`; TO usa códigos de tipo de 11 dígitos (`01`, `02`, `03`, `99`).
+Valida se a inscrição estadual de um estado é válida. A UF é case-insensitive. Regras notáveis por estado: GO aceita os prefixos `10`, `11` e `15`; PA aceita `15` e `75`-`79`; MS aceita `28` e `50`; SP tem o padrão de produtor rural `P0MMMSSSSD000`; TO usa códigos de tipo de 11 dígitos (`01`, `02`, `03`, `99`). O TO também aceita uma forma de 9 dígitos, aplicando a mesma regra módulo 11 sobre os oito primeiros dígitos; a página do SINTEGRA documenta apenas a de 11 dígitos, então essa forma é comportamento da 2.3.0 mantido por compatibilidade, e não regra publicada. Uma inscrição só de zeros é aceita em todo estado cuja fórmula publicada produz dígito verificador 0 para ela (AM, BA com 8 ou 9 dígitos, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE, SP e TO com 9 dígitos), diferente de `isValidCpf` e `isValidCnpj`, que rejeitam dígitos repetidos.
 
 ```javascript
 import { isValidIe } from '@brazilian-utils/brazilian-utils';
@@ -587,7 +605,7 @@ Bancos validados pelo algoritmo de dígito verificador publicado:
 | Santander | `033` | 4 dígitos | 8 dígitos | pesos `9,7,3,1,0,0,9,7,1,3,1,9,7,3` sobre agência + `"00"` + conta, desprezando as dezenas |
 | Banrisul | `041` | 4 dígitos | 9 dígitos | pesos `3,2,4,7,6,5,4,3,2`; resto 0 gera `0` e resto 1 gera `6`; `account` é tipo (2 dígitos) + conta (7 dígitos) |
 | Caixa Econômica Federal | `104` | 4 dígitos | 11 dígitos | mod11 sobre agência + conta; `account` é operação (3 dígitos) + conta (8 dígitos) |
-| Bradesco | `237` | 4 dígitos | 7 dígitos | mod11 com pesos 2..7; `digit` pode ser `"P"` (geralmente exibido como `"0"`) |
+| Bradesco | `237` | 4 dígitos | 7 dígitos | mod11 com pesos 2..7; resto 0 gera `0` e resto 1 gera `"P"` |
 | Nubank | `260` | 4 dígitos | 5-13 dígitos | dígito de Verhoeff sobre a conta, ignorando zeros à esquerda |
 | Itaú Unibanco | `341` | 4 dígitos | 5 dígitos | mod10 sobre agência + conta |
 | HSBC / Kirton Bank | `399` | 4 dígitos | 6 dígitos | pesos `8,9,2,3,4,5,6,7,8,9` sobre agência + conta; resto 10 gera `0` |
@@ -597,17 +615,15 @@ Bancos validados apenas pela estrutura, por não publicarem regra de dígito ver
 
 | Banco | Código | | Banco | Código |
 | --- | --- | --- | --- | --- |
-| Inter | `077` | | PicPay | `380` |
-| Ailos | `085` | | Cora | `403` |
-| XP | `102` | | Pan | `623` |
-| Unicred | `136` | | BV | `655` |
-| Stone | `197` | | Daycoval | `707` |
-| BTG Pactual | `208` | | Modal | `746` |
-| Original | `212` | | Sicredi | `748` |
-| PagBank | `290` | | Sicoob | `756` |
-| BMG | `318` | | | |
-| Mercado Pago | `323` | | | |
-| C6 | `336` | | | |
+| Inter | `077` | | Mercado Pago | `323` |
+| Ailos | `085` | | C6 | `336` |
+| XP | `102` | | PicPay | `380` |
+| Unicred | `136` | | Cora | `403` |
+| Stone | `197` | | Pan | `623` |
+| BTG Pactual | `208` | | BV | `655` |
+| Original | `212` | | Daycoval | `707` |
+| PagBank | `290` | | Sicredi | `748` |
+| BMG | `318` | | Sicoob | `756` |
 
 Quando `digit` tem 2 caracteres, o fallback genérico encadeia mod10 seguido de mod11 sobre a conta, do mesmo jeito que os dígitos de CPF/CNPJ são encadeados.
 
@@ -722,7 +738,7 @@ getBankByIspb('99999999'); // null
 
 ## isValidIban
 
-Valida se um IBAN (International Bank Account Number) brasileiro é válido, conforme as [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf) do Bacen (Circular BCB nº 3.625/2013): `BR` + 2 dígitos verificadores ISO 7064 MOD 97-10 + 8 dígitos de ISPB + 5 dígitos de agência + 10 dígitos de conta + 1 letra de tipo de conta (qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 caractere alfanumérico de titularidade, totalizando 29 caracteres. Somente IBANs brasileiros (código de país `BR`) são reconhecidos; qualquer outro país retorna `false`, já que este pacote não conhece o layout de campos dos outros mais de 90 países da ISO 13616. Aceita os espaços de agrupamento usuais e não diferencia maiúsculas de minúsculas. O valor precisa estar escrito no formato impresso da ISO 13616: letras e dígitos em grupos separados por um único espaço, com espaços em branco opcionais no início e no fim. Qualquer outro caractere faz do valor algo que não é um IBAN, então ele é rejeitado em vez de removido.
+Valida se um IBAN (International Bank Account Number) brasileiro é válido, conforme as [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf) do Bacen (Circular BCB nº 3.625/2013): `BR` + 2 dígitos verificadores ISO 7064 MOD 97-10 + 8 dígitos de ISPB + 5 dígitos de agência + 10 dígitos de conta + 1 letra de tipo de conta (qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 indicador de titularidade (`1` para o primeiro ou único titular até `9` para o nono, depois `A` a `Z` a partir do décimo, então `0` é rejeitado), totalizando 29 caracteres. Somente IBANs brasileiros (código de país `BR`) são reconhecidos; qualquer outro país retorna `false`, já que este pacote não conhece o layout de campos dos outros mais de 90 países da ISO 13616. Não diferencia maiúsculas de minúsculas e aceita as duas formas em que um IBAN é escrito: compacta (`'BR1500000000000010932840814P2'`) ou no formato impresso da ISO 13616, letras e dígitos em grupos separados por um único espaço, em ambos os casos com espaços em branco opcionais no início e no fim. Apenas um caractere fora de letras e dígitos, ou um separador diferente de um único espaço, faz do valor algo que não é um IBAN, então ele é rejeitado em vez de removido.
 
 ```javascript
 import { isValidIban } from '@brazilian-utils/brazilian-utils';
@@ -736,7 +752,7 @@ isValidIban('DE89370400440532013000'); // false (IBAN não brasileiro)
 
 ## formatIban
 
-Formata um IBAN brasileiro agrupando-o em blocos de 4 caracteres, a apresentação "impressa" da ISO 13616 usada em extratos e formulários bancários. Não valida os dígitos verificadores nem o layout dos campos; formata o que for passado, até o limite de 29 caracteres de um IBAN brasileiro, até onde for possível, então a função também pode ser usada como máscara de digitação. Use `isValidIban` para verificar a validade. O valor ainda precisa estar escrito no formato impresso da ISO 13616 (letras e dígitos em grupos separados por um único espaço, com espaços em branco opcionais no início e no fim); qualquer outro caractere resulta em uma string vazia, em vez de ser descartado silenciosamente.
+Formata um IBAN no agrupamento impresso da ISO 13616, blocos de 4 caracteres, a apresentação usada em extratos e formulários bancários. Não valida os dígitos verificadores nem o layout dos campos; formata o que for passado, até o limite de 29 caracteres de um IBAN brasileiro, até onde for possível, então a função também pode ser usada como máscara de digitação, e um IBAN de outro país é agrupado do mesmo jeito até esse limite. Use `isValidIban` para verificar a validade. O valor pode ser compacto (`'BR1500000000000010932840814P2'`), já estar no formato impresso da ISO 13616 (letras e dígitos em grupos separados por um único espaço) ou ser um valor parcial ainda sendo digitado (`'BR15'`), em todos os casos com espaços em branco opcionais no início e no fim; apenas um caractere fora de letras e dígitos, ou um separador diferente de um único espaço, resulta em uma string vazia, em vez de ser descartado silenciosamente.
 
 ```javascript
 import { formatIban } from '@brazilian-utils/brazilian-utils';
@@ -749,7 +765,7 @@ formatIban('BR1500000000000010932840814P-2'); // '' (hífen não faz parte de um
 
 ## parseIban
 
-Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular). Aceita as mesmas formas de entrada que `isValidIban` (espaços de agrupamento, minúsculas) e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega qualquer caractere além de letras, dígitos e os espaços de agrupamento do formato impresso. O resultado é tipado como `Iban`, cujo `accountType` é uma `string`.
+Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular, `1` a `9` e depois `A` a `Z`). Aceita as mesmas formas de entrada que `isValidIban`, compacta ou no formato impresso da ISO 13616 (grupos separados por um único espaço), em ambos os casos com espaços em branco opcionais no início e no fim e sem diferenciar maiúsculas de minúsculas, e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega qualquer caractere além de letras, dígitos e esses espaços de agrupamento. O resultado é tipado como `Iban`, cujo `accountType` é uma `string`.
 
 ```javascript
 import { parseIban } from '@brazilian-utils/brazilian-utils';
@@ -771,7 +787,7 @@ parseIban('BR1500000000000010932840814P-2'); // null (hífen não faz parte de u
 
 ## isValidCreditCard
 
-Valida se um número de cartão de pagamento é válido usando o algoritmo de Luhn ([ISO/IEC 7812-1](https://www.iso.org/standard/70484.html)). Aceita os caracteres de máscara usuais (espaços, hifens) entre os dígitos. Não faz detecção de bandeira (Visa, Mastercard, Amex...), consulta de faixa de emissor nem validação de validade/CVV, verifica apenas a quantidade de dígitos (12 a 19) e o dígito verificador de Luhn. Um `number` só é aceito quando é um inteiro seguro não negativo: qualquer valor acima de `Number.MAX_SAFE_INTEGER` (2^53 - 1, 16 dígitos) já chega arredondado para outro número, então passe cartões mais longos como string.
+Valida se um número de cartão de pagamento é válido usando o algoritmo de Luhn ([ISO/IEC 7812-1](https://www.iso.org/standard/70484.html)). Aceita os caracteres de máscara usuais (espaços, hifens) entre os dígitos e espaços ao redor do valor; qualquer outro caractere invalida o valor. Não faz detecção de bandeira (Visa, Mastercard, Amex...), consulta de faixa de emissor nem validação de validade/CVV, verifica apenas a quantidade de dígitos (12 a 19) e o dígito verificador de Luhn. Um `number` só é aceito quando é um inteiro seguro não negativo: qualquer valor acima de `Number.MAX_SAFE_INTEGER` (2^53 - 1, 16 dígitos) já chega arredondado para outro número, então passe cartões mais longos como string.
 
 ```javascript
 import { isValidCreditCard } from '@brazilian-utils/brazilian-utils';
@@ -781,29 +797,42 @@ isValidCreditCard('5555555555554444'); // true (número de teste Mastercard)
 isValidCreditCard('378282246310005'); // true (número de teste American Express)
 isValidCreditCard('4111 1111 1111 1111'); // true (máscara com espaços)
 isValidCreditCard('4111111111111112'); // false (dígito verificador inválido)
+isValidCreditCard('4111a1111b1111c1111'); // false (letras entre os dígitos)
 isValidCreditCard(4111111111111111111); // false (acima de 2^53 - 1, passe como string)
 ```
 
 ## capitalize
 
-Transforma primeira letra de cada palavra em maiúscula ignorando preposições. As palavras são separadas por espaço em branco, por `-` e por `/`, então `'MOGI-GUAÇU'` vira `'Mogi-Guaçu'` e `'SANTANA/RS'` vira `'Santana/Rs'`. Toda sequência de espaços em branco (tabs, quebras de linha, espaços repetidos) vira um único espaço, e o espaço no início e no fim é descartado. `options.upperCaseWords` tem como padrão `[]`, ou seja, nenhuma sigla é colocada em maiúsculas a menos que você a liste, e a comparação com `upperCaseWords` e `lowerCaseWords` é case-insensitive (locale pt-BR). As opções são tipadas como `CapitalizeOptions`.
+Transforma a primeira letra de cada palavra em maiúscula do jeito que se escreve um nome, uma razão social ou um endereço brasileiro, sem precisar de opções. As palavras são separadas por espaço em branco, por `-` e por `/`, então `'MOGI-GUAÇU'` vira `'Mogi-Guaçu'`. Toda sequência de espaços em branco (tabs, quebras de linha, espaços repetidos) vira um único espaço, e o espaço no início e no fim é descartado.
+
+`options.lowerCaseWords` tem como padrão as preposições, artigos e conjunções que permanecem em minúsculas dentro de um nome próprio (`de`, `da`, `do`, `e`, ...), exceto quando uma delas é a primeira palavra. `options.upperCaseWords` tem como padrão as designações societárias e as abreviações de documentos escritas em maiúsculas no uso brasileiro (`LTDA`, `S.A.`, `S/A`, `S.S.`, `S/S`, `ME`, `EPP`, `MEI`, `EIRELI`, `CIA`, `SCP`, `CNPJ`, `CPF`, `RG`, `CEP`, `UF`) mais os algarismos romanos que aparecem em nomes e endereços (de `II` a `XXIII`, exceto `VI`, que colide com a forma verbal "vi"). `SA` sem pontuação ficou de fora de propósito, por ser indistinguível do sobrenome "Sá" digitado sem o acento, enquanto `ME` casa também com o pronome "me" (`'diga-me'` vira `'Diga-ME'`), então informe o seu próprio `upperCaseWords` quando a entrada for texto livre em vez de um nome. `S/A` e `S/S` são reconhecidos mesmo com a barra no meio, embora a barra separe palavras. Uma palavra de duas letras logo depois de uma `/` vira maiúscula quando é a sigla de um estado brasileiro (`'porto alegre/rs'` vira `'Porto Alegre/RS'`); essa regra é estrutural e continua valendo mesmo com `upperCaseWords` informado, enquanto uma sigla de estado que não venha depois de uma `/` é deixada como está.
+
+Qualquer uma das listas informada em `options` substitui inteiramente a lista padrão correspondente, e a comparação com as duas é case-insensitive (locale pt-BR). As opções são tipadas como `CapitalizeOptions`.
 
 ```javascript
 import { capitalize } from '@brazilian-utils/brazilian-utils';
 
-capitalize('josé e maria'); // José e Maria
+capitalize('jose da silva'); // Jose da Silva
+capitalize('JOSÉ DA SILVA'); // José da Silva
+capitalize('empresa ltda'); // Empresa LTDA
+capitalize('banco do brasil s.a.'); // Banco do Brasil S.A.
+capitalize('casa de carnes s/a'); // Casa de Carnes S/A ("S/A" é reconhecido com a barra no meio)
+capitalize('mogi-guaçu'); // Mogi-Guaçu ("-" inicia uma nova palavra)
+capitalize('santana/rs'); // Santana/RS ("RS" é sigla de estado logo depois de uma "/")
+capitalize('porto alegre/rs'); // Porto Alegre/RS
+capitalize('santana rs'); // Santana Rs (sem "/", "rs" é só uma palavra)
+capitalize('rua xv de novembro'); // Rua XV de Novembro (algarismo romano, "de" fica em minúsculas)
+capitalize('joão paulo ii'); // João Paulo II
+capitalize('de'); // De (uma preposição mantém a maiúscula quando é a primeira palavra)
+capitalize('empresa ltda', { upperCaseWords: [] }); // Empresa Ltda (a lista informada substitui a padrão)
 capitalize('josé Ama MARIA', { lowerCaseWords: ['ama'] }); // José ama Maria
-capitalize('doc inválido', { upperCaseWords: ['DOC'] }); // DOC Inválido
-capitalize('MOGI-GUAÇU'); // Mogi-Guaçu ("-" inicia uma nova palavra)
-capitalize('SANTANA/RS', { upperCaseWords: ['RS'] }); // Santana/RS ("/" inicia uma nova palavra, então "RS" corresponde)
-capitalize('empresa ltda'); // Empresa Ltda (sem siglas padrão)
-capitalize('empresa ltda', { upperCaseWords: ['LTDA'] }); // Empresa LTDA (comparação case-insensitive)
+capitalize('doc inválido', { upperCaseWords: ['DOC'] }); // DOC Inválido (comparação case-insensitive)
 capitalize('  josé   maria  '); // José Maria (toda sequência de espaço em branco, tabs e quebras de linha inclusive, vira um único espaço)
 ```
 
 ## formatCurrency
 
-Formata um número inteiro ou float para uma string no padrão BRL. Um `number` é formatado como está (sinal e decimais preservados). Uma entrada em `string` é lida pela mesma regra do `parseCurrency`, com a diferença de que um valor escrito sem nenhum separador permanece em unidades inteiras: o último `,` ou `.` seguido de 1 ou 2 dígitos é o separador decimal, todo outro `,` ou `.` é separador de milhar, e um `-` escrito antes do primeiro dígito é preservado. Assim `'1.234,56'` vira `1.234,56`, `'-10.5'` vira `-10,50` e `'1234'` vira `1.234,00`. `precision` é limitado ao intervalo `0..20` (o aceito pelo `Intl.NumberFormat`) e o padrão é 2. Um valor que não seja um número finito (`NaN`, `Infinity`, `-Infinity`) vira string vazia. As opções são tipadas como `FormatCurrencyOptions`.
+Formata um número inteiro ou float para uma string no padrão BRL. Um `number` é formatado como está (sinal e decimais preservados). Uma entrada em `string` é lida pela mesma regra do `parseCurrency`, com a diferença de que um valor escrito sem nenhum separador permanece em unidades inteiras: o último `,` ou `.` seguido de 1 ou 2 dígitos (ou de até `precision` dígitos, quando esse valor for maior) é o separador decimal, todo outro `,` ou `.` é separador de milhar, e um `-` escrito antes do primeiro dígito é preservado. Assim `'1.234,56'` vira `1.234,56`, `'-10.5'` vira `-10,50` e `'1234'` vira `1.234,00`. `precision` é limitado ao intervalo `0..20` (o aceito pelo `Intl.NumberFormat`), o padrão é 2 e volta a 2 quando não é um número finito. Um valor que não seja um número finito (`NaN`, `Infinity`, `-Infinity`) vira string vazia, e um valor que não pode ser convertido em número (um symbol, um objeto simples, um objeto sem protótipo) também; `null`, arrays e booleanos passam por `Number()` como no 2.3.0. As opções são tipadas como `FormatCurrencyOptions`.
 
 ```javascript
 import { formatCurrency } from '@brazilian-utils/brazilian-utils';
@@ -821,7 +850,7 @@ formatCurrency(Number.NaN); // "" (números não finitos viram string vazia)
 
 ## parseCurrency
 
-Transforma uma string para o formato de inteiro ou float. O último `,` ou `.` seguido de 1 ou 2 dígitos (ou de até `precision` dígitos, quando esse valor for maior) é o separador decimal; todo outro `,` ou `.` é separador de milhar. Assim `'R$ 1.234,56'` vira `1234.56`, `'R$ 1.234'` vira `1234`, `'1,5'` vira `1.5` e `'12.34'` vira `12.34`. Um valor escrito sem nenhum separador mantém a convenção de centavos e é dividido por `10 ** precision`, então `'1234'` vira `12.34`. Um `-` escrito antes do primeiro dígito é preservado, então `'-R$ 1,00'` vira `-1`. `precision` (padrão 2, limitado a `0..20`) controla quantos dígitos são tratados como centavos. As opções são tipadas como `ParseCurrencyOptions`.
+Transforma uma string para o formato de inteiro ou float. O último `,` ou `.` seguido de 1 ou 2 dígitos (ou de até `precision` dígitos, quando esse valor for maior) é o separador decimal; todo outro `,` ou `.` é separador de milhar. Assim `'R$ 1.234,56'` vira `1234.56`, `'R$ 1.234'` vira `1234`, `'1,5'` vira `1.5` e `'12.34'` vira `12.34`. Um valor escrito sem nenhum separador mantém a convenção de centavos e é dividido por `10 ** precision`, então `'1234'` vira `12.34`. Um `-` escrito antes do primeiro dígito é preservado, então `'-R$ 1,00'` vira `-1`. `precision` (padrão 2, limitado a `0..20`, e voltando a 2 quando não é um número finito) controla quantos dígitos são tratados como centavos. As opções são tipadas como `ParseCurrencyOptions`.
 
 ```javascript
 import { parseCurrency } from '@brazilian-utils/brazilian-utils';
@@ -839,7 +868,7 @@ parseCurrency(''); // 0
 
 ## convertNumberToWords
 
-Formata um número inteiro por extenso em português do Brasil, ex.: `1235` vira `"mil, duzentos e trinta e cinco"`. Só são suportados inteiros de `-999999999999999` a `999999999999999` (999 trilhões em valor absoluto); fora desse intervalo, `NaN` ou um valor não finito retornam `""`. Um `value` não inteiro é truncado em direção a zero antes da conversão. `options.gender` (parte de `ConvertNumberToWordsOptions`) concorda "um/dois" e a centena ("duzentos/duzentas" etc.) com o substantivo que o número qualifica, com padrão `"masculine"`. `options.case` define a caixa do resultado: `"lower"` (padrão, sem alteração), `"sentence"` (só a primeira letra em maiúscula) ou `"upper"` (tudo em maiúscula pelo locale "pt-BR", preservando os acentos, ex.: "três" -> "TRÊS"). Um valor inválido de `gender`/`case` é ignorado e o padrão é usado.
+Formata um número inteiro por extenso em português do Brasil, ex.: `1235` vira `"mil, duzentos e trinta e cinco"`. Só são suportados inteiros de `-999999999999999` a `999999999999999` (999 trilhões em valor absoluto); fora desse intervalo, `NaN` ou um valor não finito retornam `""`. Um `value` não inteiro é truncado em direção a zero antes da conversão. `options.gender` (parte de `ConvertNumberToWordsOptions`) concorda "um/dois" e a centena ("duzentos/duzentas" etc.) com o substantivo que o número qualifica, com padrão `"masculine"`. Um valor inválido de `gender` é ignorado e o padrão é usado. O resultado sai sempre em minúsculas; aplique qualquer outra caixa por conta própria.
 
 ```javascript
 import { convertNumberToWords } from '@brazilian-utils/brazilian-utils';
@@ -849,13 +878,13 @@ convertNumberToWords(1001); // "mil e um"
 convertNumberToWords(2000000); // "dois milhões"
 convertNumberToWords(-42); // "menos quarenta e dois"
 convertNumberToWords(2, { gender: 'feminine' }); // "duas"
-convertNumberToWords(3, { case: 'upper' }); // "TRÊS"
+convertNumberToWords(12.9); // "doze" (truncado em direção a zero)
 convertNumberToWords(NaN); // ""
 ```
 
 ## convertCurrencyToWords
 
-Formata um valor monetário em Reais por extenso, no estilo usado para escrever o valor à mão em cheques e contratos, ex.: `1523.45` vira `"mil, quinhentos e vinte e três reais e quarenta e cinco centavos"`. O `value` é truncado (não arredondado) para 2 casas decimais. O substantivo no singular é usado para exatamente 1 ("um real", "um centavo") e "de" é inserido antes de "reais" quando o valor é um milhão, bilhão ou trilhão de reais redondo. Um valor que trunca para nada vira `"zero reais"`, sem o prefixo "menos"; qualquer outro valor negativo recebe o prefixo "menos", e uma entrada inválida retorna `""`. Acima de `Number.MAX_SAFE_INTEGER / 100` reais (cerca de 90 trilhões) um double não consegue carregar centavos, então o valor é lido como um número inteiro de reais. `options.case` (parte de `ConvertCurrencyToWordsOptions`) define a caixa do resultado: `"lower"` (padrão), `"sentence"` (só a primeira letra em maiúscula) ou `"upper"` (tudo em maiúscula, preservando os acentos). Um valor inválido de `case` é ignorado e `"lower"` é usado.
+Formata um valor monetário em Reais por extenso, no estilo usado para escrever o valor à mão em cheques e contratos, ex.: `1523.45` vira `"mil, quinhentos e vinte e três reais e quarenta e cinco centavos"`. O `value` é truncado (não arredondado) para 2 casas decimais. O substantivo no singular é usado para exatamente 1 ("um real", "um centavo") e "de" é inserido antes de "reais" quando o valor é um milhão, bilhão ou trilhão de reais redondo. Um valor que trunca para nada vira `"zero reais"`, sem o prefixo "menos"; qualquer outro valor negativo recebe o prefixo "menos", e uma entrada inválida retorna `""`. Acima de `Number.MAX_SAFE_INTEGER / 100` reais (cerca de 90 trilhões) um double não consegue carregar centavos, então o valor é lido como um número inteiro de reais. Não recebe opções: o resultado sai sempre em minúsculas; aplique qualquer outra caixa por conta própria.
 
 ```javascript
 import { convertCurrencyToWords } from '@brazilian-utils/brazilian-utils';
@@ -867,7 +896,6 @@ convertCurrencyToWords(1000000); // "um milhão de reais"
 convertCurrencyToWords(0); // "zero reais"
 convertCurrencyToWords(-5.5); // "menos cinco reais e cinquenta centavos"
 convertCurrencyToWords(-0.001); // "zero reais" (trunca para nada)
-convertCurrencyToWords(1000, { case: 'upper' }); // "MIL REAIS"
 ```
 
 ## getStates
@@ -969,7 +997,7 @@ getTimezoneByState('ZZ'); // null
 
 ## getCities
 
-Retorna as cidades brasileiras. Retorna todas as cidades se nenhum estado for fornecido, ou cidades de um estado específico. Cada chamada retorna um array novo, então alterar o resultado nunca afeta chamadas seguintes. Um código de estado desconhecido (ou um valor que não seja `StateCode`) retorna um array vazio em vez de lançar erro.
+Retorna as cidades brasileiras. Retorna todas as cidades se nenhum estado for fornecido, ou cidades de um estado específico. Cada chamada retorna um array novo, então alterar o resultado nunca afeta chamadas seguintes. Um código de estado desconhecido (ou um valor que não seja `StateCode`) retorna um array vazio em vez de lançar erro, exceto quando é um valor falsy: `getCities(null)` e `getCities('')` são lidos como "nenhum estado informado" e retornam todas as cidades, enquanto o mais estrito `getMunicipalities` retorna `[]` para eles.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -1007,11 +1035,22 @@ getCities('SP');
 // ]
 ```
 
-`getCities` embute os nomes dos 5571 municípios do IBGE (~153 KB minificado, ~49 KB com gzip) e é uma das poucas exceções pesadas neste pacote, que é tree-shakeable no restante. Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-cities` em vez do import da raiz.
+`getCities` embute os nomes dos 5571 municípios do IBGE (~153,6 KB minificado, ~49,4 KB com gzip) e é uma das poucas exceções pesadas neste pacote, que é tree-shakeable no restante. Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-cities` em vez do import da raiz.
 
 ## getHolidays
 
-Retorna feriados brasileiros para um determinado ano. Retorna feriados nacionais e opcionalmente feriados estaduais. Cada feriado (tipado como `Holiday`) tem um campo `type` (`HolidayType`: `"national"`, `"state"`, `"optional"` ou `"religious"`). O "Dia da Consciência Negra" (20 de novembro) é feriado nacional a partir de 2024 (Lei nº 14.759/2023). Antes disso, MT e RJ ainda trazem seu próprio feriado estadual chamado `"Consciência Negra"` na mesma data. Os resultados são memoizados por `year`/`stateCode`, mas cada chamada ainda retorna uma cópia nova. Um `stateCode` desconhecido/inválido é ignorado, retornando apenas os feriados nacionais.
+Retorna feriados brasileiros para um determinado ano. Retorna feriados nacionais e opcionalmente feriados estaduais. Cada feriado (tipado como `Holiday`) tem um campo `type` (`HolidayType`: `"national"`, `"state"`, `"optional"` ou `"religious"`). O "Dia da Consciência Negra" (20 de novembro) é feriado nacional a partir de 2024 (Lei nº 14.759/2023). Antes disso, MT e RJ ainda trazem seu próprio feriado estadual chamado `"Consciência Negra"` na mesma data. Os resultados são memoizados por `year`/`stateCode`, mas cada chamada ainda retorna uma cópia nova. Um `stateCode` desconhecido/inválido é ignorado, retornando apenas os feriados nacionais; a busca lê apenas propriedades próprias, então `"__proto__"`, `"constructor"` e afins são códigos desconhecidos como qualquer outro, e não uma exceção.
+
+Apenas um feriado estadual por UF é feriado civil pela [Lei nº 9.093/1995](https://www.planalto.gov.br/ccivil_03/leis/l9093.htm), art. 1º, II, que autoriza "a data magna do Estado fixada em lei estadual", no singular; as demais entradas se apoiam em leis estaduais ordinárias e são reportadas por serem observadas na prática. Regras notáveis por estado:
+
+- **SC** — a [Lei SC nº 18.531/2022](http://leis.alesc.sc.gov.br/html/2022/18531_2022_lei.html) transfere os dois feriados estaduais, "Dia do Estado de Santa Catarina" (11/08) e "Dia de Santa Catarina de Alexandria" (25/11), para o domingo subsequente sempre que caem de segunda a sexta, então a segunda-feira 11/08/2025 é dia útil em SC e o feriado cai no domingo 17/08.
+- **DF** — a [Lei distrital nº 72/1989](https://www.sinj.df.gov.br/sinj/Norma/18459/Lei_72_27_12_1989.html), art. 1º parágrafo único, declara Corpus Christi feriado. Com `stateCode: 'DF'` a única entrada de Corpus Christi volta tipada como `"state"` em vez de `"optional"`; ela é substituída, não duplicada.
+- **GO** — a [Lei GO nº 20.756/2020](https://legisla.casacivil.go.gov.br/pesquisa_legislacao/100979/lei-20756), art. 269, II, lista três feriados estaduais: 26/07 (Fundação da Cidade de Goiás), 24/10 (Lançamento da Pedra Fundamental de Goiânia) e 28/10 (Dia do Servidor Público).
+- **AL** — 16/09 é feriado estadual a partir de 2024 ([Lei AL nº 9.358/2024](https://sapl.al.al.leg.br/norma/3117)) e apenas ponto facultativo (`"optional"`) antes disso.
+- **PB** — 26/07 ("Morte de João Pessoa") é emitido apenas até 2015: a [Lei PB nº 10.601/2015](https://sapl.al.pb.leg.br/norma/11988), art. 2º, revogou a sua base.
+- **TO** — 18/03 ("Autonomia do Estado do Tocantins") é emitido apenas até 2008: a [Lei TO nº 2.013/2009](https://www.al.to.leg.br/arquivo/15724) transformou em meramente comemorativo o dispositivo que declarava o feriado.
+
+A data retornada é a legal. O deslocamento de SC acima é o único modelado; o de Acre (feriados de terça a quinta transferidos para a sexta) e os decretos goianos que podem mover 26/07 e 28/10 não são.
 
 ```javascript
 import { getHolidays } from '@brazilian-utils/brazilian-utils';
@@ -1058,7 +1097,7 @@ formatPassport('AB-123.456'); // 'AB123456'
 
 ## generatePassport
 
-Gera um número de passaporte brasileiro válido aleatoriamente.
+Gera um número de passaporte brasileiro válido aleatoriamente. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generatePassport } from '@brazilian-utils/brazilian-utils';
@@ -1079,7 +1118,7 @@ parsePassport(' AB 123 456 '); // 'AB123456'
 
 ## generateCep
 
-Gera um CEP aleatório.
+Gera um CEP aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateCep } from '@brazilian-utils/brazilian-utils';
@@ -1089,7 +1128,7 @@ generateCep(); // '92500000'
 
 ## formatCnh
 
-Formata a CNH.
+Formata a CNH. `options.pad` (parte de `FormatCnhOptions`) completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara.
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
@@ -1100,17 +1139,19 @@ formatCnh('2650306461', { pad: true }); // 026503064-61
 
 ## isValidCnh
 
-Valida se a CNH é válida.
+Valida se a CNH é válida. Espaços, pontos e hífens ao redor/entre os dígitos são ignorados, mas qualquer outro caractere, uma letra em especial, invalida o valor.
 
 ```javascript
 import { isValidCnh } from '@brazilian-utils/brazilian-utils';
 
 isValidCnh('00000000119'); // true
+isValidCnh('000000001-19'); // true (hífen antes dos dígitos verificadores)
+isValidCnh('ab00000000119'); // false (letras são rejeitadas)
 ```
 
 ## generateCnh
 
-Gera uma CNH válida aleatória.
+Gera uma CNH válida aleatória. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateCnh } from '@brazilian-utils/brazilian-utils';
@@ -1143,9 +1184,9 @@ const ceps = await getCepInfoByAddress({
 
 // [
 //   {
-//     cep: '01310100',
+//     cep: '01310-100',
 //     logradouro: 'Avenida Paulista',
-//     complemento: 'lado par',
+//     complemento: 'de 612 a 1510 - lado par',
 //     bairro: 'Bela Vista',
 //     localidade: 'São Paulo',
 //     uf: 'SP'
@@ -1188,7 +1229,7 @@ isValidLegalNature('9999'); // false
 
 ## generateLegalNature
 
-Gera um código de natureza jurídica válido aleatório.
+Gera um código de natureza jurídica válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateLegalNature } from '@brazilian-utils/brazilian-utils';
@@ -1226,6 +1267,8 @@ Busca um código de natureza jurídica na tabela oficial do IBGE/CONCLA.
 import { getLegalNature } from '@brazilian-utils/brazilian-utils';
 
 getLegalNature('2062'); // { code: '2062', description: 'Sociedade Empresária Limitada' }
+getLegalNature('206-2'); // { code: '2062', description: 'Sociedade Empresária Limitada' }
+getLegalNature(206.2); // { code: '2062', description: 'Sociedade Empresária Limitada' }
 getLegalNature('0000'); // null
 ```
 
@@ -1255,7 +1298,7 @@ formatLicensePlate('abc1d23'); // 'ABC1D23'
 
 ## generateLicensePlate
 
-Gera uma placa aleatória no formato escolhido.
+Gera uma placa aleatória no formato escolhido. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateLicensePlate } from '@brazilian-utils/brazilian-utils';
@@ -1337,7 +1380,7 @@ await getMunicipality({ code: '123' });
 
 ## getMunicipalities
 
-Retorna os municípios brasileiros publicados pelo IBGE. Retorna todos os municípios se nenhum estado for fornecido, ou os municípios de um estado específico. Cada município é retornado como `{ code, name, stateCode }`, onde `code` é o código IBGE de 7 dígitos do município. Os resultados são ordenados por nome com `localeCompare` no locale "pt-BR". Cada chamada retorna um array novo com objetos novos, então alterar o resultado nunca afeta chamadas seguintes. Um código de estado desconhecido retorna um array vazio em vez de lançar erro.
+Retorna os municípios brasileiros publicados pelo IBGE. Retorna todos os municípios se nenhum estado for fornecido, ou os municípios de um estado específico. Cada município é retornado como `{ code, name, stateCode }`, onde `code` é o código IBGE de 7 dígitos do município. Os resultados são ordenados por nome com `localeCompare` no locale "pt-BR". Cada chamada retorna um array novo com objetos novos, então alterar o resultado nunca afeta chamadas seguintes. Um código de estado desconhecido retorna um array vazio em vez de lançar erro. Só um `stateCode` omitido (ou `undefined`) pede a lista completa: `getMunicipalities(null)` e `getMunicipalities('')` retornam `[]`, enquanto os mais permissivos `getCities(null)` e `getCities('')` retornam todas as cidades.
 
 ```javascript
 import { getMunicipalities } from '@brazilian-utils/brazilian-utils';
@@ -1400,7 +1443,7 @@ isHoliday(); // false
 
 ## isBusinessDay
 
-Verifica se uma data é um dia útil no Brasil. Retorna `false` para sábados, domingos e feriados brasileiros retornados por `getHolidays` para a data local de `value` (ano/mês/dia lidos localmente), a mesma convenção usada por `isHoliday`. `options.includeOptional` (parte de `IsBusinessDayOptions`) tem valor padrão `true`, então feriados do tipo opcional (`Holiday.type === "optional"`, ou seja, Carnaval e Corpus Christi) também contam como dias não úteis; passe `false` para considerar apenas os feriados estatutários. `options.stateCode` também considera os feriados daquele estado; um `stateCode` desconhecido/inválido é ignorado, retornando apenas os feriados nacionais. Um `value` que não é um `Date` válido retorna `false`. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `false`.
+Verifica se uma data é um dia útil no Brasil. Retorna `false` para sábados, domingos e feriados brasileiros retornados por `getHolidays` para a data local de `value` (ano/mês/dia lidos localmente), a mesma convenção usada por `isHoliday`. `options.includeOptional` (parte de `BusinessDayOptions`, o tipo de opções que todos os utilitários de dias úteis compartilham) tem valor padrão `true`, então feriados do tipo opcional (`Holiday.type === "optional"`, ou seja, Carnaval e Corpus Christi) também contam como dias não úteis; passe `false` para considerar apenas os feriados estatutários. `options.stateCode` também considera os feriados daquele estado; um `stateCode` desconhecido/inválido é ignorado, retornando apenas os feriados nacionais. Um `value` que não é um `Date` válido retorna `false`. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `false`.
 
 ```javascript
 import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
@@ -1417,38 +1460,55 @@ isBusinessDay(new Date('not a date')); // false
 
 ## addBusinessDays
 
-Adiciona um número de dias úteis brasileiros a uma data, pulando sábados, domingos e feriados brasileiros exatamente como `isBusinessDay` os define (mesmas opções `stateCode`/`includeOptional`). Retorna um novo `Date`; a `date` de entrada (parte de `AddBusinessDaysParams`) nunca é alterada, e seu horário é preservado no resultado. `days: 0` retorna um novo `Date` igual a `date`, sem alterações, mesmo quando `date` cai em um fim de semana ou feriado, isso reflete o comportamento verificado de [`addBusinessDays(date, 0)` do date-fns](https://date-fns.org/docs/addBusinessDays), que também não avança a entrada para o próximo dia útil. Um `days` negativo anda para trás, um dia útil por vez, também como no date-fns. Retorna `null` em caso de entrada inválida: uma `date` que não é um `Date` válido, um `days` que não é um número inteiro finito, ou um `stateCode` que não é uma string. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele (ou, no `addBusinessDays`, um percurso que sai dele) retorna `null`.
+Adiciona um número de dias úteis brasileiros a uma data, pulando sábados, domingos e feriados brasileiros exatamente como `isBusinessDay` os define (as mesmas `BusinessDayOptions`). A assinatura é a do date-fns: `addBusinessDays(date, amount, options?)`. Retorna um novo `Date`; a `date` de entrada nunca é alterada, e seu horário é preservado no resultado. Um `amount` igual a `0` retorna um novo `Date` igual a `date`, sem alterações, mesmo quando `date` cai em um fim de semana ou feriado, isso reflete o comportamento verificado de [`addBusinessDays(date, 0)` do date-fns](https://date-fns.org/docs/addBusinessDays), que também não avança a entrada para o próximo dia útil. Um `amount` negativo anda para trás, um dia útil por vez, também como no date-fns. Retorna `null` em caso de entrada inválida: uma `date` que não é um `Date` válido, um `amount` que não é um número inteiro finito, ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado, exatamente como o `isBusinessDay` o ignora. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele, ou um percurso que sai dele, retorna `null`.
 
 ```javascript
 import { addBusinessDays } from '@brazilian-utils/brazilian-utils';
 
-addBusinessDays({ date: new Date(2024, 0, 2, 12), days: 1 }); // Date, 2024-01-03 12:00 (o dia seguinte já é útil)
-addBusinessDays({ date: new Date(2024, 11, 31, 12), days: 1 }); // Date, 2025-01-02 12:00 (2025-01-01 é Ano novo, pulado)
-addBusinessDays({ date: new Date(2024, 0, 5, 12), days: -1 }); // Date, 2024-01-04 12:00 (anda para trás)
-addBusinessDays({ date: new Date(2024, 0, 6, 12), days: 0 }); // Date, 2024-01-06 12:00 (sem alteração, mesmo sendo sábado)
-addBusinessDays({ date: new Date(2024, 6, 8, 12), days: 1, stateCode: 'SP' }); // Date, 2024-07-10 12:00 (2024-07-09 é a Revolução Constitucionalista em SP, pulado)
-addBusinessDays({ date: new Date('not a date'), days: 1 }); // null
-addBusinessDays({ date: new Date(2024, 0, 2), days: 1.5 }); // null (não é um número inteiro)
+addBusinessDays(new Date(2024, 0, 2, 12), 1); // Date, 2024-01-03 12:00 (o dia seguinte já é útil)
+addBusinessDays(new Date(2024, 11, 31, 12), 1); // Date, 2025-01-02 12:00 (2025-01-01 é Ano novo, pulado)
+addBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-04 12:00 (anda para trás)
+addBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (sem alteração, mesmo sendo sábado)
+addBusinessDays(new Date(2024, 6, 8, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-10 12:00 (2024-07-09 é a Revolução Constitucionalista em SP, pulado)
+addBusinessDays(new Date('not a date'), 1); // null
+addBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
+```
+
+## subBusinessDays
+
+Subtrai um número de dias úteis brasileiros de uma data: `subBusinessDays(date, amount, options?)` é `addBusinessDays(date, -amount, options)`, e é exatamente assim que a função é implementada, então tudo o que vale acima vale aqui (o horário preservado, a entrada intacta, um `amount` igual a `0` devolvendo a data sem alterações, o intervalo de 1900 a 2099 e os casos de `null`). Um `amount` negativo anda para frente.
+
+```javascript
+import { subBusinessDays } from '@brazilian-utils/brazilian-utils';
+
+subBusinessDays(new Date(2024, 0, 5, 12), 1); // Date, 2024-01-04 12:00 (o dia anterior já é útil)
+subBusinessDays(new Date(2024, 0, 8, 12), 1); // Date, 2024-01-05 12:00 (anda para trás passando pelo fim de semana)
+subBusinessDays(new Date(2025, 0, 2, 12), 1); // Date, 2024-12-31 12:00 (2025-01-01 é Ano novo, pulado)
+subBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-08 12:00 (anda para frente)
+subBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (sem alteração, mesmo sendo sábado)
+subBusinessDays(new Date(2024, 6, 10, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-08 12:00 (2024-07-09 é a Revolução Constitucionalista em SP, pulado)
+subBusinessDays(new Date('not a date'), 1); // null
+subBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
 ```
 
 ## differenceInBusinessDays
 
-Conta o número de dias úteis brasileiros entre duas datas, refletindo a semântica de [`differenceInBusinessDays` do date-fns](https://date-fns.org/docs/differenceInBusinessDays) (verificada em seu código-fonte): `params.from` é contado quando ele próprio é um dia útil, `params.to` nunca é contado, e cada dia útil estritamente entre os dois é contado uma vez. Só a data de calendário de cada `Date` importa, o horário é ignorado. Os dias úteis são determinados exatamente como em `isBusinessDay` (mesmas opções `stateCode`/`includeOptional`). `from`/`to` no mesmo dia de calendário retornam `0`; um `to` anterior a `from` retorna um número negativo. Retorna `null` em caso de entrada inválida: um `from`/`to` que não é um `Date` válido, ou um `stateCode` que não é uma string. Os parâmetros são tipados como `DifferenceInBusinessDaysParams`. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele (ou, no `addBusinessDays`, um percurso que sai dele) retorna `null`.
+Conta o número de dias úteis brasileiros entre duas datas, refletindo a semântica de [`differenceInBusinessDays` do date-fns](https://date-fns.org/docs/differenceInBusinessDays) (verificada em seu código-fonte), inclusive a ordem dos argumentos: `differenceInBusinessDays(laterDate, earlierDate, options?)`. O percurso começa em `earlierDate` e para logo antes de `laterDate`, então `earlierDate` é contado quando ele próprio é um dia útil, `laterDate` nunca é contado, e cada dia útil estritamente entre os dois é contado uma vez. Só a data de calendário de cada `Date` importa, o horário é ignorado. Os dias úteis são determinados exatamente como em `isBusinessDay` (as mesmas `BusinessDayOptions`). O resultado é positivo quando `laterDate` é posterior a `earlierDate` e negativo quando é anterior; duas datas no mesmo dia de calendário retornam `0`. Retorna `null` em caso de entrada inválida: uma data que não é um `Date` válido, ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `null`.
 
 ```javascript
 import { differenceInBusinessDays } from '@brazilian-utils/brazilian-utils';
 
-differenceInBusinessDays({ from: new Date(2024, 0, 1), to: new Date(2024, 0, 2) }); // 0 (01/01 é Ano novo)
-differenceInBusinessDays({ from: new Date(2024, 0, 2), to: new Date(2024, 0, 3) }); // 1 (02/01 contado, uma terça-feira)
-differenceInBusinessDays({ from: new Date(2024, 0, 3), to: new Date(2024, 0, 2) }); // -1 (to anterior a from)
-differenceInBusinessDays({ from: new Date(2024, 0, 2), to: new Date(2024, 0, 2) }); // 0 (mesmo dia)
-differenceInBusinessDays({ from: new Date(2024, 6, 8), to: new Date(2024, 6, 10), stateCode: 'SP' }); // 1 (09/07/2024 é feriado estadual em SP)
-differenceInBusinessDays({ from: new Date('not a date'), to: new Date() }); // null
+differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 1)); // 0 (01/01 é Ano novo, não contado)
+differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (02/01 contado, uma terça-feira; 03/01 não)
+differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (a data posterior vem primeiro, então a contagem é negativa)
+differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (mesmo dia)
+differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: 'SP' }); // 1 (09/07/2024 é feriado estadual em SP)
+differenceInBusinessDays(new Date(), new Date('not a date')); // null
 ```
 
 ## convertDateToWords
 
-Formata uma data por extenso em português do Brasil, ex.: `"01/01/2024"` vira `"primeiro de janeiro de dois mil e vinte e quatro"`. Aceita um `Date` (lido pela sua data de calendário local, a mesma convenção usada por `isHoliday`) ou uma string no formato `"dd/mm/yyyy"` ou ISO `"yyyy-mm-dd"`. Com o `options.style` padrão `"full"`, o dia 1 é escrito como "primeiro" e os demais dias usam o número cardinal; com `"month"`, só o nome do mês é escrito por extenso e o dia/ano ficam em dígitos (o dia 1 como `"1º"`, ex.: `"2 de março de 2024"`, `"1º de janeiro de 2024"`). Os nomes dos meses ficam em minúsculo. No estilo `"full"` o ano é escrito por extenso sem a vírgula de milhar que `convertNumberToWords`/`convertCurrencyToWords` usam (`1999` vira `"mil novecentos e noventa e nove"`, não `"mil, novecentos e noventa e nove"`), do jeito que uma data é lida em voz alta. `options.weekday` (padrão `false`) prefixa o nome do dia da semana em pt-BR minúsculo seguido de vírgula (`"sábado, dois de março de dois mil e vinte e quatro"`), calculado a partir da data de calendário resolvida. `options.case` define a caixa de todo o resultado: `"lower"` (padrão), `"sentence"` (só a primeira letra em maiúscula) ou `"upper"` (tudo em maiúscula, preservando os acentos). Valores inválidos de `case`/`style` são ignorados e o padrão é usado. O dia 29 de fevereiro é aceito nos anos bissextos do calendário gregoriano proléptico (divisíveis por 4, exceto séculos não divisíveis por 400). Retorna `""` para um `Date` inválido, uma string malformada, um dia/mês que não existe ou uma data anterior ao ano 1.
+Formata uma data por extenso em português do Brasil, ex.: `"01/01/2024"` vira `"primeiro de janeiro de dois mil e vinte e quatro"`. Aceita um `Date` (lido pela sua data de calendário local, a mesma convenção usada por `isHoliday`) ou uma string no formato `"dd/mm/yyyy"` ou ISO `"yyyy-mm-dd"`. Com o `options.style` padrão `"full"`, o dia 1 é escrito como "primeiro" e os demais dias usam o número cardinal; com `"month"`, só o nome do mês é escrito por extenso e o dia/ano ficam em dígitos (o dia 1 como `"1º"`, ex.: `"2 de março de 2024"`, `"1º de janeiro de 2024"`). Os nomes dos meses ficam em minúsculo. No estilo `"full"` o ano é escrito por extenso sem a vírgula de milhar que `convertNumberToWords`/`convertCurrencyToWords` usam (`1999` vira `"mil novecentos e noventa e nove"`, não `"mil, novecentos e noventa e nove"`), do jeito que uma data é lida em voz alta. `options.weekday` (padrão `false`) prefixa o nome do dia da semana em pt-BR minúsculo seguido de vírgula (`"sábado, dois de março de dois mil e vinte e quatro"`), calculado a partir da data de calendário resolvida. Um valor inválido de `style` é ignorado e o padrão é usado. O resultado sai sempre em minúsculas; aplique qualquer outra caixa por conta própria. O dia 29 de fevereiro é aceito nos anos bissextos do calendário gregoriano proléptico (divisíveis por 4, exceto séculos não divisíveis por 400). Retorna `""` para um `Date` inválido, uma string malformada, um dia/mês que não existe ou uma data anterior ao ano 1.
 
 ```javascript
 import { convertDateToWords } from '@brazilian-utils/brazilian-utils';
@@ -1456,7 +1516,6 @@ import { convertDateToWords } from '@brazilian-utils/brazilian-utils';
 convertDateToWords('01/01/2024'); // "primeiro de janeiro de dois mil e vinte e quatro"
 convertDateToWords('2024-01-02'); // "dois de janeiro de dois mil e vinte e quatro"
 convertDateToWords(new Date(2024, 0, 1)); // "primeiro de janeiro de dois mil e vinte e quatro"
-convertDateToWords('01/01/2024', { case: 'sentence' }); // "Primeiro de janeiro de dois mil e vinte e quatro"
 convertDateToWords('02/03/2024', { style: 'month' }); // "2 de março de 2024"
 convertDateToWords('01/01/2024', { style: 'month' }); // "1º de janeiro de 2024"
 convertDateToWords('02/03/2024', { weekday: true }); // "sábado, dois de março de dois mil e vinte e quatro"
@@ -1479,7 +1538,7 @@ formatVoterId('1234567880191'); // '1234 5678 8 01 91' (título de 13 dígitos S
 
 ## isValidVoterId
 
-Valida se um título de eleitor é válido. Aceita tanto o título padrão de 12 dígitos quanto o título de 13 dígitos emitido por São Paulo (UF `01`) e Minas Gerais (UF `02`).
+Valida se um título de eleitor é válido. Aceita tanto o título padrão de 12 dígitos quanto o título de 13 dígitos emitido por São Paulo (UF `01`) e Minas Gerais (UF `02`). Espaços e pontos são aceitos ao redor e entre os grupos `0000 0000 00 00`, mas qualquer outro caractere, uma letra em especial, invalida o valor.
 
 ```javascript
 import { generateVoterId, isValidVoterId } from '@brazilian-utils/brazilian-utils';
@@ -1516,6 +1575,8 @@ parseVoterId('1234 5678 8 01 91'); // '1234567880191' (título de 13 dígitos SP
 
 Verifica se um número de CNS (Cartão Nacional de Saúde) é válido, o identificador único do usuário do SUS (Sistema Único de Saúde). Cartões definitivos (iniciados em 1 ou 2) são validados com a mesma ponderação módulo 11 usada no PIS sobre uma base de 11 dígitos embutida, ajustando a base em +2 quando o dígito verificador bruto resulta em 10. Cartões provisórios (iniciados em 7, 8 ou 9) são validados por uma soma ponderada única (pesos de 15 a 1) que deve ser múltipla de 11. O valor precisa vir escrito como os 15 dígitos, opcionalmente separados nos grupos impressos de 3-4-4-4 por espaços ou pelos caracteres de máscara usuais; letras no meio dos dígitos são rejeitadas em vez de ignoradas.
 
+As duas rotinas vêm da [página de validação de CNS da ANVISA](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/), que fica atrás de um filtro de bots e responde HTTP 403 a clientes que não sejam navegadores. A [página do e-SUS APS](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html) documenta o mesmo algoritmo e é acessível sem navegador, mas aplica a rotina de provisórios a números iniciados em 5, 7, 8 ou 9; esta implementação segue a ANVISA e rejeita um número iniciado em 5 mesmo quando a soma ponderada fecha.
+
 ```javascript
 import { isValidCns } from '@brazilian-utils/brazilian-utils';
 
@@ -1532,14 +1593,14 @@ Formata um número de CNS (Cartão Nacional de Saúde) nos grupos de exibição 
 ```javascript
 import { formatCns } from '@brazilian-utils/brazilian-utils';
 
-formatCns('123456789010001'); // '123 4567 8901 0001'
-formatCns(123456789010001); // '123 4567 8901 0001'
+formatCns('123456789010000'); // '123 4567 8901 0000'
+formatCns(123456789010000); // '123 4567 8901 0000'
 formatCns('89010001', { pad: true }); // '000 0000 8901 0001'
 ```
 
 ## isValidCertidao
 
-Verifica se a matrícula de uma certidão de registro civil (nascimento, casamento, óbito e os demais atos mantidos por uma serventia de registro civil das pessoas naturais) é válida. A matrícula tem 32 dígitos distribuídos em 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), e os dois dígitos verificadores usam módulo 11 com pesos ciclando de 2 a 10 e voltando por 0. Aceita os caracteres de máscara usuais e espaços entre e ao redor dos grupos. O layout é o em vigor do [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) (Provimento CNJ nº 149/2023, na redação do Provimento CN nº 182/2024); a própria matrícula foi instituída pelo já revogado [Provimento CNJ nº 2/2009](https://atos.cnj.jus.br/atos/detalhar/1311). Os dígitos verificadores estão detalhados em [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e implementado pelo [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) e pelo [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
+Verifica se a matrícula de uma certidão de registro civil (nascimento, casamento, óbito e os demais atos mantidos por uma serventia de registro civil das pessoas naturais) é válida. A matrícula tem 32 dígitos distribuídos em 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), e os dois dígitos verificadores usam módulo 11 com pesos ciclando de 2 a 10 e voltando por 0. Aceita os caracteres de máscara usuais e espaços entre e ao redor dos grupos. O layout é o publicado atualmente no [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) (Provimento CNJ nº 149/2023), com o inciso II e os §§ 1º a 5º na redação do Provimento CN nº 237/2026 e o restante do artigo na do Provimento CN nº 182/2024; a própria matrícula foi instituída pelo já revogado [Provimento CNJ nº 2/2009](https://atos.cnj.jus.br/atos/detalhar/1311). Os dígitos verificadores estão detalhados em [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e implementado pelo [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) e pelo [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
 
 Os dígitos do serviço são fixos em `55`, o código que o [art. 473, III](https://atos.cnj.jus.br/atos/detalhar/5243) atribui ao registro civil das pessoas naturais, então uma matrícula com qualquer outro par na nona e décima posições é rejeitada por mais que os dígitos verificadores confiram. O dígito do tipo de livro sempre precisa nomear um dos nove tipos de livro (o mesmo `CertidaoType` retornado por `parseCertidao`), então uma matrícula cujo dígito é `0` é rejeitada por mais que os dígitos verificadores confiram, do mesmo jeito que `parseCertidao` devolve `null` para ela. `options.accept` (parte de `IsValidCertidaoOptions`) restringe ainda mais aos tipos listados; o padrão é aceitar todos os tipos, e um valor que não seja um array volta para esse padrão. Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
 
@@ -1686,7 +1747,7 @@ formatCaepf('184', { pad: true }); // 000.000.000/001-84
 
 ## isValidRegistroProfissional
 
-Verifica a estrutura de um número de registro/inscrição profissional. As opções são tipadas como `IsValidRegistroProfissionalOptions`: `options.council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `options.stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos e o tipo de registro (`"O"` Originário, `"P"` Provisório ou `"T"` Transferido, que nada diz sobre a categoria profissional), conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1) e a Resolução CFC nº 1.707/2023. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. A OAB, o CFM e o CFO não publicam o formato dos números que emitem, então as faixas de dígitos aceitas para `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas. O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
+Verifica a estrutura de um número de registro/inscrição profissional. As opções são tipadas como `IsValidRegistroProfissionalOptions`: `options.council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `options.stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos, o tipo de registro (`"O"` Originário ou `"P"` Provisório, que nada diz sobre a categoria profissional) e o dígito verificador, conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1). Um Registro Transferido ou Secundário acrescenta `"T"` ou `"S"` e a UF do CRC de destino **depois** do dígito verificador, conforme esse mesmo item e a [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), art. 5º parágrafo único: os exemplos do próprio Manual são `SP-123456/O-3 T-MG`, `TO-654321/P-8 T-SC` e `PI-111222/O-5 S-AC`. As duas UFs precisam ser códigos reais, e o `options.stateCode` é comparado com a de origem. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. Só o formato do CRC e esses códigos regionais do CRP se apoiam em fonte publicada: a página do CFP não publica o tamanho do número de inscrição, e a OAB, o CFM e o CFO não publicam formato algum, então as faixas de dígitos aceitas para `"CRP"`, `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas (a busca pública da OAB/SP tem `maxlength="7"`, e o CFM documenta CRMs com prefixo `300` e sufixo `P`, nenhum deles expresso por esses formatos). O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
 
 ```javascript
 import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
@@ -1695,6 +1756,8 @@ isValidRegistroProfissional('123456/SP', { council: 'OAB' }); // true
 isValidRegistroProfissional('123456-RJ', { council: 'OAB', stateCode: 'SP' }); // false (UF divergente)
 isValidRegistroProfissional('06/12345', { council: 'CRP' }); // true
 isValidRegistroProfissional('SP-123456/O-3', { council: 'CRC' }); // true
+isValidRegistroProfissional('SP-123456/O-3 T-MG', { council: 'CRC' }); // true (registro transferido)
+isValidRegistroProfissional('SP-123456/T-3', { council: 'CRC' }); // false ("T" não é tipo de registro)
 ```
 
 ## isValidVin
@@ -1712,7 +1775,7 @@ isValidVin('1HGCM8263IA004352'); // false (contém a letra excluída I)
 
 ## isValidCbo
 
-Valida se um código CBO (Classificação Brasileira de Ocupações) existe na tabela de ocupações do MTE. Aceita o código com ou sem a máscara de hífen, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 6 dígitos, ou a máscara `NNNN-NN`, com os separadores usuais entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
+Valida se um código CBO (Classificação Brasileira de Ocupações) existe na tabela de ocupações do MTE. Aceita o código com ou sem a máscara de hífen, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 6 dígitos, ou a máscara `NNNN-NN`, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
 
 ```javascript
 import { isValidCbo } from '@brazilian-utils/brazilian-utils';
@@ -1725,7 +1788,7 @@ isValidCbo('2124abc05'); // false (não é uma forma documentada)
 isValidCbo(-212405); // false (não é um inteiro seguro não negativo)
 ```
 
-Os títulos das ocupações vêm das [tabelas oficiais da CBO 2002 publicadas pelo MTE](http://www.mtecbo.gov.br/cbosite/pages/downloads.jsf).
+Os títulos das ocupações vêm da [tabela oficial de ocupações da CBO 2002 publicada pelo MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
 
 ## getCbo
 
@@ -1739,11 +1802,11 @@ getCbo('000000'); // null
 getCbo('2124abc05'); // null (não é uma forma documentada)
 ```
 
-Os títulos das ocupações vêm das [tabelas oficiais da CBO 2002 publicadas pelo MTE](http://www.mtecbo.gov.br/cbosite/pages/downloads.jsf).
+Os títulos das ocupações vêm da [tabela oficial de ocupações da CBO 2002 publicada pelo MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
 
 ## isValidCnae
 
-Valida se um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas) existe na tabela CNAE 2.3 publicada pelo IBGE. Aceita o código com ou sem a máscara `NNNN-N/NN`, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 7 dígitos, ou a máscara, com os separadores usuais entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
+Valida se um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas) existe na tabela CNAE 2.3 publicada pelo IBGE. Aceita o código com ou sem a máscara `NNNN-N/NN`, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 7 dígitos, ou a máscara, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
 
 ```javascript
 import { isValidCnae } from '@brazilian-utils/brazilian-utils';
@@ -1757,12 +1820,18 @@ isValidCnae(-111301); // false (não é um inteiro seguro não negativo)
 
 ## formatCnae
 
-Formata um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas).
+Formata um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas). `options.pad` (parte de `FormatCnaeOptions`) funciona exatamente como em `formatCpf`/`formatCep`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai, que é o que um campo sendo digitado precisa; com `true` o valor é primeiro completado com zeros à esquerda até os 7 dígitos de uma subclasse completa, então ele sempre volta com a máscara inteira. Um número é tratado exatamente como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Só dígitos e os caracteres de máscara são aceitos; qualquer outra coisa retorna `''`, assim como um número que não seja um inteiro seguro não negativo.
 
 ```javascript
 import { formatCnae } from '@brazilian-utils/brazilian-utils';
 
 formatCnae('6201501'); // 6201-5/01
+formatCnae('62'); // 62 (máscara aplicada até onde o valor vai)
+formatCnae('62015'); // 6201-5
+formatCnae('62', { pad: true }); // 0000-0/62 (completado até 7 dígitos antes)
+formatCnae(111301, { pad: true }); // 0111-3/01
+formatCnae('abc6201501'); // '' (não é uma forma documentada)
+formatCnae(-6201501); // '' (não é um inteiro seguro não negativo)
 ```
 
 ## getCnae
@@ -1779,7 +1848,7 @@ getCnae('0111abc301'); // null (não é uma forma documentada)
 
 ## isValidNcm
 
-Valida se um código NCM (Nomenclatura Comum do Mercosul) existe na tabela vigente publicada pelo Siscomex/MDIC. Aceita o código com ou sem a máscara de pontos, ou como número.
+Valida se um código NCM (Nomenclatura Comum do Mercosul) existe na tabela vigente publicada pelo Siscomex/MDIC. Aceita o código com ou sem a máscara de pontos, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 8 dígitos, ou a máscara `NNNN.NN.NN`, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
 
 ```javascript
 import { isValidNcm } from '@brazilian-utils/brazilian-utils';
@@ -1787,40 +1856,55 @@ import { isValidNcm } from '@brazilian-utils/brazilian-utils';
 isValidNcm('8471.30.12'); // true
 isValidNcm('84713012'); // true
 isValidNcm('00000000'); // false
+isValidNcm('abc01012100'); // false (não é uma forma documentada)
+isValidNcm(-84713012); // false (não é um inteiro seguro não negativo)
 ```
 
 ## formatNcm
 
-Formata um código NCM (Nomenclatura Comum do Mercosul).
+Formata um código NCM (Nomenclatura Comum do Mercosul). `options.pad` (parte de `FormatNcmOptions`) funciona exatamente como em `formatCpf`/`formatCep`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai, que é o que um campo sendo digitado precisa; com `true` o valor é primeiro completado com zeros à esquerda até os 8 dígitos de um código completo, então ele sempre volta com a máscara inteira. Um número é tratado exatamente como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Só dígitos e os caracteres de máscara são aceitos; qualquer outra coisa retorna `''`, assim como um número que não seja um inteiro seguro não negativo.
 
 ```javascript
 import { formatNcm } from '@brazilian-utils/brazilian-utils';
 
 formatNcm('84713012'); // 8471.30.12
+formatNcm('8471'); // 8471 (máscara aplicada até onde o valor vai)
+formatNcm('847130'); // 8471.30
+formatNcm('8471', { pad: true }); // 0000.84.71 (completado até 8 dígitos antes)
+formatNcm('abc8471'); // '' (não é uma forma documentada)
+formatNcm(-84713012); // '' (não é um inteiro seguro não negativo)
 ```
 
 ## isValidCfop
 
-Valida se um código CFOP (Código Fiscal de Operações e Prestações) existe na tabela oficial (Ajuste SINIEF 07/2001 e atualizações). Só os códigos operáveis contam: os títulos de grupo e subgrupo da nomenclatura oficial, os códigos terminados em `00` e `50` (1000, 1100, 1150, 5350, ...), são títulos de seção e não códigos que um documento pode carregar, então são rejeitados.
+Valida se um código CFOP (Código Fiscal de Operações e Prestações) existe na tabela oficial. A tabela é o [Anexo II consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), o texto vigente (redação atual dada pelo Ajuste SINIEF 03/24, última alteração pelo Ajuste SINIEF 39/25), e não o texto congelado de 2001 do Ajuste SINIEF 07/01. Só os códigos operáveis contam: os títulos de grupo e subgrupo da nomenclatura oficial, os códigos terminados em `00` e `50` (1000, 1100, 1150, 5350, ...), são títulos de seção e não códigos que um documento pode carregar, então são rejeitados.
+
+Uma string só é lida como código quando está escrita em uma das formas documentadas (os 4 dígitos, ou a forma `N.NNN` impressa no anexo, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
 
 ```javascript
 import { isValidCfop } from '@brazilian-utils/brazilian-utils';
 
 isValidCfop('5102'); // true
+isValidCfop('1.101'); // true
+isValidCfop('7504'); // true (incluído na reescrita de 2022 do anexo)
 isValidCfop('0000'); // false
 isValidCfop('1150'); // false (título de subgrupo, não é um código operável)
+isValidCfop('abc5102'); // false (não é uma forma documentada)
+isValidCfop(-5102); // false (não é um inteiro seguro não negativo)
 ```
 
 ## getCfop
 
-Busca um código CFOP (Código Fiscal de Operações e Prestações) e retorna seu código e a descrição oficial. Os títulos de grupo e subgrupo da nomenclatura oficial, os códigos terminados em `00` e `50`, não estão na tabela e retornam `null`.
+Busca um código CFOP (Código Fiscal de Operações e Prestações) e retorna seu código e a descrição oficial, na redação do [Anexo II consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24). Os títulos de grupo e subgrupo da nomenclatura oficial, os códigos terminados em `00` e `50`, não estão na tabela e retornam `null`. Valem as mesmas regras de entrada de `isValidCfop`.
 
 ```javascript
 import { getCfop } from '@brazilian-utils/brazilian-utils';
 
-getCfop('5102'); // { code: '5102', description: 'Venda de mercadoria adquirida ou recebida de terceiros' }
+getCfop('1101'); // { code: '1101', description: 'Compra para industrialização ou produção rural' }
+getCfop('7504'); // { code: '7504', description: 'Exportação de mercadoria que foi objeto de formação de lote de exportação' }
 getCfop('0000'); // null
 getCfop('5350'); // null (título de subgrupo, não é um código operável)
+getCfop('abc5102'); // null (não é uma forma documentada)
 ```
 
 ## isValidCst
@@ -1829,33 +1913,44 @@ Valida um código de CST (Código de Situação Tributária) para um tributo. In
 
 | Tributo | Formato | Códigos aceitos |
 | --- | --- | --- |
-| `icms` | 3 dígitos (origem + CST) | origem `0`-`8` + um de `00`, `10`, `20`, `30`, `40`, `41`, `50`, `51`, `60`, `70`, `90` |
+| `icms` | 3 dígitos (origem + CST) | origem `0`-`8` + um de `00`, `02`, `10`, `15`, `20`, `30`, `40`, `41`, `50`, `51`, `53`, `60`, `61`, `70`, `90` |
 | `ipi` | 2 dígitos | `00`, `01`, `02`, `03`, `04`, `05`, `49`, `50`, `51`, `52`, `53`, `54`, `55`, `99` |
 | `pis` | 2 dígitos | `01`-`09`, `49`, `50`-`56`, `60`-`67`, `70`-`75`, `98`, `99` |
 | `cofins` | 2 dígitos | mesma tabela do `pis` |
 
 `options.tax` (parte de `IsValidCstOptions`) é opcional: omita-o para aceitar um código que exista em qualquer uma das quatro tabelas acima.
 
+A Tabela B do ICMS é a vigente: o [Anexo I consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), cuja redação atual veio do [Ajuste SINIEF 39/23](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2023/ajuste-sinief-39-23) (efeitos a partir de 01.12.23) e que o [Ajuste SINIEF 20/24](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2024/AJ020_24) alterou revogando os itens 12, 13, 52, 72 e 74 (efeitos a partir de 09.07.24). `02`, `15`, `53` e `61` são seus códigos de monofasia de combustíveis.
+
+Uma string só é lida como código quando está escrita em uma das formas documentadas (os 2 ou 3 dígitos, com um único separador entre eles e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
+
 ```javascript
 import { isValidCst } from '@brazilian-utils/brazilian-utils';
 
 isValidCst('000', { tax: 'icms' }); // true
 isValidCst('110', { tax: 'icms' }); // true
+isValidCst('002', { tax: 'icms' }); // true (monofasia de combustíveis)
 isValidCst('06', { tax: 'pis' }); // true
 isValidCst('99', { tax: 'ipi' }); // true
 isValidCst('110'); // true (encontrado na tabela icms, tax omitido)
 isValidCst('999'); // false (não existe em nenhuma tabela)
+isValidCst('abc110'); // false (não é uma forma documentada)
+isValidCst(-110); // false (não é um inteiro seguro não negativo)
 ```
 
 ## isValidCsosn
 
-Valida se um código de CSOSN (Código de Situação da Operação no Simples Nacional) é um dos 10 códigos definidos pelo Ajuste SINIEF 03/2010: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` ou `900`.
+Valida se um código de CSOSN (Código de Situação da Operação no Simples Nacional) é um dos 10 códigos do [Anexo III-A consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), a tabela instituída pelo Ajuste SINIEF 03/2010: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` ou `900`.
+
+Uma string só é lida como código quando está escrita em uma das formas documentadas (os 3 dígitos, com um único separador entre eles e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
 
 ```javascript
 import { isValidCsosn } from '@brazilian-utils/brazilian-utils';
 
 isValidCsosn('101'); // true
 isValidCsosn('999'); // false
+isValidCsosn('abc101'); // false (não é uma forma documentada)
+isValidCsosn(-101); // false (não é um inteiro seguro não negativo)
 ```
 
 ## removeAccents

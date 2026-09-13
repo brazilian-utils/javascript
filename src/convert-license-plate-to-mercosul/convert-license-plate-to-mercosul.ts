@@ -20,11 +20,14 @@ import { DIGIT_TO_MERCOSUL_LETTER } from "./constants";
  * convertLicensePlateToMercosul("invalid"); // ""
  * ```
  *
- * Resolução CONTRAN nº 969/2022, art. 2º § 4º. The linked DOU PDF has no annexes; the digit to
- * letter table comes from Anexo II, published separately on the CONTRAN resolutions page.
+ * Resolução CONTRAN nº 969/2022, art. 2º § 4º, is what requires the substitution of the second
+ * numeric character. The digit to letter table itself is Anexo II of that resolution, which is
+ * not published at a stable public URL: the linked DOU PDF carries no annexes and the CONTRAN
+ * resolutions index does not host the annex either, so the table below is cited as `Based on:`
+ * rather than as an official document a reader can open.
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
- * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes
+ * @see Based on: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes
  */
 export const convertLicensePlateToMercosul = (value: string): string => {
 	if (getFormatLicensePlate(value) !== "LLLNNNN") return "";

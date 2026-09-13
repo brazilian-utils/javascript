@@ -9,6 +9,9 @@ const COMBINING_MARKS_REGEX = /\p{M}/gu;
  * @returns {string} The text with every diacritical mark removed. `""` when `value` is not a
  * non-empty string.
  *
+ * @see Official: https://unicode.org/reports/tr15/
+ * @see Official: https://www.unicode.org/reports/tr44/#General_Category_Values
+ *
  * @example
  * ```typescript
  * removeAccents("São Paulo"); // "Sao Paulo"

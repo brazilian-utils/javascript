@@ -28,9 +28,14 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  * generateCpf("SP"); // "12345678810" (with the SP state code, 8, in the 9th digit)
  * ```
  *
+ * The região fiscal digit in the 9th position comes from the Receita Federal's folheto
+ * "Cadastros: CPF e CNPJ"; the check digit rule (`REGRA_VALIDA_CPF`) is specified, with a worked
+ * example (`280012389-38`), in the Receita Federal's Manual e-Financeira, Anexo II.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/educacao-fiscal/educacao_fiscal/folhetos-orientativos/cadastros-dig.pdf
- * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
+ * @see Official: http://sped.rfb.gov.br/arquivo/show/8231
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const generateCpf = (state?: StateCode): string => {
 	let base = generateRandomNumber(BASE_LENGTH) + getStateCode(state);

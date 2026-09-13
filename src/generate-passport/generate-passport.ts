@@ -13,6 +13,7 @@ import { ALPHABET_LENGTH, CHAR_CODE_A, DIGITS_LENGTH, LETTERS_LENGTH } from "./c
  * generatePassport() // "ZS840088"
  *
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
+ * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e
  */
 export const generatePassport = (): string => {
 	const letters = Array.from({ length: LETTERS_LENGTH }, () =>

@@ -1,13 +1,10 @@
 export type { Bank } from "./_internals/constants/banks";
 export type { Municipality } from "./_internals/constants/cities";
 export type { State, StateCode, StateName } from "./_internals/constants/states";
-export type { NumberToWordsGender, WordsCase } from "./_internals/number-to-words/number-to-words";
-export { type AddBusinessDaysParams, addBusinessDays } from "./add-business-days/add-business-days";
+export type { NumberToWordsGender } from "./_internals/number-to-words/number-to-words";
+export { addBusinessDays } from "./add-business-days/add-business-days";
 export { type CapitalizeOptions, capitalize } from "./capitalize/capitalize";
-export {
-	type ConvertCurrencyToWordsOptions,
-	convertCurrencyToWords,
-} from "./convert-currency-to-words/convert-currency-to-words";
+export { convertCurrencyToWords } from "./convert-currency-to-words/convert-currency-to-words";
 export {
 	type ConvertDateToWordsOptions,
 	convertDateToWords,
@@ -17,16 +14,13 @@ export {
 	type ConvertNumberToWordsOptions,
 	convertNumberToWords,
 } from "./convert-number-to-words/convert-number-to-words";
-export {
-	type DifferenceInBusinessDaysParams,
-	differenceInBusinessDays,
-} from "./difference-in-business-days/difference-in-business-days";
+export { differenceInBusinessDays } from "./difference-in-business-days/difference-in-business-days";
 export { type FormatBoletoOptions, formatBoleto } from "./format-boleto/format-boleto";
 export { type FormatCaepfOptions, formatCaepf } from "./format-caepf/format-caepf";
 export { type FormatCeiOptions, formatCei } from "./format-cei/format-cei";
 export { type FormatCepOptions, formatCep } from "./format-cep/format-cep";
 export { type FormatCertidaoOptions, formatCertidao } from "./format-certidao/format-certidao";
-export { formatCnae } from "./format-cnae/format-cnae";
+export { type FormatCnaeOptions, formatCnae } from "./format-cnae/format-cnae";
 export { type FormatCnhOptions, formatCnh } from "./format-cnh/format-cnh";
 export { type FormatCnoOptions, formatCno } from "./format-cno/format-cno";
 export { type FormatCnpjOptions, formatCnpj } from "./format-cnpj/format-cnpj";
@@ -36,7 +30,7 @@ export { type FormatCurrencyOptions, formatCurrency } from "./format-currency/fo
 export { formatIban } from "./format-iban/format-iban";
 export { formatLegalNature } from "./format-legal-nature/format-legal-nature";
 export { formatLicensePlate } from "./format-license-plate/format-license-plate";
-export { formatNcm } from "./format-ncm/format-ncm";
+export { type FormatNcmOptions, formatNcm } from "./format-ncm/format-ncm";
 export { formatNfeKey } from "./format-nfe-key/format-nfe-key";
 export { formatPassport } from "./format-passport/format-passport";
 export { type FormatPhoneOptions, type PhoneMask, formatPhone } from "./format-phone/format-phone";
@@ -125,7 +119,7 @@ export { getStateCodeByName } from "./get-state-code-by-name/get-state-code-by-n
 export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-code";
 export { getStates } from "./get-states/get-states";
 export { getTimezoneByState } from "./get-timezone-by-state/get-timezone-by-state";
-export { type IsBusinessDayOptions, isBusinessDay } from "./is-business-day/is-business-day";
+export { type BusinessDayOptions, isBusinessDay } from "./is-business-day/is-business-day";
 export { type IsHolidayOptions, isHoliday } from "./is-holiday/is-holiday";
 export {
 	type IsValidBankAccountOptions,
@@ -205,6 +199,7 @@ export {
 export { parseProcessoJuridico } from "./parse-processo-juridico/parse-processo-juridico";
 export { parseVoterId } from "./parse-voter-id/parse-voter-id";
 export { removeAccents } from "./remove-accents/remove-accents";
+export { subBusinessDays } from "./sub-business-days/sub-business-days";
 
 /**
  * The bank account `isValidBankAccount` checks: the bank, the agency and the account with its

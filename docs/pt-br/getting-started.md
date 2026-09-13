@@ -69,13 +69,13 @@ Alguns utilitários são a exceção: cada um embute um dataset oficial e pesa m
 
 | Utilitário | Dataset | Minificado | Gzip |
 | --- | --- | --- | --- |
-| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 156 KB | 50 KB |
-| `getCities` | nomes dos 5571 municípios do IBGE | 153 KB | 49 KB |
-| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 113 KB | 24 KB |
-| `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 110 KB | 27 KB |
-| `isValidCnae` · `getCnae` | subclasses da CNAE 2.3 | 93 KB | 21 KB |
-| `isValidCfop` · `getCfop` | descrições das operações do CFOP | 55 KB | 5,4 KB |
-| `getBanks` · `getBankByCode` | participantes do STR do Banco Central (COMPE + ISPB) | 28 KB | 7,3 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 155,9 KB | 50,0 KB |
+| `getCities` | nomes dos 5571 municípios do IBGE | 153,6 KB | 49,4 KB |
+| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 113,4 KB | 24,0 KB |
+| `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 118,4 KB | 30,2 KB |
+| `isValidCnae` · `getCnae` | subclasses da CNAE 2.3 | 93,6 KB | 21,1 KB |
+| `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,3 KB | 6,5 KB |
+| `getBanks` · `getBankByCode` | participantes do STR do Banco Central (COMPE + ISPB) | 37,9 KB | 9,3 KB |
 
 Importar qualquer um deles da raiz, mesmo ao lado de um único utilitário pequeno, traz todo esse dataset para o seu bundle principal, porque este pacote é publicado como um único módulo ESM: um `import()` dinâmico da raiz (`await import('@brazilian-utils/brazilian-utils')`) ainda resolve para esse mesmo arquivo único, então não há como separá-lo sozinho. Um bundler que faz code-splitting precisa de um módulo separado para separar.
 
@@ -97,4 +97,4 @@ getMunicipalityByCode('3550308');
 
 Todos os utilitários estão disponíveis dessa forma, como `@brazilian-utils/brazilian-utils/<nome-do-utilitario>` (kebab-case, seguindo o nome da função: `isValidCpf` → `is-valid-cpf`), pelo mesmo motivo de lazy-loading/code-splitting.
 
-Escolha um estilo por utilitário em cada aplicação: um bundler trata o import da raiz e o import do subpath como dois módulos independentes, então importar `getCities` tanto da raiz quanto de `/get-cities` na mesma aplicação inclui a tabela de 153 KB de cidades duas vezes, uma em cada módulo.
+Escolha um estilo por utilitário em cada aplicação: um bundler trata o import da raiz e o import do subpath como dois módulos independentes, então importar `getCities` tanto da raiz quanto de `/get-cities` na mesma aplicação inclui a tabela de 153,6 KB de cidades duas vezes, uma em cada módulo.

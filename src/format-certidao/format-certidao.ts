@@ -32,14 +32,17 @@ export type FormatCertidaoOptions = {
  * // "000000 01 55 2010 1 00020 112 0000120 87"
  * ```
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243 Código Nacional de Normas da
- * Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento CNJ nº 149/2023), art. 473
- * in the wording of the Provimento CN nº 182, de 17/09/2024: the in-force layout of the 32
- * digit matrícula.
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311 Provimento CNJ nº 2, de 27/04/2009,
- * which instituted the modelos únicos de certidão and the matrícula (revoked; historical).
- * @see Based on: http://ghiorzi.org/DVnew.htm Worked example of the two check digits
- * (sums 288 and 309).
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
+ * Código Nacional de Normas da Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento
+ * CNJ nº 149/2023), art. 473 as currently published: the in-force layout of the 32 digit
+ * matrícula. Inciso II and §§ 1º to 5º carry the redação of the Provimento CN nº 237, de
+ * 13/07/2026; the rest of the article, and the digit layout this library depends on, come from the
+ * Provimento CN nº 182, de 17/09/2024.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311
+ * Provimento CNJ nº 2, de 27/04/2009, which instituted the modelos únicos de certidão and the
+ * matrícula (revoked; historical).
+ * @see Based on: http://ghiorzi.org/DVnew.htm
+ * Worked example of the two check digits (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts
  * Reference implementation, and the source of the matrículas used as test vectors.
  * @see Based on: https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php

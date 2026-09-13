@@ -84,6 +84,12 @@ export type GetBoletoInfoOptions = {
  * barcode, both starting with `8`. Arrecadação bank slips also return `type`, `segment`,
  * `value` and `hasEffectiveValue`, and have no `bankCode` nor `expirationDate`.
  *
+ * Neither FEBRABAN nor the Banco Central publishes a way of telling an old cycle fator de
+ * vencimento from a new cycle one, so every factor resolves to either of two dates 9000 days
+ * apart. `referenceDate` (now by default) picks between them through the library's own safety
+ * windows, which means the same slip can resolve to the other candidate as time passes: pass
+ * `referenceDate` explicitly whenever the answer has to stay stable.
+ *
  * @param {string} value - The boleto digitable line (can be with or without mask).
  * @param {GetBoletoInfoOptions} [options] - Optional options.
  * @param {Date} options.referenceDate - Date used to resolve the "fator de vencimento" cycle. Defaults to now.
@@ -91,21 +97,29 @@ export type GetBoletoInfoOptions = {
  *
  * @example
  * ```typescript
- * getBoletoInfo('00190000090114971860168524522114675860000102656');
+ * getBoletoInfo('00190000090114971860168524522114675860000102656', {
+ *   referenceDate: new Date(2025, 5, 15),
+ * });
  * // { amount: 102656, expirationDate: new Date(2018, 6, 15), bankCode: '001' }
  *
  * getBoletoInfo('846100000005246100291102005460339004695895061080');
  * // { amount: 2461, expirationDate: null, bankCode: '', type: 'arrecadacao', segment: 4, value: 24.61, hasEffectiveValue: true }
  * ```
  *
- * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields, the módulo 11 check
- * digit (using 1 for remainders 0, 10 and 1) and the fator de vencimento behind the 47 digit
- * cobrança bancária slip; the FEBRABAN layout index covers the arrecadação slip. See
+ * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
+ * check digit (using 1 for remainders 0, 10 and 1) of the 47 digit cobrança bancária slip,
+ * including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
+ * Arrecadação/Recebimento com Utilização do Código de Barras" and the FEBRABAN layout index
+ * cover the arrecadação slip. The 22/02/2025 reset of the fator de vencimento is in neither:
+ * the Bradesco cobrança layout manual below reproduces the FEBRABAN rule. See
  * `src/get-boleto-info/constants.ts` for the fator de vencimento cycle base date and reset.
  *
- * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
+ * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
+ * @see Based on: https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf
+ * Bradesco "Layout da Cobrança" manual: base date 07/10/1997, 03/07/2000 = 1000, 21/02/2025 = 9999
+ * and a restart at 1000 on 22/02/2025.
  */
 export const getBoletoInfo = (
 	value: string,

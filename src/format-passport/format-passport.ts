@@ -14,5 +14,6 @@ import { parsePassport } from "../parse-passport/parse-passport";
  * formatPassport("") // ""
  *
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
+ * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e
  */
 export const formatPassport = (passport: string): string => parsePassport(passport);
