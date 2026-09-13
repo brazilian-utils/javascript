@@ -19,7 +19,10 @@ export type Iban = {
 	 * usual values, but any letter is allowed.
 	 */
 	accountType: string;
-	/** The 1 character alphanumeric owner indicator, distinguishing co-owners of the same account. */
+	/**
+	 * The 1 character owner indicator, distinguishing co-owners of the same account: `"1"` for
+	 * the first or only holder up to `"9"` for the ninth, then `"A"` to `"Z"` from the tenth.
+	 */
 	owner: string;
 };
 
@@ -42,13 +45,15 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  *
  * The 29 character Brazilian IBAN is laid out as 2 (country code, always `BR`) + 2 (ISO 7064
  * MOD 97-10 check digits) + 8 (ISPB) + 5 (branch) + 10 (account) + 1 (account type, any letter,
- * usually `C` for conta corrente or `P` for conta poupança) + 1 (owner indicator). Only
+ * usually `C` for conta corrente or `P` for conta poupança) + 1 (owner indicator, `1` to `9`
+ * then `A` to `Z`). Only
  * Brazilian IBANs are supported: the field layout of the other ISO 13616 countries is out of
  * scope, so a well-formed non `BR` IBAN also returns `null`.
  *
- * Accepts the same input forms as `isValidIban` (grouping spaces, lowercase) and returns `null`
- * whenever `isValidIban` would return `false`, including a value carrying any character other
- * than letters, digits and the grouping spaces of the ISO 13616 print format.
+ * Accepts the same input forms as `isValidIban`, compact or in the ISO 13616 print format
+ * (groups separated by a single space), in either case with optional surrounding whitespace and
+ * in any case, and returns `null` whenever `isValidIban` would return `false`, including a value
+ * carrying any character other than letters, digits and those single grouping spaces.
  *
  * @param {string} value - The IBAN to be parsed.
  * @returns {Iban|null} The parsed IBAN, or `null` when it is not a valid Brazilian IBAN.

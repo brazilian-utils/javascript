@@ -5,14 +5,16 @@
  * alphanumeric owner indicator = 29 characters. The registry pattern `BR2!n8!n5!n10!n1!a1!c`
  * allows any letter as the account type, drawn from the "Dicionário de Tipos" of the Catálogo
  * de Mensagens e de Arquivos do SFN; `C` (conta corrente) and `P` (conta poupança) are the
- * usual values.
+ * usual values. Circular BCB nº 3.625/2013 art. 2º § 1º numbers the owner indicator `1` for
+ * the first or only holder, `2` for the second and so on up to the ninth, then `A` to `Z` from
+ * the tenth, so `0` is not a valid owner indicator.
  * Only Brazilian IBANs follow this layout; every other ISO 13616 country has its own.
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf Diretrizes de Implementação do IBAN no Brasil
  */
 export const BR_IBAN_LENGTH = 29;
 
-export const BR_IBAN_REGEX = /^BR\d{2}\d{8}\d{5}\d{10}[A-Z][A-Z0-9]$/;
+export const BR_IBAN_REGEX = /^BR\d{2}\d{8}\d{5}\d{10}[A-Z][A-Z1-9]$/;
 
 /**
  * Shape an IBAN has to be written in: the ISO 13616 print format, letters and digits in

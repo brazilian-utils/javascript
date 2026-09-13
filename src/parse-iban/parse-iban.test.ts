@@ -111,6 +111,10 @@ describe("parseIban", () => {
 			expect(parseIban("BR150000000000001093284081412")).toBeNull();
 		});
 
+		test("when the owner indicator is 0, which Circular 3.625 art. 2 § 1 does not assign, even though the check digits match", () => {
+			expect(parseIban("BR6900000000000010932840814P0")).toBeNull();
+		});
+
 		test("when the account type letter does not match the check digits", () => {
 			expect(parseIban("BR1500000000000010932840814X2")).toBeNull();
 		});
@@ -164,7 +168,7 @@ describe("parseIban", () => {
 	});
 
 	describe("properties", () => {
-		const bodies = fc.stringMatching(/^[0-9]{23}[A-Z][A-Z0-9]$/);
+		const bodies = fc.stringMatching(/^[0-9]{23}[A-Z][A-Z1-9]$/);
 
 		test("should split an IBAN into fields that spell it back", () => {
 			fc.assert(
