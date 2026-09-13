@@ -24,7 +24,10 @@ const padLeft = (input: string, padLength: number): string =>
  * isValidRenavam("12345678901"); // false (invalid checksum)
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm The Código de
+ * Trânsito Brasileiro, which creates the RENAVAM registry but does not define its check digit.
+ * @see Based on: https://github.com/klawdyo/validation-br/blob/main/src/renavam.ts
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/renavam.py
  */
 export const isValidRenavam = (renavam: string | number): boolean => {
 	if (typeof renavam !== "string" && typeof renavam !== "number") return false;

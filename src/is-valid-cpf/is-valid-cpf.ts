@@ -39,6 +39,7 @@ const isValidChecksum = (cpf: string): boolean => {
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
  */
 export const isValidCpf = (cpf: string): boolean => {
 	if (typeof cpf !== "string") return false;

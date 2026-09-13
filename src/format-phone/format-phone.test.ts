@@ -13,6 +13,14 @@ describe("formatPhone", () => {
 		expect(formatPhone("55 4004-1234", { mask: "e164" })).toBe("+555540041234");
 	});
 
+	it("should format a service number written with a bare country code", () => {
+		expect(formatPhone("5508001234567", { mask: "auto" })).toBe("0800 123 4567");
+		expect(formatPhone("5508001234567", { mask: "e164" })).toBe("0800 123 4567");
+		expect(formatPhone("5508001234567", { mask: "international" })).toBe("0800 123 4567");
+		expect(formatPhone("5508001234567", { mask: "service" })).toBe("0800 123 4567");
+		expect(formatPhone("55 0300 123 4567", { mask: "auto" })).toBe("0300 123 4567");
+	});
+
 	it("should sn format phone", () => {
 		expect(formatPhone("")).toBe("");
 		expect(formatPhone("9")).toBe("9");

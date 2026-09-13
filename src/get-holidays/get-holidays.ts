@@ -1,11 +1,11 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { resolveStateHolidayDate } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
 import {
 	CONSCIENCIA_NEGRA_HOLIDAY_NAME,
 	CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 	FIXED_HOLIDAYS,
-	type StateHolidayEntry,
 	STATE_HOLIDAYS,
 } from "./constants";
 
@@ -29,50 +29,6 @@ export type GetHolidaysOptions = {
 	/** Two letter state code whose state holidays are added to the national ones (default: national holidays only). */
 	stateCode?: StateCode;
 };
-
-function calculateEaster(year: number): Date {
-	const a = year % 19;
-	const b = Math.floor(year / 100);
-	const c = year % 100;
-	const d = Math.floor(b / 4);
-	const e = b % 4;
-	const f = Math.floor((b + 8) / 25);
-	const g = Math.floor((b - f + 1) / 3);
-	const h = (19 * a + b - d - g + 15) % 30;
-	const i = Math.floor(c / 4);
-	const k = c % 4;
-	const l = (32 + 2 * e + 2 * i - h - k) % 7;
-	const m = Math.floor((a + 11 * h + 22 * l) / 451);
-
-	const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
-	const day = ((h + l - 7 * m + 114) % 31) + 1;
-
-	return new Date(year, month, day);
-}
-
-function calculateHolidayFromEaster(year: number, offset: number): Date {
-	const easterDate = calculateEaster(year);
-	const holidayDate = new Date(easterDate);
-	holidayDate.setDate(easterDate.getDate() + offset);
-	return holidayDate;
-}
-
-function resolveStateHolidayDate(
-	year: number,
-	{ day, month, easterOffset }: Pick<StateHolidayEntry, "day" | "month" | "easterOffset">,
-): Date {
-	if (easterOffset !== undefined) {
-		return calculateHolidayFromEaster(year, easterOffset);
-	}
-
-	if (day !== undefined && month !== undefined) {
-		return new Date(year, month - 1, day);
-	}
-
-	throw new Error(
-		"State holiday entry must define either `easterOffset` or both `day` and `month`",
-	);
-}
 
 let cache: Map<string, Holiday[]> | undefined;
 
@@ -98,17 +54,17 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		});
 	}
 
-	const easterDate = calculateEaster(year);
+	const easterDate = resolveStateHolidayDate(year, { easterOffset: 0 });
 
 	holidays.push(
 		{
 			name: "Carnaval (terça-feira)",
-			date: calculateHolidayFromEaster(year, -47),
+			date: resolveStateHolidayDate(year, { easterOffset: -47 }),
 			type: "optional",
 		},
 		{
 			name: "Sexta-feira Santa",
-			date: calculateHolidayFromEaster(year, -2),
+			date: resolveStateHolidayDate(year, { easterOffset: -2 }),
 			type: "national",
 		},
 		{
@@ -118,7 +74,7 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		},
 		{
 			name: "Corpus Christi",
-			date: calculateHolidayFromEaster(year, 60),
+			date: resolveStateHolidayDate(year, { easterOffset: 60 }),
 			type: "optional",
 		},
 	);

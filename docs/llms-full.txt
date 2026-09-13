@@ -143,7 +143,7 @@ Brazilian Utils is a library focused on solving problems that we face daily in t
 
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
 - **Tree-shakeable, down to the function.** `import { isValidCpf }` costs under 1 KB; every util is also its own subpath entry (`@brazilian-utils/brazilian-utils/get-cities`) for the heavy ones.
-- **Runs everywhere.** Node.js 20+, Bun, Deno and evergreen browsers, tested in CI on every one of them.
+- **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, tested in CI on every one of them.
 - **Written in TypeScript.** Types ship with the package; the public API is tracked by an API report so nothing changes silently.
 - **Validated against the official rules.** Every validator cites the specification, law or dataset it implements (`@see` in the docs), and the test suite is mutation-tested, not just covered.
 - **Documented in English and Portuguese**, with an `llms.txt` for AI assistants.
@@ -934,7 +934,7 @@ getBankByCode('999'); // null
 
 ### getBankByIspb
 
-Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Unlike the COMPE code (`getBankByCode`), every SPB participant has an ISPB, including institutions with no COMPE code of their own. Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
+Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Every SPB participant has an ISPB, but this dataset only carries the institutions that also have a COMPE code, so an ISPB whose institution has no COMPE code of its own returns `null`. Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
 
 ```javascript
 import { getBankByIspb } from '@brazilian-utils/brazilian-utils';
@@ -1378,7 +1378,7 @@ Generate a valid random processo jurídico number according to [CNJ's definition
 ```javascript
 import { generateProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
-generateProcessoJuridico(); // '00020802520125150049'
+generateProcessoJuridico(); // '89478643020269670326'
 generateProcessoJuridico({ year: 2026, court: 5 }); // string | null
 generateProcessoJuridico({ year: 10000 }); // null (year out of range)
 ```
@@ -1527,7 +1527,7 @@ Generate a valid random PIS.
 ```javascript
 import { generatePis } from '@brazilian-utils/brazilian-utils';
 
-generatePis(); // '12345678901'
+generatePis(); // '91077906857'
 ```
 
 ### getMunicipality
@@ -1663,7 +1663,7 @@ differenceInBusinessDays({ from: new Date('not a date'), to: new Date() }); // n
 
 ### convertDateToWords
 
-Formats a date as its Brazilian Portuguese "por extenso" textual representation, e.g. `"01/01/2024"` becomes `"primeiro de janeiro de dois mil e vinte e quatro"`. Accepts a `Date` (read by its local calendar date, the same convention used by `isHoliday`) or a string in `"dd/mm/yyyy"` or ISO `"yyyy-mm-dd"` format. With the default `options.style` of `"full"`, day 1 is written as "primeiro" and every other day uses the cardinal number; with `"month"`, only the month name is spelled out and the day/year are left as digits (day 1 as `"1º"`, e.g. `"2 de março de 2024"`, `"1º de janeiro de 2024"`). Month names are lowercase. In `"full"` style the year is written out as a cardinal number without the thousands comma that `convertNumberToWords`/`convertCurrencyToWords` use (`1999` reads as `"mil novecentos e noventa e nove"`, not `"mil, novecentos e noventa e nove"`), matching how a date is read aloud. `options.weekday` (default `false`) prefixes the pt-BR weekday name in lowercase followed by a comma (`"sábado, dois de março de dois mil e vinte e quatro"`), computed from the resolved calendar date. `options.case` sets the letter case of the whole result: `"lower"` (default), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Invalid `case`/`style` values are ignored and the default is used; the previous `capitalize` boolean option has been removed in favor of `case: "sentence"`. February 29th is accepted on the leap years of the proleptic Gregorian calendar (divisible by 4, except centuries not divisible by 400). Returns `""` for an invalid `Date`, a malformed string, a day/month that does not exist, or a date before year 1.
+Formats a date as its Brazilian Portuguese "por extenso" textual representation, e.g. `"01/01/2024"` becomes `"primeiro de janeiro de dois mil e vinte e quatro"`. Accepts a `Date` (read by its local calendar date, the same convention used by `isHoliday`) or a string in `"dd/mm/yyyy"` or ISO `"yyyy-mm-dd"` format. With the default `options.style` of `"full"`, day 1 is written as "primeiro" and every other day uses the cardinal number; with `"month"`, only the month name is spelled out and the day/year are left as digits (day 1 as `"1º"`, e.g. `"2 de março de 2024"`, `"1º de janeiro de 2024"`). Month names are lowercase. In `"full"` style the year is written out as a cardinal number without the thousands comma that `convertNumberToWords`/`convertCurrencyToWords` use (`1999` reads as `"mil novecentos e noventa e nove"`, not `"mil, novecentos e noventa e nove"`), matching how a date is read aloud. `options.weekday` (default `false`) prefixes the pt-BR weekday name in lowercase followed by a comma (`"sábado, dois de março de dois mil e vinte e quatro"`), computed from the resolved calendar date. `options.case` sets the letter case of the whole result: `"lower"` (default), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Invalid `case`/`style` values are ignored and the default is used. February 29th is accepted on the leap years of the proleptic Gregorian calendar (divisible by 4, except centuries not divisible by 400). Returns `""` for an invalid `Date`, a malformed string, a day/month that does not exist, or a date before year 1.
 
 ```javascript
 import { convertDateToWords } from '@brazilian-utils/brazilian-utils';
@@ -1683,7 +1683,7 @@ convertDateToWords('29/02/1900'); // "" (1900 is not a leap year)
 
 ### formatVoterId
 
-Format a voter ID number. Uses the 12-digit grouping `0000 0000 00 00` by default; when the sanitized value has 13 digits (São Paulo/Minas Gerais voter ids may have a 9-digit sequential number) the `0000 0000 0 00 00` grouping is used instead.
+Format a voter ID number. Uses the 12-digit grouping `0000 0000 00 00` by default; the 13-digit grouping `0000 0000 0 00 00` is used only when the sanitized value has more than 12 digits **and** its federative union code (the 10th and 11th digits) is `01` (São Paulo) or `02` (Minas Gerais), the two states whose voter ids may carry a 9-digit sequential number.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
@@ -1734,7 +1734,7 @@ Check if a CNS (Cartão Nacional de Saúde) number is valid, the unique SUS (Sis
 ```javascript
 import { isValidCns } from '@brazilian-utils/brazilian-utils';
 
-isValidCns('123456789010001'); // true (definitive)
+isValidCns('123456789010000'); // true (definitive)
 isValidCns('700000000000005'); // true (provisional)
 isValidCns('12345678901'); // false (wrong length)
 ```
@@ -1753,7 +1753,7 @@ formatCns('89010001', { pad: true }); // '000 0000 8901 0001'
 
 ### isValidCertidao
 
-Check if the matrícula of a certidão de registro civil (nascimento, casamento, óbito and the other acts kept by a serventia de registro civil das pessoas naturais) is valid. The matrícula has 32 digits laid out as 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), and both check digits are modulus 11 with weights cycling from 2 to 10 and back through 0. Accepts the usual mask characters and whitespace between/around groups. The layout and both check digits follow the Provimento CNJ 46/2015, as detailed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and implemented by [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) and [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
+Check if the matrícula of a certidão de registro civil (nascimento, casamento, óbito and the other acts kept by a serventia de registro civil das pessoas naturais) is valid. The matrícula has 32 digits laid out as 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), and both check digits are modulus 11 with weights cycling from 2 to 10 and back through 0. Accepts the usual mask characters and whitespace between/around groups. The layout and both check digits follow the [Provimento CNJ nº 3/2009](https://atos.cnj.jus.br/atos/detalhar/1310), whose CNS da serventia comes from the [Provimento CNJ nº 2/2009](https://atos.cnj.jus.br/atos/detalhar/1311), as detailed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and implemented by [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) and [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
 
 `options.accept` (part of `IsValidCertidaoOptions`) restricts which book types (the same `CertidaoType` returned by `parseCertidao`) count as valid; when given, the book-type digit must map to one of the listed types. Defaults to every type.
 
@@ -1770,7 +1770,7 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] 
 
 ### parseCertidao
 
-Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid or when its book code is not one of the nine books defined by the Provimento. The nine books and their codes are the ones defined by the Provimento CNJ 46/2015, as listed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm).
+Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid or when its book code is not one of the nine books defined by the Provimento. The nine books and their codes are the ones defined by the [Provimento CNJ nº 3/2009](https://atos.cnj.jus.br/atos/detalhar/1310), as listed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm).
 
 ```javascript
 import { parseCertidao } from '@brazilian-utils/brazilian-utils';
@@ -1809,7 +1809,7 @@ The `Certidao` result carries:
 
 ### formatCertidao
 
-Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces. `options.pad` (part of `FormatCertidaoOptions`) left pads the value with zeros up to 32 digits. The mask is the one printed in the Provimento CNJ 46/2015.
+Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces. `options.pad` (part of `FormatCertidaoOptions`) left pads the value with zeros up to 32 digits. The mask is the one printed in the [Provimento CNJ nº 3/2009](https://atos.cnj.jus.br/atos/detalhar/1310).
 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
@@ -2054,7 +2054,7 @@ isValidCst('999'); // false (not in any table)
 
 ### isValidCsosn
 
-Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes defined by Convênio ICMS 92/2015: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
+Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes defined by Ajuste SINIEF 03/2010: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
 
 ```javascript
 import { isValidCsosn } from '@brazilian-utils/brazilian-utils';

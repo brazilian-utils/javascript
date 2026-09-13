@@ -12,7 +12,11 @@ const runWithRepeatedDigitsForcingRandom = (run: () => void) => {
 
 	let nextDigitIndex = 0;
 
-	Math.random = () => (forcedDigitSequence[nextDigitIndex++] + 0.5) / 10;
+	Math.random = () => {
+		const digit = forcedDigitSequence[nextDigitIndex];
+		nextDigitIndex += 1;
+		return (digit + 0.5) / 10;
+	};
 
 	try {
 		run();

@@ -12,9 +12,10 @@ const LENGTH = 12;
 /**
  * Formats a Brazilian voter id (título de eleitor) for display.
  *
- * Uses the 12-digit grouping "0000 0000 00 00" by default. When the sanitized value has more
- * than 12 digits (São Paulo/Minas Gerais voter ids may have a 9-digit sequential number) the
- * 13-digit grouping "0000 0000 0 00 00" is used instead.
+ * Uses the 12-digit grouping "0000 0000 00 00" by default. The 13-digit grouping
+ * "0000 0000 0 00 00" is used only when the sanitized value has more than 12 digits and its
+ * federative union code (the 10th and 11th digits) is "01" (São Paulo) or "02" (Minas Gerais),
+ * the two states whose voter ids may carry a 9-digit sequential number.
  *
  * @param {string|number} value - The voter id value to be formatted.
  * @returns {string} The formatted voter id string.

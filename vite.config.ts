@@ -2,6 +2,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { transform } from "esbuild";
+import { rules as sonarjsPluginRules } from "eslint-plugin-sonarjs";
 import { defineConfig } from "vite-plus";
 import { type PackUserConfig } from "vite-plus/pack";
 import { webdriverio } from "vite-plus/test/browser-webdriverio";
@@ -10,6 +11,14 @@ const rootDir = import.meta.dirname;
 const srcDir = resolve(rootDir, "src");
 
 type PackPlugin = Extract<NonNullable<PackUserConfig["plugins"]>, unknown[]>[number];
+
+/**
+ * Every SonarJS rule as an error, so a plugin upgrade that adds rules turns them on by default;
+ * the rules that are off on purpose are listed right after the spread in the lint config.
+ */
+const sonarjsRules = Object.fromEntries(
+	Object.keys(sonarjsPluginRules).map((rule) => [`sonarjs/${rule}`, "error"]),
+);
 
 /**
  * The root build ships a UMD file for `require()`, which tsdown never pairs with a `.d.cts`
@@ -147,6 +156,10 @@ export default defineConfig({
 			typeCheck: true,
 		},
 		plugins: ["oxc", "typescript", "unicorn", "import", "jsdoc", "promise", "vitest"],
+		// SonarJS runs as an oxlint JS plugin (bug patterns, cognitive complexity, regex checks
+		// and test smells that the Rust plugins do not cover). Its type-aware rules are inert
+		// here because oxlint does not hand ESLint plugins a type checker.
+		jsPlugins: ["eslint-plugin-sonarjs"],
 		categories: {
 			correctness: "error",
 			suspicious: "error",
@@ -396,11 +409,42 @@ export default defineConfig({
 			"import/no-self-import": "error",
 			"import/no-webpack-loader-syntax": "error",
 			"import/no-anonymous-default-export": "error",
+			...sonarjsRules,
+			// Formatting, naming and layout are vp fmt's job or are enforced by other plugins.
+			"sonarjs/file-header": "off",
+			"sonarjs/no-tab": "off",
+			"sonarjs/arrow-function-convention": "off",
+			"sonarjs/shorthand-property-grouping": "off",
+			"sonarjs/concise-regex": "off",
+			"sonarjs/no-wildcard-import": "off",
+			"sonarjs/elseif-without-else": "off",
+			"sonarjs/no-undefined-assignment": "off",
+			// Already gated by eslint/complexity (20), eslint/max-lines-per-function and jscpd.
+			"sonarjs/cyclomatic-complexity": "off",
+			"sonarjs/max-lines": "off",
+			"sonarjs/max-lines-per-function": "off",
+			"sonarjs/no-duplicate-string": "off",
+			"sonarjs/expression-complexity": "off",
+			"sonarjs/too-many-break-or-continue-in-loop": "off",
+			"sonarjs/nested-control-flow": "off",
+			// TypeScript utility types (Record, Pick, ...) are reported as undeclared references.
+			"sonarjs/no-reference-error": "off",
+			// The union of the 27 state codes and the generators' Math.random are intentional.
+			"sonarjs/max-union-size": "off",
+			"sonarjs/pseudo-random": "off",
+			// Deprecated aliases kept for backwards compatibility are redundant by design.
+			"sonarjs/redundant-type-aliases": "off",
+			// test.todo is a runtime shim feature, not a pending task.
+			"sonarjs/todo-tag": "off",
+			"sonarjs/cognitive-complexity": ["error", 25],
+			"sonarjs/regex-complexity": ["error", { threshold: 25 }],
 		},
 		overrides: [
 			{
 				files: ["src/_internals/test/**"],
 				rules: {
+					"sonarjs/no-implicit-dependencies": "off",
+					"sonarjs/no-nested-functions": "off",
 					"typescript/consistent-type-definitions": "off",
 					"vitest/no-disabled-tests": "off",
 					"vitest/valid-title": "off",
@@ -426,6 +470,7 @@ export default defineConfig({
 					"vitest/no-conditional-in-test": "off",
 					"unicorn/new-for-builtins": "off",
 					"eslint/no-new-wrappers": "off",
+					"sonarjs/no-primitive-wrappers": "off",
 					"vitest/no-conditional-expect": "off",
 					"eslint/max-lines-per-function": "off",
 					"typescript/explicit-function-return-type": "off",
@@ -441,6 +486,8 @@ export default defineConfig({
 				files: ["scripts/**/*.ts", "vite.config.ts"],
 				rules: {
 					"eslint/no-console": "off",
+					// The dataset scripts parse trusted official sources with backtracking regexes.
+					"sonarjs/super-linear-regex": "off",
 					"import/no-default-export": "off",
 				},
 			},

@@ -122,8 +122,11 @@ duplicating logic (e.g. `src/_internals/format/format.ts`,
 above for every function the package exports, by building a one-import consumer bundle per
 export with esbuild and printing its size. There is no committed budgets file: instead, the
 `tree-shaking` job in CI measures every export's single-import bundle size on the PR's base
-branch and on the PR head, then comments a Markdown diff on the PR (sorted by absolute delta,
-with new and removed exports called out and unchanged exports collapsed). The check fails the PR
+branch and on the PR head, then comments a Markdown report on the PR that leads with the impact:
+a single "no bundle size impact" line when every export is the same size, otherwise the bundle
+totals plus a "What changed" table listing only the exports that grew, shrank, appeared or
+disappeared (sorted by absolute delta); the full per-export list is always there, collapsed. The
+check fails the PR
 when a pre-existing export grows by more than 20% and more than 256 bytes, or when a bundle
 importing every export that already existed on the base grows by more than 5% (new exports
 never count as a regression); those thresholds live as constants at the top of
@@ -150,6 +153,20 @@ tag checks and the `vitest` matcher preferences, among others); whole categories
 check-digit code and the `null`-returning API on purpose. Test files relax the rules that only
 make sense for production code (return types, JSDoc, the `unsafe-*` family, since the
 multi-runtime `expect` shim is untyped) and every `@ts-expect-error` must carry a description.
+
+[SonarJS](https://github.com/SonarSource/SonarJS) runs as an
+oxlint JS plugin (`lint.jsPlugins` in `vite.config.ts`) with every rule as an error, minus a
+short list that is off on purpose right below the spread: formatting and naming rules that
+`vp fmt` owns, the complexity/duplication rules already gated by `eslint/complexity` and jscpd,
+`no-reference-error` (it reports TypeScript utility types), `max-union-size` and `pseudo-random`
+(the 27 state codes and the generators' `Math.random` are intentional), `redundant-type-aliases`
+(deprecated aliases kept for compatibility) and `todo-tag` (`test.todo` is a shim feature). It
+adds what the Rust plugins do not have: cognitive complexity (25), regex complexity (25) and
+regex bug patterns (anchor precedence, super-linear backtracking), nested ternaries and template
+literals, redundant assignments and optional markers, and the test smells (hooks after test
+cases, disabled or exclusive tests, assertions outside tests). Its type-aware rules are inert,
+since oxlint does not hand ESLint plugins a type checker. The plugin adds about three seconds to
+`vp check`.
 
 `tsconfig.json` is `strict` plus `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters` and
 `noPropertyAccessFromIndexSignature`. `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
@@ -207,7 +224,15 @@ signatures are pinned by the `describe("<name> types")` blocks in the tests, and
 - The `Security` workflow lints the workflows themselves with
   [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor)
   and scans `package-lock.json` with [OSV-Scanner](https://google.github.io/osv-scanner/); the
-  `Check` workflow runs `audit-ci` and lockfile-lint on top.
+  `Check` workflow runs `audit-ci` and lockfile-lint on top. The same workflow runs the
+  [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript) on
+  every push to `main` and weekly: it grades the repository configuration (pinned actions, token
+  permissions, branch protection, code review, dependency updates, SAST) rather than the code,
+  publishes the score and uploads the findings to the Security tab.
+- Every GitHub release carries `brazilian-utils.cdx.json`, a CycloneDX SBOM of the published
+  package generated with `npm sbom` from the release tag. The package has no runtime dependencies,
+  so the document describes the package itself; it exists for consumers whose supply-chain policy
+  requires one.
 - Commit messages are checked with commitlint on every pull request, since release-please derives
   the version bump and the changelog from them.
 - The `Links` workflow checks every URL in the Markdown files and in the `@see` tags of the source

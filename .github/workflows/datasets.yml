@@ -28,10 +28,13 @@ jobs:
       - name: Rebuild datasets
         run: npm run build:data
 
+      - name: Validate the regenerated datasets
+        run: npm run check && npx vp test --run
+
       - name: Check for changes
         id: diff
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain --untracked-files=all)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -43,6 +46,7 @@ jobs:
         with:
           commit-message: "chore(data): update IBGE/CONCLA datasets"
           branch: chore/update-datasets
+          base: ${{ github.event.repository.default_branch }}
           title: "chore(data): update IBGE/CONCLA datasets"
           body: |
             Automated weekly refresh of the cities, states and legal-natures

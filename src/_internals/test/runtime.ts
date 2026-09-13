@@ -14,12 +14,13 @@ type RuntimeModule = {
 	vi: { fn: (...args: any[]) => any; restoreAllMocks: () => void };
 };
 
-const runtimeModule: RuntimeModule =
-	"Bun" in globalThis
-		? await import("./runtime-bun")
-		: "Deno" in globalThis
-			? await import("./runtime-deno")
-			: await import("./runtime-vitest");
+const loadRuntime = (): Promise<RuntimeModule> => {
+	if ("Bun" in globalThis) return import("./runtime-bun");
+	if ("Deno" in globalThis) return import("./runtime-deno");
+	return import("./runtime-vitest");
+};
+
+const runtimeModule = await loadRuntime();
 
 export const { afterEach, bench, beforeEach, describe, expect, expectTypeOf, it, test, vi } =
 	runtimeModule;

@@ -42,7 +42,7 @@ export type ConvertNumberToWordsOptions = {
  * convertNumberToWords(NaN); // ""
  * ```
  *
- * @see https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
 export const convertNumberToWords = (
 	value: number,

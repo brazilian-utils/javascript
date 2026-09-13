@@ -19,6 +19,7 @@ import { RESERVED_NUMBERS } from "./constants";
  * ```
  *
  * @see Official: https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao
+ * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/pis.py
  */
 export const isValidPis = (pis: string): boolean => {
 	if (typeof pis !== "string") return false;

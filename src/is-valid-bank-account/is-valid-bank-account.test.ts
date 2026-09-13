@@ -1506,12 +1506,13 @@ describe("isValidBankAccount", () => {
 		});
 
 		test("should accept the last bank code of COMPE_CODES, which an endsWith based scan would never reach", () => {
-			expect(COMPE_CODES.endsWith("757")).toBe(true);
-			expect(BANKS.some((bank) => bank.code === "757")).toBe(true);
+			const lastCode = COMPE_CODES.slice(-3);
+
+			expect(BANKS.some((bank) => bank.code === lastCode)).toBe(true);
 
 			expect(
 				isValidBankAccount({
-					bankCode: "757",
+					bankCode: lastCode,
 					agency: "1234",
 					account: "123456",
 					digit: "6",

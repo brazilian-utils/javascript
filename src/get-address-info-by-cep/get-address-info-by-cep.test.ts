@@ -18,6 +18,13 @@ import {
 	getAddressInfoByCep,
 } from "./get-address-info-by-cep";
 
+type FetchInput = string | URL | Request;
+
+const requestUrl = (input: FetchInput): string => {
+	if (typeof input === "string") return input;
+	return input instanceof URL ? input.href : input.url;
+};
+
 type MockResponse = {
 	ok: boolean;
 	status?: number;
@@ -66,8 +73,8 @@ function setupFetchMock(
 	fetchMock: ReturnType<typeof vi.fn>,
 	overrides?: Partial<Record<"brasilapi" | "viacep" | "widenet", Error | MockResponse>>,
 ) {
-	fetchMock.mockImplementation((input: string | URL | Request) => {
-		const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+	fetchMock.mockImplementation((input: FetchInput) => {
+		const url = requestUrl(input);
 
 		if (url.includes("viacep.com.br")) {
 			if (overrides?.viacep instanceof Error) {
@@ -262,8 +269,8 @@ describe("getAddressInfoByCep", () => {
 
 				expectDefaultAddress(result);
 
-				const requestedUrls = fetchMock.mock.calls.map(([input]: [string | URL | Request]) =>
-					typeof input === "string" ? input : input instanceof URL ? input.href : input.url,
+				const requestedUrls = fetchMock.mock.calls.map(([input]: [FetchInput]) =>
+					requestUrl(input),
 				);
 				expect(requestedUrls.some((url: string) => url.includes("widenet"))).toBe(false);
 			});

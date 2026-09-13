@@ -408,39 +408,6 @@ describe("getHolidays", () => {
 		expect(rjHolidays.some((h) => h.name === "São Sebastião")).toBe(false);
 	});
 
-	test("should throw when a state holiday entry defines neither easterOffset nor both day and month", () => {
-		const entries = STATE_HOLIDAYS.AC ?? [];
-		entries.push({ name: "Feriado estadual sem data" });
-
-		try {
-			expect(() => getHolidays({ year: 2098, stateCode: "AC" })).toThrow(
-				"State holiday entry must define either `easterOffset` or both `day` and `month`",
-			);
-		} finally {
-			entries.pop();
-		}
-	});
-
-	test("should throw when a state holiday entry defines only one of day/month, without easterOffset", () => {
-		const incompleteEntries = [
-			{ name: "Feriado com apenas o mês", month: 5 },
-			{ name: "Feriado com apenas o dia", day: 10 },
-		];
-
-		for (const entry of incompleteEntries) {
-			const entries = STATE_HOLIDAYS.AC ?? [];
-			entries.push(entry);
-
-			try {
-				expect(() => getHolidays({ year: 2097, stateCode: "AC" })).toThrow(
-					"State holiday entry must define either `easterOffset` or both `day` and `month`",
-				);
-			} finally {
-				entries.pop();
-			}
-		}
-	});
-
 	describe("properties", () => {
 		const yearArbitrary = fc.integer({ min: HOLIDAYS_MIN_YEAR, max: HOLIDAYS_MAX_YEAR });
 		const stateCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.code));

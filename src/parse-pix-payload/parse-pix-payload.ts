@@ -108,9 +108,9 @@ const isValidAmount = (amount: string | undefined): boolean =>
 	(AMOUNT_REGEX.test(amount) && amount.length <= PIX_TRANSACTION_AMOUNT_MAX_LENGTH);
 
 type MerchantKeyInfo = {
-	key?: string | undefined;
-	url?: string | undefined;
-	description?: string | undefined;
+	key?: string;
+	url?: string;
+	description?: string;
 };
 
 const resolveMerchantKeyInfo = (fields: TlvFields): MerchantKeyInfo | null => {
@@ -142,12 +142,12 @@ const resolveTxid = (fields: TlvFields): string | undefined | null => {
 };
 
 type OptionalPixFields = {
-	key?: string | undefined;
-	url?: string | undefined;
-	description?: string | undefined;
-	amount?: string | undefined;
-	txid?: string | undefined;
-	pointOfInitiation?: string | undefined;
+	key?: string;
+	url?: string;
+	description?: string;
+	amount?: string;
+	txid?: string;
+	pointOfInitiation?: string;
 };
 
 const buildPixPayload = (
