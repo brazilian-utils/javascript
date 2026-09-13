@@ -1,5 +1,6 @@
 import { DATA as STATES, type StateCode } from "../_internals/constants/states";
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { removeAccents } from "../remove-accents/remove-accents";
 
 /** Base class of every error `getCepInfoByAddress` rejects with. */
@@ -78,6 +79,8 @@ const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Arr
  * @param {string} params.street - The street name, or part of it.
  * @returns {Promise<CepAddressInfo[]>} Every address matching the query.
  * @throws {GetCepInfoByAddressValidationError} When the UF, city or street is missing or invalid.
+ * A `params` that is not an object at all (omitted, `null`, a string) and a `federalUnit` that is
+ * not a string reject this way too, rather than with a raw `TypeError`.
  * @throws {GetCepInfoByAddressNotFoundError} When no address matches the query.
  * @throws {GetCepInfoByAddressError} When ViaCEP answers with an HTTP error status. A request
  * that cannot be performed at all rejects with the underlying `fetch` error instead.
@@ -89,13 +92,22 @@ const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Arr
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
- * @see Official: https://viacep.com.br/
+ * @see Based on: https://viacep.com.br/
+ * ViaCEP, the service queried. A third-party service, not a Correios one.
  */
-export const getCepInfoByAddress = async ({
-	federalUnit,
-	city,
-	street,
-}: GetCepInfoByAddressOptions): Promise<CepAddressInfo[]> => {
+export const getCepInfoByAddress = async (
+	params: GetCepInfoByAddressOptions,
+): Promise<CepAddressInfo[]> => {
+	if (isNullish(params) || typeof params !== "object") {
+		throw new GetCepInfoByAddressValidationError("UF, city and street are required");
+	}
+
+	const { federalUnit, city, street } = params;
+
+	if (typeof federalUnit !== "string") {
+		throw new GetCepInfoByAddressValidationError("Invalid UF: a two letter string is required");
+	}
+
 	const normalizedUf = federalUnit.trim().toUpperCase();
 
 	if (!isStateCode(normalizedUf)) {
