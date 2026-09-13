@@ -38,7 +38,7 @@ const endsInMillionScale = (words: string): boolean =>
 /**
  * Formats a monetary amount in Brazilian Reais as its "por extenso" textual representation,
  * the style used to write out the amount by hand on cheques and contracts, e.g. `1523.45`
- * becomes `"mil, quinhentos e vinte e três reais e quarenta e cinco centavos"`.
+ * becomes `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`.
  *
  * `value` is truncated (not rounded) to 2 decimal places before conversion, matching
  * `brutils`' `convert_real_to_text`. The singular noun is used for exactly 1 ("um real",
@@ -58,7 +58,7 @@ const endsInMillionScale = (words: string): boolean =>
  *
  * @example
  * ```typescript
- * convertCurrencyToWords(1523.45); // "mil, quinhentos e vinte e três reais e quarenta e cinco centavos"
+ * convertCurrencyToWords(1523.45); // "mil quinhentos e vinte e três reais e quarenta e cinco centavos"
  * convertCurrencyToWords(1); // "um real"
  * convertCurrencyToWords(0.01); // "um centavo"
  * convertCurrencyToWords(1000000); // "um milhão de reais"

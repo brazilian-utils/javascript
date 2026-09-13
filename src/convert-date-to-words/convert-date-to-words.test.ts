@@ -327,7 +327,7 @@ describe("convertDateToWords", () => {
 				["11/03/2024", "onze de março de dois mil e vinte e quatro"],
 				["12/03/2024", "doze de março de dois mil e vinte e quatro"],
 				["13/03/2024", "treze de março de dois mil e vinte e quatro"],
-				["14/03/2024", "catorze de março de dois mil e vinte e quatro"],
+				["14/03/2024", "quatorze de março de dois mil e vinte e quatro"],
 				["15/03/2024", "quinze de março de dois mil e vinte e quatro"],
 				["16/03/2024", "dezesseis de março de dois mil e vinte e quatro"],
 				["17/03/2024", "dezessete de março de dois mil e vinte e quatro"],

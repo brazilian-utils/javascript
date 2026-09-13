@@ -41,9 +41,8 @@ const dayToWords = (day: number, monthStyle: boolean): string => {
  * with no timezone conversion. With the default `"full"` `options.style`, day 1 is written as
  * "primeiro" and every other day uses the cardinal number; with `"month"`, only the month name
  * is spelled out and the day/year are written as digits (day 1 as `"1º"`). Month names are
- * lowercase. In `"full"` style the year is written out as a cardinal number without the
- * thousands comma that `convertNumberToWords`/`convertCurrencyToWords` use (`1999` reads as
- * `"mil novecentos e noventa e nove"`, not `"mil, novecentos e noventa e nove"`), matching how a
+ * lowercase. In `"full"` style the year is written out as a cardinal number the way
+ * `convertNumberToWords` writes it (`1999` reads as `"mil novecentos e noventa e nove"`), matching how a
  * date is read aloud. `options.weekday` prefixes the pt-BR weekday name (lowercase) followed by
  * a comma. The result is always lowercase; apply any other casing to it yourself.
  * February 29th is accepted on the leap years of the proleptic Gregorian calendar
@@ -112,7 +111,7 @@ export const convertDateToWords = (
 	const monthName = MONTH_NAMES[month - 1];
 	const isMonthStyle = options?.style === "month";
 
-	const yearWords = isMonthStyle ? String(year) : numberToWords(year).replaceAll(", ", " ");
+	const yearWords = isMonthStyle ? String(year) : numberToWords(year);
 	const dateWords = `${dayToWords(day, isMonthStyle)} de ${monthName} de ${yearWords}`;
 
 	return options?.weekday === true

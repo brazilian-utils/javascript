@@ -2,12 +2,13 @@
  * Portuguese (pt-BR) number-to-words tables, shared by `numberToWords` and by every public
  * "por extenso" formatter (`convertNumberToWords`, `convertCurrencyToWords`, `convertDateToWords`).
  *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/lei/L14822.htm
+ * Lei nº 14.822/2024 (Lei Orçamentária Anual de 2024), art. 1º, which spells 14 "quatorze"
+ * ("quatrocentos e quatorze bilhões"), the form the official Brazilian texts use; the Vocabulário
+ * Ortográfico admits both "quatorze" and "quatorze", and num2words' Portuguese table (below) picks
+ * "quatorze".
  * @see Based on: https://github.com/savoirfairelinux/num2words/blob/master/num2words/lang_PT.py
- * num2words' Portuguese table, which spells 14 "catorze" (not "quatorze"), the spelling used
- * here. Its `lang_PT_BR` subclass keeps that table, so `num2words(14, lang="pt_BR")` is
- * "catorze".
- * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
- * brutils' currency helper, which delegates to num2words and therefore inherits that spelling.
+ * num2words' Portuguese table, the source of every other word of this file.
  */
 
 export const ZERO_WORD = "zero";
@@ -27,7 +28,7 @@ export const UNITS: readonly string[] = [
 	"onze",
 	"doze",
 	"treze",
-	"catorze",
+	"quatorze",
 	"quinze",
 	"dezesseis",
 	"dezessete",

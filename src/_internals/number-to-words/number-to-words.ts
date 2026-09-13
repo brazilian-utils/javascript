@@ -71,21 +71,22 @@ const isRoundHundred = (value: number): boolean => value % 100 === 0;
 
 /**
  * Converts a non-negative integer into its Brazilian Portuguese cardinal number words
- * ("por extenso"), e.g. `1235` becomes `"mil, duzentos e trinta e cinco"`.
+ * ("por extenso"), e.g. `1235` becomes `"mil duzentos e trinta e cinco"`.
  *
  * This is the shared engine behind every "por extenso" formatter of this library
  * (`convertNumberToWords`, `convertCurrencyToWords`, `convertDateToWords`): it only converts, it
  * never validates or sanitizes its input, so callers must pass a finite, non-negative integer
- * within `[0, NUMBER_TO_WORDS_MAX_VALUE]`. Grouping uses commas between groups and "e" is used
- * instead of a comma right before the last group when that group is below 100 or is a round
- * hundred (100, 200, ..., 900), matching how the value would be written by hand
- * (e.g. `1200` -> `"mil e duzentos"`, `1235` -> `"mil, duzentos e trinta e cinco"`). The "e"
- * connector is therefore reserved for the last group: an intermediate group below 100 still takes
- * a comma (`1045678` -> `"um milhão, quarenta e cinco mil, seiscentos e setenta e oito"`). This is
- * the one place where the output deviates from `num2words`' pt_BR locale, which writes
- * `"um milhão e quarenta e cinco mil, ..."` there because its post-processing only rewrites " e "
- * into "," when the next word is a hundreds word, making an intermediate group's punctuation
- * depend on the group that follows it. Every published `brutils` example is reproduced exactly.
+ * within `[0, NUMBER_TO_WORDS_MAX_VALUE]`. Groups are joined by a space, and "e" is used right
+ * before the last group when that group is below 100 or is a round hundred (100, 200, ..., 900),
+ * the way the official texts write amounts out: `1200` -> `"mil e duzentos"`, `1001` -> `"mil e
+ * um"`, `1235` -> `"mil duzentos e trinta e cinco"`, `1045678` -> `"um milhão quarenta e cinco mil
+ * seiscentos e setenta e oito"`. This is the spelling of the Lei Orçamentária Anual ("cinco
+ * trilhões quinhentos e sessenta e seis bilhões duzentos e oitenta e quatro milhões oitocentos e
+ * dez mil trezentos e setenta e três reais", Lei 14.822/2024, art. 1º), of the salário mínimo
+ * decrees ("mil quinhentos e dezoito reais", Decreto 12.342/2024) and of the examples in the Manual
+ * de Redação da Presidência da República ("mil duzentos e cinquenta reais", "mil e quatrocentos
+ * reais"). It deviates from `num2words`' pt_BR locale, which separates the groups with commas
+ * ("mil duzentos e trinta e cinco") and writes "e" before an intermediate group below 100.
  *
  * @param {number} value - A non-negative integer in `[0, NUMBER_TO_WORDS_MAX_VALUE]`.
  * @param {NumberToWordsOptions} [options] - Optional conversion options.
@@ -98,12 +99,17 @@ const isRoundHundred = (value: number): boolean => value % 100 === 0;
  * numberToWords(21); // "vinte e um"
  * numberToWords(100); // "cem"
  * numberToWords(1100); // "mil e cem"
- * numberToWords(1235); // "mil, duzentos e trinta e cinco"
+ * numberToWords(1235); // "mil duzentos e trinta e cinco"
  * numberToWords(2000000); // "dois milhões"
  * numberToWords(2, { gender: "feminine" }); // "duas"
  * numberToWords(2000, { gender: "feminine" }); // "duas mil"
  * ```
  *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/lei/L14822.htm
+ * Lei nº 14.822, de 22 de janeiro de 2024 (Lei Orçamentária Anual de 2024), art. 1º: amounts written
+ * out with the groups separated by spaces, "e" only inside a group, and "quatorze".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/D12342.htm
+ * Decreto nº 12.342, de 30 de dezembro de 2024, art. 1º: "R$ 1.518,00 (mil quinhentos e dezoito reais)".
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
 export const numberToWords = (value: number, options?: NumberToWordsOptions): string => {
@@ -136,7 +142,7 @@ export const numberToWords = (value: number, options?: NumberToWordsOptions): st
 
 		const connector =
 			// Stryker disable next-line EqualityOperator: equivalent, groupValue === 100 already satisfies isRoundHundred(groupValue)
-			index === lastNonZeroIndex && (groupValue < 100 || isRoundHundred(groupValue)) ? " e " : ", ";
+			index === lastNonZeroIndex && (groupValue < 100 || isRoundHundred(groupValue)) ? " e " : " ";
 
 		result += connector + groupText;
 	}

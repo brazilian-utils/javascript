@@ -42,8 +42,8 @@ describe("convertNumberToWords", () => {
 
 	test("should convert the maximum supported value (999999999999999, 999 trillion)", () => {
 		expect(convertNumberToWords(NUMBER_TO_WORDS_MAX_VALUE)).toBe(
-			"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, " +
-				"novecentos e noventa e nove milhões, novecentos e noventa e nove mil, " +
+			"novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões " +
+				"novecentos e noventa e nove milhões novecentos e noventa e nove mil " +
 				"novecentos e noventa e nove",
 		);
 	});
@@ -181,7 +181,7 @@ describe("convertNumberToWords", () => {
 				[111, "cento e onze"],
 				[112, "cento e doze"],
 				[113, "cento e treze"],
-				[114, "cento e catorze"],
+				[114, "cento e quatorze"],
 				[115, "cento e quinze"],
 				[116, "cento e dezesseis"],
 				[117, "cento e dezessete"],
@@ -304,48 +304,48 @@ describe("convertNumberToWords", () => {
 				[1001, "mil e um"],
 				[1021, "mil e vinte e um"],
 				[1100, "mil e cem"],
-				[1101, "mil, cento e um"],
+				[1101, "mil cento e um"],
 				[1200, "mil e duzentos"],
-				[1235, "mil, duzentos e trinta e cinco"],
-				[1999, "mil, novecentos e noventa e nove"],
+				[1235, "mil duzentos e trinta e cinco"],
+				[1999, "mil novecentos e noventa e nove"],
 				[2000, "dois mil"],
 				[2001, "dois mil e um"],
 				[5000, "cinco mil"],
-				[9999, "nove mil, novecentos e noventa e nove"],
+				[9999, "nove mil novecentos e noventa e nove"],
 				[10_000, "dez mil"],
 				[21_000, "vinte e um mil"],
 				[100_000, "cem mil"],
 				[101_000, "cento e um mil"],
 				[200_000, "duzentos mil"],
 				[300_000, "trezentos mil"],
-				[999_999, "novecentos e noventa e nove mil, novecentos e noventa e nove"],
+				[999_999, "novecentos e noventa e nove mil novecentos e noventa e nove"],
 				[1_000_000, "um milhão"],
 				[1_000_001, "um milhão e um"],
 				[1_000_100, "um milhão e cem"],
-				[1_000_230, "um milhão, duzentos e trinta"],
-				[1_045_678, "um milhão, quarenta e cinco mil, seiscentos e setenta e oito"],
+				[1_000_230, "um milhão duzentos e trinta"],
+				[1_045_678, "um milhão quarenta e cinco mil seiscentos e setenta e oito"],
 				[1_100_000, "um milhão e cem mil"],
 				[1_200_000, "um milhão e duzentos mil"],
-				[1_230_000, "um milhão, duzentos e trinta mil"],
-				[1_230_045, "um milhão, duzentos e trinta mil e quarenta e cinco"],
-				[1_230_456, "um milhão, duzentos e trinta mil, quatrocentos e cinquenta e seis"],
+				[1_230_000, "um milhão duzentos e trinta mil"],
+				[1_230_045, "um milhão duzentos e trinta mil e quarenta e cinco"],
+				[1_230_456, "um milhão duzentos e trinta mil quatrocentos e cinquenta e seis"],
 				[2_000_000, "dois milhões"],
 				[1_000_000_000, "um bilhão"],
 				[1_000_000_001, "um bilhão e um"],
 				[2_000_000_000, "dois bilhões"],
 				[
 					1_234_567_890,
-					"um bilhão, duzentos e trinta e quatro milhões, quinhentos e sessenta e sete mil, oitocentos e noventa",
+					"um bilhão duzentos e trinta e quatro milhões quinhentos e sessenta e sete mil oitocentos e noventa",
 				],
 				[
 					999_999_999_999,
-					"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
+					"novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove",
 				],
 				[1_000_000_000_000, "um trilhão"],
 				[2_000_000_000_000, "dois trilhões"],
 				[
 					999_999_999_999_999,
-					"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
+					"novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove",
 				],
 			];
 			expectWords(cases);
@@ -366,7 +366,7 @@ describe("convertNumberToWords", () => {
 				[-11, "menos onze"],
 				[-12, "menos doze"],
 				[-13, "menos treze"],
-				[-14, "menos catorze"],
+				[-14, "menos quatorze"],
 				[-15, "menos quinze"],
 				[-16, "menos dezesseis"],
 				[-17, "menos dezessete"],
@@ -467,7 +467,7 @@ describe("convertNumberToWords", () => {
 				[-1_000_000, "menos um milhão"],
 				[
 					-999_999_999_999_999,
-					"menos novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
+					"menos novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove",
 				],
 			];
 			expectWords(cases);
@@ -489,7 +489,7 @@ describe("convertNumberToWords", () => {
 				[11, "onze"],
 				[12, "doze"],
 				[13, "treze"],
-				[14, "catorze"],
+				[14, "quatorze"],
 				[15, "quinze"],
 				[16, "dezesseis"],
 				[17, "dezessete"],
@@ -527,7 +527,7 @@ describe("convertNumberToWords", () => {
 				[1000, "mil"],
 				[1001, "mil e uma"],
 				[1100, "mil e cem"],
-				[1101, "mil, cento e uma"],
+				[1101, "mil cento e uma"],
 				[2000, "duas mil"],
 				[2002, "duas mil e duas"],
 				[3000, "três mil"],

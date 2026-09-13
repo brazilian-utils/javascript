@@ -12,7 +12,7 @@ export type ConvertNumberToWordsOptions = {
 
 /**
  * Formats an integer as its Brazilian Portuguese cardinal number words ("por extenso"),
- * e.g. `1235` becomes `"mil, duzentos e trinta e cinco"`.
+ * e.g. `1235` becomes `"mil duzentos e trinta e cinco"`.
  *
  * Only integers from `-999999999999999` to `999999999999999` (999 trillion in absolute value,
  * the highest value expressible with the "trilhão" scale word) are supported; anything outside

@@ -39,12 +39,12 @@ describe("convertCurrencyToWords", () => {
 
 	test("should join reais and centavos with 'e' (1523.45, brutils 'convert_real_to_text' example)", () => {
 		expect(convertCurrencyToWords(1523.45)).toBe(
-			"mil, quinhentos e vinte e três reais e quarenta e cinco centavos",
+			"mil quinhentos e vinte e três reais e quarenta e cinco centavos",
 		);
 	});
 
 	test("should not insert 'de' when a mil/hundred group follows the million group", () => {
-		expect(convertCurrencyToWords(1_000_230)).toBe("um milhão, duzentos e trinta reais");
+		expect(convertCurrencyToWords(1_000_230)).toBe("um milhão duzentos e trinta reais");
 	});
 
 	test("should return only the centavos when the reais part is zero", () => {
@@ -114,7 +114,7 @@ describe("convertCurrencyToWords", () => {
 
 		test("should still report cents exactly at the Number.MAX_SAFE_INTEGER cents boundary, reading the 90 cents the double holds (90071992547409.9 is exactly 90071992547409.90625, the 91st cent only shows up when 9007199254740990.625 is scaled and rounded to Number.MAX_SAFE_INTEGER)", () => {
 			expect(convertCurrencyToWords(90_071_992_547_409.9)).toBe(
-				"noventa trilhões, setenta e um bilhões, novecentos e noventa e dois milhões, quinhentos e quarenta e sete mil, quatrocentos e nove reais e noventa centavos",
+				"noventa trilhões setenta e um bilhões novecentos e noventa e dois milhões quinhentos e quarenta e sete mil quatrocentos e nove reais e noventa centavos",
 			);
 		});
 	});
@@ -144,19 +144,19 @@ describe("convertCurrencyToWords", () => {
 				[1_000_000_000_000.0199, "um trilhão de reais e um centavo"],
 				[
 					123_456_789_012.345,
-					"cento e vinte e três bilhões, quatrocentos e cinquenta e seis milhões, setecentos e oitenta e nove mil e doze reais e trinta e quatro centavos",
+					"cento e vinte e três bilhões quatrocentos e cinquenta e seis milhões setecentos e oitenta e nove mil e doze reais e trinta e quatro centavos",
 				],
 				[
 					87_654_321_098.7654,
-					"oitenta e sete bilhões, seiscentos e cinquenta e quatro milhões, trezentos e vinte e um mil e noventa e oito reais e setenta e seis centavos",
+					"oitenta e sete bilhões seiscentos e cinquenta e quatro milhões trezentos e vinte e um mil e noventa e oito reais e setenta e seis centavos",
 				],
 				[
 					999_999_999_999.999,
-					"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais e noventa e nove centavos",
+					"novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove reais e noventa e nove centavos",
 				],
 				[
 					9_007_199_254_740.99,
-					"nove trilhões, sete bilhões, cento e noventa e nove milhões, duzentos e cinquenta e quatro mil, setecentos e quarenta reais e noventa e nove centavos",
+					"nove trilhões sete bilhões cento e noventa e nove milhões duzentos e cinquenta e quatro mil setecentos e quarenta reais e noventa e nove centavos",
 				],
 			];
 
@@ -204,7 +204,7 @@ describe("convertCurrencyToWords", () => {
 			expect(convertCurrencyToWords(0)).toBe("zero reais");
 			expect(convertCurrencyToWords(-5.5)).toBe("menos cinco reais e cinquenta centavos");
 			expect(convertCurrencyToWords(1523.45)).toBe(
-				"mil, quinhentos e vinte e três reais e quarenta e cinco centavos",
+				"mil quinhentos e vinte e três reais e quarenta e cinco centavos",
 			);
 		});
 	});
@@ -226,7 +226,7 @@ describe("convertCurrencyToWords", () => {
 				[11, "onze centavos"],
 				[12, "doze centavos"],
 				[13, "treze centavos"],
-				[14, "catorze centavos"],
+				[14, "quatorze centavos"],
 				[15, "quinze centavos"],
 				[16, "dezesseis centavos"],
 				[17, "dezessete centavos"],
@@ -326,7 +326,7 @@ describe("convertCurrencyToWords", () => {
 				[111, "um real e onze centavos"],
 				[112, "um real e doze centavos"],
 				[113, "um real e treze centavos"],
-				[114, "um real e catorze centavos"],
+				[114, "um real e quatorze centavos"],
 				[115, "um real e quinze centavos"],
 				[116, "um real e dezesseis centavos"],
 				[117, "um real e dezessete centavos"],
@@ -371,22 +371,22 @@ describe("convertCurrencyToWords", () => {
 			const cases: [number, string][] = [
 				[1000, "mil reais"],
 				[1000.01, "mil reais e um centavo"],
-				[1101, "mil, cento e um reais"],
-				[1101.01, "mil, cento e um reais e um centavo"],
-				[1523.45, "mil, quinhentos e vinte e três reais e quarenta e cinco centavos"],
+				[1101, "mil cento e um reais"],
+				[1101.01, "mil cento e um reais e um centavo"],
+				[1523.45, "mil quinhentos e vinte e três reais e quarenta e cinco centavos"],
 				[1_000_000, "um milhão de reais"],
 				[1_000_000.01, "um milhão de reais e um centavo"],
 				[2_000_000, "dois milhões de reais"],
 				[1_000_001, "um milhão e um reais"],
 				[
 					999_999_999_999_999,
-					"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais",
+					"novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove reais",
 				],
 				[1.999, "um real e noventa e nove centavos"],
 				[100.5, "cem reais e cinquenta centavos"],
 				[2, "dois reais"],
 				[10.5, "dez reais e cinquenta centavos"],
-				[999_999, "novecentos e noventa e nove mil, novecentos e noventa e nove reais"],
+				[999_999, "novecentos e noventa e nove mil novecentos e noventa e nove reais"],
 				[100, "cem reais"],
 				[1_000_000_000, "um bilhão de reais"],
 				[2_000_000_000, "dois bilhões de reais"],
@@ -403,7 +403,7 @@ describe("convertCurrencyToWords", () => {
 				[0.5, "cinquenta centavos"],
 				[1, "um real"],
 				[-50.25, "menos cinquenta reais e vinte e cinco centavos"],
-				[1523.45, "mil, quinhentos e vinte e três reais e quarenta e cinco centavos"],
+				[1523.45, "mil quinhentos e vinte e três reais e quarenta e cinco centavos"],
 				[1_000_000, "um milhão de reais"],
 				[2_000_000, "dois milhões de reais"],
 				[1_000_000_000, "um bilhão de reais"],
@@ -414,7 +414,7 @@ describe("convertCurrencyToWords", () => {
 				[2_000_000_000.99, "dois bilhões de reais e noventa e nove centavos"],
 				[
 					1_234_567_890.5,
-					"um bilhão, duzentos e trinta e quatro milhões, quinhentos e sessenta e sete mil, oitocentos e noventa reais e cinquenta centavos",
+					"um bilhão duzentos e trinta e quatro milhões quinhentos e sessenta e sete mil oitocentos e noventa reais e cinquenta centavos",
 				],
 				[0.001, "zero reais"],
 				[0.009, "zero reais"],
@@ -424,13 +424,13 @@ describe("convertCurrencyToWords", () => {
 				[1_000_000_000.99, "um bilhão de reais e noventa e nove centavos"],
 				[
 					999_999_999_999.99,
-					"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais e noventa e nove centavos",
+					"novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove reais e noventa e nove centavos",
 				],
 				[1_000_000_000_000.01, "um trilhão de reais e um centavo"],
 				[1_000_000_000_000.99, "um trilhão de reais e noventa e nove centavos"],
 				[
 					9_999_999_999_999.99,
-					"nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais e noventa e nove centavos",
+					"nove trilhões novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove reais e noventa e nove centavos",
 				],
 			];
 			expectAmounts(cases);

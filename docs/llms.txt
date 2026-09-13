@@ -154,8 +154,8 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 ## Other utilities
 
 - [capitalize](https://brazilian-utils.com.br/utilities.md#capitalize): Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed.
-- [convertNumberToWords](https://brazilian-utils.com.br/utilities.md#convertnumbertowords): Formats an integer as its Brazilian Portuguese cardinal number words ("por extenso"), e.g. `1235` becomes `"mil, duzentos e trinta e cinco"`.
-- [convertCurrencyToWords](https://brazilian-utils.com.br/utilities.md#convertcurrencytowords): Formats a monetary amount in Brazilian Reais as its "por extenso" textual representation, the style used to write out the amount by hand on cheques and contracts, e.g. `1523.45` becomes `"mil, quinhentos e vinte e três reais e quarenta e cinco centavos"`.
+- [convertNumberToWords](https://brazilian-utils.com.br/utilities.md#convertnumbertowords): Formats an integer as its Brazilian Portuguese cardinal number words ("por extenso"), e.g. `1235` becomes `"mil duzentos e trinta e cinco"`.
+- [convertCurrencyToWords](https://brazilian-utils.com.br/utilities.md#convertcurrencytowords): Formats a monetary amount in Brazilian Reais as its "por extenso" textual representation, the style used to write out the amount by hand on cheques and contracts, e.g. `1523.45` becomes `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`.
 - [convertLicensePlateToMercosul](https://brazilian-utils.com.br/utilities.md#convertlicenseplatetomercosul): Convert an old format Brazilian license plate (`LLLNNNN`) to the Mercosul format (`LLLNLNN`), following the official conversion table: the digit in the 5th position becomes a letter (`0` through `9` mapping to `A` through `J`).
 - [isHoliday](https://brazilian-utils.com.br/utilities.md#isholiday): Check if a specific date is a Brazilian holiday.
 - [isBusinessDay](https://brazilian-utils.com.br/utilities.md#isbusinessday): Check if a date is a Brazilian business day (dia útil).
