@@ -25,12 +25,15 @@ export type AreaCodeInfo = {
 /**
  * Retrieves the state (and its region) a Brazilian DDD (area code) belongs to.
  *
- * `stateCode` is always a single state: the one that holds all but a handful of the DDD's
+ * `stateCode` is always a single state: the one the DDD is seated in, the state of the city the
+ * code was allocated around, which is not necessarily the state holding most of its
  * municipalities. Four DDDs straddle a state border, and for those `stateCodes` lists the
  * other states too. DDD 61 is the widest of them, serving the Distrito Federal and the twelve
  * Goiás municipalities of the Entorno do Distrito Federal, so its `stateCode` is `"DF"` and
- * its `stateCodes` is `["DF", "GO"]`. The other three are 42 (`["PR", "SC"]`, for Porto
- * União), 47 (`["SC", "PR"]`, for Rio Negro) and 49 (`["SC", "PR"]`, for Barracão).
+ * its `stateCodes` is `["DF", "GO"]` even though the Distrito Federal holds only one of its
+ * thirteen municipalities, Brasília. The other three are 42 (`["PR", "SC"]`, for Porto
+ * União), 47 (`["SC", "PR"]`, for Rio Negro) and 49 (`["SC", "PR"]`, for Barracão), and there
+ * the seat does hold every municipality but the one named.
  *
  * A `areaCode` given as a number must be a non-negative integer: a sign and a decimal point
  * are not digits, so `-11` and `1.1` are rejected instead of being read as `11`.
@@ -41,12 +44,13 @@ export type AreaCodeInfo = {
  * 67 DDDs in use under the Plano Geral de Numeração.
  *
  * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
- * page below lists the codes actually allocated and links to the Anexo of Resolução Anatel
- * nº 263/2001, which gives the Código Nacional of every municipality.
+ * page below lists the codes actually allocated and links, under "POR MUNICÍPIO", to the Anexo
+ * of Resolução Anatel nº 263/2001, which gives the Código Nacional of every municipality.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
- * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
  * @see Based on: https://brasilapi.com.br/docs#tag/DDD
  *
  * @example

@@ -6,9 +6,11 @@
  * desdobrado para interdições.
  *
  * The in-force art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça
- * lists only the codes 1 to 7. The codes 8 (emancipação) and 9 (interdição) come from the Anexo
- * IV of the revoked Provimento CNJ nº 63/2017 and are kept because matrículas issued under it
- * are still in circulation.
+ * lists only the codes 1 to 7, and no CNJ primary text reachable today publishes the other two:
+ * the Anexo IV of the revoked Provimento CNJ nº 63/2017 lists the same seven. The codes 8
+ * (emancipação) and 9 (interdição) come from the `Based on:` references below: ghiorzi.org prints
+ * the nine book list and the cited Casilhero support class maps the same nine. They are kept
+ * because matrículas carrying them circulate.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
  * Código Nacional de Normas da Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento

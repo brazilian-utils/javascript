@@ -9,9 +9,11 @@ import { CERTIDAO_TYPES } from "./constants";
  * `isValidCertidao` accepts a list of them.
  *
  * The in-force art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça
- * lists only the codes 1 to 7. The codes 8 (`"emancipation"`) and 9 (`"interdiction"`) come from
- * the Anexo IV of the revoked Provimento CNJ nº 63/2017 and are kept because matrículas issued
- * under it are still in circulation.
+ * lists only the codes 1 to 7, and no CNJ primary text reachable today publishes the other two:
+ * the Anexo IV of the revoked Provimento CNJ nº 63/2017 lists the same seven. The codes 8
+ * (`"emancipation"`) and 9 (`"interdiction"`) come from the `Based on:` references below: ghiorzi.org and
+ * validation-br both print the nine book list. They are kept because matrículas carrying them
+ * circulate.
  */
 export type CertidaoType =
 	| "birth"

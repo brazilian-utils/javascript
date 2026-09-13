@@ -2,13 +2,15 @@
  * Digit to letter conversion table used to turn an old format plate's 5th character into the
  * Mercosul format's embedded letter (0=A, 1=B, ..., 9=J).
  *
- * Resolução CONTRAN nº 969/2022, art. 2º § 4º, is what requires the substitution. The table
- * itself is Anexo II of that resolution, which is not published at a stable public URL: the
- * linked DOU PDF carries no annexes and the CONTRAN resolutions index does not host the annex
- * either, so it is cited as `Based on:` rather than as an official document a reader can open.
+ * Resolução CONTRAN nº 969/2022, art. 2º § 4º, is what requires the substitution, "conforme
+ * padrão previsto no Anexo II". The table itself is that Anexo II, which calls it a "tabela
+ * equiparativa, para substituição do antepenúltimo caractere, de número para letra". Its range
+ * of letters is deliberately limited to `A` through `J`, "apenas para a conversão da PNU para o
+ * novo sistema de PIV". The annexes are published in a PDF of their own, separate from the
+ * resolution's text; both are cited below.
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
- * @see Based on: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
 export const DIGIT_TO_MERCOSUL_LETTER: Record<string, string> = {
 	"0": "A",

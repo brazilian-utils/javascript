@@ -38,7 +38,10 @@ const FORMAT_REGEX = /^\d+(?:[ -]+\d+)*$/;
  * ```
  *
  * ISO/IEC 7812-1 (issuer identification numbers) caps the PAN at 19 digits but sets no
- * minimum; the 12-digit floor here is the de-facto industry minimum (e.g. Maestro).
+ * minimum; the 12-digit floor here is the de-facto industry minimum (e.g. Maestro). The ISO
+ * catalogue page sits behind a bot filter and answers HTTP 403 to every non-browser client, so
+ * it has to be opened in a browser, where it renders the standard's paywalled abstract rather
+ * than its text.
  *
  * @see Official: https://www.iso.org/standard/70484.html
  */

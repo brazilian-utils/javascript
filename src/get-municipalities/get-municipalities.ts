@@ -21,6 +21,11 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  * looser and treats every falsy `state` as "no state given", so `getCities(null)` returns the
  * full list where `getMunicipalities(null)` returns `[]`.
  *
+ * The state code is matched exactly, case included: `getMunicipalities("sp")` returns `[]` where
+ * `getMunicipalities("SP")` returns the 645 São Paulo municipalities. `getMunicipalities` and
+ * `getCities` are the only state-taking lookups that are case-sensitive; `getStateNameByCode`,
+ * `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
+ *
  * @param {StateCode} [stateCode] - The two letter code of the Brazilian state to filter by.
  * @returns {Municipality[]} A fresh array of fresh `Municipality` objects. Empty when
  * `stateCode` is not a known state.
@@ -30,6 +35,7 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  * getMunicipalities("SP")[0]; // { code: "3500105", name: "Adamantina", stateCode: "SP" }
  * getMunicipalities().length; // every municipality of every state
  * getMunicipalities("ZZ"); // []
+ * getMunicipalities("sp"); // [] (the state code is case-sensitive here)
  * getMunicipalities(null); // [] (only an omitted state code asks for the full list)
  * ```
  *

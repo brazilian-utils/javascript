@@ -185,7 +185,7 @@ describe("isValidNfeKey", () => {
 				expected: false,
 			},
 			{
-				name: "model 67, the CT-e OS of the Ajuste SINIEF 09/07",
+				name: "model 67, the CT-e OS instituted by the cláusula primeira of the Ajuste SINIEF 36/19",
 				key: "35170458716523000119670010000000121000123458",
 				expected: true,
 			},

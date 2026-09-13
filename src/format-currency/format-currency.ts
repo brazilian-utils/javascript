@@ -57,7 +57,8 @@ const toNumber = (value: unknown, precision: number): number => {
  * symbol, a null-prototype object or a plain object (`Number({})` is `NaN`); every other
  * value goes through `Number()` the way 2.3.0 did, so `null`, `[]` and `true` still format.
  *
- * The precision is clamped to `0-20`, the range Node's `Intl.NumberFormat` accepts, and a
+ * The precision is clamped to `0-20`, the package limit, the bound Node 20 still enforces on
+ * `Intl.NumberFormat` (ES2023 raised it to 100, and newer runtimes accept more), and a
  * precision that is not a finite number falls back to 2.
  *
  * @param {string|number} value - The value to be formatted. Can be a string or a number.

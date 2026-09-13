@@ -18,6 +18,10 @@ import { LEGAL_NATURE, MASK_REGEX } from "./constants";
  * isValidLegalNature("0000"); // false
  * ```
  *
+ * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
+ * normally.
+ *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */

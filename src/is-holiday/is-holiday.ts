@@ -59,7 +59,8 @@ export type IsHolidayOptions = {
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
  * Lei 662/1949, the base national holidays law.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
- * Lei 10.607/2002, added Tiradentes and Finados.
+ * Lei 10.607/2002, added Finados (2 November) and folded in Tiradentes (21 April), which had
+ * been national since art. 3º of the Lei 1.266/1950 it revoked.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
  * Lei 6.802/1980, declared Nossa Senhora Aparecida a national holiday.
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
@@ -68,8 +69,11 @@ export type IsHolidayOptions = {
  * Lei 9.093/1995, the framework law authorizing state and municipal holidays.
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
- * pontos facultativos, the only source behind the Easter-derived entries; see the `getHolidays`
- * JSDoc for why Sexta-feira Santa is typed `national` without a law of its own.
+ * pontos facultativos, the source behind three of the four Easter-derived entries: Sexta-feira
+ * Santa, Carnaval and Corpus Christi. Páscoa is not one of them; the portaria never mentions
+ * Easter Sunday, whose date `getHolidays` derives arithmetically with the Meeus/Jones/Butcher
+ * algorithm. See the `getHolidays` JSDoc for why Sexta-feira Santa is typed `national` without a
+ * law of its own.
  */
 export const isHoliday = (options?: IsHolidayOptions): boolean => {
 	if (isNullish(options) || typeof options !== "object") {

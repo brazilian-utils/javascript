@@ -31,9 +31,13 @@ import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
  * Manual de Orientação do Contribuinte (MOC) NF-e, "chave de acesso".
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/AJ_009_07
- * Ajuste SINIEF 09/07, cláusula primeira, § 3.º, II, "b": the CT-e OS, modelo 67.
+ * Ajuste SINIEF 09/07, cláusula primeira, caput: the CT-e, modelo 57.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2019/AJ036_19
+ * Ajuste SINIEF 36/19, cláusula primeira: the CT-e OS, modelo 67.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2020/ajuste-sinief-03-20
+ * Ajuste SINIEF 03/20, cláusula primeira: the GTV-e, modelo 64.
  * @see Official: https://www.cte.fazenda.gov.br/portal/listaManuais.aspx?tipoConteudo=manuais
- * CT-e MOC 4.00, Anexo I: modelo 64 (GTV-e) and the `tpEmis` domains D19, D27 and D15.
+ * CT-e MOC 4.00, Anexo I: the `tpEmis` domains D19, D27 and D15.
  * @see Official: https://dfe-portal.svrs.rs.gov.br/BPE/Documentos
  * BP-e MOC 1.00b, Visão Geral and Anexo I: modelo 63.
  * @see Official: https://dfe-portal.svrs.rs.gov.br/NF3e/Documentos

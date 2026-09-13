@@ -81,8 +81,9 @@ const resolvePhoneKey = (trimmed: string): PixKey | null => {
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Official: https://github.com/bacen/pix-dict-api DICT (Diretório de Identificadores de
- * Contas Transacionais) OpenAPI spec, key format reference.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
+ * reference.
  * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
  */
 export const parsePixKey = (value: string): PixKey | null => {

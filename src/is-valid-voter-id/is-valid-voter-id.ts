@@ -33,6 +33,9 @@ const FORMAT_REGEX = /^[\s.]*\d{4}[\s.]*\d{4}[\s.]*(?:\d[\s.]*)?\d{2}[\s.]*\d{2}
  * 13-digit São Paulo/Minas Gerais ids are brutils parity, not published by the TSE — siga0984 uses
  * a different 9-digit rule for the sequential number.
  *
+ * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser.
+ *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py

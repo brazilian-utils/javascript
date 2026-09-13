@@ -48,6 +48,8 @@ export type Cfop = {
  * Anexo II of Convênio SINIEF s/nº 1970, the CFOP table in force.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70
  * Convênio SINIEF s/nº 1970, the consolidated text the annex belongs to.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25
+ * Ajuste SINIEF 39/25, the last amendment the annex carries (CFOP 7.667, from 01.02.26).
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2001/AJ_007_01
  * Ajuste SINIEF 07/01, the historical text that gave the CFOP its 4 digit form.
  */

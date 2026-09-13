@@ -525,7 +525,9 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  * - An all zero registration is accepted for every state whose published formula yields a
  *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS,
  *   SC, SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which reject repeated
- *   digits.
+ *   digits. AM is on that list through the second branch of its published formula only: the
+ *   page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma", gives 11 for an all zero
+ *   registration, while the "resto <= 1 ⇒ 0" branch, the one implemented here, gives 0.
  *
  * @param {StateCode} stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
  * @param {string} ie - The state registration number to validate

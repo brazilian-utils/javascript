@@ -17,12 +17,18 @@ let allCitiesCache: string[] | undefined;
  * every city. The sibling `getMunicipalities` is stricter and only reads an omitted (or
  * `undefined`) state code that way, returning `[]` for `null` and `""`.
  *
+ * The state code is matched exactly, case included: `getCities("sp")` returns `[]` where
+ * `getCities("SP")` returns the 645 São Paulo cities. `getCities` and `getMunicipalities` are
+ * the only state-taking lookups that are case-sensitive; `getStateNameByCode`,
+ * `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
+ *
  * @param {StateCode} [state] - The code of the Brazilian state to filter cities by. Optional.
  * @returns {string[]} An array of city names, sorted alphabetically. Returns an empty array if the state is not found.
  *
  * @example
  * ```typescript
  * getCities("SP")[0]; // "Adamantina"
+ * getCities("sp"); // [] (the state code is case-sensitive here)
  * getCities().length; // every city of every state
  * ```
  *

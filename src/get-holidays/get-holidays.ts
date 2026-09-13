@@ -167,7 +167,13 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * Lei 662/1949, the base national holidays law (Ano novo, Dia do trabalhador, Independência do
  * Brasil, Proclamação da República, Natal).
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
- * Lei 10.607/2002, added Tiradentes and Finados to the national holidays.
+ * Lei 10.607/2002, rewrote that art. 1º into the list in force: it added Finados (2 November)
+ * to the national holidays and folded in Tiradentes (21 April), already national since art. 3º
+ * of Lei 1.266/1950, which its own art. 3º revoked.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/L1266.htm
+ * Lei 1.266/1950, art. 3º, which first made Tiradentes a national holiday: "É feriado nacional o
+ * dia 21 de abril, consagrado à glorificação de Tiradentes". Revoked by Lei 10.607/2002 only
+ * after that law had carried 21 April into Lei 662/1949.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
  * Lei 6.802/1980, declared Nossa Senhora Aparecida (12 October) a national holiday.
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
@@ -180,14 +186,18 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * `STATE_HOLIDAYS`.
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
- * pontos facultativos, reissued every December. It is the source of the typing of the four entries
- * derived from Easter, which no federal law declares: "Paixão de Cristo (feriado nacional)"
- * (Easter minus 2, emitted as `"Sexta-feira Santa"` typed `national`), "Carnaval (ponto
+ * pontos facultativos, reissued every December. It is the source of the typing of three of the
+ * four entries derived from Easter, which no federal law declares: "Paixão de Cristo (feriado
+ * nacional)" (Easter minus 2, emitted as `"Sexta-feira Santa"` typed `national`), "Carnaval (ponto
  * facultativo)" (Easter minus 47) and "Corpus Christi (ponto facultativo)" (Easter plus 60), both
  * typed `optional`. Sexta-feira Santa has no statutory basis of its own: Lei 9.093/1995 art. 2º
  * places it among the *municipal* religious holidays, and it is typed `national` here because the
- * portaria observes it nationwide. Easter itself is emitted as `"Páscoa"` typed `religious`,
- * computed with the Meeus/Jones/Butcher algorithm by `resolveStateHolidayDate`.
+ * portaria observes it nationwide. The fourth entry, Easter Sunday itself, is emitted as
+ * `"Páscoa"` typed `religious` and has no normative basis at all: the portaria never mentions it,
+ * no federal law declares it, and its date is derived arithmetically by `resolveStateHolidayDate`
+ * with the Meeus/Jones/Butcher algorithm. It is a convenience entry, listed because callers
+ * computing a liturgical calendar expect it, not because it is a holiday anyone observes as a day
+ * off.
  * @see Official: state holiday laws are cited individually, one `@see` per holiday, in
  * `src/get-holidays/constants.ts`.
  */

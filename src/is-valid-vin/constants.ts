@@ -5,6 +5,9 @@
  * algorithm are a North-American requirement (49 CFR 565.15 / SAE J853), not something
  * Resolução CONTRAN nº 24/1998 or ABNT NBR 6066 — which define the Brazilian VIN structure —
  * mandate; many Brazilian-built VINs do not carry a matching check digit.
+ * The ISO catalogue page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser, where it renders the standard's paywalled
+ * abstract rather than its text.
  * @see Official: https://www.iso.org/standard/52200.html
  * @see Official: https://www.ecfr.gov/current/title-49/section-565.15
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/resolucoes-contran

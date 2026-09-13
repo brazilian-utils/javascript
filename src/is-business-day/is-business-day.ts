@@ -73,9 +73,9 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * isBusinessDay(new Date(2024, 6, 9), { stateCode: "SP" }); // false (Revolução Constitucionalista)
  * isBusinessDay(new Date(2024, 6, 9)); // true (state holiday ignored without stateCode)
  * isBusinessDay(new Date("not a date")); // false
+ * isBusinessDay(new Date(2024, 6, 9), { stateCode: 5 }); // false (a non-string stateCode is rejected)
  * isBusinessDay(new Date(2100, 0, 4)); // false (a Monday, but 2100 is outside the supported range)
  * ```
- * isBusinessDay(new Date(2024, 6, 9), { stateCode: 5 }); // false (a non-string stateCode is rejected)
  *
  * The underlying holidays are the ones `getHolidays` computes; see its JSDoc (and
  * `src/get-holidays/constants.ts` for state holidays) for the full set of laws behind them.
@@ -83,7 +83,8 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
  * Lei 662/1949, the base national holidays law.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
- * Lei 10.607/2002, added Tiradentes and Finados.
+ * Lei 10.607/2002, added Finados (2 November) and folded in Tiradentes (21 April), which had
+ * been national since art. 3º of the Lei 1.266/1950 it revoked.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
  * Lei 6.802/1980, declared Nossa Senhora Aparecida a national holiday.
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
@@ -92,21 +93,24 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * Lei 9.093/1995, the framework law authorizing state and municipal holidays.
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
- * pontos facultativos: the source of Sexta-feira Santa being observed nationally and of Carnaval
- * and Corpus Christi being ponto facultativo, which is what `includeOptional` switches on.
+ * pontos facultativos: the source of three of the four Easter-derived entries, namely
+ * Sexta-feira Santa being observed nationally and Carnaval and Corpus Christi being ponto
+ * facultativo, which is what `includeOptional` switches on. The fourth, Páscoa, has no entry in
+ * the portaria; `getHolidays` derives Easter Sunday arithmetically with the Meeus/Jones/Butcher
+ * algorithm, and it never affects this function because Easter is always a Sunday.
  */
 export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolean => {
 	if (!(value instanceof Date) || Number.isNaN(value.getTime())) return false;
+
+	const stateCode = options?.stateCode;
+
+	if (stateCode !== undefined && typeof stateCode !== "string") return false;
 
 	const year = value.getFullYear();
 
 	if (!isSupportedHolidayYear(year)) return false;
 
 	if (WEEKEND_DAYS.has(value.getDay())) return false;
-
-	const stateCode = options?.stateCode;
-
-	if (stateCode !== undefined && typeof stateCode !== "string") return false;
 
 	const includeOptional = options?.includeOptional ?? true;
 

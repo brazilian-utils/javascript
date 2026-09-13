@@ -38,11 +38,18 @@ const isValidChecksum = (cpf: string): boolean => {
  * isValidCpf("12345678900"); // false (invalid checksum)
  * ```
  *
- * The check digit rule (`REGRA_VALIDA_CPF`) is specified, with a worked example
- * (`280012389-38`), in the Receita Federal's Manual e-Financeira, Anexo II.
+ * The check digit rule (`REGRA_VALIDA_CPF`) is specified, with the worked example
+ * `280012389-38`, in the Receita Federal's Manual de Preenchimento da e-Financeira, Anexo II —
+ * Leiautes Gerais, approved by the Ato Declaratório Executivo Cofis nº 10, de 25 de maio de
+ * 2026. The manual states the rule in its mirror form, weights 9 down to 1 "a partir da
+ * unidade" with "o resto 10 é considerado 0", which is algebraically the same digit as the
+ * weights 10 down to 2 with `11 - resto` implemented above. The manual's own file used to be
+ * served from `sped.rfb.gov.br`, a host that no longer answers at all, so the approving act is
+ * cited below in its place; its Receita Federal permalink redirects into the norms viewer, which
+ * has to be opened in a browser.
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
- * @see Official: http://sped.rfb.gov.br/arquivo/show/8231
+ * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=151372
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const isValidCpf = (cpf: string): boolean => {

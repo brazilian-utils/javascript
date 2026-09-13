@@ -9,7 +9,8 @@ export type { State } from "../_internals/constants/states";
  * Federação) matches the given value.
  *
  * The IBGE code is the same 2-digit UF code found in the first field of every DF-e access key
- * (chave de acesso) issued for NF-e, NFC-e, CT-e and MDF-e documents.
+ * (chave de acesso) issued for any of the models `isValidNfeKey` covers: NF-e (55), NFC-e
+ * (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
  *
  * A `code` given as a number must be a non-negative integer: a sign and a decimal point are
  * not digits, so `-35` and `3.5` are rejected instead of being read as `35`.

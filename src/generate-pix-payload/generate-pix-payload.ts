@@ -155,9 +155,10 @@ const resolveFormattedAmount = (
  * accepts the others too. The Pix Saque BR Code, which announces the ISPB of the "facilitador de
  * serviço de saque" in sub-object 26-03 (`fss`), is not generated here, only parsed.
  *
- * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
- * composto" of Pix Automático (Pix recorrente) does, are out of scope: the location is always
- * written in the "Merchant Account Information" template.
+ * Unreserved Templates (IDs 80 to 99) are never written: the location always goes in the
+ * "Merchant Account Information" template, so the "QR Code composto" of Pix Automático (Pix
+ * recorrente), which puts its recurrence location in one of them, is out of scope here.
+ * `parsePixPayload` does read a composto, but only as an ordinary dynamic payload.
  *
  * The merchant name, the merchant city and the description are folded to printable ASCII
  * (accents are dropped) and truncated to the lengths the BR Code allows, the description to
@@ -203,7 +204,8 @@ const resolveFormattedAmount = (
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
  * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
- * @see Official: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
 export const generatePixPayload = (params: GeneratePixPayloadParams): string | null => {
 	if (isNullish(params) || typeof params !== "object") return null;

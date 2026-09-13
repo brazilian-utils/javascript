@@ -26,6 +26,10 @@ const lookUp = (code: string): LegalNature | null => {
  * @returns {LegalNature|null} The matching legal nature entry, or null when the code is unknown
  * or invalid.
  *
+ * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
+ * normally.
+ *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  *

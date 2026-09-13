@@ -17,9 +17,10 @@ export type ValidModel = (typeof VALID_MODELS)[number];
  * The `tpEmis` (forma de emissão) codes each MOC assigns to its own document, so a code that is
  * meaningful for one document does not make a key of another valid.
  *
- * NF-e and NFC-e (MOC 7.0 Anexo I, field B22): 1 normal, 2 contingência FS-IA, 3 contingência
- * SCAN, 4 contingência EPEC, 5 contingência FS-DA, 6 contingência SVC-AN, 7 contingência SVC-RS
- * and 9 contingência off-line da NFC-e.
+ * NF-e and NFC-e (MOC 7.0 Anexo I, field B22): 1 normal, 2 contingência FS-IA, 3 Regime Especial
+ * NFF, 4 contingência EPEC, 5 contingência FS-DA, 6 contingência SVC-AN, 7 contingência SVC-RS
+ * and 9 contingência off-line da NFC-e. Code 3 used to be "contingência SCAN"; NT 2021.002
+ * redefined it as the Regime Especial da Nota Fiscal Fácil, leaving the value set unchanged.
  *
  * CT-e (CT-e MOC 4.00 Anexo I, field D19): 1 normal, 3 Regime Especial NFF, 4 EPEC pela SVC,
  * 5 contingência FS-DA, 7 autorização pela SVC-RS and 8 autorização pela SVC-SP. CT-e OS
@@ -27,7 +28,7 @@ export type ValidModel = (typeof VALID_MODELS)[number];
  * 8. Rule G011 of the same annex, "(7=SVC-RS e 8=SVC-SP)", is what makes 8 a real code here,
  * even though the NF-e MOC never assigns it.
  *
- * MDF-e (MDF-e MOC 3.00 Anexo I, domain D7): 1 normal, 2 contingência off-line and 3 Regime
+ * MDF-e (MDF-e MOC 3.00b Anexo I, domain D7): 1 normal, 2 contingência off-line and 3 Regime
  * Especial NFF. NFCom, BP-e and NF3e (their own Anexo I, domain D7): 1 normal and
  * 2 contingência off-line.
  */
@@ -79,7 +80,13 @@ export const FORBIDDEN_CODES: readonly string[] = [
 	"01234567",
 ];
 
-/** The models rule B03-10 is written for, the only ones whose `cNF` it constrains. */
+/**
+ * The models rule B03-10 is written for, the only ones whose `cNF` it constrains.
+ *
+ * The scope is stated inconsistently by the sources: the change log of NT 2019.001 v1.40 says
+ * modelo 65 was taken out of the rule, while MOC 7.0 Anexo I still prints its applicability as
+ * `55/65`. The MOC being the consolidated text in force, both models are kept here.
+ */
 export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
 
 /**
@@ -98,5 +105,9 @@ export const NUMBER_START = 25;
 /** End (exclusive) of the document number (nNF) inside the 44 digit key. */
 export const NUMBER_END = 34;
 
-/** A document number of all zeros is not a valid nNF. */
+/**
+ * A document number of all zeros is not a valid nNF: the leiaute types `nNF` as `TNF`, whose
+ * pattern is `[1-9]{1}[0-9]{0,8}` in `tiposBasico_v4.00.xsd`, and the Anexo I of every other
+ * model repeats the same regex for its own number field.
+ */
 export const ABSENT_NUMBER = "000000000";

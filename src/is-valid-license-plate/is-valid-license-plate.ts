@@ -23,7 +23,16 @@ import { getFormatLicensePlate } from "../get-format-license-plate/get-format-li
  * isValidLicensePlate("invalid"); // false
  * ```
  *
+ * The resolution's own text does not spell the sequence out: art. 2º § 2º delegates the
+ * technical specification to Anexo I, whose item 1.2 reads "O padrão de estampagem é composto de
+ * 7 (sete) caracteres alfanuméricos, em alto relevo, na sequência LLLNLNN" and whose item 1.2.1
+ * reads `L` as a letter and `N` as a numeral. Art. 2º § 1º puts a single rear plate of that same
+ * standard on motorcycles and similar vehicles, and art. 2º § 3º describes the old `AAA-1111`
+ * PNU it coexists with. The annexes are published in a PDF of their own, cited below alongside
+ * the resolution's text.
+ *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
 export const isValidLicensePlate = (value: string): boolean =>
 	getFormatLicensePlate(value) !== null;

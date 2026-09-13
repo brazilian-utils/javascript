@@ -35,7 +35,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidPhone](https://brazilian-utils.com.br/utilities.md#isvalidphone): Check if phone number (mobile or landline) is valid.
 - [isValidMobilePhone](https://brazilian-utils.com.br/utilities.md#isvalidmobilephone): Check if mobile phone number is valid.
 - [isValidLandlinePhone](https://brazilian-utils.com.br/utilities.md#isvalidlandlinephone): Check if landline phone number is valid.
-- [isValidServicePhone](https://brazilian-utils.com.br/utilities.md#isvalidservicephone): Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`; `112` and `911` are accepted too, as mobile-only aliases of `190` that Anatel lists alongside the other 3-digit codes).
+- [isValidServicePhone](https://brazilian-utils.com.br/utilities.md#isvalidservicephone): Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`), whose consolidated table is the Anexo of Ato Anatel nº 43.151/2004.
 - [isValidLicensePlate](https://brazilian-utils.com.br/utilities.md#isvalidlicenseplate): Check if license plate is valid.
 - [isValidRenavam](https://brazilian-utils.com.br/utilities.md#isvalidrenavam): Check if RENAVAM (Registro Nacional de Veículos Automotores) is valid.
 - [isValidPis](https://brazilian-utils.com.br/utilities.md#isvalidpis): Check if PIS is valid.
@@ -149,7 +149,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [getMunicipalityByCode](https://brazilian-utils.com.br/utilities.md#getmunicipalitybycode): Look up a Brazilian municipality by its 7-digit IBGE code.
 - [getCbo](https://brazilian-utils.com.br/utilities.md#getcbo): Look a CBO (Classificação Brasileira de Ocupações) code up and get its official occupation title.
 - [getCnae](https://brazilian-utils.com.br/utilities.md#getcnae): Look a CNAE (Classificação Nacional de Atividades Econômicas) subclass code up and get its formatted code and official description.
-- [getCfop](https://brazilian-utils.com.br/utilities.md#getcfop): Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the consolidated Anexo II of Convênio SINIEF s/nº 1970 words it.
+- [getCfop](https://brazilian-utils.com.br/utilities.md#getcfop): Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the consolidated Anexo II of Convênio SINIEF s/nº 1970 words it, in the text in force, last amended by Ajuste SINIEF 39/25.
 
 ## Other utilities
 

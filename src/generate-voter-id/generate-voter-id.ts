@@ -24,6 +24,9 @@ import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
  * the two-step módulo 11 structure; the weights themselves are not published by the TSE and follow
  * the community reference cited as `Based on:`.
  *
+ * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser.
+ *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
  */

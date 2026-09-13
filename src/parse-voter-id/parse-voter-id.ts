@@ -23,6 +23,9 @@ import { EXTENDED_LENGTH, LENGTH } from "./constants";
  * 14-or-more-digit input whose 10th and 11th digits are "01"/"02" is read as a 13-digit São Paulo
  * or Minas Gerais id and capped at 13 digits, discarding anything past that.
  *
+ * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser.
+ *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */

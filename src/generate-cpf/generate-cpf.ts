@@ -19,7 +19,7 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @param {StateCode} state - Optional. The Brazilian state code to generate a CPF for.
+ * @param {StateCode} [state] - The Brazilian state code to generate a CPF for.
  * @returns {string} A valid 11-digit CPF string without formatting.
  *
  * @example
@@ -29,12 +29,17 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  * ```
  *
  * The região fiscal digit in the 9th position comes from the Receita Federal's folheto
- * "Cadastros: CPF e CNPJ"; the check digit rule (`REGRA_VALIDA_CPF`) is specified, with a worked
- * example (`280012389-38`), in the Receita Federal's Manual e-Financeira, Anexo II.
+ * "Cadastros: CPF e CNPJ"; the check digit rule (`REGRA_VALIDA_CPF`) is specified, with the
+ * worked example `280012389-38`, in the Receita Federal's Manual de Preenchimento da
+ * e-Financeira, Anexo II — Leiautes Gerais, approved by the Ato Declaratório Executivo Cofis
+ * nº 10, de 25 de maio de 2026. The manual's own file used to be served from `sped.rfb.gov.br`,
+ * a host that no longer answers at all, so the approving act is cited below in its place; its
+ * Receita Federal permalink redirects into the norms viewer, which has to be opened in a
+ * browser.
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/educacao-fiscal/educacao_fiscal/folhetos-orientativos/cadastros-dig.pdf
- * @see Official: http://sped.rfb.gov.br/arquivo/show/8231
+ * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=151372
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const generateCpf = (state?: StateCode): string => {

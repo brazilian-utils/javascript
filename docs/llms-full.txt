@@ -201,19 +201,19 @@ You can check a list of utilities [by clicking here](utilities.md).
 
 ### Bundle size
 
-The package is tree-shakeable: importing one util from the root pulls in only that util's code, not the rest of the library. `isValidCpf`, for example, adds roughly 0.7 KB minified to your bundle. A bundler that supports tree-shaking (webpack, Rollup, esbuild, Vite, etc.) drops every other util.
+The package is tree-shakeable: importing one util from the root pulls in only that util's code, not the rest of the library. `isValidCpf`, for example, adds roughly 1.2 KB minified (0.6 KB gzipped) to your bundle. A bundler that supports tree-shaking (webpack, Rollup, esbuild, Vite, etc.) drops every other util.
 
 A handful of utils are the exception: each embeds an official dataset, so it weighs far more than every other util combined. These are their single-import sizes, minified and gzipped:
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
-| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 155.9 KB | 50.0 KB |
-| `getCities` | 5571 IBGE municipality names | 153.6 KB | 49.4 KB |
-| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 113.4 KB | 24.0 KB |
-| `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 118.4 KB | 30.2 KB |
-| `isValidCnae` · `getCnae` | CNAE 2.3 subclasses | 93.6 KB | 21.1 KB |
-| `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.3 KB | 6.5 KB |
-| `getBanks` · `getBankByCode` | Banco Central STR participants (COMPE + ISPB) | 37.9 KB | 9.3 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 156.2 KB | 50.2 KB |
+| `getCities` | 5571 IBGE municipality names | 154.0 KB | 49.7 KB |
+| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 113.8 KB | 24.3 KB |
+| `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 118.8 KB | 30.4 KB |
+| `isValidCnae` · `getCnae` | CNAE 2.3 subclasses | 94.0 KB | 21.3 KB |
+| `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.7 KB | 6.8 KB |
+| `getBanks` · `getBankByCode` | Banco Central STR participants (COMPE + ISPB) | 38.3 KB | 9.6 KB |
 
 Importing any of them from the root, even alongside a single small util, pulls that whole dataset into your main bundle, because this package ships as a single ESM module: a dynamic `import()` of the root (`await import('@brazilian-utils/brazilian-utils')`) still resolves to that same one file, so it can't be split out on its own. A bundler doing code-splitting needs a separate module to split *into*.
 
@@ -235,13 +235,13 @@ getMunicipalityByCode('3550308');
 
 Every util is available this way, as `@brazilian-utils/brazilian-utils/<util-name>` (kebab-case, matching the function name: `isValidCpf` → `is-valid-cpf`), for the same lazy-loading/code-splitting reason.
 
-Pick one style per util in a given app: a bundler treats the root import and the subpath import as two unrelated modules, so importing `getCities` from both the root *and* `/get-cities` in the same app bundles the 153.6 KB city table twice, once in each module's own output.
+Pick one style per util in a given app: a bundler treats the root import and the subpath import as two unrelated modules, so importing `getCities` from both the root *and* `/get-cities` in the same app bundles the 154.0 KB city table twice, once in each module's own output.
 
 ## Utilities
 
 Here you will find all the utilities available for use.
 
-> **Input handling:** no synchronous public function throws on `null`/`undefined` or a wrong-type value; the two network helpers, `getAddressInfoByCep` and `getCepInfoByAddress`, reject with their typed errors (see their sections). `isValid*` predicates return `false`; `isHoliday` returns `false`; `getHolidays` returns `[]`; `generateProcessoJuridico` returns `null`; `getMunicipality` returns `null` for a malformed/unmatched lookup. Every other `format*`/`parse*` function (including `capitalize`) returns an empty value of its return type: `""` for strings, `0` for `parseCurrency`. `formatCurrency` returns `""` for a non-finite number and for a value that cannot be coerced to one (a symbol, a plain object, a null-prototype object); `null`, arrays and booleans go through `Number()` as in 2.3.0. The one exception to the promise above: an object created with `Object.create(null)` has no `toString`, so the `format*`/`parse*` helpers that read their input as text still throw a `TypeError` for it, exactly as they did in 2.3.0.
+> **Input handling:** no synchronous public function throws on `null`/`undefined` or a wrong-type value; the two network helpers, `getAddressInfoByCep` and `getCepInfoByAddress`, reject with their typed errors (see their sections). `isValid*` predicates return `false`; `isHoliday` returns `false`; `getHolidays` returns `[]`; `generateProcessoJuridico` returns `null`; `getMunicipality` returns `null` for a malformed/unmatched lookup. Every other `format*`/`parse*` function returns an empty value of its return type: every `format*` function, `capitalize`, and the string-returning `parse*` functions (`parseBoleto`, `parseCep`, `parseCnh`, `parseCnpj`, `parseCpf`, `parseLegalNature`, `parseLicensePlate`, `parsePassport`, `parsePhone`, `parsePis`, `parseProcessoJuridico`, `parseVoterId`) return `""`; `parseCurrency` returns `0`; the object/tuple parsers — `parseCertidao`, `parseIban`, `parseNfeKey`, `parsePixKey`, `parsePixPayload` — return `null`. `formatCurrency` returns `""` for a non-finite number and for a value that cannot be coerced to one (a symbol, a plain object, a null-prototype object); `null`, arrays and booleans go through `Number()` as in 2.3.0. The one exception to the promise above: an object created with `Object.create(null)` has no `toString`, so the `format*`/`parse*` helpers that read their input as text still throw a `TypeError` for it, exactly as they did in 2.3.0.
 
 ### isValidCpf
 
@@ -256,7 +256,7 @@ isValidCpf('111 444 777 35'); // true (whitespace mask)
 
 ### formatCpf
 
-Format CPF. `options.obfuscate` (part of `FormatCpfOptions`) hides the first 3 digits and the 2 check digits (`***.456.789-**`), the gov.br / Receita Federal display convention, applied after `pad`.
+Format CPF. `options.obfuscate` (part of `FormatCpfOptions`) hides the first 3 digits and the 2 check digits (`***.456.789-**`), the gov.br / Receita Federal display convention, applied after `pad`. It is read for truthiness, the way `pad` is, so any truthy value obfuscates.
 
 ```javascript
 import { formatCpf } from '@brazilian-utils/brazilian-utils';
@@ -300,7 +300,7 @@ isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (lowercase alphanumeric)
 
 ### formatCnpj
 
-Format CNPJ. `options.obfuscate` (part of `FormatCnpjOptions`) hides the first 2 digits and the 2 check digits (`**.345.678/0001-**`), the gov.br / Receita Federal display convention. It applies to both versions and comes after `pad`.
+Format CNPJ. `options.obfuscate` (part of `FormatCnpjOptions`) hides the first 2 digits and the 2 check digits (`**.345.678/0001-**`), the gov.br / Receita Federal display convention. It applies to both versions and comes after `pad`, and is read for truthiness, the way `pad` is, so any truthy value obfuscates.
 
 ```javascript
 import { formatCnpj } from '@brazilian-utils/brazilian-utils';
@@ -340,7 +340,7 @@ isValidCep('12345'); // false (invalid length)
 
 ### generateCnpj
 
-Generate a valid random CNPJ.
+Generate a valid random CNPJ. Uses `Math.random()` internally, so it is not cryptographically secure.
 
 ```javascript
 import { generateCnpj } from '@brazilian-utils/brazilian-utils'
@@ -396,7 +396,7 @@ generateBoleto({ type: 'arrecadacao' }); // "84610000000524610029110200546033900
 
 ### getBoletoInfo
 
-Extract information from a boleto (amount, expiration date, bank code). Accepts an optional `{ referenceDate }` (typed as `GetBoletoInfoOptions`) to resolve the "fator de vencimento" cycle as of a specific date instead of now (the factor's date-base cycle reset on 22/02/2025 per FEBRABAN). Neither FEBRABAN nor the Banco Central publishes a way of telling an old cycle factor from a new cycle one, so every factor resolves to either of two dates 9000 days apart and `referenceDate` picks between them through the library's own safety windows: the same slip can resolve to the other candidate as time passes, so pass `referenceDate` explicitly whenever the answer has to stay stable. For a boleto de arrecadação, the result, typed as `BoletoInfo`, still carries both keys but empty, `bankCode: ''` and `expirationDate: null`, since the slip has neither a bank code nor a fator de vencimento, and adds `type: "arrecadacao"`, `segment`, `value` and `hasEffectiveValue`.
+Extract information from a boleto (amount, expiration date, bank code). Accepts an optional `{ referenceDate }` (typed as `GetBoletoInfoOptions`) to resolve the "fator de vencimento" cycle as of a specific date instead of now (the factor's date-base cycle reset on 22/02/2025 per FEBRABAN). Neither FEBRABAN nor the Banco Central publishes a way of telling an old cycle factor from a new cycle one, so every factor resolves to either of two dates 9000 days apart and `referenceDate` picks between them through the library's own safety windows: the same slip can resolve to the other candidate as time passes, so pass `referenceDate` explicitly whenever the answer has to stay stable. The cycle search never goes below the first cycle, so a `referenceDate` older than the scheme itself still resolves a factor to the oldest date that factor can denote rather than to one before the 07/10/1997 base date. For a boleto de arrecadação, the result, typed as `BoletoInfo`, still carries both keys but empty, `bankCode: ''` and `expirationDate: null`, since the slip has neither a bank code nor a fator de vencimento, and adds `type: "arrecadacao"`, `segment`, `value` and `hasEffectiveValue`.
 
 ```javascript
 import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
@@ -448,7 +448,7 @@ parsePixKey('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
 
 ### isValidPixPayload
 
-Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, and a matching CRC-16. The "Point of Initiation Method" object (`01`) is advisory: the Manual do BR Code marks it optional and only assigns a meaning to the value `"12"` ("só pode ser utilizado uma vez"), so it may be absent from either shape and only a value outside `{"11", "12"}` makes the payload invalid. When a payload built around a key carries an amount (`54`), that amount must be greater than zero, unless the payload is a Pix Saque BR Code, i.e. unless it carries the ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`) as §2.6 of the Pix manual prescribes; rejecting `"0"`/`"0.00"` without `fss` is a deliberate restriction of this library, not a rule of the manual. The key itself is not checked against the DICT formats, use `isValidPixKey` for that. Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code composto" of Pix Automático (Pix recorrente) does, are out of scope and reported as invalid.
+Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, and a matching CRC-16. The "Point of Initiation Method" object (`01`) is advisory: the Manual do BR Code marks it optional and only assigns a meaning to the value `"12"` ("só pode ser utilizado uma vez"), so it may be absent from either shape and only a value outside `{"11", "12"}` makes the payload invalid. When a payload built around a key carries an amount (`54`), that amount must be greater than zero, unless the payload is a Pix Saque BR Code, i.e. unless it carries the ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`) as §2.6 of the Pix manual prescribes; rejecting `"0"`/`"0.00"` without `fss` is a deliberate restriction of this library, not a rule of the manual. A `fss` written next to a PSP location makes the payload invalid: §2.7 of the Manual de Padrões para Iniciação do Pix maps the dynamic QR Code to exactly two sub-objects, `00` (GUI) and `25` (URL), and `fss` belongs to the static template of §2.6. The key itself is not checked against the DICT formats, use `isValidPixKey` for that. Unreserved Templates (IDs 80 to 99) are ignored: the "QR Code composto" of Pix Automático (Pix recorrente) writes its recurrence location in one of them, and when such a payload also carries a payment location in 26-25, as the composite example of the Pix manual does, it is accepted and read as an ordinary dynamic payload with the recurrence location dropped. Only a payload with no Pix template at all in IDs 26 to 51 is reported as invalid.
 
 ```javascript
 import { isValidPixPayload } from '@brazilian-utils/brazilian-utils';
@@ -463,7 +463,7 @@ isValidPixPayload('00020126580014br.gov.bcb.pix...'); // false (broken CRC)
 
 ### parsePixPayload
 
-Parses a Pix BR Code payload into its fields. The payload is validated by `isValidPixPayload` first, so a malformed structure, a broken CRC or a missing mandatory object returns `null` instead of a partial result. A static payload comes back with `key`, a dynamic one with `url`. The result is typed as `PixPayload`; `pointOfInitiation` is always present and typed as `PixPointOfInitiation`, `"dynamic"` when the payload carries a PSP location or when the "Point of Initiation Method" object (`01`) is `"12"`, `"static"` otherwise. The merchant account information must carry exactly one of a key or a `url` (checked with the same PSP location rule as `generatePixPayload`); `01` itself is advisory, so it may be absent from either shape and only a value outside `{"11", "12"}` returns `null`. When a payload built around a key carries an amount, that amount must be greater than zero, unless the payload is a Pix Saque BR Code: §2.6 of the Pix manual puts the ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`), which comes back as `withdrawalFacilitator`, and `54` set to `"0"` or `"0.00"` is accepted alongside it. Rejecting a zero amount without `fss` is a deliberate restriction of this library, not a rule of the manual. When the payload carries a PSP location the amount and the `txid` are ignored, as the manual mandates. Payloads whose location lives in an Unreserved Template (IDs 80 to 99, Pix Automático) are out of scope and return `null`.
+Parses a Pix BR Code payload into its fields. The payload is validated by `isValidPixPayload` first, so a malformed structure, a broken CRC or a missing mandatory object returns `null` instead of a partial result. A static payload comes back with `key`, a dynamic one with `url`. The result is typed as `PixPayload`; `pointOfInitiation` is always present and typed as `PixPointOfInitiation`, `"dynamic"` when the payload carries a PSP location or when the "Point of Initiation Method" object (`01`) is `"12"`, `"static"` otherwise. The merchant account information must carry exactly one of a key or a `url` (checked with the same PSP location rule as `generatePixPayload`); `01` itself is advisory, so it may be absent from either shape and only a value outside `{"11", "12"}` returns `null`. When a payload built around a key carries an amount, that amount must be greater than zero, unless the payload is a Pix Saque BR Code: §2.6 of the Pix manual puts the ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`), which comes back as `withdrawalFacilitator`, and `54` set to `"0"` or `"0.00"` is accepted alongside it. Rejecting a zero amount without `fss` is a deliberate restriction of this library, not a rule of the manual. A `fss` written next to a PSP location returns `null`: §2.7 of the Manual de Padrões para Iniciação do Pix maps the dynamic QR Code to exactly two sub-objects, `00` (GUI) and `25` (URL), and `fss` belongs to the static template of §2.6. When the payload carries a PSP location the amount and the `txid` are ignored, as the manual mandates. Unreserved Templates (IDs 80 to 99) are ignored: a "QR Code composto" of Pix Automático that also carries a payment location in 26-25 is parsed as an ordinary dynamic payload and its recurrence location is dropped, so a consumer that has to tell the two apart cannot rely on this parser. Only a payload with no Pix template at all in IDs 26 to 51 returns `null`.
 
 ```javascript
 import { parsePixPayload } from '@brazilian-utils/brazilian-utils';
@@ -509,9 +509,9 @@ generatePixPayload({ merchantName: 'Fulano', merchantCity: 'Brasília' }); // nu
 
 ### isValidNfeKey
 
-Check if a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) is valid. It covers every document whose access key is the same 44 digit string: NF-e (modelo 55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67, the Conhecimento de Transporte Eletrônico para Outros Serviços of the [Ajuste SINIEF 09/07](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/AJ_009_07)), GTV-e (64, the CT-e Guia de Transporte de Valores), BP-e (63), NF3e (66) and NFCom (62). The CF-e-SAT (59) is out: its 44 position "chave de consulta" is composed differently. Accepts whitespace between digit groups (the common display mask) and the `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes found in the `Id` attribute of the document's XML.
+Check if a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) is valid. It covers every document whose access key is the same 44 digit string: NF-e (modelo 55), NFC-e (65), CT-e (57, the Conhecimento de Transporte Eletrônico instituted by the cláusula primeira of the [Ajuste SINIEF 09/07](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/AJ_009_07)), MDF-e (58), CT-e OS (67, the Conhecimento de Transporte Eletrônico para Outros Serviços instituted by the cláusula primeira of the [Ajuste SINIEF 36/19](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2019/AJ036_19)), GTV-e (64, the CT-e Guia de Transporte de Valores instituted by the cláusula primeira of the [Ajuste SINIEF 03/20](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2020/ajuste-sinief-03-20)), BP-e (63), NF3e (66) and NFCom (62). The CF-e-SAT (59) is out: its 44 position "chave de consulta" is composed differently. Accepts whitespace between digit groups (the common display mask) and the `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes found in the `Id` attribute of the document's XML.
 
-The emission type (`tpEmis`) is checked against the codes the MOC of that model assigns, so the accepted set changes with the model: 1 to 7 and 9 for NF-e and NFC-e, `{1, 3, 4, 5, 7, 8}` for the CT-e, `{1, 5, 7, 8}` for the CT-e OS, `{1, 2, 7, 8}` for the GTV-e, `{1, 2, 3}` for the MDF-e and `{1, 2}` for the BP-e, the NF3e and the NFCom. Code 8, the authorização pela SVC-SP, is assigned by the [CT-e MOC 4.00](https://www.cte.fazenda.gov.br/portal/listaManuais.aspx?tipoConteudo=manuais) only, never by the NF-e one; the domains of the [BP-e](https://dfe-portal.svrs.rs.gov.br/BPE/Documentos), the [NF3e](https://dfe-portal.svrs.rs.gov.br/NF3e/Documentos) and the [NFCom](https://dfe-portal.svrs.rs.gov.br/NFCOM/Documentos) come from their own manuals. For NF-e and NFC-e the numeric code is also checked against rule B03-10 of the NF-e MOC, which forbids the twenty repeated and sequential `cNF` values it lists and a `cNF` equal to the document number. Rejecting a document number of all zeros, on the other hand, is a choice of this library: no MOC rule was found forbidding it.
+The emission type (`tpEmis`) is checked against the codes the MOC of that model assigns, so the accepted set changes with the model: 1 to 7 and 9 for NF-e and NFC-e, `{1, 3, 4, 5, 7, 8}` for the CT-e, `{1, 5, 7, 8}` for the CT-e OS, `{1, 2, 7, 8}` for the GTV-e, `{1, 2, 3}` for the MDF-e and `{1, 2}` for the BP-e, the NF3e and the NFCom. Code 8, the authorização pela SVC-SP, is assigned by the [CT-e MOC 4.00](https://www.cte.fazenda.gov.br/portal/listaManuais.aspx?tipoConteudo=manuais) only, never by the NF-e one; the domains of the [BP-e](https://dfe-portal.svrs.rs.gov.br/BPE/Documentos), the [NF3e](https://dfe-portal.svrs.rs.gov.br/NF3e/Documentos) and the [NFCom](https://dfe-portal.svrs.rs.gov.br/NFCOM/Documentos) come from their own manuals. For NF-e and NFC-e the numeric code is also checked against rule B03-10 of the NF-e MOC, which forbids the twenty repeated and sequential `cNF` values it lists and a `cNF` equal to the document number. A document number of all zeros is turned down for every model, following the leiaute rather than a choice of this library: `tiposBasico_v4.00.xsd` of the [NF-e schema package](https://dfe-portal.svrs.rs.gov.br/NFE/Documentos) types `nNF` as `TNF`, whose pattern is `[1-9]{1}[0-9]{0,8}`, and the Anexo I of every other model repeats the same regex for its own number field.
 
 ```javascript
 import { isValidNfeKey } from '@brazilian-utils/brazilian-utils';
@@ -527,7 +527,7 @@ isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 000
 
 ### formatNfeKey
 
-Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 digits separated by spaces, the form every auxiliary document prints it in: the DANFE of the NF-e and the NFC-e, the DACTE of the CT-e, the CT-e OS and the GTV-e, the DAMDFE of the MDF-e, the DABPE of the BP-e, the DANF3E of the NF3e and the DANFE-COM of the NFCom.
+Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 digits separated by spaces, the form every auxiliary document prints it in: the DANFE of the NF-e and the NFC-e, the DACTE of the CT-e, the CT-e OS and the GTV-e, the DAMDFE of the MDF-e, the DABPE of the BP-e, the DANF3E of the NF3e and the DANFE-COM of the NFCom. A value that is not a string is only read when it is a non-negative safe integer, so anything with no usable digit representation (a negative or fractional number, an object, an object created with `Object.create(null)`) gives `''`.
 
 ```javascript
 import { formatNfeKey } from '@brazilian-utils/brazilian-utils';
@@ -635,7 +635,7 @@ isValidLandlinePhone('1130000000'); // true
 
 ### isValidServicePhone
 
-Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`; `112` and `911` are accepted too, as mobile-only aliases of `190` that Anatel lists alongside the other 3-digit codes). Only the structure is checked, the number does not have to be assigned to anyone. Anatel publishes no allocation for the abbreviated numbers, so only the conventional `300X` and `400X` roots are recognised: other "Número Único" carrier prefixes in market use, such as `4020` and `4062`, are out of scope and are rejected.
+Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`), whose consolidated table is the Anexo of [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151). `112` and `911` are rejected: Anatel designates neither, and `911` is not even inside the `1N₂N₁` range art. 13 of [Resolução nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749) destines to public utility services, so the way handsets route them is a GSM convention rather than a numbering designation. Only the structure is checked, the number does not have to be assigned to anyone. Anatel withdrew the 4-digit codes instead of allocating them (art. 43 I of [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86) and art. 2º II of the Ato above both ordered them released), so only the conventional `300X` and `400X` roots are recognised: other "Número Único" carrier prefixes in market use, such as `4020` and `4062`, are out of scope and are rejected.
 
 ```javascript
 import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
@@ -650,7 +650,7 @@ isValidServicePhone('11987654321'); // false (geographic number)
 
 Get the state (and its region) a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração. Accepts a string or a non-negative integer number, stripping any non-digit characters before matching. Exports the `AreaCodeInfo` type.
 
-`stateCode` is always a single state: the one that holds all but a handful of the DDD's municipalities. Four DDDs straddle a state border, and for those `stateCodes` lists the other states too. DDD 61 is the widest of them, serving the Distrito Federal and the twelve Goiás municipalities of the Entorno do Distrito Federal (Águas Lindas de Goiás, Cabeceiras, Cidade Ocidental, Cristalina, Formosa, Luziânia, Novo Gama, Padre Bernardo, Planaltina, Santo Antônio do Descoberto, Valparaíso de Goiás and Vila Boa). The other three are 42, shared by Paraná and Porto União (SC), 47, shared by Santa Catarina and Rio Negro (PR), and 49, shared by Santa Catarina and Barracão (PR).
+`stateCode` is always a single state: the one the DDD is seated in, the state of the city the code was allocated around, which is not necessarily the state holding most of its municipalities. Four DDDs straddle a state border, and for those `stateCodes` lists the other states too. DDD 61 is the widest of them, serving the Distrito Federal and the twelve Goiás municipalities of the Entorno do Distrito Federal (Águas Lindas de Goiás, Cabeceiras, Cidade Ocidental, Cristalina, Formosa, Luziânia, Novo Gama, Padre Bernardo, Planaltina, Santo Antônio do Descoberto, Valparaíso de Goiás and Vila Boa), so its `stateCode` is `'DF'` even though the Distrito Federal holds only one of its thirteen municipalities, Brasília. The other three are 42, shared by Paraná and Porto União (SC), 47, shared by Santa Catarina and Rio Negro (PR), and 49, shared by Santa Catarina and Barracão (PR), and there the seat does hold every municipality but the one named.
 
 ```javascript
 import { getAreaCodeInfo } from '@brazilian-utils/brazilian-utils';
@@ -770,7 +770,7 @@ parseCep('92500-000'); // 92500000
 
 ### getAddressInfoByCep
 
-Fetch address information for a given CEP using multiple providers. Defaults to `['viacep', 'brasilapi']`. The `'widenet'` provider is deprecated (its endpoint no longer responds) and excluded from the default list, but it can still be requested explicitly via `options.providers` (typed as `CepProvider[]`). The resolved address is typed as `AddressInfo`. A transient network failure is retried twice per provider, with a 250 ms linear backoff (250 ms, then 500 ms), so a provider that keeps failing is tried up to 3 times and adds about 750 ms before the next provider is reached; an HTTP error status or a non-retryable failure is not retried.
+Fetch address information for a given CEP using multiple providers. Defaults to `['viacep', 'brasilapi']`. The `'widenet'` provider is deprecated (its endpoint no longer responds) and excluded from the default list, but it can still be requested explicitly via `options.providers` (typed as `CepProvider[]`). The resolved address is typed as `AddressInfo`. A transient network failure is retried twice per provider, with a 250 ms linear backoff (250 ms, then 500 ms), so a provider that keeps failing is tried up to 3 times and adds about 750 ms before its own failure lands; an HTTP error status or a non-retryable failure is not retried. The providers are started together and raced with `Promise.any`, not queried one after the other, so those retries delay nothing for the other providers, only the moment an all-failed rejection can surface. An `options.providers` that names no known provider rejects with `GetAddressInfoByCepValidationError` ("Nenhum provedor válido especificado"): an empty array, an array of unknown names, and a value that is not an array at all, `null` included. With `providers: ['brasilapi']`, a CEP BrasilAPI does not know rejects with `GetAddressInfoByCepNotFoundError`, since BrasilAPI signals a miss with HTTP 404; any other error status is still a `GetAddressInfoByCepServiceError`.
 
 ```javascript
 import { getAddressInfoByCep } from '@brazilian-utils/brazilian-utils';
@@ -823,7 +823,7 @@ parseProcessoJuridico('0002080-25.2012.5.15.0049'); // 00020802520125150049
 
 ### isValidIe
 
-Check if inscrição estadual (state registration) is valid. The state code is case-insensitive. Notable per-state rules: GO accepts prefixes `10`, `11` and `15`; PA accepts `15` and `75`-`79`; MS accepts `28` and `50`; SP has a produtor rural pattern `P0MMMSSSSD000`; TO uses 11-digit type codes (`01`, `02`, `03`, `99`). TO also accepts a 9-digit form, applying the same modulus 11 rule to the first eight digits; the SINTEGRA page documents only the 11-digit one, so that shape is 2.3.0 behaviour kept for compatibility rather than a published rule. An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike `isValidCpf` and `isValidCnpj`, which reject repeated digits.
+Check if inscrição estadual (state registration) is valid. The state code is case-insensitive. Notable per-state rules: GO accepts prefixes `10`, `11` and `15`; PA accepts `15` and `75`-`79`; MS accepts `28` and `50`; SP has a produtor rural pattern `P0MMMSSSSD000`; TO uses 11-digit type codes (`01`, `02`, `03`, `99`). TO also accepts a 9-digit form, applying the same modulus 11 rule to the first eight digits; the SINTEGRA page documents only the 11-digit one, so that shape is 2.3.0 behaviour kept for compatibility rather than a published rule. An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike `isValidCpf` and `isValidCnpj`, which reject repeated digits. AM is on that list through the second branch of its published formula only: the page's first branch, `Se Soma < 11 Então Dígito = 11 - Soma`, gives 11 for an all-zero registration, while the `resto <= 1 ⇒ 0` branch, the one implemented here, gives 0.
 
 ```javascript
 import { isValidIe } from '@brazilian-utils/brazilian-utils';
@@ -840,11 +840,11 @@ Banks validated by their published check digit algorithm:
 
 | Bank | Code | Agency | Account | Notes |
 | --- | --- | --- | --- | --- |
-| Banco do Brasil | `001` | 4-5 digits | 8-10 digits | mod11 with weights 9..2; `digit` may be `"X"` |
+| Banco do Brasil | `001` | 4-5 digits | 8-10 digits | mod11 with weights 2..9 cycling from the right; `digit` may be `"X"` |
 | Santander | `033` | 4 digits | 8 digits | weights `9,7,3,1,0,0,9,7,1,3,1,9,7,3` over agency + `"00"` + account, tens discarded |
 | Banrisul | `041` | 4 digits | 9 digits | weights `3,2,4,7,6,5,4,3,2`; remainder 0 gives `0` and remainder 1 gives `6`; `account` is tipo (2 digits) + conta (7 digits) |
 | Caixa Econômica Federal | `104` | 4 digits | 11 digits | mod11 over agency + account; `account` is operação (3 digits) + conta (8 digits) |
-| Bradesco | `237` | 4 digits | 7 digits | mod11 with weights 2..7; remainder 0 gives `0` and remainder 1 gives `"P"` |
+| Bradesco | `237` | 4 digits | 7 digits | mod11 with weights 2..7 cycling from the right; remainder 0 gives `0` and remainder 1 gives `"P"` |
 | Nubank | `260` | 4 digits | 5-13 digits | Verhoeff check digit over the account, leading zeros dropped |
 | Itaú Unibanco | `341` | 4 digits | 5 digits | mod10 over agency + account |
 | HSBC / Kirton Bank | `399` | 4 digits | 6 digits | weights `8,9,2,3,4,5,6,7,8,9` over agency + account; remainder 10 gives `0` |
@@ -1071,7 +1071,7 @@ capitalize('  josé   maria  '); // José Maria (every run of whitespace, tabs a
 
 ### formatCurrency
 
-Formats an integer or float to a string in the BRL pattern. A `number` is formatted as-is (sign and decimals preserved). A `string` input is read by the same rule as `parseCurrency`, except that a value written without any separator stays in whole units: the last `,` or `.` followed by 1 to 2 digits (or up to `precision` digits, when that is larger) is the decimal separator, every other `,` or `.` is a thousands separator, and a `-` written before the first digit is preserved. So `'1.234,56'` formats as `1.234,56`, `'-10.5'` as `-10,50` and `'1234'` as `1.234,00`. `precision` is clamped to `0..20` (the range `Intl.NumberFormat` accepts), defaults to 2, and falls back to 2 when it is not a finite number. A value that is not a finite number (`NaN`, `Infinity`, `-Infinity`) formats as an empty string, and so does a value that cannot be coerced to a number (a symbol, a plain object, a null-prototype object); `null`, arrays and booleans go through `Number()` as in 2.3.0. Options are typed as `FormatCurrencyOptions`.
+Formats an integer or float to a string in the BRL pattern. A `number` is formatted as-is (sign and decimals preserved). A `string` input is read by the same rule as `parseCurrency`, except that a value written without any separator stays in whole units: the last `,` or `.` followed by 1 to 2 digits (or up to `precision` digits, when that is larger) is the decimal separator, every other `,` or `.` is a thousands separator, and a `-` written before the first digit is preserved. So `'1.234,56'` formats as `1.234,56`, `'-10.5'` as `-10,50` and `'1234'` as `1.234,00`. `precision` is clamped to `0..20` (the package limit, the bound Node 20 still enforces on `Intl.NumberFormat`), defaults to 2, and falls back to 2 when it is not a finite number. A value that is not a finite number (`NaN`, `Infinity`, `-Infinity`) formats as an empty string, and so does a value that cannot be coerced to a number (a symbol, a plain object, a null-prototype object); `null`, arrays and booleans go through `Number()` as in 2.3.0. Options are typed as `FormatCurrencyOptions`.
 
 ```javascript
 import { formatCurrency } from '@brazilian-utils/brazilian-utils';
@@ -1178,7 +1178,7 @@ getStates();
 
 ### getStateByIbgeCode
 
-Get the Brazilian state whose 2-digit IBGE code ("cUF", the Código da Unidade da Federação) matches the given value. This is the same 2-digit UF code found in the first field of every DF-e access key (chave de acesso) issued for NF-e, NFC-e, CT-e and MDF-e documents. Accepts a string or a non-negative integer number, stripping any non-digit characters before matching. Exports the `State` type.
+Get the Brazilian state whose 2-digit IBGE code ("cUF", the Código da Unidade da Federação) matches the given value. This is the same 2-digit UF code found in the first field of every DF-e access key (chave de acesso) issued for any of the models `isValidNfeKey` covers: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62). Accepts a string or a non-negative integer number, stripping any non-digit characters before matching. Exports the `State` type.
 
 ```javascript
 import { getStateByIbgeCode } from '@brazilian-utils/brazilian-utils';
@@ -1236,7 +1236,7 @@ getTimezoneByState('ZZ'); // null
 
 ### getCities
 
-Get Brazilian cities. Returns all cities if no state is provided, or cities from a specific state. Each call returns a fresh array, so mutating the result never affects subsequent calls. An unknown state code (or a non-`StateCode` value) returns an empty array instead of throwing, except for a falsy one: `getCities(null)` and `getCities('')` are read as "no state given" and return every city, where the stricter `getMunicipalities` returns `[]` for them.
+Get Brazilian cities. Returns all cities if no state is provided, or cities from a specific state. Each call returns a fresh array, so mutating the result never affects subsequent calls. An unknown state code (or a non-`StateCode` value) returns an empty array instead of throwing, except for a falsy one: `getCities(null)` and `getCities('')` are read as "no state given" and return every city, where the stricter `getMunicipalities` returns `[]` for them. The state code is matched exactly, case included: `getCities('sp')` returns `[]` where `getCities('SP')` returns the 645 São Paulo cities. `getCities` and `getMunicipalities` are the only state-taking lookups that are case-sensitive; `getStateNameByCode`, `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -1274,7 +1274,7 @@ getCities('SP');
 // ]
 ```
 
-`getCities` embeds all 5571 IBGE municipality names (~153.6 KB minified, ~49.4 KB gzipped) and is one of the few heavy exceptions in this otherwise tree-shakeable package. See [Bundle size](getting-started.md#bundle-size) for how to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities` instead of the root import.
+`getCities` embeds all 5571 IBGE municipality names (~154.0 KB minified, ~49.7 KB gzipped) and is one of the few heavy exceptions in this otherwise tree-shakeable package. See [Bundle size](getting-started.md#bundle-size) for how to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities` instead of the root import.
 
 ### getHolidays
 
@@ -1282,7 +1282,7 @@ Get Brazilian holidays for a given year. Returns national holidays and optionall
 
 Only one state holiday per UF is a feriado civil under [Lei nº 9.093/1995](https://www.planalto.gov.br/ccivil_03/leis/l9093.htm), art. 1º, II, which authorises "a data magna do Estado fixada em lei estadual" in the singular; the other entries rest on ordinary state laws and are reported because they are observed in practice. Notable per-state rules:
 
-- **SC** — [Lei SC nº 18.531/2022](http://leis.alesc.sc.gov.br/html/2022/18531_2022_lei.html) moves both state holidays, "Dia do Estado de Santa Catarina" (Aug 11) and "Dia de Santa Catarina de Alexandria" (Nov 25), to the following Sunday whenever they fall Monday to Friday, so Monday Aug 11 2025 is a business day in SC and the holiday lands on Sunday Aug 17. The transfer starts in 2005, the year [Lei SC nº 13.408/2005](http://leis.alesc.sc.gov.br/html/2005/13408_2005_lei.html) first introduced it (published and in force on Jul 15 2005); up to 2004 both holidays stay on Aug 11 and Nov 25 whatever weekday they fall on.
+- **SC** — [Lei SC nº 18.531/2022](http://leis.alesc.sc.gov.br/html/2022/18531_2022_lei.html) moves both state holidays, "Dia do Estado de Santa Catarina" (Aug 11) and "Dia de Santa Catarina de Alexandria" (Nov 25), to the following Sunday whenever they fall Monday to Friday, so Monday Aug 11 2025 is a business day in SC and the holiday lands on Sunday Aug 17. The two dates did not start transferring together. Aug 11 transfers from 2005 on, the year [Lei SC nº 13.408/2005](http://leis.alesc.sc.gov.br/html/2005/13408_2005_lei.html) extended the clause to it (published and in force on Jul 15 2005), and stays on Aug 11 before that. Nov 25 transfers from 1999 on, the year [Lei SC nº 11.213/1999](http://leis.alesc.sc.gov.br/html/1999/11213_1999_lei.html) first introduced the clause (published and in force on Nov 12 1999, thirteen days before that year's Nov 25), with a one-year gap: art. 3º of [Lei SC nº 12.906/2004](http://leis.alesc.sc.gov.br/html/2004/12906_2004_lei.html) revoked that law without restating the clause, so Nov 25 2004 alone stays on the statutory date until Lei SC nº 13.408/2005 reinstated the transfer. So Nov 25 1999 (a Thursday) lands on Sunday Nov 28, Nov 25 2002 (a Monday) on Sunday Dec 1, Nov 25 2004 (a Thursday) stays put, and Nov 25 2005 (a Friday) lands on Sunday Nov 27.
 - **DF** — [Lei distrital nº 72/1989](https://www.sinj.df.gov.br/sinj/Norma/18459/Lei_72_27_12_1989.html), art. 1º parágrafo único, declares Corpus Christi a feriado. With `stateCode: 'DF'` the single Corpus Christi entry comes back typed `"state"` instead of `"optional"`; it is replaced, not duplicated.
 - **GO** — [Lei GO nº 20.756/2020](https://legisla.casacivil.go.gov.br/pesquisa_legislacao/100979/lei-20756), art. 269, II, lists three feriados estaduais: Jul 26 (Fundação da Cidade de Goiás), Oct 24 (Lançamento da Pedra Fundamental de Goiânia) and Oct 28 (Dia do Servidor Público).
 - **AL** — Sep 16 is a feriado estadual from 2024 ([Lei AL nº 9.358/2024](https://sapl.al.al.leg.br/norma/3117)) and only a ponto facultativo (`"optional"`) before that.
@@ -1312,7 +1312,7 @@ getHolidays({ year: 2024, stateCode: 'SP' });
 
 ### isValidPassport
 
-Check if a Brazilian passport number is valid (2 letters followed by 6 digits). Accepts both `string` and `number` input; the input is case-insensitive and any non-alphanumeric characters (spaces, dots, hyphens) are ignored.
+Check if a Brazilian passport number is valid (2 letters followed by 6 digits). Accepts both `string` and `number` input; the input is case-insensitive and any non-alphanumeric characters (spaces, dots, hyphens) are ignored. A number is accepted for symmetry with `formatPassport`/`parsePassport` but is never valid: the decimal form of a number never starts with the two letters a passport number needs.
 
 ```javascript
 import { isValidPassport } from '@brazilian-utils/brazilian-utils';
@@ -1410,7 +1410,7 @@ parseCnh('026503064-61'); // '02650306461'
 
 ### getCepInfoByAddress
 
-Fetch CEPs from an address using ViaCEP. Throws `GetCepInfoByAddressValidationError` when the UF, city or street is missing/invalid, `GetCepInfoByAddressNotFoundError` when no address matches the query, and `GetCepInfoByAddressError` when ViaCEP itself answers with an HTTP error status. A request that cannot be performed at all (a transport failure) rejects with the underlying `fetch` error instead.
+Fetch CEPs from an address using ViaCEP. Throws `GetCepInfoByAddressValidationError` when the UF, city or street is missing/invalid — including when the argument is not an object at all (omitted, `null`, a string) and when `federalUnit` is not a string, neither of which leaks a raw `TypeError` — `GetCepInfoByAddressNotFoundError` when no address matches the query, and `GetCepInfoByAddressError` when ViaCEP itself answers with an HTTP error status. A request that cannot be performed at all (a transport failure) rejects with the underlying `fetch` error instead.
 
 ```javascript
 import { getCepInfoByAddress } from '@brazilian-utils/brazilian-utils';
@@ -1546,6 +1546,8 @@ generateLicensePlate(); // 'ABC1D23' (Mercosul, the default)
 generateLicensePlate('LLLNNNN'); // 'ABC1234'
 ```
 
+A `format` string outside the two supported literals is not rejected: it is used verbatim, character by character, with `L` producing a letter and every other position a digit. So `generateLicensePlate('LLLNNLN')` returns a plate in the withdrawn motorcycle sequence, which `isValidLicensePlate` rejects; `generateLicensePlate('bogus')` returns five digits; and `generateLicensePlate('')` returns an empty string. Only a non-string falls back to the Mercosul default. This is the 2.3.0 behaviour, kept for the JavaScript callers the TypeScript type cannot reach.
+
 ### getFormatLicensePlate
 
 Detect the normalized format of a license plate.
@@ -1586,7 +1588,7 @@ convertLicensePlateToMercosul('ABC1D23'); // '' (already Mercosul)
 
 ### generatePis
 
-Generate a valid random PIS.
+Generate a valid random PIS. Uses `Math.random()` internally, so it is not cryptographically secure.
 
 ```javascript
 import { generatePis } from '@brazilian-utils/brazilian-utils';
@@ -1642,7 +1644,7 @@ const lookUp = (options: GetMunicipalityOptions) => getMunicipality(options);
 
 ### getMunicipalities
 
-Get Brazilian municipalities published by the IBGE. Returns all municipalities if no state is provided, or municipalities from a specific state. Each municipality is returned as `{ code, name, stateCode }`, where `code` is the 7-digit IBGE municipality code. Results are sorted by name with `localeCompare` in the "pt-BR" locale. Each call returns a fresh array of fresh objects, so mutating the result never affects subsequent calls. An unknown state code returns an empty array instead of throwing. Only an omitted (or `undefined`) `stateCode` asks for the full list: `getMunicipalities(null)` and `getMunicipalities('')` return `[]`, where the looser `getCities(null)` and `getCities('')` return every city.
+Get Brazilian municipalities published by the IBGE. Returns all municipalities if no state is provided, or municipalities from a specific state. Each municipality is returned as `{ code, name, stateCode }`, where `code` is the 7-digit IBGE municipality code. Results are sorted by name with `localeCompare` in the "pt-BR" locale. Each call returns a fresh array of fresh objects, so mutating the result never affects subsequent calls. An unknown state code returns an empty array instead of throwing. Only an omitted (or `undefined`) `stateCode` asks for the full list: `getMunicipalities(null)` and `getMunicipalities('')` return `[]`, where the looser `getCities(null)` and `getCities('')` return every city. The state code is matched exactly, case included: `getMunicipalities('sp')` returns `[]` where `getMunicipalities('SP')` returns the 645 São Paulo municipalities. `getMunicipalities` and `getCities` are the only state-taking lookups that are case-sensitive; `getStateNameByCode`, `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
 
 ```javascript
 import { getMunicipalities } from '@brazilian-utils/brazilian-utils';
@@ -1705,7 +1707,7 @@ isHoliday(); // false
 
 ### isBusinessDay
 
-Check if a date is a Brazilian business day (dia útil). Returns `false` for Saturdays, Sundays, and Brazilian holidays returned by `getHolidays` for `value`'s local calendar day (year/month/day as read locally), the same convention used by `isHoliday`. `options.includeOptional` (part of `BusinessDayOptions`, the option type every business day utility shares) defaults to `true`, so optional-type holidays (`Holiday.type === "optional"`, i.e. Carnaval and Corpus Christi) also count as non-business days; pass `false` to only treat statutory holidays this way. `options.stateCode` also considers that state's holidays; an unknown/invalid `stateCode` is ignored, falling back to national holidays only. A `value` that is not a valid `Date` returns `false`. Only years from 1900 through 2099 are supported, the range `getHolidays` computes; a date outside it returns `false`.
+Check if a date is a Brazilian business day (dia útil). Returns `false` for Saturdays, Sundays, and Brazilian holidays returned by `getHolidays` for `value`'s local calendar day (year/month/day as read locally), the same convention used by `isHoliday`. `options.includeOptional` (part of `BusinessDayOptions`, the option type every business day utility shares) defaults to `true`, so optional-type holidays (`Holiday.type === "optional"`, i.e. Carnaval and Corpus Christi) also count as non-business days; pass `false` to only treat statutory holidays this way. `options.stateCode` also considers that state's holidays; a string that is not a known state code is ignored, falling back to national holidays only, while a `stateCode` that is present and is not a string at all (a number, `null`, an object) is rejected and makes the call return `false` even for an ordinary weekday, the same split `isHoliday` makes and the value `addBusinessDays`, `subBusinessDays` and `differenceInBusinessDays` reject with `null`. A `value` that is not a valid `Date` returns `false`. Only years from 1900 through 2099 are supported, the range `getHolidays` computes; a date outside it returns `false`.
 
 ```javascript
 import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
@@ -1835,7 +1837,7 @@ parseVoterId('1234 5678 8 01 91'); // '1234567880191' (13-digit SP/MG voter id)
 
 ### isValidCns
 
-Check if a CNS (Cartão Nacional de Saúde) number is valid, the unique SUS (Sistema Único de Saúde) user identifier. Definitive cards (starting with 1 or 2) are validated with the same mod 11 weighting used for PIS numbers over an embedded 11 digit base, adjusting the base by +2 when the raw check digit computes to 10. Provisional cards (starting with 7, 8 or 9) are validated instead by a single weighted sum (weights 15 down to 1) that must be a multiple of 11. The value has to be written as the 15 digits, optionally split into the printed groups of 3-4-4-4 by whitespace or the usual mask characters; letters among the digits are rejected instead of being read past.
+Check if a CNS (Cartão Nacional de Saúde) number is valid, the unique SUS (Sistema Único de Saúde) user identifier. Definitive cards (starting with 1 or 2) are validated over an embedded 11 digit PIS/PASEP/NIS derived base weighted 15 down to 5; when the raw digit computes to 10, DATASUS raises the weighted sum by 2, recomputes the digit and marks the card with the suffix `001` instead of `000`. Provisional cards (starting with 7, 8 or 9) are validated instead by a single weighted sum (weights 15 down to 1) that must be a multiple of 11. The value has to be written as the 15 digits, optionally split into the printed groups of 3-4-4-4 by whitespace or the usual mask characters, a run of them between two groups included; letters among the digits are rejected instead of being read past.
 
 The two routines come from the [ANVISA CNS validation page](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/), which sits behind a bot filter and answers HTTP 403 to non-browser clients. The [e-SUS APS page](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html) documents the same algorithm and is reachable without a browser, but applies the provisional routine to numbers starting with 5, 7, 8 or 9; this implementation follows ANVISA and rejects a 5-prefixed number even when its weighted sum checks out.
 
@@ -1880,7 +1882,7 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] 
 
 ### parseCertidao
 
-Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid, which includes a book code that is not one of the nine books. [Art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) lists the codes 1 to 7; the codes 8 (emancipação) and 9 (interdição) come from Anexo IV of the revoked Provimento CNJ nº 63/2017, as listed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm), and are kept because matrículas issued under it are still in circulation. Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can hold.
+Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid, which includes a book code that is not one of the nine books. [Art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) lists the codes 1 to 7; no CNJ primary text reachable today publishes the other two, the Anexo IV of the revoked Provimento CNJ nº 63/2017 included, which lists the same seven. The codes 8 (emancipação) and 9 (interdição) come from the references the check digit rule rests on: [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) both print the nine book list. They are kept because matrículas carrying them circulate. Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can hold.
 
 ```javascript
 import { parseCertidao } from '@brazilian-utils/brazilian-utils';
@@ -1931,7 +1933,7 @@ formatCertidao('1552010100020112000012087', { pad: true }); // 000000 01 55 2010
 
 ### isValidCei
 
-Check if a CEI (Cadastro Específico do INSS) number is valid. The CEI identifies an employer with no CNPJ, such as a construction work or a rural producer: 12 digits printed as `00.000.00000/00`, the last one a check digit calculated over the 11 base digits with the weights 7, 4, 1, 8, 5, 2, 1, 6, 3, 7 and 4. Accepts the usual mask characters and whitespace between/around groups. The Receita Federal does not publish this check digit rule, so it follows the reference implementations of [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php) and [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs), cross-checked against the [Cadastro Nacional de Obras (CNO) open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno) of the Receita Federal.
+Check if a CEI (Cadastro Específico do INSS) number is valid. The CEI identifies an employer with no CNPJ, such as a construction work or a rural producer: 12 digits printed as `00.000.00000/00`, the last one a check digit calculated over the 11 base digits with the weights 7, 4, 1, 8, 5, 2, 1, 6, 3, 7 and 4. Accepts the usual mask characters and whitespace between/around groups, a run of them between two groups included. The Receita Federal does not publish this check digit rule, so it follows the reference implementations of [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php) and [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs), cross-checked against the [Cadastro Nacional de Obras (CNO) open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno) of the Receita Federal.
 
 ```javascript
 import { isValidCei } from '@brazilian-utils/brazilian-utils';
@@ -1983,7 +1985,7 @@ formatCno('979', { pad: true }); // 00.000.00009/79
 
 ### isValidCaepf
 
-Check if a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number is valid. The CAEPF replaced the CEI for individuals who hire employees: 14 digits printed as `000.000.000/000-00`, formed by the 9 digit CPF base of the holder, a 3 digit sequence for the holder's several registrations and 2 check digits. Both check digits use the modulus 11 of the CNPJ, and the resulting pair is then shifted by 12, wrapping around 100. The Receita Federal does not publish the layout or the check digit rule: both are described by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and implemented the same way by [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
+Check if a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number is valid. The CAEPF replaced the CEI for individuals who hire employees: 14 digits printed as `000.000.000/000-00`, formed by the 9 digit CPF base of the holder, a 3 digit sequence for the holder's several registrations and 2 check digits. Both check digits are the CNPJ's modulus 11 in the formulation of the cited reference: the weights cycle from 9 down to 2 from the right and the check digit is the remainder itself, with a remainder of 10 read as 0 — the same digit the CNPJ's 2-to-9 weights with `11 - remainder` produce. The resulting pair is then shifted by 12, wrapping around 100. A base whose 12 digits are all the same is rejected before the check digits are computed, the way `isValidCei` and `isValidCno` reject a repeated CEI/CNO number, so the otherwise well-formed `00000000000012` is invalid. The Receita Federal does not publish the layout or the check digit rule: both are described by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and implemented the same way by [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
 
 ```javascript
 import { isValidCaepf } from '@brazilian-utils/brazilian-utils';
@@ -1992,7 +1994,8 @@ isValidCaepf('293.118.610/001-84'); // true
 isValidCaepf('41142260000101'); // true
 isValidCaepf(29311861000184); // true
 isValidCaepf('29311861000185'); // false (invalid check digits)
-isValidCaepf('00000000000000'); // false (repeated digits)
+isValidCaepf('00000000000000'); // false (invalid check digits)
+isValidCaepf('00000000000012'); // false (repeated base digits)
 ```
 
 ### formatCaepf
@@ -2139,7 +2142,7 @@ formatNcm(-84713012); // '' (not a non-negative safe integer)
 
 ### isValidCfop
 
-Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table. The table is the [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), the text in force (current wording given by Ajuste SINIEF 03/24, last amended by Ajuste SINIEF 39/25), not the frozen 2001 text of Ajuste SINIEF 07/01. Only operable codes count: the group and subgroup headings of the official nomenclature, the codes ending in `00` and `50` (1000, 1100, 1150, 5350, ...), are section titles rather than codes a document can carry, so they are rejected.
+Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table. The table is the [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), the text in force (current wording given by Ajuste SINIEF 03/24, last amended by [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25)), not the frozen 2001 text of Ajuste SINIEF 07/01. Only operable codes count: the group and subgroup headings of the official nomenclature, the codes ending in `00` and `50` (1000, 1100, 1150, 5350, ...), are section titles rather than codes a document can carry, so they are rejected.
 
 A string is only read as a code when it is written in one of the documented forms (the 4 digits, or the `N.NNN` form the annex prints, with a single separator between the groups and optional surrounding whitespace), and a number only when it is a non-negative safe integer.
 
@@ -2157,7 +2160,7 @@ isValidCfop(-5102); // false (not a non-negative safe integer)
 
 ### getCfop
 
-Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24) words it. The group and subgroup headings of the official nomenclature, the codes ending in `00` and `50`, are not in the table and give `null`. Same input rules as `isValidCfop`.
+Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24) words it, in the text in force, last amended by [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25). The group and subgroup headings of the official nomenclature, the codes ending in `00` and `50`, are not in the table and give `null`. Same input rules as `isValidCfop`.
 
 ```javascript
 import { getCfop } from '@brazilian-utils/brazilian-utils';
@@ -2182,9 +2185,9 @@ Check if a CST (Código de Situação Tributária) code is valid for a given tax
 
 `options.tax` (part of `IsValidCstOptions`) is optional: omit it to accept a code that exists in any one of the four tables above.
 
-The ICMS Tabela B is the one in force: the [consolidated Anexo I of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), whose current wording came from [Ajuste SINIEF 39/23](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2023/ajuste-sinief-39-23) (effective 01.12.23) and which [Ajuste SINIEF 20/24](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2024/AJ020_24) amended by revoking items 12, 13, 52, 72 and 74 (effective 09.07.24). `02`, `15`, `53` and `61` are its monofasia de combustíveis codes.
+The ICMS Tabela B is the one in force: the [consolidated Anexo I of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), whose current wording came from [Ajuste SINIEF 39/23](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2023/ajuste-sinief-39-23) (effective 01.12.23) and which [Ajuste SINIEF 20/24](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2024/AJ020_24) amended by striking items 12, 13, 52, 72 and 74 (effects from 09.07.24) before they ever took effect: 39/23 had added them "sem efeitos", so those codes were never in force. `02`, `15`, `53` and `61` are its monofasia de combustíveis codes.
 
-A string is only read as a code when it is written in one of the documented forms (the 2 or 3 digits, with a single separator between them and optional surrounding whitespace), and a number only when it is a non-negative safe integer.
+A string is only read as a code when it is written in one of the documented forms (the 2 digits of a Tabela B code, or the 3 digits of the ICMS form with an optional single separator after the origin digit, plus optional surrounding whitespace), and a number only when it is a non-negative safe integer. The origin digit is the only boundary a printed CST has, so `'0 10'` and `'1-10'` are read while `'0-0'`, `'11-0'` and `'00-'` are not.
 
 ```javascript
 import { isValidCst } from '@brazilian-utils/brazilian-utils';
