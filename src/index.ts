@@ -61,6 +61,7 @@ export {
 	type GenerateProcessoJuridicoOptions,
 	generateProcessoJuridico,
 } from "./generate-processo-juridico/generate-processo-juridico";
+export { generateRenavam } from "./generate-renavam/generate-renavam";
 export { generateVoterId } from "./generate-voter-id/generate-voter-id";
 export {
 	type AddressInfo,

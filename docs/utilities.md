@@ -480,6 +480,16 @@ isValidRenavam('00000000000'); // false (repeated digits)
 isValidRenavam('ab00639884962'); // false (letters are rejected)
 ```
 
+## generateRenavam
+
+Generate a valid random RENAVAM: the 11 digit form, ten base digits plus the check digit. A base whose digits are all the same is drawn again, since `isValidRenavam` rejects those. Uses `Math.random()` internally, so it is not cryptographically secure.
+
+```javascript
+import { generateRenavam } from '@brazilian-utils/brazilian-utils';
+
+generateRenavam(); // '12345678900'
+```
+
 ## isValidPis
 
 Check if PIS is valid. Accepts the usual mask characters (`.`, `-`, `/`, `(`, `)`, `,`, `*`) and whitespace.

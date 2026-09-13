@@ -133,6 +133,7 @@ const PUBLIC = [
 	"generatePis",
 	"generatePixPayload",
 	"generateProcessoJuridico",
+	"generateRenavam",
 	"generateVoterId",
 	"getAddressInfoByCep",
 	"getAreaCodeInfo",

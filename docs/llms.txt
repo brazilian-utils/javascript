@@ -114,6 +114,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [generateCnpj](https://brazilian-utils.com.br/utilities.md#generatecnpj): Generate a valid random CNPJ.
 - [generateBoleto](https://brazilian-utils.com.br/utilities.md#generateboleto): Generate a valid random boleto.
 - [generatePixPayload](https://brazilian-utils.com.br/utilities.md#generatepixpayload): Generates the payload of a Pix BR Code.
+- [generateRenavam](https://brazilian-utils.com.br/utilities.md#generaterenavam): Generate a valid random RENAVAM: the 11 digit form, ten base digits plus the check digit.
 - [generatePassport](https://brazilian-utils.com.br/utilities.md#generatepassport): Generate a random valid Brazilian passport number.
 - [generateCep](https://brazilian-utils.com.br/utilities.md#generatecep): Generate a random CEP.
 - [generateCnh](https://brazilian-utils.com.br/utilities.md#generatecnh): Generate a valid random CNH.

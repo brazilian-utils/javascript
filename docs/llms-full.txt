@@ -44,6 +44,7 @@
   - [getAreaCodesByState](#getareacodesbystate)
   - [isValidLicensePlate](#isvalidlicenseplate)
   - [isValidRenavam](#isvalidrenavam)
+  - [generateRenavam](#generaterenavam)
   - [isValidPis](#isvalidpis)
   - [formatPis](#formatpis)
   - [parsePis](#parsepis)
@@ -718,6 +719,16 @@ isValidRenavam('0063988.4962'); // true (dots and hyphens are ignored)
 isValidRenavam('12345678901'); // false (invalid checksum)
 isValidRenavam('00000000000'); // false (repeated digits)
 isValidRenavam('ab00639884962'); // false (letters are rejected)
+```
+
+### generateRenavam
+
+Generate a valid random RENAVAM: the 11 digit form, ten base digits plus the check digit. A base whose digits are all the same is drawn again, since `isValidRenavam` rejects those. Uses `Math.random()` internally, so it is not cryptographically secure.
+
+```javascript
+import { generateRenavam } from '@brazilian-utils/brazilian-utils';
+
+generateRenavam(); // '12345678900'
 ```
 
 ### isValidPis
