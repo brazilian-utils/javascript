@@ -17,7 +17,12 @@ export const CRO_REGEX = /^(?<number>\d{3,6})(?<uf>[A-Z]{2})$/;
 
 export const CRP_REGEX = /^(?<region>\d{2})(?<number>\d{4,6})$/;
 
-export const CRC_REGEX = /^(?<uf>[A-Z]{2})(?<number>\d{6})(?<category>[OPT])(?<checkDigit>\d)$/;
+/**
+ * UF, six digits, the tipo de registro (`O` Originário or `P` Provisório), the check digit and,
+ * for a Registro Transferido or Secundário, the `T`/`S` suffix plus the UF of the destination CRC.
+ */
+export const CRC_REGEX =
+	/^(?<uf>[A-Z]{2})(?<number>\d{6})(?<category>[OP])(?<checkDigit>\d)(?:(?<transfer>[TS])(?<transferUf>[A-Z]{2}))?$/;
 
 /** Lowest regional code of the CFP system, CRP-01. */
 export const CRP_MIN_REGION = 1;

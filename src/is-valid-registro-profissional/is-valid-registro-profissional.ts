@@ -52,20 +52,29 @@ const isKnownCrpRegion = (value: string): boolean => {
  *   system, CRP-01 to CRP-24. It is not a literal UF (some regions cover more than one state),
  *   so `options.stateCode` is ignored for this council.
  * - `"CRC"` (Conselho Regional de Contabilidade): UF + 6 digits + the tipo de registro (`"O"`
- *   Originário, `"P"` Provisório or `"T"` Transferido) + 1 check digit whose value is not
- *   verified, e.g. `"SP-123456/O-3"`. The letter says nothing about the professional category:
- *   the Manual de Registro states that the distinction between `"O"` and `"P"` applies
- *   "independentemente da categoria profissional do contabilista", and `"T"` comes from the
- *   Resolução CFC nº 1.707/2023, art. 5º, parágrafo único, which appends it to the número do
- *   Registro Originário when a registration is transferred to another CRC.
+ *   Originário or `"P"` Provisório) + 1 check digit whose value is not verified, e.g.
+ *   `"SP-123456/O-3"`. The letter says nothing about the professional category: the Manual de
+ *   Registro states that the distinction between `"O"` and `"P"` applies "independentemente da
+ *   categoria profissional do contabilista". A Registro Transferido or Secundário is written by
+ *   appending `"T"` or `"S"` and the UF of the destination CRC **after** the check digit, as the
+ *   Resolução CFC nº 1.707/2023, art. 5º, parágrafo único, and the Manual's own examples
+ *   (`"SP-123456/O-3 T-MG"`, `"TO-654321/P-8 T-SC"`, `"PI-111222/O-5 S-AC"`) put it. Both UFs
+ *   have to be real state codes; `options.stateCode` is compared against the originating one,
+ *   the UF the número do Registro Originário belongs to.
  *
  * CREA (Conselho Regional de Engenharia e Agronomia) is not supported: since the 2016 national
  * unification (RNP) its registration number format could not be confirmed from an official,
  * publicly documented source.
  *
- * Only the CRC and the CRP shapes rest on a published source. The OAB, the CFM and the CFO do
- * not publish the format of the numbers their seccionais and regionais issue, so the digit
- * ranges accepted for `"OAB"`, `"CRM"` and `"CRO"` are conventional rather than normative.
+ * Only the CRC shape and the CRP regional codes rest on a published source: the CFP page lists
+ * the 24 Conselhos Regionais and nothing else, so the 4 to 6 digit body of a CRP number is as
+ * unsourced as the OAB, CRM and CRO ranges. The OAB, the CFM and the CFO do not publish the
+ * format of the numbers their seccionais and regionais issue, so the digit ranges accepted for
+ * `"OAB"`, `"CRM"` and `"CRO"` are conventional rather than normative, and two counterexamples
+ * are known: the OAB/SP public search field is `maxlength="7"` and rejects only inputs of two
+ * characters or fewer, and the CFM's Manual de Procedimentos Administrativos documents a `300`
+ * prefixed CRM for foreign-trained physicians and a trailing `P` for inscrição provisória,
+ * neither of which the accepted shape can express.
  *
  * @param {string} value - The registration number to be validated.
  * @param {IsValidRegistroProfissionalOptions} options - The validation options.
@@ -81,21 +90,34 @@ const isKnownCrpRegion = (value: string): boolean => {
  * isValidRegistroProfissional("123456-RJ", { council: "OAB", stateCode: "SP" }); // false (UF mismatch)
  * isValidRegistroProfissional("06/12345", { council: "CRP" }); // true
  * isValidRegistroProfissional("SP-123456/O-3", { council: "CRC" }); // true
+ * isValidRegistroProfissional("SP-123456/O-3 T-MG", { council: "CRC" }); // true (transferido)
+ * isValidRegistroProfissional("SP-123456/T-3", { council: "CRC" }); // false ("T" is not a tipo)
  * isValidRegistroProfissional("123456", { council: "OAB" }); // false (no UF)
  * ```
  *
- * @see Official: https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf Manual de
- * Registro do Sistema CFC/CRCs, item 1.1: the CRC registration is the sigla of the UF, six
- * sequential digits, the letter of the tipo de registro and a check digit, with "UF-000001/P-7"
- * and "UF-000002/O-5" as its own worked examples.
- * @see Official: https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/ Conselho
- * Federal de Psicologia: the 24 Conselhos Regionais of the system, numbered CRP-01 to CRP-24.
- * @see Based on: https://www.oab.org.br/ Ordem dos Advogados do Brasil (OAB), which publishes
- * no format for the número de inscrição and the seccional.
- * @see Based on: https://portal.cfm.org.br/ Conselho Federal de Medicina (CRM), which publishes
- * no format for the registration number and the UF.
- * @see Based on: https://cfo.org.br/ Conselho Federal de Odontologia (CRO), which publishes no
- * format for the registration number and the UF.
+ * @see Official: https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf
+ * Manual de Registro do Sistema CFC/CRCs, item 1.1: the CRC registration is the sigla of the UF,
+ * six sequential digits, the letter of the tipo de registro and a check digit, with
+ * "UF-000001/P-7" and "UF-000002/O-5" as its own worked examples; the same item adds the "T" of
+ * the Registro Transferido "ao número do Registro Definitivo Originário ou Registro Provisório …
+ * acompanhada de um hífen e da sigla designativa da jurisdição do CRC de destino".
+ * @see Official: https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf
+ * Resolução CFC nº 1.707/2023, art. 5º parágrafo único: "No caso de Registro Transferido, ao
+ * número do Registro Originário será acrescentada a letra 'T', acompanhada da sigla designativa da
+ * jurisdição do CRC de destino."
+ * @see Official: https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/
+ * Conselho Federal de Psicologia: the 24 Conselhos Regionais of the system, numbered CRP-01 to
+ * CRP-24. The page establishes the regional codes only; it publishes no length for the inscription
+ * number itself.
+ * @see Based on: https://www.oab.org.br/
+ * Ordem dos Advogados do Brasil (OAB), which publishes no format for the número de inscrição and
+ * the seccional.
+ * @see Based on: https://portal.cfm.org.br/
+ * Conselho Federal de Medicina (CRM), which publishes no format for the registration number and
+ * the UF.
+ * @see Based on: https://cfo.org.br/
+ * Conselho Federal de Odontologia (CRO), which publishes no format for the registration number and
+ * the UF.
  */
 export const isValidRegistroProfissional = (
 	value: string,
@@ -113,9 +135,11 @@ export const isValidRegistroProfissional = (
 
 	if (!match?.groups) return false;
 
-	const { region, uf } = match.groups;
+	const { region, uf, transferUf } = match.groups;
 
 	if (region !== undefined && !isKnownCrpRegion(region)) return false;
+
+	if (transferUf !== undefined && !isKnownStateCode(transferUf)) return false;
 
 	if (uf === undefined) return true;
 

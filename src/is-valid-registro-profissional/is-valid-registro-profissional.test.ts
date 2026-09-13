@@ -69,6 +69,22 @@ describe("isValidRegistroProfissional", () => {
 			expect(isValidRegistroProfissional("SP-123456/X-3", { council: "CRC" })).toBe(false);
 		});
 
+		test('when a CRC number puts "T" in the tipo de registro slot, which the Manual de Registro restricts to O and P', () => {
+			expect(isValidRegistroProfissional("SP-123456/T-3", { council: "CRC" })).toBe(false);
+		});
+
+		test('when a CRC number puts "S" in the tipo de registro slot', () => {
+			expect(isValidRegistroProfissional("SP-123456/S-3", { council: "CRC" })).toBe(false);
+		});
+
+		test("when the destination UF of a transferred CRC number is not a real Brazilian state code", () => {
+			expect(isValidRegistroProfissional("SP-123456/O-3 T-ZZ", { council: "CRC" })).toBe(false);
+		});
+
+		test("when a transferred CRC number carries no destination UF at all", () => {
+			expect(isValidRegistroProfissional("SP-123456/O-3 T", { council: "CRC" })).toBe(false);
+		});
+
 		test("when a CRP regional code is 00, below the CRP-01 of the CFP system", () => {
 			expect(isValidRegistroProfissional("00/12345", { council: "CRP" })).toBe(false);
 		});
@@ -127,8 +143,25 @@ describe("isValidRegistroProfissional", () => {
 			expect(isValidRegistroProfissional("DF-000002/O-5", { council: "CRC" })).toBe(true);
 		});
 
-		test("for a valid CRC number of a registro transferido", () => {
-			expect(isValidRegistroProfissional("RJ-654321/T-9", { council: "CRC" })).toBe(true);
+		test('for "SP-123456/O-3 T-MG", the Manual de Registro\'s own example of a registro definitivo transferido', () => {
+			expect(isValidRegistroProfissional("SP-123456/O-3 T-MG", { council: "CRC" })).toBe(true);
+		});
+
+		test('for "TO-654321/P-8 T-SC", the Manual de Registro\'s own example of a registro provisório transferido', () => {
+			expect(isValidRegistroProfissional("TO-654321/P-8 T-SC", { council: "CRC" })).toBe(true);
+		});
+
+		test('for "PI-111222/O-5 S-AC", the Manual de Registro\'s own example of a registro secundário', () => {
+			expect(isValidRegistroProfissional("PI-111222/O-5 S-AC", { council: "CRC" })).toBe(true);
+		});
+
+		test("for a transferred CRC number matching options.stateCode, which is the originating UF", () => {
+			expect(
+				isValidRegistroProfissional("SP-123456/O-3 T-MG", { council: "CRC", stateCode: "SP" }),
+			).toBe(true);
+			expect(
+				isValidRegistroProfissional("SP-123456/O-3 T-MG", { council: "CRC", stateCode: "MG" }),
+			).toBe(false);
 		});
 	});
 
@@ -173,7 +206,7 @@ describe("isValidRegistroProfissional", () => {
 				fc.property(
 					states,
 					fc.integer({ min: 1, max: 9_999_999 }),
-					fc.constantFrom("O", "P", "T"),
+					fc.constantFrom("O", "P"),
 					(stateCode, number, category) => {
 						const digits = String(number);
 						const value = `${stateCode}-${digits}/${category}-3`;
@@ -181,6 +214,30 @@ describe("isValidRegistroProfissional", () => {
 						expect(isValidRegistroProfissional(value, { council: "CRC" })).toBe(
 							digits.length === 6,
 						);
+					},
+				),
+			);
+		});
+
+		test('should accept the "T" and "S" suffixes only after the check digit and only with a real destination UF', () => {
+			fc.assert(
+				fc.property(
+					states,
+					states,
+					fc.constantFrom("O", "P"),
+					(stateCode, destination, category) => {
+						const number = `${stateCode}-123456/${category}-3`;
+
+						for (const suffix of ["T", "S"]) {
+							expect(
+								isValidRegistroProfissional(`${number} ${suffix}-${destination}`, {
+									council: "CRC",
+								}),
+							).toBe(true);
+							expect(
+								isValidRegistroProfissional(`${stateCode}-123456/${suffix}-3`, { council: "CRC" }),
+							).toBe(false);
+						}
 					},
 				),
 			);
