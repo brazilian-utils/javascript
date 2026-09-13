@@ -105,8 +105,13 @@ export {
 	type HolidayType,
 	getHolidays,
 } from "./get-holidays/get-holidays";
-export { type LegalNature, getLegalNature } from "./get-legal-nature/get-legal-nature";
+export {
+	type LegalNature,
+	type LegalNatureCategory,
+	getLegalNature,
+} from "./get-legal-nature/get-legal-nature";
 export { getLegalNatures } from "./get-legal-natures/get-legal-natures";
+export { getLegalNaturesByCategory } from "./get-legal-natures-by-category/get-legal-natures-by-category";
 export { getMunicipalities } from "./get-municipalities/get-municipalities";
 export {
 	type GetMunicipalityByCodeOptions,

@@ -1,47 +1,69 @@
 import * as fc from "fast-check";
 
+import { LEGAL_NATURE_CATEGORIES } from "../_internals/constants/legal-nature-categories";
 import { anyValue, digitsUpTo } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
-import { getLegalNature, type LegalNature } from "./get-legal-nature";
+import { getLegalNature, type LegalNature, type LegalNatureCategory } from "./get-legal-nature";
+
+const SOCIEDADE_EMPRESARIA_LIMITADA: LegalNature = {
+	code: "2062",
+	description: "Sociedade Empresária Limitada",
+	category: { code: "2", description: "Entidades Empresariais" },
+};
 
 describe("getLegalNature", () => {
 	it("should reject a code with letters attached, like isValidLegalNature does", () => {
 		expect(getLegalNature("2062a")).toBeNull();
 		expect(getLegalNature("a2062")).toBeNull();
-		expect(getLegalNature("206-2")).toEqual({
-			code: "2062",
-			description: getLegalNature("2062")?.description,
-		});
+		expect(getLegalNature("206-2")).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
 	});
 
 	it("should return the legal nature entry for a known code as a string", () => {
-		expect(getLegalNature("2062")).toEqual({
-			code: "2062",
-			description: "Sociedade Empresária Limitada",
-		});
+		expect(getLegalNature("2062")).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
 	});
 
 	it("should return the legal nature entry for a known code as a number", () => {
-		expect(getLegalNature(2062)).toEqual({
-			code: "2062",
-			description: "Sociedade Empresária Limitada",
-		});
+		expect(getLegalNature(2062)).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
 	});
 
 	it("should strip the mask of a number just like the mask of a string", () => {
-		expect(getLegalNature(206.2)).toEqual({
-			code: "2062",
-			description: "Sociedade Empresária Limitada",
-		});
+		expect(getLegalNature(206.2)).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
 		expect(getLegalNature(206.2)).toEqual(getLegalNature("206.2"));
 	});
 
 	it("should return the legal nature entry for a masked code (206-2)", () => {
-		expect(getLegalNature("206-2")).toEqual({
-			code: "2062",
-			description: "Sociedade Empresária Limitada",
+		expect(getLegalNature("206-2")).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
+	});
+
+	it("should carry the CONCLA category of the first digit of the code", () => {
+		expect(getLegalNature("1015")?.category).toEqual({
+			code: "1",
+			description: "Administração Pública",
+		});
+		expect(getLegalNature("3034")?.category).toEqual({
+			code: "3",
+			description: "Entidades sem Fins Lucrativos",
+		});
+		expect(getLegalNature("4014")?.category).toEqual({
+			code: "4",
+			description: "Pessoas Físicas",
+		});
+		expect(getLegalNature("5010")?.category).toEqual({
+			code: "5",
+			description: "Organizações Internacionais e Outras Instituições Extraterritoriais",
+		});
+	});
+
+	it("should carry the category of the first digit for a legacy code too", () => {
+		expect(getLegalNature("2208")?.category).toEqual({
+			code: "2",
+			description: "Entidades Empresariais",
+		});
+		expect(getLegalNature("5002")?.category).toEqual({
+			code: "5",
+			description: "Organizações Internacionais e Outras Instituições Extraterritoriais",
 		});
 	});
 
@@ -49,6 +71,7 @@ describe("getLegalNature", () => {
 		const first = getLegalNature("2062");
 		const second = getLegalNature("2062");
 		expect(first).not.toBe(second);
+		expect(first?.category).not.toBe(second?.category);
 	});
 
 	it("should return null for an unknown 4 digit code", () => {
@@ -83,7 +106,11 @@ describe("getLegalNature", () => {
 		test("should look every code of the table up, masked, plain or numeric", () => {
 			fc.assert(
 				fc.property(knownCode, (code) => {
-					const entry = { code, description: LEGAL_NATURE[code] };
+					const entry = {
+						code,
+						description: LEGAL_NATURE[code],
+						category: LEGAL_NATURE_CATEGORIES[code[0]],
+					};
 
 					expect(getLegalNature(code)).toEqual(entry);
 					expect(getLegalNature(`${code.slice(0, 3)}-${code.slice(3)}`)).toEqual(entry);
@@ -121,5 +148,11 @@ describe("getLegalNature types", () => {
 	test("should type the legal nature entry fields as strings", () => {
 		expectTypeOf<LegalNature["code"]>().toEqualTypeOf<string>();
 		expectTypeOf<LegalNature["description"]>().toEqualTypeOf<string>();
+	});
+
+	test("should type the category as a code of the five CONCLA groups and a description", () => {
+		expectTypeOf<LegalNature["category"]>().toEqualTypeOf<LegalNatureCategory>();
+		expectTypeOf<LegalNatureCategory["code"]>().toEqualTypeOf<"1" | "2" | "3" | "4" | "5">();
+		expectTypeOf<LegalNatureCategory["description"]>().toEqualTypeOf<string>();
 	});
 });

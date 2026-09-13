@@ -1279,22 +1279,45 @@ const legalNatures = getLegalNatures();
 legalNatures['2062']; // 'Sociedade Empresária Limitada'
 ```
 
+## getLegalNaturesByCategory
+
+Get every legal nature of a CONCLA category, the group given by the first digit of the code: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas and `5` Organizações Internacionais e Outras Instituições Extraterritoriais. The category is accepted as a string or as a number, the entries come back sorted by code, and an unknown category gives `[]`.
+
+```javascript
+import { getLegalNaturesByCategory } from '@brazilian-utils/brazilian-utils';
+
+getLegalNaturesByCategory('4')[0];
+// {
+//   code: '4014',
+//   description: 'Empresa Individual Imobiliária',
+//   category: { code: '4', description: 'Pessoas Físicas' },
+// }
+getLegalNaturesByCategory(4).length; // 6
+getLegalNaturesByCategory('2').length; // 33
+getLegalNaturesByCategory('9'); // []
+```
+
 ## getLegalNature
 
-Look a legal nature code up in the official IBGE/CONCLA table.
+Look a legal nature code up in the official IBGE/CONCLA table. The entry also carries the CONCLA category the code is listed under, taken from its first digit.
 
 ```javascript
 import { getLegalNature } from '@brazilian-utils/brazilian-utils';
 
-getLegalNature('2062'); // { code: '2062', description: 'Sociedade Empresária Limitada' }
-getLegalNature('206-2'); // { code: '2062', description: 'Sociedade Empresária Limitada' }
-getLegalNature(206.2); // { code: '2062', description: 'Sociedade Empresária Limitada' }
+getLegalNature('2062');
+// {
+//   code: '2062',
+//   description: 'Sociedade Empresária Limitada',
+//   category: { code: '2', description: 'Entidades Empresariais' },
+// }
+getLegalNature('206-2')?.code; // '2062'
+getLegalNature(206.2)?.category.description; // 'Entidades Empresariais'
 getLegalNature('0000'); // null
 ```
 
 ## generatePhone
 
-Generate a random Brazilian phone number. Accepts `'mobile'`, `'landline'` or `'service'` (typed as `GeneratePhoneType`); a service number has no DDD. Omitted, it randomly generates a mobile or a landline, never a service number.
+Generate a random Brazilian phone number. Accepts `'mobile'`, `'landline'` or `'service'` (typed as `GeneratePhoneType`); a service number has no DDD. Omitted, it randomly generates a mobile or a landline, never a service number. A generated mobile number always starts with 9, so it passes both `isValidMobilePhone` numbering rules.
 
 ```javascript
 import { generatePhone } from '@brazilian-utils/brazilian-utils';

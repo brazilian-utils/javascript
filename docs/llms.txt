@@ -143,6 +143,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [getHolidays](https://brazilian-utils.com.br/utilities.md#getholidays): Get Brazilian holidays for a given year.
 - [getCepInfoByAddress](https://brazilian-utils.com.br/utilities.md#getcepinfobyaddress): Fetch CEPs from an address using ViaCEP.
 - [getLegalNatures](https://brazilian-utils.com.br/utilities.md#getlegalnatures): Get the legal nature map keyed by code.
+- [getLegalNaturesByCategory](https://brazilian-utils.com.br/utilities.md#getlegalnaturesbycategory): Get every legal nature of a CONCLA category, the group given by the first digit of the code: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas and `5` Organizações Internacionais e Outras Instituições Extraterritoriais.
 - [getLegalNature](https://brazilian-utils.com.br/utilities.md#getlegalnature): Look a legal nature code up in the official IBGE/CONCLA table.
 - [getFormatLicensePlate](https://brazilian-utils.com.br/utilities.md#getformatlicenseplate): Detect the normalized format of a license plate.
 - [getMunicipality](https://brazilian-utils.com.br/utilities.md#getmunicipality): Get municipality information by IBGE code, or get an IBGE code from municipality name and UF.

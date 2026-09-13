@@ -1279,22 +1279,45 @@ const legalNatures = getLegalNatures();
 legalNatures['2062']; // 'Sociedade Empresária Limitada'
 ```
 
+## getLegalNaturesByCategory
+
+Retorna todas as naturezas jurídicas de uma categoria do CONCLA, o grupo dado pelo primeiro dígito do código: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas e `5` Organizações Internacionais e Outras Instituições Extraterritoriais. A categoria é aceita como string ou como número, as entradas voltam ordenadas por código e uma categoria desconhecida devolve `[]`.
+
+```javascript
+import { getLegalNaturesByCategory } from '@brazilian-utils/brazilian-utils';
+
+getLegalNaturesByCategory('4')[0];
+// {
+//   code: '4014',
+//   description: 'Empresa Individual Imobiliária',
+//   category: { code: '4', description: 'Pessoas Físicas' },
+// }
+getLegalNaturesByCategory(4).length; // 6
+getLegalNaturesByCategory('2').length; // 33
+getLegalNaturesByCategory('9'); // []
+```
+
 ## getLegalNature
 
-Busca um código de natureza jurídica na tabela oficial do IBGE/CONCLA.
+Busca um código de natureza jurídica na tabela oficial do IBGE/CONCLA. A entrada também traz a categoria do CONCLA em que o código está listado, dada pelo seu primeiro dígito.
 
 ```javascript
 import { getLegalNature } from '@brazilian-utils/brazilian-utils';
 
-getLegalNature('2062'); // { code: '2062', description: 'Sociedade Empresária Limitada' }
-getLegalNature('206-2'); // { code: '2062', description: 'Sociedade Empresária Limitada' }
-getLegalNature(206.2); // { code: '2062', description: 'Sociedade Empresária Limitada' }
+getLegalNature('2062');
+// {
+//   code: '2062',
+//   description: 'Sociedade Empresária Limitada',
+//   category: { code: '2', description: 'Entidades Empresariais' },
+// }
+getLegalNature('206-2')?.code; // '2062'
+getLegalNature(206.2)?.category.description; // 'Entidades Empresariais'
 getLegalNature('0000'); // null
 ```
 
 ## generatePhone
 
-Gera um telefone brasileiro aleatório. Aceita `'mobile'`, `'landline'` ou `'service'` (tipado como `GeneratePhoneType`); um número de serviço não tem DDD. Se omitido, gera aleatoriamente um celular ou um fixo, nunca um número de serviço.
+Gera um telefone brasileiro aleatório. Aceita `'mobile'`, `'landline'` ou `'service'` (tipado como `GeneratePhoneType`); um número de serviço não tem DDD. Se omitido, gera aleatoriamente um celular ou um fixo, nunca um número de serviço. Um celular gerado sempre começa com 9, então passa nas duas regras de numeração do `isValidMobilePhone`.
 
 ```javascript
 import { generatePhone } from '@brazilian-utils/brazilian-utils';

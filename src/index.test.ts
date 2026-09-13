@@ -58,6 +58,7 @@ import {
 	type IsValidPixKeyOptions,
 	type IsValidRegistroProfissionalOptions,
 	type LegalNature,
+	type LegalNatureCategory,
 	type LicensePlateFormat,
 	type Municipality,
 	type NfeKey,
@@ -151,6 +152,7 @@ const PUBLIC = [
 	"getHolidays",
 	"getLegalNature",
 	"getLegalNatures",
+	"getLegalNaturesByCategory",
 	"getMunicipalities",
 	"getMunicipality",
 	"getMunicipalityByCode",
@@ -310,6 +312,7 @@ describe("Public API", () => {
 			IsValidPixKeyOptions: IsValidPixKeyOptions;
 			IsValidRegistroProfissionalOptions: IsValidRegistroProfissionalOptions;
 			LegalNature: LegalNature;
+			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;
 			Municipality: Municipality;
 			NfeKey: NfeKey;
