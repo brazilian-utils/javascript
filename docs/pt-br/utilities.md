@@ -157,7 +157,7 @@ generateBoleto({ type: 'arrecadacao' }); // "84610000000524610029110200546033900
 
 ## getBoletoInfo
 
-Extrai informações de um boleto (valor, data de vencimento, código do banco). Aceita opcionalmente `{ referenceDate }` (tipado como `GetBoletoInfoOptions`) para resolver o ciclo do "fator de vencimento" a partir de uma data específica em vez de agora (o ciclo do fator reiniciou em 22/02/2025, segundo a FEBRABAN). Nem a FEBRABAN nem o Banco Central publicam uma forma de distinguir um fator do ciclo antigo de um do ciclo novo, então todo fator resolve para uma de duas datas separadas por 9000 dias e o `referenceDate` escolhe entre elas por meio das janelas de segurança da própria biblioteca: o mesmo boleto pode passar a resolver para a outra candidata com o tempo, então informe `referenceDate` explicitamente sempre que a resposta precisar ser estável. Para um boleto de arrecadação, o resultado, tipado como `BoletoInfo`, não tem `bankCode`/`expirationDate` e traz em vez disso `type: "arrecadacao"`, `segment`, `value` e `hasEffectiveValue`.
+Extrai informações de um boleto (valor, data de vencimento, código do banco). Aceita opcionalmente `{ referenceDate }` (tipado como `GetBoletoInfoOptions`) para resolver o ciclo do "fator de vencimento" a partir de uma data específica em vez de agora (o ciclo do fator reiniciou em 22/02/2025, segundo a FEBRABAN). Nem a FEBRABAN nem o Banco Central publicam uma forma de distinguir um fator do ciclo antigo de um do ciclo novo, então todo fator resolve para uma de duas datas separadas por 9000 dias e o `referenceDate` escolhe entre elas por meio das janelas de segurança da própria biblioteca: o mesmo boleto pode passar a resolver para a outra candidata com o tempo, então informe `referenceDate` explicitamente sempre que a resposta precisar ser estável. Para um boleto de arrecadação, o resultado, tipado como `BoletoInfo`, continua trazendo as duas chaves, porém vazias, `bankCode: ''` e `expirationDate: null`, já que o boleto não tem código de banco nem fator de vencimento, e acrescenta `type: "arrecadacao"`, `segment`, `value` e `hasEffectiveValue`.
 
 ```javascript
 import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
@@ -1043,7 +1043,7 @@ Retorna feriados brasileiros para um determinado ano. Retorna feriados nacionais
 
 Apenas um feriado estadual por UF é feriado civil pela [Lei nº 9.093/1995](https://www.planalto.gov.br/ccivil_03/leis/l9093.htm), art. 1º, II, que autoriza "a data magna do Estado fixada em lei estadual", no singular; as demais entradas se apoiam em leis estaduais ordinárias e são reportadas por serem observadas na prática. Regras notáveis por estado:
 
-- **SC** — a [Lei SC nº 18.531/2022](http://leis.alesc.sc.gov.br/html/2022/18531_2022_lei.html) transfere os dois feriados estaduais, "Dia do Estado de Santa Catarina" (11/08) e "Dia de Santa Catarina de Alexandria" (25/11), para o domingo subsequente sempre que caem de segunda a sexta, então a segunda-feira 11/08/2025 é dia útil em SC e o feriado cai no domingo 17/08.
+- **SC** — a [Lei SC nº 18.531/2022](http://leis.alesc.sc.gov.br/html/2022/18531_2022_lei.html) transfere os dois feriados estaduais, "Dia do Estado de Santa Catarina" (11/08) e "Dia de Santa Catarina de Alexandria" (25/11), para o domingo subsequente sempre que caem de segunda a sexta, então a segunda-feira 11/08/2025 é dia útil em SC e o feriado cai no domingo 17/08. A transferência começa em 2005, ano em que a [Lei SC nº 13.408/2005](http://leis.alesc.sc.gov.br/html/2005/13408_2005_lei.html) a introduziu (publicada e em vigor em 15/07/2005); até 2004 os dois feriados ficam em 11/08 e 25/11 em qualquer dia da semana.
 - **DF** — a [Lei distrital nº 72/1989](https://www.sinj.df.gov.br/sinj/Norma/18459/Lei_72_27_12_1989.html), art. 1º parágrafo único, declara Corpus Christi feriado. Com `stateCode: 'DF'` a única entrada de Corpus Christi volta tipada como `"state"` em vez de `"optional"`; ela é substituída, não duplicada.
 - **GO** — a [Lei GO nº 20.756/2020](https://legisla.casacivil.go.gov.br/pesquisa_legislacao/100979/lei-20756), art. 269, II, lista três feriados estaduais: 26/07 (Fundação da Cidade de Goiás), 24/10 (Lançamento da Pedra Fundamental de Goiânia) e 28/10 (Dia do Servidor Público).
 - **AL** — 16/09 é feriado estadual a partir de 2024 ([Lei AL nº 9.358/2024](https://sapl.al.al.leg.br/norma/3117)) e apenas ponto facultativo (`"optional"`) antes disso.
@@ -1357,7 +1357,7 @@ generatePis(); // '91077906857'
 
 ## getMunicipality
 
-Busca informações de município por código IBGE, ou obtém o código IBGE a partir do nome do município e UF. Uma única função cobre as duas direções, dependendo se `options` tem `code` ou `municipalityName`/`uf`. `code` aceita tanto `string` quanto `number` e deve ter exatamente 7 dígitos, caso contrário a função resolve para `null`. Um `code` informado como número precisa ser um inteiro não negativo: sinal e ponto decimal não são dígitos, então `-3550308` e `355030.8` resolvem para `null` em vez de serem lidos como `3550308`. A resolução é totalmente offline, a partir de um dataset do IBGE embutido na biblioteca: nenhuma requisição de rede é feita. A comparação do nome do município ignora acentos e diferenças entre maiúsculas/minúsculas. Um município desconhecido, uma UF desconhecida ou uma entrada inválida resolvem para `null`.
+Busca informações de município por código IBGE, ou obtém o código IBGE a partir do nome do município e UF. Uma única função cobre as duas direções, dependendo se `options` tem `code` ou `municipalityName`/`uf`. `code` aceita tanto `string` quanto `number` e deve ter exatamente 7 dígitos, caso contrário a função resolve para `null`. Um `code` informado como número precisa ser um inteiro não negativo: sinal e ponto decimal não são dígitos, então `-3550308` e `355030.8` resolvem para `null` em vez de serem lidos como `3550308`. A resolução é totalmente offline, a partir de um dataset do IBGE embutido na biblioteca: nenhuma requisição de rede é feita. A comparação do nome do município ignora acentos e diferenças entre maiúsculas/minúsculas. Um município desconhecido, uma UF desconhecida ou uma entrada inválida resolvem para `null`. O par `[name, uf]` é um array novo a cada chamada, então alterar o resultado nunca afeta as buscas seguintes.
 
 ```javascript
 import { getMunicipality } from '@brazilian-utils/brazilian-utils';
@@ -1376,6 +1376,29 @@ await getMunicipality({ code: '0000000' });
 
 await getMunicipality({ code: '123' });
 // null (não tem 7 dígitos)
+```
+
+Em TypeScript o tipo de retorno acompanha a direção da busca: uma consulta `{ code }` resolve para `[string, string] | null`, uma consulta `{ municipalityName, uf }` resolve para `string | null`, e uma consulta cuja direção só é conhecida em tempo de execução (uma variável tipada como `GetMunicipalityOptions`) resolve para a união das duas.
+
+```typescript
+import {
+  getMunicipality,
+  type GetMunicipalityByCodeOptions,
+  type GetMunicipalityByNameOptions,
+  type GetMunicipalityOptions,
+} from '@brazilian-utils/brazilian-utils';
+
+const byCode: GetMunicipalityByCodeOptions = { code: '3550308' };
+const byName: GetMunicipalityByNameOptions = { municipalityName: 'sao paulo', uf: 'sp' };
+
+await getMunicipality(byCode);
+// Promise<[string, string] | null>
+
+await getMunicipality(byName);
+// Promise<string | null>
+
+const lookUp = (options: GetMunicipalityOptions) => getMunicipality(options);
+// (options: GetMunicipalityOptions) => Promise<[string, string] | string | null>
 ```
 
 ## getMunicipalities
@@ -1431,7 +1454,7 @@ getMunicipalityByCode('123'); // null (não tem 7 dígitos)
 
 ## isHoliday
 
-Verifica se uma data específica é feriado brasileiro. A verificação compara a data local do `targetDate` (ano/mês/dia lidos localmente), não seu instante UTC subjacente. Retorna `false` quando `targetDate` está ausente ou não é um `Date` válido.
+Verifica se uma data específica é feriado brasileiro. A verificação compara a data local do `targetDate` (ano/mês/dia lidos localmente), não seu instante UTC subjacente. Retorna `false` quando `targetDate` está ausente ou não é um `Date` válido. Um `stateCode` inválido é tratado de duas formas diferentes: uma string que não é um código de estado conhecido é ignorada e só os feriados nacionais são considerados, igual ao `getHolidays`, enquanto um `stateCode` presente que não é uma string (um número, `null`, um objeto) é rejeitado e faz a chamada retornar `false` mesmo em um feriado nacional.
 
 ```javascript
 import { isHoliday } from '@brazilian-utils/brazilian-utils';
@@ -1645,7 +1668,7 @@ O resultado `Certidao` traz:
 | Chave | Descrição |
 | --- | --- |
 | `registryCns` | O CNS (Código Nacional de Serventia) de 6 dígitos da serventia que lavrou o ato. |
-| `acervo` | Acervo a que o livro pertence: `"01"` acervo próprio, `"02"` acervo incorporado. |
+| `acervo` | Acervo a que o livro pertence: `"01"` acervo próprio, `"02"` em diante um por acervo incorporado. O [art. 473, §§ 3º a 5º](https://atos.cnj.jus.br/atos/detalhar/5243) separa os incorporados pela data em que a serventia de origem foi extinta ou desativada: até 31/12/2009 a matrícula leva o CNS da unidade incorporadora e um código de acervo a partir de `"02"`, um por incorporação; a partir de 1º/01/2010 leva o CNS da própria unidade incorporada e o código `"01"`, considerado acervo próprio dessa unidade; e um acervo fracionado entre duas ou mais serventias sucessoras leva o CNS próprio de cada sucessora com o código `"02"`. |
 | `service` | Serviço prestado pela serventia, sempre `"55"`, o registro civil das pessoas naturais. |
 | `year` | Ano do registro, com 4 dígitos. |
 | `type` | Livro a que o ato pertence: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, `"other"`, `"emancipation"` ou `"interdiction"`. |

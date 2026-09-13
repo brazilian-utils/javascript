@@ -208,7 +208,8 @@ const main = async (): Promise<void> => {
  *
  * ${codes.length} of the ${codes.length + legacyCodes.length} entries are the official codes from the CONCLA 2021 table; the other
  * ${legacyCodes.length} (${legacyCodes.join(", ")}) are legacy codes kept for 2.3.0
- * compatibility. These codes fix an accent typo of the official PDF: ${typoFixedCodes.join(", ")}.
+ * compatibility. Separately, and unrelated to those legacy codes, the descriptions of the
+ * following official codes fix an accent typo of the PDF: ${typoFixedCodes.join(", ")}.
  *
  * @see Official: ${SOURCE_PAGE_URL}
  * @see Official: ${SOURCE_URL}

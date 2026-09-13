@@ -28,7 +28,16 @@ export type CertidaoType =
 export type Certidao = {
 	/** The 6 digit CNS (Código Nacional de Serventia) of the serventia that issued the act. */
 	registryCns: string;
-	/** Acervo the book belongs to: "01" the serventia's own acervo; 02 and up, one per incorporated acervo. */
+	/**
+	 * Acervo the book belongs to: `"01"` the serventia's own acervo; `"02"` and up, one per
+	 * incorporated acervo. Art. 473, §§ 3º to 5º splits the incorporated ones by the date the
+	 * origin serventia was extinguished or deactivated: up to 31 December 2009 the matrícula
+	 * carries the CNS of the incorporating unit and an acervo code from `"02"` up, one per
+	 * incorporation in their numeric order; from 1 January 2010 on it carries the CNS of the
+	 * incorporated unit itself and the acervo code `"01"`, counted as that unit's own acervo. When
+	 * one acervo is split between two or more successor serventias, each of them uses its own CNS
+	 * with the acervo code `"02"`.
+	 */
 	acervo: string;
 	/** Service rendered by the serventia, always "55", the registro civil das pessoas naturais. */
 	service: string;

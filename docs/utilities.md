@@ -157,7 +157,7 @@ generateBoleto({ type: 'arrecadacao' }); // "84610000000524610029110200546033900
 
 ## getBoletoInfo
 
-Extract information from a boleto (amount, expiration date, bank code). Accepts an optional `{ referenceDate }` (typed as `GetBoletoInfoOptions`) to resolve the "fator de vencimento" cycle as of a specific date instead of now (the factor's date-base cycle reset on 22/02/2025 per FEBRABAN). Neither FEBRABAN nor the Banco Central publishes a way of telling an old cycle factor from a new cycle one, so every factor resolves to either of two dates 9000 days apart and `referenceDate` picks between them through the library's own safety windows: the same slip can resolve to the other candidate as time passes, so pass `referenceDate` explicitly whenever the answer has to stay stable. For a boleto de arrecadação, the result, typed as `BoletoInfo`, has no `bankCode`/`expirationDate` and instead carries `type: "arrecadacao"`, `segment`, `value` and `hasEffectiveValue`.
+Extract information from a boleto (amount, expiration date, bank code). Accepts an optional `{ referenceDate }` (typed as `GetBoletoInfoOptions`) to resolve the "fator de vencimento" cycle as of a specific date instead of now (the factor's date-base cycle reset on 22/02/2025 per FEBRABAN). Neither FEBRABAN nor the Banco Central publishes a way of telling an old cycle factor from a new cycle one, so every factor resolves to either of two dates 9000 days apart and `referenceDate` picks between them through the library's own safety windows: the same slip can resolve to the other candidate as time passes, so pass `referenceDate` explicitly whenever the answer has to stay stable. For a boleto de arrecadação, the result, typed as `BoletoInfo`, still carries both keys but empty, `bankCode: ''` and `expirationDate: null`, since the slip has neither a bank code nor a fator de vencimento, and adds `type: "arrecadacao"`, `segment`, `value` and `hasEffectiveValue`.
 
 ```javascript
 import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
@@ -1043,7 +1043,7 @@ Get Brazilian holidays for a given year. Returns national holidays and optionall
 
 Only one state holiday per UF is a feriado civil under [Lei nº 9.093/1995](https://www.planalto.gov.br/ccivil_03/leis/l9093.htm), art. 1º, II, which authorises "a data magna do Estado fixada em lei estadual" in the singular; the other entries rest on ordinary state laws and are reported because they are observed in practice. Notable per-state rules:
 
-- **SC** — [Lei SC nº 18.531/2022](http://leis.alesc.sc.gov.br/html/2022/18531_2022_lei.html) moves both state holidays, "Dia do Estado de Santa Catarina" (Aug 11) and "Dia de Santa Catarina de Alexandria" (Nov 25), to the following Sunday whenever they fall Monday to Friday, so Monday Aug 11 2025 is a business day in SC and the holiday lands on Sunday Aug 17.
+- **SC** — [Lei SC nº 18.531/2022](http://leis.alesc.sc.gov.br/html/2022/18531_2022_lei.html) moves both state holidays, "Dia do Estado de Santa Catarina" (Aug 11) and "Dia de Santa Catarina de Alexandria" (Nov 25), to the following Sunday whenever they fall Monday to Friday, so Monday Aug 11 2025 is a business day in SC and the holiday lands on Sunday Aug 17. The transfer starts in 2005, the year [Lei SC nº 13.408/2005](http://leis.alesc.sc.gov.br/html/2005/13408_2005_lei.html) first introduced it (published and in force on Jul 15 2005); up to 2004 both holidays stay on Aug 11 and Nov 25 whatever weekday they fall on.
 - **DF** — [Lei distrital nº 72/1989](https://www.sinj.df.gov.br/sinj/Norma/18459/Lei_72_27_12_1989.html), art. 1º parágrafo único, declares Corpus Christi a feriado. With `stateCode: 'DF'` the single Corpus Christi entry comes back typed `"state"` instead of `"optional"`; it is replaced, not duplicated.
 - **GO** — [Lei GO nº 20.756/2020](https://legisla.casacivil.go.gov.br/pesquisa_legislacao/100979/lei-20756), art. 269, II, lists three feriados estaduais: Jul 26 (Fundação da Cidade de Goiás), Oct 24 (Lançamento da Pedra Fundamental de Goiânia) and Oct 28 (Dia do Servidor Público).
 - **AL** — Sep 16 is a feriado estadual from 2024 ([Lei AL nº 9.358/2024](https://sapl.al.al.leg.br/norma/3117)) and only a ponto facultativo (`"optional"`) before that.
@@ -1357,7 +1357,7 @@ generatePis(); // '91077906857'
 
 ## getMunicipality
 
-Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. A single function handles both directions, based on whether `options` has a `code` or a `municipalityName`/`uf`. `code` accepts both `string` and `number` input and must be exactly 7 digits, otherwise the function resolves to `null`. A `code` given as a number must be a non-negative integer: a sign and a decimal point are not digits, so `-3550308` and `355030.8` resolve to `null` instead of being read as `3550308`. Resolution is entirely offline, from a bundled IBGE dataset: no network request is made. The municipality name match ignores accents and casing. An unknown municipality, an unknown UF or invalid input all resolve to `null`.
+Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. A single function handles both directions, based on whether `options` has a `code` or a `municipalityName`/`uf`. `code` accepts both `string` and `number` input and must be exactly 7 digits, otherwise the function resolves to `null`. A `code` given as a number must be a non-negative integer: a sign and a decimal point are not digits, so `-3550308` and `355030.8` resolve to `null` instead of being read as `3550308`. Resolution is entirely offline, from a bundled IBGE dataset: no network request is made. The municipality name match ignores accents and casing. An unknown municipality, an unknown UF or invalid input all resolve to `null`. The `[name, uf]` pair is a fresh array on every call, so mutating the result never affects subsequent lookups.
 
 ```javascript
 import { getMunicipality } from '@brazilian-utils/brazilian-utils';
@@ -1376,6 +1376,29 @@ await getMunicipality({ code: '0000000' });
 
 await getMunicipality({ code: '123' });
 // null (not 7 digits)
+```
+
+In TypeScript the return type follows the direction of the lookup: a `{ code }` query resolves to `[string, string] | null`, a `{ municipalityName, uf }` query resolves to `string | null`, and a query whose direction is only known at run time (a variable typed as `GetMunicipalityOptions`) resolves to the union of both.
+
+```typescript
+import {
+  getMunicipality,
+  type GetMunicipalityByCodeOptions,
+  type GetMunicipalityByNameOptions,
+  type GetMunicipalityOptions,
+} from '@brazilian-utils/brazilian-utils';
+
+const byCode: GetMunicipalityByCodeOptions = { code: '3550308' };
+const byName: GetMunicipalityByNameOptions = { municipalityName: 'sao paulo', uf: 'sp' };
+
+await getMunicipality(byCode);
+// Promise<[string, string] | null>
+
+await getMunicipality(byName);
+// Promise<string | null>
+
+const lookUp = (options: GetMunicipalityOptions) => getMunicipality(options);
+// (options: GetMunicipalityOptions) => Promise<[string, string] | string | null>
 ```
 
 ## getMunicipalities
@@ -1431,7 +1454,7 @@ getMunicipalityByCode('123'); // null (not 7 digits)
 
 ## isHoliday
 
-Check if a specific date is a Brazilian holiday. The check compares `targetDate`'s local calendar date (year/month/day as read locally), not its underlying UTC instant. Returns `false` when `targetDate` is missing or not a valid `Date`.
+Check if a specific date is a Brazilian holiday. The check compares `targetDate`'s local calendar date (year/month/day as read locally), not its underlying UTC instant. Returns `false` when `targetDate` is missing or not a valid `Date`. An invalid `stateCode` is treated in two different ways: a string that is not a known state code is ignored and only national holidays are considered, the same as `getHolidays`, while a `stateCode` that is present and is not a string at all (a number, `null`, an object) is rejected and makes the call return `false` even for a national holiday.
 
 ```javascript
 import { isHoliday } from '@brazilian-utils/brazilian-utils';
@@ -1645,7 +1668,7 @@ The `Certidao` result carries:
 | Key | Description |
 | --- | --- |
 | `registryCns` | The 6 digit CNS (Código Nacional de Serventia) of the serventia that issued the act. |
-| `acervo` | Acervo the book belongs to: `"01"` the serventia's own, `"02"` a collection it absorbed. |
+| `acervo` | Acervo the book belongs to: `"01"` the serventia's own, `"02"` and up one per acervo it absorbed. [Art. 473, §§ 3º to 5º](https://atos.cnj.jus.br/atos/detalhar/5243) splits the absorbed ones by the date the origin serventia was extinguished or deactivated: up to 31/12/2009 the matrícula carries the CNS of the incorporating unit and an acervo code from `"02"` up, one per incorporation; from 01/01/2010 on it carries the CNS of the incorporated unit itself and the code `"01"`, counted as that unit's own acervo; and an acervo split between two or more successor serventias gets each successor's own CNS with the code `"02"`. |
 | `service` | Service rendered by the serventia, always `"55"`, the registro civil das pessoas naturais. |
 | `year` | Four digit year the act was recorded. |
 | `type` | The book the act belongs to: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, `"other"`, `"emancipation"` or `"interdiction"`. |

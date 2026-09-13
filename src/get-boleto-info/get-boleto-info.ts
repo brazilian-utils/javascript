@@ -82,7 +82,9 @@ export type GetBoletoInfoOptions = {
  * Supports the 47 digit "cobrança bancária" linha digitável and, additionally, the
  * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
  * barcode, both starting with `8`. Arrecadação bank slips also return `type`, `segment`,
- * `value` and `hasEffectiveValue`, and have no `bankCode` nor `expirationDate`.
+ * `value` and `hasEffectiveValue`, and, carrying neither a bank code nor a fator de vencimento,
+ * come back with `bankCode` set to `""` and `expirationDate` set to `null` rather than with those
+ * two keys missing.
  *
  * Neither FEBRABAN nor the Banco Central publishes a way of telling an old cycle fator de
  * vencimento from a new cycle one, so every factor resolves to either of two dates 9000 days

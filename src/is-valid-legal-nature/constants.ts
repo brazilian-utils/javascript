@@ -5,7 +5,8 @@
  *
  * 92 of the 100 entries are the official codes from the CONCLA 2021 table; the other
  * 8 (2076, 2100, 2208, 3042, 3050, 3093, 3123, 5002) are legacy codes kept for 2.3.0
- * compatibility. These codes fix an accent typo of the official PDF: 3298.
+ * compatibility. Separately, and unrelated to those legacy codes, the descriptions of the
+ * following official codes fix an accent typo of the PDF: 3298.
  *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
