@@ -7,58 +7,76 @@ import { fetchSortedRecord } from "../src/_internals/fetch-sorted-record/fetch-s
 
 const scriptsDir = import.meta.dirname;
 
-const EMBEDDED_ENTRY_REGEX = /\s+(\d)\.(\d{3})\s+-\s+/g;
+/**
+ * CONFAZ prints the text in force with the `A5-1TextoAcordo` class and keeps every superseded
+ * wording alongside it under `A8-3RedacaoAnt`, with the amendment notes under `Remisso`,
+ * `A8-1Remissao` and `A8-2RemissaoAnt`. Reading only the first class is what keeps the previous
+ * redaction of a re-worded code (7.667, re-worded by Ajuste SINIEF 39/25) out of the table.
+ */
+const CURRENT_TEXT_PARAGRAPH_REGEX = /<p class="A5-1TextoAcordo">([^<]*)<\/p>/g;
+
+/** A code line, e.g. `1.101 - Compra para industrialização ou produção rural.`. */
+const CODE_LINE_REGEX = /^(\d)\.(\d{3})\s*[-–]\s*(.+)$/;
 
 /**
- * Some rows of the mirror glue the next code into the description, e.g.
- * `1305;"... energia elétrica 1.306 - Aquisição de serviço ..."`, which both corrupts the
- * `1305` description and drops `1306`. Splits such a row into one entry per code.
- * @param {string} code - The CFOP code the row started with.
- * @param {string} description - The row description, possibly containing embedded codes.
- * @returns {[string, string][]} One `[code, description]` entry per code found in the row.
+ * The sentence that opens the body of every operable code. Group and subgroup headings
+ * (1.000, 1.100, 1.150, ...) are printed in upper case and followed by "Classificam-se neste
+ * grupo" instead, so they carry no such body and are left out of the table.
  */
-const splitEmbeddedEntries = (code: string, description: string): [string, string][] => {
-	const entries: [string, string][] = [];
-	let currentCode = code;
-	let lastIndex = 0;
+const OPERABLE_BODY = "Classificam-se neste código";
 
-	for (const match of description.matchAll(EMBEDDED_ENTRY_REGEX)) {
-		entries.push([
-			currentCode,
-			description.slice(lastIndex, match.index).replaceAll(/\s+/g, " ").trim(),
-		]);
-		currentCode = `${match[1]}${match[2]}`;
-		lastIndex = match.index + match[0].length;
+const TRAILING_PUNCTUATION_REGEX = /[.\s]+$/;
+
+/**
+ * Reads the consolidated Anexo II out of the CONFAZ page.
+ *
+ * A handful of rows glue the body into the same paragraph as the code line, e.g.
+ * `1.255 - Compra de energia elétrica ... Classificam-se neste código as compras ...`, so the
+ * body sentence is looked for inside the code line first and only then in the paragraph that
+ * follows it.
+ * @param {string} html - The annex page.
+ * @returns {Record<string, string>} One entry per operable code, keyed by the 4 digits.
+ */
+const parseAnnex = (html: string): Record<string, string> => {
+	const paragraphs = [...html.matchAll(CURRENT_TEXT_PARAGRAPH_REGEX)].map((match) =>
+		(match[1] ?? "").replaceAll(/\s+/g, " ").trim(),
+	);
+
+	const data: Record<string, string> = {};
+
+	for (const [index, paragraph] of paragraphs.entries()) {
+		const match = CODE_LINE_REGEX.exec(paragraph);
+
+		if (!match) continue;
+
+		const [, series, code, line] = match;
+
+		if (series === undefined || code === undefined || line === undefined) continue;
+
+		const bodyIndex = line.indexOf(OPERABLE_BODY);
+		const isOperable = bodyIndex !== -1 || (paragraphs[index + 1] ?? "").startsWith(OPERABLE_BODY);
+
+		if (!isOperable) continue;
+
+		const description = (bodyIndex === -1 ? line : line.slice(0, bodyIndex))
+			.trim()
+			.replace(TRAILING_PUNCTUATION_REGEX, "");
+
+		data[`${series}${code}`] = description;
 	}
 
-	entries.push([currentCode, description.slice(lastIndex).replaceAll(/\s+/g, " ").trim()]);
-
-	return entries;
+	return data;
 };
 
 const main = async (): Promise<void> => {
 	const sorted = await fetchSortedRecord(
-		"https://raw.githubusercontent.com/jansenfelipe/cfop/master/cfop.csv",
-		"CFOP mirror",
+		"https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24",
+		"CFOP annex",
 		async (response) => {
-			const csv = await response.text();
+			const data = parseAnnex(await response.text());
 
-			const data: Record<string, string> = {};
-
-			for (const line of csv.split("\n")) {
-				const match = /^(\d{4});"(.*)"\s*$/.exec(line);
-
-				if (!match) continue;
-
-				const [, code, description] = match;
-
-				if (code === undefined || description === undefined) continue;
-
-				for (const [entryCode, entryDescription] of splitEmbeddedEntries(code, description)) {
-					if (entryCode.endsWith("00") || entryCode.endsWith("50")) continue;
-
-					data[entryCode] = entryDescription;
-				}
+			if (Object.keys(data).length === 0) {
+				throw new Error("CFOP annex page holds no operable code");
 			}
 
 			return data;
@@ -70,17 +88,31 @@ const main = async (): Promise<void> => {
 		`/**
  * CFOP (Código Fiscal de Operações e Prestações) table, indexed by the 4 digit code.
  *
+ * Built from the consolidated Anexo II of Convênio SINIEF s/nº of 15 December 1970, the text in
+ * force (given its current wording by Ajuste SINIEF 03/24 and last amended by Ajuste SINIEF
+ * 39/25), not from the frozen 2001 text of Ajuste SINIEF 07/01.
+ *
  * Group and subgroup headers (codes ending in "00" or "50", e.g. "1000", "1100", "1150")
  * are section titles from the official nomenclature rather than operable codes, so they
- * are excluded: the Ajuste SINIEF 07/01 prints them in upper case with no "Classificam-se
- * neste código" body, unlike the operable codes they head (1151, 1152, ...).
+ * are excluded: the annex prints them in upper case with no "Classificam-se neste código"
+ * body, unlike the operable codes they head (1151, 1152, ...).
  *
  * Generated by \`node ./scripts/cfop.ts\`. Do not edit by hand.
  *
- * @see Based on: https://raw.githubusercontent.com/jansenfelipe/cfop/master/cfop.csv
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24
+ * Anexo II of Convênio SINIEF s/nº 1970, the CFOP table in force.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70
+ * Convênio SINIEF s/nº 1970, the consolidated text the annex belongs to.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2001/AJ_007_01
+ * Ajuste SINIEF 07/01, the historical text that gave the CFOP its 4 digit form.
  */
 export const CFOP_TABLE: Record<string, string> = ${JSON.stringify(sorted)};
+
+/**
+ * Shape a CFOP code has to be written in: the 4 digits, optionally split after the series
+ * digit by a single whitespace or mask character, the way the annex prints them ("1.101").
+ */
+export const CFOP_FORMAT_REGEX = /^\\d[\\s.\\-/]?\\d{3}$/;
 `,
 	);
 };
