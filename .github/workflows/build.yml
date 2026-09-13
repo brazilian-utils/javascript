@@ -69,15 +69,13 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         id: base
         run: |
-          if [ -f base/scripts/tree-shaking.ts ]; then
-            node scripts/tree-shaking.ts --json head.json
-            (cd base && npm ci && npm run build && node scripts/tree-shaking.ts --json ../base.json --surviving ../head.json) || true
-          fi
-          if [ -f base.json ]; then
-            echo "measured=true" >> "$GITHUB_OUTPUT"
-          else
+          if [ ! -f base/scripts/tree-shaking.ts ]; then
             echo "measured=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          node scripts/tree-shaking.ts --json head.json
+          (cd base && npm ci && npm run build && node scripts/tree-shaking.ts --json ../base.json --surviving ../head.json)
+          echo "measured=true" >> "$GITHUB_OUTPUT"
 
       - name: Compare against base
         if: ${{ github.event_name == 'pull_request' }}
