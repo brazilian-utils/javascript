@@ -13,6 +13,25 @@ export type ConvertCurrencyToWordsOptions = {
 
 const MILLION_SCALE_SUFFIXES = ["lhão", "lhões"];
 
+/**
+ * Scales an amount to whole cents, truncating it, without letting the floating point noise of
+ * the multiplication decide the result. `absolute * 100` lands a hair off the integer it
+ * should be (`1.15 * 100` is `114.99999999999999`, `0.57 * 100` is `56.99999999999999`), so a
+ * scaled value within one double rounding error of an integer is read as that integer.
+ * An amount that is genuinely below the next cent sits much further away than that
+ * (`1.999999999 * 100` is `199.9999999`) and is truncated, as it must be.
+ *
+ * @param {number} absolute - The absolute amount in reais.
+ * @returns {number} The amount truncated to whole cents.
+ */
+const toCents = (absolute: number): number => {
+	const scaled = absolute * 100;
+	const rounded = Math.round(scaled);
+
+	// Stryker disable next-line EqualityOperator: `<` is equivalent, the two sides are never equal. Writing scaled as m * 2 ** (k - 52) with 2 ** k <= scaled < 2 ** (k + 1) and m its 53 bit significand, both scaled and rounded are multiples of the ulp 2 ** (k - 52), so the difference is j * 2 ** (k - 52) for an integer j, while Number.EPSILON * scaled is exactly m * 2 ** (k - 104): equality asks for m === j * 2 ** 52, and m < 2 ** 53 leaves only m === 2 ** 52, i.e. scaled a power of two. A power of two of at least 1 is an integer, whose difference is 0, and one below 1 rounds to 0 or to 1 at a distance of at least 0.25, never one ulp. The only case where both sides are 0 is scaled === 0, where rounded and Math.trunc(scaled) are both 0 anyway
+	return Math.abs(scaled - rounded) <= Number.EPSILON * scaled ? rounded : Math.trunc(scaled);
+};
+
 const endsInMillionScale = (words: string): boolean =>
 	MILLION_SCALE_SUFFIXES.some((suffix) => words.endsWith(suffix));
 
@@ -58,7 +77,7 @@ export const convertCurrencyToWords = (
 
 	const absolute = Math.abs(value);
 	const hasExactCents = absolute * 100 <= Number.MAX_SAFE_INTEGER;
-	const totalCents = hasExactCents ? Math.trunc(Number((absolute * 100).toFixed(6))) : 0;
+	const totalCents = hasExactCents ? toCents(absolute) : 0;
 
 	const reais = hasExactCents ? Math.floor(totalCents / 100) : Math.trunc(absolute);
 	const centavos = hasExactCents ? totalCents % 100 : 0;

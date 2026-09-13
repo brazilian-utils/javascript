@@ -123,6 +123,23 @@ describe("convertCurrencyToWords", () => {
 		});
 	});
 
+	describe("floating point precision", () => {
+		test("should not carry an amount over a cent boundary while truncating it", () => {
+			expect(convertCurrencyToWords(0.009999999)).toBe("zero reais");
+			expect(convertCurrencyToWords(1.999999999)).toBe("um real e noventa e nove centavos");
+		});
+
+		test("should absorb the noise of scaling a two decimal amount to cents", () => {
+			expect(convertCurrencyToWords(1.15)).toBe("um real e quinze centavos");
+			expect(convertCurrencyToWords(0.29)).toBe("vinte e nove centavos");
+			expect(convertCurrencyToWords(19.99)).toBe("dezenove reais e noventa e nove centavos");
+		});
+
+		test("should absorb the noise of an amount that is itself the sum of two floats", () => {
+			expect(convertCurrencyToWords(0.1 + 0.2)).toBe("trinta centavos");
+		});
+	});
+
 	describe("case option", () => {
 		test("should keep the result lowercase by default", () => {
 			expect(convertCurrencyToWords(1000)).toBe("mil reais");
