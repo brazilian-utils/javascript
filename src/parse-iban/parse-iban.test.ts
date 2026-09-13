@@ -115,6 +115,11 @@ describe("parseIban", () => {
 			expect(parseIban("BR1500000000000010932840814X2")).toBeNull();
 		});
 
+		test("when it carries a character outside the print format", () => {
+			expect(parseIban("BR1500000000000010932840814P-2")).toBeNull();
+			expect(parseIban("BR15.0000.0000.0000.1093.2840.814P2")).toBeNull();
+		});
+
 		test("when it is an empty string", () => {
 			expect(parseIban("")).toBeNull();
 		});

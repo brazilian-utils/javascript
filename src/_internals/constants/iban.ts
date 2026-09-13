@@ -13,3 +13,10 @@
 export const BR_IBAN_LENGTH = 29;
 
 export const BR_IBAN_REGEX = /^BR\d{2}\d{8}\d{5}\d{10}[A-Z][A-Z0-9]$/;
+
+/**
+ * Shape an IBAN has to be written in: the ISO 13616 print format, letters and digits in
+ * groups separated by a single space. Any other character (a hyphen, a dot, a slash) makes
+ * the value something other than an IBAN, so it is rejected instead of stripped.
+ */
+export const IBAN_FORMAT_REGEX = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
