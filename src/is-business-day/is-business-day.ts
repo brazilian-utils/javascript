@@ -2,6 +2,8 @@ import { type StateCode } from "../_internals/constants/states";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { getHolidays } from "../get-holidays/get-holidays";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /**
  * Options shared by every business day util (`isBusinessDay`, `addBusinessDays`,
  * `subBusinessDays` and `differenceInBusinessDays`): which holidays count as non-business days.

@@ -9,6 +9,8 @@ import {
 	STATE_HOLIDAYS,
 } from "./constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /** The class a holiday returned by `getHolidays` falls into. */
 export type HolidayType = "national" | "state" | "optional" | "religious";
 

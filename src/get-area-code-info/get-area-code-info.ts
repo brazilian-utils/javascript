@@ -3,6 +3,8 @@ import { DATA, type State, type StateCode, type StateName } from "../_internals/
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
+export type { State, StateCode, StateName } from "../_internals/constants/states";
+
 /** The state, and the region it belongs to, that `getAreaCodeInfo` returns for a DDD. */
 export type AreaCodeInfo = {
 	/** The DDD (area code) as a number, e.g. `11`. */

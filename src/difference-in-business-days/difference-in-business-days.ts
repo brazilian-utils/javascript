@@ -1,6 +1,8 @@
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 
+export type { BusinessDayOptions } from "../is-business-day/is-business-day";
+
 const toLocalDayTimestamp = (date: Date): number =>
 	Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
 

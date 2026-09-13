@@ -2,6 +2,8 @@ import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { getHolidays } from "../get-holidays/get-holidays";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /** The options `isHoliday` takes: the date to check and, optionally, the state whose holidays also count. */
 export type IsHolidayOptions = {
 	/** The date to check, read by its local calendar day. */

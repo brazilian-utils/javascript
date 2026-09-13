@@ -1,6 +1,8 @@
 import { addBusinessDays } from "../add-business-days/add-business-days";
 import { type BusinessDayOptions } from "../is-business-day/is-business-day";
 
+export type { BusinessDayOptions } from "../is-business-day/is-business-day";
+
 /**
  * Subtracts a number of Brazilian business days (dias úteis) from a date.
  *
