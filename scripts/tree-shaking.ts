@@ -47,6 +47,9 @@ import { build } from "esbuild";
 const rootDir = resolve(import.meta.dirname, "..");
 const packageName = "@brazilian-utils/brazilian-utils";
 
+/** Exit code of a comparison that could not be carried out (missing build, unreadable base). */
+const COMPARISON_ERROR_EXIT_CODE = 2;
+
 const CONCURRENCY = 16;
 const FULL_IMPORT_KEY = "__full__";
 
@@ -250,7 +253,7 @@ const measureExports = async (
 	const distEntry = resolve(packageRoot, "dist/brazilian-utils.js");
 	if (!existsSync(distEntry)) {
 		console.error(`Missing ${distEntry}. Run \`npm run build\` first.`);
-		process.exit(1);
+		process.exit(COMPARISON_ERROR_EXIT_CODE);
 	}
 
 	const { testable, aliasOf } = await loadExports(distEntry);
@@ -578,8 +581,6 @@ const readSnapshot = async (path: string): Promise<Snapshot> => {
 
 	return parsed;
 };
-
-const COMPARISON_ERROR_EXIT_CODE = 2;
 
 const main = async (): Promise<void> => {
 	const args = parseArgs(process.argv.slice(2));

@@ -83,6 +83,8 @@ jobs:
         continue-on-error: true
         run: |
           if [ "${{ steps.base.outputs.measured }}" = "true" ]; then
+            code=2
+            echo "code=$code" >> "$GITHUB_OUTPUT"
             set +e
             node scripts/tree-shaking.ts --compare base.json --markdown tree-shaking.md
             code=$?
