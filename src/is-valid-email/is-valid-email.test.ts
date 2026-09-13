@@ -59,6 +59,10 @@ describe("isValidEmail", () => {
 		test("when a domain label is longer than the 63 characters WHATWG allows", () => {
 			expect(isValidEmail(`user@${"a".repeat(64)}.com`)).toBe(false);
 		});
+
+		test("when the final domain label is longer than the 63 characters WHATWG allows", () => {
+			expect(isValidEmail(`user@example.${"a".repeat(64)}`)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -78,6 +82,10 @@ describe("isValidEmail", () => {
 
 		test("when a domain label is exactly 63 characters long", () => {
 			expect(isValidEmail(`user@${"a".repeat(63)}.com`)).toBe(true);
+		});
+
+		test("when the final domain label is exactly 63 characters long", () => {
+			expect(isValidEmail(`user@example.${"a".repeat(63)}`)).toBe(true);
 		});
 
 		test("when is a valid email with special characters", () => {
