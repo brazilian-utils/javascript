@@ -29,7 +29,9 @@ export type PixKey = {
  * - `cnpj`: 14 characters, no mask, uppercase for the alphanumeric format;
  * - `email`: trimmed and lowercased, at most 77 characters;
  * - `phone`: E.164, `+55` followed by the DDD and the subscriber number, so at most 14
- *   characters. Masked, bare and `+55` prefixed inputs are all accepted;
+ *   characters. The manual registers a "número de telefone celular", so only mobile numbers
+ *   are recognized; a landline is not a Pix key. Masked, bare and `+55` prefixed inputs are
+ *   all accepted;
  * - `evp`: the random key, a lowercase UUID version 4.
  *
  * A value with a valid CNPJ check digit is read as a CNPJ, even when it starts with `0055`
@@ -53,9 +55,9 @@ export type PixKey = {
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Based on: https://github.com/bacen/pix-dict-api DICT (Diretório de Identificadores de
+ * @see Official: https://github.com/bacen/pix-dict-api DICT (Diretório de Identificadores de
  * Contas Transacionais) OpenAPI spec, key format reference.
- * @see Based on: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
  */
 export const parsePixKey = (value: string): PixKey | null => {
 	if (typeof value !== "string") return null;
@@ -76,7 +78,7 @@ export const parsePixKey = (value: string): PixKey | null => {
 	}
 
 	const national = normalizePhone(trimmed);
-	const phone: PixKey | null = isValidPhone(national)
+	const phone: PixKey | null = isValidPhone(national, { accept: ["mobile"] })
 		? { type: "phone", value: `+${PHONE_COUNTRY_CODE}${national}` }
 		: null;
 

@@ -19,8 +19,11 @@ import { AREA_CODE_STATES } from "../_internals/constants/area-codes";
  * getAreaCodesByState("XX"); // []
  * ```
  *
- * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2010/167-resolucao-553
- *   (Resolução Anatel 553/2010, Plano Geral de Numeração)
+ * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
+ * page below lists the codes actually allocated.
+ *
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
+ * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
  */
 export const getAreaCodesByState = (stateCode: string): number[] => {
 	if (typeof stateCode !== "string") return [];

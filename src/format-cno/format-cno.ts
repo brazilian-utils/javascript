@@ -1,7 +1,7 @@
+import { CEI_PATTERN } from "../_internals/constants/cei";
 import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { PATTERN } from "./constants";
 
 /** Options of `formatCno`. */
 export type FormatCnoOptions = {
@@ -33,6 +33,9 @@ export type FormatCnoOptions = {
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno
+ * The registry's own page at the Receita Federal, which describes the cadastro but does not
+ * print the mask; the mask below is the one the two reference implementations of the check
+ * digit cited by `isValidCei` agree on.
  */
 export const formatCno = (value: string | number, options?: FormatCnoOptions): string => {
 	if (isNullish(value)) return "";
@@ -40,6 +43,6 @@ export const formatCno = (value: string | number, options?: FormatCnoOptions): s
 	return format({
 		pad: options?.pad,
 		value: sanitizeToDigits(value),
-		pattern: PATTERN,
+		pattern: CEI_PATTERN,
 	});
 };

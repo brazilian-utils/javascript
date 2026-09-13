@@ -37,7 +37,19 @@ export type IsHolidayOptions = {
  * isHoliday(); // false
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
+ * The underlying national holidays are the ones `getHolidays` computes; see its JSDoc (and
+ * `src/get-holidays/constants.ts` for state holidays) for the full set of laws behind them.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm Lei 662/1949, the base
+ * national holidays law.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm Lei 10.607/2002,
+ * added Tiradentes and Finados.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm Lei 6.802/1980, declared
+ * Nossa Senhora Aparecida a national holiday.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm Lei
+ * 14.759/2023, nationalized Dia da Consciência Negra from 2024.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm Lei 9.093/1995, the
+ * framework law authorizing state and municipal holidays.
  */
 export const isHoliday = (options?: IsHolidayOptions): boolean => {
 	if (isNullish(options) || typeof options !== "object") {

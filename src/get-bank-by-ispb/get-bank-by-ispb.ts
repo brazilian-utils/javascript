@@ -23,7 +23,7 @@ const ISPB_LENGTH = 8;
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
- * @see Based on: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
+ * @see Official: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
  * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */
 export const getBankByIspb = (value: string | number): Bank | null => {

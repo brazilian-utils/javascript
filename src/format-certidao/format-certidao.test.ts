@@ -60,9 +60,10 @@ describe("formatCertidao", () => {
 		});
 	});
 
-	describe("should accept a number", () => {
-		test("for a value short enough to be an exact integer", () => {
-			expect(formatCertidao(104_539_015_520)).toBe("104539 01 55 20");
+	describe("should refuse a number", () => {
+		test("because the 32 digits of a matrícula do not fit in a JavaScript number", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(formatCertidao(104_539_015_520)).toBe("");
 		});
 	});
 
@@ -101,7 +102,8 @@ describe("formatCertidao", () => {
 			fc.assert(
 				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
 					expect(typeof formatCertidao(text)).toBe("string");
-					expect(typeof formatCertidao(number)).toBe("string");
+					// @ts-expect-error: intentionally invalid input
+					expect(formatCertidao(number)).toBe("");
 				}),
 			);
 		});
@@ -109,8 +111,8 @@ describe("formatCertidao", () => {
 });
 
 describe("formatCertidao types", () => {
-	test("should take a string or number, optional options, and return a string", () => {
-		expectTypeOf(formatCertidao).parameter(0).toEqualTypeOf<string | number>();
+	test("should take a string, optional options, and return a string", () => {
+		expectTypeOf(formatCertidao).parameter(0).toEqualTypeOf<string>();
 		expectTypeOf(formatCertidao).parameter(1).toEqualTypeOf<FormatCertidaoOptions | undefined>();
 		expectTypeOf<FormatCertidaoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 		expectTypeOf(formatCertidao).returns.toEqualTypeOf<string>();

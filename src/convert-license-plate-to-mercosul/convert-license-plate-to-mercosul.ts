@@ -20,8 +20,11 @@ import { DIGIT_TO_MERCOSUL_LETTER } from "./constants";
  * convertLicensePlateToMercosul("invalid"); // ""
  * ```
  *
+ * Resolução CONTRAN nº 969/2022, art. 2º § 4º. The linked DOU PDF has no annexes; the digit to
+ * letter table comes from Anexo II, published separately on the CONTRAN resolutions page.
+ *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
- * Resolução CONTRAN nº 969/2022, art. 2º § 4º and Anexo II.
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes
  */
 export const convertLicensePlateToMercosul = (value: string): string => {
 	if (getFormatLicensePlate(value) !== "LLLNNNN") return "";

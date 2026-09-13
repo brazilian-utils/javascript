@@ -39,13 +39,16 @@ const getCheckDigit = (value: string): number => {
  * 0, 1, ... In both passes the check digit is the remainder itself, with a remainder of 10 read
  * as 1.
  *
- * `options.accept` restricts which of the nine books (see `CertidaoType`, reused from
- * `parseCertidao`) count as valid: when given, the book-type digit (fifteenth position of the
- * matrícula) must map to one of the listed types, so a matrícula whose digit is `0` or greater
- * than `9` (not one of the nine defined books) is also rejected. When omitted, every book type
- * is accepted and the digit is not otherwise checked, matching the previous behavior.
+ * The book-type digit (fifteenth position of the matrícula) always has to name one of the nine
+ * books (see `CertidaoType`, reused from `parseCertidao`), so a matrícula whose digit is `0` is
+ * rejected however good its check digits are, the same way `parseCertidao` returns `null` for
+ * it. `options.accept` narrows that further to the listed types; when it is omitted, or when it
+ * is not an array, every book type is accepted.
  *
- * @param {string|number} value - The matrícula value to be validated.
+ * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
+ * hold, so a numeric argument is always rejected instead of being read as a rounded value.
+ *
+ * @param {string} value - The matrícula value to be validated.
  * @param {IsValidCertidaoOptions} [options] - Optional validation options.
  * @param {CertidaoType[]} [options.accept] - The book types to accept. Defaults to all of them.
  * @returns {boolean} True if the matrícula is valid, false otherwise.
@@ -60,10 +63,12 @@ const getCheckDigit = (value: string): number => {
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: ["death"] }); // false
  * ```
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310 Provimento CNJ nº 3, de 17/11/2009,
- * which instituted the modelo único de certidão and its 32 digit matrícula.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243 Código Nacional de Normas da
+ * Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento CNJ nº 149/2023), art. 473
+ * in the wording of the Provimento CN nº 182, de 17/09/2024: the in-force layout of the 32
+ * digit matrícula.
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311 Provimento CNJ nº 2, de 27/04/2009,
- * which instituted the Código Nacional de Serventias (CNS).
+ * which instituted the modelos únicos de certidão and the matrícula (revoked; historical).
  * @see Based on: http://ghiorzi.org/DVnew.htm Worked example of the two check digits
  * (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts
@@ -71,10 +76,7 @@ const getCheckDigit = (value: string): number => {
  * @see Based on: https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php
  * Third reference implementation agreeing on the weights and on the remainder of 10 read as 1.
  */
-export const isValidCertidao = (
-	value: string | number,
-	options?: IsValidCertidaoOptions,
-): boolean => {
+export const isValidCertidao = (value: string, options?: IsValidCertidaoOptions): boolean => {
 	if (typeof value !== "string") return false;
 
 	const digits = sanitizeToDigits(value);
@@ -87,12 +89,14 @@ export const isValidCertidao = (
 
 	if (digits.slice(CERTIDAO_BASE_LENGTH) !== `${first}${second}`) return false;
 
+	const typeCode = digits.charCodeAt(14) - 48;
+	const type: CertidaoType | undefined = CERTIDAO_TYPES[typeCode - 1];
+
+	if (type === undefined) return false;
+
 	const accept = options?.accept;
 
 	if (!Array.isArray(accept)) return true;
 
-	const typeCode = digits.charCodeAt(14) - 48;
-	const type: CertidaoType | undefined = CERTIDAO_TYPES[typeCode - 1];
-
-	return type !== undefined && accept.includes(type);
+	return accept.includes(type);
 };

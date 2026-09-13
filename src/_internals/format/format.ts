@@ -36,7 +36,7 @@ export const format = ({ pad, value, pattern }: FormatParams): string => {
 	let valueIndex = 0;
 	let paddedValue = value;
 
-	if (pad === true) {
+	if (pad ?? false) {
 		const separatorsLength = pattern.replaceAll(/[0*]/g, "").length;
 		paddedValue = value.padStart(pattern.length - separatorsLength, "0");
 	}

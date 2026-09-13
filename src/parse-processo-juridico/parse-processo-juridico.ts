@@ -13,7 +13,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * parseProcessoJuridico("0002080-25.2026.5.15.0049"); // "00020802520265150049"
  * ```
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/119 Resolução CNJ nº 65/2008
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits.
+ *
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */
 export const parseProcessoJuridico = (value: string | number): string =>
 	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, PROCESSO_JURIDICO_LENGTH);

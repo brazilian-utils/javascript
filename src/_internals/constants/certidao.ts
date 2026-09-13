@@ -3,10 +3,12 @@
  * 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) +
  * 3 (folha) + 7 (termo) + 2 (dígitos verificadores).
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310 Provimento CNJ nº 3, de 17/11/2009,
- * which instituted the modelo único de certidão and its 32 digit matrícula.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243 Código Nacional de Normas da
+ * Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento CNJ nº 149/2023), art. 473
+ * in the wording of the Provimento CN nº 182, de 17/09/2024: the in-force layout of the 32
+ * digit matrícula.
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311 Provimento CNJ nº 2, de 27/04/2009,
- * which instituted the Código Nacional de Serventias (CNS).
+ * which instituted the modelos únicos de certidão and the matrícula (revoked; historical).
  * @see Based on: http://ghiorzi.org/DVnew.htm Worked example of the two check digits
  * (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts

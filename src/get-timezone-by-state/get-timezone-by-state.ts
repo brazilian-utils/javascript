@@ -7,15 +7,19 @@ import { STATE_TIMEZONES } from "./constants";
  *
  * Some tzdata zones cover more than one state: `America/Sao_Paulo` also covers DF, GO, MG, ES,
  * RJ, PR, SC and RS besides SP, and `America/Fortaleza` also covers MA, PI, RN and PB besides
- * CE. Pernambuco resolves to `America/Recife`, not `America/Noronha`: Fernando de Noronha is an
- * archipelago district of PE, not a state of its own.
+ * CE. Pará and Amazonas each straddle two IANA zones themselves (`America/Belem`/
+ * `America/Santarem` and `America/Manaus`/`America/Eirunepe` respectively); both resolve here
+ * to their capital's zone (Belém and Manaus). Pernambuco resolves to `America/Recife`, not
+ * `America/Noronha`: Fernando de Noronha is an archipelago district of PE, not a state of its
+ * own.
  *
  * @param {string} stateCode - The two-letter state code (sigla).
  * @returns {string|null} The IANA time zone name, or `null` when `stateCode` does not match
  * any Brazilian state.
  *
- * @see Official: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab (IANA tz
- * database, `BR` rows)
+ * @see Official: https://www.iana.org/time-zones
+ * @see Based on: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab (IANA tz
+ * database data file, `BR` rows)
  * @see Based on: https://en.wikipedia.org/wiki/Time_in_Brazil Used to confirm the state
  * coverage of each zone.
  *

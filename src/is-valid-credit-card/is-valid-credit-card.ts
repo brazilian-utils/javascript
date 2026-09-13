@@ -6,9 +6,9 @@ import { MAX_LENGTH, MIN_LENGTH } from "./constants";
  * Validates a payment card number (crédito ou débito) using the Luhn algorithm.
  *
  * Accepts the usual mask characters (spaces and hyphens) between digits. Only checks the
- * digit count (12 to 19, the range every ISO/IEC 7812-1 issuer identification number falls
- * into) and the Luhn check digit; it performs no brand detection (Visa, Mastercard, Amex...),
- * issuer range lookup or expiration/CVV checks.
+ * digit count (12 to 19: 12 is the de-facto industry minimum PAN length, e.g. Maestro, and
+ * ISO/IEC 7812-1 caps the PAN at 19) and the Luhn check digit; it performs no brand detection
+ * (Visa, Mastercard, Amex...), issuer range lookup or expiration/CVV checks.
  *
  * @param {string|number} value - The card number to be validated.
  * @returns {boolean} True when `value` sanitizes to 12-19 digits ending in a valid Luhn check digit.
@@ -23,7 +23,10 @@ import { MAX_LENGTH, MIN_LENGTH } from "./constants";
  * isValidCreditCard("123456789"); // false (too short)
  * ```
  *
- * @see Official: https://www.iso.org/standard/70484.html ISO/IEC 7812-1 (issuer identification numbers)
+ * ISO/IEC 7812-1 (issuer identification numbers) caps the PAN at 19 digits but sets no
+ * minimum; the 12-digit floor here is the de-facto industry minimum (e.g. Maestro).
+ *
+ * @see Official: https://www.iso.org/standard/70484.html
  */
 export const isValidCreditCard = (value: string | number): boolean => {
 	if (typeof value !== "string" && typeof value !== "number") return false;

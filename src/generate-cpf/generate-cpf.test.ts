@@ -55,6 +55,13 @@ describe("generateCpf", () => {
 		}
 	});
 
+	test("should embed the 1st região fiscal digit for the states the Receita Federal groups there", () => {
+		expect(STATE_CODES.MS).toBe("1");
+		expect(STATE_CODES.MT).toBe("1");
+		expect(generateCpf("MS")[8]).toBe("1");
+		expect(generateCpf("MT")[8]).toBe("1");
+	});
+
 	test("should fall back to a random digit instead of looking up an unknown state code", () => {
 		// @ts-expect-error: intentionally invalid input
 		const cpf = generateCpf("XX");

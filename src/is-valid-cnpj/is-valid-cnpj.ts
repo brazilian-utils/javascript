@@ -85,6 +85,10 @@ const isValidChecksum = (cnpj: string): boolean => {
  * isValidCnpj("q0slfmbd7vx439", { version: 2 }); // true (case-insensitive)
  * ```
  *
+ * Version 2 has no reserved-value list because the Receita Federal manual defines none for the
+ * alphanumeric format, so a repeated-character alphanumeric base (e.g. all `A`s) that passes the
+ * checksum is accepted, unlike the numeric reserved numbers rejected under version 1.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico

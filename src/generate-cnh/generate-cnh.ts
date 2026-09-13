@@ -15,7 +15,11 @@ import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-d
  * generateCnh(); // "00000000119"
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm
+ * Resolução CONTRAN nº 886/2021, art. 4º I, defines the CNH registry number as 9 characters plus
+ * 2 security check digits, but no official text publishes the check-digit weights; the algorithm
+ * below follows the community reference cited as `Based on:`.
+ *
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/
  */
 export const generateCnh = (): string => {

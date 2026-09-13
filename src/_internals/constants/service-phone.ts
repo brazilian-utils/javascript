@@ -17,8 +17,8 @@
  * - **Código de Acesso a Serviços de Utilidade Pública (SUP)**, art. 13-14: 3 digits, with the
  *   whole `1N₂N₁` range destined to SUP and every other 3-digit series held in reserva técnica.
  *   Individual codes are designated one by one by Anatel Ato, so the codes below are the
- *   consolidated list Anatel publishes, not the full `100`-`199` range. `112` and `911` are
- *   mobile-only aliases of `190` and are listed by Anatel alongside the `1XX` codes.
+ *   consolidated list Anatel publishes, not the full `100`-`199` range (see `isValidServicePhone`
+ *   for the `112`/`911` mobile-alias note).
  * - **The abbreviated `300X`/`400X` numbers** (`3003-1234`, `4004-1234`) are *not* a regulatory
  *   category at all. They are ordinary 8-digit geographic STFC user numbers (art. 11 assigns
  *   `2`-`6` as the first digit of a fixed-line number) whose 4-digit prefix a carrier licenses

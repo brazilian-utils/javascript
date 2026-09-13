@@ -23,10 +23,13 @@ export type AreaCodeInfo = {
  * @returns {AreaCodeInfo|null} The area code info, or `null` when `areaCode` is not one of the
  * 67 DDDs in use under the Plano Geral de Numeração.
  *
- * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2010/167-resolucao-553
- *   (Resolução Anatel 553/2010, Plano Geral de Numeração)
- * @see Based on: https://brasilapi.com.br/docs#tag/DDD BrasilAPI DDD endpoint, used to verify
- *   the code-to-state mapping.
+ * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
+ * page below lists the codes actually allocated. The BrasilAPI DDD endpoint was used to verify
+ * the code-to-state mapping.
+ *
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
+ * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Based on: https://brasilapi.com.br/docs#tag/DDD
  *
  * @example
  * ```typescript

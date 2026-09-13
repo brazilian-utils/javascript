@@ -11,5 +11,6 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
  * ```
  *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
+ * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const getLegalNatures = (): Record<string, string> => ({ ...LEGAL_NATURE });

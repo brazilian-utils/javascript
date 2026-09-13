@@ -41,6 +41,11 @@ describe("parseCertidao", () => {
 		test("when the book code is 0, outside the nine books of the Provimento", () => {
 			expect(parseCertidao("10453901552013000012021000012387")).toBeNull();
 		});
+
+		test("when it is a number, which cannot carry the 32 significant digits of a matrícula", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(parseCertidao(1_045_390_155)).toBeNull();
+		});
 	});
 
 	describe("should return the parsed matrícula", () => {
@@ -169,8 +174,8 @@ describe("parseCertidao", () => {
 });
 
 describe("parseCertidao types", () => {
-	test("should take a string or number and return a Certidao or null", () => {
-		expectTypeOf(parseCertidao).parameter(0).toEqualTypeOf<string | number>();
+	test("should take a string and return a Certidao or null", () => {
+		expectTypeOf(parseCertidao).parameter(0).toEqualTypeOf<string>();
 		expectTypeOf(parseCertidao).returns.toEqualTypeOf<Certidao | null>();
 		expectTypeOf<Certidao>().toEqualTypeOf<{
 			registryCns: string;

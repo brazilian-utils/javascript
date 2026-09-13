@@ -2,7 +2,7 @@ import {
 	CNS_DEFINITIVE_ADJUSTED_SUFFIX,
 	CNS_DEFINITIVE_BASE_LENGTH,
 	CNS_DEFINITIVE_SUFFIX,
-	CNS_LENGTH,
+	CNS_FORMAT_REGEX,
 } from "../_internals/constants/cns";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -41,6 +41,10 @@ const isValidProvisional = (digits: string): boolean =>
  * are validated by a single weighted sum (weights 15 down to 1 over all 15 digits) that must
  * be a multiple of 11.
  *
+ * The value has to be written as the 15 digits, optionally split into the printed groups of 3,
+ * 4, 4 and 4 by whitespace or the usual mask characters; anything else, a letter among the
+ * digits included, is rejected instead of being read past.
+ *
  * @param {string|number} value - The CNS value to be validated.
  * @returns {boolean} True if the CNS is valid, false otherwise.
  *
@@ -54,13 +58,15 @@ const isValidProvisional = (digits: string): boolean =>
  * ```
  *
  * @see Official: https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/
+ * @see Based on: https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html
+ * e-SUS APS documentation of the same DATASUS algorithm, reachable without a browser.
  */
 export const isValidCns = (value: string | number): boolean => {
 	if (typeof value !== "string" && typeof value !== "number") return false;
 
 	const digits = sanitizeToDigits(value);
 
-	if (digits.length !== CNS_LENGTH) return false;
+	if (!CNS_FORMAT_REGEX.test(String(value).trim())) return false;
 
 	if (DEFINITIVE_FIRST_DIGIT_REGEX.test(digits)) return isValidDefinitive(digits);
 

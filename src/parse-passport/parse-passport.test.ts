@@ -34,9 +34,12 @@ describe("parsePassport", () => {
 			expect(parsePassport("AB123456789")).toBe("AB123456");
 		});
 
-		test("when it is a non-string value", () => {
-			// @ts-expect-error not a string
+		test("when it is not a string", () => {
+			// @ts-expect-error: intentionally invalid input
 			expect(parsePassport(null)).toBe("");
+			// @ts-expect-error: intentionally invalid input
+			expect(parsePassport(123_456)).toBe("");
+			expect(parsePassport(Object.create(null))).toBe("");
 		});
 	});
 

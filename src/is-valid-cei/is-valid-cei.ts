@@ -10,6 +10,10 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * mapping 10 back to 0. The CEI was replaced by the CNO for construction works and by the CAEPF
  * for individuals, but numbers already issued keep their meaning and their check digit.
  *
+ * The Receita Federal does not publish the check digit rule of the CEI/CNO numbering, so the
+ * calculation follows the reference implementations cited below, cross-checked against the CNO
+ * open data of the Receita Federal.
+ *
  * @param {string|number} value - The CEI value to be validated.
  * @returns {boolean} True if the CEI is valid, false otherwise.
  *
@@ -23,6 +27,12 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno
+ * The registry's own page at the Receita Federal, which describes the cadastro but publishes
+ * neither the mask nor the check digit rule.
+ * @see Official: https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno
+ * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: every one of the 38432
+ * works registered in Minas Gerais passes this check, which is what ties the CNO to the CEI
+ * rule and where the test vectors come from.
  * @see Based on: https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php
  * PHP reference implementation of the CEI check digit.
  * @see Based on: https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs

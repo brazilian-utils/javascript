@@ -3,6 +3,7 @@ import * as fc from "fast-check";
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
 import { type StateCode } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { VALID_EMISSION_TYPES } from "./constants";
 import { parseNfeKey, type NfeKey, type NfeKeyModel } from "./parse-nfe-key";
 
 const KEY_SP = "35170458716523000119550010000000121000123458";
@@ -45,6 +46,10 @@ describe("parseNfeKey", () => {
 
 		test("when the document number is zero", () => {
 			expect(parseNfeKey("35170458716523000119550010000000001000123457")).toBeNull();
+		});
+
+		test("when tpEmis is 8, a code the MOC does not assign, even with a matching check digit", () => {
+			expect(parseNfeKey("35170458716523000119550010000000128000123455")).toBeNull();
 		});
 
 		test("when the access key is otherwise invalid", () => {
@@ -95,6 +100,10 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey(KEY_CPF_PADDED)?.taxId).toHaveLength(14);
 		});
 
+		test("for tpEmis 9, the off-line NFC-e contingency, same shape as the SP key with the tpEmis field changed and the check digit recalculated", () => {
+			expect(parseNfeKey("35170458716523000119550010000000129000123453")?.emissionType).toBe(9);
+		});
+
 		test("for every other DF-e model (CT-e, MDF-e, NFC-e), same shape as the SP key with the model field changed and the check digit recalculated", () => {
 			expect(parseNfeKey("35170458716523000119570010000000121000123455")?.model).toBe("57");
 			expect(parseNfeKey("35170458716523000119580010000000121000123459")?.model).toBe("58");
@@ -111,7 +120,7 @@ describe("parseNfeKey", () => {
 			fc.constantFrom("55", "57", "58", "65"),
 			fc.stringMatching(/^[0-9]{3}$/),
 			fc.integer({ min: 1, max: 999_999_999 }),
-			fc.integer({ min: 1, max: 9 }),
+			fc.constantFrom(...VALID_EMISSION_TYPES),
 			fc.stringMatching(/^[0-9]{8}$/),
 		);
 

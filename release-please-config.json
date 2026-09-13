@@ -15,6 +15,7 @@
 		{ "type": "ci", "section": "CI" },
 		{ "type": "deps", "section": "Dependencies" },
 		{ "type": "chore", "scope": "deps", "section": "Dependencies" },
+		{ "type": "chore", "scope": "data", "section": "Data" },
 		{ "type": "chore", "section": "Miscellaneous", "hidden": true },
 		{ "type": "test", "section": "Tests", "hidden": true },
 		{ "type": "refactor", "section": "Refactoring", "hidden": true },

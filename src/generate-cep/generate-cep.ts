@@ -14,5 +14,6 @@ import { generateRandomNumber } from "../_internals/generate-random-number/gener
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
+ * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/guia-de-enderecamento/guia-de-enderecamento
  */
 export const generateCep = (): string => generateRandomNumber(8);

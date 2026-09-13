@@ -38,6 +38,11 @@ describe("isValidPixKey", () => {
 			expect(isValidPixKey([])).toBe(false);
 		});
 
+		test("when the phone is a landline, since the manual registers a mobile number", () => {
+			expect(isValidPixKey("(11) 3000-0000")).toBe(false);
+			expect(isValidPixKey("1130000000")).toBe(false);
+		});
+
 		test("when it is not a key of any accepted kind", () => {
 			expect(isValidPixKey("chave pix")).toBe(false);
 			expect(isValidPixKey("11257245286")).toBe(false);
@@ -60,7 +65,7 @@ describe("isValidPixKey", () => {
 			expect(isValidPixKey("fulano_da_silva.recebedor@example.com")).toBe(true);
 		});
 
-		test("for a phone", () => {
+		test("for a mobile phone", () => {
 			expect(isValidPixKey("+5561912345678")).toBe(true);
 			expect(isValidPixKey("(11) 98765-4321")).toBe(true);
 		});

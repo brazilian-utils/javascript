@@ -14,7 +14,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
- * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
+ * @see Official: http://sped.rfb.gov.br/arquivo/show/8231
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const parseCpf = (value: string | number): string =>
 	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, CPF_LENGTH);

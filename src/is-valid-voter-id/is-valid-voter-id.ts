@@ -27,9 +27,14 @@ const isValidLength = (value: string): boolean => {
  * isValidVoterId("123456780124"); // false (invalid checksum)
  * ```
  *
- * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2003/resolucao-no-21-538-de-14-de-outubro-de-2003
+ * Resolução TSE nº 23.659/2021, art. 36, parágrafo único, confirms the federative union table and
+ * the two-step módulo 11 structure ("até 12 algarismos"). The weights used in each step and the
+ * 13-digit São Paulo/Minas Gerais ids are brutils parity, not published by the TSE — siga0984 uses
+ * a different 9-digit rule for the sequential number.
+ *
+ * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
- * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/voter_id.py (13-digit São Paulo and Minas Gerais ids)
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const isValidVoterId = (value: string): boolean => {
 	if (typeof value !== "string") return false;

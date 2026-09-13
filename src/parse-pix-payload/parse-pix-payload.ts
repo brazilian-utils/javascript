@@ -189,7 +189,11 @@ const buildPixPayload = (
  * optional in the EMV® specification it refers to, so it is accepted when absent. The lengths
  * the manual reserves for the merchant name (25), the merchant city (15) and the `txid` (25)
  * are generator side limits, enforced by `generatePixPayload`; payloads in the wild routinely
- * overrun them, so they are not enforced here.
+ * overrun them, so they are not enforced here, and neither is the 77 character limit of the
+ * Pix key field (26-01).
+ *
+ * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
+ * composto" of Pix Automático (Pix recorrente) does, are out of scope and rejected.
  *
  * The merchant account information must carry exactly one of a Pix key (26-01) or a PSP
  * location (26-25); the location is checked with the same host and path rule
@@ -214,9 +218,10 @@ const buildPixPayload = (
  * // }
  * ```
  *
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Based on: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
- * @see Based on: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
  */
 export const parsePixPayload = (value: string): PixPayload | null => {
 	if (typeof value !== "string") return null;

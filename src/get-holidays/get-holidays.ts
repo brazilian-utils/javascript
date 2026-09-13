@@ -131,8 +131,19 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * const spHolidays = getHolidays({ year: 2024, stateCode: 'SP' });
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm National holidays law
- * (fixed and movable national holidays).
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm Lei 662/1949, the base
+ * national holidays law (Ano novo, Dia do trabalhador, Independência do Brasil, Proclamação da
+ * República, Natal).
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm Lei 10.607/2002,
+ * added Tiradentes and Finados to the national holidays.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm Lei 6.802/1980, declared
+ * Nossa Senhora Aparecida (12 October) a national holiday.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm Lei
+ * 14.759/2023, nationalized Dia da Consciência Negra (20 November) from
+ * `CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR` (2024) onward.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm Lei 9.093/1995, the
+ * framework law authorizing one state civil holiday and up to four municipal religious holidays;
+ * the legal basis for `STATE_HOLIDAYS`.
  * @see Official: state holiday laws are cited individually, one `@see` per holiday, in
  * `src/get-holidays/constants.ts`.
  * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Used as secondary evidence for

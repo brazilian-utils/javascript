@@ -47,6 +47,10 @@ const isValidMobileFirstNumber = (value: string, version?: PhoneVersion): boolea
  * isValidMobilePhone("+55 11 98765-4321"); // true
  * ```
  *
+ * `version: 1` (the default) is the pre-Resolução 749/2022 rule, which also accepts a leading
+ * 6, kept for 2.3.0 compatibility. `version: 2` enforces only 9, a stricter subset of the
+ * resolution's art. 12 I, which places 7, 8 and 9 in Serviço Móvel Pessoal (SMP).
+ *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidMobilePhone = (value: string, options?: IsValidMobilePhoneOptions): boolean => {

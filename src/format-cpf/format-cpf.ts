@@ -29,7 +29,8 @@ export type FormatCpfOptions = {
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
- * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/cpf.py
+ * @see Official: http://sped.rfb.gov.br/arquivo/show/8231
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const formatCpf = (value: string | number, options?: FormatCpfOptions): string => {
 	if (isNullish(value)) return "";

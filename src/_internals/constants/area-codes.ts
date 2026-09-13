@@ -6,10 +6,13 @@ import { type StateCode } from "./states";
  * second, richer literal mapping every one of those same 67 codes to its state (UF), verified
  * one by one against the ANATEL numbering plan reflected by the BrasilAPI DDD dataset.
  *
- * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2010/167-resolucao-553
- *   (Resolução Anatel 553/2010, Plano Geral de Numeração)
- * @see Based on: https://brasilapi.com.br/docs#tag/DDD BrasilAPI DDD endpoint (`GET
- *   /api/ddd/v1/{ddd}`), used to verify the code-to-state mapping.
+ * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
+ * page below lists the codes actually allocated. The BrasilAPI DDD endpoint (`GET
+ * /api/ddd/v1/{ddd}`) was used to verify the code-to-state mapping.
+ *
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
+ * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Based on: https://brasilapi.com.br/docs#tag/DDD
  */
 export const VALID_AREA_CODES: readonly number[] = [
 	11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34, 35, 37, 38, 41, 42, 43,

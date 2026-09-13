@@ -15,6 +15,9 @@ import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
  * can be generated with a key that is not (or is no longer) registered, so use `isValidPixKey`
  * when that matters.
  *
+ * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
+ * composto" of Pix Automático (Pix recorrente) does, are out of scope and reported as invalid.
+ *
  * @param {string} value - The BR Code payload to validate.
  * @returns {boolean} True if the payload is a valid Pix BR Code, false otherwise.
  *
@@ -30,7 +33,7 @@ import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Based on: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
- * @see Based on: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
  */
 export const isValidPixPayload = (value: string): boolean => parsePixPayload(value) !== null;

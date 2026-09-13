@@ -30,6 +30,10 @@ describe("isValidPassport", () => {
 			expect(isValidPassport({})).toBe(false);
 		});
 
+		test("when passport is an object without a prototype", () => {
+			expect(isValidPassport(Object.create(null))).toBe(false);
+		});
+
 		test("when passport length is different from 8", () => {
 			expect(isValidPassport("1")).toBe(false);
 		});

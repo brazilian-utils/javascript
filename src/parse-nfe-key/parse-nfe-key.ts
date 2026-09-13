@@ -3,7 +3,14 @@ import { NFE_KEY_LENGTH } from "../_internals/constants/nfe-key";
 import { type StateCode } from "../_internals/constants/states";
 import { mod11 } from "../_internals/mod11/mod11";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { ABSENT_NUMBER, FORMAT_REGEX, NUMBER_END, NUMBER_START, VALID_MODELS } from "./constants";
+import {
+	ABSENT_NUMBER,
+	FORMAT_REGEX,
+	NUMBER_END,
+	NUMBER_START,
+	VALID_EMISSION_TYPES,
+	VALID_MODELS,
+} from "./constants";
 
 /** The document models a DF-e access key can carry: `"55"` NF-e, `"57"` CT-e, `"58"` MDF-e and `"65"` NFC-e. */
 export type NfeKeyModel = "55" | "57" | "58" | "65";
@@ -24,7 +31,7 @@ export type NfeKey = {
 	series: number;
 	/** Document number, 1 to 999999999. */
 	number: number;
-	/** Emission type code (tpEmis), 1 to 9. */
+	/** Emission type code (tpEmis): 1 to 7 or 9, the codes the MOC assigns (8 is not one of them). */
 	emissionType: number;
 	/** The 8 digit numeric code (cNF) drawn by the issuer. */
 	code: string;
@@ -38,7 +45,8 @@ export type NfeKey = {
  * Covers every document that shares the same 44 digit layout: NF-e (modelo 55), NFC-e
  * (modelo 65), CT-e (modelo 57) and MDF-e (modelo 58). Accepts the same input forms as
  * `isValidNfeKey` (whitespace mask, `NFe` XML `Id` prefix) and returns `null` when the key
- * is not valid.
+ * is not valid. The emission type (`tpEmis`) must be one of the codes the MOC assigns, 1 to 7
+ * or 9; 8 is not assigned and is rejected.
  *
  * @param {string} value - The access key value to be parsed.
  * @returns {NfeKey | null} The parsed access key, or `null` when it is not valid.
@@ -85,7 +93,7 @@ export const parseNfeKey = (value: string): NfeKey | null => {
 
 	const emissionType = Number(digits[34]);
 
-	if (emissionType < 1) return null;
+	if (!VALID_EMISSION_TYPES.includes(emissionType)) return null;
 
 	const checkDigit = Number(digits[43]);
 

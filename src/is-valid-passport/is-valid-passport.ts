@@ -1,4 +1,3 @@
-import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { PASSPORT_REGEX } from "./constants";
 
@@ -10,6 +9,8 @@ import { PASSPORT_REGEX } from "./constants";
  * sanitization performed by `formatPassport`/`parsePassport`.
  * This function does not verify if the input is a real passport number,
  * as there are no checksums for the Brazilian passport.
+ * A number is accepted for symmetry with `formatPassport`/`parsePassport` but is never valid:
+ * the decimal form of a number never starts with the two letters a passport number needs.
  *
  * @param {string|number} passport - The string containing the passport number to be checked.
  * @returns {boolean} True if the passport number is valid (2 letters followed by 6 digits).
@@ -24,7 +25,7 @@ import { PASSPORT_REGEX } from "./constants";
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  */
 export const isValidPassport = (passport: string | number): boolean => {
-	if (isNullish(passport)) return false;
+	if (typeof passport !== "string") return false;
 
 	return PASSPORT_REGEX.test(sanitizeToAlphanumeric(passport));
 };

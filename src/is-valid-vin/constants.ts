@@ -1,12 +1,14 @@
 /**
- * ISO 3779 layout of a VIN (Vehicle Identification Number / chassi): 17 characters, excluding
- * the letters `I`, `O` and `Q` (dropped to avoid confusion with `1` and `0`), with a check
- * digit at the 9th position. Resolução CONTRAN nº 27/1998 requires the same transliteration
- * table and weighted MOD 11 check digit algorithm used across the Americas (SAE J853 / NHTSA
- * 49 CFR 565.15) for vehicles manufactured in or imported into Brazil.
- * @see Official: https://www.iso.org/standard/52200.html ISO 3779:2009 (VIN content and structure)
- * @see Based on: https://vpic.nhtsa.dot.gov/api/ NHTSA vPIC VIN decoding API and WMI table, used
- * as a reference for the transliteration/weights across the Americas.
+ * VIN (Vehicle Identification Number / chassi) layout: 17 characters, excluding the letters
+ * `I`, `O` and `Q` (dropped to avoid confusion with `1` and `0`), per ISO 3779:2009 structure.
+ * The check digit at the 9th position, its transliteration table and its weighted MOD 11
+ * algorithm are a North-American requirement (49 CFR 565.15 / SAE J853), not something
+ * Resolução CONTRAN nº 24/1998 or ABNT NBR 6066 — which define the Brazilian VIN structure —
+ * mandate; many Brazilian-built VINs do not carry a matching check digit.
+ * @see Official: https://www.iso.org/standard/52200.html
+ * @see Official: https://www.ecfr.gov/current/title-49/section-565.15
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/resolucoes-contran
+ * @see Based on: https://vpic.nhtsa.dot.gov/api/
  */
 export const VIN_LENGTH = 17;
 

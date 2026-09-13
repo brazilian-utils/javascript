@@ -2,12 +2,16 @@
  * IANA time zone database (tzdata) name for each Brazilian state, chosen as the zone of the
  * state capital per the official `zone1970.tab` comments (some tzdata zones span more than
  * one state, e.g. `America/Sao_Paulo` also covers DF, GO, MG, ES, RJ, PR, SC and RS, and
- * `America/Fortaleza` also covers MA, PI, RN and PB besides CE). Pernambuco maps to
- * `America/Recife`, not `America/Noronha`: Fernando de Noronha is an archipelago district of
- * PE, not a state of its own, and its distinct UTC-02:00 offset is out of scope here.
+ * `America/Fortaleza` also covers MA, PI, RN and PB besides CE). Pará and Amazonas each
+ * straddle two IANA zones themselves (`America/Belem`/`America/Santarem` and
+ * `America/Manaus`/`America/Eirunepe` respectively); both map here to their capital's zone
+ * (Belém and Manaus). Pernambuco maps to `America/Recife`, not `America/Noronha`: Fernando de
+ * Noronha is an archipelago district of PE, not a state of its own, and its distinct
+ * UTC-02:00 offset is out of scope here.
  *
- * @see Official: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab (IANA tz
- * database, `BR` rows)
+ * @see Official: https://www.iana.org/time-zones
+ * @see Based on: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab (IANA tz
+ * database data file, `BR` rows)
  * @see Based on: https://en.wikipedia.org/wiki/Time_in_Brazil Used to confirm the state
  * coverage of each zone.
  */

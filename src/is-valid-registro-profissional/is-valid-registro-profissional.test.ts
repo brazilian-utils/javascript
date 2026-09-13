@@ -60,6 +60,26 @@ describe("isValidRegistroProfissional", () => {
 		test("when a CRC number is missing the check digit", () => {
 			expect(isValidRegistroProfissional("SP-123456/O", { council: "CRC" })).toBe(false);
 		});
+
+		test("when a CRC number of ordem has 5 digits instead of the 6 of the Manual de Registro", () => {
+			expect(isValidRegistroProfissional("SP-12345/O-3", { council: "CRC" })).toBe(false);
+		});
+
+		test("when a CRC number carries a letter that is not a tipo de registro", () => {
+			expect(isValidRegistroProfissional("SP-123456/X-3", { council: "CRC" })).toBe(false);
+		});
+
+		test("when a CRP regional code is 00, below the CRP-01 of the CFP system", () => {
+			expect(isValidRegistroProfissional("00/12345", { council: "CRP" })).toBe(false);
+		});
+
+		test("when a CRP regional code is 25, above the CRP-24 of the CFP system", () => {
+			expect(isValidRegistroProfissional("25/12345", { council: "CRP" })).toBe(false);
+		});
+
+		test("when a CRP regional code is 99, which no Conselho Regional carries", () => {
+			expect(isValidRegistroProfissional("99/12345", { council: "CRP" })).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -87,11 +107,27 @@ describe("isValidRegistroProfissional", () => {
 			);
 		});
 
-		test("for a valid CRC number", () => {
+		test("for the first regional code of the CFP system, CRP-01", () => {
+			expect(isValidRegistroProfissional("01/12345", { council: "CRP" })).toBe(true);
+		});
+
+		test("for the last regional code of the CFP system, CRP-24", () => {
+			expect(isValidRegistroProfissional("24/12345", { council: "CRP" })).toBe(true);
+		});
+
+		test("for a valid CRC number of a registro originário", () => {
 			expect(isValidRegistroProfissional("SP-123456/O-3", { council: "CRC" })).toBe(true);
 		});
 
-		test("for a valid CRC number of a técnico em contabilidade", () => {
+		test("for DF-000001/P-7, the Manual de Registro's own example of a registro provisório", () => {
+			expect(isValidRegistroProfissional("DF-000001/P-7", { council: "CRC" })).toBe(true);
+		});
+
+		test("for DF-000002/O-5, the Manual de Registro's own example of a registro originário", () => {
+			expect(isValidRegistroProfissional("DF-000002/O-5", { council: "CRC" })).toBe(true);
+		});
+
+		test("for a valid CRC number of a registro transferido", () => {
 			expect(isValidRegistroProfissional("RJ-654321/T-9", { council: "CRC" })).toBe(true);
 		});
 	});
@@ -113,9 +149,40 @@ describe("isValidRegistroProfissional", () => {
 
 					expect(isValidRegistroProfissional(`06/${number}`, { council: "CRP" })).toBe(true);
 					expect(
-						isValidRegistroProfissional(`${stateCode}-${number}/O-3`, { council: "CRC" }),
+						isValidRegistroProfissional(`${stateCode}-${String(number).padStart(6, "0")}/O-3`, {
+							council: "CRC",
+						}),
 					).toBe(true);
 				}),
+			);
+		});
+
+		test("should accept a CRP registration only for the 24 regionals of the CFP system", () => {
+			fc.assert(
+				fc.property(fc.integer({ min: 0, max: 99 }), numbers, (region, number) => {
+					const value = `${String(region).padStart(2, "0")}/${number}`;
+					const expected = region >= 1 && region <= 24;
+
+					expect(isValidRegistroProfissional(value, { council: "CRP" })).toBe(expected);
+				}),
+			);
+		});
+
+		test("should accept a CRC registration only with six digits of ordem", () => {
+			fc.assert(
+				fc.property(
+					states,
+					fc.integer({ min: 1, max: 9_999_999 }),
+					fc.constantFrom("O", "P", "T"),
+					(stateCode, number, category) => {
+						const digits = String(number);
+						const value = `${stateCode}-${digits}/${category}-3`;
+
+						expect(isValidRegistroProfissional(value, { council: "CRC" })).toBe(
+							digits.length === 6,
+						);
+					},
+				),
 			);
 		});
 

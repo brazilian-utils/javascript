@@ -22,7 +22,8 @@ import { GROUP_SIZE } from "./constants";
  * formatIban("BR1500000000000010932840814P2EXTRA"); // "BR15 0000 0000 0000 1093 2840 814P 2"
  * ```
  *
- * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Circular&numero=3625 Circular BCB nº 3.625/2013 (Diretrizes de Implementação do IBAN no Brasil)
+ * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf Diretrizes de Implementação do IBAN no Brasil
  */
 export const formatIban = (value: string): string => {
 	if (typeof value !== "string") return "";

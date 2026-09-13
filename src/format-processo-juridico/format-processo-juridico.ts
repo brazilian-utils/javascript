@@ -21,7 +21,9 @@ export type FormatProcessoJuridicoOptions = {
  * formatProcessoJuridico("00020802520125150049"); // "0002080-25.2012.5.15.0049"
  * ```
  *
- * @see Official: https://atos.cnj.jus.br/atos/detalhar/119 Resolução CNJ nº 65/2008
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits.
+ *
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */
 export const formatProcessoJuridico = (
 	value: string | number,

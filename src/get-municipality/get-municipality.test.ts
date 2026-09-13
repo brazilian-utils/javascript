@@ -77,11 +77,15 @@ describe("getMunicipality", () => {
 			await expect(getMunicipality({ code: "3550308?x=1" })).resolves.toBeNull();
 		});
 
-		it("should return null for a non-string code", async () => {
+		it("should return null for a code that is neither a string nor a number", async () => {
 			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality({ code: null })).resolves.toBeNull();
-			// @ts-expect-error: intentionally invalid input
-			await expect(getMunicipality({ code: 3_550_308 })).resolves.toBeNull();
+			await expect(getMunicipality({ code: Object.create(null) })).resolves.toBeNull();
+		});
+
+		it("should resolve a code given as a number", async () => {
+			await expect(getMunicipality({ code: 3_550_308 })).resolves.toEqual(["São Paulo", "SP"]);
+			await expect(getMunicipality({ code: 0 })).resolves.toBeNull();
 		});
 
 		it("should return null for a code with the wrong number of digits", async () => {
@@ -175,7 +179,7 @@ describe("getMunicipality types", () => {
 		expectTypeOf<GetMunicipalityOptions>().toEqualTypeOf<
 			GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions
 		>();
-		expectTypeOf<GetMunicipalityByCodeOptions>().toEqualTypeOf<{ code: string }>();
+		expectTypeOf<GetMunicipalityByCodeOptions>().toEqualTypeOf<{ code: string | number }>();
 		expectTypeOf<GetMunicipalityByNameOptions>().toEqualTypeOf<{
 			municipalityName: string;
 			uf: string;

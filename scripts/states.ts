@@ -92,7 +92,7 @@ export type State = {
  * locale. \`ibgeCode\` is the 2-digit IBGE code of the Federative Unit ("cUF"), the same code
  * found in the first field of every DF-e access key (chave de acesso).
  *
- * @see https://servicodados.ibge.gov.br/api/docs/localidades
+ * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
 export const DATA: readonly State[] = ${JSON.stringify(states)};`,
 	);
