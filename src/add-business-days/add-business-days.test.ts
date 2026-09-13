@@ -175,6 +175,13 @@ describe("addBusinessDays", () => {
 			expect(addBusinessDays(new Date(2024, 0, 2), 1, { stateCode: 123 })).toBeNull();
 		});
 
+		it("should return null when the stateCode is not a string even for an amount of 0, which walks no day", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(addBusinessDays(new Date(2024, 0, 2), 0, { stateCode: 123 })).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(addBusinessDays(new Date(2024, 0, 2), 0, { stateCode: null })).toBeNull();
+		});
+
 		it("should ignore options that are not an object", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(addBusinessDays(new Date(2024, 6, 8, 12), 1, "SP")).toEqual(new Date(2024, 6, 9, 12));
