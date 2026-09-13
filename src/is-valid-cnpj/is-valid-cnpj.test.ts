@@ -71,6 +71,17 @@ describe("isValidCnpj", () => {
 			expect(isValidCnpj("Q0SLFMBD7VX439")).toBe(false);
 		});
 
+		test("when it has letters and the version option is not 2, as formatCnpj and parseCnpj read it", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCnpj("Q0SLFMBD7VX439", { version: 3 })).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCnpj("Q0SLFMBD7VX439", { version: 0 })).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCnpj("Q0SLFMBD7VX439", { version: "2" })).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCnpj("Q0SLFMBD7VX439", { version: true })).toBe(false);
+		});
+
 		test("when it is a reserved number under version 2, even though its raw checksum happens to be valid", () => {
 			expect(isValidCnpj("00000000000000", { version: 2 })).toBe(false);
 		});
