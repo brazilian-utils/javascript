@@ -120,7 +120,7 @@ const fetchFromBrasilApi = async (): Promise<BankRow[]> => {
 
 	for (const entry of json) {
 		if (!isBrasilApiBank(entry) || typeof entry.code !== "number") continue;
-		if (!Number.isInteger(entry.code) || entry.code < 0 || entry.code > 999) continue;
+		if (!Number.isInteger(entry.code) || entry.code <= 0 || entry.code > 999) continue;
 
 		const ispb = entry.ispb;
 
