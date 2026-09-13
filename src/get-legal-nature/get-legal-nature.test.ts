@@ -30,6 +30,14 @@ describe("getLegalNature", () => {
 		});
 	});
 
+	it("should strip the mask of a number just like the mask of a string", () => {
+		expect(getLegalNature(206.2)).toEqual({
+			code: "2062",
+			description: "Sociedade Empresária Limitada",
+		});
+		expect(getLegalNature(206.2)).toEqual(getLegalNature("206.2"));
+	});
+
 	it("should return the legal nature entry for a masked code (206-2)", () => {
 		expect(getLegalNature("206-2")).toEqual({
 			code: "2062",
@@ -53,6 +61,10 @@ describe("getLegalNature", () => {
 
 	it("should return null for an empty string", () => {
 		expect(getLegalNature("")).toBeNull();
+	});
+
+	it("should return null for an object with no string form, instead of throwing", () => {
+		expect(getLegalNature(Object.create(null))).toBeNull();
 	});
 
 	it("should return null for null", () => {
