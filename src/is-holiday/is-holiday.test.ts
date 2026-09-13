@@ -11,6 +11,13 @@ function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
 	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
 }
 
+const PROTOTYPE_KEYS = Object.getOwnPropertyNames(Object.prototype);
+
+const anyTargetDate = fc.oneof(fc.date(), fc.anything());
+const anyStateCode = fc.oneof(fc.constantFrom(...PROTOTYPE_KEYS, "SP", "xx"), fc.anything());
+const hostileOptions = fc.record({ targetDate: anyTargetDate, stateCode: anyStateCode });
+const anyInput = fc.oneof(fc.anything(), hostileOptions);
+
 describe("isHoliday", () => {
 	it("should return true for a national holiday built from local date components", () => {
 		expect(isHoliday({ targetDate: new Date(2024, 0, 1) })).toBe(true);
@@ -67,6 +74,15 @@ describe("isHoliday", () => {
 		expect(isHoliday({ targetDate: new Date(2024, 5, 10), stateCode: "XX" })).toBe(false);
 	});
 
+	it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
+		for (const stateCode of PROTOTYPE_KEYS) {
+			// @ts-expect-error: intentionally invalid input
+			expect(isHoliday({ targetDate: new Date(2024, 0, 1), stateCode })).toBe(true);
+			// @ts-expect-error: intentionally invalid input
+			expect(isHoliday({ targetDate: new Date(2024, 5, 10), stateCode })).toBe(false);
+		}
+	});
+
 	describe("local calendar date vs UTC instant", () => {
 		it("should read the local calendar day of a UTC-midnight instant, not its UTC day, deriving the expectation from the ambient zone (e.g. '2024-12-25' is local 2024-12-24 in America/Sao_Paulo, UTC-3) so the test is deterministic under vitest, bun and deno", () => {
 			const utcMidnight = new Date("2024-12-25");
@@ -102,8 +118,8 @@ describe("isHoliday", () => {
 			);
 		});
 
-		test("should never throw, regardless of the input", () => {
-			expectNeverThrows(isHoliday, fc.anything());
+		test("should never throw, regardless of the input, prototype chain state codes included", () => {
+			expectNeverThrows(isHoliday, anyInput);
 		});
 	});
 });

@@ -29,6 +29,28 @@ describe("resolveStateHolidayDate", () => {
 		);
 	});
 
+	test("should move a fixed date landing Monday to Friday on to the following Sunday", () => {
+		const rule = { day: 11, month: 8, nextSundayWhenWeekday: true };
+
+		expect(resolveStateHolidayDate(2025, rule)).toEqual(new Date(2025, 7, 17));
+		expect(resolveStateHolidayDate(2026, rule)).toEqual(new Date(2026, 7, 16));
+		expect(resolveStateHolidayDate(2027, rule)).toEqual(new Date(2027, 7, 15));
+		expect(resolveStateHolidayDate(2028, rule)).toEqual(new Date(2028, 7, 13));
+	});
+
+	test("should leave a fixed date already falling on a Saturday or a Sunday where it is", () => {
+		const rule = { day: 25, month: 11, nextSundayWhenWeekday: true };
+
+		expect(resolveStateHolidayDate(2028, rule)).toEqual(new Date(2028, 10, 25));
+		expect(resolveStateHolidayDate(2029, rule)).toEqual(new Date(2029, 10, 25));
+	});
+
+	test("should move an Easter derived date landing Monday to Friday on to the following Sunday", () => {
+		expect(
+			resolveStateHolidayDate(2024, { easterOffset: 60, nextSundayWhenWeekday: true }),
+		).toEqual(new Date(2024, 5, 2));
+	});
+
 	test("should throw when the rule defines neither an Easter offset nor both day and month", () => {
 		const message =
 			"State holiday entry must define either `easterOffset` or both `day` and `month`";

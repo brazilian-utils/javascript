@@ -6,7 +6,16 @@ export type HolidayDateRule = {
 	month?: number;
 	/** Offset in days from Easter Sunday (Carnaval is -47, Corpus Christi is 60); Easter itself is 0. */
 	easterOffset?: number;
+	/**
+	 * Whether the holiday is observed on the following Sunday when the date the two rules above
+	 * resolve to falls on a weekday (Monday to Friday), as Santa Catarina's two state holidays do.
+	 */
+	nextSundayWhenWeekday?: boolean;
 };
+
+const SUNDAY = 0;
+const SATURDAY = 6;
+const DAYS_IN_WEEK = 7;
 
 function calculateEaster(year: number): Date {
 	const a = year % 19;
@@ -35,9 +44,21 @@ function calculateHolidayFromEaster(year: number, offset: number): Date {
 	return holidayDate;
 }
 
+function moveToNextSundayWhenWeekday(date: Date): Date {
+	const weekday = date.getDay();
+
+	if (weekday === SUNDAY || weekday === SATURDAY) return date;
+
+	const observed = new Date(date);
+	observed.setDate(date.getDate() + (DAYS_IN_WEEK - weekday));
+
+	return observed;
+}
+
 /**
  * Resolves the date of a holiday in a given year: a fixed `day`/`month` pair, or an offset in
- * days from Easter Sunday, computed with the Meeus/Jones/Butcher algorithm.
+ * days from Easter Sunday, computed with the Meeus/Jones/Butcher algorithm. When the rule sets
+ * `nextSundayWhenWeekday`, a date landing on a weekday is moved on to the following Sunday.
  *
  * @param {number} year - The four digit year.
  * @param {HolidayDateRule} rule - The fixed date or the Easter offset of the holiday.
@@ -49,23 +70,26 @@ function calculateHolidayFromEaster(year: number, offset: number): Date {
  * resolveStateHolidayDate(2024, { easterOffset: 0 }); // 2024-03-31 (Easter Sunday)
  * resolveStateHolidayDate(2024, { easterOffset: 60 }); // 2024-05-30 (Corpus Christi)
  * resolveStateHolidayDate(2024, { day: 9, month: 7 }); // 2024-07-09
+ * resolveStateHolidayDate(2025, { day: 11, month: 8, nextSundayWhenWeekday: true }); // 2025-08-17
  * ```
  *
  * @see Based on: https://en.wikipedia.org/wiki/Date_of_Easter#Anonymous_Gregorian_algorithm
  */
 export const resolveStateHolidayDate = (
 	year: number,
-	{ day, month, easterOffset }: HolidayDateRule,
+	{ day, month, easterOffset, nextSundayWhenWeekday }: HolidayDateRule,
 ): Date => {
+	let date: Date;
+
 	if (easterOffset !== undefined) {
-		return calculateHolidayFromEaster(year, easterOffset);
+		date = calculateHolidayFromEaster(year, easterOffset);
+	} else if (day !== undefined && month !== undefined) {
+		date = new Date(year, month - 1, day);
+	} else {
+		throw new Error(
+			"State holiday entry must define either `easterOffset` or both `day` and `month`",
+		);
 	}
 
-	if (day !== undefined && month !== undefined) {
-		return new Date(year, month - 1, day);
-	}
-
-	throw new Error(
-		"State holiday entry must define either `easterOffset` or both `day` and `month`",
-	);
+	return nextSundayWhenWeekday === true ? moveToNextSundayWhenWeekday(date) : date;
 };
