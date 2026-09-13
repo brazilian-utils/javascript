@@ -5,7 +5,7 @@ import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
-import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
+import { type PixPointOfInitiation, parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
 import { type GeneratePixPayloadParams, generatePixPayload } from "./generate-pix-payload";
 
 const BASE = {
@@ -111,6 +111,12 @@ describe("generatePixPayload", () => {
 					amount: 0.001,
 				}),
 			).toBeNull();
+		});
+
+		test("when the amount has more than two decimal places, since writing it would change the sum asked for", () => {
+			expect(generatePixPayload({ ...BASE, amount: 0.005 })).toBeNull();
+			expect(generatePixPayload({ ...BASE, amount: 1.005 })).toBeNull();
+			expect(generatePixPayload({ ...BASE, amount: 123.456 })).toBeNull();
 		});
 
 		test("when a dynamic payload (url) also carries an amount or a txid", () => {
@@ -222,8 +228,13 @@ describe("generatePixPayload", () => {
 
 		test("with the amount formatted with two decimal places", () => {
 			expect(generatePixPayload({ ...BASE, amount: 10 })).toContain("540510.00");
-			expect(generatePixPayload({ ...BASE, amount: 123.456 })).toContain("5406123.46");
+			expect(generatePixPayload({ ...BASE, amount: 10.1 })).toContain("540510.10");
+			expect(generatePixPayload({ ...BASE, amount: 123.45 })).toContain("5406123.45");
 			expect(generatePixPayload({ ...BASE, amount: 0.01 })).toContain("54040.01");
+		});
+
+		test("with an amount whose binary representation is not exact, as 0.1 + 0.2 is", () => {
+			expect(generatePixPayload({ ...BASE, amount: 0.1 + 0.2 })).toContain("54040.30");
 		});
 
 		test("with *** as the txid when it is omitted", () => {
@@ -368,49 +379,53 @@ describe("generatePixPayload", () => {
 	});
 
 	describe("should round-trip", () => {
-		test("through isValidPixPayload and parsePixPayload for randomized CPF keys", () => {
-			for (let index = 0; index < 200; index++) {
-				const params = {
+		const ROUND_TRIPS: {
+			name: string;
+			build: (index: number) => GeneratePixPayloadParams;
+			pointOfInitiation: PixPointOfInitiation;
+		}[] = [
+			{
+				name: "randomized CPF keys",
+				build: (index) => ({
 					key: generateCpf(),
 					merchantName: "Fulano de Tal",
 					merchantCity: "Brasilia",
 					amount: Number(((index + 1) / 100).toFixed(2)),
 					txid: `TX${index}`,
-				};
-				const payload = generatePixPayload(params) ?? "";
-
-				expect(isValidPixPayload(payload)).toBe(true);
-				expect(parsePixPayload(payload)).toEqual(params);
-			}
-		});
-
-		test("through isValidPixPayload and parsePixPayload for randomized CNPJ keys", () => {
-			for (let index = 0; index < 200; index++) {
-				const params = {
+				}),
+				pointOfInitiation: "static",
+			},
+			{
+				name: "randomized CNPJ keys",
+				build: () => ({
 					key: generateCnpj(),
 					merchantName: "Loja Exemplo",
 					merchantCity: "Sao Paulo",
-				};
-				const payload = generatePixPayload(params) ?? "";
-
-				expect(isValidPixPayload(payload)).toBe(true);
-				expect(parsePixPayload(payload)).toEqual(params);
-			}
-		});
-
-		test("through isValidPixPayload and parsePixPayload for randomized dynamic urls", () => {
-			for (let index = 0; index < 200; index++) {
-				const params = {
+				}),
+				pointOfInitiation: "static",
+			},
+			{
+				name: "randomized dynamic urls",
+				build: (index) => ({
 					url: `pix.example.com/qr/v2/${index}`,
 					merchantName: "Fulano de Tal",
 					merchantCity: "Brasilia",
-				};
-				const payload = generatePixPayload(params) ?? "";
+				}),
+				pointOfInitiation: "dynamic",
+			},
+		];
 
-				expect(isValidPixPayload(payload)).toBe(true);
-				expect(parsePixPayload(payload)).toEqual({ ...params, pointOfInitiation: "dynamic" });
-			}
-		});
+		for (const { name, build, pointOfInitiation } of ROUND_TRIPS) {
+			test(`through isValidPixPayload and parsePixPayload for ${name}`, () => {
+				for (let index = 0; index < 200; index++) {
+					const params = build(index);
+					const payload = generatePixPayload(params) ?? "";
+
+					expect(isValidPixPayload(payload)).toBe(true);
+					expect(parsePixPayload(payload)).toEqual({ ...params, pointOfInitiation });
+				}
+			});
+		}
 	});
 
 	describe("properties", () => {
