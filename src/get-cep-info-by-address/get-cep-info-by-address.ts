@@ -27,7 +27,11 @@ export class GetCepInfoByAddressNotFoundError extends GetCepInfoByAddressError {
 	}
 }
 
-/** One address returned by `getCepInfoByAddress`, under the field names ViaCEP itself uses. */
+/**
+ * One address returned by `getCepInfoByAddress`, under the field names ViaCEP itself uses. The
+ * ViaCEP payload is passed through unchanged, so every field the service sends is present and a
+ * field it adds later shows up even though it is not declared here.
+ */
 export type CepAddressInfo = {
 	/** The CEP, masked as "00000-000" the way ViaCEP returns it. */
 	cep: string;
@@ -35,12 +39,18 @@ export type CepAddressInfo = {
 	logradouro: string;
 	/** Extra address information, e.g. a house number range. */
 	complemento: string;
+	/** Name of the establishment the CEP belongs to, e.g. "AC São Carlos"; empty for a street CEP. */
+	unidade?: string;
 	/** Neighborhood name. */
 	bairro: string;
 	/** City name. */
 	localidade: string;
 	/** Two letter state code, e.g. "SP". */
 	uf: string;
+	/** Full state name, e.g. "Minas Gerais". */
+	estado?: string;
+	/** Region name, e.g. "Sudeste". */
+	regiao?: string;
 	/** The 7 digit IBGE municipality code. */
 	ibge?: string;
 	/** GIA code, used by the São Paulo state tax authority. */
@@ -87,8 +97,24 @@ const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Arr
  *
  * @example
  * ```typescript
- * await getCepInfoByAddress({ federalUnit: "SP", city: "São Paulo", street: "Avenida Paulista" });
- * // [{ cep: "01310-100", logradouro: "Avenida Paulista", ... }]
+ * await getCepInfoByAddress({ federalUnit: "MG", city: "Ouro Preto", street: "Rua Direita" });
+ * // [
+ * //   {
+ * //     cep: "35411-152",
+ * //     logradouro: "Rua Direita",
+ * //     complemento: "",
+ * //     unidade: "",
+ * //     bairro: "Riacho (Amarantina)",
+ * //     localidade: "Ouro Preto",
+ * //     uf: "MG",
+ * //     estado: "Minas Gerais",
+ * //     regiao: "Sudeste",
+ * //     ibge: "3146107",
+ * //     gia: "",
+ * //     ddd: "31",
+ * //     siafi: "4921"
+ * //   }
+ * // ]
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
