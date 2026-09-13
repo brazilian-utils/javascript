@@ -23,6 +23,12 @@ describe("getStateCodeByName", () => {
 		expect(getStateCodeByName("  São Paulo  ")).toBe("SP");
 	});
 
+	it("should collapse every run of internal whitespace", () => {
+		expect(getStateCodeByName("Rio  de  Janeiro")).toBe("RJ");
+		expect(getStateCodeByName("Rio\tde\nJaneiro")).toBe("RJ");
+		expect(getStateCodeByName("  sao   paulo  ")).toBe("SP");
+	});
+
 	it("should combine accent removal, casing and trimming together", () => {
 		expect(getStateCodeByName("  sao PAULO  ")).toBe("SP");
 	});
@@ -38,6 +44,16 @@ describe("getStateCodeByName", () => {
 	it("should distinguish Rio Grande do Norte from Rio Grande do Sul", () => {
 		expect(getStateCodeByName("Rio Grande do Norte")).toBe("RN");
 		expect(getStateCodeByName("Rio Grande do Sul")).toBe("RS");
+	});
+
+	it("should not match a name written without the space the published one carries", () => {
+		expect(getStateCodeByName("sao paulo")).toBe("SP");
+		expect(getStateCodeByName("saopaulo")).toBeNull();
+	});
+
+	it("should fold the casing to lower case, which leaves ß as it is instead of expanding it to ss", () => {
+		expect(getStateCodeByName("Mato Grosso")).toBe("MT");
+		expect(getStateCodeByName("Mato Großo")).toBeNull();
 	});
 
 	it("should return null for a name that matches no state", () => {

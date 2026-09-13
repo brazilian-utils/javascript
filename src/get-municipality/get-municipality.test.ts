@@ -39,6 +39,32 @@ describe("getMunicipality", () => {
 		);
 	});
 
+	it("should collapse every run of internal whitespace in the municipality name before matching", async () => {
+		await expect(getMunicipality({ municipalityName: "sao  paulo", uf: "sp" })).resolves.toBe(
+			"3550308",
+		);
+		await expect(getMunicipality({ municipalityName: "sao\tpaulo", uf: "sp" })).resolves.toBe(
+			"3550308",
+		);
+		await expect(getMunicipality({ municipalityName: "sao\npaulo", uf: "sp" })).resolves.toBe(
+			"3550308",
+		);
+		await expect(
+			getMunicipality({ municipalityName: " Angra \t dos \n Reis ", uf: "RJ" }),
+		).resolves.toBe("3300100");
+	});
+
+	it("should not match a municipality name written without the space the dataset carries", async () => {
+		await expect(getMunicipality({ municipalityName: "saopaulo", uf: "SP" })).resolves.toBeNull();
+	});
+
+	it("should fold the casing to upper case, the direction that expands ß to SS", async () => {
+		await expect(getMunicipality({ municipalityName: "Passos", uf: "MG" })).resolves.toBe(
+			"3147907",
+		);
+		await expect(getMunicipality({ municipalityName: "Paßos", uf: "MG" })).resolves.toBe("3147907");
+	});
+
 	it("should trim and uppercase a uf with surrounding whitespace and lowercase letters", async () => {
 		await expect(getMunicipality({ municipalityName: "São Paulo", uf: " sp " })).resolves.toBe(
 			"3550308",

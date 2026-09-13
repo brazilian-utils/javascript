@@ -23,11 +23,8 @@ export type GetMunicipalityOptions = GetMunicipalityByCodeOptions | GetMunicipal
 
 let codeIndex: Map<string, [string, string]> | undefined;
 
-// Stryker disable next-line MethodExpression: normalizeName is only ever used to compare two
-// values against each other (never returned or displayed), and every name in the dataset is
-// plain ASCII Latin letters once accents are stripped, so folding to upper or lower case is
-// symmetric and cannot change which names are considered equal.
-const normalizeName = (value: string): string => removeAccents(value).trim().toUpperCase();
+const normalizeName = (value: string): string =>
+	removeAccents(value).replaceAll(/\s+/g, " ").trim().toUpperCase();
 
 const getMunicipalityByCode = (code: string | number): [string, string] | null => {
 	if (!isLookupCode(code)) return null;
@@ -75,7 +72,11 @@ const getMunicipalityCodeByName = ({
  * Looks a Brazilian municipality up in the offline IBGE "localidades" dataset.
  *
  * Given a `code` it resolves the municipality name and its UF; given a `municipalityName`
- * and a `uf` it resolves the IBGE code. The name lookup ignores accents and casing.
+ * and a `uf` it resolves the IBGE code. The name lookup ignores accents and casing, and every
+ * run of whitespace collapses into a single space, so `"sao  paulo"` matches `"São Paulo"`; a
+ * name written without the space does not, since only the runs that are there collapse. The
+ * casing is folded to upper case, the direction Unicode expands `"ß"` to `"SS"` in, so
+ * `"Paßos"` matches `"Passos"`.
  * Validation failures and unknown municipalities are reported as `null`. A `code` given as a
  * number must be a non-negative integer: a sign and a decimal point are not digits, so
  * `-3550308` and `355030.8` are rejected instead of being read as `3550308`.
