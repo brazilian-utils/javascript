@@ -6,7 +6,7 @@ import { isValidIban } from "../is-valid-iban/is-valid-iban";
 import { parseIban, type Iban } from "./parse-iban";
 
 const findBrazilianIban = (body: string): string => {
-	for (let pair = 0; pair < 97; pair++) {
+	for (let pair = 2; pair <= 98; pair++) {
 		const candidate = `BR${String(pair).padStart(2, "0")}${body}`;
 
 		if (isValidIban(candidate)) return candidate;

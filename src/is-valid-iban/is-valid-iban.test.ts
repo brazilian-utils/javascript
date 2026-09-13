@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidIban } from "./is-valid-iban";
 
-const CHECK_DIGITS = Array.from({ length: 97 }, (_, index) => String(index).padStart(2, "0"));
+const CHECK_DIGITS = Array.from({ length: 97 }, (_, index) => String(index + 2).padStart(2, "0"));
 
 const findIban = (body: string): string =>
 	CHECK_DIGITS.map((pair) => `BR${pair}${body}`).find((iban) => isValidIban(iban)) ?? "";

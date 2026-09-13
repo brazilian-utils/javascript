@@ -94,7 +94,7 @@ describe("getStates", () => {
 
 describe("getStates types", () => {
 	test("should take no arguments and return an array of State", () => {
-		expectTypeOf(getStates).parameter(0).toBeUndefined();
+		expectTypeOf(getStates).parameters.toEqualTypeOf<[]>();
 		expectTypeOf(getStates).returns.toEqualTypeOf<State[]>();
 		expectTypeOf<State["code"]>().toEqualTypeOf<StateCode>();
 		expectTypeOf<State["name"]>().toEqualTypeOf<StateName>();
