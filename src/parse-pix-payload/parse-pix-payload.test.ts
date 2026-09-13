@@ -249,6 +249,14 @@ describe("parsePixPayload", () => {
 			expect(parsePixPayload(buildWithdrawalPayload("1234567x", "0.00"))).toBeNull();
 		});
 
+		test("when the fss of a Pix Saque is written next to a PSP location", () => {
+			const payload =
+				"00020126600014br.gov.bcb.pix2526pix.example.com/qr/v2/12340308123456785204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304DA55";
+
+			expect(hasValidCrc(payload)).toBe(true);
+			expect(parsePixPayload(payload)).toBeNull();
+		});
+
 		test("when the additional data template is malformed", () => {
 			const merchantAccountInformation = tlv("00", "br.gov.bcb.pix") + tlv("01", "some-key");
 
