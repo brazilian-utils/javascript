@@ -15,6 +15,25 @@ const scriptsDir = import.meta.dirname;
  */
 const CURRENT_TEXT_PARAGRAPH_REGEX = /<p class="A5-1TextoAcordo">([^<]*)<\/p>/g;
 
+/**
+ * Smallest number of operable codes a complete annex yields. The consolidated text carries 619
+ * today and CONFAZ only adds or replaces codes, so a result far below it means the markup changed
+ * and the paragraph pattern above stopped matching, not that codes were revoked.
+ */
+const MINIMUM_OPERABLE_CODES = 600;
+
+const HTML_ENTITIES: Record<string, string> = {
+	"&amp;": "&",
+	"&lt;": "<",
+	"&gt;": ">",
+	"&quot;": '"',
+	"&#39;": "'",
+	"&nbsp;": " ",
+};
+
+const decodeEntities = (text: string): string =>
+	text.replaceAll(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (entity) => HTML_ENTITIES[entity] ?? entity);
+
 /** A code line, e.g. `1.101 - Compra para industrialização ou produção rural.`. */
 const CODE_LINE_REGEX = /^(\d)\.(\d{3})\s*[-–]\s*(.+)$/;
 
@@ -39,7 +58,9 @@ const TRAILING_PUNCTUATION_REGEX = /[.\s]+$/;
  */
 const parseAnnex = (html: string): Record<string, string> => {
 	const paragraphs = [...html.matchAll(CURRENT_TEXT_PARAGRAPH_REGEX)].map((match) =>
-		(match[1] ?? "").replaceAll(/\s+/g, " ").trim(),
+		decodeEntities(match[1] ?? "")
+			.replaceAll(/\s+/g, " ")
+			.trim(),
 	);
 
 	const data: Record<string, string> = {};
@@ -75,8 +96,12 @@ const main = async (): Promise<void> => {
 		async (response) => {
 			const data = parseAnnex(await response.text());
 
-			if (Object.keys(data).length === 0) {
-				throw new Error("CFOP annex page holds no operable code");
+			const count = Object.keys(data).length;
+
+			if (count < MINIMUM_OPERABLE_CODES) {
+				throw new Error(
+					`CFOP annex page yielded ${count} operable codes, below the ${MINIMUM_OPERABLE_CODES} a complete annex holds; the markup probably changed`,
+				);
 			}
 
 			return data;
