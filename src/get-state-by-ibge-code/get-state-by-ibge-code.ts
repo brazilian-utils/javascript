@@ -2,6 +2,8 @@ import { DATA, type State } from "../_internals/constants/states";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
+export type { State } from "../_internals/constants/states";
+
 /**
  * Retrieves the Brazilian state whose 2-digit IBGE code ("cUF", the Código da Unidade da
  * Federação) matches the given value.

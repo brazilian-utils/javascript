@@ -1,5 +1,7 @@
 import { DATA, type StateName } from "../_internals/constants/states";
 
+export type { StateName } from "../_internals/constants/states";
+
 /**
  * Retrieves the full name of a Brazilian state given its two-letter code (sigla).
  *

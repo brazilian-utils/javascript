@@ -30,6 +30,15 @@ describe("getMunicipalities", () => {
 		expect(names).toEqual(sortedNames);
 	});
 
+	it("should sort every per-state list with the pt-BR comparator", () => {
+		for (const state of getStates()) {
+			const names = getMunicipalities(state.code).map((municipality) => municipality.name);
+			const sortedNames = [...names].sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+			expect(names).toEqual(sortedNames);
+		}
+	});
+
 	it("should return municipality objects shaped as { code, name, stateCode }", () => {
 		const saoPaulo = getMunicipalities("SP").find(
 			(municipality) => municipality.name === "São Paulo",
