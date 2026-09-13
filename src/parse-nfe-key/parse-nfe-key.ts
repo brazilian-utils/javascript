@@ -16,6 +16,8 @@ import {
 	XML_ID_PREFIX_REGEX,
 } from "./constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /**
  * The document models a DF-e access key can carry: `"55"` NF-e, `"57"` CT-e, `"58"` MDF-e,
  * `"62"` NFCom, `"63"` BP-e, `"64"` GTV-e, `"65"` NFC-e, `"66"` NF3e and `"67"` CT-e OS.
@@ -110,8 +112,11 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  * Ajuste SINIEF 36/19, cláusula primeira: the CT-e OS, modelo 67.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2020/ajuste-sinief-03-20
  * Ajuste SINIEF 03/20, cláusula primeira: the GTV-e, modelo 64.
- * @see Official: https://www.cte.fazenda.gov.br/portal/listaManuais.aspx?tipoConteudo=manuais
- * CT-e MOC 4.00, Anexo I: the `tpEmis` domains D19, D27 and D15.
+ * @see Official: https://dfe-portal.svrs.rs.gov.br/CTE/Documentos
+ * CT-e MOC 4.00, Anexo I ("MOC CTe 4.00 Anexo I - Leiaute e Regras de Validação"): the `tpEmis`
+ * domains D19, D27 and D15. Published by the SVRS dfe-portal, like the BP-e, NF3e and NFCom
+ * manuals below; the cte.fazenda.gov.br manual index answers "Sistema temporariamente
+ * indisponível" permanently.
  * @see Official: https://dfe-portal.svrs.rs.gov.br/BPE/Documentos
  * BP-e MOC 1.00b, Visão Geral and Anexo I: modelo 63.
  * @see Official: https://dfe-portal.svrs.rs.gov.br/NF3e/Documentos

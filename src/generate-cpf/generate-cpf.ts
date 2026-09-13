@@ -4,6 +4,8 @@ import { generateRandomNumber } from "../_internals/generate-random-number/gener
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { BASE_LENGTH, STATE_CODES } from "./constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
 const getStateCode = (state?: StateCode): string => {
 	if (state && Object.hasOwn(STATE_CODES, state)) return STATE_CODES[state];
 	return generateRandomNumber(1);
@@ -32,7 +34,8 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  * "Cadastros: CPF e CNPJ"; the check digit rule (`REGRA_VALIDA_CPF`) is specified, with the
  * worked example `280012389-38`, in the Receita Federal's Manual de Preenchimento da
  * e-Financeira, Anexo II — Leiautes Gerais, approved by the Ato Declaratório Executivo Cofis
- * nº 10, de 25 de maio de 2026. The manual's own file used to be served from `sped.rfb.gov.br`,
+ * nº 10, de 19 de maio de 2026 (DOU de 25/05/2026). The manual's own file used to be served from
+ * `sped.rfb.gov.br`,
  * a host that no longer answers at all, so the approving act is cited below in its place; its
  * Receita Federal permalink redirects into the norms viewer, which has to be opened in a
  * browser.

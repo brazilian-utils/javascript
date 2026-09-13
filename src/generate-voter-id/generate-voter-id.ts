@@ -4,6 +4,8 @@ import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /**
  * Generates a valid random Brazilian voter id (título de eleitor).
  *

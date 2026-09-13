@@ -1,5 +1,7 @@
 import { BANKS, type Bank } from "../_internals/constants/banks";
 
+export type { Bank } from "../_internals/constants/banks";
+
 /**
  * Returns every Brazilian bank with a compensation code (COMPE), published by Banco Central
  * do Brasil in the STR (Sistema de Transferência de Reservas) participants list.

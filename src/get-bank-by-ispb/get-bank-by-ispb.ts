@@ -2,6 +2,8 @@ import { BANKS, type Bank } from "../_internals/constants/banks";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
+export type { Bank } from "../_internals/constants/banks";
+
 const ISPB_LENGTH = 8;
 
 /**

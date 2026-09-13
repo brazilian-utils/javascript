@@ -15,6 +15,8 @@ import {
 	TO_TYPES,
 } from "./constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
 type IeValidator = (ie: string) => boolean;
 
 const checkLength = (ie: string, length: number | number[]): boolean => {

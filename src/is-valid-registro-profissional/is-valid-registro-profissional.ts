@@ -10,6 +10,8 @@ import {
 	type RegistroProfissionalCouncil,
 } from "./constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /** The options `isValidRegistroProfissional` takes: the professional council and, optionally, the UF the registration must belong to. */
 export type IsValidRegistroProfissionalOptions = {
 	/** The professional council that issued the registration number. */
@@ -109,15 +111,15 @@ const isKnownCrpRegion = (value: string): boolean => {
  * Conselho Federal de Psicologia: the 24 Conselhos Regionais of the system, numbered CRP-01 to
  * CRP-24. The page establishes the regional codes only; it publishes no length for the inscription
  * number itself.
- * @see Based on: https://www.oab.org.br/
- * Ordem dos Advogados do Brasil (OAB), which publishes no format for the número de inscrição and
- * the seccional.
- * @see Based on: https://portal.cfm.org.br/
- * Conselho Federal de Medicina (CRM), which publishes no format for the registration number and
- * the UF.
- * @see Based on: https://cfo.org.br/
- * Conselho Federal de Odontologia (CRO), which publishes no format for the registration number and
- * the UF.
+ * @see Official: https://www.oab.org.br/
+ * Ordem dos Advogados do Brasil (OAB), the federal body that regulates the profession, which
+ * publishes no format for the número de inscrição and the seccional.
+ * @see Official: https://portal.cfm.org.br/
+ * Conselho Federal de Medicina (CFM), the autarquia federal that regulates the profession, which
+ * publishes no format for the registration number and the UF.
+ * @see Official: https://cfo.org.br/
+ * Conselho Federal de Odontologia (CFO), the autarquia federal that regulates the profession,
+ * which publishes no format for the registration number and the UF.
  */
 export const isValidRegistroProfissional = (
 	value: string,
