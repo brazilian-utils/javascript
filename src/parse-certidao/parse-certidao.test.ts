@@ -42,6 +42,10 @@ describe("parseCertidao", () => {
 			expect(parseCertidao("10453901552013000012021000012387")).toBeNull();
 		});
 
+		test("when the serviço is not the 55 of art. 473, III, even with matching check digits", () => {
+			expect(parseCertidao("09400301542011100110002005191744")).toBeNull();
+		});
+
 		test("when it is a number, which cannot carry the 32 significant digits of a matrícula", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(parseCertidao(1_045_390_155)).toBeNull();
@@ -131,7 +135,7 @@ describe("parseCertidao", () => {
 		const parts = fc.tuple(
 			fc.stringMatching(/^[0-9]{6}$/),
 			fc.stringMatching(/^[0-9]{2}$/),
-			fc.stringMatching(/^[0-9]{2}$/),
+			fc.constant("55"),
 			fc.integer({ min: 1000, max: 9999 }),
 			fc.integer({ min: 1, max: 9 }),
 			fc.stringMatching(/^[0-9]{5}$/),

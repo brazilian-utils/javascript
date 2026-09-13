@@ -21,6 +21,13 @@ export const CERTIDAO_LENGTH = 32;
 
 export const CERTIDAO_BASE_LENGTH = 30;
 
+/**
+ * The only serviço code a matrícula de registro civil can carry, in the ninth and tenth
+ * positions: art. 473, III fixes it as "Código 55 (9º e 10º números da matrícula), que é o
+ * número relativo ao serviço de registro civil das pessoas naturais".
+ */
+export const CERTIDAO_SERVICE_CODE = "55";
+
 export const CERTIDAO_PATTERN = "000000 00 00 0000 0 00000 000 0000000 00";
 
 export const CERTIDAO_FORMAT_REGEX =

@@ -68,6 +68,11 @@ describe("isValidCertidao", () => {
 		test("when the book code is 0, outside the nine books, even with matching check digits", () => {
 			expect(isValidCertidao("10453901552013000012021000012387")).toBe(false);
 		});
+
+		test("when the serviço is not the 55 of art. 473, III, even with matching check digits", () => {
+			expect(isValidCertidao("09400301542011100110002005191744")).toBe(false);
+			expect(isValidCertidao("094003 01 56 2011 1 00110 002 0051917 42")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -182,10 +187,10 @@ describe("isValidCertidao", () => {
 	});
 
 	describe("properties", () => {
-		const bases = fc.stringMatching(/^[0-9]{14}[1-9][0-9]{15}$/);
+		const bases = fc.stringMatching(/^[0-9]{8}55[0-9]{4}[1-9][0-9]{15}$/);
 
 		const books = fc.tuple(
-			fc.stringMatching(/^[0-9]{14}$/),
+			fc.stringMatching(/^[0-9]{8}55[0-9]{4}$/),
 			fc.integer({ min: 1, max: 9 }),
 			fc.stringMatching(/^[0-9]{15}$/),
 		);
