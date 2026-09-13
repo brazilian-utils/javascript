@@ -9,7 +9,11 @@ import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
  * category code, currency `986`, country `BR`, merchant name and merchant city), when one of
  * the "Merchant Account Information" templates (IDs 26 to 51) carries the `br.gov.bcb.pix` GUI
  * together with a key (static QR Code) or a URL (dynamic QR Code), and when the CRC-16 matches
- * the rest of the payload.
+ * the rest of the payload. The "Point of Initiation Method" object (`01`) must agree with what
+ * that template carries: a key requires a static payload (`01` absent or `"11"`) and a URL
+ * requires a dynamic one (`01` set to `"12"`). A static payload that states a transaction
+ * amount (`54`) must state one greater than zero: `0.00` is reserved for the Pix Saque/Troco
+ * BR Code, which is out of scope here.
  *
  * The key itself is not checked against the DICT formats: the manual states a static QR Code
  * can be generated with a key that is not (or is no longer) registered, so use `isValidPixKey`

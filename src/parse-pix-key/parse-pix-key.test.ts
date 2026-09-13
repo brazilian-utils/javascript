@@ -94,6 +94,21 @@ describe("parsePixKey", () => {
 			expect(parsePixKey("chave pix")).toBeNull();
 			expect(parsePixKey("---")).toBeNull();
 		});
+
+		test("when a phone number is buried in surrounding text", () => {
+			expect(parsePixKey("abc(11) 98765-4321xyz")).toBeNull();
+			expect(parsePixKey("tel: (11) 98765-4321")).toBeNull();
+		});
+
+		test("when a CPF is buried in surrounding text", () => {
+			expect(parsePixKey("abc123.456.789-09")).toBeNull();
+			expect(parsePixKey("CPF 123.456.789-09")).toBeNull();
+		});
+
+		test("when a CPF is written with separators outside the documented positions", () => {
+			expect(parsePixKey("1.2.3.4.5.6.7.8.9.0.9")).toBeNull();
+			expect(parsePixKey("123/456/789/09")).toBeNull();
+		});
 	});
 
 	describe("should return a CPF", () => {
@@ -220,7 +235,7 @@ describe("parsePixKey", () => {
 	});
 
 	describe("should return a random key", () => {
-		test("when it is a lowercase UUID version 4", () => {
+		test("when it is a lowercase UUID", () => {
 			expect(parsePixKey("71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d")).toEqual({
 				type: "evp",
 				value: "71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d",

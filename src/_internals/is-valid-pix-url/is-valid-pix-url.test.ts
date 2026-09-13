@@ -18,6 +18,11 @@ describe("isValidPixUrl", () => {
 		test("for a path with the URL unreserved and sub-delimiter characters", () => {
 			expect(isValidPixUrl("pix.example.com/a-b_c.d~e%20f!$&'()*+,;=:@")).toBe(true);
 		});
+
+		test("for a path with a percent-encoded octet, in either letter case", () => {
+			expect(isValidPixUrl("pix.example.com/%2F")).toBe(true);
+			expect(isValidPixUrl("pix.example.com/%2f")).toBe(true);
+		});
 	});
 
 	describe("should return false", () => {
@@ -46,6 +51,13 @@ describe("isValidPixUrl", () => {
 		test("when the path carries characters outside the allowed sets", () => {
 			expect(isValidPixUrl("pix.example.com/<x>")).toBe(false);
 			expect(isValidPixUrl("pix.example.com/x?y=1")).toBe(false);
+		});
+
+		test("when a percent sign does not start a percent-encoded octet", () => {
+			expect(isValidPixUrl("pix.example.com/%ZZ")).toBe(false);
+			expect(isValidPixUrl("pix.example.com/%2")).toBe(false);
+			expect(isValidPixUrl("pix.example.com/%")).toBe(false);
+			expect(isValidPixUrl("pix.example.com/100%")).toBe(false);
 		});
 	});
 });

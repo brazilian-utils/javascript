@@ -21,11 +21,23 @@ const BRCODE_MANUAL =
 const COMMUNITY_STATIC =
 	"00020126580014br.gov.bcb.pix0136bee05743-4291-4f3c-9259-595df1307ba1520400005303986540510.005802BR5914Alexandre Lima6019Presidente Prudente62180514Um-Id-Qualquer6304D475";
 
+const KEY_ANNOUNCED_AS_DYNAMIC =
+	"00020101021226330014br.gov.bcb.pix0111123456789095204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63043CAC";
+
+const URL_ANNOUNCED_AS_STATIC =
+	"00020101021126480014br.gov.bcb.pix2526pix.example.com/qr/v2/12345204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304F299";
+
+const URL_WITHOUT_POINT_OF_INITIATION =
+	"00020126480014br.gov.bcb.pix2526pix.example.com/qr/v2/12345204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041420";
+
 const STATIC_POINT_OF_INITIATION =
 	"00020101021126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***630448CD";
 
 const tlv = (id: string, value: string): string =>
 	`${id}${value.length.toString().padStart(2, "0")}${value}`;
+
+const hasValidCrc = (payload: string): boolean =>
+	crc16Ccitt(payload.slice(0, -4)) === payload.slice(-4);
 
 const buildPayload = (merchantAccountInformation: string, additionalData?: string): string => {
 	const withoutCrc = [
@@ -102,6 +114,15 @@ const buildPayloadWithAmount = (amount: string): string => {
 		tlv("60", "BRASILIA"),
 		"6304",
 	].join("");
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
+
+const DYNAMIC_URL = "pix.example.com/qr/v2/1234";
+
+const buildDynamicPayloadWithAmount = (amount: string): string => {
+	const location = tlv("00", "br.gov.bcb.pix") + tlv("25", DYNAMIC_URL);
+	const withoutCrc = `${tlv("00", "01")}${tlv("01", "12")}${tlv("26", location)}${tlv("52", "0000")}${tlv("53", "986")}${tlv("54", amount)}${tlv("58", "BR")}${tlv("59", "Fulano de Tal")}${tlv("60", "BRASILIA")}6304`;
 
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
@@ -204,6 +225,21 @@ describe("parsePixPayload", () => {
 			).toBeNull();
 		});
 
+		test("when a key is announced as dynamic by the point of initiation method", () => {
+			expect(hasValidCrc(KEY_ANNOUNCED_AS_DYNAMIC)).toBe(true);
+			expect(parsePixPayload(KEY_ANNOUNCED_AS_DYNAMIC)).toBeNull();
+		});
+
+		test("when a url is announced as static by the point of initiation method", () => {
+			expect(hasValidCrc(URL_ANNOUNCED_AS_STATIC)).toBe(true);
+			expect(parsePixPayload(URL_ANNOUNCED_AS_STATIC)).toBeNull();
+		});
+
+		test("when a url carries no point of initiation method at all", () => {
+			expect(hasValidCrc(URL_WITHOUT_POINT_OF_INITIATION)).toBe(true);
+			expect(parsePixPayload(URL_WITHOUT_POINT_OF_INITIATION)).toBeNull();
+		});
+
 		test("when the additional data template is malformed", () => {
 			const merchantAccountInformation = tlv("00", "br.gov.bcb.pix") + tlv("01", "some-key");
 
@@ -232,6 +268,24 @@ describe("parsePixPayload", () => {
 			expect(parsePixPayload(buildPayloadWithAmount("99999999999.99"))).toBeNull();
 		});
 
+		test("when the transaction amount is not written as a plain decimal number", () => {
+			expect(parsePixPayload(buildPayloadWithAmount("+1.00"))).toBeNull();
+			expect(parsePixPayload(buildPayloadWithAmount(" 1.00"))).toBeNull();
+			expect(parsePixPayload(buildPayloadWithAmount("1.00x"))).toBeNull();
+			expect(parsePixPayload(buildPayloadWithAmount("abc"))).toBeNull();
+		});
+
+		test("when the transaction amount states more than two decimal places", () => {
+			expect(parsePixPayload(buildPayloadWithAmount("1.234"))).toBeNull();
+		});
+
+		test("when a static payload states a transaction amount of zero", () => {
+			expect(hasValidCrc(buildPayloadWithAmount("0.00"))).toBe(true);
+			expect(parsePixPayload(buildPayloadWithAmount("0.00"))).toBeNull();
+			expect(parsePixPayload(buildPayloadWithAmount("0"))).toBeNull();
+			expect(parsePixPayload(buildPayloadWithAmount("0.0"))).toBeNull();
+		});
+
 		test("when the merchant name is present but empty", () => {
 			expect(parsePixPayload(buildPayloadWithMerchantName(""))).toBeNull();
 		});
@@ -251,6 +305,15 @@ describe("parsePixPayload", () => {
 				url: "pix.example.com/qr/v2/1234",
 				merchantName: "A",
 				merchantCity: "B",
+				pointOfInitiation: "dynamic",
+			});
+		});
+
+		test("should accept a transaction amount of zero in a dynamic payload, whose amount the PSP location settles", () => {
+			expect(parsePixPayload(buildDynamicPayloadWithAmount("0.00"))).toEqual({
+				url: DYNAMIC_URL,
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
 				pointOfInitiation: "dynamic",
 			});
 		});

@@ -35,7 +35,7 @@ import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
 import { sanitizeToAscii } from "../_internals/sanitize-to-ascii/sanitize-to-ascii";
 import { parsePixKey } from "../parse-pix-key/parse-pix-key";
-import { AMOUNT_DECIMAL_PLACES, TLV_OVERHEAD, TXID_REGEX } from "./constants";
+import { AMOUNT_DECIMAL_PLACES, AMOUNT_REGEX, TLV_OVERHEAD, TXID_REGEX } from "./constants";
 
 /** The parameters `generatePixPayload` takes to build a Pix BR Code. */
 export type GeneratePixPayloadParams = {
@@ -100,10 +100,15 @@ const resolveFormattedAmount = (
 ): string | null => {
 	if (pointOfInitiation !== undefined && (amount !== undefined || txid !== undefined)) return null;
 
-	// Stryker disable next-line EqualityOperator: amount <= 0 differs from amount < 0 only at 0 (or -0), and both format to "0.00", which the "rounds to 0.00" check below always rejects anyway
-	if (amount !== undefined && (!Number.isFinite(amount) || amount <= 0)) return null;
+	// `Number.isFinite` is false for every value that is not a number, so this guard is what keeps
+	// `toFixed` below from being called on something that has no `toFixed`. A negative amount keeps
+	// its sign in `toFixed`, so the amount regex below turns it down, and an amount that is zero or
+	// rounds to zero is turned down by the `Number(formattedAmount)` check.
+	if (amount !== undefined && !Number.isFinite(amount)) return null;
 
 	const formattedAmount = amount === undefined ? "" : amount.toFixed(AMOUNT_DECIMAL_PLACES);
+
+	if (amount !== undefined && !AMOUNT_REGEX.test(formattedAmount)) return null;
 
 	if (formattedAmount.length > PIX_TRANSACTION_AMOUNT_MAX_LENGTH) return null;
 

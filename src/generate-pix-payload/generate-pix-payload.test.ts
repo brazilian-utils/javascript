@@ -179,6 +179,11 @@ describe("generatePixPayload", () => {
 			expect(generatePixPayload({ ...BASE, amount: 123_456_789_012 })).toBeNull();
 		});
 
+		test("when the amount is so large that it formats in exponential notation", () => {
+			expect(generatePixPayload({ ...BASE, amount: 1e21 })).toBeNull();
+			expect(generatePixPayload({ ...BASE, amount: 1.5e25 })).toBeNull();
+		});
+
 		test("but accept an amount whose formatted length is exactly 13 characters", () => {
 			expect(generatePixPayload({ ...BASE, amount: 9_999_999_999.99 })).toContain(
 				"54139999999999.99",
