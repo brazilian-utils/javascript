@@ -3,7 +3,6 @@ import * as fc from "fast-check";
 import {
 	NUMBER_TO_WORDS_MAX_VALUE,
 	type NumberToWordsGender,
-	type WordsCase,
 } from "../_internals/number-to-words/number-to-words";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { convertNumberToWords, type ConvertNumberToWordsOptions } from "./convert-number-to-words";
@@ -88,29 +87,11 @@ describe("convertNumberToWords", () => {
 		});
 	});
 
-	describe("case option", () => {
-		test("should keep the result lowercase by default", () => {
+	describe("letter case", () => {
+		test("should always keep the result lowercase", () => {
 			expect(convertNumberToWords(123)).toBe("cento e vinte e três");
-		});
-
-		test("should keep the result lowercase for 'lower'", () => {
-			expect(convertNumberToWords(123, { case: "lower" })).toBe("cento e vinte e três");
-		});
-
-		test("should capitalize only the first letter for 'sentence'", () => {
-			expect(convertNumberToWords(123, { case: "sentence" })).toBe("Cento e vinte e três");
-			expect(convertNumberToWords(3, { case: "sentence" })).toBe("Três");
-		});
-
-		test("should uppercase everything for 'upper', keeping accents", () => {
-			expect(convertNumberToWords(3, { case: "upper" })).toBe("TRÊS");
-			expect(convertNumberToWords(50, { case: "upper" })).toBe("CINQUENTA");
-			expect(convertNumberToWords(-3, { case: "upper" })).toBe("MENOS TRÊS");
-		});
-
-		test("should ignore an invalid case value and fall back to 'lower'", () => {
-			// @ts-expect-error: intentionally invalid input
-			expect(convertNumberToWords(123, { case: "invalid" })).toBe("cento e vinte e três");
+			expect(convertNumberToWords(3)).toBe("três");
+			expect(convertNumberToWords(-3)).toBe("menos três");
 		});
 	});
 
@@ -599,14 +580,12 @@ describe("convertNumberToWords", () => {
 			);
 		});
 
-		test("should uppercase the result the same way as the lower case result, for the 'upper' case option", () => {
+		test("should never return a character in upper case", () => {
 			fc.assert(
 				fc.property(inRangeIntegerArbitrary, (value) => {
-					const lower = convertNumberToWords(value);
+					const words = convertNumberToWords(value);
 
-					expect(convertNumberToWords(value, { case: "upper" })).toBe(
-						lower.toLocaleUpperCase("pt-BR"),
-					);
+					expect(words).toBe(words.toLocaleLowerCase("pt-BR"));
 				}),
 			);
 		});
@@ -622,7 +601,6 @@ describe("convertNumberToWords types", () => {
 		expectTypeOf<ConvertNumberToWordsOptions["gender"]>().toEqualTypeOf<
 			NumberToWordsGender | undefined
 		>();
-		expectTypeOf<ConvertNumberToWordsOptions["case"]>().toEqualTypeOf<WordsCase | undefined>();
 		expectTypeOf(convertNumberToWords).returns.toEqualTypeOf<string>();
 	});
 });

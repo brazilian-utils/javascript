@@ -12,16 +12,6 @@ import {
 /** The grammatical gender `convertNumberToWords` agrees the number it writes out with. */
 export type NumberToWordsGender = "masculine" | "feminine";
 
-/**
- * Letter case applied to the final "por extenso" string of `convertNumberToWords`,
- * `convertCurrencyToWords` and `convertDateToWords`. `"lower"` leaves the string as produced
- * (every word already lowercase); `"sentence"` capitalizes only its first letter; `"upper"`
- * uppercases the whole string with the "pt-BR" locale, which keeps accents intact
- * ("três" -> "TRÊS", "março" -> "MARÇO"). Defaults to `"lower"`; any other value is ignored and
- * `"lower"` is used instead.
- */
-export type WordsCase = "lower" | "sentence" | "upper";
-
 export type NumberToWordsOptions = {
 	/** Grammatical gender used to agree "um/dois" and the 100-999 group ("duzentos/duzentas", etc.) with the noun the number qualifies. Only the thousands group and the final 0-999 group are affected: the multiplier of "milhão/bilhão/trilhão" always agrees with those (masculine) nouns. Defaults to `"masculine"`. */
 	gender?: NumberToWordsGender;
