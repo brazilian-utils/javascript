@@ -7,14 +7,18 @@ import { type StateCode } from "./states";
  * all but a handful of its municipalities, and `AREA_CODE_SECONDARY_STATES` carries the other
  * states the four cross-border codes also serve.
  *
- * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
- * page below lists the codes actually allocated and links, under "POR MUNICÍPIO", to the Anexo
- * of Resolução Anatel nº 263/2001, which gives the Código Nacional of every municipality. That
- * Anexo was parsed to derive both tables.
+ * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code). The Plano
+ * Geral de Códigos Nacionais that art. 15 referred to was revoked by Resolução Anatel nº
+ * 755/2022, and the allocation in force is the one Despacho Decisório nº 17/2025/PRRE/SPR
+ * approved; Anatel publishes it on the gov.br page below, which lists the codes actually
+ * allocated and links, under "POR MUNICÍPIO", to the Anexo of Resolução Anatel nº 263/2001,
+ * giving the Código Nacional of every municipality. That Anexo was parsed to derive both
+ * tables.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
- * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
  * @see Based on: https://brasilapi.com.br/docs#tag/DDD
  */
 export const VALID_AREA_CODES: readonly number[] = [

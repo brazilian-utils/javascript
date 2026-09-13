@@ -24,6 +24,7 @@ import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
  * ```
  *
  * @see Official: https://www.itu.int/rec/T-REC-E.164
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const parsePhone = (value: string | number): string =>
 	isNullish(value) ? "" : normalizePhone(value).slice(0, PHONE_NATIONAL_MAX_LENGTH);
