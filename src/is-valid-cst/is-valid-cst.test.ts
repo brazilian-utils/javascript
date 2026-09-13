@@ -33,7 +33,7 @@ describe("isValidCst", () => {
 			expect(isValidCst("061", { tax: "icms" })).toBe(true);
 		});
 
-		it("should return false for the codes Ajuste SINIEF 20/24 revoked (12, 13, 52, 72 and 74)", () => {
+		it('should return false for the codes Ajuste SINIEF 39/23 added "sem efeitos" and Ajuste SINIEF 20/24 struck before they took effect (12, 13, 52, 72 and 74)', () => {
 			expect(isValidCst("012", { tax: "icms" })).toBe(false);
 			expect(isValidCst("013", { tax: "icms" })).toBe(false);
 			expect(isValidCst("052", { tax: "icms" })).toBe(false);
@@ -144,13 +144,28 @@ describe("isValidCst", () => {
 		expect(isValidCst(undefined, { tax: "icms" })).toBe(false);
 	});
 
-	it("should accept a single separator between the digits and surrounding whitespace", () => {
+	it("should accept a single separator after the origin digit and surrounding whitespace", () => {
 		expect(isValidCst(" 1-10 ", { tax: "icms" })).toBe(true);
 		expect(isValidCst("0 10", { tax: "icms" })).toBe(true);
+		expect(isValidCst("0.10", { tax: "icms" })).toBe(true);
+		expect(isValidCst("0/10", { tax: "icms" })).toBe(true);
 	});
 
 	it("should return false when more than one separator sits between two digits", () => {
 		expect(isValidCst("1--10", { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false when a separator does not sit right after the origin digit", () => {
+		expect(isValidCst("00-", { tax: "icms" })).toBe(false);
+		expect(isValidCst("0-0", { tax: "icms" })).toBe(false);
+		expect(isValidCst("11-0", { tax: "icms" })).toBe(false);
+		expect(isValidCst("0.0", { tax: "icms" })).toBe(false);
+		expect(isValidCst("4-9", { tax: "ipi" })).toBe(false);
+		expect(isValidCst("00-")).toBe(false);
+		expect(isValidCst("0-0")).toBe(false);
+		expect(isValidCst("11-0")).toBe(false);
+		expect(isValidCst("0.0")).toBe(false);
+		expect(isValidCst("4-9")).toBe(false);
 	});
 
 	it("should return false for a string that is not a documented form", () => {

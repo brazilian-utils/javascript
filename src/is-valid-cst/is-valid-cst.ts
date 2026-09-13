@@ -44,9 +44,12 @@ const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): 
  * `options.tax` is optional. When it is omitted, the code is valid as long as it exists in any
  * one of the four tables above; when it is given, only that table is consulted.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 2 or
- * 3 digits, with a single separator between them and optional surrounding whitespace.
- * Anything else (`"abc110"`) is rejected instead of having its digits picked out. A number is
+ * A string is only read as a code when it is written in one of the documented forms: the 2
+ * digits of a Tabela B code, or the 3 digits of the ICMS form with an optional single
+ * separator after the origin digit, plus optional surrounding whitespace. The origin digit is
+ * the only boundary a printed CST has, so `"0 10"` and `"1-10"` are read while `"0-0"`,
+ * `"11-0"` and `"00-"` are not. Anything else (`"abc110"`) is rejected instead of having its
+ * digits picked out. A number is
  * only read as a code when it is a non-negative safe integer, since a sign, a decimal point or
  * a rounded magnitude would otherwise be read as a code the caller never wrote.
  *
@@ -61,8 +64,9 @@ const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): 
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2023/ajuste-sinief-39-23
  * Ajuste SINIEF 39/23, which gave Tabela B its current wording with effect from 01.12.23.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2024/AJ020_24
- * Ajuste SINIEF 20/24, which revoked items 12, 13, 52, 72 and 74 of Tabela B with effect from
- * 09.07.24.
+ * Ajuste SINIEF 20/24, which struck items 12, 13, 52, 72 and 74 from Tabela B (effects from
+ * 09.07.24) before they ever took effect: Ajuste SINIEF 39/23 had added them "sem efeitos",
+ * so those codes were never in force.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/1994/aj_003_94
  * Ajuste SINIEF 03/1994, which instituted the ICMS CST as the two digit code AB.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2000/AJ_006_00
