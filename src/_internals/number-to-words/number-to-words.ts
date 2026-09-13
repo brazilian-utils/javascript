@@ -86,7 +86,7 @@ const isRoundHundred = (value: number): boolean => value % 100 === 0;
  * decrees ("mil quinhentos e dezoito reais", Decreto 12.342/2024) and of the examples in the Manual
  * de Redação da Presidência da República ("mil duzentos e cinquenta reais", "mil e quatrocentos
  * reais"). It deviates from `num2words`' pt_BR locale, which separates the groups with commas
- * ("mil duzentos e trinta e cinco") and writes "e" before an intermediate group below 100.
+ * ("mil, duzentos e trinta e cinco") and writes "e" before an intermediate group below 100.
  *
  * @param {number} value - A non-negative integer in `[0, NUMBER_TO_WORDS_MAX_VALUE]`.
  * @param {NumberToWordsOptions} [options] - Optional conversion options.

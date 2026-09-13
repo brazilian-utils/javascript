@@ -5,7 +5,7 @@
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/lei/L14822.htm
  * Lei nº 14.822/2024 (Lei Orçamentária Anual de 2024), art. 1º, which spells 14 "quatorze"
  * ("quatrocentos e quatorze bilhões"), the form the official Brazilian texts use; the Vocabulário
- * Ortográfico admits both "quatorze" and "quatorze", and num2words' Portuguese table (below) picks
+ * Ortográfico admits both "catorze" and "quatorze", and num2words' Portuguese table (below) picks
  * "quatorze".
  * @see Based on: https://github.com/savoirfairelinux/num2words/blob/master/num2words/lang_PT.py
  * num2words' Portuguese table, the source of every other word of this file.

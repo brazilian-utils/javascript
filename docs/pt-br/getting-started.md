@@ -5,7 +5,7 @@ Brazilian Utils é uma biblioteca com foco na resolução de problemas que enfre
 ## Por que Brazilian Utils
 
 - **Zero dependências de runtime.** Nada além da lib entra no seu `node_modules` ou no seu bundle.
-- **Tree-shakeable até a função.** `import { isValidCpf }` custa menos de 1 KB; cada utilitário também é um subpath próprio (`@brazilian-utils/brazilian-utils/get-cities`) para os mais pesados.
+- **Tree-shakeable até a função.** `import { isValidCpf }` custa cerca de 1,2 KB minificado (0,6 KB com gzip); cada utilitário também é um subpath próprio (`@brazilian-utils/brazilian-utils/get-cities`) para os mais pesados.
 - **Roda em qualquer lugar.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno e navegadores modernos, testados no CI em todos eles.
 - **Escrita em TypeScript.** Os tipos vêm no pacote; a API pública é acompanhada por um relatório de API, então nada muda em silêncio.
 - **Validada contra as regras oficiais.** Cada validador cita a especificação, lei ou base de dados que implementa (`@see` na documentação), e a suíte de testes passa por mutation testing, não só por cobertura.
@@ -63,7 +63,7 @@ Você pode conferir a lista de utilitários [clicando aqui](utilities.md).
 
 ## Tamanho do bundle
 
-O pacote é tree-shakeable: importar um utilitário da raiz traz apenas o código daquele utilitário, não o resto da biblioteca. `isValidCpf`, por exemplo, adiciona cerca de 1,2 KB minificado (0,6 KB com gzip) ao seu bundle. Um bundler com suporte a tree-shaking (webpack, Rollup, esbuild, Vite etc.) descarta todos os outros utilitários.
+O pacote é tree-shakeable: importar um utilitário da raiz traz apenas o código daquele utilitário, não o resto da biblioteca. `isValidCpf`, por exemplo, adiciona cerca de 1,2 KB minificado (0,6 KB com gzip) ao seu bundle. Um bundler com suporte a tree-shaking (webpack, Rollup, esbuild, Vite, etc.) descarta todos os outros utilitários.
 
 Alguns utilitários são a exceção: cada um embute um dataset oficial e pesa muito mais que todos os outros utilitários somados. Estes são os tamanhos de um import isolado, minificado e com gzip:
 
