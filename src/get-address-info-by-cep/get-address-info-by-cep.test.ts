@@ -757,17 +757,19 @@ describe("getAddressInfoByCep", () => {
 			LIVE_TEST_TIMEOUT,
 		);
 
-		it(
-			"should fetch live address from Widenet",
-			async () => {
-				const result = await getAddressInfoByCep(VALID_CEP, {
-					providers: ["widenet"],
-				});
+		describe.skip("Widenet, skipped while the service answers HTTP 502 (since September 2026, the reason it left the default provider list)", () => {
+			it(
+				"should fetch live address from Widenet",
+				async () => {
+					const result = await getAddressInfoByCep(VALID_CEP, {
+						providers: ["widenet"],
+					});
 
-				expectAddressFound(result);
-			},
-			LIVE_TEST_TIMEOUT,
-		);
+					expectAddressFound(result);
+				},
+				LIVE_TEST_TIMEOUT,
+			);
+		});
 
 		it(
 			"should fetch live address from BrasilAPI",
