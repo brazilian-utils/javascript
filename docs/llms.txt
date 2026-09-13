@@ -29,7 +29,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidCep](https://brazilian-utils.com.br/utilities.md#isvalidcep): Check if CEP (brazilian postal code) is valid.
 - [isValidBoleto](https://brazilian-utils.com.br/utilities.md#isvalidboleto): Check if boleto (brazilian payment method) is valid.
 - [isValidPixKey](https://brazilian-utils.com.br/utilities.md#isvalidpixkey): Check if a Pix key (chave Pix) is valid: a CPF, a CNPJ, an e-mail address, a Brazilian mobile phone number or a random key (EVP), per the DICT key formats.
-- [isValidPixPayload](https://brazilian-utils.com.br/utilities.md#isvalidpixpayload): Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, and a matching CRC-16.
+- [isValidPixPayload](https://brazilian-utils.com.br/utilities.md#isvalidpixpayload): Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, a "Point of Initiation Method" object (`01`) that agrees with it (a key requires a static payload, so `01` is absent or `"11"`; a URL requires a dynamic one, so `01` is `"12"`), an amount (`54`) greater than zero in a static payload, and a matching CRC-16.
 - [isValidNfeKey](https://brazilian-utils.com.br/utilities.md#isvalidnfekey): Check if a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) is valid.
 - [isValidEmail](https://brazilian-utils.com.br/utilities.md#isvalidemail): Check if email is valid.
 - [isValidPhone](https://brazilian-utils.com.br/utilities.md#isvalidphone): Check if phone number (mobile or landline) is valid.
@@ -67,7 +67,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [formatCpf](https://brazilian-utils.com.br/utilities.md#formatcpf): Format CPF.
 - [formatCnpj](https://brazilian-utils.com.br/utilities.md#formatcnpj): Format CNPJ.
 - [formatBoleto](https://brazilian-utils.com.br/utilities.md#formatboleto): Format a boleto number.
-- [formatNfeKey](https://brazilian-utils.com.br/utilities.md#formatnfekey): Format a DF-e (NF-e, NFC-e, CT-e or MDF-e) access key into groups of 4 digits separated by spaces, the common display form printed on the DANFE.
+- [formatNfeKey](https://brazilian-utils.com.br/utilities.md#formatnfekey): Format a DF-e (NF-e, NFC-e, CT-e, MDF-e or CT-e OS) access key into groups of 4 digits separated by spaces, the common display form printed on the DANFE.
 - [formatPhone](https://brazilian-utils.com.br/utilities.md#formatphone): Format phone number according to Brazilian patterns.
 - [formatPis](https://brazilian-utils.com.br/utilities.md#formatpis): Format PIS number.
 - [formatCep](https://brazilian-utils.com.br/utilities.md#formatcep): Format CEP (brazilian postal code).
@@ -128,7 +128,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 - [getBoletoInfo](https://brazilian-utils.com.br/utilities.md#getboletoinfo): Extract information from a boleto (amount, expiration date, bank code).
 - [getAreaCodeInfo](https://brazilian-utils.com.br/utilities.md#getareacodeinfo): Get the state (and its region) a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração.
-- [getAreaCodesByState](https://brazilian-utils.com.br/utilities.md#getareacodesbystate): Get every DDD (area code) that belongs to a given Brazilian state, under the Anatel Plano Geral de Numeração.
+- [getAreaCodesByState](https://brazilian-utils.com.br/utilities.md#getareacodesbystate): Get every DDD (area code) that serves a given Brazilian state, under the Anatel Plano Geral de Numeração.
 - [getAddressInfoByCep](https://brazilian-utils.com.br/utilities.md#getaddressinfobycep): Fetch address information for a given CEP using multiple providers.
 - [getBanks](https://brazilian-utils.com.br/utilities.md#getbanks): Get every Brazilian bank with a compensation code (COMPE), published by Banco Central do Brasil in the STR participants list.
 - [getBankByCode](https://brazilian-utils.com.br/utilities.md#getbankbycode): Look a Brazilian bank up by its compensation code (COMPE), published by Banco Central do Brasil in the STR participants list.

@@ -9,7 +9,7 @@ import {
 	STATE_HOLIDAYS,
 } from "./constants";
 
-/** How a holiday returned by `getHolidays` is observed. */
+/** The class a holiday returned by `getHolidays` falls into. */
 export type HolidayType = "national" | "state" | "optional" | "religious";
 
 /** One holiday returned by `getHolidays`. */
