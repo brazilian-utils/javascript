@@ -2,8 +2,12 @@ import * as fc from "fast-check";
 
 import { BANKS } from "../_internals/constants/banks";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { COMPE_CODES } from "./constants";
-import { isValidBankAccount, type IsValidBankAccountOptions } from "./is-valid-bank-account";
+import { COMPE_CODES, STRUCTURE_ONLY_BANK_CODES } from "./constants";
+import {
+	ALGORITHM_BANK_CODES,
+	isValidBankAccount,
+	type IsValidBankAccountOptions,
+} from "./is-valid-bank-account";
 
 const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
 	bankCode: "001",
@@ -595,7 +599,7 @@ describe("isValidBankAccount", () => {
 				).toBe(true);
 			});
 
-			test("when the check digit is P for account 0301357 (sum 67, remainder 1), also accepted rendered as 0, and false when the digit is 1", () => {
+			test("when the check digit is P for account 0301357 (sum 67, remainder 1), which is the only digit accepted for that remainder", () => {
 				expect(
 					isValidBankAccount({
 						bankCode: "237",
@@ -612,7 +616,7 @@ describe("isValidBankAccount", () => {
 						account: "0301357",
 						digit: "0",
 					}),
-				).toBe(true);
+				).toBe(false);
 
 				expect(
 					isValidBankAccount({
@@ -1165,6 +1169,63 @@ describe("isValidBankAccount", () => {
 					digit: "01",
 				}),
 			).toBe(false);
+		});
+
+		test("should accept one account of every structure only bank code", () => {
+			const accepted = STRUCTURE_ONLY_BANK_CODES.filter((bankCode) =>
+				isValidBankAccount({ bankCode, agency: "0001", account: "1234567", digit: "0" }),
+			);
+
+			expect(accepted).toStrictEqual([
+				"077",
+				"085",
+				"102",
+				"136",
+				"197",
+				"208",
+				"212",
+				"290",
+				"318",
+				"323",
+				"336",
+				"380",
+				"403",
+				"623",
+				"655",
+				"707",
+				"748",
+				"756",
+			]);
+		});
+	});
+
+	describe("bank table consistency", () => {
+		test("should list every structure only bank code in COMPE_CODES and in BANKS", () => {
+			const missing = STRUCTURE_ONLY_BANK_CODES.filter(
+				(bankCode) => !LISTED_CODES.has(bankCode) || !BANKS.some((bank) => bank.code === bankCode),
+			);
+
+			expect(missing).toStrictEqual([]);
+		});
+
+		test("should list every bank code with a published algorithm in COMPE_CODES and in BANKS", () => {
+			expect([...ALGORITHM_BANK_CODES].sort()).toStrictEqual([
+				"001",
+				"033",
+				"041",
+				"104",
+				"237",
+				"260",
+				"341",
+				"399",
+				"745",
+			]);
+
+			const missing = ALGORITHM_BANK_CODES.filter(
+				(bankCode) => !LISTED_CODES.has(bankCode) || !BANKS.some((bank) => bank.code === bankCode),
+			);
+
+			expect(missing).toStrictEqual([]);
 		});
 	});
 

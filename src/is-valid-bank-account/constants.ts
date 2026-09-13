@@ -79,7 +79,6 @@ export const STRUCTURE_ONLY_BANK_CODES = [
 	"623",
 	"655",
 	"707",
-	"746",
 	"748",
 	"756",
 ];

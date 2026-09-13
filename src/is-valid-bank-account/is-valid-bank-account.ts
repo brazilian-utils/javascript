@@ -84,7 +84,7 @@ const caixaDigits: BankAccountDigits = (agency, account) => {
 const bradescoDigits: BankAccountDigits = (_agency, account) => {
 	const digit = mod11(account, { variant: "bank", maxWeight: 7 });
 
-	return digit === 10 ? ["P", "0"] : [String(digit)];
+	return digit === 10 ? ["P"] : [String(digit)];
 };
 
 const nubankDigits: BankAccountDigits = (_agency, account) => {
@@ -181,6 +181,9 @@ const BANK_RULES: Record<string, BankAccountRule> = {
 	},
 };
 
+/** The bank codes validated by a published check digit algorithm. */
+export const ALGORITHM_BANK_CODES = Object.keys(BANK_RULES);
+
 const STRUCTURE_ONLY_RULE: BankAccountRule = {
 	minAgencyLength: 1,
 	maxAgencyLength: 5,
@@ -252,7 +255,7 @@ const sanitizeCheckDigit = (value: string): string =>
  * Banks validated by structure only, because they publish no check digit rule:
  * Inter (077), Ailos (085), XP (102), Unicred (136), Stone (197), BTG Pactual (208),
  * Original (212), PagBank (290), BMG (318), Mercado Pago (323), C6 (336), PicPay (380),
- * Cora (403), Pan (623), BV (655), Daycoval (707), Modal (746), Sicredi (748) and Sicoob (756).
+ * Cora (403), Pan (623), BV (655), Daycoval (707), Sicredi (748) and Sicoob (756).
  * For those the agency and account only need to match the documented digit lengths.
  *
  * Every other bank of the list falls back to a generic modulus 10 and modulus 11 check.
