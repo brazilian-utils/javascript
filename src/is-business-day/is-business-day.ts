@@ -1,9 +1,12 @@
-import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
 import { type StateCode } from "../_internals/constants/states";
+import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { getHolidays } from "../get-holidays/get-holidays";
 
-/** Options of `isBusinessDay`. */
-export type IsBusinessDayOptions = {
+/**
+ * Options shared by every business day util (`isBusinessDay`, `addBusinessDays`,
+ * `subBusinessDays` and `differenceInBusinessDays`): which holidays count as non-business days.
+ */
+export type BusinessDayOptions = {
 	/** Two letter state code whose state holidays are also treated as non-business days (default: national holidays only). */
 	stateCode?: StateCode;
 	/** Whether optional-type holidays (`Holiday.type === "optional"`, e.g. Carnaval, Corpus Christi) count as non-business days (default: `true`). */
@@ -29,12 +32,20 @@ const WEEKEND_DAYS = new Set([0, 6]);
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored
  * and only national holidays are considered (same behavior as `getHolidays`/`isHoliday`).
+ * The lookup is an own-property one, so a prototype-chain key such as `"__proto__"` or
+ * `"constructor"` is an unknown state code like any other.
+ *
+ * Two state rules change what `includeOptional: false` answers. The Distrito Federal declares
+ * Corpus Christi a feriado (Lei distrital nº 72/1989, art. 1º parágrafo único), so with
+ * `stateCode: "DF"` it is typed `"state"` and still counts; and Santa Catarina's two holidays
+ * are observed on the following Sunday when they fall Monday to Friday (Lei SC nº 18.531/2022),
+ * so 11 August 2025, a Monday, is a business day there.
  *
  * Only years from 1900 through 2099 are supported, the range `getHolidays` computes; a date
  * outside it returns `false` rather than silently treating every weekday as a business day.
  *
  * @param {Date} value - The date to check.
- * @param {IsBusinessDayOptions} [options] - Options for the check.
+ * @param {BusinessDayOptions} [options] - Which holidays count as non-business days.
  * @param {StateCode} [options.stateCode] - Brazilian state code whose state holidays are also considered.
  * @param {boolean} [options.includeOptional] - Whether optional holidays count as non-business days (default: `true`).
  * @returns {boolean} True when `value` is a business day, false otherwise. Bad input also
@@ -57,23 +68,27 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * The underlying holidays are the ones `getHolidays` computes; see its JSDoc (and
  * `src/get-holidays/constants.ts` for state holidays) for the full set of laws behind them.
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm Lei 662/1949, the base
- * national holidays law.
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm Lei 10.607/2002,
- * added Tiradentes and Finados.
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm Lei 6.802/1980, declared
- * Nossa Senhora Aparecida a national holiday.
- * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm Lei
- * 14.759/2023, nationalized Dia da Consciência Negra from 2024.
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm Lei 9.093/1995, the
- * framework law authorizing state and municipal holidays.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
+ * Lei 662/1949, the base national holidays law.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
+ * Lei 10.607/2002, added Tiradentes and Finados.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
+ * Lei 6.802/1980, declared Nossa Senhora Aparecida a national holiday.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
+ * Lei 14.759/2023, nationalized Dia da Consciência Negra from 2024.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm
+ * Lei 9.093/1995, the framework law authorizing state and municipal holidays.
+ * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
+ * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
+ * pontos facultativos: the source of Sexta-feira Santa being observed nationally and of Carnaval
+ * and Corpus Christi being ponto facultativo, which is what `includeOptional` switches on.
  */
-export const isBusinessDay = (value: Date, options?: IsBusinessDayOptions): boolean => {
+export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolean => {
 	if (!(value instanceof Date) || Number.isNaN(value.getTime())) return false;
 
 	const year = value.getFullYear();
 
-	if (year < HOLIDAYS_MIN_YEAR || year > HOLIDAYS_MAX_YEAR) return false;
+	if (!isSupportedHolidayYear(year)) return false;
 
 	if (WEEKEND_DAYS.has(value.getDay())) return false;
 

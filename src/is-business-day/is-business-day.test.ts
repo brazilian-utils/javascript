@@ -1,15 +1,32 @@
 import * as fc from "fast-check";
 
 import { type StateCode } from "../_internals/constants/states";
-import { holidayYears, monthDays, monthIndexes, stateCodes } from "../_internals/test/arbitraries";
+import {
+	businessDayDates,
+	holidayYears,
+	monthDays,
+	monthIndexes,
+	stateCodes,
+} from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getHolidays, type Holiday } from "../get-holidays/get-holidays";
-import { isBusinessDay, type IsBusinessDayOptions } from "./is-business-day";
+import { isBusinessDay, type BusinessDayOptions } from "./is-business-day";
+
+const PROTOTYPE_KEYS = Object.getOwnPropertyNames(Object.prototype);
 
 function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
 	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
 }
+
+const anyStateCode = fc.oneof(fc.constantFrom(...PROTOTYPE_KEYS, "SP", "xx"), fc.anything());
+const anyIncludeOptional = fc.oneof(fc.boolean(), fc.anything());
+const hostileOptions = fc.record({
+	stateCode: anyStateCode,
+	includeOptional: anyIncludeOptional,
+});
+const anyValueInput = fc.oneof(fc.anything(), businessDayDates);
+const anyOptionsInput = fc.oneof(fc.anything(), hostileOptions);
 
 describe("isBusinessDay", () => {
 	it("should return true for a plain weekday that is not a holiday (noon, DST-safe)", () => {
@@ -50,6 +67,29 @@ describe("isBusinessDay", () => {
 		it("should ignore an unknown stateCode and fall back to national holidays", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: "XX" })).toBe(true);
+		});
+
+		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
+			for (const stateCode of PROTOTYPE_KEYS) {
+				// @ts-expect-error: intentionally invalid input
+				expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode })).toBe(true);
+				// @ts-expect-error: intentionally invalid input
+				expect(isBusinessDay(new Date(2024, 0, 1, 12), { stateCode })).toBe(false);
+			}
+		});
+
+		it("should treat Monday 11/08/2025 as a business day in SC, since Lei SC nº 18.531/2022 moves the feriado to Sunday 17/08", () => {
+			expect(isBusinessDay(new Date(2025, 7, 11, 12), { stateCode: "SC" })).toBe(true);
+			expect(isBusinessDay(new Date(2025, 7, 17, 12), { stateCode: "SC" })).toBe(false);
+		});
+
+		it("should treat Corpus Christi as a non-business day in the DF even with includeOptional false, since Lei distrital nº 72/1989 declares it a feriado", () => {
+			expect(
+				isBusinessDay(new Date(2024, 4, 30, 12), { stateCode: "DF", includeOptional: false }),
+			).toBe(false);
+			expect(
+				isBusinessDay(new Date(2024, 4, 30, 12), { stateCode: "SP", includeOptional: false }),
+			).toBe(true);
 		});
 	});
 
@@ -151,8 +191,8 @@ describe("isBusinessDay", () => {
 			);
 		});
 
-		test("should never throw, regardless of the input", () => {
-			expectNeverThrowsWithOptions(isBusinessDay, fc.anything(), fc.anything());
+		test("should never throw, regardless of the input, prototype chain state codes included", () => {
+			expectNeverThrowsWithOptions(isBusinessDay, anyValueInput, anyOptionsInput);
 		});
 	});
 });
@@ -160,9 +200,9 @@ describe("isBusinessDay", () => {
 describe("isBusinessDay types", () => {
 	test("should take a Date, options, and return a boolean", () => {
 		expectTypeOf(isBusinessDay).parameter(0).toEqualTypeOf<Date>();
-		expectTypeOf(isBusinessDay).parameter(1).toEqualTypeOf<IsBusinessDayOptions | undefined>();
-		expectTypeOf<IsBusinessDayOptions["stateCode"]>().toEqualTypeOf<StateCode | undefined>();
-		expectTypeOf<IsBusinessDayOptions["includeOptional"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(isBusinessDay).parameter(1).toEqualTypeOf<BusinessDayOptions | undefined>();
+		expectTypeOf<BusinessDayOptions["stateCode"]>().toEqualTypeOf<StateCode | undefined>();
+		expectTypeOf<BusinessDayOptions["includeOptional"]>().toEqualTypeOf<boolean | undefined>();
 		expectTypeOf(isBusinessDay).returns.toEqualTypeOf<boolean>();
 	});
 });

@@ -41,6 +41,23 @@ export const expectNeverThrowsWithOptions = (
 };
 
 /**
+ * Asserts the util never throws for any argument list the arbitrary produces.
+ * @param {Function} fn The util under test.
+ * @param {fc.Arbitrary<unknown[]>} argumentLists The argument lists to spread into it.
+ * @returns {void} Nothing.
+ */
+export const expectNeverThrowsWithArguments = (
+	fn: (...args: never[]) => unknown,
+	argumentLists: fc.Arbitrary<unknown[]>,
+): void => {
+	fc.assert(
+		fc.property(argumentLists, (values) => {
+			expect(() => fn(...(values as never[]))).not.toThrow();
+		}),
+	);
+};
+
+/**
  * Asserts the util always returns a value of `expectedType`, whatever the arbitrary produces.
  * @param {UnknownInputFunction} fn The util under test.
  * @param {string} expectedType The `typeof` the util is expected to return.
