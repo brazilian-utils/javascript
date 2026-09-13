@@ -34,9 +34,11 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * The registry's own page at the Receita Federal, which describes the cadastro but publishes
  * neither the mask nor the check digit rule.
  * @see Official: https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno
- * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: every one of the 38432
- * works registered in Minas Gerais passes this check, which is what ties the CNO to the CEI
- * rule and where the test vectors come from.
+ * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: the catalogue entry for the
+ * dataset this rule was cross-checked against and where the test vectors come from. The check was
+ * run over the Minas Gerais extract of the downloaded dataset, which every registered work passed;
+ * the catalogue page itself publishes only the dataset's description and download links (and
+ * currently flags it "Desatualizado"), not that result.
  * @see Based on: https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php
  * PHP reference implementation of the CEI check digit.
  */

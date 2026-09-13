@@ -12,7 +12,8 @@ import {
  * Checks the length (17 characters), the excluded letters (`I`, `O`, `Q` are never valid; ISO
  * 3779:2009 structure) and the check digit at the 9th position, with the check digit and
  * transliteration computed per 49 CFR 565.15. That 9th-position check digit is a North-American
- * requirement (49 CFR 565.15 / SAE J853): Resolução CONTRAN nº 24/1998 and ABNT NBR 6066 define
+ * requirement (49 CFR 565.15 / SAE J853): Resolução CONTRAN nº 968/2022 (in force since 1 July 2022, revoking Resolução CONTRAN nº 24/1998 from
+ * 1 January 2025 by its art. 50, II) and ABNT NBR 6066 define
  * the Brazilian VIN structure but do not mandate it, so many Brazilian-built VINs do not carry
  * a matching check digit. This function is therefore a North-American-style structural check,
  * not a universal validator of Brazilian VINs. Case-insensitive and trims surrounding whitespace.
@@ -36,8 +37,10 @@ import {
  *
  * @see Official: https://www.iso.org/standard/52200.html
  * @see Official: https://www.ecfr.gov/current/title-49/section-565.15
- * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/resolucoes-contran
- * @see Based on: https://vpic.nhtsa.dot.gov/api/
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9682022.pdf
+ * Resolução CONTRAN nº 968, de 20 de junho de 2022, art. 2º, I (VIN of 17 characters in three sections)
+ * and art. 50, II (revocation of Resolução nº 24/1998 from 1 January 2025).
+ * @see Official: https://vpic.nhtsa.dot.gov/api/
  */
 export const isValidVin = (value: string): boolean => {
 	if (typeof value !== "string") return false;

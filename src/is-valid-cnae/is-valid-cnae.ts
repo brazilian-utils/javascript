@@ -2,7 +2,7 @@ import { getCnae } from "../get-cnae/get-cnae";
 
 /**
  * Validates if a CNAE (Classificação Nacional de Atividades Econômicas) subclass code
- * exists in the official CNAE 2.3 table.
+ * exists in the official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
  * digits, or the `NNNN-N/NN` mask, with a single separator (space, `.`, `-` or `/`) between the groups and optional
@@ -25,5 +25,7 @@ import { getCnae } from "../get-cnae/get-cnae";
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/v2/cnae/subclasses
+ * @see Official: https://concla.ibge.gov.br/busca-online-cnae.html
+ * CONCLA's CNAE search and structure browser, which publishes CNAE-Subclasses 2.3.
  */
 export const isValidCnae = (value: string | number): boolean => getCnae(value) !== null;

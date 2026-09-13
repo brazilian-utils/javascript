@@ -53,7 +53,11 @@ export type CepProvider = "viacep" | "widenet" | "brasilapi";
 
 /** Options of `getAddressInfoByCep`. */
 export type GetAddressInfoByCepOptions = {
-	/** Which CEP services to race, in the order given (default: all of them). */
+	/**
+	 * Which CEP services to race, in the order given (default: `["viacep", "brasilapi"]`; the
+	 * deprecated `"widenet"` provider is excluded from the default list, but can still be
+	 * requested explicitly).
+	 */
 	providers?: CepProvider[];
 };
 

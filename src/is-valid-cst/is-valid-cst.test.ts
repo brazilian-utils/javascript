@@ -33,7 +33,7 @@ describe("isValidCst", () => {
 			expect(isValidCst("061", { tax: "icms" })).toBe(true);
 		});
 
-		it('should return false for the codes Ajuste SINIEF 39/23 added "sem efeitos" and Ajuste SINIEF 20/24 struck before they took effect (12, 13, 52, 72 and 74)', () => {
+		it("should return false for the codes Ajuste SINIEF 39/23 added with deferred effect and Ajuste SINIEF 20/24 struck before they took effect (12, 13, 52, 72 and 74)", () => {
 			expect(isValidCst("012", { tax: "icms" })).toBe(false);
 			expect(isValidCst("013", { tax: "icms" })).toBe(false);
 			expect(isValidCst("052", { tax: "icms" })).toBe(false);

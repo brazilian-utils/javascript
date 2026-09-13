@@ -458,7 +458,7 @@ describe("getHolidays", () => {
 		});
 	});
 
-	test("should list DF's Fundação de Brasília (Lei distrital nº 10.633/1989) next to the national Tiradentes, which falls on the same 21 April under a different name", () => {
+	test("should list DF's Fundação de Brasília (Lei distrital nº 72/1989, art. 1º, I) next to the national Tiradentes, which falls on the same 21 April under a different name", () => {
 		const dfHolidays = getHolidays({ year: 2024, stateCode: "DF" });
 
 		expect(dfHolidays).toContainEqual({

@@ -73,7 +73,7 @@ A handful of utils are the exception: each embeds an official dataset, so it wei
 | `getCities` | 5571 IBGE municipality names | 154.0 KB | 49.7 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 113.8 KB | 24.3 KB |
 | `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 118.8 KB | 30.4 KB |
-| `isValidCnae` · `getCnae` | CNAE 2.3 subclasses | 94.0 KB | 21.3 KB |
+| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 94.0 KB | 21.3 KB |
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.7 KB | 6.8 KB |
 | `getBanks` · `getBankByCode` | Banco Central STR participants (COMPE + ISPB) | 38.3 KB | 9.6 KB |
 

@@ -2,8 +2,12 @@
  * Portuguese (pt-BR) number-to-words tables, shared by `numberToWords` and by every public
  * "por extenso" formatter (`convertNumberToWords`, `convertCurrencyToWords`, `convertDateToWords`).
  *
+ * @see Based on: https://github.com/savoirfairelinux/num2words/blob/master/num2words/lang_PT.py
+ * num2words' Portuguese table, which spells 14 "catorze" (not "quatorze"), the spelling used
+ * here. Its `lang_PT_BR` subclass keeps that table, so `num2words(14, lang="pt_BR")` is
+ * "catorze".
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
- * "catorze" (not "quatorze") is used for 14, matching num2words pt_BR and brutils.
+ * brutils' currency helper, which delegates to num2words and therefore inherits that spelling.
  */
 
 export const ZERO_WORD = "zero";

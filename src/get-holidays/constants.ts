@@ -165,19 +165,31 @@ export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://sapl.al.pi.leg.br/norma/5849
  * Lei PI nº 176/1937, Dia do Piauí (19/10)
  * @see Official: http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/c8aa0900025feef6032564ec0060dfff/1baf90ca125ff96f8325740a00776600
- * Lei RJ nº 5.198/2008, São Jorge (23/04), upheld by STF ADI 4092 (Plenário, sessão virtual de 18
- * a 25/08/2023, trânsito em julgado 28/10/2023): "O Tribunal, por maioria, declarou a
- * constitucionalidade da Lei do Estado do Rio de Janeiro n. 5.198, de 5 de março de 2008".
+ * Lei RJ nº 5.198/2008, São Jorge (23/04): the ALERJ text of the law. Its Ficha Técnica records
+ * no ação de inconstitucionalidade; the STF case is cited separately below.
+ * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=2624787
+ * STF ADI 4092, which upheld that law. Decisão de julgamento of 28/08/2023, Tribunal Pleno,
+ * sessão virtual: "O Tribunal, por maioria, declarou a constitucionalidade da Lei do Estado do Rio
+ * de Janeiro n. 5.198, de 5 de março de 2008, e, por conseguinte, julgou improcedente a presente
+ * ação direta … Plenário, Sessão Virtual de 18.8.2023 a 25.8.2023"; trânsito em julgado 28/10/2023.
  * @see Official: http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/69d90307244602bb032567e800668618/80a541c3a5a9d63183256c7d0057bf25
  * Lei RJ nº 4.007/2002, Dia da Consciência Negra (state holiday until it became national in 2024).
- * STF ADI 4131, cited here before as pending against it, in fact challenged Lei RJ nº 5.243/2008
- * and was não conhecida on 21/09/2018 (trânsito em julgado 25/10/2018).
+ * Its Ficha Técnica records no ação de inconstitucionalidade either.
+ * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=2636281
+ * STF ADI 4131, cited here before as pending against Lei RJ nº 4.007/2002, in fact sought "a
+ * declaração de inconstitucionalidade da Lei n. 5.243, do Estado do Rio de Janeiro, de 14 de maio
+ * de 2008" and was não conhecida on 21/09/2018 (trânsito em julgado 25/10/2018).
  * @see Official: http://www.al.rn.leg.br/storage/legislacao//arq5064574f632ec.pdf
  * Lei RN nº 8.913/2006, Mártires de Cunhaú e Uruaçu (03/10)
+ * @see Official: https://ww2.al.rs.gov.br/dal/LinkClick.aspx?fileticket=WQdIfqNoXO4%3d&tabid=3683&mid=5359
+ * Constituição Estadual do RS compilada (the "Veja em HTML" document of the Assembleia's
+ * Constituição Estadual page, linked below), art. 6º § 1º, Revolução Farroupilha (20/09): "O dia
+ * 20 de setembro é a data magna, sendo considerado feriado no Estado. (Redação dada pela Emenda
+ * Constitucional n.º 11, de 03/10/95) … (Renumerado pela Emenda Constitucional n.º 83, de
+ * 28/09/23)".
  * @see Official: https://ww2.al.rs.gov.br/dal/Legisla%C3%A7%C3%A3o/Constitui%C3%A7%C3%A3oEstadual/tabid/3683/Default.aspx
- * Constituição Estadual do RS, art. 6º § 1º (EC nº 11/1995, renumbered by EC nº 83/2023),
- * Revolução Farroupilha (20/09): "O dia 20 de setembro é a data magna, sendo considerado feriado
- * no Estado".
+ * The Assembleia Legislativa do RS page that publishes that compiled text; it is a link hub and
+ * carries no article text of its own.
  * @see Official: https://sapl.al.ro.leg.br/norma/4958
  * Lei RO nº 2.291, de 22/04/2010, Criação do Estado de Rondônia (04/01): "DECLARA O DIA 4 DE
  * JANEIRO DATA MAGNA E FERIADO CIVIL ESTADUAL". Lei RO nº 3.170/2013, cited here before, is a

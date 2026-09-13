@@ -27,10 +27,11 @@
  *   `2`-`6` as the first digit of a fixed-line number) whose 4-digit prefix a carrier licenses
  *   in many DDDs at once and points at a single customer, marketed as "Número Único". Anatel
  *   withdrew the 4-digit special service codes instead of allocating them: Resolução nº 86/1998
- *   art. 43 I, in the wording of Resolução nº 229/2000, ordered the prestadoras de STFC to
- *   release every 4-character code in use, and Ato nº 43.151/2004 art. 2º II repeated the order
- *   with a 180-day deadline. So the roots below are the conventional ones the market settled on,
- *   not an official allocation.
+ *   art. 43 I, in its last wording (Resolução nº 241, de 30 de novembro de 2000, which superseded
+ *   the Resolução nº 229/2000 one), ordered the prestadoras de STFC to release "até 30 de julho de
+ *   2001, os códigos de serviços especiais com 4 caracteres que estejam em uso", and Ato nº
+ *   43.151/2004 art. 2º II repeated the order with a 180-day deadline. So the roots below are the
+ *   conventional ones the market settled on, not an official allocation.
  *
  * Display formatting is convention too: no Anatel document specifies one. `0800 123 4567` (4-3-4)
  * is the grouping used on gov.br, and `4004-1234` the one carriers print.
@@ -39,10 +40,13 @@
  * Resolução Anatel nº 749/2022, the Regulamento de Numeração in force.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151
  * Ato Anatel nº 43.151/2004, whose Anexo is the consolidated SUP designation table.
- * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2024/1953-ato-12712
- * Ato Anatel nº 12.712/2024, the CNG designation table (items 10.6 and 12.1).
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2140-ato-12712
+ * Ato Anatel nº 12.712, de 04/09/2024, art. 1º: the Procedimento para a Atribuição e Designação
+ * de Recursos de Numeração (Anexo I), in force since 03/12/2024, whose items 10.6 and 12.1 carry
+ * the `500` donation-amount rule and the `900` reserva técnica.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86
- * Resolução Anatel nº 86/1998 (revoked), art. 43 I: the release of the 4-character codes.
+ * Resolução Anatel nº 86/1998 (revoked), art. 43 I: the release of the 4-character codes, in the
+ * redação dada pela Resolução nº 241, de 30 de novembro de 2000, the last one the page carries.
  */
 
 export const SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES = [

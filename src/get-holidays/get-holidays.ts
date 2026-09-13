@@ -163,6 +163,9 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * const spHolidays = getHolidays({ year: 2024, stateCode: 'SP' });
  * ```
  *
+ * The national holiday laws are cited below; the state holiday laws are cited individually, one
+ * `@see` per holiday, in `src/get-holidays/constants.ts`.
+ *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
  * Lei 662/1949, the base national holidays law (Ano novo, Dia do trabalhador, Independência do
  * Brasil, Proclamação da República, Natal).
@@ -198,8 +201,6 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * with the Meeus/Jones/Butcher algorithm. It is a convenience entry, listed because callers
  * computing a liturgical calendar expect it, not because it is a holiday anyone observes as a day
  * off.
- * @see Official: state holiday laws are cited individually, one `@see` per holiday, in
- * `src/get-holidays/constants.ts`.
  */
 export function getHolidays(year: number): Holiday[];
 /**

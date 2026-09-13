@@ -23,7 +23,11 @@ export type IsValidBankAccountOptions = {
 	agency: string;
 	/** Account number, digits only, without the check digit. */
 	account: string;
-	/** The account check digit, one character. */
+	/**
+	 * The account check digit: one or two characters, or "X" for Banco do Brasil and "P" for
+	 * Bradesco. Banks with a published rule take a single character; the generic fallback also
+	 * accepts two, chaining mod10 and mod11 over the account.
+	 */
 	digit: string;
 };
 

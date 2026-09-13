@@ -3,11 +3,20 @@ import { type StateCode } from "../_internals/constants/states";
 /**
  * Prepositions, articles and conjunctions that stay in lower case inside a proper name, the
  * default `lowerCaseWords` of `capitalize`. The Manual de Redação da Presidência da República
- * writes personal and institutional names with every word capitalized except the connective
- * words ("Ministério da Justiça", "José da Silva"), and the same convention is used by the IBGE
- * for the names of municipalities ("Mogi das Cruzes", "Santa Bárbara d'Oeste").
+ * states the convention twice: a cargo is "redigido apenas com as iniciais maiúsculas. As
+ * preposições que liguem as palavras do cargo devem ser grafadas em minúsculas" (item 5.1.8 b),
+ * and a title is written "com inicial maiúscula em todas as palavras, exceto nas de ligação"
+ * (item 10.2 a). The same convention is used by the IBGE for the names of municipalities
+ * ("Mogi das Cruzes", "Santa Bárbara d'Oeste"). Applying it to personal and institutional names
+ * ("Ministério da Justiça", "José da Silva") is this library's extension of that rule; the
+ * Manual does not spell those two cases out.
  *
+ * @see Official: https://www4.planalto.gov.br/centrodeestudos/assuntos/manual-de-redacao-da-presidencia-da-republica/manual-de-redacao.pdf
+ * Manual de Redação da Presidência da República, 3ª edição (Portaria nº 1.369, de 27/12/2018),
+ * items 5.1.8 b) and 10.2 a). The landing page below only recounts the editions and links to
+ * this PDF; the rule itself is in the PDF.
  * @see Official: https://www4.planalto.gov.br/centrodeestudos/assuntos/manual-de-redacao-da-presidencia-da-republica
+ * The Presidência page that publishes it ("Acesse aqui a íntegra da última edição publicada").
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
 export const PREPOSITIONS = [
@@ -46,9 +55,14 @@ export const PREPOSITIONS = [
  * Lei Complementar nº 123/2006, art. 72, revoked by the Lei Complementar nº 155/2016, added
  * "Microempresa ou Empresa de Pequeno Porte, ou suas respectivas abreviações, ME ou EPP" to the
  * name; art. 18-A defines the Microempreendedor Individual (MEI).
- * @see Based on: https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/instrucoes-normativas
- * Instruções normativas of the DREI, which the Juntas Comerciais follow to register a nome
- * empresarial and the source of the S/S spelling of the sociedade simples.
+ * @see Official: https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/instrucoes-normativas/arquivos-instrucoes-normativas-em-vigor/anexo-iv-limitada_link.pdf
+ * IN DREI nº 81/2020, Anexo IV (Manual de Registro de Sociedade Limitada), the rules the Juntas
+ * Comerciais follow for the nome empresarial and for the "conversão de sociedade simples ou
+ * associação do cartório de registro de pessoas jurídicas para a Junta Comercial". The S/S
+ * abbreviation itself is registry practice: no DREI norm spells it out, and it is kept in this
+ * list only because registered names carry it.
+ * @see Official: https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/instrucoes-normativas
+ * The DREI index of instruções normativas in force, where that Anexo is published.
  */
 const BUSINESS_ABBREVIATIONS = [
 	"CEP",

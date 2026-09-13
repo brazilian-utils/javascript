@@ -33,8 +33,8 @@ const calculateCheckDigits = (base: string): string => {
  *
  * @example
  * ```typescript
- * generateProcessoJuridico(); // "00020802520265150049"
- * generateProcessoJuridico({ year: 2030, court: 5 }); // "12345672820305120049"
+ * generateProcessoJuridico(); // "00020803420265150049"
+ * generateProcessoJuridico({ year: 2030, court: 5 }); // "12345679820305120049"
  * generateProcessoJuridico({ year: 10000 }); // null
  * ```
  *

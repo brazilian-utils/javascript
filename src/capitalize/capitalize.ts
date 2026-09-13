@@ -73,7 +73,11 @@ const toWordSet = (
  * Redação da Presidência da República keeps in lower case inside a proper name, and the default
  * `upperCaseWords` list is sourced in `constants.ts` from the laws that create each designation.
  *
- * @see Based on: https://www4.planalto.gov.br/centrodeestudos/assuntos/manual-de-redacao-da-presidencia-da-republica
+ * @see Official: https://www4.planalto.gov.br/centrodeestudos/assuntos/manual-de-redacao-da-presidencia-da-republica/manual-de-redacao.pdf
+ * Manual de Redação da Presidência da República, 3ª edição (Portaria nº 1.369/2018), item 5.1.8
+ * b) and item 10.2 a).
+ * @see Official: https://www4.planalto.gov.br/centrodeestudos/assuntos/manual-de-redacao-da-presidencia-da-republica
+ * The Presidência page that publishes it.
  *
  * @example
  * ```typescript

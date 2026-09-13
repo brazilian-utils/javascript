@@ -114,8 +114,12 @@ When an exported function has a source to credit, list the authoritative source 
 `@see Official:` (a law, regulator, standard body or government dataset), followed by one
 `@see Based on:` line for every third-party implementation, mirror dataset or reference test
 vector the code actually relied on (a GitHub repo, a blog article, a community CSV/JSON mirror,
-and so on), one `@see` per line. A utility with no located source of either kind (e.g.
-`capitalize`, `formatCurrency`) can be left without an `@see` block. See
+and so on), one `@see` per line. A regulator's own repository counts as `Official:` even though it
+is a GitHub URL: `https://github.com/bacen/pix-api` is the Banco Central publishing the normative
+Pix/SPI specification, not a third party reimplementing it. Put the URL alone on the `@see` line
+and the description on the lines below it. Every utility in the package currently has at least one
+`@see`; if you add one whose behaviour is a plain convention with no locatable source, say so in
+prose in the JSDoc instead of inventing a citation. See
 `src/is-valid-certidao/is-valid-certidao.ts` and `src/is-valid-cei/is-valid-cei.ts` for the style.
 
 Shared helpers used by multiple utilities live under `src/_internals/`. Check there before
