@@ -235,8 +235,9 @@ signatures are pinned by the `describe("<name> types")` blocks in the tests, and
   requires one.
 - Commit messages are checked with commitlint on every pull request, since release-please derives
   the version bump and the changelog from them.
-- The `Links` workflow checks every URL in the Markdown files and in the `@see` tags of the source
-  with [lychee](https://lychee.cli.rs) when a pull request touches them.
+- The URLs cited in the Markdown files and in the `@see` tags of the source are checked by hand
+  when a citation is added or changed: an automated link check was tried and dropped, since the
+  government hosts the library cites time out or answer 403 to anything that is not a browser.
 
 ## Zero runtime dependencies
 
