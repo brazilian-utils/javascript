@@ -87,6 +87,7 @@ jobs:
             node scripts/tree-shaking.ts --compare base.json --markdown tree-shaking.md
             code=$?
             set -e
+            case "$code" in 0 | 1) ;; *) code=2 ;; esac
             echo "code=$code" >> "$GITHUB_OUTPUT"
             exit "$code"
           else
