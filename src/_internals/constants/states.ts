@@ -1,76 +1,211 @@
+/**
+ * One Brazilian state, as returned by `getStates`, `getStateByIbgeCode` and the other state
+ * utils. Every state is its own member of the union, so the fields of a state are tied to each
+ * other: `Extract<State, { code: "SP" }>["name"]` is `"São Paulo"`, and narrowing a `State` by
+ * `code` narrows its `name`, `regionCode`, `regionName` and `ibgeCode` too. An impossible
+ * combination such as `{ code: "SP", name: "Acre" }` is not a `State`.
+ *
+ * Each member has the two letter code of the state (`code`, e.g. `"SP"`), its full name
+ * (`name`, e.g. `"São Paulo"`), the code and the full name of the region it belongs to
+ * (`regionCode` and `regionName`, e.g. `"SE"` and `"Sudeste"`) and the 2 digit IBGE code of the
+ * Federative Unit (`ibgeCode`, the "cUF", e.g. `35`).
+ */
+export type State =
+	| {
+			readonly code: "AC";
+			readonly name: "Acre";
+			readonly regionCode: "N";
+			readonly regionName: "Norte";
+			readonly ibgeCode: 12;
+	  }
+	| {
+			readonly code: "AL";
+			readonly name: "Alagoas";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 27;
+	  }
+	| {
+			readonly code: "AP";
+			readonly name: "Amapá";
+			readonly regionCode: "N";
+			readonly regionName: "Norte";
+			readonly ibgeCode: 16;
+	  }
+	| {
+			readonly code: "AM";
+			readonly name: "Amazonas";
+			readonly regionCode: "N";
+			readonly regionName: "Norte";
+			readonly ibgeCode: 13;
+	  }
+	| {
+			readonly code: "BA";
+			readonly name: "Bahia";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 29;
+	  }
+	| {
+			readonly code: "CE";
+			readonly name: "Ceará";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 23;
+	  }
+	| {
+			readonly code: "DF";
+			readonly name: "Distrito Federal";
+			readonly regionCode: "CO";
+			readonly regionName: "Centro-Oeste";
+			readonly ibgeCode: 53;
+	  }
+	| {
+			readonly code: "ES";
+			readonly name: "Espírito Santo";
+			readonly regionCode: "SE";
+			readonly regionName: "Sudeste";
+			readonly ibgeCode: 32;
+	  }
+	| {
+			readonly code: "GO";
+			readonly name: "Goiás";
+			readonly regionCode: "CO";
+			readonly regionName: "Centro-Oeste";
+			readonly ibgeCode: 52;
+	  }
+	| {
+			readonly code: "MA";
+			readonly name: "Maranhão";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 21;
+	  }
+	| {
+			readonly code: "MT";
+			readonly name: "Mato Grosso";
+			readonly regionCode: "CO";
+			readonly regionName: "Centro-Oeste";
+			readonly ibgeCode: 51;
+	  }
+	| {
+			readonly code: "MS";
+			readonly name: "Mato Grosso do Sul";
+			readonly regionCode: "CO";
+			readonly regionName: "Centro-Oeste";
+			readonly ibgeCode: 50;
+	  }
+	| {
+			readonly code: "MG";
+			readonly name: "Minas Gerais";
+			readonly regionCode: "SE";
+			readonly regionName: "Sudeste";
+			readonly ibgeCode: 31;
+	  }
+	| {
+			readonly code: "PA";
+			readonly name: "Pará";
+			readonly regionCode: "N";
+			readonly regionName: "Norte";
+			readonly ibgeCode: 15;
+	  }
+	| {
+			readonly code: "PB";
+			readonly name: "Paraíba";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 25;
+	  }
+	| {
+			readonly code: "PR";
+			readonly name: "Paraná";
+			readonly regionCode: "S";
+			readonly regionName: "Sul";
+			readonly ibgeCode: 41;
+	  }
+	| {
+			readonly code: "PE";
+			readonly name: "Pernambuco";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 26;
+	  }
+	| {
+			readonly code: "PI";
+			readonly name: "Piauí";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 22;
+	  }
+	| {
+			readonly code: "RJ";
+			readonly name: "Rio de Janeiro";
+			readonly regionCode: "SE";
+			readonly regionName: "Sudeste";
+			readonly ibgeCode: 33;
+	  }
+	| {
+			readonly code: "RN";
+			readonly name: "Rio Grande do Norte";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 24;
+	  }
+	| {
+			readonly code: "RS";
+			readonly name: "Rio Grande do Sul";
+			readonly regionCode: "S";
+			readonly regionName: "Sul";
+			readonly ibgeCode: 43;
+	  }
+	| {
+			readonly code: "RO";
+			readonly name: "Rondônia";
+			readonly regionCode: "N";
+			readonly regionName: "Norte";
+			readonly ibgeCode: 11;
+	  }
+	| {
+			readonly code: "RR";
+			readonly name: "Roraima";
+			readonly regionCode: "N";
+			readonly regionName: "Norte";
+			readonly ibgeCode: 14;
+	  }
+	| {
+			readonly code: "SC";
+			readonly name: "Santa Catarina";
+			readonly regionCode: "S";
+			readonly regionName: "Sul";
+			readonly ibgeCode: 42;
+	  }
+	| {
+			readonly code: "SP";
+			readonly name: "São Paulo";
+			readonly regionCode: "SE";
+			readonly regionName: "Sudeste";
+			readonly ibgeCode: 35;
+	  }
+	| {
+			readonly code: "SE";
+			readonly name: "Sergipe";
+			readonly regionCode: "NE";
+			readonly regionName: "Nordeste";
+			readonly ibgeCode: 28;
+	  }
+	| {
+			readonly code: "TO";
+			readonly name: "Tocantins";
+			readonly regionCode: "N";
+			readonly regionName: "Norte";
+			readonly ibgeCode: 17;
+	  };
+
 /** The two letter code of each Brazilian state, as published by the IBGE. */
-export type StateCode =
-	| "AC"
-	| "AL"
-	| "AP"
-	| "AM"
-	| "BA"
-	| "CE"
-	| "DF"
-	| "ES"
-	| "GO"
-	| "MA"
-	| "MT"
-	| "MS"
-	| "MG"
-	| "PA"
-	| "PB"
-	| "PR"
-	| "PE"
-	| "PI"
-	| "RJ"
-	| "RN"
-	| "RS"
-	| "RO"
-	| "RR"
-	| "SC"
-	| "SP"
-	| "SE"
-	| "TO";
+export type StateCode = State["code"];
 
 /** The name of each Brazilian state, as published by the IBGE. */
-export type StateName =
-	| "Acre"
-	| "Alagoas"
-	| "Amapá"
-	| "Amazonas"
-	| "Bahia"
-	| "Ceará"
-	| "Distrito Federal"
-	| "Espírito Santo"
-	| "Goiás"
-	| "Maranhão"
-	| "Mato Grosso"
-	| "Mato Grosso do Sul"
-	| "Minas Gerais"
-	| "Pará"
-	| "Paraíba"
-	| "Paraná"
-	| "Pernambuco"
-	| "Piauí"
-	| "Rio de Janeiro"
-	| "Rio Grande do Norte"
-	| "Rio Grande do Sul"
-	| "Rondônia"
-	| "Roraima"
-	| "Santa Catarina"
-	| "São Paulo"
-	| "Sergipe"
-	| "Tocantins";
-
-/** One Brazilian state, as returned by `getStates`, `getStateByIbgeCode` and the other state utils. */
-export type State = {
-	/** The two letter code of the state, e.g. `"SP"`. */
-	readonly code: StateCode;
-	/** The full name of the state, e.g. `"São Paulo"`. */
-	readonly name: StateName;
-	/** The code of the region the state belongs to, e.g. `"SE"`. */
-	readonly regionCode: "N" | "NE" | "CO" | "SE" | "S";
-	/** The full name of the region the state belongs to, e.g. `"Sudeste"`. */
-	readonly regionName: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
-	/** The 2 digit IBGE code of the Federative Unit ("cUF"), e.g. `35`. */
-	readonly ibgeCode: number;
-};
+export type StateName = State["name"];
 
 /**
  * Brazilian states published by the IBGE, sorted by name with `localeCompare` in the "pt-BR"
