@@ -30,10 +30,18 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * they are not statutory holidays. Pass `false` to only treat statutory (`"national"` and
  * `"state"`) holidays as non-business days.
  *
- * If `options.stateCode` is provided but is not a valid/known state code, it is ignored
- * and only national holidays are considered (same behavior as `getHolidays`/`isHoliday`).
- * The lookup is an own-property one, so a prototype-chain key such as `"__proto__"` or
- * `"constructor"` is an unknown state code like any other.
+ * An invalid `options.stateCode` is treated in two different ways, depending on its type, the
+ * same split `isHoliday` makes:
+ *
+ * - a string that is not a known state code is ignored, and only national holidays are
+ *   considered, the same behavior as `getHolidays`. The lookup is an own-property one, so a
+ *   prototype-chain key such as `"__proto__"` or `"constructor"` is an unknown state code like
+ *   any other;
+ * - a `stateCode` that is present and is not a string at all (a number, `null`, an object) is
+ *   rejected rather than ignored: `isBusinessDay` returns `false` without looking at the date,
+ *   even when that date is an ordinary Tuesday. `undefined`, or an absent property, is the only
+ *   non-string value that stands for "no state" instead. `addBusinessDays`, `subBusinessDays`
+ *   and `differenceInBusinessDays` reject the same value with `null`.
  *
  * Two state rules change what `includeOptional: false` answers. The Distrito Federal declares
  * Corpus Christi a feriado (Lei distrital nº 72/1989, art. 1º parágrafo único), so with
@@ -49,8 +57,9 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * @param {StateCode} [options.stateCode] - Brazilian state code whose state holidays are also considered.
  * @param {boolean} [options.includeOptional] - Whether optional holidays count as non-business days (default: `true`).
  * @returns {boolean} True when `value` is a business day, false otherwise. Bad input also
- * returns false: a `value` that is not a valid `Date` (including non-`Date` values) or a
- * `value` outside the supported 1900-2099 range.
+ * returns false: a `value` that is not a valid `Date` (including non-`Date` values), a
+ * `value` outside the supported 1900-2099 range, or a `stateCode` that is present and is not a
+ * string.
  *
  * @example
  * ```typescript
@@ -64,6 +73,7 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * isBusinessDay(new Date("not a date")); // false
  * isBusinessDay(new Date(2100, 0, 4)); // false (a Monday, but 2100 is outside the supported range)
  * ```
+ * isBusinessDay(new Date(2024, 6, 9), { stateCode: 5 }); // false (a non-string stateCode is rejected)
  *
  * The underlying holidays are the ones `getHolidays` computes; see its JSDoc (and
  * `src/get-holidays/constants.ts` for state holidays) for the full set of laws behind them.
@@ -93,6 +103,9 @@ export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolea
 	if (WEEKEND_DAYS.has(value.getDay())) return false;
 
 	const stateCode = options?.stateCode;
+
+	if (stateCode !== undefined && typeof stateCode !== "string") return false;
+
 	const includeOptional = options?.includeOptional ?? true;
 
 	const month = value.getMonth();

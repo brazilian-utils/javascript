@@ -69,6 +69,22 @@ describe("isBusinessDay", () => {
 			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: "XX" })).toBe(true);
 		});
 
+		it("should return false for a stateCode that is present and is not a string, as isHoliday does, instead of ignoring it", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: 5 })).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: null })).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: {} })).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: ["SP"] })).toBe(false);
+		});
+
+		it("should read an explicit undefined stateCode as no state at all, the only non-string value that is not rejected", () => {
+			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: undefined })).toBe(true);
+			expect(isBusinessDay(new Date(2024, 0, 1, 12), { stateCode: undefined })).toBe(false);
+		});
+
 		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
 			for (const stateCode of PROTOTYPE_KEYS) {
 				// @ts-expect-error: intentionally invalid input
