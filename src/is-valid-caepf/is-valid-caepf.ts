@@ -1,4 +1,5 @@
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
 	CAEPF_BASE_LENGTH,
@@ -17,12 +18,19 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * The CAEPF replaced the CEI for individuals who hire employees, such as rural producers and
  * notary officials. It has 14 digits printed as "000.000.000/000-00": the 9 digit CPF base of
  * the holder, a 3 digit sequence for the holder's several registrations and 2 check digits.
- * Both check digits use the modulus 11 of the CNPJ, weights cycling from 2 to 9 from the right,
- * with a remainder of 10 read as 0. The pair is then shifted by 12, wrapping around 100, so a
- * CAEPF whose plain modulus 11 digits would be 72 is printed with 84.
+ * Both check digits are the CNPJ's modulus 11 in the formulation of the cited reference: the
+ * weights cycle from 9 down to 2 from the right and the check digit is the remainder itself,
+ * with a remainder of 10 read as 0 — the same digit the CNPJ's 2-to-9 weights with
+ * `11 - remainder` produce. The pair is then shifted by 12, wrapping around 100, so a CAEPF
+ * whose plain modulus 11 digits would be 72 is printed with 84.
  *
- * The Receita Federal does not publish the check digit rule of the CAEPF, the shift of 12
- * included, so the calculation follows the reference implementations cited below.
+ * A base whose 12 digits are all the same is rejected before the check digits are computed, the
+ * way `isValidCei` and `isValidCno` reject a repeated CEI/CNO number, so the otherwise
+ * well-formed `"00000000000012"` is invalid.
+ *
+ * The Receita Federal does not publish the check digit rule of the CAEPF, the shift of 12 and
+ * the repeated-base rejection included, so the calculation follows the reference implementations
+ * cited below.
  *
  * @param {string|number} value - The CAEPF value to be validated.
  * @returns {boolean} True if the CAEPF is valid, false otherwise.
@@ -33,7 +41,8 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * isValidCaepf("41142260000101"); // true
  * isValidCaepf(29311861000184); // true
  * isValidCaepf("29311861000185"); // false (invalid check digits)
- * isValidCaepf("00000000000000"); // false (repeated digits)
+ * isValidCaepf("00000000000000"); // false (invalid check digits)
+ * isValidCaepf("00000000000012"); // false (repeated base digits)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
@@ -54,6 +63,9 @@ export const isValidCaepf = (value: string | number): boolean => {
 	if (!CAEPF_FORMAT_REGEX.test(String(value).trim())) return false;
 
 	const base = digits.slice(0, CAEPF_BASE_LENGTH);
+
+	if (isRepeatedDigits(base)) return false;
+
 	const first = getCheckDigit(base, CAEPF_FIRST_WEIGHTS);
 	const second = getCheckDigit(`${base}${first}`, CAEPF_SECOND_WEIGHTS);
 	const expected = (first * 10 + second + CAEPF_CHECK_DIGITS_OFFSET) % 100;
