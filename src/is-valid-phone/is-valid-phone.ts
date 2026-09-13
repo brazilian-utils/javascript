@@ -9,7 +9,7 @@ import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-pho
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
 import { DEFAULT_ACCEPT } from "./constants";
 
-/** The Brazilian mobile numbering rule to enforce over the 11 digit number: `1` the legacy one, `2` the current one. */
+/** The Brazilian mobile numbering rule to enforce over the 11 digit number: `1` the legacy one (6, 7, 8 or 9), `2` the current one (7, 8 or 9, without the `700` series). */
 export type PhoneVersion = 1 | 2;
 
 /** The kinds of Brazilian phone number `isValidPhone` can accept. */
@@ -33,6 +33,10 @@ export type IsValidPhoneOptions = {
  * `["mobile", "landline"]`, i.e. geographic numbers only. Add `"service"` to also accept the
  * non-geographic numbers recognized by `isValidServicePhone`; pass `[]` to accept none.
  *
+ * `options.version` is forwarded to `isValidMobilePhone` and only affects mobile numbers:
+ * `1` (the default) accepts a first number digit of 6, 7, 8 or 9, and `2` the 7, 8 and 9 of
+ * Resolução Anatel nº 749/2022, art. 12, I, "a", minus its `700` satellite series.
+ *
  * @param {string} value - The phone number to validate.
  * @param {IsValidPhoneOptions} options - Optional validation options.
  * @param {1|2} options.version - The mobile numbering rule to enforce, see `isValidMobilePhone`.
@@ -43,6 +47,8 @@ export type IsValidPhoneOptions = {
  * ```typescript
  * isValidPhone("(11) 98765-4321"); // true
  * isValidPhone("11987654321", { version: 2 }); // true
+ * isValidPhone("11712345678", { version: 2 }); // true (7 is SMP as well)
+ * isValidPhone("11700123456", { version: 2 }); // false (the 700 series is satellite)
  * isValidPhone("1130000000"); // true (landline)
  * isValidPhone("+55 11 98765-4321"); // true
  * isValidPhone("08001234567"); // false (service numbers are not accepted by default)

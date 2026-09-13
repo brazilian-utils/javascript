@@ -329,13 +329,14 @@ isValidEmail('john.doe@hotmail.com'); // true
 
 ## isValidPhone
 
-Valida se o número de telefone (celular ou fixo) é válido. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes da validação, seguindo a regra documentada em `parsePhone`. `options.accept` (tipado como `PhoneType[]`, parte de `IsValidPhoneOptions`) define quais tipos de número são aceitos e tem como padrão `['mobile', 'landline']`; adicione `'service'` para também aceitar os números não geográficos reconhecidos por `isValidServicePhone`, ou informe `[]` para não aceitar nenhum. `options.version` (tipado como `PhoneVersion`, parte do mesmo tipo) é repassado ao `isValidMobilePhone` e escolhe qual regra de numeração celular é aplicada: `1` (padrão) o formato antigo, cujo primeiro dígito do número pode ser 6, 7, 8 ou 9, e `2` o atual, que exige 9 e rejeita o prefixo `700`. Vale apenas para celulares; números fixos e de serviço não são afetados.
+Valida se o número de telefone (celular ou fixo) é válido. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes da validação, seguindo a regra documentada em `parsePhone`. `options.accept` (tipado como `PhoneType[]`, parte de `IsValidPhoneOptions`) define quais tipos de número são aceitos e tem como padrão `['mobile', 'landline']`; adicione `'service'` para também aceitar os números não geográficos reconhecidos por `isValidServicePhone`, ou informe `[]` para não aceitar nenhum. `options.version` (tipado como `PhoneVersion`, parte do mesmo tipo) é repassado ao `isValidMobilePhone` e escolhe qual regra de numeração celular é aplicada: `1` (padrão) o formato antigo, cujo primeiro dígito do número pode ser 6, 7, 8 ou 9, e `2` o atual, da Resolução Anatel 749/2022, art. 12, I, "a", que aceita 7, 8 ou 9 e rejeita o prefixo `700`. Vale apenas para celulares; números fixos e de serviço não são afetados.
 
 ```javascript
 import { isValidPhone } from '@brazilian-utils/brazilian-utils';
 
 isValidPhone('11900000000'); // true
-isValidPhone('11712345678', { version: 2 }); // false (v2 exige 9 como primeiro dígito do celular)
+isValidPhone('11712345678', { version: 2 }); // true (7, 8 e 9 são todos SMP)
+isValidPhone('11700123456', { version: 2 }); // false (a série 700 é de satélite)
 isValidPhone('+55 11 98765-4321'); // true (código de país aceito)
 isValidPhone('08001234567'); // false (números de serviço não são aceitos por padrão)
 isValidPhone('08001234567', { accept: ['service'] }); // true
@@ -377,14 +378,16 @@ parsePhone('55987654321'); // 55987654321 (DDD 55, não confundido com o código
 
 ## isValidMobilePhone
 
-Valida se o número de telefone celular é válido. `options.version` (tipado como `PhoneVersion`) controla qual regra de numeração celular é aplicada: `1` (padrão) é o formato anterior à Resolução Anatel 749/2022, mantido por compatibilidade com a 2.3.0, cujo primeiro dígito do número (após o DDD) pode ser 6, 7, 8 ou 9; `2` exige apenas 9, um subconjunto mais restrito do art. 12 I da resolução (Serviço Móvel Pessoal). A versão `1` também não exclui o prefixo `700`, que o art. 12 II reserva ao Serviço Móvel Global por Satélite e não ao SMP, então `isValidMobilePhone('11700123456')` é `true` para um número fora do SMP; a versão `2` o rejeita.
+Valida se o número de telefone celular é válido. `options.version` (tipado como `PhoneVersion`) controla qual regra de numeração celular é aplicada: `1` (padrão) é o formato anterior à Resolução Anatel 749/2022, mantido por compatibilidade com a 2.3.0, cujo primeiro dígito do número (após o DDD) pode ser 6, 7, 8 ou 9; `2` aplica o art. 12, I, "a" da resolução, que coloca 7, 8 e 9 no Serviço Móvel Pessoal (SMP), então um 6 inicial é Reserva Técnica e é rejeitado. A versão `2` também exclui o prefixo `700`, que o art. 12, II reserva ao Serviço Móvel Global por Satélite e não ao SMP, então `isValidMobilePhone('11700123456', { version: 2 })` é `false`; a versão `1` não o exclui e o aceita.
 
 ```javascript
 import { isValidMobilePhone } from '@brazilian-utils/brazilian-utils';
 
 isValidMobilePhone('11900000000'); // true
 isValidMobilePhone('11712345678', { version: 1 }); // true (formato antigo)
-isValidMobilePhone('11712345678', { version: 2 }); // false (v2 exige 9 como primeiro dígito)
+isValidMobilePhone('11712345678', { version: 2 }); // true (7 também é SMP)
+isValidMobilePhone('11612345678', { version: 2 }); // false (6 é Reserva Técnica)
+isValidMobilePhone('11700123456', { version: 2 }); // false (a série 700 é de satélite)
 ```
 
 ## isValidLandlinePhone
