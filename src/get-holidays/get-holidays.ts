@@ -141,9 +141,13 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * authorizes "a data magna do Estado fixada em lei estadual" in the singular; the other entries
  * of `STATE_HOLIDAYS` rest on ordinary state laws and are reported because they are observed in
  * practice. The date returned is the statutory one. Santa Catarina's two holidays are the only
- * observance shift the table models (both move to the following Sunday when they fall Monday to
- * Friday); Acre's Tuesday-to-Thursday shift and the Goiás decrees that may move 26/07 and 28/10
- * are not, because neither can be resolved from a year alone.
+ * observance shift the table models: each moves to the following Sunday when it falls Monday to
+ * Friday, 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
+ * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it, except in 2004, the
+ * year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause. Outside those ranges
+ * each holiday stays on 11 August or 25 November. Acre's Tuesday-to-Thursday shift and the Goiás decrees
+ * that may move 26/07 and 28/10 are not modelled, because neither can be resolved from a year
+ * alone.
  *
  * @param {number} year - The year for which to retrieve holidays (must be between 1900 and 2099)
  * @returns {Holiday[]} An array of holidays sorted by date

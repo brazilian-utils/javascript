@@ -43,6 +43,30 @@ export const PB_MORTE_JOAO_PESSOA_UNTIL_YEAR = 2016;
 export const TO_AUTONOMIA_UNTIL_YEAR = 2009;
 
 /**
+ * First year Santa Catarina's 25 November moves to the following Sunday: Lei SC nº 11.213, de
+ * 11/11/1999, added the transfer clause to Lei SC nº 10.306/1996 and, by its art. 2º, entered
+ * into force on the day it was published (DO 16.290, de 12/11/1999), thirteen days before that
+ * year's 25 November.
+ */
+export const SC_ALEXANDRIA_TRANSFER_SINCE_YEAR = 1999;
+
+/**
+ * The one year Santa Catarina's 25 November is observed on the statutory date again: art. 3º of
+ * Lei SC nº 12.906, de 22/01/2004, revoked Lei SC nº 11.213/1999 outright and its own art. 1º did
+ * not carry the transfer clause forward, leaving 2004 without one until Lei SC nº 13.408/2005
+ * reinstated it.
+ */
+export const SC_ALEXANDRIA_TRANSFER_GAP_YEAR = 2004;
+
+/**
+ * First year Santa Catarina's 11 August and 25 November both move to the following Sunday: Lei SC
+ * nº 13.408, de 15/07/2005, added the transfer clause covering the two dates and entered into
+ * force on the day it was published (DO 17.680, de 15/07/2005), before that year's 11 August. Up
+ * to 2004 the 11 August holiday was always observed on the date itself.
+ */
+export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
+
+/**
  * Feriados estaduais, um `@see` por entrada.
  *
  * Only one of these is a feriado civil under art. 1º, II of Lei 9.093/1995, which authorizes
@@ -52,7 +76,10 @@ export const TO_AUTONOMIA_UNTIL_YEAR = 2009;
  * because art. 1º, II covers them.
  *
  * The statutory date is what is emitted. Three states shift the observed date and only Santa
- * Catarina's shift is modelled here (`nextSundayWhenWeekday`): Acre moves feriados falling from
+ * Catarina's shift is modelled here (`nextSundayWhenWeekday`, from
+ * `SC_ALEXANDRIA_TRANSFER_SINCE_YEAR` on for 25 November, apart from the
+ * `SC_ALEXANDRIA_TRANSFER_GAP_YEAR` gap, and from `SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR` on for
+ * 11 August): Acre moves feriados falling from
  * Tuesday to Thursday on to the following Friday (Lei AC nº 2.126/2009, except 15/06), and the
  * Goiás executive may move 26/07 and 28/10 to a nearby dia útil by decree (Lei GO nº 20.756/2020,
  * art. 269, § 1º), neither of which can be resolved from a year alone.
@@ -167,10 +194,30 @@ export const TO_AUTONOMIA_UNTIL_YEAR = 2009;
  * Lei SC nº 10.306/1996, art. 1º, in the wording of Lei SC nº 12.906/2004: "É considerada data
  * magna do Estado o dia 11 de agosto, Dia do Estado de Santa Catarina, e dia de Santa Catarina de
  * Alexandria, dia 25 de novembro".
+ * @see Official: http://leis.alesc.sc.gov.br/html/1999/11213_1999_lei.html
+ * Lei SC nº 11.213, de 11 de novembro de 1999, which added to art. 1º of Lei SC nº 10.306/1996 the
+ * parágrafo único transferring 25 November alone: "Sempre que o dia 25 de novembro coincidir com
+ * dia útil da semana, o feriado e os eventos alusivos à data serão transferidos para o domingo
+ * subseqüente". Its art. 2º put it in force on the day it was published (DO 16.290, de 12/11/1999),
+ * thirteen days before that year's 25 November, so the 25 November transfer starts in 1999 and not
+ * in 2005. The Anexo of the in-force Lei SC nº 18.531/2022 credits the same clause to "10.306, de
+ * 1996; 11.213, de 1999 e 12.906, de 2004".
+ * @see Official: http://leis.alesc.sc.gov.br/html/2004/12906_2004_lei.html
+ * Lei SC nº 12.906, de 22 de janeiro de 2004, which added 11 August to the caput of art. 1º of Lei
+ * SC nº 10.306/1996 and, by its art. 3º, "Revoga-se a Lei nº 11.213, de 11 de novembro de 1999"
+ * without restating the transfer clause. It entered into force on the day it was published (DO
+ * 17.320, de 22/01/2004), before that year's 25 November, so 2004 is the one year in which neither
+ * date is transferred.
  * @see Official: http://leis.alesc.sc.gov.br/html/2005/13408_2005_lei.html
- * Lei SC nº 13.408/2005, which added the parágrafo único transferring both dates to the following
- * Sunday. Lei SC nº 16.719/2015, cited here before, was revoked by Lei SC nº 17.335/2017, itself
- * consolidated and revoked by Lei SC nº 18.531/2022.
+ * Lei SC nº 13.408, de 15/07/2005, which reinstated the parágrafo único, this time transferring
+ * both dates to the following Sunday, and, by its art. 2º, entered into force on the day it was
+ * published (DO 17.680, de 15/07/2005): "Sempre que o dia 11 de agosto e o dia 25 de novembro
+ * coincidirem com dias úteis da semana, os feriados e os eventos alusivos às datas serão
+ * transferidos para o domingo subseqüente". Both of that year's dates fall after it. The two
+ * holidays are therefore split by year: 11 August is fixed up to 2004 and transferring from 2005
+ * on, while 25 November is fixed up to 1998, transferring from 1999 to 2003, fixed again in 2004
+ * and transferring from 2005 on. Lei SC nº 16.719/2015, cited here before, was revoked by Lei SC nº
+ * 17.335/2017, itself consolidated and revoked by Lei SC nº 18.531/2022.
  * @see Official: https://www.al.sp.gov.br/documentacao/estudos-e-manuais/feriado-9-julho/artigo.htm
  * Lei SP nº 9.497/1997 (PL 710/1995), Revolução Constitucionalista (09/07)
  * @see Official: https://www.al.sp.gov.br/repositorio/legislacao/lei/2023/lei-17746-12.09.2023.html
@@ -291,13 +338,42 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			name: "Dia do Estado de Santa Catarina",
 			day: 11,
 			month: 8,
+			until: SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR,
+		},
+		{
+			name: "Dia do Estado de Santa Catarina",
+			day: 11,
+			month: 8,
 			nextSundayWhenWeekday: true,
+			since: SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR,
+		},
+		{
+			name: "Dia de Santa Catarina de Alexandria",
+			day: 25,
+			month: 11,
+			until: SC_ALEXANDRIA_TRANSFER_SINCE_YEAR,
 		},
 		{
 			name: "Dia de Santa Catarina de Alexandria",
 			day: 25,
 			month: 11,
 			nextSundayWhenWeekday: true,
+			since: SC_ALEXANDRIA_TRANSFER_SINCE_YEAR,
+			until: SC_ALEXANDRIA_TRANSFER_GAP_YEAR,
+		},
+		{
+			name: "Dia de Santa Catarina de Alexandria",
+			day: 25,
+			month: 11,
+			since: SC_ALEXANDRIA_TRANSFER_GAP_YEAR,
+			until: SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR,
+		},
+		{
+			name: "Dia de Santa Catarina de Alexandria",
+			day: 25,
+			month: 11,
+			nextSundayWhenWeekday: true,
+			since: SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR,
 		},
 	],
 	SP: [

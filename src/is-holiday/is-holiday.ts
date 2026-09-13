@@ -20,14 +20,22 @@ export type IsHolidayOptions = {
  * "2024-12-24" in local time, so build `targetDate` from local components
  * (`new Date(2024, 11, 25)`) or from a full ISO datetime when you mean a specific local day.
  *
- * If `stateCode` is provided but is not a valid/known state code, it is ignored and only
- * national holidays are considered (same behavior as `getHolidays`). The lookup is an
- * own-property one, so a prototype-chain key such as `"__proto__"` or `"constructor"` is an
- * unknown state code like any other.
+ * An invalid `stateCode` is treated in two different ways, depending on its type:
+ *
+ * - a string that is not a known state code is ignored, and only national holidays are
+ *   considered, the same behavior as `getHolidays`. The lookup is an own-property one, so a
+ *   prototype-chain key such as `"__proto__"` or `"constructor"` is an unknown state code like
+ *   any other;
+ * - a `stateCode` that is present and is not a string at all (a number, `null`, an object) is
+ *   rejected rather than ignored: `isHoliday` returns `false` without looking at the date, even
+ *   when that date is a national holiday. `undefined`, or an absent property, is the only
+ *   non-string value that stands for "no state" instead.
  *
  * The date a state holiday is checked against is the statutory one, except for Santa Catarina's
  * two holidays, which `getHolidays` moves to the following Sunday when they fall Monday to
- * Friday, as Lei SC nº 18.531/2022 requires.
+ * Friday: 11 August from 2005 on, as Lei SC nº 13.408/2005 introduced, and 25 November from 1999
+ * on, as Lei SC nº 11.213/1999 introduced, save for 2004, the year art. 3º of Lei SC nº
+ * 12.906/2004 left that date without a transfer clause. Lei SC nº 18.531/2022 now carries both.
  *
  * @param {IsHolidayOptions} [options] - Options for the check.
  * @param {Date} options.targetDate - The date to check.

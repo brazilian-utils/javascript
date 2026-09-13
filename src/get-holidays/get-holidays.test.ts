@@ -506,6 +506,80 @@ describe("getHolidays", () => {
 		});
 	});
 
+	test("should keep the Santa Catarina 11 August holiday on its statutory weekday before 2005, the year Lei SC nº 13.408/2005 extended the transfer to it (11/08/2003 is a Monday)", () => {
+		expect(getHolidays({ year: 2003, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2003, 7, 11),
+			type: "state",
+		});
+	});
+
+	test("should keep the Santa Catarina 25 November holiday on its statutory weekday before 1999, the year Lei SC nº 11.213/1999 introduced its transfer (25/11/1998 is a Wednesday)", () => {
+		expect(getHolidays({ year: 1998, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(1998, 10, 25),
+			type: "state",
+		});
+	});
+
+	test("should move the Santa Catarina 25 November holiday to the following Sunday from 1999 on, the year Lei SC nº 11.213, de 11/11/1999, entered into force thirteen days before it (25/11/1999 is a Thursday)", () => {
+		expect(getHolidays({ year: 1999, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(1999, 10, 28),
+			type: "state",
+		});
+	});
+
+	test("should move the Santa Catarina 25 November holiday into the next month when the following Sunday falls there (25/11/2002 is a Monday, so the holiday lands on 01/12/2002)", () => {
+		expect(getHolidays({ year: 2002, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2002, 11, 1),
+			type: "state",
+		});
+	});
+
+	test("should keep the Santa Catarina 25 November holiday on its statutory weekday in 2004, the one year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause (25/11/2004 is a Thursday)", () => {
+		expect(getHolidays({ year: 2004, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2004, 10, 25),
+			type: "state",
+		});
+	});
+
+	test("should move the Santa Catarina 25 November holiday again from 2005 on, the year Lei SC nº 13.408/2005 reinstated the transfer (25/11/2005 is a Friday)", () => {
+		expect(getHolidays({ year: 2005, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2005, 10, 27),
+			type: "state",
+		});
+	});
+
+	test("should switch to the Sunday transfer exactly in 2005, the year Lei SC nº 13.408, de 15/07/2005, entered into force (11/08/2004 is a Wednesday and stays, 11/08/2005 a Thursday and moves to 14/08)", () => {
+		expect(getHolidays({ year: 2004, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2004, 7, 11),
+			type: "state",
+		});
+		expect(getHolidays({ year: 2005, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2005, 7, 14),
+			type: "state",
+		});
+	});
+
+	test("should list each Santa Catarina holiday exactly once in every year the four 25 November ranges and the two 11 August ranges border on", () => {
+		for (const year of [1998, 1999, 2003, 2004, 2005, 2025]) {
+			const names = getHolidays({ year, stateCode: "SC" }).map((holiday) => holiday.name);
+
+			expect(names.filter((name) => name === "Dia do Estado de Santa Catarina")).toEqual([
+				"Dia do Estado de Santa Catarina",
+			]);
+			expect(names.filter((name) => name === "Dia de Santa Catarina de Alexandria")).toEqual([
+				"Dia de Santa Catarina de Alexandria",
+			]);
+		}
+	});
+
 	test("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
 		const nationalHolidays = getHolidays(2024);
 
