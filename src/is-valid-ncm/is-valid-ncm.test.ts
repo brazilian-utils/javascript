@@ -60,6 +60,21 @@ describe("isValidNcm", () => {
 		expect(isValidNcm("abcdefgh")).toBe(false);
 	});
 
+	it("should return false for a string that is not a documented form", () => {
+		expect(isValidNcm("abc01012100")).toBe(false);
+		expect(isValidNcm("2203..00.00")).toBe(false);
+	});
+
+	it("should return false for a number that is not a non-negative safe integer", () => {
+		expect(isValidNcm(-22_030_000)).toBe(false);
+		expect(isValidNcm(2_203_000.01)).toBe(false);
+		expect(isValidNcm(2 ** 53)).toBe(false);
+	});
+
+	it("should return false for a null-prototype object", () => {
+		expect(isValidNcm(Object.create(null))).toBe(false);
+	});
+
 	describe("properties", () => {
 		const codeArbitrary = fc.constantFrom(...NCM_CODES);
 		const nonZeroLeadingCodeArbitrary = fc.constantFrom(

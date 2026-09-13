@@ -23,14 +23,24 @@ describe("isValidCfop", () => {
 		expect(isValidCfop(" 5102 ")).toBe(true);
 	});
 
-	it("should validate the sale of goods acquired from third parties (CFOP 5102, Ajuste SINIEF 07/2001)", () => {
+	it("should validate the sale of goods acquired from third parties (CFOP 5102)", () => {
 		expect(isValidCfop("5102")).toBe(true);
 	});
 
-	it("should accept the codes the mirror glues into the previous row (1306, 1414 and 6913)", () => {
-		expect(isValidCfop("1306")).toBe(true);
-		expect(isValidCfop("1414")).toBe(true);
-		expect(isValidCfop("6913")).toBe(true);
+	it("should accept the codes the 2022 and 2024 rewrites of the annex added (7504, 6360, 2128 and 1934)", () => {
+		expect(isValidCfop("7504")).toBe(true);
+		expect(isValidCfop("6360")).toBe(true);
+		expect(isValidCfop("2128")).toBe(true);
+		expect(isValidCfop("1934")).toBe(true);
+	});
+
+	it("should accept the ato cooperativo and Sistema de Integração e Parceria Rural series (1131 and 1453)", () => {
+		expect(isValidCfop("1131")).toBe(true);
+		expect(isValidCfop("1453")).toBe(true);
+	});
+
+	it("should accept a code whose body the annex glues into the code line (1255)", () => {
+		expect(isValidCfop("1255")).toBe(true);
 	});
 
 	it("should return false for an unknown 4 digit code", () => {
@@ -73,6 +83,21 @@ describe("isValidCfop", () => {
 
 	it("should return false for a non numeric string", () => {
 		expect(isValidCfop("abcd")).toBe(false);
+	});
+
+	it("should return false for a string that is not a documented form", () => {
+		expect(isValidCfop("abc5102")).toBe(false);
+		expect(isValidCfop("5..102")).toBe(false);
+	});
+
+	it("should return false for a number that is not a non-negative safe integer", () => {
+		expect(isValidCfop(-5102)).toBe(false);
+		expect(isValidCfop(51.02)).toBe(false);
+		expect(isValidCfop(2 ** 53)).toBe(false);
+	});
+
+	it("should return false for a null-prototype object", () => {
+		expect(isValidCfop(Object.create(null))).toBe(false);
 	});
 
 	describe("properties", () => {

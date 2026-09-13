@@ -29,9 +29,32 @@ describe("getCbo", () => {
 		});
 	});
 
-	it("should pad a number to six digits so codes starting with zero resolve (0102-05, Oficial da Aeronáutica)", () => {
-		expect(getCbo(10_205)).toEqual({ code: "010205", title: "Oficial da Aeronáutica" });
+	it("should pad a number to six digits so codes starting with zero resolve (0102-05, Oficial da aeronáutica)", () => {
+		expect(getCbo(10_205)).toEqual({ code: "010205", title: "Oficial da aeronáutica" });
 		expect(getCbo("10205")).toBeNull();
+	});
+
+	it("should resolve a code the official CSV carries and the community mirror did not (142135)", () => {
+		expect(getCbo("142135")).toEqual({
+			code: "142135",
+			title: "Oficial de proteção de dados pessoais (dpo)",
+		});
+	});
+
+	it("should return null for a code the official CSV no longer carries (223150)", () => {
+		expect(getCbo("223150")).toBeNull();
+	});
+
+	it("should reject a group boundary written with more than one separator (2124--05)", () => {
+		expect(getCbo("2124--05")).toBeNull();
+		expect(getCbo("2124-05")).toEqual({
+			code: "212405",
+			title: "Analista de desenvolvimento de sistemas",
+		});
+		expect(getCbo("2124 05")).toEqual({
+			code: "212405",
+			title: "Analista de desenvolvimento de sistemas",
+		});
 	});
 
 	it("should return a fresh object that does not leak the internal table", () => {

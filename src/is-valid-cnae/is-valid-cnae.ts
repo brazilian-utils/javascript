@@ -5,7 +5,7 @@ import { getCnae } from "../get-cnae/get-cnae";
  * exists in the official CNAE 2.3 table.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with the usual separators between the groups and optional
+ * digits, or the `NNNN-N/NN` mask, with a single separator (space, `.`, `-` or `/`) between the groups and optional
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *

@@ -29,6 +29,11 @@ describe("isValidCnae", () => {
 		expect(isValidCnae(" 6201501 ")).toBe(true);
 	});
 
+	it("should reject a group boundary written with more than one separator (6201--5//01)", () => {
+		expect(isValidCnae("6201--5//01")).toBe(false);
+		expect(isValidCnae("6201-5/01")).toBe(true);
+	});
+
 	it("should return false for an unknown seven digit code", () => {
 		expect(isValidCnae("0000000")).toBe(false);
 	});
