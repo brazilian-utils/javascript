@@ -57,6 +57,38 @@ describe("isValidPixPayload", () => {
 				),
 			).toBe(true);
 		});
+
+		test("when a key payload marks itself single use with the point of initiation method 12", () => {
+			expect(
+				isValidPixPayload(
+					"00020101021226330014br.gov.bcb.pix0111123456789095204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63043CAC",
+				),
+			).toBe(true);
+		});
+
+		test("when a url payload carries the point of initiation method 11, which the manual leaves optional", () => {
+			expect(
+				isValidPixPayload(
+					"00020101021126480014br.gov.bcb.pix2526pix.example.com/qr/v2/12345204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304F299",
+				),
+			).toBe(true);
+		});
+
+		test("when a url payload carries no point of initiation method at all", () => {
+			expect(
+				isValidPixPayload(
+					"00020126480014br.gov.bcb.pix2526pix.example.com/qr/v2/12345204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041420",
+				),
+			).toBe(true);
+		});
+
+		test("for a Pix Saque BR Code, whose fss (26-03) goes with a transaction amount of zero", () => {
+			expect(
+				isValidPixPayload(
+					"00020126700014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000003081234567852040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***63043A07",
+				),
+			).toBe(true);
+		});
 	});
 
 	describe("should return false", () => {
@@ -122,26 +154,18 @@ describe("isValidPixPayload", () => {
 			).toBe(false);
 		});
 
-		test("when a key is announced as dynamic by the point of initiation method", () => {
-			expect(
-				isValidPixPayload(
-					"00020101021226330014br.gov.bcb.pix0111123456789095204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63043CAC",
-				),
-			).toBe(false);
-		});
-
-		test("when a url is announced as static by the point of initiation method", () => {
-			expect(
-				isValidPixPayload(
-					"00020101021126480014br.gov.bcb.pix2526pix.example.com/qr/v2/12345204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304F299",
-				),
-			).toBe(false);
-		});
-
-		test("when a static payload states a transaction amount of zero", () => {
+		test("when a key payload states a transaction amount of zero without the fss of a Pix Saque", () => {
 			expect(
 				isValidPixPayload(
 					"00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000052040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***63042451",
+				),
+			).toBe(false);
+		});
+
+		test("when the fss of a Pix Saque is not the 8 digits of an ISPB", () => {
+			expect(
+				isValidPixPayload(
+					"00020126690014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400000307123456752040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***630450C2",
 				),
 			).toBe(false);
 		});

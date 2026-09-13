@@ -23,6 +23,6 @@ export const CEI_BASE_LENGTH = 11;
 
 export const CEI_WEIGHTS = [7, 4, 1, 8, 5, 2, 1, 6, 3, 7, 4];
 
-export const CEI_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{5}[\s.\-/]*\d{2}$/;
+export const CEI_FORMAT_REGEX = /^\d{2}[\s.\-/]?\d{3}[\s.\-/]?\d{5}[\s.\-/]?\d{2}$/;
 
 export const CEI_PATTERN = "00.000.00000/00";

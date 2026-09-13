@@ -69,6 +69,10 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR150000000000001093284081412")).toBe(false);
 		});
 
+		test("when the owner indicator is 0, which Circular 3.625 art. 2 § 1 does not assign, even though the check digits match", () => {
+			expect(isValidIban("BR6900000000000010932840814P0")).toBe(false);
+		});
+
 		test("when the account type letter does not match the check digits", () => {
 			expect(isValidIban("BR1500000000000010932840814X2")).toBe(false);
 		});
@@ -129,7 +133,7 @@ describe("isValidIban", () => {
 	});
 
 	describe("properties", () => {
-		const bodies = fc.stringMatching(/^[0-9]{23}[A-Z][A-Z0-9]$/);
+		const bodies = fc.stringMatching(/^[0-9]{23}[A-Z][A-Z1-9]$/);
 
 		test("should accept exactly one pair of check digits for any account", () => {
 			fc.assert(

@@ -35,6 +35,15 @@ describe("isValidCreditCard", () => {
 			expect(isValidCreditCard("4111-1111-1111-1111")).toBe(true);
 		});
 
+		test("for a value whose digit groups are separated by a run of mask characters", () => {
+			expect(isValidCreditCard("4111 - 1111 - 1111 - 1111")).toBe(true);
+			expect(isValidCreditCard("4111  1111  1111  1111")).toBe(true);
+		});
+
+		test("for a value surrounded by whitespace", () => {
+			expect(isValidCreditCard("  4111 1111 1111 1111  ")).toBe(true);
+		});
+
 		test("for the shortest accepted length (12 digits)", () => {
 			expect(isValidCreditCard("601100000004")).toBe(true);
 		});
@@ -84,6 +93,18 @@ describe("isValidCreditCard", () => {
 
 		test("when it contains only letters", () => {
 			expect(isValidCreditCard("abcdabcdabcd")).toBe(false);
+		});
+
+		test("when letters are attached before the digits", () => {
+			expect(isValidCreditCard("abc4111111111111111")).toBe(false);
+		});
+
+		test("when letters are embedded between the digit groups", () => {
+			expect(isValidCreditCard("4111a1111b1111c1111")).toBe(false);
+		});
+
+		test("when the mask uses characters other than spaces and hyphens", () => {
+			expect(isValidCreditCard("(41)11-1111 1111 1111")).toBe(false);
 		});
 
 		test("when it is null", () => {

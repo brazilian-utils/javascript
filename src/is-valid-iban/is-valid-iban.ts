@@ -24,10 +24,16 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * ISO 13616 countries is out of scope, so any non `BR` IBAN, however well formed, returns
  * `false`. Accepts the usual grouping spaces and is case-insensitive.
  *
- * The value has to be written in the ISO 13616 print format: letters and digits in groups
- * separated by a single space, with optional surrounding whitespace. Any other character
- * makes the value something other than an IBAN, so `"BR1500000000000010932840814P-2"` is
- * rejected instead of having its hyphen stripped.
+ * Both accepted forms are the ones an IBAN is written in: compact,
+ * `"BR1500000000000010932840814P2"`, or the ISO 13616 print format, letters and digits in
+ * groups separated by a single space, with optional surrounding whitespace either way. Only a
+ * character outside letters and digits, or a separator other than a single space, makes the
+ * value something other than an IBAN, so `"BR1500000000000010932840814P-2"` and a double space
+ * are rejected instead of having the offending character stripped.
+ *
+ * The last character is the owner indicator, `1` for the first or only holder up to `9` for the
+ * ninth and then `A` to `Z` from the tenth, per Circular BCB nº 3.625/2013 art. 2º § 1º, so a
+ * value ending in `0` is rejected.
  *
  * @param {string} value - The IBAN to be validated.
  * @returns {boolean} True when `value` is a structurally valid Brazilian IBAN whose ISO 7064

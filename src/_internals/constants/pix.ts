@@ -35,6 +35,8 @@ export const PIX_KEY_ID = "01";
 
 export const PIX_DESCRIPTION_ID = "02";
 
+export const PIX_WITHDRAWAL_FACILITATOR_ID = "03";
+
 export const PIX_URL_ID = "25";
 
 export const PIX_MERCHANT_CATEGORY_CODE_ID = "52";

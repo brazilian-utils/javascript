@@ -60,6 +60,20 @@ describe("isValidRenavam", () => {
 			expect(isValidRenavam("639884963xyz")).toBe(false);
 		});
 
+		test("when letters are attached to an otherwise valid RENAVAM", () => {
+			expect(isValidRenavam("639884962abc")).toBe(false);
+			expect(isValidRenavam("ab00639884962")).toBe(false);
+		});
+
+		test("when the mask uses a character other than whitespace, a dot or a hyphen", () => {
+			expect(isValidRenavam("0063988/4962")).toBe(false);
+		});
+
+		test("when every digit is the same", () => {
+			expect(isValidRenavam("00000000000")).toBe(false);
+			expect(isValidRenavam("000000000")).toBe(false);
+		});
+
 		test("when is a RENAVAM with invalid length: 8 digits (too short), 10 digits (invalid), or 12 digits (too long)", () => {
 			expect(isValidRenavam("12345678")).toBe(false);
 			expect(isValidRenavam("1234567890")).toBe(false);
@@ -80,8 +94,10 @@ describe("isValidRenavam", () => {
 			expect(isValidRenavam(639_884_962)).toBe(true);
 		});
 
-		test("when is a RENAVAM valid with mixed characters that sanitize to a valid RENAVAM", () => {
-			expect(isValidRenavam("639884962abc")).toBe(true);
+		test("when is a RENAVAM valid with the usual mask characters", () => {
+			expect(isValidRenavam("0063988.4962")).toBe(true);
+			expect(isValidRenavam("00639884-962")).toBe(true);
+			expect(isValidRenavam(" 00639884962 ")).toBe(true);
 		});
 
 		test("when the multiplier cycle wraps from 9 back to 2 on non-zero digits", () => {
@@ -97,6 +113,8 @@ describe("isValidRenavam", () => {
 		test("should accept exactly one check digit for any base", () => {
 			fc.assert(
 				fc.property(fc.stringMatching(/^[0-9]{10}$/), (base) => {
+					fc.pre(!/^(\d)\1{9}$/.test(base));
+
 					const accepted = RENAVAM_DIGITS.filter((digit) => isValidRenavam(`${base}${digit}`));
 
 					expect(accepted.length).toBe(1);

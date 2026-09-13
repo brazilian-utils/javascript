@@ -10,7 +10,17 @@ import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
-import { INTERNATIONAL_MASK, INTERNATIONAL_PREFIX, LENGTH, MASK, SERVICE_MASK } from "./constants";
+import {
+	DEFAULT_MASK,
+	INTERNATIONAL_MASK,
+	INTERNATIONAL_PREFIX,
+	LENGTH,
+	MASK,
+	NANP_LANDLINE_MASK,
+	type NationalMask,
+	PHONE_MASKS,
+	SERVICE_MASK,
+} from "./constants";
 
 /** The masks `formatPhone` can apply. */
 export type PhoneMask = "auto" | "e164" | "international" | "service" | "sn" | "nanp";
@@ -59,6 +69,9 @@ const formatInternational = (national: string): string => {
 const formatE164 = (national: string): string =>
 	national ? `${INTERNATIONAL_PREFIX}${national}` : "";
 
+const resolveNationalPattern = (digits: string, mask: NationalMask): string =>
+	mask === "nanp" && digits.length === PHONE_NATIONAL_MIN_LENGTH ? NANP_LANDLINE_MASK : MASK[mask];
+
 const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMask, "auto"> => {
 	if (isValidServicePhone(serviceDigits)) return "service";
 
@@ -66,6 +79,8 @@ const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMa
 
 	return digits.length > LENGTH.sn ? "nanp" : "sn";
 };
+
+const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(value);
 
 /**
  * Formats a phone number according to Brazilian phone number patterns.
@@ -76,7 +91,9 @@ const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMa
  *   (with `mask` omitted) returns `"11987-6543"`, silently dropping the last digit, because
  *   only the first 9 digits are used and the DDD's 2 digits are consumed as if they were part
  *   of the subscriber number.
- * - `"nanp"`: `"(00) 00000-0000"`, i.e. DDD + subscriber number (11 digits).
+ * - `"nanp"`: DDD + subscriber number, `"(00) 00000-0000"` for the 11 digits of a mobile and
+ *   `"(00) 0000-0000"` for the 10 digits of a landline. Any other length keeps the 11 digit
+ *   grouping, so a value still being typed reads as a partial mobile.
  * - `"auto"`: picks a mask from `value`. A leading Brazilian country code (`+55`, `0055` or a
  *   bare `55` followed by 10 or 11 digits) selects `"international"`; a service number selects
  *   `"service"`; otherwise the digit count decides, `"nanp"` when `value` has more digits than
@@ -95,7 +112,8 @@ const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMa
  * under the same rule, so `"5508001234567"` is the `0800` number, not a `+55 08` one.
  *
  * If `value` includes a DDD (area code), pass `{ mask: "auto" }` (or `"nanp"`) explicitly,
- * do not rely on the default, since the default `"sn"` mask assumes no DDD is present.
+ * do not rely on the default, since the default `"sn"` mask assumes no DDD is present. A `mask`
+ * outside the union falls back to the default `"sn"` instead of throwing.
  *
  * @param {string|number} value - The phone number to format, either as a string or a number.
  * @param {FormatPhoneOptions} [options] - Optional formatting options.
@@ -106,6 +124,7 @@ const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMa
  * ```typescript
  * formatPhone("987654321"); // "98765-4321" (default "sn", no DDD)
  * formatPhone("11987654321", { mask: "auto" }); // "(11) 98765-4321"
+ * formatPhone("1130000000", { mask: "auto" }); // "(11) 3000-0000" (10 digit landline)
  * formatPhone("5511987654321", { mask: "auto" }); // "+55 11 98765-4321"
  * formatPhone("08001234567", { mask: "auto" }); // "0800 123 4567"
  * formatPhone("5508001234567", { mask: "auto" }); // "0800 123 4567"
@@ -124,7 +143,8 @@ export const formatPhone = (value: string | number, options?: FormatPhoneOptions
 	const enhancedValue = sanitizeToDigits(value);
 
 	const serviceDigits = resolveServicePhoneDigits(value);
-	const requested = options?.mask ?? "sn";
+	const givenMask = options?.mask;
+	const requested: PhoneMask = isPhoneMask(givenMask) ? givenMask : DEFAULT_MASK;
 	const mask = requested === "auto" ? resolveAutoMask(enhancedValue, serviceDigits) : requested;
 
 	if (mask === "service") return formatService(serviceDigits);
@@ -137,5 +157,8 @@ export const formatPhone = (value: string | number, options?: FormatPhoneOptions
 		return mask === "e164" ? formatE164(national) : formatInternational(national);
 	}
 
-	return format({ value: enhancedValue, pattern: MASK[mask] });
+	return format({
+		value: enhancedValue,
+		pattern: resolveNationalPattern(enhancedValue, mask),
+	});
 };

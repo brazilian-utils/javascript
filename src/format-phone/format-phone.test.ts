@@ -45,8 +45,19 @@ describe("formatPhone", () => {
 		expect(formatPhone("1198888", { mask: "nanp" })).toBe("(11) 98888");
 		expect(formatPhone("11988887", { mask: "nanp" })).toBe("(11) 98888-7");
 		expect(formatPhone("119888877", { mask: "nanp" })).toBe("(11) 98888-77");
-		expect(formatPhone("1198888777", { mask: "nanp" })).toBe("(11) 98888-777");
+		expect(formatPhone("1198888777", { mask: "nanp" })).toBe("(11) 9888-8777");
 		expect(formatPhone("11988887777", { mask: "nanp" })).toBe("(11) 98888-7777");
+	});
+
+	it("should group a complete 10 digit landline as (00) 0000-0000", () => {
+		expect(formatPhone("1130000000", { mask: "nanp" })).toBe("(11) 3000-0000");
+		expect(formatPhone("1130000000", { mask: "auto" })).toBe("(11) 3000-0000");
+		expect(formatPhone("(11) 3000-0000", { mask: "nanp" })).toBe("(11) 3000-0000");
+	});
+
+	it("should keep the 9 digit sn grouping for a 10 digit value, which only nanp reads as a landline", () => {
+		expect(formatPhone("1130000000")).toBe("11300-0000");
+		expect(formatPhone("1130000000", { mask: "sn" })).toBe("11300-0000");
 	});
 
 	it("should auto format phone", () => {
@@ -60,7 +71,7 @@ describe("formatPhone", () => {
 		expect(formatPhone("1198888", { mask: "auto" })).toBe("11988-88");
 		expect(formatPhone("11988887", { mask: "auto" })).toBe("11988-887");
 		expect(formatPhone("119888877", { mask: "auto" })).toBe("11988-8877");
-		expect(formatPhone("1198888777", { mask: "auto" })).toBe("(11) 98888-777");
+		expect(formatPhone("1198888777", { mask: "auto" })).toBe("(11) 9888-8777");
 		expect(formatPhone("11988887777", { mask: "auto" })).toBe("(11) 98888-7777");
 	});
 
@@ -147,6 +158,13 @@ describe("formatPhone", () => {
 	it("should keep international masks on service numbers", () => {
 		expect(formatPhone("08001234567", { mask: "e164" })).toBe("0800 123 4567");
 		expect(formatPhone("40041234", { mask: "international" })).toBe("4004-1234");
+	});
+
+	it("should fall back to the default mask when mask is outside the union", () => {
+		// @ts-expect-error: intentionally invalid mask
+		expect(formatPhone("988887777", { mask: "bogus" })).toBe("98888-7777");
+		// @ts-expect-error: intentionally invalid mask
+		expect(formatPhone("11988887777", { mask: "bogus" })).toBe("11988-8877");
 	});
 
 	it("should return an empty string for nullish values", () => {

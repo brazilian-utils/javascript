@@ -26,6 +26,21 @@ describe("isValidCst", () => {
 			expect(isValidCst("199", { tax: "icms" })).toBe(false);
 		});
 
+		it("should return true for the monofasia de combustíveis codes Ajuste SINIEF 39/23 added", () => {
+			expect(isValidCst("002", { tax: "icms" })).toBe(true);
+			expect(isValidCst("015", { tax: "icms" })).toBe(true);
+			expect(isValidCst("053", { tax: "icms" })).toBe(true);
+			expect(isValidCst("061", { tax: "icms" })).toBe(true);
+		});
+
+		it("should return false for the codes Ajuste SINIEF 20/24 revoked (12, 13, 52, 72 and 74)", () => {
+			expect(isValidCst("012", { tax: "icms" })).toBe(false);
+			expect(isValidCst("013", { tax: "icms" })).toBe(false);
+			expect(isValidCst("052", { tax: "icms" })).toBe(false);
+			expect(isValidCst("072", { tax: "icms" })).toBe(false);
+			expect(isValidCst("074", { tax: "icms" })).toBe(false);
+		});
+
 		it("should return false for a length different from 3", () => {
 			expect(isValidCst("10", { tax: "icms" })).toBe(false);
 			expect(isValidCst("1020", { tax: "icms" })).toBe(false);
@@ -129,8 +144,27 @@ describe("isValidCst", () => {
 		expect(isValidCst(undefined, { tax: "icms" })).toBe(false);
 	});
 
-	it("should sanitize whitespace and mask characters", () => {
+	it("should accept a single separator between the digits and surrounding whitespace", () => {
 		expect(isValidCst(" 1-10 ", { tax: "icms" })).toBe(true);
+		expect(isValidCst("0 10", { tax: "icms" })).toBe(true);
+	});
+
+	it("should return false when more than one separator sits between two digits", () => {
+		expect(isValidCst("1--10", { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false for a string that is not a documented form", () => {
+		expect(isValidCst("abc110", { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false for a number that is not a non-negative safe integer", () => {
+		expect(isValidCst(-110, { tax: "icms" })).toBe(false);
+		expect(isValidCst(1.1, { tax: "icms" })).toBe(false);
+		expect(isValidCst(2 ** 53, { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false for a null-prototype object", () => {
+		expect(isValidCst(Object.create(null), { tax: "icms" })).toBe(false);
 	});
 
 	describe("properties", () => {

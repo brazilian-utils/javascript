@@ -67,7 +67,8 @@ const isValidChecksum = (cnpj: string): boolean => {
  * @param {string} cnpj - The CNPJ value to be validated.
  * @param {IsValidCnpjOptions} [options] - Optional options.
  * @param {1|2} [options.version] - `1` validates the numeric-only format (the default),
- * `2` validates both the numeric and the alphanumeric formats.
+ * `2` validates both the numeric and the alphanumeric formats. Any other value is read as `1`,
+ * as `formatCnpj` and `parseCnpj` do.
  * @returns {boolean} True if the CNPJ is valid, false otherwise.
  *
  * @example
@@ -104,7 +105,7 @@ export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean
 
 	let isNumeric = true;
 
-	if (version !== 1) {
+	if (version === 2) {
 		// Stryker disable next-line EqualityOperator: cleaned.length is always exactly CNPJ_LENGTH here (checked above), so the extra i===CNPJ_LENGTH iteration reads charCodeAt(CNPJ_LENGTH), which is NaN and fails both boundary comparisons either way.
 		for (let i = 0; i < CNPJ_LENGTH; i++) {
 			const code = cleaned.charCodeAt(i);

@@ -3,17 +3,20 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
 import { GROUP_SIZE } from "./constants";
 
 /**
- * Formats a Brazilian IBAN by grouping it in blocks of 4 characters, the ISO 13616 "print"
- * presentation used on statements and bank forms.
+ * Formats an IBAN in the ISO 13616 print grouping, blocks of 4 characters, the presentation
+ * used on statements and bank forms.
  *
  * Does not validate the check digits or the field layout; formats whatever is given, up to
  * the 29 character length of a Brazilian IBAN, as far as it goes, so the function can also be
- * used as an input mask. Use `isValidIban` to check validity.
+ * used as an input mask, and an IBAN of another country is grouped the same way up to that
+ * length. Use `isValidIban` to check validity.
  *
- * The value still has to be written in the ISO 13616 print format: letters and digits in
- * groups separated by a single space, with optional surrounding whitespace. Any other
- * character makes the value something other than an IBAN, so it returns an empty string
- * instead of quietly dropping the character and presenting the rest as an IBAN.
+ * The value may be compact (`"BR1500000000000010932840814P2"`), already in the ISO 13616 print
+ * format (letters and digits in groups separated by a single space) or a partial value still
+ * being typed, in every case with optional surrounding whitespace. Only a character outside
+ * letters and digits, or a separator other than a single space, makes the value something
+ * other than an IBAN, and then the function returns an empty string instead of quietly
+ * dropping the character and presenting the rest as an IBAN.
  *
  * @param {string} value - The IBAN to be formatted.
  * @returns {string} The IBAN uppercased and grouped in blocks of 4 characters, or an empty

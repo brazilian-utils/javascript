@@ -29,6 +29,20 @@ describe("isValidCbo", () => {
 		expect(isValidCbo(" 212405 ")).toBe(true);
 	});
 
+	it("should accept a code the official CSV carries and the community mirror did not (142135)", () => {
+		expect(isValidCbo("142135")).toBe(true);
+	});
+
+	it("should reject a code the official CSV no longer carries (223150)", () => {
+		expect(isValidCbo("223150")).toBe(false);
+	});
+
+	it("should reject a group boundary written with more than one separator (2124--05)", () => {
+		expect(isValidCbo("2124--05")).toBe(false);
+		expect(isValidCbo("2124-05")).toBe(true);
+		expect(isValidCbo("2124 05")).toBe(true);
+	});
+
 	it("should return false for an unknown six digit code", () => {
 		expect(isValidCbo("000000")).toBe(false);
 	});

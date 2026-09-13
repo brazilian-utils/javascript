@@ -1,11 +1,13 @@
-import { PROCESSO_JURIDICO_LENGTH } from "../_internals/constants/processo-juridico";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
 	CHECK_DIGIT_LENGTH,
 	CHECK_DIGIT_START_POSITION,
 	MOD_97_10_QUOTIENT,
 	MOD_97_10_SUM,
 } from "./constants";
+
+const SEPARATORS_REGEX = /[\s.-]/g;
+
+const FORMAT_REGEX = /^\d{7}[\s.-]*\d{2}[\s.-]*\d{4}[\s.-]*\d[\s.-]*\d{2}[\s.-]*\d{4}$/;
 
 const verifyCheckDigit = (value: string): boolean => {
 	const verificationDigits = Number.parseInt(
@@ -39,6 +41,10 @@ const verifyCheckDigit = (value: string): boolean => {
 /**
  * Validates a Brazilian Processo Jurídico (court case) number.
  *
+ * The CNJ mask separators (whitespace, `.` and `-`) are accepted between the
+ * `NNNNNNN-DD.AAAA.J.TR.OOOO` fields, and whitespace around the value is ignored, but any other
+ * character, a letter in particular, makes the value invalid.
+ *
  * @param {string} value - The Processo Jurídico number to validate.
  * @returns {boolean} True if the Processo Jurídico number is valid, false otherwise.
  *
@@ -46,6 +52,8 @@ const verifyCheckDigit = (value: string): boolean => {
  * ```typescript
  * isValidProcessoJuridico("00020802520125150049"); // true
  * isValidProcessoJuridico("0002080-25.2012.5.15.0049"); // true
+ * isValidProcessoJuridico(" 0002080-25.2012.5.15.0049 "); // true (surrounding whitespace)
+ * isValidProcessoJuridico("ab00020802520125150049"); // false (invalid format)
  * ```
  *
  * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits.
@@ -55,9 +63,7 @@ const verifyCheckDigit = (value: string): boolean => {
 export const isValidProcessoJuridico = (value: string): boolean => {
 	if (typeof value !== "string") return false;
 
-	const digits = sanitizeToDigits(value);
+	if (!FORMAT_REGEX.test(value.trim())) return false;
 
-	if (digits.length !== PROCESSO_JURIDICO_LENGTH) return false;
-
-	return verifyCheckDigit(digits);
+	return verifyCheckDigit(value.replace(SEPARATORS_REGEX, ""));
 };

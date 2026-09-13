@@ -5,7 +5,7 @@ import { getCbo } from "../get-cbo/get-cbo";
  * CBO 2002 table.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 6
- * digits, or the `NNNN-NN` mask, with the usual separators between the groups and optional
+ * digits, or the `NNNN-NN` mask, with a single separator between the groups and optional
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *
@@ -24,8 +24,10 @@ import { getCbo } from "../get-cbo/get-cbo";
  * isValidCbo(-212405); // false (not a non-negative safe integer)
  * ```
  *
- * @see Official: http://www.mtecbo.gov.br/cbosite/pages/downloads.jsf
+ * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv
+ * The CBO 2002 occupation table, as published by the Ministério do Trabalho e Emprego.
  * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
- * Community mirror of the official table used to build `CBO_TITLES`.
+ * Community mirror of the same table, the fallback `CBO_TITLES` was built from before the
+ * official CSV was used.
  */
 export const isValidCbo = (value: string | number): boolean => getCbo(value) !== null;

@@ -96,6 +96,12 @@ const main = async (): Promise<void> => {
  * @see Official: https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json
  */
 export const NCM_CODES: readonly string[] = ${JSON.stringify(uniqueSortedCodes)};
+
+/**
+ * Shape a complete NCM code has to be written in: the 8 digits, optionally split into the
+ * printed \`NNNN.NN.NN\` groups by a single whitespace or mask character.
+ */
+export const NCM_FORMAT_REGEX = /^\\d{4}[\\s.\\-/]?\\d{2}[\\s.\\-/]?\\d{2}$/;
 `,
 	);
 };

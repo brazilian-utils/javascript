@@ -47,6 +47,18 @@ describe("isValidEmail", () => {
 		test("when the local part has consecutive dots that are not at the very start", () => {
 			expect(isValidEmail("ab..c@example.com")).toBe(false);
 		});
+
+		test("when a domain label ends with a hyphen", () => {
+			expect(isValidEmail("user@example-.com")).toBe(false);
+		});
+
+		test("when a domain label starts with a hyphen", () => {
+			expect(isValidEmail("user@-example.com")).toBe(false);
+		});
+
+		test("when a domain label is longer than the 63 characters WHATWG allows", () => {
+			expect(isValidEmail(`user@${"a".repeat(64)}.com`)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -60,6 +72,14 @@ describe("isValidEmail", () => {
 			expect(isValidEmail("test@subdomain.example.com")).toBe(true);
 		});
 
+		test("when a domain label carries an inner hyphen", () => {
+			expect(isValidEmail("user@ex-ample.com")).toBe(true);
+		});
+
+		test("when a domain label is exactly 63 characters long", () => {
+			expect(isValidEmail(`user@${"a".repeat(63)}.com`)).toBe(true);
+		});
+
 		test("when is a valid email with special characters", () => {
 			expect(isValidEmail("user+tag@example.co.uk")).toBe(true);
 		});
@@ -67,7 +87,7 @@ describe("isValidEmail", () => {
 
 	describe("properties", () => {
 		const addresses = fc.stringMatching(
-			/^[a-z0-9][a-z0-9_+-]{0,15}@[a-z0-9][a-z0-9-]{0,10}\.[a-z]{2,6}$/,
+			/^[a-z0-9][a-z0-9_+-]{0,15}@[a-z0-9](?:[a-z0-9-]{0,9}[a-z0-9])?\.[a-z]{2,6}$/,
 		);
 
 		test("should accept a well-formed address", () => {

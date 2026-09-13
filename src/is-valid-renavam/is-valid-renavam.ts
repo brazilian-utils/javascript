@@ -1,6 +1,10 @@
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
 const RENAVAM_LENGTH = 11;
+
+const SEPARATORS_REGEX = /[\s.-]/g;
+
+const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
 
 const padLeft = (input: string, padLength: number): string =>
 	"0".repeat(padLength - input.length) + input;
@@ -14,6 +18,10 @@ const padLeft = (input: string, padLength: number): string =>
  *
  * The validation uses a checksum algorithm based on modulo 11.
  *
+ * Spaces, dots and hyphens are ignored, so every punctuated form of a RENAVAM is accepted, but
+ * any other character, a letter in particular, makes the value invalid. A registration whose
+ * digits are all the same (`"00000000000"`) is rejected as well, matching both references below.
+ *
  * @param {string} renavam - The RENAVAM value to be validated.
  * @returns {boolean} True if the RENAVAM is valid, false otherwise.
  *
@@ -21,22 +29,29 @@ const padLeft = (input: string, padLength: number): string =>
  * ```typescript
  * isValidRenavam("639884962"); // true (9 digits, old format)
  * isValidRenavam("00639884962"); // true (11 digits, new format)
+ * isValidRenavam("0063988.4962"); // true (dots and hyphens are ignored)
  * isValidRenavam("12345678901"); // false (invalid checksum)
+ * isValidRenavam("00000000000"); // false (repeated digits)
+ * isValidRenavam("ab00639884962"); // false (invalid format)
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm The Código de
- * Trânsito Brasileiro, which creates the RENAVAM registry but does not define its check digit.
+ * The Código de Trânsito Brasileiro creates the RENAVAM registry but does not define its check
+ * digit, so the algorithm below follows the two community references cited as `Based on:`.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm
  * @see Based on: https://github.com/klawdyo/validation-br/blob/main/src/renavam.ts
- * @see Based on: https://github.com/brazilian-utils/brutils-python/blob/main/brutils/renavam.py
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/renavam.py
  */
 export const isValidRenavam = (renavam: string | number): boolean => {
 	if (typeof renavam !== "string" && typeof renavam !== "number") return false;
 
-	const digits = sanitizeToDigits(renavam);
+	const digits = renavam.toString().replace(SEPARATORS_REGEX, "");
 
-	if (digits.length !== 9 && digits.length !== 11) return false;
+	if (!FORMAT_REGEX.test(digits)) return false;
 
 	const paddedDigits = padLeft(digits, RENAVAM_LENGTH);
+
+	if (isRepeatedDigits(paddedDigits)) return false;
 
 	const renavamWithoutDigit = paddedDigits.slice(0, 10);
 

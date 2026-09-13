@@ -34,6 +34,19 @@ describe("isValidProcessoJuridico", () => {
 		test("when it is a 20 digit value with a mismatched check digit", () => {
 			expect(isValidProcessoJuridico("00020802520125150050")).toBe(false);
 		});
+
+		test("when a letter is attached to the digits", () => {
+			expect(isValidProcessoJuridico("ab00020802520125150049")).toBe(false);
+			expect(isValidProcessoJuridico("00020802520125150049ab")).toBe(false);
+		});
+
+		test("when the mask uses a character the CNJ layout does not carry", () => {
+			expect(isValidProcessoJuridico("0002080/25.2012.5.15.0049")).toBe(false);
+		});
+
+		test("when a mask separator falls outside the CNJ field boundaries", () => {
+			expect(isValidProcessoJuridico("000208-0252012.5.15.0049")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -45,6 +58,11 @@ describe("isValidProcessoJuridico", () => {
 			expect(isValidProcessoJuridico("0002080-25.2012.5.15.0049")).toBe(true);
 		});
 
+		test("when a masked processo juridico is surrounded by whitespace", () => {
+			expect(isValidProcessoJuridico(" 0002080-25.2012.5.15.0049 ")).toBe(true);
+			expect(isValidProcessoJuridico("\n00020802520125150049\t")).toBe(true);
+		});
+
 		test("when is a processo juridico valid with the legacy fused mask", () => {
 			expect(isValidProcessoJuridico("0002080-25.2012.515.0049")).toBe(true);
 		});
@@ -53,7 +71,7 @@ describe("isValidProcessoJuridico", () => {
 	describe("properties", () => {
 		test("should accept a generated number whatever mask separates its fields", () => {
 			fc.assert(
-				fc.property(maskSeparators([".", "-", "/", " "], 5, 3), (separators) => {
+				fc.property(maskSeparators([".", "-", " "], 5, 3), (separators) => {
 					const value = generateProcessoJuridico() as string;
 					const head = `${value.slice(0, 7)}${separators[0]}${value.slice(7, 9)}`;
 					const body = `${separators[1]}${value.slice(9, 13)}${separators[2]}`;

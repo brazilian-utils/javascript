@@ -29,6 +29,15 @@ describe("isValidCnh", () => {
 		expect(isValidCnh("0000000011900")).toBe(false);
 	});
 
+	it("should return false when a letter is attached to the digits", () => {
+		expect(isValidCnh("ab00000000119")).toBe(false);
+		expect(isValidCnh("00000000119ab")).toBe(false);
+	});
+
+	it("should return false when the mask uses a character other than whitespace, a dot or a hyphen", () => {
+		expect(isValidCnh("000000001/19")).toBe(false);
+	});
+
 	it("should return false for falsy or non-string values", () => {
 		expect(isValidCnh("")).toBe(false);
 		// @ts-expect-error: intentionally invalid input
@@ -40,7 +49,7 @@ describe("isValidCnh", () => {
 	describe("properties", () => {
 		test("should accept a generated CNH whatever mask characters surround its digits", () => {
 			fc.assert(
-				fc.property(maskSeparators([".", "-", "/", " "], 3, 3), (separators) => {
+				fc.property(maskSeparators([".", "-", " "], 3, 3), (separators) => {
 					const cnh = generateCnh();
 					const base = `${separators[0]}${cnh.slice(0, 9)}${separators[1]}`;
 

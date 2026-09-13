@@ -21,10 +21,10 @@ const BRCODE_MANUAL =
 const COMMUNITY_STATIC =
 	"00020126580014br.gov.bcb.pix0136bee05743-4291-4f3c-9259-595df1307ba1520400005303986540510.005802BR5914Alexandre Lima6019Presidente Prudente62180514Um-Id-Qualquer6304D475";
 
-const KEY_ANNOUNCED_AS_DYNAMIC =
+const KEY_MARKED_SINGLE_USE =
 	"00020101021226330014br.gov.bcb.pix0111123456789095204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63043CAC";
 
-const URL_ANNOUNCED_AS_STATIC =
+const URL_WITH_STATIC_POINT_OF_INITIATION =
 	"00020101021126480014br.gov.bcb.pix2526pix.example.com/qr/v2/12345204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304F299";
 
 const URL_WITHOUT_POINT_OF_INITIATION =
@@ -56,6 +56,24 @@ const buildPayload = (merchantAccountInformation: string, additionalData?: strin
 };
 
 const MERCHANT_ACCOUNT_INFORMATION = tlv("00", "br.gov.bcb.pix") + tlv("01", "12345678909");
+
+const WITHDRAWAL_FACILITATOR_ISPB = "12345678";
+
+const buildWithdrawalPayload = (fss: string, amount?: string): string => {
+	const withoutCrc = [
+		tlv("00", "01"),
+		tlv("26", MERCHANT_ACCOUNT_INFORMATION + tlv("03", fss)),
+		tlv("52", "0000"),
+		tlv("53", "986"),
+		amount === undefined ? "" : tlv("54", amount),
+		tlv("58", "BR"),
+		tlv("59", "Fulano de Tal"),
+		tlv("60", "BRASILIA"),
+		"6304",
+	].join("");
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
 
 const buildPayloadWithMerchantAccountInformationTag = (tag: string): string => {
 	const withoutCrc = [
@@ -225,19 +243,10 @@ describe("parsePixPayload", () => {
 			).toBeNull();
 		});
 
-		test("when a key is announced as dynamic by the point of initiation method", () => {
-			expect(hasValidCrc(KEY_ANNOUNCED_AS_DYNAMIC)).toBe(true);
-			expect(parsePixPayload(KEY_ANNOUNCED_AS_DYNAMIC)).toBeNull();
-		});
-
-		test("when a url is announced as static by the point of initiation method", () => {
-			expect(hasValidCrc(URL_ANNOUNCED_AS_STATIC)).toBe(true);
-			expect(parsePixPayload(URL_ANNOUNCED_AS_STATIC)).toBeNull();
-		});
-
-		test("when a url carries no point of initiation method at all", () => {
-			expect(hasValidCrc(URL_WITHOUT_POINT_OF_INITIATION)).toBe(true);
-			expect(parsePixPayload(URL_WITHOUT_POINT_OF_INITIATION)).toBeNull();
+		test("when the fss of a Pix Saque is not the 8 digits of an ISPB", () => {
+			expect(parsePixPayload(buildWithdrawalPayload("1234567", "0.00"))).toBeNull();
+			expect(parsePixPayload(buildWithdrawalPayload("123456789", "0.00"))).toBeNull();
+			expect(parsePixPayload(buildWithdrawalPayload("1234567x", "0.00"))).toBeNull();
 		});
 
 		test("when the additional data template is malformed", () => {
@@ -279,7 +288,7 @@ describe("parsePixPayload", () => {
 			expect(parsePixPayload(buildPayloadWithAmount("1.234"))).toBeNull();
 		});
 
-		test("when a static payload states a transaction amount of zero", () => {
+		test("when a key payload states a transaction amount of zero without the fss of a Pix Saque", () => {
 			expect(hasValidCrc(buildPayloadWithAmount("0.00"))).toBe(true);
 			expect(parsePixPayload(buildPayloadWithAmount("0.00"))).toBeNull();
 			expect(parsePixPayload(buildPayloadWithAmount("0"))).toBeNull();
@@ -318,11 +327,54 @@ describe("parsePixPayload", () => {
 			});
 		});
 
-		test("from the static QR Code example in the Bacen 'Manual de Padrões para Iniciação do Pix'", () => {
-			expect(parsePixPayload(BACEN_STATIC)).toEqual({
+		test("from the static QR Code example in the Bacen 'Manual de Padrões para Iniciação do Pix', with no key of its own for a field the payload does not carry", () => {
+			expect(parsePixPayload(BACEN_STATIC)).toStrictEqual({
 				key: "123e4567-e12b-12d1-a456-426655440000",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
+				pointOfInitiation: "static",
+			});
+		});
+
+		test("for a Pix Saque BR Code, reading back the fss (26-03) of §2.6 with a transaction amount of zero", () => {
+			expect(parsePixPayload(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0.00"))).toEqual({
+				key: "12345678909",
+				withdrawalFacilitator: "12345678",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+				amount: 0,
+				pointOfInitiation: "static",
+			});
+		});
+
+		test("for a Pix Saque BR Code whose amount is written as the plain '0' of the BR Code field table", () => {
+			expect(parsePixPayload(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0"))).toEqual({
+				key: "12345678909",
+				withdrawalFacilitator: "12345678",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+				amount: 0,
+				pointOfInitiation: "static",
+			});
+		});
+
+		test("for a Pix Saque BR Code that states no transaction amount at all", () => {
+			expect(parsePixPayload(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB))).toEqual({
+				key: "12345678909",
+				withdrawalFacilitator: "12345678",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+				pointOfInitiation: "static",
+			});
+		});
+
+		test("marked single use by the point of initiation method 12, which the manual allows on any BR Code", () => {
+			expect(hasValidCrc(KEY_MARKED_SINGLE_USE)).toBe(true);
+			expect(parsePixPayload(KEY_MARKED_SINGLE_USE)).toEqual({
+				key: "12345678909",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+				pointOfInitiation: "dynamic",
 			});
 		});
 
@@ -337,6 +389,7 @@ describe("parsePixPayload", () => {
 				merchantCity: "Presidente Prudente",
 				amount: 10,
 				txid: "Um-Id-Qualquer",
+				pointOfInitiation: "static",
 			});
 		});
 
@@ -347,6 +400,7 @@ describe("parsePixPayload", () => {
 				merchantCity: "BRASILIA",
 				amount: 123.45,
 				txid: "RP12345678-2019",
+				pointOfInitiation: "static",
 			});
 		});
 
@@ -355,6 +409,7 @@ describe("parsePixPayload", () => {
 				key: "12345678909",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
+				pointOfInitiation: "static",
 			});
 		});
 
@@ -395,6 +450,7 @@ describe("parsePixPayload", () => {
 				description: "Pedido 42",
 				merchantName: "Fulano de Tal",
 				merchantCity: "Brasilia",
+				pointOfInitiation: "static",
 			});
 		});
 	});
@@ -421,6 +477,26 @@ describe("parsePixPayload", () => {
 		test("reading the point of initiation method 11 as static, per the Bacen static example with it made explicit", () => {
 			expect(parsePixPayload(STATIC_POINT_OF_INITIATION)?.pointOfInitiation).toBe("static");
 		});
+
+		test("when it carries no point of initiation method at all, which the manual marks optional", () => {
+			expect(hasValidCrc(URL_WITHOUT_POINT_OF_INITIATION)).toBe(true);
+			expect(parsePixPayload(URL_WITHOUT_POINT_OF_INITIATION)).toEqual({
+				url: "pix.example.com/qr/v2/1234",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+				pointOfInitiation: "dynamic",
+			});
+		});
+
+		test("when the point of initiation method is 11, since the PSP location is what makes it dynamic", () => {
+			expect(hasValidCrc(URL_WITH_STATIC_POINT_OF_INITIATION)).toBe(true);
+			expect(parsePixPayload(URL_WITH_STATIC_POINT_OF_INITIATION)).toEqual({
+				url: "pix.example.com/qr/v2/1234",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+				pointOfInitiation: "dynamic",
+			});
+		});
 	});
 
 	describe("should round-trip with generatePixPayload", () => {
@@ -434,7 +510,10 @@ describe("parsePixPayload", () => {
 				txid: "RP123456782019",
 			};
 
-			expect(parsePixPayload(generatePixPayload(pix) ?? "")).toEqual(pix);
+			expect(parsePixPayload(generatePixPayload(pix) ?? "")).toEqual({
+				...pix,
+				pointOfInitiation: "static",
+			});
 		});
 
 		test("for randomized CPF keys", () => {
@@ -447,7 +526,10 @@ describe("parsePixPayload", () => {
 					txid: `TX${index}`,
 				};
 
-				expect(parsePixPayload(generatePixPayload(pix) ?? "")).toEqual(pix);
+				expect(parsePixPayload(generatePixPayload(pix) ?? "")).toEqual({
+					...pix,
+					pointOfInitiation: "static",
+				});
 			}
 		});
 	});
@@ -505,11 +587,12 @@ describe("parsePixPayload types", () => {
 			key?: string;
 			url?: string;
 			description?: string;
+			withdrawalFacilitator?: string;
 			merchantName: string;
 			merchantCity: string;
 			amount?: number;
 			txid?: string;
-			pointOfInitiation?: PixPointOfInitiation;
+			pointOfInitiation: PixPointOfInitiation;
 		}>();
 		expectTypeOf<PixPointOfInitiation>().toEqualTypeOf<"static" | "dynamic">();
 	});

@@ -35,7 +35,13 @@ import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
 import { sanitizeToAscii } from "../_internals/sanitize-to-ascii/sanitize-to-ascii";
 import { parsePixKey } from "../parse-pix-key/parse-pix-key";
-import { AMOUNT_DECIMAL_PLACES, AMOUNT_REGEX, TLV_OVERHEAD, TXID_REGEX } from "./constants";
+import {
+	AMOUNT_DECIMAL_PLACES,
+	AMOUNT_REGEX,
+	AMOUNT_COMPARISON_DECIMAL_PLACES,
+	TLV_OVERHEAD,
+	TXID_REGEX,
+} from "./constants";
 
 /** The parameters `generatePixPayload` takes to build a Pix BR Code. */
 export type GeneratePixPayloadParams = {
@@ -52,7 +58,7 @@ export type GeneratePixPayloadParams = {
 	merchantName: string;
 	/** City of the receiver, folded to ASCII and truncated to 15 characters. */
 	merchantCity: string;
-	/** Amount in BRL. Omit it to let the payer type it. Not allowed together with `url`: a dynamic BR Code takes its amount from the PSP location. */
+	/** Amount in BRL, with at most two decimal places. Omit it to let the payer type it. Not allowed together with `url`: a dynamic BR Code takes its amount from the PSP location. */
 	amount?: number;
 	/** Transaction ID, 1 to 25 characters of `[A-Za-z0-9]` (default: the absent marker `***`). Not allowed together with `url`. */
 	txid?: string;
@@ -114,6 +120,12 @@ const resolveFormattedAmount = (
 
 	if (amount !== undefined && Number(formattedAmount) === 0) return null;
 
+	if (
+		amount !== undefined &&
+		Number(amount.toFixed(AMOUNT_COMPARISON_DECIMAL_PLACES)) !== Number(formattedAmount)
+	)
+		return null;
+
 	if (txid !== undefined && (typeof txid !== "string" || !TXID_REGEX.test(txid))) return null;
 
 	return formattedAmount;
@@ -138,6 +150,11 @@ const resolveFormattedAmount = (
  * template within its 99 character limit together with the `br.gov.bcb.pix` GUI. `parsePixPayload`
  * already parses both shapes, so `parsePixPayload(generatePixPayload({ url, ... }))` round-trips.
  *
+ * Object `01` is optional in the Manual do BR Code (`Uso: O`), so writing it only for a dynamic
+ * payload is one of the shapes the manual allows and follows its own examples; `parsePixPayload`
+ * accepts the others too. The Pix Saque BR Code, which announces the ISPB of the "facilitador de
+ * serviço de saque" in sub-object 26-03 (`fss`), is not generated here, only parsed.
+ *
  * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
  * composto" of Pix Automático (Pix recorrente) does, are out of scope: the location is always
  * written in the "Merchant Account Information" template.
@@ -146,13 +163,18 @@ const resolveFormattedAmount = (
  * (accents are dropped) and truncated to the lengths the BR Code allows, the description to
  * whatever is left of the 99 characters the "Merchant Account Information" template holds.
  *
+ * `params.amount` is written with the two decimal places the BR Code takes, so an amount that
+ * does not survive that round trip (`0.005`, `123.456`) is refused rather than rounded into a
+ * payload that asks the payer for a different sum.
+ *
  * @param {GeneratePixPayloadParams} params - The parameters of the payload.
  * @param {string} [params.key] - The Pix key of the receiver. Required unless `url` is given.
  * @param {string} [params.url] - The PSP location of a dynamic payload. Required unless `key`
  * is given.
  * @param {string} params.merchantName - The name of the receiver.
  * @param {string} params.merchantCity - The city of the receiver.
- * @param {number} [params.amount] - The amount in BRL. Omit it to let the payer type it.
+ * @param {number} [params.amount] - The amount in BRL, with at most two decimal places. Omit it
+ * to let the payer type it.
  * @param {string} [params.txid] - The transaction ID, 1 to 25 characters of `[A-Za-z0-9]`.
  * @param {string} [params.description] - The free text shown to the payer.
  * @returns {string|null} The BR Code payload, or `null` when the parameters are invalid.

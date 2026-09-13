@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
 import { type StateCode } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { VALID_EMISSION_TYPES, VALID_MODELS } from "./constants";
+import { EMISSION_TYPES_BY_MODEL, FORBIDDEN_CODES, VALID_MODELS } from "./constants";
 import { parseNfeKey, type NfeKey, type NfeKeyModel } from "./parse-nfe-key";
 
 const KEY_SP = "35170458716523000119550010000000121000123458";
@@ -11,6 +11,12 @@ const KEY_RS = "43160472202112000136550000000010571048440722";
 const KEY_CPF_PADDED = "35170400040364478829550010000000121000123457";
 
 const CHECK_DIGITS = Array.from({ length: 10 }, (_, digit) => String(digit));
+
+const AUTHORIZATION_SITE_MODELS = new Set(["62", "66"]);
+
+const MODEL_EMISSION_TYPES: { model: string; emissionType: number }[] = VALID_MODELS.flatMap(
+	(model) => EMISSION_TYPES_BY_MODEL[model].map((emissionType) => ({ model, emissionType })),
+);
 
 const buildNfeKey = (base: string): string =>
 	CHECK_DIGITS.map((digit) => `${base}${digit}`).find((key) => parseNfeKey(key) !== null) ?? "";
@@ -40,7 +46,7 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey(`${KEY_SP.slice(0, 43)}9`)).toBeNull();
 		});
 
-		test("when the model is not 55, 57, 58, 65 or 67 (model 99 with a matching check digit)", () => {
+		test("when the model is not one of the nine supported (model 99 with a matching check digit)", () => {
 			expect(parseNfeKey("35170458716523000119990010000000121000123453")).toBeNull();
 		});
 
@@ -48,8 +54,25 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey("35170458716523000119550010000000001000123457")).toBeNull();
 		});
 
-		test("when tpEmis is 8, a code the MOC does not assign, even with a matching check digit", () => {
+		test("when tpEmis is 8, which the NF-e MOC does not assign, even with a matching check digit", () => {
 			expect(parseNfeKey("35170458716523000119550010000000128000123455")).toBeNull();
+		});
+
+		test("when tpEmis belongs to another model: 2 for a CT-e, 3 for a CT-e OS, 9 for an MDF-e, 3 for a BP-e", () => {
+			expect(parseNfeKey("35170458716523000119570010000000122000123453")).toBeNull();
+			expect(parseNfeKey("35170458716523000119670010000000123000123454")).toBeNull();
+			expect(parseNfeKey("35170458716523000119580010000000129000123454")).toBeNull();
+			expect(parseNfeKey("35170458716523000119630010000000123000123450")).toBeNull();
+		});
+
+		test("when the cNF of an NF-e is one rule B03-10 of the MOC forbids", () => {
+			expect(parseNfeKey("35170458716523000119550010000000121000000003")).toBeNull();
+			expect(parseNfeKey("35170458716523000119550010000000121111111113")).toBeNull();
+			expect(parseNfeKey("35170458716523000119550010000000121123456781")).toBeNull();
+		});
+
+		test("when the cNF of an NF-e equals its nNF, the second half of rule B03-10", () => {
+			expect(parseNfeKey("35170458716523000119550010000123451000123458")).toBeNull();
 		});
 
 		test("when the access key is otherwise invalid", () => {
@@ -95,6 +118,29 @@ describe("parseNfeKey", () => {
 			);
 		});
 
+		test("accepting the XML Id prefix of every other covered document", () => {
+			expect(parseNfeKey("CTe35170458716523000119570010000000121000123455")?.model).toBe("57");
+			expect(parseNfeKey("MDFe35170458716523000119580010000000121000123459")?.model).toBe("58");
+			expect(parseNfeKey("BPe35170458716523000119630010000000121000123453")?.model).toBe("63");
+			expect(parseNfeKey("NF3e35170458716523000119660010000000121000123454")?.model).toBe("66");
+			expect(parseNfeKey("NFCom35170458716523000119620010000000121000123450")?.model).toBe("62");
+		});
+
+		test("for the CT-e models the SVC-SP authorises, whose MOC assigns tpEmis 8", () => {
+			expect(parseNfeKey("35170458716523000119570010000000128000123452")?.emissionType).toBe(8);
+			expect(parseNfeKey("35170458716523000119670010000000128000123455")?.emissionType).toBe(8);
+			expect(parseNfeKey("35170458716523000119640010000000128000123454")?.emissionType).toBe(8);
+		});
+
+		test("for the MDF-e contingência Regime Especial NFF, tpEmis 3", () => {
+			expect(parseNfeKey("35170458716523000119580010000000123000123455")?.emissionType).toBe(3);
+		});
+
+		test("keeping the cNF of a CT-e that rule B03-10 would forbid, since only the NF-e MOC states it", () => {
+			expect(parseNfeKey("35170458716523000119570010000000121000000000")?.code).toBe("00000000");
+			expect(parseNfeKey("35170458716523000119570010000123451000123455")?.code).toBe("00012345");
+		});
+
 		test("keeping the left zero padding of a CPF issuer, using a synthetic key with an 11-digit CPF left-padded to 14 digits in the tax id field and the check digit recalculated", () => {
 			expect(parseNfeKey(KEY_CPF_PADDED)?.taxId).toBe("00040364478829");
 			expect(parseNfeKey(KEY_CPF_PADDED)?.taxId).toHaveLength(14);
@@ -104,11 +150,52 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey("35170458716523000119550010000000129000123453")?.emissionType).toBe(9);
 		});
 
-		test("for every other DF-e model (CT-e, MDF-e, NFC-e, CT-e OS), same shape as the SP key with the model field changed and the check digit recalculated", () => {
+		test("for every other DF-e model (CT-e, MDF-e, GTV-e, NFC-e, CT-e OS), same shape as the SP key with the model field changed and the check digit recalculated", () => {
 			expect(parseNfeKey("35170458716523000119570010000000121000123455")?.model).toBe("57");
 			expect(parseNfeKey("35170458716523000119580010000000121000123459")?.model).toBe("58");
+			expect(parseNfeKey("35170458716523000119630010000000121000123453")?.model).toBe("63");
+			expect(parseNfeKey("35170458716523000119640010000000121000123457")?.model).toBe("64");
 			expect(parseNfeKey("35170458716523000119650010000000121000123450")?.model).toBe("65");
 			expect(parseNfeKey("35170458716523000119670010000000121000123458")?.model).toBe("67");
+		});
+
+		test("splitting nSiteAutoriz from the 7 digit cNF of an NFCom, per its Visão Geral §2.1.3", () => {
+			expect(parseNfeKey("35170458716523000119620010000000121000123450")).toEqual({
+				state: "SP",
+				year: 2017,
+				month: 4,
+				taxId: "58716523000119",
+				model: "62",
+				series: 1,
+				number: 12,
+				emissionType: 1,
+				authorizationSite: 0,
+				code: "0012345",
+				checkDigit: 0,
+			});
+			expect(parseNfeKey("35170458716523000119620010000000121700123452")?.authorizationSite).toBe(
+				7,
+			);
+		});
+
+		test("splitting nSiteAutoriz from the 7 digit cNF of an NF3e, per its Visão Geral", () => {
+			expect(parseNfeKey("35170458716523000119660010000000121000123454")).toEqual({
+				state: "SP",
+				year: 2017,
+				month: 4,
+				taxId: "58716523000119",
+				model: "66",
+				series: 1,
+				number: 12,
+				emissionType: 1,
+				authorizationSite: 0,
+				code: "0012345",
+				checkDigit: 4,
+			});
+		});
+
+		test("without an authorizationSite property for a model whose key has no nSiteAutoriz", () => {
+			expect(parseNfeKey(KEY_SP)).not.toHaveProperty("authorizationSite");
 		});
 	});
 
@@ -118,20 +205,25 @@ describe("parseNfeKey", () => {
 			fc.stringMatching(/^[0-9]{2}$/),
 			fc.integer({ min: 1, max: 12 }),
 			fc.stringMatching(/^[0-9]{14}$/),
-			fc.constantFrom("55", "57", "58", "65", "67"),
+			fc.constantFrom(...MODEL_EMISSION_TYPES),
 			fc.stringMatching(/^[0-9]{3}$/),
 			fc.integer({ min: 1, max: 999_999_999 }),
-			fc.constantFrom(...VALID_EMISSION_TYPES),
 			fc.stringMatching(/^[0-9]{8}$/),
 		);
 
 		test("should give back every field of a well-formed access key", () => {
 			fc.assert(
 				fc.property(parts, (fields) => {
-					const [uf, year, month, taxId, model, series, number, emissionType, code] = fields;
+					const [uf, year, month, taxId, document, series, number, tail] = fields;
+					const { model, emissionType } = document;
+					const hasSite = AUTHORIZATION_SITE_MODELS.has(model);
+					const code = hasSite ? tail.slice(1) : tail;
+
+					fc.pre(!FORBIDDEN_CODES.includes(code) && Number(code) !== number);
+
 					const issuer = `${uf}${year}${String(month).padStart(2, "0")}${taxId}`;
-					const document = `${model}${series}${String(number).padStart(9, "0")}`;
-					const key = buildNfeKey(`${issuer}${document}${emissionType}${code}`);
+					const numbering = `${model}${series}${String(number).padStart(9, "0")}`;
+					const key = buildNfeKey(`${issuer}${numbering}${emissionType}${tail}`);
 					const parsed = parseNfeKey(key);
 
 					expect(parsed?.state).toBe(IBGE_UF_CODES[uf]);
@@ -142,6 +234,7 @@ describe("parseNfeKey", () => {
 					expect(parsed?.series).toBe(Number(series));
 					expect(parsed?.number).toBe(number);
 					expect(parsed?.emissionType).toBe(emissionType);
+					expect(parsed?.authorizationSite).toBe(hasSite ? Number(tail.charAt(0)) : undefined);
 					expect(parsed?.code).toBe(code);
 					expect(parsed?.checkDigit).toBe(Number(key.charAt(43)));
 				}),
@@ -173,10 +266,13 @@ describe("parseNfeKey types", () => {
 			series: number;
 			number: number;
 			emissionType: number;
+			authorizationSite?: number;
 			code: string;
 			checkDigit: number;
 		}>();
-		expectTypeOf<NfeKeyModel>().toEqualTypeOf<"55" | "57" | "58" | "65" | "67">();
+		expectTypeOf<NfeKeyModel>().toEqualTypeOf<
+			"55" | "57" | "58" | "62" | "63" | "64" | "65" | "66" | "67"
+		>();
 		expectTypeOf<NfeKeyModel>().toEqualTypeOf<(typeof VALID_MODELS)[number]>();
 	});
 });

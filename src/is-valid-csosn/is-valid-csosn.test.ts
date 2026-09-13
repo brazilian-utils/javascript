@@ -48,6 +48,21 @@ describe("isValidCsosn", () => {
 		expect(isValidCsosn("abc")).toBe(false);
 	});
 
+	it("should return false for a string that is not a documented form", () => {
+		expect(isValidCsosn("abc101")).toBe(false);
+		expect(isValidCsosn("1--01")).toBe(false);
+	});
+
+	it("should return false for a number that is not a non-negative safe integer", () => {
+		expect(isValidCsosn(-101)).toBe(false);
+		expect(isValidCsosn(10.1)).toBe(false);
+		expect(isValidCsosn(2 ** 53)).toBe(false);
+	});
+
+	it("should return false for a null-prototype object", () => {
+		expect(isValidCsosn(Object.create(null))).toBe(false);
+	});
+
 	describe("properties", () => {
 		const codeArbitrary = fc.constantFrom(...CSOSN_CODES);
 

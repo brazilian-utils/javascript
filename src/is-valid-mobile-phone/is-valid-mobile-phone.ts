@@ -51,6 +51,11 @@ const isValidMobileFirstNumber = (value: string, version?: PhoneVersion): boolea
  * 6, kept for 2.3.0 compatibility. `version: 2` enforces only 9, a stricter subset of the
  * resolution's art. 12 I, which places 7, 8 and 9 in Serviço Móvel Pessoal (SMP).
  *
+ * `version: 1` also does not carve out the `700` prefix, which art. 12 II reserves for the
+ * Serviço Móvel Global por Satélite rather than SMP, so `isValidMobilePhone("11700123456")` is
+ * `true` for a number outside SMP. `version: 2` rejects it, along with every other first digit
+ * that is not 9.
+ *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidMobilePhone = (value: string, options?: IsValidMobilePhoneOptions): boolean => {

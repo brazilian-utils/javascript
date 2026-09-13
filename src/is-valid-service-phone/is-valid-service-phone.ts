@@ -23,7 +23,9 @@ const UTILITY_CODES: readonly string[] = SERVICE_PHONE_UTILITY_CODES;
  * - the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900`, each followed by
  *   7 digits (11 in total, the shorter, extinct `0800` + 6 form is rejected);
  * - the abbreviated `300X` and `400X` numbers, followed by 4 digits, e.g. `3003-1234`. Anatel
- *   publishes no allocation for these, so the accepted roots are the conventional ones;
+ *   publishes no allocation for these, so the accepted roots are the conventional ones. Only
+ *   `300X` and `400X` are recognised: other "Número Único" carrier prefixes in market use, such
+ *   as `4020` and `4062`, are out of scope and are rejected;
  * - the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated,
  *   e.g. `190` and `192`. Undesignated codes in the `1XX` range are rejected. `112` and `911`
  *   are accepted too: Anatel lists them alongside the `1XX` codes as mobile-only aliases of `190`.
