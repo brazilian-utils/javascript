@@ -5,7 +5,7 @@ import { isValidNfeKey } from "./is-valid-nfe-key";
 
 const VALID_A = "35120859597245000190550000000095831710040056";
 const VALID_B = "35170458716523000119550010000000121000123458";
-const VALID_C = "35170358716523000119550010000000301000000300";
+const CNF_EQUAL_TO_NNF = "35170358716523000119550010000000301000000300";
 const VALID_D = "43160472202112000136550000000010571048440722";
 const INVALID_TYPE = "42100484684182000157550010000000020108042108";
 
@@ -23,16 +23,33 @@ describe("isValidNfeKey", () => {
 			expect(isValidNfeKey(VALID_B)).toBe(true);
 		});
 
-		test("for a real NF-e access key without a mask, the NFePHP `Keys::isValid` doc example (SP)", () => {
-			expect(isValidNfeKey(VALID_C)).toBe(true);
-		});
-
 		test("for a real NF-e access key without a mask, the NFePHP sped-cte `$infNFe->chave` example (RS, NF-e referenced by a CT-e)", () => {
 			expect(isValidNfeKey(VALID_D)).toBe(true);
 		});
 
 		test("when it has the NFe prefix found in the XML Id attribute", () => {
 			expect(isValidNfeKey(`NFe${VALID_B}`)).toBe(true);
+		});
+
+		test("when it has the XML Id prefix of one of the other covered documents", () => {
+			expect(isValidNfeKey("CTe35170458716523000119570010000000121000123455")).toBe(true);
+			expect(isValidNfeKey("MDFe35170458716523000119580010000000121000123459")).toBe(true);
+			expect(isValidNfeKey("BPe35170458716523000119630010000000121000123453")).toBe(true);
+			expect(isValidNfeKey("NF3e35170458716523000119660010000000121000123454")).toBe(true);
+			expect(isValidNfeKey("nfcom35170458716523000119620010000000121000123450")).toBe(true);
+		});
+
+		test("for the four models added beside the NF-e family: NFCom (62), BP-e (63), GTV-e (64) and NF3e (66)", () => {
+			expect(isValidNfeKey("35170458716523000119620010000000121000123450")).toBe(true);
+			expect(isValidNfeKey("35170458716523000119630010000000121000123453")).toBe(true);
+			expect(isValidNfeKey("35170458716523000119640010000000121000123457")).toBe(true);
+			expect(isValidNfeKey("35170458716523000119660010000000121000123454")).toBe(true);
+		});
+
+		test("for a CT-e, a CT-e OS and a GTV-e authorised by the SVC-SP, whose MOC assigns tpEmis 8", () => {
+			expect(isValidNfeKey("35170458716523000119570010000000128000123452")).toBe(true);
+			expect(isValidNfeKey("35170458716523000119670010000000128000123455")).toBe(true);
+			expect(isValidNfeKey("35170458716523000119640010000000128000123454")).toBe(true);
 		});
 
 		test("when it is grouped in spaces of 4 digits", () => {
@@ -99,8 +116,17 @@ describe("isValidNfeKey", () => {
 			expect(isValidNfeKey(`00${VALID_B.slice(2)}`)).toBe(false);
 		});
 
-		test("when the mod is not 55, 57, 58, 65 or 67", () => {
+		test("when the mod is not one of the nine supported", () => {
 			expect(isValidNfeKey(`${VALID_B.slice(0, 20)}99${VALID_B.slice(22)}`)).toBe(false);
+		});
+
+		test("for the NFePHP `Keys::isValid` doc example, whose cNF equals its nNF (rule B03-10)", () => {
+			expect(isValidNfeKey(CNF_EQUAL_TO_NNF)).toBe(false);
+		});
+
+		test("when the cNF of an NF-e is one of the codes rule B03-10 lists", () => {
+			expect(isValidNfeKey("35170458716523000119550010000000121000000003")).toBe(false);
+			expect(isValidNfeKey("35170458716523000119550010000000121123456781")).toBe(false);
 		});
 
 		test("when the month is not between 01 and 12", () => {
@@ -130,32 +156,32 @@ describe("isValidNfeKey", () => {
 		const CASES: { name: string; key: string; expected: boolean }[] = [
 			{
 				name: "an unmapped cUF (99)",
-				key: "99200600000000000000550010000000011000000005",
+				key: "99200600000000000000550010000000011000000129",
 				expected: false,
 			},
 			{
 				name: "month 00, below the valid range",
-				key: "35200000000000000000550010000000011000000006",
+				key: "35200000000000000000550010000000011000000120",
 				expected: false,
 			},
 			{
 				name: "month 01, the lower boundary",
-				key: "35200100000000000000550010000000011000000000",
+				key: "35200100000000000000550010000000011000000123",
 				expected: true,
 			},
 			{
 				name: "month 12, the upper boundary",
-				key: "35201200000000000000550010000000011000000006",
+				key: "35201200000000000000550010000000011000000120",
 				expected: true,
 			},
 			{
 				name: "month 13, above the valid range",
-				key: "35201300000000000000550010000000011000000000",
+				key: "35201300000000000000550010000000011000000123",
 				expected: false,
 			},
 			{
 				name: "a model not in VALID_MODELS (99)",
-				key: "35200600000000000000990010000000011000000003",
+				key: "35200600000000000000990010000000011000000127",
 				expected: false,
 			},
 			{
@@ -165,11 +191,11 @@ describe("isValidNfeKey", () => {
 			},
 			{
 				name: "tpEmis 9, the upper boundary",
-				key: "35200600000000000000550010000000019000000003",
+				key: "35200600000000000000550010000000019000000127",
 				expected: true,
 			},
 			{
-				name: "tpEmis 8, a code the MOC does not assign",
+				name: "tpEmis 8, a code the NF-e MOC does not assign",
 				key: "35170458716523000119550010000000128000123455",
 				expected: false,
 			},
