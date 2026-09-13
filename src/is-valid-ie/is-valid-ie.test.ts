@@ -758,6 +758,55 @@ describe("isValidIe", () => {
 		});
 	});
 
+	describe("SINTEGRA worked examples", () => {
+		const publishedExamples: [StateCode, string][] = [
+			["AC", "01.004.823/001-12"],
+			["AL", "240000048"],
+			["AP", "030123459"],
+			["AM", "99.999.999-0"],
+			["BA", "123456-63"],
+			["BA", "612345-57"],
+			["BA", "1000003-06"],
+			["CE", "06000001-5"],
+			["ES", "999999990"],
+			["GO", "10.987.654-7"],
+			["MA", "120000385"],
+			["MG", "062.307.904/0081"],
+			["MS", "280000006"],
+			["MT", "0013000001-9"],
+			["PA", "15999999-5"],
+			["PA", "75000002-3"],
+			["PB", "06000001-5"],
+			["PI", "012345679"],
+			["PR", "123.45678-50"],
+			["RN", "20.040.040-1"],
+			["RN", "20.0.040.040-0"],
+			["RO", "0000000062521-3"],
+			["RR", "24006628-1"],
+			["RR", "24001755-6"],
+			["RR", "24003429-0"],
+			["RR", "24001360-3"],
+			["RR", "24008266-8"],
+			["RR", "24006153-6"],
+			["RR", "24007356-2"],
+			["RR", "24005467-4"],
+			["RR", "24004145-5"],
+			["RR", "24001340-7"],
+			["RS", "224/3658792"],
+			["SC", "251.040.852"],
+			["SE", "27123456-3"],
+			["SP", "110.042.490.114"],
+			["SP", "P-01100424.3/002"],
+			["TO", "29010227836"],
+		];
+
+		test("should accept every worked example the SINTEGRA pages print", () => {
+			for (const [stateCode, ie] of publishedExamples) {
+				expect(isValidIe(stateCode, ie)).toBe(true);
+			}
+		});
+	});
+
 	describe("state code lookup", () => {
 		test("should not resolve properties from the prototype chain", () => {
 			// @ts-expect-error: intentionally invalid input

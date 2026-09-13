@@ -518,9 +518,13 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
  * - PE: only the current 9 digit eFisco format is accepted; the old 14 digit CACEPE format
  *   documented on the same page is not.
+ * - TO: the SINTEGRA page documents only the 11 digit form, the one carrying the tipo digits in
+ *   positions 3 and 4. The 9 digit form is also accepted, applying the same modulus 11 rule with
+ *   weights 9 down to 2 to the first eight digits; it is 2.3.0 behavior kept for compatibility
+ *   and no published SEFAZ-TO roteiro covers it.
  * - An all zero registration is accepted for every state whose published formula yields a
- *   check digit of 0 for it (AM, BA with 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC,
- *   SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which reject repeated
+ *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS,
+ *   SC, SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which reject repeated
  *   digits.
  *
  * @param {StateCode} stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
@@ -569,6 +573,9 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SP.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_TO.html
+ * Documents only the 11 digit form, with the tipo digits 01, 02, 03 and 99 in positions 3 and 4;
+ * the 9 digit form the validator also accepts is not covered by this page or by any other
+ * published SEFAZ-TO roteiro.
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
  * SEFAZ-GO's roteiro de crítica, the source of the Goiás prefixes and special ranges.
  */
