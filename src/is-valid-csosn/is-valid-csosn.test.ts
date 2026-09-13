@@ -53,6 +53,14 @@ describe("isValidCsosn", () => {
 		expect(isValidCsosn("1--01")).toBe(false);
 	});
 
+	it("should return false for a code split by a separator, since a CSOSN has no printed grouping", () => {
+		expect(isValidCsosn("1-01")).toBe(false);
+		expect(isValidCsosn("1 01")).toBe(false);
+		expect(isValidCsosn("10.1")).toBe(false);
+		expect(isValidCsosn("1-0-1")).toBe(false);
+		expect(isValidCsosn(" 101 ")).toBe(true);
+	});
+
 	it("should return false for a number that is not a non-negative safe integer", () => {
 		expect(isValidCsosn(-101)).toBe(false);
 		expect(isValidCsosn(10.1)).toBe(false);

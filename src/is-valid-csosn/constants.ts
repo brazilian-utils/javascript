@@ -23,7 +23,8 @@ export const CSOSN_CODES = [
 ] as const;
 
 /**
- * Shape a CSOSN code has to be written in: the 3 digits, optionally split by a single
- * whitespace or mask character.
+ * Shape a CSOSN code has to be written in: the bare 3 digits. Unlike the ICMS CST, whose origin
+ * digit is printed apart from the Tabela B pair, a CSOSN has no internal grouping anywhere it is
+ * printed (the NF-e carries the origin in its own `orig` field), so no separator is accepted.
  */
-export const CSOSN_FORMAT_REGEX = /^\d[\s.\-/]?\d[\s.\-/]?\d$/;
+export const CSOSN_FORMAT_REGEX = /^\d{3}$/;

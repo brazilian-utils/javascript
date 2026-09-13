@@ -8,9 +8,10 @@ import { CSOSN_CODES, CSOSN_FORMAT_REGEX } from "./constants";
  * Accepted codes are `101, 102, 103, 201, 202, 203, 300, 400, 500, 900`, the table the
  * consolidated Anexo III-A of Convênio SINIEF s/nº 1970 carries.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 3
- * digits, with a single separator between them and optional surrounding whitespace. Anything
- * else (`"abc101"`) is rejected instead of having its digits picked out. A number is only read
+ * A string is only read as a code when it is written as the bare 3 digits with optional
+ * surrounding whitespace. A CSOSN has no printed grouping (the NF-e carries the origin digit in
+ * its own `orig` field), so a separator inside it (`"1-01"`) is rejected, and so is anything
+ * else (`"abc101"`) instead of having its digits picked out. A number is only read
  * as a code when it is a non-negative safe integer, since a sign, a decimal point or a rounded
  * magnitude would otherwise be read as a code the caller never wrote.
  *

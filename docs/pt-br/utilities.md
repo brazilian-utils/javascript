@@ -885,7 +885,7 @@ convertNumberToWords(NaN); // ""
 
 ## convertCurrencyToWords
 
-Formata um valor monetário em Reais por extenso, no estilo usado para escrever o valor à mão em cheques e contratos, ex.: `1523.45` vira `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`. O `value` é truncado (não arredondado) para 2 casas decimais. O substantivo no singular é usado para exatamente 1 ("um real", "um centavo") e "de" é inserido antes de "reais" quando o valor é um milhão bilhão ou trilhão de reais redondo. Um valor que trunca para nada vira `"zero reais"`, sem o prefixo "menos"; qualquer outro valor negativo recebe o prefixo "menos", e uma entrada inválida retorna `""`. Acima de `Number.MAX_SAFE_INTEGER / 100` reais (cerca de 90 trilhões) um double não consegue carregar centavos, então o valor é lido como um número inteiro de reais. Não recebe opções: o resultado sai sempre em minúsculas; aplique qualquer outra caixa por conta própria.
+Formata um valor monetário em Reais por extenso, no estilo usado para escrever o valor à mão em cheques e contratos, ex.: `1523.45` vira `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`. O `value` é truncado (não arredondado) para 2 casas decimais. O substantivo no singular é usado para exatamente 1 ("um real", "um centavo") e "de" é inserido antes de "reais" quando o valor é um milhão, bilhão ou trilhão de reais redondo. Um valor que trunca para nada vira `"zero reais"`, sem o prefixo "menos"; qualquer outro valor negativo recebe o prefixo "menos", e uma entrada inválida retorna `""`. Acima de `Number.MAX_SAFE_INTEGER / 100` reais (cerca de 90 trilhões) um double não consegue carregar centavos, então o valor é lido como um número inteiro de reais. Não recebe opções: o resultado sai sempre em minúsculas; aplique qualquer outra caixa por conta própria.
 
 ```javascript
 import { convertCurrencyToWords } from '@brazilian-utils/brazilian-utils';
@@ -1976,7 +1976,7 @@ isValidCst(-110); // false (não é um inteiro seguro não negativo)
 
 Valida se um código de CSOSN (Código de Situação da Operação no Simples Nacional) é um dos 10 códigos do [Anexo III-A consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), a tabela instituída pelo Ajuste SINIEF 03/2010: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` ou `900`.
 
-Uma string só é lida como código quando está escrita em uma das formas documentadas (os 3 dígitos, com um único separador entre eles e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
+Uma string só é lida como código quando está escrita como os 3 dígitos puros, com espaços em branco opcionais no início e no fim: um CSOSN não tem agrupamento impresso (a NF-e leva o dígito de origem no seu próprio campo `orig`), então `'1-01'` é rejeitado; um número só é lido quando é um inteiro seguro não negativo.
 
 ```javascript
 import { isValidCsosn } from '@brazilian-utils/brazilian-utils';

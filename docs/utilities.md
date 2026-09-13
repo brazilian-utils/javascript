@@ -1976,7 +1976,7 @@ isValidCst(-110); // false (not a non-negative safe integer)
 
 Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes of the [consolidated Anexo III-A of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), the table Ajuste SINIEF 03/2010 instituted: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
 
-A string is only read as a code when it is written in one of the documented forms (the 3 digits, with a single separator between them and optional surrounding whitespace), and a number only when it is a non-negative safe integer.
+A string is only read as a code when it is written as the bare 3 digits with optional surrounding whitespace: a CSOSN has no printed grouping (the NF-e carries the origin digit in its own `orig` field), so `'1-01'` is rejected; a number is read only when it is a non-negative safe integer.
 
 ```javascript
 import { isValidCsosn } from '@brazilian-utils/brazilian-utils';
