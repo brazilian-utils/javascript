@@ -42,8 +42,9 @@ const isValidProvisional = (digits: string): boolean =>
  * be a multiple of 11.
  *
  * The value has to be written as the 15 digits, optionally split into the printed groups of 3,
- * 4, 4 and 4 by whitespace or the usual mask characters; anything else, a letter among the
- * digits included, is rejected instead of being read past.
+ * 4, 4 and 4 by whitespace or the usual mask characters, a run of them between two groups
+ * included; anything else, a letter among the digits included, is rejected instead of being
+ * read past.
  *
  * @param {string|number} value - The CNS value to be validated.
  * @returns {boolean} True if the CNS is valid, false otherwise.

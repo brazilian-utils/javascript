@@ -9,6 +9,11 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * the weights 7, 4, 1, 8, 5, 2, 1, 6, 3, 7 and 4. A work registered under a legacy CEI keeps
  * the same number in the CNO, so both registries validate identically.
  *
+ * The value has to be written as the 12 digits, optionally split into the printed groups of 2,
+ * 3, 5 and 2 by whitespace or the usual mask characters, a run of them between two groups
+ * included; anything else, a letter among the digits included, is rejected instead of being
+ * read past.
+ *
  * The Receita Federal does not publish the check digit rule of the CEI/CNO numbering, so the
  * calculation follows the reference implementations cited below, cross-checked against the CNO
  * open data of the Receita Federal.

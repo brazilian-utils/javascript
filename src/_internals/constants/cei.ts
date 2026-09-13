@@ -23,6 +23,12 @@ export const CEI_BASE_LENGTH = 11;
 
 export const CEI_WEIGHTS = [7, 4, 1, 8, 5, 2, 1, 6, 3, 7, 4];
 
-export const CEI_FORMAT_REGEX = /^\d{2}[\s.\-/]?\d{3}[\s.\-/]?\d{5}[\s.\-/]?\d{2}$/;
+/**
+ * Shape a CEI/CNO number has to be written in: the 12 digits, optionally split into the printed
+ * groups of 2, 3, 5 and 2 by whitespace or the usual mask characters. A run of separators is
+ * tolerated between two groups, not just a single one, which is what the CPF, CNPJ, CAEPF and
+ * certidão regexes of this library do.
+ */
+export const CEI_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{5}[\s.\-/]*\d{2}$/;
 
 export const CEI_PATTERN = "00.000.00000/00";

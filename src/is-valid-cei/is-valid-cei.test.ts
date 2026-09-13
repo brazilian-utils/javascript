@@ -46,6 +46,11 @@ describe("isValidCei", () => {
 			expect(isValidCei("aa.583.00249/85")).toBe(false);
 		});
 
+		test("when a valid registration is followed or preceded by a letter", () => {
+			expect(isValidCei("11.583.00249/85a")).toBe(false);
+			expect(isValidCei("a11.583.00249/85")).toBe(false);
+		});
+
 		test("when every digit is the same", () => {
 			expect(isValidCei("000000000000")).toBe(false);
 			expect(isValidCei("111111111111")).toBe(false);

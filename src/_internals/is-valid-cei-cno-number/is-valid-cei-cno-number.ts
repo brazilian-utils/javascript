@@ -12,6 +12,11 @@ import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
  * that sum to its units part and takes the complement of the units digit of the result to 10,
  * mapping 10 back to 0.
  *
+ * The value has to be written as the 12 digits, optionally split into the printed groups of 2,
+ * 3, 5 and 2 by whitespace or the usual mask characters, a run of them between two groups
+ * included; anything else, a letter among the digits included, is rejected instead of being
+ * read past.
+ *
  * The Receita Federal does not publish the check digit rule of the CEI/CNO numbering, so the
  * calculation follows the reference implementations cited below, cross-checked against the CNO
  * open data of the Receita Federal.

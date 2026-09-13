@@ -138,6 +138,11 @@ describe("isValidCns", () => {
 			expect(isValidCns("800000000000001")).toBe(true);
 		});
 
+		test("for 898 0000 0004 3208, the only concrete CNS the ANVISA page prints (weighted sum 396)", () => {
+			expect(isValidCns("898000000043208")).toBe(true);
+			expect(isValidCns("898 0000 0004 3208")).toBe(true);
+		});
+
 		test("for a provisional CNS starting with 9", () => {
 			expect(isValidCns("900000000000008")).toBe(true);
 		});
