@@ -1,5 +1,7 @@
 import * as fc from "fast-check";
 
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { formatNfeKey } from "./format-nfe-key";
 
@@ -44,6 +46,14 @@ describe("formatNfeKey", () => {
 		expect(formatNfeKey([])).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey(true)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(-11)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(1.1)).toBe("");
+	});
+
+	test("should return an empty string for an object with a null prototype, which has no toString", () => {
+		expect(formatNfeKey(Object.create(null))).toBe("");
 	});
 
 	describe("properties", () => {
@@ -79,6 +89,10 @@ describe("formatNfeKey", () => {
 					},
 				),
 			);
+		});
+
+		test("should never throw for any garbage input", () => {
+			expectNeverThrows(formatNfeKey, anyGarbage);
 		});
 	});
 });

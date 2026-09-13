@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { PATTERN } from "./constants";
 
@@ -8,6 +8,10 @@ import { PATTERN } from "./constants";
  * digits separated by spaces, the form every auxiliary document prints it in: the DANFE of the
  * NF-e and the NFC-e, the DACTE of the CT-e, the CT-e OS and the GTV-e, the DAMDFE of the
  * MDF-e, the DABPE of the BP-e, the DANF3E of the NF3e and the DANFE-COM of the NFCom.
+ *
+ * Anything that is not a string is only read when it is a non-negative safe integer, so a value
+ * with no usable digit representation (a negative or fractional number, an object, a value with
+ * a null prototype) gives `""` instead of throwing.
  *
  * @param {string} value - The access key value to be formatted.
  * @returns {string} The formatted access key, e.g. "3520 0612 3456 ...".
@@ -22,4 +26,4 @@ import { PATTERN } from "./constants";
  * Manual de Orientação do Contribuinte (MOC) NF-e, "chave de acesso".
  */
 export const formatNfeKey = (value: string): string =>
-	isNullish(value) ? "" : format({ value: sanitizeToDigits(value), pattern: PATTERN });
+	isLookupCode(value) ? format({ value: sanitizeToDigits(value), pattern: PATTERN }) : "";
