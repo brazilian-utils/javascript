@@ -99,7 +99,7 @@ describe("isValidNfeKey", () => {
 			expect(isValidNfeKey(`00${VALID_B.slice(2)}`)).toBe(false);
 		});
 
-		test("when the mod is not 55, 57, 58 or 65", () => {
+		test("when the mod is not 55, 57, 58, 65 or 67", () => {
 			expect(isValidNfeKey(`${VALID_B.slice(0, 20)}99${VALID_B.slice(22)}`)).toBe(false);
 		});
 
@@ -157,6 +157,11 @@ describe("isValidNfeKey", () => {
 				name: "a model not in VALID_MODELS (99)",
 				key: "35200600000000000000990010000000011000000003",
 				expected: false,
+			},
+			{
+				name: "model 67, the CT-e OS of the Ajuste SINIEF 09/07",
+				key: "35170458716523000119670010000000121000123458",
+				expected: true,
 			},
 			{
 				name: "tpEmis 9, the upper boundary",

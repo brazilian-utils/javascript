@@ -4,7 +4,8 @@ import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
  * Validates a DF-e (Documento Fiscal eletrônico) access key (chave de acesso).
  *
  * Covers every document that shares the same 44 digit layout: NF-e (modelo 55), NFC-e
- * (modelo 65), CT-e (modelo 57) and MDF-e (modelo 58). Accepts whitespace between digit
+ * (modelo 65), CT-e (modelo 57), MDF-e (modelo 58) and CT-e OS (modelo 67, the Conhecimento de
+ * Transporte Eletrônico para Outros Serviços). Accepts whitespace between digit
  * groups (the common display mask) and the `NFe` prefix found in the `Id` attribute of the
  * document's XML (e.g. `Id="NFe3517...`), which is stripped before validation.
  *
@@ -18,6 +19,8 @@ import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
  *
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
  * Manual de Orientação do Contribuinte (MOC) NF-e, "chave de acesso".
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/aj_009_07
+ * Ajuste SINIEF 09/07, cláusula primeira, § 3.º, II, "b": the CT-e OS, modelo 67.
  * @see Based on: https://github.com/nfephp-org/sped-common/blob/master/src/Keys.php
  * NFePHP `Keys::build`/`Keys::isValid` reference implementation.
  * @see Based on: https://github.com/vmarchesin/br-validate-dfe-access-key
