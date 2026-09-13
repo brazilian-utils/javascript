@@ -52,7 +52,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * addBusinessDays(null, 1); // null
  * ```
  *
- * @see Based on: https://date-fns.org/docs/addBusinessDays Reference behavior for `amount: 0`,
+ * @see Based on: https://date-fns.org/docs/addBusinessDays
+ * Reference behavior for `amount: 0`,
  * for the positional `(date, amount)` argument order and for walking backwards on a negative
  * `amount`. The underlying holiday determination's official sources are cited in
  * `isBusinessDay`/`getHolidays`.

@@ -10,7 +10,7 @@ Install with `npm install --save @brazilian-utils/brazilian-utils` (also availab
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 ```
 
-Every util is also available as its own subpath for lazy-loading/code-splitting, `@brazilian-utils/brazilian-utils/<kebab-name>` (kebab-case of the function name, e.g. `isValidCpf` maps to `is-valid-cpf`) - most useful for `getCities`, the one util that embeds a large dataset:
+Every util is also available as its own subpath for lazy-loading/code-splitting, `@brazilian-utils/brazilian-utils/<kebab-name>` (kebab-case of the function name, e.g. `isValidCpf` maps to `is-valid-cpf`) - most useful for the utils that embed an official dataset (`getMunicipalities`, `getMunicipalityByCode`, `getMunicipality`, `getCities`, `isValidNcm`, `isValidCbo`, `getCbo`, `isValidCnae`, `getCnae`, `isValidCfop`, `getCfop`, `getBanks` and `getBankByCode`):
 
 ```javascript
 const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities');
@@ -20,7 +20,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 - [Getting started](https://brazilian-utils.com.br/getting-started.md): installation, runtime support, usage and bundle size/subpath imports
 - [Utilities](https://brazilian-utils.com.br/utilities.md): full English reference, one section per function, with signatures and examples
-- [Bundle size](https://brazilian-utils.com.br/getting-started.md#bundle-size): tree-shaking behavior and the `getCities`/subpath-import exception
+- [Bundle size](https://brazilian-utils.com.br/getting-started.md#bundle-size): tree-shaking behavior and the dataset-backed utils that are worth a subpath import
 
 ## Validators (isValid*)
 
@@ -35,7 +35,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidPhone](https://brazilian-utils.com.br/utilities.md#isvalidphone): Check if phone number (mobile or landline) is valid.
 - [isValidMobilePhone](https://brazilian-utils.com.br/utilities.md#isvalidmobilephone): Check if mobile phone number is valid.
 - [isValidLandlinePhone](https://brazilian-utils.com.br/utilities.md#isvalidlandlinephone): Check if landline phone number is valid.
-- [isValidServicePhone](https://brazilian-utils.com.br/utilities.md#isvalidservicephone): Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`), whose consolidated table is the Anexo of Ato Anatel nº 43.151/2004.
+- [isValidServicePhone](https://brazilian-utils.com.br/utilities.md#isvalidservicephone): Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total, so the shorter, extinct `0800` + 6 digit form is rejected), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`), whose consolidated table is the Anexo of Ato Anatel nº 43.151/2004.
 - [isValidLicensePlate](https://brazilian-utils.com.br/utilities.md#isvalidlicenseplate): Check if license plate is valid.
 - [isValidRenavam](https://brazilian-utils.com.br/utilities.md#isvalidrenavam): Check if RENAVAM (Registro Nacional de Veículos Automotores) is valid.
 - [isValidPis](https://brazilian-utils.com.br/utilities.md#isvalidpis): Check if PIS is valid.

@@ -33,7 +33,8 @@ export type IsValidPixKeyOptions = {
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
  * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
  * reference.
- * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api
+ * Pix (SPI) OpenAPI spec.
  */
 export const isValidPixKey = (value: string, options?: IsValidPixKeyOptions): boolean => {
 	const key = parsePixKey(value);

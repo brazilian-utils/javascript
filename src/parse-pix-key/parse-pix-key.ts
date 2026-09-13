@@ -84,7 +84,8 @@ const resolvePhoneKey = (trimmed: string): PixKey | null => {
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
  * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
  * reference.
- * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api
+ * Pix (SPI) OpenAPI spec.
  */
 export const parsePixKey = (value: string): PixKey | null => {
 	if (typeof value !== "string") return null;

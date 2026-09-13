@@ -49,7 +49,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * subBusinessDays(new Date(1900, 0, 2), 1); // null (the walk leaves the supported years)
  * ```
  *
- * @see Based on: https://date-fns.org/docs/subBusinessDays Reference behavior and the positional
+ * @see Based on: https://date-fns.org/docs/subBusinessDays
+ * Reference behavior and the positional
  * `(date, amount)` argument order. The underlying holiday determination's official sources are
  * cited in `isBusinessDay`/`getHolidays`.
  */

@@ -77,10 +77,14 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * parseIban("BR1500000000000010932840814P-2"); // null (hyphens are not part of an IBAN)
  * ```
  *
- * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013
- * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf Diretrizes de Implementação do IBAN no Brasil
- * @see Official: https://www.iso.org/standard/81090.html ISO 13616-1:2020 (IBAN structure)
- * @see Official: https://www.iso.org/standard/31531.html ISO/IEC 7064:2003 (MOD 97-10 check digit algorithm)
+ * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
+ * Circular BCB nº 3.625/2013
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf
+ * Diretrizes de Implementação do IBAN no Brasil
+ * @see Official: https://www.iso.org/standard/81090.html
+ * ISO 13616-1:2020 (IBAN structure)
+ * @see Official: https://www.iso.org/standard/31531.html
+ * ISO/IEC 7064:2003 (MOD 97-10 check digit algorithm)
  */
 export const parseIban = (value: string): Iban | null => {
 	if (!isValidIban(value)) return null;

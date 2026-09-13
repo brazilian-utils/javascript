@@ -39,7 +39,8 @@ export type ConvertNumberToWordsOptions = {
  * convertNumberToWords(NaN); // ""
  * ```
  *
- * @see Based on: https://github.com/savoirfairelinux/num2words `brutils` itself has no dedicated
+ * @see Based on: https://github.com/savoirfairelinux/num2words
+ * `brutils` itself has no dedicated
  * number-to-words module (its `currency.py` delegates the Portuguese numeral text to this
  * library's `pt_BR` locale); this is the reference for the numeral-word tables reproduced here.
  */

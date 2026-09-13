@@ -41,14 +41,15 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * isValidCaepf("41142260000101"); // true
  * isValidCaepf(29311861000184); // true
  * isValidCaepf("29311861000185"); // false (invalid check digits)
- * isValidCaepf("00000000000000"); // false (invalid check digits)
+ * isValidCaepf("00000000000000"); // false (repeated base digits)
  * isValidCaepf("00000000000012"); // false (repeated base digits)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
  * The registry's own page at the Receita Federal, which describes the cadastro but publishes
  * neither the 14 digit layout nor the check digit rule.
- * @see Based on: http://ghiorzi.org/DVnew.htm Description of the CAEPF layout and of the
+ * @see Based on: http://ghiorzi.org/DVnew.htm
+ * Description of the CAEPF layout and of the
  * shift of 12 applied to the check digit pair.
  * @see Based on: https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts
  * Reference implementation agreeing on the weights and on the shift.

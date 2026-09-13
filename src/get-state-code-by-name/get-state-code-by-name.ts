@@ -21,7 +21,8 @@ const normalizeName = (value: string): string =>
  * @returns {StateCode|null} The two-letter state code, or `null` when `name` does not match
  * any Brazilian state.
  *
- * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados (IBGE Localidades API)
+ * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados
+ * (IBGE Localidades API)
  *
  * @example
  * ```typescript

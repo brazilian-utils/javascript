@@ -12,8 +12,10 @@
  * caractere alfanumérico", while the ISO 13616 registry pattern `1!a` makes it a letter, and the
  * registry is the form followed here, so a digit in that position is deliberately rejected.
  * Only Brazilian IBANs follow this layout; every other ISO 13616 country has its own.
- * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013
- * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf Diretrizes de Implementação do IBAN no Brasil
+ * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
+ * Circular BCB nº 3.625/2013
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf
+ * Diretrizes de Implementação do IBAN no Brasil
  */
 export const BR_IBAN_LENGTH = 29;
 

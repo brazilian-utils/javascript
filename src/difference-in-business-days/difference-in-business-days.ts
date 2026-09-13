@@ -51,9 +51,11 @@ const toLocalDayTimestamp = (date: Date): number =>
  * differenceInBusinessDays(new Date(2100, 0, 5), new Date(2100, 0, 4)); // null (outside the supported years)
  * ```
  *
- * @see Based on: https://date-fns.org/docs/differenceInBusinessDays Documented behavior and the
+ * @see Based on: https://date-fns.org/docs/differenceInBusinessDays
+ * Documented behavior and the
  * positional `(laterDate, earlierDate)` argument order.
- * @see Based on: https://unpkg.com/date-fns@4.1.0/differenceInBusinessDays.js Source used to
+ * @see Based on: https://unpkg.com/date-fns@4.1.0/differenceInBusinessDays.js
+ * Source used to
  * verify the exact boundary treatment (`earlierDate` counted, `laterDate` excluded) and the sign
  * convention. The underlying holiday determination's official sources are cited in
  * `isBusinessDay`/`getHolidays`.

@@ -20,7 +20,8 @@ export type { State } from "../_internals/constants/states";
  * @returns {State|null} The matching `State` object, or `null` when `code` is not a known
  * IBGE UF code.
  *
- * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados (IBGE Localidades API, field `id`)
+ * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados
+ * (IBGE Localidades API, field `id`)
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
  *   (Manual de Orientação do Contribuinte, "chave de acesso" / "Tabela do IBGE")
  *

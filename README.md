@@ -5,9 +5,9 @@
 
 [📖 Documentation](https://brazilian-utils.com.br/#/getting-started)
 
-[![npm version](https://img.shields.io/npm/v/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![Downloads per month](https://img.shields.io/npm/dm/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![License: MIT](https://img.shields.io/github/license/brazilian-utils/javascript.svg)](LICENSE)
-[![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](CONTRIBUTING.md#zero-runtime-dependencies) [![Bundle size](https://img.shields.io/bundlephobia/minzip/@brazilian-utils/brazilian-utils?label=isValidCpf%20import%20%3C%201%20KB&color=brightgreen)](docs/getting-started.md#bundle-size) [![Tree-shakeable](https://badgen.net/bundlephobia/tree-shaking/@brazilian-utils/brazilian-utils)](docs/getting-started.md#bundle-size) [![TypeScript](https://img.shields.io/npm/types/@brazilian-utils/brazilian-utils)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils)
-[![Build Status](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml?query=branch%3Amain) [![Tests](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml?query=branch%3Amain) [![codecov](https://codecov.io/gh/brazilian-utils/javascript/branch/main/graph/badge.svg)](https://codecov.io/gh/brazilian-utils/javascript) [![Mutation tests](https://github.com/brazilian-utils/javascript/actions/workflows/mutation.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/mutation.yml?query=branch%3Amain) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/brazilian-utils/javascript/badge)](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript)
+[![npm version](https://img.shields.io/npm/v/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![Downloads per month](https://img.shields.io/npm/dm/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![License: MIT](https://img.shields.io/github/license/brazilian-utils/javascript.svg)](https://github.com/brazilian-utils/javascript/blob/main/LICENSE)
+[![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/brazilian-utils/javascript/blob/main/CONTRIBUTING.md#zero-runtime-dependencies) [![Bundle size](https://img.shields.io/bundlephobia/minzip/@brazilian-utils/brazilian-utils?label=isValidCpf%20import%20%3C%201%20KB&color=brightgreen)](https://brazilian-utils.com.br/#/getting-started?id=bundle-size) [![Tree-shakeable](https://badgen.net/bundlephobia/tree-shaking/@brazilian-utils/brazilian-utils)](https://brazilian-utils.com.br/#/getting-started?id=bundle-size) [![TypeScript](https://img.shields.io/npm/types/@brazilian-utils/brazilian-utils)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils)
+[![Build Status](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml?query=branch%3Amain) [![Tests](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml?query=branch%3Amain) [![codecov](https://codecov.io/gh/brazilian-utils/javascript/branch/main/graph/badge.svg)](https://codecov.io/gh/brazilian-utils/javascript) [![Mutation tests](https://github.com/brazilian-utils/javascript/actions/workflows/mutation.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/mutation.yml?query=branch%3Amain) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/brazilian-utils/javascript/badge)](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript)
 
 </div>
 
@@ -88,7 +88,7 @@ isValidCpf("1232454233345"); // false
 
 You can check a list of utilities [by clicking here](https://brazilian-utils.com.br/#/utilities).
 
-- The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](docs/getting-started.md#bundle-size).
+- The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](https://brazilian-utils.com.br/#/getting-started?id=bundle-size).
 
 ## Development
 
@@ -174,4 +174,4 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/brazilian-utils/javascript/blob/main/LICENSE)

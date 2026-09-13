@@ -50,7 +50,7 @@ generateCpf('SP'); // the 9th digit is 8, the SP região fiscal code
 
 ## isValidCnpj
 
-Check if CNPJ is valid. `options.version` (part of `IsValidCnpjOptions`) picks which format is accepted: `1` (default) the numeric-only format, `2` both the numeric and the alphanumeric one; any other value is read as `1`, the way `formatCnpj` and `parseCnpj` read it. The usual mask characters and whitespace are accepted in either version.
+Check if CNPJ is valid. `options.version` (part of `IsValidCnpjOptions`) picks which format is accepted: `1` (default) the numeric-only format, `2` both the numeric and the alphanumeric one; any other value is read as `1`, the way `formatCnpj` and `parseCnpj` read it. The usual mask characters and whitespace are accepted in either version. Version `2` has no reserved-value list, because the Receita Federal manual defines none for the alphanumeric format: a repeated-character alphanumeric base (all `A`s, say) that passes the checksum is accepted, while the numeric reserved numbers are rejected under version `1`.
 
 ```javascript
 import { isValidCnpj } from '@brazilian-utils/brazilian-utils';
@@ -317,7 +317,7 @@ parseNfeKey('invalid'); // null
 
 ## isValidEmail
 
-Check if email is valid.
+Check if email is valid. The accepted set is a practical subset of the WHATWG HTML [valid e-mail address](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address) definition, not of [RFC 5322](https://www.rfc-editor.org/rfc/rfc5322). The local part is limited to letters, digits and `_'+-.`, and may not start with a dot, end with a dot or an apostrophe, or contain two dots in a row. The domain must carry at least one dot, and each dotted label follows the WHATWG production `[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?`, so a label may neither start nor end with a hyphen nor exceed 63 characters; the final label is alphabetic and 2 to 63 letters long, so `user@example.c1` is rejected. Quoted local parts (`"john doe"@example.com`) and address literals (`john@[127.0.0.1]`) are rejected.
 
 ```javascript
 import { isValidEmail } from '@brazilian-utils/brazilian-utils';
@@ -397,7 +397,7 @@ isValidLandlinePhone('1130000000'); // true
 
 ## isValidServicePhone
 
-Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`), whose consolidated table is the Anexo of [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151). `112` and `911` are rejected: Anatel designates neither, and `911` is not even inside the `1N₂N₁` range art. 13 of [Resolução nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749) destines to public utility services, so the way handsets route them is a GSM convention rather than a numbering designation. Only the structure is checked, the number does not have to be assigned to anyone. Anatel withdrew the 4-digit codes instead of allocating them (art. 43 I of [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86) and art. 2º II of the Ato above both ordered them released), so only the conventional `300X` and `400X` roots are recognised: other "Número Único" carrier prefixes in market use, such as `4020` and `4062`, are out of scope and are rejected.
+Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total, so the shorter, extinct `0800` + 6 digit form is rejected), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`), whose consolidated table is the Anexo of [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151). `112` and `911` are rejected: Anatel designates neither, and `911` is not even inside the `1N₂N₁` range art. 13 of [Resolução nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749) destines to public utility services, so the way handsets route them is a GSM convention rather than a numbering designation. Only the structure is checked: the number does not have to be assigned to anyone, and the `0500` rule that encodes a donation amount in the last two digits is not enforced. Anatel withdrew the 4-digit codes instead of allocating them (art. 43 I of [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86) and art. 2º II of the Ato above both ordered them released), so only the conventional `300X` and `400X` roots are recognised: other "Número Único" carrier prefixes in market use, such as `4020` and `4062`, are out of scope and are rejected.
 
 ```javascript
 import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
@@ -490,7 +490,7 @@ isValidPis('12056412547'); // false
 
 ## formatPis
 
-Format PIS number. `options.pad` (part of `FormatPisOptions`) left-pads the value with zeros to the full 11 digits before masking.
+Format PIS number. `options.pad` (part of `FormatPisOptions`) left-pads the value with zeros to the full 11 digits before masking (default `false`).
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
@@ -511,7 +511,7 @@ parsePis('123.45678.90-1'); // 12345678901
 
 ## formatCep
 
-Format CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)). `options.pad` (part of `FormatCepOptions`) left-pads the value with zeros to the full 8 digits before masking.
+Format CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)). `options.pad` (part of `FormatCepOptions`) left-pads the value with zeros to the full 8 digits before masking (default `false`).
 
 ```javascript
 import { formatCep } from '@brazilian-utils/brazilian-utils';
@@ -532,7 +532,7 @@ parseCep('92500-000'); // 92500000
 
 ## getAddressInfoByCep
 
-Fetch address information for a given CEP using multiple providers. Defaults to `['viacep', 'brasilapi']`. The `'widenet'` provider is deprecated (its endpoint no longer responds) and excluded from the default list, but it can still be requested explicitly via `options.providers` (typed as `CepProvider[]`). The resolved address is typed as `AddressInfo`. A transient network failure is retried twice per provider, with a 250 ms linear backoff (250 ms, then 500 ms), so a provider that keeps failing is tried up to 3 times and adds about 750 ms before its own failure lands; an HTTP error status or a non-retryable failure is not retried. The providers are started together and raced with `Promise.any`, not queried one after the other, so those retries delay nothing for the other providers, only the moment an all-failed rejection can surface. An `options.providers` that names no known provider rejects with `GetAddressInfoByCepValidationError` ("Nenhum provedor válido especificado"): an empty array, an array of unknown names, and a value that is not an array at all, `null` included. With `providers: ['brasilapi']`, a CEP BrasilAPI does not know rejects with `GetAddressInfoByCepNotFoundError`, since BrasilAPI signals a miss with HTTP 404; any other error status is still a `GetAddressInfoByCepServiceError`.
+Fetch address information for a given CEP using multiple providers. Defaults to `['viacep', 'brasilapi']`. The `'widenet'` provider is deprecated (its endpoint no longer responds) and excluded from the default list, but it can still be requested explicitly via `options.providers` (typed as `CepProvider[]`). The resolved address is typed as `AddressInfo`. A transient network failure is retried twice per provider, with a 250 ms linear backoff (250 ms, then 500 ms), so a provider that keeps failing is tried up to 3 times and adds about 750 ms before its own failure lands; an HTTP error status or a non-retryable failure is not retried. The providers are started together and raced with `Promise.any`, not queried one after the other, so those retries delay nothing for the other providers, only the moment an all-failed rejection can surface. An `options.providers` that names no known provider rejects with `GetAddressInfoByCepValidationError` ("Nenhum provedor válido especificado"): an empty array, an array of unknown names, and a value that is not an array at all, `null` included. With `providers: ['brasilapi']`, a CEP BrasilAPI does not know rejects with `GetAddressInfoByCepNotFoundError`, since BrasilAPI signals a miss with HTTP 404; any other error status is still a `GetAddressInfoByCepServiceError`. All three extend `GetAddressInfoByCepError`, the base class of every error this util rejects with, so a single `catch` on it covers all of them.
 
 ```javascript
 import { getAddressInfoByCep } from '@brazilian-utils/brazilian-utils';
@@ -564,7 +564,7 @@ isValidProcessoJuridico('ab00020802520125150049'); // false (letters are rejecte
 
 ## formatProcessoJuridico
 
-Format the processo jurídico number according to [CNJ's definition](https://atos.cnj.jus.br/atos/detalhar/119) (mask `NNNNNNN-DD.AAAA.J.TR.OOOO`). `options.pad` (part of `FormatProcessoJuridicoOptions`) left-pads the value with zeros to the full 20 digits before masking.
+Format the processo jurídico number according to [CNJ's definition](https://atos.cnj.jus.br/atos/detalhar/119) (mask `NNNNNNN-DD.AAAA.J.TR.OOOO`). `options.pad` (part of `FormatProcessoJuridicoOptions`) left-pads the value with zeros to the full 20 digits before masking (default `false`).
 
 ```javascript
 import { formatProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -727,7 +727,7 @@ getBankByCode('999'); // null
 
 ## getBankByIspb
 
-Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Every SPB participant has an ISPB, but this dataset only carries the institutions that also have a COMPE code, so an ISPB whose institution has no COMPE code of its own returns `null`. Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
+Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Every SPB participant has an ISPB, but this dataset only carries the institutions that also have a COMPE code, so an ISPB whose institution has no COMPE code of its own returns `null`. Accepts both `string` and `number` input, with or without leading zeros, so `getBankByIspb(0)` finds the same bank as `getBankByIspb('00000000')`. The dataset is generated from that CSV, falling back to [BrasilAPI](https://brasilapi.com.br/api/banks/v1) when the Bacen request fails. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
 
 ```javascript
 import { getBankByIspb } from '@brazilian-utils/brazilian-utils';
@@ -958,7 +958,7 @@ getStateByIbgeCode(3.5); // null
 
 ## getStateCodeByName
 
-Get the two-letter code (sigla) of a Brazilian state given its full name. The match is accent-insensitive, case-insensitive and ignores leading/trailing whitespace, so `'sao paulo'`, `'SÃO PAULO'` and `'  São Paulo  '` all resolve to `'SP'`. Exports the `StateCode` type.
+Get the two-letter code (sigla) of a Brazilian state given its full name. The match is accent-insensitive, case-insensitive and ignores leading/trailing whitespace, so `'sao paulo'`, `'SÃO PAULO'` and `'  São Paulo  '` all resolve to `'SP'`. Every run of internal whitespace collapses into a single space too, so `'Rio  de  Janeiro'` resolves to `'RJ'`, while a name written without the space matches nothing (`'saopaulo'` is not `'São Paulo'`). Exports the `StateCode` type.
 
 ```javascript
 import { getStateCodeByName } from '@brazilian-utils/brazilian-utils';
@@ -1040,7 +1040,7 @@ getCities('SP');
 
 ## getHolidays
 
-Get Brazilian holidays for a given year. Returns national holidays and optionally state-specific holidays. Each holiday (typed as `Holiday`) has a `type` field (`HolidayType`: `"national"`, `"state"`, `"optional"` or `"religious"`). "Dia da Consciência Negra" (Nov 20) is a national holiday from 2024 onward (Lei nº 14.759/2023). Before that, MT and RJ still carry their own state-level entry named `"Consciência Negra"` on the same date. Results are memoized per `year`/`stateCode`, but each call still returns a fresh copy. An unknown/invalid `stateCode` is ignored, returning national holidays only; the lookup reads own properties only, so `"__proto__"`, `"constructor"` and the like are unknown state codes rather than a crash.
+Get Brazilian holidays for a given year. Returns national holidays and optionally state-specific holidays. Each holiday (typed as `Holiday`) has a `type` field (`HolidayType`: `"national"`, `"state"`, `"optional"` or `"religious"`). "Dia da Consciência Negra" (Nov 20) is a national holiday from 2024 onward (Lei nº 14.759/2023). Before that, several states still carry a state-level entry of their own on the same date: `"Consciência Negra"` in MT and RJ, `"Dia Estadual da Consciência Negra"` in AP and `"Dia da Consciência Negra"` in AM and SP. Results are memoized per `year`/`stateCode`, but each call still returns a fresh copy. An unknown/invalid `stateCode` is ignored, returning national holidays only; the lookup reads own properties only, so `"__proto__"`, `"constructor"` and the like are unknown state codes rather than a crash. Only the years 1900 through 2099 are supported, the range the business day utilities inherit; a year outside it returns `[]`.
 
 Only one state holiday per UF is a feriado civil under [Lei nº 9.093/1995](https://www.planalto.gov.br/ccivil_03/leis/l9093.htm), art. 1º, II, which authorises "a data magna do Estado fixada em lei estadual" in the singular; the other entries rest on ordinary state laws and are reported because they are observed in practice. Notable per-state rules:
 
@@ -1129,7 +1129,7 @@ generateCep(); // '92500000'
 
 ## formatCnh
 
-Format CNH. `options.pad` (part of `FormatCnhOptions`) left-pads the value with zeros to the full 11 digits before masking.
+Format CNH. `options.pad` (part of `FormatCnhOptions`) left-pads the value with zeros to the full 11 digits before masking (default `false`).
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
@@ -1140,7 +1140,7 @@ formatCnh('2650306461', { pad: true }); // 026503064-61
 
 ## isValidCnh
 
-Check if CNH is valid. Spaces, dots and hyphens around/between the digits are ignored, but any other character, a letter in particular, makes the value invalid.
+Check if CNH is valid. Spaces, dots and hyphens around/between the digits are ignored, but any other character, a letter in particular, makes the value invalid. A value whose 11 digits are all the same is rejected before the check digits are computed, so `'11111111111'` is invalid.
 
 ```javascript
 import { isValidCnh } from '@brazilian-utils/brazilian-utils';
@@ -1162,7 +1162,7 @@ generateCnh(); // '02650306461'
 
 ## parseCnh
 
-Remove CNH formatting, keep only digits, and cap the result to 11 digits.
+Remove CNH formatting, keep only digits, and cap the result to 11 digits. Returns `''` when there is no digit at all.
 
 ```javascript
 import { parseCnh } from '@brazilian-utils/brazilian-utils';
@@ -1295,7 +1295,7 @@ generatePhone('service'); // '08001234567' or '40041234'
 
 ## formatLicensePlate
 
-Format a license plate. Old Brazilian plates (`LLLNNNN`) are returned with a hyphen and Mercosul plates (`LLLNLNN`) stay normalized.
+Format a license plate. Old Brazilian plates (`LLLNNNN`) are returned with a hyphen and Mercosul plates (`LLLNLNN`) stay normalized. Partial values are formatted as far as they go, so it can also be used as an input mask, and a value that cannot start a valid plate gives `''`.
 
 ```javascript
 import { formatLicensePlate } from '@brazilian-utils/brazilian-utils';
@@ -1367,7 +1367,7 @@ generatePis(); // '91077906857'
 
 ## getMunicipality
 
-Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. A single function handles both directions, based on whether `options` has a `code` or a `municipalityName`/`uf`. `code` accepts both `string` and `number` input and must be exactly 7 digits, otherwise the function resolves to `null`. A `code` given as a number must be a non-negative integer: a sign and a decimal point are not digits, so `-3550308` and `355030.8` resolve to `null` instead of being read as `3550308`. Resolution is entirely offline, from a bundled IBGE dataset: no network request is made. The municipality name match ignores accents and casing. An unknown municipality, an unknown UF or invalid input all resolve to `null`. The `[name, uf]` pair is a fresh array on every call, so mutating the result never affects subsequent lookups.
+Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. A single function handles both directions, based on whether `options` has a `code` or a `municipalityName`/`uf`. `code` accepts both `string` and `number` input and must be exactly 7 digits, otherwise the function resolves to `null`. A `code` given as a number must be a non-negative integer: a sign and a decimal point are not digits, so `-3550308` and `355030.8` resolve to `null` instead of being read as `3550308`. Resolution is entirely offline, from a bundled IBGE dataset: no network request is made. The municipality name match ignores accents and casing, and every run of whitespace collapses into a single space, so `'sao  paulo'` matches `'São Paulo'` while a name written without the space does not; the casing is folded to upper case, the direction Unicode expands `'ß'` to `'SS'` in, so `'Paßos'` matches `'Passos'`. An unknown municipality, an unknown UF or invalid input all resolve to `null`. The `[name, uf]` pair is a fresh array on every call, so mutating the result never affects subsequent lookups.
 
 ```javascript
 import { getMunicipality } from '@brazilian-utils/brazilian-utils';
@@ -1633,7 +1633,7 @@ formatCns('89010001', { pad: true }); // '000 0000 8901 0001'
 
 ## isValidCertidao
 
-Check if the matrícula of a certidão de registro civil (nascimento, casamento, óbito and the other acts kept by a serventia de registro civil das pessoas naturais) is valid. The matrícula has 32 digits laid out as 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), and both check digits are modulus 11 with weights cycling from 2 to 10 and back through 0. Accepts the usual mask characters and whitespace between/around groups. The layout is the one [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) (Provimento CNJ nº 149/2023) currently publishes, with inciso II and §§ 1º and 3º to 5º in the redação of the Provimento CN nº 237/2026 and the rest of the article, § 2º included, in that of the Provimento CN nº 182/2024; the matrícula itself was instituted by the now revoked [Provimento CNJ nº 2/2009](https://atos.cnj.jus.br/atos/detalhar/1311) and got its digit structure from the also revoked [Provimento CNJ nº 3/2009, art. 7º](https://atos.cnj.jus.br/atos/detalhar/1310). The check digits are detailed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and implemented by [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) and [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
+Check if the matrícula of a certidão de registro civil (nascimento, casamento, óbito and the other acts kept by a serventia de registro civil das pessoas naturais) is valid. The matrícula has 32 digits laid out as 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), and both check digits are modulus 11 with the weights cycling from 2 to 10 and back through 0: the first pass starts at 2 over the 30 base digits, the second at 1 over the 31 digits that include the first check digit, and in both a remainder of 10 is read as 1. Accepts the usual mask characters and whitespace between/around groups. The layout is the one [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) (Provimento CNJ nº 149/2023) currently publishes, with inciso II and §§ 1º and 3º to 5º in the redação of the Provimento CN nº 237/2026 and the rest of the article, § 2º included, in that of the Provimento CN nº 182/2024; the matrícula itself was instituted by the now revoked [Provimento CNJ nº 2/2009](https://atos.cnj.jus.br/atos/detalhar/1311) and got its digit structure from the also revoked [Provimento CNJ nº 3/2009, art. 7º](https://atos.cnj.jus.br/atos/detalhar/1310). The check digits are detailed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and implemented by [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) and [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
 
 The serviço digits are fixed at `55`, the code [art. 473, III](https://atos.cnj.jus.br/atos/detalhar/5243) assigns to the registro civil das pessoas naturais, so a matrícula carrying any other pair in the ninth and tenth positions is rejected however good its check digits are. The book-type digit always has to name one of the nine book types (the same `CertidaoType` returned by `parseCertidao`), so a matrícula whose digit is `0` is rejected however good its check digits are, the same way `parseCertidao` returns `null` for it. `options.accept` (part of `IsValidCertidaoOptions`) narrows that to the listed types; it defaults to every type, and a value that is not an array falls back to that default. Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can hold.
 
@@ -1690,7 +1690,7 @@ The `Certidao` result carries:
 
 ## formatCertidao
 
-Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces. `options.pad` (part of `FormatCertidaoOptions`) left pads the value with zeros up to 32 digits. The mask is the one of [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243). Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can hold.
+Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces. `options.pad` (part of `FormatCertidaoOptions`) left pads the value with zeros up to 32 digits (default `false`). The mask is the one of [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243). Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can hold.
 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
@@ -1716,7 +1716,7 @@ isValidCei('000000000000'); // false (repeated digits)
 
 ## formatCei
 
-Format a CEI (Cadastro Específico do INSS) number according to the usual `00.000.00000/00` mask, the one the reference implementations of the check digit agree on (the Receita Federal does not print it). Formats progressively, as far as the digits given go, so it can also be used as an input mask. `options.pad` (part of `FormatCeiOptions`) left pads the value with zeros up to 12 digits.
+Format a CEI (Cadastro Específico do INSS) number according to the usual `00.000.00000/00` mask, the one the reference implementations of the check digit agree on (the Receita Federal does not print it). Formats progressively, as far as the digits given go, so it can also be used as an input mask. `options.pad` (part of `FormatCeiOptions`) left pads the value with zeros up to 12 digits (default `false`).
 
 ```javascript
 import { formatCei } from '@brazilian-utils/brazilian-utils';
@@ -1742,7 +1742,7 @@ isValidCno('000000000000'); // false (repeated digits)
 
 ## formatCno
 
-Format a CNO (Cadastro Nacional de Obras) number. The CNO kept the CEI's numbering, so both share the same 12 digit, `00.000.00000/00` mask, the one the reference implementations of the check digit agree on (the Receita Federal does not print it). Formats progressively, as far as the digits given go, so it can also be used as an input mask. `options.pad` (part of `FormatCnoOptions`) left pads the value with zeros up to 12 digits.
+Format a CNO (Cadastro Nacional de Obras) number. The CNO kept the CEI's numbering, so both share the same 12 digit, `00.000.00000/00` mask, the one the reference implementations of the check digit agree on (the Receita Federal does not print it). Formats progressively, as far as the digits given go, so it can also be used as an input mask. `options.pad` (part of `FormatCnoOptions`) left pads the value with zeros up to 12 digits (default `false`).
 
 ```javascript
 import { formatCno } from '@brazilian-utils/brazilian-utils';
@@ -1763,13 +1763,13 @@ isValidCaepf('293.118.610/001-84'); // true
 isValidCaepf('41142260000101'); // true
 isValidCaepf(29311861000184); // true
 isValidCaepf('29311861000185'); // false (invalid check digits)
-isValidCaepf('00000000000000'); // false (invalid check digits)
+isValidCaepf('00000000000000'); // false (repeated base digits)
 isValidCaepf('00000000000012'); // false (repeated base digits)
 ```
 
 ## formatCaepf
 
-Format a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number according to the usual `000.000.000/000-00` mask, the one the sources of the check digit rule agree on (the Receita Federal does not print it). Formats progressively, as far as the digits given go, so it can also be used as an input mask. `options.pad` (part of `FormatCaepfOptions`) left pads the value with zeros up to 14 digits.
+Format a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number according to the usual `000.000.000/000-00` mask, the one the sources of the check digit rule agree on (the Receita Federal does not print it). Formats progressively, as far as the digits given go, so it can also be used as an input mask. `options.pad` (part of `FormatCaepfOptions`) left pads the value with zeros up to 14 digits (default `false`).
 
 ```javascript
 import { formatCaepf } from '@brazilian-utils/brazilian-utils';
@@ -1882,7 +1882,7 @@ getCnae('0111abc301'); // null (not a documented form)
 
 ## isValidNcm
 
-Check if an NCM (Nomenclatura Comum do Mercosul) code exists in the current table published by Siscomex/MDIC. Accepts the code with or without the dotted mask, or as a number. A string is only read as a code when it is written in one of those forms (the 8 digits, or the `NNNN.NN.NN` mask, with a single separator between the groups and optional surrounding whitespace), and a number only when it is a non-negative safe integer.
+Check if an NCM (Nomenclatura Comum do Mercosul) code exists in the current table published by Siscomex/MDIC. Accepts the code with or without the dotted mask, or as a number. A string is only read as a code when it is written in one of those forms (the 8 digits, or the `NNNN.NN.NN` mask, with a single separator between the groups and optional surrounding whitespace), and a number only when it is a non-negative safe integer. A bare number cannot carry a leading zero, so a code starting with `0` has to be passed as a string: `isValidNcm(1012100)` is `false` while `isValidNcm('01012100')` is `true`.
 
 ```javascript
 import { isValidNcm } from '@brazilian-utils/brazilian-utils';

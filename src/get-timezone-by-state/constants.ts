@@ -10,9 +10,11 @@
  * UTC-02:00 offset is out of scope here.
  *
  * @see Official: https://www.iana.org/time-zones
- * @see Based on: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab (IANA tz
+ * @see Based on: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab
+ * (IANA tz
  * database data file, `BR` rows)
- * @see Based on: https://en.wikipedia.org/wiki/Time_in_Brazil Used to confirm the state
+ * @see Based on: https://en.wikipedia.org/wiki/Time_in_Brazil
+ * Used to confirm the state
  * coverage of each zone.
  */
 export const STATE_TIMEZONES: Record<string, string> = {

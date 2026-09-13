@@ -14,7 +14,8 @@
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
  * The registry's own page at the Receita Federal, which describes the cadastro but publishes
  * neither the 14 digit layout nor the check digit rule.
- * @see Based on: http://ghiorzi.org/DVnew.htm Description of the CAEPF layout and of the
+ * @see Based on: http://ghiorzi.org/DVnew.htm
+ * Description of the CAEPF layout and of the
  * shift of 12 applied to the check digit pair.
  * @see Based on: https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts
  * Reference implementation agreeing on the weights and on the shift.
