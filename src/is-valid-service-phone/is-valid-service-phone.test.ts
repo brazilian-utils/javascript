@@ -58,6 +58,11 @@ describe("isValidServicePhone", () => {
 			expect(isValidServicePhone("200")).toBe(false);
 			expect(isValidServicePhone("999")).toBe(false);
 		});
+
+		test("for the handset emergency aliases 112 and 911, which Anatel designates in neither the Anexo of Ato nº 43.151/2004 nor Ato nº 12.712/2024 (and 911 falls outside the 1N₂N₁ range Resolução nº 749/2022 art. 13 destines to public utility services)", () => {
+			expect(isValidServicePhone("112")).toBe(false);
+			expect(isValidServicePhone("911")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -93,8 +98,8 @@ describe("isValidServicePhone", () => {
 		test("for the public utility codes", () => {
 			expect(isValidServicePhone("100")).toBe(true);
 			expect(isValidServicePhone("102")).toBe(true);
-			expect(isValidServicePhone("112")).toBe(true);
 			expect(isValidServicePhone("136")).toBe(true);
+			expect(isValidServicePhone("141")).toBe(true);
 			expect(isValidServicePhone("156")).toBe(true);
 			expect(isValidServicePhone("180")).toBe(true);
 			expect(isValidServicePhone("181")).toBe(true);

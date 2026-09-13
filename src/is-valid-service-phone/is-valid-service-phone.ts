@@ -23,12 +23,17 @@ const UTILITY_CODES: readonly string[] = SERVICE_PHONE_UTILITY_CODES;
  * - the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900`, each followed by
  *   7 digits (11 in total, the shorter, extinct `0800` + 6 form is rejected);
  * - the abbreviated `300X` and `400X` numbers, followed by 4 digits, e.g. `3003-1234`. Anatel
- *   publishes no allocation for these, so the accepted roots are the conventional ones. Only
- *   `300X` and `400X` are recognised: other "Número Único" carrier prefixes in market use, such
- *   as `4020` and `4062`, are out of scope and are rejected;
+ *   withdrew the 4-digit codes rather than allocating them (Resolução nº 86/1998 art. 43 I and
+ *   Ato nº 43.151/2004 art. 2º II both ordered them released), so the accepted roots are the
+ *   conventional ones the market settled on. Only `300X` and `400X` are recognised: other
+ *   "Número Único" carrier prefixes in market use, such as `4020` and `4062`, are out of scope
+ *   and are rejected;
  * - the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated,
- *   e.g. `190` and `192`. Undesignated codes in the `1XX` range are rejected. `112` and `911`
- *   are accepted too: Anatel lists them alongside the `1XX` codes as mobile-only aliases of `190`.
+ *   e.g. `190` and `192`, the consolidated table being the Anexo of Ato nº 43.151/2004.
+ *   Undesignated codes in the `1XX` range are rejected, and so are `112` and `911`: Anatel
+ *   designates neither, and `911` is not even inside the `1N₂N₁` range Resolução nº 749/2022
+ *   art. 13 destines to public utility services. Handsets route both by GSM convention, which
+ *   is not a numbering designation.
  *
  * Only the structure is checked: the number does not have to be assigned to anyone, and the
  * `0500` rule that encodes a donation amount in the last two digits is not enforced.
@@ -45,6 +50,9 @@ const UTILITY_CODES: readonly string[] = SERVICE_PHONE_UTILITY_CODES;
  * ```
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
+ * Resolução Anatel nº 749/2022, arts. 13, 14, 18 and 28.
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151
+ * Ato Anatel nº 43.151/2004, whose Anexo designates the 3-digit public utility codes.
  */
 export const isValidServicePhone = (value: string): boolean => {
 	if (typeof value !== "string") return false;

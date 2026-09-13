@@ -16,20 +16,33 @@
  *   library does not enforce, since it validates structure only.
  * - **Código de Acesso a Serviços de Utilidade Pública (SUP)**, art. 13-14: 3 digits, with the
  *   whole `1N₂N₁` range destined to SUP and every other 3-digit series held in reserva técnica.
- *   Individual codes are designated one by one by Anatel Ato, so the codes below are the
- *   consolidated list Anatel publishes, not the full `100`-`199` range (see `isValidServicePhone`
- *   for the `112`/`911` mobile-alias note).
+ *   Individual codes are designated one by one by Anatel Ato, the consolidated table being the
+ *   Anexo of Ato nº 43.151/2004, so the codes below are the ones Anatel has designated rather
+ *   than the full `100`-`199` range. `112` and `911` are *not* among them: `911` is not even
+ *   inside the `1N₂N₁` address space art. 13 destines to SUP, and neither code appears in the
+ *   Anexo of Ato nº 43.151/2004 or in Ato nº 12.712/2024. Their routing on Brazilian handsets is
+ *   a GSM convention of the handset, not an Anatel designation, so both are rejected here.
  * - **The abbreviated `300X`/`400X` numbers** (`3003-1234`, `4004-1234`) are *not* a regulatory
  *   category at all. They are ordinary 8-digit geographic STFC user numbers (art. 11 assigns
  *   `2`-`6` as the first digit of a fixed-line number) whose 4-digit prefix a carrier licenses
  *   in many DDDs at once and points at a single customer, marketed as "Número Único". Anatel
- *   neither names them nor publishes an allocated list, so the roots below are the conventional
- *   ones rather than an official allocation.
+ *   withdrew the 4-digit special service codes instead of allocating them: Resolução nº 86/1998
+ *   art. 43 I, in the wording of Resolução nº 229/2000, ordered the prestadoras de STFC to
+ *   release every 4-character code in use, and Ato nº 43.151/2004 art. 2º II repeated the order
+ *   with a 180-day deadline. So the roots below are the conventional ones the market settled on,
+ *   not an official allocation.
  *
  * Display formatting is convention too: no Anatel document specifies one. `0800 123 4567` (4-3-4)
  * is the grouping used on gov.br, and `4004-1234` the one carriers print.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
+ * Resolução Anatel nº 749/2022, the Regulamento de Numeração in force.
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151
+ * Ato Anatel nº 43.151/2004, whose Anexo is the consolidated SUP designation table.
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2024/1953-ato-12712
+ * Ato Anatel nº 12.712/2024, the CNG designation table (items 10.6 and 12.1).
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86
+ * Resolução Anatel nº 86/1998 (revoked), art. 43 I: the release of the 4-character codes.
  */
 
 export const SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES = [
@@ -60,7 +73,6 @@ export const SERVICE_PHONE_UTILITY_CODES = [
 	"105",
 	"106",
 	"111",
-	"112",
 	"115",
 	"116",
 	"117",
@@ -78,6 +90,7 @@ export const SERVICE_PHONE_UTILITY_CODES = [
 	"135",
 	"136",
 	"138",
+	"141",
 	"142",
 	"145",
 	"146",
@@ -117,5 +130,4 @@ export const SERVICE_PHONE_UTILITY_CODES = [
 	"197",
 	"198",
 	"199",
-	"911",
 ] as const;
