@@ -763,7 +763,6 @@ describe("isValidIe", () => {
 			["AC", "01.004.823/001-12"],
 			["AL", "240000048"],
 			["AP", "030123459"],
-			["AM", "99.999.999-0"],
 			["BA", "123456-63"],
 			["BA", "612345-57"],
 			["BA", "1000003-06"],
@@ -772,11 +771,11 @@ describe("isValidIe", () => {
 			["GO", "10.987.654-7"],
 			["MA", "120000385"],
 			["MG", "062.307.904/0081"],
-			["MS", "280000006"],
 			["MT", "0013000001-9"],
 			["PA", "15999999-5"],
 			["PA", "75000002-3"],
 			["PB", "06000001-5"],
+			["PE", "0321418-40"],
 			["PI", "012345679"],
 			["PR", "123.45678-50"],
 			["RN", "20.040.040-1"],
@@ -802,6 +801,17 @@ describe("isValidIe", () => {
 
 		test("should accept every worked example the SINTEGRA pages print", () => {
 			for (const [stateCode, ie] of publishedExamples) {
+				expect(isValidIe(stateCode, ie)).toBe(true);
+			}
+		});
+
+		const derivedFromPublishedFormula: [StateCode, string][] = [
+			["AM", "99.999.999-0"],
+			["MS", "280000006"],
+		];
+
+		test("should accept the values derived from the formulas the AM and MS pages publish", () => {
+			for (const [stateCode, ie] of derivedFromPublishedFormula) {
 				expect(isValidIe(stateCode, ie)).toBe(true);
 			}
 		});

@@ -63,6 +63,10 @@ describe("isValidBoleto", () => {
 		test("when is a boleto valid with mask", () => {
 			expect(isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656")).toBe(true);
 		});
+
+		test("when the código de moeda is not 9 (same fixture as the boleto valid without mask, with the moeda in barcode position 4 changed to 7 and both the campo 1 and the DV geral recalculated): Carta-Circular BCB nº 2.926/2000 fixes that position at 9, and the leniency kept from 2.3.0 accepts any other digit", () => {
+			expect(isValidBoleto("00170000010114971860168524522114275860000102656")).toBe(true);
+		});
 	});
 
 	describe("arrecadação", () => {

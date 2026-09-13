@@ -27,6 +27,13 @@ describe("formatVoterId", () => {
 		expect(formatVoterId("1234567880299")).toBe("1234 5678 8 02 99");
 	});
 
+	it("should drop the digits past the last slot of the pattern", () => {
+		expect(formatVoterId("1234567880191")).toBe("1234 5678 8 01 91");
+		expect(formatVoterId("12345678801912")).toBe("1234 5678 8 01 91");
+		expect(formatVoterId("123456788019123")).toBe("1234 5678 8 01 91");
+		expect(formatVoterId("12345678803991")).toBe("1234 5678 80 39");
+	});
+
 	it("should keep the 12-digit grouping for a 13-digit value whose UF cannot carry 9 sequential digits", () => {
 		expect(formatVoterId("1234567880399")).toBe("1234 5678 80 39");
 	});
