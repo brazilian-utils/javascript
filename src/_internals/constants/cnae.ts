@@ -1518,3 +1518,9 @@ export const CNAE_SUBCLASSES: Record<string, string> = {
 	"0990402": "ATIVIDADES DE APOIO À EXTRAÇÃO DE MINERAIS METÁLICOS NÃO FERROSOS",
 	"0990403": "ATIVIDADES DE APOIO À EXTRAÇÃO DE MINERAIS NÃO METÁLICOS",
 };
+
+/**
+ * Shape a CNAE subclass code has to be written in: the 7 digits, optionally split into the
+ * printed `NNNN-N/NN` groups by whitespace or the usual mask characters.
+ */
+export const CNAE_FORMAT_REGEX = /^\d{4}[\s.\-/]*\d[\s.\-/]*\d{2}$/;

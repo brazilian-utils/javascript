@@ -1,4 +1,5 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/cities";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { removeAccents } from "../remove-accents/remove-accents";
@@ -29,6 +30,8 @@ let codeIndex: Map<string, [string, string]> | undefined;
 const normalizeName = (value: string): string => removeAccents(value).trim().toUpperCase();
 
 const getMunicipalityByCode = (code: string | number): [string, string] | null => {
+	if (!isLookupCode(code)) return null;
+
 	if (!codeIndex) {
 		codeIndex = new Map();
 
@@ -39,10 +42,9 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 		}
 	}
 
-	if (typeof code !== "string" && typeof code !== "number") return null;
-
 	// `Map#get` never throws and simply misses for a key of the wrong shape (a malformed, too
-	// short or too long code), so there is no need to pre-validate `code` any further.
+	// short or too long code), so only the sign and the decimal point of a numeric `code`, which
+	// `sanitizeToDigits` would silently drop, have to be pre-validated above.
 	return codeIndex.get(sanitizeToDigits(code)) ?? null;
 };
 
@@ -74,7 +76,9 @@ const getMunicipalityCodeByName = ({
  *
  * Given a `code` it resolves the municipality name and its UF; given a `municipalityName`
  * and a `uf` it resolves the IBGE code. The name lookup ignores accents and casing.
- * Validation failures and unknown municipalities are reported as `null`.
+ * Validation failures and unknown municipalities are reported as `null`. A `code` given as a
+ * number must be a non-negative integer: a sign and a decimal point are not digits, so
+ * `-3550308` and `355030.8` are rejected instead of being read as `3550308`.
  *
  * @param {GetMunicipalityOptions} options - Either `{ code }` or `{ municipalityName, uf }`.
  * @returns {Promise<[string, string] | string | null>} The `[name, uf]` pair when looking up

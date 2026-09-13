@@ -57,6 +57,24 @@ describe("isValidCbo", () => {
 		expect(isValidCbo("abcdef")).toBe(false);
 	});
 
+	it("should accept the separators the mask uses between the two groups", () => {
+		expect(isValidCbo("2124 05")).toBe(true);
+		expect(isValidCbo("2124.05")).toBe(true);
+		expect(isValidCbo("2124/05")).toBe(true);
+	});
+
+	it("should return false for a string that is not written in a documented form", () => {
+		expect(isValidCbo("2124abc05")).toBe(false);
+		expect(isValidCbo("21-2405")).toBe(false);
+		expect(isValidCbo("+212405")).toBe(false);
+	});
+
+	it("should return false for a number that is not a non-negative safe integer", () => {
+		expect(isValidCbo(-212_405)).toBe(false);
+		expect(isValidCbo(2124.05)).toBe(false);
+		expect(isValidCbo(2 ** 53)).toBe(false);
+	});
+
 	describe("properties", () => {
 		const codeArbitrary = fc.constantFrom(...Object.keys(CBO_TITLES));
 

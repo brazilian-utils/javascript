@@ -1,3 +1,4 @@
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { mod10 } from "../_internals/mod10/mod10";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { MAX_LENGTH, MIN_LENGTH } from "./constants";
@@ -10,6 +11,11 @@ import { MAX_LENGTH, MIN_LENGTH } from "./constants";
  * ISO/IEC 7812-1 caps the PAN at 19) and the Luhn check digit; it performs no brand detection
  * (Visa, Mastercard, Amex...), issuer range lookup or expiration/CVV checks.
  *
+ * A number is only accepted when it is a non-negative safe integer: a card number above
+ * `Number.MAX_SAFE_INTEGER` (2^53 - 1, 16 digits) has already been rounded to a different
+ * number by the time it arrives, and a negative one is not a PAN, so both are rejected rather
+ * than validated as digits the caller never wrote. Pass a longer PAN as a string.
+ *
  * @param {string|number} value - The card number to be validated.
  * @returns {boolean} True when `value` sanitizes to 12-19 digits ending in a valid Luhn check digit.
  *
@@ -21,6 +27,7 @@ import { MAX_LENGTH, MIN_LENGTH } from "./constants";
  * isValidCreditCard("4111 1111 1111 1111"); // true (spaced mask)
  * isValidCreditCard("4111111111111112"); // false (bad check digit)
  * isValidCreditCard("123456789"); // false (too short)
+ * isValidCreditCard(4111111111111111111); // false (above 2^53 - 1, pass it as a string)
  * ```
  *
  * ISO/IEC 7812-1 (issuer identification numbers) caps the PAN at 19 digits but sets no
@@ -29,7 +36,7 @@ import { MAX_LENGTH, MIN_LENGTH } from "./constants";
  * @see Official: https://www.iso.org/standard/70484.html
  */
 export const isValidCreditCard = (value: string | number): boolean => {
-	if (typeof value !== "string" && typeof value !== "number") return false;
+	if (!isLookupCode(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 

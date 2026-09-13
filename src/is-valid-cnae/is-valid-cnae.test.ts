@@ -57,6 +57,23 @@ describe("isValidCnae", () => {
 		expect(isValidCnae("abcdefg")).toBe(false);
 	});
 
+	it("should accept the separators the mask uses between the three groups", () => {
+		expect(isValidCnae("6201 5 01")).toBe(true);
+		expect(isValidCnae("6201.5.01")).toBe(true);
+	});
+
+	it("should return false for a string that is not written in a documented form", () => {
+		expect(isValidCnae("0111abc301")).toBe(false);
+		expect(isValidCnae("62-01501")).toBe(false);
+		expect(isValidCnae("+6201501")).toBe(false);
+	});
+
+	it("should return false for a number that is not a non-negative safe integer", () => {
+		expect(isValidCnae(-111_301)).toBe(false);
+		expect(isValidCnae(6201.501)).toBe(false);
+		expect(isValidCnae(2 ** 53)).toBe(false);
+	});
+
 	describe("properties", () => {
 		const codeArbitrary = fc.constantFrom(...Object.keys(CNAE_SUBCLASSES));
 
