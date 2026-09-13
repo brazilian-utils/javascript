@@ -6,7 +6,7 @@ import { isValidIban } from "../is-valid-iban/is-valid-iban";
 import { parseIban, type Iban } from "./parse-iban";
 
 const findBrazilianIban = (body: string): string => {
-	for (let pair = 0; pair < 97; pair++) {
+	for (let pair = 2; pair <= 98; pair++) {
 		const candidate = `BR${String(pair).padStart(2, "0")}${body}`;
 
 		if (isValidIban(candidate)) return candidate;
@@ -113,6 +113,11 @@ describe("parseIban", () => {
 
 		test("when the account type letter does not match the check digits", () => {
 			expect(parseIban("BR1500000000000010932840814X2")).toBeNull();
+		});
+
+		test("when it carries a character outside the print format", () => {
+			expect(parseIban("BR1500000000000010932840814P-2")).toBeNull();
+			expect(parseIban("BR15.0000.0000.0000.1093.2840.814P2")).toBeNull();
 		});
 
 		test("when it is an empty string", () => {

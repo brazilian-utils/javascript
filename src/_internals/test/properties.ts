@@ -163,10 +163,11 @@ export const expectCaseInsensitive = (
  * Asserts `parse` undoes `format` for every value the arbitrary produces.
  * @param {Function} format The formatter under test.
  * @param {Function} parse The parser that must undo it.
- * @param {fc.Arbitrary<T>} arbitrary The values to feed them.
+ * @param {fc.Arbitrary<T>} arbitrary The values to feed them. Only primitives, so the round-trip
+ * is compared by value and not by reference.
  * @returns {void} Nothing.
  */
-export const expectRoundTrip = <T>(
+export const expectRoundTrip = <T extends number | string>(
 	format: (value: T) => string,
 	parse: (value: string) => T,
 	arbitrary: fc.Arbitrary<T>,

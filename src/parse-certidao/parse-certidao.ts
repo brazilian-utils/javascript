@@ -30,7 +30,7 @@ export type Certidao = {
 	registryCns: string;
 	/** Acervo the book belongs to: "01" the serventia's own, "02" a collection it absorbed. */
 	acervo: string;
-	/** Service rendered by the serventia, "55" for registro civil das pessoas naturais. */
+	/** Service rendered by the serventia, always "55", the registro civil das pessoas naturais. */
 	service: string;
 	/** Four digit year the act was recorded. */
 	year: number;
@@ -52,7 +52,8 @@ export type Certidao = {
  * Parses the matrícula of a certidão de registro civil into its fields.
  *
  * Accepts the same input forms as `isValidCertidao` and returns `null` when the matrícula is
- * not valid, which includes a book code that is not one of the nine books defined by the
+ * not valid, which includes a serviço other than the `55` art. 473, III fixes for the registro
+ * civil das pessoas naturais, and a book code that is not one of the nine books defined by the
  * Provimento, since an unknown book cannot be named.
  *
  * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can

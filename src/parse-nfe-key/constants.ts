@@ -1,5 +1,10 @@
-/** Valid `mod` (modelo do documento) values shared by every DF-e access key. */
-export const VALID_MODELS = ["55", "57", "58", "65"] as const;
+/**
+ * Valid `mod` (modelo do documento) values shared by every DF-e access key: 55 NF-e, 57 CT-e,
+ * 58 MDF-e, 65 NFC-e and 67 CT-e OS (Conhecimento de Transporte Eletrônico para Outros
+ * Serviços), the model the CT-e MOC assigns to the transporte de pessoas, valores e excesso de
+ * bagagem, which shares the same 44 digit key.
+ */
+export const VALID_MODELS = ["55", "57", "58", "65", "67"] as const;
 
 /**
  * The `tpEmis` (forma de emissão) codes the MOC assigns: 1 normal, 2 contingência FS-IA,

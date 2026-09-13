@@ -94,14 +94,22 @@ describe("getStates", () => {
 
 describe("getStates types", () => {
 	test("should take no arguments and return an array of State", () => {
-		expectTypeOf(getStates).parameter(0).toBeUndefined();
+		expectTypeOf(getStates).parameters.toEqualTypeOf<[]>();
 		expectTypeOf(getStates).returns.toEqualTypeOf<State[]>();
-		expectTypeOf<State>().toEqualTypeOf<{
-			readonly code: StateCode;
-			readonly name: StateName;
-			readonly regionCode: "N" | "NE" | "CO" | "SE" | "S";
-			readonly regionName: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
-			readonly ibgeCode: number;
-		}>();
+		expectTypeOf<State["code"]>().toEqualTypeOf<StateCode>();
+		expectTypeOf<State["name"]>().toEqualTypeOf<StateName>();
+		expectTypeOf<State["regionCode"]>().toEqualTypeOf<"N" | "NE" | "CO" | "SE" | "S">();
+		expectTypeOf<State["regionName"]>().toEqualTypeOf<
+			"Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul"
+		>();
+	});
+
+	test("should tie every field of a state to its code, so narrowing by code narrows the rest", () => {
+		expectTypeOf<Extract<State, { code: "SP" }>["name"]>().toEqualTypeOf<"São Paulo">();
+		expectTypeOf<Extract<State, { code: "SP" }>["regionCode"]>().toEqualTypeOf<"SE">();
+		expectTypeOf<Extract<State, { code: "SP" }>["regionName"]>().toEqualTypeOf<"Sudeste">();
+		expectTypeOf<Extract<State, { code: "SP" }>["ibgeCode"]>().toEqualTypeOf<35>();
+		expectTypeOf<Extract<State, { code: "AC" }>["name"]>().toEqualTypeOf<"Acre">();
+		expectTypeOf<Extract<State, { code: "SP"; name: "Acre" }>>().toEqualTypeOf<never>();
 	});
 });

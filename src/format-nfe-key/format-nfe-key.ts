@@ -4,8 +4,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 import { PATTERN } from "./constants";
 
 /**
- * Formats a DF-e (NF-e, NFC-e, CT-e or MDF-e) access key (chave de acesso) into groups of 4
- * digits separated by spaces, the common display form printed on the DANFE.
+ * Formats a DF-e (NF-e, NFC-e, CT-e, MDF-e or CT-e OS) access key (chave de acesso) into
+ * groups of 4 digits separated by spaces, the common display form printed on the DANFE.
  *
  * @param {string} value - The access key value to be formatted.
  * @returns {string} The formatted access key, e.g. "3520 0612 3456 ...".

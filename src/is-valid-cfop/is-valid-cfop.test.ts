@@ -37,6 +37,21 @@ describe("isValidCfop", () => {
 		expect(isValidCfop("0000")).toBe(false);
 	});
 
+	it("should return false for a group heading (a code ending in 00)", () => {
+		expect(isValidCfop("1100")).toBe(false);
+		expect(isValidCfop("5300")).toBe(false);
+	});
+
+	it("should return false for a subgroup heading (a code ending in 50)", () => {
+		expect(isValidCfop("1150")).toBe(false);
+		expect(isValidCfop("5350")).toBe(false);
+	});
+
+	it("should still accept the operable codes a subgroup heading heads (1151 and 5351)", () => {
+		expect(isValidCfop("1151")).toBe(true);
+		expect(isValidCfop("5351")).toBe(true);
+	});
+
 	it("should return false for a code with a length different from 4", () => {
 		expect(isValidCfop("510")).toBe(false);
 		expect(isValidCfop("51020")).toBe(false);

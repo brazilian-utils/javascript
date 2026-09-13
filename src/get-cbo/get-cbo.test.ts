@@ -64,6 +64,17 @@ describe("getCbo", () => {
 		expect(getCbo("      ")).toBeNull();
 	});
 
+	it("should return null for a string that is not written in a documented form", () => {
+		expect(getCbo("2124abc05")).toBeNull();
+		expect(getCbo("21-2405")).toBeNull();
+	});
+
+	it("should return null for a number that is not a non-negative safe integer", () => {
+		expect(getCbo(-212_405)).toBeNull();
+		expect(getCbo(2124.05)).toBeNull();
+		expect(getCbo(2 ** 53)).toBeNull();
+	});
+
 	describe("properties", () => {
 		const codeArbitrary = fc.constantFrom(...Object.keys(CBO_TITLES));
 

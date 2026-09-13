@@ -63,6 +63,12 @@ const main = async (): Promise<void> => {
  * @see Official: http://www.mtecbo.gov.br/cbosite/pages/downloads.jsf
  */
 export const CBO_TITLES: Record<string, string> = ${JSON.stringify(sorted)};
+
+/**
+ * Shape a CBO code has to be written in: the 6 digits, optionally split into the printed
+ * groups of 4 and 2 by whitespace or the usual mask characters.
+ */
+export const CBO_FORMAT_REGEX = /^\\d{4}[\\s.\\-/]*\\d{2}$/;
 `,
 	);
 };

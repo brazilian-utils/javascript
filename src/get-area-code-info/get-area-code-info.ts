@@ -1,6 +1,6 @@
-import { AREA_CODE_STATES } from "../_internals/constants/area-codes";
+import { AREA_CODE_SECONDARY_STATES, AREA_CODE_STATES } from "../_internals/constants/area-codes";
 import { DATA, type State, type StateCode, type StateName } from "../_internals/constants/states";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** The state, and the region it belongs to, that `getAreaCodeInfo` returns for a DDD. */
@@ -13,34 +13,51 @@ export type AreaCodeInfo = {
 	stateName: StateName;
 	/** The full name of the region the state belongs to, e.g. `"Sudeste"`. */
 	region: State["regionName"];
+	/**
+	 * Every state the DDD serves, the primary `stateCode` first, e.g. `["SP"]` for 11 and
+	 * `["DF", "GO"]` for 61.
+	 */
+	stateCodes: StateCode[];
 };
 
 /**
  * Retrieves the state (and its region) a Brazilian DDD (area code) belongs to.
  *
- * @param {string|number} areaCode - The DDD to look up. Accepts a string or a number, with any
- * non-digit characters stripped before matching.
+ * `stateCode` is always a single state: the one that holds all but a handful of the DDD's
+ * municipalities. Four DDDs straddle a state border, and for those `stateCodes` lists the
+ * other states too. DDD 61 is the widest of them, serving the Distrito Federal and the twelve
+ * Goiás municipalities of the Entorno do Distrito Federal, so its `stateCode` is `"DF"` and
+ * its `stateCodes` is `["DF", "GO"]`. The other three are 42 (`["PR", "SC"]`, for Porto
+ * União), 47 (`["SC", "PR"]`, for Rio Negro) and 49 (`["SC", "PR"]`, for Barracão).
+ *
+ * A `areaCode` given as a number must be a non-negative integer: a sign and a decimal point
+ * are not digits, so `-11` and `1.1` are rejected instead of being read as `11`.
+ *
+ * @param {string|number} areaCode - The DDD to look up. Accepts a string or a non-negative
+ * integer number, with any non-digit characters stripped before matching.
  * @returns {AreaCodeInfo|null} The area code info, or `null` when `areaCode` is not one of the
  * 67 DDDs in use under the Plano Geral de Numeração.
  *
  * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
- * page below lists the codes actually allocated. The BrasilAPI DDD endpoint was used to verify
- * the code-to-state mapping.
+ * page below lists the codes actually allocated and links to the Anexo of Resolução Anatel
+ * nº 263/2001, which gives the Código Nacional of every municipality.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
  * @see Based on: https://brasilapi.com.br/docs#tag/DDD
  *
  * @example
  * ```typescript
- * getAreaCodeInfo("11"); // { areaCode: 11, stateCode: "SP", stateName: "São Paulo", region: "Sudeste" }
- * getAreaCodeInfo(21); // { areaCode: 21, stateCode: "RJ", stateName: "Rio de Janeiro", region: "Sudeste" }
- * getAreaCodeInfo("68"); // { areaCode: 68, stateCode: "AC", stateName: "Acre", region: "Norte" }
+ * getAreaCodeInfo("11"); // { areaCode: 11, stateCode: "SP", stateName: "São Paulo", region: "Sudeste", stateCodes: ["SP"] }
+ * getAreaCodeInfo(21); // { areaCode: 21, stateCode: "RJ", stateName: "Rio de Janeiro", region: "Sudeste", stateCodes: ["RJ"] }
+ * getAreaCodeInfo("61"); // { areaCode: 61, stateCode: "DF", stateName: "Distrito Federal", region: "Centro-Oeste", stateCodes: ["DF", "GO"] }
  * getAreaCodeInfo("00"); // null
+ * getAreaCodeInfo(-11); // null
  * ```
  */
 export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null => {
-	if (isNullish(areaCode)) return null;
+	if (!isLookupCode(areaCode)) return null;
 
 	const digits = sanitizeToDigits(areaCode);
 
@@ -55,5 +72,11 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 
 	const state = statesByCode[stateCode];
 
-	return { areaCode: numericAreaCode, stateCode, stateName: state.name, region: state.regionName };
+	return {
+		areaCode: numericAreaCode,
+		stateCode,
+		stateName: state.name,
+		region: state.regionName,
+		stateCodes: [stateCode, ...(AREA_CODE_SECONDARY_STATES[numericAreaCode] ?? [])],
+	};
 };

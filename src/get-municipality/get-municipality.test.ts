@@ -88,6 +88,20 @@ describe("getMunicipality", () => {
 			await expect(getMunicipality({ code: 0 })).resolves.toBeNull();
 		});
 
+		it("should return null for a negative number, instead of dropping its sign", async () => {
+			await expect(getMunicipality({ code: -3_550_308 })).resolves.toBeNull();
+		});
+
+		it("should return null for a fractional number, instead of dropping its decimal point", async () => {
+			await expect(getMunicipality({ code: 355_030.8 })).resolves.toBeNull();
+			await expect(getMunicipality({ code: 3_550_308.5 })).resolves.toBeNull();
+		});
+
+		it("should return null for a non-finite number", async () => {
+			await expect(getMunicipality({ code: Number.NaN })).resolves.toBeNull();
+			await expect(getMunicipality({ code: Number.POSITIVE_INFINITY })).resolves.toBeNull();
+		});
+
 		it("should return null for a code with the wrong number of digits", async () => {
 			await expect(getMunicipality({ code: "123" })).resolves.toBeNull();
 			await expect(getMunicipality({ code: "12345678" })).resolves.toBeNull();

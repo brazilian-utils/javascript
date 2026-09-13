@@ -2575,3 +2575,9 @@ export const CBO_TITLES: Record<string, string> = {
 	"031205": "Cabo Bombeiro Militar",
 	"031210": "Soldado Bombeiro Militar",
 };
+
+/**
+ * Shape a CBO code has to be written in: the 6 digits, optionally split into the printed
+ * groups of 4 and 2 by whitespace or the usual mask characters.
+ */
+export const CBO_FORMAT_REGEX = /^\d{4}[\s.\-/]*\d{2}$/;

@@ -1,5 +1,5 @@
 import { BANKS, type Bank } from "../_internals/constants/banks";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 const CODE_LENGTH = 3;
@@ -23,10 +23,7 @@ const CODE_LENGTH = 3;
  * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */
 export const getBankByCode = (code: string | number): Bank | null => {
-	if (isNullish(code) || (typeof code !== "string" && typeof code !== "number")) return null;
-
-	// Stryker disable next-line EqualityOperator: no institution has COMPE code 000, so 0 and a negative number both resolve to null.
-	if (typeof code === "number" && (!Number.isInteger(code) || code < 0)) return null;
+	if (!isLookupCode(code)) return null;
 
 	const digits = sanitizeToDigits(code);
 

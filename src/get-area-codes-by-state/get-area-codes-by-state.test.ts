@@ -28,6 +28,20 @@ describe("getAreaCodesByState", () => {
 		expect(getAreaCodesByState("PE")).toEqual([81, 87]);
 	});
 
+	test("should list DDD 61 for Goiás, which the Entorno do Distrito Federal shares with the DF", () => {
+		expect(getAreaCodesByState("GO")).toContain(61);
+		expect(getAreaCodesByState("GO")).toEqual([61, 62, 64]);
+	});
+
+	test("should list only DDD 61 for the Distrito Federal", () => {
+		expect(getAreaCodesByState("DF")).toEqual([61]);
+	});
+
+	test("should list the border DDDs 42, 47 and 49 under both of their states", () => {
+		expect(getAreaCodesByState("SC")).toEqual([42, 47, 48, 49]);
+		expect(getAreaCodesByState("PR")).toEqual([41, 42, 43, 44, 45, 46, 47, 49]);
+	});
+
 	test("should return a fresh array on every call", () => {
 		const first = getAreaCodesByState("AC");
 		first.push(999);
@@ -68,7 +82,7 @@ describe("getAreaCodesByState", () => {
 			expectNeverThrows(getAreaCodesByState, fc.anything());
 		});
 
-		test("should return every DDD sorted ascending, each resolving back to the same state", () => {
+		test("should return every DDD sorted ascending, each listing the state back", () => {
 			fc.assert(
 				fc.property(stateCodes, (stateCode) => {
 					const areaCodes = getAreaCodesByState(stateCode);
@@ -77,7 +91,19 @@ describe("getAreaCodesByState", () => {
 					expect(areaCodes).toEqual(sorted);
 
 					for (const areaCode of areaCodes) {
-						expect(getAreaCodeInfo(areaCode)?.stateCode).toBe(stateCode);
+						expect(getAreaCodeInfo(areaCode)?.stateCodes).toContain(stateCode);
+					}
+				}),
+			);
+		});
+
+		test("should return the primary state of every DDD it does not share with another state", () => {
+			fc.assert(
+				fc.property(stateCodes, (stateCode) => {
+					for (const areaCode of getAreaCodesByState(stateCode)) {
+						const info = getAreaCodeInfo(areaCode);
+
+						if (info?.stateCodes.length === 1) expect(info.stateCode).toBe(stateCode);
 					}
 				}),
 			);

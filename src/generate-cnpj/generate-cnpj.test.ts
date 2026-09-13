@@ -44,6 +44,24 @@ describe("generateCnpj", () => {
 			expect(isValidCnpj(cnpj)).toBe(true);
 		});
 
+		test("should generate a valid numeric CNPJ when the version is null", () => {
+			// @ts-expect-error: intentionally invalid input
+			const cnpj = generateCnpj(null);
+
+			expect(cnpj).toHaveLength(CNPJ_LENGTH);
+			expect(/^\d+$/.test(cnpj)).toBe(true);
+			expect(isValidCnpj(cnpj)).toBe(true);
+		});
+
+		test("should generate a valid numeric CNPJ when the version is not a known version", () => {
+			// @ts-expect-error: intentionally invalid input
+			const cnpj = generateCnpj("2");
+
+			expect(cnpj).toHaveLength(CNPJ_LENGTH);
+			expect(/^\d+$/.test(cnpj)).toBe(true);
+			expect(isValidCnpj(cnpj)).toBe(true);
+		});
+
 		test("should regenerate the base when it comes out with repeated digits", () => {
 			const digits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2];
 			const originalRandom = Math.random;

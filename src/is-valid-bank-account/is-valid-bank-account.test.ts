@@ -1589,11 +1589,18 @@ describe("isValidBankAccount", () => {
 			const structureOnly = fc.constantFrom("077", "085", "197", "290", "336", "748", "756");
 
 			fc.assert(
-				fc.property(structureOnly, agencies, accounts, (bankCode, agency, pool) => {
-					const account = pool.slice(0, 6);
+				fc.property(
+					structureOnly,
+					agencies,
+					accounts,
+					fc.integer({ min: 0, max: 9 }),
+					(bankCode, agency, pool, checkDigit) => {
+						const account = pool.slice(0, 6);
+						const digit = String(checkDigit);
 
-					expect(isValidBankAccount({ bankCode, agency, account, digit: "7" })).toBe(true);
-				}),
+						expect(isValidBankAccount({ bankCode, agency, account, digit })).toBe(true);
+					},
+				),
 			);
 		});
 

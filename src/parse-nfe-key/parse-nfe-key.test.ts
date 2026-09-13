@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
 import { type StateCode } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { VALID_EMISSION_TYPES } from "./constants";
+import { VALID_EMISSION_TYPES, VALID_MODELS } from "./constants";
 import { parseNfeKey, type NfeKey, type NfeKeyModel } from "./parse-nfe-key";
 
 const KEY_SP = "35170458716523000119550010000000121000123458";
@@ -40,7 +40,7 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey(`${KEY_SP.slice(0, 43)}9`)).toBeNull();
 		});
 
-		test("when the model is not 55, 57, 58 or 65 (model 99 with a matching check digit)", () => {
+		test("when the model is not 55, 57, 58, 65 or 67 (model 99 with a matching check digit)", () => {
 			expect(parseNfeKey("35170458716523000119990010000000121000123453")).toBeNull();
 		});
 
@@ -104,10 +104,11 @@ describe("parseNfeKey", () => {
 			expect(parseNfeKey("35170458716523000119550010000000129000123453")?.emissionType).toBe(9);
 		});
 
-		test("for every other DF-e model (CT-e, MDF-e, NFC-e), same shape as the SP key with the model field changed and the check digit recalculated", () => {
+		test("for every other DF-e model (CT-e, MDF-e, NFC-e, CT-e OS), same shape as the SP key with the model field changed and the check digit recalculated", () => {
 			expect(parseNfeKey("35170458716523000119570010000000121000123455")?.model).toBe("57");
 			expect(parseNfeKey("35170458716523000119580010000000121000123459")?.model).toBe("58");
 			expect(parseNfeKey("35170458716523000119650010000000121000123450")?.model).toBe("65");
+			expect(parseNfeKey("35170458716523000119670010000000121000123458")?.model).toBe("67");
 		});
 	});
 
@@ -117,7 +118,7 @@ describe("parseNfeKey", () => {
 			fc.stringMatching(/^[0-9]{2}$/),
 			fc.integer({ min: 1, max: 12 }),
 			fc.stringMatching(/^[0-9]{14}$/),
-			fc.constantFrom("55", "57", "58", "65"),
+			fc.constantFrom("55", "57", "58", "65", "67"),
 			fc.stringMatching(/^[0-9]{3}$/),
 			fc.integer({ min: 1, max: 999_999_999 }),
 			fc.constantFrom(...VALID_EMISSION_TYPES),
@@ -175,6 +176,7 @@ describe("parseNfeKey types", () => {
 			code: string;
 			checkDigit: number;
 		}>();
-		expectTypeOf<NfeKeyModel>().toEqualTypeOf<"55" | "57" | "58" | "65">();
+		expectTypeOf<NfeKeyModel>().toEqualTypeOf<"55" | "57" | "58" | "65" | "67">();
+		expectTypeOf<NfeKeyModel>().toEqualTypeOf<(typeof VALID_MODELS)[number]>();
 	});
 });

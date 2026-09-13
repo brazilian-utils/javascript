@@ -1,5 +1,5 @@
 import { BANKS, type Bank } from "../_internals/constants/banks";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 const ISPB_LENGTH = 8;
@@ -27,9 +27,7 @@ const ISPB_LENGTH = 8;
  * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */
 export const getBankByIspb = (value: string | number): Bank | null => {
-	if (isNullish(value) || (typeof value !== "string" && typeof value !== "number")) return null;
-
-	if (typeof value === "number" && (!Number.isInteger(value) || value < 0)) return null;
+	if (!isLookupCode(value)) return null;
 
 	const digits = sanitizeToDigits(value);
 

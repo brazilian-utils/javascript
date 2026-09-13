@@ -8,7 +8,7 @@ import {
 	type GenerateProcessoJuridicoOptions,
 } from "./generate-processo-juridico";
 
-const currentYear = new Date().getFullYear();
+const currentYear = (): number => new Date().getFullYear();
 
 const expectValidGeneratedProcessoJuridico = (value: string | null) => {
 	expect(value).not.toBe(null);
@@ -28,16 +28,16 @@ describe("generateProcessoJuridico", () => {
 	});
 
 	it("should honor the year and court options", () => {
-		const value = generateProcessoJuridico({ year: currentYear, court: 5 });
+		const value = generateProcessoJuridico({ year: currentYear(), court: 5 });
 
 		expect(value).not.toBe(null);
-		expect((value as string).slice(9, 13)).toBe(String(currentYear));
+		expect((value as string).slice(9, 13)).toBe(String(currentYear()));
 		expect((value as string).charAt(13)).toBe("5");
 		expect(isValidProcessoJuridico(value as string)).toBe(true);
 	});
 
 	it("should return null for years before the current one", () => {
-		expect(generateProcessoJuridico({ year: currentYear - 1 })).toBe(null);
+		expect(generateProcessoJuridico({ year: currentYear() - 1 })).toBe(null);
 	});
 
 	it("should return null for years above 9999", () => {
@@ -57,7 +57,7 @@ describe("generateProcessoJuridico", () => {
 	});
 
 	it("should return null for non integer years", () => {
-		expect(generateProcessoJuridico({ year: currentYear + 0.5 })).toBe(null);
+		expect(generateProcessoJuridico({ year: currentYear() + 0.5 })).toBe(null);
 		expect(generateProcessoJuridico({ year: Number.NaN })).toBe(null);
 	});
 
@@ -74,7 +74,7 @@ describe("generateProcessoJuridico", () => {
 		Math.random = () => 0.5;
 
 		try {
-			const value = generateProcessoJuridico({ year: currentYear });
+			const value = generateProcessoJuridico({ year: currentYear() });
 
 			expect(value).not.toBe(null);
 			expect((value as string).charAt(13)).toBe("5");
@@ -84,31 +84,32 @@ describe("generateProcessoJuridico", () => {
 	});
 
 	describe("properties", () => {
-		const year = fc.integer({ min: currentYear, max: 9999 });
+		const year = fc.integer({ min: 0, max: 9999 });
 		const court = fc.integer({ min: 1, max: 9 });
 
 		test("should embed every accepted year and court in a valid number", () => {
 			fc.assert(
 				fc.property(year, court, (chosenYear, chosenCourt) => {
-					const value = generateProcessoJuridico({
-						year: chosenYear,
-						court: chosenCourt,
-					}) as string;
+					fc.pre(chosenYear >= currentYear());
 
+					const value = generateProcessoJuridico({ year: chosenYear, court: chosenCourt });
+
+					expect(value).not.toBe(null);
 					expect(value).toHaveLength(PROCESSO_JURIDICO_LENGTH);
-					expect(value.slice(9, 13)).toBe(String(chosenYear));
-					expect(value.charAt(13)).toBe(String(chosenCourt));
-					expect(isValidProcessoJuridico(value)).toBe(true);
+					expect(value?.slice(9, 13)).toBe(String(chosenYear));
+					expect(value?.charAt(13)).toBe(String(chosenCourt));
+					expect(isValidProcessoJuridico(value ?? "")).toBe(true);
 				}),
 			);
 		});
 
 		test("should return null for every year outside the accepted range", () => {
-			const tooEarly = fc.integer({ min: -9999, max: currentYear - 1 });
-			const tooLate = fc.integer({ min: 10_000, max: 999_999 });
+			const outOfRangeYears = fc.integer({ min: -9999, max: 999_999 });
 
 			fc.assert(
-				fc.property(fc.oneof(tooEarly, tooLate), (invalidYear) => {
+				fc.property(outOfRangeYears, (invalidYear) => {
+					fc.pre(invalidYear < currentYear() || invalidYear > 9999);
+
 					expect(generateProcessoJuridico({ year: invalidYear })).toBe(null);
 				}),
 			);

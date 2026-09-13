@@ -69,6 +69,19 @@ describe("isValidCreditCard", () => {
 			expect(isValidCreditCard("")).toBe(false);
 		});
 
+		test("when it is a number above Number.MAX_SAFE_INTEGER", () => {
+			expect(isValidCreditCard(2 ** 53)).toBe(false);
+			expect(isValidCreditCard(Number("4111111111111111111"))).toBe(false);
+		});
+
+		test("when it is a negative number", () => {
+			expect(isValidCreditCard(-4_111_111_111_111_111)).toBe(false);
+		});
+
+		test("when it is a number that is not an integer", () => {
+			expect(isValidCreditCard(411_111_111_111_111.1)).toBe(false);
+		});
+
 		test("when it contains only letters", () => {
 			expect(isValidCreditCard("abcdabcdabcd")).toBe(false);
 		});

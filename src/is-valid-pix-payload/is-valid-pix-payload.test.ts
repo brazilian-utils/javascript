@@ -122,6 +122,30 @@ describe("isValidPixPayload", () => {
 			).toBe(false);
 		});
 
+		test("when a key is announced as dynamic by the point of initiation method", () => {
+			expect(
+				isValidPixPayload(
+					"00020101021226330014br.gov.bcb.pix0111123456789095204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63043CAC",
+				),
+			).toBe(false);
+		});
+
+		test("when a url is announced as static by the point of initiation method", () => {
+			expect(
+				isValidPixPayload(
+					"00020101021126480014br.gov.bcb.pix2526pix.example.com/qr/v2/12345204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304F299",
+				),
+			).toBe(false);
+		});
+
+		test("when a static payload states a transaction amount of zero", () => {
+			expect(
+				isValidPixPayload(
+					"00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000052040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***63042451",
+				),
+			).toBe(false);
+		});
+
 		test("when the currency is not 986", () => {
 			expect(
 				isValidPixPayload(

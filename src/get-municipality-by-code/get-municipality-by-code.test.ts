@@ -71,6 +71,20 @@ describe("getMunicipalityByCode", () => {
 		expect(getMunicipalityByCode([])).toBeNull();
 	});
 
+	it("should return null for a negative number, instead of dropping its sign", () => {
+		expect(getMunicipalityByCode(-3_550_308)).toBeNull();
+	});
+
+	it("should return null for a fractional number, instead of dropping its decimal point", () => {
+		expect(getMunicipalityByCode(355_030.8)).toBeNull();
+		expect(getMunicipalityByCode(3_550_308.5)).toBeNull();
+	});
+
+	it("should return null for a non-finite number", () => {
+		expect(getMunicipalityByCode(Number.NaN)).toBeNull();
+		expect(getMunicipalityByCode(Number.POSITIVE_INFINITY)).toBeNull();
+	});
+
 	it("should ignore non-digit characters before validating the length", () => {
 		expect(getMunicipalityByCode("355-030-8")).toEqual({
 			code: "3550308",

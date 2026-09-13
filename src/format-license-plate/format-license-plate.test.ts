@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { licensePlates } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { generateLicensePlate } from "../generate-license-plate/generate-license-plate";
 import { parseLicensePlate } from "../parse-license-plate/parse-license-plate";
 import { formatLicensePlate } from "./format-license-plate";
 
@@ -46,13 +46,20 @@ describe("formatLicensePlate", () => {
 	});
 
 	describe("properties", () => {
-		test("should hyphenate an old format plate and leave a Mercosul one alone", () => {
+		test("should hyphenate an old format plate", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("LLLNNNN", "LLLNLNN"), (format) => {
-					const plate = generateLicensePlate(format);
-					const expected = format === "LLLNNNN" ? `${plate.slice(0, 3)}-${plate.slice(3)}` : plate;
+				fc.property(licensePlates("LLLNNNN"), (plate) => {
+					expect(formatLicensePlate(plate.toLowerCase())).toBe(
+						`${plate.slice(0, 3)}-${plate.slice(3)}`,
+					);
+				}),
+			);
+		});
 
-					expect(formatLicensePlate(plate.toLowerCase())).toBe(expected);
+		test("should leave a Mercosul plate alone", () => {
+			fc.assert(
+				fc.property(licensePlates("LLLNLNN"), (plate) => {
+					expect(formatLicensePlate(plate.toLowerCase())).toBe(plate);
 				}),
 			);
 		});

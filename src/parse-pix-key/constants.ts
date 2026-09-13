@@ -9,8 +9,17 @@ export const EMAIL_MAX_LENGTH = 77;
 export const EVP_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * Marks of a value written as a phone number rather than as a document: an explicit
- * international prefix (`+55` or `0055`) or a DDD wrapped in parentheses. A CPF mask uses only
- * dots and a dash, so it never matches.
+ * The characters a value written as a phone number may carry: digits, the `+` of the
+ * international prefix and the spaces, dots, hyphens and parentheses of the usual masks.
+ * Sanitizing to digits alone would read `"abc(11) 98765-4321xyz"` as a phone number, so the
+ * value is matched against this before it is sanitized.
  */
-export const PHONE_HINT_REGEX = /(?:^(?:\+|00)\s*55)|[()]/;
+export const PHONE_SYNTAX_REGEX = /^[\d ()+.-]+$/;
+
+/**
+ * The forms a value written as a CPF may take: the bare 11 digits or the documented mask, with
+ * the dots and the hyphen optional and a space accepted wherever a separator goes. Sanitizing
+ * to digits alone would read `"abc123.456.789-09"` as a CPF, so the value is matched against
+ * this before it is sanitized.
+ */
+export const CPF_SYNTAX_REGEX = /^\d{3}[ .]?\d{3}[ .]?\d{3}[ -]?\d{2}$/;

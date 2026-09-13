@@ -55,6 +55,12 @@ const main = async (): Promise<void> => {
  * @see Official: https://concla.ibge.gov.br/classificacoes/por-tema/atividades-economicas/classificacao-nacional-de-atividades-economicas
  */
 export const CNAE_SUBCLASSES: Record<string, string> = ${JSON.stringify(data)};
+
+/**
+ * Shape a CNAE subclass code has to be written in: the 7 digits, optionally split into the
+ * printed \`NNNN-N/NN\` groups by whitespace or the usual mask characters.
+ */
+export const CNAE_FORMAT_REGEX = /^\\d{4}[\\s.\\-/]*\\d[\\s.\\-/]*\\d{2}$/;
 `,
 	);
 };

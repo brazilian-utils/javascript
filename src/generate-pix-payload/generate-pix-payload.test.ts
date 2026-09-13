@@ -16,6 +16,10 @@ const BASE = {
 
 const EVP = "71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d";
 
+const CPF_KEY = "12345678909";
+
+const CNPJ_KEY = "13723705000189";
+
 describe("generatePixPayload", () => {
 	describe("should return null", () => {
 		test("when it is null", () => {
@@ -177,6 +181,11 @@ describe("generatePixPayload", () => {
 
 		test("when the amount does not fit in 13 characters", () => {
 			expect(generatePixPayload({ ...BASE, amount: 123_456_789_012 })).toBeNull();
+		});
+
+		test("when the amount is so large that it formats in exponential notation", () => {
+			expect(generatePixPayload({ ...BASE, amount: 1e21 })).toBeNull();
+			expect(generatePixPayload({ ...BASE, amount: 1.5e25 })).toBeNull();
 		});
 
 		test("but accept an amount whose formatted length is exactly 13 characters", () => {
@@ -418,12 +427,11 @@ describe("generatePixPayload", () => {
 		test("should round-trip a static payload through parsePixPayload", () => {
 			fc.assert(
 				fc.property(names, cities, (merchantName, merchantCity) => {
-					const key = generateCpf();
-					const payload = generatePixPayload({ key, merchantName, merchantCity });
+					const payload = generatePixPayload({ key: CPF_KEY, merchantName, merchantCity });
 					const parsed = parsePixPayload(payload ?? "");
 
 					expect(isValidPixPayload(payload ?? "")).toBe(true);
-					expect(parsed?.key).toBe(key);
+					expect(parsed?.key).toBe(CPF_KEY);
 					expect(parsed?.merchantName).toBe(merchantName);
 					expect(parsed?.merchantCity).toBe(merchantCity);
 					expect(parsed?.amount).toBeUndefined();
@@ -436,9 +444,8 @@ describe("generatePixPayload", () => {
 			fc.assert(
 				fc.property(names, cents, txids, (merchantName, amountInCents, txid) => {
 					const amount = amountInCents / 100;
-					const key = generateCnpj();
 					const payload = generatePixPayload({
-						key,
+						key: CNPJ_KEY,
 						merchantName,
 						merchantCity: "BRASILIA",
 						amount,
@@ -468,10 +475,9 @@ describe("generatePixPayload", () => {
 		test("should return null unless exactly one of the key and the url is given", () => {
 			fc.assert(
 				fc.property(names, urls, (merchantName, url) => {
-					const key = generateCpf();
 					const merchantCity = "BRASILIA";
 
-					expect(generatePixPayload({ key, url, merchantName, merchantCity })).toBeNull();
+					expect(generatePixPayload({ key: CPF_KEY, url, merchantName, merchantCity })).toBeNull();
 					expect(generatePixPayload({ merchantName, merchantCity })).toBeNull();
 				}),
 			);
@@ -483,8 +489,7 @@ describe("generatePixPayload", () => {
 					fc.string({ minLength: 1, unit: "grapheme" }),
 					fc.string({ minLength: 1, unit: "grapheme" }),
 					(merchantName, merchantCity) => {
-						const key = generateCpf();
-						const payload = generatePixPayload({ key, merchantName, merchantCity });
+						const payload = generatePixPayload({ key: CPF_KEY, merchantName, merchantCity });
 
 						fc.pre(payload !== null);
 

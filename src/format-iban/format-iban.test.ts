@@ -26,10 +26,22 @@ describe("formatIban", () => {
 		expect(formatIban("BR1500000000000010932840814P")).toBe("BR15 0000 0000 0000 1093 2840 814P");
 	});
 
-	it("should remove non alphanumeric characters before grouping", () => {
-		expect(formatIban("BR15 0000-0000.0000/1093 2840 814P 2")).toBe(
+	it("should regroup a value that is already written in the print format", () => {
+		expect(formatIban("BR1500 000000000010 932840814P2")).toBe(
 			"BR15 0000 0000 0000 1093 2840 814P 2",
 		);
+	});
+
+	it("should trim the surrounding whitespace", () => {
+		expect(formatIban("  BR15 0000 0000 0000 1093 2840 814P 2  ")).toBe(
+			"BR15 0000 0000 0000 1093 2840 814P 2",
+		);
+	});
+
+	it("should return an empty string when a character outside the print format is present", () => {
+		expect(formatIban("BR1500000000000010932840814P-2")).toBe("");
+		expect(formatIban("BR15 0000-0000.0000/1093 2840 814P 2")).toBe("");
+		expect(formatIban("BR15  0000")).toBe("");
 	});
 
 	it("should cap the result to 29 characters", () => {

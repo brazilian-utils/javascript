@@ -4,6 +4,11 @@ import { getCbo } from "../get-cbo/get-cbo";
  * Validates if a CBO (Classificação Brasileira de Ocupações) code exists in the official
  * CBO 2002 table.
  *
+ * A string is only read as a code when it is written in one of the documented forms: the 6
+ * digits, or the `NNNN-NN` mask, with the usual separators between the groups and optional
+ * surrounding whitespace. A number is only read as a code when it is a non-negative safe
+ * integer.
+ *
  * @param {string|number} value - The CBO code to be validated, with or without the hyphen
  * mask, e.g. `"2124-05"`, `"212405"` or `212405`.
  * @returns {boolean} True when the code is a known 6 digit occupation code, false otherwise.
@@ -15,6 +20,8 @@ import { getCbo } from "../get-cbo/get-cbo";
  * isValidCbo(212405); // true
  * isValidCbo(10205); // true (a number is padded to 6 digits, so this is "010205")
  * isValidCbo("999999"); // false
+ * isValidCbo("2124abc05"); // false (not a documented form)
+ * isValidCbo(-212405); // false (not a non-negative safe integer)
  * ```
  *
  * @see Official: http://www.mtecbo.gov.br/cbosite/pages/downloads.jsf

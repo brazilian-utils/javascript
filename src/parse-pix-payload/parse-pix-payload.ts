@@ -103,9 +103,13 @@ const resolvePointOfInitiation = (fields: TlvFields): string | undefined | null 
 	return pointOfInitiation;
 };
 
-const isValidAmount = (amount: string | undefined): boolean =>
-	amount === undefined ||
-	(AMOUNT_REGEX.test(amount) && amount.length <= PIX_TRANSACTION_AMOUNT_MAX_LENGTH);
+const isValidAmount = (amount: string | undefined, isDynamic: boolean): boolean => {
+	if (amount === undefined) return true;
+
+	if (!AMOUNT_REGEX.test(amount) || amount.length > PIX_TRANSACTION_AMOUNT_MAX_LENGTH) return false;
+
+	return isDynamic || Number(amount) > 0;
+};
 
 type MerchantKeyInfo = {
 	key?: string;
@@ -128,6 +132,14 @@ const resolveMerchantKeyInfo = (fields: TlvFields): MerchantKeyInfo | null => {
 
 	return { key, url, description };
 };
+
+const isConsistentPointOfInitiation = (
+	{ url }: MerchantKeyInfo,
+	pointOfInitiation: string | undefined,
+): boolean =>
+	url === undefined
+		? pointOfInitiation !== PIX_DYNAMIC_POINT_OF_INITIATION
+		: pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION;
 
 const resolveTxid = (fields: TlvFields): string | undefined | null => {
 	const additionalData = fields[PIX_ADDITIONAL_DATA_ID];
@@ -197,9 +209,17 @@ const buildPixPayload = (
  *
  * The merchant account information must carry exactly one of a Pix key (26-01) or a PSP
  * location (26-25); the location is checked with the same host and path rule
- * `generatePixPayload` applies. In a dynamic payload the transaction amount (54) and the
- * `txid` (62-05) are ignored, as the manual mandates, because the PSP location is the source
- * of truth for both.
+ * `generatePixPayload` applies. The "Point of Initiation Method" object (`01`) must agree with
+ * it: a key belongs to a static payload, so `01` is absent or `"11"`, and a PSP location
+ * belongs to a dynamic one, so `01` is `"12"`. Any other pairing (a key announced as dynamic,
+ * a location announced as static) is rejected. In a dynamic payload the transaction amount
+ * (54) and the `txid` (62-05) are ignored, as the manual mandates, because the PSP location is
+ * the source of truth for both.
+ *
+ * A static payload that carries the transaction amount (54) must state an amount greater than
+ * zero: the only BR Code the manual writes with `54` set to `0.00` is a Pix Saque/Troco one,
+ * which announces the withdrawal agent in a template this parser does not read, so a static
+ * `"0"`/`"0.00"` is rejected rather than reported as a free amount of nothing.
  *
  * @param {string} value - The BR Code payload to be parsed.
  * @returns {PixPayload|null} The Pix data of the payload, or `null` when it is not a valid Pix
@@ -253,13 +273,15 @@ export const parsePixPayload = (value: string): PixPayload | null => {
 
 	if (merchantCity === undefined || merchantCity === "") return null;
 
-	const amount = fields[PIX_TRANSACTION_AMOUNT_ID];
-
-	if (!isValidAmount(amount)) return null;
-
 	const merchantKeyInfo = resolveMerchantKeyInfo(fields);
 
 	if (!merchantKeyInfo) return null;
+
+	if (!isConsistentPointOfInitiation(merchantKeyInfo, pointOfInitiation)) return null;
+
+	const amount = fields[PIX_TRANSACTION_AMOUNT_ID];
+
+	if (!isValidAmount(amount, merchantKeyInfo.url !== undefined)) return null;
 
 	const txid = resolveTxid(fields);
 

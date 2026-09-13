@@ -15,6 +15,7 @@ describe("getAreaCodeInfo", () => {
 			stateCode: "SP",
 			stateName: "São Paulo",
 			region: "Sudeste",
+			stateCodes: ["SP"],
 		});
 	});
 
@@ -24,6 +25,7 @@ describe("getAreaCodeInfo", () => {
 			stateCode: "SP",
 			stateName: "São Paulo",
 			region: "Sudeste",
+			stateCodes: ["SP"],
 		});
 	});
 
@@ -37,16 +39,32 @@ describe("getAreaCodeInfo", () => {
 			stateCode: "AC",
 			stateName: "Acre",
 			region: "Norte",
+			stateCodes: ["AC"],
 		});
 	});
 
-	it("should resolve DDD 61 to Distrito Federal, Centro-Oeste", () => {
+	it("should resolve DDD 61 to Distrito Federal, Centro-Oeste, and list Goiás as a second state", () => {
 		expect(getAreaCodeInfo("61")).toEqual({
 			areaCode: 61,
 			stateCode: "DF",
 			stateName: "Distrito Federal",
 			region: "Centro-Oeste",
+			stateCodes: ["DF", "GO"],
 		});
+	});
+
+	it("should keep DDD 61 singular in stateCode, since the Entorno is the exception", () => {
+		expect(getAreaCodeInfo(61)?.stateCode).toBe("DF");
+	});
+
+	it("should list both states of the three other border DDDs, 42, 47 and 49", () => {
+		expect(getAreaCodeInfo(42)?.stateCodes).toEqual(["PR", "SC"]);
+		expect(getAreaCodeInfo(47)?.stateCodes).toEqual(["SC", "PR"]);
+		expect(getAreaCodeInfo(49)?.stateCodes).toEqual(["SC", "PR"]);
+	});
+
+	it("should list a single state for a DDD that does not cross a border", () => {
+		expect(getAreaCodeInfo(62)?.stateCodes).toEqual(["GO"]);
 	});
 
 	it("should resolve every one of the 67 valid DDDs to a state (Anatel Plano Geral de Numeração)", () => {
@@ -92,6 +110,14 @@ describe("getAreaCodeInfo", () => {
 		expect(getAreaCodeInfo("")).toBeNull();
 	});
 
+	it("should return null for a negative number, not read it as the DDD 11", () => {
+		expect(getAreaCodeInfo(-11)).toBeNull();
+	});
+
+	it("should return null for a fractional number, not read it as the DDD 11", () => {
+		expect(getAreaCodeInfo(1.1)).toBeNull();
+	});
+
 	it("should return null for null", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(getAreaCodeInfo(null)).toBeNull();
@@ -109,13 +135,27 @@ describe("getAreaCodeInfo", () => {
 			expectNeverThrows(getAreaCodeInfo, anyGarbage);
 		});
 
-		test("should resolve every valid DDD back to a state that lists it", () => {
+		test("should resolve every valid DDD back to every state that lists it", () => {
 			fc.assert(
 				fc.property(areaCodeArbitrary, (areaCode) => {
 					const info = getAreaCodeInfo(areaCode);
 
 					expect(info).not.toBeNull();
-					expect(getAreaCodesByState(info?.stateCode ?? "")).toContain(areaCode);
+					expect(info?.stateCodes[0]).toBe(info?.stateCode);
+
+					for (const stateCode of info?.stateCodes ?? []) {
+						expect(getAreaCodesByState(stateCode)).toContain(areaCode);
+					}
+				}),
+			);
+		});
+
+		test("should never repeat a state in stateCodes", () => {
+			fc.assert(
+				fc.property(areaCodeArbitrary, (areaCode) => {
+					const stateCodes = getAreaCodeInfo(areaCode)?.stateCodes ?? [];
+
+					expect(new Set(stateCodes).size).toBe(stateCodes.length);
 				}),
 			);
 		});
@@ -139,6 +179,7 @@ describe("getAreaCodeInfo types", () => {
 			stateCode: StateCode;
 			stateName: StateName;
 			region: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
+			stateCodes: StateCode[];
 		}>();
 	});
 });

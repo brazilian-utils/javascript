@@ -2,6 +2,7 @@ import {
 	CERTIDAO_BASE_LENGTH,
 	CERTIDAO_FORMAT_REGEX,
 	CERTIDAO_LENGTH,
+	CERTIDAO_SERVICE_CODE,
 } from "../_internals/constants/certidao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CERTIDAO_TYPES } from "../parse-certidao/constants";
@@ -33,7 +34,9 @@ const getCheckDigit = (value: string): number => {
  *
  * The matrícula has 32 digits laid out as 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) +
  * 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores),
- * printed as "000000 00 00 0000 0 00000 000 0000000 00". Both check digits are modulus 11: the
+ * printed as "000000 00 00 0000 0 00000 000 0000000 00". The serviço is fixed at `55`, the code
+ * art. 473, III assigns to the registro civil das pessoas naturais, so a matrícula carrying any
+ * other pair there is rejected. Both check digits are modulus 11: the
  * first weights the 30 base digits by 2, 3, ... 10, 0, 1, 2, ... restarting the cycle every 11
  * digits, the second weights the 31 digits that include the first check digit by 1, 2, ... 10,
  * 0, 1, ... In both passes the check digit is the remainder itself, with a remainder of 10 read
@@ -58,6 +61,7 @@ const getCheckDigit = (value: string): number => {
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21"); // true
  * isValidCertidao("09430001552010100020112000012087"); // true
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 22"); // false (invalid check digits)
+ * isValidCertidao("09400301542011100110002005191744"); // false (serviço is not 55)
  * isValidCertidao("123456"); // false (wrong length)
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: ["birth"] }); // true
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: ["death"] }); // false
@@ -82,6 +86,8 @@ export const isValidCertidao = (value: string, options?: IsValidCertidaoOptions)
 	const digits = sanitizeToDigits(value);
 
 	if (!CERTIDAO_FORMAT_REGEX.test(value.trim())) return false;
+
+	if (digits.slice(8, 10) !== CERTIDAO_SERVICE_CODE) return false;
 
 	const base = digits.slice(0, CERTIDAO_BASE_LENGTH);
 	const first = getCheckDigit(base);

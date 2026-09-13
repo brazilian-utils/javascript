@@ -55,6 +55,14 @@ describe("getStateByIbgeCode", () => {
 		expect(getStateByIbgeCode("")).toBeNull();
 	});
 
+	it("should return null for a negative number, not read it as the cUF 35", () => {
+		expect(getStateByIbgeCode(-35)).toBeNull();
+	});
+
+	it("should return null for a fractional number, not read it as the cUF 35", () => {
+		expect(getStateByIbgeCode(3.5)).toBeNull();
+	});
+
 	it("should return null for whitespace only", () => {
 		expect(getStateByIbgeCode("   ")).toBeNull();
 	});

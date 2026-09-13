@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidIban } from "./is-valid-iban";
 
-const CHECK_DIGITS = Array.from({ length: 97 }, (_, index) => String(index).padStart(2, "0"));
+const CHECK_DIGITS = Array.from({ length: 97 }, (_, index) => String(index + 2).padStart(2, "0"));
 
 const findIban = (body: string): string =>
 	CHECK_DIGITS.map((pair) => `BR${pair}${body}`).find((iban) => isValidIban(iban)) ?? "";
@@ -20,6 +20,10 @@ describe("isValidIban", () => {
 
 		test("for a lowercase value", () => {
 			expect(isValidIban("br1500000000000010932840814p2")).toBe(true);
+		});
+
+		test("for a value with surrounding whitespace", () => {
+			expect(isValidIban("  BR15 0000 0000 0000 1093 2840 814P 2  ")).toBe(true);
 		});
 
 		test("for a valid IBAN with a poupança (P) account type", () => {
@@ -71,6 +75,16 @@ describe("isValidIban", () => {
 
 		test("when a digit position holds a letter instead, even if the check digits happen to match", () => {
 			expect(isValidIban("BR170000000A000010000012345C2")).toBe(false);
+		});
+
+		test("when it carries a character outside the print format", () => {
+			expect(isValidIban("BR1500000000000010932840814P-2")).toBe(false);
+			expect(isValidIban("BR15.0000.0000.0000.1093.2840.814P2")).toBe(false);
+			expect(isValidIban("BR1500000000000010932840814P/2")).toBe(false);
+		});
+
+		test("when the groups are separated by more than one space", () => {
+			expect(isValidIban("BR15 0000 0000 0000 1093 2840  814P 2")).toBe(false);
 		});
 
 		test("when it is an empty string", () => {

@@ -1,4 +1,4 @@
-import { BR_IBAN_REGEX } from "../_internals/constants/iban";
+import { BR_IBAN_REGEX, IBAN_FORMAT_REGEX } from "../_internals/constants/iban";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 
 const LETTER_CODE_A = 65;
@@ -24,6 +24,11 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * ISO 13616 countries is out of scope, so any non `BR` IBAN, however well formed, returns
  * `false`. Accepts the usual grouping spaces and is case-insensitive.
  *
+ * The value has to be written in the ISO 13616 print format: letters and digits in groups
+ * separated by a single space, with optional surrounding whitespace. Any other character
+ * makes the value something other than an IBAN, so `"BR1500000000000010932840814P-2"` is
+ * rejected instead of having its hyphen stripped.
+ *
  * @param {string} value - The IBAN to be validated.
  * @returns {boolean} True when `value` is a structurally valid Brazilian IBAN whose ISO 7064
  * MOD 97-10 check digits match.
@@ -34,6 +39,7 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * isValidIban("BR15 0000 0000 0000 1093 2840 814P 2"); // true (grouping spaces)
  * isValidIban("br1500000000000010932840814p2"); // true (case-insensitive)
  * isValidIban("BR1500000000000010932840814P3"); // false (bad check digits)
+ * isValidIban("BR1500000000000010932840814P-2"); // false (hyphens are not part of an IBAN)
  * isValidIban("DE89370400440532013000"); // false (non Brazilian IBAN)
  * ```
  *
@@ -46,7 +52,11 @@ const hasValidCheckDigits = (iban: string): boolean => {
 export const isValidIban = (value: string): boolean => {
 	if (typeof value !== "string") return false;
 
-	const sanitized = sanitizeToAlphanumeric(value);
+	const printed = value.trim();
+
+	if (!IBAN_FORMAT_REGEX.test(printed)) return false;
+
+	const sanitized = sanitizeToAlphanumeric(printed);
 
 	if (!BR_IBAN_REGEX.test(sanitized)) return false;
 

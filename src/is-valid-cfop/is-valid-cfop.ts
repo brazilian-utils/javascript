@@ -6,6 +6,10 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Validates if a CFOP (Código Fiscal de Operações e Prestações) code exists in the
  * official table.
  *
+ * Only operable codes count: the group and subgroup headings of the official nomenclature,
+ * the codes ending in "00" and "50" (1000, 1100, 1150, 5350, ...), are section titles rather
+ * than codes a document can carry, so they are rejected.
+ *
  * @param {string|number} value - The CFOP code to be validated.
  * @returns {boolean} True when the code is a known 4 digit CFOP code, false otherwise.
  *
@@ -14,6 +18,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * isValidCfop("5102"); // true
  * isValidCfop(5102); // true
  * isValidCfop("0000"); // false
+ * isValidCfop("1150"); // false (a subgroup heading, not an operable code)
  * ```
  *
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2001/AJ_007_01

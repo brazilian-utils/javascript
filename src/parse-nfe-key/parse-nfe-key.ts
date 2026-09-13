@@ -12,8 +12,13 @@ import {
 	VALID_MODELS,
 } from "./constants";
 
-/** The document models a DF-e access key can carry: `"55"` NF-e, `"57"` CT-e, `"58"` MDF-e and `"65"` NFC-e. */
-export type NfeKeyModel = "55" | "57" | "58" | "65";
+/**
+ * The document models a DF-e access key can carry: `"55"` NF-e, `"57"` CT-e, `"58"` MDF-e,
+ * `"65"` NFC-e and `"67"` CT-e OS. Spelled out instead of derived from `VALID_MODELS` because
+ * the allowlist is internal and API Extractor cannot name it in the public report; the type
+ * test of `parse-nfe-key.test.ts` pins the two together so they cannot drift apart.
+ */
+export type NfeKeyModel = "55" | "57" | "58" | "65" | "67";
 
 /** The fields `parseNfeKey` reads out of a DF-e access key (chave de acesso). */
 export type NfeKey = {
@@ -25,7 +30,7 @@ export type NfeKey = {
 	month: number;
 	/** The 14 digit CNPJ (or zero padded CPF) of the issuer. */
 	taxId: string;
-	/** Document model: "55" NF-e, "57" CT-e, "58" MDF-e, "65" NFC-e. */
+	/** Document model: "55" NF-e, "57" CT-e, "58" MDF-e, "65" NFC-e, "67" CT-e OS. */
 	model: NfeKeyModel;
 	/** Document series, 0 to 999. */
 	series: number;
@@ -43,16 +48,18 @@ export type NfeKey = {
  * Parses a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) into its fields.
  *
  * Covers every document that shares the same 44 digit layout: NF-e (modelo 55), NFC-e
- * (modelo 65), CT-e (modelo 57) and MDF-e (modelo 58). Accepts the same input forms as
- * `isValidNfeKey` (whitespace mask, `NFe` XML `Id` prefix) and returns `null` when the key
- * is not valid. The emission type (`tpEmis`) must be one of the codes the MOC assigns, 1 to 7
- * or 9; 8 is not assigned and is rejected.
+ * (modelo 65), CT-e (modelo 57), MDF-e (modelo 58) and CT-e OS (modelo 67). Accepts the same
+ * input forms as `isValidNfeKey` (whitespace mask, `NFe` XML `Id` prefix) and returns `null`
+ * when the key is not valid. The emission type (`tpEmis`) must be one of the codes the MOC
+ * assigns, 1 to 7 or 9; 8 is not assigned and is rejected.
  *
  * @param {string} value - The access key value to be parsed.
  * @returns {NfeKey | null} The parsed access key, or `null` when it is not valid.
  *
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
  * Manual de Orientação do Contribuinte (MOC) NF-e, "chave de acesso".
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/aj_009_07
+ * Ajuste SINIEF 09/07, cláusula primeira, § 3.º, II, "b": the CT-e OS, modelo 67.
  * @see Based on: https://github.com/nfephp-org/sped-common/blob/master/src/Keys.php
  * NFePHP `Keys::build` reference implementation, source of the SP and RS test vectors.
  * @see Based on: https://github.com/vmarchesin/br-validate-dfe-access-key

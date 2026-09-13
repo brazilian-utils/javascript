@@ -1,4 +1,4 @@
-import { BR_IBAN_LENGTH } from "../_internals/constants/iban";
+import { BR_IBAN_LENGTH, IBAN_FORMAT_REGEX } from "../_internals/constants/iban";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { GROUP_SIZE } from "./constants";
 
@@ -10,9 +10,14 @@ import { GROUP_SIZE } from "./constants";
  * the 29 character length of a Brazilian IBAN, as far as it goes, so the function can also be
  * used as an input mask. Use `isValidIban` to check validity.
  *
+ * The value still has to be written in the ISO 13616 print format: letters and digits in
+ * groups separated by a single space, with optional surrounding whitespace. Any other
+ * character makes the value something other than an IBAN, so it returns an empty string
+ * instead of quietly dropping the character and presenting the rest as an IBAN.
+ *
  * @param {string} value - The IBAN to be formatted.
  * @returns {string} The IBAN uppercased and grouped in blocks of 4 characters, or an empty
- * string when `value` is not a string.
+ * string when `value` is not a string written in the print format.
  *
  * @example
  * ```typescript
@@ -20,6 +25,7 @@ import { GROUP_SIZE } from "./constants";
  * formatIban("br1500000000000010932840814p2"); // "BR15 0000 0000 0000 1093 2840 814P 2"
  * formatIban("BR15"); // "BR15"
  * formatIban("BR1500000000000010932840814P2EXTRA"); // "BR15 0000 0000 0000 1093 2840 814P 2"
+ * formatIban("BR1500000000000010932840814P-2"); // "" (hyphens are not part of an IBAN)
  * ```
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013
@@ -28,7 +34,11 @@ import { GROUP_SIZE } from "./constants";
 export const formatIban = (value: string): string => {
 	if (typeof value !== "string") return "";
 
-	const sanitized = sanitizeToAlphanumeric(value).slice(0, BR_IBAN_LENGTH);
+	const printed = value.trim();
+
+	if (!IBAN_FORMAT_REGEX.test(printed)) return "";
+
+	const sanitized = sanitizeToAlphanumeric(printed).slice(0, BR_IBAN_LENGTH);
 
 	let formatted = "";
 

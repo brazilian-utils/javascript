@@ -47,7 +47,8 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * scope, so a well-formed non `BR` IBAN also returns `null`.
  *
  * Accepts the same input forms as `isValidIban` (grouping spaces, lowercase) and returns `null`
- * whenever `isValidIban` would return `false`.
+ * whenever `isValidIban` would return `false`, including a value carrying any character other
+ * than letters, digits and the grouping spaces of the ISO 13616 print format.
  *
  * @param {string} value - The IBAN to be parsed.
  * @returns {Iban|null} The parsed IBAN, or `null` when it is not a valid Brazilian IBAN.
@@ -68,6 +69,7 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * parseIban("BR15 0000 0000 0000 1093 2840 814P 2"); // same result (grouping spaces)
  * parseIban("DE89370400440532013000"); // null (non Brazilian IBAN)
  * parseIban("BR1500000000000010932840814P3"); // null (bad check digits)
+ * parseIban("BR1500000000000010932840814P-2"); // null (hyphens are not part of an IBAN)
  * ```
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013

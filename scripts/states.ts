@@ -35,8 +35,18 @@ const isState = (value: unknown): value is State =>
 	"nome" in value.regiao &&
 	typeof value.regiao.nome === "string";
 
-const union = (values: string[]): string =>
-	values.map((value) => `| ${JSON.stringify(value)}`).join(" ");
+type GeneratedState = {
+	code: string;
+	name: string;
+	regionCode: string;
+	regionName: string;
+	ibgeCode: number;
+};
+
+const member = (state: GeneratedState): string =>
+	`| { readonly code: ${JSON.stringify(state.code)}; readonly name: ${JSON.stringify(state.name)}; readonly regionCode: ${JSON.stringify(state.regionCode)}; readonly regionName: ${JSON.stringify(state.regionName)}; readonly ibgeCode: ${state.ibgeCode} }`;
+
+const union = (states: GeneratedState[]): string => states.map((state) => member(state)).join(" ");
 
 const main = async (): Promise<void> => {
 	const response = await fetchWithRetry(
@@ -67,25 +77,25 @@ const main = async (): Promise<void> => {
 
 	await writeFile(
 		resolve(scriptsDir, "..", "./src/_internals/constants/states.ts"),
-		`/** The two letter code of each Brazilian state, as published by the IBGE. */
-export type StateCode = ${union(states.map((state) => state.code))};
+		`/**
+ * One Brazilian state, as returned by \`getStates\`, \`getStateByIbgeCode\` and the other state
+ * utils. Every state is its own member of the union, so the fields of a state are tied to each
+ * other: \`Extract<State, { code: "SP" }>["name"]\` is \`"São Paulo"\`, and narrowing a \`State\` by
+ * \`code\` narrows its \`name\`, \`regionCode\`, \`regionName\` and \`ibgeCode\` too. An impossible
+ * combination such as \`{ code: "SP", name: "Acre" }\` is not a \`State\`.
+ *
+ * Each member has the two letter code of the state (\`code\`, e.g. \`"SP"\`), its full name
+ * (\`name\`, e.g. \`"São Paulo"\`), the code and the full name of the region it belongs to
+ * (\`regionCode\` and \`regionName\`, e.g. \`"SE"\` and \`"Sudeste"\`) and the 2 digit IBGE code of the
+ * Federative Unit (\`ibgeCode\`, the "cUF", e.g. \`35\`).
+ */
+export type State = ${union(states)};
+
+/** The two letter code of each Brazilian state, as published by the IBGE. */
+export type StateCode = State["code"];
 
 /** The name of each Brazilian state, as published by the IBGE. */
-export type StateName = ${union(states.map((state) => state.name))};
-
-/** One Brazilian state, as returned by \`getStates\`, \`getStateByIbgeCode\` and the other state utils. */
-export type State = {
-	/** The two letter code of the state, e.g. \`"SP"\`. */
-	readonly code: StateCode;
-	/** The full name of the state, e.g. \`"São Paulo"\`. */
-	readonly name: StateName;
-	/** The code of the region the state belongs to, e.g. \`"SE"\`. */
-	readonly regionCode: "N" | "NE" | "CO" | "SE" | "S";
-	/** The full name of the region the state belongs to, e.g. \`"Sudeste"\`. */
-	readonly regionName: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
-	/** The 2 digit IBGE code of the Federative Unit ("cUF"), e.g. \`35\`. */
-	readonly ibgeCode: number;
-};
+export type StateName = State["name"];
 
 /**
  * Brazilian states published by the IBGE, sorted by name with \`localeCompare\` in the "pt-BR"

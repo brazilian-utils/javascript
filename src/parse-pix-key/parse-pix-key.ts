@@ -1,4 +1,3 @@
-import { CPF_LENGTH } from "../_internals/constants/cpf";
 import { PHONE_COUNTRY_CODE } from "../_internals/constants/phone";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -7,7 +6,7 @@ import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 import { isValidEmail } from "../is-valid-email/is-valid-email";
 import { isValidPhone } from "../is-valid-phone/is-valid-phone";
 import { parseCnpj } from "../parse-cnpj/parse-cnpj";
-import { EMAIL_MAX_LENGTH, EVP_REGEX, PHONE_HINT_REGEX } from "./constants";
+import { CPF_SYNTAX_REGEX, EMAIL_MAX_LENGTH, EVP_REGEX, PHONE_SYNTAX_REGEX } from "./constants";
 
 /** The kinds of Pix key `parsePixKey` recognizes. */
 export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
@@ -18,6 +17,23 @@ export type PixKey = {
 	type: PixKeyType;
 	/** The key in the canonical DICT form for its kind. */
 	value: string;
+};
+
+/**
+ * Reads a value written as a phone number, i.e. one holding nothing but digits and the
+ * characters of the usual masks, as the E.164 mobile key of the DICT.
+ *
+ * @param {string} trimmed - The trimmed value to read.
+ * @returns {PixKey|null} The phone key, or `null` when the value is not a mobile number.
+ */
+const resolvePhoneKey = (trimmed: string): PixKey | null => {
+	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
+
+	const national = normalizePhone(trimmed);
+
+	return isValidPhone(national, { accept: ["mobile"] })
+		? { type: "phone", value: `+${PHONE_COUNTRY_CODE}${national}` }
+		: null;
 };
 
 /**
@@ -32,13 +48,23 @@ export type PixKey = {
  *   characters. The manual registers a "número de telefone celular", so only mobile numbers
  *   are recognized; a landline is not a Pix key. Masked, bare and `+55` prefixed inputs are
  *   all accepted;
- * - `evp`: the random key, a lowercase UUID version 4.
+ * - `evp`: the random key, a lowercase UUID written with its punctuation (8-4-4-4-12
+ *   hexadecimal digits). The DICT issues version 4 UUIDs, but neither the pattern the manual
+ *   registers nor its own example (`123e4567-e12b-12d1-a456-426655440000`, whose version
+ *   nibble is `1`) constrains the version, so the version and variant nibbles are not enforced.
+ *
+ * The CPF and the phone number are recognized by the way they are written, not only by the
+ * digits they carry: a value is read as a CPF when it is the bare 11 digits or the documented
+ * mask, and as a phone number when it holds nothing but digits, spaces and the `+`, `-`, `(`,
+ * `)` and `.` of the usual masks. Surrounding text is not stripped away, so
+ * `"abc123.456.789-09"` is not a CPF key.
  *
  * A value with a valid CNPJ check digit is read as a CNPJ, even when it starts with `0055`
  * (a phone key inside a BR Code always carries the `+55` prefix). An 11 digit value can be
  * read both as a CPF and as a mobile phone number: when it is valid as both, it is read as a
- * CPF, unless it was written as a phone number, i.e. unless it starts with `+55`/`0055` or
- * wraps its DDD in parentheses.
+ * CPF, unless it was written as a phone number. A `+55`/`0055` prefix or a DDD between
+ * parentheses falls outside the CPF forms above, so a value written that way is never read as
+ * a CPF, even when its digits carry a valid CPF check digit.
  *
  * @param {string} value - The Pix key to be parsed.
  * @returns {PixKey|null} The normalized key, or `null` when the value is not a valid Pix key.
@@ -64,7 +90,7 @@ export const parsePixKey = (value: string): PixKey | null => {
 
 	const trimmed = value.trim();
 
-	// Stryker disable next-line ConditionalExpression: an empty trimmed value never matches the EVP regex, never contains "@", normalizes to no valid phone, is never a valid CNPJ, and has no CPF-length digits, so every branch below already falls through to null on its own
+	// Stryker disable next-line ConditionalExpression: an empty trimmed value never matches the EVP regex, never contains "@", is never a valid CNPJ, matches neither the CPF nor the phone syntax, so every branch below already falls through to null on its own
 	if (!trimmed) return null;
 
 	if (EVP_REGEX.test(trimmed)) return { type: "evp", value: trimmed.toLowerCase() };
@@ -77,21 +103,15 @@ export const parsePixKey = (value: string): PixKey | null => {
 			: null;
 	}
 
-	const national = normalizePhone(trimmed);
-	const phone: PixKey | null = isValidPhone(national, { accept: ["mobile"] })
-		? { type: "phone", value: `+${PHONE_COUNTRY_CODE}${national}` }
-		: null;
-
 	if (isValidCnpj(trimmed, { version: 2 })) {
 		return { type: "cnpj", value: parseCnpj(trimmed, { version: 2 }) };
 	}
 
-	if (phone && PHONE_HINT_REGEX.test(trimmed)) return phone;
+	if (CPF_SYNTAX_REGEX.test(trimmed)) {
+		const digits = sanitizeToDigits(trimmed);
 
-	const digits = sanitizeToDigits(trimmed);
+		if (isValidCpf(digits)) return { type: "cpf", value: digits };
+	}
 
-	// Stryker disable next-line ConditionalExpression: isValidCpf already rejects any digits whose length is not CPF_LENGTH on its own, so this length check can never change the outcome
-	if (digits.length === CPF_LENGTH && isValidCpf(digits)) return { type: "cpf", value: digits };
-
-	return phone;
+	return resolvePhoneKey(trimmed);
 };

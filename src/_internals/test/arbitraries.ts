@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
 
+import { type LicensePlateFormat } from "../../get-format-license-plate/get-format-license-plate";
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../constants/holidays";
 import { DATA as STATES, type StateCode } from "../constants/states";
 
@@ -101,6 +102,19 @@ export const maskedValues = (
 			interleave(value, separators),
 		),
 	);
+
+const LICENSE_PLATE_PATTERNS = {
+	LLLNLNN: /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/,
+	LLLNNNN: /^[A-Z]{3}[0-9]{4}$/,
+};
+
+/**
+ * @param {LicensePlateFormat} format The layout the plate follows: `LLLNLNN` for a Mercosul plate
+ * and `LLLNNNN` for an old one.
+ * @returns {fc.Arbitrary<string>} Uppercase unmasked plates of exactly that layout.
+ */
+export const licensePlates = (format: LicensePlateFormat): fc.Arbitrary<string> =>
+	fc.stringMatching(LICENSE_PLATE_PATTERNS[format]);
 
 /** The two letter code of every Brazilian state. */
 export const stateCodes: fc.Arbitrary<StateCode> = fc.constantFrom(

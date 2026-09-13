@@ -53,6 +53,17 @@ describe("getCnae", () => {
 		expect(getCnae("")).toBeNull();
 	});
 
+	it("should return null for a string that is not written in a documented form", () => {
+		expect(getCnae("0111abc301")).toBeNull();
+		expect(getCnae("62-01501")).toBeNull();
+	});
+
+	it("should return null for a number that is not a non-negative safe integer", () => {
+		expect(getCnae(-111_301)).toBeNull();
+		expect(getCnae(6201.501)).toBeNull();
+		expect(getCnae(2 ** 53)).toBeNull();
+	});
+
 	it("should return null for null and undefined", () => {
 		// @ts-expect-error not a string or number
 		expect(getCnae(null)).toBeNull();

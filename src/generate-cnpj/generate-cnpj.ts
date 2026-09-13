@@ -63,7 +63,9 @@ const generateAlphanumericCnpj = (): string => {
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @param {1 | 2} version - The version of the CNPJ to be generated.
+ * @param {1 | 2} version - The version of the CNPJ to be generated: `1` for the numeric CNPJ and
+ * `2` for the alphanumeric one. Defaults to `1`, and never throws: `null`, `undefined` and any
+ * other runtime value that is not `2` also generate a version 1 (numeric) CNPJ.
  * @returns {string} A valid 14-digit CNPJ string without formatting.
  *
  * @example
@@ -77,4 +79,4 @@ const generateAlphanumericCnpj = (): string => {
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
 export const generateCnpj = (version: 1 | 2 = 1): string =>
-	version === 1 ? generateNumericCnpj() : generateAlphanumericCnpj();
+	version === 2 ? generateAlphanumericCnpj() : generateNumericCnpj();
