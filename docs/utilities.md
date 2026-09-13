@@ -101,13 +101,15 @@ isValidCep('12345'); // false (invalid length)
 
 ## generateCnpj
 
-Generate a valid random CNPJ. Uses `Math.random()` internally, so it is not cryptographically secure.
+Generate a valid random CNPJ. Uses `Math.random()` internally, so it is not cryptographically secure. The first argument is either the version, as before, or a `GenerateCnpjOptions` object with the same `version` plus `branch`, the "número de ordem" (filial) block in positions 9 to 12: an integer from 1 to 9999 written zero padded to four characters, random by default. An invalid `branch` is ignored and a random block is used, and the block stays numeric on the alphanumeric version.
 
 ```javascript
 import { generateCnpj } from '@brazilian-utils/brazilian-utils'
 
 generateCnpj();
 generateCnpj(2); // alphanumeric CNPJ, e.g. 'Q0SLFMBD7VX439'
+generateCnpj({ branch: 3 }); // ordem block '0003', e.g. '12345678000372'
+generateCnpj({ version: 2, branch: 1 }); // alphanumeric CNPJ whose ordem block is '0001'
 ```
 
 ## isValidBoleto

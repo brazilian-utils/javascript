@@ -101,13 +101,15 @@ isValidCep('12345'); // false (tamanho inválido)
 
 ## generateCnpj
 
-Gera um CNPJ válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro.
+Gera um CNPJ válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro. O primeiro argumento é a versão, como antes, ou um objeto `GenerateCnpjOptions` com a mesma `version` mais `branch`, o bloco do "número de ordem" (filial) nas posições 9 a 12: um inteiro de 1 a 9999 escrito com zeros à esquerda em quatro caracteres, aleatório por padrão. Um `branch` inválido é ignorado e um bloco aleatório é usado, e o bloco continua numérico na versão alfanumérica.
 
 ```javascript
 import { generateCnpj } from '@brazilian-utils/brazilian-utils'
 
 generateCnpj();
 generateCnpj(2); // CNPJ alfanumérico, ex. 'Q0SLFMBD7VX439'
+generateCnpj({ branch: 3 }); // bloco de ordem '0003', ex. '12345678000372'
+generateCnpj({ version: 2, branch: 1 }); // CNPJ alfanumérico cujo bloco de ordem é '0001'
 ```
 
 ## isValidBoleto

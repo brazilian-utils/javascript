@@ -3,9 +3,19 @@ import * as fc from "fast-check";
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
-import { generateCnpj } from "./generate-cnpj";
+import { type GenerateCnpjOptions, generateCnpj } from "./generate-cnpj";
 
 const REMAINDER_TWO_DRAWS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+
+const BRANCH_FALLBACK_DRAWS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2];
+
+const INVALID_BRANCHES: [string, number][] = [
+	["0, below the first ordem", 0],
+	["10000, past the last ordem", 10_000],
+	["1.5, not an integer", 1.5],
+	["-1, a negative ordem", -1],
+	["NaN", Number.NaN],
+];
 
 const generateWithForcedDraws = (
 	draws: number[],
@@ -159,6 +169,92 @@ describe("generateCnpj", () => {
 		});
 	});
 
+	describe("options object", () => {
+		test("should generate a numeric CNPJ for an empty options object", () => {
+			const cnpj = generateCnpj({});
+
+			expect(cnpj).toHaveLength(CNPJ_LENGTH);
+			expect(/^\d+$/.test(cnpj)).toBe(true);
+			expect(isValidCnpj(cnpj)).toBe(true);
+		});
+
+		test("should write the branch as the ordem block in positions 9 to 12", () => {
+			const cnpj = generateCnpj({ branch: 1 });
+
+			expect(cnpj.slice(8, 12)).toBe("0001");
+			expect(isValidCnpj(cnpj)).toBe(true);
+		});
+
+		test("should zero pad a branch shorter than the four character ordem block", () => {
+			expect(generateCnpj({ branch: 3 }).slice(8, 12)).toBe("0003");
+			expect(generateCnpj({ branch: 42 }).slice(8, 12)).toBe("0042");
+			expect(generateCnpj({ branch: 500 }).slice(8, 12)).toBe("0500");
+		});
+
+		test("should keep the ordem block numeric on the alphanumeric version, with letters in the raiz", () => {
+			const raizChars = new Set<string>();
+
+			for (let index = 0; index < 100; index++) {
+				const cnpj = generateCnpj({ version: 2, branch: 9999 });
+
+				expect(cnpj).toHaveLength(CNPJ_LENGTH);
+				expect(cnpj.slice(8, 12)).toBe("9999");
+				expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
+
+				for (const char of cnpj.slice(0, 8)) {
+					raizChars.add(char);
+				}
+			}
+
+			expect([...raizChars].some((char) => /[A-Z]/.test(char))).toBe(true);
+		});
+
+		test("should generate a numeric CNPJ with a branch when the version is 1", () => {
+			const cnpj = generateCnpj({ version: 1, branch: 1234 });
+
+			expect(/^\d+$/.test(cnpj)).toBe(true);
+			expect(cnpj.slice(8, 12)).toBe("1234");
+			expect(isValidCnpj(cnpj)).toBe(true);
+		});
+
+		for (const [label, branch] of INVALID_BRANCHES) {
+			test(`should draw a random ordem block when the branch is ${label}`, () => {
+				const cnpj = generateWithForcedDraws(BRANCH_FALLBACK_DRAWS, 10, () =>
+					generateCnpj({ branch }),
+				);
+
+				expect(cnpj).toBe("12345678901230");
+				expect(isValidCnpj(cnpj)).toBe(true);
+			});
+		}
+
+		test("should draw a random ordem block when the branch is a string", () => {
+			const cnpj = generateWithForcedDraws(BRANCH_FALLBACK_DRAWS, 10, () =>
+				// @ts-expect-error: intentionally invalid input
+				generateCnpj({ branch: "3" }),
+			);
+
+			expect(cnpj).toBe("12345678901230");
+		});
+
+		test("should draw a random ordem block when the branch is null", () => {
+			const cnpj = generateWithForcedDraws(BRANCH_FALLBACK_DRAWS, 10, () =>
+				// @ts-expect-error: intentionally invalid input
+				generateCnpj({ branch: null }),
+			);
+
+			expect(cnpj).toBe("12345678901230");
+		});
+
+		test("should ignore an unknown version in the options object and generate a numeric CNPJ", () => {
+			// @ts-expect-error: intentionally invalid input
+			const cnpj = generateCnpj({ version: 3 });
+
+			expect(/^\d+$/.test(cnpj)).toBe(true);
+			expect(isValidCnpj(cnpj)).toBe(true);
+		});
+	});
+
 	describe("properties", () => {
 		const batchSize = fc.integer({ min: 1, max: 10 });
 
@@ -189,12 +285,30 @@ describe("generateCnpj", () => {
 				}),
 			);
 		});
+
+		test("should write any ordem from 1 to 9999 into positions 9 to 12 of both versions", () => {
+			fc.assert(
+				fc.property(fc.integer({ min: 1, max: 9999 }), (branch) => {
+					const padded = `000${branch}`.slice(-4);
+
+					expect(generateCnpj({ branch }).slice(8, 12)).toBe(padded);
+					expect(generateCnpj({ version: 2, branch }).slice(8, 12)).toBe(padded);
+				}),
+			);
+		});
 	});
 });
 
 describe("generateCnpj types", () => {
-	test("should take an optional version and return a string", () => {
-		expectTypeOf(generateCnpj).parameter(0).toEqualTypeOf<1 | 2 | undefined>();
+	test("should take an optional version or options object and return a string", () => {
+		expectTypeOf(generateCnpj)
+			.parameter(0)
+			.toEqualTypeOf<1 | 2 | GenerateCnpjOptions | undefined>();
 		expectTypeOf(generateCnpj).returns.toEqualTypeOf<string>();
+	});
+
+	test("should take an optional version and branch in the options object", () => {
+		expectTypeOf<GenerateCnpjOptions["version"]>().toEqualTypeOf<1 | 2 | undefined>();
+		expectTypeOf<GenerateCnpjOptions["branch"]>().toEqualTypeOf<number | undefined>();
 	});
 });

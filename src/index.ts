@@ -43,7 +43,7 @@ export { formatVoterId } from "./format-voter-id/format-voter-id";
 export { type GenerateBoletoOptions, generateBoleto } from "./generate-boleto/generate-boleto";
 export { generateCep } from "./generate-cep/generate-cep";
 export { generateCnh } from "./generate-cnh/generate-cnh";
-export { generateCnpj } from "./generate-cnpj/generate-cnpj";
+export { type GenerateCnpjOptions, generateCnpj } from "./generate-cnpj/generate-cnpj";
 export { generateCpf } from "./generate-cpf/generate-cpf";
 export { generateLegalNature } from "./generate-legal-nature/generate-legal-nature";
 export {
