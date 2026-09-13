@@ -29,6 +29,7 @@ const normalizeName = (value: string): string =>
 const getMunicipalityByCode = (code: string | number): [string, string] | null => {
 	if (!isLookupCode(code)) return null;
 
+	// Stryker disable next-line ConditionalExpression: this guard only memoizes; CITIES_DATA is a module level constant that is never written to, so rebuilding the index on every call produces the very same entries, and each lookup already returns a fresh copy of the pair, leaving the repeated work unobservable.
 	if (!codeIndex) {
 		codeIndex = new Map();
 
@@ -42,7 +43,9 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 	// `Map#get` never throws and simply misses for a key of the wrong shape (a malformed, too
 	// short or too long code), so only the sign and the decimal point of a numeric `code`, which
 	// `sanitizeToDigits` would silently drop, have to be pre-validated above.
-	return codeIndex.get(sanitizeToDigits(code)) ?? null;
+	const entry = codeIndex.get(sanitizeToDigits(code));
+
+	return entry ? [...entry] : null;
 };
 
 const getMunicipalityCodeByName = ({
@@ -69,17 +72,55 @@ const getMunicipalityCodeByName = ({
 };
 
 /**
- * Looks a Brazilian municipality up in the offline IBGE "localidades" dataset.
+ * Looks a Brazilian municipality up by its IBGE code in the offline IBGE "localidades" dataset.
  *
- * Given a `code` it resolves the municipality name and its UF; given a `municipalityName`
- * and a `uf` it resolves the IBGE code. The name lookup ignores accents and casing, and every
- * run of whitespace collapses into a single space, so `"sao  paulo"` matches `"São Paulo"`; a
- * name written without the space does not, since only the runs that are there collapse. The
- * casing is folded to upper case, the direction Unicode expands `"ß"` to `"SS"` in, so
- * `"Paßos"` matches `"Passos"`.
- * Validation failures and unknown municipalities are reported as `null`. A `code` given as a
- * number must be a non-negative integer: a sign and a decimal point are not digits, so
- * `-3550308` and `355030.8` are rejected instead of being read as `3550308`.
+ * A `code` given as a number must be a non-negative integer: a sign and a decimal point are not
+ * digits, so `-3550308` and `355030.8` are rejected instead of being read as `3550308`.
+ *
+ * @param {GetMunicipalityByCodeOptions} options - The `{ code }` query.
+ * @returns {Promise<[string, string] | null>} A fresh `[name, uf]` pair, which the caller owns
+ * and may mutate, or null when the code is malformed or unknown.
+ *
+ * @example
+ * ```typescript
+ * await getMunicipality({ code: "3550308" }); // ["São Paulo", "SP"]
+ * await getMunicipality({ code: 3550308 }); // ["São Paulo", "SP"]
+ * ```
+ *
+ * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ */
+export function getMunicipality(
+	options: GetMunicipalityByCodeOptions,
+): Promise<[string, string] | null>;
+
+/**
+ * Looks a Brazilian municipality's IBGE code up in the offline IBGE "localidades" dataset.
+ *
+ * The name lookup ignores accents and casing, and every run of whitespace collapses into a
+ * single space, so `"sao  paulo"` matches `"São Paulo"`; a name written without the space does
+ * not, since only the runs that are there collapse. The casing is folded to upper case, the
+ * direction Unicode expands `"ß"` to `"SS"` in, so `"Paßos"` matches `"Passos"`.
+ *
+ * @param {GetMunicipalityByNameOptions} options - The `{ municipalityName, uf }` query.
+ * @returns {Promise<string | null>} The 7 digit IBGE code, or null when the state code or the
+ * municipality is unknown.
+ *
+ * @example
+ * ```typescript
+ * await getMunicipality({ municipalityName: "sao paulo", uf: "sp" }); // "3550308"
+ * ```
+ *
+ * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ */
+export function getMunicipality(options: GetMunicipalityByNameOptions): Promise<string | null>;
+
+/**
+ * Looks a Brazilian municipality up in the offline IBGE "localidades" dataset, from a query
+ * whose direction is only known at run time.
+ *
+ * Given a `code` it resolves the municipality name and its UF; given a `municipalityName` and a
+ * `uf` it resolves the IBGE code. Validation failures and unknown municipalities are reported
+ * as `null`.
  *
  * @param {GetMunicipalityOptions} options - Either `{ code }` or `{ municipalityName, uf }`.
  * @returns {Promise<[string, string] | string | null>} The `[name, uf]` pair when looking up
@@ -89,16 +130,20 @@ const getMunicipalityCodeByName = ({
  *
  * @example
  * ```typescript
- * await getMunicipality({ code: "3550308" }); // ["São Paulo", "SP"]
- * await getMunicipality({ code: 3550308 }); // ["São Paulo", "SP"]
- * await getMunicipality({ municipalityName: "sao paulo", uf: "sp" }); // "3550308"
+ * const lookUp = (options: GetMunicipalityOptions) => getMunicipality(options);
+ *
+ * await lookUp({ code: "3550308" }); // ["São Paulo", "SP"]
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const getMunicipality = (
+export function getMunicipality(
 	options: GetMunicipalityOptions,
-): Promise<[string, string] | null | string> => {
+): Promise<[string, string] | string | null>;
+
+export function getMunicipality(
+	options: GetMunicipalityOptions,
+): Promise<[string, string] | string | null> {
 	if (isNullish(options) || typeof options !== "object" || Array.isArray(options)) {
 		return Promise.resolve(null);
 	}
@@ -108,4 +153,4 @@ export const getMunicipality = (
 	}
 
 	return Promise.resolve(getMunicipalityCodeByName(options));
-};
+}

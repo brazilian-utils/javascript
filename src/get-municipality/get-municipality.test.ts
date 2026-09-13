@@ -71,11 +71,15 @@ describe("getMunicipality", () => {
 		);
 	});
 
-	it("should return the same cached tuple instance across repeated calls with the same code", async () => {
+	it("should return a fresh pair, so mutating it leaves a later lookup of the same code intact", async () => {
 		const first = await getMunicipality({ code: "3550308" });
-		const second = await getMunicipality({ code: "3550308" });
 
-		expect(first).toBe(second);
+		expect(first).toStrictEqual(["São Paulo", "SP"]);
+
+		first?.fill("Mutated");
+
+		expect(first).toStrictEqual(["Mutated", "Mutated"]);
+		await expect(getMunicipality({ code: "3550308" })).resolves.toStrictEqual(["São Paulo", "SP"]);
 	});
 
 	it("should resolve a known Boa Esperança do Norte/MT lookup", async () => {
@@ -213,9 +217,10 @@ describe("getMunicipality", () => {
 	});
 });
 
+const lookUpEither = (options: GetMunicipalityOptions) => getMunicipality(options);
+
 describe("getMunicipality types", () => {
-	it("should take a code or a name plus uf and resolve to a pair, a name or null", () => {
-		expectTypeOf(getMunicipality).parameter(0).toEqualTypeOf<GetMunicipalityOptions>();
+	it("should take a code or a name plus uf", () => {
 		expectTypeOf<GetMunicipalityOptions>().toEqualTypeOf<
 			GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions
 		>();
@@ -224,8 +229,13 @@ describe("getMunicipality types", () => {
 			municipalityName: string;
 			uf: string;
 		}>();
-		expectTypeOf(getMunicipality).returns.resolves.toEqualTypeOf<
-			[string, string] | string | null
-		>();
+	});
+
+	it("should overload the return type on the direction of the lookup", () => {
+		const byCode: GetMunicipalityByCodeOptions = { code: "3550308" };
+		const byName: GetMunicipalityByNameOptions = { municipalityName: "São Paulo", uf: "SP" };
+		expectTypeOf(getMunicipality(byCode)).resolves.toEqualTypeOf<[string, string] | null>();
+		expectTypeOf(getMunicipality(byName)).resolves.toEqualTypeOf<string | null>();
+		expectTypeOf(lookUpEither).returns.resolves.toEqualTypeOf<[string, string] | string | null>();
 	});
 });
