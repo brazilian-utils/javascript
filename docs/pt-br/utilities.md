@@ -85,7 +85,7 @@ parseCnpj('12.OUT.345/0001-99', { version: 2 }); // 12OUT345000199
 
 ## isValidCep
 
-Valida se o CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) é válido. Aceita entrada como `string` ou `number`; espaços, pontos e hífens ao redor/entre os 8 dígitos são ignorados, mas qualquer outro caractere, uma letra em especial, invalida o valor.
+Valida se o CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) é válido. Aceita entrada como `string` ou `number`, mas um CEP que começa com `0` precisa ser passado como string, já que um número não preserva o zero à esquerda (`isValidCep(1310100)` é `false`, `isValidCep('01310100')` é `true`); espaços, pontos e hífens ao redor/entre os 8 dígitos são ignorados, mas qualquer outro caractere, uma letra em especial, invalida o valor.
 
 ```javascript
 import { isValidCep } from '@brazilian-utils/brazilian-utils';
@@ -511,7 +511,7 @@ parsePis('123.45678.90-1'); // 12345678901
 
 ## formatCep
 
-Formata o CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)). `options.pad` (parte de `FormatCepOptions`) completa o valor com zeros à esquerda até os 8 dígitos antes de aplicar a máscara (padrão `false`).
+Formata o CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)). `options.pad` (parte de `FormatCepOptions`) completa o valor com zeros à esquerda até os 8 dígitos antes de aplicar a máscara (padrão `false`); um CEP que começa com `0` passado como número perde esse zero, então passe-o como string ou use `pad`.
 
 ```javascript
 import { formatCep } from '@brazilian-utils/brazilian-utils';

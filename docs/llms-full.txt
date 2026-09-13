@@ -325,7 +325,7 @@ parseCnpj('12.OUT.345/0001-99', { version: 2 }); // 12OUT345000199
 
 ### isValidCep
 
-Check if CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) is valid. Accepts both `string` and `number` input; any spaces, dots and hyphens around/between the 8 digits are ignored, but any other character, a letter in particular, makes the value invalid.
+Check if CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) is valid. Accepts both `string` and `number` input, but a CEP that starts with `0` has to be passed as a string, since a number cannot keep the leading zero (`isValidCep(1310100)` is `false`, `isValidCep('01310100')` is `true`); any spaces, dots and hyphens around/between the 8 digits are ignored, but any other character, a letter in particular, makes the value invalid.
 
 ```javascript
 import { isValidCep } from '@brazilian-utils/brazilian-utils';
@@ -751,7 +751,7 @@ parsePis('123.45678.90-1'); // 12345678901
 
 ### formatCep
 
-Format CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)). `options.pad` (part of `FormatCepOptions`) left-pads the value with zeros to the full 8 digits before masking (default `false`).
+Format CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)). `options.pad` (part of `FormatCepOptions`) left-pads the value with zeros to the full 8 digits before masking (default `false`); a CEP that starts with `0` given as a number loses that zero, so pass it as a string or use `pad`.
 
 ```javascript
 import { formatCep } from '@brazilian-utils/brazilian-utils';
