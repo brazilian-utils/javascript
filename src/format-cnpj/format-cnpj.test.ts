@@ -140,6 +140,11 @@ describe("formatCnpj", () => {
 		);
 	});
 
+	it("should obfuscate on any truthy obfuscate value, the way pad is read", () => {
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatCnpj("46843485000186", { obfuscate: 1 })).toBe("**.843.485/0001-**");
+	});
+
 	it("should behave exactly as without the option when obfuscate is false or absent", () => {
 		expect(formatCnpj("46843485000186", { obfuscate: false })).toBe("46.843.485/0001-86");
 		expect(formatCnpj("46843485000186")).toBe("46.843.485/0001-86");

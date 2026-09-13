@@ -99,6 +99,11 @@ describe("formatCpf", () => {
 		expect(formatCpf("9438", { obfuscate: true })).toBe("***.8");
 	});
 
+	it("should obfuscate on any truthy obfuscate value, the way pad is read", () => {
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatCpf("94389575104", { obfuscate: 1 })).toBe("***.895.751-**");
+	});
+
 	it("should behave exactly as without the option when obfuscate is false or absent", () => {
 		expect(formatCpf("94389575104", { obfuscate: false })).toBe("943.895.751-04");
 		expect(formatCpf("94389575104")).toBe("943.895.751-04");

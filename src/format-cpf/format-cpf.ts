@@ -7,7 +7,7 @@ import { OBFUSCATED_PATTERN, PATTERN } from "./constants";
 export type FormatCpfOptions = {
 	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
 	pad?: boolean;
-	/** Whether to hide the first 3 digits and the 2 check digits with `*` (default: `false`). */
+	/** Whether to hide the first 3 digits and the 2 check digits with `*` (default: `false`, read for truthiness like `pad`). */
 	obfuscate?: boolean;
 };
 
@@ -17,7 +17,8 @@ export type FormatCpfOptions = {
  * @param {string|number} value - The CPF value to be formatted. It can be a string or a number.
  * @param {FormatCpfOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - If true, the value will be padded with leading zeros if necessary.
- * @param {boolean} options.obfuscate - If true, hides the first 3 digits and the 2 check digits.
+ * @param {boolean} options.obfuscate - If truthy, hides the first 3 digits and the 2 check
+ * digits. Read for truthiness, the way `pad` is, so a non-boolean such as `1` obfuscates too.
  * @returns {string} The formatted CPF string in the pattern "000.000.000-00".
  *
  * @example
@@ -29,7 +30,6 @@ export type FormatCpfOptions = {
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
- * @see Official: http://sped.rfb.gov.br/arquivo/show/8231
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const formatCpf = (value: string | number, options?: FormatCpfOptions): string => {
@@ -38,6 +38,6 @@ export const formatCpf = (value: string | number, options?: FormatCpfOptions): s
 	return format({
 		pad: options?.pad,
 		value: sanitizeToDigits(value),
-		pattern: options?.obfuscate === true ? OBFUSCATED_PATTERN : PATTERN,
+		pattern: (options?.obfuscate ?? false) ? OBFUSCATED_PATTERN : PATTERN,
 	});
 };
