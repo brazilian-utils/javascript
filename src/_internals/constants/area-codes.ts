@@ -3,15 +3,18 @@ import { type StateCode } from "./states";
 /**
  * Brazilian DDD (area code) data under the Plano Geral de Numeração. `VALID_AREA_CODES` is kept
  * as a bare array of the 67 valid codes for its existing importers; `AREA_CODE_STATES` is a
- * second, richer literal mapping every one of those same 67 codes to its state (UF), verified
- * one by one against the ANATEL numbering plan reflected by the BrasilAPI DDD dataset.
+ * second, richer literal mapping every one of those same 67 codes to the state (UF) that holds
+ * all but a handful of its municipalities, and `AREA_CODE_SECONDARY_STATES` carries the other
+ * states the four cross-border codes also serve.
  *
  * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
- * page below lists the codes actually allocated. The BrasilAPI DDD endpoint (`GET
- * /api/ddd/v1/{ddd}`) was used to verify the code-to-state mapping.
+ * page below lists the codes actually allocated and links, under "POR MUNICÍPIO", to the Anexo
+ * of Resolução Anatel nº 263/2001, which gives the Código Nacional of every municipality. That
+ * Anexo was parsed to derive both tables.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
  * @see Based on: https://brasilapi.com.br/docs#tag/DDD
  */
 export const VALID_AREA_CODES: readonly number[] = [
@@ -88,4 +91,32 @@ export const AREA_CODE_STATES: Record<number, StateCode> = {
 	97: "AM",
 	98: "MA",
 	99: "MA",
+};
+
+/**
+ * The other states a DDD serves, besides the primary state `AREA_CODE_STATES` gives it. Four
+ * Códigos Nacionais straddle a state border:
+ *
+ * - 61 serves the Distrito Federal and the Goiás municipalities of the Entorno do Distrito
+ *   Federal: Águas Lindas de Goiás, Cabeceiras, Cidade Ocidental, Cristalina, Formosa,
+ *   Luziânia, Novo Gama, Padre Bernardo, Planaltina, Santo Antônio do Descoberto, Valparaíso
+ *   de Goiás and Vila Boa.
+ * - 42 serves Paraná and Porto União (SC), across the river from União da Vitória (PR).
+ * - 47 serves Santa Catarina and Rio Negro (PR), across the river from Mafra (SC).
+ * - 49 serves Santa Catarina and Barracão (PR), on the border with Dionísio Cerqueira (SC).
+ *
+ * Derived from the Anexo of Resolução Anatel nº 263/2001, which lists the Código Nacional of
+ * every municipality, as later amended by Resolução nº 580/2012 (Vila Boa, 62 to 61),
+ * Resolução nº 644/2014 (Porto União, 49 to 42) and Resolução nº 701/2018 (Rio Negro, 41 to
+ * 47, and Barracão, 46 to 49). No other Código Nacional in that Anexo covers more than one
+ * state.
+ *
+ * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ */
+export const AREA_CODE_SECONDARY_STATES: Record<number, readonly StateCode[]> = {
+	42: ["SC"],
+	47: ["PR"],
+	49: ["PR"],
+	61: ["GO"],
 };
