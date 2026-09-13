@@ -45,6 +45,19 @@
 	"main": "./dist/brazilian-utils.umd.cjs",
 	"module": "./dist/brazilian-utils.js",
 	"types": "./dist/brazilian-utils.d.ts",
+	"typesVersions": {
+		"*": {
+			"dist/*": [
+				"dist/*"
+			],
+			"package.json": [
+				"package.json"
+			],
+			"*": [
+				"dist/*.d.ts"
+			]
+		}
+	},
 	"exports": {
 		".": {
 			"import": {
