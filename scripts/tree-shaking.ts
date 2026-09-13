@@ -491,6 +491,25 @@ const renderMarkdown = (
 		const counts = describeCounts(result);
 		const scope =
 			counts === "" ? `${measured} exports measured` : `${counts} out of ${measured} exports`;
+		const changedRows = [
+			...result.changed.map((row) => ({
+				name: row.name,
+				weight: Math.abs(row.deltaBytes),
+				line: renderExportRow(changeMarker(row, result), row.name, row.base, row.head),
+			})),
+			...result.added.map((item) => ({
+				name: item.name,
+				weight: item.bytes,
+				line: renderExportRow("🆕", item.name, null, item),
+			})),
+			...result.removed.map((item) => ({
+				name: item.name,
+				weight: item.bytes,
+				line: renderExportRow("🗑️", item.name, item, null),
+			})),
+		]
+			.sort((a, b) => b.weight - a.weight || a.name.localeCompare(b.name))
+			.map((item) => item.line);
 		lines.push(
 			`${status} ${scope}.`,
 			"",
@@ -500,13 +519,7 @@ const renderMarkdown = (
 			`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatDelta(head.full.bytes - base.full.bytes, base.full.bytes === 0 ? 0 : (head.full.bytes - base.full.bytes) / base.full.bytes)} |`,
 			`| Exports | ${Object.keys(base.exports).length} | ${measured} | ${formatCount(measured - Object.keys(base.exports).length)} |`,
 			"",
-			...renderRows("What changed", EXPORT_COLUMNS, [
-				...result.changed.map((row) =>
-					renderExportRow(changeMarker(row, result), row.name, row.base, row.head),
-				),
-				...result.added.map((item) => renderExportRow("🆕", item.name, null, item)),
-				...result.removed.map((item) => renderExportRow("🗑️", item.name, item, null)),
-			]),
+			...renderRows("What changed", EXPORT_COLUMNS, changedRows),
 		);
 	}
 
