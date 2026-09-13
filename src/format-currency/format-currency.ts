@@ -34,10 +34,13 @@ const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => 
 	return formatter;
 };
 
-const toNumber = (value: unknown, precision: number): number =>
-	typeof value === "string"
-		? parseDecimal(value, { maxFractionDigits: Math.max(DEFAULT_PRECISION, precision) })
-		: Number(value);
+const toNumber = (value: unknown, precision: number): number => {
+	if (typeof value === "string") {
+		return parseDecimal(value, { maxFractionDigits: Math.max(DEFAULT_PRECISION, precision) });
+	}
+
+	return Number(value);
+};
 
 /**
  * Formats a given value as a currency string in Brazilian Real (BRL).
@@ -50,15 +53,25 @@ const toNumber = (value: unknown, precision: number): number =>
  * `"1.234,00"`.
  *
  * A value that is not a finite number, such as `NaN`, `Infinity` or `-Infinity`, formats as
- * an empty string.
+ * an empty string, and so does a value that cannot be coerced to a number at all, such as a
+ * symbol, a null-prototype object or a plain object (`Number({})` is `NaN`); every other
+ * value goes through `Number()` the way 2.3.0 did, so `null`, `[]` and `true` still format.
  *
- * The precision is clamped to `0-20`, the range Node's `Intl.NumberFormat` accepts.
+ * The precision is clamped to `0-20`, the range Node's `Intl.NumberFormat` accepts, and a
+ * precision that is not a finite number falls back to 2.
  *
  * @param {string|number} value - The value to be formatted. Can be a string or a number.
  * @param {FormatCurrencyOptions} [options] - Optional formatting options.
  * @param {boolean} options.symbol - If true, includes the currency symbol in the formatted string.
  * @param {number} options.precision - The number of decimal places to include in the formatted string. Defaults to 2, clamped to 0-20.
  * @returns {string} The formatted currency string, or an empty string when the value is not finite.
+ *
+ * The `R$` prefix and the comma before the centavos are the ones Lei nº 9.069/1995, art. 1º,
+ * §§ 1º and 2º prescribes; the `.` grouping comes from the CLDR pt-BR locale data behind
+ * `Intl.NumberFormat`.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9069.htm
+ * @see Based on: https://cldr.unicode.org/
  *
  * @example
  * ```typescript
@@ -73,11 +86,15 @@ const toNumber = (value: unknown, precision: number): number =>
 export const formatCurrency = (value: string | number, options?: FormatCurrencyOptions): string => {
 	const precision = clampPrecision(options?.precision);
 
-	const enhancedValue = toNumber(value, precision);
+	try {
+		const enhancedValue = toNumber(value, precision);
 
-	if (!Number.isFinite(enhancedValue)) return "";
+		if (!Number.isFinite(enhancedValue)) return "";
 
-	return getFormatter(Boolean(options?.symbol), precision)
-		.format(enhancedValue)
-		.replace("\u00A0", " ");
+		return getFormatter(Boolean(options?.symbol), precision)
+			.format(enhancedValue)
+			.replaceAll("\u00A0", " ");
+	} catch {
+		return "";
+	}
 };

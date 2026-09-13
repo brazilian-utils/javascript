@@ -1,14 +1,8 @@
 import * as fc from "fast-check";
 
-import {
-	NUMBER_TO_WORDS_MAX_VALUE,
-	type WordsCase,
-} from "../_internals/number-to-words/number-to-words";
+import { NUMBER_TO_WORDS_MAX_VALUE } from "../_internals/number-to-words/number-to-words";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import {
-	convertCurrencyToWords,
-	type ConvertCurrencyToWordsOptions,
-} from "./convert-currency-to-words";
+import { convertCurrencyToWords } from "./convert-currency-to-words";
 
 function expectAmounts(cases: readonly (readonly [number, string])[]): void {
 	const failures = cases
@@ -118,8 +112,10 @@ describe("convertCurrencyToWords", () => {
 			expect(convertCurrencyToWords(9_007_199_254_740.99)).toContain("noventa e nove centavos");
 		});
 
-		test("should still report cents exactly at the Number.MAX_SAFE_INTEGER cents boundary", () => {
-			expect(convertCurrencyToWords(90_071_992_547_409.9)).toContain("noventa e um centavos");
+		test("should still report cents exactly at the Number.MAX_SAFE_INTEGER cents boundary, reading the 90 cents the double holds (90071992547409.9 is exactly 90071992547409.90625, the 91st cent only shows up when 9007199254740990.625 is scaled and rounded to Number.MAX_SAFE_INTEGER)", () => {
+			expect(convertCurrencyToWords(90_071_992_547_409.9)).toBe(
+				"noventa trilhões, setenta e um bilhões, novecentos e noventa e dois milhões, quinhentos e quarenta e sete mil, quatrocentos e nove reais e noventa centavos",
+			);
 		});
 	});
 
@@ -138,35 +134,78 @@ describe("convertCurrencyToWords", () => {
 		test("should absorb the noise of an amount that is itself the sum of two floats", () => {
 			expect(convertCurrencyToWords(0.1 + 0.2)).toBe("trinta centavos");
 		});
+
+		test("should not invent a cent for a large amount whose sub cent part scales to a hair below the next integer (1000000000000.0099 * 100 is 100000000000000.98)", () => {
+			expect(convertCurrencyToWords(1_000_000_000_000.0099)).toBe("um trilhão de reais");
+		});
+
+		test("should truncate, not round, the sub cent part of a large amount", () => {
+			const cases: [number, string][] = [
+				[1_000_000_000_000.0199, "um trilhão de reais e um centavo"],
+				[
+					123_456_789_012.345,
+					"cento e vinte e três bilhões, quatrocentos e cinquenta e seis milhões, setecentos e oitenta e nove mil e doze reais e trinta e quatro centavos",
+				],
+				[
+					87_654_321_098.7654,
+					"oitenta e sete bilhões, seiscentos e cinquenta e quatro milhões, trezentos e vinte e um mil e noventa e oito reais e setenta e seis centavos",
+				],
+				[
+					999_999_999_999.999,
+					"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove reais e noventa e nove centavos",
+				],
+				[
+					9_007_199_254_740.99,
+					"nove trilhões, sete bilhões, cento e noventa e nove milhões, duzentos e cinquenta e quatro mil, setecentos e quarenta reais e noventa e nove centavos",
+				],
+			];
+
+			expectAmounts(cases);
+		});
+
+		test("should return 'zero reais' for an amount so small that it is written in exponent notation", () => {
+			expect(convertCurrencyToWords(1.5e-7)).toBe("zero reais");
+			expect(convertCurrencyToWords(-1.5e-7)).toBe("zero reais");
+			expect(convertCurrencyToWords(1e-7)).toBe("zero reais");
+			expect(convertCurrencyToWords(Number.MIN_VALUE)).toBe("zero reais");
+		});
+
+		test("should read back the exact cents of every amount from R$ 0.00 to R$ 1 000.00, cent by cent, and of every 997th cent up to R$ 20 000.00, against the same amount built from whole reais and whole cents", () => {
+			const reaisWords = Array.from({ length: 20_001 }, (_, reais) =>
+				convertCurrencyToWords(reais),
+			);
+			const centavosWords = Array.from({ length: 100 }, (_, centavos) =>
+				convertCurrencyToWords(centavos / 100),
+			);
+			const expectedWords = (reais: number, centavos: number): string => {
+				if (reais === 0) return centavosWords[centavos];
+				if (centavos === 0) return reaisWords[reais];
+
+				return `${reaisWords[reais]} e ${centavosWords[centavos]}`;
+			};
+			const failures: number[] = [];
+
+			const check = (cents: number): void => {
+				const expected = expectedWords(Math.floor(cents / 100), cents % 100);
+
+				if (convertCurrencyToWords(cents / 100) !== expected) failures.push(cents);
+			};
+
+			for (let cents = 0; cents <= 100_000; cents++) check(cents);
+			for (let cents = 100_997; cents <= 2_000_000; cents += 997) check(cents);
+
+			expect(failures).toEqual([]);
+		});
 	});
 
-	describe("case option", () => {
-		test("should keep the result lowercase by default", () => {
+	describe("letter case", () => {
+		test("should always keep the result lowercase", () => {
 			expect(convertCurrencyToWords(1000)).toBe("mil reais");
-		});
-
-		test("should keep the result lowercase for 'lower'", () => {
-			expect(convertCurrencyToWords(1000, { case: "lower" })).toBe("mil reais");
-		});
-
-		test("should capitalize only the first letter for 'sentence'", () => {
-			expect(convertCurrencyToWords(1000, { case: "sentence" })).toBe("Mil reais");
-			expect(convertCurrencyToWords(0, { case: "sentence" })).toBe("Zero reais");
-		});
-
-		test("should uppercase everything for 'upper', keeping accents", () => {
-			expect(convertCurrencyToWords(1000, { case: "upper" })).toBe("MIL REAIS");
-			expect(convertCurrencyToWords(1523.45, { case: "upper" })).toBe(
-				"MIL, QUINHENTOS E VINTE E TRÊS REAIS E QUARENTA E CINCO CENTAVOS",
+			expect(convertCurrencyToWords(0)).toBe("zero reais");
+			expect(convertCurrencyToWords(-5.5)).toBe("menos cinco reais e cinquenta centavos");
+			expect(convertCurrencyToWords(1523.45)).toBe(
+				"mil, quinhentos e vinte e três reais e quarenta e cinco centavos",
 			);
-			expect(convertCurrencyToWords(-5.5, { case: "upper" })).toBe(
-				"MENOS CINCO REAIS E CINQUENTA CENTAVOS",
-			);
-		});
-
-		test("should ignore an invalid case value and fall back to 'lower'", () => {
-			// @ts-expect-error: intentionally invalid input
-			expect(convertCurrencyToWords(1000, { case: "invalid" })).toBe("mil reais");
 		});
 	});
 
@@ -431,15 +470,12 @@ describe("convertCurrencyToWords", () => {
 			);
 		});
 
-		test("should uppercase the result the same way as the lower case result, for the 'upper' case option", () => {
+		test("should never return a character in upper case", () => {
 			fc.assert(
 				fc.property(safeCentsArbitrary, (cents) => {
-					const value = cents / 100;
-					const lower = convertCurrencyToWords(value);
+					const words = convertCurrencyToWords(cents / 100);
 
-					expect(convertCurrencyToWords(value, { case: "upper" })).toBe(
-						lower.toLocaleUpperCase("pt-BR"),
-					);
+					expect(words).toBe(words.toLocaleLowerCase("pt-BR"));
 				}),
 			);
 		});
@@ -447,12 +483,9 @@ describe("convertCurrencyToWords", () => {
 });
 
 describe("convertCurrencyToWords types", () => {
-	test("should take a number, options, and return a string", () => {
+	test("should take a single number and return a string", () => {
 		expectTypeOf(convertCurrencyToWords).parameter(0).toEqualTypeOf<number>();
-		expectTypeOf(convertCurrencyToWords)
-			.parameter(1)
-			.toEqualTypeOf<ConvertCurrencyToWordsOptions | undefined>();
-		expectTypeOf<ConvertCurrencyToWordsOptions["case"]>().toEqualTypeOf<WordsCase | undefined>();
+		expectTypeOf(convertCurrencyToWords).parameters.toEqualTypeOf<[value: number]>();
 		expectTypeOf(convertCurrencyToWords).returns.toEqualTypeOf<string>();
 	});
 });
