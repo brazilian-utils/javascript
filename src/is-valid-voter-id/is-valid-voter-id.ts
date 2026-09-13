@@ -1,14 +1,10 @@
 import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-first-digit/calculate-voter-id-first-digit";
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
 import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
-const isValidLength = (value: string): boolean => {
-	if (value.length === 12) return true;
+const SEPARATORS_REGEX = /[\s.]/g;
 
-	const federativeUnion = value.slice(-4, -2);
-	return value.length === 13 && NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion);
-};
+const FORMAT_REGEX = /^[\s.]*\d{4}[\s.]*\d{4}[\s.]*(?:\d[\s.]*)?\d{2}[\s.]*\d{2}[\s.]*$/;
 
 /**
  * Validates if a Brazilian voter id (título de eleitor) is valid.
@@ -17,6 +13,9 @@ const isValidLength = (value: string): boolean => {
  * union code (01-28) and a 2-digit verification code. São Paulo (01) and Minas Gerais (02)
  * may instead issue voter ids with a 9-digit sequential number, totalling 13 digits.
  *
+ * Whitespace and dots are accepted around and between the "0000 0000 00 00" groups, but any
+ * other character, a letter in particular, makes the value invalid.
+ *
  * @param {string} value - The voter id value to be validated.
  * @returns {boolean} True if the voter id is valid, false otherwise.
  *
@@ -24,7 +23,9 @@ const isValidLength = (value: string): boolean => {
  * ```typescript
  * isValidVoterId("102385010671"); // true (12 digits)
  * isValidVoterId("1234567880191"); // true (13 digits, São Paulo)
+ * isValidVoterId("1023 8501 06 71"); // true (whitespace mask)
  * isValidVoterId("123456780124"); // false (invalid checksum)
+ * isValidVoterId("ab102385010671"); // false (invalid format)
  * ```
  *
  * Resolução TSE nº 23.659/2021, art. 36, parágrafo único, confirms the federative union table and
@@ -39,14 +40,18 @@ const isValidLength = (value: string): boolean => {
 export const isValidVoterId = (value: string): boolean => {
 	if (typeof value !== "string") return false;
 
-	const digits = sanitizeToDigits(value);
+	if (!FORMAT_REGEX.test(value)) return false;
 
-	if (!isValidLength(digits)) return false;
+	const digits = value.replace(SEPARATORS_REGEX, "");
 
 	// Stryker disable next-line MethodExpression: the check digits are computed from the first eight digits only, so passing the whole value instead of the sequential part yields the same result.
 	const sequentialNumber = digits.slice(0, -4);
 	const federativeUnion = digits.slice(-4, -2);
 	const verifier = digits.slice(-2);
+
+	if (digits.length === 13 && !NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion)) {
+		return false;
+	}
 
 	const ufCode = Number(federativeUnion);
 

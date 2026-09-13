@@ -62,6 +62,21 @@ describe("isValidVoterId", () => {
 		expect(isValidVoterId("1234567890345")).toBe(false);
 	});
 
+	it("should reject a value with a letter attached to the digits", () => {
+		expect(isValidVoterId("ab102385010671")).toBe(false);
+		expect(isValidVoterId("102385010671ab")).toBe(false);
+	});
+
+	it("should reject a mask that is not whitespace or a dot", () => {
+		expect(isValidVoterId("1023-8501-06-71")).toBe(false);
+	});
+
+	it("should accept the documented whitespace and dot masks", () => {
+		expect(isValidVoterId("1023 8501 06 71")).toBe(true);
+		expect(isValidVoterId("1023.8501.06.71")).toBe(true);
+		expect(isValidVoterId("1234 5678 8 01 91")).toBe(true);
+	});
+
 	it("should return false for null, undefined, a number or an empty string", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(isValidVoterId(null)).toBe(false);
@@ -95,7 +110,7 @@ describe("isValidVoterId", () => {
 	describe("properties", () => {
 		test("should accept a generated voter id whatever mask surrounds its digits", () => {
 			fc.assert(
-				fc.property(maskSeparators([".", "-", "/", " "], 3, 3), (separators) => {
+				fc.property(maskSeparators([".", " "], 3, 3), (separators) => {
 					const voterId = generateVoterId();
 					const head = `${separators[0]}${voterId.slice(0, 8)}${separators[1]}`;
 

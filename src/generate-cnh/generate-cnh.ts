@@ -19,6 +19,12 @@ import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-d
  * 2 security check digits, but no official text publishes the check-digit weights; the algorithm
  * below follows the community reference cited as `Based on:`.
  *
+ * Art. 4º § 1º of the same resolution states that the check digit is computed by the DSR system
+ * with a "módulo 11" routine in which a remainder of 0 or 1 yields the digit 0. That rounding is
+ * not the rule the registry numbers use in practice: the first verifier keeps the remainder
+ * itself, so a remainder of 1 yields the digit 1 (which is why `"00000000119"` is a valid CNH).
+ * The implementation follows the cited `Based on:` reference, not § 1º.
+ *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/
  */
