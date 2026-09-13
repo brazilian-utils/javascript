@@ -61,6 +61,27 @@ describe("getCfop", () => {
 		expect(getCfop("0000")).toBeNull();
 	});
 
+	it("should return null for a group heading (a code ending in 00)", () => {
+		expect(getCfop("1100")).toBeNull();
+		expect(getCfop("5300")).toBeNull();
+	});
+
+	it("should return null for a subgroup heading (a code ending in 50)", () => {
+		expect(getCfop("1150")).toBeNull();
+		expect(getCfop("5350")).toBeNull();
+	});
+
+	it("should still resolve the operable codes a subgroup heading heads (1151 and 5351)", () => {
+		expect(getCfop("1151")).toEqual({
+			code: "1151",
+			description: "Transferência para industrialização ou produção rural",
+		});
+		expect(getCfop("5351")).toEqual({
+			code: "5351",
+			description: "Prestação de serviço de transporte para execução de serviço da mesma natureza",
+		});
+	});
+
 	it("should return null for a code with a length different from 4", () => {
 		expect(getCfop("510")).toBeNull();
 	});
