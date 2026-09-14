@@ -79,6 +79,26 @@ describe("capitalize", () => {
 			expect(capitalize("são paulo/sp")).toBe("São Paulo/SP");
 		});
 
+		test("when a word is bound by an apostrophe or by punctuation", () => {
+			expect(capitalize("santa bárbara d'oeste")).toBe("Santa Bárbara d'Oeste");
+			expect(capitalize("SANTA BÁRBARA D'OESTE")).toBe("Santa Bárbara d'Oeste");
+			expect(capitalize("joão d’ávila")).toBe("João d’Ávila");
+			expect(capitalize("o'neill")).toBe("O'Neill");
+			expect(capitalize("(empresa) ltda")).toBe("(Empresa) LTDA");
+			expect(capitalize('"joão" silva')).toBe('"João" Silva');
+			expect(capitalize("bairro:centro")).toBe("Bairro:Centro");
+			expect(capitalize("rua b,número 10")).toBe("Rua B,Número 10");
+			expect(capitalize("casa;lote [3]")).toBe("Casa;Lote [3]");
+		});
+
+		test("when the name carries a foreign particle", () => {
+			expect(capitalize("luiz von schmidt")).toBe("Luiz von Schmidt");
+			expect(capitalize("maria van der berg")).toBe("Maria van der Berg");
+			expect(capitalize("são joão del rei")).toBe("São João del Rei");
+			expect(capitalize("carlo di giovanni")).toBe("Carlo di Giovanni");
+			expect(capitalize("von schmidt")).toBe("Von Schmidt");
+		});
+
 		test("when a word after a slash is not a state code, and when a state code has no slash before it", () => {
 			expect(capitalize("santana/br")).toBe("Santana/Br");
 			expect(capitalize("santana/xingu")).toBe("Santana/Xingu");

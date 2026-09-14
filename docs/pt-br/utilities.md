@@ -856,7 +856,7 @@ isValidCreditCard(4111111111111111111); // false (acima de 2^53 - 1, passe como 
 
 ## capitalize
 
-Transforma a primeira letra de cada palavra em maiúscula do jeito que se escreve um nome, uma razão social ou um endereço brasileiro, sem precisar de opções. As palavras são separadas por espaço em branco, por `-` e por `/`, então `'MOGI-GUAÇU'` vira `'Mogi-Guaçu'`. Toda sequência de espaços em branco (tabs, quebras de linha, espaços repetidos) vira um único espaço, e o espaço no início e no fim é descartado.
+Transforma a primeira letra de cada palavra em maiúscula do jeito que se escreve um nome, uma razão social ou um endereço brasileiro, sem precisar de opções. As palavras são separadas por espaço em branco, por `-` e `/`, pelo apóstrofo (`'d'oeste'` vira `'d'Oeste'`) e pela pontuação colada à palavra (`'(empresa)'` vira `'(Empresa)'`, `'bairro:centro'` vira `'Bairro:Centro'`), então `'MOGI-GUAÇU'` vira `'Mogi-Guaçu'`; os separadores ficam onde estão. Toda sequência de espaços em branco (tabs, quebras de linha, espaços repetidos) vira um único espaço, e o espaço no início e no fim é descartado. As partículas de nomes de origem estrangeira (`d'`, `del`, `della`, `di`, `du`, `van`, `von`, `der`, `den`) ficam em minúsculas como as preposições do português.
 
 `options.lowerCaseWords` tem como padrão as preposições, artigos e conjunções que permanecem em minúsculas dentro de um nome próprio (`de`, `da`, `do`, `e`, ...), exceto quando uma delas é a primeira palavra. `options.upperCaseWords` tem como padrão as designações societárias e as abreviações de documentos escritas em maiúsculas no uso brasileiro (`LTDA`, `S.A.`, `S/A`, `S.S.`, `S/S`, `ME`, `EPP`, `MEI`, `EIRELI`, `CIA`, `SCP`, `CNPJ`, `CPF`, `RG`, `CEP`, `UF`) mais os algarismos romanos que aparecem em nomes e endereços (de `II` a `XXIII`, exceto `VI`, que colide com a forma verbal "vi"). `SA` sem pontuação ficou de fora de propósito, por ser indistinguível do sobrenome "Sá" digitado sem o acento, enquanto `ME` casa também com o pronome "me" (`'diga-me'` vira `'Diga-ME'`), então informe o seu próprio `upperCaseWords` quando a entrada for texto livre em vez de um nome. `S/A` e `S/S` são reconhecidos mesmo com a barra no meio, embora a barra separe palavras. Uma palavra de duas letras logo depois de uma `/` vira maiúscula quando é a sigla de um estado brasileiro (`'porto alegre/rs'` vira `'Porto Alegre/RS'`); essa regra é estrutural e continua valendo mesmo com `upperCaseWords` informado, enquanto uma sigla de estado que não venha depois de uma `/` é deixada como está.
 
@@ -871,6 +871,9 @@ capitalize('empresa ltda'); // Empresa LTDA
 capitalize('banco do brasil s.a.'); // Banco do Brasil S.A.
 capitalize('casa de carnes s/a'); // Casa de Carnes S/A ("S/A" é reconhecido com a barra no meio)
 capitalize('mogi-guaçu'); // Mogi-Guaçu ("-" inicia uma nova palavra)
+capitalize("santa bárbara d'oeste"); // Santa Bárbara d'Oeste ("'" inicia uma nova palavra, "d" fica minúsculo)
+capitalize('(empresa) ltda'); // (Empresa) LTDA
+capitalize('luiz von schmidt'); // Luiz von Schmidt
 capitalize('santana/rs'); // Santana/RS ("RS" é sigla de estado logo depois de uma "/")
 capitalize('porto alegre/rs'); // Porto Alegre/RS
 capitalize('santana rs'); // Santana Rs (sem "/", "rs" é só uma palavra)

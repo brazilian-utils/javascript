@@ -27,6 +27,13 @@ export const PREPOSITIONS = [
 	"de",
 	"do",
 	"dos",
+	"d",
+	"del",
+	"della",
+	"den",
+	"der",
+	"di",
+	"du",
 	"e",
 	"em",
 	"na",
@@ -36,6 +43,8 @@ export const PREPOSITIONS = [
 	"o",
 	"por",
 	"sem",
+	"van",
+	"von",
 ];
 
 /**
@@ -154,6 +163,14 @@ export const STATE_CODES: StateCode[] = [
 	"TO",
 ];
 
-export const SEPARATOR_REGEX = /(\s+|[-/])/;
+/**
+ * Word boundaries: runs of whitespace, hyphen and slash (kept in place), the apostrophe of
+ * `d'Oeste`, and the punctuation that may wrap or follow a word without a space, so `(empresa)`
+ * and `bairro:centro` still capitalize the word after the mark.
+ */
+export const SEPARATOR_REGEX = /(\s+|[-/'’‘(){}[\]"“”:;,])/;
+
+/** A single separator token that is kept where it is, as opposed to a whitespace run. */
+export const PUNCTUATION_REGEX = /^[-/'’‘(){}[\]"“”:;,]$/;
 
 export const WHITESPACE_REGEX = /^\s+$/;

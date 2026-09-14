@@ -856,7 +856,7 @@ isValidCreditCard(4111111111111111111); // false (above 2^53 - 1, pass it as a s
 
 ## capitalize
 
-Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed. Words are separated by whitespace, by `-` and by `/`, so `'MOGI-GUAÇU'` becomes `'Mogi-Guaçu'`. Every run of whitespace (tabs, newlines, repeated spaces) collapses into a single space, and the leading and trailing whitespace is dropped.
+Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed. Words are separated by whitespace, by `-` and `/`, by the apostrophe (`'d'oeste'` becomes `'d'Oeste'`) and by punctuation that touches a word (`'(empresa)'` becomes `'(Empresa)'`, `'bairro:centro'` becomes `'Bairro:Centro'`), so `'MOGI-GUAÇU'` becomes `'Mogi-Guaçu'`; the separators are kept where they are. Every run of whitespace (tabs, newlines, repeated spaces) collapses into a single space, and the leading and trailing whitespace is dropped. The particles of foreign-origin names (`d'`, `del`, `della`, `di`, `du`, `van`, `von`, `der`, `den`) stay lower case like the Portuguese prepositions.
 
 `options.lowerCaseWords` defaults to the Portuguese prepositions, articles and conjunctions that stay in lower case inside a proper name (`de`, `da`, `do`, `e`, ...), except when one of them is the first word. `options.upperCaseWords` defaults to the company designations and document abbreviations written in upper case in Brazilian usage (`LTDA`, `S.A.`, `S/A`, `S.S.`, `S/S`, `ME`, `EPP`, `MEI`, `EIRELI`, `CIA`, `SCP`, `CNPJ`, `CPF`, `RG`, `CEP`, `UF`) plus the roman numerals that appear in names and addresses (`II` through `XXIII`, except `VI`, which collides with the pt-BR verb form "vi"). `SA` without punctuation is deliberately absent, since it is indistinguishable from the surname "Sá" typed without its accent, while `ME` does match the pronoun "me" (`'diga-me'` becomes `'Diga-ME'`), so pass your own `upperCaseWords` when the input is free text rather than a name. `S/A` and `S/S` are matched across the slash even though a slash separates words. A two letter word that follows a `/` is upper-cased when it is the code of a Brazilian state (`'porto alegre/rs'` becomes `'Porto Alegre/RS'`); that rule is structural and stays on even when `upperCaseWords` is given, while a state code that does not follow a `/` is left alone.
 
@@ -871,6 +871,9 @@ capitalize('empresa ltda'); // Empresa LTDA
 capitalize('banco do brasil s.a.'); // Banco do Brasil S.A.
 capitalize('casa de carnes s/a'); // Casa de Carnes S/A ("S/A" is matched across the slash)
 capitalize('mogi-guaçu'); // Mogi-Guaçu ("-" starts a new word)
+capitalize("santa bárbara d'oeste"); // Santa Bárbara d'Oeste ("'" starts a new word, "d" stays lower case)
+capitalize('(empresa) ltda'); // (Empresa) LTDA
+capitalize('luiz von schmidt'); // Luiz von Schmidt
 capitalize('santana/rs'); // Santana/RS ("RS" is a state code right after a "/")
 capitalize('porto alegre/rs'); // Porto Alegre/RS
 capitalize('santana rs'); // Santana Rs (no "/", so "rs" is just a word)

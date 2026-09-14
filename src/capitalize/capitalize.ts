@@ -1,5 +1,6 @@
 import {
 	PREPOSITIONS,
+	PUNCTUATION_REGEX,
 	SEPARATOR_REGEX,
 	STATE_CODES,
 	UPPER_CASE_WORDS,
@@ -31,10 +32,13 @@ const toWordSet = (
  * written, with no configuration needed: `"jose da silva"` becomes `"Jose da Silva"`,
  * `"empresa ltda"` becomes `"Empresa LTDA"` and `"santana/rs"` becomes `"Santana/RS"`.
  *
- * Words are separated by whitespace, by `-` and by `/`, so `"MOGI-GUAÇU"` becomes
- * `"Mogi-Guaçu"`. Hyphens and slashes are kept where they are, while every run of whitespace
- * (spaces, tabs, newlines) collapses into a single space and the leading and trailing whitespace
- * is dropped.
+ * Words are separated by whitespace, by `-` and `/`, by the apostrophe (`"d'oeste"` becomes
+ * `"d'Oeste"`) and by punctuation that touches a word (`"(empresa)"` becomes `"(Empresa)"`,
+ * `"bairro:centro"` becomes `"Bairro:Centro"`), so `"MOGI-GUAÇU"` becomes `"Mogi-Guaçu"`. The
+ * separators are kept where they are, while every run of whitespace (spaces, tabs, newlines)
+ * collapses into a single space and the leading and trailing whitespace is dropped. The particles
+ * of foreign-origin names (`d'`, `del`, `della`, `di`, `du`, `van`, `von`, `der`, `den`) stay lower
+ * case like the Portuguese prepositions, so `"luiz von schmidt"` becomes `"Luiz von Schmidt"`.
  *
  * - Words listed in `lowerCaseWords` are converted to lower case, except for the first word. The
  *   default list is the Portuguese prepositions, articles and conjunctions that stay in lower
@@ -84,6 +88,9 @@ const toWordSet = (
  * capitalize("JOSÉ DA SILVA"); // "José da Silva"
  * capitalize("empresa ltda"); // "Empresa LTDA"
  * capitalize("banco do brasil s.a."); // "Banco do Brasil S.A."
+ * capitalize("santa bárbara d'oeste"); // "Santa Bárbara d'Oeste"
+ * capitalize("(empresa) ltda"); // "(Empresa) LTDA"
+ * capitalize("luiz von schmidt"); // "Luiz von Schmidt"
  * capitalize("casa de carnes s/a"); // "Casa de Carnes S/A"
  * capitalize("MOGI-GUAÇU"); // "Mogi-Guaçu"
  * capitalize("santana/rs"); // "Santana/RS"
@@ -118,7 +125,7 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 			continue;
 		}
 
-		if (token === "-" || token === "/") {
+		if (PUNCTUATION_REGEX.test(token)) {
 			output.push(token);
 			continue;
 		}
