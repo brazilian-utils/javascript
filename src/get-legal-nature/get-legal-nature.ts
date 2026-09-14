@@ -34,6 +34,10 @@ const lookUp = (code: string): LegalNature | null => {
  * The usual mask characters (hyphens, dots, whitespace) are stripped before the lookup, from a
  * number as well as from a string, so `getLegalNature(206.2)` resolves like `getLegalNature("206.2")`.
  *
+ * No legal nature code starts with a zero, its first digit is the CONCLA category (1 to 5), so
+ * nothing is ever padded here: a number and the string of the same digits are read identically,
+ * and a value narrower than 4 digits is not a code at all.
+ *
  * The entry also carries the CONCLA category of the code, the group the table lists it under,
  * taken from its first digit: 1 Administração Pública, 2 Entidades Empresariais, 3 Entidades
  * sem Fins Lucrativos, 4 Pessoas Físicas and 5 Organizações Internacionais e Outras

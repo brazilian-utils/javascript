@@ -9,6 +9,10 @@ import { getCbo } from "../get-cbo/get-cbo";
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *
+ * A CBO code is always 6 digits and its leading zeros are part of it, so a value written as
+ * bare digits is left padded with zeros to 6 whether it comes as a string or as a number:
+ * `10205`, `"10205"` and `"010205"` are the same code.
+ *
  * @param {string|number} value - The CBO code to be validated, with or without the hyphen
  * mask, e.g. `"2124-05"`, `"212405"` or `212405`.
  * @returns {boolean} True when the code is a known 6 digit occupation code, false otherwise.
@@ -18,7 +22,8 @@ import { getCbo } from "../get-cbo/get-cbo";
  * isValidCbo("2124-05"); // true
  * isValidCbo("212405"); // true
  * isValidCbo(212405); // true
- * isValidCbo(10205); // true (a number is padded to 6 digits, so this is "010205")
+ * isValidCbo(10205); // true (padded to 6 digits, so this is "010205")
+ * isValidCbo("10205"); // true (padded to 6 digits, so this is "010205")
  * isValidCbo("999999"); // false
  * isValidCbo("2124abc05"); // false (not a documented form)
  * isValidCbo(-212405); // false (not a non-negative safe integer)

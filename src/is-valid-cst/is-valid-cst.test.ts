@@ -80,14 +80,43 @@ describe("isValidCst", () => {
 		});
 	});
 
-	it("should return false for an unknown tax", () => {
-		// @ts-expect-error not a valid tax
-		expect(isValidCst("00", { tax: "iss" })).toBe(false);
+	describe("unknown tax", () => {
+		it("should fall back to the default and check every table, as every other scalar option does", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("000", { tax: "nope" })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("00", { tax: "iss" })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: "iss" })).toBe(true);
+		});
+
+		it("should still reject a code that exists in no table", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("999", { tax: "iss" })).toBe(false);
+		});
+
+		it("should fall back to the default when the tax is not a string", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: 1 })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: null })).toBe(true);
+		});
+
+		it("should fall back to the default for a prototype chain key", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: "__proto__" })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: "toString" })).toBe(true);
+		});
 	});
 
-	it("should return false for an unknown tax even when the code is a valid pis/cofins code", () => {
-		// @ts-expect-error not a valid tax
-		expect(isValidCst("07", { tax: "iss" })).toBe(false);
+	it("should consult only the given table, never the other three", () => {
+		expect(isValidCst("00", { tax: "icms" })).toBe(false);
+		expect(isValidCst("06", { tax: "ipi" })).toBe(false);
+		expect(isValidCst("00", { tax: "pis" })).toBe(false);
+		expect(isValidCst("00", { tax: "cofins" })).toBe(false);
+		expect(isValidCst("00")).toBe(true);
+		expect(isValidCst("06")).toBe(true);
 	});
 
 	describe("without options (tax omitted)", () => {
@@ -128,6 +157,35 @@ describe("isValidCst", () => {
 	it("should return false when options is a non-null, non-object value (e.g. a string)", () => {
 		// @ts-expect-error not an options object
 		expect(isValidCst("00", "foo")).toBe(false);
+	});
+
+	describe("padding", () => {
+		it("should read a single digit as the three digit icms form, as a number or as a string", () => {
+			expect(isValidCst(0, { tax: "icms" })).toBe(true);
+			expect(isValidCst("0", { tax: "icms" })).toBe(true);
+			expect(isValidCst("000", { tax: "icms" })).toBe(true);
+			expect(isValidCst(2, { tax: "icms" })).toBe(true);
+			expect(isValidCst("2", { tax: "icms" })).toBe(true);
+		});
+
+		it("should agree between a number and a string when the tax is omitted", () => {
+			expect(isValidCst(0)).toBe(true);
+			expect(isValidCst("0")).toBe(true);
+			expect(isValidCst(9)).toBe(false);
+			expect(isValidCst("9")).toBe(false);
+		});
+
+		it("should leave a two digit Tabela B code as written, never padding it to three", () => {
+			expect(isValidCst(49, { tax: "ipi" })).toBe(true);
+			expect(isValidCst("49", { tax: "ipi" })).toBe(true);
+			expect(isValidCst(49, { tax: "icms" })).toBe(false);
+			expect(isValidCst("00", { tax: "ipi" })).toBe(true);
+		});
+
+		it("should trim a single digit before padding it", () => {
+			expect(isValidCst("  0  ", { tax: "icms" })).toBe(true);
+			expect(isValidCst("  0  ")).toBe(true);
+		});
 	});
 
 	it("should return false for an empty string", () => {

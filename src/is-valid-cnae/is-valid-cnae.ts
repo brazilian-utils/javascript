@@ -9,6 +9,10 @@ import { getCnae } from "../get-cnae/get-cnae";
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *
+ * A CNAE subclass code is always 7 digits and its leading zeros are part of it, so a value
+ * written as bare digits is left padded with zeros to 7 whether it comes as a string or as a
+ * number: `111301`, `"111301"` and `"0111301"` are the same code.
+ *
  * @param {string|number} value - The CNAE code to be validated, with or without the
  * `NNNN-N/NN` mask, e.g. `"6201-5/01"`, `"6201501"` or `6201501`.
  * @returns {boolean} True when the code is a known 7 digit subclass, false otherwise.
@@ -18,7 +22,8 @@ import { getCnae } from "../get-cnae/get-cnae";
  * isValidCnae("6201-5/01"); // true
  * isValidCnae("6201501"); // true
  * isValidCnae(6201501); // true
- * isValidCnae(111301); // true (a number is padded to 7 digits, so this is "0111301")
+ * isValidCnae(111301); // true (padded to 7 digits, so this is "0111301")
+ * isValidCnae("111301"); // true (padded to 7 digits, so this is "0111301")
  * isValidCnae("0000000"); // false
  * isValidCnae("0111abc301"); // false (not a documented form)
  * isValidCnae(-111301); // false (not a non-negative safe integer)

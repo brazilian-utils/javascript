@@ -1845,12 +1845,13 @@ import { isValidVin } from '@brazilian-utils/brazilian-utils';
 isValidVin('1HGCM82633A004352'); // true
 isValidVin('1m8gdm9axkp042788'); // true (dígito verificador X, minúsculo)
 isValidVin('1HGCM82633A004353'); // false (dígito verificador inválido)
+isValidVin('00000000000000000'); // false (todos os caracteres iguais, ainda que o dígito feche)
 isValidVin('1HGCM8263IA004352'); // false (contém a letra excluída I)
 ```
 
 ## isValidCbo
 
-Valida se um código CBO (Classificação Brasileira de Ocupações) existe na tabela de ocupações do MTE. Aceita o código com ou sem a máscara de hífen, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 6 dígitos, ou a máscara `NNNN-NN`, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
+Valida se um código CBO (Classificação Brasileira de Ocupações) existe na tabela de ocupações do MTE. Aceita o código com ou sem a máscara de hífen, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 6 dígitos, ou a máscara `NNNN-NN`, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo. Um código CBO sempre tem 6 dígitos e os zeros à esquerda fazem parte dele, então um valor escrito apenas com dígitos é completado com zeros à esquerda até 6, seja ele string ou número, exatamente como `getBankByCode` completa um código de banco: `10205`, `'10205'` e `'010205'` são o mesmo código. Um valor mascarado já carrega os seus separadores e é lido como foi escrito.
 
 ```javascript
 import { isValidCbo } from '@brazilian-utils/brazilian-utils';
@@ -1858,6 +1859,8 @@ import { isValidCbo } from '@brazilian-utils/brazilian-utils';
 isValidCbo('2124-05'); // true
 isValidCbo('212405'); // true
 isValidCbo(212405); // true
+isValidCbo(10205); // true (completado para 6 dígitos, ou seja, '010205')
+isValidCbo('10205'); // true (completado do mesmo jeito que um número)
 isValidCbo('000000'); // false
 isValidCbo('2124abc05'); // false (não é uma forma documentada)
 isValidCbo(-212405); // false (não é um inteiro seguro não negativo)
@@ -1867,12 +1870,14 @@ Os títulos das ocupações vêm da [tabela oficial de ocupações da CBO 2002 p
 
 ## getCbo
 
-Consulta um código CBO (Classificação Brasileira de Ocupações) e retorna o título oficial da ocupação. Um `number` mantém os zeros à esquerda implícitos: `getCbo(10205)` é lido como `010205`. Valem as mesmas regras de entrada de `isValidCbo`: uma string precisa estar escrita com os 6 dígitos ou com a máscara `NNNN-NN`, e um número precisa ser um inteiro seguro não negativo.
+Consulta um código CBO (Classificação Brasileira de Ocupações) e retorna o título oficial da ocupação, no registro `{ code, description }` que toda consulta desta biblioteca devolve. Um valor escrito apenas com dígitos mantém os zeros à esquerda implícitos, tanto como string quanto como número: `getCbo(10205)` e `getCbo('10205')` são lidos como `010205`. Valem as mesmas regras de entrada de `isValidCbo`: uma string precisa estar escrita com os 6 dígitos ou com a máscara `NNNN-NN`, e um número precisa ser um inteiro seguro não negativo.
 
 ```javascript
 import { getCbo } from '@brazilian-utils/brazilian-utils';
 
-getCbo('2124-05'); // { code: '212405', title: 'Analista de desenvolvimento de sistemas' }
+getCbo('2124-05'); // { code: '212405', description: 'Analista de desenvolvimento de sistemas' }
+getCbo(10205); // { code: '010205', description: 'Oficial da aeronáutica' } (completado para 6 dígitos)
+getCbo('10205'); // { code: '010205', description: 'Oficial da aeronáutica' } (completado do mesmo jeito)
 getCbo('000000'); // null
 getCbo('2124abc05'); // null (não é uma forma documentada)
 ```
@@ -1881,13 +1886,15 @@ Os títulos das ocupações vêm da [tabela oficial de ocupações da CBO 2002 p
 
 ## isValidCnae
 
-Valida se um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas) existe na [tabela CNAE-Subclasses 2.3 publicada pelo IBGE](https://concla.ibge.gov.br/busca-online-cnae.html), a revisão de subclasses atual da CNAE 2.0. Aceita o código com ou sem a máscara `NNNN-N/NN`, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 7 dígitos, ou a máscara, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
+Valida se um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas) existe na [tabela CNAE-Subclasses 2.3 publicada pelo IBGE](https://concla.ibge.gov.br/busca-online-cnae.html), a revisão de subclasses atual da CNAE 2.0. Aceita o código com ou sem a máscara `NNNN-N/NN`, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 7 dígitos, ou a máscara, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo. Um código de subclasse CNAE sempre tem 7 dígitos e os zeros à esquerda fazem parte dele, então um valor escrito apenas com dígitos é completado com zeros à esquerda até 7, seja ele string ou número: `111301`, `'111301'` e `'0111301'` são o mesmo código. Um valor mascarado já carrega os seus separadores e é lido como foi escrito.
 
 ```javascript
 import { isValidCnae } from '@brazilian-utils/brazilian-utils';
 
 isValidCnae('6201-5/01'); // true
 isValidCnae('6201501'); // true
+isValidCnae(111301); // true (completado para 7 dígitos, ou seja, '0111301')
+isValidCnae('111301'); // true (completado do mesmo jeito que um número)
 isValidCnae('0000000'); // false
 isValidCnae('0111abc301'); // false (não é uma forma documentada)
 isValidCnae(-111301); // false (não é um inteiro seguro não negativo)
@@ -1911,25 +1918,30 @@ formatCnae(-6201501); // 6201-5/01
 
 ## getCnae
 
-Busca um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas) e retorna seu código formatado e a descrição oficial. Um `number` mantém os zeros à esquerda implícitos: `getCnae(111301)` é lido como `0111301`. Valem as mesmas regras de entrada de `isValidCnae`: uma string precisa estar escrita com os 7 dígitos ou com a máscara `NNNN-N/NN`, e um número precisa ser um inteiro seguro não negativo.
+Busca um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas) e retorna seu código e a descrição oficial. O `code` volta com os 7 dígitos crus, como em toda consulta desta biblioteca; passe-o para `formatCnae` para obter a forma `NNNN-N/NN`. Um valor escrito apenas com dígitos mantém os zeros à esquerda implícitos, tanto como string quanto como número: `getCnae(111301)` e `getCnae('111301')` são lidos como `0111301`. Valem as mesmas regras de entrada de `isValidCnae`: uma string precisa estar escrita com os 7 dígitos ou com a máscara `NNNN-N/NN`, e um número precisa ser um inteiro seguro não negativo.
 
 ```javascript
-import { getCnae } from '@brazilian-utils/brazilian-utils';
+import { formatCnae, getCnae } from '@brazilian-utils/brazilian-utils';
 
-getCnae('6201501'); // { code: '6201-5/01', description: 'DESENVOLVIMENTO DE PROGRAMAS DE COMPUTADOR SOB ENCOMENDA' }
+getCnae('6201-5/01'); // { code: '6201501', description: 'DESENVOLVIMENTO DE PROGRAMAS DE COMPUTADOR SOB ENCOMENDA' }
+getCnae(111301); // { code: '0111301', description: 'CULTIVO DE ARROZ' } (completado para 7 dígitos)
+getCnae('111301'); // { code: '0111301', description: 'CULTIVO DE ARROZ' } (completado do mesmo jeito)
 getCnae('0000000'); // null
 getCnae('0111abc301'); // null (não é uma forma documentada)
+formatCnae(getCnae('6201501')?.code); // 6201-5/01 (aplicar a máscara é trabalho do formatador)
 ```
 
 ## isValidNcm
 
-Valida se um código NCM (Nomenclatura Comum do Mercosul) existe na tabela vigente publicada pelo Siscomex/MDIC. Aceita o código com ou sem a máscara de pontos, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 8 dígitos, ou a máscara `NNNN.NN.NN`, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo. Um número não carrega zero à esquerda, então um código iniciado por `0` precisa ser informado como string: `isValidNcm(1012100)` é `false`, enquanto `isValidNcm('01012100')` é `true`.
+Valida se um código NCM (Nomenclatura Comum do Mercosul) existe na tabela vigente publicada pelo Siscomex/MDIC. Aceita o código com ou sem a máscara de pontos, ou como número. Uma string só é lida como código quando está escrita em uma dessas formas (os 8 dígitos, ou a máscara `NNNN.NN.NN`, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo. Um código NCM sempre tem 8 dígitos e os zeros à esquerda fazem parte dele, então um valor escrito apenas com dígitos é completado com zeros à esquerda até 8, seja ele string ou número: `1012100`, `'1012100'` e `'01012100'` são o mesmo código. Um valor mascarado já carrega os seus separadores e é lido como foi escrito.
 
 ```javascript
 import { isValidNcm } from '@brazilian-utils/brazilian-utils';
 
 isValidNcm('8471.30.12'); // true
 isValidNcm('84713012'); // true
+isValidNcm(1012100); // true (completado para 8 dígitos, ou seja, '01012100')
+isValidNcm('1012100'); // true (completado do mesmo jeito que um número)
 isValidNcm('00000000'); // false
 isValidNcm('abc01012100'); // false (não é uma forma documentada)
 isValidNcm(-84713012); // false (não é um inteiro seguro não negativo)
@@ -1954,7 +1966,7 @@ formatNcm(-84713012); // 8471.30.12
 
 Valida se um código CFOP (Código Fiscal de Operações e Prestações) existe na tabela oficial. A tabela é o [Anexo II consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), o texto vigente (redação atual dada pelo Ajuste SINIEF 03/24, última alteração pelo [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25)), e não o texto congelado de 2001 do Ajuste SINIEF 07/01. Só os códigos operáveis contam: os títulos de grupo e subgrupo da nomenclatura oficial, os códigos terminados em `00` e `50` (1000, 1100, 1150, 5350, ...), são títulos de seção e não códigos que um documento pode carregar, então são rejeitados.
 
-Uma string só é lida como código quando está escrita em uma das formas documentadas (os 4 dígitos, ou a forma `N.NNN` impressa no anexo, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo.
+Uma string só é lida como código quando está escrita em uma das formas documentadas (os 4 dígitos, ou a forma `N.NNN` impressa no anexo, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo. Nenhum código CFOP começa com zero, o seu primeiro dígito é o grupo da operação (1 a 7), então aqui nada é completado: um número e a string dos mesmos dígitos são lidos de forma idêntica.
 
 ```javascript
 import { isValidCfop } from '@brazilian-utils/brazilian-utils';
@@ -1993,21 +2005,26 @@ Valida um código de CST (Código de Situação Tributária) para um tributo. In
 | `pis` | 2 dígitos | `01`-`09`, `49`, `50`-`56`, `60`-`67`, `70`-`75`, `98`, `99` |
 | `cofins` | 2 dígitos | mesma tabela do `pis` |
 
-`options.tax` (parte de `IsValidCstOptions`) é opcional: omita-o para aceitar um código que exista em qualquer uma das quatro tabelas acima.
+`options.tax` (parte de `IsValidCstOptions`) é opcional: omita-o para aceitar um código que exista em qualquer uma das quatro tabelas acima. Um `tax` fora desses quatro valores cai nesse mesmo padrão em tempo de execução, do jeito que toda outra opção escalar desta biblioteca trata um valor que não conhece.
 
 A Tabela B do ICMS é a vigente: o [Anexo I consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), cuja redação atual veio do [Ajuste SINIEF 39/23](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2023/ajuste-sinief-39-23) (efeitos a partir de 01.12.23) e que o [Ajuste SINIEF 20/24](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2024/AJ020_24) alterou suprimindo os itens 12, 13, 52, 72 e 74 (efeitos a partir de 09.07.24) antes que eles chegassem a produzir efeitos: o 39/23 havia adiado a produção de efeitos deles para 1º de outubro de 2024, então a revogação os alcançou antes e esses códigos nunca estiveram em vigor. `02`, `15`, `53` e `61` são seus códigos de monofasia de combustíveis.
 
 Uma string só é lida como código quando está escrita em uma das formas documentadas (os 2 dígitos de um código da Tabela B, ou os 3 dígitos da forma do ICMS com um único separador opcional depois do dígito de origem, além de espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo. O dígito de origem é a única fronteira que um CST impresso tem, então `'0 10'` e `'1-10'` são lidos, mas `'0-0'`, `'11-0'` e `'00-'` não.
 
+Um único dígito é mais estreito que qualquer uma das formas documentadas, então ele é completado com zeros à esquerda até os 3 dígitos da forma do ICMS, seja ele string ou número: `0`, `'0'` e `'000'` são todos o código ICMS `000`. Um valor de 2 dígitos já é uma forma documentada, um código da Tabela B, e é lido como foi escrito, ou seja, um código da Tabela B mantém os seus dois dígitos: `'07'`, não `7`, que é o código ICMS `007`.
+
 ```javascript
 import { isValidCst } from '@brazilian-utils/brazilian-utils';
 
 isValidCst('000', { tax: 'icms' }); // true
+isValidCst(0, { tax: 'icms' }); // true (um único dígito é completado até a forma de 3 dígitos, '000')
+isValidCst('0', { tax: 'icms' }); // true (completado do mesmo jeito que um número)
 isValidCst('110', { tax: 'icms' }); // true
 isValidCst('002', { tax: 'icms' }); // true (monofasia de combustíveis)
 isValidCst('06', { tax: 'pis' }); // true
 isValidCst('99', { tax: 'ipi' }); // true
 isValidCst('110'); // true (encontrado na tabela icms, tax omitido)
+isValidCst('000', { tax: 'nope' }); // true (um tax desconhecido cai em todas as tabelas)
 isValidCst('999'); // false (não existe em nenhuma tabela)
 isValidCst('abc110'); // false (não é uma forma documentada)
 isValidCst(-110); // false (não é um inteiro seguro não negativo)
@@ -2017,7 +2034,7 @@ isValidCst(-110); // false (não é um inteiro seguro não negativo)
 
 Valida se um código de CSOSN (Código de Situação da Operação no Simples Nacional) é um dos 10 códigos do [Anexo III-A consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70), a tabela instituída pelo Ajuste SINIEF 03/2010: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` ou `900`.
 
-Uma string só é lida como código quando está escrita como os 3 dígitos puros, com espaços em branco opcionais no início e no fim: um CSOSN não tem agrupamento impresso (a NF-e leva o dígito de origem no seu próprio campo `orig`), então `'1-01'` é rejeitado; um número só é lido quando é um inteiro seguro não negativo.
+Uma string só é lida como código quando está escrita como os 3 dígitos puros, com espaços em branco opcionais no início e no fim: um CSOSN não tem agrupamento impresso (a NF-e leva o dígito de origem no seu próprio campo `orig`), então `'1-01'` é rejeitado; um número só é lido quando é um inteiro seguro não negativo. Nenhum código CSOSN começa com zero, a tabela vai de `101` a `900`, então aqui nada é completado: um número e a string dos mesmos dígitos são lidos de forma idêntica.
 
 ```javascript
 import { isValidCsosn } from '@brazilian-utils/brazilian-utils';

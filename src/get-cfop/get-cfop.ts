@@ -29,6 +29,10 @@ export type Cfop = {
  * safe integer, since a sign, a decimal point or a rounded magnitude would otherwise be read
  * as a code the caller never wrote.
  *
+ * No CFOP code starts with a zero, its first digit is the operation group (1 to 7), so nothing
+ * is ever padded here: a number and the string of the same digits are read identically, and a
+ * value narrower than 4 digits is not a code at all.
+ *
  * @param {string|number} value - The CFOP code to look up, with or without the `N.NNN` mask,
  * e.g. `"1.101"`, `"1101"` or `1101`.
  * @returns {Cfop|null} The matching CFOP entry, or null when the code is unknown or

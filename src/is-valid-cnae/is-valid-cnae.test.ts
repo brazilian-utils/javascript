@@ -19,10 +19,15 @@ describe("isValidCnae", () => {
 		expect(isValidCnae(6_201_501)).toBe(true);
 	});
 
-	it("should pad a number with leading zeros before looking it up", () => {
+	it("should pad a value with leading zeros before looking it up, as a number or as a string", () => {
 		expect(isValidCnae(111_301)).toBe(true);
 		expect(isValidCnae("0111301")).toBe(true);
-		expect(isValidCnae("111301")).toBe(false);
+		expect(isValidCnae("111301")).toBe(true);
+	});
+
+	it("should not pad a masked value, which already carries its separators", () => {
+		expect(isValidCnae("111-3/01")).toBe(false);
+		expect(isValidCnae("0111-3/01")).toBe(true);
 	});
 
 	it("should validate a CNAE code with surrounding whitespace", () => {
@@ -38,7 +43,7 @@ describe("isValidCnae", () => {
 		expect(isValidCnae("0000000")).toBe(false);
 	});
 
-	it("should return false when the digit count is not seven", () => {
+	it("should return false for a padded short value no subclass carries and for a wider value", () => {
 		expect(isValidCnae("620150")).toBe(false);
 		expect(isValidCnae("62015011")).toBe(false);
 	});

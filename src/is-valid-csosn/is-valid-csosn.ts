@@ -15,6 +15,10 @@ import { CSOSN_CODES, CSOSN_FORMAT_REGEX } from "./constants";
  * as a code when it is a non-negative safe integer, since a sign, a decimal point or a rounded
  * magnitude would otherwise be read as a code the caller never wrote.
  *
+ * No CSOSN code starts with a zero, the table runs from `101` to `900`, so nothing is ever
+ * padded here: a number and the string of the same digits are read identically, and a value
+ * narrower than 3 digits is not a code at all.
+ *
  * @param {string|number} value - The CSOSN code to be validated, e.g. `"101"` or `101`.
  * @returns {boolean} True when the code is a known CSOSN code, false otherwise.
  *
