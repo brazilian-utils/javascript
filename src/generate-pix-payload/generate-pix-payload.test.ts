@@ -4,8 +4,11 @@ import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
+import {
+	type PixPointOfInitiation,
+	getPixPayloadInfo,
+} from "../get-pix-payload-info/get-pix-payload-info";
 import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
-import { type PixPointOfInitiation, parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
 import { type GeneratePixPayloadOptions, generatePixPayload } from "./generate-pix-payload";
 
 const BASE = {
@@ -267,8 +270,8 @@ describe("generatePixPayload", () => {
 			expect(isValidPixPayload(generatePixPayload(DYNAMIC_BASE) ?? "")).toBe(true);
 		});
 
-		test("that parsePixPayload parses back with pointOfInitiation dynamic and no key", () => {
-			expect(parsePixPayload(generatePixPayload(DYNAMIC_BASE) ?? "")).toEqual({
+		test("that getPixPayloadInfo parses back with pointOfInitiation dynamic and no key", () => {
+			expect(getPixPayloadInfo(generatePixPayload(DYNAMIC_BASE) ?? "")).toEqual({
 				url: "pix.example.com/qr/v2/1234",
 				merchantName: "Fulano de Tal",
 				merchantCity: "Brasilia",
@@ -284,26 +287,26 @@ describe("generatePixPayload", () => {
 			const payload = generatePixPayload({ ...DYNAMIC_BASE, url });
 
 			expect(payload).not.toBeNull();
-			expect(parsePixPayload(payload ?? "")?.url).toBe(url);
+			expect(getPixPayloadInfo(payload ?? "")?.url).toBe(url);
 		});
 	});
 
 	describe("should normalize its parameters", () => {
 		test("folding accents out of the merchant name and city", () => {
 			expect(
-				parsePixPayload(generatePixPayload({ ...BASE, merchantCity: "Brasília" }) ?? ""),
+				getPixPayloadInfo(generatePixPayload({ ...BASE, merchantCity: "Brasília" }) ?? ""),
 			).toMatchObject({
 				merchantCity: "Brasilia",
 			});
 			expect(
-				parsePixPayload(generatePixPayload({ ...BASE, merchantName: "José Antônio" }) ?? ""),
+				getPixPayloadInfo(generatePixPayload({ ...BASE, merchantName: "José Antônio" }) ?? ""),
 			).toMatchObject({
 				merchantName: "Jose Antonio",
 			});
 		});
 
 		test("trimming trailing whitespace introduced by truncating to the maximum length", () => {
-			const pix = parsePixPayload(
+			const pix = getPixPayloadInfo(
 				generatePixPayload({ ...BASE, merchantName: `${"A".repeat(24)} B` }) ?? "",
 			);
 
@@ -311,7 +314,7 @@ describe("generatePixPayload", () => {
 		});
 
 		test("truncating the merchant name to 25 characters", () => {
-			const pix = parsePixPayload(
+			const pix = getPixPayloadInfo(
 				generatePixPayload({ ...BASE, merchantName: "A".repeat(40) }) ?? "",
 			);
 
@@ -319,7 +322,7 @@ describe("generatePixPayload", () => {
 		});
 
 		test("truncating the merchant city to 15 characters", () => {
-			const pix = parsePixPayload(
+			const pix = getPixPayloadInfo(
 				generatePixPayload({ ...BASE, merchantCity: "B".repeat(40) }) ?? "",
 			);
 
@@ -328,17 +331,17 @@ describe("generatePixPayload", () => {
 
 		test("normalizing the key to its DICT canonical form", () => {
 			expect(
-				parsePixPayload(generatePixPayload({ ...BASE, key: "123.456.789-09" }) ?? "")?.key,
+				getPixPayloadInfo(generatePixPayload({ ...BASE, key: "123.456.789-09" }) ?? "")?.key,
 			).toBe("12345678909");
 			expect(
-				parsePixPayload(generatePixPayload({ ...BASE, key: "(11) 98765-4321" }) ?? "")?.key,
+				getPixPayloadInfo(generatePixPayload({ ...BASE, key: "(11) 98765-4321" }) ?? "")?.key,
 			).toBe("+5511987654321");
 			expect(
-				parsePixPayload(generatePixPayload({ ...BASE, key: " Fulano@Example.COM " }) ?? "")?.key,
+				getPixPayloadInfo(generatePixPayload({ ...BASE, key: " Fulano@Example.COM " }) ?? "")?.key,
 			).toBe("fulano@example.com");
 			const upperCaseEvp = EVP.toUpperCase();
 
-			expect(parsePixPayload(generatePixPayload({ ...BASE, key: upperCaseEvp }) ?? "")?.key).toBe(
+			expect(getPixPayloadInfo(generatePixPayload({ ...BASE, key: upperCaseEvp }) ?? "")?.key).toBe(
 				EVP,
 			);
 		});
@@ -350,7 +353,7 @@ describe("generatePixPayload", () => {
 				description: "y".repeat(90),
 			});
 
-			expect(parsePixPayload(payload ?? "")?.description).toBe("y".repeat(62));
+			expect(getPixPayloadInfo(payload ?? "")?.description).toBe("y".repeat(62));
 		});
 
 		test("truncating the description to what a mobile phone key leaves", () => {
@@ -360,21 +363,21 @@ describe("generatePixPayload", () => {
 				description: "y".repeat(90),
 			});
 
-			expect(parsePixPayload(payload ?? "")?.description).toBe("y".repeat(59));
+			expect(getPixPayloadInfo(payload ?? "")?.description).toBe("y".repeat(59));
 		});
 
 		test("leaving room for the description on a long key", () => {
 			const key = `${"a".repeat(56)}@example.com`;
 			const payload = generatePixPayload({ ...BASE, key, description: "z".repeat(30) }) ?? "";
 
-			expect(parsePixPayload(payload)?.description).toBe("z".repeat(5));
+			expect(getPixPayloadInfo(payload)?.description).toBe("z".repeat(5));
 		});
 
 		test("dropping a description that does not fit at all", () => {
 			const key = `${"a".repeat(65)}@example.com`;
 			const payload = generatePixPayload({ ...BASE, key, description: "z".repeat(30) }) ?? "";
 
-			expect(parsePixPayload(payload)).not.toHaveProperty("description");
+			expect(getPixPayloadInfo(payload)).not.toHaveProperty("description");
 		});
 	});
 
@@ -416,13 +419,13 @@ describe("generatePixPayload", () => {
 		];
 
 		for (const { name, build, pointOfInitiation } of ROUND_TRIPS) {
-			test(`through isValidPixPayload and parsePixPayload for ${name}`, () => {
+			test(`through isValidPixPayload and getPixPayloadInfo for ${name}`, () => {
 				for (let index = 0; index < 200; index++) {
 					const params = build(index);
 					const payload = generatePixPayload(params) ?? "";
 
 					expect(isValidPixPayload(payload)).toBe(true);
-					expect(parsePixPayload(payload)).toEqual({ ...params, pointOfInitiation });
+					expect(getPixPayloadInfo(payload)).toEqual({ ...params, pointOfInitiation });
 				}
 			});
 		}
@@ -439,11 +442,11 @@ describe("generatePixPayload", () => {
 
 		const cents = fc.integer({ min: 1, max: 9_999_999 });
 
-		test("should round-trip a static payload through parsePixPayload", () => {
+		test("should round-trip a static payload through getPixPayloadInfo", () => {
 			fc.assert(
 				fc.property(names, cities, (merchantName, merchantCity) => {
 					const payload = generatePixPayload({ key: CPF_KEY, merchantName, merchantCity });
-					const parsed = parsePixPayload(payload ?? "");
+					const parsed = getPixPayloadInfo(payload ?? "");
 
 					expect(isValidPixPayload(payload ?? "")).toBe(true);
 					expect(parsed?.key).toBe(CPF_KEY);
@@ -466,7 +469,7 @@ describe("generatePixPayload", () => {
 						amount,
 						txid,
 					});
-					const parsed = parsePixPayload(payload ?? "");
+					const parsed = getPixPayloadInfo(payload ?? "");
 
 					expect(parsed?.amount).toBe(Number(amount.toFixed(2)));
 					expect(parsed?.txid).toBe(txid);
@@ -478,7 +481,7 @@ describe("generatePixPayload", () => {
 			fc.assert(
 				fc.property(names, urls, (merchantName, url) => {
 					const payload = generatePixPayload({ url, merchantName, merchantCity: "BRASILIA" });
-					const parsed = parsePixPayload(payload ?? "");
+					const parsed = getPixPayloadInfo(payload ?? "");
 
 					expect(parsed?.url).toBe(url);
 					expect(parsed?.pointOfInitiation).toBe("dynamic");
@@ -508,7 +511,7 @@ describe("generatePixPayload", () => {
 
 						fc.pre(payload !== null);
 
-						const parsed = parsePixPayload(payload ?? "");
+						const parsed = getPixPayloadInfo(payload ?? "");
 
 						expect(/^[\u0020-\u007E]{1,25}$/.test(parsed?.merchantName ?? "")).toBe(true);
 						expect(/^[\u0020-\u007E]{1,15}$/.test(parsed?.merchantCity ?? "")).toBe(true);

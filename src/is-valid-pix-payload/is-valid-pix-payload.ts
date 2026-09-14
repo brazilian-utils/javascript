@@ -1,4 +1,4 @@
-import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
+import { getPixPayloadInfo } from "../get-pix-payload-info/get-pix-payload-info";
 
 /**
  * Validates a Pix BR Code payload, the string behind a Pix QR Code and behind "Pix copia e
@@ -51,4 +51,4 @@ import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
  * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
-export const isValidPixPayload = (value: string): boolean => parsePixPayload(value) !== null;
+export const isValidPixPayload = (value: string): boolean => getPixPayloadInfo(value) !== null;

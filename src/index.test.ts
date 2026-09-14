@@ -9,7 +9,7 @@ import {
 	type Cbo,
 	type CepAddressInfo,
 	type CepProvider,
-	type Certidao,
+	type CertidaoInfo,
 	type CertidaoType,
 	type Cfop,
 	type Cnae,
@@ -48,7 +48,7 @@ import {
 	type GetMunicipalityOptions,
 	type Holiday,
 	type HolidayType,
-	type Iban,
+	type IbanInfo,
 	type IsHolidayOptions,
 	type IsValidBankAccountOptions,
 	type IsValidBankAccountParams,
@@ -63,7 +63,7 @@ import {
 	type LegalNatureCategory,
 	type LicensePlateFormat,
 	type Municipality,
-	type NfeKey,
+	type NfeKeyInfo,
 	type NfeKeyModel,
 	type NumberToWordsGender,
 	type ParseCnpjOptions,
@@ -71,9 +71,9 @@ import {
 	type PhoneMask,
 	type PhoneType,
 	type PhoneVersion,
-	type PixKey,
+	type PixKeyInfo,
 	type PixKeyType,
-	type PixPayload,
+	type PixPayloadInfo,
 	type PixPointOfInitiation,
 	type RegistroProfissionalCouncil,
 	type State,
@@ -147,17 +147,22 @@ const PUBLIC = [
 	"getBoletoInfo",
 	"getCbo",
 	"getCepInfoByAddress",
+	"getCertidaoInfo",
 	"getCfop",
 	"getCities",
 	"getCnae",
 	"getFormatLicensePlate",
 	"getHolidays",
+	"getIbanInfo",
 	"getLegalNature",
 	"getLegalNatures",
 	"getLegalNaturesByCategory",
 	"getMunicipalities",
 	"getMunicipality",
 	"getMunicipalityByCode",
+	"getNfeKeyInfo",
+	"getPixKeyInfo",
+	"getPixPayloadInfo",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
 	"getStateNameByCode",
@@ -265,7 +270,7 @@ describe("Public API", () => {
 			Cbo: Cbo;
 			CepAddressInfo: CepAddressInfo;
 			CepProvider: CepProvider;
-			Certidao: Certidao;
+			CertidaoInfo: CertidaoInfo;
 			CertidaoType: CertidaoType;
 			Cfop: Cfop;
 			Cnae: Cnae;
@@ -304,7 +309,7 @@ describe("Public API", () => {
 			GetMunicipalityOptions: GetMunicipalityOptions;
 			Holiday: Holiday;
 			HolidayType: HolidayType;
-			Iban: Iban;
+			IbanInfo: IbanInfo;
 			IsHolidayOptions: IsHolidayOptions;
 			IsValidBankAccountOptions: IsValidBankAccountOptions;
 			IsValidBankAccountParams: IsValidBankAccountParams;
@@ -319,7 +324,7 @@ describe("Public API", () => {
 			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;
 			Municipality: Municipality;
-			NfeKey: NfeKey;
+			NfeKeyInfo: NfeKeyInfo;
 			NfeKeyModel: NfeKeyModel;
 			NumberToWordsGender: NumberToWordsGender;
 			ParseCnpjOptions: ParseCnpjOptions;
@@ -327,9 +332,9 @@ describe("Public API", () => {
 			PhoneMask: PhoneMask;
 			PhoneType: PhoneType;
 			PhoneVersion: PhoneVersion;
-			PixKey: PixKey;
+			PixKeyInfo: PixKeyInfo;
 			PixKeyType: PixKeyType;
-			PixPayload: PixPayload;
+			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
 			State: State;

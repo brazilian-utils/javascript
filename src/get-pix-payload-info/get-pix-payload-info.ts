@@ -38,8 +38,8 @@ import { type TlvFields, parseTlv } from "../_internals/parse-tlv/parse-tlv";
  */
 export type PixPointOfInitiation = "static" | "dynamic";
 
-/** The fields `parsePixPayload` reads out of a Pix BR Code. */
-export type PixPayload = {
+/** The fields `getPixPayloadInfo` reads out of a Pix BR Code. */
+export type PixPayloadInfo = {
 	/** The Pix key of the receiver, present in a static payload. */
 	key?: string;
 	/** URL of the dynamic payload, present instead of `key` in a dynamic one. */
@@ -179,11 +179,11 @@ const buildPixPayload = (
 	merchantName: string,
 	merchantCity: string,
 	optional: OptionalPixFields,
-): PixPayload => {
+): PixPayloadInfo => {
 	const { key, url, description, withdrawalFacilitator, amount, txid, pointOfInitiation } =
 		optional;
 	const isDynamic = url !== undefined || pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION;
-	const pix: PixPayload = {
+	const pix: PixPayloadInfo = {
 		merchantName,
 		merchantCity,
 		pointOfInitiation: isDynamic ? "dynamic" : "static",
@@ -249,12 +249,12 @@ const buildPixPayload = (
  * de Pix Troco para QR Codes estáticos, apenas para QR Codes dinâmicos".
  *
  * @param {string} value - The BR Code payload to be parsed.
- * @returns {PixPayload|null} The Pix data of the payload, or `null` when it is not a valid Pix
+ * @returns {PixPayloadInfo|null} The Pix data of the payload, or `null` when it is not a valid Pix
  * BR Code.
  *
  * @example
  * ```typescript
- * parsePixPayload(
+ * getPixPayloadInfo(
  *   "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-426655440000" +
  *     "5204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D",
  * );
@@ -273,7 +273,7 @@ const buildPixPayload = (
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
  * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
-export const parsePixPayload = (value: string): PixPayload | null => {
+export const getPixPayloadInfo = (value: string): PixPayloadInfo | null => {
 	if (typeof value !== "string") return null;
 
 	const payload = value.trim();

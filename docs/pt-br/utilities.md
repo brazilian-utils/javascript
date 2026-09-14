@@ -2,7 +2,7 @@
 
 Aqui você encontrará todos os utilitários disponíveis para uso.
 
-> **Tratamento de entrada:** nenhuma função pública síncrona lança exceção com `null`/`undefined` ou um valor de tipo incorreto; as duas funções de rede, `getAddressInfoByCep` e `getCepInfoByAddress`, rejeitam com seus erros tipados (veja as seções delas). Os validadores (`isValid*`) retornam `false`; `isHoliday` retorna `false`; `getHolidays` retorna `[]`; `getBoletoInfo` retorna `null` para um boleto inválido; `generateProcessoJuridico` retorna `null`; `getMunicipality` retorna `null` para uma busca malformada/sem correspondência. Todas as demais funções `format*`/`parse*` retornam um valor vazio do seu tipo de retorno: toda função `format*`, `capitalize`, e as funções `parse*` que retornam string (`parseBoleto`, `parseCep`, `parseCnh`, `parseCnpj`, `parseCpf`, `parseLegalNature`, `parseLicensePlate`, `parsePassport`, `parsePhone`, `parsePis`, `parseProcessoJuridico`, `parseVoterId`) retornam `""`; `parseCurrency` retorna `0`; os parsers que retornam objeto/tupla — `parseCertidao`, `parseIban`, `parseNfeKey`, `parsePixKey`, `parsePixPayload` — retornam `null`. `formatCurrency` retorna `""` para um número não finito e para um valor que não pode ser convertido em número (um symbol, um objeto simples, um objeto sem protótipo); `null`, arrays e booleanos passam por `Number()` como no 2.3.0. A única exceção à promessa acima: um objeto criado com `Object.create(null)` não tem `toString`, então as funções `format*`/`parse*` que leem a entrada como texto ainda lançam um `TypeError` para ele, exatamente como na 2.3.0.
+> **Tratamento de entrada:** nenhuma função pública síncrona lança exceção com `null`/`undefined` ou um valor de tipo incorreto; as duas funções de rede, `getAddressInfoByCep` e `getCepInfoByAddress`, rejeitam com seus erros tipados (veja as seções delas). Os validadores (`isValid*`) retornam `false`; `isHoliday` retorna `false`; `getHolidays` retorna `[]`; `getBoletoInfo` retorna `null` para um boleto inválido; `generateProcessoJuridico` retorna `null`; `getMunicipality` retorna `null` para uma busca malformada/sem correspondência. Todas as demais funções `format*`/`parse*` retornam um valor vazio do seu tipo de retorno: toda função `format*`, `capitalize`, e as funções `parse*` que retornam string (`parseBoleto`, `parseCaepf`, `parseCbo`, `parseCei`, `parseCep`, `parseCertidao`, `parseCfop`, `parseCnae`, `parseCnh`, `parseCno`, `parseCnpj`, `parseCns`, `parseCpf`, `parseIban`, `parseLegalNature`, `parseLicensePlate`, `parseNcm`, `parseNfeKey`, `parsePassport`, `parsePhone`, `parsePis`, `parseProcessoJuridico`, `parseVoterId`) retornam `""`; `parseCurrency` retorna `0`; os leitores estruturados — `getCertidaoInfo`, `getIbanInfo`, `getNfeKeyInfo`, `getPixKeyInfo`, `getPixPayloadInfo` — retornam `null`. `formatCurrency` retorna `""` para um número não finito e para um valor que não pode ser convertido em número (um symbol, um objeto simples, um objeto sem protótipo); `null`, arrays e booleanos passam por `Number()` como no 2.3.0. A única exceção à promessa acima: um objeto criado com `Object.create(null)` não tem `toString`, então as funções `format*`/`parse*` que leem a entrada como texto ainda lançam um `TypeError` para ele, exatamente como na 2.3.0.
 
 ## isValidCpf
 
@@ -194,21 +194,21 @@ isValidPixKey('123.456.789-09', { accept: ['email', 'evp'] }); // false
 isValidPixKey('not a key'); // false
 ```
 
-## parsePixKey
+## getPixKeyInfo
 
-Identifica uma chave Pix e a normaliza para a forma canônica que o DICT espera dentro do BR Code: CPF com 11 dígitos, CNPJ com 14 caracteres, e-mail em minúsculas, telefone celular em E.164 (um telefone fixo não é chave Pix) ou UUID em minúsculas (EVP). Um valor de 11 dígitos válido tanto como CPF quanto como celular é lido como CPF, a menos que tenha sido escrito como telefone (prefixo `+55`/`0055` ou DDD entre parênteses). O CPF e o telefone são reconhecidos pela forma como são escritos, não apenas pelos dígitos que carregam, então texto ao redor não é descartado e `'abc123.456.789-09'` não é uma chave CPF. Retorna `null` quando o valor não é uma chave Pix válida. O resultado é tipado como `PixKey`.
+Identifica uma chave Pix e a normaliza para a forma canônica que o DICT espera dentro do BR Code: CPF com 11 dígitos, CNPJ com 14 caracteres, e-mail em minúsculas, telefone celular em E.164 (um telefone fixo não é chave Pix) ou UUID em minúsculas (EVP). Um valor de 11 dígitos válido tanto como CPF quanto como celular é lido como CPF, a menos que tenha sido escrito como telefone (prefixo `+55`/`0055` ou DDD entre parênteses). O CPF e o telefone são reconhecidos pela forma como são escritos, não apenas pelos dígitos que carregam, então texto ao redor não é descartado e `'abc123.456.789-09'` não é uma chave CPF. Retorna `null` quando o valor não é uma chave Pix válida. O resultado é tipado como `PixKeyInfo`.
 
 ```javascript
-import { parsePixKey } from '@brazilian-utils/brazilian-utils';
+import { getPixKeyInfo } from '@brazilian-utils/brazilian-utils';
 
-parsePixKey('123.456.789-09'); // { type: 'cpf', value: '12345678909' }
-parsePixKey('Fulano@Example.COM '); // { type: 'email', value: 'fulano@example.com' }
-parsePixKey('(11) 98765-4321'); // { type: 'phone', value: '+5511987654321' }
-parsePixKey('71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D');
+getPixKeyInfo('123.456.789-09'); // { type: 'cpf', value: '12345678909' }
+getPixKeyInfo('Fulano@Example.COM '); // { type: 'email', value: 'fulano@example.com' }
+getPixKeyInfo('(11) 98765-4321'); // { type: 'phone', value: '+5511987654321' }
+getPixKeyInfo('71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D');
 // { type: 'evp', value: '71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d' }
-parsePixKey('(11) 3000-0000'); // null (telefone fixo não é chave Pix)
-parsePixKey('51998259765'); // { type: 'cpf', value: '51998259765' } (também é um telefone válido)
-parsePixKey('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
+getPixKeyInfo('(11) 3000-0000'); // null (telefone fixo não é chave Pix)
+getPixKeyInfo('51998259765'); // { type: 'cpf', value: '51998259765' } (também é um telefone válido)
+getPixKeyInfo('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
 ```
 
 ## isValidPixPayload
@@ -226,14 +226,14 @@ isValidPixPayload(
 isValidPixPayload('00020126580014br.gov.bcb.pix...'); // false (CRC quebrado)
 ```
 
-## parsePixPayload
+## getPixPayloadInfo
 
-Interpreta um payload de BR Code Pix e retorna seus campos. O payload é validado pelo `isValidPixPayload` primeiro, então uma estrutura malformada, um CRC quebrado ou um objeto obrigatório ausente retornam `null` em vez de um resultado parcial. Um payload estático vem com `key`, um dinâmico com `url`. O resultado é tipado como `PixPayload`; `pointOfInitiation` está sempre presente e é tipado como `PixPointOfInitiation`, `"dynamic"` quando o payload traz uma localização de PSP ou quando o objeto "Point of Initiation Method" (`01`) é `"12"`, e `"static"` nos demais casos. As informações da conta do recebedor devem trazer exatamente um entre uma chave e uma `url` (verificada com a mesma regra de localização de PSP do `generatePixPayload`); o próprio `01` é informativo, então pode estar ausente em qualquer um dos formatos e apenas um valor fora de `{"11", "12"}` retorna `null`. Quando um payload construído em torno de uma chave traz um valor, esse valor precisa ser maior que zero, a menos que o payload seja um BR Code de Pix Saque: o §2.6 do manual do Pix coloca o ISPB do facilitador de serviço de saque no subobjeto 26-03 (`fss`), devolvido como `withdrawalFacilitator`, e `54` igual a `"0"` ou `"0.00"` é aceito junto dele. Rejeitar um valor zero sem o `fss` é uma restrição deliberada desta biblioteca, não uma regra do manual. Um `fss` escrito ao lado de uma localização de PSP retorna `null`: o §2.7 do Manual de Padrões para Iniciação do Pix mapeia o QR Code dinâmico para exatamente dois subobjetos, `00` (GUI) e `25` (URL), e o `fss` pertence ao template estático do §2.6. Quando o payload traz uma localização de PSP, o valor e o `txid` são ignorados, como o manual determina. Os Unreserved Templates (IDs 80 a 99) são ignorados: um "QR Code composto" do Pix Automático que também traga uma localização de pagamento em 26-25 é interpretado como um payload dinâmico comum e sua localização de recorrência é descartada, então quem precisa distinguir os dois não pode se apoiar neste parser. Só um payload sem nenhum template Pix nos IDs 26 a 51 retorna `null`.
+Interpreta um payload de BR Code Pix e retorna seus campos. O payload é validado pelo `isValidPixPayload` primeiro, então uma estrutura malformada, um CRC quebrado ou um objeto obrigatório ausente retornam `null` em vez de um resultado parcial. Um payload estático vem com `key`, um dinâmico com `url`. O resultado é tipado como `PixPayloadInfo`; `pointOfInitiation` está sempre presente e é tipado como `PixPointOfInitiation`, `"dynamic"` quando o payload traz uma localização de PSP ou quando o objeto "Point of Initiation Method" (`01`) é `"12"`, e `"static"` nos demais casos. As informações da conta do recebedor devem trazer exatamente um entre uma chave e uma `url` (verificada com a mesma regra de localização de PSP do `generatePixPayload`); o próprio `01` é informativo, então pode estar ausente em qualquer um dos formatos e apenas um valor fora de `{"11", "12"}` retorna `null`. Quando um payload construído em torno de uma chave traz um valor, esse valor precisa ser maior que zero, a menos que o payload seja um BR Code de Pix Saque: o §2.6 do manual do Pix coloca o ISPB do facilitador de serviço de saque no subobjeto 26-03 (`fss`), devolvido como `withdrawalFacilitator`, e `54` igual a `"0"` ou `"0.00"` é aceito junto dele. Rejeitar um valor zero sem o `fss` é uma restrição deliberada desta biblioteca, não uma regra do manual. Um `fss` escrito ao lado de uma localização de PSP retorna `null`: o §2.7 do Manual de Padrões para Iniciação do Pix mapeia o QR Code dinâmico para exatamente dois subobjetos, `00` (GUI) e `25` (URL), e o `fss` pertence ao template estático do §2.6. Quando o payload traz uma localização de PSP, o valor e o `txid` são ignorados, como o manual determina. Os Unreserved Templates (IDs 80 a 99) são ignorados: um "QR Code composto" do Pix Automático que também traga uma localização de pagamento em 26-25 é interpretado como um payload dinâmico comum e sua localização de recorrência é descartada, então quem precisa distinguir os dois não pode se apoiar neste parser. Só um payload sem nenhum template Pix nos IDs 26 a 51 retorna `null`.
 
 ```javascript
-import { parsePixPayload } from '@brazilian-utils/brazilian-utils';
+import { getPixPayloadInfo } from '@brazilian-utils/brazilian-utils';
 
-parsePixPayload(
+getPixPayloadInfo(
   '00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-426655440000' +
     '5204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D'
 );
@@ -247,9 +247,9 @@ parsePixPayload(
 
 ## generatePixPayload
 
-Gera o payload de um BR Code Pix. Exatamente um entre `params.key` e `params.url` deve ser informado (parte de `GeneratePixPayloadOptions`); `null` é retornado quando ambos ou nenhum são informados. `url` deve ser uma localização de PSP como o manual do Bacen define: um host com caminho, sem esquema (`pix.example.com/qr/v2/1234`); um payload dinâmico não pode carregar `amount` nem `txid`, que pertencem à localização do PSP. O valor é escrito com as duas casas decimais que o BR Code aceita, então tanto um que arredonda para `0.00` quanto um que não sobrevive a esse round-trip (`0.005`, `123.456`) são rejeitados, em vez de escritos como uma quantia diferente. O BR Code de Pix Saque, que anuncia o `fss` do subobjeto 26-03, é interpretado pelo `parsePixPayload`, mas não é gerado aqui.
+Gera o payload de um BR Code Pix. Exatamente um entre `params.key` e `params.url` deve ser informado (parte de `GeneratePixPayloadOptions`); `null` é retornado quando ambos ou nenhum são informados. `url` deve ser uma localização de PSP como o manual do Bacen define: um host com caminho, sem esquema (`pix.example.com/qr/v2/1234`); um payload dinâmico não pode carregar `amount` nem `txid`, que pertencem à localização do PSP. O valor é escrito com as duas casas decimais que o BR Code aceita, então tanto um que arredonda para `0.00` quanto um que não sobrevive a esse round-trip (`0.005`, `123.456`) são rejeitados, em vez de escritos como uma quantia diferente. O BR Code de Pix Saque, que anuncia o `fss` do subobjeto 26-03, é interpretado pelo `getPixPayloadInfo`, mas não é gerado aqui.
 
-Quando `params.key` é informado, ela é normalizada para a forma canônica do DICT pelo `parsePixKey` e o payload é estático. Quando `params.url` é informado no lugar (a localização do PSP, sem o esquema da URL, ex.: `"pix.example.com/qr/v2/1234"`), o payload é dinâmico conforme o Manual de Padrões para Iniciação do Pix: a URL ocupa o lugar da chave no template "Merchant Account Information" e o objeto "Point of Initiation Method" é definido como dinâmico (`12`); `params.url` pode ter no máximo 77 caracteres. `merchantName`, `merchantCity` e `description` são convertidos para ASCII imprimível (acentos removidos) e truncados ao que o BR Code permite. O `parsePixPayload` já interpreta os dois formatos, então `parsePixPayload(generatePixPayload({ url, ... }))` forma um round-trip.
+Quando `params.key` é informado, ela é normalizada para a forma canônica do DICT pelo `getPixKeyInfo` e o payload é estático. Quando `params.url` é informado no lugar (a localização do PSP, sem o esquema da URL, ex.: `"pix.example.com/qr/v2/1234"`), o payload é dinâmico conforme o Manual de Padrões para Iniciação do Pix: a URL ocupa o lugar da chave no template "Merchant Account Information" e o objeto "Point of Initiation Method" é definido como dinâmico (`12`); `params.url` pode ter no máximo 77 caracteres. `merchantName`, `merchantCity` e `description` são convertidos para ASCII imprimível (acentos removidos) e truncados ao que o BR Code permite. O `getPixPayloadInfo` já interpreta os dois formatos, então `getPixPayloadInfo(generatePixPayload({ url, ... }))` forma um round-trip.
 
 ```javascript
 import { generatePixPayload } from '@brazilian-utils/brazilian-utils';
@@ -310,20 +310,34 @@ formatNfeKey('12345', { pad: true });
 
 ## parseNfeKey
 
-Interpreta uma chave de acesso de DF-e e retorna seus campos (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit). Aceita as mesmas formas de entrada do `isValidNfeKey` e retorna `null` quando a chave não é válida. O resultado é tipado como `NfeKey`, cujo `model` é um `NfeKeyModel`. A NFCom (`'62'`) e a NF3e (`'66'`) gastam a posição 36 da chave com o `nSiteAutoriz`, o site do autorizador que recebeu o documento, então para esses dois modelos o resultado também traz `authorizationSite` e o `code` tem 7 dígitos em vez de 8.
+Remove a formatação de uma chave de acesso de DF-e, mantém apenas os dígitos e limita o resultado a 44 dígitos. Os prefixos `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` e `NFCom` que o atributo `Id` do XML do documento coloca antes da chave são retirados primeiro, já que o `NF3e` carrega um dígito próprio; use `isValidNfeKey` para verificar a chave e `getNfeKeyInfo` para ler os campos dela.
 
 ```javascript
 import { parseNfeKey } from '@brazilian-utils/brazilian-utils';
 
-parseNfeKey('35170458716523000119550010000000121000123458');
+parseNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458');
+// '35170458716523000119550010000000121000123458'
+
+parseNfeKey('NFe35170458716523000119550010000000121000123458');
+// '35170458716523000119550010000000121000123458'
+```
+
+## getNfeKeyInfo
+
+Interpreta uma chave de acesso de DF-e e retorna seus campos (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit). Aceita as mesmas formas de entrada do `isValidNfeKey` e retorna `null` quando a chave não é válida. O resultado é tipado como `NfeKeyInfo`, cujo `model` é um `NfeKeyModel`. A NFCom (`'62'`) e a NF3e (`'66'`) gastam a posição 36 da chave com o `nSiteAutoriz`, o site do autorizador que recebeu o documento, então para esses dois modelos o resultado também traz `authorizationSite` e o `code` tem 7 dígitos em vez de 8.
+
+```javascript
+import { getNfeKeyInfo } from '@brazilian-utils/brazilian-utils';
+
+getNfeKeyInfo('35170458716523000119550010000000121000123458');
 // { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '55',
 //   series: 1, number: 12, emissionType: 1, code: '00012345', checkDigit: 8 }
 
-parseNfeKey('35170458716523000119620010000000121000123450');
+getNfeKeyInfo('35170458716523000119620010000000121000123450');
 // { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
 //   series: 1, number: 12, emissionType: 1, authorizationSite: 0, code: '0012345', checkDigit: 0 }
 
-parseNfeKey('invalid'); // null
+getNfeKeyInfo('invalid'); // null
 ```
 
 ## isValidEmail
@@ -791,12 +805,23 @@ formatIban('BR15 0000-0000.0000/1093 2840 814P-2'); // 'BR15 0000 0000 0000 1093
 
 ## parseIban
 
-Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular, `1` a `9` e depois `A` a `Z`). Aceita as mesmas formas de entrada que `isValidIban`, compacta ou no formato impresso da ISO 13616 (grupos de 4 separados por um único espaço em branco, `.`, `-` ou `/`), em ambos os casos com espaços em branco opcionais no início e no fim e sem diferenciar maiúsculas de minúsculas, e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega um separador fora do limite de um grupo, uma sequência de separadores ou qualquer caractere além de letras e dígitos. O resultado é tipado como `Iban`, cujo `accountType` é uma `string`.
+Remove a formatação do IBAN, mantém as letras e os dígitos, coloca o resultado em maiúsculas e o limita aos 29 caracteres de um IBAN brasileiro. Um IBAN carrega letras além de dígitos, então o valor é lido como o `parsePassport` lê um número de passaporte; use `isValidIban` para verificar os dígitos verificadores e `getIbanInfo` para ler os campos.
 
 ```javascript
 import { parseIban } from '@brazilian-utils/brazilian-utils';
 
-parseIban('BR1500000000000010932840814P2');
+parseIban('BR15 0000 0000 0000 1093 2840 814P 2'); // 'BR1500000000000010932840814P2'
+parseIban('br15-0000.0000/0000 1093 2840 814p-2'); // 'BR1500000000000010932840814P2'
+```
+
+## getIbanInfo
+
+Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular, `1` a `9` e depois `A` a `Z`). Aceita as mesmas formas de entrada que `isValidIban`, compacta ou no formato impresso da ISO 13616 (grupos de 4 separados por um único espaço em branco, `.`, `-` ou `/`), em ambos os casos com espaços em branco opcionais no início e no fim e sem diferenciar maiúsculas de minúsculas, e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega um separador fora do limite de um grupo, uma sequência de separadores ou qualquer caractere além de letras e dígitos. O resultado é tipado como `IbanInfo`, cujo `accountType` é uma `string`.
+
+```javascript
+import { getIbanInfo } from '@brazilian-utils/brazilian-utils';
+
+getIbanInfo('BR1500000000000010932840814P2');
 // {
 //   countryCode: 'BR',
 //   checkDigits: '15',
@@ -807,8 +832,8 @@ parseIban('BR1500000000000010932840814P2');
 //   owner: '2'
 // }
 
-parseIban('DE89370400440532013000'); // null (IBAN não brasileiro)
-parseIban('BR15 000 00000 0000 1093 2840 814P 2'); // null (separador dentro de um grupo)
+getIbanInfo('DE89370400440532013000'); // null (IBAN não brasileiro)
+getIbanInfo('BR15 000 00000 0000 1093 2840 814P 2'); // null (separador dentro de um grupo)
 ```
 
 ## isValidCreditCard
@@ -1685,11 +1710,21 @@ formatCns(123456789010000); // '123 4567 8901 0000'
 formatCns('89010001', { pad: true }); // '000 0000 8901 0001'
 ```
 
+## parseCns
+
+Remove a formatação do CNS (Cartão Nacional de Saúde), mantém apenas os dígitos e limita o resultado a 15 dígitos. Um valor parcial passa adiante até onde vai, então também dá para tirar a máscara de um campo ainda sendo digitado; use `isValidCns` para verificar o número em si.
+
+```javascript
+import { parseCns } from '@brazilian-utils/brazilian-utils';
+
+parseCns('123 4567 8901 0000'); // '123456789010000'
+```
+
 ## isValidCertidao
 
 Verifica se a matrícula de uma certidão de registro civil (nascimento, casamento, óbito e os demais atos mantidos por uma serventia de registro civil das pessoas naturais) é válida. A matrícula tem 32 dígitos distribuídos em 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) + 3 (folha) + 7 (termo) + 2 (dígitos verificadores), e os dois dígitos verificadores usam módulo 11 com os pesos ciclando de 2 a 10 e voltando por 0: o primeiro cálculo começa em 2 sobre os 30 dígitos da base, o segundo em 1 sobre os 31 dígitos que incluem o primeiro dígito verificador, e nos dois um resto 10 é lido como 1. Aceita os caracteres de máscara usuais e espaços entre e ao redor dos grupos. O layout é o publicado atualmente no [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) (Provimento CNJ nº 149/2023), com o inciso II e os §§ 1º e 3º a 5º na redação do Provimento CN nº 237/2026 e o restante do artigo, inclusive o § 2º, na do Provimento CN nº 182/2024; a própria matrícula foi instituída pelo já revogado [Provimento CNJ nº 2/2009](https://atos.cnj.jus.br/atos/detalhar/1311) e ganhou sua estrutura de dígitos no também revogado [Provimento CNJ nº 3/2009, art. 7º](https://atos.cnj.jus.br/atos/detalhar/1310). Os dígitos verificadores estão detalhados em [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e implementado pelo [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) e pelo [validator-docs](https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php).
 
-Os dígitos do serviço são fixos em `55`, o código que o [art. 473, III](https://atos.cnj.jus.br/atos/detalhar/5243) atribui ao registro civil das pessoas naturais, então uma matrícula com qualquer outro par na nona e décima posições é rejeitada por mais que os dígitos verificadores confiram. O dígito do tipo de livro sempre precisa nomear um dos nove tipos de livro (o mesmo `CertidaoType` retornado por `parseCertidao`), então uma matrícula cujo dígito é `0` é rejeitada por mais que os dígitos verificadores confiram, do mesmo jeito que `parseCertidao` devolve `null` para ela. `options.accept` (parte de `IsValidCertidaoOptions`) restringe ainda mais aos tipos listados; o padrão é aceitar todos os tipos, e um valor que não seja um array volta para esse padrão. Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
+Os dígitos do serviço são fixos em `55`, o código que o [art. 473, III](https://atos.cnj.jus.br/atos/detalhar/5243) atribui ao registro civil das pessoas naturais, então uma matrícula com qualquer outro par na nona e décima posições é rejeitada por mais que os dígitos verificadores confiram. O dígito do tipo de livro sempre precisa nomear um dos nove tipos de livro (o mesmo `CertidaoType` retornado por `getCertidaoInfo`), então uma matrícula cujo dígito é `0` é rejeitada por mais que os dígitos verificadores confiram, do mesmo jeito que `getCertidaoInfo` devolve `null` para ela. `options.accept` (parte de `IsValidCertidaoOptions`) restringe ainda mais aos tipos listados; o padrão é aceitar todos os tipos, e um valor que não seja um array volta para esse padrão. Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
 
 ```javascript
 import { isValidCertidao } from '@brazilian-utils/brazilian-utils';
@@ -1703,14 +1738,38 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['birth'] 
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] }); // false
 ```
 
+## formatCertidao
+
+Formata a matrícula de uma certidão de registro civil na máscara impressa do Provimento, os 32 dígitos agrupados em 6 2 2 4 1 5 3 7 2 e separados por espaços. `options.pad` (parte de `FormatCertidaoOptions`) preenche o valor com zeros à esquerda até 32 dígitos (padrão `false`). A máscara é a do [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243). Um número é aceito e lido como a string dos seus dígitos, como no `formatCpf`, mas uma matrícula completa de 32 dígitos precisa ser uma string: essa quantidade de dígitos é mais do que um número JavaScript comporta com exatidão. Em tempo de execução o valor é lido pelos seus dígitos e a máscara é aplicada até onde eles vão, como em todo formatador deste pacote, então uma matrícula parcial ainda sendo digitada é mascarada progressivamente.
+
+```javascript
+import { formatCertidao } from '@brazilian-utils/brazilian-utils';
+
+formatCertidao('10453901552013100012021000012321'); // 104539 01 55 2013 1 00012 021 0000123 21
+formatCertidao('104539.01.55.2013.1.00012.021.0000123-21'); // 104539 01 55 2013 1 00012 021 0000123 21
+formatCertidao('1552010100020112000012087', { pad: true }); // 000000 01 55 2010 1 00020 112 0000120 87
+formatCertidao(104539015520); // 104539 01 55 20 (um número é lido como a string dos seus dígitos)
+```
+
 ## parseCertidao
 
-Extrai os campos da matrícula de uma certidão de registro civil, retornando `null` quando a matrícula é inválida, o que inclui um código de livro que não é um dos nove livros. O [art. 473, V do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) lista os códigos de 1 a 7; nenhum texto primário do CNJ acessível hoje publica os outros dois, inclusive o Anexo IV do revogado Provimento CNJ nº 63/2017, que lista os mesmos sete. Os códigos 8 (emancipação) e 9 (interdição) vêm das referências em que a regra do dígito verificador se apoia: o [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e o [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) publicam a lista dos nove livros. Eles são mantidos porque matrículas com eles circulam. Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
+Remove a formatação da matrícula de uma certidão de registro civil, mantém apenas os dígitos e limita o resultado a 32 dígitos. Isso só tira a máscara: use `isValidCertidao` para verificar a matrícula e `getCertidaoInfo` para ler os campos dela.
 
 ```javascript
 import { parseCertidao } from '@brazilian-utils/brazilian-utils';
 
 parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
+// '10453901552013100012021000012321'
+```
+
+## getCertidaoInfo
+
+Extrai os campos da matrícula de uma certidão de registro civil, retornando `null` quando a matrícula é inválida, o que inclui um código de livro que não é um dos nove livros. O [art. 473, V do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) lista os códigos de 1 a 7; nenhum texto primário do CNJ acessível hoje publica os outros dois, inclusive o Anexo IV do revogado Provimento CNJ nº 63/2017, que lista os mesmos sete. Os códigos 8 (emancipação) e 9 (interdição) vêm das referências em que a regra do dígito verificador se apoia: o [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e o [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) publicam a lista dos nove livros. Eles são mantidos porque matrículas com eles circulam. Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
+
+```javascript
+import { getCertidaoInfo } from '@brazilian-utils/brazilian-utils';
+
+getCertidaoInfo('104539 01 55 2013 1 00012 021 0000123 21');
 // {
 //   registryCns: '104539',
 //   acervo: '01',
@@ -1724,10 +1783,10 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 //   checkDigits: '21'
 // }
 
-parseCertidao('invalid'); // null
+getCertidaoInfo('invalid'); // null
 ```
 
-O resultado `Certidao` traz:
+O resultado `CertidaoInfo` traz:
 
 | Chave | Descrição |
 | --- | --- |

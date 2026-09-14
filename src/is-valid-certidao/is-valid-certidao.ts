@@ -5,8 +5,8 @@ import {
 	CERTIDAO_SERVICE_CODE,
 } from "../_internals/constants/certidao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { CERTIDAO_TYPES } from "../parse-certidao/constants";
-import { type CertidaoType } from "../parse-certidao/parse-certidao";
+import { CERTIDAO_TYPES } from "../get-certidao-info/constants";
+import { type CertidaoType } from "../get-certidao-info/get-certidao-info";
 
 /** Options of `isValidCertidao`. */
 export type IsValidCertidaoOptions = {
@@ -43,8 +43,8 @@ const getCheckDigit = (value: string): number => {
  * as 1.
  *
  * The book-type digit (fifteenth position of the matrícula) always has to name one of the nine
- * books (see `CertidaoType`, reused from `parseCertidao`), so a matrícula whose digit is `0` is
- * rejected however good its check digits are, the same way `parseCertidao` returns `null` for
+ * books (see `CertidaoType`, reused from `getCertidaoInfo`), so a matrícula whose digit is `0` is
+ * rejected however good its check digits are, the same way `getCertidaoInfo` returns `null` for
  * it. `options.accept` narrows that further to the listed types; when it is omitted, or when it
  * is not an array, every book type is accepted.
  *

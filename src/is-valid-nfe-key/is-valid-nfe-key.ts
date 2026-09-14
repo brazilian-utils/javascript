@@ -1,4 +1,4 @@
-import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
+import { getNfeKeyInfo } from "../get-nfe-key-info/get-nfe-key-info";
 
 /**
  * Validates a DF-e (Documento Fiscal eletrônico) access key (chave de acesso).
@@ -66,4 +66,4 @@ import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
  * isValidNfeKey("35170458716523000119010010000000121000123450"); // false (invalid mod)
  * ```
  */
-export const isValidNfeKey = (value: string): boolean => parseNfeKey(value) !== null;
+export const isValidNfeKey = (value: string): boolean => getNfeKeyInfo(value) !== null;

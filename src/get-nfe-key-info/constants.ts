@@ -1,5 +1,5 @@
 /**
- * The `mod` (modelo do documento) values `parseNfeKey` supports, every one of them a document
+ * The `mod` (modelo do documento) values `getNfeKeyInfo` supports, every one of them a document
  * whose "chave de acesso" is the same 44 digit string built the same way: 55 NF-e, 57 CT-e,
  * 58 MDF-e, 62 NFCom, 63 BP-e, 64 GTV-e (the CT-e Guia de Transporte de Valores), 65 NFC-e,
  * 66 NF3e and 67 CT-e OS (Conhecimento de Transporte Eletrônico para Outros Serviços).
@@ -10,7 +10,7 @@
  */
 export const VALID_MODELS = ["55", "57", "58", "62", "63", "64", "65", "66", "67"] as const;
 
-/** One of the `mod` values `parseNfeKey` supports. */
+/** One of the `mod` values `getNfeKeyInfo` supports. */
 export type ValidModel = (typeof VALID_MODELS)[number];
 
 /**
@@ -88,13 +88,6 @@ export const FORBIDDEN_CODES: readonly string[] = [
  * `55/65`. The MOC being the consolidated text in force, both models are kept here.
  */
 export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
-
-/**
- * The prefixes the `Id` attribute of a DF-e XML puts in front of the 44 digits, one per
- * document: `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom`. Stripped before the digits are
- * read, since `NF3e` carries a digit of its own.
- */
-export const XML_ID_PREFIX_REGEX = /^(?:nfe|cte|mdfe|bpe|nf3e|nfcom)/i;
 
 /**
  * Shape the key has to be written in once the prefix is stripped: the digits, optionally split

@@ -81,6 +81,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [formatVoterId](https://brazilian-utils.com.br/utilities.md#formatvoterid): Format a voter ID number.
 - [formatCns](https://brazilian-utils.com.br/utilities.md#formatcns): Format a CNS (Cartão Nacional de Saúde) number into the common display groups of 3-4-4-4 digits separated by spaces.
 - [formatCertidao](https://brazilian-utils.com.br/utilities.md#formatcertidao): Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
+- [formatCertidao](https://brazilian-utils.com.br/utilities.md#formatcertidao): Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
 - [formatCei](https://brazilian-utils.com.br/utilities.md#formatcei): Format a CEI (Cadastro Específico do INSS) number according to the usual `00.000.00000/00` mask, the one the reference implementations of the check digit agree on (the Receita Federal does not print it).
 - [formatCno](https://brazilian-utils.com.br/utilities.md#formatcno): Format a CNO (Cadastro Nacional de Obras) number.
 - [formatCaepf](https://brazilian-utils.com.br/utilities.md#formatcaepf): Format a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number according to the usual `000.000.000/000-00` mask, the one the sources of the check digit rule agree on (the Receita Federal does not print it).
@@ -92,21 +93,20 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [parseCpf](https://brazilian-utils.com.br/utilities.md#parsecpf): Remove CPF formatting, keep only digits, and cap the result to 11 digits.
 - [parseCnpj](https://brazilian-utils.com.br/utilities.md#parsecnpj): Remove CNPJ formatting, return a normalized value, and cap the result to 14 characters.
 - [parseBoleto](https://brazilian-utils.com.br/utilities.md#parseboleto): Remove boleto formatting, keep only digits, and cap the result to 47 digits (48 for boleto de arrecadação).
-- [parsePixKey](https://brazilian-utils.com.br/utilities.md#parsepixkey): Identifies a Pix key and normalizes it to the canonical form the DICT expects inside a BR Code: 11 digit CPF, 14 character CNPJ, lowercased e-mail, E.164 mobile phone (a landline is not a Pix key) or lowercase UUID EVP.
-- [parsePixPayload](https://brazilian-utils.com.br/utilities.md#parsepixpayload): Parses a Pix BR Code payload into its fields.
-- [parseNfeKey](https://brazilian-utils.com.br/utilities.md#parsenfekey): Parses a DF-e access key into its fields (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit).
+- [parseNfeKey](https://brazilian-utils.com.br/utilities.md#parsenfekey): Remove the formatting of a DF-e access key (chave de acesso), keep only digits, and cap the result to 44 digits.
 - [parsePhone](https://brazilian-utils.com.br/utilities.md#parsephone): Remove phone formatting, keep only digits, and cap the result to 11 digits.
 - [parsePis](https://brazilian-utils.com.br/utilities.md#parsepis): Remove PIS formatting, keep only digits, and cap the result to 11 digits.
 - [parseCep](https://brazilian-utils.com.br/utilities.md#parsecep): Remove CEP formatting, keep only digits, and cap the result to 8 digits.
 - [parseProcessoJuridico](https://brazilian-utils.com.br/utilities.md#parseprocessojuridico): Remove processo jurídico formatting, keep only digits, and cap the result to 20 digits.
-- [parseIban](https://brazilian-utils.com.br/utilities.md#parseiban): Parses a Brazilian IBAN into its fields: 2 (country code, always `BR`) + 2 (ISO 7064 MOD 97-10 check digits) + 8 (ISPB) + 5 (branch) + 10 (account) + 1 (account type, any letter, usually `C` for conta corrente or `P` for conta poupança) + 1 (owner indicator, `1` to `9` then `A` to `Z`).
+- [parseIban](https://brazilian-utils.com.br/utilities.md#parseiban): Remove IBAN formatting, keep the letters and digits, uppercase the result, and cap it to the 29 characters of a Brazilian IBAN.
 - [parseCurrency](https://brazilian-utils.com.br/utilities.md#parsecurrency): Transforms a string to an integer or float format.
 - [parsePassport](https://brazilian-utils.com.br/utilities.md#parsepassport): Remove all non-alphanumeric characters from a passport number, uppercase the result, and cap it to 8 characters.
 - [parseCnh](https://brazilian-utils.com.br/utilities.md#parsecnh): Remove CNH formatting, keep only digits, and cap the result to 11 digits.
 - [parseLegalNature](https://brazilian-utils.com.br/utilities.md#parselegalnature): Remove legal nature formatting, keep only digits, and cap the result to 4 digits.
 - [parseLicensePlate](https://brazilian-utils.com.br/utilities.md#parselicenseplate): Remove separators from a license plate, normalize it to uppercase, and cap it to 7 characters.
 - [parseVoterId](https://brazilian-utils.com.br/utilities.md#parsevoterid): Remove voter ID formatting, keep only digits, and cap the result to 12 digits (13 when the UF digits identify São Paulo or Minas Gerais).
-- [parseCertidao](https://brazilian-utils.com.br/utilities.md#parsecertidao): Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid, which includes a book code that is not one of the nine books.
+- [parseCns](https://brazilian-utils.com.br/utilities.md#parsecns): Remove CNS (Cartão Nacional de Saúde) formatting, keep only digits, and cap the result to 15 digits.
+- [parseCertidao](https://brazilian-utils.com.br/utilities.md#parsecertidao): Remove the formatting of the matrícula of a certidão de registro civil, keep only digits, and cap the result to 32 digits.
 
 ## Generators (generate*)
 
@@ -128,12 +128,16 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 ## Getters (get*)
 
 - [getBoletoInfo](https://brazilian-utils.com.br/utilities.md#getboletoinfo): Extract information from a boleto (amount, expiration date, bank code).
+- [getPixKeyInfo](https://brazilian-utils.com.br/utilities.md#getpixkeyinfo): Identifies a Pix key and normalizes it to the canonical form the DICT expects inside a BR Code: 11 digit CPF, 14 character CNPJ, lowercased e-mail, E.164 mobile phone (a landline is not a Pix key) or lowercase UUID EVP.
+- [getPixPayloadInfo](https://brazilian-utils.com.br/utilities.md#getpixpayloadinfo): Parses a Pix BR Code payload into its fields.
+- [getNfeKeyInfo](https://brazilian-utils.com.br/utilities.md#getnfekeyinfo): Parses a DF-e access key into its fields (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit).
 - [getAreaCodeInfo](https://brazilian-utils.com.br/utilities.md#getareacodeinfo): Get the state (and its region) a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração.
 - [getAreaCodesByState](https://brazilian-utils.com.br/utilities.md#getareacodesbystate): Get every DDD (area code) that serves a given Brazilian state, under the Anatel Plano Geral de Numeração.
 - [getAddressInfoByCep](https://brazilian-utils.com.br/utilities.md#getaddressinfobycep): Fetch address information for a given CEP using multiple providers.
 - [getBanks](https://brazilian-utils.com.br/utilities.md#getbanks): Get every Brazilian bank with a compensation code (COMPE), published by Banco Central do Brasil in the STR participants list.
 - [getBankByCode](https://brazilian-utils.com.br/utilities.md#getbankbycode): Look a Brazilian bank up by its compensation code (COMPE), published by Banco Central do Brasil in the STR participants list.
 - [getBankByIspb](https://brazilian-utils.com.br/utilities.md#getbankbyispb): Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the STR participants list.
+- [getIbanInfo](https://brazilian-utils.com.br/utilities.md#getibaninfo): Parses a Brazilian IBAN into its fields: 2 (country code, always `BR`) + 2 (ISO 7064 MOD 97-10 check digits) + 8 (ISPB) + 5 (branch) + 10 (account) + 1 (account type, any letter, usually `C` for conta corrente or `P` for conta poupança) + 1 (owner indicator, `1` to `9` then `A` to `Z`).
 - [getStates](https://brazilian-utils.com.br/utilities.md#getstates): Get all Brazilian states, each with its two-letter code, name, region code, region name and 2-digit IBGE code of the Federative Unit (`cUF`).
 - [getStateByIbgeCode](https://brazilian-utils.com.br/utilities.md#getstatebyibgecode): Get the Brazilian state whose 2-digit IBGE code ("cUF", the Código da Unidade da Federação) matches the given value.
 - [getStateCodeByName](https://brazilian-utils.com.br/utilities.md#getstatecodebyname): Get the two-letter code (sigla) of a Brazilian state given its full name.
@@ -149,6 +153,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [getMunicipality](https://brazilian-utils.com.br/utilities.md#getmunicipality): Get municipality information by IBGE code, or get an IBGE code from municipality name and UF.
 - [getMunicipalities](https://brazilian-utils.com.br/utilities.md#getmunicipalities): Get Brazilian municipalities published by the IBGE.
 - [getMunicipalityByCode](https://brazilian-utils.com.br/utilities.md#getmunicipalitybycode): Look up a Brazilian municipality by its 7-digit IBGE code.
+- [getCertidaoInfo](https://brazilian-utils.com.br/utilities.md#getcertidaoinfo): Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid, which includes a book code that is not one of the nine books.
 - [getCbo](https://brazilian-utils.com.br/utilities.md#getcbo): Look a CBO (Classificação Brasileira de Ocupações) code up and get its official occupation title, in the `{ code, description }` record every lookup of this library returns.
 - [getCnae](https://brazilian-utils.com.br/utilities.md#getcnae): Look a CNAE (Classificação Nacional de Atividades Econômicas) subclass code up and get its code and official description.
 - [getCfop](https://brazilian-utils.com.br/utilities.md#getcfop): Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the consolidated Anexo II of Convênio SINIEF s/nº 1970 words it, in the text in force, last amended by Ajuste SINIEF 39/25.

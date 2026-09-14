@@ -1,8 +1,8 @@
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { isValidIban } from "../is-valid-iban/is-valid-iban";
 
-/** The fields `parseIban` reads out of a Brazilian IBAN. */
-export type Iban = {
+/** The fields `getIbanInfo` reads out of a Brazilian IBAN. */
+export type IbanInfo = {
 	/** ISO 3166-1 alpha-2 country code. Always `"BR"`, the only country this parser supports. */
 	countryCode: "BR";
 	/** The 2 digit ISO 7064 MOD 97-10 check digits. */
@@ -57,11 +57,11 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * character other than letters and digits.
  *
  * @param {string} value - The IBAN to be parsed.
- * @returns {Iban|null} The parsed IBAN, or `null` when it is not a valid Brazilian IBAN.
+ * @returns {IbanInfo|null} The parsed IBAN, or `null` when it is not a valid Brazilian IBAN.
  *
  * @example
  * ```typescript
- * parseIban("BR1500000000000010932840814P2");
+ * getIbanInfo("BR1500000000000010932840814P2");
  * // {
  * //   countryCode: "BR",
  * //   checkDigits: "15",
@@ -72,11 +72,11 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * //   owner: "2",
  * // }
  *
- * parseIban("BR15 0000 0000 0000 1093 2840 814P 2"); // same result (grouping spaces)
- * parseIban("BR15-0000-0000-0000-1093-2840-814P-2"); // same result (any of the mask characters)
- * parseIban("DE89370400440532013000"); // null (non Brazilian IBAN)
- * parseIban("BR1500000000000010932840814P3"); // null (bad check digits)
- * parseIban("BR15 000 00000 0000 1093 2840 814P 2"); // null (a separator inside a group)
+ * getIbanInfo("BR15 0000 0000 0000 1093 2840 814P 2"); // same result (grouping spaces)
+ * getIbanInfo("BR15-0000-0000-0000-1093-2840-814P-2"); // same result (any of the mask characters)
+ * getIbanInfo("DE89370400440532013000"); // null (non Brazilian IBAN)
+ * getIbanInfo("BR1500000000000010932840814P3"); // null (bad check digits)
+ * getIbanInfo("BR15 000 00000 0000 1093 2840 814P 2"); // null (a separator inside a group)
  * ```
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
@@ -88,7 +88,7 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * @see Official: https://www.iso.org/standard/31531.html
  * ISO/IEC 7064:2003 (MOD 97-10 check digit algorithm)
  */
-export const parseIban = (value: string): Iban | null => {
+export const getIbanInfo = (value: string): IbanInfo | null => {
 	if (!isValidIban(value)) return null;
 
 	const sanitized = sanitizeToAlphanumeric(value);

@@ -1,4 +1,4 @@
-import { type PixKeyType, parsePixKey } from "../parse-pix-key/parse-pix-key";
+import { type PixKeyType, getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 
 /** Options of `isValidPixKey`. */
 export type IsValidPixKeyOptions = {
@@ -9,7 +9,7 @@ export type IsValidPixKeyOptions = {
 /**
  * Validates a Pix key (chave Pix) against the DICT key formats.
  *
- * A value is valid when `parsePixKey` recognizes it as a CPF, a CNPJ, an e-mail address, a
+ * A value is valid when `getPixKeyInfo` recognizes it as a CPF, a CNPJ, an e-mail address, a
  * Brazilian mobile phone number or a random key (EVP), and when that kind is listed in
  * `options.accept`. The manual registers a "número de telefone celular", so a landline is not
  * a valid phone key.
@@ -37,7 +37,7 @@ export type IsValidPixKeyOptions = {
  * Pix (SPI) OpenAPI spec.
  */
 export const isValidPixKey = (value: string, options?: IsValidPixKeyOptions): boolean => {
-	const key = parsePixKey(value);
+	const key = getPixKeyInfo(value);
 
 	if (!key) return false;
 

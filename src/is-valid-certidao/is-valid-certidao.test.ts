@@ -1,8 +1,8 @@
 import * as fc from "fast-check";
 
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { CERTIDAO_TYPES } from "../parse-certidao/constants";
-import { type CertidaoType } from "../parse-certidao/parse-certidao";
+import { CERTIDAO_TYPES } from "../get-certidao-info/constants";
+import { type CertidaoType } from "../get-certidao-info/get-certidao-info";
 import { isValidCertidao, type IsValidCertidaoOptions } from "./is-valid-certidao";
 
 const CHECK_DIGIT_PAIRS = Array.from({ length: 100 }, (_, index) => String(index).padStart(2, "0"));

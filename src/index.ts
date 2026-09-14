@@ -95,6 +95,11 @@ export {
 	GetCepInfoByAddressValidationError,
 	getCepInfoByAddress,
 } from "./get-cep-info-by-address/get-cep-info-by-address";
+export {
+	type CertidaoInfo,
+	type CertidaoType,
+	getCertidaoInfo,
+} from "./get-certidao-info/get-certidao-info";
 export { type Cfop, getCfop } from "./get-cfop/get-cfop";
 export { getCities } from "./get-cities/get-cities";
 export { type Cnae, getCnae } from "./get-cnae/get-cnae";
@@ -108,6 +113,7 @@ export {
 	type HolidayType,
 	getHolidays,
 } from "./get-holidays/get-holidays";
+export { type IbanInfo, getIbanInfo } from "./get-iban-info/get-iban-info";
 export {
 	type LegalNature,
 	type LegalNatureCategory,
@@ -123,6 +129,21 @@ export {
 	getMunicipality,
 } from "./get-municipality/get-municipality";
 export { getMunicipalityByCode } from "./get-municipality-by-code/get-municipality-by-code";
+export {
+	type NfeKeyInfo,
+	type NfeKeyModel,
+	getNfeKeyInfo,
+} from "./get-nfe-key-info/get-nfe-key-info";
+export {
+	type PixKeyInfo,
+	type PixKeyType,
+	getPixKeyInfo,
+} from "./get-pix-key-info/get-pix-key-info";
+export {
+	type PixPayloadInfo,
+	type PixPointOfInitiation,
+	getPixPayloadInfo,
+} from "./get-pix-payload-info/get-pix-payload-info";
 export { getStateByIbgeCode } from "./get-state-by-ibge-code/get-state-by-ibge-code";
 export { getStateCodeByName } from "./get-state-code-by-name/get-state-code-by-name";
 export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-code";

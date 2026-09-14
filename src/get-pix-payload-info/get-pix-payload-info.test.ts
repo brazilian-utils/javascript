@@ -4,7 +4,11 @@ import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";
-import { type PixPayload, type PixPointOfInitiation, parsePixPayload } from "./parse-pix-payload";
+import {
+	type PixPayloadInfo,
+	type PixPointOfInitiation,
+	getPixPayloadInfo,
+} from "./get-pix-payload-info";
 
 const BACEN_STATIC =
 	"00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D";
@@ -166,60 +170,60 @@ const buildPayloadWithMerchantCity = (merchantCity: string): string => {
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
 
-describe("parsePixPayload", () => {
+describe("getPixPayloadInfo", () => {
 	describe("should return null", () => {
 		test("when it is an empty or blank string", () => {
-			expect(parsePixPayload("")).toBeNull();
-			expect(parsePixPayload("   ")).toBeNull();
+			expect(getPixPayloadInfo("")).toBeNull();
+			expect(getPixPayloadInfo("   ")).toBeNull();
 		});
 
 		test("when it is null", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(parsePixPayload(null)).toBeNull();
+			expect(getPixPayloadInfo(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(parsePixPayload()).toBeNull();
+			expect(getPixPayloadInfo()).toBeNull();
 		});
 
 		test("when it is a number", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(parsePixPayload(20_250_101)).toBeNull();
+			expect(getPixPayloadInfo(20_250_101)).toBeNull();
 		});
 
 		test("when it is a boolean, an object or an array", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(parsePixPayload(true)).toBeNull();
+			expect(getPixPayloadInfo(true)).toBeNull();
 			// @ts-expect-error: intentionally invalid input
-			expect(parsePixPayload({})).toBeNull();
+			expect(getPixPayloadInfo({})).toBeNull();
 			// @ts-expect-error: intentionally invalid input
-			expect(parsePixPayload([])).toBeNull();
+			expect(getPixPayloadInfo([])).toBeNull();
 		});
 
 		test("when the CRC does not match", () => {
-			expect(parsePixPayload(BACEN_STATIC.replace(/1D3D$/, "1D3E"))).toBeNull();
+			expect(getPixPayloadInfo(BACEN_STATIC.replace(/1D3D$/, "1D3E"))).toBeNull();
 		});
 
 		test("when it is free text", () => {
-			expect(parsePixPayload("pix copia e cola")).toBeNull();
+			expect(getPixPayloadInfo("pix copia e cola")).toBeNull();
 		});
 
 		test("when the key object is present but empty", () => {
 			const merchantAccountInformation = tlv("00", "br.gov.bcb.pix") + tlv("01", "");
 
-			expect(parsePixPayload(buildPayload(merchantAccountInformation))).toBeNull();
+			expect(getPixPayloadInfo(buildPayload(merchantAccountInformation))).toBeNull();
 		});
 
 		test("when the url object is present but empty", () => {
 			const merchantAccountInformation = tlv("00", "br.gov.bcb.pix") + tlv("25", "");
 
-			expect(parsePixPayload(buildPayload(merchantAccountInformation))).toBeNull();
+			expect(getPixPayloadInfo(buildPayload(merchantAccountInformation))).toBeNull();
 		});
 
 		test("when the merchant account information carries both a key and a url", () => {
 			expect(
-				parsePixPayload(
+				getPixPayloadInfo(
 					"00020101021226500014br.gov.bcb.pix0107a@b.com2517pix.example.com/x5204000053039865802BR5901A6001B62070503***63049A4B",
 				),
 			).toBeNull();
@@ -227,26 +231,26 @@ describe("parsePixPayload", () => {
 
 		test("when the url is not a PSP location (scheme, whitespace, host without a dot)", () => {
 			expect(
-				parsePixPayload(
+				getPixPayloadInfo(
 					"00020101021226470014br.gov.bcb.pix2525https://pix.example.com/x5204000053039865802BR5901A6001B62070503***6304F843",
 				),
 			).toBeNull();
 			expect(
-				parsePixPayload(
+				getPixPayloadInfo(
 					"00020101021226390014br.gov.bcb.pix2517pix example.com/x5204000053039865802BR5901A6001B62070503***6304C8E4",
 				),
 			).toBeNull();
 			expect(
-				parsePixPayload(
+				getPixPayloadInfo(
 					"00020101021226330014br.gov.bcb.pix2511localhost/x5204000053039865802BR5901A6001B62070503***630494D9",
 				),
 			).toBeNull();
 		});
 
 		test("when the fss of a Pix Saque is not the 8 digits of an ISPB", () => {
-			expect(parsePixPayload(buildWithdrawalPayload("1234567", "0.00"))).toBeNull();
-			expect(parsePixPayload(buildWithdrawalPayload("123456789", "0.00"))).toBeNull();
-			expect(parsePixPayload(buildWithdrawalPayload("1234567x", "0.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildWithdrawalPayload("1234567", "0.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildWithdrawalPayload("123456789", "0.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildWithdrawalPayload("1234567x", "0.00"))).toBeNull();
 		});
 
 		test("when the fss of a Pix Saque is written next to a PSP location", () => {
@@ -254,68 +258,68 @@ describe("parsePixPayload", () => {
 				"00020126600014br.gov.bcb.pix2526pix.example.com/qr/v2/12340308123456785204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304DA55";
 
 			expect(hasValidCrc(payload)).toBe(true);
-			expect(parsePixPayload(payload)).toBeNull();
+			expect(getPixPayloadInfo(payload)).toBeNull();
 		});
 
 		test("when the additional data template is malformed", () => {
 			const merchantAccountInformation = tlv("00", "br.gov.bcb.pix") + tlv("01", "some-key");
 
-			expect(parsePixPayload(buildPayload(merchantAccountInformation, "9"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayload(merchantAccountInformation, "9"))).toBeNull();
 		});
 
 		test("when a merchant account information template is malformed TLV, without throwing", () => {
-			expect(parsePixPayload(buildPayload("XY"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayload("XY"))).toBeNull();
 		});
 
 		test("when a merchant account information template is well-formed but carries no GUI, without throwing", () => {
 			const merchantAccountInformation = tlv("01", "12345678909");
 
-			expect(parsePixPayload(buildPayload(merchantAccountInformation))).toBeNull();
+			expect(getPixPayloadInfo(buildPayload(merchantAccountInformation))).toBeNull();
 		});
 
 		test("when the country code field is entirely absent, without throwing", () => {
-			expect(parsePixPayload(buildPayloadWithoutCountryCode())).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithoutCountryCode())).toBeNull();
 		});
 
 		test("when the CRC tag id is not 6304, even with an otherwise self-consistent checksum", () => {
-			expect(parsePixPayload(buildPayloadWithCrcTag("9904"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithCrcTag("9904"))).toBeNull();
 		});
 
 		test("when the transaction amount is longer than 13 characters", () => {
-			expect(parsePixPayload(buildPayloadWithAmount("99999999999.99"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("99999999999.99"))).toBeNull();
 		});
 
 		test("when the transaction amount is not written as a plain decimal number", () => {
-			expect(parsePixPayload(buildPayloadWithAmount("+1.00"))).toBeNull();
-			expect(parsePixPayload(buildPayloadWithAmount(" 1.00"))).toBeNull();
-			expect(parsePixPayload(buildPayloadWithAmount("1.00x"))).toBeNull();
-			expect(parsePixPayload(buildPayloadWithAmount("abc"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("+1.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount(" 1.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("1.00x"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("abc"))).toBeNull();
 		});
 
 		test("when the transaction amount states more than two decimal places", () => {
-			expect(parsePixPayload(buildPayloadWithAmount("1.234"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("1.234"))).toBeNull();
 		});
 
 		test("when a key payload states a transaction amount of zero without the fss of a Pix Saque", () => {
 			expect(hasValidCrc(buildPayloadWithAmount("0.00"))).toBe(true);
-			expect(parsePixPayload(buildPayloadWithAmount("0.00"))).toBeNull();
-			expect(parsePixPayload(buildPayloadWithAmount("0"))).toBeNull();
-			expect(parsePixPayload(buildPayloadWithAmount("0.0"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("0.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("0"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("0.0"))).toBeNull();
 		});
 
 		test("when the merchant name is present but empty", () => {
-			expect(parsePixPayload(buildPayloadWithMerchantName(""))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithMerchantName(""))).toBeNull();
 		});
 
 		test("when the merchant city is present but empty", () => {
-			expect(parsePixPayload(buildPayloadWithMerchantCity(""))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithMerchantCity(""))).toBeNull();
 		});
 	});
 
 	describe("should parse a static payload", () => {
 		test("should ignore the transaction amount and the txid of a dynamic payload, which belong to the PSP location", () => {
 			expect(
-				parsePixPayload(
+				getPixPayloadInfo(
 					"00020101021226480014br.gov.bcb.pix2526pix.example.com/qr/v2/123452040000530398654041.005802BR5901A6001B62100506ABC1236304C7F9",
 				),
 			).toEqual({
@@ -327,7 +331,7 @@ describe("parsePixPayload", () => {
 		});
 
 		test("should accept a transaction amount of zero in a dynamic payload, whose amount the PSP location settles", () => {
-			expect(parsePixPayload(buildDynamicPayloadWithAmount("0.00"))).toEqual({
+			expect(getPixPayloadInfo(buildDynamicPayloadWithAmount("0.00"))).toEqual({
 				url: DYNAMIC_URL,
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -336,7 +340,7 @@ describe("parsePixPayload", () => {
 		});
 
 		test("from the static QR Code example in the Bacen 'Manual de Padrões para Iniciação do Pix', with no key of its own for a field the payload does not carry", () => {
-			expect(parsePixPayload(BACEN_STATIC)).toStrictEqual({
+			expect(getPixPayloadInfo(BACEN_STATIC)).toStrictEqual({
 				key: "123e4567-e12b-12d1-a456-426655440000",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -345,7 +349,9 @@ describe("parsePixPayload", () => {
 		});
 
 		test("for a Pix Saque BR Code, reading back the fss (26-03) of §2.6 with a transaction amount of zero", () => {
-			expect(parsePixPayload(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0.00"))).toEqual({
+			expect(
+				getPixPayloadInfo(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0.00")),
+			).toEqual({
 				key: "12345678909",
 				withdrawalFacilitator: "12345678",
 				merchantName: "Fulano de Tal",
@@ -356,7 +362,7 @@ describe("parsePixPayload", () => {
 		});
 
 		test("for a Pix Saque BR Code whose amount is written as the plain '0' of the BR Code field table", () => {
-			expect(parsePixPayload(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0"))).toEqual({
+			expect(getPixPayloadInfo(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0"))).toEqual({
 				key: "12345678909",
 				withdrawalFacilitator: "12345678",
 				merchantName: "Fulano de Tal",
@@ -367,7 +373,7 @@ describe("parsePixPayload", () => {
 		});
 
 		test("for a Pix Saque BR Code that states no transaction amount at all", () => {
-			expect(parsePixPayload(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB))).toEqual({
+			expect(getPixPayloadInfo(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB))).toEqual({
 				key: "12345678909",
 				withdrawalFacilitator: "12345678",
 				merchantName: "Fulano de Tal",
@@ -378,7 +384,7 @@ describe("parsePixPayload", () => {
 
 		test("marked single use by the point of initiation method 12, which the manual allows on any BR Code", () => {
 			expect(hasValidCrc(KEY_MARKED_SINGLE_USE)).toBe(true);
-			expect(parsePixPayload(KEY_MARKED_SINGLE_USE)).toEqual({
+			expect(getPixPayloadInfo(KEY_MARKED_SINGLE_USE)).toEqual({
 				key: "12345678909",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -387,11 +393,11 @@ describe("parsePixPayload", () => {
 		});
 
 		test("dropping the *** placeholder of an absent txid", () => {
-			expect(parsePixPayload(BACEN_STATIC)).not.toHaveProperty("txid");
+			expect(getPixPayloadInfo(BACEN_STATIC)).not.toHaveProperty("txid");
 		});
 
 		test("with an amount and a txid, as in a widely published community example", () => {
-			expect(parsePixPayload(COMMUNITY_STATIC)).toEqual({
+			expect(getPixPayloadInfo(COMMUNITY_STATIC)).toEqual({
 				key: "bee05743-4291-4f3c-9259-595df1307ba1",
 				merchantName: "Alexandre Lima",
 				merchantCity: "Presidente Prudente",
@@ -402,7 +408,7 @@ describe("parsePixPayload", () => {
 		});
 
 		test("picking the Pix arrangement out of the multi-arrangement payload from the 'Manual do BR Code' §2.2", () => {
-			expect(parsePixPayload(BRCODE_MANUAL)).toEqual({
+			expect(getPixPayloadInfo(BRCODE_MANUAL)).toEqual({
 				key: "123e4567-e12b-12d1-a456-426655440000",
 				merchantName: "NOME DO RECEBEDOR",
 				merchantCity: "BRASILIA",
@@ -413,7 +419,7 @@ describe("parsePixPayload", () => {
 		});
 
 		test("when the merchant account information sits at the last valid id (51), not just at the usual 26", () => {
-			expect(parsePixPayload(buildPayloadWithMerchantAccountInformationTag("51"))).toEqual({
+			expect(getPixPayloadInfo(buildPayloadWithMerchantAccountInformationTag("51"))).toEqual({
 				key: "12345678909",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -422,25 +428,25 @@ describe("parsePixPayload", () => {
 		});
 
 		test("accepting a transaction amount whose length is exactly 13 characters", () => {
-			expect(parsePixPayload(buildPayloadWithAmount("9999999999.99"))?.amount).toBe(
+			expect(getPixPayloadInfo(buildPayloadWithAmount("9999999999.99"))?.amount).toBe(
 				9_999_999_999.99,
 			);
 		});
 
 		test("accepting a transaction amount written as a whole number, with no decimal point", () => {
-			expect(parsePixPayload(buildPayloadWithAmount("100"))?.amount).toBe(100);
+			expect(getPixPayloadInfo(buildPayloadWithAmount("100"))?.amount).toBe(100);
 		});
 
 		test("without a key property when the payload is dynamic (carries a url instead)", () => {
-			expect(parsePixPayload(BACEN_DYNAMIC)).not.toHaveProperty("key");
+			expect(getPixPayloadInfo(BACEN_DYNAMIC)).not.toHaveProperty("key");
 		});
 
 		test("without a url property when the payload is static (carries a key instead)", () => {
-			expect(parsePixPayload(BACEN_STATIC)).not.toHaveProperty("url");
+			expect(getPixPayloadInfo(BACEN_STATIC)).not.toHaveProperty("url");
 		});
 
 		test("without a txid property when the payload carries no additional data template at all", () => {
-			expect(parsePixPayload(buildPayload(MERCHANT_ACCOUNT_INFORMATION))).not.toHaveProperty(
+			expect(getPixPayloadInfo(buildPayload(MERCHANT_ACCOUNT_INFORMATION))).not.toHaveProperty(
 				"txid",
 			);
 		});
@@ -453,7 +459,7 @@ describe("parsePixPayload", () => {
 				description: "Pedido 42",
 			});
 
-			expect(parsePixPayload(payload ?? "")).toEqual({
+			expect(getPixPayloadInfo(payload ?? "")).toEqual({
 				key: "12345678909",
 				description: "Pedido 42",
 				merchantName: "Fulano de Tal",
@@ -465,7 +471,7 @@ describe("parsePixPayload", () => {
 
 	describe("should parse a dynamic payload", () => {
 		test("from the dynamic QR Code example in the Bacen 'Manual de Padrões para Iniciação do Pix'", () => {
-			expect(parsePixPayload(BACEN_DYNAMIC)).toEqual({
+			expect(getPixPayloadInfo(BACEN_DYNAMIC)).toEqual({
 				url: "pix.example.com/8b3da2f39a4140d1a91abd93113bd441",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -474,7 +480,7 @@ describe("parsePixPayload", () => {
 		});
 
 		test("picking the Pix arrangement out of the composite QR Code example in the Bacen manual", () => {
-			expect(parsePixPayload(BACEN_COMPOSITE)).toEqual({
+			expect(getPixPayloadInfo(BACEN_COMPOSITE)).toEqual({
 				url: "pix.example.com/8b3da2f39a4140d1a91abd93113bd441",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -483,12 +489,12 @@ describe("parsePixPayload", () => {
 		});
 
 		test("reading the point of initiation method 11 as static, per the Bacen static example with it made explicit", () => {
-			expect(parsePixPayload(STATIC_POINT_OF_INITIATION)?.pointOfInitiation).toBe("static");
+			expect(getPixPayloadInfo(STATIC_POINT_OF_INITIATION)?.pointOfInitiation).toBe("static");
 		});
 
 		test("when it carries no point of initiation method at all, which the manual marks optional", () => {
 			expect(hasValidCrc(URL_WITHOUT_POINT_OF_INITIATION)).toBe(true);
-			expect(parsePixPayload(URL_WITHOUT_POINT_OF_INITIATION)).toEqual({
+			expect(getPixPayloadInfo(URL_WITHOUT_POINT_OF_INITIATION)).toEqual({
 				url: "pix.example.com/qr/v2/1234",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -498,7 +504,7 @@ describe("parsePixPayload", () => {
 
 		test("when the point of initiation method is 11, since the PSP location is what makes it dynamic", () => {
 			expect(hasValidCrc(URL_WITH_STATIC_POINT_OF_INITIATION)).toBe(true);
-			expect(parsePixPayload(URL_WITH_STATIC_POINT_OF_INITIATION)).toEqual({
+			expect(getPixPayloadInfo(URL_WITH_STATIC_POINT_OF_INITIATION)).toEqual({
 				url: "pix.example.com/qr/v2/1234",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
@@ -518,7 +524,7 @@ describe("parsePixPayload", () => {
 				txid: "RP123456782019",
 			};
 
-			expect(parsePixPayload(generatePixPayload(pix) ?? "")).toEqual({
+			expect(getPixPayloadInfo(generatePixPayload(pix) ?? "")).toEqual({
 				...pix,
 				pointOfInitiation: "static",
 			});
@@ -534,7 +540,7 @@ describe("parsePixPayload", () => {
 					txid: `TX${index}`,
 				};
 
-				expect(parsePixPayload(generatePixPayload(pix) ?? "")).toEqual({
+				expect(getPixPayloadInfo(generatePixPayload(pix) ?? "")).toEqual({
 					...pix,
 					pointOfInitiation: "static",
 				});
@@ -549,7 +555,7 @@ describe("parsePixPayload", () => {
 			fc.assert(
 				fc.property(names, fc.uuid(), (merchantName, key) => {
 					const payload = generatePixPayload({ key, merchantName, merchantCity: "BRASILIA" });
-					const parsed = parsePixPayload(payload ?? "");
+					const parsed = getPixPayloadInfo(payload ?? "");
 
 					expect(parsed?.merchantName).toBe(merchantName);
 					expect(parsed?.merchantCity).toBe("BRASILIA");
@@ -567,7 +573,7 @@ describe("parsePixPayload", () => {
 					const replacement = crc.charAt(index) === "0" ? "1" : "0";
 					const broken = `${(payload ?? "").slice(0, -4)}${crc.slice(0, index)}${replacement}${crc.slice(index + 1)}`;
 
-					expect(parsePixPayload(broken)).toBeNull();
+					expect(getPixPayloadInfo(broken)).toBeNull();
 				}),
 			);
 		});
@@ -575,7 +581,7 @@ describe("parsePixPayload", () => {
 		test("should never throw and always return a BR Code or null", () => {
 			fc.assert(
 				fc.property(fc.anything(), (value) => {
-					const parsed = parsePixPayload(value as string);
+					const parsed = getPixPayloadInfo(value as string);
 
 					expect(parsed === null || typeof parsed.merchantName === "string").toBe(true);
 				}),
@@ -584,14 +590,14 @@ describe("parsePixPayload", () => {
 	});
 });
 
-describe("parsePixPayload types", () => {
+describe("getPixPayloadInfo types", () => {
 	test("should take a string and return a Pix payload or null", () => {
-		expectTypeOf(parsePixPayload).parameter(0).toEqualTypeOf<string>();
-		expectTypeOf(parsePixPayload).returns.toEqualTypeOf<PixPayload | null>();
+		expectTypeOf(getPixPayloadInfo).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(getPixPayloadInfo).returns.toEqualTypeOf<PixPayloadInfo | null>();
 	});
 
 	test("should restrict the Pix payload shape and its point of initiation", () => {
-		expectTypeOf<PixPayload>().toEqualTypeOf<{
+		expectTypeOf<PixPayloadInfo>().toEqualTypeOf<{
 			key?: string;
 			url?: string;
 			description?: string;

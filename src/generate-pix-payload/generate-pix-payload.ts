@@ -34,7 +34,7 @@ import { formatTlv } from "../_internals/format-tlv/format-tlv";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
 import { sanitizeToAscii } from "../_internals/sanitize-to-ascii/sanitize-to-ascii";
-import { parsePixKey } from "../parse-pix-key/parse-pix-key";
+import { getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 import {
 	AMOUNT_DECIMAL_PLACES,
 	AMOUNT_REGEX,
@@ -92,7 +92,7 @@ const resolveIdentifier = (
 		};
 	}
 
-	const key = parsePixKey(keyInput);
+	const key = getPixKeyInfo(keyInput);
 
 	if (!key) return null;
 
@@ -139,7 +139,7 @@ const resolveFormattedAmount = (
  * given and when neither is given, since only one of them can occupy the "Merchant Account
  * Information" template at a time.
  *
- * When `params.key` is given, it is normalized to its DICT canonical form by `parsePixKey` and
+ * When `params.key` is given, it is normalized to its DICT canonical form by `getPixKeyInfo` and
  * the payload is static: the "Point of Initiation Method" object is left out, so the payload
  * may be paid more than once, as in the example of the Bacen manual.
  *
@@ -147,18 +147,18 @@ const resolveFormattedAmount = (
  * Iniciação do Pix: the URL takes the key's place in the "Merchant Account Information"
  * template (sub-object `25` instead of `01`) and the "Point of Initiation Method" object (`01`)
  * is set to `"12"`. `params.url` must be at most 77 characters, the length that keeps the
- * template within its 99 character limit together with the `br.gov.bcb.pix` GUI. `parsePixPayload`
- * already parses both shapes, so `parsePixPayload(generatePixPayload({ url, ... }))` round-trips.
+ * template within its 99 character limit together with the `br.gov.bcb.pix` GUI. `getPixPayloadInfo`
+ * already parses both shapes, so `getPixPayloadInfo(generatePixPayload({ url, ... }))` round-trips.
  *
  * Object `01` is optional in the Manual do BR Code (`Uso: O`), so writing it only for a dynamic
- * payload is one of the shapes the manual allows and follows its own examples; `parsePixPayload`
+ * payload is one of the shapes the manual allows and follows its own examples; `getPixPayloadInfo`
  * accepts the others too. The Pix Saque BR Code, which announces the ISPB of the "facilitador de
  * serviço de saque" in sub-object 26-03 (`fss`), is not generated here, only parsed.
  *
  * Unreserved Templates (IDs 80 to 99) are never written: the location always goes in the
  * "Merchant Account Information" template, so the "QR Code composto" of Pix Automático (Pix
  * recorrente), which puts its recurrence location in one of them, is out of scope here.
- * `parsePixPayload` does read a composto, but only as an ordinary dynamic payload.
+ * `getPixPayloadInfo` does read a composto, but only as an ordinary dynamic payload.
  *
  * The merchant name, the merchant city and the description are folded to printable ASCII
  * (accents are dropped) and truncated to the lengths the BR Code allows, the description to

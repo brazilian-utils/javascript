@@ -1,5 +1,5 @@
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
-import { NFE_KEY_LENGTH } from "../_internals/constants/nfe-key";
+import { NFE_KEY_LENGTH, XML_ID_PREFIX_REGEX } from "../_internals/constants/nfe-key";
 import { type StateCode } from "../_internals/constants/states";
 import { mod11 } from "../_internals/mod11/mod11";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -13,7 +13,6 @@ import {
 	NUMBER_END,
 	NUMBER_START,
 	VALID_MODELS,
-	XML_ID_PREFIX_REGEX,
 } from "./constants";
 
 export type { StateCode } from "../_internals/constants/states";
@@ -22,13 +21,13 @@ export type { StateCode } from "../_internals/constants/states";
  * The document models a DF-e access key can carry: `"55"` NF-e, `"57"` CT-e, `"58"` MDF-e,
  * `"62"` NFCom, `"63"` BP-e, `"64"` GTV-e, `"65"` NFC-e, `"66"` NF3e and `"67"` CT-e OS.
  * Spelled out instead of derived from `VALID_MODELS` because the allowlist is internal and API
- * Extractor cannot name it in the public report; the type test of `parse-nfe-key.test.ts` pins
+ * Extractor cannot name it in the public report; the type test of `get-nfe-key-info.test.ts` pins
  * the two together so they cannot drift apart.
  */
 export type NfeKeyModel = "55" | "57" | "58" | "62" | "63" | "64" | "65" | "66" | "67";
 
-/** The fields `parseNfeKey` reads out of a DF-e access key (chave de acesso). */
-export type NfeKey = {
+/** The fields `getNfeKeyInfo` reads out of a DF-e access key (chave de acesso). */
+export type NfeKeyInfo = {
 	/** Two letter code of the issuing state (UF), read from the IBGE UF code. */
 	stateCode: StateCode;
 	/** Four digit issue year. */
@@ -99,7 +98,7 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  * own number field (`nCT`, `nMDF`, `nBP`, `nNF`).
  *
  * @param {string} value - The access key value to be parsed.
- * @returns {NfeKey | null} The parsed access key, or `null` when it is not valid.
+ * @returns {NfeKeyInfo | null} The parsed access key, or `null` when it is not valid.
  *
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
  * Manual de Orientação do Contribuinte (MOC) NF-e, "chave de acesso".
@@ -130,14 +129,14 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  *
  * @example
  * ```typescript
- * parseNfeKey("35170458716523000119550010000000121000123458");
+ * getNfeKeyInfo("35170458716523000119550010000000121000123458");
  * // { stateCode: "SP", year: 2017, month: 4, taxId: "58716523000119", model: "55",
  * //   series: 1, number: 12, emissionType: 1, code: "00012345", checkDigit: 8 }
  *
- * parseNfeKey("invalid"); // null
+ * getNfeKeyInfo("invalid"); // null
  * ```
  */
-export const parseNfeKey = (value: string): NfeKey | null => {
+export const getNfeKeyInfo = (value: string): NfeKeyInfo | null => {
 	if (typeof value !== "string") return null;
 
 	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart();
@@ -184,7 +183,7 @@ export const parseNfeKey = (value: string): NfeKey | null => {
 		return null;
 	}
 
-	const parsed: NfeKey = {
+	const parsed: NfeKeyInfo = {
 		stateCode,
 		year: 2000 + Number(digits.slice(2, 4)),
 		month,

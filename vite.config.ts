@@ -132,7 +132,7 @@ const sharedPack = {
  * shipped), and the ~76 util subpaths are built together in a second, separate invocation. Within
  * that second group, rolldown's default splitting still applies *among the utils themselves*:
  * most end up self-contained (single importer within that graph), but a few genuine cross-util
- * dependencies (e.g. `parsePixKey` reusing `isValidCpf`'s digit-check, several phone utils sharing
+ * dependencies (e.g. `getPixKeyInfo` reusing `isValidCpf`'s digit-check, several phone utils sharing
  * `formatPhone`'s area-code table) get factored into a small shared chunk, real code reuse that
  * would otherwise be duplicated; either way, none of it touches the root. Running
  * ~77 entries as ~77 *separate* `PackUserConfig`s (fully self-contained, zero sharing at all) was

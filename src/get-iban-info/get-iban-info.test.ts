@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { formatIban } from "../format-iban/format-iban";
 import { isValidIban } from "../is-valid-iban/is-valid-iban";
-import { parseIban, type Iban } from "./parse-iban";
+import { getIbanInfo, type IbanInfo } from "./get-iban-info";
 
 const findBrazilianIban = (body: string): string => {
 	for (let pair = 2; pair <= 98; pair++) {
@@ -15,10 +15,10 @@ const findBrazilianIban = (body: string): string => {
 	return "";
 };
 
-describe("parseIban", () => {
+describe("getIbanInfo", () => {
 	describe("should return the parsed iban", () => {
 		test("for a known valid IBAN (iban.com Brazil example)", () => {
-			expect(parseIban("BR1500000000000010932840814P2")).toEqual({
+			expect(getIbanInfo("BR1500000000000010932840814P2")).toEqual({
 				countryCode: "BR",
 				checkDigits: "15",
 				bankIspb: "00000000",
@@ -30,7 +30,7 @@ describe("parseIban", () => {
 		});
 
 		test("for a value with grouping spaces", () => {
-			expect(parseIban("BR15 0000 0000 0000 1093 2840 814P 2")).toEqual({
+			expect(getIbanInfo("BR15 0000 0000 0000 1093 2840 814P 2")).toEqual({
 				countryCode: "BR",
 				checkDigits: "15",
 				bankIspb: "00000000",
@@ -42,7 +42,7 @@ describe("parseIban", () => {
 		});
 
 		test("for a lowercase value", () => {
-			expect(parseIban("br1500000000000010932840814p2")).toEqual({
+			expect(getIbanInfo("br1500000000000010932840814p2")).toEqual({
 				countryCode: "BR",
 				checkDigits: "15",
 				bankIspb: "00000000",
@@ -54,7 +54,7 @@ describe("parseIban", () => {
 		});
 
 		test("for a valid IBAN with a corrente (C) account type", () => {
-			expect(parseIban("BR3860701190000010000012345C1")).toEqual({
+			expect(getIbanInfo("BR3860701190000010000012345C1")).toEqual({
 				countryCode: "BR",
 				checkDigits: "38",
 				bankIspb: "60701190",
@@ -66,7 +66,7 @@ describe("parseIban", () => {
 		});
 
 		test("for a valid IBAN with a poupança (P) account type and a non zero branch", () => {
-			expect(parseIban("BR1460746948000020001234567P2")).toEqual({
+			expect(getIbanInfo("BR1460746948000020001234567P2")).toEqual({
 				countryCode: "BR",
 				checkDigits: "14",
 				bankIspb: "60746948",
@@ -78,7 +78,7 @@ describe("parseIban", () => {
 		});
 
 		test("for a valid IBAN with an account type letter other than C or P", () => {
-			expect(parseIban("BR5400000000000010932840814D2")).toEqual({
+			expect(getIbanInfo("BR5400000000000010932840814D2")).toEqual({
 				countryCode: "BR",
 				checkDigits: "54",
 				bankIspb: "00000000",
@@ -92,59 +92,59 @@ describe("parseIban", () => {
 
 	describe("should return null", () => {
 		test("when the check digits do not match", () => {
-			expect(parseIban("BR1500000000000010932840814P3")).toBeNull();
+			expect(getIbanInfo("BR1500000000000010932840814P3")).toBeNull();
 		});
 
 		test("when the country code is not BR", () => {
-			expect(parseIban("DE89370400440532013000")).toBeNull();
+			expect(getIbanInfo("DE89370400440532013000")).toBeNull();
 		});
 
 		test("when it is shorter than 29 characters", () => {
-			expect(parseIban("BR15000000000000109328408")).toBeNull();
+			expect(getIbanInfo("BR15000000000000109328408")).toBeNull();
 		});
 
 		test("when it is longer than 29 characters", () => {
-			expect(parseIban("BR1500000000000010932840814P2000")).toBeNull();
+			expect(getIbanInfo("BR1500000000000010932840814P2000")).toBeNull();
 		});
 
 		test("when the account type is not a letter", () => {
-			expect(parseIban("BR150000000000001093284081412")).toBeNull();
+			expect(getIbanInfo("BR150000000000001093284081412")).toBeNull();
 		});
 
 		test("when the owner indicator is 0, which Circular 3.625 art. 2 § 1 does not assign, even though the check digits match", () => {
-			expect(parseIban("BR6900000000000010932840814P0")).toBeNull();
+			expect(getIbanInfo("BR6900000000000010932840814P0")).toBeNull();
 		});
 
 		test("when the account type letter does not match the check digits", () => {
-			expect(parseIban("BR1500000000000010932840814X2")).toBeNull();
+			expect(getIbanInfo("BR1500000000000010932840814X2")).toBeNull();
 		});
 
 		test("when it carries a character outside the print format", () => {
-			expect(parseIban("BR1500000000000010932840814P_2")).toBeNull();
-			expect(parseIban("BR15,0000,0000,0000,1093,2840,814P2")).toBeNull();
+			expect(getIbanInfo("BR1500000000000010932840814P_2")).toBeNull();
+			expect(getIbanInfo("BR15,0000,0000,0000,1093,2840,814P2")).toBeNull();
 		});
 
 		test("when a separator falls inside a group instead of at its boundary", () => {
-			expect(parseIban("BR15 000 00000 0000 1093 2840 814P 2")).toBeNull();
+			expect(getIbanInfo("BR15 000 00000 0000 1093 2840 814P 2")).toBeNull();
 		});
 
 		test("when it is an empty string", () => {
-			expect(parseIban("")).toBeNull();
+			expect(getIbanInfo("")).toBeNull();
 		});
 
 		test("when it is null", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(parseIban(null)).toBeNull();
+			expect(getIbanInfo(null)).toBeNull();
 		});
 
 		test("when it is undefined", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(parseIban()).toBeNull();
+			expect(getIbanInfo()).toBeNull();
 		});
 
 		test("when it is a number", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(parseIban(150_000_000_000)).toBeNull();
+			expect(getIbanInfo(150_000_000_000)).toBeNull();
 		});
 	});
 
@@ -160,7 +160,7 @@ describe("parseIban", () => {
 			test(`for ${iban}`, () => {
 				expect(isValidIban(iban)).toBe(true);
 
-				const parsed = parseIban(iban);
+				const parsed = getIbanInfo(iban);
 
 				expect(parsed).not.toBeNull();
 				expect(
@@ -178,7 +178,7 @@ describe("parseIban", () => {
 			fc.assert(
 				fc.property(bodies, (body) => {
 					const iban = findBrazilianIban(body);
-					const parsed = parseIban(formatIban(iban));
+					const parsed = getIbanInfo(formatIban(iban));
 					const account = `${parsed?.bankIspb}${parsed?.branch}${parsed?.account}`;
 					const owner = `${parsed?.accountType}${parsed?.owner}`;
 
@@ -190,7 +190,7 @@ describe("parseIban", () => {
 		test("should return a value exactly when the IBAN is valid", () => {
 			fc.assert(
 				fc.property(fc.string({ unit: "grapheme" }), (value) => {
-					expect(parseIban(value) !== null).toBe(isValidIban(value));
+					expect(getIbanInfo(value) !== null).toBe(isValidIban(value));
 				}),
 			);
 		});
@@ -198,7 +198,7 @@ describe("parseIban", () => {
 		test("should never throw and always return an IBAN or null", () => {
 			fc.assert(
 				fc.property(fc.anything(), (value) => {
-					const parsed = parseIban(value as string);
+					const parsed = getIbanInfo(value as string);
 
 					expect(parsed === null || parsed.countryCode === "BR").toBe(true);
 				}),
@@ -207,11 +207,11 @@ describe("parseIban", () => {
 	});
 });
 
-describe("parseIban types", () => {
-	test("should take a string and return an Iban or null", () => {
-		expectTypeOf(parseIban).parameter(0).toEqualTypeOf<string>();
-		expectTypeOf(parseIban).returns.toEqualTypeOf<Iban | null>();
-		expectTypeOf<Iban>().toEqualTypeOf<{
+describe("getIbanInfo types", () => {
+	test("should take a string and return an IbanInfo or null", () => {
+		expectTypeOf(getIbanInfo).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(getIbanInfo).returns.toEqualTypeOf<IbanInfo | null>();
+		expectTypeOf<IbanInfo>().toEqualTypeOf<{
 			countryCode: "BR";
 			checkDigits: string;
 			bankIspb: string;

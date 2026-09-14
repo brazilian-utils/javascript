@@ -5,7 +5,7 @@ import { CERTIDAO_TYPES } from "./constants";
 
 /**
  * The nine books (tipo do livro) a matrícula de registro civil can point to, in the order of the
- * codes 1 to 9. `parseCertidao` names the book of a matrícula with one of these, and
+ * codes 1 to 9. `getCertidaoInfo` names the book of a matrícula with one of these, and
  * `isValidCertidao` accepts a list of them.
  *
  * The in-force art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça
@@ -26,8 +26,8 @@ export type CertidaoType =
 	| "emancipation"
 	| "interdiction";
 
-/** The fields `parseCertidao` reads out of the matrícula of a certidão de registro civil. */
-export type Certidao = {
+/** The fields `getCertidaoInfo` reads out of the matrícula of a certidão de registro civil. */
+export type CertidaoInfo = {
 	/** The 6 digit CNS (Código Nacional de Serventia) of the serventia that issued the act. */
 	registryCns: string;
 	/**
@@ -71,15 +71,15 @@ export type Certidao = {
  * hold, so a numeric argument always gives `null` instead of being read as a rounded value.
  *
  * @param {string} value - The matrícula value to be parsed.
- * @returns {Certidao | null} The parsed matrícula, or `null` when it is not valid.
+ * @returns {CertidaoInfo | null} The parsed matrícula, or `null` when it is not valid.
  *
  * @example
  * ```typescript
- * parseCertidao("104539 01 55 2013 1 00012 021 0000123 21");
+ * getCertidaoInfo("104539 01 55 2013 1 00012 021 0000123 21");
  * // { registryCns: "104539", acervo: "01", service: "55", year: 2013, type: "birth",
  * //   typeCode: 1, book: "00012", page: "021", term: "0000123", checkDigits: "21" }
  *
- * parseCertidao("invalid"); // null
+ * getCertidaoInfo("invalid"); // null
  * ```
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
@@ -106,7 +106,7 @@ export type Certidao = {
  * @see Based on: https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php
  * Third reference implementation agreeing on the weights and on the remainder of 10 read as 1.
  */
-export const parseCertidao = (value: string): Certidao | null => {
+export const getCertidaoInfo = (value: string): CertidaoInfo | null => {
 	if (!isValidCertidao(value)) return null;
 
 	const digits = sanitizeToDigits(value);
