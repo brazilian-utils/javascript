@@ -94,7 +94,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [parseBoleto](https://brazilian-utils.com.br/utilities.md#parseboleto): Remove boleto formatting, keep only digits, and cap the result to 47 digits (48 for boleto de arrecadação).
 - [parsePixKey](https://brazilian-utils.com.br/utilities.md#parsepixkey): Identifies a Pix key and normalizes it to the canonical form the DICT expects inside a BR Code: 11 digit CPF, 14 character CNPJ, lowercased e-mail, E.164 mobile phone (a landline is not a Pix key) or lowercase UUID EVP.
 - [parsePixPayload](https://brazilian-utils.com.br/utilities.md#parsepixpayload): Parses a Pix BR Code payload into its fields.
-- [parseNfeKey](https://brazilian-utils.com.br/utilities.md#parsenfekey): Parses a DF-e access key into its fields (state, year, month, taxId, model, series, number, emissionType, code, checkDigit).
+- [parseNfeKey](https://brazilian-utils.com.br/utilities.md#parsenfekey): Parses a DF-e access key into its fields (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit).
 - [parsePhone](https://brazilian-utils.com.br/utilities.md#parsephone): Remove phone formatting, keep only digits, and cap the result to 11 digits.
 - [parsePis](https://brazilian-utils.com.br/utilities.md#parsepis): Remove PIS formatting, keep only digits, and cap the result to 11 digits.
 - [parseCep](https://brazilian-utils.com.br/utilities.md#parsecep): Remove CEP formatting, keep only digits, and cap the result to 8 digits.

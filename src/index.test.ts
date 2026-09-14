@@ -29,6 +29,7 @@ import {
 	type FormatCpfOptions,
 	type FormatCurrencyOptions,
 	type FormatNcmOptions,
+	type FormatNfeKeyOptions,
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
@@ -284,6 +285,7 @@ describe("Public API", () => {
 			FormatCpfOptions: FormatCpfOptions;
 			FormatCurrencyOptions: FormatCurrencyOptions;
 			FormatNcmOptions: FormatNcmOptions;
+			FormatNfeKeyOptions: FormatNfeKeyOptions;
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;

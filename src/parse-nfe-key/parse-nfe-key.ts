@@ -29,8 +29,8 @@ export type NfeKeyModel = "55" | "57" | "58" | "62" | "63" | "64" | "65" | "66" 
 
 /** The fields `parseNfeKey` reads out of a DF-e access key (chave de acesso). */
 export type NfeKey = {
-	/** Two letter code of the issuing state, read from the IBGE UF code. */
-	state: StateCode;
+	/** Two letter code of the issuing state (UF), read from the IBGE UF code. */
+	stateCode: StateCode;
 	/** Four digit issue year. */
 	year: number;
 	/** Issue month, 1 to 12. */
@@ -75,9 +75,9 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  *
  * Covers every document whose access key is the same 44 digit string: NF-e (modelo 55), NFC-e
  * (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
- * Accepts the same input forms as `isValidNfeKey` (whitespace mask, the `NFe`, `CTe`, `MDFe`,
- * `BPe`, `NF3e` and `NFCom` prefixes of the XML `Id` attribute) and returns `null` when the key
- * is not valid.
+ * Accepts the same input forms as `isValidNfeKey` (the printed mask of 4 digit groups, split by
+ * whitespace, `.`, `-` or `/`, and the `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes
+ * of the XML `Id` attribute) and returns `null` when the key is not valid.
  *
  * The emission type (`tpEmis`) is checked against the codes the MOC of that model assigns, so
  * the accepted set changes with the model: 1 to 7 and 9 for NF-e and NFC-e, `{1, 3, 4, 5, 7, 8}`
@@ -131,7 +131,7 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  * @example
  * ```typescript
  * parseNfeKey("35170458716523000119550010000000121000123458");
- * // { state: "SP", year: 2017, month: 4, taxId: "58716523000119", model: "55",
+ * // { stateCode: "SP", year: 2017, month: 4, taxId: "58716523000119", model: "55",
  * //   series: 1, number: 12, emissionType: 1, code: "00012345", checkDigit: 8 }
  *
  * parseNfeKey("invalid"); // null
@@ -140,7 +140,7 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
 export const parseNfeKey = (value: string): NfeKey | null => {
 	if (typeof value !== "string") return null;
 
-	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "");
+	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart();
 
 	if (!FORMAT_REGEX.test(body)) return null;
 
@@ -150,9 +150,9 @@ export const parseNfeKey = (value: string): NfeKey | null => {
 
 	const uf = digits.slice(0, 2);
 
-	const state = IBGE_UF_CODES[uf];
+	const stateCode = IBGE_UF_CODES[uf];
 
-	if (state === undefined) return null;
+	if (stateCode === undefined) return null;
 
 	const month = Number(digits.slice(4, 6));
 
@@ -185,7 +185,7 @@ export const parseNfeKey = (value: string): NfeKey | null => {
 	}
 
 	const parsed: NfeKey = {
-		state,
+		stateCode,
 		year: 2000 + Number(digits.slice(2, 4)),
 		month,
 		taxId: digits.slice(6, 20),

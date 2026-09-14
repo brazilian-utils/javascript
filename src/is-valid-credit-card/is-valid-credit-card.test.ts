@@ -35,6 +35,17 @@ describe("isValidCreditCard", () => {
 			expect(isValidCreditCard("4111-1111-1111-1111")).toBe(true);
 		});
 
+		test("for a value masked with the other interchangeable separators", () => {
+			expect(isValidCreditCard("4111.1111.1111.1111")).toBe(true);
+			expect(isValidCreditCard("4111/1111/1111/1111")).toBe(true);
+			expect(isValidCreditCard("4111.1111/1111-1111")).toBe(true);
+		});
+
+		test("for a separator between any two digits, since the grouping changes with the brand", () => {
+			expect(isValidCreditCard("3782-822463-10005")).toBe(true);
+			expect(isValidCreditCard("4.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1")).toBe(true);
+		});
+
 		test("for a value whose digit groups are separated by a run of mask characters", () => {
 			expect(isValidCreditCard("4111 - 1111 - 1111 - 1111")).toBe(true);
 			expect(isValidCreditCard("4111  1111  1111  1111")).toBe(true);
@@ -58,12 +69,27 @@ describe("isValidCreditCard", () => {
 			expect(isValidCreditCard("4111111111111112")).toBe(false);
 		});
 
+		test("when every digit is the same, even though the Luhn check passes", () => {
+			expect(isValidCreditCard("0000000000000000")).toBe(false);
+			expect(isValidCreditCard("000000000000")).toBe(false);
+			expect(isValidCreditCard("8888888888888888")).toBe(false);
+			expect(isValidCreditCard("0000000000000000000")).toBe(false);
+		});
+
+		test("when every digit is the same behind a mask, even though the Luhn check passes", () => {
+			expect(isValidCreditCard("0000 0000 0000 0000")).toBe(false);
+		});
+
 		test("when it has fewer than 12 digits (11 digits)", () => {
 			expect(isValidCreditCard("60110000000")).toBe(false);
 		});
 
 		test("when it has more than 19 digits (20 digits)", () => {
 			expect(isValidCreditCard("12345678901234567850")).toBe(false);
+		});
+
+		test("when it has more than 19 digits and would pass the Luhn check on its own", () => {
+			expect(isValidCreditCard("12345678901234567852")).toBe(false);
 		});
 
 		test("when it has more than 19 digits and would still pass the Luhn check on its own", () => {
@@ -103,8 +129,15 @@ describe("isValidCreditCard", () => {
 			expect(isValidCreditCard("4111a1111b1111c1111")).toBe(false);
 		});
 
-		test("when the mask uses characters other than spaces and hyphens", () => {
+		test("when the mask uses characters outside the interchangeable set", () => {
 			expect(isValidCreditCard("(41)11-1111 1111 1111")).toBe(false);
+			expect(isValidCreditCard("4111,1111,1111,1111")).toBe(false);
+			expect(isValidCreditCard("4111_1111_1111_1111")).toBe(false);
+		});
+
+		test("when a mask character is not between two digits", () => {
+			expect(isValidCreditCard("-4111111111111111")).toBe(false);
+			expect(isValidCreditCard("4111111111111111.")).toBe(false);
 		});
 
 		test("when it is null", () => {
@@ -139,6 +172,10 @@ describe("isValidCreditCard", () => {
 		test("should accept exactly one Luhn check digit for any base", () => {
 			fc.assert(
 				fc.property(fc.stringMatching(/^[0-9]{11,18}$/), (base) => {
+					// A base of a single repeated digit can have its one Luhn candidate rejected as a
+					// repeated-digit PAN, so it is left to the literal tests above.
+					fc.pre(new Set(base).size > 1);
+
 					const accepted = LUHN_DIGITS.filter((digit) => isValidCreditCard(`${base}${digit}`));
 
 					expect(accepted.length).toBe(1);
@@ -146,11 +183,11 @@ describe("isValidCreditCard", () => {
 			);
 		});
 
-		test("should ignore the spaces and hyphens between the digits", () => {
+		test("should ignore any of the mask characters between the digits", () => {
 			fc.assert(
 				fc.property(
 					fc.stringMatching(/^[0-9]{12,19}$/),
-					fc.constantFrom(" ", "-"),
+					fc.constantFrom(" ", "-", ".", "/"),
 					(card, separator) => {
 						const masked = card.replaceAll(/(\d{4})(?=\d)/g, `$1${separator}`);
 

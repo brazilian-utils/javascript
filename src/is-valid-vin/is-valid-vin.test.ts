@@ -35,6 +35,13 @@ describe("isValidVin", () => {
 			expect(isValidVin("1HGCM82633A004353")).toBe(false);
 		});
 
+		test("when every character is the same, even though the check digit matches", () => {
+			expect(isValidVin("00000000000000000")).toBe(false);
+			expect(isValidVin("55555555555555555")).toBe(false);
+			expect(isValidVin("99999999999999999")).toBe(false);
+			expect(isValidVin(" 00000000000000000 ")).toBe(false);
+		});
+
 		test("when it contains the excluded letter I", () => {
 			expect(isValidVin("1HGCM8263IA004352")).toBe(false);
 		});
@@ -69,6 +76,13 @@ describe("isValidVin", () => {
 
 		test("when it contains a symbol", () => {
 			expect(isValidVin("1HGCM82633A00435-")).toBe(false);
+		});
+
+		test("when a mask character splits it, since a VIN has no printed grouping", () => {
+			expect(isValidVin("1HGCM8 2633A004352")).toBe(false);
+			expect(isValidVin("1HGCM8-2633A004352")).toBe(false);
+			expect(isValidVin("1HGCM8.2633A004352")).toBe(false);
+			expect(isValidVin("1HGCM8/2633A004352")).toBe(false);
 		});
 
 		test("when it is an empty string", () => {
@@ -120,6 +134,10 @@ describe("isValidVin", () => {
 		test("should accept exactly one check character for any body", () => {
 			fc.assert(
 				fc.property(bodies, (body) => {
+					// A body of a single repeated character can have its one accepted candidate rejected
+					// as a repeated-character VIN, so it is left to the literal tests above.
+					fc.pre(new Set(body).size > 1);
+
 					const candidates = VIN_CHECK_CHARACTERS.map(
 						(character) => `${body.slice(0, 8)}${character}${body.slice(8)}`,
 					);

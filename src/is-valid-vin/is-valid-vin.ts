@@ -1,4 +1,5 @@
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import {
 	VIN_CHECK_DIGIT_POSITION,
 	VIN_LENGTH,
@@ -18,6 +19,17 @@ import {
  * a matching check digit. This function is therefore a North-American-style structural check,
  * not a universal validator of Brazilian VINs. Case-insensitive and trims surrounding whitespace.
  *
+ * A VIN is printed as one unbroken run of 17 characters, so, unlike the documents this package
+ * masks (`isValidCpf`, `isValidCnpj`, `isValidNfeKey`), it has no group boundary to write a
+ * separator at and none is accepted: a space, `.`, `-` or `/` among the characters is rejected
+ * instead of being stripped.
+ *
+ * A value whose 17 characters are all the same (`"00000000000000000"`) is rejected even when it
+ * carries a matching check digit, as every other validator of this package rejects a
+ * repeated-digit document (`isValidCpf("00000000000")`, `isValidCns`, `isValidCaepf`,
+ * `isValidCei`): no WMI, VDS and VIS are built out of a single repeated character, and it is what
+ * a placeholder or a zero-filled field looks like.
+ *
  * @param {string} value - The VIN to be validated.
  * @returns {boolean} True when `value` is a 17 character VIN with a matching check digit.
  *
@@ -27,6 +39,7 @@ import {
  * isValidVin("1m8gdm9axkp042788"); // true (check digit X, lowercase)
  * isValidVin("JH4TB2H26CC000000"); // true
  * isValidVin("1HGCM82633A004353"); // false (bad check digit)
+ * isValidVin("00000000000000000"); // false (every character the same, though the check digit matches)
  * isValidVin("1HGCM8263IA004352"); // false (contains the excluded letter I)
  * isValidVin("1HGCM82633A00435"); // false (16 characters)
  * ```
@@ -48,6 +61,8 @@ export const isValidVin = (value: string): boolean => {
 	const vin = value.trim().toUpperCase();
 
 	if (vin.length !== VIN_LENGTH) return false;
+
+	if (isRepeatedDigits(vin)) return false;
 
 	// Stryker disable next-line StringLiteral: generateChecksum strips this to digits, so it's inert.
 	let translitDigits = "";

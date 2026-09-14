@@ -22,14 +22,17 @@ const hasValidCheckDigits = (iban: string): boolean => {
  *
  * Only Brazilian IBANs (country code `BR`) are recognized: the field layout of the other 90+
  * ISO 13616 countries is out of scope, so any non `BR` IBAN, however well formed, returns
- * `false`. Accepts the usual grouping spaces and is case-insensitive.
+ * `false`. Accepts the usual grouping mask and is case-insensitive.
  *
  * Both accepted forms are the ones an IBAN is written in: compact,
- * `"BR1500000000000010932840814P2"`, or the ISO 13616 print format, letters and digits in
- * groups separated by a single space, with optional surrounding whitespace either way. Only a
- * character outside letters and digits, or a separator other than a single space, makes the
- * value something other than an IBAN, so `"BR1500000000000010932840814P-2"` and a double space
- * are rejected instead of having the offending character stripped.
+ * `"BR1500000000000010932840814P2"`, or the ISO 13616 print format, letters and digits in groups
+ * of 4 (the last one shorter), with optional surrounding whitespace either way. The groups may be
+ * split by whitespace, `.`, `-` or `/`, the interchangeable mask characters `isValidCpf` and
+ * `isValidCnpj` accept, so `"BR1500000000000010932840814P-2"` reads as the same IBAN. Only a
+ * separator away from a group boundary, a run of separators (ISO 13616 prints a single one) or a
+ * character outside letters and digits makes the value something other than an IBAN, so
+ * `"BR15 0000 0000 0000 1093 2840  814P 2"` and `"BR15 000 00000 0000 1093 2840 814P 2"` are
+ * rejected instead of having the offending character stripped.
  *
  * The last character is the owner indicator, `1` for the first or only holder up to `9` for the
  * ninth and then `A` to `Z` from the tenth, per Circular BCB nº 3.625/2013 art. 2º § 1º, so a
@@ -43,9 +46,10 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * ```typescript
  * isValidIban("BR1500000000000010932840814P2"); // true
  * isValidIban("BR15 0000 0000 0000 1093 2840 814P 2"); // true (grouping spaces)
+ * isValidIban("BR15-0000-0000-0000-1093-2840-814P-2"); // true (any of the mask characters)
  * isValidIban("br1500000000000010932840814p2"); // true (case-insensitive)
  * isValidIban("BR1500000000000010932840814P3"); // false (bad check digits)
- * isValidIban("BR1500000000000010932840814P-2"); // false (hyphens are not part of an IBAN)
+ * isValidIban("BR15 000 00000 0000 1093 2840 814P 2"); // false (a separator inside a group)
  * isValidIban("DE89370400440532013000"); // false (non Brazilian IBAN)
  * ```
  *

@@ -42,9 +42,10 @@ const isValidProvisional = (digits: string): boolean =>
  * be a multiple of 11.
  *
  * The value has to be written as the 15 digits, optionally split into the printed groups of 3,
- * 4, 4 and 4 by whitespace or the usual mask characters, a run of them between two groups
- * included; anything else, a letter among the digits included, is rejected instead of being
- * read past.
+ * 4, 4 and 4 by whitespace, `.`, `-` or `/`, the interchangeable mask characters `isValidCpf`
+ * and `isValidCnpj` accept, a run of them between two groups included; anything else, a letter
+ * among the digits or a separator inside a group included, is rejected instead of being read
+ * past.
  *
  * @param {string|number} value - The CNS value to be validated.
  * @returns {boolean} True if the CNS is valid, false otherwise.
@@ -54,6 +55,7 @@ const isValidProvisional = (digits: string): boolean =>
  * isValidCns("123456789010000"); // true (definitive, suffix 000)
  * isValidCns("100000000060018"); // true (definitive, raw check digit 10, suffix 001)
  * isValidCns("700000000000005"); // true (provisional)
+ * isValidCns("123.4567-8901/0000"); // true (any of the mask characters)
  * isValidCns("123456789010001"); // false (wrong check digit)
  * isValidCns("12345678901"); // false (wrong length)
  * ```

@@ -83,7 +83,7 @@ describe("parseNfeKey", () => {
 	describe("should return the parsed access key", () => {
 		test("for a NF-e access key (SP), the NFePHP `Keys::build` doc example also used in is-valid-nfe-key.test.ts", () => {
 			expect(parseNfeKey(KEY_SP)).toEqual({
-				state: "SP",
+				stateCode: "SP",
 				year: 2017,
 				month: 4,
 				taxId: "58716523000119",
@@ -98,7 +98,7 @@ describe("parseNfeKey", () => {
 
 		test("for a NF-e access key (RS), the NFePHP sped-cte `$infNFe->chave` example (NF-e referenced by a CT-e)", () => {
 			expect(parseNfeKey(KEY_RS)).toEqual({
-				state: "RS",
+				stateCode: "RS",
 				year: 2016,
 				month: 4,
 				taxId: "72202112000136",
@@ -161,7 +161,7 @@ describe("parseNfeKey", () => {
 
 		test("splitting nSiteAutoriz from the 7 digit cNF of an NFCom, per its Visão Geral §2.1.3", () => {
 			expect(parseNfeKey("35170458716523000119620010000000121000123450")).toEqual({
-				state: "SP",
+				stateCode: "SP",
 				year: 2017,
 				month: 4,
 				taxId: "58716523000119",
@@ -180,7 +180,7 @@ describe("parseNfeKey", () => {
 
 		test("splitting nSiteAutoriz from the 7 digit cNF of an NF3e, per its Visão Geral", () => {
 			expect(parseNfeKey("35170458716523000119660010000000121000123454")).toEqual({
-				state: "SP",
+				stateCode: "SP",
 				year: 2017,
 				month: 4,
 				taxId: "58716523000119",
@@ -226,7 +226,7 @@ describe("parseNfeKey", () => {
 					const key = buildNfeKey(`${issuer}${numbering}${emissionType}${tail}`);
 					const parsed = parseNfeKey(key);
 
-					expect(parsed?.state).toBe(IBGE_UF_CODES[uf]);
+					expect(parsed?.stateCode).toBe(IBGE_UF_CODES[uf]);
 					expect(parsed?.year).toBe(2000 + Number(year));
 					expect(parsed?.month).toBe(month);
 					expect(parsed?.taxId).toBe(taxId);
@@ -258,7 +258,7 @@ describe("parseNfeKey types", () => {
 		expectTypeOf(parseNfeKey).parameter(0).toEqualTypeOf<string>();
 		expectTypeOf(parseNfeKey).returns.toEqualTypeOf<NfeKey | null>();
 		expectTypeOf<NfeKey>().toEqualTypeOf<{
-			state: StateCode;
+			stateCode: StateCode;
 			year: number;
 			month: number;
 			taxId: string;

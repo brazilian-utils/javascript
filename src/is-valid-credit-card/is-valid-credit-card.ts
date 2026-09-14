@@ -1,20 +1,30 @@
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { mod10 } from "../_internals/mod10/mod10";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { MAX_LENGTH, MIN_LENGTH } from "./constants";
 
-const FORMAT_REGEX = /^\d+(?:[ -]+\d+)*$/;
+const FORMAT_REGEX = /^\d+(?:[\s.\-/]+\d+)*$/;
 
 /**
  * Validates a payment card number (crédito ou débito) using the Luhn algorithm.
  *
- * Accepts the usual mask characters (spaces and hyphens) between digits, a run of them included,
- * so `"4111 - 1111 - 1111 - 1111"` reads as the same PAN, and whitespace around the value; any
+ * Accepts the usual mask characters (whitespace, `.`, `-` and `/`, the interchangeable set
+ * `isValidCpf` and `isValidCnpj` accept) between digits, a run of them included, so
+ * `"4111 - 1111 - 1111 - 1111"` reads as the same PAN, and whitespace around the value; any
  * other character makes the value invalid, so `"4111a1111b1111c1111"` is rejected instead of
- * being read as `"4111111111111111"`. Only checks the digit count (12 to 19: 12 is
+ * being read as `"4111111111111111"`. They are accepted between any two digits rather than at
+ * fixed positions: the printed grouping of a PAN changes with the brand (4-4-4-4 for Visa and
+ * Mastercard, 4-6-5 for American Express, 4-6-4 for Diners Club), so there is no single layout
+ * to pin them to. Only checks the digit count (12 to 19: 12 is
  * the de-facto industry minimum PAN length, e.g. Maestro, and ISO/IEC 7812-1 caps the PAN at 19)
  * and the Luhn check digit; it performs no brand detection (Visa, Mastercard, Amex...), issuer
  * range lookup or expiration/CVV checks.
+ *
+ * A value whose digits are all the same (`"0000000000000000"`) is rejected even when it passes
+ * the Luhn check, as every other validator of this package rejects a repeated-digit document
+ * (`isValidCpf("00000000000")`, `isValidCns`, `isValidCaepf`, `isValidCei`): no issuer hands out
+ * such a PAN, and it is what a placeholder or a zero-filled field looks like.
  *
  * A number is only accepted when it is a non-negative safe integer: a card number above
  * `Number.MAX_SAFE_INTEGER` (2^53 - 1, 16 digits) has already been rounded to a different
@@ -31,7 +41,9 @@ const FORMAT_REGEX = /^\d+(?:[ -]+\d+)*$/;
  * isValidCreditCard("378282246310005"); // true (American Express test number)
  * isValidCreditCard("4111 1111 1111 1111"); // true (spaced mask)
  * isValidCreditCard("4111 - 1111 - 1111 - 1111"); // true (a run of separators between the digits)
+ * isValidCreditCard("4111.1111/1111-1111"); // true (any of the mask characters)
  * isValidCreditCard("4111111111111112"); // false (bad check digit)
+ * isValidCreditCard("0000000000000000"); // false (every digit the same, though the Luhn check passes)
  * isValidCreditCard("4111a1111b1111c1111"); // false (letters between the digits)
  * isValidCreditCard("123456789"); // false (too short)
  * isValidCreditCard(4111111111111111111); // false (above 2^53 - 1, pass it as a string)
@@ -53,6 +65,8 @@ export const isValidCreditCard = (value: string | number): boolean => {
 	const digits = sanitizeToDigits(value);
 
 	if (digits.length < MIN_LENGTH || digits.length > MAX_LENGTH) return false;
+
+	if (isRepeatedDigits(digits)) return false;
 
 	const checkDigit = digits.charCodeAt(digits.length - 1) - 48;
 

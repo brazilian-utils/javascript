@@ -34,7 +34,7 @@ export {
 } from "./format-legal-nature/format-legal-nature";
 export { formatLicensePlate } from "./format-license-plate/format-license-plate";
 export { type FormatNcmOptions, formatNcm } from "./format-ncm/format-ncm";
-export { formatNfeKey } from "./format-nfe-key/format-nfe-key";
+export { type FormatNfeKeyOptions, formatNfeKey } from "./format-nfe-key/format-nfe-key";
 export { formatPassport } from "./format-passport/format-passport";
 export { type FormatPhoneOptions, type PhoneMask, formatPhone } from "./format-phone/format-phone";
 export { type FormatPisOptions, formatPis } from "./format-pis/format-pis";

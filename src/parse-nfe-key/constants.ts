@@ -96,8 +96,14 @@ export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
  */
 export const XML_ID_PREFIX_REGEX = /^(?:nfe|cte|mdfe|bpe|nf3e|nfcom)/i;
 
-/** Digits and optional whitespace between groups, what is left once the prefix is stripped. */
-export const FORMAT_REGEX = /^[\d\s]+$/;
+/**
+ * Shape the key has to be written in once the prefix is stripped: the digits, optionally split
+ * into the printed groups of 4 by whitespace or the usual mask characters, a run of them between
+ * two groups included, the same rule the CPF, CNPJ, CAEPF and CNS regexes of this library follow.
+ * A separator inside a group of 4, or any other character, is rejected instead of being stripped.
+ * The group count is left open so the 44 digit length is still checked where the key is read.
+ */
+export const FORMAT_REGEX = /^\d{4}(?:[\s.\-/]*\d{4})*$/;
 
 /** Start of the document number (nNF) inside the 44 digit key. */
 export const NUMBER_START = 25;

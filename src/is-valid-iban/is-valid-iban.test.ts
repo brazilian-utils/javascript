@@ -18,6 +18,17 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR15 0000 0000 0000 1093 2840 814P 2")).toBe(true);
 		});
 
+		test("for a value whose ISO 13616 groups are split by any of the mask characters", () => {
+			expect(isValidIban("BR15.0000.0000.0000.1093.2840.814P.2")).toBe(true);
+			expect(isValidIban("BR15-0000-0000-0000-1093-2840-814P-2")).toBe(true);
+			expect(isValidIban("BR15/0000/0000/0000/1093/2840/814P/2")).toBe(true);
+			expect(isValidIban("BR15.0000-0000/0000 1093 2840 814P2")).toBe(true);
+		});
+
+		test("for a value split at one group boundary only", () => {
+			expect(isValidIban("BR1500000000000010932840814P-2")).toBe(true);
+		});
+
 		test("for a lowercase value", () => {
 			expect(isValidIban("br1500000000000010932840814p2")).toBe(true);
 		});
@@ -82,13 +93,20 @@ describe("isValidIban", () => {
 		});
 
 		test("when it carries a character outside the print format", () => {
-			expect(isValidIban("BR1500000000000010932840814P-2")).toBe(false);
-			expect(isValidIban("BR15.0000.0000.0000.1093.2840.814P2")).toBe(false);
-			expect(isValidIban("BR1500000000000010932840814P/2")).toBe(false);
+			expect(isValidIban("BR1500000000000010932840814P_2")).toBe(false);
+			expect(isValidIban("BR15,0000,0000,0000,1093,2840,814P,2")).toBe(false);
+			expect(isValidIban("BR1500000000000010932840814P#2")).toBe(false);
 		});
 
-		test("when the groups are separated by more than one space", () => {
+		test("when a separator falls inside a group instead of at its boundary", () => {
+			expect(isValidIban("BR15 000 00000 0000 1093 2840 814P 2")).toBe(false);
+			expect(isValidIban("BR1 50000000000001093 2840 814P 2")).toBe(false);
+			expect(isValidIban("BR15 0000 0000 0000 1093 2840 814 P2")).toBe(false);
+		});
+
+		test("when the groups are separated by more than one separator", () => {
 			expect(isValidIban("BR15 0000 0000 0000 1093 2840  814P 2")).toBe(false);
+			expect(isValidIban("BR15 0000 0000 0000 1093 2840 .-814P 2")).toBe(false);
 		});
 
 		test("when it is an empty string", () => {
@@ -145,15 +163,34 @@ describe("isValidIban", () => {
 			);
 		});
 
-		test("should ignore the grouping spaces and the case of an IBAN", () => {
+		test("should ignore the grouping separators and the case of an IBAN", () => {
 			fc.assert(
-				fc.property(bodies, (body) => {
+				fc.property(bodies, fc.constantFrom(" ", ".", "-", "/"), (body, separator) => {
 					const iban = findIban(body);
-					const grouped = iban.replaceAll(/(.{4})(?=.)/g, "$1 ");
+					const grouped = iban.replaceAll(/(.{4})(?=.)/g, `$1${separator}`);
 
 					expect(isValidIban(grouped)).toBe(true);
 					expect(isValidIban(grouped.toLowerCase())).toBe(true);
 				}),
+			);
+		});
+
+		test("should reject a separator that falls inside an ISO 13616 group", () => {
+			fc.assert(
+				fc.property(
+					bodies,
+					fc.integer({ min: 1, max: 28 }),
+					fc.constantFrom(" ", ".", "-", "/"),
+					(body, index, separator) => {
+						fc.pre(index % 4 !== 0);
+
+						const iban = findIban(body);
+
+						expect(isValidIban(`${iban.slice(0, index)}${separator}${iban.slice(index)}`)).toBe(
+							false,
+						);
+					},
+				),
 			);
 		});
 

@@ -2,7 +2,7 @@
 
 Aqui você encontrará todos os utilitários disponíveis para uso.
 
-> **Tratamento de entrada:** nenhuma função pública síncrona lança exceção com `null`/`undefined` ou um valor de tipo incorreto; as duas funções de rede, `getAddressInfoByCep` e `getCepInfoByAddress`, rejeitam com seus erros tipados (veja as seções delas). Os validadores (`isValid*`) retornam `false`; `isHoliday` retorna `false`; `getHolidays` retorna `[]`; `getBoletoInfo` retorna `undefined` para um boleto inválido, a única função do pacote que retorna `undefined`; `generateProcessoJuridico` retorna `null`; `getMunicipality` retorna `null` para uma busca malformada/sem correspondência. Todas as demais funções `format*`/`parse*` retornam um valor vazio do seu tipo de retorno: toda função `format*`, `capitalize`, e as funções `parse*` que retornam string (`parseBoleto`, `parseCep`, `parseCnh`, `parseCnpj`, `parseCpf`, `parseLegalNature`, `parseLicensePlate`, `parsePassport`, `parsePhone`, `parsePis`, `parseProcessoJuridico`, `parseVoterId`) retornam `""`; `parseCurrency` retorna `0`; os parsers que retornam objeto/tupla — `parseCertidao`, `parseIban`, `parseNfeKey`, `parsePixKey`, `parsePixPayload` — retornam `null`. `formatCurrency` retorna `""` para um número não finito e para um valor que não pode ser convertido em número (um symbol, um objeto simples, um objeto sem protótipo); `null`, arrays e booleanos passam por `Number()` como no 2.3.0. A única exceção à promessa acima: um objeto criado com `Object.create(null)` não tem `toString`, então as funções `format*`/`parse*` que leem a entrada como texto ainda lançam um `TypeError` para ele, exatamente como na 2.3.0.
+> **Tratamento de entrada:** nenhuma função pública síncrona lança exceção com `null`/`undefined` ou um valor de tipo incorreto; as duas funções de rede, `getAddressInfoByCep` e `getCepInfoByAddress`, rejeitam com seus erros tipados (veja as seções delas). Os validadores (`isValid*`) retornam `false`; `isHoliday` retorna `false`; `getHolidays` retorna `[]`; `getBoletoInfo` retorna `null` para um boleto inválido; `generateProcessoJuridico` retorna `null`; `getMunicipality` retorna `null` para uma busca malformada/sem correspondência. Todas as demais funções `format*`/`parse*` retornam um valor vazio do seu tipo de retorno: toda função `format*`, `capitalize`, e as funções `parse*` que retornam string (`parseBoleto`, `parseCep`, `parseCnh`, `parseCnpj`, `parseCpf`, `parseLegalNature`, `parseLicensePlate`, `parsePassport`, `parsePhone`, `parsePis`, `parseProcessoJuridico`, `parseVoterId`) retornam `""`; `parseCurrency` retorna `0`; os parsers que retornam objeto/tupla — `parseCertidao`, `parseIban`, `parseNfeKey`, `parsePixKey`, `parsePixPayload` — retornam `null`. `formatCurrency` retorna `""` para um número não finito e para um valor que não pode ser convertido em número (um symbol, um objeto simples, um objeto sem protótipo); `null`, arrays e booleanos passam por `Number()` como no 2.3.0. A única exceção à promessa acima: um objeto criado com `Object.create(null)` não tem `toString`, então as funções `format*`/`parse*` que leem a entrada como texto ainda lançam um `TypeError` para ele, exatamente como na 2.3.0.
 
 ## isValidCpf
 
@@ -283,6 +283,8 @@ isValidNfeKey('35170458716523000119550010000000121000123458'); // true (NF-e, SP
 isValidNfeKey('NFe35170458716523000119550010000000121000123458'); // true (prefixo Id do XML)
 isValidNfeKey('CTe35170458716523000119570010000000128000123452'); // true (CT-e autorizado pela SVC-SP)
 isValidNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'); // true (com máscara)
+isValidNfeKey('3517.0458.7165.2300.0119.5500.1000.0000.1210.0012.3458'); // true (qualquer um dos caracteres de máscara)
+isValidNfeKey('351 70458716523000119550010000000121000123458'); // false (separador dentro de um grupo de 4)
 isValidNfeKey('99170458716523000119550010000000121000123458'); // false (cUF inválido)
 isValidNfeKey('35170458716523000119550010000000128000123455'); // false (o MOC da NF-e não atribui tpEmis 8)
 isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 00000000, regra B03-10)
@@ -290,28 +292,33 @@ isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 000
 
 ## formatNfeKey
 
-Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 dígitos separados por espaço, a forma em que todo documento auxiliar a imprime: o DANFE da NF-e e da NFC-e, o DACTE do CT-e, do CT-e OS e da GTV-e, o DAMDFE do MDF-e, o DABPE do BP-e, o DANF3E da NF3e e o DANFE-COM da NFCom. Como todo formatador deste pacote, o valor é lido pelos seus dígitos e agrupado até onde eles vão, então uma chave com máscara ou parcial, ainda sendo digitada, é agrupada progressivamente, e qualquer coisa sem dígito (um objeto, `true`, um objeto criado com `Object.create(null)`) devolve `''` em vez de lançar. Use `isValidNfeKey` para verificar uma chave.
+Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 dígitos separados por espaço, a forma em que todo documento auxiliar a imprime: o DANFE da NF-e e da NFC-e, o DACTE do CT-e, do CT-e OS e da GTV-e, o DAMDFE do MDF-e, o DABPE do BP-e, o DANF3E da NF3e e o DANFE-COM da NFCom. Como todo formatador deste pacote, o valor é lido pelos seus dígitos e agrupado até onde eles vão, então uma chave com máscara ou parcial, ainda sendo digitada, é agrupada progressivamente, e qualquer coisa sem dígito (um objeto, `true`, um objeto criado com `Object.create(null)`) devolve `''` em vez de lançar. Use `isValidNfeKey` para verificar uma chave. O `options.pad` (parte de `FormatNfeKeyOptions`) preenche o valor com zeros à esquerda até os 44 dígitos de uma chave de acesso completa (padrão `false`). O parâmetro é tipado como string porque 44 dígitos são mais do que um número JavaScript comporta com exatidão; em tempo de execução um número é lido como a string dos seus dígitos, como em todo formatador deste pacote.
 
 ```javascript
 import { formatNfeKey } from '@brazilian-utils/brazilian-utils';
 
 formatNfeKey('35170458716523000119550010000000121000123458');
 // '3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'
+
+formatNfeKey('12345'); // '1234 5'
+
+formatNfeKey('12345', { pad: true });
+// '0000 0000 0000 0000 0000 0000 0000 0000 0000 0001 2345'
 ```
 
 ## parseNfeKey
 
-Interpreta uma chave de acesso de DF-e e retorna seus campos (state, year, month, taxId, model, series, number, emissionType, code, checkDigit). Aceita as mesmas formas de entrada do `isValidNfeKey` e retorna `null` quando a chave não é válida. O resultado é tipado como `NfeKey`, cujo `model` é um `NfeKeyModel`. A NFCom (`'62'`) e a NF3e (`'66'`) gastam a posição 36 da chave com o `nSiteAutoriz`, o site do autorizador que recebeu o documento, então para esses dois modelos o resultado também traz `authorizationSite` e o `code` tem 7 dígitos em vez de 8.
+Interpreta uma chave de acesso de DF-e e retorna seus campos (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit). Aceita as mesmas formas de entrada do `isValidNfeKey` e retorna `null` quando a chave não é válida. O resultado é tipado como `NfeKey`, cujo `model` é um `NfeKeyModel`. A NFCom (`'62'`) e a NF3e (`'66'`) gastam a posição 36 da chave com o `nSiteAutoriz`, o site do autorizador que recebeu o documento, então para esses dois modelos o resultado também traz `authorizationSite` e o `code` tem 7 dígitos em vez de 8.
 
 ```javascript
 import { parseNfeKey } from '@brazilian-utils/brazilian-utils';
 
 parseNfeKey('35170458716523000119550010000000121000123458');
-// { state: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '55',
+// { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '55',
 //   series: 1, number: 12, emissionType: 1, code: '00012345', checkDigit: 8 }
 
 parseNfeKey('35170458716523000119620010000000121000123450');
-// { state: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
+// { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
 //   series: 1, number: 12, emissionType: 1, authorizationSite: 0, code: '0012345', checkDigit: 0 }
 
 parseNfeKey('invalid'); // null
@@ -754,15 +761,16 @@ getBankByIspb('99999999'); // null
 
 ## isValidIban
 
-Valida se um IBAN (International Bank Account Number) brasileiro é válido, conforme as [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf) do Bacen (Circular BCB nº 3.625/2013): `BR` + 2 dígitos verificadores ISO 7064 MOD 97-10 + 8 dígitos de ISPB + 5 dígitos de agência + 10 dígitos de conta + 1 letra de tipo de conta (qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 indicador de titularidade (`1` para o primeiro ou único titular até `9` para o nono, depois `A` a `Z` a partir do décimo, então `0` é rejeitado), totalizando 29 caracteres. Somente IBANs brasileiros (código de país `BR`) são reconhecidos; qualquer outro país retorna `false`, já que este pacote não conhece o layout de campos dos outros mais de 90 países da ISO 13616. Não diferencia maiúsculas de minúsculas e aceita as duas formas em que um IBAN é escrito: compacta (`'BR1500000000000010932840814P2'`) ou no formato impresso da ISO 13616, letras e dígitos em grupos separados por um único espaço, em ambos os casos com espaços em branco opcionais no início e no fim. Apenas um caractere fora de letras e dígitos, ou um separador diferente de um único espaço, faz do valor algo que não é um IBAN, então ele é rejeitado em vez de removido.
+Valida se um IBAN (International Bank Account Number) brasileiro é válido, conforme as [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf) do Bacen (Circular BCB nº 3.625/2013): `BR` + 2 dígitos verificadores ISO 7064 MOD 97-10 + 8 dígitos de ISPB + 5 dígitos de agência + 10 dígitos de conta + 1 letra de tipo de conta (qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 indicador de titularidade (`1` para o primeiro ou único titular até `9` para o nono, depois `A` a `Z` a partir do décimo, então `0` é rejeitado), totalizando 29 caracteres. Somente IBANs brasileiros (código de país `BR`) são reconhecidos; qualquer outro país retorna `false`, já que este pacote não conhece o layout de campos dos outros mais de 90 países da ISO 13616. Não diferencia maiúsculas de minúsculas e aceita as duas formas em que um IBAN é escrito: compacta (`'BR1500000000000010932840814P2'`) ou no formato impresso da ISO 13616, letras e dígitos em grupos de 4 (o último menor), em ambos os casos com espaços em branco opcionais no início e no fim. Os grupos podem ser separados por espaço em branco, `.`, `-` ou `/`, os caracteres de máscara intercambiáveis que `isValidCpf` e `isValidCnpj` aceitam. Apenas um separador fora do limite de um grupo, uma sequência de separadores (a ISO 13616 imprime um único) ou um caractere fora de letras e dígitos faz do valor algo que não é um IBAN, então ele é rejeitado em vez de removido.
 
 ```javascript
 import { isValidIban } from '@brazilian-utils/brazilian-utils';
 
 isValidIban('BR1500000000000010932840814P2'); // true
 isValidIban('BR15 0000 0000 0000 1093 2840 814P 2'); // true (espaços de agrupamento)
+isValidIban('BR15-0000-0000-0000-1093-2840-814P-2'); // true (qualquer um dos caracteres de máscara)
 isValidIban('BR1500000000000010932840814P3'); // false (dígitos verificadores inválidos)
-isValidIban('BR1500000000000010932840814P-2'); // false (hífen não faz parte de um IBAN)
+isValidIban('BR15 000 00000 0000 1093 2840 814P 2'); // false (separador dentro de um grupo)
 isValidIban('DE89370400440532013000'); // false (IBAN não brasileiro)
 ```
 
@@ -781,7 +789,7 @@ formatIban('BR15 0000-0000.0000/1093 2840 814P-2'); // 'BR15 0000 0000 0000 1093
 
 ## parseIban
 
-Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular, `1` a `9` e depois `A` a `Z`). Aceita as mesmas formas de entrada que `isValidIban`, compacta ou no formato impresso da ISO 13616 (grupos separados por um único espaço), em ambos os casos com espaços em branco opcionais no início e no fim e sem diferenciar maiúsculas de minúsculas, e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega qualquer caractere além de letras, dígitos e esses espaços de agrupamento. O resultado é tipado como `Iban`, cujo `accountType` é uma `string`.
+Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular, `1` a `9` e depois `A` a `Z`). Aceita as mesmas formas de entrada que `isValidIban`, compacta ou no formato impresso da ISO 13616 (grupos de 4 separados por um único espaço em branco, `.`, `-` ou `/`), em ambos os casos com espaços em branco opcionais no início e no fim e sem diferenciar maiúsculas de minúsculas, e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega um separador fora do limite de um grupo, uma sequência de separadores ou qualquer caractere além de letras e dígitos. O resultado é tipado como `Iban`, cujo `accountType` é uma `string`.
 
 ```javascript
 import { parseIban } from '@brazilian-utils/brazilian-utils';
@@ -798,12 +806,12 @@ parseIban('BR1500000000000010932840814P2');
 // }
 
 parseIban('DE89370400440532013000'); // null (IBAN não brasileiro)
-parseIban('BR1500000000000010932840814P-2'); // null (hífen não faz parte de um IBAN)
+parseIban('BR15 000 00000 0000 1093 2840 814P 2'); // null (separador dentro de um grupo)
 ```
 
 ## isValidCreditCard
 
-Valida se um número de cartão de pagamento é válido usando o algoritmo de Luhn ([ISO/IEC 7812-1](https://www.iso.org/standard/70484.html)). Aceita os caracteres de máscara usuais (espaços, hifens) entre os dígitos e espaços ao redor do valor; qualquer outro caractere invalida o valor. Não faz detecção de bandeira (Visa, Mastercard, Amex...), consulta de faixa de emissor nem validação de validade/CVV, verifica apenas a quantidade de dígitos (12 a 19) e o dígito verificador de Luhn. Um `number` só é aceito quando é um inteiro seguro não negativo: qualquer valor acima de `Number.MAX_SAFE_INTEGER` (2^53 - 1, 16 dígitos) já chega arredondado para outro número, então passe cartões mais longos como string.
+Valida se um número de cartão de pagamento é válido usando o algoritmo de Luhn ([ISO/IEC 7812-1](https://www.iso.org/standard/70484.html)). Aceita os caracteres de máscara usuais (espaço em branco, `.`, `-` e `/`, o conjunto intercambiável que `isValidCpf` e `isValidCnpj` aceitam) entre dois dígitos quaisquer e espaços ao redor do valor; qualquer outro caractere invalida o valor. Eles são aceitos entre dois dígitos quaisquer, e não em posições fixas, porque o agrupamento impresso de um PAN muda com a bandeira (4-4-4-4 para Visa e Mastercard, 4-6-5 para American Express, 4-6-4 para Diners Club), então não há um único leiaute ao qual prendê-los. Não faz detecção de bandeira (Visa, Mastercard, Amex...), consulta de faixa de emissor nem validação de validade/CVV, verifica apenas a quantidade de dígitos (12 a 19) e o dígito verificador de Luhn. Um `number` só é aceito quando é um inteiro seguro não negativo: qualquer valor acima de `Number.MAX_SAFE_INTEGER` (2^53 - 1, 16 dígitos) já chega arredondado para outro número, então passe cartões mais longos como string. Um valor cujos dígitos são todos iguais (`'0000000000000000'`) é rejeitado mesmo passando no cálculo de Luhn, do jeito que todo outro validador deste pacote rejeita um documento de dígitos repetidos (`isValidCpf('00000000000')`, `isValidCns`, `isValidCaepf`, `isValidCei`).
 
 ```javascript
 import { isValidCreditCard } from '@brazilian-utils/brazilian-utils';
@@ -812,7 +820,9 @@ isValidCreditCard('4111111111111111'); // true (número de teste Visa)
 isValidCreditCard('5555555555554444'); // true (número de teste Mastercard)
 isValidCreditCard('378282246310005'); // true (número de teste American Express)
 isValidCreditCard('4111 1111 1111 1111'); // true (máscara com espaços)
+isValidCreditCard('4111.1111/1111-1111'); // true (qualquer um dos caracteres de máscara)
 isValidCreditCard('4111111111111112'); // false (dígito verificador inválido)
+isValidCreditCard('0000000000000000'); // false (todos os dígitos iguais, ainda que o Luhn feche)
 isValidCreditCard('4111a1111b1111c1111'); // false (letras entre os dígitos)
 isValidCreditCard(4111111111111111111); // false (acima de 2^53 - 1, passe como string)
 ```
@@ -1647,7 +1657,7 @@ parseVoterId('1234 5678 8 01 91'); // '1234567880191' (título de 13 dígitos SP
 
 ## isValidCns
 
-Verifica se um número de CNS (Cartão Nacional de Saúde) é válido, o identificador único do usuário do SUS (Sistema Único de Saúde). Cartões definitivos (iniciados em 1 ou 2) são validados sobre uma base embutida de 11 dígitos derivada do PIS/PASEP/NIS, ponderada de 15 até 5; quando o dígito bruto resulta em 10, o DATASUS soma 2 à soma ponderada, recalcula o dígito e marca o cartão com o sufixo `001` em vez de `000`. Cartões provisórios (iniciados em 7, 8 ou 9) são validados por uma soma ponderada única (pesos de 15 a 1) que deve ser múltipla de 11. O valor precisa vir escrito como os 15 dígitos, opcionalmente separados nos grupos impressos de 3-4-4-4 por espaços ou pelos caracteres de máscara usuais, inclusive uma sequência deles entre dois grupos; letras no meio dos dígitos são rejeitadas em vez de ignoradas.
+Verifica se um número de CNS (Cartão Nacional de Saúde) é válido, o identificador único do usuário do SUS (Sistema Único de Saúde). Cartões definitivos (iniciados em 1 ou 2) são validados sobre uma base embutida de 11 dígitos derivada do PIS/PASEP/NIS, ponderada de 15 até 5; quando o dígito bruto resulta em 10, o DATASUS soma 2 à soma ponderada, recalcula o dígito e marca o cartão com o sufixo `001` em vez de `000`. Cartões provisórios (iniciados em 7, 8 ou 9) são validados por uma soma ponderada única (pesos de 15 a 1) que deve ser múltipla de 11. O valor precisa vir escrito como os 15 dígitos, opcionalmente separados nos grupos impressos de 3-4-4-4 por espaço em branco, `.`, `-` ou `/`, os caracteres de máscara intercambiáveis que `isValidCpf` e `isValidCnpj` aceitam, inclusive uma sequência deles entre dois grupos; letras no meio dos dígitos, ou um separador dentro de um grupo, são rejeitadas em vez de ignoradas.
 
 As duas rotinas vêm da [página de validação de CNS da ANVISA](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/), que fica atrás de um filtro de bots e responde HTTP 403 a clientes que não sejam navegadores. A [página do e-SUS APS](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html) documenta o mesmo algoritmo e é acessível sem navegador, mas aplica a rotina de provisórios a números iniciados em 5, 7, 8 ou 9; esta implementação segue a ANVISA e rejeita um número iniciado em 5 mesmo quando a soma ponderada fecha.
 
@@ -1656,6 +1666,7 @@ import { isValidCns } from '@brazilian-utils/brazilian-utils';
 
 isValidCns('123456789010000'); // true (definitivo)
 isValidCns('700000000000005'); // true (provisório)
+isValidCns('123.4567-8901/0000'); // true (qualquer um dos caracteres de máscara)
 isValidCns('12345678901'); // false (tamanho inválido)
 isValidCns('abc123456789010000'); // false (não escrito como um CNS)
 ```
@@ -1822,22 +1833,22 @@ formatCaepf('184', { pad: true }); // 000.000.000/001-84
 
 ## isValidRegistroProfissional
 
-Verifica a estrutura de um número de registro/inscrição profissional. As opções são tipadas como `IsValidRegistroProfissionalOptions`: `options.council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `options.stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos, o tipo de registro (`"O"` Originário ou `"P"` Provisório, que nada diz sobre a categoria profissional) e o dígito verificador, conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1). Um Registro Transferido ou Secundário acrescenta `"T"` ou `"S"` e a UF do CRC de destino **depois** do dígito verificador, conforme esse mesmo item e a [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), art. 5º parágrafo único: os exemplos do próprio Manual são `SP-123456/O-3 T-MG`, `TO-654321/P-8 T-SC` e `PI-111222/O-5 S-AC`. As duas UFs precisam ser códigos reais, e o `options.stateCode` é comparado com a de origem. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. Só o formato do CRC e esses códigos regionais do CRP se apoiam em fonte publicada: a página do CFP não publica o tamanho do número de inscrição, e a OAB, o CFM e o CFO não publicam formato algum, então as faixas de dígitos aceitas para `"CRP"`, `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas (a busca pública da OAB/SP tem `maxlength="7"`, e o CFM documenta CRMs com prefixo `300` e sufixo `P`, nenhum deles expresso por esses formatos). O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
+Verifica a estrutura de um número de registro/inscrição profissional. Recebe um único objeto, tipado como `IsValidRegistroProfissionalOptions`, no mesmo formato do `isValidBankAccount`: `value` é o número do registro, `council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). Qualquer coisa que não seja um objeto, e um objeto sem `value` ou sem `council`, é `false`. É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos, o tipo de registro (`"O"` Originário ou `"P"` Provisório, que nada diz sobre a categoria profissional) e o dígito verificador, conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1). Um Registro Transferido ou Secundário acrescenta `"T"` ou `"S"` e a UF do CRC de destino **depois** do dígito verificador, conforme esse mesmo item e a [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), art. 5º parágrafo único: os exemplos do próprio Manual são `SP-123456/O-3 T-MG`, `TO-654321/P-8 T-SC` e `PI-111222/O-5 S-AC`. As duas UFs precisam ser códigos reais, e o `stateCode` é comparado com a de origem. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. Só o formato do CRC e esses códigos regionais do CRP se apoiam em fonte publicada: a página do CFP não publica o tamanho do número de inscrição, e a OAB, o CFM e o CFO não publicam formato algum, então as faixas de dígitos aceitas para `"CRP"`, `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas (a busca pública da OAB/SP tem `maxlength="7"`, e o CFM documenta CRMs com prefixo `300` e sufixo `P`, nenhum deles expresso por esses formatos). O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
 
 ```javascript
 import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
 
-isValidRegistroProfissional('123456/SP', { council: 'OAB' }); // true
-isValidRegistroProfissional('123456-RJ', { council: 'OAB', stateCode: 'SP' }); // false (UF divergente)
-isValidRegistroProfissional('06/12345', { council: 'CRP' }); // true
-isValidRegistroProfissional('SP-123456/O-3', { council: 'CRC' }); // true
-isValidRegistroProfissional('SP-123456/O-3 T-MG', { council: 'CRC' }); // true (registro transferido)
-isValidRegistroProfissional('SP-123456/T-3', { council: 'CRC' }); // false ("T" não é tipo de registro)
+isValidRegistroProfissional({ value: '123456/SP', council: 'OAB' }); // true
+isValidRegistroProfissional({ value: '123456-RJ', council: 'OAB', stateCode: 'SP' }); // false (UF divergente)
+isValidRegistroProfissional({ value: '06/12345', council: 'CRP' }); // true
+isValidRegistroProfissional({ value: 'SP-123456/O-3', council: 'CRC' }); // true
+isValidRegistroProfissional({ value: 'SP-123456/O-3 T-MG', council: 'CRC' }); // true (registro transferido)
+isValidRegistroProfissional({ value: 'SP-123456/T-3', council: 'CRC' }); // false ("T" não é tipo de registro)
 ```
 
 ## isValidVin
 
-Valida se um VIN (Vehicle Identification Number / chassi) é válido. Verifica o tamanho (17 caracteres), as letras excluídas (`I`, `O`, `Q` nunca são válidas; estrutura da [ISO 3779:2009](https://www.iso.org/standard/52200.html)) e o dígito verificador na 9ª posição, calculado e transliterado conforme o [49 CFR 565.15](https://www.ecfr.gov/current/title-49/section-565.15). Esse dígito verificador é uma exigência norte-americana (49 CFR 565.15 / SAE J853): a [Resolução CONTRAN nº 968/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9682022.pdf) (que revogou a Resolução CONTRAN nº 24/1998 a partir de 1º de janeiro de 2025) e a ABNT NBR 6066 definem a estrutura do VIN brasileiro, mas não o exigem, então muitos VINs fabricados no Brasil não possuem um dígito verificador correspondente. Esta função é, portanto, uma verificação estrutural no padrão norte-americano, não um validador universal de VINs brasileiros. Não diferencia maiúsculas de minúsculas e remove espaços nas extremidades.
+Valida se um VIN (Vehicle Identification Number / chassi) é válido. Verifica o tamanho (17 caracteres), as letras excluídas (`I`, `O`, `Q` nunca são válidas; estrutura da [ISO 3779:2009](https://www.iso.org/standard/52200.html)) e o dígito verificador na 9ª posição, calculado e transliterado conforme o [49 CFR 565.15](https://www.ecfr.gov/current/title-49/section-565.15). Esse dígito verificador é uma exigência norte-americana (49 CFR 565.15 / SAE J853): a [Resolução CONTRAN nº 968/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9682022.pdf) (que revogou a Resolução CONTRAN nº 24/1998 a partir de 1º de janeiro de 2025) e a ABNT NBR 6066 definem a estrutura do VIN brasileiro, mas não o exigem, então muitos VINs fabricados no Brasil não possuem um dígito verificador correspondente. Esta função é, portanto, uma verificação estrutural no padrão norte-americano, não um validador universal de VINs brasileiros. Não diferencia maiúsculas de minúsculas e remove espaços nas extremidades. Um VIN é impresso como uma sequência única de 17 caracteres, então, diferente dos documentos que este pacote mascara (`isValidCpf`, `isValidCnpj`, `isValidNfeKey`), ele não tem limite de grupo onde escrever um separador e nenhum é aceito: um espaço, `.`, `-` ou `/` entre os caracteres é rejeitado em vez de removido. Um valor cujos 17 caracteres são todos iguais (`'00000000000000000'`) é rejeitado mesmo com o dígito verificador correspondente, do jeito que todo outro validador deste pacote rejeita um documento de dígitos repetidos.
 
 ```javascript
 import { isValidVin } from '@brazilian-utils/brazilian-utils';

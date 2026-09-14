@@ -22,8 +22,12 @@ export const BR_IBAN_LENGTH = 29;
 export const BR_IBAN_REGEX = /^BR\d{2}\d{8}\d{5}\d{10}[A-Z][A-Z1-9]$/;
 
 /**
- * Shape an IBAN has to be written in: the ISO 13616 print format, letters and digits in
- * groups separated by a single space. Any other character (a hyphen, a dot, a slash) makes
- * the value something other than an IBAN, so it is rejected instead of stripped.
+ * Shape an IBAN has to be written in: letters and digits, optionally split into the ISO 13616
+ * print groups of 4 (the last one shorter, 1 to 3 characters, when the length is not a multiple
+ * of 4) by whitespace, `.`, `-` or `/`, the same interchangeable mask characters `isValidCpf`
+ * and `isValidCnpj` accept. A separator inside a group, a group of any other size, a run of
+ * separators between two groups (ISO 13616 prints a single one) or any character outside letters
+ * and digits makes the value something other than an IBAN, so it is rejected instead of stripped.
  */
-export const IBAN_FORMAT_REGEX = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
+export const IBAN_FORMAT_REGEX =
+	/^[A-Za-z0-9]{4}(?:[\s.\-/]?[A-Za-z0-9]{4})*(?:[\s.\-/]?[A-Za-z0-9]{1,3})?$/;

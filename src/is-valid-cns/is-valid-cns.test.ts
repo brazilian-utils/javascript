@@ -44,6 +44,11 @@ describe("isValidCns", () => {
 			expect(isValidCns([])).toBe(false);
 		});
 
+		test("when it is an array whose text reads as a valid card", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCns(["123456789010000"])).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidCns("")).toBe(false);
 		});
@@ -120,6 +125,13 @@ describe("isValidCns", () => {
 
 		test("for a definitive CNS with a dotted mask", () => {
 			expect(isValidCns("123.4567.8901.0000")).toBe(true);
+		});
+
+		test("for a definitive CNS split by the other interchangeable separators", () => {
+			expect(isValidCns("123-4567-8901-0000")).toBe(true);
+			expect(isValidCns("123/4567/8901/0000")).toBe(true);
+			expect(isValidCns("123.4567-8901/0000")).toBe(true);
+			expect(isValidCns("123 - 4567 8901 0000")).toBe(true);
 		});
 
 		test("for a definitive CNS with leading and trailing whitespace", () => {

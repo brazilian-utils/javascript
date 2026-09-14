@@ -56,6 +56,17 @@ describe("isValidNfeKey", () => {
 			expect(isValidNfeKey("3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458")).toBe(true);
 		});
 
+		test("when the printed groups of 4 are split by any of the mask characters", () => {
+			expect(isValidNfeKey("3517.0458.7165.2300.0119.5500.1000.0000.1210.0012.3458")).toBe(true);
+			expect(isValidNfeKey("3517-0458-7165-2300-0119-5500-1000-0000-1210-0012-3458")).toBe(true);
+			expect(isValidNfeKey("3517/0458/7165/2300/0119/5500/1000/0000/1210/0012/3458")).toBe(true);
+		});
+
+		test("when the mask characters are mixed and a run of them separates two groups", () => {
+			expect(isValidNfeKey("3517.0458-7165/2300 0119 5500 1000 0000 1210 0012 3458")).toBe(true);
+			expect(isValidNfeKey("3517 - 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458")).toBe(true);
+		});
+
 		test("when it has the NFe prefix and a whitespace mask combined", () => {
 			expect(isValidNfeKey("NFe 3512 0859 5972 4500 0190 5500 0000 0095 8317 1004 0056")).toBe(
 				true,
@@ -110,6 +121,21 @@ describe("isValidNfeKey", () => {
 		test("when it does not have 44 digits", () => {
 			expect(isValidNfeKey(VALID_B.slice(0, 43))).toBe(false);
 			expect(isValidNfeKey(`${VALID_B}9`)).toBe(false);
+		});
+
+		test("when it has whole groups of 4 digits but not the 44 of a key", () => {
+			expect(isValidNfeKey(VALID_B.slice(0, 40))).toBe(false);
+			expect(isValidNfeKey(`${VALID_B}9999`)).toBe(false);
+		});
+
+		test("when a separator falls inside a printed group of 4 digits", () => {
+			expect(isValidNfeKey("351 70458716523000119550010000000121000123458")).toBe(false);
+			expect(isValidNfeKey("3517 0458 7165 2300 0119 5500 1000 0000 1210 00123 458")).toBe(false);
+		});
+
+		test("when the groups are split by a character outside the mask", () => {
+			expect(isValidNfeKey("3517#0458#7165#2300#0119#5500#1000#0000#1210#0012#3458")).toBe(false);
+			expect(isValidNfeKey("3517,0458,7165,2300,0119,5500,1000,0000,1210,0012,3458")).toBe(false);
 		});
 
 		test("when the cUF is not a valid IBGE UF code", () => {
@@ -224,14 +250,35 @@ describe("isValidNfeKey", () => {
 			);
 		});
 
-		test("should ignore whitespace anywhere between the digits", () => {
+		test("should ignore any mask character placed at a printed group boundary", () => {
 			fc.assert(
-				fc.property(fc.integer({ min: 1, max: 43 }), (index) => {
-					const masked = `${NFE_KEY.slice(0, index)} ${NFE_KEY.slice(index)}`;
+				fc.property(
+					fc.integer({ min: 1, max: 10 }),
+					fc.constantFrom(" ", ".", "-", "/"),
+					(group, separator) => {
+						const index = group * 4;
+						const masked = `${NFE_KEY.slice(0, index)}${separator}${NFE_KEY.slice(index)}`;
 
-					expect(isValidNfeKey(masked)).toBe(true);
-					expect(isValidNfeKey(`NFe${masked}`)).toBe(true);
-				}),
+						expect(isValidNfeKey(masked)).toBe(true);
+						expect(isValidNfeKey(`NFe${masked}`)).toBe(true);
+					},
+				),
+			);
+		});
+
+		test("should reject a mask character placed anywhere but a printed group boundary", () => {
+			fc.assert(
+				fc.property(
+					fc.integer({ min: 1, max: 43 }),
+					fc.constantFrom(" ", ".", "-", "/"),
+					(index, separator) => {
+						fc.pre(index % 4 !== 0);
+
+						const masked = `${NFE_KEY.slice(0, index)}${separator}${NFE_KEY.slice(index)}`;
+
+						expect(isValidNfeKey(masked)).toBe(false);
+					},
+				),
 			);
 		});
 
