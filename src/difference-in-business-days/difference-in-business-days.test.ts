@@ -1,7 +1,6 @@
 import * as fc from "fast-check";
 
 import {
-	anyBusinessDayDate,
 	anyBusinessDayOptions,
 	businessDayDates,
 	PROTOTYPE_KEYS,
@@ -169,9 +168,17 @@ describe("differenceInBusinessDays", () => {
 		const amounts = fc.integer({ min: -100, max: 100 });
 
 		test("should never throw, regardless of the input, prototype chain state codes included", () => {
+			// The walk visits every day between the two dates, so the dates that are dates stay inside a
+			// few years: a pair a century apart is thousands of iterations per run, which is what the
+			// other properties already cover and what made this one time out under mutation testing.
+			const anyNearDate = fc.oneof(
+				fc.date({ min: new Date(2020, 0, 1), max: new Date(2026, 11, 31), noInvalidDate: true }),
+				fc.anything(),
+			);
+
 			expectNeverThrowsWithArguments(
 				differenceInBusinessDays,
-				fc.tuple(anyBusinessDayDate, anyBusinessDayDate, anyBusinessDayOptions),
+				fc.tuple(anyNearDate, anyNearDate, anyBusinessDayOptions),
 			);
 		});
 
