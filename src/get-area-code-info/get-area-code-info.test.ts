@@ -14,7 +14,8 @@ describe("getAreaCodeInfo", () => {
 			areaCode: 11,
 			stateCode: "SP",
 			stateName: "São Paulo",
-			region: "Sudeste",
+			regionCode: "SE",
+			regionName: "Sudeste",
 			stateCodes: ["SP"],
 		});
 	});
@@ -24,7 +25,8 @@ describe("getAreaCodeInfo", () => {
 			areaCode: 11,
 			stateCode: "SP",
 			stateName: "São Paulo",
-			region: "Sudeste",
+			regionCode: "SE",
+			regionName: "Sudeste",
 			stateCodes: ["SP"],
 		});
 	});
@@ -38,7 +40,8 @@ describe("getAreaCodeInfo", () => {
 			areaCode: 68,
 			stateCode: "AC",
 			stateName: "Acre",
-			region: "Norte",
+			regionCode: "N",
+			regionName: "Norte",
 			stateCodes: ["AC"],
 		});
 	});
@@ -48,7 +51,8 @@ describe("getAreaCodeInfo", () => {
 			areaCode: 61,
 			stateCode: "DF",
 			stateName: "Distrito Federal",
-			region: "Centro-Oeste",
+			regionCode: "CO",
+			regionName: "Centro-Oeste",
 			stateCodes: ["DF", "GO"],
 		});
 	});
@@ -178,7 +182,8 @@ describe("getAreaCodeInfo types", () => {
 			areaCode: number;
 			stateCode: StateCode;
 			stateName: StateName;
-			region: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
+			regionCode: "N" | "NE" | "CO" | "SE" | "S";
+			regionName: "Norte" | "Nordeste" | "Centro-Oeste" | "Sudeste" | "Sul";
 			stateCodes: StateCode[];
 		}>();
 	});

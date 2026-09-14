@@ -13,8 +13,10 @@ export type AreaCodeInfo = {
 	stateCode: StateCode;
 	/** The full name of the state the DDD belongs to, e.g. `"São Paulo"`. */
 	stateName: StateName;
+	/** The code of the region the state belongs to, e.g. `"SE"`. */
+	regionCode: State["regionCode"];
 	/** The full name of the region the state belongs to, e.g. `"Sudeste"`. */
-	region: State["regionName"];
+	regionName: State["regionName"];
 	/**
 	 * Every state the DDD serves, the primary `stateCode` first, e.g. `["SP"]` for 11 and
 	 * `["DF", "GO"]` for 61.
@@ -55,9 +57,15 @@ export type AreaCodeInfo = {
  *
  * @example
  * ```typescript
- * getAreaCodeInfo("11"); // { areaCode: 11, stateCode: "SP", stateName: "São Paulo", region: "Sudeste", stateCodes: ["SP"] }
- * getAreaCodeInfo(21); // { areaCode: 21, stateCode: "RJ", stateName: "Rio de Janeiro", region: "Sudeste", stateCodes: ["RJ"] }
- * getAreaCodeInfo("61"); // { areaCode: 61, stateCode: "DF", stateName: "Distrito Federal", region: "Centro-Oeste", stateCodes: ["DF", "GO"] }
+ * getAreaCodeInfo("11");
+ * // { areaCode: 11, stateCode: "SP", stateName: "São Paulo", regionCode: "SE", regionName: "Sudeste", stateCodes: ["SP"] }
+ *
+ * getAreaCodeInfo(21);
+ * // { areaCode: 21, stateCode: "RJ", stateName: "Rio de Janeiro", regionCode: "SE", regionName: "Sudeste", stateCodes: ["RJ"] }
+ *
+ * getAreaCodeInfo("61");
+ * // { areaCode: 61, stateCode: "DF", stateName: "Distrito Federal", regionCode: "CO", regionName: "Centro-Oeste", stateCodes: ["DF", "GO"] }
+ *
  * getAreaCodeInfo("00"); // null
  * getAreaCodeInfo(-11); // null
  * ```
@@ -82,7 +90,8 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 		areaCode: numericAreaCode,
 		stateCode,
 		stateName: state.name,
-		region: state.regionName,
+		regionCode: state.regionCode,
+		regionName: state.regionName,
 		stateCodes: [stateCode, ...(AREA_CODE_SECONDARY_STATES[numericAreaCode] ?? [])],
 	};
 };

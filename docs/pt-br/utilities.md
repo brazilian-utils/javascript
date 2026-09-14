@@ -446,13 +446,13 @@ Retorna o estado (e a região) a que um DDD brasileiro pertence, dentre os 67 DD
 import { getAreaCodeInfo } from '@brazilian-utils/brazilian-utils';
 
 getAreaCodeInfo('11');
-// { areaCode: 11, stateCode: 'SP', stateName: 'São Paulo', region: 'Sudeste', stateCodes: ['SP'] }
+// { areaCode: 11, stateCode: 'SP', stateName: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', stateCodes: ['SP'] }
 
 getAreaCodeInfo(21);
-// { areaCode: 21, stateCode: 'RJ', stateName: 'Rio de Janeiro', region: 'Sudeste', stateCodes: ['RJ'] }
+// { areaCode: 21, stateCode: 'RJ', stateName: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', stateCodes: ['RJ'] }
 
 getAreaCodeInfo('61');
-// { areaCode: 61, stateCode: 'DF', stateName: 'Distrito Federal', region: 'Centro-Oeste', stateCodes: ['DF', 'GO'] }
+// { areaCode: 61, stateCode: 'DF', stateName: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', stateCodes: ['DF', 'GO'] }
 
 getAreaCodeInfo('00'); // null
 getAreaCodeInfo(-11); // null
