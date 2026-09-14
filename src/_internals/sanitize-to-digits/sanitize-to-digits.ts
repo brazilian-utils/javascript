@@ -1,5 +1,8 @@
+import { toStringSafe } from "../to-string-safe/to-string-safe";
+
 /**
- * Sanitizes the input value by removing all non-digit characters.
+ * Sanitizes the input value by removing all non-digit characters. A value with no string
+ * conversion (an object with a null prototype) reads as `""` instead of throwing.
  *
  * @param {string|number} value - The input value to be sanitized. It can be a string or a number.
  * @returns {string} A string containing only the digit characters from the input value.
@@ -13,4 +16,4 @@
  * ```
  */
 export const sanitizeToDigits = (value: string | number): string =>
-	value.toString().replaceAll(/\D/g, "");
+	toStringSafe(value).replaceAll(/\D/g, "");
