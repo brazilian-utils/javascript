@@ -37,7 +37,7 @@ import {
 	type GenerateCnpjOptions,
 	type GenerateLicensePlateFormat,
 	type GeneratePhoneType,
-	type GeneratePixPayloadParams,
+	type GeneratePixPayloadOptions,
 	type GenerateProcessoJuridicoOptions,
 	type GetAddressInfoByCepOptions,
 	type GetBoletoInfoOptions,
@@ -293,7 +293,7 @@ describe("Public API", () => {
 			GenerateCnpjOptions: GenerateCnpjOptions;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;
 			GeneratePhoneType: GeneratePhoneType;
-			GeneratePixPayloadParams: GeneratePixPayloadParams;
+			GeneratePixPayloadOptions: GeneratePixPayloadOptions;
 			GenerateProcessoJuridicoOptions: GenerateProcessoJuridicoOptions;
 			GetAddressInfoByCepOptions: GetAddressInfoByCepOptions;
 			GetBoletoInfoOptions: GetBoletoInfoOptions;

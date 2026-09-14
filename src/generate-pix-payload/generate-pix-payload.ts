@@ -43,8 +43,8 @@ import {
 	TXID_REGEX,
 } from "./constants";
 
-/** The parameters `generatePixPayload` takes to build a Pix BR Code. */
-export type GeneratePixPayloadParams = {
+/** The options `generatePixPayload` takes to build a Pix BR Code. */
+export type GeneratePixPayloadOptions = {
 	/** The Pix key of the receiver, in any accepted form. Required unless `url` is given. */
 	key?: string;
 	/**
@@ -168,7 +168,7 @@ const resolveFormattedAmount = (
  * does not survive that round trip (`0.005`, `123.456`) is refused rather than rounded into a
  * payload that asks the payer for a different sum.
  *
- * @param {GeneratePixPayloadParams} params - The parameters of the payload.
+ * @param {GeneratePixPayloadOptions} params - The parameters of the payload.
  * @param {string} [params.key] - The Pix key of the receiver. Required unless `url` is given.
  * @param {string} [params.url] - The PSP location of a dynamic payload. Required unless `key`
  * is given.
@@ -208,7 +208,7 @@ const resolveFormattedAmount = (
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
  * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
-export const generatePixPayload = (params: GeneratePixPayloadParams): string | null => {
+export const generatePixPayload = (params: GeneratePixPayloadOptions): string | null => {
 	if (isNullish(params) || typeof params !== "object") return null;
 
 	const { key: keyInput, url: urlInput } = params;

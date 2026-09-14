@@ -165,7 +165,7 @@ describe("generateBoleto", () => {
 					const value = generateBoleto({ type });
 					const info = getBoletoInfo(value);
 
-					expect(info).toBeDefined();
+					expect(info).not.toBeNull();
 					expect(info?.bankCode).toBe(type === "arrecadacao" ? "" : value.slice(0, 3));
 				}),
 			);

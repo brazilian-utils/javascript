@@ -1,4 +1,5 @@
 import { DATA, type StateCode } from "../_internals/constants/states";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import {
 	CRC_REGEX,
@@ -12,8 +13,10 @@ import {
 
 export type { StateCode } from "../_internals/constants/states";
 
-/** The options `isValidRegistroProfissional` takes: the professional council and, optionally, the UF the registration must belong to. */
+/** The registration `isValidRegistroProfissional` checks: the number, the council that issued it and, optionally, the UF it must belong to. */
 export type IsValidRegistroProfissionalOptions = {
+	/** The registration number to be validated, e.g. `"123456/SP"`. */
+	value: string;
 	/** The professional council that issued the registration number. */
 	council: RegistroProfissionalCouncil;
 	/** The UF the registration is expected to belong to. Ignored for `"CRP"` (see below). */
@@ -42,7 +45,7 @@ const isKnownCrpRegion = (value: string): boolean => {
  *
  * This is a structural check only: it validates the digit count and, for the councils whose
  * number embeds the UF, that the UF is a real Brazilian state code, optionally matching
- * `options.stateCode`. It never computes or asserts a check digit, even for CRC, whose format
+ * `params.stateCode`. It never computes or asserts a check digit, even for CRC, whose format
  * includes one (the digit is only checked for presence and shape).
  *
  * Supported councils and what is validated:
@@ -52,7 +55,7 @@ const isKnownCrpRegion = (value: string): boolean => {
  * - `"CRP"` (Conselho Regional de Psicologia): 2 digit regional code + 4 to 6 digits, e.g.
  *   `"06/12345"`. The regional code must be one of the 24 Conselhos Regionais of the CFP
  *   system, CRP-01 to CRP-24. It is not a literal UF (some regions cover more than one state),
- *   so `options.stateCode` is ignored for this council.
+ *   so `params.stateCode` is ignored for this council.
  * - `"CRC"` (Conselho Regional de Contabilidade): UF + 6 digits + the tipo de registro (`"O"`
  *   Originário or `"P"` Provisório) + 1 check digit whose value is not verified, e.g.
  *   `"SP-123456/O-3"`. The letter says nothing about the professional category: the Manual de
@@ -61,7 +64,7 @@ const isKnownCrpRegion = (value: string): boolean => {
  *   appending `"T"` or `"S"` and the UF of the destination CRC **after** the check digit, as the
  *   Resolução CFC nº 1.707/2023, art. 5º, parágrafo único, and the Manual's own examples
  *   (`"SP-123456/O-3 T-MG"`, `"TO-654321/P-8 T-SC"`, `"PI-111222/O-5 S-AC"`) put it. Both UFs
- *   have to be real state codes; `options.stateCode` is compared against the originating one,
+ *   have to be real state codes; `params.stateCode` is compared against the originating one,
  *   the UF the número do Registro Originário belongs to.
  *
  * CREA (Conselho Regional de Engenharia e Agronomia) is not supported: since the 2016 national
@@ -78,23 +81,28 @@ const isKnownCrpRegion = (value: string): boolean => {
  * prefixed CRM for foreign-trained physicians and a trailing `P` for inscrição provisória,
  * neither of which the accepted shape can express.
  *
- * @param {string} value - The registration number to be validated.
- * @param {IsValidRegistroProfissionalOptions} options - The validation options.
- * @param {RegistroProfissionalCouncil} options.council - The issuing council.
- * @param {string} [options.stateCode] - The expected UF, ignored for `"CRP"`.
+ * Everything it needs travels in a single object, the shape `isValidBankAccount` takes: a
+ * registration number means nothing without the council that issued it, so the two are read
+ * together. A value that is not an object, or one missing `value` or `council`, is `false` like
+ * any other registration it cannot recognise.
+ *
+ * @param {IsValidRegistroProfissionalOptions} params - The registration to be validated.
+ * @param {string} params.value - The registration number, e.g. `"123456/SP"`.
+ * @param {RegistroProfissionalCouncil} params.council - The issuing council.
+ * @param {string} [params.stateCode] - The expected UF, ignored for `"CRP"`.
  * @returns {boolean} True if the value has the structure of a registration number for the
  * given council, false otherwise.
  *
  * @example
  * ```typescript
- * isValidRegistroProfissional("123456/SP", { council: "OAB" }); // true
- * isValidRegistroProfissional("123456-SP", { council: "OAB", stateCode: "SP" }); // true
- * isValidRegistroProfissional("123456-RJ", { council: "OAB", stateCode: "SP" }); // false (UF mismatch)
- * isValidRegistroProfissional("06/12345", { council: "CRP" }); // true
- * isValidRegistroProfissional("SP-123456/O-3", { council: "CRC" }); // true
- * isValidRegistroProfissional("SP-123456/O-3 T-MG", { council: "CRC" }); // true (transferido)
- * isValidRegistroProfissional("SP-123456/T-3", { council: "CRC" }); // false ("T" is not a tipo)
- * isValidRegistroProfissional("123456", { council: "OAB" }); // false (no UF)
+ * isValidRegistroProfissional({ value: "123456/SP", council: "OAB" }); // true
+ * isValidRegistroProfissional({ value: "123456-SP", council: "OAB", stateCode: "SP" }); // true
+ * isValidRegistroProfissional({ value: "123456-RJ", council: "OAB", stateCode: "SP" }); // false (UF mismatch)
+ * isValidRegistroProfissional({ value: "06/12345", council: "CRP" }); // true
+ * isValidRegistroProfissional({ value: "SP-123456/O-3", council: "CRC" }); // true
+ * isValidRegistroProfissional({ value: "SP-123456/O-3 T-MG", council: "CRC" }); // true (transferido)
+ * isValidRegistroProfissional({ value: "SP-123456/T-3", council: "CRC" }); // false ("T" is not a tipo)
+ * isValidRegistroProfissional({ value: "123456", council: "OAB" }); // false (no UF)
  * ```
  *
  * @see Official: https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf
@@ -122,16 +130,17 @@ const isKnownCrpRegion = (value: string): boolean => {
  * which publishes no format for the registration number and the UF.
  */
 export const isValidRegistroProfissional = (
-	value: string,
-	options: IsValidRegistroProfissionalOptions,
+	params: IsValidRegistroProfissionalOptions,
 ): boolean => {
+	if (isNullish(params)) return false;
+
+	const { value, council, stateCode } = params;
+
 	if (typeof value !== "string") return false;
 
-	if (typeof options !== "object" || options === null) return false;
+	if (!Object.hasOwn(REGEX_BY_COUNCIL, council)) return false;
 
-	if (!Object.hasOwn(REGEX_BY_COUNCIL, options.council)) return false;
-
-	const regex = REGEX_BY_COUNCIL[options.council];
+	const regex = REGEX_BY_COUNCIL[council];
 
 	const match = regex.exec(sanitizeToAlphanumeric(value));
 
@@ -147,5 +156,5 @@ export const isValidRegistroProfissional = (
 
 	if (!isKnownStateCode(uf)) return false;
 
-	return !options.stateCode || uf === options.stateCode;
+	return !stateCode || uf === stateCode;
 };

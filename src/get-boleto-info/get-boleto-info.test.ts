@@ -31,13 +31,22 @@ const ARRECADACAO_LINE = "846100000005246100291102005460339004695895061080";
 const ARRECADACAO_BARCODE = "84610000000246100291100054603390069589506108";
 
 describe("getBoletoInfo", () => {
-	describe("should return undefined", () => {
+	describe("should return null", () => {
 		test("when boleto is empty string", () => {
-			expect(getBoletoInfo("")).toBeUndefined();
+			expect(getBoletoInfo("")).toBeNull();
 		});
 
 		test("when boleto is invalid", () => {
-			expect(getBoletoInfo("00190000090114971860168524522114775860000102656")).toBeUndefined();
+			expect(getBoletoInfo("00190000090114971860168524522114775860000102656")).toBeNull();
+		});
+
+		test("when boleto is not a string, never undefined, as every other getter answers", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(getBoletoInfo(null)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(getBoletoInfo()).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(getBoletoInfo(123)).toBeNull();
 		});
 	});
 
@@ -224,17 +233,17 @@ describe("getBoletoInfo", () => {
 		test("should return a value exactly when the bank slip is valid", () => {
 			fc.assert(
 				fc.property(fc.string(), (value) => {
-					expect(getBoletoInfo(value) !== undefined).toBe(isValidBoleto(value));
+					expect(getBoletoInfo(value) !== null).toBe(isValidBoleto(value));
 				}),
 			);
 		});
 
-		test("should never throw and always return an object or undefined", () => {
+		test("should never throw and always return an object or null", () => {
 			fc.assert(
 				fc.property(fc.anything(), (value) => {
 					const info = getBoletoInfo(value as string);
 
-					expect(info === undefined || typeof info === "object").toBe(true);
+					expect(info === null || typeof info === "object").toBe(true);
 				}),
 			);
 		});
@@ -242,10 +251,10 @@ describe("getBoletoInfo", () => {
 });
 
 describe("getBoletoInfo types", () => {
-	test("should take a string, optional options, and return boleto info or undefined", () => {
+	test("should take a string, optional options, and return boleto info or null", () => {
 		expectTypeOf(getBoletoInfo).parameter(0).toEqualTypeOf<string>();
 		expectTypeOf(getBoletoInfo).parameter(1).toEqualTypeOf<GetBoletoInfoOptions | undefined>();
-		expectTypeOf(getBoletoInfo).returns.toEqualTypeOf<BoletoInfo | undefined>();
+		expectTypeOf(getBoletoInfo).returns.toEqualTypeOf<BoletoInfo | null>();
 	});
 
 	test("should restrict referenceDate to a Date", () => {

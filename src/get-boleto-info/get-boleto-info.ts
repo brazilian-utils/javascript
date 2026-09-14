@@ -83,6 +83,10 @@ export type GetBoletoInfoOptions = {
 /**
  * Extracts information from a Brazilian bank slip (boleto).
  *
+ * The value is checked with `isValidBoleto` first, so an invalid bank slip gives `null` rather
+ * than a partial result, the way every other getter of this package answers a lookup it cannot
+ * resolve (`getFormatLicensePlate`, `getMunicipality`).
+ *
  * Supports the 47 digit "cobrança bancária" linha digitável and, additionally, the
  * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
  * barcode, both starting with `8`. Arrecadação bank slips also return `type`, `segment`,
@@ -101,7 +105,7 @@ export type GetBoletoInfoOptions = {
  * @param {string} value - The boleto digitable line (can be with or without mask).
  * @param {GetBoletoInfoOptions} [options] - Optional options.
  * @param {Date} options.referenceDate - Date used to resolve the "fator de vencimento" cycle. Defaults to now.
- * @returns {BoletoInfo | undefined} An object containing amount (in cents), expirationDate, and bankCode, or undefined if the boleto is invalid.
+ * @returns {BoletoInfo | null} An object containing amount (in cents), expirationDate, and bankCode, or null if the boleto is invalid.
  *
  * @example
  * ```typescript
@@ -112,6 +116,8 @@ export type GetBoletoInfoOptions = {
  *
  * getBoletoInfo('846100000005246100291102005460339004695895061080');
  * // { amount: 2461, expirationDate: null, bankCode: '', type: 'arrecadacao', segment: 4, value: 24.61, hasEffectiveValue: true }
+ *
+ * getBoletoInfo('invalid'); // null
  * ```
  *
  * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
@@ -129,11 +135,8 @@ export type GetBoletoInfoOptions = {
  * Bradesco "Layout da Cobrança" manual: base date 07/10/1997, 03/07/2000 = 1000, 21/02/2025 = 9999
  * and a restart at 1000 on 22/02/2025.
  */
-export const getBoletoInfo = (
-	value: string,
-	options?: GetBoletoInfoOptions,
-): BoletoInfo | undefined => {
-	if (!isValidBoleto(value)) return undefined;
+export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): BoletoInfo | null => {
+	if (!isValidBoleto(value)) return null;
 
 	const sanitized = sanitizeToDigits(value);
 

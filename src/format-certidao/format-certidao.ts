@@ -13,12 +13,12 @@ export type FormatCertidaoOptions = {
  * Formats the matrícula of a certidão de registro civil into the printed mask of the norm, the
  * 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
  *
- * The parameter is typed as a string because the 32 digits of a matrícula are more than a
- * JavaScript number can hold exactly. At runtime the value is read for its digits and masked as
- * far as they go, like in every formatter of this package, so a partial matrícula still being
- * typed is masked progressively and a number is read as the string of its digits.
+ * A number is accepted and read as the string of its digits, like in `formatCpf`, but a full 32
+ * digit matrícula has to be a string: that many digits are more than a JavaScript number can hold
+ * exactly. At runtime the value is read for its digits and masked as far as they go, like in every
+ * formatter of this package, so a partial matrícula still being typed is masked progressively.
  *
- * @param {string} value - The matrícula value to be formatted.
+ * @param {string|number} value - The matrícula value to be formatted.
  * @param {FormatCertidaoOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - If true, pads the value with leading zeros if necessary.
  * @returns {string} The formatted matrícula in the pattern "000000 00 00 0000 0 00000 000 0000000 00".
@@ -33,6 +33,8 @@ export type FormatCertidaoOptions = {
  *
  * formatCertidao("1552010100020112000012087", { pad: true });
  * // "000000 01 55 2010 1 00020 112 0000120 87"
+ *
+ * formatCertidao(104539015520); // "104539 01 55 20" (a number is read as the string of its digits)
  * ```
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
@@ -59,7 +61,7 @@ export type FormatCertidaoOptions = {
  * @see Based on: https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php
  * Third reference implementation agreeing on the weights and on the remainder of 10 read as 1.
  */
-export const formatCertidao = (value: string, options?: FormatCertidaoOptions): string =>
+export const formatCertidao = (value: string | number, options?: FormatCertidaoOptions): string =>
 	isNullish(value)
 		? ""
 		: format({

@@ -6,7 +6,7 @@ import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
 import { type PixPointOfInitiation, parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
-import { type GeneratePixPayloadParams, generatePixPayload } from "./generate-pix-payload";
+import { type GeneratePixPayloadOptions, generatePixPayload } from "./generate-pix-payload";
 
 const BASE = {
 	key: "123e4567-e12b-12d1-a456-426655440000",
@@ -381,7 +381,7 @@ describe("generatePixPayload", () => {
 	describe("should round-trip", () => {
 		const ROUND_TRIPS: {
 			name: string;
-			build: (index: number) => GeneratePixPayloadParams;
+			build: (index: number) => GeneratePixPayloadOptions;
 			pointOfInitiation: PixPointOfInitiation;
 		}[] = [
 			{
@@ -521,12 +521,12 @@ describe("generatePixPayload", () => {
 
 describe("generatePixPayload types", () => {
 	test("should take Pix payload params and return a string or null", () => {
-		expectTypeOf(generatePixPayload).parameter(0).toEqualTypeOf<GeneratePixPayloadParams>();
+		expectTypeOf(generatePixPayload).parameter(0).toEqualTypeOf<GeneratePixPayloadOptions>();
 		expectTypeOf(generatePixPayload).returns.toEqualTypeOf<string | null>();
 	});
 
 	test("should restrict the params to the documented fields", () => {
-		expectTypeOf<GeneratePixPayloadParams>().toEqualTypeOf<{
+		expectTypeOf<GeneratePixPayloadOptions>().toEqualTypeOf<{
 			key?: string;
 			url?: string;
 			merchantName: string;

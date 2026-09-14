@@ -57,7 +57,7 @@ export { generatePassport } from "./generate-passport/generate-passport";
 export { generatePhone, type GeneratePhoneType } from "./generate-phone/generate-phone";
 export { generatePis } from "./generate-pis/generate-pis";
 export {
-	type GeneratePixPayloadParams,
+	type GeneratePixPayloadOptions,
 	generatePixPayload,
 } from "./generate-pix-payload/generate-pix-payload";
 export {

@@ -61,8 +61,7 @@ describe("formatCertidao", () => {
 	});
 
 	describe("should read a number as the string of its digits, like formatCpf", () => {
-		test("masking it as far as it goes; the parameter is typed as a string only because 32 digits do not fit a number", () => {
-			// @ts-expect-error: intentionally invalid input
+		test("masking it as far as it goes; a full 32 digit matrícula still has to be a string", () => {
 			expect(formatCertidao(104_539_015_520)).toBe("104539 01 55 20");
 		});
 	});
@@ -102,7 +101,6 @@ describe("formatCertidao", () => {
 			fc.assert(
 				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
 					expect(typeof formatCertidao(text)).toBe("string");
-					// @ts-expect-error: intentionally invalid input
 					expect(typeof formatCertidao(number)).toBe("string");
 				}),
 			);
@@ -111,8 +109,8 @@ describe("formatCertidao", () => {
 });
 
 describe("formatCertidao types", () => {
-	test("should take a string, optional options, and return a string", () => {
-		expectTypeOf(formatCertidao).parameter(0).toEqualTypeOf<string>();
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatCertidao).parameter(0).toEqualTypeOf<string | number>();
 		expectTypeOf(formatCertidao).parameter(1).toEqualTypeOf<FormatCertidaoOptions | undefined>();
 		expectTypeOf<FormatCertidaoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 		expectTypeOf(formatCertidao).returns.toEqualTypeOf<string>();
