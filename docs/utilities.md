@@ -1050,7 +1050,7 @@ getTimezoneByState('ZZ'); // null
 
 ## getCities
 
-Get Brazilian cities. Returns all cities if no state is provided, or cities from a specific state. Each call returns a fresh array, so mutating the result never affects subsequent calls. An unknown state code (or a non-`StateCode` value) returns an empty array instead of throwing, except for a falsy one: `getCities(null)` and `getCities('')` are read as "no state given" and return every city, where the stricter `getMunicipalities` returns `[]` for them. The state code is matched exactly, case included: `getCities('sp')` returns `[]` where `getCities('SP')` returns the 645 São Paulo cities. `getCities` and `getMunicipalities` are the only state-taking lookups that are case-sensitive; `getStateNameByCode`, `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
+Get Brazilian cities. **Deprecated:** use `getMunicipalities` instead. Returns all cities if no state is provided, or cities from a specific state. Each call returns a fresh array, so mutating the result never affects subsequent calls. An unknown state code (or a non-`StateCode` value) returns an empty array instead of throwing, except for a falsy one: `getCities(null)` and `getCities('')` are read as "no state given" and return every city, where the stricter `getMunicipalities` returns `[]` for them. The state code is matched exactly, case included: `getCities('sp')` returns `[]` where `getCities('SP')` returns the 645 São Paulo cities. `getCities` and `getMunicipalities` are the only state-taking lookups that are case-sensitive; `getStateNameByCode`, `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -1445,7 +1445,7 @@ generatePis(); // '91077906857'
 
 ## getMunicipality
 
-Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. A single function handles both directions, based on whether `options` has a `code` or a `municipalityName`/`uf`. `code` accepts both `string` and `number` input and must be exactly 7 digits, otherwise the function resolves to `null`. A `code` given as a number must be a non-negative integer: a sign and a decimal point are not digits, so `-3550308` and `355030.8` resolve to `null` instead of being read as `3550308`. Resolution is entirely offline, from a bundled IBGE dataset: no network request is made. The municipality name match ignores accents and casing, and every run of whitespace collapses into a single space, so `'sao  paulo'` matches `'São Paulo'` while a name written without the space does not; the casing is folded to upper case, the direction Unicode expands `'ß'` to `'SS'` in, so `'Paßos'` matches `'Passos'`. An unknown municipality, an unknown UF or invalid input all resolve to `null`. The `[name, uf]` pair is a fresh array on every call, so mutating the result never affects subsequent lookups.
+Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. **Deprecated:** use `getMunicipalityByCode` instead, which is synchronous and offline; matching a municipality by name is up to the application, over `getMunicipalities`. A single function handles both directions, based on whether `options` has a `code` or a `municipalityName`/`uf`. `code` accepts both `string` and `number` input and must be exactly 7 digits, otherwise the function resolves to `null`. A `code` given as a number must be a non-negative integer: a sign and a decimal point are not digits, so `-3550308` and `355030.8` resolve to `null` instead of being read as `3550308`. Resolution is entirely offline, from a bundled IBGE dataset: no network request is made. The municipality name match ignores accents and casing, and every run of whitespace collapses into a single space, so `'sao  paulo'` matches `'São Paulo'` while a name written without the space does not; the casing is folded to upper case, the direction Unicode expands `'ß'` to `'SS'` in, so `'Paßos'` matches `'Passos'`. An unknown municipality, an unknown UF or invalid input all resolve to `null`. The `[name, uf]` pair is a fresh array on every call, so mutating the result never affects subsequent lookups.
 
 ```javascript
 import { getMunicipality } from '@brazilian-utils/brazilian-utils';
@@ -1539,7 +1539,6 @@ getMunicipalityByCode(3550308);
 getMunicipalityByCode('0000000'); // null (unknown code)
 getMunicipalityByCode('123'); // null (not 7 digits)
 ```
-
 ## isHoliday
 
 Check if a specific date is a Brazilian holiday. The check compares `targetDate`'s local calendar date (year/month/day as read locally), not its underlying UTC instant. Returns `false` when `targetDate` is missing or not a valid `Date`. An invalid `stateCode` is treated in two different ways: a string that is not a known state code is ignored and only national holidays are considered, the same as `getHolidays`, while a `stateCode` that is present and is not a string at all (a number, `null`, an object) is rejected and makes the call return `false` even for a national holiday.

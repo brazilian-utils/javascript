@@ -22,6 +22,8 @@ let allCitiesCache: string[] | undefined;
  * the only state-taking lookups that are case-sensitive; `getStateNameByCode`,
  * `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
  *
+ * @deprecated Use `getMunicipalities` instead.
+ *
  * @param {StateCode} [state] - The code of the Brazilian state to filter cities by. Optional.
  * @returns {string[]} An array of city names, sorted alphabetically. Returns an empty array if the state is not found.
  *

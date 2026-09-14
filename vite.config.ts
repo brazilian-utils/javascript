@@ -451,8 +451,17 @@ export default defineConfig({
 					"vitest/warn-todo": "off",
 				},
 			},
+			// The barrel re-exports every deprecated alias, and a deprecated util's own tests (plus
+			// the `getMunicipalities` property that cross-checks it against `getCities`) have to
+			// keep calling it for as long as it is still supported.
 			{
-				files: ["src/index.ts", "src/index.test.ts"],
+				files: [
+					"src/index.ts",
+					"src/index.test.ts",
+					"src/get-cities/get-cities.test.ts",
+					"src/get-municipalities/get-municipalities.test.ts",
+					"src/get-municipality/get-municipality.test.ts",
+				],
 				rules: {
 					"typescript/no-deprecated": "off",
 				},

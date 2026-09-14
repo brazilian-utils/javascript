@@ -1,8 +1,8 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/cities";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { removeAccents } from "../remove-accents/remove-accents";
 
 /** The `getMunicipality` query by IBGE municipality code. */
 export type GetMunicipalityByCodeOptions = {
@@ -22,9 +22,6 @@ export type GetMunicipalityByNameOptions = {
 export type GetMunicipalityOptions = GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions;
 
 let codeIndex: Map<string, [string, string]> | undefined;
-
-const normalizeName = (value: string): string =>
-	removeAccents(value).replaceAll(/\s+/g, " ").trim().toUpperCase();
 
 const getMunicipalityByCode = (code: string | number): [string, string] | null => {
 	if (!isLookupCode(code)) return null;
@@ -62,11 +59,11 @@ const getMunicipalityCodeByName = ({
 
 	if (!stateEntry) return null;
 
-	// `removeAccents` (and so `normalizeName`) already folds a non-string or empty
+	// `removeAccents` (and so `normalizeMunicipalityName`) already folds a non-string or empty
 	// `municipalityName` down to `""`, which no real municipality name normalizes to, so there is
 	// no need to pre-validate `municipalityName` here first.
-	const normalizedName = normalizeName(municipalityName);
-	const match = stateEntry[1].find(([name]) => normalizeName(name) === normalizedName);
+	const normalizedName = normalizeMunicipalityName(municipalityName);
+	const match = stateEntry[1].find(([name]) => normalizeMunicipalityName(name) === normalizedName);
 
 	return match ? match[1] : null;
 };
@@ -76,6 +73,9 @@ const getMunicipalityCodeByName = ({
  *
  * A `code` given as a number must be a non-negative integer: a sign and a decimal point are not
  * digits, so `-3550308` and `355030.8` are rejected instead of being read as `3550308`.
+ *
+ * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
+ * municipality by name is up to the application, over `getMunicipalities`.
  *
  * @param {GetMunicipalityByCodeOptions} options - The `{ code }` query.
  * @returns {Promise<[string, string] | null>} A fresh `[name, uf]` pair, which the caller owns
@@ -101,6 +101,9 @@ export function getMunicipality(
  * not, since only the runs that are there collapse. The casing is folded to upper case, the
  * direction Unicode expands `"ß"` to `"SS"` in, so `"Paßos"` matches `"Passos"`.
  *
+ * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
+ * municipality by name is up to the application, over `getMunicipalities`.
+ *
  * @param {GetMunicipalityByNameOptions} options - The `{ municipalityName, uf }` query.
  * @returns {Promise<string | null>} The 7 digit IBGE code, or null when the state code or the
  * municipality is unknown.
@@ -121,6 +124,9 @@ export function getMunicipality(options: GetMunicipalityByNameOptions): Promise<
  * Given a `code` it resolves the municipality name and its UF; given a `municipalityName` and a
  * `uf` it resolves the IBGE code. Validation failures and unknown municipalities are reported
  * as `null`.
+ *
+ * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
+ * municipality by name is up to the application, over `getMunicipalities`.
  *
  * @param {GetMunicipalityOptions} options - Either `{ code }` or `{ municipalityName, uf }`.
  * @returns {Promise<[string, string] | string | null>} The `[name, uf]` pair when looking up
