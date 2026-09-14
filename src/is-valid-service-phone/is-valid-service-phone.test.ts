@@ -150,6 +150,13 @@ describe("isValidServicePhone", () => {
 	});
 });
 
+describe("isValidServicePhone with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidServicePhone("08001234567".match(/\d/g))).toBe(false);
+	});
+});
+
 describe("isValidServicePhone types", () => {
 	test("should take a string and return a boolean", () => {
 		expectTypeOf(isValidServicePhone).parameter(0).toEqualTypeOf<string>();

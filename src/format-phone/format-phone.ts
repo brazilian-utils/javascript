@@ -5,7 +5,6 @@ import {
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 } from "../_internals/constants/service-phone";
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -138,8 +137,6 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const formatPhone = (value: string | number, options?: FormatPhoneOptions): string => {
-	if (isNullish(value)) return "";
-
 	const enhancedValue = sanitizeToDigits(value);
 
 	const serviceDigits = resolveServicePhoneDigits(value);

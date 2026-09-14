@@ -81,6 +81,15 @@ describe("formatCaepf", () => {
 	});
 });
 
+describe("formatCaepf with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCaepf(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCaepf(undefined, { pad: true })).toBe("");
+	});
+});
+
 describe("formatCaepf types", () => {
 	test("should take a string or number, optional options, and return a string", () => {
 		expectTypeOf(formatCaepf).parameter(0).toEqualTypeOf<string | number>();

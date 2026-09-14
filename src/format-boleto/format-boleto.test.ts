@@ -213,6 +213,15 @@ describe("formatBoleto", () => {
 	});
 });
 
+describe("formatBoleto with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatBoleto(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatBoleto(undefined, { pad: true })).toBe("");
+	});
+});
+
 describe("formatBoleto types", () => {
 	test("should take a string or number, optional options, and return a string", () => {
 		expectTypeOf(formatBoleto).parameter(0).toEqualTypeOf<string | number>();

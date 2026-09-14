@@ -1,6 +1,5 @@
 import { ARRECADACAO_LINE_LENGTH, ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /**
@@ -32,8 +31,6 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const parseBoleto = (value: string | number): string => {
-	if (isNullish(value)) return "";
-
 	const digits = sanitizeToDigits(value);
 
 	return digits.slice(

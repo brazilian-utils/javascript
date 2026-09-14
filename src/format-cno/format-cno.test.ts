@@ -69,6 +69,15 @@ describe("formatCno", () => {
 	});
 });
 
+describe("formatCno with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCno(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCno(undefined, { pad: true })).toBe("");
+	});
+});
+
 describe("formatCno types", () => {
 	test("should take a string or number, optional options, and return a string", () => {
 		expectTypeOf(formatCno).parameter(0).toEqualTypeOf<string | number>();

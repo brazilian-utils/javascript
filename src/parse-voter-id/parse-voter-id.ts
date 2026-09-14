@@ -1,5 +1,4 @@
 import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { EXTENDED_LENGTH, LENGTH } from "./constants";
 
@@ -30,8 +29,6 @@ import { EXTENDED_LENGTH, LENGTH } from "./constants";
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const parseVoterId = (value: string | number): string => {
-	if (isNullish(value)) return "";
-
 	const digits = sanitizeToDigits(value);
 
 	const federativeUnion = digits.slice(9, 11);

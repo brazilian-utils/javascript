@@ -62,8 +62,6 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const isValidBoleto = (value: string): boolean => {
-	if (typeof value !== "string") return false;
-
 	const digits = sanitizeToDigits(value);
 
 	if (digits.startsWith(ARRECADACAO_PRODUCT) && parseArrecadacao(digits)) return true;

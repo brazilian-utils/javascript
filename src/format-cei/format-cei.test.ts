@@ -77,6 +77,15 @@ describe("formatCei", () => {
 	});
 });
 
+describe("formatCei with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCei(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCei(undefined, { pad: true })).toBe("");
+	});
+});
+
 describe("formatCei types", () => {
 	test("should take a string or number, optional options, and return a string", () => {
 		expectTypeOf(formatCei).parameter(0).toEqualTypeOf<string | number>();

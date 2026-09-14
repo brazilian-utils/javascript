@@ -195,6 +195,15 @@ describe("formatCnpj", () => {
 	});
 });
 
+describe("formatCnpj with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCnpj(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCnpj(undefined, { pad: true })).toBe("");
+	});
+});
+
 describe("formatCnpj types", () => {
 	test("should take a string or number value and options and return a string", () => {
 		expectTypeOf(formatCnpj).parameter(0).toEqualTypeOf<string | number>();

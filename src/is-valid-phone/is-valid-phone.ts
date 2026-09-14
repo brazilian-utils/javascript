@@ -59,8 +59,6 @@ export type IsValidPhoneOptions = {
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidPhone = (value: string, options?: IsValidPhoneOptions): boolean => {
-	if (typeof value !== "string") return false;
-
 	const requested = options?.accept;
 	const accept: PhoneType[] = Array.isArray(requested) ? requested : DEFAULT_ACCEPT;
 

@@ -139,6 +139,15 @@ describe("formatCpf", () => {
 	});
 });
 
+describe("formatCpf with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCpf(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCpf(undefined, { pad: true })).toBe("");
+	});
+});
+
 describe("formatCpf types", () => {
 	test("should take a string or number value and options and return a string", () => {
 		expectTypeOf(formatCpf).parameter(0).toEqualTypeOf<string | number>();

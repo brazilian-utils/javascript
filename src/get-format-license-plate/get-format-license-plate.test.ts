@@ -46,6 +46,13 @@ describe("getFormatLicensePlate", () => {
 	});
 });
 
+describe("getFormatLicensePlate with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(getFormatLicensePlate(["A", "B", "C", "1", "D", "2", "3"])).toBeNull();
+	});
+});
+
 describe("getFormatLicensePlate types", () => {
 	test("should take a string and return a license plate format or null", () => {
 		expectTypeOf(getFormatLicensePlate).parameter(0).toEqualTypeOf<string>();

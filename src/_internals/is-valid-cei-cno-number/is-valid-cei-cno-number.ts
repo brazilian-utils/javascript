@@ -2,6 +2,7 @@ import { calculateCeiCheckDigit } from "../calculate-cei-check-digit/calculate-c
 import { CEI_BASE_LENGTH, CEI_FORMAT_REGEX } from "../constants/cei";
 import { isRepeatedDigits } from "../is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
+import { toStringSafe } from "../to-string-safe/to-string-safe";
 
 /**
  * Validates a number that follows the CEI (Cadastro Específico do INSS) numbering, which the
@@ -48,11 +49,9 @@ import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
  * Second, independent reference implementation agreeing with the first.
  */
 export const isValidCeiCnoNumber = (value: string | number): boolean => {
-	if (typeof value !== "string" && typeof value !== "number") return false;
-
 	const digits = sanitizeToDigits(value);
 
-	if (!CEI_FORMAT_REGEX.test(String(value).trim())) return false;
+	if (!CEI_FORMAT_REGEX.test(toStringSafe(value).trim())) return false;
 
 	if (isRepeatedDigits(digits)) return false;
 

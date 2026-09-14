@@ -170,6 +170,13 @@ describe("isValidBoleto", () => {
 	});
 });
 
+describe("isValidBoleto with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidBoleto("34191790010104351004791020150008291070026000".match(/\d/g))).toBe(false);
+	});
+});
+
 describe("isValidBoleto types", () => {
 	test("should take a string and return a boolean", () => {
 		expectTypeOf(isValidBoleto).parameter(0).toEqualTypeOf<string>();

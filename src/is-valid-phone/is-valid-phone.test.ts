@@ -158,6 +158,13 @@ describe("isValidPhone", () => {
 	});
 });
 
+describe("isValidPhone with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPhone("11987654321".match(/\d/g))).toBe(false);
+	});
+});
+
 describe("isValidPhone types", () => {
 	test("should take a string, optional options, and return a boolean", () => {
 		expectTypeOf(isValidPhone).parameter(0).toEqualTypeOf<string>();
