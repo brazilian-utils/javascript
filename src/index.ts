@@ -207,25 +207,27 @@ export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-p
 export { isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
 export { parseBoleto } from "./parse-boleto/parse-boleto";
+export { parseCaepf } from "./parse-caepf/parse-caepf";
+export { parseCbo } from "./parse-cbo/parse-cbo";
+export { parseCei } from "./parse-cei/parse-cei";
 export { parseCep } from "./parse-cep/parse-cep";
-export { type Certidao, type CertidaoType, parseCertidao } from "./parse-certidao/parse-certidao";
+export { parseCertidao } from "./parse-certidao/parse-certidao";
+export { parseCfop } from "./parse-cfop/parse-cfop";
+export { parseCnae } from "./parse-cnae/parse-cnae";
 export { parseCnh } from "./parse-cnh/parse-cnh";
+export { parseCno } from "./parse-cno/parse-cno";
 export { type ParseCnpjOptions, parseCnpj } from "./parse-cnpj/parse-cnpj";
+export { parseCns } from "./parse-cns/parse-cns";
 export { parseCpf } from "./parse-cpf/parse-cpf";
 export { type ParseCurrencyOptions, parseCurrency } from "./parse-currency/parse-currency";
-export { type Iban, parseIban } from "./parse-iban/parse-iban";
+export { parseIban } from "./parse-iban/parse-iban";
 export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
-export { type NfeKey, type NfeKeyModel, parseNfeKey } from "./parse-nfe-key/parse-nfe-key";
+export { parseNcm } from "./parse-ncm/parse-ncm";
+export { parseNfeKey } from "./parse-nfe-key/parse-nfe-key";
 export { parsePassport } from "./parse-passport/parse-passport";
 export { parsePhone } from "./parse-phone/parse-phone";
 export { parsePis } from "./parse-pis/parse-pis";
-export { type PixKey, type PixKeyType, parsePixKey } from "./parse-pix-key/parse-pix-key";
-export {
-	type PixPayload,
-	type PixPointOfInitiation,
-	parsePixPayload,
-} from "./parse-pix-payload/parse-pix-payload";
 export { parseProcessoJuridico } from "./parse-processo-juridico/parse-processo-juridico";
 export { parseVoterId } from "./parse-voter-id/parse-voter-id";
 export { removeAccents } from "./remove-accents/remove-accents";

@@ -81,7 +81,6 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [formatVoterId](https://brazilian-utils.com.br/utilities.md#formatvoterid): Format a voter ID number.
 - [formatCns](https://brazilian-utils.com.br/utilities.md#formatcns): Format a CNS (Cartão Nacional de Saúde) number into the common display groups of 3-4-4-4 digits separated by spaces.
 - [formatCertidao](https://brazilian-utils.com.br/utilities.md#formatcertidao): Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
-- [formatCertidao](https://brazilian-utils.com.br/utilities.md#formatcertidao): Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
 - [formatCei](https://brazilian-utils.com.br/utilities.md#formatcei): Format a CEI (Cadastro Específico do INSS) number according to the usual `00.000.00000/00` mask, the one the reference implementations of the check digit agree on (the Receita Federal does not print it).
 - [formatCno](https://brazilian-utils.com.br/utilities.md#formatcno): Format a CNO (Cadastro Nacional de Obras) number.
 - [formatCaepf](https://brazilian-utils.com.br/utilities.md#formatcaepf): Format a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number according to the usual `000.000.000/000-00` mask, the one the sources of the check digit rule agree on (the Receita Federal does not print it).
@@ -107,6 +106,13 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [parseVoterId](https://brazilian-utils.com.br/utilities.md#parsevoterid): Remove voter ID formatting, keep only digits, and cap the result to 12 digits (13 when the UF digits identify São Paulo or Minas Gerais).
 - [parseCns](https://brazilian-utils.com.br/utilities.md#parsecns): Remove CNS (Cartão Nacional de Saúde) formatting, keep only digits, and cap the result to 15 digits.
 - [parseCertidao](https://brazilian-utils.com.br/utilities.md#parsecertidao): Remove the formatting of the matrícula of a certidão de registro civil, keep only digits, and cap the result to 32 digits.
+- [parseCei](https://brazilian-utils.com.br/utilities.md#parsecei): Remove CEI (Cadastro Específico do INSS) formatting, keep only digits, and cap the result to 12 digits.
+- [parseCno](https://brazilian-utils.com.br/utilities.md#parsecno): Remove CNO (Cadastro Nacional de Obras) formatting, keep only digits, and cap the result to 12 digits, the numbering the CNO kept from the CEI.
+- [parseCaepf](https://brazilian-utils.com.br/utilities.md#parsecaepf): Remove CAEPF (Cadastro de Atividade Econômica da Pessoa Física) formatting, keep only digits, and cap the result to 14 digits.
+- [parseCbo](https://brazilian-utils.com.br/utilities.md#parsecbo): Remove CBO (Classificação Brasileira de Ocupações) formatting, keep only digits, and cap the result to 6 digits.
+- [parseCnae](https://brazilian-utils.com.br/utilities.md#parsecnae): Remove CNAE (Classificação Nacional de Atividades Econômicas) formatting, keep only digits, and cap the result to the 7 digits of a complete subclass code.
+- [parseNcm](https://brazilian-utils.com.br/utilities.md#parsencm): Remove NCM (Nomenclatura Comum do Mercosul) formatting, keep only digits, and cap the result to the 8 digits of a complete code.
+- [parseCfop](https://brazilian-utils.com.br/utilities.md#parsecfop): Remove CFOP (Código Fiscal de Operações e Prestações) formatting, keep only digits, and cap the result to 4 digits.
 
 ## Generators (generate*)
 

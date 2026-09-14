@@ -1801,19 +1801,6 @@ The `CertidaoInfo` result carries:
 | `term` | The 7 digit term (termo) number, zero padded. |
 | `checkDigits` | The 2 modulus 11 check digits of the matrícula. |
 
-## formatCertidao
-
-Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces. `options.pad` (part of `FormatCertidaoOptions`) left pads the value with zeros up to 32 digits (default `false`). The mask is the one of [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243). A number is accepted and read as the string of its digits, like in `formatCpf`, but a full 32 digit matrícula has to be a string: that many digits are more than a JavaScript number can hold exactly. At runtime the value is read for its digits and masked as far as they go, like in every formatter of this package, so a partial matrícula still being typed is masked progressively.
-
-```javascript
-import { formatCertidao } from '@brazilian-utils/brazilian-utils';
-
-formatCertidao('10453901552013100012021000012321'); // 104539 01 55 2013 1 00012 021 0000123 21
-formatCertidao('104539.01.55.2013.1.00012.021.0000123-21'); // 104539 01 55 2013 1 00012 021 0000123 21
-formatCertidao('1552010100020112000012087', { pad: true }); // 000000 01 55 2010 1 00020 112 0000120 87
-formatCertidao(104539015520); // 104539 01 55 20 (a number is read as the string of its digits)
-```
-
 ## isValidCei
 
 Check if a CEI (Cadastro Específico do INSS) number is valid. The CEI identifies an employer with no CNPJ, such as a construction work or a rural producer: 12 digits printed as `00.000.00000/00`, the last one a check digit calculated over the 11 base digits with the weights 7, 4, 1, 8, 5, 2, 1, 6, 3, 7 and 4. Accepts the usual mask characters and whitespace between/around groups, a run of them between two groups included. The Receita Federal does not publish this check digit rule, so it follows the reference implementations of [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php) and [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs), cross-checked against the [Cadastro Nacional de Obras (CNO) open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno) of the Receita Federal.
@@ -1838,6 +1825,16 @@ import { formatCei } from '@brazilian-utils/brazilian-utils';
 formatCei('277297118187'); // 27.729.71181/87
 formatCei(249859674386); // 24.985.96743/86
 formatCei('249', { pad: true }); // 00.000.00002/49
+```
+
+## parseCei
+
+Remove CEI (Cadastro Específico do INSS) formatting, keep only digits, and cap the result to 12 digits. A partial value passes through as far as it goes; use `isValidCei` to check the number itself.
+
+```javascript
+import { parseCei } from '@brazilian-utils/brazilian-utils';
+
+parseCei('27.729.71181/87'); // '277297118187'
 ```
 
 ## isValidCno
@@ -1866,6 +1863,16 @@ formatCno(401800097960); // 40.180.00979/60
 formatCno('979', { pad: true }); // 00.000.00009/79
 ```
 
+## parseCno
+
+Remove CNO (Cadastro Nacional de Obras) formatting, keep only digits, and cap the result to 12 digits, the numbering the CNO kept from the CEI. Use `isValidCno` to check the number itself.
+
+```javascript
+import { parseCno } from '@brazilian-utils/brazilian-utils';
+
+parseCno('11.113.01373/68'); // '111130137368'
+```
+
 ## isValidCaepf
 
 Check if a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number is valid. The CAEPF replaced the CEI for individuals who hire employees: 14 digits printed as `000.000.000/000-00`, formed by the 9 digit CPF base of the holder, a 3 digit sequence for the holder's several registrations and 2 check digits. Both check digits are the CNPJ's modulus 11 in the formulation of the cited reference: the weights cycle from 9 down to 2 from the right and the check digit is the remainder itself, with a remainder of 10 read as 0 — the same digit the CNPJ's 2-to-9 weights with `11 - remainder` produce. The resulting pair is then shifted by 12, wrapping around 100. A base whose 12 digits are all the same is rejected before the check digits are computed, the way `isValidCei` and `isValidCno` reject a repeated CEI/CNO number, so the otherwise well-formed `00000000000012` is invalid. The Receita Federal does not publish the layout or the check digit rule: both are described by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and implemented the same way by [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
@@ -1891,6 +1898,16 @@ import { formatCaepf } from '@brazilian-utils/brazilian-utils';
 formatCaepf('29311861000184'); // 293.118.610/001-84
 formatCaepf(41142260000101); // 411.422.600/001-01
 formatCaepf('184', { pad: true }); // 000.000.000/001-84
+```
+
+## parseCaepf
+
+Remove CAEPF (Cadastro de Atividade Econômica da Pessoa Física) formatting, keep only digits, and cap the result to 14 digits. Use `isValidCaepf` to check the number itself.
+
+```javascript
+import { parseCaepf } from '@brazilian-utils/brazilian-utils';
+
+parseCaepf('293.118.610/001-84'); // '29311861000184'
 ```
 
 ## isValidRegistroProfissional
@@ -1941,6 +1958,16 @@ isValidCbo(-212405); // false (not a non-negative safe integer)
 
 The occupation titles come from the [official CBO 2002 occupation table published by the MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
 
+## parseCbo
+
+Remove CBO (Classificação Brasileira de Ocupações) formatting, keep only digits, and cap the result to 6 digits. Nothing is left padded here, so the leading zero of a code such as `010205` has to be written out; use `getCbo` or `isValidCbo`, which do pad a bare numeric code, to look an occupation up.
+
+```javascript
+import { parseCbo } from '@brazilian-utils/brazilian-utils';
+
+parseCbo('2124-05'); // '212405'
+```
+
 ## getCbo
 
 Look a CBO (Classificação Brasileira de Ocupações) code up and get its official occupation title, in the `{ code, description }` record every lookup of this library returns. A value written as bare digits keeps its implied leading zeros, as a string as much as a number: `getCbo(10205)` and `getCbo('10205')` are both read as `010205`. Same input rules as `isValidCbo`: a string has to be written as the 6 digits or with the `NNNN-NN` mask, and a number has to be a non-negative safe integer.
@@ -1989,6 +2016,17 @@ formatCnae('abc6201501'); // 6201-5/01 (only the digits are read)
 formatCnae(-6201501); // 6201-5/01
 ```
 
+## parseCnae
+
+Remove CNAE (Classificação Nacional de Atividades Econômicas) formatting, keep only digits, and cap the result to the 7 digits of a complete subclass code. Nothing is left padded here; use `getCnae` or `isValidCnae`, which do pad a bare numeric code, to look a subclass up.
+
+```javascript
+import { parseCnae } from '@brazilian-utils/brazilian-utils';
+
+parseCnae('6201-5/01'); // '6201501'
+parseCnae('62'); // '62' (a partial code is kept as written)
+```
+
 ## getCnae
 
 Look a CNAE (Classificação Nacional de Atividades Econômicas) subclass code up and get its code and official description. `code` comes back as the 7 bare digits, like every other lookup of this library; pass it to `formatCnae` for the `NNNN-N/NN` form. A value written as bare digits keeps its implied leading zeros, as a string as much as a number: `getCnae(111301)` and `getCnae('111301')` are both read as `0111301`. Same input rules as `isValidCnae`: a string has to be written as the 7 digits or with the `NNNN-N/NN` mask, and a number has to be a non-negative safe integer.
@@ -2035,6 +2073,17 @@ formatNcm('abc8471'); // 8471 (only the digits are read)
 formatNcm(-84713012); // 8471.30.12
 ```
 
+## parseNcm
+
+Remove NCM (Nomenclatura Comum do Mercosul) formatting, keep only digits, and cap the result to the 8 digits of a complete code. Nothing is left padded here; use `isValidNcm`, which does pad a bare numeric code, to check a code against the official table.
+
+```javascript
+import { parseNcm } from '@brazilian-utils/brazilian-utils';
+
+parseNcm('8471.30.12'); // '84713012'
+parseNcm('8471'); // '8471' (a partial code is kept as written)
+```
+
 ## isValidCfop
 
 Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table. The table is the [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), the text in force (current wording given by Ajuste SINIEF 03/24, last amended by [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25)), not the frozen 2001 text of Ajuste SINIEF 07/01. Only operable codes count: the group and subgroup headings of the official nomenclature, the codes ending in `00` and `50` (1000, 1100, 1150, 5350, ...), are section titles rather than codes a document can carry, so they are rejected.
@@ -2051,6 +2100,16 @@ isValidCfop('0000'); // false
 isValidCfop('1150'); // false (a subgroup heading, not an operable code)
 isValidCfop('abc5102'); // false (not a documented form)
 isValidCfop(-5102); // false (not a non-negative safe integer)
+```
+
+## parseCfop
+
+Remove CFOP (Código Fiscal de Operações e Prestações) formatting, keep only digits, and cap the result to 4 digits. No CFOP code starts with a zero, its first digit is the operation group from 1 to 7, so nothing is ever padded here.
+
+```javascript
+import { parseCfop } from '@brazilian-utils/brazilian-utils';
+
+parseCfop('5.102'); // '5102'
 ```
 
 ## getCfop
