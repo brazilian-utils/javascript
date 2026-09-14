@@ -38,10 +38,14 @@ describe("formatIban", () => {
 		);
 	});
 
-	it("should return an empty string when a character outside the print format is present", () => {
-		expect(formatIban("BR1500000000000010932840814P-2")).toBe("");
-		expect(formatIban("BR15 0000-0000.0000/1093 2840 814P 2")).toBe("");
-		expect(formatIban("BR15  0000")).toBe("");
+	it("should read only the letters and digits of a value with other characters, like formatCpf", () => {
+		expect(formatIban("BR1500000000000010932840814P-2")).toBe(
+			"BR15 0000 0000 0000 1093 2840 814P 2",
+		);
+		expect(formatIban("BR15 0000-0000.0000/1093 2840 814P 2")).toBe(
+			"BR15 0000 0000 0000 1093 2840 814P 2",
+		);
+		expect(formatIban("BR15  0000")).toBe("BR15 0000");
 	});
 
 	it("should cap the result to 29 characters", () => {

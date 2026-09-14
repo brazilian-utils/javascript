@@ -6,7 +6,7 @@ import {
 } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { parseLegalNature } from "../parse-legal-nature/parse-legal-nature";
-import { formatLegalNature } from "./format-legal-nature";
+import { type FormatLegalNatureOptions, formatLegalNature } from "./format-legal-nature";
 
 describe("formatLegalNature", () => {
 	it("should format legal nature values", () => {
@@ -15,6 +15,19 @@ describe("formatLegalNature", () => {
 		expect(formatLegalNature("20")).toBe("20");
 		expect(formatLegalNature("206")).toBe("206");
 		expect(formatLegalNature("2062")).toBe("206-2");
+	});
+
+	it("should format a number and read only the digits of a masked value, like formatCpf", () => {
+		expect(formatLegalNature(2062)).toBe("206-2");
+		expect(formatLegalNature("206-2")).toBe("206-2");
+		expect(formatLegalNature("abc2062")).toBe("206-2");
+	});
+
+	it("should left pad with zeros to 4 digits when pad is true", () => {
+		expect(formatLegalNature("62", { pad: true })).toBe("006-2");
+		expect(formatLegalNature(62, { pad: true })).toBe("006-2");
+		expect(formatLegalNature("2062", { pad: true })).toBe("206-2");
+		expect(formatLegalNature("62", { pad: false })).toBe("62");
 	});
 
 	it("should return an empty string for null or undefined", () => {
@@ -44,6 +57,9 @@ describe("formatLegalNature", () => {
 describe("formatLegalNature types", () => {
 	test("should take a string or number value and return a string", () => {
 		expectTypeOf(formatLegalNature).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatLegalNature)
+			.parameter(1)
+			.toEqualTypeOf<FormatLegalNatureOptions | undefined>();
 		expectTypeOf(formatLegalNature).returns.toEqualTypeOf<string>();
 	});
 });

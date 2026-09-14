@@ -21,6 +21,7 @@ import {
 	type FormatCepOptions,
 	type FormatCertidaoOptions,
 	type FormatCnaeOptions,
+	type FormatLegalNatureOptions,
 	type FormatCnhOptions,
 	type FormatCnoOptions,
 	type FormatCnpjOptions,
@@ -275,6 +276,7 @@ describe("Public API", () => {
 			FormatCepOptions: FormatCepOptions;
 			FormatCertidaoOptions: FormatCertidaoOptions;
 			FormatCnaeOptions: FormatCnaeOptions;
+			FormatLegalNatureOptions: FormatLegalNatureOptions;
 			FormatCnhOptions: FormatCnhOptions;
 			FormatCnoOptions: FormatCnoOptions;
 			FormatCnpjOptions: FormatCnpjOptions;

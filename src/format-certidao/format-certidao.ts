@@ -1,5 +1,6 @@
 import { CERTIDAO_PATTERN } from "../_internals/constants/certidao";
 import { format } from "../_internals/format/format";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `formatCertidao`. */
@@ -12,8 +13,10 @@ export type FormatCertidaoOptions = {
  * Formats the matrícula of a certidão de registro civil into the printed mask of the norm, the
  * 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
  *
- * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
- * hold, so a numeric argument gives an empty string instead of the digits of a rounded value.
+ * The parameter is typed as a string because the 32 digits of a matrícula are more than a
+ * JavaScript number can hold exactly. At runtime the value is read for its digits and masked as
+ * far as they go, like in every formatter of this package, so a partial matrícula still being
+ * typed is masked progressively and a number is read as the string of its digits.
  *
  * @param {string} value - The matrícula value to be formatted.
  * @param {FormatCertidaoOptions} [options] - Optional formatting options.
@@ -57,10 +60,10 @@ export type FormatCertidaoOptions = {
  * Third reference implementation agreeing on the weights and on the remainder of 10 read as 1.
  */
 export const formatCertidao = (value: string, options?: FormatCertidaoOptions): string =>
-	typeof value === "string"
-		? format({
+	isNullish(value)
+		? ""
+		: format({
 				pad: options?.pad,
 				value: sanitizeToDigits(value),
 				pattern: CERTIDAO_PATTERN,
-			})
-		: "";
+			});

@@ -74,14 +74,22 @@ describe("formatCnae", () => {
 		expect(formatCnae()).toBe("");
 	});
 
-	it("should return an empty string for a value that is not digits and mask characters", () => {
-		expect(formatCnae("abc6201501")).toBe("");
+	it("should return an empty string for null and undefined even under pad, instead of a zero-filled code", () => {
+		// @ts-expect-error not a string or number
+		expect(formatCnae(null, { pad: true })).toBe("");
+		// @ts-expect-error not a string or number
+		expect(formatCnae(undefined, { pad: true })).toBe("");
 	});
 
-	it("should return an empty string for a number that is not a non-negative safe integer", () => {
-		expect(formatCnae(-6_201_501)).toBe("");
-		expect(formatCnae(620_150.1)).toBe("");
-		expect(formatCnae(2 ** 53)).toBe("");
+	it("should read only the digits of a value with other characters, like formatCpf", () => {
+		expect(formatCnae("abc6201501")).toBe("6201-5/01");
+		expect(formatCnae("62.01-5/01")).toBe("6201-5/01");
+	});
+
+	it("should read a signed or fractional number as the string of its digits, like formatCpf", () => {
+		expect(formatCnae(-6_201_501)).toBe("6201-5/01");
+		expect(formatCnae(620_150.1)).toBe("6201-5/01");
+		expect(formatCnae(2 ** 53)).toBe("9007-1/99");
 	});
 
 	it("should return an empty string for a null-prototype object", () => {

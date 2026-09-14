@@ -1,13 +1,6 @@
 import { format } from "../_internals/format/format";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-/**
- * Shape a value may be written in while an NCM code is being typed: digits and the mask
- * characters of the `NNNN.NN.NN` presentation, nothing else. Wider than the complete-code
- * shape `isValidNcm` demands, because this formatter masks progressively.
- */
-const NCM_MASK_REGEX = /^[\d\s.\-/]*$/;
 
 /** Options of `formatNcm`. */
 export type FormatNcmOptions = {
@@ -29,10 +22,11 @@ export type FormatNcmOptions = {
  * `pad: true`, so `formatNcm(8471)` gives `"8471"` and `formatNcm(8471, { pad: true })` gives
  * `"0000.84.71"`.
  *
- * A string is only formatted when it holds nothing but digits and the mask characters;
- * anything else (`"abc8471"`) gives `""` instead of having its digits picked out. A number is
- * only formatted when it is a non-negative safe integer, since a sign, a decimal point or a
- * rounded magnitude would otherwise be read as a code the caller never wrote.
+ * Like every formatter of this package, the value is read for its digits and masked as far as
+ * they go: characters outside the mask are dropped (`formatNcm("abc8471")` gives
+ * `"8471"`) and a number is read as the string of its digits, sign and decimal point
+ * included (`formatNcm(-84713012)` gives `"8471.30.12"`). This is the input-mask contract of
+ * `formatCpf`; use `isValidNcm` to check a code.
  *
  * @param {string|number} value - The NCM code to be formatted.
  * @param {FormatNcmOptions} [options] - Optional formatting options.
@@ -47,22 +41,18 @@ export type FormatNcmOptions = {
  * formatNcm("8471"); // "8471" (partial values are masked as far as they go)
  * formatNcm("847130"); // "8471.30"
  * formatNcm("8471", { pad: true }); // "0000.84.71" (padded to 8 digits first)
- * formatNcm("abc8471"); // "" (not a documented form)
- * formatNcm(-84713012); // "" (not a non-negative safe integer)
+ * formatNcm("abc8471"); // "8471" (only the digits are read)
+ * formatNcm(-84713012); // "8471.30.12"
  * ```
  *
  * @see Official: https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json
  */
 export const formatNcm = (value: string | number, options?: FormatNcmOptions): string => {
-	if (!isLookupCode(value)) return "";
-
-	const code = String(value);
-
-	if (!NCM_MASK_REGEX.test(code)) return "";
+	if (isNullish(value)) return "";
 
 	return format({
 		pad: options?.pad,
-		value: sanitizeToDigits(code),
+		value: sanitizeToDigits(value),
 		pattern: "0000.00.00",
 	});
 };

@@ -1,12 +1,6 @@
 import { format } from "../_internals/format/format";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-/**
- * Shape a value may be written in while a CNAE code is being typed: digits and the mask
- * characters of the `NNNN-N/NN` presentation, nothing else.
- */
-const CNAE_MASK_REGEX = /^[\d\s.\-/]*$/;
 
 /** Options of `formatCnae`. */
 export type FormatCnaeOptions = {
@@ -28,10 +22,11 @@ export type FormatCnaeOptions = {
  * `pad: true`, so `formatCnae(111301)` gives `"1113-0/1"` and `formatCnae(111301, { pad: true })`
  * gives `"0111-3/01"`.
  *
- * A string is only formatted when it holds nothing but digits and the mask characters;
- * anything else (`"abc6201501"`) gives `""` instead of having its digits picked out. A number
- * is only formatted when it is a non-negative safe integer, since a sign, a decimal point or a
- * rounded magnitude would otherwise be read as a code the caller never wrote.
+ * Like every formatter of this package, the value is read for its digits and masked as far as
+ * they go: characters outside the mask are dropped (`formatCnae("abc6201501")` gives
+ * `"6201-5/01"`) and a number is read as the string of its digits, sign and decimal point
+ * included (`formatCnae(-6201501)` gives `"6201-5/01"`). This is the input-mask contract of
+ * `formatCpf`; use `isValidCnae` to check a code.
  *
  * @param {string|number} value - The CNAE code to be formatted.
  * @param {FormatCnaeOptions} [options] - Optional formatting options.
@@ -46,22 +41,18 @@ export type FormatCnaeOptions = {
  * formatCnae("62"); // "62" (partial values are masked as far as they go)
  * formatCnae("62015"); // "6201-5"
  * formatCnae("62", { pad: true }); // "0000-0/62" (padded to 7 digits first)
- * formatCnae("abc6201501"); // "" (not a documented form)
- * formatCnae(-6201501); // "" (not a non-negative safe integer)
+ * formatCnae("abc6201501"); // "6201-5/01" (only the digits are read)
+ * formatCnae(-6201501); // "6201-5/01"
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/v2/cnae/subclasses
  */
 export const formatCnae = (value: string | number, options?: FormatCnaeOptions): string => {
-	if (!isLookupCode(value)) return "";
-
-	const code = String(value);
-
-	if (!CNAE_MASK_REGEX.test(code)) return "";
+	if (isNullish(value)) return "";
 
 	return format({
 		pad: options?.pad,
-		value: sanitizeToDigits(code),
+		value: sanitizeToDigits(value),
 		pattern: "0000-0/00",
 	});
 };

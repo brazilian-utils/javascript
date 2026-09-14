@@ -73,14 +73,22 @@ describe("formatNcm", () => {
 		expect(formatNcm()).toBe("");
 	});
 
-	it("should return an empty string for a value that is not digits and mask characters", () => {
-		expect(formatNcm("abc8471")).toBe("");
+	it("should return an empty string for null and undefined even under pad, instead of a zero-filled code", () => {
+		// @ts-expect-error not a string or number
+		expect(formatNcm(null, { pad: true })).toBe("");
+		// @ts-expect-error not a string or number
+		expect(formatNcm(undefined, { pad: true })).toBe("");
 	});
 
-	it("should return an empty string for a number that is not a non-negative safe integer", () => {
-		expect(formatNcm(-84_713_012)).toBe("");
-		expect(formatNcm(8_471_301.2)).toBe("");
-		expect(formatNcm(2 ** 53)).toBe("");
+	it("should read only the digits of a value with other characters, like formatCpf", () => {
+		expect(formatNcm("abc8471")).toBe("8471");
+		expect(formatNcm("8471.30-12")).toBe("8471.30.12");
+	});
+
+	it("should read a signed or fractional number as the string of its digits, like formatCpf", () => {
+		expect(formatNcm(-84_713_012)).toBe("8471.30.12");
+		expect(formatNcm(8_471_301.2)).toBe("8471.30.12");
+		expect(formatNcm(2 ** 53)).toBe("9007.19.92");
 	});
 
 	it("should return an empty string for a null-prototype object", () => {

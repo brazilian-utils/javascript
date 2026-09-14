@@ -28,7 +28,10 @@ export { type FormatCnsOptions, formatCns } from "./format-cns/format-cns";
 export { type FormatCpfOptions, formatCpf } from "./format-cpf/format-cpf";
 export { type FormatCurrencyOptions, formatCurrency } from "./format-currency/format-currency";
 export { formatIban } from "./format-iban/format-iban";
-export { formatLegalNature } from "./format-legal-nature/format-legal-nature";
+export {
+	type FormatLegalNatureOptions,
+	formatLegalNature,
+} from "./format-legal-nature/format-legal-nature";
 export { formatLicensePlate } from "./format-license-plate/format-license-plate";
 export { type FormatNcmOptions, formatNcm } from "./format-ncm/format-ncm";
 export { formatNfeKey } from "./format-nfe-key/format-nfe-key";

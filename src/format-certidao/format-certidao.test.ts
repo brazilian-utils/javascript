@@ -60,10 +60,10 @@ describe("formatCertidao", () => {
 		});
 	});
 
-	describe("should refuse a number", () => {
-		test("because the 32 digits of a matrícula do not fit in a JavaScript number", () => {
+	describe("should read a number as the string of its digits, like formatCpf", () => {
+		test("masking it as far as it goes; the parameter is typed as a string only because 32 digits do not fit a number", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(formatCertidao(104_539_015_520)).toBe("");
+			expect(formatCertidao(104_539_015_520)).toBe("104539 01 55 20");
 		});
 	});
 
@@ -103,7 +103,7 @@ describe("formatCertidao", () => {
 				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
 					expect(typeof formatCertidao(text)).toBe("string");
 					// @ts-expect-error: intentionally invalid input
-					expect(formatCertidao(number)).toBe("");
+					expect(typeof formatCertidao(number)).toBe("string");
 				}),
 			);
 		});

@@ -290,7 +290,7 @@ isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 000
 
 ## formatNfeKey
 
-Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 dígitos separados por espaço, a forma em que todo documento auxiliar a imprime: o DANFE da NF-e e da NFC-e, o DACTE do CT-e, do CT-e OS e da GTV-e, o DAMDFE do MDF-e, o DABPE do BP-e, o DANF3E da NF3e e o DANFE-COM da NFCom. Um valor que não seja string só é lido quando é um inteiro seguro não negativo, então qualquer coisa sem representação utilizável em dígitos (um número negativo ou fracionário, um objeto, um objeto criado com `Object.create(null)`) devolve `''`.
+Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 dígitos separados por espaço, a forma em que todo documento auxiliar a imprime: o DANFE da NF-e e da NFC-e, o DACTE do CT-e, do CT-e OS e da GTV-e, o DAMDFE do MDF-e, o DABPE do BP-e, o DANF3E da NF3e e o DANFE-COM da NFCom. Como todo formatador deste pacote, o valor é lido pelos seus dígitos e agrupado até onde eles vão, então uma chave com máscara ou parcial, ainda sendo digitada, é agrupada progressivamente, e qualquer coisa sem dígito (um objeto, `true`, um objeto criado com `Object.create(null)`) devolve `''` em vez de lançar. Use `isValidNfeKey` para verificar uma chave.
 
 ```javascript
 import { formatNfeKey } from '@brazilian-utils/brazilian-utils';
@@ -768,7 +768,7 @@ isValidIban('DE89370400440532013000'); // false (IBAN não brasileiro)
 
 ## formatIban
 
-Formata um IBAN no agrupamento impresso da ISO 13616, blocos de 4 caracteres, a apresentação usada em extratos e formulários bancários. Não valida os dígitos verificadores nem o layout dos campos; formata o que for passado, até o limite de 29 caracteres de um IBAN brasileiro, até onde for possível, então a função também pode ser usada como máscara de digitação, e um IBAN de outro país é agrupado do mesmo jeito até esse limite. Use `isValidIban` para verificar a validade. O valor pode ser compacto (`'BR1500000000000010932840814P2'`), já estar no formato impresso da ISO 13616 (letras e dígitos em grupos separados por um único espaço) ou ser um valor parcial ainda sendo digitado (`'BR15'`), em todos os casos com espaços em branco opcionais no início e no fim; apenas um caractere fora de letras e dígitos, ou um separador diferente de um único espaço, resulta em uma string vazia, em vez de ser descartado silenciosamente.
+Formata um IBAN no agrupamento impresso da ISO 13616, blocos de 4 caracteres, a apresentação usada em extratos e formulários bancários. Não valida os dígitos verificadores nem o layout dos campos; formata o que for passado, até o limite de 29 caracteres de um IBAN brasileiro, até onde for possível, então a função também pode ser usada como máscara de digitação, e um IBAN de outro país é agrupado do mesmo jeito até esse limite. Use `isValidIban` para verificar a validade. O valor pode ser compacto (`'BR1500000000000010932840814P2'`), já estar no formato impresso da ISO 13616 ou ser um valor parcial ainda sendo digitado (`'BR15'`); como todo formatador deste pacote, ele é lido pelas suas letras e dígitos e agrupado até onde eles vão, qualquer outro caractere (hífen, ponto, espaço a mais) é descartado e as letras viram maiúsculas. Só um valor que não seja string resulta em uma string vazia.
 
 ```javascript
 import { formatIban } from '@brazilian-utils/brazilian-utils';
@@ -776,7 +776,7 @@ import { formatIban } from '@brazilian-utils/brazilian-utils';
 formatIban('BR1500000000000010932840814P2'); // 'BR15 0000 0000 0000 1093 2840 814P 2'
 formatIban('br1500000000000010932840814p2'); // 'BR15 0000 0000 0000 1093 2840 814P 2'
 formatIban('BR15'); // 'BR15'
-formatIban('BR1500000000000010932840814P-2'); // '' (hífen não faz parte de um IBAN)
+formatIban('BR15 0000-0000.0000/1093 2840 814P-2'); // 'BR15 0000 0000 0000 1093 2840 814P 2' (só letras e dígitos são lidos)
 ```
 
 ## parseIban
@@ -1231,12 +1231,15 @@ generateProcessoJuridico({ year: 10000 }); // null (ano fora do intervalo)
 
 ## formatLegalNature
 
-Formata um código de natureza jurídica.
+Formata um código de natureza jurídica. `options.pad` (parte de `FormatLegalNatureOptions`) funciona exatamente como em `formatCpf`/`formatCep`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai; com `true` o valor é primeiro completado com zeros à esquerda até os 4 dígitos de um código completo. Use `isValidLegalNature` para verificar um código.
 
 ```javascript
 import { formatLegalNature } from '@brazilian-utils/brazilian-utils';
 
 formatLegalNature('2062'); // 206-2
+formatLegalNature(2062); // 206-2
+formatLegalNature('206'); // 206 (máscara aplicada até onde o valor vai)
+formatLegalNature('62', { pad: true }); // 006-2 (completado até 4 dígitos antes)
 ```
 
 ## isValidLegalNature
@@ -1728,7 +1731,7 @@ O resultado `Certidao` traz:
 
 ## formatCertidao
 
-Formata a matrícula de uma certidão de registro civil na máscara impressa do Provimento, os 32 dígitos agrupados em 6 2 2 4 1 5 3 7 2 e separados por espaços. `options.pad` (parte de `FormatCertidaoOptions`) preenche o valor com zeros à esquerda até 32 dígitos (padrão `false`). A máscara é a do [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243). Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
+Formata a matrícula de uma certidão de registro civil na máscara impressa do Provimento, os 32 dígitos agrupados em 6 2 2 4 1 5 3 7 2 e separados por espaços. `options.pad` (parte de `FormatCertidaoOptions`) preenche o valor com zeros à esquerda até 32 dígitos (padrão `false`). A máscara é a do [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243). O parâmetro é tipado como string porque os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta com exatidão; em tempo de execução o valor é lido pelos seus dígitos e a máscara é aplicada até onde eles vão, como em todo formatador deste pacote, então uma matrícula parcial ainda sendo digitada é mascarada progressivamente.
 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
@@ -1892,7 +1895,7 @@ isValidCnae(-111301); // false (não é um inteiro seguro não negativo)
 
 ## formatCnae
 
-Formata um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas). `options.pad` (parte de `FormatCnaeOptions`) funciona exatamente como em `formatCpf`/`formatCep`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai, que é o que um campo sendo digitado precisa; com `true` o valor é primeiro completado com zeros à esquerda até os 7 dígitos de uma subclasse completa, então ele sempre volta com a máscara inteira. Um número é tratado exatamente como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Só dígitos e os caracteres de máscara são aceitos; qualquer outra coisa retorna `''`, assim como um número que não seja um inteiro seguro não negativo.
+Formata um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas). `options.pad` (parte de `FormatCnaeOptions`) funciona exatamente como em `formatCpf`/`formatCep`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai, que é o que um campo sendo digitado precisa; com `true` o valor é primeiro completado com zeros à esquerda até os 7 dígitos de uma subclasse completa, então ele sempre volta com a máscara inteira. Um número é tratado exatamente como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Como todo formatador deste pacote, o valor é lido pelos seus dígitos e a máscara é aplicada até onde eles vão: caracteres fora da máscara são descartados e um número é lido como a string dos seus dígitos, sinal e ponto decimal inclusos. Use `isValidCnae` para verificar um código.
 
 ```javascript
 import { formatCnae } from '@brazilian-utils/brazilian-utils';
@@ -1902,8 +1905,8 @@ formatCnae('62'); // 62 (máscara aplicada até onde o valor vai)
 formatCnae('62015'); // 6201-5
 formatCnae('62', { pad: true }); // 0000-0/62 (completado até 7 dígitos antes)
 formatCnae(111301, { pad: true }); // 0111-3/01
-formatCnae('abc6201501'); // '' (não é uma forma documentada)
-formatCnae(-6201501); // '' (não é um inteiro seguro não negativo)
+formatCnae('abc6201501'); // 6201-5/01 (só os dígitos são lidos)
+formatCnae(-6201501); // 6201-5/01
 ```
 
 ## getCnae
@@ -1934,7 +1937,7 @@ isValidNcm(-84713012); // false (não é um inteiro seguro não negativo)
 
 ## formatNcm
 
-Formata um código NCM (Nomenclatura Comum do Mercosul). `options.pad` (parte de `FormatNcmOptions`) funciona exatamente como em `formatCpf`/`formatCep`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai, que é o que um campo sendo digitado precisa; com `true` o valor é primeiro completado com zeros à esquerda até os 8 dígitos de um código completo, então ele sempre volta com a máscara inteira. Um número é tratado exatamente como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Só dígitos e os caracteres de máscara são aceitos; qualquer outra coisa retorna `''`, assim como um número que não seja um inteiro seguro não negativo.
+Formata um código NCM (Nomenclatura Comum do Mercosul). `options.pad` (parte de `FormatNcmOptions`) funciona exatamente como em `formatCpf`/`formatCep`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai, que é o que um campo sendo digitado precisa; com `true` o valor é primeiro completado com zeros à esquerda até os 8 dígitos de um código completo, então ele sempre volta com a máscara inteira. Um número é tratado exatamente como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Como todo formatador deste pacote, o valor é lido pelos seus dígitos e a máscara é aplicada até onde eles vão: caracteres fora da máscara são descartados e um número é lido como a string dos seus dígitos, sinal e ponto decimal inclusos. Use `isValidNcm` para verificar um código.
 
 ```javascript
 import { formatNcm } from '@brazilian-utils/brazilian-utils';
@@ -1943,8 +1946,8 @@ formatNcm('84713012'); // 8471.30.12
 formatNcm('8471'); // 8471 (máscara aplicada até onde o valor vai)
 formatNcm('847130'); // 8471.30
 formatNcm('8471', { pad: true }); // 0000.84.71 (completado até 8 dígitos antes)
-formatNcm('abc8471'); // '' (não é uma forma documentada)
-formatNcm(-84713012); // '' (não é um inteiro seguro não negativo)
+formatNcm('abc8471'); // 8471 (só os dígitos são lidos)
+formatNcm(-84713012); // 8471.30.12
 ```
 
 ## isValidCfop

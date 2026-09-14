@@ -47,9 +47,9 @@ describe("formatNfeKey", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey(true)).toBe("");
 		// @ts-expect-error: intentionally invalid input
-		expect(formatNfeKey(-11)).toBe("");
+		expect(formatNfeKey(-11)).toBe("11");
 		// @ts-expect-error: intentionally invalid input
-		expect(formatNfeKey(1.1)).toBe("");
+		expect(formatNfeKey(1.1)).toBe("11");
 	});
 
 	test("should return an empty string for an object with a null prototype, which has no toString", () => {
