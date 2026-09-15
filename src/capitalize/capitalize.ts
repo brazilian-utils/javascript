@@ -1,10 +1,15 @@
 import {
+	APOSTROPHE_REGEX,
+	ELIDED_PARTICLE,
+	JOINER_REGEX,
 	PREPOSITIONS,
 	PUNCTUATION_REGEX,
 	SEPARATOR_REGEX,
 	STATE_CODES,
+	TRAILING_DESIGNATIONS,
 	UPPER_CASE_WORDS,
 	WHITESPACE_REGEX,
+	WORD_REGEX,
 } from "./constants";
 
 /** Options of `capitalize`. */
@@ -17,6 +22,8 @@ export type CapitalizeOptions = {
 
 const stateCodeSet: Set<string> = new Set(STATE_CODES);
 
+const trailingDesignationSet: Set<string> = new Set(TRAILING_DESIGNATIONS);
+
 const toWordSet = (
 	words: unknown,
 	fallback: readonly string[],
@@ -28,6 +35,84 @@ const toWordSet = (
 };
 
 /**
+ * A token that carries a word, as opposed to a separator or the empty token between two of them.
+ *
+ * @param {string} token - The token to classify.
+ * @returns {boolean} `true` when the token is a word.
+ */
+const isWord = (token: string): boolean => WORD_REGEX.test(token);
+
+/**
+ * An apostrophe token, the one that elides the particle of `d'Oeste` and marks the possessive of
+ * `Bob's`.
+ *
+ * @param {string} token - The token to classify.
+ * @returns {boolean} `true` when the token is an apostrophe.
+ */
+const isApostrophe = (token: string): boolean => APOSTROPHE_REGEX.test(token);
+
+/**
+ * The next word of the value after `index`, plus whether it is joined to the word at `index`, that
+ * is, whether only whitespace, `-`, `/` or an apostrophe stands between the two.
+ *
+ * @param {string[]} tokens - Every token of the value, words and separators alike.
+ * @param {number} index - The index of the word to look ahead from.
+ * @returns {{ joined: boolean; next: string }} The next word (`""` when there is none) and whether it is joined to the word at `index`.
+ */
+const lookAhead = (tokens: string[], index: number): { joined: boolean; next: string } => {
+	let joined = true;
+
+	for (let position = index + 1; position < tokens.length; position++) {
+		const token = tokens[position];
+
+		if (token === "") continue;
+		if (isWord(token)) return { joined, next: token };
+		if (!JOINER_REGEX.test(token)) joined = false;
+	}
+
+	return { joined: false, next: "" };
+};
+
+/**
+ * The `d` of `d'Oeste`: an elided particle only when an apostrophe and a word follow it. Splitting
+ * on the separators always leaves a token after each of them, so the token two places ahead of a
+ * word followed by an apostrophe is always there, even when it is the empty one of `"rua d'"`.
+ *
+ * @param {string[]} tokens - Every token of the value, words and separators alike.
+ * @param {number} index - The index of the word being written.
+ * @param {string} word - That word, in lower case.
+ * @returns {boolean} `true` when the word is the elided particle.
+ */
+const isElidedParticle = (tokens: string[], index: number, word: string): boolean =>
+	word === ELIDED_PARTICLE && isApostrophe(tokens[index + 1]) && isWord(tokens[index + 2]);
+
+/**
+ * The `s` of `Bob's`: the English possessive, a single letter written right after an apostrophe.
+ *
+ * @param {string[]} tokens - Every token of the value, words and separators alike.
+ * @param {number} index - The index of the word being written.
+ * @param {string} word - That word, in lower case.
+ * @returns {boolean} `true` when the word is an English possessive.
+ */
+const isPossessive = (tokens: string[], index: number, word: string): boolean =>
+	word.length === 1 && isApostrophe(tokens[index - 1]);
+
+/**
+ * Whether a word of the upper case list stands where it is written in upper case. Every
+ * designation but the ones of `TRAILING_DESIGNATIONS` is upper case wherever it appears; those
+ * are upper case only as the last word of the value or right before another designation.
+ *
+ * @param {string} word - The word being written, in upper case.
+ * @param {string} next - The next word of the value, `""` when the word is the last one.
+ * @param {Set<string>} upperCaseSet - The upper case word list in force.
+ * @returns {boolean} `true` when the word is written in upper case where it stands.
+ */
+const isUpperCasePosition = (word: string, next: string, upperCaseSet: Set<string>): boolean =>
+	!trailingDesignationSet.has(word) ||
+	next === "" ||
+	upperCaseSet.has(next.toLocaleUpperCase("pt-BR"));
+
+/**
  * Capitalizes a given string according to the way a Brazilian name, company name or address is
  * written, with no configuration needed: `"jose da silva"` becomes `"Jose da Silva"`,
  * `"empresa ltda"` becomes `"Empresa LTDA"` and `"santana/rs"` becomes `"Santana/RS"`.
@@ -37,21 +122,33 @@ const toWordSet = (
  * `"bairro:centro"` becomes `"Bairro:Centro"`), so `"MOGI-GUAÇU"` becomes `"Mogi-Guaçu"`. The
  * separators are kept where they are, while every run of whitespace (spaces, tabs, newlines)
  * collapses into a single space and the leading and trailing whitespace is dropped. The particles
- * of foreign-origin names (`d'`, `del`, `della`, `di`, `du`, `van`, `von`, `der`, `den`) stay lower
+ * of foreign-origin names (`del`, `della`, `di`, `du`, `van`, `von`, `der`, `den`) stay lower
  * case like the Portuguese prepositions, so `"luiz von schmidt"` becomes `"Luiz von Schmidt"`.
  *
- * - Words listed in `lowerCaseWords` are converted to lower case, except for the first word. The
- *   default list is the Portuguese prepositions, articles and conjunctions that stay in lower
- *   case inside a proper name ("de", "da", "do", "e", ...), so `"JOSÉ DA SILVA"` becomes
- *   `"José da Silva"`.
+ * - Words listed in `lowerCaseWords` are converted to lower case when they link two words, that
+ *   is, when they are neither the first word nor the last one and another word follows them
+ *   across whitespace, `-`, `/` or an apostrophe. The default list is the Portuguese
+ *   prepositions, articles and conjunctions that stay in lower case inside a proper name ("de",
+ *   "da", "do", "e", ...), so `"JOSÉ DA SILVA"` becomes `"José da Silva"`. A word of the list
+ *   that ends the value or is followed by punctuation is a designator instead, and keeps its
+ *   capital: `"rua a, 100"` becomes `"Rua A, 100"` and `"condomínio a, quadra d, lote o"` becomes
+ *   `"Condomínio A, Quadra D, Lote O"`.
+ * - The elided particle `d'` is written in lower case wherever it appears, including as the first
+ *   word, but only when an apostrophe and a word follow it, so `"santa bárbara d'oeste"` becomes
+ *   `"Santa Bárbara d'Oeste"` and `"dias d'ávila"` becomes `"Dias d'Ávila"` while the designator
+ *   `"rua d"` becomes `"Rua D"`. A single letter written right after an apostrophe is the English
+ *   possessive and stays in lower case, so `"bob's"` becomes `"Bob's"`, not `"Bob'S"`.
  * - Words listed in `upperCaseWords` are converted to upper case wherever they appear. The
  *   default list is the company designations and document abbreviations that are written in upper
  *   case in Brazilian usage (`LTDA`, `S.A.`, `S/A`, `S.S.`, `S/S`, `ME`, `EPP`, `MEI`, `EIRELI`,
  *   `CIA`, `SCP`, `CNPJ`, `CPF`, `RG`, `CEP`, `UF`) plus the roman numerals that appear in names
  *   and addresses (`II` through `XXIII`, except `VI`, so `"joão paulo ii"` becomes
- *   `"João Paulo II"` and `"rua xv de novembro"` becomes `"Rua XV de Novembro"`). `ME` matches
- *   the pronoun "me" too, so free text such as `"diga-me"` becomes `"Diga-ME"`: pass an
- *   `upperCaseWords` of your own when the input is not a name. A designation
+ *   `"João Paulo II"` and `"rua xv de novembro"` becomes `"Rua XV de Novembro"`). `ME` is also
+ *   the pt-BR pronoun "me", so it is only upper cased in the designation position, as the last
+ *   word of the value (`"fulano comércio me"` becomes `"Fulano Comércio ME"`) or right before
+ *   another designation (`"fulano me epp"` becomes `"Fulano ME EPP"`); anywhere else it is an
+ *   ordinary word, so `"diga-me a verdade"` becomes `"Diga-Me a Verdade"` and the municipality
+ *   `"não-me-toque"` becomes `"Não-Me-Toque"`. A designation
  *   written around a slash, `S/A` and `S/S`, is matched across that slash even though a slash
  *   separates words, so `"casa de carnes s/a"` becomes `"Casa de Carnes S/A"`.
  * - A two letter word that follows a `/` is converted to upper case when it is the code of a
@@ -89,6 +186,10 @@ const toWordSet = (
  * capitalize("empresa ltda"); // "Empresa LTDA"
  * capitalize("banco do brasil s.a."); // "Banco do Brasil S.A."
  * capitalize("santa bárbara d'oeste"); // "Santa Bárbara d'Oeste"
+ * capitalize("bob's"); // "Bob's"
+ * capitalize("rua a, 100"); // "Rua A, 100"
+ * capitalize("fulano comércio me"); // "Fulano Comércio ME"
+ * capitalize("não-me-toque"); // "Não-Me-Toque"
  * capitalize("(empresa) ltda"); // "(Empresa) LTDA"
  * capitalize("luiz von schmidt"); // "Luiz von Schmidt"
  * capitalize("casa de carnes s/a"); // "Casa de Carnes S/A"
@@ -117,7 +218,7 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 	const output: string[] = [];
 	let wordIndex = 0;
 
-	for (const token of tokens) {
+	for (const [index, token] of tokens.entries()) {
 		if (!token) continue;
 
 		if (WHITESPACE_REGEX.test(token)) {
@@ -133,12 +234,20 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 		const lowerCaseWord = token.toLocaleLowerCase("pt-BR");
 		const upperCaseWord = token.toLocaleUpperCase("pt-BR");
 		const designation = (output.slice(-2).join("") + upperCaseWord).toLocaleUpperCase("pt-BR");
+		const { joined, next } = lookAhead(tokens, index);
 
 		if (upperCaseSet.has(designation)) {
 			output.splice(-2, 2, designation);
-		} else if (wordIndex > 0 && lowerCaseSet.has(lowerCaseWord)) {
+		} else if (isPossessive(tokens, index, lowerCaseWord)) {
 			output.push(lowerCaseWord);
-		} else if (upperCaseSet.has(upperCaseWord)) {
+		} else if (isElidedParticle(tokens, index, lowerCaseWord)) {
+			output.push(lowerCaseWord);
+		} else if (wordIndex > 0 && joined && lowerCaseSet.has(lowerCaseWord)) {
+			output.push(lowerCaseWord);
+		} else if (
+			upperCaseSet.has(upperCaseWord) &&
+			isUpperCasePosition(upperCaseWord, next, upperCaseSet)
+		) {
 			output.push(upperCaseWord);
 		} else if (output.at(-1) === "/" && stateCodeSet.has(upperCaseWord)) {
 			output.push(upperCaseWord);

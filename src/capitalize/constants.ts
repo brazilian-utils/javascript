@@ -7,7 +7,9 @@ import { type StateCode } from "../_internals/constants/states";
  * preposições que liguem as palavras do cargo devem ser grafadas em minúsculas" (item 5.1.8 b),
  * and a title is written "com inicial maiúscula em todas as palavras, exceto nas de ligação"
  * (item 10.2 a). The same convention is used by the IBGE for the names of municipalities
- * ("Mogi das Cruzes", "Santa Bárbara d'Oeste"). Applying it to personal and institutional names
+ * ("Mogi das Cruzes", "Santa Bárbara d'Oeste"). The elided `d` of "d'Oeste" is not a member of
+ * this list: on its own it is a designator ("Rua D", "Quadra D"), so `capitalize` lower-cases it
+ * structurally, only when an apostrophe and a word follow it. Applying it to personal and institutional names
  * ("Ministério da Justiça", "José da Silva") is this library's extension of that rule; the
  * Manual does not spell those two cases out.
  *
@@ -27,7 +29,6 @@ export const PREPOSITIONS = [
 	"de",
 	"do",
 	"dos",
-	"d",
 	"del",
 	"della",
 	"den",
@@ -174,3 +175,39 @@ export const SEPARATOR_REGEX = /(\s+|[-/'’‘(){}[\]"“”:;,])/;
 export const PUNCTUATION_REGEX = /^[-/'’‘(){}[\]"“”:;,]$/;
 
 export const WHITESPACE_REGEX = /^\s+$/;
+
+/**
+ * A token that carries a word: one that holds at least one character that is not a separator. The
+ * empty token that `String.prototype.split` leaves between two separators does not, and neither
+ * does a whitespace run or a single punctuation mark.
+ */
+export const WORD_REGEX = /[^\s/'’‘(){}[\]"“”:;,-]/;
+
+/**
+ * The separators that join two words into one name ("Rio-de-Janeiro", "Santa Bárbara d'Oeste",
+ * "Porto Alegre/RS"), as opposed to the punctuation that closes a phrase (`,`, `;`, `:`, brackets
+ * and quotes). A word of the lower case list is only written in lower case when another word
+ * follows it across separators of this kind; before a closing mark, or at the end of the value, it
+ * is a designator ("Rua D", "Quadra A, Lote B") and keeps its capital.
+ */
+export const JOINER_REGEX = /^(?:\s+|[-/'’‘])$/;
+
+/** The apostrophe that elides the particle of `d'Oeste` and marks the English possessive of `Bob's`. */
+export const APOSTROPHE_REGEX = /^['’‘]$/;
+
+/** The elided particle of `Santa Bárbara d'Oeste`, lower case only when an apostrophe and a word follow it. */
+export const ELIDED_PARTICLE = "d";
+
+/**
+ * Designations that are only written in upper case in the designation position, that is, as the
+ * last word of the name ("Fulano Comércio ME") or right before another designation
+ * ("Fulano ME EPP"). `ME` is also the pt-BR pronoun "me", so upper-casing it wherever it appears
+ * turned free text into `"Diga-ME a Verdade"` and the municipality of Não-Me-Toque/RS into
+ * `"Não-ME-Toque"`; anywhere else in the value it is written as an ordinary word.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm
+ * Lei Complementar nº 123/2006, art. 72 (revoked by the Lei Complementar nº 155/2016): the
+ * abbreviation is added "ao final" of the firma or denominação, which is the position this list
+ * keeps it in.
+ */
+export const TRAILING_DESIGNATIONS = ["ME"];

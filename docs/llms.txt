@@ -149,14 +149,14 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [getStateCodeByName](https://brazilian-utils.com.br/utilities.md#getstatecodebyname): Get the two-letter code (sigla) of a Brazilian state given its full name.
 - [getStateNameByCode](https://brazilian-utils.com.br/utilities.md#getstatenamebycode): Get the full name of a Brazilian state given its two-letter code (sigla).
 - [getTimezoneByState](https://brazilian-utils.com.br/utilities.md#gettimezonebystate): Get the IANA time zone database name (tzdata zone) for a Brazilian state, chosen as the zone of the state capital.
-- [getCities](https://brazilian-utils.com.br/utilities.md#getcities): Get Brazilian cities.
+- [getCities](https://brazilian-utils.com.br/utilities.md#getcities): Get Brazilian cities. Deprecated: use `getMunicipalities` instead.
 - [getHolidays](https://brazilian-utils.com.br/utilities.md#getholidays): Get Brazilian holidays for a given year.
 - [getCepInfoByAddress](https://brazilian-utils.com.br/utilities.md#getcepinfobyaddress): Fetch CEPs from an address using ViaCEP.
 - [getLegalNatures](https://brazilian-utils.com.br/utilities.md#getlegalnatures): Get the legal nature map keyed by code.
 - [getLegalNaturesByCategory](https://brazilian-utils.com.br/utilities.md#getlegalnaturesbycategory): Get every legal nature of a CONCLA category, the group given by the first digit of the code: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas and `5` Organizações Internacionais e Outras Instituições Extraterritoriais.
 - [getLegalNature](https://brazilian-utils.com.br/utilities.md#getlegalnature): Look a legal nature code up in the official IBGE/CONCLA table.
 - [getFormatLicensePlate](https://brazilian-utils.com.br/utilities.md#getformatlicenseplate): Detect the normalized format of a license plate.
-- [getMunicipality](https://brazilian-utils.com.br/utilities.md#getmunicipality): Get municipality information by IBGE code, or get an IBGE code from municipality name and UF.
+- [getMunicipality](https://brazilian-utils.com.br/utilities.md#getmunicipality): Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. Deprecated: use `getMunicipalityByCode` instead, which is synchronous and offline; matching a municipality by name is up to the application, over `getMunicipalities`.
 - [getMunicipalities](https://brazilian-utils.com.br/utilities.md#getmunicipalities): Get Brazilian municipalities published by the IBGE.
 - [getMunicipalityByCode](https://brazilian-utils.com.br/utilities.md#getmunicipalitybycode): Look up a Brazilian municipality by its 7-digit IBGE code.
 - [getCertidaoInfo](https://brazilian-utils.com.br/utilities.md#getcertidaoinfo): Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid, which includes a book code that is not one of the nine books.

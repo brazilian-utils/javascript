@@ -157,7 +157,7 @@ Brazilian Utils is a library focused on solving problems that we face daily in t
 ### Why Brazilian Utils
 
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
-- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.2 KB minified (0.6 KB gzipped); every util is also its own subpath entry (`@brazilian-utils/brazilian-utils/get-cities`) for the heavy ones.
+- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped); every util is also its own subpath entry (`@brazilian-utils/brazilian-utils/get-cities`) for the heavy ones.
 - **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, tested in CI on every one of them.
 - **Written in TypeScript.** Types ship with the package; the public API is tracked by an API report so nothing changes silently.
 - **Validated against the official rules.** Every validator cites the specification, law or dataset it implements (`@see` in the docs), and the test suite is mutation-tested, not just covered.
@@ -215,19 +215,19 @@ You can check a list of utilities [by clicking here](utilities.md).
 
 ### Bundle size
 
-The package is tree-shakeable: importing one util from the root pulls in only that util's code, not the rest of the library. `isValidCpf`, for example, adds roughly 1.2 KB minified (0.6 KB gzipped) to your bundle. A bundler that supports tree-shaking (webpack, Rollup, esbuild, Vite, etc.) drops every other util.
+The package is tree-shakeable: importing one util from the root pulls in only that util's code, not the rest of the library. `isValidCpf`, for example, adds roughly 1.4 KB minified (0.8 KB gzipped) to your bundle. A bundler that supports tree-shaking (webpack, Rollup, esbuild, Vite, etc.) drops every other util.
 
 A handful of utils are the exception: each embeds an official dataset, so it weighs far more than every other util combined. These are their single-import sizes, minified and gzipped:
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
-| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 156.2 KB | 50.2 KB |
-| `getCities` | 5571 IBGE municipality names | 154.0 KB | 49.7 KB |
-| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 113.8 KB | 24.3 KB |
-| `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 118.8 KB | 30.4 KB |
-| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 94.0 KB | 21.3 KB |
-| `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.7 KB | 6.8 KB |
-| `getBanks` · `getBankByCode` | Banco Central STR participants (COMPE + ISPB) | 38.3 KB | 9.6 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
+| `getCities` | 5571 IBGE municipality names | 154.2 KB | 49.8 KB |
+| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.1 KB | 24.6 KB |
+| `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
+| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
+| `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
+| `getBanks` · `getBankByCode` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
 
 Importing any of them from the root, even alongside a single small util, pulls that whole dataset into your main bundle, because this package ships as a single ESM module: a dynamic `import()` of the root (`await import('@brazilian-utils/brazilian-utils')`) still resolves to that same one file, so it can't be split out on its own. A bundler doing code-splitting needs a separate module to split *into*.
 
@@ -249,7 +249,7 @@ getMunicipalityByCode('3550308');
 
 Every util is available this way, as `@brazilian-utils/brazilian-utils/<util-name>` (kebab-case, matching the function name: `isValidCpf` → `is-valid-cpf`), for the same lazy-loading/code-splitting reason.
 
-Pick one style per util in a given app: a bundler treats the root import and the subpath import as two unrelated modules, so importing `getCities` from both the root *and* `/get-cities` in the same app bundles the 154.0 KB city table twice, once in each module's own output.
+Pick one style per util in a given app: a bundler treats the root import and the subpath import as two unrelated modules, so importing `getCities` from both the root *and* `/get-cities` in the same app bundles the 154.2 KB city table twice, once in each module's own output.
 
 ## Utilities
 
@@ -1111,9 +1111,9 @@ isValidCreditCard(4111111111111111111); // false (above 2^53 - 1, pass it as a s
 
 ### capitalize
 
-Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed. Words are separated by whitespace, by `-` and `/`, by the apostrophe (`'d'oeste'` becomes `'d'Oeste'`) and by punctuation that touches a word (`'(empresa)'` becomes `'(Empresa)'`, `'bairro:centro'` becomes `'Bairro:Centro'`), so `'MOGI-GUAÇU'` becomes `'Mogi-Guaçu'`; the separators are kept where they are. Every run of whitespace (tabs, newlines, repeated spaces) collapses into a single space, and the leading and trailing whitespace is dropped. The particles of foreign-origin names (`d'`, `del`, `della`, `di`, `du`, `van`, `von`, `der`, `den`) stay lower case like the Portuguese prepositions.
+Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed. Words are separated by whitespace, by `-` and `/`, by the apostrophe (`'d'oeste'` becomes `'d'Oeste'`) and by punctuation that touches a word (`'(empresa)'` becomes `'(Empresa)'`, `'bairro:centro'` becomes `'Bairro:Centro'`), so `'MOGI-GUAÇU'` becomes `'Mogi-Guaçu'`; the separators are kept where they are. Every run of whitespace (tabs, newlines, repeated spaces) collapses into a single space, and the leading and trailing whitespace is dropped. The particles of foreign-origin names (`del`, `della`, `di`, `du`, `van`, `von`, `der`, `den`) stay lower case like the Portuguese prepositions, and so does the elided `d'`, wherever it appears, whenever an apostrophe and a word follow it (`'dias d'ávila'` becomes `'Dias d'Ávila'`); a single letter written right after an apostrophe is the English possessive and stays lower case too (`"bob's"` becomes `"Bob's"`).
 
-`options.lowerCaseWords` defaults to the Portuguese prepositions, articles and conjunctions that stay in lower case inside a proper name (`de`, `da`, `do`, `e`, ...), except when one of them is the first word. `options.upperCaseWords` defaults to the company designations and document abbreviations written in upper case in Brazilian usage (`LTDA`, `S.A.`, `S/A`, `S.S.`, `S/S`, `ME`, `EPP`, `MEI`, `EIRELI`, `CIA`, `SCP`, `CNPJ`, `CPF`, `RG`, `CEP`, `UF`) plus the roman numerals that appear in names and addresses (`II` through `XXIII`, except `VI`, which collides with the pt-BR verb form "vi"). `SA` without punctuation is deliberately absent, since it is indistinguishable from the surname "Sá" typed without its accent, while `ME` does match the pronoun "me" (`'diga-me'` becomes `'Diga-ME'`), so pass your own `upperCaseWords` when the input is free text rather than a name. `S/A` and `S/S` are matched across the slash even though a slash separates words. A two letter word that follows a `/` is upper-cased when it is the code of a Brazilian state (`'porto alegre/rs'` becomes `'Porto Alegre/RS'`); that rule is structural and stays on even when `upperCaseWords` is given, while a state code that does not follow a `/` is left alone.
+`options.lowerCaseWords` defaults to the Portuguese prepositions, articles and conjunctions that stay in lower case inside a proper name (`de`, `da`, `do`, `e`, ...), and they are only written in lower case when they link two words: one of them that is the first word, that ends the value, or that is followed by punctuation is a designator instead and keeps its capital (`'rua a, 100'` becomes `'Rua A, 100'` and `'condomínio a, quadra d, lote o'` becomes `'Condomínio A, Quadra D, Lote O'`). `options.upperCaseWords` defaults to the company designations and document abbreviations written in upper case in Brazilian usage (`LTDA`, `S.A.`, `S/A`, `S.S.`, `S/S`, `ME`, `EPP`, `MEI`, `EIRELI`, `CIA`, `SCP`, `CNPJ`, `CPF`, `RG`, `CEP`, `UF`) plus the roman numerals that appear in names and addresses (`II` through `XXIII`, except `VI`, which collides with the pt-BR verb form "vi"). `SA` without punctuation is deliberately absent, since it is indistinguishable from the surname "Sá" typed without its accent, while `ME` is also the pronoun "me", so it is only written in upper case in the designation position, as the last word of the value (`'fulano comércio me'` becomes `'Fulano Comércio ME'`) or right before another designation (`'fulano me epp'` becomes `'Fulano ME EPP'`); anywhere else it is an ordinary word (`'diga-me a verdade'` becomes `'Diga-Me a Verdade'`, `'não-me-toque'` becomes `'Não-Me-Toque'`). `S/A` and `S/S` are matched across the slash even though a slash separates words. A two letter word that follows a `/` is upper-cased when it is the code of a Brazilian state (`'porto alegre/rs'` becomes `'Porto Alegre/RS'`); that rule is structural and stays on even when `upperCaseWords` is given, while a state code that does not follow a `/` is left alone.
 
 Either list given in `options` replaces its default entirely, and the comparison against both is case-insensitive (pt-BR locale). Options are typed as `CapitalizeOptions`.
 
@@ -1127,6 +1127,10 @@ capitalize('banco do brasil s.a.'); // Banco do Brasil S.A.
 capitalize('casa de carnes s/a'); // Casa de Carnes S/A ("S/A" is matched across the slash)
 capitalize('mogi-guaçu'); // Mogi-Guaçu ("-" starts a new word)
 capitalize("santa bárbara d'oeste"); // Santa Bárbara d'Oeste ("'" starts a new word, "d" stays lower case)
+capitalize("bob's"); // Bob's (a single letter after an apostrophe is the English possessive)
+capitalize('rua a, 100'); // Rua A, 100 (a preposition followed by punctuation is a designator)
+capitalize('fulano comércio me'); // Fulano Comércio ME ("ME" as the last word is the designation)
+capitalize('não-me-toque'); // Não-Me-Toque (anywhere else "me" is an ordinary word)
 capitalize('(empresa) ltda'); // (Empresa) LTDA
 capitalize('luiz von schmidt'); // Luiz von Schmidt
 capitalize('santana/rs'); // Santana/RS ("RS" is a state code right after a "/")

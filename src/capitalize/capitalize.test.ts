@@ -60,6 +60,7 @@ describe("capitalize", () => {
 			expect(capitalize("empresa ltda")).toBe("Empresa LTDA");
 			expect(capitalize("banco do brasil s.a.")).toBe("Banco do Brasil S.A.");
 			expect(capitalize("casa de carnes s/a")).toBe("Casa de Carnes S/A");
+			expect(capitalize("casa de carnes s/a comércio")).toBe("Casa de Carnes S/A Comércio");
 			expect(capitalize("consultoria s/s")).toBe("Consultoria S/S");
 			expect(capitalize("padaria e confeitaria me")).toBe("Padaria e Confeitaria ME");
 			expect(capitalize("meu cpf e rg")).toBe("Meu CPF e RG");
@@ -89,6 +90,42 @@ describe("capitalize", () => {
 			expect(capitalize("bairro:centro")).toBe("Bairro:Centro");
 			expect(capitalize("rua b,número 10")).toBe("Rua B,Número 10");
 			expect(capitalize("casa;lote [3]")).toBe("Casa;Lote [3]");
+		});
+
+		test("when a single letter follows an apostrophe, the English possessive, which stays in lower case", () => {
+			expect(capitalize("bob's")).toBe("Bob's");
+			expect(capitalize("habib's")).toBe("Habib's");
+			expect(capitalize("mc donald's")).toBe("Mc Donald's");
+			expect(capitalize("x'd")).toBe("X'd");
+			expect(capitalize("sant'ana")).toBe("Sant'Ana");
+		});
+
+		test("when the elided particle d' is followed by an apostrophe and a word, wherever it appears", () => {
+			expect(capitalize("d'oeste")).toBe("d'Oeste");
+			expect(capitalize("dias d'ávila")).toBe("Dias d'Ávila");
+			expect(capitalize("olho d'água do piauí")).toBe("Olho d'Água do Piauí");
+			expect(capitalize("rua d'")).toBe("Rua D'");
+			expect(capitalize("d''oeste")).toBe("D''Oeste");
+		});
+
+		test("when a word of the lower case list ends the value or is followed by punctuation, so it is a designator rather than a link between two words", () => {
+			expect(capitalize("rua d")).toBe("Rua D");
+			expect(capitalize("rua a, 100")).toBe("Rua A, 100");
+			expect(capitalize("condomínio a, quadra d, lote o")).toBe("Condomínio A, Quadra D, Lote O");
+			expect(capitalize("maria e joão")).toBe("Maria e João");
+			expect(capitalize("maria e--joão")).toBe("Maria e--João");
+			expect(capitalize("josé da silva")).toBe("José da Silva");
+			expect(capitalize("de")).toBe("De");
+			expect(capitalize("luiz von schmidt")).toBe("Luiz von Schmidt");
+			expect(capitalize("são joão del rei")).toBe("São João del Rei");
+		});
+
+		test("when ME is the pronoun rather than the designation of a microempresa, which is written at the end of the name", () => {
+			expect(capitalize("fulano comércio me")).toBe("Fulano Comércio ME");
+			expect(capitalize("fulano me epp")).toBe("Fulano ME EPP");
+			expect(capitalize("fulano ltda me")).toBe("Fulano LTDA ME");
+			expect(capitalize("não-me-toque")).toBe("Não-Me-Toque");
+			expect(capitalize("diga-me a verdade")).toBe("Diga-Me a Verdade");
 		});
 
 		test("when the name carries a foreign particle", () => {
