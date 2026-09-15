@@ -3,8 +3,11 @@
  * "por extenso" formatter (`convertNumberToWords`, `convertCurrencyToWords`, `convertDateToWords`).
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/lei/L14822.htm
- * Lei nº 14.822/2024 (Lei Orçamentária Anual de 2024), art. 1º, which spells 14 "quatorze"
- * ("quatrocentos e quatorze bilhões"), the form the official Brazilian texts use; the Vocabulário
+ * Lei nº 14.822/2024 (Lei Orçamentária Anual de 2024), which spells 14 "quatorze" in the caput of
+ * art. 2º and in the caput of art. 3º, both writing the same amount out as "cinco trilhões
+ * quatrocentos e quatorze bilhões novecentos e dezenove milhões quatrocentos e noventa e dois mil
+ * novecentos e oitenta e seis reais" (the only two occurrences of the word in the law; art. 1º
+ * writes an amount with no 14 in it), the form the official Brazilian texts use; the Vocabulário
  * Ortográfico admits both "catorze" and "quatorze", and num2words' Portuguese table (below) picks
  * "quatorze".
  * @see Based on: https://github.com/savoirfairelinux/num2words/blob/master/num2words/lang_PT.py

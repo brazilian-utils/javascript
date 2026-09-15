@@ -82,7 +82,9 @@ const isRoundHundred = (value: number): boolean => value % 100 === 0;
  * um"`, `1235` -> `"mil duzentos e trinta e cinco"`, `1045678` -> `"um milhão quarenta e cinco mil
  * seiscentos e setenta e oito"`. This is the spelling of the Lei Orçamentária Anual ("cinco
  * trilhões quinhentos e sessenta e seis bilhões duzentos e oitenta e quatro milhões oitocentos e
- * dez mil trezentos e setenta e três reais", Lei 14.822/2024, art. 1º), of the salário mínimo
+ * dez mil trezentos e setenta e três reais", Lei 14.822/2024, art. 1º, and "novecentos e trinta e
+ * um mil e oitenta e um reais" for the "e" before a last group below 100, art. 2º, inciso III), of
+ * the salário mínimo
  * decrees ("mil quinhentos e dezoito reais", Decreto 12.342/2024) and of the examples in the Manual
  * de Redação da Presidência da República ("mil duzentos e cinquenta reais", "mil e quatrocentos
  * reais"). It deviates from `num2words`' pt_BR locale, which separates the groups with commas
@@ -106,8 +108,10 @@ const isRoundHundred = (value: number): boolean => value % 100 === 0;
  * ```
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/lei/L14822.htm
- * Lei nº 14.822, de 22 de janeiro de 2024 (Lei Orçamentária Anual de 2024), art. 1º: amounts written
- * out with the groups separated by spaces, "e" only inside a group, and "quatorze".
+ * Lei nº 14.822, de 22 de janeiro de 2024 (Lei Orçamentária Anual de 2024): amounts written out with
+ * the groups separated by spaces and "e" only inside a group (art. 1º), "e" before the last group
+ * when that group is below 100 ("novecentos e trinta e um mil e oitenta e um reais", art. 2º,
+ * inciso III) and "quatorze" for 14 (art. 2º and art. 3º, caput).
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/D12342.htm
  * Decreto nº 12.342, de 30 de dezembro de 2024, art. 1º: "R$ 1.518,00 (mil quinhentos e dezoito reais)".
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
