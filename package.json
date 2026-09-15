@@ -38,6 +38,7 @@
 		"url": "git+https://github.com/brazilian-utils/javascript.git"
 	},
 	"files": [
+		"./CHANGELOG.md",
 		"./dist"
 	],
 	"type": "module",
