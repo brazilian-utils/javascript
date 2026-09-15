@@ -6,8 +6,17 @@ import { BASE_LENGTH, STATE_CODES } from "./constants";
 
 export type { StateCode } from "../_internals/constants/states";
 
+/**
+ * The região fiscal digit of a state, a random one for anything else. The state is read as a
+ * string before the own property lookup, so a value with no string conversion (an object created
+ * with `Object.create(null)`, one whose `toString` throws) is an unknown state rather than a
+ * `TypeError` thrown while `Object.hasOwn` coerces it into a property key.
+ *
+ * @param {StateCode} [state] - The state code the CPF is generated for, if any.
+ * @returns {string} The região fiscal digit of that state, or a random digit.
+ */
 const getStateCode = (state?: StateCode): string => {
-	if (state && Object.hasOwn(STATE_CODES, state)) return STATE_CODES[state];
+	if (typeof state === "string" && Object.hasOwn(STATE_CODES, state)) return STATE_CODES[state];
 	return generateRandomNumber(1);
 };
 
@@ -21,7 +30,9 @@ const calculateCheckDigit = (base: string, weight: number): string => {
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @param {StateCode} [state] - The Brazilian state code to generate a CPF for.
+ * @param {StateCode} [state] - The Brazilian state code to generate a CPF for. An unknown state
+ * draws a random região fiscal digit instead of throwing, a key of the prototype chain
+ * (`"__proto__"`, `"constructor"`) and a value with no string conversion included.
  * @returns {string} A valid 11-digit CPF string without formatting.
  *
  * @example
