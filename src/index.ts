@@ -1,3 +1,14 @@
+import { formatCep } from "./format-cep/format-cep";
+import { formatCnpj } from "./format-cnpj/format-cnpj";
+import { formatCpf } from "./format-cpf/format-cpf";
+import { generateCnpj } from "./generate-cnpj/generate-cnpj";
+import { generateCpf } from "./generate-cpf/generate-cpf";
+import { isValidCep } from "./is-valid-cep/is-valid-cep";
+import { isValidCnpj } from "./is-valid-cnpj/is-valid-cnpj";
+import { isValidCpf } from "./is-valid-cpf/is-valid-cpf";
+import { isValidIe } from "./is-valid-ie/is-valid-ie";
+import { isValidPis } from "./is-valid-pis/is-valid-pis";
+
 export type { Bank } from "./_internals/constants/banks";
 export type { Municipality } from "./_internals/constants/cities";
 export type { State, StateCode, StateName } from "./_internals/constants/states";
@@ -240,23 +251,68 @@ export { subBusinessDays } from "./sub-business-days/sub-business-days";
  * @deprecated Use `IsValidBankAccountOptions` instead.
  */
 export type { IsValidBankAccountParams } from "./is-valid-bank-account/is-valid-bank-account";
-/** @deprecated Use `formatCep` instead. */
-export { formatCep as formatCEP } from "./format-cep/format-cep";
-/** @deprecated Use `formatCnpj` instead. */
-export { formatCnpj as formatCNPJ } from "./format-cnpj/format-cnpj";
-/** @deprecated Use `formatCpf` instead. */
-export { formatCpf as formatCPF } from "./format-cpf/format-cpf";
-/** @deprecated Use `generateCnpj` instead. */
-export { generateCnpj as generateCNPJ } from "./generate-cnpj/generate-cnpj";
-/** @deprecated Use `generateCpf` instead. */
-export { generateCpf as generateCPF } from "./generate-cpf/generate-cpf";
-/** @deprecated Use `isValidCep` instead. */
-export { isValidCep as isValidCEP } from "./is-valid-cep/is-valid-cep";
-/** @deprecated Use `isValidCnpj` instead. */
-export { isValidCnpj as isValidCNPJ } from "./is-valid-cnpj/is-valid-cnpj";
-/** @deprecated Use `isValidCpf` instead. */
-export { isValidCpf as isValidCPF } from "./is-valid-cpf/is-valid-cpf";
-/** @deprecated Use `isValidIe` instead. */
-export { isValidIe as isValidIE } from "./is-valid-ie/is-valid-ie";
-/** @deprecated Use `isValidPis` instead. */
-export { isValidPis as isValidPIS } from "./is-valid-pis/is-valid-pis";
+// The deprecated aliases below are declared as constants rather than as renamed re-exports
+// (`export { formatCpf as formatCPF }`) so that their `@deprecated` tag survives into the bundled
+// declaration file: the bundler collapses every renamed re-export of the entry point into a single
+// `export { ... }` statement, which carries no documentation, while a `declare const` keeps the
+// comment written right above it.
+/**
+ * Formats a CEP, the 1.x name of `formatCep`.
+ *
+ * @deprecated Use `formatCep` instead.
+ */
+export const formatCEP: typeof formatCep = formatCep;
+/**
+ * Formats a CNPJ, the 1.x name of `formatCnpj`.
+ *
+ * @deprecated Use `formatCnpj` instead.
+ */
+export const formatCNPJ: typeof formatCnpj = formatCnpj;
+/**
+ * Formats a CPF, the 1.x name of `formatCpf`.
+ *
+ * @deprecated Use `formatCpf` instead.
+ */
+export const formatCPF: typeof formatCpf = formatCpf;
+/**
+ * Generates a valid random CNPJ, the 1.x name of `generateCnpj`.
+ *
+ * @deprecated Use `generateCnpj` instead.
+ */
+export const generateCNPJ: typeof generateCnpj = generateCnpj;
+/**
+ * Generates a valid random CPF, the 1.x name of `generateCpf`.
+ *
+ * @deprecated Use `generateCpf` instead.
+ */
+export const generateCPF: typeof generateCpf = generateCpf;
+/**
+ * Checks whether a CEP is valid, the 1.x name of `isValidCep`.
+ *
+ * @deprecated Use `isValidCep` instead.
+ */
+export const isValidCEP: typeof isValidCep = isValidCep;
+/**
+ * Checks whether a CNPJ is valid, the 1.x name of `isValidCnpj`.
+ *
+ * @deprecated Use `isValidCnpj` instead.
+ */
+export const isValidCNPJ: typeof isValidCnpj = isValidCnpj;
+/**
+ * Checks whether a CPF is valid, the 1.x name of `isValidCpf`.
+ *
+ * @deprecated Use `isValidCpf` instead.
+ */
+export const isValidCPF: typeof isValidCpf = isValidCpf;
+/**
+ * Checks whether a state registration (inscrição estadual) is valid, the 1.x name of `isValidIe`.
+ *
+ * @deprecated Use `isValidIe` instead.
+ */
+export const isValidIE: typeof isValidIe = isValidIe;
+/**
+ * Checks whether a PIS/PASEP is valid, the 1.x name of `isValidPis`.
+ *
+ * @deprecated Use `isValidPis` instead.
+ */
+export const isValidPIS: typeof isValidPis = isValidPis;
