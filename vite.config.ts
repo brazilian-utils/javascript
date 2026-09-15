@@ -145,7 +145,9 @@ const sharedPack = {
 
 export default defineConfig({
 	fmt: {
-		ignorePatterns: ["dist", "coverage", "docs", ".claude"],
+		// `reports` holds generated output only, the committed API Extractor baseline included:
+		// reformatting its code block would make every `check:api` run report a changed API.
+		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude"],
 		singleQuote: false,
 		sortImports: true,
 		useTabs: true,
