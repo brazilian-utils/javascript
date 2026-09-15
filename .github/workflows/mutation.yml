@@ -26,7 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: ./.github/actions/setup
+        uses: $/.github/actions/setup
 
       - name: Mutation test every file
         run: npm run test:mutation

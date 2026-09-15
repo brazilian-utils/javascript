@@ -8,11 +8,11 @@ import { isValidPhone } from "../is-valid-phone/is-valid-phone";
 import { parseCnpj } from "../parse-cnpj/parse-cnpj";
 import { CPF_SYNTAX_REGEX, EMAIL_MAX_LENGTH, EVP_REGEX, PHONE_SYNTAX_REGEX } from "./constants";
 
-/** The kinds of Pix key `parsePixKey` recognizes. */
+/** The kinds of Pix key `getPixKeyInfo` recognizes. */
 export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
 
-/** A Pix key recognized by `parsePixKey`, normalized to the canonical DICT form of its kind. */
-export type PixKey = {
+/** A Pix key recognized by `getPixKeyInfo`, normalized to the canonical DICT form of its kind. */
+export type PixKeyInfo = {
 	/** Which kind of Pix key the value was recognized as. */
 	type: PixKeyType;
 	/** The key in the canonical DICT form for its kind. */
@@ -24,9 +24,9 @@ export type PixKey = {
  * characters of the usual masks, as the E.164 mobile key of the DICT.
  *
  * @param {string} trimmed - The trimmed value to read.
- * @returns {PixKey|null} The phone key, or `null` when the value is not a mobile number.
+ * @returns {PixKeyInfo|null} The phone key, or `null` when the value is not a mobile number.
  */
-const resolvePhoneKey = (trimmed: string): PixKey | null => {
+const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
 	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
 
 	const national = normalizePhone(trimmed);
@@ -67,25 +67,27 @@ const resolvePhoneKey = (trimmed: string): PixKey | null => {
  * a CPF, even when its digits carry a valid CPF check digit.
  *
  * @param {string} value - The Pix key to be parsed.
- * @returns {PixKey|null} The normalized key, or `null` when the value is not a valid Pix key.
+ * @returns {PixKeyInfo|null} The normalized key, or `null` when the value is not a valid Pix key.
  *
  * @example
  * ```typescript
- * parsePixKey("123.456.789-09"); // { type: "cpf", value: "12345678909" }
- * parsePixKey("Fulano@Example.COM "); // { type: "email", value: "fulano@example.com" }
- * parsePixKey("(11) 98765-4321"); // { type: "phone", value: "+5511987654321" }
- * parsePixKey("71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D");
+ * getPixKeyInfo("123.456.789-09"); // { type: "cpf", value: "12345678909" }
+ * getPixKeyInfo("Fulano@Example.COM "); // { type: "email", value: "fulano@example.com" }
+ * getPixKeyInfo("(11) 98765-4321"); // { type: "phone", value: "+5511987654321" }
+ * getPixKeyInfo("71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D");
  * // { type: "evp", value: "71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d" }
- * parsePixKey("51998259765"); // { type: "cpf", value: "51998259765" } (also a valid phone)
- * parsePixKey("+5551998259765"); // { type: "phone", value: "+5551998259765" }
+ * getPixKeyInfo("51998259765"); // { type: "cpf", value: "51998259765" } (also a valid phone)
+ * getPixKeyInfo("+5551998259765"); // { type: "phone", value: "+5551998259765" }
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Official: https://github.com/bacen/pix-dict-api DICT (Diretório de Identificadores de
- * Contas Transacionais) OpenAPI spec, key format reference.
- * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
+ * reference.
+ * @see Official: https://github.com/bacen/pix-api
+ * Pix (SPI) OpenAPI spec.
  */
-export const parsePixKey = (value: string): PixKey | null => {
+export const getPixKeyInfo = (value: string): PixKeyInfo | null => {
 	if (typeof value !== "string") return null;
 
 	const trimmed = value.trim();

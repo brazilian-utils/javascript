@@ -2,6 +2,7 @@ import { calculateCeiCheckDigit } from "../calculate-cei-check-digit/calculate-c
 import { CEI_BASE_LENGTH, CEI_FORMAT_REGEX } from "../constants/cei";
 import { isRepeatedDigits } from "../is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
+import { toStringSafe } from "../to-string-safe/to-string-safe";
 
 /**
  * Validates a number that follows the CEI (Cadastro Específico do INSS) numbering, which the
@@ -11,6 +12,11 @@ import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
  * The check digit weights the base by 7, 4, 1, 8, 5, 2, 1, 6, 3, 7 and 4, adds the tens part of
  * that sum to its units part and takes the complement of the units digit of the result to 10,
  * mapping 10 back to 0.
+ *
+ * The value has to be written as the 12 digits, optionally split into the printed groups of 2,
+ * 3, 5 and 2 by whitespace or the usual mask characters, a run of them between two groups
+ * included; anything else, a letter among the digits included, is rejected instead of being
+ * read past.
  *
  * The Receita Federal does not publish the check digit rule of the CEI/CNO numbering, so the
  * calculation follows the reference implementations cited below, cross-checked against the CNO
@@ -32,20 +38,20 @@ import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
  * The registry's own page at the Receita Federal, which describes the cadastro but publishes
  * neither the mask nor the check digit rule.
  * @see Official: https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno
- * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: every one of the 38432
- * works registered in Minas Gerais passes this check, which is what ties the CNO to the CEI
- * rule and where the test vectors come from.
+ * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: the catalogue entry for the
+ * dataset this rule was cross-checked against and where the test vectors come from. The check was
+ * run over the Minas Gerais extract of the downloaded dataset, which every registered work passed;
+ * the catalogue page itself publishes only the dataset's description and download links (and
+ * currently flags it "Desatualizado"), not that result.
  * @see Based on: https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php
  * PHP reference implementation of the CEI check digit.
  * @see Based on: https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs
  * Second, independent reference implementation agreeing with the first.
  */
 export const isValidCeiCnoNumber = (value: string | number): boolean => {
-	if (typeof value !== "string" && typeof value !== "number") return false;
-
 	const digits = sanitizeToDigits(value);
 
-	if (!CEI_FORMAT_REGEX.test(String(value).trim())) return false;
+	if (!CEI_FORMAT_REGEX.test(toStringSafe(value).trim())) return false;
 
 	if (isRepeatedDigits(digits)) return false;
 

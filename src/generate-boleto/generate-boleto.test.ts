@@ -12,6 +12,25 @@ import { type GenerateBoletoOptions, generateBoleto } from "./generate-boleto";
 const drawArrecadacaoSegment = (): number =>
 	getBoletoInfo(generateBoleto({ type: "arrecadacao" }))?.segment ?? 0;
 
+const drawArrecadacaoIdentifier = (algorithmDraw: number, valueDraw: number): string => {
+	const draws = [0, algorithmDraw, valueDraw];
+	const originalRandom = Math.random;
+	let call = 0;
+
+	try {
+		Math.random = (): number => {
+			const draw = draws[call] ?? 0;
+			call++;
+
+			return draw;
+		};
+
+		return generateBoleto({ type: "arrecadacao" })[2];
+	} finally {
+		Math.random = originalRandom;
+	}
+};
+
 describe("generateBoleto", () => {
 	test("should generate a valid boleto", () => {
 		const boleto = generateBoleto();
@@ -93,18 +112,23 @@ describe("generateBoleto", () => {
 			expect(segments.size).toBeGreaterThan(1);
 		});
 
-		test("should pick the value identifier (position 3) from the same Math.random() draw that selects the check digit algorithm, modulo 11 below 0.5 ('8') and modulo 10 at or above 0.5 ('6')", () => {
-			const originalRandom = Math.random;
+		test("should pick the value identifier (position 3) from all four values, the algorithm draw choosing modulo 11 ('8', '9') below 0.5 and modulo 10 ('6', '7') at or above it, and the value draw choosing an effective amount ('8', '6') below 0.5 and a reference quantity ('9', '7') at or above it", () => {
+			expect(drawArrecadacaoIdentifier(0.3, 0.3)).toBe("8");
+			expect(drawArrecadacaoIdentifier(0.3, 0.5)).toBe("9");
+			expect(drawArrecadacaoIdentifier(0.5, 0.3)).toBe("6");
+			expect(drawArrecadacaoIdentifier(0.5, 0.5)).toBe("7");
+		});
 
-			try {
-				Math.random = () => 0.3;
-				expect(generateBoleto({ type: "arrecadacao" })[2]).toBe("8");
+		test("should generate both an effective amount and a reference quantity across many draws", () => {
+			const flags = new Set(
+				Array.from(
+					{ length: 200 },
+					() => getBoletoInfo(generateBoleto({ type: "arrecadacao" }))?.hasEffectiveValue,
+				),
+			);
 
-				Math.random = () => 0.5;
-				expect(generateBoleto({ type: "arrecadacao" })[2]).toBe("6");
-			} finally {
-				Math.random = originalRandom;
-			}
+			expect(flags.has(true)).toBe(true);
+			expect(flags.has(false)).toBe(true);
 		});
 	});
 
@@ -141,7 +165,7 @@ describe("generateBoleto", () => {
 					const value = generateBoleto({ type });
 					const info = getBoletoInfo(value);
 
-					expect(info).toBeDefined();
+					expect(info).not.toBeNull();
 					expect(info?.bankCode).toBe(type === "arrecadacao" ? "" : value.slice(0, 3));
 				}),
 			);

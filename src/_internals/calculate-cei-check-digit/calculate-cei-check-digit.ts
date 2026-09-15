@@ -26,9 +26,11 @@ import { generateChecksum } from "../generate-checksum/generate-checksum";
  * The registry's own page at the Receita Federal, which describes the cadastro but publishes
  * neither the mask nor the check digit rule.
  * @see Official: https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno
- * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: the 38432 works
- * registered in Minas Gerais confirm the rule, and their check digits of 0 are what shows
- * that a computed 10 maps back to 0, which neither reference implementation does.
+ * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: the catalogue entry for the
+ * dataset this rule was cross-checked against. The Minas Gerais extract of the downloaded dataset
+ * confirms the rule, and the works whose check digit is 0 are what shows that a computed 10 maps
+ * back to 0, which neither reference implementation does; the catalogue page itself publishes only
+ * the dataset's description and download links (and currently flags it "Desatualizado").
  * @see Based on: https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php
  * PHP reference implementation of the CEI check digit.
  * @see Based on: https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs

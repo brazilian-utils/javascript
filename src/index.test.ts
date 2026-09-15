@@ -1,40 +1,43 @@
 import { describe, expect, test } from "./_internals/test/runtime";
 import {
-	type AddBusinessDaysParams,
 	type AddressInfo,
 	type AreaCodeInfo,
 	type Bank,
 	type BoletoInfo,
+	type BusinessDayOptions,
 	type CapitalizeOptions,
 	type Cbo,
 	type CepAddressInfo,
 	type CepProvider,
-	type Certidao,
+	type CertidaoInfo,
 	type CertidaoType,
 	type Cfop,
 	type Cnae,
-	type ConvertCurrencyToWordsOptions,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
-	type DifferenceInBusinessDaysParams,
 	type FormatBoletoOptions,
 	type FormatCaepfOptions,
 	type FormatCeiOptions,
 	type FormatCepOptions,
 	type FormatCertidaoOptions,
+	type FormatCnaeOptions,
+	type FormatLegalNatureOptions,
 	type FormatCnhOptions,
 	type FormatCnoOptions,
 	type FormatCnpjOptions,
 	type FormatCnsOptions,
 	type FormatCpfOptions,
 	type FormatCurrencyOptions,
+	type FormatNcmOptions,
+	type FormatNfeKeyOptions,
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
 	type GenerateBoletoOptions,
+	type GenerateCnpjOptions,
 	type GenerateLicensePlateFormat,
 	type GeneratePhoneType,
-	type GeneratePixPayloadParams,
+	type GeneratePixPayloadOptions,
 	type GenerateProcessoJuridicoOptions,
 	type GetAddressInfoByCepOptions,
 	type GetBoletoInfoOptions,
@@ -45,8 +48,7 @@ import {
 	type GetMunicipalityOptions,
 	type Holiday,
 	type HolidayType,
-	type Iban,
-	type IsBusinessDayOptions,
+	type IbanInfo,
 	type IsHolidayOptions,
 	type IsValidBankAccountOptions,
 	type IsValidBankAccountParams,
@@ -58,9 +60,10 @@ import {
 	type IsValidPixKeyOptions,
 	type IsValidRegistroProfissionalOptions,
 	type LegalNature,
+	type LegalNatureCategory,
 	type LicensePlateFormat,
 	type Municipality,
-	type NfeKey,
+	type NfeKeyInfo,
 	type NfeKeyModel,
 	type NumberToWordsGender,
 	type ParseCnpjOptions,
@@ -68,15 +71,14 @@ import {
 	type PhoneMask,
 	type PhoneType,
 	type PhoneVersion,
-	type PixKey,
+	type PixKeyInfo,
 	type PixKeyType,
-	type PixPayload,
+	type PixPayloadInfo,
 	type PixPointOfInitiation,
 	type RegistroProfissionalCouncil,
 	type State,
 	type StateCode,
 	type StateName,
-	type WordsCase,
 } from "./index";
 import * as brazilianUtils from "./index";
 
@@ -134,6 +136,7 @@ const PUBLIC = [
 	"generatePis",
 	"generatePixPayload",
 	"generateProcessoJuridico",
+	"generateRenavam",
 	"generateVoterId",
 	"getAddressInfoByCep",
 	"getAreaCodeInfo",
@@ -144,16 +147,22 @@ const PUBLIC = [
 	"getBoletoInfo",
 	"getCbo",
 	"getCepInfoByAddress",
+	"getCertidaoInfo",
 	"getCfop",
 	"getCities",
 	"getCnae",
 	"getFormatLicensePlate",
 	"getHolidays",
+	"getIbanInfo",
 	"getLegalNature",
 	"getLegalNatures",
+	"getLegalNaturesByCategory",
 	"getMunicipalities",
 	"getMunicipality",
 	"getMunicipalityByCode",
+	"getNfeKeyInfo",
+	"getPixKeyInfo",
+	"getPixPayloadInfo",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
 	"getStateNameByCode",
@@ -204,24 +213,31 @@ const PUBLIC = [
 	"isValidVin",
 	"isValidVoterId",
 	"parseBoleto",
+	"parseCaepf",
+	"parseCbo",
+	"parseCei",
 	"parseCep",
 	"parseCertidao",
+	"parseCfop",
+	"parseCnae",
 	"parseCnh",
+	"parseCno",
 	"parseCnpj",
+	"parseCns",
 	"parseCpf",
 	"parseCurrency",
 	"parseIban",
 	"parseLegalNature",
 	"parseLicensePlate",
+	"parseNcm",
 	"parseNfeKey",
 	"parsePassport",
 	"parsePhone",
 	"parsePis",
-	"parsePixKey",
-	"parsePixPayload",
 	"parseProcessoJuridico",
 	"parseVoterId",
 	"removeAccents",
+	"subBusinessDays",
 ].sort();
 
 const NETWORK_ENTRY_POINTS = new Set(["getAddressInfoByCep", "getCepInfoByAddress"]);
@@ -251,41 +267,44 @@ describe("Public API", () => {
 
 	test("should export every documented public type", () => {
 		const publicTypes: Partial<{
-			AddBusinessDaysParams: AddBusinessDaysParams;
 			AddressInfo: AddressInfo;
 			AreaCodeInfo: AreaCodeInfo;
 			Bank: Bank;
 			BoletoInfo: BoletoInfo;
+			BusinessDayOptions: BusinessDayOptions;
 			CapitalizeOptions: CapitalizeOptions;
 			Cbo: Cbo;
 			CepAddressInfo: CepAddressInfo;
 			CepProvider: CepProvider;
-			Certidao: Certidao;
+			CertidaoInfo: CertidaoInfo;
 			CertidaoType: CertidaoType;
 			Cfop: Cfop;
 			Cnae: Cnae;
-			ConvertCurrencyToWordsOptions: ConvertCurrencyToWordsOptions;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
-			DifferenceInBusinessDaysParams: DifferenceInBusinessDaysParams;
 			FormatBoletoOptions: FormatBoletoOptions;
 			FormatCaepfOptions: FormatCaepfOptions;
 			FormatCeiOptions: FormatCeiOptions;
 			FormatCepOptions: FormatCepOptions;
 			FormatCertidaoOptions: FormatCertidaoOptions;
+			FormatCnaeOptions: FormatCnaeOptions;
+			FormatLegalNatureOptions: FormatLegalNatureOptions;
 			FormatCnhOptions: FormatCnhOptions;
 			FormatCnoOptions: FormatCnoOptions;
 			FormatCnpjOptions: FormatCnpjOptions;
 			FormatCnsOptions: FormatCnsOptions;
 			FormatCpfOptions: FormatCpfOptions;
 			FormatCurrencyOptions: FormatCurrencyOptions;
+			FormatNcmOptions: FormatNcmOptions;
+			FormatNfeKeyOptions: FormatNfeKeyOptions;
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
 			GenerateBoletoOptions: GenerateBoletoOptions;
+			GenerateCnpjOptions: GenerateCnpjOptions;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;
 			GeneratePhoneType: GeneratePhoneType;
-			GeneratePixPayloadParams: GeneratePixPayloadParams;
+			GeneratePixPayloadOptions: GeneratePixPayloadOptions;
 			GenerateProcessoJuridicoOptions: GenerateProcessoJuridicoOptions;
 			GetAddressInfoByCepOptions: GetAddressInfoByCepOptions;
 			GetBoletoInfoOptions: GetBoletoInfoOptions;
@@ -296,8 +315,7 @@ describe("Public API", () => {
 			GetMunicipalityOptions: GetMunicipalityOptions;
 			Holiday: Holiday;
 			HolidayType: HolidayType;
-			Iban: Iban;
-			IsBusinessDayOptions: IsBusinessDayOptions;
+			IbanInfo: IbanInfo;
 			IsHolidayOptions: IsHolidayOptions;
 			IsValidBankAccountOptions: IsValidBankAccountOptions;
 			IsValidBankAccountParams: IsValidBankAccountParams;
@@ -309,9 +327,10 @@ describe("Public API", () => {
 			IsValidPixKeyOptions: IsValidPixKeyOptions;
 			IsValidRegistroProfissionalOptions: IsValidRegistroProfissionalOptions;
 			LegalNature: LegalNature;
+			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;
 			Municipality: Municipality;
-			NfeKey: NfeKey;
+			NfeKeyInfo: NfeKeyInfo;
 			NfeKeyModel: NfeKeyModel;
 			NumberToWordsGender: NumberToWordsGender;
 			ParseCnpjOptions: ParseCnpjOptions;
@@ -319,15 +338,14 @@ describe("Public API", () => {
 			PhoneMask: PhoneMask;
 			PhoneType: PhoneType;
 			PhoneVersion: PhoneVersion;
-			PixKey: PixKey;
+			PixKeyInfo: PixKeyInfo;
 			PixKeyType: PixKeyType;
-			PixPayload: PixPayload;
+			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
 			State: State;
 			StateCode: StateCode;
 			StateName: StateName;
-			WordsCase: WordsCase;
 		}> = {};
 
 		expect(publicTypes).toEqual({});

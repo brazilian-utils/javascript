@@ -38,6 +38,11 @@ describe("isValidCaepf", () => {
 			expect(isValidCaepf("abc.118.610/001-84")).toBe(false);
 		});
 
+		test("when a valid registration is followed or preceded by a letter", () => {
+			expect(isValidCaepf("293.118.610/001-84a")).toBe(false);
+			expect(isValidCaepf("a293.118.610/001-84")).toBe(false);
+		});
+
 		test("when it has 14 digits but an unsupported separator", () => {
 			expect(isValidCaepf("293#118#610#001#84")).toBe(false);
 		});
@@ -45,6 +50,12 @@ describe("isValidCaepf", () => {
 		test("when every digit is the same", () => {
 			expect(isValidCaepf("00000000000000")).toBe(false);
 			expect(isValidCaepf("11111111111111")).toBe(false);
+		});
+
+		test("when the 12 digit base is a repeated digit, as isValidCei and isValidCno reject it", () => {
+			expect(isValidCaepf("00000000000012")).toBe(false);
+			expect(isValidCaepf("000.000.000/000-12")).toBe(false);
+			expect(isValidCaepf("11111111111192")).toBe(false);
 		});
 
 		test("when the check digits do not match (29311861000185, Casilhero/brazilian-validators CaepfTest)", () => {

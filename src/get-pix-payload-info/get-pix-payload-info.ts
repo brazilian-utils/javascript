@@ -38,8 +38,8 @@ import { type TlvFields, parseTlv } from "../_internals/parse-tlv/parse-tlv";
  */
 export type PixPointOfInitiation = "static" | "dynamic";
 
-/** The fields `parsePixPayload` reads out of a Pix BR Code. */
-export type PixPayload = {
+/** The fields `getPixPayloadInfo` reads out of a Pix BR Code. */
+export type PixPayloadInfo = {
 	/** The Pix key of the receiver, present in a static payload. */
 	key?: string;
 	/** URL of the dynamic payload, present instead of `key` in a dynamic one. */
@@ -146,6 +146,7 @@ const resolveMerchantKeyInfo = (fields: TlvFields): MerchantKeyInfo | null => {
 	if ((key === undefined) === (url === undefined)) return null;
 	if (key !== undefined && !key) return null;
 	if (url !== undefined && !isValidPixUrl(url)) return null;
+	if (withdrawalFacilitator !== undefined && url !== undefined) return null;
 	if (
 		withdrawalFacilitator !== undefined &&
 		!WITHDRAWAL_FACILITATOR_REGEX.test(withdrawalFacilitator)
@@ -178,11 +179,11 @@ const buildPixPayload = (
 	merchantName: string,
 	merchantCity: string,
 	optional: OptionalPixFields,
-): PixPayload => {
+): PixPayloadInfo => {
 	const { key, url, description, withdrawalFacilitator, amount, txid, pointOfInitiation } =
 		optional;
 	const isDynamic = url !== undefined || pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION;
-	const pix: PixPayload = {
+	const pix: PixPayloadInfo = {
 		merchantName,
 		merchantCity,
 		pointOfInitiation: isDynamic ? "dynamic" : "static",
@@ -216,8 +217,12 @@ const buildPixPayload = (
  * overrun them, so they are not enforced here, and neither is the 77 character limit of the
  * Pix key field (26-01).
  *
- * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
- * composto" of Pix Automático (Pix recorrente) does, are out of scope and rejected.
+ * Unreserved Templates (IDs 80 to 99) are ignored. The "QR Code composto" of Pix Automático
+ * (Pix recorrente) writes its recurrence location in one of them: when such a payload also
+ * carries a payment location in 26-25, as the composite example of the Pix manual does, it is
+ * parsed here as an ordinary dynamic payload and its recurrence location is dropped, so a
+ * consumer that has to tell the two apart cannot rely on this parser. Only a payload with no
+ * Pix template at all in IDs 26 to 51 returns `null`.
  *
  * The merchant account information must carry exactly one of a Pix key (26-01) or a PSP
  * location (26-25); the location is checked with the same host and path rule
@@ -237,15 +242,19 @@ const buildPixPayload = (
  * válido […] indica que esse é um QR Code para Pix Saque", whose amount is settled at payment
  * time. So `54` set to `"0"` or `"0.00"` is accepted together with `fss` and rejected without
  * it; that rejection is a deliberate restriction of this library, not a rule of the manual,
- * whose field table allows `"0"` in any payload. A `fss` that is not 8 digits is rejected.
+ * whose field table allows `"0"` in any payload. A `fss` that is not 8 digits is rejected, and
+ * so is a `fss` written next to a PSP location: §2.7 of the Manual de Padrões para Iniciação do
+ * Pix maps the dynamic QR Code to exactly two sub-objects, `00` (GUI) and `25` (URL), while
+ * `fss` belongs to the static template of §2.6, whose §2.6.1 states that "não há funcionalidade
+ * de Pix Troco para QR Codes estáticos, apenas para QR Codes dinâmicos".
  *
  * @param {string} value - The BR Code payload to be parsed.
- * @returns {PixPayload|null} The Pix data of the payload, or `null` when it is not a valid Pix
+ * @returns {PixPayloadInfo|null} The Pix data of the payload, or `null` when it is not a valid Pix
  * BR Code.
  *
  * @example
  * ```typescript
- * parsePixPayload(
+ * getPixPayloadInfo(
  *   "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-426655440000" +
  *     "5204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D",
  * );
@@ -259,10 +268,12 @@ const buildPixPayload = (
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
- * @see Official: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api
+ * Pix (SPI) OpenAPI spec.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
-export const parsePixPayload = (value: string): PixPayload | null => {
+export const getPixPayloadInfo = (value: string): PixPayloadInfo | null => {
 	if (typeof value !== "string") return null;
 
 	const payload = value.trim();

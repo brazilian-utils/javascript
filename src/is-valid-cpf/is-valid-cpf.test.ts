@@ -94,6 +94,11 @@ describe("isValidCpf", () => {
 			expect(isValidCpf("12345678909 ")).toBe(true);
 		});
 
+		test("when it is the worked example the RFB Manual da e-Financeira prints", () => {
+			expect(isValidCpf("28001238938")).toBe(true);
+			expect(isValidCpf("280.012.389-38")).toBe(true);
+		});
+
 		test("should return true for randomly generated CPFs", () => {
 			for (let i = 0; i < 100; i++) {
 				expect(isValidCpf(generateCpf())).toBe(true);

@@ -34,19 +34,43 @@ const isNcmResponse = (value: unknown): value is NcmResponse =>
 	Array.isArray(value.Nomenclaturas) &&
 	value.Nomenclaturas.every((entry) => isNcmEntry(entry));
 
+const BR_DATE_REGEX = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
 /**
  * Parses a Siscomex `dd/mm/yyyy` date into a `Date` at UTC midnight.
  *
+ * The string must have the exact `dd/mm/yyyy` shape and name a day that exists: `Date.UTC`
+ * rolls impossible dates over (`31/02/2026` would become 3 March 2026) and would silently
+ * widen the in-force window, so the parsed components are compared back against the date.
+ * An invalid `Date` is returned otherwise, which makes every comparison in `isInForce` false.
+ *
  * @param {string} date - A date string in `dd/mm/yyyy` format.
- * @returns {Date} The parsed date.
+ * @returns {Date} The parsed date, or an invalid `Date`.
  */
 const parseBrDate = (date: string): Date => {
-	const [day, month, year] = date.split("/").map(Number);
-	return new Date(Date.UTC(year, month - 1, day));
+	const match = BR_DATE_REGEX.exec(date);
+
+	if (match === null) return new Date(Number.NaN);
+
+	const day = Number(match[1]);
+	const month = Number(match[2]);
+	const year = Number(match[3]);
+	const parsed = new Date(Date.UTC(year, month - 1, day));
+
+	if (
+		parsed.getUTCFullYear() !== year ||
+		parsed.getUTCMonth() + 1 !== month ||
+		parsed.getUTCDate() !== day
+	) {
+		return new Date(Number.NaN);
+	}
+
+	return parsed;
 };
 
 /**
- * Whether `today` falls within `[Data_Inicio, Data_Fim]` (both inclusive).
+ * Whether `today` falls within `[Data_Inicio, Data_Fim]` (both inclusive). An entry whose
+ * boundaries are not both valid `dd/mm/yyyy` dates is treated as not in force.
  *
  * @param {NcmEntry} entry - The Siscomex NCM entry to check.
  * @param {Date} today - The reference date.
@@ -70,9 +94,8 @@ const main = async (): Promise<void> => {
 		throw new Error("Siscomex NCM payload is not a Nomenclaturas response");
 	}
 
-	const today = new Date(
-		Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()),
-	);
+	const now = new Date();
+	const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
 	const codes = json.Nomenclaturas.filter(
 		(entry) => /^[\d.]{10}$/.test(entry.Codigo) && isInForce(entry, today),

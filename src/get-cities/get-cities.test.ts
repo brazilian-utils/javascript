@@ -38,9 +38,26 @@ describe("getCities", () => {
 		expect(cities).toEqual(sorted);
 	});
 
+	it("should sort every per-state list with the pt-BR comparator", () => {
+		for (const state of getStates()) {
+			const cities = getCities(state.code);
+			const sorted = [...cities].sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+			expect(cities).toEqual(sorted);
+		}
+	});
+
 	it("should return empty array if state does not exist", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(getCities("ACC")).toEqual([]);
+	});
+
+	it("should return empty array for a truthy state that is not a string instead of throwing", () => {
+		expect(getCities(Object.create(null))).toEqual([]);
+		// @ts-expect-error: intentionally invalid input
+		expect(getCities(35)).toEqual([]);
+		// @ts-expect-error: intentionally invalid input
+		expect(getCities(["SP"])).toEqual([]);
 	});
 
 	it("should return empty array for inherited Object property names instead of throwing", () => {

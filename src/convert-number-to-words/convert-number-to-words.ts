@@ -1,22 +1,18 @@
-import { applyWordsCase } from "../_internals/apply-words-case/apply-words-case";
 import {
 	NUMBER_TO_WORDS_MAX_VALUE,
 	type NumberToWordsGender,
 	numberToWords,
-	type WordsCase,
 } from "../_internals/number-to-words/number-to-words";
 
 /** Options of `convertNumberToWords`. */
 export type ConvertNumberToWordsOptions = {
 	/** Grammatical gender used to agree "um/dois" and the hundreds group ("duzentos/duzentas", etc.) with the noun the number qualifies. Defaults to `"masculine"`. */
 	gender?: NumberToWordsGender;
-	/** Letter case applied to the result: `"lower"` (unchanged), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Defaults to `"lower"`; an invalid value is ignored and `"lower"` is used instead. */
-	case?: WordsCase;
 };
 
 /**
  * Formats an integer as its Brazilian Portuguese cardinal number words ("por extenso"),
- * e.g. `1235` becomes `"mil, duzentos e trinta e cinco"`.
+ * e.g. `1235` becomes `"mil duzentos e trinta e cinco"`.
  *
  * Only integers from `-999999999999999` to `999999999999999` (999 trillion in absolute value,
  * the highest value expressible with the "trilhão" scale word) are supported; anything outside
@@ -25,10 +21,11 @@ export type ConvertNumberToWordsOptions = {
  * only writes out whole numbers, it never spells out a decimal part (use
  * `convertCurrencyToWords` for a monetary amount with cents).
  *
+ * The result is always lowercase; apply any other casing to it yourself.
+ *
  * @param {number} value - The integer to convert.
  * @param {ConvertNumberToWordsOptions} [options] - Optional formatting options.
  * @param {NumberToWordsGender} [options.gender] - Grammatical gender for "um/dois" and the hundreds group. Defaults to `"masculine"`.
- * @param {WordsCase} [options.case] - Letter case applied to the result. Defaults to `"lower"`.
  * @returns {string} The cardinal number written out in Portuguese, or `""` for invalid input.
  *
  * @example
@@ -38,11 +35,12 @@ export type ConvertNumberToWordsOptions = {
  * convertNumberToWords(2000000); // "dois milhões"
  * convertNumberToWords(-42); // "menos quarenta e dois"
  * convertNumberToWords(2, { gender: "feminine" }); // "duas"
- * convertNumberToWords(3, { case: "upper" }); // "TRÊS"
+ * convertNumberToWords(12.9); // "doze" (truncated toward zero)
  * convertNumberToWords(NaN); // ""
  * ```
  *
- * @see Based on: https://github.com/savoirfairelinux/num2words `brutils` itself has no dedicated
+ * @see Based on: https://github.com/savoirfairelinux/num2words
+ * `brutils` itself has no dedicated
  * number-to-words module (its `currency.py` delegates the Portuguese numeral text to this
  * library's `pt_BR` locale); this is the reference for the numeral-word tables reproduced here.
  */
@@ -57,7 +55,6 @@ export const convertNumberToWords = (
 	if (Math.abs(truncated) > NUMBER_TO_WORDS_MAX_VALUE) return "";
 
 	const words = numberToWords(Math.abs(truncated), { gender: options?.gender });
-	const result = truncated < 0 ? `menos ${words}` : words;
 
-	return applyWordsCase(result, options?.case);
+	return truncated < 0 ? `menos ${words}` : words;
 };

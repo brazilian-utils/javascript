@@ -1,6 +1,13 @@
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CST_FORMAT_REGEX, ICMS_CST_CODES, IPI_CST_CODES, PIS_COFINS_CST_CODES } from "./constants";
+
+/** Width of the ICMS form, the widest a CST is printed with: 1 origin digit plus a Tabela B code. */
+const CST_LENGTH = 3;
+
+/** Width of a bare Tabela B code, the narrowest documented form a CST is written in. */
+const TABELA_B_LENGTH = 2;
 
 /**
  * Options for `isValidCst`.
@@ -9,23 +16,30 @@ export type IsValidCstOptions = {
 	/**
 	 * The tax whose CST (Código de Situação Tributária) table the value is checked against.
 	 * Omit it to accept a code that exists in any of the four tables (`icms`, `ipi`, `pis`,
-	 * `cofins`).
+	 * `cofins`); a value outside those four falls back to that same default at runtime.
 	 */
 	tax?: "icms" | "ipi" | "pis" | "cofins";
 };
 
+type CstTax = NonNullable<IsValidCstOptions["tax"]>;
+
 const isValidIcmsCst = (digits: string): boolean =>
 	digits.charAt(0) <= "8" && (ICMS_CST_CODES as readonly string[]).includes(digits.slice(1));
 
-const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): boolean => {
+const isValidIpiCst = (digits: string): boolean =>
+	(IPI_CST_CODES as readonly string[]).includes(digits);
+
+const isValidPisCofinsCst = (digits: string): boolean =>
+	(PIS_COFINS_CST_CODES as readonly string[]).includes(digits);
+
+const isKnownTax = (tax: unknown): tax is CstTax =>
+	tax === "icms" || tax === "ipi" || tax === "pis" || tax === "cofins";
+
+const isValidForTax = (digits: string, tax: CstTax): boolean => {
 	if (tax === "icms") return isValidIcmsCst(digits);
-	if (tax === "ipi") return (IPI_CST_CODES as readonly string[]).includes(digits);
+	if (tax === "ipi") return isValidIpiCst(digits);
 
-	if (tax === "pis" || tax === "cofins") {
-		return (PIS_COFINS_CST_CODES as readonly string[]).includes(digits);
-	}
-
-	return false;
+	return isValidPisCofinsCst(digits);
 };
 
 /**
@@ -42,17 +56,29 @@ const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): 
  * 52, 53, 54, 55, 56, 60, 61, 62, 63, 64, 65, 66, 67, 70, 71, 72, 73, 74, 75, 98, 99`.
  *
  * `options.tax` is optional. When it is omitted, the code is valid as long as it exists in any
- * one of the four tables above; when it is given, only that table is consulted.
+ * one of the four tables above; when it is given, only that table is consulted. A `tax` outside
+ * the four documented values falls back to that default instead of turning the code down, the
+ * way every other scalar option of this library (`version`, `type`, `style`) treats a value it
+ * does not know.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 2 or
- * 3 digits, with a single separator between them and optional surrounding whitespace.
- * Anything else (`"abc110"`) is rejected instead of having its digits picked out. A number is
+ * A string is only read as a code when it is written in one of the documented forms: the 2
+ * digits of a Tabela B code, or the 3 digits of the ICMS form with an optional single
+ * separator after the origin digit, plus optional surrounding whitespace. The origin digit is
+ * the only boundary a printed CST has, so `"0 10"` and `"1-10"` are read while `"0-0"`,
+ * `"11-0"` and `"00-"` are not. Anything else (`"abc110"`) is rejected instead of having its
+ * digits picked out. A number is
  * only read as a code when it is a non-negative safe integer, since a sign, a decimal point or
  * a rounded magnitude would otherwise be read as a code the caller never wrote.
  *
+ * A single digit is narrower than either documented form, so it is left padded with zeros to
+ * the 3 digits of the ICMS form, whether it comes as a string or as a number: `0`, `"0"` and
+ * `"000"` are all the ICMS code `000`. A 2 digit value is already a documented form, a Tabela B
+ * code, and is read as written, so `isValidCst("00", { tax: "ipi" })` stays a CST-IPI check and
+ * a Tabela B code keeps its own two digits: `"07"`, not `7`, which is the ICMS code `007`.
+ *
  * @param {string|number} value - The CST code to be validated, e.g. `"110"`, `"0 10"` or `110`.
  * @param {IsValidCstOptions} [options] - The tax whose table the value is checked against.
- * Checks every table when omitted.
+ * Checks every table when omitted or when the tax is not one of the four documented values.
  * @returns {boolean} True when the code is valid for the given tax (or for any tax, when
  * `options.tax` is omitted), false otherwise.
  *
@@ -61,8 +87,12 @@ const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): 
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2023/ajuste-sinief-39-23
  * Ajuste SINIEF 39/23, which gave Tabela B its current wording with effect from 01.12.23.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2024/AJ020_24
- * Ajuste SINIEF 20/24, which revoked items 12, 13, 52, 72 and 74 of Tabela B with effect from
- * 09.07.24.
+ * Ajuste SINIEF 20/24, which struck items 12, 13, 52, 72 and 74 from Tabela B (effects from
+ * 09.07.24) before they ever took effect: those items sat in the inciso III of its cláusula
+ * segunda, whose effect the alínea "b" of the inciso I of the cláusula terceira of Ajuste SINIEF
+ * 39/23 had deferred to 1º de outubro de 2024, so the revocation reached them first and the codes
+ * were never in force. Neither ajuste uses the phrase "sem efeitos"; this is the reading of the
+ * two clauses, not a quotation.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/1994/aj_003_94
  * Ajuste SINIEF 03/1994, which instituted the ICMS CST as the two digit code AB.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2000/AJ_006_00
@@ -82,8 +112,11 @@ const isValidForTax = (digits: string, tax: "icms" | "ipi" | "pis" | "cofins"): 
  * isValidCst("49", { tax: "pis" }); // true
  * isValidCst("07", { tax: "cofins" }); // true
  * isValidCst("99", { tax: "icms" }); // false
+ * isValidCst(0, { tax: "icms" }); // true (a single digit is padded to the 3 digit form, "000")
+ * isValidCst("0", { tax: "icms" }); // true (padded the same way a number is)
  * isValidCst("110"); // true (found in the icms table)
  * isValidCst("49"); // true (found in the ipi table)
+ * isValidCst("000", { tax: "nope" }); // true (an unknown tax falls back to checking every table)
  * isValidCst("999"); // false (not in any table)
  * isValidCst("abc110"); // false (not a documented form)
  * isValidCst(-110); // false (not a non-negative safe integer)
@@ -93,16 +126,15 @@ export const isValidCst = (value: string | number, options?: IsValidCstOptions):
 	if (!isLookupCode(value)) return false;
 	if (options !== undefined && (options === null || typeof options !== "object")) return false;
 
-	const code = typeof value === "number" ? String(value) : value.trim();
+	const trimmed = String(value).trim();
+	const code = trimmed.length < TABELA_B_LENGTH ? padLookupCode(trimmed, CST_LENGTH) : trimmed;
 
 	if (!CST_FORMAT_REGEX.test(code)) return false;
 
 	const digits = sanitizeToDigits(code);
 	const tax = options?.tax;
 
-	if (tax !== undefined) return isValidForTax(digits, tax);
+	if (isKnownTax(tax)) return isValidForTax(digits, tax);
 
-	return (
-		isValidForTax(digits, "icms") || isValidForTax(digits, "ipi") || isValidForTax(digits, "pis")
-	);
+	return isValidIcmsCst(digits) || isValidIpiCst(digits) || isValidPisCofinsCst(digits);
 };

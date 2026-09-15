@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.0](https://github.com/brazilian-utils/javascript/compare/2.2.0...2.3.0) (2026-04-09)
+## [2.3.0](https://github.com/brazilian-utils/javascript/compare/2.2.0...2.3.0) (2026-04-08)
 
 ### Features
 
@@ -193,5 +193,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 🎡 adjust travis config ([0ec107f](https://github.com/brazilian-utils/javascript/commit/0ec107f1ebee536e15a6bb991750342457bf1a44))
 - 🎡 rename travis file ([25da01e](https://github.com/brazilian-utils/javascript/commit/25da01e5c700c17c3e88217c4bf272f5eef5639a))
-
-[Unreleased]: https://github.com/brazilian-utils/javascript/compare/2.3.0...HEAD

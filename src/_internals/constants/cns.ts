@@ -13,9 +13,11 @@
 
 /**
  * Shape a CNS number has to be written in: the 15 digits, optionally split into the printed
- * groups of 3, 4, 4 and 4 by whitespace or the usual mask characters.
+ * groups of 3, 4, 4 and 4 by whitespace or the usual mask characters. A run of separators is
+ * tolerated between two groups, not just a single one, which is what the CPF, CNPJ, CAEPF and
+ * certidão regexes of this library do.
  */
-export const CNS_FORMAT_REGEX = /^\d{3}[\s.\-/]?\d{4}[\s.\-/]?\d{4}[\s.\-/]?\d{4}$/;
+export const CNS_FORMAT_REGEX = /^\d{3}[\s.\-/]*\d{4}[\s.\-/]*\d{4}[\s.\-/]*\d{4}$/;
 
 /** Digits of the PIS/PASEP/NIS derived base embedded in a definitive CNS (starts with 1 or 2). */
 export const CNS_DEFINITIVE_BASE_LENGTH = 11;

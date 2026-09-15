@@ -7,6 +7,10 @@ import { isBusinessDay } from "../is-business-day/is-business-day";
 import { STATE_HOLIDAYS } from "./constants";
 import { getHolidays, type GetHolidaysOptions, type Holiday } from "./get-holidays";
 
+const PROTOTYPE_KEYS = Object.getOwnPropertyNames(Object.prototype);
+
+const hostileStateCodes = fc.constantFrom(...PROTOTYPE_KEYS, "SP", "xx");
+
 function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
 	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
 }
@@ -340,21 +344,21 @@ describe("getHolidays", () => {
 		).toHaveLength(1);
 	});
 
-	test("should include state holidays added after the 2026 legal audit: PB's Morte de João Pessoa (Lei nº 3.489/1967, art. 2º), TO's Autonomia do Estado do Tocantins (Lei nº 960/1998), and AP's Dia Estadual da Consciência Negra (Lei nº 1.169/2007, until superseded by the 2024 national holiday)", () => {
-		const pbHolidays = getHolidays({ year: 2024, stateCode: "PB" });
-		const toHolidays = getHolidays({ year: 2024, stateCode: "TO" });
+	test("should include state holidays added after the 2026 legal audit while they were in force: PB's Morte de João Pessoa (Lei nº 3.489/1967, art. 2º), TO's Autonomia do Estado do Tocantins (Lei nº 960/1998), and AP's Dia Estadual da Consciência Negra (Lei nº 1.169/2007, until superseded by the 2024 national holiday)", () => {
+		const pbHolidays = getHolidays({ year: 2015, stateCode: "PB" });
+		const toHolidays = getHolidays({ year: 2008, stateCode: "TO" });
 		const apHolidays2023 = getHolidays({ year: 2023, stateCode: "AP" });
 		const apHolidays2024 = getHolidays({ year: 2024, stateCode: "AP" });
 
 		expect(pbHolidays).toContainEqual({
 			name: "Morte de João Pessoa",
-			date: new Date(2024, 6, 26),
+			date: new Date(2015, 6, 26),
 			type: "state",
 		});
 
 		expect(toHolidays).toContainEqual({
 			name: "Autonomia do Estado do Tocantins",
-			date: new Date(2024, 2, 18),
+			date: new Date(2008, 2, 18),
 			type: "state",
 		});
 
@@ -365,6 +369,224 @@ describe("getHolidays", () => {
 		});
 
 		expect(apHolidays2024.some((h) => h.name === "Dia Estadual da Consciência Negra")).toBe(false);
+	});
+
+	test("should stop emitting PB's Morte de João Pessoa from 2016 on, since Lei PB nº 10.601/2015 art. 2º revoked art. 2º of Lei PB nº 3.489/1967 on 17/12/2015", () => {
+		expect(
+			getHolidays({ year: 2016, stateCode: "PB" }).some((h) => h.name === "Morte de João Pessoa"),
+		).toBe(false);
+
+		expect(getHolidays({ year: 2016, stateCode: "PB" })).toContainEqual({
+			name: "Data Magna do Estado da Paraíba",
+			date: new Date(2016, 7, 5),
+			type: "state",
+		});
+	});
+
+	test("should stop emitting TO's Autonomia do Estado do Tocantins from 2009 on, since Lei TO nº 2.013/2009 rewrote the parágrafo único of Lei TO nº 960/1998 art. 1º, the only clause that declared the feriado, into a commemorative provision", () => {
+		expect(
+			getHolidays({ year: 2009, stateCode: "TO" }).some(
+				(h) => h.name === "Autonomia do Estado do Tocantins",
+			),
+		).toBe(false);
+
+		expect(getHolidays({ year: 2009, stateCode: "TO" })).toContainEqual({
+			name: "Criação do Estado do Tocantins",
+			date: new Date(2009, 9, 5),
+			type: "state",
+		});
+	});
+
+	test("should type AL's 16 September as a feriado estadual from 2024 on (Lei AL nº 9.358/2024) and as an optional day before it (Decreto AL nº 68.782/2019)", () => {
+		expect(getHolidays({ year: 2023, stateCode: "AL" })).toContainEqual({
+			name: "Emancipação Política de Alagoas",
+			date: new Date(2023, 8, 16),
+			type: "optional",
+		});
+
+		expect(getHolidays({ year: 2024, stateCode: "AL" })).toContainEqual({
+			name: "Emancipação Política de Alagoas",
+			date: new Date(2024, 8, 16),
+			type: "state",
+		});
+
+		expect(
+			getHolidays({ year: 2024, stateCode: "AL" }).filter(
+				(h) => h.name === "Emancipação Política de Alagoas",
+			),
+		).toHaveLength(1);
+	});
+
+	test("should list the three Goiás state holidays of Lei GO nº 20.756/2020, art. 269, II", () => {
+		const holidays = getHolidays({ year: 2024, stateCode: "GO" });
+
+		expect(holidays).toContainEqual({
+			name: "Fundação da Cidade de Goiás",
+			date: new Date(2024, 6, 26),
+			type: "state",
+		});
+		expect(holidays).toContainEqual({
+			name: "Lançamento da Pedra Fundamental de Goiânia",
+			date: new Date(2024, 9, 24),
+			type: "state",
+		});
+		expect(holidays).toContainEqual({
+			name: "Dia do Servidor Público",
+			date: new Date(2024, 9, 28),
+			type: "state",
+		});
+	});
+
+	test("should replace the national optional Corpus Christi with a DF state entry, which Lei distrital nº 72/1989 art. 1º parágrafo único declares a feriado, without listing the date twice", () => {
+		const dfHolidays = getHolidays({ year: 2024, stateCode: "DF" });
+		const nationalHolidays = getHolidays(2024);
+
+		expect(dfHolidays.filter((h) => h.name === "Corpus Christi")).toEqual([
+			{ name: "Corpus Christi", date: new Date(2024, 4, 30), type: "state" },
+		]);
+
+		expect(nationalHolidays).toContainEqual({
+			name: "Corpus Christi",
+			date: new Date(2024, 4, 30),
+			type: "optional",
+		});
+
+		expect(getHolidays({ year: 2024, stateCode: "SP" })).toContainEqual({
+			name: "Corpus Christi",
+			date: new Date(2024, 4, 30),
+			type: "optional",
+		});
+	});
+
+	test("should list DF's Fundação de Brasília (Lei distrital nº 72/1989, art. 1º, I) next to the national Tiradentes, which falls on the same 21 April under a different name", () => {
+		const dfHolidays = getHolidays({ year: 2024, stateCode: "DF" });
+
+		expect(dfHolidays).toContainEqual({
+			name: "Fundação de Brasília",
+			date: new Date(2024, 3, 21),
+			type: "state",
+		});
+		expect(dfHolidays).toContainEqual({
+			name: "Tiradentes",
+			date: new Date(2024, 3, 21),
+			type: "national",
+		});
+	});
+
+	test("should move both Santa Catarina holidays to the following Sunday when they fall Monday to Friday, as Lei SC nº 18.531/2022 requires (11/08/2025 is a Monday, 25/11/2025 a Tuesday)", () => {
+		const holidays = getHolidays({ year: 2025, stateCode: "SC" });
+
+		expect(holidays).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2025, 7, 17),
+			type: "state",
+		});
+		expect(holidays).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2025, 10, 30),
+			type: "state",
+		});
+	});
+
+	test("should keep both Santa Catarina holidays on their statutory date in a year they already fall on a weekend (11/08/2024 is a Sunday, 25/11/2029 a Sunday and 25/11/2028 a Saturday)", () => {
+		expect(getHolidays({ year: 2024, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2024, 7, 11),
+			type: "state",
+		});
+		expect(getHolidays({ year: 2029, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2029, 10, 25),
+			type: "state",
+		});
+		expect(getHolidays({ year: 2028, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2028, 10, 25),
+			type: "state",
+		});
+	});
+
+	test("should keep the Santa Catarina 11 August holiday on its statutory weekday before 2005, the year Lei SC nº 13.408/2005 extended the transfer to it (11/08/2003 is a Monday)", () => {
+		expect(getHolidays({ year: 2003, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2003, 7, 11),
+			type: "state",
+		});
+	});
+
+	test("should keep the Santa Catarina 25 November holiday on its statutory weekday before 1999, the year Lei SC nº 11.213/1999 introduced its transfer (25/11/1998 is a Wednesday)", () => {
+		expect(getHolidays({ year: 1998, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(1998, 10, 25),
+			type: "state",
+		});
+	});
+
+	test("should move the Santa Catarina 25 November holiday to the following Sunday from 1999 on, the year Lei SC nº 11.213, de 11/11/1999, entered into force thirteen days before it (25/11/1999 is a Thursday)", () => {
+		expect(getHolidays({ year: 1999, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(1999, 10, 28),
+			type: "state",
+		});
+	});
+
+	test("should move the Santa Catarina 25 November holiday into the next month when the following Sunday falls there (25/11/2002 is a Monday, so the holiday lands on 01/12/2002)", () => {
+		expect(getHolidays({ year: 2002, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2002, 11, 1),
+			type: "state",
+		});
+	});
+
+	test("should keep the Santa Catarina 25 November holiday on its statutory weekday in 2004, the one year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause (25/11/2004 is a Thursday)", () => {
+		expect(getHolidays({ year: 2004, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2004, 10, 25),
+			type: "state",
+		});
+	});
+
+	test("should move the Santa Catarina 25 November holiday again from 2005 on, the year Lei SC nº 13.408/2005 reinstated the transfer (25/11/2005 is a Friday)", () => {
+		expect(getHolidays({ year: 2005, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2005, 10, 27),
+			type: "state",
+		});
+	});
+
+	test("should switch to the Sunday transfer exactly in 2005, the year Lei SC nº 13.408, de 15/07/2005, entered into force (11/08/2004 is a Wednesday and stays, 11/08/2005 a Thursday and moves to 14/08)", () => {
+		expect(getHolidays({ year: 2004, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2004, 7, 11),
+			type: "state",
+		});
+		expect(getHolidays({ year: 2005, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2005, 7, 14),
+			type: "state",
+		});
+	});
+
+	test("should list each Santa Catarina holiday exactly once in every year the four 25 November ranges and the two 11 August ranges border on", () => {
+		for (const year of [1998, 1999, 2003, 2004, 2005, 2025]) {
+			const names = getHolidays({ year, stateCode: "SC" }).map((holiday) => holiday.name);
+
+			expect(names.filter((name) => name === "Dia do Estado de Santa Catarina")).toEqual([
+				"Dia do Estado de Santa Catarina",
+			]);
+			expect(names.filter((name) => name === "Dia de Santa Catarina de Alexandria")).toEqual([
+				"Dia de Santa Catarina de Alexandria",
+			]);
+		}
+	});
+
+	test("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
+		const nationalHolidays = getHolidays(2024);
+
+		for (const stateCode of PROTOTYPE_KEYS) {
+			// @ts-expect-error: intentionally invalid input
+			expect(getHolidays({ year: 2024, stateCode })).toEqual(nationalHolidays);
+		}
 	});
 
 	test("should compute ES's Nossa Senhora da Penha (Lei nº 11.010/2019) as a movable state holiday, 8 days after Easter Sunday, replacing the removed 'Dia do Estado do Espírito Santo' which was only a municipal ponto facultativo", () => {
@@ -436,9 +658,14 @@ describe("getHolidays", () => {
 			);
 		});
 
-		test("should never throw, regardless of the input", () => {
+		const anyYear = fc.oneof(yearArbitrary, fc.anything());
+		const anyStateCode = fc.oneof(hostileStateCodes, stateCodeArbitrary, fc.anything());
+		const hostileOptions = fc.record({ year: anyYear, stateCode: anyStateCode });
+		const anyInput = fc.oneof(fc.anything(), hostileOptions);
+
+		test("should never throw, regardless of the input, prototype chain state codes included", () => {
 			fc.assert(
-				fc.property(fc.anything(), (value) => {
+				fc.property(anyInput, (value) => {
 					expect(() => getHolidays(value as never)).not.toThrow();
 				}),
 			);

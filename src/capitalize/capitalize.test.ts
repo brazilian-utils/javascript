@@ -1,7 +1,10 @@
 import * as fc from "fast-check";
 
+import { DATA } from "../_internals/constants/states";
+import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { capitalize, type CapitalizeOptions } from "./capitalize";
+import { STATE_CODES } from "./constants";
 
 describe("capitalize", () => {
 	describe("should capitalize", () => {
@@ -43,9 +46,115 @@ describe("capitalize", () => {
 		});
 
 		test("when upper case words are provided in any case", () => {
-			expect(capitalize("empresa ltda")).toBe("Empresa Ltda");
 			expect(capitalize("empresa ltda", { upperCaseWords: ["ltda"] })).toBe("Empresa LTDA");
 			expect(capitalize("meu cpf e rg", { upperCaseWords: ["CPF", "Rg"] })).toBe("Meu CPF e RG");
+		});
+
+		test("when the value is a Brazilian personal name", () => {
+			expect(capitalize("jose da silva")).toBe("Jose da Silva");
+			expect(capitalize("JOSÉ DA SILVA")).toBe("José da Silva");
+			expect(capitalize("de")).toBe("De");
+		});
+
+		test("when the value carries a company designation, upper cased by default", () => {
+			expect(capitalize("empresa ltda")).toBe("Empresa LTDA");
+			expect(capitalize("banco do brasil s.a.")).toBe("Banco do Brasil S.A.");
+			expect(capitalize("casa de carnes s/a")).toBe("Casa de Carnes S/A");
+			expect(capitalize("casa de carnes s/a comércio")).toBe("Casa de Carnes S/A Comércio");
+			expect(capitalize("consultoria s/s")).toBe("Consultoria S/S");
+			expect(capitalize("padaria e confeitaria me")).toBe("Padaria e Confeitaria ME");
+			expect(capitalize("meu cpf e rg")).toBe("Meu CPF e RG");
+			expect(capitalize("cep 01310-100")).toBe("CEP 01310-100");
+		});
+
+		test("when a word looks like a designation but is not one, or is a designation left out of the default list", () => {
+			expect(capitalize("jose de sa")).toBe("Jose de Sa");
+			expect(capitalize("eu vi maria")).toBe("Eu Vi Maria");
+			expect(capitalize("diga-me")).toBe("Diga-ME");
+		});
+
+		test("when the value is a Brazilian address", () => {
+			expect(capitalize("mogi-guaçu")).toBe("Mogi-Guaçu");
+			expect(capitalize("santana/rs")).toBe("Santana/RS");
+			expect(capitalize("porto alegre/rs")).toBe("Porto Alegre/RS");
+			expect(capitalize("são paulo/sp")).toBe("São Paulo/SP");
+		});
+
+		test("when a word is bound by an apostrophe or by punctuation", () => {
+			expect(capitalize("santa bárbara d'oeste")).toBe("Santa Bárbara d'Oeste");
+			expect(capitalize("SANTA BÁRBARA D'OESTE")).toBe("Santa Bárbara d'Oeste");
+			expect(capitalize("joão d’ávila")).toBe("João d’Ávila");
+			expect(capitalize("o'neill")).toBe("O'Neill");
+			expect(capitalize("(empresa) ltda")).toBe("(Empresa) LTDA");
+			expect(capitalize('"joão" silva')).toBe('"João" Silva');
+			expect(capitalize("bairro:centro")).toBe("Bairro:Centro");
+			expect(capitalize("rua b,número 10")).toBe("Rua B,Número 10");
+			expect(capitalize("casa;lote [3]")).toBe("Casa;Lote [3]");
+		});
+
+		test("when a single letter follows an apostrophe, the English possessive, which stays in lower case", () => {
+			expect(capitalize("bob's")).toBe("Bob's");
+			expect(capitalize("habib's")).toBe("Habib's");
+			expect(capitalize("mc donald's")).toBe("Mc Donald's");
+			expect(capitalize("x'd")).toBe("X'd");
+			expect(capitalize("sant'ana")).toBe("Sant'Ana");
+		});
+
+		test("when the elided particle d' is followed by an apostrophe and a word, wherever it appears", () => {
+			expect(capitalize("d'oeste")).toBe("d'Oeste");
+			expect(capitalize("dias d'ávila")).toBe("Dias d'Ávila");
+			expect(capitalize("olho d'água do piauí")).toBe("Olho d'Água do Piauí");
+			expect(capitalize("rua d'")).toBe("Rua D'");
+			expect(capitalize("d''oeste")).toBe("D''Oeste");
+		});
+
+		test("when a word of the lower case list ends the value or is followed by punctuation, so it is a designator rather than a link between two words", () => {
+			expect(capitalize("rua d")).toBe("Rua D");
+			expect(capitalize("rua a, 100")).toBe("Rua A, 100");
+			expect(capitalize("condomínio a, quadra d, lote o")).toBe("Condomínio A, Quadra D, Lote O");
+			expect(capitalize("maria e joão")).toBe("Maria e João");
+			expect(capitalize("maria e--joão")).toBe("Maria e--João");
+			expect(capitalize("josé da silva")).toBe("José da Silva");
+			expect(capitalize("de")).toBe("De");
+			expect(capitalize("luiz von schmidt")).toBe("Luiz von Schmidt");
+			expect(capitalize("são joão del rei")).toBe("São João del Rei");
+		});
+
+		test("when ME is the pronoun rather than the designation of a microempresa, which is written at the end of the name", () => {
+			expect(capitalize("fulano comércio me")).toBe("Fulano Comércio ME");
+			expect(capitalize("fulano me epp")).toBe("Fulano ME EPP");
+			expect(capitalize("fulano ltda me")).toBe("Fulano LTDA ME");
+			expect(capitalize("não-me-toque")).toBe("Não-Me-Toque");
+			expect(capitalize("diga-me a verdade")).toBe("Diga-Me a Verdade");
+		});
+
+		test("when the name carries a foreign particle", () => {
+			expect(capitalize("luiz von schmidt")).toBe("Luiz von Schmidt");
+			expect(capitalize("maria van der berg")).toBe("Maria van der Berg");
+			expect(capitalize("são joão del rei")).toBe("São João del Rei");
+			expect(capitalize("carlo di giovanni")).toBe("Carlo di Giovanni");
+			expect(capitalize("von schmidt")).toBe("Von Schmidt");
+		});
+
+		test("when a word after a slash is not a state code, and when a state code has no slash before it", () => {
+			expect(capitalize("santana/br")).toBe("Santana/Br");
+			expect(capitalize("santana/xingu")).toBe("Santana/Xingu");
+			expect(capitalize("santana rs")).toBe("Santana Rs");
+		});
+
+		test("when the value carries a roman numeral", () => {
+			expect(capitalize("joão paulo ii")).toBe("João Paulo II");
+			expect(capitalize("rua xv de novembro")).toBe("Rua XV de Novembro");
+			expect(capitalize("avenida papa joão xxiii")).toBe("Avenida Papa João XXIII");
+		});
+
+		test("when a word list given in the options replaces the default one", () => {
+			expect(capitalize("empresa ltda", { upperCaseWords: [] })).toBe("Empresa Ltda");
+			expect(capitalize("jose da silva", { lowerCaseWords: [] })).toBe("Jose Da Silva");
+			expect(capitalize("banco do brasil s.a.", { upperCaseWords: ["s.a."] })).toBe(
+				"Banco do Brasil S.A.",
+			);
+			expect(capitalize("santana/rs", { upperCaseWords: [] })).toBe("Santana/RS");
 		});
 
 		test("when the value contains whitespace other than a space", () => {
@@ -56,7 +165,7 @@ describe("capitalize", () => {
 
 		test("when the value contains hyphens or slashes", () => {
 			expect(capitalize("MOGI-GUAÇU")).toBe("Mogi-Guaçu");
-			expect(capitalize("SANTANA/RS")).toBe("Santana/Rs");
+			expect(capitalize("SANTANA/RS")).toBe("Santana/RS");
 			expect(capitalize("SANTANA/RS", { upperCaseWords: ["rs"] })).toBe("Santana/RS");
 			expect(capitalize("sÃo josÉ do rio-preto")).toBe("São José do Rio-Preto");
 			expect(capitalize("de-facto")).toBe("De-Facto");
@@ -83,13 +192,44 @@ describe("capitalize", () => {
 		expect(capitalize(123)).toBe("");
 	});
 
+	describe("should fall back to the defaults when a word list is malformed", () => {
+		test("when the word list is not an array", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(capitalize("jose da silva", { lowerCaseWords: null })).toBe("Jose da Silva");
+			// @ts-expect-error: intentionally invalid input
+			expect(capitalize("jose da silva", { upperCaseWords: null })).toBe("Jose da Silva");
+			// @ts-expect-error: intentionally invalid input
+			expect(capitalize("jose da silva", { lowerCaseWords: "ab" })).toBe("Jose da Silva");
+			// @ts-expect-error: intentionally invalid input
+			expect(capitalize("jose da silva", { upperCaseWords: 1 })).toBe("Jose da Silva");
+		});
+
+		test("when the word list holds a value that is not a string", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(capitalize("jose da silva", { lowerCaseWords: [null] })).toBe("Jose Da Silva");
+			// @ts-expect-error: intentionally invalid input
+			expect(capitalize("jose da silva", { upperCaseWords: [1] })).toBe("Jose da Silva");
+			// @ts-expect-error: intentionally invalid input
+			expect(capitalize("jose da silva", { lowerCaseWords: [1, "da"] })).toBe("Jose da Silva");
+		});
+	});
+
+	test("should keep its state code list in sync with the one published by the IBGE", () => {
+		expect(STATE_CODES).toStrictEqual(DATA.map((state) => state.code));
+	});
+
 	describe("properties", () => {
+		const nulls = fc.constant(null);
+		const wordListMembers = fc.oneof(fc.string(), fc.integer(), nulls);
+		const wordLists = fc.oneof(nulls, fc.string(), fc.integer(), fc.array(wordListMembers));
+		const optionRecord = fc.record(
+			{ lowerCaseWords: wordLists, upperCaseWords: wordLists },
+			{ requiredKeys: [] },
+		);
+		const hostileOptions = fc.oneof(fc.anything(), optionRecord);
+
 		test("should never throw, regardless of the input", () => {
-			fc.assert(
-				fc.property(fc.anything(), (value) => {
-					expect(() => capitalize(value as never)).not.toThrow();
-				}),
-			);
+			expectNeverThrowsWithOptions(capitalize, fc.anything(), hostileOptions);
 		});
 
 		test("should be idempotent on its own output", () => {

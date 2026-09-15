@@ -72,6 +72,23 @@ function firstSentence(paragraph: string): string {
 	return sentence.split(ABBREVIATION_PLACEHOLDER).join(".").trim();
 }
 
+const DEPRECATION_MARKER = "**Deprecated:**";
+
+/**
+ * Extracts the `**Deprecated:** ...` sentence of a paragraph, without its markdown bold. The
+ * description of an entry is its first sentence, and a deprecation notice never is the first
+ * sentence, so without this it would be dropped from the generated index.
+ * @param {string} paragraph - The paragraph to read the deprecation notice of.
+ * @returns {string} The deprecation sentence, or an empty string when the paragraph carries none.
+ */
+function deprecationSentence(paragraph: string): string {
+	const markerIndex = paragraph.indexOf(DEPRECATION_MARKER);
+
+	if (markerIndex === -1) return "";
+
+	return firstSentence(paragraph.slice(markerIndex).replaceAll("**", ""));
+}
+
 /**
  * Parses every `## <fn>` section of `utilities.md` into name/slug/description.
  * @param {string} utilitiesMd - The full contents of `utilities.md`.
@@ -86,13 +103,78 @@ function parseUtilities(utilitiesMd: string): UtilSection[] {
 		const body = section.slice(newlineIndex + 1);
 		const [firstParagraphRaw = ""] = body.split(/\n\s*\n/);
 		const firstParagraph = firstParagraphRaw.trim();
+		const description = firstSentence(firstParagraph);
+		const deprecation = description.includes(DEPRECATION_MARKER)
+			? ""
+			: deprecationSentence(firstParagraph);
 
 		return {
 			name,
 			slug: slugify(name),
-			description: firstSentence(firstParagraph),
+			description: deprecation === "" ? description : `${description} ${deprecation}`,
 		};
 	});
+}
+
+const FENCE_MARKER = "```";
+const SUB_HEADING_PATTERN = /^#{2,3} (.+)$/;
+const BACKTICKED_PATTERN = /`([^`]+)`/g;
+
+/**
+ * Collects the `##` and `###` headings of a page, in document order and outside code fences, so a
+ * generated table of contents cannot drift from the page it indexes.
+ * @param {string} markdown - The Markdown page to read the headings of.
+ * @returns {string[]} The heading texts, in document order.
+ */
+function subHeadings(markdown: string): string[] {
+	let insideFence = false;
+
+	return markdown.split("\n").flatMap((line) => {
+		if (line.startsWith(FENCE_MARKER)) {
+			insideFence = !insideFence;
+			return [];
+		}
+
+		if (insideFence) return [];
+
+		const heading = SUB_HEADING_PATTERN.exec(line)?.[1];
+
+		return heading === undefined ? [] : [heading.trim()];
+	});
+}
+
+/**
+ * Reads the util names listed in the "Bundle size" table of `getting-started.md`, so the summary
+ * of the dataset-backed utils cannot drift from the table it summarizes.
+ * @param {string} gettingStartedMd - The full contents of `getting-started.md`.
+ * @returns {string[]} The util names of the table, in document order.
+ */
+function parseDatasetUtils(gettingStartedMd: string): string[] {
+	const section = /\n## Bundle size\n([\s\S]*?)(?=\n## |$)/.exec(gettingStartedMd)?.[1] ?? "";
+
+	const names: string[] = [];
+
+	for (const row of section.split("\n")) {
+		if (!row.startsWith("| `")) continue;
+
+		for (const [, name] of (row.split("|")[1] ?? "").matchAll(BACKTICKED_PATTERN)) {
+			if (name !== undefined) names.push(name);
+		}
+	}
+
+	return names;
+}
+
+/**
+ * Joins names into an English list, e.g. "`a`, `b` and `c`".
+ * @param {string[]} names - The names to join, in order.
+ * @returns {string} The names, backticked and comma-separated, with "and" before the last one.
+ */
+function joinNames(names: string[]): string {
+	const quoted = names.map((name) => `\`${name}\``);
+	const last = quoted.at(-1) ?? "";
+
+	return quoted.length < 2 ? last : `${quoted.slice(0, -1).join(", ")} and ${last}`;
 }
 
 const PREFIX_GROUPS: { title: string; test: (name: string) => boolean }[] = [
@@ -132,7 +214,7 @@ function utilLink(util: UtilSection): string {
 	return `- [${util.name}](${SITE}/utilities.md#${util.slug}): ${util.description}`;
 }
 
-function buildLlmsTxt(utils: UtilSection[]): string {
+function buildLlmsTxt(utils: UtilSection[], datasetUtils: string[]): string {
 	const groups = groupUtilities(utils);
 	const groupSections = groups
 		.map((group) => `## ${group.title}\n\n${group.utils.map(utilLink).join("\n")}`)
@@ -150,7 +232,7 @@ Install with \`npm install --save @brazilian-utils/brazilian-utils\` (also avail
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 \`\`\`
 
-Every util is also available as its own subpath for lazy-loading/code-splitting, \`@brazilian-utils/brazilian-utils/<kebab-name>\` (kebab-case of the function name, e.g. \`isValidCpf\` maps to \`is-valid-cpf\`) - most useful for \`getCities\`, the one util that embeds a large dataset:
+Every util is also available as its own subpath for lazy-loading/code-splitting, \`@brazilian-utils/brazilian-utils/<kebab-name>\` (kebab-case of the function name, e.g. \`isValidCpf\` maps to \`is-valid-cpf\`) - most useful for the utils that embed an official dataset (${joinNames(datasetUtils)}):
 
 \`\`\`javascript
 const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities');
@@ -160,7 +242,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 - [Getting started](${SITE}/getting-started.md): installation, runtime support, usage and bundle size/subpath imports
 - [Utilities](${SITE}/utilities.md): full English reference, one section per function, with signatures and examples
-- [Bundle size](${SITE}/getting-started.md#bundle-size): tree-shaking behavior and the \`getCities\`/subpath-import exception
+- [Bundle size](${SITE}/getting-started.md#bundle-size): tree-shaking behavior and the dataset-backed utils that are worth a subpath import
 
 ${groupSections}
 
@@ -210,9 +292,7 @@ function buildLlmsFullTxt(
 ): string {
 	const toc = [
 		"- [Getting Started](#getting-started)",
-		...["Installation", "Runtime support", "Usage", "Bundle size"].map(
-			(heading) => `  - [${heading}](#${slugify(heading)})`,
-		),
+		...subHeadings(gettingStartedMd).map((heading) => `  - [${heading}](#${slugify(heading)})`),
 		"- [Utilities](#utilities)",
 		...utils.map((util) => `  - [${util.name}](#${util.slug})`),
 	].join("\n");
@@ -239,7 +319,10 @@ function main(): void {
 	const utilitiesMd = readFileSync(join(DOCS_DIR, "utilities.md"), "utf8");
 	const utils = parseUtilities(utilitiesMd);
 
-	writeFileSync(join(DOCS_DIR, "llms.txt"), buildLlmsTxt(utils));
+	writeFileSync(
+		join(DOCS_DIR, "llms.txt"),
+		buildLlmsTxt(utils, parseDatasetUtils(gettingStartedMd)),
+	);
 	writeFileSync(
 		join(DOCS_DIR, "llms-full.txt"),
 		buildLlmsFullTxt(gettingStartedMd, utilitiesMd, utils),

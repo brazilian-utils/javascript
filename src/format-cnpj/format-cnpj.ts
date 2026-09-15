@@ -10,7 +10,7 @@ export type FormatCnpjOptions = {
 	pad?: boolean;
 	/** Which CNPJ format to read: `1` numeric only, `2` alphanumeric (default: `1`). */
 	version?: 1 | 2;
-	/** Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`). */
+	/** Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`, read for truthiness like `pad`). */
 	obfuscate?: boolean;
 };
 
@@ -29,7 +29,8 @@ const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]
  * @param {FormatCnpjOptions} [options] - Optional configuration for formatting the CNPJ.
  * @param {boolean} options.pad - If true, the value will be padded with leading zeros if necessary.
  * @param {1|2} options.version - The version of the CNPJ to be sanitized.
- * @param {boolean} options.obfuscate - If true, hides the first 2 digits and the 2 check digits.
+ * @param {boolean} options.obfuscate - If truthy, hides the first 2 digits and the 2 check
+ * digits. Read for truthiness, the way `pad` is, so a non-boolean such as `1` obfuscates too.
  * @returns {string} The formatted CNPJ string in the pattern "00.000.000/0000-00".
  *
  * @example
@@ -52,6 +53,6 @@ export const formatCnpj = (value: string | number, options?: FormatCnpjOptions):
 	return format({
 		pad: options?.pad,
 		value: sanitize(value, options?.version),
-		pattern: options?.obfuscate === true ? OBFUSCATED_PATTERN : PATTERN,
+		pattern: (options?.obfuscate ?? false) ? OBFUSCATED_PATTERN : PATTERN,
 	});
 };

@@ -53,11 +53,25 @@ export type CepProvider = "viacep" | "widenet" | "brasilapi";
 
 /** Options of `getAddressInfoByCep`. */
 export type GetAddressInfoByCepOptions = {
-	/** Which CEP services to race, in the order given (default: all of them). */
+	/**
+	 * Which CEP services to race, in the order given (default: `["viacep", "brasilapi"]`; the
+	 * deprecated `"widenet"` provider is excluded from the default list, but can still be
+	 * requested explicitly).
+	 */
 	providers?: CepProvider[];
 };
 
 type ProviderPayload = Record<string, unknown>;
+
+/**
+ * The status BrasilAPI answers an unknown CEP with, alongside an `errors` body. ViaCEP and
+ * Widenet report a miss inside a 200 body instead, so BrasilAPI is the only provider whose
+ * not-found signal is an HTTP status and the only one that needs it mapped before `response.ok`
+ * turns it into a service failure.
+ *
+ * @see Based on: https://brasilapi.com.br/docs#tag/CEP
+ */
+const BRASIL_API_NOT_FOUND_STATUS = 404;
 
 const asString = (value: unknown): string => (typeof value === "string" ? value : "");
 
@@ -126,6 +140,12 @@ const fetchWidenet = async (cep: string): Promise<AddressInfo> => {
 const fetchBrasilApi = async (cep: string): Promise<AddressInfo> => {
 	const response = await fetchWithRetry(`https://brasilapi.com.br/api/cep/v1/${cep}`);
 
+	if (response.status === BRASIL_API_NOT_FOUND_STATUS) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
+		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
+	}
+
 	if (!response.ok) {
 		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
 		// is checked when aggregating provider failures below, so this message is never observable.
@@ -160,19 +180,27 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  * Fetches address information for a given CEP using multiple providers simultaneously.
  * Returns the result from the first provider that responds successfully.
  *
+ * The providers are started together and raced with `Promise.any`, not tried one after the
+ * other, so a provider that is retrying delays nothing for the others: its retries only push
+ * back the moment its own failure lands, and therefore the moment an all-failed rejection can
+ * surface.
+ *
  * @param {string|number} cep - The CEP (Brazilian postal code) to search for. Can be a string or number.
  * @param {GetAddressInfoByCepOptions} options - Optional configuration for the function.
  * @param {CepProvider[]} options.providers - List of providers to use. Defaults to `["viacep", "brasilapi"]`
  * if not specified (the deprecated `"widenet"` provider is excluded from the default list, but can still
  * be requested explicitly).
  * @returns {Promise<AddressInfo>} A promise that resolves to the address information.
- * @throws {GetAddressInfoByCepValidationError} If the CEP format is invalid.
+ * @throws {GetAddressInfoByCepValidationError} If the CEP format is invalid, or if
+ * `options.providers` is given and names no known provider: an empty array, an array of unknown
+ * names, and a value that is not an array at all (`null` included) all reject this way rather
+ * than with a raw `TypeError`.
  * @throws {GetAddressInfoByCepNotFoundError} If the CEP is not found in any of the services.
  * @throws {GetAddressInfoByCepServiceError} If all services are unavailable.
  *
  * @example
  * ```typescript
- * // Using all providers (default)
+ * // Using the default providers (["viacep", "brasilapi"])
  * const address = await getAddressInfoByCep("01310100");
  *
  * // Using specific providers
@@ -185,8 +213,10 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
- * @see Official: https://viacep.com.br/ Default `"viacep"` provider.
- * @see Official: https://brasilapi.com.br/docs#tag/CEP Default `"brasilapi"` provider.
+ * @see Based on: https://viacep.com.br/
+ * ViaCEP, one of the two default providers. A third-party service, not a Correios one.
+ * @see Based on: https://brasilapi.com.br/docs#tag/CEP
+ * BrasilAPI, the other default provider. A third-party service, not a Correios one.
  */
 export const getAddressInfoByCep = async (
 	cep: string | number,
@@ -206,14 +236,16 @@ export const getAddressInfoByCep = async (
 
 	let providersToUse: CepProvider[];
 	if (options?.providers === undefined) {
-		providersToUse = ["viacep", "brasilapi"] as CepProvider[];
-	} else {
+		providersToUse = ["viacep", "brasilapi"];
+	} else if (Array.isArray(options.providers)) {
 		// An empty `options.providers` array also filters down to an empty `providersToUse` below,
 		// which already reports the same validation error, so there is no dedicated check for it here.
-		providersToUse = options.providers.filter((p) => Object.hasOwn(providerMap, p));
+		providersToUse = options.providers.filter((provider) => Object.hasOwn(providerMap, provider));
 		if (providersToUse.length === 0) {
 			throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
 		}
+	} else {
+		throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
 	}
 
 	let notFound = false;

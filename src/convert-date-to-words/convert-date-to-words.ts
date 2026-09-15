@@ -1,11 +1,8 @@
-import { applyWordsCase } from "../_internals/apply-words-case/apply-words-case";
 import { MONTH_NAMES, WEEKDAY_NAMES } from "../_internals/constants/number-words";
-import { numberToWords, type WordsCase } from "../_internals/number-to-words/number-to-words";
+import { numberToWords } from "../_internals/number-to-words/number-to-words";
 
 /** Options of `convertDateToWords`. */
 export type ConvertDateToWordsOptions = {
-	/** Letter case applied to the result: `"lower"` (unchanged), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Defaults to `"lower"`; an invalid value is ignored and `"lower"` is used instead. */
-	case?: WordsCase;
 	/** Output style: `"full"` spells out the day, month and year (`"dois de março de dois mil e vinte e quatro"`); `"month"` spells out only the month name and leaves the day and year as digits (`"2 de março de 2024"`, day 1 as `"1º"`). Defaults to `"full"`; an invalid value is ignored and `"full"` is used instead. */
 	style?: "full" | "month";
 	/** Prefixes the pt-BR weekday name (lowercase) followed by a comma, e.g. `"sábado, dois de março de dois mil e vinte e quatro"`. The weekday is derived from the resolved calendar date (the `Date`'s local calendar date, or the parsed civil date for a string). Defaults to `false`. */
@@ -44,18 +41,17 @@ const dayToWords = (day: number, monthStyle: boolean): string => {
  * with no timezone conversion. With the default `"full"` `options.style`, day 1 is written as
  * "primeiro" and every other day uses the cardinal number; with `"month"`, only the month name
  * is spelled out and the day/year are written as digits (day 1 as `"1º"`). Month names are
- * lowercase. In `"full"` style the year is written out as a cardinal number without the
- * thousands comma that `convertNumberToWords`/`convertCurrencyToWords` use (`1999` reads as
- * `"mil novecentos e noventa e nove"`, not `"mil, novecentos e noventa e nove"`), matching how a
+ * lowercase. In `"full"` style the year is written out as a cardinal number the way
+ * `convertNumberToWords` writes it (`1999` reads as `"mil novecentos e noventa e nove"`), matching how a
  * date is read aloud. `options.weekday` prefixes the pt-BR weekday name (lowercase) followed by
- * a comma. February 29th is accepted on the leap years of the proleptic Gregorian calendar
+ * a comma. The result is always lowercase; apply any other casing to it yourself.
+ * February 29th is accepted on the leap years of the proleptic Gregorian calendar
  * (divisible by 4, except centuries that are not divisible by 400). Returns `""` when `value` is
  * not one of those forms, is an invalid `Date`, names a day/month that does not exist (e.g.
  * `"31/04/2024"` or `"29/02/2023"`), or falls before year 1, which has no year to write out.
  *
  * @param {Date|string} value - The date to convert: a `Date`, `"dd/mm/yyyy"` or ISO `"yyyy-mm-dd"`.
  * @param {ConvertDateToWordsOptions} [options] - Optional formatting options.
- * @param {WordsCase} [options.case] - Letter case applied to the result. Defaults to `"lower"`.
  * @param {"full"|"month"} [options.style] - Output style. Defaults to `"full"`.
  * @param {boolean} [options.weekday] - Prefixes the pt-BR weekday name and a comma. Defaults to `false`.
  * @returns {string} The date written out in Portuguese, or `""` for invalid input.
@@ -65,7 +61,6 @@ const dayToWords = (day: number, monthStyle: boolean): string => {
  * convertDateToWords("01/01/2024"); // "primeiro de janeiro de dois mil e vinte e quatro"
  * convertDateToWords("2024-01-02"); // "dois de janeiro de dois mil e vinte e quatro"
  * convertDateToWords(new Date(2024, 0, 1)); // "primeiro de janeiro de dois mil e vinte e quatro"
- * convertDateToWords("01/01/2024", { case: "sentence" }); // "Primeiro de janeiro de dois mil e vinte e quatro"
  * convertDateToWords("02/03/2024", { style: "month" }); // "2 de março de 2024"
  * convertDateToWords("01/01/2024", { style: "month" }); // "1º de janeiro de 2024"
  * convertDateToWords("02/03/2024", { weekday: true }); // "sábado, dois de março de dois mil e vinte e quatro"
@@ -116,13 +111,10 @@ export const convertDateToWords = (
 	const monthName = MONTH_NAMES[month - 1];
 	const isMonthStyle = options?.style === "month";
 
-	const yearWords = isMonthStyle ? String(year) : numberToWords(year).replaceAll(", ", " ");
+	const yearWords = isMonthStyle ? String(year) : numberToWords(year);
 	const dateWords = `${dayToWords(day, isMonthStyle)} de ${monthName} de ${yearWords}`;
 
-	const result =
-		options?.weekday === true
-			? `${WEEKDAY_NAMES[getWeekdayIndex(year, month, day)]}, ${dateWords}`
-			: dateWords;
-
-	return applyWordsCase(result, options?.case);
+	return options?.weekday === true
+		? `${WEEKDAY_NAMES[getWeekdayIndex(year, month, day)]}, ${dateWords}`
+		: dateWords;
 };

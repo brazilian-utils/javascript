@@ -44,6 +44,11 @@ describe("isValidCns", () => {
 			expect(isValidCns([])).toBe(false);
 		});
 
+		test("when it is an array whose text reads as a valid card", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidCns(["123456789010000"])).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidCns("")).toBe(false);
 		});
@@ -122,6 +127,13 @@ describe("isValidCns", () => {
 			expect(isValidCns("123.4567.8901.0000")).toBe(true);
 		});
 
+		test("for a definitive CNS split by the other interchangeable separators", () => {
+			expect(isValidCns("123-4567-8901-0000")).toBe(true);
+			expect(isValidCns("123/4567/8901/0000")).toBe(true);
+			expect(isValidCns("123.4567-8901/0000")).toBe(true);
+			expect(isValidCns("123 - 4567 8901 0000")).toBe(true);
+		});
+
 		test("for a definitive CNS with leading and trailing whitespace", () => {
 			expect(isValidCns(" 123456789010000 ")).toBe(true);
 		});
@@ -136,6 +148,11 @@ describe("isValidCns", () => {
 
 		test("for a provisional CNS starting with 8", () => {
 			expect(isValidCns("800000000000001")).toBe(true);
+		});
+
+		test("for 898 0000 0004 3208, the only concrete CNS the ANVISA page prints (weighted sum 396)", () => {
+			expect(isValidCns("898000000043208")).toBe(true);
+			expect(isValidCns("898 0000 0004 3208")).toBe(true);
 		});
 
 		test("for a provisional CNS starting with 9", () => {

@@ -10,7 +10,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * @example
  * ```typescript
- * parseProcessoJuridico("0002080-25.2026.5.15.0049"); // "00020802520265150049"
+ * parseProcessoJuridico("0002080-34.2026.5.15.0049"); // "00020803420265150049"
  * ```
  *
  * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits.

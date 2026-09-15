@@ -1,6 +1,9 @@
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { NCM_CODES, NCM_FORMAT_REGEX } from "./constants";
+
+const NCM_LENGTH = 8;
 
 let cache: Set<string> | undefined;
 
@@ -19,9 +22,10 @@ const getCache = (): Set<string> => {
  * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
  * caller never wrote.
  *
- * A bare `number` input cannot represent a code that starts with `0` (the leading zero is
- * lost), so a numeric NCM code starting with `0` must be passed as a string to validate
- * correctly.
+ * An NCM code is always 8 digits and its leading zeros are part of it, so a value written as
+ * bare digits is left padded with zeros to 8 whether it comes as a string or as a number:
+ * `1012100`, `"1012100"` and `"01012100"` are the same code. A masked value already carries its
+ * separators and is read as written.
  *
  * @param {string|number} value - The NCM code to be validated, with or without the
  * `NNNN.NN.NN` mask.
@@ -31,6 +35,8 @@ const getCache = (): Set<string> => {
  * ```typescript
  * isValidNcm("0101.21.00"); // true
  * isValidNcm("01012100"); // true
+ * isValidNcm(1012100); // true (padded to 8 digits, so this is "01012100")
+ * isValidNcm("1012100"); // true (padded to 8 digits, so this is "01012100")
  * isValidNcm("00000000"); // false
  * isValidNcm("abc01012100"); // false (not a documented form)
  * isValidNcm(-84713012); // false (not a non-negative safe integer)
@@ -41,7 +47,7 @@ const getCache = (): Set<string> => {
 export const isValidNcm = (value: string | number): boolean => {
 	if (!isLookupCode(value)) return false;
 
-	const code = typeof value === "number" ? String(value) : value.trim();
+	const code = padLookupCode(value, NCM_LENGTH);
 
 	if (!NCM_FORMAT_REGEX.test(code)) return false;
 

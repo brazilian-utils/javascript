@@ -11,28 +11,46 @@ import { getCnae, type Cnae } from "./get-cnae";
 describe("getCnae", () => {
 	it("should return the CNAE entry for a known code as a string", () => {
 		expect(getCnae("6201501")).toEqual({
-			code: "6201-5/01",
+			code: "6201501",
 			description: "DESENVOLVIMENTO DE PROGRAMAS DE COMPUTADOR SOB ENCOMENDA",
 		});
 	});
 
 	it("should return the CNAE entry for a known code as a number", () => {
 		expect(getCnae(6_201_501)).toEqual({
-			code: "6201-5/01",
+			code: "6201501",
 			description: "DESENVOLVIMENTO DE PROGRAMAS DE COMPUTADOR SOB ENCOMENDA",
 		});
 	});
 
 	it("should return the CNAE entry for a masked code", () => {
 		expect(getCnae("6201-5/01")).toEqual({
-			code: "6201-5/01",
+			code: "6201501",
 			description: "DESENVOLVIMENTO DE PROGRAMAS DE COMPUTADOR SOB ENCOMENDA",
 		});
 	});
 
-	it("should pad a number to seven digits so codes starting with zero resolve (0111-3/01, cultivo de arroz)", () => {
-		expect(getCnae(111_301)).toEqual({ code: "0111-3/01", description: "CULTIVO DE ARROZ" });
-		expect(getCnae("111301")).toBeNull();
+	it("should pad to seven digits so codes starting with zero resolve (0111-3/01, cultivo de arroz)", () => {
+		const arroz = { code: "0111301", description: "CULTIVO DE ARROZ" };
+
+		expect(getCnae(111_301)).toEqual(arroz);
+		expect(getCnae("111301")).toEqual(arroz);
+		expect(getCnae("0111301")).toEqual(arroz);
+	});
+
+	it("should pad a string of bare digits exactly like the number it spells", () => {
+		expect(getCnae("111301")).toEqual(getCnae(111_301));
+		expect(getCnae(" 111301 ")).toEqual(getCnae(111_301));
+	});
+
+	it("should not pad a masked value, which already carries its separators", () => {
+		expect(getCnae("111-3/01")).toBeNull();
+		expect(getCnae("0111-3/01")).toEqual({ code: "0111301", description: "CULTIVO DE ARROZ" });
+	});
+
+	it("should return the bare digits as the code and leave the mask to formatCnae", () => {
+		expect(getCnae("6201-5/01")?.code).toBe("6201501");
+		expect(formatCnae(getCnae("6201-5/01")?.code ?? "")).toBe("6201-5/01");
 	});
 
 	it("should return a fresh object on every call", () => {
@@ -45,7 +63,7 @@ describe("getCnae", () => {
 		expect(getCnae("0000000")).toBeNull();
 	});
 
-	it("should return null for a code with a digit count different from seven", () => {
+	it("should return null for a padded short value no subclass carries", () => {
 		expect(getCnae("620150")).toBeNull();
 	});
 
@@ -81,10 +99,13 @@ describe("getCnae", () => {
 		test("should resolve every known code, as a string or a number, and agree with formatCnae and isValidCnae", () => {
 			fc.assert(
 				fc.property(codeArbitrary, (code) => {
-					const expected = { code: formatCnae(code), description: CNAE_SUBCLASSES[code] };
+					const expected = { code, description: CNAE_SUBCLASSES[code] };
+					const unpadded = String(Number(code));
 
 					expect(getCnae(code)).toEqual(expected);
 					expect(getCnae(Number(code))).toEqual(expected);
+					expect(getCnae(unpadded)).toEqual(expected);
+					expect(formatCnae(getCnae(code)?.code ?? "")).toBe(formatCnae(code));
 					expect(isValidCnae(code)).toBe(true);
 				}),
 			);

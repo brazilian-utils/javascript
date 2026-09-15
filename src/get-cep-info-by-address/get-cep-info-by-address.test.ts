@@ -86,6 +86,54 @@ describe("getCepInfoByAddress", () => {
 		).rejects.toThrow("Invalid UF: XX");
 	});
 
+	it("should throw GetCepInfoByAddressValidationError when params is not an object, instead of a raw TypeError", async () => {
+		await Promise.all(
+			[undefined, null, "SP", 5, true].map((params) =>
+				expect(
+					// @ts-expect-error: intentionally invalid input
+					getCepInfoByAddress(params),
+				).rejects.toThrow(GetCepInfoByAddressValidationError),
+			),
+		);
+
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it("should include the message when params is not an object, reporting the argument rather than the UF", async () => {
+		await expect(
+			// @ts-expect-error: intentionally invalid input
+			getCepInfoByAddress(),
+		).rejects.toThrow("UF, city and street are required");
+		await expect(
+			// @ts-expect-error: intentionally invalid input
+			getCepInfoByAddress("SP"),
+		).rejects.toThrow("UF, city and street are required");
+	});
+
+	it("should throw GetCepInfoByAddressValidationError when federalUnit is missing or is not a string, instead of a raw TypeError", async () => {
+		await Promise.all(
+			[undefined, null, 35, {}, ["SP"]].map((federalUnit) =>
+				expect(
+					// @ts-expect-error: intentionally invalid input
+					getCepInfoByAddress({ federalUnit, city: "São Paulo", street: "Avenida Paulista" }),
+				).rejects.toThrow(GetCepInfoByAddressValidationError),
+			),
+		);
+
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it("should include the message when federalUnit is not a string", async () => {
+		await expect(
+			getCepInfoByAddress({
+				// @ts-expect-error: intentionally invalid input
+				federalUnit: 35,
+				city: "São Paulo",
+				street: "Avenida Paulista",
+			}),
+		).rejects.toThrow("Invalid UF: a two letter string is required");
+	});
+
 	it("should accept a federal unit with surrounding whitespace and lowercase letters", async () => {
 		mockAddressListOnce([SAMPLE_ADDRESS]);
 

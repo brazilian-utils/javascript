@@ -1,4 +1,4 @@
-import { type PixKeyType, parsePixKey } from "../parse-pix-key/parse-pix-key";
+import { type PixKeyType, getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 
 /** Options of `isValidPixKey`. */
 export type IsValidPixKeyOptions = {
@@ -9,7 +9,7 @@ export type IsValidPixKeyOptions = {
 /**
  * Validates a Pix key (chave Pix) against the DICT key formats.
  *
- * A value is valid when `parsePixKey` recognizes it as a CPF, a CNPJ, an e-mail address, a
+ * A value is valid when `getPixKeyInfo` recognizes it as a CPF, a CNPJ, an e-mail address, a
  * Brazilian mobile phone number or a random key (EVP), and when that kind is listed in
  * `options.accept`. The manual registers a "número de telefone celular", so a landline is not
  * a valid phone key.
@@ -30,12 +30,14 @@ export type IsValidPixKeyOptions = {
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Official: https://github.com/bacen/pix-dict-api DICT (Diretório de Identificadores de
- * Contas Transacionais) OpenAPI spec, key format reference.
- * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
+ * reference.
+ * @see Official: https://github.com/bacen/pix-api
+ * Pix (SPI) OpenAPI spec.
  */
 export const isValidPixKey = (value: string, options?: IsValidPixKeyOptions): boolean => {
-	const key = parsePixKey(value);
+	const key = getPixKeyInfo(value);
 
 	if (!key) return false;
 

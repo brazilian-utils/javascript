@@ -119,6 +119,35 @@ describe("formatCurrency", () => {
 		expect(formatCurrency()).toBe("");
 	});
 
+	it("should return an empty string for a value with no numeric reading", () => {
+		expect(formatCurrency(Object.create(null))).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency(Symbol("x"))).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency({})).toBe("");
+	});
+
+	it("should coerce the other values the way 2.3.0 did", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency(null)).toBe("0,00");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency([])).toBe("0,00");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency(true)).toBe("1,00");
+	});
+
+	it("should read a bigint as a whole number", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency(1234n)).toBe("1.234,00");
+	});
+
+	it("should fall back to a precision of 2 when the requested one is not a finite number", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency(1234.5678, { precision: "3" })).toBe("1.234,57");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCurrency(1234.5678, { precision: true })).toBe("1.234,57");
+	});
+
 	it("should read as many fraction digits as the requested precision allows, not just the default 2, when reading a string", () => {
 		expect(formatCurrency("1234,12345", { precision: 5 })).toBe("1.234,12345");
 	});
@@ -129,20 +158,32 @@ describe("formatCurrency", () => {
 	});
 
 	describe("properties", () => {
-		const optionsArbitrary = fc
-			.option(fc.record({ symbol: fc.boolean(), precision: fc.double() }, { requiredKeys: [] }))
-			.map((options) => options ?? undefined);
+		const hostileValues = fc.oneof(
+			anyGarbage,
+			fc.constant(Object.create(null)),
+			fc.constant(Symbol("x")),
+			fc.bigInt(),
+		);
+
+		const nulls = fc.constant(null);
+		const symbols = fc.oneof(fc.boolean(), nulls, fc.string());
+		const precisions = fc.oneof(fc.double(), nulls, fc.string(), fc.boolean());
+		const optionRecord = fc.record(
+			{ symbol: symbols, precision: precisions },
+			{ requiredKeys: [] },
+		);
+		const optionsArbitrary = fc.option(optionRecord).map((options) => options ?? undefined);
 
 		test("should round-trip with parseCurrency for any value with 2 decimals", () => {
 			expectRoundTrip(formatCurrency, parseCurrency, twoDecimalAmounts);
 		});
 
 		test("should never throw, regardless of the input", () => {
-			expectNeverThrowsWithOptions(formatCurrency, anyGarbage, optionsArbitrary);
+			expectNeverThrowsWithOptions(formatCurrency, hostileValues, optionsArbitrary);
 		});
 
 		test("should always return a string", () => {
-			expectAlwaysReturnsType(formatCurrency, "string", anyGarbage);
+			expectAlwaysReturnsType(formatCurrency, "string", hostileValues);
 		});
 	});
 });

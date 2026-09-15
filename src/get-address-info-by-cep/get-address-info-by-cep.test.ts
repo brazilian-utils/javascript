@@ -272,6 +272,8 @@ describe("getAddressInfoByCep", () => {
 				const requestedUrls = fetchMock.mock.calls.map(([input]: [FetchInput]) =>
 					requestUrl(input),
 				);
+				expect(requestedUrls.some((url: string) => url.includes("viacep.com.br"))).toBe(true);
+				expect(requestedUrls.some((url: string) => url.includes("brasilapi.com.br"))).toBe(true);
 				expect(requestedUrls.some((url: string) => url.includes("widenet"))).toBe(false);
 			});
 
@@ -299,6 +301,24 @@ describe("getAddressInfoByCep", () => {
 						// @ts-expect-error: intentionally invalid input
 						providers: ["invalid"],
 					}),
+				).rejects.toThrow("Nenhum provedor válido especificado");
+			});
+
+			it("should throw GetAddressInfoByCepValidationError for a providers value that is not an array, null included", async () => {
+				await Promise.all(
+					[null, "viacep", 5, {}, true].map((providers) =>
+						expect(
+							// @ts-expect-error: intentionally invalid input
+							getAddressInfoByCep(VALID_CEP, { providers }),
+						).rejects.toThrow(GetAddressInfoByCepValidationError),
+					),
+				);
+			});
+
+			it("should include the Portuguese message for a providers value that is not an array", async () => {
+				await expect(
+					// @ts-expect-error: intentionally invalid input
+					getAddressInfoByCep(VALID_CEP, { providers: null }),
 				).rejects.toThrow("Nenhum provedor válido especificado");
 			});
 
@@ -512,6 +532,26 @@ describe("getAddressInfoByCep", () => {
 				);
 			});
 
+			it("should throw GetAddressInfoByCepNotFoundError when BrasilAPI answers 404, the status it reports an unknown CEP with", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ errors: [{ message: "CEP não encontrado" }] }, 404),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepServiceError when BrasilAPI answers a non-404 error status", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({}, 500),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepServiceError,
+				);
+			});
+
 			it("should throw GetAddressInfoByCepNotFoundError when every provider returns a payload that is not an object", async () => {
 				setupFetchMock(fetchMock, {
 					brasilapi: createJsonResponse(null),
@@ -717,17 +757,19 @@ describe("getAddressInfoByCep", () => {
 			LIVE_TEST_TIMEOUT,
 		);
 
-		it(
-			"should fetch live address from Widenet",
-			async () => {
-				const result = await getAddressInfoByCep(VALID_CEP, {
-					providers: ["widenet"],
-				});
+		describe.skip("Widenet, skipped while the service answers HTTP 502 (since September 2026, the reason it left the default provider list)", () => {
+			it(
+				"should fetch live address from Widenet",
+				async () => {
+					const result = await getAddressInfoByCep(VALID_CEP, {
+						providers: ["widenet"],
+					});
 
-				expectAddressFound(result);
-			},
-			LIVE_TEST_TIMEOUT,
-		);
+					expectAddressFound(result);
+				},
+				LIVE_TEST_TIMEOUT,
+			);
+		});
 
 		it(
 			"should fetch live address from BrasilAPI",

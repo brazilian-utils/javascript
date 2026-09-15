@@ -1,5 +1,5 @@
 /**
- * The `mod` (modelo do documento) values `parseNfeKey` supports, every one of them a document
+ * The `mod` (modelo do documento) values `getNfeKeyInfo` supports, every one of them a document
  * whose "chave de acesso" is the same 44 digit string built the same way: 55 NF-e, 57 CT-e,
  * 58 MDF-e, 62 NFCom, 63 BP-e, 64 GTV-e (the CT-e Guia de Transporte de Valores), 65 NFC-e,
  * 66 NF3e and 67 CT-e OS (Conhecimento de Transporte Eletrônico para Outros Serviços).
@@ -10,16 +10,17 @@
  */
 export const VALID_MODELS = ["55", "57", "58", "62", "63", "64", "65", "66", "67"] as const;
 
-/** One of the `mod` values `parseNfeKey` supports. */
+/** One of the `mod` values `getNfeKeyInfo` supports. */
 export type ValidModel = (typeof VALID_MODELS)[number];
 
 /**
  * The `tpEmis` (forma de emissão) codes each MOC assigns to its own document, so a code that is
  * meaningful for one document does not make a key of another valid.
  *
- * NF-e and NFC-e (MOC 7.0 Anexo I, field B22): 1 normal, 2 contingência FS-IA, 3 contingência
- * SCAN, 4 contingência EPEC, 5 contingência FS-DA, 6 contingência SVC-AN, 7 contingência SVC-RS
- * and 9 contingência off-line da NFC-e.
+ * NF-e and NFC-e (MOC 7.0 Anexo I, field B22): 1 normal, 2 contingência FS-IA, 3 Regime Especial
+ * NFF, 4 contingência EPEC, 5 contingência FS-DA, 6 contingência SVC-AN, 7 contingência SVC-RS
+ * and 9 contingência off-line da NFC-e. Code 3 used to be "contingência SCAN"; NT 2021.002
+ * redefined it as the Regime Especial da Nota Fiscal Fácil, leaving the value set unchanged.
  *
  * CT-e (CT-e MOC 4.00 Anexo I, field D19): 1 normal, 3 Regime Especial NFF, 4 EPEC pela SVC,
  * 5 contingência FS-DA, 7 autorização pela SVC-RS and 8 autorização pela SVC-SP. CT-e OS
@@ -27,7 +28,7 @@ export type ValidModel = (typeof VALID_MODELS)[number];
  * 8. Rule G011 of the same annex, "(7=SVC-RS e 8=SVC-SP)", is what makes 8 a real code here,
  * even though the NF-e MOC never assigns it.
  *
- * MDF-e (MDF-e MOC 3.00 Anexo I, domain D7): 1 normal, 2 contingência off-line and 3 Regime
+ * MDF-e (MDF-e MOC 3.00b Anexo I, domain D7): 1 normal, 2 contingência off-line and 3 Regime
  * Especial NFF. NFCom, BP-e and NF3e (their own Anexo I, domain D7): 1 normal and
  * 2 contingência off-line.
  */
@@ -79,18 +80,23 @@ export const FORBIDDEN_CODES: readonly string[] = [
 	"01234567",
 ];
 
-/** The models rule B03-10 is written for, the only ones whose `cNF` it constrains. */
+/**
+ * The models rule B03-10 is written for, the only ones whose `cNF` it constrains.
+ *
+ * The scope is stated inconsistently by the sources: the change log of NT 2019.001 v1.40 says
+ * modelo 65 was taken out of the rule, while MOC 7.0 Anexo I still prints its applicability as
+ * `55/65`. The MOC being the consolidated text in force, both models are kept here.
+ */
 export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
 
 /**
- * The prefixes the `Id` attribute of a DF-e XML puts in front of the 44 digits, one per
- * document: `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom`. Stripped before the digits are
- * read, since `NF3e` carries a digit of its own.
+ * Shape the key has to be written in once the prefix is stripped: the digits, optionally split
+ * into the printed groups of 4 by whitespace or the usual mask characters, a run of them between
+ * two groups included, the same rule the CPF, CNPJ, CAEPF and CNS regexes of this library follow.
+ * A separator inside a group of 4, or any other character, is rejected instead of being stripped.
+ * The group count is left open so the 44 digit length is still checked where the key is read.
  */
-export const XML_ID_PREFIX_REGEX = /^(?:nfe|cte|mdfe|bpe|nf3e|nfcom)/i;
-
-/** Digits and optional whitespace between groups, what is left once the prefix is stripped. */
-export const FORMAT_REGEX = /^[\d\s]+$/;
+export const FORMAT_REGEX = /^\d{4}(?:[\s.\-/]*\d{4})*$/;
 
 /** Start of the document number (nNF) inside the 44 digit key. */
 export const NUMBER_START = 25;
@@ -98,5 +104,9 @@ export const NUMBER_START = 25;
 /** End (exclusive) of the document number (nNF) inside the 44 digit key. */
 export const NUMBER_END = 34;
 
-/** A document number of all zeros is not a valid nNF. */
+/**
+ * A document number of all zeros is not a valid nNF: the leiaute types `nNF` as `TNF`, whose
+ * pattern is `[1-9]{1}[0-9]{0,8}` in `tiposBasico_v4.00.xsd`, and the Anexo I of every other
+ * model repeats the same regex for its own number field.
+ */
 export const ABSENT_NUMBER = "000000000";

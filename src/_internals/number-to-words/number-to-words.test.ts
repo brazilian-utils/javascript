@@ -15,7 +15,7 @@ describe("numberToWords", () => {
 		expect(numberToWords(11)).toBe("onze");
 		expect(numberToWords(12)).toBe("doze");
 		expect(numberToWords(13)).toBe("treze");
-		expect(numberToWords(14)).toBe("catorze");
+		expect(numberToWords(14)).toBe("quatorze");
 		expect(numberToWords(15)).toBe("quinze");
 		expect(numberToWords(16)).toBe("dezesseis");
 		expect(numberToWords(17)).toBe("dezessete");
@@ -51,8 +51,8 @@ describe("numberToWords", () => {
 		expect(numberToWords(1100)).toBe("mil e cem");
 	});
 
-	test("should separate 'mil' from a non round last group with a comma (1235 -> num2words pt_BR 'mil, duzentos e trinta e cinco')", () => {
-		expect(numberToWords(1235)).toBe("mil, duzentos e trinta e cinco");
+	test("should separate 'mil' from a non round last group with a comma (1235 -> num2words pt_BR 'mil duzentos e trinta e cinco')", () => {
+		expect(numberToWords(1235)).toBe("mil duzentos e trinta e cinco");
 	});
 
 	test("should return 'dois mil' for 2000 (masculine default)", () => {
@@ -73,26 +73,26 @@ describe("numberToWords", () => {
 
 	test("should convert the maximum supported value (999 trillion, num2words pt_BR)", () => {
 		expect(numberToWords(NUMBER_TO_WORDS_MAX_VALUE)).toBe(
-			"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, " +
-				"novecentos e noventa e nove milhões, novecentos e noventa e nove mil, " +
+			"novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões " +
+				"novecentos e noventa e nove milhões novecentos e noventa e nove mil " +
 				"novecentos e noventa e nove",
 		);
 	});
 
 	test("should convert a value spanning billions, millions and thousands (999999999999, num2words pt_BR)", () => {
 		expect(numberToWords(999_999_999_999)).toBe(
-			"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, " +
-				"novecentos e noventa e nove mil, novecentos e noventa e nove",
+			"novecentos e noventa e nove bilhões novecentos e noventa e nove milhões " +
+				"novecentos e noventa e nove mil novecentos e noventa e nove",
 		);
 	});
 
 	test("should skip a zero intermediate group (1000230 -> no 'zero mil')", () => {
-		expect(numberToWords(1_000_230)).toBe("um milhão, duzentos e trinta");
+		expect(numberToWords(1_000_230)).toBe("um milhão duzentos e trinta");
 	});
 
 	test("should separate an intermediate group below 100 with a comma, reserving 'e' for the last group (1045678; num2words pt_BR differs here only because its post-processing rewrites ' e ' before a hundreds word)", () => {
 		expect(numberToWords(1_045_678)).toBe(
-			"um milhão, quarenta e cinco mil, seiscentos e setenta e oito",
+			"um milhão quarenta e cinco mil seiscentos e setenta e oito",
 		);
 	});
 

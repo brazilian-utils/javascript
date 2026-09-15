@@ -34,7 +34,7 @@ import { formatTlv } from "../_internals/format-tlv/format-tlv";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
 import { sanitizeToAscii } from "../_internals/sanitize-to-ascii/sanitize-to-ascii";
-import { parsePixKey } from "../parse-pix-key/parse-pix-key";
+import { getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 import {
 	AMOUNT_DECIMAL_PLACES,
 	AMOUNT_REGEX,
@@ -43,8 +43,8 @@ import {
 	TXID_REGEX,
 } from "./constants";
 
-/** The parameters `generatePixPayload` takes to build a Pix BR Code. */
-export type GeneratePixPayloadParams = {
+/** The options `generatePixPayload` takes to build a Pix BR Code. */
+export type GeneratePixPayloadOptions = {
 	/** The Pix key of the receiver, in any accepted form. Required unless `url` is given. */
 	key?: string;
 	/**
@@ -92,7 +92,7 @@ const resolveIdentifier = (
 		};
 	}
 
-	const key = parsePixKey(keyInput);
+	const key = getPixKeyInfo(keyInput);
 
 	if (!key) return null;
 
@@ -139,7 +139,7 @@ const resolveFormattedAmount = (
  * given and when neither is given, since only one of them can occupy the "Merchant Account
  * Information" template at a time.
  *
- * When `params.key` is given, it is normalized to its DICT canonical form by `parsePixKey` and
+ * When `params.key` is given, it is normalized to its DICT canonical form by `getPixKeyInfo` and
  * the payload is static: the "Point of Initiation Method" object is left out, so the payload
  * may be paid more than once, as in the example of the Bacen manual.
  *
@@ -147,17 +147,18 @@ const resolveFormattedAmount = (
  * Iniciação do Pix: the URL takes the key's place in the "Merchant Account Information"
  * template (sub-object `25` instead of `01`) and the "Point of Initiation Method" object (`01`)
  * is set to `"12"`. `params.url` must be at most 77 characters, the length that keeps the
- * template within its 99 character limit together with the `br.gov.bcb.pix` GUI. `parsePixPayload`
- * already parses both shapes, so `parsePixPayload(generatePixPayload({ url, ... }))` round-trips.
+ * template within its 99 character limit together with the `br.gov.bcb.pix` GUI. `getPixPayloadInfo`
+ * already parses both shapes, so `getPixPayloadInfo(generatePixPayload({ url, ... }))` round-trips.
  *
  * Object `01` is optional in the Manual do BR Code (`Uso: O`), so writing it only for a dynamic
- * payload is one of the shapes the manual allows and follows its own examples; `parsePixPayload`
+ * payload is one of the shapes the manual allows and follows its own examples; `getPixPayloadInfo`
  * accepts the others too. The Pix Saque BR Code, which announces the ISPB of the "facilitador de
  * serviço de saque" in sub-object 26-03 (`fss`), is not generated here, only parsed.
  *
- * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
- * composto" of Pix Automático (Pix recorrente) does, are out of scope: the location is always
- * written in the "Merchant Account Information" template.
+ * Unreserved Templates (IDs 80 to 99) are never written: the location always goes in the
+ * "Merchant Account Information" template, so the "QR Code composto" of Pix Automático (Pix
+ * recorrente), which puts its recurrence location in one of them, is out of scope here.
+ * `getPixPayloadInfo` does read a composto, but only as an ordinary dynamic payload.
  *
  * The merchant name, the merchant city and the description are folded to printable ASCII
  * (accents are dropped) and truncated to the lengths the BR Code allows, the description to
@@ -167,7 +168,7 @@ const resolveFormattedAmount = (
  * does not survive that round trip (`0.005`, `123.456`) is refused rather than rounded into a
  * payload that asks the payer for a different sum.
  *
- * @param {GeneratePixPayloadParams} params - The parameters of the payload.
+ * @param {GeneratePixPayloadOptions} params - The parameters of the payload.
  * @param {string} [params.key] - The Pix key of the receiver. Required unless `url` is given.
  * @param {string} [params.url] - The PSP location of a dynamic payload. Required unless `key`
  * is given.
@@ -202,10 +203,12 @@ const resolveFormattedAmount = (
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
- * @see Official: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api
+ * Pix (SPI) OpenAPI spec.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
-export const generatePixPayload = (params: GeneratePixPayloadParams): string | null => {
+export const generatePixPayload = (params: GeneratePixPayloadOptions): string | null => {
 	if (isNullish(params) || typeof params !== "object") return null;
 
 	const { key: keyInput, url: urlInput } = params;

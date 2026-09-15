@@ -2,6 +2,8 @@ import { BANKS, type Bank } from "../_internals/constants/banks";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
+export type { Bank } from "../_internals/constants/banks";
+
 const CODE_LENGTH = 3;
 
 /**
@@ -19,8 +21,8 @@ const CODE_LENGTH = 3;
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
- * @see Official: https://brasilapi.com.br/api/banks/v1 Fallback source used by the dataset
- * generator (`scripts/banks.ts`) when the Bacen CSV request fails.
+ * @see Based on: https://brasilapi.com.br/api/banks/v1
+ * Fallback source used by the dataset generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */
 export const getBankByCode = (code: string | number): Bank | null => {
 	if (!isLookupCode(code)) return null;

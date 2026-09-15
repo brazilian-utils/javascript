@@ -1,4 +1,4 @@
-import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
+import { getPixPayloadInfo } from "../get-pix-payload-info/get-pix-payload-info";
 
 /**
  * Validates a Pix BR Code payload, the string behind a Pix QR Code and behind "Pix copia e
@@ -16,14 +16,20 @@ import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
  * greater than zero, unless it is a Pix Saque BR Code, i.e. unless it carries the ISPB of the
  * "facilitador de serviço de saque" in sub-object 26-03 (`fss`) as §2.6 of the Pix manual
  * prescribes; rejecting `"0"`/`"0.00"` without `fss` is a deliberate restriction of this
- * library, not a rule of the manual.
+ * library, not a rule of the manual. A `fss` written next to a PSP location makes the payload
+ * invalid: §2.7 of the Manual de Padrões para Iniciação do Pix maps the dynamic QR Code to
+ * exactly two sub-objects, `00` (GUI) and `25` (URL), and `fss` belongs to the static template
+ * of §2.6.
  *
  * The key itself is not checked against the DICT formats: the manual states a static QR Code
  * can be generated with a key that is not (or is no longer) registered, so use `isValidPixKey`
  * when that matters.
  *
- * Payloads that carry the location in an Unreserved Template (IDs 80 to 99), as the "QR Code
- * composto" of Pix Automático (Pix recorrente) does, are out of scope and reported as invalid.
+ * Unreserved Templates (IDs 80 to 99) are ignored. The "QR Code composto" of Pix Automático
+ * (Pix recorrente) writes its recurrence location in one of them: when such a payload also
+ * carries a payment location in 26-25, as the composite example of the Pix manual does, it is
+ * accepted here and read as an ordinary dynamic payload, its recurrence location dropped. Only
+ * a payload with no Pix template at all in IDs 26 to 51 is reported as invalid.
  *
  * @param {string} value - The BR Code payload to validate.
  * @returns {boolean} True if the payload is a valid Pix BR Code, false otherwise.
@@ -40,7 +46,9 @@ import { parsePixPayload } from "../parse-pix-payload/parse-pix-payload";
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * @see Official: https://github.com/bacen/pix-api Pix (SPI) OpenAPI spec.
- * @see Official: https://github.com/bacen/pix-dict-api DICT OpenAPI spec.
+ * @see Official: https://github.com/bacen/pix-api
+ * Pix (SPI) OpenAPI spec.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
-export const isValidPixPayload = (value: string): boolean => parsePixPayload(value) !== null;
+export const isValidPixPayload = (value: string): boolean => getPixPayloadInfo(value) !== null;

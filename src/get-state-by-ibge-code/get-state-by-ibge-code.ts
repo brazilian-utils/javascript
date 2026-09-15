@@ -2,12 +2,15 @@ import { DATA, type State } from "../_internals/constants/states";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
+export type { State } from "../_internals/constants/states";
+
 /**
  * Retrieves the Brazilian state whose 2-digit IBGE code ("cUF", the Código da Unidade da
  * Federação) matches the given value.
  *
  * The IBGE code is the same 2-digit UF code found in the first field of every DF-e access key
- * (chave de acesso) issued for NF-e, NFC-e, CT-e and MDF-e documents.
+ * (chave de acesso) issued for any of the models `isValidNfeKey` covers: NF-e (55), NFC-e
+ * (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
  *
  * A `code` given as a number must be a non-negative integer: a sign and a decimal point are
  * not digits, so `-35` and `3.5` are rejected instead of being read as `35`.
@@ -17,7 +20,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @returns {State|null} The matching `State` object, or `null` when `code` is not a known
  * IBGE UF code.
  *
- * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados (IBGE Localidades API, field `id`)
+ * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados
+ * (IBGE Localidades API, field `id`)
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
  *   (Manual de Orientação do Contribuinte, "chave de acesso" / "Tabela do IBGE")
  *

@@ -1,0 +1,7 @@
+# actionlint 1.7.12 does not know GitHub's self-repository `uses: $/...` syntax yet
+# (https://github.com/rhysd/actionlint/issues/711); zizmor's self-repository audit and the GitHub
+# docs recommend it over the workspace-relative `./...` form. Drop this once actionlint supports it.
+paths:
+  .github/workflows/**/*.yml:
+    ignore:
+      - 'specifying action "\$/\.github/actions/setup" in invalid format because ref is missing'

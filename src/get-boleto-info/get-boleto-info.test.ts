@@ -11,41 +11,58 @@ const withFactor = {
 	"1000": "00190000090114971860168524522114210000000102656",
 	"1001": "00190000090114971860168524522114810010000102656",
 	"5000": "00190000090114971860168524522114350000000102656",
+	"7000": "00190000090114971860168524522114970000000102656",
 	"7586": "00190000090114971860168524522114675860000102656",
 	"7654": "00190000090114971860168524522114576540000102656",
+	"8841": "00190000090114971860168524522114488410000102656",
 	"8999": "00190000090114971860168524522114489990000102656",
 	"9999": "00190000090114971860168524522114799990000102656",
+};
+
+const REFERENCE_DATE = new Date(2025, 5, 15);
+
+const CANONICAL_INFO = {
+	amount: 102_656,
+	expirationDate: new Date(2018, 6, 15),
+	bankCode: "001",
 };
 
 const ARRECADACAO_LINE = "846100000005246100291102005460339004695895061080";
 const ARRECADACAO_BARCODE = "84610000000246100291100054603390069589506108";
 
 describe("getBoletoInfo", () => {
-	describe("should return undefined", () => {
+	describe("should return null", () => {
 		test("when boleto is empty string", () => {
-			expect(getBoletoInfo("")).toBeUndefined();
+			expect(getBoletoInfo("")).toBeNull();
 		});
 
 		test("when boleto is invalid", () => {
-			expect(getBoletoInfo("00190000090114971860168524522114775860000102656")).toBeUndefined();
+			expect(getBoletoInfo("00190000090114971860168524522114775860000102656")).toBeNull();
+		});
+
+		test("when boleto is not a string, never undefined, as every other getter answers", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(getBoletoInfo(null)).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(getBoletoInfo()).toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			expect(getBoletoInfo(123)).toBeNull();
 		});
 	});
 
 	describe("should return boleto info", () => {
 		test("when boleto is valid without mask", () => {
-			expect(getBoletoInfo("00190000090114971860168524522114675860000102656")).toStrictEqual({
-				amount: 102_656,
-				expirationDate: new Date(2018, 6, 15),
-				bankCode: "001",
-			});
+			const info = getBoletoInfo(withFactor["7586"], { referenceDate: REFERENCE_DATE });
+
+			expect(info).toStrictEqual(CANONICAL_INFO);
 		});
 
 		test("when boleto is valid with mask", () => {
-			expect(getBoletoInfo("0019000009 01149.718601 68524.522114 6 75860000102656")).toStrictEqual({
-				amount: 102_656,
-				expirationDate: new Date(2018, 6, 15),
-				bankCode: "001",
-			});
+			const masked = "0019000009 01149.718601 68524.522114 6 75860000102656";
+
+			expect(getBoletoInfo(masked, { referenceDate: REFERENCE_DATE })).toStrictEqual(
+				CANONICAL_INFO,
+			);
 		});
 
 		test("when the amount field is all zeros (same fixture as the 'valid without mask' boleto, amount positions 37-46 zeroed and the main check digit recalculated)", () => {
@@ -54,7 +71,7 @@ describe("getBoletoInfo", () => {
 	});
 
 	describe("fator de vencimento (fixtures share a banco 001, R$ 1.026,56 slip with only the factor and check digits changed; FEBRABAN restarted the factor at 1000 on 22/02/2025 right after it reached 9999 on 21/02/2025, so the same factor can map to two dates 9000 days apart, and referenceDate pins which cycle wins)", () => {
-		const referenceDate = new Date(2025, 5, 15);
+		const referenceDate = REFERENCE_DATE;
 
 		test("should return null when there is no fator de vencimento", () => {
 			expect(getBoletoInfo(withFactor["0000"], { referenceDate })?.expirationDate).toBeNull();
@@ -103,7 +120,7 @@ describe("getBoletoInfo", () => {
 			).toStrictEqual(new Date(2000, 6, 3));
 		});
 
-		test("should resolve a factor inside the safety range to its closest candidate (fixture '7586' with the factor changed to 6614 and the main check digit recalculated: with referenceDate 15/06/2025 neither cycle candidate falls inside the accepted control range, landing in the 'range de segurança' the FEBRABAN manual describes, so the closest one is used anyway)", () => {
+		test("should resolve a factor inside the safety range to its closest candidate (fixture '7586' with the factor changed to 6614 and the main check digit recalculated: with referenceDate 15/06/2025 neither cycle candidate falls inside the accepted control range, landing in the safety window RANGE_BEFORE/RANGE_AFTER define, which is a heuristic of this library rather than a published FEBRABAN rule, so the closest one is used anyway)", () => {
 			expect(
 				getBoletoInfo("00190000090114971860168524522114466140000102656", {
 					referenceDate,
@@ -111,10 +128,36 @@ describe("getBoletoInfo", () => {
 			).toStrictEqual(new Date(2015, 10, 16));
 		});
 
-		test("should accept a factor whose difference from the reference date is exactly RANGE_AFTER (5500 days), even though the other cycle candidate (3500 days before the reference, on the other side) is numerically closer", () => {
+		test("should prefer the candidate inside the control range over the closest one (factor 1000 with referenceDate 16/06/2011: the old cycle date 03/07/2000 is 4000 days back, past RANGE_BEFORE, while the new cycle date 22/02/2025 is 5000 days ahead, inside RANGE_AFTER)", () => {
+			expect(
+				getBoletoInfo(withFactor["1000"], { referenceDate: new Date(2011, 5, 16) })?.expirationDate,
+			).toStrictEqual(new Date(2025, 1, 22));
+		});
+
+		test("should accept a factor whose difference from the reference date is exactly RANGE_AFTER (5500 days)", () => {
 			expect(
 				getBoletoInfo(withFactor["1000"], { referenceDate: new Date(1985, 5, 12) })?.expirationDate,
 			).toStrictEqual(new Date(2000, 6, 3));
+		});
+
+		test("should never resolve a factor to a date before the 07/10/1997 base date, even when the reference date predates the scheme: the cycle search is clamped to the first cycle, so each factor below gives the single date it is able to denote", () => {
+			const preSchemeReference = new Date(2000, 0, 1);
+
+			expect(
+				getBoletoInfo(withFactor["7000"], { referenceDate: preSchemeReference })?.expirationDate,
+			).toStrictEqual(new Date(2016, 11, 6));
+			expect(
+				getBoletoInfo(withFactor["8841"], { referenceDate: preSchemeReference })?.expirationDate,
+			).toStrictEqual(new Date(2021, 11, 21));
+			expect(
+				getBoletoInfo(withFactor["9999"], { referenceDate: preSchemeReference })?.expirationDate,
+			).toStrictEqual(new Date(2025, 1, 21));
+		});
+
+		test("should keep the clamped answer stable while the reference date is still before the first cycle", () => {
+			expect(
+				getBoletoInfo(withFactor["8841"], { referenceDate: new Date(2003, 0, 1) })?.expirationDate,
+			).toStrictEqual(new Date(2021, 11, 21));
 		});
 
 		test("should default the reference date to now", () => {
@@ -190,17 +233,17 @@ describe("getBoletoInfo", () => {
 		test("should return a value exactly when the bank slip is valid", () => {
 			fc.assert(
 				fc.property(fc.string(), (value) => {
-					expect(getBoletoInfo(value) !== undefined).toBe(isValidBoleto(value));
+					expect(getBoletoInfo(value) !== null).toBe(isValidBoleto(value));
 				}),
 			);
 		});
 
-		test("should never throw and always return an object or undefined", () => {
+		test("should never throw and always return an object or null", () => {
 			fc.assert(
 				fc.property(fc.anything(), (value) => {
 					const info = getBoletoInfo(value as string);
 
-					expect(info === undefined || typeof info === "object").toBe(true);
+					expect(info === null || typeof info === "object").toBe(true);
 				}),
 			);
 		});
@@ -208,10 +251,10 @@ describe("getBoletoInfo", () => {
 });
 
 describe("getBoletoInfo types", () => {
-	test("should take a string, optional options, and return boleto info or undefined", () => {
+	test("should take a string, optional options, and return boleto info or null", () => {
 		expectTypeOf(getBoletoInfo).parameter(0).toEqualTypeOf<string>();
 		expectTypeOf(getBoletoInfo).parameter(1).toEqualTypeOf<GetBoletoInfoOptions | undefined>();
-		expectTypeOf(getBoletoInfo).returns.toEqualTypeOf<BoletoInfo | undefined>();
+		expectTypeOf(getBoletoInfo).returns.toEqualTypeOf<BoletoInfo | null>();
 	});
 
 	test("should restrict referenceDate to a Date", () => {

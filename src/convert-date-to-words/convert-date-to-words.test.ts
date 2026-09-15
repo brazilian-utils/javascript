@@ -1,7 +1,6 @@
 import * as fc from "fast-check";
 
 import { MONTH_NAMES, WEEKDAY_NAMES } from "../_internals/constants/number-words";
-import { type WordsCase } from "../_internals/number-to-words/number-to-words";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { convertDateToWords, type ConvertDateToWordsOptions } from "./convert-date-to-words";
 
@@ -73,41 +72,19 @@ describe("convertDateToWords", () => {
 		expect(convertDateToWords("32/01/2024")).toBe("");
 	});
 
-	describe("case option", () => {
-		test("should keep the result lowercase by default", () => {
+	describe("letter case", () => {
+		test("should always keep the result lowercase", () => {
 			expect(convertDateToWords("01/01/2024")).toBe(
 				"primeiro de janeiro de dois mil e vinte e quatro",
 			);
-		});
-
-		test("should keep the result lowercase for 'lower'", () => {
-			expect(convertDateToWords("01/01/2024", { case: "lower" })).toBe(
-				"primeiro de janeiro de dois mil e vinte e quatro",
+			expect(convertDateToWords("02/03/2024")).toBe("dois de março de dois mil e vinte e quatro");
+			expect(convertDateToWords("02/03/2024", { weekday: true })).toBe(
+				"sábado, dois de março de dois mil e vinte e quatro",
 			);
 		});
+	});
 
-		test("should capitalize only the first letter for 'sentence'", () => {
-			expect(convertDateToWords("01/01/2024", { case: "sentence" })).toBe(
-				"Primeiro de janeiro de dois mil e vinte e quatro",
-			);
-			expect(convertDateToWords("10/05/1999", { case: "sentence" })).toBe(
-				"Dez de maio de mil novecentos e noventa e nove",
-			);
-		});
-
-		test("should uppercase everything for 'upper', keeping accents", () => {
-			expect(convertDateToWords("02/03/2024", { case: "upper" })).toBe(
-				"DOIS DE MARÇO DE DOIS MIL E VINTE E QUATRO",
-			);
-		});
-
-		test("should ignore an invalid case value and fall back to 'lower'", () => {
-			expect(
-				// @ts-expect-error: intentionally invalid input
-				convertDateToWords("01/01/2024", { case: "invalid" }),
-			).toBe("primeiro de janeiro de dois mil e vinte e quatro");
-		});
-
+	describe("style option", () => {
 		test("should write only the month name and leave day/year as digits for 'month'", () => {
 			expect(convertDateToWords("02/03/2024", { style: "month" })).toBe("2 de março de 2024");
 		});
@@ -201,15 +178,6 @@ describe("convertDateToWords", () => {
 		test("should combine with 'month' style", () => {
 			expect(convertDateToWords("01/01/2024", { weekday: true, style: "month" })).toBe(
 				"segunda-feira, 1º de janeiro de 2024",
-			);
-		});
-
-		test("should combine with the 'case' option", () => {
-			expect(convertDateToWords("02/03/2024", { weekday: true, case: "sentence" })).toBe(
-				"Sábado, dois de março de dois mil e vinte e quatro",
-			);
-			expect(convertDateToWords("02/03/2024", { weekday: true, case: "upper" })).toBe(
-				"SÁBADO, DOIS DE MARÇO DE DOIS MIL E VINTE E QUATRO",
 			);
 		});
 	});
@@ -359,7 +327,7 @@ describe("convertDateToWords", () => {
 				["11/03/2024", "onze de março de dois mil e vinte e quatro"],
 				["12/03/2024", "doze de março de dois mil e vinte e quatro"],
 				["13/03/2024", "treze de março de dois mil e vinte e quatro"],
-				["14/03/2024", "catorze de março de dois mil e vinte e quatro"],
+				["14/03/2024", "quatorze de março de dois mil e vinte e quatro"],
 				["15/03/2024", "quinze de março de dois mil e vinte e quatro"],
 				["16/03/2024", "dezesseis de março de dois mil e vinte e quatro"],
 				["17/03/2024", "dezessete de março de dois mil e vinte e quatro"],
@@ -381,7 +349,7 @@ describe("convertDateToWords", () => {
 			expectDates(cases);
 		});
 
-		test("should reproduce every published brutils 'convert_date_to_text' example (tests/test_date_utils.py, lowercase here because brutils always capitalizes and this library exposes that as case: 'sentence')", () => {
+		test("should reproduce every published brutils 'convert_date_to_text' example (tests/test_date_utils.py, lowercase here because brutils always capitalizes and this library leaves casing to the caller)", () => {
 			const cases: [string, string][] = [
 				["15/08/2024", "quinze de agosto de dois mil e vinte e quatro"],
 				["01/01/2000", "primeiro de janeiro de dois mil"],
@@ -467,7 +435,6 @@ describe("convertDateToWords types", () => {
 		expectTypeOf(convertDateToWords)
 			.parameter(1)
 			.toEqualTypeOf<ConvertDateToWordsOptions | undefined>();
-		expectTypeOf<ConvertDateToWordsOptions["case"]>().toEqualTypeOf<WordsCase | undefined>();
 		expectTypeOf<ConvertDateToWordsOptions["style"]>().toEqualTypeOf<
 			"full" | "month" | undefined
 		>();

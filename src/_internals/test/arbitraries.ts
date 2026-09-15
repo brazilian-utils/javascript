@@ -38,7 +38,11 @@ export const anyValue: fc.Arbitrary<unknown> = fc.oneof(
 /** ASCII alphanumeric text, at most twelve characters long. */
 export const asciiAlphanumericText: fc.Arbitrary<string> = fc.stringMatching(/^[0-9A-Za-z]{0,12}$/);
 
-/** Booleans, `null`, numbers, strings, arrays and plain objects, including nested primitives. */
+/**
+ * Booleans, `null`, numbers, strings, arrays and plain objects, including nested primitives,
+ * plus null-prototype objects: an object built with `Object.create(null)` has no `toString`,
+ * so it is the shape that catches a util reaching a sanitizer behind a nullish guard alone.
+ */
 export const anyGarbage: fc.Arbitrary<unknown> = fc.oneof(
 	fc.boolean(),
 	fc.constant(null),
@@ -46,6 +50,7 @@ export const anyGarbage: fc.Arbitrary<unknown> = fc.oneof(
 	fc.string(),
 	fc.array(anyPrimitive),
 	fc.object({ key: fc.constantFrom("a", "b", "c") }),
+	fc.object({ withNullPrototype: true }),
 );
 
 /**
@@ -139,6 +144,30 @@ export const businessDayDates: fc.Arbitrary<Date> = fc.date({
 	max: new Date(2050, 11, 31),
 	noInvalidDate: true,
 });
+
+/**
+ * `Object.prototype`'s own keys: the ones a lookup must resolve as unknown rather than reach
+ * through the prototype chain.
+ */
+export const PROTOTYPE_KEYS: string[] = Object.getOwnPropertyNames(Object.prototype);
+
+/** A date, or anything at all: what a business day util may be handed as its date argument. */
+export const anyBusinessDayDate: fc.Arbitrary<unknown> = fc.oneof(businessDayDates, fc.anything());
+
+/** A number of business days, or anything at all: what a business day util may be asked to walk. */
+export const anyBusinessDayAmount: fc.Arbitrary<unknown> = fc.oneof(
+	fc.integer({ min: -200, max: 200 }),
+	fc.anything(),
+);
+
+const anyStateCode = fc.oneof(fc.constantFrom(...PROTOTYPE_KEYS, "SP", "xx"), fc.anything());
+const anyIncludeOptional = fc.oneof(fc.boolean(), fc.anything());
+
+/** Business day options, or anything at all, prototype chain keys as the state code included. */
+export const anyBusinessDayOptions: fc.Arbitrary<unknown> = fc.oneof(
+	fc.anything(),
+	fc.record({ stateCode: anyStateCode, includeOptional: anyIncludeOptional }),
+);
 
 /** An amount with at most two decimals, the precision currency formatting round-trips. */
 export const twoDecimalAmounts: fc.Arbitrary<number> = fc

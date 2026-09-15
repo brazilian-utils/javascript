@@ -132,7 +132,7 @@ const sharedPack = {
  * shipped), and the ~76 util subpaths are built together in a second, separate invocation. Within
  * that second group, rolldown's default splitting still applies *among the utils themselves*:
  * most end up self-contained (single importer within that graph), but a few genuine cross-util
- * dependencies (e.g. `parsePixKey` reusing `isValidCpf`'s digit-check, several phone utils sharing
+ * dependencies (e.g. `getPixKeyInfo` reusing `isValidCpf`'s digit-check, several phone utils sharing
  * `formatPhone`'s area-code table) get factored into a small shared chunk, real code reuse that
  * would otherwise be duplicated; either way, none of it touches the root. Running
  * ~77 entries as ~77 *separate* `PackUserConfig`s (fully self-contained, zero sharing at all) was
@@ -145,7 +145,9 @@ const sharedPack = {
 
 export default defineConfig({
 	fmt: {
-		ignorePatterns: ["dist", "coverage", "docs", ".claude"],
+		// `reports` holds generated output only, the committed API Extractor baseline included:
+		// reformatting its code block would make every `check:api` run report a changed API.
+		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude"],
 		singleQuote: false,
 		sortImports: true,
 		useTabs: true,
@@ -451,8 +453,17 @@ export default defineConfig({
 					"vitest/warn-todo": "off",
 				},
 			},
+			// The barrel re-exports every deprecated alias, and a deprecated util's own tests (plus
+			// the `getMunicipalities` property that cross-checks it against `getCities`) have to
+			// keep calling it for as long as it is still supported.
 			{
-				files: ["src/index.ts", "src/index.test.ts"],
+				files: [
+					"src/index.ts",
+					"src/index.test.ts",
+					"src/get-cities/get-cities.test.ts",
+					"src/get-municipalities/get-municipalities.test.ts",
+					"src/get-municipality/get-municipality.test.ts",
+				],
 				rules: {
 					"typescript/no-deprecated": "off",
 				},

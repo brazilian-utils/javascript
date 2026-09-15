@@ -83,7 +83,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: ./.github/actions/setup
+        uses: $/.github/actions/setup
         with:
           node-version: 24
 
@@ -104,6 +104,7 @@ jobs:
           cat tree-shaking.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Ensure npm supports staged publishing and OIDC (npm >= 11.15)
+        # zizmor: ignore[adhoc-packages] npm is pinned to an exact version and is not a package.json dependency
         run: npm install -g npm@12.0.2
 
       - name: Stage on npm
@@ -126,7 +127,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: ./.github/actions/setup
+        uses: $/.github/actions/setup
 
       - name: Generate the CycloneDX SBOM of the published package
         # The package has no runtime dependencies, so the SBOM describes the package itself;

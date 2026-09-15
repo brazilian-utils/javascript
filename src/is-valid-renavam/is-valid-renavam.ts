@@ -1,6 +1,9 @@
+import { calculateRenavamCheckDigit } from "../_internals/calculate-renavam-check-digit/calculate-renavam-check-digit";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
 const RENAVAM_LENGTH = 11;
+
+const BASE_LENGTH = 10;
 
 const SEPARATORS_REGEX = /[\s.-]/g;
 
@@ -53,28 +56,9 @@ export const isValidRenavam = (renavam: string | number): boolean => {
 
 	if (isRepeatedDigits(paddedDigits)) return false;
 
-	const renavamWithoutDigit = paddedDigits.slice(0, 10);
+	const expectedDigit = calculateRenavamCheckDigit(paddedDigits.slice(0, BASE_LENGTH));
 
-	let reversedRenavam = "";
-
-	for (const char of renavamWithoutDigit) {
-		reversedRenavam = char + reversedRenavam;
-	}
-
-	let sum = 0;
-	let multiplier = 2;
-	for (const char of reversedRenavam) {
-		const digit = Number.parseInt(char, 10);
-		sum += digit * multiplier;
-
-		multiplier = multiplier >= 9 ? 2 : multiplier + 1;
-	}
-
-	const mod11 = sum % 11;
-
-	const expectedDigit = mod11 <= 1 ? 0 : 11 - mod11;
-
-	const actualDigit = Number.parseInt(paddedDigits.charAt(10), 10);
+	const actualDigit = Number.parseInt(paddedDigits.charAt(BASE_LENGTH), 10);
 
 	return expectedDigit === actualDigit;
 };

@@ -3,12 +3,17 @@
  * `I`, `O` and `Q` (dropped to avoid confusion with `1` and `0`), per ISO 3779:2009 structure.
  * The check digit at the 9th position, its transliteration table and its weighted MOD 11
  * algorithm are a North-American requirement (49 CFR 565.15 / SAE J853), not something
- * Resolução CONTRAN nº 24/1998 or ABNT NBR 6066 — which define the Brazilian VIN structure —
- * mandate; many Brazilian-built VINs do not carry a matching check digit.
+ * Resolução CONTRAN nº 968/2022 (which replaced Resolução CONTRAN nº 24/1998 from 1 January 2025,
+ * art. 50, II) or ABNT NBR 6066, which define the Brazilian VIN structure, mandate; many Brazilian-built VINs do not carry a matching check digit.
+ * The ISO catalogue page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser, where it renders the standard's paywalled
+ * abstract rather than its text.
  * @see Official: https://www.iso.org/standard/52200.html
  * @see Official: https://www.ecfr.gov/current/title-49/section-565.15
- * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/resolucoes-contran
- * @see Based on: https://vpic.nhtsa.dot.gov/api/
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9682022.pdf
+ * Resolução CONTRAN nº 968, de 20 de junho de 2022, art. 2º, I (VIN of 17 characters in three sections)
+ * and art. 50, II (revocation of Resolução nº 24/1998 from 1 January 2025).
+ * @see Official: https://vpic.nhtsa.dot.gov/api/
  */
 export const VIN_LENGTH = 17;
 

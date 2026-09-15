@@ -116,7 +116,8 @@ export const AREA_CODE_STATES: Record<number, StateCode> = {
  * state.
  *
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
- * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
  */
 export const AREA_CODE_SECONDARY_STATES: Record<number, readonly StateCode[]> = {
 	42: ["SC"],

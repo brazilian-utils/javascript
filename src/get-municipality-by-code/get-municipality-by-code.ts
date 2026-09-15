@@ -3,6 +3,8 @@ import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { getStates } from "../get-states/get-states";
 
+export type { Municipality } from "../_internals/constants/cities";
+
 /**
  * Looks up a Brazilian municipality by its 7 digit IBGE code, published by the IBGE.
  *

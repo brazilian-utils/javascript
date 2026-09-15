@@ -1,5 +1,7 @@
 import { DATA, type StateName } from "../_internals/constants/states";
 
+export type { StateName } from "../_internals/constants/states";
+
 /**
  * Retrieves the full name of a Brazilian state given its two-letter code (sigla).
  *
@@ -10,7 +12,8 @@ import { DATA, type StateName } from "../_internals/constants/states";
  * @returns {StateName|null} The full state name, or `null` when `code` does not match any
  * Brazilian state.
  *
- * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados (IBGE Localidades API)
+ * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/estados
+ * (IBGE Localidades API)
  *
  * @example
  * ```typescript

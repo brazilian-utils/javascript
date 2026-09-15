@@ -2,6 +2,7 @@ import * as fc from "fast-check";
 
 import { CPF_LENGTH } from "../_internals/constants/cpf";
 import { DATA, type StateCode } from "../_internals/constants/states";
+import { PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 import { STATE_CODES } from "./constants";
@@ -69,9 +70,31 @@ describe("generateCpf", () => {
 		expect(isValidCpf(cpf)).toBe(true);
 	});
 
+	test("should fall back to a random digit instead of reaching the prototype chain for a state code", () => {
+		for (const key of PROTOTYPE_KEYS) {
+			// @ts-expect-error: intentionally invalid input
+			const cpf = generateCpf(key);
+			expect(cpf).toHaveLength(CPF_LENGTH);
+			expect(isValidCpf(cpf)).toBe(true);
+		}
+	});
+
+	test("should fall back to a random digit instead of throwing for a state code with no string conversion", () => {
+		const nullPrototype = generateCpf(Object.create(null));
+		const throwing = generateCpf({
+			toString() {
+				throw new Error("no string conversion");
+			},
+		} as unknown as StateCode);
+
+		expect(isValidCpf(nullPrototype)).toBe(true);
+		expect(isValidCpf(throwing)).toBe(true);
+	});
+
 	describe("properties", () => {
 		const stateCode = fc.constantFrom(...DATA.map((state) => state.code));
 		const batchSize = fc.integer({ min: 1, max: 10 });
+		const hostileStateCode = fc.oneof(fc.constantFrom(...PROTOTYPE_KEYS), fc.anything());
 
 		test("should generate a valid CPF carrying the state digit of every state", () => {
 			fc.assert(
@@ -80,6 +103,17 @@ describe("generateCpf", () => {
 
 					expect(cpf).toHaveLength(CPF_LENGTH);
 					expect(cpf[8]).toBe(STATE_CODES[state]);
+					expect(isValidCpf(cpf)).toBe(true);
+				}),
+			);
+		});
+
+		test("should generate a valid CPF for any state code at all, prototype chain keys included", () => {
+			fc.assert(
+				fc.property(hostileStateCode, (state) => {
+					const cpf = generateCpf(state as StateCode);
+
+					expect(cpf).toMatch(/^\d{11}$/);
 					expect(isValidCpf(cpf)).toBe(true);
 				}),
 			);

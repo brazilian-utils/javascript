@@ -80,6 +80,13 @@ describe("isValidPassport", () => {
 	});
 });
 
+describe("isValidPassport with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPassport(["A", "B", "1", "2", "3", "4", "5", "6"])).toBe(false);
+	});
+});
+
 describe("isValidPassport types", () => {
 	test("should take a string or number and return a boolean", () => {
 		expectTypeOf(isValidPassport).parameter(0).toEqualTypeOf<string | number>();

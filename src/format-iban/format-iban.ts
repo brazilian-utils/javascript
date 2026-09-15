@@ -1,4 +1,4 @@
-import { BR_IBAN_LENGTH, IBAN_FORMAT_REGEX } from "../_internals/constants/iban";
+import { BR_IBAN_LENGTH } from "../_internals/constants/iban";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { GROUP_SIZE } from "./constants";
 
@@ -12,15 +12,14 @@ import { GROUP_SIZE } from "./constants";
  * length. Use `isValidIban` to check validity.
  *
  * The value may be compact (`"BR1500000000000010932840814P2"`), already in the ISO 13616 print
- * format (letters and digits in groups separated by a single space) or a partial value still
- * being typed, in every case with optional surrounding whitespace. Only a character outside
- * letters and digits, or a separator other than a single space, makes the value something
- * other than an IBAN, and then the function returns an empty string instead of quietly
- * dropping the character and presenting the rest as an IBAN.
+ * format, or a partial value still being typed. Like every formatter of this package, it is read
+ * for its letters and digits and grouped as far as they go: any other character (a hyphen, a
+ * dot, extra whitespace) is dropped and the letters are uppercased. Only a value that is not a
+ * string gives an empty string.
  *
  * @param {string} value - The IBAN to be formatted.
  * @returns {string} The IBAN uppercased and grouped in blocks of 4 characters, or an empty
- * string when `value` is not a string written in the print format.
+ * string when `value` is not a string.
  *
  * @example
  * ```typescript
@@ -28,20 +27,18 @@ import { GROUP_SIZE } from "./constants";
  * formatIban("br1500000000000010932840814p2"); // "BR15 0000 0000 0000 1093 2840 814P 2"
  * formatIban("BR15"); // "BR15"
  * formatIban("BR1500000000000010932840814P2EXTRA"); // "BR15 0000 0000 0000 1093 2840 814P 2"
- * formatIban("BR1500000000000010932840814P-2"); // "" (hyphens are not part of an IBAN)
+ * formatIban("BR15 0000-0000.0000/1093 2840 814P-2"); // "BR15 0000 0000 0000 1093 2840 814P 2"
  * ```
  *
- * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf Circular BCB nº 3.625/2013
- * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf Diretrizes de Implementação do IBAN no Brasil
+ * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
+ * Circular BCB nº 3.625/2013
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf
+ * Diretrizes de Implementação do IBAN no Brasil
  */
 export const formatIban = (value: string): string => {
 	if (typeof value !== "string") return "";
 
-	const printed = value.trim();
-
-	if (!IBAN_FORMAT_REGEX.test(printed)) return "";
-
-	const sanitized = sanitizeToAlphanumeric(printed).slice(0, BR_IBAN_LENGTH);
+	const sanitized = sanitizeToAlphanumeric(value).slice(0, BR_IBAN_LENGTH);
 
 	let formatted = "";
 

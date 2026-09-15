@@ -13,6 +13,7 @@ type MockImplementation = (...args: unknown[]) => unknown;
 type MockFunction = ((...args: unknown[]) => unknown) & {
 	mock: { calls: unknown[][] };
 	mockClear: () => void;
+	mockReset: () => void;
 	mockRejectedValue: (value: unknown) => MockFunction;
 	mockRejectedValueOnce: (value: unknown) => MockFunction;
 	mockResolvedValue: (value: unknown) => MockFunction;
@@ -35,8 +36,20 @@ function hasLength(value: unknown): value is { length: number } {
 	return isRecord(value) && typeof value["length"] === "number";
 }
 
+class AssertionMismatch extends Error {
+	public constructor(message: string) {
+		super(message);
+
+		this.name = "AssertionMismatch";
+	}
+}
+
 function createAssertionError(message: string): Error {
-	return new Error(message);
+	return new AssertionMismatch(message);
+}
+
+function createUsageError(message: string): Error {
+	return new TypeError(message);
 }
 
 function describeValue(value: unknown): string {
@@ -122,8 +135,12 @@ function createMock(implementation?: MockImplementation): MockFunction {
 	const mockFn: MockFunction = Object.assign(baseFn, {
 		mock: { calls },
 		mockClear: (): void => {
+			calls.length = 0;
+		},
+		mockReset: (): void => {
 			queue.length = 0;
 			calls.length = 0;
+			currentImplementation = implementation;
 		},
 		mockResolvedValueOnce: (value: unknown): MockFunction => {
 			queue.push(() => Promise.resolve(value));
@@ -306,7 +323,7 @@ const createCollectionMatchers = (actual: unknown): Matchers => ({
 	},
 	toMatch(expected: RegExp | string): void {
 		if (typeof actual !== "string") {
-			throw createAssertionError("Expected value to be a string");
+			throw createUsageError("Expected value to be a string");
 		}
 
 		if (expected instanceof RegExp) {
@@ -323,7 +340,7 @@ const createCollectionMatchers = (actual: unknown): Matchers => ({
 	},
 	toContainEqual(expected: unknown): void {
 		if (!Array.isArray(actual)) {
-			throw createAssertionError("Expected value to be an array");
+			throw createUsageError("Expected value to be an array");
 		}
 
 		if (!actual.some((value) => deepEqual(value, expected))) {
@@ -337,7 +354,7 @@ const createCollectionMatchers = (actual: unknown): Matchers => ({
 	},
 	toHaveLength(expected: number): void {
 		if (!hasLength(actual)) {
-			throw createAssertionError("Expected value to have a length");
+			throw createUsageError("Expected value to have a length");
 		}
 
 		if (actual.length !== expected) {
@@ -354,7 +371,7 @@ const createCollectionMatchers = (actual: unknown): Matchers => ({
 const createBehaviorMatchers = (actual: unknown): Matchers => ({
 	toThrow(expected?: ThrowExpectation): void {
 		if (!isCallable(actual)) {
-			throw createAssertionError("Expected value to be a function");
+			throw createUsageError("Expected value to be a function");
 		}
 
 		try {
@@ -369,7 +386,7 @@ const createBehaviorMatchers = (actual: unknown): Matchers => ({
 	},
 	toHaveBeenCalled(): void {
 		if (!isMockFunction(actual)) {
-			throw createAssertionError("Expected value to be a mock function");
+			throw createUsageError("Expected value to be a mock function");
 		}
 
 		if (actual.mock.calls.length === 0) {
@@ -378,7 +395,7 @@ const createBehaviorMatchers = (actual: unknown): Matchers => ({
 	},
 	toHaveBeenCalledTimes(expected: number): void {
 		if (!isMockFunction(actual)) {
-			throw createAssertionError("Expected value to be a mock function");
+			throw createUsageError("Expected value to be a mock function");
 		}
 
 		if (actual.mock.calls.length !== expected) {
@@ -416,8 +433,12 @@ function createExpect(actual: unknown): ExpectResult {
 					(...args: unknown[]): void => {
 						try {
 							matcher(...args);
-						} catch {
-							return;
+						} catch (error) {
+							if (error instanceof AssertionMismatch) {
+								return;
+							}
+
+							throw error;
 						}
 
 						throw createAssertionError(`Expected value not to satisfy ${name}`);
@@ -559,7 +580,7 @@ export const vi = {
 	fn: createMock,
 	restoreAllMocks: (): void => {
 		for (const mockFn of registeredMocks) {
-			mockFn.mockClear();
+			mockFn.mockReset();
 		}
 	},
 };

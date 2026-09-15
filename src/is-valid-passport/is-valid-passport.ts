@@ -22,7 +22,11 @@ import { PASSPORT_REGEX } from "./constants";
  * isValidPassport("12345678") // false
  * isValidPassport("DC-221345extra") // false
  *
+ * The Polícia Federal passport FAQ states the layout: "Ele é composto por duas letras - chamadas
+ * de 'série', e por seis dígitos subsequentes. Por exemplo: Passaporte CS265436."
+ *
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
+ * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e
  */
 export const isValidPassport = (passport: string | number): boolean => {
 	if (typeof passport !== "string") return false;

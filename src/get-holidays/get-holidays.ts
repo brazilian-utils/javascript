@@ -9,6 +9,8 @@ import {
 	STATE_HOLIDAYS,
 } from "./constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /** The class a holiday returned by `getHolidays` falls into. */
 export type HolidayType = "national" | "state" | "optional" | "religious";
 
@@ -79,22 +81,33 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		},
 	);
 
-	// Stryker disable next-line ConditionalExpression: when stateCode is undefined, STATE_HOLIDAYS[stateCode] resolves to undefined too, so the inner `if (stateHolidays)` already no-ops either way
-	if (stateCode !== undefined) {
-		const stateHolidays = STATE_HOLIDAYS[stateCode];
-		if (stateHolidays) {
-			for (const entry of stateHolidays) {
-				const { name, type, since, until } = entry;
-				// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
-				if (since !== undefined && year < since) continue;
-				// Stryker disable next-line ConditionalExpression: `until` is undefined for most entries, and `year >= undefined` is already always false, so the explicit `until !== undefined` guard never changes the outcome
-				if (until !== undefined && year >= until) continue;
+	// An own entry lookup, so a prototype chain key ("toString", "__proto__", ...) is an unknown
+	// state code like any other, and so is `undefined` when no state code was given.
+	const stateEntry = Object.entries(STATE_HOLIDAYS).find(([code]) => code === stateCode);
 
-				holidays.push({
-					name,
-					date: resolveStateHolidayDate(year, entry),
-					type: type ?? "state",
-				});
+	if (stateEntry) {
+		for (const entry of stateEntry[1]) {
+			const { name, type, since, until } = entry;
+			// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
+			if (since !== undefined && year < since) continue;
+			// Stryker disable next-line ConditionalExpression: `until` is undefined for most entries, and `year >= undefined` is already always false, so the explicit `until !== undefined` guard never changes the outcome
+			if (until !== undefined && year >= until) continue;
+
+			const date = resolveStateHolidayDate(year, entry);
+			const stateHoliday: Holiday = { name, date, type: type ?? "state" };
+			// Name and date together are the identity of a holiday here: a state entry only replaces
+			// a national one when both match, so DF's Corpus Christi replaces the national optional
+			// one while its Fundação de Brasília is listed next to Tiradentes, which falls on the
+			// same 21 April under a different name.
+			const stateHolidayKey = `${name}|${date.getTime()}`;
+			const nationalIndex = holidays.findIndex(
+				(holiday) => `${holiday.name}|${holiday.date.getTime()}` === stateHolidayKey,
+			);
+
+			if (nationalIndex === -1) {
+				holidays.push(stateHoliday);
+			} else {
+				holidays[nationalIndex] = stateHoliday;
 			}
 		}
 	}
@@ -117,7 +130,26 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  *
  * If `stateCode` is provided but is not a valid/known state code, it is ignored and
  * only national holidays are returned (this mirrors passing no `stateCode` at all,
- * and is kept for backwards compatibility).
+ * and is kept for backwards compatibility). The lookup is an own-property one, so a
+ * prototype-chain key such as `"__proto__"`, `"constructor"` or `"toString"` is an unknown
+ * state code like any other rather than a crash.
+ *
+ * When a state entry falls on the same date as a national one and carries the same name, the
+ * state entry replaces it instead of being listed twice: this is how the Distrito Federal's
+ * Corpus Christi, a feriado under Lei distrital nº 72/1989 art. 1º parágrafo único, comes back
+ * typed `"state"` for `stateCode: "DF"` while staying `"optional"` everywhere else.
+ *
+ * Only one state holiday per UF is a feriado civil under Lei 9.093/1995 art. 1º, II, which
+ * authorizes "a data magna do Estado fixada em lei estadual" in the singular; the other entries
+ * of `STATE_HOLIDAYS` rest on ordinary state laws and are reported because they are observed in
+ * practice. The date returned is the statutory one. Santa Catarina's two holidays are the only
+ * observance shift the table models: each moves to the following Sunday when it falls Monday to
+ * Friday, 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
+ * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it, except in 2004, the
+ * year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause. Outside those ranges
+ * each holiday stays on 11 August or 25 November. Acre's Tuesday-to-Thursday shift and the Goiás decrees
+ * that may move 26/07 and 28/10 are not modelled, because neither can be resolved from a year
+ * alone.
  *
  * @param {number} year - The year for which to retrieve holidays (must be between 1900 and 2099)
  * @returns {Holiday[]} An array of holidays sorted by date
@@ -131,23 +163,44 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * const spHolidays = getHolidays({ year: 2024, stateCode: 'SP' });
  * ```
  *
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm Lei 662/1949, the base
- * national holidays law (Ano novo, Dia do trabalhador, Independência do Brasil, Proclamação da
- * República, Natal).
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm Lei 10.607/2002,
- * added Tiradentes and Finados to the national holidays.
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm Lei 6.802/1980, declared
- * Nossa Senhora Aparecida (12 October) a national holiday.
- * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm Lei
- * 14.759/2023, nationalized Dia da Consciência Negra (20 November) from
+ * The national holiday laws are cited below; the state holiday laws are cited individually, one
+ * `@see` per holiday, in `src/get-holidays/constants.ts`.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
+ * Lei 662/1949, the base national holidays law (Ano novo, Dia do trabalhador, Independência do
+ * Brasil, Proclamação da República, Natal).
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
+ * Lei 10.607/2002, rewrote that art. 1º into the list in force: it added Finados (2 November)
+ * to the national holidays and folded in Tiradentes (21 April), already national since art. 3º
+ * of Lei 1.266/1950, which its own art. 3º revoked.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/L1266.htm
+ * Lei 1.266/1950, art. 3º, which first made Tiradentes a national holiday: "É feriado nacional o
+ * dia 21 de abril, consagrado à glorificação de Tiradentes". Revoked by Lei 10.607/2002 only
+ * after that law had carried 21 April into Lei 662/1949.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
+ * Lei 6.802/1980, declared Nossa Senhora Aparecida (12 October) a national holiday.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
+ * Lei 14.759/2023, nationalized Dia da Consciência Negra (20 November) from
  * `CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR` (2024) onward.
- * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm Lei 9.093/1995, the
- * framework law authorizing one state civil holiday and up to four municipal religious holidays;
- * the legal basis for `STATE_HOLIDAYS`.
- * @see Official: state holiday laws are cited individually, one `@see` per holiday, in
- * `src/get-holidays/constants.ts`.
- * @see Based on: https://pt.wikipedia.org/wiki/Feriados_no_Brasil Used as secondary evidence for
- * some state holidays where no official law text was located (see constants.ts for which).
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm
+ * Lei 9.093/1995, the framework law authorizing one state civil holiday (art. 1º, II, "a data
+ * magna do Estado fixada em lei estadual") and up to four municipal religious holidays, "neste
+ * incluída a Sexta-Feira da Paixão" (art. 2º); the legal basis for the data magna entries of
+ * `STATE_HOLIDAYS`.
+ * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
+ * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
+ * pontos facultativos, reissued every December. It is the source of the typing of three of the
+ * four entries derived from Easter, which no federal law declares: "Paixão de Cristo (feriado
+ * nacional)" (Easter minus 2, emitted as `"Sexta-feira Santa"` typed `national`), "Carnaval (ponto
+ * facultativo)" (Easter minus 47) and "Corpus Christi (ponto facultativo)" (Easter plus 60), both
+ * typed `optional`. Sexta-feira Santa has no statutory basis of its own: Lei 9.093/1995 art. 2º
+ * places it among the *municipal* religious holidays, and it is typed `national` here because the
+ * portaria observes it nationwide. The fourth entry, Easter Sunday itself, is emitted as
+ * `"Páscoa"` typed `religious` and has no normative basis at all: the portaria never mentions it,
+ * no federal law declares it, and its date is derived arithmetically by `resolveStateHolidayDate`
+ * with the Meeus/Jones/Butcher algorithm. It is a convenience entry, listed because callers
+ * computing a liturgical calendar expect it, not because it is a holiday anyone observes as a day
+ * off.
  */
 export function getHolidays(year: number): Holiday[];
 /**

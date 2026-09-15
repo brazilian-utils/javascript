@@ -13,6 +13,11 @@ describe("formatCns", () => {
 		expect(formatCns("123456789010001")).toBe("123 4567 8901 0001");
 	});
 
+	it("should round trip 898 0000 0004 3208, the only concrete CNS the ANVISA page prints", () => {
+		expect(formatCns("898000000043208")).toBe("898 0000 0004 3208");
+		expect(formatCns("898 0000 0004 3208")).toBe("898 0000 0004 3208");
+	});
+
 	it("should format a number CNS with the space mask", () => {
 		expect(formatCns(123_456_789_010_001)).toBe("123 4567 8901 0001");
 	});

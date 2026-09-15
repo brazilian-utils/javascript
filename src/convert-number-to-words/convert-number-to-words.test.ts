@@ -3,7 +3,6 @@ import * as fc from "fast-check";
 import {
 	NUMBER_TO_WORDS_MAX_VALUE,
 	type NumberToWordsGender,
-	type WordsCase,
 } from "../_internals/number-to-words/number-to-words";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { convertNumberToWords, type ConvertNumberToWordsOptions } from "./convert-number-to-words";
@@ -43,8 +42,8 @@ describe("convertNumberToWords", () => {
 
 	test("should convert the maximum supported value (999999999999999, 999 trillion)", () => {
 		expect(convertNumberToWords(NUMBER_TO_WORDS_MAX_VALUE)).toBe(
-			"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, " +
-				"novecentos e noventa e nove milhões, novecentos e noventa e nove mil, " +
+			"novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões " +
+				"novecentos e noventa e nove milhões novecentos e noventa e nove mil " +
 				"novecentos e noventa e nove",
 		);
 	});
@@ -88,29 +87,11 @@ describe("convertNumberToWords", () => {
 		});
 	});
 
-	describe("case option", () => {
-		test("should keep the result lowercase by default", () => {
+	describe("letter case", () => {
+		test("should always keep the result lowercase", () => {
 			expect(convertNumberToWords(123)).toBe("cento e vinte e três");
-		});
-
-		test("should keep the result lowercase for 'lower'", () => {
-			expect(convertNumberToWords(123, { case: "lower" })).toBe("cento e vinte e três");
-		});
-
-		test("should capitalize only the first letter for 'sentence'", () => {
-			expect(convertNumberToWords(123, { case: "sentence" })).toBe("Cento e vinte e três");
-			expect(convertNumberToWords(3, { case: "sentence" })).toBe("Três");
-		});
-
-		test("should uppercase everything for 'upper', keeping accents", () => {
-			expect(convertNumberToWords(3, { case: "upper" })).toBe("TRÊS");
-			expect(convertNumberToWords(50, { case: "upper" })).toBe("CINQUENTA");
-			expect(convertNumberToWords(-3, { case: "upper" })).toBe("MENOS TRÊS");
-		});
-
-		test("should ignore an invalid case value and fall back to 'lower'", () => {
-			// @ts-expect-error: intentionally invalid input
-			expect(convertNumberToWords(123, { case: "invalid" })).toBe("cento e vinte e três");
+			expect(convertNumberToWords(3)).toBe("três");
+			expect(convertNumberToWords(-3)).toBe("menos três");
 		});
 	});
 
@@ -200,7 +181,7 @@ describe("convertNumberToWords", () => {
 				[111, "cento e onze"],
 				[112, "cento e doze"],
 				[113, "cento e treze"],
-				[114, "cento e catorze"],
+				[114, "cento e quatorze"],
 				[115, "cento e quinze"],
 				[116, "cento e dezesseis"],
 				[117, "cento e dezessete"],
@@ -323,48 +304,48 @@ describe("convertNumberToWords", () => {
 				[1001, "mil e um"],
 				[1021, "mil e vinte e um"],
 				[1100, "mil e cem"],
-				[1101, "mil, cento e um"],
+				[1101, "mil cento e um"],
 				[1200, "mil e duzentos"],
-				[1235, "mil, duzentos e trinta e cinco"],
-				[1999, "mil, novecentos e noventa e nove"],
+				[1235, "mil duzentos e trinta e cinco"],
+				[1999, "mil novecentos e noventa e nove"],
 				[2000, "dois mil"],
 				[2001, "dois mil e um"],
 				[5000, "cinco mil"],
-				[9999, "nove mil, novecentos e noventa e nove"],
+				[9999, "nove mil novecentos e noventa e nove"],
 				[10_000, "dez mil"],
 				[21_000, "vinte e um mil"],
 				[100_000, "cem mil"],
 				[101_000, "cento e um mil"],
 				[200_000, "duzentos mil"],
 				[300_000, "trezentos mil"],
-				[999_999, "novecentos e noventa e nove mil, novecentos e noventa e nove"],
+				[999_999, "novecentos e noventa e nove mil novecentos e noventa e nove"],
 				[1_000_000, "um milhão"],
 				[1_000_001, "um milhão e um"],
 				[1_000_100, "um milhão e cem"],
-				[1_000_230, "um milhão, duzentos e trinta"],
-				[1_045_678, "um milhão, quarenta e cinco mil, seiscentos e setenta e oito"],
+				[1_000_230, "um milhão duzentos e trinta"],
+				[1_045_678, "um milhão quarenta e cinco mil seiscentos e setenta e oito"],
 				[1_100_000, "um milhão e cem mil"],
 				[1_200_000, "um milhão e duzentos mil"],
-				[1_230_000, "um milhão, duzentos e trinta mil"],
-				[1_230_045, "um milhão, duzentos e trinta mil e quarenta e cinco"],
-				[1_230_456, "um milhão, duzentos e trinta mil, quatrocentos e cinquenta e seis"],
+				[1_230_000, "um milhão duzentos e trinta mil"],
+				[1_230_045, "um milhão duzentos e trinta mil e quarenta e cinco"],
+				[1_230_456, "um milhão duzentos e trinta mil quatrocentos e cinquenta e seis"],
 				[2_000_000, "dois milhões"],
 				[1_000_000_000, "um bilhão"],
 				[1_000_000_001, "um bilhão e um"],
 				[2_000_000_000, "dois bilhões"],
 				[
 					1_234_567_890,
-					"um bilhão, duzentos e trinta e quatro milhões, quinhentos e sessenta e sete mil, oitocentos e noventa",
+					"um bilhão duzentos e trinta e quatro milhões quinhentos e sessenta e sete mil oitocentos e noventa",
 				],
 				[
 					999_999_999_999,
-					"novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
+					"novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove",
 				],
 				[1_000_000_000_000, "um trilhão"],
 				[2_000_000_000_000, "dois trilhões"],
 				[
 					999_999_999_999_999,
-					"novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
+					"novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove",
 				],
 			];
 			expectWords(cases);
@@ -385,7 +366,7 @@ describe("convertNumberToWords", () => {
 				[-11, "menos onze"],
 				[-12, "menos doze"],
 				[-13, "menos treze"],
-				[-14, "menos catorze"],
+				[-14, "menos quatorze"],
 				[-15, "menos quinze"],
 				[-16, "menos dezesseis"],
 				[-17, "menos dezessete"],
@@ -486,7 +467,7 @@ describe("convertNumberToWords", () => {
 				[-1_000_000, "menos um milhão"],
 				[
 					-999_999_999_999_999,
-					"menos novecentos e noventa e nove trilhões, novecentos e noventa e nove bilhões, novecentos e noventa e nove milhões, novecentos e noventa e nove mil, novecentos e noventa e nove",
+					"menos novecentos e noventa e nove trilhões novecentos e noventa e nove bilhões novecentos e noventa e nove milhões novecentos e noventa e nove mil novecentos e noventa e nove",
 				],
 			];
 			expectWords(cases);
@@ -508,7 +489,7 @@ describe("convertNumberToWords", () => {
 				[11, "onze"],
 				[12, "doze"],
 				[13, "treze"],
-				[14, "catorze"],
+				[14, "quatorze"],
 				[15, "quinze"],
 				[16, "dezesseis"],
 				[17, "dezessete"],
@@ -546,7 +527,7 @@ describe("convertNumberToWords", () => {
 				[1000, "mil"],
 				[1001, "mil e uma"],
 				[1100, "mil e cem"],
-				[1101, "mil, cento e uma"],
+				[1101, "mil cento e uma"],
 				[2000, "duas mil"],
 				[2002, "duas mil e duas"],
 				[3000, "três mil"],
@@ -599,14 +580,12 @@ describe("convertNumberToWords", () => {
 			);
 		});
 
-		test("should uppercase the result the same way as the lower case result, for the 'upper' case option", () => {
+		test("should never return a character in upper case", () => {
 			fc.assert(
 				fc.property(inRangeIntegerArbitrary, (value) => {
-					const lower = convertNumberToWords(value);
+					const words = convertNumberToWords(value);
 
-					expect(convertNumberToWords(value, { case: "upper" })).toBe(
-						lower.toLocaleUpperCase("pt-BR"),
-					);
+					expect(words).toBe(words.toLocaleLowerCase("pt-BR"));
 				}),
 			);
 		});
@@ -622,7 +601,6 @@ describe("convertNumberToWords types", () => {
 		expectTypeOf<ConvertNumberToWordsOptions["gender"]>().toEqualTypeOf<
 			NumberToWordsGender | undefined
 		>();
-		expectTypeOf<ConvertNumberToWordsOptions["case"]>().toEqualTypeOf<WordsCase | undefined>();
 		expectTypeOf(convertNumberToWords).returns.toEqualTypeOf<string>();
 	});
 });

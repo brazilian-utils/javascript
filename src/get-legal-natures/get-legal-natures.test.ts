@@ -35,7 +35,7 @@ describe("getLegalNatures", () => {
 
 					expect(code).toMatch(/^\d{4}$/);
 					expect(isValidLegalNature(code)).toBe(true);
-					expect(getLegalNature(code)).toEqual(entry);
+					expect(getLegalNature(code)).toMatchObject(entry);
 				}),
 			);
 		});

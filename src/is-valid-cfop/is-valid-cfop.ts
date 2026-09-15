@@ -20,6 +20,10 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * safe integer, since a sign, a decimal point or a rounded magnitude would otherwise be read
  * as a code the caller never wrote.
  *
+ * No CFOP code starts with a zero, its first digit is the operation group (1 to 7), so nothing
+ * is ever padded here: a number and the string of the same digits are read identically, and a
+ * value narrower than 4 digits is not a code at all.
+ *
  * @param {string|number} value - The CFOP code to be validated, with or without the `N.NNN`
  * mask, e.g. `"1.101"`, `"1101"` or `1101`.
  * @returns {boolean} True when the code is a known 4 digit CFOP code, false otherwise.
@@ -39,6 +43,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Anexo II of Convênio SINIEF s/nº 1970, the CFOP table in force.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70
  * Convênio SINIEF s/nº 1970, the consolidated text the annex belongs to.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25
+ * Ajuste SINIEF 39/25, the last amendment the annex carries (CFOP 7.667, from 01.02.26).
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2001/AJ_007_01
  * Ajuste SINIEF 07/01, the historical text that gave the CFOP its 4 digit form.
  */

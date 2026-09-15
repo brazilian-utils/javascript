@@ -1,35 +1,35 @@
-import { applyWordsCase } from "../_internals/apply-words-case/apply-words-case";
 import {
 	NUMBER_TO_WORDS_MAX_VALUE,
 	numberToWords,
-	type WordsCase,
 } from "../_internals/number-to-words/number-to-words";
-
-/** Options of `convertCurrencyToWords`. */
-export type ConvertCurrencyToWordsOptions = {
-	/** Letter case applied to the result: `"lower"` (unchanged), `"sentence"` (capitalizes only the first letter) or `"upper"` (uppercases everything, keeping accents). Defaults to `"lower"`; an invalid value is ignored and `"lower"` is used instead. */
-	case?: WordsCase;
-};
 
 const MILLION_SCALE_SUFFIXES = ["lhão", "lhões"];
 
+const ONE_CENTAVO = 0.01;
+
 /**
  * Scales an amount to whole cents, truncating it, without letting the floating point noise of
- * the multiplication decide the result. `absolute * 100` lands a hair off the integer it
- * should be (`1.15 * 100` is `114.99999999999999`, `0.57 * 100` is `56.99999999999999`), so a
- * scaled value within one double rounding error of an integer is read as that integer.
- * An amount that is genuinely below the next cent sits much further away than that
- * (`1.999999999 * 100` is `199.9999999`) and is truncated, as it must be.
+ * the multiplication decide the result. `absolute * 100` lands a hair off the integer it should
+ * be (`1.15 * 100` is `114.99999999999999`, `0.57 * 100` is `56.99999999999999`) and that error
+ * grows with the amount, up to a whole cent for the trillions (`1000000000000.0099 * 100` is
+ * `100000000000000.98`, a hair below an integer while the amount holds no cents at all), so the
+ * cents are read off the decimal notation of the amount instead of off the product.
+ * `String(absolute)` is the shortest decimal that reads back as `absolute`, i.e. the amount as
+ * it was written, and its first two fractional digits are the cents; anything after them is
+ * truncated, as it must be (`1.999999999` is one real and 99 cents).
+ * An amount below one cent has no cents to read, which also keeps `String(absolute)` in plain
+ * decimal notation: the exponent form only shows up below `1e-6` and from `1e21` up, and an
+ * amount that large is out of range for the caller.
  *
  * @param {number} absolute - The absolute amount in reais.
  * @returns {number} The amount truncated to whole cents.
  */
 const toCents = (absolute: number): number => {
-	const scaled = absolute * 100;
-	const rounded = Math.round(scaled);
+	if (absolute < ONE_CENTAVO) return 0;
 
-	// Stryker disable next-line EqualityOperator: `<` is equivalent, the two sides are never equal. Writing scaled as m * 2 ** (k - 52) with 2 ** k <= scaled < 2 ** (k + 1) and m its 53 bit significand, both scaled and rounded are multiples of the ulp 2 ** (k - 52), so the difference is j * 2 ** (k - 52) for an integer j, while Number.EPSILON * scaled is exactly m * 2 ** (k - 104): equality asks for m === j * 2 ** 52, and m < 2 ** 53 leaves only m === 2 ** 52, i.e. scaled a power of two. A power of two of at least 1 is an integer, whose difference is 0, and one below 1 rounds to 0 or to 1 at a distance of at least 0.25, never one ulp. The only case where both sides are 0 is scaled === 0, where rounded and Math.trunc(scaled) are both 0 anyway
-	return Math.abs(scaled - rounded) <= Number.EPSILON * scaled ? rounded : Math.trunc(scaled);
+	const [wholeReais, fraction = ""] = String(absolute).split(".");
+
+	return Number(`${wholeReais}${fraction.slice(0, 2).padEnd(2, "0")}`);
 };
 
 const endsInMillionScale = (words: string): boolean =>
@@ -38,7 +38,7 @@ const endsInMillionScale = (words: string): boolean =>
 /**
  * Formats a monetary amount in Brazilian Reais as its "por extenso" textual representation,
  * the style used to write out the amount by hand on cheques and contracts, e.g. `1523.45`
- * becomes `"mil, quinhentos e vinte e três reais e quarenta e cinco centavos"`.
+ * becomes `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`.
  *
  * `value` is truncated (not rounded) to 2 decimal places before conversion, matching
  * `brutils`' `convert_real_to_text`. The singular noun is used for exactly 1 ("um real",
@@ -51,28 +51,25 @@ const endsInMillionScale = (words: string): boolean =>
  * double cannot carry cents at all, so the amount is read as a whole number of reais instead of
  * reporting cents that the input never held.
  *
+ * The result is always lowercase; apply any other casing to it yourself.
+ *
  * @param {number} value - The monetary amount to convert, in reais (e.g. `1523.45` for R$ 1.523,45).
- * @param {ConvertCurrencyToWordsOptions} [options] - Optional formatting options.
- * @param {WordsCase} [options.case] - Letter case applied to the result. Defaults to `"lower"`.
  * @returns {string} The amount written out in Portuguese, or `""` for invalid input.
  *
  * @example
  * ```typescript
- * convertCurrencyToWords(1523.45); // "mil, quinhentos e vinte e três reais e quarenta e cinco centavos"
+ * convertCurrencyToWords(1523.45); // "mil quinhentos e vinte e três reais e quarenta e cinco centavos"
  * convertCurrencyToWords(1); // "um real"
  * convertCurrencyToWords(0.01); // "um centavo"
  * convertCurrencyToWords(1000000); // "um milhão de reais"
  * convertCurrencyToWords(0); // "zero reais"
  * convertCurrencyToWords(-5.5); // "menos cinco reais e cinquenta centavos"
- * convertCurrencyToWords(1000, { case: "upper" }); // "MIL REAIS"
+ * convertCurrencyToWords(-0.001); // "zero reais"
  * ```
  *
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/currency.py
  */
-export const convertCurrencyToWords = (
-	value: number,
-	options?: ConvertCurrencyToWordsOptions,
-): string => {
+export const convertCurrencyToWords = (value: number): string => {
 	if (!Number.isFinite(value)) return "";
 
 	const absolute = Math.abs(value);
@@ -97,11 +94,10 @@ export const convertCurrencyToWords = (
 		parts.push(reais > 0 ? `e ${centavosText}` : centavosText);
 	}
 
-	if (reais === 0 && centavos === 0) return applyWordsCase("zero reais", options?.case);
+	if (reais === 0 && centavos === 0) return "zero reais";
 
 	const joined = parts.join(" ");
-	// Stryker disable next-line EqualityOperator: equivalent, value is never exactly 0 here (reais === 0 && centavos === 0 already returned above)
-	const result = value < 0 ? `menos ${joined}` : joined;
 
-	return applyWordsCase(result, options?.case);
+	// Stryker disable next-line EqualityOperator: equivalent, value is never exactly 0 here (reais === 0 && centavos === 0 already returned above)
+	return value < 0 ? `menos ${joined}` : joined;
 };

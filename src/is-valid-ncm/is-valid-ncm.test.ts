@@ -24,8 +24,14 @@ describe("isValidNcm", () => {
 		expect(isValidNcm("0101.21.00")).toBe(true);
 	});
 
-	it("should return false for a number that lost a leading zero (1012100 is not 01012100)", () => {
-		expect(isValidNcm(1_012_100)).toBe(false);
+	it("should pad a value to eight digits, as a number or as a string (1012100 is 01012100)", () => {
+		expect(isValidNcm(1_012_100)).toBe(true);
+		expect(isValidNcm("1012100")).toBe(true);
+	});
+
+	it("should not pad a masked value, which already carries its separators", () => {
+		expect(isValidNcm("101.21.00")).toBe(false);
+		expect(isValidNcm("0101.21.00")).toBe(true);
 	});
 
 	it("should validate an NCM code with surrounding whitespace", () => {
@@ -36,7 +42,7 @@ describe("isValidNcm", () => {
 		expect(isValidNcm("12345678")).toBe(false);
 	});
 
-	it("should return false when the digit count is not eight", () => {
+	it("should return false for a padded short value no code carries and for a wider value", () => {
 		expect(isValidNcm("2203000")).toBe(false);
 		expect(isValidNcm("220300000")).toBe(false);
 	});
@@ -77,9 +83,6 @@ describe("isValidNcm", () => {
 
 	describe("properties", () => {
 		const codeArbitrary = fc.constantFrom(...NCM_CODES);
-		const nonZeroLeadingCodeArbitrary = fc.constantFrom(
-			...NCM_CODES.filter((code) => !code.startsWith("0")),
-		);
 
 		test("should never throw, regardless of the input", () => {
 			expectNeverThrows(isValidNcm, anyGarbage);
@@ -96,10 +99,13 @@ describe("isValidNcm", () => {
 			);
 		});
 
-		test("should validate every known code without a leading zero when given as a number", () => {
+		test("should validate every known code written without its leading zeros", () => {
 			fc.assert(
-				fc.property(nonZeroLeadingCodeArbitrary, (code) => {
+				fc.property(codeArbitrary, (code) => {
+					const unpadded = String(Number(code));
+
 					expect(isValidNcm(Number(code))).toBe(true);
+					expect(isValidNcm(unpadded)).toBe(true);
 				}),
 			);
 		});

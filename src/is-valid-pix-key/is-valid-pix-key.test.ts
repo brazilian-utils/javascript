@@ -4,7 +4,7 @@ import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePhone } from "../generate-phone/generate-phone";
-import { type PixKeyType, parsePixKey } from "../parse-pix-key/parse-pix-key";
+import { type PixKeyType, getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 import { type IsValidPixKeyOptions, isValidPixKey } from "./is-valid-pix-key";
 
 describe("isValidPixKey", () => {
@@ -131,10 +131,10 @@ describe("isValidPixKey", () => {
 			);
 		});
 
-		test("should agree with parsePixKey on every value", () => {
+		test("should agree with getPixKeyInfo on every value", () => {
 			fc.assert(
 				fc.property(fc.string({ unit: "grapheme" }), (value) => {
-					expect(isValidPixKey(value)).toBe(parsePixKey(value) !== null);
+					expect(isValidPixKey(value)).toBe(getPixKeyInfo(value) !== null);
 				}),
 			);
 		});

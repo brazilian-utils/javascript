@@ -140,6 +140,11 @@ describe("formatCnpj", () => {
 		);
 	});
 
+	it("should obfuscate on any truthy obfuscate value, the way pad is read", () => {
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatCnpj("46843485000186", { obfuscate: 1 })).toBe("**.843.485/0001-**");
+	});
+
 	it("should behave exactly as without the option when obfuscate is false or absent", () => {
 		expect(formatCnpj("46843485000186", { obfuscate: false })).toBe("46.843.485/0001-86");
 		expect(formatCnpj("46843485000186")).toBe("46.843.485/0001-86");
@@ -187,6 +192,15 @@ describe("formatCnpj", () => {
 		test("should never throw and always return a string", () => {
 			expectAlwaysReturnsType(formatCnpj, "string", anyValue);
 		});
+	});
+});
+
+describe("formatCnpj with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCnpj(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatCnpj(undefined, { pad: true })).toBe("");
 	});
 });
 

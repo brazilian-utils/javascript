@@ -19,7 +19,12 @@ import { OLD_FORMAT_SEPARATOR_INDEX } from "./constants";
  * formatLicensePlate("1234567"); // ""
  * ```
  *
+ * The `AAA-1111` shape of the old PNU is art. 2º § 3º of Resolução CONTRAN nº 969/2022; the
+ * separatorless `LLLNLNN` shape of the Mercosul plate is item 1.2 of its Anexo I, published in a
+ * PDF of its own. Both are cited below.
+ *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
 export const formatLicensePlate = (value: string): string => {
 	const parsed = parseLicensePlate(value);

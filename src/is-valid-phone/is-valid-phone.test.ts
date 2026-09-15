@@ -60,6 +60,11 @@ describe("isValidPhone", () => {
 			expect(isValidPhone("08001234567", { accept: [] })).toBe(false);
 		});
 
+		test("when version 2 rejects the mobile number", () => {
+			expect(isValidPhone("11612345678", { version: 2 })).toBe(false);
+			expect(isValidPhone("11700123456", { version: 2 })).toBe(false);
+		});
+
 		test("when the kind is not accepted", () => {
 			expect(isValidPhone("11987654321", { accept: ["landline"] })).toBe(false);
 			expect(isValidPhone("1130000000", { accept: ["mobile"] })).toBe(false);
@@ -72,6 +77,8 @@ describe("isValidPhone", () => {
 		test("when is a valid mobile phone version 2", () => {
 			expect(isValidPhone("(11) 98765-4321")).toBe(true);
 			expect(isValidPhone("11987654321", { version: 2 })).toBe(true);
+			expect(isValidPhone("11712345678", { version: 2 })).toBe(true);
+			expect(isValidPhone("11812345678", { version: 2 })).toBe(true);
 		});
 
 		test("when is a valid landline phone", () => {
@@ -148,6 +155,13 @@ describe("isValidPhone", () => {
 				}),
 			);
 		});
+	});
+});
+
+describe("isValidPhone with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPhone("11987654321".match(/\d/g))).toBe(false);
 	});
 });
 

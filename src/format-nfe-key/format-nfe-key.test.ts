@@ -1,7 +1,9 @@
 import * as fc from "fast-check";
 
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrows, expectPadsToLength } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { formatNfeKey } from "./format-nfe-key";
+import { formatNfeKey, type FormatNfeKeyOptions } from "./format-nfe-key";
 
 const KEY = "35170458716523000119550010000000121000123458";
 const FORMATTED = "3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458";
@@ -21,6 +23,31 @@ describe("formatNfeKey", () => {
 
 	test("should NOT add digits after the access key length (44)", () => {
 		expect(formatNfeKey(`${KEY}999999`)).toBe(FORMATTED);
+	});
+
+	describe("should left pad the value", () => {
+		test("when options.pad is true", () => {
+			expect(formatNfeKey("12345", { pad: true })).toBe(
+				"0000 0000 0000 0000 0000 0000 0000 0000 0000 0001 2345",
+			);
+		});
+
+		test("keeping a complete access key untouched", () => {
+			expect(formatNfeKey(KEY, { pad: true })).toBe(FORMATTED);
+		});
+
+		test("and nothing else when options.pad is false, undefined or the options object is missing", () => {
+			expect(formatNfeKey("12345", { pad: false })).toBe("1234 5");
+			expect(formatNfeKey("12345", {})).toBe("1234 5");
+			expect(formatNfeKey("12345")).toBe("1234 5");
+		});
+
+		test("without throwing when the options object is not one", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(formatNfeKey("12345", null)).toBe("1234 5");
+			// @ts-expect-error: intentionally invalid input
+			expect(formatNfeKey("12345", "pad")).toBe("1234 5");
+		});
 	});
 
 	test("should remove all non numeric characters, including the NFe prefix", () => {
@@ -44,6 +71,14 @@ describe("formatNfeKey", () => {
 		expect(formatNfeKey([])).toBe("");
 		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey(true)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(-11)).toBe("11");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(1.1)).toBe("11");
+	});
+
+	test("should return an empty string for an object with a null prototype, which has no toString", () => {
+		expect(formatNfeKey(Object.create(null))).toBe("");
 	});
 
 	describe("properties", () => {
@@ -80,12 +115,27 @@ describe("formatNfeKey", () => {
 				),
 			);
 		});
+
+		test("should left pad a shorter value up to the access key length", () => {
+			expectPadsToLength(
+				formatNfeKey,
+				(value) => value.replaceAll(/\D/g, ""),
+				fc.stringMatching(/^[0-9]{0,44}$/),
+				44,
+			);
+		});
+
+		test("should never throw for any garbage input", () => {
+			expectNeverThrows(formatNfeKey, anyGarbage);
+		});
 	});
 });
 
 describe("formatNfeKey types", () => {
-	test("should take a string and return a string", () => {
+	test("should take a string, optional options, and return a string", () => {
 		expectTypeOf(formatNfeKey).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(formatNfeKey).parameter(1).toEqualTypeOf<FormatNfeKeyOptions | undefined>();
+		expectTypeOf<FormatNfeKeyOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 		expectTypeOf(formatNfeKey).returns.toEqualTypeOf<string>();
 	});
 });

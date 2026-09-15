@@ -20,11 +20,14 @@ import { DIGIT_TO_MERCOSUL_LETTER } from "./constants";
  * convertLicensePlateToMercosul("invalid"); // ""
  * ```
  *
- * Resolução CONTRAN nº 969/2022, art. 2º § 4º. The linked DOU PDF has no annexes; the digit to
- * letter table comes from Anexo II, published separately on the CONTRAN resolutions page.
+ * Resolução CONTRAN nº 969/2022, art. 2º § 4º, is what requires the substitution of the second
+ * numeric character, "conforme padrão previsto no Anexo II". Anexo II is the digit to letter
+ * table, and it prints the same worked example as above: "A placa anterior ABC1234 será
+ * substituída pela nova placa com o padrão alfanumérico ABC1C34". The annexes are published in a
+ * PDF of their own, separate from the resolution's text; both are cited below.
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
- * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
 export const convertLicensePlateToMercosul = (value: string): string => {
 	if (getFormatLicensePlate(value) !== "LLLNNNN") return "";

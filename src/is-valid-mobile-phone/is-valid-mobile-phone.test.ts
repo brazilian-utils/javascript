@@ -36,10 +36,14 @@ describe("isValidMobilePhone", () => {
 			expect(isValidMobilePhone("+1 415 555 2671")).toBe(false);
 		});
 
-		test("when version 2 is requested but the first number digit is a version-1-only value (6, 7 or 8)", () => {
-			expect(isValidMobilePhone("11712345678", { version: 2 })).toBe(false);
+		test("when version 2 is requested but the first number digit is the version-1-only 6", () => {
 			expect(isValidMobilePhone("11612345678", { version: 2 })).toBe(false);
-			expect(isValidMobilePhone("11812345678", { version: 2 })).toBe(false);
+		});
+
+		test("when version 2 is requested and the number is in the 700 satellite series", () => {
+			expect(isValidMobilePhone("11700123456", { version: 2 })).toBe(false);
+			expect(isValidMobilePhone("(11) 70012-3456", { version: 2 })).toBe(false);
+			expect(isValidMobilePhone("+55 11 70012-3456", { version: 2 })).toBe(false);
 		});
 	});
 
@@ -49,8 +53,20 @@ describe("isValidMobilePhone", () => {
 			expect(isValidMobilePhone("11987654321", { version: 2 })).toBe(true);
 		});
 
+		test("when version 2 is requested and the first number digit is 7 or 8", () => {
+			expect(isValidMobilePhone("11712345678", { version: 2 })).toBe(true);
+			expect(isValidMobilePhone("11812345678", { version: 2 })).toBe(true);
+		});
+
+		test("when version 2 is requested and the number only starts like the 700 series", () => {
+			expect(isValidMobilePhone("11701234567", { version: 2 })).toBe(true);
+			expect(isValidMobilePhone("11770012345", { version: 2 })).toBe(true);
+		});
+
 		test("when is a valid mobile phone version 1", () => {
 			expect(isValidMobilePhone("11712345678", { version: 1 })).toBe(true);
+			expect(isValidMobilePhone("11612345678", { version: 1 })).toBe(true);
+			expect(isValidMobilePhone("11700123456", { version: 1 })).toBe(true);
 		});
 
 		test("when it carries the country code", () => {

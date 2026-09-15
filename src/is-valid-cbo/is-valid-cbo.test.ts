@@ -19,10 +19,15 @@ describe("isValidCbo", () => {
 		expect(isValidCbo(212_405)).toBe(true);
 	});
 
-	it("should pad a number with leading zeros before looking it up", () => {
+	it("should pad a value with leading zeros before looking it up, as a number or as a string", () => {
 		expect(isValidCbo(10_205)).toBe(true);
 		expect(isValidCbo("010205")).toBe(true);
-		expect(isValidCbo("10205")).toBe(false);
+		expect(isValidCbo("10205")).toBe(true);
+	});
+
+	it("should not pad a masked value, which already carries its separators", () => {
+		expect(isValidCbo("102-05")).toBe(false);
+		expect(isValidCbo("0102-05")).toBe(true);
 	});
 
 	it("should validate a CBO code with surrounding whitespace", () => {
@@ -47,7 +52,7 @@ describe("isValidCbo", () => {
 		expect(isValidCbo("000000")).toBe(false);
 	});
 
-	it("should return false when the digit count is not six", () => {
+	it("should return false for a padded short value no occupation carries and for a wider value", () => {
 		expect(isValidCbo("21240")).toBe(false);
 		expect(isValidCbo("2124055")).toBe(false);
 	});

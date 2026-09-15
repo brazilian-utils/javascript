@@ -11,33 +11,46 @@ describe("getCbo", () => {
 	it("should return the occupation for a code without a mask", () => {
 		expect(getCbo("212405")).toEqual({
 			code: "212405",
-			title: "Analista de desenvolvimento de sistemas",
+			description: "Analista de desenvolvimento de sistemas",
 		});
 	});
 
 	it("should return the occupation for a code with the hyphen mask", () => {
 		expect(getCbo("2124-05")).toEqual({
 			code: "212405",
-			title: "Analista de desenvolvimento de sistemas",
+			description: "Analista de desenvolvimento de sistemas",
 		});
 	});
 
 	it("should return the occupation for a code given as a number", () => {
 		expect(getCbo(212_405)).toEqual({
 			code: "212405",
-			title: "Analista de desenvolvimento de sistemas",
+			description: "Analista de desenvolvimento de sistemas",
 		});
 	});
 
-	it("should pad a number to six digits so codes starting with zero resolve (0102-05, Oficial da aeronáutica)", () => {
-		expect(getCbo(10_205)).toEqual({ code: "010205", title: "Oficial da aeronáutica" });
-		expect(getCbo("10205")).toBeNull();
+	it("should pad to six digits so codes starting with zero resolve (0102-05, Oficial da aeronáutica)", () => {
+		const oficial = { code: "010205", description: "Oficial da aeronáutica" };
+
+		expect(getCbo(10_205)).toEqual(oficial);
+		expect(getCbo("10205")).toEqual(oficial);
+		expect(getCbo("010205")).toEqual(oficial);
+	});
+
+	it("should pad a string of bare digits exactly like the number it spells", () => {
+		expect(getCbo("10205")).toEqual(getCbo(10_205));
+		expect(getCbo(" 10205 ")).toEqual(getCbo(10_205));
+	});
+
+	it("should not pad a masked value, which already carries its separators", () => {
+		expect(getCbo("102-05")).toBeNull();
+		expect(getCbo("0102-05")).toEqual({ code: "010205", description: "Oficial da aeronáutica" });
 	});
 
 	it("should resolve a code the official CSV carries and the community mirror did not (142135)", () => {
 		expect(getCbo("142135")).toEqual({
 			code: "142135",
-			title: "Oficial de proteção de dados pessoais (dpo)",
+			description: "Oficial de proteção de dados pessoais (dpo)",
 		});
 	});
 
@@ -49,11 +62,11 @@ describe("getCbo", () => {
 		expect(getCbo("2124--05")).toBeNull();
 		expect(getCbo("2124-05")).toEqual({
 			code: "212405",
-			title: "Analista de desenvolvimento de sistemas",
+			description: "Analista de desenvolvimento de sistemas",
 		});
 		expect(getCbo("2124 05")).toEqual({
 			code: "212405",
-			title: "Analista de desenvolvimento de sistemas",
+			description: "Analista de desenvolvimento de sistemas",
 		});
 	});
 
@@ -67,7 +80,7 @@ describe("getCbo", () => {
 		expect(getCbo("000000")).toBeNull();
 	});
 
-	it("should return null when the digit count is not six", () => {
+	it("should return null for a padded short value no occupation carries and for a wider value", () => {
 		expect(getCbo("21240")).toBeNull();
 		expect(getCbo("2124055")).toBeNull();
 	});
@@ -108,8 +121,12 @@ describe("getCbo", () => {
 		test("should resolve every known code, as a string or a number, and agree with isValidCbo", () => {
 			fc.assert(
 				fc.property(codeArbitrary, (code) => {
-					expect(getCbo(code)).toEqual({ code, title: CBO_TITLES[code] });
-					expect(getCbo(Number(code))).toEqual({ code, title: CBO_TITLES[code] });
+					const expected = { code, description: CBO_TITLES[code] };
+					const unpadded = String(Number(code));
+
+					expect(getCbo(code)).toEqual(expected);
+					expect(getCbo(Number(code))).toEqual(expected);
+					expect(getCbo(unpadded)).toEqual(expected);
 					expect(isValidCbo(code)).toBe(true);
 				}),
 			);
@@ -120,7 +137,7 @@ describe("getCbo", () => {
 				fc.property(codeArbitrary, (code) => {
 					const masked = `${code.slice(0, 4)}-${code.slice(4)}`;
 
-					expect(getCbo(masked)).toEqual({ code, title: CBO_TITLES[code] });
+					expect(getCbo(masked)).toEqual({ code, description: CBO_TITLES[code] });
 				}),
 			);
 		});
@@ -131,6 +148,6 @@ describe("getCbo types", () => {
 	test("should take a string or number and return a Cbo or null", () => {
 		expectTypeOf(getCbo).parameter(0).toEqualTypeOf<string | number>();
 		expectTypeOf(getCbo).returns.toEqualTypeOf<Cbo | null>();
-		expectTypeOf<Cbo>().toEqualTypeOf<{ code: string; title: string }>();
+		expectTypeOf<Cbo>().toEqualTypeOf<{ code: string; description: string }>();
 	});
 });

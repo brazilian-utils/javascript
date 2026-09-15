@@ -110,6 +110,21 @@ describe("parseCurrency", () => {
 			expect(parseCurrency("R$ 150", { precision: -1 })).toBe(150);
 			expect(parseCurrency("R$ 150", { precision: 21 })).toBe(150 / 10 ** 20);
 		});
+
+		test("when the precision is not a finite number", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(parseCurrency("1,001", { precision: "3" })).toBe(1001);
+			// @ts-expect-error: intentionally invalid input
+			expect(parseCurrency("R$ 1,50", { precision: null })).toBe(1.5);
+		});
+	});
+
+	describe("should return 0 for a value with no numeric reading", () => {
+		test("when the value is a null-prototype object or a symbol", () => {
+			expect(parseCurrency(Object.create(null))).toBe(0);
+			// @ts-expect-error: intentionally invalid input
+			expect(parseCurrency(Symbol("x"))).toBe(0);
+		});
 	});
 
 	describe("should round-trip with formatCurrency", () => {
@@ -127,9 +142,16 @@ describe("parseCurrency", () => {
 	});
 
 	describe("properties", () => {
+		const hostileValues = fc.oneof(
+			fc.anything(),
+			fc.constant(Object.create(null)),
+			fc.constant(Symbol("x")),
+			fc.bigInt(),
+		);
+
 		test("should never throw and always return a finite number, regardless of the input", () => {
 			fc.assert(
-				fc.property(fc.anything(), (value) => {
+				fc.property(hostileValues, (value) => {
 					const result = parseCurrency(value as never);
 
 					expect(Number.isFinite(result)).toBe(true);

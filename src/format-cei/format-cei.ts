@@ -10,7 +10,9 @@ export type FormatCeiOptions = {
 };
 
 /**
- * Formats a CEI (Cadastro Específico do INSS) number according to the official mask.
+ * Formats a CEI (Cadastro Específico do INSS) number according to the usual "00.000.00000/00"
+ * mask, the one the reference implementations of the check digit agree on (the Receita Federal
+ * does not print it).
  *
  * Formats progressively, as far as the digits given go, so it can also be used as an input
  * mask while the user is still typing.
