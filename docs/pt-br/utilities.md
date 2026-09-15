@@ -590,13 +590,15 @@ const addressFromNumber = await getAddressInfoByCep(1310100);
 
 ## isValidProcessoJuridico
 
-Valida o número do processo jurídico de acordo com definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119). Os separadores da máscara do CNJ (espaços, `.` e `-`) são aceitos entre os campos `NNNNNNN-DD.AAAA.J.TR.OOOO`, mas qualquer outro caractere, uma letra em especial, invalida o valor.
+Valida o número do processo jurídico de acordo com definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119): o layout `NNNNNNN-DD.AAAA.J.TR.OOOO`, os dígitos verificadores `DD` e o par `J`/`TR`, que precisa nomear um órgão e um tribunal que a Resolução CNJ nº 65/2008 criou, de modo que um número com dígito verificador correto mas com um tribunal inexistente é rejeitado. As listas fechadas vêm do art. 1º, § 4º e § 5º da resolução, o § 5º, III na redação que a Resolução CNJ nº 477/2022 lhe deu para acomodar o TRF da 6ª Região. A unidade de origem (`OOOO`) é lida apenas como quatro dígitos, já que o art. 1º, § 6º deixa a codificação dela a cargo de cada tribunal e não publica lista central. Os separadores da máscara do CNJ (espaços, `.` e `-`) são aceitos entre os campos, mas qualquer outro caractere, uma letra em especial, invalida o valor.
 
 ```javascript
 import { isValidProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
 isValidProcessoJuridico('00020802520125150049'); // true
 isValidProcessoJuridico('0002080-25.2012.5.15.0049'); // true (máscara do CNJ)
+isValidProcessoJuridico('0000100-68.2008.4.06.0000'); // true (TRF da 6ª Região)
+isValidProcessoJuridico('0000100-23.2008.8.28.0000'); // false (não existe 28º Tribunal de Justiça)
 isValidProcessoJuridico('ab00020802520125150049'); // false (letras são rejeitadas)
 ```
 
@@ -1259,14 +1261,15 @@ const ceps = await getCepInfoByAddress({
 
 ## generateProcessoJuridico
 
-Gera um número de processo jurídico válido de acordo com a definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119). `year` deve estar entre o ano atual e 9999, `court` entre 1 e 9; valores fora do intervalo retornam `null`. Usa `Math.random()` internamente, então não é criptograficamente seguro.
+Gera um número de processo jurídico válido de acordo com a definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119). `year` deve estar entre o ano atual e 9999, `court` entre 1 e 9; valores fora do intervalo retornam `null`. O órgão (`J`) e o tribunal (`TR`) são sorteados das listas fechadas do art. 1º, § 4º e § 5º, então o par sempre nomeia um tribunal que existe: `court` escolhe o órgão e o `TR` é sorteado entre os tribunais que aquele órgão tem. A unidade de origem (`OOOO`) é sorteada livremente, já que a resolução não publica lista central para ela. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
-generateProcessoJuridico(); // '89478643020269670326'
+generateProcessoJuridico(); // '89478645020266070326'
 generateProcessoJuridico({ year: 2026, court: 5 }); // string | null
 generateProcessoJuridico({ year: 10000 }); // null (ano fora do intervalo)
+generateProcessoJuridico({ court: 10 }); // null (órgão inexistente)
 ```
 
 ## formatLegalNature

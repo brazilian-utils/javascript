@@ -1,6 +1,9 @@
 import * as fc from "fast-check";
 
-import { PROCESSO_JURIDICO_LENGTH } from "../_internals/constants/processo-juridico";
+import {
+	PROCESSO_JURIDICO_LENGTH,
+	PROCESSO_JURIDICO_TRIBUNALS,
+} from "../_internals/constants/processo-juridico";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidProcessoJuridico } from "../is-valid-processo-juridico/is-valid-processo-juridico";
 import {
@@ -14,6 +17,13 @@ const expectValidGeneratedProcessoJuridico = (value: string | null) => {
 	expect(value).not.toBe(null);
 	expect((value as string).length).toBe(PROCESSO_JURIDICO_LENGTH);
 	expect(isValidProcessoJuridico(value as string)).toBe(true);
+};
+
+const expectListedCourtAndTribunal = (value: string | null) => {
+	const court = Number((value as string).charAt(13));
+	const tribunal = Number((value as string).slice(14, 16));
+
+	expect(PROCESSO_JURIDICO_TRIBUNALS.get(court)).toContain(tribunal);
 };
 
 describe("generateProcessoJuridico", () => {
@@ -69,6 +79,34 @@ describe("generateProcessoJuridico", () => {
 		expect(generateProcessoJuridico(42)).toBe(null);
 	});
 
+	it("should draw a tribunal the órgão really has for every court option", () => {
+		for (const court of PROCESSO_JURIDICO_TRIBUNALS.keys()) {
+			const value = generateProcessoJuridico({ court });
+
+			expectValidGeneratedProcessoJuridico(value);
+			expect((value as string).charAt(13)).toBe(String(court));
+			expectListedCourtAndTribunal(value);
+		}
+	});
+
+	it("should zero the tribunal of a segment whose only listed code is the superior court", () => {
+		expect(generateProcessoJuridico({ court: 1 })?.slice(14, 16)).toBe("00");
+		expect(generateProcessoJuridico({ court: 2 })?.slice(14, 16)).toBe("00");
+		expect(generateProcessoJuridico({ court: 3 })?.slice(14, 16)).toBe("00");
+	});
+
+	it("should pad a single digit tribunal to the two digits of the CNJ field", () => {
+		const originalRandom = Math.random;
+
+		Math.random = () => 0;
+
+		try {
+			expect(generateProcessoJuridico({ court: 4 })?.slice(14, 16)).toBe("01");
+		} finally {
+			Math.random = originalRandom;
+		}
+	});
+
 	it("should map a forced random value to the hand-computed default court", () => {
 		const originalRandom = Math.random;
 
@@ -115,6 +153,17 @@ describe("generateProcessoJuridico", () => {
 					fc.pre(invalidYear < thisYear || invalidYear > 9999);
 
 					expect(generateProcessoJuridico({ year: invalidYear })).toBe(null);
+				}),
+			);
+		});
+
+		test("should only ever produce a valid number whose órgão and tribunal pair is listed", () => {
+			fc.assert(
+				fc.property(fc.option(court, { nil: undefined }), (chosenCourt) => {
+					const value = generateProcessoJuridico({ court: chosenCourt });
+
+					expectValidGeneratedProcessoJuridico(value);
+					expectListedCourtAndTribunal(value);
 				}),
 			);
 		});
