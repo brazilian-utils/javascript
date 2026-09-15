@@ -187,14 +187,13 @@ export const BANKS: Bank[] = ${JSON.stringify(sorted)};`;
 	const constantsPath = resolve(scriptsDir, "..", "./src/is-valid-bank-account/constants.ts");
 	const constants = await readFile(constantsPath, "utf8");
 	const literal = (compeCodes.match(/.{1,90}/g) ?? []).map((chunk) => `\t"${chunk}"`).join(" +\n");
-	const updated = constants.replace(
-		/export const COMPE_CODES =\n(?:\t"\d*" \+\n)*\t"\d*";/,
-		`export const COMPE_CODES =\n${literal};`,
-	);
+	const compeCodesPattern = /export const COMPE_CODES =\n(?:\t"\d*" \+\n)*\t"\d*";/;
 
-	if (updated === constants) {
+	if (!compeCodesPattern.test(constants)) {
 		throw new Error("COMPE_CODES literal not found in src/is-valid-bank-account/constants.ts");
 	}
+
+	const updated = constants.replace(compeCodesPattern, `export const COMPE_CODES =\n${literal};`);
 
 	console.log(`Generated ${sorted.length} banks from ${source}`);
 

@@ -211,6 +211,10 @@ const main = async (): Promise<void> => {
  * compatibility. Separately, and unrelated to those legacy codes, the descriptions of the
  * following official codes fix an accent typo of the PDF: ${typoFixedCodes.join(", ")}.
  *
+ * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
+ * normally.
+ *
  * @see Official: ${SOURCE_PAGE_URL}
  * @see Official: ${SOURCE_URL}
  */

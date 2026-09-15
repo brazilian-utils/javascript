@@ -45,19 +45,13 @@ const results = await Promise.all(
 	generators.map((generator) => run("node", [resolve(scriptsDir, generator)])),
 );
 
-if (results.some((result) => result !== 0)) {
-	process.exit(1);
-}
-
+// Lint and format before checking the generators, so a failing generator never leaves
+// unformatted files behind in the working tree. `vp fmt` runs last because `vp lint --fix`
+// rewrites code without reformatting it.
+const lintResult = await run("vp", ["lint", "--fix", ...generatedFiles]);
 const formatResult = await run("vp", ["fmt", "--write", ...generatedFiles]);
 
-if (formatResult !== 0) {
-	process.exit(1);
-}
-
-const lintResult = await run("vp", ["lint", "--fix", ...generatedFiles]);
-
-if (lintResult !== 0) {
+if (results.some((result) => result !== 0) || lintResult !== 0 || formatResult !== 0) {
 	process.exit(1);
 }
 
