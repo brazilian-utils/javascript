@@ -13,7 +13,7 @@ body:
     attributes:
       label: Package version
       description: Which version of `@brazilian-utils/brazilian-utils` are you using?
-      placeholder: "2.3.0"
+      placeholder: "2.4.0"
     validations:
       required: true
 

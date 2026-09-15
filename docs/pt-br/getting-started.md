@@ -5,7 +5,7 @@ Brazilian Utils é uma biblioteca com foco na resolução de problemas que enfre
 ## Por que Brazilian Utils
 
 - **Zero dependências de runtime.** Nada além da lib entra no seu `node_modules` ou no seu bundle.
-- **Tree-shakeable até a função.** `import { isValidCpf }` custa cerca de 1,2 KB minificado (0,6 KB com gzip); cada utilitário também é um subpath próprio (`@brazilian-utils/brazilian-utils/get-cities`) para os mais pesados.
+- **Tree-shakeable até a função.** `import { isValidCpf }` custa cerca de 1,4 KB minificado (0,8 KB com gzip); cada utilitário também é um subpath próprio (`@brazilian-utils/brazilian-utils/get-cities`) para os mais pesados.
 - **Roda em qualquer lugar.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno e navegadores modernos, testados no CI em todos eles.
 - **Escrita em TypeScript.** Os tipos vêm no pacote; a API pública é acompanhada por um relatório de API, então nada muda em silêncio.
 - **Validada contra as regras oficiais.** Cada validador cita a especificação, lei ou base de dados que implementa (`@see` na documentação), e a suíte de testes passa por mutation testing, não só por cobertura.
@@ -63,19 +63,19 @@ Você pode conferir a lista de utilitários [clicando aqui](utilities.md).
 
 ## Tamanho do bundle
 
-O pacote é tree-shakeable: importar um utilitário da raiz traz apenas o código daquele utilitário, não o resto da biblioteca. `isValidCpf`, por exemplo, adiciona cerca de 1,2 KB minificado (0,6 KB com gzip) ao seu bundle. Um bundler com suporte a tree-shaking (webpack, Rollup, esbuild, Vite, etc.) descarta todos os outros utilitários.
+O pacote é tree-shakeable: importar um utilitário da raiz traz apenas o código daquele utilitário, não o resto da biblioteca. `isValidCpf`, por exemplo, adiciona cerca de 1,4 KB minificado (0,8 KB com gzip) ao seu bundle. Um bundler com suporte a tree-shaking (webpack, Rollup, esbuild, Vite, etc.) descarta todos os outros utilitários.
 
 Alguns utilitários são a exceção: cada um embute um dataset oficial e pesa muito mais que todos os outros utilitários somados. Estes são os tamanhos de um import isolado, minificado e com gzip:
 
 | Utilitário | Dataset | Minificado | Gzip |
 | --- | --- | --- | --- |
-| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 156,2 KB | 50,2 KB |
-| `getCities` | nomes dos 5571 municípios do IBGE | 154,0 KB | 49,7 KB |
-| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 113,8 KB | 24,3 KB |
-| `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 118,8 KB | 30,4 KB |
-| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 94,0 KB | 21,3 KB |
-| `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,7 KB | 6,8 KB |
-| `getBanks` · `getBankByCode` | participantes do STR do Banco Central (COMPE + ISPB) | 38,3 KB | 9,6 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 154,9 - 156,5 KB | 50,3 - 50,4 KB |
+| `getCities` | nomes dos 5571 municípios do IBGE | 154,2 KB | 49,8 KB |
+| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 114,1 KB | 24,6 KB |
+| `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 119,1 KB | 30,6 KB |
+| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 KB | 21,2 KB |
+| `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,9 KB | 6,9 KB |
+| `getBanks` · `getBankByCode` | participantes do STR do Banco Central (COMPE + ISPB) | 38,3 - 38,6 KB | 9,5 - 9,7 KB |
 
 Importar qualquer um deles da raiz, mesmo ao lado de um único utilitário pequeno, traz todo esse dataset para o seu bundle principal, porque este pacote é publicado como um único módulo ESM: um `import()` dinâmico da raiz (`await import('@brazilian-utils/brazilian-utils')`) ainda resolve para esse mesmo arquivo único, então não há como separá-lo sozinho. Um bundler que faz code-splitting precisa de um módulo separado para separar.
 
@@ -97,4 +97,4 @@ getMunicipalityByCode('3550308');
 
 Todos os utilitários estão disponíveis dessa forma, como `@brazilian-utils/brazilian-utils/<nome-do-utilitario>` (kebab-case, seguindo o nome da função: `isValidCpf` → `is-valid-cpf`), pelo mesmo motivo de lazy-loading/code-splitting.
 
-Escolha um estilo por utilitário em cada aplicação: um bundler trata o import da raiz e o import do subpath como dois módulos independentes, então importar `getCities` tanto da raiz quanto de `/get-cities` na mesma aplicação inclui a tabela de 154,0 KB de cidades duas vezes, uma em cada módulo.
+Escolha um estilo por utilitário em cada aplicação: um bundler trata o import da raiz e o import do subpath como dois módulos independentes, então importar `getCities` tanto da raiz quanto de `/get-cities` na mesma aplicação inclui a tabela de 154,2 KB de cidades duas vezes, uma em cada módulo.

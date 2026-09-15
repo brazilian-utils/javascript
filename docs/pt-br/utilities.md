@@ -196,7 +196,7 @@ isValidPixKey('not a key'); // false
 
 ## getPixKeyInfo
 
-Identifica uma chave Pix e a normaliza para a forma canônica que o DICT espera dentro do BR Code: CPF com 11 dígitos, CNPJ com 14 caracteres, e-mail em minúsculas, telefone celular em E.164 (um telefone fixo não é chave Pix) ou UUID em minúsculas (EVP). Um valor de 11 dígitos válido tanto como CPF quanto como celular é lido como CPF, a menos que tenha sido escrito como telefone (prefixo `+55`/`0055` ou DDD entre parênteses). O CPF e o telefone são reconhecidos pela forma como são escritos, não apenas pelos dígitos que carregam, então texto ao redor não é descartado e `'abc123.456.789-09'` não é uma chave CPF. Retorna `null` quando o valor não é uma chave Pix válida. O resultado é tipado como `PixKeyInfo`.
+Identifica uma chave Pix e a normaliza para a forma canônica que o DICT espera dentro do BR Code: CPF com 11 dígitos, CNPJ com 14 caracteres, e-mail em minúsculas, telefone celular em E.164 (um telefone fixo não é chave Pix) ou UUID em minúsculas (EVP). Um valor de 11 dígitos válido tanto como CPF quanto como celular é lido como CPF, a menos que tenha sido escrito como telefone (prefixo `+55`/`0055` ou DDD entre parênteses). O CPF e o telefone são reconhecidos pela forma como são escritos, não apenas pelos dígitos que carregam, então texto ao redor não é descartado e `'abc123.456.789-09'` não é uma chave CPF. Uma chave de e-mail é trimada e passada para minúsculas, e uma maior que os 77 caracteres que o DICT permite é rejeitada. Um valor cujos dígitos carregam um dígito verificador de CNPJ válido é lido como CNPJ mesmo quando começa com `0055`, já que uma chave de telefone dentro do BR Code sempre carrega o prefixo `+55`. Retorna `null` quando o valor não é uma chave Pix válida. O resultado é tipado como `PixKeyInfo`.
 
 ```javascript
 import { getPixKeyInfo } from '@brazilian-utils/brazilian-utils';
@@ -228,7 +228,7 @@ isValidPixPayload('00020126580014br.gov.bcb.pix...'); // false (CRC quebrado)
 
 ## getPixPayloadInfo
 
-Interpreta um payload de BR Code Pix e retorna seus campos. O payload é validado pelo `isValidPixPayload` primeiro, então uma estrutura malformada, um CRC quebrado ou um objeto obrigatório ausente retornam `null` em vez de um resultado parcial. Um payload estático vem com `key`, um dinâmico com `url`. O resultado é tipado como `PixPayloadInfo`; `pointOfInitiation` está sempre presente e é tipado como `PixPointOfInitiation`, `"dynamic"` quando o payload traz uma localização de PSP ou quando o objeto "Point of Initiation Method" (`01`) é `"12"`, e `"static"` nos demais casos. As informações da conta do recebedor devem trazer exatamente um entre uma chave e uma `url` (verificada com a mesma regra de localização de PSP do `generatePixPayload`); o próprio `01` é informativo, então pode estar ausente em qualquer um dos formatos e apenas um valor fora de `{"11", "12"}` retorna `null`. Quando um payload construído em torno de uma chave traz um valor, esse valor precisa ser maior que zero, a menos que o payload seja um BR Code de Pix Saque: o §2.6 do manual do Pix coloca o ISPB do facilitador de serviço de saque no subobjeto 26-03 (`fss`), devolvido como `withdrawalFacilitator`, e `54` igual a `"0"` ou `"0.00"` é aceito junto dele. Rejeitar um valor zero sem o `fss` é uma restrição deliberada desta biblioteca, não uma regra do manual. Um `fss` escrito ao lado de uma localização de PSP retorna `null`: o §2.7 do Manual de Padrões para Iniciação do Pix mapeia o QR Code dinâmico para exatamente dois subobjetos, `00` (GUI) e `25` (URL), e o `fss` pertence ao template estático do §2.6. Quando o payload traz uma localização de PSP, o valor e o `txid` são ignorados, como o manual determina. Os Unreserved Templates (IDs 80 a 99) são ignorados: um "QR Code composto" do Pix Automático que também traga uma localização de pagamento em 26-25 é interpretado como um payload dinâmico comum e sua localização de recorrência é descartada, então quem precisa distinguir os dois não pode se apoiar neste parser. Só um payload sem nenhum template Pix nos IDs 26 a 51 retorna `null`.
+Interpreta um payload de BR Code Pix e retorna seus campos. O payload é validado pelo `isValidPixPayload` primeiro, então uma estrutura malformada, um CRC quebrado ou um objeto obrigatório ausente retornam `null` em vez de um resultado parcial. Um payload estático vem com `key`, um dinâmico com `url`. A chave Pix em si não é validada, já que o manual permite um QR Code estático construído com uma chave que não existe mais no DICT; a titularidade da chave só é resolvida no momento do pagamento. O "Additional Data Field Template" (ID 62) é obrigatório na tabela do BR Code mas opcional na especificação EMV® a que ela se refere, então é aceito quando ausente. Os tamanhos que o manual reserva para o nome do recebedor (25), a cidade do recebedor (15), o `txid` (25) e o campo 26-01 da chave Pix (77) são limites do lado do gerador, aplicados por `generatePixPayload` e não verificados aqui, já que payloads reais os ultrapassam com frequência. O resultado é tipado como `PixPayloadInfo`; `pointOfInitiation` está sempre presente e é tipado como `PixPointOfInitiation`, `"dynamic"` quando o payload traz uma localização de PSP ou quando o objeto "Point of Initiation Method" (`01`) é `"12"`, e `"static"` nos demais casos. As informações da conta do recebedor devem trazer exatamente um entre uma chave e uma `url` (verificada com a mesma regra de localização de PSP do `generatePixPayload`); o próprio `01` é informativo, então pode estar ausente em qualquer um dos formatos e apenas um valor fora de `{"11", "12"}` retorna `null`. Quando um payload construído em torno de uma chave traz um valor, esse valor precisa ser maior que zero, a menos que o payload seja um BR Code de Pix Saque: o §2.6 do manual do Pix coloca o ISPB do facilitador de serviço de saque no subobjeto 26-03 (`fss`), devolvido como `withdrawalFacilitator`, e `54` igual a `"0"` ou `"0.00"` é aceito junto dele. Rejeitar um valor zero sem o `fss` é uma restrição deliberada desta biblioteca, não uma regra do manual. Um `fss` escrito ao lado de uma localização de PSP retorna `null`: o §2.7 do Manual de Padrões para Iniciação do Pix mapeia o QR Code dinâmico para exatamente dois subobjetos, `00` (GUI) e `25` (URL), e o `fss` pertence ao template estático do §2.6. Quando o payload traz uma localização de PSP, o valor e o `txid` são ignorados, como o manual determina. Os Unreserved Templates (IDs 80 a 99) são ignorados: um "QR Code composto" do Pix Automático que também traga uma localização de pagamento em 26-25 é interpretado como um payload dinâmico comum e sua localização de recorrência é descartada, então quem precisa distinguir os dois não pode se apoiar neste parser. Só um payload sem nenhum template Pix nos IDs 26 a 51 retorna `null`.
 
 ```javascript
 import { getPixPayloadInfo } from '@brazilian-utils/brazilian-utils';
@@ -238,10 +238,10 @@ getPixPayloadInfo(
     '5204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D'
 );
 // {
-//   key: '123e4567-e12b-12d1-a456-426655440000',
 //   merchantName: 'Fulano de Tal',
 //   merchantCity: 'BRASILIA',
-//   pointOfInitiation: 'static'
+//   pointOfInitiation: 'static',
+//   key: '123e4567-e12b-12d1-a456-426655440000'
 // }
 ```
 
@@ -335,7 +335,7 @@ getNfeKeyInfo('35170458716523000119550010000000121000123458');
 
 getNfeKeyInfo('35170458716523000119620010000000121000123450');
 // { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
-//   series: 1, number: 12, emissionType: 1, authorizationSite: 0, code: '0012345', checkDigit: 0 }
+//   series: 1, number: 12, emissionType: 1, code: '0012345', checkDigit: 0, authorizationSite: 0 }
 
 getNfeKeyInfo('invalid'); // null
 ```
@@ -590,7 +590,7 @@ const addressFromNumber = await getAddressInfoByCep(1310100);
 
 ## isValidProcessoJuridico
 
-Valida o número do processo jurídico de acordo com definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119): o layout `NNNNNNN-DD.AAAA.J.TR.OOOO`, os dígitos verificadores `DD` e o par `J`/`TR`, que precisa nomear um órgão e um tribunal que a Resolução CNJ nº 65/2008 criou, de modo que um número com dígito verificador correto mas com um tribunal inexistente é rejeitado. As listas fechadas vêm do art. 1º, § 4º e § 5º da resolução, o § 5º, III na redação que a Resolução CNJ nº 477/2022 lhe deu para acomodar o TRF da 6ª Região. A unidade de origem (`OOOO`) é lida apenas como quatro dígitos, já que o art. 1º, § 6º deixa a codificação dela a cargo de cada tribunal e não publica lista central. Os separadores da máscara do CNJ (espaços, `.` e `-`) são aceitos entre os campos, mas qualquer outro caractere, uma letra em especial, invalida o valor.
+Valida o número do processo jurídico de acordo com definição do [CNJ](https://atos.cnj.jus.br/atos/detalhar/119): o layout `NNNNNNN-DD.AAAA.J.TR.OOOO`, os dígitos verificadores `DD` e o par `J`/`TR`, que precisa identificar um órgão e um tribunal existentes nas listas fechadas definidas pela Resolução CNJ nº 65/2008, de modo que um número com dígito verificador correto mas com um tribunal inexistente é rejeitado. As listas fechadas vêm do art. 1º, § 4º e § 5º da resolução, o § 5º, III na redação que a Resolução CNJ nº 477/2022 lhe deu para acomodar o TRF da 6ª Região. A unidade de origem (`OOOO`) é lida apenas como quatro dígitos, já que o art. 1º, § 6º deixa a codificação dela a cargo de cada tribunal e não publica lista central. Os separadores da máscara do CNJ (espaços, `.` e `-`) são aceitos entre os campos, e espaços em branco ao redor do valor são ignorados, mas qualquer outro caractere, uma letra em especial, invalida o valor.
 
 ```javascript
 import { isValidProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -818,7 +818,7 @@ parseIban('br15-0000.0000/0000 1093 2840 814p-2'); // 'BR15000000000000109328408
 
 ## getIbanInfo
 
-Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular, `1` a `9` e depois `A` a `Z`). Aceita as mesmas formas de entrada que `isValidIban`, compacta ou no formato impresso da ISO 13616 (grupos de 4 separados por um único espaço em branco, `.`, `-` ou `/`), em ambos os casos com espaços em branco opcionais no início e no fim e sem diferenciar maiúsculas de minúsculas, e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega um separador fora do limite de um grupo, uma sequência de separadores ou qualquer caractere além de letras e dígitos. O resultado é tipado como `IbanInfo`, cujo `accountType` é uma `string`.
+Interpreta um IBAN brasileiro em seus campos: 2 (código do país, sempre `BR`) + 2 (dígitos verificadores ISO 7064 MOD 97-10) + 8 (ISPB) + 5 (agência) + 10 (conta) + 1 (tipo de conta, qualquer letra, normalmente `C` para conta corrente ou `P` para conta poupança) + 1 (indicador do titular, `1` a `9` e depois `A` a `Z`). Apenas IBANs brasileiros são suportados: o layout de campos dos demais países da ISO 13616 está fora de escopo, então um IBAN bem formado que não seja `BR` também retorna `null`. Aceita as mesmas formas de entrada que `isValidIban`, compacta ou no formato impresso da ISO 13616 (grupos de 4 separados por um único espaço em branco, `.`, `-` ou `/`), em ambos os casos com espaços em branco opcionais no início e no fim e sem diferenciar maiúsculas de minúsculas, e retorna `null` sempre que `isValidIban` retornaria `false`, inclusive quando o valor carrega um separador fora do limite de um grupo, uma sequência de separadores ou qualquer caractere além de letras e dígitos. O resultado é tipado como `IbanInfo`, cujo `accountType` é uma `string`.
 
 ```javascript
 import { getIbanInfo } from '@brazilian-utils/brazilian-utils';
@@ -1097,7 +1097,7 @@ getCities('SP');
 // ]
 ```
 
-`getCities` embute os nomes dos 5571 municípios do IBGE (~154,0 KB minificado, ~49,7 KB com gzip) e é uma das poucas exceções pesadas neste pacote, que é tree-shakeable no restante. Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-cities` em vez do import da raiz.
+`getCities` embute os nomes dos 5571 municípios do IBGE (~154,2 KB minificado, ~49,8 KB com gzip) e é uma das poucas exceções pesadas neste pacote, que é tree-shakeable no restante. Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-cities` em vez do import da raiz.
 
 ## getHolidays
 
@@ -1271,7 +1271,7 @@ Gera um número de processo jurídico válido de acordo com a definição do [CN
 import { generateProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
 generateProcessoJuridico(); // '89478645020266070326'
-generateProcessoJuridico({ year: 2026, court: 5 }); // string | null
+generateProcessoJuridico({ year: 2026, court: 5 }); // '98412562120265087260' (Justiça do Trabalho, TRT da 8ª Região)
 generateProcessoJuridico({ year: 10000 }); // null (ano fora do intervalo)
 generateProcessoJuridico({ court: 10 }); // null (órgão inexistente)
 ```
@@ -1773,7 +1773,7 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 
 ## getCertidaoInfo
 
-Extrai os campos da matrícula de uma certidão de registro civil, retornando `null` quando a matrícula é inválida, o que inclui um código de livro que não é um dos nove livros. O [art. 473, V do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) lista os códigos de 1 a 7; nenhum texto primário do CNJ acessível hoje publica os outros dois, inclusive o Anexo IV do revogado Provimento CNJ nº 63/2017, que lista os mesmos sete. Os códigos 8 (emancipação) e 9 (interdição) vêm das referências em que a regra do dígito verificador se apoia: o [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e o [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) publicam a lista dos nove livros. Eles são mantidos porque matrículas com eles circulam. Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
+Extrai os campos da matrícula de uma certidão de registro civil, retornando `null` quando a matrícula é inválida, o que inclui um código de livro que não é um dos nove livros. Um serviço diferente do `55` que o art. 473, III fixa para o registro civil das pessoas naturais também resulta em `null`. O [art. 473, V do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243) lista os códigos de 1 a 7; nenhum texto primário do CNJ acessível hoje publica os outros dois, inclusive o Anexo IV do revogado Provimento CNJ nº 63/2017, que lista os mesmos sete. Os códigos 8 (emancipação) e 9 (interdição) vêm das referências em que a regra do dígito verificador se apoia: o [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e o [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts) publicam a lista dos nove livros. Eles são mantidos porque matrículas com eles circulam. Só uma string é aceita: os 32 dígitos de uma matrícula são mais do que um número JavaScript comporta.
 
 ```javascript
 import { getCertidaoInfo } from '@brazilian-utils/brazilian-utils';
@@ -1874,7 +1874,7 @@ formatCno('979', { pad: true }); // 00.000.00009/79
 
 ## parseCno
 
-Remove a formatação do CNO (Cadastro Nacional de Obras), mantém apenas os dígitos e limita o resultado a 12 dígitos, a numeração que o CNO herdou do CEI. Use `isValidCno` para verificar o número em si.
+Remove a formatação do CNO (Cadastro Nacional de Obras), mantém apenas os dígitos e limita o resultado a 12 dígitos, a numeração que o CNO herdou do CEI. Um valor mais curto passa adiante até onde vai; use `isValidCno` para verificar o número em si.
 
 ```javascript
 import { parseCno } from '@brazilian-utils/brazilian-utils';
@@ -1911,7 +1911,7 @@ formatCaepf('184', { pad: true }); // 000.000.000/001-84
 
 ## parseCaepf
 
-Remove a formatação do CAEPF (Cadastro de Atividade Econômica da Pessoa Física), mantém apenas os dígitos e limita o resultado a 14 dígitos. Use `isValidCaepf` para verificar o número em si.
+Remove a formatação do CAEPF (Cadastro de Atividade Econômica da Pessoa Física), mantém apenas os dígitos e limita o resultado a 14 dígitos. Um valor mais curto passa adiante até onde vai; use `isValidCaepf` para verificar o número em si.
 
 ```javascript
 import { parseCaepf } from '@brazilian-utils/brazilian-utils';
@@ -1921,7 +1921,7 @@ parseCaepf('293.118.610/001-84'); // '29311861000184'
 
 ## isValidRegistroProfissional
 
-Verifica a estrutura de um número de registro/inscrição profissional. Recebe um único objeto, tipado como `IsValidRegistroProfissionalOptions`, no mesmo formato do `isValidBankAccount`: `value` é o número do registro, `council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). Qualquer coisa que não seja um objeto, e um objeto sem `value` ou sem `council`, é `false`. É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos, o tipo de registro (`"O"` Originário ou `"P"` Provisório, que nada diz sobre a categoria profissional) e o dígito verificador, conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1). Um Registro Transferido ou Secundário acrescenta `"T"` ou `"S"` e a UF do CRC de destino **depois** do dígito verificador, conforme esse mesmo item e a [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), art. 5º parágrafo único: os exemplos do próprio Manual são `SP-123456/O-3 T-MG`, `TO-654321/P-8 T-SC` e `PI-111222/O-5 S-AC`. As duas UFs precisam ser códigos reais, e o `stateCode` é comparado com a de origem. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. Só o formato do CRC e esses códigos regionais do CRP se apoiam em fonte publicada: a página do CFP não publica o tamanho do número de inscrição, e a OAB, o CFM e o CFO não publicam formato algum, então as faixas de dígitos aceitas para `"CRP"`, `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas (a busca pública da OAB/SP tem `maxlength="7"`, e o CFM documenta CRMs com prefixo `300` e sufixo `P`, nenhum deles expresso por esses formatos). O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
+Verifica a estrutura de um número de registro/inscrição profissional. Recebe um único objeto, tipado como `IsValidRegistroProfissionalOptions`, no mesmo formato do `isValidBankAccount`: `value` é o número do registro, `council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). Qualquer coisa que não seja um objeto, e um objeto sem `value` ou sem `council`, é `false`. Os formatos aceitos são de 4 a 6 dígitos mais a UF para `"OAB"` e `"CRM"`, de 3 a 6 dígitos mais a UF para `"CRO"`, um código regional de 2 dígitos mais 4 a 6 dígitos para `"CRP"`, e a UF mais 6 dígitos, o tipo de registro e um dígito verificador para `"CRC"`. É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos, o tipo de registro (`"O"` Originário ou `"P"` Provisório, que nada diz sobre a categoria profissional) e o dígito verificador, conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1). Um Registro Transferido ou Secundário acrescenta `"T"` ou `"S"` e a UF do CRC de destino **depois** do dígito verificador, conforme esse mesmo item e a [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), art. 5º parágrafo único: os exemplos do próprio Manual são `SP-123456/O-3 T-MG`, `TO-654321/P-8 T-SC` e `PI-111222/O-5 S-AC`. As duas UFs precisam ser códigos reais, e o `stateCode` é comparado com a de origem. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. Só o formato do CRC e esses códigos regionais do CRP se apoiam em fonte publicada: a página do CFP não publica o tamanho do número de inscrição, e a OAB, o CFM e o CFO não publicam formato algum, então as faixas de dígitos aceitas para `"CRP"`, `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas (a busca pública da OAB/SP tem `maxlength="7"`, e o CFM documenta CRMs com prefixo `300` e sufixo `P`, nenhum deles expresso por esses formatos). O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
 
 ```javascript
 import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
@@ -1969,7 +1969,7 @@ Os títulos das ocupações vêm da [tabela oficial de ocupações da CBO 2002 p
 
 ## parseCbo
 
-Remove a formatação do CBO (Classificação Brasileira de Ocupações), mantém apenas os dígitos e limita o resultado a 6 dígitos. Nada é preenchido com zeros à esquerda aqui, então o zero inicial de um código como `010205` precisa ser escrito; use `getCbo` ou `isValidCbo`, que preenchem um código numérico sem máscara, para consultar uma ocupação.
+Remove a formatação do CBO (Classificação Brasileira de Ocupações), mantém apenas os dígitos e limita o resultado a 6 dígitos. Um valor mais curto passa adiante até onde vai e nada é preenchido com zeros à esquerda aqui, então o zero inicial de um código como `010205` precisa ser escrito; use `getCbo` ou `isValidCbo`, que preenchem um código numérico sem máscara, para consultar uma ocupação.
 
 ```javascript
 import { parseCbo } from '@brazilian-utils/brazilian-utils';
@@ -2113,7 +2113,7 @@ isValidCfop(-5102); // false (não é um inteiro seguro não negativo)
 
 ## parseCfop
 
-Remove a formatação do CFOP (Código Fiscal de Operações e Prestações), mantém apenas os dígitos e limita o resultado a 4 dígitos. Nenhum código CFOP começa com zero, o primeiro dígito é o grupo da operação, de 1 a 7, então nada é preenchido com zeros aqui.
+Remove a formatação do CFOP (Código Fiscal de Operações e Prestações), mantém apenas os dígitos e limita o resultado a 4 dígitos. Um valor mais curto passa adiante até onde vai. Nenhum código CFOP começa com zero, o primeiro dígito é o grupo da operação, de 1 a 7, então nada é preenchido com zeros aqui.
 
 ```javascript
 import { parseCfop } from '@brazilian-utils/brazilian-utils';

@@ -72,6 +72,23 @@ function firstSentence(paragraph: string): string {
 	return sentence.split(ABBREVIATION_PLACEHOLDER).join(".").trim();
 }
 
+const DEPRECATION_MARKER = "**Deprecated:**";
+
+/**
+ * Extracts the `**Deprecated:** ...` sentence of a paragraph, without its markdown bold. The
+ * description of an entry is its first sentence, and a deprecation notice never is the first
+ * sentence, so without this it would be dropped from the generated index.
+ * @param {string} paragraph - The paragraph to read the deprecation notice of.
+ * @returns {string} The deprecation sentence, or an empty string when the paragraph carries none.
+ */
+function deprecationSentence(paragraph: string): string {
+	const markerIndex = paragraph.indexOf(DEPRECATION_MARKER);
+
+	if (markerIndex === -1) return "";
+
+	return firstSentence(paragraph.slice(markerIndex).replaceAll("**", ""));
+}
+
 /**
  * Parses every `## <fn>` section of `utilities.md` into name/slug/description.
  * @param {string} utilitiesMd - The full contents of `utilities.md`.
@@ -86,11 +103,15 @@ function parseUtilities(utilitiesMd: string): UtilSection[] {
 		const body = section.slice(newlineIndex + 1);
 		const [firstParagraphRaw = ""] = body.split(/\n\s*\n/);
 		const firstParagraph = firstParagraphRaw.trim();
+		const description = firstSentence(firstParagraph);
+		const deprecation = description.includes(DEPRECATION_MARKER)
+			? ""
+			: deprecationSentence(firstParagraph);
 
 		return {
 			name,
 			slug: slugify(name),
-			description: firstSentence(firstParagraph),
+			description: deprecation === "" ? description : `${description} ${deprecation}`,
 		};
 	});
 }

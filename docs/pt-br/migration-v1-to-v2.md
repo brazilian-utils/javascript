@@ -148,7 +148,6 @@ Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCa
 | `formatCPF` | `formatCpf` |
 | `formatCNPJ` | `formatCnpj` |
 | `formatCEP` | `formatCep` |
-| `formatPIS` | `formatPis` |
 | `formatProcessoJuridico` | `formatProcessoJuridico` (inalterado) |
 | `formatBoleto` | `formatBoleto` (inalterado) |
 | `formatCurrency` | `formatCurrency` (inalterado) |
@@ -182,7 +181,7 @@ generateCnpj(); // Atualmente gera numérico (v1), mas será aleatório na v3.0.
 | `parseCurrency` | `parseCurrency` (inalterado) |
 | `capitalize` | `capitalize` (inalterado) |
 | `getStates` | `getStates` (inalterado) |
-| `getCities` | `getCities` (inalterado) |
+| `getCities` | `getCities` (inalterado; descontinuado na 2.4.0 em favor de `getMunicipalities`) |
 | `getAddressInfoByCep` | `getAddressInfoByCep` (API alterada, veja abaixo) |
 
 ### Exemplo de Migração
@@ -238,16 +237,12 @@ if (index === input.length - 1) { /* ... */ }
 ```
 
 #### `generateChecksum`
-Esta função agora é interna e não é mais exportada na API pública.
+Esta função agora é interna e não é mais exportada na API pública. O pacote não exporta internals: `dist/_internals` não é publicado e não existe subpath para ele, então não há forma suportada de importar essa função na v2. Calcule o dígito verificador que você precisa no seu próprio código.
 
 **Migração:**
 ```javascript
 // v1 - Não use mais isso
 import { generateChecksum } from '@brazilian-utils/brazilian-utils';
-
-// v2 - Se você absolutamente precisar, importe dos internals (não recomendado)
-// Isto não faz parte da API pública e pode mudar sem aviso
-import { generateChecksum } from '@brazilian-utils/brazilian-utils/dist/_internals/generate-checksum/generate-checksum';
 ```
 
 #### `generateRandomNumber`
@@ -304,9 +299,9 @@ Formata números de telefone de acordo com padrões brasileiros.
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
 
-formatPhone('11900000000'); // 90000-0000
+formatPhone('11900000000'); // 11900-0000 (CUIDADO: a máscara padrão "sn" trunca um número com DDD)
 formatPhone('11900000000', { mask: 'nanp' }); // (11) 90000-0000
-formatPhone('11900000000', { mask: 'auto' }); // Detecta automaticamente a máscara
+formatPhone('11900000000', { mask: 'auto' }); // (11) 90000-0000
 ```
 
 ### `isValidRenavam`
@@ -331,26 +326,26 @@ import { isValidBankAccount } from '@brazilian-utils/brazilian-utils';
 // Banco do Brasil
 isValidBankAccount({
   bankCode: '001',
-  agency: '1234',
-  account: '12345678',
-  digit: '5'
-}); // true (se válido)
+  agency: '1584',
+  account: '00210169',
+  digit: '6'
+}); // true
 
 // Itaú
 isValidBankAccount({
   bankCode: '341',
-  agency: '1234',
-  account: '12345',
-  digit: '6'
-}); // true (se válido)
+  agency: '2545',
+  account: '02366',
+  digit: '1'
+}); // true
 
 // Outros bancos usam validação genérica
 isValidBankAccount({
-  bankCode: '999',
+  bankCode: '246',
   agency: '1234',
   account: '123456',
-  digit: '7'
-}); // true (se validação mod10/mod11 passar)
+  digit: '6'
+}); // true (o dígito corresponde ao mod10)
 ```
 
 ## Mudanças na API
@@ -438,4 +433,4 @@ Se você encontrar problemas durante a migração, por favor:
 
 1. Verifique a [documentação de utilitários](/pt-br/utilities.md) para as assinaturas corretas das funções
 2. Revise os exemplos neste guia de migração
-3. Abra uma issue no [repositório GitHub](https://github.com/brazilian-utils/brazilian-utils) se encontrar um bug
+3. Abra uma issue no [repositório GitHub](https://github.com/brazilian-utils/javascript) se encontrar um bug

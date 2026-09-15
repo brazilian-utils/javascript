@@ -9,7 +9,8 @@
 - [ ] I updated the documentation if this adds/changes a utility, in **both**:
   - [ ] `docs/utilities.md` (English)
   - [ ] `docs/pt-br/utilities.md` (Portuguese)
-- [ ] `npm check` passes locally (format, lint, types).
+- [ ] `npm run check` passes locally (format, lint, types).
+- [ ] I ran `npm run build:llms` if I touched `docs/utilities.md` (the Check workflow fails when `docs/llms.txt` is stale).
 - [ ] This change does not introduce a breaking change, **or** I flagged it clearly below and it was discussed with maintainers beforehand.
 - [ ] This change does not add any runtime dependency (this library is zero-runtime-dependency by design).
 
