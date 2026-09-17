@@ -318,9 +318,10 @@ There are no local release commands to run.
    or a `BREAKING CHANGE:` footer bumps the major version. The release PR's description and the
    `CHANGELOG.md` entry it adds are generated from the commit subjects/bodies, so writing a clear,
    accurately-typed commit message matters. `release-please-config.json` maps the types to the
-   changelog sections: `feat`, `fix`, `perf`, `revert`, `docs`, `build`, `ci`, `deps`/`chore(deps)`
-   and `chore(data)` (the dataset refreshes) are listed; `chore`, `test`, `refactor` and `style`
-   stay hidden.
+   changelog sections: `feat`, `fix`, `perf`, `revert`, `docs` and `chore(data)` (the dataset
+   refreshes) are listed; `build`, `ci`, `chore` (including the Dependabot `chore(deps)` and
+   `chore(deps-dev)` bumps, which only touch the toolchain), `test`, `refactor` and `style` stay
+   hidden.
 2. A maintainer reviews the release PR (version bump, changelog) and merges it. **Merging the
    release PR is the first confirmation.** Nothing is published yet at this point.
 3. Merging tags the release and publishes a GitHub Release, which triggers the `publish` job in

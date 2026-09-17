@@ -29,7 +29,16 @@ jobs:
         uses: $/.github/actions/setup
 
       - name: Mutation test every file
+        if: ${{ github.event_name != 'push' }}
         run: npm run test:mutation
+
+      # On `main` the dashboard reporter also publishes the score to dashboard.stryker-mutator.io;
+      # pull requests keep the local reporters only, so a fork never needs the key.
+      - name: Mutation test every file and publish the score
+        if: ${{ github.event_name == 'push' }}
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+        run: npm run test:mutation -- --reporters clear-text,progress,html,json,dashboard
 
       - name: Upload the mutation report
         if: ${{ always() }}

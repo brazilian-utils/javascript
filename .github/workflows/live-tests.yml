@@ -26,4 +26,3 @@ jobs:
 
       - name: Run live CEP tests
         run: vp run test:live
-        continue-on-error: false

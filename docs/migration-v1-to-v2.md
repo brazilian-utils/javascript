@@ -42,7 +42,7 @@ The codebase has been reorganized for better maintainability:
 Updated to modern, faster tooling:
 - **Build**: Migrated from `tsdx` to a **Vite+** toolchain for faster builds and scripts
 - **Testing**: Migrated from `jest` to **Vitest** (faster, Jest-compatible, ESM-native)
-- **Linting/Formatting**: Migrated from `prettier` + `eslint` to **Biome** (faster, all-in-one)
+- **Linting/Formatting**: Migrated from `prettier` + `eslint` to the Vite+ toolchain (`vp fmt` and `vp check`, backed by Oxc)
 - **TypeScript**: Modern configuration optimized for bundlers
 
 ### 🌐 Browser Testing
@@ -63,8 +63,8 @@ npm run test:edge-browser
 ### 📦 Fewer Dependencies
 
 Reduced development dependencies while maintaining zero runtime dependencies:
-- **v1**: Multiple tools (tsdx, jest, prettier, eslint, husky, lint-staged, commitlint, etc.)
-- **v2**: Minimal dependencies (Vite+, Vitest browser support, webdriverio)
+- **v1**: Multiple tools (tsdx, jest, prettier, eslint, husky, lint-staged, etc.)
+- **v2**: One toolchain (Vite+ for build, lint, format and tests, with Vitest browser support through webdriverio) plus the quality gates listed in CONTRIBUTING.md (Stryker, knip, jscpd, API Extractor, commitlint)
 - Simpler maintenance and faster CI/CD pipelines
 - Zero runtime dependencies (maintained)
 
