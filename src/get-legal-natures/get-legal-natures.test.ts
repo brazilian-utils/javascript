@@ -114,6 +114,15 @@ describe("getLegalNatures", () => {
 	});
 });
 
+describe("getLegalNatures includeLegacy truthiness", () => {
+	test("should read includeLegacy for truthiness, like pad", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(Object.keys(getLegalNatures({ includeLegacy: 1 })).length).toBe(100);
+		// @ts-expect-error: intentionally invalid input
+		expect(Object.keys(getLegalNatures({ includeLegacy: 0 })).length).toBe(92);
+	});
+});
+
 describe("getLegalNatures types", () => {
 	test("should take optional listing options and return a record of strings", () => {
 		expectTypeOf(getLegalNatures).parameter(0).toEqualTypeOf<GetLegalNaturesParams | undefined>();

@@ -44,7 +44,7 @@ export type GetBanksParams = {
  */
 export const getBanks = (params?: GetBanksParams): Bank[] => {
 	const banks =
-		params?.includeLegacy === true
+		(params?.includeLegacy ?? false)
 			? BANKS
 			: BANKS.filter((bank) => !LEGACY_BANK_CODES.includes(bank.code));
 

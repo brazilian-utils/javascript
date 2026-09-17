@@ -38,7 +38,7 @@ export type GetLegalNaturesParams = {
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const getLegalNatures = (params?: GetLegalNaturesParams): Record<string, string> => {
-	if (params?.includeLegacy === true) return { ...LEGAL_NATURE };
+	if (params?.includeLegacy ?? false) return { ...LEGAL_NATURE };
 
 	const legalNatures: Record<string, string> = {};
 

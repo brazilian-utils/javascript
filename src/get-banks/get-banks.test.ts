@@ -120,6 +120,15 @@ describe("getBanks", () => {
 	});
 });
 
+describe("getBanks includeLegacy truthiness", () => {
+	test("should read includeLegacy for truthiness, like pad", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(getBanks({ includeLegacy: 1 }).length).toBe(getBanks({ includeLegacy: true }).length);
+		// @ts-expect-error: intentionally invalid input
+		expect(getBanks({ includeLegacy: 0 }).length).toBe(getBanks().length);
+	});
+});
+
 describe("getBanks types", () => {
 	test("should take optional listing options and return an array of banks", () => {
 		expectTypeOf(getBanks).parameter(0).toEqualTypeOf<GetBanksParams | undefined>();

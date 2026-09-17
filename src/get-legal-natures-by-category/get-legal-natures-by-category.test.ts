@@ -373,6 +373,15 @@ describe("getLegalNaturesByCategory", () => {
 	});
 });
 
+describe("getLegalNaturesByCategory includeLegacy truthiness", () => {
+	test("should read includeLegacy for truthiness, like pad", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(getLegalNaturesByCategory("2", { includeLegacy: 1 }).length).toBe(33);
+		// @ts-expect-error: intentionally invalid input
+		expect(getLegalNaturesByCategory("2", { includeLegacy: 0 }).length).toBe(30);
+	});
+});
+
 describe("getLegalNaturesByCategory types", () => {
 	test("should take a string or number category and return an array of legal natures", () => {
 		expectTypeOf(getLegalNaturesByCategory).parameter(0).toEqualTypeOf<string | number>();
