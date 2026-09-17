@@ -111,13 +111,13 @@ jobs:
         run: npm stage publish --provenance --access public
 
   sbom:
-    name: Attach the SBOM to the release
+    name: Record the SBOM of the release
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout the release tag
@@ -134,8 +134,12 @@ jobs:
         # --package-lock-only reads the lockfile instead of installing anything.
         run: npm sbom --sbom-format cyclonedx --omit dev --package-lock-only > brazilian-utils.cdx.json
 
-      - name: Upload the SBOM as a release asset
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
-        run: gh release upload "$TAG_NAME" brazilian-utils.cdx.json --clobber
+      # Releases are immutable in this repository, so an asset cannot be added after release-please
+      # creates one (HTTP 422 on 2.4.0); the SBOM is kept as an artifact of the release run instead,
+      # next to the provenance statement npm records for the package.
+      - name: Keep the SBOM as an artifact of the release run
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sbom-${{ needs.release-please.outputs.tag_name }}
+          path: brazilian-utils.cdx.json
+          if-no-files-found: error
