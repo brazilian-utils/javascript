@@ -70,7 +70,7 @@ describe("capitalize", () => {
 		test("when a word looks like a designation but is not one, or is a designation left out of the default list", () => {
 			expect(capitalize("jose de sa")).toBe("Jose de Sa");
 			expect(capitalize("eu vi maria")).toBe("Eu Vi Maria");
-			expect(capitalize("diga-me")).toBe("Diga-ME");
+			expect(capitalize("diga-me")).toBe("Diga-Me");
 		});
 
 		test("when the value is a Brazilian address", () => {
@@ -126,6 +126,20 @@ describe("capitalize", () => {
 			expect(capitalize("fulano ltda me")).toBe("Fulano LTDA ME");
 			expect(capitalize("não-me-toque")).toBe("Não-Me-Toque");
 			expect(capitalize("diga-me a verdade")).toBe("Diga-Me a Verdade");
+			expect(capitalize("me e você")).toBe("Me e Você");
+			expect(capitalize("me")).toBe("ME");
+			expect(capitalize("envie-me, cpf")).toBe("Envie-Me, CPF");
+			expect(capitalize("envie-me ltda")).toBe("Envie-Me LTDA");
+			expect(capitalize("dê-me a mão")).toBe("Dê-Me a Mão");
+			expect(capitalize("por favor, diga-me")).toBe("Por Favor, Diga-Me");
+			expect(capitalize("fulano, me")).toBe("Fulano, ME");
+			expect(capitalize("fulano/me")).toBe("Fulano/ME");
+			expect(capitalize("fulano d’me")).toBe("Fulano d’Me");
+			expect(capitalize("fulano d‘me")).toBe("Fulano d‘Me");
+			expect(capitalize("fulano me cpf")).toBe("Fulano Me CPF");
+			expect(capitalize("fulano me, epp")).toBe("Fulano Me, EPP");
+			expect(capitalize("fulano me epp", { upperCaseWords: ["ME"] })).toBe("Fulano Me Epp");
+			expect(capitalize("fulano me", { upperCaseWords: ["ME"] })).toBe("Fulano ME");
 		});
 
 		test("when the name carries a foreign particle", () => {

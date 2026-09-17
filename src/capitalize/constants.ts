@@ -49,9 +49,10 @@ export const PREPOSITIONS = [
 ];
 
 /**
- * Company designations and document abbreviations that are written in upper case in Brazilian
- * names. "SA" without punctuation is deliberately absent: it is indistinguishable from the
- * surname "Sá" typed without its accent, which would turn "Jose de Sa" into "Jose de SA".
+ * Company designations that are written in upper case in Brazilian names, and the only words a
+ * designation of `TRAILING_DESIGNATIONS` is upper case before. "SA" without punctuation is
+ * deliberately absent: it is indistinguishable from the surname "Sá" typed without its accent,
+ * which would turn "Jose de Sa" into "Jose de SA".
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6404consol.htm
  * Lei nº 6.404/1976, art. 3º: the sociedade anônima is designated by "companhia" or "sociedade
@@ -74,24 +75,22 @@ export const PREPOSITIONS = [
  * @see Official: https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/instrucoes-normativas
  * The DREI index of instruções normativas in force, where that Anexo is published.
  */
-const BUSINESS_ABBREVIATIONS = [
-	"CEP",
+export const COMPANY_DESIGNATIONS = [
 	"CIA",
-	"CNPJ",
-	"CPF",
 	"EIRELI",
 	"EPP",
 	"LTDA",
 	"ME",
 	"MEI",
-	"RG",
 	"S.A.",
 	"S.S.",
 	"S/A",
 	"S/S",
 	"SCP",
-	"UF",
 ];
+
+/** The document abbreviations that are written in upper case wherever they appear. */
+const DOCUMENT_ABBREVIATIONS = ["CEP", "CNPJ", "CPF", "RG", "UF"];
 
 /**
  * Roman numerals that appear inside Brazilian names and addresses ("João Paulo II", "Rua XV de
@@ -122,7 +121,11 @@ const ROMAN_NUMERALS = [
 ];
 
 /** Words that are written in upper case wherever they appear, the default `upperCaseWords`. */
-export const UPPER_CASE_WORDS = [...BUSINESS_ABBREVIATIONS, ...ROMAN_NUMERALS];
+export const UPPER_CASE_WORDS = [
+	...COMPANY_DESIGNATIONS,
+	...DOCUMENT_ABBREVIATIONS,
+	...ROMAN_NUMERALS,
+];
 
 /**
  * The two letter code of each Brazilian state, written in upper case when it follows a `/`
@@ -199,11 +202,18 @@ export const APOSTROPHE_REGEX = /^['’‘]$/;
 export const ELIDED_PARTICLE = "d";
 
 /**
+ * The separators that attach an enclitic pronoun to its verb (`"diga-me"`, `"d'me"`): a word of
+ * `TRAILING_DESIGNATIONS` written right after one of them is the pronoun, never the designation.
+ */
+export const ENCLISIS_REGEX = /^[-'’‘]$/;
+
+/**
  * Designations that are only written in upper case in the designation position, that is, as the
- * last word of the name ("Fulano Comércio ME") or right before another designation
- * ("Fulano ME EPP"). `ME` is also the pt-BR pronoun "me", so upper-casing it wherever it appears
- * turned free text into `"Diga-ME a Verdade"` and the municipality of Não-Me-Toque/RS into
- * `"Não-ME-Toque"`; anywhere else in the value it is written as an ordinary word.
+ * last word of the name ("Fulano Comércio ME") or right before another company designation
+ * ("Fulano ME EPP"), and never attached to the previous word by a hyphen or an apostrophe. `ME`
+ * is also the pt-BR pronoun "me", so upper-casing it wherever it appears turned free text into
+ * `"Diga-ME a Verdade"` and the municipality of Não-Me-Toque/RS into `"Não-ME-Toque"`; anywhere
+ * else in the value it is written as an ordinary word.
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm
  * Lei Complementar nº 123/2006, art. 72 (revoked by the Lei Complementar nº 155/2016): the

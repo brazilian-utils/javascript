@@ -1,6 +1,8 @@
 import {
 	APOSTROPHE_REGEX,
+	COMPANY_DESIGNATIONS,
 	ELIDED_PARTICLE,
+	ENCLISIS_REGEX,
 	JOINER_REGEX,
 	PREPOSITIONS,
 	PUNCTUATION_REGEX,
@@ -23,6 +25,7 @@ export type CapitalizeOptions = {
 const stateCodeSet: Set<string> = new Set(STATE_CODES);
 
 const trailingDesignationSet: Set<string> = new Set(TRAILING_DESIGNATIONS);
+const companyDesignationSet: Set<string> = new Set(COMPANY_DESIGNATIONS);
 
 const toWordSet = (
 	words: unknown,
@@ -100,17 +103,30 @@ const isPossessive = (tokens: string[], index: number, word: string): boolean =>
 /**
  * Whether a word of the upper case list stands where it is written in upper case. Every
  * designation but the ones of `TRAILING_DESIGNATIONS` is upper case wherever it appears; those
- * are upper case only as the last word of the value or right before another designation.
+ * are upper case only as the last word of the value or right before an adjacent company
+ * designation of the list in force, and never when a hyphen or an apostrophe attaches them to
+ * the previous word, where they are the enclitic pronoun (`"diga-me"`).
  *
  * @param {string} word - The word being written, in upper case.
- * @param {string} next - The next word of the value, `""` when the word is the last one.
+ * @param {boolean} enclitic - Whether a hyphen or an apostrophe attaches the word to the previous one.
+ * @param {{ joined: boolean; next: string }} ahead - The next word of the value (`""` when the word is the last one) and whether it is joined to the word.
  * @param {Set<string>} upperCaseSet - The upper case word list in force.
  * @returns {boolean} `true` when the word is written in upper case where it stands.
  */
-const isUpperCasePosition = (word: string, next: string, upperCaseSet: Set<string>): boolean =>
-	!trailingDesignationSet.has(word) ||
-	next === "" ||
-	upperCaseSet.has(next.toLocaleUpperCase("pt-BR"));
+const isUpperCasePosition = (
+	word: string,
+	enclitic: boolean,
+	ahead: { joined: boolean; next: string },
+	upperCaseSet: Set<string>,
+): boolean => {
+	if (!trailingDesignationSet.has(word)) return true;
+	if (enclitic) return false;
+	if (ahead.next === "") return true;
+
+	const next = ahead.next.toLocaleUpperCase("pt-BR");
+
+	return ahead.joined && companyDesignationSet.has(next) && upperCaseSet.has(next);
+};
 
 /**
  * Capitalizes a given string according to the way a Brazilian name, company name or address is
@@ -217,36 +233,39 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 
 	const output: string[] = [];
 	let wordIndex = 0;
+	let enclitic = false;
 
 	for (const [index, token] of tokens.entries()) {
 		if (!token) continue;
 
 		if (WHITESPACE_REGEX.test(token)) {
 			output.push(" ");
+			enclitic = false;
 			continue;
 		}
 
 		if (PUNCTUATION_REGEX.test(token)) {
 			output.push(token);
+			enclitic = ENCLISIS_REGEX.test(token);
 			continue;
 		}
 
 		const lowerCaseWord = token.toLocaleLowerCase("pt-BR");
 		const upperCaseWord = token.toLocaleUpperCase("pt-BR");
 		const designation = (output.slice(-2).join("") + upperCaseWord).toLocaleUpperCase("pt-BR");
-		const { joined, next } = lookAhead(tokens, index);
+		const ahead = lookAhead(tokens, index);
 
-		if (upperCaseSet.has(designation)) {
+		if (designation !== upperCaseWord && upperCaseSet.has(designation)) {
 			output.splice(-2, 2, designation);
 		} else if (isPossessive(tokens, index, lowerCaseWord)) {
 			output.push(lowerCaseWord);
 		} else if (isElidedParticle(tokens, index, lowerCaseWord)) {
 			output.push(lowerCaseWord);
-		} else if (wordIndex > 0 && joined && lowerCaseSet.has(lowerCaseWord)) {
+		} else if (wordIndex > 0 && ahead.joined && lowerCaseSet.has(lowerCaseWord)) {
 			output.push(lowerCaseWord);
 		} else if (
 			upperCaseSet.has(upperCaseWord) &&
-			isUpperCasePosition(upperCaseWord, next, upperCaseSet)
+			isUpperCasePosition(upperCaseWord, enclitic, ahead, upperCaseSet)
 		) {
 			output.push(upperCaseWord);
 		} else if (output.at(-1) === "/" && stateCodeSet.has(upperCaseWord)) {
