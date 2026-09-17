@@ -4,6 +4,8 @@
  * @see Official: http://www.sintegra.gov.br/insc_est.html
  */
 
+export const AL_PREFIXES = ["24"];
+
 export const BA_MOD_10_DIGITS = [0, 1, 2, 3, 4, 5, 8];
 
 export const GO_PREFIXES = ["10", "11", "15"];

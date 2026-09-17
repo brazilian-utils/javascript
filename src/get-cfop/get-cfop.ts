@@ -60,7 +60,7 @@ export type Cfop = {
 export const getCfop = (value: string | number): Cfop | null => {
 	if (!isLookupCode(value)) return null;
 
-	const code = typeof value === "number" ? String(value) : value.trim();
+	const code = String(value).trim();
 
 	if (!CFOP_FORMAT_REGEX.test(code)) return null;
 

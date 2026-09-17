@@ -305,12 +305,8 @@ export const isValidBankAccount = (params: IsValidBankAccountParams): boolean =>
 
 	const { bankCode, agency, account, digit } = params;
 
+	// An empty field is left to the length checks below, which reject it once sanitized.
 	if (
-		// Stryker disable next-line ConditionalExpression,LogicalOperator: bankCode, agency, account and digit are typed as strings, so the only falsy value any of them can take is "", which the length checks below (once sanitized) reject on their own regardless of this chain.
-		!bankCode ||
-		!agency ||
-		!account ||
-		!digit ||
 		typeof bankCode !== "string" ||
 		typeof agency !== "string" ||
 		typeof account !== "string" ||

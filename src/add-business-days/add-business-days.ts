@@ -1,4 +1,5 @@
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
+import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 
 export type { BusinessDayOptions } from "../is-business-day/is-business-day";
@@ -63,7 +64,7 @@ export const addBusinessDays = (
 	amount: number,
 	options?: BusinessDayOptions,
 ): Date | null => {
-	if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+	if (!isValidDate(date)) return null;
 
 	if (!Number.isInteger(amount)) return null;
 

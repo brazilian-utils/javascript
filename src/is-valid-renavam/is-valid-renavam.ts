@@ -9,9 +9,6 @@ const SEPARATORS_REGEX = /[\s.-]/g;
 
 const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
 
-const padLeft = (input: string, padLength: number): string =>
-	"0".repeat(padLength - input.length) + input;
-
 /**
  * Validates if a RENAVAM (Registro Nacional de Veículos Automotores) is valid.
  *
@@ -52,7 +49,7 @@ export const isValidRenavam = (renavam: string | number): boolean => {
 
 	if (!FORMAT_REGEX.test(digits)) return false;
 
-	const paddedDigits = padLeft(digits, RENAVAM_LENGTH);
+	const paddedDigits = digits.padStart(RENAVAM_LENGTH, "0");
 
 	if (isRepeatedDigits(paddedDigits)) return false;
 

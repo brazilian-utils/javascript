@@ -85,7 +85,7 @@ export const HUNDREDS_FEMININE: readonly string[] = [
 	"novecentas",
 ];
 
-export type NumberScaleWord = {
+type NumberScaleWord = {
 	/** Word used for a group whose value is exactly 1 (e.g. `"mil"`, `"milhão"`). */
 	singular: string;
 	/** Word used for a group whose value is 0 or 2-999 (e.g. `"mil"`, `"milhões"`). */

@@ -3,7 +3,7 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
+import { fetchSortedRecord } from "../src/_internals/fetch-sorted-record/fetch-sorted-record.ts";
 
 const scriptsDir = import.meta.dirname;
 
@@ -21,27 +21,23 @@ const isCnaeSubclass = (value: unknown): value is CnaeSubclass =>
 	typeof value.descricao === "string";
 
 const main = async (): Promise<void> => {
-	const response = await fetchWithRetry("https://servicodados.ibge.gov.br/api/v2/cnae/subclasses");
+	const data = await fetchSortedRecord(
+		"https://servicodados.ibge.gov.br/api/v2/cnae/subclasses",
+		"IBGE CNAE",
+		async (response) => {
+			const json: unknown = await response.json();
 
-	if (!response.ok) {
-		throw new Error(`IBGE CNAE request failed with status ${response.status}`);
-	}
+			if (!Array.isArray(json) || !json.every((entry) => isCnaeSubclass(entry))) {
+				throw new Error("IBGE CNAE payload is not an array of subclass entries");
+			}
 
-	const json: unknown = await response.json();
-
-	if (!Array.isArray(json) || !json.every((entry) => isCnaeSubclass(entry))) {
-		throw new Error("IBGE CNAE payload is not an array of subclass entries");
-	}
-
-	const entries = json
-		.filter((subclass) => /^\d{7}$/.test(subclass.id))
-		.sort((subclassA, subclassB) => (subclassA.id > subclassB.id ? 1 : -1))
-		.map((subclass) => [subclass.id, subclass.descricao] as const);
-
-	const data: Record<string, string> = {};
-	for (const [id, descricao] of entries) {
-		data[id] = descricao;
-	}
+			return Object.fromEntries(
+				json
+					.filter((subclass) => /^\d{7}$/.test(subclass.id))
+					.map((subclass) => [subclass.id, subclass.descricao]),
+			);
+		},
+	);
 
 	await writeFile(
 		resolve(scriptsDir, "..", "./src/_internals/constants/cnae.ts"),

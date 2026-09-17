@@ -8,24 +8,22 @@ import {
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 } from "../_internals/constants/service-phone";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
+import { pickRandom } from "../_internals/pick-random/pick-random";
 
 /** The kinds of phone number `generatePhone` can generate. */
 export type GeneratePhoneType = "mobile" | "landline" | "service";
 
-const randomFrom = <Item>(list: readonly Item[]): Item =>
-	list[Math.floor(Math.random() * list.length)];
-
-const randomAreaCode = (): string => randomFrom(VALID_AREA_CODES).toString();
+const randomAreaCode = (): string => pickRandom(VALID_AREA_CODES).toString();
 
 const randomServicePhone = (): string => {
 	if (Math.random() >= 0.5) {
-		const prefix = randomFrom(SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES);
+		const prefix = pickRandom(SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES);
 		const rest = SERVICE_PHONE_NON_GEOGRAPHIC_LENGTH - SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH;
 
 		return `${prefix}${generateRandomNumber(rest)}`;
 	}
 
-	const root = randomFrom(SERVICE_PHONE_ABBREVIATED_ROOTS);
+	const root = pickRandom(SERVICE_PHONE_ABBREVIATED_ROOTS);
 	const rest = SERVICE_PHONE_ABBREVIATED_LENGTH - SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH;
 
 	return `${root}${generateRandomNumber(rest)}`;

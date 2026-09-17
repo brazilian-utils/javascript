@@ -1,7 +1,6 @@
 import { format } from "../_internals/format/format";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
-import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { sanitizeCnpj } from "../_internals/sanitize-cnpj/sanitize-cnpj";
 import { OBFUSCATED_PATTERN, PATTERN } from "./constants";
 
 /** Options of `formatCnpj`. */
@@ -12,14 +11,6 @@ export type FormatCnpjOptions = {
 	version?: 1 | 2;
 	/** Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`, read for truthiness like `pad`). */
 	obfuscate?: boolean;
-};
-
-const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]): string => {
-	if (version === 2) {
-		return sanitizeToAlphanumeric(value);
-	}
-
-	return sanitizeToDigits(value);
 };
 
 /**
@@ -52,7 +43,7 @@ export const formatCnpj = (value: string | number, options?: FormatCnpjOptions):
 
 	return format({
 		pad: options?.pad,
-		value: sanitize(value, options?.version),
+		value: sanitizeCnpj(value, options?.version),
 		pattern: (options?.obfuscate ?? false) ? OBFUSCATED_PATTERN : PATTERN,
 	});
 };

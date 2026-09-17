@@ -34,6 +34,12 @@ export type BoletoInfo = {
 const toDayNumber = (date: Date): number =>
 	Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_IN_MS);
 
+/**
+ * The day number of the cycle's base date, the fixed point every fator de vencimento counts
+ * from. Computed per call on purpose: as a module level constant it would be a top level call no
+ * consumer bundler can prove pure, which pins this module into every export's bundle.
+ * @returns {number} The day number of the base date.
+ */
 const getBaseDayNumber = (): number =>
 	Math.floor(Date.UTC(BASE_DATE_YEAR, BASE_DATE_MONTH, BASE_DATE_DAY) / DAY_IN_MS);
 
@@ -41,7 +47,7 @@ const dateFromBase = (days: number): Date =>
 	new Date(BASE_DATE_YEAR, BASE_DATE_MONTH, BASE_DATE_DAY + days);
 
 const getExpirationDate = (factor: number, referenceDate: Date): Date | null => {
-	if (!Number.isFinite(factor) || factor < MIN_FACTOR) return null;
+	if (factor < MIN_FACTOR) return null;
 
 	const reference = toDayNumber(referenceDate);
 	const cycle = Math.max(
@@ -161,7 +167,7 @@ export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): Bo
 		options?.referenceDate ?? new Date(),
 	);
 
-	const amount = Number(sanitized.slice(37, 47)) || 0;
+	const amount = Number(sanitized.slice(37, 47));
 
 	return { amount, expirationDate, bankCode };
 };

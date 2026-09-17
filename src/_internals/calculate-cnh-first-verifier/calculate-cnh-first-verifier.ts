@@ -19,6 +19,8 @@ export type CnhFirstVerifier = {
  * ```
  */
 export const calculateCnhFirstVerifier = (base: string): CnhFirstVerifier => {
+	// The weighted sum is written out rather than delegated to the shared `generateChecksum`: its
+	// sanitizer chain costs `isValidCnh` and `generateCnh` around 240 B of bundle each.
 	let sum = 0;
 
 	for (let i = 0; i < 9; i++) {

@@ -95,32 +95,16 @@ const unescapePdfString = (value: string): string =>
 		return char ?? "";
 	});
 
-const extractBracketText = (body: string): string => {
+/**
+ * Concatenates every string a PDF text operator carries, unescaped.
+ * @param {string} source - The fragment of the content stream to read.
+ * @param {RegExp} pattern - The global pattern whose first group is one escaped string.
+ * @returns {string} The strings of every match, unescaped and joined.
+ */
+const collectStrings = (source: string, pattern: RegExp): string => {
 	let text = "";
 
-	for (const array of body.matchAll(/\[((?:[^[\]\\]|\\.)*)\]\s*TJ/g)) {
-		const arrayContent = array[1];
-
-		if (arrayContent === undefined) continue;
-
-		for (const chunk of arrayContent.matchAll(/\(((?:[^()\\]|\\.)*)\)/g)) {
-			const chunkText = chunk[1];
-
-			if (chunkText === undefined) continue;
-
-			text += unescapePdfString(chunkText);
-		}
-	}
-
-	return text;
-};
-
-const extractParenthesizedText = (body: string): string => {
-	let text = "";
-
-	for (const chunk of body.matchAll(/\(((?:[^()\\]|\\.)*)\)\s*Tj/g)) {
-		const chunkText = chunk[1];
-
+	for (const [, chunkText] of source.matchAll(pattern)) {
 		if (chunkText === undefined) continue;
 
 		text += unescapePdfString(chunkText);
@@ -128,6 +112,21 @@ const extractParenthesizedText = (body: string): string => {
 
 	return text;
 };
+
+const extractBracketText = (body: string): string => {
+	let text = "";
+
+	for (const [, arrayContent] of body.matchAll(/\[((?:[^[\]\\]|\\.)*)\]\s*TJ/g)) {
+		if (arrayContent === undefined) continue;
+
+		text += collectStrings(arrayContent, /\(((?:[^()\\]|\\.)*)\)/g);
+	}
+
+	return text;
+};
+
+const extractParenthesizedText = (body: string): string =>
+	collectStrings(body, /\(((?:[^()\\]|\\.)*)\)\s*Tj/g);
 
 const extractLines = (streams: string[]): string[] => {
 	const lines: string[] = [];
@@ -159,8 +158,7 @@ const extractLines = (streams: string[]): string[] => {
 			rows.set(y, row);
 		}
 
-		for (const y of [...rows.keys()].sort((a, b) => b - a)) {
-			const row = rows.get(y) ?? [];
+		for (const [, row] of [...rows].sort(([a], [b]) => b - a)) {
 			lines.push(
 				row
 					.sort(([a], [b]) => a - b)

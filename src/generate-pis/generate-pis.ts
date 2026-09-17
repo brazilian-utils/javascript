@@ -3,6 +3,8 @@ import { generateRandomNumber } from "../_internals/generate-random-number/gener
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
 const calculateCheckDigit = (base: string): string => {
+	// The weighted sum is written out rather than delegated to the shared `generateChecksum`: its
+	// sanitizer chain costs `generatePis` around 270 B of bundle, a 23% regression for four lines.
 	const sum = PIS_WEIGHTS.reduce(
 		(acc, weight, index) => acc + Number(base.charAt(index)) * weight,
 		0,

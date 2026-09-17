@@ -28,8 +28,9 @@ import { OLD_FORMAT_SEPARATOR_INDEX } from "./constants";
  */
 export const formatLicensePlate = (value: string): string => {
 	const parsed = parseLicensePlate(value);
+	const head = parsed.slice(0, OLD_FORMAT_SEPARATOR_INDEX);
 
-	if (!/^[A-Z]{1,3}$/.test(parsed.slice(0, Math.min(parsed.length, OLD_FORMAT_SEPARATOR_INDEX)))) {
+	if (!/^[A-Z]{1,3}$/.test(head)) {
 		return "";
 	}
 
@@ -38,7 +39,7 @@ export const formatLicensePlate = (value: string): string => {
 	const tail = parsed.slice(OLD_FORMAT_SEPARATOR_INDEX);
 
 	if (/^\d{1,4}$/.test(tail)) {
-		return `${parsed.slice(0, OLD_FORMAT_SEPARATOR_INDEX)}-${tail}`;
+		return `${head}-${tail}`;
 	}
 
 	if (/^\d[A-Z]\d{0,2}$/.test(tail)) {

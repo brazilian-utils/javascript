@@ -5,13 +5,25 @@ import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/tes
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generatePis } from "../generate-pis/generate-pis";
-import { RESERVED_NUMBERS } from "./constants";
 import { isValidPis } from "./is-valid-pis";
+
+const REPEATED_DIGITS = [
+	"00000000000",
+	"11111111111",
+	"22222222222",
+	"33333333333",
+	"44444444444",
+	"55555555555",
+	"66666666666",
+	"77777777777",
+	"88888888888",
+	"99999999999",
+];
 
 describe("isValidPis", () => {
 	describe("should return false", () => {
-		test("when it is on the RESERVED_NUMBERS", () => {
-			for (const pis of RESERVED_NUMBERS) {
+		test("when every digit is the same", () => {
+			for (const pis of REPEATED_DIGITS) {
 				expect(isValidPis(pis)).toBe(false);
 			}
 		});

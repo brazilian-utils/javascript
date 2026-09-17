@@ -17,10 +17,8 @@ export const PHONE_MASKS: ReadonlySet<unknown> = new Set([
 /** The mask `formatPhone` applies when `options.mask` is missing or is not a `PhoneMask`. */
 export const DEFAULT_MASK = "sn";
 
-export const LENGTH: Record<NationalMask, number> = {
-	sn: 9,
-	nanp: 11,
-};
+/** Length of a bare Brazilian subscriber number, the boundary the `"auto"` mask reads. */
+export const SN_LENGTH = 9;
 
 export const MASK: Record<NationalMask, string> = {
 	sn: "00000-0000",

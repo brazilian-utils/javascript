@@ -152,17 +152,12 @@ function subHeadings(markdown: string): string[] {
 function parseDatasetUtils(gettingStartedMd: string): string[] {
 	const section = /\n## Bundle size\n([\s\S]*?)(?=\n## |$)/.exec(gettingStartedMd)?.[1] ?? "";
 
-	const names: string[] = [];
-
-	for (const row of section.split("\n")) {
-		if (!row.startsWith("| `")) continue;
-
-		for (const [, name] of (row.split("|")[1] ?? "").matchAll(BACKTICKED_PATTERN)) {
-			if (name !== undefined) names.push(name);
-		}
-	}
-
-	return names;
+	return section
+		.split("\n")
+		.filter((row) => row.startsWith("| `"))
+		.flatMap((row) =>
+			[...(row.split("|")[1] ?? "").matchAll(BACKTICKED_PATTERN)].map(([, name]) => name),
+		);
 }
 
 /**
@@ -272,17 +267,13 @@ function stripDocsifySyntax(markdown: string): string {
 }
 
 /**
- * Demotes every markdown heading in `markdown` by `levels` (adds `#`s), so it nests under a
+ * Demotes every markdown heading in `markdown` by one level (adds one `#`), so it nests under a
  * higher-level heading.
  * @param {string} markdown - The Markdown whose headings should be demoted.
- * @param {number} levels - How many `#`s to add to each heading.
- * @returns {string} `markdown` with every heading demoted by `levels`.
+ * @returns {string} `markdown` with every heading demoted by one level.
  */
-function demoteHeadings(markdown: string, levels: number): string {
-	return markdown.replaceAll(
-		/^(#{1,5})(\s)/gm,
-		(_match, hashes: string, space: string) => `${"#".repeat(hashes.length + levels)}${space}`,
-	);
+function demoteHeadings(markdown: string): string {
+	return markdown.replaceAll(/^(#{1,5}\s)/gm, "#$1");
 }
 
 function buildLlmsFullTxt(
@@ -297,8 +288,8 @@ function buildLlmsFullTxt(
 		...utils.map((util) => `  - [${util.name}](#${util.slug})`),
 	].join("\n");
 
-	const gettingStarted = demoteHeadings(stripDocsifySyntax(gettingStartedMd), 1);
-	const utilities = demoteHeadings(stripDocsifySyntax(utilitiesMd), 1);
+	const gettingStarted = demoteHeadings(stripDocsifySyntax(gettingStartedMd));
+	const utilities = demoteHeadings(stripDocsifySyntax(utilitiesMd));
 
 	return `# Brazilian Utils
 

@@ -4,13 +4,25 @@ import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
 import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
-import { RESERVED_NUMBERS } from "./constants";
 import { isValidCnpj, type IsValidCnpjOptions } from "./is-valid-cnpj";
+
+const REPEATED_DIGITS = [
+	"00000000000000",
+	"11111111111111",
+	"22222222222222",
+	"33333333333333",
+	"44444444444444",
+	"55555555555555",
+	"66666666666666",
+	"77777777777777",
+	"88888888888888",
+	"99999999999999",
+];
 
 describe("isValidCnpj", () => {
 	describe("should return false", () => {
-		test("when it is on the RESERVED_NUMBERS", () => {
-			for (const cnpj of RESERVED_NUMBERS) {
+		test("when every digit is the same", () => {
+			for (const cnpj of REPEATED_DIGITS) {
 				expect(isValidCnpj(cnpj)).toBe(false);
 			}
 		});

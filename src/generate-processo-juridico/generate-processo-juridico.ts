@@ -1,6 +1,7 @@
 import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-juridico";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { pickRandom } from "../_internals/pick-random/pick-random";
 
 /** The parameters of `generateProcessoJuridico`. */
 export type GenerateProcessoJuridicoParams = {
@@ -22,9 +23,6 @@ const MAX_YEAR = 9999;
 const TRIBUNAL_LENGTH = 2;
 
 const COURTS = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
-
-const pick = <Item>(items: readonly Item[]): Item =>
-	items[Math.floor(Math.random() * items.length)];
 
 const calculateCheckDigits = (base: string): string => {
 	const checksum = 98n - ((BigInt(base) * 100n) % 97n);
@@ -69,8 +67,8 @@ export const generateProcessoJuridico = (
 ): string | null => {
 	if (isNullish(options) || typeof options !== "object") return null;
 
-	const { year = new Date().getFullYear(), court = pick(COURTS) } = options;
 	const currentYear = new Date().getFullYear();
+	const { year = currentYear, court = pickRandom(COURTS) } = options;
 	const tribunals = PROCESSO_JURIDICO_TRIBUNALS.get(court);
 
 	if (!Number.isInteger(year) || year < currentYear || year > MAX_YEAR || tribunals === undefined) {
@@ -78,7 +76,7 @@ export const generateProcessoJuridico = (
 	}
 
 	const sequencial = generateRandomNumber(7);
-	const tribunal = String(pick(tribunals)).padStart(TRIBUNAL_LENGTH, "0");
+	const tribunal = String(pickRandom(tribunals)).padStart(TRIBUNAL_LENGTH, "0");
 	const foro = generateRandomNumber(4);
 	const base = `${sequencial}${year}${court}${tribunal}${foro}`;
 	const checkDigits = calculateCheckDigits(base);

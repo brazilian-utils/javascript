@@ -226,7 +226,6 @@ export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[
 		year = yearOrOptions;
 		stateCode = undefined;
 	} else {
-		// Stryker disable next-line BlockStatement: an empty block here still falls through to the `!Number.isInteger(year)` guard below, which returns [] anyway since `year` stays unassigned (undefined)
 		if (isNullish(yearOrOptions) || typeof yearOrOptions !== "object") {
 			return [];
 		}

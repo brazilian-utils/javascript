@@ -1,6 +1,5 @@
 import { PHONE_NATIONAL_MIN_LENGTH } from "../_internals/constants/phone";
 import {
-	SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH,
 	SERVICE_PHONE_ABBREVIATED_ROOTS,
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 } from "../_internals/constants/service-phone";
@@ -13,12 +12,12 @@ import {
 	DEFAULT_MASK,
 	INTERNATIONAL_MASK,
 	INTERNATIONAL_PREFIX,
-	LENGTH,
 	MASK,
 	NANP_LANDLINE_MASK,
 	type NationalMask,
 	PHONE_MASKS,
 	SERVICE_MASK,
+	SN_LENGTH,
 } from "./constants";
 
 /** The masks `formatPhone` can apply. */
@@ -31,23 +30,22 @@ export type FormatPhoneOptions = {
 };
 
 const matchesPrefix = (digits: string, prefixes: readonly string[]): boolean =>
-	prefixes.some((prefix) =>
-		// Stryker disable next-line ConditionalExpression,EqualityOperator,MethodExpression: every prefix list used here shares one prefix length, and both service masks only emit their first separator once the value is longer than that shared length, so this "still typing" branch can never change formatService's output, and the boundary (digits.length === prefix.length) reduces to the same string equality either way
-		digits.length < prefix.length ? prefix.startsWith(digits) : digits.startsWith(prefix),
-	);
+	prefixes.some((prefix) => digits.startsWith(prefix));
 
+/**
+ * A value still being typed is formatted as far as it goes: it is shorter than every prefix
+ * below, so it matches none of them and is returned as it came, which is exactly what both
+ * masks would print for it anyway (their first separator only appears once the value is longer
+ * than the prefix that selects the mask).
+ * @param {string} digits - The digits of a service number.
+ * @returns {string} The digits under the mask of their service number family.
+ */
 const formatService = (digits: string): string => {
 	if (matchesPrefix(digits, SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES)) {
 		return format({ value: digits, pattern: SERVICE_MASK.nonGeographic });
 	}
 
-	if (
-		matchesPrefix(
-			// Stryker disable next-line MethodExpression: digits.startsWith(prefix) already holds for the full digits if and only if it holds for digits.slice(0, ROOT_LENGTH), since a root is only ever matched at its own length
-			digits.slice(0, SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH),
-			SERVICE_PHONE_ABBREVIATED_ROOTS,
-		)
-	) {
+	if (matchesPrefix(digits, SERVICE_PHONE_ABBREVIATED_ROOTS)) {
 		return format({ value: digits, pattern: SERVICE_MASK.abbreviated });
 	}
 
@@ -76,7 +74,7 @@ const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMa
 
 	if (normalizePhone(digits) !== digits) return "international";
 
-	return digits.length > LENGTH.sn ? "nanp" : "sn";
+	return digits.length > SN_LENGTH ? "nanp" : "sn";
 };
 
 const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(value);

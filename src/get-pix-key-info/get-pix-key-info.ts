@@ -92,9 +92,6 @@ export const getPixKeyInfo = (value: string): PixKeyInfo | null => {
 
 	const trimmed = value.trim();
 
-	// Stryker disable next-line ConditionalExpression: an empty trimmed value never matches the EVP regex, never contains "@", is never a valid CNPJ, matches neither the CPF nor the phone syntax, so every branch below already falls through to null on its own
-	if (!trimmed) return null;
-
 	if (EVP_REGEX.test(trimmed)) return { type: "evp", value: trimmed.toLowerCase() };
 
 	if (trimmed.includes("@")) {

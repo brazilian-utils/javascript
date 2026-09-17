@@ -1,19 +1,10 @@
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
-import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { sanitizeCnpj } from "../_internals/sanitize-cnpj/sanitize-cnpj";
 import { type FormatCnpjOptions } from "../format-cnpj/format-cnpj";
 
 /** Options of `parseCnpj`. */
 export type ParseCnpjOptions = Pick<FormatCnpjOptions, "version">;
-
-const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]): string => {
-	if (version === 2) {
-		return sanitizeToAlphanumeric(value);
-	}
-
-	return sanitizeToDigits(value);
-};
 
 /**
  * Removes CNPJ formatting characters and returns a normalized value.
@@ -34,4 +25,4 @@ const sanitize = (value: string | number, version?: FormatCnpjOptions["version"]
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
 export const parseCnpj = (value: string | number, options?: ParseCnpjOptions): string =>
-	isNullish(value) ? "" : sanitize(value, options?.version).slice(0, CNPJ_LENGTH);
+	isNullish(value) ? "" : sanitizeCnpj(value, options?.version).slice(0, CNPJ_LENGTH);

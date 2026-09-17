@@ -11,7 +11,7 @@
 export const VALID_MODELS = ["55", "57", "58", "62", "63", "64", "65", "66", "67"] as const;
 
 /** One of the `mod` values `getNfeKeyInfo` supports. */
-export type ValidModel = (typeof VALID_MODELS)[number];
+type ValidModel = (typeof VALID_MODELS)[number];
 
 /**
  * The `tpEmis` (forma de emissão) codes each MOC assigns to its own document, so a code that is

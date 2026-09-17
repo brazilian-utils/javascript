@@ -17,6 +17,11 @@ const OVERFLOW_DIGIT = 10;
  * ten and the check digit is the remainder of that product by eleven, with a remainder of ten
  * mapped back to 0.
  *
+ * The digit is the very same one `mod11`'s `arrecadacao` mapping yields, for every possible base,
+ * but the loop is written out here rather than delegated to it: pulling the shared, table driven
+ * `mod11` into this module costs `isValidRenavam` and `generateRenavam` around 100 B of bundle
+ * each, which the tree-shaking budget of this package does not spend on eight lines.
+ *
  * The Código de Trânsito Brasileiro creates the RENAVAM registry but does not define its check
  * digit, so the calculation follows the two community references cited below.
  *

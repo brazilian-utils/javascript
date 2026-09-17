@@ -1,5 +1,5 @@
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { RESERVED_NUMBERS } from "./constants";
 
 const FORMAT_REGEX = /^\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{2}$/;
 
@@ -59,7 +59,7 @@ export const isValidCpf = (cpf: string): boolean => {
 
 	if (!FORMAT_REGEX.test(cpf.trim())) return false;
 
-	if (RESERVED_NUMBERS.includes(digits)) return false;
+	if (isRepeatedDigits(digits)) return false;
 
 	return isValidChecksum(digits);
 };

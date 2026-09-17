@@ -23,6 +23,8 @@ export const calculateCnhSecondVerifier = ({
 	base,
 	decrement,
 }: CalculateCnhSecondVerifierParams): number => {
+	// Written out rather than delegated to the shared `generateChecksum`, for the reason given in
+	// `calculateCnhFirstVerifier`.
 	let sum = 0;
 
 	for (let i = 0; i < 9; i++) {

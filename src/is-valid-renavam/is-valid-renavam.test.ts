@@ -11,6 +11,14 @@ describe("isValidRenavam", () => {
 			expect(isValidRenavam("")).toBe(false);
 		});
 
+		test("when a valid registration carries an extra digit", () => {
+			// The 11 digits of a valid RENAVAM, plus a twelfth: neither the 9 nor the 11 digit form,
+			// so it is turned down even though its first eleven digits check out.
+			expect(isValidRenavam("00639884962")).toBe(true);
+			expect(isValidRenavam("006398849620")).toBe(false);
+			expect(isValidRenavam("0639884962")).toBe(false);
+		});
+
 		test("when it is null", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidRenavam(null)).toBe(false);

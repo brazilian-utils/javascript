@@ -1,7 +1,7 @@
 import { type StateCode } from "../_internals/constants/states";
 import { type HolidayType } from "./get-holidays";
 
-export type StateHolidayEntry = {
+type StateHolidayEntry = {
 	name: string;
 	day?: number;
 	month?: number;
@@ -42,13 +42,13 @@ export const CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR = 2024;
 export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
 
 /** First year Alagoas' 16 September is a feriado estadual, not a ponto facultativo (Lei AL nº 9.358/2024). */
-export const AL_EMANCIPACAO_FERIADO_SINCE_YEAR = 2024;
+const AL_EMANCIPACAO_FERIADO_SINCE_YEAR = 2024;
 
 /** First year Paraíba's 26 July is no longer a holiday: Lei PB nº 10.601/2015 revoked its basis on 17/12/2015. */
-export const PB_MORTE_JOAO_PESSOA_UNTIL_YEAR = 2016;
+const PB_MORTE_JOAO_PESSOA_UNTIL_YEAR = 2016;
 
 /** First year Tocantins' 18 March is no longer a holiday: Lei TO nº 2.013/2009 repealed the feriado clause on 18/02/2009. */
-export const TO_AUTONOMIA_UNTIL_YEAR = 2009;
+const TO_AUTONOMIA_UNTIL_YEAR = 2009;
 
 /**
  * First year Santa Catarina's 25 November moves to the following Sunday: Lei SC nº 11.213, de
@@ -56,7 +56,7 @@ export const TO_AUTONOMIA_UNTIL_YEAR = 2009;
  * into force on the day it was published (DO 16.290, de 12/11/1999), thirteen days before that
  * year's 25 November.
  */
-export const SC_ALEXANDRIA_TRANSFER_SINCE_YEAR = 1999;
+const SC_ALEXANDRIA_TRANSFER_SINCE_YEAR = 1999;
 
 /**
  * The one year Santa Catarina's 25 November is observed on the statutory date again: art. 3º of
@@ -64,7 +64,7 @@ export const SC_ALEXANDRIA_TRANSFER_SINCE_YEAR = 1999;
  * not carry the transfer clause forward, leaving 2004 without one until Lei SC nº 13.408/2005
  * reinstated it.
  */
-export const SC_ALEXANDRIA_TRANSFER_GAP_YEAR = 2004;
+const SC_ALEXANDRIA_TRANSFER_GAP_YEAR = 2004;
 
 /**
  * First year Santa Catarina's 11 August and 25 November both move to the following Sunday: Lei SC
@@ -72,7 +72,7 @@ export const SC_ALEXANDRIA_TRANSFER_GAP_YEAR = 2004;
  * force on the day it was published (DO 17.680, de 15/07/2005), before that year's 11 August. Up
  * to 2004 the 11 August holiday was always observed on the date itself.
  */
-export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
+const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
 
 /**
  * Feriados estaduais, um `@see` por entrada.

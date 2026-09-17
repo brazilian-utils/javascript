@@ -3,8 +3,8 @@ import {
 	CNPJ_LENGTH,
 	CNPJ_SECOND_DIGIT_WEIGHTS,
 } from "../_internals/constants/cnpj";
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { RESERVED_NUMBERS } from "./constants";
 
 /** Options of `isValidCnpj`. */
 export type IsValidCnpjOptions = {
@@ -120,9 +120,7 @@ export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean
 		const numeric = sanitizeToDigits(cnpj);
 
 		return (
-			NUMERIC_FORMAT_REGEX.test(trimmed) &&
-			!RESERVED_NUMBERS.includes(numeric) &&
-			isValidChecksum(numeric)
+			NUMERIC_FORMAT_REGEX.test(trimmed) && !isRepeatedDigits(numeric) && isValidChecksum(numeric)
 		);
 	}
 

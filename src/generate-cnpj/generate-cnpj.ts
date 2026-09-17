@@ -1,5 +1,4 @@
 import { CNPJ_FIRST_DIGIT_WEIGHTS, CNPJ_SECOND_DIGIT_WEIGHTS } from "../_internals/constants/cnpj";
-import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
@@ -41,6 +40,7 @@ const generateRandomCnpjChars = (length: number): string => {
 	return chars;
 };
 
+// `Number.isInteger` as a type guard, so an out of range `branch` narrows to `number`.
 const isInteger = (value: unknown): value is number => Number.isInteger(value);
 
 const isBranchInRange = (branch: number | undefined): branch is number =>
@@ -65,16 +65,23 @@ const generateNonRepeatedBase = (generate: () => string): string => {
 
 const charToCnpjValue = (char: string): number => char.charCodeAt(0) - 48;
 
-const generateAlphanumericChecksum = (cnpj: string, weights: number[]): number =>
-	weights.reduce((sum, weight, index) => sum + charToCnpjValue(cnpj.charAt(index)) * weight, 0);
-
+/**
+ * The check digit of a base, under the rule both CNPJ versions share: the weighted sum of the
+ * base modulo 11, and 11 minus that remainder unless the remainder is 0 or 1, in which case the
+ * digit is 0. The base is read through `charToCnpjValue`, which reads a digit as itself and a
+ * letter as the value the alphanumeric CNPJ gives it, so the numeric version goes through the
+ * very same calculation instead of a second, digits-only one.
+ * @param {string} base - The base the digit is calculated for, as long as `weights`.
+ * @param {number[]} weights - The weight of each character of the base, from left to right.
+ * @returns {string} The check digit, as a single character.
+ */
 const calculateCheckDigit = (base: string, weights: number[]): string => {
-	const mod = generateChecksum({ base, weight: weights }) % 11;
-	return (mod < 2 ? 0 : 11 - mod).toString();
-};
+	const sum = weights.reduce(
+		(total, weight, index) => total + charToCnpjValue(base.charAt(index)) * weight,
+		0,
+	);
+	const mod = sum % 11;
 
-const calculateAlphanumericCheckDigit = (base: string, weights: number[]): string => {
-	const mod = generateAlphanumericChecksum(base, weights) % 11;
 	return (mod < 2 ? 0 : 11 - mod).toString();
 };
 
@@ -87,11 +94,8 @@ const generateNumericCnpj = (branch: number | undefined): string => {
 
 const generateAlphanumericCnpj = (branch: number | undefined): string => {
 	const base = generateNonRepeatedBase(() => generateBase(branch, generateRandomCnpjChars));
-	const firstCheckDigit = calculateAlphanumericCheckDigit(base, CNPJ_FIRST_DIGIT_WEIGHTS);
-	const secondCheckDigit = calculateAlphanumericCheckDigit(
-		base + firstCheckDigit,
-		CNPJ_SECOND_DIGIT_WEIGHTS,
-	);
+	const firstCheckDigit = calculateCheckDigit(base, CNPJ_FIRST_DIGIT_WEIGHTS);
+	const secondCheckDigit = calculateCheckDigit(base + firstCheckDigit, CNPJ_SECOND_DIGIT_WEIGHTS);
 	return base + firstCheckDigit + secondCheckDigit;
 };
 

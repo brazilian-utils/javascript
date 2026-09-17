@@ -86,7 +86,6 @@ type CompareRow = {
 
 type CompareResult = {
 	changed: CompareRow[];
-	unchanged: CompareRow[];
 	added: (Measurement & { name: string })[];
 	removed: (Measurement & { name: string })[];
 	fullDeltaBytes: number;
@@ -218,15 +217,15 @@ const loadExports = async (
 	const aliasOf = new Map<string, string>();
 	for (const group of groups.values()) {
 		if (group.length < 2) continue;
-		const sorted = [...group].sort();
-		const target = sorted.at(-1);
+		// `group` is built from the already sorted `functionExports`, so it is sorted too.
+		const target = group.at(-1);
 
 		if (target === undefined) continue;
 
-		for (const name of sorted.slice(0, -1)) aliasOf.set(name, target);
+		for (const name of group.slice(0, -1)) aliasOf.set(name, target);
 	}
 
-	const testable = functionExports.filter((name) => !aliasOf.has(name)).sort();
+	const testable = functionExports.filter((name) => !aliasOf.has(name));
 	return { testable, aliasOf };
 };
 
@@ -272,8 +271,9 @@ const measureExports = async (
 		throw new Error("No measurements produced");
 	}
 
-	const exportsMap: Record<string, Measurement> = {};
-	for (const m of measurements) exportsMap[m.name] = { bytes: m.bytes, gzip: m.gzip };
+	const exportsMap: Record<string, Measurement> = Object.fromEntries(
+		measurements.map((m) => [m.name, { bytes: m.bytes, gzip: m.gzip }]),
+	);
 	for (const [alias, target] of aliasOf) {
 		const targetMeasurement: Measurement | undefined = exportsMap[target];
 		if (targetMeasurement !== undefined) exportsMap[alias] = targetMeasurement;
@@ -314,7 +314,6 @@ const printTable = (
 const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement): CompareResult => {
 	const names = new Set([...Object.keys(base.exports), ...Object.keys(head.exports)]);
 	const changed: CompareRow[] = [];
-	const unchanged: CompareRow[] = [];
 	const added: (Measurement & { name: string })[] = [];
 	const removed: (Measurement & { name: string })[] = [];
 
@@ -340,7 +339,7 @@ const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement)
 			deltaBytes,
 			deltaPercent,
 		};
-		(deltaBytes === 0 ? unchanged : changed).push(row);
+		if (deltaBytes !== 0) changed.push(row);
 	}
 
 	changed.sort((a, b) => Math.abs(b.deltaBytes) - Math.abs(a.deltaBytes));
@@ -358,7 +357,6 @@ const compareSnapshots = (base: Snapshot, head: Snapshot, existing: Measurement)
 
 	return {
 		changed,
-		unchanged,
 		added,
 		removed,
 		fullDeltaBytes,
@@ -519,7 +517,7 @@ const renderMarkdown = (
 			"| | Base | Head | Δ |",
 			"| --- | ---: | ---: | ---: |",
 			`| Pre-existing exports, all imported | ${formatBytes((base.surviving ?? base.full).bytes)} | ${formatBytes(existing.bytes)} (gzip ${formatBytes(existing.gzip)}) | ${result.fullImportRegressed ? "🔴 " : ""}${formatDelta(result.fullDeltaBytes, result.fullDeltaPercent)} |`,
-			`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatDelta(head.full.bytes - base.full.bytes, base.full.bytes === 0 ? 0 : (head.full.bytes - base.full.bytes) / base.full.bytes)} |`,
+			`| Full import | ${formatBytes(base.full.bytes)} | ${formatBytes(head.full.bytes)} (gzip ${formatBytes(head.full.gzip)}) | ${formatRowDelta(base.full, head.full)} |`,
 			`| Exports | ${Object.keys(base.exports).length} | ${measured} | ${formatCount(measured - Object.keys(base.exports).length)} |`,
 			"",
 			...renderRows("What changed", EXPORT_COLUMNS, changedRows),

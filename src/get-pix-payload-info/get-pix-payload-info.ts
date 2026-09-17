@@ -63,9 +63,6 @@ export type PixPayloadInfo = {
 	pointOfInitiation: PixPointOfInitiation;
 };
 
-// Stryker disable next-line Regex: this is only ever tested against `checksum`, a slice of exactly PIX_CRC_LENGTH (4) characters, so dropping either anchor cannot change whether it matches
-const CRC_VALUE_REGEX = /^[0-9a-f]{4}$/i;
-
 const AMOUNT_REGEX = /^\d+(?:\.\d{1,2})?$/;
 
 const WITHDRAWAL_FACILITATOR_REGEX = /^\d{8}$/;
@@ -95,9 +92,8 @@ const isValidCrc = (payload: string): boolean => {
 
 	if (payload.slice(-CRC_TAG_LENGTH, -PIX_CRC_LENGTH) !== PIX_CRC_TAG) return false;
 
-	// Stryker disable next-line ConditionalExpression: a checksum that fails this hex check can never equal crc16Ccitt's always-hex output, so the final comparison below already rejects it on its own
-	if (!CRC_VALUE_REGEX.test(checksum)) return false;
-
+	// A checksum that is not four uppercase hexadecimal digits can never equal crc16Ccitt's
+	// always-hexadecimal output, so the comparison below turns it down on its own.
 	return crc16Ccitt(payload.slice(0, -PIX_CRC_LENGTH)) === checksum.toUpperCase();
 };
 

@@ -1,4 +1,5 @@
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
+import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 
 export type { BusinessDayOptions } from "../is-business-day/is-business-day";
@@ -65,8 +66,8 @@ export const differenceInBusinessDays = (
 	earlierDate: Date,
 	options?: BusinessDayOptions,
 ): number | null => {
-	if (!(laterDate instanceof Date) || Number.isNaN(laterDate.getTime())) return null;
-	if (!(earlierDate instanceof Date) || Number.isNaN(earlierDate.getTime())) return null;
+	if (!isValidDate(laterDate)) return null;
+	if (!isValidDate(earlierDate)) return null;
 
 	const stateCode = options?.stateCode;
 

@@ -1,8 +1,10 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { mod10 } from "../_internals/mod10/mod10";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
+	AL_PREFIXES,
 	BA_MOD_10_DIGITS,
 	GO_DUAL_DIGIT_IE,
 	GO_PREFIXES,
@@ -35,8 +37,6 @@ const checkLength = (ie: string, length: number | number[]): boolean => {
 
 const startsWithAny = (ie: string, prefixes: readonly string[]): boolean =>
 	prefixes.some((prefix) => ie.startsWith(prefix));
-
-const startsWith = (ie: string, prefix: string): boolean => startsWithAny(ie, [prefix]);
 
 type WeightedSumParams = {
 	source: string;
@@ -93,9 +93,15 @@ const calcDFDigit = (body: string): number => {
 const SP_RURAL_PATTERN = /^P\d{12}$/;
 const SP_COMPANY_PATTERN = /^\d{12}$/;
 
-const validateAC: IeValidator = (ie: string) => {
+/**
+ * The 13 digit rule AC and DF share, each under its own prefix.
+ * @param {string} ie - The sanitized registration.
+ * @param {string} prefix - The two digits the state's registrations start with.
+ * @returns {boolean} True when the registration follows the rule under that prefix.
+ */
+const validateAcDfRule = (ie: string, prefix: string): boolean => {
 	if (!checkLength(ie, 13)) return false;
-	if (!startsWith(ie, "01")) return false;
+	if (!ie.startsWith(prefix)) return false;
 
 	const body = ie.slice(0, 11);
 	const firstDig = calcDFDigit(body);
@@ -107,37 +113,19 @@ const validateAC: IeValidator = (ie: string) => {
 	);
 };
 
-const validateAL: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "24")) return false;
+const validateAC: IeValidator = (ie) => validateAcDfRule(ie, "01");
 
-	let weight = 9;
-	const position = 8;
-	let sum = 0;
-
-	for (let i = 0; i < position; i++) {
-		// Stryker disable next-line ArithmeticOperator: charCodeAt(i)+48 shifts each digit by 96; with weights 9..2 (summing to 44) the total shift is 96*44=4224=384*11, a multiple of 11, so the mod-11 result is unaffected.
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const product = sum * 10;
-	let digit = product - Math.floor(product / 11) * 11;
-	if (digit >= 10) {
-		digit = 0;
-	}
-
-	return digit === Number.parseInt(ie.charAt(position), 10);
-};
+// AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
+// which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
+// 1 and `11 - remainder` for every other one.
+const validateAL: IeValidator = (ie) => validateMod11Ie(ie, AL_PREFIXES);
 
 const validateAP: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "03")) return false;
+	if (!ie.startsWith("03")) return false;
 
 	const length = ie.length;
 	const position = length - 1;
-	let weight = length;
 	const body = ie.slice(0, position);
 	const bodyInt = Number.parseInt(body, 10);
 	let p = 0;
@@ -150,13 +138,7 @@ const validateAP: IeValidator = (ie: string) => {
 		d = 1;
 	}
 
-	let sum = p;
-	for (let i = 0; i < body.length; i++) {
-		// Stryker disable next-line ArithmeticOperator: charCodeAt(i)+48 shifts each digit by 96; with weights 9..2 (summing to 44) the total shift is 96*44=4224=384*11, a multiple of 11, so the mod-11 result is unaffected.
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
+	const sum = p + calcWeightedSum({ source: ie, length: body.length, startWeight: length });
 
 	let dig = 11 - (sum % 11);
 	if (dig === 10) {
@@ -169,8 +151,6 @@ const validateAP: IeValidator = (ie: string) => {
 
 	return dig === Number.parseInt(ie.charAt(position), 10);
 };
-
-const validateAM: IeValidator = (ie) => validateMod11Ie(ie);
 
 const validateBA: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [8, 9])) return false;
@@ -201,25 +181,7 @@ const validateBA: IeValidator = (ie: string) => {
 	);
 };
 
-const validateCE: IeValidator = (ie) => validateMod11Ie(ie);
-
-const validateDF: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 13)) return false;
-	if (!startsWith(ie, "07")) return false;
-
-	const length = ie.length;
-	const body = ie.slice(0, length - 2);
-
-	const firstDig = calcDFDigit(body);
-	const secondDig = calcDFDigit(body + firstDig);
-
-	return (
-		Number.parseInt(ie.charAt(length - 2), 10) === firstDig &&
-		Number.parseInt(ie.charAt(length - 1), 10) === secondDig
-	);
-};
-
-const validateES: IeValidator = (ie) => validateMod11Ie(ie);
+const validateDF: IeValidator = (ie) => validateAcDfRule(ie, "07");
 
 const validateGO: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
@@ -256,38 +218,18 @@ const validateMG: IeValidator = (ie: string) => {
 	const body = ie.slice(0, 11);
 	const bodyWithZero = `${body.slice(0, 3)}0${body.slice(3)}`;
 
-	let concat = "";
-	for (let i = 0; i < bodyWithZero.length; i++) {
-		const digit = bodyWithZero.charCodeAt(i) - 48;
-		const weight = i % 2 === 1 ? 2 : 1;
-		concat += String(digit * weight);
-	}
+	// The first digit doubles every second character from the right and adds the digits of each
+	// product, the modulus 10 rule `mod10` implements.
+	const firstDig = mod10(bodyWithZero);
 
-	let sum = 0;
-	for (let i = 0; i < concat.length; i++) {
-		sum += concat.charCodeAt(i) - 48;
-	}
-
-	const lastCharInt = sum % 10;
-	const firstDig = lastCharInt === 0 ? 0 : 10 - lastCharInt;
-
-	let weight = 3;
-	let sum2 = 0;
 	const bodyWithFirst = body + firstDig;
-	for (let i = 0; i < bodyWithFirst.length; i++) {
-		const digit = bodyWithFirst.charCodeAt(i) - 48;
-		sum2 += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 11;
-		}
-	}
-
-	const rest = sum2 % 11;
-	let secondDig = 11 - rest;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithFirst,
+		length: bodyWithFirst.length,
+		startWeight: 3,
+		wrapTo: 11,
+	});
+	const secondDig = calcMod11CheckDigit(secondSum);
 
 	return (
 		Number.parseInt(ie.charAt(11), 10) === firstDig &&
@@ -308,8 +250,6 @@ const validateMT: IeValidator = (ie: string) => {
 const validateMS: IeValidator = (ie) => validateMod11Ie(ie, MS_PREFIXES);
 
 const validatePA: IeValidator = (ie) => validateMod11Ie(ie, PA_PREFIXES);
-
-const validatePB: IeValidator = (ie) => validateMod11Ie(ie);
 
 const validatePE: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
@@ -335,8 +275,6 @@ const validatePE: IeValidator = (ie: string) => {
 		Number.parseInt(ie.charAt(8), 10) === secondDig
 	);
 };
-
-const validatePI: IeValidator = (ie) => validateMod11Ie(ie);
 
 const validatePR: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 10)) return false;
@@ -377,7 +315,7 @@ const validateRJ: IeValidator = (ie: string) => {
 
 const validateRN: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [9, 10])) return false;
-	if (!startsWith(ie, "20")) return false;
+	if (!ie.startsWith("20")) return false;
 
 	const length = ie.length;
 	const position = length - 1;
@@ -408,7 +346,7 @@ const validateRO: IeValidator = (ie: string) => {
 
 const validateRR: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "24")) return false;
+	if (!ie.startsWith("24")) return false;
 
 	let weight = 1;
 	let sum = 0;
@@ -434,10 +372,6 @@ const validateRS: IeValidator = (ie: string) => {
 
 	return Number.parseInt(ie.charAt(9), 10) === dig;
 };
-
-const validateSC: IeValidator = (ie) => validateMod11Ie(ie);
-
-const validateSE: IeValidator = (ie) => validateMod11Ie(ie);
 
 const calcSPDigit = (body: string, weights: readonly number[]): number => {
 	let sum = 0;
@@ -487,28 +421,28 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
 	AC: validateAC,
 	AL: validateAL,
 	AP: validateAP,
-	AM: validateAM,
+	AM: validateMod11Ie,
 	BA: validateBA,
-	CE: validateCE,
+	CE: validateMod11Ie,
 	DF: validateDF,
-	ES: validateES,
+	ES: validateMod11Ie,
 	GO: validateGO,
 	MA: validateMA,
 	MG: validateMG,
 	MT: validateMT,
 	MS: validateMS,
 	PA: validatePA,
-	PB: validatePB,
+	PB: validateMod11Ie,
 	PE: validatePE,
-	PI: validatePI,
+	PI: validateMod11Ie,
 	PR: validatePR,
 	RJ: validateRJ,
 	RN: validateRN,
 	RO: validateRO,
 	RR: validateRR,
 	RS: validateRS,
-	SC: validateSC,
-	SE: validateSE,
+	SC: validateMod11Ie,
+	SE: validateMod11Ie,
 	SP: validateSP,
 	TO: validateTO,
 } satisfies Record<StateCode, IeValidator>;

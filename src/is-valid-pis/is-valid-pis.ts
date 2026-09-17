@@ -1,7 +1,7 @@
 import { PIS_LENGTH, PIS_WEIGHTS } from "../_internals/constants/pis";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { RESERVED_NUMBERS } from "./constants";
 
 /**
  * Validates a Brazilian PIS (Programa de Integração Social) number.
@@ -38,7 +38,7 @@ export const isValidPis = (pis: string): boolean => {
 
 	if (digits.length !== PIS_LENGTH) return false;
 
-	if (RESERVED_NUMBERS.includes(digits)) return false;
+	if (isRepeatedDigits(digits)) return false;
 
 	const base = digits.slice(0, PIS_LENGTH - 1);
 	const checkDigit = digits.charCodeAt(PIS_LENGTH - 1) - 48;

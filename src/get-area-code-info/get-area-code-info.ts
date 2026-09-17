@@ -81,6 +81,8 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 
 	if (stateCode === undefined) return null;
 
+	// Built per call on purpose: a module level index would be a top level call no consumer
+	// bundler can prove pure, which pins the whole states table into every export's bundle.
 	const statesByCode: Record<string, State> = {};
 	for (const entry of DATA) statesByCode[entry.code] = entry;
 

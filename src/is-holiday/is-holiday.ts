@@ -1,5 +1,6 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { getHolidays } from "../get-holidays/get-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
@@ -89,9 +90,7 @@ export const isHoliday = (options?: IsHolidayParams): boolean => {
 
 	const { targetDate, stateCode } = options;
 
-	if (!(targetDate instanceof Date) || Number.isNaN(targetDate.getTime())) {
-		return false;
-	}
+	if (!isValidDate(targetDate)) return false;
 
 	if (stateCode !== undefined && typeof stateCode !== "string") {
 		return false;

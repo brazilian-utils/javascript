@@ -5,13 +5,25 @@ import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/tes
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";
-import { RESERVED_NUMBERS } from "./constants";
 import { isValidCpf } from "./is-valid-cpf";
+
+const REPEATED_DIGITS = [
+	"00000000000",
+	"11111111111",
+	"22222222222",
+	"33333333333",
+	"44444444444",
+	"55555555555",
+	"66666666666",
+	"77777777777",
+	"88888888888",
+	"99999999999",
+];
 
 describe("isValidCpf", () => {
 	describe("should return false", () => {
-		test("when it is on the RESERVED_NUMBERS", () => {
-			for (const cpf of RESERVED_NUMBERS) {
+		test("when every digit is the same", () => {
+			for (const cpf of REPEATED_DIGITS) {
 				expect(isValidCpf(cpf)).toBe(false);
 			}
 		});

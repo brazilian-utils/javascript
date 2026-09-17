@@ -31,6 +31,8 @@ export const calculateVoterIdFirstDigit = ({
 	sequentialNumber,
 	federativeUnion,
 }: CalculateVoterIdFirstDigitParams): number => {
+	// The weighted sum is written out rather than delegated to the shared `generateChecksum`: its
+	// sanitizer chain costs `isValidVoterId` and `generateVoterId` around 285 B of bundle each.
 	let sum = 0;
 
 	for (let i = 0; i < SEQUENTIAL_LENGTH; i++) {

@@ -6,7 +6,6 @@ import {
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH,
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 	SERVICE_PHONE_UTILITY_CODES,
-	SERVICE_PHONE_UTILITY_LENGTH,
 } from "../_internals/constants/service-phone";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
@@ -69,10 +68,7 @@ export const isValidServicePhone = (value: string): boolean => {
 		return ABBREVIATED_ROOTS.includes(digits.slice(0, SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH));
 	}
 
-	// Stryker disable next-line ConditionalExpression: UTILITY_CODES.includes(digits) only ever matches an exact 3 character code, so a digits value of any other length already correctly fails this check on its own
-	if (digits.length === SERVICE_PHONE_UTILITY_LENGTH) {
-		return UTILITY_CODES.includes(digits);
-	}
-
-	return false;
+	// Every public utility code is exactly 3 digits, so a value of any other length that reaches
+	// here matches none of them and is turned down by this very check.
+	return UTILITY_CODES.includes(digits);
 };

@@ -1,5 +1,6 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
+import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { getHolidays } from "../get-holidays/get-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
@@ -100,7 +101,7 @@ const WEEKEND_DAYS = new Set([0, 6]);
  * algorithm, and it never affects this function because Easter is always a Sunday.
  */
 export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolean => {
-	if (!(value instanceof Date) || Number.isNaN(value.getTime())) return false;
+	if (!isValidDate(value)) return false;
 
 	const stateCode = options?.stateCode;
 
