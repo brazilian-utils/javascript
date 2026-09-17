@@ -1430,6 +1430,7 @@ import { generateLicensePlate } from '@brazilian-utils/brazilian-utils';
 
 generateLicensePlate(); // 'ABC1D23' (Mercosul, the default)
 generateLicensePlate('LLLNNNN'); // 'ABC1234'
+generateLicensePlate('LLLNNLN'); // 'ABC1D23' (a format outside the two in circulation falls back to the default)
 ```
 
 A `format` string outside the two supported literals is not rejected: it is used verbatim, character by character, with `L` producing a letter and every other position a digit. So `generateLicensePlate('LLLNNLN')` returns a plate in the withdrawn motorcycle sequence, which `isValidLicensePlate` rejects; `generateLicensePlate('bogus')` returns five digits; and `generateLicensePlate('')` returns an empty string. Only a non-string falls back to the Mercosul default. This is the 2.3.0 behaviour, kept for the JavaScript callers the TypeScript type cannot reach.

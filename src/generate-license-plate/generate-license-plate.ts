@@ -34,13 +34,11 @@ const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
  * reads `L` as a letter and `N` as a numeral. The annexes are published in a PDF of their own,
  * cited below alongside the resolution's text.
  *
- * A `format` string outside the two supported literals is not rejected: it is used verbatim,
- * character by character, `L` producing a letter and every other position a digit, which is the
- * 2.3.0 behaviour and is kept for the JavaScript callers the type cannot reach. So
- * `generateLicensePlate("LLLNNLN")` returns a plate in the withdrawn motorcycle sequence, which
- * `isValidLicensePlate` rejects, `generateLicensePlate("bogus")` returns five digits and
- * `generateLicensePlate("")` returns an empty string. Only a non-string falls back to the
- * default. Pass one of the two literals to get a plate the library considers valid.
+ * A `format` outside the two supported literals falls back to the default, like every other
+ * generator of this package does with an option it does not know, so the result is always a plate
+ * `isValidLicensePlate` accepts. (2.3.0 used an unknown string verbatim, so
+ * `generateLicensePlate("LLLNNLN")` produced the withdrawn motorcycle sequence and
+ * `generateLicensePlate("bogus")` five digits; neither is a plate.)
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
@@ -48,7 +46,9 @@ const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
 export const generateLicensePlate = (
 	format: GenerateLicensePlateFormat = DEFAULT_FORMAT,
 ): string => {
-	const safeFormat = typeof format === "string" ? format : DEFAULT_FORMAT;
+	// Only the old sequence needs naming: the Mercosul one is the default, and anything else falls
+	// back to it, as every generator of this package does with an option it does not know.
+	const safeFormat = format === "LLLNNNN" ? format : DEFAULT_FORMAT;
 
 	let plate = "";
 

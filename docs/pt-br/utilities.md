@@ -1430,6 +1430,7 @@ import { generateLicensePlate } from '@brazilian-utils/brazilian-utils';
 
 generateLicensePlate(); // 'ABC1D23' (Mercosul, o padrão)
 generateLicensePlate('LLLNNNN'); // 'ABC1234'
+generateLicensePlate('LLLNNLN'); // 'ABC1D23' (um formato fora dos dois em circulação cai no padrão)
 ```
 
 Uma string `format` fora dos dois literais suportados não é rejeitada: ela é usada literalmente, caractere a caractere, com `L` produzindo uma letra e qualquer outra posição um dígito. Assim, `generateLicensePlate('LLLNNLN')` devolve uma placa na sequência de motocicleta que foi retirada, que o próprio `isValidLicensePlate` rejeita; `generateLicensePlate('bogus')` devolve cinco dígitos; e `generateLicensePlate('')` devolve uma string vazia. Apenas um valor que não seja string recai no padrão Mercosul. Esse é o comportamento da versão 2.3.0, mantido para as pessoas que chamam a função em JavaScript, onde o tipo do TypeScript não alcança.

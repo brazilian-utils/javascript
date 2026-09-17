@@ -36,6 +36,16 @@ describe("generateLicensePlate", () => {
 		expect(plate).toMatch(/^[A-Z]{3}\d[A-Z]\d{2}$/);
 	});
 
+	it("should fall back to the mercosul format for a format string the CONTRAN does not keep in circulation", () => {
+		for (const format of ["LLLNNLN", "bogus", "", "lllnlnn"]) {
+			// @ts-expect-error: intentionally invalid input
+			const plate = generateLicensePlate(format);
+
+			expect(plate).toMatch(/^[A-Z]{3}\d[A-Z]\d{2}$/);
+			expect(isValidLicensePlate(plate)).toBe(true);
+		}
+	});
+
 	it("should fall back to the mercosul format when the argument is not a string", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(generateLicensePlate(123)).toMatch(/^[A-Z]{3}\d[A-Z]\d{2}$/);
