@@ -82,8 +82,8 @@ const attemptFetch = async (
 	retries: number,
 	retryDelayMs: number,
 ): Promise<Response> => {
-	if (retries < 0) {
-		throw new RangeError("retries must be zero or greater");
+	if (!Number.isInteger(retries) || retries < 0) {
+		throw new RangeError("retries must be an integer of zero or greater");
 	}
 
 	let attempt = 0;
@@ -93,7 +93,7 @@ const attemptFetch = async (
 			// eslint-disable-next-line no-await-in-loop
 			return await fetch(input, init);
 		} catch (error) {
-			if (attempt === retries || !isRetryableFetchError(error)) {
+			if (attempt >= retries || !isRetryableFetchError(error)) {
 				throw error;
 			}
 		}

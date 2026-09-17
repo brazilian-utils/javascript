@@ -99,19 +99,25 @@ describe("fetchWithRetry", () => {
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("throws without ever attempting the fetch when retries is negative", async () => {
+	it("throws without ever attempting the fetch when retries is not an integer of zero or greater", async () => {
 		const fetchMock = vi.fn();
 		globalThis.fetch = fetchMock;
 
-		const rejection = await fetchWithRetry("https://example.com", { retries: -1 }).then(
-			() => {
-				throw new Error("expected the fetch to reject");
-			},
-			(error: unknown) => error,
-		);
+		for (const retries of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+			// eslint-disable-next-line no-await-in-loop
+			const rejection = await fetchWithRetry("https://example.com", { retries }).then(
+				() => {
+					throw new Error("expected the fetch to reject");
+				},
+				(error: unknown) => error,
+			);
 
-		expect(rejection).toBeInstanceOf(RangeError);
-		expect((rejection as RangeError).message).toBe("retries must be zero or greater");
+			expect(rejection).toBeInstanceOf(RangeError);
+			expect((rejection as RangeError).message).toBe(
+				"retries must be an integer of zero or greater",
+			);
+		}
+
 		expect(fetchMock).toHaveBeenCalledTimes(0);
 	});
 
@@ -128,16 +134,12 @@ describe("fetchWithRetry", () => {
 			"ETIMEDOUT",
 		];
 
-		const expectEachRetries = async ([code, ...rest]: string[]): Promise<void> => {
-			if (code === undefined) return;
-
+		for (const code of RETRYABLE_CODES) {
 			const error = Object.assign(new Error("boom"), { code });
 
+			// eslint-disable-next-line no-await-in-loop
 			await expectRetrySucceeds(mockFetchRejectingOnceWith(error));
-			await expectEachRetries(rest);
-		};
-
-		await expectEachRetries(RETRYABLE_CODES);
+		}
 	});
 
 	it("does not retry when the error code is unknown", async () => {
@@ -206,11 +208,11 @@ describe("fetchWithRetry", () => {
 
 		const start = Date.now();
 		await expect(
-			fetchWithRetry("https://example.com", { retries: 0, retryDelayMs: 200 }),
+			fetchWithRetry("https://example.com", { retries: 0, retryDelayMs: 5000 }),
 		).rejects.toThrow(error);
 		const elapsed = Date.now() - start;
 
-		expect(elapsed).toBeLessThan(100);
+		expect(elapsed).toBeLessThan(2500);
 	});
 
 	it("increases the wait delay linearly with each retry attempt", async () => {
