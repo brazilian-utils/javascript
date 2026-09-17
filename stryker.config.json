@@ -4,6 +4,7 @@
 	"vitest": {
 		"configFile": "vite.config.ts"
 	},
+	"tsconfigFile": "",
 	"mutate": [
 		"src/**/*.ts",
 		"!src/**/*.test.ts",

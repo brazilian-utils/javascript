@@ -215,7 +215,11 @@ pull request so the CI result is not a surprise.
   means a test is missing (add one, with a literal expectation) or the code has a branch that can
   never matter (simplify it). Only when a mutant is truly equivalent, use
   `// Stryker disable next-line <MutatorName>: <reason>` right above the line; that is the one
-  place an inline comment is accepted in this codebase.
+  place an inline comment is accepted in this codebase. The config sets `tsconfigFile` to an empty
+  string because Stryker's sandbox preprocessor rewrites the `tsconfig.json` it finds through
+  `ts.parseConfigFileTextToJson`, which TypeScript 7 no longer exposes; an empty value skips that
+  preprocessor, and the sandbox does not need the tsconfig since vitest transpiles the sources
+  itself (`stryker.config.json` is parsed as strict JSON, so the note cannot live in the file).
 
 ## Public API validation
 

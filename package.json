@@ -126,20 +126,26 @@
 		"@stryker-mutator/vitest-runner": "10.0.0",
 		"@vitest/browser-webdriverio": "4.1.11",
 		"@vitest/coverage-v8": "4.1.11",
-		"esbuild": "0.27.2",
-		"eslint-plugin-sonarjs": "^4.2.0",
-		"fast-check": "4.10.0",
-		"jscpd": "5.2.0",
-		"knip": "6.35.1",
+		"esbuild": "0.28.2",
+		"eslint-plugin-sonarjs": "^4.2.1",
+		"fast-check": "4.10.1",
+		"jscpd": "5.2.1",
+		"knip": "6.36.0",
 		"lockfile-lint": "5.0.1",
 		"publint": "0.3.24",
-		"typescript": "5.9.3",
-		"vite-plus": "0.3.0",
-		"webdriverio": "9.31.6"
+		"typescript": "7.0.2",
+		"vite-plus": "0.3.2",
+		"webdriverio": "9.31.9"
 	},
 	"overrides": {
 		"basic-ftp@5": "^5.3.1",
 		"brace-expansion@2": "^2.1.2",
+		"eslint-plugin-sonarjs": {
+			"typescript": "6.0.3",
+			"ts-api-utils": {
+				"typescript": "6.0.3"
+			}
+		},
 		"fast-xml-builder@1": "^1.1.7",
 		"ip-address@10": "^10.3.1",
 		"nanoid@3": "^3.3.16",
