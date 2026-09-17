@@ -130,8 +130,11 @@ export {
 	type LegalNatureCategory,
 	getLegalNature,
 } from "./get-legal-nature/get-legal-nature";
-export { getLegalNatures } from "./get-legal-natures/get-legal-natures";
-export { getLegalNaturesByCategory } from "./get-legal-natures-by-category/get-legal-natures-by-category";
+export { type GetLegalNaturesParams, getLegalNatures } from "./get-legal-natures/get-legal-natures";
+export {
+	type GetLegalNaturesByCategoryOptions,
+	getLegalNaturesByCategory,
+} from "./get-legal-natures-by-category/get-legal-natures-by-category";
 export { getMunicipalities } from "./get-municipalities/get-municipalities";
 export {
 	type GetMunicipalityByCodeParams,

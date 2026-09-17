@@ -1,6 +1,8 @@
 import * as fc from "fast-check";
 
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getLegalNature } from "../get-legal-nature/get-legal-nature";
+import { LEGACY_LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
 import { generateLegalNature } from "./generate-legal-nature";
 
@@ -17,10 +19,27 @@ describe("generateLegalNature", () => {
 		Math.random = () => 0.5;
 
 		try {
-			expect(generateLegalNature()).toBe("2216");
+			expect(generateLegalNature()).toBe("2194");
 		} finally {
 			Math.random = originalRandom;
 		}
+	});
+
+	it("should never draw a code a past CONCLA revision retired", () => {
+		const originalRandom = Math.random;
+		const drawn: string[] = [];
+
+		try {
+			for (let index = 0; index < 92; index++) {
+				Math.random = () => (index + 0.5) / 92;
+				drawn.push(generateLegalNature());
+			}
+		} finally {
+			Math.random = originalRandom;
+		}
+
+		expect(new Set(drawn).size).toBe(92);
+		expect(drawn.some((code) => Object.hasOwn(LEGACY_LEGAL_NATURE, code))).toBe(false);
 	});
 
 	describe("properties", () => {
@@ -34,6 +53,7 @@ describe("generateLegalNature", () => {
 
 						expect(code).toMatch(/^\d{4}$/);
 						expect(isValidLegalNature(code)).toBe(true);
+						expect(getLegalNature(code)?.legacy).toBe(false);
 					}
 				}),
 			);

@@ -1544,18 +1544,19 @@ formatLegalNature('62', { pad: true }); // 006-2 (padded to 4 digits first)
 
 ### isValidLegalNature
 
-Check if a legal nature code exists in the official list. The table follows IBGE/CONCLA's "Natureza Jurídica 2021": 92 official codes plus 8 legacy codes kept for backwards compatibility. Only the usual mask characters (hyphens, dots, whitespace) are tolerated around the 4 digits, so `'2062a'` is rejected instead of being read as `'2062'`.
+Check if a legal nature code exists in the official list. The table follows IBGE/CONCLA's "Natureza Jurídica 2021": the 92 codes in force plus the 8 a past revision of the table retired, kept because they still appear in records filed while they were in force. Use `getLegalNature` to tell the two apart: a retired code comes back with `legacy: true` and the `currentCode` it corresponds to today. Only the usual mask characters (hyphens, dots, whitespace) are tolerated around the 4 digits, so `'2062a'` is rejected instead of being read as `'2062'`.
 
 ```javascript
 import { isValidLegalNature } from '@brazilian-utils/brazilian-utils';
 
 isValidLegalNature('2062'); // true
+isValidLegalNature('2208'); // true (retired by a past revision, still accepted)
 isValidLegalNature('9999'); // false
 ```
 
 ### generateLegalNature
 
-Generate a random valid legal nature code. Uses `Math.random()` internally, so it is not cryptographically secure.
+Generate a random valid legal nature code. Only the 92 codes in force are drawn, never one of the 8 a past revision retired. Uses `Math.random()` internally, so it is not cryptographically secure.
 
 ```javascript
 import { generateLegalNature } from '@brazilian-utils/brazilian-utils';
@@ -1575,7 +1576,7 @@ parseLegalNature('206-2'); // '2062'
 
 ### getLegalNatures
 
-Get the legal nature map keyed by code.
+Get the legal nature map keyed by code. Only the 92 codes of the CONCLA 2021 table, the ones in force, are listed by default; pass `{ includeLegacy: true }` (`GetLegalNaturesParams`) to add the 8 a past revision of the table retired.
 
 ```javascript
 import { getLegalNatures } from '@brazilian-utils/brazilian-utils';
@@ -1583,11 +1584,14 @@ import { getLegalNatures } from '@brazilian-utils/brazilian-utils';
 const legalNatures = getLegalNatures();
 
 legalNatures['2062']; // 'Sociedade Empresária Limitada'
+Object.keys(legalNatures).length; // 92
+legalNatures['2208']; // undefined (retired by a past revision)
+getLegalNatures({ includeLegacy: true })['2208']; // 'Entidade Binacional Itaipu'
 ```
 
 ### getLegalNaturesByCategory
 
-Get every legal nature of a CONCLA category, the group given by the first digit of the code: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas and `5` Organizações Internacionais e Outras Instituições Extraterritoriais. The category is accepted as a string or as a number, the entries come back sorted by code, and an unknown category gives `[]`.
+Get every legal nature of a CONCLA category, the group given by the first digit of the code: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas and `5` Organizações Internacionais e Outras Instituições Extraterritoriais. The category is accepted as a string or as a number, the entries come back sorted by code, and an unknown category gives `[]`. Only the codes in force are listed by default; pass `{ includeLegacy: true }` (`GetLegalNaturesByCategoryOptions`) to add the retired codes of the category, in code order.
 
 ```javascript
 import { getLegalNaturesByCategory } from '@brazilian-utils/brazilian-utils';
@@ -1597,15 +1601,30 @@ getLegalNaturesByCategory('4')[0];
 //   code: '4014',
 //   description: 'Empresa Individual Imobiliária',
 //   category: { code: '4', description: 'Pessoas Físicas' },
+//   legacy: false,
 // }
 getLegalNaturesByCategory(4).length; // 6
-getLegalNaturesByCategory('2').length; // 33
+getLegalNaturesByCategory('2').length; // 30
+getLegalNaturesByCategory('2', { includeLegacy: true }).length; // 33
 getLegalNaturesByCategory('9'); // []
 ```
 
 ### getLegalNature
 
 Look a legal nature code up in the official IBGE/CONCLA table. The entry also carries the CONCLA category the code is listed under, taken from its first digit. No legal nature code starts with a zero, that first digit is the category (1 to 5), so nothing is ever padded here: a number and the string of the same digits are read identically.
+
+A code a past revision of the table retired is still looked up, because it keeps appearing in records filed while it was in force, and comes back with `legacy: true` and the `currentCode` it corresponds to today, per the CONCLA correspondence spreadsheets. The 92 codes in force have `legacy: false` and no `currentCode`.
+
+| Retired code | Description | Corresponds to |
+| --- | --- | --- |
+| `2076` | Sociedade Empresária em Nome Coletivo | `2070`, the code the 2003.1 revision renumbered it to, same denomination |
+| `2100` | Sociedade Mercantil de Capital e Indústria | none, marked "categoria extinta" by the 2003.1 x 2009 correspondence |
+| `2208` | Entidade Binacional Itaipu | `2275` Empresa Binacional |
+| `3042` | Organização Social | `3069` Fundação Privada; the 2014 revision later created `3301` Organização Social (OS), where an entity qualified as one is classified today |
+| `3050` | Organização da Sociedade Civil de Interesse Público (Oscip) | none, an Oscip is classified by the form it takes (`3999` or `3069`) |
+| `3093` | Unidade Executora (Programa Dinheiro Direto na Escola) | `3999` Associação Privada |
+| `3123` | Partido Político | none, the 2014 revision split it into `3255`, `3263` and `3271` |
+| `5002` | Organização Internacional e Outras Instituições Extraterritoriais | `5010` Organização Internacional, the code it was opened into alongside `5029` and `5037` |
 
 ```javascript
 import { getLegalNature } from '@brazilian-utils/brazilian-utils';
@@ -1615,7 +1634,17 @@ getLegalNature('2062');
 //   code: '2062',
 //   description: 'Sociedade Empresária Limitada',
 //   category: { code: '2', description: 'Entidades Empresariais' },
+//   legacy: false,
 // }
+getLegalNature('2208');
+// {
+//   code: '2208',
+//   description: 'Entidade Binacional Itaipu',
+//   category: { code: '2', description: 'Entidades Empresariais' },
+//   legacy: true,
+//   currentCode: '2275',
+// }
+getLegalNature('3123')?.currentCode; // null (retired without a successor)
 getLegalNature('206-2')?.code; // '2062'
 getLegalNature(206.2)?.category.description; // 'Entidades Empresariais'
 getLegalNature('0000'); // null
@@ -1654,6 +1683,7 @@ import { generateLicensePlate } from '@brazilian-utils/brazilian-utils';
 
 generateLicensePlate(); // 'ABC1D23' (Mercosul, the default)
 generateLicensePlate('LLLNNNN'); // 'ABC1234'
+generateLicensePlate('LLLNNLN'); // 'ABC1D23' (a format outside the two in circulation falls back to the default)
 ```
 
 A `format` string outside the two supported literals is not rejected: it is used verbatim, character by character, with `L` producing a letter and every other position a digit. So `generateLicensePlate('LLLNNLN')` returns a plate in the withdrawn motorcycle sequence, which `isValidLicensePlate` rejects; `generateLicensePlate('bogus')` returns five digits; and `generateLicensePlate('')` returns an empty string. Only a non-string falls back to the Mercosul default. This is the 2.3.0 behaviour, kept for the JavaScript callers the TypeScript type cannot reach.

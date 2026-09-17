@@ -1,11 +1,14 @@
-import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 /**
  * Generates a random valid Brazilian legal nature (natureza jurídica) code.
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @returns {string} One of the legal nature codes published by the CONCLA.
+ * Only the 92 codes of the Tabela de Natureza Jurídica 2021 are drawn: a code a past revision of
+ * the table retired stays valid for `isValidLegalNature`, but is never generated.
+ *
+ * @returns {string} One of the legal nature codes in force published by the CONCLA.
  *
  * @example
  * ```typescript
@@ -20,7 +23,9 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const generateLegalNature = (): string => {
-	const legalNatureCodes = Object.keys(LEGAL_NATURE);
+	const legalNatureCodes = Object.keys(LEGAL_NATURE).filter(
+		(code) => !Object.hasOwn(LEGACY_LEGAL_NATURE, code),
+	);
 
 	return legalNatureCodes[Math.floor(Math.random() * legalNatureCodes.length)];
 };

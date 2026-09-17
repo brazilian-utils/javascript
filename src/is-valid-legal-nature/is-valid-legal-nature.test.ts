@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { anyValue, maskedValues } from "../_internals/test/arbitraries";
 import { expectAccepted, expectAlwaysReturnsType } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { LEGAL_NATURE } from "./constants";
+import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "./constants";
 import { isValidLegalNature } from "./is-valid-legal-nature";
 
 describe("isValidLegalNature", () => {
@@ -29,6 +29,13 @@ describe("isValidLegalNature", () => {
 		expect(isValidLegalNature("5002")).toBe(true);
 		expect(isValidLegalNature("3123")).toBe(true);
 		expect(isValidLegalNature("2076")).toBe(true);
+	});
+
+	it("should accept every legacy code, the ones getLegalNatures leaves out by default", () => {
+		for (const code of Object.keys(LEGACY_LEGAL_NATURE)) {
+			expect(isValidLegalNature(code)).toBe(true);
+			expect(isValidLegalNature(`${code.slice(0, 3)}-${code.slice(3)}`)).toBe(true);
+		}
 	});
 
 	it("should reject codes with a length different from 4", () => {

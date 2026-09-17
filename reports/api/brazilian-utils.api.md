@@ -513,10 +513,20 @@ export const getIbanInfo: (value: string) => IbanInfo | null;
 export const getLegalNature: (value: string | number) => LegalNature | null;
 
 // @public
-export const getLegalNatures: () => Record<string, string>;
+export const getLegalNatures: (params?: GetLegalNaturesParams) => Record<string, string>;
 
 // @public
-export const getLegalNaturesByCategory: (category: string | number) => LegalNature[];
+export const getLegalNaturesByCategory: (category: string | number, options?: GetLegalNaturesByCategoryOptions) => LegalNature[];
+
+// @public
+export type GetLegalNaturesByCategoryOptions = {
+    includeLegacy?: boolean;
+};
+
+// @public
+export type GetLegalNaturesParams = {
+    includeLegacy?: boolean;
+};
 
 // @public
 export const getMunicipalities: (stateCode?: StateCode) => Municipality[];
@@ -805,7 +815,12 @@ export type LegalNature = {
     code: string;
     description: string;
     category: LegalNatureCategory;
-};
+} & ({
+    legacy: false;
+} | {
+    legacy: true;
+    currentCode: string | null;
+});
 
 // @public
 export type LegalNatureCategory = {

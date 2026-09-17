@@ -10,7 +10,7 @@ export type LegalNatureCategory = {
  * The five categories of the Tabela de Natureza Jurídica 2021 (IBGE/CONCLA), indexed by the
  * first digit of the four digit code: the table groups its codes under these headings, so
  * "2062" (Sociedade Empresária Limitada) belongs to "2" (Entidades Empresariais). The legacy
- * codes kept in `LEGAL_NATURE` for 2.3.0 compatibility follow the same rule.
+ * codes a past revision of the table retired, which `LEGAL_NATURE` keeps, follow the same rule.
  *
  * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser; the detailed structure PDF next to it is served

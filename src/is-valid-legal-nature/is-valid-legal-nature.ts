@@ -7,6 +7,11 @@ import { LEGAL_NATURE, MASK_REGEX } from "./constants";
  * digits. Any other character makes the value invalid, so `"2062a"` is rejected instead of
  * being read as `"2062"`.
  *
+ * The 8 codes a past revision of the CONCLA table retired are accepted alongside the 92 in force,
+ * because they still appear in records filed while they were in force. Use `getLegalNature` to
+ * tell the two apart: a retired code comes back with `legacy: true` and the `currentCode` it
+ * corresponds to today.
+ *
  * @param {string} code - The legal nature code to be validated, with or without formatting.
  * @returns {boolean} True when the code is a known 4 digit legal nature, false otherwise.
  *
@@ -14,6 +19,7 @@ import { LEGAL_NATURE, MASK_REGEX } from "./constants";
  * ```typescript
  * isValidLegalNature("2062"); // true
  * isValidLegalNature("206-2"); // true
+ * isValidLegalNature("2208"); // true (retired by a past revision, still accepted)
  * isValidLegalNature("2062a"); // false
  * isValidLegalNature("0000"); // false
  * ```

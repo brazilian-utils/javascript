@@ -1,6 +1,18 @@
 import { LEGAL_NATURE_CATEGORIES } from "../_internals/constants/legal-nature-categories";
-import { type LegalNature } from "../get-legal-nature/get-legal-nature";
-import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { buildLegalNature, type LegalNature } from "../get-legal-nature/get-legal-nature";
+import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+
+/**
+ * The options `getLegalNaturesByCategory` accepts, saying whether the legacy codes of the category
+ * are listed too.
+ */
+export type GetLegalNaturesByCategoryOptions = {
+	/**
+	 * Whether the codes of the category that a past revision of the CONCLA table retired are listed
+	 * alongside the ones in force (default: `false`).
+	 */
+	includeLegacy?: boolean;
+};
 
 /**
  * Retrieves every Brazilian legal nature (natureza jurídica) of a CONCLA category.
@@ -10,12 +22,15 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
  * 4 Pessoas Físicas and 5 Organizações Internacionais e Outras Instituições Extraterritoriais.
  * It is accepted as a string or as a number, so `"2"` and `2` return the same list.
  *
- * The legacy codes `LEGAL_NATURE` keeps for 2.3.0 compatibility (2076, 2100, 2208, 3042, 3050,
- * 3093, 3123 and 5002) are listed under the category of their first digit as well. The result
- * is in ascending code order, since the table is keyed by the codes themselves, and is a fresh
- * array of fresh entries on every call.
+ * Only the codes in force are listed by default. Pass `{ includeLegacy: true }` to add the ones a
+ * past revision of the table retired (2076, 2100 and 2208 in category 2, 3042, 3050, 3093 and 3123
+ * in category 3, 5002 in category 5), which come back with `legacy: true` and the `currentCode`
+ * they correspond to today. The result is in ascending code order, since the table is keyed by the
+ * codes themselves, and is a fresh array of fresh entries on every call.
  *
  * @param {string|number} category - The category code, `"1"` through `"5"` or 1 through 5.
+ * @param {GetLegalNaturesByCategoryOptions} [options] - Optional listing options.
+ * @param {boolean} [options.includeLegacy] - Whether to add the retired codes. Defaults to `false`.
  * @returns {LegalNature[]} The legal natures of the category, sorted by code, or an empty array
  * when the category is unknown or the input is invalid.
  *
@@ -33,26 +48,32 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
  * //   code: "4014",
  * //   description: "Empresa Individual Imobiliária",
  * //   category: { code: "4", description: "Pessoas Físicas" },
+ * //   legacy: false,
  * // }
  * getLegalNaturesByCategory(4).length; // 6
- * getLegalNaturesByCategory("2").length; // 33
+ * getLegalNaturesByCategory("2").length; // 30
+ * getLegalNaturesByCategory("2", { includeLegacy: true }).length; // 33
  * getLegalNaturesByCategory("9"); // []
  * ```
  */
-export const getLegalNaturesByCategory = (category: string | number): LegalNature[] => {
+export const getLegalNaturesByCategory = (
+	category: string | number,
+	options?: GetLegalNaturesByCategoryOptions,
+): LegalNature[] => {
 	if (typeof category !== "string" && typeof category !== "number") return [];
 
 	const categoryCode = String(category);
 
 	if (!Object.hasOwn(LEGAL_NATURE_CATEGORIES, categoryCode)) return [];
 
-	const entry = LEGAL_NATURE_CATEGORIES[categoryCode];
+	const includeLegacy = Boolean(options?.includeLegacy);
 	const legalNatures: LegalNature[] = [];
 
 	for (const [code, description] of Object.entries(LEGAL_NATURE)) {
-		if (code.startsWith(categoryCode)) {
-			legalNatures.push({ code, description, category: { ...entry } });
-		}
+		if (!code.startsWith(categoryCode)) continue;
+		if (!includeLegacy && Object.hasOwn(LEGACY_LEGAL_NATURE, code)) continue;
+
+		legalNatures.push(buildLegalNature(code, description));
 	}
 
 	return legalNatures;

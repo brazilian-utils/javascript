@@ -46,6 +46,8 @@ import {
 	type GetCepInfoByAddressParams,
 	type GetHolidaysOptions,
 	type GetHolidaysParams,
+	type GetLegalNaturesByCategoryOptions,
+	type GetLegalNaturesParams,
 	type GetMunicipalityByCodeOptions,
 	type GetMunicipalityByCodeParams,
 	type GetMunicipalityByNameOptions,
@@ -321,6 +323,8 @@ describe("Public API", () => {
 			GetCepInfoByAddressParams: GetCepInfoByAddressParams;
 			GetHolidaysOptions: GetHolidaysOptions;
 			GetHolidaysParams: GetHolidaysParams;
+			GetLegalNaturesByCategoryOptions: GetLegalNaturesByCategoryOptions;
+			GetLegalNaturesParams: GetLegalNaturesParams;
 			GetMunicipalityByCodeOptions: GetMunicipalityByCodeOptions;
 			GetMunicipalityByCodeParams: GetMunicipalityByCodeParams;
 			GetMunicipalityByNameOptions: GetMunicipalityByNameOptions;

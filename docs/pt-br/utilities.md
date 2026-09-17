@@ -1291,18 +1291,19 @@ formatLegalNature('62', { pad: true }); // 006-2 (completado até 4 dígitos ant
 
 ## isValidLegalNature
 
-Valida se um código de natureza jurídica existe na lista oficial. A tabela segue a "Natureza Jurídica 2021" do IBGE/CONCLA: 92 códigos oficiais mais 8 códigos legados mantidos por compatibilidade. Somente os caracteres de máscara usuais (hífens, pontos, espaços) são tolerados ao redor dos 4 dígitos, então `'2062a'` é rejeitado em vez de ser lido como `'2062'`.
+Valida se um código de natureza jurídica existe na lista oficial. A tabela segue a "Natureza Jurídica 2021" do IBGE/CONCLA: os 92 códigos em vigor mais os 8 que uma revisão anterior da tabela extinguiu, mantidos porque continuam aparecendo em registros feitos enquanto valiam. Use `getLegalNature` para distinguir os dois: um código extinto volta com `legacy: true` e o `currentCode` a que corresponde hoje. Somente os caracteres de máscara usuais (hífens, pontos, espaços) são tolerados ao redor dos 4 dígitos, então `'2062a'` é rejeitado em vez de ser lido como `'2062'`.
 
 ```javascript
 import { isValidLegalNature } from '@brazilian-utils/brazilian-utils';
 
 isValidLegalNature('2062'); // true
+isValidLegalNature('2208'); // true (extinto por uma revisão anterior, ainda aceito)
 isValidLegalNature('9999'); // false
 ```
 
 ## generateLegalNature
 
-Gera um código de natureza jurídica válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro.
+Gera um código de natureza jurídica válido aleatório. Apenas os 92 códigos em vigor são sorteados, nunca um dos 8 que uma revisão anterior extinguiu. Usa `Math.random()` internamente, então não é criptograficamente seguro.
 
 ```javascript
 import { generateLegalNature } from '@brazilian-utils/brazilian-utils';
@@ -1322,7 +1323,7 @@ parseLegalNature('206-2'); // '2062'
 
 ## getLegalNatures
 
-Retorna o mapa de naturezas jurídicas indexado pelo código.
+Retorna o mapa de naturezas jurídicas indexado pelo código. Por padrão apenas os 92 códigos da tabela CONCLA 2021, os em vigor, são listados; passe `{ includeLegacy: true }` (`GetLegalNaturesParams`) para somar os 8 que uma revisão anterior da tabela extinguiu.
 
 ```javascript
 import { getLegalNatures } from '@brazilian-utils/brazilian-utils';
@@ -1330,11 +1331,14 @@ import { getLegalNatures } from '@brazilian-utils/brazilian-utils';
 const legalNatures = getLegalNatures();
 
 legalNatures['2062']; // 'Sociedade Empresária Limitada'
+Object.keys(legalNatures).length; // 92
+legalNatures['2208']; // undefined (extinto por uma revisão anterior)
+getLegalNatures({ includeLegacy: true })['2208']; // 'Entidade Binacional Itaipu'
 ```
 
 ## getLegalNaturesByCategory
 
-Retorna todas as naturezas jurídicas de uma categoria do CONCLA, o grupo dado pelo primeiro dígito do código: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas e `5` Organizações Internacionais e Outras Instituições Extraterritoriais. A categoria é aceita como string ou como número, as entradas voltam ordenadas por código e uma categoria desconhecida devolve `[]`.
+Retorna todas as naturezas jurídicas de uma categoria do CONCLA, o grupo dado pelo primeiro dígito do código: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas e `5` Organizações Internacionais e Outras Instituições Extraterritoriais. A categoria é aceita como string ou como número, as entradas voltam ordenadas por código e uma categoria desconhecida devolve `[]`. Por padrão apenas os códigos em vigor são listados; passe `{ includeLegacy: true }` (`GetLegalNaturesByCategoryOptions`) para somar os códigos extintos da categoria, na ordem dos códigos.
 
 ```javascript
 import { getLegalNaturesByCategory } from '@brazilian-utils/brazilian-utils';
@@ -1344,15 +1348,30 @@ getLegalNaturesByCategory('4')[0];
 //   code: '4014',
 //   description: 'Empresa Individual Imobiliária',
 //   category: { code: '4', description: 'Pessoas Físicas' },
+//   legacy: false,
 // }
 getLegalNaturesByCategory(4).length; // 6
-getLegalNaturesByCategory('2').length; // 33
+getLegalNaturesByCategory('2').length; // 30
+getLegalNaturesByCategory('2', { includeLegacy: true }).length; // 33
 getLegalNaturesByCategory('9'); // []
 ```
 
 ## getLegalNature
 
 Busca um código de natureza jurídica na tabela oficial do IBGE/CONCLA. A entrada também traz a categoria do CONCLA em que o código está listado, dada pelo seu primeiro dígito. Nenhum código de natureza jurídica começa com zero, esse primeiro dígito é a categoria (1 a 5), então aqui nada é completado: um número e a string dos mesmos dígitos são lidos de forma idêntica.
+
+Um código que uma revisão anterior da tabela extinguiu continua sendo encontrado, porque segue aparecendo em registros feitos enquanto valia, e volta com `legacy: true` e o `currentCode` a que corresponde hoje, conforme as planilhas de correspondência do CONCLA. Os 92 códigos em vigor têm `legacy: false` e nenhum `currentCode`.
+
+| Código extinto | Descrição | Corresponde a |
+| --- | --- | --- |
+| `2076` | Sociedade Empresária em Nome Coletivo | `2070`, o código para o qual a revisão 2003.1 o renumerou, mesma denominação |
+| `2100` | Sociedade Mercantil de Capital e Indústria | nenhum, marcado como "categoria extinta" na correspondência 2003.1 x 2009 |
+| `2208` | Entidade Binacional Itaipu | `2275` Empresa Binacional |
+| `3042` | Organização Social | `3069` Fundação Privada; a revisão de 2014 criou depois o `3301` Organização Social (OS), onde uma entidade assim qualificada é classificada hoje |
+| `3050` | Organização da Sociedade Civil de Interesse Público (Oscip) | nenhum, uma Oscip é classificada pela forma que assume (`3999` ou `3069`) |
+| `3093` | Unidade Executora (Programa Dinheiro Direto na Escola) | `3999` Associação Privada |
+| `3123` | Partido Político | nenhum, a revisão de 2014 o desdobrou em `3255`, `3263` e `3271` |
+| `5002` | Organização Internacional e Outras Instituições Extraterritoriais | `5010` Organização Internacional, o código em que foi aberto junto com `5029` e `5037` |
 
 ```javascript
 import { getLegalNature } from '@brazilian-utils/brazilian-utils';
@@ -1362,7 +1381,17 @@ getLegalNature('2062');
 //   code: '2062',
 //   description: 'Sociedade Empresária Limitada',
 //   category: { code: '2', description: 'Entidades Empresariais' },
+//   legacy: false,
 // }
+getLegalNature('2208');
+// {
+//   code: '2208',
+//   description: 'Entidade Binacional Itaipu',
+//   category: { code: '2', description: 'Entidades Empresariais' },
+//   legacy: true,
+//   currentCode: '2275',
+// }
+getLegalNature('3123')?.currentCode; // null (extinto sem sucessor)
 getLegalNature('206-2')?.code; // '2062'
 getLegalNature(206.2)?.category.description; // 'Entidades Empresariais'
 getLegalNature('0000'); // null
