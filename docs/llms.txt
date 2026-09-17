@@ -10,7 +10,7 @@ Install with `npm install --save @brazilian-utils/brazilian-utils` (also availab
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 ```
 
-Every util is also available as its own subpath for lazy-loading/code-splitting, `@brazilian-utils/brazilian-utils/<kebab-name>` (kebab-case of the function name, e.g. `isValidCpf` maps to `is-valid-cpf`) - most useful for the utils that embed an official dataset (`getMunicipalities`, `getMunicipalityByCode`, `getMunicipality`, `getCities`, `isValidNcm`, `isValidCbo`, `getCbo`, `isValidCnae`, `getCnae`, `isValidCfop`, `getCfop`, `getBanks` and `getBankByCode`):
+Every util is also available as its own subpath for lazy-loading/code-splitting, `@brazilian-utils/brazilian-utils/<kebab-name>` (kebab-case of the function name, e.g. `isValidCpf` maps to `is-valid-cpf`) - most useful for the utils that embed an official dataset (`getMunicipalities`, `getMunicipalityByCode`, `getMunicipality`, `getCities`, `isValidNcm`, `isValidCbo`, `getCbo`, `isValidCnae`, `getCnae`, `isValidCfop`, `getCfop`, `getBanks`, `getBankByCode` and `getBankByIspb`):
 
 ```javascript
 const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities');

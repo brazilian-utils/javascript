@@ -71,11 +71,11 @@ A handful of utils are the exception: each embeds an official dataset, so it wei
 | --- | --- | --- | --- |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
 | `getCities` | 5571 IBGE municipality names | 154.2 KB | 49.8 KB |
-| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.1 KB | 24.6 KB |
+| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
 | `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
-| `getBanks` · `getBankByCode` | Banco Central STR participants (COMPE + ISPB) | 41.0 - 41.3 KB | 10.3 - 10.4 KB |
+| `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 41.0 - 41.3 KB | 10.3 - 10.4 KB |
 
 Importing any of them from the root, even alongside a single small util, pulls that whole dataset into your main bundle, because this package ships as a single ESM module: a dynamic `import()` of the root (`await import('@brazilian-utils/brazilian-utils')`) still resolves to that same one file, so it can't be split out on its own. A bundler doing code-splitting needs a separate module to split *into*.
 

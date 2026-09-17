@@ -636,7 +636,7 @@ isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
 
 ## isValidBankAccount
 
-Verifica se uma conta bancária brasileira é válida. O `bankCode` precisa estar na lista de participantes do STR publicada pelo Banco Central do Brasil (o mesmo dataset usado por `getBankByCode`), então um código não atribuído como `'999'` é sempre inválido. A partir daí o banco é validado de uma de três formas: pelo algoritmo de dígito verificador publicado, apenas pela estrutura (o banco existe e a agência/conta respeitam a quantidade de dígitos documentada, para bancos que não publicam regra de dígito) ou pela verificação genérica mod10/mod11, que continua sendo o fallback para os demais bancos da lista.
+Verifica se uma conta bancária brasileira é válida. O `bankCode` precisa estar na lista de participantes do STR publicada pelo Banco Central do Brasil (o mesmo dataset usado por `getBankByCode`), então um código não atribuído como `'999'` é sempre inválido. A partir daí o banco é validado de uma de três formas: pelo algoritmo de dígito verificador publicado, apenas pela estrutura (o banco existe e a agência/conta respeitam a quantidade de dígitos documentada, para bancos que não publicam regra de dígito) ou pela verificação genérica mod10/mod11, que continua sendo o fallback para os demais bancos da lista. Os 29 códigos que a lista de participantes deixou de publicar também são aceitos, sob essa mesma verificação genérica, porque uma conta deles continua aparecendo em documentos preenchidos enquanto a instituição tinha o código; nenhum deles publica regra de dígito verificador própria, e `getBankByCode` os marca com `legacy: true`.
 
 Bancos validados pelo algoritmo de dígito verificador publicado:
 
@@ -1104,7 +1104,7 @@ getCities('SP');
 // ]
 ```
 
-`getCities` embute os nomes dos 5571 municípios do IBGE (~154,2 KB minificado, ~49,8 KB com gzip) e é uma das poucas exceções pesadas neste pacote, que é tree-shakeable no restante. Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-cities` em vez do import da raiz.
+`getCities` embute os nomes dos 5571 municípios do IBGE (~154,2 KB minificado, ~49,8 KB com gzip) e é uma das poucas exceções pesadas neste pacote, que é tree-shakeable no restante. Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-cities` em vez do import da raiz.
 
 ## getHolidays
 
@@ -1440,7 +1440,7 @@ generateLicensePlate('LLLNNNN'); // 'ABC1234'
 generateLicensePlate('LLLNNLN'); // 'ABC1D23' (um formato fora dos dois em circulação cai no padrão)
 ```
 
-Uma string `format` fora dos dois literais suportados não é rejeitada: ela é usada literalmente, caractere a caractere, com `L` produzindo uma letra e qualquer outra posição um dígito. Assim, `generateLicensePlate('LLLNNLN')` devolve uma placa na sequência de motocicleta que foi retirada, que o próprio `isValidLicensePlate` rejeita; `generateLicensePlate('bogus')` devolve cinco dígitos; e `generateLicensePlate('')` devolve uma string vazia. Apenas um valor que não seja string recai no padrão Mercosul. Esse é o comportamento da versão 2.3.0, mantido para as pessoas que chamam a função em JavaScript, onde o tipo do TypeScript não alcança.
+Um `format` fora dos dois literais suportados recai no padrão Mercosul, como todo gerador deste pacote faz com uma opção que não conhece, então o resultado é sempre uma placa que `isValidLicensePlate` aceita. Essa sequência padrão é `LLLNLNN`, da Resolução CONTRAN nº 969/2022, Anexo I item 1.2, a única sequência que a resolução define para todo veículo, motocicletas incluídas. (A versão 2.3.0 usava uma string desconhecida literalmente, então `generateLicensePlate('LLLNNLN')` produzia a sequência de motocicleta que foi retirada e `generateLicensePlate('bogus')`, cinco dígitos; nenhuma das duas é uma placa.)
 
 ## getFormatLicensePlate
 
@@ -1568,7 +1568,7 @@ getMunicipalities('SP');
 getMunicipalities('ZZ'); // []
 ```
 
-`getMunicipalities` embute todos os 5571 municípios do IBGE e seus códigos, então carrega o mesmo custo de tamanho de pacote que `getCities`. Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-municipalities` em vez do import da raiz.
+`getMunicipalities` embute todos os 5571 municípios do IBGE e seus códigos, então carrega o mesmo custo de tamanho de pacote que `getCities`. Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para saber como carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-municipalities` em vez do import da raiz.
 
 ## getMunicipalityByCode
 

@@ -77,5 +77,5 @@ body:
       options:
         - label: I searched existing issues and this hasn't been reported yet.
           required: true
-        - label: I'm using a version listed in [SECURITY.md](../../SECURITY.md#supported-versions) as supported.
+        - label: I'm using a version listed in [SECURITY.md](https://github.com/brazilian-utils/javascript/blob/main/SECURITY.md#supported-versions) as supported.
           required: false

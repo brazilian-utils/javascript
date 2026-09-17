@@ -1440,7 +1440,7 @@ generateLicensePlate('LLLNNNN'); // 'ABC1234'
 generateLicensePlate('LLLNNLN'); // 'ABC1D23' (a format outside the two in circulation falls back to the default)
 ```
 
-A `format` string outside the two supported literals is not rejected: it is used verbatim, character by character, with `L` producing a letter and every other position a digit. So `generateLicensePlate('LLLNNLN')` returns a plate in the withdrawn motorcycle sequence, which `isValidLicensePlate` rejects; `generateLicensePlate('bogus')` returns five digits; and `generateLicensePlate('')` returns an empty string. Only a non-string falls back to the Mercosul default. This is the 2.3.0 behaviour, kept for the JavaScript callers the TypeScript type cannot reach.
+A `format` outside the two supported literals falls back to the Mercosul default, the way every other generator in this package treats an option it does not know, so the result is always a plate `isValidLicensePlate` accepts. That default sequence is `LLLNLNN`, from Resolução CONTRAN nº 969/2022, Anexo I item 1.2, the single sequence the resolution defines for every vehicle, motorcycles included. (2.3.0 used an unknown string verbatim, so `generateLicensePlate('LLLNNLN')` produced the withdrawn motorcycle sequence and `generateLicensePlate('bogus')` five digits; neither is a plate.)
 
 ## getFormatLicensePlate
 
