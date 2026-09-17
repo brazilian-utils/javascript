@@ -89,17 +89,23 @@ function deprecationSentence(paragraph: string): string {
 	return firstSentence(paragraph.slice(markerIndex).replaceAll("**", ""));
 }
 
+const UTIL_HEADING_PATTERN = /^#{2,3} ([a-z][A-Za-z0-9]*)\n/;
+
 /**
- * Parses every `## <fn>` section of `utilities.md` into name/slug/description.
+ * Parses every function section of `utilities.md` into name/slug/description. A function section
+ * starts with a `## <fn>` or `### <fn>` heading whose text is a bare identifier; the `##` family
+ * headings that group most of them ("CPF", "Pix", ...) are skipped.
  * @param {string} utilitiesMd - The full contents of `utilities.md`.
- * @returns {UtilSection[]} One entry per `## <fn>` section, in document order.
+ * @returns {UtilSection[]} One entry per function section, in document order.
  */
 function parseUtilities(utilitiesMd: string): UtilSection[] {
-	const sections = utilitiesMd.split(/^## /m).slice(1);
+	const sections = utilitiesMd
+		.split(/^(?=#{2,3} )/m)
+		.filter((section) => UTIL_HEADING_PATTERN.test(section));
 
 	return sections.map((section) => {
 		const newlineIndex = section.indexOf("\n");
-		const name = section.slice(0, newlineIndex).trim();
+		const name = section.slice(0, newlineIndex).replace(/^#+ /, "").trim();
 		const body = section.slice(newlineIndex + 1);
 		const [firstParagraphRaw = ""] = body.split(/\n\s*\n/);
 		const firstParagraph = firstParagraphRaw.trim();
