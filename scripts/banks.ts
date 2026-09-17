@@ -244,6 +244,21 @@ const main = async (): Promise<void> => {
 		uniqueBanks.set(bank.code, bank);
 	}
 
+	const reappeared = LEGACY_BANKS.filter((bank) => uniqueBanks.has(bank.code));
+
+	// Only the official list is taken as proof that a code is back: BrasilAPI keeps publishing
+	// institutions Bacen has already dropped, so on that fallback a retired code stays legacy and
+	// its curated row wins over the live one.
+	if (reappeared.length > 0 && source === BACEN_CSV_URL) {
+		throw new Error(
+			`The Bacen STR participants list publishes ${reappeared.map((bank) => bank.code).join(", ")} again: remove the code from LEGACY_BANKS in scripts/banks.ts so it ships as a current one`,
+		);
+	}
+
+	for (const bank of reappeared) {
+		uniqueBanks.delete(bank.code);
+	}
+
 	const sorted = [...uniqueBanks.values()].sort((bankA, bankB) =>
 		bankA.code > bankB.code ? 1 : -1,
 	);
@@ -252,17 +267,7 @@ const main = async (): Promise<void> => {
 		throw new Error("Refusing to write an empty bank dataset");
 	}
 
-	const reappeared = LEGACY_BANKS.filter((bank) => uniqueBanks.has(bank.code));
-
-	// Only the official list is taken as proof that a code is back: BrasilAPI keeps publishing
-	// institutions Bacen has already dropped, and on that fallback the live row simply wins.
-	if (reappeared.length > 0 && source === BACEN_CSV_URL) {
-		throw new Error(
-			`The Bacen STR participants list publishes ${reappeared.map((bank) => bank.code).join(", ")} again: remove the code from LEGACY_BANKS in scripts/banks.ts so it ships as a current one`,
-		);
-	}
-
-	const legacyRows = LEGACY_BANKS.filter((bank) => !uniqueBanks.has(bank.code));
+	const legacyRows = LEGACY_BANKS;
 
 	const rows = [...sorted, ...legacyRows].sort((bankA, bankB) =>
 		bankA.code > bankB.code ? 1 : -1,
