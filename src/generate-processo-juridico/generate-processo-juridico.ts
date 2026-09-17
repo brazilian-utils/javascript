@@ -2,13 +2,21 @@ import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-ju
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 
-/** Options of `generateProcessoJuridico`. */
-export type GenerateProcessoJuridicoOptions = {
+/** The parameters of `generateProcessoJuridico`. */
+export type GenerateProcessoJuridicoParams = {
 	/** Filing year, from the current year to 9999 (default: the current year). */
 	year?: number;
 	/** Court segment (J), from 1 to 9 (default: random). */
 	court?: number;
 };
+
+/**
+ * The parameters of `generateProcessoJuridico`, the 2.3.0 name of
+ * `GenerateProcessoJuridicoParams`.
+ *
+ * @deprecated Use `GenerateProcessoJuridicoParams` instead.
+ */
+export type GenerateProcessoJuridicoOptions = GenerateProcessoJuridicoParams;
 
 const MAX_YEAR = 9999;
 const TRIBUNAL_LENGTH = 2;
@@ -36,7 +44,7 @@ const calculateCheckDigits = (base: string): string => {
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @param {GenerateProcessoJuridicoOptions} [options] - Optional generation options.
+ * @param {GenerateProcessoJuridicoParams} [options] - Optional generation options.
  * @param {number} options.year - The `AAAA` field. Must be an integer between the
  * current year and 9999. Defaults to the current year.
  * @param {number} options.court - The `J` field (segmento do Judiciário). Must be an
@@ -57,7 +65,7 @@ const calculateCheckDigits = (base: string): string => {
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */
 export const generateProcessoJuridico = (
-	options: GenerateProcessoJuridicoOptions = {},
+	options: GenerateProcessoJuridicoParams = {},
 ): string | null => {
 	if (isNullish(options) || typeof options !== "object") return null;
 

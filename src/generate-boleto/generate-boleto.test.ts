@@ -7,7 +7,7 @@ import { formatBoleto } from "../format-boleto/format-boleto";
 import { getBoletoInfo } from "../get-boleto-info/get-boleto-info";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
 import { parseBoleto } from "../parse-boleto/parse-boleto";
-import { type GenerateBoletoOptions, generateBoleto } from "./generate-boleto";
+import { type GenerateBoletoParams, generateBoleto } from "./generate-boleto";
 
 const drawArrecadacaoSegment = (): number =>
 	getBoletoInfo(generateBoleto({ type: "arrecadacao" }))?.segment ?? 0;
@@ -175,12 +175,12 @@ describe("generateBoleto", () => {
 
 describe("generateBoleto types", () => {
 	test("should take optional options and return a string", () => {
-		expectTypeOf(generateBoleto).parameter(0).toEqualTypeOf<GenerateBoletoOptions | undefined>();
+		expectTypeOf(generateBoleto).parameter(0).toEqualTypeOf<GenerateBoletoParams | undefined>();
 		expectTypeOf(generateBoleto).returns.toEqualTypeOf<string>();
 	});
 
 	test("should restrict type to the supported boleto kinds", () => {
-		expectTypeOf<GenerateBoletoOptions["type"]>().toEqualTypeOf<
+		expectTypeOf<GenerateBoletoParams["type"]>().toEqualTypeOf<
 			"bancario" | "arrecadacao" | undefined
 		>();
 	});

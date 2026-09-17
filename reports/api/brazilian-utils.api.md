@@ -310,10 +310,10 @@ export type FormatProcessoJuridicoOptions = {
 export const formatVoterId: (value: string | number) => string;
 
 // @public
-export const generateBoleto: (options?: GenerateBoletoOptions) => string;
+export const generateBoleto: (params?: GenerateBoletoParams) => string;
 
 // @public
-export type GenerateBoletoOptions = {
+export type GenerateBoletoParams = {
     type?: "bancario" | "arrecadacao";
 };
 
@@ -327,10 +327,10 @@ export const generateCnh: () => string;
 export const generateCNPJ: typeof generateCnpj;
 
 // @public
-export const generateCnpj: (versionOrOptions?: 1 | 2 | GenerateCnpjOptions) => string;
+export const generateCnpj: (versionOrParams?: 1 | 2 | GenerateCnpjParams) => string;
 
 // @public
-export type GenerateCnpjOptions = {
+export type GenerateCnpjParams = {
     version?: 1 | 2;
     branch?: number;
 };
@@ -363,10 +363,10 @@ export type GeneratePhoneType = "mobile" | "landline" | "service";
 export const generatePis: () => string;
 
 // @public
-export const generatePixPayload: (params: GeneratePixPayloadOptions) => string | null;
+export const generatePixPayload: (params: GeneratePixPayloadParams) => string | null;
 
 // @public
-export type GeneratePixPayloadOptions = {
+export type GeneratePixPayloadParams = {
     key?: string;
     url?: string;
     merchantName: string;
@@ -377,10 +377,13 @@ export type GeneratePixPayloadOptions = {
 };
 
 // @public
-export const generateProcessoJuridico: (options?: GenerateProcessoJuridicoOptions) => string | null;
+export const generateProcessoJuridico: (options?: GenerateProcessoJuridicoParams) => string | null;
+
+// @public @deprecated
+export type GenerateProcessoJuridicoOptions = GenerateProcessoJuridicoParams;
 
 // @public
-export type GenerateProcessoJuridicoOptions = {
+export type GenerateProcessoJuridicoParams = {
     year?: number;
     court?: number;
 };
@@ -446,7 +449,7 @@ export type GetBoletoInfoOptions = {
 export const getCbo: (value: string | number) => Cbo | null;
 
 // @public
-export const getCepInfoByAddress: (params: GetCepInfoByAddressOptions) => Promise<CepAddressInfo[]>;
+export const getCepInfoByAddress: (params: GetCepInfoByAddressParams) => Promise<CepAddressInfo[]>;
 
 // @public
 export class GetCepInfoByAddressError extends Error {
@@ -458,8 +461,11 @@ export class GetCepInfoByAddressNotFoundError extends GetCepInfoByAddressError {
     constructor(message: string);
 }
 
+// @public @deprecated
+export type GetCepInfoByAddressOptions = GetCepInfoByAddressParams;
+
 // @public
-export type GetCepInfoByAddressOptions = {
+export type GetCepInfoByAddressParams = {
     federalUnit: string;
     city: string;
     street: string;
@@ -489,10 +495,13 @@ export const getFormatLicensePlate: (value: string) => LicensePlateFormat | null
 export function getHolidays(year: number): Holiday[];
 
 // @public
-export function getHolidays(options: GetHolidaysOptions): Holiday[];
+export function getHolidays(options: GetHolidaysParams): Holiday[];
+
+// @public @deprecated
+export type GetHolidaysOptions = GetHolidaysParams;
 
 // @public
-export type GetHolidaysOptions = {
+export type GetHolidaysParams = {
     year: number;
     stateCode?: StateCode;
 };
@@ -513,30 +522,39 @@ export const getLegalNaturesByCategory: (category: string | number) => LegalNatu
 export const getMunicipalities: (stateCode?: StateCode) => Municipality[];
 
 // @public @deprecated
-export function getMunicipality(options: GetMunicipalityByCodeOptions): Promise<[string, string] | null>;
+export function getMunicipality(options: GetMunicipalityByCodeParams): Promise<[string, string] | null>;
 
 // @public @deprecated
-export function getMunicipality(options: GetMunicipalityByNameOptions): Promise<string | null>;
+export function getMunicipality(options: GetMunicipalityByNameParams): Promise<string | null>;
 
 // @public @deprecated
-export function getMunicipality(options: GetMunicipalityOptions): Promise<[string, string] | string | null>;
+export function getMunicipality(options: GetMunicipalityParams): Promise<[string, string] | string | null>;
 
 // @public
 export const getMunicipalityByCode: (code: string | number) => Municipality | null;
 
+// @public @deprecated
+export type GetMunicipalityByCodeOptions = GetMunicipalityByCodeParams;
+
 // @public
-export type GetMunicipalityByCodeOptions = {
+export type GetMunicipalityByCodeParams = {
     code: string | number;
 };
 
+// @public @deprecated
+export type GetMunicipalityByNameOptions = GetMunicipalityByNameParams;
+
 // @public
-export type GetMunicipalityByNameOptions = {
+export type GetMunicipalityByNameParams = {
     municipalityName: string;
     uf: string;
 };
 
+// @public @deprecated
+export type GetMunicipalityOptions = GetMunicipalityParams;
+
 // @public
-export type GetMunicipalityOptions = GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions;
+export type GetMunicipalityParams = GetMunicipalityByCodeParams | GetMunicipalityByNameParams;
 
 // @public
 export const getNfeKeyInfo: (value: string) => NfeKeyInfo | null;
@@ -587,27 +605,30 @@ export type IbanInfo = {
 export const isBusinessDay: (value: Date, options?: BusinessDayOptions) => boolean;
 
 // @public
-export const isHoliday: (options?: IsHolidayOptions) => boolean;
+export const isHoliday: (options?: IsHolidayParams) => boolean;
+
+// @public @deprecated
+export type IsHolidayOptions = IsHolidayParams;
 
 // @public
-export type IsHolidayOptions = {
+export type IsHolidayParams = {
     targetDate: Date;
     stateCode?: StateCode;
 };
 
 // @public
-export const isValidBankAccount: (params: IsValidBankAccountOptions) => boolean;
+export const isValidBankAccount: (params: IsValidBankAccountParams) => boolean;
+
+// @public @deprecated
+export type IsValidBankAccountOptions = IsValidBankAccountParams;
 
 // @public
-export type IsValidBankAccountOptions = {
+export type IsValidBankAccountParams = {
     bankCode: string;
     agency: string;
     account: string;
     digit: string;
 };
-
-// @public @deprecated
-export type IsValidBankAccountParams = IsValidBankAccountOptions;
 
 // @public
 export const isValidBoleto: (value: string) => boolean;
@@ -691,7 +712,16 @@ export const isValidIban: (value: string) => boolean;
 export const isValidIE: typeof isValidIe;
 
 // @public
-export const isValidIe: (stateCode: StateCode, ie: string) => boolean;
+export function isValidIe(params: IsValidIeParams): boolean;
+
+// @public @deprecated
+export function isValidIe(stateCode: StateCode, ie: string): boolean;
+
+// @public
+export type IsValidIeParams = {
+    value: string;
+    stateCode: StateCode;
+};
 
 // @public
 export const isValidLandlinePhone: (value: string) => boolean;
@@ -749,10 +779,10 @@ export const isValidPixPayload: (value: string) => boolean;
 export const isValidProcessoJuridico: (value: string) => boolean;
 
 // @public
-export const isValidRegistroProfissional: (params: IsValidRegistroProfissionalOptions) => boolean;
+export const isValidRegistroProfissional: (params: IsValidRegistroProfissionalParams) => boolean;
 
 // @public
-export type IsValidRegistroProfissionalOptions = {
+export type IsValidRegistroProfissionalParams = {
     value: string;
     council: RegistroProfissionalCouncil;
     stateCode?: StateCode;

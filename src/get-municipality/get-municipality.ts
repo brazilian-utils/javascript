@@ -5,13 +5,13 @@ import { normalizeMunicipalityName } from "../_internals/normalize-municipality-
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** The `getMunicipality` query by IBGE municipality code. */
-export type GetMunicipalityByCodeOptions = {
+export type GetMunicipalityByCodeParams = {
 	/** The 7 digit IBGE municipality code, as a string or a number. */
 	code: string | number;
 };
 
 /** The `getMunicipality` query by municipality name and state code. */
-export type GetMunicipalityByNameOptions = {
+export type GetMunicipalityByNameParams = {
 	/** The municipality name, accents and casing ignored. */
 	municipalityName: string;
 	/** The two letter state code the municipality belongs to, e.g. "SP". */
@@ -19,7 +19,30 @@ export type GetMunicipalityByNameOptions = {
 };
 
 /** The two ways `getMunicipality` can be queried: by IBGE code, or by municipality name and state code. */
-export type GetMunicipalityOptions = GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions;
+export type GetMunicipalityParams = GetMunicipalityByCodeParams | GetMunicipalityByNameParams;
+
+/**
+ * The `getMunicipality` query by IBGE municipality code, the 2.3.0 name of
+ * `GetMunicipalityByCodeParams`.
+ *
+ * @deprecated Use `GetMunicipalityByCodeParams` instead.
+ */
+export type GetMunicipalityByCodeOptions = GetMunicipalityByCodeParams;
+
+/**
+ * The `getMunicipality` query by municipality name and state code, the 2.3.0 name of
+ * `GetMunicipalityByNameParams`.
+ *
+ * @deprecated Use `GetMunicipalityByNameParams` instead.
+ */
+export type GetMunicipalityByNameOptions = GetMunicipalityByNameParams;
+
+/**
+ * The two ways `getMunicipality` can be queried, the 2.3.0 name of `GetMunicipalityParams`.
+ *
+ * @deprecated Use `GetMunicipalityParams` instead.
+ */
+export type GetMunicipalityOptions = GetMunicipalityParams;
 
 let codeIndex: Map<string, [string, string]> | undefined;
 
@@ -48,7 +71,7 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 const getMunicipalityCodeByName = ({
 	municipalityName,
 	uf,
-}: GetMunicipalityByNameOptions): string | null => {
+}: GetMunicipalityByNameParams): string | null => {
 	if (typeof uf !== "string") return null;
 
 	const normalizedUf = uf.trim().toUpperCase();
@@ -77,7 +100,7 @@ const getMunicipalityCodeByName = ({
  * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
  * municipality by name is up to the application, over `getMunicipalities`.
  *
- * @param {GetMunicipalityByCodeOptions} options - The `{ code }` query.
+ * @param {GetMunicipalityByCodeParams} options - The `{ code }` query.
  * @returns {Promise<[string, string] | null>} A fresh `[name, uf]` pair, which the caller owns
  * and may mutate, or null when the code is malformed or unknown.
  *
@@ -90,7 +113,7 @@ const getMunicipalityCodeByName = ({
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
 export function getMunicipality(
-	options: GetMunicipalityByCodeOptions,
+	options: GetMunicipalityByCodeParams,
 ): Promise<[string, string] | null>;
 
 /**
@@ -104,7 +127,7 @@ export function getMunicipality(
  * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
  * municipality by name is up to the application, over `getMunicipalities`.
  *
- * @param {GetMunicipalityByNameOptions} options - The `{ municipalityName, uf }` query.
+ * @param {GetMunicipalityByNameParams} options - The `{ municipalityName, uf }` query.
  * @returns {Promise<string | null>} The 7 digit IBGE code, or null when the state code or the
  * municipality is unknown.
  *
@@ -115,7 +138,7 @@ export function getMunicipality(
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export function getMunicipality(options: GetMunicipalityByNameOptions): Promise<string | null>;
+export function getMunicipality(options: GetMunicipalityByNameParams): Promise<string | null>;
 
 /**
  * Looks a Brazilian municipality up in the offline IBGE "localidades" dataset, from a query
@@ -128,7 +151,7 @@ export function getMunicipality(options: GetMunicipalityByNameOptions): Promise<
  * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
  * municipality by name is up to the application, over `getMunicipalities`.
  *
- * @param {GetMunicipalityOptions} options - Either `{ code }` or `{ municipalityName, uf }`.
+ * @param {GetMunicipalityParams} options - Either `{ code }` or `{ municipalityName, uf }`.
  * @returns {Promise<[string, string] | string | null>} The `[name, uf]` pair when looking up
  * by code, the IBGE code when looking up by name, or null when the municipality is unknown
  * (this includes `options` itself being missing or not an object, e.g. `null`, `undefined`,
@@ -136,7 +159,7 @@ export function getMunicipality(options: GetMunicipalityByNameOptions): Promise<
  *
  * @example
  * ```typescript
- * const lookUp = (options: GetMunicipalityOptions) => getMunicipality(options);
+ * const lookUp = (options: GetMunicipalityParams) => getMunicipality(options);
  *
  * await lookUp({ code: "3550308" }); // ["São Paulo", "SP"]
  * ```
@@ -144,11 +167,11 @@ export function getMunicipality(options: GetMunicipalityByNameOptions): Promise<
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
 export function getMunicipality(
-	options: GetMunicipalityOptions,
+	options: GetMunicipalityParams,
 ): Promise<[string, string] | string | null>;
 
 export function getMunicipality(
-	options: GetMunicipalityOptions,
+	options: GetMunicipalityParams,
 ): Promise<[string, string] | string | null> {
 	if (isNullish(options) || typeof options !== "object" || Array.isArray(options)) {
 		return Promise.resolve(null);

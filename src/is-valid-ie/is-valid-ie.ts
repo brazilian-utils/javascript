@@ -1,4 +1,5 @@
 import { type StateCode } from "../_internals/constants/states";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
@@ -16,6 +17,14 @@ import {
 } from "./constants";
 
 export type { StateCode } from "../_internals/constants/states";
+
+/** The parameters `isValidIe` takes: the registration and the state whose rule it is checked against. */
+export type IsValidIeParams = {
+	/** The inscrição estadual to validate. */
+	value: string;
+	/** The two letter state code the registration belongs to, e.g. `"SP"`. Case insensitive. */
+	stateCode: StateCode;
+};
 
 type IeValidator = (ie: string) => boolean;
 
@@ -504,6 +513,22 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
 	TO: validateTO,
 } satisfies Record<StateCode, IeValidator>;
 
+const validateIe = (stateCode: unknown, value: unknown): boolean => {
+	if (typeof stateCode !== "string") return false;
+	if (typeof value !== "string") return false;
+
+	const normalizedStateCode = stateCode.toUpperCase();
+
+	const validator = Object.hasOwn(IE_VALIDATORS, normalizedStateCode)
+		? IE_VALIDATORS[normalizedStateCode]
+		: undefined;
+	if (!validator) return false;
+
+	const sanitize = normalizedStateCode === "SP" ? sanitizeToAlphanumeric : sanitizeToDigits;
+
+	return validator(sanitize(value));
+};
+
 /**
  * Validates a Brazilian state tax registration number (IE).
  *
@@ -531,15 +556,22 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  *   page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma", gives 11 for an all zero
  *   registration, while the "resto <= 1 ⇒ 0" branch, the one implemented here, gives 0.
  *
- * @param {StateCode} stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
- * @param {string} ie - The state registration number to validate
+ * The state can also be passed first and the registration second, `isValidIe('SP', '110042490114')`,
+ * the 2.3.0 form, which still works and is deprecated. The two forms are told apart by the first
+ * argument: an object is the parameters of the current form, a string the state code of the
+ * deprecated one, and anything else returns false.
+ *
+ * @param {IsValidIeParams} params - The registration to validate and the state to validate it against
+ * @param {string} params.value - The state registration number to validate
+ * @param {StateCode} params.stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
  * @returns {boolean} True if the state registration number is valid, false otherwise
  *
  * @example
  * ```typescript
- * isValidIe('SP', '110042490114'); // true
- * isValidIe('SP', 'P011004243002'); // true
- * isValidIe('RJ', '12345'); // false
+ * isValidIe({ value: '110042490114', stateCode: 'SP' }); // true
+ * isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true
+ * isValidIe({ value: '12345', stateCode: 'RJ' }); // false
+ * isValidIe({ value: '109161793', stateCode: 'go' as StateCode }); // true (case-insensitive)
  * ```
  *
  * @see Official: http://www.sintegra.gov.br/insc_est.html
@@ -583,19 +615,24 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
  * SEFAZ-GO's roteiro de crítica, the source of the Goiás prefixes and special ranges.
  */
-export const isValidIe = (stateCode: StateCode, ie: string): boolean => {
-	if (!stateCode || typeof stateCode !== "string") return false;
-	if (typeof ie !== "string") return false;
+export function isValidIe(params: IsValidIeParams): boolean;
+/**
+ * Validates a Brazilian state tax registration number (IE) with the state given first. See the
+ * overload taking the parameters object for the full documentation.
+ *
+ * @param {StateCode} stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
+ * @param {string} ie - The state registration number to validate
+ * @returns {boolean} True if the state registration number is valid, false otherwise
+ *
+ * @deprecated Use the object form, `isValidIe({ value, stateCode })`.
+ */
+export function isValidIe(stateCode: StateCode, ie: string): boolean;
+export function isValidIe(paramsOrStateCode: IsValidIeParams | StateCode, ie?: string): boolean {
+	// The two call forms are told apart by the first argument alone: a string is the state code of
+	// the deprecated `(stateCode, ie)` form, anything else is read as the parameters object of the
+	// current one (a primitive has no `stateCode`, so it fails the validation like any bad input).
+	if (typeof paramsOrStateCode === "string") return validateIe(paramsOrStateCode, ie);
+	if (isNullish(paramsOrStateCode)) return false;
 
-	const normalizedStateCode = stateCode.toUpperCase();
-
-	const validator = Object.hasOwn(IE_VALIDATORS, normalizedStateCode)
-		? IE_VALIDATORS[normalizedStateCode]
-		: undefined;
-	if (!validator) return false;
-
-	const sanitize = normalizedStateCode === "SP" ? sanitizeToAlphanumeric : sanitizeToDigits;
-	const value = sanitize(ie);
-
-	return validator(value);
-};
+	return validateIe(paramsOrStateCode.stateCode, paramsOrStateCode.value);
+}

@@ -5,7 +5,7 @@ import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime
 import { type RegistroProfissionalCouncil } from "./constants";
 import {
 	isValidRegistroProfissional,
-	type IsValidRegistroProfissionalOptions,
+	type IsValidRegistroProfissionalParams,
 } from "./is-valid-registro-profissional";
 
 const STATE_CODES = DATA.map((state) => state.code);
@@ -311,7 +311,7 @@ describe("isValidRegistroProfissional", () => {
 		test("should never throw and always judge a registration with a boolean", () => {
 			fc.assert(
 				fc.property(fc.anything(), (params) => {
-					const result = isValidRegistroProfissional(params as IsValidRegistroProfissionalOptions);
+					const result = isValidRegistroProfissional(params as IsValidRegistroProfissionalParams);
 
 					expect(typeof result).toBe("boolean");
 				}),
@@ -324,15 +324,15 @@ describe("isValidRegistroProfissional types", () => {
 	test("should take a single required object and return a boolean", () => {
 		expectTypeOf(isValidRegistroProfissional)
 			.parameter(0)
-			.toEqualTypeOf<IsValidRegistroProfissionalOptions>();
+			.toEqualTypeOf<IsValidRegistroProfissionalParams>();
 		expectTypeOf(isValidRegistroProfissional).parameters.toEqualTypeOf<
-			[IsValidRegistroProfissionalOptions]
+			[IsValidRegistroProfissionalParams]
 		>();
-		expectTypeOf<IsValidRegistroProfissionalOptions["value"]>().toEqualTypeOf<string>();
+		expectTypeOf<IsValidRegistroProfissionalParams["value"]>().toEqualTypeOf<string>();
 		expectTypeOf<
-			IsValidRegistroProfissionalOptions["council"]
+			IsValidRegistroProfissionalParams["council"]
 		>().toEqualTypeOf<RegistroProfissionalCouncil>();
-		expectTypeOf<IsValidRegistroProfissionalOptions["stateCode"]>().toEqualTypeOf<
+		expectTypeOf<IsValidRegistroProfissionalParams["stateCode"]>().toEqualTypeOf<
 			StateCode | undefined
 		>();
 		expectTypeOf<RegistroProfissionalCouncil>().toEqualTypeOf<

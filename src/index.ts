@@ -54,10 +54,10 @@ export {
 	formatProcessoJuridico,
 } from "./format-processo-juridico/format-processo-juridico";
 export { formatVoterId } from "./format-voter-id/format-voter-id";
-export { type GenerateBoletoOptions, generateBoleto } from "./generate-boleto/generate-boleto";
+export { type GenerateBoletoParams, generateBoleto } from "./generate-boleto/generate-boleto";
 export { generateCep } from "./generate-cep/generate-cep";
 export { generateCnh } from "./generate-cnh/generate-cnh";
-export { type GenerateCnpjOptions, generateCnpj } from "./generate-cnpj/generate-cnpj";
+export { type GenerateCnpjParams, generateCnpj } from "./generate-cnpj/generate-cnpj";
 export { generateCpf } from "./generate-cpf/generate-cpf";
 export { generateLegalNature } from "./generate-legal-nature/generate-legal-nature";
 export {
@@ -68,11 +68,11 @@ export { generatePassport } from "./generate-passport/generate-passport";
 export { generatePhone, type GeneratePhoneType } from "./generate-phone/generate-phone";
 export { generatePis } from "./generate-pis/generate-pis";
 export {
-	type GeneratePixPayloadOptions,
+	type GeneratePixPayloadParams,
 	generatePixPayload,
 } from "./generate-pix-payload/generate-pix-payload";
 export {
-	type GenerateProcessoJuridicoOptions,
+	type GenerateProcessoJuridicoParams,
 	generateProcessoJuridico,
 } from "./generate-processo-juridico/generate-processo-juridico";
 export { generateRenavam } from "./generate-renavam/generate-renavam";
@@ -102,7 +102,7 @@ export {
 	type CepAddressInfo,
 	GetCepInfoByAddressError,
 	GetCepInfoByAddressNotFoundError,
-	type GetCepInfoByAddressOptions,
+	type GetCepInfoByAddressParams,
 	GetCepInfoByAddressValidationError,
 	getCepInfoByAddress,
 } from "./get-cep-info-by-address/get-cep-info-by-address";
@@ -119,7 +119,7 @@ export {
 	type LicensePlateFormat,
 } from "./get-format-license-plate/get-format-license-plate";
 export {
-	type GetHolidaysOptions,
+	type GetHolidaysParams,
 	type Holiday,
 	type HolidayType,
 	getHolidays,
@@ -134,9 +134,9 @@ export { getLegalNatures } from "./get-legal-natures/get-legal-natures";
 export { getLegalNaturesByCategory } from "./get-legal-natures-by-category/get-legal-natures-by-category";
 export { getMunicipalities } from "./get-municipalities/get-municipalities";
 export {
-	type GetMunicipalityByCodeOptions,
-	type GetMunicipalityByNameOptions,
-	type GetMunicipalityOptions,
+	type GetMunicipalityByCodeParams,
+	type GetMunicipalityByNameParams,
+	type GetMunicipalityParams,
 	getMunicipality,
 } from "./get-municipality/get-municipality";
 export { getMunicipalityByCode } from "./get-municipality-by-code/get-municipality-by-code";
@@ -161,9 +161,9 @@ export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-c
 export { getStates } from "./get-states/get-states";
 export { getTimezoneByState } from "./get-timezone-by-state/get-timezone-by-state";
 export { type BusinessDayOptions, isBusinessDay } from "./is-business-day/is-business-day";
-export { type IsHolidayOptions, isHoliday } from "./is-holiday/is-holiday";
+export { type IsHolidayParams, isHoliday } from "./is-holiday/is-holiday";
 export {
-	type IsValidBankAccountOptions,
+	type IsValidBankAccountParams,
 	isValidBankAccount,
 } from "./is-valid-bank-account/is-valid-bank-account";
 export { isValidBoleto } from "./is-valid-boleto/is-valid-boleto";
@@ -187,7 +187,7 @@ export { isValidCsosn } from "./is-valid-csosn/is-valid-csosn";
 export { type IsValidCstOptions, isValidCst } from "./is-valid-cst/is-valid-cst";
 export { isValidEmail } from "./is-valid-email/is-valid-email";
 export { isValidIban } from "./is-valid-iban/is-valid-iban";
-export { isValidIe } from "./is-valid-ie/is-valid-ie";
+export { type IsValidIeParams, isValidIe } from "./is-valid-ie/is-valid-ie";
 export { isValidLandlinePhone } from "./is-valid-landline-phone/is-valid-landline-phone";
 export { isValidLegalNature } from "./is-valid-legal-nature/is-valid-legal-nature";
 export { isValidLicensePlate } from "./is-valid-license-plate/is-valid-license-plate";
@@ -210,7 +210,7 @@ export { isValidPixPayload } from "./is-valid-pix-payload/is-valid-pix-payload";
 export { isValidProcessoJuridico } from "./is-valid-processo-juridico/is-valid-processo-juridico";
 export type { RegistroProfissionalCouncil } from "./is-valid-registro-profissional/constants";
 export {
-	type IsValidRegistroProfissionalOptions,
+	type IsValidRegistroProfissionalParams,
 	isValidRegistroProfissional,
 } from "./is-valid-registro-profissional/is-valid-registro-profissional";
 export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
@@ -245,12 +245,60 @@ export { removeAccents } from "./remove-accents/remove-accents";
 export { subBusinessDays } from "./sub-business-days/sub-business-days";
 
 /**
+ * The parameters of `generateProcessoJuridico`, the 2.3.0 name of
+ * `GenerateProcessoJuridicoParams`.
+ *
+ * @deprecated Use `GenerateProcessoJuridicoParams` instead.
+ */
+export type { GenerateProcessoJuridicoOptions } from "./generate-processo-juridico/generate-processo-juridico";
+/**
+ * The address `getCepInfoByAddress` looks up, the 2.3.0 name of `GetCepInfoByAddressParams`.
+ *
+ * @deprecated Use `GetCepInfoByAddressParams` instead.
+ */
+export type { GetCepInfoByAddressOptions } from "./get-cep-info-by-address/get-cep-info-by-address";
+/**
+ * The object form `getHolidays` accepts, the 2.3.0 name of `GetHolidaysParams`.
+ *
+ * @deprecated Use `GetHolidaysParams` instead.
+ */
+export type { GetHolidaysOptions } from "./get-holidays/get-holidays";
+/**
+ * The `getMunicipality` query by IBGE municipality code, the 2.3.0 name of
+ * `GetMunicipalityByCodeParams`.
+ *
+ * @deprecated Use `GetMunicipalityByCodeParams` instead.
+ */
+export type { GetMunicipalityByCodeOptions } from "./get-municipality/get-municipality";
+/**
+ * The `getMunicipality` query by municipality name and state code, the 2.3.0 name of
+ * `GetMunicipalityByNameParams`.
+ *
+ * @deprecated Use `GetMunicipalityByNameParams` instead.
+ */
+export type { GetMunicipalityByNameOptions } from "./get-municipality/get-municipality";
+/**
+ * The two ways `getMunicipality` can be queried, the 2.3.0 name of `GetMunicipalityParams`.
+ *
+ * @deprecated Use `GetMunicipalityParams` instead.
+ */
+export type { GetMunicipalityOptions } from "./get-municipality/get-municipality";
+/**
+ * The parameters `isHoliday` takes, the 2.3.0 name of `IsHolidayParams`.
+ *
+ * @deprecated Use `IsHolidayParams` instead.
+ */
+export type { IsHolidayOptions } from "./is-holiday/is-holiday";
+/**
  * The bank account `isValidBankAccount` checks: the bank, the agency and the account with its
  * check digit.
  *
- * @deprecated Use `IsValidBankAccountOptions` instead.
+ * Kept from 2.3.0: the name violates the naming rule, since this object is the only argument
+ * `isValidBankAccount` takes, but it shipped in 2.3.0 as the canonical name.
+ *
+ * @deprecated Use `IsValidBankAccountParams` instead.
  */
-export type { IsValidBankAccountParams } from "./is-valid-bank-account/is-valid-bank-account";
+export type { IsValidBankAccountOptions } from "./is-valid-bank-account/is-valid-bank-account";
 // The deprecated aliases below are declared as constants rather than as renamed re-exports
 // (`export { formatCpf as formatCPF }`) so that their `@deprecated` tag survives into the bundled
 // declaration file: the bundler collapses every renamed re-export of the entry point into a single

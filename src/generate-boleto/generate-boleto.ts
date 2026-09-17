@@ -3,8 +3,8 @@ import { generateRandomNumber } from "../_internals/generate-random-number/gener
 import { mod10 } from "../_internals/mod10/mod10";
 import { mod11 } from "../_internals/mod11/mod11";
 
-/** Options of `generateBoleto`. */
-export type GenerateBoletoOptions = {
+/** The parameters of `generateBoleto`. */
+export type GenerateBoletoParams = {
 	/** Which kind of bank slip to generate (default: `"bancario"`). */
 	type?: "bancario" | "arrecadacao";
 };
@@ -76,8 +76,8 @@ const generateArrecadacao = (): string => {
  * identifier from all four values, `6` and `8` for an effective amount and `7` and `9` for a
  * reference quantity, so both `hasEffectiveValue` branches of `getBoletoInfo` are reachable.
  *
- * @param {GenerateBoletoOptions} [options] - Optional options.
- * @param {string} options.type - `"bancario"` (default) or `"arrecadacao"`.
+ * @param {GenerateBoletoParams} [params] - Optional parameters.
+ * @param {string} params.type - `"bancario"` (default) or `"arrecadacao"`.
  * @returns {string} A valid 47-digit boleto string without formatting, or a 48-digit one for arrecadação.
  *
  * @example
@@ -96,5 +96,5 @@ const generateArrecadacao = (): string => {
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
-export const generateBoleto = (options?: GenerateBoletoOptions): string =>
-	options?.type === "arrecadacao" ? generateArrecadacao() : generateBancario();
+export const generateBoleto = (params?: GenerateBoletoParams): string =>
+	params?.type === "arrecadacao" ? generateArrecadacao() : generateBancario();

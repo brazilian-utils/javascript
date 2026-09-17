@@ -62,7 +62,7 @@ export type CepAddressInfo = {
 };
 
 /** The address `getCepInfoByAddress` looks up. */
-export type GetCepInfoByAddressOptions = {
+export type GetCepInfoByAddressParams = {
 	/** Two letter state code, e.g. "SP". */
 	federalUnit: string;
 	/** City name. Must not be empty; ViaCEP itself rejects values shorter than 3 characters. */
@@ -70,6 +70,13 @@ export type GetCepInfoByAddressOptions = {
 	/** Street name or part of it. Must not be empty; ViaCEP itself rejects values shorter than 3 characters. */
 	street: string;
 };
+
+/**
+ * The address `getCepInfoByAddress` looks up, the 2.3.0 name of `GetCepInfoByAddressParams`.
+ *
+ * @deprecated Use `GetCepInfoByAddressParams` instead.
+ */
+export type GetCepInfoByAddressOptions = GetCepInfoByAddressParams;
 
 const isStateCode = (value: string): value is StateCode =>
 	STATES.some((state) => state.code === value);
@@ -83,7 +90,7 @@ const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Arr
 /**
  * Looks every CEP of a Brazilian street up on the ViaCEP API.
  *
- * @param {GetCepInfoByAddressOptions} params - The address to look up.
+ * @param {GetCepInfoByAddressParams} params - The address to look up.
  * @param {string} params.federalUnit - The two letter state code (e.g. "SP").
  * @param {string} params.city - The city name.
  * @param {string} params.street - The street name, or part of it.
@@ -122,7 +129,7 @@ const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Arr
  * ViaCEP, the service queried. A third-party service, not a Correios one.
  */
 export const getCepInfoByAddress = async (
-	params: GetCepInfoByAddressOptions,
+	params: GetCepInfoByAddressParams,
 ): Promise<CepAddressInfo[]> => {
 	if (isNullish(params) || typeof params !== "object") {
 		throw new GetCepInfoByAddressValidationError("UF, city and street are required");

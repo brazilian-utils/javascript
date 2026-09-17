@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
-import { type GenerateCnpjOptions, generateCnpj } from "./generate-cnpj";
+import { type GenerateCnpjParams, generateCnpj } from "./generate-cnpj";
 
 const REMAINDER_TWO_DRAWS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
 
@@ -301,14 +301,12 @@ describe("generateCnpj", () => {
 
 describe("generateCnpj types", () => {
 	test("should take an optional version or options object and return a string", () => {
-		expectTypeOf(generateCnpj)
-			.parameter(0)
-			.toEqualTypeOf<1 | 2 | GenerateCnpjOptions | undefined>();
+		expectTypeOf(generateCnpj).parameter(0).toEqualTypeOf<1 | 2 | GenerateCnpjParams | undefined>();
 		expectTypeOf(generateCnpj).returns.toEqualTypeOf<string>();
 	});
 
 	test("should take an optional version and branch in the options object", () => {
-		expectTypeOf<GenerateCnpjOptions["version"]>().toEqualTypeOf<1 | 2 | undefined>();
-		expectTypeOf<GenerateCnpjOptions["branch"]>().toEqualTypeOf<number | undefined>();
+		expectTypeOf<GenerateCnpjParams["version"]>().toEqualTypeOf<1 | 2 | undefined>();
+		expectTypeOf<GenerateCnpjParams["branch"]>().toEqualTypeOf<number | undefined>();
 	});
 });

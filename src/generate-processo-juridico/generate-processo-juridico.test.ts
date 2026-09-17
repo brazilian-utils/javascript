@@ -8,7 +8,7 @@ import { describe, expect, expectTypeOf, it, test } from "../_internals/test/run
 import { isValidProcessoJuridico } from "../is-valid-processo-juridico/is-valid-processo-juridico";
 import {
 	generateProcessoJuridico,
-	type GenerateProcessoJuridicoOptions,
+	type GenerateProcessoJuridicoParams,
 } from "./generate-processo-juridico";
 
 const currentYear = (): number => new Date().getFullYear();
@@ -186,12 +186,12 @@ describe("generateProcessoJuridico types", () => {
 	test("should take options and return a string or null", () => {
 		expectTypeOf(generateProcessoJuridico)
 			.parameter(0)
-			.toEqualTypeOf<GenerateProcessoJuridicoOptions | undefined>();
+			.toEqualTypeOf<GenerateProcessoJuridicoParams | undefined>();
 		expectTypeOf(generateProcessoJuridico).returns.toEqualTypeOf<string | null>();
 	});
 
 	test("should type the year and court options as optional numbers", () => {
-		expectTypeOf<GenerateProcessoJuridicoOptions["year"]>().toEqualTypeOf<number | undefined>();
-		expectTypeOf<GenerateProcessoJuridicoOptions["court"]>().toEqualTypeOf<number | undefined>();
+		expectTypeOf<GenerateProcessoJuridicoParams["year"]>().toEqualTypeOf<number | undefined>();
+		expectTypeOf<GenerateProcessoJuridicoParams["court"]>().toEqualTypeOf<number | undefined>();
 	});
 });

@@ -14,9 +14,9 @@ const MAX_BRANCH = 9999;
 const VALID_CNPJ_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 /**
- * The options `generateCnpj` accepts, an alternative to passing the version positionally.
+ * The parameters `generateCnpj` accepts, an alternative to passing the version positionally.
  */
-export type GenerateCnpjOptions = {
+export type GenerateCnpjParams = {
 	/**
 	 * The version of the CNPJ to be generated: `1` for the numeric CNPJ and `2` for the
 	 * alphanumeric one. Defaults to `1`, and any other runtime value also generates a version 1
@@ -95,26 +95,26 @@ const generateAlphanumericCnpj = (branch: number | undefined): string => {
 	return base + firstCheckDigit + secondCheckDigit;
 };
 
-const isGenerateCnpjOptions = (
-	versionOrOptions: 1 | 2 | GenerateCnpjOptions,
-): versionOrOptions is GenerateCnpjOptions =>
-	typeof versionOrOptions === "object" && versionOrOptions !== null;
+const isGenerateCnpjParams = (
+	versionOrParams: 1 | 2 | GenerateCnpjParams,
+): versionOrParams is GenerateCnpjParams =>
+	typeof versionOrParams === "object" && versionOrParams !== null;
 
 /**
  * Generates a valid random CNPJ (Cadastro Nacional da Pessoa Jurídica).
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * The first argument is either the version, as it has always been, or a `GenerateCnpjOptions`
+ * The first argument is either the version, as it has always been, or a `GenerateCnpjParams`
  * object carrying that same version plus the "número de ordem" (filial) block to write in
  * positions 9 to 12.
  *
- * @param {1 | 2 | GenerateCnpjOptions} [versionOrOptions] - The version of the CNPJ to be
+ * @param {1 | 2 | GenerateCnpjParams} [versionOrParams] - The version of the CNPJ to be
  * generated: `1` for the numeric CNPJ and `2` for the alphanumeric one, or an options object.
  * Defaults to `1`, and never throws: `null`, `undefined` and any other runtime value that is
  * neither `2` nor an object also generate a version 1 (numeric) CNPJ.
- * @param {1 | 2} [versionOrOptions.version] - The version of the CNPJ to be generated, as above.
- * @param {number} [versionOrOptions.branch] - The "número de ordem" (filial) block, an integer
+ * @param {1 | 2} [versionOrParams.version] - The version of the CNPJ to be generated, as above.
+ * @param {number} [versionOrParams.branch] - The "número de ordem" (filial) block, an integer
  * from 1 to 9999 written zero padded to four characters. Defaults to a random block, and an
  * invalid branch is ignored rather than reported, so a random block is used for it too.
  * @returns {string} A valid 14-digit CNPJ string without formatting.
@@ -133,12 +133,12 @@ const isGenerateCnpjOptions = (
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
-export const generateCnpj = (versionOrOptions: 1 | 2 | GenerateCnpjOptions = 1): string => {
-	const options: GenerateCnpjOptions = isGenerateCnpjOptions(versionOrOptions)
-		? versionOrOptions
-		: { version: versionOrOptions };
+export const generateCnpj = (versionOrParams: 1 | 2 | GenerateCnpjParams = 1): string => {
+	const params: GenerateCnpjParams = isGenerateCnpjParams(versionOrParams)
+		? versionOrParams
+		: { version: versionOrParams };
 
-	return options.version === 2
-		? generateAlphanumericCnpj(options.branch)
-		: generateNumericCnpj(options.branch);
+	return params.version === 2
+		? generateAlphanumericCnpj(params.branch)
+		: generateNumericCnpj(params.branch);
 };

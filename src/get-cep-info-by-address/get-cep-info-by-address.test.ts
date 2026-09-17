@@ -10,7 +10,7 @@ import {
 import {
 	type CepAddressInfo,
 	GetCepInfoByAddressError,
-	type GetCepInfoByAddressOptions,
+	type GetCepInfoByAddressParams,
 	GetCepInfoByAddressNotFoundError,
 	GetCepInfoByAddressValidationError,
 	getCepInfoByAddress,
@@ -267,8 +267,8 @@ describe("getCepInfoByAddress", () => {
 
 describe("getCepInfoByAddress types", () => {
 	it("should take the address options and resolve to a list of CepAddressInfo", () => {
-		expectTypeOf(getCepInfoByAddress).parameter(0).toEqualTypeOf<GetCepInfoByAddressOptions>();
-		expectTypeOf<GetCepInfoByAddressOptions>().toEqualTypeOf<{
+		expectTypeOf(getCepInfoByAddress).parameter(0).toEqualTypeOf<GetCepInfoByAddressParams>();
+		expectTypeOf<GetCepInfoByAddressParams>().toEqualTypeOf<{
 			federalUnit: string;
 			city: string;
 			street: string;

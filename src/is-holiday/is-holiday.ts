@@ -4,13 +4,20 @@ import { getHolidays } from "../get-holidays/get-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
 
-/** The options `isHoliday` takes: the date to check and, optionally, the state whose holidays also count. */
-export type IsHolidayOptions = {
+/** The parameters `isHoliday` takes: the date to check and, optionally, the state whose holidays also count. */
+export type IsHolidayParams = {
 	/** The date to check, read by its local calendar day. */
 	targetDate: Date;
 	/** Two letter state code whose state holidays are also considered (default: national holidays only). */
 	stateCode?: StateCode;
 };
+
+/**
+ * The parameters `isHoliday` takes, the 2.3.0 name of `IsHolidayParams`.
+ *
+ * @deprecated Use `IsHolidayParams` instead.
+ */
+export type IsHolidayOptions = IsHolidayParams;
 
 /**
  * Checks whether a given date is a Brazilian holiday.
@@ -39,7 +46,7 @@ export type IsHolidayOptions = {
  * on, as Lei SC nº 11.213/1999 introduced, save for 2004, the year art. 3º of Lei SC nº
  * 12.906/2004 left that date without a transfer clause. Lei SC nº 18.531/2022 now carries both.
  *
- * @param {IsHolidayOptions} [options] - Options for the check.
+ * @param {IsHolidayParams} [options] - Options for the check.
  * @param {Date} options.targetDate - The date to check.
  * @param {StateCode} [options.stateCode] - Optional Brazilian state code to also consider state holidays.
  * @returns {boolean} True when the date is a holiday, false otherwise. Bad input also returns
@@ -75,7 +82,7 @@ export type IsHolidayOptions = {
  * algorithm. See the `getHolidays` JSDoc for why Sexta-feira Santa is typed `national` without a
  * law of its own.
  */
-export const isHoliday = (options?: IsHolidayOptions): boolean => {
+export const isHoliday = (options?: IsHolidayParams): boolean => {
 	if (isNullish(options) || typeof options !== "object") {
 		return false;
 	}

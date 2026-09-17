@@ -69,11 +69,18 @@ example `formatSomething`):
    wiring needed. That subpath lets consumers lazy-load a single heavy util (see `getCities` in
    [Bundle size](docs/getting-started.md#bundle-size)) without touching the root bundle.
 2. Add the implementation in `src/format-something/format-something.ts`. If the function takes an
-   options object, type it as `FormatSomethingOptions` (i.e. the function's `PascalCase` name plus
-   `Options`) and export it alongside the function. Write a JSDoc comment (description, `@param`,
-   `@returns`, `@example`, and an `@see` link to the authoritative source when the utility
-   implements an official Brazilian specification/algorithm (e.g. a Bacen manual, an IBGE table,
-   a government validation algorithm) following the style used in the existing utilities (see
+   object argument, name its type after the function's `PascalCase` name plus the suffix that says
+   which argument it is: `FormatSomethingOptions` for a second, usually optional, options object
+   (`formatSomething(value, options?)`), and `FormatSomethingParams` for the object that is the
+   function's only (or first and only object) argument (`formatSomething(params)`). Export it
+   alongside the function. The rule has no exceptions: the 2.3.0 names that broke it
+   (`GenerateProcessoJuridicoOptions`, `GetCepInfoByAddressOptions`, `GetHolidaysOptions`,
+   `IsHolidayOptions`, `IsValidBankAccountOptions` and the three `GetMunicipality*Options`) are
+   now `@deprecated` aliases of the rule-compliant `*Params` names, and go away in v3. Write a
+   JSDoc comment (description, `@param`, `@returns`, `@example`, and an `@see` link to the
+   authoritative source when the utility implements an official Brazilian
+   specification/algorithm (e.g. a Bacen manual, an IBGE table, a government validation
+   algorithm) following the style used in the existing utilities (see
    `src/format-cpf/format-cpf.ts` for a reference). Keep the module tree-shakeable: no top-level
    allocations or calls (`new Map()`, `new Set()`, etc.) that a bundler cannot prove side-effect
    free, since those pin the module into every bundle that imports any util from the package.

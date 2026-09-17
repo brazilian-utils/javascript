@@ -16,7 +16,7 @@ import {
 } from "./constants";
 
 /** The bank account `isValidBankAccount` checks: the bank, the agency and the account with its check digit. */
-export type IsValidBankAccountOptions = {
+export type IsValidBankAccountParams = {
 	/** Three digit bank code (COMPE), e.g. "001" for Banco do Brasil. */
 	bankCode: string;
 	/** Agency number, digits only, without its own check digit. */
@@ -35,9 +35,13 @@ export type IsValidBankAccountOptions = {
  * The bank account `isValidBankAccount` checks: the bank, the agency and the account with its
  * check digit.
  *
- * @deprecated Use `IsValidBankAccountOptions` instead.
+ * Kept from 2.3.0: the name violates the naming rule (`Options` is the type of a second,
+ * usually optional, argument, and this object is the only argument `isValidBankAccount` takes),
+ * but it shipped in 2.3.0 as the canonical name, so it stays as an alias until v3.
+ *
+ * @deprecated Use `IsValidBankAccountParams` instead.
  */
-export type IsValidBankAccountParams = IsValidBankAccountOptions;
+export type IsValidBankAccountOptions = IsValidBankAccountParams;
 
 type BankAccountDigits = (agency: string, account: string) => string[];
 
@@ -264,7 +268,7 @@ const sanitizeCheckDigit = (value: string): string =>
  *
  * Every other bank of the list falls back to a generic modulus 10 and modulus 11 check.
  *
- * @param {IsValidBankAccountOptions} params - The bank account parameters.
+ * @param {IsValidBankAccountParams} params - The bank account parameters.
  * @param {string} params.bankCode - The bank code (3 digits), as published by Banco Central.
  * @param {string} params.agency - The agency number (1-5 digits).
  * @param {string} params.account - The account number (1-13 digits). For Caixa, operação + conta.
@@ -290,7 +294,7 @@ const sanitizeCheckDigit = (value: string): string =>
  * @see Based on: https://github.com/luizalabs/heimdall/blob/main/heimdall_valid_bank/calculate_number_account.py
  * @see Based on: https://github.com/Xerpa/bran_checker/tree/master/lib/banks
  */
-export const isValidBankAccount = (params: IsValidBankAccountOptions): boolean => {
+export const isValidBankAccount = (params: IsValidBankAccountParams): boolean => {
 	if (isNullish(params) || typeof params !== "object") return false;
 
 	const { bankCode, agency, account, digit } = params;

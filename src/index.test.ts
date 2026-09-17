@@ -33,32 +33,40 @@ import {
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
-	type GenerateBoletoOptions,
-	type GenerateCnpjOptions,
+	type GenerateBoletoParams,
+	type GenerateCnpjParams,
 	type GenerateLicensePlateFormat,
 	type GeneratePhoneType,
-	type GeneratePixPayloadOptions,
+	type GeneratePixPayloadParams,
 	type GenerateProcessoJuridicoOptions,
+	type GenerateProcessoJuridicoParams,
 	type GetAddressInfoByCepOptions,
 	type GetBoletoInfoOptions,
 	type GetCepInfoByAddressOptions,
+	type GetCepInfoByAddressParams,
 	type GetHolidaysOptions,
+	type GetHolidaysParams,
 	type GetMunicipalityByCodeOptions,
+	type GetMunicipalityByCodeParams,
 	type GetMunicipalityByNameOptions,
+	type GetMunicipalityByNameParams,
 	type GetMunicipalityOptions,
+	type GetMunicipalityParams,
 	type Holiday,
 	type HolidayType,
 	type IbanInfo,
 	type IsHolidayOptions,
+	type IsHolidayParams,
 	type IsValidBankAccountOptions,
 	type IsValidBankAccountParams,
 	type IsValidCertidaoOptions,
 	type IsValidCnpjOptions,
 	type IsValidCstOptions,
+	type IsValidIeParams,
 	type IsValidMobilePhoneOptions,
 	type IsValidPhoneOptions,
 	type IsValidPixKeyOptions,
-	type IsValidRegistroProfissionalOptions,
+	type IsValidRegistroProfissionalParams,
 	type LegalNature,
 	type LegalNatureCategory,
 	type LicensePlateFormat,
@@ -300,32 +308,40 @@ describe("Public API", () => {
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
-			GenerateBoletoOptions: GenerateBoletoOptions;
-			GenerateCnpjOptions: GenerateCnpjOptions;
+			GenerateBoletoParams: GenerateBoletoParams;
+			GenerateCnpjParams: GenerateCnpjParams;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;
 			GeneratePhoneType: GeneratePhoneType;
-			GeneratePixPayloadOptions: GeneratePixPayloadOptions;
+			GeneratePixPayloadParams: GeneratePixPayloadParams;
 			GenerateProcessoJuridicoOptions: GenerateProcessoJuridicoOptions;
+			GenerateProcessoJuridicoParams: GenerateProcessoJuridicoParams;
 			GetAddressInfoByCepOptions: GetAddressInfoByCepOptions;
 			GetBoletoInfoOptions: GetBoletoInfoOptions;
 			GetCepInfoByAddressOptions: GetCepInfoByAddressOptions;
+			GetCepInfoByAddressParams: GetCepInfoByAddressParams;
 			GetHolidaysOptions: GetHolidaysOptions;
+			GetHolidaysParams: GetHolidaysParams;
 			GetMunicipalityByCodeOptions: GetMunicipalityByCodeOptions;
+			GetMunicipalityByCodeParams: GetMunicipalityByCodeParams;
 			GetMunicipalityByNameOptions: GetMunicipalityByNameOptions;
+			GetMunicipalityByNameParams: GetMunicipalityByNameParams;
 			GetMunicipalityOptions: GetMunicipalityOptions;
+			GetMunicipalityParams: GetMunicipalityParams;
 			Holiday: Holiday;
 			HolidayType: HolidayType;
 			IbanInfo: IbanInfo;
 			IsHolidayOptions: IsHolidayOptions;
+			IsHolidayParams: IsHolidayParams;
 			IsValidBankAccountOptions: IsValidBankAccountOptions;
 			IsValidBankAccountParams: IsValidBankAccountParams;
 			IsValidCertidaoOptions: IsValidCertidaoOptions;
 			IsValidCnpjOptions: IsValidCnpjOptions;
 			IsValidCstOptions: IsValidCstOptions;
+			IsValidIeParams: IsValidIeParams;
 			IsValidMobilePhoneOptions: IsValidMobilePhoneOptions;
 			IsValidPhoneOptions: IsValidPhoneOptions;
 			IsValidPixKeyOptions: IsValidPixKeyOptions;
-			IsValidRegistroProfissionalOptions: IsValidRegistroProfissionalOptions;
+			IsValidRegistroProfissionalParams: IsValidRegistroProfissionalParams;
 			LegalNature: LegalNature;
 			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;

@@ -101,7 +101,7 @@ isValidCep('12345'); // false (tamanho inválido)
 
 ## generateCnpj
 
-Gera um CNPJ válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro. O primeiro argumento é a versão, como antes, ou um objeto `GenerateCnpjOptions` com a mesma `version` mais `branch`, o bloco do "número de ordem" (filial) nas posições 9 a 12: um inteiro de 1 a 9999 escrito com zeros à esquerda em quatro caracteres, aleatório por padrão. Um `branch` inválido é ignorado e um bloco aleatório é usado, e o bloco continua numérico na versão alfanumérica.
+Gera um CNPJ válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro. O primeiro argumento é a versão, como antes, ou um objeto `GenerateCnpjParams` com a mesma `version` mais `branch`, o bloco do "número de ordem" (filial) nas posições 9 a 12: um inteiro de 1 a 9999 escrito com zeros à esquerda em quatro caracteres, aleatório por padrão. Um `branch` inválido é ignorado e um bloco aleatório é usado, e o bloco continua numérico na versão alfanumérica.
 
 ```javascript
 import { generateCnpj } from '@brazilian-utils/brazilian-utils'
@@ -148,7 +148,7 @@ parseBoleto('00190.00009 01149.718601 68524.522114 6 75860000102656'); // 001900
 
 ## generateBoleto
 
-Gera um boleto válido aleatório. Informe `{ type: "arrecadacao" }` (tipado como `GenerateBoletoOptions`) para gerar um boleto de arrecadação em vez do tipo padrão "bancario" (cobrança bancária). Um boleto de arrecadação sorteia o segmento entre 1 e 7 (o segmento 9 é de uso dos próprios bancos) e o identificador de valor entre os quatro valores possíveis, `6` e `8` para valor efetivo e `7` e `9` para quantidade de referência, de modo que os dois ramos de `hasEffectiveValue` do `getBoletoInfo` sejam alcançáveis.
+Gera um boleto válido aleatório. Informe `{ type: "arrecadacao" }` (tipado como `GenerateBoletoParams`) para gerar um boleto de arrecadação em vez do tipo padrão "bancario" (cobrança bancária). Um boleto de arrecadação sorteia o segmento entre 1 e 7 (o segmento 9 é de uso dos próprios bancos) e o identificador de valor entre os quatro valores possíveis, `6` e `8` para valor efetivo e `7` e `9` para quantidade de referência, de modo que os dois ramos de `hasEffectiveValue` do `getBoletoInfo` sejam alcançáveis.
 
 ```javascript
 import { generateBoleto } from '@brazilian-utils/brazilian-utils';
@@ -247,7 +247,7 @@ getPixPayloadInfo(
 
 ## generatePixPayload
 
-Gera o payload de um BR Code Pix. Exatamente um entre `params.key` e `params.url` deve ser informado (parte de `GeneratePixPayloadOptions`); `null` é retornado quando ambos ou nenhum são informados. `url` deve ser uma localização de PSP como o manual do Bacen define: um host com caminho, sem esquema (`pix.example.com/qr/v2/1234`); um payload dinâmico não pode carregar `amount` nem `txid`, que pertencem à localização do PSP. O valor é escrito com as duas casas decimais que o BR Code aceita, então tanto um que arredonda para `0.00` quanto um que não sobrevive a esse round-trip (`0.005`, `123.456`) são rejeitados, em vez de escritos como uma quantia diferente. O BR Code de Pix Saque, que anuncia o `fss` do subobjeto 26-03, é interpretado pelo `getPixPayloadInfo`, mas não é gerado aqui.
+Gera o payload de um BR Code Pix. Exatamente um entre `params.key` e `params.url` deve ser informado (parte de `GeneratePixPayloadParams`); `null` é retornado quando ambos ou nenhum são informados. `url` deve ser uma localização de PSP como o manual do Bacen define: um host com caminho, sem esquema (`pix.example.com/qr/v2/1234`); um payload dinâmico não pode carregar `amount` nem `txid`, que pertencem à localização do PSP. O valor é escrito com as duas casas decimais que o BR Code aceita, então tanto um que arredonda para `0.00` quanto um que não sobrevive a esse round-trip (`0.005`, `123.456`) são rejeitados, em vez de escritos como uma quantia diferente. O BR Code de Pix Saque, que anuncia o `fss` do subobjeto 26-03, é interpretado pelo `getPixPayloadInfo`, mas não é gerado aqui.
 
 Quando `params.key` é informado, ela é normalizada para a forma canônica do DICT pelo `getPixKeyInfo` e o payload é estático. Quando `params.url` é informado no lugar (a localização do PSP, sem o esquema da URL, ex.: `"pix.example.com/qr/v2/1234"`), o payload é dinâmico conforme o Manual de Padrões para Iniciação do Pix: a URL ocupa o lugar da chave no template "Merchant Account Information" e o objeto "Point of Initiation Method" é definido como dinâmico (`12`); `params.url` pode ter no máximo 77 caracteres. `merchantName`, `merchantCity` e `description` são convertidos para ASCII imprimível (acentos removidos) e truncados ao que o BR Code permite. O `getPixPayloadInfo` já interpreta os dois formatos, então `getPixPayloadInfo(generatePixPayload({ url, ... }))` forma um round-trip.
 
@@ -625,13 +625,13 @@ parseProcessoJuridico('0002080-25.2012.5.15.0049'); // 00020802520125150049
 
 ## isValidIe
 
-Valida se a inscrição estadual de um estado é válida. A UF é case-insensitive. Regras notáveis por estado: GO aceita os prefixos `10`, `11` e `15`; PA aceita `15` e `75`-`79`; MS aceita `28` e `50`; SP tem o padrão de produtor rural `P0MMMSSSSD000`; TO usa códigos de tipo de 11 dígitos (`01`, `02`, `03`, `99`). O TO também aceita uma forma de 9 dígitos, aplicando a mesma regra módulo 11 sobre os oito primeiros dígitos; a página do SINTEGRA documenta apenas a de 11 dígitos, então essa forma é comportamento da 2.3.0 mantido por compatibilidade, e não regra publicada. Uma inscrição só de zeros é aceita em todo estado cuja fórmula publicada produz dígito verificador 0 para ela (AM, BA com 8 ou 9 dígitos, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE, SP e TO com 9 dígitos), diferente de `isValidCpf` e `isValidCnpj`, que rejeitam dígitos repetidos. O AM entra nessa lista apenas pelo segundo ramo da fórmula publicada: o primeiro ramo da página, `Se Soma < 11 Então Dígito = 11 - Soma`, dá 11 para a inscrição só de zeros, enquanto o ramo `resto <= 1 ⇒ 0`, o implementado aqui, dá 0.
+Valida se a inscrição estadual de um estado é válida. A UF é case-insensitive. Regras notáveis por estado: GO aceita os prefixos `10`, `11` e `15`; PA aceita `15` e `75`-`79`; MS aceita `28` e `50`; SP tem o padrão de produtor rural `P0MMMSSSSD000`; TO usa códigos de tipo de 11 dígitos (`01`, `02`, `03`, `99`). O TO também aceita uma forma de 9 dígitos, aplicando a mesma regra módulo 11 sobre os oito primeiros dígitos; a página do SINTEGRA documenta apenas a de 11 dígitos, então essa forma é comportamento da 2.3.0 mantido por compatibilidade, e não regra publicada. Uma inscrição só de zeros é aceita em todo estado cuja fórmula publicada produz dígito verificador 0 para ela (AM, BA com 8 ou 9 dígitos, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE, SP e TO com 9 dígitos), diferente de `isValidCpf` e `isValidCnpj`, que rejeitam dígitos repetidos. O AM entra nessa lista apenas pelo segundo ramo da fórmula publicada: o primeiro ramo da página, `Se Soma < 11 Então Dígito = 11 - Soma`, dá 11 para a inscrição só de zeros, enquanto o ramo `resto <= 1 ⇒ 0`, o implementado aqui, dá 0. A inscrição e a UF vão juntas num único objeto, tipado como `IsValidIeParams`; a forma da 2.3.0, `isValidIe(stateCode, ie)`, continua funcionando e está deprecada.
 
 ```javascript
 import { isValidIe } from '@brazilian-utils/brazilian-utils';
 
-isValidIe('AC', '0187634580933'); // false
-isValidIe('go', '109161793'); // true (case-insensitive)
+isValidIe({ value: '0187634580933', stateCode: 'AC' }); // false
+isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
 ```
 
 ## isValidBankAccount
@@ -1476,18 +1476,18 @@ await getMunicipality({ code: '123' });
 // null (não tem 7 dígitos)
 ```
 
-Em TypeScript o tipo de retorno acompanha a direção da busca: uma consulta `{ code }` resolve para `[string, string] | null`, uma consulta `{ municipalityName, uf }` resolve para `string | null`, e uma consulta cuja direção só é conhecida em tempo de execução (uma variável tipada como `GetMunicipalityOptions`) resolve para a união das duas.
+Em TypeScript o tipo de retorno acompanha a direção da busca: uma consulta `{ code }` resolve para `[string, string] | null`, uma consulta `{ municipalityName, uf }` resolve para `string | null`, e uma consulta cuja direção só é conhecida em tempo de execução (uma variável tipada como `GetMunicipalityParams`) resolve para a união das duas. Os nomes da 2.3.0 `GetMunicipalityOptions`, `GetMunicipalityByCodeOptions` e `GetMunicipalityByNameOptions` continuam exportados como aliases deprecados destes.
 
 ```typescript
 import {
   getMunicipality,
-  type GetMunicipalityByCodeOptions,
-  type GetMunicipalityByNameOptions,
-  type GetMunicipalityOptions,
+  type GetMunicipalityByCodeParams,
+  type GetMunicipalityByNameParams,
+  type GetMunicipalityParams,
 } from '@brazilian-utils/brazilian-utils';
 
-const byCode: GetMunicipalityByCodeOptions = { code: '3550308' };
-const byName: GetMunicipalityByNameOptions = { municipalityName: 'sao paulo', uf: 'sp' };
+const byCode: GetMunicipalityByCodeParams = { code: '3550308' };
+const byName: GetMunicipalityByNameParams = { municipalityName: 'sao paulo', uf: 'sp' };
 
 await getMunicipality(byCode);
 // Promise<[string, string] | null>
@@ -1495,8 +1495,8 @@ await getMunicipality(byCode);
 await getMunicipality(byName);
 // Promise<string | null>
 
-const lookUp = (options: GetMunicipalityOptions) => getMunicipality(options);
-// (options: GetMunicipalityOptions) => Promise<[string, string] | string | null>
+const lookUp = (options: GetMunicipalityParams) => getMunicipality(options);
+// (options: GetMunicipalityParams) => Promise<[string, string] | string | null>
 ```
 
 ## getMunicipalities
@@ -1921,7 +1921,7 @@ parseCaepf('293.118.610/001-84'); // '29311861000184'
 
 ## isValidRegistroProfissional
 
-Verifica a estrutura de um número de registro/inscrição profissional. Recebe um único objeto, tipado como `IsValidRegistroProfissionalOptions`, no mesmo formato do `isValidBankAccount`: `value` é o número do registro, `council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). Qualquer coisa que não seja um objeto, e um objeto sem `value` ou sem `council`, é `false`. Os formatos aceitos são de 4 a 6 dígitos mais a UF para `"OAB"` e `"CRM"`, de 3 a 6 dígitos mais a UF para `"CRO"`, um código regional de 2 dígitos mais 4 a 6 dígitos para `"CRP"`, e a UF mais 6 dígitos, o tipo de registro e um dígito verificador para `"CRC"`. É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos, o tipo de registro (`"O"` Originário ou `"P"` Provisório, que nada diz sobre a categoria profissional) e o dígito verificador, conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1). Um Registro Transferido ou Secundário acrescenta `"T"` ou `"S"` e a UF do CRC de destino **depois** do dígito verificador, conforme esse mesmo item e a [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), art. 5º parágrafo único: os exemplos do próprio Manual são `SP-123456/O-3 T-MG`, `TO-654321/P-8 T-SC` e `PI-111222/O-5 S-AC`. As duas UFs precisam ser códigos reais, e o `stateCode` é comparado com a de origem. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. Só o formato do CRC e esses códigos regionais do CRP se apoiam em fonte publicada: a página do CFP não publica o tamanho do número de inscrição, e a OAB, o CFM e o CFO não publicam formato algum, então as faixas de dígitos aceitas para `"CRP"`, `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas (a busca pública da OAB/SP tem `maxlength="7"`, e o CFM documenta CRMs com prefixo `300` e sufixo `P`, nenhum deles expresso por esses formatos). O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
+Verifica a estrutura de um número de registro/inscrição profissional. Recebe um único objeto, tipado como `IsValidRegistroProfissionalParams`, no mesmo formato do `isValidBankAccount`: `value` é o número do registro, `council` escolhe o conselho emissor (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e o `stateCode` opcional verifica a UF embutida (ignorado para `"CRP"`, cujo prefixo de 2 dígitos é um código regional, não uma UF literal). Qualquer coisa que não seja um objeto, e um objeto sem `value` ou sem `council`, é `false`. Os formatos aceitos são de 4 a 6 dígitos mais a UF para `"OAB"` e `"CRM"`, de 3 a 6 dígitos mais a UF para `"CRO"`, um código regional de 2 dígitos mais 4 a 6 dígitos para `"CRP"`, e a UF mais 6 dígitos, o tipo de registro e um dígito verificador para `"CRC"`. É apenas uma verificação estrutural: a quantidade de dígitos e a UF são validadas, mas nenhum dígito verificador é calculado, mesmo para o CRC, cujo formato inclui um. Um registro no CRC é a UF, 6 dígitos, o tipo de registro (`"O"` Originário ou `"P"` Provisório, que nada diz sobre a categoria profissional) e o dígito verificador, conforme o [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf) (item 1.1). Um Registro Transferido ou Secundário acrescenta `"T"` ou `"S"` e a UF do CRC de destino **depois** do dígito verificador, conforme esse mesmo item e a [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), art. 5º parágrafo único: os exemplos do próprio Manual são `SP-123456/O-3 T-MG`, `TO-654321/P-8 T-SC` e `PI-111222/O-5 S-AC`. As duas UFs precisam ser códigos reais, e o `stateCode` é comparado com a de origem. O código regional do CRP precisa ser um dos [24 Conselhos Regionais](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/) do sistema CFP, de CRP-01 a CRP-24. Só o formato do CRC e esses códigos regionais do CRP se apoiam em fonte publicada: a página do CFP não publica o tamanho do número de inscrição, e a OAB, o CFM e o CFO não publicam formato algum, então as faixas de dígitos aceitas para `"CRP"`, `"OAB"`, `"CRM"` e `"CRO"` são convencionais, não normativas (a busca pública da OAB/SP tem `maxlength="7"`, e o CFM documenta CRMs com prefixo `300` e sufixo `P`, nenhum deles expresso por esses formatos). O CREA não é suportado: seu formato de registro não pôde ser confirmado em uma fonte oficial e publicamente documentada após a unificação nacional de 2016 (RNP).
 
 ```javascript
 import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';

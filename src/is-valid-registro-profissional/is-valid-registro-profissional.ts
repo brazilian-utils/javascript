@@ -14,7 +14,7 @@ import {
 export type { StateCode } from "../_internals/constants/states";
 
 /** The registration `isValidRegistroProfissional` checks: the number, the council that issued it and, optionally, the UF it must belong to. */
-export type IsValidRegistroProfissionalOptions = {
+export type IsValidRegistroProfissionalParams = {
 	/** The registration number to be validated, e.g. `"123456/SP"`. */
 	value: string;
 	/** The professional council that issued the registration number. */
@@ -86,7 +86,7 @@ const isKnownCrpRegion = (value: string): boolean => {
  * together. A value that is not an object, or one missing `value` or `council`, is `false` like
  * any other registration it cannot recognise.
  *
- * @param {IsValidRegistroProfissionalOptions} params - The registration to be validated.
+ * @param {IsValidRegistroProfissionalParams} params - The registration to be validated.
  * @param {string} params.value - The registration number, e.g. `"123456/SP"`.
  * @param {RegistroProfissionalCouncil} params.council - The issuing council.
  * @param {string} [params.stateCode] - The expected UF, ignored for `"CRP"`.
@@ -129,9 +129,7 @@ const isKnownCrpRegion = (value: string): boolean => {
  * Conselho Federal de Odontologia (CFO), the autarquia federal that regulates the profession,
  * which publishes no format for the registration number and the UF.
  */
-export const isValidRegistroProfissional = (
-	params: IsValidRegistroProfissionalOptions,
-): boolean => {
+export const isValidRegistroProfissional = (params: IsValidRegistroProfissionalParams): boolean => {
 	if (isNullish(params)) return false;
 
 	const { value, council, stateCode } = params;

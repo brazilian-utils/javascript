@@ -7,6 +7,7 @@ import {
 	ALGORITHM_BANK_CODES,
 	isValidBankAccount,
 	type IsValidBankAccountOptions,
+	type IsValidBankAccountParams,
 } from "./is-valid-bank-account";
 
 const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
@@ -1688,13 +1689,18 @@ describe("isValidBankAccount", () => {
 });
 
 describe("isValidBankAccount types", () => {
-	test("should take required bank account options and return a boolean", () => {
-		expectTypeOf(isValidBankAccount).parameter(0).toEqualTypeOf<IsValidBankAccountOptions>();
-		expectTypeOf<IsValidBankAccountOptions["bankCode"]>().toEqualTypeOf<string>();
-		expectTypeOf<IsValidBankAccountOptions["agency"]>().toEqualTypeOf<string>();
-		expectTypeOf<IsValidBankAccountOptions["account"]>().toEqualTypeOf<string>();
-		expectTypeOf<IsValidBankAccountOptions["digit"]>().toEqualTypeOf<string>();
+	test("should take required bank account params and return a boolean", () => {
+		expectTypeOf(isValidBankAccount).parameter(0).toEqualTypeOf<IsValidBankAccountParams>();
+		expectTypeOf<IsValidBankAccountParams["bankCode"]>().toEqualTypeOf<string>();
+		expectTypeOf<IsValidBankAccountParams["agency"]>().toEqualTypeOf<string>();
+		expectTypeOf<IsValidBankAccountParams["account"]>().toEqualTypeOf<string>();
+		expectTypeOf<IsValidBankAccountParams["digit"]>().toEqualTypeOf<string>();
 		expectTypeOf(isValidBankAccount).returns.toEqualTypeOf<boolean>();
+	});
+
+	test("should keep the 2.3.0 name as an alias of the params type", () => {
+		// oxlint-disable-next-line typescript/no-deprecated -- the deprecated 2.3.0 alias is the type under test
+		expectTypeOf<IsValidBankAccountOptions>().toEqualTypeOf<IsValidBankAccountParams>();
 	});
 });
 

@@ -5,7 +5,7 @@ import { DATA as STATES, type StateCode } from "../_internals/constants/states";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isBusinessDay } from "../is-business-day/is-business-day";
 import { STATE_HOLIDAYS } from "./constants";
-import { getHolidays, type GetHolidaysOptions, type Holiday } from "./get-holidays";
+import { getHolidays, type GetHolidaysParams, type Holiday } from "./get-holidays";
 
 const PROTOTYPE_KEYS = Object.getOwnPropertyNames(Object.prototype);
 
@@ -703,8 +703,8 @@ describe("getHolidays types", () => {
 		expectTypeOf(getHolidays(2024)).toEqualTypeOf<Holiday[]>();
 	});
 
-	test("should accept a GetHolidaysOptions and return an array of Holiday", () => {
-		expectTypeOf<GetHolidaysOptions>().toEqualTypeOf<{ year: number; stateCode?: StateCode }>();
+	test("should accept a GetHolidaysParams and return an array of Holiday", () => {
+		expectTypeOf<GetHolidaysParams>().toEqualTypeOf<{ year: number; stateCode?: StateCode }>();
 		expectTypeOf(getHolidays({ year: 2024, stateCode: "SP" })).toEqualTypeOf<Holiday[]>();
 	});
 

@@ -5,7 +5,7 @@ import { holidayYears, monthDays, monthIndexes, stateCodes } from "../_internals
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getHolidays, type Holiday } from "../get-holidays/get-holidays";
-import { isHoliday, type IsHolidayOptions } from "./is-holiday";
+import { isHoliday, type IsHolidayParams } from "./is-holiday";
 
 function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
 	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
@@ -138,8 +138,8 @@ describe("isHoliday", () => {
 
 describe("isHoliday types", () => {
 	test("should take an options object and return a boolean", () => {
-		expectTypeOf(isHoliday).parameter(0).toEqualTypeOf<IsHolidayOptions | undefined>();
-		expectTypeOf<IsHolidayOptions>().toEqualTypeOf<{ targetDate: Date; stateCode?: StateCode }>();
+		expectTypeOf(isHoliday).parameter(0).toEqualTypeOf<IsHolidayParams | undefined>();
+		expectTypeOf<IsHolidayParams>().toEqualTypeOf<{ targetDate: Date; stateCode?: StateCode }>();
 		expectTypeOf(isHoliday).returns.toEqualTypeOf<boolean>();
 	});
 });

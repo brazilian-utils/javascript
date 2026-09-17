@@ -9,7 +9,7 @@ import {
 	getPixPayloadInfo,
 } from "../get-pix-payload-info/get-pix-payload-info";
 import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
-import { type GeneratePixPayloadOptions, generatePixPayload } from "./generate-pix-payload";
+import { type GeneratePixPayloadParams, generatePixPayload } from "./generate-pix-payload";
 
 const BASE = {
 	key: "123e4567-e12b-12d1-a456-426655440000",
@@ -384,7 +384,7 @@ describe("generatePixPayload", () => {
 	describe("should round-trip", () => {
 		const ROUND_TRIPS: {
 			name: string;
-			build: (index: number) => GeneratePixPayloadOptions;
+			build: (index: number) => GeneratePixPayloadParams;
 			pointOfInitiation: PixPointOfInitiation;
 		}[] = [
 			{
@@ -524,12 +524,12 @@ describe("generatePixPayload", () => {
 
 describe("generatePixPayload types", () => {
 	test("should take Pix payload params and return a string or null", () => {
-		expectTypeOf(generatePixPayload).parameter(0).toEqualTypeOf<GeneratePixPayloadOptions>();
+		expectTypeOf(generatePixPayload).parameter(0).toEqualTypeOf<GeneratePixPayloadParams>();
 		expectTypeOf(generatePixPayload).returns.toEqualTypeOf<string | null>();
 	});
 
 	test("should restrict the params to the documented fields", () => {
-		expectTypeOf<GeneratePixPayloadOptions>().toEqualTypeOf<{
+		expectTypeOf<GeneratePixPayloadParams>().toEqualTypeOf<{
 			key?: string;
 			url?: string;
 			merchantName: string;

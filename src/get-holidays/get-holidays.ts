@@ -24,13 +24,20 @@ export type Holiday = {
 	type: HolidayType;
 };
 
-/** The options form `getHolidays` accepts, naming the year to list and, optionally, the state whose holidays are added. */
-export type GetHolidaysOptions = {
+/** The object form `getHolidays` accepts, naming the year to list and, optionally, the state whose holidays are added. */
+export type GetHolidaysParams = {
 	/** The four digit year to list holidays for. Must be an integer between 1900 and 2099. */
 	year: number;
 	/** Two letter state code whose state holidays are added to the national ones (default: national holidays only). */
 	stateCode?: StateCode;
 };
+
+/**
+ * The object form `getHolidays` accepts, the 2.3.0 name of `GetHolidaysParams`.
+ *
+ * @deprecated Use `GetHolidaysParams` instead.
+ */
+export type GetHolidaysOptions = GetHolidaysParams;
 
 let cache: Map<string, Holiday[]> | undefined;
 
@@ -207,11 +214,11 @@ export function getHolidays(year: number): Holiday[];
  * Retrieves all Brazilian holidays for a given year, optionally including the holidays of a
  * state. See the overload taking a year for the full documentation.
  *
- * @param {GetHolidaysOptions} options - The year to list holidays for and, optionally, the state whose holidays are added
+ * @param {GetHolidaysParams} options - The year to list holidays for and, optionally, the state whose holidays are added
  * @returns {Holiday[]} An array of holidays sorted by date
  */
-export function getHolidays(options: GetHolidaysOptions): Holiday[];
-export function getHolidays(yearOrOptions: number | GetHolidaysOptions): Holiday[] {
+export function getHolidays(options: GetHolidaysParams): Holiday[];
+export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[] {
 	let year: number;
 	let stateCode: StateCode | undefined;
 

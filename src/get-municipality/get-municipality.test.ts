@@ -1,8 +1,8 @@
 import { describe, expect, expectTypeOf, it } from "../_internals/test/runtime";
 import {
-	type GetMunicipalityByCodeOptions,
-	type GetMunicipalityByNameOptions,
-	type GetMunicipalityOptions,
+	type GetMunicipalityByCodeParams,
+	type GetMunicipalityByNameParams,
+	type GetMunicipalityParams,
 	getMunicipality,
 } from "./get-municipality";
 
@@ -180,7 +180,7 @@ describe("getMunicipality", () => {
 
 		it("should return null for a non-string uf", async () => {
 			// @ts-expect-error: intentionally invalid input
-			const options: GetMunicipalityByNameOptions = { municipalityName: "São Paulo", uf: null };
+			const options: GetMunicipalityByNameParams = { municipalityName: "São Paulo", uf: null };
 
 			await expect(getMunicipality(options)).resolves.toBeNull();
 		});
@@ -217,23 +217,23 @@ describe("getMunicipality", () => {
 	});
 });
 
-const lookUpEither = (options: GetMunicipalityOptions) => getMunicipality(options);
+const lookUpEither = (options: GetMunicipalityParams) => getMunicipality(options);
 
 describe("getMunicipality types", () => {
 	it("should take a code or a name plus uf", () => {
-		expectTypeOf<GetMunicipalityOptions>().toEqualTypeOf<
-			GetMunicipalityByCodeOptions | GetMunicipalityByNameOptions
+		expectTypeOf<GetMunicipalityParams>().toEqualTypeOf<
+			GetMunicipalityByCodeParams | GetMunicipalityByNameParams
 		>();
-		expectTypeOf<GetMunicipalityByCodeOptions>().toEqualTypeOf<{ code: string | number }>();
-		expectTypeOf<GetMunicipalityByNameOptions>().toEqualTypeOf<{
+		expectTypeOf<GetMunicipalityByCodeParams>().toEqualTypeOf<{ code: string | number }>();
+		expectTypeOf<GetMunicipalityByNameParams>().toEqualTypeOf<{
 			municipalityName: string;
 			uf: string;
 		}>();
 	});
 
 	it("should overload the return type on the direction of the lookup", () => {
-		const byCode: GetMunicipalityByCodeOptions = { code: "3550308" };
-		const byName: GetMunicipalityByNameOptions = { municipalityName: "São Paulo", uf: "SP" };
+		const byCode: GetMunicipalityByCodeParams = { code: "3550308" };
+		const byName: GetMunicipalityByNameParams = { municipalityName: "São Paulo", uf: "SP" };
 		expectTypeOf(getMunicipality(byCode)).resolves.toEqualTypeOf<[string, string] | null>();
 		expectTypeOf(getMunicipality(byName)).resolves.toEqualTypeOf<string | null>();
 		expectTypeOf(lookUpEither).returns.resolves.toEqualTypeOf<[string, string] | string | null>();
