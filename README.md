@@ -102,7 +102,8 @@ You can check a list of utilities [by clicking here](https://brazilian-utils.com
 ## Development
 
 This repository uses Vite+ as the local toolchain; it is installed as a dependency, so nothing has
-to be installed globally beyond Node.js `^20.19.0 || >=22.12.0`.
+to be installed globally beyond Node.js 24 (the version in `.nvmrc`, which the toolchain needs; the
+library itself supports Node.js `^20.19.0 || >=22.12.0`).
 
 ```bash
 npm install
