@@ -248,20 +248,22 @@ describe("getHolidays", () => {
 		expect(mtHolidays.filter((h) => h.name === "Dia da Consciência Negra")).toHaveLength(1);
 	});
 
-	test("should keep the state-specific Consciência Negra entry before 2024", () => {
+	test("should keep the state-specific Consciência Negra entry before 2024, under the same name the national entry uses from 2024 on (Lei MT nº 7.879/2002 and Lei RJ nº 4.007/2002 both institute the feriado estadual naming the date 'Dia Nacional da Consciência Negra')", () => {
 		const rjHolidays = getHolidays({ year: 2023, stateCode: "RJ" });
 		const mtHolidays = getHolidays({ year: 2023, stateCode: "MT" });
 
 		expect(rjHolidays).toContainEqual({
-			name: "Consciência Negra",
+			name: "Dia da Consciência Negra",
 			date: new Date(2023, 10, 20),
 			type: "state",
 		});
 		expect(mtHolidays).toContainEqual({
-			name: "Consciência Negra",
+			name: "Dia da Consciência Negra",
 			date: new Date(2023, 10, 20),
 			type: "state",
 		});
+		expect(rjHolidays.some((h) => h.name === "Consciência Negra")).toBe(false);
+		expect(mtHolidays.some((h) => h.name === "Consciência Negra")).toBe(false);
 	});
 
 	test("should return only national holidays when stateCode is not provided, while SP's holidays still contain every national holiday plus extras", () => {
@@ -610,11 +612,34 @@ describe("getHolidays", () => {
 		]);
 		expect(prHolidays.some((h) => h.name === "Dia de Nossa Senhora do Rocio")).toBe(false);
 		expect(rnHolidays.some((h) => h.name === "Dia do Rio Grande do Norte")).toBe(false);
+		expect(rnHolidays.filter((h) => h.date.getMonth() === 7 && h.date.getDate() === 7)).toEqual([]);
+		expect(rnHolidays.filter((h) => h.date.getMonth() === 8 && h.date.getDate() === 7)).toEqual([
+			{ name: "Independência do Brasil", date: new Date(2024, 8, 7), type: "national" },
+		]);
 		expect(rnHolidays).toContainEqual({
 			name: "Mártires de Cunhaú e Uruaçu",
 			date: new Date(2024, 9, 3),
 			type: "state",
 		});
+		expect(rnHolidays.filter((h) => h.type === "state")).toEqual([
+			{ name: "Mártires de Cunhaú e Uruaçu", date: new Date(2024, 9, 3), type: "state" },
+		]);
+	});
+
+	test("should not include RO's Dia dos Evangélicos (18/06): Lei RO nº 1.026/2001 created it, but STF ADI 3940 declared that law unconstitutional, so the date is absent for every year while the 04/01 data magna of Lei RO nº 2.291/2010 stays", () => {
+		for (const year of [2002, 2019, 2024]) {
+			const roHolidays = getHolidays({ year, stateCode: "RO" });
+
+			expect(roHolidays.some((h) => h.name === "Dia dos Evangélicos")).toBe(false);
+			expect(roHolidays.filter((h) => h.date.getMonth() === 5 && h.date.getDate() === 18)).toEqual(
+				[],
+			);
+			expect(roHolidays).toContainEqual({
+				name: "Criação do Estado de Rondônia",
+				date: new Date(year, 0, 4),
+				type: "state",
+			});
+		}
 	});
 
 	test("should no longer include state holidays that lack a statewide legal basis: CE's São José (municipal, Fortaleza's patron saint), GO's Dia do Estado and Nossa Senhora Sant'Ana (no state law found), MT's Criação do Estado de Mato Grosso (Mato Grosso's only state holiday by law is Dia da Consciência Negra), and RJ's São Sebastião (municipal, city of Rio de Janeiro's patron saint)", () => {

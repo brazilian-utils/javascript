@@ -39,6 +39,18 @@ describe("isHoliday", () => {
 		expect(isHoliday({ targetDate: new Date(2024, 6, 9) })).toBe(false);
 	});
 
+	it("should return false for RN's 7 August: Lei RN nº 7.831/2000 makes the Dia do Rio Grande do Norte a commemorative date, not a feriado, while 7 September stays true everywhere as the national Independência do Brasil", () => {
+		expect(isHoliday({ targetDate: new Date(2026, 7, 7), stateCode: "RN" })).toBe(false);
+		expect(isHoliday({ targetDate: new Date(2026, 8, 7), stateCode: "RN" })).toBe(true);
+		expect(isHoliday({ targetDate: new Date(2026, 8, 7) })).toBe(true);
+		expect(isHoliday({ targetDate: new Date(2026, 9, 3), stateCode: "RN" })).toBe(true);
+	});
+
+	it("should return false for RO's 18 June, the Dia dos Evangélicos of the Lei RO nº 1.026/2001 that STF ADI 3940 voided, while RO's 4 January data magna stays true", () => {
+		expect(isHoliday({ targetDate: new Date(2019, 5, 18), stateCode: "RO" })).toBe(false);
+		expect(isHoliday({ targetDate: new Date(2019, 0, 4), stateCode: "RO" })).toBe(true);
+	});
+
 	it("should return false when called without arguments", () => {
 		expect(isHoliday()).toBe(false);
 	});

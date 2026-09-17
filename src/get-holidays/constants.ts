@@ -26,12 +26,20 @@ export const FIXED_HOLIDAYS = {
 export const CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR = 2024;
 
 /**
- * Lei 14.759/2023 names the holiday "Dia Nacional de Zumbi e da Consciência Negra"; the shorter
- * form below is the one 2.3.0 emitted and is kept so the output does not change.
+ * The name the 20 November entries are emitted under, national and state alike.
+ *
+ * No law spells it exactly this way. Art. 1º of Lei 14.759/2023 calls the national holiday "Dia
+ * Nacional de Zumbi e da Consciência Negra", and the state laws behind the pre-2024 entries of
+ * Mato Grosso, Rio de Janeiro and Amazonas are worded alike to each other: each institutes 20
+ * November as a feriado estadual and names the date after the federal commemorative one, "Dia
+ * Nacional da Consciência Negra" (see the `@see` entries below for the three texts). The form
+ * below drops a "Nacional" that would read as wrong on a state entry, is the one 2.3.0 already
+ * emitted for the national holiday, and keeps the name continuous across the 2023/2024 boundary
+ * where the state entries give way to the national one. Amapá is the exception: art. 1º of its
+ * Lei nº 1.169/2007 says "Dia Estadual da Consciência Negra" in so many words, so that entry
+ * carries the name its own law uses.
  */
 export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
-
-export const LEGACY_CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Consciência Negra";
 
 /** First year Alagoas' 16 September is a feriado estadual, not a ponto facultativo (Lei AL nº 9.358/2024). */
 export const AL_EMANCIPACAO_FERIADO_SINCE_YEAR = 2024;
@@ -75,14 +83,15 @@ export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * feriados estaduais; the library reports them because they are observed in practice, not
  * because art. 1º, II covers them.
  *
- * The statutory date is what is emitted. Three states shift the observed date and only Santa
+ * The statutory date is what is emitted. Four states shift the observed date and only Santa
  * Catarina's shift is modelled here (`nextSundayWhenWeekday`, from
  * `SC_ALEXANDRIA_TRANSFER_SINCE_YEAR` on for 25 November, apart from the
  * `SC_ALEXANDRIA_TRANSFER_GAP_YEAR` gap, and from `SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR` on for
  * 11 August): Acre moves feriados falling from
  * Tuesday to Thursday on to the following Friday (Lei AC nº 2.126/2009, except 15/06), and the
  * Goiás executive may move 26/07 and 28/10 to a nearby dia útil by decree (Lei GO nº 20.756/2020,
- * art. 269, § 1º), neither of which can be resolved from a year alone.
+ * art. 269, § 1º), neither of which can be resolved from a year alone; São Paulo moved 09/07 to
+ * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry.
  *
  * @see Official: https://legis.ac.gov.br/detalhar/1087
  * Lei AC nº 1.538/2004, Dia do Evangélico (23/01)
@@ -115,7 +124,10 @@ export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://sapl.al.am.leg.br/norma/8919
  * Lei AM nº 25/1977, Elevação do Amazonas à categoria de Província (05/09)
  * @see Official: https://sapl.al.am.leg.br/norma/2873
- * Lei AM nº 84/2010, Dia da Consciência Negra (state holiday until it became national in 2024)
+ * Lei AM nº 84/2010, Dia da Consciência Negra (state holiday until it became national in 2024).
+ * Its ementa carries the same wording as the Mato Grosso and Rio de Janeiro laws: "INSTITUI no
+ * Calendário Oficial do Estado do Amazonas o dia 20 de novembro, data de aniversário da morte de
+ * Zumbi dos Palmares e Dia Nacional da Consciência Negra, como feriado estadual".
  * @see Official: https://sapl.cmm.am.gov.br/norma/3932
  * Lei Municipal de Manaus nº 496/1999, Nossa Senhora da Conceição (08/12): "INSTITUI feriado
  * religioso no Município de Manaus no dia 8 de dezembro". No state norm declaring 08/12 was
@@ -144,7 +156,14 @@ export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://arquivos.al.ma.leg.br:8443/ged/legislacao/LEI_2457
  * Lei MA nº 2.457/1964, Adesão do Maranhão à Independência (28/07)
  * @see Official: https://www.al.mt.gov.br/norma-juridica/urn:lex:br;mato.grosso:estadual:lei.ordinaria:2002-12-27;7879
- * Lei MT nº 7.879/2002, Dia da Consciência Negra (state holiday until it became national in 2024)
+ * Lei MT nº 7.879, de 27/12/2002, Dia da Consciência Negra (state holiday until it became
+ * national in 2024). Art. 1º, as published in the Diário Oficial do Estado de Mato Grosso of
+ * 27/12/2002 (p. 6), the text the ALMT ficha técnica links: "Fica instituído o dia 20 de
+ * novembro, data do aniversário da morte de Zumbi dos Palmares e Dia Nacional da Consciência
+ * Negra, como feriado estadual"; its ementa repeats the same wording, and the ficha técnica
+ * records "Não consta revogação expressa". The "Lei MT nº 1.587/2002" cited for this holiday
+ * elsewhere is not in the ALMT norm base at all, under any norm type: 7.879/2002 is the law that
+ * creates it.
  * @see Official: https://aacpdappls.net.ms.gov.br/appls/legislacao/secoge/govato.nsf/1b758e65922af3e904256b220050342a/a489a293563f506304256e450002e9f8
  * Lei MS nº 10/1979, Criação do Estado de Mato Grosso do Sul (11/10)
  * @see Official: https://bancodeleis.alepa.pa.gov.br/arquivos/lei5999_1996_93239.pdf
@@ -173,14 +192,32 @@ export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * de Janeiro n. 5.198, de 5 de março de 2008, e, por conseguinte, julgou improcedente a presente
  * ação direta … Plenário, Sessão Virtual de 18.8.2023 a 25.8.2023"; trânsito em julgado 28/10/2023.
  * @see Official: http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/69d90307244602bb032567e800668618/80a541c3a5a9d63183256c7d0057bf25
- * Lei RJ nº 4.007/2002, Dia da Consciência Negra (state holiday until it became national in 2024).
- * Its Ficha Técnica records no ação de inconstitucionalidade either.
+ * Lei RJ nº 4.007, de 11/11/2002, Dia da Consciência Negra (state holiday until it became
+ * national in 2024). Art. 1º: "Fica instituído o dia 20 de novembro, data do aniversário da
+ * morte de Zumbi dos Palmares e dia Nacional da consciência Negra, como feriado Estadual", the
+ * same wording Mato Grosso's law of the same year carries. Its Ficha Técnica records no ação de
+ * inconstitucionalidade either.
  * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=2636281
  * STF ADI 4131, cited here before as pending against Lei RJ nº 4.007/2002, in fact sought "a
  * declaração de inconstitucionalidade da Lei n. 5.243, do Estado do Rio de Janeiro, de 14 de maio
  * de 2008" and was não conhecida on 21/09/2018 (trânsito em julgado 25/10/2018).
  * @see Official: http://www.al.rn.leg.br/storage/legislacao//arq5064574f632ec.pdf
- * Lei RN nº 8.913/2006, Mártires de Cunhaú e Uruaçu (03/10)
+ * Lei RN nº 8.913/2006, Mártires de Cunhaú e Uruaçu (03/10), the single entry of Rio Grande do
+ * Norte: a "Resumo da Lei" search for "feriado" in the ALRN legislation base
+ * (https://www.al.rn.leg.br/legislacao/pesquisa) returns this law and no other.
+ * @see Official: https://www.al.rn.leg.br/noticia/19157/rn-faz-519-anos-e-data-foi-criada-por-lei-estadual-em-alusao-ao-marco-de-touros
+ * Lei RN nº 7.831, de 30/05/2000, the "Dia do Rio Grande do Norte" (07/08), which is *not* a
+ * holiday and therefore has no entry. The ALRN records it as "Lei Ord. nº 7.831, de 30/05/2000"
+ * and describes it in the Assembleia's own reporting on the date: the deputy "propôs o projeto de
+ * lei instituindo o dia 7 de agosto como data do aniversário do Rio Grande do Norte. A lei 7.831
+ * foi aprovada no dia 30 de maio de 2000, sancionada no dia seguinte". It creates a data
+ * comemorativa and nothing else; the ALRN's own ementa index does not return it for "feriado",
+ * and the state's 07/08 is a working day. The 07/09 "Dia do Rio Grande do Norte" this table
+ * carried before 2.4.0 had no law behind it at all and merely duplicated the national
+ * Independência do Brasil, which still makes `isHoliday` true on 07/09 for every state. The
+ * ALRN's own download link for the 7.831 text
+ * (https://www.al.rn.leg.br/storage/legislacao//Lei%20n%C2%BA%207.831.pdf) 404s, as do the links
+ * of every other law it holds from that year.
  * @see Official: https://ww2.al.rs.gov.br/dal/LinkClick.aspx?fileticket=WQdIfqNoXO4%3d&tabid=3683&mid=5359
  * Constituição Estadual do RS compilada (the "Veja em HTML" document of the Assembleia's
  * Constituição Estadual page, linked below), art. 6º § 1º, Revolução Farroupilha (20/09): "O dia
@@ -193,7 +230,20 @@ export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://sapl.al.ro.leg.br/norma/4958
  * Lei RO nº 2.291, de 22/04/2010, Criação do Estado de Rondônia (04/01): "DECLARA O DIA 4 DE
  * JANEIRO DATA MAGNA E FERIADO CIVIL ESTADUAL". Lei RO nº 3.170/2013, cited here before, is a
- * supplementary credit law unrelated to holidays.
+ * supplementary credit law: "AUTORIZA O PODER EXECUTIVO A ABRIR CRÉDITO SUPLEMENTAR POR ANULAÇÃO
+ * ... EM FAVOR DAS UNIDADES ORÇAMENTÁRIAS: DEPARTAMENTO DE ESTRADAS E RODAGEM - DER/RO,
+ * SECRETARIA DE ESTADO DE ASSISTÊNCIA SOCIAL - SEAS", nothing to do with holidays.
+ * @see Official: https://sapl.al.ro.leg.br/norma/3003
+ * Lei RO nº 1.026, de 20/12/2001, the other law cited for Rondônia, whose art. 1º did create a
+ * second feriado estadual — "Fica instituído feriado no Estado de Rondônia, o dia 18 de junho,
+ * em homenagem aos evangélicos" — but which the STF struck down, so 18/06 has no entry.
+ * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=2545186
+ * STF ADI 3940, which voided that law. Decisão de julgamento of 20/03/2020, Tribunal Pleno,
+ * sessão virtual: "O Tribunal, por unanimidade, julgou procedente o pedido formulado na ação
+ * direta para declarar a inconstitucionalidade da Lei nº 1.026, de 20 de dezembro de 2001, do
+ * Estado de Rondônia, nos termos do voto do Relator ... Plenário, Sessão Virtual de 13.3.2020 a
+ * 19.3.2020"; trânsito em julgado 11/08/2020. The declaration is erga omnes and ex tunc, so the
+ * date is absent for every year, not only from 2020 on.
  * @see Official: http://sapl.al.rr.leg.br/media/sapl/public/normajuridica/1991/3912/constituicao_estadual_do_estado_de_roraima.pdf
  * Constituição Estadual de RR, art. 9º, Criação do Estado de Roraima (05/10): "Cinco de outubro,
  * data magna de Roraima, é feriado em todo o território do Estado".
@@ -230,11 +280,21 @@ export const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * on, while 25 November is fixed up to 1998, transferring from 1999 to 2003, fixed again in 2004
  * and transferring from 2005 on. Lei SC nº 16.719/2015, cited here before, was revoked by Lei SC nº
  * 17.335/2017, itself consolidated and revoked by Lei SC nº 18.531/2022.
- * @see Official: https://www.al.sp.gov.br/documentacao/estudos-e-manuais/feriado-9-julho/artigo.htm
- * Lei SP nº 9.497/1997 (PL 710/1995), Revolução Constitucionalista (09/07)
+ * @see Official: https://www.al.sp.gov.br/repositorio/legislacao/lei/1997/lei-9497-05.03.1997.html
+ * Lei SP nº 9.497, de 05/03/1997, Revolução Constitucionalista (09/07), art. 1º: "Fica
+ * instituído, como feriado civil, o dia 9 (nove) de julho, data magna do Estado de São Paulo,
+ * conforme autorizado pelo Artigo 1.º, inciso II, da Lei Federal n. 9.093, de 12 de setembro de
+ * 1995". The "710/1995" cited for this holiday elsewhere is the number of the projeto de lei that
+ * became it, not of a law. The same ALESP text records one exception this table does not model,
+ * because it applies to a single year: Lei SP nº 17.264, de 22/05/2020, "que determinou a
+ * comemoração do feriado, excepcionalmente para o ano de 2020, em 25 de maio".
  * @see Official: https://www.al.sp.gov.br/repositorio/legislacao/lei/2023/lei-17746-12.09.2023.html
- * Lei SP nº 17.746/2023, Dia da Consciência Negra: a permanent state holiday, listed here only for
- * 2023 because the national holiday of Lei 14.759/2023 takes over from 2024.
+ * Lei SP nº 17.746, de 12/09/2023, Dia da Consciência Negra: a permanent state holiday, listed
+ * here only for 2023 because the national holiday of Lei 14.759/2023 takes over from 2024. Art.
+ * 1º: "Fica instituído, no âmbito do Estado, o dia 20 de novembro de cada ano, Dia Estadual da
+ * Consciência Negra, como feriado estadual". That is the Amapá wording, not the Mato Grosso one,
+ * so this single-year entry is the one place the table reports a holiday under
+ * `CONSCIENCIA_NEGRA_HOLIDAY_NAME` where the law itself says "Dia Estadual".
  * @see Official: https://aleselegis.al.se.leg.br/Arquivo/Documents/legislacao/html/CE11989.html
  * Constituição Estadual de SE, art. 269 (EC nº 20/2000), Independência de Sergipe (08/07): "Será
  * feriado estadual o dia 08 de julho, data consagrada à Independência de Sergipe".
@@ -312,7 +372,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	MA: [{ name: "Adesão do Maranhão à Independência", day: 28, month: 7 }],
 	MT: [
 		{
-			name: LEGACY_CONSCIENCIA_NEGRA_HOLIDAY_NAME,
+			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
 			day: 20,
 			month: 11,
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
@@ -335,7 +395,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	RJ: [
 		{ name: "São Jorge", day: 23, month: 4 },
 		{
-			name: LEGACY_CONSCIENCIA_NEGRA_HOLIDAY_NAME,
+			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
 			day: 20,
 			month: 11,
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
