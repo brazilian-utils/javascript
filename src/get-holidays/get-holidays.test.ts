@@ -703,6 +703,15 @@ describe("getHolidays", () => {
 				}),
 			);
 		});
+
+		test("should return the national holidays for a state code that is not a string, an object without a primitive value included", () => {
+			const national = getHolidays(2024);
+
+			expect(getHolidays({ year: 2024, stateCode: Object.create(null) as never })).toEqual(
+				national,
+			);
+			expect(getHolidays({ year: 2024, stateCode: ["SP"] as never })).toEqual(national);
+		});
 	});
 });
 

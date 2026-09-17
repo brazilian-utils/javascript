@@ -47,7 +47,7 @@ export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 		);
 	}
 
-	if (!Object.hasOwn(CITIES_DATA, stateCode)) return [];
+	if (typeof stateCode !== "string" || !Object.hasOwn(CITIES_DATA, stateCode)) return [];
 
 	return buildMunicipalities(stateCode);
 };

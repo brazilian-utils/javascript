@@ -89,8 +89,8 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 	);
 
 	// An own entry lookup, so a prototype chain key ("toString", "__proto__", ...) is an unknown
-	// state code like any other, and so is `undefined` when no state code was given.
-	// Stryker disable next-line ConditionalExpression: `Object.hasOwn` reads an `undefined` key as the string "undefined", which is no state code either, so the `undefined` guard only narrows the type.
+	// state code like any other. `getHolidays` only passes a string or `undefined` down here.
+	// Stryker disable next-line ConditionalExpression: `Object.hasOwn` reads an `undefined` key as the string "undefined", which is no state code either, so the guard only narrows the type.
 	const hasStateHolidays = stateCode !== undefined && Object.hasOwn(STATE_HOLIDAYS, stateCode);
 
 	const stateHolidays = hasStateHolidays ? STATE_HOLIDAYS[stateCode] : undefined;

@@ -128,6 +128,12 @@ describe("getMunicipalities", () => {
 			);
 		});
 
+		test("should return an empty list for a state code that is not a string, an object without a primitive value included", () => {
+			expect(getMunicipalities(Object.create(null) as never)).toEqual([]);
+			expect(getMunicipalities(["SP"] as never)).toEqual([]);
+			expect(getMunicipalities(35 as never)).toEqual([]);
+		});
+
 		test("should list, for every state, the same names and order as getCities", () => {
 			fc.assert(
 				fc.property(stateCodeArbitrary, (stateCode) => {
