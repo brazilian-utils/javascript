@@ -1,21 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>Brazilian Utils</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more." />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
   <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/brazilian-utils/brand/main/favicons/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/brazilian-utils/brand/main/favicons/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/brazilian-utils/brand/main/favicons/apple-touch-icon.png" />
-  <meta name="viewport"
-    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
-  <link rel="stylesheet" href="//unpkg.com/docsify-themeable@0.9.0/dist/css/theme-simple-dark.css" />
+
+  <!-- docsify 5 core theme with the dark add-on always on, the look the site had before v5;
+       add media="(prefers-color-scheme: dark)" to the add-on to follow the system instead -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/core.min.css" />
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/addons/core-dark.min.css" />
+  <style>
+    :root {
+      /* The green of the official palette (github.com/brazilian-utils/brand) */
+      --theme-color: #009739;
+      /* The cover page shares the page background instead of the default gradient */
+      --cover-bg: var(--color-bg);
+      --cover-bg-overlay: none;
+    }
+  </style>
 </head>
 
-<body>
+<body class="loading sidebar-chevron-right">
   <div id="app"></div>
+
+  <!-- Configuration -->
   <script>
     window.$docsify = {
       name: 'Brazilian Utils',
@@ -32,7 +46,7 @@
       loadNavbar: true,
       loadSidebar: true,
       auto2top: true,
-      subMaxLevel: 2,
+      subMaxLevel: 3,
       coverpage: {
         '/': '_coverpage.md',
         '/pt-br/': 'pt-br/_coverpage.md'
@@ -65,11 +79,13 @@
       },
     };
   </script>
-  <script src="//unpkg.com/docsify@5.0.0/lib/docsify.min.js"></script>
-  <script src="//unpkg.com/docsify@5.0.0/lib/plugins/search.min.js"></script>
-  <script src="//unpkg.com/docsify@5.0.0/lib/plugins/emoji.min.js"></script>
-  <script src="//unpkg.com/docsify-copy-code@3.0.2"></script>
-  <script src="//unpkg.com/docsify-themeable@0.9.0"></script>
+
+  <!-- Docsify 5: the major version pin picks up non-breaking releases automatically -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/docsify.min.js"></script>
+
+  <!-- Plugins (emoji is built into docsify since 4.13, so its plugin is gone) -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@3/dist/docsify-copy-code.min.js"></script>
 </body>
 
 </html>
