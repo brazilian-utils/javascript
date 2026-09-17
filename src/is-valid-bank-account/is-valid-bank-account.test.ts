@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { BANKS, LEGACY_BANK_CODES } from "../_internals/constants/banks";
+import { BANKS } from "../_internals/constants/banks";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { COMPE_CODES, STRUCTURE_ONLY_BANK_CODES } from "./constants";
 import {
@@ -766,37 +766,6 @@ describe("isValidBankAccount", () => {
 					digit: "6",
 				}),
 			).toBe(true);
-		});
-
-		test("should return true for a code the participants list no longer publishes, using the generic check", () => {
-			expect(
-				isValidBankAccount({
-					bankCode: "746",
-					agency: "1234",
-					account: "123456",
-					digit: "6",
-				}),
-			).toBe(true);
-		});
-
-		test("should still reject a wrong check digit for a code the list no longer publishes", () => {
-			expect(
-				isValidBankAccount({
-					bankCode: "746",
-					agency: "1234",
-					account: "123456",
-					digit: "5",
-				}),
-			).toBe(false);
-		});
-
-		test("should publish no check digit algorithm of its own for any legacy code", () => {
-			const legacyCodes = LEGACY_BANK_CODES;
-
-			expect(legacyCodes).toHaveLength(29);
-			expect(legacyCodes.every((code) => BANKS.some((bank) => bank.code === code))).toBe(true);
-			expect(legacyCodes.some((code) => ALGORITHM_BANK_CODES.includes(code))).toBe(false);
-			expect(legacyCodes.some((code) => STRUCTURE_ONLY_BANK_CODES.includes(code))).toBe(false);
 		});
 	});
 

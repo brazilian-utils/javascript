@@ -636,7 +636,7 @@ isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
 
 ## isValidBankAccount
 
-Verifica se uma conta bancária brasileira é válida. O `bankCode` precisa estar na lista de participantes do STR publicada pelo Banco Central do Brasil (o mesmo dataset usado por `getBankByCode`), então um código não atribuído como `'999'` é sempre inválido. A partir daí o banco é validado de uma de três formas: pelo algoritmo de dígito verificador publicado, apenas pela estrutura (o banco existe e a agência/conta respeitam a quantidade de dígitos documentada, para bancos que não publicam regra de dígito) ou pela verificação genérica mod10/mod11, que continua sendo o fallback para os demais bancos da lista. Os 29 códigos que a lista de participantes deixou de publicar também são aceitos, sob essa mesma verificação genérica, porque uma conta deles continua aparecendo em documentos preenchidos enquanto a instituição tinha o código; nenhum deles publica regra de dígito verificador própria, e `getBankByCode` os marca com `legacy: true`.
+Verifica se uma conta bancária brasileira é válida. O `bankCode` precisa estar na lista de participantes do STR publicada pelo Banco Central do Brasil (o mesmo dataset usado por `getBankByCode`), então um código não atribuído como `'999'` é sempre inválido. A partir daí o banco é validado de uma de três formas: pelo algoritmo de dígito verificador publicado, apenas pela estrutura (o banco existe e a agência/conta respeitam a quantidade de dígitos documentada, para bancos que não publicam regra de dígito) ou pela verificação genérica mod10/mod11, que continua sendo o fallback para os demais bancos da lista.
 
 Bancos validados pelo algoritmo de dígito verificador publicado:
 
@@ -739,48 +739,41 @@ isValidBankAccount({
 
 ## getBanks
 
-Obtém todos os bancos brasileiros com código de compensação (COMPE), publicados pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Cada banco (tipado como `Bank`) tem um `code` (COMPE, 3 dígitos), um `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 dígitos), um `name` e um marcador `legacy`. Por padrão só voltam os 463 participantes que a lista publica hoje, cada um com `legacy: false`; passe `{ includeLegacy: true }` (tipado como `GetBanksParams`) para somar os 29 códigos que ela deixou de publicar, que voltam com `legacy: true` e que `getBankByCode`, `getBankByIspb` e `isValidBankAccount` continuam aceitando. Cada chamada retorna um novo array com novos objetos, então alterar o resultado nunca afeta chamadas seguintes.
+Obtém todos os bancos brasileiros com código de compensação (COMPE), publicados pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Cada banco (tipado como `Bank`) tem um `code` (COMPE, 3 dígitos), um `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 dígitos) e um `name`. Cada chamada retorna um novo array com novos objetos, então alterar o resultado nunca afeta chamadas seguintes.
 
 ```javascript
 import { getBanks } from '@brazilian-utils/brazilian-utils';
 
 getBanks();
 // [
-//   { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false },
-//   { code: '003', ispb: '04902979', name: 'BANCO DA AMAZONIA S.A.', legacy: false },
-//   { code: '004', ispb: '07237373', name: 'Banco do Nordeste do Brasil S.A.', legacy: false },
+//   { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' },
+//   { code: '003', ispb: '04902979', name: 'BANCO DA AMAZONIA S.A.' },
+//   { code: '004', ispb: '07237373', name: 'Banco do Nordeste do Brasil S.A.' },
 //   ... mais 460 itens
 // ]
-
-getBanks().length; // 463
-getBanks({ includeLegacy: true }).length; // 492
-getBanks({ includeLegacy: true }).find((bank) => bank.code === '746');
-// { code: '746', ispb: '30723886', name: 'Banco Modal S.A.', legacy: true }
 ```
 
 ## getBankByCode
 
-Busca um banco brasileiro pelo seu código de compensação (COMPE), publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Um código que a lista deixou de publicar é encontrado do mesmo jeito, porque um código escrito em um documento é justamente o caso que essa busca responde, e volta com `legacy: true`; os participantes da lista atual têm `legacy: false`. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse código.
+Busca um banco brasileiro pelo seu código de compensação (COMPE), publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse código.
 
 ```javascript
 import { getBankByCode } from '@brazilian-utils/brazilian-utils';
 
-getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false }
-getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false }
-getBankByCode('746'); // { code: '746', ispb: '30723886', name: 'Banco Modal S.A.', legacy: true }
+getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
+getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
 getBankByCode('999'); // null
 ```
 
 ## getBankByIspb
 
-Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 dígitos publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Todo participante do SPB tem um ISPB, mas este conjunto de dados só traz as instituições que também têm código COMPE, então um ISPB cuja instituição não tem código COMPE próprio retorna `null`. Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda, então `getBankByIspb(0)` encontra o mesmo banco que `getBankByIspb('00000000')`. O conjunto de dados é gerado a partir desse CSV, recorrendo à [BrasilAPI](https://brasilapi.com.br/api/banks/v1) quando a requisição ao Bacen falha. Uma instituição cujo código COMPE a lista deixou de publicar é encontrada do mesmo jeito, e volta com `legacy: true`; nenhum ISPB é compartilhado entre esses códigos e os participantes da lista atual. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse ISPB.
+Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 dígitos publicado pelo Banco Central do Brasil na [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Todo participante do SPB tem um ISPB, mas este conjunto de dados só traz as instituições que também têm código COMPE, então um ISPB cuja instituição não tem código COMPE próprio retorna `null`. Aceita tanto `string` quanto `number`, com ou sem zeros à esquerda, então `getBankByIspb(0)` encontra o mesmo banco que `getBankByIspb('00000000')`. O conjunto de dados é gerado a partir desse CSV, recorrendo à [BrasilAPI](https://brasilapi.com.br/api/banks/v1) quando a requisição ao Bacen falha. Retorna uma nova cópia (tipada como `Bank`) do banco correspondente, ou `null` quando nenhum banco tem esse ISPB.
 
 ```javascript
 import { getBankByIspb } from '@brazilian-utils/brazilian-utils';
 
-getBankByIspb('00000000'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false }
-getBankByIspb('60701190'); // { code: '341', ispb: '60701190', name: 'ITAÚ UNIBANCO S.A.', legacy: false }
-getBankByIspb('30723886'); // { code: '746', ispb: '30723886', name: 'Banco Modal S.A.', legacy: true }
+getBankByIspb('00000000'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
+getBankByIspb('60701190'); // { code: '341', ispb: '60701190', name: 'ITAÚ UNIBANCO S.A.' }
 getBankByIspb('99999999'); // null
 ```
 

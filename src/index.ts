@@ -91,7 +91,7 @@ export { type AreaCodeInfo, getAreaCodeInfo } from "./get-area-code-info/get-are
 export { getAreaCodesByState } from "./get-area-codes-by-state/get-area-codes-by-state";
 export { getBankByCode } from "./get-bank-by-code/get-bank-by-code";
 export { getBankByIspb } from "./get-bank-by-ispb/get-bank-by-ispb";
-export { type GetBanksParams, getBanks } from "./get-banks/get-banks";
+export { getBanks } from "./get-banks/get-banks";
 export {
 	type BoletoInfo,
 	type GetBoletoInfoOptions,

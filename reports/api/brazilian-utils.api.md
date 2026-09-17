@@ -31,7 +31,6 @@ export type Bank = {
     code: string;
     ispb: string;
     name: string;
-    legacy: boolean;
 };
 
 // @public
@@ -436,12 +435,7 @@ export const getBankByCode: (code: string | number) => Bank | null;
 export const getBankByIspb: (value: string | number) => Bank | null;
 
 // @public
-export const getBanks: (params?: GetBanksParams) => Bank[];
-
-// @public
-export type GetBanksParams = {
-    includeLegacy?: boolean;
-};
+export const getBanks: () => Bank[];
 
 // @public
 export const getBoletoInfo: (value: string, options?: GetBoletoInfoOptions) => BoletoInfo | null;

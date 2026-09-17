@@ -227,7 +227,7 @@ A handful of utils are the exception: each embeds an official dataset, so it wei
 | `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
-| `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 41.0 - 41.3 KB | 10.3 - 10.4 KB |
+| `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
 
 Importing any of them from the root, even alongside a single small util, pulls that whole dataset into your main bundle, because this package ships as a single ESM module: a dynamic `import()` of the root (`await import('@brazilian-utils/brazilian-utils')`) still resolves to that same one file, so it can't be split out on its own. A bundler doing code-splitting needs a separate module to split *into*.
 
@@ -889,7 +889,7 @@ isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
 
 ### isValidBankAccount
 
-Check if a Brazilian bank account is valid. The `bankCode` must belong to the Banco Central do Brasil STR participants list (the same dataset used by `getBankByCode`), so an unassigned code such as `'999'` is always invalid. Banks are then validated in one of three ways: by their published check digit algorithm, by structure only (bank exists and the agency/account match the documented digit lengths, for banks that publish no check digit rule) or by a generic mod10/mod11 check, which stays the fallback for every other listed bank. The 29 codes the participants list no longer publishes are accepted too, under that same generic check, because an account of theirs keeps appearing in documents filled in while the institution had its code; none of them publishes a check digit rule of its own, and `getBankByCode` marks them `legacy: true`.
+Check if a Brazilian bank account is valid. The `bankCode` must belong to the Banco Central do Brasil STR participants list (the same dataset used by `getBankByCode`), so an unassigned code such as `'999'` is always invalid. Banks are then validated in one of three ways: by their published check digit algorithm, by structure only (bank exists and the agency/account match the documented digit lengths, for banks that publish no check digit rule) or by a generic mod10/mod11 check, which stays the fallback for every other listed bank.
 
 Banks validated by their published check digit algorithm:
 
@@ -992,48 +992,41 @@ isValidBankAccount({
 
 ### getBanks
 
-Get every Brazilian bank with a compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Each bank (typed as `Bank`) has a `code` (COMPE, 3 digits), an `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 digits), a `name` and a `legacy` flag. Only the 463 participants the list publishes today are returned by default, each with `legacy: false`; pass `{ includeLegacy: true }` (typed as `GetBanksParams`) to add the 29 codes it no longer publishes, which come back with `legacy: true` and which `getBankByCode`, `getBankByIspb` and `isValidBankAccount` keep accepting. Each call returns a fresh array of fresh objects, so mutating the result never affects subsequent calls.
+Get every Brazilian bank with a compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Each bank (typed as `Bank`) has a `code` (COMPE, 3 digits), an `ispb` (Identificador do Sistema de Pagamentos Brasileiro, 8 digits) and a `name`. Each call returns a fresh array of fresh objects, so mutating the result never affects subsequent calls.
 
 ```javascript
 import { getBanks } from '@brazilian-utils/brazilian-utils';
 
 getBanks();
 // [
-//   { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false },
-//   { code: '003', ispb: '04902979', name: 'BANCO DA AMAZONIA S.A.', legacy: false },
-//   { code: '004', ispb: '07237373', name: 'Banco do Nordeste do Brasil S.A.', legacy: false },
+//   { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' },
+//   { code: '003', ispb: '04902979', name: 'BANCO DA AMAZONIA S.A.' },
+//   { code: '004', ispb: '07237373', name: 'Banco do Nordeste do Brasil S.A.' },
 //   ... 460 more items
 // ]
-
-getBanks().length; // 463
-getBanks({ includeLegacy: true }).length; // 492
-getBanks({ includeLegacy: true }).find((bank) => bank.code === '746');
-// { code: '746', ispb: '30723886', name: 'Banco Modal S.A.', legacy: true }
 ```
 
 ### getBankByCode
 
-Look a Brazilian bank up by its compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Accepts both `string` and `number` input, with or without leading zeros. A code the list no longer publishes is looked up all the same, because a code written on a document is exactly the case this lookup answers, and comes back with `legacy: true`; the participants of the current list carry `legacy: false`. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that code.
+Look a Brazilian bank up by its compensation code (COMPE), published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Accepts both `string` and `number` input, with or without leading zeros. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that code.
 
 ```javascript
 import { getBankByCode } from '@brazilian-utils/brazilian-utils';
 
-getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false }
-getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false }
-getBankByCode('746'); // { code: '746', ispb: '30723886', name: 'Banco Modal S.A.', legacy: true }
+getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
+getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
 getBankByCode('999'); // null
 ```
 
 ### getBankByIspb
 
-Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Every SPB participant has an ISPB, but this dataset only carries the institutions that also have a COMPE code, so an ISPB whose institution has no COMPE code of its own returns `null`. Accepts both `string` and `number` input, with or without leading zeros, so `getBankByIspb(0)` finds the same bank as `getBankByIspb('00000000')`. The dataset is generated from that CSV, falling back to [BrasilAPI](https://brasilapi.com.br/api/banks/v1) when the Bacen request fails. An institution whose COMPE code the list no longer publishes is looked up all the same, and comes back with `legacy: true`; no ISPB is shared between those and the participants of the current list. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
+Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv). Every SPB participant has an ISPB, but this dataset only carries the institutions that also have a COMPE code, so an ISPB whose institution has no COMPE code of its own returns `null`. Accepts both `string` and `number` input, with or without leading zeros, so `getBankByIspb(0)` finds the same bank as `getBankByIspb('00000000')`. The dataset is generated from that CSV, falling back to [BrasilAPI](https://brasilapi.com.br/api/banks/v1) when the Bacen request fails. Returns a fresh copy (typed as `Bank`) of the matching bank, or `null` when no bank has that ISPB.
 
 ```javascript
 import { getBankByIspb } from '@brazilian-utils/brazilian-utils';
 
-getBankByIspb('00000000'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.', legacy: false }
-getBankByIspb('60701190'); // { code: '341', ispb: '60701190', name: 'ITAÚ UNIBANCO S.A.', legacy: false }
-getBankByIspb('30723886'); // { code: '746', ispb: '30723886', name: 'Banco Modal S.A.', legacy: true }
+getBankByIspb('00000000'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
+getBankByIspb('60701190'); // { code: '341', ispb: '60701190', name: 'ITAÚ UNIBANCO S.A.' }
 getBankByIspb('99999999'); // null
 ```
 

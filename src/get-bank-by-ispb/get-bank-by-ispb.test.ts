@@ -22,7 +22,6 @@ describe("getBankByIspb", () => {
 				code: "001",
 				ispb: "00000000",
 				name: "Banco do Brasil S.A.",
-				legacy: false,
 			});
 		});
 
@@ -31,7 +30,6 @@ describe("getBankByIspb", () => {
 				code: "001",
 				ispb: "00000000",
 				name: "Banco do Brasil S.A.",
-				legacy: false,
 			});
 		});
 
@@ -40,7 +38,6 @@ describe("getBankByIspb", () => {
 				code: "001",
 				ispb: "00000000",
 				name: "Banco do Brasil S.A.",
-				legacy: false,
 			});
 		});
 
@@ -49,7 +46,6 @@ describe("getBankByIspb", () => {
 				code: "001",
 				ispb: "00000000",
 				name: "Banco do Brasil S.A.",
-				legacy: false,
 			});
 		});
 
@@ -58,16 +54,6 @@ describe("getBankByIspb", () => {
 				code: "341",
 				ispb: "60701190",
 				name: "ITAÚ UNIBANCO S.A.",
-				legacy: false,
-			});
-		});
-
-		test("for an institution whose code the list no longer publishes, marked legacy", () => {
-			expect(getBankByIspb("30723886")).toEqual({
-				code: "746",
-				ispb: "30723886",
-				name: "Banco Modal S.A.",
-				legacy: true,
 			});
 		});
 	});
@@ -162,6 +148,6 @@ describe("getBankByIspb types", () => {
 	test("should take a string or number and return a bank or null", () => {
 		expectTypeOf(getBankByIspb).parameter(0).toEqualTypeOf<string | number>();
 		expectTypeOf(getBankByIspb).returns.toEqualTypeOf<Bank | null>();
-		expectTypeOf<Bank["legacy"]>().toEqualTypeOf<boolean>();
+		expectTypeOf<Bank>().toEqualTypeOf<{ code: string; ispb: string; name: string }>();
 	});
 });
