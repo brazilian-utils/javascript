@@ -64,49 +64,80 @@ function describeValue(value: unknown): string {
 	}
 }
 
-function deepEqual(a: unknown, b: unknown): boolean {
-	if (Object.is(a, b)) {
-		return true;
-	}
+type Pair = [unknown, unknown];
 
-	if (a instanceof Date && b instanceof Date) {
-		return a.getTime() === b.getTime();
-	}
+/**
+ * Queues the element pairs of two arrays or the entry pairs of two records for comparison, or
+ * reports that the two values can only be equal when `Object.is` says so (dates compare by time).
+ */
+function queuePairs(a: unknown, b: unknown, pending: Pair[]): boolean {
+	if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
 
 	if (Array.isArray(a) && Array.isArray(b)) {
-		return a.length === b.length && a.every((value, index) => deepEqual(value, b[index]));
+		if (a.length !== b.length) return false;
+		for (let index = 0; index < a.length; index++) pending.push([a[index], b[index]]);
+		return true;
 	}
 
 	if (isRecord(a) && isRecord(b)) {
 		const aKeys = Object.keys(a);
 		const bKeys = Object.keys(b);
 
-		return (
-			aKeys.length === bKeys.length &&
-			aKeys.every((key) => bKeys.includes(key) && deepEqual(a[key], b[key]))
-		);
+		if (aKeys.length !== bKeys.length) return false;
+
+		for (const key of aKeys) {
+			if (!bKeys.includes(key)) return false;
+			pending.push([a[key], b[key]]);
+		}
+		return true;
 	}
 
 	return false;
+}
+
+function deepEqual(left: unknown, right: unknown): boolean {
+	const pending: Pair[] = [[left, right]];
+
+	while (pending.length > 0) {
+		const pair = pending.pop();
+
+		if (pair === undefined) break;
+
+		const [a, b] = pair;
+
+		if (!Object.is(a, b) && !queuePairs(a, b, pending)) return false;
+	}
+
+	return true;
 }
 
 function objectMatches(
 	actual: Record<string, unknown>,
 	expected: Record<string, unknown>,
 ): boolean {
-	return Object.entries(expected).every(([key, value]) => {
-		if (!(key in actual)) {
-			return false;
+	const pending: [Record<string, unknown>, Record<string, unknown>][] = [[actual, expected]];
+
+	while (pending.length > 0) {
+		const pair = pending.pop();
+
+		if (pair === undefined) break;
+
+		const [actualRecord, expectedRecord] = pair;
+
+		for (const [key, value] of Object.entries(expectedRecord)) {
+			if (!(key in actualRecord)) return false;
+
+			const actualValue = actualRecord[key];
+
+			if (isRecord(value) && isRecord(actualValue)) {
+				pending.push([actualValue, value]);
+			} else if (!deepEqual(actualValue, value)) {
+				return false;
+			}
 		}
+	}
 
-		const actualValue = actual[key];
-
-		if (isRecord(value) && isRecord(actualValue)) {
-			return objectMatches(actualValue, value);
-		}
-
-		return deepEqual(actualValue, value);
-	});
+	return true;
 }
 
 function createMock(implementation?: MockImplementation): MockFunction {
@@ -484,12 +515,10 @@ function createExpect(actual: unknown): ExpectResult {
 }
 
 async function runHooks(hooks: TestCallback[]): Promise<void> {
-	const [hook, ...rest] = hooks;
-
-	if (hook === undefined) return;
-
-	await hook();
-	await runHooks(rest);
+	for (const hook of hooks) {
+		// eslint-disable-next-line no-await-in-loop
+		await hook();
+	}
 }
 
 function currentSuiteChain(): Suite[] {

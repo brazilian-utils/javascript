@@ -5,8 +5,8 @@ const chain: unknown = new Proxy(() => chain, { apply: () => chain, get: () => c
 /**
  * Runtime stand-in for vitest's `expectTypeOf` on Bun and Deno: every call and property access
  * returns the same chainable no-op, so a `describe("<name> types")` block runs without effect
- * there. The assertions themselves are checked statically by `vp check` and by
- * `npm run test:types`.
+ * there. The assertions themselves are checked statically by `vp check`, which type-checks the
+ * test files too.
  */
 export const expectTypeOf = chain as typeof vitestExpectTypeOf;
 
