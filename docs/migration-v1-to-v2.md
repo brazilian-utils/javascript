@@ -29,6 +29,17 @@ The library now uses modern ES module exports with proper `exports` field in `pa
 import { isValidCpf, formatCpf } from '@brazilian-utils/brazilian-utils';
 ```
 
+Since 2.4.0 every util is also its own subpath entry, so a bundler that does not tree-shake (or a
+plain `require`) still loads a single module, and the few heavy ones (`getCities`,
+`getMunicipalities`, `isValidNcm`, `isValidCbo`, `isValidCnae`, `getBanks`) can be lazy-loaded:
+
+```javascript
+import { isValidCpf } from '@brazilian-utils/brazilian-utils/is-valid-cpf'; // ~1.4 KB, 0.8 KB gzipped
+const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'); // only when needed
+```
+
+See [Bundle size](getting-started.md#bundle-size) for the sizes of every entry.
+
 ### 📁 Simpler Structure
 
 The codebase has been reorganized for better maintainability:
@@ -79,6 +90,14 @@ Added new useful utilities:
 - `formatPis` - Format PIS numbers
 - `isValidRenavam` - Validate RENAVAM (vehicle registration number)
 - `isValidBankAccount` - Validate Brazilian bank accounts with specific algorithms for major banks
+
+2.4.0 added many more families on top of these, all listed in the [utilities documentation](utilities.md):
+Pix (`isValidPixKey`, `generatePixPayload`, `getPixPayloadInfo`), NF-e/DF-e keys, CNS, certidão,
+CEI/CNO/CAEPF, IBAN, card numbers, VIN, professional registrations, bank lookups (`getBanks`,
+`getBankByCode`, `getBankByIspb`), CBO/CNAE/NCM/CFOP/CST/CSOSN codes, business days
+(`isBusinessDay`, `addBusinessDays`, `differenceInBusinessDays`), legal nature categories, offline
+municipalities (`getMunicipalities`, `getMunicipalityByCode`), DDD and time zone lookups, numbers in
+words, and a `capitalize` that knows the Brazilian company designations.
 
 #### Alphanumeric CNPJ Support (Version 2)
 
@@ -131,7 +150,7 @@ To make the migration easier, **v2.x still exports the old PascalCase names as d
 | `isValidCNPJ` | `isValidCnpj` |
 | `isValidCEP` | `isValidCep` |
 | `isValidPIS` | `isValidPis` |
-| `isValidIE` | `isValidIe` |
+| `isValidIE` | `isValidIe` (since 2.4.0 prefer the object form, `isValidIe({ value, stateCode })`; the positional form is deprecated) |
 | `isValidProcessoJuridico` | `isValidProcessoJuridico` (unchanged) |
 | `isValidBoleto` | `isValidBoleto` (unchanged) |
 | `isValidEmail` | `isValidEmail` (unchanged) |
@@ -182,6 +201,7 @@ generateCnpj(); // Currently generates numeric (v1), but will be random in v3.0.
 | `capitalize` | `capitalize` (unchanged) |
 | `getStates` | `getStates` (unchanged) |
 | `getCities` | `getCities` (unchanged; deprecated in 2.4.0 in favour of `getMunicipalities`) |
+| `getMunicipality` | `getMunicipality` (deprecated in 2.4.0 in favour of `getMunicipalityByCode`, which is synchronous and offline) |
 | `getAddressInfoByCep` | `getAddressInfoByCep` (API changed, see below) |
 
 ### Migration Example
@@ -412,6 +432,10 @@ getCities(); // Returns sorted alphabetically
 getCities('SP'); // Returns sorted alphabetically
 ```
 
+**Since 2.4.0:** `getCities` is deprecated. `getMunicipalities('SP')` returns the same municipalities
+with their IBGE codes (`{ code, name, stateCode }`), and `getMunicipalityByCode('3550308')` looks one
+up without a network call.
+
 ## Migration Checklist
 
 ### Required (before upgrading to v2.x)
@@ -420,6 +444,10 @@ getCities('SP'); // Returns sorted alphabetically
 ### Optional (recommended before v3.0.0)
 - [ ] Update all imports to use camelCase function names
 - [ ] Replace all function calls with camelCase names
+- [ ] Replace `getCities` with `getMunicipalities` and `getMunicipality` with `getMunicipalityByCode` (deprecated in 2.4.0)
+- [ ] Call `isValidIe({ value, stateCode })` instead of `isValidIe(stateCode, ie)` (deprecated in 2.4.0)
+- [ ] Import the `*Params` type names instead of the `*Options` aliases kept for the single-object-argument functions (deprecated in 2.4.0)
+- [ ] Drop `'widenet'` from the `providers` of `getAddressInfoByCep` (the service is gone; deprecated in 2.4.0)
 
 ### Review if applicable
 - [ ] Update error handling for `getAddressInfoByCep` if needed

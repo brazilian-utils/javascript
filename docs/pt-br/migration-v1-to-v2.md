@@ -29,6 +29,18 @@ A biblioteca agora usa exports de módulos ES modernos com o campo `exports` ade
 import { isValidCpf, formatCpf } from '@brazilian-utils/brazilian-utils';
 ```
 
+Desde a 2.4.0 cada utilitário também é um subpath próprio, então um bundler que não faz tree
+shaking (ou um `require` simples) ainda carrega um único módulo, e os poucos pesados (`getCities`,
+`getMunicipalities`, `isValidNcm`, `isValidCbo`, `isValidCnae`, `getBanks`) podem ser carregados sob
+demanda:
+
+```javascript
+import { isValidCpf } from '@brazilian-utils/brazilian-utils/is-valid-cpf'; // ~1,4 KB, 0,8 KB com gzip
+const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'); // só quando precisar
+```
+
+Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para o tamanho de cada entrada.
+
 ### Estrutura Mais Simples
 
 O código foi reorganizado para melhor manutenibilidade:
@@ -79,6 +91,14 @@ Adicionadas novas utilitários úteis:
 - `formatPis` - Formata números de PIS
 - `isValidRenavam` - Valida RENAVAM (número de registro de veículos)
 - `isValidBankAccount` - Valida contas bancárias brasileiras com algoritmos específicos para principais bancos
+
+A 2.4.0 acrescentou muitas outras famílias a essas, todas listadas na [documentação de utilitários](pt-br/utilities.md):
+Pix (`isValidPixKey`, `generatePixPayload`, `getPixPayloadInfo`), chave de NF-e/DF-e, CNS, certidão,
+CEI/CNO/CAEPF, IBAN, número de cartão, VIN, registro profissional, consulta de bancos (`getBanks`,
+`getBankByCode`, `getBankByIspb`), códigos CBO/CNAE/NCM/CFOP/CST/CSOSN, dias úteis (`isBusinessDay`,
+`addBusinessDays`, `differenceInBusinessDays`), categorias de natureza jurídica, municípios offline
+(`getMunicipalities`, `getMunicipalityByCode`), DDD e fuso horário, número por extenso e um
+`capitalize` que conhece as designações societárias brasileiras.
 
 #### Suporte a CNPJ Alfanumérico (Versão 2)
 
@@ -131,7 +151,7 @@ Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCa
 | `isValidCNPJ` | `isValidCnpj` |
 | `isValidCEP` | `isValidCep` |
 | `isValidPIS` | `isValidPis` |
-| `isValidIE` | `isValidIe` |
+| `isValidIE` | `isValidIe` (desde a 2.4.0 prefira a forma objeto, `isValidIe({ value, stateCode })`; a forma posicional está descontinuada) |
 | `isValidProcessoJuridico` | `isValidProcessoJuridico` (inalterado) |
 | `isValidBoleto` | `isValidBoleto` (inalterado) |
 | `isValidEmail` | `isValidEmail` (inalterado) |
@@ -182,6 +202,7 @@ generateCnpj(); // Atualmente gera numérico (v1), mas será aleatório na v3.0.
 | `capitalize` | `capitalize` (inalterado) |
 | `getStates` | `getStates` (inalterado) |
 | `getCities` | `getCities` (inalterado; descontinuado na 2.4.0 em favor de `getMunicipalities`) |
+| `getMunicipality` | `getMunicipality` (descontinuado na 2.4.0 em favor de `getMunicipalityByCode`, que é síncrono e offline) |
 | `getAddressInfoByCep` | `getAddressInfoByCep` (API alterada, veja abaixo) |
 
 ### Exemplo de Migração
@@ -412,6 +433,10 @@ getCities(); // Retorna ordenado alfabeticamente
 getCities('SP'); // Retorna ordenado alfabeticamente
 ```
 
+**Desde a 2.4.0:** `getCities` está descontinuado. `getMunicipalities('SP')` retorna os mesmos municípios
+com o código do IBGE (`{ code, name, stateCode }`), e `getMunicipalityByCode('3550308')` busca um deles
+sem chamada de rede.
+
 ## Checklist de Migração
 
 ### Obrigatório (antes de atualizar para v2.x)
@@ -420,6 +445,10 @@ getCities('SP'); // Retorna ordenado alfabeticamente
 ### Opcional (recomendado antes da v3.0.0)
 - [ ] Atualizar todas as importações para usar nomes de funções em camelCase
 - [ ] Substituir todas as chamadas de funções com nomes em camelCase
+- [ ] Trocar `getCities` por `getMunicipalities` e `getMunicipality` por `getMunicipalityByCode` (descontinuados na 2.4.0)
+- [ ] Chamar `isValidIe({ value, stateCode })` em vez de `isValidIe(stateCode, ie)` (descontinuado na 2.4.0)
+- [ ] Importar os tipos `*Params` em vez dos aliases `*Options` mantidos para as funções de um único argumento objeto (descontinuados na 2.4.0)
+- [ ] Tirar `'widenet'` dos `providers` do `getAddressInfoByCep` (o serviço acabou; descontinuado na 2.4.0)
 
 ### Revisar se aplicável
 - [ ] Atualizar tratamento de erros para `getAddressInfoByCep` se necessário
