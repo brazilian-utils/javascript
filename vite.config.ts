@@ -147,7 +147,17 @@ export default defineConfig({
 	fmt: {
 		// `reports` holds generated output only, the committed API Extractor baseline included:
 		// reformatting its code block would make every `check:api` run report a changed API.
-		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude"],
+		// `CHANGELOG.md` is written by release-please (`* ` bullets); formatting it would fail the
+		// Check workflow on every release PR.
+		ignorePatterns: [
+			"dist",
+			"coverage",
+			"docs",
+			"reports",
+			".stryker-tmp",
+			".claude",
+			"CHANGELOG.md",
+		],
 		singleQuote: false,
 		sortImports: true,
 		useTabs: true,
