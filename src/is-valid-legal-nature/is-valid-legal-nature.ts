@@ -1,4 +1,5 @@
-import { LEGAL_NATURE, MASK_REGEX } from "./constants";
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
+import { LEGAL_NATURE } from "./constants";
 
 /**
  * Validates if a Brazilian legal nature (natureza jurídica) code exists.
@@ -34,7 +35,7 @@ import { LEGAL_NATURE, MASK_REGEX } from "./constants";
 export const isValidLegalNature = (code: string): boolean => {
 	if (typeof code !== "string") return false;
 
-	const normalized = code.replace(MASK_REGEX, "");
+	const normalized = code.replace(SEPARATORS_REGEX, "");
 
 	return Object.hasOwn(LEGAL_NATURE, normalized);
 };

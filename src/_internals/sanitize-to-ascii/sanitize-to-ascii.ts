@@ -1,5 +1,3 @@
-const COMBINING_MARKS_REGEX = /[\u0300-\u036F]/g;
-
 const WHITESPACE_REGEX = /\s/g;
 
 const NON_PRINTABLE_ASCII_REGEX = /[^\u0020-\u007E]/g;
@@ -27,7 +25,6 @@ const SPACE_RUN_REGEX = / {2,}/g;
 export const sanitizeToAscii = (value: string): string =>
 	value
 		.normalize("NFD")
-		.replace(COMBINING_MARKS_REGEX, "")
 		.replace(WHITESPACE_REGEX, " ")
 		.replace(NON_PRINTABLE_ASCII_REGEX, "")
 		.replace(SPACE_RUN_REGEX, " ")

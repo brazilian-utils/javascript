@@ -125,6 +125,14 @@ describe("getHolidays", () => {
 		expect(getHolidays(null)).toEqual([]);
 	});
 
+	test("should read a prototype chain key as an unknown state code and list the national holidays only", () => {
+		const national = getHolidays(2024);
+
+		for (const stateCode of ["toString", "constructor", "__proto__", "hasOwnProperty"]) {
+			expect(getHolidays({ year: 2024, stateCode: stateCode as StateCode })).toEqual(national);
+		}
+	});
+
 	test('should return an empty array when called with a function, even one carrying a year property (typeof yearOrOptions !== "object" must reject it, not just isNullish)', () => {
 		const fakeOptions = Object.assign(() => null, { year: 2024 });
 
@@ -163,13 +171,13 @@ describe("getHolidays", () => {
 		expect(second).not.toEqual(first);
 	});
 
-	test("should serve a second identical call from the cache without recomputing (verified by corrupting the state holiday data in between; recomputing would throw)", () => {
+	test("should serve a second identical call from the cache without recomputing (verified by adding a state holiday in between; recomputing would list it)", () => {
 		const year = 2085;
 		const stateCode = "AC" as const;
 		const first = getHolidays({ year, stateCode });
 		const acEntries = STATE_HOLIDAYS.AC ?? [];
 
-		acEntries.push({ name: "Feriado inválido para checar o cache" });
+		acEntries.push({ name: "Feriado inventado para checar o cache", day: 2, month: 1 });
 
 		try {
 			expect(getHolidays({ year, stateCode })).toEqual(first);

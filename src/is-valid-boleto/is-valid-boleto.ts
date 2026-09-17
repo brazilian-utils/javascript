@@ -1,4 +1,3 @@
-import { ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
 import { mod10 } from "../_internals/mod10/mod10";
 import { mod11 } from "../_internals/mod11/mod11";
@@ -64,7 +63,7 @@ const isValidCheckDigit = (boleto: string): boolean => {
 export const isValidBoleto = (value: string): boolean => {
 	const digits = sanitizeToDigits(value);
 
-	if (digits.startsWith(ARRECADACAO_PRODUCT) && parseArrecadacao(digits)) return true;
+	if (parseArrecadacao(digits)) return true;
 
 	if (digits.length !== BOLETO_LENGTH) return false;
 

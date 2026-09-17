@@ -22,6 +22,13 @@ describe("getFormatLicensePlate", () => {
 		expect(getFormatLicensePlate("invalid")).toBeNull();
 	});
 
+	it("should return null for a value that is not a string, even one that stringifies to a plate", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(getFormatLicensePlate({ toString: () => "ABC1234" })).toBeNull();
+		// @ts-expect-error: intentionally invalid input
+		expect(getFormatLicensePlate(1_234_567)).toBeNull();
+	});
+
 	describe("properties", () => {
 		test("should name the format of every generated plate", () => {
 			fc.assert(

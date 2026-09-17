@@ -1,14 +1,19 @@
 /** How a holiday's date is defined: a fixed day and month, or an offset in days from Easter Sunday. */
-export type HolidayDateRule = {
-	/** Day of the month, 1 to 31, used together with `month`. */
-	day?: number;
-	/** Month, 1 to 12, used together with `day`. */
-	month?: number;
-	/** Offset in days from Easter Sunday (Carnaval is -47, Corpus Christi is 60); Easter itself is 0. */
-	easterOffset?: number;
+export type HolidayDateRule = (
+	| {
+			/** Offset in days from Easter Sunday (Carnaval is -47, Corpus Christi is 60); Easter itself is 0. */
+			easterOffset: number;
+	  }
+	| {
+			/** Day of the month, 1 to 31, used together with `month`. */
+			day: number;
+			/** Month, 1 to 12, used together with `day`. */
+			month: number;
+	  }
+) & {
 	/**
-	 * Whether the holiday is observed on the following Sunday when the date the two rules above
-	 * resolve to falls on a weekday (Monday to Friday), as Santa Catarina's two state holidays do.
+	 * Whether the holiday is observed on the following Sunday when the date the rule resolves to
+	 * falls on a weekday (Monday to Friday), as Santa Catarina's two state holidays do.
 	 */
 	nextSundayWhenWeekday?: boolean;
 };
@@ -75,21 +80,11 @@ function moveToNextSundayWhenWeekday(date: Date): Date {
  *
  * @see Based on: https://en.wikipedia.org/wiki/Date_of_Easter#Anonymous_Gregorian_algorithm
  */
-export const resolveStateHolidayDate = (
-	year: number,
-	{ day, month, easterOffset, nextSundayWhenWeekday }: HolidayDateRule,
-): Date => {
-	let date: Date;
+export const resolveStateHolidayDate = (year: number, rule: HolidayDateRule): Date => {
+	const date =
+		"easterOffset" in rule
+			? calculateHolidayFromEaster(year, rule.easterOffset)
+			: new Date(year, rule.month - 1, rule.day);
 
-	if (easterOffset !== undefined) {
-		date = calculateHolidayFromEaster(year, easterOffset);
-	} else if (day !== undefined && month !== undefined) {
-		date = new Date(year, month - 1, day);
-	} else {
-		throw new Error(
-			"State holiday entry must define either `easterOffset` or both `day` and `month`",
-		);
-	}
-
-	return nextSundayWhenWeekday === true ? moveToNextSundayWhenWeekday(date) : date;
+	return rule.nextSundayWhenWeekday === true ? moveToNextSundayWhenWeekday(date) : date;
 };

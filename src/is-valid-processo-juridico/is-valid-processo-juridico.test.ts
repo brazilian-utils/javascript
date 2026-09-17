@@ -38,6 +38,12 @@ describe("isValidProcessoJuridico", () => {
 			expect(isValidProcessoJuridico("00020802520125150050")).toBe(false);
 		});
 
+		test("when a mask character leads or trails an otherwise valid value", () => {
+			expect(isValidProcessoJuridico("-00020802520125150049")).toBe(false);
+			expect(isValidProcessoJuridico("00020802520125150049.")).toBe(false);
+			expect(isValidProcessoJuridico(".0002080-25.2012.5.15.0049-")).toBe(false);
+		});
+
 		test("when a letter is attached to the digits", () => {
 			expect(isValidProcessoJuridico("ab00020802520125150049")).toBe(false);
 			expect(isValidProcessoJuridico("00020802520125150049ab")).toBe(false);

@@ -1,5 +1,5 @@
-import { PIS_LENGTH, PIS_WEIGHTS } from "../_internals/constants/pis";
-import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
+import { calculatePisCheckDigit } from "../_internals/calculate-pis-check-digit/calculate-pis-check-digit";
+import { PIS_LENGTH } from "../_internals/constants/pis";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
@@ -40,13 +40,5 @@ export const isValidPis = (pis: string): boolean => {
 
 	if (isRepeatedDigits(digits)) return false;
 
-	const base = digits.slice(0, PIS_LENGTH - 1);
-	const checkDigit = digits.charCodeAt(PIS_LENGTH - 1) - 48;
-
-	const weightedChecksum = generateChecksum({ base, weight: PIS_WEIGHTS });
-	const calculatedDigit = 11 - (weightedChecksum % 11);
-
-	const finalDigit = calculatedDigit >= 10 ? 0 : calculatedDigit;
-
-	return checkDigit === finalDigit;
+	return digits.charCodeAt(PIS_LENGTH - 1) - 48 === calculatePisCheckDigit(digits);
 };

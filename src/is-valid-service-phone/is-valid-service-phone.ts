@@ -9,12 +9,6 @@ import {
 } from "../_internals/constants/service-phone";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
-const NON_GEOGRAPHIC_PREFIXES: readonly string[] = SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES;
-
-const ABBREVIATED_ROOTS: readonly string[] = SERVICE_PHONE_ABBREVIATED_ROOTS;
-
-const UTILITY_CODES: readonly string[] = SERVICE_PHONE_UTILITY_CODES;
-
 /**
  * Validates if a phone number is a valid Brazilian service number.
  *
@@ -59,16 +53,18 @@ export const isValidServicePhone = (value: string): boolean => {
 	const digits = sanitizeToDigits(value);
 
 	if (digits.length === SERVICE_PHONE_NON_GEOGRAPHIC_LENGTH) {
-		return NON_GEOGRAPHIC_PREFIXES.includes(
+		return SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES.includes(
 			digits.slice(0, SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH),
 		);
 	}
 
 	if (digits.length === SERVICE_PHONE_ABBREVIATED_LENGTH) {
-		return ABBREVIATED_ROOTS.includes(digits.slice(0, SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH));
+		return SERVICE_PHONE_ABBREVIATED_ROOTS.includes(
+			digits.slice(0, SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH),
+		);
 	}
 
 	// Every public utility code is exactly 3 digits, so a value of any other length that reaches
 	// here matches none of them and is turned down by this very check.
-	return UTILITY_CODES.includes(digits);
+	return SERVICE_PHONE_UTILITY_CODES.includes(digits);
 };

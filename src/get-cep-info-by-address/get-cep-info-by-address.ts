@@ -1,6 +1,6 @@
-import { DATA as STATES, type StateCode } from "../_internals/constants/states";
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isStateCode } from "../_internals/is-state-code/is-state-code";
 import { removeAccents } from "../remove-accents/remove-accents";
 
 /** Base class of every error `getCepInfoByAddress` rejects with. */
@@ -77,9 +77,6 @@ export type GetCepInfoByAddressParams = {
  * @deprecated Use `GetCepInfoByAddressParams` instead.
  */
 export type GetCepInfoByAddressOptions = GetCepInfoByAddressParams;
-
-const isStateCode = (value: string): value is StateCode =>
-	STATES.some((state) => state.code === value);
 
 const normalizeAddressPart = (value: string): string => removeAccents(value).trim();
 

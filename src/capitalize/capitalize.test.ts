@@ -1,10 +1,8 @@
 import * as fc from "fast-check";
 
-import { DATA } from "../_internals/constants/states";
 import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { capitalize, type CapitalizeOptions } from "./capitalize";
-import { STATE_CODES } from "./constants";
 
 describe("capitalize", () => {
 	describe("should capitalize", () => {
@@ -234,10 +232,6 @@ describe("capitalize", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(capitalize("jose da silva", { lowerCaseWords: [1, "da"] })).toBe("Jose da Silva");
 		});
-	});
-
-	test("should keep its state code list in sync with the one published by the IBGE", () => {
-		expect(STATE_CODES).toStrictEqual(DATA.map((state) => state.code));
 	});
 
 	describe("properties", () => {

@@ -1,6 +1,4 @@
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
-import { LENGTH } from "../parse-license-plate/constants";
-import { parseLicensePlate } from "../parse-license-plate/parse-license-plate";
 import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
 
 /** The Brazilian license plate formats `getFormatLicensePlate` can identify: the old `LLLNNNN` and the Mercosul `LLLNLNN`. */
@@ -41,9 +39,9 @@ export type LicensePlateFormat = "LLLNNNN" | "LLLNLNN";
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
 export const getFormatLicensePlate = (value: string): LicensePlateFormat | null => {
-	if (sanitizeToAlphanumeric(value).length !== LENGTH) return null;
+	if (typeof value !== "string") return null;
 
-	const parsed = parseLicensePlate(value);
+	const parsed = sanitizeToAlphanumeric(value);
 
 	if (OLD_FORMAT_REGEX.test(parsed)) return "LLLNNNN";
 	if (MERCOSUL_REGEX.test(parsed)) return "LLLNLNN";

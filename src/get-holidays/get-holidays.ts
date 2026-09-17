@@ -39,7 +39,7 @@ export type GetHolidaysParams = {
  */
 export type GetHolidaysOptions = GetHolidaysParams;
 
-let cache: Map<string, Holiday[]> | undefined;
+const cache = new Map<string, Holiday[]>();
 
 const cloneHolidays = (holidays: Holiday[]): Holiday[] =>
 	holidays.map((holiday) => ({ ...holiday, date: new Date(holiday.date) }));
@@ -90,10 +90,13 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 
 	// An own entry lookup, so a prototype chain key ("toString", "__proto__", ...) is an unknown
 	// state code like any other, and so is `undefined` when no state code was given.
-	const stateEntry = Object.entries(STATE_HOLIDAYS).find(([code]) => code === stateCode);
+	// Stryker disable next-line ConditionalExpression: `Object.hasOwn` reads an `undefined` key as the string "undefined", which is no state code either, so the `undefined` guard only narrows the type.
+	const hasStateHolidays = stateCode !== undefined && Object.hasOwn(STATE_HOLIDAYS, stateCode);
 
-	if (stateEntry) {
-		for (const entry of stateEntry[1]) {
+	const stateHolidays = hasStateHolidays ? STATE_HOLIDAYS[stateCode] : undefined;
+
+	if (stateHolidays) {
+		for (const entry of stateHolidays) {
 			const { name, type, since, until } = entry;
 			// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
 			if (since !== undefined && year < since) continue;
@@ -241,8 +244,6 @@ export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[
 
 	// Stryker disable next-line StringLiteral: the exact fallback text is never observable outside this module; it only has to be a value no real StateCode equals, which any fixed string satisfies
 	const cacheKey = `${year}|${normalizedStateCode ?? ""}`;
-
-	cache ??= new Map<string, Holiday[]>();
 
 	const cached = cache.get(cacheKey);
 	if (cached) {

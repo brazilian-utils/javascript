@@ -50,13 +50,4 @@ describe("resolveStateHolidayDate", () => {
 			resolveStateHolidayDate(2024, { easterOffset: 60, nextSundayWhenWeekday: true }),
 		).toEqual(new Date(2024, 5, 2));
 	});
-
-	test("should throw when the rule defines neither an Easter offset nor both day and month", () => {
-		const message =
-			"State holiday entry must define either `easterOffset` or both `day` and `month`";
-
-		expect(() => resolveStateHolidayDate(2024, {})).toThrow(message);
-		expect(() => resolveStateHolidayDate(2024, { day: 10 })).toThrow(message);
-		expect(() => resolveStateHolidayDate(2024, { month: 5 })).toThrow(message);
-	});
 });

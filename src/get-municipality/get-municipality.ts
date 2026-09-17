@@ -1,4 +1,5 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/cities";
+import { type StateCode } from "../_internals/constants/states";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
@@ -68,6 +69,8 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 	return entry ? [...entry] : null;
 };
 
+const isStateCode = (value: string): value is StateCode => Object.hasOwn(CITIES_DATA, value);
+
 const getMunicipalityCodeByName = ({
 	municipalityName,
 	uf,
@@ -78,15 +81,15 @@ const getMunicipalityCodeByName = ({
 
 	// Every real state code is exactly 2 uppercase letters, so a malformed `normalizedUf` (wrong
 	// length, digits, ...) simply finds no match below; there is no need to pre-validate its shape.
-	const stateEntry = Object.entries(CITIES_DATA).find(([code]) => code === normalizedUf);
-
-	if (!stateEntry) return null;
+	if (!isStateCode(normalizedUf)) return null;
 
 	// `removeAccents` (and so `normalizeMunicipalityName`) already folds a non-string or empty
 	// `municipalityName` down to `""`, which no real municipality name normalizes to, so there is
 	// no need to pre-validate `municipalityName` here first.
 	const normalizedName = normalizeMunicipalityName(municipalityName);
-	const match = stateEntry[1].find(([name]) => normalizeMunicipalityName(name) === normalizedName);
+	const match = CITIES_DATA[normalizedUf].find(
+		([name]) => normalizeMunicipalityName(name) === normalizedName,
+	);
 
 	return match ? match[1] : null;
 };

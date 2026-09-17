@@ -4,7 +4,7 @@ export type GenerateChecksumParams = {
 	/** The digits the checksum is computed over. */
 	base: string | number;
 	/** A starting weight that decreases along the digits, or the explicit weight of each digit. */
-	weight: number | number[];
+	weight: number | readonly number[];
 };
 
 /**

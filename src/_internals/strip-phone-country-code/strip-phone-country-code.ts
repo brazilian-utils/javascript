@@ -1,4 +1,5 @@
 import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
+import { toStringSafe } from "../to-string-safe/to-string-safe";
 
 const EXPLICIT_COUNTRY_CODE_REGEX = /^\s*(?:\+|00)\s*55/;
 
@@ -18,10 +19,9 @@ const EXPLICIT_COUNTRY_CODE_REGEX = /^\s*(?:\+|00)\s*55/;
  * ```
  */
 export const stripPhoneCountryCode = (value: string | number): string => {
-	// Stryker disable next-line ConditionalExpression: a number cannot carry a "+" or "00" prefix, so running it through the regex changes nothing.
-	if (typeof value !== "string") return sanitizeToDigits(value);
+	const text = toStringSafe(value);
 
-	const match = EXPLICIT_COUNTRY_CODE_REGEX.exec(value);
+	const match = EXPLICIT_COUNTRY_CODE_REGEX.exec(text);
 
-	return sanitizeToDigits(match ? value.slice(match[0].length) : value);
+	return sanitizeToDigits(match ? text.slice(match[0].length) : text);
 };

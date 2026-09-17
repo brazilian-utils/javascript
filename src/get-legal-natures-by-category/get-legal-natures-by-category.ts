@@ -1,6 +1,7 @@
 import { LEGAL_NATURE_CATEGORIES } from "../_internals/constants/legal-nature-categories";
+import { isLegacyLegalNature } from "../_internals/is-legacy-legal-nature/is-legacy-legal-nature";
 import { buildLegalNature, type LegalNature } from "../get-legal-nature/get-legal-nature";
-import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 /**
  * The options `getLegalNaturesByCategory` accepts, saying whether the legacy codes of the category
@@ -71,7 +72,7 @@ export const getLegalNaturesByCategory = (
 
 	for (const [code, description] of Object.entries(LEGAL_NATURE)) {
 		if (!code.startsWith(categoryCode)) continue;
-		if (!includeLegacy && Object.hasOwn(LEGACY_LEGAL_NATURE, code)) continue;
+		if (!includeLegacy && isLegacyLegalNature(code)) continue;
 
 		legalNatures.push(buildLegalNature(code, description));
 	}

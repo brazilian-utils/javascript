@@ -1,4 +1,4 @@
-import { fetchWithRetry } from "../fetch-with-retry/fetch-with-retry.ts";
+import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
 /**
  * Fetches a dataset with retry, fails when the response is not ok, and returns the parsed

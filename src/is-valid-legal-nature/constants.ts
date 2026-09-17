@@ -155,6 +155,3 @@ export const LEGACY_LEGAL_NATURE: Record<string, string | null> = {
 	"3123": null,
 	"5002": "5010",
 };
-
-/** Mask characters (hyphen, dot, whitespace) tolerated around a legal nature code. */
-export const MASK_REGEX = /[-.\s]/g;

@@ -39,7 +39,7 @@ import { CSOSN_CODES, CSOSN_FORMAT_REGEX } from "./constants";
 export const isValidCsosn = (value: string | number): boolean => {
 	if (!isLookupCode(value)) return false;
 
-	const code = typeof value === "number" ? String(value) : value.trim();
+	const code = String(value).trim();
 
 	if (!CSOSN_FORMAT_REGEX.test(code)) return false;
 

@@ -189,9 +189,6 @@ const BANK_RULES: Record<string, BankAccountRule> = {
 	},
 };
 
-/** The bank codes validated by a published check digit algorithm. */
-export const ALGORITHM_BANK_CODES = Object.keys(BANK_RULES);
-
 const STRUCTURE_ONLY_RULE: BankAccountRule = {
 	minAgencyLength: 1,
 	maxAgencyLength: 5,

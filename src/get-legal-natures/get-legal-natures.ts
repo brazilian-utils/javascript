@@ -1,4 +1,5 @@
-import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { isLegacyLegalNature } from "../_internals/is-legacy-legal-nature/is-legacy-legal-nature";
+import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 /** The object form `getLegalNatures` accepts, saying whether the legacy codes are listed too. */
 export type GetLegalNaturesParams = {
@@ -43,7 +44,7 @@ export const getLegalNatures = (params?: GetLegalNaturesParams): Record<string, 
 	const legalNatures: Record<string, string> = {};
 
 	for (const [code, description] of Object.entries(LEGAL_NATURE)) {
-		if (!Object.hasOwn(LEGACY_LEGAL_NATURE, code)) legalNatures[code] = description;
+		if (!isLegacyLegalNature(code)) legalNatures[code] = description;
 	}
 
 	return legalNatures;

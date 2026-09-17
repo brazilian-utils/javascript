@@ -1,25 +1,12 @@
+import { calculateCpfCheckDigit } from "../_internals/calculate-cpf-check-digit/calculate-cpf-check-digit";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 const FORMAT_REGEX = /^\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{2}$/;
 
-const isValidChecksum = (cpf: string): boolean => {
-	let sum = 0;
-	for (let i = 0; i < 9; i++) {
-		sum += (cpf.charCodeAt(i) - 48) * (10 - i);
-	}
-	let mod = sum % 11;
-	const expected1 = mod < 2 ? 48 : 48 + 11 - mod;
-	if (cpf.charCodeAt(9) !== expected1) return false;
-
-	sum = 0;
-	for (let i = 0; i < 10; i++) {
-		sum += (cpf.charCodeAt(i) - 48) * (11 - i);
-	}
-	mod = sum % 11;
-	const expected2 = mod < 2 ? 48 : 48 + 11 - mod;
-	return cpf.charCodeAt(10) === expected2;
-};
+const isValidChecksum = (cpf: string): boolean =>
+	cpf.charCodeAt(9) - 48 === calculateCpfCheckDigit(cpf.slice(0, 9)) &&
+	cpf.charCodeAt(10) - 48 === calculateCpfCheckDigit(cpf.slice(0, 10));
 
 /**
  * Validates if a CPF (Cadastro de Pessoas Físicas) is valid.

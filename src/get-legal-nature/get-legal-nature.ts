@@ -2,7 +2,8 @@ import {
 	LEGAL_NATURE_CATEGORIES,
 	type LegalNatureCategory,
 } from "../_internals/constants/legal-nature-categories";
-import { LEGACY_LEGAL_NATURE, LEGAL_NATURE, MASK_REGEX } from "../is-valid-legal-nature/constants";
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
+import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 export type { LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
 
@@ -117,5 +118,5 @@ const lookUp = (code: string): LegalNature | null =>
 export const getLegalNature = (value: string | number): LegalNature | null => {
 	if (typeof value !== "string" && typeof value !== "number") return null;
 
-	return lookUp(String(value).replace(MASK_REGEX, ""));
+	return lookUp(String(value).replace(SEPARATORS_REGEX, ""));
 };

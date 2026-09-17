@@ -1,15 +1,13 @@
+import { calculateProcessoJuridicoCheckDigits } from "../_internals/calculate-processo-juridico-check-digits/calculate-processo-juridico-check-digits";
 import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-juridico";
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import {
 	CHECK_DIGIT_LENGTH,
 	CHECK_DIGIT_START_POSITION,
 	COURT_POSITION,
-	MOD_97_10_QUOTIENT,
-	MOD_97_10_SUM,
 	TRIBUNAL_LENGTH,
 	TRIBUNAL_START_POSITION,
 } from "./constants";
-
-const SEPARATORS_REGEX = /[\s.-]/g;
 
 const FORMAT_REGEX = /^\d{7}[\s.-]*\d{2}[\s.-]*\d{4}[\s.-]*\d[\s.-]*\d{2}[\s.-]*\d{4}$/;
 
@@ -23,23 +21,7 @@ const verifyCheckDigit = (value: string): boolean => {
 		value.slice(0, CHECK_DIGIT_START_POSITION) +
 		value.slice(CHECK_DIGIT_START_POSITION + CHECK_DIGIT_LENGTH);
 
-	let digits1to11 = 0;
-	for (let i = 0; i < 11; i++) {
-		digits1to11 += (withoutCheck.charCodeAt(i) - 48) * 10 ** (10 - i);
-	}
-	const firstRemainder = digits1to11 % MOD_97_10_QUOTIENT;
-
-	let digits12to18 = 0;
-	for (let i = 11; i < 18; i++) {
-		digits12to18 += (withoutCheck.charCodeAt(i) - 48) * 10 ** (6 - (i - 11));
-	}
-
-	const secondRemainder =
-		(firstRemainder * 1_000_000_000 + digits12to18 * 100) % MOD_97_10_QUOTIENT;
-
-	const verifier = MOD_97_10_SUM - secondRemainder;
-
-	return verifier === verificationDigits;
+	return calculateProcessoJuridicoCheckDigits(withoutCheck) === verificationDigits;
 };
 
 const verifyCourtAndTribunal = (value: string): boolean => {

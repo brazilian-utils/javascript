@@ -79,14 +79,10 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 
 	const stateCode = AREA_CODE_STATES[numericAreaCode];
 
-	if (stateCode === undefined) return null;
+	// An unknown DDD maps to no state code, so the lookup below finds no state for it either.
+	const state = DATA.find((entry) => entry.code === stateCode);
 
-	// Built per call on purpose: a module level index would be a top level call no consumer
-	// bundler can prove pure, which pins the whole states table into every export's bundle.
-	const statesByCode: Record<string, State> = {};
-	for (const entry of DATA) statesByCode[entry.code] = entry;
-
-	const state = statesByCode[stateCode];
+	if (state === undefined) return null;
 
 	return {
 		areaCode: numericAreaCode,

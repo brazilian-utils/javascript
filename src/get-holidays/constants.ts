@@ -1,12 +1,9 @@
 import { type StateCode } from "../_internals/constants/states";
+import { type HolidayDateRule } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
 import { type HolidayType } from "./get-holidays";
 
-type StateHolidayEntry = {
+type StateHolidayEntry = HolidayDateRule & {
 	name: string;
-	day?: number;
-	month?: number;
-	easterOffset?: number;
-	nextSundayWhenWeekday?: boolean;
 	type?: HolidayType;
 	since?: number;
 	until?: number;

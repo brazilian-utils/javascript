@@ -1,4 +1,4 @@
-const SEPARATORS_REGEX = /[\s.-]/g;
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 
 const CEP_REGEX = /^\d{8}$/;
 

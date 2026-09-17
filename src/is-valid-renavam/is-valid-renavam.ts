@@ -1,11 +1,10 @@
 import { calculateRenavamCheckDigit } from "../_internals/calculate-renavam-check-digit/calculate-renavam-check-digit";
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
 const RENAVAM_LENGTH = 11;
 
 const BASE_LENGTH = 10;
-
-const SEPARATORS_REGEX = /[\s.-]/g;
 
 const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
 

@@ -1,3 +1,4 @@
+import { calculateProcessoJuridicoCheckDigits } from "../_internals/calculate-processo-juridico-check-digits/calculate-processo-juridico-check-digits";
 import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-juridico";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
@@ -23,11 +24,6 @@ const MAX_YEAR = 9999;
 const TRIBUNAL_LENGTH = 2;
 
 const COURTS = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
-
-const calculateCheckDigits = (base: string): string => {
-	const checksum = 98n - ((BigInt(base) * 100n) % 97n);
-	return checksum.toString().padStart(2, "0");
-};
 
 /**
  * Generates a random valid Brazilian Processo Jurídico (court case) number,
@@ -79,7 +75,7 @@ export const generateProcessoJuridico = (
 	const tribunal = String(pickRandom(tribunals)).padStart(TRIBUNAL_LENGTH, "0");
 	const foro = generateRandomNumber(4);
 	const base = `${sequencial}${year}${court}${tribunal}${foro}`;
-	const checkDigits = calculateCheckDigits(base);
+	const checkDigits = String(calculateProcessoJuridicoCheckDigits(base)).padStart(2, "0");
 
 	return `${sequencial}${checkDigits}${year}${court}${tribunal}${foro}`;
 };

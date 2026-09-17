@@ -1,5 +1,3 @@
-import { type StateCode } from "../_internals/constants/states";
-
 /**
  * Prepositions, articles and conjunctions that stay in lower case inside a proper name, the
  * default `lowerCaseWords` of `capitalize`. The Manual de Redação da Presidência da República
@@ -125,46 +123,6 @@ export const UPPER_CASE_WORDS = [
 	...COMPANY_DESIGNATIONS,
 	...DOCUMENT_ABBREVIATIONS,
 	...ROMAN_NUMERALS,
-];
-
-/**
- * The two letter code of each Brazilian state, written in upper case when it follows a `/`
- * ("Santana/RS"), the way a municipality and its Federative Unit are written together. The codes
- * are a literal copy of the `code` of every state published by the IBGE (see
- * `_internals/constants/states`, whose table is not imported here so that `capitalize` does not
- * carry the whole state dataset into a consumer's bundle); `capitalize.test.ts` asserts that this
- * list is exactly that one.
- *
- * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
- */
-export const STATE_CODES: StateCode[] = [
-	"AC",
-	"AL",
-	"AP",
-	"AM",
-	"BA",
-	"CE",
-	"DF",
-	"ES",
-	"GO",
-	"MA",
-	"MT",
-	"MS",
-	"MG",
-	"PA",
-	"PB",
-	"PR",
-	"PE",
-	"PI",
-	"RJ",
-	"RN",
-	"RS",
-	"RO",
-	"RR",
-	"SC",
-	"SP",
-	"SE",
-	"TO",
 ];
 
 /**

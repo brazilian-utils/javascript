@@ -1,7 +1,7 @@
 import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/cities";
+import { DATA } from "../_internals/constants/states";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { getStates } from "../get-states/get-states";
 
 export type { Municipality } from "../_internals/constants/cities";
 
@@ -31,12 +31,12 @@ export const getMunicipalityByCode = (code: string | number): Municipality | nul
 
 	// Every real municipality code is exactly 7 digits, so a `digits` of the wrong length simply
 	// finds no match in the loop below; there is no need to pre-validate its length here first.
-	for (const state of getStates()) {
-		const match = CITIES_DATA[state.code].find(
+	for (const { code: stateCode } of DATA) {
+		const match = CITIES_DATA[stateCode].find(
 			([, municipalityCode]) => municipalityCode === digits,
 		);
 
-		if (match) return { code: digits, name: match[0], stateCode: state.code };
+		if (match) return { code: digits, name: match[0], stateCode };
 	}
 
 	return null;

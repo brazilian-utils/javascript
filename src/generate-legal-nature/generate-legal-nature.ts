@@ -1,4 +1,5 @@
-import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { isLegacyLegalNature } from "../_internals/is-legacy-legal-nature/is-legacy-legal-nature";
+import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 /**
  * Generates a random valid Brazilian legal nature (natureza jurídica) code.
@@ -23,9 +24,7 @@ import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/cons
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const generateLegalNature = (): string => {
-	const legalNatureCodes = Object.keys(LEGAL_NATURE).filter(
-		(code) => !Object.hasOwn(LEGACY_LEGAL_NATURE, code),
-	);
+	const legalNatureCodes = Object.keys(LEGAL_NATURE).filter((code) => !isLegacyLegalNature(code));
 
 	return legalNatureCodes[Math.floor(Math.random() * legalNatureCodes.length)];
 };

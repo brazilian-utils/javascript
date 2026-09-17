@@ -1,19 +1,6 @@
 import { NFE_KEY_LENGTH, XML_ID_PREFIX_REGEX } from "../_internals/constants/nfe-key";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
-
-/**
- * Drops the XML `Id` prefix a DF-e document writes in front of its access key, so the digit it
- * may carry (the `3` of `NF3e`) is not read as part of the key.
- * @param {string} value - The trimmed value to strip the prefix from.
- * @returns {string} The value without its leading `NFe`/`CTe`/`MDFe`/`BPe`/`NF3e`/`NFCom` prefix.
- */
-const stripXmlIdPrefix = (value: string): string => {
-	const [prefix = ""] = XML_ID_PREFIX_REGEX.exec(value) ?? [];
-
-	return value.slice(prefix.length);
-};
 
 /**
  * Removes the formatting of a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) and
@@ -44,7 +31,9 @@ const stripXmlIdPrefix = (value: string): string => {
  * Manual de Orientação do Contribuinte (MOC) NF-e, "chave de acesso", which fixes the 44 digits
  * and the `Id` attribute the prefixes come from.
  */
-export const parseNfeKey = (value: string | number): string =>
-	isNullish(value)
-		? ""
-		: sanitizeToDigits(stripXmlIdPrefix(toStringSafe(value).trim())).slice(0, NFE_KEY_LENGTH);
+export const parseNfeKey = (value: string | number): string => {
+	// Stryker disable next-line StringLiteral: whatever replaces the prefix is stripped again by sanitizeToDigits unless it carries a digit, and the mutant's literal carries none.
+	const body = toStringSafe(value).trim().replace(XML_ID_PREFIX_REGEX, "");
+
+	return sanitizeToDigits(body).slice(0, NFE_KEY_LENGTH);
+};

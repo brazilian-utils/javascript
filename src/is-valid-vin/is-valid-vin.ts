@@ -75,7 +75,7 @@ export const isValidVin = (value: string): boolean => {
 
 	const checkDigit = vin[VIN_CHECK_DIGIT_POSITION];
 
-	const remainder = generateChecksum({ base: translitDigits, weight: [...VIN_WEIGHTS] }) % 11;
+	const remainder = generateChecksum({ base: translitDigits, weight: VIN_WEIGHTS }) % 11;
 	const expected = remainder === 10 ? "X" : String(remainder);
 
 	return expected === checkDigit;

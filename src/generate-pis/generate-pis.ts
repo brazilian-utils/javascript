@@ -1,17 +1,6 @@
-import { PIS_WEIGHTS } from "../_internals/constants/pis";
+import { calculatePisCheckDigit } from "../_internals/calculate-pis-check-digit/calculate-pis-check-digit";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
-
-const calculateCheckDigit = (base: string): string => {
-	// The weighted sum is written out rather than delegated to the shared `generateChecksum`: its
-	// sanitizer chain costs `generatePis` around 270 B of bundle, a 23% regression for four lines.
-	const sum = PIS_WEIGHTS.reduce(
-		(acc, weight, index) => acc + Number(base.charAt(index)) * weight,
-		0,
-	);
-	const digit = 11 - (sum % 11);
-	return digit >= 10 ? "0" : digit.toString();
-};
 
 /**
  * Generates a valid random Brazilian PIS (Programa de Integração Social) number.
@@ -41,5 +30,5 @@ export const generatePis = (): string => {
 		base = generateRandomNumber(10);
 	}
 
-	return `${base}${calculateCheckDigit(base)}`;
+	return `${base}${calculatePisCheckDigit(base)}`;
 };

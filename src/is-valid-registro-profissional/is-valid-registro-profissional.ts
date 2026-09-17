@@ -1,5 +1,6 @@
-import { DATA, type StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isStateCode } from "../_internals/is-state-code/is-state-code";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import {
 	CRC_REGEX,
@@ -30,8 +31,6 @@ const REGEX_BY_COUNCIL: Record<RegistroProfissionalCouncil, RegExp> = {
 	CRP: CRP_REGEX,
 	CRC: CRC_REGEX,
 };
-
-const isKnownStateCode = (value: string): boolean => DATA.some((state) => state.code === value);
 
 const isKnownCrpRegion = (value: string): boolean => {
 	const region = Number(value);
@@ -148,11 +147,11 @@ export const isValidRegistroProfissional = (params: IsValidRegistroProfissionalP
 
 	if (region !== undefined && !isKnownCrpRegion(region)) return false;
 
-	if (transferUf !== undefined && !isKnownStateCode(transferUf)) return false;
+	if (transferUf !== undefined && !isStateCode(transferUf)) return false;
 
 	if (uf === undefined) return true;
 
-	if (!isKnownStateCode(uf)) return false;
+	if (!isStateCode(uf)) return false;
 
 	return !stateCode || uf === stateCode;
 };

@@ -49,25 +49,25 @@
  * redação dada pela Resolução nº 241, de 30 de novembro de 2000, the last one the page carries.
  */
 
-export const SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES = [
+export const SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES: readonly string[] = [
 	"0300",
 	"0303",
 	"0500",
 	"0800",
 	"0900",
-] as const;
+];
 
 export const SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH = 4;
 
 export const SERVICE_PHONE_NON_GEOGRAPHIC_LENGTH = 11;
 
-export const SERVICE_PHONE_ABBREVIATED_ROOTS = ["300", "400"] as const;
+export const SERVICE_PHONE_ABBREVIATED_ROOTS: readonly string[] = ["300", "400"];
 
 export const SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH = 3;
 
 export const SERVICE_PHONE_ABBREVIATED_LENGTH = 8;
 
-export const SERVICE_PHONE_UTILITY_CODES = [
+export const SERVICE_PHONE_UTILITY_CODES: readonly string[] = [
 	"100",
 	"102",
 	"103",
@@ -132,4 +132,4 @@ export const SERVICE_PHONE_UTILITY_CODES = [
 	"197",
 	"198",
 	"199",
-] as const;
+];

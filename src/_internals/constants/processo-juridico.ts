@@ -39,6 +39,12 @@
 /** Digits of a processo jurídico number (`NNNNNNNDDAAAAJTROOOO`, Resolução CNJ nº 65/2008). */
 export const PROCESSO_JURIDICO_LENGTH = 20;
 
+/** Modulus of the ISO 7064 MOD 97-10 check the two verifying digits (`DD`) come from. */
+export const MOD_97_10_QUOTIENT = 97;
+
+/** The MOD 97-10 check digits are this value minus the remainder of the number times 100 by 97. */
+export const MOD_97_10_SUM = 98;
+
 /**
  * @param {number} first Lowest code of the range.
  * @param {number} last Highest code of the range.

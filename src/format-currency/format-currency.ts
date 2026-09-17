@@ -9,11 +9,9 @@ export type FormatCurrencyOptions = {
 	precision?: number;
 };
 
-let formatters: Map<string, Intl.NumberFormat> | undefined;
+const formatters = new Map<string, Intl.NumberFormat>();
 
 const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => {
-	formatters ??= new Map<string, Intl.NumberFormat>();
-
 	const key = `${symbol}|${precision}`;
 	const cached = formatters.get(key);
 

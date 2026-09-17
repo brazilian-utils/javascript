@@ -1,6 +1,5 @@
 import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/cities";
-import { type StateCode } from "../_internals/constants/states";
-import { getStates } from "../get-states/get-states";
+import { DATA, type StateCode } from "../_internals/constants/states";
 
 export type { Municipality } from "../_internals/constants/cities";
 export type { StateCode } from "../_internals/constants/states";
@@ -43,14 +42,12 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  */
 export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 	if (stateCode === undefined) {
-		return getStates()
-			.flatMap((state) => buildMunicipalities(state.code))
-			.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+		return DATA.flatMap((state) => buildMunicipalities(state.code)).sort((a, b) =>
+			a.name.localeCompare(b.name, "pt-BR"),
+		);
 	}
 
-	const state = getStates().find((candidate) => candidate.code === stateCode);
+	if (!Object.hasOwn(CITIES_DATA, stateCode)) return [];
 
-	if (!state) return [];
-
-	return buildMunicipalities(state.code);
+	return buildMunicipalities(stateCode);
 };

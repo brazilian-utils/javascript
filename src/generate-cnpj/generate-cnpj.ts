@@ -1,3 +1,4 @@
+import { calculateCnpjCheckDigit } from "../_internals/calculate-cnpj-check-digit/calculate-cnpj-check-digit";
 import { CNPJ_FIRST_DIGIT_WEIGHTS, CNPJ_SECOND_DIGIT_WEIGHTS } from "../_internals/constants/cnpj";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
@@ -63,39 +64,15 @@ const generateNonRepeatedBase = (generate: () => string): string => {
 	return base;
 };
 
-const charToCnpjValue = (char: string): number => char.charCodeAt(0) - 48;
-
-/**
- * The check digit of a base, under the rule both CNPJ versions share: the weighted sum of the
- * base modulo 11, and 11 minus that remainder unless the remainder is 0 or 1, in which case the
- * digit is 0. The base is read through `charToCnpjValue`, which reads a digit as itself and a
- * letter as the value the alphanumeric CNPJ gives it, so the numeric version goes through the
- * very same calculation instead of a second, digits-only one.
- * @param {string} base - The base the digit is calculated for, as long as `weights`.
- * @param {number[]} weights - The weight of each character of the base, from left to right.
- * @returns {string} The check digit, as a single character.
- */
-const calculateCheckDigit = (base: string, weights: number[]): string => {
-	const sum = weights.reduce(
-		(total, weight, index) => total + charToCnpjValue(base.charAt(index)) * weight,
-		0,
+const generateCnpjWith = (
+	branch: number | undefined,
+	generatePart: (length: number) => string,
+): string => {
+	const base = generateNonRepeatedBase(() => generateBase(branch, generatePart));
+	const firstCheckDigit = String(calculateCnpjCheckDigit(base, CNPJ_FIRST_DIGIT_WEIGHTS));
+	const secondCheckDigit = String(
+		calculateCnpjCheckDigit(base + firstCheckDigit, CNPJ_SECOND_DIGIT_WEIGHTS),
 	);
-	const mod = sum % 11;
-
-	return (mod < 2 ? 0 : 11 - mod).toString();
-};
-
-const generateNumericCnpj = (branch: number | undefined): string => {
-	const base = generateNonRepeatedBase(() => generateBase(branch, generateRandomNumber));
-	const firstCheckDigit = calculateCheckDigit(base, CNPJ_FIRST_DIGIT_WEIGHTS);
-	const secondCheckDigit = calculateCheckDigit(base + firstCheckDigit, CNPJ_SECOND_DIGIT_WEIGHTS);
-	return base + firstCheckDigit + secondCheckDigit;
-};
-
-const generateAlphanumericCnpj = (branch: number | undefined): string => {
-	const base = generateNonRepeatedBase(() => generateBase(branch, generateRandomCnpjChars));
-	const firstCheckDigit = calculateCheckDigit(base, CNPJ_FIRST_DIGIT_WEIGHTS);
-	const secondCheckDigit = calculateCheckDigit(base + firstCheckDigit, CNPJ_SECOND_DIGIT_WEIGHTS);
 	return base + firstCheckDigit + secondCheckDigit;
 };
 
@@ -142,7 +119,8 @@ export const generateCnpj = (versionOrParams: 1 | 2 | GenerateCnpjParams = 1): s
 		? versionOrParams
 		: { version: versionOrParams };
 
-	return params.version === 2
-		? generateAlphanumericCnpj(params.branch)
-		: generateNumericCnpj(params.branch);
+	return generateCnpjWith(
+		params.branch,
+		params.version === 2 ? generateRandomCnpjChars : generateRandomNumber,
+	);
 };

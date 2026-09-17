@@ -1,9 +1,7 @@
-import {
-	CNPJ_FIRST_DIGIT_WEIGHTS,
-	CNPJ_LENGTH,
-	CNPJ_SECOND_DIGIT_WEIGHTS,
-} from "../_internals/constants/cnpj";
+import { calculateCnpjCheckDigit } from "../_internals/calculate-cnpj-check-digit/calculate-cnpj-check-digit";
+import { CNPJ_FIRST_DIGIT_WEIGHTS, CNPJ_SECOND_DIGIT_WEIGHTS } from "../_internals/constants/cnpj";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
+import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `isValidCnpj`. */
@@ -17,47 +15,11 @@ const FORMAT_REGEX =
 
 const NUMERIC_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{4}[\s.\-/]*\d{2}$/;
 
-const cleanCnpj = (cnpj: string): string => {
-	let result = "";
-	for (const char of cnpj) {
-		// Stryker disable next-line ConditionalExpression,EqualityOperator: this early exit only bounds how much of an oversized input is scanned; whatever length `result` ends up with, the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX check still requires exactly CNPJ_LENGTH real characters and rejects anything else, so the exact cutoff point here never changes the final answer.
-		if (result.length > CNPJ_LENGTH) break;
+const LETTER_REGEX = /[A-Z]/;
 
-		// Stryker disable next-line ConditionalExpression: the only characters that ever reach isValidChecksum are ones the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX already restricted to "0"-"9", "A"-"Z" or a "\s.-/" separator (all below "0" in code point), so no reachable character can trigger this comparison's alternate branch without the whole match already having failed for an unrelated reason.
-		const isDigit = char >= "0" && char <= "9";
-		// Stryker disable next-line ConditionalExpression: same reasoning as isDigit above — any character reaching here already satisfied FORMAT_REGEX/NUMERIC_FORMAT_REGEX, so it is always a genuine "0"-"9", "A"-"Z", "a"-"z" or a low-code-point separator.
-		const isUpper = char >= "A" && char <= "Z";
-		// Stryker disable next-line ConditionalExpression: a character above "z" that this would wrongly accept is never itself "0"-"9"/"A"-"Z" or a "\s.-/" separator, and toUpperCase() cannot turn it into one either, so the caller's FORMAT_REGEX/NUMERIC_FORMAT_REGEX already rejects any string containing it, regardless of this classification.
-		const isLower = char >= "a" && char <= "z";
-
-		if (isDigit || isUpper || isLower) {
-			result += isLower ? String.fromCharCode(char.charCodeAt(0) - 32) : char;
-		}
-	}
-	return result;
-};
-
-const isValidChecksum = (cnpj: string): boolean => {
-	let sum = 0;
-	let position = 0;
-	for (const weight of CNPJ_FIRST_DIGIT_WEIGHTS) {
-		sum += (cnpj.charCodeAt(position) - 48) * weight;
-		position++;
-	}
-	let mod = sum % 11;
-	const expected1 = mod < 2 ? 48 : 48 + 11 - mod;
-	if (cnpj.charCodeAt(12) !== expected1) return false;
-
-	sum = 0;
-	position = 0;
-	for (const weight of CNPJ_SECOND_DIGIT_WEIGHTS) {
-		sum += (cnpj.charCodeAt(position) - 48) * weight;
-		position++;
-	}
-	mod = sum % 11;
-	const expected2 = mod < 2 ? 48 : 48 + 11 - mod;
-	return cnpj.charCodeAt(13) === expected2;
-};
+const isValidChecksum = (cnpj: string): boolean =>
+	cnpj.charCodeAt(12) - 48 === calculateCnpjCheckDigit(cnpj, CNPJ_FIRST_DIGIT_WEIGHTS) &&
+	cnpj.charCodeAt(13) - 48 === calculateCnpjCheckDigit(cnpj, CNPJ_SECOND_DIGIT_WEIGHTS);
 
 /**
  * Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.
@@ -97,32 +59,19 @@ const isValidChecksum = (cnpj: string): boolean => {
 export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean => {
 	if (typeof cnpj !== "string") return false;
 
-	const cleaned = cleanCnpj(cnpj);
-
 	const trimmed = cnpj.trim();
 
-	const version = options?.version ?? 1;
+	if (options?.version === 2) {
+		const cleaned = sanitizeToAlphanumeric(cnpj);
 
-	let isNumeric = true;
-
-	if (version === 2) {
-		// Stryker disable next-line EqualityOperator: cleaned.length is always exactly CNPJ_LENGTH here (checked above), so the extra i===CNPJ_LENGTH iteration reads charCodeAt(CNPJ_LENGTH), which is NaN and fails both boundary comparisons either way.
-		for (let i = 0; i < CNPJ_LENGTH; i++) {
-			const code = cleaned.charCodeAt(i);
-			// Stryker disable next-line ConditionalExpression,EqualityOperator: cleaned only ever holds "0"-"9"/"A"-"Z" characters (minimum code 48), so `code < 48` is always false and forcing it to a literal `false` changes nothing; and the only listed CNPJ reserved number whose raw checksum also happens to pass is "00000000000000" (code 48), so shifting the upper boundary to 57 (">=57") can never be told apart from the correct ">57" by any reachable input.
-			if (code < 48 || code > 57) {
-				isNumeric = false;
-			}
+		if (LETTER_REGEX.test(cleaned)) {
+			return FORMAT_REGEX.test(trimmed.toUpperCase()) && isValidChecksum(cleaned);
 		}
 	}
 
-	if (isNumeric) {
-		const numeric = sanitizeToDigits(cnpj);
+	const numeric = sanitizeToDigits(cnpj);
 
-		return (
-			NUMERIC_FORMAT_REGEX.test(trimmed) && !isRepeatedDigits(numeric) && isValidChecksum(numeric)
-		);
-	}
-
-	return FORMAT_REGEX.test(trimmed.toUpperCase()) && isValidChecksum(cleaned);
+	return (
+		NUMERIC_FORMAT_REGEX.test(trimmed) && !isRepeatedDigits(numeric) && isValidChecksum(numeric)
+	);
 };

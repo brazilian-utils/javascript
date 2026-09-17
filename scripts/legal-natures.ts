@@ -291,9 +291,6 @@ ${stringifyEntries(legacyDescriptions)}
 export const LEGACY_LEGAL_NATURE: Record<string, string | null> = {
 ${stringifyEntries(legacyCurrentCodes)}
 };
-
-/** Mask characters (hyphen, dot, whitespace) tolerated around a legal nature code. */
-export const MASK_REGEX = /[-.\\s]/g;
 `,
 	);
 };

@@ -3,7 +3,7 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { fetchSortedRecord } from "../src/_internals/fetch-sorted-record/fetch-sorted-record.ts";
+import { fetchSortedRecord } from "./fetch-sorted-record.ts";
 
 const scriptsDir = import.meta.dirname;
 

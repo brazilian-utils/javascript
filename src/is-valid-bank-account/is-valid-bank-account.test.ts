@@ -4,7 +4,6 @@ import { BANKS } from "../_internals/constants/banks";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { COMPE_CODES, STRUCTURE_ONLY_BANK_CODES } from "./constants";
 import {
-	ALGORITHM_BANK_CODES,
 	isValidBankAccount,
 	type IsValidBankAccountOptions,
 	type IsValidBankAccountParams,
@@ -22,6 +21,9 @@ const LISTED_CODES = new Set(
 		COMPE_CODES.slice(index * 3, index * 3 + 3),
 	),
 );
+
+/** The bank codes `isValidBankAccount` validates with a published check digit algorithm. */
+const ALGORITHM_BANK_CODES = ["001", "033", "041", "104", "237", "260", "341", "399", "745"];
 
 const CHECK_CHARACTERS = [...Array.from({ length: 10 }, (_, digit) => String(digit)), "X", "P"];
 
@@ -1210,18 +1212,6 @@ describe("isValidBankAccount", () => {
 		});
 
 		test("should list every bank code with a published algorithm in COMPE_CODES and in BANKS", () => {
-			expect([...ALGORITHM_BANK_CODES].sort()).toStrictEqual([
-				"001",
-				"033",
-				"041",
-				"104",
-				"237",
-				"260",
-				"341",
-				"399",
-				"745",
-			]);
-
 			const missing = ALGORITHM_BANK_CODES.filter(
 				(bankCode) => !LISTED_CODES.has(bankCode) || !BANKS.some((bank) => bank.code === bankCode),
 			);

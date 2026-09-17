@@ -51,7 +51,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 export const isValidCfop = (value: string | number): boolean => {
 	if (!isLookupCode(value)) return false;
 
-	const code = typeof value === "number" ? String(value) : value.trim();
+	const code = String(value).trim();
 
 	if (!CFOP_FORMAT_REGEX.test(code)) return false;
 

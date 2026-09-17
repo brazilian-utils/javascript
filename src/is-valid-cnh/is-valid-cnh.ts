@@ -1,8 +1,7 @@
 import { calculateCnhFirstVerifier } from "../_internals/calculate-cnh-first-verifier/calculate-cnh-first-verifier";
 import { calculateCnhSecondVerifier } from "../_internals/calculate-cnh-second-verifier/calculate-cnh-second-verifier";
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
-
-const SEPARATORS_REGEX = /[\s.-]/g;
 
 const FORMAT_REGEX = /^\d{11}$/;
 
