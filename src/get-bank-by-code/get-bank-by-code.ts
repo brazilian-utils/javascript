@@ -1,3 +1,4 @@
+import { buildBank } from "../_internals/build-bank/build-bank";
 import { BANKS, type Bank } from "../_internals/constants/banks";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -10,13 +11,19 @@ const CODE_LENGTH = 3;
  * Looks up a Brazilian bank by its compensation code (COMPE), published by Banco Central do
  * Brasil in the STR (Sistema de Transferência de Reservas) participants list.
  *
+ * A code the list no longer publishes is looked up all the same, because a code written on a
+ * document is exactly the case this lookup answers, and comes back with `legacy: true`. The 463
+ * participants of the current list carry `legacy: false`. Use `getBanks` to list the current ones
+ * on their own.
+ *
  * @param {string|number} code - The bank's COMPE code, with or without leading zeros.
  * @returns {Bank|null} A fresh copy of the matching bank, or `null` when no bank has that code.
  *
  * @example
  * ```typescript
- * getBankByCode("001"); // { code: "001", ispb: "00000000", name: "Banco do Brasil S.A." }
- * getBankByCode(1); // { code: "001", ispb: "00000000", name: "Banco do Brasil S.A." }
+ * getBankByCode("001"); // { code: "001", ispb: "00000000", name: "Banco do Brasil S.A.", legacy: false }
+ * getBankByCode(1); // { code: "001", ispb: "00000000", name: "Banco do Brasil S.A.", legacy: false }
+ * getBankByCode("746"); // { code: "746", ispb: "30723886", name: "Banco Modal S.A.", legacy: true }
  * getBankByCode("999"); // null
  * ```
  *
@@ -36,5 +43,5 @@ export const getBankByCode = (code: string | number): Bank | null => {
 
 	const bank = BANKS.find((candidate) => candidate.code === normalizedCode);
 
-	return bank ? { ...bank } : null;
+	return bank ? buildBank(bank) : null;
 };

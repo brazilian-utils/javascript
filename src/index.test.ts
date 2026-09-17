@@ -41,6 +41,7 @@ import {
 	type GenerateProcessoJuridicoOptions,
 	type GenerateProcessoJuridicoParams,
 	type GetAddressInfoByCepOptions,
+	type GetBanksParams,
 	type GetBoletoInfoOptions,
 	type GetCepInfoByAddressOptions,
 	type GetCepInfoByAddressParams,
@@ -318,6 +319,7 @@ describe("Public API", () => {
 			GenerateProcessoJuridicoOptions: GenerateProcessoJuridicoOptions;
 			GenerateProcessoJuridicoParams: GenerateProcessoJuridicoParams;
 			GetAddressInfoByCepOptions: GetAddressInfoByCepOptions;
+			GetBanksParams: GetBanksParams;
 			GetBoletoInfoOptions: GetBoletoInfoOptions;
 			GetCepInfoByAddressOptions: GetCepInfoByAddressOptions;
 			GetCepInfoByAddressParams: GetCepInfoByAddressParams;

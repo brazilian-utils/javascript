@@ -268,6 +268,11 @@ const sanitizeCheckDigit = (value: string): string =>
  *
  * Every other bank of the list falls back to a generic modulus 10 and modulus 11 check.
  *
+ * The 29 codes the participants list no longer publishes are accepted too, under that same generic
+ * check, because an account of theirs keeps appearing in documents filled in while the institution
+ * had its code. None of them publishes a check digit rule of its own. `getBankByCode` tells the two
+ * apart: a code that left the list comes back with `legacy: true`.
+ *
  * @param {IsValidBankAccountParams} params - The bank account parameters.
  * @param {string} params.bankCode - The bank code (3 digits), as published by Banco Central.
  * @param {string} params.agency - The agency number (1-5 digits).
@@ -280,12 +285,13 @@ const sanitizeCheckDigit = (value: string): string =>
  * isValidBankAccount({ bankCode: "001", agency: "1584", account: "00210169", digit: "6" }); // true
  * isValidBankAccount({ bankCode: "041", agency: "2664", account: "358507670", digit: "6" }); // true
  * isValidBankAccount({ bankCode: "260", agency: "0001", account: "5216125", digit: "0" }); // true
+ * isValidBankAccount({ bankCode: "746", agency: "0001", account: "123456", digit: "6" }); // true (legacy code, generic check)
  * isValidBankAccount({ bankCode: "999", agency: "1234", account: "123456", digit: "6" }); // false
  * ```
  *
- * Only bank codes present in the bundled Banco Central participant table are accepted; that table is
- * regenerated weekly by the datasets workflow, so a bank created after the release becomes valid
- * on the next release.
+ * Only bank codes present in the bundled Banco Central participant table are accepted, whether they
+ * are published today or marked legacy; that table is regenerated weekly by the datasets workflow,
+ * so a bank created after the release becomes valid on the next release.
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
  * @see Based on: https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf
