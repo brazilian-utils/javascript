@@ -110,7 +110,8 @@ describe("fetchWithRetry", () => {
 			(error: unknown) => error,
 		);
 
-		expect(rejection).toBeUndefined();
+		expect(rejection).toBeInstanceOf(RangeError);
+		expect((rejection as RangeError).message).toBe("retries must be zero or greater");
 		expect(fetchMock).toHaveBeenCalledTimes(0);
 	});
 

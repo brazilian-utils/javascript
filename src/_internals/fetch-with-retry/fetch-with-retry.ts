@@ -64,37 +64,44 @@ const wait = (ms: number): Promise<void> =>
 				setTimeout(resolve, ms);
 			});
 
-type Attempt = {
-	retries: number;
-	retryDelayMs: number;
-	attempt: number;
-	lastError?: unknown;
-};
-
+/**
+ * Performs the attempts of `fetchWithRetry` in a loop: the first attempt plus one retry per
+ * `retries`, waiting `retryDelayMs * attempt` before each retry. Written as a loop rather than a
+ * recursive attempt so a long retry budget never grows the call stack. A negative `retries`
+ * rejects before any attempt, as it always did.
+ *
+ * @param {string|URL|Request} input - The resource to fetch.
+ * @param {RequestInit} init - The `fetch` init.
+ * @param {number} retries - How many retries follow the first attempt.
+ * @param {number} retryDelayMs - The base delay, multiplied by the attempt number.
+ * @returns {Promise<Response>} The first successful `fetch` response.
+ */
 const attemptFetch = async (
 	input: string | URL | Request,
 	init: RequestInit,
-	{ retries, retryDelayMs, attempt, lastError }: Attempt,
+	retries: number,
+	retryDelayMs: number,
 ): Promise<Response> => {
-	if (attempt > retries) {
-		throw lastError;
+	if (retries < 0) {
+		throw new RangeError("retries must be zero or greater");
 	}
 
-	try {
-		return await fetch(input, init);
-	} catch (error) {
-		if (attempt === retries || !isRetryableFetchError(error)) {
-			throw error;
+	let attempt = 0;
+
+	for (;;) {
+		try {
+			// eslint-disable-next-line no-await-in-loop
+			return await fetch(input, init);
+		} catch (error) {
+			if (attempt === retries || !isRetryableFetchError(error)) {
+				throw error;
+			}
 		}
 
-		await wait(retryDelayMs * (attempt + 1));
-
-		return attemptFetch(input, init, {
-			retries,
-			retryDelayMs,
-			attempt: attempt + 1,
-			lastError: error,
-		});
+		attempt++;
+		// Retries are sequential by definition: each one waits for the previous failure and its backoff.
+		// eslint-disable-next-line no-await-in-loop
+		await wait(retryDelayMs * attempt);
 	}
 };
 
@@ -117,4 +124,4 @@ const attemptFetch = async (
 export const fetchWithRetry = (
 	input: string | URL | Request,
 	{ retries = 2, retryDelayMs = 250, ...init }: FetchWithRetryOptions = {},
-): Promise<Response> => attemptFetch(input, init, { retries, retryDelayMs, attempt: 0 });
+): Promise<Response> => attemptFetch(input, init, retries, retryDelayMs);

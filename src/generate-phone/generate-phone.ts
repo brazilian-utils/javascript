@@ -56,19 +56,17 @@ const randomServicePhone = (): string => {
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const generatePhone = (type?: GeneratePhoneType): string => {
-	const areaCode = randomAreaCode();
-
-	if (type === "landline") {
-		return `${areaCode}${2 + Math.floor(Math.random() * 5)}${generateRandomNumber(7)}`;
-	}
-
-	if (type === "mobile") {
-		return `${areaCode}9${generateRandomNumber(8)}`;
-	}
-
 	if (type === "service") {
 		return randomServicePhone();
 	}
 
-	return Math.random() >= 0.5 ? generatePhone("mobile") : generatePhone("landline");
+	const areaCode = randomAreaCode();
+	// Without a type, a coin flip picks the line; no self-call, so the choice is made once here.
+	const isLandline = type === "landline" || (type !== "mobile" && Math.random() < 0.5);
+
+	if (isLandline) {
+		return `${areaCode}${2 + Math.floor(Math.random() * 5)}${generateRandomNumber(7)}`;
+	}
+
+	return `${areaCode}9${generateRandomNumber(8)}`;
 };

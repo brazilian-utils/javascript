@@ -131,18 +131,18 @@ const mapWithConcurrency = async <T, R>(
 	let cursor = 0;
 
 	const worker = async (): Promise<void> => {
-		const index = cursor;
-		cursor += 1;
+		while (cursor < items.length) {
+			const index = cursor;
+			cursor += 1;
 
-		if (index >= items.length) return;
+			const item = items[index];
 
-		const item = items[index];
-
-		if (item !== undefined) {
-			results[index] = await fn(item);
+			if (item !== undefined) {
+				// Each worker of the pool processes its items one after the other on purpose.
+				// eslint-disable-next-line no-await-in-loop
+				results[index] = await fn(item);
+			}
 		}
-
-		await worker();
 	};
 
 	const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
