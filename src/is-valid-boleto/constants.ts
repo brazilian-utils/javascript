@@ -1,4 +1,3 @@
-export const LENGTH = 47;
 export const CHECK_DIGIT_POSITION = 4;
 
 export const PARTIALS = [

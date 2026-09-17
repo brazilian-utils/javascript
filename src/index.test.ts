@@ -1,26 +1,142 @@
 import { describe, expect, test } from "./_internals/test/runtime";
+import {
+	type AddressInfo,
+	type AreaCodeInfo,
+	type Bank,
+	type BoletoInfo,
+	type BusinessDayOptions,
+	type CapitalizeOptions,
+	type Cbo,
+	type CepAddressInfo,
+	type CepProvider,
+	type CertidaoInfo,
+	type CertidaoType,
+	type Cfop,
+	type Cnae,
+	type ConvertDateToWordsOptions,
+	type ConvertNumberToWordsOptions,
+	type FormatBoletoOptions,
+	type FormatCaepfOptions,
+	type FormatCeiOptions,
+	type FormatCepOptions,
+	type FormatCertidaoOptions,
+	type FormatCnaeOptions,
+	type FormatLegalNatureOptions,
+	type FormatCnhOptions,
+	type FormatCnoOptions,
+	type FormatCnpjOptions,
+	type FormatCnsOptions,
+	type FormatCpfOptions,
+	type FormatCurrencyOptions,
+	type FormatNcmOptions,
+	type FormatNfeKeyOptions,
+	type FormatPhoneOptions,
+	type FormatPisOptions,
+	type FormatProcessoJuridicoOptions,
+	type GenerateBoletoParams,
+	type GenerateCnpjParams,
+	type GenerateLicensePlateFormat,
+	type GeneratePhoneType,
+	type GeneratePixPayloadParams,
+	type GenerateProcessoJuridicoOptions,
+	type GenerateProcessoJuridicoParams,
+	type GetAddressInfoByCepOptions,
+	type GetBoletoInfoOptions,
+	type GetCepInfoByAddressOptions,
+	type GetCepInfoByAddressParams,
+	type GetHolidaysOptions,
+	type GetHolidaysParams,
+	type GetLegalNaturesByCategoryOptions,
+	type GetLegalNaturesParams,
+	type GetMunicipalityByCodeOptions,
+	type GetMunicipalityByCodeParams,
+	type GetMunicipalityByNameOptions,
+	type GetMunicipalityByNameParams,
+	type GetMunicipalityOptions,
+	type GetMunicipalityParams,
+	type Holiday,
+	type HolidayType,
+	type IbanInfo,
+	type IsHolidayOptions,
+	type IsHolidayParams,
+	type IsValidBankAccountOptions,
+	type IsValidBankAccountParams,
+	type IsValidCertidaoOptions,
+	type IsValidCnpjOptions,
+	type IsValidCstOptions,
+	type IsValidIeParams,
+	type IsValidMobilePhoneOptions,
+	type IsValidPhoneOptions,
+	type IsValidPixKeyOptions,
+	type IsValidRegistroProfissionalParams,
+	type LegalNature,
+	type LegalNatureCategory,
+	type LicensePlateFormat,
+	type Municipality,
+	type NfeKeyInfo,
+	type NfeKeyModel,
+	type NumberToWordsGender,
+	type ParseCnpjOptions,
+	type ParseCurrencyOptions,
+	type PhoneMask,
+	type PhoneType,
+	type PhoneVersion,
+	type PixKeyInfo,
+	type PixKeyType,
+	type PixPayloadInfo,
+	type PixPointOfInitiation,
+	type RegistroProfissionalCouncil,
+	type State,
+	type StateCode,
+	type StateName,
+} from "./index";
 import * as brazilianUtils from "./index";
 
 const PUBLIC = [
+	"GetAddressInfoByCepError",
+	"GetAddressInfoByCepNotFoundError",
+	"GetAddressInfoByCepServiceError",
+	"GetAddressInfoByCepValidationError",
+	"GetCepInfoByAddressError",
+	"GetCepInfoByAddressNotFoundError",
+	"GetCepInfoByAddressValidationError",
+	"addBusinessDays",
 	"capitalize",
-	"formatCep",
+	"convertCurrencyToWords",
+	"convertDateToWords",
+	"convertLicensePlateToMercosul",
+	"convertNumberToWords",
+	"differenceInBusinessDays",
 	"formatBoleto",
+	"formatCEP",
+	"formatCNPJ",
+	"formatCPF",
+	"formatCaepf",
+	"formatCei",
+	"formatCep",
+	"formatCertidao",
+	"formatCnae",
 	"formatCnh",
+	"formatCno",
 	"formatCnpj",
+	"formatCns",
 	"formatCpf",
 	"formatCurrency",
+	"formatIban",
 	"formatLegalNature",
 	"formatLicensePlate",
+	"formatNcm",
+	"formatNfeKey",
 	"formatPassport",
 	"formatPhone",
 	"formatPis",
 	"formatProcessoJuridico",
 	"formatVoterId",
 	"generateBoleto",
-	"generateCep",
-	"generateCnh",
 	"generateCNPJ",
 	"generateCPF",
+	"generateCep",
+	"generateCnh",
 	"generateCnpj",
 	"generateCpf",
 	"generateLegalNature",
@@ -28,71 +144,269 @@ const PUBLIC = [
 	"generatePassport",
 	"generatePhone",
 	"generatePis",
+	"generatePixPayload",
 	"generateProcessoJuridico",
+	"generateRenavam",
 	"generateVoterId",
 	"getAddressInfoByCep",
-	"GetAddressInfoByCepError",
-	"GetAddressInfoByCepNotFoundError",
-	"GetAddressInfoByCepServiceError",
-	"GetAddressInfoByCepValidationError",
+	"getAreaCodeInfo",
+	"getAreaCodesByState",
+	"getBankByCode",
+	"getBankByIspb",
+	"getBanks",
 	"getBoletoInfo",
+	"getCbo",
 	"getCepInfoByAddress",
-	"GetCepInfoByAddressError",
-	"GetCepInfoByAddressNotFoundError",
-	"GetCepInfoByAddressValidationError",
+	"getCertidaoInfo",
+	"getCfop",
 	"getCities",
+	"getCnae",
 	"getFormatLicensePlate",
 	"getHolidays",
+	"getIbanInfo",
+	"getLegalNature",
 	"getLegalNatures",
+	"getLegalNaturesByCategory",
+	"getMunicipalities",
 	"getMunicipality",
+	"getMunicipalityByCode",
+	"getNfeKeyInfo",
+	"getPixKeyInfo",
+	"getPixPayloadInfo",
+	"getStateByIbgeCode",
+	"getStateCodeByName",
+	"getStateNameByCode",
 	"getStates",
+	"getTimezoneByState",
+	"isBusinessDay",
 	"isHoliday",
 	"isValidBankAccount",
 	"isValidBoleto",
 	"isValidCEP",
 	"isValidCNPJ",
 	"isValidCPF",
+	"isValidCaepf",
+	"isValidCbo",
+	"isValidCei",
 	"isValidCep",
+	"isValidCertidao",
+	"isValidCfop",
+	"isValidCnae",
 	"isValidCnh",
+	"isValidCno",
 	"isValidCnpj",
+	"isValidCns",
 	"isValidCpf",
+	"isValidCreditCard",
+	"isValidCsosn",
+	"isValidCst",
 	"isValidEmail",
 	"isValidIE",
+	"isValidIban",
 	"isValidIe",
 	"isValidLandlinePhone",
 	"isValidLegalNature",
 	"isValidLicensePlate",
 	"isValidMobilePhone",
+	"isValidNcm",
+	"isValidNfeKey",
 	"isValidPIS",
 	"isValidPassport",
 	"isValidPhone",
 	"isValidPis",
+	"isValidPixKey",
+	"isValidPixPayload",
 	"isValidProcessoJuridico",
+	"isValidRegistroProfissional",
 	"isValidRenavam",
+	"isValidServicePhone",
+	"isValidVin",
 	"isValidVoterId",
 	"parseBoleto",
+	"parseCaepf",
+	"parseCbo",
+	"parseCei",
 	"parseCep",
+	"parseCertidao",
+	"parseCfop",
+	"parseCnae",
 	"parseCnh",
+	"parseCno",
 	"parseCnpj",
+	"parseCns",
 	"parseCpf",
-	"formatCurrency",
 	"parseCurrency",
+	"parseIban",
 	"parseLegalNature",
 	"parseLicensePlate",
+	"parseNcm",
+	"parseNfeKey",
 	"parsePassport",
 	"parsePhone",
 	"parsePis",
 	"parseProcessoJuridico",
 	"parseVoterId",
-	"formatCEP",
-	"formatCNPJ",
-	"formatCPF",
+	"removeAccents",
+	"subBusinessDays",
+].sort();
+
+const NETWORK_ENTRY_POINTS = new Set(["getAddressInfoByCep", "getCepInfoByAddress"]);
+
+const BAD_INPUTS: [string, unknown][] = [
+	["null", null],
+	["undefined", undefined],
+	["a number", 123],
+	["an empty string", ""],
+	["a blank string", "   "],
+	["an object", {}],
+	["an array", []],
+	["NaN", Number.NaN],
+	["a boolean", true],
 ];
 
+const isErrorClass = (name: string): boolean => /^[A-Z]/.test(name);
+
 describe("Public API", () => {
-	for (const util of Object.keys(brazilianUtils)) {
-		test(`${util} is available on the public API`, () => {
-			expect(PUBLIC).toContain(util);
-		});
+	test("should export exactly the documented surface", () => {
+		expect(Object.keys(brazilianUtils).sort()).toEqual(PUBLIC);
+	});
+
+	test("should not list the same export twice", () => {
+		expect(PUBLIC.length).toBe(new Set(PUBLIC).size);
+	});
+
+	test("should export every documented public type", () => {
+		const publicTypes: Partial<{
+			AddressInfo: AddressInfo;
+			AreaCodeInfo: AreaCodeInfo;
+			Bank: Bank;
+			BoletoInfo: BoletoInfo;
+			BusinessDayOptions: BusinessDayOptions;
+			CapitalizeOptions: CapitalizeOptions;
+			Cbo: Cbo;
+			CepAddressInfo: CepAddressInfo;
+			CepProvider: CepProvider;
+			CertidaoInfo: CertidaoInfo;
+			CertidaoType: CertidaoType;
+			Cfop: Cfop;
+			Cnae: Cnae;
+			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
+			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
+			FormatBoletoOptions: FormatBoletoOptions;
+			FormatCaepfOptions: FormatCaepfOptions;
+			FormatCeiOptions: FormatCeiOptions;
+			FormatCepOptions: FormatCepOptions;
+			FormatCertidaoOptions: FormatCertidaoOptions;
+			FormatCnaeOptions: FormatCnaeOptions;
+			FormatLegalNatureOptions: FormatLegalNatureOptions;
+			FormatCnhOptions: FormatCnhOptions;
+			FormatCnoOptions: FormatCnoOptions;
+			FormatCnpjOptions: FormatCnpjOptions;
+			FormatCnsOptions: FormatCnsOptions;
+			FormatCpfOptions: FormatCpfOptions;
+			FormatCurrencyOptions: FormatCurrencyOptions;
+			FormatNcmOptions: FormatNcmOptions;
+			FormatNfeKeyOptions: FormatNfeKeyOptions;
+			FormatPhoneOptions: FormatPhoneOptions;
+			FormatPisOptions: FormatPisOptions;
+			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
+			GenerateBoletoParams: GenerateBoletoParams;
+			GenerateCnpjParams: GenerateCnpjParams;
+			GenerateLicensePlateFormat: GenerateLicensePlateFormat;
+			GeneratePhoneType: GeneratePhoneType;
+			GeneratePixPayloadParams: GeneratePixPayloadParams;
+			GenerateProcessoJuridicoOptions: GenerateProcessoJuridicoOptions;
+			GenerateProcessoJuridicoParams: GenerateProcessoJuridicoParams;
+			GetAddressInfoByCepOptions: GetAddressInfoByCepOptions;
+			GetBoletoInfoOptions: GetBoletoInfoOptions;
+			GetCepInfoByAddressOptions: GetCepInfoByAddressOptions;
+			GetCepInfoByAddressParams: GetCepInfoByAddressParams;
+			GetHolidaysOptions: GetHolidaysOptions;
+			GetHolidaysParams: GetHolidaysParams;
+			GetLegalNaturesByCategoryOptions: GetLegalNaturesByCategoryOptions;
+			GetLegalNaturesParams: GetLegalNaturesParams;
+			GetMunicipalityByCodeOptions: GetMunicipalityByCodeOptions;
+			GetMunicipalityByCodeParams: GetMunicipalityByCodeParams;
+			GetMunicipalityByNameOptions: GetMunicipalityByNameOptions;
+			GetMunicipalityByNameParams: GetMunicipalityByNameParams;
+			GetMunicipalityOptions: GetMunicipalityOptions;
+			GetMunicipalityParams: GetMunicipalityParams;
+			Holiday: Holiday;
+			HolidayType: HolidayType;
+			IbanInfo: IbanInfo;
+			IsHolidayOptions: IsHolidayOptions;
+			IsHolidayParams: IsHolidayParams;
+			IsValidBankAccountOptions: IsValidBankAccountOptions;
+			IsValidBankAccountParams: IsValidBankAccountParams;
+			IsValidCertidaoOptions: IsValidCertidaoOptions;
+			IsValidCnpjOptions: IsValidCnpjOptions;
+			IsValidCstOptions: IsValidCstOptions;
+			IsValidIeParams: IsValidIeParams;
+			IsValidMobilePhoneOptions: IsValidMobilePhoneOptions;
+			IsValidPhoneOptions: IsValidPhoneOptions;
+			IsValidPixKeyOptions: IsValidPixKeyOptions;
+			IsValidRegistroProfissionalParams: IsValidRegistroProfissionalParams;
+			LegalNature: LegalNature;
+			LegalNatureCategory: LegalNatureCategory;
+			LicensePlateFormat: LicensePlateFormat;
+			Municipality: Municipality;
+			NfeKeyInfo: NfeKeyInfo;
+			NfeKeyModel: NfeKeyModel;
+			NumberToWordsGender: NumberToWordsGender;
+			ParseCnpjOptions: ParseCnpjOptions;
+			ParseCurrencyOptions: ParseCurrencyOptions;
+			PhoneMask: PhoneMask;
+			PhoneType: PhoneType;
+			PhoneVersion: PhoneVersion;
+			PixKeyInfo: PixKeyInfo;
+			PixKeyType: PixKeyType;
+			PixPayloadInfo: PixPayloadInfo;
+			PixPointOfInitiation: PixPointOfInitiation;
+			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
+			State: State;
+			StateCode: StateCode;
+			StateName: StateName;
+		}> = {};
+
+		expect(publicTypes).toEqual({});
+	});
+});
+
+describe("Public API contract: never throws on bad input", () => {
+	const entries = Object.entries(brazilianUtils).filter(
+		([name, value]) =>
+			typeof value === "function" && !isErrorClass(name) && !NETWORK_ENTRY_POINTS.has(name),
+	) as [string, (...args: unknown[]) => unknown][];
+
+	for (const [name, fn] of entries) {
+		for (const [label, value] of BAD_INPUTS) {
+			test(`${name} should not throw for ${label}`, async () => {
+				let thrown: unknown;
+
+				try {
+					const result = fn(value);
+
+					if (result instanceof Promise) await result;
+				} catch (error) {
+					thrown = error;
+				}
+
+				expect(thrown).toBeUndefined();
+			});
+
+			test(`${name} should not throw for ${label} as its second argument`, async () => {
+				let thrown: unknown;
+
+				try {
+					const result = fn("123", value);
+
+					if (result instanceof Promise) await result;
+				} catch (error) {
+					thrown = error;
+				}
+
+				expect(thrown).toBeUndefined();
+			});
+		}
 	}
 });

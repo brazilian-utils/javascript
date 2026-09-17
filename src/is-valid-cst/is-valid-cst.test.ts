@@ -1,0 +1,293 @@
+import * as fc from "fast-check";
+
+import { anyGarbage } from "../_internals/test/arbitraries";
+import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { ICMS_CST_CODES, IPI_CST_CODES, PIS_COFINS_CST_CODES } from "./constants";
+import { isValidCst, type IsValidCstOptions } from "./is-valid-cst";
+
+describe("isValidCst", () => {
+	describe("icms", () => {
+		it("should return true for a valid origin + CST combination", () => {
+			expect(isValidCst("110", { tax: "icms" })).toBe(true);
+			expect(isValidCst("000", { tax: "icms" })).toBe(true);
+			expect(isValidCst("890", { tax: "icms" })).toBe(true);
+		});
+
+		it("should return true for a number input", () => {
+			expect(isValidCst(110, { tax: "icms" })).toBe(true);
+		});
+
+		it("should return false when the origin digit is greater than 8", () => {
+			expect(isValidCst("910", { tax: "icms" })).toBe(false);
+		});
+
+		it("should return false when the CST part is not a known code", () => {
+			expect(isValidCst("199", { tax: "icms" })).toBe(false);
+		});
+
+		it("should return true for the monofasia de combustíveis codes Ajuste SINIEF 39/23 added", () => {
+			expect(isValidCst("002", { tax: "icms" })).toBe(true);
+			expect(isValidCst("015", { tax: "icms" })).toBe(true);
+			expect(isValidCst("053", { tax: "icms" })).toBe(true);
+			expect(isValidCst("061", { tax: "icms" })).toBe(true);
+		});
+
+		it("should return false for the codes Ajuste SINIEF 39/23 added with deferred effect and Ajuste SINIEF 20/24 struck before they took effect (12, 13, 52, 72 and 74)", () => {
+			expect(isValidCst("012", { tax: "icms" })).toBe(false);
+			expect(isValidCst("013", { tax: "icms" })).toBe(false);
+			expect(isValidCst("052", { tax: "icms" })).toBe(false);
+			expect(isValidCst("072", { tax: "icms" })).toBe(false);
+			expect(isValidCst("074", { tax: "icms" })).toBe(false);
+		});
+
+		it("should return false for a length different from 3", () => {
+			expect(isValidCst("10", { tax: "icms" })).toBe(false);
+			expect(isValidCst("1020", { tax: "icms" })).toBe(false);
+		});
+	});
+
+	describe("ipi", () => {
+		it("should return true for known codes", () => {
+			expect(isValidCst("00", { tax: "ipi" })).toBe(true);
+			expect(isValidCst("49", { tax: "ipi" })).toBe(true);
+			expect(isValidCst("99", { tax: "ipi" })).toBe(true);
+		});
+
+		it("should return false for an unknown code", () => {
+			expect(isValidCst("06", { tax: "ipi" })).toBe(false);
+		});
+	});
+
+	describe("pis", () => {
+		it("should return true for known codes", () => {
+			expect(isValidCst("07", { tax: "pis" })).toBe(true);
+			expect(isValidCst("98", { tax: "pis" })).toBe(true);
+		});
+
+		it("should return false for an unknown code", () => {
+			expect(isValidCst("11", { tax: "pis" })).toBe(false);
+		});
+	});
+
+	describe("cofins", () => {
+		it("should return true for known codes (same table as pis)", () => {
+			expect(isValidCst("07", { tax: "cofins" })).toBe(true);
+		});
+
+		it("should return false for an unknown code", () => {
+			expect(isValidCst("11", { tax: "cofins" })).toBe(false);
+		});
+	});
+
+	describe("unknown tax", () => {
+		it("should fall back to the default and check every table, as every other scalar option does", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("000", { tax: "nope" })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("00", { tax: "iss" })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: "iss" })).toBe(true);
+		});
+
+		it("should still reject a code that exists in no table", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("999", { tax: "iss" })).toBe(false);
+		});
+
+		it("should fall back to the default when the tax is not a string", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: 1 })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: null })).toBe(true);
+		});
+
+		it("should fall back to the default for a prototype chain key", () => {
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: "__proto__" })).toBe(true);
+			// @ts-expect-error not a valid tax
+			expect(isValidCst("07", { tax: "toString" })).toBe(true);
+		});
+	});
+
+	it("should consult only the given table, never the other three", () => {
+		expect(isValidCst("00", { tax: "icms" })).toBe(false);
+		expect(isValidCst("06", { tax: "ipi" })).toBe(false);
+		expect(isValidCst("00", { tax: "pis" })).toBe(false);
+		expect(isValidCst("00", { tax: "cofins" })).toBe(false);
+		expect(isValidCst("00")).toBe(true);
+		expect(isValidCst("06")).toBe(true);
+	});
+
+	describe("without options (tax omitted)", () => {
+		it("should return true when the code is a valid icms combination", () => {
+			expect(isValidCst("110")).toBe(true);
+		});
+
+		it("should return true when the code exists only in the ipi table", () => {
+			expect(isValidCst("00")).toBe(true);
+		});
+
+		it("should return true when the code exists only in the pis/cofins table", () => {
+			expect(isValidCst("07")).toBe(true);
+		});
+
+		it("should return true when the code exists in both the ipi and pis/cofins tables", () => {
+			expect(isValidCst("49")).toBe(true);
+		});
+
+		it("should return true when options is undefined", () => {
+			expect(isValidCst("110")).toBe(true);
+		});
+
+		it("should return true when options.tax is undefined", () => {
+			expect(isValidCst("110", {})).toBe(true);
+		});
+
+		it("should return false when the code exists in no table", () => {
+			expect(isValidCst("999")).toBe(false);
+		});
+	});
+
+	it("should return false when options is null", () => {
+		// @ts-expect-error not an options object
+		expect(isValidCst("00", null)).toBe(false);
+	});
+
+	it("should return false when options is a non-null, non-object value (e.g. a string)", () => {
+		// @ts-expect-error not an options object
+		expect(isValidCst("00", "foo")).toBe(false);
+	});
+
+	describe("padding", () => {
+		it("should read a single digit as the three digit icms form, as a number or as a string", () => {
+			expect(isValidCst(0, { tax: "icms" })).toBe(true);
+			expect(isValidCst("0", { tax: "icms" })).toBe(true);
+			expect(isValidCst("000", { tax: "icms" })).toBe(true);
+			expect(isValidCst(2, { tax: "icms" })).toBe(true);
+			expect(isValidCst("2", { tax: "icms" })).toBe(true);
+		});
+
+		it("should agree between a number and a string when the tax is omitted", () => {
+			expect(isValidCst(0)).toBe(true);
+			expect(isValidCst("0")).toBe(true);
+			expect(isValidCst(9)).toBe(false);
+			expect(isValidCst("9")).toBe(false);
+		});
+
+		it("should leave a two digit Tabela B code as written, never padding it to three", () => {
+			expect(isValidCst(49, { tax: "ipi" })).toBe(true);
+			expect(isValidCst("49", { tax: "ipi" })).toBe(true);
+			expect(isValidCst(49, { tax: "icms" })).toBe(false);
+			expect(isValidCst("00", { tax: "ipi" })).toBe(true);
+		});
+
+		it("should trim a single digit before padding it", () => {
+			expect(isValidCst("  0  ", { tax: "icms" })).toBe(true);
+			expect(isValidCst("  0  ")).toBe(true);
+		});
+	});
+
+	it("should return false for an empty string", () => {
+		expect(isValidCst("", { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false for null", () => {
+		// @ts-expect-error not a string or number
+		expect(isValidCst(null, { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false for undefined", () => {
+		// @ts-expect-error not a string or number
+		expect(isValidCst(undefined, { tax: "icms" })).toBe(false);
+	});
+
+	it("should accept a single separator after the origin digit and surrounding whitespace", () => {
+		expect(isValidCst(" 1-10 ", { tax: "icms" })).toBe(true);
+		expect(isValidCst("0 10", { tax: "icms" })).toBe(true);
+		expect(isValidCst("0.10", { tax: "icms" })).toBe(true);
+		expect(isValidCst("0/10", { tax: "icms" })).toBe(true);
+	});
+
+	it("should return false when more than one separator sits between two digits", () => {
+		expect(isValidCst("1--10", { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false when a separator does not sit right after the origin digit", () => {
+		expect(isValidCst("00-", { tax: "icms" })).toBe(false);
+		expect(isValidCst("0-0", { tax: "icms" })).toBe(false);
+		expect(isValidCst("11-0", { tax: "icms" })).toBe(false);
+		expect(isValidCst("0.0", { tax: "icms" })).toBe(false);
+		expect(isValidCst("4-9", { tax: "ipi" })).toBe(false);
+		expect(isValidCst("00-")).toBe(false);
+		expect(isValidCst("0-0")).toBe(false);
+		expect(isValidCst("11-0")).toBe(false);
+		expect(isValidCst("0.0")).toBe(false);
+		expect(isValidCst("4-9")).toBe(false);
+	});
+
+	it("should return false for a string that is not a documented form", () => {
+		expect(isValidCst("abc110", { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false for a number that is not a non-negative safe integer", () => {
+		expect(isValidCst(-110, { tax: "icms" })).toBe(false);
+		expect(isValidCst(1.1, { tax: "icms" })).toBe(false);
+		expect(isValidCst(2 ** 53, { tax: "icms" })).toBe(false);
+	});
+
+	it("should return false for a null-prototype object", () => {
+		expect(isValidCst(Object.create(null), { tax: "icms" })).toBe(false);
+	});
+
+	describe("properties", () => {
+		test("should never throw, regardless of the input", () => {
+			expectNeverThrowsWithOptions(isValidCst, anyGarbage, anyGarbage);
+		});
+
+		test("should validate every origin digit 0-8 combined with a known icms code", () => {
+			fc.assert(
+				fc.property(
+					fc.integer({ min: 0, max: 8 }),
+					fc.constantFrom(...ICMS_CST_CODES),
+					(origin, code) => {
+						expect(isValidCst(`${origin}${code}`, { tax: "icms" })).toBe(true);
+					},
+				),
+			);
+		});
+
+		test("should reject origin digit 9 for icms, regardless of the code", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...ICMS_CST_CODES), (code) => {
+					expect(isValidCst(`9${code}`, { tax: "icms" })).toBe(false);
+				}),
+			);
+		});
+
+		test("should validate every known ipi, pis and cofins code", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...IPI_CST_CODES), (code) => {
+					expect(isValidCst(code, { tax: "ipi" })).toBe(true);
+				}),
+			);
+			fc.assert(
+				fc.property(fc.constantFrom(...PIS_COFINS_CST_CODES), (code) => {
+					expect(isValidCst(code, { tax: "pis" })).toBe(true);
+					expect(isValidCst(code, { tax: "cofins" })).toBe(true);
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidCst types", () => {
+	test("should take a string or number, options, and return a boolean", () => {
+		expectTypeOf(isValidCst).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidCst).parameter(1).toEqualTypeOf<IsValidCstOptions | undefined>();
+		expectTypeOf<IsValidCstOptions["tax"]>().toEqualTypeOf<
+			"icms" | "ipi" | "pis" | "cofins" | undefined
+		>();
+		expectTypeOf(isValidCst).returns.toEqualTypeOf<boolean>();
+	});
+});

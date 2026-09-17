@@ -1,10 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, jest, test } from "bun:test";
+import { jest } from "bun:test";
 
-export { afterEach, beforeEach, describe, expect, it, test };
+export { afterEach, beforeEach, describe, expect, it, test } from "bun:test";
+export { bench, expectTypeOf } from "./noop";
 
 export const vi = {
 	fn: jest.fn,
-	restoreAllMocks: () => {
+	restoreAllMocks: (): void => {
 		jest.restoreAllMocks();
 	},
 };

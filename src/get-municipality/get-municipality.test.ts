@@ -1,40 +1,241 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "../_internals/test/runtime";
-import { getMunicipality } from "./get-municipality";
+import { describe, expect, expectTypeOf, it } from "../_internals/test/runtime";
+import {
+	type GetMunicipalityByCodeParams,
+	type GetMunicipalityByNameParams,
+	type GetMunicipalityParams,
+	getMunicipality,
+} from "./get-municipality";
 
 describe("getMunicipality", () => {
-	const fetchMock = vi.fn();
-	const originalFetch = globalThis.fetch;
-
-	beforeEach(() => {
-		globalThis.fetch = fetchMock as unknown as typeof fetch;
-		fetchMock.mockClear();
-	});
-
-	afterEach(() => {
-		globalThis.fetch = originalFetch;
-		vi.restoreAllMocks();
-	});
-
 	it("should get municipality code by name", async () => {
-		fetchMock.mockResolvedValueOnce({
-			ok: true,
-			json: async () => [{ id: 3550308, nome: "São Paulo" }],
-		});
-
 		await expect(getMunicipality({ municipalityName: "Sao Paulo", uf: "sp" })).resolves.toBe(
 			"3550308",
 		);
 	});
 
 	it("should get municipality name and UF by code", async () => {
-		fetchMock.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({
-				microrregiao: { mesorregiao: { UF: { sigla: "SP" } } },
-				nome: "São Paulo",
-			}),
+		await expect(getMunicipality({ code: "3550308" })).resolves.toEqual(["São Paulo", "SP"]);
+	});
+
+	it("should match the municipality name ignoring accents and casing", async () => {
+		await expect(getMunicipality({ municipalityName: "SÃO PAULO", uf: "SP" })).resolves.toBe(
+			"3550308",
+		);
+		await expect(getMunicipality({ municipalityName: "sao PAULO", uf: "SP" })).resolves.toBe(
+			"3550308",
+		);
+	});
+
+	it("should match a municipality whose own name carries accents regardless of query accents", async () => {
+		await expect(getMunicipality({ municipalityName: "Ceara-Mirim", uf: "RN" })).resolves.toBe(
+			"2402600",
+		);
+		await expect(getMunicipality({ code: "2402600" })).resolves.toEqual(["Ceará-Mirim", "RN"]);
+	});
+
+	it("should trim whitespace from the municipality name before matching", async () => {
+		await expect(getMunicipality({ municipalityName: "  São Paulo  ", uf: "SP" })).resolves.toBe(
+			"3550308",
+		);
+	});
+
+	it("should collapse every run of internal whitespace in the municipality name before matching", async () => {
+		await expect(getMunicipality({ municipalityName: "sao  paulo", uf: "sp" })).resolves.toBe(
+			"3550308",
+		);
+		await expect(getMunicipality({ municipalityName: "sao\tpaulo", uf: "sp" })).resolves.toBe(
+			"3550308",
+		);
+		await expect(getMunicipality({ municipalityName: "sao\npaulo", uf: "sp" })).resolves.toBe(
+			"3550308",
+		);
+		await expect(
+			getMunicipality({ municipalityName: " Angra \t dos \n Reis ", uf: "RJ" }),
+		).resolves.toBe("3300100");
+	});
+
+	it("should not match a municipality name written without the space the dataset carries", async () => {
+		await expect(getMunicipality({ municipalityName: "saopaulo", uf: "SP" })).resolves.toBeNull();
+	});
+
+	it("should fold the casing to upper case, the direction that expands ß to SS", async () => {
+		await expect(getMunicipality({ municipalityName: "Passos", uf: "MG" })).resolves.toBe(
+			"3147907",
+		);
+		await expect(getMunicipality({ municipalityName: "Paßos", uf: "MG" })).resolves.toBe("3147907");
+	});
+
+	it("should trim and uppercase a uf with surrounding whitespace and lowercase letters", async () => {
+		await expect(getMunicipality({ municipalityName: "São Paulo", uf: " sp " })).resolves.toBe(
+			"3550308",
+		);
+	});
+
+	it("should return a fresh pair, so mutating it leaves a later lookup of the same code intact", async () => {
+		const first = await getMunicipality({ code: "3550308" });
+
+		expect(first).toStrictEqual(["São Paulo", "SP"]);
+
+		first?.fill("Mutated");
+
+		expect(first).toStrictEqual(["Mutated", "Mutated"]);
+		await expect(getMunicipality({ code: "3550308" })).resolves.toStrictEqual(["São Paulo", "SP"]);
+	});
+
+	it("should resolve a known Boa Esperança do Norte/MT lookup", async () => {
+		await expect(getMunicipality({ code: "5101837" })).resolves.toEqual([
+			"Boa Esperança do Norte",
+			"MT",
+		]);
+		await expect(
+			getMunicipality({ municipalityName: "Boa Esperanca do Norte", uf: "MT" }),
+		).resolves.toBe("5101837");
+	});
+
+	describe("code validation", () => {
+		it("should return null for an empty code", async () => {
+			await expect(getMunicipality({ code: "" })).resolves.toBeNull();
 		});
 
-		await expect(getMunicipality({ code: "3550308" })).resolves.toEqual(["São Paulo", "SP"]);
+		it("should return null for a path-traversal code", async () => {
+			await expect(
+				getMunicipality({ code: "../../../v1/localidades/estados" }),
+			).resolves.toBeNull();
+		});
+
+		it("should return null for a code with query-string injection", async () => {
+			await expect(getMunicipality({ code: "3550308?x=1" })).resolves.toBeNull();
+		});
+
+		it("should return null for a code that is neither a string nor a number", async () => {
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality({ code: null })).resolves.toBeNull();
+			await expect(getMunicipality({ code: Object.create(null) })).resolves.toBeNull();
+		});
+
+		it("should resolve a code given as a number", async () => {
+			await expect(getMunicipality({ code: 3_550_308 })).resolves.toEqual(["São Paulo", "SP"]);
+			await expect(getMunicipality({ code: 0 })).resolves.toBeNull();
+		});
+
+		it("should return null for a negative number, instead of dropping its sign", async () => {
+			await expect(getMunicipality({ code: -3_550_308 })).resolves.toBeNull();
+		});
+
+		it("should return null for a fractional number, instead of dropping its decimal point", async () => {
+			await expect(getMunicipality({ code: 355_030.8 })).resolves.toBeNull();
+			await expect(getMunicipality({ code: 3_550_308.5 })).resolves.toBeNull();
+		});
+
+		it("should return null for a non-finite number", async () => {
+			await expect(getMunicipality({ code: Number.NaN })).resolves.toBeNull();
+			await expect(getMunicipality({ code: Number.POSITIVE_INFINITY })).resolves.toBeNull();
+		});
+
+		it("should return null for a code with the wrong number of digits", async () => {
+			await expect(getMunicipality({ code: "123" })).resolves.toBeNull();
+			await expect(getMunicipality({ code: "12345678" })).resolves.toBeNull();
+		});
+
+		it("should return null for an unknown 7 digit code", async () => {
+			await expect(getMunicipality({ code: "0000000" })).resolves.toBeNull();
+		});
+	});
+
+	describe("options validation (non-object input)", () => {
+		it("should return null for null", async () => {
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality(null)).resolves.toBeNull();
+		});
+
+		it("should return null for undefined", async () => {
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality()).resolves.toBeNull();
+		});
+
+		it("should return null for a primitive", async () => {
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality("3550308")).resolves.toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality(123)).resolves.toBeNull();
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality(true)).resolves.toBeNull();
+		});
+
+		it("should return null for an array", async () => {
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality([])).resolves.toBeNull();
+		});
+	});
+
+	describe("municipality name lookup validation", () => {
+		it("should return null for an empty municipality name", async () => {
+			await expect(getMunicipality({ municipalityName: "", uf: "SP" })).resolves.toBeNull();
+		});
+
+		it("should return null for a non-string municipality name", async () => {
+			// @ts-expect-error: intentionally invalid input
+			await expect(getMunicipality({ municipalityName: null, uf: "SP" })).resolves.toBeNull();
+		});
+
+		it("should return null for a non-string uf", async () => {
+			// @ts-expect-error: intentionally invalid input
+			const options: GetMunicipalityByNameParams = { municipalityName: "São Paulo", uf: null };
+
+			await expect(getMunicipality(options)).resolves.toBeNull();
+		});
+
+		it("should return null for a malformed UF (digits)", async () => {
+			await expect(
+				getMunicipality({ municipalityName: "São Paulo", uf: "123" }),
+			).resolves.toBeNull();
+		});
+
+		it("should return null for a malformed UF (wrong length)", async () => {
+			await expect(
+				getMunicipality({ municipalityName: "São Paulo", uf: "XXX" }),
+			).resolves.toBeNull();
+		});
+
+		it("should return null for an unknown UF", async () => {
+			await expect(
+				getMunicipality({ municipalityName: "São Paulo", uf: "ZZ" }),
+			).resolves.toBeNull();
+		});
+
+		it("should return null when the municipality is not found in the given state", async () => {
+			await expect(
+				getMunicipality({ municipalityName: "Cidade Inexistente", uf: "SP" }),
+			).resolves.toBeNull();
+		});
+
+		it("should return null when the municipality exists but in a different state", async () => {
+			await expect(
+				getMunicipality({ municipalityName: "São Paulo", uf: "RJ" }),
+			).resolves.toBeNull();
+		});
+	});
+});
+
+const lookUpEither = (options: GetMunicipalityParams) => getMunicipality(options);
+
+describe("getMunicipality types", () => {
+	it("should take a code or a name plus uf", () => {
+		expectTypeOf<GetMunicipalityParams>().toEqualTypeOf<
+			GetMunicipalityByCodeParams | GetMunicipalityByNameParams
+		>();
+		expectTypeOf<GetMunicipalityByCodeParams>().toEqualTypeOf<{ code: string | number }>();
+		expectTypeOf<GetMunicipalityByNameParams>().toEqualTypeOf<{
+			municipalityName: string;
+			uf: string;
+		}>();
+	});
+
+	it("should overload the return type on the direction of the lookup", () => {
+		const byCode: GetMunicipalityByCodeParams = { code: "3550308" };
+		const byName: GetMunicipalityByNameParams = { municipalityName: "São Paulo", uf: "SP" };
+		expectTypeOf(getMunicipality(byCode)).resolves.toEqualTypeOf<[string, string] | null>();
+		expectTypeOf(getMunicipality(byName)).resolves.toEqualTypeOf<string | null>();
+		expectTypeOf(lookUpEither).returns.resolves.toEqualTypeOf<[string, string] | string | null>();
 	});
 });

@@ -1,0 +1,7 @@
+[[IgnoredVulns]]
+id = "GHSA-jmr9-qjv8-65gv"
+reason = "extract-zip is a development-only transitive dependency of webdriverio (browser tests); no patched release exists and it never runs on user input"
+
+[[IgnoredVulns]]
+id = "GHSA-7pqw-9j4j-h8q3"
+reason = "extract-zip is a development-only transitive dependency of webdriverio (browser tests); no patched release exists and it never runs on user input"

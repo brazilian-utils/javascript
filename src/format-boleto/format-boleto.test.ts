@@ -1,6 +1,10 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { LENGTH } from "./constants";
-import { formatBoleto } from "./format-boleto";
+import * as fc from "fast-check";
+
+import { ARRECADACAO_LINE_LENGTH } from "../_internals/constants/arrecadacao";
+import { BOLETO_LENGTH } from "../_internals/constants/boleto";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generateBoleto } from "../generate-boleto/generate-boleto";
+import { type FormatBoletoOptions, formatBoleto } from "./format-boleto";
 
 describe("formatBoleto", () => {
 	test("should format boleto with mask", () => {
@@ -92,7 +96,7 @@ describe("formatBoleto", () => {
 		);
 	});
 
-	test(`shouldn't add digits after the boleto length (${LENGTH})`, () => {
+	test(`shouldn't add digits after the boleto length (${BOLETO_LENGTH})`, () => {
 		expect(formatBoleto("10491443385511900000200000000141325230000093423123123123")).toBe(
 			"10491.44338 55119.000002 00000.000141 3 25230000093423",
 		);
@@ -115,5 +119,117 @@ describe("formatBoleto", () => {
 	test("should return an empty string when receive an empty string", () => {
 		expect(formatBoleto("")).toBe("");
 		expect(formatBoleto("")).toBe("");
+	});
+
+	test("should return an empty string when the value is nullish", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatBoleto(null)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatBoleto()).toBe("");
+	});
+
+	describe("arrecadação", () => {
+		test("should use the arrecadação mask when it starts with 8", () => {
+			expect(formatBoleto("846100000005246100291102005460339004695895061080")).toBe(
+				"84610000000-5 24610029110-2 00546033900-4 69589506108-0",
+			);
+			expect(formatBoleto("858900004609524601791605607593050865831483000010")).toBe(
+				"85890000460-9 52460179160-5 60759305086-5 83148300001-0",
+			);
+		});
+
+		test("should keep the cobrança bancária mask for partial values", () => {
+			expect(formatBoleto("8")).toBe("8");
+			expect(formatBoleto("84610000000")).toBe("84610.00000 0");
+			expect(formatBoleto("846100000005")).toBe("84610.00000 05");
+			expect(formatBoleto("8461000000052")).toBe("84610.00000 052");
+		});
+
+		test("should keep the cobrança bancária mask for the 44 digit barcode", () => {
+			expect(formatBoleto("84610000000246100291100054603390069589506108")).toBe(
+				"84610.00000 02461.002911 00054.603390 0 69589506108",
+			);
+		});
+
+		test(`shouldn't apply the arrecadação mask past its length (${ARRECADACAO_LINE_LENGTH})`, () => {
+			expect(formatBoleto("846100000005246100291102005460339004695895061080123")).toBe(
+				"84610.00000 05246.100291 10200.546033 9 00469589506108",
+			);
+		});
+
+		test("should remove all non numeric characters", () => {
+			expect(formatBoleto("84610000000-5 24610029110-2 00546033900-4 69589506108-0")).toBe(
+				"84610000000-5 24610029110-2 00546033900-4 69589506108-0",
+			);
+		});
+	});
+
+	describe("properties", () => {
+		const bancarioMask = /^\d{5}\.\d{5} \d{5}\.\d{6} \d{5}\.\d{6} \d \d{14}$/;
+
+		const arrecadacaoMask = /^\d{11}-\d \d{11}-\d \d{11}-\d \d{11}-\d$/;
+
+		test("should print a generated bank slip in the mask of its kind", () => {
+			fc.assert(
+				fc.property(fc.constantFrom("bancario", "arrecadacao"), (type) => {
+					const value = generateBoleto({ type });
+					const mask = type === "arrecadacao" ? arrecadacaoMask : bancarioMask;
+
+					expect(mask.test(formatBoleto(value))).toBe(true);
+				}),
+			);
+		});
+
+		test("should never emit a digit it was not given", () => {
+			fc.assert(
+				fc.property(fc.string(), (value) => {
+					const digits = value.replaceAll(/\D/g, "");
+					const formatted = formatBoleto(value).replaceAll(/\D/g, "");
+
+					expect(digits.startsWith(formatted)).toBe(true);
+					expect(formatted.length).toBeLessThanOrEqual(ARRECADACAO_LINE_LENGTH);
+				}),
+			);
+		});
+
+		test("should pad a short value up to the bank slip length", () => {
+			fc.assert(
+				fc.property(fc.integer({ min: 0, max: 999_999 }), (value) => {
+					const padded = formatBoleto(value, { pad: true }).replaceAll(/\D/g, "");
+
+					expect(padded.length).toBe(BOLETO_LENGTH);
+				}),
+			);
+		});
+
+		test("should never throw and always return the bank slip as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatBoleto(text)).toBe("string");
+					expect(typeof formatBoleto(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatBoleto with a nullish value under pad", () => {
+	test("should return an empty string instead of a zero-filled document", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(formatBoleto(null, { pad: true })).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatBoleto(undefined, { pad: true })).toBe("");
+	});
+});
+
+describe("formatBoleto types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatBoleto).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatBoleto).parameter(1).toEqualTypeOf<FormatBoletoOptions | undefined>();
+		expectTypeOf(formatBoleto).returns.toEqualTypeOf<string>();
+	});
+
+	test("should restrict pad to a boolean", () => {
+		expectTypeOf<FormatBoletoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

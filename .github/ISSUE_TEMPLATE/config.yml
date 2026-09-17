@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & discussions
+    url: https://github.com/brazilian-utils/javascript/discussions
+    about: Ask a question, share an idea, or discuss usage before opening an issue.
+  - name: Report a security vulnerability
+    url: https://github.com/brazilian-utils/javascript/security/advisories/new
+    about: Report security issues privately instead of opening a public issue. See SECURITY.md.

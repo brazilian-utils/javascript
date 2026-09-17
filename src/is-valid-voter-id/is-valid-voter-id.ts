@@ -1,72 +1,67 @@
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-first-digit/calculate-voter-id-first-digit";
+import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
+import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
 
-const isValidLength = (value: string): boolean => {
-	if (value.length === 12) return true;
+const SEPARATORS_REGEX = /[\s.]/g;
 
-	const federativeUnion = value.slice(-4, -2);
-	return value.length === 13 && (federativeUnion === "01" || federativeUnion === "02");
-};
+const FORMAT_REGEX = /^[\s.]*\d{4}[\s.]*\d{4}[\s.]*(?:\d[\s.]*)?\d{2}[\s.]*\d{2}[\s.]*$/;
 
-const calculateFirstDigit = ({
-	sequentialNumber,
-	federativeUnion,
-}: {
-	sequentialNumber: string;
-	federativeUnion: string;
-}): number => {
-	let sum = 0;
-
-	for (let i = 0; i < 8; i++) {
-		sum += (sequentialNumber.charCodeAt(i) - 48) * (i + 2);
-	}
-
-	const remainder = sum % 11;
-
-	if (remainder === 0 && (federativeUnion === "01" || federativeUnion === "02")) {
-		return 1;
-	}
-
-	return remainder === 10 ? 0 : remainder;
-};
-
-const calculateSecondDigit = ({
-	federativeUnion,
-	firstDigit,
-}: {
-	federativeUnion: string;
-	firstDigit: number;
-}): number => {
-	const sum =
-		(federativeUnion.charCodeAt(0) - 48) * 7 +
-		(federativeUnion.charCodeAt(1) - 48) * 8 +
-		firstDigit * 9;
-
-	const remainder = sum % 11;
-
-	if ((federativeUnion === "01" || federativeUnion === "02") && remainder === 0) {
-		return 1;
-	}
-
-	return remainder === 10 ? 0 : remainder;
-};
-
+/**
+ * Validates if a Brazilian voter id (título de eleitor) is valid.
+ *
+ * A voter id normally has 12 digits: an 8-digit sequential number, a 2-digit federative
+ * union code (01-28) and a 2-digit verification code. São Paulo (01) and Minas Gerais (02)
+ * may instead issue voter ids with a 9-digit sequential number, totalling 13 digits.
+ *
+ * Whitespace and dots are accepted around and between the "0000 0000 00 00" groups, but any
+ * other character, a letter in particular, makes the value invalid.
+ *
+ * @param {string} value - The voter id value to be validated.
+ * @returns {boolean} True if the voter id is valid, false otherwise.
+ *
+ * @example
+ * ```typescript
+ * isValidVoterId("102385010671"); // true (12 digits)
+ * isValidVoterId("1234567880191"); // true (13 digits, São Paulo)
+ * isValidVoterId("1023 8501 06 71"); // true (whitespace mask)
+ * isValidVoterId("123456780124"); // false (invalid checksum)
+ * isValidVoterId("ab102385010671"); // false (invalid format)
+ * ```
+ *
+ * Resolução TSE nº 23.659/2021, art. 36, parágrafo único, confirms the federative union table and
+ * the two-step módulo 11 structure ("até 12 algarismos"). The weights used in each step and the
+ * 13-digit São Paulo/Minas Gerais ids are brutils parity, not published by the TSE — siga0984 uses
+ * a different 9-digit rule for the sequential number.
+ *
+ * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser.
+ *
+ * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
+ * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
+ */
 export const isValidVoterId = (value: string): boolean => {
-	if (!value || typeof value !== "string") return false;
+	if (typeof value !== "string") return false;
 
-	const digits = sanitizeToDigits(value);
+	if (!FORMAT_REGEX.test(value)) return false;
 
-	if (!isValidLength(digits)) return false;
+	const digits = value.replace(SEPARATORS_REGEX, "");
 
-	const sequentialNumber = digits.slice(0, 8);
+	// Stryker disable next-line MethodExpression: the check digits are computed from the first eight digits only, so passing the whole value instead of the sequential part yields the same result.
+	const sequentialNumber = digits.slice(0, -4);
 	const federativeUnion = digits.slice(-4, -2);
 	const verifier = digits.slice(-2);
 
+	if (digits.length === 13 && !NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion)) {
+		return false;
+	}
+
 	const ufCode = Number(federativeUnion);
 
-	if (!Number.isInteger(ufCode) || ufCode < 1 || ufCode > 28) return false;
+	if (ufCode < 1 || ufCode > 28) return false;
 
-	const digit1 = calculateFirstDigit({ sequentialNumber, federativeUnion });
-	const digit2 = calculateSecondDigit({ federativeUnion, firstDigit: digit1 });
+	const digit1 = calculateVoterIdFirstDigit({ sequentialNumber, federativeUnion });
+	const digit2 = calculateVoterIdSecondDigit({ federativeUnion, firstDigit: digit1 });
 
 	return verifier === `${digit1}${digit2}`;
 };

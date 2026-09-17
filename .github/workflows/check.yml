@@ -21,12 +21,38 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          cache: true
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
 
       - name: Run checks
-        run: npm run check
+        run: vp check
+
+      - name: Check commit messages
+        if: ${{ github.event_name == 'pull_request' }}
+        run: npx commitlint --from "${{ github.event.pull_request.base.sha }}" --to HEAD --verbose
+
+      - name: Check the package has no runtime dependencies
+        run: npm run check:dependencies
+
+      - name: Check the lockfile
+        run: npm run check:lockfile
+
+      - name: Check for duplicated code
+        run: npm run check:duplication
+
+      - name: Check for unused files, exports and dependencies
+        run: npm run check:unused
+
+      - name: Validate the public API
+        run: npm run check:api
+
+      - name: Check llms.txt/llms-full.txt are up to date
+        run: npm run build:llms && git diff --exit-code -- docs/llms.txt docs/llms-full.txt
+
+      - name: Audit dependencies
+        run: npx --yes audit-ci@7.1.0 --high --allowlist GHSA-jmr9-qjv8-65gv GHSA-7pqw-9j4j-h8q3

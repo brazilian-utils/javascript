@@ -20,24 +20,38 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [20, 22, 24]
+        node-version: [20, 22, 24, 26]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup
+        uses: $/.github/actions/setup
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          cache: true
+      - name: Print the Node.js version in use
+        run: node --version
 
       - name: Run tests
+        if: matrix.node-version != 24
         run: vp test
+
+      - name: Run tests with coverage
+        if: matrix.node-version == 24
+        run: vp test run --coverage
+
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == 24
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true
+          flags: node
 
   test-bun:
     name: Test on Bun
@@ -46,10 +60,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
 
       - name: Run tests
         run: bun test src
@@ -61,15 +80,20 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v2
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: v2.x
 
       - name: Run tests
-        run: deno test --unstable-sloppy-imports --allow-net src
+        run: deno test --unstable-sloppy-imports --allow-net --allow-env src
 
   test-browsers:
     name: Test on Browsers (${{ matrix.browser }})
@@ -81,15 +105,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          cache: true
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
 
       - name: Run tests in ${{ matrix.browser }}
-        run: vp test --browser=${{ matrix.browser }}
+        run: vp test --browser.enabled --browser.name=${{ matrix.browser }}
 
   test-safari:
     name: Test on Browsers (safari)
@@ -98,12 +122,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          cache: true
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
 
       - name: Run tests in Safari
-        run: vp test --browser=safari --browser.headless=false
+        run: vp test --browser.enabled --browser.name=safari --browser.headless=false

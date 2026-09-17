@@ -1,0 +1,8 @@
+# Code owners for this repository.
+#
+# @hyanmandian is the sole maintainer, so one catch-all rule covers everything.
+# GitHub requests a review from the owner on every pull request that touches a
+# matching path; combined with "Require review from Code Owners" in the branch
+# protection rules for `main`, it makes that review mandatory.
+
+* @hyanmandian

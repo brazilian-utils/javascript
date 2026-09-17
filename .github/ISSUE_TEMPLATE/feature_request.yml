@@ -1,0 +1,81 @@
+name: New utility / feature request
+description: Propose a new Brazilian document/format utility, or an improvement to an existing one
+title: "feat: <short description>"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an idea! Most requests here are for a new utility covering a Brazilian
+        document, format or business rule (e.g. a new document validator/formatter/generator).
+        The more concrete detail you give, the faster this can be reviewed and implemented.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: What kind of request is this?
+      options:
+        - New utility (validate/format/generate/parse something)
+        - Improvement to an existing utility
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: document
+    attributes:
+      label: Brazilian document / spec name
+      description: What Brazilian document, identifier or business rule is this about?
+      placeholder: "e.g. CNH (Carteira Nacional de Habilitação), Nota Fiscal, RENAVAM..."
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Official source / specification link
+      description: Link to the official government page, law, or specification describing the format and validation/check-digit algorithm.
+      placeholder: "https://www.gov.br/..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Expected API
+      description: |
+        What would the function signature(s) look like? Follow the existing naming convention
+        (`isValidX`, `formatX`, `generateX`, `parseX`) if applicable.
+      render: typescript
+      placeholder: |
+        isValidRenavam(value: string | number): boolean;
+        formatRenavam(value: string | number): string;
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example input/output
+      description: A few concrete examples of valid/invalid input and the expected output.
+      render: typescript
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that helps explain the use case or edge cases (regional variants, check-digit algorithm details, etc).
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues/discussions and this hasn't been requested yet.
+          required: true
+        - label: I understand this library has zero runtime dependencies and any implementation should follow that constraint.
+          required: true

@@ -1,8 +1,12 @@
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Fist.svg" alt="Raised Fist" height="200"/>
+<img src="https://raw.githubusercontent.com/brazilian-utils/brand/main/logos/logo-js.svg" alt="Brazilian Utils" width="360"/>
 
-# 🇧🇷 Brazilian Utils
+> Utils library for Brazilian-specific businesses.
 
-> Utils library for specific Brazilian businesses.
+- Zero runtime dependencies
+- Tree-shakeable, one import per util
+- Node.js, Bun, Deno and browsers
+- Typed, documented in English and Portuguese
 
 [Get Started](getting-started.md)
-[GitHub](https://github.com/brazilian-utils/brazilian-utils)
+[Utilities](utilities.md)
+[GitHub](https://github.com/brazilian-utils/javascript)

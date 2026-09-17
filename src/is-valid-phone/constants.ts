@@ -1,2 +1,3 @@
-export const PHONE_MIN_LENGTH = 10;
-export const PHONE_MAX_LENGTH = 11;
+import { type PhoneType } from "./is-valid-phone";
+
+export const DEFAULT_ACCEPT: PhoneType[] = ["mobile", "landline"];

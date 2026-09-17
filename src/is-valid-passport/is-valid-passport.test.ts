@@ -1,4 +1,12 @@
-import { describe, expect, test } from "../_internals/test/runtime";
+import * as fc from "fast-check";
+
+import { anyValue, maskedValues } from "../_internals/test/arbitraries";
+import {
+	expectAccepted,
+	expectAlwaysReturnsType,
+	expectRejected,
+} from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidPassport } from "./is-valid-passport";
 
 describe("isValidPassport", () => {
@@ -8,18 +16,22 @@ describe("isValidPassport", () => {
 		});
 
 		test("when passport is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPassport(null)).toBe(false);
 		});
 
 		test("when passport is undefined", () => {
-			// @ts-expect-error
-			expect(isValidPassport(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPassport()).toBe(false);
 		});
 
 		test("when passport is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPassport({})).toBe(false);
+		});
+
+		test("when passport is an object without a prototype", () => {
+			expect(isValidPassport(Object.create(null))).toBe(false);
 		});
 
 		test("when passport length is different from 8", () => {
@@ -36,5 +48,48 @@ describe("isValidPassport", () => {
 			expect(isValidPassport("AA111111")).toBe(true);
 			expect(isValidPassport("CL125167")).toBe(true);
 		});
+
+		test("when passport is lowercase", () => {
+			expect(isValidPassport("ab123456")).toBe(true);
+		});
+
+		test("when passport contains mask symbols", () => {
+			expect(isValidPassport("AB-123456")).toBe(true);
+			expect(isValidPassport("AB.123.456")).toBe(true);
+		});
+	});
+
+	describe("properties", () => {
+		test("should ignore case and every non alphanumeric character", () => {
+			const passport = fc.stringMatching(/^[A-Za-z]{2}[0-9]{6}$/);
+
+			expectAccepted(isValidPassport, maskedValues(passport, [".", "-", "/", " ", "_"], 2));
+		});
+
+		test("should reject any alphanumeric value that is not 2 letters and 6 digits", () => {
+			const notAPassport = fc
+				.stringMatching(/^[0-9A-Z]{0,12}$/)
+				.filter((value) => !/^[A-Z]{2}[0-9]{6}$/.test(value));
+
+			expectRejected(isValidPassport, notAPassport);
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidPassport, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidPassport with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPassport(["A", "B", "1", "2", "3", "4", "5", "6"])).toBe(false);
+	});
+});
+
+describe("isValidPassport types", () => {
+	test("should take a string or number and return a boolean", () => {
+		expectTypeOf(isValidPassport).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(isValidPassport).returns.toEqualTypeOf<boolean>();
 	});
 });

@@ -1,0 +1,118 @@
+import * as fc from "fast-check";
+
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { formatCertidao, type FormatCertidaoOptions } from "./format-certidao";
+
+describe("formatCertidao", () => {
+	describe("should return an empty string", () => {
+		test("when it is null", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(formatCertidao(null)).toBe("");
+		});
+
+		test("when it is undefined", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(formatCertidao()).toBe("");
+		});
+
+		test("when it is an empty string", () => {
+			expect(formatCertidao("")).toBe("");
+		});
+	});
+
+	describe("should return the matrícula in the printed mask", () => {
+		test("for the 32 digits of the ghiorzi.org/DVnew.htm worked example", () => {
+			expect(formatCertidao("10453901552013100012021000012321")).toBe(
+				"104539 01 55 2013 1 00012 021 0000123 21",
+			);
+		});
+
+		test("for a value already carrying the dotted mask of the Provimento", () => {
+			expect(formatCertidao("104539.01.55.2013.1.00012.021.0000123-21")).toBe(
+				"104539 01 55 2013 1 00012 021 0000123 21",
+			);
+		});
+
+		test("for 094300 01 55 2010 1 00020 112 0000120-87 (klawdyo/validation-br certidao.spec.ts)", () => {
+			expect(formatCertidao("09430001552010100020112000012087")).toBe(
+				"094300 01 55 2010 1 00020 112 0000120 87",
+			);
+		});
+	});
+
+	describe("should return a partial mask", () => {
+		test("when the value has fewer than 32 digits", () => {
+			expect(formatCertidao("10453901")).toBe("104539 01");
+		});
+
+		test("when the value has more than 32 digits, dropping the excess", () => {
+			expect(formatCertidao("1045390155201310001202100001232199")).toBe(
+				"104539 01 55 2013 1 00012 021 0000123 21",
+			);
+		});
+	});
+
+	describe("should left pad the value", () => {
+		test("when options.pad is true", () => {
+			expect(formatCertidao("1552010100020112000012087", { pad: true })).toBe(
+				"000000 01 55 2010 1 00020 112 0000120 87",
+			);
+		});
+	});
+
+	describe("should read a number as the string of its digits, like formatCpf", () => {
+		test("masking it as far as it goes; a full 32 digit matrícula still has to be a string", () => {
+			expect(formatCertidao(104_539_015_520)).toBe("104539 01 55 20");
+		});
+	});
+
+	describe("properties", () => {
+		test("should print a full matrícula in the groups of the Provimento", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{32}$/), (value) => {
+					const mask = /^\d{6} \d{2} \d{2} \d{4} \d \d{5} \d{3} \d{7} \d{2}$/;
+
+					expect(mask.test(formatCertidao(value))).toBe(true);
+				}),
+			);
+		});
+
+		test("should keep only the digits of the matrícula it formats", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					const digits = value.replaceAll(/\D/g, "").slice(0, 32);
+
+					expect(formatCertidao(value).replaceAll(/\D/g, "")).toBe(digits);
+				}),
+			);
+		});
+
+		test("should left pad a shorter value up to the matrícula length", () => {
+			fc.assert(
+				fc.property(fc.stringMatching(/^[0-9]{0,32}$/), (value) => {
+					const padded = formatCertidao(value, { pad: true }).replaceAll(/\D/g, "");
+
+					expect(padded).toBe(value.padStart(32, "0"));
+				}),
+			);
+		});
+
+		test("should never throw and always return the matrícula as a string", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
+					expect(typeof formatCertidao(text)).toBe("string");
+					expect(typeof formatCertidao(number)).toBe("string");
+				}),
+			);
+		});
+	});
+});
+
+describe("formatCertidao types", () => {
+	test("should take a string or number, optional options, and return a string", () => {
+		expectTypeOf(formatCertidao).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatCertidao).parameter(1).toEqualTypeOf<FormatCertidaoOptions | undefined>();
+		expectTypeOf<FormatCertidaoOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf(formatCertidao).returns.toEqualTypeOf<string>();
+	});
+});

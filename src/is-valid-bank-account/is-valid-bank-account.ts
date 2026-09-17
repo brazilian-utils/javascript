@@ -1,185 +1,303 @@
+import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { mod10 } from "../_internals/mod10/mod10";
 import { mod11 } from "../_internals/mod11/mod11";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import {
+	BANRISUL_ACCOUNT_WEIGHTS,
+	CITIBANK_ACCOUNT_WEIGHTS,
+	COMPE_CODES,
+	HSBC_AGENCY_ACCOUNT_WEIGHTS,
+	SANTANDER_WEIGHTS,
+	STRUCTURE_ONLY_BANK_CODES,
+	VERHOEFF_INVERSE,
+	VERHOEFF_MULTIPLICATION,
+	VERHOEFF_PERMUTATION,
+} from "./constants";
 
-export type IsValidBankAccountOptions = {
+/** The bank account `isValidBankAccount` checks: the bank, the agency and the account with its check digit. */
+export type IsValidBankAccountParams = {
+	/** Three digit bank code (COMPE), e.g. "001" for Banco do Brasil. */
 	bankCode: string;
+	/** Agency number, digits only, without its own check digit. */
 	agency: string;
+	/** Account number, digits only, without the check digit. */
 	account: string;
+	/**
+	 * The account check digit: one or two characters, or "X" for Banco do Brasil and "P" for
+	 * Bradesco. Banks with a published rule take a single character; the generic fallback also
+	 * accepts two, chaining mod10 and mod11 over the account.
+	 */
 	digit: string;
 };
 
-export type IsValidBankAccountParams = IsValidBankAccountOptions;
+/**
+ * The bank account `isValidBankAccount` checks: the bank, the agency and the account with its
+ * check digit.
+ *
+ * Kept from 2.3.0: the name violates the naming rule (`Options` is the type of a second,
+ * usually optional, argument, and this object is the only argument `isValidBankAccount` takes),
+ * but it shipped in 2.3.0 as the canonical name, so it stays as an alias until v3.
+ *
+ * @deprecated Use `IsValidBankAccountParams` instead.
+ */
+export type IsValidBankAccountOptions = IsValidBankAccountParams;
 
-const validateBancoDoBrasil = (params: IsValidBankAccountOptions): boolean => {
-	const { agency, account, digit } = params;
+type BankAccountDigits = (agency: string, account: string) => string[];
 
-	if (agency.length < 4 || agency.length > 5) return false;
-	if (account.length < 8 || account.length > 10) return false;
-	if (digit.length !== 1) return false;
+type BankAccountRule = {
+	minAgencyLength: number;
+	maxAgencyLength: number;
+	minAccountLength: number;
+	maxAccountLength: number;
+	digits: BankAccountDigits | null;
+};
 
-	const accountWithoutLeadingZeros = account.replace(/^0+/, "") || "0";
-	const fullNumber = agency.padStart(5, "0") + accountWithoutLeadingZeros.padStart(8, "0");
+const bancoDoBrasilDigits: BankAccountDigits = (_agency, account) => {
+	const digit = mod11(account, { variant: "bank" });
+
+	return [digit === 10 ? "X" : String(digit)];
+};
+
+const santanderDigits: BankAccountDigits = (agency, account) => {
+	const base = `${agency}00${account}`;
 
 	let sum = 0;
-	let weight = 2;
-	for (let i = fullNumber.length - 1; i >= 0; i--) {
-		const digitValue = fullNumber.charCodeAt(i) - 48;
-		sum += digitValue * weight;
-		weight = weight === 9 ? 2 : weight + 1;
+	let position = 0;
+
+	for (const weight of SANTANDER_WEIGHTS) {
+		// Stryker disable next-line ArithmeticOperator: SANTANDER_WEIGHTS sums to 60, a multiple of 10, so replacing -48 with +48 shifts every term's contribution by a multiple of 10 mod 10, leaving the final check digit unchanged for every possible input.
+		sum += ((base.charCodeAt(position) - 48) * weight) % 10;
+		position++;
 	}
 
-	const remainder = sum % 11;
-	const calculatedDigit = remainder === 0 || remainder === 1 ? 0 : 11 - remainder;
-
-	const digitChar = String(calculatedDigit);
-	return digitChar === digit;
+	return [String((10 - (sum % 10)) % 10)];
 };
 
-const validateItau = (params: IsValidBankAccountOptions): boolean => {
-	const { agency, account, digit } = params;
+const banrisulDigits: BankAccountDigits = (_agency, account) => {
+	const remainder = generateChecksum({ base: account, weight: BANRISUL_ACCOUNT_WEIGHTS }) % 11;
 
-	if (agency.length !== 4) return false;
-	if (account.length !== 5) return false;
-	if (digit.length !== 1) return false;
+	if (remainder === 0) return ["0"];
+	if (remainder === 1) return ["6"];
 
-	const fullNumber = agency + account;
-	let sum = 0;
+	return [String(11 - remainder)];
+};
 
-	for (let i = 0; i < fullNumber.length; i++) {
-		const digitValue = fullNumber.charCodeAt(i) - 48;
-		const weight = i % 2 === 0 ? 2 : 1;
-		let result = digitValue * weight;
-		if (result > 9) {
-			result = Math.floor(result / 10) + (result % 10);
-		}
-		sum += result;
+const caixaDigits: BankAccountDigits = (agency, account) => {
+	const digit = mod11(agency + account, { variant: "bank" });
+
+	return [String(digit === 10 ? 0 : digit)];
+};
+
+const bradescoDigits: BankAccountDigits = (_agency, account) => {
+	const digit = mod11(account, { variant: "bank", maxWeight: 7 });
+
+	return digit === 10 ? ["P"] : [String(digit)];
+};
+
+const nubankDigits: BankAccountDigits = (_agency, account) => {
+	const base = account.replace(/^0+(?=\d)/, "");
+
+	let checksum = 0;
+
+	for (let i = base.length - 1, position = 1; i >= 0; i--, position++) {
+		const permuted = VERHOEFF_PERMUTATION[position % 8][base.charCodeAt(i) - 48];
+		checksum = VERHOEFF_MULTIPLICATION[checksum][permuted];
 	}
 
-	const remainder = sum % 10;
-	const calculatedDigit = remainder === 0 ? 0 : 10 - remainder;
-
-	return String(calculatedDigit) === digit;
+	return [String(VERHOEFF_INVERSE[checksum])];
 };
 
-const validateBradesco = (params: IsValidBankAccountOptions): boolean => {
-	const { agency, account, digit } = params;
+const itauDigits: BankAccountDigits = (agency, account) => [String(mod10(agency + account))];
 
-	if (agency.length !== 4) return false;
-	if (account.length !== 7) return false;
-	if (digit.length !== 1) return false;
+const hsbcDigits: BankAccountDigits = (agency, account) => {
+	const remainder =
+		generateChecksum({ base: agency + account, weight: HSBC_AGENCY_ACCOUNT_WEIGHTS }) % 11;
 
-	let sum = 0;
-	let weight = 2;
-
-	for (let i = account.length - 1; i >= 0; i--) {
-		const digitValue = account.charCodeAt(i) - 48;
-		sum += digitValue * weight;
-		weight = weight === 7 ? 2 : weight + 1;
-	}
-
-	const remainder = sum % 11;
-	const calculatedDigit = remainder === 0 || remainder === 1 ? 0 : 11 - remainder;
-
-	return String(calculatedDigit) === digit;
+	return [String(remainder === 10 ? 0 : remainder)];
 };
 
-const validateSantander = (params: IsValidBankAccountOptions): boolean => {
-	const { agency, account, digit } = params;
+const citibankDigits: BankAccountDigits = (_agency, account) => {
+	const remainder = generateChecksum({ base: account, weight: CITIBANK_ACCOUNT_WEIGHTS }) % 11;
 
-	if (agency.length !== 4) return false;
-	if (account.length !== 8) return false;
-	if (digit.length !== 1) return false;
-
-	const calculatedDigit = mod11(account);
-	const digitValue = calculatedDigit > 9 ? 0 : calculatedDigit;
-
-	return String(digitValue) === digit;
+	return [String(remainder <= 1 ? 0 : 11 - remainder)];
 };
 
-const validateCaixa = (params: IsValidBankAccountOptions): boolean => {
-	const { agency, account, digit } = params;
-
-	if (agency.length !== 4) return false;
-	if (account.length !== 11) return false;
-	if (digit.length !== 1) return false;
-
-	const accountWithoutDigit = account.substring(0, 10);
-	const calculatedDigit = mod11(accountWithoutDigit);
-	const digitValue = calculatedDigit > 9 ? 0 : calculatedDigit;
-
-	return String(digitValue) === digit;
+const BANK_RULES: Record<string, BankAccountRule> = {
+	"001": {
+		minAgencyLength: 4,
+		maxAgencyLength: 5,
+		minAccountLength: 8,
+		maxAccountLength: 10,
+		digits: bancoDoBrasilDigits,
+	},
+	"033": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 8,
+		maxAccountLength: 8,
+		digits: santanderDigits,
+	},
+	"041": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 9,
+		maxAccountLength: 9,
+		digits: banrisulDigits,
+	},
+	"104": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 11,
+		maxAccountLength: 11,
+		digits: caixaDigits,
+	},
+	"237": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 7,
+		maxAccountLength: 7,
+		digits: bradescoDigits,
+	},
+	"260": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 5,
+		maxAccountLength: 13,
+		digits: nubankDigits,
+	},
+	"341": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 5,
+		maxAccountLength: 5,
+		digits: itauDigits,
+	},
+	"399": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 6,
+		maxAccountLength: 6,
+		digits: hsbcDigits,
+	},
+	"745": {
+		minAgencyLength: 4,
+		maxAgencyLength: 4,
+		minAccountLength: 10,
+		maxAccountLength: 10,
+		digits: citibankDigits,
+	},
 };
 
-const validateGeneric = (params: IsValidBankAccountOptions): boolean => {
-	const { account, digit } = params;
+const STRUCTURE_ONLY_RULE: BankAccountRule = {
+	minAgencyLength: 1,
+	maxAgencyLength: 5,
+	minAccountLength: 1,
+	maxAccountLength: 13,
+	digits: null,
+};
 
-	if (digit.length < 1 || digit.length > 2) return false;
-
-	const mod11Result = mod11(account);
-	if (mod11Result <= 9 && String(mod11Result) === digit) {
-		return true;
-	}
-
-	const mod10Result = mod10(account);
-	if (String(mod10Result) === digit) {
-		return true;
+const isListedBankCode = (bankCode: string): boolean => {
+	// Stryker disable next-line EqualityOperator: bankCode always has exactly 3 characters here and COMPE_CODES.length is always a multiple of 3, so the extra out-of-range iteration only tests an empty remainder against a 3-character code, which never matches.
+	for (let i = 0; i < COMPE_CODES.length; i += 3) {
+		if (COMPE_CODES.startsWith(bankCode, i)) return true;
 	}
 
 	return false;
 };
 
-const VALIDATORS: Record<string, (params: IsValidBankAccountOptions) => boolean> = {
-	"001": validateBancoDoBrasil,
-	"341": validateItau,
-	"237": validateBradesco,
-	"033": validateSantander,
-	"104": validateCaixa,
+const findRule = (bankCode: string): BankAccountRule | null => {
+	if (Object.hasOwn(BANK_RULES, bankCode)) return BANK_RULES[bankCode];
+
+	if (STRUCTURE_ONLY_BANK_CODES.includes(bankCode)) return STRUCTURE_ONLY_RULE;
+
+	return null;
 };
 
+const validateWithRule = (
+	rule: BankAccountRule,
+	agency: string,
+	account: string,
+	digit: string,
+): boolean => {
+	if (agency.length < rule.minAgencyLength || agency.length > rule.maxAgencyLength) return false;
+	if (account.length < rule.minAccountLength || account.length > rule.maxAccountLength)
+		return false;
+	if (digit.length !== 1) return false;
+
+	if (rule.digits === null) return sanitizeToDigits(digit).length === 1;
+
+	return rule.digits(agency, account).includes(digit);
+};
+
+const validateGeneric = (account: string, digit: string): boolean => {
+	if (digit.length === 2) {
+		const first = mod10(account);
+		const second = mod11(`${account}${first}`, { variant: "bank" });
+
+		return `${first}${second === 10 ? 0 : second}` === digit;
+	}
+
+	return (
+		String(mod10(account)) === digit ||
+		String(mod11(account)) === digit ||
+		String(mod11(account, { variant: "bank" })) === digit
+	);
+};
+
+const sanitizeCheckDigit = (value: string): string =>
+	value.toUpperCase().replaceAll(/[^\dPX]/g, "");
+
 /**
- * Validates if a Brazilian bank account is valid.
- * Supports specific validation algorithms for major banks:
- * - Banco do Brasil (001)
- * - Itaú (341)
- * - Bradesco (237)
- * - Santander (033)
- * - Caixa Econômica Federal (104)
+ * Validates a Brazilian bank account. The bank code must belong to the Banco Central do Brasil
+ * STR participants list, otherwise the account is rejected.
  *
- * For other banks, uses generic mod10/mod11 validation.
+ * Banks validated by their published check digit algorithm:
+ * Banco do Brasil (001), Santander (033), Banrisul (041), Caixa Econômica Federal (104),
+ * Bradesco (237), Nubank (260, Verhoeff), Itaú Unibanco (341), HSBC/Kirton (399) and
+ * Citibank (745).
  *
- * @param {IsValidBankAccountOptions} params - The bank account parameters.
- * @param {string} params.bankCode - The bank code (3 digits).
+ * Banks validated by structure only, because they publish no check digit rule:
+ * Inter (077), Ailos (085), XP (102), Unicred (136), Stone (197), BTG Pactual (208),
+ * Original (212), PagBank (290), BMG (318), Mercado Pago (323), C6 (336), PicPay (380),
+ * Cora (403), Pan (623), BV (655), Daycoval (707), Sicredi (748) and Sicoob (756).
+ * For those the agency and account only need to match the documented digit lengths.
+ *
+ * Every other bank of the list falls back to a generic modulus 10 and modulus 11 check.
+ *
+ * @param {IsValidBankAccountParams} params - The bank account parameters.
+ * @param {string} params.bankCode - The bank code (3 digits), as published by Banco Central.
  * @param {string} params.agency - The agency number (1-5 digits).
- * @param {string} params.account - The account number (1-13 digits).
- * @param {string} params.digit - The verification digit (1-2 digits).
+ * @param {string} params.account - The account number (1-13 digits). For Caixa, operação + conta.
+ * @param {string} params.digit - The verification digit (1-2 digits, or "X" for Banco do Brasil and "P" for Bradesco).
  * @returns {boolean} True if the bank account is valid, false otherwise.
  *
  * @example
  * ```typescript
- * isValidBankAccount({
- *   bankCode: "001",
- *   agency: "1234",
- *   account: "12345678",
- *   digit: "5"
- * }); // true (if valid Banco do Brasil account)
- *
- * isValidBankAccount({
- *   bankCode: "341",
- *   agency: "1234",
- *   account: "12345",
- *   digit: "6"
- * }); // true (if valid Itaú account)
+ * isValidBankAccount({ bankCode: "001", agency: "1584", account: "00210169", digit: "6" }); // true
+ * isValidBankAccount({ bankCode: "041", agency: "2664", account: "358507670", digit: "6" }); // true
+ * isValidBankAccount({ bankCode: "260", agency: "0001", account: "5216125", digit: "0" }); // true
+ * isValidBankAccount({ bankCode: "999", agency: "1234", account: "123456", digit: "6" }); // false
  * ```
+ *
+ * Only bank codes present in the bundled Banco Central participant table are accepted; that table is
+ * regenerated weekly by the datasets workflow, so a bank created after the release becomes valid
+ * on the next release.
+ *
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
+ * @see Based on: https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf
+ * Icatu Seguros compendium of per bank agency/account check digit rules.
+ * @see Based on: https://github.com/ajmiciano/banktools-br/tree/master/lib/banktools-br/banks
+ * @see Based on: https://github.com/luizalabs/heimdall/blob/main/heimdall_valid_bank/calculate_number_account.py
+ * @see Based on: https://github.com/Xerpa/bran_checker/tree/master/lib/banks
  */
-export const isValidBankAccount = (params: IsValidBankAccountOptions): boolean => {
+export const isValidBankAccount = (params: IsValidBankAccountParams): boolean => {
+	if (isNullish(params) || typeof params !== "object") return false;
+
 	const { bankCode, agency, account, digit } = params;
 
+	// An empty field is left to the length checks below, which reject it once sanitized.
 	if (
-		!bankCode ||
-		!agency ||
-		!account ||
-		!digit ||
 		typeof bankCode !== "string" ||
 		typeof agency !== "string" ||
 		typeof account !== "string" ||
@@ -191,19 +309,19 @@ export const isValidBankAccount = (params: IsValidBankAccountOptions): boolean =
 	const bankCodeDigits = sanitizeToDigits(bankCode);
 	const agencyDigits = sanitizeToDigits(agency);
 	const accountDigits = sanitizeToDigits(account);
-	const digitDigits = sanitizeToDigits(digit);
+	const checkDigit = sanitizeCheckDigit(digit);
 
 	if (bankCodeDigits.length !== 3) return false;
 	if (agencyDigits.length === 0 || agencyDigits.length > 5) return false;
 	if (accountDigits.length === 0 || accountDigits.length > 13) return false;
-	if (digitDigits.length === 0 || digitDigits.length > 2) return false;
+	// Stryker disable next-line ConditionalExpression,LogicalOperator: every path below also rejects a malformed checkDigit on its own — validateWithRule requires digit.length===1 before it ever compares, and validateGeneric compares against 1 or 2 character strings, so a 0, 3+ character checkDigit can never match either way.
+	if (checkDigit.length === 0 || checkDigit.length > 2) return false;
 
-	const validator = bankCodeDigits in VALIDATORS ? VALIDATORS[bankCodeDigits] : validateGeneric;
+	if (!isListedBankCode(bankCodeDigits)) return false;
 
-	return validator({
-		bankCode: bankCodeDigits,
-		agency: agencyDigits,
-		account: accountDigits,
-		digit: digitDigits,
-	});
+	const rule = findRule(bankCodeDigits);
+
+	if (rule !== null) return validateWithRule(rule, agencyDigits, accountDigits, checkDigit);
+
+	return validateGeneric(accountDigits, checkDigit);
 };

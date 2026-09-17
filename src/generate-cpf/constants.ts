@@ -1,6 +1,5 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
 
-export const LENGTH = 11;
 export const BASE_LENGTH = 8;
 
 export const STATE_CODES: Record<StateCode, string> = {
@@ -14,8 +13,8 @@ export const STATE_CODES: Record<StateCode, string> = {
 	ES: "7",
 	GO: "1",
 	MA: "3",
-	MT: "5",
-	MS: "5",
+	MT: "1",
+	MS: "1",
 	MG: "6",
 	PR: "9",
 	PB: "4",

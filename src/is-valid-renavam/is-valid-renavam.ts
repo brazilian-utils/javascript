@@ -1,19 +1,12 @@
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { calculateRenavamCheckDigit } from "../_internals/calculate-renavam-check-digit/calculate-renavam-check-digit";
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
+import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
 const RENAVAM_LENGTH = 11;
 
-/**
- * Pads a string with zeros on the left to reach the desired length.
- *
- * @param {string} input - The input string to pad.
- * @param {number} padLength - The desired length after padding.
- * @returns {string} The padded string.
- */
-const padLeft = (input: string, padLength: number): string => {
-	const currentLength = input.length;
-	if (currentLength >= padLength) return input;
-	return "0".repeat(padLength - currentLength) + input;
-};
+const BASE_LENGTH = 10;
+
+const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
 
 /**
  * Validates if a RENAVAM (Registro Nacional de Veículos Automotores) is valid.
@@ -24,6 +17,10 @@ const padLeft = (input: string, padLength: number): string => {
  *
  * The validation uses a checksum algorithm based on modulo 11.
  *
+ * Spaces, dots and hyphens are ignored, so every punctuated form of a RENAVAM is accepted, but
+ * any other character, a letter in particular, makes the value invalid. A registration whose
+ * digits are all the same (`"00000000000"`) is rejected as well, matching both references below.
+ *
  * @param {string} renavam - The RENAVAM value to be validated.
  * @returns {boolean} True if the RENAVAM is valid, false otherwise.
  *
@@ -31,46 +28,33 @@ const padLeft = (input: string, padLength: number): string => {
  * ```typescript
  * isValidRenavam("639884962"); // true (9 digits, old format)
  * isValidRenavam("00639884962"); // true (11 digits, new format)
+ * isValidRenavam("0063988.4962"); // true (dots and hyphens are ignored)
  * isValidRenavam("12345678901"); // false (invalid checksum)
+ * isValidRenavam("00000000000"); // false (repeated digits)
+ * isValidRenavam("ab00639884962"); // false (invalid format)
  * ```
+ *
+ * The Código de Trânsito Brasileiro creates the RENAVAM registry but does not define its check
+ * digit, so the algorithm below follows the two community references cited as `Based on:`.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm
+ * @see Based on: https://github.com/klawdyo/validation-br/blob/main/src/renavam.ts
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/renavam.py
  */
 export const isValidRenavam = (renavam: string | number): boolean => {
-	if (!renavam) return false;
+	if (typeof renavam !== "string" && typeof renavam !== "number") return false;
 
-	const digits = sanitizeToDigits(renavam);
+	const digits = renavam.toString().replace(SEPARATORS_REGEX, "");
 
-	if (digits.length !== 9 && digits.length !== 11) return false;
+	if (!FORMAT_REGEX.test(digits)) return false;
 
-	const paddedDigits = padLeft(digits, RENAVAM_LENGTH);
+	const paddedDigits = digits.padStart(RENAVAM_LENGTH, "0");
 
-	if (!/^\d{11}$/.test(paddedDigits)) return false;
+	if (isRepeatedDigits(paddedDigits)) return false;
 
-	const renavamWithoutDigit = paddedDigits.substring(0, 10);
+	const expectedDigit = calculateRenavamCheckDigit(paddedDigits.slice(0, BASE_LENGTH));
 
-	const reversedRenavam = renavamWithoutDigit.split("").reverse().join("");
-
-	let sum = 0;
-	let multiplier = 2;
-	for (let i = 0; i < 10; i++) {
-		const digit = Number.parseInt(reversedRenavam[i] ?? "0", 10);
-		sum += digit * multiplier;
-
-		if (multiplier >= 9) {
-			multiplier = 2;
-		} else {
-			multiplier++;
-		}
-	}
-
-	const mod11 = sum % 11;
-
-	let expectedDigit = 11 - mod11;
-
-	if (expectedDigit >= 10) {
-		expectedDigit = 0;
-	}
-
-	const actualDigit = Number.parseInt(paddedDigits[10] ?? "0", 10);
+	const actualDigit = Number.parseInt(paddedDigits.charAt(BASE_LENGTH), 10);
 
 	return expectedDigit === actualDigit;
 };

@@ -1,13 +1,18 @@
-import { type FormatParams, format } from "../_internals/format/format";
+import { format } from "../_internals/format/format";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
-export type FormatPisOptions = Pick<FormatParams, "pad">;
+/** Options of `formatPis`. */
+export type FormatPisOptions = {
+	/** Whether to left pad the value with zeros up to the number of slots in the pattern (default: `false`). */
+	pad?: boolean;
+};
 
 /**
  * Formats a PIS (Programa de Integração Social) number according to the specified pattern.
  *
  * @param {string|number} value - The PIS number to be formatted. It can be a string or a number.
- * @param {Object} options - Optional formatting options.
+ * @param {FormatPisOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - If true, pads the value with leading zeros if necessary.
  * @returns {string} The formatted PIS number as a string.
  *
@@ -17,10 +22,17 @@ export type FormatPisOptions = Pick<FormatParams, "pad">;
  * formatPis(12345678901); // "123.45678.90-1"
  * formatPis("123456789", { pad: true }); // "001.23456.78-9"
  * ```
+ *
+ * @see Official: https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao
+ * @see Official: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-manual-de-orientacao-do-esocial-vs-2-4.pdf
+ * @see Official: https://www.sirc.gov.br/wp-content/uploads/manual_sirc_recomendacoes_tecnicas_v7.pdf
+ * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/pis.py
  */
 export const formatPis = (value: string | number, options?: FormatPisOptions): string =>
-	format({
-		pad: options?.pad,
-		value: sanitizeToDigits(value),
-		pattern: "000.00000.00-0",
-	});
+	isNullish(value)
+		? ""
+		: format({
+				pad: options?.pad,
+				value: sanitizeToDigits(value),
+				pattern: "000.00000.00-0",
+			});

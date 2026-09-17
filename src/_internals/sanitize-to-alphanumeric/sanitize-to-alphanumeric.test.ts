@@ -7,6 +7,6 @@ describe("sanitizeToAlphanumeric", () => {
 	});
 
 	it("should support number input", () => {
-		expect(sanitizeToAlphanumeric(12345)).toBe("12345");
+		expect(sanitizeToAlphanumeric(12_345)).toBe("12345");
 	});
 });

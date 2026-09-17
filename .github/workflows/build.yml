@@ -2,7 +2,7 @@ name: Build
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
   push:
     branches: [main]
 
@@ -21,18 +21,143 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          cache: true
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
 
       - name: Run build
         run: vp run build
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist
           path: dist
+
+  tree-shaking:
+    name: Tree-shaking report
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
+
+      - name: Checkout base
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: base
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Build head
+        run: npm ci && npm run build
+
+      - name: Measure base
+        if: ${{ github.event_name == 'pull_request' }}
+        id: base
+        run: |
+          if [ ! -f base/scripts/tree-shaking.ts ]; then
+            echo "measured=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/tree-shaking.ts --json head.json
+          (cd base && npm ci && npm run build && node scripts/tree-shaking.ts --json ../base.json --surviving ../head.json)
+          echo "measured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Compare against base
+        if: ${{ github.event_name == 'pull_request' }}
+        id: compare
+        continue-on-error: true
+        run: |
+          if [ "${{ steps.base.outputs.measured }}" = "true" ]; then
+            code=2
+            echo "code=$code" >> "$GITHUB_OUTPUT"
+            set +e
+            node scripts/tree-shaking.ts --compare base.json --markdown tree-shaking.md
+            code=$?
+            set -e
+            case "$code" in 0 | 1) ;; *) code=2 ;; esac
+            echo "code=$code" >> "$GITHUB_OUTPUT"
+            exit "$code"
+          else
+            {
+              echo "## Tree-shaking report"
+              echo
+              echo "No base measurement available (the base branch has no \`scripts/tree-shaking.ts\`, or an incompatible version). Showing head sizes only."
+              echo
+              printf '%s\n' "\`\`\`"
+              node scripts/tree-shaking.ts
+              printf '%s\n' "\`\`\`"
+            } > tree-shaking.md
+          fi
+
+      - name: Add report marker
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if [ ! -f tree-shaking.md ]; then
+            printf '## Tree-shaking report\n\nThe measurement step failed before producing a report. See the job log.\n' > tree-shaking.md
+          fi
+          sed -i '1i<!-- tree-shaking-report -->' tree-shaking.md
+          if [ "${{ steps.compare.outputs.code }}" = "2" ]; then
+            printf '\n> The comparison itself failed (see the job log); the "tree-shaking: accepted" label does not cover this.\n' >> tree-shaking.md
+          elif [ "${{ steps.compare.outcome }}" = "failure" ]; then
+            if [ "${{ contains(github.event.pull_request.labels.*.name, 'tree-shaking: accepted') }}" = "true" ]; then
+              printf '\n> Regression accepted through the "tree-shaking: accepted" label.\n' >> tree-shaking.md
+            else
+              printf '\n> To accept an intentional size increase, add the "tree-shaking: accepted" label to this pull request.\n' >> tree-shaking.md
+            fi
+          fi
+
+      - name: Find existing comment
+        if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork }}
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "<!-- tree-shaking-report -->"
+
+      - name: Post or update comment
+        if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork }}
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body-path: tree-shaking.md
+
+      - name: Summarize tree-shaking for fork pull requests
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
+        run: cat tree-shaking.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on regression
+        if: "${{ github.event_name == 'pull_request' && steps.compare.outcome == 'failure' && steps.compare.outputs.code != '2' && !contains(github.event.pull_request.labels.*.name, 'tree-shaking: accepted') }}"
+        run: exit 1
+
+      - name: Fail when the comparison itself failed
+        if: "${{ github.event_name == 'pull_request' && steps.compare.outputs.code == '2' }}"
+        run: exit 1
+
+      - name: Summarize tree-shaking
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          {
+            echo "## Tree-shaking report"
+            echo
+            printf '%s\n' "\`\`\`"
+            node scripts/tree-shaking.ts
+            printf '%s\n' "\`\`\`"
+          } >> "$GITHUB_STEP_SUMMARY"

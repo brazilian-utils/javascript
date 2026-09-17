@@ -12,9 +12,9 @@
 export const mod10 = (str: string): number => {
 	let sum = 0;
 	const len = str.length;
-	for (let i = len - 1; i >= 0; i--) {
-		const digit = str.charCodeAt(i) - 48;
-		const result = digit * ((len - 1 - i) & 1 ? 1 : 2);
+	for (let i = 0; i < len; i++) {
+		const digit = str.charCodeAt(len - 1 - i) - 48;
+		const result = digit * (i % 2 === 0 ? 2 : 1);
 		sum += result > 9 ? result - 9 : result;
 	}
 	const mod = sum % 10;

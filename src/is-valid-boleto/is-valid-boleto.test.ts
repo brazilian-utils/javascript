@@ -1,5 +1,8 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { LENGTH } from "./constants";
+import * as fc from "fast-check";
+
+import { BOLETO_LENGTH } from "../_internals/constants/boleto";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generateBoleto } from "../generate-boleto/generate-boleto";
 import { isValidBoleto } from "./is-valid-boleto";
 
 describe("isValidBoleto", () => {
@@ -9,33 +12,33 @@ describe("isValidBoleto", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidBoleto(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidBoleto()).toBe(false);
 		});
 
-		test(`when length is less than ${LENGTH}`, () => {
+		test(`when length is less than ${BOLETO_LENGTH}`, () => {
 			expect(isValidBoleto("123456789")).toBe(false);
 		});
 
 		test("when is array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto([])).toBe(false);
 		});
 
 		test("when is object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto({})).toBe(false);
 		});
 
 		test("when is boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto(false)).toBe(false);
 		});
 
@@ -45,6 +48,10 @@ describe("isValidBoleto", () => {
 
 		test("check digit mod11 is invalid", () => {
 			expect(isValidBoleto("00190000090114971860168524522114975860000102656")).toBe(false);
+		});
+
+		test(`when length is greater than ${BOLETO_LENGTH}, even with extra digits appended to an otherwise valid boleto`, () => {
+			expect(isValidBoleto("00190000090114971860168524522114675860000102656999")).toBe(false);
 		});
 	});
 
@@ -56,5 +63,123 @@ describe("isValidBoleto", () => {
 		test("when is a boleto valid with mask", () => {
 			expect(isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656")).toBe(true);
 		});
+
+		test("when the código de moeda is not 9 (same fixture as the boleto valid without mask, with the moeda in barcode position 4 changed to 7 and both the campo 1 and the DV geral recalculated): Carta-Circular BCB nº 2.926/2000 fixes that position at 9, and the leniency kept from 2.3.0 accepts any other digit", () => {
+			expect(isValidBoleto("00170000010114971860168524522114275860000102656")).toBe(true);
+		});
+	});
+
+	describe("arrecadação", () => {
+		const FEBRABAN_LINE = "846100000005246100291102005460339004695895061080";
+		const FEBRABAN_BARCODE = "84610000000246100291100054603390069589506108";
+
+		describe("should return true", () => {
+			test("for the FEBRABAN 'Layout Padrão de Arrecadação' §11 modulo 10 linha digitável example", () => {
+				expect(isValidBoleto(FEBRABAN_LINE)).toBe(true);
+			});
+
+			test("for the mcrvaz/boleto-brasileiro-validator modulus 10 linha digitável fixture", () => {
+				expect(isValidBoleto("836200000005667800481000180975657313001589636081")).toBe(true);
+			});
+
+			test("for the mrmgomes/boleto-utils modulus 10 linha digitável fixture", () => {
+				expect(isValidBoleto("846300000003299902962024004101360008002006441147")).toBe(true);
+			});
+
+			test("when it is a valid modulo 11 linha digitável", () => {
+				expect(isValidBoleto("858900004609524601791605607593050865831483000010")).toBe(true);
+				expect(isValidBoleto("848900000002404201622015806051904292586034111220")).toBe(true);
+				expect(isValidBoleto("858000000070438403281922630720192528304729600523")).toBe(true);
+				expect(isValidBoleto("838600000050096000190009000801782309000343062712")).toBe(true);
+				expect(isValidBoleto("858200000007572503282030560708202107539591904460")).toBe(true);
+			});
+
+			test("for the barcode form of the FEBRABAN §11 modulus 10 example", () => {
+				expect(isValidBoleto(FEBRABAN_BARCODE)).toBe(true);
+				expect(isValidBoleto("85890000460524601791606075930508683148300001")).toBe(true);
+			});
+
+			test("when it has a mask", () => {
+				expect(isValidBoleto("84610000000-5 24610029110-2 00546033900-4 69589506108-0")).toBe(true);
+			});
+		});
+
+		describe("should return false", () => {
+			test("when the general check digit is wrong", () => {
+				expect(isValidBoleto(`8469${FEBRABAN_BARCODE.slice(4)}`)).toBe(false);
+			});
+
+			test("when a block check digit is wrong", () => {
+				expect(isValidBoleto(`${FEBRABAN_LINE.slice(0, 11)}9${FEBRABAN_LINE.slice(12)}`)).toBe(
+					false,
+				);
+			});
+
+			test("when the value identifier is not 6, 7, 8 or 9", () => {
+				expect(isValidBoleto(`841${FEBRABAN_BARCODE.slice(3)}`)).toBe(false);
+			});
+
+			test("when the length is wrong", () => {
+				expect(isValidBoleto(FEBRABAN_LINE.slice(0, 47))).toBe(false);
+				expect(isValidBoleto(`${FEBRABAN_LINE}0`)).toBe(false);
+			});
+		});
+	});
+
+	describe("properties", () => {
+		const types = ["bancario", "arrecadacao"] as const;
+
+		const digitString = fc.string({ unit: fc.constantFrom("0", "1", "2", "7", "9") });
+
+		test("should accept every generated bank slip", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...types), (type) => {
+					expect(isValidBoleto(generateBoleto({ type }))).toBe(true);
+				}),
+			);
+		});
+
+		test("should ignore the mask characters of a generated bank slip", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...types), (type) => {
+					const value = generateBoleto({ type });
+					const masked = `${value.slice(0, 5)}. ${value.slice(5, 20)}-${value.slice(20)}`;
+
+					expect(isValidBoleto(masked)).toBe(true);
+				}),
+			);
+		});
+
+		test("should reject every digit string that has no bank slip length", () => {
+			fc.assert(
+				fc.property(digitString, (value) => {
+					fc.pre(value.length !== BOLETO_LENGTH);
+
+					expect(isValidBoleto(value)).toBe(false);
+				}),
+			);
+		});
+
+		test("should never throw and always judge a bank slip with a boolean", () => {
+			fc.assert(
+				fc.property(fc.anything(), (value) => {
+					expect(typeof isValidBoleto(value as string)).toBe("boolean");
+				}),
+			);
+		});
+	});
+});
+
+describe("isValidBoleto with an array of characters", () => {
+	test("should reject it instead of reading it as the joined string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidBoleto("34191790010104351004791020150008291070026000".match(/\d/g))).toBe(false);
+	});
+});
+
+describe("isValidBoleto types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidBoleto).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidBoleto).returns.toEqualTypeOf<boolean>();
 	});
 });

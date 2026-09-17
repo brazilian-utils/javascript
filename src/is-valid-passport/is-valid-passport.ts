@@ -1,22 +1,35 @@
+import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { PASSPORT_REGEX } from "./constants";
 
 /**
  * Checks if a Brazilian passport number is valid.
- * To be considered valid, the input must be a string containing exactly two
- * alphabetical characters followed by exactly six numerical digits.
+ * To be considered valid, the sanitized input must contain exactly two alphabetical
+ * characters followed by exactly six numerical digits. The input is case-insensitive and
+ * any non-alphanumeric characters (spaces, dots, hyphens, etc.) are ignored, mirroring the
+ * sanitization performed by `formatPassport`/`parsePassport`.
  * This function does not verify if the input is a real passport number,
  * as there are no checksums for the Brazilian passport.
+ * A number is accepted for symmetry with `formatPassport`/`parsePassport` but is never valid:
+ * the decimal form of a number never starts with the two letters a passport number needs.
  *
- * @param passport - The string containing the passport number to be checked.
- * @returns True if the passport number is valid (2 letters followed by 6 digits).
+ * @param {string|number} passport - The string containing the passport number to be checked.
+ * @returns {boolean} True if the passport number is valid (2 letters followed by 6 digits).
  *
  * @example
- * isValidPassport("Ab123456") // false - must be uppercase
  * isValidPassport("AB123456") // true
+ * isValidPassport("ab123456") // true (case-insensitive)
+ * isValidPassport("AB-123.456") // true (symbols are ignored)
  * isValidPassport("12345678") // false
- * isValidPassport("DC-221345") // false
+ * isValidPassport("DC-221345extra") // false
+ *
+ * The Polícia Federal passport FAQ states the layout: "Ele é composto por duas letras - chamadas
+ * de 'série', e por seis dígitos subsequentes. Por exemplo: Passaporte CS265436."
+ *
+ * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
+ * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e
  */
 export const isValidPassport = (passport: string | number): boolean => {
-	if (passport === null || passport === undefined) return false;
-	return PASSPORT_REGEX.test(String(passport));
+	if (typeof passport !== "string") return false;
+
+	return PASSPORT_REGEX.test(sanitizeToAlphanumeric(passport));
 };

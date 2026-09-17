@@ -1,25 +1,99 @@
 {
 	"name": "@brazilian-utils/brazilian-utils",
 	"version": "2.3.0",
-	"description": "Brazilian Utils is a library focused on solving problems that we face daily in the development of applications for the Brazilian business.",
+	"description": "Zero-dependency, tree-shakeable TypeScript utilities for Brazilian data: validate, format, parse and generate CPF, CNPJ, CEP, boleto, Pix, phone, holidays and more.",
+	"keywords": [
+		"boleto",
+		"brasil",
+		"brazil",
+		"brazilian",
+		"cbo",
+		"cep",
+		"cfop",
+		"cnae",
+		"cnh",
+		"cnpj",
+		"cpf",
+		"esm",
+		"feriados",
+		"formatter",
+		"generator",
+		"holidays",
+		"iban",
+		"ibge",
+		"ie",
+		"license-plate",
+		"municipios",
+		"ncm",
+		"nfe",
+		"phone",
+		"pis",
+		"pix",
+		"renavam",
+		"tree-shakeable",
+		"typescript",
+		"utils",
+		"validation",
+		"validator",
+		"zero-dependencies"
+	],
+	"homepage": "https://brazilian-utils.com.br",
+	"bugs": {
+		"url": "https://github.com/brazilian-utils/javascript/issues"
+	},
 	"license": "MIT",
-	"repository": "https://github.com/brazilian-utils/javascript",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/brazilian-utils/javascript.git"
+	},
 	"files": [
+		"./CHANGELOG.md",
 		"./dist"
 	],
 	"type": "module",
 	"sideEffects": false,
 	"main": "./dist/brazilian-utils.umd.cjs",
 	"module": "./dist/brazilian-utils.js",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/brazilian-utils.js",
-			"require": "./dist/brazilian-utils.umd.cjs"
+	"types": "./dist/brazilian-utils.d.ts",
+	"typesVersions": {
+		"*": {
+			"dist/*": [
+				"dist/*"
+			],
+			"package.json": [
+				"package.json"
+			],
+			"*": [
+				"dist/*.d.ts"
+			]
 		}
 	},
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/brazilian-utils.d.ts",
+				"default": "./dist/brazilian-utils.js"
+			},
+			"require": {
+				"types": "./dist/brazilian-utils.d.cts",
+				"default": "./dist/brazilian-utils.umd.cjs"
+			}
+		},
+		"./*": {
+			"import": {
+				"types": "./dist/*.d.ts",
+				"default": "./dist/*.js"
+			},
+			"require": {
+				"types": "./dist/*.d.cts",
+				"default": "./dist/*.cjs"
+			}
+		},
+		"./package.json": "./package.json"
+	},
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"provenance": true
 	},
 	"scripts": {
 		"test": "vp test",
@@ -27,41 +101,77 @@
 		"test:bun": "bun test src",
 		"test:deno": "deno test --unstable-sloppy-imports --allow-net --allow-env src",
 		"test:live": "RUN_LIVE_CEP_TESTS=1 vp test src/get-address-info-by-cep/get-address-info-by-cep.test.ts",
-		"test:edge-browser": "vp test --browser=edge",
-		"test:chrome-browser": "vp test --browser=chrome",
-		"test:safari-browser": "vp test --browser=safari --browser.headless=false",
-		"test:firefox-browser": "vp test --browser=firefox",
+		"test:edge-browser": "vp test --browser.enabled --browser.name=edge",
+		"test:chrome-browser": "vp test --browser.enabled --browser.name=chrome",
+		"test:safari-browser": "vp test --browser.enabled --browser.name=safari --browser.headless=false",
+		"test:firefox-browser": "vp test --browser.enabled --browser.name=firefox",
 		"format": "vp fmt --write .",
 		"format:check": "vp fmt --check .",
 		"lint": "vp lint .",
 		"lint:fix": "vp lint --fix .",
 		"check": "vp check",
 		"check:fix": "vp check --fix",
-		"prebuild": "node ./scripts/prebuild.ts",
-		"build": "vp build",
-		"build:cities": "node ./scripts/cities.ts",
-		"build:states": "node ./scripts/states.ts",
+		"build": "vp pack",
+		"check:tree-shaking": "node ./scripts/tree-shaking.ts",
+		"check:duplication": "jscpd",
+		"check:unused": "knip",
+		"test:mutation": "stryker run",
+		"bench": "vp test bench --run",
+		"check:api": "npm run build && api-extractor run --verbose",
+		"check:api:update": "npm run build && api-extractor run --local --verbose",
+		"check:commits": "commitlint --from origin/main --to HEAD --verbose",
+		"check:lockfile": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https --validate-integrity",
+		"build:data": "node ./scripts/data.ts",
+		"build:llms": "node ./scripts/llms.ts",
 		"prepublishOnly": "vp run build",
-		"ci": "vp check",
-		"release": "release-it"
+		"check:dependencies": "node -e \"const d=require('./package.json').dependencies||{};if(Object.keys(d).length){console.error('runtime dependencies are not allowed:',Object.keys(d).join(', '));process.exit(1)}\""
 	},
 	"devDependencies": {
-		"@vitest/coverage-v8": "4.1.5",
-		"release-it": "20.0.1",
-		"vite": "npm:@voidzero-dev/vite-plus-core@0.1.16",
-		"vite-plugin-dts": "4.5.4",
-		"vite-plus": "0.1.19",
-		"vitest": "npm:@voidzero-dev/vite-plus-test@0.1.16",
-		"webdriverio": "9.27.0"
+		"@arethetypeswrong/core": "0.18.5",
+		"@commitlint/cli": "21.2.2",
+		"@commitlint/config-conventional": "21.2.2",
+		"@microsoft/api-extractor": "7.59.1",
+		"@stryker-mutator/core": "10.0.0",
+		"@stryker-mutator/vitest-runner": "10.0.0",
+		"@vitest/browser-webdriverio": "4.1.11",
+		"@vitest/coverage-v8": "4.1.11",
+		"esbuild": "0.28.2",
+		"eslint-plugin-sonarjs": "^4.2.1",
+		"fast-check": "4.10.1",
+		"jscpd": "5.2.1",
+		"knip": "6.36.0",
+		"lockfile-lint": "5.0.1",
+		"publint": "0.3.24",
+		"typescript": "7.0.2",
+		"vite-plus": "0.3.2",
+		"webdriverio": "9.31.9"
+	},
+	"overrides": {
+		"basic-ftp@5": "^5.3.1",
+		"brace-expansion@2": "^2.1.2",
+		"eslint-plugin-sonarjs": {
+			"typescript": "6.0.3",
+			"ts-api-utils": {
+				"typescript": "6.0.3"
+			}
+		},
+		"fast-xml-builder@1": "^1.1.7",
+		"ip-address@10": "^10.3.1",
+		"nanoid@3": "^3.3.16",
+		"postcss@8": "^8.5.23",
+		"qs@6": "^6.16.0",
+		"undici@7": "^7.28.0",
+		"ws@8": "^8.21.0"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": ">=24.0.0",
+			"onFail": "warn"
+		}
 	},
 	"engines": {
 		"node": "^20.19.0 || >=22.12.0"
 	},
-	"packageManager": "pnpm@10.33.0",
-	"pnpm": {
-		"overrides": {
-			"vite": "npm:@voidzero-dev/vite-plus-core@0.1.16",
-			"vitest": "npm:@voidzero-dev/vite-plus-test@0.1.16"
-		}
-	}
+	"packageManager": "npm@12.0.2"
 }

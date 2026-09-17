@@ -1,11 +1,29 @@
-import { describe, expect, test } from "../_internals/test/runtime";
-import { LENGTH, RESERVED_NUMBERS } from "./constants";
+import * as fc from "fast-check";
+
+import { PIS_LENGTH } from "../_internals/constants/pis";
+import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
+import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { generatePis } from "../generate-pis/generate-pis";
 import { isValidPis } from "./is-valid-pis";
+
+const REPEATED_DIGITS = [
+	"00000000000",
+	"11111111111",
+	"22222222222",
+	"33333333333",
+	"44444444444",
+	"55555555555",
+	"66666666666",
+	"77777777777",
+	"88888888888",
+	"99999999999",
+];
 
 describe("isValidPis", () => {
 	describe("should return false", () => {
-		test("when it is on the RESERVED_NUMBERS", () => {
-			for (const pis of RESERVED_NUMBERS) {
+		test("when every digit is the same", () => {
+			for (const pis of REPEATED_DIGITS) {
 				expect(isValidPis(pis)).toBe(false);
 			}
 		});
@@ -15,33 +33,42 @@ describe("isValidPis", () => {
 		});
 
 		test("when it is null", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis(null)).toBe(false);
 		});
 
 		test("when it is undefined", () => {
-			// @ts-expect-error
-			expect(isValidPis(undefined)).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidPis()).toBe(false);
 		});
 
 		test("when it is a boolean", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis(true)).toBe(false);
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis(false)).toBe(false);
 		});
 
 		test("when is an object", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis({})).toBe(false);
 		});
 
 		test("when is an array", () => {
-			// @ts-expect-error
+			// @ts-expect-error: intentionally invalid input
 			expect(isValidPis([])).toBe(false);
 		});
 
-		test(`when dont match with PIS length (${LENGTH})`, () => {
+		test("when it is a non-string that stringifies to a valid PIS", () => {
+			// @ts-expect-error not a string
+			expect(isValidPis([12_056_412_847])).toBe(false);
+		});
+
+		test("when it sanitizes to more digits than the PIS length, even if the first 11 match a valid PIS", () => {
+			expect(isValidPis("1205641284799")).toBe(false);
+		});
+
+		test(`when it does not match the PIS length (${PIS_LENGTH})`, () => {
 			expect(isValidPis("123456")).toBe(false);
 		});
 
@@ -68,9 +95,48 @@ describe("isValidPis", () => {
 			expect(isValidPis("120.5641.284-7")).toBe(true);
 		});
 
+		test("when is valid PIS with a slash mask", () => {
+			expect(isValidPis("120/56874/10-7")).toBe(true);
+		});
+
+		test("when is valid PIS with a whitespace mask", () => {
+			expect(isValidPis("120 56874 10 7")).toBe(true);
+		});
+
 		test("when is a valid PIS with last digit 0", () => {
 			expect(isValidPis("120.1213.266-0")).toBe(true);
 			expect(isValidPis("120.7041.469-0")).toBe(true);
 		});
+	});
+
+	describe("properties", () => {
+		test("should accept a generated PIS written with any of the accepted mask characters", () => {
+			const masks = maskSeparators([".", "-", "/", " ", "(", ")", ",", "*"], 4, 3);
+
+			fc.assert(
+				fc.property(masks, (separators) => {
+					const pis = generatePis();
+					const head = `${separators[0]}${pis.slice(0, 3)}${separators[1]}`;
+					const tail = `${pis.slice(3, 8)}${separators[2]}${pis.slice(8)}`;
+
+					expect(isValidPis(`${head}${tail}${separators[3]}`)).toBe(true);
+				}),
+			);
+		});
+
+		test(`should reject any digits only value that is not ${PIS_LENGTH} digits long`, () => {
+			expectRejected(isValidPis, digitsOfOtherLength(22, [PIS_LENGTH]));
+		});
+
+		test("should never throw and always return a boolean", () => {
+			expectAlwaysReturnsType(isValidPis, "boolean", anyValue);
+		});
+	});
+});
+
+describe("isValidPis types", () => {
+	test("should take a string and return a boolean", () => {
+		expectTypeOf(isValidPis).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidPis).returns.toEqualTypeOf<boolean>();
 	});
 });

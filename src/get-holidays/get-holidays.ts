@@ -1,160 +1,131 @@
-import type { StateCode } from "../_internals/constants/states";
+import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
+import { type StateCode } from "../_internals/constants/states";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { resolveStateHolidayDate } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
+import {
+	CONSCIENCIA_NEGRA_HOLIDAY_NAME,
+	CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
+	FIXED_HOLIDAYS,
+	STATE_HOLIDAYS,
+} from "./constants";
 
+export type { StateCode } from "../_internals/constants/states";
+
+/** The class a holiday returned by `getHolidays` falls into. */
+export type HolidayType = "national" | "state" | "optional" | "religious";
+
+/** One holiday returned by `getHolidays`. */
 export type Holiday = {
+	/** The holiday name in Brazilian Portuguese, e.g. `"Sexta-feira Santa"`. */
 	name: string;
+	/** The holiday date, at local midnight of the requested year. */
 	date: Date;
+	/** How the holiday is observed: national, state, optional (ponto facultativo) or religious. */
+	type: HolidayType;
 };
 
-export type GetHolidaysOptions = {
+/** The object form `getHolidays` accepts, naming the year to list and, optionally, the state whose holidays are added. */
+export type GetHolidaysParams = {
+	/** The four digit year to list holidays for. Must be an integer between 1900 and 2099. */
 	year: number;
+	/** Two letter state code whose state holidays are added to the national ones (default: national holidays only). */
 	stateCode?: StateCode;
 };
 
 /**
- * Fixed holidays that occur on the same date every year.
- * Month is 1-based (1 = January, 12 = December).
- */
-const FIXED_HOLIDAYS = {
-	"Ano novo": { day: 1, month: 1 },
-	Tiradentes: { day: 21, month: 4 },
-	"Dia do trabalhador": { day: 1, month: 5 },
-	"Independência do Brasil": { day: 7, month: 9 },
-	"Nossa Senhora Aparecida": { day: 12, month: 10 },
-	Finados: { day: 2, month: 11 },
-	"Proclamação da República": { day: 15, month: 11 },
-	"Dia da Consciência Negra": { day: 20, month: 11 },
-	Natal: { day: 25, month: 12 },
-} as const;
-
-/**
- * State-specific holidays by state code.
- * Month is 1-based (1 = January, 12 = December).
- */
-const STATE_HOLIDAYS: Partial<
-	Record<StateCode, Array<{ name: string; day: number; month: number }>>
-> = {
-	AC: [
-		{ name: "Dia do Evangélico", day: 23, month: 1 },
-		{ name: "Dia Internacional da Mulher", day: 8, month: 3 },
-		{ name: "Aniversário do Acre", day: 15, month: 6 },
-		{ name: "Dia da Amazônia", day: 5, month: 9 },
-		{ name: "Assinatura do Tratado de Petrópolis", day: 17, month: 11 },
-	],
-	AL: [
-		{ name: "São João", day: 24, month: 6 },
-		{ name: "São Pedro", day: 29, month: 6 },
-		{ name: "Emancipação Política de Alagoas", day: 16, month: 9 },
-	],
-	AP: [
-		{ name: "Dia de São José", day: 19, month: 3 },
-		{ name: "Criação do Território Federal do Amapá", day: 13, month: 9 },
-	],
-	AM: [
-		{ name: "Elevação do Amazonas à categoria de Província", day: 5, month: 9 },
-		{ name: "Nossa Senhora da Conceição", day: 8, month: 12 },
-	],
-	BA: [{ name: "Independência da Bahia", day: 2, month: 7 }],
-	CE: [
-		{ name: "Dia de São José", day: 19, month: 3 },
-		{ name: "Abolição da Escravidão no Ceará", day: 25, month: 3 },
-	],
-	DF: [
-		{ name: "Fundação de Brasília", day: 21, month: 4 },
-		{ name: "Dia do Evangélico", day: 30, month: 11 },
-	],
-	ES: [{ name: "Dia do Estado do Espírito Santo", day: 23, month: 5 }],
-	GO: [
-		{ name: "Dia do Estado de Goiás", day: 5, month: 7 },
-		{ name: "Nossa Senhora Sant'Ana", day: 26, month: 7 },
-	],
-	MA: [{ name: "Adesão do Maranhão à Independência", day: 28, month: 7 }],
-	MT: [
-		{ name: "Criação do Estado de Mato Grosso", day: 9, month: 5 },
-		{ name: "Consciência Negra", day: 20, month: 11 },
-	],
-	MS: [{ name: "Criação do Estado de Mato Grosso do Sul", day: 11, month: 10 }],
-	MG: [{ name: "Aniversário de Minas Gerais", day: 21, month: 7 }],
-	PA: [{ name: "Adesão do Pará à Independência", day: 15, month: 8 }],
-	PB: [
-		{
-			name: "Fundação do Estado e Dia de Nossa Senhora das Neves",
-			day: 5,
-			month: 8,
-		},
-	],
-	PR: [{ name: "Emancipação Política do Paraná", day: 19, month: 12 }],
-	PE: [{ name: "Revolução Pernambucana", day: 6, month: 3 }],
-	PI: [{ name: "Dia do Piauí", day: 19, month: 10 }],
-	RJ: [
-		{ name: "São Sebastião", day: 20, month: 1 },
-		{ name: "São Jorge", day: 23, month: 4 },
-		{ name: "Consciência Negra", day: 20, month: 11 },
-	],
-	RN: [
-		{ name: "Mártires de Cunhaú e Uruaçu", day: 3, month: 10 },
-		{ name: "Dia do Rio Grande do Norte", day: 7, month: 9 },
-	],
-	RS: [{ name: "Revolução Farroupilha", day: 20, month: 9 }],
-	RO: [
-		{ name: "Criação do Estado de Rondônia", day: 4, month: 1 },
-		{ name: "Dia do Evangélico", day: 18, month: 6 },
-	],
-	RR: [{ name: "Criação do Estado de Roraima", day: 5, month: 10 }],
-	SC: [
-		{ name: "Criação da Capitania de Santa Catarina", day: 11, month: 8 },
-		{ name: "Dia de Santa Catarina de Alexandria", day: 25, month: 11 },
-	],
-	SP: [{ name: "Revolução Constitucionalista", day: 9, month: 7 }],
-	SE: [{ name: "Emancipação Política de Sergipe", day: 8, month: 7 }],
-	TO: [
-		{
-			name: "Padroeira do Estado (Nossa Senhora da Natividade)",
-			day: 8,
-			month: 9,
-		},
-		{ name: "Criação do Estado do Tocantins", day: 5, month: 10 },
-	],
-} as const;
-
-/**
- * Calculates the date of Easter Sunday for a given year using the Computus algorithm.
+ * The object form `getHolidays` accepts, the 2.3.0 name of `GetHolidaysParams`.
  *
- * @param {number} year - The year for which to calculate Easter
- * @returns {Date} The date of Easter Sunday
+ * @deprecated Use `GetHolidaysParams` instead.
  */
-function calculateEaster(year: number): Date {
-	const a = year % 19;
-	const b = Math.floor(year / 100);
-	const c = year % 100;
-	const d = Math.floor(b / 4);
-	const e = b % 4;
-	const f = Math.floor((b + 8) / 25);
-	const g = Math.floor((b - f + 1) / 3);
-	const h = (19 * a + b - d - g + 15) % 30;
-	const i = Math.floor(c / 4);
-	const k = c % 4;
-	const l = (32 + 2 * e + 2 * i - h - k) % 7;
-	const m = Math.floor((a + 11 * h + 22 * l) / 451);
+export type GetHolidaysOptions = GetHolidaysParams;
 
-	const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-based month
-	const day = ((h + l - 7 * m + 114) % 31) + 1;
+const cache = new Map<string, Holiday[]>();
 
-	return new Date(year, month, day);
-}
+const cloneHolidays = (holidays: Holiday[]): Holiday[] =>
+	holidays.map((holiday) => ({ ...holiday, date: new Date(holiday.date) }));
 
-/**
- * Calculates a holiday date based on Easter Sunday with a given offset in days.
- *
- * @param {number} year - The year for which to calculate the holiday
- * @param {number} offset - The number of days to add or subtract from Easter (negative for before, positive for after)
- * @returns {Date} The date of the holiday
- */
-function calculateHolidayFromEaster(year: number, offset: number): Date {
-	const easterDate = calculateEaster(year);
-	const holidayDate = new Date(easterDate);
-	holidayDate.setDate(easterDate.getDate() + offset);
-	return holidayDate;
-}
+const computeHolidays = (year: number, stateCode: StateCode | undefined): Holiday[] => {
+	const holidays: Holiday[] = [];
+
+	for (const [name, { day, month }] of Object.entries(FIXED_HOLIDAYS)) {
+		holidays.push({
+			name,
+			date: new Date(year, month - 1, day),
+			type: "national",
+		});
+	}
+
+	if (year >= CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR) {
+		holidays.push({
+			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
+			date: new Date(year, 10, 20),
+			type: "national",
+		});
+	}
+
+	const easterDate = resolveStateHolidayDate(year, { easterOffset: 0 });
+
+	holidays.push(
+		{
+			name: "Carnaval (terça-feira)",
+			date: resolveStateHolidayDate(year, { easterOffset: -47 }),
+			type: "optional",
+		},
+		{
+			name: "Sexta-feira Santa",
+			date: resolveStateHolidayDate(year, { easterOffset: -2 }),
+			type: "national",
+		},
+		{
+			name: "Páscoa",
+			date: easterDate,
+			type: "religious",
+		},
+		{
+			name: "Corpus Christi",
+			date: resolveStateHolidayDate(year, { easterOffset: 60 }),
+			type: "optional",
+		},
+	);
+
+	// An own entry lookup, so a prototype chain key ("toString", "__proto__", ...) is an unknown
+	// state code like any other. `getHolidays` only passes a string or `undefined` down here.
+	// Stryker disable next-line ConditionalExpression: `Object.hasOwn` reads an `undefined` key as the string "undefined", which is no state code either, so the guard only narrows the type.
+	const hasStateHolidays = stateCode !== undefined && Object.hasOwn(STATE_HOLIDAYS, stateCode);
+
+	const stateHolidays = hasStateHolidays ? STATE_HOLIDAYS[stateCode] : undefined;
+
+	if (stateHolidays) {
+		for (const entry of stateHolidays) {
+			const { name, type, since, until } = entry;
+			// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
+			if (since !== undefined && year < since) continue;
+			// Stryker disable next-line ConditionalExpression: `until` is undefined for most entries, and `year >= undefined` is already always false, so the explicit `until !== undefined` guard never changes the outcome
+			if (until !== undefined && year >= until) continue;
+
+			const date = resolveStateHolidayDate(year, entry);
+			const stateHoliday: Holiday = { name, date, type: type ?? "state" };
+			// Name and date together are the identity of a holiday here: a state entry only replaces
+			// a national one when both match, so DF's Corpus Christi replaces the national optional
+			// one while its Fundação de Brasília is listed next to Tiradentes, which falls on the
+			// same 21 April under a different name.
+			const stateHolidayKey = `${name}|${date.getTime()}`;
+			const nationalIndex = holidays.findIndex(
+				(holiday) => `${holiday.name}|${holiday.date.getTime()}` === stateHolidayKey,
+			);
+
+			if (nationalIndex === -1) {
+				holidays.push(stateHoliday);
+			} else {
+				holidays[nationalIndex] = stateHoliday;
+			}
+		}
+	}
+
+	holidays.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+	return holidays;
+};
 
 /**
  * Retrieves all Brazilian holidays for a given year.
@@ -163,7 +134,32 @@ function calculateHolidayFromEaster(year: number, offset: number): Date {
  * and movable holidays (that are calculated based on Easter Sunday).
  * If a state code is provided, state-specific holidays are also included.
  *
- * Holidays are returned sorted by date (chronological order).
+ * Holidays are returned sorted by date (chronological order). Results are memoized
+ * per `year`/`stateCode` combination; the returned array (and each `Holiday.date`) is
+ * always a fresh copy, so mutating it never affects subsequent calls.
+ *
+ * If `stateCode` is provided but is not a valid/known state code, it is ignored and
+ * only national holidays are returned (this mirrors passing no `stateCode` at all,
+ * and is kept for backwards compatibility). The lookup is an own-property one, so a
+ * prototype-chain key such as `"__proto__"`, `"constructor"` or `"toString"` is an unknown
+ * state code like any other rather than a crash.
+ *
+ * When a state entry falls on the same date as a national one and carries the same name, the
+ * state entry replaces it instead of being listed twice: this is how the Distrito Federal's
+ * Corpus Christi, a feriado under Lei distrital nº 72/1989 art. 1º parágrafo único, comes back
+ * typed `"state"` for `stateCode: "DF"` while staying `"optional"` everywhere else.
+ *
+ * Only one state holiday per UF is a feriado civil under Lei 9.093/1995 art. 1º, II, which
+ * authorizes "a data magna do Estado fixada em lei estadual" in the singular; the other entries
+ * of `STATE_HOLIDAYS` rest on ordinary state laws and are reported because they are observed in
+ * practice. The date returned is the statutory one. Santa Catarina's two holidays are the only
+ * observance shift the table models: each moves to the following Sunday when it falls Monday to
+ * Friday, 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
+ * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it, except in 2004, the
+ * year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause. Outside those ranges
+ * each holiday stays on 11 August or 25 November. Acre's Tuesday-to-Thursday shift and the Goiás decrees
+ * that may move 26/07 and 28/10 are not modelled, because neither can be resolved from a year
+ * alone.
  *
  * @param {number} year - The year for which to retrieve holidays (must be between 1900 and 2099)
  * @returns {Holiday[]} An array of holidays sorted by date
@@ -176,79 +172,86 @@ function calculateHolidayFromEaster(year: number, offset: number): Date {
  * // Get holidays for a specific state
  * const spHolidays = getHolidays({ year: 2024, stateCode: 'SP' });
  * ```
+ *
+ * The national holiday laws are cited below; the state holiday laws are cited individually, one
+ * `@see` per holiday, in `src/get-holidays/constants.ts`.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
+ * Lei 662/1949, the base national holidays law (Ano novo, Dia do trabalhador, Independência do
+ * Brasil, Proclamação da República, Natal).
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
+ * Lei 10.607/2002, rewrote that art. 1º into the list in force: it added Finados (2 November)
+ * to the national holidays and folded in Tiradentes (21 April), already national since art. 3º
+ * of Lei 1.266/1950, which its own art. 3º revoked.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/L1266.htm
+ * Lei 1.266/1950, art. 3º, which first made Tiradentes a national holiday: "É feriado nacional o
+ * dia 21 de abril, consagrado à glorificação de Tiradentes". Revoked by Lei 10.607/2002 only
+ * after that law had carried 21 April into Lei 662/1949.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
+ * Lei 6.802/1980, declared Nossa Senhora Aparecida (12 October) a national holiday.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
+ * Lei 14.759/2023, nationalized Dia da Consciência Negra (20 November) from
+ * `CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR` (2024) onward.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm
+ * Lei 9.093/1995, the framework law authorizing one state civil holiday (art. 1º, II, "a data
+ * magna do Estado fixada em lei estadual") and up to four municipal religious holidays, "neste
+ * incluída a Sexta-Feira da Paixão" (art. 2º); the legal basis for the data magna entries of
+ * `STATE_HOLIDAYS`.
+ * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
+ * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
+ * pontos facultativos, reissued every December. It is the source of the typing of three of the
+ * four entries derived from Easter, which no federal law declares: "Paixão de Cristo (feriado
+ * nacional)" (Easter minus 2, emitted as `"Sexta-feira Santa"` typed `national`), "Carnaval (ponto
+ * facultativo)" (Easter minus 47) and "Corpus Christi (ponto facultativo)" (Easter plus 60), both
+ * typed `optional`. Sexta-feira Santa has no statutory basis of its own: Lei 9.093/1995 art. 2º
+ * places it among the *municipal* religious holidays, and it is typed `national` here because the
+ * portaria observes it nationwide. The fourth entry, Easter Sunday itself, is emitted as
+ * `"Páscoa"` typed `religious` and has no normative basis at all: the portaria never mentions it,
+ * no federal law declares it, and its date is derived arithmetically by `resolveStateHolidayDate`
+ * with the Meeus/Jones/Butcher algorithm. It is a convenience entry, listed because callers
+ * computing a liturgical calendar expect it, not because it is a holiday anyone observes as a day
+ * off.
  */
 export function getHolidays(year: number): Holiday[];
-export function getHolidays(options: GetHolidaysOptions): Holiday[];
-export function getHolidays(yearOrOptions: number | GetHolidaysOptions): Holiday[] {
+/**
+ * Retrieves all Brazilian holidays for a given year, optionally including the holidays of a
+ * state. See the overload taking a year for the full documentation.
+ *
+ * @param {GetHolidaysParams} options - The year to list holidays for and, optionally, the state whose holidays are added
+ * @returns {Holiday[]} An array of holidays sorted by date
+ */
+export function getHolidays(options: GetHolidaysParams): Holiday[];
+export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[] {
 	let year: number;
 	let stateCode: StateCode | undefined;
 
-	// Handle overload: either a number (year) or an options object
 	if (typeof yearOrOptions === "number") {
 		year = yearOrOptions;
 		stateCode = undefined;
 	} else {
+		if (isNullish(yearOrOptions) || typeof yearOrOptions !== "object") {
+			return [];
+		}
 		year = yearOrOptions.year;
 		stateCode = yearOrOptions.stateCode;
 	}
 
-	// Validate year
-	if (typeof year !== "number" || !Number.isInteger(year) || year < 1900 || year > 2099) {
+	if (!Number.isInteger(year) || year < HOLIDAYS_MIN_YEAR || year > HOLIDAYS_MAX_YEAR) {
 		return [];
 	}
 
-	const holidays: Holiday[] = [];
+	const normalizedStateCode = typeof stateCode === "string" ? stateCode : undefined;
 
-	// Add fixed national holidays
-	for (const [name, { day, month }] of Object.entries(FIXED_HOLIDAYS)) {
-		holidays.push({
-			name,
-			date: new Date(year, month - 1, day),
-		});
+	// Stryker disable next-line StringLiteral: the exact fallback text is never observable outside this module; it only has to be a value no real StateCode equals, which any fixed string satisfies
+	const cacheKey = `${year}|${normalizedStateCode ?? ""}`;
+
+	const cached = cache.get(cacheKey);
+	if (cached) {
+		return cloneHolidays(cached);
 	}
 
-	// Calculate and add movable holidays based on Easter
-	const easterDate = calculateEaster(year);
+	const holidays = computeHolidays(year, normalizedStateCode);
+	cache.set(cacheKey, holidays);
 
-	// Carnaval (Shrove Tuesday) - 47 days before Easter
-	holidays.push({
-		name: "Carnaval (terça-feira)",
-		date: calculateHolidayFromEaster(year, -47),
-	});
-
-	// Sexta-feira Santa (Good Friday) - 2 days before Easter
-	holidays.push({
-		name: "Sexta-feira Santa",
-		date: calculateHolidayFromEaster(year, -2),
-	});
-
-	// Páscoa (Easter Sunday)
-	holidays.push({
-		name: "Páscoa",
-		date: easterDate,
-	});
-
-	// Corpus Christi - 60 days after Easter Sunday
-	holidays.push({
-		name: "Corpus Christi",
-		date: calculateHolidayFromEaster(year, 70),
-	});
-
-	// Add state-specific holidays if stateCode is provided
-	if (stateCode) {
-		const stateHolidays = STATE_HOLIDAYS[stateCode];
-		if (stateHolidays) {
-			for (const { name, day, month } of stateHolidays) {
-				holidays.push({
-					name,
-					date: new Date(year, month - 1, day),
-				});
-			}
-		}
-	}
-
-	// Sort holidays by date (chronological order)
-	holidays.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-	return holidays;
+	return cloneHolidays(holidays);
 }

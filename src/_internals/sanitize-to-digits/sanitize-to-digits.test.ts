@@ -19,7 +19,7 @@ describe("sanitizeToDigits", () => {
 	});
 
 	it("should handle a number input", () => {
-		expect(sanitizeToDigits(123456)).toBe("123456");
+		expect(sanitizeToDigits(123_456)).toBe("123456");
 	});
 
 	it("should handle a number with non-digit characters", () => {

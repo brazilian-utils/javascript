@@ -6,9 +6,9 @@ Este guia irá ajudá-lo a migrar do Brazilian Utils v1.x para v2.0.0.
 
 **Boas notícias!** A v2.x mantém compatibilidade para a maioria das mudanças quebradoras:
 
-✅ **Você pode atualizar para v2.x sem alterar seu código** - nomes antigos de funções como `formatCPF`, `isValidCNPJ`, etc. ainda funcionam
-⚠️ **Você receberá avisos de deprecação** - encorajando você a migrar para os novos nomes
-🗑️ **Nomes antigos serão removidos na v3.0.0** - então migre gradualmente
+**Você pode atualizar para v2.x sem alterar seu código** - nomes antigos de funções como `formatCPF`, `isValidCNPJ`, etc. ainda funcionam
+**Você receberá avisos de deprecação** - encorajando você a migrar para os novos nomes
+**Nomes antigos serão removidos na v3.0.0** - então migre gradualmente
 
 **Porém**, você deve remover o uso dessas funções helper antes de atualizar:
 - `onlyNumbers` → use `string.replace(/\D/g, '')`
@@ -20,7 +20,7 @@ Este guia irá ajudá-lo a migrar do Brazilian Utils v1.x para v2.0.0.
 
 A versão 2.0.0 traz melhorias significativas em arquitetura, ferramentas e experiência do desenvolvedor:
 
-### 🎯 Melhor Tree Shaking
+### Melhor Tree Shaking
 
 A biblioteca agora usa exports de módulos ES modernos com o campo `exports` adequado no `package.json`, permitindo melhor tree shaking em bundlers modernos. Você pode importar apenas o que precisa:
 
@@ -29,7 +29,19 @@ A biblioteca agora usa exports de módulos ES modernos com o campo `exports` ade
 import { isValidCpf, formatCpf } from '@brazilian-utils/brazilian-utils';
 ```
 
-### 📁 Estrutura Mais Simples
+Desde a 2.4.0 cada utilitário também é um subpath próprio, então um bundler que não faz tree
+shaking (ou um `require` simples) ainda carrega um único módulo, e os poucos pesados (`getCities`,
+`getMunicipalities`, `isValidNcm`, `isValidCbo`, `isValidCnae`, `getBanks`) podem ser carregados sob
+demanda:
+
+```javascript
+import { isValidCpf } from '@brazilian-utils/brazilian-utils/is-valid-cpf'; // ~1,4 KB, 0,8 KB com gzip
+const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'); // só quando precisar
+```
+
+Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para o tamanho de cada entrada.
+
+### Estrutura Mais Simples
 
 O código foi reorganizado para melhor manutenibilidade:
 - **v1**: Estrutura complexa com diretórios separados `utilities/` e `helpers/`
@@ -37,15 +49,15 @@ O código foi reorganizado para melhor manutenibilidade:
 - Cada utilitário é autocontido em seu próprio diretório
 - Caminhos de importação mais limpos e melhor organização do código
 
-### 🔧 Ferramentas Modernas
+### Ferramentas Modernas
 
 Atualizado para ferramentas modernas e mais rápidas:
 - **Build**: Migrado de `tsdx` para uma stack com **Vite+** para builds e scripts mais rápidos
 - **Testes**: Migrado de `jest` para **Vitest** (mais rápido, compatível com Jest, nativo ESM)
-- **Linting/Formatação**: Migrado de `prettier` + `eslint` para **Biome** (mais rápido, tudo-em-um)
+- **Linting/Formatação**: Migrado de `prettier` + `eslint` para a toolchain do Vite+ (`vp fmt` e `vp check`, sobre o Oxc)
 - **TypeScript**: Configuração moderna otimizada para bundlers
 
-### 🌐 Testes em Browsers
+### Testes em Browsers
 
 Agora inclui suporte para testes cross-browser:
 - Testes rodam em browsers reais (Chrome, Firefox, Safari, Edge)
@@ -60,15 +72,15 @@ npm run test:safari-browser
 npm run test:edge-browser
 ```
 
-### 📦 Menos Dependências
+### Menos Dependências
 
 Redução de dependências de desenvolvimento mantendo zero dependências de runtime:
-- **v1**: Múltiplas ferramentas (tsdx, jest, prettier, eslint, husky, lint-staged, commitlint, etc.)
-- **v2**: Dependências mínimas (Vite+, suporte de browser do Vitest, webdriverio)
+- **v1**: Múltiplas ferramentas (tsdx, jest, prettier, eslint, husky, lint-staged, etc.)
+- **v2**: Uma toolchain (Vite+ para build, lint, formatação e testes, com suporte de browser do Vitest via webdriverio) mais os gates de qualidade listados no CONTRIBUTING.md (Stryker, knip, jscpd, API Extractor, commitlint)
 - Manutenção mais simples e pipelines CI/CD mais rápidos
 - Zero dependências de runtime (mantido)
 
-### ✨ Novas Funções & Recursos
+### Novas Funções e Recursos
 
 Adicionadas novas utilitários úteis:
 - `getHolidays` - Obtém feriados brasileiros (nacionais e estaduais)
@@ -79,6 +91,14 @@ Adicionadas novas utilitários úteis:
 - `formatPis` - Formata números de PIS
 - `isValidRenavam` - Valida RENAVAM (número de registro de veículos)
 - `isValidBankAccount` - Valida contas bancárias brasileiras com algoritmos específicos para principais bancos
+
+A 2.4.0 acrescentou muitas outras famílias a essas, todas listadas na [documentação de utilitários](pt-br/utilities.md):
+Pix (`isValidPixKey`, `generatePixPayload`, `getPixPayloadInfo`), chave de NF-e/DF-e, CNS, certidão,
+CEI/CNO/CAEPF, IBAN, número de cartão, VIN, registro profissional, consulta de bancos (`getBanks`,
+`getBankByCode`, `getBankByIspb`), códigos CBO/CNAE/NCM/CFOP/CST/CSOSN, dias úteis (`isBusinessDay`,
+`addBusinessDays`, `differenceInBusinessDays`), categorias de natureza jurídica, municípios offline
+(`getMunicipalities`, `getMunicipalityByCode`), DDD e fuso horário, número por extenso e um
+`capitalize` que conhece as designações societárias brasileiras.
 
 #### Suporte a CNPJ Alfanumérico (Versão 2)
 
@@ -101,7 +121,7 @@ isValidCnpj("12.345.678/0001-95", { version: 1 }); // true (explícito)
 
 **Importante**: Por padrão, `isValidCnpj()` valida apenas CNPJs numéricos (versão 1). Para validar CNPJs alfanuméricos, você deve passar explicitamente `{ version: 2 }`.
 
-### 📈 Melhor Suporte TypeScript
+### Melhor Suporte TypeScript
 
 - Configuração TypeScript moderna otimizada para bundlers
 - Melhor inferência de tipos e exports
@@ -113,13 +133,13 @@ isValidCnpj("12.345.678/0001-95", { version: 1 }); // true (explícito)
 
 Todos os nomes de funções foram alterados de PascalCase para camelCase para seguir as convenções de nomenclatura JavaScript.
 
-**⚠️ Importante: Compatibilidade com Versões Anteriores**
+**Importante: Compatibilidade com Versões Anteriores**
 
 Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCase como aliases deprecated**. Isso significa:
 
-- ✅ Seu código existente usando `formatCPF`, `isValidCNPJ`, etc. continuará funcionando na v2.x
-- ⚠️ Você receberá avisos de deprecação no seu IDE/TypeScript
-- 🗑️ Os nomes antigos serão **removidos na v3.0.0**
+- Seu código existente usando `formatCPF`, `isValidCNPJ`, etc. continuará funcionando na v2.x
+- Você receberá avisos de deprecação no seu IDE/TypeScript
+- Os nomes antigos serão **removidos na v3.0.0**
 
 **Recomendação:** Embora você possa atualizar para v2.x sem alterar seu código imediatamente, recomendamos migrar para os novos nomes em camelCase o quanto antes para se preparar para a v3.0.0.
 
@@ -131,7 +151,7 @@ Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCa
 | `isValidCNPJ` | `isValidCnpj` |
 | `isValidCEP` | `isValidCep` |
 | `isValidPIS` | `isValidPis` |
-| `isValidIE` | `isValidIe` |
+| `isValidIE` | `isValidIe` (desde a 2.4.0 prefira a forma objeto, `isValidIe({ value, stateCode })`; a forma posicional está descontinuada) |
 | `isValidProcessoJuridico` | `isValidProcessoJuridico` (inalterado) |
 | `isValidBoleto` | `isValidBoleto` (inalterado) |
 | `isValidEmail` | `isValidEmail` (inalterado) |
@@ -148,7 +168,6 @@ Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCa
 | `formatCPF` | `formatCpf` |
 | `formatCNPJ` | `formatCnpj` |
 | `formatCEP` | `formatCep` |
-| `formatPIS` | `formatPis` |
 | `formatProcessoJuridico` | `formatProcessoJuridico` (inalterado) |
 | `formatBoleto` | `formatBoleto` (inalterado) |
 | `formatCurrency` | `formatCurrency` (inalterado) |
@@ -162,7 +181,7 @@ Para facilitar a migração, **a v2.x ainda exporta os nomes antigos em PascalCa
 | `generateCNPJ` | `generateCnpj` |
 | `generateBoleto` | `generateBoleto` (inalterado) |
 
-**⚠️ Nota sobre o comportamento do `generateCnpj`:**
+**Nota sobre o comportamento do `generateCnpj`:**
 
 Na v2.x, `generateCnpj()` sem argumentos retorna por padrão a versão 1 (CNPJ numérico). Na v3.0.0, este comportamento mudará para selecionar aleatoriamente entre versão 1 (numérico) e versão 2 (alfanumérico) para melhor aleatoriedade. Se você precisa de uma versão específica, sempre passe o parâmetro de versão explicitamente:
 
@@ -182,7 +201,8 @@ generateCnpj(); // Atualmente gera numérico (v1), mas será aleatório na v3.0.
 | `parseCurrency` | `parseCurrency` (inalterado) |
 | `capitalize` | `capitalize` (inalterado) |
 | `getStates` | `getStates` (inalterado) |
-| `getCities` | `getCities` (inalterado) |
+| `getCities` | `getCities` (inalterado; descontinuado na 2.4.0 em favor de `getMunicipalities`) |
+| `getMunicipality` | `getMunicipality` (descontinuado na 2.4.0 em favor de `getMunicipalityByCode`, que é síncrono e offline) |
 | `getAddressInfoByCep` | `getAddressInfoByCep` (API alterada, veja abaixo) |
 
 ### Exemplo de Migração
@@ -209,7 +229,7 @@ const cnpj = generateCnpj();
 
 As seguintes funções helper não são mais exportadas na API pública. Estas eram utilitários internos que não deveriam ter sido expostos.
 
-**⚠️ Nota:** Diferentemente das funções renomeadas acima, esses helpers **NÃO** possuem aliases de compatibilidade. Você deve migrar para longe deles antes de atualizar para a v2.x.
+**Nota:** Diferentemente das funções renomeadas acima, esses helpers **NÃO** possuem aliases de compatibilidade. Você deve migrar para longe deles antes de atualizar para a v2.x.
 
 #### `onlyNumbers`
 Esta função foi removida da API pública. Agora é um utilitário interno chamado `sanitizeToDigits`.
@@ -238,16 +258,12 @@ if (index === input.length - 1) { /* ... */ }
 ```
 
 #### `generateChecksum`
-Esta função agora é interna e não é mais exportada na API pública.
+Esta função agora é interna e não é mais exportada na API pública. O pacote não exporta internals: `dist/_internals` não é publicado e não existe subpath para ele, então não há forma suportada de importar essa função na v2. Calcule o dígito verificador que você precisa no seu próprio código.
 
 **Migração:**
 ```javascript
 // v1 - Não use mais isso
 import { generateChecksum } from '@brazilian-utils/brazilian-utils';
-
-// v2 - Se você absolutamente precisar, importe dos internals (não recomendado)
-// Isto não faz parte da API pública e pode mudar sem aviso
-import { generateChecksum } from '@brazilian-utils/brazilian-utils/dist/_internals/generate-checksum/generate-checksum';
 ```
 
 #### `generateRandomNumber`
@@ -304,9 +320,9 @@ Formata números de telefone de acordo com padrões brasileiros.
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
 
-formatPhone('11900000000'); // 90000-0000
+formatPhone('11900000000'); // 11900-0000 (CUIDADO: a máscara padrão "sn" trunca um número com DDD)
 formatPhone('11900000000', { mask: 'nanp' }); // (11) 90000-0000
-formatPhone('11900000000', { mask: 'auto' }); // Detecta automaticamente a máscara
+formatPhone('11900000000', { mask: 'auto' }); // (11) 90000-0000
 ```
 
 ### `isValidRenavam`
@@ -331,26 +347,26 @@ import { isValidBankAccount } from '@brazilian-utils/brazilian-utils';
 // Banco do Brasil
 isValidBankAccount({
   bankCode: '001',
-  agency: '1234',
-  account: '12345678',
-  digit: '5'
-}); // true (se válido)
+  agency: '1584',
+  account: '00210169',
+  digit: '6'
+}); // true
 
 // Itaú
 isValidBankAccount({
   bankCode: '341',
-  agency: '1234',
-  account: '12345',
-  digit: '6'
-}); // true (se válido)
+  agency: '2545',
+  account: '02366',
+  digit: '1'
+}); // true
 
 // Outros bancos usam validação genérica
 isValidBankAccount({
-  bankCode: '999',
+  bankCode: '246',
   agency: '1234',
   account: '123456',
-  digit: '7'
-}); // true (se validação mod10/mod11 passar)
+  digit: '6'
+}); // true (o dígito corresponde ao mod10)
 ```
 
 ## Mudanças na API
@@ -417,6 +433,10 @@ getCities(); // Retorna ordenado alfabeticamente
 getCities('SP'); // Retorna ordenado alfabeticamente
 ```
 
+**Desde a 2.4.0:** `getCities` está descontinuado. `getMunicipalities('SP')` retorna os mesmos municípios
+com o código do IBGE (`{ code, name, stateCode }`), e `getMunicipalityByCode('3550308')` busca um deles
+sem chamada de rede.
+
 ## Checklist de Migração
 
 ### Obrigatório (antes de atualizar para v2.x)
@@ -425,6 +445,10 @@ getCities('SP'); // Retorna ordenado alfabeticamente
 ### Opcional (recomendado antes da v3.0.0)
 - [ ] Atualizar todas as importações para usar nomes de funções em camelCase
 - [ ] Substituir todas as chamadas de funções com nomes em camelCase
+- [ ] Trocar `getCities` por `getMunicipalities` e `getMunicipality` por `getMunicipalityByCode` (descontinuados na 2.4.0)
+- [ ] Chamar `isValidIe({ value, stateCode })` em vez de `isValidIe(stateCode, ie)` (descontinuado na 2.4.0)
+- [ ] Importar os tipos `*Params` em vez dos aliases `*Options` mantidos para as funções de um único argumento objeto (descontinuados na 2.4.0)
+- [ ] Tirar `'widenet'` dos `providers` do `getAddressInfoByCep` (o serviço acabou; descontinuado na 2.4.0)
 
 ### Revisar se aplicável
 - [ ] Atualizar tratamento de erros para `getAddressInfoByCep` se necessário
@@ -436,6 +460,6 @@ getCities('SP'); // Retorna ordenado alfabeticamente
 
 Se você encontrar problemas durante a migração, por favor:
 
-1. Verifique a [documentação de utilitários](pt-br/utilities.md) para as assinaturas corretas das funções
+1. Verifique a [documentação de utilitários](/pt-br/utilities.md) para as assinaturas corretas das funções
 2. Revise os exemplos neste guia de migração
-3. Abra uma issue no [repositório GitHub](https://github.com/brazilian-utils/brazilian-utils) se encontrar um bug
+3. Abra uma issue no [repositório GitHub](https://github.com/brazilian-utils/javascript) se encontrar um bug

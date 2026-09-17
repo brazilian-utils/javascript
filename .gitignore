@@ -6,6 +6,11 @@ node_modules
 .rts2_cache_umd
 dist
 coverage
-tree-shaking-test/node_modules
-tree-shaking-test/dist
-tree-shaking-test/bun.lockb
+.stryker-tmp
+# Every report is generated (stryker, coverage, jscpd) except the API Extractor baseline, which is
+# committed so that `npm run check:api` compares the public API against the reviewed one instead of
+# writing a new file on every run.
+reports/*
+!reports/api/
+reports/api/*
+!reports/api/brazilian-utils.api.md

@@ -29,6 +29,17 @@ The library now uses modern ES module exports with proper `exports` field in `pa
 import { isValidCpf, formatCpf } from '@brazilian-utils/brazilian-utils';
 ```
 
+Since 2.4.0 every util is also its own subpath entry, so a bundler that does not tree-shake (or a
+plain `require`) still loads a single module, and the few heavy ones (`getCities`,
+`getMunicipalities`, `isValidNcm`, `isValidCbo`, `isValidCnae`, `getBanks`) can be lazy-loaded:
+
+```javascript
+import { isValidCpf } from '@brazilian-utils/brazilian-utils/is-valid-cpf'; // ~1.4 KB, 0.8 KB gzipped
+const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'); // only when needed
+```
+
+See [Bundle size](getting-started.md#bundle-size) for the sizes of every entry.
+
 ### 📁 Simpler Structure
 
 The codebase has been reorganized for better maintainability:
@@ -42,7 +53,7 @@ The codebase has been reorganized for better maintainability:
 Updated to modern, faster tooling:
 - **Build**: Migrated from `tsdx` to a **Vite+** toolchain for faster builds and scripts
 - **Testing**: Migrated from `jest` to **Vitest** (faster, Jest-compatible, ESM-native)
-- **Linting/Formatting**: Migrated from `prettier` + `eslint` to **Biome** (faster, all-in-one)
+- **Linting/Formatting**: Migrated from `prettier` + `eslint` to the Vite+ toolchain (`vp fmt` and `vp check`, backed by Oxc)
 - **TypeScript**: Modern configuration optimized for bundlers
 
 ### 🌐 Browser Testing
@@ -63,8 +74,8 @@ npm run test:edge-browser
 ### 📦 Fewer Dependencies
 
 Reduced development dependencies while maintaining zero runtime dependencies:
-- **v1**: Multiple tools (tsdx, jest, prettier, eslint, husky, lint-staged, commitlint, etc.)
-- **v2**: Minimal dependencies (Vite+, Vitest browser support, webdriverio)
+- **v1**: Multiple tools (tsdx, jest, prettier, eslint, husky, lint-staged, etc.)
+- **v2**: One toolchain (Vite+ for build, lint, format and tests, with Vitest browser support through webdriverio) plus the quality gates listed in CONTRIBUTING.md (Stryker, knip, jscpd, API Extractor, commitlint)
 - Simpler maintenance and faster CI/CD pipelines
 - Zero runtime dependencies (maintained)
 
@@ -79,6 +90,14 @@ Added new useful utilities:
 - `formatPis` - Format PIS numbers
 - `isValidRenavam` - Validate RENAVAM (vehicle registration number)
 - `isValidBankAccount` - Validate Brazilian bank accounts with specific algorithms for major banks
+
+2.4.0 added many more families on top of these, all listed in the [utilities documentation](utilities.md):
+Pix (`isValidPixKey`, `generatePixPayload`, `getPixPayloadInfo`), NF-e/DF-e keys, CNS, certidão,
+CEI/CNO/CAEPF, IBAN, card numbers, VIN, professional registrations, bank lookups (`getBanks`,
+`getBankByCode`, `getBankByIspb`), CBO/CNAE/NCM/CFOP/CST/CSOSN codes, business days
+(`isBusinessDay`, `addBusinessDays`, `differenceInBusinessDays`), legal nature categories, offline
+municipalities (`getMunicipalities`, `getMunicipalityByCode`), DDD and time zone lookups, numbers in
+words, and a `capitalize` that knows the Brazilian company designations.
 
 #### Alphanumeric CNPJ Support (Version 2)
 
@@ -131,7 +150,7 @@ To make the migration easier, **v2.x still exports the old PascalCase names as d
 | `isValidCNPJ` | `isValidCnpj` |
 | `isValidCEP` | `isValidCep` |
 | `isValidPIS` | `isValidPis` |
-| `isValidIE` | `isValidIe` |
+| `isValidIE` | `isValidIe` (since 2.4.0 prefer the object form, `isValidIe({ value, stateCode })`; the positional form is deprecated) |
 | `isValidProcessoJuridico` | `isValidProcessoJuridico` (unchanged) |
 | `isValidBoleto` | `isValidBoleto` (unchanged) |
 | `isValidEmail` | `isValidEmail` (unchanged) |
@@ -148,7 +167,6 @@ To make the migration easier, **v2.x still exports the old PascalCase names as d
 | `formatCPF` | `formatCpf` |
 | `formatCNPJ` | `formatCnpj` |
 | `formatCEP` | `formatCep` |
-| `formatPIS` | `formatPis` |
 | `formatProcessoJuridico` | `formatProcessoJuridico` (unchanged) |
 | `formatBoleto` | `formatBoleto` (unchanged) |
 | `formatCurrency` | `formatCurrency` (unchanged) |
@@ -182,7 +200,8 @@ generateCnpj(); // Currently generates numeric (v1), but will be random in v3.0.
 | `parseCurrency` | `parseCurrency` (unchanged) |
 | `capitalize` | `capitalize` (unchanged) |
 | `getStates` | `getStates` (unchanged) |
-| `getCities` | `getCities` (unchanged) |
+| `getCities` | `getCities` (unchanged; deprecated in 2.4.0 in favour of `getMunicipalities`) |
+| `getMunicipality` | `getMunicipality` (deprecated in 2.4.0 in favour of `getMunicipalityByCode`, which is synchronous and offline) |
 | `getAddressInfoByCep` | `getAddressInfoByCep` (API changed, see below) |
 
 ### Migration Example
@@ -238,16 +257,12 @@ if (index === input.length - 1) { /* ... */ }
 ```
 
 #### `generateChecksum`
-This function is now internal and no longer exported in the public API.
+This function is now internal and no longer exported in the public API. The package exports no internals: `dist/_internals` is not published and there is no subpath for it, so there is no supported way to import this function in v2. Inline the check digit calculation you need instead.
 
 **Migration:**
 ```javascript
 // v1 - Don't use this anymore
 import { generateChecksum } from '@brazilian-utils/brazilian-utils';
-
-// v2 - If you absolutely need it, import from internals (not recommended)
-// This is not part of the public API and may change without notice
-import { generateChecksum } from '@brazilian-utils/brazilian-utils/dist/_internals/generate-checksum/generate-checksum';
 ```
 
 #### `generateRandomNumber`
@@ -304,9 +319,9 @@ Format phone numbers according to Brazilian patterns.
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
 
-formatPhone('11900000000'); // 90000-0000
+formatPhone('11900000000'); // 11900-0000 (BEWARE: default "sn" truncates a DDD-prefixed number)
 formatPhone('11900000000', { mask: 'nanp' }); // (11) 90000-0000
-formatPhone('11900000000', { mask: 'auto' }); // Auto-detects mask
+formatPhone('11900000000', { mask: 'auto' }); // (11) 90000-0000
 ```
 
 ### `isValidRenavam`
@@ -331,26 +346,26 @@ import { isValidBankAccount } from '@brazilian-utils/brazilian-utils';
 // Banco do Brasil
 isValidBankAccount({
   bankCode: '001',
-  agency: '1234',
-  account: '12345678',
-  digit: '5'
-}); // true (if valid)
+  agency: '1584',
+  account: '00210169',
+  digit: '6'
+}); // true
 
 // Itaú
 isValidBankAccount({
   bankCode: '341',
-  agency: '1234',
-  account: '12345',
-  digit: '6'
-}); // true (if valid)
+  agency: '2545',
+  account: '02366',
+  digit: '1'
+}); // true
 
 // Other banks use generic validation
 isValidBankAccount({
-  bankCode: '999',
+  bankCode: '246',
   agency: '1234',
   account: '123456',
-  digit: '7'
-}); // true (if mod10/mod11 validation passes)
+  digit: '6'
+}); // true (the digit matches mod10)
 ```
 
 ## API Changes
@@ -417,6 +432,10 @@ getCities(); // Returns sorted alphabetically
 getCities('SP'); // Returns sorted alphabetically
 ```
 
+**Since 2.4.0:** `getCities` is deprecated. `getMunicipalities('SP')` returns the same municipalities
+with their IBGE codes (`{ code, name, stateCode }`), and `getMunicipalityByCode('3550308')` looks one
+up without a network call.
+
 ## Migration Checklist
 
 ### Required (before upgrading to v2.x)
@@ -425,6 +444,10 @@ getCities('SP'); // Returns sorted alphabetically
 ### Optional (recommended before v3.0.0)
 - [ ] Update all imports to use camelCase function names
 - [ ] Replace all function calls with camelCase names
+- [ ] Replace `getCities` with `getMunicipalities` and `getMunicipality` with `getMunicipalityByCode` (deprecated in 2.4.0)
+- [ ] Call `isValidIe({ value, stateCode })` instead of `isValidIe(stateCode, ie)` (deprecated in 2.4.0)
+- [ ] Import the `*Params` type names instead of the `*Options` aliases kept for the single-object-argument functions (deprecated in 2.4.0)
+- [ ] Drop `'widenet'` from the `providers` of `getAddressInfoByCep` (the service is gone; deprecated in 2.4.0)
 
 ### Review if applicable
 - [ ] Update error handling for `getAddressInfoByCep` if needed
@@ -438,4 +461,4 @@ If you encounter any issues during migration, please:
 
 1. Check the [utilities documentation](utilities.md) for the correct function signatures
 2. Review the examples in this migration guide
-3. Open an issue on the [GitHub repository](https://github.com/brazilian-utils/brazilian-utils) if you find a bug
+3. Open an issue on the [GitHub repository](https://github.com/brazilian-utils/javascript) if you find a bug

@@ -4,11 +4,16 @@ import { ALPHABET_LENGTH, CHAR_CODE_A, DIGITS_LENGTH, LETTERS_LENGTH } from "./c
 /**
  * Generates a random valid Brazilian passport number.
  *
- * @returns A random valid passport number string (e.g. "RY393097").
+ * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
+ *
+ * @returns {string} A random valid passport number string (e.g. "RY393097").
  *
  * @example
  * generatePassport() // "RY393097"
  * generatePassport() // "ZS840088"
+ *
+ * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
+ * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e
  */
 export const generatePassport = (): string => {
 	const letters = Array.from({ length: LETTERS_LENGTH }, () =>

@@ -1,0 +1,45 @@
+/**
+ * Layout of the matrícula of a certidão de registro civil, 32 digits grouped as
+ * 6 (CNS da serventia) + 2 (acervo) + 2 (serviço) + 4 (ano) + 1 (tipo do livro) + 5 (livro) +
+ * 3 (folha) + 7 (termo) + 2 (dígitos verificadores).
+ *
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
+ * Código Nacional de Normas da Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento
+ * CNJ nº 149/2023), art. 473 as currently published: the in-force layout of the 32 digit
+ * matrícula. Inciso II and §§ 1º and 3º to 5º carry the redação of the Provimento CN nº 237, de
+ * 13/07/2026; the rest of the article, § 2º included, and the digit layout this library depends
+ * on, come from the Provimento CN nº 182, de 17/09/2024.
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311
+ * Provimento CNJ nº 2, de 27/04/2009, art. 1º and 2º, which instituted the modelos únicos de
+ * certidão and ordered that "as certidões passarão a consignar matrícula que identifica o código
+ * nacional da serventia, o código do acervo, o tipo do serviço prestado, o tipo do livro, o número
+ * do livro, o número da folha, o número do termo e o digito verificador" (revoked; historical).
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310
+ * Provimento CNJ nº 3, de 17/11/2009, art. 7º, which is where that matrícula first got its digit
+ * structure: "a matrícula, de inserção obrigatória nas certidões (primeira e demais vias) emitidas
+ * pelos Cartórios de Registro Civil das Pessoas Naturais a partir de 1º de janeiro de 2010, é
+ * formada pelos seguintes elementos", incisos I to IX fixing the same 6 + 2 + 2 + 4 + 1 + 5 + 3 +
+ * 7 + 2 positions art. 473 carries today (revoked; historical).
+ * @see Based on: http://ghiorzi.org/DVnew.htm
+ * Worked example of the two check digits (sums 288 and 309).
+ * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts
+ * Reference implementation, and the source of the matrículas used as test vectors.
+ * @see Based on: https://github.com/geekcom/validator-docs/blob/master/src/validator-docs/Rules/Certidao.php
+ * Third reference implementation agreeing on the weights and on the remainder of 10 read as 1.
+ */
+
+export const CERTIDAO_LENGTH = 32;
+
+export const CERTIDAO_BASE_LENGTH = 30;
+
+/**
+ * The only serviço code a matrícula de registro civil can carry, in the ninth and tenth
+ * positions: art. 473, III fixes it as "Código 55 (9º e 10º números da matrícula), que é o
+ * número relativo ao serviço de registro civil das pessoas naturais".
+ */
+export const CERTIDAO_SERVICE_CODE = "55";
+
+export const CERTIDAO_PATTERN = "000000 00 00 0000 0 00000 000 0000000 00";
+
+export const CERTIDAO_FORMAT_REGEX =
+	/^\d{6}[\s.\-/]*\d{2}[\s.\-/]*\d{2}[\s.\-/]*\d{4}[\s.\-/]*\d[\s.\-/]*\d{5}[\s.\-/]*\d{3}[\s.\-/]*\d{7}[\s.\-/]*\d{2}$/;

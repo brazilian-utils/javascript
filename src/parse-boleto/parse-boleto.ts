@@ -1,11 +1,40 @@
+import { ARRECADACAO_LINE_LENGTH, ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
+import { BOLETO_LENGTH } from "../_internals/constants/boleto";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { LENGTH } from "../format-boleto/constants";
 
 /**
  * Removes boleto formatting characters and returns only digits.
  *
+ * Bank slips starting with `8` are "arrecadação" (convênio/tributos) slips, whose linha
+ * digitável has 48 digits instead of the 47 of a "cobrança bancária" slip.
+ *
  * @param {string|number} value - The boleto value to be parsed.
  * @returns {string} The boleto value without formatting.
+ *
+ * @example
+ * ```typescript
+ * parseBoleto("10491.44338 55119.000002 00000.000141 3 25230000093423");
+ * // "10491443385511900000200000000141325230000093423"
+ *
+ * parseBoleto("82630000001-1 09880010070-2 02410202400-0 00020510451-9");
+ * // "826300000011098800100702024102024000000205104519"
+ * ```
+ *
+ * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
+ * check digit (using 1 for remainders 0, 10 and 1) of the 47 digit cobrança bancária slip,
+ * including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
+ * Arrecadação/Recebimento com Utilização do Código de Barras" and the FEBRABAN layout index
+ * cover the arrecadação slip.
+ *
+ * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
+ * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
-export const parseBoleto = (value: string | number): string =>
-	sanitizeToDigits(value).slice(0, LENGTH);
+export const parseBoleto = (value: string | number): string => {
+	const digits = sanitizeToDigits(value);
+
+	return digits.slice(
+		0,
+		digits.startsWith(ARRECADACAO_PRODUCT) ? ARRECADACAO_LINE_LENGTH : BOLETO_LENGTH,
+	);
+};

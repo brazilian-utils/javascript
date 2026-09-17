@@ -1,5 +1,32 @@
-import type { StateCode } from "../_internals/constants/states";
+import { type StateCode } from "../_internals/constants/states";
+import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { mod10 } from "../_internals/mod10/mod10";
+import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import {
+	AL_PREFIXES,
+	BA_MOD_10_DIGITS,
+	GO_DUAL_DIGIT_IE,
+	GO_PREFIXES,
+	GO_SPECIAL_RANGE_END,
+	GO_SPECIAL_RANGE_START,
+	MA_PREFIXES,
+	MS_PREFIXES,
+	PA_PREFIXES,
+	SP_FIRST_WEIGHTS,
+	SP_SECOND_WEIGHTS,
+	TO_TYPES,
+} from "./constants";
+
+export type { StateCode } from "../_internals/constants/states";
+
+/** The parameters `isValidIe` takes: the registration and the state whose rule it is checked against. */
+export type IsValidIeParams = {
+	/** The inscrição estadual to validate. */
+	value: string;
+	/** The two letter state code the registration belongs to, e.g. `"SP"`. Case insensitive. */
+	stateCode: StateCode;
+};
 
 type IeValidator = (ie: string) => boolean;
 
@@ -8,81 +35,77 @@ const checkLength = (ie: string, length: number | number[]): boolean => {
 	return length.includes(ie.length);
 };
 
-const startsWith = (ie: string, prefix: string): boolean =>
-	ie.substring(0, prefix.length) === prefix;
+const startsWithAny = (ie: string, prefixes: readonly string[]): boolean =>
+	prefixes.some((prefix) => ie.startsWith(prefix));
 
-type CalcDigitDecreasingParams = {
-	body: string;
+type WeightedSumParams = {
+	source: string;
+	length: number;
 	startWeight: number;
-	minWeight: number;
-	mod?: number;
+	wrapTo?: number;
 };
 
-const calcDigitDecreasing = ({
-	body,
-	startWeight,
-	minWeight,
-	mod = 11,
-}: CalcDigitDecreasingParams): number => {
+const calcWeightedSum = ({ source, length, startWeight, wrapTo }: WeightedSumParams): number => {
 	let weight = startWeight;
 	let sum = 0;
 
-	for (let i = 0; i < body.length; i++) {
-		const digit = body.charCodeAt(i) - 48;
+	for (let i = 0; i < length; i++) {
+		const digit = source.charCodeAt(i) - 48;
 		sum += digit * weight;
 		weight--;
-		if (weight < minWeight) {
-			weight = minWeight === 1 ? 9 : 11;
+		// Stryker disable next-line ConditionalExpression: for every current caller that omits wrapTo, the weight sequence is built to reach 1 only on the final iteration, so replacing this guard with `weight === 1` alone still only resets the (unused) weight after the loop's last read, which is unobservable.
+		if (wrapTo !== undefined && weight === 1) {
+			weight = wrapTo;
 		}
 	}
 
+	return sum;
+};
+
+const calcMod11CheckDigit = (sum: number, mod = 11): number => {
 	const rest = sum % mod;
 	const dig = mod - rest;
 	return dig >= 10 ? 0 : dig;
 };
 
-const validateAC: IeValidator = (ie: string) => {
+const validateMod11Ie = (ie: string, prefixes?: readonly string[]): boolean => {
+	if (!checkLength(ie, 9)) return false;
+	if (prefixes && !startsWithAny(ie, prefixes)) return false;
+
+	const body = ie.slice(0, 8);
+	const sum = calcWeightedSum({ source: body, length: body.length, startWeight: body.length + 1 });
+	const dig = calcMod11CheckDigit(sum);
+
+	return Number.parseInt(ie.charAt(8), 10) === dig;
+};
+
+const calcDFDigit = (body: string): number => {
+	const sum = calcWeightedSum({
+		source: body,
+		length: body.length,
+		startWeight: body.length - 7,
+		wrapTo: 9,
+	});
+
+	return calcMod11CheckDigit(sum);
+};
+
+const SP_RURAL_PATTERN = /^P\d{12}$/;
+const SP_COMPANY_PATTERN = /^\d{12}$/;
+
+/**
+ * The 13 digit rule AC and DF share, each under its own prefix.
+ * @param {string} ie - The sanitized registration.
+ * @param {string} prefix - The two digits the state's registrations start with.
+ * @returns {boolean} True when the registration follows the rule under that prefix.
+ */
+const validateAcDfRule = (ie: string, prefix: string): boolean => {
 	if (!checkLength(ie, 13)) return false;
-	if (!startsWith(ie, "01")) return false;
+	if (!ie.startsWith(prefix)) return false;
 
-	const body = ie.substring(0, 11);
-	let weight = body.length - 7;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const mod = 11;
-	const rest = sum % mod;
-	let firstDig = mod - rest;
-	if (firstDig >= 10) {
-		firstDig = 0;
-	}
-
-	const bodyWithFirst = body + firstDig;
-	weight = bodyWithFirst.length - 7;
-	sum = 0;
-
-	for (let i = 0; i < bodyWithFirst.length; i++) {
-		const digit = i < body.length ? ie.charCodeAt(i) - 48 : firstDig;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const rest2 = sum % mod;
-	let secondDig = mod - rest2;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const body = ie.slice(0, 11);
+	const firstDig = calcDFDigit(body);
+	const secondDig = calcDFDigit(body + firstDig);
 
 	return (
 		Number.parseInt(ie.charAt(11), 10) === firstDig &&
@@ -90,55 +113,32 @@ const validateAC: IeValidator = (ie: string) => {
 	);
 };
 
-const validateAL: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "24")) return false;
+const validateAC: IeValidator = (ie) => validateAcDfRule(ie, "01");
 
-	let weight = 9;
-	const position = 8;
-	let sum = 0;
-
-	for (let i = 0; i < position; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const product = sum * 10;
-	let digit = product - Math.floor(product / 11) * 11;
-	if (digit >= 10) {
-		digit = 0;
-	}
-
-	return digit === Number.parseInt(ie.charAt(position), 10);
-};
+// AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
+// which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
+// 1 and `11 - remainder` for every other one.
+const validateAL: IeValidator = (ie) => validateMod11Ie(ie, AL_PREFIXES);
 
 const validateAP: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "03")) return false;
+	if (!ie.startsWith("03")) return false;
 
 	const length = ie.length;
 	const position = length - 1;
-	let weight = length;
-	const body = ie.substring(0, position);
+	const body = ie.slice(0, position);
 	const bodyInt = Number.parseInt(body, 10);
 	let p = 0;
 	let d = 0;
 
 	if (bodyInt >= 3_000_001 && bodyInt <= 3_017_000) {
 		p = 5;
-		d = 0;
 	} else if (bodyInt >= 3_017_001 && bodyInt <= 3_019_022) {
 		p = 9;
 		d = 1;
 	}
 
-	let sum = p;
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
+	const sum = p + calcWeightedSum({ source: ie, length: body.length, startWeight: length });
 
 	let dig = 11 - (sum % 11);
 	if (dig === 10) {
@@ -152,216 +152,84 @@ const validateAP: IeValidator = (ie: string) => {
 	return dig === Number.parseInt(ie.charAt(position), 10);
 };
 
-const validateAM: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
-
 const validateBA: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [8, 9])) return false;
 
 	const pos = ie.length === 9 ? 1 : 0;
-	const charAt = Number.parseInt(ie.substring(pos, pos + 1), 10);
-	const arr = [0, 1, 2, 3, 4, 5, 8];
-	const mod = arr.includes(charAt) ? 10 : 11;
+	const charAt = Number.parseInt(ie.slice(pos, pos + 1), 10);
+	const mod = BA_MOD_10_DIGITS.includes(charAt) ? 10 : 11;
 
-	const body = ie.substring(0, ie.length - 2);
-	let weight = body.length + 1;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	let rest = sum % mod;
-	let secondDig = mod - rest;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const body = ie.slice(0, -2);
+	const firstSum = calcWeightedSum({
+		source: ie,
+		length: body.length,
+		startWeight: body.length + 1,
+	});
+	const secondDig = calcMod11CheckDigit(firstSum, mod);
 
 	const bodyWithSecond = body + secondDig;
-	weight = bodyWithSecond.length + 1;
-	sum = 0;
-
-	for (let i = 0; i < bodyWithSecond.length; i++) {
-		const digit = i < body.length ? ie.charCodeAt(i) - 48 : secondDig;
-		sum += digit * weight;
-		weight--;
-	}
-
-	rest = sum % mod;
-	let firstDig = mod - rest;
-	if (firstDig >= 10) {
-		firstDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithSecond,
+		length: bodyWithSecond.length,
+		startWeight: bodyWithSecond.length + 1,
+	});
+	const firstDig = calcMod11CheckDigit(secondSum, mod);
 
 	return (
-		Number.parseInt(ie.charAt(ie.length - 2), 10) === firstDig &&
-		Number.parseInt(ie.charAt(ie.length - 1), 10) === secondDig
+		Number.parseInt(ie.slice(-2, -1), 10) === firstDig &&
+		Number.parseInt(ie.slice(-1), 10) === secondDig
 	);
 };
 
-const validateCE: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
-
-const validateDF: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 13)) return false;
-	if (!startsWith(ie, "07")) return false;
-
-	const length = ie.length;
-	const body = ie.substring(0, length - 2);
-
-	const firstDig = calcDFDigit(body);
-	const secondDig = calcDFDigit(body + firstDig);
-
-	return (
-		Number.parseInt(ie.charAt(length - 2), 10) === firstDig &&
-		Number.parseInt(ie.charAt(length - 1), 10) === secondDig
-	);
-};
-
-const calcDFDigit = (body: string): number => {
-	let weight = body.length - 7;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = Number.parseInt(body.charAt(i), 10);
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const mod = 11;
-	const rest = sum % mod;
-	let dig = mod - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
-
-	return dig;
-};
-
-const validateES: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
+const validateDF: IeValidator = (ie) => validateAcDfRule(ie, "07");
 
 const validateGO: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
+	if (!startsWithAny(ie, GO_PREFIXES)) return false;
 
-	const beginWith = ["10", "11", "12", "20"];
-	const begin = ie.substring(0, 2);
-	if (!beginWith.includes(begin)) return false;
-
-	const body = ie.substring(0, 8);
+	const body = ie.slice(0, 8);
 	const bodyInt = Number.parseInt(body, 10);
-	let weight = 9;
-	let sum = 0;
+	const checkDigit = Number.parseInt(ie.charAt(8), 10);
 
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
+	if (bodyInt === GO_DUAL_DIGIT_IE) {
+		return checkDigit === 0 || checkDigit === 1;
 	}
 
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 9 });
 	const rest = sum % 11;
-	let dig = 11 - rest;
+	let dig: number;
 
-	if (dig >= 10) {
-		if (dig === 11 && bodyInt >= 10_103_105 && bodyInt <= 10_119_997) {
-			dig = 1;
-		} else {
-			dig = 0;
-		}
+	if (rest === 0) {
+		dig = 0;
+	} else if (rest === 1) {
+		dig = bodyInt >= GO_SPECIAL_RANGE_START && bodyInt <= GO_SPECIAL_RANGE_END ? 1 : 0;
+	} else {
+		dig = 11 - rest;
 	}
 
-	return Number.parseInt(ie.charAt(8), 10) === dig;
+	return checkDigit === dig;
 };
 
-const validateMA: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "12")) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
+const validateMA: IeValidator = (ie) => validateMod11Ie(ie, MA_PREFIXES);
 
 const validateMG: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 13)) return false;
 
-	const body = ie.substring(0, 11);
-	const bodyWithZero = `${body.substring(0, 3)}0${body.substring(3)}`;
+	const body = ie.slice(0, 11);
+	const bodyWithZero = `${body.slice(0, 3)}0${body.slice(3)}`;
 
-	let concat = "";
-	for (let i = 0; i < bodyWithZero.length; i++) {
-		const digit = bodyWithZero.charCodeAt(i) - 48;
-		const weight = (i + 3) % 2 === 0 ? 2 : 1;
-		concat += String(digit * weight);
-	}
+	// The first digit doubles every second character from the right and adds the digits of each
+	// product, the modulus 10 rule `mod10` implements.
+	const firstDig = mod10(bodyWithZero);
 
-	let sum = 0;
-	for (let i = 0; i < concat.length; i++) {
-		sum += concat.charCodeAt(i) - 48;
-	}
-
-	const sumStr = String(sum);
-	const lastChar = sumStr.charAt(sumStr.length - 1);
-	const lastCharInt = Number.parseInt(lastChar, 10);
-	const firstDig = lastCharInt === 0 ? 0 : 10 - lastCharInt;
-
-	let weight = 3;
-	let sum2 = 0;
 	const bodyWithFirst = body + firstDig;
-	for (let i = 0; i < bodyWithFirst.length; i++) {
-		const digit = bodyWithFirst.charCodeAt(i) - 48;
-		sum2 += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 11;
-		}
-	}
-
-	const rest = sum2 % 11;
-	let secondDig = 11 - rest;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithFirst,
+		length: bodyWithFirst.length,
+		startWeight: 3,
+		wrapTo: 11,
+	});
+	const secondDig = calcMod11CheckDigit(secondSum);
 
 	return (
 		Number.parseInt(ie.charAt(11), 10) === firstDig &&
@@ -372,104 +240,35 @@ const validateMG: IeValidator = (ie: string) => {
 const validateMT: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 11)) return false;
 
-	const body = ie.substring(0, 10);
-	let weight = 3;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const body = ie.slice(0, 10);
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 3, wrapTo: 9 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(10), 10) === dig;
 };
 
-const validateMS: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "28")) return false;
+const validateMS: IeValidator = (ie) => validateMod11Ie(ie, MS_PREFIXES);
 
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
-
-const validatePA: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "15")) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
-
-const validatePB: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
+const validatePA: IeValidator = (ie) => validateMod11Ie(ie, PA_PREFIXES);
 
 const validatePE: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
 
-	const body = ie.substring(0, 7);
-	let weight = body.length + 1;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const mod = 11;
-	const rest = sum % mod;
-	let firstDig = mod - rest;
-	if (firstDig >= 10) {
-		firstDig = 0;
-	}
+	const body = ie.slice(0, 7);
+	const firstSum = calcWeightedSum({
+		source: ie,
+		length: body.length,
+		startWeight: body.length + 1,
+	});
+	const firstDig = calcMod11CheckDigit(firstSum);
 
 	const bodyWithFirst = body + firstDig;
-	weight = bodyWithFirst.length + 1;
-	sum = 0;
-
-	for (let i = 0; i < bodyWithFirst.length; i++) {
-		const digit = i < body.length ? ie.charCodeAt(i) - 48 : firstDig;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const rest2 = sum % mod;
-	let secondDig = mod - rest2;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithFirst,
+		length: bodyWithFirst.length,
+		startWeight: bodyWithFirst.length + 1,
+	});
+	const secondDig = calcMod11CheckDigit(secondSum);
 
 	return (
 		Number.parseInt(ie.charAt(7), 10) === firstDig &&
@@ -477,59 +276,26 @@ const validatePE: IeValidator = (ie: string) => {
 	);
 };
 
-const validatePI: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
-
 const validatePR: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 10)) return false;
 
-	const body = ie.substring(0, 8);
-	let weight = body.length - 5;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 7;
-		}
-	}
-
-	const rest = sum % 11;
-	let firstDig = 11 - rest;
-	if (firstDig >= 10) {
-		firstDig = 0;
-	}
+	const body = ie.slice(0, 8);
+	const firstSum = calcWeightedSum({
+		source: ie,
+		length: body.length,
+		startWeight: body.length - 5,
+		wrapTo: 7,
+	});
+	const firstDig = calcMod11CheckDigit(firstSum);
 
 	const bodyWithFirst = body + firstDig;
-	weight = bodyWithFirst.length - 5;
-	sum = 0;
-
-	for (let i = 0; i < bodyWithFirst.length; i++) {
-		const digit = Number.parseInt(bodyWithFirst.charAt(i), 10);
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 7;
-		}
-	}
-
-	const rest2 = sum % 11;
-	let secondDig = 11 - rest2;
-	if (secondDig >= 10) {
-		secondDig = 0;
-	}
+	const secondSum = calcWeightedSum({
+		source: bodyWithFirst,
+		length: bodyWithFirst.length,
+		startWeight: bodyWithFirst.length - 5,
+		wrapTo: 7,
+	});
+	const secondDig = calcMod11CheckDigit(secondSum);
 
 	return (
 		Number.parseInt(ie.charAt(8), 10) === firstDig &&
@@ -540,49 +306,22 @@ const validatePR: IeValidator = (ie: string) => {
 const validateRJ: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 8)) return false;
 
-	const body = ie.substring(0, 7);
-	let weight = 2;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = Number.parseInt(ie.charAt(i), 10);
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 7;
-		}
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const body = ie.slice(0, 7);
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 2, wrapTo: 7 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(7), 10) === dig;
 };
 
 const validateRN: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [9, 10])) return false;
-	if (!startsWith(ie, "20")) return false;
+	if (!ie.startsWith("20")) return false;
 
 	const length = ie.length;
 	const position = length - 1;
-	let weight = length;
-	const body = ie.substring(0, position);
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const body = ie.slice(0, position);
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: length });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(position), 10) === dig;
 };
@@ -592,18 +331,8 @@ const validateRO: IeValidator = (ie: string) => {
 
 	const length = ie.length;
 	const position = length - 1;
-	let weight = 6;
-	const body = ie.substring(0, position);
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = Number.parseInt(ie.charAt(i), 10);
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
+	const body = ie.slice(0, position);
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 6, wrapTo: 9 });
 
 	const rest = sum % 11;
 	let dig = 11 - rest;
@@ -617,13 +346,14 @@ const validateRO: IeValidator = (ie: string) => {
 
 const validateRR: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
-	if (!startsWith(ie, "24")) return false;
+	if (!ie.startsWith("24")) return false;
 
-	const body = ie.substring(0, 8);
 	let weight = 1;
 	let sum = 0;
 
-	for (let i = 0; i < body.length; i++) {
+	// Stryker disable next-line EqualityOperator: an extra iteration at i===8 would use weight 9, and any digit times 9 contributes 0 to the mod-9 result, so it is unobservable.
+	for (let i = 0; i < 8; i++) {
+		// Stryker disable next-line ArithmeticOperator: charCodeAt(i)+48 shifts each digit by 96; with weights 1..8 (summing to 36) the total shift is 96*36=3456, a multiple of 9, so the mod-9 result is unaffected.
 		const digit = ie.charCodeAt(i) - 48;
 		sum += digit * weight;
 		weight++;
@@ -636,86 +366,35 @@ const validateRR: IeValidator = (ie: string) => {
 const validateRS: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 10)) return false;
 
-	const body = ie.substring(0, 9);
-	let weight = 2;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 9;
-		}
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (dig >= 10) {
-		dig = 0;
-	}
+	const body = ie.slice(0, 9);
+	const sum = calcWeightedSum({ source: ie, length: body.length, startWeight: 2, wrapTo: 9 });
+	const dig = calcMod11CheckDigit(sum);
 
 	return Number.parseInt(ie.charAt(9), 10) === dig;
 };
 
-const validateSC: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
-
-const validateSE: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 9)) return false;
-
-	const body = ie.substring(0, 8);
-	const dig = calcDigitDecreasing({
-		body,
-		startWeight: body.length + 1,
-		minWeight: 1,
-	});
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
-};
-
-const validateSP: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 12)) return false;
-
-	const body = ie.substring(0, 8);
-	const weightFirst = [1, 3, 4, 5, 6, 7, 8, 10];
+const calcSPDigit = (body: string, weights: readonly number[]): number => {
 	let sum = 0;
 
 	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weightFirst[i];
+		sum += (body.charCodeAt(i) - 48) * weights[i];
 	}
 
-	const dig = sum % 11;
-	const digitStr = String(dig);
-	const firstDig = Number.parseInt(digitStr.charAt(digitStr.length - 1), 10);
+	return (sum % 11) % 10;
+};
 
-	const bodyForSecond = ie.substring(0, 11);
-	let weight = 3;
-	let sum2 = 0;
+const validateSP: IeValidator = (ie: string) => {
+	if (SP_RURAL_PATTERN.test(ie)) {
+		const body = ie.slice(1, 9);
+		const dig = calcSPDigit(body, SP_FIRST_WEIGHTS);
 
-	for (let i = 0; i < bodyForSecond.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum2 += digit * weight;
-		weight--;
-		if (weight === 1) {
-			weight = 10;
-		}
+		return Number.parseInt(ie.charAt(9), 10) === dig;
 	}
 
-	const dig2 = sum2 % 11;
-	const digitStr2 = String(dig2);
-	const secondDig = Number.parseInt(digitStr2.charAt(digitStr2.length - 1), 10);
+	if (!SP_COMPANY_PATTERN.test(ie)) return false;
+
+	const firstDig = calcSPDigit(ie.slice(0, 8), SP_FIRST_WEIGHTS);
+	const secondDig = calcSPDigit(ie.slice(0, 11), SP_SECOND_WEIGHTS);
 
 	return (
 		Number.parseInt(ie.charAt(8), 10) === firstDig &&
@@ -726,100 +405,168 @@ const validateSP: IeValidator = (ie: string) => {
 const validateTO: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [9, 11])) return false;
 
-	if (ie.length === 11) {
-		const begin = ie.substring(2, 4);
-		const beginWith = ["01", "02", "03", "99"];
-		if (beginWith.includes(begin)) {
-			const body = ie.substring(0, 2) + ie.substring(4, 10);
-			let weight = 9;
-			let sum = 0;
+	const isLegacy = ie.length === 11;
 
-			for (let i = 0; i < body.length; i++) {
-				const digit = Number.parseInt(body.charAt(i), 10);
-				sum += digit * weight;
-				weight--;
-			}
+	if (isLegacy && !TO_TYPES.includes(ie.slice(2, 4))) return false;
 
-			const rest = sum % 11;
-			let dig = 11 - rest;
-			if (rest < 2) {
-				dig = 0;
-			}
+	const body = isLegacy ? ie.slice(0, 2) + ie.slice(4, 10) : ie.slice(0, 8);
+	const position = isLegacy ? 10 : 8;
+	const sum = calcWeightedSum({ source: body, length: body.length, startWeight: 9 });
+	const dig = calcMod11CheckDigit(sum);
 
-			return Number.parseInt(ie.charAt(10), 10) === dig;
-		}
-	}
-
-	const body = ie.substring(0, 8);
-	let weight = 9;
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		const digit = ie.charCodeAt(i) - 48;
-		sum += digit * weight;
-		weight--;
-	}
-
-	const rest = sum % 11;
-	let dig = 11 - rest;
-	if (rest < 2) {
-		dig = 0;
-	}
-
-	return Number.parseInt(ie.charAt(8), 10) === dig;
+	return Number.parseInt(ie.charAt(position), 10) === dig;
 };
 
-const IE_VALIDATORS: Record<StateCode, IeValidator> = {
+const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
 	AC: validateAC,
 	AL: validateAL,
 	AP: validateAP,
-	AM: validateAM,
+	AM: validateMod11Ie,
 	BA: validateBA,
-	CE: validateCE,
+	CE: validateMod11Ie,
 	DF: validateDF,
-	ES: validateES,
+	ES: validateMod11Ie,
 	GO: validateGO,
 	MA: validateMA,
 	MG: validateMG,
 	MT: validateMT,
 	MS: validateMS,
 	PA: validatePA,
-	PB: validatePB,
+	PB: validateMod11Ie,
 	PE: validatePE,
-	PI: validatePI,
+	PI: validateMod11Ie,
 	PR: validatePR,
 	RJ: validateRJ,
 	RN: validateRN,
 	RO: validateRO,
 	RR: validateRR,
 	RS: validateRS,
-	SC: validateSC,
-	SE: validateSE,
+	SC: validateMod11Ie,
+	SE: validateMod11Ie,
 	SP: validateSP,
 	TO: validateTO,
+} satisfies Record<StateCode, IeValidator>;
+
+const validateIe = (stateCode: unknown, value: unknown): boolean => {
+	if (typeof stateCode !== "string") return false;
+	if (typeof value !== "string") return false;
+
+	const normalizedStateCode = stateCode.toUpperCase();
+
+	const validator = Object.hasOwn(IE_VALIDATORS, normalizedStateCode)
+		? IE_VALIDATORS[normalizedStateCode]
+		: undefined;
+	if (!validator) return false;
+
+	const sanitize = normalizedStateCode === "SP" ? sanitizeToAlphanumeric : sanitizeToDigits;
+
+	return validator(sanitize(value));
 };
 
 /**
- * Validates a Brazilian state registration number (Inscrição Estadual).
+ * Validates a Brazilian state tax registration number (IE).
+ *
+ * Per state notes, all of them deliberate and unchanged since 2.3.0:
+ * - DF: the SINTEGRA page is published but empty, and no SEFAZ-DF roteiro is published either,
+ *   so DF follows the 13 digit AC rule under the prefix 07.
+ * - GO: the SINTEGRA page is superseded by the SEFAZ-GO roteiro, which is the source of the
+ *   prefixes 10, 11 and 15, of the 10103105 to 10119997 range and of the dual digit
+ *   registration 11094402.
+ * - RJ: the SINTEGRA page publishes only the modulus rule; the 8 digit length and the weights
+ *   2, 7, 6, 5, 4, 3 and 2 come from the SINTEGRA validator itself, not from the page.
+ * - SP: characters other than "P" and digits are rejected on purpose, a deliberate deviation
+ *   from the Regra Geral of the SINTEGRA page, which ignores them instead.
+ * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
+ * - PE: only the current 9 digit eFisco format is accepted; the old 14 digit CACEPE format
+ *   documented on the same page is not.
+ * - TO: the SINTEGRA page documents only the 11 digit form, the one carrying the tipo digits in
+ *   positions 3 and 4. The 9 digit form is also accepted, applying the same modulus 11 rule with
+ *   weights 9 down to 2 to the first eight digits; it is 2.3.0 behavior kept for compatibility
+ *   and no published SEFAZ-TO roteiro covers it.
+ * - An all zero registration is accepted for every state whose published formula yields a
+ *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS,
+ *   SC, SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which reject repeated
+ *   digits. AM is on that list through the second branch of its published formula only: the
+ *   page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma", gives 11 for an all zero
+ *   registration, while the "resto <= 1 ⇒ 0" branch, the one implemented here, gives 0.
+ *
+ * The state can also be passed first and the registration second, `isValidIe('SP', '110042490114')`,
+ * the 2.3.0 form, which still works and is deprecated. The two forms are told apart by the first
+ * argument: an object is the parameters of the current form, a string the state code of the
+ * deprecated one, and anything else returns false.
+ *
+ * @param {IsValidIeParams} params - The registration to validate and the state to validate it against
+ * @param {string} params.value - The state registration number to validate
+ * @param {StateCode} params.stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
+ * @returns {boolean} True if the state registration number is valid, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isValidIe({ value: '110042490114', stateCode: 'SP' }); // true
+ * isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true
+ * isValidIe({ value: '12345', stateCode: 'RJ' }); // false
+ * isValidIe({ value: '109161793', stateCode: 'go' as StateCode }); // true (case-insensitive)
+ * ```
+ *
+ * @see Official: http://www.sintegra.gov.br/insc_est.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AC.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AL.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AM.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AP.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_BA.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_CE.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_DF.html
+ * The page is published but empty: it carries no format, no weights and no worked example,
+ * and no SEFAZ-DF roteiro is published either, so DF follows the 13 digit AC rule under the
+ * prefix 07.
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
+ * Superseded for Goiás by the SEFAZ-GO roteiro below: this page still gives the prefixes as
+ * 10, 11 or 20 to 29 and knows nothing of the special ranges.
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MA.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MG.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MS.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PA.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PB.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PE.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PI.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PR.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RJ.html
+ * Publishes only the modulus rule: the 8 digit length and the weights 2, 7, 6, 5, 4, 3 and 2
+ * come from the SINTEGRA validator itself, not from this page.
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RN.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RO.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RR.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RS.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SC.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SE.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SP.html
+ * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_TO.html
+ * Documents only the 11 digit form, with the tipo digits 01, 02, 03 and 99 in positions 3 and 4;
+ * the 9 digit form the validator also accepts is not covered by this page or by any other
+ * published SEFAZ-TO roteiro.
+ * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
+ * SEFAZ-GO's roteiro de crítica, the source of the Goiás prefixes and special ranges.
+ */
+export function isValidIe(params: IsValidIeParams): boolean;
+/**
+ * Validates a Brazilian state tax registration number (IE) with the state given first. See the
+ * overload taking the parameters object for the full documentation.
  *
  * @param {StateCode} stateCode - The state abbreviation (e.g., 'SP', 'RJ', 'MG')
  * @param {string} ie - The state registration number to validate
  * @returns {boolean} True if the state registration number is valid, false otherwise
  *
- * @example
- * ```typescript
- * isValidIe('SP', '110042490114'); // true
- * isValidIe('RJ', '12345'); // false
- * ```
+ * @deprecated Use the object form, `isValidIe({ value, stateCode })`.
  */
-export const isValidIe = (stateCode: StateCode, ie: string): boolean => {
-	if (!stateCode || !ie || typeof ie !== "string") return false;
+export function isValidIe(stateCode: StateCode, ie: string): boolean;
+export function isValidIe(paramsOrStateCode: IsValidIeParams | StateCode, ie?: string): boolean {
+	// The two call forms are told apart by the first argument alone: a string is the state code of
+	// the deprecated `(stateCode, ie)` form, anything else is read as the parameters object of the
+	// current one (a primitive has no `stateCode`, so it fails the validation like any bad input).
+	if (typeof paramsOrStateCode === "string") return validateIe(paramsOrStateCode, ie);
+	if (isNullish(paramsOrStateCode)) return false;
 
-	const digits = sanitizeToDigits(ie);
-	if (!digits) return false;
-
-	const validator = IE_VALIDATORS[stateCode];
-	if (!validator) return false;
-
-	return validator(digits);
-};
+	return validateIe(paramsOrStateCode.stateCode, paramsOrStateCode.value);
+}

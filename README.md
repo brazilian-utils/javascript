@@ -5,8 +5,9 @@
 
 [📖 Documentation](https://brazilian-utils.com.br/#/getting-started)
 
-[![Build Status](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml?query=branch%3Amain) [![Coverage Status](https://codecov.io/gh/brazilian-utils/javascript/graph/badge.svg?branch=main)](https://codecov.io/gh/brazilian-utils/javascript?branch=main) [![Known Vulnerabilities](https://snyk.io/test/github/brazilian-utils/javascript/badge.svg?targetFile=package.json)](https://snyk.io/test/github/brazilian-utils/javascript?targetFile=package.json) [![Maintainability](https://api.codeclimate.com/v1/badges/05d3cd8492ed438bf51d/maintainability)](https://codeclimate.com/github/brazilian-utils/javascript/maintainability)
-[![Downloads per month](https://img.shields.io/npm/dm/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![License: MIT](https://img.shields.io/github/license/brazilian-utils/javascript.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![Downloads per month](https://img.shields.io/npm/dm/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![License: MIT](https://img.shields.io/github/license/brazilian-utils/javascript.svg)](https://github.com/brazilian-utils/javascript/blob/main/LICENSE)
+[![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/brazilian-utils/javascript/blob/main/CONTRIBUTING.md#zero-runtime-dependencies) [![Bundle size](https://img.shields.io/badge/isValidCpf%20import-0.8%20KB%20gzip-brightgreen)](https://brazilian-utils.com.br/#/getting-started?id=bundle-size) [![TypeScript](https://img.shields.io/npm/types/@brazilian-utils/brazilian-utils)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils)
+[![Build Status](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/build.yml?query=branch%3Amain) [![Tests](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml?query=branch%3Amain) [![codecov](https://codecov.io/gh/brazilian-utils/javascript/branch/main/graph/badge.svg)](https://codecov.io/gh/brazilian-utils/javascript) [![Mutation tests](https://github.com/brazilian-utils/javascript/actions/workflows/mutation.yml/badge.svg?branch=main)](https://github.com/brazilian-utils/javascript/actions/workflows/mutation.yml?query=branch%3Amain) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/brazilian-utils/javascript/badge)](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript)
 
 </div>
 
@@ -16,8 +17,11 @@
 **Table of Contents**
 
 - [Getting Started](#getting-started)
+  - [Why Brazilian Utils](#why-brazilian-utils)
   - [Installation](#installation)
+    - [Runtime support](#runtime-support)
   - [Usage](#usage)
+  - [Development](#development)
   - [Contributors](#contributors)
   - [License](#license)
 
@@ -27,9 +31,18 @@
 
 Brazilian Utils is a library focused on solving problems that we face daily in the development of applications for the Brazilian business.
 
+## Why Brazilian Utils
+
+- **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
+- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped); every util is also its own subpath entry (`@brazilian-utils/brazilian-utils/get-cities`) for the heavy ones.
+- **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, tested in CI on every one of them.
+- **Written in TypeScript.** Types ship with the package; the public API is tracked by an API report so nothing changes silently.
+- **Validated against the official rules.** Every validator cites the specification, law or dataset it implements (`@see` in the docs), and the test suite is mutation-tested, not just covered.
+- **Documented in English and Portuguese**, with an `llms.txt` for AI assistants.
+
 ## Installation
 
-Using **Brazilian Utils** is quite simple and you can use it in some ways:
+You can install **Brazilian Utils** in a few ways:
 
 as npm package:
 
@@ -43,15 +56,38 @@ with yarn package manager:
 yarn add @brazilian-utils/brazilian-utils
 ```
 
-or `<script>` tag (global `brazilianUtils`):
+with pnpm:
+
+```bash
+pnpm add @brazilian-utils/brazilian-utils
+```
+
+with bun:
+
+```bash
+bun add @brazilian-utils/brazilian-utils
+```
+
+or `<script>` tag (global `BrazilianUtils`):
 
 ```html
-<script src="https://unpkg.com/@brazilian-utils/brazilian-utils/dist/brazilian-utils.cjs.production.min.js"></script>
+<script src="https://unpkg.com/@brazilian-utils/brazilian-utils/dist/brazilian-utils.umd.cjs"></script>
 ```
+
+### Runtime support
+
+The supported range is the `engines` field in `package.json`; every row below is exercised by the [Tests workflow](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml?query=branch%3Amain) on every pull request.
+
+| Runtime  | Supported                 | Covered in CI                 |
+| -------- | ------------------------- | ----------------------------- |
+| Node.js  | `^20.19.0 \|\| >=22.12.0` | 20, 22, 24, 26                |
+| Bun      | latest                    | latest                        |
+| Deno     | 2.x                       | 2.x                           |
+| Browsers | evergreen                 | Chrome, Firefox, Edge, Safari |
 
 ## Usage
 
-To use one of our utilities you just need to import the required function as in the example below:
+To use a utility, import the required function, as shown below:
 
 ```javascript
 import { isValidCpf } from "@brazilian-utils/brazilian-utils";
@@ -61,23 +97,22 @@ isValidCpf("1232454233345"); // false
 
 You can check a list of utilities [by clicking here](https://brazilian-utils.com.br/#/utilities).
 
+- The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](https://brazilian-utils.com.br/#/getting-started?id=bundle-size).
+
 ## Development
 
-This repository uses Vite+ as the local toolchain.
-
-Requirements:
-
-- Node.js `^20.19.0 || >=22.12.0`
-- `vp` installed and available in your shell
-
-Common commands:
+This repository uses Vite+ as the local toolchain; it is installed as a dependency, so nothing has
+to be installed globally beyond Node.js 24 (the version in `.nvmrc`, which the toolchain needs; the
+library itself supports Node.js `^20.19.0 || >=22.12.0`).
 
 ```bash
-vp install
-vp check
-vp test
-vp run build
+npm install
+npm run check
+npm test
+npm run build
 ```
+
+[CONTRIBUTING.md](CONTRIBUTING.md) lists every script and the checks a pull request goes through.
 
 Release notes are published through [GitHub Releases](https://github.com/brazilian-utils/javascript/releases).
 
@@ -93,7 +128,7 @@ Our "thank you" goes to these wonderful people ([emoji key](https://github.com/k
     <td align="center"><a href="https://github.com/hyanmandian"><img src="https://avatars2.githubusercontent.com/u/5044101?v=3?s=100" width="100px;" alt=""/><br /><sub><b>Hyan Mandian</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=hyanmandian" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=hyanmandian" title="Documentation">📖</a> <a href="#ideas-hyanmandian" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=hyanmandian" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/lucassveloso"><img src="https://avatars2.githubusercontent.com/u/4587602?v=3?s=100" width="100px;" alt=""/><br /><sub><b>Lucas Veloso</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=lucassveloso" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=lucassveloso" title="Documentation">📖</a> <a href="#ideas-lucassveloso" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=lucassveloso" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/andreoav"><img src="https://avatars2.githubusercontent.com/u/508827?v=3?s=100" width="100px;" alt=""/><br /><sub><b>Andreo Vieira</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=andreoav" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=andreoav" title="Documentation">📖</a> <a href="#ideas-andreoav" title="Ideas, Planning, & Feedback">🤔</a> <a href="#tool-andreoav" title="Tools">🔧</a></td>
-    <td align="center"><a href="http://matalmeida.me"><img src="https://avatars3.githubusercontent.com/u/12724212?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matheus Almeida</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=matAlmeida" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=matAlmeida" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=matAlmeida" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/matAlmeida"><img src="https://avatars3.githubusercontent.com/u/12724212?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matheus Almeida</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=matAlmeida" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=matAlmeida" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=matAlmeida" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/FernandoRogelin"><img src="https://avatars2.githubusercontent.com/u/32275453?s=400&u=55d9685df8b4dc14169719993d4997b2a9adda61&v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fernando Rogelin</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=fernandorogelin" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=fernandorogelin" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=fernandorogelin" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/rodineijf"><img src="https://avatars2.githubusercontent.com/u/24531420?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rodineijf</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=rodineijf" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=rodineijf" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=rodineijf" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://twitter.com/elaurent_"><img src="https://avatars2.githubusercontent.com/u/10627086?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Emerson Laurentino</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=emersonlaurentino" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=emersonlaurentino" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=emersonlaurentino" title="Tests">⚠️</a></td>
@@ -105,7 +140,7 @@ Our "thank you" goes to these wonderful people ([emoji key](https://github.com/k
     <td align="center"><a href="https://github.com/felipediogo"><img src="https://avatars3.githubusercontent.com/u/26486135?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Felipe F. Diogo</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=felipediogo" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=felipediogo" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/alanraso"><img src="https://avatars0.githubusercontent.com/u/6992731?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alan Raso</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=alanraso" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=alanraso" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://ftfetter.wordpress.com/"><img src="https://avatars0.githubusercontent.com/u/18450242?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Felipe Fetter</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=ftfetter" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://rfoel.com"><img src="https://avatars3.githubusercontent.com/u/19496473?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rafael Franco</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=rfoel" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=rfoel" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/rfoel"><img src="https://avatars3.githubusercontent.com/u/19496473?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rafael Franco</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=rfoel" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=rfoel" title="Documentation">📖</a></td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/pezzetti"><img src="https://avatars1.githubusercontent.com/u/6005103?s=460&v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rafael Pezzetti</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=pezzetti" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=pezzetti" title="Tests">⚠️</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=pezzetti" title="Documentation">📖</a></td>
@@ -118,7 +153,7 @@ Our "thank you" goes to these wonderful people ([emoji key](https://github.com/k
   </tr>
   <tr>
     <td align="center"><a href="https://lincon.dev/"><img src="https://avatars3.githubusercontent.com/u/5117676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lincon Kusunoki</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=linconkusunoki" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=linconkusunoki" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=linconkusunoki" title="Tests">⚠️</a></td>
-    <td align="center"><a href="http://www.engenhandosoftware.com.br/"><img src="https://avatars3.githubusercontent.com/u/11621153?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marcelo Cristiano</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=marceloabk" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=marceloabk" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=marceloabk" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/marceloabk"><img src="https://avatars3.githubusercontent.com/u/11621153?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marcelo Cristiano</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=marceloabk" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=marceloabk" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=marceloabk" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/tbfreitas"><img src="https://avatars.githubusercontent.com/u/8523621?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tarcísio Batista de Freitas Junior</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=tbfreitas" title="Documentation">📖</a></td>
     <td align="center"><a href="https://www.linkedin.com/in/lucas-carrias-474081195/"><img src="https://avatars.githubusercontent.com/u/24925816?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lucas Carrias</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=LucasCarrias" title="Documentation">📖</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=LucasCarrias" title="Tests">⚠️</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=LucasCarrias" title="Code">💻</a> <a href="#tool-LucasCarrias" title="Tools">🔧</a></td>
     <td align="center"><a href="https://github.com/matheusandre1"><img src="https://github.com/matheusandre1.png?size=100" width="100px;" alt=""/><br /><sub><b>Matheus Andre</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=matheusandre1" title="Documentation">📖</a></td>
@@ -127,8 +162,8 @@ Our "thank you" goes to these wonderful people ([emoji key](https://github.com/k
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/vicentevendramin"><img src="https://github.com/vicentevendramin.png?size=100" width="100px;" alt=""/><br /><sub><b>Vicente Vendramin</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=vicentevendramin" title="Code">💻</a></td>
-    <td></td>
-    <td></td>
+    <td align="center"><a href="https://github.com/joaopedroassad"><img src="https://github.com/joaopedroassad.png?size=100" width="100px;" alt=""/><br /><sub><b>Joao Assad</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/JanderSilv"><img src="https://github.com/JanderSilv.png?size=100" width="100px;" alt=""/><br /><sub><b>Jander Silva</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=JanderSilv" title="Code">💻</a></td>
     <td></td>
     <td></td>
     <td></td>
@@ -145,4 +180,4 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/brazilian-utils/javascript/blob/main/LICENSE)

@@ -1,0 +1,141 @@
+# Fully CI-driven release flow, no local commands. Two human confirmations, both without
+# running anything on a maintainer's machine:
+#
+#   1. release-please watches pushes to `main` and keeps a "release PR" open, whose title/body
+#      and CHANGELOG.md entry are generated from Conventional Commit messages since the last
+#      release (feat -> minor, fix -> patch, `!`/`BREAKING CHANGE:` -> major). Nothing is
+#      published yet. A maintainer reviews and merges that PR: that merge is confirmation #1.
+#   2. Merging the release PR makes release-please tag the release commit and create a GitHub
+#      Release, which triggers this same workflow again. This time `release_created` is `true`,
+#      so the `publish` job builds, validates and STAGES the package on npm
+#      (`npm stage publish --provenance`). A staged version is not installable until a
+#      maintainer approves it with 2FA, on npmjs.com (package -> Staged versions) or with
+#      `npm stage approve <stage-id>`. That approval is confirmation #2 (npm's
+#      "proof-of-presence"), and the trusted publisher is configured for staged publishing only,
+#      so no workflow can ever publish directly.
+#
+# Dependabot and dataset-update PRs are included automatically: any conventional commit merged
+# to `main` (via any PR) feeds the next release PR, no extra step needed.
+#
+# One-time npm Trusted Publishing setup (done by a package maintainer, not by CI):
+#   1. Sign in at npmjs.com and open this package.
+#   2. Settings -> Trusted Publishing -> Add a trusted publisher -> GitHub Actions.
+#   3. Organization/user: brazilian-utils | Repository: javascript
+#      Workflow filename: release.yml | Environment: npm
+#      Allowed actions: leave "publish directly" UNCHECKED (staged publishing only).
+#   4. Save. No NPM_TOKEN secret is needed: npm exchanges the workflow's OIDC token for a
+#      short-lived token automatically.
+#
+# One-time GitHub Environment setup (done by a package maintainer, not by CI):
+#   Repository Settings -> Environments -> New environment -> name it `npm`. No protection rules
+#   are needed: the environment only exists so the npm trusted publisher can be bound to it.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Publish to npm
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run build
+        run: npm run build
+
+      - name: Compare tree-shaking against the published version
+        continue-on-error: true
+        run: |
+          mkdir -p /tmp/prev
+          npm pack @brazilian-utils/brazilian-utils@latest --pack-destination /tmp/prev
+          tar -xzf /tmp/prev/*.tgz -C /tmp/prev
+          node scripts/tree-shaking.ts --dist /tmp/prev/package --json /tmp/prev/published.json
+          node scripts/tree-shaking.ts --compare /tmp/prev/published.json --markdown tree-shaking.md
+          cat tree-shaking.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Ensure npm supports staged publishing and OIDC (npm >= 11.15)
+        # zizmor: ignore[adhoc-packages] npm is pinned to an exact version and is not a package.json dependency
+        run: npm install -g npm@12.0.2
+
+      - name: Stage on npm
+        run: npm stage publish --provenance --access public
+
+  sbom:
+    name: Attach the SBOM to the release
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout the release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+
+      - name: Setup
+        uses: $/.github/actions/setup
+
+      - name: Generate the CycloneDX SBOM of the published package
+        # The package has no runtime dependencies, so the SBOM describes the package itself;
+        # --package-lock-only reads the lockfile instead of installing anything.
+        run: npm sbom --sbom-format cyclonedx --omit dev --package-lock-only > brazilian-utils.cdx.json
+
+      - name: Upload the SBOM as a release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
+        run: gh release upload "$TAG_NAME" brazilian-utils.cdx.json --clobber

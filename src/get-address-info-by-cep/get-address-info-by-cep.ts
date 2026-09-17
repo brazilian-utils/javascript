@@ -1,101 +1,110 @@
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
-/**
- * based on https://github.com/BrasilAPI/cep-promise
- */
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
 
+/** Base class of every error `getAddressInfoByCep` rejects with. */
 export class GetAddressInfoByCepError extends Error {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepError";
 	}
 }
 
+/** Thrown by `getAddressInfoByCep` when the value given is not a valid CEP. */
 export class GetAddressInfoByCepValidationError extends GetAddressInfoByCepError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepValidationError";
 	}
 }
 
+/** Thrown by `getAddressInfoByCep` when no CEP service knows the CEP. */
 export class GetAddressInfoByCepNotFoundError extends GetAddressInfoByCepError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepNotFoundError";
 	}
 }
 
+/** Thrown by `getAddressInfoByCep` when every CEP service failed to answer. */
 export class GetAddressInfoByCepServiceError extends GetAddressInfoByCepError {
-	constructor(message: string) {
+	public constructor(message: string) {
 		super(message);
 		this.name = "GetAddressInfoByCepServiceError";
 	}
 }
 
+/** The address `getAddressInfoByCep` returns for a CEP. */
 export type AddressInfo = {
+	/** The 8 digit CEP, no mask. */
 	cep: string;
+	/** Two letter state code, e.g. "SP". */
 	state: string;
+	/** City name. */
 	city: string;
+	/** Neighborhood name, empty when the CEP covers a whole city. */
 	neighborhood: string;
+	/** Street name, empty when the CEP covers a whole city. */
 	street: string;
 };
 
+/** The CEP services `getAddressInfoByCep` can query. */
 export type CepProvider = "viacep" | "widenet" | "brasilapi";
 
+/** Options of `getAddressInfoByCep`. */
 export type GetAddressInfoByCepOptions = {
+	/**
+	 * Which CEP services to race, in the order given (default: `["viacep", "brasilapi"]`; the
+	 * deprecated `"widenet"` provider is excluded from the default list, but can still be
+	 * requested explicitly).
+	 */
 	providers?: CepProvider[];
 };
 
-type ViaCepResponse = {
-	cep?: string;
-	logradouro?: string;
-	complemento?: string;
-	bairro?: string;
-	localidade?: string;
-	uf?: string;
-	erro?: boolean;
-};
+type ProviderPayload = Record<string, unknown>;
 
-type WidenetResponse = {
-	code?: string;
-	status?: number;
-	ok?: boolean;
-	state?: string;
-	city?: string;
-	district?: string;
-	address?: string;
-	message?: string;
-};
+/**
+ * The status BrasilAPI answers an unknown CEP with, alongside an `errors` body. ViaCEP and
+ * Widenet report a miss inside a 200 body instead, so BrasilAPI is the only provider whose
+ * not-found signal is an HTTP status and the only one that needs it mapped before `response.ok`
+ * turns it into a service failure.
+ *
+ * @see Based on: https://brasilapi.com.br/docs#tag/CEP
+ */
+const BRASIL_API_NOT_FOUND_STATUS = 404;
 
-type BrasilApiResponse = {
-	cep?: string;
-	state?: string;
-	city?: string;
-	neighborhood?: string;
-	street?: string;
-	errors?: Array<{ message: string }>;
+const asString = (value: unknown): string => (typeof value === "string" ? value : "");
+
+const readPayload = async (response: Response): Promise<ProviderPayload> => {
+	const data: unknown = await response.json();
+
+	return Object.assign<ProviderPayload, unknown>({}, data);
 };
 
 const fetchViaCep = async (cep: string): Promise<AddressInfo> => {
 	const response = await fetchWithRetry(`https://viacep.com.br/ws/${cep}/json/`);
 
 	if (!response.ok) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new Error(`ViaCEP request failed with status ${response.status}`);
 	}
 
-	const data = (await response.json()) as ViaCepResponse;
+	const record = await readPayload(response);
+	const cepValue = asString(record["cep"]);
 
-	if (data.erro || !data.cep) {
+	if (Boolean(record["erro"]) || cepValue === "") {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
 	return {
-		cep: data.cep.replace(/\D/g, ""),
-		state: data.uf || "",
-		city: data.localidade || "",
-		neighborhood: data.bairro || "",
-		street: data.logradouro || "",
+		cep: cepValue.replaceAll(/\D/g, ""),
+		state: asString(record["uf"]),
+		city: asString(record["localidade"]),
+		neighborhood: asString(record["bairro"]),
+		street: asString(record["logradouro"]),
 	};
 };
 
@@ -105,43 +114,59 @@ const fetchWidenet = async (cep: string): Promise<AddressInfo> => {
 	);
 
 	if (!response.ok) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new Error(`Widenet request failed with status ${response.status}`);
 	}
 
-	const data = (await response.json()) as WidenetResponse;
+	const record = await readPayload(response);
+	const codeValue = asString(record["code"]);
 
-	if (data.status !== 200 || !data.ok || !data.code) {
+	if (record["status"] !== 200 || record["ok"] !== true || codeValue === "") {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
 	return {
-		cep: data.code.replace(/\D/g, ""),
-		state: data.state || "",
-		city: data.city || "",
-		neighborhood: data.district || "",
-		street: data.address || "",
+		cep: codeValue.replaceAll(/\D/g, ""),
+		state: asString(record["state"]),
+		city: asString(record["city"]),
+		neighborhood: asString(record["district"]),
+		street: asString(record["address"]),
 	};
 };
 
 const fetchBrasilApi = async (cep: string): Promise<AddressInfo> => {
 	const response = await fetchWithRetry(`https://brasilapi.com.br/api/cep/v1/${cep}`);
 
+	if (response.status === BRASIL_API_NOT_FOUND_STATUS) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
+		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
+	}
+
 	if (!response.ok) {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new Error(`BrasilAPI request failed with status ${response.status}`);
 	}
 
-	const data = (await response.json()) as BrasilApiResponse;
+	const record = await readPayload(response);
+	const cepValue = asString(record["cep"]);
 
-	if (data.errors || !data.cep) {
+	if (Boolean(record["errors"]) || cepValue === "") {
+		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
+		// is checked when aggregating provider failures below, so this message is never observable.
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
 	return {
-		cep: data.cep.replace(/\D/g, ""),
-		state: data.state || "",
-		city: data.city || "",
-		neighborhood: data.neighborhood || "",
-		street: data.street || "",
+		cep: cepValue.replaceAll(/\D/g, ""),
+		state: asString(record["state"]),
+		city: asString(record["city"]),
+		neighborhood: asString(record["neighborhood"]),
+		street: asString(record["street"]),
 	};
 };
 
@@ -155,17 +180,27 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  * Fetches address information for a given CEP using multiple providers simultaneously.
  * Returns the result from the first provider that responds successfully.
  *
+ * The providers are started together and raced with `Promise.any`, not tried one after the
+ * other, so a provider that is retrying delays nothing for the others: its retries only push
+ * back the moment its own failure lands, and therefore the moment an all-failed rejection can
+ * surface.
+ *
  * @param {string|number} cep - The CEP (Brazilian postal code) to search for. Can be a string or number.
  * @param {GetAddressInfoByCepOptions} options - Optional configuration for the function.
- * @param {CepProvider[]} options.providers - List of providers to use. Defaults to all providers if not specified.
+ * @param {CepProvider[]} options.providers - List of providers to use. Defaults to `["viacep", "brasilapi"]`
+ * if not specified (the deprecated `"widenet"` provider is excluded from the default list, but can still
+ * be requested explicitly).
  * @returns {Promise<AddressInfo>} A promise that resolves to the address information.
- * @throws {GetAddressInfoByCepValidationError} If the CEP format is invalid.
+ * @throws {GetAddressInfoByCepValidationError} If the CEP format is invalid, or if
+ * `options.providers` is given and names no known provider: an empty array, an array of unknown
+ * names, and a value that is not an array at all (`null` included) all reject this way rather
+ * than with a raw `TypeError`.
  * @throws {GetAddressInfoByCepNotFoundError} If the CEP is not found in any of the services.
  * @throws {GetAddressInfoByCepServiceError} If all services are unavailable.
  *
  * @example
  * ```typescript
- * // Using all providers (default)
+ * // Using the default providers (["viacep", "brasilapi"])
  * const address = await getAddressInfoByCep("01310100");
  *
  * // Using specific providers
@@ -176,6 +211,12 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  * // Using number input
  * const address = await getAddressInfoByCep(1310100);
  * ```
+ *
+ * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
+ * @see Based on: https://viacep.com.br/
+ * ViaCEP, one of the two default providers. A third-party service, not a Correios one.
+ * @see Based on: https://brasilapi.com.br/docs#tag/CEP
+ * BrasilAPI, the other default provider. A third-party service, not a Correios one.
  */
 export const getAddressInfoByCep = async (
 	cep: string | number,
@@ -183,7 +224,9 @@ export const getAddressInfoByCep = async (
 ): Promise<AddressInfo> => {
 	let cepString = sanitizeToDigits(cep);
 
-	if (typeof cep === "number" && cepString.length < 8) {
+	if (typeof cep === "number") {
+		// `padStart` is a no-op when `cepString` is already 8 characters or longer, so there is no
+		// need to check its length here first.
 		cepString = cepString.padStart(8, "0");
 	}
 
@@ -192,55 +235,38 @@ export const getAddressInfoByCep = async (
 	}
 
 	let providersToUse: CepProvider[];
-	if (options?.providers !== undefined) {
-		if (options.providers.length === 0) {
-			throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
-		}
-		providersToUse = options.providers.filter((p) => p in providerMap);
+	if (options?.providers === undefined) {
+		providersToUse = ["viacep", "brasilapi"];
+	} else if (Array.isArray(options.providers)) {
+		// An empty `options.providers` array also filters down to an empty `providersToUse` below,
+		// which already reports the same validation error, so there is no dedicated check for it here.
+		providersToUse = options.providers.filter((provider) => Object.hasOwn(providerMap, provider));
 		if (providersToUse.length === 0) {
 			throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
 		}
 	} else {
-		providersToUse = ["viacep", "widenet", "brasilapi"] as CepProvider[];
+		throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
 	}
 
-	const providerPromises = providersToUse.map((provider) =>
-		providerMap[provider](cepString).catch((error) => {
-			return Promise.reject({ provider, error });
-		}),
-	);
+	let notFound = false;
+	const providerPromises = providersToUse.map(async (provider) => {
+		try {
+			return await providerMap[provider](cepString);
+		} catch (error) {
+			if (error instanceof GetAddressInfoByCepNotFoundError) notFound = true;
+			throw error;
+		}
+	});
 
 	try {
 		return await Promise.any(providerPromises);
 	} catch {
-		const results = await Promise.allSettled(providerPromises);
-
-		const rejections = results.filter((result) => result.status === "rejected");
-
-		const notFoundErrors = rejections.filter((rejection) => {
-			const error = rejection.reason?.error || rejection.reason;
-			return error instanceof GetAddressInfoByCepNotFoundError;
-		});
-
-		const networkErrors = rejections.filter((rejection) => {
-			const error = rejection.reason?.error || rejection.reason;
-			return !(error instanceof GetAddressInfoByCepNotFoundError);
-		});
-
-		if (notFoundErrors.length === rejections.length) {
+		if (notFound) {
 			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
 		}
 
-		if (networkErrors.length === rejections.length) {
-			throw new GetAddressInfoByCepServiceError(
-				"Todos os serviços estão fora de serviço ou indisponíveis",
-			);
-		}
-
-		if (notFoundErrors.length > 0) {
-			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
-		}
-
-		throw new GetAddressInfoByCepServiceError("Erro ao consultar os serviços de CEP");
+		throw new GetAddressInfoByCepServiceError(
+			"Todos os serviços estão fora de serviço ou indisponíveis",
+		);
 	}
 };

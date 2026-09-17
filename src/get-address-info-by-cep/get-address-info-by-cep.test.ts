@@ -1,10 +1,29 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "../_internals/test/runtime";
 import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	expectTypeOf,
+	it,
+	vi,
+} from "../_internals/test/runtime";
+import {
+	type AddressInfo,
+	type CepProvider,
+	type GetAddressInfoByCepOptions,
+	GetAddressInfoByCepError,
 	GetAddressInfoByCepNotFoundError,
 	GetAddressInfoByCepServiceError,
 	GetAddressInfoByCepValidationError,
 	getAddressInfoByCep,
 } from "./get-address-info-by-cep";
+
+type FetchInput = string | URL | Request;
+
+const requestUrl = (input: FetchInput): string => {
+	if (typeof input === "string") return input;
+	return input instanceof URL ? input.href : input.url;
+};
 
 type MockResponse = {
 	ok: boolean;
@@ -14,7 +33,7 @@ type MockResponse = {
 
 const VALID_CEP = "01310100";
 const VALID_CEP_MASKED = "01310-100";
-const LIVE_TEST_TIMEOUT = 15000;
+const LIVE_TEST_TIMEOUT = 15_000;
 
 const viacepPayload = {
 	bairro: "Bela Vista",
@@ -44,7 +63,7 @@ const brasilApiPayload = {
 
 function createJsonResponse(payload: unknown, status = 200): MockResponse {
 	return {
-		json: async () => payload,
+		json: () => Promise.resolve(payload),
 		ok: status >= 200 && status < 300,
 		status,
 	};
@@ -54,8 +73,8 @@ function setupFetchMock(
 	fetchMock: ReturnType<typeof vi.fn>,
 	overrides?: Partial<Record<"brasilapi" | "viacep" | "widenet", Error | MockResponse>>,
 ) {
-	fetchMock.mockImplementation(async (input: string | URL | Request) => {
-		const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+	fetchMock.mockImplementation((input: FetchInput) => {
+		const url = requestUrl(input);
 
 		if (url.includes("viacep.com.br")) {
 			if (overrides?.viacep instanceof Error) {
@@ -85,6 +104,37 @@ function setupFetchMock(
 	});
 }
 
+function expectDefaultAddress(result: AddressInfo) {
+	expect(result).toBeDefined();
+	expect(result.cep).toBe(VALID_CEP);
+	expect(result.state).toBe("SP");
+	expect(result.city).toBe("São Paulo");
+}
+
+function expectNormalizedAddress(result: AddressInfo) {
+	expectDefaultAddress(result);
+	expect(result).toHaveProperty("cep");
+	expect(result).toHaveProperty("state");
+	expect(result).toHaveProperty("city");
+	expect(result).toHaveProperty("neighborhood");
+	expect(result).toHaveProperty("street");
+	expect(result.neighborhood).toBe("Bela Vista");
+	expect(result.street).toBe("Avenida Paulista");
+}
+
+function expectAddressFound(result: AddressInfo) {
+	expectDefaultAddress(result);
+	expect(result.neighborhood).toBeTruthy();
+	expect(result.street).toBeTruthy();
+}
+
+function expectEmptyAddressFields(result: AddressInfo) {
+	expect(result.neighborhood).toBe("");
+	expect(result.city).toBe("");
+	expect(result.street).toBe("");
+	expect(result.state).toBe("");
+}
+
 const globalWithLiveFlag = globalThis as typeof globalThis & {
 	RUN_LIVE_CEP_TESTS?: string | number;
 };
@@ -102,7 +152,7 @@ function shouldRunLiveCepTests() {
 			return Deno.env.get("RUN_LIVE_CEP_TESTS") === "1";
 		}
 	} catch {
-		// ignore
+		return false;
 	}
 
 	try {
@@ -114,11 +164,11 @@ function shouldRunLiveCepTests() {
 			}
 		).process;
 
-		if (maybeProcess?.env?.RUN_LIVE_CEP_TESTS === "1") {
+		if (maybeProcess?.env?.["RUN_LIVE_CEP_TESTS"] === "1") {
 			return true;
 		}
 	} catch {
-		// ignore
+		return false;
 	}
 
 	return false;
@@ -127,12 +177,36 @@ function shouldRunLiveCepTests() {
 const RUN_LIVE_CEP_TESTS = shouldRunLiveCepTests();
 
 describe("getAddressInfoByCep", () => {
+	describe("error class names", () => {
+		it("should set name to GetAddressInfoByCepError", () => {
+			expect(new GetAddressInfoByCepError("message").name).toBe("GetAddressInfoByCepError");
+		});
+
+		it("should set name to GetAddressInfoByCepValidationError", () => {
+			const error = new GetAddressInfoByCepValidationError("message");
+
+			expect(error.name).toBe("GetAddressInfoByCepValidationError");
+		});
+
+		it("should set name to GetAddressInfoByCepNotFoundError", () => {
+			const error = new GetAddressInfoByCepNotFoundError("message");
+
+			expect(error.name).toBe("GetAddressInfoByCepNotFoundError");
+		});
+
+		it("should set name to GetAddressInfoByCepServiceError", () => {
+			const error = new GetAddressInfoByCepServiceError("message");
+
+			expect(error.name).toBe("GetAddressInfoByCepServiceError");
+		});
+	});
+
 	describe("deterministic behavior", () => {
 		const fetchMock = vi.fn();
 		const originalFetch = globalThis.fetch;
 
 		beforeEach(() => {
-			globalThis.fetch = fetchMock as unknown as typeof fetch;
+			globalThis.fetch = fetchMock as typeof fetch;
 			fetchMock.mockClear();
 			setupFetchMock(fetchMock);
 		});
@@ -159,22 +233,26 @@ describe("getAddressInfoByCep", () => {
 				);
 			});
 
+			it("should include the Portuguese message for an invalid CEP", async () => {
+				await expect(getAddressInfoByCep("12345")).rejects.toThrow("CEP inválido");
+			});
+
+			it("should not pad a short string CEP with leading zeros (only numbers get padded)", async () => {
+				await expect(getAddressInfoByCep("1310100")).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+			});
+
 			it("should accept valid CEP as string", async () => {
 				const result = await getAddressInfoByCep(VALID_CEP);
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
+				expectDefaultAddress(result);
 			});
 
 			it("should accept valid CEP as number and pad with leading zeros", async () => {
-				const result = await getAddressInfoByCep(1310100);
+				const result = await getAddressInfoByCep(1_310_100);
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
+				expectDefaultAddress(result);
 			});
 
 			it("should accept CEP with mask", async () => {
@@ -186,13 +264,62 @@ describe("getAddressInfoByCep", () => {
 		});
 
 		describe("provider selection", () => {
-			it("should use all providers by default", async () => {
+			it("should use the default providers (viacep, brasilapi) and skip the deprecated widenet provider", async () => {
 				const result = await getAddressInfoByCep(VALID_CEP);
+
+				expectDefaultAddress(result);
+
+				const requestedUrls = fetchMock.mock.calls.map(([input]: [FetchInput]) =>
+					requestUrl(input),
+				);
+				expect(requestedUrls.some((url: string) => url.includes("viacep.com.br"))).toBe(true);
+				expect(requestedUrls.some((url: string) => url.includes("brasilapi.com.br"))).toBe(true);
+				expect(requestedUrls.some((url: string) => url.includes("widenet"))).toBe(false);
+			});
+
+			it("should still allow widenet to be used when explicitly requested", async () => {
+				const result = await getAddressInfoByCep(VALID_CEP, {
+					providers: ["widenet"],
+				});
 
 				expect(result).toBeDefined();
 				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
+			});
+
+			it("should throw GetAddressInfoByCepValidationError for a providers array made only of inherited Object property names", async () => {
+				await expect(
+					getAddressInfoByCep(VALID_CEP, {
+						// @ts-expect-error: intentionally invalid input
+						providers: ["constructor", "toString"],
+					}),
+				).rejects.toThrow(GetAddressInfoByCepValidationError);
+			});
+
+			it("should include the Portuguese message when providers filter down to none", async () => {
+				await expect(
+					getAddressInfoByCep(VALID_CEP, {
+						// @ts-expect-error: intentionally invalid input
+						providers: ["invalid"],
+					}),
+				).rejects.toThrow("Nenhum provedor válido especificado");
+			});
+
+			it("should throw GetAddressInfoByCepValidationError for a providers value that is not an array, null included", async () => {
+				await Promise.all(
+					[null, "viacep", 5, {}, true].map((providers) =>
+						expect(
+							// @ts-expect-error: intentionally invalid input
+							getAddressInfoByCep(VALID_CEP, { providers }),
+						).rejects.toThrow(GetAddressInfoByCepValidationError),
+					),
+				);
+			});
+
+			it("should include the Portuguese message for a providers value that is not an array", async () => {
+				await expect(
+					// @ts-expect-error: intentionally invalid input
+					getAddressInfoByCep(VALID_CEP, { providers: null }),
+				).rejects.toThrow("Nenhum provedor válido especificado");
 			});
 
 			it("should use only specified providers", async () => {
@@ -200,10 +327,7 @@ describe("getAddressInfoByCep", () => {
 					providers: ["brasilapi"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
+				expectDefaultAddress(result);
 			});
 
 			it("should use multiple specified providers", async () => {
@@ -211,15 +335,12 @@ describe("getAddressInfoByCep", () => {
 					providers: ["viacep", "brasilapi"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
+				expectDefaultAddress(result);
 			});
 
 			it("should filter out invalid provider names", async () => {
 				const result = await getAddressInfoByCep(VALID_CEP, {
-					// @ts-expect-error
+					// @ts-expect-error: intentionally invalid input
 					providers: ["viacep", "invalid", "brasilapi"],
 				});
 
@@ -234,17 +355,7 @@ describe("getAddressInfoByCep", () => {
 					providers: ["viacep"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result).toHaveProperty("cep");
-				expect(result).toHaveProperty("state");
-				expect(result).toHaveProperty("city");
-				expect(result).toHaveProperty("neighborhood");
-				expect(result).toHaveProperty("street");
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBe("Bela Vista");
-				expect(result.street).toBe("Avenida Paulista");
+				expectNormalizedAddress(result);
 			});
 
 			it("should return normalized address information from Widenet", async () => {
@@ -252,17 +363,7 @@ describe("getAddressInfoByCep", () => {
 					providers: ["widenet"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result).toHaveProperty("cep");
-				expect(result).toHaveProperty("state");
-				expect(result).toHaveProperty("city");
-				expect(result).toHaveProperty("neighborhood");
-				expect(result).toHaveProperty("street");
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBe("Bela Vista");
-				expect(result.street).toBe("Avenida Paulista");
+				expectNormalizedAddress(result);
 			});
 
 			it("should return normalized address information from BrasilAPI", async () => {
@@ -270,17 +371,7 @@ describe("getAddressInfoByCep", () => {
 					providers: ["brasilapi"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result).toHaveProperty("cep");
-				expect(result).toHaveProperty("state");
-				expect(result).toHaveProperty("city");
-				expect(result).toHaveProperty("neighborhood");
-				expect(result).toHaveProperty("street");
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBe("Bela Vista");
-				expect(result.street).toBe("Avenida Paulista");
+				expectNormalizedAddress(result);
 			});
 		});
 
@@ -293,6 +384,16 @@ describe("getAddressInfoByCep", () => {
 				});
 
 				await expect(getAddressInfoByCep("00000000", { providers: ["viacep"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when ViaCEP returns erro even if cep is present", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ cep: "01310-100", erro: true }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] })).rejects.toThrow(
 					GetAddressInfoByCepNotFoundError,
 				);
 			});
@@ -310,6 +411,46 @@ describe("getAddressInfoByCep", () => {
 				);
 			});
 
+			it("should throw GetAddressInfoByCepNotFoundError when Widenet's code is missing", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ ok: true, status: 200 }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when Widenet's ok flag is false even with a code", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ code: "01310-100", ok: false, status: 200 }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when Widenet's status is not 200 even with ok and a code", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ code: "01310-100", ok: true, status: 404 }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepServiceError when Widenet's HTTP request itself fails", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({}, 503),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepServiceError,
+				);
+			});
+
 			it("should throw GetAddressInfoByCepNotFoundError when BrasilAPI returns errors", async () => {
 				setupFetchMock(fetchMock, {
 					brasilapi: createJsonResponse({
@@ -320,6 +461,29 @@ describe("getAddressInfoByCep", () => {
 				await expect(getAddressInfoByCep("00000000", { providers: ["brasilapi"] })).rejects.toThrow(
 					GetAddressInfoByCepNotFoundError,
 				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when BrasilAPI returns errors even if cep is present", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({
+						cep: VALID_CEP,
+						errors: [{ message: "CEP não encontrado" }],
+					}),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should strip non-digit characters from BrasilAPI's cep", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ ...brasilApiPayload, cep: "01310-100" }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] });
+
+				expect(result.cep).toBe(VALID_CEP);
 			});
 
 			it("should throw GetAddressInfoByCepNotFoundError when all providers return not found", async () => {
@@ -341,7 +505,7 @@ describe("getAddressInfoByCep", () => {
 				);
 			});
 
-			it("should throw GetAddressInfoByCepServiceError when all providers fail with network errors", async () => {
+			it("should throw GetAddressInfoByCepServiceError with the Portuguese message when all providers fail with network errors", async () => {
 				setupFetchMock(fetchMock, {
 					brasilapi: new Error("Connection failed"),
 					viacep: new Error("Network error"),
@@ -350,6 +514,9 @@ describe("getAddressInfoByCep", () => {
 
 				await expect(getAddressInfoByCep(VALID_CEP)).rejects.toThrow(
 					GetAddressInfoByCepServiceError,
+				);
+				await expect(getAddressInfoByCep(VALID_CEP)).rejects.toThrow(
+					"Todos os serviços estão fora de serviço ou indisponíveis",
 				);
 			});
 
@@ -363,6 +530,76 @@ describe("getAddressInfoByCep", () => {
 				await expect(getAddressInfoByCep(VALID_CEP)).rejects.toThrow(
 					GetAddressInfoByCepServiceError,
 				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when BrasilAPI answers 404, the status it reports an unknown CEP with", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ errors: [{ message: "CEP não encontrado" }] }, 404),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepServiceError when BrasilAPI answers a non-404 error status", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({}, 500),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepServiceError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when every provider returns a payload that is not an object", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse(null),
+					viacep: createJsonResponse("oops"),
+					widenet: createJsonResponse(42),
+				});
+
+				await expect(
+					getAddressInfoByCep(VALID_CEP, { providers: ["viacep", "brasilapi", "widenet"] }),
+				).rejects.toThrow(GetAddressInfoByCepNotFoundError);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when ViaCEP returns an empty cep", async () => {
+				setupFetchMock(fetchMock, { viacep: createJsonResponse({ ...viacepPayload, cep: "" }) });
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when Widenet returns an empty code", async () => {
+				setupFetchMock(fetchMock, { widenet: createJsonResponse({ ...widenetPayload, code: "" }) });
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when BrasilAPI returns an empty cep", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ ...brasilApiPayload, cep: "" }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should treat a field that is not a string as missing", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ ...viacepPayload, uf: 12, localidade: null }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] });
+
+				expect(result.state).toBe("");
+				expect(result.city).toBe("");
+				expect(result.street).toBe("Avenida Paulista");
 			});
 
 			it("should return first successful response when some providers fail", async () => {
@@ -394,6 +631,82 @@ describe("getAddressInfoByCep", () => {
 					GetAddressInfoByCepNotFoundError,
 				);
 			});
+
+			it("should prioritize GetAddressInfoByCepNotFoundError when mixed across only 2 providers", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: new Error("Network error"),
+					viacep: createJsonResponse({ erro: true }),
+				});
+
+				await expect(
+					getAddressInfoByCep("00000000", { providers: ["viacep", "brasilapi"] }),
+				).rejects.toThrow(GetAddressInfoByCepNotFoundError);
+			});
+
+			it("should throw GetAddressInfoByCepServiceError when 2 providers both fail with network errors", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: new Error("Network error"),
+					viacep: new Error("Connection failed"),
+				});
+
+				await expect(
+					getAddressInfoByCep(VALID_CEP, { providers: ["viacep", "brasilapi"] }),
+				).rejects.toThrow(GetAddressInfoByCepServiceError);
+			});
+
+			it("should include the Portuguese message when a CEP is not found in any service", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ erro: true }),
+				});
+
+				await expect(getAddressInfoByCep("00000000", { providers: ["viacep"] })).rejects.toThrow(
+					"CEP não encontrado em nenhum serviço",
+				);
+			});
+		});
+
+		describe("missing optional fields default to empty string", () => {
+			it("should default bairro/localidade/logradouro to empty string for ViaCEP", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ cep: "01310-100", uf: "SP" }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] });
+
+				expect(result.neighborhood).toBe("");
+				expect(result.city).toBe("");
+				expect(result.street).toBe("");
+			});
+
+			it("should default uf to empty string for ViaCEP", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ cep: "01310-100" }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] });
+
+				expect(result.state).toBe("");
+			});
+
+			it("should default district/city/address to empty string for Widenet", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ code: "01310-100", ok: true, status: 200 }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] });
+
+				expectEmptyAddressFields(result);
+			});
+
+			it("should default neighborhood/city/street to empty string for BrasilAPI", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ cep: VALID_CEP }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] });
+
+				expectEmptyAddressFields(result);
+			});
 		});
 
 		describe("provider integration", () => {
@@ -402,12 +715,7 @@ describe("getAddressInfoByCep", () => {
 					providers: ["viacep"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBeTruthy();
-				expect(result.street).toBeTruthy();
+				expectAddressFound(result);
 			});
 
 			it("should fetch address from Widenet", async () => {
@@ -415,12 +723,7 @@ describe("getAddressInfoByCep", () => {
 					providers: ["widenet"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBeTruthy();
-				expect(result.street).toBeTruthy();
+				expectAddressFound(result);
 			});
 
 			it("should fetch address from BrasilAPI", async () => {
@@ -428,21 +731,13 @@ describe("getAddressInfoByCep", () => {
 					providers: ["brasilapi"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBeTruthy();
-				expect(result.street).toBeTruthy();
+				expectAddressFound(result);
 			});
 
 			it("should return first successful response from multiple providers", async () => {
 				const result = await getAddressInfoByCep(VALID_CEP);
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
+				expectDefaultAddress(result);
 			});
 		});
 	});
@@ -457,32 +752,24 @@ describe("getAddressInfoByCep", () => {
 					providers: ["viacep"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBeTruthy();
-				expect(result.street).toBeTruthy();
+				expectAddressFound(result);
 			},
 			LIVE_TEST_TIMEOUT,
 		);
 
-		it(
-			"should fetch live address from Widenet",
-			async () => {
-				const result = await getAddressInfoByCep(VALID_CEP, {
-					providers: ["widenet"],
-				});
+		describe.skip("Widenet, skipped while the service answers HTTP 502 (since September 2026, the reason it left the default provider list)", () => {
+			it(
+				"should fetch live address from Widenet",
+				async () => {
+					const result = await getAddressInfoByCep(VALID_CEP, {
+						providers: ["widenet"],
+					});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBeTruthy();
-				expect(result.street).toBeTruthy();
-			},
-			LIVE_TEST_TIMEOUT,
-		);
+					expectAddressFound(result);
+				},
+				LIVE_TEST_TIMEOUT,
+			);
+		});
 
 		it(
 			"should fetch live address from BrasilAPI",
@@ -491,12 +778,7 @@ describe("getAddressInfoByCep", () => {
 					providers: ["brasilapi"],
 				});
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBeTruthy();
-				expect(result.street).toBeTruthy();
+				expectAddressFound(result);
 			},
 			LIVE_TEST_TIMEOUT,
 		);
@@ -506,14 +788,37 @@ describe("getAddressInfoByCep", () => {
 			async () => {
 				const result = await getAddressInfoByCep(VALID_CEP);
 
-				expect(result).toBeDefined();
-				expect(result.cep).toBe(VALID_CEP);
-				expect(result.state).toBe("SP");
-				expect(result.city).toBe("São Paulo");
-				expect(result.neighborhood).toBeTruthy();
-				expect(result.street).toBeTruthy();
+				expectAddressFound(result);
 			},
 			LIVE_TEST_TIMEOUT,
 		);
+	});
+});
+
+describe("getAddressInfoByCep types", () => {
+	it("should take a string or number CEP, optional providers, and resolve to an AddressInfo", () => {
+		expectTypeOf(getAddressInfoByCep).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(getAddressInfoByCep)
+			.parameter(1)
+			.toEqualTypeOf<GetAddressInfoByCepOptions | undefined>();
+		expectTypeOf<GetAddressInfoByCepOptions["providers"]>().toEqualTypeOf<
+			CepProvider[] | undefined
+		>();
+		expectTypeOf<CepProvider>().toEqualTypeOf<"viacep" | "widenet" | "brasilapi">();
+		expectTypeOf(getAddressInfoByCep).returns.resolves.toEqualTypeOf<AddressInfo>();
+		expectTypeOf<AddressInfo>().toEqualTypeOf<{
+			cep: string;
+			state: string;
+			city: string;
+			neighborhood: string;
+			street: string;
+		}>();
+	});
+
+	it("should expose error classes that extend the base error", () => {
+		expectTypeOf(new GetAddressInfoByCepNotFoundError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepServiceError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepValidationError("m")).toExtend<GetAddressInfoByCepError>();
+		expectTypeOf(new GetAddressInfoByCepError("m")).toExtend<Error>();
 	});
 });
