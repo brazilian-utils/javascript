@@ -65,6 +65,26 @@ function describeValue(value: unknown): string {
 }
 
 type Pair = [unknown, unknown];
+type SeenPairs = WeakMap<object, WeakSet<object>>;
+
+function isObject(value: unknown): value is object {
+	return typeof value === "object" && value !== null;
+}
+
+/**
+ * Records the pair and reports whether it had been recorded before, so a cycle (an object that
+ * references itself, or two objects that reference each other) is compared once instead of forever.
+ */
+function seenBefore(seen: SeenPairs, a: object, b: object): boolean {
+	const partners = seen.get(a) ?? new WeakSet<object>();
+
+	if (partners.has(b)) return true;
+
+	partners.add(b);
+	seen.set(a, partners);
+
+	return false;
+}
 
 /**
  * Queues the element pairs of two arrays or the entry pairs of two records for comparison, or
@@ -97,6 +117,7 @@ function queuePairs(a: unknown, b: unknown, pending: Pair[]): boolean {
 
 function deepEqual(left: unknown, right: unknown): boolean {
 	const pending: Pair[] = [[left, right]];
+	const seen: SeenPairs = new WeakMap();
 
 	while (pending.length > 0) {
 		const pair = pending.pop();
@@ -105,7 +126,9 @@ function deepEqual(left: unknown, right: unknown): boolean {
 
 		const [a, b] = pair;
 
-		if (!Object.is(a, b) && !queuePairs(a, b, pending)) return false;
+		if (Object.is(a, b)) continue;
+		if (isObject(a) && isObject(b) && seenBefore(seen, a, b)) continue;
+		if (!queuePairs(a, b, pending)) return false;
 	}
 
 	return true;
@@ -116,6 +139,7 @@ function objectMatches(
 	expected: Record<string, unknown>,
 ): boolean {
 	const pending: [Record<string, unknown>, Record<string, unknown>][] = [[actual, expected]];
+	const seen: SeenPairs = new WeakMap();
 
 	while (pending.length > 0) {
 		const pair = pending.pop();
@@ -123,6 +147,8 @@ function objectMatches(
 		if (pair === undefined) break;
 
 		const [actualRecord, expectedRecord] = pair;
+
+		if (seenBefore(seen, actualRecord, expectedRecord)) continue;
 
 		for (const [key, value] of Object.entries(expectedRecord)) {
 			if (!(key in actualRecord)) return false;
