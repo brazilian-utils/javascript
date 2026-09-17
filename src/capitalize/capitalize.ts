@@ -55,25 +55,41 @@ const isWord = (token: string): boolean => WORD_REGEX.test(token);
 const isApostrophe = (token: string): boolean => APOSTROPHE_REGEX.test(token);
 
 /**
- * The next word of the value after `index`, plus whether it is joined to the word at `index`, that
- * is, whether only whitespace, `-`, `/` or an apostrophe stands between the two.
+ * The index of the next word of the value after `index`, `tokens.length` when there is none.
+ *
+ * @param {string[]} tokens - Every token of the value, words and separators alike.
+ * @param {number} index - The index to look ahead from.
+ * @returns {number} The index of the next word.
+ */
+const nextWordIndex = (tokens: string[], index: number): number => {
+	const offset = tokens.slice(index + 1).findIndex((token) => isWord(token));
+
+	return offset === -1 ? tokens.length : index + 1 + offset;
+};
+
+/**
+ * What follows the word at `index`: whether the next word is joined to it, that is, whether only
+ * whitespace, `-`, `/` or an apostrophe stands between the two, and the designation the next
+ * word forms, which is the word itself (`"EPP"`) or the word and the one after it when a slash
+ * alone joins them (`"S/A"`); `""` when no word follows.
  *
  * @param {string[]} tokens - Every token of the value, words and separators alike.
  * @param {number} index - The index of the word to look ahead from.
- * @returns {{ joined: boolean; next: string }} The next word (`""` when there is none) and whether it is joined to the word at `index`.
+ * @returns {{ joined: boolean; designation: string }} Whether the next word is joined to the word at `index` and the designation it forms.
  */
-const lookAhead = (tokens: string[], index: number): { joined: boolean; next: string } => {
-	let joined = true;
+const lookAhead = (tokens: string[], index: number): { joined: boolean; designation: string } => {
+	const position = nextWordIndex(tokens, index);
 
-	for (let position = index + 1; position < tokens.length; position++) {
-		const token = tokens[position];
+	if (position === tokens.length) return { joined: false, designation: "" };
 
-		if (token === "") continue;
-		if (isWord(token)) return { joined, next: token };
-		if (!JOINER_REGEX.test(token)) joined = false;
-	}
+	const joined = tokens
+		.slice(index + 1, position)
+		.every((token) => token === "" || JOINER_REGEX.test(token));
+	const next = tokens[position];
+	const following = nextWordIndex(tokens, position);
+	const acrossSlash = tokens.slice(position + 1, following + 1).join("");
 
-	return { joined: false, next: "" };
+	return { joined, designation: acrossSlash.startsWith("/") ? next + acrossSlash : next };
 };
 
 /**
@@ -104,28 +120,28 @@ const isPossessive = (tokens: string[], index: number, word: string): boolean =>
  * Whether a word of the upper case list stands where it is written in upper case. Every
  * designation but the ones of `TRAILING_DESIGNATIONS` is upper case wherever it appears; those
  * are upper case only as the last word of the value or right before an adjacent company
- * designation of the list in force, and never when a hyphen or an apostrophe attaches them to
- * the previous word, where they are the enclitic pronoun (`"diga-me"`).
+ * designation of the list in force (`"EPP"`, `"S/A"`), and never when a hyphen or an apostrophe
+ * attaches them to the previous word, where they are the enclitic pronoun (`"diga-me"`).
  *
  * @param {string} word - The word being written, in upper case.
  * @param {boolean} enclitic - Whether a hyphen or an apostrophe attaches the word to the previous one.
- * @param {{ joined: boolean; next: string }} ahead - The next word of the value (`""` when the word is the last one) and whether it is joined to the word.
+ * @param {{ joined: boolean; designation: string }} ahead - What follows the word: whether the next word is joined to it and the designation it forms (`""` when the word is the last one).
  * @param {Set<string>} upperCaseSet - The upper case word list in force.
  * @returns {boolean} `true` when the word is written in upper case where it stands.
  */
 const isUpperCasePosition = (
 	word: string,
 	enclitic: boolean,
-	ahead: { joined: boolean; next: string },
+	ahead: { joined: boolean; designation: string },
 	upperCaseSet: Set<string>,
 ): boolean => {
 	if (!trailingDesignationSet.has(word)) return true;
 	if (enclitic) return false;
-	if (ahead.next === "") return true;
+	if (ahead.designation === "") return true;
 
-	const next = ahead.next.toLocaleUpperCase("pt-BR");
+	const designation = ahead.designation.toLocaleUpperCase("pt-BR");
 
-	return ahead.joined && companyDesignationSet.has(next) && upperCaseSet.has(next);
+	return ahead.joined && companyDesignationSet.has(designation) && upperCaseSet.has(designation);
 };
 
 /**

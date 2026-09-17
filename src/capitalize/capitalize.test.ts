@@ -138,7 +138,15 @@ describe("capitalize", () => {
 			expect(capitalize("fulano d‘me")).toBe("Fulano d‘Me");
 			expect(capitalize("fulano me cpf")).toBe("Fulano Me CPF");
 			expect(capitalize("fulano me, epp")).toBe("Fulano Me, EPP");
+			expect(capitalize("fulano me s/a")).toBe("Fulano ME S/A");
+			expect(capitalize("fulano me s.a.")).toBe("Fulano ME S.A.");
+			expect(capitalize("fulano me s/x")).toBe("Fulano Me S/X");
+			expect(capitalize("fulano me s / a")).toBe("Fulano Me S / A");
+			expect(capitalize("fulano me s a")).toBe("Fulano Me S A");
+			expect(capitalize("fulano me epp ltda")).toBe("Fulano ME EPP LTDA");
+			expect(capitalize("fulano me s/")).toBe("Fulano Me S/");
 			expect(capitalize("fulano me epp", { upperCaseWords: ["ME"] })).toBe("Fulano Me Epp");
+			expect(capitalize("fulano me s/a", { upperCaseWords: ["ME"] })).toBe("Fulano Me S/A");
 			expect(capitalize("fulano me", { upperCaseWords: ["ME"] })).toBe("Fulano ME");
 		});
 
