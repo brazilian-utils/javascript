@@ -39,13 +39,14 @@ parseCpf('746.506.880-00'); // 74650688000
 
 ### generateCpf
 
-Gera um CPF válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro.
+Gera um CPF válido aleatório. Usa `Math.random()` internamente, então não é criptograficamente seguro. O argumento opcional `state` (tipado como `StateCode`, os códigos de duas letras dos 27 estados brasileiros, ex. `"SP"`, `"MG"`) vincula o CPF a um estado fixando o dígito da região fiscal na 9ª posição ao código desse estado. Omitido, uma região aleatória é usada. Um código desconhecido sorteia um dígito de região fiscal aleatório em vez de lançar erro, então o resultado continua sendo um CPF válido.
 
 ```javascript
 import { generateCpf } from '@brazilian-utils/brazilian-utils'
 
 generateCpf();
 generateCpf('SP'); // o 9º dígito é 8, o código da região fiscal de SP
+generateCpf('MG'); // o 9º dígito é 6, o código da região fiscal de MG
 ```
 
 ## CNPJ

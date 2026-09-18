@@ -39,13 +39,14 @@ parseCpf('746.506.880-00'); // 74650688000
 
 ### generateCpf
 
-Generate a valid random CPF. Uses `Math.random()` internally, so it is not cryptographically secure.
+Generate a valid random CPF. Uses `Math.random()` internally, so it is not cryptographically secure. The optional `state` argument (typed as `StateCode`, the two-letter codes of the 27 Brazilian states, e.g. `"SP"`, `"MG"`) ties the CPF to a state by fixing the região fiscal digit in the 9th position to that state's code. Omitted, a random region is used. An unknown code draws a random região fiscal digit instead of throwing, so the result is still a valid CPF.
 
 ```javascript
 import { generateCpf } from '@brazilian-utils/brazilian-utils'
 
 generateCpf();
 generateCpf('SP'); // the 9th digit is 8, the SP região fiscal code
+generateCpf('MG'); // the 9th digit is 6, the MG região fiscal code
 ```
 
 ## CNPJ
