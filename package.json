@@ -129,6 +129,7 @@
 		"check:lockfile": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https --validate-integrity",
 		"build:data": "node ./scripts/data.ts",
 		"build:llms": "node ./scripts/llms.ts",
+		"build:site": "node ./scripts/site.ts",
 		"prepublishOnly": "vp run build",
 		"check:dependencies": "node -e \"const d=require('./package.json').dependencies||{};if(Object.keys(d).length){console.error('runtime dependencies are not allowed:',Object.keys(d).join(', '));process.exit(1)}\""
 	},

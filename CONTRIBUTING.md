@@ -43,6 +43,7 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run build`                                                                                                           | Builds the library for publishing with `vp pack` (also runs attw and publint over the built output).                                                                                                                                                                     |
 | `npm run build:data`                                                                                                      | Regenerates the datasets under `src/_internals/constants` from the IBGE/CONCLA sources (`scripts/data.ts`); run by the scheduled `Update datasets` workflow.                                                                                                             |
 | `npm run build:llms`                                                                                                      | Regenerates `docs/llms.txt` and `docs/llms-full.txt` from the docs (`scripts/llms.ts`); CI fails if they're out of date.                                                                                                                                                 |
+| `npm run build:site`                                                                                                      | Regenerates the per-page copies of `docs/index.html`, `docs/404.html` and `docs/sitemap.xml` from the sidebars (`scripts/site.ts`); CI fails if they're out of date.                                                                                                     |
 | `npm run check:dependencies`                                                                                              | Fails if `package.json` declares any runtime `dependencies` (this package ships zero by design).                                                                                                                                                                         |
 | `npm run check:tree-shaking`                                                                                              | Builds nothing; measures the single-import size of every export against `dist` (`scripts/tree-shaking.ts`). Run it after `npm run build` when you change a dataset, and update the bundle-size table in `docs/getting-started.md` / `docs/pt-br/getting-started.md`.     |
 | `npm run check:duplication`                                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                                                                                                                                                          |
@@ -327,7 +328,13 @@ JavaScript/TypeScript features.
 
 - [brazilian-utils.com.br](https://brazilian-utils.com.br), served by GitHub Pages with
   [docsify](https://docsify.js.org): `docs/index.html` renders the Markdown in the browser, with
-  `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation. There is no build step.
+  `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation. docsify runs in history
+  mode, so every page is a real URL (`/getting-started`, `/pt-br/utilities`) that search engines
+  index on its own; GitHub Pages serves each one from a copy of `index.html` next to the page
+  (`getting-started.html`), and `npm run build:site` (`scripts/site.ts`) writes those copies,
+  `404.html` and `sitemap.xml` from the sidebars. The Check workflow fails when they are stale, so
+  run it after editing `index.html` or a sidebar. Links from the hash-router era
+  (`/#/getting-started?id=usage`) are rewritten on load, so nothing out there breaks.
 - [Docs7](https://context7.com/docs/docs7/overview), the Context7 documentation platform, which
   reads `docs/docs.json` (the Mintlify `docs.json` format) and the same Markdown pages, and serves
   them to people and, as Markdown, to agents (`/llms.txt`, `/<page>.md`, `/search`). Every push to
@@ -338,7 +345,9 @@ What keeps the two sites rendering the same pages:
 - Every page starts with a front matter block with a quoted `title` and `description`, and has no
   `#` heading of its own: Docs7 renders the title from the front matter, and the plugin in
   `docs/index.html` turns it into the page's heading for docsify.
-- The docsify-only files are listed in `docs/.mintignore`, so Docs7 never publishes them as pages.
+- The docsify-only files (the shell copies, the navigation files, `robots.txt` and `sitemap.xml`)
+  are listed in `docs/.mintignore`, so Docs7 never publishes them as pages or in place of the
+  files it generates itself.
 - `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
   `docs/llms-full.txt` keep their headings; run `npm run build:llms` after editing a page.
 - The `$schema` in `docs/docs.json` gives the editor validation and autocomplete for it.
