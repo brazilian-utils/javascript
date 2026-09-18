@@ -25,7 +25,8 @@ release pull request and approves the staged version on npm with 2FA, keeps the 
 toolchain updated, and speaks for the project in discussions. Maintainers have the `Admin` role on
 the repository, are members of the `brazilian-utils` GitHub organization (which requires two-factor
 authentication for every member) and are publishers of the package on npm (two-factor
-authentication required, publishing only through the repository's trusted publisher).
+authentication required, publishing only through the repository's trusted publisher). They hold
+the repository's secrets under the policy in [SECURITY.md](SECURITY.md#secrets-and-credentials).
 
 **Automation**: GitHub Actions (build, tests, publish), Dependabot and release-please act with
 short-lived tokens scoped to each job (`permissions:` in every workflow); none of them can merge a
