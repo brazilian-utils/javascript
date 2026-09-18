@@ -1,48 +1,4 @@
 {
 	"url": "https://context7.com/brazilian-utils/javascript",
-	"public_key": "pk_oM2bnqm6FW1O0U0ygGlHr",
-	"projectTitle": "Brazilian Utils",
-	"description": "Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more.",
-	"folders": ["docs"],
-	"excludeFolders": ["docs/pt-br"],
-	"excludeFiles": [
-		"CHANGELOG.md",
-		"CODE_OF_CONDUCT.md",
-		"CONTRIBUTING.md",
-		"SECURITY.md",
-		"SUPPORT.md",
-		"MAINTAINERS.md",
-		"index.html",
-		"CNAME",
-		"_sidebar.md",
-		"_navbar.md",
-		"_coverpage.md",
-		"llms.txt",
-		"llms-full.txt"
-	],
-	"previousVersions": [
-		{
-			"tag": "v1.1.0",
-			"title": "version 1.1.0"
-		}
-	],
-	"rules": [
-		"The package has zero runtime dependencies and ships as ESM plus a UMD build; nothing else needs to be installed to use it.",
-		"Import from the root: import { isValidCpf } from '@brazilian-utils/brazilian-utils'. Every util is also a kebab-case subpath, e.g. '@brazilian-utils/brazilian-utils/is-valid-cpf'.",
-		"Use the subpaths to lazy-load the dataset-backed utils (getMunicipalities, getMunicipalityByCode, getCnae, getCbo, getCfop, isValidNcm, getBanks): each one embeds a large official table.",
-		"Never import the same util from both the root and its subpath in one app: a bundler treats them as two unrelated modules and bundles the dataset twice.",
-		"Public functions never throw on bad input (null, undefined, wrong type): isValid* return false, format* and parse* return '', single-item getters return null, list getters return [].",
-		"The only utils that reject are the async getAddressInfoByCep (GetAddressInfoByCepError: NotFound, Validation, Service) and getCepInfoByAddress (GetCepInfoByAddressError: NotFound, Validation).",
-		"isValid* accept the usual mask characters and whitespace, so there is no need to strip formatting first; format* return the masked string and parse* return the unmasked value.",
-		"Alphanumeric CNPJ (IN RFB 2.229/2024): pass { version: 2 } to isValidCnpj, formatCnpj and parseCnpj, and call generateCnpj(2) or generateCnpj({ version: 2 }).",
-		"CNPJ version 2 accepts both numeric and alphanumeric values and folds lowercase to uppercase; the default version 1 is numeric only, so parseCnpj without { version: 2 } drops the letters.",
-		"CNPJ version 2 has no reserved-value list: a repeated-character alphanumeric base that passes the checksum is valid, unlike the repeated numeric values that version 1 rejects.",
-		"The 1.x aliases formatCEP, formatCNPJ, formatCPF, generateCNPJ, generateCPF, isValidCEP, isValidCNPJ, isValidCPF, isValidIE and isValidPIS are deprecated; use the camelCase names.",
-		"Deprecated since 2.4.0: getCities (use getMunicipalities, which returns { name, code } objects) and the async getMunicipality (use the synchronous, offline getMunicipalityByCode).",
-		"Deprecated since 2.4.0: the positional isValidIe(stateCode, ie), replaced by isValidIe({ value, stateCode }), and the 'widenet' provider of getAddressInfoByCep.",
-		"Deprecated since 2.4.0: the *Options type aliases of the single-object-argument functions; use the *Params names (GetHolidaysParams, IsHolidayParams, GetMunicipalityParams, ...).",
-		"Every util is synchronous and pure except getAddressInfoByCep, getCepInfoByAddress and the deprecated getMunicipality, which are async; the first two query public CEP APIs over HTTPS.",
-		"The generate* utils draw random values with Math.random() (generatePixPayload is the exception, built from its parameters), so use them for tests and fixtures, never for security.",
-		"Supported runtimes: Node.js ^20.19.0 || >=22.12.0, Bun, Deno and evergreen browsers. Types ship with the package; import option and result types by name from the root."
-	]
+	"public_key": "pk_oM2bnqm6FW1O0U0ygGlHr"
 }
