@@ -1,4 +1,5 @@
 {
+	"$schema": "https://context7.com/schema/context7.json",
 	"url": "https://context7.com/brazilian-utils/javascript",
 	"public_key": "pk_oM2bnqm6FW1O0U0ygGlHr",
 	"projectTitle": "Brazilian Utils",
@@ -23,8 +24,7 @@
 	],
 	"previousVersions": [
 		{
-			"tag": "v1.1.0",
-			"title": "version 1.1.0"
+			"tag": "v1.1.0"
 		}
 	],
 	"rules": [
