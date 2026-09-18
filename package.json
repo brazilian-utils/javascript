@@ -42,6 +42,10 @@
 		"url": "https://github.com/brazilian-utils/javascript/issues"
 	},
 	"license": "MIT",
+	"author": {
+		"name": "Hyan Mandian",
+		"url": "https://github.com/hyanmandian"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/brazilian-utils/javascript.git"
