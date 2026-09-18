@@ -1,6 +1,7 @@
 ---
 title: "Utilitários"
 description: "Todos os utilitários do Brazilian Utils, agrupados por família (CPF, CNPJ, CEP, boleto, Pix e mais), com opções, exemplos e casos de borda."
+keywords: ["CPF", "CNPJ", "CEP", "boleto", "Pix", "NF-e", "telefone", "placa", "RENAVAM", "PIS", "CNH", "IBAN", "feriados", "dias úteis", "CBO", "CNAE", "NCM", "CFOP", "validador", "formatador", "parser", "gerador"]
 ---
 
 Aqui você encontrará todos os utilitários disponíveis para uso.

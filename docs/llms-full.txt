@@ -222,6 +222,8 @@ The documentation is indexed on Context7 as [`/brazilian-utils/javascript`](http
 Validate a CNPJ with Brazilian Utils. use library /brazilian-utils/javascript
 ```
 
+To stop repeating it, add the rule to the agent's instructions file (`CLAUDE.md`, Cursor rules or the equivalent): "For Brazilian document utils, use the Context7 library /brazilian-utils/javascript".
+
 Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.br/llms.txt), which lists every util with a one-line description and a link to its section, or at [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), the whole English documentation in one Markdown file.
 
 ### Bundle size

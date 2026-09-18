@@ -97,6 +97,7 @@ isValidCpf("1232454233345"); // false
 
 You can check a list of utilities [by clicking here](https://brazilian-utils.com.br/#/utilities).
 
+- Using an AI coding assistant? The docs are indexed on Context7 as [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript), and [llms.txt](https://brazilian-utils.com.br/llms.txt) lists every util for other tools. See [AI assistants](https://brazilian-utils.com.br/#/getting-started?id=ai-assistants).
 - The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](https://brazilian-utils.com.br/#/getting-started?id=bundle-size).
 
 ## Development
