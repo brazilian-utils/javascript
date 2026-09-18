@@ -1,10 +1,18 @@
 {
+	"$schema": "https://context7.com/schema/context7.json",
 	"url": "https://context7.com/brazilian-utils/javascript",
 	"public_key": "pk_oM2bnqm6FW1O0U0ygGlHr",
 	"projectTitle": "Brazilian Utils",
 	"description": "Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more.",
 	"folders": ["docs"],
+	"excludeFolders": ["docs/pt-br"],
 	"excludeFiles": [
+		"CHANGELOG.md",
+		"CODE_OF_CONDUCT.md",
+		"CONTRIBUTING.md",
+		"SECURITY.md",
+		"SUPPORT.md",
+		"MAINTAINERS.md",
 		"index.html",
 		"CNAME",
 		"_sidebar.md",
