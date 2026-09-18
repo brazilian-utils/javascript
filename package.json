@@ -42,12 +42,17 @@
 		"url": "https://github.com/brazilian-utils/javascript/issues"
 	},
 	"license": "MIT",
+	"author": {
+		"name": "Hyan Mandian",
+		"url": "https://github.com/hyanmandian"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/brazilian-utils/javascript.git"
 	},
 	"files": [
 		"./CHANGELOG.md",
+		"./brazilian-utils.cdx.json",
 		"./dist"
 	],
 	"type": "module",
@@ -115,6 +120,7 @@
 		"check:tree-shaking": "node ./scripts/tree-shaking.ts",
 		"check:duplication": "jscpd",
 		"check:unused": "knip",
+		"check:vex": "node ./scripts/vex.ts",
 		"test:mutation": "stryker run",
 		"bench": "vp test bench --run",
 		"check:api": "npm run build && api-extractor run --verbose",

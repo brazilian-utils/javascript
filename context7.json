@@ -1,0 +1,31 @@
+{
+	"$schema": "https://context7.com/schema/context7.json",
+	"url": "https://context7.com/brazilian-utils/javascript",
+	"public_key": "pk_oM2bnqm6FW1O0U0ygGlHr",
+	"projectTitle": "Brazilian Utils",
+	"description": "Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more.",
+	"folders": ["docs"],
+	"excludeFolders": ["docs/pt-br"],
+	"excludeFiles": [
+		"CHANGELOG.md",
+		"CODE_OF_CONDUCT.md",
+		"CONTRIBUTING.md",
+		"SECURITY.md",
+		"SUPPORT.md",
+		"MAINTAINERS.md",
+		"index.html",
+		"CNAME",
+		"_sidebar.md",
+		"_navbar.md",
+		"_coverpage.md",
+		"llms.txt",
+		"llms-full.txt"
+	],
+	"rules": [
+		"The package has zero runtime dependencies and ships as ESM with a UMD build; nothing else needs to be installed to use it.",
+		"Import from the package root: import { isValidCpf } from '@brazilian-utils/brazilian-utils'. Every util is also a subpath, '@brazilian-utils/brazilian-utils/<util-name>' in kebab-case (isValidCpf -> is-valid-cpf), meant for lazy-loading the dataset-backed utils (getCities, getMunicipality*, getCnae, getCfop, getBanks...). Never import the same util from both the root and its subpath in one app: the dataset is bundled twice.",
+		"Document validators such as isValidCpf and isValidCnpj accept the usual mask characters and whitespace, so there is no need to strip formatting before calling them; formatters (format*) return the masked string.",
+		"Every util is synchronous and pure except getAddressInfoByCep and getCepInfoByAddress, which are async and query public CEP APIs over HTTPS.",
+		"Supported runtimes: Node.js ^20.19.0 || >=22.12.0, Bun, Deno and evergreen browsers."
+	]
+}
