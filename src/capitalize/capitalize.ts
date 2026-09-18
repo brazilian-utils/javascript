@@ -145,6 +145,26 @@ const isUpperCasePosition = (
 };
 
 /**
+ * A word with its first letter in upper case and the rest in lower case, letter by code point. A
+ * first letter whose upper case is more than one character (`ß` becomes `SS`, the `ﬁ` ligature
+ * becomes `FI`) keeps its case: expanding it would drop or add letters, and a second pass over
+ * the result would not give the result back. The rest is lower cased on its own, not sliced out
+ * of the lower cased word, since lower casing the first letter can change its length too (`İ`
+ * becomes `i` plus a combining dot), which is what made `"İ"` grow a dot on every pass.
+ *
+ * @param {string} word - The word to write.
+ * @returns {string} The word, capitalized.
+ */
+const capitalizeWord = (word: string): string => {
+	// A word is never empty (the empty tokens are skipped), and neither is its upper case.
+	const [first, ...rest] = word;
+	const [upperFirst, ...expansion] = first.toLocaleUpperCase("pt-BR");
+	const head = expansion.length > 0 ? first : upperFirst;
+
+	return head + rest.join("").toLocaleLowerCase("pt-BR");
+};
+
+/**
  * Capitalizes a given string according to the way a Brazilian name, company name or address is
  * written, with no configuration needed: `"jose da silva"` becomes `"Jose da Silva"`,
  * `"empresa ltda"` becomes `"Empresa LTDA"` and `"santana/rs"` becomes `"Santana/RS"`.
@@ -188,7 +208,9 @@ const isUpperCasePosition = (
  *   `"porto alegre/rs"` becomes `"Porto Alegre/RS"` while `"santana/br"` becomes `"Santana/Br"`.
  *   A state code that does not follow a `/` is left alone (`"santana rs"` becomes
  *   `"Santana Rs"`), and so is any other two letter word.
- * - All other words are capitalized (first letter upper case, rest lower case).
+ * - All other words are capitalized (first letter upper case, rest lower case), letter by letter:
+ *   `"İSTANBUL"` becomes `"İstanbul"`, and a first letter whose upper case is two letters (`ß`,
+ *   the `ﬁ` ligature) keeps its case, so `"straße"` becomes `"Straße"` and `"ßa"` stays `"ßa"`.
  *
  * Both lists are compared ignoring the case of the words, and either one given in `options`
  * replaces its default list entirely, so `capitalize("empresa ltda", { upperCaseWords: [] })`
@@ -287,7 +309,7 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 		} else if (output.at(-1) === "/" && stateCodeSet.has(upperCaseWord)) {
 			output.push(upperCaseWord);
 		} else {
-			output.push(upperCaseWord.charAt(0) + lowerCaseWord.slice(1));
+			output.push(capitalizeWord(token));
 		}
 
 		wordIndex++;
