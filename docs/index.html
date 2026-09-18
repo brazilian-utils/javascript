@@ -130,9 +130,12 @@
       loadSidebar: true,
       auto2top: true,
       subMaxLevel: 3,
+      // Resolved relative to the route's folder, so the Portuguese cover is `_coverpage.md`
+      // inside `pt-br/`, not `pt-br/_coverpage.md` (which docsify would fetch as
+      // `/pt-br/pt-br/_coverpage.md` and leave the cover blank).
       coverpage: {
         '/': '_coverpage.md',
-        '/pt-br/': 'pt-br/_coverpage.md'
+        '/pt-br/': '_coverpage.md'
       },
       search: {
         paths: 'auto',
