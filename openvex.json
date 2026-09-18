@@ -1,0 +1,52 @@
+{
+	"@context": "https://openvex.dev/ns/v0.2.0",
+	"@id": "https://github.com/brazilian-utils/javascript/blob/main/openvex.json",
+	"author": "Brazilian Utils maintainers",
+	"role": "Project maintainers, see MAINTAINERS.md",
+	"timestamp": "2026-09-18T04:45:00Z",
+	"version": 1,
+	"statements": [
+		{
+			"vulnerability": {
+				"@id": "https://github.com/advisories/GHSA-jmr9-qjv8-65gv",
+				"name": "GHSA-jmr9-qjv8-65gv",
+				"description": "extract-zip unvalidated symlink path traversal"
+			},
+			"timestamp": "2026-09-18T04:45:00Z",
+			"products": [
+				{
+					"@id": "pkg:npm/%40brazilian-utils/brazilian-utils",
+					"subcomponents": [
+						{
+							"@id": "pkg:npm/extract-zip@2.0.1"
+						}
+					]
+				}
+			],
+			"status": "not_affected",
+			"justification": "component_not_present",
+			"impact_statement": "extract-zip is a development-only transitive dependency (webdriverio -> @wdio/utils -> @puppeteer/browsers -> extract-zip) used by the browser test runner to unpack browser builds downloaded from the vendors in CI. The published package has zero runtime dependencies, so extract-zip is not present in any released asset and never runs on user input. No patched release of extract-zip exists; the statement is withdrawn when webdriverio drops the dependency."
+		},
+		{
+			"vulnerability": {
+				"@id": "https://github.com/advisories/GHSA-7pqw-9j4j-h8q3",
+				"name": "GHSA-7pqw-9j4j-h8q3",
+				"description": "extract-zip allows arbitrary file writes through symlink archive entries"
+			},
+			"timestamp": "2026-09-18T04:45:00Z",
+			"products": [
+				{
+					"@id": "pkg:npm/%40brazilian-utils/brazilian-utils",
+					"subcomponents": [
+						{
+							"@id": "pkg:npm/extract-zip@2.0.1"
+						}
+					]
+				}
+			],
+			"status": "not_affected",
+			"justification": "component_not_present",
+			"impact_statement": "extract-zip is a development-only transitive dependency (webdriverio -> @wdio/utils -> @puppeteer/browsers -> extract-zip) used by the browser test runner to unpack browser builds downloaded from the vendors in CI. The published package has zero runtime dependencies, so extract-zip is not present in any released asset and never runs on user input. No patched release of extract-zip exists; the statement is withdrawn when webdriverio drops the dependency."
+		}
+	]
+}

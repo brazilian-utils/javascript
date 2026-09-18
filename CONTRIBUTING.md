@@ -53,6 +53,7 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run check:api:update`                                                                                                | Rewrites the committed API Extractor baseline `reports/api/brazilian-utils.api.md` from the current build; run it when a public signature changes on purpose and commit the new report.                                                                                  |
 | `npm run check:commits`                                                                                                   | Checks the commit messages since `origin/main` with commitlint (Conventional Commits).                                                                                                                                                                                   |
 | `npm run check:lockfile`                                                                                                  | Checks `package-lock.json` only resolves to the npm registry over HTTPS with integrity hashes (lockfile-lint).                                                                                                                                                           |
+| `npm run check:vex`                                                                                                       | Checks that every advisory suppressed for `audit-ci` and OSV-Scanner has a `not_affected` statement in `openvex.json`, and nothing else does.                                                                                                                            |
 
 Before opening a pull request, make sure `npm run check` and `npm run test` both pass locally. If your
 change touches runtime behavior, also consider running the Bun/Deno scripts above. The library is
@@ -281,7 +282,9 @@ export that goes missing.
   scans `package-lock.json` with [OSV-Scanner](https://google.github.io/osv-scanner/) and scans the
   commits of every pull request (the whole history on the weekly run) for leaked secrets with
   [TruffleHog](https://github.com/trufflesecurity/trufflehog), next to GitHub's own secret scanning
-  and push protection; the `Check` workflow runs `audit-ci` and lockfile-lint on top. The `Security` workflow also runs the
+  and push protection; the `Check` workflow runs `audit-ci` and lockfile-lint on top, and
+  `npm run check:vex` keeps the advisories those two suppress accounted for in `openvex.json` (see
+  SECURITY.md). The `Security` workflow also runs the
   [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript) on
   every push to `main` and weekly: it grades the repository configuration (pinned actions, token
   permissions, branch protection, code review, dependency updates, SAST) rather than the code,

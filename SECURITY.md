@@ -142,6 +142,10 @@ sits in `node_modules/@brazilian-utils/brazilian-utils/` after install) and is a
   pipeline (a development-only dependency in a code path the toolchain never exercises), and the
   allow list in `.github/workflows/check.yml` names each advisory by ID so the exception is
   reviewable; it is removed as soon as a fixed version is available.
+- Every such exception is also recorded as a `not_affected` statement, with its justification and
+  impact, in [`openvex.json`](openvex.json), the project's [OpenVEX](https://openvex.dev) document,
+  so consumers' scanners can be told why the advisory does not apply; `npm run check:vex` runs on
+  every pull request and fails when the VEX document and the suppression lists disagree.
 - Static analysis has no accepted threshold of open findings: every ESLint, TypeScript, knip, jscpd,
   actionlint and zizmor finding blocks the merge, and the OpenSSF Scorecard findings uploaded to
   the Security tab are worked in the next change to the affected file. The only suppressions are the
