@@ -1,8 +1,8 @@
 {
 	"@context": "https://openvex.dev/ns/v0.2.0",
 	"@id": "https://github.com/brazilian-utils/javascript/blob/main/openvex.json",
-	"author": "Brazilian Utils maintainers",
-	"role": "Project maintainers, see MAINTAINERS.md",
+	"author": "Hyan Mandian",
+	"role": "Maintainer of @brazilian-utils/brazilian-utils, see MAINTAINERS.md",
 	"timestamp": "2026-09-18T04:45:00Z",
 	"version": 1,
 	"statements": [
