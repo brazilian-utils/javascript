@@ -104,8 +104,13 @@ jobs:
           cat tree-shaking.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Ensure npm supports staged publishing and OIDC (npm >= 11.15)
-        # zizmor: ignore[adhoc-packages] npm is pinned to an exact version and is not a package.json dependency
-        run: npm install -g npm@12.0.2
+        # Node.js 24.18 and later bundle npm 11.16+, so the npm that actions/setup-node ships is
+        # enough; upgrading it with `npm install -g` is an unpinned install for OpenSSF Scorecard
+        # (Pinned-Dependencies), so the step only asserts the version and never installs anything.
+        run: |
+          npm_version="$(npm --version)"
+          echo "npm ${npm_version}"
+          echo "${npm_version}" | awk -F. '{ exit !($1 > 11 || ($1 == 11 && $2 >= 15)) }'
 
       - name: Stage on npm
         run: npm stage publish --provenance --access public
