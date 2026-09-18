@@ -15,15 +15,16 @@
        and a link preview see. -->
   <link rel="canonical" href="https://brazilian-utils.com.br/" />
   <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/" />
-  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/getting-started" />
   <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <!-- The Markdown behind the site, for agents that look for it: the per-util index, the whole
        English documentation in one file, and (rewritten per page by the hook) the page's own source -->
   <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
   <link rel="alternate" type="text/plain" href="/llms-full.txt" title="llms-full.txt" />
-  <link rel="alternate" type="text/markdown" href="/README.md" title="Markdown source" />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="alternate" type="text/markdown" href="https://raw.githubusercontent.com/brazilian-utils/javascript/main/README.md" title="Markdown source" />
+  <!-- docsify's scripts and styles load without CORS, so that preconnect must not be `crossorigin`;
+       the README is fetched with XHR, so that one must -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Brazilian Utils" />
@@ -161,38 +162,78 @@
         },
         // Per-page metadata for search engines and link previews: the title, description,
         // canonical URL, language and hreflang pair of the page being shown, from its front
-        // matter and route. The home page keeps the static values in <head>.
+        // matter and route. The generated copies of this shell carry the same values statically
+        // (scripts/site.ts), this hook keeps them right as the reader navigates.
         function (hook, vm) {
           var site = 'https://brazilian-utils.com.br';
-          var defaultDescription = document.querySelector('meta[name="description"]').getAttribute('content');
+          var siteDescription = JSON.parse(
+            document.querySelector('script[type="application/ld+json"]').textContent
+          )['@graph'][0].description;
           function set(selector, attribute, value) {
             var element = document.querySelector(selector);
             if (element) element.setAttribute(attribute, value);
           }
+          function setAlternate(hreflang, href) {
+            var element = document.querySelector('link[rel="alternate"][hreflang="' + hreflang + '"]');
+            if (href === null) {
+              if (element) element.remove();
+              return;
+            }
+            if (!element) {
+              element = document.createElement('link');
+              element.rel = 'alternate';
+              element.hreflang = hreflang;
+              document.head.appendChild(element);
+            }
+            element.href = href;
+          }
+          function remove(selector) {
+            var element = document.querySelector(selector);
+            if (element) element.remove();
+          }
           hook.doneEach(function () {
             var path = (vm.route && vm.route.path) || '/';
+            var file = (vm.route && vm.route.file) || '';
             var frontmatter = vm.frontmatter || {};
+            // A page docsify could not fetch (its 404 view): no canonical, alternates or
+            // Open Graph URL for a URL that does not exist, only noindex, like 404.html.
+            if (vm.route && vm.route.response && vm.route.response.ok === false) {
+              document.title = 'Not found · Brazilian Utils';
+              remove('link[rel="canonical"]');
+              remove('meta[property="og:url"]');
+              remove('link[type="text/markdown"]');
+              setAlternate('en', null);
+              setAlternate('pt-BR', null);
+              setAlternate('x-default', null);
+              if (!document.querySelector('meta[name="robots"]')) {
+                var robots = document.createElement('meta');
+                robots.name = 'robots';
+                robots.content = 'noindex';
+                document.head.appendChild(robots);
+              }
+              return;
+            }
             var isPtBr = path.indexOf('/pt-br') === 0;
             var title = frontmatter.title ? frontmatter.title + ' · Brazilian Utils' : 'Brazilian Utils';
-            var description = frontmatter.description || defaultDescription;
-            // /pt-br/ shows pt-br/getting-started (see `alias`), so it canonicalizes there; the
-            // English home is the README, whose Portuguese counterpart is that same entry page.
-            var canonicalPath = path === '/pt-br/' ? '/pt-br/getting-started' : path;
-            var enPath = isPtBr ? canonicalPath.replace(/^\/pt-br\//, '/') : path;
-            var ptBrPath = isPtBr ? canonicalPath : path === '/' ? '/pt-br/getting-started' : '/pt-br' + path;
+            var description = frontmatter.description || siteDescription;
+            // An aliased route (see `alias`: /pt-br/ shows pt-br/getting-started) canonicalizes to
+            // the page it shows; the English home is the README, which has no Portuguese twin.
+            var aliased = vm.config.alias && vm.config.alias[path];
+            var canonicalPath = aliased && aliased.indexOf('/') === 0 ? aliased.replace(/\.md$/, '') : path;
+            var enPath = isPtBr ? canonicalPath.replace(/^\/pt-br\//, '/') : canonicalPath;
+            var ptBrPath = isPtBr ? canonicalPath : canonicalPath === '/' ? null : '/pt-br' + canonicalPath;
             document.title = title;
             document.documentElement.lang = isPtBr ? 'pt-BR' : 'en';
             set('meta[name="description"]', 'content', description);
             set('link[rel="canonical"]', 'href', site + canonicalPath);
-            set('link[hreflang="en"]', 'href', site + enPath);
-            set('link[hreflang="pt-BR"]', 'href', site + ptBrPath);
-            set('link[hreflang="x-default"]', 'href', site + enPath);
+            setAlternate('en', site + enPath);
+            setAlternate('pt-BR', ptBrPath === null ? null : site + ptBrPath);
+            setAlternate('x-default', site + enPath);
             set('meta[property="og:title"]', 'content', title);
             set('meta[property="og:description"]', 'content', description);
             set('meta[property="og:url"]', 'content', site + canonicalPath);
             set('meta[property="og:locale"]', 'content', isPtBr ? 'pt_BR' : 'en_US');
             set('meta[property="og:locale:alternate"]', 'content', isPtBr ? 'en_US' : 'pt_BR');
-            var file = (vm.route && vm.route.file) || '';
             set('link[type="text/markdown"]', 'href', /^https?:/.test(file) ? file : site + '/' + file.replace(/^\//, ''));
           });
         },
@@ -216,6 +257,32 @@
 
   <!-- Docsify 5: the major version pin picks up non-breaking releases automatically -->
   <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/docsify.min.js"></script>
+  <!-- The search plugin indexes the raw Markdown through Docsify.get, without the front-matter
+       plugin, so it would index the front matter as a heading and lose the page's title; this
+       hands it every page the way it renders: the block gone, the title as the H1. -->
+  <script>
+    (function () {
+      var get = Docsify.get;
+      var FRONT_MATTER = /^---\n([\s\S]*?)\n---\n+/;
+      Docsify.get = function (url, hasBar, headers) {
+        var request = get(url, hasBar, headers);
+        if (!/\.md(\?|$)/.test(url)) return request;
+        return {
+          then: function (success, error) {
+            return request.then(function (text, opt) {
+              var match = FRONT_MATTER.exec(text || '');
+              if (match) {
+                var title = /^title: "(.*)"$/m.exec(match[1]);
+                text = (title ? '# ' + title[1].replace(/\\"/g, '"') + '\n\n' : '') + text.slice(match[0].length);
+              }
+              success(text, opt);
+            }, error);
+          },
+          abort: request.abort
+        };
+      };
+    })();
+  </script>
 
   <!-- Plugins (emoji is built into docsify since 4.13, so its plugin is gone) -->
   <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>

@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { parseFrontMatter } from "./front-matter.ts";
+
 const ROOT = join(import.meta.dirname, "..");
 const DOCS_DIR = join(ROOT, "docs");
 const SITE = "https://brazilian-utils.com.br";
@@ -311,9 +313,6 @@ ${utilities}
 `;
 }
 
-const FRONT_MATTER_PATTERN = /^---\n([\s\S]*?)\n---\n+/;
-const FRONT_MATTER_TITLE_PATTERN = /^title: "(.+)"$/m;
-
 /**
  * Replaces the front matter block of a page (the `title` and `description` the Docs7 site reads,
  * see `docs/docs.json`) with a level-one heading of its title, the heading the page shows on both
@@ -322,15 +321,8 @@ const FRONT_MATTER_TITLE_PATTERN = /^title: "(.+)"$/m;
  * @returns {string} The page body, headed by its front matter title when it has one.
  */
 function frontMatterToHeading(markdown: string): string {
-	const match = FRONT_MATTER_PATTERN.exec(markdown);
-
-	if (!match) return markdown;
-
-	const title = FRONT_MATTER_TITLE_PATTERN.exec(match[1] ?? "")?.[1]?.replaceAll(
-		String.raw`\"`,
-		'"',
-	);
-	const body = markdown.slice(match[0].length);
+	const { fields, body } = parseFrontMatter(markdown);
+	const title = fields["title"];
 
 	return title === undefined ? body : `# ${title}\n\n${body}`;
 }

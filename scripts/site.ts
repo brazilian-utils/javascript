@@ -1,12 +1,14 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
+import { parseFrontMatter } from "./front-matter.ts";
+
 /**
  * Keeps brazilian-utils.com.br crawlable as a set of real URLs. docsify runs in history mode there
  * (`routerMode: 'history'` in `docs/index.html`), so `/getting-started` has to answer with the
  * docsify shell: GitHub Pages serves `getting-started.html` for it, and this script writes that
  * file, and one per page of each `_sidebar.md`, from `docs/index.html`, with the page's own
- * title, description, canonical URL, language and hreflang pair in place of the home page's, so
+ * title, description, canonical URL, language and hreflang links in place of the home page's, so
  * a crawler that does not run JavaScript still reads the right metadata for each URL (the hook
  * in the shell keeps them right as the reader navigates). It also writes `404.html` and the
  * `sitemap.xml` that lists every page with its English/Portuguese counterpart. The Check
@@ -17,6 +19,9 @@ const ROOT = join(import.meta.dirname, "..");
 const DOCS_DIR = join(ROOT, "docs");
 const SITE = "https://brazilian-utils.com.br";
 const SITE_NAME = "Brazilian Utils";
+
+/** The Markdown docsify shows at `/`: the README, fetched from GitHub (the `alias` in the shell). */
+const HOME_MARKDOWN = "https://raw.githubusercontent.com/brazilian-utils/javascript/main/README.md";
 
 /** The folder of each language, keyed by its hreflang, `""` being the English root. */
 const LANGUAGES: { hreflang: string; folder: string; locale: string }[] = [
@@ -31,7 +36,8 @@ const LANGUAGES: { hreflang: string; folder: string; locale: string }[] = [
 const PT_BR_HOME_PAGE = "/pt-br/getting-started";
 
 const SIDEBAR_LINK_PATTERN = /\]\(([^)]+)\.md\)/g;
-const FRONT_MATTER_FIELD_PATTERN = /^(title|description): "(.*)"$/gm;
+const HREFLANG_LINK_PATTERN = /^ *<link rel="alternate" hreflang="[^"]*" href="[^"]*" \/>\n/gm;
+const CANONICAL_LINK_PATTERN = /^( *)<link rel="canonical" href="[^"]*" \/>\n/m;
 
 type Page = {
 	/** The site path, `/getting-started`. */
@@ -42,9 +48,11 @@ type Page = {
 	folder: string;
 	title: string;
 	description: string;
-	/** The Markdown file docsify loads for the path. */
+	/** The Markdown docsify loads for the path: a file relative to `docs/`, or a full URL. */
 	markdown: string;
 };
+
+type Alternate = { hreflang: string; href: string };
 
 /**
  * Reads the pages a `_sidebar.md` links to, as site paths (`/getting-started`).
@@ -58,17 +66,12 @@ function sidebarPaths(folder: string): string[] {
 }
 
 /**
- * Reads the quoted `title` and `description` of a page's front matter.
+ * Reads the `title` and `description` of a page's front matter.
  * @param {string} markdown - The Markdown file, relative to `docs/`.
  * @returns {{ title: string; description: string }} The two fields, empty when absent.
  */
 function frontMatter(markdown: string): { title: string; description: string } {
-	const head = readFileSync(join(DOCS_DIR, markdown), "utf8").split("\n---\n")[0] ?? "";
-	const fields: Record<string, string> = {};
-
-	for (const [, field, value] of head.matchAll(FRONT_MATTER_FIELD_PATTERN)) {
-		fields[field ?? ""] = (value ?? "").replaceAll(String.raw`\"`, '"');
-	}
+	const { fields } = parseFrontMatter(readFileSync(join(DOCS_DIR, markdown), "utf8"));
 
 	return { title: fields["title"] ?? "", description: fields["description"] ?? "" };
 }
@@ -102,18 +105,35 @@ function shellFile(path: string): string {
 }
 
 /**
- * The same page in another language: `/pt-br/utilities` for `/utilities` and back; the English
- * home (`/`, the README) pairs with the Portuguese entry page.
+ * The same page in another language: `/pt-br/utilities` for `/utilities` and back. The English
+ * home (`/`, the README) has no Portuguese twin.
  * @param {string} canonicalPath - A canonical site path.
  * @param {string} folder - The target language folder, `""` for the root.
- * @returns {string} The canonical path of the page in that language.
+ * @returns {string | null} The canonical path of the page in that language, `null` when it has none.
  */
-function translate(canonicalPath: string, folder: string): string {
-	if (canonicalPath === "/") return folder === "" ? "/" : PT_BR_HOME_PAGE;
+function translate(canonicalPath: string, folder: string): string | null {
+	if (canonicalPath === "/") return folder === "" ? "/" : null;
 
 	const bare = canonicalPath.replace(/^\/pt-br\//, "/");
 
 	return folder === "" ? bare : `/${folder}${bare}`;
+}
+
+/**
+ * The `hreflang` links of a page: one per language that has it, plus `x-default` on the English one.
+ * @param {string} canonicalPath - A canonical site path.
+ * @returns {Alternate[]} The links, in `LANGUAGES` order.
+ */
+function alternates(canonicalPath: string): Alternate[] {
+	const links = LANGUAGES.flatMap(({ hreflang, folder }): Alternate[] => {
+		const path = translate(canonicalPath, folder);
+		return path === null ? [] : [{ hreflang, href: `${SITE}${path}` }];
+	});
+
+	return [
+		...links,
+		{ hreflang: "x-default", href: `${SITE}${translate(canonicalPath, "") ?? "/"}` },
+	];
 }
 
 /**
@@ -130,8 +150,30 @@ function replaceTag(shell: string, tag: RegExp, value: string): string {
 	if (match?.[1] === undefined) throw new Error(`docs/index.html has no ${tag.source}`);
 
 	const escaped = value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
+	const rewritten = match[0].replace(match[1], () => escaped);
 
-	return shell.replace(match[0], match[0].replace(match[1], escaped));
+	return shell.replace(match[0], () => rewritten);
+}
+
+/**
+ * Replaces the home page's `hreflang` links with the page's own, right after its canonical link.
+ * @param {string} shell - The shell being rewritten.
+ * @param {Alternate[]} links - The page's links, none to drop them all.
+ * @returns {string} The rewritten shell.
+ */
+function replaceAlternates(shell: string, links: Alternate[]): string {
+	const stripped = shell.replace(HREFLANG_LINK_PATTERN, "");
+	const canonical = CANONICAL_LINK_PATTERN.exec(stripped);
+
+	if (canonical === null) throw new Error("docs/index.html has no canonical link");
+
+	const indent = canonical[1] ?? "";
+	const lines = links.map(
+		({ hreflang, href }) =>
+			`${indent}<link rel="alternate" hreflang="${hreflang}" href="${href}" />\n`,
+	);
+
+	return stripped.replace(canonical[0], () => canonical[0] + lines.join(""));
 }
 
 /**
@@ -144,30 +186,15 @@ function pageShell(shell: string, page: Page): string {
 	const language = LANGUAGES.find(({ folder }) => folder === page.folder);
 	const canonical = `${SITE}${page.canonicalPath}`;
 	const title = `${page.title} · ${SITE_NAME}`;
+	const markdown = /^https?:/.test(page.markdown) ? page.markdown : `${SITE}/${page.markdown}`;
 	let copy = shell;
 
 	copy = replaceTag(copy, /<html lang="([^"]*)">/, language?.hreflang ?? "en");
 	copy = replaceTag(copy, /<title>([^<]*)<\/title>/, title);
 	copy = replaceTag(copy, /<meta name="description" content="([^"]*)" \/>/, page.description);
 	copy = replaceTag(copy, /<link rel="canonical" href="([^"]*)" \/>/, canonical);
-	for (const { hreflang, folder } of LANGUAGES) {
-		const href = `${SITE}${translate(page.canonicalPath, folder)}`;
-		copy = replaceTag(
-			copy,
-			new RegExp(`<link rel="alternate" hreflang="${hreflang}" href="([^"]*)" />`),
-			href,
-		);
-	}
-	copy = replaceTag(
-		copy,
-		/<link rel="alternate" hreflang="x-default" href="([^"]*)" \/>/,
-		`${SITE}${translate(page.canonicalPath, "")}`,
-	);
-	copy = replaceTag(
-		copy,
-		/<link rel="alternate" type="text\/markdown" href="([^"]*)"/,
-		`${SITE}/${page.markdown}`,
-	);
+	copy = replaceAlternates(copy, alternates(page.canonicalPath));
+	copy = replaceTag(copy, /<link rel="alternate" type="text\/markdown" href="([^"]*)"/, markdown);
 	copy = replaceTag(copy, /<meta property="og:title" content="([^"]*)" \/>/, title);
 	copy = replaceTag(
 		copy,
@@ -190,30 +217,32 @@ function pageShell(shell: string, page: Page): string {
 }
 
 /**
- * The shell for unknown URLs: the home page's metadata, titled as not found and kept out of the
- * index, since GitHub Pages serves it with a 404 status but a crawler may still read the tags.
+ * The shell for unknown URLs: titled as not found, kept out of the index and without the home
+ * page's canonical, hreflang, `og:url` and Markdown links, so an unknown URL sends no signal but
+ * `noindex` (GitHub Pages serves it with a 404 status, a crawler may still read the tags).
  * @param {string} shell - `docs/index.html`.
  * @returns {string} The copy.
  */
 function notFoundShell(shell: string): string {
-	const copy = replaceTag(shell, /<title>([^<]*)<\/title>/, `Not found · ${SITE_NAME}`);
+	const titled = replaceTag(shell, /<title>([^<]*)<\/title>/, `Not found · ${SITE_NAME}`);
+	const bare = replaceAlternates(titled, [])
+		.replace(CANONICAL_LINK_PATTERN, "")
+		.replace(/^ *<meta property="og:url" content="[^"]*" \/>\n/m, "")
+		.replace(/^ *<link rel="alternate" type="text\/markdown" [^\n]*\n/m, "");
 
-	return copy.replace("<title>", '<meta name="robots" content="noindex" />\n  <title>');
+	return bare.replace("<title>", () => '<meta name="robots" content="noindex" />\n  <title>');
 }
 
 function buildSitemap(sitePages: Page[]): string {
 	const entries = sitePages.map((page) => {
-		const alternates = LANGUAGES.map(
-			({ hreflang, folder }) =>
-				`    <xhtml:link rel="alternate" hreflang="${hreflang}" href="${SITE}${translate(page.canonicalPath, folder)}" />`,
+		const links = alternates(page.canonicalPath).map(
+			({ hreflang, href }) =>
+				`    <xhtml:link rel="alternate" hreflang="${hreflang}" href="${href}" />`,
 		);
 
-		return [
-			"  <url>",
-			`    <loc>${SITE}${page.canonicalPath}</loc>`,
-			...alternates,
-			"  </url>",
-		].join("\n");
+		return ["  <url>", `    <loc>${SITE}${page.canonicalPath}</loc>`, ...links, "  </url>"].join(
+			"\n",
+		);
 	});
 
 	return `<?xml version="1.0" encoding="UTF-8"?>
@@ -243,7 +272,7 @@ function main(): void {
 		folder: "",
 		title: SITE_NAME,
 		description: "",
-		markdown: "README.md",
+		markdown: HOME_MARKDOWN,
 	};
 	const canonicalPages = sitePages.filter((page) => page.path === page.canonicalPath);
 	writeFileSync(join(DOCS_DIR, "sitemap.xml"), buildSitemap([home, ...canonicalPages]));

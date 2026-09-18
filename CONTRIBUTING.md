@@ -346,7 +346,9 @@ What keeps the two sites rendering the same pages:
 
 - Every page starts with a front matter block with a quoted `title` and `description`, and has no
   `#` heading of its own: Docs7 renders the title from the front matter, and the plugin in
-  `docs/index.html` turns it into the page's heading for docsify.
+  `docs/index.html` turns it into the page's heading for docsify (a small wrapper there hands the
+  search plugin the same view, so the block never shows up in search results). Scripts read the
+  block through `scripts/front-matter.ts`.
 - The docsify-only files (the shell copies, the navigation files, `robots.txt` and `sitemap.xml`)
   are listed in `docs/.mintignore`, so Docs7 never publishes them as pages or in place of the
   files it generates itself.
