@@ -15,7 +15,7 @@
        and a link preview see. -->
   <link rel="canonical" href="https://brazilian-utils.com.br/" />
   <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/" />
-  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/" />
+  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/getting-started" />
   <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <!-- The Markdown behind the site, for agents that look for it: the per-util index, the whole
@@ -172,18 +172,21 @@
             var isPtBr = path.indexOf('/pt-br') === 0;
             var title = frontmatter.title ? frontmatter.title + ' · Brazilian Utils' : 'Brazilian Utils';
             var description = frontmatter.description || defaultDescription;
-            var enPath = isPtBr ? path.replace(/^\/pt-br\/?/, '/') : path;
-            var ptBrPath = isPtBr ? path : '/pt-br' + path;
+            // /pt-br/ shows pt-br/getting-started (see `alias`), so it canonicalizes there; the
+            // English home is the README, whose Portuguese counterpart is that same entry page.
+            var canonicalPath = path === '/pt-br/' ? '/pt-br/getting-started' : path;
+            var enPath = isPtBr ? canonicalPath.replace(/^\/pt-br\//, '/') : path;
+            var ptBrPath = isPtBr ? canonicalPath : path === '/' ? '/pt-br/getting-started' : '/pt-br' + path;
             document.title = title;
             document.documentElement.lang = isPtBr ? 'pt-BR' : 'en';
             set('meta[name="description"]', 'content', description);
-            set('link[rel="canonical"]', 'href', site + path);
+            set('link[rel="canonical"]', 'href', site + canonicalPath);
             set('link[hreflang="en"]', 'href', site + enPath);
             set('link[hreflang="pt-BR"]', 'href', site + ptBrPath);
             set('link[hreflang="x-default"]', 'href', site + enPath);
             set('meta[property="og:title"]', 'content', title);
             set('meta[property="og:description"]', 'content', description);
-            set('meta[property="og:url"]', 'content', site + path);
+            set('meta[property="og:url"]', 'content', site + canonicalPath);
             set('meta[property="og:locale"]', 'content', isPtBr ? 'pt_BR' : 'en_US');
             set('meta[property="og:locale:alternate"]', 'content', isPtBr ? 'en_US' : 'pt_BR');
             var file = (vm.route && vm.route.file) || '';

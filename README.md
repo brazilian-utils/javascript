@@ -113,7 +113,7 @@ npm test
 npm run build
 ```
 
-[CONTRIBUTING.md](CONTRIBUTING.md) lists every script and the checks a pull request goes through.
+[CONTRIBUTING.md](https://github.com/brazilian-utils/javascript/blob/main/CONTRIBUTING.md) lists every script and the checks a pull request goes through.
 
 Release notes are published through [GitHub Releases](https://github.com/brazilian-utils/javascript/releases).
 

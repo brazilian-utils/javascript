@@ -331,10 +331,12 @@ JavaScript/TypeScript features.
   `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation. docsify runs in history
   mode, so every page is a real URL (`/getting-started`, `/pt-br/utilities`) that search engines
   index on its own; GitHub Pages serves each one from a copy of `index.html` next to the page
-  (`getting-started.html`), and `npm run build:site` (`scripts/site.ts`) writes those copies,
-  `404.html` and `sitemap.xml` from the sidebars. The Check workflow fails when they are stale, so
-  run it after editing `index.html` or a sidebar. Links from the hash-router era
-  (`/#/getting-started?id=usage`) are rewritten on load, so nothing out there breaks.
+  (`getting-started.html`) that carries the page's own title, description, canonical URL and
+  hreflang pair, and `npm run build:site` (`scripts/site.ts`) writes those copies, `404.html` and
+  `sitemap.xml` from the sidebars and the pages' front matter. The Check workflow fails when they
+  are stale, so run it after editing `index.html`, a sidebar or a page's front matter. Links from
+  the hash-router era (`/#/getting-started?id=usage`) are rewritten on load, so nothing out there
+  breaks.
 - [Docs7](https://context7.com/docs/docs7/overview), the Context7 documentation platform, which
   reads `docs/docs.json` (the Mintlify `docs.json` format) and the same Markdown pages, and serves
   them to people and, as Markdown, to agents (`/llms.txt`, `/<page>.md`, `/search`). Every push to

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8" />
-  <title>Brazilian Utils</title>
-  <meta name="description" content="Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more." />
+  <title>Introdução · Brazilian Utils</title>
+  <meta name="description" content="Instale o Brazilian Utils, a biblioteca de utilitários sem dependências para o business brasileiro, e veja como importar um utilitário, quais runtimes são suportados e como o tamanho do bundle se comporta." />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#009739" />
@@ -13,25 +13,25 @@
        hook further down rewrites the title, description, canonical, hreflang and Open Graph tags for
        the page being shown; the values here are the home page's, what a crawler without JavaScript
        and a link preview see. -->
-  <link rel="canonical" href="https://brazilian-utils.com.br/" />
-  <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/" />
-  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/" />
-  <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/" />
+  <link rel="canonical" href="https://brazilian-utils.com.br/pt-br/getting-started" />
+  <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/getting-started" />
+  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/getting-started" />
+  <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/getting-started" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <!-- The Markdown behind the site, for agents that look for it: the per-util index, the whole
        English documentation in one file, and (rewritten per page by the hook) the page's own source -->
   <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
   <link rel="alternate" type="text/plain" href="/llms-full.txt" title="llms-full.txt" />
-  <link rel="alternate" type="text/markdown" href="/README.md" title="Markdown source" />
+  <link rel="alternate" type="text/markdown" href="https://brazilian-utils.com.br/pt-br/getting-started.md" title="Markdown source" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Brazilian Utils" />
-  <meta property="og:title" content="Brazilian Utils" />
-  <meta property="og:description" content="Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more." />
-  <meta property="og:url" content="https://brazilian-utils.com.br/" />
-  <meta property="og:locale" content="en_US" />
-  <meta property="og:locale:alternate" content="pt_BR" />
+  <meta property="og:title" content="Introdução · Brazilian Utils" />
+  <meta property="og:description" content="Instale o Brazilian Utils, a biblioteca de utilitários sem dependências para o business brasileiro, e veja como importar um utilitário, quais runtimes são suportados e como o tamanho do bundle se comporta." />
+  <meta property="og:url" content="https://brazilian-utils.com.br/pt-br/getting-started" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:locale:alternate" content="en_US" />
   <meta property="og:image" content="https://brazilian-utils.com.br/images/logo.png" />
   <meta property="og:image:width" content="569" />
   <meta property="og:image:height" content="291" />
@@ -172,18 +172,21 @@
             var isPtBr = path.indexOf('/pt-br') === 0;
             var title = frontmatter.title ? frontmatter.title + ' · Brazilian Utils' : 'Brazilian Utils';
             var description = frontmatter.description || defaultDescription;
-            var enPath = isPtBr ? path.replace(/^\/pt-br\/?/, '/') : path;
-            var ptBrPath = isPtBr ? path : '/pt-br' + path;
+            // /pt-br/ shows pt-br/getting-started (see `alias`), so it canonicalizes there; the
+            // English home is the README, whose Portuguese counterpart is that same entry page.
+            var canonicalPath = path === '/pt-br/' ? '/pt-br/getting-started' : path;
+            var enPath = isPtBr ? canonicalPath.replace(/^\/pt-br\//, '/') : path;
+            var ptBrPath = isPtBr ? canonicalPath : path === '/' ? '/pt-br/getting-started' : '/pt-br' + path;
             document.title = title;
             document.documentElement.lang = isPtBr ? 'pt-BR' : 'en';
             set('meta[name="description"]', 'content', description);
-            set('link[rel="canonical"]', 'href', site + path);
+            set('link[rel="canonical"]', 'href', site + canonicalPath);
             set('link[hreflang="en"]', 'href', site + enPath);
             set('link[hreflang="pt-BR"]', 'href', site + ptBrPath);
             set('link[hreflang="x-default"]', 'href', site + enPath);
             set('meta[property="og:title"]', 'content', title);
             set('meta[property="og:description"]', 'content', description);
-            set('meta[property="og:url"]', 'content', site + path);
+            set('meta[property="og:url"]', 'content', site + canonicalPath);
             set('meta[property="og:locale"]', 'content', isPtBr ? 'pt_BR' : 'en_US');
             set('meta[property="og:locale:alternate"]', 'content', isPtBr ? 'en_US' : 'pt_BR');
             var file = (vm.route && vm.route.file) || '';

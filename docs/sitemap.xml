@@ -3,7 +3,7 @@
   <url>
     <loc>https://brazilian-utils.com.br/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/" />
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/getting-started" />
   </url>
   <url>
     <loc>https://brazilian-utils.com.br/getting-started</loc>
@@ -19,11 +19,6 @@
     <loc>https://brazilian-utils.com.br/migration-v1-to-v2</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/migration-v1-to-v2" />
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/migration-v1-to-v2" />
-  </url>
-  <url>
-    <loc>https://brazilian-utils.com.br/pt-br/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/" />
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/" />
   </url>
   <url>
     <loc>https://brazilian-utils.com.br/pt-br/getting-started</loc>
