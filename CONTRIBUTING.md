@@ -324,46 +324,30 @@ JavaScript/TypeScript features.
 
 ## Documentation site
 
-`docs/` is the source of two sites:
+`docs/` is the source of [brazilian-utils.com.br](https://brazilian-utils.com.br), served by GitHub
+Pages with [docsify](https://docsify.js.org): `docs/index.html` renders the Markdown in the
+browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
 
-- [brazilian-utils.com.br](https://brazilian-utils.com.br), served by GitHub Pages with
-  [docsify](https://docsify.js.org): `docs/index.html` renders the Markdown in the browser, with
-  `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation. docsify runs in history
-  mode, so every page is a real URL (`/getting-started`, `/pt-br/utilities`) that search engines
-  index on its own; GitHub Pages serves each one from a copy of `index.html` next to the page
-  (`getting-started.html`) that carries the page's own title, description, canonical URL and
-  hreflang pair, and `npm run build:site` (`scripts/site.ts`) writes those copies, `404.html` and
-  `sitemap.xml` from the sidebars and the pages' front matter. The Check workflow fails when they
-  are stale, so run it after editing `index.html`, a sidebar or a page's front matter. Links from
-  the hash-router era (`/#/getting-started?id=usage`) are rewritten on load, so nothing out there
-  breaks.
-- [Docs7](https://context7.com/docs/docs7/overview), the Context7 documentation platform, which
-  reads `docs/docs.json` (the Mintlify `docs.json` format) and the same Markdown pages, and serves
-  them to people and, as Markdown, to agents (`/llms.txt`, `/<page>.md`, `/search`). Every push to
-  `main` is a production build and every pull request that touches `docs/` gets a preview site.
-
-What keeps the two sites rendering the same pages:
-
-- Every page starts with a front matter block with a quoted `title` and `description`, and has no
-  `#` heading of its own: Docs7 renders the title from the front matter, and the plugin in
-  `docs/index.html` turns it into the page's heading for docsify (a small wrapper there hands the
-  search plugin the same view, so the block never shows up in search results). Scripts read the
-  block through `scripts/front-matter.ts`.
-- The docsify-only files (the shell copies, the navigation files, `robots.txt` and `sitemap.xml`)
-  are listed in `docs/.mintignore`, so Docs7 never publishes them as pages or in place of the
-  files it generates itself.
+- docsify runs in history mode, so every page is a real URL (`/getting-started`,
+  `/pt-br/utilities`) that search engines index on its own. GitHub Pages serves each one from a
+  copy of `index.html` next to the page (`getting-started.html`) that carries the page's own
+  title, description, canonical URL and hreflang pair, and `npm run build:site`
+  (`scripts/site.ts`) writes those copies, `404.html` and `sitemap.xml` from the sidebars and the
+  pages' front matter. The Check workflow fails when they are stale, so run it after editing
+  `index.html`, a sidebar or a page's front matter. Links from the hash-router era
+  (`/#/getting-started?id=usage`) are rewritten on load, so nothing out there breaks.
+- Every page starts with a front matter block with a quoted `title` and `description` (and
+  `keywords`), and has no `#` heading of its own: the plugin in `docs/index.html` turns the title
+  into the page's heading and the block feeds the page's metadata (a small wrapper there hands
+  the search plugin the same view, so the block never shows up in search results). Scripts read
+  the block through `scripts/front-matter.ts`.
 - `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
   `docs/llms-full.txt` keep their headings; run `npm run build:llms` after editing a page.
-- The `$schema` in `docs/docs.json` gives the editor validation and autocomplete for it.
+- Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,
+  and `.github/workflows/context7.yml` asks for a refresh when the docs change on `main`.
 
-Preview the Docs7 site locally with `npx @upstash/docs7 dev docs` (http://localhost:3333; the first
-run downloads the renderer). The docsify site needs nothing beyond a static file server pointed at
-`docs/`.
-
-Publishing the Docs7 site is a one-time step for a maintainer: in the Context7 teamspace, open
-**Docs7**, click **Add New Site**, choose `brazilian-utils/javascript`, set the production branch to
-`main` and the docs path to `docs`, enable **Add to Context7** (so a production build refreshes the
-Context7 library) and publish.
+To preview the site, point a static file server that resolves `/page` to `page.html`, the way
+GitHub Pages does, at `docs/`.
 
 ## Commit messages
 

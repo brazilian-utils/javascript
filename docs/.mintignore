@@ -1,9 +1,0 @@
-# docsify-only files: the site shell (index.html and its per-page copies), its navigation and
-# the crawler files of brazilian-utils.com.br, never pages or static files of the Docs7 site.
-*.html
-CNAME
-_coverpage.md
-_navbar.md
-_sidebar.md
-robots.txt
-sitemap.xml

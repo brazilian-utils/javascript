@@ -314,9 +314,9 @@ ${utilities}
 }
 
 /**
- * Replaces the front matter block of a page (the `title` and `description` the Docs7 site reads,
- * see `docs/docs.json`) with a level-one heading of its title, the heading the page shows on both
- * sites, so the generated files keep reading as they did when the heading was in the Markdown.
+ * Replaces the front matter block of a page (its `title` and `description`, which the docsify
+ * shell reads) with a level-one heading of its title, the heading the page shows on the site, so
+ * the generated files keep reading as they did when the heading was in the Markdown.
  * @param {string} markdown - A docs page, with or without a front matter block.
  * @returns {string} The page body, headed by its front matter title when it has one.
  */

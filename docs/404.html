@@ -147,9 +147,9 @@
         depth: 3
       },
       plugins: [
-        // Every page carries a front matter block (title, description) for the Docs7 site and no
-        // heading of its own; the front-matter plugin below strips the block, and this hook turns
-        // its title into the page's H1 so docsify shows the same heading Docs7 renders.
+        // Every page carries a front matter block (title, description, keywords) and no heading
+        // of its own; the front-matter plugin below strips the block, and this hook turns its
+        // title into the page's H1.
         function (hook, vm) {
           hook.beforeEach(function (content) {
             var title = vm.frontmatter && vm.frontmatter.title;
@@ -296,10 +296,6 @@
     data-placeholder="Ask about Brazilian Utils..."
     async
   ></script>
-
-  <!-- Docs7 analytics: page views, searches and AI crawler traffic of this site, reported in the
-       Docs7 dashboard of the Context7 teamspace. The site id is public by design. -->
-  <script defer src="https://context7.com/docs7-analytics.js" data-site="246c02c2-6f38-4062-8ed9-9433888c653d"></script>
 </body>
 
 </html>

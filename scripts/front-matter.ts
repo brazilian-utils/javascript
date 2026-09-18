@@ -1,7 +1,7 @@
 /**
  * The front matter block the docs pages open with (`title`, `description` and `keywords`, read by
- * the Docs7 site and by the docsify shell), parsed once for every script that generates files
- * from the pages, so they all read a page the same way.
+ * the docsify shell), parsed once for every script that generates files from the pages, so they
+ * all read a page the same way.
  */
 
 const FRONT_MATTER_PATTERN = /^---\r?\n([\s\S]*?)\r?\n---\r?\n+/;
