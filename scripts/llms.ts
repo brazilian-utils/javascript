@@ -311,9 +311,35 @@ ${utilities}
 `;
 }
 
+const FRONT_MATTER_PATTERN = /^---\n([\s\S]*?)\n---\n+/;
+const FRONT_MATTER_TITLE_PATTERN = /^title: "(.+)"$/m;
+
+/**
+ * Replaces the front matter block of a page (the `title` and `description` the Docs7 site reads,
+ * see `docs/docs.json`) with a level-one heading of its title, the heading the page shows on both
+ * sites, so the generated files keep reading as they did when the heading was in the Markdown.
+ * @param {string} markdown - A docs page, with or without a front matter block.
+ * @returns {string} The page body, headed by its front matter title when it has one.
+ */
+function frontMatterToHeading(markdown: string): string {
+	const match = FRONT_MATTER_PATTERN.exec(markdown);
+
+	if (!match) return markdown;
+
+	const title = FRONT_MATTER_TITLE_PATTERN.exec(match[1] ?? "")?.[1]?.replaceAll(
+		String.raw`\"`,
+		'"',
+	);
+	const body = markdown.slice(match[0].length);
+
+	return title === undefined ? body : `# ${title}\n\n${body}`;
+}
+
 function main(): void {
-	const gettingStartedMd = readFileSync(join(DOCS_DIR, "getting-started.md"), "utf8");
-	const utilitiesMd = readFileSync(join(DOCS_DIR, "utilities.md"), "utf8");
+	const gettingStartedMd = frontMatterToHeading(
+		readFileSync(join(DOCS_DIR, "getting-started.md"), "utf8"),
+	);
+	const utilitiesMd = frontMatterToHeading(readFileSync(join(DOCS_DIR, "utilities.md"), "utf8"));
 	const utils = parseUtilities(utilitiesMd);
 
 	writeFileSync(

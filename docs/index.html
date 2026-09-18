@@ -63,6 +63,17 @@
         },
         depth: 3
       },
+      plugins: [
+        // Every page carries a front matter block (title, description) for the Docs7 site and no
+        // heading of its own; the front-matter plugin below strips the block, and this hook turns
+        // its title into the page's H1 so docsify shows the same heading Docs7 renders.
+        function (hook, vm) {
+          hook.beforeEach(function (content) {
+            var title = vm.frontmatter && vm.frontmatter.title;
+            return title ? '# ' + title + '\n\n' + content : content;
+          });
+        },
+      ],
       copyCode: {
         buttonText: {
           '/pt-br/': 'Clique para copiar',
@@ -85,6 +96,7 @@
 
   <!-- Plugins (emoji is built into docsify since 4.13, so its plugin is gone) -->
   <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/front-matter.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@3/dist/docsify-copy-code.min.js"></script>
 </body>
 

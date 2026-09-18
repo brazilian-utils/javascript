@@ -1,4 +1,7 @@
-# Introdução
+---
+title: "Introdução"
+description: "Instale o Brazilian Utils, a biblioteca de utilitários sem dependências para o business brasileiro, e veja como importar um utilitário, quais runtimes são suportados e como o tamanho do bundle se comporta."
+---
 
 Brazilian Utils é uma biblioteca com foco na resolução de problemas que enfrentamos diariamente no desenvolvimento de aplicações para o business brasileiro.
 
@@ -60,6 +63,16 @@ isValidCpf('1232454233345'); // false
 ```
 
 Você pode conferir a lista de utilitários [clicando aqui](pt-br/utilities.md).
+
+## Assistentes de IA
+
+A documentação está indexada no Context7 como [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript). Em um agente de código conectado ao servidor MCP do Context7, cite a biblioteca no prompt e o agente pula a busca pela biblioteca:
+
+```text
+Valide um CNPJ com o Brazilian Utils. use library /brazilian-utils/javascript
+```
+
+Sem o Context7, aponte o assistente para o [llms.txt](https://brazilian-utils.com.br/llms.txt), que lista todos os utilitários com uma descrição de uma linha e o link para a seção de cada um, ou para o [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), a documentação completa em inglês em um único arquivo Markdown.
 
 ## Tamanho do bundle
 

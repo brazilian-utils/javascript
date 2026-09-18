@@ -321,6 +321,37 @@ Every utility must keep working across all the runtimes this library targets:
 Avoid Node-specific APIs unless they are polyfilled/guarded, and prefer standard, widely available
 JavaScript/TypeScript features.
 
+## Documentation site
+
+`docs/` is the source of two sites:
+
+- [brazilian-utils.com.br](https://brazilian-utils.com.br), served by GitHub Pages with
+  [docsify](https://docsify.js.org): `docs/index.html` renders the Markdown in the browser, with
+  `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation. There is no build step.
+- [Docs7](https://context7.com/docs/docs7/overview), the Context7 documentation platform, which
+  reads `docs/docs.json` (the Mintlify `docs.json` format) and the same Markdown pages, and serves
+  them to people and, as Markdown, to agents (`/llms.txt`, `/<page>.md`, `/search`). Every push to
+  `main` is a production build and every pull request that touches `docs/` gets a preview site.
+
+What keeps the two sites rendering the same pages:
+
+- Every page starts with a front matter block with a quoted `title` and `description`, and has no
+  `#` heading of its own: Docs7 renders the title from the front matter, and the plugin in
+  `docs/index.html` turns it into the page's heading for docsify.
+- The docsify-only files are listed in `docs/.mintignore`, so Docs7 never publishes them as pages.
+- `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
+  `docs/llms-full.txt` keep their headings; run `npm run build:llms` after editing a page.
+- The `$schema` in `docs/docs.json` gives the editor validation and autocomplete for it.
+
+Preview the Docs7 site locally with `npx @upstash/docs7 dev docs` (http://localhost:3333; the first
+run downloads the renderer). The docsify site needs nothing beyond a static file server pointed at
+`docs/`.
+
+Publishing the Docs7 site is a one-time step for a maintainer: in the Context7 teamspace, open
+**Docs7**, click **Add New Site**, choose `brazilian-utils/javascript`, set the production branch to
+`main` and the docs path to `docs`, enable **Add to Context7** (so a production build refreshes the
+Context7 library) and publish.
+
 ## Commit messages
 
 This project follows [Conventional Commits](https://www.conventionalcommits.org/). Examples:

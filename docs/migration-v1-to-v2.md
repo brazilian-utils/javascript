@@ -1,4 +1,7 @@
-# Migration Guide: v1 to v2
+---
+title: "Migration Guide: v1 to v2"
+description: "How to move a project from Brazilian Utils v1.x to v2: the renamed exports, the deprecated aliases that still work and a checklist to follow."
+---
 
 This guide will help you migrate from Brazilian Utils v1.x to v2.0.0.
 
