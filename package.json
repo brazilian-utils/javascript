@@ -48,6 +48,7 @@
 	},
 	"files": [
 		"./CHANGELOG.md",
+		"./brazilian-utils.cdx.json",
 		"./dist"
 	],
 	"type": "module",

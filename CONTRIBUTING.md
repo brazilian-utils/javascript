@@ -286,9 +286,10 @@ export that goes missing.
   every push to `main` and weekly: it grades the repository configuration (pinned actions, token
   permissions, branch protection, code review, dependency updates, SAST) rather than the code,
   publishes the score and uploads the findings to the Security tab.
-- Every release run keeps `brazilian-utils.cdx.json` as a workflow artifact (`sbom-<tag>`), a
-  CycloneDX SBOM of the published package generated with `npm sbom` from the release tag; releases
-  are immutable here, so the file cannot be attached to the release itself. The package has no
+- Every release ships `brazilian-utils.cdx.json` inside the package, a CycloneDX SBOM generated
+  with `npm sbom` from the release tag right before staging on npm, and keeps the same file as a
+  workflow artifact (`sbom-<tag>`); releases are immutable here, so the file cannot be attached to
+  the release itself. The package has no
   runtime dependencies, so the document describes the package itself; it exists for consumers
   whose supply-chain policy requires one.
 - Commit messages are checked with commitlint on every pull request, since release-please derives

@@ -112,6 +112,11 @@ jobs:
           echo "npm ${npm_version}"
           echo "${npm_version}" | awk -F. '{ exit !($1 > 11 || ($1 == 11 && $2 >= 15)) }'
 
+      - name: Generate the CycloneDX SBOM shipped inside the package
+        # `files` in package.json lists brazilian-utils.cdx.json, so the tarball carries it;
+        # --package-lock-only reads the lockfile instead of installing anything.
+        run: npm sbom --sbom-format cyclonedx --omit dev --package-lock-only > brazilian-utils.cdx.json
+
       - name: Stage on npm
         run: npm stage publish --provenance --access public
 

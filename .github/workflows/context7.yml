@@ -1,0 +1,37 @@
+# Asks Context7 (https://context7.com/brazilian-utils/javascript) to re-index the documentation
+# whenever what it reads changes on `main`; without this it refreshes on its own schedule. The
+# request needs the CONTEXT7_API_KEY secret from the Context7 dashboard (Settings -> Secrets and
+# variables -> Actions); until it is set, the job says so and exits green.
+name: Context7
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "context7.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    name: Refresh the Context7 index
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
+
+    steps:
+      - name: Trigger the refresh
+        run: |
+          if [ -z "$CONTEXT7_API_KEY" ]; then
+            echo "::notice::CONTEXT7_API_KEY is not set, skipping the Context7 refresh"
+            exit 0
+          fi
+          curl --silent --show-error --fail-with-body -X POST https://context7.com/api/v1/refresh \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CONTEXT7_API_KEY" \
+            -d '{"libraryName": "/brazilian-utils/javascript"}'
