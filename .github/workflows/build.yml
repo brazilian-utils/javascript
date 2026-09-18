@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: $/.github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Run build
         run: vp run build
@@ -54,7 +54,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: $/.github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Checkout base
         if: ${{ github.event_name == 'pull_request' }}

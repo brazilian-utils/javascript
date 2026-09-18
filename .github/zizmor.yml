@@ -1,0 +1,14 @@
+# zizmor prefers `uses: $/.github/actions/setup` (self-repository) over the workspace-relative
+# `./.github/actions/setup`, but actionlint and OpenSSF Scorecard do not know the `$/` form:
+# Scorecard reads it as an unpinned third-party action and halves Pinned-Dependencies. The
+# workspace-relative form is what those tools and the GitHub docs have always accepted.
+rules:
+  self-repository:
+    ignore:
+      - build.yml
+      - check.yml
+      - datasets.yml
+      - live-tests.yml
+      - mutation.yml
+      - release.yml
+      - tests.yml

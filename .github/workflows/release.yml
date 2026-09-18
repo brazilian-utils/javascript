@@ -83,7 +83,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: $/.github/actions/setup
+        uses: ./.github/actions/setup
         with:
           node-version: 24
 
@@ -127,7 +127,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: $/.github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Generate the CycloneDX SBOM of the published package
         # The package has no runtime dependencies, so the SBOM describes the package itself;

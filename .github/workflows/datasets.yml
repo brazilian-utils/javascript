@@ -7,13 +7,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   update-datasets:
     name: Update IBGE/CONCLA datasets
     runs-on: ubuntu-latest
+    # Only this job pushes the dataset branch and opens the pull request.
+    permissions:
+      contents: write
+      pull-requests: write
     timeout-minutes: 15
 
     steps:
@@ -23,7 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup
-        uses: $/.github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Rebuild datasets
         run: npm run build:data
