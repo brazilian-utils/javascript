@@ -7,6 +7,9 @@ node_modules
 dist
 coverage
 .stryker-tmp
+# Nothing in the project reads one, so a local `.env` never has a reason to be committed.
+.env
+.env.*
 # Every report is generated (stryker, coverage, jscpd) except the API Extractor baseline, which is
 # committed so that `npm run check:api` compares the public API against the reviewed one instead of
 # writing a new file on every run.

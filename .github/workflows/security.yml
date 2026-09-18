@@ -52,6 +52,28 @@ jobs:
           scan-args: |
             --lockfile=package-lock.json
 
+  secrets:
+    name: Scan for committed secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The scan walks the commits between the base and the head of the pull request (or of
+          # the push), so it needs the history, not just the checked-out tree.
+          fetch-depth: 0
+          persist-credentials: false
+
+      # GitHub's push protection rejects known token formats at push time; this is the second,
+      # tool-independent check, over the commits of the pull request or push and, on the weekly
+      # run and on a manual one, over the whole history.
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@f714bf454f350590f4a24c3ddb1aef02c35bf5b6 # v3.97.5
+        with:
+          extra_args: --results=verified,unknown
+
   scorecard:
     name: OpenSSF Scorecard
     # Scorecard only analyses the default branch, so pull requests are skipped.

@@ -277,9 +277,11 @@ export that goes missing.
 - Every GitHub Action is pinned to a full commit SHA with the version in a trailing comment
   (Dependabot updates both). Checkouts use `persist-credentials: false`.
 - The `Security` workflow lints the workflows themselves with
-  [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor)
-  and scans `package-lock.json` with [OSV-Scanner](https://google.github.io/osv-scanner/); the
-  `Check` workflow runs `audit-ci` and lockfile-lint on top. The `Security` workflow also runs the
+  [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor),
+  scans `package-lock.json` with [OSV-Scanner](https://google.github.io/osv-scanner/) and scans the
+  commits of every pull request (the whole history on the weekly run) for leaked secrets with
+  [TruffleHog](https://github.com/trufflesecurity/trufflehog), next to GitHub's own secret scanning
+  and push protection; the `Check` workflow runs `audit-ci` and lockfile-lint on top. The `Security` workflow also runs the
   [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/brazilian-utils/javascript) on
   every push to `main` and weekly: it grades the repository configuration (pinned actions, token
   permissions, branch protection, code review, dependency updates, SAST) rather than the code,
