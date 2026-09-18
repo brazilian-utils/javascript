@@ -376,5 +376,7 @@
 	"hardened_site_status": "Unmet",
 	"hardened_site_justification": "The documentation site is served by GitHub Pages, which does not let a project set Content-Security-Policy, HSTS or X-Content-Type-Options headers.",
 	"security_review_status": "Met",
-	"security_review_justification": "The maintainers reviewed the security requirements and boundaries in September 2026 and recorded the result as the threat model and policies in https://github.com/brazilian-utils/javascript/blob/main/SECURITY.md"
+	"security_review_justification": "The maintainers reviewed the security requirements and boundaries in September 2026 and recorded the result as the threat model and policies in https://github.com/brazilian-utils/javascript/blob/main/SECURITY.md",
+	"code_review_standards_status": "Met",
+	"code_review_standards_justification": "https://github.com/brazilian-utils/javascript/blob/main/CONTRIBUTING.md#code-review (how a pull request is reviewed, what CI already decides, the seven things a reviewer checks and what it takes to merge)."
 }
