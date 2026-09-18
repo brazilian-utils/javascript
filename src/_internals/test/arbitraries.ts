@@ -157,7 +157,16 @@ export const anyBusinessDayDate: fc.Arbitrary<unknown> = fc.oneof(businessDayDat
 /** A number of business days, or anything at all: what a business day util may be asked to walk. */
 export const anyBusinessDayAmount: fc.Arbitrary<unknown> = fc.oneof(
 	fc.integer({ min: -200, max: 200 }),
-	fc.anything(),
+	// A huge integer (1e308 passes Number.isInteger) is valid input that walks the whole supported
+	// year range before returning null, tens of milliseconds each; a hundred of them under Stryker's
+	// instrumented dry run exceed the test timeout, so they are clamped and the walk stays bounded.
+	fc
+		.anything()
+		.map((value) =>
+			typeof value === "number" && Number.isInteger(value) && Math.abs(value) > 1000
+				? Math.sign(value) * 1000
+				: value,
+		),
 );
 
 const anyStateCode = fc.oneof(fc.constantFrom(...PROTOTYPE_KEYS, "SP", "xx"), fc.anything());
