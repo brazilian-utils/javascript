@@ -1,4 +1,8 @@
-# Getting Started
+---
+title: "Getting Started"
+description: "Install Brazilian Utils, the zero-dependency utils library for Brazilian businesses, and learn how to import a util, which runtimes are supported and how the bundle size behaves."
+keywords: ["Brazilian Utils", "install", "npm", "tree-shaking", "bundle size", "subpath imports", "Node.js", "Bun", "Deno", "browser", "AI assistants", "Context7"]
+---
 
 Brazilian Utils is a library focused on solving problems that we face daily in the development of applications for the Brazilian business.
 
@@ -60,6 +64,18 @@ isValidCpf('1232454233345'); // false
 ```
 
 You can check a list of utilities [by clicking here](utilities.md).
+
+## AI assistants
+
+The documentation is indexed on Context7 as [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript). In a coding agent connected to the Context7 MCP server, name the library in the prompt and the agent skips the library search:
+
+```text
+Validate a CNPJ with Brazilian Utils. use library /brazilian-utils/javascript
+```
+
+To stop repeating it, add the rule to the agent's instructions file (`CLAUDE.md`, Cursor rules or the equivalent): "For Brazilian document utils, use the Context7 library /brazilian-utils/javascript".
+
+Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.br/llms.txt), which lists every util with a one-line description and a link to its section, or at [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), the whole English documentation in one Markdown file.
 
 ## Bundle size
 

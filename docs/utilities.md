@@ -1,4 +1,8 @@
-# Utilities
+---
+title: "Utilities"
+description: "Every utility of Brazilian Utils, grouped by family (CPF, CNPJ, CEP, boleto, Pix and more), with its options, examples and edge cases."
+keywords: ["CPF", "CNPJ", "CEP", "boleto", "Pix", "NF-e", "phone", "license plate", "RENAVAM", "PIS", "CNH", "IBAN", "holidays", "business days", "CBO", "CNAE", "NCM", "CFOP", "validator", "formatter", "parser", "generator"]
+---
 
 Here you will find all the utilities available for use.
 

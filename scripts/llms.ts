@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { parseFrontMatter } from "./front-matter.ts";
+
 const ROOT = join(import.meta.dirname, "..");
 const DOCS_DIR = join(ROOT, "docs");
 const SITE = "https://brazilian-utils.com.br";
@@ -311,9 +313,25 @@ ${utilities}
 `;
 }
 
+/**
+ * Replaces the front matter block of a page (its `title` and `description`, which the docsify
+ * shell reads) with a level-one heading of its title, the heading the page shows on the site, so
+ * the generated files keep reading as they did when the heading was in the Markdown.
+ * @param {string} markdown - A docs page, with or without a front matter block.
+ * @returns {string} The page body, headed by its front matter title when it has one.
+ */
+function frontMatterToHeading(markdown: string): string {
+	const { fields, body } = parseFrontMatter(markdown);
+	const title = fields["title"];
+
+	return title === undefined ? body : `# ${title}\n\n${body}`;
+}
+
 function main(): void {
-	const gettingStartedMd = readFileSync(join(DOCS_DIR, "getting-started.md"), "utf8");
-	const utilitiesMd = readFileSync(join(DOCS_DIR, "utilities.md"), "utf8");
+	const gettingStartedMd = frontMatterToHeading(
+		readFileSync(join(DOCS_DIR, "getting-started.md"), "utf8"),
+	);
+	const utilitiesMd = frontMatterToHeading(readFileSync(join(DOCS_DIR, "utilities.md"), "utf8"));
 	const utils = parseUtilities(utilitiesMd);
 
 	writeFileSync(

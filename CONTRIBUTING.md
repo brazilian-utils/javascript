@@ -43,6 +43,7 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run build`                                                                                                           | Builds the library for publishing with `vp pack` (also runs attw and publint over the built output).                                                                                                                                                                     |
 | `npm run build:data`                                                                                                      | Regenerates the datasets under `src/_internals/constants` from the IBGE/CONCLA sources (`scripts/data.ts`); run by the scheduled `Update datasets` workflow.                                                                                                             |
 | `npm run build:llms`                                                                                                      | Regenerates `docs/llms.txt` and `docs/llms-full.txt` from the docs (`scripts/llms.ts`); CI fails if they're out of date.                                                                                                                                                 |
+| `npm run build:site`                                                                                                      | Regenerates the per-page copies of `docs/index.html`, `docs/404.html` and `docs/sitemap.xml` from the sidebars (`scripts/site.ts`); CI fails if they're out of date.                                                                                                     |
 | `npm run check:dependencies`                                                                                              | Fails if `package.json` declares any runtime `dependencies` (this package ships zero by design).                                                                                                                                                                         |
 | `npm run check:tree-shaking`                                                                                              | Builds nothing; measures the single-import size of every export against `dist` (`scripts/tree-shaking.ts`). Run it after `npm run build` when you change a dataset, and update the bundle-size table in `docs/getting-started.md` / `docs/pt-br/getting-started.md`.     |
 | `npm run check:duplication`                                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                                                                                                                                                          |
@@ -320,6 +321,33 @@ Every utility must keep working across all the runtimes this library targets:
 
 Avoid Node-specific APIs unless they are polyfilled/guarded, and prefer standard, widely available
 JavaScript/TypeScript features.
+
+## Documentation site
+
+`docs/` is the source of [brazilian-utils.com.br](https://brazilian-utils.com.br), served by GitHub
+Pages with [docsify](https://docsify.js.org): `docs/index.html` renders the Markdown in the
+browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
+
+- docsify runs in history mode, so every page is a real URL (`/getting-started`,
+  `/pt-br/utilities`) that search engines index on its own. GitHub Pages serves each one from a
+  copy of `index.html` next to the page (`getting-started.html`) that carries the page's own
+  title, description, canonical URL and hreflang pair, and `npm run build:site`
+  (`scripts/site.ts`) writes those copies, `404.html` and `sitemap.xml` from the sidebars and the
+  pages' front matter. The Check workflow fails when they are stale, so run it after editing
+  `index.html`, a sidebar or a page's front matter. Links from the hash-router era
+  (`/#/getting-started?id=usage`) are rewritten on load, so nothing out there breaks.
+- Every page starts with a front matter block with a quoted `title` and `description` (and
+  `keywords`), and has no `#` heading of its own: the plugin in `docs/index.html` turns the title
+  into the page's heading and the block feeds the page's metadata (a small wrapper there hands
+  the search plugin the same view, so the block never shows up in search results). Scripts read
+  the block through `scripts/front-matter.ts`.
+- `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
+  `docs/llms-full.txt` keep their headings; run `npm run build:llms` after editing a page.
+- Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,
+  and `.github/workflows/context7.yml` asks for a refresh when the docs change on `main`.
+
+To preview the site, point a static file server that resolves `/page` to `page.html`, the way
+GitHub Pages does, at `docs/`.
 
 ## Commit messages
 
