@@ -198,6 +198,17 @@ describe("capitalize", () => {
 			expect(capitalize("/de paula")).toBe("/De Paula");
 		});
 
+		test("when the first letter changes length between cases: the dotted İ is one character in upper case and two in lower case, and a letter whose upper case is two letters keeps its case", () => {
+			expect(capitalize("İSTANBUL")).toBe("İstanbul");
+			expect(capitalize("İ")).toBe("İ");
+			expect(capitalize(capitalize("İ"))).toBe("İ");
+			expect(capitalize("i\u0307stanbul")).toBe("I\u0307stanbul");
+			expect(capitalize("straße")).toBe("Straße");
+			expect(capitalize("ßa")).toBe("ßa");
+			expect(capitalize("ﬁm")).toBe("ﬁm");
+			expect(capitalize("ǆemal")).toBe("Ǆemal");
+		});
+
 		test("when consecutive separators produce an empty token, which must not be counted as a word either", () => {
 			expect(capitalize("--de paula")).toBe("--De Paula");
 		});
@@ -248,14 +259,18 @@ describe("capitalize", () => {
 			expectNeverThrowsWithOptions(capitalize, fc.anything(), hostileOptions);
 		});
 
-		test("should be idempotent on its own output", () => {
-			fc.assert(
-				fc.property(fc.string({ unit: "grapheme" }), (value) => {
-					const once = capitalize(value);
+		const idempotent = fc.property(fc.string({ unit: "grapheme" }), (value) => {
+			const once = capitalize(value);
 
-					expect(capitalize(once)).toBe(once);
-				}),
-			);
+			expect(capitalize(once)).toBe(once);
+		});
+
+		test("should be idempotent on its own output", () => {
+			fc.assert(idempotent);
+		});
+
+		test("should be idempotent on the run that once drew the dotted İ", () => {
+			fc.assert(idempotent, { seed: 1_258_609_463, path: "43:11" });
 		});
 
 		test("should never produce leading, trailing or doubled whitespace", () => {
