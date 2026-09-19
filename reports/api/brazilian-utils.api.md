@@ -288,6 +288,7 @@ export const formatPhone: (value: string | number, options?: FormatPhoneOptions)
 // @public
 export type FormatPhoneOptions = {
     mask?: PhoneMask;
+    obfuscate?: boolean;
 };
 
 // @public
