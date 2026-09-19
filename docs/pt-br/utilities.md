@@ -1119,7 +1119,7 @@ getStates();
 
 ### getStateByCep
 
-Retorna o estado brasileiro ao qual um CEP pertence, a partir das faixas de CEP que os Correios atribuem a cada UF. Funciona offline: nenhuma API de CEP é chamada, então a resposta diz qual estado é dono da faixa, não se o CEP está em uso. Aceita o que o `isValidCep` aceita (8 dígitos, como string ou número, ignorando espaços, pontos e hifens); um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado. Amazonas, Distrito Federal e Goiás têm duas faixas cada, e nenhum estado é dono de `00000-000` a `00999-999` nem de `78900-000` a `78999-999`. Retorna `null` para um CEP inválido ou fora de todas as faixas. Exporta o tipo `State`.
+Retorna o estado brasileiro ao qual um CEP pertence, a partir das faixas de CEP que os Correios atribuem a cada UF. Funciona offline: nenhuma API de CEP é chamada, então a resposta diz qual estado é dono da faixa, não se o CEP está em uso. Aceita o que o `isValidCep` aceita (8 dígitos, como string ou número, ignorando espaços, pontos e hifens); um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado. Amazonas, Distrito Federal e Goiás têm duas faixas cada, e nenhuma faixa estadual cobre `00000-000` a `00999-999` nem `78900-000` a `78999-999`. A faixa é o bloco que pertence ao estado, não uma garantia de que todo CEP dentro dela está em uso: `10000-000` está sem uso dentro da faixa de São Paulo e ainda assim responde São Paulo. Retorna `null` para um CEP inválido ou fora de todas as faixas. Exporta o tipo `State`.
 
 ```javascript
 import { getStateByCep } from '@brazilian-utils/brazilian-utils';

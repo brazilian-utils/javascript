@@ -1119,7 +1119,7 @@ getStates();
 
 ### getStateByCep
 
-Returns the Brazilian state a CEP belongs to, from the CEP ranges the Correios assign to each state ("Faixa de CEP" per UF). It runs offline: no CEP API is called, so the answer says which state owns the range, not whether the CEP is in use. Accepts what `isValidCep` accepts (8 digits, as a string or a number, with spaces, dots and hyphens ignored); a CEP that starts with `0` has to be a string, and a negative or fractional number is rejected. Amazonas, Distrito Federal and Goiás have two ranges each, and no state owns `00000-000` to `00999-999` nor `78900-000` to `78999-999`. Returns `null` for an invalid CEP or one outside every range. Exports the `State` type.
+Returns the Brazilian state a CEP belongs to, from the CEP ranges the Correios assign to each state ("Faixa de CEP" per UF). It runs offline: no CEP API is called, so the answer says which state owns the range, not whether the CEP is in use. Accepts what `isValidCep` accepts (8 digits, as a string or a number, with spaces, dots and hyphens ignored); a CEP that starts with `0` has to be a string, and a negative or fractional number is rejected. Amazonas, Distrito Federal and Goiás have two ranges each, and no state range covers `00000-000` to `00999-999` nor `78900-000` to `78999-999`. A range is the block the state owns, not a promise that every CEP in it is in use: `10000-000` sits unused inside the São Paulo range and still answers São Paulo. Returns `null` for an invalid CEP or one outside every range. Exports the `State` type.
 
 ```javascript
 import { getStateByCep } from '@brazilian-utils/brazilian-utils';

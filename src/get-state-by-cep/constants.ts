@@ -14,8 +14,9 @@ type CepRange = {
  * CEP ranges of each state ("Faixa de CEP" per UF), as answered by the Correios "Busca Faixa de
  * CEP" search when only the UF is given, in ascending order. Amazonas, Distrito Federal and Goiás
  * have two ranges each: Roraima sits inside the Amazonas block and the Goiás municipalities
- * around Brasília sit inside the Distrito Federal block. No state owns `00000-000` to
- * `00999-999` nor `78900-000` to `78999-999`.
+ * around Brasília sit inside the Distrito Federal block. No range covers `00000-000` to
+ * `00999-999` nor `78900-000` to `78999-999`. A range is the block the state owns, not a promise
+ * that every CEP in it is in use: `10000-000` to `10999-999` sits unused inside the São Paulo one.
  *
  * @see Official: https://buscacepinter.correios.com.br/app/faixa_cep_uf_localidade/index.php
  * @see Based on: https://gist.github.com/tamnil/792a6a66f6df9fc028041587cfca0c3d
