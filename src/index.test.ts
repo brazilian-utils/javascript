@@ -13,6 +13,8 @@ import {
 	type CertidaoType,
 	type Cfop,
 	type Cnae,
+	type CnpjFormat,
+	type CnpjInfo,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
 	type CpfInfo,
@@ -46,6 +48,7 @@ import {
 	type GetBoletoInfoOptions,
 	type GetCepInfoByAddressOptions,
 	type GetCepInfoByAddressParams,
+	type GetCnpjInfoOptions,
 	type GetHolidaysOptions,
 	type GetHolidaysParams,
 	type GetLegalNaturesByCategoryOptions,
@@ -175,6 +178,7 @@ const PUBLIC = [
 	"getCfop",
 	"getCities",
 	"getCnae",
+	"getCnpjInfo",
 	"getCpfInfo",
 	"getFormatLicensePlate",
 	"getHolidays",
@@ -308,6 +312,8 @@ describe("Public API", () => {
 			CertidaoType: CertidaoType;
 			Cfop: Cfop;
 			Cnae: Cnae;
+			CnpjFormat: CnpjFormat;
+			CnpjInfo: CnpjInfo;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
 			CpfInfo: CpfInfo;
@@ -341,6 +347,7 @@ describe("Public API", () => {
 			GetBoletoInfoOptions: GetBoletoInfoOptions;
 			GetCepInfoByAddressOptions: GetCepInfoByAddressOptions;
 			GetCepInfoByAddressParams: GetCepInfoByAddressParams;
+			GetCnpjInfoOptions: GetCnpjInfoOptions;
 			GetHolidaysOptions: GetHolidaysOptions;
 			GetHolidaysParams: GetHolidaysParams;
 			GetLegalNaturesByCategoryOptions: GetLegalNaturesByCategoryOptions;

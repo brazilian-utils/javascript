@@ -62,6 +62,7 @@
 		"./get-cfop": "./src/get-cfop/get-cfop.ts",
 		"./get-cities": "./src/get-cities/get-cities.ts",
 		"./get-cnae": "./src/get-cnae/get-cnae.ts",
+		"./get-cnpj-info": "./src/get-cnpj-info/get-cnpj-info.ts",
 		"./get-cpf-info": "./src/get-cpf-info/get-cpf-info.ts",
 		"./get-format-license-plate": "./src/get-format-license-plate/get-format-license-plate.ts",
 		"./get-holidays": "./src/get-holidays/get-holidays.ts",

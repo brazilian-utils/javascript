@@ -115,6 +115,18 @@ export type Cnae = {
 };
 
 // @public
+export type CnpjFormat = "numeric" | "alphanumeric";
+
+// @public
+export type CnpjInfo = {
+    root: string;
+    order: string;
+    checkDigits: string;
+    format: CnpjFormat;
+    isInitialHeadquarters: boolean;
+};
+
+// @public
 export const convertCurrencyToWords: (value: number) => string;
 
 // @public
@@ -506,6 +518,12 @@ export const getCities: (state?: StateCode) => string[];
 
 // @public
 export const getCnae: (value: string | number) => Cnae | null;
+
+// @public
+export const getCnpjInfo: (value: string, options?: GetCnpjInfoOptions) => CnpjInfo | null;
+
+// @public
+export type GetCnpjInfoOptions = Pick<IsValidCnpjOptions, "version">;
 
 // @public
 export const getCpfInfo: (value: string) => CpfInfo | null;
