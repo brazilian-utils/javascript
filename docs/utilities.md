@@ -1117,6 +1117,25 @@ getStates();
 // ]
 ```
 
+### getStateByCep
+
+Returns the Brazilian state a CEP belongs to, from the CEP ranges the Correios assign to each state ("Faixa de CEP" per UF). It runs offline: no CEP API is called, so the answer says which state owns the range, not whether the CEP is in use. Accepts what `isValidCep` accepts (8 digits, as a string or a number, with spaces, dots and hyphens ignored); a CEP that starts with `0` has to be a string, and a negative or fractional number is rejected. Amazonas, Distrito Federal and Goiás have two ranges each, and no state owns `00000-000` to `00999-999` nor `78900-000` to `78999-999`. Returns `null` for an invalid CEP or one outside every range. Exports the `State` type.
+
+```javascript
+import { getStateByCep } from '@brazilian-utils/brazilian-utils';
+
+getStateByCep('01310-100');
+// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35 }
+
+getStateByCep(20040020);
+// { code: 'RJ', name: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 33 }
+
+getStateByCep('69300-000')?.code; // 'RR'
+getStateByCep('72800-000')?.code; // 'GO'
+getStateByCep('00999-999'); // null
+getStateByCep('12345'); // null
+```
+
 ### getStateByIbgeCode
 
 Get the Brazilian state whose 2-digit IBGE code ("cUF", the Código da Unidade da Federação) matches the given value. This is the same 2-digit UF code found in the first field of every DF-e access key (chave de acesso) issued for any of the models `isValidNfeKey` covers: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62). Accepts a string or a non-negative integer number, stripping any non-digit characters before matching. Exports the `State` type.

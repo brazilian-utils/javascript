@@ -1117,6 +1117,25 @@ getStates();
 // ]
 ```
 
+### getStateByCep
+
+Retorna o estado brasileiro ao qual um CEP pertence, a partir das faixas de CEP que os Correios atribuem a cada UF. Funciona offline: nenhuma API de CEP é chamada, então a resposta diz qual estado é dono da faixa, não se o CEP está em uso. Aceita o que o `isValidCep` aceita (8 dígitos, como string ou número, ignorando espaços, pontos e hifens); um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado. Amazonas, Distrito Federal e Goiás têm duas faixas cada, e nenhum estado é dono de `00000-000` a `00999-999` nem de `78900-000` a `78999-999`. Retorna `null` para um CEP inválido ou fora de todas as faixas. Exporta o tipo `State`.
+
+```javascript
+import { getStateByCep } from '@brazilian-utils/brazilian-utils';
+
+getStateByCep('01310-100');
+// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35 }
+
+getStateByCep(20040020);
+// { code: 'RJ', name: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 33 }
+
+getStateByCep('69300-000')?.code; // 'RR'
+getStateByCep('72800-000')?.code; // 'GO'
+getStateByCep('00999-999'); // null
+getStateByCep('12345'); // null
+```
+
 ### getStateByIbgeCode
 
 Retorna o estado brasileiro cujo código IBGE de 2 dígitos ("cUF", Código da Unidade da Federação) corresponde ao valor informado. É o mesmo código de UF de 2 dígitos presente no primeiro campo de toda chave de acesso de DF-e de qualquer um dos modelos que o `isValidNfeKey` cobre: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) e NFCom (62). Aceita string ou número inteiro não negativo, removendo caracteres não numéricos antes de comparar. Exporta o tipo `State`.
