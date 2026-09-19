@@ -621,6 +621,9 @@ export type GetMunicipalityParams = GetMunicipalityByCodeParams | GetMunicipalit
 export const getNfeKeyInfo: (value: string) => NfeKeyInfo | null;
 
 // @public
+export const getNfseKeyInfo: (value: string) => NfseKeyInfo | null;
+
+// @public
 export const getPixKeyInfo: (value: string) => PixKeyInfo | null;
 
 // @public
@@ -835,6 +838,9 @@ export const isValidNcm: (value: string | number) => boolean;
 export const isValidNfeKey: (value: string) => boolean;
 
 // @public
+export const isValidNfseKey: (value: string) => boolean;
+
+// @public
 export const isValidPassport: (passport: string | number) => boolean;
 
 // @public
@@ -938,6 +944,26 @@ export type NfeKeyInfo = {
 export type NfeKeyModel = "55" | "57" | "58" | "62" | "63" | "64" | "65" | "66" | "67";
 
 // @public
+export type NfseKeyGeneratorEnvironment = 1 | 2;
+
+// @public
+export type NfseKeyInfo = {
+    municipalityCode: string;
+    stateCode: StateCode;
+    generatorEnvironment: NfseKeyGeneratorEnvironment;
+    taxIdType: NfseKeyTaxIdType;
+    taxId: string;
+    number: number;
+    year: number;
+    month: number;
+    code: string;
+    checkDigit: number;
+};
+
+// @public
+export type NfseKeyTaxIdType = "cpf" | "cnpj";
+
+// @public
 export type NumberToWordsGender = "masculine" | "feminine";
 
 // @public
@@ -1010,6 +1036,9 @@ export const parseNcm: (value: string | number) => string;
 
 // @public
 export const parseNfeKey: (value: string | number) => string;
+
+// @public
+export const parseNfseKey: (value: string | number) => string;
 
 // @public
 export const parsePassport: (passport: string) => string;
