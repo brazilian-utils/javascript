@@ -2216,6 +2216,54 @@ removeAccents('Açaí'); // 'Acai'
 removeAccents(''); // ''
 ```
 
+## Standard Schema
+
+### toStandardSchema
+
+Wraps an `isValid*` utility (or any function of the same shape) in a [Standard Schema](https://standardschema.dev), the interface that form libraries, routers and API frameworks accept as a validator whichever library produced it: TanStack Form, tRPC, Hono, react-hook-form and the rest, next to schemas made with Zod, Valibot or ArkType. The types of the specification are copied into the package, so nothing is installed. The schema validates synchronously and does not transform: a valid value comes back as it was given, an invalid one yields a single issue. `config.options` (part of `ToStandardSchemaOptions`) is handed to the validator on every call, and `config.message` is the message of that issue (default `'Invalid value'`). Like the validators it wraps it never throws: a first argument that is not a function gives a schema that rejects everything, and a `message` that is not a string falls back to the default. Validators that take a single object (`isValidBankAccount`, `isValidRegistroProfissional`, `isValidIe`) work the same way, the object being the value under validation; wrap the overloaded `isValidIe` in an arrow function, `toStandardSchema((params) => isValidIe(params))`. The types `StandardSchemaV1`, `StandardSchemaV1Result`, `StandardSchemaV1Issue` and the others of the specification are exported too.
+
+```javascript
+import { isValidCnpj, isValidCpf, toStandardSchema } from '@brazilian-utils/brazilian-utils';
+
+const cpf = toStandardSchema(isValidCpf, { message: 'CPF inválido' });
+
+cpf['~standard'].validate('123.456.789-09'); // { value: '123.456.789-09' }
+cpf['~standard'].validate('123'); // { issues: [{ message: 'CPF inválido' }] }
+
+const cnpj = toStandardSchema(isValidCnpj, { options: { version: 2 } }); // alphanumeric CNPJ
+```
+
+Anything that takes a Standard Schema takes it as is, a TanStack Form field for example:
+
+```javascript
+<form.Field name="cpf" validators={{ onChange: cpf }} />
+```
+
+Inside a Zod or Valibot schema the validators plug in directly, no wrapper needed, and the result is itself a Standard Schema, which is how a whole form is validated with react-hook-form:
+
+```javascript
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
+import { isValidCep, isValidCpf } from '@brazilian-utils/brazilian-utils';
+import { useForm } from 'react-hook-form';
+import * as v from 'valibot';
+import { z } from 'zod';
+
+// Zod
+const zodSchema = z.object({
+  cpf: z.string().refine(isValidCpf, 'CPF inválido'),
+  cep: z.string().refine(isValidCep, 'CEP inválido'),
+});
+
+// Valibot
+const valibotSchema = v.object({
+  cpf: v.pipe(v.string(), v.check(isValidCpf, 'CPF inválido')),
+  cep: v.pipe(v.string(), v.check(isValidCep, 'CEP inválido')),
+});
+
+// react-hook-form, with either one
+const form = useForm({ resolver: standardSchemaResolver(zodSchema) });
+```
+
 ## isValidIe
 
 Check if inscrição estadual (state registration) is valid. The state code is case-insensitive. Notable per-state rules: GO accepts prefixes `10`, `11` and `15`; PA accepts `15` and `75`-`79`; MS accepts `28` and `50`; SP has a produtor rural pattern `P0MMMSSSSD000`; TO uses 11-digit type codes (`01`, `02`, `03`, `99`). TO also accepts a 9-digit form, applying the same modulus 11 rule to the first eight digits; the SINTEGRA page documents only the 11-digit one, so that shape is 2.3.0 behaviour kept for compatibility rather than a published rule. An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike `isValidCpf` and `isValidCnpj`, which reject repeated digits. AM is on that list through the second branch of its published formula only: the page's first branch, `Se Soma < 11 Então Dígito = 11 - Soma`, gives 11 for an all-zero registration, while the `resto <= 1 ⇒ 0` branch, the one implemented here, gives 0. The registration and the state code go together in a single object, typed as `IsValidIeParams`; the 2.3.0 form, `isValidIe(stateCode, ie)`, still works and is deprecated.
