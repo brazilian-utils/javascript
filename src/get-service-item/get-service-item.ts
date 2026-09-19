@@ -24,8 +24,11 @@ export type ServiceItem = {
  * The law numbers a subitem as the item, a dot and two digits, `1.01` to `40.01`. It is accepted
  * in that form, with a zero padded item (`"01.01"`) or as the bare digits (`"0101"`, `"101"`),
  * which are the first four digits of the `cTribNac` code of the national NFS-e, and optional
- * surrounding whitespace. A number is only read when it is a non-negative safe integer, so
- * `101` is `1.01` while the float `1.01` gives `null`: write the dotted form as a string.
+ * surrounding whitespace. The dot is the only separator the law ever prints between the item and
+ * the subitem, so unlike the codes with a printed grouping mask (`getCfop`, `getNbs`) nothing
+ * else is accepted in its place and `"1-01"` gives `null`. A number is only read when it is a
+ * non-negative safe integer, so `101` is `1.01` while the float `1.01` gives `null`: write the
+ * dotted form as a string.
  *
  * Only the subitems in force are in the table. The vetoed ones (`3.01`, `7.14`, `7.15`, `13.01`
  * and `17.07`) give `null`, and so do the item headings (`"1"`), the national codes a subitem is
