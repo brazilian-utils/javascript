@@ -75,7 +75,7 @@ generateCpf('MG'); // the 9th digit is 6, the MG região fiscal code
 
 ### getCpfInfo
 
-Read the fields a CPF encodes, as a `CpfInfo`: the 8 digit `base`, the `fiscalRegion` digit (the 9th digit, the Região Fiscal of the Receita Federal the CPF was registered in, `"1"` to `"9"` and `"0"` for the 10ª), the `states` of that region (`StateCode[]`, sorted by state name) and the 2 `checkDigits`. Accepts the same masked or unmasked input as `isValidCpf` and returns `null` for anything that is not a valid CPF. The region is the one of the address given at the first registration: it tells where the CPF was issued, not where the holder was born or lives, and a region with more than one state does not tell which of them it was.
+Read the fields a CPF encodes, as a `CpfInfo`: the 8 digit `base`, the `fiscalRegion` digit (the 9th digit, the Região Fiscal of the Receita Federal the CPF was registered in, `"1"` to `"9"` and `"0"` for the 10ª), the `states` of that region (`StateCode[]`, sorted by state name) and the 2 `checkDigits`. Accepts the same masked or unmasked input as `isValidCpf` and returns `null` for anything that is not a valid CPF. The region is the one of the address given at the first registration: it says nothing about where the holder was born, lives today or asked for the number, and a region with more than one state does not tell which of them it was.
 
 | `fiscalRegion` | `states` |
 | --- | --- |

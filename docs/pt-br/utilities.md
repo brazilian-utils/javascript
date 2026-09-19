@@ -75,7 +75,7 @@ generateCpf('MG'); // o 9º dígito é 6, o código da região fiscal de MG
 
 ### getCpfInfo
 
-Lê os campos que um CPF codifica, como um `CpfInfo`: a `base` de 8 dígitos, o dígito `fiscalRegion` (o 9º dígito, a Região Fiscal da Receita Federal em que o CPF foi inscrito, `"1"` a `"9"` e `"0"` para a 10ª), os `states` dessa região (`StateCode[]`, ordenados pelo nome do estado) e os 2 `checkDigits`. Aceita a mesma entrada com ou sem máscara que o `isValidCpf` e retorna `null` para tudo que não for um CPF válido. A região é a do endereço informado na primeira inscrição: ela diz onde o CPF foi emitido, não onde o titular nasceu ou mora, e uma região com mais de um estado não diz qual deles foi.
+Lê os campos que um CPF codifica, como um `CpfInfo`: a `base` de 8 dígitos, o dígito `fiscalRegion` (o 9º dígito, a Região Fiscal da Receita Federal em que o CPF foi inscrito, `"1"` a `"9"` e `"0"` para a 10ª), os `states` dessa região (`StateCode[]`, ordenados pelo nome do estado) e os 2 `checkDigits`. Aceita a mesma entrada com ou sem máscara que o `isValidCpf` e retorna `null` para tudo que não for um CPF válido. A região é a do endereço informado na primeira inscrição: ela não diz onde o titular nasceu, onde mora hoje nem onde pediu o número, e uma região com mais de um estado não diz qual deles foi.
 
 | `fiscalRegion` | `states` |
 | --- | --- |
