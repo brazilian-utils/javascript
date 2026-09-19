@@ -627,11 +627,13 @@ isValidSuframa('001234560'); // false (sector 00)
 Format an Inscrição SUFRAMA.
 
 - **Options** (`FormatSuframaOptions`): `pad` left-pads the value with zeros to the full 9 digits before masking (default `false`), which restores the leading zero of an 8 digit value.
+- The mask is progressive, as in the other `format` utilities, so an 8 digit value without `pad` is grouped one position early: use `pad: true` for a value read straight out of the `ISUF` field, which may be stored with 8 digits.
 
 ```javascript
 import { formatSuframa } from '@brazilian-utils/brazilian-utils';
 
 formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018'); // 10.0010.18 (8 digits, the mask groups one position early)
 formatSuframa('10001018', { pad: true }); // 01.0001.018
 ```
 
@@ -657,7 +659,7 @@ import { generateSuframa } from '@brazilian-utils/brazilian-utils';
 generateSuframa(); // '205678106'
 ```
 
-Source: [NF-e Manual de Orientação do Contribuinte 6.0, Anexo XII.01](https://portal.fazenda.sp.gov.br/servicos/nfce/Downloads/Manual_de_Orientacao_Contribuinte_v_6.pdf).
+Source: [NF-e Manual de Orientação do Contribuinte 7.0, Visão Geral](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf) (section 8.4), [MOC 7.0, Anexo I](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-anexo-i-leiaute-e-rv.pdf) (field 79, `E18` `ISUF`, and rule E18-20).
 
 ## Phone
 

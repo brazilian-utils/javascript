@@ -627,11 +627,13 @@ isValidSuframa('001234560'); // false (setor 00)
 Formata uma Inscrição SUFRAMA.
 
 - **Opções** (`FormatSuframaOptions`): `pad` completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos.
+- A máscara é progressiva, como nas outras funções `format`, então um valor de 8 dígitos sem `pad` é agrupado uma posição antes: use `pad: true` para um valor lido direto do campo `ISUF`, que pode vir com 8 dígitos.
 
 ```javascript
 import { formatSuframa } from '@brazilian-utils/brazilian-utils';
 
 formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018'); // 10.0010.18 (8 dígitos, a máscara agrupa uma posição antes)
 formatSuframa('10001018', { pad: true }); // 01.0001.018
 ```
 
@@ -657,7 +659,7 @@ import { generateSuframa } from '@brazilian-utils/brazilian-utils';
 generateSuframa(); // '205678106'
 ```
 
-Fonte: [Manual de Orientação do Contribuinte da NF-e 6.0, Anexo XII.01](https://portal.fazenda.sp.gov.br/servicos/nfce/Downloads/Manual_de_Orientacao_Contribuinte_v_6.pdf).
+Fonte: [Manual de Orientação do Contribuinte da NF-e 7.0, Visão Geral](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf) (seção 8.4), [MOC 7.0, Anexo I](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-anexo-i-leiaute-e-rv.pdf) (campo 79, `E18` `ISUF`, e regra E18-20).
 
 ## Telefone
 

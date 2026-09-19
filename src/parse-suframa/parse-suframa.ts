@@ -14,9 +14,11 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * parseSuframa("12.3456.789"); // "123456789"
  * ```
  *
- * @see Official: https://portal.fazenda.sp.gov.br/servicos/nfce/Downloads/Manual_de_Orientacao_Contribuinte_v_6.pdf
- * Manual de Orientação do Contribuinte da NF-e 6.0, Anexo XII.01 and field E18 (`ISUF`, numeric,
- * 8 or 9 positions).
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
+ * Manual de Orientação do Contribuinte (MOC) NF-e 7.0, Visão Geral, section 8.4, which gives the
+ * composition as `SS.NNNN.LLD`.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-anexo-i-leiaute-e-rv.pdf
+ * MOC 7.0, Anexo I: field 79 (`E18`, `ISUF`) is numeric with 8 to 9 positions.
  */
 export const parseSuframa = (value: string | number): string =>
 	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, SUFRAMA_LENGTH);

@@ -13,7 +13,8 @@ export type FormatSuframaOptions = {
  * number, locality and check digit.
  *
  * An 8 digit value is a number whose sector code lost its leading zero, so format it with
- * `pad: true` to get the zero back.
+ * `pad: true` to get the zero back. The mask is progressive, as in the other `format` utilities,
+ * so an 8 digit value without `pad` is grouped one position early.
  *
  * @param {string|number} value - The Inscrição SUFRAMA to be formatted. It can be a string or a number.
  * @param {FormatSuframaOptions} [options] - Optional formatting options.
@@ -24,12 +25,13 @@ export type FormatSuframaOptions = {
  * ```typescript
  * formatSuframa("123456789"); // "12.3456.789"
  * formatSuframa(123456789); // "12.3456.789"
+ * formatSuframa("10001018"); // "10.0010.18" (8 digits, the mask groups one position early)
  * formatSuframa("10001018", { pad: true }); // "01.0001.018"
  * ```
  *
- * @see Official: https://portal.fazenda.sp.gov.br/servicos/nfce/Downloads/Manual_de_Orientacao_Contribuinte_v_6.pdf
- * Manual de Orientação do Contribuinte da NF-e 6.0, Anexo XII.01, which gives the composition
- * as `SS.NNNN.LLD`.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
+ * Manual de Orientação do Contribuinte (MOC) NF-e 7.0, Visão Geral, section 8.4, which gives the
+ * composition as `SS.NNNN.LLD`.
  */
 export const formatSuframa = (value: string | number, options?: FormatSuframaOptions): string =>
 	isNullish(value)
