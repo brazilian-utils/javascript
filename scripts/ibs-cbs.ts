@@ -128,15 +128,19 @@ const CENTRAL_DIRECTORY_ENTRY = 0x02_01_4b_50;
 const DEFLATE = 8;
 
 /**
- * How much one entry may inflate to. The whole workbook is under 1 MB, so this leaves room for
- * the table to grow while a crafted or corrupted download cannot expand without a bound.
+ * How much one entry may inflate to, and how much the accepted entries may hold together. The
+ * whole workbook is under 1 MB, so both leave room for the table to grow while a crafted or
+ * corrupted download cannot expand without a bound, whether it does so in one entry or across
+ * the thousands of entries a central directory can list.
  */
 const MAXIMUM_ENTRY_SIZE = 64 * 1024 * 1024;
+const MAXIMUM_WORKBOOK_SIZE = 128 * 1024 * 1024;
 
 /**
  * Reads the entries of a zip archive (an xlsx workbook is one) that `isWanted` accepts, through
- * its central directory. Nothing else is decompressed, and inflating stops at
- * `MAXIMUM_ENTRY_SIZE` per entry, which throws `ERR_BUFFER_TOO_LARGE`.
+ * its central directory. Nothing else is decompressed, inflating stops at `MAXIMUM_ENTRY_SIZE`
+ * per entry, which throws `ERR_BUFFER_TOO_LARGE`, and the entries kept stop at
+ * `MAXIMUM_WORKBOOK_SIZE` together.
  * @param {Buffer} zip - The archive.
  * @param {(name: string) => boolean} isWanted - Whether an entry path is one to read.
  * @returns {Map<string, string>} The UTF-8 content of the accepted entries, by path.
@@ -150,6 +154,7 @@ const unzip = (zip: Buffer, isWanted: (name: string) => boolean): Map<string, st
 
 	const files = new Map<string, string>();
 	let offset = zip.readUInt32LE(end + 16);
+	let total = 0;
 
 	for (let index = 0; index < zip.readUInt16LE(end + 10); index += 1) {
 		if (zip.readUInt32LE(offset) !== CENTRAL_DIRECTORY_ENTRY) {
@@ -167,6 +172,14 @@ const unzip = (zip: Buffer, isWanted: (name: string) => boolean): Map<string, st
 			const data = zip.subarray(start, start + compressedSize);
 			const content =
 				method === DEFLATE ? inflateRawSync(data, { maxOutputLength: MAXIMUM_ENTRY_SIZE }) : data;
+
+			total += content.length;
+
+			if (total > MAXIMUM_WORKBOOK_SIZE) {
+				throw new Error(
+					`The entries read out of the downloaded table hold more than ${MAXIMUM_WORKBOOK_SIZE} bytes together; the archive is not the workbook`,
+				);
+			}
 
 			files.set(name, content.toString("utf8"));
 		}
