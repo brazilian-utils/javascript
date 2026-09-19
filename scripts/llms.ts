@@ -57,15 +57,16 @@ function slugify(heading: string): string {
 const ABBREVIATION_PLACEHOLDER = String.fromCharCode(1);
 
 /**
- * Extracts the first sentence of a paragraph, treating `e.g.`/`i.e.` as
- * abbreviations rather than sentence boundaries.
+ * Extracts the first sentence of a paragraph, treating `e.g.`, `i.e.` and `art.` (the way a
+ * Brazilian law article is cited, as in "LGPD, art. 6º III") as abbreviations rather than
+ * sentence boundaries.
  * @param {string} paragraph - The paragraph to extract the first sentence from.
  * @returns {string} The first sentence of `paragraph`.
  */
 function firstSentence(paragraph: string): string {
 	const withoutLinks = paragraph.replaceAll(/\[([^\]]+)\]\([^)]+\)/g, "$1");
 	const protectedText = withoutLinks.replaceAll(
-		/\b(e\.g|i\.e)\./gi,
+		/\b(e\.g|i\.e|art)\./gi,
 		(_match, abbr: string) => `${abbr}${ABBREVIATION_PLACEHOLDER}`,
 	);
 	const match = /[\s\S]*?[.!?](?=\s|$)/.exec(protectedText);
