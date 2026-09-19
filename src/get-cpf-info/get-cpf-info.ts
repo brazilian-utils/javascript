@@ -4,9 +4,11 @@ import { type StateCode } from "../_internals/constants/states";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 
+export type { StateCode } from "../_internals/constants/states";
+
 /** The fields `getCpfInfo` reads out of a CPF. */
 export type CpfInfo = {
-	/** The first 8 digits, the sequential number of the registration. */
+	/** The first 8 digits, the ones ahead of the Região Fiscal digit. */
 	base: string;
 	/**
 	 * The 9th digit, the Região Fiscal of the Receita Federal the CPF was registered in: `"1"` to

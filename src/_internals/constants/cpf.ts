@@ -3,7 +3,7 @@ import { type StateCode } from "./states";
 /** Digits of a CPF. */
 export const CPF_LENGTH = 11;
 
-/** Digits of the base of a CPF, the sequential number ahead of the região fiscal digit. */
+/** Digits of a CPF ahead of the região fiscal digit. */
 export const CPF_BASE_LENGTH = 8;
 
 /**
