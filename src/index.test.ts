@@ -12,6 +12,7 @@ import {
 	type CertidaoInfo,
 	type CertidaoType,
 	type Cfop,
+	type Cid10,
 	type Cnae,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
@@ -115,6 +116,7 @@ const PUBLIC = [
 	"formatCei",
 	"formatCep",
 	"formatCertidao",
+	"formatCid10",
 	"formatCnae",
 	"formatCnh",
 	"formatCno",
@@ -159,6 +161,7 @@ const PUBLIC = [
 	"getCepInfoByAddress",
 	"getCertidaoInfo",
 	"getCfop",
+	"getCid10",
 	"getCities",
 	"getCnae",
 	"getFormatLicensePlate",
@@ -191,6 +194,7 @@ const PUBLIC = [
 	"isValidCep",
 	"isValidCertidao",
 	"isValidCfop",
+	"isValidCid10",
 	"isValidCnae",
 	"isValidCnh",
 	"isValidCno",
@@ -229,6 +233,7 @@ const PUBLIC = [
 	"parseCep",
 	"parseCertidao",
 	"parseCfop",
+	"parseCid10",
 	"parseCnae",
 	"parseCnh",
 	"parseCno",
@@ -289,6 +294,7 @@ describe("Public API", () => {
 			CertidaoInfo: CertidaoInfo;
 			CertidaoType: CertidaoType;
 			Cfop: Cfop;
+			Cid10: Cid10;
 			Cnae: Cnae;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
