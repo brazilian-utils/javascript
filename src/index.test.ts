@@ -15,6 +15,7 @@ import {
 	type Cnae,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
+	type CpfInfo,
 	type FormatBoletoOptions,
 	type FormatCaepfOptions,
 	type FormatCeiOptions,
@@ -161,6 +162,7 @@ const PUBLIC = [
 	"getCfop",
 	"getCities",
 	"getCnae",
+	"getCpfInfo",
 	"getFormatLicensePlate",
 	"getHolidays",
 	"getIbanInfo",
@@ -292,6 +294,7 @@ describe("Public API", () => {
 			Cnae: Cnae;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
+			CpfInfo: CpfInfo;
 			FormatBoletoOptions: FormatBoletoOptions;
 			FormatCaepfOptions: FormatCaepfOptions;
 			FormatCeiOptions: FormatCeiOptions;

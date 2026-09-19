@@ -138,6 +138,14 @@ export type ConvertNumberToWordsOptions = {
 };
 
 // @public
+export type CpfInfo = {
+    base: string;
+    fiscalRegion: string;
+    states: StateCode[];
+    checkDigits: string;
+};
+
+// @public
 export const differenceInBusinessDays: (laterDate: Date, earlierDate: Date, options?: BusinessDayOptions) => number | null;
 
 // @public
@@ -487,6 +495,9 @@ export const getCities: (state?: StateCode) => string[];
 
 // @public
 export const getCnae: (value: string | number) => Cnae | null;
+
+// @public
+export const getCpfInfo: (value: string) => CpfInfo | null;
 
 // @public
 export const getFormatLicensePlate: (value: string) => LicensePlateFormat | null;
