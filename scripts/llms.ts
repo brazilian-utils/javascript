@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { parseFrontMatter } from "./front-matter.ts";
+import { removeUntilStable } from "./remove-until-stable.ts";
 
 const ROOT = join(import.meta.dirname, "..");
 const DOCS_DIR = join(ROOT, "docs");
@@ -17,23 +18,6 @@ type UtilSection = {
 const SLUG_STRIP_PATTERN = /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g;
 const VARIATION_SELECTOR_PATTERN = /\uFE0F/g;
 const EMOJI_PATTERN = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
-
-/**
- * Removes every match of `pattern` repeatedly until nothing changes, so nested or overlapping
- * matches cannot survive a single pass.
- * @param {string} value - The string to strip matches from.
- * @param {RegExp} pattern - The pattern to remove, repeatedly.
- * @returns {string} `value` with every match of `pattern` removed.
- */
-function removeUntilStable(value: string, pattern: RegExp): string {
-	let current = value;
-	let previous = "";
-	while (current !== previous) {
-		previous = current;
-		current = current.replace(pattern, "");
-	}
-	return current;
-}
 
 /**
  * Reproduces docsify's heading-to-anchor slug algorithm (see

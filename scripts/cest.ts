@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 import { decodeEntities } from "./decode-entities.ts";
 import { fetchSortedRecord } from "./fetch-sorted-record.ts";
+import { removeUntilStable } from "./remove-until-stable.ts";
 
 const scriptsDir = import.meta.dirname;
 
@@ -15,6 +16,7 @@ const ANNEX_HEADING_REGEX = /<p class="A6-1Subtitulo"[^>]*>\s*ANEXO ([IVX]+)\s*<
 
 const ROW_REGEX = /<tr[^>]*>(.*?)<\/tr>/gs;
 const CELL_REGEX = /<td[^>]*>(.*?)<\/td>/gs;
+const COMMENT_REGEX = /<!--[\s\S]*?-->/g;
 const TAG_REGEX = /<[^>]+>/g;
 
 /** Anexo I names the segments; Anexos II to XXVI list the goods of one segment each. */
@@ -35,16 +37,23 @@ const SEGMENT_CODE_REGEX = /^\d{2}$/;
  * that introduces a wording is read as well: "Redação anterior ..." and "Redação original ..."
  * head a superseded row, "Nova redação ...", "Acrescido ..." and "Revogado ..." head the row in
  * force.
+ *
+ * Both classes are looked for inside a `class` attribute rather than anywhere in the row, so a
+ * description that happens to carry the word ("milho verde") does not drop the row.
  */
-const SUPERSEDED_CLASS_MARKER = "verde";
-const NOTE_CLASS_MARKER = "Remiss";
+const SUPERSEDED_CLASS_REGEX = /class="[^"]*verde[^"]*"/;
+const NOTE_CLASS_REGEX = /class="[^"]*Remiss[^"]*"/;
 const SUPERSEDED_NOTE_REGEX = /^Redação (?:anterior|original)/;
 
 /** A revoked item keeps its row, with this word in place of the description. */
 const REVOKED_MARKER = "REVOGADO";
 
-/** The date an amendment takes effect from, e.g. `efeitos a partir de 01.02.25`. */
-const EFFECTIVE_FROM_REGEX = /efeitos a partir de (\d{2})\.(\d{2})\.(\d{2})\b/g;
+/**
+ * The date an amendment takes effect from, e.g. `efeitos a partir de 01.02.25`. CONFAZ also
+ * drops "a partir de" (`efeitos 01.06.21. a 31.08.24`, Anexo IV item 5.0) and writes the first
+ * day of a month as an ordinal (`1º.01.27`), so all three spellings are read.
+ */
+const EFFECTIVE_FROM_REGEX = /efeitos(?: a partir)?(?: de)? (1[º°o]|\d{2})\.(\d{2})\.(\d{2})\b/g;
 
 /** The line under the title that lists every convênio the consolidated text carries. */
 const AMENDED_BY_REGEX = /<p class="A2DataPublicacao"[^>]*>(\s*Alterado pel.*?)<\/p>/s;
@@ -58,8 +67,19 @@ const TRAILING_PUNCTUATION_REGEX = /[.;\s]+$/;
  */
 const MINIMUM_CODES = 1000;
 
-const toText = (fragment: string): string =>
-	decodeEntities(fragment.replaceAll(TAG_REGEX, "")).replaceAll(/\s+/g, " ").trim();
+/**
+ * Turns a fragment of the page into the text it renders as. Comments and tags are removed
+ * repeatedly until nothing changes, since a single pass leaves the outer markup of a nested or
+ * overlapping match behind.
+ * @param {string} fragment - The markup to read the text out of.
+ * @returns {string} The text of `fragment`, entities decoded and whitespace collapsed.
+ */
+const toText = (fragment: string): string => {
+	const withoutComments = removeUntilStable(fragment, COMMENT_REGEX);
+	const withoutTags = removeUntilStable(withoutComments, TAG_REGEX);
+
+	return decodeEntities(withoutTags).replaceAll(/\s+/g, " ").trim();
+};
 
 /** Widest a line of the generated header may get, its ` * ` prefix left out. */
 const COMMENT_WIDTH = 90;
@@ -106,8 +126,8 @@ const readRows = (html: string): Row[] =>
 
 		return {
 			cells: [...markup.matchAll(CELL_REGEX)].map((cell) => toText(cell[1] ?? "")),
-			isSuperseded: markup.includes(SUPERSEDED_CLASS_MARKER),
-			isNote: markup.includes(NOTE_CLASS_MARKER),
+			isSuperseded: SUPERSEDED_CLASS_REGEX.test(markup),
+			isNote: NOTE_CLASS_REGEX.test(markup),
 		};
 	});
 
@@ -115,17 +135,37 @@ const readRows = (html: string): Row[] =>
  * Reads Anexo I, whose rows are `ITEM | NOME DO SEGMENTO | CÓDIGO DO SEGMENTO`. The item number
  * and the segment code stopped matching when segments were dropped (item 15 is segment 16), and
  * the first two digits of a CEST are the segment code, so the table is keyed by the last column.
+ *
+ * Superseded rows are skipped the same way the goods annexes skip them, so a re-worded segment
+ * name cannot be overwritten by the previous wording CONFAZ keeps under it.
  * @param {string} html - The markup of Anexo I.
  * @returns {Record<string, string>} The segment names, keyed by the 2 digit segment code.
  */
 const parseSegments = (html: string): Record<string, string> => {
 	const segments: Record<string, string> = {};
+	let isNextSuperseded = false;
 
-	for (const { cells } of readRows(html)) {
-		const [, name, code] = cells;
+	for (const { cells, isSuperseded, isNote } of readRows(html)) {
+		const [item, name, code] = cells;
 
-		if (cells.length !== 3 || name === undefined || code === undefined) continue;
-		if (!SEGMENT_CODE_REGEX.test(code)) continue;
+		if (
+			cells.length !== 3 ||
+			name === undefined ||
+			code === undefined ||
+			!SEGMENT_CODE_REGEX.test(code)
+		) {
+			isNextSuperseded = isNote && SUPERSEDED_NOTE_REGEX.test(item ?? "");
+			continue;
+		}
+
+		const isCurrent = !isSuperseded && !isNextSuperseded;
+		isNextSuperseded = false;
+
+		if (!isCurrent) continue;
+
+		if (code in segments) {
+			throw new Error(`Segment ${code} of Anexo ${SEGMENTS_ANNEX} is listed twice as in force`);
+		}
 
 		segments[code] = name;
 	}
@@ -142,7 +182,9 @@ const parseSegments = (html: string): Record<string, string> => {
  */
 const assertNoPendingAmendment = (html: string, today: Date): void => {
 	for (const [, day, month, year] of toText(html).matchAll(EFFECTIVE_FROM_REGEX)) {
-		const effectiveFrom = new Date(Date.UTC(2000 + Number(year), Number(month) - 1, Number(day)));
+		const effectiveFrom = new Date(
+			Date.UTC(2000 + Number(year), Number(month) - 1, Number.parseInt(day, 10)),
+		);
 
 		if (effectiveFrom > today) {
 			throw new Error(
@@ -153,13 +195,19 @@ const assertNoPendingAmendment = (html: string, today: Date): void => {
 };
 
 /**
- * Reads the rows in force of one goods annex, `ITEM | CEST | NCM/SH | DESCRIÇÃO`.
+ * Reads the rows in force of one goods annex, `ITEM | CEST | NCM/SH | DESCRIÇÃO`, into `goods`.
+ * The annexes share one record so that a CEST listed in two of them fails the same way a CEST
+ * listed twice in one of them does.
  * @param {Annex} annex - One of Anexos II to XXVI.
  * @param {Record<string, string>} segments - The segments of Anexo I.
- * @returns {Record<string, string>} The descriptions in force, keyed by the 7 digits.
+ * @param {Record<string, string>} goods - The descriptions read so far, keyed by the 7 digits.
+ * The rows in force of `annex` are added to it.
  */
-const parseGoods = (annex: Annex, segments: Record<string, string>): Record<string, string> => {
-	const goods: Record<string, string> = {};
+const parseGoods = (
+	annex: Annex,
+	segments: Record<string, string>,
+	goods: Record<string, string>,
+): void => {
 	let annexSegment: string | undefined;
 	let isNextSuperseded = false;
 
@@ -183,7 +231,7 @@ const parseGoods = (annex: Annex, segments: Record<string, string>): Record<stri
 
 		annexSegment ??= segment;
 
-		if (segment === undefined || segment !== annexSegment || segments[segment] === undefined) {
+		if (segment !== annexSegment || segments[segment] === undefined) {
 			throw new Error(
 				`CEST ${cest} of Anexo ${annex.numeral} does not belong to the segment of its annex`,
 			);
@@ -197,8 +245,6 @@ const parseGoods = (annex: Annex, segments: Record<string, string>): Record<stri
 
 		goods[code] = description.replace(TRAILING_PUNCTUATION_REGEX, "");
 	}
-
-	return goods;
 };
 
 const main = async (): Promise<void> => {
@@ -225,7 +271,7 @@ const main = async (): Promise<void> => {
 
 		for (const annex of goodsAnnexes) {
 			assertNoPendingAmendment(annex.html, new Date());
-			Object.assign(data, parseGoods(annex, segments));
+			parseGoods(annex, segments, data);
 		}
 
 		const count = Object.keys(data).length;
@@ -239,9 +285,11 @@ const main = async (): Promise<void> => {
 		return data;
 	});
 
-	const sortedSegments = Object.fromEntries(
-		Object.entries(segments).sort(([a], [b]) => a.localeCompare(b)),
-	);
+	const sortedSegments: Record<string, string> = {};
+
+	for (const code of Object.keys(segments).sort()) {
+		sortedSegments[code] = segments[code];
+	}
 
 	await writeFile(
 		resolve(scriptsDir, "..", "./src/_internals/constants/cest.ts"),
@@ -255,6 +303,10 @@ const main = async (): Promise<void> => {
  * Only the wording in force of each item is kept: the superseded wordings CONFAZ prints next
  * to it and the items marked "REVOGADO" are left out. The NCM/SH column of the annexes is not
  * carried.
+ *
+ * Both tables below are built in ascending code order, which is not the order they read in:
+ * JavaScript lists the keys of an object that look like array indexes before the rest, so
+ * segments 10 to 28 come first and segments 01 to 09 follow, as in \`cbo.ts\` and \`cnae.ts\`.
  *
  * Generated by \`node ./scripts/cest.ts\`. Do not edit by hand.
  *
