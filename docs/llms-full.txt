@@ -33,6 +33,7 @@
   - [getBoletoInfo](#getboletoinfo)
   - [isValidPixKey](#isvalidpixkey)
   - [getPixKeyInfo](#getpixkeyinfo)
+  - [obfuscatePixKey](#obfuscatepixkey)
   - [isValidPixPayload](#isvalidpixpayload)
   - [getPixPayloadInfo](#getpixpayloadinfo)
   - [generatePixPayload](#generatepixpayload)
@@ -147,6 +148,7 @@
   - [removeAccents](#removeaccents)
   - [isValidIe](#isvalidie)
   - [isValidEmail](#isvalidemail)
+  - [obfuscateEmail](#obfuscateemail)
   - [isValidCreditCard](#isvalidcreditcard)
   - [isValidRegistroProfissional](#isvalidregistroprofissional)
   - [isValidVin](#isvalidvin)
@@ -569,6 +571,21 @@ getPixKeyInfo('51998259765'); // { type: 'cpf', value: '51998259765' } (also a v
 getPixKeyInfo('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
 ```
 
+#### obfuscatePixKey
+
+Hides most of a Pix key with `*`, for the places where a key is shown to someone who should only recognize it, such as a list of registered keys (LGPD, art. 6º III, necessidade). The key is identified by `getPixKeyInfo`, under the rules documented there, and each kind is hidden by the utility that already knows how: a CPF by `formatCpf` with `obfuscate` (`***.456.789-**`, the form the Banco Central prints for a "CPF mascarado" in the [Pix user experience manual](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf)), a CNPJ by `formatCnpj` with `obfuscate`, a phone by `formatPhone` with the `"international"` mask and `obfuscate`, and an e-mail by `obfuscateEmail` over the lowercased address. A random key (EVP) is returned whole, lowercased: the [DICT manual](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/X_ManualOperacionaldoDICT.pdf) defines it as a sequence "que não possui qualquer significado, a não ser o de servir como uma chave Pix", so it carries no personal data to hide. Returns an empty string when the value is not a valid Pix key. The user experience manual forbids masking the key on the screen where a payer confirms the recipient, so this is not meant for that screen.
+
+```javascript
+import { obfuscatePixKey } from '@brazilian-utils/brazilian-utils';
+
+obfuscatePixKey('123.456.789-09'); // ***.456.789-**
+obfuscatePixKey('12345678000195'); // **.345.678/0001-**
+obfuscatePixKey('(11) 98765-4321'); // +55 11 *****-**21
+obfuscatePixKey('Fulano@Example.com'); // fu****@ex*********
+obfuscatePixKey('71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D'); // 71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d
+obfuscatePixKey('not a key'); // ''
+```
+
 #### isValidPixPayload
 
 Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, and a matching CRC-16. The "Point of Initiation Method" object (`01`) is advisory: the Manual do BR Code marks it optional and only assigns a meaning to the value `"12"` ("só pode ser utilizado uma vez"), so it may be absent from either shape and only a value outside `{"11", "12"}` makes the payload invalid. When a payload built around a key carries an amount (`54`), that amount must be greater than zero, unless the payload is a Pix Saque BR Code, i.e. unless it carries the ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`) as §2.6 of the Pix manual prescribes; rejecting `"0"`/`"0.00"` without `fss` is a deliberate restriction of this library, not a rule of the manual. A `fss` written next to a PSP location makes the payload invalid: §2.7 of the Manual de Padrões para Iniciação do Pix maps the dynamic QR Code to exactly two sub-objects, `00` (GUI) and `25` (URL), and `fss` belongs to the static template of §2.6. The key itself is not checked against the DICT formats, use `isValidPixKey` for that. Unreserved Templates (IDs 80 to 99) are ignored: the "QR Code composto" of Pix Automático (Pix recorrente) writes its recurrence location in one of them, and when such a payload also carries a payment location in 26-25, as the composite example of the Pix manual does, it is accepted and read as an ordinary dynamic payload with the recurrence location dropped. Only a payload with no Pix template at all in IDs 26 to 51 is reported as invalid.
@@ -720,7 +737,7 @@ isValidPhone('11900000000', { accept: [] }); // false
 
 #### formatPhone
 
-Format phone number according to Brazilian patterns. `options.mask` (typed as `PhoneMask`) accepts `"sn"` (default, subscriber number only, 9 digits, no DDD), `"nanp"` (DDD + subscriber number, `"(00) 00000-0000"` for the 11 digits of a mobile and `"(00) 0000-0000"` for the 10 digits of a landline, any other length keeping the 11 digit grouping), `"e164"` (`"+5511987654321"`), `"international"` (`"+55 11 98765-4321"`, the way a Brazilian number is printed for foreign callers), `"service"` (`"0800 123 4567"` or `"4004-1234"`, the conventional groupings for service numbers) or `"auto"`. `"auto"` picks `"international"` when `value` carries a Brazilian country code (`+55`, `0055` or a bare `55` followed by 10 or 11 digits), `"service"` when `value` is a service number, and otherwise falls back to the digit count: `"nanp"` when `value` has more digits than a bare subscriber number, `"sn"` when it does not. `"e164"` and `"international"` drop the country code from `value` first, under the rule documented in `parsePhone`, and fall back to the `"service"` presentation for a service number, since those have no E.164 form. If `value` includes a DDD, pass `{ mask: 'auto' }` (or `'nanp'`) explicitly, since the default `"sn"` mask assumes no DDD and silently truncates one if present. A `mask` outside the union falls back to the default `"sn"` instead of throwing.
+Format phone number according to Brazilian patterns. `options.mask` (typed as `PhoneMask`) accepts `"sn"` (default, subscriber number only, 9 digits, no DDD), `"nanp"` (DDD + subscriber number, `"(00) 00000-0000"` for the 11 digits of a mobile and `"(00) 0000-0000"` for the 10 digits of a landline, any other length keeping the 11 digit grouping), `"e164"` (`"+5511987654321"`), `"international"` (`"+55 11 98765-4321"`, the way a Brazilian number is printed for foreign callers), `"service"` (`"0800 123 4567"` or `"4004-1234"`, the conventional groupings for service numbers) or `"auto"`. `"auto"` picks `"international"` when `value` carries a Brazilian country code (`+55`, `0055` or a bare `55` followed by 10 or 11 digits), `"service"` when `value` is a service number, and otherwise falls back to the digit count: `"nanp"` when `value` has more digits than a bare subscriber number, `"sn"` when it does not. `"e164"` and `"international"` drop the country code from `value` first, under the rule documented in `parsePhone`, and fall back to the `"service"` presentation for a service number, since those have no E.164 form. If `value` includes a DDD, pass `{ mask: 'auto' }` (or `'nanp'`) explicitly, since the default `"sn"` mask assumes no DDD and silently truncates one if present. A `mask` outside the union falls back to the default `"sn"` instead of throwing. `options.obfuscate` (default `false`) hides the subscriber number under every mask. The [gov.br account](https://acesso.gov.br/faq/_perguntasdafaq/formarrecuperarconta.html) shows the registered mobile as `*********00`, only the last 2 digits, and this keeps that count; the prefix that names a region or a service instead of a subscriber also stays: the DDD, the `0800`-like code and the `300X`/`400X` root. A 3 digit public utility code (`190`) identifies no one and is returned as it is, and a value the `"service"` mask does not recognize is hidden entirely. The obfuscated patterns have a fixed number of slots, so under `"e164"` anything past the 11th national digit is dropped. The option is read for truthiness, so any truthy value obfuscates.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -735,6 +752,13 @@ formatPhone('+5511987654321', { mask: 'international' }); // +55 11 98765-4321
 formatPhone('08001234567', { mask: 'service' }); // 0800 123 4567
 formatPhone('40041234', { mask: 'service' }); // 4004-1234
 formatPhone('+5511987654321', { mask: 'auto' }); // +55 11 98765-4321 ("auto" detects the +55 prefix and picks "international")
+formatPhone('987654321', { obfuscate: true }); // *****-**21
+formatPhone('11987654321', { mask: 'auto', obfuscate: true }); // (11) *****-**21
+formatPhone('1130000000', { mask: 'auto', obfuscate: true }); // (11) ****-**00
+formatPhone('+5511987654321', { mask: 'auto', obfuscate: true }); // +55 11 *****-**21
+formatPhone('11987654321', { mask: 'e164', obfuscate: true }); // +5511*******21
+formatPhone('08001234567', { mask: 'service', obfuscate: true }); // 0800 *** **67
+formatPhone('40041234', { mask: 'service', obfuscate: true }); // 4004-**34
 formatPhone('11900000000'); // 11900-0000 (BEWARE: default "sn" truncates a DDD-prefixed number)
 ```
 
@@ -962,13 +986,14 @@ isValidPis('12056412547'); // false
 
 #### formatPis
 
-Format PIS number. `options.pad` (part of `FormatPisOptions`) left-pads the value with zeros to the full 11 digits before masking (default `false`).
+Format PIS number. `options.pad` (part of `FormatPisOptions`) left-pads the value with zeros to the full 11 digits before masking (default `false`). `options.obfuscate` (same type, default `false`) hides the first 3 digits and the check digit (`***.45678.90-*`), after `pad`. No authority publishes a masking rule for the PIS, so this applies the one [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure. It is read for truthiness, so any truthy value obfuscates.
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
 
 formatPis('12345678901'); // 123.45678.90-1
 formatPis('123456789', { pad: true }); // 001.23456.78-9
+formatPis('12345678901', { obfuscate: true }); // ***.45678.90-*
 ```
 
 #### parsePis
@@ -1752,13 +1777,14 @@ isValidCnh('ab00000000119'); // false (letters are rejected)
 
 #### formatCnh
 
-Format CNH. `options.pad` (part of `FormatCnhOptions`) left-pads the value with zeros to the full 11 digits before masking (default `false`).
+Format CNH. `options.pad` (part of `FormatCnhOptions`) left-pads the value with zeros to the full 11 digits before masking (default `false`). `options.obfuscate` (same type, default `false`) hides the first 3 digits and the 2 check digits (`***503064-**`), after `pad`. No authority publishes a masking rule for the CNH, so this applies the one [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure. It is read for truthiness, so any truthy value obfuscates.
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
 
 formatCnh('02650306461'); // 026503064-61
 formatCnh('2650306461', { pad: true }); // 026503064-61
+formatCnh('02650306461', { obfuscate: true }); // ***503064-**
 ```
 
 #### parseCnh
@@ -1920,12 +1946,13 @@ isValidVoterId(voterId); // true
 
 #### formatVoterId
 
-Format a voter ID number. Uses the 12-digit grouping `0000 0000 00 00` by default; the 13-digit grouping `0000 0000 0 00 00` is used only when the sanitized value has more than 12 digits **and** its federative union code (the 10th and 11th digits) is `01` (São Paulo) or `02` (Minas Gerais), the two states whose voter ids may carry a 9-digit sequential number.
+Format a voter ID number. Uses the 12-digit grouping `0000 0000 00 00` by default; the 13-digit grouping `0000 0000 0 00 00` is used only when the sanitized value has more than 12 digits **and** its federative union code (the 10th and 11th digits) is `01` (São Paulo) or `02` (Minas Gerais), the two states whose voter ids may carry a 9-digit sequential number. `options.obfuscate` (part of `FormatVoterIdOptions`, default `false`) hides the first 3 digits and the 2 check digits (`***4 5678 01 **`), leaving the federative union code visible. No authority publishes a masking rule for the voter id, so this applies the one [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure. It is read for truthiness, so any truthy value obfuscates.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
 
 formatVoterId('123456780175'); // '1234 5678 01 75'
+formatVoterId('123456780175', { obfuscate: true }); // '***4 5678 01 **'
 formatVoterId('1234567880191'); // '1234 5678 8 01 91' (13-digit SP/MG voter id)
 ```
 
@@ -2497,6 +2524,19 @@ Check if email is valid. The accepted set is a practical subset of the WHATWG HT
 import { isValidEmail } from '@brazilian-utils/brazilian-utils';
 
 isValidEmail('john.doe@hotmail.com'); // true
+```
+
+### obfuscateEmail
+
+Hides most of an e-mail address with `*`, for the places where an address is shown to someone who should only recognize it (LGPD, art. 6º III, necessidade). It follows the way the [gov.br account](https://acesso.gov.br/faq/_perguntasdafaq/formarrecuperarconta.html) shows the registered address, `li***********@gm*******`: the first 2 characters of the local part and the first 2 of the domain stay, the `@` stays, and every other character, the dots of the domain included, becomes one `*`, so the length is preserved. The gov.br sample does not cover a local part of 1 or 2 characters, which that rule would show whole, so here such a local part always loses its last character. The value is judged by `isValidEmail` as it comes, with no trimming, and keeps its letter case. Returns an empty string when the value is not a valid e-mail address.
+
+```javascript
+import { obfuscateEmail } from '@brazilian-utils/brazilian-utils';
+
+obfuscateEmail('fulano.silva@example.com'); // fu**********@ex*********
+obfuscateEmail('ab@example.com.br'); // a*@ex************
+obfuscateEmail('a@example.com'); // *@ex*********
+obfuscateEmail('not an e-mail'); // ''
 ```
 
 ### isValidCreditCard
