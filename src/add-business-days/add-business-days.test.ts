@@ -98,6 +98,51 @@ describe("addBusinessDays", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should land on Saturday when it counts (Fri 2024-01-05 + 1 -> Sat 2024-01-06)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+
+		it("should keep skipping the whole weekend without the option (Fri 2024-01-05 + 1 -> Mon 2024-01-08)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 5, 12), 1);
+
+			expect(result).toEqual(new Date(2024, 0, 8, 12));
+		});
+
+		it("should never land on a Sunday (Sat 2024-01-06 + 1 -> Mon 2024-01-08)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 6, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 8, 12));
+		});
+
+		it("should still skip a holiday that falls on a Saturday (Fri 2024-11-01 + 1 -> Mon 2024-11-04, Finados)", () => {
+			const result = addBusinessDays(new Date(2024, 10, 1, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 10, 4, 12));
+		});
+
+		it("should count a full week as six business days (Mon 2024-01-08 + 6 -> Mon 2024-01-15, with Sat 2024-01-13)", () => {
+			expect(addBusinessDays(new Date(2024, 0, 8, 12), 6, { includeSaturday: true })).toEqual(
+				new Date(2024, 0, 15, 12),
+			);
+			expect(addBusinessDays(new Date(2024, 0, 8, 12), 6)).toEqual(new Date(2024, 0, 16, 12));
+		});
+
+		it("should walk backwards over Saturday too (Mon 2024-01-08 - 1 -> Sat 2024-01-06)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 8, 12), -1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+
+		it("should give the same result as no options when includeSaturday is false", () => {
+			expect(addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: false })).toEqual(
+				new Date(2024, 0, 8, 12),
+			);
+		});
+	});
+
 	describe("negative amounts", () => {
 		it("should walk backwards, skipping weekends (Fri 2024-01-05 - 1 -> Thu 2024-01-04)", () => {
 			const result = addBusinessDays(new Date(2024, 0, 5, 12), -1);
@@ -272,26 +317,68 @@ describe("addBusinessDays", () => {
 		});
 	});
 
+	describe("the n-th business day of a month in the labour law count (includeSaturday)", () => {
+		const labour = { includeSaturday: true };
+
+		it("should give the payroll fifth business day of March 2024 (Wed 2024-03-06, Sat 2024-03-02 counted) against the banking one (Thu 2024-03-07)", () => {
+			expect(addBusinessDays(new Date(2024, 2, 0), 5, labour)).toEqual(new Date(2024, 2, 6));
+			expect(addBusinessDays(new Date(2024, 2, 0), 5)).toEqual(new Date(2024, 2, 7));
+		});
+
+		it("should give the payroll fifth business day of February 2024 (Tue 2024-02-06, Sat 2024-02-03 counted) against the banking one (Wed 2024-02-07)", () => {
+			expect(addBusinessDays(new Date(2024, 1, 0), 5, labour)).toEqual(new Date(2024, 1, 6));
+			expect(addBusinessDays(new Date(2024, 1, 0), 5)).toEqual(new Date(2024, 1, 7));
+		});
+
+		it("should give the same fifth business day of November 2024 either way (Thu 2024-11-07), since Sat 2024-11-02 is Finados", () => {
+			expect(addBusinessDays(new Date(2024, 10, 0), 5, labour)).toEqual(new Date(2024, 10, 7));
+			expect(addBusinessDays(new Date(2024, 10, 0), 5)).toEqual(new Date(2024, 10, 7));
+		});
+
+		it("should skip Independência on Saturday 2024-09-07 and count Sat 2024-09-14 as the 11th (Mon 2024-09-16 without the option)", () => {
+			expect(addBusinessDays(new Date(2024, 8, 0), 11, labour)).toEqual(new Date(2024, 8, 14));
+			expect(addBusinessDays(new Date(2024, 8, 0), 11)).toEqual(new Date(2024, 8, 16));
+		});
+
+		it("should give January 2024 its 26 business days (22 plus the Saturdays 6, 13, 20 and 27), the 27th spilling into Thu 2024-02-01", () => {
+			expect(addBusinessDays(new Date(2024, 0, 0), 26, labour)).toEqual(new Date(2024, 0, 31));
+			expect(addBusinessDays(new Date(2024, 0, 0), 27, labour)).toEqual(new Date(2024, 1, 1));
+		});
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should count 26 labour law business days in December 2011, the Friday 30th Samoa skipped not among them", () => {
+			expect(addBusinessDays(new Date(2011, 11, 0), 26, { includeSaturday: true })).toEqual(
+				new Date(2011, 11, 31),
+			);
+		});
+	});
+
 	describe("properties", () => {
 		const amounts = fc.integer({ min: -200, max: 200 });
 
-		test("should give the n-th business day of the month from the last day of the month before", () => {
-			fc.assert(
-				fc.property(
-					businessDayMonths(),
-					fc.integer({ min: 1, max: 23 }),
-					({ year, month, businessDays }, n) => {
-						const result = addBusinessDays(new Date(year, month, 0), n);
+		for (const [count, options] of [
+			["banking", {}],
+			["labour law", { includeSaturday: true }],
+		] as const) {
+			test(`should give the n-th business day of the month from the last day of the month before (${count} count)`, () => {
+				fc.assert(
+					fc.property(
+						businessDayMonths(options),
+						fc.integer({ min: 1, max: 27 }),
+						({ year, month, businessDays }, n) => {
+							const result = addBusinessDays(new Date(year, month, 0), n, options);
 
-						if (n <= businessDays.length) {
-							expect(result).toEqual(businessDays[n - 1]);
-						} else {
-							expect(result?.getMonth()).toBe((month + 1) % 12);
-						}
-					},
-				),
-			);
-		});
+							if (n <= businessDays.length) {
+								expect(result).toEqual(businessDays[n - 1]);
+							} else {
+								expect(result?.getMonth()).toBe((month + 1) % 12);
+							}
+						},
+					),
+				);
+			});
+		}
 
 		test("should give the last business day of the month, walking back 1 from the first day of the month after", () => {
 			fc.assert(
