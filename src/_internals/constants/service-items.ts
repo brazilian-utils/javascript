@@ -18,6 +18,112 @@
  * Sistema Nacional NFS-e, current technical documentation, ANEXO B.
  */
 export const SERVICE_ITEM_DESCRIPTIONS: Record<string, string> = {
+	"0101": "Análise e desenvolvimento de sistemas.",
+	"0102": "Programação.",
+	"0103":
+		"Processamento, armazenamento ou hospedagem de dados, textos, imagens, vídeos, páginas eletrônicas, aplicativos e sistemas de informação, entre outros formatos, e congêneres.",
+	"0104":
+		"Elaboração de programas de computadores, inclusive de jogos eletrônicos, independentemente da arquitetura construtiva da máquina em que o programa será executado, incluindo tablets, smartphones e congêneres.",
+	"0105": "Licenciamento ou cessão de direito de uso de programas de computação.",
+	"0106": "Assessoria e consultoria em informática.",
+	"0107":
+		"Suporte técnico em informática, inclusive instalação, configuração e manutenção de programas de computação e bancos de dados.",
+	"0108": "Planejamento, confecção, manutenção e atualização de páginas eletrônicas.",
+	"0109":
+		"Disponibilização, sem cessão definitiva, de conteúdos de áudio, vídeo, imagem e texto por meio da internet, respeitada a imunidade de livros, jornais e periódicos (exceto a distribuição de conteúdos pelas prestadoras de Serviço de Acesso Condicionado, de que trata a Lei nº 12.485, de 12 de setembro de 2011, sujeita ao ICMS).",
+	"0201": "Serviços de pesquisas e desenvolvimento de qualquer natureza.",
+	"0302": "Cessão de direito de uso de marcas e de sinais de propaganda.",
+	"0303":
+		"Exploração de salões de festas, centro de convenções, escritórios virtuais, stands, quadras esportivas, estádios, ginásios, auditórios, casas de espetáculos, parques de diversões, canchas e congêneres, para realização de eventos ou negócios de qualquer natureza.",
+	"0304":
+		"Locação, sublocação, arrendamento, direito de passagem ou permissão de uso, compartilhado ou não, de ferrovia, rodovia, postes, cabos, dutos e condutos de qualquer natureza.",
+	"0305": "Cessão de andaimes, palcos, coberturas e outras estruturas de uso temporário.",
+	"0401": "Medicina e biomedicina.",
+	"0402":
+		"Análises clínicas, patologia, eletricidade médica, radioterapia, quimioterapia, ultra-sonografia, ressonância magnética, radiologia, tomografia e congêneres.",
+	"0403":
+		"Hospitais, clínicas, laboratórios, sanatórios, manicômios, casas de saúde, prontos-socorros, ambulatórios e congêneres.",
+	"0404": "Instrumentação cirúrgica.",
+	"0405": "Acupuntura.",
+	"0406": "Enfermagem, inclusive serviços auxiliares.",
+	"0407": "Serviços farmacêuticos.",
+	"0408": "Terapia ocupacional, fisioterapia e fonoaudiologia.",
+	"0409": "Terapias de qualquer espécie destinadas ao tratamento físico, orgânico e mental.",
+	"0410": "Nutrição.",
+	"0411": "Obstetrícia.",
+	"0412": "Odontologia.",
+	"0413": "Ortóptica.",
+	"0414": "Próteses sob encomenda.",
+	"0415": "Psicanálise.",
+	"0416": "Psicologia.",
+	"0417": "Casas de repouso e de recuperação, creches, asilos e congêneres.",
+	"0418": "Inseminação artificial, fertilização in vitro e congêneres.",
+	"0419": "Bancos de sangue, leite, pele, olhos, óvulos, sêmen e congêneres.",
+	"0420":
+		"Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
+	"0421": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
+	"0422":
+		"Planos de medicina de grupo ou individual e convênios para prestação de assistência médica, hospitalar, odontológica e congêneres.",
+	"0423":
+		"Outros planos de saúde que se cumpram através de serviços de terceiros contratados, credenciados, cooperados ou apenas pagos pelo operador do plano mediante indicação do beneficiário.",
+	"0501": "Medicina veterinária e zootecnia.",
+	"0502": "Hospitais, clínicas, ambulatórios, prontos-socorros e congêneres, na área veterinária.",
+	"0503": "Laboratórios de análise na área veterinária.",
+	"0504": "Inseminação artificial, fertilização in vitro e congêneres.",
+	"0505": "Bancos de sangue e de órgãos e congêneres.",
+	"0506":
+		"Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
+	"0507": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
+	"0508": "Guarda, tratamento, amestramento, embelezamento, alojamento e congêneres.",
+	"0509": "Planos de atendimento e assistência médico-veterinária.",
+	"0601": "Barbearia, cabeleireiros, manicuros, pedicuros e congêneres.",
+	"0602": "Esteticistas, tratamento de pele, depilação e congêneres.",
+	"0603": "Banhos, duchas, sauna, massagens e congêneres.",
+	"0604": "Ginástica, dança, esportes, natação, artes marciais e demais atividades físicas.",
+	"0605": "Centros de emagrecimento, spa e congêneres.",
+	"0606": "Aplicação de tatuagens, piercings e congêneres.",
+	"0701":
+		"Engenharia, agronomia, agrimensura, arquitetura, geologia, urbanismo, paisagismo e congêneres.",
+	"0702":
+		"Execução, por administração, empreitada ou subempreitada, de obras de construção civil, hidráulica ou elétrica e de outras obras semelhantes, inclusive sondagem, perfuração de poços, escavação, drenagem e irrigação, terraplanagem, pavimentação, concretagem e a instalação e montagem de produtos, peças e equipamentos (exceto o fornecimento de mercadorias produzidas pelo prestador de serviços fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
+	"0703":
+		"Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia.",
+	"0704": "Demolição.",
+	"0705":
+		"Reparação, conservação e reforma de edifícios, estradas, pontes, portos e congêneres (exceto o fornecimento de mercadorias produzidas pelo prestador dos serviços, fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
+	"0706":
+		"Colocação e instalação de tapetes, carpetes, assoalhos, cortinas, revestimentos de parede, vidros, divisórias, placas de gesso e congêneres, com material fornecido pelo tomador do serviço.",
+	"0707": "Recuperação, raspagem, polimento e lustração de pisos e congêneres.",
+	"0708": "Calafetação.",
+	"0709":
+		"Varrição, coleta, remoção, incineração, tratamento, reciclagem, separação e destinação final de lixo, rejeitos e outros resíduos quaisquer.",
+	"0710":
+		"Limpeza, manutenção e conservação de vias e logradouros públicos, imóveis, chaminés, piscinas, parques, jardins e congêneres.",
+	"0711": "Decoração e jardinagem, inclusive corte e poda de árvores.",
+	"0712":
+		"Controle e tratamento de efluentes de qualquer natureza e de agentes físicos, químicos e biológicos.",
+	"0713":
+		"Dedetização, desinfecção, desinsetização, imunização, higienização, desratização, pulverização e congêneres.",
+	"0716":
+		"Florestamento, reflorestamento, semeadura, adubação, reparação de solo, plantio, silagem, colheita, corte e descascamento de árvores, silvicultura, exploração florestal e dos serviços congêneres indissociáveis da formação, manutenção e colheita de florestas, para quaisquer fins e por quaisquer meios.",
+	"0717": "Escoramento, contenção de encostas e serviços congêneres.",
+	"0718":
+		"Limpeza e dragagem de rios, portos, canais, baías, lagos, lagoas, represas, açudes e congêneres.",
+	"0719":
+		"Acompanhamento e fiscalização da execução de obras de engenharia, arquitetura e urbanismo.",
+	"0720":
+		"Aerofotogrametria (inclusive interpretação), cartografia, mapeamento, levantamentos topográficos, batimétricos, geográficos, geodésicos, geológicos, geofísicos e congêneres.",
+	"0721":
+		"Pesquisa, perfuração, cimentação, mergulho, perfilagem, concretação, testemunhagem, pescaria, estimulação e outros serviços relacionados com a exploração e explotação de petróleo, gás natural e de outros recursos minerais.",
+	"0722": "Nucleação e bombardeamento de nuvens e congêneres.",
+	"0801": "Ensino regular pré-escolar, fundamental, médio e superior.",
+	"0802":
+		"Instrução, treinamento, orientação pedagógica e educacional, avaliação de conhecimentos de qualquer natureza.",
+	"0901":
+		"Hospedagem de qualquer natureza em hotéis, apart-service condominiais, flat, apart-hotéis, hotéis residência, residence-service, suite service, hotelaria marítima, motéis, pensões e congêneres; ocupação por temporada com fornecimento de serviço (o valor da alimentação e gorjeta, quando incluído no preço da diária, fica sujeito ao Imposto Sobre Serviços).",
+	"0902":
+		"Agenciamento, organização, promoção, intermediação e execução de programas de turismo, passeios, viagens, excursões, hospedagens e congêneres.",
+	"0903": "Guias de turismo.",
 	"1001":
 		"Agenciamento, corretagem ou intermediação de câmbio, de seguros, de cartões de crédito, de planos de saúde e de planos de previdência privada.",
 	"1002":
@@ -200,112 +306,6 @@ export const SERVICE_ITEM_DESCRIPTIONS: Record<string, string> = {
 	"3901":
 		"Serviços de ourivesaria e lapidação (quando o material for fornecido pelo tomador do serviço).",
 	"4001": "Obras de arte sob encomenda.",
-	"0101": "Análise e desenvolvimento de sistemas.",
-	"0102": "Programação.",
-	"0103":
-		"Processamento, armazenamento ou hospedagem de dados, textos, imagens, vídeos, páginas eletrônicas, aplicativos e sistemas de informação, entre outros formatos, e congêneres.",
-	"0104":
-		"Elaboração de programas de computadores, inclusive de jogos eletrônicos, independentemente da arquitetura construtiva da máquina em que o programa será executado, incluindo tablets, smartphones e congêneres.",
-	"0105": "Licenciamento ou cessão de direito de uso de programas de computação.",
-	"0106": "Assessoria e consultoria em informática.",
-	"0107":
-		"Suporte técnico em informática, inclusive instalação, configuração e manutenção de programas de computação e bancos de dados.",
-	"0108": "Planejamento, confecção, manutenção e atualização de páginas eletrônicas.",
-	"0109":
-		"Disponibilização, sem cessão definitiva, de conteúdos de áudio, vídeo, imagem e texto por meio da internet, respeitada a imunidade de livros, jornais e periódicos (exceto a distribuição de conteúdos pelas prestadoras de Serviço de Acesso Condicionado, de que trata a Lei nº 12.485, de 12 de setembro de 2011, sujeita ao ICMS).",
-	"0201": "Serviços de pesquisas e desenvolvimento de qualquer natureza.",
-	"0302": "Cessão de direito de uso de marcas e de sinais de propaganda.",
-	"0303":
-		"Exploração de salões de festas, centro de convenções, escritórios virtuais, stands, quadras esportivas, estádios, ginásios, auditórios, casas de espetáculos, parques de diversões, canchas e congêneres, para realização de eventos ou negócios de qualquer natureza.",
-	"0304":
-		"Locação, sublocação, arrendamento, direito de passagem ou permissão de uso, compartilhado ou não, de ferrovia, rodovia, postes, cabos, dutos e condutos de qualquer natureza.",
-	"0305": "Cessão de andaimes, palcos, coberturas e outras estruturas de uso temporário.",
-	"0401": "Medicina e biomedicina.",
-	"0402":
-		"Análises clínicas, patologia, eletricidade médica, radioterapia, quimioterapia, ultra-sonografia, ressonância magnética, radiologia, tomografia e congêneres.",
-	"0403":
-		"Hospitais, clínicas, laboratórios, sanatórios, manicômios, casas de saúde, prontos-socorros, ambulatórios e congêneres.",
-	"0404": "Instrumentação cirúrgica.",
-	"0405": "Acupuntura.",
-	"0406": "Enfermagem, inclusive serviços auxiliares.",
-	"0407": "Serviços farmacêuticos.",
-	"0408": "Terapia ocupacional, fisioterapia e fonoaudiologia.",
-	"0409": "Terapias de qualquer espécie destinadas ao tratamento físico, orgânico e mental.",
-	"0410": "Nutrição.",
-	"0411": "Obstetrícia.",
-	"0412": "Odontologia.",
-	"0413": "Ortóptica.",
-	"0414": "Próteses sob encomenda.",
-	"0415": "Psicanálise.",
-	"0416": "Psicologia.",
-	"0417": "Casas de repouso e de recuperação, creches, asilos e congêneres.",
-	"0418": "Inseminação artificial, fertilização in vitro e congêneres.",
-	"0419": "Bancos de sangue, leite, pele, olhos, óvulos, sêmen e congêneres.",
-	"0420":
-		"Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
-	"0421": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
-	"0422":
-		"Planos de medicina de grupo ou individual e convênios para prestação de assistência médica, hospitalar, odontológica e congêneres.",
-	"0423":
-		"Outros planos de saúde que se cumpram através de serviços de terceiros contratados, credenciados, cooperados ou apenas pagos pelo operador do plano mediante indicação do beneficiário.",
-	"0501": "Medicina veterinária e zootecnia.",
-	"0502": "Hospitais, clínicas, ambulatórios, prontos-socorros e congêneres, na área veterinária.",
-	"0503": "Laboratórios de análise na área veterinária.",
-	"0504": "Inseminação artificial, fertilização in vitro e congêneres.",
-	"0505": "Bancos de sangue e de órgãos e congêneres.",
-	"0506":
-		"Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
-	"0507": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
-	"0508": "Guarda, tratamento, amestramento, embelezamento, alojamento e congêneres.",
-	"0509": "Planos de atendimento e assistência médico-veterinária.",
-	"0601": "Barbearia, cabeleireiros, manicuros, pedicuros e congêneres.",
-	"0602": "Esteticistas, tratamento de pele, depilação e congêneres.",
-	"0603": "Banhos, duchas, sauna, massagens e congêneres.",
-	"0604": "Ginástica, dança, esportes, natação, artes marciais e demais atividades físicas.",
-	"0605": "Centros de emagrecimento, spa e congêneres.",
-	"0606": "Aplicação de tatuagens, piercings e congêneres.",
-	"0701":
-		"Engenharia, agronomia, agrimensura, arquitetura, geologia, urbanismo, paisagismo e congêneres.",
-	"0702":
-		"Execução, por administração, empreitada ou subempreitada, de obras de construção civil, hidráulica ou elétrica e de outras obras semelhantes, inclusive sondagem, perfuração de poços, escavação, drenagem e irrigação, terraplanagem, pavimentação, concretagem e a instalação e montagem de produtos, peças e equipamentos (exceto o fornecimento de mercadorias produzidas pelo prestador de serviços fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
-	"0703":
-		"Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia.",
-	"0704": "Demolição.",
-	"0705":
-		"Reparação, conservação e reforma de edifícios, estradas, pontes, portos e congêneres (exceto o fornecimento de mercadorias produzidas pelo prestador dos serviços, fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
-	"0706":
-		"Colocação e instalação de tapetes, carpetes, assoalhos, cortinas, revestimentos de parede, vidros, divisórias, placas de gesso e congêneres, com material fornecido pelo tomador do serviço.",
-	"0707": "Recuperação, raspagem, polimento e lustração de pisos e congêneres.",
-	"0708": "Calafetação.",
-	"0709":
-		"Varrição, coleta, remoção, incineração, tratamento, reciclagem, separação e destinação final de lixo, rejeitos e outros resíduos quaisquer.",
-	"0710":
-		"Limpeza, manutenção e conservação de vias e logradouros públicos, imóveis, chaminés, piscinas, parques, jardins e congêneres.",
-	"0711": "Decoração e jardinagem, inclusive corte e poda de árvores.",
-	"0712":
-		"Controle e tratamento de efluentes de qualquer natureza e de agentes físicos, químicos e biológicos.",
-	"0713":
-		"Dedetização, desinfecção, desinsetização, imunização, higienização, desratização, pulverização e congêneres.",
-	"0716":
-		"Florestamento, reflorestamento, semeadura, adubação, reparação de solo, plantio, silagem, colheita, corte e descascamento de árvores, silvicultura, exploração florestal e dos serviços congêneres indissociáveis da formação, manutenção e colheita de florestas, para quaisquer fins e por quaisquer meios.",
-	"0717": "Escoramento, contenção de encostas e serviços congêneres.",
-	"0718":
-		"Limpeza e dragagem de rios, portos, canais, baías, lagos, lagoas, represas, açudes e congêneres.",
-	"0719":
-		"Acompanhamento e fiscalização da execução de obras de engenharia, arquitetura e urbanismo.",
-	"0720":
-		"Aerofotogrametria (inclusive interpretação), cartografia, mapeamento, levantamentos topográficos, batimétricos, geográficos, geodésicos, geológicos, geofísicos e congêneres.",
-	"0721":
-		"Pesquisa, perfuração, cimentação, mergulho, perfilagem, concretação, testemunhagem, pescaria, estimulação e outros serviços relacionados com a exploração e explotação de petróleo, gás natural e de outros recursos minerais.",
-	"0722": "Nucleação e bombardeamento de nuvens e congêneres.",
-	"0801": "Ensino regular pré-escolar, fundamental, médio e superior.",
-	"0802":
-		"Instrução, treinamento, orientação pedagógica e educacional, avaliação de conhecimentos de qualquer natureza.",
-	"0901":
-		"Hospedagem de qualquer natureza em hotéis, apart-service condominiais, flat, apart-hotéis, hotéis residência, residence-service, suite service, hotelaria marítima, motéis, pensões e congêneres; ocupação por temporada com fornecimento de serviço (o valor da alimentação e gorjeta, quando incluído no preço da diária, fica sujeito ao Imposto Sobre Serviços).",
-	"0902":
-		"Agenciamento, organização, promoção, intermediação e execução de programas de turismo, passeios, viagens, excursões, hospedagens e congêneres.",
-	"0903": "Guias de turismo.",
 };
 
 /**

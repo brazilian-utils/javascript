@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 import { readXlsxSheet } from "./read-xlsx-sheet.ts";
+import { serializeRecord } from "./serialize-record.ts";
 
 const scriptsDir = import.meta.dirname;
 
@@ -81,11 +82,8 @@ const main = async (): Promise<void> => {
 	const workbookResponse = await fetchOk(link, "NFS-e ANEXO B");
 	const workbook = await workbookResponse.arrayBuffer();
 	const data = parseSheet(readXlsxSheet(Buffer.from(workbook), SHEET_NAME));
-	const sorted: Record<string, string> = {};
 
-	for (const key of Object.keys(data).sort()) sorted[key] = data[key];
-
-	if (Object.keys(sorted).length < MINIMUM_SUBITEMS) {
+	if (Object.keys(data).length < MINIMUM_SUBITEMS) {
 		throw new Error(`the national service list holds fewer than ${MINIMUM_SUBITEMS} subitems`);
 	}
 
@@ -110,7 +108,7 @@ const main = async (): Promise<void> => {
  * @see Official: ${DOCUMENTATION_URL}
  * Sistema Nacional NFS-e, current technical documentation, ANEXO B.
  */
-export const SERVICE_ITEM_DESCRIPTIONS: Record<string, string> = ${JSON.stringify(sorted)};
+export const SERVICE_ITEM_DESCRIPTIONS: Record<string, string> = ${serializeRecord(data)};
 
 /**
  * Shape a subitem has to be written in: one or two digits of the item and the two of the
