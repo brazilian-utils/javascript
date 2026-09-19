@@ -5,8 +5,8 @@
 	"newlineKind": "lf",
 	"apiReport": {
 		"enabled": true,
-		"reportFolder": "<projectFolder>/reports/api/",
-		"reportTempFolder": "<projectFolder>/reports/api/temp/",
+		"reportFolder": "<projectFolder>/node_modules/.cache/api-extractor/",
+		"reportTempFolder": "<projectFolder>/node_modules/.cache/api-extractor/temp/",
 		"reportFileName": "brazilian-utils.api.md"
 	},
 	"docModel": {
