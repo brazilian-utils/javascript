@@ -84,6 +84,9 @@ import {
 	type Municipality,
 	type NfeKeyInfo,
 	type NfeKeyModel,
+	type NfseKeyGeneratorEnvironment,
+	type NfseKeyInfo,
+	type NfseKeyTaxIdType,
 	type NumberToWordsGender,
 	type ParseCnpjOptions,
 	type ParseCurrencyOptions,
@@ -195,6 +198,7 @@ const PUBLIC = [
 	"getMunicipality",
 	"getMunicipalityByCode",
 	"getNfeKeyInfo",
+	"getNfseKeyInfo",
 	"getPixKeyInfo",
 	"getPixPayloadInfo",
 	"getStateByCep",
@@ -236,6 +240,7 @@ const PUBLIC = [
 	"isValidMobilePhone",
 	"isValidNcm",
 	"isValidNfeKey",
+	"isValidNfseKey",
 	"isValidPIS",
 	"isValidPassport",
 	"isValidPhone",
@@ -268,6 +273,7 @@ const PUBLIC = [
 	"parseLicensePlate",
 	"parseNcm",
 	"parseNfeKey",
+	"parseNfseKey",
 	"parsePassport",
 	"parsePhone",
 	"parsePis",
@@ -390,6 +396,9 @@ describe("Public API", () => {
 			Municipality: Municipality;
 			NfeKeyInfo: NfeKeyInfo;
 			NfeKeyModel: NfeKeyModel;
+			NfseKeyGeneratorEnvironment: NfseKeyGeneratorEnvironment;
+			NfseKeyInfo: NfseKeyInfo;
+			NfseKeyTaxIdType: NfseKeyTaxIdType;
 			NumberToWordsGender: NumberToWordsGender;
 			ParseCnpjOptions: ParseCnpjOptions;
 			ParseCurrencyOptions: ParseCurrencyOptions;
