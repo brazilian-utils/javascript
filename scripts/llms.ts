@@ -246,6 +246,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [Getting started](${SITE}/getting-started.md): installation, runtime support, usage and bundle size/subpath imports
 - [Utilities](${SITE}/utilities.md): full English reference, one section per function, with signatures and examples
 - [Bundle size](${SITE}/getting-started.md#bundle-size): tree-shaking behavior and the dataset-backed utils that are worth a subpath import
+- [Examples](${SITE}/examples.md): a CPF field that formats as you type and validates, in React, Vue, Angular and plain JavaScript
 
 ${groupSections}
 

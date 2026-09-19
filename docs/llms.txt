@@ -21,6 +21,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [Getting started](https://brazilian-utils.com.br/getting-started.md): installation, runtime support, usage and bundle size/subpath imports
 - [Utilities](https://brazilian-utils.com.br/utilities.md): full English reference, one section per function, with signatures and examples
 - [Bundle size](https://brazilian-utils.com.br/getting-started.md#bundle-size): tree-shaking behavior and the dataset-backed utils that are worth a subpath import
+- [Examples](https://brazilian-utils.com.br/examples.md): a CPF field that formats as you type and validates, in React, Vue, Angular and plain JavaScript
 
 ## Validators (isValid*)
 

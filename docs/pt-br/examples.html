@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Playground · Brazilian Utils</title>
-  <meta name="description" content="Experimente qualquer função do Brazilian Utils no navegador: escolha a função, edite os argumentos e veja o resultado, rodando a última versão publicada." />
+  <title>Exemplos · Brazilian Utils</title>
+  <meta name="description" content="Um campo de CPF que formata enquanto você digita e valida o resultado, com Brazilian Utils em React, Vue, Angular e JavaScript puro." />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#009739" />
@@ -15,25 +15,25 @@
        hook further down rewrites the title, description, canonical, hreflang and Open Graph tags for
        the page being shown; the values here are the home page's, what a crawler without JavaScript
        and a link preview see. -->
-  <link rel="canonical" href="https://brazilian-utils.com.br/pt-br/playground" />
-  <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/playground" />
-  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/playground" />
-  <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/playground" />
+  <link rel="canonical" href="https://brazilian-utils.com.br/pt-br/examples" />
+  <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/examples" />
+  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/examples" />
+  <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/examples" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <!-- The Markdown behind the site, for agents that look for it: the per-util index, the whole
        English documentation in one file, and (rewritten per page by the hook) the page's own source -->
   <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
   <link rel="alternate" type="text/plain" href="/llms-full.txt" title="llms-full.txt" />
-  <link rel="alternate" type="text/markdown" href="https://brazilian-utils.com.br/pt-br/playground.md" title="Markdown source" />
+  <link rel="alternate" type="text/markdown" href="https://brazilian-utils.com.br/pt-br/examples.md" title="Markdown source" />
   <!-- docsify's scripts and styles load without CORS, so that preconnect must not be `crossorigin`;
        the README is fetched with XHR, so that one must -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Brazilian Utils" />
-  <meta property="og:title" content="Playground · Brazilian Utils" />
-  <meta property="og:description" content="Experimente qualquer função do Brazilian Utils no navegador: escolha a função, edite os argumentos e veja o resultado, rodando a última versão publicada." />
-  <meta property="og:url" content="https://brazilian-utils.com.br/pt-br/playground" />
+  <meta property="og:title" content="Exemplos · Brazilian Utils" />
+  <meta property="og:description" content="Um campo de CPF que formata enquanto você digita e valida o resultado, com Brazilian Utils em React, Vue, Angular e JavaScript puro." />
+  <meta property="og:url" content="https://brazilian-utils.com.br/pt-br/examples" />
   <meta property="og:locale" content="pt_BR" />
   <meta property="og:locale:alternate" content="en_US" />
   <meta property="og:image" content="https://brazilian-utils.com.br/images/logo.png" />
@@ -102,26 +102,15 @@
       --cover-bg-overlay: none;
     }
 
-    /* The "try it" playground (playground.md, playground.js) */
-    .playground label { display: block; margin: 1em 0 0.35em; font-weight: 600; }
-    .playground select, .playground textarea {
-      width: 100%; box-sizing: border-box; padding: 0.6em 0.75em; border-radius: 6px;
-      border: 1px solid var(--border-color, #444); background: var(--code-bg, #22262b); color: inherit;
-      font: 0.95em/1.5 var(--font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    /* The live CPF field of examples.md */
+    .cpf-demo { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em 0.75em; }
+    .cpf-demo label { font-weight: 600; }
+    .cpf-demo input {
+      width: 12em; padding: 0.55em 0.75em; border-radius: 6px; border: 1px solid var(--border-color, #444);
+      background: var(--code-bg, #22262b); color: inherit; font: 1em var(--font-family-mono, ui-monospace, monospace);
     }
-    .playground button {
-      margin-top: 0.75em; padding: 0.55em 1.4em; border: 0; border-radius: 6px; cursor: pointer;
-      background: var(--theme-color); color: #fff; font-weight: 600;
-    }
-    .playground button:focus-visible, .playground select:focus-visible, .playground textarea:focus-visible {
-      outline: 2px solid var(--theme-color); outline-offset: 2px;
-    }
-    .playground-hint, .playground-version { margin: 0.4em 0; font-size: 0.9em; opacity: 0.75; }
-    .playground pre {
-      white-space: pre-wrap; word-break: break-word; max-height: 28em; overflow: auto;
-      padding: 0.9em 1em; border-radius: 6px; background: var(--code-bg, #22262b);
-    }
-    .playground pre code { padding: 0; background: none; }
+    .cpf-demo input:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
+    .cpf-demo output { display: inline; margin: 0; padding: 0; border: 0; background: none; font-weight: 600; }
   </style>
 </head>
 
@@ -184,18 +173,22 @@
             return title ? '# ' + title + '\n\n' + content : content;
           });
         },
-        // The "try it" playground: a page with a #try-it element (playground.md) gets
-        // playground.js, loaded once and on that page only, which imports the published package
-        // from a CDN.
+        // The live CPF field of examples.md: formats as you type and validates the result, with the
+        // latest release imported from a CDN on that page only.
         function (hook) {
           hook.doneEach(function () {
-            var root = document.getElementById('try-it');
-            if (!root) return;
-            if (window.BrazilianUtilsPlayground) return window.BrazilianUtilsPlayground(root);
-            var script = document.createElement('script');
-            script.src = '/playground.js';
-            script.onload = function () { window.BrazilianUtilsPlayground(root); };
-            document.body.appendChild(script);
+            var demo = document.querySelector('.cpf-demo');
+            if (!demo) return;
+            var input = demo.querySelector('input');
+            var output = demo.querySelector('output');
+            import('https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm').then(function (utils) {
+              input.addEventListener('input', function () {
+                input.value = utils.formatCpf(input.value);
+                output.textContent = input.value.length === 14
+                  ? (utils.isValidCpf(input.value) ? demo.dataset.valid : demo.dataset.invalid)
+                  : '';
+              });
+            });
           });
         },
         // Per-page metadata for search engines and link previews: the title, description,

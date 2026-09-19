@@ -20,9 +20,7 @@
 		"_coverpage.md",
 		"llms.txt",
 		"llms-full.txt",
-		"robots.txt",
-		"playground.md",
-		"playground.js"
+		"robots.txt"
 	],
 	"previousVersions": [
 		{

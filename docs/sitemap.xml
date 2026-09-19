@@ -18,10 +18,10 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/utilities" />
   </url>
   <url>
-    <loc>https://brazilian-utils.com.br/playground</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/playground" />
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/playground" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/playground" />
+    <loc>https://brazilian-utils.com.br/examples</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/examples" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/examples" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/examples" />
   </url>
   <url>
     <loc>https://brazilian-utils.com.br/migration-v1-to-v2</loc>
@@ -42,10 +42,10 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/utilities" />
   </url>
   <url>
-    <loc>https://brazilian-utils.com.br/pt-br/playground</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/playground" />
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/playground" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/playground" />
+    <loc>https://brazilian-utils.com.br/pt-br/examples</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/examples" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/examples" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/examples" />
   </url>
   <url>
     <loc>https://brazilian-utils.com.br/pt-br/migration-v1-to-v2</loc>
