@@ -225,7 +225,7 @@ function buildLlmsTxt(utils: UtilSection[], datasetUtils: string[]): string {
 
 	return `# Brazilian Utils
 
-> Brazilian Utils is a zero-dependency JavaScript/TypeScript library of small, focused utilities for the day-to-day problems of building software for Brazilian businesses: validating, formatting, parsing and generating documents (CPF, CNPJ, CEP, Pix, boleto, NF-e, phone numbers, license plates and more).
+> Brazilian Utils is a zero-dependency JavaScript/TypeScript library of small, focused utilities for the day-to-day problems of building software for Brazil: validating, formatting, parsing and generating CPF, CNPJ, CEP, Pix, boleto, NF-e, phone numbers, license plates and more.
 
 The package has **zero runtime dependencies**, is fully tree-shakeable and runs on Node.js \`^20.19.0 || >=22.12.0\`, Bun, Deno and modern browsers (including a UMD \`<script>\` build).
 
@@ -301,7 +301,7 @@ function buildLlmsFullTxt(
 
 	return `# Brazilian Utils
 
-> Brazilian Utils is a zero-dependency JavaScript/TypeScript library of small, focused utilities for the day-to-day problems of building software for Brazilian businesses. This file concatenates the full English documentation (getting started + utilities reference) in one Markdown document for LLM context loading.
+> Brazilian Utils is a zero-dependency JavaScript/TypeScript library of small, focused utilities for the day-to-day problems of building software for Brazil. This file concatenates the full English documentation (getting started + utilities reference) in one Markdown document for LLM context loading.
 
 ## Table of contents
 
