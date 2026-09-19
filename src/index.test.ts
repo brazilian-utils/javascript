@@ -173,6 +173,7 @@ const PUBLIC = [
 	"getNfeKeyInfo",
 	"getPixKeyInfo",
 	"getPixPayloadInfo",
+	"getStateByCep",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
 	"getStateNameByCode",

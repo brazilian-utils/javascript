@@ -79,6 +79,7 @@
   - [convertCurrencyToWords](#convertcurrencytowords)
   - [convertDateToWords](#convertdatetowords)
   - [getStates](#getstates)
+  - [getStateByCep](#getstatebycep)
   - [getStateByIbgeCode](#getstatebyibgecode)
   - [getStateCodeByName](#getstatecodebyname)
   - [getStateNameByCode](#getstatenamebycode)
@@ -1377,6 +1378,25 @@ getStates();
 //   { code: 'SE', name: 'Sergipe', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 28 },
 //   { code: 'TO', name: 'Tocantins', regionCode: 'N', regionName: 'Norte', ibgeCode: 17 },
 // ]
+```
+
+#### getStateByCep
+
+Returns the Brazilian state a CEP belongs to, from the CEP ranges the Correios assign to each state ("Faixa de CEP" per UF). It runs offline: no CEP API is called, so the answer says which state owns the range, not whether the CEP is in use. Accepts what `isValidCep` accepts (8 digits, as a string or a number, with spaces, dots and hyphens ignored); a CEP that starts with `0` has to be a string, and a negative or fractional number is rejected. Amazonas, Distrito Federal and Goiás have two ranges each, and no state range covers `00000-000` to `00999-999` nor `78900-000` to `78999-999`. A range is the block the state owns, not a promise that every CEP in it is in use: `10000-000` sits unused inside the São Paulo range and still answers São Paulo. Returns `null` for an invalid CEP or one outside every range. Exports the `State` type.
+
+```javascript
+import { getStateByCep } from '@brazilian-utils/brazilian-utils';
+
+getStateByCep('01310-100');
+// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35 }
+
+getStateByCep(20040020);
+// { code: 'RJ', name: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 33 }
+
+getStateByCep('69300-000')?.code; // 'RR'
+getStateByCep('72800-000')?.code; // 'GO'
+getStateByCep('00999-999'); // null
+getStateByCep('12345'); // null
 ```
 
 #### getStateByIbgeCode

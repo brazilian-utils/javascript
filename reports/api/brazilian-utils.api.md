@@ -576,6 +576,9 @@ export const getPixKeyInfo: (value: string) => PixKeyInfo | null;
 export const getPixPayloadInfo: (value: string) => PixPayloadInfo | null;
 
 // @public
+export const getStateByCep: (value: string | number) => State | null;
+
+// @public
 export const getStateByIbgeCode: (code: string | number) => State | null;
 
 // @public
