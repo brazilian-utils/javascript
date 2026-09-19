@@ -1,29 +1,53 @@
 /*
  * "Run" buttons for the guide pages (docs/guides, docs/pt-br/guides).
  *
- * A docsify plugin: after a guide page renders, every code block that is a complete example (an
- * `html` document, or a `jsx`/`tsx`/`vue` block with a default export) gets a Run button. Clicking
- * it compiles the block in the page (JSX through sucrase, a single-file component through
- * @vue/compiler-sfc, both loaded on demand from the CDN) and runs the result in a sandboxed iframe
- * under the block, with an import map that resolves the bare imports (`react`, `vue`, `zod`,
- * `valibot` and the package itself) to the CDN.
+ * A docsify plugin: after a guide page renders, every code block that is a complete example gets a
+ * Run button: an `html` document, a `jsx`/`tsx` block with a default export (React), a `vue`
+ * single-file component, or a `typescript` block whose default export is an `@Component`
+ * (Angular). Nothing is downloaded until the button is clicked. Then the block is compiled in the
+ * page (JSX through sucrase, a single-file component through @vue/compiler-sfc, an Angular
+ * component through Babel with the TypeScript preset and legacy decorators, each loaded from the
+ * CDN on first use) and runs in a sandboxed iframe under the block, with an import map that
+ * resolves the bare imports (`react`, `vue`, `@angular/*`, `zod`, `valibot` and the package
+ * itself) to the CDN. The iframe fetches those modules only at that point.
  *
- * `window.$docsify.run` overrides the CDN URLs (`importMap`, `sucrase`, `compilerSfc`), which is
- * how the local test runs the examples against copies of the modules.
+ * The versions are pinned to the latest releases at the time of writing; bump them here.
+ * `window.$docsify.run` overrides the URLs (`importMap`, `sucrase`, `compilerSfc`, `babel`),
+ * which is how the local test runs the examples against copies of the modules.
  */
 (function () {
+  var CDN = 'https://cdn.jsdelivr.net/npm/';
+  var VERSIONS = {
+    react: '19.3.0',
+    vue: '3.5.43',
+    angular: '22.1.7',
+    rxjs: '7.8.2',
+    zod: '4.6.5',
+    valibot: '1.5.0',
+    sucrase: '3.35.1',
+    babel: '7.29.9',
+  };
+
   var DEFAULTS = {
     importMap: {
-      '@brazilian-utils/brazilian-utils': 'https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm',
-      react: 'https://cdn.jsdelivr.net/npm/react@19.3.0/+esm',
-      'react/jsx-runtime': 'https://cdn.jsdelivr.net/npm/react@19.3.0/jsx-runtime/+esm',
-      'react-dom/client': 'https://cdn.jsdelivr.net/npm/react-dom@19.3.0/client/+esm',
-      vue: 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.esm-browser.prod.js',
-      zod: 'https://cdn.jsdelivr.net/npm/zod@4/+esm',
-      valibot: 'https://cdn.jsdelivr.net/npm/valibot@1/+esm',
+      '@brazilian-utils/brazilian-utils': CDN + '@brazilian-utils/brazilian-utils/+esm',
+      react: CDN + 'react@' + VERSIONS.react + '/+esm',
+      'react/jsx-runtime': CDN + 'react@' + VERSIONS.react + '/jsx-runtime/+esm',
+      'react-dom/client': CDN + 'react-dom@' + VERSIONS.react + '/client/+esm',
+      vue: CDN + 'vue@' + VERSIONS.vue + '/dist/vue.esm-browser.prod.js',
+      '@angular/core': CDN + '@angular/core@' + VERSIONS.angular + '/+esm',
+      '@angular/common': CDN + '@angular/common@' + VERSIONS.angular + '/+esm',
+      '@angular/forms': CDN + '@angular/forms@' + VERSIONS.angular + '/+esm',
+      '@angular/platform-browser': CDN + '@angular/platform-browser@' + VERSIONS.angular + '/+esm',
+      '@angular/compiler': CDN + '@angular/compiler@' + VERSIONS.angular + '/+esm',
+      rxjs: CDN + 'rxjs@' + VERSIONS.rxjs + '/+esm',
+      'rxjs/operators': CDN + 'rxjs@' + VERSIONS.rxjs + '/operators/+esm',
+      zod: CDN + 'zod@' + VERSIONS.zod + '/+esm',
+      valibot: CDN + 'valibot@' + VERSIONS.valibot + '/+esm',
     },
-    sucrase: 'https://cdn.jsdelivr.net/npm/sucrase@3.35.1/+esm',
-    compilerSfc: 'https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@3.5.43/dist/compiler-sfc.esm-browser.js',
+    sucrase: CDN + 'sucrase@' + VERSIONS.sucrase + '/+esm',
+    compilerSfc: CDN + '@vue/compiler-sfc@' + VERSIONS.vue + '/dist/compiler-sfc.esm-browser.js',
+    babel: CDN + '@babel/standalone@' + VERSIONS.babel + '/babel.min.js',
   };
 
   var TEXT = {
@@ -53,9 +77,24 @@
 
   var loaders = {};
 
-  /** Loads a module from the CDN once and caches the promise. */
+  /** Loads an ES module from the CDN once and caches the promise. */
   function load(url) {
     if (!loaders[url]) loaders[url] = import(/* webpackIgnore: true */ url);
+    return loaders[url];
+  }
+
+  /** Loads a classic script (Babel standalone is one) once and resolves with the global it defines. */
+  function loadScript(url, globalName) {
+    if (!loaders[url]) {
+      loaders[url] = new Promise(function (resolve, reject) {
+        if (window[globalName]) return resolve(window[globalName]);
+        var script = document.createElement('script');
+        script.src = url;
+        script.onload = function () { resolve(window[globalName]); };
+        script.onerror = function () { reject(new Error('Could not load ' + url)); };
+        document.head.appendChild(script);
+      });
+    }
     return loaders[url];
   }
 
@@ -67,8 +106,8 @@
     return 'data:text/javascript;base64,' + btoa(unescape(encodeURIComponent(code)));
   }
 
-  function importMapTag(extra) {
-    return '<script type="importmap">' + JSON.stringify({ imports: Object.assign({}, config.importMap, extra || {}) }) + '</script>';
+  function importMapTag(imports) {
+    return '<script type="importmap">' + JSON.stringify({ imports: imports }) + '</script>';
   }
 
   function document_(body, head) {
@@ -76,16 +115,20 @@
       '<script>' + FRAME_BOOT + '</script></head><body>' + body + '</body></html>';
   }
 
+  /** Wraps the boot of an example: the imports it needs and the user's module, mounted on the page. */
+  function bootDocument(mount, boot, head) {
+    return document_(mount + '<script type="module">try {' + escapeScript(boot) + '} catch (error) { __report(error); }</script>', importMapTag(config.importMap) + (head || ''));
+  }
+
   /** A React example: JSX compiled by sucrase, the default export mounted on #app. */
   function reactDocument(code) {
     return load(config.sucrase).then(function (sucrase) {
       var js = sucrase.transform(code, { transforms: ['jsx', 'typescript'], jsxRuntime: 'automatic', production: true }).code;
-      var boot =
-        'try {' +
+      return bootDocument(
+        '<div id="app"></div>',
         'const [{ createElement }, { createRoot }, mod] = await Promise.all([import("react"), import("react-dom/client"), import(' + JSON.stringify(moduleUrl(js)) + ')]);' +
-        'createRoot(document.getElementById("app")).render(createElement(mod.default));' +
-        '} catch (error) { __report(error); }';
-      return document_('<div id="app"></div><script type="module">' + escapeScript(boot) + '</script>', importMapTag());
+        'createRoot(document.getElementById("app")).render(createElement(mod.default));'
+      );
     });
   }
 
@@ -112,12 +155,32 @@
       }
       js += '\nexport default __sfc__;';
       var css = descriptor.styles.map(function (style) { return style.content; }).join('\n');
-      var boot =
-        'try {' +
+      return bootDocument(
+        '<div id="app"></div>',
         'const [{ createApp }, mod] = await Promise.all([import("vue"), import(' + JSON.stringify(moduleUrl(js)) + ')]);' +
-        'createApp(mod.default).mount("#app");' +
-        '} catch (error) { __report(error); }';
-      return document_('<div id="app"></div><script type="module">' + escapeScript(boot) + '</script>', importMapTag() + '<style>' + css + '</style>');
+        'createApp(mod.default).mount("#app");',
+        '<style>' + css + '</style>'
+      );
+    });
+  }
+
+  /**
+   * An Angular example: TypeScript and the decorators compiled by Babel, the JIT compiler loaded
+   * first, the default export bootstrapped on <app-root> (the selector every example uses).
+   */
+  function angularDocument(code) {
+    return loadScript(config.babel, 'Babel').then(function (Babel) {
+      var js = Babel.transform(code, {
+        filename: 'example.ts',
+        presets: [['typescript', { onlyRemoveTypeImports: false }]],
+        plugins: [['proposal-decorators', { legacy: true }], ['proposal-class-properties', { loose: true }]],
+      }).code;
+      return bootDocument(
+        '<app-root></app-root>',
+        'await import("@angular/compiler");' +
+        'const [{ bootstrapApplication }, mod] = await Promise.all([import("@angular/platform-browser"), import(' + JSON.stringify(moduleUrl(js)) + ')]);' +
+        'await bootstrapApplication(mod.default);'
+      );
     });
   }
 
@@ -130,7 +193,7 @@
     }
     // The configured entries win over the document's own (that is how the local test redirects
     // the CDN), so the document's map is replaced by the merged one.
-    var map = '<script type="importmap">' + JSON.stringify({ imports: Object.assign({}, imports, config.importMap) }) + '</script>';
+    var map = importMapTag(Object.assign({}, imports, config.importMap));
     var html = own ? code.replace(own[0], '') : code;
     var boot = '<script>' + FRAME_BOOT + '</script><style>' + FRAME_CSS + '</style>';
     if (/<head[^>]*>/i.test(html)) return Promise.resolve(html.replace(/<head[^>]*>/i, function (head) { return head + map + boot; }));
@@ -138,25 +201,23 @@
     return Promise.resolve(document_(html, map));
   }
 
-  function isRunnable(pre, code) {
+  function kindOf(pre, code) {
     var lang = pre.getAttribute('data-lang') || '';
-    if (lang === 'html') return /<!doctype html|<html[\s>]/i.test(code);
-    if (lang === 'jsx' || lang === 'tsx') return /export default/.test(code);
-    if (lang === 'vue') return /<template[\s>]/i.test(code);
-    return false;
+    if (lang === 'html') return /<!doctype html|<html[\s>]/i.test(code) ? 'html' : null;
+    if (lang === 'jsx' || lang === 'tsx') return /export default/.test(code) ? 'react' : null;
+    if (lang === 'vue') return /<template[\s>]/i.test(code) ? 'vue' : null;
+    if (lang === 'typescript' || lang === 'ts') return /@Component\(/.test(code) && /export default/.test(code) ? 'angular' : null;
+    return null;
   }
 
-  function compile(lang, code) {
-    if (lang === 'html') return htmlDocument(code);
-    if (lang === 'vue') return vueDocument(code);
-    return reactDocument(code);
-  }
+  var COMPILERS = { html: htmlDocument, react: reactDocument, vue: vueDocument, angular: angularDocument };
 
   function addButton(pre, text) {
     var code = pre.querySelector('code');
     if (!code || pre.querySelector('.run-button')) return;
     var source = code.textContent;
-    if (!isRunnable(pre, source)) return;
+    var kind = kindOf(pre, source);
+    if (!kind) return;
 
     var button = document.createElement('button');
     button.type = 'button';
@@ -165,13 +226,20 @@
     button.title = text.title;
     pre.appendChild(button);
 
-    var frame = null;
     var wrapper = null;
+
+    function open(node) {
+      wrapper = document.createElement('div');
+      wrapper.className = 'run-output';
+      wrapper.appendChild(node);
+      pre.parentNode.insertBefore(wrapper, pre.nextSibling);
+      button.textContent = text.close;
+      button.disabled = false;
+    }
 
     function close() {
       if (wrapper) wrapper.remove();
       wrapper = null;
-      frame = null;
       button.textContent = text.run;
       button.disabled = false;
     }
@@ -180,33 +248,22 @@
       if (wrapper) return close();
       button.disabled = true;
       button.textContent = text.running;
-      compile(pre.getAttribute('data-lang'), source).then(function (html) {
-        wrapper = document.createElement('div');
-        wrapper.className = 'run-output';
-        frame = document.createElement('iframe');
+      COMPILERS[kind](source).then(function (html) {
+        var frame = document.createElement('iframe');
         frame.setAttribute('sandbox', 'allow-scripts allow-forms');
         frame.setAttribute('title', text.run);
         frame.srcdoc = html;
-        wrapper.appendChild(frame);
-        pre.parentNode.insertBefore(wrapper, pre.nextSibling);
-        button.textContent = text.close;
-        button.disabled = false;
-        var current = frame;
+        open(frame);
         window.addEventListener('message', function onMessage(event) {
-          if (current !== frame) return window.removeEventListener('message', onMessage);
-          if (event.source !== current.contentWindow || !event.data || !event.data.runHeight) return;
-          current.style.height = Math.min(Math.max(event.data.runHeight + 4, 80), 800) + 'px';
+          if (!frame.isConnected) return window.removeEventListener('message', onMessage);
+          if (event.source !== frame.contentWindow || !event.data || !event.data.runHeight) return;
+          frame.style.height = Math.min(Math.max(event.data.runHeight + 4, 80), 800) + 'px';
         });
       }, function (error) {
-        wrapper = document.createElement('div');
-        wrapper.className = 'run-output';
-        var pre_ = document.createElement('pre');
-        pre_.className = 'run-error';
-        pre_.textContent = String(error && error.message || error);
-        wrapper.appendChild(pre_);
-        pre.parentNode.insertBefore(wrapper, pre.nextSibling);
-        button.textContent = text.close;
-        button.disabled = false;
+        var message = document.createElement('pre');
+        message.className = 'run-error';
+        message.textContent = String(error && error.message || error);
+        open(message);
       });
     });
   }

@@ -118,7 +118,7 @@ Put the validator in a `refine` and the parser in a `transform`: the schema reje
       {
         "imports": {
           "@brazilian-utils/brazilian-utils": "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm",
-          "zod": "https://cdn.jsdelivr.net/npm/zod@4/+esm"
+          "zod": "https://cdn.jsdelivr.net/npm/zod@4.6.5/+esm"
         }
       }
     </script>
@@ -177,7 +177,7 @@ The same idea in valibot: `check` for the validator, `transform` for the parser,
       {
         "imports": {
           "@brazilian-utils/brazilian-utils": "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm",
-          "valibot": "https://cdn.jsdelivr.net/npm/valibot@1/+esm"
+          "valibot": "https://cdn.jsdelivr.net/npm/valibot@1.5.0/+esm"
         }
       }
     </script>
@@ -257,5 +257,5 @@ Store the digits, format when rendering. `formatCpf` can hide the digits the way
 ## Where to go next
 
 - The [utilities reference](utilities.md) lists every function with its options.
-- The same patterns for [React](guides/react.md) and for [Vue](guides/vue.md).
+- The same patterns for [React](guides/react.md), [Vue](guides/vue.md) and [Angular](guides/angular.md).
 - Heavy utils such as `getMunicipalities` deserve a lazy import; see [Bundle size](getting-started.md#bundle-size).

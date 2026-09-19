@@ -241,5 +241,5 @@ export default function Receipt() {
 ## Where to go next
 
 - The [utilities reference](utilities.md) lists every function with its options.
-- The same patterns for [Vue](guides/vue.md) and for [plain JavaScript](guides/vanilla.md).
+- The same patterns for [Vue](guides/vue.md), [Angular](guides/angular.md) and [plain JavaScript](guides/vanilla.md).
 - Heavy utils such as `getMunicipalities` deserve a lazy import; see [Bundle size](getting-started.md#bundle-size).

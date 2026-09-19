@@ -118,7 +118,7 @@ Coloque o validador em um `refine` e o parser em um `transform`: o esquema rejei
       {
         "imports": {
           "@brazilian-utils/brazilian-utils": "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm",
-          "zod": "https://cdn.jsdelivr.net/npm/zod@4/+esm"
+          "zod": "https://cdn.jsdelivr.net/npm/zod@4.6.5/+esm"
         }
       }
     </script>
@@ -177,7 +177,7 @@ A mesma ideia no valibot: `check` para o validador, `transform` para o parser, `
       {
         "imports": {
           "@brazilian-utils/brazilian-utils": "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm",
-          "valibot": "https://cdn.jsdelivr.net/npm/valibot@1/+esm"
+          "valibot": "https://cdn.jsdelivr.net/npm/valibot@1.5.0/+esm"
         }
       }
     </script>
@@ -257,5 +257,5 @@ Guarde os dígitos, formate na hora de renderizar. `formatCpf` pode esconder os 
 ## Para onde ir depois
 
 - A [referência de utilitários](pt-br/utilities.md) lista todas as funções com suas opções.
-- Os mesmos padrões em [React](pt-br/guides/react.md) e em [Vue](pt-br/guides/vue.md).
+- Os mesmos padrões em [React](pt-br/guides/react.md), [Vue](pt-br/guides/vue.md) e [Angular](pt-br/guides/angular.md).
 - Utilitários pesados como `getMunicipalities` merecem um import sob demanda; veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle).

@@ -222,5 +222,5 @@ const order = {
 ## Where to go next
 
 - The [utilities reference](utilities.md) lists every function with its options.
-- The same patterns for [React](guides/react.md) and for [plain JavaScript](guides/vanilla.md).
+- The same patterns for [React](guides/react.md), [Angular](guides/angular.md) and [plain JavaScript](guides/vanilla.md).
 - Heavy utils such as `getMunicipalities` deserve a lazy import; see [Bundle size](getting-started.md#bundle-size).

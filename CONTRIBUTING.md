@@ -351,11 +351,14 @@ browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
 - Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,
   and `.github/workflows/context7.yml` asks for a refresh when the docs change on `main`.
 - The guide pages (`docs/guides/`, `docs/pt-br/guides/`) show how to use the package with React,
-  Vue and plain JavaScript. Their examples are complete: a `jsx` or `vue` block with a default
-  export, or a full `html` document. `docs/run.js` (a docsify plugin loaded by `index.html`) puts a
-  Run button on those blocks and runs them in a sandboxed iframe, compiling JSX with sucrase and a
-  single-file component with `@vue/compiler-sfc`, both fetched from jsdelivr on demand, with an
-  import map that resolves `react`, `vue`, `zod`, `valibot` and the package itself to jsdelivr.
+  Vue, Angular and plain JavaScript. Their examples are complete: a `jsx` or `vue` block with a
+  default export, a `typescript` block whose default export is an `@Component` with the selector
+  `app-root`, or a full `html` document. `docs/run.js` (a docsify plugin loaded by `index.html`) puts a
+  Run button on those blocks and runs them in a sandboxed iframe, compiling JSX with sucrase, a
+  single-file component with `@vue/compiler-sfc` and an Angular component with Babel, each fetched
+  from jsdelivr when a button is first clicked, with an import map that resolves `react`, `vue`,
+  `@angular/*`, `zod`, `valibot` and the package itself to jsdelivr, at the versions pinned at the
+  top of `run.js`.
   A new example only needs to follow one of those shapes; a fragment (no default export, no
   `<html>`) gets no button. `window.$docsify.run` overrides the CDN URLs when testing offline.
 
