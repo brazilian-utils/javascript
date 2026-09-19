@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to Brazilian Utils! This project exists thanks to
 [everyone who contributes](README.md#contributors), and we'd love your help solving the little
-day-to-day problems of building software for Brazilian businesses.
+day-to-day problems of building software for Brazil.
 
 By participating in this project, you agree to abide by our
 [Code of Conduct](CODE_OF_CONDUCT.md).

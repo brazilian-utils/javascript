@@ -1,6 +1,6 @@
 # Brazilian Utils
 
-> Brazilian Utils is a zero-dependency JavaScript/TypeScript library of small, focused utilities for the day-to-day problems of building software for Brazilian businesses. This file concatenates the full English documentation (getting started + utilities reference) in one Markdown document for LLM context loading.
+> Brazilian Utils is a zero-dependency JavaScript/TypeScript library of small, focused utilities for the day-to-day problems of building software for Brazil. This file concatenates the full English documentation (getting started + utilities reference) in one Markdown document for LLM context loading.
 
 ## Table of contents
 
@@ -154,46 +154,24 @@
 
 ## Getting Started
 
-Brazilian Utils is a library focused on solving problems that we face daily in the development of applications for the Brazilian business.
+Brazilian Utils is a zero-dependency library of small utilities for the day-to-day problems of building software for Brazil: validating, formatting, parsing and generating CPF, CNPJ, CEP, boleto, Pix, phone numbers, holidays and more.
 
 ### Why Brazilian Utils
 
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
-- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped); every util is also its own subpath entry (`@brazilian-utils/brazilian-utils/get-cities`) for the heavy ones.
-- **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, tested in CI on every one of them.
-- **Written in TypeScript.** Types ship with the package; the public API is tracked by an API report so nothing changes silently.
-- **Validated against the official rules.** Every validator cites the specification, law or dataset it implements (`@see` in the docs), and the test suite is mutation-tested, not just covered.
+- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
+- **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, all tested in CI.
+- **Written in TypeScript.** Types ship with the package, and an API report tracks the public API so nothing changes silently.
+- **Validated against the official rules.** Every validator cites the specification, law or dataset it implements, and the test suite is mutation-tested, not just covered.
 - **Documented in English and Portuguese**, with an `llms.txt` for AI assistants.
 
 ### Installation
 
-You can install **Brazilian Utils** in a few ways:
-
-as npm package:
-
 ```bash
-npm install --save @brazilian-utils/brazilian-utils
+npm install @brazilian-utils/brazilian-utils
 ```
 
-with yarn package manager:
-
-```bash
-yarn add @brazilian-utils/brazilian-utils
-```
-
-with pnpm:
-
-```bash
-pnpm add @brazilian-utils/brazilian-utils
-```
-
-with bun:
-
-```bash
-bun add @brazilian-utils/brazilian-utils
-```
-
-or `<script>` tag (global `BrazilianUtils`):
+The same package works with `yarn add`, `pnpm add` and `bun add`. In a plain `<script>` tag it exposes the global `BrazilianUtils`:
 
 ```html
 <script src="https://unpkg.com/@brazilian-utils/brazilian-utils/dist/brazilian-utils.umd.cjs"></script>
@@ -201,11 +179,16 @@ or `<script>` tag (global `BrazilianUtils`):
 
 #### Runtime support
 
-Node `^20.19.0 || >=22.12.0`, Bun, Deno, and modern browsers.
+| Runtime  | Supported                 | Tested in CI                  |
+| -------- | ------------------------- | ----------------------------- |
+| Node.js  | `^20.19.0 \|\| >=22.12.0` | 20, 22, 24, 26                |
+| Bun      | latest                    | latest                        |
+| Deno     | 2.x                       | 2.x                           |
+| Browsers | evergreen                 | Chrome, Firefox, Edge, Safari |
 
 ### Usage
 
-To use a utility, import the required function, as shown below:
+Import the function you need:
 
 ```javascript
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';
@@ -213,7 +196,7 @@ import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 isValidCpf('1232454233345'); // false
 ```
 
-You can check a list of utilities [by clicking here](utilities.md). The [examples](examples.md) show them in a React, Vue or Angular form field.
+The [utilities reference](utilities.md) lists every function, grouped by family, with its options and examples. The [examples](examples.md) show a CPF field in React, Angular, Vue and plain JavaScript.
 
 ### AI assistants
 
@@ -223,15 +206,15 @@ The documentation is indexed on Context7 as [`/brazilian-utils/javascript`](http
 Validate a CNPJ with Brazilian Utils. use library /brazilian-utils/javascript
 ```
 
-To stop repeating it, add the rule to the agent's instructions file (`CLAUDE.md`, Cursor rules or the equivalent): "For Brazilian document utils, use the Context7 library /brazilian-utils/javascript".
+To stop repeating it, add a rule to the agent's instructions file (`CLAUDE.md`, Cursor rules or the equivalent): "For Brazilian document utils, use the Context7 library /brazilian-utils/javascript".
 
-Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.br/llms.txt), which lists every util with a one-line description and a link to its section, or at [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), the whole English documentation in one Markdown file.
+Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.br/llms.txt), which lists every util with a one-line description, or at [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), the whole English documentation in one Markdown file.
 
 ### Bundle size
 
-The package is tree-shakeable: importing one util from the root pulls in only that util's code, not the rest of the library. `isValidCpf`, for example, adds roughly 1.4 KB minified (0.8 KB gzipped) to your bundle. A bundler that supports tree-shaking (webpack, Rollup, esbuild, Vite, etc.) drops every other util.
+The package is tree-shakeable: importing one util from the root pulls in only that util's code. `isValidCpf`, for example, adds about 1.4 KB minified (0.8 KB gzipped) to your bundle.
 
-A handful of utils are the exception: each embeds an official dataset, so it weighs far more than every other util combined. These are their single-import sizes, minified and gzipped:
+A few utils embed an official dataset and weigh far more than everything else combined:
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
@@ -243,9 +226,7 @@ A handful of utils are the exception: each embeds an official dataset, so it wei
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
 
-Importing any of them from the root, even alongside a single small util, pulls that whole dataset into your main bundle, because this package ships as a single ESM module: a dynamic `import()` of the root (`await import('@brazilian-utils/brazilian-utils')`) still resolves to that same one file, so it can't be split out on its own. A bundler doing code-splitting needs a separate module to split *into*.
-
-Those separate modules are the per-util subpaths. Load a heavy util lazily, only where you actually need its data:
+The root of the package is a single ESM module, so a bundler cannot split one of these datasets out of it: importing a heavy util from the root puts its whole dataset in your main bundle, and a dynamic `import()` of the root does not help. To lazy-load one, import it from its own subpath:
 
 ```javascript
 const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities');
@@ -261,9 +242,9 @@ const { getMunicipalityByCode } = await import(
 getMunicipalityByCode('3550308');
 ```
 
-Every util is available this way, as `@brazilian-utils/brazilian-utils/<util-name>` (kebab-case, matching the function name: `isValidCpf` → `is-valid-cpf`), for the same lazy-loading/code-splitting reason.
+Every util has a subpath, `@brazilian-utils/brazilian-utils/<util-name>` in kebab-case (`isValidCpf` is `is-valid-cpf`).
 
-Pick one style per util in a given app: a bundler treats the root import and the subpath import as two unrelated modules, so importing `getCities` from both the root *and* `/get-cities` in the same app bundles the 154.2 KB city table twice, once in each module's own output.
+Pick one style per util in a given app. A bundler treats the root import and the subpath import as two unrelated modules, so importing `getCities` from both bundles the city table twice.
 
 ## Utilities
 
