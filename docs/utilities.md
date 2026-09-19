@@ -746,8 +746,9 @@ Format a phone number according to Brazilian patterns. If `value` includes a DDD
 - `"e164"` and `"international"` drop the country code first, as `parsePhone` does, and fall back to `"service"` for a service number.
 - `"service"`: the Códigos Não Geográficos (`0800 123 4567`) and the abbreviated `300X`/`400X` numbers (`4004-1234`).
 - `"auto"`: `"service"` for a service number, `"international"` when `value` carries a country code, otherwise `"nanp"` for more than 9 digits, else `"sn"`.
-- `obfuscate` keeps the last 2 digits, the count the gov.br account shows for a registered mobile, and keeps the prefix that names a region or a service instead of a subscriber: the DDD, the `0800`-like code and the `300X`/`400X` root.
-- A 3 digit public utility code (`190`) identifies no one and is returned as it is; a value the `"service"` mask does not recognize is hidden entirely. The obfuscated patterns have a fixed number of slots, so under `"e164"` anything past the 11th national digit is dropped.
+- `obfuscate` keeps 2 digits, the count the gov.br account shows for a registered mobile, and keeps the prefix that names a region or a service instead of a subscriber: the DDD, the `0800`-like code and the `300X`/`400X` root.
+- The 2 digits are the last ones the mask itself has room for, so under the default `"sn"` a DDD-prefixed value is truncated first, exactly as it is without `obfuscate`, and the visible pair is the 8th and 9th digit rather than the last 2 of `value`.
+- A 3 digit public utility code (`190`) identifies no one and is returned as it is; a value the `"service"` mask does not recognize has every digit replaced by a `*`, which hides the digits but not how many there were. The obfuscated patterns have a fixed number of slots, so under `"e164"` anything past the 11th national digit is dropped.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -770,6 +771,8 @@ formatPhone('+5511987654321', { mask: 'auto', obfuscate: true }); // +55 11 ****
 formatPhone('11987654321', { mask: 'e164', obfuscate: true }); // +5511*******21
 formatPhone('08001234567', { mask: 'service', obfuscate: true }); // 0800 *** **67
 formatPhone('40041234', { mask: 'service', obfuscate: true }); // 4004-**34
+formatPhone('11988887766', { mask: 'service', obfuscate: true }); // *********** (not a service number)
+formatPhone('11987654321', { obfuscate: true }); // *****-**43 (BEWARE: "sn" truncates first, so "43", not "21")
 formatPhone('11900000000'); // 11900-0000 (BEWARE: default "sn" truncates a DDD-prefixed number)
 ```
 
@@ -3022,7 +3025,8 @@ isValidEmail('invalid.email'); // false
 
 Hide most of an e-mail address with `*`, for the places where an address is shown to someone who should only recognize it.
 
-- The first 2 characters of the local part and the first 2 of the domain stay, the `@` stays, and every other character, the dots of the domain included, becomes one `*`, so the length is preserved. That is how the gov.br account shows the registered address, `li***********@gm*******`.
+- The first 2 characters of the local part and the first 2 of the domain stay, whatever they are, a dot included, the `@` stays, and every other character, the remaining dots included, becomes one `*`, so the length is preserved. That is how the gov.br account shows the registered address, `li***********@gm*******`.
+- A first domain label of a single character therefore keeps the dot that follows it visible.
 - The gov.br sample does not cover a local part of 1 or 2 characters, which that rule would show whole, so such a local part always loses its last character here.
 - The value is judged by `isValidEmail` as it comes, with no trimming, and keeps its letter case.
 - Returns `''` when the value is not a valid e-mail address.
@@ -3033,6 +3037,7 @@ import { obfuscateEmail } from '@brazilian-utils/brazilian-utils';
 obfuscateEmail('fulano.silva@example.com'); // fu**********@ex*********
 obfuscateEmail('ab@example.com.br'); // a*@ex************
 obfuscateEmail('a@example.com'); // *@ex*********
+obfuscateEmail('maria@a.bc'); // ma***@a.** (a 1 character label leaves its dot visible)
 obfuscateEmail('not an e-mail'); // ''
 ```
 

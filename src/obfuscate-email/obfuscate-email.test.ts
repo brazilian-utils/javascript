@@ -12,9 +12,10 @@ describe("obfuscateEmail", () => {
 		expect(obfuscateEmail("abc@example.com.br")).toBe("ab*@ex************");
 	});
 
-	test("should hide the dots of the domain and preserve the length", () => {
-		expect(obfuscateEmail("maria@a.bc")).toBe("ma***@a.**");
+	test("should hide the dots that fall outside the 2 visible characters and preserve the length", () => {
 		expect(obfuscateEmail("maria@ab.cd.ef")).toBe("ma***@ab******");
+		expect(obfuscateEmail("maria@a.bc")).toBe("ma***@a.**");
+		expect(obfuscateEmail("a.b@a.co")).toBe("a.*@a.**");
 	});
 
 	test("should always hide the last character of a short local part", () => {

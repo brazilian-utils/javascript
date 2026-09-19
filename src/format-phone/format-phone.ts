@@ -28,7 +28,7 @@ export type PhoneMask = "auto" | "e164" | "international" | "service" | "sn" | "
 export type FormatPhoneOptions = {
 	/** Which mask to apply, or `"auto"` to pick one from the value (default: `"sn"`). */
 	mask?: PhoneMask;
-	/** Whether to hide the subscriber number with `*`, except its last 2 digits (default: `false`, read for truthiness). */
+	/** Whether to hide the subscriber number with `*`, except the last 2 digits the mask has room for (default: `false`, read for truthiness). */
 	obfuscate?: boolean;
 };
 
@@ -41,9 +41,9 @@ const matchesPrefix = (digits: string, prefixes: readonly string[]): boolean =>
  * masks would print for it anyway (their first separator only appears once the value is longer
  * than the prefix that selects the mask).
  *
- * Under `obfuscate` such a value has no prefix that tells which digits are safe to show, so it
- * is hidden entirely, unless it is one of the 3 digit public utility codes (`190`), which
- * identify no subscriber.
+ * Under `obfuscate` such a value has no prefix that tells which digits are safe to show, so
+ * every one of its digits becomes a `*` and only how many there were stays visible, unless it
+ * is one of the 3 digit public utility codes (`190`), which identify no subscriber.
  * @param {string} digits - The digits of a service number.
  * @param {boolean} obfuscate - Whether to hide the digits after the prefix, except the last 2.
  * @returns {string} The digits under the mask of their service number family.
@@ -134,17 +134,21 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * `options.obfuscate` hides the subscriber number under every mask, for the places where a
  * number is shown to someone who should only recognize it (LGPD, art. 6º III, necessidade). The
  * gov.br account shows the registered mobile as `"*********00"`, only the last 2 digits, and
- * this keeps that count. The prefix that names a region or a service instead of a subscriber
- * also stays: the DDD, the `0800`-like code and the `300X`/`400X` root. A 3 digit public
- * utility code (`190`) identifies no one and is returned as it is, and a value the `"service"`
- * mask does not recognize is hidden entirely. The patterns have a fixed number of slots, so
- * under `"e164"` anything past the 11th national digit is dropped.
+ * this keeps that count. The 2 digits are the last ones the mask itself has room for, so under
+ * the default `"sn"` a DDD-prefixed value is truncated first, exactly as it is without
+ * `obfuscate`, and the visible pair is the 8th and 9th digit rather than the last 2 of `value`.
+ * The prefix that names a region or a service instead of a subscriber also stays: the DDD, the
+ * `0800`-like code and the `300X`/`400X` root. A 3 digit public utility code (`190`) identifies
+ * no one and is returned as it is, and a value the `"service"` mask does not recognize has
+ * every digit replaced by a `*`, which hides the digits but not how many there were. The
+ * patterns have a fixed number of slots, so under `"e164"` anything past the 11th national
+ * digit is dropped.
  *
  * @param {string|number} value - The phone number to format, either as a string or a number.
  * @param {FormatPhoneOptions} [options] - Optional formatting options.
  * @param {"auto"|"sn"|"nanp"|"e164"|"international"|"service"} options.mask - The mask to apply for formatting the phone number (default: `"sn"`).
- * @param {boolean} options.obfuscate - If truthy, hides the subscriber number except its last 2
- * digits. Read for truthiness, so a non-boolean such as `1` obfuscates too.
+ * @param {boolean} options.obfuscate - If truthy, hides the subscriber number except the last 2
+ * digits the mask has room for. Read for truthiness, so a non-boolean such as `1` obfuscates too.
  * @returns {string} The formatted phone number as a string.
  *
  * @example
@@ -165,7 +169,9 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * formatPhone("11987654321", { mask: "e164", obfuscate: true }); // "+5511*******21"
  * formatPhone("08001234567", { mask: "auto", obfuscate: true }); // "0800 *** **67"
  * formatPhone("40041234", { mask: "service", obfuscate: true }); // "4004-**34"
+ * formatPhone("11988887766", { mask: "service", obfuscate: true }); // "***********" (not a service number)
  * formatPhone("11987654321"); // "11987-6543" (BEWARE: default "sn" truncates a DDD-prefixed number)
+ * formatPhone("11987654321", { obfuscate: true }); // "*****-**43" (BEWARE: truncated too, so "43", not "21")
  * ```
  *
  * @see Official: https://www.itu.int/rec/T-REC-E.164
