@@ -600,6 +600,65 @@ getNfeKeyInfo('35170458716523000119620010000000121000123450');
 getNfeKeyInfo('invalid'); // null
 ```
 
+## SUFRAMA
+
+### isValidSuframa
+
+Valida uma Inscrição SUFRAMA. É o número de registro que a Superintendência da Zona Franca de Manaus dá às empresas com incentivo fiscal, informado no campo `ISUF` do destinatário da NF-e.
+
+- O número tem a forma `SS.NNNN.LLD`: setor de atividade, número sequencial, localidade da unidade da SUFRAMA e dígito verificador.
+- Aceita 8 ou 9 dígitos: um valor de 8 dígitos é um número cujo código de setor perdeu o zero à esquerda.
+- Retorna `false` para um código de setor `00` e para um dígito verificador módulo 11 errado.
+- Os códigos de setor e de localidade não são conferidos com uma tabela, pois o manual os lista apenas como exemplos.
+- Além dos caracteres de máscara usuais, `(`, `)`, `,` e `*` também são ignorados.
+
+```javascript
+import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
+
+isValidSuframa('123456789'); // true
+isValidSuframa('12.3456.789'); // true
+isValidSuframa('10001018'); // true (o mesmo que '010001018')
+isValidSuframa('123456780'); // false
+isValidSuframa('001234560'); // false (setor 00)
+```
+
+### formatSuframa
+
+Formata uma Inscrição SUFRAMA.
+
+- **Opções** (`FormatSuframaOptions`): `pad` completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos.
+
+```javascript
+import { formatSuframa } from '@brazilian-utils/brazilian-utils';
+
+formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018', { pad: true }); // 01.0001.018
+```
+
+### parseSuframa
+
+Remove a formatação da Inscrição SUFRAMA, mantém apenas os dígitos e limita o resultado a 9 dígitos.
+
+```javascript
+import { parseSuframa } from '@brazilian-utils/brazilian-utils';
+
+parseSuframa('12.3456.789'); // 123456789
+```
+
+### generateSuframa
+
+Gera uma Inscrição SUFRAMA aleatória válida de 9 dígitos.
+
+- O dígito verificador é válido e o código de setor nunca é `00`. Os códigos de setor e de localidade são aleatórios.
+
+```javascript
+import { generateSuframa } from '@brazilian-utils/brazilian-utils';
+
+generateSuframa(); // '205678106'
+```
+
+Fonte: [Manual de Orientação do Contribuinte da NF-e 6.0, Anexo XII.01](https://portal.fazenda.sp.gov.br/servicos/nfce/Downloads/Manual_de_Orientacao_Contribuinte_v_6.pdf).
+
 ## Telefone
 
 ### isValidPhone
