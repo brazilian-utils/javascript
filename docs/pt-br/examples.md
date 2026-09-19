@@ -16,7 +16,7 @@ Um campo de CPF que formata enquanto você digita, com `formatCpf`, e valida qua
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/angular.html">
 
-[cpf-field.component.ts](../snippets/cpf-field.component.ts ':include :type=code ts')
+[cpf-field.ts](../snippets/cpf-field.ts ':include :type=code ts')
 
 </div>
 

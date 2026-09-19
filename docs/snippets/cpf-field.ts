@@ -61,12 +61,12 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
     </label>
   `,
 })
-export class CpfFieldComponent {
-  readonly cpf = signal("");
-  readonly complete = computed(() => this.cpf().length === 14);
-  readonly valid = computed(() => this.complete() && isValidCpf(this.cpf()));
+export class CpfField {
+  protected readonly cpf = signal("");
+  protected readonly complete = computed(() => this.cpf().length === 14);
+  protected readonly valid = computed(() => this.complete() && isValidCpf(this.cpf()));
 
-  onInput(event: Event) {
+  protected onInput(event: Event) {
     this.cpf.set(
       maskCpf({
         input: event.target as HTMLInputElement,

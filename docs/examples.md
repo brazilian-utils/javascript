@@ -16,7 +16,7 @@ A CPF field that formats as you type, with `formatCpf`, and validates once compl
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/angular.html">
 
-[cpf-field.component.ts](snippets/cpf-field.component.ts ':include :type=code ts')
+[cpf-field.ts](snippets/cpf-field.ts ':include :type=code ts')
 
 </div>
 

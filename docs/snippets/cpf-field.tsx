@@ -56,7 +56,7 @@ export function CpfField() {
         inputMode="numeric"
         placeholder="000.000.000-00"
         aria-invalid={complete && !valid}
-        onInput={(event) =>
+        onChange={(event) =>
           setCpf(
             maskCpf({
               input: event.currentTarget,

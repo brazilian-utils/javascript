@@ -100,7 +100,7 @@
     .then(function (code) {
       // Angular's JIT compiler has to be evaluated before any other Angular package, the example
       // included: the partially compiled packages look for it as they load.
-      return /\.component\.ts$/.test(example) ? import("@angular/compiler").then(function () { return code; }) : code;
+      return /\.ts$/.test(example) ? import("@angular/compiler").then(function () { return code; }) : code;
     })
     .then(function (code) {
       return import(toModule(transpile(code, example.replace(/\.vue$/, ".ts"))));
