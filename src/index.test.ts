@@ -58,6 +58,9 @@ import {
 	type GetMunicipalityByNameParams,
 	type GetMunicipalityOptions,
 	type GetMunicipalityParams,
+	type GtinInfo,
+	type GtinLength,
+	type GtinType,
 	type Holiday,
 	type HolidayType,
 	type IbanInfo,
@@ -68,6 +71,7 @@ import {
 	type IsValidCertidaoOptions,
 	type IsValidCnpjOptions,
 	type IsValidCstOptions,
+	type IsValidGtinOptions,
 	type IsValidIeParams,
 	type IsValidMobilePhoneOptions,
 	type IsValidPhoneOptions,
@@ -180,6 +184,7 @@ const PUBLIC = [
 	"getCnpjInfo",
 	"getCpfInfo",
 	"getFormatLicensePlate",
+	"getGtinInfo",
 	"getHolidays",
 	"getIbanInfo",
 	"getLegalNature",
@@ -220,6 +225,7 @@ const PUBLIC = [
 	"isValidCsosn",
 	"isValidCst",
 	"isValidEmail",
+	"isValidGtin",
 	"isValidIE",
 	"isValidIban",
 	"isValidIe",
@@ -357,6 +363,9 @@ describe("Public API", () => {
 			GetMunicipalityByNameParams: GetMunicipalityByNameParams;
 			GetMunicipalityOptions: GetMunicipalityOptions;
 			GetMunicipalityParams: GetMunicipalityParams;
+			GtinInfo: GtinInfo;
+			GtinLength: GtinLength;
+			GtinType: GtinType;
 			Holiday: Holiday;
 			HolidayType: HolidayType;
 			IbanInfo: IbanInfo;
@@ -367,6 +376,7 @@ describe("Public API", () => {
 			IsValidCertidaoOptions: IsValidCertidaoOptions;
 			IsValidCnpjOptions: IsValidCnpjOptions;
 			IsValidCstOptions: IsValidCstOptions;
+			IsValidGtinOptions: IsValidGtinOptions;
 			IsValidIeParams: IsValidIeParams;
 			IsValidMobilePhoneOptions: IsValidMobilePhoneOptions;
 			IsValidPhoneOptions: IsValidPhoneOptions;
