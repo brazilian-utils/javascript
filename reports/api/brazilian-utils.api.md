@@ -104,6 +104,13 @@ export type CertidaoInfo = {
 export type CertidaoType = "birth" | "marriage" | "religious-marriage" | "death" | "stillbirth" | "banns" | "other" | "emancipation" | "interdiction";
 
 // @public
+export type Cest = {
+    code: string;
+    description: string;
+    segment: string;
+};
+
+// @public
 export type Cfop = {
     code: string;
     description: string;
@@ -211,6 +218,14 @@ export const formatCertidao: (value: string | number, options?: FormatCertidaoOp
 
 // @public
 export type FormatCertidaoOptions = {
+    pad?: boolean;
+};
+
+// @public
+export const formatCest: (value: string | number, options?: FormatCestOptions) => string;
+
+// @public
+export type FormatCestOptions = {
     pad?: boolean;
 };
 
@@ -533,6 +548,9 @@ export class GetCepInfoByAddressValidationError extends GetCepInfoByAddressError
 export const getCertidaoInfo: (value: string) => CertidaoInfo | null;
 
 // @public
+export const getCest: (value: string | number) => Cest | null;
+
+// @public
 export const getCfop: (value: string | number) => Cfop | null;
 
 // @public @deprecated
@@ -767,6 +785,9 @@ export const isValidCertidao: (value: string, options?: IsValidCertidaoOptions) 
 export type IsValidCertidaoOptions = {
     accept?: CertidaoType[];
 };
+
+// @public
+export const isValidCest: (value: string | number) => boolean;
 
 // @public
 export const isValidCfop: (value: string | number) => boolean;
@@ -1041,6 +1062,9 @@ export const parseCep: (value: string | number) => string;
 
 // @public
 export const parseCertidao: (value: string | number) => string;
+
+// @public
+export const parseCest: (value: string | number) => string;
 
 // @public
 export const parseCfop: (value: string | number) => string;

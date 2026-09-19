@@ -2971,6 +2971,77 @@ getCfop('abc5102'); // null (not a documented form)
 
 Source: [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), last amended by [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25).
 
+### isValidCest
+
+Check if a CEST (Código Especificador da Substituição Tributária) is listed in the annexes of Convênio ICMS 142/18, the consolidated text in force.
+
+- Only the items in force count: an item the annexes mark as revoked is rejected.
+- The check is about the code alone: it does not tell whether the code suits a given NCM, nor whether a state applies the substituição tributária regime to it.
+- A CEST has 7 digits: the first two are the segment, the third to the fifth the item of the segment and the last two the specification of the item (cláusula sexta, IV).
+- Accepts a string with the 7 digits or with the `NN.NNN.NN` form the annexes print, with a single separator between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
+- The leading zero of segments 01 to 09 is part of the code, so a value written as bare digits is left padded with zeros to 7, as a string or as a number: `100100`, `'100100'` and `'0100100'` are the same code. A masked value is read as written.
+
+```javascript
+import { isValidCest } from '@brazilian-utils/brazilian-utils';
+
+isValidCest('01.001.00'); // true
+isValidCest('0100100'); // true
+isValidCest(100100); // true (padded to 7 digits, so this is '0100100')
+isValidCest('03.001.00'); // false (a revoked item)
+isValidCest('0000000'); // false
+isValidCest('abc0100100'); // false (not a documented form)
+isValidCest(-100100); // false (not a non-negative safe integer)
+```
+
+### formatCest
+
+Format a CEST (Código Especificador da Substituição Tributária) in the `NN.NNN.NN` form the annexes of Convênio ICMS 142/18 print. Only the structure changes; use `isValidCest` to check a code against the annexes.
+
+- **Options** (`FormatCestOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code.
+- Same rules as `formatNcm`: without `pad` the mask is applied as far as the value goes, which is what an input being typed into needs, characters outside it are dropped, and a number is read as the string of its digits, so it is only padded under `pad: true`.
+
+```javascript
+import { formatCest } from '@brazilian-utils/brazilian-utils';
+
+formatCest('0100100'); // 01.001.00
+formatCest(2899900); // 28.999.00
+formatCest('01001'); // 01.001 (masked as far as it goes)
+formatCest(100100, { pad: true }); // 01.001.00 (padded to 7 digits first)
+formatCest('abc0100100'); // 01.001.00 (only the digits are read)
+```
+
+### parseCest
+
+Remove CEST (Código Especificador da Substituição Tributária) formatting, keep only digits, and cap the result to the 7 digits of a complete code.
+
+- Same rules as `parseCbo`: nothing is left padded here, so the leading zero of segments 01 to 09 has to be written out. Use `isValidCest` or `getCest`, which do pad a bare numeric code, to look a code up.
+
+```javascript
+import { parseCest } from '@brazilian-utils/brazilian-utils';
+
+parseCest('01.001.00'); // '0100100'
+parseCest('28.999'); // '28999' (a partial code is kept as written)
+```
+
+### getCest
+
+Look a CEST (Código Especificador da Substituição Tributária) up and get the description of the goods and the name of its segment, as Anexos I to XXVI of Convênio ICMS 142/18 word them. The result is a `Cest` record: `{ code, description, segment }`.
+
+- Same rules as `isValidCest`. Returns `null` for an unknown, revoked or malformed code.
+- The NCM/SH codes the annexes pair each CEST with are not part of the entry.
+
+```javascript
+import { getCest } from '@brazilian-utils/brazilian-utils';
+
+getCest('05.001.00'); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest(500100); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest('03.001.00'); // null (a revoked item)
+getCest('0000000'); // null
+getCest('abc0500100'); // null (not a documented form)
+```
+
+Source: [consolidated Convênio ICMS 142/18](https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18), last amended by Convênio ICMS 180/24.
+
 ### isValidCst
 
 Check if a CST (Código de Situação Tributária) code is valid for a given tax. Pass the tax through `options.tax`:

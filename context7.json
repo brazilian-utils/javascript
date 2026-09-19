@@ -30,7 +30,7 @@
 	"rules": [
 		"The package has zero runtime dependencies and ships as ESM plus a UMD build; nothing else needs to be installed to use it.",
 		"Import from the root: import { isValidCpf } from '@brazilian-utils/brazilian-utils'. Every util is also a kebab-case subpath, e.g. '@brazilian-utils/brazilian-utils/is-valid-cpf'.",
-		"Use the subpaths to lazy-load the dataset-backed utils (getMunicipalities, getMunicipalityByCode, getCnae, getCbo, getCfop, getClassTrib, isValidNcm, getBanks, getNbs, isValidNbs, getServiceItem, isValidServiceItem): each one embeds a large official table.",
+		"Use the subpaths to lazy-load the dataset-backed utils (getMunicipalities, getMunicipalityByCode, getCnae, getCbo, getCest, getCfop, getClassTrib, isValidNcm, getBanks, getNbs, isValidNbs, getServiceItem, isValidServiceItem): each one embeds a large official table.",
 		"Never import the same util from both the root and its subpath in one app: a bundler treats them as two unrelated modules and bundles the dataset twice.",
 		"Public functions never throw on bad input (null, undefined, wrong type): isValid* return false, format* and parse* return '', single-item getters return null, list getters return [].",
 		"The only utils that reject are the async getAddressInfoByCep (GetAddressInfoByCepError: NotFound, Validation, Service) and getCepInfoByAddress (GetCepInfoByAddressError: NotFound, Validation).",

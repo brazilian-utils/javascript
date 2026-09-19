@@ -3,6 +3,7 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import { decodeEntities } from "./decode-entities.ts";
 import { fetchSortedRecord } from "./fetch-sorted-record.ts";
 
 const scriptsDir = import.meta.dirname;
@@ -21,18 +22,6 @@ const CURRENT_TEXT_PARAGRAPH_REGEX = /<p class="A5-1TextoAcordo">([^<]*)<\/p>/g;
  * and the paragraph pattern above stopped matching, not that codes were revoked.
  */
 const MINIMUM_OPERABLE_CODES = 600;
-
-const HTML_ENTITIES: Record<string, string> = {
-	"&amp;": "&",
-	"&lt;": "<",
-	"&gt;": ">",
-	"&quot;": '"',
-	"&#39;": "'",
-	"&nbsp;": " ",
-};
-
-const decodeEntities = (text: string): string =>
-	text.replaceAll(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (entity) => HTML_ENTITIES[entity] ?? entity);
 
 /** A code line, e.g. `1.101 - Compra para industrialização ou produção rural.`. */
 const CODE_LINE_REGEX = /^(\d)\.(\d{3})\s*[-–]\s*(.+)$/;
