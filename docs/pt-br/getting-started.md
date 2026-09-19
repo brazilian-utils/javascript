@@ -1,7 +1,7 @@
 ---
 title: "Introdução"
 description: "Instale o Brazilian Utils, a biblioteca de utilitários sem dependências para o business brasileiro, e veja como importar um utilitário, quais runtimes são suportados e como o tamanho do bundle se comporta."
-keywords: ["Brazilian Utils", "instalação", "npm", "tree-shaking", "tamanho do bundle", "subpath", "Node.js", "Bun", "Deno", "navegador", "assistentes de IA", "Context7"]
+keywords: ["Brazilian Utils", "instalação", "npm", "tree-shaking", "tamanho do bundle", "subpath", "Node.js", "Bun", "Deno", "navegador", "assistentes de IA", "Context7", "MCP"]
 ---
 
 Brazilian Utils é uma biblioteca com foco na resolução de problemas que enfrentamos diariamente no desenvolvimento de aplicações para o business brasileiro.
@@ -119,6 +119,33 @@ Valide um CNPJ com o Brazilian Utils. use library /brazilian-utils/javascript
 Para não repetir isso a cada prompt, coloque a regra no arquivo de instruções do agente (`CLAUDE.md`, regras do Cursor ou equivalente): "Para utilitários de documentos brasileiros, use a biblioteca /brazilian-utils/javascript do Context7".
 
 Sem o Context7, aponte o assistente para o [llms.txt](https://brazilian-utils.com.br/llms.txt), que lista todos os utilitários com uma descrição de uma linha e o link para a seção de cada um, ou para o [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), a documentação completa em inglês em um único arquivo Markdown.
+
+## Servidor MCP
+
+O pacote também traz o `brazilian-utils-mcp`, um servidor [Model Context Protocol](https://modelcontextprotocol.io) que entrega cada utilitário ao agente como uma ferramenta. Assim o agente valida um CPF, lê um boleto ou busca um município do IBGE chamando a biblioteca, em vez de responder de memória:
+
+```bash
+npx -y --package=@brazilian-utils/brazilian-utils brazilian-utils-mcp
+```
+
+É um servidor local, que fala por stdio, então entra no arquivo de configuração do cliente como qualquer outro. O mesmo bloco funciona no Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json` no macOS, `%APPDATA%\Claude\claude_desktop_config.json` no Windows), no Claude Code (`.mcp.json` na raiz do projeto) e no Cursor (`.cursor/mcp.json` no projeto, ou `~/.cursor/mcp.json` para todos eles):
+
+```json
+{
+  "mcpServers": {
+    "brazilian-utils": {
+      "command": "npx",
+      "args": ["-y", "--package=@brazilian-utils/brazilian-utils", "brazilian-utils-mcp"]
+    }
+  }
+}
+```
+
+No Claude Code, `claude mcp add brazilian-utils -- npx -y --package=@brazilian-utils/brazilian-utils brazilian-utils-mcp` escreve esse arquivo para você. Reinicie o cliente e um prompt como "111.444.777-35 é um CPF válido? E quais são os feriados de São Paulo em 2026?" chega às ferramentas.
+
+Há uma ferramenta por utilitário, com o mesmo nome da função exportada (`isValidCpf`, `formatCnpj`, `getHolidays`), que recebe os mesmos argumentos e responde com o resultado em JSON. Documentos são passados como texto, para que os zeros à esquerda sobrevivam, e datas são escritas como `YYYY-MM-DD`. Um valor inválido é uma resposta comum, não uma falha: validadores respondem `false`, formatadores e parsers `""`, buscas `null`. Tudo é calculado offline, a partir dos datasets embutidos, com exceção de `getAddressInfoByCep` e `getCepInfoByAddress`, as duas únicas ferramentas que acessam a rede.
+
+O servidor implementa a revisão [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28) da especificação, que negocia a versão do protocolo a cada requisição, e volta para o handshake `initialize` das revisões anteriores, da 2025-11-25 até a 2024-11-05, para os clientes que falam uma delas. Ele não tem dependências próprias: o transporte stdio e a superfície JSON-RPC vêm no pacote. Como a biblioteca, é um arquivo separado que nenhum entry point importa, então não adiciona nada ao seu bundle.
 
 ## Tamanho do bundle
 

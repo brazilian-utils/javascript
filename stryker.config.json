@@ -12,7 +12,8 @@
 		"!src/**/constants.ts",
 		"!src/_internals/constants/**",
 		"!src/index.ts",
-		"!src/_cli/bin/bin.ts"
+		"!src/_cli/bin/bin.ts",
+		"!src/_mcp/brazilian-utils-mcp.ts"
 	],
 	"coverageAnalysis": "perTest",
 	"reporters": ["clear-text", "progress", "html", "json"],

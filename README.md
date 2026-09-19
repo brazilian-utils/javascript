@@ -21,6 +21,7 @@
   - [Installation](#installation)
     - [Runtime support](#runtime-support)
   - [Usage](#usage)
+  - [MCP server](#mcp-server)
   - [Development](#development)
   - [Contributors](#contributors)
   - [License](#license)
@@ -112,6 +113,23 @@ echo 01001000 | npx @brazilian-utils/brazilian-utils getAddressInfoByCep   # rea
 ```
 
 The first argument is the name of a utility, the positional values are its arguments and `--key value`, `--flag` or `--json '<object>'` become its options object. `list` prints every utility and `--help` the full usage. See [Command line](https://brazilian-utils.com.br/getting-started?id=command-line).
+
+## MCP server
+
+The package also ships `brazilian-utils-mcp`, a [Model Context Protocol](https://modelcontextprotocol.io) server that hands every util to an agent as a tool, so it validates a CPF or reads a boleto by calling the library instead of answering from memory. Add it to Claude Desktop, Claude Code, Cursor or any other MCP client:
+
+```json
+{
+	"mcpServers": {
+		"brazilian-utils": {
+			"command": "npx",
+			"args": ["-y", "--package=@brazilian-utils/brazilian-utils", "brazilian-utils-mcp"]
+		}
+	}
+}
+```
+
+It speaks stdio, implements revision 2026-07-28 of the specification and falls back to the `initialize` handshake of the older ones, and has no dependencies of its own. See [MCP server](https://brazilian-utils.com.br/getting-started?id=mcp-server).
 
 ## Development
 

@@ -56,10 +56,11 @@ const minifyUmdChunk = (): PackPlugin => ({
 });
 
 /**
- * The command line (`src/_cli/bin/bin.ts`, published as the `bin` of the package) dispatches to
- * the whole public API. Bundling `src/index.ts` into it would ship every dataset a second time,
- * so its import of the barrel is rewritten to the root ESM bundle that sits next to it in `dist/`.
- * @returns {PackPlugin} The pack plugin that points the command line at `dist/brazilian-utils.js`.
+ * The command line (`src/_cli/bin/bin.ts`) and the MCP server (`src/_mcp/brazilian-utils-mcp.ts`),
+ * both published as a `bin` of the package, dispatch to the whole public API. Bundling
+ * `src/index.ts` into them would ship every dataset a second time, so their import of the barrel
+ * is rewritten to the root ESM bundle that sits next to them in `dist/`.
+ * @returns {PackPlugin} The pack plugin that points a `bin` at `dist/brazilian-utils.js`.
  */
 const externalizeLibrary = (): PackPlugin => ({
 	name: "brazilian-utils:externalize-library",
@@ -90,7 +91,8 @@ const utilEntries = Object.fromEntries(
 );
 
 /**
- * Settings shared by both pack configs below (the root build and the per-util subpath build).
+ * Settings shared by the pack configs below (the root build, the per-util subpath build and the
+ * MCP server build).
  */
 const sharedPack = {
 	outDir: "dist",
@@ -112,7 +114,7 @@ const sharedPack = {
 		moduleSideEffects: false,
 		propertyReadSideEffects: false,
 	},
-	// Both pack configs below declare the same `publint`/`attw` value, so the build engine
+	// Every pack config below declares the same `publint`/`attw` value, so the build engine
 	// dedupes them and runs a single combined check over the fully assembled `dist/`, once
 	// every entry (root + every subpath) has finished building, rather than once per config.
 	publint: true,
@@ -575,6 +577,7 @@ export default defineConfig({
 				"src/_internals/constants/**",
 				"src/index.ts",
 				"src/_cli/bin/bin.ts",
+				"src/_mcp/brazilian-utils-mcp.ts",
 			],
 			thresholds: {
 				statements: 100,
@@ -607,6 +610,17 @@ export default defineConfig({
 			sourcemap: false,
 			dts: false,
 			entry: { cli: resolve(rootDir, "src/_cli/bin/bin.ts") },
+			format: ["es"],
+			plugins: [externalizeLibrary()],
+		},
+		// The MCP server: one ESM file with a shebang, no declarations (it exports nothing) and the
+		// library left external (see `externalizeLibrary`), so it costs library consumers nothing:
+		// no entry point imports it and `exports` does not list it.
+		{
+			...sharedPack,
+			sourcemap: false,
+			dts: false,
+			entry: { "brazilian-utils-mcp": resolve(rootDir, "src/_mcp/brazilian-utils-mcp.ts") },
 			format: ["es"],
 			plugins: [externalizeLibrary()],
 		},
