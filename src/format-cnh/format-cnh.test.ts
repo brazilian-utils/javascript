@@ -36,6 +36,21 @@ describe("formatCnh", () => {
 		expect(formatCnh()).toBe("");
 	});
 
+	it("should hide the first 3 digits and the 2 check digits when obfuscate is truthy", () => {
+		expect(formatCnh("98765432119", { obfuscate: true })).toBe("***654321-**");
+		expect(formatCnh(98_765_432_119, { obfuscate: true })).toBe("***654321-**");
+		expect(formatCnh("9876", { obfuscate: true })).toBe("***6");
+		expect(formatCnh("9876", { pad: true, obfuscate: true })).toBe("***000098-**");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatCnh("98765432119", { obfuscate: "yes" })).toBe("***654321-**");
+	});
+
+	it("should behave exactly as without the option when obfuscate is falsy", () => {
+		expect(formatCnh("98765432119", { obfuscate: false })).toBe("987654321-19");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatCnh("9876", { pad: true, obfuscate: "" })).toBe("000000098-76");
+	});
+
 	describe("properties", () => {
 		const upToACnh = digitsUpTo(11);
 
@@ -45,6 +60,14 @@ describe("formatCnh", () => {
 
 		test("should produce the documented mask shape for a full CNH", () => {
 			expectMatchesPattern(formatCnh, /^\d{9}-\d{2}$/, digits(11));
+		});
+
+		test("should produce the documented obfuscated shape for a full CNH", () => {
+			expectMatchesPattern(
+				(value: string) => formatCnh(value, { obfuscate: true }),
+				/^\*{3}\d{6}-\*{2}$/,
+				digits(11),
+			);
 		});
 
 		test("should left pad a shorter value up to the CNH length", () => {
@@ -64,7 +87,8 @@ describe("formatCnh types", () => {
 		expectTypeOf(formatCnh).returns.toEqualTypeOf<string>();
 	});
 
-	test("should type the pad option as an optional boolean", () => {
+	test("should type the pad and obfuscate options as optional booleans", () => {
 		expectTypeOf<FormatCnhOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf<FormatCnhOptions["obfuscate"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

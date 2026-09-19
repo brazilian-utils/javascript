@@ -214,6 +214,7 @@ export const formatCnh: (value: string | number, options?: FormatCnhOptions) => 
 // @public
 export type FormatCnhOptions = {
     pad?: boolean;
+    obfuscate?: boolean;
 };
 
 // @public
@@ -314,6 +315,7 @@ export const formatPis: (value: string | number, options?: FormatPisOptions) => 
 // @public
 export type FormatPisOptions = {
     pad?: boolean;
+    obfuscate?: boolean;
 };
 
 // @public
@@ -333,7 +335,12 @@ export type FormatSuframaOptions = {
 };
 
 // @public
-export const formatVoterId: (value: string | number) => string;
+export const formatVoterId: (value: string | number, options?: FormatVoterIdOptions) => string;
+
+// @public
+export type FormatVoterIdOptions = {
+    obfuscate?: boolean;
+};
 
 // @public
 export const generateBoleto: (params?: GenerateBoletoParams) => string;
