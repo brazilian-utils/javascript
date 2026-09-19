@@ -250,7 +250,7 @@ brazilian-utils isValidBankAccount --json '{"bankCode":"001","agency":"1234","ac
 brazilian-utils getAddressInfoByCep 01001000                   # awaits the lookup, then prints the address
 ```
 
-Strings and numbers are printed as they are, anything else as JSON. The exit code is `0` on success, `1` when the answer is negative (`false`, `null`, or the empty string a formatter answers with when it cannot read its value) or the utility throws (the error goes to stderr), and `2` when the command line itself is wrong, so a validator works as a shell condition:
+Strings and numbers are printed as they are, a date as its `YYYY-MM-DD` local day (inside JSON too), anything else as JSON. The exit code is `0` on success, `1` when the answer is negative (`false`, `null`, or the empty string a formatter answers with when it cannot read its value) or the utility throws (the error goes to stderr), and `2` when the command line itself is wrong, so a validator works as a shell condition:
 
 ```bash
 if brazilian-utils isValidCnpj "$CNPJ" > /dev/null; then echo "ok"; fi

@@ -100,7 +100,7 @@ brazilian-utils isValidBankAccount --json '{"bankCode":"001","agency":"1234","ac
 brazilian-utils getAddressInfoByCep 01001000                   # aguarda a consulta e imprime o endereço
 ```
 
-Strings e números são impressos como estão, e todo o resto como JSON. O código de saída é `0` em caso de sucesso, `1` quando a resposta é negativa (`false`, `null` ou a string vazia que um formatador devolve quando não consegue ler o valor) ou quando o utilitário lança um erro (que vai para a stderr), e `2` quando a própria linha de comando está errada, então um validador funciona como condição no shell:
+Strings e números são impressos como estão, uma data como o seu dia local `YYYY-MM-DD` (também dentro do JSON), e todo o resto como JSON. O código de saída é `0` em caso de sucesso, `1` quando a resposta é negativa (`false`, `null` ou a string vazia que um formatador devolve quando não consegue ler o valor) ou quando o utilitário lança um erro (que vai para a stderr), e `2` quando a própria linha de comando está errada, então um validador funciona como condição no shell:
 
 ```bash
 if brazilian-utils isValidCnpj "$CNPJ" > /dev/null; then echo "ok"; fi
