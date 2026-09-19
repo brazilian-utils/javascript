@@ -2164,6 +2164,66 @@ isValidCsosn('abc101'); // false (not a documented form)
 isValidCsosn(-101); // false (not a non-negative safe integer)
 ```
 
+## GTIN (product barcode)
+
+### isValidGtin
+
+Check if a GTIN (Global Trade Item Number, the number under an EAN/UPC barcode) is valid. It covers the four structures of the [GS1 General Specifications](https://ref.gs1.org/standards/genspecs/), the same four the NF-e accepts in `cEAN` and `cEANTrib`: GTIN-8, GTIN-12 (UPC), GTIN-13 (EAN) and GTIN-14 (DUN-14). The value must be a string of 8, 12, 13 or 14 digits, surrounding whitespace aside, whose last digit is the [GS1 modulo 10 check digit](https://www.gs1.org/services/how-calculate-check-digit-manually): weights 3 and 1 alternating from the right, the sum subtracted from the next multiple of ten. That is what rules I03-10 and I12-10 of [SEFAZ Nota Técnica 2021.003](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D) check (rejections 611 and 612).
+
+Leading zeros count, so a number is never accepted, and a masked value (`'7 890000 000017'`) is rejected instead of having its digits picked out. The `'SEM GTIN'` literal the NF-e uses for a product without a GTIN is not a GTIN, so it is not valid here: test for it before calling.
+
+Pass `options.lengths` (part of `IsValidGtinOptions`) to accept only some of the four lengths. It defaults to all four.
+
+The prefix does not change the verdict. Restricted Circulation Numbers (prefixes 02, 04 and 20 to 29, the codes a shop prints on its own scale labels) and the ISSN, ISBN and coupon ranges share the structure and the check digit, and the ["Tabela Prefixo GS1"](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D) SEFAZ validates `cEAN` against lists them as valid; use `getGtinInfo` to tell them apart. The prefix is not checked against the list of GS1 Member Organisations either: GS1 keeps assigning ranges, so a copy of that list would turn down valid numbers as it ages. Whether the number is registered (the Cadastro Centralizado de GTIN lookup SEFAZ runs for the 789 and 790 prefixes) cannot be checked offline.
+
+```javascript
+import { isValidGtin } from '@brazilian-utils/brazilian-utils';
+
+isValidGtin('7890000000017'); // true (GTIN-13, GS1 Brasil prefix)
+isValidGtin('6291041500213'); // true (the example of the GS1 check digit page)
+isValidGtin('78912342'); // true (GTIN-8)
+isValidGtin('061414112345'); // true (GTIN-12)
+isValidGtin('17890000000014'); // true (GTIN-14)
+isValidGtin('7890000000018'); // false (wrong check digit)
+isValidGtin('17890000000014', { lengths: [8, 12, 13] }); // false (GTIN-14 not accepted)
+isValidGtin('7 890000 000017'); // false (digits only)
+isValidGtin('SEM GTIN'); // false
+```
+
+### getGtinInfo
+
+Parse a GTIN into its fields, or get `null` when it is not valid (same rules as `isValidGtin`). The result is a `GtinInfo`:
+
+| Field | Description |
+| --- | --- |
+| `type` | `'GTIN-8'`, `'GTIN-12'`, `'GTIN-13'` or `'GTIN-14'` (`GtinType`), from the length the value was written with |
+| `length` | `8`, `12`, `13` or `14` (`GtinLength`) |
+| `prefix` | The three digit GS1 Prefix (GS1-8 Prefix for a GTIN-8). It names the GS1 Member Organisation that licensed the number, not the country of origin |
+| `isBrazilian` | `true` when the prefix is one of GS1 Brasil, `789` or `790`, what NT 2021.003 calls "prefixo do Brasil" |
+| `isRestrictedCirculation` | `true` when the prefix is in a range GS1 sets aside for Restricted Circulation Numbers (GS1 Prefixes 02, 04 and 20 to 29; GS1-8 Prefixes 000 to 099 and 200 to 299), so the number is only unique inside a company or region |
+| `checkDigit` | The modulo 10 check digit, the last digit |
+
+The prefix is read the way the "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14 digits, and the prefix is positions 7 to 9 when the first six are zeros (a GTIN-8) and positions 2 to 4 otherwise. A GTIN-12 therefore has a prefix that starts with `0`, and a GTIN-14 has the prefix of the GTIN-13 it packs, after the indicator digit.
+
+```javascript
+import { getGtinInfo } from '@brazilian-utils/brazilian-utils';
+
+getGtinInfo('7890000000017');
+// { type: 'GTIN-13', length: 13, prefix: '789', isBrazilian: true,
+//   isRestrictedCirculation: false, checkDigit: 7 }
+
+getGtinInfo('17890000000014');
+// { type: 'GTIN-14', length: 14, prefix: '789', isBrazilian: true,
+//   isRestrictedCirculation: false, checkDigit: 4 }
+
+getGtinInfo('061414112345');
+// { type: 'GTIN-12', length: 12, prefix: '006', isBrazilian: false,
+//   isRestrictedCirculation: false, checkDigit: 5 }
+
+getGtinInfo('2000000000015')?.isRestrictedCirculation; // true (in-store number)
+getGtinInfo('7890000000018'); // null (wrong check digit)
+```
+
 ## Text
 
 ### capitalize

@@ -119,6 +119,12 @@ export {
 	type LicensePlateFormat,
 } from "./get-format-license-plate/get-format-license-plate";
 export {
+	type GtinInfo,
+	type GtinLength,
+	type GtinType,
+	getGtinInfo,
+} from "./get-gtin-info/get-gtin-info";
+export {
 	type GetHolidaysParams,
 	type Holiday,
 	type HolidayType,
@@ -189,6 +195,7 @@ export { isValidCreditCard } from "./is-valid-credit-card/is-valid-credit-card";
 export { isValidCsosn } from "./is-valid-csosn/is-valid-csosn";
 export { type IsValidCstOptions, isValidCst } from "./is-valid-cst/is-valid-cst";
 export { isValidEmail } from "./is-valid-email/is-valid-email";
+export { type IsValidGtinOptions, isValidGtin } from "./is-valid-gtin/is-valid-gtin";
 export { isValidIban } from "./is-valid-iban/is-valid-iban";
 export { type IsValidIeParams, isValidIe } from "./is-valid-ie/is-valid-ie";
 export { isValidLandlinePhone } from "./is-valid-landline-phone/is-valid-landline-phone";

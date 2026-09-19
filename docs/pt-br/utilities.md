@@ -2164,6 +2164,66 @@ isValidCsosn('abc101'); // false (não é uma forma documentada)
 isValidCsosn(-101); // false (não é um inteiro seguro não negativo)
 ```
 
+## GTIN (código de barras de produto)
+
+### isValidGtin
+
+Verifica se um GTIN (Global Trade Item Number, o número sob um código de barras EAN/UPC) é válido. Cobre as quatro estruturas das [GS1 General Specifications](https://ref.gs1.org/standards/genspecs/), as mesmas quatro que a NF-e aceita em `cEAN` e `cEANTrib`: GTIN-8, GTIN-12 (UPC), GTIN-13 (EAN) e GTIN-14 (DUN-14). O valor deve ser uma string de 8, 12, 13 ou 14 dígitos, fora os espaços em volta, cujo último dígito é o [dígito verificador módulo 10 da GS1](https://www.gs1.org/services/how-calculate-check-digit-manually): pesos 3 e 1 alternados a partir da direita, e a soma subtraída do próximo múltiplo de dez. É o que as regras I03-10 e I12-10 da [Nota Técnica 2021.003 da SEFAZ](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D) verificam (rejeições 611 e 612).
+
+Zeros à esquerda contam, então um número nunca é aceito, e um valor com máscara (`'7 890000 000017'`) é rejeitado em vez de ter seus dígitos extraídos. O literal `'SEM GTIN'`, que a NF-e usa para produto sem GTIN, não é um GTIN e portanto não é válido aqui: teste por ele antes de chamar.
+
+Passe `options.lengths` (parte de `IsValidGtinOptions`) para aceitar só alguns dos quatro tamanhos. O padrão são os quatro.
+
+O prefixo não muda o veredito. Os Números de Circulação Restrita (prefixos 02, 04 e 20 a 29, os códigos que a loja imprime nas etiquetas da própria balança) e as faixas de ISSN, ISBN e cupons têm a mesma estrutura e o mesmo dígito verificador, e a ["Tabela Prefixo GS1"](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D), contra a qual a SEFAZ valida o `cEAN`, lista essas faixas como válidas; use `getGtinInfo` para distingui-las. O prefixo também não é conferido contra a lista de Organizações Membro da GS1: a GS1 segue atribuindo faixas, e uma cópia dessa lista passaria a recusar números válidos conforme envelhecesse. Se o número está cadastrado (a consulta ao Cadastro Centralizado de GTIN que a SEFAZ faz para os prefixos 789 e 790) não dá para verificar offline.
+
+```javascript
+import { isValidGtin } from '@brazilian-utils/brazilian-utils';
+
+isValidGtin('7890000000017'); // true (GTIN-13, prefixo da GS1 Brasil)
+isValidGtin('6291041500213'); // true (o exemplo da página de dígito verificador da GS1)
+isValidGtin('78912342'); // true (GTIN-8)
+isValidGtin('061414112345'); // true (GTIN-12)
+isValidGtin('17890000000014'); // true (GTIN-14)
+isValidGtin('7890000000018'); // false (dígito verificador errado)
+isValidGtin('17890000000014', { lengths: [8, 12, 13] }); // false (GTIN-14 não aceito)
+isValidGtin('7 890000 000017'); // false (somente dígitos)
+isValidGtin('SEM GTIN'); // false
+```
+
+### getGtinInfo
+
+Extrai os campos de um GTIN, ou retorna `null` quando ele não é válido (mesmas regras de `isValidGtin`). O resultado é um `GtinInfo`:
+
+| Campo | Descrição |
+| --- | --- |
+| `type` | `'GTIN-8'`, `'GTIN-12'`, `'GTIN-13'` ou `'GTIN-14'` (`GtinType`), conforme o tamanho com que o valor foi escrito |
+| `length` | `8`, `12`, `13` ou `14` (`GtinLength`) |
+| `prefix` | O Prefixo GS1 de três dígitos (Prefixo GS1-8 em um GTIN-8). Identifica a Organização Membro da GS1 que licenciou o número, não o país de origem |
+| `isBrazilian` | `true` quando o prefixo é um dos da GS1 Brasil, `789` ou `790`, o que a NT 2021.003 chama de "prefixo do Brasil" |
+| `isRestrictedCirculation` | `true` quando o prefixo está em uma faixa que a GS1 reserva para Números de Circulação Restrita (Prefixos GS1 02, 04 e 20 a 29; Prefixos GS1-8 000 a 099 e 200 a 299), ou seja, o número só é único dentro de uma empresa ou região |
+| `checkDigit` | O dígito verificador módulo 10, o último dígito |
+
+O prefixo é lido como a "Tabela Prefixo GS1" do Portal da NF-e orienta: o valor é preenchido com zeros à esquerda até 14 dígitos, e o prefixo são as posições 7 a 9 quando as seis primeiras são zeros (um GTIN-8) e as posições 2 a 4 caso contrário. Um GTIN-12 tem, portanto, um prefixo que começa com `0`, e um GTIN-14 tem o prefixo do GTIN-13 que ele agrupa, depois do dígito indicador.
+
+```javascript
+import { getGtinInfo } from '@brazilian-utils/brazilian-utils';
+
+getGtinInfo('7890000000017');
+// { type: 'GTIN-13', length: 13, prefix: '789', isBrazilian: true,
+//   isRestrictedCirculation: false, checkDigit: 7 }
+
+getGtinInfo('17890000000014');
+// { type: 'GTIN-14', length: 14, prefix: '789', isBrazilian: true,
+//   isRestrictedCirculation: false, checkDigit: 4 }
+
+getGtinInfo('061414112345');
+// { type: 'GTIN-12', length: 12, prefix: '006', isBrazilian: false,
+//   isRestrictedCirculation: false, checkDigit: 5 }
+
+getGtinInfo('2000000000015')?.isRestrictedCirculation; // true (número interno da loja)
+getGtinInfo('7890000000018'); // null (dígito verificador errado)
+```
+
 ## Texto
 
 ### capitalize
