@@ -154,6 +154,7 @@
 		"webdriverio": "9.31.9"
 	},
 	"overrides": {
+		"@puppeteer/browsers@2": "^3.2.2",
 		"basic-ftp@5": "^5.3.1",
 		"brace-expansion@2": "^2.1.2",
 		"eslint-plugin-sonarjs": {
