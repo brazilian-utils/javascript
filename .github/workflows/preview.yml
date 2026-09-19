@@ -19,9 +19,6 @@ permissions:
 jobs:
   preview:
     name: Publish a preview to pkg.pr.new
-    # Off until the app is installed and the PKG_PR_NEW repository variable is set to `true`, so
-    # pull requests do not carry a failing check in the meantime.
-    if: ${{ vars.PKG_PR_NEW == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
