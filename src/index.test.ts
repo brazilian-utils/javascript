@@ -73,6 +73,7 @@ import {
 	type LegalNatureCategory,
 	type LicensePlateFormat,
 	type Municipality,
+	type Nbs,
 	type NfeKeyInfo,
 	type NfeKeyModel,
 	type NumberToWordsGender,
@@ -86,6 +87,7 @@ import {
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
 	type RegistroProfissionalCouncil,
+	type ServiceItem,
 	type State,
 	type StateCode,
 	type StateName,
@@ -125,6 +127,7 @@ const PUBLIC = [
 	"formatIban",
 	"formatLegalNature",
 	"formatLicensePlate",
+	"formatNbs",
 	"formatNcm",
 	"formatNfeKey",
 	"formatPassport",
@@ -170,9 +173,11 @@ const PUBLIC = [
 	"getMunicipalities",
 	"getMunicipality",
 	"getMunicipalityByCode",
+	"getNbs",
 	"getNfeKeyInfo",
 	"getPixKeyInfo",
 	"getPixPayloadInfo",
+	"getServiceItem",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
 	"getStateNameByCode",
@@ -208,6 +213,7 @@ const PUBLIC = [
 	"isValidLegalNature",
 	"isValidLicensePlate",
 	"isValidMobilePhone",
+	"isValidNbs",
 	"isValidNcm",
 	"isValidNfeKey",
 	"isValidPIS",
@@ -219,6 +225,7 @@ const PUBLIC = [
 	"isValidProcessoJuridico",
 	"isValidRegistroProfissional",
 	"isValidRenavam",
+	"isValidServiceItem",
 	"isValidServicePhone",
 	"isValidVin",
 	"isValidVoterId",
@@ -350,6 +357,7 @@ describe("Public API", () => {
 			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;
 			Municipality: Municipality;
+			Nbs: Nbs;
 			NfeKeyInfo: NfeKeyInfo;
 			NfeKeyModel: NfeKeyModel;
 			NumberToWordsGender: NumberToWordsGender;
@@ -363,6 +371,7 @@ describe("Public API", () => {
 			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
+			ServiceItem: ServiceItem;
 			State: State;
 			StateCode: StateCode;
 			StateName: StateName;

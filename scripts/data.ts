@@ -26,7 +26,9 @@ const generators = [
 	"cities.ts",
 	"cnae.ts",
 	"legal-natures.ts",
+	"nbs.ts",
 	"ncm.ts",
+	"service-items.ts",
 	"states.ts",
 ];
 
@@ -36,6 +38,8 @@ const generatedFiles = [
 	"./src/_internals/constants/cfop.ts",
 	"./src/_internals/constants/cities.ts",
 	"./src/_internals/constants/cnae.ts",
+	"./src/_internals/constants/nbs.ts",
+	"./src/_internals/constants/service-items.ts",
 	"./src/_internals/constants/states.ts",
 	"./src/is-valid-legal-nature/constants.ts",
 	"./src/is-valid-ncm/constants.ts",

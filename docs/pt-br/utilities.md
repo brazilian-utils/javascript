@@ -2071,6 +2071,78 @@ parseNcm('8471.30.12'); // '84713012'
 parseNcm('8471'); // '8471' (a partial code is kept as written)
 ```
 
+### isValidNbs
+
+Verifica se um código NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) existe na [tabela oficial da NBS 2.0](https://www.gov.br/mdic/pt-br/assuntos/sdic/comercio-e-servicos/nbs-nomenclatura-brasileira-de-servicos) publicada pelo MDIC (Portaria Conjunta RFB/SCS 1.429/2018, alterada pela Portaria Conjunta RFB/SCS 2.000/2018), o código que a NFS-e nacional leva em `cNBS`. O código tem 9 dígitos, impressos como `N.NNNN.NN.NN`: o algarismo 1, o capítulo, a posição, os dois níveis de subposição, o item e o subitem. Aceita os 9 dígitos ou a máscara, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo; qualquer outra coisa é rejeitada em vez de ter os dígitos pinçados. Só códigos completos são válidos: os títulos de capítulo (`1.01`), posição (`1.0101`) e subposição (`1.0101.1`) não classificam nada por si sós. O [ANEXO B do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual) lista os mesmos 920 códigos menos três (`1.0402.29.00`, `1.0403.29.00` e `1.0904.40.00`), então um código válido aqui ainda pode ser recusado pela NFS-e.
+
+```javascript
+import { isValidNbs } from '@brazilian-utils/brazilian-utils';
+
+isValidNbs('1.0101.11.00'); // true
+isValidNbs('101011100'); // true
+isValidNbs(101011100); // true
+isValidNbs('1.0101'); // false (título de posição, não um código completo)
+isValidNbs('1.9999.99.99'); // false
+isValidNbs('1.0101abc11.00'); // false (não é uma forma documentada)
+```
+
+### formatNbs
+
+Formata um código NBS na máscara `N.NNNN.NN.NN` em que a nomenclatura o imprime. É uma transformação puramente estrutural: não confere o código com a tabela oficial (use `isValidNbs` para isso), a máscara é aplicada progressivamente, até onde o valor vai, e só os dígitos são lidos. Todo código NBS começa com 1, então, diferente do `formatNcm`, não há opção `pad`.
+
+```javascript
+import { formatNbs } from '@brazilian-utils/brazilian-utils';
+
+formatNbs('101011100'); // 1.0101.11.00
+formatNbs(101011100); // 1.0101.11.00
+formatNbs('10101'); // 1.0101 (mascarado até onde vai)
+formatNbs('abc101011100'); // 1.0101.11.00 (só os dígitos são lidos)
+```
+
+### getNbs
+
+Consulta um código NBS na tabela oficial da NBS 2.0 e retorna o `code` (os 9 dígitos, sem a máscara) e a `description` oficial, tipados como `Nbs`, ou `null` quando o código é desconhecido ou inválido. Aceita as mesmas formas do `isValidNbs`.
+
+```javascript
+import { getNbs } from '@brazilian-utils/brazilian-utils';
+
+getNbs('1.0101.11.00');
+// { code: '101011100', description: 'Serviços de construção de edificações residenciais de um e dois pavimentos' }
+
+getNbs(126050000); // { code: '126050000', description: 'Serviços domésticos' }
+getNbs('1.0101'); // null (título de posição, não um código completo)
+getNbs('1.9999.99.99'); // null
+```
+
+### isValidServiceItem
+
+Verifica se um valor é um subitem em vigor da lista de serviços anexa à [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm), a lista dos serviços sobre os quais incide o ISS. A lei numera o subitem como o item, um ponto e dois dígitos, de `1.01` a `40.01`. Ele é aceito nessa forma, com o item preenchido com zero (`'01.01'`) ou como os dígitos puros (`'0101'`, `'101'` ou o inteiro `101`), que são os quatro primeiros dígitos do código `cTribNac` da NFS-e nacional, com espaços opcionais nas extremidades. O ponto é o único separador que a lei imprime entre o item e o subitem, então, ao contrário dos códigos com máscara de agrupamento impressa (`isValidCfop`, `isValidNbs`), nada mais é aceito no lugar dele e `'1-01'` é rejeitado. Um número só é lido quando é um inteiro seguro não negativo, então o decimal `1.01` é rejeitado: escreva a forma com ponto como string. Os subitens vetados (`3.01`, `7.14`, `7.15`, `13.01` e `17.07`), os títulos de item, os códigos nacionais de 6 dígitos em que um subitem se desdobra e o item 99 da lista nacional, que não faz parte da lei, não são válidos; códigos municipais de serviço estão fora do escopo. A tabela é gerada a partir da planilha `LISTA.SERV.NAC.` do [ANEXO B do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), a lista em vigor em formato legível por máquina.
+
+```javascript
+import { isValidServiceItem } from '@brazilian-utils/brazilian-utils';
+
+isValidServiceItem('1.01'); // true
+isValidServiceItem('01.01'); // true
+isValidServiceItem('0101'); // true
+isValidServiceItem(101); // true
+isValidServiceItem('3.01'); // false (vetado)
+isValidServiceItem('99.01'); // false (só da lista nacional, não da lei)
+isValidServiceItem(1.01); // false (não é um inteiro seguro não negativo)
+```
+
+### getServiceItem
+
+Consulta um subitem na lista de serviços anexa à Lei Complementar 116/2003 e retorna o `code`, na forma em que a lei o imprime (`'1.01'`), e a `description`, tipados como `ServiceItem`, ou `null` quando o subitem é desconhecido ou inválido. Aceita as mesmas formas do `isValidServiceItem`.
+
+```javascript
+import { getServiceItem } from '@brazilian-utils/brazilian-utils';
+
+getServiceItem('1.01'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('0101'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob encomenda.' }
+getServiceItem('3.01'); // null (vetado)
+```
+
 ### isValidCfop
 
 Valida se um código CFOP (Código Fiscal de Operações e Prestações) existe na tabela oficial. A tabela é o [Anexo II consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), o texto vigente (redação atual dada pelo Ajuste SINIEF 03/24, última alteração pelo [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25)), e não o texto congelado de 2001 do Ajuste SINIEF 07/01. Só os códigos operáveis contam: os títulos de grupo e subgrupo da nomenclatura oficial, os códigos terminados em `00` e `50` (1000, 1100, 1150, 5350, ...), são títulos de seção e não códigos que um documento pode carregar, então são rejeitados.

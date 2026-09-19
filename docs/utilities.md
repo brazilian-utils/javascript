@@ -2071,6 +2071,78 @@ parseNcm('8471.30.12'); // '84713012'
 parseNcm('8471'); // '8471' (a partial code is kept as written)
 ```
 
+### isValidNbs
+
+Check if an NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) code exists in the official [NBS 2.0 table](https://www.gov.br/mdic/pt-br/assuntos/sdic/comercio-e-servicos/nbs-nomenclatura-brasileira-de-servicos) the MDIC publishes (Portaria Conjunta RFB/SCS 1.429/2018, amended by the Portaria Conjunta RFB/SCS 2.000/2018), the code the national NFS-e carries in `cNBS`. A code has 9 digits, printed as `N.NNNN.NN.NN`: the digit 1, the chapter, the position, the two subposition levels, the item and the subitem. Accepts the 9 digits or the mask, with a single separator between the groups and optional surrounding whitespace, or a non-negative safe integer; anything else is rejected instead of having its digits picked out. Only complete codes are valid: the chapter (`1.01`), position (`1.0101`) and subposition (`1.0101.1`) headings classify nothing by themselves. The [ANEXO B of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual) lists the same 920 codes except three (`1.0402.29.00`, `1.0403.29.00` and `1.0904.40.00`), so a code valid here can still be refused by the NFS-e.
+
+```javascript
+import { isValidNbs } from '@brazilian-utils/brazilian-utils';
+
+isValidNbs('1.0101.11.00'); // true
+isValidNbs('101011100'); // true
+isValidNbs(101011100); // true
+isValidNbs('1.0101'); // false (a position heading, not a complete code)
+isValidNbs('1.9999.99.99'); // false
+isValidNbs('1.0101abc11.00'); // false (not a documented form)
+```
+
+### formatNbs
+
+Format an NBS code into the `N.NNNN.NN.NN` mask the nomenclature prints. This is a purely structural transformation: it does not check the code against the official table (use `isValidNbs` for that), the mask is applied progressively, as far as the value goes, and only the digits are read. Every NBS code starts with 1, so, unlike `formatNcm`, there is no `pad` option.
+
+```javascript
+import { formatNbs } from '@brazilian-utils/brazilian-utils';
+
+formatNbs('101011100'); // 1.0101.11.00
+formatNbs(101011100); // 1.0101.11.00
+formatNbs('10101'); // 1.0101 (masked as far as it goes)
+formatNbs('abc101011100'); // 1.0101.11.00 (only the digits are read)
+```
+
+### getNbs
+
+Look an NBS code up in the official NBS 2.0 table and return its `code` (the 9 digits, without the mask) and official `description`, typed as `Nbs`, or `null` when the code is unknown or invalid. Accepts the same forms as `isValidNbs`.
+
+```javascript
+import { getNbs } from '@brazilian-utils/brazilian-utils';
+
+getNbs('1.0101.11.00');
+// { code: '101011100', description: 'Serviços de construção de edificações residenciais de um e dois pavimentos' }
+
+getNbs(126050000); // { code: '126050000', description: 'Serviços domésticos' }
+getNbs('1.0101'); // null (a position heading, not a complete code)
+getNbs('1.9999.99.99'); // null
+```
+
+### isValidServiceItem
+
+Check if a value is a subitem in force of the service list annexed to the [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm), the list of the services the ISS is levied on. The law numbers a subitem as the item, a dot and two digits, `1.01` to `40.01`. It is accepted in that form, with a zero padded item (`'01.01'`) or as the bare digits (`'0101'`, `'101'` or the integer `101`), which are the first four digits of the `cTribNac` code of the national NFS-e, with optional surrounding whitespace. The dot is the only separator the law ever prints between the item and the subitem, so unlike the codes with a printed grouping mask (`isValidCfop`, `isValidNbs`) nothing else is accepted in its place and `'1-01'` is rejected. A number is only read when it is a non-negative safe integer, so the float `1.01` is rejected: write the dotted form as a string. The vetoed subitems (`3.01`, `7.14`, `7.15`, `13.01` and `17.07`), the item headings, the 6 digit national codes a subitem is split into and item 99 of the national list, which is not part of the law, are not valid; municipal service codes are out of scope. The table is generated from the sheet `LISTA.SERV.NAC.` of the [ANEXO B of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), the list in force in machine readable form.
+
+```javascript
+import { isValidServiceItem } from '@brazilian-utils/brazilian-utils';
+
+isValidServiceItem('1.01'); // true
+isValidServiceItem('01.01'); // true
+isValidServiceItem('0101'); // true
+isValidServiceItem(101); // true
+isValidServiceItem('3.01'); // false (vetoed)
+isValidServiceItem('99.01'); // false (national list only, not the law)
+isValidServiceItem(1.01); // false (not a non-negative safe integer)
+```
+
+### getServiceItem
+
+Look a subitem up in the service list annexed to the Lei Complementar 116/2003 and return its `code`, in the form the law prints (`'1.01'`), and its `description`, typed as `ServiceItem`, or `null` when the subitem is unknown or invalid. Accepts the same forms as `isValidServiceItem`.
+
+```javascript
+import { getServiceItem } from '@brazilian-utils/brazilian-utils';
+
+getServiceItem('1.01'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('0101'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob encomenda.' }
+getServiceItem('3.01'); // null (vetoed)
+```
+
 ### isValidCfop
 
 Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table. The table is the [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), the text in force (current wording given by Ajuste SINIEF 03/24, last amended by [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25)), not the frozen 2001 text of Ajuste SINIEF 07/01. Only operable codes count: the group and subgroup headings of the official nomenclature, the codes ending in `00` and `50` (1000, 1100, 1150, 5350, ...), are section titles rather than codes a document can carry, so they are rejected.
