@@ -1,25 +1,77 @@
 import { Component, computed, signal } from "@angular/core";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
+type MaskCpfParams = {
+  /** The field the CPF is typed into. */
+  input: HTMLInputElement;
+  /** The `inputType` of the `input` event. */
+  inputType?: string;
+};
+
+/**
+ * Formats the CPF typed into `input` in place and keeps the caret next to
+ * the digit being edited, so typing, deleting or pasting anywhere works.
+ * Returns the formatted value.
+ */
+function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
+  let value = input.value;
+  let caret = input.selectionStart ?? value.length;
+
+  // A deleted "." or "-" would come straight back: delete the digit next to it.
+  if (
+    inputType.startsWith("delete") &&
+    formatCpf(value).length > value.length
+  ) {
+    if (inputType === "deleteContentBackward") caret -= 1;
+    value = value.slice(0, caret) + value.slice(caret + 1);
+  }
+
+  const digitsBeforeCaret = value.slice(0, caret).replace(/\D/g, "").length;
+  const formatted = formatCpf(value);
+  let position = 0;
+
+  for (
+    let seen = 0;
+    seen < digitsBeforeCaret && position < formatted.length;
+    position += 1
+  ) {
+    if (/\d/.test(formatted.charAt(position))) seen += 1;
+  }
+
+  input.value = formatted;
+  input.setSelectionRange(position, position);
+
+  return formatted;
+}
+
 @Component({
   selector: "app-cpf-field",
   template: `
     <label>
       CPF
-      <input [value]="cpf()" (input)="onInput($event)" inputmode="numeric" />
-      @if (cpf().length === 14) {
-        <span>{{ valid() ? "✓ Valid CPF" : "✗ Invalid CPF" }}</span>
+      <input
+        inputmode="numeric"
+        placeholder="000.000.000-00"
+        [attr.aria-invalid]="complete() && !valid()"
+        (input)="onInput($event)"
+      />
+      @if (complete()) {
+        <output>{{ valid() ? "✓ Valid CPF" : "✗ Invalid CPF" }}</output>
       }
     </label>
   `,
 })
 export class CpfFieldComponent {
   readonly cpf = signal("");
-  readonly valid = computed(() => isValidCpf(this.cpf()));
+  readonly complete = computed(() => this.cpf().length === 14);
+  readonly valid = computed(() => this.complete() && isValidCpf(this.cpf()));
 
   onInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.cpf.set(formatCpf(input.value));
-    input.value = this.cpf();
+    this.cpf.set(
+      maskCpf({
+        input: event.target as HTMLInputElement,
+        inputType: (event as InputEvent).inputType,
+      }),
+    );
   }
 }

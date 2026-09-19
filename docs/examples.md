@@ -1,33 +1,35 @@
 ---
 title: "Examples"
-description: "A CPF field that formats as you type and validates the result, with Brazilian Utils in React, Vue, Angular and plain JavaScript."
-keywords: ["examples", "CPF input mask", "React CPF", "Vue CPF", "Angular CPF", "format CPF as you type", "validate CPF"]
+description: "A CPF field that formats as you type and validates the result, with Brazilian Utils in React, Angular, Vue and plain JavaScript."
+keywords: ["examples", "CPF input mask", "React CPF", "Angular CPF", "Vue CPF", "format CPF as you type", "validate CPF"]
 ---
 
-One field does both jobs: `formatCpf` formats whatever has been typed so far (`"9438"` becomes `"943.8"`, letters are dropped and digits past the eleventh are cut), and `isValidCpf` checks the result once it is complete.
+A CPF field that formats as you type, with `formatCpf`, and validates once complete, with `isValidCpf`. Each tab runs the code below it, which you can copy as is.
 
-## Try it
+`formatCpf` formats whatever has been typed so far (`"9438"` becomes `"943.8"`), drops anything that is not a digit and cuts digits past the eleventh. Replacing a field's value moves the caret to the end, though, so `maskCpf` puts it back next to the digit being edited, and turns a deleted `.` or `-` into a deleted digit, which `formatCpf` would otherwise put straight back. The field is marked `aria-invalid` when a complete CPF is not valid.
 
-<iframe src="/snippets/cpf-field.html" title="Live CPF field" loading="lazy" width="100%" height="40" style="border: 0; border-radius: 6px; background: #fff"></iframe>
+<div class="example" data-name="React" data-demo="/snippets/live/react.html">
 
-## React
+[cpf-field.tsx](snippets/cpf-field.tsx ':include :type=code tsx')
 
-[cpf-field.jsx](snippets/cpf-field.jsx ':include :type=code jsx')
+</div>
 
-## Vue
-
-[cpf-field.vue](snippets/cpf-field.vue ':include :type=code html')
-
-Setting `event.target.value` again keeps the field in sync when a keystroke does not change the formatted value, such as a letter.
-
-## Angular
+<div class="example" data-name="Angular" data-demo="/snippets/live/angular.html">
 
 [cpf-field.component.ts](snippets/cpf-field.component.ts ':include :type=code ts')
 
-## Plain JavaScript
+</div>
 
-No build step: the package is imported straight from a CDN.
+<div class="example" data-name="Vue" data-demo="/snippets/live/vue.html">
+
+[cpf-field.vue](snippets/cpf-field.vue ':include :type=code vue')
+
+</div>
+
+<div class="example" data-name="Vanilla" data-demo="/snippets/cpf-field.html">
 
 [cpf-field.html](snippets/cpf-field.html ':include :type=code html')
 
-The same field works for a CNPJ (`formatCnpj` and `isValidCnpj`, complete at 18 characters) or a CEP (`formatCep` and `isValidCep`, complete at 9). The [utilities reference](utilities.md) lists every function.
+</div>
+
+The [utilities reference](utilities.md) lists every function.

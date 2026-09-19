@@ -1,17 +1,73 @@
 <!doctype html>
 <meta charset="utf-8" />
+<link rel="stylesheet" href="styles.css" />
 
-<label>CPF <input id="cpf" inputmode="numeric" placeholder="529.982.247-25" /></label>
-<output id="result"></output>
+<label>
+  CPF
+  <input id="cpf" inputmode="numeric" placeholder="000.000.000-00" />
+  <output id="result" hidden></output>
+</label>
 
 <script type="module">
-  import { formatCpf, isValidCpf } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import {
+    formatCpf,
+    isValidCpf,
+  } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+
+  /**
+   * @typedef {object} MaskCpfParams
+   * @property {HTMLInputElement} input - The field the CPF is typed into.
+   * @property {string} [inputType] - The `inputType` of the `input` event.
+   */
+
+  /**
+   * Formats the CPF typed into `input` in place and keeps the caret next to
+   * the digit being edited, so typing, deleting or pasting anywhere works.
+   * Returns the formatted value.
+   * @param {MaskCpfParams} params
+   * @returns {string}
+   */
+  function maskCpf({ input, inputType = "" }) {
+    let value = input.value;
+    let caret = input.selectionStart ?? value.length;
+
+    // A deleted "." or "-" would come straight back: delete the digit next to it.
+    if (
+      inputType.startsWith("delete") &&
+      formatCpf(value).length > value.length
+    ) {
+      if (inputType === "deleteContentBackward") caret -= 1;
+      value = value.slice(0, caret) + value.slice(caret + 1);
+    }
+
+    const digitsBeforeCaret = value.slice(0, caret).replace(/\D/g, "").length;
+    const formatted = formatCpf(value);
+    let position = 0;
+
+    for (
+      let seen = 0;
+      seen < digitsBeforeCaret && position < formatted.length;
+      position += 1
+    ) {
+      if (/\d/.test(formatted.charAt(position))) seen += 1;
+    }
+
+    input.value = formatted;
+    input.setSelectionRange(position, position);
+
+    return formatted;
+  }
 
   const input = document.getElementById("cpf");
   const result = document.getElementById("result");
 
-  input.addEventListener("input", () => {
-    input.value = formatCpf(input.value);
-    result.textContent = input.value.length === 14 ? (isValidCpf(input.value) ? "✓ Valid CPF" : "✗ Invalid CPF") : "";
+  input.addEventListener("input", (event) => {
+    const cpf = maskCpf({ input, inputType: event.inputType });
+    const complete = cpf.length === 14;
+    const valid = complete && isValidCpf(cpf);
+
+    input.setAttribute("aria-invalid", String(complete && !valid));
+    result.hidden = !complete;
+    result.textContent = valid ? "✓ Valid CPF" : "✗ Invalid CPF";
   });
 </script>

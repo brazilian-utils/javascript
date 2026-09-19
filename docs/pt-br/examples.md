@@ -1,33 +1,35 @@
 ---
 title: "Exemplos"
-description: "Um campo de CPF que formata enquanto você digita e valida o resultado, com Brazilian Utils em React, Vue, Angular e JavaScript puro."
-keywords: ["exemplos", "máscara de CPF", "CPF React", "CPF Vue", "CPF Angular", "formatar CPF ao digitar", "validar CPF"]
+description: "Um campo de CPF que formata enquanto você digita e valida o resultado, com Brazilian Utils em React, Angular, Vue e JavaScript puro."
+keywords: ["exemplos", "máscara de CPF", "CPF React", "CPF Angular", "CPF Vue", "formatar CPF ao digitar", "validar CPF"]
 ---
 
-Um campo só faz as duas coisas: `formatCpf` formata o que já foi digitado (`"9438"` vira `"943.8"`, letras são descartadas e dígitos além do décimo primeiro são cortados), e `isValidCpf` confere o resultado quando ele está completo.
+Um campo de CPF que formata enquanto você digita, com `formatCpf`, e valida quando completo, com `isValidCpf`. Cada aba roda o código logo abaixo dela, que pode ser copiado do jeito que está.
 
-## Experimente
+`formatCpf` formata o que já foi digitado (`"9438"` vira `"943.8"`), descarta o que não é dígito e corta os dígitos além do décimo primeiro. Só que trocar o valor do campo joga o cursor para o fim, então `maskCpf` devolve o cursor para perto do dígito que está sendo editado, e transforma um `.` ou `-` apagado num dígito apagado, que o `formatCpf` recolocaria na hora. O campo recebe `aria-invalid` quando um CPF completo não é válido.
 
-<iframe src="/snippets/cpf-field.html" title="Campo de CPF ao vivo" loading="lazy" width="100%" height="40" style="border: 0; border-radius: 6px; background: #fff"></iframe>
+<div class="example" data-name="React" data-demo="/snippets/live/react.html">
 
-## React
+[cpf-field.tsx](../snippets/cpf-field.tsx ':include :type=code tsx')
 
-[cpf-field.jsx](../snippets/cpf-field.jsx ':include :type=code jsx')
+</div>
 
-## Vue
-
-[cpf-field.vue](../snippets/cpf-field.vue ':include :type=code html')
-
-Atribuir `event.target.value` de novo mantém o campo em sincronia quando uma tecla não muda o valor formatado, como uma letra.
-
-## Angular
+<div class="example" data-name="Angular" data-demo="/snippets/live/angular.html">
 
 [cpf-field.component.ts](../snippets/cpf-field.component.ts ':include :type=code ts')
 
-## JavaScript puro
+</div>
 
-Sem build: o pacote é importado direto de um CDN.
+<div class="example" data-name="Vue" data-demo="/snippets/live/vue.html">
+
+[cpf-field.vue](../snippets/cpf-field.vue ':include :type=code vue')
+
+</div>
+
+<div class="example" data-name="Vanilla" data-demo="/snippets/cpf-field.html">
 
 [cpf-field.html](../snippets/cpf-field.html ':include :type=code html')
 
-O mesmo campo serve para CNPJ (`formatCnpj` e `isValidCnpj`, completo com 18 caracteres) ou CEP (`formatCep` e `isValidCep`, completo com 9). A [referência de utilitários](pt-br/utilities.md) lista todas as funções.
+</div>
+
+A [referência de utilitários](pt-br/utilities.md) lista todas as funções.

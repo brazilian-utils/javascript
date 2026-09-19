@@ -101,6 +101,21 @@
       --cover-bg-overlay: none;
     }
 
+    /* The framework tabs of examples.md */
+    .example-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 1.5em 0 0; border-bottom: 1px solid var(--color-mono-3, #3d444d); }
+    .example-tabs button {
+      padding: 0.55em 1.1em; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
+      background: none; color: inherit; font: inherit; font-weight: 600; opacity: 0.7; cursor: pointer;
+    }
+    .example-tabs button:hover { opacity: 1; }
+    .example-tabs button[aria-selected="true"] { opacity: 1; color: var(--theme-color); border-bottom-color: var(--theme-color); }
+    .example-tabs button:focus { box-shadow: none; outline: none; }
+    .example-tabs button:focus-visible { box-shadow: none; outline: 2px solid var(--theme-color); outline-offset: -2px; }
+    .example[hidden] { display: none; }
+    .example iframe {
+      display: block; width: 100%; height: 72px; margin: 1em 0; box-sizing: border-box;
+      border: 1px solid var(--color-mono-3, #3d444d); border-radius: 6px;
+    }
   </style>
 </head>
 
@@ -161,6 +176,57 @@
           hook.beforeEach(function (content) {
             var title = vm.frontmatter && vm.frontmatter.title;
             return title ? '# ' + title + '\n\n' + content : content;
+          });
+        },
+        // The framework tabs of examples.md: every <div class="example" data-name data-demo> becomes a
+        // tab; its live demo, an iframe of docs/snippets, loads the first time the tab is shown, in
+        // the site's color scheme and as tall as its content.
+        function (hook) {
+          hook.doneEach(function () {
+            var panels = [].slice.call(document.querySelectorAll('.example[data-name]'));
+            if (panels.length === 0) return;
+            var scheme = document.querySelector('meta[name="color-scheme"]');
+            var tabs = document.createElement('div');
+            tabs.className = 'example-tabs';
+            tabs.setAttribute('role', 'tablist');
+            panels[0].parentNode.insertBefore(tabs, panels[0]);
+
+            var show = function (name) {
+              panels.forEach(function (panel, index) {
+                var selected = panel.dataset.name === name;
+                tabs.children[index].setAttribute('aria-selected', String(selected));
+                panel.hidden = !selected;
+                if (!selected || panel.querySelector('iframe')) return;
+                var frame = document.createElement('iframe');
+                frame.title = panel.dataset.name + ' demo';
+                frame.src = panel.dataset.demo;
+                // The same scheme on both sides, or the browser paints the frame opaque
+                if (scheme) frame.style.colorScheme = scheme.content;
+                frame.addEventListener('load', function () {
+                  var page = frame.contentDocument;
+                  if (scheme) page.documentElement.style.colorScheme = scheme.content;
+                  new ResizeObserver(function () {
+                    frame.style.height = page.documentElement.scrollHeight + 'px';
+                  }).observe(page.body);
+                });
+                panel.insertBefore(frame, panel.firstChild);
+              });
+              try { localStorage.setItem('example-tab', name); } catch (error) {}
+            };
+
+            panels.forEach(function (panel) {
+              panel.setAttribute('role', 'tabpanel');
+              var button = document.createElement('button');
+              button.type = 'button';
+              button.setAttribute('role', 'tab');
+              button.textContent = panel.dataset.name;
+              button.addEventListener('click', function () { show(panel.dataset.name); });
+              tabs.appendChild(button);
+            });
+
+            var saved = null;
+            try { saved = localStorage.getItem('example-tab'); } catch (error) {}
+            show(panels.some(function (panel) { return panel.dataset.name === saved; }) ? saved : panels[0].dataset.name);
           });
         },
         // Per-page metadata for search engines and link previews: the title, description,
@@ -291,6 +357,11 @@
   <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/front-matter.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@3/dist/docsify-copy-code.min.js"></script>
+  <!-- Grammars docsify's bundled Prism lacks, for the TypeScript, TSX and Vue examples -->
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-typescript.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-jsx.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-tsx.min.js"></script>
+  <script>Prism.languages.vue = Prism.languages.markup;</script>
 
   <!-- Context7 chat widget: a floating assistant that answers from this library's documentation
        indexed at context7.com/brazilian-utils/javascript. Loads asynchronously; the chat only

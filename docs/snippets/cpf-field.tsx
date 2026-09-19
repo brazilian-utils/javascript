@@ -1,10 +1,5 @@
-<script setup lang="ts">
-import { computed, ref } from "vue";
+import { useState } from "react";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
-
-const cpf = ref("");
-const complete = computed(() => cpf.value.length === 14);
-const valid = computed(() => complete.value && isValidCpf(cpf.value));
 
 type MaskCpfParams = {
   /** The field the CPF is typed into. */
@@ -49,25 +44,28 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
   return formatted;
 }
 
-function onInput(event: Event) {
-  cpf.value = maskCpf({
-    input: event.target as HTMLInputElement,
-    inputType: (event as InputEvent).inputType,
-  });
-}
-</script>
+export function CpfField() {
+  const [cpf, setCpf] = useState("");
+  const complete = cpf.length === 14;
+  const valid = complete && isValidCpf(cpf);
 
-<template>
-  <label>
-    CPF
-    <input
-      inputmode="numeric"
-      placeholder="000.000.000-00"
-      :aria-invalid="complete && !valid"
-      @input="onInput"
-    />
-    <output v-if="complete">{{
-      valid ? "✓ Valid CPF" : "✗ Invalid CPF"
-    }}</output>
-  </label>
-</template>
+  return (
+    <label>
+      CPF
+      <input
+        inputMode="numeric"
+        placeholder="000.000.000-00"
+        aria-invalid={complete && !valid}
+        onInput={(event) =>
+          setCpf(
+            maskCpf({
+              input: event.currentTarget,
+              inputType: (event.nativeEvent as InputEvent).inputType,
+            }),
+          )
+        }
+      />
+      {complete && <output>{valid ? "✓ Valid CPF" : "✗ Invalid CPF"}</output>}
+    </label>
+  );
+}

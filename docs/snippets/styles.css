@@ -1,0 +1,75 @@
+/*
+ * The look of the live demos of examples.md, matched to the docs site: its green, its fonts and its
+ * dark and light backgrounds. The demo pages take the site's color scheme (run.js), or the
+ * system's when opened on their own.
+ */
+:root {
+  color-scheme: light dark;
+  --green: #009739;
+  --red: light-dark(#cf222e, #ff6b6b);
+  --text: light-dark(#333, #ddd);
+  --muted: light-dark(#8c959f, #8b949e);
+  --field: light-dark(#fff, #2a3035);
+  --border: light-dark(#d0d7de, #3d444d);
+}
+
+body {
+  margin: 0;
+  padding: 14px 16px;
+  font: 16px/1.5 system-ui, sans-serif;
+  color: var(--text);
+  background: transparent;
+}
+
+label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-weight: 600;
+}
+
+input {
+  width: 16ch;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--field);
+  color: inherit;
+  font: 500 16px/1.2 ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+  letter-spacing: 0.03em;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 30%, transparent);
+}
+
+output {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+input[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 30%, transparent);
+}
+
+input[aria-invalid="true"] ~ output {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+}
