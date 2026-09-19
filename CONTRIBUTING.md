@@ -79,6 +79,16 @@ but the few rules below hold everywhere:
   ViaCEP and the alternatives listed in their docs) over HTTPS through
   `src/_internals/fetch-with-retry`, treat every response as untrusted input and never send anything
   but the CEP or address being looked up.
+- `src/_cli/` is the `brazilian-utils` command (the `bin` of `package.json`), laid out like
+  `src/_internals/`: one function per folder. It is a generic dispatcher over `src/index.ts`, so a
+  new utility is a new command with no wiring. `run-cli` is the dispatcher as a pure function
+  (arguments and stdin in, output and exit code out), `run-bin` connects it to a process, and
+  `bin/bin.ts` is the three-line Node.js entry, built into `dist/cli.js` by its own pack config in
+  `vite.config.ts` with the library left external. No library entry point imports it, so it never
+  reaches a consumer's bundle. Arguments are strings unless `src/_cli/constants.ts` says otherwise:
+  `CLI_OPTION_KINDS` and `CLI_POSITIONAL_KINDS` list the options and positional arguments that are
+  a number, a boolean, a list or a date, and their types are derived from the public signatures,
+  so `npm run check` fails when a new non-string option or argument is missing from them.
 - There are no runtime dependencies (see [Zero runtime dependencies](#zero-runtime-dependencies)),
   so the trust boundary of the published package is this repository, its build toolchain and the
   npm registry; [MAINTAINERS.md](MAINTAINERS.md) lists who can change what, and
