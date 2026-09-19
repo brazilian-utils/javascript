@@ -251,6 +251,7 @@ const PUBLIC = [
 	"isValidVin",
 	"isValidVoterId",
 	"obfuscateEmail",
+	"obfuscatePixKey",
 	"parseBoleto",
 	"parseCaepf",
 	"parseCbo",
