@@ -15,9 +15,10 @@ export type IsValidGtinOptions = {
  * in `cEAN` and `cEANTrib`: GTIN-8, GTIN-12 (UPC), GTIN-13 (EAN) and GTIN-14 (DUN-14). The value
  * must be a string of 8, 12, 13 or 14 digits, surrounding whitespace aside, whose last digit is
  * the GS1 modulo 10 check digit: weights 3 and 1 alternating from the right, the sum subtracted
- * from the next multiple of ten. This is what rules I03-10 and I12-10 of the NF-e check
- * (rejections 611 and 612). The `"SEM GTIN"` literal the NF-e uses for a product without a GTIN
- * is not a GTIN, so it is not valid here. Leading zeros count, so a number is never accepted.
+ * from the nearest equal or higher multiple of ten. This is what rules I03-10 and I12-10 of the
+ * NF-e check (rejections 611 and 612). The `"SEM GTIN"` literal the NF-e uses for a product
+ * without a GTIN is not a GTIN, so it is not valid here. Leading zeros count, so a number is
+ * never accepted.
  *
  * The prefix does not change the verdict: Restricted Circulation Numbers (prefixes 02, 04 and 20
  * to 29, the codes a shop prints on its own scale labels) and the ISSN, ISBN and coupon ranges

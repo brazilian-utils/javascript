@@ -111,7 +111,7 @@ describe("getGtinInfo", () => {
 			});
 		});
 
-		test("for the GTIN-13 example of the GS1 General Specifications (demonstration prefix 952)", () => {
+		test("for the 13 digit example of the GS1 General Specifications, a GLN under the same check digit rule (demonstration prefix 952)", () => {
 			expect(getGtinInfo("9521234500018")).toEqual({
 				type: "GTIN-13",
 				length: 13,
@@ -155,7 +155,7 @@ describe("getGtinInfo", () => {
 			});
 		});
 
-		test("for the 14 digit example of the GS1 General Specifications, a GTIN-13 with a leading zero", () => {
+		test("for the 14 digit example of the GS1 General Specifications, a GRAI read here as a GTIN-14", () => {
 			expect(getGtinInfo("09524141234564")).toEqual({
 				type: "GTIN-14",
 				length: 14,

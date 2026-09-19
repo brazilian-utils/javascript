@@ -23,8 +23,9 @@ export type GtinInfo = {
 	/** How many digits the value was written with. */
 	length: GtinLength;
 	/**
-	 * The three digit GS1 Prefix, or GS1-8 Prefix for a GTIN-8, read from the 14 digit form. It
-	 * names the GS1 Member Organisation that licensed the number, not the country of origin.
+	 * The three digit GS1 Prefix, or a GS1-8 Prefix when the first six digits of the 14 digit form
+	 * are zeros, which covers every GTIN-8 and the GS1 Prefix 0000000. It names the GS1 Member
+	 * Organisation that licensed the number, not the country of origin.
 	 */
 	prefix: string;
 	/** True when the prefix is one of GS1 Brasil (789 or 790). */
@@ -51,9 +52,9 @@ const PREFIX_LENGTH = 3;
  * in `cEAN` and `cEANTrib`: GTIN-8, GTIN-12 (UPC), GTIN-13 (EAN) and GTIN-14 (DUN-14). The value
  * must be a string of 8, 12, 13 or 14 digits, surrounding whitespace aside, whose last digit is
  * the GS1 modulo 10 check digit: weights 3 and 1 alternating from the right, the sum subtracted
- * from the next multiple of ten. Anything else returns `null`, including the `"SEM GTIN"`
- * literal the NF-e uses for a product without one. Leading zeros count, so the value is never
- * read from a number.
+ * from the nearest equal or higher multiple of ten. Anything else returns `null`, including the
+ * `"SEM GTIN"` literal the NF-e uses for a product without one. Leading zeros count, so the value
+ * is never read from a number.
  *
  * `type` and `length` describe the value as it was written. The prefix is read the way the
  * "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14
