@@ -139,9 +139,14 @@ example `formatSomething`):
    - `docs/utilities.md` (English)
    - `docs/pt-br/utilities.md` (Portuguese translation)
 
-   Follow the existing format: a `##` heading with the function name, a short description, and a
-   `javascript` code block showing example input/output. Place the new section next to the other
-   utilities in the same domain, keeping both files in the same order.
+   Follow the existing format: a `###` heading with the function name under the `##` family it
+   belongs to, one sentence saying what it does (`llms.txt` indexes that sentence), a few short
+   bullets for the options and the return rules, a `javascript` code block showing example
+   input/output, and a one-line `Source:` (`Fonte:` in Portuguese) with the official reference when
+   there is one. Do not repeat what the Conventions section at the top of the file already says
+   (nothing throws, masked input is accepted, generators use `Math.random()`); the JSDoc is the place
+   for every edge case, the reference is the place for what a caller needs. Keep both files in the
+   same order.
 
    After editing `docs/getting-started.md` or `docs/utilities.md`, run `npm run build:llms` to
    regenerate `docs/llms.txt` and `docs/llms-full.txt` (see [llms.txt](https://llmstxt.org/)) and
@@ -467,8 +472,8 @@ the commit messages.
    responses as untrusted. A workflow change keeps actions pinned by SHA, permissions minimal and
    secrets away from pull request code. A new development dependency needs a reason, a maintained
    upstream and a license compatible with MIT.
-7. **Can the next person use it?** The JSDoc and both `docs/utilities.md` files describe what the
-   code does, edge cases included, with an example that is true; the commit message has the right
+7. **Can the next person use it?** The JSDoc describes what the code does, edge cases included,
+   both `docs/utilities.md` files describe what a caller needs, with an example that is true; the commit message has the right
    Conventional Commit type, because the changelog and the version are computed from it.
 
 **Automated pull requests** get the same review with a narrower focus: a Dependabot bump is read
