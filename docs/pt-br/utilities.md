@@ -1427,6 +1427,59 @@ differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCod
 differenceInBusinessDays(new Date(), new Date('not a date')); // null
 ```
 
+### getNextBusinessDay
+
+Retorna o primeiro dia útil brasileiro estritamente depois de uma data: `getNextBusinessDay(date, options?)` é `addBusinessDays(date, 1, options)`, que é exatamente como ela é implementada, então todos os detalhes de `addBusinessDays` (o horário preservado, a entrada intocada, o intervalo de 1900 a 2099 e os casos de `null`) valem aqui também, inclusive o `options.stateCode` e o `options.includeOptional` (as `BusinessDayOptions` compartilhadas). "Próximo" significa estritamente depois, o sentido que o [date-fns dá em `nextDay`](https://date-fns.org/docs/nextDay) (verificado em seu código-fonte): um `date` que já é dia útil nunca é retornado. Quando o que você precisa é "no dia ou depois", consulte `isBusinessDay(date)` antes e fique com `date` quando a resposta for `true`.
+
+```javascript
+import { getNextBusinessDay } from '@brazilian-utils/brazilian-utils';
+
+getNextBusinessDay(new Date(2024, 0, 2, 12)); // Date, 2024-01-03 12:00 (estritamente depois, embora 02/01/2024 seja dia útil)
+getNextBusinessDay(new Date(2024, 0, 5, 12)); // Date, 2024-01-08 12:00 (pula o fim de semana)
+getNextBusinessDay(new Date(2024, 0, 6, 12)); // Date, 2024-01-08 12:00 (a partir de um sábado)
+getNextBusinessDay(new Date(2024, 11, 31, 12)); // Date, 2025-01-02 12:00 (01/01/2025 é Ano novo, pulado)
+getNextBusinessDay(new Date(2024, 6, 8, 12), { stateCode: 'SP' }); // Date, 2024-07-10 12:00 (09/07/2024 é Revolução Constitucionalista em SP, pulado)
+getNextBusinessDay(new Date('not a date')); // null
+getNextBusinessDay(new Date(2099, 11, 31)); // null (o percurso sai dos anos suportados)
+```
+
+### getNthBusinessDay
+
+Retorna o n-ésimo dia útil brasileiro do mês em que uma data cai: `getNthBusinessDay(date, n, options?)`, a ordem de argumentos no estilo do date-fns de `addBusinessDays(date, amount, options?)`. `date` é qualquer data dentro do mês (o que importa são o ano e o mês locais; o dia do mês e o horário são ignorados). Um `n` positivo conta a partir do primeiro dia do mês (`1` é o primeiro dia útil) e um `n` negativo conta a partir do último (`-1` é o último dia útil, `-2` o anterior a ele), como `Array#at` lê um índice. Os dias úteis são determinados exatamente como em `isBusinessDay` (as mesmas `BusinessDayOptions`), inclusive o `options.includeOptional` (padrão `true`) e o `options.stateCode`. Retorna um novo `Date` no início daquele dia local (00:00), o formato que o [`lastDayOfMonth` do date-fns](https://date-fns.org/docs/lastDayOfMonth) retorna; o `date` de entrada nunca é modificado. Retorna `null` em caso de entrada inválida: um `date` que não é um `Date` válido, um `n` que não é um inteiro finito, é `0` ou vai além do número de dias úteis que o mês tem (a resposta nunca transborda para um mês vizinho), ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `null`.
+
+Atenção ao prazo de pagamento de salário do art. 459, § 1º, da CLT ("até o quinto dia útil do mês subsequente ao vencido"): a inspeção do trabalho conta o sábado como dia útil nesse prazo e exclui os feriados municipais ([Instrução Normativa MTP nº 2/2021](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf), art. 14, I), enquanto `isBusinessDay`, e portanto esta função, nunca conta um sábado e não conhece feriados municipais. O quinto dia útil retornado aqui é o bancário, que pode cair depois do trabalhista.
+
+```javascript
+import { getNthBusinessDay } from '@brazilian-utils/brazilian-utils';
+
+getNthBusinessDay(new Date(2024, 0, 15), 1); // Date, 2024-01-02 00:00 (01/01/2024 é Ano novo)
+getNthBusinessDay(new Date(2024, 0, 15), 5); // Date, 2024-01-08 00:00
+getNthBusinessDay(new Date(2024, 1, 1), 10); // Date, 2024-02-15 00:00 (Carnaval, 13/02/2024, pulado)
+getNthBusinessDay(new Date(2024, 1, 1), 10, { includeOptional: false }); // Date, 2024-02-14 00:00
+getNthBusinessDay(new Date(2024, 6, 1), 7, { stateCode: 'SP' }); // Date, 2024-07-10 00:00 (09/07/2024 é Revolução Constitucionalista em SP, pulado)
+getNthBusinessDay(new Date(2024, 0, 15), -1); // Date, 2024-01-31 00:00 (o último dia útil)
+getNthBusinessDay(new Date(2024, 0, 15), -2); // Date, 2024-01-30 00:00
+getNthBusinessDay(new Date(2024, 0, 15), 23); // null (janeiro de 2024 tem 22 dias úteis)
+getNthBusinessDay(new Date(2024, 0, 15), 0); // null
+getNthBusinessDay(new Date('not a date'), 1); // null
+```
+
+### getLastBusinessDayOfMonth
+
+Retorna o último dia útil brasileiro do mês em que uma data cai: `getLastBusinessDayOfMonth(date, options?)` é `getNthBusinessDay(date, -1, options)`, que é exatamente como ela é implementada, então todos os detalhes acima (qualquer data dentro do mês, o resultado no início do dia local, a entrada intocada, o intervalo de 1900 a 2099 e os casos de `null`) valem aqui também, inclusive o `options.stateCode` e o `options.includeOptional`. O nome segue o [`lastDayOfMonth` do date-fns](https://date-fns.org/docs/lastDayOfMonth).
+
+```javascript
+import { getLastBusinessDayOfMonth } from '@brazilian-utils/brazilian-utils';
+
+getLastBusinessDayOfMonth(new Date(2024, 0, 15)); // Date, 2024-01-31 00:00
+getLastBusinessDayOfMonth(new Date(2024, 2, 1)); // Date, 2024-03-28 00:00 (29/03/2024 é Sexta-feira Santa, seguida de um fim de semana)
+getLastBusinessDayOfMonth(new Date(2024, 7, 31, 18, 30)); // Date, 2024-08-30 00:00 (31/08/2024 é um sábado)
+getLastBusinessDayOfMonth(new Date(2018, 4, 1)); // Date, 2018-05-30 00:00 (31/05/2018 é Corpus Christi, facultativo, conta por padrão)
+getLastBusinessDayOfMonth(new Date(2018, 4, 1), { includeOptional: false }); // Date, 2018-05-31 00:00
+getLastBusinessDayOfMonth(new Date(2023, 10, 1), { stateCode: 'DF' }); // Date, 2023-11-29 00:00 (30/11/2023 é Dia do Evangélico no DF)
+getLastBusinessDayOfMonth(new Date('not a date')); // null
+```
+
 ## Passaporte
 
 ### isValidPassport

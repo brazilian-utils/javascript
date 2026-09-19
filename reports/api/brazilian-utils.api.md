@@ -510,6 +510,9 @@ export type GetHolidaysParams = {
 export const getIbanInfo: (value: string) => IbanInfo | null;
 
 // @public
+export const getLastBusinessDayOfMonth: (date: Date, options?: BusinessDayOptions) => Date | null;
+
+// @public
 export const getLegalNature: (value: string | number) => LegalNature | null;
 
 // @public
@@ -567,7 +570,13 @@ export type GetMunicipalityOptions = GetMunicipalityParams;
 export type GetMunicipalityParams = GetMunicipalityByCodeParams | GetMunicipalityByNameParams;
 
 // @public
+export const getNextBusinessDay: (date: Date, options?: BusinessDayOptions) => Date | null;
+
+// @public
 export const getNfeKeyInfo: (value: string) => NfeKeyInfo | null;
+
+// @public
+export const getNthBusinessDay: (date: Date, n: number, options?: BusinessDayOptions) => Date | null;
 
 // @public
 export const getPixKeyInfo: (value: string) => PixKeyInfo | null;
