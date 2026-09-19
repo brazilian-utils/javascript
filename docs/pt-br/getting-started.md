@@ -11,7 +11,7 @@ Brazilian Utils é uma biblioteca de utilitários, sem dependências, para os pr
 - **Zero dependências de runtime.** Nada além da biblioteca entra no seu `node_modules` ou no seu bundle.
 - **Tree-shakeable até a função.** `import { isValidCpf }` custa cerca de 1,4 KB minificado (0,8 KB com gzip). Cada utilitário também é um subpath próprio, então os pesados podem ser carregados sob demanda.
 - **Roda em qualquer lugar.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno e navegadores modernos, todos testados no CI.
-- **Escrita em TypeScript.** Os tipos vêm no pacote, e um relatório de API acompanha a API pública para que nada mude em silêncio.
+- **Escrita em TypeScript.** Os tipos vêm no pacote, e todo pull request é comparado com a última versão publicada para que a API pública nunca mude em silêncio.
 - **Validada contra as regras oficiais.** Cada validador cita a especificação, lei ou base de dados que implementa, e a suíte de testes passa por mutation testing, não só por cobertura.
 - **Documentada em inglês e português**, com um `llms.txt` para assistentes de IA.
 
