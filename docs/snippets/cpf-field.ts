@@ -1,4 +1,5 @@
 import { Component, computed, model } from "@angular/core";
+import type { FormValueControl } from "@angular/forms/signals";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
 type MaskCpfParams = {
@@ -52,7 +53,7 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
       <input
         inputmode="numeric"
         placeholder="000.000.000-00"
-        [value]="cpf()"
+        [value]="value()"
         [attr.aria-invalid]="complete() && !valid()"
         (input)="onInput($event)"
       />
@@ -62,14 +63,16 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
     </label>
   `,
 })
-export class CpfField {
-  /** The formatted CPF, bound with [(cpf)]. */
-  readonly cpf = model("");
-  protected readonly complete = computed(() => this.cpf().length === 14);
-  protected readonly valid = computed(() => this.complete() && isValidCpf(this.cpf()));
+export class CpfField implements FormValueControl<string> {
+  /** The formatted CPF: bind it with [formField] (Signal Forms) or [(value)]. */
+  readonly value = model("");
+  protected readonly complete = computed(() => this.value().length === 14);
+  protected readonly valid = computed(
+    () => this.complete() && isValidCpf(this.value()),
+  );
 
   protected onInput(event: Event) {
-    this.cpf.set(
+    this.value.set(
       maskCpf({
         input: event.target as HTMLInputElement,
         inputType: (event as InputEvent).inputType,

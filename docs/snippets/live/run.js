@@ -73,8 +73,13 @@
   var mount = function (module) {
     if (/\.tsx$/.test(example)) {
       return Promise.all([import("react"), import("react-dom/client")]).then(function (react) {
+        // The example is a controlled component: the demo is the parent that holds its value.
+        var Demo = function () {
+          var state = react[0].useState("");
+          return react[0].createElement(Object.values(module)[0], { value: state[0], onChange: state[1] });
+        };
         var root = document.body.appendChild(document.createElement("div"));
-        react[1].createRoot(root).render(react[0].createElement(Object.values(module)[0]));
+        react[1].createRoot(root).render(react[0].createElement(Demo));
       });
     }
 

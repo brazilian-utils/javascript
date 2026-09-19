@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
 type MaskCpfParams = {
@@ -45,14 +44,15 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
 }
 
 type CpfFieldProps = {
+  /** The formatted CPF. */
+  value: string;
   /** Called with the formatted CPF on every change. */
-  onChange?: (cpf: string) => void;
+  onChange: (cpf: string) => void;
 };
 
-export function CpfField({ onChange }: CpfFieldProps) {
-  const [cpf, setCpf] = useState("");
-  const complete = cpf.length === 14;
-  const valid = complete && isValidCpf(cpf);
+export function CpfField({ value, onChange }: CpfFieldProps) {
+  const complete = value.length === 14;
+  const valid = complete && isValidCpf(value);
 
   return (
     <label>
@@ -60,16 +60,16 @@ export function CpfField({ onChange }: CpfFieldProps) {
       <input
         inputMode="numeric"
         placeholder="000.000.000-00"
+        value={value}
         aria-invalid={complete && !valid}
-        onChange={(event) => {
-          const formatted = maskCpf({
-            input: event.currentTarget,
-            inputType: (event.nativeEvent as InputEvent).inputType,
-          });
-
-          setCpf(formatted);
-          onChange?.(formatted);
-        }}
+        onChange={(event) =>
+          onChange(
+            maskCpf({
+              input: event.currentTarget,
+              inputType: (event.nativeEvent as InputEvent).inputType,
+            }),
+          )
+        }
       />
       {complete && <output>{valid ? "✓ Valid CPF" : "✗ Invalid CPF"}</output>}
     </label>
