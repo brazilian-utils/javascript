@@ -6,11 +6,11 @@ const toDate = (value: string): Date => {
 	const match = ISO_DATE_REGEX.exec(value);
 	if (match === null) return new Date(Number.NaN);
 
+	const year = Number(match[1]);
 	const month = Number(match[2]) - 1;
-	const date = new Date(0);
+	const date = new Date(year, month, Number(match[3]));
 
-	date.setFullYear(Number(match[1]), month, Number(match[3]));
-	date.setHours(0, 0, 0, 0);
+	date.setFullYear(year);
 
 	return date.getMonth() === month ? date : new Date(Number.NaN);
 };
@@ -34,7 +34,8 @@ const toBoolean = (value: string): boolean | string => {
  *
  * A date is written `YYYY-MM-DD` and means that local calendar day, the way the date utilities of
  * this library read a `Date`. A day that does not exist (`2024-02-30`, month `13`) rolls over into
- * another month when it is set, which is how it is told apart and made an invalid `Date`.
+ * another month when it is built, which is how it is told apart and made an invalid `Date`. The
+ * year is set again afterwards because the `Date` constructor reads one below 100 as 19xx.
  *
  * @param {unknown} value - The argument, as written on the command line or read from `--json`.
  * @param {CliValueKind | "text"} [kind] - The kind the utility expects. Text stays text without one.
