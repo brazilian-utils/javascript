@@ -68,7 +68,7 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 
 | Utilitário | Base de dados | Minificado | Gzip |
 | --- | --- | --- | --- |
-| `getCid10` | categorias e subcategorias da CID-10 V2008, com as descrições do DATASUS | 1030,4 KB | 146,8 KB |
+| `getCid10` | categorias e subcategorias da CID-10 V2008, com as descrições do DATASUS | 1030,4 KB | 146,9 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 154,9 - 156,5 KB | 50,3 - 50,4 KB |
 | `getCities` | nomes dos 5571 municípios do IBGE | 154,3 KB | 49,9 KB |
 | `getMunicipalityByCep` | a tabela de municípios do IBGE acima, mais 5573 faixas de CEP dos Correios | 393,3 KB | 98,8 KB |
@@ -81,7 +81,7 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | `getClassTrib` | nomes e descrições do cClassTrib (IBS/CBS) | 50,8 KB | 9,6 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 38,3 - 38,6 KB | 9,5 - 9,7 KB |
 | `isValidServiceItem` · `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 27,1 - 27,2 KB | 8,8 - 8,9 KB |
-| `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008, sem as descrições | 27,1 KB | 7,4 KB |
+| `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008, sem as descrições | 27,0 KB | 7,4 KB |
 
 A raiz do pacote é um único módulo ESM, então o bundler não consegue separar uma dessas bases de dados dele: importar um utilitário pesado da raiz coloca a base inteira no seu bundle principal, e um `import()` dinâmico da raiz não ajuda. Para carregar sob demanda, importe do subpath próprio:
 

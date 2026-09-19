@@ -1,5 +1,5 @@
-import { CID10_LENGTH } from "../_internals/constants/cid10";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
+import { LENGTH } from "./constants";
 
 /**
  * Removes CID-10 (Classificação Internacional de Doenças, 10th revision) formatting characters
@@ -26,4 +26,4 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * ponto".
  */
 export const parseCid10 = (value: string): string =>
-	typeof value === "string" ? sanitizeToAlphanumeric(value).slice(0, CID10_LENGTH) : "";
+	typeof value === "string" ? sanitizeToAlphanumeric(value).slice(0, LENGTH) : "";

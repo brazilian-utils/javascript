@@ -1,5 +1,6 @@
-import { CID10_FORMAT_REGEX } from "../constants/cid10";
 import { sanitizeToAlphanumeric } from "../sanitize-to-alphanumeric/sanitize-to-alphanumeric";
+
+const CID10_FORMAT_REGEX = /^[A-Za-z]\d{2}(?:\.?\d)?$/;
 
 /**
  * Reads a CID-10 code written in one of its documented forms and returns the key the CID-10

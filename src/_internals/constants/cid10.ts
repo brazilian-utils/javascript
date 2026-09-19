@@ -2058,12 +2058,3 @@ export const CID10_SUBCATEGORIES: Record<string, string> = {
 	Z98: "0128",
 	Z99: "012389",
 };
-
-/**
- * Shape a CID-10 code has to be written in: a letter and two digits for a category, plus the
- * fourth character of a subcategory, with or without the dot before it.
- */
-export const CID10_FORMAT_REGEX = /^[A-Za-z]\d{2}(?:\.?\d)?$/;
-
-/** Characters of a complete subcategory code, without the dot. */
-export const CID10_LENGTH = 4;
