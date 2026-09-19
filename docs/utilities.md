@@ -2886,6 +2886,7 @@ Check if a value is a subitem in force of the service list annexed to the Lei Co
 
 - The law numbers a subitem as the item, a dot and two digits, `1.01` to `40.01`.
 - Accepts that form, a zero padded item (`'01.01'`) or the bare digits (`'0101'`, `'101'` or the integer `101`), which are the first four digits of the `cTribNac` code of the national NFS-e, with optional surrounding whitespace.
+- The dot is the only separator the law ever prints between the item and the subitem, so, unlike the codes with a printed grouping mask (`isValidCfop`, `isValidNbs`), nothing else is accepted in its place and `'1-01'` is rejected.
 - A number is only read when it is a non-negative safe integer, so the float `1.01` is rejected: write the dotted form as a string.
 - The vetoed subitems (`3.01`, `7.14`, `7.15`, `13.01` and `17.07`), the item headings, the 6 digit national codes a subitem is split into and item 99 of the national list, which is not part of the law, are not valid. Municipal service codes are out of scope.
 

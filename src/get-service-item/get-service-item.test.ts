@@ -45,6 +45,10 @@ describe("getServiceItem", () => {
 		expect(getServiceItem(" 1.01\n")).toEqual(SYSTEMS);
 	});
 
+	it("should return the subitem 17.14 as the official sheet prints it, without a final period", () => {
+		expect(getServiceItem("17.14")).toEqual({ code: "17.14", description: "Advocacia" });
+	});
+
 	it("should return a fresh object that does not leak the internal table", () => {
 		expect(getServiceItem("1.01")).not.toBe(getServiceItem("1.01"));
 	});
