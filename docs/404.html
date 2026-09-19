@@ -96,6 +96,27 @@
       --cover-bg: var(--color-bg);
       --cover-bg-overlay: none;
     }
+
+    /* The "try it" playground (playground.md, playground.js) */
+    .playground label { display: block; margin: 1em 0 0.35em; font-weight: 600; }
+    .playground select, .playground textarea {
+      width: 100%; box-sizing: border-box; padding: 0.6em 0.75em; border-radius: 6px;
+      border: 1px solid var(--border-color, #444); background: var(--code-bg, #22262b); color: inherit;
+      font: 0.95em/1.5 var(--font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    }
+    .playground button {
+      margin-top: 0.75em; padding: 0.55em 1.4em; border: 0; border-radius: 6px; cursor: pointer;
+      background: var(--theme-color); color: #fff; font-weight: 600;
+    }
+    .playground button:focus-visible, .playground select:focus-visible, .playground textarea:focus-visible {
+      outline: 2px solid var(--theme-color); outline-offset: 2px;
+    }
+    .playground-hint, .playground-version { margin: 0.4em 0; font-size: 0.9em; opacity: 0.75; }
+    .playground pre {
+      white-space: pre-wrap; word-break: break-word; max-height: 28em; overflow: auto;
+      padding: 0.9em 1em; border-radius: 6px; background: var(--code-bg, #22262b);
+    }
+    .playground pre code { padding: 0; background: none; }
   </style>
 </head>
 
@@ -156,6 +177,20 @@
           hook.beforeEach(function (content) {
             var title = vm.frontmatter && vm.frontmatter.title;
             return title ? '# ' + title + '\n\n' + content : content;
+          });
+        },
+        // The "try it" playground: a page with a #try-it element (playground.md) gets
+        // playground.js, loaded once and on that page only, which imports the published package
+        // from a CDN.
+        function (hook) {
+          hook.doneEach(function () {
+            var root = document.getElementById('try-it');
+            if (!root) return;
+            if (window.BrazilianUtilsPlayground) return window.BrazilianUtilsPlayground(root);
+            var script = document.createElement('script');
+            script.src = '/playground.js';
+            script.onload = function () { window.BrazilianUtilsPlayground(root); };
+            document.body.appendChild(script);
           });
         },
         // Per-page metadata for search engines and link previews: the title, description,

@@ -63,7 +63,7 @@ import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 isValidCpf('1232454233345'); // false
 ```
 
-Você pode conferir a lista de utilitários [clicando aqui](pt-br/utilities.md).
+Você pode conferir a lista de utilitários [clicando aqui](pt-br/utilities.md) e executar qualquer um deles no navegador no [playground](pt-br/playground.md).
 
 ## Assistentes de IA
 
