@@ -1,5 +1,9 @@
 import { calculateCnpjCheckDigit } from "../_internals/calculate-cnpj-check-digit/calculate-cnpj-check-digit";
-import { CNPJ_FIRST_DIGIT_WEIGHTS, CNPJ_SECOND_DIGIT_WEIGHTS } from "../_internals/constants/cnpj";
+import {
+	CNPJ_FIRST_DIGIT_WEIGHTS,
+	CNPJ_LETTER_REGEX,
+	CNPJ_SECOND_DIGIT_WEIGHTS,
+} from "../_internals/constants/cnpj";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -14,8 +18,6 @@ const FORMAT_REGEX =
 	/^[0-9A-Z]{2}[\s.\-/]*[0-9A-Z]{3}[\s.\-/]*[0-9A-Z]{3}[\s.\-/]*[0-9A-Z]{4}[\s.\-/]*[0-9]{2}$/;
 
 const NUMERIC_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{3}[\s.\-/]*\d{4}[\s.\-/]*\d{2}$/;
-
-const LETTER_REGEX = /[A-Z]/;
 
 const isValidChecksum = (cnpj: string): boolean =>
 	cnpj.charCodeAt(12) - 48 === calculateCnpjCheckDigit(cnpj, CNPJ_FIRST_DIGIT_WEIGHTS) &&
@@ -64,7 +66,7 @@ export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean
 	if (options?.version === 2) {
 		const cleaned = sanitizeToAlphanumeric(cnpj);
 
-		if (LETTER_REGEX.test(cleaned)) {
+		if (CNPJ_LETTER_REGEX.test(cleaned)) {
 			return FORMAT_REGEX.test(trimmed.toUpperCase()) && isValidChecksum(cleaned);
 		}
 	}
