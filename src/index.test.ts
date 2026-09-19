@@ -82,6 +82,7 @@ import {
 	type LegalNatureCategory,
 	type LicensePlateFormat,
 	type Municipality,
+	type Nbs,
 	type NfeKeyInfo,
 	type NfeKeyModel,
 	type NfseKeyGeneratorEnvironment,
@@ -98,6 +99,7 @@ import {
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
 	type RegistroProfissionalCouncil,
+	type ServiceItem,
 	type State,
 	type StateCode,
 	type StandardSchemaV1,
@@ -147,6 +149,7 @@ const PUBLIC = [
 	"formatIban",
 	"formatLegalNature",
 	"formatLicensePlate",
+	"formatNbs",
 	"formatNcm",
 	"formatNfeKey",
 	"formatPassport",
@@ -197,10 +200,12 @@ const PUBLIC = [
 	"getMunicipalities",
 	"getMunicipality",
 	"getMunicipalityByCode",
+	"getNbs",
 	"getNfeKeyInfo",
 	"getNfseKeyInfo",
 	"getPixKeyInfo",
 	"getPixPayloadInfo",
+	"getServiceItem",
 	"getStateByCep",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
@@ -238,6 +243,7 @@ const PUBLIC = [
 	"isValidLegalNature",
 	"isValidLicensePlate",
 	"isValidMobilePhone",
+	"isValidNbs",
 	"isValidNcm",
 	"isValidNfeKey",
 	"isValidNfseKey",
@@ -250,6 +256,7 @@ const PUBLIC = [
 	"isValidProcessoJuridico",
 	"isValidRegistroProfissional",
 	"isValidRenavam",
+	"isValidServiceItem",
 	"isValidServicePhone",
 	"isValidSuframa",
 	"isValidVin",
@@ -394,6 +401,7 @@ describe("Public API", () => {
 			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;
 			Municipality: Municipality;
+			Nbs: Nbs;
 			NfeKeyInfo: NfeKeyInfo;
 			NfeKeyModel: NfeKeyModel;
 			NfseKeyGeneratorEnvironment: NfseKeyGeneratorEnvironment;
@@ -410,6 +418,7 @@ describe("Public API", () => {
 			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
+			ServiceItem: ServiceItem;
 			State: State;
 			StateCode: StateCode;
 			StandardSchemaV1: StandardSchemaV1;

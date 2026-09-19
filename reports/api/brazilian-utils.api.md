@@ -282,6 +282,9 @@ export type FormatLegalNatureOptions = {
 export const formatLicensePlate: (value: string) => string;
 
 // @public
+export const formatNbs: (value: string | number) => string;
+
+// @public
 export const formatNcm: (value: string | number, options?: FormatNcmOptions) => string;
 
 // @public
@@ -615,6 +618,9 @@ export type GetMunicipalityOptions = GetMunicipalityParams;
 export type GetMunicipalityParams = GetMunicipalityByCodeParams | GetMunicipalityByNameParams;
 
 // @public
+export const getNbs: (value: string | number) => Nbs | null;
+
+// @public
 export const getNfeKeyInfo: (value: string) => NfeKeyInfo | null;
 
 // @public
@@ -625,6 +631,9 @@ export const getPixKeyInfo: (value: string) => PixKeyInfo | null;
 
 // @public
 export const getPixPayloadInfo: (value: string) => PixPayloadInfo | null;
+
+// @public
+export const getServiceItem: (value: string | number) => ServiceItem | null;
 
 // @public
 export const getStateByCep: (value: string | number) => State | null;
@@ -829,6 +838,9 @@ export type IsValidMobilePhoneOptions = {
 };
 
 // @public
+export const isValidNbs: (value: string | number) => boolean;
+
+// @public
 export const isValidNcm: (value: string | number) => boolean;
 
 // @public
@@ -883,6 +895,9 @@ export type IsValidRegistroProfissionalParams = {
 export const isValidRenavam: (renavam: string | number) => boolean;
 
 // @public
+export const isValidServiceItem: (value: string | number) => boolean;
+
+// @public
 export const isValidServicePhone: (value: string) => boolean;
 
 // @public
@@ -920,6 +935,12 @@ export type Municipality = {
     code: string;
     name: string;
     stateCode: StateCode;
+};
+
+// @public
+export type Nbs = {
+    code: string;
+    description: string;
 };
 
 // @public
@@ -1088,6 +1109,12 @@ export type RegistroProfissionalCouncil = "OAB" | "CRM" | "CRO" | "CRP" | "CRC";
 
 // @public
 export const removeAccents: (value: string) => string;
+
+// @public
+export type ServiceItem = {
+    code: string;
+    description: string;
+};
 
 // @public
 export type StandardSchemaV1<Input = unknown, Output = Input> = {
