@@ -6,7 +6,7 @@ import {
 	PROTOTYPE_KEYS,
 } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithArguments } from "../_internals/test/properties";
-import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, inTimeZone, it, test } from "../_internals/test/runtime";
 import { addBusinessDays } from "../add-business-days/add-business-days";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 import { differenceInBusinessDays } from "./difference-in-business-days";
@@ -161,6 +161,24 @@ describe("differenceInBusinessDays", () => {
 					}),
 				).toBe(1);
 			}
+		});
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should count the 20 business days December 2011 has there, the missing 30th excluded", () => {
+			expect(differenceInBusinessDays(new Date(2011, 11, 1), new Date(2011, 11, 31))).toBe(-20);
+		});
+	});
+
+	inTimeZone("UTC", () => {
+		it("should count 21 for the same December, where the 30th is an ordinary Friday", () => {
+			expect(differenceInBusinessDays(new Date(2011, 11, 1), new Date(2011, 11, 31))).toBe(-21);
+		});
+	});
+
+	inTimeZone("America/Sao_Paulo", () => {
+		it("should count November 2018 across the summer time start of the 4th", () => {
+			expect(differenceInBusinessDays(new Date(2018, 10, 30), new Date(2018, 10, 1))).toBe(19);
 		});
 	});
 

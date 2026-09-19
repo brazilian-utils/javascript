@@ -1427,6 +1427,61 @@ differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCod
 differenceInBusinessDays(new Date(), new Date('not a date')); // null
 ```
 
+### getNextBusinessDay
+
+Get the first Brazilian business day (dia útil) strictly after a date: `getNextBusinessDay(date, options?)` is `addBusinessDays(date, 1, options)`, which is exactly how it is implemented, so every detail of `addBusinessDays` (the preserved time-of-day, the untouched input, the 1900-2099 range and the `null` cases) holds here too, `options.stateCode` and `options.includeOptional` (the shared `BusinessDayOptions`) included. "Next" means strictly after, the meaning [date-fns gives it in `nextDay`](https://date-fns.org/docs/nextDay) (verified against its source): a `date` that is itself a business day is never returned. When "on or after" is what you need, check `isBusinessDay(date)` first and keep `date` when it answers `true`.
+
+```javascript
+import { getNextBusinessDay } from '@brazilian-utils/brazilian-utils';
+
+getNextBusinessDay(new Date(2024, 0, 2, 12)); // Date, 2024-01-03 12:00 (strictly after, even though 2024-01-02 is a business day)
+getNextBusinessDay(new Date(2024, 0, 5, 12)); // Date, 2024-01-08 12:00 (skips the weekend)
+getNextBusinessDay(new Date(2024, 0, 6, 12)); // Date, 2024-01-08 12:00 (from a Saturday)
+getNextBusinessDay(new Date(2024, 11, 31, 12)); // Date, 2025-01-02 12:00 (2025-01-01 is Ano novo, skipped)
+getNextBusinessDay(new Date(2024, 6, 8, 12), { stateCode: 'SP' }); // Date, 2024-07-10 12:00 (2024-07-09 is Revolução Constitucionalista in SP, skipped)
+getNextBusinessDay(new Date('not a date')); // null
+getNextBusinessDay(new Date(2099, 11, 31)); // null (the walk leaves the supported years)
+```
+
+### getNthBusinessDay
+
+Get the n-th Brazilian business day (dia útil) of the month a date falls in: `getNthBusinessDay(date, n, options?)`, the date-fns-like argument order of `addBusinessDays(date, amount, options?)`. `date` is any date inside the month (its local year and month are what matter; the day of the month and the time of day are ignored). A positive `n` counts from the first day of the month (`1` is the first business day) and a negative `n` counts from the last one (`-1` is the last business day, `-2` the one before it), the way `Array#at` reads an index. Business days are determined exactly like `isBusinessDay` (same `BusinessDayOptions`), `options.includeOptional` (default `true`) and `options.stateCode` included. Returns a new `Date` at the start of that local day (00:00), the shape [date-fns' `lastDayOfMonth`](https://date-fns.org/docs/lastDayOfMonth) returns; the input `date` is never mutated. Returns `null` on bad input: a `date` that is not a valid `Date`, an `n` that is not a finite integer, is `0` or goes beyond the number of business days the month has (the answer never spills into a neighbouring month), or a `stateCode` that is not a string; an `options` that is not an object at all is ignored. Only years from 1900 through 2099 are supported, the range `getHolidays` computes; a date outside it returns `null`.
+
+Mind the payroll deadline of CLT art. 459 § 1º ("até o quinto dia útil do mês subsequente ao vencido"): labour inspection counts Saturday as a business day for that deadline and excludes municipal holidays ([Instrução Normativa MTP nº 2/2021](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf), art. 14, I), while `isBusinessDay`, and therefore this function, never counts a Saturday and does not know municipal holidays. The fifth business day returned here is the banking one, which can fall after the labour one.
+
+The walk counts local calendar days, so it holds in every time zone. Two consequences are worth knowing where the clocks jump: when the resulting local day has no 00:00 (Brazilian summer time always started at midnight, so 6 October 1997 begins at 01:00 in São Paulo), the nearest instant of that day is returned, the same `Date` [date-fns' `startOfDay`](https://date-fns.org/docs/startOfDay) gives there; and a local calendar day a zone never had, such as 30 December 2011 in `Pacific/Apia`, is neither counted nor returned.
+
+```javascript
+import { getNthBusinessDay } from '@brazilian-utils/brazilian-utils';
+
+getNthBusinessDay(new Date(2024, 0, 15), 1); // Date, 2024-01-02 00:00 (2024-01-01 is Ano novo)
+getNthBusinessDay(new Date(2024, 0, 15), 5); // Date, 2024-01-08 00:00
+getNthBusinessDay(new Date(2024, 1, 1), 10); // Date, 2024-02-15 00:00 (Carnaval, 2024-02-13, skipped)
+getNthBusinessDay(new Date(2024, 1, 1), 10, { includeOptional: false }); // Date, 2024-02-14 00:00
+getNthBusinessDay(new Date(2024, 6, 1), 7, { stateCode: 'SP' }); // Date, 2024-07-10 00:00 (2024-07-09 is Revolução Constitucionalista in SP, skipped)
+getNthBusinessDay(new Date(2024, 0, 15), -1); // Date, 2024-01-31 00:00 (the last business day)
+getNthBusinessDay(new Date(2024, 0, 15), -2); // Date, 2024-01-30 00:00
+getNthBusinessDay(new Date(2024, 0, 15), 23); // null (January 2024 has 22 business days)
+getNthBusinessDay(new Date(2024, 0, 15), 0); // null
+getNthBusinessDay(new Date('not a date'), 1); // null
+```
+
+### getLastBusinessDayOfMonth
+
+Get the last Brazilian business day (dia útil) of the month a date falls in: `getLastBusinessDayOfMonth(date, options?)` is `getNthBusinessDay(date, -1, options)`, which is exactly how it is implemented, so every detail above (any date inside the month, the result at the start of the local day, the untouched input, the 1900-2099 range and the `null` cases) holds here too, `options.stateCode` and `options.includeOptional` included. The name follows [date-fns' `lastDayOfMonth`](https://date-fns.org/docs/lastDayOfMonth).
+
+```javascript
+import { getLastBusinessDayOfMonth } from '@brazilian-utils/brazilian-utils';
+
+getLastBusinessDayOfMonth(new Date(2024, 0, 15)); // Date, 2024-01-31 00:00
+getLastBusinessDayOfMonth(new Date(2024, 2, 1)); // Date, 2024-03-28 00:00 (2024-03-29 is Sexta-feira Santa, then a weekend)
+getLastBusinessDayOfMonth(new Date(2024, 7, 31, 18, 30)); // Date, 2024-08-30 00:00 (2024-08-31 is a Saturday)
+getLastBusinessDayOfMonth(new Date(2018, 4, 1)); // Date, 2018-05-30 00:00 (2018-05-31 is Corpus Christi, optional, counts by default)
+getLastBusinessDayOfMonth(new Date(2018, 4, 1), { includeOptional: false }); // Date, 2018-05-31 00:00
+getLastBusinessDayOfMonth(new Date(2023, 10, 1), { stateCode: 'DF' }); // Date, 2023-11-29 00:00 (2023-11-30 is Dia do Evangélico in DF)
+getLastBusinessDayOfMonth(new Date('not a date')); // null
+```
+
 ## Passport
 
 ### isValidPassport

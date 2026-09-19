@@ -125,6 +125,7 @@ export {
 	getHolidays,
 } from "./get-holidays/get-holidays";
 export { type IbanInfo, getIbanInfo } from "./get-iban-info/get-iban-info";
+export { getLastBusinessDayOfMonth } from "./get-last-business-day-of-month/get-last-business-day-of-month";
 export {
 	type LegalNature,
 	type LegalNatureCategory,
@@ -143,11 +144,13 @@ export {
 	getMunicipality,
 } from "./get-municipality/get-municipality";
 export { getMunicipalityByCode } from "./get-municipality-by-code/get-municipality-by-code";
+export { getNextBusinessDay } from "./get-next-business-day/get-next-business-day";
 export {
 	type NfeKeyInfo,
 	type NfeKeyModel,
 	getNfeKeyInfo,
 } from "./get-nfe-key-info/get-nfe-key-info";
+export { getNthBusinessDay } from "./get-nth-business-day/get-nth-business-day";
 export {
 	type PixKeyInfo,
 	type PixKeyType,

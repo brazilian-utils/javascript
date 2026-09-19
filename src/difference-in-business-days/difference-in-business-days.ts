@@ -1,3 +1,4 @@
+import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
@@ -78,20 +79,12 @@ export const differenceInBusinessDays = (
 
 	const laterDay = toLocalDayTimestamp(laterDate);
 	const earlierDay = toLocalDayTimestamp(earlierDate);
-
-	// Stryker disable next-line EqualityOperator: when the two days are equal, the loop below never runs (movingDate already equals laterDay), so < vs <= here is unobservable
-	const step = earlierDay < laterDay ? 1 : -1;
-	const movingDate = new Date(
-		earlierDate.getFullYear(),
-		earlierDate.getMonth(),
-		earlierDate.getDate(),
-	);
+	const step = Math.sign(laterDay - earlierDay);
 
 	let result = 0;
 
-	while (toLocalDayTimestamp(movingDate) !== laterDay) {
-		if (isBusinessDay(movingDate, options)) result += step;
-		movingDate.setDate(movingDate.getDate() + step);
+	for (const candidate of eachLocalDay({ from: earlierDay, until: laterDay })) {
+		if (isBusinessDay(candidate, options)) result += step;
 	}
 
 	return result;
