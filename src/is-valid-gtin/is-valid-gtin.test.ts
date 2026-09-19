@@ -25,7 +25,7 @@ describe("isValidGtin", () => {
 			expect(isValidGtin(GTIN_8)).toBe(true);
 		});
 
-		test("for a GTIN-12, the U.P.C. example of the GS1 General Specifications", () => {
+		test("for a GTIN-12 built from the U.P.C. Company Prefix 614141 of the GS1 General Specifications", () => {
 			expect(isValidGtin(GTIN_12)).toBe(true);
 		});
 
@@ -38,7 +38,7 @@ describe("isValidGtin", () => {
 			expect(isValidGtin(GTIN_14)).toBe(true);
 		});
 
-		test("for the examples GS1 publishes", () => {
+		test("for the numbers GS1 publishes as examples: a GTIN-13, a GLN and a GRAI", () => {
 			expect(isValidGtin("6291041500213")).toBe(true);
 			expect(isValidGtin("9521234500018")).toBe(true);
 			expect(isValidGtin("09524141234564")).toBe(true);
