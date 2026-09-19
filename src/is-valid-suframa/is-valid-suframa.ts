@@ -28,9 +28,13 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * isValidSuframa("001234560"); // false (sector 00)
  * ```
  *
- * @see Official: https://portal.fazenda.sp.gov.br/servicos/nfce/Downloads/Manual_de_Orientacao_Contribuinte_v_6.pdf
- * Manual de Orientação do Contribuinte da NF-e 6.0, Anexo XII.01 (composition, validation and
- * check digit example) and validation rule E18-20 (rejection 235).
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
+ * Manual de Orientação do Contribuinte (MOC) NF-e 7.0, Visão Geral, section 8.4: the composition
+ * `SS.NNNN.LLD`, the numeric field with 8 or 9 positions whose `SS` may start with 0 but never be
+ * `00`, and the módulo 11 check digit with weights 2 to 9 and 0 for a remainder of 0 or 1.
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-anexo-i-leiaute-e-rv.pdf
+ * MOC 7.0, Anexo I: field 79 (`E18`, `ISUF`) is numeric with 8 to 9 positions, and validation
+ * rule E18-20 turns down an Inscrição SUFRAMA with an invalid check digit (rejection 235).
  */
 export const isValidSuframa = (suframa: string): boolean => {
 	if (typeof suframa !== "string") return false;

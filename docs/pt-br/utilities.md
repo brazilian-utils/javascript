@@ -440,7 +440,7 @@ getNfeKeyInfo('invalid'); // null
 
 ## SUFRAMA
 
-A Inscrição SUFRAMA é o número de registro que a Superintendência da Zona Franca de Manaus dá às empresas com incentivo fiscal, informado no campo `ISUF` do destinatário da NF-e. Tem a forma `SS.NNNN.LLD`: setor de atividade, número sequencial, localidade da unidade da SUFRAMA e dígito verificador (Manual de Orientação do Contribuinte da NF-e, Anexo XII.01).
+A Inscrição SUFRAMA é o número de registro que a Superintendência da Zona Franca de Manaus dá às empresas com incentivo fiscal, informado no campo `ISUF` do destinatário da NF-e. Tem a forma `SS.NNNN.LLD`: setor de atividade, número sequencial, localidade da unidade da SUFRAMA e dígito verificador ([Manual de Orientação do Contribuinte da NF-e 7.0, Visão Geral](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), seção 8.4).
 
 ### isValidSuframa
 
@@ -458,12 +458,13 @@ isValidSuframa('001234560'); // false (setor 00)
 
 ### formatSuframa
 
-Formata uma Inscrição SUFRAMA. `options.pad` (parte de `FormatSuframaOptions`) completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos.
+Formata uma Inscrição SUFRAMA. `options.pad` (parte de `FormatSuframaOptions`) completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos. A máscara é progressiva, como nas outras funções `format`, então um valor de 8 dígitos sem `pad` é agrupado uma posição antes: use `pad: true` para um valor lido direto do campo `ISUF`, que pode vir com 8 dígitos.
 
 ```javascript
 import { formatSuframa } from '@brazilian-utils/brazilian-utils';
 
 formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018'); // 10.0010.18 (8 dígitos, a máscara agrupa uma posição antes)
 formatSuframa('10001018', { pad: true }); // 01.0001.018
 ```
 

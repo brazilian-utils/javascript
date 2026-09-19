@@ -18,9 +18,9 @@ import { mod11 } from "../_internals/mod11/mod11";
  * generateSuframa(); // "123456789"
  * ```
  *
- * @see Official: https://portal.fazenda.sp.gov.br/servicos/nfce/Downloads/Manual_de_Orientacao_Contribuinte_v_6.pdf
- * Manual de Orientação do Contribuinte da NF-e 6.0, Anexo XII.01 (composition, validation and
- * check digit example).
+ * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
+ * Manual de Orientação do Contribuinte (MOC) NF-e 7.0, Visão Geral, section 8.4: the composition
+ * `SS.NNNN.LLD` with `SS` never `00`, and the módulo 11 check digit with weights 2 to 9.
  */
 export const generateSuframa = (): string => {
 	let base = generateRandomNumber(SUFRAMA_LENGTH - 1);

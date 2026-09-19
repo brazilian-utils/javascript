@@ -53,6 +53,9 @@ describe("isValidSuframa", () => {
 
 		test("when it has more than 9 digits, even if the first 9 are valid", () => {
 			expect(isValidSuframa("1234567899")).toBe(false);
+		});
+
+		test("when it has more than 9 digits, even if the last 9 are valid", () => {
 			expect(isValidSuframa("1234567090")).toBe(false);
 		});
 
