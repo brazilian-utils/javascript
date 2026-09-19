@@ -1449,6 +1449,8 @@ Get the n-th Brazilian business day (dia útil) of the month a date falls in: `g
 
 Mind the payroll deadline of CLT art. 459 § 1º ("até o quinto dia útil do mês subsequente ao vencido"): labour inspection counts Saturday as a business day for that deadline and excludes municipal holidays ([Instrução Normativa MTP nº 2/2021](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf), art. 14, I), while `isBusinessDay`, and therefore this function, never counts a Saturday and does not know municipal holidays. The fifth business day returned here is the banking one, which can fall after the labour one.
 
+The walk counts local calendar days, so it holds in every time zone. Two consequences are worth knowing where the clocks jump: when the resulting local day has no 00:00 (Brazilian summer time always started at midnight, so 6 October 1997 begins at 01:00 in São Paulo), the nearest instant of that day is returned, the same `Date` [date-fns' `startOfDay`](https://date-fns.org/docs/startOfDay) gives there; and a local calendar day a zone never had, such as 30 December 2011 in `Pacific/Apia`, is neither counted nor returned.
+
 ```javascript
 import { getNthBusinessDay } from '@brazilian-utils/brazilian-utils';
 

@@ -7,7 +7,7 @@ import {
 	PROTOTYPE_KEYS,
 } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
-import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, inTimeZone, it, test } from "../_internals/test/runtime";
 import { differenceInBusinessDays } from "../difference-in-business-days/difference-in-business-days";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 import { getNextBusinessDay } from "./get-next-business-day";
@@ -95,6 +95,18 @@ describe("getNextBusinessDay", () => {
 			expect(getNextBusinessDay(new Date(1899, 11, 29))).toBeNull();
 			expect(getNextBusinessDay(new Date(2100, 0, 4))).toBeNull();
 			expect(getNextBusinessDay(new Date(2099, 11, 31, 12))).toBeNull();
+		});
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should skip 30 December 2011, the local day Samoa never had (-> Mon 2012-01-02)", () => {
+			expect(getNextBusinessDay(new Date(2011, 11, 29, 12))).toEqual(new Date(2012, 0, 2, 12));
+		});
+	});
+
+	inTimeZone("UTC", () => {
+		it("should reach 30 December 2011, where it is an ordinary Friday", () => {
+			expect(getNextBusinessDay(new Date(2011, 11, 29, 12))).toEqual(new Date(2011, 11, 30, 12));
 		});
 	});
 

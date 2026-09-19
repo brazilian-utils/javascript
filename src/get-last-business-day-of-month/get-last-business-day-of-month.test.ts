@@ -7,7 +7,7 @@ import {
 	PROTOTYPE_KEYS,
 } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
-import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, inTimeZone, it, test } from "../_internals/test/runtime";
 import { addBusinessDays } from "../add-business-days/add-business-days";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 import { getLastBusinessDayOfMonth } from "./get-last-business-day-of-month";
@@ -90,6 +90,30 @@ describe("getLastBusinessDayOfMonth", () => {
 		it("should return null outside the supported years (1899 and 2100)", () => {
 			expect(getLastBusinessDayOfMonth(new Date(1899, 11, 15))).toBeNull();
 			expect(getLastBusinessDayOfMonth(new Date(2100, 0, 15))).toBeNull();
+		});
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should answer for December 2011, whose 30th does not exist there (Thu 2011-12-29)", () => {
+			expect(getLastBusinessDayOfMonth(new Date(2011, 11, 5))).toEqual(new Date(2011, 11, 29));
+		});
+	});
+
+	inTimeZone("Asia/Beirut", () => {
+		it("should start the day at 00:00 walking back over 31 March 2024, which has no midnight there (Thu 2024-03-28)", () => {
+			const result = getLastBusinessDayOfMonth(new Date(2024, 2, 1));
+
+			expect(result).toEqual(new Date(2024, 2, 28));
+			expect(result?.getHours()).toBe(0);
+		});
+	});
+
+	inTimeZone("America/Sao_Paulo", () => {
+		it("should start the day at 00:00 during the summer time era (Fri 2018-11-30)", () => {
+			const result = getLastBusinessDayOfMonth(new Date(2018, 10, 1));
+
+			expect(result).toEqual(new Date(2018, 10, 30));
+			expect(result?.getHours()).toBe(0);
 		});
 	});
 

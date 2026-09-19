@@ -12,7 +12,9 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * **local calendar day**; the day of the month and the time of day of `date` are ignored.
  *
  * The name and the result follow date-fns' `lastDayOfMonth`: a new `Date` at the start of that
- * local day (00:00:00.000), with `date` itself never mutated.
+ * local day (00:00:00.000), with `date` itself never mutated. In a time zone whose clocks jump
+ * over that local midnight, the nearest representable instant of the day is returned instead,
+ * exactly as in `getNthBusinessDay`.
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
  * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a

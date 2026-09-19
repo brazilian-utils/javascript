@@ -8,7 +8,7 @@ import {
 	PROTOTYPE_KEYS,
 } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithArguments } from "../_internals/test/properties";
-import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, inTimeZone, it, test } from "../_internals/test/runtime";
 import { differenceInBusinessDays } from "../difference-in-business-days/difference-in-business-days";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 import { getNthBusinessDay } from "./get-nth-business-day";
@@ -163,6 +163,47 @@ describe("getNthBusinessDay", () => {
 			const result = getNthBusinessDay(new Date(2024, 1, 1), 10, { includeOptional: false });
 
 			expect(result).toEqual(new Date(2024, 1, 14));
+		});
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should count the 21 business days December 2011 has there, the missing 30th excluded", () => {
+			expect(getNthBusinessDay(new Date(2011, 11, 15), 21)).toEqual(new Date(2011, 11, 29));
+			expect(getNthBusinessDay(new Date(2011, 11, 15), 22)).toBeNull();
+			expect(getNthBusinessDay(new Date(2011, 11, 15), -1)).toEqual(new Date(2011, 11, 29));
+		});
+	});
+
+	inTimeZone("UTC", () => {
+		it("should count the 22 the same December has, the 30th included", () => {
+			expect(getNthBusinessDay(new Date(2011, 11, 15), 22)).toEqual(new Date(2011, 11, 30));
+			expect(getNthBusinessDay(new Date(2011, 11, 15), 23)).toBeNull();
+		});
+	});
+
+	inTimeZone("America/Havana", () => {
+		it("should start the day at 00:00 walking back over 10 March 2024, which has no midnight there (Tue 2024-03-05)", () => {
+			const result = getNthBusinessDay(new Date(2024, 2, 15), -18);
+
+			expect(result).toEqual(new Date(2024, 2, 5));
+			expect(result?.getHours()).toBe(0);
+		});
+	});
+
+	inTimeZone("America/Sao_Paulo", () => {
+		it("should start the day at 00:00 during the summer time era (Thu 2018-11-08)", () => {
+			const result = getNthBusinessDay(new Date(2018, 10, 1), 5);
+
+			expect(result).toEqual(new Date(2018, 10, 8));
+			expect(result?.getHours()).toBe(0);
+		});
+
+		it("should fall back to 01:00 on Monday 6 October 1997, whose local midnight does not exist", () => {
+			const result = getNthBusinessDay(new Date(1997, 9, 15), 4);
+
+			expect(result).toEqual(new Date(1997, 9, 6));
+			expect(result?.getDate()).toBe(6);
+			expect(result?.getHours()).toBe(1);
 		});
 	});
 

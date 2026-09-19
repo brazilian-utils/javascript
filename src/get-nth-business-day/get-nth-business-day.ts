@@ -1,3 +1,4 @@
+import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
@@ -20,7 +21,12 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * `null`: the answer never spills into a neighbouring month.
  *
  * The result is a new `Date` at the start of that local day (00:00:00.000), the same shape
- * date-fns' `lastDayOfMonth` returns, and `date` itself is never mutated.
+ * date-fns' `lastDayOfMonth` returns, and `date` itself is never mutated. In a time zone whose
+ * clocks jump over that local midnight (Brazilian summer time always started at 00:00, so
+ * 4 November 2018 has no 00:00 in São Paulo) the nearest representable instant of the day is
+ * returned instead, 01:00 in that example, which is what date-fns' `startOfDay` gives there too.
+ * A local calendar day a zone does not have at all, such as 30 December 2011 in `Pacific/Apia`,
+ * is never returned and never counted.
  *
  * The signature follows the sibling business day utils, which follow date-fns:
  * `(date, n, options?)`, like `addBusinessDays(date, amount, options?)`.
@@ -83,6 +89,11 @@ export const getNthBusinessDay = (
 
 	if (!Number.isInteger(n)) return null;
 
+	const stateCode = options?.stateCode;
+
+	// Stryker disable next-line ConditionalExpression: isBusinessDay rejects the same non-string stateCode for every day of the month, so the walk below already returns null without this early exit; it is here to fail fast and to read like the sibling utils
+	if (stateCode !== undefined && typeof stateCode !== "string") return null;
+
 	const year = date.getFullYear();
 
 	if (!isSupportedHolidayYear(year)) return null;
@@ -90,17 +101,19 @@ export const getNthBusinessDay = (
 	const month = date.getMonth();
 	// Stryker disable next-line EqualityOperator: when n is 0, remaining never reaches 0 below and the walk returns null from either end of the month, so > vs >= here is unobservable
 	const step = n > 0 ? 1 : -1;
-	const result = step === 1 ? new Date(year, month, 1) : new Date(year, month + 1, 0);
+	const walk =
+		step === 1
+			? { from: Date.UTC(year, month, 1), until: Date.UTC(year, month + 1, 1) }
+			: { from: Date.UTC(year, month + 1, 0), until: Date.UTC(year, month, 0) };
+
 	let remaining = Math.abs(n);
 
-	while (result.getMonth() === month) {
-		if (isBusinessDay(result, options)) {
+	for (const candidate of eachLocalDay(walk)) {
+		if (isBusinessDay(candidate, options)) {
 			remaining -= 1;
 
-			if (remaining === 0) return result;
+			if (remaining === 0) return new Date(year, month, candidate.getDate());
 		}
-
-		result.setDate(result.getDate() + step);
 	}
 
 	return null;

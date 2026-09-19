@@ -1449,6 +1449,8 @@ Retorna o n-ésimo dia útil brasileiro do mês em que uma data cai: `getNthBusi
 
 Atenção ao prazo de pagamento de salário do art. 459, § 1º, da CLT ("até o quinto dia útil do mês subsequente ao vencido"): a inspeção do trabalho conta o sábado como dia útil nesse prazo e exclui os feriados municipais ([Instrução Normativa MTP nº 2/2021](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf), art. 14, I), enquanto `isBusinessDay`, e portanto esta função, nunca conta um sábado e não conhece feriados municipais. O quinto dia útil retornado aqui é o bancário, que pode cair depois do trabalhista.
 
+A contagem percorre dias do calendário local, então vale em qualquer fuso horário. Dois detalhes importam onde os relógios pulam: quando o dia local resultante não tem 00:00 (o horário de verão brasileiro sempre começava à meia-noite, então 6 de outubro de 1997 começa à 01:00 em São Paulo), é retornado o instante mais próximo daquele dia, o mesmo `Date` que o [`startOfDay` do date-fns](https://date-fns.org/docs/startOfDay) dá ali; e um dia do calendário local que o fuso nunca teve, como 30 de dezembro de 2011 em `Pacific/Apia`, não é contado nem retornado.
+
 ```javascript
 import { getNthBusinessDay } from '@brazilian-utils/brazilian-utils';
 
