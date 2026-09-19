@@ -3245,6 +3245,78 @@ getGtinInfo('7890000000018'); // null (wrong check digit)
 
 Source: [GS1 General Specifications](https://ref.gs1.org/standards/genspecs/), [GS1 check digit calculator](https://www.gs1.org/services/how-calculate-check-digit-manually), [SEFAZ Nota Técnica 2021.003](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D) and the [Tabela Prefixo GS1](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D) of the Portal da NF-e.
 
+## CID-10
+
+### isValidCid10
+
+Check if a CID-10 code exists in the tables DATASUS publishes, the Brazilian Portuguese edition of the ICD-10 (Classificação Estatística Internacional de Doenças e Problemas Relacionados à Saúde, 10th revision), the code medical certificates and health systems carry.
+
+- Both levels of the classification are valid: the 3 character categories (`A00`) and the 4 character subcategories, written with the dot (`A00.0`) or without it (`A000`).
+- Letter case and surrounding whitespace are ignored. Anything else (another separator, a fifth character, a dagger or asterisk suffix, a value that is not a string) is rejected.
+- The V2008 tables are the only source: a code that is not in them, such as `U07.1` (COVID-19), is not found.
+- Only a table of codes is read (about 27 KB minified), not the descriptions `getCid10` carries.
+
+```javascript
+import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
+
+isValidCid10('A00.0'); // true
+isValidCid10('a000'); // true
+isValidCid10('A00'); // true (a category)
+isValidCid10('I10'); // true (a category that is not subdivided)
+isValidCid10('A00.5'); // false (A00 has no subcategory 5)
+isValidCid10('I10.0'); // false (I10 has no subcategories)
+isValidCid10('A00-0'); // false (not a documented form)
+```
+
+### formatCid10
+
+Format a CID-10 code the way it is printed: upper case, with a dot between the 3 character category and the fourth character of the subcategory. Only the structure changes; use `isValidCid10` to check a code against the tables.
+
+- The mask is applied as far as the value goes, so a category stays as it is and the dot only shows up with the fourth character.
+- Characters outside the mask are dropped and the value is capped at 4 characters.
+
+```javascript
+import { formatCid10 } from '@brazilian-utils/brazilian-utils';
+
+formatCid10('A000'); // A00.0
+formatCid10('f322'); // F32.2
+formatCid10('A00'); // A00 (a category has no dot)
+formatCid10('A00.0'); // A00.0
+```
+
+### parseCid10
+
+Remove CID-10 formatting, keep only letters and digits, upper case them and cap the result to the 4 characters of a subcategory, the form the DATASUS tables store.
+
+- A shorter value passes through as far as it goes.
+
+```javascript
+import { parseCid10 } from '@brazilian-utils/brazilian-utils';
+
+parseCid10('A00.0'); // 'A000'
+parseCid10('f32.2'); // 'F322'
+parseCid10('A00'); // 'A00'
+```
+
+### getCid10
+
+Look a CID-10 code up and get its official Brazilian Portuguese description. The result is a `Cid10` record: `{ code, description }`.
+
+- Same input rules as `isValidCid10`. `code` is upper case and has no dot. Returns `null` when the code is unknown or the value is not in a documented form.
+- This is the heaviest util of the package: it embeds the 2045 categories and 12188 subcategories with their descriptions, about 1 MB minified (147 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
+
+```javascript
+import { getCid10 } from '@brazilian-utils/brazilian-utils';
+
+getCid10('A00.0'); // { code: 'A000', description: 'Cólera devida a Vibrio cholerae 01, biótipo cholerae' }
+getCid10('a000'); // { code: 'A000', description: 'Cólera devida a Vibrio cholerae 01, biótipo cholerae' }
+getCid10('A00'); // { code: 'A00', description: 'Cólera' }
+getCid10('A00.5'); // null
+getCid10('A00-0'); // null (not a documented form)
+```
+
+Source: [CID-10 V2008 tables DATASUS publishes as CSV](http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm).
+
 ## Text
 
 ### capitalize

@@ -3245,6 +3245,78 @@ getGtinInfo('7890000000018'); // null (dígito verificador errado)
 
 Fonte: [GS1 General Specifications](https://ref.gs1.org/standards/genspecs/), [calculadora de dígito verificador da GS1](https://www.gs1.org/services/how-calculate-check-digit-manually), [Nota Técnica 2021.003 da SEFAZ](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D) e [Tabela Prefixo GS1](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D) do Portal da NF-e.
 
+## CID-10
+
+### isValidCid10
+
+Valida um código CID-10 contra as tabelas que o DATASUS publica, a edição brasileira da CID-10 (Classificação Estatística Internacional de Doenças e Problemas Relacionados à Saúde, 10ª revisão), o código que atestados médicos e sistemas de saúde carregam.
+
+- Os dois níveis da classificação são válidos: as categorias de 3 caracteres (`A00`) e as subcategorias de 4 caracteres, escritas com o ponto (`A00.0`) ou sem ele (`A000`).
+- Maiúsculas, minúsculas e espaços em volta são ignorados. Qualquer outra coisa (outro separador, um quinto caractere, um sufixo de cruz ou asterisco, um valor que não é string) é rejeitada.
+- As tabelas da V2008 são a única fonte: um código que não está nelas, como `U07.1` (COVID-19), não é encontrado.
+- Só uma tabela de códigos é lida (cerca de 27 KB minificada), não as descrições que `getCid10` carrega.
+
+```javascript
+import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
+
+isValidCid10('A00.0'); // true
+isValidCid10('a000'); // true
+isValidCid10('A00'); // true (uma categoria)
+isValidCid10('I10'); // true (uma categoria que não é subdividida)
+isValidCid10('A00.5'); // false (A00 não tem a subcategoria 5)
+isValidCid10('I10.0'); // false (I10 não tem subcategorias)
+isValidCid10('A00-0'); // false (não é uma forma documentada)
+```
+
+### formatCid10
+
+Formata um código CID-10 do jeito que ele é impresso: em maiúsculas, com um ponto entre a categoria de 3 caracteres e o quarto caractere da subcategoria. Só a estrutura muda; use `isValidCid10` para conferir um código com as tabelas.
+
+- A máscara é aplicada até onde o valor vai, então uma categoria fica como está e o ponto só aparece com o quarto caractere.
+- Caracteres fora da máscara são descartados e o valor é limitado a 4 caracteres.
+
+```javascript
+import { formatCid10 } from '@brazilian-utils/brazilian-utils';
+
+formatCid10('A000'); // A00.0
+formatCid10('f322'); // F32.2
+formatCid10('A00'); // A00 (uma categoria não tem ponto)
+formatCid10('A00.0'); // A00.0
+```
+
+### parseCid10
+
+Remove a formatação de um código CID-10, mantém apenas letras e dígitos, em maiúsculas, e limita o resultado aos 4 caracteres de uma subcategoria, a forma que as tabelas do DATASUS guardam.
+
+- Um valor mais curto passa até onde ele vai.
+
+```javascript
+import { parseCid10 } from '@brazilian-utils/brazilian-utils';
+
+parseCid10('A00.0'); // 'A000'
+parseCid10('f32.2'); // 'F322'
+parseCid10('A00'); // 'A00'
+```
+
+### getCid10
+
+Busca um código CID-10 e retorna a sua descrição oficial em português. O resultado é um registro `Cid10`: `{ code, description }`.
+
+- Mesmas regras de entrada de `isValidCid10`. O `code` vem em maiúsculas e sem o ponto. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+- Este é o utilitário mais pesado do pacote: ele embute as 2045 categorias e 12188 subcategorias com suas descrições, cerca de 1 MB minificado (147 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
+
+```javascript
+import { getCid10 } from '@brazilian-utils/brazilian-utils';
+
+getCid10('A00.0'); // { code: 'A000', description: 'Cólera devida a Vibrio cholerae 01, biótipo cholerae' }
+getCid10('a000'); // { code: 'A000', description: 'Cólera devida a Vibrio cholerae 01, biótipo cholerae' }
+getCid10('A00'); // { code: 'A00', description: 'Cólera' }
+getCid10('A00.5'); // null
+getCid10('A00-0'); // null (não é uma forma documentada)
+```
+
+Fonte: [tabelas da CID-10 V2008 que o DATASUS publica em CSV](http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm).
+
 ## Texto
 
 ### capitalize

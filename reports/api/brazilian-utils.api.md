@@ -117,6 +117,12 @@ export type Cfop = {
 };
 
 // @public
+export type Cid10 = {
+    code: string;
+    description: string;
+};
+
+// @public
 export type ClassTrib = {
     code: string;
     cst: string;
@@ -228,6 +234,9 @@ export const formatCest: (value: string | number, options?: FormatCestOptions) =
 export type FormatCestOptions = {
     pad?: boolean;
 };
+
+// @public
+export const formatCid10: (value: string) => string;
 
 // @public
 export const formatCnae: (value: string | number, options?: FormatCnaeOptions) => string;
@@ -553,6 +562,9 @@ export const getCest: (value: string | number) => Cest | null;
 // @public
 export const getCfop: (value: string | number) => Cfop | null;
 
+// @public
+export const getCid10: (value: string) => Cid10 | null;
+
 // @public @deprecated
 export const getCities: (state?: StateCode) => string[];
 
@@ -791,6 +803,9 @@ export const isValidCest: (value: string | number) => boolean;
 
 // @public
 export const isValidCfop: (value: string | number) => boolean;
+
+// @public
+export const isValidCid10: (value: string) => boolean;
 
 // @public
 export const isValidClassTrib: (value: string | number, options?: IsValidClassTribOptions) => boolean;
@@ -1068,6 +1083,9 @@ export const parseCest: (value: string | number) => string;
 
 // @public
 export const parseCfop: (value: string | number) => string;
+
+// @public
+export const parseCid10: (value: string) => string;
 
 // @public
 export const parseCnae: (value: string | number) => string;
