@@ -5,7 +5,7 @@
 	"buildCommand": "",
 	"outputDirectory": "docs",
 	"cleanUrls": true,
-	"ignoreCommand": "test -n \"$VERCEL_GIT_PREVIOUS_SHA\" && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- docs vercel.json",
+	"ignoreCommand": "test -n \"$VERCEL_GIT_PREVIOUS_SHA\" && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- docs vercel.json 2>/dev/null || exit 1",
 	"git": {
 		"deploymentEnabled": {
 			"main": false
