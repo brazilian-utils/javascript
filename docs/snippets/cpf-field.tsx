@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
 type MaskCpfParams = {
@@ -43,14 +44,14 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
   return formatted;
 }
 
-type CpfFieldProps = {
+type CpfFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
   /** The formatted CPF. */
   value: string;
   /** Called with the formatted CPF on every change. */
   onChange: (cpf: string) => void;
 };
 
-export function CpfField({ value, onChange }: CpfFieldProps) {
+export function CpfField({ value, onChange, ...props }: CpfFieldProps) {
   const complete = value.length === 14;
   const valid = complete && isValidCpf(value);
 
@@ -58,6 +59,7 @@ export function CpfField({ value, onChange }: CpfFieldProps) {
     <label>
       CPF
       <input
+        {...props}
         inputMode="numeric"
         placeholder="000.000.000-00"
         value={value}

@@ -21,6 +21,7 @@
       "@angular/core": CDN + "@angular/core@22.1.7/+esm",
       "@angular/compiler": CDN + "@angular/compiler@22.1.7/+esm",
       "@angular/platform-browser": CDN + "@angular/platform-browser@22.1.7/+esm",
+      "@angular/forms": CDN + "@angular/forms@22.1.7/+esm",
     },
   });
   document.head.appendChild(script);

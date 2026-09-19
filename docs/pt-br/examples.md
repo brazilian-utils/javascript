@@ -6,13 +6,13 @@ keywords: ["exemplos", "máscara de CPF", "CPF React", "CPF Angular", "CPF Vue",
 
 Um campo de CPF que formata enquanto você digita, com `formatCpf`, e valida quando completo, com `isValidCpf`. Cada aba roda o código logo abaixo dela, que pode ser copiado do jeito que está.
 
-`formatCpf` formata o que já foi digitado (`"9438"` vira `"943.8"`), descarta o que não é dígito e corta os dígitos além do décimo primeiro. Só que trocar o valor do campo joga o cursor para o fim, então `maskCpf` devolve o cursor para perto do dígito que está sendo editado, e transforma um `.` ou `-` apagado num dígito apagado, que o `formatCpf` recolocaria na hora. O campo recebe `aria-invalid` quando um CPF completo não é válido, e entrega o CPF formatado ao componente pai do jeito que cada framework espera: props `value` e `onChange` no React (um componente controlado), um controle do Signal Forms no Angular (`[formField]`, ou `[(value)]`), `v-model` no Vue.
+`formatCpf` formata o que já foi digitado (`"9438"` vira `"943.8"`), descarta o que não é dígito e corta os dígitos além do décimo primeiro. Só que trocar o valor do campo joga o cursor para o fim, então `maskCpf` devolve o cursor para perto do dígito que está sendo editado, e transforma um `.` ou `-` apagado num dígito apagado, que o `formatCpf` recolocaria na hora. O campo recebe `aria-invalid` quando um CPF completo não é válido, e entrega o CPF formatado ao componente pai do jeito que cada framework espera, então encaixa na biblioteca de formulários que a maioria dos projetos usa: um componente controlado no React (`value`, `onChange` e as props do próprio input, para o `field` do react-hook-form), um `ControlValueAccessor` no Angular (`formControlName`), `v-model` no Vue (o `defineField` do VeeValidate).
 
 <div class="example" data-name="React" data-demo="/snippets/live/react.html">
 
 [cpf-field.tsx](../snippets/cpf-field.tsx ':include :type=code tsx')
 
-Num formulário:
+Com react-hook-form:
 
 [signup-form.tsx](../snippets/usage/signup-form.tsx ':include :type=code tsx')
 
@@ -22,7 +22,7 @@ Num formulário:
 
 [cpf-field.ts](../snippets/cpf-field.ts ':include :type=code ts')
 
-Num formulário:
+Com Reactive Forms:
 
 [signup.ts](../snippets/usage/signup.ts ':include :type=code ts')
 
@@ -32,7 +32,7 @@ Num formulário:
 
 [cpf-field.vue](../snippets/cpf-field.vue ':include :type=code vue')
 
-Num formulário:
+Com VeeValidate:
 
 [signup-form.vue](../snippets/usage/signup-form.vue ':include :type=code vue')
 

@@ -1,5 +1,5 @@
-import { Component, computed, model } from "@angular/core";
-import type { FormValueControl } from "@angular/forms/signals";
+import { Component, computed, forwardRef, signal } from "@angular/core";
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
 type MaskCpfParams = {
@@ -47,6 +47,13 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
 
 @Component({
   selector: "app-cpf-field",
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => CpfField),
+      multi: true,
+    },
+  ],
   template: `
     <label>
       CPF
@@ -54,8 +61,10 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
         inputmode="numeric"
         placeholder="000.000.000-00"
         [value]="value()"
+        [disabled]="disabled()"
         [attr.aria-invalid]="complete() && !valid()"
         (input)="onInput($event)"
+        (blur)="onTouched()"
       />
       @if (complete()) {
         <output>{{ valid() ? "✓ Valid CPF" : "✗ Invalid CPF" }}</output>
@@ -63,20 +72,40 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
     </label>
   `,
 })
-export class CpfField implements FormValueControl<string> {
-  /** The formatted CPF: bind it with [formField] (Signal Forms) or [(value)]. */
-  readonly value = model("");
+export class CpfField implements ControlValueAccessor {
+  protected readonly value = signal("");
+  protected readonly disabled = signal(false);
   protected readonly complete = computed(() => this.value().length === 14);
   protected readonly valid = computed(
     () => this.complete() && isValidCpf(this.value()),
   );
 
+  protected onChange: (cpf: string) => void = () => {};
+  protected onTouched: () => void = () => {};
+
+  writeValue(cpf: string | null): void {
+    this.value.set(formatCpf(cpf ?? ""));
+  }
+
+  registerOnChange(onChange: (cpf: string) => void): void {
+    this.onChange = onChange;
+  }
+
+  registerOnTouched(onTouched: () => void): void {
+    this.onTouched = onTouched;
+  }
+
+  setDisabledState(disabled: boolean): void {
+    this.disabled.set(disabled);
+  }
+
   protected onInput(event: Event) {
-    this.value.set(
-      maskCpf({
-        input: event.target as HTMLInputElement,
-        inputType: (event as InputEvent).inputType,
-      }),
-    );
+    const cpf = maskCpf({
+      input: event.target as HTMLInputElement,
+      inputType: (event as InputEvent).inputType,
+    });
+
+    this.value.set(cpf);
+    this.onChange(cpf);
   }
 }
