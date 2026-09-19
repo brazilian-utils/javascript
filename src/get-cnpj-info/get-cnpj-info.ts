@@ -1,3 +1,4 @@
+import { CNPJ_LETTER_REGEX } from "../_internals/constants/cnpj";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { isValidCnpj, type IsValidCnpjOptions } from "../is-valid-cnpj/is-valid-cnpj";
 
@@ -11,7 +12,7 @@ export type CnpjFormat = "numeric" | "alphanumeric";
 export type CnpjInfo = {
 	/** The 8 character root (raiz), positions 1 to 8, shared by every establishment of the entity. */
 	root: string;
-	/** The 4 character order (número de ordem) of the establishment, positions 9 to 12. */
+	/** The 4 character order (número de ordem) of the establishment, positions 9 to 12, the ones `generateCnpj` takes as `branch`. */
 	order: string;
 	/** The 2 numeric check digits (dígitos verificadores), positions 13 and 14. */
 	checkDigits: string;
@@ -30,8 +31,6 @@ const ROOT_END = 8;
 const ORDER_END = 12;
 
 const INITIAL_HEADQUARTERS_ORDER = "0001";
-
-const LETTER_REGEX = /[A-Z]/;
 
 /**
  * Parses a CNPJ (Cadastro Nacional da Pessoa Jurídica) into the fields the number encodes.
@@ -105,7 +104,7 @@ export const getCnpjInfo = (value: string, options?: GetCnpjInfoOptions): CnpjIn
 		root: cnpj.slice(0, ROOT_END),
 		order,
 		checkDigits: cnpj.slice(ORDER_END),
-		format: LETTER_REGEX.test(cnpj) ? "alphanumeric" : "numeric",
+		format: CNPJ_LETTER_REGEX.test(cnpj) ? "alphanumeric" : "numeric",
 		isInitialHeadquarters: order === INITIAL_HEADQUARTERS_ORDER,
 	};
 };
