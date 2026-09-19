@@ -220,6 +220,7 @@ export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
 export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-phone";
 export { isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
+export { obfuscateEmail } from "./obfuscate-email/obfuscate-email";
 export { parseBoleto } from "./parse-boleto/parse-boleto";
 export { parseCaepf } from "./parse-caepf/parse-caepf";
 export { parseCbo } from "./parse-cbo/parse-cbo";

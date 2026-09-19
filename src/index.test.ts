@@ -223,6 +223,7 @@ const PUBLIC = [
 	"isValidServicePhone",
 	"isValidVin",
 	"isValidVoterId",
+	"obfuscateEmail",
 	"parseBoleto",
 	"parseCaepf",
 	"parseCbo",

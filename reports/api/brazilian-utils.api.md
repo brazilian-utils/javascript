@@ -868,6 +868,9 @@ export type NfeKeyModel = "55" | "57" | "58" | "62" | "63" | "64" | "65" | "66" 
 export type NumberToWordsGender = "masculine" | "feminine";
 
 // @public
+export const obfuscateEmail: (value: string) => string;
+
+// @public
 export const parseBoleto: (value: string | number) => string;
 
 // @public
