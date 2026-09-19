@@ -58,6 +58,8 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidCfop](https://brazilian-utils.com.br/utilities.md#isvalidcfop): Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table.
 - [isValidCst](https://brazilian-utils.com.br/utilities.md#isvalidcst): Check if a CST (Código de Situação Tributária) code is valid for a given tax.
 - [isValidCsosn](https://brazilian-utils.com.br/utilities.md#isvalidcsosn): Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes of the consolidated Anexo III-A of Convênio SINIEF s/nº 1970, the table Ajuste SINIEF 03/2010 instituted: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
+- [isValidCstIbsCbs](https://brazilian-utils.com.br/utilities.md#isvalidcstibscbs): Check if a CST-IBS/CBS (Código de Situação Tributária do IBS e da CBS) exists in the official table, the code the field `CST` of the group `IBSCBS` carries in the electronic fiscal documents of the tax reform (Lei Complementar nº 214/2025): NF-e, NFC-e, CT-e, NFS-e and the others.
+- [isValidClassTrib](https://brazilian-utils.com.br/utilities.md#isvalidclasstrib): Check if a cClassTrib (Código de Classificação Tributária do IBS e da CBS) exists in the official table, the code the field `cClassTrib` carries next to the CST-IBS/CBS.
 - [isValidIe](https://brazilian-utils.com.br/utilities.md#isvalidie): Check if inscrição estadual (state registration) is valid.
 - [isValidEmail](https://brazilian-utils.com.br/utilities.md#isvalidemail): Check if email is valid.
 - [isValidCreditCard](https://brazilian-utils.com.br/utilities.md#isvalidcreditcard): Check if a payment card number is valid using the Luhn algorithm (ISO/IEC 7812-1).
@@ -168,6 +170,8 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [getNbs](https://brazilian-utils.com.br/utilities.md#getnbs): Look an NBS code up in the official NBS 2.0 table and return its `code` (the 9 digits, without the mask) and official `description`, typed as `Nbs`, or `null` when the code is unknown or invalid.
 - [getServiceItem](https://brazilian-utils.com.br/utilities.md#getserviceitem): Look a subitem up in the service list annexed to the Lei Complementar 116/2003 and return its `code`, in the form the law prints (`'1.01'`), and its `description`, typed as `ServiceItem`, or `null` when the subitem is unknown or invalid.
 - [getCfop](https://brazilian-utils.com.br/utilities.md#getcfop): Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the consolidated Anexo II of Convênio SINIEF s/nº 1970 words it, in the text in force, last amended by Ajuste SINIEF 39/25.
+- [getCstIbsCbs](https://brazilian-utils.com.br/utilities.md#getcstibscbs): Look a CST-IBS/CBS up and get its code and the description the official CST table gives it.
+- [getClassTrib](https://brazilian-utils.com.br/utilities.md#getclasstrib): Look a cClassTrib up and get its code, the CST-IBS/CBS it belongs to (`cst`, the first 3 digits), the short name the official table gives for display (`name`, the column "Nome cClassTrib") and the situation it refers to (`description`, the column "Descrição cClassTrib").
 
 ## Other utilities
 
