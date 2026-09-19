@@ -250,6 +250,7 @@ const PUBLIC = [
 	"isValidSuframa",
 	"isValidVin",
 	"isValidVoterId",
+	"obfuscateEmail",
 	"parseBoleto",
 	"parseCaepf",
 	"parseCbo",

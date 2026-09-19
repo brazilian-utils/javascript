@@ -125,6 +125,7 @@
 		"./is-valid-suframa": "./src/is-valid-suframa/is-valid-suframa.ts",
 		"./is-valid-vin": "./src/is-valid-vin/is-valid-vin.ts",
 		"./is-valid-voter-id": "./src/is-valid-voter-id/is-valid-voter-id.ts",
+		"./obfuscate-email": "./src/obfuscate-email/obfuscate-email.ts",
 		"./parse-boleto": "./src/parse-boleto/parse-boleto.ts",
 		"./parse-caepf": "./src/parse-caepf/parse-caepf.ts",
 		"./parse-cbo": "./src/parse-cbo/parse-cbo.ts",
