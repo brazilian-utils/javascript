@@ -50,6 +50,7 @@ const CST_DESCRIPTION_HEADER = "Descrição CST-IBS/CBS";
 const CLASS_TRIB_HEADER = "cClassTrib";
 const CLASS_TRIB_NAME_HEADER = "Nome cClassTrib";
 const CLASS_TRIB_DESCRIPTION_HEADER = "Descrição cClassTrib";
+const START_OF_VALIDITY_HEADER = "dIniVig";
 const END_OF_VALIDITY_HEADER = "dFimVig";
 
 const XML_ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
@@ -127,11 +128,20 @@ const CENTRAL_DIRECTORY_ENTRY = 0x02_01_4b_50;
 const DEFLATE = 8;
 
 /**
- * Reads the text files of a zip archive (an xlsx workbook is one) through its central directory.
- * @param {Buffer} zip - The archive.
- * @returns {Map<string, string>} The UTF-8 content of every entry, by path.
+ * How much one entry may inflate to. The whole workbook is under 1 MB, so this leaves room for
+ * the table to grow while a crafted or corrupted download cannot expand without a bound.
  */
-const unzip = (zip: Buffer): Map<string, string> => {
+const MAXIMUM_ENTRY_SIZE = 64 * 1024 * 1024;
+
+/**
+ * Reads the entries of a zip archive (an xlsx workbook is one) that `isWanted` accepts, through
+ * its central directory. Nothing else is decompressed, and inflating stops at
+ * `MAXIMUM_ENTRY_SIZE` per entry, which throws `ERR_BUFFER_TOO_LARGE`.
+ * @param {Buffer} zip - The archive.
+ * @param {(name: string) => boolean} isWanted - Whether an entry path is one to read.
+ * @returns {Map<string, string>} The UTF-8 content of the accepted entries, by path.
+ */
+const unzip = (zip: Buffer, isWanted: (name: string) => boolean): Map<string, string> => {
 	let end = zip.length - 22;
 
 	while (end >= 0 && zip.readUInt32LE(end) !== END_OF_CENTRAL_DIRECTORY) end -= 1;
@@ -146,15 +156,21 @@ const unzip = (zip: Buffer): Map<string, string> => {
 			throw new Error("The downloaded table has a broken zip central directory");
 		}
 
-		const method = zip.readUInt16LE(offset + 10);
-		const compressedSize = zip.readUInt32LE(offset + 20);
 		const nameLength = zip.readUInt16LE(offset + 28);
-		const local = zip.readUInt32LE(offset + 42);
 		const name = zip.toString("utf8", offset + 46, offset + 46 + nameLength);
-		const start = local + 30 + zip.readUInt16LE(local + 26) + zip.readUInt16LE(local + 28);
-		const data = zip.subarray(start, start + compressedSize);
 
-		files.set(name, (method === DEFLATE ? inflateRawSync(data) : data).toString("utf8"));
+		if (isWanted(name)) {
+			const method = zip.readUInt16LE(offset + 10);
+			const compressedSize = zip.readUInt32LE(offset + 20);
+			const local = zip.readUInt32LE(offset + 42);
+			const start = local + 30 + zip.readUInt16LE(local + 26) + zip.readUInt16LE(local + 28);
+			const data = zip.subarray(start, start + compressedSize);
+			const content =
+				method === DEFLATE ? inflateRawSync(data, { maxOutputLength: MAXIMUM_ENTRY_SIZE }) : data;
+
+			files.set(name, content.toString("utf8"));
+		}
+
 		offset += 46 + nameLength + zip.readUInt16LE(offset + 30) + zip.readUInt16LE(offset + 32);
 	}
 
@@ -165,6 +181,7 @@ type Row = Record<string, string>;
 
 const SHARED_STRING_REGEX = /<si>([\s\S]*?)<\/si>/g;
 const TEXT_RUN_REGEX = /<t[^>]*>([\s\S]*?)<\/t>/g;
+const PHONETIC_RUN_REGEX = /<rPh[\s\S]*?<\/rPh>/g;
 const ROW_REGEX = /<row[^>]*>([\s\S]*?)<\/row>/g;
 const CELL_REGEX = /<c r="([A-Z]+)\d+"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
 const CELL_VALUE_REGEX = /<v>([\s\S]*?)<\/v>/;
@@ -207,41 +224,52 @@ const readSheet = (sheet: string, sharedStrings: string[]): Row[] => {
 	});
 };
 
+const SHARED_STRINGS_PATH = "xl/sharedStrings.xml";
+
+const isWorksheet = (name: string): boolean =>
+	name.startsWith("xl/worksheets/") && name.endsWith(".xml");
+
 /**
- * Reads every worksheet of the workbook.
+ * Reads every worksheet of the workbook. The `rPh` elements of a shared string hold the phonetic
+ * hint of the text, not the text, so they are dropped before the runs are joined.
  * @param {Buffer} xlsx - The workbook.
  * @returns {Row[][]} The rows of each worksheet.
  */
 const readWorkbook = (xlsx: Buffer): Row[][] => {
-	const files = unzip(xlsx);
-	const sharedStrings = [
-		...(files.get("xl/sharedStrings.xml") ?? "").matchAll(SHARED_STRING_REGEX),
-	].map(([, item = ""]) =>
-		decodeXml([...item.matchAll(TEXT_RUN_REGEX)].map(([, text = ""]) => text).join("")),
-	);
+	const files = unzip(xlsx, (name) => name === SHARED_STRINGS_PATH || isWorksheet(name));
+	const sharedStrings = [...(files.get(SHARED_STRINGS_PATH) ?? "").matchAll(SHARED_STRING_REGEX)]
+		.map(([, item = ""]) => item.replaceAll(PHONETIC_RUN_REGEX, ""))
+		.map((item) =>
+			decodeXml([...item.matchAll(TEXT_RUN_REGEX)].map(([, text = ""]) => text).join("")),
+		);
 
 	return [...files]
-		.filter(([name]) => name.startsWith("xl/worksheets/") && name.endsWith(".xml"))
+		.filter(([name]) => isWorksheet(name))
 		.map(([, sheet]) => readSheet(sheet, sharedStrings));
 };
 
 const MS_PER_DAY = 86_400_000;
 
+const fromSerialDate = (serial: string): number =>
+	Date.UTC(1899, 11, 30) + Number(serial) * MS_PER_DAY;
+
 /**
- * Whether a row is in force on `today`. `dFimVig` is an Excel serial date (days since
- * 30/12/1899) and is inclusive, the way `scripts/ncm.ts` reads the Siscomex window. A
- * classification the Informe Técnico excludes is not deleted from the table, it gets a `dFimVig`
- * (220001, 220002 and 220003 in v.1.60), so this is what keeps it out.
+ * Whether a row is in force on `today`. `dIniVig` and `dFimVig` are Excel serial dates (days
+ * since 30/12/1899) and both ends of the window are inclusive, the way `scripts/ncm.ts` reads the
+ * Siscomex window. A classification the Informe Técnico excludes is not deleted from the table,
+ * it gets a `dFimVig` (220001, 220002 and 220003 in v.1.60), so this is what keeps it out, and a
+ * classification published before it starts to apply stays out until its `dIniVig`.
  * @param {Row} row - A classification row.
  * @param {number} today - The reference date, in milliseconds at UTC midnight.
- * @returns {boolean} True when the row has no end of validity, or one that has not passed.
+ * @returns {boolean} True when `today` is inside the validity window the row declares.
  */
 const isInForce = (row: Row, today: number): boolean => {
-	const serial = row[END_OF_VALIDITY_HEADER];
+	const start = row[START_OF_VALIDITY_HEADER];
+	const end = row[END_OF_VALIDITY_HEADER];
 
-	if (serial === undefined) return true;
+	if (start !== undefined && today < fromSerialDate(start)) return false;
 
-	return today <= Date.UTC(1899, 11, 30) + Number(serial) * MS_PER_DAY;
+	return end === undefined || today <= fromSerialDate(end);
 };
 
 const serializeSorted = (data: Record<string, unknown>): string =>
