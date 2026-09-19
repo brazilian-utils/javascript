@@ -13,6 +13,18 @@ const DEFLATE = 8;
 /** Largest file the reader inflates, so a corrupt archive cannot exhaust the memory. */
 const MAXIMUM_FILE_SIZE = 64 * 1024 * 1024;
 
+/**
+ * The part that holds the text of the cells. A workbook whose cells are all inline strings does
+ * not carry it, which is valid, so it is read only when the archive has it.
+ */
+const SHARED_STRINGS = "xl/sharedStrings.xml";
+
+/** Rows a worksheet can hold, `1048576`. A reference past it is not a sheet this reader can read. */
+const MAXIMUM_ROWS = 1_048_576;
+
+/** Columns a worksheet can hold, `A` to `XFD`. */
+const MAXIMUM_COLUMNS = 16_384;
+
 const ALPHABET_LENGTH = 26;
 
 const CODE_BEFORE_A = 64;
@@ -149,6 +161,38 @@ const resolveTarget = (target: string): string =>
 	decodeURIComponent(new URL(target, "file:///xl/").pathname).slice(1);
 
 /**
+ * Reads the cells of one row, placed by the column of their reference. A cell past the last
+ * column a worksheet can hold fails the run, so a corrupt reference cannot make the row array
+ * grow to its index.
+ * @param {string} row - The content of the `<row>` element.
+ * @param {string[]} strings - The shared strings of the workbook.
+ * @returns {string[]} The cells of the row, an absent one as `""`.
+ */
+const readCells = (row: string, strings: string[]): string[] => {
+	const cells: string[] = [];
+
+	for (const cell of row.matchAll(/<c\b([^>]*?)(?:\/>|>(.*?)<\/c>)/gs)) {
+		const reference = /\br="([A-Z]+)\d+"/.exec(cell[1])?.[1];
+
+		if (reference === undefined) continue;
+
+		const column = columnIndex(reference);
+
+		if (column >= MAXIMUM_COLUMNS) throw new Error(`the column ${reference} is past the sheet`);
+
+		const type = /\bt="([^"]*)"/.exec(cell[1])?.[1];
+		const body = cell[2] ?? "";
+		const value = /<v>([^<]*)<\/v>/.exec(body)?.[1] ?? "";
+
+		if (type === "inlineStr") cells[column] = joinRuns(body);
+		else if (type === "s") cells[column] = strings[Number(value)] ?? "";
+		else cells[column] = decodeXml(value);
+	}
+
+	return Array.from(cells, (cell) => cell ?? "");
+};
+
+/**
  * Reads the rows of a worksheet, placed by the `r` attribute of the row rather than by the
  * order they are written in, so a skipped row leaves a gap instead of shifting the table.
  * @param {string} sheet - The worksheet XML.
@@ -159,24 +203,11 @@ const readRows = (sheet: string, strings: string[]): string[][] => {
 	const rows: string[][] = [];
 
 	for (const row of sheet.matchAll(/<row\b([^>]*?)(?:\/>|>(.*?)<\/row>)/gs)) {
-		const cells: string[] = [];
-
-		for (const cell of (row[2] ?? "").matchAll(/<c\b([^>]*?)(?:\/>|>(.*?)<\/c>)/gs)) {
-			const reference = /\br="([A-Z]+)\d+"/.exec(cell[1])?.[1];
-			const type = /\bt="([^"]*)"/.exec(cell[1])?.[1];
-			const body = cell[2] ?? "";
-			const value = /<v>([^<]*)<\/v>/.exec(body)?.[1] ?? "";
-
-			if (reference === undefined) continue;
-
-			if (type === "inlineStr") cells[columnIndex(reference)] = joinRuns(body);
-			else if (type === "s") cells[columnIndex(reference)] = strings[Number(value)] ?? "";
-			else cells[columnIndex(reference)] = decodeXml(value);
-		}
-
 		const index = Number(/\br="(\d+)"/.exec(row[1])?.[1] ?? rows.length + 1) - 1;
 
-		rows[index] = Array.from(cells, (cell) => cell ?? "");
+		if (index >= MAXIMUM_ROWS) throw new Error(`the row ${index + 1} is past the sheet`);
+
+		rows[index] = readCells(row[2] ?? "", strings);
 	}
 
 	return Array.from(rows, (row) => row ?? []);
@@ -201,9 +232,8 @@ export const readXlsxSheet = (workbook: Buffer, sheetName: string): string[][] =
 
 	if (target === undefined) throw new Error(`the workbook has no sheet named ${sheetName}`);
 
-	const items = readFile(files, "xl/sharedStrings.xml").matchAll(
-		/<si\b[^>]*?(?:\/>|>(.*?)<\/si>)/gs,
-	);
+	const shared = files.has(SHARED_STRINGS) ? readFile(files, SHARED_STRINGS) : "";
+	const items = shared.matchAll(/<si\b[^>]*?(?:\/>|>(.*?)<\/si>)/gs);
 	const strings = [...items].map((item) => joinRuns(item[1] ?? ""));
 
 	const content = readFile(files, resolveTarget(target));
