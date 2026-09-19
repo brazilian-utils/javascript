@@ -9,9 +9,11 @@ const hideAfter = (text: string, visible: number): string =>
  * who should only recognize it (LGPD, art. 6º III, necessidade).
  *
  * It follows the way the gov.br account shows the registered address, `"li***********@gm*******"`:
- * the first 2 characters of the local part and the first 2 of the domain stay, the `@` stays,
- * and every other character, the dots of the domain included, becomes one `*`, so the length of
- * the address is preserved. The gov.br sample does not cover a local part of 1 or 2 characters,
+ * the first 2 characters of the local part and the first 2 of the domain stay, whatever they
+ * are, a dot included, the `@` stays, and every other character, the remaining dots included,
+ * becomes one `*`, so the length of the address is preserved. A first label of a single
+ * character therefore keeps the dot that follows it visible, `"maria@a.bc"` becoming
+ * `"ma***@a.**"`. The gov.br sample does not cover a local part of 1 or 2 characters,
  * which that rule would show whole; here such a local part always loses its last character
  * (`"ab@example.com"` becomes `"a*@ex*********"`, `"a@example.com"` becomes `"*@ex*********"`).
  *
@@ -25,6 +27,7 @@ const hideAfter = (text: string, visible: number): string =>
  * ```typescript
  * obfuscateEmail("fulano.silva@example.com"); // "fu**********@ex*********"
  * obfuscateEmail("ab@example.com.br"); // "a*@ex************"
+ * obfuscateEmail("maria@a.bc"); // "ma***@a.**" (a 1 character label leaves its dot visible)
  * obfuscateEmail("not an e-mail"); // ""
  * ```
  *

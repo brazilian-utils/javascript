@@ -177,6 +177,12 @@ describe("formatPhone", () => {
 		expect(formatPhone("988887766", { mask: "auto", obfuscate: true })).toBe("*****-**66");
 	});
 
+	it("should truncate a DDD-prefixed value under the default mask before obfuscating it", () => {
+		expect(formatPhone("11988887766", { obfuscate: true })).toBe("*****-**77");
+		expect(formatPhone("11988887766", { mask: "sn", obfuscate: true })).toBe("*****-**77");
+		expect(formatPhone("1130001234", { mask: "sn", obfuscate: true })).toBe("*****-**23");
+	});
+
 	it("should keep the country code and the DDD when obfuscating the international masks", () => {
 		expect(formatPhone("11988887766", { mask: "international", obfuscate: true })).toBe(
 			"+55 11 *****-**66",
