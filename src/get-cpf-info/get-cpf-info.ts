@@ -28,9 +28,9 @@ const CHECK_DIGITS_START = CPF_BASE_LENGTH + 1;
  * Fiscal digit with the states it covers, and the 2 check digits.
  *
  * The Receita Federal is split into ten Regiões Fiscais, and the 9th digit of a CPF is the one of
- * the address given when the number was first registered. It tells where the CPF was issued, not
- * where its holder was born or lives today, and a region with more than one state does not tell
- * which of them it was.
+ * the address given when the number was first registered. It says nothing about where its holder
+ * was born, lives today or asked for the number, and a region with more than one state does not
+ * tell which of them it was.
  *
  * Accepts the same input forms as `isValidCpf`, masked or not, with whitespace around and between
  * the groups, and returns `null` whenever `isValidCpf` would return `false`.
