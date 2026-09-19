@@ -88,10 +88,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/brazilian-utils/brand/main/favicons/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/brazilian-utils/brand/main/favicons/apple-touch-icon.png" />
 
-  <!-- docsify 5 core theme with the dark add-on always on, the look the site had before v5;
-       add media="(prefers-color-scheme: dark)" to the add-on to follow the system instead -->
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/core.min.css" />
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/addons/core-dark.min.css" />
+  <!-- The docsify theme and the site's own styles, in one file shared with the live demos -->
   <link rel="stylesheet" href="/styles.css" />
 </head>
 
@@ -155,13 +152,12 @@
           });
         },
         // The framework tabs of examples.md: every <div class="example" data-name data-demo> becomes a
-        // tab; its live demo, an iframe of docs/snippets, loads the first time the tab is shown, in
-        // the site's color scheme and as tall as its content.
+        // tab; its live demo, an iframe of docs/snippets, loads the first time the tab is shown and
+        // is as tall as its content.
         function (hook) {
           hook.doneEach(function () {
             var panels = [].slice.call(document.querySelectorAll('.example[data-name]'));
             if (panels.length === 0) return;
-            var scheme = document.querySelector('meta[name="color-scheme"]');
             var tabs = document.createElement('div');
             tabs.className = 'example-tabs';
             tabs.setAttribute('role', 'tablist');
@@ -176,13 +172,11 @@
                 var frame = document.createElement('iframe');
                 frame.title = panel.dataset.name + ' demo';
                 frame.src = panel.dataset.demo;
-                // The same scheme on both sides, or the browser paints the frame opaque
-                if (scheme) frame.style.colorScheme = scheme.content;
                 frame.addEventListener('load', function () {
                   var page = frame.contentDocument;
-                  if (scheme) page.documentElement.style.colorScheme = scheme.content;
                   new ResizeObserver(function () {
-                    frame.style.height = page.documentElement.scrollHeight + 'px';
+                    var border = frame.offsetHeight - frame.clientHeight;
+                    frame.style.height = page.body.scrollHeight + border + 'px';
                   }).observe(page.body);
                 });
                 panel.insertBefore(frame, panel.firstChild);

@@ -1,25 +1,19 @@
 /*
- * The look of the live demos of examples.md: the site's theme color, from its stylesheet, and its
- * dark and light backgrounds. The docs page gives each demo the site's color scheme; opened on its
- * own, a demo follows the system's.
+ * The live demos of examples.md: the site's own stylesheet, so a demo looks like the page around
+ * it (docsify already styles the input), plus the layout of the field and its validity states.
  */
 @import url("../styles.css");
 
 :root {
-  color-scheme: light dark;
-  --red: light-dark(#cf222e, #ff6b6b);
-  --text: light-dark(#333, #ddd);
-  --muted: light-dark(#8c959f, #8b949e);
-  --field: light-dark(#fff, #2a3035);
-  --border: light-dark(#d0d7de, #3d444d);
+  --invalid-color: #e5534b;
+}
+
+html {
+  overflow: hidden;
 }
 
 body {
-  margin: 0;
-  padding: 14px 16px;
-  font: 16px/1.5 system-ui, sans-serif;
-  color: var(--text);
-  background: transparent;
+  padding: 16px;
 }
 
 label {
@@ -31,46 +25,26 @@ label {
 }
 
 input {
-  width: 16ch;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--field);
-  color: inherit;
-  font: 500 16px/1.2 ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
-  letter-spacing: 0.03em;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-
-input::placeholder {
-  color: var(--muted);
+  width: calc(14ch + 1.3em + 2px);
+  padding: 0.4em 0.65em;
+  font-family: var(--font-family-mono);
+  font-weight: normal;
 }
 
 input:focus {
   outline: none;
   border-color: var(--theme-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 30%, transparent);
 }
 
 output {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 14px;
+  font-size: var(--font-size-s, 0.875em);
   color: var(--theme-color);
-  background: color-mix(in srgb, var(--theme-color) 14%, transparent);
 }
 
 input[aria-invalid="true"] {
-  border-color: var(--red);
-}
-
-input[aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 30%, transparent);
+  border-color: var(--invalid-color);
 }
 
 input[aria-invalid="true"] ~ output {
-  color: var(--red);
-  background: color-mix(in srgb, var(--red) 14%, transparent);
+  color: var(--invalid-color);
 }
