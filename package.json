@@ -89,6 +89,7 @@
 			}
 		},
 		"./cli": null,
+		"./brazilian-utils-mcp": null,
 		"./*": {
 			"import": {
 				"types": "./dist/*.d.ts",

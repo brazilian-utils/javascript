@@ -92,7 +92,7 @@ const utilEntries = Object.fromEntries(
 
 /**
  * Settings shared by the pack configs below (the root build, the per-util subpath build and the
- * MCP server build).
+ * command line and MCP server builds).
  */
 const sharedPack = {
 	outDir: "dist",
@@ -614,8 +614,9 @@ export default defineConfig({
 			plugins: [externalizeLibrary()],
 		},
 		// The MCP server: one ESM file with a shebang, no declarations (it exports nothing) and the
-		// library left external (see `externalizeLibrary`), so it costs library consumers nothing:
-		// no entry point imports it and `exports` does not list it.
+		// library left external (see `externalizeLibrary`), so it costs library consumers nothing: no
+		// entry point imports it, and `exports` maps its subpath to `null`, since importing it
+		// would start the server.
 		{
 			...sharedPack,
 			sourcemap: false,
