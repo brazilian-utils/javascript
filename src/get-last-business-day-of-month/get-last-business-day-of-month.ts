@@ -8,13 +8,20 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  *
  * It is `getNthBusinessDay(date, -1, options)`, which it delegates to, down to the last detail. A
  * business day is a day for which `isBusinessDay` returns `true` (not a Saturday, a Sunday, or a
- * Brazilian holiday), evaluated with the same `options`, and the month is the one of `date`'s
+ * Brazilian holiday; `options.includeSaturday` keeps Saturday), evaluated with the same
+ * `options`, and the month is the one of `date`'s
  * **local calendar day**; the day of the month and the time of day of `date` are ignored.
  *
  * The name and the result follow date-fns' `lastDayOfMonth`: a new `Date` at the start of that
  * local day (00:00:00.000), with `date` itself never mutated. In a time zone whose clocks jump
  * over that local midnight, the nearest representable instant of the day is returned instead,
  * exactly as in `getNthBusinessDay`.
+ *
+ * `options.includeSaturday` defaults to `false`, the Monday to Friday banking count. Pass `true`
+ * for the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I, which includes
+ * Saturday and still excludes Sunday and holidays, so a holiday that falls on a Saturday is never
+ * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
+ * holidays, which `getHolidays` does not carry.
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
  * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
@@ -25,9 +32,10 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * outside it returns `null`.
  *
  * @param {Date} date - Any date inside the month to look at. Never mutated: a new `Date` is returned.
- * @param {BusinessDayOptions} [options] - Which holidays count as non-business days.
+ * @param {BusinessDayOptions} [options] - Which days count as business days.
  * @param {StateCode} [options.stateCode] - Brazilian state code whose state holidays are also considered.
  * @param {boolean} [options.includeOptional] - Whether optional holidays count as non-business days (default: `true`).
+ * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {Date | null} A new `Date` at 00:00 local time of the last business day of the month.
  * `null` on bad input: a `date` that is not a valid `Date` or is outside 1900-2099, or a
  * `stateCode` that is not a string.
@@ -39,6 +47,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * getLastBusinessDayOfMonth(new Date(2024, 7, 31, 18, 30)); // Fri 2024-08-30, 00:00 (Aug 31 is a Saturday)
  * getLastBusinessDayOfMonth(new Date(2018, 4, 1)); // Wed 2018-05-30, 00:00 (May 31 is Corpus Christi, optional, counted by default)
  * getLastBusinessDayOfMonth(new Date(2018, 4, 1), { includeOptional: false }); // Thu 2018-05-31, 00:00
+ * getLastBusinessDayOfMonth(new Date(2024, 7, 1), { includeSaturday: true }); // Sat 2024-08-31, 00:00 (labour count)
+ * getLastBusinessDayOfMonth(new Date(2024, 10, 1), { stateCode: "DF", includeSaturday: true }); // Fri 2024-11-29, 00:00 (Sat Nov 30 is Dia do Evangélico in DF)
  * getLastBusinessDayOfMonth(new Date(2023, 10, 1), { stateCode: "DF" }); // Wed 2023-11-29, 00:00 (Nov 30 is Dia do Evangélico in DF)
  * getLastBusinessDayOfMonth(new Date("not a date")); // null
  * getLastBusinessDayOfMonth(new Date(2100, 0, 15)); // null (outside the supported years)

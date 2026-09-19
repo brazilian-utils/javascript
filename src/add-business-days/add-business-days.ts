@@ -10,7 +10,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * Adds a number of Brazilian business days (dias úteis) to a date.
  *
  * A business day is a day for which `isBusinessDay` returns `true` (not a Saturday, a
- * Sunday, or a Brazilian holiday), evaluated with the same `options`. The function walks one
+ * Sunday, or a Brazilian holiday; `options.includeSaturday` keeps Saturday), evaluated with
+ * the same `options`. The function walks one
  * calendar day at a time, in the direction of `amount`, counting only business days, so it is
  * exact regardless of the arrangement of holidays around `date` (cheap in practice:
  * `getHolidays` is memoized per year).
@@ -28,6 +29,12 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * not have, such as `00:30` on a day whose clocks jump from `00:00` to `01:00`: the result is
  * then the nearest instant of that day, `01:30`.
  *
+ * `options.includeSaturday` defaults to `false`, the Monday to Friday banking count. Pass `true`
+ * for the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I, which includes
+ * Saturday and still excludes Sunday and holidays, so a holiday that falls on a Saturday is never
+ * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
+ * holidays, which `getHolidays` does not carry.
+ *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and
  * only national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
  * prototype-chain key such as `"__proto__"` is an unknown state code like any other. An
@@ -38,9 +45,10 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  *
  * @param {Date} date - The date to count from. Never mutated: a new `Date` is returned.
  * @param {number} amount - The number of business days to add; a negative value walks backwards.
- * @param {BusinessDayOptions} [options] - Which holidays count as non-business days.
+ * @param {BusinessDayOptions} [options] - Which days count as business days.
  * @param {StateCode} [options.stateCode] - Brazilian state code whose state holidays are also considered.
  * @param {boolean} [options.includeOptional] - Whether optional holidays count as non-business days (default: `true`).
+ * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {Date | null} A new `Date`, `amount` business days after `date`. `null` on bad
  * input: a `date` that is not a valid `Date` or is outside 1900-2099, an `amount` that is not a
  * finite integer, a `stateCode` that is not a string, or a walk that leaves the supported years.
@@ -51,6 +59,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * addBusinessDays(new Date(2024, 11, 31, 12), 1); // Thu 2025-01-02, 12:00 (Jan 1 is Ano novo, skipped)
  * addBusinessDays(new Date(2024, 0, 5, 12), -1); // Thu 2024-01-04, 12:00 (walks backwards)
  * addBusinessDays(new Date(2024, 0, 6, 12), 0); // Sat 2024-01-06, 12:00 (unchanged, even though Saturday is not a business day)
+ * addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: true }); // Sat 2024-01-06, 12:00 (labour count)
+ * addBusinessDays(new Date(2024, 10, 1, 12), 1, { includeSaturday: true }); // Mon 2024-11-04, 12:00 (Nov 2 is Finados, a holiday on a Saturday)
  * addBusinessDays(new Date(2024, 6, 8, 12), 1, { stateCode: "SP" }); // Wed 2024-07-10, 12:00 (Jul 9 is a state holiday in SP)
  * addBusinessDays(new Date("not a date"), 1); // null
  * addBusinessDays(new Date(2024, 0, 2), 1.5); // null (not an integer)

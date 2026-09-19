@@ -97,6 +97,51 @@ describe("addBusinessDays", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should land on Saturday when it counts (Fri 2024-01-05 + 1 -> Sat 2024-01-06)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+
+		it("should keep skipping the whole weekend without the option (Fri 2024-01-05 + 1 -> Mon 2024-01-08)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 5, 12), 1);
+
+			expect(result).toEqual(new Date(2024, 0, 8, 12));
+		});
+
+		it("should never land on a Sunday (Sat 2024-01-06 + 1 -> Mon 2024-01-08)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 6, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 8, 12));
+		});
+
+		it("should still skip a holiday that falls on a Saturday (Fri 2024-11-01 + 1 -> Mon 2024-11-04, Finados)", () => {
+			const result = addBusinessDays(new Date(2024, 10, 1, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 10, 4, 12));
+		});
+
+		it("should count a full week as six business days (Mon 2024-01-08 + 6 -> Mon 2024-01-15, with Sat 2024-01-13)", () => {
+			expect(addBusinessDays(new Date(2024, 0, 8, 12), 6, { includeSaturday: true })).toEqual(
+				new Date(2024, 0, 15, 12),
+			);
+			expect(addBusinessDays(new Date(2024, 0, 8, 12), 6)).toEqual(new Date(2024, 0, 16, 12));
+		});
+
+		it("should walk backwards over Saturday too (Mon 2024-01-08 - 1 -> Sat 2024-01-06)", () => {
+			const result = addBusinessDays(new Date(2024, 0, 8, 12), -1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+
+		it("should give the same result as no options when includeSaturday is false", () => {
+			expect(addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: false })).toEqual(
+				new Date(2024, 0, 8, 12),
+			);
+		});
+	});
+
 	describe("negative amounts", () => {
 		it("should walk backwards, skipping weekends (Fri 2024-01-05 - 1 -> Thu 2024-01-04)", () => {
 			const result = addBusinessDays(new Date(2024, 0, 5, 12), -1);

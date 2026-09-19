@@ -71,6 +71,29 @@ describe("getLastBusinessDayOfMonth", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should return the Saturday August 2024 ends on when it counts (Sat 2024-08-31, Fri 2024-08-30 without the option)", () => {
+			expect(getLastBusinessDayOfMonth(new Date(2024, 7, 1), { includeSaturday: true })).toEqual(
+				new Date(2024, 7, 31),
+			);
+			expect(getLastBusinessDayOfMonth(new Date(2024, 7, 1), { includeSaturday: false })).toEqual(
+				new Date(2024, 7, 30),
+			);
+		});
+
+		it("should return Sat 2024-11-30 nationally, and Fri 2024-11-29 in the DF, where that Saturday is Dia do Evangélico", () => {
+			expect(getLastBusinessDayOfMonth(new Date(2024, 10, 1), { includeSaturday: true })).toEqual(
+				new Date(2024, 10, 30),
+			);
+			expect(
+				getLastBusinessDayOfMonth(new Date(2024, 10, 1), {
+					stateCode: "DF",
+					includeSaturday: true,
+				}),
+			).toEqual(new Date(2024, 10, 29));
+		});
+	});
+
 	describe("invalid input", () => {
 		it("should return null for a date that is not a valid Date", () => {
 			// @ts-expect-error: intentionally invalid input

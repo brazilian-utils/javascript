@@ -75,6 +75,32 @@ describe("getNextBusinessDay", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should return the Saturday when it counts (Fri 2024-01-05 -> Sat 2024-01-06)", () => {
+			const result = getNextBusinessDay(new Date(2024, 0, 5, 12), { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+
+		it("should return the Monday without the option (Fri 2024-01-05 -> Mon 2024-01-08)", () => {
+			expect(getNextBusinessDay(new Date(2024, 0, 5, 12), { includeSaturday: false })).toEqual(
+				new Date(2024, 0, 8, 12),
+			);
+		});
+
+		it("should never return a Sunday (Sat 2024-01-06 -> Mon 2024-01-08)", () => {
+			const result = getNextBusinessDay(new Date(2024, 0, 6, 12), { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 8, 12));
+		});
+
+		it("should skip a holiday that falls on a Saturday (Fri 2024-11-01 -> Mon 2024-11-04, Finados)", () => {
+			const result = getNextBusinessDay(new Date(2024, 10, 1, 12), { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 10, 4, 12));
+		});
+	});
+
 	describe("invalid input", () => {
 		it("should return null for a date that is not a valid Date", () => {
 			// @ts-expect-error: intentionally invalid input

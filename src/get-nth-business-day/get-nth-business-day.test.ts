@@ -172,12 +172,38 @@ describe("getNthBusinessDay", () => {
 			expect(getNthBusinessDay(new Date(2011, 11, 15), 22)).toBeNull();
 			expect(getNthBusinessDay(new Date(2011, 11, 15), -1)).toEqual(new Date(2011, 11, 29));
 		});
+
+		it("should step over the missing Friday 30th with includeSaturday too (-1 is Sat 2011-12-31, -2 is Thu 2011-12-29)", () => {
+			const options = { includeSaturday: true };
+
+			expect(getNthBusinessDay(new Date(2011, 11, 15), -1, options)).toEqual(
+				new Date(2011, 11, 31),
+			);
+			expect(getNthBusinessDay(new Date(2011, 11, 15), -2, options)).toEqual(
+				new Date(2011, 11, 29),
+			);
+			expect(getNthBusinessDay(new Date(2011, 11, 15), 26, options)).toEqual(
+				new Date(2011, 11, 31),
+			);
+			expect(getNthBusinessDay(new Date(2011, 11, 15), 27, options)).toBeNull();
+		});
 	});
 
 	inTimeZone("UTC", () => {
 		it("should count the 22 the same December has, the 30th included", () => {
 			expect(getNthBusinessDay(new Date(2011, 11, 15), 22)).toEqual(new Date(2011, 11, 30));
 			expect(getNthBusinessDay(new Date(2011, 11, 15), 23)).toBeNull();
+		});
+
+		it("should count the 27 the same December has with includeSaturday (-2 is Fri 2011-12-30)", () => {
+			const options = { includeSaturday: true };
+
+			expect(getNthBusinessDay(new Date(2011, 11, 15), -2, options)).toEqual(
+				new Date(2011, 11, 30),
+			);
+			expect(getNthBusinessDay(new Date(2011, 11, 15), 27, options)).toEqual(
+				new Date(2011, 11, 31),
+			);
 		});
 	});
 
@@ -204,6 +230,60 @@ describe("getNthBusinessDay", () => {
 			expect(result).toEqual(new Date(1997, 9, 6));
 			expect(result?.getDate()).toBe(6);
 			expect(result?.getHours()).toBe(1);
+		});
+	});
+
+	describe("includeSaturday", () => {
+		it("should give the labour law fifth business day of March 2024 (Wed 2024-03-06, Sat 2024-03-02 counted) against the banking one (Thu 2024-03-07)", () => {
+			expect(getNthBusinessDay(new Date(2024, 2, 1), 5, { includeSaturday: true })).toEqual(
+				new Date(2024, 2, 6),
+			);
+			expect(getNthBusinessDay(new Date(2024, 2, 1), 5)).toEqual(new Date(2024, 2, 7));
+		});
+
+		it("should give the labour law fifth business day of February 2024 (Tue 2024-02-06, Sat 2024-02-03 counted) against the banking one (Wed 2024-02-07)", () => {
+			expect(getNthBusinessDay(new Date(2024, 1, 1), 5, { includeSaturday: true })).toEqual(
+				new Date(2024, 1, 6),
+			);
+			expect(getNthBusinessDay(new Date(2024, 1, 1), 5)).toEqual(new Date(2024, 1, 7));
+		});
+
+		it("should give the same fifth business day of November 2024 either way (Thu 2024-11-07), since Sat 2024-11-02 is Finados", () => {
+			expect(getNthBusinessDay(new Date(2024, 10, 1), 5, { includeSaturday: true })).toEqual(
+				new Date(2024, 10, 7),
+			);
+			expect(getNthBusinessDay(new Date(2024, 10, 1), 5)).toEqual(new Date(2024, 10, 7));
+		});
+
+		it("should skip Independência on Saturday 2024-09-07 and count Sat 2024-09-14 as the 11th (Mon 2024-09-16 without the option)", () => {
+			expect(getNthBusinessDay(new Date(2024, 8, 1), 11, { includeSaturday: true })).toEqual(
+				new Date(2024, 8, 14),
+			);
+			expect(getNthBusinessDay(new Date(2024, 8, 1), 11)).toEqual(new Date(2024, 8, 16));
+		});
+
+		it("should give January 2024 its 26 business days (22 plus the Saturdays 6, 13, 20 and 27), the 26th being Wed 2024-01-31", () => {
+			expect(getNthBusinessDay(new Date(2024, 0, 15), 26, { includeSaturday: true })).toEqual(
+				new Date(2024, 0, 31),
+			);
+			expect(getNthBusinessDay(new Date(2024, 0, 15), 27, { includeSaturday: true })).toBeNull();
+			expect(getNthBusinessDay(new Date(2024, 0, 15), 23)).toBeNull();
+		});
+
+		it("should count backwards from a Saturday at the end of the month (-1 of November 2024 -> Sat 2024-11-30, Fri 2024-11-29 without the option)", () => {
+			expect(getNthBusinessDay(new Date(2024, 10, 15), -1, { includeSaturday: true })).toEqual(
+				new Date(2024, 10, 30),
+			);
+			expect(getNthBusinessDay(new Date(2024, 10, 15), -1)).toEqual(new Date(2024, 10, 29));
+		});
+
+		it("should still exclude that Saturday when it is a state holiday (DF, Dia do Evangélico 2024-11-30)", () => {
+			const result = getNthBusinessDay(new Date(2024, 10, 15), -1, {
+				stateCode: "DF",
+				includeSaturday: true,
+			});
+
+			expect(result).toEqual(new Date(2024, 10, 29));
 		});
 	});
 

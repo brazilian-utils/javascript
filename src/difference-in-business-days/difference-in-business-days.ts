@@ -23,7 +23,13 @@ const toLocalDayTimestamp = (date: Date): number =>
  * zero, never `-0`).
  *
  * A business day is a day for which `isBusinessDay` returns `true` (not a Saturday, a Sunday,
- * or a Brazilian holiday), evaluated with the same `options`.
+ * or a Brazilian holiday; `options.includeSaturday` keeps Saturday), evaluated with the same `options`.
+ *
+ * `options.includeSaturday` defaults to `false`, the Monday to Friday banking count. Pass `true`
+ * for the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I, which includes
+ * Saturday and still excludes Sunday and holidays, so a holiday that falls on a Saturday is never
+ * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
+ * holidays, which `getHolidays` does not carry.
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
  * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
@@ -35,9 +41,10 @@ const toLocalDayTimestamp = (date: Date): number =>
  *
  * @param {Date} laterDate - The date to count to. Never counted itself, regardless of whether it is a business day.
  * @param {Date} earlierDate - The date to count from. Counted as a business day when it is one; never mutated.
- * @param {BusinessDayOptions} [options] - Which holidays count as non-business days.
+ * @param {BusinessDayOptions} [options] - Which days count as business days.
  * @param {StateCode} [options.stateCode] - Brazilian state code whose state holidays are also considered.
  * @param {boolean} [options.includeOptional] - Whether optional holidays count as non-business days (default: `true`).
+ * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {number | null} The number of business days between the two dates, or `null` on bad
  * input: a `laterDate`/`earlierDate` that is not a valid `Date` or is outside 1900-2099, or a
  * `stateCode` that is not a string.
@@ -48,6 +55,9 @@ const toLocalDayTimestamp = (date: Date): number =>
  * differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (Jan 2 counted, a Tuesday; Jan 3 is not)
  * differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (the later date comes first, so the count is negative)
  * differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (same day)
+ * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (Jan 2 to Jan 5, banking count)
+ * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (Jan 6, a Saturday, also counts)
+ * differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (Nov 2 is Finados, a holiday on a Saturday)
  * differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: "SP" }); // 1 (Jul 9 is a state holiday in SP)
  * differenceInBusinessDays(new Date(), new Date("not a date")); // null
  * differenceInBusinessDays(new Date(2100, 0, 5), new Date(2100, 0, 4)); // null (outside the supported years)
