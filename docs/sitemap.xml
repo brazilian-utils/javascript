@@ -18,6 +18,30 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/utilities" />
   </url>
   <url>
+    <loc>https://brazilian-utils.com.br/guides/react</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/react" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/react" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/react" />
+  </url>
+  <url>
+    <loc>https://brazilian-utils.com.br/guides/vue</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/vue" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/vue" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/vue" />
+  </url>
+  <url>
+    <loc>https://brazilian-utils.com.br/guides/angular</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/angular" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/angular" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/angular" />
+  </url>
+  <url>
+    <loc>https://brazilian-utils.com.br/guides/vanilla</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/vanilla" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/vanilla" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/vanilla" />
+  </url>
+  <url>
     <loc>https://brazilian-utils.com.br/migration-v1-to-v2</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/migration-v1-to-v2" />
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/migration-v1-to-v2" />
@@ -34,6 +58,30 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/utilities" />
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/utilities" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/utilities" />
+  </url>
+  <url>
+    <loc>https://brazilian-utils.com.br/pt-br/guides/react</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/react" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/react" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/react" />
+  </url>
+  <url>
+    <loc>https://brazilian-utils.com.br/pt-br/guides/vue</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/vue" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/vue" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/vue" />
+  </url>
+  <url>
+    <loc>https://brazilian-utils.com.br/pt-br/guides/angular</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/angular" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/angular" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/angular" />
+  </url>
+  <url>
+    <loc>https://brazilian-utils.com.br/pt-br/guides/vanilla</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/guides/vanilla" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/guides/vanilla" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/guides/vanilla" />
   </url>
   <url>
     <loc>https://brazilian-utils.com.br/pt-br/migration-v1-to-v2</loc>
