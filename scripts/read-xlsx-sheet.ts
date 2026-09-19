@@ -208,7 +208,8 @@ const readCells = (row: string, strings: string[]): string[] => {
 		const value = /<v>([^<]*)<\/v>/.exec(body)?.[1] ?? "";
 
 		if (type === "inlineStr") cells[column] = joinRuns(body);
-		else if (type === "s") cells[column] = strings[Number(value)] ?? "";
+		else if (type === "s")
+			cells[column] = /^\d+$/.test(value) ? (strings[Number(value)] ?? "") : "";
 		else cells[column] = decodeXml(value);
 	}
 
