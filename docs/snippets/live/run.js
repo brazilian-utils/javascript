@@ -84,20 +84,23 @@
       });
     }
 
-    return Promise.all([import("@angular/compiler"), import("@angular/core"), import("@angular/platform-browser")]).then(
-      function (angular) {
-        var component = Object.values(module)[0];
-        document.body.appendChild(document.createElement(angular[1].reflectComponentType(component).selector));
-        return angular[2].bootstrapApplication(component, {
-          providers: [angular[1].provideZonelessChangeDetection()],
-        });
-      },
-    );
+    return Promise.all([import("@angular/core"), import("@angular/platform-browser")]).then(function (angular) {
+      var component = Object.values(module)[0];
+      document.body.appendChild(document.createElement(angular[0].reflectComponentType(component).selector));
+      return angular[1].bootstrapApplication(component, {
+        providers: [angular[0].provideZonelessChangeDetection()],
+      });
+    });
   };
 
   Promise.all([loadBabel, read(example)])
     .then(function (files) {
       return /\.vue$/.test(example) ? compileVue(files[1]) : files[1];
+    })
+    .then(function (code) {
+      // Angular's JIT compiler has to be evaluated before any other Angular package, the example
+      // included: the partially compiled packages look for it as they load.
+      return /\.component\.ts$/.test(example) ? import("@angular/compiler").then(function () { return code; }) : code;
     })
     .then(function (code) {
       return import(toModule(transpile(code, example.replace(/\.vue$/, ".ts"))));
