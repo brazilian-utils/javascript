@@ -245,6 +245,9 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 - [Getting started](${SITE}/getting-started.md): installation, runtime support, usage and bundle size/subpath imports
 - [Utilities](${SITE}/utilities.md): full English reference, one section per function, with signatures and examples
+- [Using with React](${SITE}/guides/react.md): input masks, validation as the user types, and form schemas with zod or valibot in React
+- [Using with Vue](${SITE}/guides/vue.md): the same patterns as single-file components
+- [Using with plain JavaScript](${SITE}/guides/vanilla.md): the same patterns with no framework, as complete HTML files
 - [Bundle size](${SITE}/getting-started.md#bundle-size): tree-shaking behavior and the dataset-backed utils that are worth a subpath import
 
 ${groupSections}
