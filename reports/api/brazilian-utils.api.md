@@ -120,7 +120,7 @@ export type CnpjFormat = "numeric" | "alphanumeric";
 // @public
 export type CnpjInfo = {
     root: string;
-    order: string;
+    branch: string;
     checkDigits: string;
     format: CnpjFormat;
     isInitialHeadquarters: boolean;
