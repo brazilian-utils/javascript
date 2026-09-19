@@ -103,6 +103,35 @@ generateCnpj({ branch: 3 }); // bloco de ordem '0003', ex. '12345678000372'
 generateCnpj({ version: 2, branch: 1 }); // CNPJ alfanumérico cujo bloco de ordem é '0001'
 ```
 
+### getCnpjInfo
+
+Interpreta um CNPJ nos campos que o número codifica, conforme o Anexo XV da Instrução Normativa RFB nº 2.119/2022, incluído pela [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=141102): 8 (`root`, a raiz que identifica a entidade) + 4 (`order`, o número de ordem do estabelecimento) + 2 (`checkDigits`, os dígitos verificadores, sempre numéricos). `format` é `'alphanumeric'` quando a raiz ou a ordem têm uma letra e `'numeric'` caso contrário (tipado como `CnpjFormat`). `isInitialHeadquarters` diz se a ordem é `0001`, a que a Receita Federal atribui à matriz quando a raiz é inscrita; as [Perguntas e Respostas da Receita Federal](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf) (pergunta 25) afirmam que uma filial pode depois se tornar a matriz mantendo o seu número de ordem, então só o cadastro da Receita Federal diz qual é a matriz atual. `options.version` (parte de `GetCnpjInfoOptions`) é lida como `isValidCnpj` a lê: `1` (padrão) apenas o formato numérico, `2` tanto o numérico quanto o alfanumérico. Aceita as mesmas formas de entrada que `isValidCnpj` e retorna `null` sempre que ela retornaria `false` para os mesmos argumentos, então um CNPJ alfanumérico lido na versão `1` é `null`. Os campos de um CNPJ alfanumérico são retornados em maiúsculas, e o resultado é tipado como `CnpjInfo`.
+
+```javascript
+import { getCnpjInfo } from '@brazilian-utils/brazilian-utils';
+
+getCnpjInfo('12.345.678/0001-95');
+// {
+//   root: '12345678',
+//   order: '0001',
+//   checkDigits: '95',
+//   format: 'numeric',
+//   isInitialHeadquarters: true
+// }
+
+getCnpjInfo('12.abc.345/01de-35', { version: 2 });
+// {
+//   root: '12ABC345',
+//   order: '01DE',
+//   checkDigits: '35',
+//   format: 'alphanumeric',
+//   isInitialHeadquarters: false
+// }
+
+getCnpjInfo('12.ABC.345/01DE-35'); // null (alfanumérico, lido na versão 1)
+getCnpjInfo('12.345.678/0001-90'); // null (dígitos verificadores incorretos)
+```
+
 ## CEP e endereço
 
 ### isValidCep

@@ -133,6 +133,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 ## Getters (get*)
 
+- [getCnpjInfo](https://brazilian-utils.com.br/utilities.md#getcnpjinfo): Parse a CNPJ into the fields the number encodes, per Anexo XV of Instrução Normativa RFB nº 2.119/2022, added by Instrução Normativa RFB nº 2.229/2024: 8 (`root`, the raiz that identifies the entity) + 4 (`order`, the número de ordem of the establishment) + 2 (`checkDigits`, always numeric).
 - [getAddressInfoByCep](https://brazilian-utils.com.br/utilities.md#getaddressinfobycep): Fetch address information for a given CEP using multiple providers.
 - [getCepInfoByAddress](https://brazilian-utils.com.br/utilities.md#getcepinfobyaddress): Fetch CEPs from an address using ViaCEP.
 - [getBoletoInfo](https://brazilian-utils.com.br/utilities.md#getboletoinfo): Extract information from a boleto (amount, expiration date, bank code).
