@@ -100,6 +100,19 @@ You can check a list of utilities [by clicking here](https://brazilian-utils.com
 - Using an AI coding assistant? The docs are indexed on Context7 as [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript), and [llms.txt](https://brazilian-utils.com.br/llms.txt) lists every util for other tools. See [AI assistants](https://brazilian-utils.com.br/getting-started?id=ai-assistants).
 - The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](https://brazilian-utils.com.br/getting-started?id=bundle-size).
 
+## Command line
+
+Every utility also runs from a terminal or a shell script, with no install needed:
+
+```bash
+npx @brazilian-utils/brazilian-utils isValidCpf 12345678909                # true (exit code 0; 1 for a negative answer)
+npx @brazilian-utils/brazilian-utils formatCnpj 12345678000195 --obfuscate # **.345.678/0001-**
+npx @brazilian-utils/brazilian-utils getBankByCode 001                     # { "code": "001", ... } as JSON
+echo 01001000 | npx @brazilian-utils/brazilian-utils getAddressInfoByCep   # reads stdin, awaits the lookup
+```
+
+The first argument is the name of a utility, the positional values are its arguments and `--key value`, `--flag` or `--json '<object>'` become its options object. `list` prints every utility and `--help` the full usage. See [Command line](https://brazilian-utils.com.br/getting-started?id=command-line).
+
 ## Development
 
 This repository uses Vite+ as the local toolchain; it is installed as a dependency, so nothing has

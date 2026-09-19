@@ -65,6 +65,49 @@ isValidCpf('1232454233345'); // false
 
 Você pode conferir a lista de utilitários [clicando aqui](pt-br/utilities.md).
 
+## Linha de comando
+
+O pacote traz o comando `brazilian-utils`, que executa qualquer utilitário a partir do terminal ou de um shell script, sem precisar instalar nada:
+
+```bash
+npx @brazilian-utils/brazilian-utils isValidCpf 12345678909           # true
+npx @brazilian-utils/brazilian-utils generateCpf                      # 45654643304
+npx @brazilian-utils/brazilian-utils formatCnpj 12345678000195 --obfuscate # **.345.678/0001-**
+npx @brazilian-utils/brazilian-utils getBankByCode 001                # { "code": "001", "ispb": "00000000", ... }
+```
+
+`bunx @brazilian-utils/brazilian-utils` executa o mesmo comando, e no Deno ele é `deno run npm:@brazilian-utils/brazilian-utils`, que pede as permissões necessárias (só as duas consultas de CEP acessam a rede). Com o pacote instalado no projeto ele vira `npx brazilian-utils`, ou só `brazilian-utils` em um script do `package.json`.
+
+O comando é um despachante genérico sobre a API pública: o primeiro argumento é o nome de um utilitário, exatamente como ele é exportado, e o restante vira os argumentos dele.
+
+| Você escreve                 | O utilitário recebe                                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `isValidIe SP 110042490114`  | Valores posicionais, em ordem: `isValidIe("SP", "110042490114")`                                              |
+| `--key value`, `--key=value` | Uma entrada do objeto de opções (ou de parâmetros); `--state-code` e `--stateCode` são a mesma chave          |
+| `--flag`, `--no-flag`        | Uma opção booleana com valor `true` ou `false`: `formatCurrency 10 --symbol`, `isBusinessDay 2026-02-17 --no-include-optional` |
+| `--json '<objeto>'`          | O objeto de opções (ou de parâmetros) em JSON; as opções passadas junto com ele têm prioridade                |
+| `-`, ou nenhum valor em pipe | O valor é lido da stdin: `echo 12345678909 \| brazilian-utils formatCpf --obfuscate`                          |
+| `--`                         | Encerra as opções, para que um valor que começa com `--` seja lido como valor                                 |
+
+Um utilitário cujo primeiro argumento é um objeto de opções, como `isHoliday`, `getHolidays` ou `isValidBankAccount`, nunca pega um valor da stdin por conta própria: ele só lê a stdin onde você escreve `-`. Assim `brazilian-utils isHoliday --target-date 2026-09-07` responde a mesma coisa dentro de um script cuja stdin é um arquivo ou um pipe.
+
+Os valores continuam sendo strings (assim `001` mantém os zeros), exceto onde o utilitário espera um número, uma lista (separada por vírgulas: `--accept cpf,cnpj`) ou uma data. Datas são escritas como `YYYY-MM-DD`, representam esse dia do calendário local e são impressas do mesmo jeito:
+
+```bash
+brazilian-utils addBusinessDays 2026-09-04 1                   # 2026-09-08
+brazilian-utils getHolidays --year 2026 --state-code SP        # [{ "name": "Ano novo", "date": "2026-01-01", ... }]
+brazilian-utils isValidBankAccount --json '{"bankCode":"001","agency":"1234","account":"12345678","digit":"9"}'
+brazilian-utils getAddressInfoByCep 01001000                   # aguarda a consulta e imprime o endereço
+```
+
+Strings e números são impressos como estão, uma data como o seu dia local `YYYY-MM-DD` (também dentro do JSON), e todo o resto como JSON. O código de saída é `0` em caso de sucesso, `1` quando a resposta é negativa (`false`, `null` ou a string vazia que um formatador devolve quando não consegue ler o valor) ou quando o utilitário lança um erro (que vai para a stderr), e `2` quando a própria linha de comando está errada, então um validador funciona como condição no shell:
+
+```bash
+if brazilian-utils isValidCnpj "$CNPJ" > /dev/null; then echo "ok"; fi
+```
+
+`brazilian-utils list` imprime o nome de todos os utilitários, `--help` o modo de uso e `--version` a versão do pacote. O comando é um arquivo separado que nenhum ponto de entrada da biblioteca importa, então não acrescenta nada ao seu bundle.
+
 ## Assistentes de IA
 
 A documentação está indexada no Context7 como [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript). Em um agente de código conectado ao servidor MCP do Context7, cite a biblioteca no prompt e o agente pula a busca pela biblioteca:
