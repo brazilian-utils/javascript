@@ -176,8 +176,9 @@ const parseSegments = (html: string): Record<string, string> => {
 /**
  * Fails when an amendment note announces a wording that is not in force yet: the row under it
  * would be read as current while the previous wording still applies, so a maintainer has to
- * look at it rather than the table silently running ahead of the law.
- * @param {string} html - The markup of the annexes.
+ * look at it rather than the table silently running ahead of the law. Every annex read into the
+ * generated file goes through it, Anexo I included, since a segment can be re-worded too.
+ * @param {string} html - The markup of an annex.
  * @param {Date} today - The generation date.
  */
 const assertNoPendingAmendment = (html: string, today: Date): void => {
@@ -252,6 +253,7 @@ const main = async (): Promise<void> => {
 	let amendedBy = "";
 
 	const table = await fetchSortedRecord(SOURCE_URL, "CEST annexes", async (response) => {
+		const today = new Date();
 		const html = await response.text();
 		const annexes = splitAnnexes(html);
 		const numerals = annexes.map(({ numeral }) => numeral);
@@ -259,8 +261,10 @@ const main = async (): Promise<void> => {
 			numerals.indexOf(FIRST_GOODS_ANNEX),
 			numerals.indexOf(LAST_GOODS_ANNEX) + 1,
 		);
+		const segmentsAnnex = annexes.find(({ numeral }) => numeral === SEGMENTS_ANNEX)?.html ?? "";
 
-		segments = parseSegments(annexes.find(({ numeral }) => numeral === SEGMENTS_ANNEX)?.html ?? "");
+		assertNoPendingAmendment(segmentsAnnex, today);
+		segments = parseSegments(segmentsAnnex);
 		amendedBy = toText(AMENDED_BY_REGEX.exec(html)?.[1] ?? "");
 
 		if (amendedBy === "" || goodsAnnexes.length !== GOODS_ANNEXES) {
@@ -270,7 +274,7 @@ const main = async (): Promise<void> => {
 		const data: Record<string, string> = {};
 
 		for (const annex of goodsAnnexes) {
-			assertNoPendingAmendment(annex.html, new Date());
+			assertNoPendingAmendment(annex.html, today);
 			parseGoods(annex, segments, data);
 		}
 
