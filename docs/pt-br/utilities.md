@@ -307,6 +307,21 @@ getPixKeyInfo('51998259765'); // { type: 'cpf', value: '51998259765' } (também 
 getPixKeyInfo('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
 ```
 
+### obfuscatePixKey
+
+Esconde a maior parte de uma chave Pix com `*`, para os lugares em que a chave é mostrada a alguém que só precisa reconhecê-la, como uma lista de chaves cadastradas (LGPD, art. 6º III, necessidade). A chave é identificada por `getPixKeyInfo`, pelas regras documentadas lá, e cada tipo é escondido pelo utilitário que já sabe fazer isso: o CPF por `formatCpf` com `obfuscate` (`***.456.789-**`, a forma que o Banco Central imprime para um "CPF mascarado" no [manual de experiência do usuário do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf)), o CNPJ por `formatCnpj` com `obfuscate`, o telefone por `formatPhone` com a máscara `"international"` e `obfuscate`, e o e-mail por `obfuscateEmail` sobre o endereço em minúsculas. A chave aleatória (EVP) é devolvida inteira, em minúsculas: o [manual do DICT](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/X_ManualOperacionaldoDICT.pdf) a define como uma sequência "que não possui qualquer significado, a não ser o de servir como uma chave Pix", então ela não carrega dado pessoal a esconder. Retorna string vazia quando o valor não é uma chave Pix válida. O manual de experiência do usuário proíbe mascarar a chave na tela em que o pagador confere o recebedor, então este utilitário não serve para essa tela.
+
+```javascript
+import { obfuscatePixKey } from '@brazilian-utils/brazilian-utils';
+
+obfuscatePixKey('123.456.789-09'); // ***.456.789-**
+obfuscatePixKey('12345678000195'); // **.345.678/0001-**
+obfuscatePixKey('(11) 98765-4321'); // +55 11 *****-**21
+obfuscatePixKey('Fulano@Example.com'); // fu****@ex*********
+obfuscatePixKey('71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D'); // 71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d
+obfuscatePixKey('não é chave'); // ''
+```
+
 ### isValidPixPayload
 
 Valida se um payload de BR Code Pix (a string por trás de um QR Code Pix e do "Pix copia e cola") é válido: estrutura TLV bem formada, objetos obrigatórios presentes, um dos templates "Merchant Account Information" carregando o GUI `br.gov.bcb.pix` junto com uma chave ou uma URL, e um CRC-16 que confere. O objeto "Point of Initiation Method" (`01`) é informativo: o Manual do BR Code o marca como opcional e só atribui significado ao valor `"12"` ("só pode ser utilizado uma vez"), então ele pode estar ausente em qualquer um dos formatos e apenas um valor fora de `{"11", "12"}` torna o payload inválido. Quando um payload construído em torno de uma chave traz um valor (`54`), esse valor precisa ser maior que zero, a menos que o payload seja um BR Code de Pix Saque, ou seja, a menos que traga o ISPB do facilitador de serviço de saque no subobjeto 26-03 (`fss`) como prescreve o §2.6 do manual do Pix; rejeitar `"0"`/`"0.00"` sem o `fss` é uma restrição deliberada desta biblioteca, não uma regra do manual. Um `fss` escrito ao lado de uma localização de PSP torna o payload inválido: o §2.7 do Manual de Padrões para Iniciação do Pix mapeia o QR Code dinâmico para exatamente dois subobjetos, `00` (GUI) e `25` (URL), e o `fss` pertence ao template estático do §2.6. A chave em si não é validada contra os formatos do DICT, use `isValidPixKey` para isso. Os Unreserved Templates (IDs 80 a 99) são ignorados: o "QR Code composto" do Pix Automático (Pix recorrente) grava em um deles a localização de recorrência e, quando esse payload também traz uma localização de pagamento em 26-25, como no exemplo composto do manual do Pix, ele é aceito e lido como um payload dinâmico comum, com a localização de recorrência descartada. Só um payload sem nenhum template Pix nos IDs 26 a 51 é considerado inválido.
@@ -458,7 +473,7 @@ isValidPhone('11900000000', { accept: [] }); // false
 
 ### formatPhone
 
-Formata número de telefone de acordo com padrões brasileiros. `options.mask` (tipado como `PhoneMask`) aceita `"sn"` (padrão, apenas o número assinante, 9 dígitos, sem DDD), `"nanp"` (DDD + número assinante, `"(00) 00000-0000"` para os 11 dígitos de um celular e `"(00) 0000-0000"` para os 10 dígitos de um fixo, mantendo o agrupamento de 11 dígitos em qualquer outro tamanho), `"e164"` (`"+5511987654321"`), `"international"` (`"+55 11 98765-4321"`, a forma como um número brasileiro é exibido para quem liga do exterior), `"service"` (`"0800 123 4567"` ou `"4004-1234"`, os agrupamentos convencionais para números de serviço) ou `"auto"`. O `"auto"` usa `"international"` quando `value` traz um código de país brasileiro (`+55`, `0055` ou um `55` seguido de 10 ou 11 dígitos), `"service"` quando `value` é um número de serviço e, nos demais casos, decide pela quantidade de dígitos: `"nanp"` quando `value` tem mais dígitos que um número assinante isolado, `"sn"` quando não tem. `"e164"` e `"international"` removem antes o código de país (regra documentada em `parsePhone`) e recaem para a apresentação `"service"` no caso de um número de serviço, já que esses não têm forma E.164. Se `value` incluir o DDD, informe `{ mask: 'auto' }` (ou `'nanp'`) explicitamente, já que a máscara padrão `"sn"` assume que não há DDD e trunca silenciosamente um DDD presente. Uma `mask` fora da união recai para o padrão `"sn"` em vez de lançar erro.
+Formata número de telefone de acordo com padrões brasileiros. `options.mask` (tipado como `PhoneMask`) aceita `"sn"` (padrão, apenas o número assinante, 9 dígitos, sem DDD), `"nanp"` (DDD + número assinante, `"(00) 00000-0000"` para os 11 dígitos de um celular e `"(00) 0000-0000"` para os 10 dígitos de um fixo, mantendo o agrupamento de 11 dígitos em qualquer outro tamanho), `"e164"` (`"+5511987654321"`), `"international"` (`"+55 11 98765-4321"`, a forma como um número brasileiro é exibido para quem liga do exterior), `"service"` (`"0800 123 4567"` ou `"4004-1234"`, os agrupamentos convencionais para números de serviço) ou `"auto"`. O `"auto"` usa `"international"` quando `value` traz um código de país brasileiro (`+55`, `0055` ou um `55` seguido de 10 ou 11 dígitos), `"service"` quando `value` é um número de serviço e, nos demais casos, decide pela quantidade de dígitos: `"nanp"` quando `value` tem mais dígitos que um número assinante isolado, `"sn"` quando não tem. `"e164"` e `"international"` removem antes o código de país (regra documentada em `parsePhone`) e recaem para a apresentação `"service"` no caso de um número de serviço, já que esses não têm forma E.164. Se `value` incluir o DDD, informe `{ mask: 'auto' }` (ou `'nanp'`) explicitamente, já que a máscara padrão `"sn"` assume que não há DDD e trunca silenciosamente um DDD presente. Uma `mask` fora da união recai para o padrão `"sn"` em vez de lançar erro. `options.obfuscate` (padrão `false`) esconde o número do assinante em todas as máscaras. A [conta gov.br](https://acesso.gov.br/faq/_perguntasdafaq/formarrecuperarconta.html) mostra o celular cadastrado como `*********00`, só os 2 últimos dígitos, e aqui a contagem é a mesma. Os 2 dígitos são os últimos que cabem na própria máscara, então na máscara padrão `"sn"` um valor com DDD é truncado antes, igual ao que acontece sem `obfuscate`, e o par visível é o 8º e o 9º dígito, e não os 2 últimos de `value`. Também fica o prefixo que indica uma região ou um serviço, e não um assinante: o DDD, o código do tipo `0800` e a raiz `300X`/`400X`. Um código de utilidade pública de 3 dígitos (`190`) não identifica ninguém e é devolvido como está, e num valor que a máscara `"service"` não reconhece cada dígito vira um `*`, o que esconde os dígitos, mas não quantos eram. Os padrões ofuscados têm um número fixo de posições, então em `"e164"` o que passa do 11º dígito nacional é descartado. A opção é lida por veracidade (truthiness), então qualquer valor verdadeiro esconde os dígitos.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -473,6 +488,15 @@ formatPhone('+5511987654321', { mask: 'international' }); // +55 11 98765-4321
 formatPhone('08001234567', { mask: 'service' }); // 0800 123 4567
 formatPhone('40041234', { mask: 'service' }); // 4004-1234
 formatPhone('+5511987654321', { mask: 'auto' }); // +55 11 98765-4321 ("auto" detecta o prefixo +55 e escolhe "international")
+formatPhone('987654321', { obfuscate: true }); // *****-**21
+formatPhone('11987654321', { mask: 'auto', obfuscate: true }); // (11) *****-**21
+formatPhone('1130000000', { mask: 'auto', obfuscate: true }); // (11) ****-**00
+formatPhone('+5511987654321', { mask: 'auto', obfuscate: true }); // +55 11 *****-**21
+formatPhone('11987654321', { mask: 'e164', obfuscate: true }); // +5511*******21
+formatPhone('08001234567', { mask: 'service', obfuscate: true }); // 0800 *** **67
+formatPhone('40041234', { mask: 'service', obfuscate: true }); // 4004-**34
+formatPhone('11988887766', { mask: 'service', obfuscate: true }); // *********** (não é número de serviço)
+formatPhone('11987654321', { obfuscate: true }); // *****-**43 (CUIDADO: a "sn" trunca antes, então "43", e não "21")
 formatPhone('11900000000'); // 11900-0000 (CUIDADO: a máscara padrão "sn" trunca um número com DDD)
 ```
 
@@ -700,13 +724,14 @@ isValidPis('12056412547'); // false
 
 ### formatPis
 
-Formata número de PIS. `options.pad` (parte de `FormatPisOptions`) completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`).
+Formata número de PIS. `options.pad` (parte de `FormatPisOptions`) completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`). `options.obfuscate` (do mesmo tipo, padrão `false`) esconde os 3 primeiros dígitos e o dígito verificador (`***.45678.90-*`), após o `pad`. Nenhuma autoridade publica uma regra de mascaramento para o PIS, então vale a que a [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura. É lida por veracidade (truthiness), então qualquer valor verdadeiro esconde os dígitos.
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
 
 formatPis('12345678901'); // 123.45678.90-1
 formatPis('123456789', { pad: true }); // 001.23456.78-9
+formatPis('12345678901', { obfuscate: true }); // ***.45678.90-*
 ```
 
 ### parsePis
@@ -1490,13 +1515,14 @@ isValidCnh('ab00000000119'); // false (letras são rejeitadas)
 
 ### formatCnh
 
-Formata a CNH. `options.pad` (parte de `FormatCnhOptions`) completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`).
+Formata a CNH. `options.pad` (parte de `FormatCnhOptions`) completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`). `options.obfuscate` (do mesmo tipo, padrão `false`) esconde os 3 primeiros dígitos e os 2 dígitos verificadores (`***503064-**`), após o `pad`. Nenhuma autoridade publica uma regra de mascaramento para a CNH, então vale a que a [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura. É lida por veracidade (truthiness), então qualquer valor verdadeiro esconde os dígitos.
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
 
 formatCnh('02650306461'); // 026503064-61
 formatCnh('2650306461', { pad: true }); // 026503064-61
+formatCnh('02650306461', { obfuscate: true }); // ***503064-**
 ```
 
 ### parseCnh
@@ -1658,12 +1684,13 @@ isValidVoterId(voterId); // true
 
 ### formatVoterId
 
-Formata um título de eleitor. Usa por padrão o agrupamento de 12 dígitos `0000 0000 00 00`; o agrupamento de 13 dígitos `0000 0000 0 00 00` só é usado quando o valor sanitizado tem mais de 12 dígitos **e** o código de unidade federativa (o 10º e o 11º dígitos) é `01` (São Paulo) ou `02` (Minas Gerais), os dois estados cujos títulos podem ter um número sequencial de 9 dígitos.
+Formata um título de eleitor. Usa por padrão o agrupamento de 12 dígitos `0000 0000 00 00`; o agrupamento de 13 dígitos `0000 0000 0 00 00` só é usado quando o valor sanitizado tem mais de 12 dígitos **e** o código de unidade federativa (o 10º e o 11º dígitos) é `01` (São Paulo) ou `02` (Minas Gerais), os dois estados cujos títulos podem ter um número sequencial de 9 dígitos. `options.obfuscate` (parte de `FormatVoterIdOptions`, padrão `false`) esconde os 3 primeiros dígitos e os 2 dígitos verificadores (`***4 5678 01 **`), deixando visível o código da unidade federativa. Nenhuma autoridade publica uma regra de mascaramento para o título de eleitor, então vale a que a [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura. É lida por veracidade (truthiness), então qualquer valor verdadeiro esconde os dígitos.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
 
 formatVoterId('123456780175'); // '1234 5678 01 75'
+formatVoterId('123456780175', { obfuscate: true }); // '***4 5678 01 **'
 formatVoterId('1234567880191'); // '1234 5678 8 01 91' (título de 13 dígitos SP/MG)
 ```
 
@@ -2235,6 +2262,20 @@ Valida se email é válido. O conjunto aceito é um subconjunto prático da defi
 import { isValidEmail } from '@brazilian-utils/brazilian-utils';
 
 isValidEmail('john.doe@hotmail.com'); // true
+```
+
+## obfuscateEmail
+
+Esconde a maior parte de um endereço de e-mail com `*`, para os lugares em que o endereço é mostrado a alguém que só precisa reconhecê-lo (LGPD, art. 6º III, necessidade). Segue a forma como a [conta gov.br](https://acesso.gov.br/faq/_perguntasdafaq/formarrecuperarconta.html) mostra o endereço cadastrado, `li***********@gm*******`: ficam os 2 primeiros caracteres da parte local e os 2 primeiros do domínio, sejam eles quais forem, inclusive um ponto, fica o `@`, e todo outro caractere, inclusive os demais pontos, vira um `*`, então o tamanho é preservado. Um primeiro rótulo de 1 caractere, portanto, deixa visível o ponto que vem depois dele. O exemplo do gov.br não cobre uma parte local de 1 ou 2 caracteres, que essa regra mostraria inteira, então aqui uma parte local assim sempre perde o último caractere. O valor é julgado por `isValidEmail` como veio, sem remover espaços, e mantém maiúsculas e minúsculas. Retorna string vazia quando o valor não é um e-mail válido.
+
+```javascript
+import { obfuscateEmail } from '@brazilian-utils/brazilian-utils';
+
+obfuscateEmail('fulano.silva@example.com'); // fu**********@ex*********
+obfuscateEmail('ab@example.com.br'); // a*@ex************
+obfuscateEmail('a@example.com'); // *@ex*********
+obfuscateEmail('maria@a.bc'); // ma***@a.** (um rótulo de 1 caractere deixa o ponto visível)
+obfuscateEmail('não é e-mail'); // ''
 ```
 
 ## isValidCreditCard

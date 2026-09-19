@@ -166,6 +166,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 ## Other utilities
 
+- [obfuscatePixKey](https://brazilian-utils.com.br/utilities.md#obfuscatepixkey): Hides most of a Pix key with `*`, for the places where a key is shown to someone who should only recognize it, such as a list of registered keys (LGPD, art. 6º III, necessidade).
 - [convertLicensePlateToMercosul](https://brazilian-utils.com.br/utilities.md#convertlicenseplatetomercosul): Convert an old format Brazilian license plate (`LLLNNNN`) to the Mercosul format (`LLLNLNN`), following the official conversion table: the digit in the 5th position becomes a letter (`0` through `9` mapping to `A` through `J`).
 - [convertNumberToWords](https://brazilian-utils.com.br/utilities.md#convertnumbertowords): Formats an integer as its Brazilian Portuguese cardinal number words ("por extenso"), e.g. `1235` becomes `"mil duzentos e trinta e cinco"`.
 - [convertCurrencyToWords](https://brazilian-utils.com.br/utilities.md#convertcurrencytowords): Formats a monetary amount in Brazilian Reais as its "por extenso" textual representation, the style used to write out the amount by hand on cheques and contracts, e.g. `1523.45` becomes `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`.
@@ -177,6 +178,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [differenceInBusinessDays](https://brazilian-utils.com.br/utilities.md#differenceinbusinessdays): Count the number of Brazilian business days (dias úteis) between two dates, mirroring the semantics of date-fns' `differenceInBusinessDays` (verified against its source), argument order included: `differenceInBusinessDays(laterDate, earlierDate, options?)`.
 - [capitalize](https://brazilian-utils.com.br/utilities.md#capitalize): Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed.
 - [removeAccents](https://brazilian-utils.com.br/utilities.md#removeaccents): Remove diacritical marks (accents, tildes, cedillas) from a string, decomposing every accented character into its base letter plus combining marks (Unicode NFD) and dropping the combining marks.
+- [obfuscateEmail](https://brazilian-utils.com.br/utilities.md#obfuscateemail): Hides most of an e-mail address with `*`, for the places where an address is shown to someone who should only recognize it (LGPD, art. 6º III, necessidade).
 
 ## Optional
 

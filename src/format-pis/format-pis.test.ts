@@ -91,6 +91,21 @@ describe("formatPis", () => {
 		expect(formatPis()).toBe("");
 	});
 
+	it("should hide the first 3 digits and the check digit when obfuscate is truthy", () => {
+		expect(formatPis("12056412547", { obfuscate: true })).toBe("***.56412.54-*");
+		expect(formatPis(12_056_412_547, { obfuscate: true })).toBe("***.56412.54-*");
+		expect(formatPis("1205", { obfuscate: true })).toBe("***.5");
+		expect(formatPis("1205", { pad: true, obfuscate: true })).toBe("***.00001.20-*");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatPis("12056412547", { obfuscate: 1 })).toBe("***.56412.54-*");
+	});
+
+	it("should behave exactly as without the option when obfuscate is falsy", () => {
+		expect(formatPis("12056412547", { obfuscate: false })).toBe("120.56412.54-7");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatPis("1205", { pad: true, obfuscate: 0 })).toBe("000.00001.20-5");
+	});
+
 	describe("properties", () => {
 		const upToAPis = digitsUpTo(11);
 
@@ -100,6 +115,14 @@ describe("formatPis", () => {
 
 		test("should produce the documented mask shape for a full PIS", () => {
 			expectMatchesPattern(formatPis, /^\d{3}\.\d{5}\.\d{2}-\d$/, digits(11));
+		});
+
+		test("should produce the documented obfuscated shape for a full PIS", () => {
+			expectMatchesPattern(
+				(value: string) => formatPis(value, { obfuscate: true }),
+				/^\*{3}\.\d{5}\.\d{2}-\*$/,
+				digits(11),
+			);
 		});
 
 		test("should left pad a shorter value up to the PIS length", () => {
@@ -119,7 +142,8 @@ describe("formatPis types", () => {
 		expectTypeOf(formatPis).returns.toEqualTypeOf<string>();
 	});
 
-	test("should type the pad option as an optional boolean", () => {
+	test("should type the pad and obfuscate options as optional booleans", () => {
 		expectTypeOf<FormatPisOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf<FormatPisOptions["obfuscate"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

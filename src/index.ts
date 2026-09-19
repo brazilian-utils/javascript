@@ -53,7 +53,7 @@ export {
 	type FormatProcessoJuridicoOptions,
 	formatProcessoJuridico,
 } from "./format-processo-juridico/format-processo-juridico";
-export { formatVoterId } from "./format-voter-id/format-voter-id";
+export { type FormatVoterIdOptions, formatVoterId } from "./format-voter-id/format-voter-id";
 export { type GenerateBoletoParams, generateBoleto } from "./generate-boleto/generate-boleto";
 export { generateCep } from "./generate-cep/generate-cep";
 export { generateCnh } from "./generate-cnh/generate-cnh";
@@ -220,6 +220,8 @@ export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
 export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-phone";
 export { isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
+export { obfuscateEmail } from "./obfuscate-email/obfuscate-email";
+export { obfuscatePixKey } from "./obfuscate-pix-key/obfuscate-pix-key";
 export { parseBoleto } from "./parse-boleto/parse-boleto";
 export { parseCaepf } from "./parse-caepf/parse-caepf";
 export { parseCbo } from "./parse-cbo/parse-cbo";

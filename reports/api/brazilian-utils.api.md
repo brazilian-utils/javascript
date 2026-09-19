@@ -197,6 +197,7 @@ export const formatCnh: (value: string | number, options?: FormatCnhOptions) => 
 // @public
 export type FormatCnhOptions = {
     pad?: boolean;
+    obfuscate?: boolean;
 };
 
 // @public
@@ -288,6 +289,7 @@ export const formatPhone: (value: string | number, options?: FormatPhoneOptions)
 // @public
 export type FormatPhoneOptions = {
     mask?: PhoneMask;
+    obfuscate?: boolean;
 };
 
 // @public
@@ -296,6 +298,7 @@ export const formatPis: (value: string | number, options?: FormatPisOptions) => 
 // @public
 export type FormatPisOptions = {
     pad?: boolean;
+    obfuscate?: boolean;
 };
 
 // @public
@@ -307,7 +310,12 @@ export type FormatProcessoJuridicoOptions = {
 };
 
 // @public
-export const formatVoterId: (value: string | number) => string;
+export const formatVoterId: (value: string | number, options?: FormatVoterIdOptions) => string;
+
+// @public
+export type FormatVoterIdOptions = {
+    obfuscate?: boolean;
+};
 
 // @public
 export const generateBoleto: (params?: GenerateBoletoParams) => string;
@@ -858,6 +866,12 @@ export type NfeKeyModel = "55" | "57" | "58" | "62" | "63" | "64" | "65" | "66" 
 
 // @public
 export type NumberToWordsGender = "masculine" | "feminine";
+
+// @public
+export const obfuscateEmail: (value: string) => string;
+
+// @public
+export const obfuscatePixKey: (value: string) => string;
 
 // @public
 export const parseBoleto: (value: string | number) => string;

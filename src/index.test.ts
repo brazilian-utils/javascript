@@ -33,6 +33,7 @@ import {
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
+	type FormatVoterIdOptions,
 	type GenerateBoletoParams,
 	type GenerateCnpjParams,
 	type GenerateLicensePlateFormat,
@@ -222,6 +223,8 @@ const PUBLIC = [
 	"isValidServicePhone",
 	"isValidVin",
 	"isValidVoterId",
+	"obfuscateEmail",
+	"obfuscatePixKey",
 	"parseBoleto",
 	"parseCaepf",
 	"parseCbo",
@@ -310,6 +313,7 @@ describe("Public API", () => {
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
+			FormatVoterIdOptions: FormatVoterIdOptions;
 			GenerateBoletoParams: GenerateBoletoParams;
 			GenerateCnpjParams: GenerateCnpjParams;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;
