@@ -76,6 +76,7 @@
 		"./get-nfe-key-info": "./src/get-nfe-key-info/get-nfe-key-info.ts",
 		"./get-pix-key-info": "./src/get-pix-key-info/get-pix-key-info.ts",
 		"./get-pix-payload-info": "./src/get-pix-payload-info/get-pix-payload-info.ts",
+		"./get-state-by-cep": "./src/get-state-by-cep/get-state-by-cep.ts",
 		"./get-state-by-ibge-code": "./src/get-state-by-ibge-code/get-state-by-ibge-code.ts",
 		"./get-state-code-by-name": "./src/get-state-code-by-name/get-state-code-by-name.ts",
 		"./get-state-name-by-code": "./src/get-state-name-by-code/get-state-name-by-code.ts",
