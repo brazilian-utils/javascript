@@ -31,6 +31,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidPixKey](https://brazilian-utils.com.br/utilities.md#isvalidpixkey): Check if a Pix key (chave Pix) is valid: a CPF, a CNPJ, an e-mail address, a Brazilian mobile phone number or a random key (EVP), per the DICT key formats.
 - [isValidPixPayload](https://brazilian-utils.com.br/utilities.md#isvalidpixpayload): Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, and a matching CRC-16.
 - [isValidNfeKey](https://brazilian-utils.com.br/utilities.md#isvalidnfekey): Check if a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) is valid.
+- [isValidNfseKey](https://brazilian-utils.com.br/utilities.md#isvalidnfsekey): Check if the access key (chave de acesso) of a national NFS-e, the Nota Fiscal de Serviço eletrônica of the Sistema Nacional NFS-e, is valid.
 - [isValidPhone](https://brazilian-utils.com.br/utilities.md#isvalidphone): Check if phone number (mobile or landline) is valid.
 - [isValidMobilePhone](https://brazilian-utils.com.br/utilities.md#isvalidmobilephone): Check if mobile phone number is valid.
 - [isValidLandlinePhone](https://brazilian-utils.com.br/utilities.md#isvalidlandlinephone): Check if landline phone number is valid.
@@ -94,6 +95,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [parseCep](https://brazilian-utils.com.br/utilities.md#parsecep): Remove CEP formatting, keep only digits, and cap the result to 8 digits.
 - [parseBoleto](https://brazilian-utils.com.br/utilities.md#parseboleto): Remove boleto formatting, keep only digits, and cap the result to 47 digits (48 for boleto de arrecadação).
 - [parseNfeKey](https://brazilian-utils.com.br/utilities.md#parsenfekey): Remove the formatting of a DF-e access key (chave de acesso), keep only digits, and cap the result to 44 digits.
+- [parseNfseKey](https://brazilian-utils.com.br/utilities.md#parsenfsekey): Remove everything but the digits from the access key of a national NFS-e, the `NFS` prefix of the XML `Id` attribute included, and cap the result to 50 digits.
 - [parsePhone](https://brazilian-utils.com.br/utilities.md#parsephone): Remove phone formatting, keep only digits, and cap the result to 11 digits.
 - [parseLicensePlate](https://brazilian-utils.com.br/utilities.md#parselicenseplate): Remove separators from a license plate, normalize it to uppercase, and cap it to 7 characters.
 - [parsePis](https://brazilian-utils.com.br/utilities.md#parsepis): Remove PIS formatting, keep only digits, and cap the result to 11 digits.
@@ -139,6 +141,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [getPixKeyInfo](https://brazilian-utils.com.br/utilities.md#getpixkeyinfo): Identifies a Pix key and normalizes it to the canonical form the DICT expects inside a BR Code: 11 digit CPF, 14 character CNPJ, lowercased e-mail, E.164 mobile phone (a landline is not a Pix key) or lowercase UUID EVP.
 - [getPixPayloadInfo](https://brazilian-utils.com.br/utilities.md#getpixpayloadinfo): Parses a Pix BR Code payload into its fields.
 - [getNfeKeyInfo](https://brazilian-utils.com.br/utilities.md#getnfekeyinfo): Parses a DF-e access key into its fields (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit).
+- [getNfseKeyInfo](https://brazilian-utils.com.br/utilities.md#getnfsekeyinfo): Parses the access key of a national NFS-e into its fields (municipalityCode, stateCode, generatorEnvironment, taxIdType, taxId, number, year, month, code, checkDigit).
 - [getAreaCodeInfo](https://brazilian-utils.com.br/utilities.md#getareacodeinfo): Get the state (and its region) a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração.
 - [getAreaCodesByState](https://brazilian-utils.com.br/utilities.md#getareacodesbystate): Get every DDD (area code) that serves a given Brazilian state, under the Anatel Plano Geral de Numeração.
 - [getFormatLicensePlate](https://brazilian-utils.com.br/utilities.md#getformatlicenseplate): Detect the normalized format of a license plate.
