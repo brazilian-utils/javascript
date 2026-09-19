@@ -14,20 +14,20 @@ import {
 
 describe("getCnpjInfo", () => {
 	describe("should return the parsed numeric CNPJ", () => {
-		test("for a headquarters order", () => {
+		test("for the headquarters branch", () => {
 			expect(getCnpjInfo("12345678000195")).toEqual({
 				root: "12345678",
-				order: "0001",
+				branch: "0001",
 				checkDigits: "95",
 				format: "numeric",
 				isInitialHeadquarters: true,
 			});
 		});
 
-		test("for a branch order", () => {
+		test("for another branch", () => {
 			expect(getCnpjInfo("12345678000276")).toEqual({
 				root: "12345678",
-				order: "0002",
+				branch: "0002",
 				checkDigits: "76",
 				format: "numeric",
 				isInitialHeadquarters: false,
@@ -37,7 +37,7 @@ describe("getCnpjInfo", () => {
 		test("for a root with leading zeros", () => {
 			expect(getCnpjInfo("00000001000136")).toEqual({
 				root: "00000001",
-				order: "0001",
+				branch: "0001",
 				checkDigits: "36",
 				format: "numeric",
 				isInitialHeadquarters: true,
@@ -47,7 +47,7 @@ describe("getCnpjInfo", () => {
 		test("for a masked value", () => {
 			expect(getCnpjInfo("12.345.678/0001-95")).toEqual({
 				root: "12345678",
-				order: "0001",
+				branch: "0001",
 				checkDigits: "95",
 				format: "numeric",
 				isInitialHeadquarters: true,
@@ -57,7 +57,7 @@ describe("getCnpjInfo", () => {
 		test("for a value with a whitespace mask and surrounding whitespace", () => {
 			expect(getCnpjInfo("  12 345 678 0002 76  ")).toEqual({
 				root: "12345678",
-				order: "0002",
+				branch: "0002",
 				checkDigits: "76",
 				format: "numeric",
 				isInitialHeadquarters: false,
@@ -67,7 +67,7 @@ describe("getCnpjInfo", () => {
 		test("under version 2, which reads both formats", () => {
 			expect(getCnpjInfo("12.345.678/0001-95", { version: 2 })).toEqual({
 				root: "12345678",
-				order: "0001",
+				branch: "0001",
 				checkDigits: "95",
 				format: "numeric",
 				isInitialHeadquarters: true,
@@ -78,7 +78,7 @@ describe("getCnpjInfo", () => {
 			// @ts-expect-error: intentionally invalid option
 			expect(getCnpjInfo("12345678000195", { version: 3 })).toEqual({
 				root: "12345678",
-				order: "0001",
+				branch: "0001",
 				checkDigits: "95",
 				format: "numeric",
 				isInitialHeadquarters: true,
@@ -90,7 +90,7 @@ describe("getCnpjInfo", () => {
 		test("for the example of the Receita Federal check digit manual", () => {
 			expect(getCnpjInfo("12.ABC.345/01DE-35", { version: 2 })).toEqual({
 				root: "12ABC345",
-				order: "01DE",
+				branch: "01DE",
 				checkDigits: "35",
 				format: "alphanumeric",
 				isInitialHeadquarters: false,
@@ -100,37 +100,37 @@ describe("getCnpjInfo", () => {
 		test("for a lowercase value, upper casing the fields", () => {
 			expect(getCnpjInfo("12abc34501de35", { version: 2 })).toEqual({
 				root: "12ABC345",
-				order: "01DE",
+				branch: "01DE",
 				checkDigits: "35",
 				format: "alphanumeric",
 				isInitialHeadquarters: false,
 			});
 		});
 
-		test("for an alphanumeric root with the headquarters order", () => {
+		test("for an alphanumeric root with the headquarters branch", () => {
 			expect(getCnpjInfo("AB.12C.D34/0001-84", { version: 2 })).toEqual({
 				root: "AB12CD34",
-				order: "0001",
+				branch: "0001",
 				checkDigits: "84",
 				format: "alphanumeric",
 				isInitialHeadquarters: true,
 			});
 		});
 
-		test("for an alphanumeric root and order (Receita Federal Q&A, question 23)", () => {
+		test("for an alphanumeric root and branch (Receita Federal Q&A, question 23)", () => {
 			expect(getCnpjInfo("AA345678/000A-29", { version: 2 })).toEqual({
 				root: "AA345678",
-				order: "000A",
+				branch: "000A",
 				checkDigits: "29",
 				format: "alphanumeric",
 				isInitialHeadquarters: false,
 			});
 		});
 
-		test("for a numeric root with an alphanumeric order (Receita Federal Q&A, question 23)", () => {
+		test("for a numeric root with an alphanumeric branch (Receita Federal Q&A, question 23)", () => {
 			expect(getCnpjInfo("12.345.678/000A-08", { version: 2 })).toEqual({
 				root: "12345678",
-				order: "000A",
+				branch: "000A",
 				checkDigits: "08",
 				format: "alphanumeric",
 				isInitialHeadquarters: false,
@@ -202,19 +202,19 @@ describe("getCnpjInfo", () => {
 					const written = masked ? formatCnpj(cnpj, { version: 2 }) : cnpj;
 					const parsed = getCnpjInfo(written.toLowerCase(), { version: 2 });
 
-					expect(`${parsed?.root}${parsed?.order}${parsed?.checkDigits}`).toBe(cnpj);
+					expect(`${parsed?.root}${parsed?.branch}${parsed?.checkDigits}`).toBe(cnpj);
 					expect(parsed?.format).toBe(/[A-Z]/.test(cnpj) ? "alphanumeric" : "numeric");
 				}),
 			);
 		});
 
-		test("should flag the order 0001 of a generated CNPJ and no other", () => {
+		test("should flag the branch 0001 of a generated CNPJ and no other", () => {
 			fc.assert(
 				fc.property(version, fc.integer({ min: 1, max: 9999 }), (currentVersion, branch) => {
 					const cnpj = generateCnpj({ version: currentVersion, branch });
 					const parsed = getCnpjInfo(cnpj, { version: currentVersion });
 
-					expect(parsed?.order).toBe(String(branch).padStart(4, "0"));
+					expect(parsed?.branch).toBe(String(branch).padStart(4, "0"));
 					expect(parsed?.isInitialHeadquarters).toBe(branch === 1);
 				}),
 			);
@@ -253,7 +253,7 @@ describe("getCnpjInfo types", () => {
 		expectTypeOf<CnpjFormat>().toEqualTypeOf<"numeric" | "alphanumeric">();
 		expectTypeOf<CnpjInfo>().toEqualTypeOf<{
 			root: string;
-			order: string;
+			branch: string;
 			checkDigits: string;
 			format: CnpjFormat;
 			isInitialHeadquarters: boolean;
