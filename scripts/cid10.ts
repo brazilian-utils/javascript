@@ -35,6 +35,12 @@ const CID10_ZIP_SHA256 = "84f23809275575f751255048064bbb244b0de33fd5987ab98df0f9
 const CID10_DOWNLOAD_RETRIES = 2;
 const CID10_RETRY_DELAY_MS = 1000;
 
+/**
+ * Statuses the DATASUS server answers with while it is busy or restarting, not while it is
+ * saying no. Anything else is taken as the answer it means to give.
+ */
+const CID10_RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+
 const CID10_CODE_REGEX = /^[A-Z]\d{2}\d?$/;
 
 const CATEGORY_LENGTH = 3;
@@ -62,22 +68,27 @@ const CID10_TABLES: Cid10Table[] = [
 const CID10_DESCRIPTION_COLUMN = "DESCRICAO";
 
 /**
- * Requests the archive, retrying the DATASUS host, which drops connections often enough that a
- * single attempt fails the weekly run. Written here rather than with `fetchWithRetry` so the
- * plain HTTP URL stays inside this script.
+ * Requests the archive, retrying the DATASUS host, which drops connections and answers 503
+ * often enough that a single attempt fails the weekly run. Written here rather than with
+ * `fetchWithRetry` so the plain HTTP URL stays inside this script.
  * @param {number} [attempt] - Which attempt this is, counting from zero.
- * @returns {Promise<Response>} The response of the first attempt that does not throw.
+ * @returns {Promise<Response>} The first response that is not a transient failure, or the last
+ * one once the retries are spent.
  */
 const fetchZip = async (attempt = 0): Promise<Response> => {
+	const lastAttempt = attempt >= CID10_DOWNLOAD_RETRIES;
+
 	try {
-		return await fetch(CID10_ZIP_URL);
+		const response = await fetch(CID10_ZIP_URL);
+
+		if (lastAttempt || !CID10_RETRYABLE_STATUSES.has(response.status)) return response;
 	} catch (error) {
-		if (attempt >= CID10_DOWNLOAD_RETRIES) throw error;
-
-		await delay(CID10_RETRY_DELAY_MS * (attempt + 1));
-
-		return fetchZip(attempt + 1);
+		if (lastAttempt) throw error;
 	}
+
+	await delay(CID10_RETRY_DELAY_MS * (attempt + 1));
+
+	return fetchZip(attempt + 1);
 };
 
 /**
