@@ -92,6 +92,7 @@ Alguns utilitários são a exceção: cada um embute um dataset oficial e pesa m
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 KB | 21,2 KB |
 | `isValidNbs` · `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 81,8 KB | 13,8 KB |
 | `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,9 KB | 6,9 KB |
+| `getClassTrib` | nomes e descrições do cClassTrib (IBS/CBS) | 50,8 KB | 9,6 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 38,3 - 38,6 KB | 9,5 - 9,7 KB |
 | `isValidServiceItem` · `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 27,2 KB | 8,9 KB |
 

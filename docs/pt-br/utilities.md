@@ -2236,6 +2236,81 @@ isValidCsosn('abc101'); // false (não é uma forma documentada)
 isValidCsosn(-101); // false (não é um inteiro seguro não negativo)
 ```
 
+### isValidCstIbsCbs
+
+Valida se um CST-IBS/CBS (Código de Situação Tributária do IBS e da CBS) existe na tabela oficial, o código que o campo `CST` do grupo `IBSCBS` leva nos documentos fiscais eletrônicos da reforma tributária (Lei Complementar nº 214/2025): NF-e, NFC-e, CT-e, NFS-e e os demais. A tabela é a aba CST da planilha "Tabela de Classificação Tributária do IBS e CBS" que o [Portal Nacional da NF-e publica em "Documentos" > "Diversos"](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9nus=) (a versão publicada em 23/06/2026), divulgada pelo [Informe Técnico 2025.002](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=) (v.1.60): `000`, `010`, `011`, `200`, `220`, `221`, `222`, `400`, `410`, `510`, `515`, `550`, `620`, `800`, `810`, `811`, `820` e `830`.
+
+É uma função própria, não um `tax` de `isValidCst`: IBS e CBS compartilham uma única tabela, seus códigos de 3 dígitos colidem com a forma origem + Tabela B do ICMS (`000`, `200`), e `isValidCst` sem `tax` aceita um código de qualquer tabela, então incluir esta mudaria o que esse padrão aceita.
+
+Uma string só é lida como código quando está escrita como dígitos puros, com espaços em branco opcionais no início e no fim (o campo é numérico com 3 dígitos, [Nota Técnica 2025.002-RTC](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=), campo UB13, e não tem máscara), e um número só quando é um inteiro seguro não negativo. Um valor com menos de 3 dígitos é completado com zeros à esquerda, como string ou como número, já que os códigos começam com zeros que um campo numérico descarta: `0`, `'0'` e `'000'` são todos o código `000`.
+
+```javascript
+import { isValidCstIbsCbs } from '@brazilian-utils/brazilian-utils';
+
+isValidCstIbsCbs('000'); // true
+isValidCstIbsCbs(410); // true
+isValidCstIbsCbs(10); // true (completado para '010')
+isValidCstIbsCbs('100'); // false
+isValidCstIbsCbs('cst200'); // false (não é uma forma documentada)
+isValidCstIbsCbs(-200); // false (não é um inteiro seguro não negativo)
+```
+
+### getCstIbsCbs
+
+Busca um CST-IBS/CBS e retorna seu código e a descrição que a tabela oficial de CST dá a ele. Valem a mesma tabela e as mesmas regras de entrada de `isValidCstIbsCbs`.
+
+```javascript
+import { getCstIbsCbs } from '@brazilian-utils/brazilian-utils';
+
+getCstIbsCbs('000'); // { code: '000', description: 'Tributação integral' }
+getCstIbsCbs(410); // { code: '410', description: 'Imunidade e não incidência' }
+getCstIbsCbs(10); // { code: '010', description: 'Tributação com alíquotas uniformes' }
+getCstIbsCbs('100'); // null
+getCstIbsCbs('cst200'); // null (não é uma forma documentada)
+```
+
+### isValidClassTrib
+
+Valida se um cClassTrib (Código de Classificação Tributária do IBS e da CBS) existe na tabela oficial, o código que o campo `cClassTrib` leva ao lado do CST-IBS/CBS. A tabela é a aba cClassTrib da mesma planilha que o [Portal Nacional da NF-e publica](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9nus=) (161 classificações vigentes na versão publicada em 23/06/2026). Só contam as classificações vigentes: o [Informe Técnico 2025.002](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=) exclui uma classificação encerrando sua vigência (`dFimVig`), como a v.1.60 fez com `220001`, `220002` e `220003`, e essas são rejeitadas.
+
+Toda classificação pertence a exatamente um CST-IBS/CBS, os 3 primeiros dígitos do seu código (o Informe Técnico diz: "os três primeiros dígitos são idênticos ao CST-IBS/CBS"), e um documento que leva um cClassTrib com outro CST é rejeitado (rejeição 1024, "Classificação Tributária do IBS e da CBS incompatível com o CST informado"). Informe o CST que o documento leva em `options.cst` (parte de `IsValidClassTribOptions`) para validar também o par; um `cst` informado que não seja o CST da classificação, seja ele qual for, torna o resultado `false`. Omita-o para validar só o cClassTrib.
+
+Uma string só é lida como código quando está escrita como dígitos puros, com espaços em branco opcionais no início e no fim (o campo é numérico com 6 dígitos, [Nota Técnica 2025.002-RTC](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=), campo UB14, e não tem máscara), e um número só quando é um inteiro seguro não negativo. Um valor com menos de 6 dígitos é completado com zeros à esquerda: `1`, `'1'` e `'000001'` são todos o código `000001`. `options.cst` é lido da mesma forma, completado para 3 dígitos.
+
+Só a lista de códigos entra no bundle com esta função, não as descrições que `getClassTrib` retorna.
+
+```javascript
+import { isValidClassTrib } from '@brazilian-utils/brazilian-utils';
+
+isValidClassTrib('200001'); // true
+isValidClassTrib(1); // true (completado para '000001')
+isValidClassTrib('200001', { cst: '200' }); // true
+isValidClassTrib('200001', { cst: '000' }); // false (a classificação pertence ao CST 200)
+isValidClassTrib('999999'); // false
+isValidClassTrib('220001'); // false (excluído pelo Informe Técnico 2025.002 v.1.60)
+isValidClassTrib('c200001'); // false (não é uma forma documentada)
+```
+
+### getClassTrib
+
+Busca um cClassTrib e retorna seu código, o CST-IBS/CBS a que pertence (`cst`, os 3 primeiros dígitos), o nome reduzido que a tabela oficial dá para apresentação (`name`, a coluna "Nome cClassTrib") e a situação a que se refere (`description`, a coluna "Descrição cClassTrib"). A redação legal que a planilha também traz em cada linha (o artigo da Lei Complementar nº 214/2025 e dos dois regulamentos) não é distribuída. Valem a mesma tabela e as mesmas regras de entrada de `isValidClassTrib`.
+
+```javascript
+import { getClassTrib } from '@brazilian-utils/brazilian-utils';
+
+getClassTrib('000002');
+// {
+//   code: '000002',
+//   cst: '000',
+//   name: 'Exploração de via',
+//   description: 'Exploração de via, observado o art. 11 da Lei Complementar nº 214, de 2025.',
+// }
+getClassTrib(2)?.code; // '000002'
+getClassTrib('999999'); // null
+getClassTrib('220001'); // null (excluído pelo Informe Técnico 2025.002 v.1.60)
+getClassTrib('c200001'); // null (não é uma forma documentada)
+```
+
 ## Texto
 
 ### capitalize

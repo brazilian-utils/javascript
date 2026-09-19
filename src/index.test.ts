@@ -12,9 +12,11 @@ import {
 	type CertidaoInfo,
 	type CertidaoType,
 	type Cfop,
+	type ClassTrib,
 	type Cnae,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
+	type CstIbsCbs,
 	type FormatBoletoOptions,
 	type FormatCaepfOptions,
 	type FormatCeiOptions,
@@ -62,6 +64,7 @@ import {
 	type IsValidBankAccountOptions,
 	type IsValidBankAccountParams,
 	type IsValidCertidaoOptions,
+	type IsValidClassTribOptions,
 	type IsValidCnpjOptions,
 	type IsValidCstOptions,
 	type IsValidIeParams,
@@ -163,7 +166,9 @@ const PUBLIC = [
 	"getCertidaoInfo",
 	"getCfop",
 	"getCities",
+	"getClassTrib",
 	"getCnae",
+	"getCstIbsCbs",
 	"getFormatLicensePlate",
 	"getHolidays",
 	"getIbanInfo",
@@ -196,6 +201,7 @@ const PUBLIC = [
 	"isValidCep",
 	"isValidCertidao",
 	"isValidCfop",
+	"isValidClassTrib",
 	"isValidCnae",
 	"isValidCnh",
 	"isValidCno",
@@ -205,6 +211,7 @@ const PUBLIC = [
 	"isValidCreditCard",
 	"isValidCsosn",
 	"isValidCst",
+	"isValidCstIbsCbs",
 	"isValidEmail",
 	"isValidIE",
 	"isValidIban",
@@ -296,9 +303,11 @@ describe("Public API", () => {
 			CertidaoInfo: CertidaoInfo;
 			CertidaoType: CertidaoType;
 			Cfop: Cfop;
+			ClassTrib: ClassTrib;
 			Cnae: Cnae;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
+			CstIbsCbs: CstIbsCbs;
 			FormatBoletoOptions: FormatBoletoOptions;
 			FormatCaepfOptions: FormatCaepfOptions;
 			FormatCeiOptions: FormatCeiOptions;
@@ -346,6 +355,7 @@ describe("Public API", () => {
 			IsValidBankAccountOptions: IsValidBankAccountOptions;
 			IsValidBankAccountParams: IsValidBankAccountParams;
 			IsValidCertidaoOptions: IsValidCertidaoOptions;
+			IsValidClassTribOptions: IsValidClassTribOptions;
 			IsValidCnpjOptions: IsValidCnpjOptions;
 			IsValidCstOptions: IsValidCstOptions;
 			IsValidIeParams: IsValidIeParams;
