@@ -33,6 +33,7 @@ import {
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
+	type FormatVoterIdOptions,
 	type GenerateBoletoParams,
 	type GenerateCnpjParams,
 	type GenerateLicensePlateFormat,
@@ -310,6 +311,7 @@ describe("Public API", () => {
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
+			FormatVoterIdOptions: FormatVoterIdOptions;
 			GenerateBoletoParams: GenerateBoletoParams;
 			GenerateCnpjParams: GenerateCnpjParams;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;

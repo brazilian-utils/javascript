@@ -53,7 +53,7 @@ export {
 	type FormatProcessoJuridicoOptions,
 	formatProcessoJuridico,
 } from "./format-processo-juridico/format-processo-juridico";
-export { formatVoterId } from "./format-voter-id/format-voter-id";
+export { type FormatVoterIdOptions, formatVoterId } from "./format-voter-id/format-voter-id";
 export { type GenerateBoletoParams, generateBoleto } from "./generate-boleto/generate-boleto";
 export { generateCep } from "./generate-cep/generate-cep";
 export { generateCnh } from "./generate-cnh/generate-cnh";
