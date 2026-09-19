@@ -871,6 +871,9 @@ export type NumberToWordsGender = "masculine" | "feminine";
 export const obfuscateEmail: (value: string) => string;
 
 // @public
+export const obfuscatePixKey: (value: string) => string;
+
+// @public
 export const parseBoleto: (value: string | number) => string;
 
 // @public
