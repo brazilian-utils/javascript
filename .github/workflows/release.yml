@@ -26,6 +26,13 @@
 #   4. Save. No NPM_TOKEN secret is needed: npm exchanges the workflow's OIDC token for a
 #      short-lived token automatically.
 #
+# One-time JSR setup (done by a package maintainer, not by CI):
+#   1. Sign in at jsr.io with GitHub and create the scope `brazilian-utils` and the package
+#      `brazilian-utils` in it.
+#   2. Package Settings -> GitHub Actions -> link `brazilian-utils/javascript`. JSR then trusts
+#      this repository's OIDC token; no JSR token is stored anywhere.
+#   3. Repository Settings -> Secrets and variables -> Actions -> Variables -> `JSR_PUBLISH` = `true`.
+#
 # One-time GitHub Environment setup (done by a package maintainer, not by CI):
 #   Repository Settings -> Environments -> New environment -> name it `npm`. No protection rules
 #   are needed: the environment only exists so the npm trusted publisher can be bound to it.
@@ -119,6 +126,38 @@ jobs:
 
       - name: Stage on npm
         run: npm stage publish --provenance --access public
+
+  publish-jsr:
+    name: Publish to JSR
+    needs: release-please
+    # JSR publishes through OIDC as well: no token is stored. The job stays off until a maintainer
+    # has created the @brazilian-utils/brazilian-utils package on jsr.io, linked this repository
+    # to it (package Settings -> GitHub Actions) and set the JSR_PUBLISH repository variable to
+    # `true`, so a release never fails on a registry that is not set up yet.
+    if: ${{ needs.release-please.outputs.release_created == 'true' && vars.JSR_PUBLISH == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout the release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.x
+
+      - name: Publish to JSR
+        run: deno publish
 
   sbom:
     name: Record the SBOM of the release
