@@ -74,7 +74,7 @@ describe("isValidNfseKey", () => {
 			expect(isValidNfseKey("35170458716523000119550010000000121000123458")).toBe(false);
 		});
 
-		test("for the example of the Guia do Emissor Público Nacional Web v1.2, item 9.1, an illustrative key whose check digit does not match", () => {
+		test("for the example of the Guia do Emissor Público Nacional Web v1.2, item 9.1, an illustrative key whose check digit does not match and whose issuer CNPJ 51235800000112 is not valid either", () => {
 			expect(isValidNfseKey("31062001251235800000112230000000173023019580208160")).toBe(false);
 		});
 
