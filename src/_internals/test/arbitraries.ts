@@ -171,11 +171,16 @@ export const anyBusinessDayAmount: fc.Arbitrary<unknown> = fc.oneof(
 
 const anyStateCode = fc.oneof(fc.constantFrom(...PROTOTYPE_KEYS, "SP", "xx"), fc.anything());
 const anyIncludeOptional = fc.oneof(fc.boolean(), fc.anything());
+const anyIncludeSaturday = fc.oneof(fc.boolean(), fc.anything());
 
 /** Business day options, or anything at all, prototype chain keys as the state code included. */
 export const anyBusinessDayOptions: fc.Arbitrary<unknown> = fc.oneof(
 	fc.anything(),
-	fc.record({ stateCode: anyStateCode, includeOptional: anyIncludeOptional }),
+	fc.record({
+		stateCode: anyStateCode,
+		includeOptional: anyIncludeOptional,
+		includeSaturday: anyIncludeSaturday,
+	}),
 );
 
 /** An amount with at most two decimals, the precision currency formatting round-trips. */

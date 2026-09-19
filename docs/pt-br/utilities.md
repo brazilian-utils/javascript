@@ -1364,7 +1364,7 @@ isHoliday(); // false
 
 ### isBusinessDay
 
-Verifica se uma data é um dia útil no Brasil. Retorna `false` para sábados, domingos e feriados brasileiros retornados por `getHolidays` para a data local de `value` (ano/mês/dia lidos localmente), a mesma convenção usada por `isHoliday`. `options.includeOptional` (parte de `BusinessDayOptions`, o tipo de opções que todos os utilitários de dias úteis compartilham) tem valor padrão `true`, então feriados do tipo opcional (`Holiday.type === "optional"`, ou seja, Carnaval e Corpus Christi) também contam como dias não úteis; passe `false` para considerar apenas os feriados estatutários. `options.stateCode` também considera os feriados daquele estado; uma string que não é um código de estado conhecido é ignorada, considerando apenas os feriados nacionais, enquanto um `stateCode` presente que não é uma string (um número, `null`, um objeto) é rejeitado e faz a chamada retornar `false` mesmo em um dia de semana comum — a mesma distinção que `isHoliday` faz, e o valor que `addBusinessDays`, `subBusinessDays` e `differenceInBusinessDays` rejeitam com `null`. Um `value` que não é um `Date` válido retorna `false`. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `false`.
+Verifica se uma data é um dia útil no Brasil. Retorna `false` para sábados, domingos e feriados brasileiros retornados por `getHolidays` para a data local de `value` (ano/mês/dia lidos localmente), a mesma convenção usada por `isHoliday`. `options.includeOptional` (parte de `BusinessDayOptions`, o tipo de opções que todos os utilitários de dias úteis compartilham) tem valor padrão `true`, então feriados do tipo opcional (`Holiday.type === "optional"`, ou seja, Carnaval e Corpus Christi) também contam como dias não úteis; passe `false` para considerar apenas os feriados estatutários. `options.includeSaturday` tem valor padrão `false`, a contagem de segunda a sexta usada por bancos e tribunais; passe `true` para a contagem trabalhista do prazo de pagamento do salário do [art. 459 § 1º da CLT](https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm) ("até o quinto dia útil do mês subsequente ao vencido"), que a fiscalização do trabalho lê pela [Instrução Normativa MTP nº 2/2021, art. 14, I](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf): "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal". Com a opção ligada, o domingo e os feriados continuam sendo dias não úteis, então um feriado que cai em um sábado continua não sendo dia útil. O que a opção **não** cobre é o trecho "inclusive o municipal" dessa regra: `getHolidays` tem apenas feriados nacionais e estaduais, então um feriado municipal é contado aqui como um dia útil comum, enquanto a fiscalização o excluiria. Retire os feriados municipais por conta própria quando a contagem precisar ser exata para um município. `options.stateCode` também considera os feriados daquele estado; uma string que não é um código de estado conhecido é ignorada, considerando apenas os feriados nacionais, enquanto um `stateCode` presente que não é uma string (um número, `null`, um objeto) é rejeitado e faz a chamada retornar `false` mesmo em um dia de semana comum — a mesma distinção que `isHoliday` faz, e o valor que `addBusinessDays`, `subBusinessDays` e `differenceInBusinessDays` rejeitam com `null`. Um `value` que não é um `Date` válido retorna `false`. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `false`.
 
 ```javascript
 import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
@@ -1372,6 +1372,9 @@ import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
 isBusinessDay(new Date(2024, 0, 2)); // true (terça-feira, não é feriado)
 isBusinessDay(new Date(2024, 0, 1)); // false (Ano novo)
 isBusinessDay(new Date(2024, 0, 6)); // false (sábado)
+isBusinessDay(new Date(2024, 0, 6), { includeSaturday: true }); // true (contagem trabalhista)
+isBusinessDay(new Date(2024, 8, 7), { includeSaturday: true }); // false (Independência, feriado em um sábado)
+isBusinessDay(new Date(2024, 0, 7), { includeSaturday: true }); // false (o domingo nunca é incluído)
 isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, feriado opcional, conta por padrão)
 isBusinessDay(new Date(2024, 1, 13), { includeOptional: false }); // true
 isBusinessDay(new Date(2024, 6, 9), { stateCode: 'SP' }); // false (Revolução Constitucionalista)
@@ -1381,7 +1384,7 @@ isBusinessDay(new Date('not a date')); // false
 
 ### addBusinessDays
 
-Adiciona um número de dias úteis brasileiros a uma data, pulando sábados, domingos e feriados brasileiros exatamente como `isBusinessDay` os define (as mesmas `BusinessDayOptions`: `options.includeOptional`, padrão `true`, e `options.stateCode` funcionam exatamente como lá). A assinatura é a do date-fns: `addBusinessDays(date, amount, options?)`. Retorna um novo `Date`; a `date` de entrada nunca é alterada, e seu horário é preservado no resultado. Um `amount` igual a `0` retorna um novo `Date` igual a `date`, sem alterações, mesmo quando `date` cai em um fim de semana ou feriado, isso reflete o comportamento verificado de [`addBusinessDays(date, 0)` do date-fns](https://date-fns.org/docs/addBusinessDays), que também não avança a entrada para o próximo dia útil. Um `amount` negativo anda para trás, um dia útil por vez, também como no date-fns. Retorna `null` em caso de entrada inválida: uma `date` que não é um `Date` válido, um `amount` que não é um número inteiro finito, ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado, exatamente como o `isBusinessDay` o ignora. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele, ou um percurso que sai dele, retorna `null`.
+Adiciona um número de dias úteis brasileiros a uma data, pulando sábados, domingos e feriados brasileiros exatamente como `isBusinessDay` os define (as mesmas `BusinessDayOptions`: `options.includeOptional`, padrão `true`, `options.includeSaturday`, padrão `false`, e `options.stateCode` funcionam exatamente como lá). A assinatura é a do date-fns: `addBusinessDays(date, amount, options?)`. Retorna um novo `Date`; a `date` de entrada nunca é alterada, e seu horário é preservado no resultado. Um `amount` igual a `0` retorna um novo `Date` igual a `date`, sem alterações, mesmo quando `date` cai em um fim de semana ou feriado, isso reflete o comportamento verificado de [`addBusinessDays(date, 0)` do date-fns](https://date-fns.org/docs/addBusinessDays), que também não avança a entrada para o próximo dia útil. Um `amount` negativo anda para trás, um dia útil por vez, também como no date-fns. Retorna `null` em caso de entrada inválida: uma `date` que não é um `Date` válido, um `amount` que não é um número inteiro finito, ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado, exatamente como o `isBusinessDay` o ignora. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele, ou um percurso que sai dele, retorna `null`.
 
 ```javascript
 import { addBusinessDays } from '@brazilian-utils/brazilian-utils';
@@ -1390,6 +1393,8 @@ addBusinessDays(new Date(2024, 0, 2, 12), 1); // Date, 2024-01-03 12:00 (o dia s
 addBusinessDays(new Date(2024, 11, 31, 12), 1); // Date, 2025-01-02 12:00 (2025-01-01 é Ano novo, pulado)
 addBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-04 12:00 (anda para trás)
 addBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (sem alteração, mesmo o sábado não sendo dia útil)
+addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: true }); // Date, 2024-01-06 12:00 (contagem trabalhista, o sábado conta)
+addBusinessDays(new Date(2024, 10, 1, 12), 1, { includeSaturday: true }); // Date, 2024-11-04 12:00 (2024-11-02 é Finados, feriado em um sábado)
 addBusinessDays(new Date(2024, 6, 8, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-10 12:00 (2024-07-09 é a Revolução Constitucionalista em SP, pulado)
 addBusinessDays(new Date('not a date'), 1); // null
 addBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
@@ -1397,7 +1402,7 @@ addBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
 
 ### subBusinessDays
 
-Subtrai um número de dias úteis brasileiros de uma data: `subBusinessDays(date, amount, options?)` é `addBusinessDays(date, -amount, options)`, e é exatamente assim que a função é implementada, então tudo o que vale acima vale aqui (o horário preservado, a entrada intacta, um `amount` igual a `0` devolvendo a data sem alterações, o intervalo de 1900 a 2099 e os casos de `null`), inclusive o `options.stateCode` e o `options.includeOptional`. Um `amount` negativo anda para frente.
+Subtrai um número de dias úteis brasileiros de uma data: `subBusinessDays(date, amount, options?)` é `addBusinessDays(date, -amount, options)`, e é exatamente assim que a função é implementada, então tudo o que vale acima vale aqui (o horário preservado, a entrada intacta, um `amount` igual a `0` devolvendo a data sem alterações, o intervalo de 1900 a 2099 e os casos de `null`), inclusive o `options.stateCode`, o `options.includeOptional` e o `options.includeSaturday`. Um `amount` negativo anda para frente.
 
 ```javascript
 import { subBusinessDays } from '@brazilian-utils/brazilian-utils';
@@ -1407,6 +1412,8 @@ subBusinessDays(new Date(2024, 0, 8, 12), 1); // Date, 2024-01-05 12:00 (anda pa
 subBusinessDays(new Date(2025, 0, 2, 12), 1); // Date, 2024-12-31 12:00 (2025-01-01 é Ano novo, pulado)
 subBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-08 12:00 (anda para frente)
 subBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (sem alteração, mesmo o sábado não sendo dia útil)
+subBusinessDays(new Date(2024, 0, 8, 12), 1, { includeSaturday: true }); // Date, 2024-01-06 12:00 (contagem trabalhista, o sábado conta)
+subBusinessDays(new Date(2024, 10, 4, 12), 1, { includeSaturday: true }); // Date, 2024-11-01 12:00 (2024-11-02 é Finados, feriado em um sábado)
 subBusinessDays(new Date(2024, 6, 10, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-08 12:00 (2024-07-09 é a Revolução Constitucionalista em SP, pulado)
 subBusinessDays(new Date('not a date'), 1); // null
 subBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
@@ -1414,7 +1421,7 @@ subBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
 
 ### differenceInBusinessDays
 
-Conta o número de dias úteis brasileiros entre duas datas, refletindo a semântica de [`differenceInBusinessDays` do date-fns](https://date-fns.org/docs/differenceInBusinessDays) (verificada em seu código-fonte), inclusive a ordem dos argumentos: `differenceInBusinessDays(laterDate, earlierDate, options?)`. O percurso começa em `earlierDate` e para logo antes de `laterDate`, então `earlierDate` é contado quando ele próprio é um dia útil, `laterDate` nunca é contado, e cada dia útil estritamente entre os dois é contado uma vez. Só a data de calendário de cada `Date` importa, o horário é ignorado. Os dias úteis são determinados exatamente como em `isBusinessDay` (as mesmas `BusinessDayOptions`), inclusive o `options.includeOptional` (padrão `true`) e o `options.stateCode`. O resultado é positivo quando `laterDate` é posterior a `earlierDate` e negativo quando é anterior; duas datas no mesmo dia de calendário retornam `0`. Retorna `null` em caso de entrada inválida: uma data que não é um `Date` válido, ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `null`.
+Conta o número de dias úteis brasileiros entre duas datas, refletindo a semântica de [`differenceInBusinessDays` do date-fns](https://date-fns.org/docs/differenceInBusinessDays) (verificada em seu código-fonte), inclusive a ordem dos argumentos: `differenceInBusinessDays(laterDate, earlierDate, options?)`. O percurso começa em `earlierDate` e para logo antes de `laterDate`, então `earlierDate` é contado quando ele próprio é um dia útil, `laterDate` nunca é contado, e cada dia útil estritamente entre os dois é contado uma vez. Só a data de calendário de cada `Date` importa, o horário é ignorado. Os dias úteis são determinados exatamente como em `isBusinessDay` (as mesmas `BusinessDayOptions`), inclusive o `options.includeOptional` (padrão `true`), o `options.includeSaturday` (padrão `false`) e o `options.stateCode`. O resultado é positivo quando `laterDate` é posterior a `earlierDate` e negativo quando é anterior; duas datas no mesmo dia de calendário retornam `0`. Retorna `null` em caso de entrada inválida: uma data que não é um `Date` válido, ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `null`.
 
 ```javascript
 import { differenceInBusinessDays } from '@brazilian-utils/brazilian-utils';
@@ -1423,13 +1430,16 @@ differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 1)); // 0 (01/0
 differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (02/01 contado, uma terça-feira; 03/01 não)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (a data posterior vem primeiro, então a contagem é negativa)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (mesmo dia)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (contagem bancária, de 2024-01-02 a 2024-01-05)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (2024-01-06, um sábado, também conta)
+differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (2024-11-02 é Finados, feriado em um sábado)
 differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: 'SP' }); // 1 (09/07/2024 é feriado estadual em SP)
 differenceInBusinessDays(new Date(), new Date('not a date')); // null
 ```
 
 ### getNextBusinessDay
 
-Retorna o primeiro dia útil brasileiro estritamente depois de uma data: `getNextBusinessDay(date, options?)` é `addBusinessDays(date, 1, options)`, que é exatamente como ela é implementada, então todos os detalhes de `addBusinessDays` (o horário preservado, a entrada intocada, o intervalo de 1900 a 2099 e os casos de `null`) valem aqui também, inclusive o `options.stateCode` e o `options.includeOptional` (as `BusinessDayOptions` compartilhadas). "Próximo" significa estritamente depois, o sentido que o [date-fns dá em `nextDay`](https://date-fns.org/docs/nextDay) (verificado em seu código-fonte): um `date` que já é dia útil nunca é retornado. Quando o que você precisa é "no dia ou depois", consulte `isBusinessDay(date)` antes e fique com `date` quando a resposta for `true`.
+Retorna o primeiro dia útil brasileiro estritamente depois de uma data: `getNextBusinessDay(date, options?)` é `addBusinessDays(date, 1, options)`, que é exatamente como ela é implementada, então todos os detalhes de `addBusinessDays` (o horário preservado, a entrada intocada, o intervalo de 1900 a 2099 e os casos de `null`) valem aqui também, inclusive o `options.stateCode`, o `options.includeOptional` e o `options.includeSaturday` (as `BusinessDayOptions` compartilhadas). "Próximo" significa estritamente depois, o sentido que o [date-fns dá em `nextDay`](https://date-fns.org/docs/nextDay) (verificado em seu código-fonte): um `date` que já é dia útil nunca é retornado. Quando o que você precisa é "no dia ou depois", consulte `isBusinessDay(date)` antes e fique com `date` quando a resposta for `true`.
 
 ```javascript
 import { getNextBusinessDay } from '@brazilian-utils/brazilian-utils';
@@ -1437,6 +1447,8 @@ import { getNextBusinessDay } from '@brazilian-utils/brazilian-utils';
 getNextBusinessDay(new Date(2024, 0, 2, 12)); // Date, 2024-01-03 12:00 (estritamente depois, embora 02/01/2024 seja dia útil)
 getNextBusinessDay(new Date(2024, 0, 5, 12)); // Date, 2024-01-08 12:00 (pula o fim de semana)
 getNextBusinessDay(new Date(2024, 0, 6, 12)); // Date, 2024-01-08 12:00 (a partir de um sábado)
+getNextBusinessDay(new Date(2024, 0, 5, 12), { includeSaturday: true }); // Date, 2024-01-06 12:00 (contagem trabalhista, o sábado conta)
+getNextBusinessDay(new Date(2024, 10, 1, 12), { includeSaturday: true }); // Date, 2024-11-04 12:00 (2024-11-02 é Finados, feriado em um sábado)
 getNextBusinessDay(new Date(2024, 11, 31, 12)); // Date, 2025-01-02 12:00 (01/01/2025 é Ano novo, pulado)
 getNextBusinessDay(new Date(2024, 6, 8, 12), { stateCode: 'SP' }); // Date, 2024-07-10 12:00 (09/07/2024 é Revolução Constitucionalista em SP, pulado)
 getNextBusinessDay(new Date('not a date')); // null
@@ -1445,9 +1457,9 @@ getNextBusinessDay(new Date(2099, 11, 31)); // null (o percurso sai dos anos sup
 
 ### getNthBusinessDay
 
-Retorna o n-ésimo dia útil brasileiro do mês em que uma data cai: `getNthBusinessDay(date, n, options?)`, a ordem de argumentos no estilo do date-fns de `addBusinessDays(date, amount, options?)`. `date` é qualquer data dentro do mês (o que importa são o ano e o mês locais; o dia do mês e o horário são ignorados). Um `n` positivo conta a partir do primeiro dia do mês (`1` é o primeiro dia útil) e um `n` negativo conta a partir do último (`-1` é o último dia útil, `-2` o anterior a ele), como `Array#at` lê um índice. Os dias úteis são determinados exatamente como em `isBusinessDay` (as mesmas `BusinessDayOptions`), inclusive o `options.includeOptional` (padrão `true`) e o `options.stateCode`. Retorna um novo `Date` no início daquele dia local (00:00), o formato que o [`lastDayOfMonth` do date-fns](https://date-fns.org/docs/lastDayOfMonth) retorna; o `date` de entrada nunca é modificado. Retorna `null` em caso de entrada inválida: um `date` que não é um `Date` válido, um `n` que não é um inteiro finito, é `0` ou vai além do número de dias úteis que o mês tem (a resposta nunca transborda para um mês vizinho), ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `null`.
+Retorna o n-ésimo dia útil brasileiro do mês em que uma data cai: `getNthBusinessDay(date, n, options?)`, a ordem de argumentos no estilo do date-fns de `addBusinessDays(date, amount, options?)`. `date` é qualquer data dentro do mês (o que importa são o ano e o mês locais; o dia do mês e o horário são ignorados). Um `n` positivo conta a partir do primeiro dia do mês (`1` é o primeiro dia útil) e um `n` negativo conta a partir do último (`-1` é o último dia útil, `-2` o anterior a ele), como `Array#at` lê um índice. Os dias úteis são determinados exatamente como em `isBusinessDay` (as mesmas `BusinessDayOptions`), inclusive o `options.includeOptional` (padrão `true`), o `options.includeSaturday` (padrão `false`) e o `options.stateCode`. Retorna um novo `Date` no início daquele dia local (00:00), o formato que o [`lastDayOfMonth` do date-fns](https://date-fns.org/docs/lastDayOfMonth) retorna; o `date` de entrada nunca é modificado. Retorna `null` em caso de entrada inválida: um `date` que não é um `Date` válido, um `n` que não é um inteiro finito, é `0` ou vai além do número de dias úteis que o mês tem (a resposta nunca transborda para um mês vizinho), ou um `stateCode` que não é uma string; um `options` que não é um objeto é ignorado. Só os anos de 1900 a 2099 são suportados, o intervalo que `getHolidays` calcula; uma data fora dele retorna `null`.
 
-Atenção ao prazo de pagamento de salário do art. 459, § 1º, da CLT ("até o quinto dia útil do mês subsequente ao vencido"): a inspeção do trabalho conta o sábado como dia útil nesse prazo e exclui os feriados municipais ([Instrução Normativa MTP nº 2/2021](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf), art. 14, I), enquanto `isBusinessDay`, e portanto esta função, nunca conta um sábado e não conhece feriados municipais. O quinto dia útil retornado aqui é o bancário, que pode cair depois do trabalhista.
+Atenção ao prazo de pagamento de salário do art. 459, § 1º, da CLT ("até o quinto dia útil do mês subsequente ao vencido"): a inspeção do trabalho conta o sábado como dia útil nesse prazo e exclui os feriados municipais ([Instrução Normativa MTP nº 2/2021](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf), art. 14, I). Por padrão esta função dá a contagem bancária, de segunda a sexta, que pode cair depois da trabalhista; passe `{ includeSaturday: true }` para a contagem trabalhista, como em `getNthBusinessDay(date, 5, { includeSaturday: true })`. Um feriado que cai em um sábado continua não sendo contado, exatamente como diz o artigo. A única parte do artigo que a opção não cobre é o "inclusive o municipal": `getHolidays` tem apenas feriados nacionais e estaduais, então um feriado municipal é contado aqui como um dia útil comum.
 
 A contagem percorre dias do calendário local, então vale em qualquer fuso horário. Dois detalhes importam onde os relógios pulam: quando o dia local resultante não tem 00:00 (o horário de verão brasileiro sempre começava à meia-noite, então 6 de outubro de 1997 começa à 01:00 em São Paulo), é retornado o instante mais próximo daquele dia, o mesmo `Date` que o [`startOfDay` do date-fns](https://date-fns.org/docs/startOfDay) dá ali; e um dia do calendário local que o fuso nunca teve, como 30 de dezembro de 2011 em `Pacific/Apia`, não é contado nem retornado.
 
@@ -1458,6 +1470,9 @@ getNthBusinessDay(new Date(2024, 0, 15), 1); // Date, 2024-01-02 00:00 (01/01/20
 getNthBusinessDay(new Date(2024, 0, 15), 5); // Date, 2024-01-08 00:00
 getNthBusinessDay(new Date(2024, 1, 1), 10); // Date, 2024-02-15 00:00 (Carnaval, 13/02/2024, pulado)
 getNthBusinessDay(new Date(2024, 1, 1), 10, { includeOptional: false }); // Date, 2024-02-14 00:00
+getNthBusinessDay(new Date(2024, 2, 1), 5); // Date, 2024-03-07 00:00 (contagem bancária)
+getNthBusinessDay(new Date(2024, 2, 1), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (contagem trabalhista, 2024-03-02 é um sábado)
+getNthBusinessDay(new Date(2024, 10, 1), 5, { includeSaturday: true }); // Date, 2024-11-07 00:00 (2024-11-02 é Finados, feriado em um sábado)
 getNthBusinessDay(new Date(2024, 6, 1), 7, { stateCode: 'SP' }); // Date, 2024-07-10 00:00 (09/07/2024 é Revolução Constitucionalista em SP, pulado)
 getNthBusinessDay(new Date(2024, 0, 15), -1); // Date, 2024-01-31 00:00 (o último dia útil)
 getNthBusinessDay(new Date(2024, 0, 15), -2); // Date, 2024-01-30 00:00
@@ -1468,7 +1483,7 @@ getNthBusinessDay(new Date('not a date'), 1); // null
 
 ### getLastBusinessDayOfMonth
 
-Retorna o último dia útil brasileiro do mês em que uma data cai: `getLastBusinessDayOfMonth(date, options?)` é `getNthBusinessDay(date, -1, options)`, que é exatamente como ela é implementada, então todos os detalhes acima (qualquer data dentro do mês, o resultado no início do dia local, a entrada intocada, o intervalo de 1900 a 2099 e os casos de `null`) valem aqui também, inclusive o `options.stateCode` e o `options.includeOptional`. O nome segue o [`lastDayOfMonth` do date-fns](https://date-fns.org/docs/lastDayOfMonth).
+Retorna o último dia útil brasileiro do mês em que uma data cai: `getLastBusinessDayOfMonth(date, options?)` é `getNthBusinessDay(date, -1, options)`, que é exatamente como ela é implementada, então todos os detalhes acima (qualquer data dentro do mês, o resultado no início do dia local, a entrada intocada, o intervalo de 1900 a 2099 e os casos de `null`) valem aqui também, inclusive o `options.stateCode`, o `options.includeOptional` e o `options.includeSaturday`. O nome segue o [`lastDayOfMonth` do date-fns](https://date-fns.org/docs/lastDayOfMonth).
 
 ```javascript
 import { getLastBusinessDayOfMonth } from '@brazilian-utils/brazilian-utils';
@@ -1478,6 +1493,8 @@ getLastBusinessDayOfMonth(new Date(2024, 2, 1)); // Date, 2024-03-28 00:00 (29/0
 getLastBusinessDayOfMonth(new Date(2024, 7, 31, 18, 30)); // Date, 2024-08-30 00:00 (31/08/2024 é um sábado)
 getLastBusinessDayOfMonth(new Date(2018, 4, 1)); // Date, 2018-05-30 00:00 (31/05/2018 é Corpus Christi, facultativo, conta por padrão)
 getLastBusinessDayOfMonth(new Date(2018, 4, 1), { includeOptional: false }); // Date, 2018-05-31 00:00
+getLastBusinessDayOfMonth(new Date(2024, 7, 1), { includeSaturday: true }); // Date, 2024-08-31 00:00 (contagem trabalhista, o sábado conta)
+getLastBusinessDayOfMonth(new Date(2024, 10, 1), { stateCode: 'DF', includeSaturday: true }); // Date, 2024-11-29 00:00 (o sábado 2024-11-30 é o Dia do Evangélico no DF)
 getLastBusinessDayOfMonth(new Date(2023, 10, 1), { stateCode: 'DF' }); // Date, 2023-11-29 00:00 (30/11/2023 é Dia do Evangélico no DF)
 getLastBusinessDayOfMonth(new Date('not a date')); // null
 ```

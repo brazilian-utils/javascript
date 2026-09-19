@@ -9,7 +9,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * Gets the n-th Brazilian business day (dia útil) of the month a date falls in.
  *
  * A business day is a day for which `isBusinessDay` returns `true` (not a Saturday, a Sunday,
- * or a Brazilian holiday), evaluated with the same `options`. The month is the one of `date`'s
+ * or a Brazilian holiday; `options.includeSaturday` keeps Saturday), evaluated with the same
+ * `options`. The month is the one of `date`'s
  * **local calendar day** (its local year and month, as read by `Date#getFullYear`/`getMonth`),
  * the convention every business day util shares; the day of the month and the time of day of
  * `date` are ignored.
@@ -34,9 +35,13 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * Mind the payroll deadline of CLT art. 459 § 1º ("até o quinto dia útil do mês subsequente ao
  * vencido"): labour inspection counts **Saturday as a business day** for that deadline
  * (Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado,
- * excluindo-se o domingo e o feriado, inclusive o municipal"), while `isBusinessDay`, and
- * therefore this function, never counts a Saturday and does not know municipal holidays. The
- * fifth business day returned here is the banking one, which can fall after the labour one.
+ * excluindo-se o domingo e o feriado, inclusive o municipal"). By default this function gives
+ * the banking count, Monday to Friday, which can fall after the labour one; pass
+ * `options.includeSaturday: true` for the labour count, as in
+ * `getNthBusinessDay(date, 5, { includeSaturday: true })`. A holiday that falls on a Saturday is
+ * still not counted, exactly as the article says. The one part of the article the option cannot
+ * cover is "inclusive o municipal": `getHolidays` carries national and state holidays only, so a
+ * municipal holiday is counted here as an ordinary business day.
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
  * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
@@ -48,9 +53,10 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  *
  * @param {Date} date - Any date inside the month to look at. Never mutated: a new `Date` is returned.
  * @param {number} n - Which business day to get: `1` is the first of the month, `-1` the last.
- * @param {BusinessDayOptions} [options] - Which holidays count as non-business days.
+ * @param {BusinessDayOptions} [options] - Which days count as business days.
  * @param {StateCode} [options.stateCode] - Brazilian state code whose state holidays are also considered.
  * @param {boolean} [options.includeOptional] - Whether optional holidays count as non-business days (default: `true`).
+ * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {Date | null} A new `Date` at 00:00 local time of the n-th business day of the month.
  * `null` on bad input: a `date` that is not a valid `Date` or is outside 1900-2099, an `n` that is
  * not a finite integer, is `0` or goes beyond the business days of the month, or a `stateCode`
@@ -62,6 +68,9 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * getNthBusinessDay(new Date(2024, 0, 15), 5); // Mon 2024-01-08, 00:00
  * getNthBusinessDay(new Date(2024, 1, 1), 10); // Thu 2024-02-15, 00:00 (Carnaval, Feb 13, skipped)
  * getNthBusinessDay(new Date(2024, 1, 1), 10, { includeOptional: false }); // Wed 2024-02-14, 00:00
+ * getNthBusinessDay(new Date(2024, 2, 1), 5); // Thu 2024-03-07, 00:00 (banking count)
+ * getNthBusinessDay(new Date(2024, 2, 1), 5, { includeSaturday: true }); // Wed 2024-03-06, 00:00 (labour count, Mar 2 is a Saturday)
+ * getNthBusinessDay(new Date(2024, 10, 1), 5, { includeSaturday: true }); // Thu 2024-11-07, 00:00 (Nov 2 is Finados, a holiday on a Saturday)
  * getNthBusinessDay(new Date(2024, 6, 1), 7, { stateCode: "SP" }); // Wed 2024-07-10, 00:00 (Jul 9 is a state holiday in SP)
  * getNthBusinessDay(new Date(2024, 0, 15), -1); // Wed 2024-01-31, 00:00 (the last business day)
  * getNthBusinessDay(new Date(2024, 0, 15), -2); // Tue 2024-01-30, 00:00
@@ -75,7 +84,7 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * CLT art. 459 § 1º, the "quinto dia útil" payroll deadline that motivates the util.
  * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf
  * Instrução Normativa MTP nº 2/2021, art. 14, I: Saturday counts towards that labour deadline,
- * which is why the caveat above exists.
+ * which is what `options.includeSaturday` switches on.
  * @see Based on: https://unpkg.com/date-fns@4.1.0/lastDayOfMonth.js
  * Reference for returning the start of the local day and for never mutating the input. The
  * underlying holiday determination's official sources are cited in `isBusinessDay`/`getHolidays`.

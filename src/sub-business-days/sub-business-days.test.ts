@@ -113,6 +113,32 @@ describe("subBusinessDays", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should stop on Saturday when it counts (Mon 2024-01-08 - 1 -> Sat 2024-01-06)", () => {
+			const result = subBusinessDays(new Date(2024, 0, 8, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+
+		it("should keep walking back to Friday without the option (Mon 2024-01-08 - 1 -> Fri 2024-01-05)", () => {
+			expect(subBusinessDays(new Date(2024, 0, 8, 12), 1, { includeSaturday: false })).toEqual(
+				new Date(2024, 0, 5, 12),
+			);
+		});
+
+		it("should still walk back over a holiday that falls on a Saturday (Mon 2024-11-04 - 1 -> Fri 2024-11-01, Finados)", () => {
+			const result = subBusinessDays(new Date(2024, 10, 4, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 10, 1, 12));
+		});
+
+		it("should walk forwards onto Saturday for a negative amount (Fri 2024-01-05 - -1 -> Sat 2024-01-06)", () => {
+			const result = subBusinessDays(new Date(2024, 0, 5, 12), -1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+	});
+
 	describe("invalid input", () => {
 		for (const [label, call] of NULL_CALLS) {
 			it(`should return null for ${label}`, () => {
@@ -124,6 +150,12 @@ describe("subBusinessDays", () => {
 	inTimeZone("Pacific/Apia", () => {
 		it("should walk back over 30 December 2011, the local day Samoa skipped to cross the date line", () => {
 			expect(subBusinessDays(new Date(2012, 0, 5, 12), 4)).toEqual(new Date(2011, 11, 29, 12));
+		});
+
+		it("should walk back over it with includeSaturday too, counting Sat 2011-12-31 and landing on Thu 2011-12-29", () => {
+			expect(subBusinessDays(new Date(2012, 0, 2, 12), 2, { includeSaturday: true })).toEqual(
+				new Date(2011, 11, 29, 12),
+			);
 		});
 	});
 
