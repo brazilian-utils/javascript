@@ -92,31 +92,7 @@
        add media="(prefers-color-scheme: dark)" to the add-on to follow the system instead -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/core.min.css" />
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/addons/core-dark.min.css" />
-  <style>
-    :root {
-      /* The green of the official palette (github.com/brazilian-utils/brand) */
-      --theme-color: #009739;
-      /* The cover page shares the page background instead of the default gradient */
-      --cover-bg: var(--color-bg);
-      --cover-bg-overlay: none;
-    }
-
-    /* The framework tabs of examples.md */
-    .example-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 1.5em 0 0; border-bottom: 1px solid var(--color-mono-3, #3d444d); }
-    .example-tabs button {
-      padding: 0.55em 1.1em; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
-      background: none; color: inherit; font: inherit; font-weight: 600; opacity: 0.7; cursor: pointer;
-    }
-    .example-tabs button:hover { opacity: 1; }
-    .example-tabs button[aria-selected="true"] { opacity: 1; color: var(--theme-color); border-bottom-color: var(--theme-color); }
-    .example-tabs button:focus { box-shadow: none; outline: none; }
-    .example-tabs button:focus-visible { box-shadow: none; outline: 2px solid var(--theme-color); outline-offset: -2px; }
-    .example[hidden] { display: none; }
-    .example iframe {
-      display: block; width: 100%; height: 72px; margin: 1em 0; box-sizing: border-box;
-      border: 1px solid var(--color-mono-3, #3d444d); border-radius: 6px;
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 
 <body class="loading sidebar-chevron-right">

@@ -1,11 +1,12 @@
 /*
- * The look of the live demos of examples.md, matched to the docs site: its green, its fonts and its
- * dark and light backgrounds. The demo pages take the site's color scheme (run.js), or the
- * system's when opened on their own.
+ * The look of the live demos of examples.md: the site's theme color, from its stylesheet, and its
+ * dark and light backgrounds. The docs page gives each demo the site's color scheme; opened on its
+ * own, a demo follows the system's.
  */
+@import url("../styles.css");
+
 :root {
   color-scheme: light dark;
-  --green: #009739;
   --red: light-dark(#cf222e, #ff6b6b);
   --text: light-dark(#333, #ddd);
   --muted: light-dark(#8c959f, #8b949e);
@@ -49,16 +50,16 @@ input::placeholder {
 
 input:focus {
   outline: none;
-  border-color: var(--green);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 30%, transparent);
+  border-color: var(--theme-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 30%, transparent);
 }
 
 output {
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 14px;
-  color: var(--green);
-  background: color-mix(in srgb, var(--green) 14%, transparent);
+  color: var(--theme-color);
+  background: color-mix(in srgb, var(--theme-color) 14%, transparent);
 }
 
 input[aria-invalid="true"] {

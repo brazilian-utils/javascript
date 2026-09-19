@@ -368,6 +368,12 @@ browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
   into the page's heading and the block feeds the page's metadata (a small wrapper there hands
   the search plugin the same view, so the block never shows up in search results). Scripts read
   the block through `scripts/front-matter.ts`.
+- The site's own CSS is `docs/styles.css`, linked by every shell: styles go there, not in a
+  `<style>` block of `index.html`.
+- `docs/examples.md` shows the files of `docs/snippets/` in one tab per framework. Each example is
+  complete on its own, so it can be copied as is, and its tab's live demo runs that same file
+  (`docs/snippets/live/run.js` compiles it in the browser). The demos take their look from
+  `docs/snippets/styles.css`.
 - `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
   `docs/llms-full.txt` keep their headings; run `npm run build:llms` after editing a page.
 - Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,
