@@ -177,6 +177,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [differenceInBusinessDays](https://brazilian-utils.com.br/utilities.md#differenceinbusinessdays): Count the number of Brazilian business days (dias úteis) between two dates, mirroring the semantics of date-fns' `differenceInBusinessDays` (verified against its source), argument order included: `differenceInBusinessDays(laterDate, earlierDate, options?)`.
 - [capitalize](https://brazilian-utils.com.br/utilities.md#capitalize): Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed.
 - [removeAccents](https://brazilian-utils.com.br/utilities.md#removeaccents): Remove diacritical marks (accents, tildes, cedillas) from a string, decomposing every accented character into its base letter plus combining marks (Unicode NFD) and dropping the combining marks.
+- [toStandardSchema](https://brazilian-utils.com.br/utilities.md#tostandardschema): Wraps an `isValid*` utility (or any function of the same shape) in a Standard Schema, the interface that form libraries, routers and API frameworks accept as a validator whichever library produced it: TanStack Form, tRPC, Hono, react-hook-form and the rest, next to schemas made with Zod, Valibot or ArkType.
 
 ## Optional
 

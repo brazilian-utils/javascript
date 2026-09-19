@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { phones } from "../_internals/test/phone-arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generatePhone } from "../generate-phone/generate-phone";
 import {
 	type IsValidPhoneOptions,
 	type PhoneType,
@@ -117,8 +117,8 @@ describe("isValidPhone", () => {
 
 		test("should accept every generated geographic number, masked or not", () => {
 			fc.assert(
-				fc.property(fc.constantFrom(...geographic), (type) => {
-					const phone = generatePhone(type);
+				fc.property(fc.gen(), fc.constantFrom(...geographic), (g, type) => {
+					const phone = g(phones, type);
 					const masked = `(${phone.slice(0, 2)}) ${phone.slice(2, -4)}-${phone.slice(-4)}`;
 
 					expect(isValidPhone(phone)).toBe(true);
@@ -131,8 +131,8 @@ describe("isValidPhone", () => {
 
 		test("should only accept a generated service number when asked to", () => {
 			fc.assert(
-				fc.property(fc.constant("service" as const), (type) => {
-					const phone = generatePhone(type);
+				fc.property(fc.gen(), fc.constant("service" as const), (g, type) => {
+					const phone = g(phones, type);
 
 					expect(isValidPhone(phone)).toBe(false);
 					expect(isValidPhone(phone, { accept: ["service"] })).toBe(true);
@@ -142,8 +142,8 @@ describe("isValidPhone", () => {
 
 		test("should accept nothing when no kind of number is accepted", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("mobile", "landline", "service"), (type) => {
-					expect(isValidPhone(generatePhone(type), { accept: [] })).toBe(false);
+				fc.property(fc.gen(), fc.constantFrom("mobile", "landline", "service"), (g, type) => {
+					expect(isValidPhone(g(phones, type), { accept: [] })).toBe(false);
 				}),
 			);
 		});

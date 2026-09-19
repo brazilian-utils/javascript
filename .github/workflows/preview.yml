@@ -1,0 +1,38 @@
+# Publishes every pull request's build to pkg.pr.new, so a change can be installed and tried before
+# it is merged: `npm i https://pkg.pr.new/@brazilian-utils/brazilian-utils@<pr-number>`. The
+# pkg.pr.new GitHub App (https://github.com/apps/pkg-pr-new), installed on this repository, posts
+# the install command as a comment; the job itself needs no token and no write permission, which is
+# why it can run for pull requests from forks.
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    name: Publish a preview to pkg.pr.new
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Run build
+        run: vp run build
+
+      - name: Publish the preview
+        run: npx --yes pkg-pr-new@0.0.88 publish --compact --comment=update

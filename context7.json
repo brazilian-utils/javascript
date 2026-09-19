@@ -20,7 +20,9 @@
 		"_coverpage.md",
 		"llms.txt",
 		"llms-full.txt",
-		"robots.txt"
+		"robots.txt",
+		"playground.md",
+		"playground.js"
 	],
 	"previousVersions": [
 		{
@@ -44,6 +46,7 @@
 		"Deprecated since 2.4.0: the *Options type aliases of the single-object-argument functions; use the *Params names (GetHolidaysParams, IsHolidayParams, GetMunicipalityParams, ...).",
 		"Every util is synchronous and pure except getAddressInfoByCep, getCepInfoByAddress and the deprecated getMunicipality, which are async; the first two query public CEP APIs over HTTPS.",
 		"The generate* utils draw random values with Math.random() (generatePixPayload is the exception, built from its parameters), so use them for tests and fixtures, never for security.",
-		"Supported runtimes: Node.js ^20.19.0 || >=22.12.0, Bun, Deno and evergreen browsers. Types ship with the package; import option and result types by name from the root."
+		"Supported runtimes: Node.js ^20.19.0 || >=22.12.0, Bun, Deno and evergreen browsers. Types ship with the package; import option and result types by name from the root.",
+		"toStandardSchema(isValidCpf, options) wraps any isValid* in a Standard Schema (the ~standard interface) for TanStack Form, tRPC, Hono and the like; inside Zod use z.string().refine(isValidCpf), inside Valibot v.check(isValidCpf)."
 	]
 }

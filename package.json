@@ -130,6 +130,7 @@
 		"build:data": "node ./scripts/data.ts",
 		"build:llms": "node ./scripts/llms.ts",
 		"build:site": "node ./scripts/site.ts",
+		"build:jsr": "node ./scripts/jsr.ts",
 		"prepublishOnly": "vp run build",
 		"check:dependencies": "node -e \"const d=require('./package.json').dependencies||{};if(Object.keys(d).length){console.error('runtime dependencies are not allowed:',Object.keys(d).join(', '));process.exit(1)}\""
 	},

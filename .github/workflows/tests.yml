@@ -97,6 +97,11 @@ jobs:
       - name: Run tests
         run: deno test --unstable-sloppy-imports --allow-net --allow-env src
 
+      # What JSR would reject at release time fails here instead: slow types in the public API,
+      # an export of jsr.json that does not resolve, a file outside the publish list.
+      - name: Dry-run the JSR publication
+        run: deno publish --dry-run
+
   test-browsers:
     name: Test on Browsers (${{ matrix.browser }})
     runs-on: ubuntu-latest

@@ -2216,6 +2216,54 @@ removeAccents('Açaí'); // 'Acai'
 removeAccents(''); // ''
 ```
 
+## Standard Schema
+
+### toStandardSchema
+
+Embrulha um utilitário `isValid*` (ou qualquer função com o mesmo formato) em um [Standard Schema](https://standardschema.dev), a interface que bibliotecas de formulário, roteadores e frameworks de API aceitam como validador, seja qual for a biblioteca que o produziu: TanStack Form, tRPC, Hono, react-hook-form e os demais, ao lado de schemas feitos com Zod, Valibot ou ArkType. Os tipos da especificação são copiados para dentro do pacote, então nada é instalado. O schema valida de forma síncrona e não transforma: um valor válido volta como foi passado, um inválido gera uma única issue. `config.options` (parte de `ToStandardSchemaOptions`) é repassado ao validador a cada chamada, e `config.message` é a mensagem dessa issue (padrão `'Invalid value'`). Como os validadores que embrulha, nunca lança exceção: um primeiro argumento que não é função gera um schema que rejeita tudo, e uma `message` que não é string cai no padrão. Validadores que recebem um único objeto (`isValidBankAccount`, `isValidRegistroProfissional`, `isValidIe`) funcionam do mesmo jeito, sendo o objeto o valor validado; embrulhe o `isValidIe`, que tem sobrecarga, em uma arrow function, `toStandardSchema((params) => isValidIe(params))`. Os tipos `StandardSchemaV1`, `StandardSchemaV1Result`, `StandardSchemaV1Issue` e os demais da especificação também são exportados.
+
+```javascript
+import { isValidCnpj, isValidCpf, toStandardSchema } from '@brazilian-utils/brazilian-utils';
+
+const cpf = toStandardSchema(isValidCpf, { message: 'CPF inválido' });
+
+cpf['~standard'].validate('123.456.789-09'); // { value: '123.456.789-09' }
+cpf['~standard'].validate('123'); // { issues: [{ message: 'CPF inválido' }] }
+
+const cnpj = toStandardSchema(isValidCnpj, { options: { version: 2 } }); // CNPJ alfanumérico
+```
+
+Tudo que recebe um Standard Schema aceita o resultado como está, um campo do TanStack Form por exemplo:
+
+```javascript
+<form.Field name="cpf" validators={{ onChange: cpf }} />
+```
+
+Dentro de um schema do Zod ou do Valibot os validadores entram direto, sem wrapper, e o resultado já é um Standard Schema, que é como se valida um formulário inteiro com o react-hook-form:
+
+```javascript
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
+import { isValidCep, isValidCpf } from '@brazilian-utils/brazilian-utils';
+import { useForm } from 'react-hook-form';
+import * as v from 'valibot';
+import { z } from 'zod';
+
+// Zod
+const zodSchema = z.object({
+  cpf: z.string().refine(isValidCpf, 'CPF inválido'),
+  cep: z.string().refine(isValidCep, 'CEP inválido'),
+});
+
+// Valibot
+const valibotSchema = v.object({
+  cpf: v.pipe(v.string(), v.check(isValidCpf, 'CPF inválido')),
+  cep: v.pipe(v.string(), v.check(isValidCep, 'CEP inválido')),
+});
+
+// react-hook-form, com qualquer um dos dois
+const form = useForm({ resolver: standardSchemaResolver(zodSchema) });
+```
+
 ## isValidIe
 
 Valida se a inscrição estadual de um estado é válida. A UF é case-insensitive. Regras notáveis por estado: GO aceita os prefixos `10`, `11` e `15`; PA aceita `15` e `75`-`79`; MS aceita `28` e `50`; SP tem o padrão de produtor rural `P0MMMSSSSD000`; TO usa códigos de tipo de 11 dígitos (`01`, `02`, `03`, `99`). O TO também aceita uma forma de 9 dígitos, aplicando a mesma regra módulo 11 sobre os oito primeiros dígitos; a página do SINTEGRA documenta apenas a de 11 dígitos, então essa forma é comportamento da 2.3.0 mantido por compatibilidade, e não regra publicada. Uma inscrição só de zeros é aceita em todo estado cuja fórmula publicada produz dígito verificador 0 para ela (AM, BA com 8 ou 9 dígitos, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE, SP e TO com 9 dígitos), diferente de `isValidCpf` e `isValidCnpj`, que rejeitam dígitos repetidos. O AM entra nessa lista apenas pelo segundo ramo da fórmula publicada: o primeiro ramo da página, `Se Soma < 11 Então Dígito = 11 - Soma`, dá 11 para a inscrição só de zeros, enquanto o ramo `resto <= 1 ⇒ 0`, o implementado aqui, dá 0. A inscrição e a UF vão juntas num único objeto, tipado como `IsValidIeParams`; a forma da 2.3.0, `isValidIe(stateCode, ie)`, continua funcionando e está deprecada.

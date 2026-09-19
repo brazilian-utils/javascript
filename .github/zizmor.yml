@@ -10,5 +10,6 @@ rules:
       - datasets.yml
       - live-tests.yml
       - mutation.yml
+      - preview.yml
       - release.yml
       - tests.yml

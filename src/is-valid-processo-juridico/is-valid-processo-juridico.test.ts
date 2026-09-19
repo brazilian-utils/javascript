@@ -6,8 +6,8 @@ import {
 } from "../_internals/constants/processo-juridico";
 import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
+import { processosJuridicos } from "../_internals/test/registry-arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generateProcessoJuridico } from "../generate-processo-juridico/generate-processo-juridico";
 import { isValidProcessoJuridico } from "./is-valid-processo-juridico";
 
 describe("isValidProcessoJuridico", () => {
@@ -161,8 +161,8 @@ describe("isValidProcessoJuridico", () => {
 	describe("properties", () => {
 		test("should accept a generated number whatever mask separates its fields", () => {
 			fc.assert(
-				fc.property(maskSeparators([".", "-", " "], 5, 3), (separators) => {
-					const value = generateProcessoJuridico() as string;
+				fc.property(fc.gen(), maskSeparators([".", "-", " "], 5, 3), (g, separators) => {
+					const value = g(processosJuridicos);
 					const head = `${value.slice(0, 7)}${separators[0]}${value.slice(7, 9)}`;
 					const body = `${separators[1]}${value.slice(9, 13)}${separators[2]}`;
 					const court = `${value.slice(13, 14)}${separators[3]}${value.slice(14, 16)}`;

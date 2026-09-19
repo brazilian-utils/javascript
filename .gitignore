@@ -19,3 +19,6 @@ reports/*
 !reports/api/
 reports/api/*
 !reports/api/brazilian-utils.api.md
+# Deno writes a lockfile next to jsr.json on every `deno test`/`deno publish`; the npm lockfile is
+# the one that pins this project's dependencies.
+deno.lock

@@ -2,8 +2,8 @@ import * as fc from "fast-check";
 
 import { ARRECADACAO_LINE_LENGTH } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
+import { boletos } from "../_internals/test/boleto-arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generateBoleto } from "../generate-boleto/generate-boleto";
 import { type FormatBoletoOptions, formatBoleto } from "./format-boleto";
 
 describe("formatBoleto", () => {
@@ -171,8 +171,8 @@ describe("formatBoleto", () => {
 
 		test("should print a generated bank slip in the mask of its kind", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("bancario", "arrecadacao"), (type) => {
-					const value = generateBoleto({ type });
+				fc.property(fc.gen(), fc.constantFrom("bancario", "arrecadacao"), (g, type) => {
+					const value = g(boletos, type);
 					const mask = type === "arrecadacao" ? arrecadacaoMask : bancarioMask;
 
 					expect(mask.test(formatBoleto(value))).toBe(true);

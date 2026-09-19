@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { phones } from "../_internals/test/phone-arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generatePhone } from "../generate-phone/generate-phone";
 import { isValidLandlinePhone } from "./is-valid-landline-phone";
 
 describe("isValidLandlinePhone", () => {
@@ -64,8 +64,8 @@ describe("isValidLandlinePhone", () => {
 	describe("properties", () => {
 		test("should accept every generated landline number, masked or not", () => {
 			fc.assert(
-				fc.property(fc.constant("landline" as const), (type) => {
-					const phone = generatePhone(type);
+				fc.property(fc.gen(), fc.constant("landline" as const), (g, type) => {
+					const phone = g(phones, type);
 					const masked = `(${phone.slice(0, 2)}) ${phone.slice(2, 6)}-${phone.slice(6)}`;
 
 					expect(isValidLandlinePhone(phone)).toBe(true);
@@ -77,8 +77,8 @@ describe("isValidLandlinePhone", () => {
 
 		test("should reject every generated mobile number", () => {
 			fc.assert(
-				fc.property(fc.constant("mobile" as const), (type) => {
-					expect(isValidLandlinePhone(generatePhone(type))).toBe(false);
+				fc.property(fc.gen(), fc.constant("mobile" as const), (g, type) => {
+					expect(isValidLandlinePhone(g(phones, type))).toBe(false);
 				}),
 			);
 		});

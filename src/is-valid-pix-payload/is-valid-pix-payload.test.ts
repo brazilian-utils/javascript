@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { cpfs } from "../_internals/test/document-arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";
 import { isValidPixPayload } from "./is-valid-pix-payload";
 
@@ -247,8 +247,8 @@ describe("isValidPixPayload", () => {
 
 		test("should accept every generated payload", () => {
 			fc.assert(
-				fc.property(names, cities, (merchantName, merchantCity) => {
-					const key = generateCpf();
+				fc.property(fc.gen(), names, cities, (g, merchantName, merchantCity) => {
+					const key = g(cpfs);
 					const payload = generatePixPayload({ key, merchantName, merchantCity });
 
 					expect(isValidPixPayload(payload ?? "")).toBe(true);
@@ -259,8 +259,8 @@ describe("isValidPixPayload", () => {
 
 		test("should reject a payload whose text was changed", () => {
 			fc.assert(
-				fc.property(names, fc.nat(), (merchantName, offset) => {
-					const key = generateCpf();
+				fc.property(fc.gen(), names, fc.nat(), (g, merchantName, offset) => {
+					const key = g(cpfs);
 					const payload = generatePixPayload({ key, merchantName, merchantCity: "BRASILIA" });
 					const text = payload ?? "";
 					const index = offset % (text.length - 4);
