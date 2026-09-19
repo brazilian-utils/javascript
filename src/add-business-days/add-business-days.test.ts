@@ -8,7 +8,7 @@ import {
 	PROTOTYPE_KEYS,
 } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithArguments } from "../_internals/test/properties";
-import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, inTimeZone, it, test } from "../_internals/test/runtime";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 import { addBusinessDays } from "./add-business-days";
 
@@ -213,6 +213,30 @@ describe("addBusinessDays", () => {
 		expect(result?.getMinutes()).toBe(30);
 		expect(result?.getSeconds()).toBe(15);
 		expect(result?.getMilliseconds()).toBe(500);
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should walk back over 30 December 2011, the local day Samoa skipped to cross the date line", () => {
+			expect(addBusinessDays(new Date(2012, 0, 5, 12), -4)).toEqual(new Date(2011, 11, 29, 12));
+		});
+	});
+
+	inTimeZone("America/Sao_Paulo", () => {
+		it("should keep the time-of-day across the summer time start of 4 November 2018", () => {
+			const result = addBusinessDays(new Date(2018, 10, 1, 9, 30, 15, 500), 5);
+
+			expect(result).toEqual(new Date(2018, 10, 9, 9, 30, 15, 500));
+			expect(result?.getHours()).toBe(9);
+		});
+	});
+
+	inTimeZone("Australia/Lord_Howe", () => {
+		it("should keep the minutes across the half hour transition of 6 October 2024", () => {
+			const result = addBusinessDays(new Date(2024, 9, 3, 2, 15), 2);
+
+			expect(result).toEqual(new Date(2024, 9, 7, 2, 15));
+			expect(result?.getMinutes()).toBe(15);
+		});
 	});
 
 	describe("properties", () => {

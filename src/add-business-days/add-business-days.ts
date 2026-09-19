@@ -1,3 +1,5 @@
+import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
+import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
@@ -21,7 +23,10 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * positively.
  *
  * The time-of-day (hours, minutes, seconds, milliseconds) of `date` is preserved in the
- * result, and `date` itself is never mutated.
+ * result, daylight saving transitions along the way included, and `date` itself is never
+ * mutated. The one case that cannot be honoured is a time of day the resulting local day does
+ * not have, such as `00:30` on a day whose clocks jump from `00:00` to `01:00`: the result is
+ * then the nearest instant of that day, `01:30`.
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and
  * only national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
@@ -74,24 +79,35 @@ export const addBusinessDays = (
 
 	if (!isSupportedHolidayYear(date.getFullYear())) return null;
 
-	const result = new Date(date);
+	if (amount === 0) return new Date(date);
 
-	const hours = result.getHours();
-	// Stryker disable next-line EqualityOperator: when amount is 0, remaining is 0 below and the loop never reads step, so > vs >= here is unobservable
+	// Stryker disable next-line EqualityOperator: amount is never 0 here, so > vs >= is unobservable
 	const step = amount > 0 ? 1 : -1;
 	let remaining = Math.abs(amount);
 
-	while (remaining > 0) {
-		result.setDate(result.getDate() + step);
+	const walk = eachLocalDay({
+		from: Date.UTC(date.getFullYear(), date.getMonth(), date.getDate() + step),
+		until:
+			step === 1 ? Date.UTC(HOLIDAYS_MAX_YEAR + 1, 0, 1) : Date.UTC(HOLIDAYS_MIN_YEAR - 1, 11, 31),
+	});
 
-		if (!isSupportedHolidayYear(result.getFullYear())) return null;
-
-		if (isBusinessDay(result, options)) {
+	for (const candidate of walk) {
+		if (isBusinessDay(candidate, options)) {
 			remaining -= 1;
+
+			if (remaining === 0) {
+				return new Date(
+					candidate.getFullYear(),
+					candidate.getMonth(),
+					candidate.getDate(),
+					date.getHours(),
+					date.getMinutes(),
+					date.getSeconds(),
+					date.getMilliseconds(),
+				);
+			}
 		}
 	}
 
-	result.setHours(hours);
-
-	return result;
+	return null;
 };
