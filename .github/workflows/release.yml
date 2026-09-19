@@ -7,7 +7,7 @@
 #      published yet. A maintainer reviews and merges that PR: that merge is confirmation #1.
 #   2. Merging the release PR makes release-please tag the release commit and create a GitHub
 #      Release, which triggers this same workflow again. This time `release_created` is `true`,
-#      so the `publish` job builds, validates and STAGES the package on npm
+#      so the `publish-npm` job builds, validates and STAGES the package on npm
 #      (`npm stage publish --provenance`). A staged version is not installable until a
 #      maintainer approves it with 2FA, on npmjs.com (package -> Staged versions) or with
 #      `npm stage approve <stage-id>`. That approval is confirmation #2 (npm's
@@ -31,7 +31,6 @@
 #      `brazilian-utils` in it.
 #   2. Package Settings -> GitHub Actions -> link `brazilian-utils/javascript`. JSR then trusts
 #      this repository's OIDC token; no JSR token is stored anywhere.
-#   3. Repository Settings -> Secrets and variables -> Actions -> Variables -> `JSR_PUBLISH` = `true`.
 #
 # One-time GitHub Environment setup (done by a package maintainer, not by CI):
 #   Repository Settings -> Environments -> New environment -> name it `npm`. No protection rules
@@ -71,7 +70,7 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  publish:
+  publish-npm:
     name: Publish to npm
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
@@ -130,11 +129,10 @@ jobs:
   publish-jsr:
     name: Publish to JSR
     needs: release-please
-    # JSR publishes through OIDC as well: no token is stored. The job stays off until a maintainer
-    # has created the @brazilian-utils/brazilian-utils package on jsr.io, linked this repository
-    # to it (package Settings -> GitHub Actions) and set the JSR_PUBLISH repository variable to
-    # `true`, so a release never fails on a registry that is not set up yet.
-    if: ${{ needs.release-please.outputs.release_created == 'true' && vars.JSR_PUBLISH == 'true' }}
+    # JSR publishes through OIDC as well: no token is stored. It needs the one-time JSR setup
+    # described at the top of this file; until that is done this job fails, and the npm job, which
+    # does not depend on it, still publishes.
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

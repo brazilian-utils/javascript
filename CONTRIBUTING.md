@@ -433,7 +433,7 @@ There are no local release commands to run.
    hidden.
 2. A maintainer reviews the release PR (version bump, changelog) and merges it. **Merging the
    release PR is the first confirmation.** Nothing is published yet at this point.
-3. Merging tags the release and publishes a GitHub Release, which triggers the `publish` job in
+3. Merging tags the release and publishes a GitHub Release, which triggers the `publish-npm` job in
    `.github/workflows/release.yml`. That job builds and validates the package and **stages** it on
    npm with `npm stage publish --provenance` (npm Trusted Publishing/OIDC; no npm token is stored
    in the repository). A staged version is not installable yet.
