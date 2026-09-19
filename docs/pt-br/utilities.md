@@ -2787,7 +2787,7 @@ Verifica se um GTIN (Global Trade Item Number, o número sob um código de barra
 
 - Cobre as quatro estruturas das GS1 General Specifications, as mesmas quatro que a NF-e aceita em `cEAN` e `cEANTrib`: GTIN-8, GTIN-12 (UPC), GTIN-13 (EAN) e GTIN-14 (DUN-14).
 - **Opções** (`IsValidGtinOptions`): `lengths` aceita só alguns dos quatro tamanhos. O padrão são os quatro.
-- O valor deve ser uma string de 8, 12, 13 ou 14 dígitos, fora os espaços em volta, cujo último dígito é o dígito verificador módulo 10 da GS1: pesos 3 e 1 alternados a partir da direita, e a soma subtraída do próximo múltiplo de dez. É o que as regras I03-10 e I12-10 da Nota Técnica 2021.003 da SEFAZ verificam (rejeições 611 e 612).
+- O valor deve ser uma string de 8, 12, 13 ou 14 dígitos, fora os espaços em volta, cujo último dígito é o dígito verificador módulo 10 da GS1: pesos 3 e 1 alternados a partir da direita, e a soma subtraída do múltiplo de dez igual ou imediatamente superior. É o que as regras I03-10 e I12-10 da Nota Técnica 2021.003 da SEFAZ verificam (rejeições 611 e 612).
 - Zeros à esquerda contam, então um número nunca é aceito, e um valor com máscara (`'7 890000 000017'`) é rejeitado em vez de ter seus dígitos extraídos.
 - O literal `'SEM GTIN'`, que a NF-e usa para produto sem GTIN, não é um GTIN e portanto não é válido aqui: teste por ele antes de chamar.
 - O prefixo não muda o veredito. Os Números de Circulação Restrita (prefixos 02, 04 e 20 a 29, os códigos que a loja imprime nas etiquetas da própria balança) e as faixas de ISSN, ISBN e cupons têm a mesma estrutura e o mesmo dígito verificador, e a "Tabela Prefixo GS1", contra a qual a SEFAZ valida o `cEAN`, lista essas faixas como válidas; use `getGtinInfo` para distingui-las.
@@ -2818,9 +2818,9 @@ Extrai os campos de um GTIN, como um `GtinInfo`.
 | --- | --- |
 | `type` | `'GTIN-8'`, `'GTIN-12'`, `'GTIN-13'` ou `'GTIN-14'` (`GtinType`), conforme o tamanho com que o valor foi escrito |
 | `length` | `8`, `12`, `13` ou `14` (`GtinLength`) |
-| `prefix` | O Prefixo GS1 de três dígitos (Prefixo GS1-8 em um GTIN-8). Identifica a Organização Membro da GS1 que licenciou o número, não o país de origem |
+| `prefix` | O Prefixo GS1 de três dígitos, ou um Prefixo GS1-8 quando os seis primeiros dígitos da forma de 14 dígitos são zeros, o que cobre todo GTIN-8 e o Prefixo GS1 `0000000`. Identifica a Organização Membro da GS1 que licenciou o número, não o país de origem |
 | `isBrazilian` | `true` quando o prefixo é um dos da GS1 Brasil, `789` ou `790`, o que a NT 2021.003 chama de "prefixo do Brasil" |
-| `isRestrictedCirculation` | `true` quando o prefixo está em uma faixa que a GS1 reserva para Números de Circulação Restrita (Prefixos GS1 02, 04 e 20 a 29; Prefixos GS1-8 000 a 099 e 200 a 299), ou seja, o número só é único dentro de uma empresa ou região |
+| `isRestrictedCirculation` | `true` quando o prefixo está em uma faixa que a GS1 reserva para Números de Circulação Restrita (Prefixos GS1 02, 04 e 20 a 29; Prefixos GS1-8 000 a 099 e 200 a 299, faixa em que também cai o Prefixo GS1 `0000000`, já que sua forma de 14 dígitos começa com seis zeros), ou seja, o número só é único dentro de uma empresa ou região |
 | `checkDigit` | O dígito verificador módulo 10, o último dígito |
 
 ```javascript
