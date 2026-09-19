@@ -22,8 +22,19 @@ const ISSUERS: { type: string; registration: string; taxIdType: string; taxId: s
 	{ type: "2", registration: "00000000000191", taxIdType: "cnpj", taxId: "00000000000191" },
 ];
 
-const buildNfseKey = (base: string): string =>
-	CHECK_DIGITS.map((digit) => `${base}${digit}`).find((key) => getNfseKeyInfo(key) !== null) ?? "";
+const expectedCheckDigit = (body: string): number => {
+	let sum = 0;
+	let weight = 2;
+
+	for (let index = body.length - 1; index >= 0; index -= 1) {
+		sum += Number(body.charAt(index)) * weight;
+		weight = weight === 9 ? 2 : weight + 1;
+	}
+
+	const remainder = sum % 11;
+
+	return remainder < 2 ? 0 : 11 - remainder;
+};
 
 describe("getNfseKeyInfo", () => {
 	describe("should return null", () => {
@@ -221,8 +232,9 @@ describe("getNfseKeyInfo", () => {
 					const [uf, municipality, ambGer, issuer, number, year, month, code] = fields;
 					const head = `${uf}${municipality}${ambGer}${issuer.type}${issuer.registration}`;
 					const issue = `${year}${String(month).padStart(2, "0")}`;
-					const key = buildNfseKey(`${head}${String(number).padStart(13, "0")}${issue}${code}`);
-					const parsed = getNfseKeyInfo(key);
+					const body = `${head}${String(number).padStart(13, "0")}${issue}${code}`;
+					const checkDigit = expectedCheckDigit(body);
+					const parsed = getNfseKeyInfo(`${body}${checkDigit}`);
 
 					expect(parsed?.municipalityCode).toBe(`${uf}${municipality}`);
 					expect(parsed?.stateCode).toBe(IBGE_UF_CODES[uf]);
@@ -233,7 +245,7 @@ describe("getNfseKeyInfo", () => {
 					expect(parsed?.year).toBe(2000 + Number(year));
 					expect(parsed?.month).toBe(month);
 					expect(parsed?.code).toBe(code);
-					expect(parsed?.checkDigit).toBe(Number(key.charAt(49)));
+					expect(parsed?.checkDigit).toBe(checkDigit);
 				}),
 			);
 		});
