@@ -76,9 +76,11 @@ const formatInternational = (national: string, masks: PhoneMasks): string => {
 const formatE164 = (national: string, obfuscate: boolean): string => {
 	if (!national) return "";
 
+	if (!obfuscate) return `${INTERNATIONAL_PREFIX}${national}`;
+
 	const pattern = resolveLinePattern(national, OBFUSCATED_E164_MASK);
 
-	return `${INTERNATIONAL_PREFIX}${obfuscate ? format({ value: national, pattern }) : national}`;
+	return `${INTERNATIONAL_PREFIX}${format({ value: national, pattern })}`;
 };
 
 const resolveNationalPattern = (digits: string, mask: NationalMask, masks: PhoneMasks): string =>
