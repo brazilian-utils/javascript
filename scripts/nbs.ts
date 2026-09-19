@@ -4,6 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { fetchSortedRecord } from "./fetch-sorted-record.ts";
+import { serializeRecord } from "./serialize-record.ts";
 
 const scriptsDir = import.meta.dirname;
 
@@ -26,12 +27,55 @@ const NBS_CODE_REGEX = /^\d\.\d{4}\.\d{2}\.\d{2}$/;
 const MINIMUM_CODES = 900;
 
 /**
+ * Splits a CSV into records. A line break inside a quoted field does not end a record, so a
+ * description written over two lines stays in one piece.
+ * @param {string} csv - The decoded CSV.
+ * @returns {string[]} One string per record, the line breaks between records removed.
+ */
+const splitRecords = (csv: string): string[] => {
+	const records: string[] = [];
+	let record = "";
+	let quoted = false;
+
+	for (const character of csv) {
+		if (character === '"') quoted = !quoted;
+
+		if (character === "\n" && !quoted) {
+			records.push(record);
+			record = "";
+		} else if (character !== "\r" || quoted) {
+			record += character;
+		}
+	}
+
+	return [...records, record];
+};
+
+/**
+ * Reads a field the way RFC 4180 writes it: a quoted field loses its outer quotes and every
+ * doubled quote inside it becomes one.
+ * @param {string} field - The raw field, quotes included.
+ * @returns {string} The text of the field, whitespace collapsed.
+ */
+const readField = (field: string): string => {
+	const trimmed = field.trim();
+
+	if (!trimmed.startsWith('"')) return trimmed.replaceAll(/\s+/g, " ");
+
+	if (trimmed.length < 2 || !trimmed.endsWith('"')) {
+		throw new Error(`NBS CSV field ${trimmed} opens a quote it never closes`);
+	}
+
+	return trimmed.slice(1, -1).replaceAll('""', '"').replaceAll(/\s+/g, " ");
+};
+
+/**
  * Reads the `NBS 2.0;DESCRIÇÃO` rows of the official NBS 2.0 CSV.
  * @param {string} csv - The decoded CSV.
  * @returns {Record<string, string>} One entry per complete code, keyed by its 9 digits.
  */
 const parseCsv = (csv: string): Record<string, string> => {
-	const [header, ...rows] = csv.split(/\r?\n/);
+	const [header, ...rows] = splitRecords(csv);
 
 	if (header?.trim() !== NBS_CSV_HEADER) {
 		throw new Error(`NBS CSV header is not "${NBS_CSV_HEADER}"`);
@@ -42,10 +86,7 @@ const parseCsv = (csv: string): Record<string, string> => {
 	for (const row of rows) {
 		const separator = row.indexOf(";");
 		const code = row.slice(0, Math.max(separator, 0)).trim();
-		const description = row
-			.slice(separator + 1)
-			.trim()
-			.replaceAll(/\s+/g, " ");
+		const description = readField(row.slice(separator + 1));
 
 		if (!NBS_CODE_REGEX.test(code) || description === "") continue;
 
@@ -88,7 +129,7 @@ const main = async (): Promise<void> => {
  * @see Official: https://www.gov.br/mdic/pt-br/images/REPOSITORIO/scs/decos/NBS/NBSa_2-0.csv
  * The NBS 2.0 table in CSV.
  */
-export const NBS_DESCRIPTIONS: Record<string, string> = ${JSON.stringify(sorted)};
+export const NBS_DESCRIPTIONS: Record<string, string> = ${serializeRecord(sorted)};
 
 /**
  * Shape an NBS code has to be written in: the 9 digits, optionally split into the printed
