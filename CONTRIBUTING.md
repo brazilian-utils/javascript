@@ -44,6 +44,7 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run build:data`                                                                                                      | Regenerates the datasets under `src/_internals/constants` from the IBGE/CONCLA sources (`scripts/data.ts`); run by the scheduled `Update datasets` workflow.                                                                                                             |
 | `npm run build:llms`                                                                                                      | Regenerates `docs/llms.txt` and `docs/llms-full.txt` from the docs (`scripts/llms.ts`); CI fails if they're out of date.                                                                                                                                                 |
 | `npm run build:site`                                                                                                      | Regenerates the per-page copies of `docs/index.html`, `docs/404.html` and `docs/sitemap.xml` from the sidebars (`scripts/site.ts`); CI fails if they're out of date.                                                                                                     |
+| `npm run build:jsr`                                                                                                       | Regenerates the `exports` of `jsr.json`, one per utility folder (`scripts/jsr.ts`); CI fails if they're out of date.                                                                                                                                                     |
 | `npm run check:dependencies`                                                                                              | Fails if `package.json` declares any runtime `dependencies` (this package ships zero by design).                                                                                                                                                                         |
 | `npm run check:tree-shaking`                                                                                              | Builds nothing; measures the single-import size of every export against `dist` (`scripts/tree-shaking.ts`). Run it after `npm run build` when you change a dataset, and update the bundle-size table in `docs/getting-started.md` / `docs/pt-br/getting-started.md`.     |
 | `npm run check:duplication`                                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                                                                                                                                                          |
@@ -89,6 +90,28 @@ from forks), the maintainers (review, merge, release approval) and the automatio
 builds, tests and publishes, Dependabot and the `Update datasets` workflow open update pull requests, and
 release-please turns merged commits into releases.
 
+## Datasets
+
+The tables under `src/_internals/constants/` fall in two groups, and only the first refreshes
+itself:
+
+- **Generated from an official source** by a script in `scripts/` (`npm run build:data`, run
+  every Monday by the `Update datasets` workflow): banks (Banco Central, `banks.ts`), CBO
+  (`cbo.ts`), CFOP (CONFAZ, `cfop.ts`), municipalities and states (IBGE, `cities.ts`,
+  `states.ts`), CNAE (`cnae.ts`), legal natures (CONCLA, `legal-natures.ts`) and NCM (Siscomex,
+  `ncm.ts`). When a run changes a file, the workflow opens a pull request whose description, written
+  by `scripts/data-summary.ts`, lists per table how many entries were added and removed, with a
+  sample of each. Never edit these files by hand.
+- **Maintained by hand**, because the source is a law or a regulation with no machine-readable
+  form: area codes and their states (Anatel, `area-codes.ts`), service phone prefixes (Anatel,
+  `service-phone.ts`), national and state holidays (`holidays.ts`), the órgãos and tribunals of the
+  processo number (Resolução CNJ nº 65/2008, `processo-juridico.ts`), IBAN lengths per country
+  (`iban.ts`), IBGE state codes (`ibge-uf-codes.ts`), legal nature categories, the CST and CSOSN
+  tables (`src/is-valid-cst`, `src/is-valid-csosn`), the professional councils
+  (`src/is-valid-registro-profissional`), the região fiscal digit of each state
+  (`src/generate-cpf`) and the voter ID state codes (`src/is-valid-voter-id`). A change to one of
+  these cites the act that changed it (`@see Official:`), like any rule.
+
 ## Adding a new utility
 
 Brazilian Utils follows a consistent folder convention for every utility. To add a new one (for
@@ -125,7 +148,11 @@ example `formatSomething`):
    never values computed by the code under test. Close the file with a `describe("properties")`
    block of [fast-check](https://fast-check.dev) properties that hold by specification (a
    generated value is valid, format/parse round-trip, masks never change the verdict, arbitrary
-   input never throws) and a `describe("<name> types")` block that pins the public signature with
+   input never throws); a property that needs a valid document draws it with `fc.gen()` from the
+   arbitraries in `src/_internals/test/` (`const cpf = g(cpfs)`, from `document-arbitraries.ts` and
+   its siblings), never by calling a `generate*` utility inside the property: those use
+   `Math.random()`, which the seed fast-check reports does not control, so a failure could be
+   neither replayed nor shrunk. Then a `describe("<name> types")` block that pins the public signature with
    `expectTypeOf` (parameters, options and return type; `vp check` fails on a wrong assertion). A
    hot path may also get a `describe("<name> benchmarks")` block of `bench` cases: they are todo
    entries in a normal run and execute with `npx vp test bench --run`. `describe`, `test`,
@@ -346,7 +373,11 @@ browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
 - Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,
   and `.github/workflows/context7.yml` asks for a refresh when the docs change on `main`.
 
-To preview the site, point a static file server that resolves `/page` to `page.html`, the way
+Every pull request that touches `docs/` gets a preview deployment on Vercel (`vercel.json`), with
+the URL posted as a comment. The file publishes `docs/` as it is (no install, no build), serves
+`/getting-started` from `getting-started.html` like GitHub Pages does (`cleanUrls`), marks every
+response `noindex` and turns deployments of `main` off: production stays on GitHub Pages. To
+preview the site locally, point a static file server that resolves `/page` to `page.html`, the way
 GitHub Pages does, at `docs/`.
 
 ## Commit messages
@@ -411,7 +442,16 @@ There are no local release commands to run.
    confirmation** (npm's proof-of-presence); the trusted publisher only allows staged publishing,
    so nothing can reach npm without it.
 
+5. The same release is published to [JSR](https://jsr.io/@brazilian-utils/brazilian-utils) by the
+   `publish-jsr` job, from the TypeScript sources and through OIDC as well. `jsr.json` names what
+   is published; release-please bumps its `version` with `package.json`, and the Deno job of the
+   Tests workflow dry-runs the publication on every pull request.
+
 No local `npm login`/`npm publish` or tagging is ever needed to cut a release.
+
+Every pull request also gets an installable preview build from [pkg.pr.new](https://pkg.pr.new)
+(the `Preview` workflow), with the install command posted as a comment, so a change can be tried
+in a real project before it is merged.
 
 ## Submitting a pull request
 
