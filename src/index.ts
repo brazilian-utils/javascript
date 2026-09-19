@@ -44,6 +44,7 @@ export {
 	formatLegalNature,
 } from "./format-legal-nature/format-legal-nature";
 export { formatLicensePlate } from "./format-license-plate/format-license-plate";
+export { formatNbs } from "./format-nbs/format-nbs";
 export { type FormatNcmOptions, formatNcm } from "./format-ncm/format-ncm";
 export { type FormatNfeKeyOptions, formatNfeKey } from "./format-nfe-key/format-nfe-key";
 export { formatPassport } from "./format-passport/format-passport";
@@ -143,6 +144,7 @@ export {
 	getMunicipality,
 } from "./get-municipality/get-municipality";
 export { getMunicipalityByCode } from "./get-municipality-by-code/get-municipality-by-code";
+export { type Nbs, getNbs } from "./get-nbs/get-nbs";
 export {
 	type NfeKeyInfo,
 	type NfeKeyModel,
@@ -158,6 +160,7 @@ export {
 	type PixPointOfInitiation,
 	getPixPayloadInfo,
 } from "./get-pix-payload-info/get-pix-payload-info";
+export { type ServiceItem, getServiceItem } from "./get-service-item/get-service-item";
 export { getStateByIbgeCode } from "./get-state-by-ibge-code/get-state-by-ibge-code";
 export { getStateCodeByName } from "./get-state-code-by-name/get-state-code-by-name";
 export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-code";
@@ -198,6 +201,7 @@ export {
 	type IsValidMobilePhoneOptions,
 	isValidMobilePhone,
 } from "./is-valid-mobile-phone/is-valid-mobile-phone";
+export { isValidNbs } from "./is-valid-nbs/is-valid-nbs";
 export { isValidNcm } from "./is-valid-ncm/is-valid-ncm";
 export { isValidNfeKey } from "./is-valid-nfe-key/is-valid-nfe-key";
 export { isValidPassport } from "./is-valid-passport/is-valid-passport";
@@ -217,6 +221,7 @@ export {
 	isValidRegistroProfissional,
 } from "./is-valid-registro-profissional/is-valid-registro-profissional";
 export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
+export { isValidServiceItem } from "./is-valid-service-item/is-valid-service-item";
 export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-phone";
 export { isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
