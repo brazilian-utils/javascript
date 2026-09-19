@@ -586,6 +586,8 @@ const renderBreakingCheck = ({
 		const current = headSubpaths.entries.get(subpath);
 		const kept = compareSubpath({ subpath, text, current, baseSubpaths, headSubpaths, removed });
 
+		if (current === undefined) continue;
+
 		addModule(`subpath "${subpath}"`, `_${identifier(subpath)}`, subpath, kept);
 	}
 
