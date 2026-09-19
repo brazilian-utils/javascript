@@ -56,6 +56,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidCfop](https://brazilian-utils.com.br/utilities.md#isvalidcfop): Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table.
 - [isValidCst](https://brazilian-utils.com.br/utilities.md#isvalidcst): Check if a CST (Código de Situação Tributária) code is valid for a given tax.
 - [isValidCsosn](https://brazilian-utils.com.br/utilities.md#isvalidcsosn): Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes of the consolidated Anexo III-A of Convênio SINIEF s/nº 1970, the table Ajuste SINIEF 03/2010 instituted: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
+- [isValidGtin](https://brazilian-utils.com.br/utilities.md#isvalidgtin): Check if a GTIN (Global Trade Item Number, the number under an EAN/UPC barcode) is valid.
 - [isValidIe](https://brazilian-utils.com.br/utilities.md#isvalidie): Check if inscrição estadual (state registration) is valid.
 - [isValidEmail](https://brazilian-utils.com.br/utilities.md#isvalidemail): Check if email is valid.
 - [isValidCreditCard](https://brazilian-utils.com.br/utilities.md#isvalidcreditcard): Check if a payment card number is valid using the Luhn algorithm (ISO/IEC 7812-1).
@@ -163,6 +164,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [getCbo](https://brazilian-utils.com.br/utilities.md#getcbo): Look a CBO (Classificação Brasileira de Ocupações) code up and get its official occupation title, in the `{ code, description }` record every lookup of this library returns.
 - [getCnae](https://brazilian-utils.com.br/utilities.md#getcnae): Look a CNAE (Classificação Nacional de Atividades Econômicas) subclass code up and get its code and official description.
 - [getCfop](https://brazilian-utils.com.br/utilities.md#getcfop): Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the consolidated Anexo II of Convênio SINIEF s/nº 1970 words it, in the text in force, last amended by Ajuste SINIEF 39/25.
+- [getGtinInfo](https://brazilian-utils.com.br/utilities.md#getgtininfo): Parse a GTIN into its fields, or get `null` when it is not valid (same rules as `isValidGtin`).
 
 ## Other utilities
 

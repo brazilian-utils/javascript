@@ -492,6 +492,9 @@ export const getCnae: (value: string | number) => Cnae | null;
 export const getFormatLicensePlate: (value: string) => LicensePlateFormat | null;
 
 // @public
+export const getGtinInfo: (value: string) => GtinInfo | null;
+
+// @public
 export function getHolidays(year: number): Holiday[];
 
 // @public
@@ -589,6 +592,22 @@ export const getStates: () => State[];
 
 // @public
 export const getTimezoneByState: (stateCode: string) => string | null;
+
+// @public
+export type GtinInfo = {
+    type: GtinType;
+    length: GtinLength;
+    prefix: string;
+    isBrazilian: boolean;
+    isRestrictedCirculation: boolean;
+    checkDigit: number;
+};
+
+// @public
+export type GtinLength = 8 | 12 | 13 | 14;
+
+// @public
+export type GtinType = "GTIN-8" | "GTIN-12" | "GTIN-13" | "GTIN-14";
 
 // @public
 export type Holiday = {
@@ -714,6 +733,14 @@ export type IsValidCstOptions = {
 
 // @public
 export const isValidEmail: (value: string) => boolean;
+
+// @public
+export const isValidGtin: (value: string, options?: IsValidGtinOptions) => boolean;
+
+// @public
+export type IsValidGtinOptions = {
+    lengths?: GtinLength[];
+};
 
 // @public
 export const isValidIban: (value: string) => boolean;
