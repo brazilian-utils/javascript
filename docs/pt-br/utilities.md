@@ -2113,6 +2113,63 @@ getCfop('5350'); // null (título de subgrupo, não é um código operável)
 getCfop('abc5102'); // null (não é uma forma documentada)
 ```
 
+### isValidCest
+
+Valida se um CEST (Código Especificador da Substituição Tributária) consta dos anexos do [Convênio ICMS 142/18](https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18), no texto consolidado vigente (alterado por último pelo Convênio ICMS 180/24). Só os itens em vigor contam: um item que os anexos marcam como revogado é rejeitado. A verificação é só do código: ela não diz se o código combina com um dado NCM, nem se um estado aplica o regime de substituição tributária a ele.
+
+Um CEST tem 7 dígitos: os dois primeiros são o segmento, do terceiro ao quinto o item do segmento e os dois últimos a especificação do item (cláusula sexta, IV). Uma string só é lida como código quando está escrita em uma das formas documentadas (os 7 dígitos, ou a forma `NN.NNN.NN` que os anexos imprimem, com um único separador entre os grupos e espaços em branco opcionais no início e no fim), e um número só quando é um inteiro seguro não negativo. O zero à esquerda dos segmentos 01 a 09 faz parte do código, então um valor escrito apenas com dígitos é completado com zeros à esquerda até 7, seja ele string ou número: `100100`, `'100100'` e `'0100100'` são o mesmo código. Um valor mascarado já carrega os seus separadores e é lido como foi escrito.
+
+```javascript
+import { isValidCest } from '@brazilian-utils/brazilian-utils';
+
+isValidCest('01.001.00'); // true
+isValidCest('0100100'); // true
+isValidCest(100100); // true (completado para 7 dígitos, ou seja, '0100100')
+isValidCest('03.001.00'); // false (um item revogado)
+isValidCest('0000000'); // false
+isValidCest('abc0100100'); // false (não é uma forma documentada)
+isValidCest(-100100); // false (não é um inteiro seguro não negativo)
+```
+
+### formatCest
+
+Formata um CEST (Código Especificador da Substituição Tributária) na forma `NN.NNN.NN` que os anexos do Convênio ICMS 142/18 imprimem. `options.pad` (parte de `FormatCestOptions`) funciona exatamente como em `formatNcm`: com o padrão `false` a máscara é aplicada progressivamente, até onde o valor vai, que é o que um campo sendo digitado precisa; com `true` o valor é primeiro completado com zeros à esquerda até os 7 dígitos de um código completo, então ele sempre volta com a máscara inteira. Um número é tratado exatamente como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Como todo formatador deste pacote, o valor é lido pelos seus dígitos e a máscara é aplicada até onde eles vão. Use `isValidCest` para verificar um código.
+
+```javascript
+import { formatCest } from '@brazilian-utils/brazilian-utils';
+
+formatCest('0100100'); // 01.001.00
+formatCest(2899900); // 28.999.00
+formatCest('01001'); // 01.001 (máscara aplicada até onde o valor vai)
+formatCest(100100, { pad: true }); // 01.001.00 (completado até 7 dígitos antes)
+formatCest('abc0100100'); // 01.001.00 (só os dígitos são lidos)
+```
+
+### parseCest
+
+Remove a formatação do CEST (Código Especificador da Substituição Tributária), mantém apenas os dígitos e limita o resultado aos 7 dígitos de um código completo. Nada é preenchido com zeros à esquerda aqui, então o zero à esquerda dos segmentos 01 a 09 precisa estar escrito; use `isValidCest` ou `getCest`, que preenchem um código numérico sem máscara, para verificar um código nos anexos.
+
+```javascript
+import { parseCest } from '@brazilian-utils/brazilian-utils';
+
+parseCest('01.001.00'); // '0100100'
+parseCest('28.999'); // '28999' (um código parcial é mantido como foi escrito)
+```
+
+### getCest
+
+Consulta um CEST (Código Especificador da Substituição Tributária) e retorna o código, a descrição do bem ou mercadoria e o nome do seu segmento, como os Anexos I a XXVI do [Convênio ICMS 142/18](https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18) os redigem. Lê o valor do mesmo jeito que `isValidCest` e retorna `null` para um código desconhecido, revogado ou malformado. Os códigos NCM/SH que os anexos associam a cada CEST não fazem parte do resultado.
+
+```javascript
+import { getCest } from '@brazilian-utils/brazilian-utils';
+
+getCest('05.001.00'); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest(500100); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest('03.001.00'); // null (um item revogado)
+getCest('0000000'); // null
+getCest('abc0500100'); // null (não é uma forma documentada)
+```
+
 ### isValidCst
 
 Valida um código de CST (Código de Situação Tributária) para um tributo. Informe o tributo em `options.tax`:

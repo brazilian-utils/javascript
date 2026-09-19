@@ -22,6 +22,7 @@ const run = (command: string, args: string[]): Promise<number | null> =>
 const generators = [
 	"banks.ts",
 	"cbo.ts",
+	"cest.ts",
 	"cfop.ts",
 	"cities.ts",
 	"cnae.ts",
@@ -33,6 +34,7 @@ const generators = [
 const generatedFiles = [
 	"./src/_internals/constants/banks.ts",
 	"./src/_internals/constants/cbo.ts",
+	"./src/_internals/constants/cest.ts",
 	"./src/_internals/constants/cfop.ts",
 	"./src/_internals/constants/cities.ts",
 	"./src/_internals/constants/cnae.ts",

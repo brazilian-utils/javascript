@@ -89,6 +89,7 @@ Alguns utilitários são a exceção: cada um embute um dataset oficial e pesa m
 | `getCities` | nomes dos 5571 municípios do IBGE | 154,2 KB | 49,8 KB |
 | `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 114,2 KB | 24,6 KB |
 | `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 119,1 KB | 30,6 KB |
+| `isValidCest` · `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 117,8 KB | 26,8 - 26,9 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 KB | 21,2 KB |
 | `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,9 KB | 6,9 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 38,3 - 38,6 KB | 9,5 - 9,7 KB |
