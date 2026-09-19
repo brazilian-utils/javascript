@@ -3086,7 +3086,8 @@ isValidClassTrib('c200001'); // false (not a documented form)
 
 Look a cClassTrib up and get its official classification. The result is a `ClassTrib` record: `{ code, cst, name, description }`.
 
-- Same table and input rules as `isValidClassTrib`. Returns `null` when the code is unknown or the value is not in a documented form.
+- Same table and the same rules for reading the code as `isValidClassTrib`. Returns `null` when the code is unknown or the value is not in a documented form.
+- The `cst` option exists only on `isValidClassTrib`, since the entry returned here already carries its CST as `cst`.
 - `cst` is the CST-IBS/CBS the classification belongs to, the first 3 digits of its code; `name` is the short name the official table gives for display (the column "Nome cClassTrib") and `description` the situation it refers to (the column "Descrição cClassTrib").
 - The legal wording the workbook also prints for each row (the article of Lei Complementar nº 214/2025 and of both regulations) is not shipped.
 

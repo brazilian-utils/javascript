@@ -3086,7 +3086,8 @@ isValidClassTrib('c200001'); // false (não é uma forma documentada)
 
 Busca um cClassTrib e retorna a sua classificação oficial. O resultado é um registro `ClassTrib`: `{ code, cst, name, description }`.
 
-- Valem a mesma tabela e as mesmas regras de entrada de `isValidClassTrib`. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+- Valem a mesma tabela e as mesmas regras de leitura do código de `isValidClassTrib`. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+- A opção `cst` existe só em `isValidClassTrib`, já que o registro retornado aqui já traz o seu CST em `cst`.
 - `cst` é o CST-IBS/CBS a que a classificação pertence, os 3 primeiros dígitos do seu código; `name` é o nome reduzido que a tabela oficial dá para apresentação (a coluna "Nome cClassTrib") e `description` a situação a que se refere (a coluna "Descrição cClassTrib").
 - A redação legal que a planilha também traz em cada linha (o artigo da Lei Complementar nº 214/2025 e dos dois regulamentos) não é distribuída.
 
