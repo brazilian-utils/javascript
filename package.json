@@ -87,6 +87,7 @@
 				"default": "./dist/brazilian-utils.umd.cjs"
 			}
 		},
+		"./cli": null,
 		"./*": {
 			"import": {
 				"types": "./dist/*.d.ts",
