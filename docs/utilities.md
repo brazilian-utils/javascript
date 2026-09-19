@@ -2659,54 +2659,6 @@ removeAccents('Açaí'); // 'Acai'
 removeAccents(''); // ''
 ```
 
-## Standard Schema
-
-### toStandardSchema
-
-Wraps an `isValid*` utility (or any function of the same shape) in a [Standard Schema](https://standardschema.dev), the interface that form libraries, routers and API frameworks accept as a validator whichever library produced it: TanStack Form, tRPC, Hono, react-hook-form and the rest, next to schemas made with Zod, Valibot or ArkType. The types of the specification are copied into the package, so nothing is installed. The schema validates synchronously and does not transform: a valid value comes back as it was given, an invalid one yields a single issue. `config.options` (part of `ToStandardSchemaOptions`) is handed to the validator on every call, and `config.message` is the message of that issue (default `'Invalid value'`). Like the validators it wraps it never throws: a first argument that is not a function gives a schema that rejects everything, and a `message` that is not a string falls back to the default. Validators that take a single object (`isValidBankAccount`, `isValidRegistroProfissional`, `isValidIe`) work the same way, the object being the value under validation; wrap the overloaded `isValidIe` in an arrow function, `toStandardSchema((params) => isValidIe(params))`. The types `StandardSchemaV1`, `StandardSchemaV1Result`, `StandardSchemaV1Issue` and the others of the specification are exported too.
-
-```javascript
-import { isValidCnpj, isValidCpf, toStandardSchema } from '@brazilian-utils/brazilian-utils';
-
-const cpf = toStandardSchema(isValidCpf, { message: 'CPF inválido' });
-
-cpf['~standard'].validate('123.456.789-09'); // { value: '123.456.789-09' }
-cpf['~standard'].validate('123'); // { issues: [{ message: 'CPF inválido' }] }
-
-const cnpj = toStandardSchema(isValidCnpj, { options: { version: 2 } }); // alphanumeric CNPJ
-```
-
-Anything that takes a Standard Schema takes it as is, a TanStack Form field for example:
-
-```javascript
-<form.Field name="cpf" validators={{ onChange: cpf }} />
-```
-
-Inside a Zod or Valibot schema the validators plug in directly, no wrapper needed, and the result is itself a Standard Schema, which is how a whole form is validated with react-hook-form:
-
-```javascript
-import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { isValidCep, isValidCpf } from '@brazilian-utils/brazilian-utils';
-import { useForm } from 'react-hook-form';
-import * as v from 'valibot';
-import { z } from 'zod';
-
-// Zod
-const zodSchema = z.object({
-  cpf: z.string().refine(isValidCpf, 'CPF inválido'),
-  cep: z.string().refine(isValidCep, 'CEP inválido'),
-});
-
-// Valibot
-const valibotSchema = v.object({
-  cpf: v.pipe(v.string(), v.check(isValidCpf, 'CPF inválido')),
-  cep: v.pipe(v.string(), v.check(isValidCep, 'CEP inválido')),
-});
-
-// react-hook-form, with either one
-const form = useForm({ resolver: standardSchemaResolver(zodSchema) });
-```
-
 ## Inscrição estadual (IE)
 
 ### isValidIe
@@ -2818,3 +2770,52 @@ isValidVin('1HGCM82633A00435'); // false (16 characters)
 ```
 
 Source: [ISO 3779:2009](https://www.iso.org/standard/52200.html), [49 CFR 565.15](https://www.ecfr.gov/current/title-49/section-565.15) and [Resolução CONTRAN nº 968/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9682022.pdf).
+
+## Standard Schema
+
+### toStandardSchema
+
+Wrap an `isValid*` utility in a [Standard Schema](https://standardschema.dev), the validator format that form libraries, routers and API frameworks accept: TanStack Form, react-hook-form, tRPC, Hono and more.
+
+- `config.options` is handed to the validator on every call, and `config.message` is the message of the issue (default `'Invalid value'`). Both are part of `ToStandardSchemaOptions`.
+- It validates synchronously and does not transform: a valid value comes back as it was given, an invalid one yields a single issue.
+- Validators that take an object (`isValidBankAccount`, `isValidRegistroProfissional`, `isValidIe`) work the same way. Wrap the overloaded `isValidIe` in an arrow function: `toStandardSchema((params) => isValidIe(params))`.
+- The types of the specification (`StandardSchemaV1`, `StandardSchemaV1Result`, `StandardSchemaV1Issue` and the rest) are exported too, so nothing else is installed.
+
+```javascript
+import { isValidCnpj, isValidCpf, toStandardSchema } from '@brazilian-utils/brazilian-utils';
+
+const cpf = toStandardSchema(isValidCpf, { message: 'CPF inválido' });
+
+cpf['~standard'].validate('123.456.789-09'); // { value: '123.456.789-09' }
+cpf['~standard'].validate('123'); // { issues: [{ message: 'CPF inválido' }] }
+
+const cnpj = toStandardSchema(isValidCnpj, { options: { version: 2 } }); // alphanumeric CNPJ
+
+// Anything that takes a Standard Schema takes it as is, a TanStack Form field for example
+<form.Field name="cpf" validators={{ onChange: cpf }} />;
+```
+
+Inside a Zod or Valibot schema the validators plug in directly, with no wrapper, and the result is itself a Standard Schema:
+
+```javascript
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
+import { isValidCep, isValidCpf } from '@brazilian-utils/brazilian-utils';
+import { useForm } from 'react-hook-form';
+import * as v from 'valibot';
+import { z } from 'zod';
+
+const zodSchema = z.object({
+  cpf: z.string().refine(isValidCpf, 'CPF inválido'),
+  cep: z.string().refine(isValidCep, 'CEP inválido'),
+});
+
+const valibotSchema = v.object({
+  cpf: v.pipe(v.string(), v.check(isValidCpf, 'CPF inválido')),
+  cep: v.pipe(v.string(), v.check(isValidCep, 'CEP inválido')),
+});
+
+const form = useForm({ resolver: standardSchemaResolver(zodSchema) }); // or valibotSchema
+```
+
+Source: [Standard Schema specification](https://standardschema.dev).
