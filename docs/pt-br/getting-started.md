@@ -74,8 +74,10 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 114,2 KB | 24,6 KB |
 | `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 119,1 KB | 30,6 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 KB | 21,2 KB |
+| `isValidNbs` · `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 81,8 KB | 13,8 KB |
 | `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,9 KB | 6,9 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 38,3 - 38,6 KB | 9,5 - 9,7 KB |
+| `isValidServiceItem` · `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 27,2 KB | 8,9 KB |
 
 A raiz do pacote é um único módulo ESM, então o bundler não consegue separar uma dessas bases de dados dele: importar um utilitário pesado da raiz coloca a base inteira no seu bundle principal, e um `import()` dinâmico da raiz não ajuda. Para carregar sob demanda, importe do subpath próprio:
 

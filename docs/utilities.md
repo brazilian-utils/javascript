@@ -2825,6 +2825,99 @@ parseNcm('8471.30.12'); // '84713012'
 parseNcm('8471'); // '8471' (a partial code is kept as written)
 ```
 
+### isValidNbs
+
+Check if an NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) code exists in the official NBS 2.0 table, the code the national NFS-e carries in `cNBS`.
+
+- A code has 9 digits, printed as `N.NNNN.NN.NN`: the digit 1, the chapter, the position, the two subposition levels, the item and the subitem.
+- Accepts a string with the 9 digits or with the mask, with a single separator between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
+- Only complete codes are valid: the chapter (`1.01`), position (`1.0101`) and subposition (`1.0101.1`) headings classify nothing by themselves.
+- The ANEXO B of the Sistema Nacional NFS-e lists the same 920 codes except three (`1.0402.29.00`, `1.0403.29.00` and `1.0904.40.00`), so a code valid here can still be refused by the NFS-e.
+
+```javascript
+import { isValidNbs } from '@brazilian-utils/brazilian-utils';
+
+isValidNbs('1.0101.11.00'); // true
+isValidNbs('101011100'); // true
+isValidNbs(101011100); // true
+isValidNbs('1.0101'); // false (a position heading, not a complete code)
+isValidNbs('1.9999.99.99'); // false
+isValidNbs('1.0101abc11.00'); // false (not a documented form)
+```
+
+### formatNbs
+
+Format an NBS (Nomenclatura Brasileira de Serviços) code into the `N.NNNN.NN.NN` mask the nomenclature prints. Only the structure changes; use `isValidNbs` to check a code against the table.
+
+- Every NBS code starts with 1, so, unlike `formatNcm`, there is no `pad` option.
+- Same rules as `formatCnae` otherwise: the mask is applied as far as the value goes, characters outside it are dropped, and a number is read as the string of its digits.
+
+```javascript
+import { formatNbs } from '@brazilian-utils/brazilian-utils';
+
+formatNbs('101011100'); // 1.0101.11.00
+formatNbs(101011100); // 1.0101.11.00
+formatNbs('10101'); // 1.0101 (masked as far as it goes)
+formatNbs('abc101011100'); // 1.0101.11.00 (only the digits are read)
+```
+
+### getNbs
+
+Look an NBS (Nomenclatura Brasileira de Serviços) code up and get its official description. The result is an `Nbs` record: `{ code, description }`.
+
+- Same rules as `isValidNbs`. `code` is the 9 digits, without the mask. Returns `null` when the code is unknown or the value is not in a documented form.
+
+```javascript
+import { getNbs } from '@brazilian-utils/brazilian-utils';
+
+getNbs('1.0101.11.00');
+// { code: '101011100', description: 'Serviços de construção de edificações residenciais de um e dois pavimentos' }
+
+getNbs(126050000); // { code: '126050000', description: 'Serviços domésticos' }
+getNbs('1.0101'); // null (a position heading, not a complete code)
+getNbs('1.9999.99.99'); // null
+```
+
+Source: [NBS 2.0 table published by the MDIC](https://www.gov.br/mdic/pt-br/assuntos/sdic/comercio-e-servicos/nbs-nomenclatura-brasileira-de-servicos), approved by the Portaria Conjunta RFB/SCS 1.429/2018 and amended by the Portaria Conjunta RFB/SCS 2.000/2018.
+
+### isValidServiceItem
+
+Check if a value is a subitem in force of the service list annexed to the Lei Complementar 116/2003, the list of the services the ISS is levied on.
+
+- The law numbers a subitem as the item, a dot and two digits, `1.01` to `40.01`.
+- Accepts that form, a zero padded item (`'01.01'`) or the bare digits (`'0101'`, `'101'` or the integer `101`), which are the first four digits of the `cTribNac` code of the national NFS-e, with optional surrounding whitespace.
+- A number is only read when it is a non-negative safe integer, so the float `1.01` is rejected: write the dotted form as a string.
+- The vetoed subitems (`3.01`, `7.14`, `7.15`, `13.01` and `17.07`), the item headings, the 6 digit national codes a subitem is split into and item 99 of the national list, which is not part of the law, are not valid. Municipal service codes are out of scope.
+
+```javascript
+import { isValidServiceItem } from '@brazilian-utils/brazilian-utils';
+
+isValidServiceItem('1.01'); // true
+isValidServiceItem('01.01'); // true
+isValidServiceItem('0101'); // true
+isValidServiceItem(101); // true
+isValidServiceItem('3.01'); // false (vetoed)
+isValidServiceItem('99.01'); // false (national list only, not the law)
+isValidServiceItem(1.01); // false (not a non-negative safe integer)
+```
+
+### getServiceItem
+
+Look a subitem of the service list annexed to the Lei Complementar 116/2003 up and get its official description. The result is a `ServiceItem` record: `{ code, description }`.
+
+- Same rules as `isValidServiceItem`. `code` is the form the law prints (`'1.01'`). Returns `null` when the subitem is unknown or the value is not in a documented form.
+
+```javascript
+import { getServiceItem } from '@brazilian-utils/brazilian-utils';
+
+getServiceItem('1.01'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('0101'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob encomenda.' }
+getServiceItem('3.01'); // null (vetoed)
+```
+
+Source: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm) and the sheet `LISTA.SERV.NAC.` of the [ANEXO B of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), the list in force in machine readable form.
+
 ### isValidCfop
 
 Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table, the consolidated Anexo II of Convênio SINIEF s/nº 1970 in force.
