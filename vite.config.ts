@@ -1,5 +1,5 @@
 import { existsSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 import { transform } from "esbuild";
 import { rules as sonarjsPluginRules } from "eslint-plugin-sonarjs";
@@ -52,6 +52,21 @@ const minifyUmdChunk = (): PackPlugin => ({
 		if (options.format !== "umd") return null;
 		const result = await transform(code, { minify: true, sourcemap: true, target: "es2020" });
 		return { code: result.code, map: result.map };
+	},
+});
+
+/**
+ * The command line (`src/_cli/bin/bin.ts`, published as the `bin` of the package) dispatches to
+ * the whole public API. Bundling `src/index.ts` into it would ship every dataset a second time,
+ * so its import of the barrel is rewritten to the root ESM bundle that sits next to it in `dist/`.
+ * @returns {PackPlugin} The pack plugin that points the command line at `dist/brazilian-utils.js`.
+ */
+const externalizeLibrary = (): PackPlugin => ({
+	name: "brazilian-utils:externalize-library",
+	resolveId(source, importer) {
+		if (importer === undefined) return null;
+		if (resolve(dirname(importer), source) !== resolve(srcDir, "index")) return null;
+		return { id: "./brazilian-utils.js", external: true };
 	},
 });
 
@@ -465,10 +480,12 @@ export default defineConfig({
 			},
 			// The barrel re-exports every deprecated alias, and a deprecated util's own tests (plus
 			// the `getMunicipalities` property that cross-checks it against `getCities`) have to
-			// keep calling it for as long as it is still supported.
+			// keep calling it for as long as it is still supported. The command line lists the
+			// deprecated `generateCNPJ` next to `generateCnpj` because both are commands.
 			{
 				files: [
 					"src/index.ts",
+					"src/_cli/constants.ts",
 					"src/index.test.ts",
 					"src/get-cities/get-cities.test.ts",
 					"src/get-municipalities/get-municipalities.test.ts",
@@ -548,6 +565,7 @@ export default defineConfig({
 				"src/**/constants.ts",
 				"src/_internals/constants/**",
 				"src/index.ts",
+				"src/_cli/bin/bin.ts",
 			],
 			thresholds: {
 				statements: 100,
@@ -570,6 +588,17 @@ export default defineConfig({
 			sourcemap: false,
 			entry: utilEntries,
 			format: ["es", "cjs"],
+		},
+		// The command line: one ESM file with a shebang, no declarations (it exports nothing) and
+		// the library left external (see `externalizeLibrary`), so it costs library consumers
+		// nothing: no entry point imports it and `exports` does not list it.
+		{
+			...sharedPack,
+			sourcemap: false,
+			dts: false,
+			entry: { cli: resolve(rootDir, "src/_cli/bin/bin.ts") },
+			format: ["es"],
+			plugins: [externalizeLibrary()],
 		},
 	],
 });

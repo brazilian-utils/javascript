@@ -50,6 +50,9 @@
 		"type": "git",
 		"url": "git+https://github.com/brazilian-utils/javascript.git"
 	},
+	"bin": {
+		"brazilian-utils": "./dist/cli.js"
+	},
 	"files": [
 		"./CHANGELOG.md",
 		"./brazilian-utils.cdx.json",
