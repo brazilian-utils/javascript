@@ -66,6 +66,14 @@ describe("coerceCliValue", () => {
 		expect([last.getFullYear(), last.getMonth(), last.getDate()]).toEqual([2024, 11, 31]);
 	});
 
+	test("should read a leap day of a year below 100 that 19xx does not have", () => {
+		const date = coerceCliValue("0000-02-29", "date") as Date;
+
+		expect([date.getFullYear(), date.getMonth(), date.getDate()]).toEqual([0, 1, 29]);
+		expect(date.getHours()).toBe(0);
+		expect(Number.isNaN((coerceCliValue("0001-02-29", "date") as Date).getTime())).toBe(true);
+	});
+
 	test("should turn anything that is not a real YYYY-MM-DD day into an invalid date", () => {
 		for (const text of [
 			"2024-02-30",
