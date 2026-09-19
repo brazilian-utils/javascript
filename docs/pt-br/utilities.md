@@ -175,7 +175,7 @@ generateCnpj({ version: 2, branch: 1 }); // CNPJ alfanumérico cujo bloco de ord
 Interpreta um CNPJ nos campos que o número codifica. Aceita as mesmas formas de entrada que `isValidCnpj` e retorna `null` sempre que ela retornaria `false` para os mesmos argumentos, então um CNPJ alfanumérico lido na versão `1` é `null`.
 
 - **Opções** (`GetCnpjInfoOptions`): `version` é lida como `isValidCnpj` a lê, `1` (padrão) apenas o formato numérico, `2` tanto o numérico quanto o alfanumérico.
-- Retorna um `CnpjInfo`, as 14 posições como o Anexo XV as dispõe: 8 (`root`, a raiz que identifica a entidade) + 4 (`order`, o número de ordem do estabelecimento) + 2 (`checkDigits`, os dígitos verificadores, sempre numéricos).
+- Retorna um `CnpjInfo`, as 14 posições como o Anexo XV as dispõe: 8 (`root`, a raiz que identifica a entidade) + 4 (`order`, o número de ordem do estabelecimento, as mesmas quatro posições que o `generateCnpj` recebe no parâmetro `branch`) + 2 (`checkDigits`, os dígitos verificadores, sempre numéricos).
 - `format` é `'alphanumeric'` quando a raiz ou a ordem têm uma letra e `'numeric'` caso contrário (tipado como `CnpjFormat`).
 - `isInitialHeadquarters` diz se a ordem é `0001`, a que a Receita Federal atribui à matriz quando a raiz é inscrita. Uma filial pode depois se tornar a matriz mantendo o seu número de ordem, então só o cadastro da Receita Federal diz qual é a matriz atual.
 - Os campos de um CNPJ alfanumérico são retornados em maiúsculas.
