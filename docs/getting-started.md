@@ -1,7 +1,7 @@
 ---
 title: "Getting Started"
 description: "Install Brazilian Utils, the zero-dependency utils library for Brazilian businesses, and learn how to import a util, which runtimes are supported and how the bundle size behaves."
-keywords: ["Brazilian Utils", "install", "npm", "tree-shaking", "bundle size", "subpath imports", "Node.js", "Bun", "Deno", "browser", "AI assistants", "Context7"]
+keywords: ["Brazilian Utils", "install", "npm", "tree-shaking", "bundle size", "subpath imports", "Node.js", "Bun", "Deno", "browser", "AI assistants", "Context7", "MCP"]
 ---
 
 Brazilian Utils is a library focused on solving problems that we face daily in the development of applications for the Brazilian business.
@@ -119,6 +119,33 @@ Validate a CNPJ with Brazilian Utils. use library /brazilian-utils/javascript
 To stop repeating it, add the rule to the agent's instructions file (`CLAUDE.md`, Cursor rules or the equivalent): "For Brazilian document utils, use the Context7 library /brazilian-utils/javascript".
 
 Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.br/llms.txt), which lists every util with a one-line description and a link to its section, or at [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), the whole English documentation in one Markdown file.
+
+## MCP server
+
+The package also ships `brazilian-utils-mcp`, a [Model Context Protocol](https://modelcontextprotocol.io) server that hands every util to an agent as a tool. The agent then validates a CPF, reads a boleto or looks an IBGE municipality up by calling the library, instead of answering from memory:
+
+```bash
+npx -y --package=@brazilian-utils/brazilian-utils brazilian-utils-mcp
+```
+
+It is a local server over stdio, so it goes in the client's configuration file the way any other one does. The same block works in Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows), in Claude Code (`.mcp.json` at the root of the project) and in Cursor (`.cursor/mcp.json` in the project, or `~/.cursor/mcp.json` for every project):
+
+```json
+{
+  "mcpServers": {
+    "brazilian-utils": {
+      "command": "npx",
+      "args": ["-y", "--package=@brazilian-utils/brazilian-utils", "brazilian-utils-mcp"]
+    }
+  }
+}
+```
+
+In Claude Code, `claude mcp add brazilian-utils -- npx -y --package=@brazilian-utils/brazilian-utils brazilian-utils-mcp` writes that file for you. Restart the client, and a prompt such as "is 111.444.777-35 a valid CPF, and which holidays does São Paulo have in 2026?" reaches the tools.
+
+There is one tool per util, named exactly as the function is exported (`isValidCpf`, `formatCnpj`, `getHolidays`), taking the same arguments and answering with its result as JSON. Documents are passed as strings, so leading zeros survive, and dates are written `YYYY-MM-DD`. An invalid value is an ordinary answer, not a failure: validators answer `false`, formatters and parsers `""`, lookups `null`. Everything is computed offline from the embedded datasets, `getAddressInfoByCep` and `getCepInfoByAddress` aside, the only two tools that reach the network.
+
+The server implements revision [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28) of the specification, which negotiates the protocol version per request, and falls back to the `initialize` handshake of the older revisions, from 2025-11-25 down to 2024-11-05, for clients that speak one of those. It has no dependencies of its own: the stdio transport and the JSON-RPC surface ship with the package. Like the library, it is a separate file that no entry point imports, so it adds nothing to your bundle.
 
 ## Bundle size
 

@@ -51,7 +51,8 @@
 		"url": "git+https://github.com/brazilian-utils/javascript.git"
 	},
 	"bin": {
-		"brazilian-utils": "./dist/cli.js"
+		"brazilian-utils": "./dist/cli.js",
+		"brazilian-utils-mcp": "./dist/brazilian-utils-mcp.js"
 	},
 	"files": [
 		"./CHANGELOG.md",
@@ -88,6 +89,7 @@
 			}
 		},
 		"./cli": null,
+		"./brazilian-utils-mcp": null,
 		"./*": {
 			"import": {
 				"types": "./dist/*.d.ts",

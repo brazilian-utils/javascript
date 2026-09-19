@@ -91,6 +91,16 @@ but the few rules below hold everywhere:
   argument is an options object, which therefore never read stdin on their own. All three types
   are derived from the public signatures, so `npm run check` fails when a new non-string option or
   argument, or a new params-only utility, is missing from them.
+- `src/_mcp/` is the `brazilian-utils-mcp` server (a `bin` of `package.json`), laid out like
+  `src/_internals/`: one function per folder. It serves the Model Context Protocol over stdio, so
+  an agent calls the library instead of answering from memory. `handle-message` is the protocol as
+  a pure function (one decoded JSON-RPC message in, one response out), `serve-stdio` connects it
+  to a pair of streams, `call-tool` and `parse-tool-arguments` check a call against the tool's
+  JSON Schema and run it, and `brazilian-utils-mcp.ts` is the Node.js entry, built into
+  `dist/brazilian-utils-mcp.js` by its own pack config in `vite.config.ts` with the library left
+  external. No library entry point imports it, so it never reaches a consumer's bundle. The tools
+  are the table in `src/_mcp/constants.ts`, one per public function: a test compares it with
+  `src/index.ts`, so `npm run test` fails when a new utility has no tool.
 - There are no runtime dependencies (see [Zero runtime dependencies](#zero-runtime-dependencies)),
   so the trust boundary of the published package is this repository, its build toolchain and the
   npm registry; [MAINTAINERS.md](MAINTAINERS.md) lists who can change what, and
@@ -147,6 +157,10 @@ example `formatSomething`):
    alphabetical ordering. Then add the function name to the `PUBLIC` list and the type(s) to the
    `publicTypes` map in `src/index.test.ts`, alphabetically. These two make up the package's
    public surface contract, and the test suite fails the build if either is out of sync.
+   Then add the tool that exposes it to agents to `TOOLS` in `src/_mcp/constants.ts`, also
+   alphabetically: the name of the function, a description written for a model, the JSON Schema of
+   its arguments and the properties to pass positionally. `src/_mcp/call-tool/call-tool.test.ts`
+   compares the table with `src/index.ts` and fails when a utility has no tool.
 5. Document the utility in **both**:
    - `docs/utilities.md` (English)
    - `docs/pt-br/utilities.md` (Portuguese translation)
