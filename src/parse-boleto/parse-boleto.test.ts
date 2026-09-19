@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { boletos } from "../_internals/test/boleto-arbitraries";
 import { bench, describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { generateBoleto } from "../generate-boleto/generate-boleto";
 import { getBoletoInfo } from "../get-boleto-info/get-boleto-info";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
 import { parseBoleto } from "./parse-boleto";
@@ -74,8 +74,8 @@ describe("parseBoleto", () => {
 
 		test("should give back the digits of a masked generated bank slip", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("bancario", "arrecadacao"), (type) => {
-					const value = generateBoleto({ type });
+				fc.property(fc.gen(), fc.constantFrom("bancario", "arrecadacao"), (g, type) => {
+					const value = g(boletos, type);
 					const masked = `${value.slice(0, 5)}. ${value.slice(5, 20)}-${value.slice(20)}`;
 
 					expect(parseBoleto(masked)).toBe(value);

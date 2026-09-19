@@ -1,8 +1,8 @@
 import * as fc from "fast-check";
 
 import { SERVICE_PHONE_UTILITY_CODES } from "../_internals/constants/service-phone";
+import { phones } from "../_internals/test/phone-arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generatePhone } from "../generate-phone/generate-phone";
 import { isValidServicePhone } from "./is-valid-service-phone";
 
 describe("isValidServicePhone", () => {
@@ -115,8 +115,8 @@ describe("isValidServicePhone", () => {
 	describe("properties", () => {
 		test("should accept every generated service number", () => {
 			fc.assert(
-				fc.property(fc.constant("service" as const), (type) => {
-					const phone = generatePhone(type);
+				fc.property(fc.gen(), fc.constant("service" as const), (g, type) => {
+					const phone = g(phones, type);
 
 					expect(isValidServicePhone(phone)).toBe(true);
 					expect([8, 11].includes(phone.length)).toBe(true);
@@ -134,8 +134,8 @@ describe("isValidServicePhone", () => {
 
 		test("should reject every generated geographic number", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("mobile", "landline"), (type) => {
-					expect(isValidServicePhone(generatePhone(type))).toBe(false);
+				fc.property(fc.gen(), fc.constantFrom("mobile", "landline"), (g, type) => {
+					expect(isValidServicePhone(g(phones, type))).toBe(false);
 				}),
 			);
 		});

@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { phones } from "../_internals/test/phone-arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { generatePhone } from "../generate-phone/generate-phone";
 import { parsePhone } from "./parse-phone";
 
 describe("parsePhone", () => {
@@ -78,8 +78,8 @@ describe("parsePhone", () => {
 
 		test("should drop the country code of a generated number however it is written", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("mobile", "landline"), (type) => {
-					const phone = generatePhone(type);
+				fc.property(fc.gen(), fc.constantFrom("mobile", "landline"), (g, type) => {
+					const phone = g(phones, type);
 
 					expect(parsePhone(phone)).toBe(phone);
 					expect(parsePhone(`+55 ${phone}`)).toBe(phone);
