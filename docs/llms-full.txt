@@ -226,7 +226,7 @@ npx @brazilian-utils/brazilian-utils formatCnpj 12345678000195 --obfuscate # **.
 npx @brazilian-utils/brazilian-utils getBankByCode 001                # { "code": "001", "ispb": "00000000", ... }
 ```
 
-`bunx @brazilian-utils/brazilian-utils` and `deno run -A npm:@brazilian-utils/brazilian-utils` run the same command, and once the package is installed in a project it is `npx brazilian-utils` (or plain `brazilian-utils` in a `package.json` script).
+`bunx @brazilian-utils/brazilian-utils` runs the same command, and Deno runs it as `deno run npm:@brazilian-utils/brazilian-utils`, asking for the permissions it needs (only the two CEP lookups reach the network). Once the package is installed in a project it is `npx brazilian-utils`, or plain `brazilian-utils` in a `package.json` script.
 
 The command is a generic dispatcher over the public API: the first argument is the name of a utility, exactly as it is exported, and the rest maps to its arguments.
 
@@ -234,10 +234,12 @@ The command is a generic dispatcher over the public API: the first argument is t
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `isValidIe SP 110042490114`  | Positional values, in order: `isValidIe("SP", "110042490114")`                                                |
 | `--key value`, `--key=value` | An entry of the options (or params) object; `--state-code` and `--stateCode` are the same key                 |
-| `--flag`, `--no-flag`        | A boolean option set to `true` or to `false`: `formatCurrency 10 --no-symbol`                                 |
+| `--flag`, `--no-flag`        | A boolean option set to `true` or to `false`: `formatCurrency 10 --symbol`, `isBusinessDay 2026-02-17 --no-include-optional` |
 | `--json '<object>'`          | The options (or params) object as JSON; options given next to it win                                          |
 | `-`, or no value in a pipe   | The value is read from stdin: `echo 12345678909 \| brazilian-utils formatCpf --obfuscate`                     |
 | `--`                         | Ends the options, so that a value starting with `--` is read as a value                                       |
+
+A utility whose first argument is an options object, such as `isHoliday`, `getHolidays` or `isValidBankAccount`, never takes a value from stdin on its own: it reads stdin only where you write `-`. So `brazilian-utils isHoliday --target-date 2026-09-07` answers the same inside a script whose own stdin is a file or a pipe.
 
 Values stay strings (so `001` keeps its zeros), except where the utility expects a number, a list (comma separated: `--accept cpf,cnpj`) or a date. Dates are written `YYYY-MM-DD`, mean that local calendar day, and are printed the same way:
 
@@ -248,7 +250,7 @@ brazilian-utils isValidBankAccount --json '{"bankCode":"001","agency":"1234","ac
 brazilian-utils getAddressInfoByCep 01001000                   # awaits the lookup, then prints the address
 ```
 
-Strings and numbers are printed as they are, anything else as JSON. The exit code is `0` on success, `1` when the answer is `false` or `null` or the utility throws (the error goes to stderr), and `2` when the command line itself is wrong, so a validator works as a shell condition:
+Strings and numbers are printed as they are, anything else as JSON. The exit code is `0` on success, `1` when the answer is negative (`false`, `null`, or the empty string a formatter answers with when it cannot read its value) or the utility throws (the error goes to stderr), and `2` when the command line itself is wrong, so a validator works as a shell condition:
 
 ```bash
 if brazilian-utils isValidCnpj "$CNPJ" > /dev/null; then echo "ok"; fi

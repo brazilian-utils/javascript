@@ -105,7 +105,7 @@ You can check a list of utilities [by clicking here](https://brazilian-utils.com
 Every utility also runs from a terminal or a shell script, with no install needed:
 
 ```bash
-npx @brazilian-utils/brazilian-utils isValidCpf 12345678909                # true (exit code 0; 1 for false or null)
+npx @brazilian-utils/brazilian-utils isValidCpf 12345678909                # true (exit code 0; 1 for a negative answer)
 npx @brazilian-utils/brazilian-utils formatCnpj 12345678000195 --obfuscate # **.345.678/0001-**
 npx @brazilian-utils/brazilian-utils getBankByCode 001                     # { "code": "001", ... } as JSON
 echo 01001000 | npx @brazilian-utils/brazilian-utils getAddressInfoByCep   # reads stdin, awaits the lookup
