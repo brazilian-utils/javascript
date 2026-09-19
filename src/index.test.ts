@@ -36,6 +36,7 @@ import {
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
 	type FormatSuframaOptions,
+	type FormatVoterIdOptions,
 	type GenerateBoletoParams,
 	type GenerateCnpjParams,
 	type GenerateLicensePlateFormat,
@@ -342,6 +343,7 @@ describe("Public API", () => {
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
 			FormatSuframaOptions: FormatSuframaOptions;
+			FormatVoterIdOptions: FormatVoterIdOptions;
 			GenerateBoletoParams: GenerateBoletoParams;
 			GenerateCnpjParams: GenerateCnpjParams;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;
