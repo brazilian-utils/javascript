@@ -85,7 +85,7 @@ Alguns utilitários são a exceção: cada um embute um dataset oficial e pesa m
 
 | Utilitário | Dataset | Minificado | Gzip |
 | --- | --- | --- | --- |
-| `getCid10` | categorias e subcategorias da CID-10 V2008, com as descrições do DATASUS | 1030,4 KB | 146,8 KB |
+| `getCid10` | categorias e subcategorias da CID-10 V2008, com as descrições do DATASUS | 1030,4 KB | 146,9 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 154,9 - 156,5 KB | 50,3 - 50,4 KB |
 | `getCities` | nomes dos 5571 municípios do IBGE | 154,2 KB | 49,8 KB |
 | `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 114,2 KB | 24,6 KB |
@@ -93,7 +93,7 @@ Alguns utilitários são a exceção: cada um embute um dataset oficial e pesa m
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 KB | 21,2 KB |
 | `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,9 KB | 6,9 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 38,3 - 38,6 KB | 9,5 - 9,7 KB |
-| `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008, sem as descrições | 27,1 KB | 7,4 KB |
+| `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008, sem as descrições | 27,0 KB | 7,4 KB |
 
 Importar qualquer um deles da raiz, mesmo ao lado de um único utilitário pequeno, traz todo esse dataset para o seu bundle principal, porque este pacote é publicado como um único módulo ESM: um `import()` dinâmico da raiz (`await import('@brazilian-utils/brazilian-utils')`) ainda resolve para esse mesmo arquivo único, então não há como separá-lo sozinho. Um bundler que faz code-splitting precisa de um módulo separado para separar.
 
