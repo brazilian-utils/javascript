@@ -6,7 +6,7 @@ keywords: ["exemplos", "máscara de CPF", "CPF React", "CPF Angular", "CPF Vue",
 
 Um campo de CPF que formata enquanto você digita, com `formatCpf`, e valida quando completo, com `isValidCpf`. Cada aba roda o código logo abaixo dela, que pode ser copiado do jeito que está.
 
-`formatCpf` formata o que já foi digitado (`"9438"` vira `"943.8"`), descarta o que não é dígito e corta os dígitos além do décimo primeiro. Só que trocar o valor do campo joga o cursor para o fim, então `maskCpf` devolve o cursor para perto do dígito que está sendo editado, e transforma um `.` ou `-` apagado num dígito apagado, que o `formatCpf` recolocaria na hora. O campo recebe `aria-invalid` quando um CPF completo não é válido.
+`formatCpf` formata o que já foi digitado (`"9438"` vira `"943.8"`), descarta o que não é dígito e corta os dígitos além do décimo primeiro. Só que trocar o valor do campo joga o cursor para o fim, então `maskCpf` devolve o cursor para perto do dígito que está sendo editado, e transforma um `.` ou `-` apagado num dígito apagado, que o `formatCpf` recolocaria na hora. O campo recebe `aria-invalid` quando um CPF completo não é válido, e entrega o CPF formatado ao componente pai do jeito de cada framework: uma prop `onChange` no React, `[(cpf)]` no Angular, `v-model` no Vue.
 
 <div class="example" data-name="React" data-demo="/snippets/live/react.html">
 

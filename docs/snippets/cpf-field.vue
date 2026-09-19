@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
-const cpf = ref("");
+// The formatted CPF, bound with v-model.
+const cpf = defineModel<string>({ default: "" });
 const complete = computed(() => cpf.value.length === 14);
 const valid = computed(() => complete.value && isValidCpf(cpf.value));
 
@@ -63,6 +64,7 @@ function onInput(event: Event) {
     <input
       inputmode="numeric"
       placeholder="000.000.000-00"
+      :value="cpf"
       :aria-invalid="complete && !valid"
       @input="onInput"
     />

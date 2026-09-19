@@ -44,7 +44,12 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
   return formatted;
 }
 
-export function CpfField() {
+type CpfFieldProps = {
+  /** Called with the formatted CPF on every change. */
+  onChange?: (cpf: string) => void;
+};
+
+export function CpfField({ onChange }: CpfFieldProps) {
   const [cpf, setCpf] = useState("");
   const complete = cpf.length === 14;
   const valid = complete && isValidCpf(cpf);
@@ -56,14 +61,15 @@ export function CpfField() {
         inputMode="numeric"
         placeholder="000.000.000-00"
         aria-invalid={complete && !valid}
-        onChange={(event) =>
-          setCpf(
-            maskCpf({
-              input: event.currentTarget,
-              inputType: (event.nativeEvent as InputEvent).inputType,
-            }),
-          )
-        }
+        onChange={(event) => {
+          const formatted = maskCpf({
+            input: event.currentTarget,
+            inputType: (event.nativeEvent as InputEvent).inputType,
+          });
+
+          setCpf(formatted);
+          onChange?.(formatted);
+        }}
       />
       {complete && <output>{valid ? "✓ Valid CPF" : "✗ Invalid CPF"}</output>}
     </label>

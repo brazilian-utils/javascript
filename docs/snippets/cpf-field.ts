@@ -1,4 +1,4 @@
-import { Component, computed, signal } from "@angular/core";
+import { Component, computed, model } from "@angular/core";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
 type MaskCpfParams = {
@@ -52,6 +52,7 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
       <input
         inputmode="numeric"
         placeholder="000.000.000-00"
+        [value]="cpf()"
         [attr.aria-invalid]="complete() && !valid()"
         (input)="onInput($event)"
       />
@@ -62,7 +63,8 @@ function maskCpf({ input, inputType = "" }: MaskCpfParams): string {
   `,
 })
 export class CpfField {
-  protected readonly cpf = signal("");
+  /** The formatted CPF, bound with [(cpf)]. */
+  readonly cpf = model("");
   protected readonly complete = computed(() => this.cpf().length === 14);
   protected readonly valid = computed(() => this.complete() && isValidCpf(this.cpf()));
 

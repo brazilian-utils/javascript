@@ -6,7 +6,7 @@ keywords: ["examples", "CPF input mask", "React CPF", "Angular CPF", "Vue CPF", 
 
 A CPF field that formats as you type, with `formatCpf`, and validates once complete, with `isValidCpf`. Each tab runs the code below it, which you can copy as is.
 
-`formatCpf` formats whatever has been typed so far (`"9438"` becomes `"943.8"`), drops anything that is not a digit and cuts digits past the eleventh. Replacing a field's value moves the caret to the end, though, so `maskCpf` puts it back next to the digit being edited, and turns a deleted `.` or `-` into a deleted digit, which `formatCpf` would otherwise put straight back. The field is marked `aria-invalid` when a complete CPF is not valid.
+`formatCpf` formats whatever has been typed so far (`"9438"` becomes `"943.8"`), drops anything that is not a digit and cuts digits past the eleventh. Replacing a field's value moves the caret to the end, though, so `maskCpf` puts it back next to the digit being edited, and turns a deleted `.` or `-` into a deleted digit, which `formatCpf` would otherwise put straight back. The field is marked `aria-invalid` when a complete CPF is not valid, and hands the formatted CPF to its parent the way each framework does it: an `onChange` prop in React, `[(cpf)]` in Angular, `v-model` in Vue.
 
 <div class="example" data-name="React" data-demo="/snippets/live/react.html">
 
