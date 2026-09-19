@@ -5,10 +5,10 @@
  * from sorted keys is not always emitted sorted. Writing the entries out in order keeps the
  * generated tables readable and their diffs small.
  *
- * @param {Record<string, string>} data - The entries to serialize.
+ * @param {Record<string, unknown>} data - The entries to serialize.
  * @returns {string} The object literal, sorted by key.
  */
-export const serializeRecord = (data: Record<string, string>): string =>
+export const serializeRecord = (data: Record<string, unknown>): string =>
 	`{${Object.keys(data)
 		.sort()
 		.map((key) => `${JSON.stringify(key)}:${JSON.stringify(data[key])}`)
