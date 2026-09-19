@@ -25,66 +25,66 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 ## Validators (isValid*)
 
-- [isValidCpf](https://brazilian-utils.com.br/utilities.md#isvalidcpf): Check if CPF is valid.
-- [isValidCnpj](https://brazilian-utils.com.br/utilities.md#isvalidcnpj): Check if CNPJ is valid.
-- [isValidCep](https://brazilian-utils.com.br/utilities.md#isvalidcep): Check if CEP (brazilian postal code) is valid.
-- [isValidBoleto](https://brazilian-utils.com.br/utilities.md#isvalidboleto): Check if boleto (brazilian payment method) is valid.
-- [isValidPixKey](https://brazilian-utils.com.br/utilities.md#isvalidpixkey): Check if a Pix key (chave Pix) is valid: a CPF, a CNPJ, an e-mail address, a Brazilian mobile phone number or a random key (EVP), per the DICT key formats.
-- [isValidPixPayload](https://brazilian-utils.com.br/utilities.md#isvalidpixpayload): Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, and a matching CRC-16.
-- [isValidNfeKey](https://brazilian-utils.com.br/utilities.md#isvalidnfekey): Check if a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) is valid.
-- [isValidPhone](https://brazilian-utils.com.br/utilities.md#isvalidphone): Check if phone number (mobile or landline) is valid.
-- [isValidMobilePhone](https://brazilian-utils.com.br/utilities.md#isvalidmobilephone): Check if mobile phone number is valid.
-- [isValidLandlinePhone](https://brazilian-utils.com.br/utilities.md#isvalidlandlinephone): Check if landline phone number is valid.
-- [isValidServicePhone](https://brazilian-utils.com.br/utilities.md#isvalidservicephone): Check if a phone number is a valid Brazilian service number, dialed without a DDD: the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` (11 digits total, so the shorter, extinct `0800` + 6 digit form is rejected), the abbreviated `300X`/`400X` numbers (8 digits), and the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated (e.g. `190`, `192`), whose consolidated table is the Anexo of Ato Anatel nº 43.151/2004.
-- [isValidLicensePlate](https://brazilian-utils.com.br/utilities.md#isvalidlicenseplate): Check if license plate is valid.
-- [isValidRenavam](https://brazilian-utils.com.br/utilities.md#isvalidrenavam): Check if RENAVAM (Registro Nacional de Veículos Automotores) is valid.
-- [isValidPis](https://brazilian-utils.com.br/utilities.md#isvalidpis): Check if PIS is valid.
-- [isValidProcessoJuridico](https://brazilian-utils.com.br/utilities.md#isvalidprocessojuridico): Validate the processo jurídico number according to CNJ's definition: the `NNNNNNN-DD.AAAA.J.TR.OOOO` layout, the `DD` check digits and the `J`/`TR` pair, which must identify an existing órgão and tribunal from the closed lists defined by Resolução CNJ nº 65/2008, so a number carrying a correct check digit but a court that does not exist is rejected.
+- [isValidCpf](https://brazilian-utils.com.br/utilities.md#isvalidcpf): Check if a CPF is valid.
+- [isValidCnpj](https://brazilian-utils.com.br/utilities.md#isvalidcnpj): Check if a CNPJ is valid.
+- [isValidCep](https://brazilian-utils.com.br/utilities.md#isvalidcep): Check if a CEP (brazilian postal code) is valid.
+- [isValidBoleto](https://brazilian-utils.com.br/utilities.md#isvalidboleto): Check if a boleto (brazilian payment method) is valid.
+- [isValidPixKey](https://brazilian-utils.com.br/utilities.md#isvalidpixkey): Check if a Pix key (chave Pix) is valid: a CPF, a CNPJ, an e-mail address, a Brazilian mobile phone number or a random EVP key, per the DICT key formats.
+- [isValidPixPayload](https://brazilian-utils.com.br/utilities.md#isvalidpixpayload): Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid.
+- [isValidNfeKey](https://brazilian-utils.com.br/utilities.md#isvalidnfekey): Check if a DF-e access key (chave de acesso) is valid.
+- [isValidPhone](https://brazilian-utils.com.br/utilities.md#isvalidphone): Check if a phone number (mobile or landline) is valid.
+- [isValidMobilePhone](https://brazilian-utils.com.br/utilities.md#isvalidmobilephone): Check if a mobile phone number is valid.
+- [isValidLandlinePhone](https://brazilian-utils.com.br/utilities.md#isvalidlandlinephone): Check if a landline phone number is valid.
+- [isValidServicePhone](https://brazilian-utils.com.br/utilities.md#isvalidservicephone): Check if a phone number is a valid Brazilian service number, dialed without a DDD.
+- [isValidLicensePlate](https://brazilian-utils.com.br/utilities.md#isvalidlicenseplate): Check if a license plate is valid.
+- [isValidRenavam](https://brazilian-utils.com.br/utilities.md#isvalidrenavam): Check if a RENAVAM (Registro Nacional de Veículos Automotores) is valid.
+- [isValidPis](https://brazilian-utils.com.br/utilities.md#isvalidpis): Check if a PIS is valid.
+- [isValidProcessoJuridico](https://brazilian-utils.com.br/utilities.md#isvalidprocessojuridico): Check if a processo jurídico number is valid, per Resolução CNJ nº 65/2008.
 - [isValidBankAccount](https://brazilian-utils.com.br/utilities.md#isvalidbankaccount): Check if a Brazilian bank account is valid.
-- [isValidIban](https://brazilian-utils.com.br/utilities.md#isvalidiban): Check if a Brazilian IBAN (International Bank Account Number) is valid, per Bacen's Diretrizes de Implementação do IBAN no Brasil (Circular BCB nº 3.625/2013): `BR` + 2 ISO 7064 MOD 97-10 check digits + 8 digit ISPB + 5 digit branch + 10 digit account + 1 letter account type (any letter, usually `C` for conta corrente or `P` for conta poupança) + 1 owner indicator (`1` for the first or only holder up to `9` for the ninth, then `A` to `Z` from the tenth, so `0` is rejected), 29 characters total.
-- [isValidPassport](https://brazilian-utils.com.br/utilities.md#isvalidpassport): Check if a Brazilian passport number is valid (2 letters followed by 6 digits).
-- [isValidCnh](https://brazilian-utils.com.br/utilities.md#isvalidcnh): Check if CNH is valid.
-- [isValidLegalNature](https://brazilian-utils.com.br/utilities.md#isvalidlegalnature): Check if a legal nature code exists in the official list.
+- [isValidIban](https://brazilian-utils.com.br/utilities.md#isvalidiban): Check if a Brazilian IBAN (International Bank Account Number) is valid.
+- [isValidPassport](https://brazilian-utils.com.br/utilities.md#isvalidpassport): Check if a Brazilian passport number is valid: 2 letters followed by 6 digits.
+- [isValidCnh](https://brazilian-utils.com.br/utilities.md#isvalidcnh): Check if a CNH is valid.
+- [isValidLegalNature](https://brazilian-utils.com.br/utilities.md#isvalidlegalnature): Check if a legal nature code exists in the official list, the IBGE/CONCLA "Natureza Jurídica 2021" table.
 - [isValidVoterId](https://brazilian-utils.com.br/utilities.md#isvalidvoterid): Check if a voter ID number is valid.
-- [isValidCns](https://brazilian-utils.com.br/utilities.md#isvalidcns): Check if a CNS (Cartão Nacional de Saúde) number is valid, the unique SUS (Sistema Único de Saúde) user identifier.
-- [isValidCertidao](https://brazilian-utils.com.br/utilities.md#isvalidcertidao): Check if the matrícula of a certidão de registro civil (nascimento, casamento, óbito and the other acts kept by a serventia de registro civil das pessoas naturais) is valid.
+- [isValidCns](https://brazilian-utils.com.br/utilities.md#isvalidcns): Check if a CNS (Cartão Nacional de Saúde) number is valid, the SUS (Sistema Único de Saúde) identifier of a user, health professional or health facility.
+- [isValidCertidao](https://brazilian-utils.com.br/utilities.md#isvalidcertidao): Check if the matrícula of a certidão de registro civil (birth, marriage, death and the other acts of a registro civil das pessoas naturais) is valid.
 - [isValidCei](https://brazilian-utils.com.br/utilities.md#isvalidcei): Check if a CEI (Cadastro Específico do INSS) number is valid.
 - [isValidCno](https://brazilian-utils.com.br/utilities.md#isvalidcno): Check if a CNO (Cadastro Nacional de Obras) number is valid.
 - [isValidCaepf](https://brazilian-utils.com.br/utilities.md#isvalidcaepf): Check if a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number is valid.
-- [isValidCbo](https://brazilian-utils.com.br/utilities.md#isvalidcbo): Check if a CBO (Classificação Brasileira de Ocupações) code exists in the MTE occupation table.
-- [isValidCnae](https://brazilian-utils.com.br/utilities.md#isvalidcnae): Check if a CNAE (Classificação Nacional de Atividades Econômicas) subclass code exists in the CNAE-Subclasses 2.3 table published by IBGE, the current subclass revision of CNAE 2.0.
+- [isValidCbo](https://brazilian-utils.com.br/utilities.md#isvalidcbo): Check if a CBO (Classificação Brasileira de Ocupações) code exists in the official CBO 2002 table.
+- [isValidCnae](https://brazilian-utils.com.br/utilities.md#isvalidcnae): Check if a CNAE (Classificação Nacional de Atividades Econômicas) subclass code exists in the CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
 - [isValidNcm](https://brazilian-utils.com.br/utilities.md#isvalidncm): Check if an NCM (Nomenclatura Comum do Mercosul) code exists in the current table published by Siscomex/MDIC.
-- [isValidCfop](https://brazilian-utils.com.br/utilities.md#isvalidcfop): Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table.
+- [isValidCfop](https://brazilian-utils.com.br/utilities.md#isvalidcfop): Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table, the consolidated Anexo II of Convênio SINIEF s/nº 1970 in force.
 - [isValidCst](https://brazilian-utils.com.br/utilities.md#isvalidcst): Check if a CST (Código de Situação Tributária) code is valid for a given tax.
-- [isValidCsosn](https://brazilian-utils.com.br/utilities.md#isvalidcsosn): Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes of the consolidated Anexo III-A of Convênio SINIEF s/nº 1970, the table Ajuste SINIEF 03/2010 instituted: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
-- [isValidIe](https://brazilian-utils.com.br/utilities.md#isvalidie): Check if inscrição estadual (state registration) is valid.
-- [isValidEmail](https://brazilian-utils.com.br/utilities.md#isvalidemail): Check if email is valid.
-- [isValidCreditCard](https://brazilian-utils.com.br/utilities.md#isvalidcreditcard): Check if a payment card number is valid using the Luhn algorithm (ISO/IEC 7812-1).
+- [isValidCsosn](https://brazilian-utils.com.br/utilities.md#isvalidcsosn): Check if a CSOSN (Código de Situação da Operação no Simples Nacional) code is one of the 10 codes of the official table: `101`, `102`, `103`, `201`, `202`, `203`, `300`, `400`, `500` or `900`.
+- [isValidIe](https://brazilian-utils.com.br/utilities.md#isvalidie): Check if an inscrição estadual (state registration) is valid for a state. Deprecated: the positional form `isValidIe(stateCode, ie)` still works but is deprecated; use the object form `isValidIe({ value, stateCode })`.
+- [isValidEmail](https://brazilian-utils.com.br/utilities.md#isvalidemail): Check if an email address is valid.
+- [isValidCreditCard](https://brazilian-utils.com.br/utilities.md#isvalidcreditcard): Check if a payment card number (credit or debit) is valid using the Luhn algorithm.
 - [isValidRegistroProfissional](https://brazilian-utils.com.br/utilities.md#isvalidregistroprofissional): Check the structure of a professional council registration number (registro/inscrição profissional).
 - [isValidVin](https://brazilian-utils.com.br/utilities.md#isvalidvin): Check if a VIN (Vehicle Identification Number / chassi) is valid.
 
 ## Formatters (format*)
 
-- [formatCpf](https://brazilian-utils.com.br/utilities.md#formatcpf): Format CPF.
-- [formatCnpj](https://brazilian-utils.com.br/utilities.md#formatcnpj): Format CNPJ.
-- [formatCep](https://brazilian-utils.com.br/utilities.md#formatcep): Format CEP (brazilian postal code).
+- [formatCpf](https://brazilian-utils.com.br/utilities.md#formatcpf): Format a CPF.
+- [formatCnpj](https://brazilian-utils.com.br/utilities.md#formatcnpj): Format a CNPJ.
+- [formatCep](https://brazilian-utils.com.br/utilities.md#formatcep): Format a CEP (brazilian postal code).
 - [formatBoleto](https://brazilian-utils.com.br/utilities.md#formatboleto): Format a boleto number.
-- [formatNfeKey](https://brazilian-utils.com.br/utilities.md#formatnfekey): Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 digits separated by spaces, the form every auxiliary document prints it in: the DANFE of the NF-e and the NFC-e, the DACTE of the CT-e, the CT-e OS and the GTV-e, the DAMDFE of the MDF-e, the DABPE of the BP-e, the DANF3E of the NF3e and the DANFE-COM of the NFCom.
-- [formatPhone](https://brazilian-utils.com.br/utilities.md#formatphone): Format phone number according to Brazilian patterns.
+- [formatNfeKey](https://brazilian-utils.com.br/utilities.md#formatnfekey): Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 digits separated by spaces, the form the DANFE, DACTE, DAMDFE, DABPE, DANF3E and DANFE-COM print it in.
+- [formatPhone](https://brazilian-utils.com.br/utilities.md#formatphone): Format a phone number according to Brazilian patterns.
 - [formatLicensePlate](https://brazilian-utils.com.br/utilities.md#formatlicenseplate): Format a license plate.
-- [formatPis](https://brazilian-utils.com.br/utilities.md#formatpis): Format PIS number.
-- [formatProcessoJuridico](https://brazilian-utils.com.br/utilities.md#formatprocessojuridico): Format the processo jurídico number according to CNJ's definition (mask `NNNNNNN-DD.AAAA.J.TR.OOOO`).
-- [formatIban](https://brazilian-utils.com.br/utilities.md#formatiban): Format an IBAN in the ISO 13616 print grouping, blocks of 4 characters, the presentation used on statements and bank forms.
-- [formatCurrency](https://brazilian-utils.com.br/utilities.md#formatcurrency): Formats an integer or float to a string in the BRL pattern.
-- [formatPassport](https://brazilian-utils.com.br/utilities.md#formatpassport): Format a Brazilian passport number (uppercase, without symbols, capped to 8 characters).
-- [formatCnh](https://brazilian-utils.com.br/utilities.md#formatcnh): Format CNH.
+- [formatPis](https://brazilian-utils.com.br/utilities.md#formatpis): Format a PIS.
+- [formatProcessoJuridico](https://brazilian-utils.com.br/utilities.md#formatprocessojuridico): Format a processo jurídico number in the CNJ mask `NNNNNNN-DD.AAAA.J.TR.OOOO`.
+- [formatIban](https://brazilian-utils.com.br/utilities.md#formatiban): Format an IBAN in the ISO 13616 print grouping: blocks of 4 characters, the presentation used on statements and bank forms.
+- [formatCurrency](https://brazilian-utils.com.br/utilities.md#formatcurrency): Format a number or a numeric string in the BRL pattern (`1.234,56`).
+- [formatPassport](https://brazilian-utils.com.br/utilities.md#formatpassport): Format a Brazilian passport number: uppercase, without symbols, capped to 8 characters.
+- [formatCnh](https://brazilian-utils.com.br/utilities.md#formatcnh): Format a CNH.
 - [formatLegalNature](https://brazilian-utils.com.br/utilities.md#formatlegalnature): Format a legal nature code.
-- [formatVoterId](https://brazilian-utils.com.br/utilities.md#formatvoterid): Format a voter ID number.
+- [formatVoterId](https://brazilian-utils.com.br/utilities.md#formatvoterid): Format a voter ID number with the 12-digit grouping `0000 0000 00 00`.
 - [formatCns](https://brazilian-utils.com.br/utilities.md#formatcns): Format a CNS (Cartão Nacional de Saúde) number into the common display groups of 3-4-4-4 digits separated by spaces.
-- [formatCertidao](https://brazilian-utils.com.br/utilities.md#formatcertidao): Format the matrícula of a certidão de registro civil into the printed mask of the Provimento, the 32 digits grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
-- [formatCei](https://brazilian-utils.com.br/utilities.md#formatcei): Format a CEI (Cadastro Específico do INSS) number according to the usual `00.000.00000/00` mask, the one the reference implementations of the check digit agree on (the Receita Federal does not print it).
+- [formatCertidao](https://brazilian-utils.com.br/utilities.md#formatcertidao): Format the matrícula of a certidão de registro civil into the printed mask of art.
+- [formatCei](https://brazilian-utils.com.br/utilities.md#formatcei): Format a CEI (Cadastro Específico do INSS) number with the usual `00.000.00000/00` mask.
 - [formatCno](https://brazilian-utils.com.br/utilities.md#formatcno): Format a CNO (Cadastro Nacional de Obras) number.
-- [formatCaepf](https://brazilian-utils.com.br/utilities.md#formatcaepf): Format a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number according to the usual `000.000.000/000-00` mask, the one the sources of the check digit rule agree on (the Receita Federal does not print it).
+- [formatCaepf](https://brazilian-utils.com.br/utilities.md#formatcaepf): Format a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number with the usual `000.000.000/000-00` mask.
 - [formatCnae](https://brazilian-utils.com.br/utilities.md#formatcnae): Format a CNAE (Classificação Nacional de Atividades Econômicas) subclass code.
 - [formatNcm](https://brazilian-utils.com.br/utilities.md#formatncm): Format an NCM (Nomenclatura Comum do Mercosul) code.
 
@@ -100,7 +100,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [parsePis](https://brazilian-utils.com.br/utilities.md#parsepis): Remove PIS formatting, keep only digits, and cap the result to 11 digits.
 - [parseProcessoJuridico](https://brazilian-utils.com.br/utilities.md#parseprocessojuridico): Remove processo jurídico formatting, keep only digits, and cap the result to 20 digits.
 - [parseIban](https://brazilian-utils.com.br/utilities.md#parseiban): Remove IBAN formatting, keep the letters and digits, uppercase the result, and cap it to the 29 characters of a Brazilian IBAN.
-- [parseCurrency](https://brazilian-utils.com.br/utilities.md#parsecurrency): Transforms a string to an integer or float format.
+- [parseCurrency](https://brazilian-utils.com.br/utilities.md#parsecurrency): Parse a BRL currency string into a number.
 - [parsePassport](https://brazilian-utils.com.br/utilities.md#parsepassport): Remove all non-alphanumeric characters from a passport number, uppercase the result, and cap it to 8 characters.
 - [parseCnh](https://brazilian-utils.com.br/utilities.md#parsecnh): Remove CNH formatting, keep only digits, and cap the result to 11 digits.
 - [parseLegalNature](https://brazilian-utils.com.br/utilities.md#parselegalnature): Remove legal nature formatting, keep only digits, and cap the result to 4 digits.
@@ -121,12 +121,12 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [generateCnpj](https://brazilian-utils.com.br/utilities.md#generatecnpj): Generate a valid random CNPJ.
 - [generateCep](https://brazilian-utils.com.br/utilities.md#generatecep): Generate a random CEP.
 - [generateBoleto](https://brazilian-utils.com.br/utilities.md#generateboleto): Generate a valid random boleto.
-- [generatePixPayload](https://brazilian-utils.com.br/utilities.md#generatepixpayload): Generates the payload of a Pix BR Code.
+- [generatePixPayload](https://brazilian-utils.com.br/utilities.md#generatepixpayload): Generate the payload of a Pix BR Code.
 - [generatePhone](https://brazilian-utils.com.br/utilities.md#generatephone): Generate a random Brazilian phone number.
-- [generateLicensePlate](https://brazilian-utils.com.br/utilities.md#generatelicenseplate): Generate a random license plate in the chosen format.
-- [generateRenavam](https://brazilian-utils.com.br/utilities.md#generaterenavam): Generate a valid random RENAVAM: the 11 digit form, ten base digits plus the check digit.
+- [generateLicensePlate](https://brazilian-utils.com.br/utilities.md#generatelicenseplate): Generate a valid random license plate in the chosen format.
+- [generateRenavam](https://brazilian-utils.com.br/utilities.md#generaterenavam): Generate a valid random RENAVAM in the 11 digit form: ten base digits plus the check digit.
 - [generatePis](https://brazilian-utils.com.br/utilities.md#generatepis): Generate a valid random PIS.
-- [generateProcessoJuridico](https://brazilian-utils.com.br/utilities.md#generateprocessojuridico): Generate a valid random processo jurídico number according to CNJ's definition.
+- [generateProcessoJuridico](https://brazilian-utils.com.br/utilities.md#generateprocessojuridico): Generate a valid random processo jurídico number in the layout of Resolução CNJ nº 65/2008.
 - [generatePassport](https://brazilian-utils.com.br/utilities.md#generatepassport): Generate a random valid Brazilian passport number.
 - [generateCnh](https://brazilian-utils.com.br/utilities.md#generatecnh): Generate a valid random CNH.
 - [generateLegalNature](https://brazilian-utils.com.br/utilities.md#generatelegalnature): Generate a random valid legal nature code.
@@ -134,50 +134,50 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 
 ## Getters (get*)
 
-- [getAddressInfoByCep](https://brazilian-utils.com.br/utilities.md#getaddressinfobycep): Fetch address information for a given CEP using multiple providers.
-- [getCepInfoByAddress](https://brazilian-utils.com.br/utilities.md#getcepinfobyaddress): Fetch CEPs from an address using ViaCEP.
+- [getAddressInfoByCep](https://brazilian-utils.com.br/utilities.md#getaddressinfobycep): Fetch the address of a CEP from several providers at once and resolve to the first successful answer.
+- [getCepInfoByAddress](https://brazilian-utils.com.br/utilities.md#getcepinfobyaddress): Fetch the CEPs of an address from ViaCEP.
 - [getBoletoInfo](https://brazilian-utils.com.br/utilities.md#getboletoinfo): Extract information from a boleto (amount, expiration date, bank code).
-- [getPixKeyInfo](https://brazilian-utils.com.br/utilities.md#getpixkeyinfo): Identifies a Pix key and normalizes it to the canonical form the DICT expects inside a BR Code: 11 digit CPF, 14 character CNPJ, lowercased e-mail, E.164 mobile phone (a landline is not a Pix key) or lowercase UUID EVP.
-- [getPixPayloadInfo](https://brazilian-utils.com.br/utilities.md#getpixpayloadinfo): Parses a Pix BR Code payload into its fields.
-- [getNfeKeyInfo](https://brazilian-utils.com.br/utilities.md#getnfekeyinfo): Parses a DF-e access key into its fields (stateCode, year, month, taxId, model, series, number, emissionType, code, checkDigit).
-- [getAreaCodeInfo](https://brazilian-utils.com.br/utilities.md#getareacodeinfo): Get the state (and its region) a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração.
+- [getPixKeyInfo](https://brazilian-utils.com.br/utilities.md#getpixkeyinfo): Identify a Pix key and normalize it to the canonical form the DICT expects inside a BR Code.
+- [getPixPayloadInfo](https://brazilian-utils.com.br/utilities.md#getpixpayloadinfo): Parse a Pix BR Code payload into its fields.
+- [getNfeKeyInfo](https://brazilian-utils.com.br/utilities.md#getnfekeyinfo): Parse a DF-e access key into its fields.
+- [getAreaCodeInfo](https://brazilian-utils.com.br/utilities.md#getareacodeinfo): Get the state and region a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração.
 - [getAreaCodesByState](https://brazilian-utils.com.br/utilities.md#getareacodesbystate): Get every DDD (area code) that serves a given Brazilian state, under the Anatel Plano Geral de Numeração.
-- [getFormatLicensePlate](https://brazilian-utils.com.br/utilities.md#getformatlicenseplate): Detect the normalized format of a license plate.
-- [getBanks](https://brazilian-utils.com.br/utilities.md#getbanks): Get every Brazilian bank with a compensation code (COMPE), published by Banco Central do Brasil in the STR participants list.
-- [getBankByCode](https://brazilian-utils.com.br/utilities.md#getbankbycode): Look a Brazilian bank up by its compensation code (COMPE), published by Banco Central do Brasil in the STR participants list.
-- [getBankByIspb](https://brazilian-utils.com.br/utilities.md#getbankbyispb): Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code published by Banco Central do Brasil in the STR participants list.
-- [getIbanInfo](https://brazilian-utils.com.br/utilities.md#getibaninfo): Parses a Brazilian IBAN into its fields: 2 (country code, always `BR`) + 2 (ISO 7064 MOD 97-10 check digits) + 8 (ISPB) + 5 (branch) + 10 (account) + 1 (account type, any letter, usually `C` for conta corrente or `P` for conta poupança) + 1 (owner indicator, `1` to `9` then `A` to `Z`).
-- [getStates](https://brazilian-utils.com.br/utilities.md#getstates): Get all Brazilian states, each with its two-letter code, name, region code, region name and 2-digit IBGE code of the Federative Unit (`cUF`).
-- [getStateByIbgeCode](https://brazilian-utils.com.br/utilities.md#getstatebyibgecode): Get the Brazilian state whose 2-digit IBGE code ("cUF", the Código da Unidade da Federação) matches the given value.
-- [getStateCodeByName](https://brazilian-utils.com.br/utilities.md#getstatecodebyname): Get the two-letter code (sigla) of a Brazilian state given its full name.
-- [getStateNameByCode](https://brazilian-utils.com.br/utilities.md#getstatenamebycode): Get the full name of a Brazilian state given its two-letter code (sigla).
-- [getTimezoneByState](https://brazilian-utils.com.br/utilities.md#gettimezonebystate): Get the IANA time zone database name (tzdata zone) for a Brazilian state, chosen as the zone of the state capital.
-- [getMunicipalities](https://brazilian-utils.com.br/utilities.md#getmunicipalities): Get Brazilian municipalities published by the IBGE.
+- [getFormatLicensePlate](https://brazilian-utils.com.br/utilities.md#getformatlicenseplate): Detect the normalized format of a license plate: `'LLLNNNN'` for the old Brazilian format, `'LLLNLNN'` for Mercosul.
+- [getBanks](https://brazilian-utils.com.br/utilities.md#getbanks): Get every Brazilian bank with a compensation code (COMPE), from the Banco Central do Brasil STR participants list.
+- [getBankByCode](https://brazilian-utils.com.br/utilities.md#getbankbycode): Look a Brazilian bank up by its compensation code (COMPE), from the Banco Central do Brasil STR participants list.
+- [getBankByIspb](https://brazilian-utils.com.br/utilities.md#getbankbyispb): Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code of every SPB participant.
+- [getIbanInfo](https://brazilian-utils.com.br/utilities.md#getibaninfo): Parse a Brazilian IBAN into its fields.
+- [getStates](https://brazilian-utils.com.br/utilities.md#getstates): Get all Brazilian states, each with its two-letter code, name, region code, region name and 2-digit IBGE code (`cUF`).
+- [getStateByIbgeCode](https://brazilian-utils.com.br/utilities.md#getstatebyibgecode): Get the Brazilian state whose 2-digit IBGE code (`cUF`, the Código da Unidade da Federação) matches the given value.
+- [getStateCodeByName](https://brazilian-utils.com.br/utilities.md#getstatecodebyname): Get the two-letter code (sigla) of a Brazilian state from its full name.
+- [getStateNameByCode](https://brazilian-utils.com.br/utilities.md#getstatenamebycode): Get the full name of a Brazilian state from its two-letter code (sigla).
+- [getTimezoneByState](https://brazilian-utils.com.br/utilities.md#gettimezonebystate): Get the IANA time zone name (tzdata zone) of a Brazilian state: the zone of its capital.
+- [getMunicipalities](https://brazilian-utils.com.br/utilities.md#getmunicipalities): Get the Brazilian municipalities published by the IBGE: every municipality, or only those of one state when `stateCode` is given.
 - [getMunicipalityByCode](https://brazilian-utils.com.br/utilities.md#getmunicipalitybycode): Look up a Brazilian municipality by its 7-digit IBGE code.
-- [getCities](https://brazilian-utils.com.br/utilities.md#getcities): Get Brazilian cities. Deprecated: use `getMunicipalities` instead.
-- [getMunicipality](https://brazilian-utils.com.br/utilities.md#getmunicipality): Get municipality information by IBGE code, or get an IBGE code from municipality name and UF. Deprecated: use `getMunicipalityByCode` instead, which is synchronous and offline; matching a municipality by name is up to the application, over `getMunicipalities`.
-- [getHolidays](https://brazilian-utils.com.br/utilities.md#getholidays): Get Brazilian holidays for a given year.
+- [getCities](https://brazilian-utils.com.br/utilities.md#getcities): Get the names of Brazilian cities: every city, or only those of one state. Deprecated: use `getMunicipalities` instead.
+- [getMunicipality](https://brazilian-utils.com.br/utilities.md#getmunicipality): Get municipality information by IBGE code, or an IBGE code from a municipality name and UF. Deprecated: use `getMunicipalityByCode` instead, which is synchronous and offline; matching a municipality by name is up to the application, over `getMunicipalities`.
+- [getHolidays](https://brazilian-utils.com.br/utilities.md#getholidays): Get the Brazilian holidays of a year: the national ones and, with a `stateCode`, that state's holidays too.
 - [getLegalNature](https://brazilian-utils.com.br/utilities.md#getlegalnature): Look a legal nature code up in the official IBGE/CONCLA table.
 - [getLegalNatures](https://brazilian-utils.com.br/utilities.md#getlegalnatures): Get the legal nature map keyed by code.
-- [getLegalNaturesByCategory](https://brazilian-utils.com.br/utilities.md#getlegalnaturesbycategory): Get every legal nature of a CONCLA category, the group given by the first digit of the code: `1` Administração Pública, `2` Entidades Empresariais, `3` Entidades sem Fins Lucrativos, `4` Pessoas Físicas and `5` Organizações Internacionais e Outras Instituições Extraterritoriais.
-- [getCertidaoInfo](https://brazilian-utils.com.br/utilities.md#getcertidaoinfo): Parse the matrícula of a certidão de registro civil into its fields, returning `null` when the matrícula is not valid, which includes a book code that is not one of the nine books.
-- [getCbo](https://brazilian-utils.com.br/utilities.md#getcbo): Look a CBO (Classificação Brasileira de Ocupações) code up and get its official occupation title, in the `{ code, description }` record every lookup of this library returns.
+- [getLegalNaturesByCategory](https://brazilian-utils.com.br/utilities.md#getlegalnaturesbycategory): Get every legal nature of a CONCLA category, the group given by the first digit of the code.
+- [getCertidaoInfo](https://brazilian-utils.com.br/utilities.md#getcertidaoinfo): Parse the matrícula of a certidão de registro civil into its fields.
+- [getCbo](https://brazilian-utils.com.br/utilities.md#getcbo): Look a CBO (Classificação Brasileira de Ocupações) code up and get its official occupation title.
 - [getCnae](https://brazilian-utils.com.br/utilities.md#getcnae): Look a CNAE (Classificação Nacional de Atividades Econômicas) subclass code up and get its code and official description.
-- [getCfop](https://brazilian-utils.com.br/utilities.md#getcfop): Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description, as the consolidated Anexo II of Convênio SINIEF s/nº 1970 words it, in the text in force, last amended by Ajuste SINIEF 39/25.
+- [getCfop](https://brazilian-utils.com.br/utilities.md#getcfop): Look a CFOP (Código Fiscal de Operações e Prestações) code up and get its code and official description.
 
 ## Other utilities
 
-- [convertLicensePlateToMercosul](https://brazilian-utils.com.br/utilities.md#convertlicenseplatetomercosul): Convert an old format Brazilian license plate (`LLLNNNN`) to the Mercosul format (`LLLNLNN`), following the official conversion table: the digit in the 5th position becomes a letter (`0` through `9` mapping to `A` through `J`).
-- [convertNumberToWords](https://brazilian-utils.com.br/utilities.md#convertnumbertowords): Formats an integer as its Brazilian Portuguese cardinal number words ("por extenso"), e.g. `1235` becomes `"mil duzentos e trinta e cinco"`.
-- [convertCurrencyToWords](https://brazilian-utils.com.br/utilities.md#convertcurrencytowords): Formats a monetary amount in Brazilian Reais as its "por extenso" textual representation, the style used to write out the amount by hand on cheques and contracts, e.g. `1523.45` becomes `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`.
-- [convertDateToWords](https://brazilian-utils.com.br/utilities.md#convertdatetowords): Formats a date as its Brazilian Portuguese "por extenso" textual representation, e.g. `"01/01/2024"` becomes `"primeiro de janeiro de dois mil e vinte e quatro"`.
-- [isHoliday](https://brazilian-utils.com.br/utilities.md#isholiday): Check if a specific date is a Brazilian holiday.
-- [isBusinessDay](https://brazilian-utils.com.br/utilities.md#isbusinessday): Check if a date is a Brazilian business day (dia útil).
-- [addBusinessDays](https://brazilian-utils.com.br/utilities.md#addbusinessdays): Add a number of Brazilian business days (dias úteis) to a date, skipping Saturdays, Sundays and Brazilian holidays exactly as `isBusinessDay` defines them (same `BusinessDayOptions`: `options.includeOptional`, default `true`, and `options.stateCode` work exactly as they do there).
-- [subBusinessDays](https://brazilian-utils.com.br/utilities.md#subbusinessdays): Subtract a number of Brazilian business days (dias úteis) from a date: `subBusinessDays(date, amount, options?)` is `addBusinessDays(date, -amount, options)`, which is exactly how it is implemented, so every detail above (the preserved time-of-day, the untouched input, an `amount` of `0` returning the date unchanged, the 1900-2099 range and the `null` cases) holds here too, `options.stateCode` and `options.includeOptional` included.
-- [differenceInBusinessDays](https://brazilian-utils.com.br/utilities.md#differenceinbusinessdays): Count the number of Brazilian business days (dias úteis) between two dates, mirroring the semantics of date-fns' `differenceInBusinessDays` (verified against its source), argument order included: `differenceInBusinessDays(laterDate, earlierDate, options?)`.
-- [capitalize](https://brazilian-utils.com.br/utilities.md#capitalize): Transforms the first letter into a capital one of each word, the way a Brazilian name, company name or address is written, with no options needed.
-- [removeAccents](https://brazilian-utils.com.br/utilities.md#removeaccents): Remove diacritical marks (accents, tildes, cedillas) from a string, decomposing every accented character into its base letter plus combining marks (Unicode NFD) and dropping the combining marks.
+- [convertLicensePlateToMercosul](https://brazilian-utils.com.br/utilities.md#convertlicenseplatetomercosul): Convert an old format Brazilian license plate (`LLLNNNN`) to the Mercosul format (`LLLNLNN`).
+- [convertNumberToWords](https://brazilian-utils.com.br/utilities.md#convertnumbertowords): Write an integer in Brazilian Portuguese cardinal words ("por extenso"): `1235` becomes `"mil duzentos e trinta e cinco"`.
+- [convertCurrencyToWords](https://brazilian-utils.com.br/utilities.md#convertcurrencytowords): Write an amount in reais in words ("por extenso"), as on cheques and contracts: `1523.45` becomes `"mil quinhentos e vinte e três reais e quarenta e cinco centavos"`.
+- [convertDateToWords](https://brazilian-utils.com.br/utilities.md#convertdatetowords): Write a date in Brazilian Portuguese words ("por extenso"): `"01/01/2024"` becomes `"primeiro de janeiro de dois mil e vinte e quatro"`.
+- [isHoliday](https://brazilian-utils.com.br/utilities.md#isholiday): Check if a date is a Brazilian holiday.
+- [isBusinessDay](https://brazilian-utils.com.br/utilities.md#isbusinessday): Check if a date is a Brazilian business day (dia útil): not a Saturday, a Sunday or a holiday `getHolidays` lists for its local calendar day.
+- [addBusinessDays](https://brazilian-utils.com.br/utilities.md#addbusinessdays): Add a number of Brazilian business days (dias úteis) to a date, skipping Saturdays, Sundays and the holidays `isBusinessDay` skips.
+- [subBusinessDays](https://brazilian-utils.com.br/utilities.md#subbusinessdays): Subtract a number of Brazilian business days (dias úteis) from a date.
+- [differenceInBusinessDays](https://brazilian-utils.com.br/utilities.md#differenceinbusinessdays): Count the Brazilian business days (dias úteis) between two dates.
+- [capitalize](https://brazilian-utils.com.br/utilities.md#capitalize): Capitalize the first letter of each word, the way a Brazilian name, company name or address is written, with no options needed.
+- [removeAccents](https://brazilian-utils.com.br/utilities.md#removeaccents): Remove diacritical marks (accents, tildes, cedillas) from a string.
 - [toStandardSchema](https://brazilian-utils.com.br/utilities.md#tostandardschema): Wraps an `isValid*` utility (or any function of the same shape) in a Standard Schema, the interface that form libraries, routers and API frameworks accept as a validator whichever library produced it: TanStack Form, tRPC, Hono, react-hook-form and the rest, next to schemas made with Zod, Valibot or ArkType.
 
 ## Optional
