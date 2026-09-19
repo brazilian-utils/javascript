@@ -100,6 +100,51 @@ describe("differenceInBusinessDays", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should count the Saturday of the first week of 2024 (Mon 2024-01-01 to Mon 2024-01-08: 4 without the option, 5 with it)", () => {
+			expect(differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1))).toBe(4);
+			expect(
+				differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), {
+					includeSaturday: true,
+				}),
+			).toBe(5);
+		});
+
+		it("should skip Finados on Saturday 2024-11-02 and count the plain Saturday 2024-11-09 (Nov 1 to Nov 11: 6 without the option, 7 with it)", () => {
+			expect(differenceInBusinessDays(new Date(2024, 10, 11), new Date(2024, 10, 1))).toBe(6);
+			expect(
+				differenceInBusinessDays(new Date(2024, 10, 11), new Date(2024, 10, 1), {
+					includeSaturday: true,
+				}),
+			).toBe(7);
+		});
+
+		it("should count only Friday 2024-11-01 over a Saturday holiday and a Sunday (Nov 1 to Nov 4)", () => {
+			const result = differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), {
+				includeSaturday: true,
+			});
+
+			expect(result).toBe(1);
+		});
+
+		it("should keep the sign convention when the later date comes first (Mon 2024-01-08 down to Tue 2024-01-02: -5 without the option, -6 with it)", () => {
+			expect(differenceInBusinessDays(new Date(2024, 0, 1), new Date(2024, 0, 8))).toBe(-5);
+			expect(
+				differenceInBusinessDays(new Date(2024, 0, 1), new Date(2024, 0, 8), {
+					includeSaturday: true,
+				}),
+			).toBe(-6);
+		});
+
+		it("should give the same count as no options when includeSaturday is false", () => {
+			const result = differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), {
+				includeSaturday: false,
+			});
+
+			expect(result).toBe(4);
+		});
+	});
+
 	describe("invalid input", () => {
 		it("should return null when called without arguments", () => {
 			// @ts-expect-error: intentionally invalid input
@@ -168,11 +213,27 @@ describe("differenceInBusinessDays", () => {
 		it("should count the 20 business days December 2011 has there, the missing 30th excluded", () => {
 			expect(differenceInBusinessDays(new Date(2011, 11, 1), new Date(2011, 11, 31))).toBe(-20);
 		});
+
+		it("should add the five Saturdays of 2 to 31 December 2011 with includeSaturday, still without the 30th (-25)", () => {
+			const result = differenceInBusinessDays(new Date(2011, 11, 1), new Date(2011, 11, 31), {
+				includeSaturday: true,
+			});
+
+			expect(result).toBe(-25);
+		});
 	});
 
 	inTimeZone("UTC", () => {
 		it("should count 21 for the same December, where the 30th is an ordinary Friday", () => {
 			expect(differenceInBusinessDays(new Date(2011, 11, 1), new Date(2011, 11, 31))).toBe(-21);
+		});
+
+		it("should count 26 for the same December with includeSaturday", () => {
+			const result = differenceInBusinessDays(new Date(2011, 11, 1), new Date(2011, 11, 31), {
+				includeSaturday: true,
+			});
+
+			expect(result).toBe(-26);
 		});
 	});
 

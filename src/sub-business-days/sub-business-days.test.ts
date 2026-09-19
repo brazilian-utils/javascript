@@ -113,6 +113,32 @@ describe("subBusinessDays", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should stop on Saturday when it counts (Mon 2024-01-08 - 1 -> Sat 2024-01-06)", () => {
+			const result = subBusinessDays(new Date(2024, 0, 8, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+
+		it("should keep walking back to Friday without the option (Mon 2024-01-08 - 1 -> Fri 2024-01-05)", () => {
+			expect(subBusinessDays(new Date(2024, 0, 8, 12), 1, { includeSaturday: false })).toEqual(
+				new Date(2024, 0, 5, 12),
+			);
+		});
+
+		it("should still walk back over a holiday that falls on a Saturday (Mon 2024-11-04 - 1 -> Fri 2024-11-01, Finados)", () => {
+			const result = subBusinessDays(new Date(2024, 10, 4, 12), 1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 10, 1, 12));
+		});
+
+		it("should walk forwards onto Saturday for a negative amount (Fri 2024-01-05 - -1 -> Sat 2024-01-06)", () => {
+			const result = subBusinessDays(new Date(2024, 0, 5, 12), -1, { includeSaturday: true });
+
+			expect(result).toEqual(new Date(2024, 0, 6, 12));
+		});
+	});
+
 	describe("invalid input", () => {
 		for (const [label, call] of NULL_CALLS) {
 			it(`should return null for ${label}`, () => {
@@ -152,6 +178,22 @@ describe("subBusinessDays", () => {
 		});
 	});
 
+	describe("the last business day of a month in the labour law count (includeSaturday)", () => {
+		const labour = { includeSaturday: true };
+
+		it("should give the Saturday August 2024 ends on (Sat 2024-08-31, Fri 2024-08-30 without the option)", () => {
+			expect(subBusinessDays(new Date(2024, 8, 1), 1, labour)).toEqual(new Date(2024, 7, 31));
+			expect(subBusinessDays(new Date(2024, 8, 1), 1)).toEqual(new Date(2024, 7, 30));
+		});
+
+		it("should give Sat 2024-11-30 nationally, and Fri 2024-11-29 in the DF, where that Saturday is Dia do Evangélico", () => {
+			expect(subBusinessDays(new Date(2024, 11, 1), 1, labour)).toEqual(new Date(2024, 10, 30));
+			expect(subBusinessDays(new Date(2024, 11, 1), 1, { ...labour, stateCode: "DF" })).toEqual(
+				new Date(2024, 10, 29),
+			);
+		});
+	});
+
 	inTimeZone("Pacific/Apia", () => {
 		it("should give Thu 2011-12-29 as the last business day of December 2011, skipping the 30th Samoa never had", () => {
 			expect(subBusinessDays(new Date(2012, 0, 1), 1)).toEqual(new Date(2011, 11, 29));
@@ -161,6 +203,21 @@ describe("subBusinessDays", () => {
 	inTimeZone("Pacific/Apia", () => {
 		it("should walk back over 30 December 2011, the local day Samoa skipped to cross the date line", () => {
 			expect(subBusinessDays(new Date(2012, 0, 5, 12), 4)).toEqual(new Date(2011, 11, 29, 12));
+		});
+
+		it("should give Sat 2011-12-31 and then Thu 2011-12-29 as the last two labour law business days of December 2011", () => {
+			expect(subBusinessDays(new Date(2012, 0, 1), 1, { includeSaturday: true })).toEqual(
+				new Date(2011, 11, 31),
+			);
+			expect(subBusinessDays(new Date(2012, 0, 1), 2, { includeSaturday: true })).toEqual(
+				new Date(2011, 11, 29),
+			);
+		});
+
+		it("should walk back over it with includeSaturday too, counting Sat 2011-12-31 and landing on Thu 2011-12-29", () => {
+			expect(subBusinessDays(new Date(2012, 0, 2, 12), 2, { includeSaturday: true })).toEqual(
+				new Date(2011, 11, 29, 12),
+			);
 		});
 	});
 

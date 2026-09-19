@@ -48,6 +48,7 @@ export type BoletoInfo = {
 export type BusinessDayOptions = {
     stateCode?: StateCode;
     includeOptional?: boolean;
+    includeSaturday?: boolean;
 };
 
 // @public
