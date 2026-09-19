@@ -31,6 +31,7 @@ export { type FormatCaepfOptions, formatCaepf } from "./format-caepf/format-caep
 export { type FormatCeiOptions, formatCei } from "./format-cei/format-cei";
 export { type FormatCepOptions, formatCep } from "./format-cep/format-cep";
 export { type FormatCertidaoOptions, formatCertidao } from "./format-certidao/format-certidao";
+export { formatCid10 } from "./format-cid10/format-cid10";
 export { type FormatCnaeOptions, formatCnae } from "./format-cnae/format-cnae";
 export { type FormatCnhOptions, formatCnh } from "./format-cnh/format-cnh";
 export { type FormatCnoOptions, formatCno } from "./format-cno/format-cno";
@@ -112,6 +113,7 @@ export {
 	getCertidaoInfo,
 } from "./get-certidao-info/get-certidao-info";
 export { type Cfop, getCfop } from "./get-cfop/get-cfop";
+export { type Cid10, getCid10 } from "./get-cid10/get-cid10";
 export { getCities } from "./get-cities/get-cities";
 export { type Cnae, getCnae } from "./get-cnae/get-cnae";
 export {
@@ -179,6 +181,7 @@ export {
 	isValidCertidao,
 } from "./is-valid-certidao/is-valid-certidao";
 export { isValidCfop } from "./is-valid-cfop/is-valid-cfop";
+export { isValidCid10 } from "./is-valid-cid10/is-valid-cid10";
 export { isValidCnae } from "./is-valid-cnae/is-valid-cnae";
 export { isValidCnh } from "./is-valid-cnh/is-valid-cnh";
 export { isValidCno } from "./is-valid-cno/is-valid-cno";
@@ -227,6 +230,7 @@ export { parseCei } from "./parse-cei/parse-cei";
 export { parseCep } from "./parse-cep/parse-cep";
 export { parseCertidao } from "./parse-certidao/parse-certidao";
 export { parseCfop } from "./parse-cfop/parse-cfop";
+export { parseCid10 } from "./parse-cid10/parse-cid10";
 export { parseCnae } from "./parse-cnae/parse-cnae";
 export { parseCnh } from "./parse-cnh/parse-cnh";
 export { parseCno } from "./parse-cno/parse-cno";

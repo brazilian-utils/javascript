@@ -85,6 +85,7 @@ A handful of utils are the exception: each embeds an official dataset, so it wei
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
+| `getCid10` | CID-10 V2008 categories and subcategories, with the DATASUS descriptions | 1030.4 KB | 146.9 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
 | `getCities` | 5571 IBGE municipality names | 154.2 KB | 49.8 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
@@ -92,6 +93,7 @@ A handful of utils are the exception: each embeds an official dataset, so it wei
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
+| `isValidCid10` | CID-10 V2008 category and subcategory codes, without the descriptions | 27.0 KB | 7.4 KB |
 
 Importing any of them from the root, even alongside a single small util, pulls that whole dataset into your main bundle, because this package ships as a single ESM module: a dynamic `import()` of the root (`await import('@brazilian-utils/brazilian-utils')`) still resolves to that same one file, so it can't be split out on its own. A bundler doing code-splitting needs a separate module to split *into*.
 
