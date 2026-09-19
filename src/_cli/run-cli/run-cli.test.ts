@@ -2,11 +2,33 @@ import * as fc from "fast-check";
 
 import { PROTOTYPE_KEYS, anyText } from "../../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../../_internals/test/runtime";
-import * as brazilianUtils from "../../index";
+import { addBusinessDays } from "../../add-business-days/add-business-days";
+import { convertNumberToWords } from "../../convert-number-to-words/convert-number-to-words";
+import { formatCnpj } from "../../format-cnpj/format-cnpj";
+import { formatCpf } from "../../format-cpf/format-cpf";
+import { formatCurrency } from "../../format-currency/format-currency";
+import { generateCnpj } from "../../generate-cnpj/generate-cnpj";
+import { generateCpf } from "../../generate-cpf/generate-cpf";
+import {
+	GetAddressInfoByCepError,
+	getAddressInfoByCep,
+} from "../../get-address-info-by-cep/get-address-info-by-cep";
+import { getBankByCode } from "../../get-bank-by-code/get-bank-by-code";
+import { getCepInfoByAddress } from "../../get-cep-info-by-address/get-cep-info-by-address";
+import { getHolidays } from "../../get-holidays/get-holidays";
+import type * as brazilianUtils from "../../index";
+import { isBusinessDay } from "../../is-business-day/is-business-day";
+import { isHoliday } from "../../is-holiday/is-holiday";
+import { isValidCnpj } from "../../is-valid-cnpj/is-valid-cnpj";
+import { isValidCpf } from "../../is-valid-cpf/is-valid-cpf";
+import { isValidIe } from "../../is-valid-ie/is-valid-ie";
 import { CLI_USAGE } from "../constants";
 import { type CliResult, type CliStdin, type RunCliParams, runCli } from "./run-cli";
 
 const USAGE_HINT = 'Run "brazilian-utils --help" for usage.\n';
+
+const HOLIDAYS_2026_HEAD =
+	'[\n  {\n    "name": "Ano novo",\n    "date": "2026-01-01",\n    "type": "national"\n  },';
 
 const terminal: CliStdin = {
 	isPiped: false,
@@ -66,8 +88,28 @@ const exitCodeOf = async (result: Promise<CliResult>) => {
 	return exitCode;
 };
 
+const publicApi = {
+	GetAddressInfoByCepError,
+	addBusinessDays,
+	convertNumberToWords,
+	formatCnpj,
+	formatCpf,
+	formatCurrency,
+	generateCnpj,
+	generateCpf,
+	getAddressInfoByCep,
+	getBankByCode,
+	getCepInfoByAddress,
+	getHolidays,
+	isBusinessDay,
+	isHoliday,
+	isValidCnpj,
+	isValidCpf,
+	isValidIe,
+};
+
 const runApi = (argv: string[], stdin: CliStdin = terminal) =>
-	runCli({ argv, api: brazilianUtils, version: "9.8.7", stdin });
+	runCli({ argv, api: publicApi, version: "9.8.7", stdin });
 
 const apiStdout = (argv: string[], stdin: CliStdin = terminal) => stdoutOf(runApi(argv, stdin));
 
@@ -408,6 +450,22 @@ describe("runCli", () => {
 			expect(calls).toEqual([[]]);
 		});
 
+		test("should not read a piped stdin for a utility whose first argument is an options object", async () => {
+			const script = pipe("hello world\n");
+			const holidays = await apiStdout(["getHolidays", "--year", "2026"], script);
+
+			expect(await apiStdout(["isHoliday", "--target-date", "2026-09-07"], script)).toBe("true\n");
+			expect(await apiStdout(["isHoliday", "--target-date", "2026-09-08"], script)).toBe("false\n");
+			expect(holidays.slice(0, 83)).toBe(HOLIDAYS_2026_HEAD);
+			expect(await apiStdout(["isHoliday"], script)).toBe("false\n");
+		});
+
+		test("should still read a - from stdin for a utility that takes an options object", async () => {
+			const holidays = await apiStdout(["getHolidays", "-"], pipe("2026\n"));
+
+			expect(holidays.slice(0, 83)).toBe(HOLIDAYS_2026_HEAD);
+		});
+
 		test("should read every - from stdin, piped or not", async () => {
 			const { api, calls } = createApi();
 
@@ -502,10 +560,33 @@ describe("runCli", () => {
 			expect(await apiStdout(["formatCnpj", "12345678000195", "--obfuscate"])).toBe(
 				"**.345.678/0001-**\n",
 			);
-			expect(await apiStdout(["formatCurrency", "1234.5", "--no-symbol"])).toBe("1.234,50\n");
+			expect(await apiStdout(["formatCurrency", "1234.5"])).toBe("1.234,50\n");
+			expect(await apiStdout(["formatCurrency", "1234.5", "--symbol"])).toBe("R$ 1.234,50\n");
+			expect(await apiStdout(["formatCurrency", "1234.5", "--symbol=false"])).toBe("1.234,50\n");
 			expect(await apiStdout(["formatCpf", "--obfuscate"], pipe("12345678909\n"))).toBe(
 				"***.456.789-**\n",
 			);
+		});
+
+		test("should exit with 1 when a formatter cannot read its value", async () => {
+			expect(await runApi(["formatCpf", "abc"])).toEqual({
+				stdout: "\n",
+				stderr: "",
+				exitCode: 1,
+			});
+		});
+
+		test("should reject a boolean option that spells neither true nor false", async () => {
+			expect(await runApi(["formatCurrency", "1234.5", "--symbol=no"])).toEqual({
+				stdout: "",
+				stderr: `Option --symbol needs true or false.\n${USAGE_HINT}`,
+				exitCode: 2,
+			});
+			expect(await runApi(["formatCurrency", "1234.5", "--no-symbol=true"])).toEqual({
+				stdout: "",
+				stderr: `Option --no-symbol does not take a value.\n${USAGE_HINT}`,
+				exitCode: 2,
+			});
 		});
 
 		test("should look up, printing JSON and exiting with 1 for a miss", async () => {
@@ -540,9 +621,7 @@ describe("runCli", () => {
 			);
 			const holidays = await apiStdout(["getHolidays", "2026"]);
 
-			expect(holidays.slice(0, 83)).toBe(
-				'[\n  {\n    "name": "Ano novo",\n    "date": "2026-01-01",\n    "type": "national"\n  },',
-			);
+			expect(holidays.slice(0, 83)).toBe(HOLIDAYS_2026_HEAD);
 		});
 
 		test("should report the rejection of a network utility without touching the network", async () => {
@@ -591,7 +670,7 @@ describe("runCli", () => {
 					async (name, argv) => {
 						const result = await runCli({
 							argv: [name, ...argv],
-							api: brazilianUtils,
+							api: publicApi,
 							version: "9.8.7",
 							stdin: pipe(""),
 						});
@@ -610,6 +689,6 @@ describe("runCli types", () => {
 		expectTypeOf(runCli).returns.toEqualTypeOf<Promise<CliResult>>();
 		expectTypeOf<CliResult["exitCode"]>().toEqualTypeOf<0 | 1 | 2>();
 		expectTypeOf<RunCliParams["api"]>().toEqualTypeOf<Readonly<Record<string, unknown>>>();
-		expectTypeOf(brazilianUtils).toExtend<RunCliParams["api"]>();
+		expectTypeOf<typeof brazilianUtils>().toExtend<RunCliParams["api"]>();
 	});
 });

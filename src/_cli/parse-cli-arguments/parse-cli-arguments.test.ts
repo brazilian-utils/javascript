@@ -77,11 +77,35 @@ describe("parseCliArguments", () => {
 		});
 	});
 
-	test("should keep the text given to a boolean option with an equals sign", () => {
-		expect(parseCliArguments(["--pad=false", "--no-pad=x"]).options).toEqual({
-			pad: "false",
-			noPad: "x",
+	test("should read the value given to a boolean option with an equals sign as the boolean", () => {
+		expect(parseCliArguments(["--pad=false", "--symbol=true"]).options).toEqual({
+			pad: false,
+			symbol: true,
 		});
+	});
+
+	test("should reject a boolean option whose value spells neither true nor false", () => {
+		expect(parseCliArguments(["--pad=x"])).toEqual({
+			positionals: [],
+			options: {},
+			error: "Option --pad needs true or false.",
+		});
+		expect(parseCliArguments(["1", "--include-optional=yes", "--pad"])).toEqual({
+			positionals: ["1"],
+			options: {},
+			error: "Option --include-optional needs true or false.",
+		});
+	});
+
+	test("should reject a value given to --no-flag", () => {
+		expect(parseCliArguments(["--no-pad=x"])).toEqual({
+			positionals: [],
+			options: {},
+			error: "Option --no-pad does not take a value.",
+		});
+		expect(parseCliArguments(["--no-symbol=false"]).error).toBe(
+			"Option --no-symbol does not take a value.",
+		);
 	});
 
 	test("should read --no-key as an ordinary text option when key is not a boolean option", () => {
@@ -98,6 +122,8 @@ describe("parseCliArguments", () => {
 			options: { help: true },
 			error: null,
 		});
+		expect(parseCliArguments(["--help=true"]).options).toEqual({ help: true });
+		expect(parseCliArguments(["--help=x"]).error).toBe("Option --help needs true or false.");
 	});
 
 	test("should let the last occurrence of an option win", () => {

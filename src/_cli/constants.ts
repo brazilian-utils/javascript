@@ -73,6 +73,18 @@ type CliPositionalKinds = {
 	]: PositionalKindsOf<ArgumentsOf<Name>>;
 };
 
+type CliParamsUtilities = {
+	[
+		Name in keyof Api as Name extends Capitalize<Name & string>
+			? never
+			: ArgumentsOf<Name> extends [unknown, ...unknown[]]
+				? PositionalKindsOf<ArgumentsOf<Name>> extends []
+					? Name
+					: never
+				: never
+	]: true;
+};
+
 /**
  * Exit codes of the command line: a negative answer (`false`, `null` or a utility that throws) is
  * told apart from a call that could not be made at all.
@@ -126,6 +138,26 @@ export const CLI_POSITIONAL_KINDS: Readonly<Record<string, readonly CliPositiona
 	subBusinessDays: ["date", "number"],
 } satisfies CliPositionalKinds & Record<string, CliPositionalKind[]>;
 
+/**
+ * Every utility whose first argument is an options or params object, derived from the signatures
+ * the same way. Their values are written as options, so stdin is only read for them when a `-`
+ * asks for it: a command run with stdin attached to a file or a pipe, as a shell script is, must
+ * not turn that text into a first argument. `getHolidays` is here through its params overload,
+ * and still takes a year as a written positional value.
+ */
+export const CLI_PARAMS_UTILITIES: Readonly<Record<string, true>> = {
+	generateBoleto: true,
+	generatePixPayload: true,
+	generateProcessoJuridico: true,
+	getCepInfoByAddress: true,
+	getHolidays: true,
+	getLegalNatures: true,
+	getMunicipality: true,
+	isHoliday: true,
+	isValidBankAccount: true,
+	isValidRegistroProfissional: true,
+} satisfies CliParamsUtilities;
+
 /** The text printed by `--help`. */
 export const CLI_USAGE = `Usage: brazilian-utils <utility> [value...] [--option value] [--flag] [--json '<object>']
 
@@ -141,7 +173,8 @@ Runs any utility exported by @brazilian-utils/brazilian-utils.
 
 Arguments:
   value              Positional arguments of the utility, in order. "-" reads the value from
-                     stdin, and so does leaving the value out while stdin is a pipe or a file.
+                     stdin, and so does leaving the value out while stdin is a pipe or a file,
+                     unless the first argument of the utility is an options object.
   --key value        An entry of the options (or params) object. --key=value and --kebab-case
                      are accepted too.
   --flag, --no-flag  A boolean option set to true or to false.
@@ -156,8 +189,8 @@ Commands:
   --version, -v      Prints the version of the package.
 
 Output: strings and numbers as they are, anything else as JSON.
-Exit codes: 0 on success, 1 when the answer is false or null or the utility throws, 2 when the
-command line itself is wrong.
+Exit codes: 0 on success, 1 when the answer is negative (false, null or the empty string a
+formatter answers with) or the utility throws, 2 when the command line itself is wrong.
 
 Documentation: https://brazilian-utils.com.br
 `;

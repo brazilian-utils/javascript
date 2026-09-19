@@ -7,8 +7,11 @@ import { type CliOutput, toCliOutput } from "./to-cli-output";
 describe("toCliOutput", () => {
 	test("should print a string as it is", () => {
 		expect(toCliOutput("123.456.789-09")).toEqual({ text: "123.456.789-09", exitCode: 0 });
-		expect(toCliOutput("")).toEqual({ text: "", exitCode: 0 });
 		expect(toCliOutput('say "oi"')).toEqual({ text: 'say "oi"', exitCode: 0 });
+	});
+
+	test("should exit with 1 for the empty string a formatter answers with", () => {
+		expect(toCliOutput("")).toEqual({ text: "", exitCode: 1 });
 	});
 
 	test("should print a number as it is", () => {
@@ -111,10 +114,10 @@ describe("toCliOutput", () => {
 	});
 
 	describe("properties", () => {
-		test("should print any string unchanged and exit with 0", () => {
+		test("should print any string unchanged", () => {
 			fc.assert(
 				fc.property(anyText, (text) => {
-					expect(toCliOutput(text)).toEqual({ text, exitCode: 0 });
+					expect(toCliOutput(text)).toEqual({ text, exitCode: text === "" ? 1 : 0 });
 				}),
 			);
 		});
@@ -129,13 +132,15 @@ describe("toCliOutput", () => {
 			);
 		});
 
-		test("should exit with 1 only for false, null and undefined", () => {
+		test("should exit with 1 only for false, null, undefined and the empty string", () => {
 			fc.assert(
 				fc.property(fc.anything(), (value) => {
 					const { text, exitCode } = toCliOutput(value);
+					const isNegative =
+						value === false || value === null || value === undefined || value === "";
 
 					expect(typeof text).toBe("string");
-					expect(exitCode).toBe(value === false || value === null || value === undefined ? 1 : 0);
+					expect(exitCode).toBe(isNegative ? 1 : 0);
 				}),
 			);
 		});

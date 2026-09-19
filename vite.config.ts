@@ -517,6 +517,15 @@ export default defineConfig({
 					"jsdoc/require-returns": "off",
 				},
 			},
+			// The command line dispatches to the public API, so its test drives a sample of real
+			// utilities. They are imported one by one, never through the barrel: a second copy of
+			// the whole module graph is more than a browser test page can instantiate.
+			{
+				files: ["src/_cli/run-cli/run-cli.test.ts"],
+				rules: {
+					"import/max-dependencies": "off",
+				},
+			},
 			{
 				env: {
 					node: true,
@@ -591,7 +600,8 @@ export default defineConfig({
 		},
 		// The command line: one ESM file with a shebang, no declarations (it exports nothing) and
 		// the library left external (see `externalizeLibrary`), so it costs library consumers
-		// nothing: no entry point imports it and `exports` does not list it.
+		// nothing: no entry point imports it and `exports` maps "./cli" to null, so the only way
+		// to reach it is the `bin`.
 		{
 			...sharedPack,
 			sourcemap: false,

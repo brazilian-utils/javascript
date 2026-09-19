@@ -28,7 +28,9 @@ const toBoolean = (value: string): boolean | string => {
  * from `--json`) is handed back untouched, and so is text with no kind, which stays a string so
  * that codes such as `"001"` keep their leading zeros. Text that does not spell its kind becomes
  * the invalid value of that kind (`NaN`, an invalid `Date`), which every utility already answers
- * with `false`, `null` or `""` instead of throwing.
+ * with `false`, `null` or `""` instead of throwing. A boolean has no invalid value, so text that
+ * spells neither `"true"` nor `"false"` is left as it is; `parseCliArguments` rejects that
+ * spelling before it gets here, and only a `--json` entry can still carry it.
  *
  * A date is written `YYYY-MM-DD` and means that local calendar day, the way the date utilities of
  * this library read a `Date`. A day that does not exist (`2024-02-30`, month `13`) rolls over into

@@ -1,5 +1,11 @@
 import { coerceCliValue } from "../coerce-cli-value/coerce-cli-value";
-import { CLI_EXIT_CODES, CLI_OPTION_KINDS, CLI_POSITIONAL_KINDS, CLI_USAGE } from "../constants";
+import {
+	CLI_EXIT_CODES,
+	CLI_OPTION_KINDS,
+	CLI_PARAMS_UTILITIES,
+	CLI_POSITIONAL_KINDS,
+	CLI_USAGE,
+} from "../constants";
 import { parseCliArguments } from "../parse-cli-arguments/parse-cli-arguments";
 import { toCliOutput } from "../to-cli-output/to-cli-output";
 
@@ -132,7 +138,11 @@ const dispatch = (
 	if (base === null) return Promise.resolve(rejectUsage("Option --json needs a JSON object."));
 
 	const isImplicit =
-		positionals.length === 0 && json === undefined && stdin.isPiped && utility.length > 0;
+		positionals.length === 0 &&
+		json === undefined &&
+		stdin.isPiped &&
+		utility.length > 0 &&
+		!Object.hasOwn(CLI_PARAMS_UTILITIES, command);
 	const kinds = Object.hasOwn(CLI_POSITIONAL_KINDS, command)
 		? CLI_POSITIONAL_KINDS[command]
 		: undefined;
@@ -177,8 +187,9 @@ const resolveCommand = (
  * utility's arguments, in order, and the `--key value` options, merged over the `--json` object,
  * become its last argument. Values stay text unless `CLI_POSITIONAL_KINDS` or `CLI_OPTION_KINDS`
  * give them a kind. A value written as `-` is read from stdin, and so is a value left out when
- * stdin is piped, the utility takes arguments and no `--json` was given. A promise returned by
- * the utility (`getAddressInfoByCep`, `getCepInfoByAddress`) is awaited.
+ * stdin is piped, the utility takes a value as its first argument (so not one of
+ * `CLI_PARAMS_UTILITIES`) and no `--json` was given. A promise returned by the utility
+ * (`getAddressInfoByCep`, `getCepInfoByAddress`) is awaited.
  *
  * It never throws: a utility that throws or rejects becomes exit code `1` with the error on
  * stderr, and a command line that cannot be read becomes exit code `2`.

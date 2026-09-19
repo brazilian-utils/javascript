@@ -87,8 +87,10 @@ but the few rules below hold everywhere:
   `vite.config.ts` with the library left external. No library entry point imports it, so it never
   reaches a consumer's bundle. Arguments are strings unless `src/_cli/constants.ts` says otherwise:
   `CLI_OPTION_KINDS` and `CLI_POSITIONAL_KINDS` list the options and positional arguments that are
-  a number, a boolean, a list or a date, and their types are derived from the public signatures,
-  so `npm run check` fails when a new non-string option or argument is missing from them.
+  a number, a boolean, a list or a date, and `CLI_PARAMS_UTILITIES` the utilities whose first
+  argument is an options object, which therefore never read stdin on their own. All three types
+  are derived from the public signatures, so `npm run check` fails when a new non-string option or
+  argument, or a new params-only utility, is missing from them.
 - There are no runtime dependencies (see [Zero runtime dependencies](#zero-runtime-dependencies)),
   so the trust boundary of the published package is this repository, its build toolchain and the
   npm registry; [MAINTAINERS.md](MAINTAINERS.md) lists who can change what, and

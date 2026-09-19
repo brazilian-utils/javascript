@@ -21,15 +21,27 @@ const isFlag = (name: string): boolean =>
 	name === "help" ||
 	(Object.hasOwn(CLI_OPTION_KINDS, name) && CLI_OPTION_KINDS[name] === "boolean");
 
-const toEntry = (body: string): [string, string | boolean] | string => {
-	const separator = body.indexOf("=");
-	const name = toCamelCase(separator === -1 ? body : body.slice(0, separator));
-	const negated = toCamelCase(body.slice(NEGATION_PREFIX.length));
+type Token = { option: [string, string | boolean] } | { pending: string } | { error: string };
 
-	if (separator !== -1) return [name, body.slice(separator + 1)];
-	if (isFlag(name)) return [name, true];
-	if (body.startsWith(NEGATION_PREFIX) && isFlag(negated)) return [negated, false];
-	return name;
+const toToken = (body: string): Token => {
+	const separator = body.indexOf("=");
+	const written = separator === -1 ? body : body.slice(0, separator);
+	const name = toCamelCase(written);
+	const negated = toCamelCase(written.slice(NEGATION_PREFIX.length));
+	const isNegated = written.startsWith(NEGATION_PREFIX) && isFlag(negated);
+
+	if (separator === -1) {
+		if (isFlag(name)) return { option: [name, true] };
+		if (isNegated) return { option: [negated, false] };
+		return { pending: name };
+	}
+
+	const value = body.slice(separator + 1);
+
+	if (isNegated) return { error: `Option --${written} does not take a value.` };
+	if (!isFlag(name)) return { option: [name, value] };
+	if (value === "true" || value === "false") return { option: [name, value === "true"] };
+	return { error: `Option --${written} needs true or false.` };
 };
 
 /**
@@ -39,7 +51,11 @@ const toEntry = (body: string): [string, string | boolean] | string => {
  * (the keys listed as `"boolean"` in `CLI_OPTION_KINDS`, plus `help`) to `true` or `false`, and
  * `--kebab-case` names are read as `camelCase`. Everything after a bare `--` is positional, and
  * so is anything that does not start with `--`, which covers negative numbers and the `-` that
- * stands for stdin. Nothing is converted here: values stay text.
+ * stands for stdin. Apart from the booleans, nothing is converted here: values stay text.
+ *
+ * A boolean option spelled `--flag=value` takes only `true` or `false`, and `--no-flag` takes no
+ * value at all. Anything else is a usage error rather than an option that looks set and holds
+ * text, which any non-empty value would make true.
  *
  * @param {readonly string[]} argv - The arguments after the utility name.
  * @returns {ParsedCliArguments} The positional values and the options, or the reason the command line cannot be read.
@@ -52,12 +68,15 @@ const toEntry = (body: string): [string, string | boolean] | string => {
  * // { positionals: [], options: { year: "2026", stateCode: "SP", pad: false }, error: null }
  * parseCliArguments(["--year"]);
  * // { positionals: [], options: {}, error: "Option --year needs a value." }
+ * parseCliArguments(["--pad=yes"]);
+ * // { positionals: [], options: {}, error: "Option --pad needs true or false." }
  * ```
  */
 export const parseCliArguments = (argv: readonly string[]): ParsedCliArguments => {
 	const positionals: string[] = [];
 	const entries: [string, string | boolean][] = [];
 	let pending: string | null = null;
+	let rejected: string | null = null;
 	let isLiteral = false;
 
 	for (const token of argv) {
@@ -70,10 +89,14 @@ export const parseCliArguments = (argv: readonly string[]): ParsedCliArguments =
 		} else if (isOption && token === OPTION_PREFIX) {
 			isLiteral = true;
 		} else if (isOption) {
-			const entry = toEntry(token.slice(OPTION_PREFIX.length));
+			const parsed = toToken(token.slice(OPTION_PREFIX.length));
 
-			if (typeof entry === "string") pending = entry;
-			else entries.push(entry);
+			if ("error" in parsed) {
+				rejected = parsed.error;
+				break;
+			}
+			if ("pending" in parsed) pending = parsed.pending;
+			else entries.push(parsed.option);
 		} else {
 			positionals.push(token);
 		}
@@ -82,6 +105,6 @@ export const parseCliArguments = (argv: readonly string[]): ParsedCliArguments =
 	return {
 		positionals,
 		options: Object.fromEntries(entries),
-		error: pending === null ? null : `Option --${pending} needs a value.`,
+		error: rejected ?? (pending === null ? null : `Option --${pending} needs a value.`),
 	};
 };
