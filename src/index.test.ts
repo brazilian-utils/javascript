@@ -33,6 +33,7 @@ import {
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
+	type FormatSuframaOptions,
 	type GenerateBoletoParams,
 	type GenerateCnpjParams,
 	type GenerateLicensePlateFormat,
@@ -131,6 +132,7 @@ const PUBLIC = [
 	"formatPhone",
 	"formatPis",
 	"formatProcessoJuridico",
+	"formatSuframa",
 	"formatVoterId",
 	"generateBoleto",
 	"generateCNPJ",
@@ -147,6 +149,7 @@ const PUBLIC = [
 	"generatePixPayload",
 	"generateProcessoJuridico",
 	"generateRenavam",
+	"generateSuframa",
 	"generateVoterId",
 	"getAddressInfoByCep",
 	"getAreaCodeInfo",
@@ -220,6 +223,7 @@ const PUBLIC = [
 	"isValidRegistroProfissional",
 	"isValidRenavam",
 	"isValidServicePhone",
+	"isValidSuframa",
 	"isValidVin",
 	"isValidVoterId",
 	"parseBoleto",
@@ -245,6 +249,7 @@ const PUBLIC = [
 	"parsePhone",
 	"parsePis",
 	"parseProcessoJuridico",
+	"parseSuframa",
 	"parseVoterId",
 	"removeAccents",
 	"subBusinessDays",
@@ -310,6 +315,7 @@ describe("Public API", () => {
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
+			FormatSuframaOptions: FormatSuframaOptions;
 			GenerateBoletoParams: GenerateBoletoParams;
 			GenerateCnpjParams: GenerateCnpjParams;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;

@@ -53,6 +53,7 @@ export {
 	type FormatProcessoJuridicoOptions,
 	formatProcessoJuridico,
 } from "./format-processo-juridico/format-processo-juridico";
+export { type FormatSuframaOptions, formatSuframa } from "./format-suframa/format-suframa";
 export { formatVoterId } from "./format-voter-id/format-voter-id";
 export { type GenerateBoletoParams, generateBoleto } from "./generate-boleto/generate-boleto";
 export { generateCep } from "./generate-cep/generate-cep";
@@ -76,6 +77,7 @@ export {
 	generateProcessoJuridico,
 } from "./generate-processo-juridico/generate-processo-juridico";
 export { generateRenavam } from "./generate-renavam/generate-renavam";
+export { generateSuframa } from "./generate-suframa/generate-suframa";
 export { generateVoterId } from "./generate-voter-id/generate-voter-id";
 export {
 	type AddressInfo,
@@ -218,6 +220,7 @@ export {
 } from "./is-valid-registro-profissional/is-valid-registro-profissional";
 export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
 export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-phone";
+export { isValidSuframa } from "./is-valid-suframa/is-valid-suframa";
 export { isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
 export { parseBoleto } from "./parse-boleto/parse-boleto";
@@ -243,6 +246,7 @@ export { parsePassport } from "./parse-passport/parse-passport";
 export { parsePhone } from "./parse-phone/parse-phone";
 export { parsePis } from "./parse-pis/parse-pis";
 export { parseProcessoJuridico } from "./parse-processo-juridico/parse-processo-juridico";
+export { parseSuframa } from "./parse-suframa/parse-suframa";
 export { parseVoterId } from "./parse-voter-id/parse-voter-id";
 export { removeAccents } from "./remove-accents/remove-accents";
 export { subBusinessDays } from "./sub-business-days/sub-business-days";

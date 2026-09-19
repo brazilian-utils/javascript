@@ -31,6 +31,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [isValidPixKey](https://brazilian-utils.com.br/utilities.md#isvalidpixkey): Check if a Pix key (chave Pix) is valid: a CPF, a CNPJ, an e-mail address, a Brazilian mobile phone number or a random key (EVP), per the DICT key formats.
 - [isValidPixPayload](https://brazilian-utils.com.br/utilities.md#isvalidpixpayload): Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid: well-formed TLV structure, the mandatory objects present, one of the "Merchant Account Information" templates carrying the `br.gov.bcb.pix` GUI with a key or a URL, and a matching CRC-16.
 - [isValidNfeKey](https://brazilian-utils.com.br/utilities.md#isvalidnfekey): Check if a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) is valid.
+- [isValidSuframa](https://brazilian-utils.com.br/utilities.md#isvalidsuframa): Check if an Inscrição SUFRAMA is valid: 8 or 9 digits (an 8 digit value is a number whose sector code lost its leading zero), a sector code other than `00` and a módulo 11 check digit.
 - [isValidPhone](https://brazilian-utils.com.br/utilities.md#isvalidphone): Check if phone number (mobile or landline) is valid.
 - [isValidMobilePhone](https://brazilian-utils.com.br/utilities.md#isvalidmobilephone): Check if mobile phone number is valid.
 - [isValidLandlinePhone](https://brazilian-utils.com.br/utilities.md#isvalidlandlinephone): Check if landline phone number is valid.
@@ -69,6 +70,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [formatCep](https://brazilian-utils.com.br/utilities.md#formatcep): Format CEP (brazilian postal code).
 - [formatBoleto](https://brazilian-utils.com.br/utilities.md#formatboleto): Format a boleto number.
 - [formatNfeKey](https://brazilian-utils.com.br/utilities.md#formatnfekey): Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 digits separated by spaces, the form every auxiliary document prints it in: the DANFE of the NF-e and the NFC-e, the DACTE of the CT-e, the CT-e OS and the GTV-e, the DAMDFE of the MDF-e, the DABPE of the BP-e, the DANF3E of the NF3e and the DANFE-COM of the NFCom.
+- [formatSuframa](https://brazilian-utils.com.br/utilities.md#formatsuframa): Format an Inscrição SUFRAMA.
 - [formatPhone](https://brazilian-utils.com.br/utilities.md#formatphone): Format phone number according to Brazilian patterns.
 - [formatLicensePlate](https://brazilian-utils.com.br/utilities.md#formatlicenseplate): Format a license plate.
 - [formatPis](https://brazilian-utils.com.br/utilities.md#formatpis): Format PIS number.
@@ -94,6 +96,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [parseCep](https://brazilian-utils.com.br/utilities.md#parsecep): Remove CEP formatting, keep only digits, and cap the result to 8 digits.
 - [parseBoleto](https://brazilian-utils.com.br/utilities.md#parseboleto): Remove boleto formatting, keep only digits, and cap the result to 47 digits (48 for boleto de arrecadação).
 - [parseNfeKey](https://brazilian-utils.com.br/utilities.md#parsenfekey): Remove the formatting of a DF-e access key (chave de acesso), keep only digits, and cap the result to 44 digits.
+- [parseSuframa](https://brazilian-utils.com.br/utilities.md#parsesuframa): Remove Inscrição SUFRAMA formatting, keep only digits, and cap the result to 9 digits.
 - [parsePhone](https://brazilian-utils.com.br/utilities.md#parsephone): Remove phone formatting, keep only digits, and cap the result to 11 digits.
 - [parseLicensePlate](https://brazilian-utils.com.br/utilities.md#parselicenseplate): Remove separators from a license plate, normalize it to uppercase, and cap it to 7 characters.
 - [parsePis](https://brazilian-utils.com.br/utilities.md#parsepis): Remove PIS formatting, keep only digits, and cap the result to 11 digits.
@@ -121,6 +124,7 @@ const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities'
 - [generateCep](https://brazilian-utils.com.br/utilities.md#generatecep): Generate a random CEP.
 - [generateBoleto](https://brazilian-utils.com.br/utilities.md#generateboleto): Generate a valid random boleto.
 - [generatePixPayload](https://brazilian-utils.com.br/utilities.md#generatepixpayload): Generates the payload of a Pix BR Code.
+- [generateSuframa](https://brazilian-utils.com.br/utilities.md#generatesuframa): Generate a random 9 digit Inscrição SUFRAMA with a valid check digit and a sector code other than `00`.
 - [generatePhone](https://brazilian-utils.com.br/utilities.md#generatephone): Generate a random Brazilian phone number.
 - [generateLicensePlate](https://brazilian-utils.com.br/utilities.md#generatelicenseplate): Generate a random license plate in the chosen format.
 - [generateRenavam](https://brazilian-utils.com.br/utilities.md#generaterenavam): Generate a valid random RENAVAM: the 11 digit form, ten base digits plus the check digit.

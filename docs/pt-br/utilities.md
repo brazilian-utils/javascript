@@ -438,6 +438,56 @@ getNfeKeyInfo('35170458716523000119620010000000121000123450');
 getNfeKeyInfo('invalid'); // null
 ```
 
+## SUFRAMA
+
+A Inscrição SUFRAMA é o número de registro que a Superintendência da Zona Franca de Manaus dá às empresas com incentivo fiscal, informado no campo `ISUF` do destinatário da NF-e. Tem a forma `SS.NNNN.LLD`: setor de atividade, número sequencial, localidade da unidade da SUFRAMA e dígito verificador ([Manual de Orientação do Contribuinte da NF-e 7.0, Visão Geral](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), seção 8.4).
+
+### isValidSuframa
+
+Valida se uma Inscrição SUFRAMA é válida: 8 ou 9 dígitos (um valor de 8 dígitos é um número cujo código de setor perdeu o zero à esquerda), código de setor diferente de `00` e dígito verificador módulo 11. Os códigos de setor e de localidade não são conferidos com uma tabela, pois o manual os lista apenas como exemplos. Aceita os caracteres de máscara usuais (`.`, `-`, `/`, `(`, `)`, `,`, `*`) e espaços em branco.
+
+```javascript
+import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
+
+isValidSuframa('123456789'); // true
+isValidSuframa('12.3456.789'); // true
+isValidSuframa('10001018'); // true (o mesmo que '010001018')
+isValidSuframa('123456780'); // false
+isValidSuframa('001234560'); // false (setor 00)
+```
+
+### formatSuframa
+
+Formata uma Inscrição SUFRAMA. `options.pad` (parte de `FormatSuframaOptions`) completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos. A máscara é progressiva, como nas outras funções `format`, então um valor de 8 dígitos sem `pad` é agrupado uma posição antes: use `pad: true` para um valor lido direto do campo `ISUF`, que pode vir com 8 dígitos.
+
+```javascript
+import { formatSuframa } from '@brazilian-utils/brazilian-utils';
+
+formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018'); // 10.0010.18 (8 dígitos, a máscara agrupa uma posição antes)
+formatSuframa('10001018', { pad: true }); // 01.0001.018
+```
+
+### parseSuframa
+
+Remove a formatação da Inscrição SUFRAMA, mantém apenas os dígitos e limita o resultado a 9 dígitos.
+
+```javascript
+import { parseSuframa } from '@brazilian-utils/brazilian-utils';
+
+parseSuframa('12.3456.789'); // 123456789
+```
+
+### generateSuframa
+
+Gera uma Inscrição SUFRAMA aleatória de 9 dígitos, com dígito verificador válido e código de setor diferente de `00`. Os códigos de setor e de localidade são aleatórios. Usa `Math.random()` internamente, então não é criptograficamente seguro.
+
+```javascript
+import { generateSuframa } from '@brazilian-utils/brazilian-utils';
+
+generateSuframa(); // '205678106'
+```
+
 ## Telefone
 
 ### isValidPhone
