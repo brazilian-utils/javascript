@@ -102,15 +102,6 @@
       --cover-bg-overlay: none;
     }
 
-    /* The live CPF field of examples.md */
-    .cpf-demo { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em 0.75em; }
-    .cpf-demo label { font-weight: 600; }
-    .cpf-demo input {
-      width: 12em; padding: 0.55em 0.75em; border-radius: 6px; border: 1px solid var(--border-color, #444);
-      background: var(--code-bg, #22262b); color: inherit; font: 1em var(--font-family-mono, ui-monospace, monospace);
-    }
-    .cpf-demo input:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
-    .cpf-demo output { display: inline; margin: 0; padding: 0; border: 0; background: none; font-weight: 600; }
   </style>
 </head>
 
@@ -171,24 +162,6 @@
           hook.beforeEach(function (content) {
             var title = vm.frontmatter && vm.frontmatter.title;
             return title ? '# ' + title + '\n\n' + content : content;
-          });
-        },
-        // The live CPF field of examples.md: formats as you type and validates the result, with the
-        // latest release imported from a CDN on that page only.
-        function (hook) {
-          hook.doneEach(function () {
-            var demo = document.querySelector('.cpf-demo');
-            if (!demo) return;
-            var input = demo.querySelector('input');
-            var output = demo.querySelector('output');
-            import('https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm').then(function (utils) {
-              input.addEventListener('input', function () {
-                input.value = utils.formatCpf(input.value);
-                output.textContent = input.value.length === 14
-                  ? (utils.isValidCpf(input.value) ? demo.dataset.valid : demo.dataset.invalid)
-                  : '';
-              });
-            });
           });
         },
         // Per-page metadata for search engines and link previews: the title, description,

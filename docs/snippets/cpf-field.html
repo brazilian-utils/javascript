@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8" />
+
+<label>CPF <input id="cpf" inputmode="numeric" placeholder="529.982.247-25" /></label>
+<output id="result"></output>
+
+<script type="module">
+  import { formatCpf, isValidCpf } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+
+  const input = document.getElementById("cpf");
+  const result = document.getElementById("result");
+
+  input.addEventListener("input", () => {
+    input.value = formatCpf(input.value);
+    result.textContent = input.value.length === 14 ? (isValidCpf(input.value) ? "✓ Valid CPF" : "✗ Invalid CPF") : "";
+  });
+</script>
