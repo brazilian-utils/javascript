@@ -438,6 +438,56 @@ getNfeKeyInfo('35170458716523000119620010000000121000123450');
 getNfeKeyInfo('invalid'); // null
 ```
 
+## Chave de NFS-e
+
+### isValidNfseKey
+
+Verifica se a chave de acesso de uma NFS-e nacional, a Nota Fiscal de Serviço eletrônica do Sistema Nacional NFS-e, é válida. A chave é um bloco único de 50 dígitos, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, como a definem os tipos `TSIdNFSe` e `TSChaveNFSe` do pacote de esquemas e o campo `NFSe/infNFSe/id` do ANEXO I na [documentação técnica do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual). O literal `NFS` que o atributo `Id` de `infNFSe` coloca antes da chave é retirado, junto com os espaços nas extremidades. A chave não tem máscara impressa, já que o DANFSe a imprime em um único bloco de 50 dígitos ([Nota Técnica SE/CGNFS-e 008](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf), item 2.1.1), então, diferente do `isValidNfeKey`, um separador em qualquer ponto dela é rejeitado em vez de removido. As chaves dos modelos municipais de NFS-e que não são o padrão nacional estão fora do escopo.
+
+O código do município precisa começar com um código IBGE de UF (ele não é consultado na tabela do IBGE), o `ambGer` precisa ser 1 (o sistema do município) ou 2 (o Sistema Nacional NFS-e), o tipo de inscrição 1 (um CPF, preenchido com `000` à esquerda) ou 2 (um CNPJ) com um CPF ou CNPJ cujos próprios dígitos verificadores sejam válidos (as regras E1280 e E1284 do ANEXO I rejeitam a NFS-e cujo emitente falha nelas), o `nNFSe` não pode ser todo de zeros (`TSNNFSe` é `[1-9]{1}[0-9]{0,12}`) e o mês precisa estar entre 01 e 12. O dígito verificador é um módulo 11 sobre os 49 primeiros dígitos, pesos de 2 a 9 ciclando a partir da direita, em que resto 0 ou 1 dá 0: o [manual da emissão por decisão administrativa ou judicial](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/manual-contribuintes-emissor-publico-api-emissao-decisao-administrativa-e-judicial.pdf) diz apenas "algoritmo do módulo 11", e os pesos e a regra do resto, os mesmos da chave de acesso de DF-e, foram confirmados com mais de cem chaves de NFS-e encontradas em repositórios públicos. Chaves com CNPJ alfanumérico ainda não são aceitas: o pacote de esquemas do ambiente de produção restrita já admite letras na inscrição, mas nenhum documento oficial diz como uma letra entra no dígito verificador da chave.
+
+```javascript
+import { isValidNfseKey } from '@brazilian-utils/brazilian-utils';
+
+isValidNfseKey('35503082258716523000119000000000001226011357924683'); // true (emitente com CNPJ, SP)
+isValidNfseKey('NFS35503082258716523000119000000000001226011357924683'); // true (prefixo Id do XML)
+isValidNfseKey('43149021100040364478829000000000105725120484407255'); // true (emitente com CPF, RS)
+isValidNfseKey('35503082258716523000119000000000001226011357924684'); // false (dígito verificador)
+isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // false (a chave não tem máscara)
+```
+
+### parseNfseKey
+
+Remove tudo o que não é dígito da chave de acesso de uma NFS-e nacional, inclusive o prefixo `NFS` do atributo `Id` do XML, e limita o resultado a 50 dígitos. Essa é a forma em que o leiaute guarda a chave e a que o DANFSe imprime, um bloco único, e por isso não existe `formatNfseKey`. Use `isValidNfseKey` para verificar a chave e `getNfseKeyInfo` para ler os campos dela.
+
+```javascript
+import { parseNfseKey } from '@brazilian-utils/brazilian-utils';
+
+parseNfseKey('NFS35503082258716523000119000000000001226011357924683');
+// '35503082258716523000119000000000001226011357924683'
+
+parseNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3');
+// '35503082258716523000119000000000001226011357924683'
+```
+
+### getNfseKeyInfo
+
+Interpreta a chave de acesso de uma NFS-e nacional e retorna seus campos (municipalityCode, stateCode, generatorEnvironment, taxIdType, taxId, number, year, month, code, checkDigit). Aceita as mesmas formas de entrada do `isValidNfseKey` e retorna `null` quando a chave não é válida. O resultado é tipado como `NfseKeyInfo`: o `generatorEnvironment` é um `NfseKeyGeneratorEnvironment` (`1` o sistema do município, `2` o Sistema Nacional NFS-e), o `taxIdType` um `NfseKeyTaxIdType` (`'cpf'` ou `'cnpj'`), e o `taxId` é o CPF de 11 dígitos, sem o `000` que o preenche na chave, ou o CNPJ de 14 dígitos.
+
+```javascript
+import { getNfseKeyInfo } from '@brazilian-utils/brazilian-utils';
+
+getNfseKeyInfo('35503082258716523000119000000000001226011357924683');
+// { municipalityCode: '3550308', stateCode: 'SP', generatorEnvironment: 2, taxIdType: 'cnpj',
+//   taxId: '58716523000119', number: 12, year: 2026, month: 1, code: '135792468', checkDigit: 3 }
+
+getNfseKeyInfo('43149021100040364478829000000000105725120484407255');
+// { municipalityCode: '4314902', stateCode: 'RS', generatorEnvironment: 1, taxIdType: 'cpf',
+//   taxId: '40364478829', number: 1057, year: 2025, month: 12, code: '048440725', checkDigit: 5 }
+
+getNfseKeyInfo('invalid'); // null
+```
+
 ## Telefone
 
 ### isValidPhone

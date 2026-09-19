@@ -149,6 +149,12 @@ export {
 	getNfeKeyInfo,
 } from "./get-nfe-key-info/get-nfe-key-info";
 export {
+	type NfseKeyGeneratorEnvironment,
+	type NfseKeyInfo,
+	type NfseKeyTaxIdType,
+	getNfseKeyInfo,
+} from "./get-nfse-key-info/get-nfse-key-info";
+export {
 	type PixKeyInfo,
 	type PixKeyType,
 	getPixKeyInfo,
@@ -200,6 +206,7 @@ export {
 } from "./is-valid-mobile-phone/is-valid-mobile-phone";
 export { isValidNcm } from "./is-valid-ncm/is-valid-ncm";
 export { isValidNfeKey } from "./is-valid-nfe-key/is-valid-nfe-key";
+export { isValidNfseKey } from "./is-valid-nfse-key/is-valid-nfse-key";
 export { isValidPassport } from "./is-valid-passport/is-valid-passport";
 export {
 	type IsValidPhoneOptions,
@@ -239,6 +246,7 @@ export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
 export { parseNcm } from "./parse-ncm/parse-ncm";
 export { parseNfeKey } from "./parse-nfe-key/parse-nfe-key";
+export { parseNfseKey } from "./parse-nfse-key/parse-nfse-key";
 export { parsePassport } from "./parse-passport/parse-passport";
 export { parsePhone } from "./parse-phone/parse-phone";
 export { parsePis } from "./parse-pis/parse-pis";
