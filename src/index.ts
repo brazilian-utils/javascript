@@ -162,6 +162,7 @@ export {
 	type PixPointOfInitiation,
 	getPixPayloadInfo,
 } from "./get-pix-payload-info/get-pix-payload-info";
+export { getStateByCep } from "./get-state-by-cep/get-state-by-cep";
 export { getStateByIbgeCode } from "./get-state-by-ibge-code/get-state-by-ibge-code";
 export { getStateCodeByName } from "./get-state-code-by-name/get-state-code-by-name";
 export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-code";
