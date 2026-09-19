@@ -141,6 +141,10 @@
   - [isValidCfop](#isvalidcfop)
   - [parseCfop](#parsecfop)
   - [getCfop](#getcfop)
+  - [isValidCest](#isvalidcest)
+  - [formatCest](#formatcest)
+  - [parseCest](#parsecest)
+  - [getCest](#getcest)
   - [isValidCst](#isvalidcst)
   - [isValidCsosn](#isvalidcsosn)
   - [capitalize](#capitalize)
@@ -238,6 +242,7 @@ A handful of utils are the exception: each embeds an official dataset, so it wei
 | `getCities` | 5571 IBGE municipality names | 154.2 KB | 49.8 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
 | `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
+| `isValidCest` · `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 117.8 KB | 26.8 - 26.9 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
@@ -2373,6 +2378,63 @@ getCfop('7504'); // { code: '7504', description: 'Exportação de mercadoria que
 getCfop('0000'); // null
 getCfop('5350'); // null (a subgroup heading, not an operable code)
 getCfop('abc5102'); // null (not a documented form)
+```
+
+#### isValidCest
+
+Check if a CEST (Código Especificador da Substituição Tributária) is listed in the annexes of [Convênio ICMS 142/18](https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18), the consolidated text in force (last amended by Convênio ICMS 180/24). Only the items in force count: an item the annexes mark as revoked is rejected. The check is about the code alone: it does not tell whether the code suits a given NCM, nor whether a state applies the substituição tributária regime to it.
+
+A CEST has 7 digits: the first two are the segment, the third to the fifth the item of the segment and the last two the specification of the item (cláusula sexta, IV). A string is only read as a code when it is written in one of the documented forms (the 7 digits, or the `NN.NNN.NN` form the annexes print, with a single separator between the groups and optional surrounding whitespace), and a number only when it is a non-negative safe integer. The leading zero of segments 01 to 09 is part of the code, so a value written as bare digits is left padded with zeros to 7 whether it comes as a string or as a number: `100100`, `'100100'` and `'0100100'` are the same code. A masked value already carries its separators and is read as written.
+
+```javascript
+import { isValidCest } from '@brazilian-utils/brazilian-utils';
+
+isValidCest('01.001.00'); // true
+isValidCest('0100100'); // true
+isValidCest(100100); // true (padded to 7 digits, so this is '0100100')
+isValidCest('03.001.00'); // false (a revoked item)
+isValidCest('0000000'); // false
+isValidCest('abc0100100'); // false (not a documented form)
+isValidCest(-100100); // false (not a non-negative safe integer)
+```
+
+#### formatCest
+
+Format a CEST (Código Especificador da Substituição Tributária) in the `NN.NNN.NN` form the annexes of Convênio ICMS 142/18 print. `options.pad` (part of `FormatCestOptions`) works exactly like it does in `formatNcm`: with the default `false` the mask is applied progressively, as far as the value goes, which is what an input being typed into needs; with `true` the value is first left padded with zeros to the 7 digits of a complete code, so it always comes back fully masked. A number is treated exactly like the string of its digits, so it is only padded under `pad: true`. Like every formatter of this package, the value is read for its digits and masked as far as they go. Use `isValidCest` to check a code.
+
+```javascript
+import { formatCest } from '@brazilian-utils/brazilian-utils';
+
+formatCest('0100100'); // 01.001.00
+formatCest(2899900); // 28.999.00
+formatCest('01001'); // 01.001 (partial values are masked as far as they go)
+formatCest(100100, { pad: true }); // 01.001.00 (padded to 7 digits first)
+formatCest('abc0100100'); // 01.001.00 (only the digits are read)
+```
+
+#### parseCest
+
+Remove CEST (Código Especificador da Substituição Tributária) formatting, keep only digits, and cap the result to the 7 digits of a complete code. Nothing is left padded here, so the leading zero of segments 01 to 09 has to be written out; use `isValidCest` or `getCest`, which do pad a bare numeric code, to check a code against the annexes.
+
+```javascript
+import { parseCest } from '@brazilian-utils/brazilian-utils';
+
+parseCest('01.001.00'); // '0100100'
+parseCest('28.999'); // '28999' (a partial code is kept as written)
+```
+
+#### getCest
+
+Look a CEST (Código Especificador da Substituição Tributária) up and get its code, the description of the goods and the name of its segment, as Anexos I to XXVI of [Convênio ICMS 142/18](https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18) word them. It reads the value the same way `isValidCest` does and returns `null` for an unknown, revoked or malformed code. The NCM/SH codes the annexes pair each CEST with are not part of the entry.
+
+```javascript
+import { getCest } from '@brazilian-utils/brazilian-utils';
+
+getCest('05.001.00'); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest(500100); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest('03.001.00'); // null (a revoked item)
+getCest('0000000'); // null
+getCest('abc0500100'); // null (not a documented form)
 ```
 
 #### isValidCst

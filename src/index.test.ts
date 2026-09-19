@@ -11,6 +11,7 @@ import {
 	type CepProvider,
 	type CertidaoInfo,
 	type CertidaoType,
+	type Cest,
 	type Cfop,
 	type Cnae,
 	type ConvertDateToWordsOptions,
@@ -20,6 +21,7 @@ import {
 	type FormatCeiOptions,
 	type FormatCepOptions,
 	type FormatCertidaoOptions,
+	type FormatCestOptions,
 	type FormatCnaeOptions,
 	type FormatLegalNatureOptions,
 	type FormatCnhOptions,
@@ -115,6 +117,7 @@ const PUBLIC = [
 	"formatCei",
 	"formatCep",
 	"formatCertidao",
+	"formatCest",
 	"formatCnae",
 	"formatCnh",
 	"formatCno",
@@ -158,6 +161,7 @@ const PUBLIC = [
 	"getCbo",
 	"getCepInfoByAddress",
 	"getCertidaoInfo",
+	"getCest",
 	"getCfop",
 	"getCities",
 	"getCnae",
@@ -190,6 +194,7 @@ const PUBLIC = [
 	"isValidCei",
 	"isValidCep",
 	"isValidCertidao",
+	"isValidCest",
 	"isValidCfop",
 	"isValidCnae",
 	"isValidCnh",
@@ -228,6 +233,7 @@ const PUBLIC = [
 	"parseCei",
 	"parseCep",
 	"parseCertidao",
+	"parseCest",
 	"parseCfop",
 	"parseCnae",
 	"parseCnh",
@@ -288,6 +294,7 @@ describe("Public API", () => {
 			CepProvider: CepProvider;
 			CertidaoInfo: CertidaoInfo;
 			CertidaoType: CertidaoType;
+			Cest: Cest;
 			Cfop: Cfop;
 			Cnae: Cnae;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
@@ -297,6 +304,7 @@ describe("Public API", () => {
 			FormatCeiOptions: FormatCeiOptions;
 			FormatCepOptions: FormatCepOptions;
 			FormatCertidaoOptions: FormatCertidaoOptions;
+			FormatCestOptions: FormatCestOptions;
 			FormatCnaeOptions: FormatCnaeOptions;
 			FormatLegalNatureOptions: FormatLegalNatureOptions;
 			FormatCnhOptions: FormatCnhOptions;
