@@ -2,9 +2,11 @@
 
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { inflateRawSync } from "node:zlib";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
+import { decodeXml } from "./decode-xml.ts";
+import { readXlsxSheets } from "./read-xlsx-sheet.ts";
+import { serializeRecord } from "./serialize-record.ts";
 
 const scriptsDir = import.meta.dirname;
 
@@ -52,21 +54,6 @@ const CLASS_TRIB_NAME_HEADER = "Nome cClassTrib";
 const CLASS_TRIB_DESCRIPTION_HEADER = "Descrição cClassTrib";
 const START_OF_VALIDITY_HEADER = "dIniVig";
 const END_OF_VALIDITY_HEADER = "dFimVig";
-
-const XML_ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
-
-const decodeXml = (text: string): string =>
-	text.replaceAll(
-		/&(?:#(\d+)|#x([\da-f]+)|(\w+));/gi,
-		(entity: string, ...groups: (string | undefined)[]) => {
-			const [decimal, hex, name = ""] = groups;
-
-			if (decimal !== undefined) return String.fromCodePoint(Number(decimal));
-			if (hex !== undefined) return String.fromCodePoint(Number.parseInt(hex, 16));
-
-			return XML_ENTITIES[name] ?? entity;
-		},
-	);
 
 const normalizeText = (text: string): string => text.replaceAll(/\s+/g, " ").trim();
 
@@ -123,142 +110,28 @@ const fetchLatestListing = async (listingUrl: string, titleRegex: RegExp): Promi
 	return latest;
 };
 
-const END_OF_CENTRAL_DIRECTORY = 0x06_05_4b_50;
-const CENTRAL_DIRECTORY_ENTRY = 0x02_01_4b_50;
-const DEFLATE = 8;
-
-/**
- * How much one entry may inflate to, and how much the accepted entries may hold together. The
- * whole workbook is under 1 MB, so both leave room for the table to grow while a crafted or
- * corrupted download cannot expand without a bound, whether it does so in one entry or across
- * the thousands of entries a central directory can list.
- */
-const MAXIMUM_ENTRY_SIZE = 64 * 1024 * 1024;
-const MAXIMUM_WORKBOOK_SIZE = 128 * 1024 * 1024;
-
-/**
- * Reads the entries of a zip archive (an xlsx workbook is one) that `isWanted` accepts, through
- * its central directory. Nothing else is decompressed, inflating stops at `MAXIMUM_ENTRY_SIZE`
- * per entry, which throws `ERR_BUFFER_TOO_LARGE`, and the entries kept stop at
- * `MAXIMUM_WORKBOOK_SIZE` together.
- * @param {Buffer} zip - The archive.
- * @param {(name: string) => boolean} isWanted - Whether an entry path is one to read.
- * @returns {Map<string, string>} The UTF-8 content of the accepted entries, by path.
- */
-const unzip = (zip: Buffer, isWanted: (name: string) => boolean): Map<string, string> => {
-	let end = zip.length - 22;
-
-	while (end >= 0 && zip.readUInt32LE(end) !== END_OF_CENTRAL_DIRECTORY) end -= 1;
-
-	if (end < 0) throw new Error("The downloaded table is not a zip archive (xlsx)");
-
-	const files = new Map<string, string>();
-	let offset = zip.readUInt32LE(end + 16);
-	let total = 0;
-
-	for (let index = 0; index < zip.readUInt16LE(end + 10); index += 1) {
-		if (zip.readUInt32LE(offset) !== CENTRAL_DIRECTORY_ENTRY) {
-			throw new Error("The downloaded table has a broken zip central directory");
-		}
-
-		const nameLength = zip.readUInt16LE(offset + 28);
-		const name = zip.toString("utf8", offset + 46, offset + 46 + nameLength);
-
-		if (isWanted(name)) {
-			const method = zip.readUInt16LE(offset + 10);
-			const compressedSize = zip.readUInt32LE(offset + 20);
-			const local = zip.readUInt32LE(offset + 42);
-			const start = local + 30 + zip.readUInt16LE(local + 26) + zip.readUInt16LE(local + 28);
-			const data = zip.subarray(start, start + compressedSize);
-			const content =
-				method === DEFLATE ? inflateRawSync(data, { maxOutputLength: MAXIMUM_ENTRY_SIZE }) : data;
-
-			total += content.length;
-
-			if (total > MAXIMUM_WORKBOOK_SIZE) {
-				throw new Error(
-					`The entries read out of the downloaded table hold more than ${MAXIMUM_WORKBOOK_SIZE} bytes together; the archive is not the workbook`,
-				);
-			}
-
-			files.set(name, content.toString("utf8"));
-		}
-
-		offset += 46 + nameLength + zip.readUInt16LE(offset + 30) + zip.readUInt16LE(offset + 32);
-	}
-
-	return files;
-};
-
 type Row = Record<string, string>;
 
-const SHARED_STRING_REGEX = /<si>([\s\S]*?)<\/si>/g;
-const TEXT_RUN_REGEX = /<t[^>]*>([\s\S]*?)<\/t>/g;
-const PHONETIC_RUN_REGEX = /<rPh[\s\S]*?<\/rPh>/g;
-const ROW_REGEX = /<row[^>]*>([\s\S]*?)<\/row>/g;
-const CELL_REGEX = /<c r="([A-Z]+)\d+"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
-const CELL_VALUE_REGEX = /<v>([\s\S]*?)<\/v>/;
-
 /**
- * Reads a worksheet into rows keyed by the text of the header row (the first one).
- * @param {string} sheet - The worksheet XML.
- * @param {string[]} sharedStrings - The workbook's shared strings.
- * @returns {Row[]} One record per data row, empty cells left out.
+ * Turns the rows of a worksheet into records keyed by the text of its header row (the first
+ * one). Every cell is whitespace-normalised and an empty one is left out.
+ * @param {string[][]} rows - The rows of the worksheet.
+ * @returns {Row[]} One record per data row.
  */
-const readSheet = (sheet: string, sharedStrings: string[]): Row[] => {
-	const rows = [...sheet.matchAll(ROW_REGEX)].map(([, row = ""]) => {
-		const cells: Row = {};
-
-		for (const [, column = "", attributes = "", body = ""] of row.matchAll(CELL_REGEX)) {
-			const raw = CELL_VALUE_REGEX.exec(body)?.[1];
-
-			if (raw === undefined) continue;
-
-			const value = attributes.includes('t="s"') ? sharedStrings[Number(raw)] : decodeXml(raw);
-
-			cells[column] = normalizeText(value ?? "");
-		}
-
-		return cells;
-	});
-
-	const [header = {}, ...body] = rows;
+const toRecords = (rows: string[][]): Row[] => {
+	const [header = [], ...body] = rows.map((cells) => cells.map((cell) => normalizeText(cell)));
 
 	return body.map((cells) => {
 		const row: Row = {};
 
-		for (const [column, value] of Object.entries(cells)) {
+		for (const [column, value] of cells.entries()) {
 			const key = header[column];
 
-			if (key !== undefined && value !== "") row[key] = value;
+			if (key !== undefined && key !== "" && value !== "") row[key] = value;
 		}
 
 		return row;
 	});
-};
-
-const SHARED_STRINGS_PATH = "xl/sharedStrings.xml";
-
-const isWorksheet = (name: string): boolean =>
-	name.startsWith("xl/worksheets/") && name.endsWith(".xml");
-
-/**
- * Reads every worksheet of the workbook. The `rPh` elements of a shared string hold the phonetic
- * hint of the text, not the text, so they are dropped before the runs are joined.
- * @param {Buffer} xlsx - The workbook.
- * @returns {Row[][]} The rows of each worksheet.
- */
-const readWorkbook = (xlsx: Buffer): Row[][] => {
-	const files = unzip(xlsx, (name) => name === SHARED_STRINGS_PATH || isWorksheet(name));
-	const sharedStrings = [...(files.get(SHARED_STRINGS_PATH) ?? "").matchAll(SHARED_STRING_REGEX)]
-		.map(([, item = ""]) => item.replaceAll(PHONETIC_RUN_REGEX, ""))
-		.map((item) =>
-			decodeXml([...item.matchAll(TEXT_RUN_REGEX)].map(([, text = ""]) => text).join("")),
-		);
-
-	return [...files]
-		.filter(([name]) => isWorksheet(name))
-		.map(([, sheet]) => readSheet(sheet, sharedStrings));
 };
 
 const MS_PER_DAY = 86_400_000;
@@ -284,12 +157,6 @@ const isInForce = (row: Row, today: number): boolean => {
 
 	return end === undefined || today <= fromSerialDate(end);
 };
-
-const serializeSorted = (data: Record<string, unknown>): string =>
-	`{${Object.keys(data)
-		.sort()
-		.map((key) => `${JSON.stringify(key)}:${JSON.stringify(data[key])}`)
-		.join(",")}}`;
 
 type Tables = {
 	/** CST description by 3 digit code. */
@@ -370,7 +237,10 @@ const main = async (): Promise<void> => {
 	const now = new Date();
 	const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 	const workbook = Buffer.from(await response.arrayBuffer());
-	const { csts, classifications } = buildTables(readWorkbook(workbook).flat(), today);
+	const { csts, classifications } = buildTables(
+		[...readXlsxSheets(workbook).values()].flatMap((rows) => toRecords(rows)),
+		today,
+	);
 	const codes = Object.keys(classifications).sort();
 
 	if (Object.keys(csts).length < MINIMUM_CST_CODES || codes.length < MINIMUM_CLASSIFICATIONS) {
@@ -403,7 +273,7 @@ const main = async (): Promise<void> => {
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm
  * Lei Complementar nº 214/2025, which institutes the IBS and the CBS.
  */
-export const CST_IBS_CBS_TABLE: Record<string, string> = ${serializeSorted(csts)};
+export const CST_IBS_CBS_TABLE: Record<string, string> = ${serializeRecord(csts)};
 
 /**
  * cClassTrib (Código de Classificação Tributária do IBS e da CBS) codes in force on the
@@ -421,7 +291,7 @@ export const CLASS_TRIB_CODES: readonly string[] = ${JSON.stringify(codes)};
  * situation the classification refers to). The legal wording columns ("LC Redação",
  * "Regulamento CBS", "Regulamento IBS") are not shipped.
  */
-export const CLASS_TRIB_TABLE: Record<string, readonly [string, string]> = ${serializeSorted(classifications)};
+export const CLASS_TRIB_TABLE: Record<string, readonly [string, string]> = ${serializeRecord(classifications)};
 
 /** Shape a CST-IBS/CBS has to be written in: the 3 digits of the field \`CST\` (UB13, N 3). */
 export const CST_IBS_CBS_FORMAT_REGEX = /^\\d{3}$/;
