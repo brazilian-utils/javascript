@@ -17,8 +17,9 @@ export type { State } from "../_internals/constants/states";
  * integer: a sign and a decimal point are not digits, so `-20040020` and `2004002.5` are rejected
  * instead of being read as a CEP.
  *
- * Amazonas, Distrito Federal and Goiás have two ranges each. No state owns `00000-000` to
- * `00999-999` nor `78900-000` to `78999-999`, so a CEP in one of them returns `null`.
+ * Amazonas, Distrito Federal and Goiás have two ranges each. No state range covers `00000-000` to
+ * `00999-999` nor `78900-000` to `78999-999`, so a CEP in one of them returns `null`. Inside a
+ * range the answer is the owner of the range even for a CEP no city uses, such as `10000-000`.
  *
  * @param {string|number} value - The CEP, with or without formatting.
  * @returns {State|null} The matching `State` object, or `null` when the value is not a valid CEP
@@ -46,11 +47,8 @@ export const getStateByCep = (value: string | number): State | null => {
 
 	const cep = Number(parseCep(value));
 
-	const state = DATA.find((entry) =>
-		CEP_RANGES.some(
-			(range) => range.state === entry.code && cep >= range.start && cep <= range.end,
-		),
-	);
+	const range = CEP_RANGES.find((entry) => cep >= entry.start && cep <= entry.end);
+	const state = range && DATA.find((entry) => entry.code === range.state);
 
 	return state ? { ...state } : null;
 };

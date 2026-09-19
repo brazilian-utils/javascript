@@ -4,6 +4,7 @@ import { type State } from "../_internals/constants/states";
 import { anyGarbage, digits, digitsOfOtherLength } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { CEP_RANGES } from "./constants";
 import { getStateByCep } from "./get-state-by-cep";
 
 const RANGE_BOUNDARIES: [string, string, string][] = [
@@ -81,6 +82,11 @@ describe("getStateByCep", () => {
 		expect(getStateByCep("74000000")?.code).toBe("GO");
 	});
 
+	it("should return the owner of the range for a CEP block no city uses", () => {
+		expect(getStateByCep("10000000")?.code).toBe("SP");
+		expect(getStateByCep("10999999")?.code).toBe("SP");
+	});
+
 	it("should return null for the CEPs below the first range", () => {
 		expect(getStateByCep("00000000")).toBeNull();
 		expect(getStateByCep("00999999")).toBeNull();
@@ -90,6 +96,21 @@ describe("getStateByCep", () => {
 		expect(getStateByCep("78900000")).toBeNull();
 		expect(getStateByCep("78950000")).toBeNull();
 		expect(getStateByCep("78999999")).toBeNull();
+	});
+
+	it("should hold a table in ascending order whose only inner gap is the one between Mato Grosso and Mato Grosso do Sul", () => {
+		const steps: string[] = [];
+
+		for (const [index, range] of CEP_RANGES.slice(1).entries()) {
+			const previous = CEP_RANGES[index];
+
+			if (range.start !== previous.end + 1) steps.push(`${previous.end}|${range.start}`);
+		}
+
+		expect(steps).toEqual(["78899999|79000000"]);
+		expect(CEP_RANGES).toHaveLength(30);
+		expect(CEP_RANGES[0].start).toBe(1_000_000);
+		expect(CEP_RANGES.at(-1)?.end).toBe(99_999_999);
 	});
 
 	it("should return a fresh copy that does not mutate the underlying constant", () => {
