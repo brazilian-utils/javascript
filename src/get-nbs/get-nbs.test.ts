@@ -54,6 +54,14 @@ describe("getNbs", () => {
 		expect(getNbs("1.0402.11.19")).toBeNull();
 	});
 
+	it("should return the only description the official CSV quotes, without its CSV quoting", () => {
+		expect(getNbs("1.1706.24.00")).toEqual({
+			code: "117062400",
+			description:
+				'Serviços de distribuição de programas de televisão por assinatura, na modalidade "pague por exibição" (pay-per-view)',
+		});
+	});
+
 	it("should return a fresh object that does not leak the internal table", () => {
 		expect(getNbs("101011100")).not.toBe(getNbs("101011100"));
 	});
@@ -133,6 +141,15 @@ describe("getNbs", () => {
 				fc.property(codeArbitrary, (code) => {
 					expect(code).toMatch(/^1\d{8}$/);
 					expect(NBS_DESCRIPTIONS[code].trim()).not.toBe("");
+				}),
+			);
+		});
+
+		test("should carry no description with the quoting of the CSV left on it", () => {
+			fc.assert(
+				fc.property(codeArbitrary, (code) => {
+					expect(NBS_DESCRIPTIONS[code].startsWith('"')).toBe(false);
+					expect(NBS_DESCRIPTIONS[code]).not.toContain('""');
 				}),
 			);
 		});

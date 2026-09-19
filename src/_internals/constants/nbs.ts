@@ -930,7 +930,7 @@ export const NBS_DESCRIPTIONS: Record<string, string> = {
 	"117062300":
 		"Serviços de distribuição de pacotes de programação adicional de televisão por assinatura",
 	"117062400":
-		'"Serviços de distribuição de programas de televisão por assinatura, na modalidade ""pague por exibição"" (pay-per-view)"',
+		'Serviços de distribuição de programas de televisão por assinatura, na modalidade "pague por exibição" (pay-per-view)',
 	"117069000":
 		"Serviços de difusão, programação e distribuição de programas de rádio e televisão não classificados em subposições anteriores",
 	"118011100": "Serviço de recrutamento e seleção de profissionais executivos",
