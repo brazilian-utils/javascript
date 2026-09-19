@@ -3,9 +3,10 @@
 import { createHash } from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { inflateRawSync } from "node:zlib";
 
-import { fetchSortedRecord } from "./fetch-sorted-record.ts";
+import { sortRecord } from "./sort-record.ts";
 
 const scriptsDir = import.meta.dirname;
 
@@ -13,12 +14,26 @@ const scriptsDir = import.meta.dirname;
 const CID10_CSV_DECODER = new TextDecoder("iso-8859-1");
 
 /**
- * DATASUS only serves the archive over plain HTTP (port 443 is closed), so the download is
- * checked against the SHA-256 of the CID-10 V2008 archive, whose files are dated October 2007.
- * A different digest fails the run: a new official revision has to be reviewed by a maintainer,
- * who then updates this value.
+ * DATASUS serves this host over plain HTTP only: port 443 times out and neither
+ * `datasus.saude.gov.br` nor `tabnet.datasus.gov.br` publishes the archive. The download is kept
+ * in this script, on its own `fetch`, so that plain HTTP never reaches the library's
+ * `fetch-with-retry`, and every byte is checked against `CID10_ZIP_SHA256` before it is read.
+ */
+// oxlint-disable-next-line sonarjs/no-clear-text-protocols -- see the comment above
+const CID10_ZIP_URL = "http://www2.datasus.gov.br/cid10/V2008/downloads/CID10CSV.zip";
+
+/**
+ * SHA-256 of the reviewed CID-10 V2008 archive, whose files are dated October 2007. It is what
+ * makes the plain HTTP download safe: any other content fails the run, including this generator's
+ * step of the weekly `Update datasets` job, which then opens no pull request for the other
+ * datasets either. When DATASUS publishes a revision, a maintainer reviews the new archive, puts
+ * its digest here and regenerates the tables with `node ./scripts/cid10.ts`.
  */
 const CID10_ZIP_SHA256 = "84f23809275575f751255048064bbb244b0de33fd5987ab98df0f98e5f5d2c95";
+
+/** How many times the download is retried, and the delay each retry waits for. */
+const CID10_DOWNLOAD_RETRIES = 2;
+const CID10_RETRY_DELAY_MS = 1000;
 
 const CID10_CODE_REGEX = /^[A-Z]\d{2}\d?$/;
 
@@ -45,6 +60,46 @@ const CID10_TABLES: Cid10Table[] = [
 ];
 
 const CID10_DESCRIPTION_COLUMN = "DESCRICAO";
+
+/**
+ * Requests the archive, retrying the DATASUS host, which drops connections often enough that a
+ * single attempt fails the weekly run. Written here rather than with `fetchWithRetry` so the
+ * plain HTTP URL stays inside this script.
+ * @param {number} [attempt] - Which attempt this is, counting from zero.
+ * @returns {Promise<Response>} The response of the first attempt that does not throw.
+ */
+const fetchZip = async (attempt = 0): Promise<Response> => {
+	try {
+		return await fetch(CID10_ZIP_URL);
+	} catch (error) {
+		if (attempt >= CID10_DOWNLOAD_RETRIES) throw error;
+
+		await delay(CID10_RETRY_DELAY_MS * (attempt + 1));
+
+		return fetchZip(attempt + 1);
+	}
+};
+
+/**
+ * Downloads the official archive and returns it only when it is byte for byte the reviewed one.
+ * @returns {Promise<Buffer>} The archive whose SHA-256 is `CID10_ZIP_SHA256`.
+ */
+const downloadZip = async (): Promise<Buffer> => {
+	const response = await fetchZip();
+
+	if (!response.ok) {
+		throw new Error(`CID-10 zip request failed with status ${response.status}`);
+	}
+
+	const zip = Buffer.from(await response.arrayBuffer());
+	const digest = createHash("sha256").update(zip).digest("hex");
+
+	if (digest !== CID10_ZIP_SHA256) {
+		throw new Error(`CID-10 zip has the SHA-256 ${digest}, not the reviewed ${CID10_ZIP_SHA256}`);
+	}
+
+	return zip;
+};
 
 /**
  * Finds the end of central directory record of a zip archive, which sits at the very end of
@@ -161,37 +216,20 @@ const groupSubcategories = (codes: string[]): Record<string, string> => {
 };
 
 const main = async (): Promise<void> => {
-	const sorted = await fetchSortedRecord(
-		// oxlint-disable-next-line sonarjs/no-clear-text-protocols -- DATASUS does not serve this host over HTTPS; the archive is checked against CID10_ZIP_SHA256 instead
-		"http://www2.datasus.gov.br/cid10/V2008/downloads/CID10CSV.zip",
-		"CID-10 zip",
-		async (response) => {
-			const zip = Buffer.from(await response.arrayBuffer());
-			const digest = createHash("sha256").update(zip).digest("hex");
+	const files = unzip(await downloadZip());
+	const data: Record<string, string> = {};
 
-			if (digest !== CID10_ZIP_SHA256) {
-				throw new Error(
-					`CID-10 zip has the SHA-256 ${digest}, not the reviewed ${CID10_ZIP_SHA256}`,
-				);
-			}
+	for (const table of CID10_TABLES) {
+		const file = files[table.file];
 
-			const files = unzip(zip);
-			const data: Record<string, string> = {};
+		if (file === undefined) throw new Error(`CID-10 zip has no ${table.file}`);
 
-			for (const table of CID10_TABLES) {
-				const file = files[table.file];
+		if (parseCsv(CID10_CSV_DECODER.decode(file), table, data) === 0) {
+			throw new Error(`${table.file} holds no code`);
+		}
+	}
 
-				if (file === undefined) throw new Error(`CID-10 zip has no ${table.file}`);
-
-				if (parseCsv(CID10_CSV_DECODER.decode(file), table, data) === 0) {
-					throw new Error(`${table.file} holds no code`);
-				}
-			}
-
-			return data;
-		},
-	);
-
+	const sorted = sortRecord(data);
 	const subcategories = groupSubcategories(Object.keys(sorted));
 
 	await writeFile(
@@ -236,15 +274,6 @@ export const CID10_DESCRIPTIONS: Record<string, string> = ${JSON.stringify(sorte
  * The DATASUS page that links the archive and documents its files, columns and encoding.
  */
 export const CID10_SUBCATEGORIES: Record<string, string> = ${JSON.stringify(subcategories)};
-
-/**
- * Shape a CID-10 code has to be written in: a letter and two digits for a category, plus the
- * fourth character of a subcategory, with or without the dot before it.
- */
-export const CID10_FORMAT_REGEX = /^[A-Za-z]\\d{2}(?:\\.?\\d)?$/;
-
-/** Characters of a complete subcategory code, without the dot. */
-export const CID10_LENGTH = 4;
 `,
 	);
 };
