@@ -307,6 +307,14 @@ export type FormatProcessoJuridicoOptions = {
 };
 
 // @public
+export const formatSuframa: (value: string | number, options?: FormatSuframaOptions) => string;
+
+// @public
+export type FormatSuframaOptions = {
+    pad?: boolean;
+};
+
+// @public
 export const formatVoterId: (value: string | number) => string;
 
 // @public
@@ -390,6 +398,9 @@ export type GenerateProcessoJuridicoParams = {
 
 // @public
 export const generateRenavam: () => string;
+
+// @public
+export const generateSuframa: () => string;
 
 // @public
 export const generateVoterId: (state?: StateCode | "ZZ") => string;
@@ -805,6 +816,9 @@ export const isValidRenavam: (renavam: string | number) => boolean;
 export const isValidServicePhone: (value: string) => boolean;
 
 // @public
+export const isValidSuframa: (suframa: string) => boolean;
+
+// @public
 export const isValidVin: (value: string) => boolean;
 
 // @public
@@ -935,6 +949,9 @@ export const parsePis: (value: string | number) => string;
 
 // @public
 export const parseProcessoJuridico: (value: string | number) => string;
+
+// @public
+export const parseSuframa: (value: string | number) => string;
 
 // @public
 export const parseVoterId: (value: string | number) => string;

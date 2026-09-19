@@ -438,6 +438,55 @@ getNfeKeyInfo('35170458716523000119620010000000121000123450');
 getNfeKeyInfo('invalid'); // null
 ```
 
+## SUFRAMA
+
+The Inscrição SUFRAMA is the registration number the Superintendência da Zona Franca de Manaus gives to companies with tax incentives, carried by the `ISUF` field of the NF-e recipient. It is `SS.NNNN.LLD`: sector of activity, sequential number, locality of the SUFRAMA unit and check digit (NF-e Manual de Orientação do Contribuinte, Anexo XII.01).
+
+### isValidSuframa
+
+Check if an Inscrição SUFRAMA is valid: 8 or 9 digits (an 8 digit value is a number whose sector code lost its leading zero), a sector code other than `00` and a módulo 11 check digit. The sector and locality codes are not checked against a table, since the manual lists them only as examples. Accepts the usual mask characters (`.`, `-`, `/`, `(`, `)`, `,`, `*`) and whitespace.
+
+```javascript
+import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
+
+isValidSuframa('123456789'); // true
+isValidSuframa('12.3456.789'); // true
+isValidSuframa('10001018'); // true (same as '010001018')
+isValidSuframa('123456780'); // false
+isValidSuframa('001234560'); // false (sector 00)
+```
+
+### formatSuframa
+
+Format an Inscrição SUFRAMA. `options.pad` (part of `FormatSuframaOptions`) left-pads the value with zeros to the full 9 digits before masking (default `false`), which restores the leading zero of an 8 digit value.
+
+```javascript
+import { formatSuframa } from '@brazilian-utils/brazilian-utils';
+
+formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018', { pad: true }); // 01.0001.018
+```
+
+### parseSuframa
+
+Remove Inscrição SUFRAMA formatting, keep only digits, and cap the result to 9 digits.
+
+```javascript
+import { parseSuframa } from '@brazilian-utils/brazilian-utils';
+
+parseSuframa('12.3456.789'); // 123456789
+```
+
+### generateSuframa
+
+Generate a random 9 digit Inscrição SUFRAMA with a valid check digit and a sector code other than `00`. The sector and locality codes are random. Uses `Math.random()` internally, so it is not cryptographically secure.
+
+```javascript
+import { generateSuframa } from '@brazilian-utils/brazilian-utils';
+
+generateSuframa(); // '205678106'
+```
+
 ## Phone
 
 ### isValidPhone
