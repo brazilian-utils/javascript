@@ -305,12 +305,6 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 
 </div>
 
-<div class="file" data-file="mask.js">
-
-[mask.js](../../snippets/document-field/generated/cpf/vanilla/mask.js ':include :type=code js')
-
-</div>
-
 </div>
 
 <div class="variant" data-variant="CNPJ" data-demo="/snippets/live/?page=document-field/generated/cnpj/vanilla/cnpj-field.html">
@@ -318,12 +312,6 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 <div class="file" data-file="cnpj-field.html">
 
 [cnpj-field.html](../../snippets/document-field/generated/cnpj/vanilla/cnpj-field.html ':include :type=code html')
-
-</div>
-
-<div class="file" data-file="mask.js">
-
-[mask.js](../../snippets/document-field/generated/cnpj/vanilla/mask.js ':include :type=code js')
 
 </div>
 
@@ -337,12 +325,6 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 
 </div>
 
-<div class="file" data-file="mask.js">
-
-[mask.js](../../snippets/document-field/generated/cep/vanilla/mask.js ':include :type=code js')
-
-</div>
-
 </div>
 
 <div class="variant" data-variant="Phone" data-demo="/snippets/live/?page=document-field/generated/phone/vanilla/phone-field.html">
@@ -350,12 +332,6 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 <div class="file" data-file="phone-field.html">
 
 [phone-field.html](../../snippets/document-field/generated/phone/vanilla/phone-field.html ':include :type=code html')
-
-</div>
-
-<div class="file" data-file="mask.js">
-
-[mask.js](../../snippets/document-field/generated/phone/vanilla/mask.js ':include :type=code js')
 
 </div>
 

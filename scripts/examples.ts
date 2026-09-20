@@ -101,6 +101,7 @@ const FRAMEWORKS = [
 ] as const;
 
 const PLACEHOLDER_PATTERN = /@@(\w+)@@/g;
+const MASK_BODY_PATTERN = /^([ \t]*)@@maskBody@@$/m;
 
 /**
  * @param {string} source - A function and the arguments after the value, `formatCnpj, { version: 2 }`.
@@ -123,10 +124,9 @@ function call({ fn, rest }: { fn: string; rest: string }, value: string): string
 
 /**
  * @param {Document} document - The document the example is about.
- * @param {string} mask - The shared `mask` function, as TypeScript.
  * @returns {Record<string, string>} What every `@@name@@` of a template stands for.
  */
-function values(document: Document, mask: string): Record<string, string> {
+function values(document: Document): Record<string, string> {
 	const format = split(document.format);
 	const validator = split(document.validator);
 	const parser = split(document.parser);
@@ -169,15 +169,10 @@ function values(document: Document, mask: string): Record<string, string> {
 		validatorCtx: call(validator, document.kind),
 		validatorOptions: validator.rest === "" ? "" : `\n  options:${validator.rest.slice(1)},`,
 		parseInput: call(parser, "input.value"),
-		parseMaskedVar: call(parser, "masked"),
 		parseMaskedEvent: call(parser, "event.currentTarget.value"),
 		parseMaskValue: call(parser, "maskValue(event)"),
 		parseMaskedEventVue: call(parser, "(event.target as HTMLInputElement).value"),
 		parseMaskedEventAngular: call(parser, "(event.target as HTMLInputElement).value"),
-		mask,
-		// `<script setup>` takes no ES module exports, so the Vue examples keep `mask` local.
-		maskLocal: mask.replace("export function mask", "function mask"),
-		maskJs: mask,
 	};
 }
 
@@ -187,21 +182,6 @@ function values(document: Document, mask: string): Record<string, string> {
  */
 function readTemplate(name: string): string {
 	return readFileSync(join(TEMPLATE_DIR, name), "utf8");
-}
-
-/**
- * @param {string} template - The template, with `@@name@@` placeholders.
- * @param {Record<string, string>} substitutions - What each placeholder stands for.
- * @returns {string} The filled in template.
- */
-function fill(template: string, substitutions: Record<string, string>): string {
-	return template.replace(PLACEHOLDER_PATTERN, (match, name: string) => {
-		const value = substitutions[name];
-
-		if (value === undefined) throw new Error(`No value for ${match}`);
-
-		return value;
-	});
 }
 
 /**
@@ -216,31 +196,28 @@ function indent(code: string, spaces: number): string {
 		.join("\n");
 }
 
+/** The mask, written once and inlined into each hook, directive and listener. */
+const maskBody = readTemplate("_mask-body.ts").trim();
+
 /**
- * @param {string} mask - The shared `mask` function, as TypeScript.
- * @returns {string} The same function without its types, for the plain JavaScript example.
+ * @param {string} template - The template, with `@@name@@` placeholders.
+ * @param {Record<string, string>} substitutions - What each placeholder stands for.
+ * @returns {string} The filled in template.
  */
-function toJavaScript(mask: string): string {
-	// From the function's own doc comment: everything before it is the type of its parameter.
-	const body = mask.slice(mask.indexOf("/**\n * Formats"));
-	const signature =
-		' */\nexport function mask({ value, caret, inputType = "", format }: MaskParams) {';
-
-	if (!body.includes(signature)) throw new Error("The mask no longer has the signature to strip");
-
-	return body.replace(
-		signature,
-		[
-			" * @param {{ value: string, caret: number, inputType?: string, format: (value: string) => string }} params",
-			" * @returns {{ value: string, caret: number }} The formatted value, and where the caret goes.",
-			" */",
-			'function mask({ value, caret, inputType = "", format }) {',
-		].join("\n"),
+function fill(template: string, substitutions: Record<string, string>): string {
+	// The shared body is written once, indented to where the template asks for it.
+	const body = template.replace(MASK_BODY_PATTERN, (_match, spaces: string) =>
+		indent(maskBody, spaces.length),
 	);
-}
 
-const maskTs = readFileSync(join(TEMPLATE_DIR, "_mask.ts"), "utf8").trim();
-const maskJs = toJavaScript(maskTs);
+	return body.replace(PLACEHOLDER_PATTERN, (match, name: string) => {
+		const value = substitutions[name];
+
+		if (value === undefined) throw new Error(`No value for ${match}`);
+
+		return value;
+	});
+}
 
 rmSync(join(EXAMPLE_DIR, "generated"), { force: true, recursive: true });
 
@@ -258,8 +235,7 @@ for (const document of DOCUMENTS) {
 		writeFileSync(
 			join(frameworkFolder, framework.mask),
 			fill(readTemplate(`mask-${framework.name}.ts`), {
-				...values(document, maskTs),
-				maskJsModule: maskJs,
+				...values(document),
 			}),
 		);
 
@@ -273,10 +249,7 @@ for (const document of DOCUMENTS) {
 			);
 			const file = `${document.kind}-${part}.${extension}`;
 
-			writeFileSync(
-				join(frameworkFolder, file),
-				fill(template, { ...values(document, maskTs), maskJs }),
-			);
+			writeFileSync(join(frameworkFolder, file), fill(template, { ...values(document) }));
 		}
 	}
 
@@ -287,25 +260,15 @@ for (const document of DOCUMENTS) {
 
 		writeFileSync(
 			join(folder, "schema", `${document.kind}-${schema}.ts`),
-			fill(template, values(document, maskTs)),
+			fill(template, values(document)),
 		);
 	}
 
 	mkdirSync(join(folder, "vanilla"), { recursive: true });
 
 	writeFileSync(
-		join(folder, "vanilla", "mask.js"),
-		fill(readTemplate("mask-vanilla.js"), {
-			...values(document, maskTs),
-			maskJsModule: maskJs.replace("function mask(", "export function mask("),
-		}),
-	);
-
-	const vanilla = readFileSync(join(TEMPLATE_DIR, "vanilla.html"), "utf8");
-
-	writeFileSync(
 		join(folder, "vanilla", `${document.kind}-field.html`),
-		fill(vanilla, { ...values(document, maskTs), maskJs: indent(maskJs, 2) }),
+		fill(readTemplate("vanilla.html"), values(document)),
 	);
 }
 
