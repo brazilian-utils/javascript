@@ -12,7 +12,7 @@
  *   node scripts/examples.ts
  */
 
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -305,6 +305,24 @@ for (const document of DOCUMENTS) {
 		join(folder, "vanilla", `${document.kind}-field.html`),
 		fill(vanilla, { ...values(document, maskTs), maskJs: indent(maskJs, 2) }),
 	);
+}
+
+// A page that points at a file which is not there renders whatever the server answers with, so
+// the pages that show these examples are checked against what was just written.
+const PAGES = [
+	join(ROOT, "docs", "examples", "document-field.md"),
+	join(ROOT, "docs", "pt-br", "examples", "document-field.md"),
+];
+const INCLUDE_PATTERN = /\]\((\.[^ )]+) ':include/g;
+
+for (const page of PAGES) {
+	const folder = join(page, "..");
+
+	for (const [, target] of readFileSync(page, "utf8").matchAll(INCLUDE_PATTERN)) {
+		const file = join(folder, target ?? "");
+
+		if (!existsSync(file)) throw new Error(`${page} includes ${target}, which is not there`);
+	}
 }
 
 console.log(`Wrote ${DOCUMENTS.length} documents × ${FRAMEWORKS.length + 1} frameworks`);

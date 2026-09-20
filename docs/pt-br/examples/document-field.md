@@ -113,7 +113,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="cpf-field.ts">
 
-[cpf-field.ts](../../snippets/document-field/generated/cpf/cpf-field.ts ':include :type=code ts')
+[cpf-field.ts](../../snippets/document-field/generated/cpf/angular/cpf-field.ts ':include :type=code ts')
 
 
 <div class="file" data-file="mask.directive.ts">
@@ -125,7 +125,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="cpf-form.ts">
 
-[cpf-form.ts](../../snippets/document-field/generated/cpf/cpf-form.ts ':include :type=code ts')
+[cpf-form.ts](../../snippets/document-field/generated/cpf/angular/cpf-form.ts ':include :type=code ts')
 
 </div>
 
@@ -135,7 +135,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="cnpj-field.ts">
 
-[cnpj-field.ts](../../snippets/document-field/generated/cnpj/cnpj-field.ts ':include :type=code ts')
+[cnpj-field.ts](../../snippets/document-field/generated/cnpj/angular/cnpj-field.ts ':include :type=code ts')
 
 
 <div class="file" data-file="mask.directive.ts">
@@ -147,7 +147,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="cnpj-form.ts">
 
-[cnpj-form.ts](../../snippets/document-field/generated/cnpj/cnpj-form.ts ':include :type=code ts')
+[cnpj-form.ts](../../snippets/document-field/generated/cnpj/angular/cnpj-form.ts ':include :type=code ts')
 
 </div>
 
@@ -157,7 +157,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="cep-field.ts">
 
-[cep-field.ts](../../snippets/document-field/generated/cep/cep-field.ts ':include :type=code ts')
+[cep-field.ts](../../snippets/document-field/generated/cep/angular/cep-field.ts ':include :type=code ts')
 
 
 <div class="file" data-file="mask.directive.ts">
@@ -169,7 +169,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="cep-form.ts">
 
-[cep-form.ts](../../snippets/document-field/generated/cep/cep-form.ts ':include :type=code ts')
+[cep-form.ts](../../snippets/document-field/generated/cep/angular/cep-form.ts ':include :type=code ts')
 
 </div>
 
@@ -179,7 +179,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="phone-field.ts">
 
-[phone-field.ts](../../snippets/document-field/generated/phone/phone-field.ts ':include :type=code ts')
+[phone-field.ts](../../snippets/document-field/generated/phone/angular/phone-field.ts ':include :type=code ts')
 
 
 <div class="file" data-file="mask.directive.ts">
@@ -191,7 +191,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="file" data-file="phone-form.ts">
 
-[phone-form.ts](../../snippets/document-field/generated/phone/phone-form.ts ':include :type=code ts')
+[phone-form.ts](../../snippets/document-field/generated/phone/angular/phone-form.ts ':include :type=code ts')
 
 </div>
 
