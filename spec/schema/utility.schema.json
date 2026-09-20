@@ -1,0 +1,237 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://brazilian-utils.com.br/spec/schema/utility.schema.json",
+	"title": "Brazilian Utils utility specification",
+	"description": "A language neutral description of one utility: what it accepts, what it answers, and which of its behaviours each package implements today.",
+	"type": "object",
+	"required": [
+		"id",
+		"kind",
+		"summary",
+		"sources",
+		"names",
+		"input",
+		"output",
+		"adopted",
+		"profiles"
+	],
+	"additionalProperties": false,
+	"properties": {
+		"$schema": { "type": "string" },
+		"id": {
+			"type": "string",
+			"pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+			"description": "The utility id, in kebab-case, which is also the file name."
+		},
+		"kind": {
+			"enum": ["validator", "formatter"],
+			"description": "Validators answer a boolean; formatters answer a string or the absent value."
+		},
+		"summary": { "type": "string" },
+		"sources": {
+			"type": "array",
+			"minItems": 1,
+			"items": {
+				"type": "object",
+				"required": ["role", "url"],
+				"additionalProperties": false,
+				"properties": {
+					"role": {
+						"enum": ["official", "based-on"],
+						"description": "`official` is a law, regulator, standard body or government dataset; `based-on` is a third party implementation or mirror the code relied on."
+					},
+					"url": { "type": "string", "format": "uri" }
+				}
+			}
+		},
+		"names": {
+			"type": "object",
+			"description": "What each package calls this utility. The generator never invents a name: it emits the one that package already publishes.",
+			"additionalProperties": {
+				"type": "object",
+				"required": ["module", "function"],
+				"additionalProperties": false,
+				"properties": {
+					"module": { "type": "string" },
+					"function": { "type": "string" }
+				}
+			}
+		},
+		"input": {
+			"type": "object",
+			"required": ["name", "type"],
+			"additionalProperties": false,
+			"properties": {
+				"name": { "type": "string" },
+				"type": { "type": "string" },
+				"onWrongType": { "enum": ["false"] },
+				"onNullish": { "enum": ["empty-string", "null"] }
+			}
+		},
+		"output": {
+			"type": "object",
+			"required": ["type"],
+			"additionalProperties": false,
+			"properties": { "type": { "enum": ["boolean", "string"] } }
+		},
+		"adopted": {
+			"type": "object",
+			"description": "Which profile each package implements today, and where it is known to differ from it.",
+			"additionalProperties": {
+				"type": "object",
+				"required": ["profile"],
+				"additionalProperties": false,
+				"properties": {
+					"profile": { "type": "string" },
+					"options": { "type": "array", "items": { "type": "string" } },
+					"knownDeviations": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": ["inputs", "reason"],
+							"additionalProperties": false,
+							"properties": {
+								"inputs": { "type": "array", "items": { "type": "string" } },
+								"reason": { "type": "string" },
+								"issue": { "type": "string", "format": "uri" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"profiles": {
+			"type": "object",
+			"description": "The named behaviours of this utility. A profile is a contract: two packages on the same profile answer identically on every input.",
+			"minProperties": 1,
+			"additionalProperties": {
+				"type": "object",
+				"required": ["description", "pipeline"],
+				"additionalProperties": false,
+				"properties": {
+					"description": { "type": "string" },
+					"absent": {
+						"enum": ["empty-string", "null"],
+						"description": "What a formatter answers when it has nothing to format."
+					},
+					"options": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": ["name", "type", "default", "read"],
+							"additionalProperties": false,
+							"properties": {
+								"name": { "type": "string" },
+								"type": { "const": "boolean" },
+								"default": { "type": "boolean" },
+								"read": { "enum": ["truthy", "strict"] }
+							}
+						}
+					},
+					"pipeline": {
+						"type": "array",
+						"minItems": 1,
+						"items": { "$ref": "#/$defs/step" }
+					}
+				}
+			}
+		}
+	},
+	"$defs": {
+		"step": {
+			"oneOf": [
+				{
+					"type": "object",
+					"description": "The whole value, optionally trimmed, has to be the given digit groups, separated only by the given charset.",
+					"required": ["op", "target", "groups"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "guard-shape" },
+						"target": { "const": "raw" },
+						"trim": { "type": "string" },
+						"groups": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+						"separators": { "type": "string" }
+					}
+				},
+				{
+					"type": "object",
+					"description": "Every character of the raw input has to belong to the union of the given charsets.",
+					"required": ["op", "target", "allow"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "guard-charset" },
+						"target": { "const": "raw" },
+						"allow": { "type": "array", "items": { "type": "string" } }
+					}
+				},
+				{
+					"type": "object",
+					"required": ["op", "keep", "into"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "sanitize" },
+						"keep": { "type": "string" },
+						"into": { "const": "digits" }
+					}
+				},
+				{
+					"type": "object",
+					"required": ["op", "target", "equals"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "guard-length" },
+						"target": { "const": "digits" },
+						"equals": { "type": "integer", "minimum": 1 }
+					}
+				},
+				{
+					"type": "object",
+					"description": "Rejects a run of one repeated digit, such as \"00000000000\".",
+					"required": ["op", "target"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "guard-repeated" },
+						"target": { "const": "digits" }
+					}
+				},
+				{
+					"type": "object",
+					"required": ["op", "target", "checkDigit"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "verify-check-digits" },
+						"target": { "const": "digits" },
+						"checkDigit": {
+							"type": "string",
+							"description": "An algorithm declared in spec/schema/check-digits.json."
+						}
+					}
+				},
+				{
+					"type": "object",
+					"description": "Requires another utility to accept the same input, under a named profile.",
+					"required": ["op", "utility", "profile"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "guard-valid" },
+						"utility": { "type": "string" },
+						"profile": { "type": "string" }
+					}
+				},
+				{
+					"type": "object",
+					"description": "Lays the digits over a pattern: `0` copies a character, `*` hides one, anything else separates.",
+					"required": ["op", "target", "engine", "pattern"],
+					"additionalProperties": false,
+					"properties": {
+						"op": { "const": "apply-pattern" },
+						"target": { "const": "digits" },
+						"engine": { "const": "pattern-v1" },
+						"pattern": { "type": "string" },
+						"variants": { "type": "object", "additionalProperties": { "type": "string" } }
+					}
+				}
+			]
+		}
+	}
+}

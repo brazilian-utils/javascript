@@ -1,0 +1,4 @@
+{
+	"$comment": "The utilities covered by the specification, in the order the emitters lay them out.",
+	"utilities": ["is-valid-cpf", "is-valid-pis", "format-cpf"]
+}

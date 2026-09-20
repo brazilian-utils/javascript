@@ -84,6 +84,11 @@ but the few rules below hold everywhere:
   npm registry; [MAINTAINERS.md](MAINTAINERS.md) lists who can change what, and
   [SECURITY.md](SECURITY.md) how a release is verified.
 
+`spec/` is not part of the published package and nothing under `src/` depends on it: it is a
+prototype of describing a utility once, as language neutral data, and emitting it to the other
+Brazilian Utils packages. Read [spec/EXPLORATION.md](spec/EXPLORATION.md) for what it proves and
+[spec/README.md](spec/README.md) for how to run it.
+
 The actors around the code are the consumers of the npm package, the contributors (pull requests
 from forks), the maintainers (review, merge, release approval) and the automation: GitHub Actions
 builds, tests and publishes, Dependabot and the `Update datasets` workflow open update pull requests, and

@@ -19,3 +19,4 @@ reports/*
 !reports/api/
 reports/api/*
 !reports/api/brazilian-utils.api.md
+spec/generated

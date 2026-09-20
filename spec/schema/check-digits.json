@@ -1,0 +1,25 @@
+{
+	"$comment": "Check digit algorithms referenced by the utility specs. Every Brazilian document number in the library is a weighted modulus sum, so the algorithms are described as data rather than reimplemented per utility.",
+	"algorithms": {
+		"cpf": {
+			"description": "Modulus 11 over the base, weights running from base length + 1 down to 2, repeated cumulatively for each check digit: the second digit is computed over the base plus the first one.",
+			"modulus": 11,
+			"weights": { "kind": "descending", "from": "length+1", "to": 2 },
+			"reduce": "modulus-minus-remainder",
+			"clamp": { "atLeast": 10, "to": 0 },
+			"positions": [9, 10],
+			"cumulative": true,
+			"source": "https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=151372"
+		},
+		"pis": {
+			"description": "Modulus 11 over the 10 base digits with the fixed weight vector 3 2 9 8 7 6 5 4 3 2.",
+			"modulus": 11,
+			"weights": { "kind": "fixed", "values": [3, 2, 9, 8, 7, 6, 5, 4, 3, 2] },
+			"reduce": "modulus-minus-remainder",
+			"clamp": { "atLeast": 10, "to": 0 },
+			"positions": [10],
+			"cumulative": false,
+			"source": "https://www.sirc.gov.br/wp-content/uploads/manual_sirc_recomendacoes_tecnicas_v7.pdf"
+		}
+	}
+}

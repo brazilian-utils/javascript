@@ -148,7 +148,9 @@ export default defineConfig({
 		// `reports` holds generated output only, the committed API Extractor baseline included:
 		// reformatting its code block would make every `check:api` run report a changed API.
 		// `CHANGELOG.md` is written by release-please (`* ` bullets); formatting it would fail the
-		// Check workflow on every release PR.
+		// Check workflow on every release PR. `spec/vectors` holds the generated conformance
+		// vectors, written on one line on purpose: pretty printing ~10k expectations would multiply
+		// the file size for a file nobody reads by hand.
 		ignorePatterns: [
 			"dist",
 			"coverage",
@@ -157,6 +159,7 @@ export default defineConfig({
 			".stryker-tmp",
 			".claude",
 			"CHANGELOG.md",
+			"spec/vectors",
 		],
 		singleQuote: false,
 		sortImports: true,
@@ -498,6 +501,23 @@ export default defineConfig({
 					"typescript/explicit-module-boundary-types": "off",
 					"jsdoc/require-param": "off",
 					"jsdoc/require-returns": "off",
+				},
+			},
+			{
+				env: {
+					node: true,
+				},
+				files: ["spec/**/*.ts"],
+				rules: {
+					// The spec tooling is a set of command line programs: their output is the product.
+					"eslint/no-console": "off",
+					// `spec/conformance/upstream.ts` runs the other languages' own toolchains on purpose,
+					// from the developer's PATH, to compare this specification against the packages the
+					// organisation already publishes.
+					"sonarjs/no-os-command-from-path": "off",
+					// The generator reads the JSON files it writes itself, whose shape is pinned by
+					// `spec/schema/utility.schema.json`, so the parse results are asserted, not validated.
+					"typescript/no-unsafe-type-assertion": "off",
 				},
 			},
 			{

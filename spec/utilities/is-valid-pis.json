@@ -1,0 +1,127 @@
+{
+	"$schema": "../schema/utility.schema.json",
+	"id": "is-valid-pis",
+	"kind": "validator",
+	"summary": "Validates a PIS/PASEP/NIS number.",
+	"sources": [
+		{
+			"role": "official",
+			"url": "https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao"
+		},
+		{
+			"role": "based-on",
+			"url": "https://github.com/brazilian-utils/python/blob/main/brutils/pis.py"
+		}
+	],
+	"names": {
+		"typescript": {
+			"module": "is-valid-pis",
+			"function": "isValidPis"
+		},
+		"python": {
+			"module": "brutils.pis",
+			"function": "is_valid"
+		},
+		"go": {
+			"module": "pis",
+			"function": "IsValid"
+		},
+		"ruby": {
+			"module": "BrazilianUtils::PISUtils",
+			"function": "valid?"
+		},
+		"rust": {
+			"module": "pis",
+			"function": "is_valid"
+		},
+		"java": {
+			"module": "Pis",
+			"function": "isValid"
+		}
+	},
+	"input": {
+		"name": "pis",
+		"type": "string",
+		"onWrongType": "false"
+	},
+	"output": {
+		"type": "boolean"
+	},
+	"adopted": {
+		"typescript": {
+			"profile": "masked-charset"
+		},
+		"java": {
+			"profile": "masked-charset"
+		},
+		"python": {
+			"profile": "digits-only-lenient",
+			"knownDeviations": [
+				{
+					"inputs": ["１２３４５６７８９０９", "١٢٣٤٥٦٧٨٩٠٩"],
+					"reason": "brutils/pis.py gates on str.isdigit(), which is Unicode aware, so full width and Arabic-Indic digits are accepted as a PIS and int() then reads them. The profile is ASCII only."
+				}
+			]
+		},
+		"go": {
+			"profile": "digits-only-lenient"
+		},
+		"ruby": {
+			"profile": "digits-only-lenient"
+		},
+		"rust": {
+			"profile": "digits-only-lenient"
+		}
+	},
+	"profiles": {
+		"masked-charset": {
+			"description": "Accepts mask characters and whitespace anywhere, rejects every other character, then validates the 11 digits left.",
+			"pipeline": [
+				{
+					"op": "guard-charset",
+					"target": "raw",
+					"allow": ["ascii-digits", "mask-pis"]
+				},
+				{
+					"op": "sanitize",
+					"keep": "ascii-digits",
+					"into": "digits"
+				},
+				{
+					"op": "guard-length",
+					"target": "digits",
+					"equals": 11
+				},
+				{
+					"op": "guard-repeated",
+					"target": "digits"
+				},
+				{
+					"op": "verify-check-digits",
+					"target": "digits",
+					"checkDigit": "pis"
+				}
+			]
+		},
+		"digits-only-lenient": {
+			"description": "Accepts exactly 11 ASCII digits, rejects every mask character, and does not reject a repeated digit run, so \"00000000000\" validates. Implemented by the Python, Go and Ruby packages.",
+			"pipeline": [
+				{
+					"op": "guard-shape",
+					"target": "raw",
+					"groups": [11]
+				},
+				{
+					"op": "sanitize",
+					"keep": "ascii-digits",
+					"into": "digits"
+				},
+				{
+					"op": "verify-check-digits",
+					"target": "digits",
+					"checkDigit": "pis"
+				}
+			]
+		}
+	}
+}
