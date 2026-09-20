@@ -16,10 +16,13 @@ export const phoneValidator: ValidatorFn = (control) =>
   imports: [ReactiveFormsModule, PhoneField],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <app-phone-field formControlName="phone" />
-      @if (form.controls.phone.touched && form.controls.phone.invalid) {
-        <p role="alert">Enter a valid Phone</p>
-      }
+      <app-phone-field formControlName="phone" aria-describedby="phone-error" />
+      <!-- On the page from the start, so a screen reader announces the message it gets. -->
+      <p id="phone-error" role="alert">
+        @if (form.controls.phone.touched && form.controls.phone.hasError("phone")) {
+          Enter a valid Phone
+        }
+      </p>
       <button type="submit">Submit</button>
     </form>
   `,

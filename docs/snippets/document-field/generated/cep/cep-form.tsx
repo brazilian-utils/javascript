@@ -16,8 +16,11 @@ export function CepForm() {
         rules={{ validate: (value) => isValidCep(value) || "Enter a valid CEP" }}
         render={({ field, fieldState }) => (
           <>
-            <CepField {...field} />
-            {fieldState.error && <p role="alert">{fieldState.error.message}</p>}
+            <CepField {...field} aria-describedby="cep-error" />
+            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <p id="cep-error" role="alert">
+              {fieldState.error?.message}
+            </p>
           </>
         )}
       />

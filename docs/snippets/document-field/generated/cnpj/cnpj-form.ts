@@ -16,10 +16,13 @@ export const cnpjValidator: ValidatorFn = (control) =>
   imports: [ReactiveFormsModule, CnpjField],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <app-cnpj-field formControlName="cnpj" />
-      @if (form.controls.cnpj.touched && form.controls.cnpj.invalid) {
-        <p role="alert">Enter a valid CNPJ</p>
-      }
+      <app-cnpj-field formControlName="cnpj" aria-describedby="cnpj-error" />
+      <!-- On the page from the start, so a screen reader announces the message it gets. -->
+      <p id="cnpj-error" role="alert">
+        @if (form.controls.cnpj.touched && form.controls.cnpj.hasError("cnpj")) {
+          Enter a valid CNPJ
+        }
+      </p>
       <button type="submit">Submit</button>
     </form>
   `,

@@ -3,18 +3,19 @@
 <meta charset="utf-8" />
 <title>CEP field</title>
 
-<form>
-  <label>
-    CEP
-    <input
-      id="cep"
-      inputmode="numeric"
-      autocomplete="postal-code"
-      placeholder="00000-000"
-      aria-describedby="cep-message"
-    />
-    <output id="cep-message" hidden></output>
-  </label>
+<form id="form">
+  <label for="cep">CEP</label>
+  <input
+    id="cep"
+    name="cep"
+    required
+    inputmode="numeric"
+    autocomplete="postal-code"
+    placeholder="00000-000"
+    aria-describedby="cep-message"
+  />
+  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+  <output id="cep-message" for="cep"></output>
   <button type="submit">Submit</button>
 </form>
 
@@ -49,6 +50,11 @@
   const input = document.getElementById("cep");
   const message = document.getElementById("cep-message");
 
+  document.getElementById("form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    console.log(Object.fromEntries(new FormData(event.target)));
+  });
+
   input.addEventListener("input", (event) => {
     const value = mask({ input, inputType: event.inputType, format: formatCep });
     const valid = isValidCep(value);
@@ -57,7 +63,6 @@
     input.setAttribute("aria-invalid", String(complete && !valid));
     // A form around the field refuses to submit an invalid CEP.
     input.setCustomValidity(complete && !valid ? "Enter a valid CEP" : "");
-    message.hidden = !complete;
-    message.textContent = valid ? "✓ Valid CEP" : "✗ Invalid CEP";
+    message.textContent = complete ? (valid ? "✓ Valid CEP" : "✗ Invalid CEP") : "";
   });
 </script>

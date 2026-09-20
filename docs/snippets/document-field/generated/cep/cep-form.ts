@@ -16,10 +16,13 @@ export const cepValidator: ValidatorFn = (control) =>
   imports: [ReactiveFormsModule, CepField],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <app-cep-field formControlName="cep" />
-      @if (form.controls.cep.touched && form.controls.cep.invalid) {
-        <p role="alert">Enter a valid CEP</p>
-      }
+      <app-cep-field formControlName="cep" aria-describedby="cep-error" />
+      <!-- On the page from the start, so a screen reader announces the message it gets. -->
+      <p id="cep-error" role="alert">
+        @if (form.controls.cep.touched && form.controls.cep.hasError("cep")) {
+          Enter a valid CEP
+        }
+      </p>
       <button type="submit">Submit</button>
     </form>
   `,

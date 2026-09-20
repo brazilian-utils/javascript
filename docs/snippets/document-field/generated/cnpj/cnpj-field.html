@@ -3,18 +3,19 @@
 <meta charset="utf-8" />
 <title>CNPJ field</title>
 
-<form>
-  <label>
-    CNPJ
-    <input
-      id="cnpj"
-      inputmode="text"
-      autocomplete="off"
-      placeholder="00.ABC.000/0001-00"
-      aria-describedby="cnpj-message"
-    />
-    <output id="cnpj-message" hidden></output>
-  </label>
+<form id="form">
+  <label for="cnpj">CNPJ</label>
+  <input
+    id="cnpj"
+    name="cnpj"
+    required
+    inputmode="text"
+    autocomplete="off"
+    placeholder="00.ABC.000/0001-00"
+    aria-describedby="cnpj-message"
+  />
+  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+  <output id="cnpj-message" for="cnpj"></output>
   <button type="submit">Submit</button>
 </form>
 
@@ -49,6 +50,11 @@
   const input = document.getElementById("cnpj");
   const message = document.getElementById("cnpj-message");
 
+  document.getElementById("form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    console.log(Object.fromEntries(new FormData(event.target)));
+  });
+
   input.addEventListener("input", (event) => {
     const value = mask({ input, inputType: event.inputType, format: (value) => formatCnpj(value, { version: 2 }) });
     const valid = isValidCnpj(value, { version: 2 });
@@ -57,7 +63,6 @@
     input.setAttribute("aria-invalid", String(complete && !valid));
     // A form around the field refuses to submit an invalid CNPJ.
     input.setCustomValidity(complete && !valid ? "Enter a valid CNPJ" : "");
-    message.hidden = !complete;
-    message.textContent = valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ";
+    message.textContent = complete ? (valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ") : "";
   });
 </script>

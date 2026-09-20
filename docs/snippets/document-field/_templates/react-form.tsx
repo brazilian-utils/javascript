@@ -16,8 +16,11 @@ export function @@Name@@Form() {
         rules={{ validate: (value) => @@validator@@ || "Enter a valid @@label@@" }}
         render={({ field, fieldState }) => (
           <>
-            <@@Name@@Field {...field} />
-            {fieldState.error && <p role="alert">{fieldState.error.message}</p>}
+            <@@Name@@Field {...field} aria-describedby="@@kind@@-error" />
+            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <p id="@@kind@@-error" role="alert">
+              {fieldState.error?.message}
+            </p>
           </>
         )}
       />

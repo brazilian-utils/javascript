@@ -3,18 +3,19 @@
 <meta charset="utf-8" />
 <title>Phone field</title>
 
-<form>
-  <label>
-    Phone
-    <input
-      id="phone"
-      inputmode="numeric"
-      autocomplete="tel-national"
-      placeholder="(00) 00000-0000"
-      aria-describedby="phone-message"
-    />
-    <output id="phone-message" hidden></output>
-  </label>
+<form id="form">
+  <label for="phone">Phone</label>
+  <input
+    id="phone"
+    name="phone"
+    required
+    inputmode="numeric"
+    autocomplete="tel-national"
+    placeholder="(00) 00000-0000"
+    aria-describedby="phone-message"
+  />
+  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+  <output id="phone-message" for="phone"></output>
   <button type="submit">Submit</button>
 </form>
 
@@ -49,6 +50,11 @@
   const input = document.getElementById("phone");
   const message = document.getElementById("phone-message");
 
+  document.getElementById("form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    console.log(Object.fromEntries(new FormData(event.target)));
+  });
+
   input.addEventListener("input", (event) => {
     const value = mask({ input, inputType: event.inputType, format: (value) => formatPhone(value, { mask: "nanp" }) });
     const valid = isValidPhone(value);
@@ -57,7 +63,6 @@
     input.setAttribute("aria-invalid", String(complete && !valid));
     // A form around the field refuses to submit an invalid Phone.
     input.setCustomValidity(complete && !valid ? "Enter a valid Phone" : "");
-    message.hidden = !complete;
-    message.textContent = valid ? "✓ Valid Phone" : "✗ Invalid Phone";
+    message.textContent = complete ? (valid ? "✓ Valid Phone" : "✗ Invalid Phone") : "";
   });
 </script>

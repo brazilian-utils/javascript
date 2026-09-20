@@ -1,8 +1,15 @@
 import { @@validatorFn@@ } from "@brazilian-utils/brazilian-utils";
 import * as v from "valibot";
 
+/** A @@label@@, reusable wherever a schema needs one. */
+export const @@kind@@Schema = v.pipe(
+  v.string(),
+  v.check(@@validatorLambda@@, "Enter a valid @@label@@"),
+);
+
 export const signupSchema = v.object({
-  @@kind@@: v.pipe(v.string(), v.check(@@validatorLambda@@, "Enter a valid @@label@@")),
+  name: v.pipe(v.string(), v.minLength(1, "Enter your name")),
+  @@kind@@: @@kind@@Schema,
 });
 
 export type Signup = v.InferOutput<typeof signupSchema>;

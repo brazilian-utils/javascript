@@ -3,18 +3,19 @@
 <meta charset="utf-8" />
 <title>@@label@@ field</title>
 
-<form>
-  <label>
-    @@label@@
-    <input
-      id="@@kind@@"
-      inputmode="@@inputMode@@"
-      autocomplete="@@autocomplete@@"
-      placeholder="@@placeholder@@"
-      aria-describedby="@@kind@@-message"
-    />
-    <output id="@@kind@@-message" hidden></output>
-  </label>
+<form id="form">
+  <label for="@@kind@@">@@label@@</label>
+  <input
+    id="@@kind@@"
+    name="@@kind@@"
+    required
+    inputmode="@@inputMode@@"
+    autocomplete="@@autocomplete@@"
+    placeholder="@@placeholder@@"
+    aria-describedby="@@kind@@-message"
+  />
+  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+  <output id="@@kind@@-message" for="@@kind@@"></output>
   <button type="submit">Submit</button>
 </form>
 
@@ -26,6 +27,11 @@
   const input = document.getElementById("@@kind@@");
   const message = document.getElementById("@@kind@@-message");
 
+  document.getElementById("form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    console.log(Object.fromEntries(new FormData(event.target)));
+  });
+
   input.addEventListener("input", (event) => {
     const value = mask({ input, inputType: event.inputType, format: @@format@@ });
     const valid = @@validator@@;
@@ -34,7 +40,6 @@
     input.setAttribute("aria-invalid", String(complete && !valid));
     // A form around the field refuses to submit an invalid @@label@@.
     input.setCustomValidity(complete && !valid ? "Enter a valid @@label@@" : "");
-    message.hidden = !complete;
-    message.textContent = valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@";
+    message.textContent = complete ? (valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@") : "";
   });
 </script>

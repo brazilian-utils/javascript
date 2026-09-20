@@ -16,8 +16,11 @@ export function CnpjForm() {
         rules={{ validate: (value) => isValidCnpj(value, { version: 2 }) || "Enter a valid CNPJ" }}
         render={({ field, fieldState }) => (
           <>
-            <CnpjField {...field} />
-            {fieldState.error && <p role="alert">{fieldState.error.message}</p>}
+            <CnpjField {...field} aria-describedby="cnpj-error" />
+            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <p id="cnpj-error" role="alert">
+              {fieldState.error?.message}
+            </p>
           </>
         )}
       />

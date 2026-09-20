@@ -40,22 +40,24 @@ type CnpjFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
 };
 
 export function CnpjField({ value, onChange, ...props }: CnpjFieldProps) {
-  // The message is tied to the field, so a screen reader reads it with the field.
-  const messageId = useId();
+  const id = useId();
+  const messageId = `${id}-message`;
   const valid = isValidCnpj(value, { version: 2 });
   const complete = valid || value.length === 18;
 
   return (
-    <label>
-      CNPJ
+    <>
+      <label htmlFor={id}>CNPJ</label>
       <input
         {...props}
+        id={id}
         inputMode="text"
         autoComplete="off"
         placeholder="00.ABC.000/0001-00"
         value={value}
         aria-invalid={complete && !valid}
-        aria-describedby={complete ? messageId : undefined}
+        // The message describes the field, next to whatever the form has to say about it.
+        aria-describedby={[props["aria-describedby"], messageId].filter(Boolean).join(" ")}
         onChange={(event) =>
           onChange(
             mask({
@@ -66,9 +68,10 @@ export function CnpjField({ value, onChange, ...props }: CnpjFieldProps) {
           )
         }
       />
-      {complete && (
-        <output id={messageId}>{valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ"}</output>
-      )}
-    </label>
+      {/* A live region is announced when its text changes, so it stays on the page, empty. */}
+      <output id={messageId} htmlFor={id}>
+        {complete && (valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ")}
+      </output>
+    </>
   );
 }

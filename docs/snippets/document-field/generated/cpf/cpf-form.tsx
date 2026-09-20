@@ -16,8 +16,11 @@ export function CpfForm() {
         rules={{ validate: (value) => isValidCpf(value) || "Enter a valid CPF" }}
         render={({ field, fieldState }) => (
           <>
-            <CpfField {...field} />
-            {fieldState.error && <p role="alert">{fieldState.error.message}</p>}
+            <CpfField {...field} aria-describedby="cpf-error" />
+            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <p id="cpf-error" role="alert">
+              {fieldState.error?.message}
+            </p>
           </>
         )}
       />

@@ -10,15 +10,19 @@ const { defineField, errors, handleSubmit } = useForm({
   },
 });
 
-const [cnpj] = defineField("cnpj");
+// The attributes carry VeeValidate's blur handler, so the field is validated once it is left.
+const [cnpj, cnpjAttrs] = defineField("cnpj", {
+  validateOnModelUpdate: false,
+});
 
 const onSubmit = handleSubmit((values) => console.log(values));
 </script>
 
 <template>
   <form @submit="onSubmit">
-    <CnpjField v-model="cnpj" />
-    <p v-if="errors.cnpj" role="alert">{{ errors.cnpj }}</p>
+    <CnpjField v-model="cnpj" v-bind="cnpjAttrs" aria-describedby="cnpj-error" />
+    <!-- On the page from the start, so a screen reader announces the message it gets. -->
+    <p id="cnpj-error" role="alert">{{ errors.cnpj }}</p>
     <button type="submit">Submit</button>
   </form>
 </template>

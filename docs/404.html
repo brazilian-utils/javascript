@@ -185,6 +185,38 @@
               });
             });
 
+            // The files of one example, as an editor's tabs: one strip per variant, the file name
+            // on each tab, one file on screen.
+            var addFiles = function (holder) {
+              var files = [].slice.call(holder.querySelectorAll('.file[data-file]'));
+              if (files.length < 2 || holder.querySelector('.file-tabs')) return;
+
+              var strip = document.createElement('div');
+              strip.className = 'file-tabs';
+              strip.setAttribute('role', 'tablist');
+
+              var open = function (name) {
+                files.forEach(function (file, index) {
+                  var selected = file.dataset.file === name;
+                  file.hidden = !selected;
+                  strip.children[index].setAttribute('aria-selected', String(selected));
+                });
+              };
+
+              files.forEach(function (file) {
+                file.setAttribute('role', 'tabpanel');
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.setAttribute('role', 'tab');
+                button.textContent = file.dataset.file;
+                button.addEventListener('click', function () { open(file.dataset.file); });
+                strip.appendChild(button);
+              });
+
+              files[0].parentNode.insertBefore(strip, files[0]);
+              open(files[0].dataset.file);
+            };
+
             var addDemo = function (holder) {
               if (!holder.dataset.demo || holder.querySelector('iframe')) return;
               var frame = document.createElement('iframe');
@@ -202,10 +234,15 @@
                 tabs.children[index].setAttribute('aria-selected', String(selected));
                 panel.hidden = !selected;
                 var variants = variantsOf(panel);
-                if (variants.length === 0) return addDemo(selected ? panel : document.createElement('div'));
+                if (variants.length === 0) {
+                  if (selected) { addDemo(panel); addFiles(panel); }
+                  return;
+                }
                 variants.forEach(function (variant) {
                   variant.hidden = variant.dataset.variant !== current.variant;
-                  if (selected && !variant.hidden) addDemo(variant);
+                  if (!selected || variant.hidden) return;
+                  addDemo(variant);
+                  addFiles(variant);
                 });
               });
               remember('example-tab', current.tab);

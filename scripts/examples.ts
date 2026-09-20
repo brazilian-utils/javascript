@@ -138,6 +138,7 @@ function values(document: Document, mask: string): Record<string, string> {
 		formatCall: call(format, "value"),
 		validator: call(validator, "value"),
 		validatorValue: call(validator, "value.value"),
+		validatorText: call(validator, "text.value"),
 		validatorSignal: call(validator, "this.value()"),
 		validatorControl: call(validator, "control.value"),
 		validatorFn: validator.fn,

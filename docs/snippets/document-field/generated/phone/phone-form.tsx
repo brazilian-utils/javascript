@@ -16,8 +16,11 @@ export function PhoneForm() {
         rules={{ validate: (value) => isValidPhone(value) || "Enter a valid Phone" }}
         render={({ field, fieldState }) => (
           <>
-            <PhoneField {...field} />
-            {fieldState.error && <p role="alert">{fieldState.error.message}</p>}
+            <PhoneField {...field} aria-describedby="phone-error" />
+            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <p id="phone-error" role="alert">
+              {fieldState.error?.message}
+            </p>
           </>
         )}
       />

@@ -20,6 +20,20 @@
 .example-picker select { padding: 0.35em 0.5em; }
 .variant[hidden] { display: none; }
 
+/* The files of an example, shown like an editor's tabs */
+.file-tabs { display: flex; flex-wrap: wrap; gap: 2px; margin: 1.5em 0 0; }
+.file-tabs button {
+  padding: 0.45em 0.9em; border: 0; border-radius: var(--border-radius) var(--border-radius) 0 0;
+  background: none; color: inherit; cursor: pointer; opacity: 0.65;
+  font: 0.85em var(--font-family-mono);
+}
+.file-tabs button:hover { opacity: 1; }
+.file-tabs button[aria-selected="true"] { opacity: 1; background: var(--code-bg); }
+.file-tabs button:focus { box-shadow: none; outline: none; }
+.file-tabs button:focus-visible { outline: 2px solid var(--theme-color); outline-offset: -2px; }
+.file[hidden] { display: none; }
+.file-tabs + .file pre { margin-top: 0; border-top-left-radius: 0; }
+
 /* The framework tabs of an example page */
 .example-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 1.5em 0 0; border-bottom: 1px solid var(--border-color); }
 .example-tabs button {

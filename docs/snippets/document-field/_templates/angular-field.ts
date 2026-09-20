@@ -1,10 +1,10 @@
-import { Component, computed, forwardRef, signal } from "@angular/core";
+import { Component, Input, computed, forwardRef, signal } from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 @@imports@@
 
 @@mask@@
 
-/** One id per field on the page, to tie each message to its own field. */
+/** One id per field on the page, to tie each label and message to their own field. */
 let fields = 0;
 
 @Component({
@@ -17,35 +17,42 @@ let fields = 0;
     },
   ],
   template: `
-    <label>
-      @@label@@
-      <input
-        inputmode="@@inputMode@@"
-        autocomplete="@@autocomplete@@"
-        placeholder="@@placeholder@@"
-        [value]="value()"
-        [disabled]="disabled()"
-        [attr.aria-invalid]="complete() && !valid()"
-        [attr.aria-describedby]="complete() ? messageId : null"
-        (input)="onInput($event)"
-        (blur)="onTouched()"
-      />
-      @if (complete()) {
-        <output [id]="messageId">
-          {{ valid() ? "✓ Valid @@label@@" : "✗ Invalid @@label@@" }}
-        </output>
-      }
-    </label>
+    <label [for]="id">@@label@@</label>
+    <input
+      [id]="id"
+      inputmode="@@inputMode@@"
+      autocomplete="@@autocomplete@@"
+      placeholder="@@placeholder@@"
+      [value]="value()"
+      [disabled]="disabled()"
+      [attr.aria-invalid]="complete() && !valid()"
+      [attr.aria-describedby]="describedBy()"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    />
+    <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+    <output [id]="messageId" [htmlFor]="id">
+      {{ complete() ? (valid() ? "✓ Valid @@label@@" : "✗ Invalid @@label@@") : "" }}
+    </output>
   `,
 })
 export class @@Name@@Field implements ControlValueAccessor {
-  protected readonly messageId = `@@kind@@-message-${(fields += 1)}`;
+  /** What else describes this field, the form's own error message for example. */
+  @Input("aria-describedby") describes?: string;
+
+  protected readonly id = `@@kind@@-${(fields += 1)}`;
+  protected readonly messageId = `${this.id}-message`;
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
   protected readonly valid = computed(() => @@validatorSignal@@);
   protected readonly complete = computed(
     () => this.valid() || this.value().length === @@length@@,
   );
+
+  // The message describes the field, next to whatever the form has to say about it.
+  protected describedBy(): string {
+    return [this.describes, this.messageId].filter(Boolean).join(" ");
+  }
 
   protected onChange: (value: string) => void = () => {};
   protected onTouched: () => void = () => {};

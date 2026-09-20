@@ -1,4 +1,4 @@
-import { Component, computed, forwardRef, signal } from "@angular/core";
+import { Component, Input, computed, forwardRef, signal } from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { formatCep, isValidCep } from "@brazilian-utils/brazilian-utils";
 
@@ -35,7 +35,7 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
-/** One id per field on the page, to tie each message to its own field. */
+/** One id per field on the page, to tie each label and message to their own field. */
 let fields = 0;
 
 @Component({
@@ -48,35 +48,42 @@ let fields = 0;
     },
   ],
   template: `
-    <label>
-      CEP
-      <input
-        inputmode="numeric"
-        autocomplete="postal-code"
-        placeholder="00000-000"
-        [value]="value()"
-        [disabled]="disabled()"
-        [attr.aria-invalid]="complete() && !valid()"
-        [attr.aria-describedby]="complete() ? messageId : null"
-        (input)="onInput($event)"
-        (blur)="onTouched()"
-      />
-      @if (complete()) {
-        <output [id]="messageId">
-          {{ valid() ? "✓ Valid CEP" : "✗ Invalid CEP" }}
-        </output>
-      }
-    </label>
+    <label [for]="id">CEP</label>
+    <input
+      [id]="id"
+      inputmode="numeric"
+      autocomplete="postal-code"
+      placeholder="00000-000"
+      [value]="value()"
+      [disabled]="disabled()"
+      [attr.aria-invalid]="complete() && !valid()"
+      [attr.aria-describedby]="describedBy()"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    />
+    <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+    <output [id]="messageId" [htmlFor]="id">
+      {{ complete() ? (valid() ? "✓ Valid CEP" : "✗ Invalid CEP") : "" }}
+    </output>
   `,
 })
 export class CepField implements ControlValueAccessor {
-  protected readonly messageId = `cep-message-${(fields += 1)}`;
+  /** What else describes this field, the form's own error message for example. */
+  @Input("aria-describedby") describes?: string;
+
+  protected readonly id = `cep-${(fields += 1)}`;
+  protected readonly messageId = `${this.id}-message`;
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
   protected readonly valid = computed(() => isValidCep(this.value()));
   protected readonly complete = computed(
     () => this.valid() || this.value().length === 9,
   );
+
+  // The message describes the field, next to whatever the form has to say about it.
+  protected describedBy(): string {
+    return [this.describes, this.messageId].filter(Boolean).join(" ");
+  }
 
   protected onChange: (value: string) => void = () => {};
   protected onTouched: () => void = () => {};

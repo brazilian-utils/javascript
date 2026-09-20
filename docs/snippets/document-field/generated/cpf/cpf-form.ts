@@ -16,10 +16,13 @@ export const cpfValidator: ValidatorFn = (control) =>
   imports: [ReactiveFormsModule, CpfField],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <app-cpf-field formControlName="cpf" />
-      @if (form.controls.cpf.touched && form.controls.cpf.invalid) {
-        <p role="alert">Enter a valid CPF</p>
-      }
+      <app-cpf-field formControlName="cpf" aria-describedby="cpf-error" />
+      <!-- On the page from the start, so a screen reader announces the message it gets. -->
+      <p id="cpf-error" role="alert">
+        @if (form.controls.cpf.touched && form.controls.cpf.hasError("cpf")) {
+          Enter a valid CPF
+        }
+      </p>
       <button type="submit">Submit</button>
     </form>
   `,

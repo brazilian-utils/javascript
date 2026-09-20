@@ -3,18 +3,19 @@
 <meta charset="utf-8" />
 <title>CPF field</title>
 
-<form>
-  <label>
-    CPF
-    <input
-      id="cpf"
-      inputmode="numeric"
-      autocomplete="off"
-      placeholder="000.000.000-00"
-      aria-describedby="cpf-message"
-    />
-    <output id="cpf-message" hidden></output>
-  </label>
+<form id="form">
+  <label for="cpf">CPF</label>
+  <input
+    id="cpf"
+    name="cpf"
+    required
+    inputmode="numeric"
+    autocomplete="off"
+    placeholder="000.000.000-00"
+    aria-describedby="cpf-message"
+  />
+  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+  <output id="cpf-message" for="cpf"></output>
   <button type="submit">Submit</button>
 </form>
 
@@ -49,6 +50,11 @@
   const input = document.getElementById("cpf");
   const message = document.getElementById("cpf-message");
 
+  document.getElementById("form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    console.log(Object.fromEntries(new FormData(event.target)));
+  });
+
   input.addEventListener("input", (event) => {
     const value = mask({ input, inputType: event.inputType, format: formatCpf });
     const valid = isValidCpf(value);
@@ -57,7 +63,6 @@
     input.setAttribute("aria-invalid", String(complete && !valid));
     // A form around the field refuses to submit an invalid CPF.
     input.setCustomValidity(complete && !valid ? "Enter a valid CPF" : "");
-    message.hidden = !complete;
-    message.textContent = valid ? "✓ Valid CPF" : "✗ Invalid CPF";
+    message.textContent = complete ? (valid ? "✓ Valid CPF" : "✗ Invalid CPF") : "";
   });
 </script>

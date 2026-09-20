@@ -40,22 +40,24 @@ type PhoneFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
 };
 
 export function PhoneField({ value, onChange, ...props }: PhoneFieldProps) {
-  // The message is tied to the field, so a screen reader reads it with the field.
-  const messageId = useId();
+  const id = useId();
+  const messageId = `${id}-message`;
   const valid = isValidPhone(value);
   const complete = valid || value.length === 15;
 
   return (
-    <label>
-      Phone
+    <>
+      <label htmlFor={id}>Phone</label>
       <input
         {...props}
+        id={id}
         inputMode="numeric"
         autoComplete="tel-national"
         placeholder="(00) 00000-0000"
         value={value}
         aria-invalid={complete && !valid}
-        aria-describedby={complete ? messageId : undefined}
+        // The message describes the field, next to whatever the form has to say about it.
+        aria-describedby={[props["aria-describedby"], messageId].filter(Boolean).join(" ")}
         onChange={(event) =>
           onChange(
             mask({
@@ -66,9 +68,10 @@ export function PhoneField({ value, onChange, ...props }: PhoneFieldProps) {
           )
         }
       />
-      {complete && (
-        <output id={messageId}>{valid ? "✓ Valid Phone" : "✗ Invalid Phone"}</output>
-      )}
-    </label>
+      {/* A live region is announced when its text changes, so it stays on the page, empty. */}
+      <output id={messageId} htmlFor={id}>
+        {complete && (valid ? "✓ Valid Phone" : "✗ Invalid Phone")}
+      </output>
+    </>
   );
 }

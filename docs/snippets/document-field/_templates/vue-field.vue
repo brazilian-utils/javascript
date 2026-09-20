@@ -4,13 +4,18 @@ import { computed, useId } from "vue";
 
 @@maskLocal@@
 
-const value = defineModel<string>({ default: "" });
+// The attributes the form library puts on this component belong on the input, not on the label.
+defineOptions({ inheritAttrs: false });
 
-// The message is tied to the field, so a screen reader reads it with the field.
-const messageId = useId();
+const value = defineModel<string>();
 
-const valid = computed(() => @@validatorValue@@);
-const complete = computed(() => valid.value || value.value.length === @@length@@);
+const id = useId();
+const messageId = `${id}-message`;
+
+// The model has no default: an unset one is an empty field.
+const text = computed(() => value.value ?? "");
+const valid = computed(() => @@validatorText@@);
+const complete = computed(() => valid.value || text.value.length === @@length@@);
 
 function onInput(event: Event) {
   value.value = mask({
@@ -22,19 +27,20 @@ function onInput(event: Event) {
 </script>
 
 <template>
-  <label>
-    @@label@@
-    <input
-      inputmode="@@inputMode@@"
-      autocomplete="@@autocomplete@@"
-      placeholder="@@placeholder@@"
-      :value="value"
-      :aria-invalid="complete && !valid"
-      :aria-describedby="complete ? messageId : undefined"
-      @input="onInput"
-    />
-    <output v-if="complete" :id="messageId">
-      {{ valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@" }}
-    </output>
-  </label>
+  <label :for="id">@@label@@</label>
+  <input
+    v-bind="$attrs"
+    :id="id"
+    inputmode="@@inputMode@@"
+    autocomplete="@@autocomplete@@"
+    placeholder="@@placeholder@@"
+    :value="text"
+    :aria-invalid="complete && !valid"
+    :aria-describedby="[$attrs['aria-describedby'], messageId].filter(Boolean).join(' ')"
+    @input="onInput"
+  />
+  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
+  <output :id="messageId" :for="id">
+    {{ complete ? (valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@") : "" }}
+  </output>
 </template>
