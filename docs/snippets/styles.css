@@ -8,8 +8,11 @@
   --invalid-color: #e5534b;
 }
 
-html {
-  overflow: hidden;
+/* The theme lays a page out to fill the window; a demo is only as tall as its content. */
+html,
+body {
+  height: auto;
+  min-height: 0;
 }
 
 body {
@@ -25,7 +28,8 @@ label {
 }
 
 input {
-  width: calc(14ch + 1.3em + 2px);
+  /* The longest of the documents, an alphanumeric CNPJ, plus the padding and the border */
+  width: calc(18ch + 1.3em + 2px);
   padding: 0.4em 0.65em;
   font-family: var(--font-family-mono);
   font-weight: normal;

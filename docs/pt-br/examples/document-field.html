@@ -178,18 +178,24 @@
               return [].slice.call(panel.querySelectorAll('.variant[data-variant]'));
             };
 
+            var frames = [];
+
+            // Each demo measures itself and posts its height (docs/snippets/live/run.js), so the
+            // frame is exactly as tall as what it runs, message by message.
+            addEventListener('message', function (event) {
+              if (event.origin !== location.origin || !event.data || event.data.type !== 'example-height') return;
+              frames.forEach(function (frame) {
+                if (event.source !== frame.contentWindow) return;
+                frame.style.height = event.data.height + (frame.offsetHeight - frame.clientHeight) + 'px';
+              });
+            });
+
             var addDemo = function (holder) {
               if (!holder.dataset.demo || holder.querySelector('iframe')) return;
               var frame = document.createElement('iframe');
               frame.title = 'Live demo';
               frame.src = holder.dataset.demo;
-              frame.addEventListener('load', function () {
-                var page = frame.contentDocument;
-                new ResizeObserver(function () {
-                  var border = frame.offsetHeight - frame.clientHeight;
-                  frame.style.height = page.body.scrollHeight + border + 'px';
-                }).observe(page.body);
-              });
+              frames.push(frame);
               holder.insertBefore(frame, holder.firstChild);
             };
 

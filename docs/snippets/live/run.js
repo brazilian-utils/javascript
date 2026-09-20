@@ -50,6 +50,25 @@
     }
   };
 
+  // The page that embeds a demo cannot see how tall it is until it renders, and it keeps changing
+  // as a validation message comes and goes, so the demo reports its own height.
+  var reportHeight = function () {
+    var height = Math.ceil(document.body.scrollHeight);
+
+    parent.postMessage({ type: "example-height", height: height }, location.origin);
+  };
+
+  var watchHeight = function () {
+    new ResizeObserver(reportHeight).observe(document.body);
+    reportHeight();
+  };
+
+  if (document.readyState === "loading") {
+    addEventListener("DOMContentLoaded", watchHeight);
+  } else {
+    watchHeight();
+  }
+
   var fail = function (error) {
     document.body.textContent = "Could not load the demo: " + error.message;
   };
