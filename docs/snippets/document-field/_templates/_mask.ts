@@ -1,6 +1,8 @@
 type MaskParams = {
-  /** The field the document is typed into. */
-  input: HTMLInputElement;
+  /** What the field holds right now. */
+  value: string;
+  /** Where the caret is in it. */
+  caret: number;
   /** The `inputType` of the `input` event. */
   inputType?: string;
   /** The formatter of the document being typed. */
@@ -8,25 +10,19 @@ type MaskParams = {
 };
 
 /**
- * Formats the document typed into `input` in place and keeps the caret next to
- * the character being edited, so typing, deleting or pasting anywhere works.
- * Returns the formatted value.
+ * Formats what has been typed and says where the caret goes, so typing, deleting or pasting
+ * anywhere in the field works. Writing the result back is the caller's job.
  */
-export function mask({ input, inputType = "", format }: MaskParams): string {
-  let value = input.value;
-  let caret = input.selectionStart ?? value.length;
+export function mask({ value, caret, inputType = "", format }: MaskParams) {
+  let typed = value;
+  let position = caret;
 
   // A deleted separator would come straight back: delete the character next to it.
-  if (inputType.startsWith("delete") && format(value).length > value.length) {
-    if (inputType === "deleteContentBackward") caret -= 1;
-    value = value.slice(0, caret) + value.slice(caret + 1);
+  if (inputType.startsWith("delete") && format(typed).length > typed.length) {
+    if (inputType === "deleteContentBackward") position -= 1;
+    typed = typed.slice(0, position) + typed.slice(position + 1);
   }
 
   // Formatting what comes before the caret says where the caret goes.
-  const position = format(value.slice(0, caret)).length;
-
-  input.value = format(value);
-  input.setSelectionRange(position, position);
-
-  return input.value;
+  return { value: format(typed), caret: format(typed.slice(0, position)).length };
 }

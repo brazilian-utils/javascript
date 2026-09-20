@@ -2,7 +2,7 @@ import { useId, type ComponentProps } from "react";
 import { formatCpf, parseCpf } from "@brazilian-utils/brazilian-utils";
 import { useMask } from "./use-mask";
 
-type CpfFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
+type CpfFieldProps = Omit<ComponentProps<"input">, "value" | "onChange" | "ref"> & {
   /** The CPF without its mask, the way the form holds it. */
   value: string;
   /** Called with the CPF without its mask. */
@@ -15,13 +15,14 @@ type CpfFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
 export function CpfField({ value, onChange, errorMessage, ...props }: CpfFieldProps) {
   const id = useId();
   const errorId = `${id}-error`;
-  const maskValue = useMask(formatCpf);
+  const ref = useMask(formatCpf);
 
   return (
     <>
       <label htmlFor={id}>CPF</label>
       <input
         {...props}
+        ref={ref}
         id={id}
         inputMode="numeric"
         autoComplete="off"
@@ -29,7 +30,7 @@ export function CpfField({ value, onChange, errorMessage, ...props }: CpfFieldPr
         value={formatCpf(value)}
         aria-invalid={Boolean(errorMessage)}
         aria-describedby={errorId}
-        onChange={(event) => onChange(parseCpf(maskValue(event)))}
+        onChange={(event) => onChange(parseCpf(event.currentTarget.value))}
       />
       {/* On the page from the start, and announced when it gets its text. */}
       <p id={errorId} role="alert">

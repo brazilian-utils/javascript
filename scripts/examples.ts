@@ -223,18 +223,20 @@ function indent(code: string, spaces: number): string {
 function toJavaScript(mask: string): string {
 	// From the function's own doc comment: everything before it is the type of its parameter.
 	const body = mask.slice(mask.indexOf("/**\n * Formats"));
+	const signature =
+		' */\nexport function mask({ value, caret, inputType = "", format }: MaskParams) {';
 
-	return body
-		.replace(" * Returns the formatted value.\n", "")
-		.replace(
-			' */\nexport function mask({ input, inputType = "", format }: MaskParams): string {',
-			[
-				" * @param {{ input: HTMLInputElement, inputType?: string, format: (value: string) => string }} params",
-				" * @returns {string} The formatted value.",
-				" */",
-				'function mask({ input, inputType = "", format }) {',
-			].join("\n"),
-		);
+	if (!body.includes(signature)) throw new Error("The mask no longer has the signature to strip");
+
+	return body.replace(
+		signature,
+		[
+			" * @param {{ value: string, caret: number, inputType?: string, format: (value: string) => string }} params",
+			" * @returns {{ value: string, caret: number }} The formatted value, and where the caret goes.",
+			" */",
+			'function mask({ value, caret, inputType = "", format }) {',
+		].join("\n"),
+	);
 }
 
 const maskTs = readFileSync(join(TEMPLATE_DIR, "_mask.ts"), "utf8").trim();
@@ -314,14 +316,27 @@ const PAGES = [
 	join(ROOT, "docs", "pt-br", "examples", "document-field.md"),
 ];
 const INCLUDE_PATTERN = /\]\((\.[^ )]+) ':include/g;
+const FILE_DIV_PATTERN = /<div class="file"|<\/div>/g;
 
 for (const page of PAGES) {
 	const folder = join(page, "..");
 
-	for (const [, target] of readFileSync(page, "utf8").matchAll(INCLUDE_PATTERN)) {
+	const markdown = readFileSync(page, "utf8");
+
+	for (const [, target] of markdown.matchAll(INCLUDE_PATTERN)) {
 		const file = join(folder, target ?? "");
 
 		if (!existsSync(file)) throw new Error(`${page} includes ${target}, which is not there`);
+	}
+
+	// A file block left open swallows the next one, which then cannot be shown on its own.
+	let open = 0;
+
+	for (const [tag] of markdown.matchAll(FILE_DIV_PATTERN)) {
+		open += tag === "</div>" ? -1 : 1;
+
+		if (open > 1) throw new Error(`${page} has a file block inside another one`);
+		if (open < 0) open = 0;
 	}
 }
 

@@ -21,12 +21,12 @@ Um componente controlado: o formulário guarda o valor e passa `value` e `onChan
 
 [cpf-field.tsx](../../snippets/document-field/generated/cpf/react/cpf-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../../snippets/document-field/generated/cpf/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cpf-form.tsx">
@@ -43,12 +43,12 @@ Um componente controlado: o formulário guarda o valor e passa `value` e `onChan
 
 [cnpj-field.tsx](../../snippets/document-field/generated/cnpj/react/cnpj-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../../snippets/document-field/generated/cnpj/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cnpj-form.tsx">
@@ -65,12 +65,12 @@ Um componente controlado: o formulário guarda o valor e passa `value` e `onChan
 
 [cep-field.tsx](../../snippets/document-field/generated/cep/react/cep-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../../snippets/document-field/generated/cep/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cep-form.tsx">
@@ -87,12 +87,12 @@ Um componente controlado: o formulário guarda o valor e passa `value` e `onChan
 
 [phone-field.tsx](../../snippets/document-field/generated/phone/react/phone-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../../snippets/document-field/generated/phone/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="phone-form.tsx">
@@ -115,12 +115,12 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 [cpf-field.ts](../../snippets/document-field/generated/cpf/angular/cpf-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../../snippets/document-field/generated/cpf/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cpf-form.ts">
@@ -137,12 +137,12 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 [cnpj-field.ts](../../snippets/document-field/generated/cnpj/angular/cnpj-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../../snippets/document-field/generated/cnpj/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cnpj-form.ts">
@@ -159,12 +159,12 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 [cep-field.ts](../../snippets/document-field/generated/cep/angular/cep-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../../snippets/document-field/generated/cep/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cep-form.ts">
@@ -181,12 +181,12 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 [phone-field.ts](../../snippets/document-field/generated/phone/angular/phone-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../../snippets/document-field/generated/phone/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="phone-form.ts">
@@ -209,12 +209,12 @@ O valor é o `v-model` do componente (`defineModel`), que é onde o `defineField
 
 [cpf-field.vue](../../snippets/document-field/generated/cpf/vue/cpf-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../../snippets/document-field/generated/cpf/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cpf-form.vue">
@@ -231,12 +231,12 @@ O valor é o `v-model` do componente (`defineModel`), que é onde o `defineField
 
 [cnpj-field.vue](../../snippets/document-field/generated/cnpj/vue/cnpj-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../../snippets/document-field/generated/cnpj/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cnpj-form.vue">
@@ -253,12 +253,12 @@ O valor é o `v-model` do componente (`defineModel`), que é onde o `defineField
 
 [cep-field.vue](../../snippets/document-field/generated/cep/vue/cep-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../../snippets/document-field/generated/cep/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cep-form.vue">
@@ -275,12 +275,12 @@ O valor é o `v-model` do componente (`defineModel`), que é onde o `defineField
 
 [phone-field.vue](../../snippets/document-field/generated/phone/vue/phone-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../../snippets/document-field/generated/phone/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="phone-form.vue">
@@ -303,12 +303,12 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 
 [cpf-field.html](../../snippets/document-field/generated/cpf/vanilla/cpf-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../../snippets/document-field/generated/cpf/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>
@@ -319,12 +319,12 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 
 [cnpj-field.html](../../snippets/document-field/generated/cnpj/vanilla/cnpj-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../../snippets/document-field/generated/cnpj/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>
@@ -335,12 +335,12 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 
 [cep-field.html](../../snippets/document-field/generated/cep/vanilla/cep-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../../snippets/document-field/generated/cep/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>
@@ -351,12 +351,12 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 
 [phone-field.html](../../snippets/document-field/generated/phone/vanilla/phone-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../../snippets/document-field/generated/phone/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>

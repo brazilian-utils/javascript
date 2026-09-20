@@ -17,10 +17,15 @@ export class MaskDirective {
   private readonly input = inject<ElementRef<HTMLInputElement>>(ElementRef);
 
   protected onInput(event: InputEvent) {
-    mask({
-      input: this.input.nativeElement,
+    const input = this.input.nativeElement;
+    const masked = mask({
+      value: input.value,
+      caret: input.selectionStart ?? input.value.length,
       inputType: event.inputType,
       format: this.format,
     });
+
+    input.value = masked.value;
+    input.setSelectionRange(masked.caret, masked.caret);
   }
 }

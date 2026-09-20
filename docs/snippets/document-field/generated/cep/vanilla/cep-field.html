@@ -30,7 +30,15 @@
 
   // The field only masks: the form below is what validates.
   input.addEventListener("input", (event) => {
-    mask({ input, inputType: event.inputType, format: formatCep });
+    const masked = mask({
+      value: input.value,
+      caret: input.selectionStart ?? input.value.length,
+      inputType: event.inputType,
+      format: formatCep,
+    });
+
+    input.value = masked.value;
+    input.setSelectionRange(masked.caret, masked.caret);
   });
 
   form.addEventListener("submit", (event) => {

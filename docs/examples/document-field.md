@@ -21,12 +21,12 @@ A controlled component: the form holds the value and passes `value` and `onChang
 
 [cpf-field.tsx](../snippets/document-field/generated/cpf/react/cpf-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../snippets/document-field/generated/cpf/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cpf-form.tsx">
@@ -43,12 +43,12 @@ A controlled component: the form holds the value and passes `value` and `onChang
 
 [cnpj-field.tsx](../snippets/document-field/generated/cnpj/react/cnpj-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../snippets/document-field/generated/cnpj/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cnpj-form.tsx">
@@ -65,12 +65,12 @@ A controlled component: the form holds the value and passes `value` and `onChang
 
 [cep-field.tsx](../snippets/document-field/generated/cep/react/cep-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../snippets/document-field/generated/cep/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cep-form.tsx">
@@ -87,12 +87,12 @@ A controlled component: the form holds the value and passes `value` and `onChang
 
 [phone-field.tsx](../snippets/document-field/generated/phone/react/phone-field.tsx ':include :type=code tsx')
 
+</div>
 
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../snippets/document-field/generated/phone/react/use-mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="phone-form.tsx">
@@ -115,12 +115,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 
 [cpf-field.ts](../snippets/document-field/generated/cpf/angular/cpf-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../snippets/document-field/generated/cpf/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cpf-form.ts">
@@ -137,12 +137,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 
 [cnpj-field.ts](../snippets/document-field/generated/cnpj/angular/cnpj-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../snippets/document-field/generated/cnpj/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cnpj-form.ts">
@@ -159,12 +159,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 
 [cep-field.ts](../snippets/document-field/generated/cep/angular/cep-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../snippets/document-field/generated/cep/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cep-form.ts">
@@ -181,12 +181,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 
 [phone-field.ts](../snippets/document-field/generated/phone/angular/phone-field.ts ':include :type=code ts')
 
+</div>
 
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../snippets/document-field/generated/phone/angular/mask.directive.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="phone-form.ts">
@@ -209,12 +209,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 
 [cpf-field.vue](../snippets/document-field/generated/cpf/vue/cpf-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../snippets/document-field/generated/cpf/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cpf-form.vue">
@@ -231,12 +231,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 
 [cnpj-field.vue](../snippets/document-field/generated/cnpj/vue/cnpj-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../snippets/document-field/generated/cnpj/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cnpj-form.vue">
@@ -253,12 +253,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 
 [cep-field.vue](../snippets/document-field/generated/cep/vue/cep-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../snippets/document-field/generated/cep/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="cep-form.vue">
@@ -275,12 +275,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 
 [phone-field.vue](../snippets/document-field/generated/phone/vue/phone-field.vue ':include :type=code vue')
 
+</div>
 
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../snippets/document-field/generated/phone/vue/mask.ts ':include :type=code ts')
 
-</div>
 </div>
 
 <div class="file" data-file="phone-form.vue">
@@ -303,12 +303,12 @@ No build step: save it as an `.html` file and open it. It imports the package fr
 
 [cpf-field.html](../snippets/document-field/generated/cpf/vanilla/cpf-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../snippets/document-field/generated/cpf/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>
@@ -319,12 +319,12 @@ No build step: save it as an `.html` file and open it. It imports the package fr
 
 [cnpj-field.html](../snippets/document-field/generated/cnpj/vanilla/cnpj-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../snippets/document-field/generated/cnpj/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>
@@ -335,12 +335,12 @@ No build step: save it as an `.html` file and open it. It imports the package fr
 
 [cep-field.html](../snippets/document-field/generated/cep/vanilla/cep-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../snippets/document-field/generated/cep/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>
@@ -351,12 +351,12 @@ No build step: save it as an `.html` file and open it. It imports the package fr
 
 [phone-field.html](../snippets/document-field/generated/phone/vanilla/phone-field.html ':include :type=code html')
 
+</div>
 
 <div class="file" data-file="mask.js">
 
 [mask.js](../snippets/document-field/generated/phone/vanilla/mask.js ':include :type=code js')
 
-</div>
 </div>
 
 </div>
