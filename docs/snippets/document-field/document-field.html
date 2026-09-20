@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Document field</title>
+  <link rel="stylesheet" href="../styles.css" />
+
+  <form>
+    <label>
+      Document
+      <select id="kind">
+        <option value="cpf">CPF</option>
+        <option value="cnpj">CNPJ</option>
+        <option value="cep">CEP</option>
+        <option value="phone">Phone</option>
+      </select>
+    </label>
+
+    <label>
+      <span id="label">CPF</span>
+      <input id="value" inputmode="numeric" />
+      <output id="result" hidden></output>
+    </label>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script type="module">
+    import {
+      formatCep,
+      formatCnpj,
+      formatCpf,
+      formatPhone,
+      isValidCep,
+      isValidCnpj,
+      isValidCpf,
+      isValidPhone,
+    } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+
+    const DOCUMENTS = {
+      cpf: {
+        label: "CPF",
+        placeholder: "000.000.000-00",
+        format: formatCpf,
+        validator: isValidCpf,
+      },
+      cnpj: {
+        label: "CNPJ",
+        placeholder: "00.ABC.000/0001-00",
+        format: (value) => formatCnpj(value, { version: 2 }),
+        validator: (value) => isValidCnpj(value, { version: 2 }),
+      },
+      cep: {
+        label: "CEP",
+        placeholder: "00000-000",
+        format: formatCep,
+        validator: isValidCep,
+      },
+      phone: {
+        label: "Phone",
+        placeholder: "(00) 00000-0000",
+        format: (value) => formatPhone(value, { mask: "nanp" }),
+        validator: isValidPhone,
+      },
+    };
+
+    /**
+     * Formats the document typed into `input` in place and keeps the caret next to
+     * the character being edited, so typing, deleting or pasting anywhere works.
+     * @param {{ input: HTMLInputElement, inputType?: string, format: (value: string) => string }} params
+     * @returns {string} The formatted value.
+     */
+    function mask({ input, inputType = "", format }) {
+      let value = input.value;
+      let caret = input.selectionStart ?? value.length;
+
+      // A deleted separator would come straight back: delete the character next to it.
+      if (inputType.startsWith("delete") && format(value).length > value.length) {
+        if (inputType === "deleteContentBackward") caret -= 1;
+        value = value.slice(0, caret) + value.slice(caret + 1);
+      }
+
+      // Formatting what comes before the caret says where the caret goes.
+      const position = format(value.slice(0, caret)).length;
+
+      input.value = format(value);
+      input.setSelectionRange(position, position);
+
+      return input.value;
+    }
+
+    const kind = document.getElementById("kind");
+    const label = document.getElementById("label");
+    const input = document.getElementById("value");
+    const result = document.getElementById("result");
+
+    function spec() {
+      return DOCUMENTS[kind.value];
+    }
+
+    function render(value) {
+      const valid = spec().validator(value);
+      const complete = valid || value.length === spec().placeholder.length;
+
+      input.setAttribute("aria-invalid", String(complete && !valid));
+      // A form around the field refuses to submit an invalid document.
+      input.setCustomValidity(complete && !valid ? `Enter a valid ${spec().label}` : "");
+      result.hidden = !complete;
+      result.textContent = valid ? "✓ Valid" : "✗ Invalid";
+    }
+
+    kind.addEventListener("change", () => {
+      label.textContent = spec().label;
+      input.placeholder = spec().placeholder;
+      input.inputMode = kind.value === "cnpj" ? "text" : "numeric";
+      input.value = "";
+      render("");
+    });
+
+    input.addEventListener("input", (event) => {
+      render(mask({ input, inputType: event.inputType, format: spec().format }));
+    });
+
+    kind.dispatchEvent(new Event("change"));
+  </script>
+</html>

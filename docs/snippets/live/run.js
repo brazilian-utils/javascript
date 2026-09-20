@@ -1,12 +1,15 @@
 /**
- * Runs an example of docs/snippets in the browser, for the live demos of examples.md, so each demo
- * is exactly the code the page shows. The page names the example in `data-example`; this script
- * compiles it with Babel (TypeScript, JSX, decorators) and, for a `.vue` file, the Vue SFC
- * compiler, both from a CDN, and mounts it into the page. Nothing is built ahead of time.
+ * Runs an example of docs/snippets in the browser, for the live demos of the example pages, so each
+ * demo is exactly the code the page shows. The page names the folder in `data-dir`, the component
+ * in `data-example` and, when the demo is the component used by another file, that file in
+ * `data-usage`. This script compiles them with Babel (TypeScript, JSX, decorators) and, for a
+ * `.vue` file, the Vue SFC compiler, both from a CDN, and mounts the result. Nothing is built
+ * ahead of time.
  */
 (function () {
   var CDN = "https://cdn.jsdelivr.net/npm/";
-  var example = document.currentScript.dataset.example;
+  var data = document.currentScript.dataset;
+  var example = data.example;
 
   var script = document.createElement("script");
   script.type = "importmap";
@@ -22,6 +25,8 @@
       "@angular/compiler": CDN + "@angular/compiler@22.1.7/+esm",
       "@angular/platform-browser": CDN + "@angular/platform-browser@22.1.7/+esm",
       "@angular/forms": CDN + "@angular/forms@22.1.7/+esm",
+      "react-hook-form": "https://esm.sh/react-hook-form@7.88.0?external=react",
+      "vee-validate": "https://esm.sh/vee-validate@4.15.1?external=vue",
     },
   });
   document.head.appendChild(script);
@@ -36,7 +41,7 @@
   };
 
   var read = function (name) {
-    return fetch("../" + name).then(function (response) {
+    return fetch("../" + data.dir + "/" + name).then(function (response) {
       if (!response.ok) throw new Error(name + ": HTTP " + response.status);
       return response.text();
     });
@@ -52,11 +57,31 @@
     document.head.appendChild(babel);
   });
 
+  // Angular's JIT compiler reads the decorators TypeScript emits, which Babel does not reproduce,
+  // so an Angular file goes through TypeScript itself.
+  var transpileTypeScript = function (code, filename) {
+    return import(CDN + "typescript@5.9.3/+esm").then(function (ts) {
+      return ts.default.transpileModule(code, {
+        fileName: filename,
+        compilerOptions: {
+          target: ts.default.ScriptTarget.ES2022,
+          module: ts.default.ModuleKind.ESNext,
+          experimentalDecorators: true,
+          useDefineForClassFields: false,
+        },
+      }).outputText;
+    });
+  };
+
   var transpile = function (code, filename) {
     return window.Babel.transform(code, {
       filename: filename,
       presets: [["typescript", { allExtensions: true, isTSX: /\.tsx$/.test(filename) }], ["react", { runtime: "automatic" }]],
-      plugins: [["proposal-decorators", { legacy: true }]],
+      // Class properties after the decorators, or Angular's signal inputs never register.
+      plugins: [
+        ["proposal-decorators", { legacy: true }],
+        ["proposal-class-properties", { loose: true }],
+      ],
     }).code;
   };
 
@@ -64,10 +89,21 @@
     return URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
   };
 
-  var compileVue = function (source) {
+  var compileVue = function (name, source) {
     return import(CDN + "@vue/compiler-sfc@3.5.43/dist/compiler-sfc.esm-browser.js").then(function (sfc) {
-      var descriptor = sfc.parse(source, { filename: example }).descriptor;
-      return sfc.compileScript(descriptor, { id: "example", inlineTemplate: true }).content;
+      var descriptor = sfc.parse(source, { filename: name }).descriptor;
+      return sfc.compileScript(descriptor, { id: name, inlineTemplate: true }).content;
+    });
+  };
+
+  // A file of the example: TypeScript, JSX or a single-file component, compiled to a module.
+  var compile = function (name, code) {
+    if (/\.ts$/.test(name)) return transpileTypeScript(code, name);
+
+    var source = /\.vue$/.test(name) ? compileVue(name, code) : Promise.resolve(code);
+
+    return source.then(function (js) {
+      return transpile(js, name.replace(/\.vue$/, ".ts"));
     });
   };
 
@@ -99,17 +135,24 @@
     });
   };
 
-  Promise.all([loadBabel, read(example)])
+  Promise.all([loadBabel, read(example), data.usage ? read(data.usage) : ""])
     .then(function (files) {
-      return /\.vue$/.test(example) ? compileVue(files[1]) : files[1];
-    })
-    .then(function (code) {
       // Angular's JIT compiler has to be evaluated before any other Angular package, the example
       // included: the partially compiled packages look for it as they load.
-      return /\.ts$/.test(example) ? import("@angular/compiler").then(function () { return code; }) : code;
+      var angular = /\.ts$/.test(example) ? import("@angular/compiler") : Promise.resolve();
+
+      return angular.then(function () {
+        return Promise.all([compile(example, files[1]), data.usage ? compile(data.usage, files[2]) : ""]);
+      });
     })
-    .then(function (code) {
-      return import(toModule(transpile(code, example.replace(/\.vue$/, ".ts"))));
+    .then(function (compiled) {
+      if (!data.usage) return import(toModule(compiled[0]));
+
+      // The usage imports the component beside it; that import becomes the compiled module.
+      var component = toModule(compiled[0]);
+      var pattern = new RegExp("([\"'])\\./" + example.replace(/\.\w+$/, "") + "(\\.vue)?\\1", "g");
+
+      return import(toModule(compiled[1].replace(pattern, '"' + component + '"')));
     })
     .then(mount)
     .catch(fail);

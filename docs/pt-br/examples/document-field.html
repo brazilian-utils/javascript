@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Exemplos · Brazilian Utils</title>
-  <meta name="description" content="Um campo de CPF que formata enquanto você digita e valida o resultado, com Brazilian Utils em React, Angular, Vue e JavaScript puro." />
+  <title>Campo de documento · Brazilian Utils</title>
+  <meta name="description" content="Um campo que aplica máscara e valida CPF, CNPJ, CEP ou telefone enquanto você digita, com Brazilian Utils em React, Angular, Vue e JavaScript puro." />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#009739" />
@@ -15,25 +15,25 @@
        hook further down rewrites the title, description, canonical, hreflang and Open Graph tags for
        the page being shown; the values here are the home page's, what a crawler without JavaScript
        and a link preview see. -->
-  <link rel="canonical" href="https://brazilian-utils.com.br/pt-br/examples" />
-  <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/examples" />
-  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/examples" />
-  <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/examples" />
+  <link rel="canonical" href="https://brazilian-utils.com.br/pt-br/examples/document-field" />
+  <link rel="alternate" hreflang="en" href="https://brazilian-utils.com.br/examples/document-field" />
+  <link rel="alternate" hreflang="pt-BR" href="https://brazilian-utils.com.br/pt-br/examples/document-field" />
+  <link rel="alternate" hreflang="x-default" href="https://brazilian-utils.com.br/examples/document-field" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <!-- The Markdown behind the site, for agents that look for it: the per-util index, the whole
        English documentation in one file, and (rewritten per page by the hook) the page's own source -->
   <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
   <link rel="alternate" type="text/plain" href="/llms-full.txt" title="llms-full.txt" />
-  <link rel="alternate" type="text/markdown" href="https://brazilian-utils.com.br/pt-br/examples.md" title="Markdown source" />
+  <link rel="alternate" type="text/markdown" href="https://brazilian-utils.com.br/pt-br/examples/document-field.md" title="Markdown source" />
   <!-- docsify's scripts and styles load without CORS, so that preconnect must not be `crossorigin`;
        the README is fetched with XHR, so that one must -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Brazilian Utils" />
-  <meta property="og:title" content="Exemplos · Brazilian Utils" />
-  <meta property="og:description" content="Um campo de CPF que formata enquanto você digita e valida o resultado, com Brazilian Utils em React, Angular, Vue e JavaScript puro." />
-  <meta property="og:url" content="https://brazilian-utils.com.br/pt-br/examples" />
+  <meta property="og:title" content="Campo de documento · Brazilian Utils" />
+  <meta property="og:description" content="Um campo que aplica máscara e valida CPF, CNPJ, CEP ou telefone enquanto você digita, com Brazilian Utils em React, Angular, Vue e JavaScript puro." />
+  <meta property="og:url" content="https://brazilian-utils.com.br/pt-br/examples/document-field" />
   <meta property="og:locale" content="pt_BR" />
   <meta property="og:locale:alternate" content="en_US" />
   <meta property="og:image" content="https://brazilian-utils.com.br/images/logo.png" />
@@ -116,7 +116,12 @@
       },
       alias: {
         '/': 'https://raw.githubusercontent.com/brazilian-utils/javascript/main/README.md',
-        '/pt-br/': '/pt-br/getting-started.md'
+        '/pt-br/': '/pt-br/getting-started.md',
+        // The example pages live in a folder; they share their language's sidebar and navbar
+        '/examples/_sidebar.md': '/_sidebar.md',
+        '/examples/_navbar.md': '/_navbar.md',
+        '/pt-br/examples/_sidebar.md': '/pt-br/_sidebar.md',
+        '/pt-br/examples/_navbar.md': '/pt-br/_navbar.md'
       },
       repo: 'brazilian-utils/javascript',
       loadNavbar: true,

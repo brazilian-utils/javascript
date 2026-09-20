@@ -116,7 +116,12 @@
       },
       alias: {
         '/': 'https://raw.githubusercontent.com/brazilian-utils/javascript/main/README.md',
-        '/pt-br/': '/pt-br/getting-started.md'
+        '/pt-br/': '/pt-br/getting-started.md',
+        // The example pages live in a folder; they share their language's sidebar and navbar
+        '/examples/_sidebar.md': '/_sidebar.md',
+        '/examples/_navbar.md': '/_navbar.md',
+        '/pt-br/examples/_sidebar.md': '/pt-br/_sidebar.md',
+        '/pt-br/examples/_navbar.md': '/pt-br/_navbar.md'
       },
       repo: 'brazilian-utils/javascript',
       loadNavbar: true,
