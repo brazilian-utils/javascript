@@ -12,10 +12,11 @@
     inputmode="@@inputMode@@"
     autocomplete="@@autocomplete@@"
     placeholder="@@placeholder@@"
-    aria-describedby="@@kind@@-message"
+    aria-describedby="@@kind@@-error"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output id="@@kind@@-message" for="@@kind@@"></output>
+  <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
+       description is read once focus lands, so it needs no live region. -->
+  <p id="@@kind@@-error"></p>
   <button type="submit">Submit</button>
 </form>
 
@@ -24,22 +25,26 @@
 
 @@maskJs@@
 
+  const form = document.getElementById("form");
   const input = document.getElementById("@@kind@@");
-  const message = document.getElementById("@@kind@@-message");
+  const error = document.getElementById("@@kind@@-error");
 
-  document.getElementById("form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    console.log(Object.fromEntries(new FormData(event.target)));
+  // The field only masks: the form below is what validates.
+  input.addEventListener("input", (event) => {
+    mask({ input, inputType: event.inputType, format: @@format@@ });
   });
 
-  input.addEventListener("input", (event) => {
-    const value = mask({ input, inputType: event.inputType, format: @@format@@ });
-    const valid = @@validator@@;
-    const complete = valid || value.length === @@length@@;
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-    input.setAttribute("aria-invalid", String(complete && !valid));
-    // A form around the field refuses to submit an invalid @@label@@.
-    input.setCustomValidity(complete && !valid ? "Enter a valid @@label@@" : "");
-    message.textContent = complete ? (valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@") : "";
+    const value = @@parseInput@@;
+    const message = value ? (@@validatorPlain@@ ? "" : "Enter a valid @@label@@") : "Enter a @@label@@";
+
+    input.setAttribute("aria-invalid", String(Boolean(message)));
+    error.textContent = message;
+
+    if (message) return input.focus();
+
+    console.log({ @@kind@@: value });
   });
 </script>

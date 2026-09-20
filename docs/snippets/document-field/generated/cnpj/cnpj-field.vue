@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
-import { formatCnpj, isValidCnpj } from "@brazilian-utils/brazilian-utils";
+import { formatCnpj, parseCnpj } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -35,29 +35,28 @@ function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
-// The attributes the form library puts on this component belong on the input, not on the label.
+// The attributes the form puts on this component belong on the input, not on the label.
 defineOptions({ inheritAttrs: false });
 
-const value = defineModel<string>();
+/** The CNPJ without its mask, the way the form holds it. */
+const value = defineModel<string>({ required: true });
 
 const id = useId();
-const messageId = `${id}-message`;
-
-// The model has no default: an unset one is an empty field.
-const text = computed(() => value.value ?? "");
-const valid = computed(() => isValidCnpj(text.value, { version: 2 }));
-const complete = computed(() => valid.value || text.value.length === 18);
+const masked = computed(() => formatCnpj(value.value, { version: 2 }));
 
 function onInput(event: Event) {
-  value.value = mask({
+  const masked = mask({
     input: event.target as HTMLInputElement,
     inputType: (event as InputEvent).inputType,
     format: (value) => formatCnpj(value, { version: 2 }),
   });
+
+  value.value = parseCnpj(masked, { version: 2 });
 }
 </script>
 
 <template>
+  <!-- Masks a CNPJ while it is typed. Validation belongs to the form. -->
   <label :for="id">CNPJ</label>
   <input
     v-bind="$attrs"
@@ -65,13 +64,7 @@ function onInput(event: Event) {
     inputmode="text"
     autocomplete="off"
     placeholder="00.ABC.000/0001-00"
-    :value="text"
-    :aria-invalid="complete && !valid"
-    :aria-describedby="[$attrs['aria-describedby'], messageId].filter(Boolean).join(' ')"
+    :value="masked"
     @input="onInput"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output :id="messageId" :for="id">
-    {{ complete ? (valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ") : "" }}
-  </output>
 </template>

@@ -1,5 +1,5 @@
 import { useId, type ComponentProps } from "react";
-import { formatPhone, isValidPhone } from "@brazilian-utils/brazilian-utils";
+import { formatPhone, parsePhone } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -35,15 +35,15 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
 }
 
 type PhoneFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
+  /** The Phone without its mask, the way the form holds it. */
   value: string;
+  /** Called with the Phone without its mask. */
   onChange: (value: string) => void;
 };
 
+/** Masks a Phone while it is typed. Validation belongs to the form. */
 export function PhoneField({ value, onChange, ...props }: PhoneFieldProps) {
   const id = useId();
-  const messageId = `${id}-message`;
-  const valid = isValidPhone(value);
-  const complete = valid || value.length === 15;
 
   return (
     <>
@@ -54,24 +54,17 @@ export function PhoneField({ value, onChange, ...props }: PhoneFieldProps) {
         inputMode="numeric"
         autoComplete="tel-national"
         placeholder="(00) 00000-0000"
-        value={value}
-        aria-invalid={complete && !valid}
-        // The message describes the field, next to whatever the form has to say about it.
-        aria-describedby={[props["aria-describedby"], messageId].filter(Boolean).join(" ")}
-        onChange={(event) =>
-          onChange(
-            mask({
-              input: event.currentTarget,
-              inputType: (event.nativeEvent as InputEvent).inputType,
-              format: (value) => formatPhone(value, { mask: "nanp" }),
-            }),
-          )
-        }
+        value={formatPhone(value, { mask: "nanp" })}
+        onChange={(event) => {
+          const masked = mask({
+            input: event.currentTarget,
+            inputType: (event.nativeEvent as InputEvent).inputType,
+            format: (value) => formatPhone(value, { mask: "nanp" }),
+          });
+
+          onChange(parsePhone(masked));
+        }}
       />
-      {/* A live region is announced when its text changes, so it stays on the page, empty. */}
-      <output id={messageId} htmlFor={id}>
-        {complete && (valid ? "✓ Valid Phone" : "✗ Invalid Phone")}
-      </output>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useId, type ComponentProps } from "react";
-import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
+import { formatCpf, parseCpf } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -35,15 +35,15 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
 }
 
 type CpfFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
+  /** The CPF without its mask, the way the form holds it. */
   value: string;
+  /** Called with the CPF without its mask. */
   onChange: (value: string) => void;
 };
 
+/** Masks a CPF while it is typed. Validation belongs to the form. */
 export function CpfField({ value, onChange, ...props }: CpfFieldProps) {
   const id = useId();
-  const messageId = `${id}-message`;
-  const valid = isValidCpf(value);
-  const complete = valid || value.length === 14;
 
   return (
     <>
@@ -54,24 +54,17 @@ export function CpfField({ value, onChange, ...props }: CpfFieldProps) {
         inputMode="numeric"
         autoComplete="off"
         placeholder="000.000.000-00"
-        value={value}
-        aria-invalid={complete && !valid}
-        // The message describes the field, next to whatever the form has to say about it.
-        aria-describedby={[props["aria-describedby"], messageId].filter(Boolean).join(" ")}
-        onChange={(event) =>
-          onChange(
-            mask({
-              input: event.currentTarget,
-              inputType: (event.nativeEvent as InputEvent).inputType,
-              format: formatCpf,
-            }),
-          )
-        }
+        value={formatCpf(value)}
+        onChange={(event) => {
+          const masked = mask({
+            input: event.currentTarget,
+            inputType: (event.nativeEvent as InputEvent).inputType,
+            format: formatCpf,
+          });
+
+          onChange(parseCpf(masked));
+        }}
       />
-      {/* A live region is announced when its text changes, so it stays on the page, empty. */}
-      <output id={messageId} htmlFor={id}>
-        {complete && (valid ? "✓ Valid CPF" : "✗ Invalid CPF")}
-      </output>
     </>
   );
 }

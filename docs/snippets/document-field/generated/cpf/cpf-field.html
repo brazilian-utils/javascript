@@ -12,15 +12,16 @@
     inputmode="numeric"
     autocomplete="off"
     placeholder="000.000.000-00"
-    aria-describedby="cpf-message"
+    aria-describedby="cpf-error"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output id="cpf-message" for="cpf"></output>
+  <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
+       description is read once focus lands, so it needs no live region. -->
+  <p id="cpf-error"></p>
   <button type="submit">Submit</button>
 </form>
 
 <script type="module">
-  import { formatCpf, isValidCpf } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import { formatCpf, isValidCpf, parseCpf } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
 
   /**
    * Formats the document typed into `input` in place and keeps the caret next to
@@ -47,22 +48,26 @@
     return input.value;
   }
 
+  const form = document.getElementById("form");
   const input = document.getElementById("cpf");
-  const message = document.getElementById("cpf-message");
+  const error = document.getElementById("cpf-error");
 
-  document.getElementById("form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    console.log(Object.fromEntries(new FormData(event.target)));
+  // The field only masks: the form below is what validates.
+  input.addEventListener("input", (event) => {
+    mask({ input, inputType: event.inputType, format: formatCpf });
   });
 
-  input.addEventListener("input", (event) => {
-    const value = mask({ input, inputType: event.inputType, format: formatCpf });
-    const valid = isValidCpf(value);
-    const complete = valid || value.length === 14;
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-    input.setAttribute("aria-invalid", String(complete && !valid));
-    // A form around the field refuses to submit an invalid CPF.
-    input.setCustomValidity(complete && !valid ? "Enter a valid CPF" : "");
-    message.textContent = complete ? (valid ? "✓ Valid CPF" : "✗ Invalid CPF") : "";
+    const value = parseCpf(input.value);
+    const message = value ? (isValidCpf(value) ? "" : "Enter a valid CPF") : "Enter a CPF";
+
+    input.setAttribute("aria-invalid", String(Boolean(message)));
+    error.textContent = message;
+
+    if (message) return input.focus();
+
+    console.log({ cpf: value });
   });
 </script>

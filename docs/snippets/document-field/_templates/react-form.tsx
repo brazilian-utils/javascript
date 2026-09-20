@@ -13,11 +13,19 @@ export function @@Name@@Form() {
       <Controller
         name="@@kind@@"
         control={control}
-        rules={{ validate: (value) => @@validator@@ || "Enter a valid @@label@@" }}
+        rules={{
+          required: "Enter a @@label@@",
+          validate: (value) => @@validator@@ || "Enter a valid @@label@@",
+        }}
         render={({ field, fieldState }) => (
           <>
-            <@@Name@@Field {...field} aria-describedby="@@kind@@-error" />
-            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <@@Name@@Field
+              {...field}
+              aria-invalid={fieldState.invalid}
+              aria-describedby="@@kind@@-error"
+            />
+            {/* On the page from the start, and announced when it gets its text: nothing moves
+                focus to the field, so the message has to speak for itself. */}
             <p id="@@kind@@-error" role="alert">
               {fieldState.error?.message}
             </p>

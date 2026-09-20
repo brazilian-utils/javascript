@@ -12,15 +12,16 @@
     inputmode="text"
     autocomplete="off"
     placeholder="00.ABC.000/0001-00"
-    aria-describedby="cnpj-message"
+    aria-describedby="cnpj-error"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output id="cnpj-message" for="cnpj"></output>
+  <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
+       description is read once focus lands, so it needs no live region. -->
+  <p id="cnpj-error"></p>
   <button type="submit">Submit</button>
 </form>
 
 <script type="module">
-  import { formatCnpj, isValidCnpj } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import { formatCnpj, isValidCnpj, parseCnpj } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
 
   /**
    * Formats the document typed into `input` in place and keeps the caret next to
@@ -47,22 +48,26 @@
     return input.value;
   }
 
+  const form = document.getElementById("form");
   const input = document.getElementById("cnpj");
-  const message = document.getElementById("cnpj-message");
+  const error = document.getElementById("cnpj-error");
 
-  document.getElementById("form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    console.log(Object.fromEntries(new FormData(event.target)));
+  // The field only masks: the form below is what validates.
+  input.addEventListener("input", (event) => {
+    mask({ input, inputType: event.inputType, format: (value) => formatCnpj(value, { version: 2 }) });
   });
 
-  input.addEventListener("input", (event) => {
-    const value = mask({ input, inputType: event.inputType, format: (value) => formatCnpj(value, { version: 2 }) });
-    const valid = isValidCnpj(value, { version: 2 });
-    const complete = valid || value.length === 18;
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-    input.setAttribute("aria-invalid", String(complete && !valid));
-    // A form around the field refuses to submit an invalid CNPJ.
-    input.setCustomValidity(complete && !valid ? "Enter a valid CNPJ" : "");
-    message.textContent = complete ? (valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ") : "";
+    const value = parseCnpj(input.value, { version: 2 });
+    const message = value ? (isValidCnpj(value, { version: 2 }) ? "" : "Enter a valid CNPJ") : "Enter a CNPJ";
+
+    input.setAttribute("aria-invalid", String(Boolean(message)));
+    error.textContent = message;
+
+    if (message) return input.focus();
+
+    console.log({ cnpj: value });
   });
 </script>

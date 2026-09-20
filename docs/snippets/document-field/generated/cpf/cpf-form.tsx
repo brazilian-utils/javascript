@@ -13,11 +13,19 @@ export function CpfForm() {
       <Controller
         name="cpf"
         control={control}
-        rules={{ validate: (value) => isValidCpf(value) || "Enter a valid CPF" }}
+        rules={{
+          required: "Enter a CPF",
+          validate: (value) => isValidCpf(value) || "Enter a valid CPF",
+        }}
         render={({ field, fieldState }) => (
           <>
-            <CpfField {...field} aria-describedby="cpf-error" />
-            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <CpfField
+              {...field}
+              aria-invalid={fieldState.invalid}
+              aria-describedby="cpf-error"
+            />
+            {/* On the page from the start, and announced when it gets its text: nothing moves
+                focus to the field, so the message has to speak for itself. */}
             <p id="cpf-error" role="alert">
               {fieldState.error?.message}
             </p>

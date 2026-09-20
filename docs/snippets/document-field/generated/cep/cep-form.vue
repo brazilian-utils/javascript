@@ -10,7 +10,7 @@ const { defineField, errors, handleSubmit } = useForm({
   },
 });
 
-// The attributes carry VeeValidate's blur handler, so the field is validated once it is left.
+// The attributes carry the blur handler, so the field is validated once it is left.
 const [cep, cepAttrs] = defineField("cep", {
   validateOnModelUpdate: false,
 });
@@ -20,8 +20,14 @@ const onSubmit = handleSubmit((values) => console.log(values));
 
 <template>
   <form @submit="onSubmit">
-    <CepField v-model="cep" v-bind="cepAttrs" aria-describedby="cep-error" />
-    <!-- On the page from the start, so a screen reader announces the message it gets. -->
+    <CepField
+      v-model="cep"
+      v-bind="cepAttrs"
+      :aria-invalid="Boolean(errors.cep)"
+      aria-describedby="cep-error"
+    />
+    <!-- On the page from the start, and announced when it gets its text: nothing moves focus
+         to the field here, so the message has to speak for itself. -->
     <p id="cep-error" role="alert">{{ errors.cep }}</p>
     <button type="submit">Submit</button>
   </form>

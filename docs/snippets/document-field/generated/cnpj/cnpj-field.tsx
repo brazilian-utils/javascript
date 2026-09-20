@@ -1,5 +1,5 @@
 import { useId, type ComponentProps } from "react";
-import { formatCnpj, isValidCnpj } from "@brazilian-utils/brazilian-utils";
+import { formatCnpj, parseCnpj } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -35,15 +35,15 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
 }
 
 type CnpjFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
+  /** The CNPJ without its mask, the way the form holds it. */
   value: string;
+  /** Called with the CNPJ without its mask. */
   onChange: (value: string) => void;
 };
 
+/** Masks a CNPJ while it is typed. Validation belongs to the form. */
 export function CnpjField({ value, onChange, ...props }: CnpjFieldProps) {
   const id = useId();
-  const messageId = `${id}-message`;
-  const valid = isValidCnpj(value, { version: 2 });
-  const complete = valid || value.length === 18;
 
   return (
     <>
@@ -54,24 +54,17 @@ export function CnpjField({ value, onChange, ...props }: CnpjFieldProps) {
         inputMode="text"
         autoComplete="off"
         placeholder="00.ABC.000/0001-00"
-        value={value}
-        aria-invalid={complete && !valid}
-        // The message describes the field, next to whatever the form has to say about it.
-        aria-describedby={[props["aria-describedby"], messageId].filter(Boolean).join(" ")}
-        onChange={(event) =>
-          onChange(
-            mask({
-              input: event.currentTarget,
-              inputType: (event.nativeEvent as InputEvent).inputType,
-              format: (value) => formatCnpj(value, { version: 2 }),
-            }),
-          )
-        }
+        value={formatCnpj(value, { version: 2 })}
+        onChange={(event) => {
+          const masked = mask({
+            input: event.currentTarget,
+            inputType: (event.nativeEvent as InputEvent).inputType,
+            format: (value) => formatCnpj(value, { version: 2 }),
+          });
+
+          onChange(parseCnpj(masked, { version: 2 }));
+        }}
       />
-      {/* A live region is announced when its text changes, so it stays on the page, empty. */}
-      <output id={messageId} htmlFor={id}>
-        {complete && (valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ")}
-      </output>
     </>
   );
 }

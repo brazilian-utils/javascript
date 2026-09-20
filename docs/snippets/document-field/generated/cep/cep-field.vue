@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
-import { formatCep, isValidCep } from "@brazilian-utils/brazilian-utils";
+import { formatCep, parseCep } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -35,29 +35,28 @@ function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
-// The attributes the form library puts on this component belong on the input, not on the label.
+// The attributes the form puts on this component belong on the input, not on the label.
 defineOptions({ inheritAttrs: false });
 
-const value = defineModel<string>();
+/** The CEP without its mask, the way the form holds it. */
+const value = defineModel<string>({ required: true });
 
 const id = useId();
-const messageId = `${id}-message`;
-
-// The model has no default: an unset one is an empty field.
-const text = computed(() => value.value ?? "");
-const valid = computed(() => isValidCep(text.value));
-const complete = computed(() => valid.value || text.value.length === 9);
+const masked = computed(() => formatCep(value.value));
 
 function onInput(event: Event) {
-  value.value = mask({
+  const masked = mask({
     input: event.target as HTMLInputElement,
     inputType: (event as InputEvent).inputType,
     format: formatCep,
   });
+
+  value.value = parseCep(masked);
 }
 </script>
 
 <template>
+  <!-- Masks a CEP while it is typed. Validation belongs to the form. -->
   <label :for="id">CEP</label>
   <input
     v-bind="$attrs"
@@ -65,13 +64,7 @@ function onInput(event: Event) {
     inputmode="numeric"
     autocomplete="postal-code"
     placeholder="00000-000"
-    :value="text"
-    :aria-invalid="complete && !valid"
-    :aria-describedby="[$attrs['aria-describedby'], messageId].filter(Boolean).join(' ')"
+    :value="masked"
     @input="onInput"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output :id="messageId" :for="id">
-    {{ complete ? (valid ? "✓ Valid CEP" : "✗ Invalid CEP") : "" }}
-  </output>
 </template>

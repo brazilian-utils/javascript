@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
-import { formatPhone, isValidPhone } from "@brazilian-utils/brazilian-utils";
+import { formatPhone, parsePhone } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -35,29 +35,28 @@ function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
-// The attributes the form library puts on this component belong on the input, not on the label.
+// The attributes the form puts on this component belong on the input, not on the label.
 defineOptions({ inheritAttrs: false });
 
-const value = defineModel<string>();
+/** The Phone without its mask, the way the form holds it. */
+const value = defineModel<string>({ required: true });
 
 const id = useId();
-const messageId = `${id}-message`;
-
-// The model has no default: an unset one is an empty field.
-const text = computed(() => value.value ?? "");
-const valid = computed(() => isValidPhone(text.value));
-const complete = computed(() => valid.value || text.value.length === 15);
+const masked = computed(() => formatPhone(value.value, { mask: "nanp" }));
 
 function onInput(event: Event) {
-  value.value = mask({
+  const masked = mask({
     input: event.target as HTMLInputElement,
     inputType: (event as InputEvent).inputType,
     format: (value) => formatPhone(value, { mask: "nanp" }),
   });
+
+  value.value = parsePhone(masked);
 }
 </script>
 
 <template>
+  <!-- Masks a Phone while it is typed. Validation belongs to the form. -->
   <label :for="id">Phone</label>
   <input
     v-bind="$attrs"
@@ -65,13 +64,7 @@ function onInput(event: Event) {
     inputmode="numeric"
     autocomplete="tel-national"
     placeholder="(00) 00000-0000"
-    :value="text"
-    :aria-invalid="complete && !valid"
-    :aria-describedby="[$attrs['aria-describedby'], messageId].filter(Boolean).join(' ')"
+    :value="masked"
     @input="onInput"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output :id="messageId" :for="id">
-    {{ complete ? (valid ? "✓ Valid Phone" : "✗ Invalid Phone") : "" }}
-  </output>
 </template>

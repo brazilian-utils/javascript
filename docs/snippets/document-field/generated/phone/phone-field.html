@@ -12,15 +12,16 @@
     inputmode="numeric"
     autocomplete="tel-national"
     placeholder="(00) 00000-0000"
-    aria-describedby="phone-message"
+    aria-describedby="phone-error"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output id="phone-message" for="phone"></output>
+  <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
+       description is read once focus lands, so it needs no live region. -->
+  <p id="phone-error"></p>
   <button type="submit">Submit</button>
 </form>
 
 <script type="module">
-  import { formatPhone, isValidPhone } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import { formatPhone, isValidPhone, parsePhone } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
 
   /**
    * Formats the document typed into `input` in place and keeps the caret next to
@@ -47,22 +48,26 @@
     return input.value;
   }
 
+  const form = document.getElementById("form");
   const input = document.getElementById("phone");
-  const message = document.getElementById("phone-message");
+  const error = document.getElementById("phone-error");
 
-  document.getElementById("form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    console.log(Object.fromEntries(new FormData(event.target)));
+  // The field only masks: the form below is what validates.
+  input.addEventListener("input", (event) => {
+    mask({ input, inputType: event.inputType, format: (value) => formatPhone(value, { mask: "nanp" }) });
   });
 
-  input.addEventListener("input", (event) => {
-    const value = mask({ input, inputType: event.inputType, format: (value) => formatPhone(value, { mask: "nanp" }) });
-    const valid = isValidPhone(value);
-    const complete = valid || value.length === 15;
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-    input.setAttribute("aria-invalid", String(complete && !valid));
-    // A form around the field refuses to submit an invalid Phone.
-    input.setCustomValidity(complete && !valid ? "Enter a valid Phone" : "");
-    message.textContent = complete ? (valid ? "✓ Valid Phone" : "✗ Invalid Phone") : "";
+    const value = parsePhone(input.value);
+    const message = value ? (isValidPhone(value) ? "" : "Enter a valid Phone") : "Enter a Phone";
+
+    input.setAttribute("aria-invalid", String(Boolean(message)));
+    error.textContent = message;
+
+    if (message) return input.focus();
+
+    console.log({ phone: value });
   });
 </script>

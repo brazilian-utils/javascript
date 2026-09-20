@@ -13,11 +13,19 @@ export function PhoneForm() {
       <Controller
         name="phone"
         control={control}
-        rules={{ validate: (value) => isValidPhone(value) || "Enter a valid Phone" }}
+        rules={{
+          required: "Enter a Phone",
+          validate: (value) => isValidPhone(value) || "Enter a valid Phone",
+        }}
         render={({ field, fieldState }) => (
           <>
-            <PhoneField {...field} aria-describedby="phone-error" />
-            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <PhoneField
+              {...field}
+              aria-invalid={fieldState.invalid}
+              aria-describedby="phone-error"
+            />
+            {/* On the page from the start, and announced when it gets its text: nothing moves
+                focus to the field, so the message has to speak for itself. */}
             <p id="phone-error" role="alert">
               {fieldState.error?.message}
             </p>

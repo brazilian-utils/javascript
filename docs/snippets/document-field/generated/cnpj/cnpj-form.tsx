@@ -13,11 +13,19 @@ export function CnpjForm() {
       <Controller
         name="cnpj"
         control={control}
-        rules={{ validate: (value) => isValidCnpj(value, { version: 2 }) || "Enter a valid CNPJ" }}
+        rules={{
+          required: "Enter a CNPJ",
+          validate: (value) => isValidCnpj(value, { version: 2 }) || "Enter a valid CNPJ",
+        }}
         render={({ field, fieldState }) => (
           <>
-            <CnpjField {...field} aria-describedby="cnpj-error" />
-            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <CnpjField
+              {...field}
+              aria-invalid={fieldState.invalid}
+              aria-describedby="cnpj-error"
+            />
+            {/* On the page from the start, and announced when it gets its text: nothing moves
+                focus to the field, so the message has to speak for itself. */}
             <p id="cnpj-error" role="alert">
               {fieldState.error?.message}
             </p>

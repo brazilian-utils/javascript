@@ -10,7 +10,7 @@ const { defineField, errors, handleSubmit } = useForm({
   },
 });
 
-// The attributes carry VeeValidate's blur handler, so the field is validated once it is left.
+// The attributes carry the blur handler, so the field is validated once it is left.
 const [cpf, cpfAttrs] = defineField("cpf", {
   validateOnModelUpdate: false,
 });
@@ -20,8 +20,14 @@ const onSubmit = handleSubmit((values) => console.log(values));
 
 <template>
   <form @submit="onSubmit">
-    <CpfField v-model="cpf" v-bind="cpfAttrs" aria-describedby="cpf-error" />
-    <!-- On the page from the start, so a screen reader announces the message it gets. -->
+    <CpfField
+      v-model="cpf"
+      v-bind="cpfAttrs"
+      :aria-invalid="Boolean(errors.cpf)"
+      aria-describedby="cpf-error"
+    />
+    <!-- On the page from the start, and announced when it gets its text: nothing moves focus
+         to the field here, so the message has to speak for itself. -->
     <p id="cpf-error" role="alert">{{ errors.cpf }}</p>
     <button type="submit">Submit</button>
   </form>

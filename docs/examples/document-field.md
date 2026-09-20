@@ -4,14 +4,16 @@ description: "A field that masks and validates a CPF, CNPJ, CEP or phone number 
 keywords: ["CPF input mask", "CNPJ mask", "CEP mask", "phone mask", "React CPF", "Angular CPF", "Vue CPF", "validate CPF"]
 ---
 
-A field that formats as you type and validates once the value is complete. Pick the document and the framework: each example is only about that document, and runs the code below it, which you can copy as is.
+A field that formats as you type, inside a form that validates. Pick the document and the framework: each example is only about that document, and runs the code below it, which you can copy as is.
+
+The field only masks. It hands the form the value without its mask, with `parse*`, so the form holds `52998224725` and a submit sends that, and it shows the value back formatted. Validation belongs to the form, where the rest of the form's rules live, which also leaves one error message per field instead of two.
 
 The `mask` function is the same in all of them, and it is all a mask needs. A formatter takes whatever has been typed so far, so it can run on every keystroke; replacing a field's value moves the caret to the end, so `mask` puts the caret back next to the character being edited. Formatting what comes before the caret is what says where it goes. A deleted separator becomes a deleted character, which the formatter would otherwise put straight back.
 
 
 <div class="example" data-name="React">
 
-A controlled component: the parent holds the value and passes `value` and `onChange`. It also takes the input's own props, so react-hook-form's `field` spreads into it as is:
+A controlled component: the form holds the value and passes `value` and `onChange`. It also takes the input's own props, so react-hook-form's `field` spreads into it as is, and the rules live on the form:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf&example=cpf-field.tsx&usage=cpf-form.tsx">
 
@@ -81,7 +83,7 @@ A controlled component: the parent holds the value and passes `value` and `onCha
 
 <div class="example" data-name="Angular">
 
-A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `ngModel`) like a native input, touched on blur and disabled with its control:
+A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `ngModel`) like a native input, touched on blur and disabled with its control. The validator is a `ValidatorFn` on the control:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf&example=cpf-field.ts&usage=cpf-form.ts">
 
@@ -151,7 +153,7 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 
 <div class="example" data-name="Vue">
 
-The value is the component's `v-model` (`defineModel`), which is what VeeValidate's `defineField` binds to:
+The value is the component's `v-model` (`defineModel`), which is what VeeValidate's `defineField` binds to, and the rule lives in the form's schema:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf&example=cpf-field.vue&usage=cpf-form.vue">
 
@@ -221,7 +223,7 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 
 <div class="example" data-name="Vanilla">
 
-No build step: save it as an `.html` file and open it. It imports the package from a CDN and calls `setCustomValidity`, so the form refuses to submit an invalid value.
+No build step: save it as an `.html` file and open it. It imports the package from a CDN, masks on `input` and validates on `submit`, moving focus to the field it rejects.
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?page=document-field/generated/cpf/cpf-field.html">
 

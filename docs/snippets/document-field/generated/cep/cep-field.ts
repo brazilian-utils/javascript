@@ -1,6 +1,6 @@
 import { Component, Input, computed, forwardRef, signal } from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { formatCep, isValidCep } from "@brazilian-utils/brazilian-utils";
+import { formatCep, parseCep } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -35,9 +35,10 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
-/** One id per field on the page, to tie each label and message to their own field. */
+/** One id per field on the page, to tie each label to its own input. */
 let fields = 0;
 
+/** Masks a CEP while it is typed. Validation belongs to the form. */
 @Component({
   selector: "app-cep-field",
   providers: [
@@ -54,42 +55,32 @@ let fields = 0;
       inputmode="numeric"
       autocomplete="postal-code"
       placeholder="00000-000"
-      [value]="value()"
+      [value]="masked()"
       [disabled]="disabled()"
-      [attr.aria-invalid]="complete() && !valid()"
-      [attr.aria-describedby]="describedBy()"
+      [attr.aria-invalid]="invalid"
+      [attr.aria-describedby]="describedBy"
       (input)="onInput($event)"
       (blur)="onTouched()"
     />
-    <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-    <output [id]="messageId" [htmlFor]="id">
-      {{ complete() ? (valid() ? "✓ Valid CEP" : "✗ Invalid CEP") : "" }}
-    </output>
   `,
 })
 export class CepField implements ControlValueAccessor {
-  /** What else describes this field, the form's own error message for example. */
-  @Input("aria-describedby") describes?: string;
+  /** What the form says about the field, passed on to the input it wraps. */
+  @Input("aria-invalid") invalid?: boolean;
+  @Input("aria-describedby") describedBy?: string;
 
   protected readonly id = `cep-${(fields += 1)}`;
-  protected readonly messageId = `${this.id}-message`;
+
+  /** The CEP without its mask, the way the form holds it. */
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
-  protected readonly valid = computed(() => isValidCep(this.value()));
-  protected readonly complete = computed(
-    () => this.valid() || this.value().length === 9,
-  );
-
-  // The message describes the field, next to whatever the form has to say about it.
-  protected describedBy(): string {
-    return [this.describes, this.messageId].filter(Boolean).join(" ");
-  }
+  protected readonly masked = computed(() => formatCep(this.value()));
 
   protected onChange: (value: string) => void = () => {};
   protected onTouched: () => void = () => {};
 
   writeValue(value: string | null): void {
-    this.value.set(value ? formatCep(value) : "");
+    this.value.set(value ?? "");
   }
 
   registerOnChange(onChange: (value: string) => void): void {
@@ -105,11 +96,12 @@ export class CepField implements ControlValueAccessor {
   }
 
   protected onInput(event: Event) {
-    const value = mask({
+    const masked = mask({
       input: event.target as HTMLInputElement,
       inputType: (event as InputEvent).inputType,
       format: formatCep,
     });
+    const value = parseCep(masked);
 
     this.value.set(value);
     this.onChange(value);

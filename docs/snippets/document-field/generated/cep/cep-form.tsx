@@ -13,11 +13,19 @@ export function CepForm() {
       <Controller
         name="cep"
         control={control}
-        rules={{ validate: (value) => isValidCep(value) || "Enter a valid CEP" }}
+        rules={{
+          required: "Enter a CEP",
+          validate: (value) => isValidCep(value) || "Enter a valid CEP",
+        }}
         render={({ field, fieldState }) => (
           <>
-            <CepField {...field} aria-describedby="cep-error" />
-            {/* On the page from the start, so a screen reader announces the message it gets. */}
+            <CepField
+              {...field}
+              aria-invalid={fieldState.invalid}
+              aria-describedby="cep-error"
+            />
+            {/* On the page from the start, and announced when it gets its text: nothing moves
+                focus to the field, so the message has to speak for itself. */}
             <p id="cep-error" role="alert">
               {fieldState.error?.message}
             </p>

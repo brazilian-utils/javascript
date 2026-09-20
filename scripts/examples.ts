@@ -32,6 +32,8 @@ type Document = {
 	format: string;
 	/** The validator of the package, and the arguments after the value, if any. */
 	validator: string;
+	/** The parser of the package, which takes the mask off, and its arguments after the value. */
+	parser: string;
 	/** What a browser may fill the field with, `off` when there is no token for the document. */
 	autocomplete: string;
 	/** The `inputmode` of the field: an alphanumeric CNPJ needs a keyboard with letters. */
@@ -46,6 +48,7 @@ const DOCUMENTS: Document[] = [
 		placeholder: "000.000.000-00",
 		format: "formatCpf",
 		validator: "isValidCpf",
+		parser: "parseCpf",
 		autocomplete: "off",
 		inputMode: "numeric",
 	},
@@ -56,6 +59,7 @@ const DOCUMENTS: Document[] = [
 		placeholder: "00.ABC.000/0001-00",
 		format: "formatCnpj, { version: 2 }",
 		validator: "isValidCnpj, { version: 2 }",
+		parser: "parseCnpj, { version: 2 }",
 		autocomplete: "off",
 		inputMode: "text",
 	},
@@ -66,6 +70,7 @@ const DOCUMENTS: Document[] = [
 		placeholder: "00000-000",
 		format: "formatCep",
 		validator: "isValidCep",
+		parser: "parseCep",
 		autocomplete: "postal-code",
 		inputMode: "numeric",
 	},
@@ -76,6 +81,7 @@ const DOCUMENTS: Document[] = [
 		placeholder: "(00) 00000-0000",
 		format: 'formatPhone, { mask: "nanp" }',
 		validator: "isValidPhone",
+		parser: "parsePhone",
 		autocomplete: "tel-national",
 		inputMode: "numeric",
 	},
@@ -120,6 +126,7 @@ function call({ fn, rest }: { fn: string; rest: string }, value: string): string
 function values(document: Document, mask: string): Record<string, string> {
 	const format = split(document.format);
 	const validator = split(document.validator);
+	const parser = split(document.parser);
 	// A formatter that takes options is wrapped, so that the mask can call it with a value alone.
 	const formatter = format.rest === "" ? format.fn : `(value) => ${call(format, "value")}`;
 
@@ -131,12 +138,17 @@ function values(document: Document, mask: string): Record<string, string> {
 		length: String(document.placeholder.length),
 		inputMode: document.inputMode,
 		autocomplete: document.autocomplete,
-		names: [format.fn, validator.fn].join(", "),
+		names: [format.fn, validator.fn, parser.fn].join(", "),
+		fieldImports: `import { ${[format.fn, parser.fn].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
 		imports: `import { ${[format.fn, validator.fn].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
 		formImports: `import { ${validator.fn} } from "@brazilian-utils/brazilian-utils";`,
 		format: formatter,
 		formatCall: call(format, "value"),
+		formatValue: call(format, "value"),
+		formatValueVue: call(format, "value.value"),
+		formatSignal: call(format, "this.value()"),
 		validator: call(validator, "value"),
+		validatorPlain: call(validator, "value"),
 		validatorValue: call(validator, "value.value"),
 		validatorText: call(validator, "text.value"),
 		validatorSignal: call(validator, "this.value()"),
@@ -151,6 +163,8 @@ function values(document: Document, mask: string): Record<string, string> {
 		validatorLambda: `(${document.kind}) => ${call(validator, document.kind)}`,
 		validatorCtx: call(validator, document.kind),
 		validatorOptions: validator.rest === "" ? "" : `\n  options:${validator.rest.slice(1)},`,
+		parseInput: call(parser, "input.value"),
+		parseMaskedVar: call(parser, "masked"),
 		mask,
 		// `<script setup>` takes no ES module exports, so the Vue examples keep `mask` local.
 		maskLocal: mask.replace("export function mask", "function mask"),

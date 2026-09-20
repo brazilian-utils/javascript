@@ -4,14 +4,16 @@ description: "Um campo que aplica máscara e valida CPF, CNPJ, CEP ou telefone e
 keywords: ["máscara de CPF", "máscara de CNPJ", "máscara de CEP", "máscara de telefone", "CPF React", "CPF Angular", "CPF Vue", "validar CPF"]
 ---
 
-Um campo que formata enquanto você digita e valida quando o valor fica completo. Escolha o documento e o framework: cada exemplo é só sobre aquele documento, e roda o código logo abaixo dele, que pode ser copiado do jeito que está.
+Um campo que formata enquanto você digita, dentro de um formulário que valida. Escolha o documento e o framework: cada exemplo é só sobre aquele documento, e roda o código logo abaixo dele, que pode ser copiado do jeito que está.
+
+O campo só aplica a máscara. Ele entrega ao formulário o valor sem máscara, com `parse*`, então o formulário guarda `52998224725` e é isso que o envio manda, e mostra o valor de volta formatado. Validar é trabalho do formulário, onde moram as outras regras dele, o que também deixa uma mensagem de erro por campo em vez de duas.
 
 A função `mask` é a mesma em todos, e é tudo que uma máscara precisa. Um formatter aceita o que já foi digitado, então pode rodar a cada tecla; trocar o valor do campo joga o cursor para o fim, então o `mask` devolve o cursor para perto do caractere que está sendo editado. Formatar o que vem antes do cursor é o que diz para onde ele vai. Um separador apagado vira um caractere apagado, que o formatter recolocaria na hora.
 
 
 <div class="example" data-name="React">
 
-Um componente controlado: o pai guarda o valor e passa `value` e `onChange`. Ele também aceita as props do próprio input, então o `field` do react-hook-form entra inteiro:
+Um componente controlado: o formulário guarda o valor e passa `value` e `onChange`. Ele também aceita as props do próprio input, então o `field` do react-hook-form entra inteiro, e as regras ficam no formulário:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf&example=cpf-field.tsx&usage=cpf-form.tsx">
 
@@ -81,7 +83,7 @@ Um componente controlado: o pai guarda o valor e passa `value` e `onChange`. Ele
 
 <div class="example" data-name="Angular">
 
-Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou `ngModel`) como um input nativo, fica touched no blur e desabilita junto com o seu controle:
+Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou `ngModel`) como um input nativo, fica touched no blur e desabilita junto com o seu controle. O validador é um `ValidatorFn` no controle:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf&example=cpf-field.ts&usage=cpf-form.ts">
 
@@ -151,7 +153,7 @@ Um `ControlValueAccessor`, então aceita `formControlName` (ou `formControl`, ou
 
 <div class="example" data-name="Vue">
 
-O valor é o `v-model` do componente (`defineModel`), que é onde o `defineField` do VeeValidate se liga:
+O valor é o `v-model` do componente (`defineModel`), que é onde o `defineField` do VeeValidate se liga, e a regra fica no schema do formulário:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf&example=cpf-field.vue&usage=cpf-form.vue">
 
@@ -221,7 +223,7 @@ O valor é o `v-model` do componente (`defineModel`), que é onde o `defineField
 
 <div class="example" data-name="Vanilla">
 
-Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN e chama `setCustomValidity`, então o formulário se recusa a enviar um valor inválido.
+Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN, aplica a máscara no `input` e valida no `submit`, levando o foco ao campo que recusou.
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?page=document-field/generated/cpf/cpf-field.html">
 

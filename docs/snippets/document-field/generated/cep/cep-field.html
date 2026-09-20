@@ -12,15 +12,16 @@
     inputmode="numeric"
     autocomplete="postal-code"
     placeholder="00000-000"
-    aria-describedby="cep-message"
+    aria-describedby="cep-error"
   />
-  <!-- A live region is announced when its text changes, so it stays on the page, empty. -->
-  <output id="cep-message" for="cep"></output>
+  <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
+       description is read once focus lands, so it needs no live region. -->
+  <p id="cep-error"></p>
   <button type="submit">Submit</button>
 </form>
 
 <script type="module">
-  import { formatCep, isValidCep } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import { formatCep, isValidCep, parseCep } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
 
   /**
    * Formats the document typed into `input` in place and keeps the caret next to
@@ -47,22 +48,26 @@
     return input.value;
   }
 
+  const form = document.getElementById("form");
   const input = document.getElementById("cep");
-  const message = document.getElementById("cep-message");
+  const error = document.getElementById("cep-error");
 
-  document.getElementById("form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    console.log(Object.fromEntries(new FormData(event.target)));
+  // The field only masks: the form below is what validates.
+  input.addEventListener("input", (event) => {
+    mask({ input, inputType: event.inputType, format: formatCep });
   });
 
-  input.addEventListener("input", (event) => {
-    const value = mask({ input, inputType: event.inputType, format: formatCep });
-    const valid = isValidCep(value);
-    const complete = valid || value.length === 9;
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-    input.setAttribute("aria-invalid", String(complete && !valid));
-    // A form around the field refuses to submit an invalid CEP.
-    input.setCustomValidity(complete && !valid ? "Enter a valid CEP" : "");
-    message.textContent = complete ? (valid ? "✓ Valid CEP" : "✗ Invalid CEP") : "";
+    const value = parseCep(input.value);
+    const message = value ? (isValidCep(value) ? "" : "Enter a valid CEP") : "Enter a CEP";
+
+    input.setAttribute("aria-invalid", String(Boolean(message)));
+    error.textContent = message;
+
+    if (message) return input.focus();
+
+    console.log({ cep: value });
   });
 </script>
