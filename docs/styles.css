@@ -15,7 +15,12 @@
   --cover-bg-overlay: none;
 }
 
-/* The framework tabs of examples.md */
+/* The document picker and framework tabs of an example page */
+.example-picker { display: flex; align-items: center; gap: 8px; margin: 1.5em 0 0; font-weight: 600; }
+.example-picker select { padding: 0.35em 0.5em; }
+.variant[hidden] { display: none; }
+
+/* The framework tabs of an example page */
 .example-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 1.5em 0 0; border-bottom: 1px solid var(--border-color); }
 .example-tabs button {
   padding: 0.55em 1.1em; border: 0; border-bottom: 2px solid transparent; border-radius: 0; margin-bottom: -1px;

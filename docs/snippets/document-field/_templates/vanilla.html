@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<title>@@label@@ field</title>
+
+<form>
+  <label>
+    @@label@@
+    <input id="@@kind@@" inputmode="@@inputMode@@" placeholder="@@placeholder@@" />
+    <output id="result" hidden></output>
+  </label>
+  <button type="submit">Submit</button>
+</form>
+
+<script type="module">
+  import { @@names@@ } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+
+@@maskJs@@
+
+  const input = document.getElementById("@@kind@@");
+  const result = document.getElementById("result");
+
+  input.addEventListener("input", (event) => {
+    const value = mask({ input, inputType: event.inputType, format: @@format@@ });
+    const valid = @@validator@@;
+    const complete = valid || value.length === @@length@@;
+
+    input.setAttribute("aria-invalid", String(complete && !valid));
+    // A form around the field refuses to submit an invalid @@label@@.
+    input.setCustomValidity(complete && !valid ? "Enter a valid @@label@@" : "");
+    result.hidden = !complete;
+    result.textContent = valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@";
+  });
+</script>

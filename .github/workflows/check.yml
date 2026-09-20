@@ -59,6 +59,9 @@ jobs:
       - name: Check the JSR exports are up to date
         run: npm run build:jsr && git diff --exit-code -- jsr.json
 
+      - name: Check the generated examples are up to date
+        run: npm run build:examples && git add --intent-to-add docs && git diff --exit-code -- docs/snippets
+
       - name: Check the docs site shells and sitemap are up to date
         # --intent-to-add makes a shell written for a new page show up in the diff as well.
         run: npm run build:site && git add --intent-to-add docs && git diff --exit-code -- docs/sitemap.xml 'docs/*.html' 'docs/pt-br/*.html'

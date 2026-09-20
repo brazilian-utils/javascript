@@ -45,6 +45,7 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run build:llms`                                                                                                      | Regenerates `docs/llms.txt` and `docs/llms-full.txt` from the docs (`scripts/llms.ts`); CI fails if they're out of date.                                                                                                                                                 |
 | `npm run build:site`                                                                                                      | Regenerates the per-page copies of `docs/index.html`, `docs/404.html` and `docs/sitemap.xml` from the sidebars (`scripts/site.ts`); CI fails if they're out of date.                                                                                                     |
 | `npm run build:jsr`                                                                                                       | Regenerates the `exports` of `jsr.json`, one per utility folder (`scripts/jsr.ts`); CI fails if they're out of date.                                                                                                                                                     |
+| `npm run build:examples`                                                                                                  | Regenerates the examples of the document field page from their templates (`scripts/examples.ts`); CI fails if they're out of date.                                                                                                                                       |
 | `npm run check:dependencies`                                                                                              | Fails if `package.json` declares any runtime `dependencies` (this package ships zero by design).                                                                                                                                                                         |
 | `npm run check:tree-shaking`                                                                                              | Builds nothing; measures the single-import size of every export against `dist` (`scripts/tree-shaking.ts`). Run it after `npm run build` when you change a dataset, and update the bundle-size table in `docs/getting-started.md` / `docs/pt-br/getting-started.md`.     |
 | `npm run check:duplication`                                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                                                                                                                                                          |
@@ -375,10 +376,15 @@ browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
   the block through `scripts/front-matter.ts`.
 - The site's own CSS is `docs/styles.css`, linked by every shell: styles go there, not in a
   `<style>` block of `index.html`.
-- `docs/examples.md` shows the files of `docs/snippets/` in one tab per framework. Each example is
-  complete on its own, so it can be copied as is, and its tab's live demo runs that same file
-  (`docs/snippets/live/run.js` compiles it in the browser). The demos take their look from
-  `docs/snippets/styles.css`.
+- The pages under `docs/examples/` show the files of `docs/snippets/`, one tab per framework and
+  one variant per document. Each example is complete on its own, so it can be copied as is, and
+  the live demo of the pair on screen runs that same file: `docs/snippets/live/index.html` takes
+  the files to compile in its query string and `run.js` compiles them in the browser. The demos
+  take their look from `docs/snippets/styles.css`.
+- The examples of the document field page are generated: `npm run build:examples`
+  (`scripts/examples.ts`) fills the templates of `docs/snippets/document-field/_templates` from a
+  table of documents, so the shared `mask` is written once. Edit a template or the table, never
+  the files under `generated/`; CI fails if they are stale.
 - `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
   `docs/llms-full.txt` keep their headings; run `npm run build:llms` after editing a page.
 - Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,

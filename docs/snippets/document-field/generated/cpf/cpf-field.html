@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<title>CPF field</title>
+
+<form>
+  <label>
+    CPF
+    <input id="cpf" inputmode="numeric" placeholder="000.000.000-00" />
+    <output id="result" hidden></output>
+  </label>
+  <button type="submit">Submit</button>
+</form>
+
+<script type="module">
+  import { formatCpf, isValidCpf } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+
+  /**
+   * Formats the document typed into `input` in place and keeps the caret next to
+   * the character being edited, so typing, deleting or pasting anywhere works.
+   * @param {{ input: HTMLInputElement, inputType?: string, format: (value: string) => string }} params
+   * @returns {string} The formatted value.
+   */
+  function mask({ input, inputType = "", format }) {
+    let value = input.value;
+    let caret = input.selectionStart ?? value.length;
+
+    // A deleted separator would come straight back: delete the character next to it.
+    if (inputType.startsWith("delete") && format(value).length > value.length) {
+      if (inputType === "deleteContentBackward") caret -= 1;
+      value = value.slice(0, caret) + value.slice(caret + 1);
+    }
+
+    // Formatting what comes before the caret says where the caret goes.
+    const position = format(value.slice(0, caret)).length;
+
+    input.value = format(value);
+    input.setSelectionRange(position, position);
+
+    return input.value;
+  }
+
+  const input = document.getElementById("cpf");
+  const result = document.getElementById("result");
+
+  input.addEventListener("input", (event) => {
+    const value = mask({ input, inputType: event.inputType, format: formatCpf });
+    const valid = isValidCpf(value);
+    const complete = valid || value.length === 14;
+
+    input.setAttribute("aria-invalid", String(complete && !valid));
+    // A form around the field refuses to submit an invalid CPF.
+    input.setCustomValidity(complete && !valid ? "Enter a valid CPF" : "");
+    result.hidden = !complete;
+    result.textContent = valid ? "✓ Valid CPF" : "✗ Invalid CPF";
+  });
+</script>

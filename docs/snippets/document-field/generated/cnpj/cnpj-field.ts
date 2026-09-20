@@ -1,52 +1,6 @@
-import { Component, Input, computed, forwardRef, signal } from "@angular/core";
+import { Component, computed, forwardRef, signal } from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import {
-  formatCep,
-  formatCnpj,
-  formatCpf,
-  formatPhone,
-  isValidCep,
-  isValidCnpj,
-  isValidCpf,
-  isValidPhone,
-} from "@brazilian-utils/brazilian-utils";
-
-export type DocumentKind = "cpf" | "cnpj" | "cep" | "phone";
-
-export type DocumentSpec = {
-  label: string;
-  /** The complete format, which also tells the field when the value is complete. */
-  placeholder: string;
-  format: (value: string) => string;
-  validator: (value: string) => boolean;
-};
-
-export const DOCUMENTS: Record<DocumentKind, DocumentSpec> = {
-  cpf: {
-    label: "CPF",
-    placeholder: "000.000.000-00",
-    format: formatCpf,
-    validator: isValidCpf,
-  },
-  cnpj: {
-    label: "CNPJ",
-    placeholder: "00.ABC.000/0001-00",
-    format: (value) => formatCnpj(value, { version: 2 }),
-    validator: (value) => isValidCnpj(value, { version: 2 }),
-  },
-  cep: {
-    label: "CEP",
-    placeholder: "00000-000",
-    format: formatCep,
-    validator: isValidCep,
-  },
-  phone: {
-    label: "Phone",
-    placeholder: "(00) 00000-0000",
-    format: (value) => formatPhone(value, { mask: "nanp" }),
-    validator: isValidPhone,
-  },
-};
+import { formatCnpj, isValidCnpj } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
   /** The field the document is typed into. */
@@ -82,55 +36,45 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
 }
 
 @Component({
-  selector: "app-document-field",
+  selector: "app-cnpj-field",
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DocumentField),
+      useExisting: forwardRef(() => CnpjField),
       multi: true,
     },
   ],
   template: `
     <label>
-      {{ spec.label }}
+      CNPJ
       <input
-        [attr.inputmode]="kind === 'cnpj' ? 'text' : 'numeric'"
-        [placeholder]="spec.placeholder"
+        inputmode="text"
+        placeholder="00.ABC.000/0001-00"
         [value]="value()"
         [disabled]="disabled()"
-        [attr.aria-invalid]="complete && !valid"
+        [attr.aria-invalid]="complete() && !valid()"
         (input)="onInput($event)"
         (blur)="onTouched()"
       />
-      @if (complete) {
-        <output>{{ valid ? "✓ Valid" : "✗ Invalid" }}</output>
+      @if (complete()) {
+        <output>{{ valid() ? "✓ Valid CNPJ" : "✗ Invalid CNPJ" }}</output>
       }
     </label>
   `,
 })
-export class DocumentField implements ControlValueAccessor {
-  @Input({ required: true }) kind!: DocumentKind;
-
+export class CnpjField implements ControlValueAccessor {
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
-
-  protected get spec(): DocumentSpec {
-    return DOCUMENTS[this.kind];
-  }
-
-  protected get valid(): boolean {
-    return this.spec.validator(this.value());
-  }
-
-  protected get complete(): boolean {
-    return this.valid || this.value().length === this.spec.placeholder.length;
-  }
+  protected readonly valid = computed(() => isValidCnpj(this.value(), { version: 2 }));
+  protected readonly complete = computed(
+    () => this.valid() || this.value().length === 18,
+  );
 
   protected onChange: (value: string) => void = () => {};
   protected onTouched: () => void = () => {};
 
   writeValue(value: string | null): void {
-    this.value.set(value ? this.spec.format(value) : "");
+    this.value.set(value ? formatCnpj(value, { version: 2 }) : "");
   }
 
   registerOnChange(onChange: (value: string) => void): void {
@@ -149,7 +93,7 @@ export class DocumentField implements ControlValueAccessor {
     const value = mask({
       input: event.target as HTMLInputElement,
       inputType: (event as InputEvent).inputType,
-      format: this.spec.format,
+      format: (value) => formatCnpj(value, { version: 2 }),
     });
 
     this.value.set(value);

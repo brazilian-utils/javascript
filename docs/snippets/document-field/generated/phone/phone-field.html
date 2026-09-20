@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<title>Phone field</title>
+
+<form>
+  <label>
+    Phone
+    <input id="phone" inputmode="numeric" placeholder="(00) 00000-0000" />
+    <output id="result" hidden></output>
+  </label>
+  <button type="submit">Submit</button>
+</form>
+
+<script type="module">
+  import { formatPhone, isValidPhone } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+
+  /**
+   * Formats the document typed into `input` in place and keeps the caret next to
+   * the character being edited, so typing, deleting or pasting anywhere works.
+   * @param {{ input: HTMLInputElement, inputType?: string, format: (value: string) => string }} params
+   * @returns {string} The formatted value.
+   */
+  function mask({ input, inputType = "", format }) {
+    let value = input.value;
+    let caret = input.selectionStart ?? value.length;
+
+    // A deleted separator would come straight back: delete the character next to it.
+    if (inputType.startsWith("delete") && format(value).length > value.length) {
+      if (inputType === "deleteContentBackward") caret -= 1;
+      value = value.slice(0, caret) + value.slice(caret + 1);
+    }
+
+    // Formatting what comes before the caret says where the caret goes.
+    const position = format(value.slice(0, caret)).length;
+
+    input.value = format(value);
+    input.setSelectionRange(position, position);
+
+    return input.value;
+  }
+
+  const input = document.getElementById("phone");
+  const result = document.getElementById("result");
+
+  input.addEventListener("input", (event) => {
+    const value = mask({ input, inputType: event.inputType, format: (value) => formatPhone(value, { mask: "nanp" }) });
+    const valid = isValidPhone(value);
+    const complete = valid || value.length === 15;
+
+    input.setAttribute("aria-invalid", String(complete && !valid));
+    // A form around the field refuses to submit an invalid Phone.
+    input.setCustomValidity(complete && !valid ? "Enter a valid Phone" : "");
+    result.hidden = !complete;
+    result.textContent = valid ? "✓ Valid Phone" : "✗ Invalid Phone";
+  });
+</script>

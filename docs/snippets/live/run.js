@@ -1,14 +1,14 @@
 /**
- * Runs an example of docs/snippets in the browser, for the live demos of the example pages, so each
- * demo is exactly the code the page shows. The page names the folder in `data-dir`, the component
- * in `data-example` and, when the demo is the component used by another file, that file in
- * `data-usage`. This script compiles them with Babel (TypeScript, JSX, decorators) and, for a
- * `.vue` file, the Vue SFC compiler, both from a CDN, and mounts the result. Nothing is built
- * ahead of time.
+ * Runs an example of docs/snippets in the browser, so a live demo is exactly the code its page
+ * shows. One page serves every demo, `live/index.html`, told what to run by its query string:
+ * `?dir=<folder>&example=<component>&usage=<the file that uses it>` compiles both (Babel for
+ * TypeScript and JSX, the Vue SFC compiler for a single-file component, TypeScript itself for
+ * Angular, each from a CDN) and mounts the usage; `?page=<file>` runs a plain HTML example as it
+ * is. Nothing is built ahead of time.
  */
 (function () {
   var CDN = "https://cdn.jsdelivr.net/npm/";
-  var data = document.currentScript.dataset;
+  var data = Object.fromEntries(new URLSearchParams(location.search));
   var example = data.example;
 
   var script = document.createElement("script");
@@ -36,12 +36,26 @@
   styles.href = "../styles.css";
   document.head.appendChild(styles);
 
+  // A plain HTML example is its own page: its markup and its module scripts run here as they are.
+  var runPage = function (html) {
+    var page = new DOMParser().parseFromString(html, "text/html");
+
+    document.body.innerHTML = page.body.innerHTML;
+
+    for (var script of page.querySelectorAll("script")) {
+      var copy = document.createElement("script");
+      copy.type = script.type;
+      copy.textContent = script.textContent;
+      document.body.appendChild(copy);
+    }
+  };
+
   var fail = function (error) {
     document.body.textContent = "Could not load the demo: " + error.message;
   };
 
   var read = function (name) {
-    return fetch("../" + data.dir + "/" + name).then(function (response) {
+    return fetch("../" + (data.dir ? data.dir + "/" : "") + name).then(function (response) {
       if (!response.ok) throw new Error(name + ": HTTP " + response.status);
       return response.text();
     });
@@ -134,6 +148,11 @@
       });
     });
   };
+
+  if (data.page) {
+    read(data.page).then(runPage).catch(fail);
+    return;
+  }
 
   Promise.all([loadBabel, read(example), data.usage ? read(data.usage) : ""])
     .then(function (files) {

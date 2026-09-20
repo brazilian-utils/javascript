@@ -157,38 +157,89 @@
             return title ? '# ' + title + '\n\n' + content : content;
           });
         },
-        // The framework tabs of examples.md: every <div class="example" data-name data-demo> becomes a
-        // tab; its live demo, an iframe of docs/snippets, loads the first time the tab is shown and
-        // is as tall as its content.
+        // The framework tabs of an example page, and the select that picks which document the
+        // examples are about: every <div class="example" data-name> is a tab, and every
+        // <div class="variant" data-variant data-demo> inside it is one document. The live demo of
+        // the pair on screen, an iframe of docs/snippets, loads the first time it is shown and is
+        // as tall as its content. Both choices are remembered.
         function (hook) {
           hook.doneEach(function () {
             var panels = [].slice.call(document.querySelectorAll('.example[data-name]'));
             if (panels.length === 0) return;
+
+            var remember = function (key, value) {
+              try { localStorage.setItem(key, value); } catch (error) {}
+            };
+            var remembered = function (key) {
+              try { return localStorage.getItem(key); } catch (error) { return null; }
+            };
+
+            var variantsOf = function (panel) {
+              return [].slice.call(panel.querySelectorAll('.variant[data-variant]'));
+            };
+
+            var addDemo = function (holder) {
+              if (!holder.dataset.demo || holder.querySelector('iframe')) return;
+              var frame = document.createElement('iframe');
+              frame.title = 'Live demo';
+              frame.src = holder.dataset.demo;
+              frame.addEventListener('load', function () {
+                var page = frame.contentDocument;
+                new ResizeObserver(function () {
+                  var border = frame.offsetHeight - frame.clientHeight;
+                  frame.style.height = page.body.scrollHeight + border + 'px';
+                }).observe(page.body);
+              });
+              holder.insertBefore(frame, holder.firstChild);
+            };
+
+            var current = { tab: null, variant: null };
+
+            var show = function () {
+              panels.forEach(function (panel, index) {
+                var selected = panel.dataset.name === current.tab;
+                tabs.children[index].setAttribute('aria-selected', String(selected));
+                panel.hidden = !selected;
+                var variants = variantsOf(panel);
+                if (variants.length === 0) return addDemo(selected ? panel : document.createElement('div'));
+                variants.forEach(function (variant) {
+                  variant.hidden = variant.dataset.variant !== current.variant;
+                  if (selected && !variant.hidden) addDemo(variant);
+                });
+              });
+              remember('example-tab', current.tab);
+              if (current.variant) remember('example-variant', current.variant);
+            };
+
+            var names = variantsOf(panels[0]).map(function (variant) {
+              return variant.dataset.variant;
+            });
+
+            if (names.length > 0) {
+              var picker = document.createElement('label');
+              picker.className = 'example-picker';
+              picker.textContent = document.documentElement.lang === 'pt-BR' ? 'Documento' : 'Document';
+              var select = document.createElement('select');
+              names.forEach(function (name) {
+                var option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+              });
+              select.addEventListener('change', function () {
+                current.variant = select.value;
+                show();
+              });
+              picker.appendChild(select);
+              panels[0].parentNode.insertBefore(picker, panels[0]);
+              current.variant = names.indexOf(remembered('example-variant')) === -1 ? names[0] : remembered('example-variant');
+              select.value = current.variant;
+            }
+
             var tabs = document.createElement('div');
             tabs.className = 'example-tabs';
             tabs.setAttribute('role', 'tablist');
             panels[0].parentNode.insertBefore(tabs, panels[0]);
-
-            var show = function (name) {
-              panels.forEach(function (panel, index) {
-                var selected = panel.dataset.name === name;
-                tabs.children[index].setAttribute('aria-selected', String(selected));
-                panel.hidden = !selected;
-                if (!selected || panel.querySelector('iframe')) return;
-                var frame = document.createElement('iframe');
-                frame.title = panel.dataset.name + ' demo';
-                frame.src = panel.dataset.demo;
-                frame.addEventListener('load', function () {
-                  var page = frame.contentDocument;
-                  new ResizeObserver(function () {
-                    var border = frame.offsetHeight - frame.clientHeight;
-                    frame.style.height = page.body.scrollHeight + border + 'px';
-                  }).observe(page.body);
-                });
-                panel.insertBefore(frame, panel.firstChild);
-              });
-              try { localStorage.setItem('example-tab', name); } catch (error) {}
-            };
 
             panels.forEach(function (panel) {
               panel.setAttribute('role', 'tabpanel');
@@ -196,13 +247,18 @@
               button.type = 'button';
               button.setAttribute('role', 'tab');
               button.textContent = panel.dataset.name;
-              button.addEventListener('click', function () { show(panel.dataset.name); });
+              button.addEventListener('click', function () {
+                current.tab = panel.dataset.name;
+                show();
+              });
               tabs.appendChild(button);
             });
 
-            var saved = null;
-            try { saved = localStorage.getItem('example-tab'); } catch (error) {}
-            show(panels.some(function (panel) { return panel.dataset.name === saved; }) ? saved : panels[0].dataset.name);
+            var saved = remembered('example-tab');
+            current.tab = panels.some(function (panel) { return panel.dataset.name === saved; })
+              ? saved
+              : panels[0].dataset.name;
+            show();
           });
         },
         // Per-page metadata for search engines and link previews: the title, description,
