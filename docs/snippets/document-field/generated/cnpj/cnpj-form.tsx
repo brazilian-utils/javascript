@@ -3,7 +3,10 @@ import { isValidCnpj } from "@brazilian-utils/brazilian-utils";
 import { CnpjField } from "./cnpj-field";
 
 export function CnpjForm() {
-  const { control, handleSubmit } = useForm({ defaultValues: { cnpj: "" } });
+  const { control, handleSubmit } = useForm({
+    defaultValues: { cnpj: "" },
+    mode: "onTouched",
+  });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>

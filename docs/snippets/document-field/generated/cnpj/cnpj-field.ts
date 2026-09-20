@@ -35,6 +35,9 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
+/** One id per field on the page, to tie each message to its own field. */
+let fields = 0;
+
 @Component({
   selector: "app-cnpj-field",
   providers: [
@@ -49,20 +52,25 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
       CNPJ
       <input
         inputmode="text"
+        autocomplete="off"
         placeholder="00.ABC.000/0001-00"
         [value]="value()"
         [disabled]="disabled()"
         [attr.aria-invalid]="complete() && !valid()"
+        [attr.aria-describedby]="complete() ? messageId : null"
         (input)="onInput($event)"
         (blur)="onTouched()"
       />
       @if (complete()) {
-        <output>{{ valid() ? "✓ Valid CNPJ" : "✗ Invalid CNPJ" }}</output>
+        <output [id]="messageId">
+          {{ valid() ? "✓ Valid CNPJ" : "✗ Invalid CNPJ" }}
+        </output>
       }
     </label>
   `,
 })
 export class CnpjField implements ControlValueAccessor {
+  protected readonly messageId = `cnpj-message-${(fields += 1)}`;
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
   protected readonly valid = computed(() => isValidCnpj(this.value(), { version: 2 }));

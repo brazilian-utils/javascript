@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import { formatCpf, isValidCpf } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
@@ -40,6 +40,8 @@ type CpfFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
 };
 
 export function CpfField({ value, onChange, ...props }: CpfFieldProps) {
+  // The message is tied to the field, so a screen reader reads it with the field.
+  const messageId = useId();
   const valid = isValidCpf(value);
   const complete = valid || value.length === 14;
 
@@ -49,9 +51,11 @@ export function CpfField({ value, onChange, ...props }: CpfFieldProps) {
       <input
         {...props}
         inputMode="numeric"
+        autoComplete="off"
         placeholder="000.000.000-00"
         value={value}
         aria-invalid={complete && !valid}
+        aria-describedby={complete ? messageId : undefined}
         onChange={(event) =>
           onChange(
             mask({
@@ -62,7 +66,9 @@ export function CpfField({ value, onChange, ...props }: CpfFieldProps) {
           )
         }
       />
-      {complete && <output>{valid ? "✓ Valid CPF" : "✗ Invalid CPF"}</output>}
+      {complete && (
+        <output id={messageId}>{valid ? "✓ Valid CPF" : "✗ Invalid CPF"}</output>
+      )}
     </label>
   );
 }

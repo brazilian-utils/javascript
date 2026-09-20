@@ -1,7 +1,15 @@
 import { Component } from "@angular/core";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  type ValidatorFn,
+} from "@angular/forms";
 import { isValidCnpj } from "@brazilian-utils/brazilian-utils";
 import { CnpjField } from "./cnpj-field";
+
+export const cnpjValidator: ValidatorFn = (control) =>
+  isValidCnpj(control.value, { version: 2 }) ? null : { cnpj: true };
 
 @Component({
   selector: "app-cnpj-form",
@@ -18,10 +26,7 @@ import { CnpjField } from "./cnpj-field";
 })
 export class CnpjForm {
   protected readonly form = new FormGroup({
-    cnpj: new FormControl("", {
-      nonNullable: true,
-      validators: (control) => (isValidCnpj(control.value, { version: 2 }) ? null : { cnpj: true }),
-    }),
+    cnpj: new FormControl("", { nonNullable: true, validators: cnpjValidator }),
   });
 
   protected submit() {

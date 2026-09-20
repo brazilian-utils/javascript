@@ -3,7 +3,10 @@ import { isValidCep } from "@brazilian-utils/brazilian-utils";
 import { CepField } from "./cep-field";
 
 export function CepForm() {
-  const { control, handleSubmit } = useForm({ defaultValues: { cep: "" } });
+  const { control, handleSubmit } = useForm({
+    defaultValues: { cep: "" },
+    mode: "onTouched",
+  });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>

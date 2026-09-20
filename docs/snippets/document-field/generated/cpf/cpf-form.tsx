@@ -3,7 +3,10 @@ import { isValidCpf } from "@brazilian-utils/brazilian-utils";
 import { CpfField } from "./cpf-field";
 
 export function CpfForm() {
-  const { control, handleSubmit } = useForm({ defaultValues: { cpf: "" } });
+  const { control, handleSubmit } = useForm({
+    defaultValues: { cpf: "" },
+    mode: "onTouched",
+  });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>

@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import { formatPhone, isValidPhone } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
@@ -40,6 +40,8 @@ type PhoneFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
 };
 
 export function PhoneField({ value, onChange, ...props }: PhoneFieldProps) {
+  // The message is tied to the field, so a screen reader reads it with the field.
+  const messageId = useId();
   const valid = isValidPhone(value);
   const complete = valid || value.length === 15;
 
@@ -49,9 +51,11 @@ export function PhoneField({ value, onChange, ...props }: PhoneFieldProps) {
       <input
         {...props}
         inputMode="numeric"
+        autoComplete="tel-national"
         placeholder="(00) 00000-0000"
         value={value}
         aria-invalid={complete && !valid}
+        aria-describedby={complete ? messageId : undefined}
         onChange={(event) =>
           onChange(
             mask({
@@ -62,7 +66,9 @@ export function PhoneField({ value, onChange, ...props }: PhoneFieldProps) {
           )
         }
       />
-      {complete && <output>{valid ? "✓ Valid Phone" : "✗ Invalid Phone"}</output>}
+      {complete && (
+        <output id={messageId}>{valid ? "✓ Valid Phone" : "✗ Invalid Phone"}</output>
+      )}
     </label>
   );
 }

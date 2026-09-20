@@ -1,7 +1,15 @@
 import { Component } from "@angular/core";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  type ValidatorFn,
+} from "@angular/forms";
 import { isValidPhone } from "@brazilian-utils/brazilian-utils";
 import { PhoneField } from "./phone-field";
+
+export const phoneValidator: ValidatorFn = (control) =>
+  isValidPhone(control.value) ? null : { phone: true };
 
 @Component({
   selector: "app-phone-form",
@@ -18,10 +26,7 @@ import { PhoneField } from "./phone-field";
 })
 export class PhoneForm {
   protected readonly form = new FormGroup({
-    phone: new FormControl("", {
-      nonNullable: true,
-      validators: (control) => (isValidPhone(control.value) ? null : { phone: true }),
-    }),
+    phone: new FormControl("", { nonNullable: true, validators: phoneValidator }),
   });
 
   protected submit() {

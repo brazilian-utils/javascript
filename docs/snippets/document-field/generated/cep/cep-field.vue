@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useId } from "vue";
 import { formatCep, isValidCep } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
@@ -37,6 +37,9 @@ function mask({ input, inputType = "", format }: MaskParams): string {
 
 const value = defineModel<string>({ default: "" });
 
+// The message is tied to the field, so a screen reader reads it with the field.
+const messageId = useId();
+
 const valid = computed(() => isValidCep(value.value));
 const complete = computed(() => valid.value || value.value.length === 9);
 
@@ -54,11 +57,15 @@ function onInput(event: Event) {
     CEP
     <input
       inputmode="numeric"
+      autocomplete="postal-code"
       placeholder="00000-000"
       :value="value"
       :aria-invalid="complete && !valid"
+      :aria-describedby="complete ? messageId : undefined"
       @input="onInput"
     />
-    <output v-if="complete">{{ valid ? "✓ Valid CEP" : "✗ Invalid CEP" }}</output>
+    <output v-if="complete" :id="messageId">
+      {{ valid ? "✓ Valid CEP" : "✗ Invalid CEP" }}
+    </output>
   </label>
 </template>

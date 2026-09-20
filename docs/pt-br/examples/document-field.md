@@ -153,4 +153,58 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN 
 
 </div>
 
+<div class="example" data-name="Schema">
+
+Aqui não tem demo: um schema é o mesmo código em qualquer lugar. Qualquer um deles entra nas bibliotecas de formulário das outras abas via [Standard Schema](https://standardschema.dev), que todas elas falam, e o `toStandardSchema` dá a mesma interface a um campo só, sem nenhuma biblioteca de schema:
+
+<div class="variant" data-variant="CPF">
+
+[cpf-zod.ts](../../snippets/document-field/generated/cpf/cpf-zod.ts ':include :type=code ts')
+
+[cpf-valibot.ts](../../snippets/document-field/generated/cpf/cpf-valibot.ts ':include :type=code ts')
+
+[cpf-arktype.ts](../../snippets/document-field/generated/cpf/cpf-arktype.ts ':include :type=code ts')
+
+[cpf-standard.ts](../../snippets/document-field/generated/cpf/cpf-standard.ts ':include :type=code ts')
+
+</div>
+
+<div class="variant" data-variant="CNPJ">
+
+[cnpj-zod.ts](../../snippets/document-field/generated/cnpj/cnpj-zod.ts ':include :type=code ts')
+
+[cnpj-valibot.ts](../../snippets/document-field/generated/cnpj/cnpj-valibot.ts ':include :type=code ts')
+
+[cnpj-arktype.ts](../../snippets/document-field/generated/cnpj/cnpj-arktype.ts ':include :type=code ts')
+
+[cnpj-standard.ts](../../snippets/document-field/generated/cnpj/cnpj-standard.ts ':include :type=code ts')
+
+</div>
+
+<div class="variant" data-variant="CEP">
+
+[cep-zod.ts](../../snippets/document-field/generated/cep/cep-zod.ts ':include :type=code ts')
+
+[cep-valibot.ts](../../snippets/document-field/generated/cep/cep-valibot.ts ':include :type=code ts')
+
+[cep-arktype.ts](../../snippets/document-field/generated/cep/cep-arktype.ts ':include :type=code ts')
+
+[cep-standard.ts](../../snippets/document-field/generated/cep/cep-standard.ts ':include :type=code ts')
+
+</div>
+
+<div class="variant" data-variant="Phone">
+
+[phone-zod.ts](../../snippets/document-field/generated/phone/phone-zod.ts ':include :type=code ts')
+
+[phone-valibot.ts](../../snippets/document-field/generated/phone/phone-valibot.ts ':include :type=code ts')
+
+[phone-arktype.ts](../../snippets/document-field/generated/phone/phone-arktype.ts ':include :type=code ts')
+
+[phone-standard.ts](../../snippets/document-field/generated/phone/phone-standard.ts ':include :type=code ts')
+
+</div>
+
+</div>
+
 A [referência de utilitários](pt-br/utilities.md) lista todas as funções.

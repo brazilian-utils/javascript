@@ -35,6 +35,9 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
+/** One id per field on the page, to tie each message to its own field. */
+let fields = 0;
+
 @Component({
   selector: "app-cep-field",
   providers: [
@@ -49,20 +52,25 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
       CEP
       <input
         inputmode="numeric"
+        autocomplete="postal-code"
         placeholder="00000-000"
         [value]="value()"
         [disabled]="disabled()"
         [attr.aria-invalid]="complete() && !valid()"
+        [attr.aria-describedby]="complete() ? messageId : null"
         (input)="onInput($event)"
         (blur)="onTouched()"
       />
       @if (complete()) {
-        <output>{{ valid() ? "✓ Valid CEP" : "✗ Invalid CEP" }}</output>
+        <output [id]="messageId">
+          {{ valid() ? "✓ Valid CEP" : "✗ Invalid CEP" }}
+        </output>
       }
     </label>
   `,
 })
 export class CepField implements ControlValueAccessor {
+  protected readonly messageId = `cep-message-${(fields += 1)}`;
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
   protected readonly valid = computed(() => isValidCep(this.value()));

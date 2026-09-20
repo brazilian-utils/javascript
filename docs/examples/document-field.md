@@ -153,4 +153,58 @@ No build step: save it as an `.html` file and open it. It imports the package fr
 
 </div>
 
+<div class="example" data-name="Schema">
+
+No demo here: a schema is the same code everywhere. Any of these plugs into the form libraries of the other tabs through [Standard Schema](https://standardschema.dev), which all of them speak, and `toStandardSchema` gives one field the same interface with no schema library at all:
+
+<div class="variant" data-variant="CPF">
+
+[cpf-zod.ts](../snippets/document-field/generated/cpf/cpf-zod.ts ':include :type=code ts')
+
+[cpf-valibot.ts](../snippets/document-field/generated/cpf/cpf-valibot.ts ':include :type=code ts')
+
+[cpf-arktype.ts](../snippets/document-field/generated/cpf/cpf-arktype.ts ':include :type=code ts')
+
+[cpf-standard.ts](../snippets/document-field/generated/cpf/cpf-standard.ts ':include :type=code ts')
+
+</div>
+
+<div class="variant" data-variant="CNPJ">
+
+[cnpj-zod.ts](../snippets/document-field/generated/cnpj/cnpj-zod.ts ':include :type=code ts')
+
+[cnpj-valibot.ts](../snippets/document-field/generated/cnpj/cnpj-valibot.ts ':include :type=code ts')
+
+[cnpj-arktype.ts](../snippets/document-field/generated/cnpj/cnpj-arktype.ts ':include :type=code ts')
+
+[cnpj-standard.ts](../snippets/document-field/generated/cnpj/cnpj-standard.ts ':include :type=code ts')
+
+</div>
+
+<div class="variant" data-variant="CEP">
+
+[cep-zod.ts](../snippets/document-field/generated/cep/cep-zod.ts ':include :type=code ts')
+
+[cep-valibot.ts](../snippets/document-field/generated/cep/cep-valibot.ts ':include :type=code ts')
+
+[cep-arktype.ts](../snippets/document-field/generated/cep/cep-arktype.ts ':include :type=code ts')
+
+[cep-standard.ts](../snippets/document-field/generated/cep/cep-standard.ts ':include :type=code ts')
+
+</div>
+
+<div class="variant" data-variant="Phone">
+
+[phone-zod.ts](../snippets/document-field/generated/phone/phone-zod.ts ':include :type=code ts')
+
+[phone-valibot.ts](../snippets/document-field/generated/phone/phone-valibot.ts ':include :type=code ts')
+
+[phone-arktype.ts](../snippets/document-field/generated/phone/phone-arktype.ts ':include :type=code ts')
+
+[phone-standard.ts](../snippets/document-field/generated/phone/phone-standard.ts ':include :type=code ts')
+
+</div>
+
+</div>
+
 The [utilities reference](utilities.md) lists every function.

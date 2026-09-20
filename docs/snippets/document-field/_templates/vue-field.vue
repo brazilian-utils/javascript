@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useId } from "vue";
 @@imports@@
 
 @@maskLocal@@
 
 const value = defineModel<string>({ default: "" });
+
+// The message is tied to the field, so a screen reader reads it with the field.
+const messageId = useId();
 
 const valid = computed(() => @@validatorValue@@);
 const complete = computed(() => valid.value || value.value.length === @@length@@);
@@ -23,11 +26,15 @@ function onInput(event: Event) {
     @@label@@
     <input
       inputmode="@@inputMode@@"
+      autocomplete="@@autocomplete@@"
       placeholder="@@placeholder@@"
       :value="value"
       :aria-invalid="complete && !valid"
+      :aria-describedby="complete ? messageId : undefined"
       @input="onInput"
     />
-    <output v-if="complete">{{ valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@" }}</output>
+    <output v-if="complete" :id="messageId">
+      {{ valid ? "✓ Valid @@label@@" : "✗ Invalid @@label@@" }}
+    </output>
   </label>
 </template>

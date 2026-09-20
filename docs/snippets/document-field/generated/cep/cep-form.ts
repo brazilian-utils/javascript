@@ -1,7 +1,15 @@
 import { Component } from "@angular/core";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  type ValidatorFn,
+} from "@angular/forms";
 import { isValidCep } from "@brazilian-utils/brazilian-utils";
 import { CepField } from "./cep-field";
+
+export const cepValidator: ValidatorFn = (control) =>
+  isValidCep(control.value) ? null : { cep: true };
 
 @Component({
   selector: "app-cep-form",
@@ -18,10 +26,7 @@ import { CepField } from "./cep-field";
 })
 export class CepForm {
   protected readonly form = new FormGroup({
-    cep: new FormControl("", {
-      nonNullable: true,
-      validators: (control) => (isValidCep(control.value) ? null : { cep: true }),
-    }),
+    cep: new FormControl("", { nonNullable: true, validators: cepValidator }),
   });
 
   protected submit() {

@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import { formatCep, isValidCep } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
@@ -40,6 +40,8 @@ type CepFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
 };
 
 export function CepField({ value, onChange, ...props }: CepFieldProps) {
+  // The message is tied to the field, so a screen reader reads it with the field.
+  const messageId = useId();
   const valid = isValidCep(value);
   const complete = valid || value.length === 9;
 
@@ -49,9 +51,11 @@ export function CepField({ value, onChange, ...props }: CepFieldProps) {
       <input
         {...props}
         inputMode="numeric"
+        autoComplete="postal-code"
         placeholder="00000-000"
         value={value}
         aria-invalid={complete && !valid}
+        aria-describedby={complete ? messageId : undefined}
         onChange={(event) =>
           onChange(
             mask({
@@ -62,7 +66,9 @@ export function CepField({ value, onChange, ...props }: CepFieldProps) {
           )
         }
       />
-      {complete && <output>{valid ? "✓ Valid CEP" : "✗ Invalid CEP"}</output>}
+      {complete && (
+        <output id={messageId}>{valid ? "✓ Valid CEP" : "✗ Invalid CEP"}</output>
+      )}
     </label>
   );
 }

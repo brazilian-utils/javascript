@@ -44,6 +44,7 @@ const DOCUMENTS: Document[] = [
 		placeholder: "000.000.000-00",
 		format: "formatCpf",
 		validator: "isValidCpf",
+		autocomplete: "off",
 		inputMode: "numeric",
 	},
 	{
@@ -53,6 +54,7 @@ const DOCUMENTS: Document[] = [
 		placeholder: "00.ABC.000/0001-00",
 		format: "formatCnpj, { version: 2 }",
 		validator: "isValidCnpj, { version: 2 }",
+		autocomplete: "off",
 		inputMode: "text",
 	},
 	{
@@ -62,6 +64,7 @@ const DOCUMENTS: Document[] = [
 		placeholder: "00000-000",
 		format: "formatCep",
 		validator: "isValidCep",
+		autocomplete: "postal-code",
 		inputMode: "numeric",
 	},
 	{
@@ -71,9 +74,13 @@ const DOCUMENTS: Document[] = [
 		placeholder: "(00) 00000-0000",
 		format: 'formatPhone, { mask: "nanp" }',
 		validator: "isValidPhone",
+		autocomplete: "tel-national",
 		inputMode: "numeric",
 	},
 ];
+
+/** The schema libraries the schema tab shows, each a template of its own. */
+const SCHEMAS = ["zod", "valibot", "arktype", "standard"] as const;
 
 /** The frameworks, each with the extension of its field and form files. */
 const FRAMEWORKS = [
@@ -121,6 +128,7 @@ function values(document: Document, mask: string): Record<string, string> {
 		placeholder: document.placeholder,
 		length: String(document.placeholder.length),
 		inputMode: document.inputMode,
+		autocomplete: document.autocomplete,
 		names: [format.fn, validator.fn].join(", "),
 		imports: `import { ${[format.fn, validator.fn].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
 		formImports: `import { ${validator.fn} } from "@brazilian-utils/brazilian-utils";`,
@@ -130,6 +138,16 @@ function values(document: Document, mask: string): Record<string, string> {
 		validatorValue: call(validator, "value.value"),
 		validatorSignal: call(validator, "this.value()"),
 		validatorControl: call(validator, "control.value"),
+		validatorFn: validator.fn,
+		// Inside a schema the validator is called on the value alone, wrapped when it takes options.
+		validatorArrow:
+			validator.rest === ""
+				? validator.fn
+				: `(${document.kind}) => ${call(validator, document.kind)}`,
+		// Valibot's `check` takes a validator of `string` alone, so the call is always wrapped.
+		validatorLambda: `(${document.kind}) => ${call(validator, document.kind)}`,
+		validatorCtx: call(validator, document.kind),
+		validatorOptions: validator.rest === "" ? "" : `\n  options:${validator.rest.slice(1)},`,
 		mask,
 		// `<script setup>` takes no ES module exports, so the Vue examples keep `mask` local.
 		maskLocal: mask.replace("export function mask", "function mask"),
@@ -208,6 +226,15 @@ for (const document of DOCUMENTS) {
 
 			writeFileSync(join(folder, file), fill(template, { ...values(document, maskTs), maskJs }));
 		}
+	}
+
+	for (const schema of SCHEMAS) {
+		const template = readFileSync(join(TEMPLATE_DIR, `schema-${schema}.ts`), "utf8");
+
+		writeFileSync(
+			join(folder, `${document.kind}-${schema}.ts`),
+			fill(template, values(document, maskTs)),
+		);
 	}
 
 	const vanilla = readFileSync(join(TEMPLATE_DIR, "vanilla.html"), "utf8");

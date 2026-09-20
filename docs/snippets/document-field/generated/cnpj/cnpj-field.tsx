@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import { formatCnpj, isValidCnpj } from "@brazilian-utils/brazilian-utils";
 
 type MaskParams = {
@@ -40,6 +40,8 @@ type CnpjFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
 };
 
 export function CnpjField({ value, onChange, ...props }: CnpjFieldProps) {
+  // The message is tied to the field, so a screen reader reads it with the field.
+  const messageId = useId();
   const valid = isValidCnpj(value, { version: 2 });
   const complete = valid || value.length === 18;
 
@@ -49,9 +51,11 @@ export function CnpjField({ value, onChange, ...props }: CnpjFieldProps) {
       <input
         {...props}
         inputMode="text"
+        autoComplete="off"
         placeholder="00.ABC.000/0001-00"
         value={value}
         aria-invalid={complete && !valid}
+        aria-describedby={complete ? messageId : undefined}
         onChange={(event) =>
           onChange(
             mask({
@@ -62,7 +66,9 @@ export function CnpjField({ value, onChange, ...props }: CnpjFieldProps) {
           )
         }
       />
-      {complete && <output>{valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ"}</output>}
+      {complete && (
+        <output id={messageId}>{valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ"}</output>
+      )}
     </label>
   );
 }

@@ -6,8 +6,14 @@
 <form>
   <label>
     CNPJ
-    <input id="cnpj" inputmode="text" placeholder="00.ABC.000/0001-00" />
-    <output id="result" hidden></output>
+    <input
+      id="cnpj"
+      inputmode="text"
+      autocomplete="off"
+      placeholder="00.ABC.000/0001-00"
+      aria-describedby="cnpj-message"
+    />
+    <output id="cnpj-message" hidden></output>
   </label>
   <button type="submit">Submit</button>
 </form>
@@ -41,7 +47,7 @@
   }
 
   const input = document.getElementById("cnpj");
-  const result = document.getElementById("result");
+  const message = document.getElementById("cnpj-message");
 
   input.addEventListener("input", (event) => {
     const value = mask({ input, inputType: event.inputType, format: (value) => formatCnpj(value, { version: 2 }) });
@@ -51,7 +57,7 @@
     input.setAttribute("aria-invalid", String(complete && !valid));
     // A form around the field refuses to submit an invalid CNPJ.
     input.setCustomValidity(complete && !valid ? "Enter a valid CNPJ" : "");
-    result.hidden = !complete;
-    result.textContent = valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ";
+    message.hidden = !complete;
+    message.textContent = valid ? "✓ Valid CNPJ" : "✗ Invalid CNPJ";
   });
 </script>

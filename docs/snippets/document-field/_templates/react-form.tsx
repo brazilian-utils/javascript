@@ -3,7 +3,10 @@ import { Controller, useForm } from "react-hook-form";
 import { @@Name@@Field } from "./@@kind@@-field";
 
 export function @@Name@@Form() {
-  const { control, handleSubmit } = useForm({ defaultValues: { @@kind@@: "" } });
+  const { control, handleSubmit } = useForm({
+    defaultValues: { @@kind@@: "" },
+    mode: "onTouched",
+  });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>

@@ -35,6 +35,9 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
   return input.value;
 }
 
+/** One id per field on the page, to tie each message to its own field. */
+let fields = 0;
+
 @Component({
   selector: "app-phone-field",
   providers: [
@@ -49,20 +52,25 @@ export function mask({ input, inputType = "", format }: MaskParams): string {
       Phone
       <input
         inputmode="numeric"
+        autocomplete="tel-national"
         placeholder="(00) 00000-0000"
         [value]="value()"
         [disabled]="disabled()"
         [attr.aria-invalid]="complete() && !valid()"
+        [attr.aria-describedby]="complete() ? messageId : null"
         (input)="onInput($event)"
         (blur)="onTouched()"
       />
       @if (complete()) {
-        <output>{{ valid() ? "✓ Valid Phone" : "✗ Invalid Phone" }}</output>
+        <output [id]="messageId">
+          {{ valid() ? "✓ Valid Phone" : "✗ Invalid Phone" }}
+        </output>
       }
     </label>
   `,
 })
 export class PhoneField implements ControlValueAccessor {
+  protected readonly messageId = `phone-message-${(fields += 1)}`;
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
   protected readonly valid = computed(() => isValidPhone(this.value()));

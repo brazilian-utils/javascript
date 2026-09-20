@@ -4,6 +4,9 @@ import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
 @@mask@@
 
+/** One id per field on the page, to tie each message to its own field. */
+let fields = 0;
+
 @Component({
   selector: "app-@@kind@@-field",
   providers: [
@@ -18,20 +21,25 @@ import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
       @@label@@
       <input
         inputmode="@@inputMode@@"
+        autocomplete="@@autocomplete@@"
         placeholder="@@placeholder@@"
         [value]="value()"
         [disabled]="disabled()"
         [attr.aria-invalid]="complete() && !valid()"
+        [attr.aria-describedby]="complete() ? messageId : null"
         (input)="onInput($event)"
         (blur)="onTouched()"
       />
       @if (complete()) {
-        <output>{{ valid() ? "✓ Valid @@label@@" : "✗ Invalid @@label@@" }}</output>
+        <output [id]="messageId">
+          {{ valid() ? "✓ Valid @@label@@" : "✗ Invalid @@label@@" }}
+        </output>
       }
     </label>
   `,
 })
 export class @@Name@@Field implements ControlValueAccessor {
+  protected readonly messageId = `@@kind@@-message-${(fields += 1)}`;
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
   protected readonly valid = computed(() => @@validatorSignal@@);

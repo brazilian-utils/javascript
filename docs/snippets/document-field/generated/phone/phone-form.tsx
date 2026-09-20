@@ -3,7 +3,10 @@ import { isValidPhone } from "@brazilian-utils/brazilian-utils";
 import { PhoneField } from "./phone-field";
 
 export function PhoneForm() {
-  const { control, handleSubmit } = useForm({ defaultValues: { phone: "" } });
+  const { control, handleSubmit } = useForm({
+    defaultValues: { phone: "" },
+    mode: "onTouched",
+  });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>

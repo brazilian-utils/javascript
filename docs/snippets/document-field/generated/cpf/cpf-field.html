@@ -6,8 +6,14 @@
 <form>
   <label>
     CPF
-    <input id="cpf" inputmode="numeric" placeholder="000.000.000-00" />
-    <output id="result" hidden></output>
+    <input
+      id="cpf"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="000.000.000-00"
+      aria-describedby="cpf-message"
+    />
+    <output id="cpf-message" hidden></output>
   </label>
   <button type="submit">Submit</button>
 </form>
@@ -41,7 +47,7 @@
   }
 
   const input = document.getElementById("cpf");
-  const result = document.getElementById("result");
+  const message = document.getElementById("cpf-message");
 
   input.addEventListener("input", (event) => {
     const value = mask({ input, inputType: event.inputType, format: formatCpf });
@@ -51,7 +57,7 @@
     input.setAttribute("aria-invalid", String(complete && !valid));
     // A form around the field refuses to submit an invalid CPF.
     input.setCustomValidity(complete && !valid ? "Enter a valid CPF" : "");
-    result.hidden = !complete;
-    result.textContent = valid ? "✓ Valid CPF" : "✗ Invalid CPF";
+    message.hidden = !complete;
+    message.textContent = valid ? "✓ Valid CPF" : "✗ Invalid CPF";
   });
 </script>

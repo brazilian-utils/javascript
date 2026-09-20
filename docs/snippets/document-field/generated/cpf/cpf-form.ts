@@ -1,7 +1,15 @@
 import { Component } from "@angular/core";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  type ValidatorFn,
+} from "@angular/forms";
 import { isValidCpf } from "@brazilian-utils/brazilian-utils";
 import { CpfField } from "./cpf-field";
+
+export const cpfValidator: ValidatorFn = (control) =>
+  isValidCpf(control.value) ? null : { cpf: true };
 
 @Component({
   selector: "app-cpf-form",
@@ -18,10 +26,7 @@ import { CpfField } from "./cpf-field";
 })
 export class CpfForm {
   protected readonly form = new FormGroup({
-    cpf: new FormControl("", {
-      nonNullable: true,
-      validators: (control) => (isValidCpf(control.value) ? null : { cpf: true }),
-    }),
+    cpf: new FormControl("", { nonNullable: true, validators: cpfValidator }),
   });
 
   protected submit() {
