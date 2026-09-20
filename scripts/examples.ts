@@ -90,11 +90,14 @@ const DOCUMENTS: Document[] = [
 /** The schema libraries the schema tab shows, each a template of its own. */
 const SCHEMAS = ["zod", "valibot", "arktype", "standard"] as const;
 
-/** The frameworks, each with the extension of its field and form files. */
+/**
+ * The frameworks, each with the extension of its field and form files and the name its mask file
+ * takes: a hook, a directive or a module, whatever that framework reaches for.
+ */
 const FRAMEWORKS = [
-	{ name: "react", field: "tsx", form: "tsx" },
-	{ name: "angular", field: "ts", form: "ts" },
-	{ name: "vue", field: "vue", form: "vue" },
+	{ name: "react", field: "tsx", form: "tsx", mask: "use-mask.ts" },
+	{ name: "angular", field: "ts", form: "ts", mask: "mask.directive.ts" },
+	{ name: "vue", field: "vue", form: "vue", mask: "mask.ts" },
 ] as const;
 
 const PLACEHOLDER_PATTERN = /@@(\w+)@@/g;
@@ -128,7 +131,7 @@ function values(document: Document, mask: string): Record<string, string> {
 	const validator = split(document.validator);
 	const parser = split(document.parser);
 	// A formatter that takes options is wrapped, so that the mask can call it with a value alone.
-	const formatter = format.rest === "" ? format.fn : `(value) => ${call(format, "value")}`;
+	const formatter = format.rest === "" ? format.fn : `(value: string) => ${call(format, "value")}`;
 
 	return {
 		kind: document.kind,
@@ -143,6 +146,8 @@ function values(document: Document, mask: string): Record<string, string> {
 		imports: `import { ${[format.fn, validator.fn].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
 		formImports: `import { ${validator.fn} } from "@brazilian-utils/brazilian-utils";`,
 		format: formatter,
+		// The plain JavaScript example takes the same formatter without the type of its parameter.
+		formatJs: formatter.replace("(value: string)", "(value)"),
 		formatCall: call(format, "value"),
 		formatValue: call(format, "value"),
 		formatValueVue: call(format, "value.value"),
@@ -165,11 +170,23 @@ function values(document: Document, mask: string): Record<string, string> {
 		validatorOptions: validator.rest === "" ? "" : `\n  options:${validator.rest.slice(1)},`,
 		parseInput: call(parser, "input.value"),
 		parseMaskedVar: call(parser, "masked"),
+		parseMaskedEvent: call(parser, "event.currentTarget.value"),
+		parseMaskValue: call(parser, "maskValue(event)"),
+		parseMaskedEventVue: call(parser, "(event.target as HTMLInputElement).value"),
+		parseMaskedEventAngular: call(parser, "(event.target as HTMLInputElement).value"),
 		mask,
 		// `<script setup>` takes no ES module exports, so the Vue examples keep `mask` local.
 		maskLocal: mask.replace("export function mask", "function mask"),
 		maskJs: mask,
 	};
+}
+
+/**
+ * @param {string} name - A file of `docs/snippets/document-field/_templates`.
+ * @returns {string} Its contents.
+ */
+function readTemplate(name: string): string {
+	return readFileSync(join(TEMPLATE_DIR, name), "utf8");
 }
 
 /**
@@ -231,6 +248,19 @@ for (const document of DOCUMENTS) {
 	mkdirSync(folder, { recursive: true });
 
 	for (const framework of FRAMEWORKS) {
+		// A folder per framework: a reader copies one, and two of them name a file the same way.
+		const frameworkFolder = join(folder, framework.name);
+
+		mkdirSync(frameworkFolder, { recursive: true });
+
+		writeFileSync(
+			join(frameworkFolder, framework.mask),
+			fill(readTemplate(`mask-${framework.name}.ts`), {
+				...values(document, maskTs),
+				maskJsModule: maskJs,
+			}),
+		);
+
 		for (const [part, extension] of [
 			["field", framework.field],
 			["form", framework.form],
@@ -241,23 +271,38 @@ for (const document of DOCUMENTS) {
 			);
 			const file = `${document.kind}-${part}.${extension}`;
 
-			writeFileSync(join(folder, file), fill(template, { ...values(document, maskTs), maskJs }));
+			writeFileSync(
+				join(frameworkFolder, file),
+				fill(template, { ...values(document, maskTs), maskJs }),
+			);
 		}
 	}
+
+	mkdirSync(join(folder, "schema"), { recursive: true });
 
 	for (const schema of SCHEMAS) {
 		const template = readFileSync(join(TEMPLATE_DIR, `schema-${schema}.ts`), "utf8");
 
 		writeFileSync(
-			join(folder, `${document.kind}-${schema}.ts`),
+			join(folder, "schema", `${document.kind}-${schema}.ts`),
 			fill(template, values(document, maskTs)),
 		);
 	}
 
+	mkdirSync(join(folder, "vanilla"), { recursive: true });
+
+	writeFileSync(
+		join(folder, "vanilla", "mask.js"),
+		fill(readTemplate("mask-vanilla.js"), {
+			...values(document, maskTs),
+			maskJsModule: maskJs.replace("function mask(", "export function mask("),
+		}),
+	);
+
 	const vanilla = readFileSync(join(TEMPLATE_DIR, "vanilla.html"), "utf8");
 
 	writeFileSync(
-		join(folder, `${document.kind}-field.html`),
+		join(folder, "vanilla", `${document.kind}-field.html`),
 		fill(vanilla, { ...values(document, maskTs), maskJs: indent(maskJs, 2) }),
 	);
 }

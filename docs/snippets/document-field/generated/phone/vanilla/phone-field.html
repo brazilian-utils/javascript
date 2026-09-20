@@ -1,49 +1,49 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8" />
-<title>@@label@@ field</title>
+<title>Phone field</title>
 
 <form id="form">
-  <label for="@@kind@@">@@label@@</label>
+  <label for="phone">Phone</label>
   <input
-    id="@@kind@@"
-    name="@@kind@@"
+    id="phone"
+    name="phone"
     required
-    inputmode="@@inputMode@@"
-    autocomplete="@@autocomplete@@"
-    placeholder="@@placeholder@@"
-    aria-describedby="@@kind@@-error"
+    inputmode="numeric"
+    autocomplete="tel-national"
+    placeholder="(00) 00000-0000"
+    aria-describedby="phone-error"
   />
   <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
        description is read once focus lands, so it needs no live region. -->
-  <p id="@@kind@@-error"></p>
+  <p id="phone-error"></p>
   <button type="submit">Submit</button>
 </form>
 
 <script type="module">
-  import { @@names@@ } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import { formatPhone, isValidPhone, parsePhone } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
   import { mask } from "./mask.js";
 
   const form = document.getElementById("form");
-  const input = document.getElementById("@@kind@@");
-  const error = document.getElementById("@@kind@@-error");
+  const input = document.getElementById("phone");
+  const error = document.getElementById("phone-error");
 
   // The field only masks: the form below is what validates.
   input.addEventListener("input", (event) => {
-    mask({ input, inputType: event.inputType, format: @@formatJs@@ });
+    mask({ input, inputType: event.inputType, format: (value) => formatPhone(value, { mask: "nanp" }) });
   });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const value = @@parseInput@@;
-    const message = value ? (@@validatorPlain@@ ? "" : "Enter a valid @@label@@") : "Enter a @@label@@";
+    const value = parsePhone(input.value);
+    const message = value ? (isValidPhone(value) ? "" : "Enter a valid Phone") : "Enter a Phone";
 
     input.setAttribute("aria-invalid", String(Boolean(message)));
     error.textContent = message;
 
     if (message) return input.focus();
 
-    console.log({ @@kind@@: value });
+    console.log({ phone: value });
   });
 </script>

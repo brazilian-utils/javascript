@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { useForm } from "vee-validate";
-@@formImports@@
-import @@Name@@Field from "./@@kind@@-field.vue";
+import { isValidCep } from "@brazilian-utils/brazilian-utils";
+import CepField from "./cep-field.vue";
 
 const { defineField, errors, handleSubmit } = useForm({
-  initialValues: { @@kind@@: "" },
+  initialValues: { cep: "" },
   validationSchema: {
-    @@kind@@: (value: string) => @@validator@@ || "Enter a valid @@label@@",
+    cep: (value: string) => isValidCep(value) || "Enter a valid CEP",
   },
 });
 
 // The attributes carry the blur handler, so the field is validated once it is left.
-const [@@kind@@, @@kind@@Attrs] = defineField("@@kind@@", {
+const [cep, cepAttrs] = defineField("cep", {
   validateOnModelUpdate: false,
 });
 
@@ -20,10 +20,10 @@ const onSubmit = handleSubmit((values) => console.log(values));
 
 <template>
   <form @submit="onSubmit">
-    <@@Name@@Field
-      v-model="@@kind@@"
-      v-bind="@@kind@@Attrs"
-      :error-message="errors.@@kind@@"
+    <CepField
+      v-model="cep"
+      v-bind="cepAttrs"
+      :error-message="errors.cep"
     />
     <button type="submit">Submit</button>
   </form>

@@ -39,7 +39,10 @@
   // A plain HTML example is its own page: its markup and its module scripts run here as they are.
   var runPage = function (html) {
     var page = new DOMParser().parseFromString(html, "text/html");
+    var base = document.createElement("base");
 
+    base.href = new URL("../" + data.page, location.href).href;
+    document.head.appendChild(base);
     document.body.innerHTML = page.body.innerHTML;
 
     for (var script of page.querySelectorAll("script")) {
@@ -78,6 +81,62 @@
       if (!response.ok) throw new Error(name + ": HTTP " + response.status);
       return response.text();
     });
+  };
+
+  // An import of "./mask" is a file whose extension the example leaves out.
+  // An import without an extension tries these in turn.
+  var EXTENSIONS = [".ts", ".tsx", ".vue", ".js"];
+
+  var find = function (name, index) {
+    var attempt = index || 0;
+
+    if (/\.(tsx?|vue|js)$/.test(name)) {
+      return read(name).then(function (code) {
+        return { name: name, code: code };
+      });
+    }
+
+    return read(name + EXTENSIONS[attempt]).then(
+      function (code) {
+        return { name: name + EXTENSIONS[attempt], code: code };
+      },
+      function (error) {
+        if (attempt + 1 >= EXTENSIONS.length) throw error;
+        return find(name, attempt + 1);
+      },
+    );
+  };
+
+  var RELATIVE_IMPORT = /from\s*"\.\/([^"]+)"/g;
+  var modules = {};
+
+  // A file of the example and, before it, whatever it imports from beside it: each one becomes a
+  // module of its own, so an example is read the way it is written.
+  var moduleOf = function (name) {
+    if (!modules[name]) {
+      modules[name] = find(name)
+        .then(function (file) {
+          return compile(file.name, file.code);
+        })
+        .then(function (js) {
+          var imports = [];
+          var match;
+
+          while ((match = RELATIVE_IMPORT.exec(js)) !== null) imports.push(match[1]);
+
+          return Promise.all(
+            imports.map(function (imported) {
+              return moduleOf(imported).then(function (url) {
+                js = js.split('"./' + imported + '"').join('"' + url + '"');
+              });
+            }),
+          ).then(function () {
+            return toModule(js);
+          });
+        });
+    }
+
+    return modules[name];
   };
 
   var loadBabel = new Promise(function (resolve, reject) {
@@ -173,24 +232,17 @@
     return;
   }
 
-  Promise.all([loadBabel, read(example), data.usage ? read(data.usage) : ""])
-    .then(function (files) {
+  loadBabel
+    .then(function () {
       // Angular's JIT compiler has to be evaluated before any other Angular package, the example
       // included: the partially compiled packages look for it as they load.
-      var angular = /\.ts$/.test(example) ? import("@angular/compiler") : Promise.resolve();
-
-      return angular.then(function () {
-        return Promise.all([compile(example, files[1]), data.usage ? compile(data.usage, files[2]) : ""]);
-      });
+      return /\.ts$/.test(example) ? import("@angular/compiler") : undefined;
     })
-    .then(function (compiled) {
-      if (!data.usage) return import(toModule(compiled[0]));
-
-      // The usage imports the component beside it; that import becomes the compiled module.
-      var component = toModule(compiled[0]);
-      var pattern = new RegExp("([\"'])\\./" + example.replace(/\.\w+$/, "") + "(\\.vue)?\\1", "g");
-
-      return import(toModule(compiled[1].replace(pattern, '"' + component + '"')));
+    .then(function () {
+      return moduleOf(data.usage || example);
+    })
+    .then(function (url) {
+      return import(url);
     })
     .then(mount)
     .catch(fail);

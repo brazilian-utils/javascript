@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { useForm } from "vee-validate";
-@@formImports@@
-import @@Name@@Field from "./@@kind@@-field.vue";
+import { isValidCnpj } from "@brazilian-utils/brazilian-utils";
+import CnpjField from "./cnpj-field.vue";
 
 const { defineField, errors, handleSubmit } = useForm({
-  initialValues: { @@kind@@: "" },
+  initialValues: { cnpj: "" },
   validationSchema: {
-    @@kind@@: (value: string) => @@validator@@ || "Enter a valid @@label@@",
+    cnpj: (value: string) => isValidCnpj(value, { version: 2 }) || "Enter a valid CNPJ",
   },
 });
 
 // The attributes carry the blur handler, so the field is validated once it is left.
-const [@@kind@@, @@kind@@Attrs] = defineField("@@kind@@", {
+const [cnpj, cnpjAttrs] = defineField("cnpj", {
   validateOnModelUpdate: false,
 });
 
@@ -20,10 +20,10 @@ const onSubmit = handleSubmit((values) => console.log(values));
 
 <template>
   <form @submit="onSubmit">
-    <@@Name@@Field
-      v-model="@@kind@@"
-      v-bind="@@kind@@Attrs"
-      :error-message="errors.@@kind@@"
+    <CnpjField
+      v-model="cnpj"
+      v-bind="cnpjAttrs"
+      :error-message="errors.cnpj"
     />
     <button type="submit">Submit</button>
   </form>

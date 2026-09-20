@@ -1,24 +1,24 @@
 import { Controller, useForm } from "react-hook-form";
-@@formImports@@
-import { @@Name@@Field } from "./@@kind@@-field";
+import { isValidCep } from "@brazilian-utils/brazilian-utils";
+import { CepField } from "./cep-field";
 
-export function @@Name@@Form() {
+export function CepForm() {
   const { control, handleSubmit } = useForm({
-    defaultValues: { @@kind@@: "" },
+    defaultValues: { cep: "" },
     mode: "onTouched",
   });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>
       <Controller
-        name="@@kind@@"
+        name="cep"
         control={control}
         rules={{
-          required: "Enter a @@label@@",
-          validate: (value) => @@validator@@ || "Enter a valid @@label@@",
+          required: "Enter a CEP",
+          validate: (value) => isValidCep(value) || "Enter a valid CEP",
         }}
         render={({ field, fieldState }) => (
-          <@@Name@@Field {...field} errorMessage={fieldState.error?.message} />
+          <CepField {...field} errorMessage={fieldState.error?.message} />
         )}
       />
       <button type="submit">Submit</button>

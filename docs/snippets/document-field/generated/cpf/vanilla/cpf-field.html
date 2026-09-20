@@ -1,49 +1,49 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8" />
-<title>@@label@@ field</title>
+<title>CPF field</title>
 
 <form id="form">
-  <label for="@@kind@@">@@label@@</label>
+  <label for="cpf">CPF</label>
   <input
-    id="@@kind@@"
-    name="@@kind@@"
+    id="cpf"
+    name="cpf"
     required
-    inputmode="@@inputMode@@"
-    autocomplete="@@autocomplete@@"
-    placeholder="@@placeholder@@"
-    aria-describedby="@@kind@@-error"
+    inputmode="numeric"
+    autocomplete="off"
+    placeholder="000.000.000-00"
+    aria-describedby="cpf-error"
   />
   <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
        description is read once focus lands, so it needs no live region. -->
-  <p id="@@kind@@-error"></p>
+  <p id="cpf-error"></p>
   <button type="submit">Submit</button>
 </form>
 
 <script type="module">
-  import { @@names@@ } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import { formatCpf, isValidCpf, parseCpf } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
   import { mask } from "./mask.js";
 
   const form = document.getElementById("form");
-  const input = document.getElementById("@@kind@@");
-  const error = document.getElementById("@@kind@@-error");
+  const input = document.getElementById("cpf");
+  const error = document.getElementById("cpf-error");
 
   // The field only masks: the form below is what validates.
   input.addEventListener("input", (event) => {
-    mask({ input, inputType: event.inputType, format: @@formatJs@@ });
+    mask({ input, inputType: event.inputType, format: formatCpf });
   });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const value = @@parseInput@@;
-    const message = value ? (@@validatorPlain@@ ? "" : "Enter a valid @@label@@") : "Enter a @@label@@";
+    const value = parseCpf(input.value);
+    const message = value ? (isValidCpf(value) ? "" : "Enter a valid CPF") : "Enter a CPF";
 
     input.setAttribute("aria-invalid", String(Boolean(message)));
     error.textContent = message;
 
     if (message) return input.focus();
 
-    console.log({ @@kind@@: value });
+    console.log({ cpf: value });
   });
 </script>

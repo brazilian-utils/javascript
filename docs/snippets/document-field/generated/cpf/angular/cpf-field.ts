@@ -1,30 +1,30 @@
 import { Component, Input, computed, forwardRef, signal } from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-@@fieldImports@@
+import { formatCpf, parseCpf } from "@brazilian-utils/brazilian-utils";
 import { MaskDirective } from "./mask.directive";
 
 /** One id per field on the page, to tie each label and message to their own input. */
 let fields = 0;
 
-/** Masks a @@label@@ while it is typed. Validation belongs to the form. */
+/** Masks a CPF while it is typed. Validation belongs to the form. */
 @Component({
-  selector: "app-@@kind@@-field",
+  selector: "app-cpf-field",
   imports: [MaskDirective],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => @@Name@@Field),
+      useExisting: forwardRef(() => CpfField),
       multi: true,
     },
   ],
   template: `
-    <label [for]="id">@@label@@</label>
+    <label [for]="id">CPF</label>
     <input
       [appMask]="format"
       [id]="id"
-      inputmode="@@inputMode@@"
-      autocomplete="@@autocomplete@@"
-      placeholder="@@placeholder@@"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="000.000.000-00"
       [value]="masked()"
       [disabled]="disabled()"
       [attr.aria-invalid]="Boolean(errorMessage)"
@@ -36,19 +36,19 @@ let fields = 0;
     <p [id]="errorId" role="alert">{{ errorMessage }}</p>
   `,
 })
-export class @@Name@@Field implements ControlValueAccessor {
+export class CpfField implements ControlValueAccessor {
   /** What the form says is wrong with the value, if anything. */
   @Input() errorMessage?: string;
 
-  protected readonly id = `@@kind@@-${(fields += 1)}`;
+  protected readonly id = `cpf-${(fields += 1)}`;
   protected readonly errorId = `${this.id}-error`;
-  protected readonly format = @@format@@;
+  protected readonly format = formatCpf;
   protected readonly Boolean = Boolean;
 
-  /** The @@label@@ without its mask, the way the form holds it. */
+  /** The CPF without its mask, the way the form holds it. */
   protected readonly value = signal("");
   protected readonly disabled = signal(false);
-  protected readonly masked = computed(() => @@formatSignal@@);
+  protected readonly masked = computed(() => formatCpf(this.value()));
 
   protected onChange: (value: string) => void = () => {};
   protected onTouched: () => void = () => {};
@@ -70,7 +70,7 @@ export class @@Name@@Field implements ControlValueAccessor {
   }
 
   protected onInput(event: Event) {
-    const value = @@parseMaskedEventAngular@@;
+    const value = parseCpf((event.target as HTMLInputElement).value);
 
     this.value.set(value);
     this.onChange(value);

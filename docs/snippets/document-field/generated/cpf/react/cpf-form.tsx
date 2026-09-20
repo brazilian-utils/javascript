@@ -1,24 +1,24 @@
 import { Controller, useForm } from "react-hook-form";
-@@formImports@@
-import { @@Name@@Field } from "./@@kind@@-field";
+import { isValidCpf } from "@brazilian-utils/brazilian-utils";
+import { CpfField } from "./cpf-field";
 
-export function @@Name@@Form() {
+export function CpfForm() {
   const { control, handleSubmit } = useForm({
-    defaultValues: { @@kind@@: "" },
+    defaultValues: { cpf: "" },
     mode: "onTouched",
   });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>
       <Controller
-        name="@@kind@@"
+        name="cpf"
         control={control}
         rules={{
-          required: "Enter a @@label@@",
-          validate: (value) => @@validator@@ || "Enter a valid @@label@@",
+          required: "Enter a CPF",
+          validate: (value) => isValidCpf(value) || "Enter a valid CPF",
         }}
         render={({ field, fieldState }) => (
-          <@@Name@@Field {...field} errorMessage={fieldState.error?.message} />
+          <CpfField {...field} errorMessage={fieldState.error?.message} />
         )}
       />
       <button type="submit">Submit</button>

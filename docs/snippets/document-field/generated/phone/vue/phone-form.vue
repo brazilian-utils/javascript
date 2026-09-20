@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { useForm } from "vee-validate";
-@@formImports@@
-import @@Name@@Field from "./@@kind@@-field.vue";
+import { isValidPhone } from "@brazilian-utils/brazilian-utils";
+import PhoneField from "./phone-field.vue";
 
 const { defineField, errors, handleSubmit } = useForm({
-  initialValues: { @@kind@@: "" },
+  initialValues: { phone: "" },
   validationSchema: {
-    @@kind@@: (value: string) => @@validator@@ || "Enter a valid @@label@@",
+    phone: (value: string) => isValidPhone(value) || "Enter a valid Phone",
   },
 });
 
 // The attributes carry the blur handler, so the field is validated once it is left.
-const [@@kind@@, @@kind@@Attrs] = defineField("@@kind@@", {
+const [phone, phoneAttrs] = defineField("phone", {
   validateOnModelUpdate: false,
 });
 
@@ -20,10 +20,10 @@ const onSubmit = handleSubmit((values) => console.log(values));
 
 <template>
   <form @submit="onSubmit">
-    <@@Name@@Field
-      v-model="@@kind@@"
-      v-bind="@@kind@@Attrs"
-      :error-message="errors.@@kind@@"
+    <PhoneField
+      v-model="phone"
+      v-bind="phoneAttrs"
+      :error-message="errors.phone"
     />
     <button type="submit">Submit</button>
   </form>

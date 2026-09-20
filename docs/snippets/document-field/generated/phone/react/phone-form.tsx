@@ -1,24 +1,24 @@
 import { Controller, useForm } from "react-hook-form";
-@@formImports@@
-import { @@Name@@Field } from "./@@kind@@-field";
+import { isValidPhone } from "@brazilian-utils/brazilian-utils";
+import { PhoneField } from "./phone-field";
 
-export function @@Name@@Form() {
+export function PhoneForm() {
   const { control, handleSubmit } = useForm({
-    defaultValues: { @@kind@@: "" },
+    defaultValues: { phone: "" },
     mode: "onTouched",
   });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>
       <Controller
-        name="@@kind@@"
+        name="phone"
         control={control}
         rules={{
-          required: "Enter a @@label@@",
-          validate: (value) => @@validator@@ || "Enter a valid @@label@@",
+          required: "Enter a Phone",
+          validate: (value) => isValidPhone(value) || "Enter a valid Phone",
         }}
         render={({ field, fieldState }) => (
-          <@@Name@@Field {...field} errorMessage={fieldState.error?.message} />
+          <PhoneField {...field} errorMessage={fieldState.error?.message} />
         )}
       />
       <button type="submit">Submit</button>

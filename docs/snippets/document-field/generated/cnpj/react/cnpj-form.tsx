@@ -1,24 +1,24 @@
 import { Controller, useForm } from "react-hook-form";
-@@formImports@@
-import { @@Name@@Field } from "./@@kind@@-field";
+import { isValidCnpj } from "@brazilian-utils/brazilian-utils";
+import { CnpjField } from "./cnpj-field";
 
-export function @@Name@@Form() {
+export function CnpjForm() {
   const { control, handleSubmit } = useForm({
-    defaultValues: { @@kind@@: "" },
+    defaultValues: { cnpj: "" },
     mode: "onTouched",
   });
 
   return (
     <form onSubmit={handleSubmit((values) => console.log(values))}>
       <Controller
-        name="@@kind@@"
+        name="cnpj"
         control={control}
         rules={{
-          required: "Enter a @@label@@",
-          validate: (value) => @@validator@@ || "Enter a valid @@label@@",
+          required: "Enter a CNPJ",
+          validate: (value) => isValidCnpj(value, { version: 2 }) || "Enter a valid CNPJ",
         }}
         render={({ field, fieldState }) => (
-          <@@Name@@Field {...field} errorMessage={fieldState.error?.message} />
+          <CnpjField {...field} errorMessage={fieldState.error?.message} />
         )}
       />
       <button type="submit">Submit</button>

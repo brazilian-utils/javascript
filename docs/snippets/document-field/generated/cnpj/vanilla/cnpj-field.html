@@ -1,49 +1,49 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8" />
-<title>@@label@@ field</title>
+<title>CNPJ field</title>
 
 <form id="form">
-  <label for="@@kind@@">@@label@@</label>
+  <label for="cnpj">CNPJ</label>
   <input
-    id="@@kind@@"
-    name="@@kind@@"
+    id="cnpj"
+    name="cnpj"
     required
-    inputmode="@@inputMode@@"
-    autocomplete="@@autocomplete@@"
-    placeholder="@@placeholder@@"
-    aria-describedby="@@kind@@-error"
+    inputmode="text"
+    autocomplete="off"
+    placeholder="00.ABC.000/0001-00"
+    aria-describedby="cnpj-error"
   />
   <!-- On the page from the start: the submit below moves focus to the field it rejects, and a
        description is read once focus lands, so it needs no live region. -->
-  <p id="@@kind@@-error"></p>
+  <p id="cnpj-error"></p>
   <button type="submit">Submit</button>
 </form>
 
 <script type="module">
-  import { @@names@@ } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+  import { formatCnpj, isValidCnpj, parseCnpj } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
   import { mask } from "./mask.js";
 
   const form = document.getElementById("form");
-  const input = document.getElementById("@@kind@@");
-  const error = document.getElementById("@@kind@@-error");
+  const input = document.getElementById("cnpj");
+  const error = document.getElementById("cnpj-error");
 
   // The field only masks: the form below is what validates.
   input.addEventListener("input", (event) => {
-    mask({ input, inputType: event.inputType, format: @@formatJs@@ });
+    mask({ input, inputType: event.inputType, format: (value) => formatCnpj(value, { version: 2 }) });
   });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const value = @@parseInput@@;
-    const message = value ? (@@validatorPlain@@ ? "" : "Enter a valid @@label@@") : "Enter a @@label@@";
+    const value = parseCnpj(input.value, { version: 2 });
+    const message = value ? (isValidCnpj(value, { version: 2 }) ? "" : "Enter a valid CNPJ") : "Enter a CNPJ";
 
     input.setAttribute("aria-invalid", String(Boolean(message)));
     error.textContent = message;
 
     if (message) return input.focus();
 
-    console.log({ @@kind@@: value });
+    console.log({ cnpj: value });
   });
 </script>
