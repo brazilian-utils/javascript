@@ -2,7 +2,7 @@ import { useId, type ComponentProps } from "react";
 @@fieldImports@@
 import { useMask } from "./use-mask";
 
-type @@Name@@FieldProps = Omit<ComponentProps<"input">, "value" | "onChange" | "ref"> & {
+type @@Name@@FieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
   /** The @@label@@ without its mask, the way the form holds it. */
   value: string;
   /** Called with the @@label@@ without its mask. */
@@ -15,14 +15,13 @@ type @@Name@@FieldProps = Omit<ComponentProps<"input">, "value" | "onChange" | "
 export function @@Name@@Field({ value, onChange, errorMessage, ...props }: @@Name@@FieldProps) {
   const id = useId();
   const errorId = `${id}-error`;
-  const ref = useMask(@@format@@);
+  const maskValue = useMask(@@format@@);
 
   return (
     <>
       <label htmlFor={id}>@@label@@</label>
       <input
         {...props}
-        ref={ref}
         id={id}
         inputMode="@@inputMode@@"
         autoComplete="@@autocomplete@@"
@@ -30,7 +29,7 @@ export function @@Name@@Field({ value, onChange, errorMessage, ...props }: @@Nam
         value={@@formatValue@@}
         aria-invalid={Boolean(errorMessage)}
         aria-describedby={errorId}
-        onChange={(event) => onChange(@@parseMaskedEvent@@)}
+        onChange={(event) => onChange(@@parseMaskValue@@)}
       />
       {/* On the page from the start, and announced when it gets its text. */}
       <p id={errorId} role="alert">

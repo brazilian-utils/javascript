@@ -2,7 +2,7 @@ import { useId, type ComponentProps } from "react";
 import { formatCnpj, parseCnpj } from "@brazilian-utils/brazilian-utils";
 import { useMask } from "./use-mask";
 
-type CnpjFieldProps = Omit<ComponentProps<"input">, "value" | "onChange" | "ref"> & {
+type CnpjFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
   /** The CNPJ without its mask, the way the form holds it. */
   value: string;
   /** Called with the CNPJ without its mask. */
@@ -15,14 +15,13 @@ type CnpjFieldProps = Omit<ComponentProps<"input">, "value" | "onChange" | "ref"
 export function CnpjField({ value, onChange, errorMessage, ...props }: CnpjFieldProps) {
   const id = useId();
   const errorId = `${id}-error`;
-  const ref = useMask((value: string) => formatCnpj(value, { version: 2 }));
+  const maskValue = useMask((value: string) => formatCnpj(value, { version: 2 }));
 
   return (
     <>
       <label htmlFor={id}>CNPJ</label>
       <input
         {...props}
-        ref={ref}
         id={id}
         inputMode="text"
         autoComplete="off"
@@ -30,7 +29,7 @@ export function CnpjField({ value, onChange, errorMessage, ...props }: CnpjField
         value={formatCnpj(value, { version: 2 })}
         aria-invalid={Boolean(errorMessage)}
         aria-describedby={errorId}
-        onChange={(event) => onChange(parseCnpj(event.currentTarget.value, { version: 2 }))}
+        onChange={(event) => onChange(parseCnpj(maskValue(event), { version: 2 }))}
       />
       {/* On the page from the start, and announced when it gets its text. */}
       <p id={errorId} role="alert">

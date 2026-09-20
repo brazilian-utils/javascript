@@ -2,7 +2,7 @@ import { useId, type ComponentProps } from "react";
 import { formatPhone, parsePhone } from "@brazilian-utils/brazilian-utils";
 import { useMask } from "./use-mask";
 
-type PhoneFieldProps = Omit<ComponentProps<"input">, "value" | "onChange" | "ref"> & {
+type PhoneFieldProps = Omit<ComponentProps<"input">, "value" | "onChange"> & {
   /** The Phone without its mask, the way the form holds it. */
   value: string;
   /** Called with the Phone without its mask. */
@@ -15,14 +15,13 @@ type PhoneFieldProps = Omit<ComponentProps<"input">, "value" | "onChange" | "ref
 export function PhoneField({ value, onChange, errorMessage, ...props }: PhoneFieldProps) {
   const id = useId();
   const errorId = `${id}-error`;
-  const ref = useMask((value: string) => formatPhone(value, { mask: "nanp" }));
+  const maskValue = useMask((value: string) => formatPhone(value, { mask: "nanp" }));
 
   return (
     <>
       <label htmlFor={id}>Phone</label>
       <input
         {...props}
-        ref={ref}
         id={id}
         inputMode="numeric"
         autoComplete="tel-national"
@@ -30,7 +29,7 @@ export function PhoneField({ value, onChange, errorMessage, ...props }: PhoneFie
         value={formatPhone(value, { mask: "nanp" })}
         aria-invalid={Boolean(errorMessage)}
         aria-describedby={errorId}
-        onChange={(event) => onChange(parsePhone(event.currentTarget.value))}
+        onChange={(event) => onChange(parsePhone(maskValue(event)))}
       />
       {/* On the page from the start, and announced when it gets its text. */}
       <p id={errorId} role="alert">
