@@ -32,6 +32,8 @@ type Document = {
 	format: string;
 	/** The validator of the package, and the arguments after the value, if any. */
 	validator: string;
+	/** What a browser may fill the field with, `off` when there is no token for the document. */
+	autocomplete: string;
 	/** The `inputmode` of the field: an alphanumeric CNPJ needs a keyboard with letters. */
 	inputMode: "numeric" | "text";
 };
