@@ -120,7 +120,7 @@ function main(): void {
 		: ["idiomatic", "plain"];
 
 	const compilation = compileProject(resolve(ROOT, "source"));
-	const cases = allCases();
+	let cases = allCases();
 
 	// Every target reads the same scripted Http, so a race is decided by the same latencies.
 	for (const mode of ["idiomatic", "plain"] as const) {
@@ -133,7 +133,7 @@ function main(): void {
 		}
 	}
 
-	const reference = runInterpreter(compilation.program, cases, {
+	let reference = runInterpreter(compilation.program, cases, {
 		http: (request) => {
 			const fixture = HTTP_FIXTURES[request.url];
 			return fixture === undefined
@@ -141,6 +141,33 @@ function main(): void {
 				: { status: fixture.status, body: fixture.body, latencyMillis: fixture.latencyMillis };
 		},
 	});
+
+	// `generateCpf`/`generateCnpj` have no published reference to compare against, only each
+	// other; this checks the reference interpreter's own draw is a document that actually
+	// validates, so a target that reproduces the same wrong draw in every language (matching the
+	// interpreter bit for bit, but on a broken value) still gets caught by the check digits.
+	const validityCases: Case[] = [];
+	cases.forEach((testCase, index) => {
+		const outcome = reference[index]!;
+		if (!outcome.ok) return;
+		if (testCase.fn === "generate-cpf::generateCpf") {
+			validityCases.push({
+				fn: "is-valid-cpf::isValidCpf",
+				args: [outcome.value as string],
+				label: "generateCpf produces a valid CPF",
+			});
+		} else if (testCase.fn === "generate-cnpj::generateCnpj") {
+			validityCases.push({
+				fn: "is-valid-cnpj::isValidCnpj",
+				args: [outcome.value as string, "1"],
+				label: "generateCnpj produces a valid CNPJ",
+			});
+		}
+	});
+	if (validityCases.length > 0) {
+		reference = [...reference, ...runInterpreter(compilation.program, validityCases, {})];
+		cases = [...cases, ...validityCases];
+	}
 
 	const { outcomes: npmOutcomes, compared } = runReference(cases);
 	const comparedCases = compared.map((index) => cases[index]!);

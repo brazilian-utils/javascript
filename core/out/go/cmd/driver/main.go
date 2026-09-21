@@ -46,6 +46,35 @@ func dispatch(name string, args []interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("unknown function %s", name)
 }
 
+// pcg32 is the reference PCG32: same constants and default seed as the interpreter's, so
+// a draw matches the reference bit for bit. A fresh instance is built for every request,
+// the same way the reference model starts a fresh interpreter -- and so a fresh generator
+// -- per case.
+type pcg32 struct {
+	state     uint64
+	increment uint64
+}
+
+func newPcg32(seed uint64) *pcg32 {
+	p := &pcg32{increment: 1442695040888963407}
+	p.next()
+	p.state += seed
+	p.next()
+	return p
+}
+
+func (p *pcg32) next() int {
+	previous := p.state
+	p.state = previous*6364136223846793005 + p.increment
+	xorshifted := uint32(((previous >> 18) ^ previous) >> 27)
+	rotation := uint32(previous >> 59)
+	return int((xorshifted >> rotation) | (xorshifted << ((-rotation) & 31)))
+}
+
+// defaultSeed is the interpreter's own default: its constructor falls back to this seed
+// whenever Capabilities.seed is left unset, which is how every conformance case runs it.
+const defaultSeed uint64 = 0x853c49e6748fea9b
+
 // fakeCapabilities is the capability fake the differential harness drives: responses
 // come from fixtures.json, a URL that is missing models a transport error, and the
 // scripted latency is what decides a race.
@@ -57,6 +86,7 @@ type fixture struct {
 
 type fakeCapabilities struct {
 	fixtures map[string]fixture
+	random   *pcg32
 }
 
 func (f fakeCapabilities) Request(request core.HttpRequest) *core.HttpResponse {
@@ -74,12 +104,20 @@ func (f fakeCapabilities) Sleep(milliseconds int) {
 	time.Sleep(time.Duration(milliseconds) * time.Millisecond)
 }
 
-func (f fakeCapabilities) NextU32() int { return 0 }
+func (f fakeCapabilities) NextU32() int { return f.random.next() }
 
 // A missing fixture file leaves every URL unanswered, which is a transport error.
-var environment core.Capabilities = loadCapabilities()
+var fixtures map[string]fixture = loadFixtures()
 
-func loadCapabilities() core.Capabilities {
+var environment core.Capabilities
+
+// newEnvironment builds a fresh capability fake, so NextU32 starts from the same state
+// the reference model's fresh interpreter starts from for every case.
+func newEnvironment() core.Capabilities {
+	return fakeCapabilities{fixtures: fixtures, random: newPcg32(defaultSeed)}
+}
+
+func loadFixtures() map[string]fixture {
 	fixtures := map[string]fixture{}
 	raw, err := os.ReadFile("fixtures.json")
 	if err == nil {
@@ -87,7 +125,7 @@ func loadCapabilities() core.Capabilities {
 			panic(err)
 		}
 	}
-	return fakeCapabilities{fixtures: fixtures}
+	return fixtures
 }
 
 func main() {
@@ -103,6 +141,10 @@ func main() {
 		if err := json.Unmarshal(scanner.Bytes(), &parsed); err != nil {
 			panic(err)
 		}
+
+		// A fresh environment per line: NextU32 starts from the same state the reference
+		// model's fresh interpreter starts from for every case.
+		environment = newEnvironment()
 
 		value, err := dispatch(parsed.Fn, parsed.Args)
 		if err != nil {

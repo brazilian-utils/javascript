@@ -953,7 +953,7 @@ function driverFiles(_program: CProgram, entries: readonly DriverEntry[]): { pat
 		...(needsEnv
 			? [
 					'const fixturePath = new URL("fixtures.json", import.meta.url).pathname;',
-					"const environment = existsSync(fixturePath) ? fakeCapabilities(fixturePath) : defaultCapabilities();",
+					"const fixtures = existsSync(fixturePath)\n\t\t\t? (JSON.parse(readFileSync(fixturePath, \"utf8\")) as Record<string, Fixture>)\n\t\t\t: undefined;",
 					"",
 				]
 			: []),
@@ -963,6 +963,14 @@ function driverFiles(_program: CProgram, entries: readonly DriverEntry[]): { pat
 		'\tif (line.trim() === "") continue;',
 		"\tconst request = JSON.parse(line) as { fn: string; args: unknown[] };",
 		"",
+		...(needsEnv
+			? [
+					"\t// A fresh environment per line: nextU32 starts from the same state the reference model's",
+					"\t// fresh interpreter starts from for every case.",
+					"\tconst environment = fixtures === undefined ? defaultCapabilities() : fakeCapabilities(fixtures);",
+					"",
+				]
+			: []),
 		"\ttry {",
 		`\t\tconst value = await handlers[request.fn]!(request.args, ${needsEnv ? "environment" : "undefined"});`,
 		'\t\tprocess.stdout.write(`${JSON.stringify({ ok: true, value: value === undefined ? null : value })}\\n`);',

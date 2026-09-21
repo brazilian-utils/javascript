@@ -6,9 +6,12 @@
  * to `A` to `Z` (17 to 42), exactly as the Receita Federal manual specifies.
  */
 
-const FIRST_WEIGHTS = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+import { randomDigit } from "./random";
 
-const SECOND_WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+/** Exported for `generate-cnpj`, which needs the check digit of a base that has none yet. */
+export const FIRST_WEIGHTS = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+export const SECOND_WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
 /** The check digit of a CNPJ base, under the rule both versions share. */
 export function cnpjCheckDigit(cnpj: AsciiOf<14>, weights: List<IntRange<2, 9>>): IntRange<0, 9> {
@@ -49,6 +52,16 @@ export function hasLetter(value: Ascii): boolean {
 	}
 
 	return false;
+}
+
+/**
+ * A random numeric CNPJ base: an 8-digit root and a 4-digit branch, each digit drawn
+ * independently — matches the published `generateCnpj()` called with no branch, where an unset
+ * branch also draws those 4 digits at random. Twelve separate draws, not a loop, is what lets the
+ * result stay exactly 12 digits long.
+ */
+export function randomCnpjBase(): DigitsOf<12> {
+	return `${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}${randomDigit()}`;
 }
 
 /** Whether every character of a 14 character value is the same one. */

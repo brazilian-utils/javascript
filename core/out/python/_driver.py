@@ -28,11 +28,41 @@ from typing import Optional
 from ._support import Capabilities, HttpRequest, HttpResponse
 
 
+# The reference PCG32: same constants and default seed as the interpreter's, so a draw
+# matches the reference bit for bit. A fresh instance is built for every request, the same
+# way the reference model starts a fresh interpreter, and so a fresh generator, per case.
+class Pcg32:
+    MASK64 = (1 << 64) - 1
+    MASK32 = (1 << 32) - 1
+    INCREMENT = 1442695040888963407
+
+    def __init__(self, seed: int) -> None:
+        self.state = 0
+        self.next_u32()
+        self.state = (self.state + seed) & self.MASK64
+        self.next_u32()
+
+    def next_u32(self) -> int:
+        previous = self.state
+        self.state = (previous * 6364136223846793005 + self.INCREMENT) & self.MASK64
+        xorshifted = (((previous >> 18) ^ previous) >> 27) & self.MASK32
+        rotation = previous >> 59
+        return (
+            (xorshifted >> rotation) | (xorshifted << ((-rotation) & 31))
+        ) & self.MASK32
+
+
+# The interpreter's own default: its constructor falls back to this seed whenever
+# `Capabilities.seed` is left unset, which is how every conformance case runs it.
+DEFAULT_SEED = 0x853C49E6748FEA9B
+
+
 class FakeCapabilities:
     """The capability fake the differential harness drives: responses come from fixtures.json."""
 
     def __init__(self, fixtures: dict) -> None:
         self.fixtures = fixtures
+        self.random = Pcg32(DEFAULT_SEED)
 
     def request(self, request: HttpRequest) -> Optional[HttpResponse]:
         fixture = self.fixtures.get(request.url)
@@ -51,16 +81,16 @@ class FakeCapabilities:
         time.sleep(milliseconds / 1000)
 
     def next_u32(self) -> int:
-        return 0
+        return self.random.next_u32()
 
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures.json")
 
 if os.path.exists(FIXTURE_PATH):
     with open(FIXTURE_PATH) as handle:
-        ENVIRONMENT = FakeCapabilities(json.load(handle))
+        FIXTURES = json.load(handle)
 else:
-    ENVIRONMENT = Capabilities()
+    FIXTURES = None
 
 HANDLERS = {
     "format-cnpj::formatCnpj": lambda args: format_cnpj(
@@ -89,6 +119,10 @@ for line in sys.stdin:
         continue
 
     request = json.loads(line)
+
+    # A fresh environment per line: next_u32 starts from the same state the reference
+    # model's fresh interpreter starts from for every case.
+    ENVIRONMENT = FakeCapabilities(FIXTURES) if FIXTURES is not None else Capabilities()
 
     try:
         value = HANDLERS[request["fn"]](request["args"])

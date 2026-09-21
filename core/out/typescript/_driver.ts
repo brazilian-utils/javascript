@@ -20,19 +20,49 @@ import {
 } from "./capabilities.ts";
 
 /**
+ * The reference PCG32: same constants and default seed as `Interpreter`'s, so a draw
+ * matches the reference bit for bit. A fresh instance is built for every request, the same
+ * way the reference model starts a fresh interpreter — and so a fresh generator — per case.
+ */
+class Pcg32 {
+	private state = 0n;
+	private readonly increment = 1442695040888963407n;
+
+	constructor(seed: bigint) {
+		this.next();
+		this.state = (this.state + seed) & 0xffffffffffffffffn;
+		this.next();
+	}
+
+	next(): number {
+		const previous = this.state;
+		this.state =
+			(previous * 6364136223846793005n + this.increment) & 0xffffffffffffffffn;
+		const xorshifted = (((previous >> 18n) ^ previous) >> 27n) & 0xffffffffn;
+		const rotation = previous >> 59n;
+		return Number(
+			((xorshifted >> rotation) | (xorshifted << (-rotation & 31n))) &
+				0xffffffffn,
+		);
+	}
+}
+
+// The interpreter's own default: its constructor falls back to this seed whenever
+// `Capabilities.seed` is left unset, which is how every conformance case runs it.
+const DEFAULT_SEED = 0x853c49e6748fea9bn;
+
+/**
  * The capability fake the differential harness drives.
  *
  * Responses come from `fixtures.json`, a URL that is not in it models a transport error,
  * and the scripted latency is what decides a race, the same way the reference model's
- * virtual clock decides it.
+ * virtual clock decides it. `nextU32` gets a fresh PCG32 per call, matching the reference
+ * model's fresh interpreter per case.
  */
 type Fixture = { status: number; body: string; latencyMillis?: number };
 
-function fakeCapabilities(path: string): Capabilities {
-	const fixtures = JSON.parse(readFileSync(path, "utf8")) as Record<
-		string,
-		Fixture
-	>;
+function fakeCapabilities(fixtures: Record<string, Fixture>): Capabilities {
+	const random = new Pcg32(DEFAULT_SEED);
 
 	return {
 		async request(request: HttpRequest): Promise<HttpResponse | undefined> {
@@ -49,7 +79,7 @@ function fakeCapabilities(path: string): Capabilities {
 		now: () => 0,
 		sleep: (milliseconds: number) =>
 			new Promise((resolve) => setTimeout(resolve, milliseconds)),
-		nextU32: () => 0,
+		nextU32: () => random.next(),
 	};
 }
 
@@ -91,15 +121,20 @@ const handlers: Record<string, Handler> = {
 };
 
 const fixturePath = new URL("fixtures.json", import.meta.url).pathname;
-const environment = existsSync(fixturePath)
-	? fakeCapabilities(fixturePath)
-	: defaultCapabilities();
+const fixtures = existsSync(fixturePath)
+	? (JSON.parse(readFileSync(fixturePath, "utf8")) as Record<string, Fixture>)
+	: undefined;
 
 const reader = createInterface({ input: process.stdin });
 
 for await (const line of reader) {
 	if (line.trim() === "") continue;
 	const request = JSON.parse(line) as { fn: string; args: unknown[] };
+
+	// A fresh environment per line: nextU32 starts from the same state the reference model's
+	// fresh interpreter starts from for every case.
+	const environment =
+		fixtures === undefined ? defaultCapabilities() : fakeCapabilities(fixtures);
 
 	try {
 		const value = await handlers[request.fn]!(request.args, environment);

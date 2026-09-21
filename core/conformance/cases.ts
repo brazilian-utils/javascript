@@ -308,6 +308,21 @@ export function currencyCases(): Case[] {
 	return cases;
 }
 
+/**
+ * `generateCpf` and `generateCnpj` call `Math.random()` in the published package, so there is no
+ * fixed value to compare against; what the reference interpreter and the three targets have to
+ * agree on is the *draw itself*, under the one default seed every case in this suite runs with.
+ * `run.ts` turns each of these into a follow-up `isValidCpf`/`isValidCnpj` case, built from
+ * whatever the reference interpreter actually drew, so a target that matches on the wrong value
+ * (the same bug reproduced identically) still gets caught by the check digits.
+ */
+export function generateCases(): Case[] {
+	return [
+		{ fn: "generate-cpf::generateCpf", args: [], label: "generateCpf" },
+		{ fn: "generate-cnpj::generateCnpj", args: [], label: "generateCnpj" },
+	];
+}
+
 export function allCases(): Case[] {
 	return [
 		...cpfCases(),
@@ -317,5 +332,6 @@ export function allCases(): Case[] {
 		...businessDayCases(),
 		...cepCases(),
 		...currencyCases(),
+		...generateCases(),
 	];
 }
