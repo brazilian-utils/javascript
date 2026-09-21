@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<title>State and city</title>
+
+<label for="state">State</label>
+<select id="state">
+  <option value="">Pick a state</option>
+</select>
+
+<label for="city">City</label>
+<select id="city" disabled>
+  <option value="">Pick a city</option>
+</select>
+
+<script type="module">
+  // The states are a short list and come with the page; the cities are 5,571 of them, so that
+  // table is fetched only when a state is picked, and only once.
+  import { getStates } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-states/+esm";
+
+  const states = document.getElementById("state");
+  const cities = document.getElementById("city");
+
+  const fill = (select, options, placeholder) => {
+    select.replaceChildren(new Option(placeholder, ""));
+
+    for (const option of options) select.append(new Option(option.label, option.value));
+  };
+
+  fill(
+    states,
+    getStates().map((state) => ({ label: state.name, value: state.code })),
+    "Pick a state",
+  );
+
+  states.addEventListener("change", async () => {
+    if (!states.value) {
+      cities.disabled = true;
+      return fill(cities, [], "Pick a city");
+    }
+
+    fill(cities, [], "Loading the cities…");
+
+    const { getCities } = await import(
+      "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-cities/+esm"
+    );
+
+    fill(
+      cities,
+      getCities(states.value).map((city) => ({ label: city, value: city })),
+      "Pick a city",
+    );
+    cities.disabled = false;
+  });
+</script>

@@ -286,6 +286,8 @@ const PAGES = [
 	join(ROOT, "docs", "pt-br", "guides", "document-field.md"),
 	join(ROOT, "docs", "guides", "address-form.md"),
 	join(ROOT, "docs", "pt-br", "guides", "address-form.md"),
+	join(ROOT, "docs", "guides", "state-city.md"),
+	join(ROOT, "docs", "pt-br", "guides", "state-city.md"),
 ];
 const INCLUDE_PATTERN = /\]\((\.[^ )]+) ':include/g;
 const FILE_DIV_PATTERN = /<div class="file"|<\/div>/g;

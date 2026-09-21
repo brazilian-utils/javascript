@@ -3,4 +3,5 @@
 * Guias
   * [Campo de documento](pt-br/guides/document-field.md)
   * [Endereço pelo CEP](pt-br/guides/address-form.md)
+  * [Estado e cidade](pt-br/guides/state-city.md)
 * [Migração v1 para v2](pt-br/migration-v1-to-v2.md)
