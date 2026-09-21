@@ -1,0 +1,52 @@
+name: Engine
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "engine/**"
+      - "core/**"
+      - ".github/workflows/engine.yml"
+  push:
+    branches: [main]
+    paths:
+      - "engine/**"
+      - "core/**"
+      - ".github/workflows/engine.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify the engine and the core it generates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The engine has its own toolchain: Node runs its TypeScript directly, and the generated
+      # Python and Go are compiled by the runner's own preinstalled toolchains.
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install the engine's one dependency
+        run: npm ci
+        working-directory: engine
+
+      - name: Verify
+        # Compiles, generates every target in both idiom modes, regenerates and diffs for
+        # determinism, runs each target's linters over the output, and runs the differential
+        # conformance harness against the published package and across the three targets.
+        run: node ../engine/scripts/verify.ts .
+        working-directory: core

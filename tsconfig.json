@@ -17,5 +17,8 @@
 		"noUnusedParameters": true,
 		"noPropertyAccessFromIndexSignature": true,
 		"noImplicitOverride": true
-	}
+	},
+	// `engine` and `core` are a separate project with their own tsconfig and their own
+	// verification pipeline; the package's type checking stops at its own sources.
+	"exclude": ["dist", "node_modules", "engine", "core"]
 }
