@@ -70,10 +70,12 @@ export function defaultCapabilities(): Capabilities {
 		sleep(milliseconds: number): Promise<void> {
 			return new Promise((resolve) => setTimeout(resolve, milliseconds));
 		},
+		// Not cryptographically secure, deliberately: the utilities that draw are generating
+		// example documents, the published package documents using `Math.random()` for exactly
+		// that, and `crypto.getRandomValues` measures 130x the cost per draw. A caller who needs
+		// unpredictability passes its own capability.
 		nextU32(): number {
-			const buffer = new Uint32Array(1);
-			crypto.getRandomValues(buffer);
-			return buffer[0]!;
+			return Math.floor(Math.random() * 4294967296);
 		},
 	};
 }

@@ -929,9 +929,13 @@ function supportModule(_program: CProgram, needs: SupportNeeds): { path: string;
 			"        time.sleep(milliseconds / 1000)",
 			"",
 			"    def next_u32(self) -> int:",
-			"        import secrets",
+			"        import random",
 			"",
-			"        return secrets.randbits(32)",
+			"        # Not cryptographically secure, deliberately: the utilities that draw are",
+			"        # generating example documents, and that is what the published package",
+			"        # documents doing. A caller who needs unpredictability passes its own",
+			"        # capability, the way the conformance harness passes a seeded one.",
+			"        return random.getrandbits(32)",
 			"",
 		);
 	}
