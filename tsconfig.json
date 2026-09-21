@@ -17,5 +17,9 @@
 		"noUnusedParameters": true,
 		"noPropertyAccessFromIndexSignature": true,
 		"noImplicitOverride": true
-	}
+	},
+	// The documentation site is not part of the library: its examples are written for React,
+	// Angular and Vue, and the templates they are generated from are not valid TypeScript on their
+	// own. `npm run build:docs` and the type-check of each example live in the docs workflow.
+	"exclude": ["docs", "dist", "coverage", "reports", ".stryker-tmp"]
 }
