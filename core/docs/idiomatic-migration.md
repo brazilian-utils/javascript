@@ -288,8 +288,8 @@ than assumed — the four `SOURCEMAP.json` files are the entire diff.
   and every target agree, in both idiom modes).
 - `conformance/run.ts` — **4256/4256** matched, per target, in both idiom modes (typescript,
   python, go, rust, and their `-plain` counterparts), unchanged from before this pass.
-- `conformance/run-source.ts` — `isValidCpf` 1,519/1,519, `formatCnpj` 160/160, `isValidCnpj`
-  1,627/2,032 (405 on the one remaining `str.asciiUpper(trimmed)` gap), up from 1,519/1,519,
-  not-run, and 1,216/2,032 before this pass. Two utilities newly run; five still do not
-  (`formatCurrency`, `generateCpf`, `generateCnpj`, `getHolidays`, `isBusinessDay`,
-  `getAddressInfoByCep` — six, all unrelated to checked accessors).
+- `conformance/run-source.ts` — `isValidCpf` 1,519/1,519 (unchanged), `formatCnpj` 160/160 (newly
+  covered — it did not run at all before this pass), `isValidCnpj` 1,627/2,032 (405 on the one
+  remaining `str.asciiUpper(trimmed)` gap, up from 1,216/2,032 before). Six utilities still do not
+  run — `formatCurrency`, `generateCpf`, `generateCnpj`, `getHolidays`, `isBusinessDay`,
+  `getAddressInfoByCep` — none of them for a reason this pass touches.
