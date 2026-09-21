@@ -21,7 +21,9 @@ source/
   is-business-day.ts
   get-address-info-by-cep.ts
   format-currency.ts
-  lib/                        library code: check digits, masks, JSON, Easter
+  generate-cpf.ts
+  generate-cnpj.ts
+  lib/                        library code: check digits, masks, JSON, Easter, random
 conformance/
   cases.ts                    vectors, seeded inputs and the scripted Http
   run.ts                      the differential runner
@@ -40,6 +42,6 @@ split for every pilot, with the behavior measured from `../src` rather than assu
 
 ## Status
 
-Seven utilities, generated for three languages, verified against the published package on every
+Nine utilities, generated for three languages, verified against the published package on every
 case that can be reproduced offline. [`docs/survey.md`](docs/survey.md) counts what the rest of
 the package would need.

@@ -34,12 +34,12 @@ import of `targets/` or a comparison against a target name. The same test proves
 
 | target | native | library | portable |
 |---|---|---|---|
-| TypeScript | 281 | 0 | 2 |
-| Python | 268 | 13 | 2 |
-| Go | 254 | 27 | 2 |
+| TypeScript | 304 | 0 | 2 |
+| Python | 292 | 12 | 2 |
+| Go | 277 | 27 | 2 |
 
 The portable selections are the interesting ones: `str.compare` on a value that is not proven
-ASCII, in **every** target, and the calendar conversions. The 13 Python and 27 Go "library"
+ASCII, in **every** target, and the calendar conversions. The 12 Python and 27 Go "library"
 selections are that language's own standard library or a generated generic helper.
 
 ### 3. Backend size
@@ -47,16 +47,16 @@ selections are that language's own standard library or a generated generic helpe
 | part | lines |
 |---|---|
 | frontend + HIR | 1166 |
-| Core (checker, IR) | 2764 |
-| analysis, link, comptime, optimize | 711 |
+| Core (checker, IR) | 2984 |
+| analysis, link, comptime, optimize | 716 |
 | intrinsics | 1827 |
 | interpreter | 353 |
-| backend framework | 1413 |
-| target: TypeScript | 910 |
-| target: Python | 961 |
-| target: Go | 1207 |
+| backend framework | 1418 |
+| target: TypeScript | 949 |
+| target: Python | 1059 |
+| target: Go | 1259 |
 
-Each backend is smaller than frontend + Core + analysis (4641), which is the shape the
+Each backend is smaller than frontend + Core + analysis (4866), which is the shape the
 architecture predicts: the expensive part is meaning, not syntax.
 
 ### 4. Generated expansion per utility
@@ -65,37 +65,43 @@ Source lines against generated lines, per target:
 
 | utility | source | TypeScript | Python | Go |
 |---|---|---|---|---|
-| `is-valid-cpf` | 18 | 25 | 17 | 26 |
-| `is-valid-cnpj` | 22 | 27 | 19 | 28 |
-| `format-cnpj` | 14 | 24 | 17 | 30 |
-| `get-holidays` | 49 | 57 | 39 | 55 |
-| `is-business-day` | 22 | 35 | 20 | 32 |
-| `get-address-info-by-cep` | 83 | 88 | 57 | 76 |
-| `format-currency` | 25 | 40 | 27 | 51 |
+| `is-valid-cpf` | 28 | 25 | 20 | 26 |
+| `is-valid-cnpj` | 30 | 27 | 23 | 28 |
+| `format-cnpj` | 28 | 24 | 20 | 30 |
+| `generate-cpf` | 32 | 30 | 24 | 28 |
+| `generate-cnpj` | 31 | 31 | 23 | 27 |
+| `get-holidays` | 54 | 41 | 36 | 37 |
+| `is-business-day` | 32 | 35 | 26 | 32 |
+| `get-address-info-by-cep` | 104 | 88 | 62 | 76 |
+| `format-currency` | 31 | 27 | 23 | 39 |
 
-Every utility is within 3× its source in every target; most are within 1.5×, and Python is
-usually *smaller* than the source. 758 lines of source (including the engine's standard library)
-produce 765 + 535 + 952 lines across the three targets.
+Every utility is within 3× its source in every target; most are *smaller* than their source, since
+the source carries the prose that says why. 902 lines of source (including the engine's standard
+library) produce 895 + 676 + 1060 lines across the three targets.
 
 ### 5. Big-integer representations — **0**
 
 No utility needs `bigint` or `math/big`: every proven range fits the platform-safe domain.
-17 loops had their accumulator ranges widened rather than proven exactly, and 98 assignments were
+16 loops had their accumulator ranges widened rather than proven exactly, and 98 assignments were
 clamped back into the platform domain under the bounded-step rule (`docs/semantics.md`, "Loops and
 widening"). Both are reported rather than hidden, because a widened range is usually a hint that
 the source could carry a tighter annotation.
 
-### 6. Conformance — **4252/4252 in every target, in both idiom modes**
+### 6. Conformance — **4256/4256 in every target, in both idiom modes**
 
 | comparison | result |
 |---|---|
-| reference interpreter vs the published npm package | 4245/4245 (every case that can be reproduced offline) |
-| TypeScript, idiomatic and `--no-idioms` | 4252/4252 |
-| Python, idiomatic and `--no-idioms` | 4252/4252 |
-| Go, idiomatic and `--no-idioms` | 4252/4252 |
+| reference interpreter vs the published npm package | 4247/4247 (every case that can be reproduced offline) |
+| TypeScript, idiomatic and `--no-idioms` | 4256/4256 |
+| Python, idiomatic and `--no-idioms` | 4256/4256 |
+| Go, idiomatic and `--no-idioms` | 4256/4256 |
 
-The seven remaining cases are `getAddressInfoByCep`, whose published implementation performs real
-requests; they are compared between the interpreter and the three targets on scripted responses.
+The nine cases the npm comparison leaves out are `getAddressInfoByCep`, whose published
+implementation performs real requests, and the two generators, which have no deterministic
+reference to compare against; all nine are compared between the interpreter and the three targets,
+on scripted responses and on the reference generator. What the generators draw is then fed back
+through `isValidCpf` and `isValidCnpj` in the same run, so three targets agreeing bit for bit on
+an invalid document would still fail.
 
 ### 7. Idiomaticity
 
@@ -112,9 +118,9 @@ inputs, 200 000 iterations after a 20 000-iteration warm-up (`core/conformance/b
 
 | utility | handwritten | generated | ratio | budget |
 |---|---|---|---|---|
-| `isValidCpf` | 63.4 ms | 36.6 ms | **0.58x** | within 1.5x |
-| `isValidCnpj` | 129.7 ms | 105.7 ms | **0.82x** | within 1.5x |
-| `formatCnpj` | 195.7 ms | 99.4 ms | **0.51x** | within 1.5x |
+| `isValidCpf` | 55.7 ms | 33.9 ms | **0.61x** | within 1.5x |
+| `isValidCnpj` | 110.7 ms | 86.9 ms | **0.78x** | within 1.5x |
+| `formatCnpj` | 179.5 ms | 99.5 ms | **0.55x** | within 1.5x |
 
 All three are faster than the handwritten code. They were not at first: the first measurement was
 3.1x, 5.3x and 4.3x *slower*. Four changes closed the gap, and all four were lowering decisions
@@ -134,23 +140,26 @@ compiler emits, not by rewriting a utility.
 
 ### 9. Marginal cost
 
-| | first pilot (`isValidCpf`) | last pilot (`formatCurrency`) |
+| | first pilot (`isValidCpf`) | a late pilot (`formatCurrency`) |
 |---|---|---|
-| source lines | 18 (+ 34 in `lib/`) | 25 (+ 24 in `lib/`) |
+| source lines | 28 (+ 39 in `lib/`) | 31 (+ 55 in `lib/`) |
 | new intrinsics | 21 (`str.*`, `int.*`, `re.test`) | 0 |
 | compiler changes | the frontend, the checker, the Core, the interpreter, three backends | none |
 | conformance | the harness itself | 38 cases |
 
 The fourth and fifth pilots (`getHolidays`, `isBusinessDay`) needed the `date.*` intrinsics and
 the standard library's calendar; the sixth (`getAddressInfoByCep`) needed the capability plumbing
-and two ADRs; the seventh needed nothing. The cost is front-loaded exactly where the thesis says
-it should be.
+and two ADRs; the seventh needed nothing. The eighth and ninth (`generateCpf`, `generateCnpj`)
+needed one more intrinsic, `random.nextU32`, and everything derived from it — a uniform value
+below a bound, by rejection sampling — is written in the subset, because a modulo bias would
+otherwise have to match digit for digit across three standard libraries to stay invisible. The
+cost is front-loaded exactly where the thesis says it should be.
 
 ## What this does not yet prove
 
 - **One project, one domain.** The engine is domain-neutral by construction and
   `examples/generic` keeps it honest, but only Brazilian Utils has been ported.
-- **Seven utilities out of 138.** [`core/docs/survey.md`](../../core/docs/survey.md) says 120 of
+- **Nine utilities out of 138.** [`core/docs/survey.md`](../../core/docs/survey.md) says 120 of
   them need only features that exist today; the remaining 18 need `Map`/`Set`, discriminated
   unions or Unicode normalization.
 - **Three targets out of the eventual list.** The Rust sketch found two frictions, both from
