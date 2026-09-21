@@ -119,7 +119,7 @@ if (process.argv.includes("--json")) {
 			`core functions:       ${metrics.coreFunctions}`,
 			`source lines:         ${metrics.sourceLines}`,
 			`frontend+core+analysis: ${frontendCoreAnalysis}`,
-			`backends (3 targets): ${targetLines}`,
+			`backends (4 targets): ${targetLines}`,
 			`generated lines:      ${Object.entries(metrics.generatedLines).map(([name, count]) => `${name} ${count}`).join(", ")}`,
 			`lowering mix:         ${Object.entries(lowering).map(([name, counts]) => `${name} ${counts["native"]}n/${counts["library"]}l/${counts["portable"]}p`).join(", ")}`,
 			`wide integers:        ${metrics.wideIntegers.length}`,

@@ -37,10 +37,12 @@ import of `targets/` or a comparison against a target name. The same test proves
 | TypeScript | 304 | 0 | 2 |
 | Python | 292 | 12 | 2 |
 | Go | 277 | 27 | 2 |
+| Rust | 250 | 54 | 2 |
 
 The portable selections are the interesting ones: `str.compare` on a value that is not proven
-ASCII, in **every** target, and the calendar conversions. The 12 Python and 27 Go "library"
-selections are that language's own standard library or a generated generic helper.
+ASCII, in **every** target, and the calendar conversions. The "library" column measures each
+standard library rather than the engine: Rust needs twice as many as Go because `std` has no
+regex, no left pad, no checked index and no stable sort that clones.
 
 ### 3. Backend size
 
@@ -51,10 +53,11 @@ selections are that language's own standard library or a generated generic helpe
 | analysis, link, comptime, optimize | 716 |
 | intrinsics | 1827 |
 | interpreter | 353 |
-| backend framework | 1418 |
+| backend framework | 1482 |
 | target: TypeScript | 949 |
-| target: Python | 1059 |
-| target: Go | 1259 |
+| target: Python | 1062 |
+| target: Go | 1292 |
+| target: Rust | 2384 |
 
 Each backend is smaller than frontend + Core + analysis (4866), which is the shape the
 architecture predicts: the expensive part is meaning, not syntax.
@@ -118,9 +121,34 @@ inputs, 200 000 iterations after a 20 000-iteration warm-up (`core/conformance/b
 
 | utility | handwritten | generated | ratio | budget |
 |---|---|---|---|---|
-| `isValidCpf` | 55.7 ms | 33.9 ms | **0.61x** | within 1.5x |
-| `isValidCnpj` | 110.7 ms | 86.9 ms | **0.78x** | within 1.5x |
-| `formatCnpj` | 179.5 ms | 99.5 ms | **0.55x** | within 1.5x |
+| `isValidCpf` | 58.2 ms | 35.8 ms | **0.62x** | within 1.5x |
+| `isValidCnpj` | 118.2 ms | 89.8 ms | **0.76x** | within 1.5x |
+| `formatCnpj` | 189.3 ms | 92.0 ms | **0.49x** | within 1.5x |
+
+Since then the same question is asked of every language, against the implementation that
+language's community actually ships — `brazilian-utils/{python,go,rust}` — in `core/bench/`:
+
+| language | handwritten baseline | generated, against it |
+|---|---|---|
+| TypeScript | this package's `src/` | 0.49x to 0.76x |
+| Python | `brutils` | 1.02x to 1.05x |
+| Go | `brazilian-utils/go` | 0.13x to 0.30x |
+| Rust | `brazilian_utils` | 3.59x and 10.89x |
+
+Two defects came out of that, and neither was visible from the TypeScript benchmark alone. The Go
+target compiled each regex inside the function that used it, and `regexp` has no compilation
+cache, so a Unicode-class pattern was rebuilt from source on every call — 79.6x the cost of the
+match. JavaScript caches a compiled literal and Python caches inside `re`, so only Go ever paid
+it. The Rust target interpreted a pattern tree at run time, allocating per node per position; it
+now emits a straight-line scanner decided at generation time, which took `isValidCpf` from 50x to
+10.9x and `isValidCnpj` from 24x to 3.6x.
+
+Rust's remaining gap is measured rather than assumed, and it is the ownership model, not the
+regex: `cpf_check_digit` calls a string-taking helper inside its loop and every value is owned, so
+it clones an eleven-character string once per weight — 44.9 ms of the 78.0 ms that is left.
+`cnpj_check_digit` indexes bytes and shows no such cost, which is why CNPJ is 3.6x and CPF 10.9x
+although CNPJ validates more digits. Closing it means inferring which parameters are only read,
+which supersedes [ADR 0009](decisions/0009-rust-values-are-owned.md) rather than extending it.
 
 All three are faster than the handwritten code. They were not at first: the first measurement was
 3.1x, 5.3x and 4.3x *slower*. Four changes closed the gap, and all four were lowering decisions
@@ -162,5 +190,7 @@ cost is front-loaded exactly where the thesis says it should be.
 - **Nine utilities out of 138.** [`core/docs/survey.md`](../../core/docs/survey.md) says 120 of
   them need only features that exist today; the remaining 18 need `Map`/`Set`, discriminated
   unions or Unicode normalization.
-- **Three targets out of the eventual list.** The Rust sketch found two frictions, both from
-  `std` being smaller than the other three standard libraries, and neither in the Core.
+- **Four targets, and the falsification held.** Rust was the one meant to break the design, and
+  it did not: `std` only, no crate, 4256/4256, and both frictions the sketch predicted turned out
+  to be about `std` rather than about the Core. What is still untried is a language whose strings
+  are UTF-16, which is where `str.compare`'s precondition gets its real test.
