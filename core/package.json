@@ -1,0 +1,18 @@
+{
+	"name": "@brazilian-utils/core",
+	"version": "0.1.0",
+	"private": true,
+	"description": "The single-source core of Brazilian Utils: each utility is written once in the engine's restricted subset and generated for TypeScript, Python and Go.",
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"check": "node ../engine/src/cli.ts check --project .",
+		"build": "node ../engine/src/cli.ts build --project . && node ../engine/src/cli.ts build --project . --no-idioms",
+		"dump": "node ../engine/src/cli.ts dump --project .",
+		"conformance": "node --import ./conformance/sloppy-imports.mjs ./conformance/run.ts",
+		"verify": "node ../engine/scripts/verify.ts ."
+	}
+}

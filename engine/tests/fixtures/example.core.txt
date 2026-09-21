@@ -1,0 +1,146 @@
+record HttpHeader { name: Ascii[0..2147483647], value: String[0..2147483647] }
+record HttpRequest { method: Ascii[3..7], url: String[0..2147483647], headers: List<HttpHeader>[0..2147483647], body: String[0..2147483647], timeoutMillis: Int[0..600000] }
+record HttpResponse { status: Int[0..599], headers: List<HttpHeader>[0..2147483647], body: String[0..2147483647] }
+error HttpError
+const is-valid-luhn::DIGITS: String[0..2147483647]
+const slugify::HYPHEN: Int[45..45]
+const slugify::LOWER_A: Int[97..97]
+const slugify::LOWER_Z: Int[122..122]
+const slugify::ZERO: Int[48..48]
+const slugify::NINE: Int[57..57]
+
+fn std/date::floorDiv(value: Int[306..3652364], divisor: Int[146097..146097]): Int[-1..24] ! Pure
+  const quotient: Int[0..24] = int.div(value: Int[306..3652364], divisor: Int[146097..146097]): Int[0..24]
+  if (int.lt(value: Int[306..3652364], 0: Int[0..0]): Bool && !core.eq(int.mul(quotient: Int[0..24], divisor: Int[146097..146097]): Int[0..3506328], value: Int[306..-1]): Bool) {
+    return int.sub(quotient: Int[0..24], 1: Int[1..1]): Int[-1..23]
+  }
+  return quotient: Int[0..24]
+
+fn std/date::yearFromDays(days: Int[-719162..2932896]): Int[1..9999] ! Pure
+  const shifted: Int[306..3652364] = int.add(days: Int[-719162..2932896], 719468: Int[719468..719468]): Int[306..3652364]
+  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364], 146097: Int[146097..146097])
+  const dayOfEra: Int[-3506022..3798461] = int.sub(shifted: Int[306..3652364], int.mul(era: Int[-1..24], 146097: Int[146097..146097]): Int[-146097..3506328]): Int[-3506022..3798461]
+  const yearOfEra: Int[-9612..10413] = int.div(int.sub(int.add(int.sub(dayOfEra: Int[-3506022..3798461], int.div(dayOfEra: Int[-3506022..3798461], 1460: Int[1460..1460]): Int[-2401..2601]): Int[-3508623..3800862], int.div(dayOfEra: Int[-3506022..3798461], 36524: Int[36524..36524]): Int[-95..103]): Int[-3508718..3800965], int.div(dayOfEra: Int[-3506022..3798461], 146096: Int[146096..146096]): Int[-23..25]): Int[-3508743..3800988], 365: Int[365..365]): Int[-9612..10413]
+  const year: Int[-10012..20013] = int.add(yearOfEra: Int[-9612..10413], int.mul(era: Int[-1..24], 400: Int[400..400]): Int[-400..9600]): Int[-10012..20013]
+  const dayOfYear: Int[-7309466..7309348] = int.sub(dayOfEra: Int[-3506022..3798461], int.sub(int.add(int.mul(365: Int[365..365], yearOfEra: Int[-9612..10413]): Int[-3508380..3800745], int.div(yearOfEra: Int[-9612..10413], 4: Int[4..4]): Int[-2403..2603]): Int[-3510783..3803348], int.div(yearOfEra: Int[-9612..10413], 100: Int[100..100]): Int[-96..104]): Int[-3510887..3803444]): Int[-7309466..7309348]
+  const monthPrime: Int[-238871..238867] = int.div(int.add(int.mul(5: Int[5..5], dayOfYear: Int[-7309466..7309348]): Int[-36547330..36546740], 2: Int[2..2]): Int[-36547328..36546742], 153: Int[153..153]): Int[-238871..238867]
+  const month: Int[-238868..238858] = (int.lt(monthPrime: Int[-238871..238867], 10: Int[10..10]): Bool ? int.add(monthPrime: Int[-238871..9], 3: Int[3..3]): Int[-238868..12] : int.sub(monthPrime: Int[10..238867], 9: Int[9..9]): Int[1..238858])
+  return int.min(int.max((int.le(month: Int[-238868..238858], 2: Int[2..2]): Bool ? int.add(year: Int[-10012..20013], 1: Int[1..1]): Int[-10011..20014] : year: Int[-10012..20013]), 1: Int[1..1]): Int[1..20014], 9999: Int[9999..9999]): Int[1..9999]
+
+fn std/date::monthFromDays(days: Int[-719162..2932896]): Int[1..12] ! Pure
+  const shifted: Int[306..3652364] = int.add(days: Int[-719162..2932896], 719468: Int[719468..719468]): Int[306..3652364]
+  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364], 146097: Int[146097..146097])
+  const dayOfEra: Int[-3506022..3798461] = int.sub(shifted: Int[306..3652364], int.mul(era: Int[-1..24], 146097: Int[146097..146097]): Int[-146097..3506328]): Int[-3506022..3798461]
+  const yearOfEra: Int[-9612..10413] = int.div(int.sub(int.add(int.sub(dayOfEra: Int[-3506022..3798461], int.div(dayOfEra: Int[-3506022..3798461], 1460: Int[1460..1460]): Int[-2401..2601]): Int[-3508623..3800862], int.div(dayOfEra: Int[-3506022..3798461], 36524: Int[36524..36524]): Int[-95..103]): Int[-3508718..3800965], int.div(dayOfEra: Int[-3506022..3798461], 146096: Int[146096..146096]): Int[-23..25]): Int[-3508743..3800988], 365: Int[365..365]): Int[-9612..10413]
+  const dayOfYear: Int[-7309466..7309348] = int.sub(dayOfEra: Int[-3506022..3798461], int.sub(int.add(int.mul(365: Int[365..365], yearOfEra: Int[-9612..10413]): Int[-3508380..3800745], int.div(yearOfEra: Int[-9612..10413], 4: Int[4..4]): Int[-2403..2603]): Int[-3510783..3803348], int.div(yearOfEra: Int[-9612..10413], 100: Int[100..100]): Int[-96..104]): Int[-3510887..3803444]): Int[-7309466..7309348]
+  const monthPrime: Int[-238871..238867] = int.div(int.add(int.mul(5: Int[5..5], dayOfYear: Int[-7309466..7309348]): Int[-36547330..36546740], 2: Int[2..2]): Int[-36547328..36546742], 153: Int[153..153]): Int[-238871..238867]
+  return int.min(int.max((int.lt(monthPrime: Int[-238871..238867], 10: Int[10..10]): Bool ? int.add(monthPrime: Int[-238871..9], 3: Int[3..3]): Int[-238868..12] : int.sub(monthPrime: Int[10..238867], 9: Int[9..9]): Int[1..238858]), 1: Int[1..1]): Int[1..238858], 12: Int[12..12]): Int[1..12]
+
+fn std/date::dayFromDays(days: Int[-719162..2932896]): Int[1..31] ! Pure
+  const shifted: Int[306..3652364] = int.add(days: Int[-719162..2932896], 719468: Int[719468..719468]): Int[306..3652364]
+  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364], 146097: Int[146097..146097])
+  const dayOfEra: Int[-3506022..3798461] = int.sub(shifted: Int[306..3652364], int.mul(era: Int[-1..24], 146097: Int[146097..146097]): Int[-146097..3506328]): Int[-3506022..3798461]
+  const yearOfEra: Int[-9612..10413] = int.div(int.sub(int.add(int.sub(dayOfEra: Int[-3506022..3798461], int.div(dayOfEra: Int[-3506022..3798461], 1460: Int[1460..1460]): Int[-2401..2601]): Int[-3508623..3800862], int.div(dayOfEra: Int[-3506022..3798461], 36524: Int[36524..36524]): Int[-95..103]): Int[-3508718..3800965], int.div(dayOfEra: Int[-3506022..3798461], 146096: Int[146096..146096]): Int[-23..25]): Int[-3508743..3800988], 365: Int[365..365]): Int[-9612..10413]
+  const dayOfYear: Int[-7309466..7309348] = int.sub(dayOfEra: Int[-3506022..3798461], int.sub(int.add(int.mul(365: Int[365..365], yearOfEra: Int[-9612..10413]): Int[-3508380..3800745], int.div(yearOfEra: Int[-9612..10413], 4: Int[4..4]): Int[-2403..2603]): Int[-3510783..3803348], int.div(yearOfEra: Int[-9612..10413], 100: Int[100..100]): Int[-96..104]): Int[-3510887..3803444]): Int[-7309466..7309348]
+  const monthPrime: Int[-238871..238867] = int.div(int.add(int.mul(5: Int[5..5], dayOfYear: Int[-7309466..7309348]): Int[-36547330..36546740], 2: Int[2..2]): Int[-36547328..36546742], 153: Int[153..153]): Int[-238871..238867]
+  return int.min(int.max(int.add(int.sub(dayOfYear: Int[-7309466..7309348], int.div(int.add(int.mul(153: Int[153..153], monthPrime: Int[-238871..238867]): Int[-36547263..36546651], 2: Int[2..2]): Int[-36547261..36546653], 5: Int[5..5]): Int[-7309452..7309330]): Int[-14618796..14618800], 1: Int[1..1]): Int[-14618795..14618801], 1: Int[1..1]): Int[1..14618801], 31: Int[31..31]): Int[1..31]
+
+fn std/date::floorDiv$1(value: Int[0..9999], divisor: Int[400..400]): Int[-1..24] ! Pure
+  const quotient: Int[0..24] = int.div(value: Int[0..9999], divisor: Int[400..400]): Int[0..24]
+  if (int.lt(value: Int[0..9999], 0: Int[0..0]): Bool && !core.eq(int.mul(quotient: Int[0..24], divisor: Int[400..400]): Int[0..9600], value: Int[0..-1]): Bool) {
+    return int.sub(quotient: Int[0..24], 1: Int[1..1]): Int[-1..23]
+  }
+  return quotient: Int[0..24]
+
+fn std/date::daysFromCivil(year: Int[1..9999], month: Int[1..12], day: Int[1..31]): Int[-719162..2932896] ! Pure
+  const shifted: Int[0..9999] = (int.le(month: Int[1..12], 2: Int[2..2]): Bool ? int.sub(year: Int[1..9999], 1: Int[1..1]): Int[0..9998] : year: Int[1..9999])
+  const era: Int[-1..24] = std/date::floorDiv$1(shifted: Int[0..9999], 400: Int[400..400])
+  const yearOfEra: Int[-9600..10399] = int.sub(shifted: Int[0..9999], int.mul(era: Int[-1..24], 400: Int[400..400]): Int[-400..9600]): Int[-9600..10399]
+  const monthTerm: Int[0..11] = (int.gt(month: Int[1..12], 2: Int[2..2]): Bool ? int.sub(month: Int[3..12], 3: Int[3..3]): Int[0..9] : int.add(month: Int[1..2], 9: Int[9..9]): Int[10..11])
+  const dayOfYear: Int[0..367] = int.sub(int.add(int.div(int.add(int.mul(153: Int[153..153], monthTerm: Int[0..11]): Int[0..1683], 2: Int[2..2]): Int[2..1685], 5: Int[5..5]): Int[0..337], day: Int[1..31]): Int[1..368], 1: Int[1..1]): Int[0..367]
+  const dayOfEra: Int[-3506503..3798697] = int.add(int.sub(int.add(int.mul(yearOfEra: Int[-9600..10399], 365: Int[365..365]): Int[-3504000..3795635], int.div(yearOfEra: Int[-9600..10399], 4: Int[4..4]): Int[-2400..2599]): Int[-3506400..3798234], int.div(yearOfEra: Int[-9600..10399], 100: Int[100..100]): Int[-96..103]): Int[-3506503..3798330], dayOfYear: Int[0..367]): Int[-3506503..3798697]
+  return int.min(int.max(int.sub(int.add(int.mul(era: Int[-1..24], 146097: Int[146097..146097]): Int[-146097..3506328], dayOfEra: Int[-3506503..3798697]): Int[-3652600..7305025], 719468: Int[719468..719468]): Int[-4372068..6585557], -719162: Int[-719162..-719162]): Int[-719162..6585557], 2932896: Int[2932896..2932896]): Int[-719162..2932896]
+
+fn std/date::ymdToDays(year: Int[-9007199254740991..9007199254740991], month: Int[-9007199254740991..9007199254740991], day: Int[-9007199254740991..9007199254740991]): Option<Int[-9007199254740991..9007199254740991]> ! Pure
+  if (((((int.lt(year: Int[-9007199254740991..9007199254740991], 1: Int[1..1]): Bool || int.gt(year: Int[1..9007199254740991], 9999: Int[9999..9999]): Bool) || int.lt(month: Int[-9007199254740991..9007199254740991], 1: Int[1..1]): Bool) || int.gt(month: Int[1..9007199254740991], 12: Int[12..12]): Bool) || int.lt(day: Int[-9007199254740991..9007199254740991], 1: Int[1..1]): Bool) || int.gt(day: Int[1..9007199254740991], 31: Int[31..31]): Bool) {
+    return none
+  }
+  const days: Int[-719162..2932896] = std/date::daysFromCivil(year: Int[1..9999], month: Int[1..12], day: Int[1..31])
+  if ((!core.eq(std/date::yearFromDays(days: Int[-719162..2932896]), year: Int[1..9999]): Bool || !core.eq(std/date::monthFromDays(days: Int[-719162..2932896]), month: Int[1..12]): Bool) || !core.eq(std/date::dayFromDays(days: Int[-719162..2932896]), day: Int[1..31]): Bool) {
+    return none
+  }
+  return some(days: Int[-719162..2932896])
+
+fn std/strings::compareScalars(left: String[0..2147483647], right: String[0..2147483647]): Int[-1..1] ! Pure
+  const leftPoints: List<Int[0..1114111]>[0..2147483647] = str.codePoints(left: String[0..2147483647]): List<Int[0..1114111]>[0..2147483647]
+  const rightPoints: List<Int[0..1114111]>[0..2147483647] = str.codePoints(right: String[0..2147483647]): List<Int[0..1114111]>[0..2147483647]
+  const shared: Int[0..2147483647] = int.min(seq.len(leftPoints: List<Int[0..1114111]>[0..2147483647]): Int[0..2147483647], seq.len(rightPoints: List<Int[0..1114111]>[0..2147483647]): Int[0..2147483647]): Int[0..2147483647]
+  for index: Int[0..2147483646] = 0: Int[0..0] to shared: Int[0..2147483647] {
+    const a: Int[0..1114111] = opt.orElse(seq.at(leftPoints: List<Int[0..1114111]>[0..2147483647], index: Int[0..2147483646]): Option<Int[0..1114111]>, 0: Int[0..0]): Int[0..1114111]
+    const b: Int[0..1114111] = opt.orElse(seq.at(rightPoints: List<Int[0..1114111]>[0..2147483647], index: Int[0..2147483646]): Option<Int[0..1114111]>, 0: Int[0..0]): Int[0..1114111]
+    if int.lt(a: Int[0..1114111], b: Int[0..1114111]): Bool {
+      return -1: Int[-1..-1]
+    }
+    if int.gt(a: Int[0..1114111], b: Int[0..1114111]): Bool {
+      return 1: Int[1..1]
+    }
+  }
+  if int.lt(seq.len(leftPoints: List<Int[0..1114111]>[0..2147483647]): Int[0..2147483647], seq.len(rightPoints: List<Int[0..1114111]>[0..2147483647]): Int[0..2147483647]): Bool {
+    return -1: Int[-1..-1]
+  }
+  if int.gt(seq.len(leftPoints: List<Int[0..1114111]>[0..2147483647]): Int[0..2147483647], seq.len(rightPoints: List<Int[0..1114111]>[0..2147483647]): Int[0..2147483647]): Bool {
+    return 1: Int[1..1]
+  }
+  return 0: Int[0..0]
+
+fn std/strings::asciiUpperAll(value: String[0..2147483647]): String[0..2147483647] ! Pure
+  let points: List<Int[0..1114111]>[0..2147483647] = []
+  forEach point: Int[0..1114111] in str.codePoints(value: String[0..2147483647]): List<Int[0..1114111]>[0..2147483647] {
+    if (int.ge(point: Int[0..1114111], 97: Int[97..97]): Bool && int.le(point: Int[97..1114111], 122: Int[122..122]): Bool) {
+      push points <- int.sub(point: Int[97..122], 32: Int[32..32]): Int[65..90]
+    } else {
+      push points <- point: Int[0..1114111]
+    }
+  }
+  return str.fromCodePoints(points: List<Int[0..1114111]>[1..2147483647]): String[1..2147483647]
+
+fn std/strings::asciiLowerAll(value: String[0..2147483647]): String[0..2147483647] ! Pure
+  let points: List<Int[0..1114111]>[0..2147483647] = []
+  forEach point: Int[0..1114111] in str.codePoints(value: String[0..2147483647]): List<Int[0..1114111]>[0..2147483647] {
+    if (int.ge(point: Int[0..1114111], 65: Int[65..65]): Bool && int.le(point: Int[65..1114111], 90: Int[90..90]): Bool) {
+      push points <- int.add(point: Int[65..90], 32: Int[32..32]): Int[97..122]
+    } else {
+      push points <- point: Int[0..1114111]
+    }
+  }
+  return str.fromCodePoints(points: List<Int[0..1114111]>[1..2147483647]): String[1..2147483647]
+
+fn is-valid-luhn::isValidLuhn(value: String[0..2147483647]): Bool ! Pure
+  if !re.test/^[0-9]{2,19}$/(value: String[0..2147483647]): Bool {
+    return false: Bool
+  }
+  let sum: Int[0..200] = 0: Int[0..0]
+  const scalars: List<Int[48..57]>[2..19] = str.codePoints(value: Digits[2..19] matches ^[0-9]{2,19}$): List<Int[48..57]>[2..19]
+  for index: Int[0..18] = 0: Int[0..0] to seq.len(scalars: List<Int[48..57]>[2..19]): Int[2..19] {
+    const digit: Int[0..9] = int.sub(opt.orElse(seq.at(scalars: List<Int[48..57]>[2..19], index: Int[0..18]): Option<Int[48..57]>, 48: Int[48..48]): Int[48..57], 48: Int[48..48]): Int[0..9]
+    const doubled: Bool = core.eq(int.mod(int.sub(seq.len(scalars: List<Int[48..57]>[2..19]): Int[2..19], index: Int[0..18]): Int[-16..19], 2: Int[2..2]): Int[-1..1], 0: Int[0..0]): Bool
+    const weighted: Int[0..18] = (doubled: Bool ? int.mul(digit: Int[0..9], 2: Int[2..2]): Int[0..18] : digit: Int[0..9])
+    sum = int.add(sum: Int[0..162], (int.gt(weighted: Int[0..18], 9: Int[9..9]): Bool ? int.sub(weighted: Int[10..18], 9: Int[9..9]): Int[1..9] : weighted: Int[0..9])): Int[0..171]
+  }
+  return core.eq(int.mod(sum: Int[0..171], 10: Int[10..10]): Int[0..9], 0: Int[0..0]): Bool
+
+fn slugify::slugify(title: String[0..2147483647]): Ascii[0..2147483647] ! Pure
+  let out: List<Int[0..127]>[0..2147483647] = []
+  let pendingHyphen: Bool = false: Bool
+  forEach point: Int[0..1114111] in str.codePoints(str.asciiLower(title: String[0..2147483647]): String[0..2147483647]): List<Int[0..1114111]>[0..2147483647] {
+    if ((int.ge(point: Int[0..1114111], 97: Int[97..97]): Bool && int.le(point: Int[97..1114111], 122: Int[122..122]): Bool) || (int.ge(point: Int[0..1114111], 48: Int[48..48]): Bool && int.le(point: Int[48..1114111], 57: Int[57..57]): Bool)) {
+      if (pendingHyphen: Bool && int.gt(seq.len(out: List<Int[0..127]>[0..2147483647]): Int[0..2147483647], 0: Int[0..0]): Bool) {
+        push out <- 45: Int[45..45]
+      }
+      pendingHyphen = false: Bool
+      push out <- point: Int[48..122]
+    } else {
+      pendingHyphen = true: Bool
+    }
+  }
+  return str.fromCodePoints(out: List<Int[0..127]>[0..2147483647]): Ascii[0..2147483647]

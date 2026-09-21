@@ -1,0 +1,43 @@
+{
+	"$comment": "Every tool whose version can change generated output or the verification of it. Pinned so a formatter upgrade cannot silently rewrite a golden file.",
+	"node": "v22.22.2",
+	"engine": "0.1.0",
+	"dependencies": {
+		"oxc-parser": "0.150.0"
+	},
+	"devDependencies": {
+		"@types/node": "24.13.6",
+		"typescript": "5.9.3"
+	},
+	"targets": {
+		"typescript": {
+			"baseline": "ES2020 on Node 20",
+			"formatter": "prettier",
+			"linters": [
+				"tsc --strict --noEmit"
+			]
+		},
+		"python": {
+			"baseline": "Python 3.9",
+			"formatter": "ruff format",
+			"linters": [
+				"ruff check",
+				"pyright"
+			]
+		},
+		"go": {
+			"baseline": "Go 1.21",
+			"formatter": "gofmt",
+			"linters": [
+				"go vet",
+				"staticcheck"
+			]
+		}
+	},
+	"measuredWith": {
+		"node": "v22.22.2",
+		"python": "Python 3.11.15",
+		"go": "go version go1.24.7 linux/amd64",
+		"icu": "78.2"
+	}
+}

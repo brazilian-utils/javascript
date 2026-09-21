@@ -1,0 +1,32 @@
+{
+	"name": "@logic-engine/compiler",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Single-source logic engine: author a library once in a restricted, semantically typed subset of TypeScript and generate native, idiomatic implementations for TypeScript, Python and Go.",
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"bin": {
+		"logic-engine": "./src/cli.ts"
+	},
+	"exports": {
+		".": "./src/api.ts",
+		"./prelude": "./prelude/index.d.ts"
+	},
+	"scripts": {
+		"build": "node ./src/cli.ts build",
+		"test": "node --test --test-reporter=dot tests/*.spec.ts",
+		"verify": "node ./scripts/verify.ts",
+		"docs": "node ./scripts/intrinsics-doc.ts",
+		"metrics": "node ./scripts/metrics.ts"
+	},
+	"dependencies": {
+		"oxc-parser": "0.150.0"
+	},
+	"devDependencies": {
+		"@types/node": "24.13.6",
+		"typescript": "5.9.3"
+	}
+}

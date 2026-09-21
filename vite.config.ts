@@ -157,6 +157,13 @@ export default defineConfig({
 			".stryker-tmp",
 			".claude",
 			"CHANGELOG.md",
+			// `engine` and `core` are a separate, self-contained project with its own toolchain
+			// (its own tsconfig, its own tests, and the target formatters it runs over its own
+			// output). It is formatted, linted and tested by `core/package.json`'s `verify`, and
+			// keeping it out of the package's own passes is what lets it be extracted later
+			// without carrying this repository's configuration with it.
+			"engine",
+			"core",
 		],
 		singleQuote: false,
 		sortImports: true,
@@ -178,7 +185,7 @@ export default defineConfig({
 			perf: "error",
 			pedantic: "error",
 		},
-		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude"],
+		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude", "engine", "core"],
 		rules: {
 			"eslint/complexity": ["error", { max: 20 }],
 			"eslint/max-lines": "off",
@@ -515,7 +522,15 @@ export default defineConfig({
 		],
 	},
 	test: {
-		exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**", "**/reports/**"],
+		exclude: [
+			"**/node_modules/**",
+			"**/dist/**",
+			"**/.stryker-tmp/**",
+			"**/reports/**",
+			// The engine runs its own suite through `node --test`; see the note in `fmt` above.
+			"engine/**",
+			"core/**",
+		],
 		benchmark: {
 			include: ["src/**/*.test.ts"],
 			exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**", "**/reports/**"],

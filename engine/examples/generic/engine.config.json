@@ -1,0 +1,6 @@
+{
+	"name": "generic-example",
+	"sourceRoot": "source",
+	"out": "out",
+	"targets": ["typescript", "python", "go"]
+}

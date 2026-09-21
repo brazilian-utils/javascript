@@ -1,0 +1,32 @@
+module is-valid-luhn
+  const DIGITS = /^[0-9]{2,19}$/
+  fn isValidLuhn(value: String): Bool
+    if !re.test(DIGITS, value)
+      return false
+    let sum = 0
+    const scalars = str.codePoints(value)
+    for index from 0 to scalars.length
+      const digit = ((seq.at(scalars, index) ?? 48) - 48)
+      const doubled = (((scalars.length - index) % 2) === 0)
+      const weighted = (doubled ? (digit * 2) : digit)
+      sum += ((weighted > 9) ? (weighted - 9) : weighted)
+    return ((sum % 10) === 0)
+
+module slugify
+  const HYPHEN = 45
+  const LOWER_A = 97
+  const LOWER_Z = 122
+  const ZERO = 48
+  const NINE = 57
+  fn slugify(title: String): Ascii
+    let out = []
+    let pendingHyphen = false
+    for point of str.codePoints(str.asciiLower(title))
+      if (((point >= LOWER_A) && (point <= LOWER_Z)) || ((point >= ZERO) && (point <= NINE)))
+        if (pendingHyphen && (out.length > 0))
+          out.push(HYPHEN)
+        pendingHyphen = false
+        out.push(point)
+      else
+        pendingHyphen = true
+    return str.fromCodePoints(out)
