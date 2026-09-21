@@ -17,7 +17,10 @@ def keep_digits(value: str) -> str:
 
 
 def is_repeated_run(value: str) -> bool:
-    """Whether every scalar of the value is the same one, for whatever length the caller proved —"""
+    """Whether every scalar of the value is the same one, for whatever length the caller proved —
+    `isRepeated` and `isRepeatedCnpj` do the same check for one specific length; this one serves a
+    generator that has to run it on a base shorter than the document it is building.
+    """
     first: int = ord(value[0])
     for index in range(1, len(value)):
         if ord(value[index]) != first:

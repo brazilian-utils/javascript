@@ -100,7 +100,12 @@ def day_from_days(days: int) -> int:
 
 
 def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
-    """Days since 1970-01-01, or absent when the components do not name a real date."""
+    """Days since 1970-01-01, or absent when the components do not name a real date.
+
+    The bounds are checked here rather than in a helper because the checker reads a guard, not a
+    called predicate: after this `if`, the three components carry the ranges `daysFromCivil`
+    requires, and the round trip rejects a day the month does not have.
+    """
     if (
         ((((year < 1) or (year > 9999)) or (month < 1)) or (month > 12)) or (day < 1)
     ) or (day > 31):

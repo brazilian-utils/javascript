@@ -10,19 +10,8 @@ def matches_at(points: List[int], needle: List[int], start: int) -> bool:
     """Whether `needle` occurs in `points` at `start`."""
     for offset in range(0, len(needle)):
         if (
-            (points[(start + offset)] if 0 <= (start + offset) < len(points) else None)
-            if (
-                points[(start + offset)]
-                if 0 <= (start + offset) < len(points)
-                else None
-            )
-            is not None
-            else -1
-        ) != (
-            (needle[offset] if 0 <= offset < len(needle) else None)
-            if (needle[offset] if 0 <= offset < len(needle) else None) is not None
-            else -2
-        ):
+            points[(start + offset)] if 0 <= (start + offset) < len(points) else -1
+        ) != (needle[offset] if 0 <= offset < len(needle) else -2):
             return False
     return True
 
@@ -37,14 +26,7 @@ def hex_value(points: List[int], start: int) -> int:
     value: int = 0
     for offset in range(0, 4):
         point: int = (
-            (points[(start + offset)] if 0 <= (start + offset) < len(points) else None)
-            if (
-                points[(start + offset)]
-                if 0 <= (start + offset) < len(points)
-                else None
-            )
-            is not None
-            else 48
+            points[(start + offset)] if 0 <= (start + offset) < len(points) else 48
         )
         digit: int = 0
         if (point >= 48) and (point <= 57):
@@ -60,7 +42,10 @@ def hex_value(points: List[int], start: int) -> int:
 
 
 def json_string_field(body: str, key: str) -> Optional[str]:
-    """The string value of a top-level JSON field, or absent when the field is missing or is not a"""
+    """The string value of a top-level JSON field, or absent when the field is missing or is not a
+    string. Escapes are decoded; a surrogate pair is left as its two escaped halves, which no CEP
+    provider emits.
+    """
     points: List[int] = [ord(__c) for __c in body]
     needle: List[int] = [ord(__c) for __c in (('"' + key) + '"')]
     for index in range(0, len(points)):
@@ -68,58 +53,25 @@ def json_string_field(body: str, key: str) -> Optional[str]:
             continue
         cursor: int = index + len(needle)
         for skip in range(0, 8):
-            if is_space(
-                (
-                    (points[cursor] if 0 <= cursor < len(points) else None)
-                    if (points[cursor] if 0 <= cursor < len(points) else None)
-                    is not None
-                    else 0
-                )
-            ):
+            if is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
                 cursor = cursor + 1
-        if (
-            (points[cursor] if 0 <= cursor < len(points) else None)
-            if (points[cursor] if 0 <= cursor < len(points) else None) is not None
-            else 0
-        ) != 58:
+        if (points[cursor] if 0 <= cursor < len(points) else 0) != 58:
             continue
         cursor = cursor + 1
         for skip in range(0, 8):
-            if is_space(
-                (
-                    (points[cursor] if 0 <= cursor < len(points) else None)
-                    if (points[cursor] if 0 <= cursor < len(points) else None)
-                    is not None
-                    else 0
-                )
-            ):
+            if is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
                 cursor = cursor + 1
-        if (
-            (points[cursor] if 0 <= cursor < len(points) else None)
-            if (points[cursor] if 0 <= cursor < len(points) else None) is not None
-            else 0
-        ) != 34:
+        if (points[cursor] if 0 <= cursor < len(points) else 0) != 34:
             continue
         cursor = cursor + 1
         out: List[int] = []
         for step in range(0, len(points)):
-            point: int = (
-                (points[cursor] if 0 <= cursor < len(points) else None)
-                if (points[cursor] if 0 <= cursor < len(points) else None) is not None
-                else -1
-            )
+            point: int = points[cursor] if 0 <= cursor < len(points) else -1
             if (point == -1) or (point == 34):
                 return "".join(chr(__p) for __p in out)
             if point == 92:
                 escaped: int = (
-                    (points[(cursor + 1)] if 0 <= (cursor + 1) < len(points) else None)
-                    if (
-                        points[(cursor + 1)]
-                        if 0 <= (cursor + 1) < len(points)
-                        else None
-                    )
-                    is not None
-                    else -1
+                    points[(cursor + 1)] if 0 <= (cursor + 1) < len(points) else -1
                 )
                 if escaped == 110:
                     out.append(10)

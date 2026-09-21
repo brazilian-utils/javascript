@@ -9,7 +9,10 @@ from .._support import Capabilities
 
 
 def random_cpf_base(env: Capabilities) -> str:
-    """A random CPF base: 8 digits plus a região fiscal digit, each drawn independently — matches the"""
+    """A random CPF base: 8 digits plus a região fiscal digit, each drawn independently — matches the
+    published `generateCpf()` called with no state, where an unset state also draws that 9th digit
+    at random. Nine separate draws, not a loop, is what lets the result stay exactly 9 digits long.
+    """
     return (
         (
             (

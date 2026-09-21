@@ -32,7 +32,7 @@ def get_with_retry(url: str, env: Capabilities) -> Optional[HttpResponse]:
                 method="GET", url=url, headers=[], body="", timeout_millis=10000
             )
         )
-        if not response is None:
+        if response is not None:
             return response
     return None
 
@@ -47,11 +47,11 @@ def fetch_via_cep(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     response: Optional[HttpResponse] = get_with_retry(
         (("https://viacep.com.br/ws/" + cep) + "/json/"), env
     )
-    if response is None or (not is_ok(response.status)):
+    if (response is None) or (not is_ok(response.status)):
         return None
     code: str = (
-        json_string_field(response.body, "cep")
-        if json_string_field(response.body, "cep") is not None
+        __value
+        if (__value := json_string_field(response.body, "cep")) is not None
         else ""
     )
     if code == "":
@@ -59,23 +59,23 @@ def fetch_via_cep(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     return AddressInfo(
         cep=keep_digits(code),
         state=(
-            json_string_field(response.body, "uf")
-            if json_string_field(response.body, "uf") is not None
+            __value
+            if (__value := json_string_field(response.body, "uf")) is not None
             else ""
         ),
         city=(
-            json_string_field(response.body, "localidade")
-            if json_string_field(response.body, "localidade") is not None
+            __value
+            if (__value := json_string_field(response.body, "localidade")) is not None
             else ""
         ),
         neighborhood=(
-            json_string_field(response.body, "bairro")
-            if json_string_field(response.body, "bairro") is not None
+            __value
+            if (__value := json_string_field(response.body, "bairro")) is not None
             else ""
         ),
         street=(
-            json_string_field(response.body, "logradouro")
-            if json_string_field(response.body, "logradouro") is not None
+            __value
+            if (__value := json_string_field(response.body, "logradouro")) is not None
             else ""
         ),
     )
@@ -86,11 +86,11 @@ def fetch_brasil_api(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     response: Optional[HttpResponse] = get_with_retry(
         ("https://brasilapi.com.br/api/cep/v1/" + cep), env
     )
-    if response is None or (not is_ok(response.status)):
+    if (response is None) or (not is_ok(response.status)):
         return None
     code: str = (
-        json_string_field(response.body, "cep")
-        if json_string_field(response.body, "cep") is not None
+        __value
+        if (__value := json_string_field(response.body, "cep")) is not None
         else ""
     )
     if code == "":
@@ -98,30 +98,36 @@ def fetch_brasil_api(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     return AddressInfo(
         cep=keep_digits(code),
         state=(
-            json_string_field(response.body, "state")
-            if json_string_field(response.body, "state") is not None
+            __value
+            if (__value := json_string_field(response.body, "state")) is not None
             else ""
         ),
         city=(
-            json_string_field(response.body, "city")
-            if json_string_field(response.body, "city") is not None
+            __value
+            if (__value := json_string_field(response.body, "city")) is not None
             else ""
         ),
         neighborhood=(
-            json_string_field(response.body, "neighborhood")
-            if json_string_field(response.body, "neighborhood") is not None
+            __value
+            if (__value := json_string_field(response.body, "neighborhood")) is not None
             else ""
         ),
         street=(
-            json_string_field(response.body, "street")
-            if json_string_field(response.body, "street") is not None
+            __value
+            if (__value := json_string_field(response.body, "street")) is not None
             else ""
         ),
     )
 
 
 def get_address_info_by_cep(cep: str, env: Capabilities) -> AddressInfo:
-    """The address of a CEP, from the first service that answers."""
+    """The address of a CEP, from the first service that answers.
+
+    The two services are queried concurrently and the first answer wins; the losing request may
+    still finish, and its answer is dropped, which is why only idempotent GETs belong here. Each
+    request is retried twice, 250 ms apart, exactly as the published package does. Turning a host
+    value into the 8 digits this takes is the DX's job.
+    """
     if not (re.fullmatch("[0-9]{8}", cep) is not None):
         raise GetAddressInfoByCepValidationError("CEP inv\u00e1lido")
     address: Optional[AddressInfo] = race_first_some(

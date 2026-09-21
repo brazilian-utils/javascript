@@ -9,7 +9,15 @@ from ._support import Capabilities
 
 
 def generate_cpf(env: Capabilities) -> str:
-    """Generates a valid random CPF (Cadastro de Pessoas Físicas): 11 digits, under the check digit"""
+    """Generates a valid random CPF (Cadastro de Pessoas Físicas): 11 digits, under the check digit
+    rule (weights 10..2 and 11..2) the Receita Federal's Manual de Preenchimento da e-Financeira,
+    Anexo II specifies.
+
+    Matches the published `generateCpf()` called with no state: a random 9-digit base — 8 digits
+    plus a região fiscal digit, also drawn at random here — redrawn while every digit of it is the
+    same, followed by its two check digits. The state code option is a DX concern: it only ever
+    picks which digit the 9th position draws from, never how the rest of the document is built.
+    """
     base: str = random_cpf_base(env)
     for attempt in range(0, 8):
         if not is_repeated_run(base):

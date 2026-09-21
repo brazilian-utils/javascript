@@ -13,7 +13,11 @@ TABLE2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
 
 def random_cnpj_base(env: Capabilities) -> str:
-    """A random numeric CNPJ base: an 8-digit root and a 4-digit branch, each digit drawn"""
+    """A random numeric CNPJ base: an 8-digit root and a 4-digit branch, each digit drawn
+    independently — matches the published `generateCnpj()` called with no branch, where an unset
+    branch also draws those 4 digits at random. Twelve separate draws, not a loop, is what lets the
+    result stay exactly 12 digits long.
+    """
     return (
         (
             (
@@ -54,13 +58,13 @@ def cnpj_check_digit(cnpj: str, weights: List[int]) -> int:
 
 
 def has_letter(value: str) -> bool:
-    """Whether the value holds at least one upper cased ASCII letter."""
+    """Whether the value holds at least one upper cased ASCII letter.
+
+    The scan reads positions rather than materializing the scalars, which the checked accessor
+    makes safe without a proof about the length.
+    """
     for index in range(0, len(value)):
-        point: int = (
-            (ord(value[index]) if 0 <= index < len(value) else None)
-            if (ord(value[index]) if 0 <= index < len(value) else None) is not None
-            else 0
-        )
+        point: int = ord(value[index]) if 0 <= index < len(value) else 0
         if (point >= 65) and (point <= 90):
             return True
     return False

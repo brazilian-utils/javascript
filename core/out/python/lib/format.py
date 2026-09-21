@@ -11,11 +11,7 @@ def pattern_slots(pattern: str) -> int:
     """How many scalars of the value a pattern consumes."""
     slots: int = 0
     for index in range(0, len(pattern)):
-        symbol: str = (
-            (pattern[index] if 0 <= index < len(pattern) else None)
-            if (pattern[index] if 0 <= index < len(pattern) else None) is not None
-            else ""
-        )
+        symbol: str = pattern[index] if 0 <= index < len(pattern) else ""
         if (symbol == "0") or (symbol == "*"):
             slots = slots + 1
     return slots
@@ -27,22 +23,14 @@ def format_with_pattern(value: str, pattern: str, pad: bool) -> str:
     out: str = ""
     taken: int = 0
     for index in range(0, len(pattern)):
-        symbol: str = (
-            (pattern[index] if 0 <= index < len(pattern) else None)
-            if (pattern[index] if 0 <= index < len(pattern) else None) is not None
-            else ""
-        )
+        symbol: str = pattern[index] if 0 <= index < len(pattern) else ""
         if (symbol == "0") or (symbol == "*"):
             if taken >= len(padded):
                 return out
             out = out + (
                 "*"
                 if (symbol == "*")
-                else (
-                    (padded[taken] if 0 <= taken < len(padded) else None)
-                    if (padded[taken] if 0 <= taken < len(padded) else None) is not None
-                    else ""
-                )
+                else (padded[taken] if 0 <= taken < len(padded) else "")
             )
             taken = taken + 1
         else:
@@ -58,11 +46,5 @@ def group_thousands(whole: str) -> str:
     for index in range(0, len(scalars)):
         if (index > 0) and (trunc_mod((len(scalars) - index), 3) == 0):
             out.append(46)
-        out.append(
-            (
-                (scalars[index] if 0 <= index < len(scalars) else None)
-                if (scalars[index] if 0 <= index < len(scalars) else None) is not None
-                else 48
-            )
-        )
+        out.append((scalars[index] if 0 <= index < len(scalars) else 48))
     return "".join(chr(__p) for __p in out)

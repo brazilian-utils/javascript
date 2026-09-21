@@ -8,7 +8,15 @@ from .lib.format import group_thousands
 
 
 def format_currency(value: int, symbol: bool) -> str:
-    """Formats an exact amount in Brazilian Real, with two decimal places."""
+    """Formats an exact amount in Brazilian Real, with two decimal places.
+
+    The separators are the ones Lei nº 9.069/1995 art. 1º prescribes and the CLDR pt-BR data uses:
+    `.` between thousands, `,` before the centavos, and a non-breaking space after `R$`. A negative
+    amount puts the sign before the symbol, `-R$ 10,50`, the shape `Intl.NumberFormat` produces.
+
+    Turning a host value into an exact amount is the DX's job, and so is the rounding that
+    conversion needs; see docs/contracts.md, which records exactly how the published package rounds.
+    """
     negative: bool = value < 0
     unscaled: int = abs(value)
     digits: str = str(unscaled).rjust(3, "0")

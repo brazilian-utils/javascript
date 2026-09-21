@@ -7,7 +7,11 @@ from .._support import Capabilities
 
 
 def random_below(bound: int, env: Capabilities) -> int:
-    """A uniform integer in `[0, bound)`, by rejection sampling rather than `% bound`: the modulo of a"""
+    """A uniform integer in `[0, bound)`, by rejection sampling rather than `% bound`: the modulo of a
+    fixed-width draw is biased whenever `bound` does not divide 2^32 evenly, and that bias would
+    have to match, digit for digit, across three unrelated standard libraries to stay invisible.
+    Rejecting the biased tail of the draw removes it instead.
+    """
     limit: int = 4294967296 - (4294967296 % bound)
     for attempt in range(0, 32):
         draw: int = env.next_u32()

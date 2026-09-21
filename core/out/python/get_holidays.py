@@ -17,7 +17,12 @@ class Holiday:
 
 
 def get_holidays(year: int) -> List[Holiday]:
-    """The Brazilian national holidays of a year, sorted by date."""
+    """The Brazilian national holidays of a year, sorted by date.
+
+    The order is the one the published package produces: the fixed holidays in statutory order,
+    then the Easter-derived ones, sorted by date with a stable sort, so two holidays on the same
+    day keep the order they were built in. State holidays are not part of this pilot.
+    """
     holidays: List[Holiday] = []
     holidays.append(
         Holiday(name="Ano novo", date=civil_date(year, 1, 1), type="national")
@@ -67,24 +72,14 @@ def get_holidays(year: int) -> List[Holiday]:
     holidays.append(
         Holiday(
             name="Carnaval (ter\u00e7a-feira)",
-            date=(
-                (easter + -47 if -719162 <= easter + -47 <= 2932896 else None)
-                if (easter + -47 if -719162 <= easter + -47 <= 2932896 else None)
-                is not None
-                else easter
-            ),
+            date=(easter + -47 if -719162 <= easter + -47 <= 2932896 else easter),
             type="optional",
         )
     )
     holidays.append(
         Holiday(
             name="Sexta-feira Santa",
-            date=(
-                (easter + -2 if -719162 <= easter + -2 <= 2932896 else None)
-                if (easter + -2 if -719162 <= easter + -2 <= 2932896 else None)
-                is not None
-                else easter
-            ),
+            date=(easter + -2 if -719162 <= easter + -2 <= 2932896 else easter),
             type="national",
         )
     )
@@ -92,12 +87,7 @@ def get_holidays(year: int) -> List[Holiday]:
     holidays.append(
         Holiday(
             name="Corpus Christi",
-            date=(
-                (easter + 60 if -719162 <= easter + 60 <= 2932896 else None)
-                if (easter + 60 if -719162 <= easter + 60 <= 2932896 else None)
-                is not None
-                else easter
-            ),
+            date=(easter + 60 if -719162 <= easter + 60 <= 2932896 else easter),
             type="optional",
         )
     )

@@ -17,7 +17,11 @@ class FormatCnpjOptions:
 
 
 def format_cnpj(value: str, options: FormatCnpjOptions) -> str:
-    """Formats a CNPJ value as `00.000.000/0000-00`."""
+    """Formats a CNPJ value as `00.000.000/0000-00`.
+
+    The core takes a string and a fully normalized options record; reading a number, a missing
+    options object or a truthy non-boolean is the DX's job.
+    """
     sanitized: str = (
         keep_alphanumeric(value) if (options.version == "2") else keep_digits(value)
     )

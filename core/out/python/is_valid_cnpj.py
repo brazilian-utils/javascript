@@ -10,7 +10,12 @@ from .lib.digits import keep_alphanumeric, keep_digits
 
 
 def is_valid_cnpj(cnpj: str, version: Literal["1", "2"]) -> bool:
-    """Validates a CNPJ (Cadastro Nacional da Pessoa Jurídica), numeric or alphanumeric."""
+    """Validates a CNPJ (Cadastro Nacional da Pessoa Jurídica), numeric or alphanumeric.
+
+    Version `"2"` accepts the alphanumeric format as well; a value with no letters is always read
+    as the numeric one, which is also where the reserved repeated numbers are rejected. Mapping a
+    missing or unexpected `options.version` onto `"1"` is the DX's job.
+    """
     trimmed: str = cnpj.strip(
         "\t\n\u000b\u000c\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"
     )

@@ -8,7 +8,15 @@ from .std.date import year_from_days
 
 
 def is_business_day(value: int, include_optional: bool) -> bool:
-    """Whether a date is a Brazilian business day (dia útil)."""
+    """Whether a date is a Brazilian business day (dia útil).
+
+    A day is not a business day when it falls on a weekend, or when it is one of the holidays
+    `getHolidays` lists for its year. `includeOptional` decides whether the ponto facultativo
+    entries (Carnaval, Corpus Christi) count; the published package defaults it to `true`, and
+    supplying that default is the DX's job.
+
+    Only the years 1900 to 2099 are supported, the range the holiday rules are stated for.
+    """
     year: int = year_from_days(value)
     if (year < 1900) or (year > 2099):
         return False

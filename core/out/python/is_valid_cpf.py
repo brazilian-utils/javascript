@@ -9,7 +9,11 @@ from .lib.digits import digit_at, keep_digits
 
 
 def is_valid_cpf(cpf: str) -> bool:
-    """Validates a CPF (Cadastro de Pessoas Físicas)."""
+    """Validates a CPF (Cadastro de Pessoas Físicas).
+
+    The core takes the value as written, accepting the usual mask characters; turning a host value
+    into a string is the DX's job.
+    """
     if not (
         re.fullmatch(
             "[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}",

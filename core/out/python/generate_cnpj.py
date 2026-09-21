@@ -9,7 +9,14 @@ from ._support import Capabilities
 
 
 def generate_cnpj(env: Capabilities) -> str:
-    """Generates a valid random CNPJ (Cadastro Nacional da Pessoa Jurídica) in the numeric format: 14"""
+    """Generates a valid random CNPJ (Cadastro Nacional da Pessoa Jurídica) in the numeric format: 14
+    digits, under the check digit rule both CNPJ versions share.
+
+    Matches the published `generateCnpj()` called with no options: a random 8-digit root and
+    4-digit branch (the "número de ordem"), redrawn while every digit of the 12-digit base is the
+    same, followed by its two check digits. The alphanumeric version and a chosen branch are DX
+    concerns layered on the same base and check digit rule, not a different generator.
+    """
     base: str = random_cnpj_base(env)
     for attempt in range(0, 8):
         if not is_repeated_run(base):

@@ -9,7 +9,7 @@ from ..std.date import ymd_to_days
 def civil_date(year: int, month: int, day: int) -> int:
     """A fixed day of a year, with the unreachable fallback named once."""
     return (
-        ymd_to_days(year, month, day)
-        if ymd_to_days(year, month, day) is not None
+        __value
+        if (__value := ymd_to_days(year, month, day)) is not None
         else min(max(0, -719162), 2932896)
     )

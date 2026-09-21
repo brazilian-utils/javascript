@@ -74,6 +74,27 @@ function classBody(printed: string): string {
 
 const raw = (text: string): TExpr => ({ kind: "raw", text });
 
+const NONE = raw("None");
+
+/**
+ * The name `opt.orElse` binds its value to when it cannot fuse into a checked lowering.
+ *
+ * One name serves every use: the walrus is evaluated in the condition, before either branch reads
+ * it, so a nested `orElse` inside the value has already been read by the time the outer one
+ * rebinds, and two siblings are evaluated one after the other.
+ */
+const ORELSE_TEMP = "__value";
+
+/**
+ * `value if test else None`, the shape every checked lowering takes in Python.
+ *
+ * It is a node rather than a string so `opt.orElse` can drop its default straight into the `else`
+ * branch. Printed on its own it is exactly the text it replaced.
+ */
+function checked(value: string, test: string): TExpr {
+	return { kind: "ternary", test: raw(test), then: raw(value), otherwise: NONE };
+}
+
 function binary(op: string): Candidate["emit"] {
 	return (args) => ({ kind: "binary", op, left: args[0]!, right: args[1]! });
 }
@@ -176,14 +197,32 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 	{ op: "float.fromInt", impl: "native", cost: cheap, emit: (args) => raw(`float(${print(args[0]!)})`) },
 	{ op: "core.eq", impl: "native", cost: cheap, emit: binary("==") },
 
-	{ op: "opt.isNone", impl: "native", cost: cheap, emit: (args) => raw(`${print(args[0]!)} is None`) },
+	// A `binary` rather than text, so negating it prints `is not None` instead of `not … is None`.
+	{ op: "opt.isNone", impl: "native", cost: cheap, emit: (args) => ({ kind: "binary", op: "is", left: args[0]!, right: NONE }) },
 	{ op: "opt.unwrap", impl: "native", cost: cheap, emit: (args) => args[0]! },
 	{ op: "opt.some", impl: "native", cost: cheap, emit: (args) => args[0]! },
 	{
 		op: "opt.orElse",
 		impl: "native",
 		cost: cheap,
-		emit: (args) => raw(`(${print(args[0]!)} if ${print(args[0]!)} is not None else ${print(args[1]!)})`),
+		emit: (args, types) => {
+			const value = args[0]!;
+			// A checked lowering already answers `value if test else None`, so the default belongs
+			// in that `else` branch: the test runs once, and the result reads the way a Python
+			// author would have written it. It is only the same expression while the value itself
+			// can never be `None`, which an Option of an Option would break.
+			if (value.kind === "ternary" && value.otherwise === NONE && types[0]?.kind === "Option" && types[0].inner.kind !== "Option") {
+				return { kind: "ternary", test: value.test, then: value.then, otherwise: args[1]! };
+			}
+			// Anything else has to be named before it can be tested and then answered, or it would
+			// be evaluated twice — for a call, that is the whole call run twice. One walrus binds
+			// it; the condition is evaluated first, so the name always holds this value by the time
+			// the branches read it, and a nested `orElse` rebinds it only after its own use.
+			if (value.kind === "name" || value.kind === "lit" || value.kind === "member") {
+				return raw(`(${print(value)} if ${print(value)} is not None else ${print(args[1]!)})`);
+			}
+			return raw(`(${ORELSE_TEMP} if (${ORELSE_TEMP} := ${print(value)}) is not None else ${print(args[1]!)})`);
+		},
 	},
 
 	{
@@ -215,8 +254,9 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 		requires: argIsAscii(0),
 		cost: cheap,
 		emit: (args) =>
-			raw(
-				`(ord(${print(args[0]!)}[${print(args[1]!)}]) if 0 <= ${print(args[1]!)} < len(${print(args[0]!)}) else None)`,
+			checked(
+				`ord(${print(args[0]!)}[${print(args[1]!)}])`,
+				`0 <= ${print(args[1]!)} < len(${print(args[0]!)})`,
 			),
 	},
 	{
@@ -225,9 +265,7 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 		requires: argIsAscii(0),
 		cost: cheap,
 		emit: (args) =>
-			raw(
-				`(${print(args[0]!)}[${print(args[1]!)}] if 0 <= ${print(args[1]!)} < len(${print(args[0]!)}) else None)`,
-			),
+			checked(`${print(args[0]!)}[${print(args[1]!)}]`, `0 <= ${print(args[1]!)} < len(${print(args[0]!)})`),
 	},
 	{
 		op: "str.slice",
@@ -282,8 +320,17 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 	},
 	{ op: "str.codePoints", impl: "native", cost: allocating, emit: (args) => raw(`[ord(__c) for __c in ${print(args[0]!)}]`) },
 	{ op: "str.fromCodePoints", impl: "native", cost: allocating, emit: (args) => raw(`"".join(chr(__p) for __p in ${print(args[0]!)})`) },
-	{ op: "str.asAscii", impl: "native", cost: linear, emit: (args) => raw(`(${print(args[0]!)} if ${print(args[0]!)}.isascii() else None)`) },
-	{ op: "str.asDigits", impl: "native", cost: linear, emit: (args) => raw(`(${print(args[0]!)} if (${print(args[0]!)} != "" and all("0" <= __c <= "9" for __c in ${print(args[0]!)})) else None)`) },
+	{ op: "str.asAscii", impl: "native", cost: linear, emit: (args) => checked(print(args[0]!), `${print(args[0]!)}.isascii()`) },
+	{
+		op: "str.asDigits",
+		impl: "native",
+		cost: linear,
+		emit: (args) =>
+			checked(
+				print(args[0]!),
+				`(${print(args[0]!)} != "" and all("0" <= __c <= "9" for __c in ${print(args[0]!)}))`,
+			),
+	},
 	{ op: "str.split", impl: "native", cost: allocating, emit: (args) => raw(`${print(args[0]!)}.split(${print(args[1]!)})`) },
 	{ op: "str.join", impl: "native", cost: allocating, emit: (args) => raw(`${print(args[1]!)}.join(${print(args[0]!)})`) },
 	{ op: "str.fromInt", impl: "native", cost: allocating, emit: (args) => raw(`str(${print(args[0]!)})`) },
@@ -291,14 +338,19 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 		op: "str.parseInt",
 		impl: "native",
 		cost: linear,
-		emit: (args) => raw(`(int(${print(args[0]!)}) if (${print(args[0]!)} != "" and len(${print(args[0]!)}) <= 18 and all("0" <= __c <= "9" for __c in ${print(args[0]!)})) else None)`),
+		emit: (args) =>
+			checked(
+				`int(${print(args[0]!)})`,
+				`(${print(args[0]!)} != "" and len(${print(args[0]!)}) <= 18 and all("0" <= __c <= "9" for __c in ${print(args[0]!)}))`,
+			),
 	},
 
 	{
 		op: "seq.at",
 		impl: "native",
 		cost: cheap,
-		emit: (args) => raw(`(${print(args[0]!)}[${print(args[1]!)}] if 0 <= ${print(args[1]!)} < len(${print(args[0]!)}) else None)`),
+		emit: (args) =>
+			checked(`${print(args[0]!)}[${print(args[1]!)}]`, `0 <= ${print(args[1]!)} < len(${print(args[0]!)})`),
 	},
 	{
 		op: "str.asciiUpper",
@@ -394,7 +446,7 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 		op: "date.fromEpochDays",
 		impl: "native",
 		cost: cheap,
-		emit: (args) => raw(`(${print(args[0]!)} if -719162 <= ${print(args[0]!)} <= 2932896 else None)`),
+		emit: (args) => checked(print(args[0]!), `-719162 <= ${print(args[0]!)} <= 2932896`),
 	},
 	{
 		op: "date.fromYmd",
@@ -410,7 +462,11 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 		op: "date.addDays",
 		impl: "native",
 		cost: cheap,
-		emit: (args) => raw(`(${print(args[0]!)} + ${print(args[1]!)} if -719162 <= ${print(args[0]!)} + ${print(args[1]!)} <= 2932896 else None)`),
+		emit: (args) =>
+			checked(
+				`${print(args[0]!)} + ${print(args[1]!)}`,
+				`-719162 <= ${print(args[0]!)} + ${print(args[1]!)} <= 2932896`,
+			),
 	},
 	{ op: "date.diffDays", impl: "native", cost: cheap, emit: binary("-") },
 	{ op: "date.compare", impl: "native", cost: cheap, emit: (args) => raw(`(-1 if ${print(args[0]!)} < ${print(args[1]!)} else (1 if ${print(args[0]!)} > ${print(args[1]!)} else 0))`) },
@@ -532,6 +588,9 @@ export function print(expr: TExpr): string {
 			if (expr.op === "!" && expr.operand.kind === "binary" && expr.operand.op === "==") {
 				return `(${print(expr.operand.left)} != ${print(expr.operand.right)})`;
 			}
+			if (expr.op === "!" && expr.operand.kind === "binary" && expr.operand.op === "is") {
+				return `(${print(expr.operand.left)} is not ${print(expr.operand.right)})`;
+			}
 			return expr.op === "!" ? `(not ${print(expr.operand)})` : `${expr.op}${print(expr.operand)}`;
 		}
 		case "ternary":
@@ -647,26 +706,31 @@ function printStmt(statement: TStmt, depth: number): string {
 	}
 }
 
-/** A docstring whose backslashes survive: a plain Python string reads `\\u` as an escape. */
-function docstring(text: string): string {
-	const first = text
-		.split("\n")[0]!
-		.replaceAll("\\", "\\\\")
-		.replaceAll(TRIPLE_QUOTE, "'''");
-	return `${TRIPLE_QUOTE}${first}${TRIPLE_QUOTE}`;
+/**
+ * A docstring whose backslashes survive: a plain Python string reads `\\u` as an escape.
+ *
+ * A doc that spans lines keeps all of them, indented to the body with the closing quotes on their
+ * own line, the shape PEP 257 describes. Keeping only the first line used to cut a sentence in
+ * half, since the source wraps its prose.
+ */
+function docstring(text: string, indent: string): string {
+	const lines = text.split("\n").map((line) => line.replaceAll("\\", "\\\\").replaceAll(TRIPLE_QUOTE, "'''"));
+	if (lines.length === 1) return `${TRIPLE_QUOTE}${lines[0]}${TRIPLE_QUOTE}`;
+	const body = lines.map((line) => (line === "" ? "" : `${indent}${line}`)).join("\n").trimStart();
+	return `${TRIPLE_QUOTE}${body}\n${indent}${TRIPLE_QUOTE}`;
 }
 
 const TRIPLE_QUOTE = '"'.repeat(3);
 
 export function printFunction(fn: TFunc): string {
 	const params = fn.params.map((param) => `${param.name}: ${pyType(param.type)}`).join(", ");
-	const doc = fn.doc === undefined ? "" : `    ${docstring(fn.doc)}\n`;
+	const doc = fn.doc === undefined ? "" : `    ${docstring(fn.doc, "    ")}\n`;
 	return `def ${fn.name}(${params}) -> ${pyType(fn.ret)}:\n${doc}${printBody(fn.body, 1)}`;
 }
 
 export function printRecord(record: TRecord): string {
 	const fields = record.fields.map((field) => `    ${snake(field.name)}: ${pyType(field.type)}`).join("\n");
-	const doc = record.doc === undefined ? "" : `    ${docstring(record.doc)}\n`;
+	const doc = record.doc === undefined ? "" : `    ${docstring(record.doc, "    ")}\n`;
 	return `@dataclass(frozen=True)\nclass ${record.name}:\n${doc}${fields}`;
 }
 
@@ -851,7 +915,7 @@ function errorsModule(program: CProgram): { path: string; text: string } | undef
 		lines.push(
 			"",
 			`class ${error.name}(${error.base ?? "DomainError"}):`,
-			`    """${error.doc?.split("\n")[0] ?? error.name}"""`,
+			`    ${docstring(error.doc ?? error.name, "    ")}`,
 			"",
 		);
 	}
