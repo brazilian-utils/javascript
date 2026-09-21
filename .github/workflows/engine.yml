@@ -40,9 +40,15 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Install the engine's one dependency
+      - name: Install the engine's dependencies
         run: npm ci
         working-directory: engine
+
+      # The generated output is committed, so the three formatters decide its bytes. Prettier and
+      # gofmt come with the engine's install and with Go; ruff is pinned to the version in
+      # `engine/toolchain.lock.json`, and `verify` fails outright if any of the three is missing.
+      - name: Install ruff, the Python formatter
+        run: pipx install ruff==0.15.8
 
       - name: Verify
         # Compiles, generates every target in both idiom modes, regenerates and diffs for

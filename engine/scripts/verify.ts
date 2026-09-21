@@ -10,6 +10,7 @@
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { formattersOf } from "../src/backend/format.ts";
 
 const ENGINE = resolve(import.meta.dirname, "..");
 const project = resolve(process.argv[2] ?? ".");
@@ -53,6 +54,22 @@ function generatedTypeScript(root: string): string[] {
 }
 
 const steps: Step[] = [
+	{
+		// The generated output is committed, so a missing formatter is not a missing nicety: it
+		// produces different bytes for the same program, and every later step would pass while the
+		// checkout drifts from what is in the repository.
+		name: "formatters",
+		run: () => {
+			const missing = ["typescript", "python", "go"].flatMap((target) =>
+				formattersOf(target)
+					.filter((formatter) => !formatter.installed)
+					.map((formatter) => `${target}: ${formatter.name}`),
+			);
+			return missing.length === 0
+				? { ok: true }
+				: { ok: false, output: `not installed, so the output would differ from the committed one:\n${missing.join("\n")}` };
+		},
+	},
 	{
 		name: "engine tests",
 		run: () =>

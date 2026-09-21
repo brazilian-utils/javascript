@@ -7,7 +7,7 @@ No shared runtime package. No WASM, no FFI, no bridge. No interpreter at run tim
 dependencies in the generated code.
 
 ```sh
-npm install            # one dependency: the parser
+npm install            # one runtime dependency, the parser; prettier and tsc for development
 npm test               # the engine's own suite
 node src/cli.ts build --project ../core
 node scripts/verify.ts ../core

@@ -78,10 +78,15 @@ function main(): void {
 				"API.json": `${JSON.stringify(result.api, null, "\t")}\n`,
 				"SOURCEMAP.json": `${JSON.stringify(result.sourceMap, null, "\t")}\n`,
 			});
-			const formatted = has("no-format") ? [] : formatOutput(target, outDir);
+			const formatted = has("no-format") ? { applied: [], missing: [] } : formatOutput(target, outDir);
 			process.stdout.write(
-				`${target}: ${result.files.length} files -> ${outDir}${formatted.length === 0 ? "" : ` (${formatted.join(", ")})`}\n`,
+				`${target}: ${result.files.length} files -> ${outDir}${formatted.applied.length === 0 ? "" : ` (${formatted.applied.join(", ")})`}\n`,
 			);
+			// Unformatted output is still correct, but it is not the bytes the committed output
+			// holds, so say which tool is missing rather than leave a diff to explain it.
+			if (formatted.missing.length > 0) {
+				process.stderr.write(`warning: ${target} left unformatted, not installed: ${formatted.missing.join(", ")}\n`);
+			}
 		}
 	} catch (error) {
 		if (error instanceof CompileError) {

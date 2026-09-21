@@ -7,6 +7,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "24.13.6",
+		"prettier": "3.8.1",
 		"typescript": "5.9.3"
 	},
 	"targets": {
@@ -20,6 +21,7 @@
 		"python": {
 			"baseline": "Python 3.9",
 			"formatter": "ruff format",
+			"formatterVersion": "0.15.8",
 			"linters": [
 				"ruff check",
 				"pyright"
