@@ -7,9 +7,9 @@ from typing import List
 from .random import random_digit
 from .._support import Capabilities
 
-TABLE1: List[int] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+LIB_CNPJ_TABLE_1: List[int] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
-TABLE2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+LIB_CNPJ_TABLE_2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
 
 def random_cnpj_base(env: Capabilities) -> str:
@@ -72,8 +72,8 @@ def has_letter(value: str) -> bool:
 
 def has_valid_cnpj_checksum(cnpj: str) -> bool:
     """Whether both check digits of a 14 character CNPJ match its base."""
-    return ((ord(cnpj[12]) - 48) == cnpj_check_digit(cnpj, TABLE1)) and (
-        (ord(cnpj[13]) - 48) == cnpj_check_digit(cnpj, TABLE2)
+    return ((ord(cnpj[12]) - 48) == cnpj_check_digit(cnpj, LIB_CNPJ_TABLE_1)) and (
+        (ord(cnpj[13]) - 48) == cnpj_check_digit(cnpj, LIB_CNPJ_TABLE_2)
     )
 
 

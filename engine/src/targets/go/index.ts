@@ -728,14 +728,49 @@ export function printRecord(record: TRecord): string {
 	return `${doc}type ${record.name} struct {\n${fields}\n}`;
 }
 
+/** A module path as an unexported Go identifier prefix: `is-valid-cpf` becomes `isValidCpf`. */
+function identifierPrefix(sourcePath: string): string {
+	const parts = sourcePath.split(/[^a-zA-Z0-9]+/u).filter((part) => part !== "");
+	return parts
+		.map((part, index) => (index === 0 ? part : `${part[0]!.toUpperCase()}${part.slice(1)}`))
+		.join("");
+}
+
+/**
+ * Lifts every `regexp.MustCompile` out of the function bodies and into a package level `var`.
+ *
+ * `regexp` has no compilation cache, so a `MustCompile` left inside a function recompiles the
+ * pattern from its source string on every call. For the mask-tolerant document patterns that is
+ * 79x the cost of the match itself, which made the generated validators slower than the handwritten
+ * package they replace. Compiling once at package initialisation is both the fix and what a Go
+ * author would have written.
+ *
+ * Every generated file shares one package, so the names carry the module they came from.
+ */
+function hoistPatterns(module: TModule, body: string): { body: string; declarations: string[] } {
+	const names = new Map<string, string>();
+	const prefix = identifierPrefix(module.sourcePath);
+	const hoisted = body.replaceAll(/regexp\.MustCompile\(("(?:[^"\\]|\\.)*")\)/gu, (_match, literal: string) => {
+		const existing = names.get(literal);
+		if (existing !== undefined) return existing;
+		const name = `${prefix}Pattern${names.size + 1}`;
+		names.set(literal, name);
+		return name;
+	});
+	const declarations = [...names].map(([literal, name]) => `var ${name} = regexp.MustCompile(${literal})`);
+	return { body: hoisted, declarations };
+}
+
 export function printModule(module: TModule): string {
-	const body = [
+	const printed = [
 		...module.records.map(printRecord),
 		...module.constants.map(
 			(constant) => `var ${constant.name} = ${print(constant.value)}`,
 		),
 		...module.functions.map(printFunction),
 	].join("\n\n");
+	const patterns = hoistPatterns(module, printed);
+	const body = [...patterns.declarations, patterns.body].join("\n\n");
 	const imports = new Set<string>(module.requires.filter((name) => name !== "_support"));
 	for (const candidate of ["strings", "strconv", "regexp", "slices"]) {
 		if (new RegExp(`\\b${candidate}\\.`).test(body)) imports.add(candidate);

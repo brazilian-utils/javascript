@@ -483,7 +483,12 @@ class Lowerer {
 			);
 			const existing = this.constantNames.get(key);
 			if (existing !== undefined) return { kind: "name", name: existing };
-			const name = this.spec.naming.value(`table${this.constants.length + 1}`);
+			// The module is part of the name because Go puts every generated file in one package,
+			// so two modules that each hoisted a bare `table1` would redeclare it. Naming by module
+			// rather than by a running count also keeps an unrelated new utility from renumbering
+			// the tables of every file that already had one.
+			const scope = this.currentModule.replaceAll("/", "-");
+			const name = this.spec.naming.value(`${scope}-table-${this.constants.length + 1}`);
 			this.constantNames.set(key, name);
 			this.constants.push({ name, type: expr.type, value: expr });
 			return { kind: "name", name };

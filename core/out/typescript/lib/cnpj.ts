@@ -6,9 +6,11 @@ import { randomDigit } from "./random.ts";
 import type { Capabilities } from "../capabilities.ts";
 import { raceFirstSome } from "../capabilities.ts";
 
-const table1: readonly number[] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+const libCnpjTable1: readonly number[] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
-const table2: readonly number[] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+const libCnpjTable2: readonly number[] = [
+	6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2,
+];
 
 /**
  * A random numeric CNPJ base: an 8-digit root and a 4-digit branch, each digit drawn
@@ -70,8 +72,8 @@ export function hasLetter(value: string): boolean {
  */
 export function hasValidCnpjChecksum(cnpj: string): boolean {
 	return (
-		cnpj.charCodeAt(12) - 48 === cnpjCheckDigit(cnpj, table1) &&
-		cnpj.charCodeAt(13) - 48 === cnpjCheckDigit(cnpj, table2)
+		cnpj.charCodeAt(12) - 48 === cnpjCheckDigit(cnpj, libCnpjTable1) &&
+		cnpj.charCodeAt(13) - 48 === cnpjCheckDigit(cnpj, libCnpjTable2)
 	);
 }
 

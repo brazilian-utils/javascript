@@ -9,6 +9,8 @@ import (
 	"regexp"
 )
 
+var getAddressInfoByCepPattern1 = regexp.MustCompile("\\A[0-9]{8}\\z")
+
 type AddressInfo struct {
 	Cep          string
 	State        string
@@ -69,7 +71,7 @@ func fetchBrasilApi(cep string, env Capabilities) *AddressInfo {
 // request is retried twice, 250 ms apart, exactly as the published package does. Turning a host
 // value into the 8 digits this takes is the DX's job.
 func GetAddressInfoByCep(cep string, env Capabilities) (AddressInfo, error) {
-	if !(regexp.MustCompile("\\A[0-9]{8}\\z").MatchString(cep)) {
+	if !(getAddressInfoByCepPattern1.MatchString(cep)) {
 		return AddressInfo{}, &GetAddressInfoByCepValidationError{Message: "CEP inv\u00e1lido"}
 	}
 	address := raceFirstSome([]func() *AddressInfo{func() *AddressInfo {

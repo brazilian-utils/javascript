@@ -736,11 +736,14 @@ export function printRecord(record: TRecord): string {
 
 export function printModule(module: TModule): string {
 	const typingNames = new Set<string>();
-	const text = module.functions
-		.map(printFunction)
-		.join("\n\n\n")
-		// Module level constants are upper cased, the way Python names a constant.
-		.replaceAll(/\btable(\d+)\b/gu, (name) => name.toUpperCase());
+	// Module level constants are upper cased, the way Python names a constant, so every reference
+	// to one has to be upper cased too. Driven by the module's own constants rather than by a
+	// pattern that guesses at their names, which silently missed any name shaped differently.
+	const text = module.constants.reduce(
+		(body, constant) =>
+			body.replaceAll(new RegExp(`\\b${constant.name}\\b`, "gu"), constant.name.toUpperCase()),
+		module.functions.map(printFunction).join("\n\n\n"),
+	);
 	const records = module.records.map(printRecord).join("\n\n\n");
 	for (const name of ["List", "Optional", "Literal", "Callable", "NoReturn"]) {
 		if (new RegExp(`\\b${name}\\[`).test(`${text}${records}`) || text.includes(`-> ${name}`)) {

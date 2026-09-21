@@ -10,12 +10,14 @@ import (
 	"strings"
 )
 
+var isValidCpfPattern1 = regexp.MustCompile("\\A[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{2}\\z")
+
 // Validates a CPF (Cadastro de Pessoas Físicas).
 //
 // The core takes the value as written, accepting the usual mask characters; turning a host value
 // into a string is the DX's job.
 func IsValidCpf(cpf string) bool {
-	if !(regexp.MustCompile("\\A[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{2}\\z").MatchString(strings.Trim(cpf, "\t\n\u000b\u000c\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"))) {
+	if !(isValidCpfPattern1.MatchString(strings.Trim(cpf, "\t\n\u000b\u000c\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"))) {
 		return false
 	}
 	digits := keepDigits(cpf)

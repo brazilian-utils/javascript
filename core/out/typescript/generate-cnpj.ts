@@ -7,9 +7,13 @@ import { isRepeatedRun } from "./lib/digits.ts";
 import type { Capabilities } from "./capabilities.ts";
 import { raceFirstSome } from "./capabilities.ts";
 
-const table1: readonly number[] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+const generateCnpjTable1: readonly number[] = [
+	5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2,
+];
 
-const table2: readonly number[] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+const generateCnpjTable2: readonly number[] = [
+	6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2,
+];
 
 /**
  * Generates a valid random CNPJ (Cadastro Nacional da Pessoa Jurídica) in the numeric format: 14
@@ -28,10 +32,13 @@ export function generateCnpj(env: Capabilities): string {
 		}
 		base = randomCnpjBase(env);
 	}
-	const firstDigit: string = cnpjCheckDigit(base + "00", table1).toString();
+	const firstDigit: string = cnpjCheckDigit(
+		base + "00",
+		generateCnpjTable1,
+	).toString();
 	const secondDigit: string = cnpjCheckDigit(
 		base + firstDigit + "0",
-		table2,
+		generateCnpjTable2,
 	).toString();
 	return base + firstDigit + secondDigit;
 }

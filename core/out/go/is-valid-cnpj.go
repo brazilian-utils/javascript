@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+var isValidCnpjPattern1 = regexp.MustCompile("\\A[0-9A-Z]{2}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9A-Z]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9A-Z]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9A-Z]{4}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{2}\\z")
+
+var isValidCnpjPattern2 = regexp.MustCompile("\\A[0-9]{2}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{4}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{2}\\z")
+
 // Validates a CNPJ (Cadastro Nacional da Pessoa Jurídica), numeric or alphanumeric.
 //
 // Version `"2"` accepts the alphanumeric format as well; a value with no letters is always read
@@ -20,7 +24,7 @@ func IsValidCnpj(cnpj string, version string) bool {
 	if version == "2" {
 		cleaned := keepAlphanumeric(cnpj)
 		if hasLetter(cleaned) && (len(cleaned) == 14) {
-			return (regexp.MustCompile("\\A[0-9A-Z]{2}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9A-Z]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9A-Z]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9A-Z]{4}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{2}\\z").MatchString(strings.Map(func(scalar rune) rune {
+			return (isValidCnpjPattern1.MatchString(strings.Map(func(scalar rune) rune {
 				if scalar >= 'a' && scalar <= 'z' {
 					return scalar - 32
 				}
@@ -32,5 +36,5 @@ func IsValidCnpj(cnpj string, version string) bool {
 	if len(numeric) != 14 {
 		return false
 	}
-	return ((regexp.MustCompile("\\A[0-9]{2}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{3}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{4}[\\x{9}-\\x{d} \\--/\\x{a0}\\x{1680}\\x{2000}-\\x{200a}\\x{2028}-\\x{2029}\\x{202f}\\x{205f}\\x{3000}\\x{feff}]*[0-9]{2}\\z").MatchString(trimmed) && !isRepeatedCnpj(numeric)) && hasValidCnpjChecksum(numeric))
+	return ((isValidCnpjPattern2.MatchString(trimmed) && !isRepeatedCnpj(numeric)) && hasValidCnpjChecksum(numeric))
 }

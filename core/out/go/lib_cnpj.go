@@ -5,9 +5,9 @@
 
 package core
 
-var table1 = []int{5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2}
+var libCnpjTable1 = []int{5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2}
 
-var table2 = []int{6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2}
+var libCnpjTable2 = []int{6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2}
 
 // A random numeric CNPJ base: an 8-digit root and a 4-digit branch, each digit drawn
 // independently — matches the published `generateCnpj()` called with no branch, where an unset
@@ -49,7 +49,7 @@ func hasLetter(value string) bool {
 
 // Whether both check digits of a 14 character CNPJ match its base.
 func hasValidCnpjChecksum(cnpj string) bool {
-	return (((int(cnpj[12]) - 48) == cnpjCheckDigit(cnpj, table1)) && ((int(cnpj[13]) - 48) == cnpjCheckDigit(cnpj, table2)))
+	return (((int(cnpj[12]) - 48) == cnpjCheckDigit(cnpj, libCnpjTable1)) && ((int(cnpj[13]) - 48) == cnpjCheckDigit(cnpj, libCnpjTable2)))
 }
 
 // Whether every character of a 14 character value is the same one.

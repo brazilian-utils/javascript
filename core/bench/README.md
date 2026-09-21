@@ -139,16 +139,21 @@ building the harness, not a frozen result.
 - TypeScript and Python: the generated core lands close to its handwritten sibling (TypeScript
   clearly faster across all three rows; Python within a few percent either way on both rows), and
   every input in both languages produced identical answers on both sides.
-- Go: `isValidCpf` and `isValidCnpj` came back roughly 6-9x *slower* on the generated side, on
-  both the `full-pipeline` and `normalized` variants, and this is real, not a harness artifact.
-  `core/out/go/is-valid-cpf.go` and `is-valid-cnpj.go` call `regexp.MustCompile(...)` **inline,
-  inside the function body**, so the (fairly large, Unicode-range-heavy) mask-detection regex is
-  recompiled from source on every single call, instead of being compiled once at package
-  initialization the way idiomatic Go does it. `formatCnpj`'s generated Go code does not have this
-  problem (it doesn't use a regex) and came back about 3x *faster* than the handwritten port. This
-  is worth flagging to whoever owns the Go code generation template -- `core/out/**` is another
-  agent's territory in this session, so nothing here was changed to fix it, but it is the single
-  most consequential finding this benchmark produced.
+- Go: the first run came back 6-9x *slower* on the generated side for `isValidCpf` and
+  `isValidCnpj`, on both variants, while generated `formatCnpj` -- which uses no regex -- was
+  about 3x faster. That split was the whole diagnosis: the Go target emitted
+  `regexp.MustCompile(...)` **inline in the function body**, so a large Unicode-range pattern was
+  recompiled from its source string on every call. `regexp` has no compilation cache, and measured
+  on its own the compile costs 2257.5 ms against 28.4 ms for the match over 200 000 iterations --
+  **79.6x**, which is to say the benchmark was almost entirely timing regex compilation.
+
+  The Go target now lifts every pattern into a package level `var`, the way a Go author would
+  have written it, and the same rows come back at **0.14x to 0.16x** -- the generated code is
+  roughly six times faster than the handwritten port rather than seven times slower. This is the
+  most valuable thing the benchmark produced, and it is the argument for benchmarking against
+  another language's real implementation rather than against yourself: the TypeScript benchmark
+  had been green for weeks and could not have found it, because JavaScript caches compiled regex
+  literals and Python caches compiled patterns in `re`, so only Go ever paid the cost.
 - No disagreements were found on any benchmarked input, in any language: every generated/
   handwritten pair returned the same answer for every value used here.
 
