@@ -13,7 +13,7 @@ A função `mask` é a mesma em todos, e é tudo que uma máscara precisa. Um fo
 
 <div class="example" data-name="React">
 
-Um componente controlado: o formulário guarda o valor e passa `value` e `onChange`. Ele também aceita as props do próprio input, então o `field` do react-hook-form entra inteiro, e as regras ficam no formulário:
+O hook é dono do input: ele recebe o formatter e o valor que o formulário guarda, aplica a máscara no que é digitado e avisa pelo próprio `onChange`. O React nunca escreve o valor do input, que é o que desfaria a máscara. O campo aceita as props do próprio input, então o `field` do react-hook-form entra inteiro:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf/react&example=cpf-field.tsx&usage=cpf-form.tsx">
 

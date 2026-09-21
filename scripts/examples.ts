@@ -170,6 +170,7 @@ function values(document: Document): Record<string, string> {
 		validatorOptions: validator.rest === "" ? "" : `\n  options:${validator.rest.slice(1)},`,
 		parseInput: call(parser, "input.value"),
 		parseMaskedEvent: call(parser, "event.currentTarget.value"),
+		parseMasked: call(parser, "masked"),
 		parseMaskValue: call(parser, "maskValue(event)"),
 		parseMaskedEventVue: call(parser, "(event.target as HTMLInputElement).value"),
 		parseMaskedEventAngular: call(parser, "(event.target as HTMLInputElement).value"),

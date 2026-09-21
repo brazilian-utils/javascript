@@ -13,7 +13,7 @@ The `mask` function is the same in all of them, and it is all a mask needs. A fo
 
 <div class="example" data-name="React">
 
-A controlled component: the form holds the value and passes `value` and `onChange`. It also takes the input's own props, so react-hook-form's `field` spreads into it as is, and the rules live on the form:
+The hook owns the input: it takes the formatter and the value the form holds, masks what is typed and says so through its own `onChange`. React never writes the input's value, which is what would undo a mask. The field takes the input's own props, so react-hook-form's `field` spreads into it as is:
 
 <div class="variant" data-variant="CPF" data-demo="/snippets/live/?dir=document-field/generated/cpf/react&example=cpf-field.tsx&usage=cpf-form.tsx">
 
