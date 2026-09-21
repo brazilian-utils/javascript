@@ -137,7 +137,7 @@ export class LoweringTable {
 		];
 		for (const selection of rows) {
 			lines.push(
-				`| \`${selection.op}\` | \`${selection.args}\` | ${selection.impl} | ${selection.reason} |`,
+				`| \`${selection.op}\` | \`${cell(selection.args)}\` | ${selection.impl} | ${cell(selection.reason)} |`,
 			);
 		}
 		lines.push("");
@@ -149,6 +149,11 @@ export class LoweringTable {
 		);
 		return lines.join("\n");
 	}
+}
+
+/** A table cell: an enum type contains `|`, which would otherwise end the column. */
+function cell(text: string): string {
+	return text.replaceAll("|", "\\|");
 }
 
 /* ------------------------------------------------------------------ *
