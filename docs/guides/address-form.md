@@ -11,7 +11,7 @@ Type a CEP and the rest of the address fills itself. Pick the framework: each ex
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=address-form/react&example=address-form.tsx">
 
-State for the CEP and for the address, and the lookup in the change handler:
+A hook does the asking, one lookup at a time, and the form draws what it answers:
 
 <div class="file" data-file="address-form.tsx">
 
@@ -19,11 +19,17 @@ State for the CEP and for the address, and the lookup in the change handler:
 
 </div>
 
+<div class="file" data-file="use-address-lookup.ts">
+
+[use-address-lookup.ts](../snippets/address-form/react/use-address-lookup.ts ':include :type=code ts')
+
+</div>
+
 </div>
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/?dir=address-form/angular&example=address-form.ts">
 
-A reactive form, filled with `patchValue` when the lookup answers:
+A service does the asking, `switchMap` dropping the answer to a CEP that is no longer being typed:
 
 <div class="file" data-file="address-form.ts">
 
@@ -31,11 +37,17 @@ A reactive form, filled with `patchValue` when the lookup answers:
 
 </div>
 
+<div class="file" data-file="address-lookup.ts">
+
+[address-lookup.ts](../snippets/address-form/angular/address-lookup.ts ':include :type=code ts')
+
+</div>
+
 </div>
 
 <div class="example" data-name="Vue" data-demo="/snippets/live/?dir=address-form/vue&example=address-form.vue">
 
-A `reactive` address, filled with `Object.assign` when the lookup answers:
+A composable does the asking, one lookup at a time, and the form draws what it answers:
 
 <div class="file" data-file="address-form.vue">
 
@@ -43,11 +55,17 @@ A `reactive` address, filled with `Object.assign` when the lookup answers:
 
 </div>
 
+<div class="file" data-file="use-address-lookup.ts">
+
+[use-address-lookup.ts](../snippets/address-form/vue/use-address-lookup.ts ':include :type=code ts')
+
+</div>
+
 </div>
 
 <div class="example" data-name="Vanilla" data-demo="/snippets/live/?page=address-form/vanilla/address-form.html">
 
-No build step: save it as an `.html` file and open it. It imports the package from a CDN and fills the form's own elements.
+No build step: save it as an `.html` file and open it. It imports the package from a CDN and drops the answer to a CEP that is no longer the one in the field.
 
 <div class="file" data-file="address-form.html">
 

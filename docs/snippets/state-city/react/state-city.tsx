@@ -1,33 +1,18 @@
-import { useId, useState } from "react";
+import { useId } from "react";
 import { getStates } from "@brazilian-utils/brazilian-utils/get-states";
-import type { StateCode } from "@brazilian-utils/brazilian-utils";
+import { useCities } from "./use-cities";
 
-// The states are a short list and come with the page; the cities are 5,571 of them, so that table
-// is fetched only when a state is picked, and only once.
+// The states are a short list, so they come with the page.
 const states = getStates();
 
 export function StateCity() {
   const id = useId();
-  const [cities, setCities] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  async function onStateChange(state: string) {
-    setCities([]);
-
-    if (!state) return;
-
-    setLoading(true);
-
-    const { getCities } = await import("@brazilian-utils/brazilian-utils/get-cities");
-
-    setCities(getCities(state as StateCode));
-    setLoading(false);
-  }
+  const { cities, loading, load } = useCities();
 
   return (
     <>
       <label htmlFor={id}>State</label>
-      <select id={id} onChange={(event) => onStateChange(event.currentTarget.value)}>
+      <select id={id} onChange={(event) => load(event.currentTarget.value)}>
         <option value="">Pick a state</option>
         {states.map((state) => (
           <option key={state.code} value={state.code}>
@@ -37,7 +22,7 @@ export function StateCity() {
       </select>
 
       <label htmlFor={`${id}-city`}>City</label>
-      <select id={`${id}-city`} disabled={cities.length === 0}>
+      <select id={`${id}-city`} disabled={cities.length === 0} aria-busy={loading}>
         <option value="">{loading ? "Loading the cities…" : "Pick a city"}</option>
         {cities.map((city) => (
           <option key={city} value={city}>

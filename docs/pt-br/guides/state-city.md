@@ -11,7 +11,7 @@ O ponto aqui é quando cada tabela é carregada. Os estados são 27 linhas e vê
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=state-city/react&example=state-city.tsx">
 
-Estado para as cidades, e o import dentro do handler de mudança:
+Um hook busca a tabela e guarda as cidades; o componente só escolhe:
 
 <div class="file" data-file="state-city.tsx">
 
@@ -19,11 +19,17 @@ Estado para as cidades, e o import dentro do handler de mudança:
 
 </div>
 
+<div class="file" data-file="use-cities.ts">
+
+[use-cities.ts](../../snippets/state-city/react/use-cities.ts ':include :type=code ts')
+
+</div>
+
 </div>
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/?dir=state-city/angular&example=state-city.ts">
 
-Signals para as cidades e para a espera, e o import dentro do handler de mudança:
+Um service busca a tabela, com `switchMap` descartando a que já não é do estado na tela:
 
 <div class="file" data-file="state-city.ts">
 
@@ -31,15 +37,27 @@ Signals para as cidades e para a espera, e o import dentro do handler de mudanç
 
 </div>
 
+<div class="file" data-file="cities.ts">
+
+[cities.ts](../../snippets/state-city/angular/cities.ts ':include :type=code ts')
+
+</div>
+
 </div>
 
 <div class="example" data-name="Vue" data-demo="/snippets/live/?dir=state-city/vue&example=state-city.vue">
 
-Refs para as cidades e para a espera, e o import dentro do handler de mudança:
+Um composable busca a tabela e guarda as cidades; o componente só escolhe:
 
 <div class="file" data-file="state-city.vue">
 
 [state-city.vue](../../snippets/state-city/vue/state-city.vue ':include :type=code vue')
+
+</div>
+
+<div class="file" data-file="use-cities.ts">
+
+[use-cities.ts](../../snippets/state-city/vue/use-cities.ts ':include :type=code ts')
 
 </div>
 

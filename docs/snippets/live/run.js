@@ -27,6 +27,8 @@
       "@angular/compiler": CDN + "@angular/compiler@22.1.7/+esm",
       "@angular/platform-browser": CDN + "@angular/platform-browser@22.1.7/+esm",
       "@angular/forms": CDN + "@angular/forms@22.1.7/+esm",
+      "@angular/core/rxjs-interop": CDN + "@angular/core@22.1.7/rxjs-interop/+esm",
+      rxjs: CDN + "rxjs@7.8.2/+esm",
       "react-hook-form": "https://esm.sh/react-hook-form@7.88.0?external=react",
       "vee-validate": "https://esm.sh/vee-validate@4.15.1?external=vue",
     },

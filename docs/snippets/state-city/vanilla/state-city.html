@@ -1,55 +1,67 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8" />
-<title>State and city</title>
+  <meta charset="utf-8" />
+  <title>State and city</title>
 
-<label for="state">State</label>
-<select id="state">
-  <option value="">Pick a state</option>
-</select>
+  <label for="state">State</label>
+  <select id="state">
+    <option value="">Pick a state</option>
+  </select>
 
-<label for="city">City</label>
-<select id="city" disabled>
-  <option value="">Pick a city</option>
-</select>
+  <label for="city">City</label>
+  <select id="city" disabled>
+    <option value="">Pick a city</option>
+  </select>
 
-<script type="module">
-  // The states are a short list and come with the page; the cities are 5,571 of them, so that
-  // table is fetched only when a state is picked, and only once.
-  import { getStates } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-states/+esm";
+  <script type="module">
+    // The states are a short list and come with the page; the cities are 5,571 of them, so that
+    // table is fetched only when a state is picked, and only once.
+    import { getStates } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-states/+esm";
 
-  const states = document.getElementById("state");
-  const cities = document.getElementById("city");
+    const states = document.getElementById("state");
+    const cities = document.getElementById("city");
 
-  const fill = (select, options, placeholder) => {
-    select.replaceChildren(new Option(placeholder, ""));
+    const fill = (select, options, placeholder) => {
+      select.replaceChildren(new Option(placeholder, ""));
 
-    for (const option of options) select.append(new Option(option.label, option.value));
-  };
-
-  fill(
-    states,
-    getStates().map((state) => ({ label: state.name, value: state.code })),
-    "Pick a state",
-  );
-
-  states.addEventListener("change", async () => {
-    if (!states.value) {
-      cities.disabled = true;
-      return fill(cities, [], "Pick a city");
-    }
-
-    fill(cities, [], "Loading the cities…");
-
-    const { getCities } = await import(
-      "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-cities/+esm"
-    );
+      for (const option of options) select.append(new Option(option.label, option.value));
+    };
 
     fill(
-      cities,
-      getCities(states.value).map((city) => ({ label: city, value: city })),
-      "Pick a city",
+      states,
+      getStates().map((state) => ({ label: state.name, value: state.code })),
+      "Pick a state",
     );
-    cities.disabled = false;
-  });
-</script>
+
+    // A state picked while the table is on its way wins; the browser fetches the table once.
+    let pending;
+
+    states.addEventListener("change", async () => {
+      pending?.abort();
+      pending = new AbortController();
+
+      const { signal } = pending;
+      const state = states.value;
+
+      cities.disabled = true;
+
+      if (!state) return fill(cities, [], "Pick a city");
+
+      fill(cities, [], "Loading the cities…");
+      cities.setAttribute("aria-busy", "true");
+
+      const { getCities } =
+        await import("https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-cities/+esm");
+
+      if (signal.aborted) return;
+
+      fill(
+        cities,
+        getCities(state).map((city) => ({ label: city, value: city })),
+        "Pick a city",
+      );
+      cities.disabled = false;
+      cities.removeAttribute("aria-busy");
+    });
+  </script>
+</html>
