@@ -80,6 +80,12 @@ function runReference(cases: readonly Case[]): { outcomes: Outcome[]; compared: 
 	return { outcomes, compared };
 }
 
+/**
+ * How each target's generated driver is started.
+ *
+ * `directory` is where that target's generated code lives, which is where its capability fake
+ * reads `fixtures.json` from; Python runs as a package, so its working directory is the parent.
+ */
 function runners(mode: "idiomatic" | "plain") {
 	const suffix = mode === "plain" ? "-plain" : "";
 	return [
@@ -88,18 +94,21 @@ function runners(mode: "idiomatic" | "plain") {
 			command: process.execPath,
 			args: ["_driver.ts"],
 			cwd: resolve(ROOT, `out/typescript${suffix}`),
+			directory: resolve(ROOT, `out/typescript${suffix}`),
 		},
 		{
 			name: `python${suffix}`,
 			command: "python3",
 			args: ["-m", `python${suffix}._driver`],
 			cwd: resolve(ROOT, "out"),
+			directory: resolve(ROOT, `out/python${suffix}`),
 		},
 		{
 			name: `go${suffix}`,
 			command: "go",
 			args: ["run", "./cmd/driver"],
 			cwd: resolve(ROOT, `out/go${suffix}`),
+			directory: resolve(ROOT, `out/go${suffix}`),
 		},
 	];
 }
@@ -116,10 +125,11 @@ function main(): void {
 	// Every target reads the same scripted Http, so a race is decided by the same latencies.
 	for (const mode of ["idiomatic", "plain"] as const) {
 		for (const runner of runners(mode)) {
-			const directory = runner.name.startsWith("python") ? resolve(runner.cwd, runner.args[1]!.split(".")[0]!) : runner.cwd;
-			if (existsSync(directory)) {
-				writeFileSync(resolve(directory, "fixtures.json"), `${JSON.stringify(HTTP_FIXTURES, null, "\t")}\n`);
-			}
+			if (!existsSync(runner.directory)) continue;
+			writeFileSync(
+				resolve(runner.directory, "fixtures.json"),
+				`${JSON.stringify(HTTP_FIXTURES, null, "\t")}\n`,
+			);
 		}
 	}
 
