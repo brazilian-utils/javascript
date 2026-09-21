@@ -1,40 +1,54 @@
 import { Component, effect, signal } from "@angular/core";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { Field } from "./field";
 import { CepField } from "./cep-field";
 import { addressByCep } from "./address-by-cep";
 
 @Component({
   selector: "app-address-form",
-  imports: [ReactiveFormsModule, Field, CepField],
+  imports: [Field, CepField],
   template: `
-    <form [formGroup]="form">
-      <app-cep-field formControlName="cep" [errorMessage]="status()" />
+    <form>
+      <app-cep-field
+        [value]="cep()"
+        (valueChange)="cep.set($event)"
+        [errorMessage]="status()"
+      />
 
       <!-- The same field the document field guide builds, told what it is about. -->
-      <app-field label="Street" autocomplete="address-line1" formControlName="street" />
-      <app-field label="Neighborhood" formControlName="neighborhood" />
-      <app-field label="City" autocomplete="address-level2" formControlName="city" />
-      <app-field label="State" autocomplete="address-level1" formControlName="state" />
+      <app-field
+        label="Street"
+        autocomplete="address-line1"
+        [value]="street()"
+        (valueChange)="street.set($event)"
+      />
+      <app-field
+        label="Neighborhood"
+        [value]="neighborhood()"
+        (valueChange)="neighborhood.set($event)"
+      />
+      <app-field
+        label="City"
+        autocomplete="address-level2"
+        [value]="city()"
+        (valueChange)="city.set($event)"
+      />
+      <app-field
+        label="State"
+        autocomplete="address-level1"
+        [value]="state()"
+        (valueChange)="state.set($event)"
+      />
     </form>
   `,
 })
 export class AddressForm {
-  protected readonly form = new FormGroup({
-    cep: new FormControl("", { nonNullable: true }),
-    street: new FormControl("", { nonNullable: true }),
-    neighborhood: new FormControl("", { nonNullable: true }),
-    city: new FormControl("", { nonNullable: true }),
-    state: new FormControl("", { nonNullable: true }),
-  });
+  protected readonly cep = signal("");
+  protected readonly street = signal("");
+  protected readonly neighborhood = signal("");
+  protected readonly city = signal("");
+  protected readonly state = signal("");
 
-  // The control is what the field writes to, so the lookup answers to it.
-  private readonly cep = signal("");
   private readonly address = addressByCep(this.cep);
-
-  private readonly typing = this.form.controls.cep.valueChanges.subscribe((cep) =>
-    this.cep.set(cep),
-  );
 
   protected status() {
     if (this.address.isLoading()) return "Looking it up…";
@@ -48,8 +62,9 @@ export class AddressForm {
 
     if (found === undefined) return;
 
-    const { street, neighborhood, city, state } = found;
-
-    this.form.patchValue({ street, neighborhood, city, state });
+    this.street.set(found.street);
+    this.neighborhood.set(found.neighborhood);
+    this.city.set(found.city);
+    this.state.set(found.state);
   });
 }

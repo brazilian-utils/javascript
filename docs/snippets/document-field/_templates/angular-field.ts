@@ -1,4 +1,4 @@
-import { Component, Input, forwardRef, signal } from "@angular/core";
+import { Component, EventEmitter, Input, Output, forwardRef, signal } from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 @@fieldImports@@
 import { Field } from "./field";
@@ -28,6 +28,13 @@ export class @@Name@@Field implements ControlValueAccessor {
   /** What the form says is wrong with the value, if anything. */
   @Input() errorMessage?: string;
 
+  /** The @@label@@ without its mask, for a field bound with `[(value)]` rather than to a form. */
+  @Input("value") set boundValue(value: string) {
+    this.value.set(value ?? "");
+  }
+
+  @Output() readonly valueChange = new EventEmitter<string>();
+
   protected readonly mask = { format: @@format@@, parse: @@parse@@ };
   protected readonly value = signal("");
 
@@ -49,5 +56,6 @@ export class @@Name@@Field implements ControlValueAccessor {
   protected onValue(value: string) {
     this.value.set(value);
     this.onChange(value);
+    this.valueChange.emit(value);
   }
 }
