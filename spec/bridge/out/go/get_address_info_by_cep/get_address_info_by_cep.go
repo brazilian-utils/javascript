@@ -77,8 +77,6 @@ type GetAddressInfoByCepOptions struct {
 	Providers *[]string
 }
 
-
-
 // fetchViaCep Reads the address ViaCEP answers with.
 //
 // @see Based on: https://viacep.com.br/

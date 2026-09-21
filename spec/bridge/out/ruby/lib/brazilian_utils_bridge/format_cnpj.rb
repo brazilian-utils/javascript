@@ -10,17 +10,11 @@ module BrazilianUtilsBridge
     CLASS0 = [[0x30, 0x39]].freeze
     CLASS1 = [[0x30, 0x39], [0x41, 0x5a], [0x61, 0x7a]].freeze
 
-
-
     PATTERN = "00.000.000/0000-00".freeze
     OBFUSCATED_PATTERN = "**.000.000/0000-**".freeze
 
-
-
     # Options of `formatCnpj`.
     FormatCnpjOptions = Struct.new(:pad, :version, :obfuscate, keyword_init: true)
-
-
 
     # Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value.
     def self.format_cnpj(value, options = nil)

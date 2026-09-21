@@ -3,7 +3,6 @@
 namespace BrazilianUtils.Bridge
 {
 
-
     /// <summary>One Brazilian municipality, as the IBGE publishes it.</summary>
     public sealed class Municipality
     {
@@ -27,11 +26,6 @@ namespace BrazilianUtils.Bridge
     /// <summary>Brazilian municipalities, written once.</summary>
     public static class GetMunicipalitiesUtility
     {
-
-
-
-
-
 
         /// <summary>Brazilian municipalities published by the IBGE, by state, in the pt-BR collation order the JavaScript package returns.</summary>
         private static readonly Dataset MUNICIPALITIES = new Dataset(

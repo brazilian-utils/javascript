@@ -7,14 +7,8 @@ import { asString, codeAt, isTruthy, keepClass, padStart, type CharClass } from 
 const class0: CharClass = [[0x30, 0x39]];
 const class1: CharClass = [[0x30, 0x39], [0x41, 0x5a], [0x61, 0x7a]];
 
-
-
 const PATTERN = "00.000.000/0000-00";
 const OBFUSCATED_PATTERN = "**.000.000/0000-**";
-
-
-
-
 
 /** Options of `formatCnpj`. */
 export type FormatCnpjOptions = {
@@ -25,8 +19,6 @@ export type FormatCnpjOptions = {
 	/** Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`). */
 	obfuscate?: boolean;
 };
-
-
 
 /**
  * Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value.

@@ -8,13 +8,6 @@ module BrazilianUtilsBridge
   # Brazilian municipalities, written once.
   module GetMunicipalities
 
-
-
-
-
-
-
-
     # One Brazilian municipality, as the IBGE publishes it.
     Municipality = Struct.new(:code, :name, :state_code, keyword_init: true)
 

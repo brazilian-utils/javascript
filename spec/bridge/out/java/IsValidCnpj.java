@@ -37,8 +37,6 @@ public final class IsValidCnpj {
     private static final long[] FIRST_DIGIT_WEIGHTS = new long[] {5L, 4L, 3L, 2L, 9L, 8L, 7L, 6L, 5L, 4L, 3L, 2L};
     private static final long[] SECOND_DIGIT_WEIGHTS = new long[] {6L, 5L, 4L, 3L, 2L, 9L, 8L, 7L, 6L, 5L, 4L, 3L, 2L};
 
-
-
     /**
      * Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.
      *

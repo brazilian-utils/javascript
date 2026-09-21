@@ -37,16 +37,12 @@ const PATTERN_NUMERIC_FORMAT: &[runtime::PatternStep] = &[
 const FIRST_DIGIT_WEIGHTS: [i64; 12] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 const SECOND_DIGIT_WEIGHTS: [i64; 13] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
-
-
 /// Options of `isValidCnpj`.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct IsValidCnpjOptions {
 	/// Which CNPJ format to accept: `1` numeric only, `2` alphanumeric (default: `1`).
 	pub version: Option<i64>,
 }
-
-
 
 /// Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.
 ///

@@ -16,8 +16,6 @@ public final class GetAddressInfoByCep {
     private static final long HTTP_RETRIES = 2L;
     private static final long HTTP_RETRY_DELAY_MS = 250L;
 
-
-
     /**
      * Reads the address ViaCEP answers with.
      *

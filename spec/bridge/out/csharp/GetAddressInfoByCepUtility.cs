@@ -93,8 +93,6 @@ namespace BrazilianUtils.Bridge
         private const long HTTP_RETRIES = 2L;
         private const long HTTP_RETRY_DELAY_MS = 250L;
 
-
-
         /// <summary>
         /// Reads the address ViaCEP answers with.
         ///

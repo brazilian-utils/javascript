@@ -5,14 +5,6 @@ package get_municipalities
 
 import "brazilianutils/bridge/runtime"
 
-
-
-
-
-
-
-
-
 // Municipality One Brazilian municipality, as the IBGE publishes it.
 type Municipality struct {
 	// The 7-digit IBGE municipality code.

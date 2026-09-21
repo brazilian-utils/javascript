@@ -7,12 +7,8 @@ public final class FormatCnpj {
     private static final int[][] CLASS0 = {{0x30, 0x39}};
     private static final int[][] CLASS1 = {{0x30, 0x39}, {0x41, 0x5a}, {0x61, 0x7a}};
 
-
-
     private static final String PATTERN = "00.000.000/0000-00";
     private static final String OBFUSCATED_PATTERN = "**.000.000/0000-**";
-
-
 
     /**
      * Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value.

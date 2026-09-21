@@ -3,7 +3,6 @@
 namespace BrazilianUtils.Bridge
 {
 
-
     /// <summary>Options of `isValidCnpj`.</summary>
     public sealed class IsValidCnpjOptions
     {
@@ -48,8 +47,6 @@ namespace BrazilianUtils.Bridge
 
         private static readonly long[] FIRST_DIGIT_WEIGHTS = new long[] { 5L, 4L, 3L, 2L, 9L, 8L, 7L, 6L, 5L, 4L, 3L, 2L };
         private static readonly long[] SECOND_DIGIT_WEIGHTS = new long[] { 6L, 5L, 4L, 3L, 2L, 9L, 8L, 7L, 6L, 5L, 4L, 3L, 2L };
-
-
 
         /// <summary>
         /// Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.

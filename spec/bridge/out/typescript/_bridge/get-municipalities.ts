@@ -4,12 +4,6 @@
 
 import { dataAll, dataRows, makeDataset } from "./_runtime.ts";
 
-
-
-
-
-
-
 /**
  * The two letter code of a Brazilian state. Checked against the dataset by `data/build.ts`, so the union and the table can never drift apart.
  */
@@ -41,8 +35,6 @@ export type StateCode =
 	| "SP"
 	| "SE"
 	| "TO";
-
-
 
 /** One Brazilian municipality, as the IBGE publishes it. */
 export type Municipality = {

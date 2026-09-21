@@ -43,26 +43,20 @@ BRASIL_API_NOT_FOUND_STATUS = 404
 HTTP_RETRIES = 2
 HTTP_RETRY_DELAY_MS = 250
 
-
 class GetAddressInfoByCepError(Exception):
     """Base class of every error `getAddressInfoByCep` rejects with."""
-
 
 class GetAddressInfoByCepValidationError(GetAddressInfoByCepError):
     """Thrown by `getAddressInfoByCep` when the value given is not a valid CEP."""
 
-
 class GetAddressInfoByCepNotFoundError(GetAddressInfoByCepError):
     """Thrown by `getAddressInfoByCep` when no CEP service knows the CEP."""
-
 
 class GetAddressInfoByCepServiceError(GetAddressInfoByCepError):
     """Thrown by `getAddressInfoByCep` when every CEP service failed to answer."""
 
-
 class CepProviderFailure(Exception):
     """Raised inside a provider that did not answer. Only whether a failure was a not found is looked at when the provider failures are aggregated, so this one never leaves the module."""
-
 
 @dataclass
 class AddressInfo:
@@ -79,17 +73,12 @@ class AddressInfo:
     # Street name, empty when the CEP covers a whole city.
     street: str
 
-
 @dataclass
 class GetAddressInfoByCepOptions:
     """Options of `getAddressInfoByCep`."""
 
     # Which CEP services to race, in the order given (default: `["viacep", "brasilapi"]`; the deprecated `"widenet"` provider is excluded from the default list, but can still be requested explicitly).
     providers: Optional[List[str]] = None
-
-
-
-
 
 def fetch_via_cep(cep: str) -> AddressInfo:
     """Reads the address ViaCEP answers with.
@@ -104,7 +93,6 @@ def fetch_via_cep(cep: str) -> AddressInfo:
         raise GetAddressInfoByCepNotFoundError("CEP n\U000000e3o encontrado")
     return AddressInfo(cep=keep_class(class0, found), state=json_string(response.body, "uf"), city=json_string(response.body, "localidade"), neighborhood=json_string(response.body, "bairro"), street=json_string(response.body, "logradouro"))
 
-
 def fetch_widenet(cep: str) -> AddressInfo:
     """Reads the address Widenet answers with.
     """
@@ -115,7 +103,6 @@ def fetch_widenet(cep: str) -> AddressInfo:
     if (((json_int(response.body, "status") != 200) or not json_is_true(response.body, "ok")) or (found == "")):
         raise GetAddressInfoByCepNotFoundError("CEP n\U000000e3o encontrado")
     return AddressInfo(cep=keep_class(class0, found), state=json_string(response.body, "state"), city=json_string(response.body, "city"), neighborhood=json_string(response.body, "district"), street=json_string(response.body, "address"))
-
 
 def fetch_brasil_api(cep: str) -> AddressInfo:
     """Reads the address BrasilAPI answers with.
@@ -132,7 +119,6 @@ def fetch_brasil_api(cep: str) -> AddressInfo:
         raise GetAddressInfoByCepNotFoundError("CEP n\U000000e3o encontrado")
     return AddressInfo(cep=keep_class(class0, found), state=json_string(response.body, "state"), city=json_string(response.body, "city"), neighborhood=json_string(response.body, "neighborhood"), street=json_string(response.body, "street"))
 
-
 def fetch_provider(provider: str, cep: str) -> AddressInfo:
     """Asks one named provider for a CEP.
     """
@@ -142,7 +128,6 @@ def fetch_provider(provider: str, cep: str) -> AddressInfo:
         return fetch_widenet(cep)
     return fetch_brasil_api(cep)
 
-
 def known_providers(given: List[str]) -> List[str]:
     """The providers of a list that are known, in the order they were given.
     """
@@ -151,7 +136,6 @@ def known_providers(given: List[str]) -> List[str]:
         if list_has(KNOWN_PROVIDERS, provider):
             kept.append(provider)
     return kept
-
 
 def get_address_info_by_cep(cep: Any, options: Optional[GetAddressInfoByCepOptions] = None) -> AddressInfo:
     """Fetches address information for a given CEP using multiple providers simultaneously.

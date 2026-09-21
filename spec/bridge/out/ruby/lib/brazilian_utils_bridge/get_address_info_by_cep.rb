@@ -40,8 +40,6 @@ module BrazilianUtilsBridge
     # Options of `getAddressInfoByCep`.
     GetAddressInfoByCepOptions = Struct.new(:providers, keyword_init: true)
 
-
-
     # Reads the address ViaCEP answers with.
     #
     # @see Based on: https://viacep.com.br/

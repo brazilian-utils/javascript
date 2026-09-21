@@ -3,7 +3,6 @@
 namespace BrazilianUtils.Bridge
 {
 
-
     /// <summary>Options of `formatCnpj`.</summary>
     public sealed class FormatCnpjOptions
     {
@@ -23,12 +22,8 @@ namespace BrazilianUtils.Bridge
         private static readonly int[][] CLASS0 = { new[] { 0x30, 0x39 } };
         private static readonly int[][] CLASS1 = { new[] { 0x30, 0x39 }, new[] { 0x41, 0x5a }, new[] { 0x61, 0x7a } };
 
-
-
         private const string PATTERN = "00.000.000/0000-00";
         private const string OBFUSCATED_PATTERN = "**.000.000/0000-**";
-
-
 
         /// <summary>
         /// Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value.

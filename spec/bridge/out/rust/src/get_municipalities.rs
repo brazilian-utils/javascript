@@ -4,14 +4,6 @@
 
 use crate::runtime;
 
-
-
-
-
-
-
-
-
 /// One Brazilian municipality, as the IBGE publishes it.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Municipality {

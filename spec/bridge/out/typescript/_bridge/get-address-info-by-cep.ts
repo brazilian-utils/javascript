@@ -84,8 +84,6 @@ export type GetAddressInfoByCepOptions = {
 	providers?: CepProvider[];
 };
 
-
-
 /**
  * Reads the address ViaCEP answers with.
  *

@@ -4,7 +4,7 @@
  * Usage: `node compiler/cli.ts [target...]`
  */
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, extname, resolve } from "node:path";
 
 import { compileModule } from "./frontend.ts";
 import { type Module } from "./ir.ts";
@@ -17,6 +17,27 @@ import { emit as emitRust } from "./targets/rust.ts";
 import { emit as emitTypeScript } from "./targets/typescript.ts";
 
 const root = resolve(import.meta.dirname, "..");
+
+/** The files whose blank lines are content rather than layout. */
+const VERBATIM = new Set([".json", ".toml", ".mod"]);
+
+/**
+ * Closes the gaps pruning leaves behind.
+ *
+ * An emitter joins its sections with a blank line between them, so a module that reaches none
+ * of the constants, or none of the errors, ends up with a run of empty lines where they would
+ * have been. Every target spells a string literal with escapes rather than a real newline, so
+ * a run of three or more newlines in an emitted file is always layout and never content.
+ *
+ * @param {string} path - The file being written, whose extension says whether to leave it be.
+ * @param {string} contents - What the emitter produced.
+ * @returns {string} The same file with at most one blank line in a row.
+ */
+const tidy = (path: string, contents: string): string => {
+	if (VERBATIM.has(extname(path))) return contents;
+
+	return `${contents.replaceAll(/\n{3,}/g, "\n\n").trimEnd()}\n`;
+};
 
 const targets: Record<string, (module: Module, modules: Module[]) => Record<string, string>> = {
 	typescript: emitTypeScript,
@@ -53,7 +74,7 @@ for (const target of selected) {
 			const full = resolve(outDir, path);
 
 			mkdirSync(dirname(full), { recursive: true });
-			writeFileSync(full, contents);
+			writeFileSync(full, tidy(full, contents));
 			count++;
 		}
 	}

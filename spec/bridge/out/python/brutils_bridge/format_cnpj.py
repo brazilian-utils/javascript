@@ -34,14 +34,8 @@ from .runtime import (
 class0: CharClass = ((0x30, 0x39),)
 class1: CharClass = ((0x30, 0x39), (0x41, 0x5a), (0x61, 0x7a),)
 
-
-
 PATTERN = "00.000.000/0000-00"
 OBFUSCATED_PATTERN = "**.000.000/0000-**"
-
-
-
-
 
 @dataclass
 class FormatCnpjOptions:
@@ -53,10 +47,6 @@ class FormatCnpjOptions:
     version: Optional[int] = None
     # Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`).
     obfuscate: Optional[bool] = None
-
-
-
-
 
 def format_cnpj(value: Any, options: Optional[FormatCnpjOptions] = None) -> str:
     """Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value.
@@ -80,7 +70,6 @@ def format_cnpj(value: Any, options: Optional[FormatCnpjOptions] = None) -> str:
     if is_truthy(options_obfuscate):
         pattern = OBFUSCATED_PATTERN
     return layout(cleaned, pattern, is_truthy(options_pad))
-
 
 def layout(value: str, pattern: str, pad: bool) -> str:
     """Lays a value over a pattern.

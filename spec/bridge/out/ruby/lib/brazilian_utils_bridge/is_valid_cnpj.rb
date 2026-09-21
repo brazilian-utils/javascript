@@ -40,12 +40,8 @@ module BrazilianUtilsBridge
     FIRST_DIGIT_WEIGHTS = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2].freeze
     SECOND_DIGIT_WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2].freeze
 
-
-
     # Options of `isValidCnpj`.
     IsValidCnpjOptions = Struct.new(:version, keyword_init: true)
-
-
 
     # Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.
     #

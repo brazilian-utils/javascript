@@ -78,8 +78,6 @@ pub struct GetAddressInfoByCepOptions {
 	pub providers: Option<Vec<String>>,
 }
 
-
-
 /// Reads the address ViaCEP answers with.
 ///
 /// @see Based on: https://viacep.com.br/

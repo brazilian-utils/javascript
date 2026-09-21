@@ -8,12 +8,8 @@ import "brazilianutils/bridge/runtime"
 var class0 = runtime.CharClass{{0x30, 0x39}}
 var class1 = runtime.CharClass{{0x30, 0x39}, {0x41, 0x5a}, {0x61, 0x7a}}
 
-
-
 const PATTERN = "00.000.000/0000-00"
 const OBFUSCATED_PATTERN = "**.000.000/0000-**"
-
-
 
 // FormatCnpjOptions Options of `formatCnpj`.
 type FormatCnpjOptions struct {
@@ -24,8 +20,6 @@ type FormatCnpjOptions struct {
 	// Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`).
 	Obfuscate *bool
 }
-
-
 
 // FormatCnpj Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value.
 func FormatCnpj(value string, options *FormatCnpjOptions) string {

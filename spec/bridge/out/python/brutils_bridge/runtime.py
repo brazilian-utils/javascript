@@ -23,7 +23,6 @@ _JS_WHITESPACE = frozenset(
     + list(range(0x2000, 0x200B))
 )
 
-
 class PatternStep:
     """One step of a compiled pattern: repeat a class between `min` and `max` times."""
 
@@ -35,7 +34,6 @@ class PatternStep:
         self.max = maximum
         self.capture = capture
 
-
 def in_class(char_class: CharClass, code: int) -> bool:
     """Whether a code point belongs to a class."""
     for start, end in char_class:
@@ -44,14 +42,12 @@ def in_class(char_class: CharClass, code: int) -> bool:
 
     return False
 
-
 def code_at(value: str, index: int) -> int:
     """Reads one code unit, or -1 when the index is out of range."""
     if index < 0 or index >= len(value):
         return -1
 
     return ord(value[index])
-
 
 def class_has(char_class: CharClass, value: str) -> bool:
     """Whether any character of the value belongs to the class."""
@@ -61,11 +57,9 @@ def class_has(char_class: CharClass, value: str) -> bool:
 
     return False
 
-
 def keep_class(char_class: CharClass, value: str) -> str:
     """Keeps only the characters of the value that belong to the class."""
     return "".join(char for char in value if in_class(char_class, ord(char)))
-
 
 def pattern_test(steps: Sequence[PatternStep], value: str) -> bool:
     """Runs a compiled pattern against the whole value, greedily and without backtracking."""
@@ -87,7 +81,6 @@ def pattern_test(steps: Sequence[PatternStep], value: str) -> bool:
 
     return index == len(value)
 
-
 def js_trim(value: str) -> str:
     """Strips the code points JavaScript's `trim()` strips."""
     start = 0
@@ -100,11 +93,9 @@ def js_trim(value: str) -> str:
 
     return value[start:end]
 
-
 def pad_start(value: str, length: int, filler: str) -> str:
     """Left pads the value with a filler up to a length."""
     return value.rjust(length, filler)
-
 
 def as_string(value: Any) -> str:
     """Reads a value as a string the way JavaScript's `String(value)` does."""
@@ -126,11 +117,9 @@ def as_string(value: Any) -> str:
     except Exception:  # noqa: BLE001 - a value with no string form reads as empty, as in JavaScript
         return ""
 
-
 def is_truthy(value: Any) -> bool:
     """Reads an optional flag the way JavaScript reads truthiness."""
     return bool(value)
-
 
 def list_get(values: List[Any], index: int) -> Any:
     """Reads one element, or None when the index is out of range."""
@@ -138,7 +127,6 @@ def list_get(values: List[Any], index: int) -> Any:
         return None
 
     return values[index]
-
 
 class Dataset:
     """A dataset: the rows in the baked full order, and the rows of each key."""
@@ -149,21 +137,17 @@ class Dataset:
         self.all = [rows[index] for index in full_order]
         self.by_key = {key: [rows[index] for index in indexes] for key, indexes in groups}
 
-
 def make_dataset(rows, groups, full_order):
     """Materialises a dataset, resolving both orders once."""
     return Dataset(rows, groups, full_order)
-
 
 def data_all(table):
     """Every row of a dataset, in the baked full order."""
     return table.all
 
-
 def data_rows(table, key):
     """The rows whose first column is the key given, empty when the key is unknown."""
     return table.by_key.get(key, [])
-
 
 class HttpResponse:
     """What a provider answered: the HTTP status, whether it counts as a success, and the body."""
@@ -174,7 +158,6 @@ class HttpResponse:
         self.status = status
         self.ok = ok
         self.body = body
-
 
 def _http_target(url):
     """The origin every request is sent to instead of its own, when one is set.
@@ -188,7 +171,6 @@ def _http_target(url):
         return url
 
     return base + "/" + re.sub(r"^https?://", "", url)
-
 
 def http_get(url, retries, retry_delay_ms):
     """Performs an HTTP GET, retrying a transient transport failure with a linear backoff."""
@@ -218,21 +200,17 @@ def http_get(url, retries, retry_delay_ms):
 
         return HttpResponse(status, 200 <= status < 300, body)
 
-
 def is_number(value):
     """Whether the caller handed a number where a string or a number was declared."""
     return isinstance(value, (int, float)) and not isinstance(value, bool)
-
 
 def is_list(value):
     """Whether a value is a list."""
     return isinstance(value, (list, tuple))
 
-
 def list_has(items, value):
     """Whether a list holds a value."""
     return value in items
-
 
 def _json_field(body, key):
     """Reads one field of a JSON body, treating anything that is not an object as empty."""
@@ -241,13 +219,11 @@ def _json_field(body, key):
 
     return body.get(key)
 
-
 def json_string(body, key):
     """Reads a string field of a JSON body, answering "" when it is missing or not a string."""
     found = _json_field(body, key)
 
     return found if isinstance(found, str) else ""
-
 
 def json_int(body, key):
     """Reads an integer field of a JSON body, answering -1 when it is missing or not a number."""
@@ -258,16 +234,13 @@ def json_int(body, key):
 
     return int(found)
 
-
 def json_truthy(body, key):
     """Whether a field of a JSON body is truthy, the way JavaScript reads truthiness."""
     return bool(_json_field(body, key))
 
-
 def json_is_true(body, key):
     """Whether a field of a JSON body is exactly True."""
     return _json_field(body, key) is True
-
 
 class Attempts:
     """The running attempts of a race, and what each one ended with."""
@@ -279,11 +252,9 @@ class Attempts:
         self.total = total
         self.outcomes = []
 
-
 def _kinds_of(error):
     """The error name and every name it inherits from, which is what a failure is matched on."""
     return [kind.__name__ for kind in type(error).__mro__ if kind is not object]
-
 
 def start_all(run, items, argument):
     """Starts one attempt per item, all at once.
@@ -304,7 +275,6 @@ def start_all(run, items, argument):
 
     return attempts
 
-
 def first_success(attempts):
     """The value of the first attempt that succeeds, or None once every attempt has failed."""
     while len(attempts.outcomes) < attempts.total:
@@ -315,7 +285,6 @@ def first_success(attempts):
             return outcome[1]
 
     return None
-
 
 def any_failed_with(attempts, kind):
     """Whether any attempt failed with a given error kind."""

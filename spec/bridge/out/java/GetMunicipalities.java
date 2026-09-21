@@ -4,12 +4,6 @@
 public final class GetMunicipalities {
     private GetMunicipalities() {}
 
-
-
-
-
-
-
     /** Brazilian municipalities published by the IBGE, by state, in the pt-BR collation order the JavaScript package returns. */
     private static final Runtime.Dataset MUNICIPALITIES = new Runtime.Dataset(
         municipalitiesRows(), new String[] {"AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"}, municipalitiesGroups(), municipalitiesOrder());

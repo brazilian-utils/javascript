@@ -64,20 +64,12 @@ PATTERN_NUMERIC_FORMAT = (
 FIRST_DIGIT_WEIGHTS = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 SECOND_DIGIT_WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
-
-
-
-
 @dataclass
 class IsValidCnpjOptions:
     """Options of `isValidCnpj`."""
 
     # Which CNPJ format to accept: `1` numeric only, `2` alphanumeric (default: `1`).
     version: Optional[int] = None
-
-
-
-
 
 def is_valid_cnpj(cnpj: Any, options: Optional[IsValidCnpjOptions] = None) -> bool:
     """Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.
@@ -104,7 +96,6 @@ def is_valid_cnpj(cnpj: Any, options: Optional[IsValidCnpjOptions] = None) -> bo
         return False
     return has_valid_checksum(numeric)
 
-
 def check_digit(base: str, weights: List[int]) -> int:
     """Computes one CNPJ check digit from the base and its weight vector.
     """
@@ -116,14 +107,12 @@ def check_digit(base: str, weights: List[int]) -> int:
         return 0
     return (11 - remainder)
 
-
 def has_valid_checksum(cnpj: str) -> bool:
     """Whether both check digits of a sanitized 14 character CNPJ match its base.
     """
     if ((code_at(cnpj, 12) - 48) != check_digit(cnpj, FIRST_DIGIT_WEIGHTS)):
         return False
     return ((code_at(cnpj, 13) - 48) == check_digit(cnpj, SECOND_DIGIT_WEIGHTS))
-
 
 def is_repeated(value: str) -> bool:
     """Whether every character of the value is the same one.

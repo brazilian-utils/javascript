@@ -37,17 +37,11 @@ const PATTERN_NUMERIC_FORMAT: readonly PatternStep[] = [
 const FIRST_DIGIT_WEIGHTS = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 const SECOND_DIGIT_WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
-
-
-
-
 /** Options of `isValidCnpj`. */
 export type IsValidCnpjOptions = {
 	/** Which CNPJ format to accept: `1` numeric only, `2` alphanumeric (default: `1`). */
 	version?: 1 | 2;
 };
-
-
 
 /**
  * Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.

@@ -38,15 +38,11 @@ var PATTERN_NUMERIC_FORMAT = []runtime.PatternStep{
 var FIRST_DIGIT_WEIGHTS = []int64{5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2}
 var SECOND_DIGIT_WEIGHTS = []int64{6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2}
 
-
-
 // IsValidCnpjOptions Options of `isValidCnpj`.
 type IsValidCnpjOptions struct {
 	// Which CNPJ format to accept: `1` numeric only, `2` alphanumeric (default: `1`).
 	Version *int64
 }
-
-
 
 // IsValidCnpj Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.
 //

@@ -7,12 +7,8 @@ use crate::runtime;
 const CLASS0: runtime::CharClass = &[(0x30, 0x39)];
 const CLASS1: runtime::CharClass = &[(0x30, 0x39), (0x41, 0x5a), (0x61, 0x7a)];
 
-
-
 const PATTERN: &str = "00.000.000/0000-00";
 const OBFUSCATED_PATTERN: &str = "**.000.000/0000-**";
-
-
 
 /// Options of `formatCnpj`.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -24,8 +20,6 @@ pub struct FormatCnpjOptions {
 	/// Whether to hide the first 2 digits and the 2 check digits with `*` (default: `false`).
 	pub obfuscate: Option<bool>,
 }
-
-
 
 /// Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value.
 pub fn format_cnpj(value: &str, options: Option<&FormatCnpjOptions>) -> String {
