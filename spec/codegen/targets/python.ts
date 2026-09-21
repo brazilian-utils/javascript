@@ -2,7 +2,7 @@
  * Python emitter: produces modules shaped like `brutils/`, with the names and the
  * `None` returning formatter contract that package already exposes.
  */
-import { type Step, type UtilitySpec } from "../ir.ts";
+import { type Step, type UtilitySpec, resolveCharset } from "../ir.ts";
 import { type Plan, type PlannedFunction, expandPipeline, naming } from "../plan.ts";
 
 /**
@@ -65,11 +65,17 @@ const prelude = (plan: Plan): string => {
 			const { algorithm } = entry;
 			const body =
 				algorithm.weights.kind === "fixed"
-					? `    weights = [${algorithm.weights.values.join(", ")}]
-    total = sum(int(base[index]) * weight for index, weight in enumerate(weights))`
-					: `    total = sum(
-        int(digit) * (len(base) + 1 - index) for index, digit in enumerate(base)
-    )`;
+					? `    weights = (${algorithm.weights.values.join(", ")},)
+    total = 0
+
+    for index, weight in enumerate(weights):
+        total += (ord(base[index]) - 48) * weight`
+					: `    total = 0
+    weight = len(base) + 1
+
+    for char in base:
+        total += (ord(char) - 48) * weight
+        weight -= 1`;
 
 			return `def check_digit_${entry.symbol}(base: str) -> int:
     """${algorithm.description}
@@ -87,7 +93,7 @@ def verify_${entry.symbol}(digits: str) -> bool:
     for position in (${algorithm.positions.join(", ")},):
         if len(digits) <= position:
             return False
-        if int(digits[position]) != check_digit_${entry.symbol}(digits[:position]):
+        if ord(digits[position]) - 48 != check_digit_${entry.symbol}(digits[:position]):
             return False
 
     return True`;
@@ -184,6 +190,66 @@ const bailValue = (spec: UtilitySpec, planned: PlannedFunction): string => {
 };
 
 /**
+ * Renders a charset as the body of a regex character class, every code point written as a
+ * `\uXXXX` escape so that no character can be read as a class metacharacter or a range.
+ *
+ * @param {string|string[]} names - The charset name, or the union of several.
+ * @returns {string} The class body, without the brackets.
+ */
+/**
+ * Renders one code point as a regex escape.
+ *
+ * @param {number} code - The code point.
+ * @returns {string} The escape sequence.
+ */
+const escapeCodePoint = (code: number): string => {
+	const hex = code.toString(16);
+
+	return code > 0xff_ff ? `\\U${hex.padStart(8, "0")}` : `\\u${hex.padStart(4, "0")}`;
+};
+
+const regexClass = (names: string | string[]): string => {
+	const { single, ranges } = resolveCharset(names);
+	const points = single.map((code) => escapeCodePoint(code));
+	const spans = ranges.map(([from, to]) => `${escapeCodePoint(from)}-${escapeCodePoint(to)}`);
+
+	return [...points, ...spans].join("");
+};
+
+/**
+ * The regex a `guard-shape` step becomes, with one capture group per digit run so that the
+ * digits come straight out of the match instead of being filtered out of the string again.
+ *
+ * @param {Step} step - The guard-shape step.
+ * @returns {string} The regex source.
+ */
+const shapeRegex = (step: Extract<Step, { op: "guard-shape" }>): string => {
+	const edge = step.trim === undefined ? "" : `[${regexClass(step.trim)}]*`;
+	const separator = step.separators === undefined ? "" : `[${regexClass(step.separators)}]*`;
+	const digits = `[${regexClass("ascii-digits")}]`;
+	const groups = step.groups.map((size) => `(${digits}{${size}})`).join(separator);
+
+	// `\Z` rather than `$`: Python's `$` also matches before a trailing newline.
+	return `\\A${edge}${groups}${edge}\\Z`;
+};
+
+/**
+ * Whether the profile is the common "match a shape, then keep the digits" shape, which
+ * collapses into a single regex.
+ *
+ * @param {PlannedFunction} planned - The planned function.
+ * @returns {boolean} True when the fast path applies.
+ */
+const hasShapeFastPath = (planned: PlannedFunction): boolean => {
+	const steps = expandPipeline(planned.profile);
+
+	return (
+		steps.some((step) => step.op === "guard-shape") &&
+		steps.some((step) => step.op === "sanitize" && step.keep === "ascii-digits")
+	);
+};
+
+/**
  * Renders one pipeline step as statements of the target language.
  *
  * @param {Step} step - The step to render.
@@ -193,23 +259,26 @@ const bailValue = (spec: UtilitySpec, planned: PlannedFunction): string => {
  */
 const renderStep = (step: Step, spec: UtilitySpec, planned: PlannedFunction): string => {
 	const bail = bailValue(spec, planned);
+	const constant = `_${naming.snake(planned.spec.id).toUpperCase()}`;
 
 	switch (step.op) {
 		case "guard-shape": {
-			const value = step.trim === undefined ? "raw" : `trim_by(raw, is_${naming.snake(step.trim)})`;
-			const separators =
-				step.separators === undefined ? "" : `, is_${naming.snake(step.separators)}`;
+			return `    match = ${constant}_SHAPE.match(raw)
 
-			return `    if not match_shape(${value}, [${step.groups.join(", ")}]${separators}):
-        return ${bail}`;
+    if match is None:
+        return ${bail}
+
+    digits = "".join(match.groups())`;
 		}
 		case "guard-charset": {
-			return `    for char in raw:
-        if not (${step.allow.map((name) => `is_${naming.snake(name)}(ord(char))`).join(" or ")}):
-            return ${bail}`;
+			return `    if ${constant}_ALLOWED.match(raw) is None:
+        return ${bail}`;
 		}
 		case "sanitize": {
-			return `    digits = keep_by(raw, is_${naming.snake(step.keep)})`;
+			// Already bound by the shape guard's capture groups.
+			if (hasShapeFastPath(planned)) return "";
+
+			return `    digits = _NON_DIGITS.sub("", raw)`;
 		}
 		case "guard-length": {
 			return `    if len(digits) != ${step.equals}:
@@ -298,10 +367,27 @@ const renderFunction = (planned: PlannedFunction): string => {
 
 	const body = expandPipeline(planned.profile)
 		.map((step) => renderStep(step, spec, planned))
+		.filter((rendered) => rendered !== "")
 		.join("\n");
 	const tail = tailOf(spec, planned);
+	const constant = `_${naming.snake(spec.id).toUpperCase()}`;
+	const constants = expandPipeline(planned.profile)
+		.map((step) => {
+			if (step.op === "guard-shape")
+				return `${constant}_SHAPE = re.compile(${escapeLiteral(shapeRegex(step))})\n`;
 
-	return `def ${planned.name}(${parameters}) -> ${returnType}:
+			if (step.op === "guard-charset") {
+				const allowed = escapeLiteral(`\\A[${regexClass(step.allow)}]*\\Z`);
+
+				return `${constant}_ALLOWED = re.compile(${allowed})\n`;
+			}
+
+			return "";
+		})
+		.join("");
+
+	return `${constants}
+def ${planned.name}(${parameters}) -> ${returnType}:
     """${spec.summary}
 
     Profile: ${planned.profileName} — ${planned.profile.description}
@@ -342,17 +428,22 @@ export const emit = (plan: Plan): Record<string, string> => {
 			...plan.charsets.map((charset) => `is_${charset.symbol}`),
 			...plan.algorithms.map((entry) => `verify_${entry.symbol}`),
 		].filter((symbol) => new RegExp(`\\b${symbol}\\b`).test(source));
-		const typing = source.includes("Optional[str]") ? "from typing import Optional\n\n" : "";
+		const typing = source.includes("Optional[str]") ? "from typing import Optional\n" : "";
+		const regexImport = source.includes("re.compile") ? "import re\n" : "";
+		const nonDigitsPattern = escapeLiteral(`[^${regexClass("ascii-digits")}]`);
+		const nonDigits = source.includes("_NON_DIGITS")
+			? `_NON_DIGITS = re.compile(${nonDigitsPattern})\n\n`
+			: "";
+		const importedSymbols = symbols.map((symbol) => `    ${symbol},`).join("\n");
+		const runtimeImport =
+			symbols.length === 0 ? "" : `from _spec_runtime import (\n${importedSymbols}\n)\n`;
 
 		files[path] = `# Code generated from spec/utilities by spec/codegen. DO NOT EDIT.
 """${functions.map((planned) => planned.spec.summary).join(" ")}"""
 
-${typing}from _spec_runtime import (
-${symbols.map((symbol) => `    ${symbol},`).join("\n")}
-)
+${regexImport}${typing}${runtimeImport}
 
-
-${source}
+${nonDigits}${source}
 `;
 	}
 

@@ -2,8 +2,75 @@
  * Ruby emitter: module functions under `BrazilianUtils::*Utils`, keeping the `valid?`
  * predicate name and the `nil` returning formatter the gem already exposes.
  */
-import { type Step, type UtilitySpec } from "../ir.ts";
+import { type Step, type UtilitySpec, resolveCharset } from "../ir.ts";
 import { type Plan, type PlannedFunction, expandPipeline, naming } from "../plan.ts";
+
+/**
+ * Renders a charset as the body of a regex character class, every code point written as a
+ * `\uXXXX` escape so that no character can be read as a class metacharacter or a range.
+ *
+ * @param {string|string[]} names - The charset name, or the union of several.
+ * @returns {string} The class body, without the brackets.
+ */
+/**
+ * Renders one code point as a regex escape.
+ *
+ * @param {number} code - The code point.
+ * @returns {string} The escape sequence.
+ */
+const escapeCodePoint = (code: number): string => {
+	const hex = code.toString(16);
+
+	return code > 0xff_ff ? `\\u{${hex}}` : `\\u${hex.padStart(4, "0")}`;
+};
+
+const regexClass = (names: string | string[]): string => {
+	const { single, ranges } = resolveCharset(names);
+	const points = single.map((code) => escapeCodePoint(code));
+	const spans = ranges.map(([from, to]) => `${escapeCodePoint(from)}-${escapeCodePoint(to)}`);
+
+	return [...points, ...spans].join("");
+};
+
+/**
+ * The regex a `guard-shape` step becomes, with one capture group per digit run.
+ *
+ * @param {Step} step - The guard-shape step.
+ * @returns {string} The regex source.
+ */
+const shapeRegex = (step: Extract<Step, { op: "guard-shape" }>): string => {
+	const edge = step.trim === undefined ? "" : `[${regexClass(step.trim)}]*`;
+	const separator = step.separators === undefined ? "" : `[${regexClass(step.separators)}]*`;
+	const digits = `[${regexClass("ascii-digits")}]`;
+	const groups = step.groups.map((size) => `(${digits}{${size}})`).join(separator);
+
+	// `\A`/`\z` rather than `^`/`$`: in Ruby those are line anchors.
+	return `\\A${edge}${groups}${edge}\\z`;
+};
+
+/**
+ * Whether the profile matches a shape and then keeps the digits, which collapses into one regex.
+ *
+ * @param {PlannedFunction} planned - The planned function.
+ * @returns {boolean} True when the fast path applies.
+ */
+const hasShapeFastPath = (planned: PlannedFunction): boolean => {
+	const steps = expandPipeline(planned.profile);
+
+	return (
+		steps.some((step) => step.op === "guard-shape") &&
+		steps.some((step) => step.op === "sanitize" && step.keep === "ascii-digits")
+	);
+};
+
+/**
+ * The prefix of the module level constants belonging to one function.
+ *
+ * @param {PlannedFunction} planned - The planned function.
+ * @returns {string} The constant prefix.
+ */
+const constantPrefix = (planned: PlannedFunction): string =>
+	naming.snake(planned.spec.id).toUpperCase();
 
 /**
  * Renders a string as a Ruby double quoted literal, where `#` also has to be escaped because
@@ -69,8 +136,22 @@ const prelude = (plan: Plan): string => {
 			const body =
 				algorithm.weights.kind === "fixed"
 					? `      weights = [${algorithm.weights.values.join(", ")}]
-      total = weights.each_with_index.sum { |weight, index| base[index].to_i * weight }`
-					: `      total = base.chars.each_with_index.sum { |digit, index| digit.to_i * (base.length + 1 - index) }`;
+      total = 0
+      index = 0
+
+      while index < weights.length
+        total += (base.getbyte(index) - 48) * weights[index]
+        index += 1
+      end`
+					: `      total = 0
+      index = 0
+      weight = base.length + 1
+
+      while index < base.length
+        total += (base.getbyte(index) - 48) * weight
+        weight -= 1
+        index += 1
+      end`;
 
 			return `    # ${algorithm.description}
     #
@@ -84,10 +165,14 @@ ${body}
 
     # Whether every check digit of the value matches its base.
     def self.verify_${entry.symbol}(digits)
-      [${algorithm.positions.join(", ")}].all? do |position|
-        digits.length > position &&
-          digits[position].to_i == check_digit_${entry.symbol}(digits[0...position])
-      end
+${algorithm.positions
+	.map(
+		(position) => `      return false if digits.length <= ${position}
+      return false unless (digits.getbyte(${position}) - 48) == check_digit_${entry.symbol}(digits[0...${position}])`,
+	)
+	.join("\n\n")}
+
+      true
     end`;
 		})
 		.join("\n\n");
@@ -200,28 +285,23 @@ const renderStep = (step: Step, spec: UtilitySpec, planned: PlannedFunction): st
 	const bail = bailValue(spec, planned);
 	const runtime = "BrazilianUtils::SpecRuntime";
 
+	const constant = constantPrefix(planned);
+
 	switch (step.op) {
 		case "guard-shape": {
-			const value =
-				step.trim === undefined
-					? "raw"
-					: `${runtime}.trim_by(raw, ${runtime}.method(:${naming.snake(step.trim)}?))`;
-			const separators =
-				step.separators === undefined
-					? ""
-					: `, ${runtime}.method(:${naming.snake(step.separators)}?)`;
+			return `      match = ${constant}_SHAPE.match(raw)
+      return ${bail} if match.nil?
 
-			return `      return ${bail} unless ${runtime}.match_shape(${value}, [${step.groups.join(", ")}]${separators})`;
+      digits = match.captures.join`;
 		}
 		case "guard-charset": {
-			return `      raw.each_char do |char|
-        code = char.ord
-
-        return ${bail} unless ${step.allow.map((name) => `${runtime}.${naming.snake(name)}?(code)`).join(" || ")}
-      end`;
+			return `      return ${bail} if ${constant}_ALLOWED.match(raw).nil?`;
 		}
 		case "sanitize": {
-			return `      digits = ${runtime}.keep_by(raw, ${runtime}.method(:${naming.snake(step.keep)}?))`;
+			// Already bound by the shape guard's capture groups.
+			if (hasShapeFastPath(planned)) return "";
+
+			return `      digits = raw.gsub(NON_DIGITS, '')`;
 		}
 		case "guard-length": {
 			return `      return ${bail} unless digits.length == ${step.equals}`;
@@ -291,10 +371,27 @@ const renderFunction = (planned: PlannedFunction): string => {
 
 	const body = expandPipeline(planned.profile)
 		.map((step) => renderStep(step, spec, planned))
+		.filter((rendered) => rendered !== "")
 		.join("\n");
 	const tail = tailOf(spec, planned);
+	const constant = constantPrefix(planned);
+	const constants = expandPipeline(planned.profile)
+		.map((step) => {
+			if (step.op === "guard-shape")
+				return `    ${constant}_SHAPE = Regexp.new(${escapeLiteral(shapeRegex(step))}).freeze\n`;
 
-	return `    # ${spec.summary}
+			if (step.op === "guard-charset") {
+				const allowed = escapeLiteral(`\\A[${regexClass(step.allow)}]*\\z`);
+
+				return `    ${constant}_ALLOWED = Regexp.new(${allowed}).freeze\n`;
+			}
+
+			return "";
+		})
+		.join("");
+
+	return `${constants}
+    # ${spec.summary}
     #
     # Profile: ${planned.profileName} — ${planned.profile.description}
     #
@@ -320,6 +417,8 @@ export const emit = (plan: Plan): Record<string, string> => {
 		modules.set(planned.module, [...(modules.get(planned.module) ?? []), planned]);
 	}
 
+	const nonDigitsPattern = escapeLiteral(`[^${regexClass("ascii-digits")}]`);
+
 	for (const [module, functions] of modules) {
 		const shortName = module.split("::").at(-1) ?? module;
 		const fileName = shortName
@@ -335,7 +434,15 @@ require_relative 'spec_runtime'
 
 module BrazilianUtils
   # ${functions.map((planned) => planned.spec.summary).join(" ")}
-  module ${shortName}
+  module ${shortName}${
+		functions.some(
+			(planned) =>
+				!hasShapeFastPath(planned) &&
+				expandPipeline(planned.profile).some((step) => step.op === "sanitize"),
+		)
+			? `\n    NON_DIGITS = Regexp.new(${nonDigitsPattern}).freeze\n`
+			: ""
+	}
 ${functions.map((planned) => renderFunction(planned)).join("\n\n")}
   end
 end

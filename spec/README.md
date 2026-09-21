@@ -2,7 +2,10 @@
 
 A prototype of describing a utility once, as data, and emitting it to every language Brazilian
 Utils publishes. Read [EXPLORATION.md](EXPLORATION.md) first: it explains why this exists, what it
-proves, what it does not, and what to do next.
+proves, what it does not, and what to do next. Then
+[BINDINGS-INVESTIGATION.md](BINDINGS-INVESTIGATION.md), which measures this approach against the
+alternative — one binary core plus bindings — in five languages, and says why generated source
+wins.
 
 Nothing here ships in the npm package. `src/` is untouched, and the build, the bundle and the
 public API are exactly what they were.
@@ -66,6 +69,15 @@ spec/conformance/run-all.sh`.
 If a utility needs a step the IR does not have, add the step to `schema/utility.schema.json`, to
 `Step` in `codegen/ir.ts`, to the interpreter, and to the six emitters — in that order. That cost
 is the honest price of a new kind of behaviour, and it is why the IR should stay small.
+
+## Benchmarking a target
+
+`bash spec/bench/run-all.sh` builds every artifact and prints one JSON line per measurement into
+`spec/bench/results.jsonl`; `python3 spec/bench/table.py` folds that into the table in the
+investigation. A new or changed emitter is not done until its output has been measured against
+idiomatic handwritten code for that language: emitting a per code point loop into a language whose
+regex engine is written in C costs 2–4×, which is how the Python and Ruby emitters were found to
+be slow and then fixed.
 
 ## Adding a language
 

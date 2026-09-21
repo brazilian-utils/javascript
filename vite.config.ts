@@ -160,6 +160,7 @@ export default defineConfig({
 			".claude",
 			"CHANGELOG.md",
 			"spec/vectors",
+			"spec/bench/corpus.json",
 		],
 		singleQuote: false,
 		sortImports: true,
