@@ -15,10 +15,18 @@ applied to every file a `Cargo.toml` lists). **Linters** `cargo clippy -- -D war
 | `Record` | `#[derive(Clone, Debug, PartialEq)] struct` with `pub` fields |
 | Capability environment | `&dyn Capabilities` |
 
-Every heap value is **owned wherever it is bound** — parameters, locals and struct fields alike,
-never `&str`/`&[T]`. `docs/targets/rust-sketch.md` planned the opposite (parameters borrow, the
-sketch's central claim); [ADR 0009](../decisions/0009-rust-values-are-owned.md) records why that
-plan does not survive contact with the shared Target AST, and what it costs instead.
+Every **local and struct field** is owned wherever it is bound, never `&str`/`&[T]` — a `let`, a
+record field, a list item, `Some(...)`, `return`, always builds an owned value. A **function
+parameter** of `String`/`Enum`/`List` type borrows (`&str`/`&[T]`) instead when a whole-program
+pre-pass proves it is never returned, stored, assigned to or forwarded to another owned parameter;
+otherwise it stays owned, the same as everything else. `docs/targets/rust-sketch.md` planned
+parameters borrowing from the start, on a single-function argument that did not survive contact
+with the shared Target AST; [ADR 0009](../decisions/0009-rust-values-are-owned.md) records exactly
+why not, and [ADR 0010](../decisions/0010-rust-parameters-borrow-where-sound.md) records what
+changed to make the sketch's original claim about parameters true after all — a pre-pass over the
+*whole* `CProgram`, computed once before lowering starts, rather than a decision made function by
+function during lowering or printing. `analysis/borrows.ts` is the pre-pass; `TParam.borrowed` and
+a "call" node's `borrowedArgs` (`backend/tast.ts`) are what it hands the lowerer and the printer.
 
 ## Shape of the output
 
@@ -94,6 +102,21 @@ infer it from which patterns happen to appear. Re-measured, `support::re_match_3
 pattern's scanner) alone is on the order of the input's own length to walk once — see
 `core/bench/README.md`'s Rust section for the current numbers and what dominates the call now that
 the matcher no longer does.
+
+**Parameter borrowing.** `analysis/borrows.ts` decides, once per build and before lowering starts,
+which `String`/`Enum`/`List` parameters may print as `&str`/`&[T]`; [ADR
+0010](../decisions/0010-rust-parameters-borrow-where-sound.md) has the full rule set and why
+starting optimistic and demoting on evidence is sound. In practice this reaches deepest along a
+read-only chain: `digit_at(value: &str, index: i64)` only reads a byte, `cpf_check_digit(cpf: &str,
+size: i64)` only forwards that byte read in a loop, and `is_valid_cpf(cpf: &str)` only forwards
+`cpf` into `keep_digits` and the trim — none of the three needs to own the 11-digit string, so
+none of them do, and the loop that used to clone it once per weight (`digit_at(cpf.to_owned(),
+index)`, 9 to 11 times per call) now passes a bare `&str` copy instead. `cnpj_check_digit(cnpj:
+&str, weights: &[i64])` borrows both parameters the same way, including the hoisted weight table
+(`LIB_CNPJ_TABLE1: &[i64]`, already a reference — passed bare, not `&`-wrapped again). A record
+parameter (`FormatCnpjOptions`, `AddressInfo`) and every return type stay owned regardless; ADR
+0010 explains why a borrowed struct field is a different, larger change this decision does not
+make.
 
 **`int.max`/`int.min`** detect a nested clamp (`x.max(lo).min(hi)`, the shape the source's own
 `int.min(int.max(x, lo), hi)` prints as by default) and merge it into `.clamp(lo, hi)`, which

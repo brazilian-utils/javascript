@@ -23,6 +23,7 @@
  * than the sketch expected because there is never a type mismatch for `?` to bridge.
  */
 
+import { computeBorrowableParams } from "../../analysis/borrows.ts";
 import type { Backend, DriverEntry, SupportNeeds } from "../../backend/generate.ts";
 import { ENGINE_VERSION } from "../../backend/generate.ts";
 import type { TargetSpec } from "../../backend/lower.ts";
@@ -495,6 +496,13 @@ function borrowed(expr: TExpr): string {
 	if (expr.kind === "list") {
 		const elem = expr.type.kind === "List" ? expr.type.elem : undefined;
 		return `&[${expr.items.map((item) => toOwned(item, elem)).join(", ")}]`;
+	}
+	// A name already carrying its own reference — a parameter the borrow pre-pass found read-only
+	// (`expr.borrowed`, set at lowering time; see `docs/decisions/0010-*.md`) or a hoisted constant
+	// table (always `&[T]`, never owned) — needs no second `&`; that would be `&&str`/`&&[T]`,
+	// exactly what `clippy::needless_borrow` (default warn) exists to catch, same as the cases above.
+	if (expr.kind === "name" && (expr.borrowed === true || hoistedConstantNames.has(expr.name))) {
+		return printedName(expr.name);
 	}
 	return `&${print(expr)}`;
 }
@@ -1135,14 +1143,23 @@ export function print(expr: TExpr): string {
 			return printedName(expr.name);
 		case "raw":
 			return expr.text;
-		case "call":
+		case "call": {
 			// Cross-module calls are not qualified at the call site (unlike a portable lowering's
 			// or a support helper's, which this file writes by hand): a candidate's own `emit` can
 			// call `print` on an argument that itself contains an ordinary Core function call,
 			// which happens at lowering time, before any module's cross-module import data exists
 			// to qualify it with. `crate::*` (see `printModule`) is what makes the bare name resolve
 			// regardless of when the text was produced.
-			return `${print(expr.callee)}(${expr.args.map((arg) => callArg(arg, currentScope)).join(", ")})`;
+			//
+			// `borrowedArgs[i]` (set at lowering time from the whole-program borrow map — see
+			// `docs/decisions/0010-*.md`) says the callee's own parameter there was found read-only;
+			// `borrowed()` is the same helper every support-function call already borrows its
+			// arguments with, reused here rather than duplicated.
+			const rendered = expr.args.map((arg, index) =>
+				expr.borrowedArgs?.[index] === true ? borrowed(arg) : callArg(arg, currentScope),
+			);
+			return `${print(expr.callee)}(${rendered.join(", ")})`;
+		}
 		case "method":
 			return `${print(expr.target)}.${snake(expr.name)}(${expr.args.map(print).join(", ")})`;
 		case "member": {
@@ -1492,10 +1509,27 @@ function indent(text: string, levels: number): string {
 		.join("\n");
 }
 
+/**
+ * A parameter's declared type: `rustType` for every parameter but the ones the borrow pre-pass
+ * (`analysis/borrows.ts`) found read-only, which print as a reference instead of an owned value —
+ * `TParam.borrowed` is this function's only input, consulted rather than decided here, exactly the
+ * way `docs/decisions/0010-*.md` describes. Only `String`/`List` have that distinction to make; a
+ * `Capabilities` environment is handled separately, by its own always-borrowed case below.
+ */
+function rustParamType(type: SemType, borrowed: boolean): string {
+	if (!borrowed) return rustType(type);
+	if (type.kind === "String" || type.kind === "Enum") return "&str";
+	if (type.kind === "List") return `&[${rustType(type.elem)}]`;
+	return rustType(type);
+}
+
 export function printFunction(fn: TFunc): string {
 	const scope = paramScope(fn.params.map((param) => ({ name: param.name, type: param.type })));
 	const params = fn.params
-		.map((param) => `${param.name}: ${param.type.kind === "Record" && param.type.name === "Capabilities" ? "&dyn Capabilities" : rustType(param.type)}`)
+		.map((param) => {
+			if (param.type.kind === "Record" && param.type.name === "Capabilities") return `${param.name}: &dyn Capabilities`;
+			return `${param.name}: ${rustParamType(param.type, param.borrowed === true)}`;
+		})
 		.join(", ");
 	const returnType = fn.fails.length > 0 ? `Result<${rustType(fn.ret)}, CoreError>` : rustType(fn.ret);
 	const doc = fn.doc === undefined ? "" : `${fn.doc.split("\n").map((line) => `/// ${line}`.trimEnd()).join("\n")}\n`;
@@ -2271,9 +2305,28 @@ function encodeValue(expr: string, type: SemType): string {
 function driverFiles(program: CProgram, entries: readonly DriverEntry[]): { path: string; text: string }[] {
 	const modules = [...emittedModules];
 	emittedModules.length = 0;
+	// The driver is hand-written-shaped generated code, outside the Target AST this file's own
+	// `print`/`callArg` consult for every other call site, so it borrows its own entry-point calls
+	// straight from the borrow map rather than through `borrowedArgs` (see `docs/decisions/0010-*.md`).
+	const borrows = computeBorrowableParams(program);
 
 	const cases = entries.map((entry) => {
-		const args = entry.params.map((type, index) => decodeArg(type, index));
+		const callee = program.functions.get(entry.coreName);
+		const borrowedHere = borrows.get(entry.coreName);
+		const args = entry.params.map((type, index) => {
+			const paramName = callee?.params[index]?.name;
+			const wantsBorrow = paramName !== undefined && borrowedHere?.has(paramName) === true;
+			// A borrowed `String`/`Enum` parameter reads `args[i].as_str()` directly — already a
+			// `&str` into the decoded JSON value, so there is no owned `String` to borrow a reference
+			// to in the first place (`clippy::unnecessary_to_owned`, default warn, is what building
+			// one only to immediately `&`-reference it would trip). A borrowed `List` has no such
+			// borrowed JSON accessor to read instead, so it still decodes into an owned `Vec` and
+			// borrows that: `&decoded` on a freshly built temporary is ordinary Rust temporary
+			// lifetime extension, not a dangling reference.
+			if (wantsBorrow && (type.kind === "String" || type.kind === "Enum")) return `args[${index}].as_str()`;
+			const decoded = decodeArg(type, index);
+			return wantsBorrow ? `&${decoded}` : decoded;
+		});
 		// `coreout`'s `lib.rs` re-exports every module flatly (see `driverFiles` below), and the
 		// driver brings that flat namespace in with `use coreout::*;`, so a bare name resolves.
 		// `dispatch`'s own `environment` parameter is already `&dyn Capabilities` (unlike
@@ -2517,6 +2570,11 @@ function printModuleTracked(module: TModule): string {
 export const RUST_BACKEND: Backend = {
 	spec: RUST_SPEC,
 	fileExtension: RUST_CONFIG.fileExtension,
+	// The whole-program pre-pass (see `analysis/borrows.ts` and `docs/decisions/0010-*.md`): the
+	// shared lowerer only consults this map (`TParam.borrowed`, a "call" node's `borrowedArgs`), it
+	// never computes it, and it is Rust's own free function precisely so no other target's build
+	// pays for it or is affected by it.
+	extraLowerOptions: (program) => ({ borrows: computeBorrowableParams(program) }),
 	printModule: printModuleTracked,
 	importPath,
 	support: supportModule,

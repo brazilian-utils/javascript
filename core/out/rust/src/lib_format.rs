@@ -6,10 +6,10 @@
 use crate::*;
 
 /// How many scalars of the value a pattern consumes.
-pub fn pattern_slots(pattern: String) -> i64 {
+pub fn pattern_slots(pattern: &str) -> i64 {
     let mut slots = 0;
     for index in 0..(pattern.len() as i64) {
-        let symbol = crate::support::char_at(&pattern, index).unwrap_or("".to_string());
+        let symbol = crate::support::char_at(pattern, index).unwrap_or("".to_string());
         if ((symbol == "0") || (symbol == "*")) {
             slots += 1;
         }
@@ -18,16 +18,16 @@ pub fn pattern_slots(pattern: String) -> i64 {
 }
 
 /// Formats a value against a pattern, optionally left padding it with zeros first.
-pub fn format_with_pattern(value: String, pattern: String, pad: bool) -> String {
+pub fn format_with_pattern(value: &str, pattern: &str, pad: bool) -> String {
     let padded = (if pad {
-        crate::support::pad_start(&value, pattern_slots(pattern.to_owned()), "0")
+        crate::support::pad_start(value, pattern_slots(pattern), "0")
     } else {
         value.to_owned()
     });
     let mut out = "".to_string();
     let mut taken = 0;
     for index in 0..(pattern.len() as i64) {
-        let symbol = crate::support::char_at(&pattern, index).unwrap_or("".to_string());
+        let symbol = crate::support::char_at(pattern, index).unwrap_or("".to_string());
         if ((symbol == "0") || (symbol == "*")) {
             if (taken >= (padded.len() as i64)) {
                 return out.to_owned();
@@ -51,9 +51,9 @@ pub fn format_with_pattern(value: String, pattern: String, pad: bool) -> String 
 }
 
 /// Groups the whole part with `.` every three digits, the pt-BR convention.
-pub fn group_thousands(whole: String) -> String {
+pub fn group_thousands(whole: &str) -> String {
     let mut out = vec![];
-    let scalars = crate::support::code_points(&whole);
+    let scalars = crate::support::code_points(whole);
     for index in 0..(scalars.len() as i64) {
         if ((index > 0) && ((((scalars.len() as i64) - index) % 3) == 0)) {
             out.push(46);

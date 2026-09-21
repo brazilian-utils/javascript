@@ -6,10 +6,10 @@
 use crate::*;
 
 /// Whether `needle` occurs in `points` at `start`.
-pub fn matches_at(points: Vec<i64>, needle: Vec<i64>, start: i64) -> bool {
+pub fn matches_at(points: &[i64], needle: &[i64], start: i64) -> bool {
     for offset in 0..(needle.len() as i64) {
-        if (crate::support::at(&points, (start + offset)).unwrap_or(-1)
-            != crate::support::at(&needle, offset).unwrap_or(-2))
+        if (crate::support::at(points, (start + offset)).unwrap_or(-1)
+            != crate::support::at(needle, offset).unwrap_or(-2))
         {
             return false;
         }
@@ -23,10 +23,10 @@ pub fn is_space(point: i64) -> bool {
 }
 
 /// The hexadecimal value of four scalars, for a `\uXXXX` escape.
-pub fn hex_value(points: Vec<i64>, start: i64) -> i64 {
+pub fn hex_value(points: &[i64], start: i64) -> i64 {
     let mut value = 0;
     for offset in 0..4 {
-        let point = crate::support::at(&points, (start + offset)).unwrap_or(48);
+        let point = crate::support::at(points, (start + offset)).unwrap_or(48);
         let mut digit = 0;
         if (48..=57).contains(&point) {
             digit = (point - 48);
@@ -47,14 +47,14 @@ pub fn hex_value(points: Vec<i64>, start: i64) -> i64 {
 /// The string value of a top-level JSON field, or absent when the field is missing or is not a
 /// string. Escapes are decoded; a surrogate pair is left as its two escaped halves, which no CEP
 /// provider emits.
-pub fn json_string_field(body: String, key: String) -> Option<String> {
-    let points = crate::support::code_points(&body);
+pub fn json_string_field(body: &str, key: &str) -> Option<String> {
+    let points = crate::support::code_points(body);
     let needle = crate::support::code_points(&crate::support::concat2(
-        &crate::support::concat2("\"", &key),
+        &crate::support::concat2("\"", key),
         "\"",
     ));
     for index in 0..(points.len() as i64) {
-        if !matches_at(points.to_owned(), needle.to_owned(), index) {
+        if !matches_at(&points, &needle, index) {
             continue;
         }
         let mut cursor = (index + (needle.len() as i64));
@@ -97,7 +97,7 @@ pub fn json_string_field(body: String, key: String) -> Option<String> {
                             cursor += 2;
                         } else {
                             if (escaped == 117) {
-                                out.push(hex_value(points.to_owned(), (cursor + 2)));
+                                out.push(hex_value(&points, (cursor + 2)));
                                 cursor += 6;
                             } else {
                                 if (escaped >= 0) {

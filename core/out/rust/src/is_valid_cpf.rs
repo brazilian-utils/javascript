@@ -9,7 +9,7 @@ use crate::*;
 ///
 /// The core takes the value as written, accepting the usual mask characters; turning a host value
 /// into a string is the DX's job.
-pub fn is_valid_cpf(cpf: String) -> bool {
+pub fn is_valid_cpf(cpf: &str) -> bool {
     if !(crate::support::re_match_3(cpf.trim_matches(|c: char| {
         matches!(
             c as u32,
@@ -41,13 +41,13 @@ pub fn is_valid_cpf(cpf: String) -> bool {
     }))) {
         return false;
     }
-    let digits = keep_digits(cpf.to_owned());
+    let digits = keep_digits(cpf);
     if ((digits.len() as i64) != 11) {
         return false;
     }
-    if is_repeated(digits.to_owned()) {
+    if is_repeated(&digits) {
         return false;
     }
-    return ((digit_at(digits.to_owned(), 9) == cpf_check_digit(digits.to_owned(), 9))
-        && (digit_at(digits.to_owned(), 10) == cpf_check_digit(digits.to_owned(), 10)));
+    return ((digit_at(&digits, 9) == cpf_check_digit(&digits, 9))
+        && (digit_at(&digits, 10) == cpf_check_digit(&digits, 10)));
 }

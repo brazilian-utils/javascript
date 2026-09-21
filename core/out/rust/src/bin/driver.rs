@@ -129,7 +129,7 @@ fn dispatch(name: &str, args: &[json::Json], environment: &dyn Capabilities) -> 
     match name {
         "format-cnpj::formatCnpj" => {
             let value = format_cnpj(
-                args[0].as_str().to_string(),
+                args[0].as_str(),
                 FormatCnpjOptions {
                     pad: args[1].get("pad").unwrap().as_bool(),
                     version: args[1].get("version").unwrap().as_str().to_string(),
@@ -163,7 +163,7 @@ fn dispatch(name: &str, args: &[json::Json], environment: &dyn Capabilities) -> 
             ])
         }
         "get-address-info-by-cep::getAddressInfoByCep" => {
-            match get_address_info_by_cep(args[0].as_str().to_string(), environment) {
+            match get_address_info_by_cep(args[0].as_str(), environment) {
                 Ok(value) => coreout::json::Json::Object(vec![
                     ("ok".to_string(), coreout::json::Json::Bool(true)),
                     ("value".to_string(), {
@@ -225,14 +225,14 @@ fn dispatch(name: &str, args: &[json::Json], environment: &dyn Capabilities) -> 
             ])
         }
         "is-valid-cnpj::isValidCnpj" => {
-            let value = is_valid_cnpj(args[0].as_str().to_string(), args[1].as_str().to_string());
+            let value = is_valid_cnpj(args[0].as_str(), args[1].as_str());
             coreout::json::Json::Object(vec![
                 ("ok".to_string(), coreout::json::Json::Bool(true)),
                 ("value".to_string(), coreout::json::Json::Bool(value)),
             ])
         }
         "is-valid-cpf::isValidCpf" => {
-            let value = is_valid_cpf(args[0].as_str().to_string());
+            let value = is_valid_cpf(args[0].as_str());
             coreout::json::Json::Object(vec![
                 ("ok".to_string(), coreout::json::Json::Bool(true)),
                 ("value".to_string(), coreout::json::Json::Bool(value)),

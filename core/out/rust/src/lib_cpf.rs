@@ -34,17 +34,17 @@ pub fn random_cpf_base(env: &dyn Capabilities) -> String {
 }
 
 /// The check digit of a CPF base, under the Receita Federal rule (weights 10..2 and 11..2).
-pub fn cpf_check_digit(cpf: String, size: i64) -> i64 {
+pub fn cpf_check_digit(cpf: &str, size: i64) -> i64 {
     let mut sum = 0;
     for index in 0..size {
-        sum += (digit_at(cpf.to_owned(), index) * ((size + 1) - index));
+        sum += (digit_at(cpf, index) * ((size + 1) - index));
     }
     let remainder = (sum % 11);
     return (if (remainder < 2) { 0 } else { (11 - remainder) });
 }
 
 /// Whether every scalar of the value is the same one, e.g. "00000000000".
-pub fn is_repeated(value: String) -> bool {
+pub fn is_repeated(value: &str) -> bool {
     let first = (value.as_bytes()[0] as i64);
     for index in 1..11 {
         if ((value.as_bytes()[index as usize] as i64) != first) {

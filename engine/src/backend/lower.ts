@@ -9,6 +9,7 @@
  */
 
 import { dependencyClosure } from "../analysis/capabilities.ts";
+import type { BorrowMap } from "../analysis/borrows.ts";
 import type { CExpr, CFunc, CProgram, CStmt } from "../core/ir.ts";
 import type { SemType } from "../types.ts";
 import { tBool, tString } from "../types.ts";
@@ -44,6 +45,13 @@ export type TargetSpec = {
 export type LowerOptions = {
 	/** Emit the plain combinator-to-loop form instead of target idioms. */
 	readonly noIdioms?: boolean;
+	/**
+	 * Which String/List parameters may be printed as borrows rather than owned values (the Rust
+	 * backend's own pre-pass — see `analysis/borrows.ts`). The lowerer only consults this map, on
+	 * `TParam.borrowed` and on a "call" node's `borrowedArgs`; it never decides borrowing itself.
+	 * Absent for every target that has no such distinction, which is every target but Rust.
+	 */
+	readonly borrows?: BorrowMap;
 };
 
 export type LoweredProgram = {
@@ -84,6 +92,15 @@ class Lowerer {
 	private currentModule = "";
 	private currentFails: readonly string[] = [];
 	private currentReturn: SemType = tBool;
+	/**
+	 * The (Core-named, not yet target-renamed) parameters of the function currently being lowered
+	 * that `options.borrows` found borrowable. Read by `expr`'s "local" case so a reference to one
+	 * of them carries `borrowed: true` from the moment it is built — including from inside a
+	 * candidate's own `emit`, which runs here, before the function it belongs to has a printed
+	 * form at all. That timing is exactly what `docs/decisions/0010-*.md` relies on: this field is
+	 * set once, before a function's body is lowered, not discovered from print-time scope.
+	 */
+	private currentBorrowedParams: ReadonlySet<string> = new Set();
 
 	constructor(program: CProgram, spec: TargetSpec, options: LowerOptions) {
 		this.program = program;
@@ -217,24 +234,32 @@ class Lowerer {
 		this.temporaries = 0;
 		this.currentFails = fn.effects.fail;
 		this.currentReturn = fn.ret;
+		const borrowedHere = this.options.borrows?.get(fn.name) ?? new Set<string>();
+		const previousBorrowed = this.currentBorrowedParams;
+		this.currentBorrowedParams = borrowedHere;
 		const params: TParam[] = fn.params.map((param) => ({
 			name: this.spec.naming.value(param.name),
 			type: param.type,
 			doc: param.doc,
+			borrowed: borrowedHere.has(param.name),
 		}));
 		if (fn.usesEnv) params.push({ name: ENV_PARAM, type: this.spec.envType });
-		return {
-			name: this.names.get(fn.name) ?? fn.localName,
-			params,
-			ret: fn.ret,
-			body: this.block(fn.body),
-			exported: fn.exported,
-			doc: fn.doc,
-			isAsync: this.spec.asyncColouring && fn.effects.http,
-			fails: fn.effects.fail,
-			usesEnv: fn.usesEnv,
-			source: { module: fn.module, name: fn.localName, start: fn.span.start, end: fn.span.end },
-		};
+		try {
+			return {
+				name: this.names.get(fn.name) ?? fn.localName,
+				params,
+				ret: fn.ret,
+				body: this.block(fn.body),
+				exported: fn.exported,
+				doc: fn.doc,
+				isAsync: this.spec.asyncColouring && fn.effects.http,
+				fails: fn.effects.fail,
+				usesEnv: fn.usesEnv,
+				source: { module: fn.module, name: fn.localName, start: fn.span.start, end: fn.span.end },
+			};
+		} finally {
+			this.currentBorrowedParams = previousBorrowed;
+		}
 	}
 
 	private block(body: readonly CStmt[]): TStmt[] {
@@ -461,7 +486,7 @@ class Lowerer {
 		if (renames.length === 0) return body;
 		const map = new Map(renames.map((rename) => [this.spec.naming.value(rename.from), rename.to]));
 		const rename = (expr: TExpr): TExpr =>
-			expr.kind === "name" && map.has(expr.name) ? { kind: "name", name: map.get(expr.name)! } : expr;
+			expr.kind === "name" && map.has(expr.name) ? { ...expr, name: map.get(expr.name)! } : expr;
 		return mapNames(body, rename);
 	}
 
@@ -514,7 +539,11 @@ class Lowerer {
 			case "lit":
 				return { kind: "lit", value: expr.value, type: expr.type };
 			case "local":
-				return { kind: "name", name: this.spec.naming.value(expr.name) };
+				return {
+					kind: "name",
+					name: this.spec.naming.value(expr.name),
+					borrowed: this.currentBorrowedParams.has(expr.name),
+				};
 			case "none":
 				return { kind: "none", type: expr.type };
 			case "some":
@@ -546,11 +575,17 @@ class Lowerer {
 			case "call": {
 				const callee = this.program.functions.get(expr.fn);
 				const args = expr.args.map((arg) => this.expr(arg));
+				const borrowedThere = this.options.borrows?.get(expr.fn);
+				const borrowedArgs =
+					borrowedThere === undefined
+						? undefined
+						: callee?.params.map((param) => borrowedThere.has(param.name));
 				if (callee?.usesEnv === true) args.push({ kind: "name", name: ENV_PARAM });
 				const call: TExpr = {
 					kind: "call",
 					callee: { kind: "name", name: this.names.get(expr.fn) ?? expr.fn },
 					args,
+					borrowedArgs,
 					await: this.spec.asyncColouring && callee?.effects.http === true,
 				};
 				if (this.spec.errorsAsValues && (callee?.effects.fail.length ?? 0) > 0) {

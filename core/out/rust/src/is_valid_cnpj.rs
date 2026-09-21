@@ -10,7 +10,7 @@ use crate::*;
 /// Version `"2"` accepts the alphanumeric format as well; a value with no letters is always read
 /// as the numeric one, which is also where the reserved repeated numbers are rejected. Mapping a
 /// missing or unexpected `options.version` onto `"1"` is the DX's job.
-pub fn is_valid_cnpj(cnpj: String, version: String) -> bool {
+pub fn is_valid_cnpj(cnpj: &str, version: &str) -> bool {
     let trimmed = cnpj
         .trim_matches(|c: char| {
             matches!(
@@ -43,8 +43,8 @@ pub fn is_valid_cnpj(cnpj: String, version: String) -> bool {
         })
         .to_string();
     if (version == "2") {
-        let cleaned = keep_alphanumeric(cnpj.to_owned());
-        if (has_letter(cleaned.to_owned()) && ((cleaned.len() as i64) == 14)) {
+        let cleaned = keep_alphanumeric(cnpj);
+        if (has_letter(&cleaned) && ((cleaned.len() as i64) == 14)) {
             return (crate::support::re_match_1(
                 &trimmed
                     .chars()
@@ -56,13 +56,13 @@ pub fn is_valid_cnpj(cnpj: String, version: String) -> bool {
                         }
                     })
                     .collect::<String>(),
-            ) && has_valid_cnpj_checksum(cleaned.to_owned()));
+            ) && has_valid_cnpj_checksum(&cleaned));
         }
     }
-    let numeric = keep_digits(cnpj.to_owned());
+    let numeric = keep_digits(cnpj);
     if ((numeric.len() as i64) != 14) {
         return false;
     }
-    return ((crate::support::re_match_2(&trimmed) && !is_repeated_cnpj(numeric.to_owned()))
-        && has_valid_cnpj_checksum(numeric.to_owned()));
+    return ((crate::support::re_match_2(&trimmed) && !is_repeated_cnpj(&numeric))
+        && has_valid_cnpj_checksum(&numeric));
 }

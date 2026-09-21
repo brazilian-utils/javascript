@@ -12,8 +12,31 @@ import type { Value } from "../values.ts";
 
 export type TExpr =
 	| { readonly kind: "lit"; readonly value: Value; readonly type: SemType }
-	| { readonly kind: "name"; readonly name: string }
-	| { readonly kind: "call"; readonly callee: TExpr; readonly args: readonly TExpr[]; readonly await?: boolean }
+	| {
+			readonly kind: "name";
+			readonly name: string;
+			/**
+			 * Set by a target's borrow-aware lowering (Rust's — see `docs/decisions/0010-*.md`) when
+			 * this name is a reference (`&str`/`&[T]`), not an owned value, so the printer never has
+			 * to guess from ambient state whether wrapping it in another `&` would double-borrow. A
+			 * target that never borrows parameters (Go, Python, TypeScript) leaves this unset.
+			 */
+			readonly borrowed?: boolean;
+	  }
+	| {
+			readonly kind: "call";
+			readonly callee: TExpr;
+			readonly args: readonly TExpr[];
+			readonly await?: boolean;
+			/**
+			 * Parallel to `args`: whether the callee's parameter at that position was found borrowable
+			 * (see `docs/decisions/0010-*.md`), so a borrow-aware printer can pass a reference instead
+			 * of cloning. Set once, during lowering, from the whole-program borrow map — never decided
+			 * by the printer itself. Unset (or `undefined` per position) means "owned", the only
+			 * meaning every non-Rust target has ever needed.
+			 */
+			readonly borrowedArgs?: readonly boolean[];
+	  }
 	| {
 			readonly kind: "method";
 			readonly target: TExpr;
@@ -91,7 +114,13 @@ export type TStmt =
 	| { readonly kind: "expr"; readonly expr: TExpr }
 	| { readonly kind: "raw"; readonly text: string };
 
-export type TParam = { readonly name: string; readonly type: SemType; readonly doc?: string };
+export type TParam = {
+	readonly name: string;
+	readonly type: SemType;
+	readonly doc?: string;
+	/** Set by a borrow-aware lowering when this parameter may be declared `&str`/`&[T]`. */
+	readonly borrowed?: boolean;
+};
 
 export type TFunc = {
 	readonly name: string;

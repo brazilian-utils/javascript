@@ -24,6 +24,13 @@ export type Backend = {
 	readonly fileExtension: string;
 	/** Renders a module. Imports have already been computed. */
 	readonly printModule: (module: TModule) => string;
+	/**
+	 * Extra `LowerOptions` this backend needs computed from the whole program, merged in before
+	 * `lowerProgram` runs. This is how the Rust backend hands its whole-program borrow pre-pass
+	 * (`analysis/borrows.ts`) to the shared lowerer without `generate` — target-independent by
+	 * design — branching on which target it is building: every other backend simply has none.
+	 */
+	readonly extraLowerOptions?: (program: CProgram) => Partial<LowerOptions>;
 	/** How module `from` refers to module `to` in an import. */
 	readonly importPath: (from: string, to: string) => string;
 	/** The generated capability and concurrency support, when the program needs it. */
@@ -77,7 +84,7 @@ export function generate(
 	backend: Backend,
 	options: LowerOptions = {},
 ): GenerateResult {
-	const lowered = lowerProgram(program, backend.spec, options);
+	const lowered = lowerProgram(program, backend.spec, { ...options, ...backend.extraLowerOptions?.(program) });
 	const moduleOf = new Map<string, string>();
 	for (const fn of program.functions.values()) moduleOf.set(fn.name, fn.module);
 

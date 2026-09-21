@@ -19,19 +19,16 @@ pub const GENERATE_CNPJ_TABLE2: &[i64] = &[6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2
 pub fn generate_cnpj(env: &dyn Capabilities) -> String {
     let mut base = random_cnpj_base(env);
     for _attempt in 0..8 {
-        if !is_repeated_run(base.to_owned()) {
+        if !is_repeated_run(&base) {
             break;
         }
         base = random_cnpj_base(env);
     }
-    let first_digit = cnpj_check_digit(
-        crate::support::concat2(&base, "00"),
-        GENERATE_CNPJ_TABLE1.to_owned(),
-    )
-    .to_string();
+    let first_digit =
+        cnpj_check_digit(&crate::support::concat2(&base, "00"), GENERATE_CNPJ_TABLE1).to_string();
     let second_digit = cnpj_check_digit(
-        crate::support::concat2(&crate::support::concat2(&base, &first_digit), "0"),
-        GENERATE_CNPJ_TABLE2.to_owned(),
+        &crate::support::concat2(&crate::support::concat2(&base, &first_digit), "0"),
+        GENERATE_CNPJ_TABLE2,
     )
     .to_string();
     return crate::support::concat2(&crate::support::concat2(&base, &first_digit), &second_digit);

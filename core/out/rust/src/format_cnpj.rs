@@ -16,15 +16,15 @@ pub struct FormatCnpjOptions {
 ///
 /// The core takes a string and a fully normalized options record; reading a number, a missing
 /// options object or a truthy non-boolean is the DX's job.
-pub fn format_cnpj(value: String, options: FormatCnpjOptions) -> String {
+pub fn format_cnpj(value: &str, options: FormatCnpjOptions) -> String {
     let sanitized = (if (options.version == "2") {
-        keep_alphanumeric(value.to_owned())
+        keep_alphanumeric(value)
     } else {
-        keep_digits(value.to_owned())
+        keep_digits(value)
     });
     return format_with_pattern(
-        sanitized.to_owned(),
-        (if options.obfuscate {
+        &sanitized,
+        &(if options.obfuscate {
             "**.000.000/0000-**".to_string()
         } else {
             "00.000.000/0000-00".to_string()

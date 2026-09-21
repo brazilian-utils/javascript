@@ -1,5 +1,17 @@
 # 0009 — Every Rust value the core touches is owned, not borrowed
 
+**Superseded by [0010](0010-rust-parameters-borrow-where-sound.md)**, which lets a function
+parameter borrow when a whole-program pre-pass proves it is only ever read. The two obstacles this
+decision found — a candidate's `emit` runs before any function scope exists, and `printModule`
+sees one module at a time — are both still true and 0010 does not dispute them; what changed is
+*when* the decision that needs the whole program gets made. 0010 computes it once, as a pre-pass
+over the full `CProgram`, before either of those narrower views exists, and hands the result to
+lowering and printing as data instead of asking them to derive it. Record fields and return types
+are still unconditionally owned either way — that part of this decision stands. This record is
+kept as originally written, including the reasoning below that a later measurement (see 0010 and
+`core/bench/README.md`'s Rust section) showed was too conservative for a parameter passed inside a
+loop, because *why* the conservative choice was made once is worth keeping next to what changed it.
+
 ## Context
 
 `docs/targets/rust-sketch.md` planned parameters as `&str`/`&[T]`/`&Record`, with only results

@@ -51,11 +51,11 @@ pub fn random_cnpj_base(env: &dyn Capabilities) -> String {
 }
 
 /// The check digit of a CNPJ base, under the rule both versions share.
-pub fn cnpj_check_digit(cnpj: String, weights: Vec<i64>) -> i64 {
+pub fn cnpj_check_digit(cnpj: &str, weights: &[i64]) -> i64 {
     let mut sum = 0;
     for index in 0..(weights.len() as i64) {
         sum += (((cnpj.as_bytes()[index as usize] as i64) - 48)
-            * crate::support::get_at(&weights, index));
+            * crate::support::get_at(weights, index));
     }
     let remainder = (sum % 11);
     return (if (remainder < 2) { 0 } else { (11 - remainder) });
@@ -65,9 +65,9 @@ pub fn cnpj_check_digit(cnpj: String, weights: Vec<i64>) -> i64 {
 ///
 /// The scan reads positions rather than materializing the scalars, which the checked accessor
 /// makes safe without a proof about the length.
-pub fn has_letter(value: String) -> bool {
+pub fn has_letter(value: &str) -> bool {
     for index in 0..(value.len() as i64) {
-        let point = crate::support::code_at(&value, index).unwrap_or(0);
+        let point = crate::support::code_at(value, index).unwrap_or(0);
         if (65..=90).contains(&point) {
             return true;
         }
@@ -76,15 +76,13 @@ pub fn has_letter(value: String) -> bool {
 }
 
 /// Whether both check digits of a 14 character CNPJ match its base.
-pub fn has_valid_cnpj_checksum(cnpj: String) -> bool {
-    return ((((cnpj.as_bytes()[12] as i64) - 48)
-        == cnpj_check_digit(cnpj.to_owned(), LIB_CNPJ_TABLE1.to_owned()))
-        && (((cnpj.as_bytes()[13] as i64) - 48)
-            == cnpj_check_digit(cnpj.to_owned(), LIB_CNPJ_TABLE2.to_owned())));
+pub fn has_valid_cnpj_checksum(cnpj: &str) -> bool {
+    return ((((cnpj.as_bytes()[12] as i64) - 48) == cnpj_check_digit(cnpj, LIB_CNPJ_TABLE1))
+        && (((cnpj.as_bytes()[13] as i64) - 48) == cnpj_check_digit(cnpj, LIB_CNPJ_TABLE2)));
 }
 
 /// Whether every character of a 14 character value is the same one.
-pub fn is_repeated_cnpj(value: String) -> bool {
+pub fn is_repeated_cnpj(value: &str) -> bool {
     let first = (value.as_bytes()[0] as i64);
     for index in 1..14 {
         if ((value.as_bytes()[index as usize] as i64) != first) {

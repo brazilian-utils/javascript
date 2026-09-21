@@ -21,7 +21,7 @@ pub fn format_currency(value: i64, symbol: bool) -> String {
     let whole = digits[0..cut as usize].to_string();
     let cents = digits[cut as usize..(digits.len() as i64) as usize].to_string();
     let body = crate::support::concat2(
-        &crate::support::concat2(&group_thousands(keep_digits(whole.to_owned())), ","),
+        &crate::support::concat2(&group_thousands(&keep_digits(&whole)), ","),
         &cents,
     );
     let prefix = (if symbol {

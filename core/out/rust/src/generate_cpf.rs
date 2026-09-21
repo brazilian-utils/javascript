@@ -16,14 +16,14 @@ use crate::*;
 pub fn generate_cpf(env: &dyn Capabilities) -> String {
     let mut base = random_cpf_base(env);
     for _attempt in 0..8 {
-        if !is_repeated_run(base.to_owned()) {
+        if !is_repeated_run(&base) {
             break;
         }
         base = random_cpf_base(env);
     }
-    let first_digit = cpf_check_digit(crate::support::concat2(&base, "00"), 9).to_string();
+    let first_digit = cpf_check_digit(&crate::support::concat2(&base, "00"), 9).to_string();
     let second_digit = cpf_check_digit(
-        crate::support::concat2(&crate::support::concat2(&base, &first_digit), "0"),
+        &crate::support::concat2(&crate::support::concat2(&base, &first_digit), "0"),
         10,
     )
     .to_string();

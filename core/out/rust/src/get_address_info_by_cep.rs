@@ -40,10 +40,10 @@ pub fn is_ok(status: i64) -> bool {
 }
 
 /// ViaCEP answers a JSON object, and marks an unknown CEP with `"erro"`.
-pub fn fetch_via_cep(cep: String, env: &dyn Capabilities) -> Option<AddressInfo> {
+pub fn fetch_via_cep(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
     let response = get_with_retry(
         crate::support::concat2(
-            &crate::support::concat2("https://viacep.com.br/ws/", &cep),
+            &crate::support::concat2("https://viacep.com.br/ws/", cep),
             "/json/",
         ),
         env,
@@ -51,75 +51,44 @@ pub fn fetch_via_cep(cep: String, env: &dyn Capabilities) -> Option<AddressInfo>
     if (response.is_none() || !is_ok(response.as_ref().unwrap().status.to_owned())) {
         return None;
     }
-    let code = json_string_field(
-        response.as_ref().unwrap().body.to_owned(),
-        "cep".to_string(),
-    )
-    .unwrap_or("".to_string());
+    let code = json_string_field(&response.as_ref().unwrap().body, "cep").unwrap_or("".to_string());
     if code.is_empty() {
         return None;
     }
     return Some(AddressInfo {
-        cep: keep_digits(code.to_owned()),
-        state: json_string_field(response.as_ref().unwrap().body.to_owned(), "uf".to_string())
+        cep: keep_digits(&code),
+        state: json_string_field(&response.as_ref().unwrap().body, "uf").unwrap_or("".to_string()),
+        city: json_string_field(&response.as_ref().unwrap().body, "localidade")
             .unwrap_or("".to_string()),
-        city: json_string_field(
-            response.as_ref().unwrap().body.to_owned(),
-            "localidade".to_string(),
-        )
-        .unwrap_or("".to_string()),
-        neighborhood: json_string_field(
-            response.as_ref().unwrap().body.to_owned(),
-            "bairro".to_string(),
-        )
-        .unwrap_or("".to_string()),
-        street: json_string_field(
-            response.as_ref().unwrap().body.to_owned(),
-            "logradouro".to_string(),
-        )
-        .unwrap_or("".to_string()),
+        neighborhood: json_string_field(&response.as_ref().unwrap().body, "bairro")
+            .unwrap_or("".to_string()),
+        street: json_string_field(&response.as_ref().unwrap().body, "logradouro")
+            .unwrap_or("".to_string()),
     });
 }
 
 /// BrasilAPI answers 404 for an unknown CEP.
-pub fn fetch_brasil_api(cep: String, env: &dyn Capabilities) -> Option<AddressInfo> {
+pub fn fetch_brasil_api(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
     let response = get_with_retry(
-        crate::support::concat2("https://brasilapi.com.br/api/cep/v1/", &cep),
+        crate::support::concat2("https://brasilapi.com.br/api/cep/v1/", cep),
         env,
     );
     if (response.is_none() || !is_ok(response.as_ref().unwrap().status.to_owned())) {
         return None;
     }
-    let code = json_string_field(
-        response.as_ref().unwrap().body.to_owned(),
-        "cep".to_string(),
-    )
-    .unwrap_or("".to_string());
+    let code = json_string_field(&response.as_ref().unwrap().body, "cep").unwrap_or("".to_string());
     if code.is_empty() {
         return None;
     }
     return Some(AddressInfo {
-        cep: keep_digits(code.to_owned()),
-        state: json_string_field(
-            response.as_ref().unwrap().body.to_owned(),
-            "state".to_string(),
-        )
-        .unwrap_or("".to_string()),
-        city: json_string_field(
-            response.as_ref().unwrap().body.to_owned(),
-            "city".to_string(),
-        )
-        .unwrap_or("".to_string()),
-        neighborhood: json_string_field(
-            response.as_ref().unwrap().body.to_owned(),
-            "neighborhood".to_string(),
-        )
-        .unwrap_or("".to_string()),
-        street: json_string_field(
-            response.as_ref().unwrap().body.to_owned(),
-            "street".to_string(),
-        )
-        .unwrap_or("".to_string()),
+        cep: keep_digits(&code),
+        state: json_string_field(&response.as_ref().unwrap().body, "state")
+            .unwrap_or("".to_string()),
+        city: json_string_field(&response.as_ref().unwrap().body, "city").unwrap_or("".to_string()),
+        neighborhood: json_string_field(&response.as_ref().unwrap().body, "neighborhood")
+            .unwrap_or("".to_string()),
+        street: json_string_field(&response.as_ref().unwrap().body, "street")
+            .unwrap_or("".to_string()),
     });
 }
 
@@ -130,20 +99,20 @@ pub fn fetch_brasil_api(cep: String, env: &dyn Capabilities) -> Option<AddressIn
 /// request is retried twice, 250 ms apart, exactly as the published package does. Turning a host
 /// value into the 8 digits this takes is the DX's job.
 pub fn get_address_info_by_cep(
-    cep: String,
+    cep: &str,
     env: &dyn Capabilities,
 ) -> Result<AddressInfo, CoreError> {
-    if !(crate::support::re_match_0(&cep)) {
+    if !(crate::support::re_match_0(cep)) {
         return Err(CoreError::GetAddressInfoByCepValidationError {
             message: "CEP inv\u{e1}lido".to_string(),
         });
     }
     let address = crate::support::race_first_some(vec![
         Box::new(|| {
-            return fetch_via_cep(cep.to_owned(), env);
+            return fetch_via_cep(cep, env);
         }) as Box<dyn FnOnce() -> _ + Send>,
         Box::new(|| {
-            return fetch_brasil_api(cep.to_owned(), env);
+            return fetch_brasil_api(cep, env);
         }) as Box<dyn FnOnce() -> _ + Send>,
     ]);
     if address.is_none() {
