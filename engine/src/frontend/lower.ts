@@ -332,13 +332,13 @@ class Lowering {
 		const span = this.span(node);
 		switch (node.type) {
 			case "TSNumberKeyword":
-				this.reject(
-					"E_BARE_NUMBER",
-					"`number` does not say what the value means",
-					node,
-					"use `Int`, `IntRange<lo, hi>`, `Float` or `Decimal<scale>`",
-				);
-				return { kind: "ref", name: "Int", args: [], span };
+				// Ordinary TypeScript, accepted as written: the checker infers what range this stands
+				// for, from a guard the body writes (an exported utility) or from each call site
+				// (library code, the same specialization `Int` already gets) — see check.ts, "Inferring
+				// a bare `number`". `Int`, `IntRange<lo, hi>`, `Float` and `Decimal<scale>` are still
+				// there for an author who wants to state the contract explicitly, and `E_BARE_NUMBER`
+				// still fires, later, for a parameter no guard and no caller ever narrows.
+				return { kind: "ref", name: "number", args: [], span };
 			case "TSAnyKeyword":
 			case "TSUnknownKeyword":
 				this.reject("E_ANY", "`any` and `unknown` are outside the subset", node);

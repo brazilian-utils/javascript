@@ -12,7 +12,10 @@ function rejects(code: string, body: string): void {
 	assert.ok(codes.includes(code), `expected ${code}, got ${codes.join(", ") || "no diagnostics"}`);
 }
 
-test("bare number is rejected", () => {
+test("a bare number no guard narrows is rejected", () => {
+	// `number` itself is ordinary TypeScript, accepted and inferred (tests/number-inference.spec.ts)
+	// — what still rejects is a utility whose body never proves a range for one, which is this case:
+	// `value` is only ever read at its unconstrained default.
 	rejects("E_BARE_NUMBER", "export function f(value: number): boolean { return value > 0; }");
 });
 

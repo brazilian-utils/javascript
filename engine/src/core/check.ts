@@ -150,9 +150,23 @@ type FuncSig = {
 	readonly qualified: string;
 	readonly params: readonly { name: string; type: SemType }[];
 	readonly ret: SemType;
+	/**
+	 * Which parameters were written as a bare `number`, aligned by index with `params`. Only an
+	 * eagerly-checked function (a utility) acts on this — see "Inferring a bare `number`" in
+	 * `checkFunction` — a library helper's `number` parameter is already the platform-safe default
+	 * `Int` is, and specialization narrows it per call site exactly the same way.
+	 */
+	readonly inferParams: readonly boolean[];
+	/** Whether the return type was written as a bare `number`: always inferred from the body. */
+	readonly inferReturn: boolean;
 	readonly hir: HFunc;
 	readonly module: string;
 };
+
+/** A parameter or return type written as exactly `number`, with no type arguments. */
+function isBareNumber(type: HTypeExpr): boolean {
+	return type.kind === "ref" && type.name === "number" && type.args.length === 0;
+}
 
 export function checkProgram(
 	modules: readonly HModule[],
@@ -356,6 +370,15 @@ class Checker {
 				return tBool;
 			case "Int":
 				return tIntDefault();
+			case "number":
+				// A bare `number`. The platform-safe domain is only its *starting* point: for a
+				// parameter or a return type this is resolved through, `resolveSignatures` records
+				// that it needs inferring, and `checkFunction` replaces it with what the body actually
+				// proves (or refuses — see "Inferring a bare `number`" below). Everywhere else — a
+				// local, a record field, a list element, a lambda's own type — there is no call site
+				// and no exported contract to infer from, so it is simply the same unconstrained
+				// default `Int` already is; `let sum = 0` (no annotation) already infers the same way.
+				return tIntDefault();
 			case "IntRange": {
 				const lo = literalArg(0);
 				const hi = literalArg(1);
@@ -456,6 +479,8 @@ class Checker {
 						type: this.resolveTypeExpr(param.type, `${fn.name}.${param.name}`),
 					})),
 					ret: this.resolveTypeExpr(fn.ret, fn.name),
+					inferParams: fn.params.map((param) => isBareNumber(param.type)),
+					inferReturn: isBareNumber(fn.ret),
 					hir: fn,
 					module: module.path,
 				});
@@ -725,12 +750,30 @@ class Checker {
 			});
 		}
 		const checker = new FunctionChecker(this, signature.module, signature.ret, scope);
+		// Inferring a bare `number`: a library helper's parameter is specialized per call site
+		// regardless (see `instantiate`, and ADR 0004), so it needs nothing extra here — it starts
+		// and stays the platform-safe default, exactly like a declared `Int`, until a caller's own
+		// proven type is substituted in. A utility has no call site to take a range from: its
+		// contract has to come from its own body, so any bare-`number` parameter is tracked while
+		// the body is checked, and `provenParamType` below turns what was tracked into either the
+		// narrower published type a guard proved, or a refusal.
+		const inferredParams = isCheckedEagerly(signature)
+			? signature.hir.params
+					.filter((_, index) => signature.inferParams[index] === true)
+					.map((param) => param.name)
+			: [];
+		if (inferredParams.length > 0) checker.beginParamInference(inferredParams);
 		const body = checker.block(signature.hir.body);
 		// A specialization may prove a narrower result than the declaration promises, and its
-		// callers should see that proof; a public signature stays exactly as declared.
+		// callers should see that proof; a public signature stays exactly as declared — unless the
+		// declaration itself was a bare `number`, which never states a ceiling to stay under: its
+		// published return type is always what the body computes.
 		const inferred = returnTypeOf(body);
-		const ret =
-			!isCheckedEagerly(signature) && inferred.kind !== "Never" && isSubtype(inferred, signature.ret)
+		const ret = signature.inferReturn
+			? inferred.kind !== "Never"
+				? inferred
+				: signature.ret
+			: !isCheckedEagerly(signature) && inferred.kind !== "Never" && isSubtype(inferred, signature.ret)
 				? inferred
 				: signature.ret;
 		if (signature.ret.kind !== "Void" && !checker.alwaysReturns(body)) {
@@ -740,15 +783,37 @@ class Checker {
 				signature.hir.span,
 			);
 		}
+		const params = paramTypes.map((param, index) => {
+			if (!inferredParams.includes(param.name)) {
+				return { name: param.name, type: param.type, doc: signature.hir.params[index]?.name };
+			}
+			const proven = checker.provenParamType(param.name);
+			const span = signature.hir.params[index]?.span ?? signature.hir.span;
+			if (proven === undefined) {
+				this.diagnostics.error(
+					"E_BARE_NUMBER",
+					`\`${param.name}\` is never used, so \`${signature.hir.name}\` proves nothing about its range`,
+					span,
+					`remove the parameter, or write \`${param.name}: Int\` if the full range really is what is meant`,
+				);
+			} else if (isUnconstrainedInt(proven)) {
+				this.diagnostics.error(
+					"E_BARE_NUMBER",
+					`\`${param.name}\` is a bare \`number\`, and \`${signature.hir.name}\` never narrows it before using it`,
+					span,
+					`add a guard before ${param.name} is used, for example ` +
+						`\`if (${param.name} < 0 || ${param.name} > 99) return …;\` — the range a guard like that ` +
+						`proves becomes ${param.name}'s published contract; write \`${param.name}: Int\` instead if ` +
+						`the full range really is what is meant`,
+				);
+			}
+			return { name: param.name, type: proven ?? param.type, doc: signature.hir.params[index]?.name };
+		});
 		return {
 			name,
 			module: signature.module,
 			localName: name === signature.qualified ? signature.hir.name : name.split("::")[1]!,
-			params: paramTypes.map((param, index) => ({
-				name: param.name,
-				type: param.type,
-				doc: signature.hir.params[index]?.name,
-			})),
+			params,
 			ret,
 			effects: checker.effects,
 			body,
@@ -1140,6 +1205,23 @@ class FunctionChecker {
 	private breakStates: ScopeSnapshot[] | undefined;
 	private continueStates: ScopeSnapshot[] | undefined;
 	effects: EffectSet = PURE;
+	/**
+	 * The type observed at each read of a bare-`number` parameter that is being inferred (see
+	 * `beginParamInference`), joined across every read that counts. `undefined` for a name means it
+	 * has never been read yet; a name absent from the map is not being inferred at all. Shared with
+	 * any lambda checked inside this function's body (`lambda()` passes the same map along), so a
+	 * closure that reads the parameter contributes to the same inference the enclosing body does.
+	 */
+	private paramObservations: Map<string, SemType | undefined> | undefined;
+	/**
+	 * True while checking the test of an `if` or a ternary — the one expression position whose
+	 * *result* narrows a binding rather than *using* its value, so a bare-`number` parameter read
+	 * only there proves nothing about the range the rest of the function relies on. Nested inside
+	 * another condition's test, a value position (a ternary's `then`/`otherwise`) still reads as
+	 * "inside a condition" for as long as the enclosing test has not finished, which is exactly the
+	 * scoping `withCondition`'s save/restore gives it.
+	 */
+	private inCondition = false;
 
 	constructor(
 		checker: Checker,
@@ -1159,6 +1241,39 @@ class FunctionChecker {
 
 	private addEffects(set: EffectSet): void {
 		this.effects = unionEffects(this.effects, set);
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Inferring a bare `number` parameter from the guards a utility writes
+	 * ---------------------------------------------------------------- */
+
+	/** Starts tracking reads of these parameter names, for `provenParamType` once the body is checked. */
+	beginParamInference(names: readonly string[]): void {
+		this.paramObservations = new Map(names.map((name) => [name, undefined]));
+	}
+
+	/** The range proven for a tracked parameter — `undefined` when it was never read at all. */
+	provenParamType(name: string): SemType | undefined {
+		return this.paramObservations?.get(name);
+	}
+
+	/** Records a read of `name` for inference, unless it is inside a condition's own test. */
+	private noteRead(name: string, type: SemType): void {
+		if (this.inCondition || this.paramObservations === undefined) return;
+		if (!this.paramObservations.has(name)) return;
+		const current = this.paramObservations.get(name);
+		this.paramObservations.set(name, current === undefined ? type : join(current, type));
+	}
+
+	/** Runs `evaluate` with `inCondition` set, restoring the previous value even if it was already set. */
+	private withCondition<T>(evaluate: () => T): T {
+		const outer = this.inCondition;
+		this.inCondition = true;
+		try {
+			return evaluate();
+		} finally {
+			this.inCondition = outer;
+		}
 	}
 
 	/* ---------------------------------------------------------------- *
@@ -1286,7 +1401,7 @@ class FunctionChecker {
 			case "assign":
 				return this.assignment(statement);
 			case "if": {
-				const test = this.expr(statement.test, tBool);
+				const test = this.withCondition(() => this.expr(statement.test, tBool));
 				this.requireBool(test, statement.span);
 				const { whenTrue, whenFalse } = deriveNarrowing(test);
 				const entry = this.snapshot();
@@ -1849,7 +1964,7 @@ class FunctionChecker {
 				return this.op(operand.type.kind === "Float" ? "float.neg" : "int.neg", [operand], node.span);
 			}
 			case "ternary": {
-				const test = this.expr(node.test, tBool);
+				const test = this.withCondition(() => this.expr(node.test, tBool));
 				this.requireBool(test, node.span);
 				const { whenTrue, whenFalse } = deriveNarrowing(test);
 				const entry = this.snapshot();
@@ -1921,6 +2036,7 @@ class FunctionChecker {
 	private name(name: string, span: Span): CExpr {
 		const binding = this.scope.get(name);
 		if (binding !== undefined) {
+			this.noteRead(name, binding.type);
 			const local: CExpr = { kind: "local", name, type: binding.declared, span };
 			if (binding.unwrapped) {
 				return { kind: "op", op: "opt.unwrap", args: [local], type: binding.type, span };
@@ -2141,6 +2257,10 @@ class FunctionChecker {
 		const expectedReturn = expected?.kind === "Lambda" ? expected.ret : tNever;
 		const sub = new FunctionChecker(this.checker, this.module, expectedReturn, inner);
 		sub.quiet = this.quiet;
+		// Shares the same observation map, not a copy: a closure that reads a captured bare-`number`
+		// parameter is still a use of it, and has to count toward the same inference the enclosing
+		// body's own reads do.
+		sub.paramObservations = this.paramObservations;
 		const body = sub.block(node.body);
 		this.addEffects(sub.effects);
 		const returnType = returnTypeOf(body);
@@ -2761,6 +2881,11 @@ export function fitsPlatformDomain(actual: SemType, declared: SemType): boolean 
 	if (declared.hi < SAFE_INT_HI - MAX_WIDENED_STEP) return false;
 	const step = stepSize(declared, actual);
 	return step !== undefined && step <= MAX_WIDENED_STEP;
+}
+
+/** Whether `type` is exactly the unconstrained platform-safe domain: an `Int` no guard narrowed. */
+function isUnconstrainedInt(type: SemType): boolean {
+	return type.kind === "Int" && type.lo === SAFE_INT_LO && type.hi === SAFE_INT_HI;
 }
 
 /** How far one assignment moves a binding's range, when both are integers. */

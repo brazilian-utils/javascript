@@ -79,6 +79,8 @@ Integers are mathematical: no wraparound anywhere, and every value carries a pro
 - `Int` with no annotation means the platform-safe domain, `±(2^53 − 1)`: the integers every
   target represents exactly with its default integer type.
 - `IntRange<lo, hi>` pins a tighter range, and the checker proves the value stays inside it.
+- `number`, ordinary TypeScript's own spelling, is accepted and its range is *inferred* rather than
+  declared — see "Inferring a bare `number`" below.
 
 A backend picks a representation it can prove safe for the range:
 
@@ -97,6 +99,39 @@ a generated helper otherwise. Division and `%` require a divisor proven non-zero
 and `Math.floor` on an Int are the identity, since an Int is already exact. There is no `float.*`
 counterpart yet — admitting one needs a second caller, section 8's admission rule — so the same
 calls on a `Float` are `E_MATH_FLOAT` rather than a made-up lowering.
+
+#### Inferring a bare `number`
+
+Inside a function, `number`'s range is already inferred the moment it is written: a local needs no
+annotation at all (`let sum = 0`), and a parameter or a return type is just two more places the
+same abstract interpretation runs. The only question is where the contract at a function's own
+boundary comes from, and there are exactly two sound answers, one per kind of function
+(`check.ts`, `checkFunction`):
+
+- **Library code** (anything not a root-level exported utility) has no published contract of its
+  own — it is already checked once per call site (section 3, specialization). A `number` parameter
+  there simply starts at the platform-safe default, the same starting point `Int` is, and the
+  caller's own proven type is substituted in exactly the way it already is for an explicit `Int`.
+  Nothing new has to happen for this case; it falls out of specialization for free.
+- **A utility** (an exported function in a module at the source root) is the published API, so
+  there is no call site to take a range from — the range has to come from the utility's own body.
+  Every read of a `number` parameter outside the test of an `if` or a ternary (the guard's own
+  condition proves nothing about a use that has not happened yet; what its *result* narrows for the
+  rest of the function is what counts) is tracked, and once the body is fully checked, the union of
+  what was actually proven at each of those reads becomes the parameter's published type. A
+  parameter that is only ever read at its unconstrained default — no guard ever narrowed it before
+  a real use — or that is never read at all, cannot be given a published range without assuming or
+  silently degrading to a checked, portable lowering, both of which are unsound or throw away the
+  performance this project exists for; the checker refuses instead, with `E_BARE_NUMBER` naming the
+  parameter, saying that nothing narrows it, and naming the guard shape to add, in ordinary
+  TypeScript, never this engine's vocabulary.
+
+A return type written as a bare `number` is unconditionally inferred from what the body computes,
+for a utility exactly as much as for library code: there is no published ceiling to stay under, so
+there is nothing to prove ahead of time and nothing to refuse.
+
+`Int`, `IntRange<lo, hi>`, `Float` and `Decimal<scale>` remain exactly what they were: an explicit,
+deliberate statement of the contract, never requiring a guard, because writing one *is* the proof.
 
 ### 2.2 Loops and widening
 
@@ -321,12 +356,14 @@ alternation of overlapping classes under an unbounded quantifier.
 
 **Rejected**, each with a diagnostic code and, where possible, the construct to write instead:
 
-`any`, `unknown`, bare `number`; `==`; truthiness of anything but `Bool`; `null`; `?.` and `??`
-outside an `Option`; `this`, prototypes, getters and setters, classes with bodies; dynamic property
-access; objects used as maps; escaping mutable values; closures that capture mutable locals;
-effectful lambdas inside combinators; generators, custom iterators, `for…in`; `while`; generic
-`try`/`catch`; host globals (`Date`, `Intl`, `JSON`, `fetch`, timers, `console`, and every `Math`
-member except the handful section 7.1 admits); regex constructs outside section 6; recursion.
+`any`, `unknown`; `==`; truthiness of anything but `Bool`; `null`; `?.` and `??` outside an
+`Option`; `this`, prototypes, getters and setters, classes with bodies; dynamic property access;
+objects used as maps; escaping mutable values; closures that capture mutable locals; effectful
+lambdas inside combinators; generators, custom iterators, `for…in`; `while`; generic `try`/`catch`;
+host globals (`Date`, `Intl`, `JSON`, `fetch`, timers, `console`, and every `Math` member except the
+handful section 7.1 admits); regex constructs outside section 6; recursion. A bare `number` used as
+a utility's parameter is accepted, but still refused with `E_BARE_NUMBER` when the body never
+narrows it before using it — section 2.1, "Inferring a bare `number`".
 
 **Allowed**: `const` and `let` with local mutation; `if`/`else`; counted `for`; `for…of`;
 `break` and `continue`; `return`; `throw` of a declared domain error; `switch` over an `Enum` with

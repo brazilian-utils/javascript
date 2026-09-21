@@ -17,7 +17,7 @@ export function keepAlphanumeric(value: string): Ascii {
 }
 
 /** The numeric value of one ASCII digit. */
-export function digitAt(value: Digits, index: Int): IntRange<0, 9> {
+export function digitAt(value: Digits, index: number): IntRange<0, 9> {
 	return value.charCodeAt(index) - 48;
 }
 

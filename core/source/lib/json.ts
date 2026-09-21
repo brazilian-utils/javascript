@@ -16,7 +16,7 @@ const NEWLINE = 10;
 const RETURN = 13;
 
 /** Whether `needle` occurs in `points` at `start`. */
-function matchesAt(points: List<Int>, needle: List<Int>, start: Int): boolean {
+function matchesAt(points: List<Int>, needle: List<Int>, start: number): boolean {
 	for (let offset = 0; offset < needle.length; offset++) {
 		// `needle[offset] ?? -2`: every call site passes a fixed-length literal key (`"cep"`,
 		// `"uf"`, …), so specialization proves this loop's index in range for `needle` — but the
@@ -33,12 +33,12 @@ function matchesAt(points: List<Int>, needle: List<Int>, start: Int): boolean {
 }
 
 /** Whether a code point is JSON whitespace. */
-function isSpace(point: Int): boolean {
+function isSpace(point: number): boolean {
 	return point === SPACE || point === TAB || point === NEWLINE || point === RETURN;
 }
 
 /** The hexadecimal value of four scalars, for a `\uXXXX` escape. */
-function hexValue(points: List<Int>, start: Int): IntRange<0, 65535> {
+function hexValue(points: List<Int>, start: number): IntRange<0, 65535> {
 	let value: IntRange<0, 1114111> = 0;
 
 	for (let offset = 0; offset < 4; offset++) {

@@ -60,7 +60,7 @@ function getWithRetry(url: string): HttpResponse | undefined {
 }
 
 /** Whether the status is a 2xx. */
-function isOk(status: Int): boolean {
+function isOk(status: number): boolean {
 	return status >= OK && status < MULTIPLE_CHOICES;
 }
 
