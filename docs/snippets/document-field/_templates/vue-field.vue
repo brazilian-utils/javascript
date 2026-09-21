@@ -13,13 +13,11 @@ const { errorMessage } = defineProps<{ errorMessage?: string }>();
 const value = defineModel<string>({ required: true });
 
 const format = @@format@@;
+const parse = @@parse@@;
 const id = useId();
 const errorId = `${id}-error`;
 const masked = computed(() => @@formatValueVue@@);
 
-function onInput(event: Event) {
-  value.value = @@parseMaskedEventVue@@;
-}
 </script>
 
 <template>
@@ -27,7 +25,7 @@ function onInput(event: Event) {
   <label :for="id">@@label@@</label>
   <input
     v-bind="$attrs"
-    v-mask="format"
+    v-mask="{ format, parse, onChange: ({ parsedValue }) => (value = parsedValue) }"
     :id="id"
     inputmode="@@inputMode@@"
     autocomplete="@@autocomplete@@"
@@ -35,7 +33,6 @@ function onInput(event: Event) {
     :value="masked"
     :aria-invalid="Boolean(errorMessage)"
     :aria-describedby="errorId"
-    @input="onInput"
   />
   <!-- On the page from the start, and announced when it gets its text. -->
   <p :id="errorId" role="alert">{{ errorMessage }}</p>

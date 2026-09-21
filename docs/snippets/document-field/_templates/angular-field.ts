@@ -1,7 +1,7 @@
 import { Component, Input, computed, forwardRef, signal } from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 @@fieldImports@@
-import { MaskDirective } from "./mask.directive";
+import { MaskDirective, type MaskChange } from "./mask.directive";
 
 /** One id per field on the page, to tie each label and message to their own input. */
 let fields = 0;
@@ -21,6 +21,7 @@ let fields = 0;
     <label [for]="id">@@label@@</label>
     <input
       [appMask]="format"
+      [parse]="parse"
       [id]="id"
       inputmode="@@inputMode@@"
       autocomplete="@@autocomplete@@"
@@ -29,7 +30,7 @@ let fields = 0;
       [disabled]="disabled()"
       [attr.aria-invalid]="Boolean(errorMessage)"
       [attr.aria-describedby]="errorId"
-      (input)="onInput($event)"
+      (masked)="onMasked($event)"
       (blur)="onTouched()"
     />
     <!-- On the page from the start, and announced when it gets its text. -->
@@ -43,6 +44,7 @@ export class @@Name@@Field implements ControlValueAccessor {
   protected readonly id = `@@kind@@-${(fields += 1)}`;
   protected readonly errorId = `${this.id}-error`;
   protected readonly format = @@format@@;
+  protected readonly parse = @@parse@@;
   protected readonly Boolean = Boolean;
 
   /** The @@label@@ without its mask, the way the form holds it. */
@@ -69,10 +71,8 @@ export class @@Name@@Field implements ControlValueAccessor {
     this.disabled.set(disabled);
   }
 
-  protected onInput(event: Event) {
-    const value = @@parseMaskedEventAngular@@;
-
-    this.value.set(value);
-    this.onChange(value);
+  protected onMasked({ parsedValue }: MaskChange) {
+    this.value.set(parsedValue);
+    this.onChange(parsedValue);
   }
 }
