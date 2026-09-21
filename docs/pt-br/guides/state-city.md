@@ -11,7 +11,7 @@ O ponto aqui é quando cada tabela é carregada. Os estados são 27 linhas e vê
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=state-city/react&example=state-city.tsx">
 
-Um hook busca a tabela e guarda as cidades; o componente só escolhe:
+Um hook recebe o estado e devolve as cidades dele, buscando a tabela na primeira vez que um estado é escolhido:
 
 <div class="file" data-file="state-city.tsx">
 
@@ -19,9 +19,9 @@ Um hook busca a tabela e guarda as cidades; o componente só escolhe:
 
 </div>
 
-<div class="file" data-file="use-cities.ts">
+<div class="file" data-file="use-cities-of-state.ts">
 
-[use-cities.ts](../../snippets/state-city/react/use-cities.ts ':include :type=code ts')
+[use-cities-of-state.ts](../../snippets/state-city/react/use-cities-of-state.ts ':include :type=code ts')
 
 </div>
 
@@ -29,7 +29,7 @@ Um hook busca a tabela e guarda as cidades; o componente só escolhe:
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/?dir=state-city/angular&example=state-city.ts">
 
-Um service busca a tabela, com `switchMap` descartando a que já não é do estado na tela:
+Um `resource` recebe o estado e devolve as cidades dele, buscando a tabela na primeira vez que um estado é escolhido:
 
 <div class="file" data-file="state-city.ts">
 
@@ -37,9 +37,9 @@ Um service busca a tabela, com `switchMap` descartando a que já não é do esta
 
 </div>
 
-<div class="file" data-file="cities.ts">
+<div class="file" data-file="cities-of-state.ts">
 
-[cities.ts](../../snippets/state-city/angular/cities.ts ':include :type=code ts')
+[cities-of-state.ts](../../snippets/state-city/angular/cities-of-state.ts ':include :type=code ts')
 
 </div>
 
@@ -47,7 +47,7 @@ Um service busca a tabela, com `switchMap` descartando a que já não é do esta
 
 <div class="example" data-name="Vue" data-demo="/snippets/live/?dir=state-city/vue&example=state-city.vue">
 
-Um composable busca a tabela e guarda as cidades; o componente só escolhe:
+Um composable recebe o estado e devolve as cidades dele, buscando a tabela na primeira vez que um estado é escolhido:
 
 <div class="file" data-file="state-city.vue">
 
@@ -55,9 +55,9 @@ Um composable busca a tabela e guarda as cidades; o componente só escolhe:
 
 </div>
 
-<div class="file" data-file="use-cities.ts">
+<div class="file" data-file="use-cities-of-state.ts">
 
-[use-cities.ts](../../snippets/state-city/vue/use-cities.ts ':include :type=code ts')
+[use-cities-of-state.ts](../../snippets/state-city/vue/use-cities-of-state.ts ':include :type=code ts')
 
 </div>
 

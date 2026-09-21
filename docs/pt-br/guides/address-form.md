@@ -11,7 +11,7 @@ O `getAddressInfoByCep` pergunta aos provedores de CEP e devolve rua, bairro, ci
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=address-form/react&example=address-form.tsx">
 
-Um hook faz a consulta, uma por vez, e o formulário desenha o que ela responde:
+Um hook recebe o CEP e devolve o que se sabe sobre ele; o formulário desenha isso. O campo de CEP é o que o [guia do campo de documento](pt-br/guides/document-field.md) constrói:
 
 <div class="file" data-file="address-form.tsx">
 
@@ -19,9 +19,9 @@ Um hook faz a consulta, uma por vez, e o formulário desenha o que ela responde:
 
 </div>
 
-<div class="file" data-file="use-address-lookup.ts">
+<div class="file" data-file="use-get-address-by-cep.ts">
 
-[use-address-lookup.ts](../../snippets/address-form/react/use-address-lookup.ts ':include :type=code ts')
+[use-get-address-by-cep.ts](../../snippets/address-form/react/use-get-address-by-cep.ts ':include :type=code ts')
 
 </div>
 
@@ -29,7 +29,7 @@ Um hook faz a consulta, uma por vez, e o formulário desenha o que ela responde:
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/?dir=address-form/angular&example=address-form.ts">
 
-Um service faz a consulta, com `switchMap` descartando a resposta de um CEP que já não está sendo digitado:
+Um `resource` recebe o CEP e devolve o que se sabe sobre ele, recarregando quando ele muda. O campo de CEP é o que o [guia do campo de documento](pt-br/guides/document-field.md) constrói:
 
 <div class="file" data-file="address-form.ts">
 
@@ -37,9 +37,9 @@ Um service faz a consulta, com `switchMap` descartando a resposta de um CEP que 
 
 </div>
 
-<div class="file" data-file="address-lookup.ts">
+<div class="file" data-file="address-by-cep.ts">
 
-[address-lookup.ts](../../snippets/address-form/angular/address-lookup.ts ':include :type=code ts')
+[address-by-cep.ts](../../snippets/address-form/angular/address-by-cep.ts ':include :type=code ts')
 
 </div>
 
@@ -47,7 +47,7 @@ Um service faz a consulta, com `switchMap` descartando a resposta de um CEP que 
 
 <div class="example" data-name="Vue" data-demo="/snippets/live/?dir=address-form/vue&example=address-form.vue">
 
-Um composable faz a consulta, uma por vez, e o formulário desenha o que ela responde:
+Um composable recebe o CEP e devolve o que se sabe sobre ele; o formulário desenha isso. O campo de CEP é o que o [guia do campo de documento](pt-br/guides/document-field.md) constrói:
 
 <div class="file" data-file="address-form.vue">
 
@@ -55,9 +55,9 @@ Um composable faz a consulta, uma por vez, e o formulário desenha o que ela res
 
 </div>
 
-<div class="file" data-file="use-address-lookup.ts">
+<div class="file" data-file="use-get-address-by-cep.ts">
 
-[use-address-lookup.ts](../../snippets/address-form/vue/use-address-lookup.ts ':include :type=code ts')
+[use-get-address-by-cep.ts](../../snippets/address-form/vue/use-get-address-by-cep.ts ':include :type=code ts')
 
 </div>
 

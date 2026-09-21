@@ -279,6 +279,28 @@ for (const document of DOCUMENTS) {
 	);
 }
 
+// The address guide types a CEP into the very field the document field guide builds, so that
+// field and its mask are written there too, from the same templates. The guide shows neither: it
+// says where they come from and gets on with the lookup.
+const ADDRESS_DIR = join(ROOT, "docs", "snippets", "address-form");
+const cep = DOCUMENTS.find((document) => document.kind === "cep");
+
+if (cep === undefined) throw new Error("The address guide needs the CEP of the documents table");
+
+for (const framework of FRAMEWORKS) {
+	const folder = join(ADDRESS_DIR, framework.name);
+
+	writeFileSync(
+		join(folder, framework.mask),
+		fill(readTemplate(`mask-${framework.name}.ts`), values(cep)),
+	);
+
+	writeFileSync(
+		join(folder, `cep-field.${framework.field}`),
+		fill(readTemplate(`${framework.name}-field.${framework.field}`), values(cep)),
+	);
+}
+
 // A page that points at a file which is not there renders whatever the server answers with, so
 // the pages that show these examples are checked against what was just written.
 const PAGES = [

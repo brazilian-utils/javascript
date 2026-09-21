@@ -34,3 +34,7 @@ docs/sitemap.xml
 docs/llms.txt
 docs/llms-full.txt
 docs/snippets/document-field/generated/
+docs/snippets/address-form/*/cep-field.*
+docs/snippets/address-form/react/use-mask.ts
+docs/snippets/address-form/vue/mask.ts
+docs/snippets/address-form/angular/mask.directive.ts

@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from "react";
-import { formatCep, isValidCep } from "@brazilian-utils/brazilian-utils";
-import { useAddressLookup } from "./use-address-lookup";
+import { CepField } from "./cep-field";
+import { useGetAddressByCep } from "./use-get-address-by-cep";
 
 const EMPTY = { street: "", neighborhood: "", city: "", state: "" };
 const STATUS = {
@@ -14,23 +14,13 @@ export function AddressForm() {
   const id = useId();
   const [cep, setCep] = useState("");
   const [address, setAddress] = useState(EMPTY);
-  const { lookup, lookupCep, reset } = useAddressLookup();
+  const lookup = useGetAddressByCep(cep);
 
   // What the lookup found is what the form starts from; it stays editable from there.
   useEffect(() => {
     if (lookup.status === "found") setAddress(lookup.address);
     if (lookup.status === "failed") setAddress(EMPTY);
   }, [lookup]);
-
-  function onCepChange(typed: string) {
-    const masked = formatCep(typed);
-
-    setCep(masked);
-
-    // Asking before the CEP is complete is asking for nothing.
-    if (isValidCep(masked)) lookupCep(masked);
-    else reset();
-  }
 
   const field = (name: keyof typeof EMPTY, label: string, autoComplete?: string) => (
     <>
@@ -48,19 +38,7 @@ export function AddressForm() {
 
   return (
     <form onSubmit={(event) => event.preventDefault()}>
-      <label htmlFor={id}>CEP</label>
-      <input
-        id={id}
-        inputMode="numeric"
-        autoComplete="postal-code"
-        placeholder="00000-000"
-        value={cep}
-        aria-describedby={`${id}-status`}
-        aria-busy={lookup.status === "loading"}
-        onChange={(event) => onCepChange(event.currentTarget.value)}
-      />
-      {/* On the page from the start, and announced when it gets its text. */}
-      <output id={`${id}-status`}>{STATUS[lookup.status]}</output>
+      <CepField value={cep} onChange={setCep} errorMessage={STATUS[lookup.status]} />
 
       {field("street", "Street", "address-line1")}
       {field("neighborhood", "Neighborhood")}

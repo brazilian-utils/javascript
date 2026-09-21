@@ -1,22 +1,27 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import { getStates } from "@brazilian-utils/brazilian-utils/get-states";
-import { useCities } from "./use-cities";
+import { useCitiesOfState } from "./use-cities-of-state";
 
 // The states are a short list, so they come with the page.
 const states = getStates();
 
 export function StateCity() {
   const id = useId();
-  const { cities, loading, load } = useCities();
+  const [state, setState] = useState("");
+  const { cities, loading } = useCitiesOfState(state);
 
   return (
     <>
       <label htmlFor={id}>State</label>
-      <select id={id} onChange={(event) => load(event.currentTarget.value)}>
+      <select
+        id={id}
+        value={state}
+        onChange={(event) => setState(event.currentTarget.value)}
+      >
         <option value="">Pick a state</option>
-        {states.map((state) => (
-          <option key={state.code} value={state.code}>
-            {state.name}
+        {states.map((current) => (
+          <option key={current.code} value={current.code}>
+            {current.name}
           </option>
         ))}
       </select>

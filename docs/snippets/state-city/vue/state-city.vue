@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { useId } from "vue";
+import { ref, useId } from "vue";
 import { getStates } from "@brazilian-utils/brazilian-utils/get-states";
-import { useCities } from "./use-cities";
+import { useCitiesOfState } from "./use-cities-of-state";
 
 // The states are a short list, so they come with the page.
 const states = getStates();
 
 const id = useId();
-const { cities, loading, load } = useCities();
+const state = ref("");
+const { cities, loading } = useCitiesOfState(state);
 </script>
 
 <template>
   <label :for="id">State</label>
-  <select :id="id" @change="load(($event.target as HTMLSelectElement).value)">
+  <select :id="id" v-model="state">
     <option value="">Pick a state</option>
-    <option v-for="state in states" :key="state.code" :value="state.code">
-      {{ state.name }}
+    <option v-for="current in states" :key="current.code" :value="current.code">
+      {{ current.name }}
     </option>
   </select>
 

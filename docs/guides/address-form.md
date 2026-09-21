@@ -11,7 +11,7 @@ Type a CEP and the rest of the address fills itself. Pick the framework: each ex
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=address-form/react&example=address-form.tsx">
 
-A hook does the asking, one lookup at a time, and the form draws what it answers:
+A hook takes the CEP and gives back what is known about it; the form draws that. The CEP field is the one the [document field guide](document-field.md) builds:
 
 <div class="file" data-file="address-form.tsx">
 
@@ -19,9 +19,9 @@ A hook does the asking, one lookup at a time, and the form draws what it answers
 
 </div>
 
-<div class="file" data-file="use-address-lookup.ts">
+<div class="file" data-file="use-get-address-by-cep.ts">
 
-[use-address-lookup.ts](../snippets/address-form/react/use-address-lookup.ts ':include :type=code ts')
+[use-get-address-by-cep.ts](../snippets/address-form/react/use-get-address-by-cep.ts ':include :type=code ts')
 
 </div>
 
@@ -29,7 +29,7 @@ A hook does the asking, one lookup at a time, and the form draws what it answers
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/?dir=address-form/angular&example=address-form.ts">
 
-A service does the asking, `switchMap` dropping the answer to a CEP that is no longer being typed:
+A `resource` takes the CEP and gives back what is known about it, reloading when it changes. The CEP field is the one the [document field guide](document-field.md) builds:
 
 <div class="file" data-file="address-form.ts">
 
@@ -37,9 +37,9 @@ A service does the asking, `switchMap` dropping the answer to a CEP that is no l
 
 </div>
 
-<div class="file" data-file="address-lookup.ts">
+<div class="file" data-file="address-by-cep.ts">
 
-[address-lookup.ts](../snippets/address-form/angular/address-lookup.ts ':include :type=code ts')
+[address-by-cep.ts](../snippets/address-form/angular/address-by-cep.ts ':include :type=code ts')
 
 </div>
 
@@ -47,7 +47,7 @@ A service does the asking, `switchMap` dropping the answer to a CEP that is no l
 
 <div class="example" data-name="Vue" data-demo="/snippets/live/?dir=address-form/vue&example=address-form.vue">
 
-A composable does the asking, one lookup at a time, and the form draws what it answers:
+A composable takes the CEP and gives back what is known about it; the form draws that. The CEP field is the one the [document field guide](document-field.md) builds:
 
 <div class="file" data-file="address-form.vue">
 
@@ -55,9 +55,9 @@ A composable does the asking, one lookup at a time, and the form draws what it a
 
 </div>
 
-<div class="file" data-file="use-address-lookup.ts">
+<div class="file" data-file="use-get-address-by-cep.ts">
 
-[use-address-lookup.ts](../snippets/address-form/vue/use-address-lookup.ts ':include :type=code ts')
+[use-get-address-by-cep.ts](../snippets/address-form/vue/use-get-address-by-cep.ts ':include :type=code ts')
 
 </div>
 
