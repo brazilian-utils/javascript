@@ -812,6 +812,27 @@ function isCheckedEagerly(signature: FuncSig): boolean {
 	return isEntryPoint(signature) || STDLIB_SURFACE.includes(signature.qualified);
 }
 
+/** Whether a statement can reach a `break` that belongs to the switch rather than to a loop. */
+function escapesCase(statement: HStmt): boolean {
+	switch (statement.kind) {
+		case "break":
+			return true;
+		case "if":
+			return statement.then.some(escapesCase) || (statement.otherwise ?? []).some(escapesCase);
+		case "block":
+			return statement.body.some(escapesCase);
+		case "switch":
+			// A nested switch owns its own breaks.
+			return false;
+		case "forCounted":
+		case "forOf":
+			// A loop inside the case owns its own breaks.
+			return false;
+		default:
+			return false;
+	}
+}
+
 /** Every operation a Core body performs, including inside nested lambdas. */
 function operationsOf(body: readonly CStmt[]): Extract<CExpr, { kind: "op" }>[] {
 	const found: Extract<CExpr, { kind: "op" }>[] = [];
@@ -1053,6 +1074,16 @@ class FunctionChecker {
 	private readonly returnType: SemType;
 	private readonly scope: Map<string, Binding>;
 	private quiet = false;
+	/**
+	 * The states `break` and `continue` leave the innermost loop's body with.
+	 *
+	 * Neither leaves the function, so an assignment made just before one is live: a `continue`'s
+	 * state seeds the next iteration, and a `break`'s state seeds the code after the loop. Both
+	 * are collected here because the statement that produced them is not on the path that falls
+	 * out of the body, which is the only path the straight-line walk sees.
+	 */
+	private breakStates: ScopeSnapshot[] | undefined;
+	private continueStates: ScopeSnapshot[] | undefined;
 	effects: EffectSet = PURE;
 
 	constructor(
@@ -1107,6 +1138,23 @@ class FunctionChecker {
 			if (a === undefined || b === undefined) continue;
 			binding.type = join(a.type, b.type);
 			binding.unwrapped = a.unwrapped && b.unwrapped;
+		}
+	}
+
+	/** Sets every binding to the join of the states it has across `states`. */
+	private applyJoin(states: readonly ScopeSnapshot[]): void {
+		for (const [name, binding] of this.scope) {
+			let merged: SemType | undefined;
+			let unwrapped = true;
+			for (const state of states) {
+				const entry = state.get(name);
+				if (entry === undefined) continue;
+				merged = merged === undefined ? entry.type : join(merged, entry.type);
+				unwrapped &&= entry.unwrapped;
+			}
+			if (merged === undefined) continue;
+			binding.type = merged;
+			binding.unwrapped = unwrapped;
 		}
 	}
 
@@ -1252,8 +1300,10 @@ class FunctionChecker {
 				return [{ kind: "fail", errorClass: statement.errorClass, args, span: statement.span }];
 			}
 			case "break":
+				this.breakStates?.push(this.snapshot());
 				return [{ kind: "break", span: statement.span }];
 			case "continue":
+				this.continueStates?.push(this.snapshot());
 				return [{ kind: "continue", span: statement.span }];
 			case "block":
 				return this.block(statement.body);
@@ -1410,8 +1460,9 @@ class FunctionChecker {
 		const exits: ScopeSnapshot[] = [];
 		for (const caseNode of statement.cases) {
 			this.restore(entry);
+			const caseBody = this.caseBody(caseNode.body);
 			if (caseNode.test === undefined) {
-				otherwise = this.block(caseNode.body);
+				otherwise = this.block(caseBody);
 				exits.push(this.snapshot());
 				continue;
 			}
@@ -1428,7 +1479,7 @@ class FunctionChecker {
 					binding.type = tEnum(binding.type.name, [value]);
 				}
 			}
-			cases.push({ values: [value], body: this.block(caseNode.body) });
+			cases.push({ values: [value], body: this.block(caseBody) });
 			exits.push(this.snapshot());
 		}
 		this.restore(entry);
@@ -1444,6 +1495,30 @@ class FunctionChecker {
 			}
 		}
 		return [{ kind: "switch", subject, cases, otherwise, span: statement.span }];
+	}
+
+	/**
+	 * The statements of a switch case, without the `break` that ends it.
+	 *
+	 * In TypeScript that `break` leaves the *switch*; the Core's switch never falls through, so it
+	 * carries no meaning and is dropped. It cannot be kept: a target that prints the switch as a
+	 * chain of conditionals — Python does — would read it as leaving the enclosing loop. A `break`
+	 * anywhere else in a case would mean the same thing and cannot be expressed, so it is refused
+	 * rather than mistranslated.
+	 */
+	private caseBody(body: readonly HStmt[]): readonly HStmt[] {
+		const trimmed = body.length > 0 && body[body.length - 1]!.kind === "break" ? body.slice(0, -1) : body;
+		for (const statement of trimmed) {
+			if (escapesCase(statement)) {
+				this.report(
+					"E_SWITCH_BREAK",
+					"a `break` inside a switch case cannot leave the switch early",
+					statement.span,
+					"restructure the case so it ends at its last statement, or use `if`/`else`",
+				);
+			}
+		}
+		return trimmed;
 	}
 
 	/* ---------------------------------------------------------------- *
@@ -1477,8 +1552,6 @@ class FunctionChecker {
 			});
 			return this.block(statement.body);
 		});
-
-		this.scope.delete(statement.name);
 		return [
 			{
 				kind: "forRange",
@@ -1525,8 +1598,6 @@ class FunctionChecker {
 			});
 			return this.block(statement.body);
 		});
-
-		this.scope.delete(statement.name);
 		return [
 			{
 				kind: "forEach",
@@ -1553,37 +1624,56 @@ class FunctionChecker {
 		// The loop head sees the state after at most `trips - 1` completed bodies, so that many
 		// merges are an exact fixpoint rather than an over-approximation.
 		const iterations = bounded ? Math.max(0, Number(trips) - 1) : MAX_LOOP_ITERATIONS;
+		const outerBreaks = this.breakStates;
+		const outerContinues = this.continueStates;
 		let converged = false;
 		this.quiet = true;
 		for (let iteration = 0; iteration < iterations; iteration++) {
 			const before = this.snapshot();
-			check();
-			const after = this.snapshot();
+			const body = this.runBody(check);
 			this.restore(entry);
-			this.mergeInto(before, after);
+			// The next iteration starts from any of: the head it started at, the end of a body that
+			// fell through, or a `continue`. A `break` is folded in as well, so that a range the
+			// analysis reports is never narrower than one the loop can really hold.
+			this.applyJoin([before, body.fellThrough, ...body.continued, ...body.broke]);
 			if (sameSnapshot(before, this.snapshot())) {
 				converged = true;
 				break;
 			}
-			const merged = this.snapshot();
-			this.restore(entry);
-			this.applySnapshot(merged);
 		}
 		if (!converged && trips > BigInt(MAX_LOOP_ITERATIONS)) {
 			this.checker.metricTable.widenedLoops++;
 			this.widenMutableIntegers();
 		}
 		this.quiet = false;
-		return check();
+
+		const head = this.snapshot();
+		const final = this.runBody(check);
+		this.breakStates = outerBreaks;
+		this.continueStates = outerContinues;
+		this.restore(entry);
+		// After the loop the state is any of: never entered it (the head, which covers the entry),
+		// fell out of the last body, or left through a `break`.
+		this.applyJoin([head, final.fellThrough, ...final.broke]);
+		return final.statements;
 	}
 
-	private applySnapshot(snapshot: ScopeSnapshot): void {
-		for (const [name, state] of snapshot) {
-			const binding = this.scope.get(name);
-			if (binding === undefined) continue;
-			binding.type = state.type;
-			binding.unwrapped = state.unwrapped;
-		}
+	/** Runs a loop body once, keeping the states its `break`s and `continue`s left with. */
+	private runBody(check: () => CStmt[]): {
+		statements: CStmt[];
+		fellThrough: ScopeSnapshot;
+		broke: ScopeSnapshot[];
+		continued: ScopeSnapshot[];
+	} {
+		this.breakStates = [];
+		this.continueStates = [];
+		const statements = check();
+		return {
+			statements,
+			fellThrough: this.snapshot(),
+			broke: this.breakStates,
+			continued: this.continueStates,
+		};
 	}
 
 	private widenMutableIntegers(): void {

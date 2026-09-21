@@ -102,7 +102,7 @@ fn std/strings::asciiUpperAll(value: String[0..2147483647]): String[0..214748364
       push points <- point: Int[0..1114111]
     }
   }
-  return str.fromCodePoints(points: List<Int[0..1114111]>[1..2147483647]): String[1..2147483647]
+  return str.fromCodePoints(points: List<Int[0..1114111]>[0..2147483647]): String[0..2147483647]
 
 fn std/strings::asciiLowerAll(value: String[0..2147483647]): String[0..2147483647] ! Pure
   let points: List<Int[0..1114111]>[0..2147483647] = []
@@ -113,7 +113,7 @@ fn std/strings::asciiLowerAll(value: String[0..2147483647]): String[0..214748364
       push points <- point: Int[0..1114111]
     }
   }
-  return str.fromCodePoints(points: List<Int[0..1114111]>[1..2147483647]): String[1..2147483647]
+  return str.fromCodePoints(points: List<Int[0..1114111]>[0..2147483647]): String[0..2147483647]
 
 fn is-valid-luhn::isValidLuhn(value: String[0..2147483647]): Bool ! Pure
   if !re.test/^[0-9]{2,19}$/(value: String[0..2147483647]): Bool {
