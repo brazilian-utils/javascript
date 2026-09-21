@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
-# Regenerates every target and replays the recorded vectors through all seven of them.
+# Regenerates every target and replays the recorded expectations through all seven of them.
 #
-# The vectors and the municipality dump are recordings of the JavaScript package this
-# repository ships, so a green run means the generated code answers exactly what the
-# handwritten code answers, in every language.
+# Three recordings, all taken from the JavaScript package this repository ships: the CNPJ
+# vectors, the municipality dump, and the CEP scenarios. A green run means the generated code
+# answers exactly what the handwritten code answers, in every language.
+#
+# The CEP replay needs somewhere to send its requests, so the same scenario table is served
+# over HTTP on a local port and every target is pointed at it through the runtime's
+# BRUTILS_BRIDGE_HTTP_ORIGIN hook.
 #
 # Usage: `bash spec/bridge/conformance/run-all.sh`
 set -uo pipefail
 
 bridge="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 out="${bridge}/out"
+port="${BRUTILS_BRIDGE_PORT:-18080}"
+export BRUTILS_BRIDGE_HTTP_ORIGIN="http://127.0.0.1:${port}"
 status=0
 
 step() {
@@ -30,10 +36,17 @@ run() {
 step "recording the expectations from the package this repository ships"
 node "${bridge}/conformance/vectors.ts"
 node "${bridge}/conformance/municipalities.ts"
+node "${bridge}/conformance/cep.ts"
 
 step "compiling source/ into every target"
 node "${bridge}/compiler/cli.ts"
 node "${bridge}/conformance/drivers.ts"
+
+step "serving the CEP scenarios on ${BRUTILS_BRIDGE_HTTP_ORIGIN}"
+node "${bridge}/conformance/cep.ts" serve "${port}" &
+server=$!
+trap 'kill "${server}" 2>/dev/null' EXIT
+sleep 1
 
 step "typescript"
 run typescript bash -c "cd '${out}/typescript' && node conformance.ts"

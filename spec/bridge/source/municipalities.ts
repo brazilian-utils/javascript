@@ -61,7 +61,8 @@ const MUNICIPALITIES: Dataset = dataset("municipalities");
 const rowToMunicipality = (row: string[]): Municipality => ({
 	code: row[2],
 	name: row[1],
-	stateCode: row[0],
+	// The dataset holds plain strings; `data/build.ts` is what keeps the closed set true.
+	stateCode: row[0] as StateCode,
 });
 
 /**

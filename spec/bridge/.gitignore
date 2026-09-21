@@ -10,3 +10,4 @@ conformance/vectors.json
 conformance/vectors.tsv
 conformance/municipalities.expected.txt
 conformance/municipalities.keys.txt
+conformance/cep.expected.tsv

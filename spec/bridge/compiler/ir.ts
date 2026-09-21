@@ -17,6 +17,8 @@ export type Ty =
 	| { k: "scalar" }
 	/** A string whose values are a closed set: a union of string literals in the source. */
 	| { k: "enum"; name: string }
+	/** The running attempts of a race, as `startAll` hands them over. */
+	| { k: "tasks"; of: Ty }
 	| { k: "list"; of: Ty }
 	| { k: "opt"; of: Ty }
 	| { k: "named"; name: string };
@@ -43,24 +45,11 @@ export type Expr =
 	| { k: "cond"; test: Expr; whenTrue: Expr; whenFalse: Expr }
 	| { k: "listOf"; items: Expr[]; of: Ty }
 	| { k: "struct"; name: string; fields: { name: string; value: Expr }[] }
-	| { k: "lambda"; params: Param[]; body: Stmt[]; ret: Ty; isAsync: boolean }
 	| { k: "await"; value: Expr }
 	/** `options?.version ?? fallback`: reads an optional field of an optional struct. */
 	| { k: "optionField"; target: string; field: string; ty: Ty; fallback: Expr };
 
-export type BinaryOp =
-	| "+"
-	| "-"
-	| "*"
-	| "%"
-	| "=="
-	| "!="
-	| "<"
-	| "<="
-	| ">"
-	| ">="
-	| "&&"
-	| "||";
+export type BinaryOp = "+" | "-" | "*" | "%" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||";
 
 export type Stmt =
 	| { k: "let"; name: string; ty: Ty; value: Expr; mutable: boolean }
@@ -80,13 +69,22 @@ export type StructDecl = {
 	fields: { name: string; ty: Ty; doc: string; domain?: number[] }[];
 	/** Options structs are the second, optional argument of a public function. */
 	isOptions: boolean;
+	/** Records the runtime already declares, which no emitter writes out again. */
+	external?: boolean;
 };
 
 /** A closed set of string values: `type StateCode = "AC" | "AL" | …`. */
 export type EnumDecl = { name: string; doc: string; values: string[] };
 
 /** An error type. `base` is another declared error, or undefined for a root error. */
-export type ErrorDecl = { name: string; doc: string; base?: string };
+export type ErrorDecl = {
+	name: string;
+	doc: string;
+	base?: string;
+	exported: boolean;
+	/** The name and every name it inherits from, which is what a failure is matched on. */
+	kinds: string[];
+};
 
 export type FuncDecl = {
 	name: string;
@@ -96,6 +94,10 @@ export type FuncDecl = {
 	body: Stmt[];
 	isAsync: boolean;
 	exported: boolean;
+	/** Whether the body waits on the network, directly or through another function. */
+	blocking: boolean;
+	/** Whether the body can raise, directly or through another function. */
+	throws: boolean;
 	/** The `@see` links of the source, carried into every target's documentation. */
 	sources: { role: string; url: string }[];
 };
@@ -168,11 +170,19 @@ export const STD = {
 	dataRows: { params: ["data", "string"], ret: "list" },
 	dataAll: { params: ["data"], ret: "list" },
 	dataHasKey: { params: ["data", "string"], ret: "bool" },
+	/** Whether a list holds a value. */
+	listHas: { params: ["list", "string"], ret: "bool" },
+	// boundary questions only a dynamically typed host can answer with anything but a constant
+	isNumber: { params: ["scalar"], ret: "bool" },
+	isList: { params: ["any"], ret: "bool" },
 	// json and http
-	httpGet: { params: ["string"], ret: "named:HttpResponse" },
+	httpGet: { params: ["string", "int", "int"], ret: "named:HttpResponse" },
 	jsonString: { params: ["json", "string"], ret: "string" },
 	jsonInt: { params: ["json", "string"], ret: "int" },
 	jsonTruthy: { params: ["json", "string"], ret: "bool" },
-	// concurrency
-	raceFirstSuccess: { params: ["list"], ret: "any" },
+	jsonIsTrue: { params: ["json", "string"], ret: "bool" },
+	// concurrency: the only primitive of the subset
+	startAll: { params: ["function", "list", "string"], ret: "tasks" },
+	firstSuccess: { params: ["tasks"], ret: "opt" },
+	anyFailedWith: { params: ["tasks", "error"], ret: "bool" },
 } as const;

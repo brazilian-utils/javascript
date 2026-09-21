@@ -16,6 +16,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+
 import { build } from "esbuild";
 
 const bridge = resolve(import.meta.dirname, "..");

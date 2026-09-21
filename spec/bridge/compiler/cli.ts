@@ -5,8 +5,9 @@
  */
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+
 import { compileModule } from "./frontend.ts";
-import type { Module } from "./ir.ts";
+import { type Module } from "./ir.ts";
 import { emit as emitCsharp } from "./targets/csharp.ts";
 import { emit as emitGo } from "./targets/go.ts";
 import { emit as emitJava } from "./targets/java.ts";

@@ -181,3 +181,278 @@ export const dataAll = (table: Dataset): string[][] => table.all;
  * @returns {string[][]} The rows, empty when the key is unknown.
  */
 export const dataRows = (table: Dataset, key: string): string[][] => table.byKey.get(key) ?? [];
+
+/** What a provider answered: the HTTP status, whether it counts as a success, and the body. */
+export type HttpResponse = {
+	readonly status: number;
+	readonly ok: boolean;
+	readonly body: unknown;
+};
+
+/**
+ * The transport failures worth retrying. `fetch` reports them on the error or on its cause,
+ * and a failure that is not one of these is an answer, not a hiccup.
+ */
+const RETRYABLE_ERROR_CODES = new Set([
+	"UND_ERR_SOCKET",
+	"UND_ERR_CONNECT_TIMEOUT",
+	"UND_ERR_HEADERS_TIMEOUT",
+	"UND_ERR_BODY_TIMEOUT",
+	"ECONNRESET",
+	"ECONNREFUSED",
+	"EHOSTUNREACH",
+	"ENETUNREACH",
+	"ETIMEDOUT",
+]);
+
+/** The `code` of an error, or of its cause. */
+const errorCode = (error: unknown): string | undefined => {
+	if (error === null || typeof error !== "object") return undefined;
+
+	const code = "code" in error ? error.code : undefined;
+
+	if (typeof code === "string") return code;
+
+	const cause = "cause" in error ? error.cause : undefined;
+
+	if (cause === null || cause === undefined || typeof cause !== "object") return undefined;
+
+	const causeCode = "code" in cause ? cause.code : undefined;
+
+	return typeof causeCode === "string" ? causeCode : undefined;
+};
+
+/** Whether a `fetch` rejection is a transient transport failure. */
+const isRetryable = (error: unknown): boolean => {
+	const code = errorCode(error);
+
+	if (code !== undefined && RETRYABLE_ERROR_CODES.has(code)) return true;
+	if (!(error instanceof Error)) return false;
+
+	return error.message.toLowerCase().includes("fetch failed");
+};
+
+/**
+ * The origin every request is sent to instead of its own, when one is set.
+ *
+ * This is the conformance hook: the cross language replay points all seven targets at one local
+ * server, the same way the JavaScript suite points `fetch` at a mock.
+ */
+const origin = (url: string): string => {
+	const base = globalThis.process?.env?.["BRUTILS_BRIDGE_HTTP_ORIGIN"];
+
+	if (base === undefined || base === "") return url;
+
+	return `${base}/${url.replace(/^https?:\/\//, "")}`;
+};
+
+/**
+ * Performs an HTTP GET, retrying a transient transport failure with a linear backoff.
+ *
+ * @param {string} url - The URL to read.
+ * @param {number} retries - How many retries follow the first attempt.
+ * @param {number} retryDelayMs - The base delay, multiplied by the attempt number.
+ * @returns {Promise<HttpResponse>} The response; `status` is 0 when nothing reached the server.
+ */
+export const httpGet = async (
+	url: string,
+	retries: number,
+	retryDelayMs: number,
+): Promise<HttpResponse> => {
+	const target = origin(url);
+
+	for (let attempt = 0; ; attempt++) {
+		try {
+			const response = await fetch(target);
+			let body: unknown;
+
+			try {
+				body = await response.json();
+			} catch {
+				body = undefined;
+			}
+
+			return { status: response.status, ok: response.ok, body };
+		} catch (error) {
+			if (attempt >= retries || !isRetryable(error))
+				return { status: 0, ok: false, body: undefined };
+		}
+
+		const delay = retryDelayMs * (attempt + 1);
+
+		await new Promise((resolve) => {
+			setTimeout(resolve, delay);
+		});
+	}
+};
+
+/**
+ * Whether the caller handed a number where a `string | number` was declared.
+ *
+ * @param {unknown} value - The value.
+ * @returns {boolean} True when it is a number.
+ */
+export const isNumber = (value: unknown): boolean => typeof value === "number";
+
+/**
+ * Whether a value is a list.
+ *
+ * @param {unknown} value - The value.
+ * @returns {boolean} True when it is a list.
+ */
+export const isList = (value: unknown): value is unknown[] => Array.isArray(value);
+
+/**
+ * Whether a list holds a value.
+ *
+ * @param {string[]} list - The list.
+ * @param {string} value - The value to look for.
+ * @returns {boolean} True when the list holds it.
+ */
+export const listHas = (list: readonly string[], value: string): boolean => list.includes(value);
+
+/** Reads one field of a JSON body, treating anything that is not an object as empty. */
+const jsonField = (body: unknown, key: string): unknown => {
+	if (body === null || typeof body !== "object" || Array.isArray(body)) return undefined;
+
+	return Object.hasOwn(body, key) ? (body as Record<string, unknown>)[key] : undefined;
+};
+
+/**
+ * Reads a string field of a JSON body, answering `""` when it is missing or not a string.
+ *
+ * @param {unknown} body - The body.
+ * @param {string} key - The field name.
+ * @returns {string} The value, or `""`.
+ */
+export const jsonString = (body: unknown, key: string): string => {
+	const found = jsonField(body, key);
+
+	return typeof found === "string" ? found : "";
+};
+
+/**
+ * Reads an integer field of a JSON body, answering `-1` when it is missing or not a number.
+ *
+ * @param {unknown} body - The body.
+ * @param {string} key - The field name.
+ * @returns {number} The value, or `-1`.
+ */
+export const jsonInt = (body: unknown, key: string): number => {
+	const found = jsonField(body, key);
+
+	return typeof found === "number" ? Math.trunc(found) : -1;
+};
+
+/**
+ * Whether a field of a JSON body is truthy, the way JavaScript reads truthiness.
+ *
+ * @param {unknown} body - The body.
+ * @param {string} key - The field name.
+ * @returns {boolean} True when the field is set and truthy.
+ */
+export const jsonTruthy = (body: unknown, key: string): boolean => Boolean(jsonField(body, key));
+
+/**
+ * Whether a field of a JSON body is exactly `true`.
+ *
+ * @param {unknown} body - The body.
+ * @param {string} key - The field name.
+ * @returns {boolean} True when the field is the boolean `true`.
+ */
+export const jsonIsTrue = (body: unknown, key: string): boolean => jsonField(body, key) === true;
+
+/** What one attempt of a race ended with. */
+type Outcome<T> = { ok: boolean; value?: T; kinds: string[] };
+
+/** The running attempts of a race, and what each one ended with. */
+export type Attempts<T> = { settled: Promise<Outcome<T>>[]; outcomes: Outcome<T>[] };
+
+/** The error name and every name it inherits from, which is what a failure is matched on. */
+const kindsOf = (error: unknown): string[] => {
+	const kinds: string[] = [];
+
+	for (
+		let current: unknown = error;
+		current instanceof Error;
+		current = Object.getPrototypeOf(current) as unknown
+	) {
+		const name = (current.constructor as { name?: string } | undefined)?.name;
+
+		if (name !== undefined && name !== "" && !kinds.includes(name)) kinds.push(name);
+	}
+
+	return kinds;
+};
+
+/**
+ * Starts one attempt per item, all at once.
+ *
+ * @param {Function} run - The function to run per item.
+ * @param {string[]} items - The items.
+ * @param {string} argument - A second argument handed to every call.
+ * @returns {Attempts} The running attempts.
+ */
+export const startAll = <T>(
+	run: (item: never, argument: string) => T | Promise<T>,
+	items: readonly string[],
+	argument: string,
+): Attempts<T> => {
+	const attempts: Attempts<T> = { settled: [], outcomes: [] };
+
+	for (const item of items) {
+		attempts.settled.push(
+			Promise.resolve()
+				.then(async (): Promise<Outcome<T>> => ({
+					ok: true,
+					value: await run(item as never, argument),
+					kinds: [],
+				}))
+				.catch((error: unknown): Outcome<T> => ({ ok: false, kinds: kindsOf(error) }))
+				.then((outcome) => {
+					attempts.outcomes.push(outcome);
+
+					return outcome;
+				}),
+		);
+	}
+
+	return attempts;
+};
+
+/**
+ * The value of the first attempt that succeeds, or nothing once every attempt has failed.
+ *
+ * @param {Attempts} attempts - The running attempts.
+ * @returns {Promise<unknown>} The value, or `undefined`.
+ */
+export const firstSuccess = async <T>(attempts: Attempts<T>): Promise<T | undefined> => {
+	const waiting = new Map(
+		attempts.settled.map((settled, index) => [
+			index,
+			settled.then((outcome) => ({ index, outcome })),
+		]),
+	);
+
+	while (waiting.size > 0) {
+		// The attempts are already running; this only picks whichever lands first.
+		// eslint-disable-next-line no-await-in-loop
+		const { index, outcome } = await Promise.race(waiting.values());
+
+		waiting.delete(index);
+
+		if (outcome.ok) return outcome.value;
+	}
+
+	return undefined;
+};
+
+/**
+ * Whether any attempt failed with a given error kind.
+ *
+ * @param {Attempts} attempts - The attempts.
+ * @param {string} kind - The error name to look for.
+ * @returns {boolean} True when at least one attempt failed with it.
+ */
+export const anyFailedWith = <T>(attempts: Attempts<T>, kind: string): boolean =>
+	attempts.outcomes.some((outcome) => !outcome.ok && outcome.kinds.includes(kind));

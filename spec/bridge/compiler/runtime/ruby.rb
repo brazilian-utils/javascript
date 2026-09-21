@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'json'
+require 'net/http'
+require 'uri'
+
 # The portable runtime for the Ruby target.
 #
 # Ruby indexes strings by character, which is what the generated code expects; everything else
@@ -126,6 +130,158 @@ module BrazilianUtilsBridge
     # The rows whose first column is the key given, empty when the key is unknown.
     def self.data_rows(table, key)
       table.by_key.fetch(key, [])
+    end
+
+    # What a provider answered: the HTTP status, whether it counts as a success, and the body.
+    HttpResponse = Struct.new(:status, :ok, :body)
+
+    # The origin every request is sent to instead of its own, when one is set.
+    #
+    # This is the conformance hook: the cross language replay points all seven targets at one
+    # local server, the same way the JavaScript suite points fetch at a mock.
+    def self.http_target(url)
+      base = ENV.fetch('BRUTILS_BRIDGE_HTTP_ORIGIN', '')
+
+      return url if base.empty?
+
+      "#{base}/#{url.sub(%r{\Ahttps?://}, '')}"
+    end
+
+    # Performs an HTTP GET, retrying a transient transport failure with a linear backoff.
+    def self.http_get(url, retries, retry_delay_ms)
+      target = URI.parse(http_target(url))
+      attempt = 0
+
+      loop do
+        begin
+          answer = Net::HTTP.get_response(target)
+        rescue StandardError
+          return HttpResponse.new(0, false, nil) if attempt >= retries
+
+          sleep(retry_delay_ms * (attempt + 1) / 1000.0)
+          attempt += 1
+          next
+        end
+
+        status = answer.code.to_i
+        body = begin
+          JSON.parse(answer.body)
+        rescue StandardError
+          nil
+        end
+
+        return HttpResponse.new(status, status >= 200 && status < 300, body)
+      end
+    end
+
+    # Whether the caller handed a number where a string or a number was declared.
+    def self.is_number(value)
+      value.is_a?(Numeric)
+    end
+
+    # Whether a value is a list.
+    def self.is_list(value)
+      value.is_a?(Array)
+    end
+
+    # Whether a list holds a value.
+    def self.list_has(items, value)
+      items.include?(value)
+    end
+
+    # Reads one field of a JSON body, treating anything that is not an object as empty.
+    def self.json_field(body, key)
+      return nil unless body.is_a?(Hash)
+
+      body[key]
+    end
+
+    # Reads a string field of a JSON body, answering '' when it is missing or not a string.
+    def self.json_string(body, key)
+      found = json_field(body, key)
+
+      found.is_a?(String) ? found : ''
+    end
+
+    # Reads an integer field of a JSON body, answering -1 when it is missing or not a number.
+    def self.json_int(body, key)
+      found = json_field(body, key)
+
+      found.is_a?(Numeric) && !found.is_a?(TrueClass) ? found.to_i : -1
+    end
+
+    # Whether a field of a JSON body is truthy, the way JavaScript reads truthiness.
+    def self.json_truthy(body, key)
+      found = json_field(body, key)
+
+      !(found.nil? || found == false || found == 0 || found == '')
+    end
+
+    # Whether a field of a JSON body is exactly true.
+    def self.json_is_true(body, key)
+      json_field(body, key) == true
+    end
+
+    # The running attempts of a race, and what each one ended with.
+    class Attempts
+      attr_reader :settled, :total
+      attr_accessor :outcomes
+
+      def initialize(total)
+        @settled = Queue.new
+        @total = total
+        @outcomes = []
+      end
+    end
+
+    # The error name and every name it inherits from, which is what a failure is matched on.
+    def self.kinds_of(error)
+      kinds = []
+      current = error.class
+
+      while current
+        kinds.push(current.name.to_s.split('::').last)
+        current = current.superclass
+      end
+
+      kinds
+    end
+
+    # Starts one attempt per item, all at once.
+    #
+    # This is the only concurrency primitive of the portable subset. Ruby has no promise to
+    # colour a function with, so the work goes on threads and the caller simply waits.
+    def self.start_all(run, items, argument)
+      attempts = Attempts.new(items.length)
+
+      items.each do |item|
+        Thread.new do
+          begin
+            attempts.settled.push([true, run.call(item, argument), []])
+          rescue StandardError => e
+            attempts.settled.push([false, nil, kinds_of(e)])
+          end
+        end
+      end
+
+      attempts
+    end
+
+    # The value of the first attempt that succeeds, or nil once every attempt has failed.
+    def self.first_success(attempts)
+      while attempts.outcomes.length < attempts.total
+        outcome = attempts.settled.pop
+        attempts.outcomes.push(outcome)
+
+        return outcome[1] if outcome[0]
+      end
+
+      nil
+    end
+
+    # Whether any attempt failed with a given error kind.
+    def self.any_failed_with(attempts, kind)
+      attempts.outcomes.any? { |ok, _value, kinds| !ok && kinds.include?(kind) }
     end
   end
 end

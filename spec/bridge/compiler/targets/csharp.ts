@@ -7,16 +7,18 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type {
-	CharClass,
-	DataDecl,
-	Expr,
-	FuncDecl,
-	Module,
-	PatternDecl,
-	Stmt,
-	StructDecl,
-	Ty,
+
+import {
+	type CharClass,
+	type DataDecl,
+	type ErrorDecl,
+	type Expr,
+	type FuncDecl,
+	type Module,
+	type PatternDecl,
+	type Stmt,
+	type StructDecl,
+	type Ty,
 } from "../ir.ts";
 import { optionReads, pascal, prose, screaming } from "../kit.ts";
 
@@ -26,11 +28,15 @@ let structs = new Map<string, StructDecl>();
 /** The declared types in scope, so a list knows whether it is an array or a growing list. */
 let localTypes = new Map<string, Ty>();
 
+/** The functions that wait on the network, and are therefore `async` here. */
+let blocking = new Set<string>();
+
 /** Splits a list into fixed size chunks, so no one method carries the whole table. */
 const chunks = <T>(items: T[], size: number): T[][] => {
 	const out: T[][] = [];
 
-	for (let index = 0; index < items.length; index += size) out.push(items.slice(index, index + size));
+	for (let index = 0; index < items.length; index += size)
+		out.push(items.slice(index, index + size));
 
 	return out;
 };
@@ -101,23 +107,34 @@ const type = (ty: Ty): string => {
 		case "string":
 		case "scalar":
 		case "json":
-		case "enum":
+		case "enum": {
 			return "string";
-		case "int":
+		}
+		case "int": {
 			return "long";
-		case "bool":
+		}
+		case "bool": {
 			return "bool";
-		case "void":
+		}
+		case "void": {
 			return "void";
-		case "list":
-			// A list of records is built by appending, which an array cannot do.
-			return ty.of.k === "named"
-				? `System.Collections.Generic.List<${type(ty.of)}>`
-				: `${type(ty.of)}[]`;
-		case "opt":
-			return `${type(ty.of)}?`;
-		case "named":
+		}
+		case "list": {
+			// Only the integer lists stay arrays: they are the hot path. Everything else is a
+			// List, which is what appending needs and what a C# caller expects.
+			return ty.of.k === "int" ? "long[]" : `System.Collections.Generic.List<${type(ty.of)}>`;
+		}
+		case "opt": {
+			// A reference is already "or nothing"; only the value types need the annotation.
+			return ty.of.k === "int" || ty.of.k === "bool" ? `${type(ty.of)}?` : type(ty.of);
+		}
+		case "named": {
+			// The runtime declares its own records beside the generated ones, in the same namespace.
 			return ty.name;
+		}
+		case "tasks": {
+			return `Attempts<${type(ty.of)}>`;
+		}
 	}
 };
 
@@ -139,45 +156,64 @@ const OPS: Record<string, string> = {
 /** Renders an expression. */
 const expr = (node: Expr): string => {
 	switch (node.k) {
-		case "str":
+		case "str": {
 			return lit(node.value);
-		case "int":
+		}
+		case "int": {
 			return `${node.value}L`;
-		case "bool":
+		}
+		case "bool": {
 			return String(node.value);
-		case "none":
+		}
+		case "none": {
 			return "null";
-		case "ref":
+		}
+		case "ref": {
 			return verbatim.has(node.name) ? screaming(node.name) : safe(node.name);
-		case "field":
+		}
+		case "field": {
 			return `${expr(node.target)}.${pascal(node.name)}`;
-		case "index":
+		}
+		case "index": {
 			return `${expr(node.target)}[(int) ${expr(node.index)}]`;
-		case "not":
+		}
+		case "not": {
 			return `!${expr(node.operand)}`;
-		case "bin":
+		}
+		case "bin": {
 			return `(${expr(node.left)} ${OPS[node.op]} ${expr(node.right)})`;
-		case "cond":
+		}
+		case "cond": {
 			return `(${expr(node.test)} ? ${expr(node.whenTrue)} : ${expr(node.whenFalse)})`;
-		case "listOf":
-			if (node.of.k === "named")
-				return `new System.Collections.Generic.List<${type(node.of)}>()`;
+		}
+		case "listOf": {
+			if (node.of.k !== "int")
+				return `new System.Collections.Generic.List<${type(node.of)}> { ${node.items
+					.map((item) => expr(item))
+					.join(", ")} }`;
 
-			return `{ ${node.items.map((item) => expr(item)).join(", ")} }`;
+			// A collection initializer without `new T[]` is only valid in a declaration.
+			return `new long[] { ${node.items.map((item) => expr(item)).join(", ")} }`;
+		}
 		case "struct": {
 			const declared = structs.get(node.name);
 			const order = declared?.fields.map((field) => field.name) ?? node.fields.map((f) => f.name);
 
 			return `new ${node.name}(${order
-				.map((name) => expr(node.fields.find((field) => field.name === name)?.value ?? { k: "none" }))
+				.map((name) =>
+					expr(node.fields.find((field) => field.name === name)?.value ?? { k: "none" }),
+				)
 				.join(", ")})`;
 		}
-		case "optionField":
+		case "optionField": {
 			return `${safe(node.target)}${pascal(node.field)}`;
-		case "call":
+		}
+		case "await": {
+			return `await ${expr(node.value)}`;
+		}
+		case "call": {
 			return call(node);
-		default:
-			throw new Error(`csharp: unsupported expression ${node.k}`);
+		}
 	}
 };
 
@@ -187,54 +223,107 @@ const isGrowing = (node: Expr): boolean => {
 
 	const ty = localTypes.get(node.name);
 
-	return ty !== undefined && ty.k === "list" && ty.of.k === "named";
+	return ty?.k === "list" && ty.of.k !== "int";
 };
 
 /** Renders a call. */
 const call = (node: Extract<Expr, { k: "call" }>): string => {
 	const args = node.args.map((argument) => expr(argument));
 
-	if (node.callee.k === "user") return `${pascal(node.callee.name)}(${args.join(", ")})`;
+	if (node.callee.k === "user")
+		return `${blocking.has(node.callee.name) ? "await " : ""}${pascal(node.callee.name)}(${args.join(", ")})`;
 
 	switch (node.callee.name) {
-		case "len":
+		case "len": {
 			return `(long) ${args[0]}.Length`;
-		case "listLen":
+		}
+		case "listLen": {
 			return isGrowing(node.args[0]) ? `(long) ${args[0]}.Count` : `(long) ${args[0]}.Length`;
-		case "codeAt":
+		}
+		case "isNumber": {
+			// C#'s parameter is a string, so the question cannot arise.
+			return "false";
+		}
+		case "isList": {
+			return "true";
+		}
+		case "listHas": {
+			return `Net.ListHas(${args[0]}, ${args[1]})`;
+		}
+		case "httpGet": {
+			return `await Net.HttpGet(${args.join(", ")})`;
+		}
+		case "jsonString": {
+			return `Net.JsonString(${args[0]}, ${args[1]})`;
+		}
+		case "jsonInt": {
+			return `Net.JsonInt(${args[0]}, ${args[1]})`;
+		}
+		case "jsonTruthy": {
+			return `Net.JsonTruthy(${args[0]}, ${args[1]})`;
+		}
+		case "jsonIsTrue": {
+			return `Net.JsonIsTrue(${args[0]}, ${args[1]})`;
+		}
+		case "startAll": {
+			return `Net.StartAll(${pascal(node.args[0].k === "ref" ? node.args[0].name : "")}, ${args[1]}, ${args[2]})`;
+		}
+		case "firstSuccess": {
+			return `await Net.FirstSuccess(${args[0]})`;
+		}
+		case "anyFailedWith": {
+			return `Net.AnyFailedWith(${args[0]}, ${args[1]})`;
+		}
+		case "codeAt": {
 			return `Runtime.CodeAt(${args[0]}, ${args[1]})`;
-		case "slice":
+		}
+		case "slice": {
 			return `Runtime.Slice(${args[0]}, ${args[1]}, ${args[2]})`;
-		case "upper":
+		}
+		case "upper": {
 			return `${args[0]}.ToUpperInvariant()`;
-		case "trim":
+		}
+		case "trim": {
 			return `Runtime.JsTrim(${args[0]})`;
-		case "padStart":
+		}
+		case "padStart": {
 			return `Runtime.PadStart(${args[0]}, ${args[1]}, ${args[2]})`;
-		case "repeat":
+		}
+		case "repeat": {
 			return `Runtime.Repeat(${args[0]}, ${args[1]})`;
-		case "classHas":
+		}
+		case "classHas": {
 			return `Runtime.ClassHas(${args[0]}, ${args[1]})`;
-		case "keepClass":
+		}
+		case "keepClass": {
 			return `Runtime.KeepClass(${args[0]}, ${args[1]})`;
-		case "patternTest":
+		}
+		case "patternTest": {
 			return `Runtime.PatternTest(${args[0]}, ${args[1]})`;
-		case "asString":
+		}
+		case "asString": {
 			// C#'s types already guarantee a string at the boundary.
 			return args[0];
-		case "isTruthy":
+		}
+		case "isTruthy": {
 			return args[0];
-		case "listPush":
+		}
+		case "listPush": {
 			return `${args[0]}.Add(${args[1]})`;
-		case "unwrap":
+		}
+		case "unwrap": {
 			// C# has no separate optional value to open; a reference is already nullable.
 			return args[0];
-		case "dataAll":
+		}
+		case "dataAll": {
 			return `Runtime.DataAll(${args[0]})`;
-		case "dataRows":
+		}
+		case "dataRows": {
 			return `Runtime.DataRows(${args[0]}, ${args[1]})`;
-		default:
+		}
+		default: {
 			throw new Error(`csharp: unsupported runtime call ${node.callee.name}`);
+		}
 	}
 };
 
@@ -248,12 +337,14 @@ const block = (body: Stmt[], indent: string): string =>
 /** Renders one statement. */
 const stmt = (node: Stmt, indent: string): string => {
 	switch (node.k) {
-		case "let":
+		case "let": {
 			localTypes.set(node.name, node.ty);
 
 			return `${indent}${type(node.ty)} ${safe(node.name)} = ${expr(node.value)};`;
-		case "assign":
+		}
+		case "assign": {
 			return `${indent}${safe(node.name)} = ${expr(node.value)};`;
+		}
 		case "if": {
 			const otherwise =
 				node.otherwise.length === 0
@@ -262,12 +353,23 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}if (${expr(node.test)})\n${indent}{\n${block(node.then, `${indent}    `)}\n${indent}}${otherwise}`;
 		}
-		case "return":
+		case "return": {
 			return node.value === undefined ? `${indent}return;` : `${indent}return ${expr(node.value)};`;
-		case "forRange":
+		}
+		case "throw": {
+			return `${indent}throw new ${node.error}(${expr(node.message)});`;
+		}
+		case "try": {
+			return `${indent}try\n${indent}{\n${block(node.body, `${indent}    `)}\n${indent}}\n${indent}catch (System.Exception ${node.catchName})\n${indent}{\n${block(node.catchBody, `${indent}    `)}\n${indent}}`;
+		}
+		case "forRange": {
 			return `${indent}for (long ${safe(node.name)} = ${expr(node.from)}; ${safe(node.name)} < ${expr(node.until)}; ${safe(node.name)}++)\n${indent}{\n${block(node.body, `${indent}    `)}\n${indent}}`;
-		case "forOf":
+		}
+		case "forOf": {
+			localTypes.set(node.name, node.ty);
+
 			return `${indent}foreach (var ${safe(node.name)} in ${expr(node.iterable)})\n${indent}{\n${block(node.body, `${indent}    `)}\n${indent}}`;
+		}
 		case "expr": {
 			const value = node.value;
 
@@ -280,8 +382,6 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}${expr(value)};`;
 		}
-		default:
-			throw new Error(`csharp: unsupported statement ${node.k}`);
 	}
 };
 
@@ -303,7 +403,7 @@ const struct = (entry: StructDecl): string => {
 	const fields = entry.fields
 		.map(
 			(field) =>
-				`${field.doc === "" ? "" : `        /// <summary>${field.doc}</summary>\n`}        public ${type(field.ty)}${entry.isOptions ? "?" : ""} ${pascal(field.name)} { get; set; }`,
+				`${field.doc === "" ? "" : `        /// <summary>${field.doc}</summary>\n`}        public ${type(field.ty)}${entry.isOptions && (field.ty.k === "int" || field.ty.k === "bool") ? "?" : ""} ${pascal(field.name)} { get; set; }`,
 		)
 		.join("\n\n");
 	// An options record is filled in property by property; a value record is built in one go.
@@ -322,13 +422,24 @@ ${fields}${constructor}
     }`;
 };
 
+/** Renders an error type. C# has real inheritance, so the hierarchy is the declaration. */
+const error = (entry: ErrorDecl): string =>
+	`    /// <summary>${entry.doc === "" ? entry.name : entry.doc}</summary>
+    public class ${entry.name} : ${entry.base ?? "System.Exception"}
+    {
+        public ${entry.name}(string message) : base(message)
+        {
+        }
+    }`;
+
 /** Renders a dataset as the tables the runtime materialises, chunked so no method carries
  * the whole thing. */
 const data = (entry: DataDecl): string => {
 	const name = pascal(entry.name.toLowerCase());
 	const rowChunks = chunks(
 		entry.rows.map(
-			(row, index) => `            rows[${index}] = new[] { ${row.map((cell) => lit(cell)).join(", ")} };`,
+			(row, index) =>
+				`            rows[${index}] = new[] { ${row.map((cell) => lit(cell)).join(", ")} };`,
 		),
 		200,
 	);
@@ -353,11 +464,11 @@ ${rowChunks.map((_, index) => `            ${name}Rows${index}(rows);`).join("\n
         }
 
 ${rowChunks
-		.map(
-			(chunk, index) =>
-				`        private static void ${name}Rows${index}(string[][] rows)\n        {\n${chunk.join("\n")}\n        }`,
-		)
-		.join("\n\n")}
+	.map(
+		(chunk, index) =>
+			`        private static void ${name}Rows${index}(string[][] rows)\n        {\n${chunk.join("\n")}\n        }`,
+	)
+	.join("\n\n")}
 
         private static int[][] ${name}Groups()
         {
@@ -367,11 +478,11 @@ ${groupChunks.map((_, index) => `            ${name}Groups${index}(groups);`).jo
         }
 
 ${groupChunks
-		.map(
-			(chunk, index) =>
-				`        private static void ${name}Groups${index}(int[][] groups)\n        {\n${chunk.join("\n")}\n        }`,
-		)
-		.join("\n\n")}`;
+	.map(
+		(chunk, index) =>
+			`        private static void ${name}Groups${index}(int[][] groups)\n        {\n${chunk.join("\n")}\n        }`,
+	)
+	.join("\n\n")}`;
 };
 
 /** Renders one function. */
@@ -387,10 +498,14 @@ const func = (entry: FuncDecl): string => {
 	const prologue = optionReads(entry)
 		.map((read) => {
 			const local = `${safe(read.target)}${pascal(read.field)}`;
+			const ty = read.expr.k === "optionField" ? read.expr.ty : ({ k: "int" } as Ty);
 			const fallback = read.expr.k === "optionField" ? expr(read.expr.fallback) : "null";
-			const declared = read.expr.k === "optionField" && read.expr.ty.k === "bool" ? "bool" : "long";
+			const primitive = ty.k === "bool" || ty.k === "int";
+			const declared = ty.k === "bool" ? "bool" : ty.k === "int" ? "long" : type(ty);
 
-			return `            ${declared} ${local} = ${fallback};\n            if (${safe(read.target)} != null && ${safe(read.target)}.${pascal(read.field)} != null)\n            {\n                ${local} = ${safe(read.target)}.${pascal(read.field)}.Value;\n            }`;
+			localTypes.set(local, ty);
+
+			return `            ${declared} ${local} = ${fallback};\n            if (${safe(read.target)} != null && ${safe(read.target)}.${pascal(read.field)} != null)\n            {\n                ${local} = ${safe(read.target)}.${pascal(read.field)}${primitive ? ".Value" : ""};\n            }`;
 		})
 		.join("\n");
 	const doc = prose(entry.doc);
@@ -402,7 +517,13 @@ const func = (entry: FuncDecl): string => {
 					.map((line) => `        /// ${line}`.trimEnd())
 					.join("\n")}\n        /// </summary>\n`;
 
-	return `${comment}        public static ${type(entry.ret)} ${pascal(entry.name)}(${params})
+	// A function that waits on the network is a Task here even though the source is written
+	// straight-line: colouring the call graph is the emitter's job, not the author's.
+	const returns = entry.blocking
+		? `async System.Threading.Tasks.Task<${type(entry.ret)}>`
+		: type(entry.ret);
+
+	return `${comment}        public static ${returns} ${pascal(entry.name)}(${params})
         {
 ${prologue === "" ? "" : `${prologue}\n`}${block(entry.body, "            ")}
         }`;
@@ -416,6 +537,7 @@ ${prologue === "" ? "" : `${prologue}\n`}${block(entry.body, "            ")}
  */
 export const emit = (module: Module): Record<string, string> => {
 	structs = new Map(module.structs.map((entry) => [entry.name, entry]));
+	blocking = new Set(module.functions.filter((entry) => entry.blocking).map((entry) => entry.name));
 	verbatim = new Set([
 		...module.charClasses.map((entry) => entry.name),
 		...module.patterns.map((entry) => entry.name),
@@ -427,8 +549,8 @@ export const emit = (module: Module): Record<string, string> => {
 	const constants = module.constants
 		.map((entry) =>
 			entry.ty.k === "list"
-				? `        private static readonly long[] ${screaming(entry.name)} = ${expr(entry.expr)};`
-				: `        private const string ${screaming(entry.name)} = ${expr(entry.expr)};`,
+				? `        private static readonly ${type(entry.ty)} ${screaming(entry.name)} = ${expr(entry.expr)};`
+				: `        private const ${type(entry.ty)} ${screaming(entry.name)} = ${expr(entry.expr)};`,
 		)
 		.join("\n");
 
@@ -441,6 +563,9 @@ export const emit = (module: Module): Record<string, string> => {
     <AssemblyName>BrazilianUtilsBridge</AssemblyName>
     <RootNamespace>BrazilianUtils.Bridge</RootNamespace>
     <OutputType>Exe</OutputType>
+    <!-- The boundary guards the dynamically typed hosts need are constants here, so the branch
+         they protect is dead code by construction. -->
+    <NoWarn>CS0162</NoWarn>
   </PropertyGroup>
 </Project>
 `,
@@ -448,7 +573,12 @@ export const emit = (module: Module): Record<string, string> => {
 
 namespace ${NAMESPACE}
 {
-${module.structs.map((entry) => struct(entry)).join("\n\n")}
+${module.errors.map((entry) => error(entry)).join("\n\n")}
+
+${module.structs
+	.filter((entry) => entry.external !== true)
+	.map((entry) => struct(entry))
+	.join("\n\n")}
 
     /// <summary>${module.doc}</summary>
     public static class ${className}

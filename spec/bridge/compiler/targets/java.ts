@@ -7,21 +7,29 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type {
-	CharClass,
-	DataDecl,
-	Expr,
-	FuncDecl,
-	Module,
-	PatternDecl,
-	Stmt,
-	StructDecl,
-	Ty,
+
+import {
+	type CharClass,
+	type DataDecl,
+	type ErrorDecl,
+	type Expr,
+	type FuncDecl,
+	type Module,
+	type PatternDecl,
+	type Stmt,
+	type StructDecl,
+	type Ty,
 } from "../ir.ts";
 import { optionReads, pascal, prose, screaming } from "../kit.ts";
 
 /** The record types of the module being emitted, so a literal calls the right constructor. */
 let structs = new Map<string, StructDecl>();
+
+/** The records the runtime declares, which are reached through its class. */
+let external = new Set<string>();
+
+/** The class the functions are being emitted into, for the method references. */
+let className = "";
 
 /** The declared types in scope, so a list knows whether it is an array or a growing list. */
 let localTypes = new Map<string, Ty>();
@@ -30,7 +38,8 @@ let localTypes = new Map<string, Ty>();
 const chunks = <T>(items: T[], size: number): T[][] => {
 	const out: T[][] = [];
 
-	for (let index = 0; index < items.length; index += size) out.push(items.slice(index, index + size));
+	for (let index = 0; index < items.length; index += size)
+		out.push(items.slice(index, index + size));
 
 	return out;
 };
@@ -76,26 +85,39 @@ const type = (ty: Ty): string => {
 		case "string":
 		case "scalar":
 		case "json":
-		case "enum":
+		case "enum": {
 			return "String";
-		case "int":
+		}
+		case "int": {
 			return "long";
-		case "bool":
+		}
+		case "bool": {
 			return "boolean";
-		case "void":
+		}
+		case "void": {
 			return "void";
-		case "list":
-			// A list of records is built by appending, which an array cannot do.
-			return ty.of.k === "named" ? `java.util.List<${type(ty.of)}>` : `${type(ty.of)}[]`;
-		case "opt":
+		}
+		case "list": {
+			// Only the integer lists stay arrays: they are the hot path, and boxing every element
+			// of a checksum would cost more than the shape is worth. Everything else is a List,
+			// which is what appending needs and what a Java caller expects.
+			return ty.of.k === "int" ? "long[]" : `java.util.List<${type(ty.of)}>`;
+		}
+		case "opt": {
 			return type(ty.of);
-		case "named":
-			return ty.name;
+		}
+		case "named": {
+			return external.has(ty.name) ? `Runtime.${ty.name}` : ty.name;
+		}
+		case "tasks": {
+			return "Runtime.Attempts";
+		}
 	}
 };
 
 /** The boxed form of a type, for nullable option fields. */
-const boxed = (ty: Ty): string => (ty.k === "int" ? "Long" : ty.k === "bool" ? "Boolean" : type(ty));
+const boxed = (ty: Ty): string =>
+	ty.k === "int" ? "Long" : ty.k === "bool" ? "Boolean" : type(ty);
 
 const OPS: Record<string, string> = {
 	"+": "+",
@@ -115,52 +137,73 @@ const OPS: Record<string, string> = {
 /** Renders an expression. */
 const expr = (node: Expr): string => {
 	switch (node.k) {
-		case "str":
+		case "str": {
 			return lit(node.value);
-		case "int":
+		}
+		case "int": {
 			return `${node.value}L`;
-		case "bool":
+		}
+		case "bool": {
 			return String(node.value);
-		case "none":
+		}
+		case "none": {
 			return "null";
-		case "ref":
+		}
+		case "ref": {
 			return verbatim.has(node.name) ? screaming(node.name) : node.name;
-		case "field":
+		}
+		case "field": {
 			return `${expr(node.target)}.${node.name}`;
-		case "index":
+		}
+		case "index": {
 			return isGrowing(node.target)
 				? `${expr(node.target)}.get((int) ${expr(node.index)})`
 				: `${expr(node.target)}[(int) ${expr(node.index)}]`;
-		case "not":
+		}
+		case "not": {
 			return `!${expr(node.operand)}`;
-		case "bin":
-			if (node.op === "==" && node.ty?.k === "string")
-				return `${expr(node.left)}.equals(${expr(node.right)})`;
+		}
+		case "bin": {
+			// `==` on Java strings compares references, which is never what the source meant.
+			const isText = node.ty?.k === "string" || node.ty?.k === "enum" || node.ty?.k === "scalar";
+
+			if (isText && (node.op === "==" || node.op === "!="))
+				return `${node.op === "!=" ? "!" : ""}${expr(node.left)}.equals(${expr(node.right)})`;
 
 			return `(${expr(node.left)} ${OPS[node.op]} ${expr(node.right)})`;
-		case "cond":
+		}
+		case "cond": {
 			return `(${expr(node.test)} ? ${expr(node.whenTrue)} : ${expr(node.whenFalse)})`;
-		case "listOf":
-			if (node.of.k === "named")
+		}
+		case "listOf": {
+			if (node.of.k !== "int")
 				return `new java.util.ArrayList<${type(node.of)}>(java.util.List.of(${node.items
 					.map((item) => expr(item))
 					.join(", ")}))`;
 
-			return `{${node.items.map((item) => expr(item)).join(", ")}}`;
+			// An array initializer without `new T[]` is only valid in a declaration.
+			return `new long[] {${node.items.map((item) => expr(item)).join(", ")}}`;
+		}
 		case "struct": {
 			const declared = structs.get(node.name);
 			const order = declared?.fields.map((field) => field.name) ?? node.fields.map((f) => f.name);
 
 			return `new ${node.name}(${order
-				.map((name) => expr(node.fields.find((field) => field.name === name)?.value ?? { k: "none" }))
+				.map((name) =>
+					expr(node.fields.find((field) => field.name === name)?.value ?? { k: "none" }),
+				)
 				.join(", ")})`;
 		}
-		case "optionField":
+		case "optionField": {
 			return `${node.target}${pascal(node.field)}`;
-		case "call":
+		}
+		case "await": {
+			// The blocking targets have nothing to wait on: the call has already returned.
+			return expr(node.value);
+		}
+		case "call": {
 			return call(node);
-		default:
-			throw new Error(`java: unsupported expression ${node.k}`);
+		}
 	}
 };
 
@@ -170,7 +213,7 @@ const isGrowing = (node: Expr): boolean => {
 
 	const ty = localTypes.get(node.name);
 
-	return ty !== undefined && ty.k === "list" && ty.of.k === "named";
+	return ty?.k === "list" && ty.of.k !== "int";
 };
 
 /** Renders a call. */
@@ -180,44 +223,96 @@ const call = (node: Extract<Expr, { k: "call" }>): string => {
 	if (node.callee.k === "user") return `${node.callee.name}(${args.join(", ")})`;
 
 	switch (node.callee.name) {
-		case "len":
+		case "len": {
 			return `(long) ${args[0]}.length()`;
-		case "listLen":
+		}
+		case "listLen": {
 			return isGrowing(node.args[0]) ? `(long) ${args[0]}.size()` : `(long) ${args[0]}.length`;
-		case "codeAt":
+		}
+		case "codeAt": {
 			return `Runtime.codeAt(${args[0]}, ${args[1]})`;
-		case "slice":
+		}
+		case "slice": {
 			return `Runtime.slice(${args[0]}, ${args[1]}, ${args[2]})`;
-		case "upper":
+		}
+		case "upper": {
 			return `${args[0]}.toUpperCase(java.util.Locale.ROOT)`;
-		case "trim":
+		}
+		case "trim": {
 			return `Runtime.jsTrim(${args[0]})`;
-		case "padStart":
+		}
+		case "padStart": {
 			return `Runtime.padStart(${args[0]}, ${args[1]}, ${args[2]})`;
-		case "repeat":
+		}
+		case "repeat": {
 			return `Runtime.repeat(${args[0]}, ${args[1]})`;
-		case "classHas":
+		}
+		case "classHas": {
 			return `Runtime.classHas(${args[0]}, ${args[1]})`;
-		case "keepClass":
+		}
+		case "keepClass": {
 			return `Runtime.keepClass(${args[0]}, ${args[1]})`;
-		case "patternTest":
+		}
+		case "patternTest": {
 			return `Runtime.patternTest(${args[0]}, ${args[1]})`;
-		case "asString":
+		}
+		case "asString": {
 			// Java's types already guarantee a string at the boundary.
 			return args[0];
-		case "isTruthy":
+		}
+		case "isTruthy": {
 			return args[0];
-		case "listPush":
+		}
+		case "listPush": {
 			return `${args[0]}.add(${args[1]})`;
-		case "unwrap":
+		}
+		case "unwrap": {
 			// Java has no separate optional value to open; a reference is already nullable.
 			return args[0];
-		case "dataAll":
+		}
+		case "dataAll": {
 			return `Runtime.dataAll(${args[0]})`;
-		case "dataRows":
+		}
+		case "dataRows": {
 			return `Runtime.dataRows(${args[0]}, ${args[1]})`;
-		default:
+		}
+		case "isNumber": {
+			// Java's parameter is a String, so the question cannot arise.
+			return "false";
+		}
+		case "isList": {
+			return "true";
+		}
+		case "listHas": {
+			return `Runtime.listHas(${args[0]}, ${args[1]})`;
+		}
+		case "httpGet": {
+			return `Runtime.httpGet(${args.join(", ")})`;
+		}
+		case "jsonString": {
+			return `Runtime.jsonString(${args[0]}, ${args[1]})`;
+		}
+		case "jsonInt": {
+			return `Runtime.jsonInt(${args[0]}, ${args[1]})`;
+		}
+		case "jsonTruthy": {
+			return `Runtime.jsonTruthy(${args[0]}, ${args[1]})`;
+		}
+		case "jsonIsTrue": {
+			return `Runtime.jsonIsTrue(${args[0]}, ${args[1]})`;
+		}
+		case "startAll": {
+			return `Runtime.startAll(${className}::${node.args[0].k === "ref" ? node.args[0].name : ""}, ${args[1]}, ${args[2]})`;
+		}
+		case "firstSuccess": {
+			return `(${type(node.ty.k === "opt" ? node.ty.of : node.ty)}) Runtime.firstSuccess(${args[0]})`;
+		}
+		case "anyFailedWith": {
+			return `Runtime.anyFailedWith(${args[0]}, ${args[1]})`;
+		}
+		default: {
 			throw new Error(`java: unsupported runtime call ${node.callee.name}`);
+		}
 	}
 };
 
@@ -231,24 +326,39 @@ const block = (body: Stmt[], indent: string): string =>
 /** Renders one statement. */
 const stmt = (node: Stmt, indent: string): string => {
 	switch (node.k) {
-		case "let":
+		case "let": {
 			localTypes.set(node.name, node.ty);
 
 			return `${indent}${type(node.ty)} ${node.name} = ${expr(node.value)};`;
-		case "assign":
+		}
+		case "assign": {
 			return `${indent}${node.name} = ${expr(node.value)};`;
+		}
 		case "if": {
 			const otherwise =
-				node.otherwise.length === 0 ? "" : ` else {\n${block(node.otherwise, `${indent}    `)}\n${indent}}`;
+				node.otherwise.length === 0
+					? ""
+					: ` else {\n${block(node.otherwise, `${indent}    `)}\n${indent}}`;
 
 			return `${indent}if (${expr(node.test)}) {\n${block(node.then, `${indent}    `)}\n${indent}}${otherwise}`;
 		}
-		case "return":
+		case "return": {
 			return node.value === undefined ? `${indent}return;` : `${indent}return ${expr(node.value)};`;
-		case "forRange":
+		}
+		case "throw": {
+			return `${indent}throw new ${node.error}(${expr(node.message)});`;
+		}
+		case "try": {
+			return `${indent}try {\n${block(node.body, `${indent}    `)}\n${indent}} catch (RuntimeException ${node.catchName}) {\n${block(node.catchBody, `${indent}    `)}\n${indent}}`;
+		}
+		case "forRange": {
 			return `${indent}for (long ${node.name} = ${expr(node.from)}; ${node.name} < ${expr(node.until)}; ${node.name}++) {\n${block(node.body, `${indent}    `)}\n${indent}}`;
-		case "forOf":
+		}
+		case "forOf": {
+			localTypes.set(node.name, node.ty);
+
 			return `${indent}for (var ${node.name} : ${expr(node.iterable)}) {\n${block(node.body, `${indent}    `)}\n${indent}}`;
+		}
 		case "expr": {
 			const value = node.value;
 
@@ -262,8 +372,6 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}${expr(value)};`;
 		}
-		default:
-			throw new Error(`java: unsupported statement ${node.k}`);
 	}
 };
 
@@ -303,13 +411,23 @@ ${fields}${constructor}
 }`;
 };
 
+/** Renders an error type. Java has real inheritance, so the hierarchy is the declaration. */
+const error = (entry: ErrorDecl): string =>
+	`/** ${entry.doc === "" ? entry.name : entry.doc} */
+public class ${entry.name} extends ${entry.base ?? "RuntimeException"} {
+    public ${entry.name}(String message) {
+        super(message);
+    }
+}`;
+
 /** Renders a dataset as the tables the runtime materialises, chunked to stay under Java's
  * 64 KiB per method limit. */
 const data = (entry: DataDecl): string => {
 	const name = entry.name.toLowerCase();
 	const rowChunks = chunks(
 		entry.rows.map(
-			(row, index) => `        rows[${index}] = new String[] {${row.map((cell) => lit(cell)).join(", ")}};`,
+			(row, index) =>
+				`        rows[${index}] = new String[] {${row.map((cell) => lit(cell)).join(", ")}};`,
 		),
 		200,
 	);
@@ -336,11 +454,11 @@ ${rowChunks.map((_, index) => `        ${name}Rows${index}(rows);`).join("\n")}
     }
 
 ${rowChunks
-		.map(
-			(chunk, index) =>
-				`    private static void ${name}Rows${index}(String[][] rows) {\n${chunk.join("\n")}\n    }`,
-		)
-		.join("\n\n")}
+	.map(
+		(chunk, index) =>
+			`    private static void ${name}Rows${index}(String[][] rows) {\n${chunk.join("\n")}\n    }`,
+	)
+	.join("\n\n")}
 
     private static int[][] ${name}Groups() {
         int[][] groups = new int[${keys.length}][];
@@ -349,11 +467,11 @@ ${groupChunks.map((_, index) => `        ${name}Groups${index}(groups);`).join("
     }
 
 ${groupChunks
-		.map(
-			(chunk, index) =>
-				`    private static void ${name}Groups${index}(int[][] groups) {\n${chunk.join("\n")}\n    }`,
-		)
-		.join("\n\n")}
+	.map(
+		(chunk, index) =>
+			`    private static void ${name}Groups${index}(int[][] groups) {\n${chunk.join("\n")}\n    }`,
+	)
+	.join("\n\n")}
 
     private static int[] ${name}Order() {
         int[] order = new int[${entry.fullOrder.length}];
@@ -362,11 +480,11 @@ ${orderChunks.map((_, index) => `        ${name}Order${index}(order);`).join("\n
     }
 
 ${orderChunks
-		.map(
-			(chunk, index) =>
-				`    private static void ${name}Order${index}(int[] order) {\n${chunk.join("\n")}\n    }`,
-		)
-		.join("\n\n")}`;
+	.map(
+		(chunk, index) =>
+			`    private static void ${name}Order${index}(int[] order) {\n${chunk.join("\n")}\n    }`,
+	)
+	.join("\n\n")}`;
 };
 
 /** Renders one function. */
@@ -379,8 +497,11 @@ const func = (entry: FuncDecl): string => {
 	const prologue = optionReads(entry)
 		.map((read) => {
 			const local = `${read.target}${pascal(read.field)}`;
+			const ty = read.expr.k === "optionField" ? read.expr.ty : ({ k: "int" } as Ty);
 			const fallback = read.expr.k === "optionField" ? expr(read.expr.fallback) : "null";
-			const declared = read.expr.k === "optionField" && read.expr.ty.k === "bool" ? "boolean" : "long";
+			const declared = ty.k === "bool" ? "boolean" : ty.k === "int" ? "long" : type(ty);
+
+			localTypes.set(local, ty);
 
 			return `        ${declared} ${local} = ${fallback};\n        if (${read.target} != null && ${read.target}.${read.field} != null) {\n            ${local} = ${read.target}.${read.field};\n        }`;
 		})
@@ -407,6 +528,10 @@ ${prologue === "" ? "" : `${prologue}\n`}${block(entry.body, "        ")}
  */
 export const emit = (module: Module): Record<string, string> => {
 	structs = new Map(module.structs.map((entry) => [entry.name, entry]));
+	external = new Set(
+		module.structs.filter((entry) => entry.external === true).map((entry) => entry.name),
+	);
+	className = pascal(module.name);
 	verbatim = new Set([
 		...module.charClasses.map((entry) => entry.name),
 		...module.patterns.map((entry) => entry.name),
@@ -414,12 +539,10 @@ export const emit = (module: Module): Record<string, string> => {
 		...module.data.map((entry) => entry.name),
 	]);
 
-	const className = pascal(module.name);
 	const constants = module.constants
-		.map((entry) =>
-			entry.ty.k === "list"
-				? `    private static final long[] ${screaming(entry.name)} = ${expr(entry.expr)};`
-				: `    private static final String ${screaming(entry.name)} = ${expr(entry.expr)};`,
+		.map(
+			(entry) =>
+				`    private static final ${type(entry.ty)} ${screaming(entry.name)} = ${expr(entry.expr)};`,
 		)
 		.join("\n");
 
@@ -444,7 +567,13 @@ ${module.functions.map((entry) => func(entry)).join("\n\n")}
 `,
 	};
 
-	for (const entry of module.structs) files[`${entry.name}.java`] = `${struct(entry)}\n`;
+	for (const entry of module.structs) {
+		if (entry.external === true) continue;
+
+		files[`${entry.name}.java`] = `${struct(entry)}\n`;
+	}
+
+	for (const entry of module.errors) files[`${entry.name}.java`] = `${error(entry)}\n`;
 
 	return files;
 };

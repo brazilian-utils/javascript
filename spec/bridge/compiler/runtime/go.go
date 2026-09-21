@@ -4,7 +4,16 @@
 // thing it does in the other targets.
 package runtime
 
-import "strings"
+import (
+	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"os"
+	"regexp"
+	"strings"
+	"time"
+)
 
 // CharClass is a set of code points, as sorted non overlapping ranges.
 type CharClass [][2]rune
@@ -197,4 +206,260 @@ func DataRows(table *Dataset, key string) [][]string {
 	}
 
 	return [][]string{}
+}
+
+// HttpResponse is what a provider answered: the status, whether it counts as a success, and
+// the decoded body.
+type HttpResponse struct {
+	Status int64
+	Ok     bool
+	Body   any
+}
+
+// httpTarget is the origin every request is sent to instead of its own, when one is set.
+//
+// This is the conformance hook: the cross language replay points all seven targets at one
+// local server, the same way the JavaScript suite points fetch at a mock.
+func httpTarget(url string) string {
+	base := os.Getenv("BRUTILS_BRIDGE_HTTP_ORIGIN")
+
+	if base == "" {
+		return url
+	}
+
+	return base + "/" + originPrefix.ReplaceAllString(url, "")
+}
+
+var originPrefix = regexp.MustCompile(`^https?://`)
+
+var httpClient = &http.Client{Timeout: 15 * time.Second}
+
+// HttpGet performs an HTTP GET, retrying a transient transport failure with a linear backoff.
+func HttpGet(url string, retries int64, retryDelayMs int64) *HttpResponse {
+	target := httpTarget(url)
+
+	for attempt := int64(0); ; attempt++ {
+		answer, err := httpClient.Get(target)
+
+		if err != nil {
+			if attempt >= retries {
+				return &HttpResponse{Status: 0, Ok: false, Body: nil}
+			}
+
+			time.Sleep(time.Duration(retryDelayMs*(attempt+1)) * time.Millisecond)
+
+			continue
+		}
+
+		raw, readErr := io.ReadAll(answer.Body)
+		answer.Body.Close()
+
+		var body any
+
+		if readErr == nil {
+			if json.Unmarshal(raw, &body) != nil {
+				body = nil
+			}
+		}
+
+		status := int64(answer.StatusCode)
+
+		return &HttpResponse{Status: status, Ok: status >= 200 && status < 300, Body: body}
+	}
+}
+
+// ListHas reports whether a list holds a value.
+func ListHas(items []string, value string) bool {
+	for _, item := range items {
+		if item == value {
+			return true
+		}
+	}
+
+	return false
+}
+
+// jsonField reads one field of a JSON body, treating anything that is not an object as empty.
+func jsonField(body any, key string) any {
+	object, ok := body.(map[string]any)
+
+	if !ok {
+		return nil
+	}
+
+	return object[key]
+}
+
+// JsonString reads a string field of a JSON body, answering "" when it is missing.
+func JsonString(body any, key string) string {
+	found, ok := jsonField(body, key).(string)
+
+	if !ok {
+		return ""
+	}
+
+	return found
+}
+
+// JsonInt reads an integer field of a JSON body, answering -1 when it is missing.
+func JsonInt(body any, key string) int64 {
+	found, ok := jsonField(body, key).(float64)
+
+	if !ok {
+		return -1
+	}
+
+	return int64(found)
+}
+
+// JsonTruthy reports whether a field of a JSON body is truthy, the way JavaScript reads it.
+func JsonTruthy(body any, key string) bool {
+	switch found := jsonField(body, key).(type) {
+	case nil:
+		return false
+	case bool:
+		return found
+	case float64:
+		return found != 0
+	case string:
+		return found != ""
+	default:
+		return true
+	}
+}
+
+// JsonIsTrue reports whether a field of a JSON body is exactly true.
+func JsonIsTrue(body any, key string) bool {
+	found, ok := jsonField(body, key).(bool)
+
+	return ok && found
+}
+
+// Error is a failure raised by the generated code. Go has no exception hierarchy, so the kinds
+// the source declared travel with the value.
+type Error struct {
+	Kinds   []string
+	Message string
+}
+
+// Error returns the message.
+func (e *Error) Error() string {
+	return e.Message
+}
+
+// Kind returns the most specific kind of the failure.
+func (e *Error) Kind() string {
+	if len(e.Kinds) == 0 {
+		return ""
+	}
+
+	return e.Kinds[0]
+}
+
+// NewError builds a failure of the given kinds.
+func NewError(kinds []string, message string) error {
+	return &Error{Kinds: kinds, Message: message}
+}
+
+// IsKind reports whether an error is of a kind, its bases included.
+func IsKind(err error, kind string) bool {
+	var found *Error
+
+	if !errors.As(err, &found) {
+		return false
+	}
+
+	for _, candidate := range found.Kinds {
+		if candidate == kind {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Outcome is what one attempt of a race ended with.
+type Outcome struct {
+	Ok    bool
+	Value any
+	Kinds []string
+}
+
+// Attempts holds the running attempts of a race and what each one ended with.
+type Attempts struct {
+	settled  chan Outcome
+	total    int
+	Outcomes []Outcome
+}
+
+// StartAll starts one attempt per item, all at once.
+//
+// This is the only concurrency primitive of the portable subset: the author never writes a
+// goroutine, and the emitter never has to decide where one belongs.
+func StartAll(run func(string, string) (any, error), items []string, argument string) *Attempts {
+	attempts := &Attempts{settled: make(chan Outcome, len(items)), total: len(items)}
+
+	for _, item := range items {
+		go func(item string) {
+			value, err := run(item, argument)
+
+			if err != nil {
+				kinds := []string{}
+
+				var raised *Error
+
+				if errors.As(err, &raised) {
+					kinds = raised.Kinds
+				}
+
+				attempts.settled <- Outcome{Ok: false, Kinds: kinds}
+
+				return
+			}
+
+			attempts.settled <- Outcome{Ok: true, Value: value}
+		}(item)
+	}
+
+	return attempts
+}
+
+// FirstSuccessOf returns the value of the first attempt that succeeds, or the zero value once
+// every attempt has failed.
+func FirstSuccessOf[T any](attempts *Attempts) T {
+	var zero T
+
+	for len(attempts.Outcomes) < attempts.total {
+		outcome := <-attempts.settled
+		attempts.Outcomes = append(attempts.Outcomes, outcome)
+
+		if outcome.Ok {
+			found, ok := outcome.Value.(T)
+
+			if ok {
+				return found
+			}
+
+			return zero
+		}
+	}
+
+	return zero
+}
+
+// AnyFailedWith reports whether any attempt failed with a given error kind.
+func AnyFailedWith(attempts *Attempts, kind string) bool {
+	for _, outcome := range attempts.Outcomes {
+		if outcome.Ok {
+			continue
+		}
+
+		for _, candidate := range outcome.Kinds {
+			if candidate == kind {
+				return true
+			}
+		}
+	}
+
+	return false
 }

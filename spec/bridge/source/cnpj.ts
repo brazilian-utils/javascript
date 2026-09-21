@@ -46,7 +46,7 @@ const checkDigit = (base: string, weights: number[]): number => {
 	let sum = 0;
 
 	for (let index = 0; index < weights.length; index++) {
-		sum = sum + (base.charCodeAt(index) - 48) * weights[index];
+		sum += (base.charCodeAt(index) - 48) * weights[index];
 	}
 
 	const remainder = sum % 11;
@@ -88,7 +88,7 @@ const layout = (value: string, pattern: string, pad: boolean): string => {
 
 	for (let index = 0; index < pattern.length; index++) {
 		if (pattern.charCodeAt(index) === 48 || pattern.charCodeAt(index) === 42) {
-			slots = slots + 1;
+			slots += 1;
 		}
 	}
 
@@ -110,14 +110,14 @@ const layout = (value: string, pattern: string, pad: boolean): string => {
 			}
 
 			if (slot === 42) {
-				formatted = formatted + "*";
+				formatted += "*";
 			} else {
-				formatted = formatted + padded.slice(cursor, cursor + 1);
+				formatted += padded.slice(cursor, cursor + 1);
 			}
 
-			cursor = cursor + 1;
+			cursor += 1;
 		} else if (cursor < padded.length) {
-			formatted = formatted + pattern.slice(index, index + 1);
+			formatted += pattern.slice(index, index + 1);
 		}
 	}
 

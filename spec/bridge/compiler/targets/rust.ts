@@ -6,17 +6,19 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type {
-	CharClass,
-	DataDecl,
-	Expr,
-	FuncDecl,
-	Module,
-	Param,
-	PatternDecl,
-	Stmt,
-	StructDecl,
-	Ty,
+
+import {
+	type CharClass,
+	type DataDecl,
+	type ErrorDecl,
+	type Expr,
+	type FuncDecl,
+	type Module,
+	type Param,
+	type PatternDecl,
+	type Stmt,
+	type StructDecl,
+	type Ty,
 } from "../ir.ts";
 import { optionReads, prose, pushTargets, screaming, snake } from "../kit.ts";
 
@@ -25,6 +27,15 @@ let structs = new Map<string, StructDecl>();
 
 /** The datasets of the module, which are functions rather than statics in Rust. */
 let datasets = new Set<string>();
+
+/** The functions that answer a `Result`. */
+let throwing = new Set<string>();
+
+/** The records the runtime declares, which are reached through its module. */
+let external = new Set<string>();
+
+/** The function being rendered, so a return knows whether to wrap its value. */
+let current: FuncDecl | undefined;
 
 const RUNTIME = resolve(import.meta.dirname, "../runtime/rust.rs");
 
@@ -55,25 +66,36 @@ const type = (ty: Ty): string => {
 	switch (ty.k) {
 		case "string":
 		case "scalar":
-		case "enum":
+		case "enum": {
 			return "String";
-		case "int":
+		}
+		case "int": {
 			return "i64";
-		case "bool":
+		}
+		case "bool": {
 			return "bool";
-		case "void":
+		}
+		case "void": {
 			return "()";
-		case "json":
-			return "String";
-		case "list":
+		}
+		case "json": {
+			return "serde_json::Value";
+		}
+		case "list": {
 			// A dataset row is borrowed from the table rather than rebuilt for every reader.
 			if (ty.of.k === "list" && ty.of.of.k === "string") return "Vec<runtime::Row>";
 
 			return `Vec<${type(ty.of)}>`;
-		case "opt":
+		}
+		case "opt": {
 			return `Option<${type(ty.of)}>`;
-		case "named":
-			return ty.name;
+		}
+		case "tasks": {
+			return `runtime::Attempts<${type(ty.of)}>`;
+		}
+		case "named": {
+			return external.has(ty.name) ? `runtime::${ty.name}` : ty.name;
+		}
 	}
 };
 
@@ -104,24 +126,32 @@ const asStr = (node: Expr): string => {
 /** Renders an expression. */
 const expr = (node: Expr): string => {
 	switch (node.k) {
-		case "str":
+		case "str": {
 			return lit(node.value);
-		case "int":
+		}
+		case "int": {
 			return String(node.value);
-		case "bool":
+		}
+		case "bool": {
 			return String(node.value);
-		case "none":
+		}
+		case "none": {
 			return "None";
-		case "ref":
+		}
+		case "ref": {
 			if (datasets.has(node.name)) return `${snake(node.name)}_table()`;
 
 			return verbatim.has(node.name) ? screaming(node.name) : snake(node.name);
-		case "field":
+		}
+		case "field": {
 			return `${expr(node.target)}.${snake(node.name)}`;
-		case "index":
+		}
+		case "index": {
 			return `${expr(node.target)}[${expr(node.index)} as usize]`;
-		case "not":
+		}
+		case "not": {
 			return `!${expr(node.operand)}`;
+		}
 		case "bin": {
 			if (node.right.k === "none" && (node.op === "==" || node.op === "!="))
 				return `${expr(node.left)}.${node.op === "!=" ? "is_some" : "is_none"}()`;
@@ -131,13 +161,15 @@ const expr = (node: Expr): string => {
 
 			return `(${expr(node.left)} ${OPS[node.op]} ${expr(node.right)})`;
 		}
-		case "cond":
+		case "cond": {
 			return `(if ${expr(node.test)} { ${expr(node.whenTrue)} } else { ${expr(node.whenFalse)} })`;
-		case "listOf":
+		}
+		case "listOf": {
 			// A list that only ever holds literals is a fixed size array; anything else is a Vec.
 			if (node.of.k === "int") return `[${node.items.map((item) => expr(item)).join(", ")}]`;
 
 			return `vec![${node.items.map((item) => expr(item)).join(", ")}]`;
+		}
 		case "struct": {
 			const declared = structs.get(node.name);
 
@@ -149,12 +181,16 @@ const expr = (node: Expr): string => {
 				})
 				.join(", ")} }`;
 		}
-		case "optionField":
+		case "optionField": {
 			return `${snake(node.target)}_${snake(node.field)}`;
-		case "call":
+		}
+		case "await": {
+			// The blocking targets have nothing to wait on: the call has already returned.
+			return expr(node.value);
+		}
+		case "call": {
 			return call(node);
-		default:
-			throw new Error(`rust: unsupported expression ${node.k}`);
+		}
 	}
 };
 
@@ -179,42 +215,98 @@ const call = (node: Extract<Expr, { k: "call" }>): string => {
 	}
 
 	switch (node.callee.name) {
-		case "listPush":
-			return `${expr(args[0])}.push(${expr(args[1])})`;
-		case "unwrap":
-			return `${expr(args[0])}.unwrap()`;
-		case "dataAll":
+		case "listPush": {
+			const target = args[0].k === "ref" ? localTypes.get(args[0].name) : undefined;
+
+			return `${expr(args[0])}.push(${owned(args[1], target?.k === "list" ? target.of : undefined)})`;
+		}
+		case "isNumber": {
+			// Rust's parameter is a `&str`, so the question cannot arise.
+			return "false";
+		}
+		case "isList": {
+			return "true";
+		}
+		case "listHas": {
+			return `runtime::list_has(${expr(args[0])}, ${asStr(args[1])})`;
+		}
+		case "httpGet": {
+			return `runtime::http_get(${asStr(args[0])}, ${expr(args[1])}, ${expr(args[2])})`;
+		}
+		case "jsonString": {
+			return `runtime::json_string(&${expr(args[0])}, ${asStr(args[1])})`;
+		}
+		case "jsonInt": {
+			return `runtime::json_int(&${expr(args[0])}, ${asStr(args[1])})`;
+		}
+		case "jsonTruthy": {
+			return `runtime::json_truthy(&${expr(args[0])}, ${asStr(args[1])})`;
+		}
+		case "jsonIsTrue": {
+			return `runtime::json_is_true(&${expr(args[0])}, ${asStr(args[1])})`;
+		}
+		case "startAll": {
+			return `runtime::start_all(${snake(args[0].k === "ref" ? args[0].name : "")}, &${expr(args[1])}, ${asStr(args[2])})`;
+		}
+		case "firstSuccess": {
+			return `runtime::first_success(&mut ${expr(args[0])})`;
+		}
+		case "anyFailedWith": {
+			return `runtime::any_failed_with(&${expr(args[0])}, ${asStr(args[1])})`;
+		}
+		case "unwrap": {
+			return node.ty.k === "int" || node.ty.k === "bool"
+				? `${expr(args[0])}.unwrap()`
+				: `${expr(args[0])}.clone().unwrap()`;
+		}
+		case "dataAll": {
 			return `runtime::data_all(${expr(args[0])})`;
-		case "dataRows":
+		}
+		case "dataRows": {
 			return `runtime::data_rows(${expr(args[0])}, ${asStr(args[1])})`;
-		case "len":
+		}
+		case "len": {
 			return `runtime::len(${asStr(args[0])})`;
-		case "listLen":
+		}
+		case "listLen": {
 			return `(${expr(args[0])}.len() as i64)`;
-		case "codeAt":
+		}
+		case "codeAt": {
 			return `runtime::code_at(${asStr(args[0])}, ${expr(args[1])})`;
-		case "slice":
+		}
+		case "slice": {
 			return `runtime::slice(${asStr(args[0])}, ${expr(args[1])}, ${expr(args[2])})`;
-		case "upper":
+		}
+		case "upper": {
 			return `runtime::upper(${asStr(args[0])})`;
-		case "trim":
+		}
+		case "trim": {
 			return `runtime::js_trim(${asStr(args[0])})`;
-		case "padStart":
+		}
+		case "padStart": {
 			return `runtime::pad_start(${asStr(args[0])}, ${expr(args[1])}, ${asStr(args[2])})`;
-		case "repeat":
+		}
+		case "repeat": {
 			return `runtime::repeat(${asStr(args[0])}, ${expr(args[1])})`;
-		case "classHas":
+		}
+		case "classHas": {
 			return `runtime::class_has(${expr(args[0])}, ${asStr(args[1])})`;
-		case "keepClass":
+		}
+		case "keepClass": {
 			return `runtime::keep_class(${expr(args[0])}, ${asStr(args[1])})`;
-		case "patternTest":
+		}
+		case "patternTest": {
 			return `runtime::pattern_test(${expr(args[0])}, ${asStr(args[1])})`;
-		case "asString":
+		}
+		case "asString": {
 			return `${expr(args[0])}.to_string()`;
-		case "isTruthy":
+		}
+		case "isTruthy": {
 			return expr(args[0]);
-		default:
+		}
+		default: {
 			throw new Error(`rust: unsupported runtime call ${node.callee.name}`);
+		}
 	}
 };
 
@@ -237,7 +329,14 @@ let localTypes = new Map<string, Ty>();
 const owned = (node: Expr, ty?: Ty): string => {
 	const rendered = expr(node);
 
-	if (ty !== undefined && ty.k !== "string" && ty.k !== "scalar" && ty.k !== "enum") return rendered;
+	// A list constant is a slice of borrowed strings; owning it is spelled out.
+	if (ty?.k === "list" && (ty.of.k === "string" || ty.of.k === "enum"))
+		return node.k === "ref" && verbatim.has(node.name)
+			? `${rendered}.iter().map(|value| value.to_string()).collect()`
+			: rendered;
+
+	if (ty !== undefined && ty.k !== "string" && ty.k !== "scalar" && ty.k !== "enum")
+		return rendered;
 	if (node.k === "str") return `${rendered}.to_string()`;
 	if (node.k === "index" && (node.ty?.k === "string" || node.ty?.k === "enum"))
 		return `${rendered}.to_string()`;
@@ -256,23 +355,51 @@ const block = (body: Stmt[], indent: string): string =>
 /** Renders one statement. */
 const stmt = (node: Stmt, indent: string): string => {
 	switch (node.k) {
-		case "let":
-			return `${indent}let ${node.mutable || mutated.has(node.name) ? "mut " : ""}${snake(node.name)}: ${type(node.ty)} = ${owned(node.value, node.ty)};`;
-		case "assign":
+		case "let": {
+			return `${indent}let ${node.mutable || mutated.has(node.name) || node.ty.k === "tasks" ? "mut " : ""}${snake(node.name)}: ${type(node.ty)} = ${owned(node.value, node.ty)};`;
+		}
+		case "assign": {
 			return `${indent}${snake(node.name)} = ${owned(node.value, localTypes.get(node.name))};`;
+		}
 		case "if": {
 			const otherwise =
-				node.otherwise.length === 0 ? "" : ` else {\n${block(node.otherwise, `${indent}\t`)}\n${indent}}`;
+				node.otherwise.length === 0
+					? ""
+					: ` else {\n${block(node.otherwise, `${indent}\t`)}\n${indent}}`;
 
 			return `${indent}if ${expr(node.test)} {\n${block(node.then, `${indent}\t`)}\n${indent}}${otherwise}`;
 		}
-		case "return":
-			return node.value === undefined ? `${indent}return;` : `${indent}return ${expr(node.value)};`;
-		case "forRange":
+		case "return": {
+			if (current?.throws !== true)
+				return node.value === undefined
+					? `${indent}return;`
+					: `${indent}return ${expr(node.value)};`;
+
+			// A call to another raising function already answers a `Result`.
+			if (
+				node.value?.k === "call" &&
+				node.value.callee.k === "user" &&
+				throwing.has(node.value.callee.name)
+			)
+				return `${indent}return ${expr(node.value)};`;
+
+			return node.value === undefined
+				? `${indent}return Ok(());`
+				: `${indent}return Ok(${owned(node.value, current.ret)});`;
+		}
+		case "try": {
+			throw new Error("rust: try/catch has no Rust form; a raising call answers a Result instead");
+		}
+		case "throw": {
+			return `${indent}return Err(runtime::Error::new(${screaming(`${node.error}Kinds`)}, ${expr(node.message)}));`;
+		}
+		case "forRange": {
 			return `${indent}for ${snake(node.name)} in ${expr(node.from)}..${expr(node.until)} {\n${block(node.body, `${indent}\t`)}\n${indent}}`;
-		case "forOf":
+		}
+		case "forOf": {
 			// The loop consumes the list: nothing in the subset reads one after iterating it.
 			return `${indent}for ${snake(node.name)} in ${expr(node.iterable)} {\n${block(node.body, `${indent}\t`)}\n${indent}}`;
+		}
 		case "expr": {
 			const value = node.value;
 
@@ -282,8 +409,6 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}${expr(value)};`;
 		}
-		default:
-			throw new Error(`rust: unsupported statement ${node.k}`);
 	}
 };
 
@@ -299,6 +424,16 @@ const pattern = (entry: PatternDecl): string =>
 				`\truntime::PatternStep { class: ${screaming(step.charClass)}, min: ${step.min}, max: ${step.max}, capture: ${step.capture} },`,
 		)
 		.join("\n")}\n];`;
+
+/** Renders an error type: its kinds, and the predicate a caller matches on. */
+const error = (entry: ErrorDecl): string =>
+	`/// ${entry.doc === "" ? entry.name : entry.doc}
+pub const ${screaming(`${entry.name}Kinds`)}: &[&str] = &[${entry.kinds.map((kind) => lit(kind)).join(", ")}];
+
+/// Whether a failure is a ${entry.name}.
+pub fn ${snake(`is${entry.name}`)}(error: &runtime::Error) -> bool {
+	error.is_kind(${lit(entry.name)})
+}`;
 
 /** Renders an options record. */
 const struct = (entry: StructDecl): string => {
@@ -319,11 +454,12 @@ ${fields}
 
 /** Renders one function. */
 const func = (entry: FuncDecl): string => {
+	current = entry;
 	borrowed = new Set([
 		...entry.params
 			.filter((param) => param.ty.k === "string" || param.ty.k === "scalar")
 			.map((param) => param.name),
-		...[...verbatim],
+		...verbatim,
 	]);
 	localTypes = new Map();
 	mutated = pushTargets(entry);
@@ -335,6 +471,12 @@ const func = (entry: FuncDecl): string => {
 				collect(statement.then);
 				collect(statement.otherwise);
 			}
+			if (statement.k === "forOf") {
+				localTypes.set(statement.name, statement.ty);
+
+				if (statement.ty.k === "string" || statement.ty.k === "enum") borrowed.add(statement.name);
+			}
+
 			if (statement.k === "forOf" || statement.k === "forRange") collect(statement.body);
 			if (statement.k === "try") {
 				collect(statement.body);
@@ -367,9 +509,12 @@ const func = (entry: FuncDecl): string => {
 	const prologue = optionReads(entry)
 		.map((read) => {
 			const local = `${snake(read.target)}_${snake(read.field)}`;
-			const fallback = read.expr.k === "optionField" ? expr(read.expr.fallback) : "None";
+			const fallback = read.expr.k === "optionField" ? read.expr.fallback : { k: "none" as const };
+			const held = `value.${snake(read.field)}`;
+			const taken =
+				fallback.k === "none" ? `${held}.clone()` : `${held}.unwrap_or(${expr(fallback)})`;
 
-			return `\tlet ${local} = match ${snake(read.target)} {\n\t\tNone => ${fallback},\n\t\tSome(value) => value.${snake(read.field)}.unwrap_or(${fallback}),\n\t};`;
+			return `\tlet ${local} = match ${snake(read.target)} {\n\t\tNone => ${fallback.k === "none" ? "None" : expr(fallback)},\n\t\tSome(value) => ${taken},\n\t};`;
 		})
 		.join("\n");
 
@@ -378,7 +523,11 @@ const func = (entry: FuncDecl): string => {
 		.map((line) => `/// ${line}`.trimEnd())
 		.join("\n");
 
-	return `${doc === "" ? "" : `${doc}\n`}pub fn ${snake(entry.name)}(${params}) -> ${type(entry.ret)} {
+	// Rust has no exceptions, so a function that can raise answers a `Result` and the emitter
+	// threads it through; the source never mentions it.
+	const returns = entry.throws ? `Result<${type(entry.ret)}, runtime::Error>` : type(entry.ret);
+
+	return `${doc === "" ? "" : `${doc}\n`}pub fn ${snake(entry.name)}(${params}) -> ${returns} {
 ${prologue === "" ? "" : `${prologue}\n`}${block(entry.body, "\t")}
 }`;
 };
@@ -420,6 +569,10 @@ fn ${snake(entry.name)}_table() -> &'static runtime::Dataset {
 export const emit = (module: Module, modules: Module[] = [module]): Record<string, string> => {
 	signatures = new Map(module.functions.map((entry) => [entry.name, entry.params]));
 	structs = new Map(module.structs.map((entry) => [entry.name, entry]));
+	throwing = new Set(module.functions.filter((entry) => entry.throws).map((entry) => entry.name));
+	external = new Set(
+		module.structs.filter((entry) => entry.external === true).map((entry) => entry.name),
+	);
 	datasets = new Set(module.data.map((entry) => entry.name));
 	verbatim = new Set([
 		...module.charClasses.map((entry) => entry.name),
@@ -428,11 +581,17 @@ export const emit = (module: Module, modules: Module[] = [module]): Record<strin
 	]);
 
 	const constants = module.constants
-		.map((entry) =>
-			entry.ty.k === "list"
-				? `const ${screaming(entry.name)}: [i64; ${(entry.expr as Extract<Expr, { k: "listOf" }>).items.length}] = ${expr(entry.expr)};`
-				: `const ${screaming(entry.name)}: &str = ${expr(entry.expr)};`,
-		)
+		.map((entry) => {
+			const items = (entry.expr as Extract<Expr, { k: "listOf" }>).items;
+
+			if (entry.ty.k === "list" && entry.ty.of.k === "int")
+				return `const ${screaming(entry.name)}: [i64; ${items.length}] = ${expr(entry.expr)};`;
+			if (entry.ty.k === "list")
+				return `const ${screaming(entry.name)}: &[&str] = &[${items.map((item) => expr(item)).join(", ")}];`;
+			if (entry.ty.k === "int") return `const ${screaming(entry.name)}: i64 = ${expr(entry.expr)};`;
+
+			return `const ${screaming(entry.name)}: &str = ${expr(entry.expr)};`;
+		})
 		.join("\n");
 
 	return {
@@ -450,6 +609,10 @@ version = "0.0.0"
 edition = "2021"
 publish = false
 
+[dependencies]
+serde_json = "1"
+ureq = "3"
+
 [lib]
 path = "src/lib.rs"
 `,
@@ -465,7 +628,12 @@ ${module.patterns.map((entry) => pattern(entry)).join("\n\n")}
 
 ${constants}
 
-${module.structs.map((entry) => struct(entry)).join("\n\n")}
+${module.errors.map((entry) => error(entry)).join("\n\n")}
+
+${module.structs
+	.filter((entry) => entry.external !== true)
+	.map((entry) => struct(entry))
+	.join("\n\n")}
 
 ${module.data.map((entry) => data(entry)).join("\n\n")}
 

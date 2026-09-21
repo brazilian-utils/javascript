@@ -7,21 +7,27 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type {
-	CharClass,
-	DataDecl,
-	EnumDecl,
-	Expr,
-	FuncDecl,
-	Module,
-	PatternDecl,
-	Stmt,
-	StructDecl,
-	Ty,
+
+import {
+	type CharClass,
+	type DataDecl,
+	type EnumDecl,
+	type ErrorDecl,
+	type Expr,
+	type FuncDecl,
+	type Module,
+	type PatternDecl,
+	type Stmt,
+	type StructDecl,
+	type Ty,
 } from "../ir.ts";
+import { optionReads, pascal } from "../kit.ts";
 
 /** The record types of the module being emitted, for the field level casts. */
 let structs = new Map<string, StructDecl>();
+
+/** The functions that wait on the network, and are therefore `async` here. */
+let blocking = new Set<string>();
 
 const RUNTIME = resolve(import.meta.dirname, "../runtime/typescript.ts");
 
@@ -54,26 +60,39 @@ const lit = (value: string): string => {
  */
 const type = (ty: Ty): string => {
 	switch (ty.k) {
-		case "string":
+		case "string": {
 			return "string";
-		case "int":
+		}
+		case "int": {
 			return "number";
-		case "bool":
+		}
+		case "bool": {
 			return "boolean";
-		case "void":
+		}
+		case "void": {
 			return "void";
-		case "json":
+		}
+		case "json": {
 			return "unknown";
-		case "scalar":
+		}
+		case "scalar": {
 			return "string | number";
-		case "enum":
+		}
+		case "enum": {
 			return ty.name;
-		case "list":
+		}
+		case "tasks": {
+			return `Attempts<${type(ty.of)}>`;
+		}
+		case "list": {
 			return `${type(ty.of)}[]`;
-		case "opt":
+		}
+		case "opt": {
 			return `${type(ty.of)} | undefined`;
-		case "named":
+		}
+		case "named": {
 			return ty.name;
+		}
 	}
 };
 
@@ -83,34 +102,45 @@ const type = (ty: Ty): string => {
  * @param {Expr} expr - The expression.
  * @returns {string} The TypeScript expression.
  */
-const expr = (expr_: Expr): string => {
-	switch (expr_.k) {
-		case "str":
-			return lit(expr_.value);
-		case "int":
-			return String(expr_.value);
-		case "bool":
-			return String(expr_.value);
-		case "none":
+const expr = (node: Expr): string => {
+	switch (node.k) {
+		case "str": {
+			return lit(node.value);
+		}
+		case "int": {
+			return String(node.value);
+		}
+		case "bool": {
+			return String(node.value);
+		}
+		case "none": {
 			return "undefined";
-		case "ref":
-			return expr_.name;
-		case "field":
-			return `${expr(expr_.target)}.${expr_.name}`;
-		case "index":
-			return `${expr(expr_.target)}[${expr(expr_.index)}]`;
-		case "not":
-			return `!${expr(expr_.operand)}`;
-		case "bin":
-			return `(${expr(expr_.left)} ${expr_.op === "==" ? "===" : expr_.op === "!=" ? "!==" : expr_.op} ${expr(expr_.right)})`;
-		case "cond":
-			return `(${expr(expr_.test)} ? ${expr(expr_.whenTrue)} : ${expr(expr_.whenFalse)})`;
-		case "listOf":
-			return `[${expr_.items.map((item) => expr(item)).join(", ")}]`;
+		}
+		case "ref": {
+			return node.name;
+		}
+		case "field": {
+			return `${expr(node.target)}.${node.name}`;
+		}
+		case "index": {
+			return `${expr(node.target)}[${expr(node.index)}]`;
+		}
+		case "not": {
+			return `!${expr(node.operand)}`;
+		}
+		case "bin": {
+			return `(${expr(node.left)} ${node.op === "==" ? "===" : node.op === "!=" ? "!==" : node.op} ${expr(node.right)})`;
+		}
+		case "cond": {
+			return `(${expr(node.test)} ? ${expr(node.whenTrue)} : ${expr(node.whenFalse)})`;
+		}
+		case "listOf": {
+			return `[${node.items.map((item) => expr(item)).join(", ")}]`;
+		}
 		case "struct": {
-			const declared = structs.get(expr_.name);
+			const declared = structs.get(node.name);
 
-			return `{ ${expr_.fields
+			return `{ ${node.fields
 				.map((field) => {
 					const ty = declared?.fields.find((candidate) => candidate.name === field.name)?.ty;
 					// A dataset holds plain strings; the closed set is the declaration's promise, and
@@ -121,14 +151,16 @@ const expr = (expr_: Expr): string => {
 				})
 				.join(", ")} }`;
 		}
-		case "await":
-			return `await ${expr(expr_.value)}`;
-		case "optionField":
-			return `${expr_.target}?.${expr_.field}`;
-		case "call":
-			return call(expr_);
-		default:
-			throw new Error(`typescript: unsupported expression ${expr_.k}`);
+		case "await": {
+			return `await ${expr(node.value)}`;
+		}
+		case "optionField": {
+			// The prologue binds every option read to a local of this name.
+			return `${node.target}${pascal(node.field)}`;
+		}
+		case "call": {
+			return call(node);
+		}
 	}
 };
 
@@ -136,46 +168,98 @@ const expr = (expr_: Expr): string => {
 const call = (node: Extract<Expr, { k: "call" }>): string => {
 	const args = node.args.map((argument) => expr(argument));
 
-	if (node.callee.k === "user") return `${node.callee.name}(${args.join(", ")})`;
+	if (node.callee.k === "user")
+		return `${blocking.has(node.callee.name) ? "await " : ""}${node.callee.name}(${args.join(", ")})`;
 
 	switch (node.callee.name) {
-		case "len":
+		case "len": {
 			return `${args[0]}.length`;
-		case "listLen":
+		}
+		case "listLen": {
 			return `${args[0]}.length`;
-		case "codeAt":
+		}
+		case "codeAt": {
 			return `codeAt(${args[0]}, ${args[1]})`;
-		case "slice":
+		}
+		case "slice": {
 			return `${args[0]}.slice(${args[1]}, ${args[2]})`;
-		case "upper":
+		}
+		case "upper": {
 			return `${args[0]}.toUpperCase()`;
-		case "trim":
+		}
+		case "trim": {
 			return `${args[0]}.trim()`;
-		case "padStart":
+		}
+		case "padStart": {
 			return `padStart(${args[0]}, ${args[1]}, ${args[2]})`;
-		case "repeat":
+		}
+		case "repeat": {
 			return `${args[0]}.repeat(${args[1]})`;
-		case "classHas":
+		}
+		case "classHas": {
 			return `classHas(${args[0]}, ${args[1]})`;
-		case "keepClass":
+		}
+		case "keepClass": {
 			return `keepClass(${args[0]}, ${args[1]})`;
-		case "patternTest":
+		}
+		case "patternTest": {
 			return `patternTest(${args[0]}, ${args[1]})`;
-		case "asString":
+		}
+		case "asString": {
 			return `asString(${args[0]})`;
-		case "isTruthy":
+		}
+		case "isTruthy": {
 			return `isTruthy(${args[0]})`;
-		case "listPush":
+		}
+		case "listPush": {
 			return `${args[0]}.push(${args[1]})`;
-		case "unwrap":
+		}
+		case "unwrap": {
 			// TypeScript's own narrowing has already done this.
 			return args[0];
-		case "dataAll":
+		}
+		case "dataAll": {
 			return `dataAll(${args[0]})`;
-		case "dataRows":
+		}
+		case "dataRows": {
 			return `dataRows(${args[0]}, ${args[1]})`;
-		default:
+		}
+		case "isNumber": {
+			return `isNumber(${args[0]})`;
+		}
+		case "isList": {
+			return `isList(${args[0]})`;
+		}
+		case "listHas": {
+			return `listHas(${args[0]}, ${args[1]})`;
+		}
+		case "httpGet": {
+			return `await httpGet(${args.join(", ")})`;
+		}
+		case "jsonString": {
+			return `jsonString(${args[0]}, ${args[1]})`;
+		}
+		case "jsonInt": {
+			return `jsonInt(${args[0]}, ${args[1]})`;
+		}
+		case "jsonTruthy": {
+			return `jsonTruthy(${args[0]}, ${args[1]})`;
+		}
+		case "jsonIsTrue": {
+			return `jsonIsTrue(${args[0]}, ${args[1]})`;
+		}
+		case "startAll": {
+			return `startAll(${args.join(", ")})`;
+		}
+		case "firstSuccess": {
+			return `await firstSuccess(${args[0]})`;
+		}
+		case "anyFailedWith": {
+			return `anyFailedWith(${args[0]}, ${args[1]})`;
+		}
+		default: {
 			throw new Error(`typescript: unsupported runtime call ${node.callee.name}`);
+		}
 	}
 };
 
@@ -202,8 +286,9 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}${node.mutable ? "let" : "const"} ${node.name}${annotation} = ${expr(node.value)};`;
 		}
-		case "assign":
+		case "assign": {
 			return `${indent}${node.name} = ${expr(node.value)};`;
+		}
 		case "if": {
 			const otherwise =
 				node.otherwise.length === 0
@@ -212,12 +297,21 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}if (${expr(node.test)}) {\n${block(node.then, `${indent}\t`)}\n${indent}}${otherwise}`;
 		}
-		case "return":
+		case "return": {
 			return node.value === undefined ? `${indent}return;` : `${indent}return ${expr(node.value)};`;
-		case "forRange":
+		}
+		case "throw": {
+			return `${indent}throw new ${node.error}(${expr(node.message)});`;
+		}
+		case "try": {
+			return `${indent}try {\n${block(node.body, `${indent}\t`)}\n${indent}} catch (${node.catchName}) {\n${block(node.catchBody, `${indent}\t`)}\n${indent}}`;
+		}
+		case "forRange": {
 			return `${indent}for (let ${node.name} = ${expr(node.from)}; ${node.name} < ${expr(node.until)}; ${node.name}++) {\n${block(node.body, `${indent}\t`)}\n${indent}}`;
-		case "forOf":
+		}
+		case "forOf": {
 			return `${indent}for (const ${node.name} of ${expr(node.iterable)}) {\n${block(node.body, `${indent}\t`)}\n${indent}}`;
+		}
 		case "expr": {
 			const value = node.value;
 
@@ -234,8 +328,6 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}${expr(value)};`;
 		}
-		default:
-			throw new Error(`typescript: unsupported statement ${node.k}`);
 	}
 };
 
@@ -252,18 +344,31 @@ const pattern = (entry: PatternDecl): string =>
 		)
 		.join("\n")}\n];`;
 
+/** Renders an error type, with the `name` its own tests assert on. */
+const error = (entry: ErrorDecl): string =>
+	`${entry.doc === "" ? "" : `/** ${entry.doc.split("\n").join(" ")} */\n`}${entry.exported ? "export " : ""}class ${entry.name} extends ${entry.base ?? "Error"} {
+\tpublic constructor(message: string) {
+\t\tsuper(message);
+\t\tthis.name = ${lit(entry.name)};
+\t}
+}`;
+
 /** Renders a closed set of strings. */
 const enumeration = (entry: EnumDecl): string =>
-	`${entry.doc === "" ? "" : `/**\n${entry.doc
-		.split("\n")
-		.map((line) => ` * ${line}`.trimEnd())
-		.join("\n")}\n */\n`}export type ${entry.name} =\n${entry.values
-		.map((value) => `\t| ${lit(value)}`)
-		.join("\n")};`;
+	`${
+		entry.doc === ""
+			? ""
+			: `/**\n${entry.doc
+					.split("\n")
+					.map((line) => ` * ${line}`.trimEnd())
+					.join("\n")}\n */\n`
+	}export type ${entry.name} =\n${entry.values.map((value) => `\t| ${lit(value)}`).join("\n")};`;
 
 /** Renders a dataset as the table the runtime materialises. */
 const data = (entry: DataDecl): string => {
-	const rows = entry.rows.map((row) => `\t\t[${row.map((cell) => lit(cell)).join(", ")}],`).join("\n");
+	const rows = entry.rows
+		.map((row) => `\t\t[${row.map((cell) => lit(cell)).join(", ")}],`)
+		.join("\n");
 	const groups = Object.entries(entry.groups)
 		.map(([key, indexes]) => `\t\t[${lit(key)}, [${indexes.join(", ")}]],`)
 		.join("\n");
@@ -303,10 +408,27 @@ const func = (entry: FuncDecl): string => {
 			return `${param.name}${param.optional ? "?" : ""}: ${type(declared)}`;
 		})
 		.join(", ");
-	const doc = entry.doc === "" ? "" : `/**\n${entry.doc.split("\n").map((line) => ` * ${line}`.trimEnd()).join("\n")}\n */\n`;
-	const signature = `(${params}): ${entry.isAsync ? `Promise<${type(entry.ret)}>` : type(entry.ret)}`;
+	const prologue = optionReads(entry)
+		.map((read) => {
+			const fallback = read.expr.k === "optionField" ? read.expr.fallback : { k: "none" as const };
+			const otherwise = fallback.k === "none" ? "" : ` ?? ${expr(fallback)}`;
 
-	return `${doc}${entry.exported ? "export " : ""}const ${entry.name} = ${entry.isAsync ? "async " : ""}${signature} => {\n${block(entry.body, "\t")}\n};`;
+			return `\tconst ${read.local} = ${read.target}?.${read.field}${otherwise};`;
+		})
+		.join("\n");
+	const doc =
+		entry.doc === ""
+			? ""
+			: `/**\n${entry.doc
+					.split("\n")
+					.map((line) => ` * ${line}`.trimEnd())
+					.join("\n")}\n */\n`;
+	// A function that waits on the network is `async` here even though the source is written
+	// straight-line: colouring the call graph is the emitter's job, not the author's.
+	const isAsync = entry.isAsync || entry.blocking;
+	const signature = `(${params}): ${isAsync ? `Promise<${type(entry.ret)}>` : type(entry.ret)}`;
+
+	return `${doc}${entry.exported ? "export " : ""}const ${entry.name} = ${isAsync ? "async " : ""}${signature} => {\n${prologue === "" ? "" : `${prologue}\n`}${block(entry.body, "\t")}\n};`;
 };
 
 /**
@@ -317,6 +439,7 @@ const func = (entry: FuncDecl): string => {
  */
 export const emit = (module: Module): Record<string, string> => {
 	structs = new Map(module.structs.map((entry) => [entry.name, entry]));
+	blocking = new Set(module.functions.filter((entry) => entry.blocking).map((entry) => entry.name));
 
 	const used = new Set<string>();
 	const rendered = module.functions.map((entry) => func(entry)).join("\n\n");
@@ -331,6 +454,17 @@ export const emit = (module: Module): Record<string, string> => {
 		"isTruthy",
 		"dataAll",
 		"dataRows",
+		"isNumber",
+		"isList",
+		"listHas",
+		"httpGet",
+		"jsonString",
+		"jsonInt",
+		"jsonTruthy",
+		"jsonIsTrue",
+		"startAll",
+		"firstSuccess",
+		"anyFailedWith",
 	]) {
 		if (new RegExp(`\\b${helper}\\(`).test(rendered)) used.add(helper);
 	}
@@ -338,10 +472,15 @@ export const emit = (module: Module): Record<string, string> => {
 	if (module.charClasses.length > 0) used.add("type CharClass");
 	if (module.patterns.length > 0) used.add("type PatternStep");
 	if (module.data.length > 0) used.add("makeDataset");
+	if (used.has("startAll")) used.add("type Attempts");
 
 	const imports = [...used].sort();
 	const constants = module.constants
-		.map((entry) => `const ${entry.name} = ${expr(entry.expr)};`)
+		.map((entry) =>
+			entry.ty.k === "list" && entry.ty.of.k === "enum"
+				? `const ${entry.name}: ${type(entry.ty)} = ${expr(entry.expr)};`
+				: `const ${entry.name} = ${expr(entry.expr)};`,
+		)
 		.join("\n");
 
 	// One file per exported function, in the layout `src/` uses, re-exporting the module. The
@@ -353,10 +492,13 @@ export const emit = (module: Module): Record<string, string> => {
 
 		const kebab = entry.name.replaceAll(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 		const types = [
-			...module.structs.map((candidate) => candidate.name),
-			...module.enums.map((candidate) => candidate.name),
-		];
-		const exports = [entry.name, ...types.map((name) => `type ${name}`)].join(", ");
+			...module.structs.filter((candidate) => candidate.external !== true),
+			...module.enums,
+		].map((candidate) => `type ${candidate.name}`);
+		const errors = module.errors
+			.filter((candidate) => candidate.exported)
+			.map((candidate) => candidate.name);
+		const exports = [entry.name, ...errors, ...types].join(", ");
 
 		shims[`${kebab}/${kebab}.ts`] =
 			`// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.\nexport { ${exports} } from "../_bridge/${module.name}";\n`;
@@ -377,7 +519,12 @@ ${constants}
 
 ${module.enums.map((entry) => enumeration(entry)).join("\n\n")}
 
-${module.structs.map((entry) => struct(entry)).join("\n\n")}
+${module.errors.map((entry) => error(entry)).join("\n\n")}
+
+${module.structs
+	.filter((entry) => entry.external !== true)
+	.map((entry) => struct(entry))
+	.join("\n\n")}
 
 ${module.data.map((entry) => data(entry)).join("\n\n")}
 

@@ -11,7 +11,7 @@
  * alternation, no backreferences, no lookaround — the frontend rejects the literal instead of
  * guessing, which is the whole point.
  */
-import type { CharClass, PatternStep } from "./ir.ts";
+import { type CharClass, type PatternStep } from "./ir.ts";
 
 type Ranges = [number, number][];
 
@@ -20,17 +20,17 @@ const JS_WHITESPACE: Ranges = [
 	[0x09, 0x0d],
 	[0x20, 0x20],
 	[0xa0, 0xa0],
-	[0x1680, 0x1680],
-	[0x2000, 0x200a],
-	[0x2028, 0x2029],
-	[0x202f, 0x202f],
-	[0x205f, 0x205f],
-	[0x3000, 0x3000],
-	[0xfeff, 0xfeff],
+	[0x16_80, 0x16_80],
+	[0x20_00, 0x20_0a],
+	[0x20_28, 0x20_29],
+	[0x20_2f, 0x20_2f],
+	[0x20_5f, 0x20_5f],
+	[0x30_00, 0x30_00],
+	[0xfe_ff, 0xfe_ff],
 ];
 
 const DIGITS: Ranges = [[0x30, 0x39]];
-const MAX_CODE_POINT = 0x10_ffff;
+const MAX_CODE_POINT = 0x10_ff_ff;
 
 /**
  * Sorts and merges ranges so that two classes built differently compare equal.
@@ -87,7 +87,9 @@ export const complement = (ranges: Ranges): Ranges => {
  * @returns {boolean} True when they overlap.
  */
 export const overlaps = (left: Ranges, right: Ranges): boolean =>
-	left.some(([from, to]) => right.some(([otherFrom, otherTo]) => from <= otherTo && otherFrom <= to));
+	left.some(([from, to]) =>
+		right.some(([otherFrom, otherTo]) => from <= otherTo && otherFrom <= to),
+	);
 
 type Parsed = { ranges: Ranges; min: number; max: number; capture: boolean };
 
@@ -141,7 +143,10 @@ const readClass = (source: string, start: number): { ranges: Ranges; next: numbe
 		}
 
 		const isRange =
-			source[index] === "-" && source[index + 1] !== "]" && index + 1 < source.length && low.length === 1;
+			source[index] === "-" &&
+			source[index + 1] !== "]" &&
+			index + 1 < source.length &&
+			low.length === 1;
 
 		if (isRange) {
 			index++;
@@ -166,7 +171,10 @@ const readClass = (source: string, start: number): { ranges: Ranges; next: numbe
 };
 
 /** Reads a quantifier, if there is one at `index`. */
-const readQuantifier = (source: string, index: number): { min: number; max: number; next: number } => {
+const readQuantifier = (
+	source: string,
+	index: number,
+): { min: number; max: number; next: number } => {
 	if (source[index] === "*") return { min: 0, max: -1, next: index + 1 };
 	if (source[index] === "+") return { min: 1, max: -1, next: index + 1 };
 	if (source[index] === "?") return { min: 0, max: 1, next: index + 1 };

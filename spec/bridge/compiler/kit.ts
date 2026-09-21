@@ -5,7 +5,7 @@
  * everywhere: naming conventions, walking the tree, and hoisting option reads into locals so
  * that no emitter has to inline a null check in the middle of an expression.
  */
-import type { Expr, FuncDecl, Stmt } from "./ir.ts";
+import { type Expr, type FuncDecl, type Stmt } from "./ir.ts";
 
 /**
  * Converts a camelCase name to snake_case.
@@ -53,78 +53,93 @@ export const walk = (body: Stmt[], visit: (expr: Expr) => void): void => {
 		visit(node);
 
 		switch (node.k) {
-			case "field":
+			case "field": {
 				expression(node.target);
 				break;
-			case "index":
+			}
+			case "index": {
 				expression(node.target);
 				expression(node.index);
 				break;
-			case "call":
+			}
+			case "call": {
 				for (const argument of node.args) expression(argument);
 				break;
-			case "bin":
+			}
+			case "bin": {
 				expression(node.left);
 				expression(node.right);
 				break;
-			case "not":
+			}
+			case "not": {
 				expression(node.operand);
 				break;
-			case "cond":
+			}
+			case "cond": {
 				expression(node.test);
 				expression(node.whenTrue);
 				expression(node.whenFalse);
 				break;
-			case "listOf":
+			}
+			case "listOf": {
 				for (const item of node.items) expression(item);
 				break;
-			case "struct":
+			}
+			case "struct": {
 				for (const field of node.fields) expression(field.value);
 				break;
-			case "await":
+			}
+			case "await": {
 				expression(node.value);
 				break;
-			case "lambda":
-				walk(node.body, visit);
+			}
+			default: {
 				break;
-			default:
-				break;
+			}
 		}
 	};
 
 	for (const statement of body) {
 		switch (statement.k) {
 			case "let":
-			case "assign":
+			case "assign": {
 				expression(statement.value);
 				break;
-			case "if":
+			}
+			case "if": {
 				expression(statement.test);
 				walk(statement.then, visit);
 				walk(statement.otherwise, visit);
 				break;
-			case "return":
+			}
+			case "return": {
 				if (statement.value !== undefined) expression(statement.value);
 				break;
-			case "forOf":
+			}
+			case "forOf": {
 				expression(statement.iterable);
 				walk(statement.body, visit);
 				break;
-			case "forRange":
+			}
+			case "forRange": {
 				expression(statement.from);
 				expression(statement.until);
 				walk(statement.body, visit);
 				break;
-			case "throw":
+			}
+			case "throw": {
 				expression(statement.message);
 				break;
-			case "try":
+			}
+			case "try": {
 				walk(statement.body, visit);
 				walk(statement.catchBody, visit);
 				break;
-			case "expr":
+			}
+			case "expr": {
 				expression(statement.value);
 				break;
+			}
 		}
 	}
 };
@@ -190,12 +205,11 @@ export const pushTargets = (entry: FuncDecl): Set<string> => {
  */
 export const usesStd = (functions: FuncDecl[], name: string): boolean => {
 	let used = false;
+	const look = (node: Expr): void => {
+		if (node.k === "call" && node.callee.k === "std" && node.callee.name === name) used = true;
+	};
 
-	for (const entry of functions) {
-		walk(entry.body, (node) => {
-			if (node.k === "call" && node.callee.k === "std" && node.callee.name === name) used = true;
-		});
-	}
+	for (const entry of functions) walk(entry.body, look);
 
 	return used;
 };
@@ -231,5 +245,8 @@ export const prose = (doc: string): string => {
 		lines.push(line);
 	}
 
-	return lines.join("\n").replaceAll(/\n{3,}/g, "\n\n").trim();
+	return lines
+		.join("\n")
+		.replaceAll(/\n{3,}/g, "\n\n")
+		.trim();
 };

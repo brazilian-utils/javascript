@@ -6,16 +6,18 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type {
-	CharClass,
-	DataDecl,
-	Expr,
-	FuncDecl,
-	Module,
-	PatternDecl,
-	Stmt,
-	StructDecl,
-	Ty,
+
+import {
+	type CharClass,
+	type DataDecl,
+	type ErrorDecl,
+	type Expr,
+	type FuncDecl,
+	type Module,
+	type PatternDecl,
+	type Stmt,
+	type StructDecl,
+	type Ty,
 } from "../ir.ts";
 import { optionReads, prose, snake } from "../kit.ts";
 
@@ -43,26 +45,38 @@ const lit = (value: string): string => {
 /** Renders an IR type as a Python annotation. */
 const type = (ty: Ty): string => {
 	switch (ty.k) {
-		case "string":
+		case "string": {
 			return "str";
-		case "int":
+		}
+		case "int": {
 			return "int";
-		case "bool":
+		}
+		case "bool": {
 			return "bool";
-		case "void":
+		}
+		case "void": {
 			return "None";
+		}
 		case "json":
-		case "scalar":
+		case "scalar": {
 			return "Any";
-		case "enum":
+		}
+		case "enum": {
 			// A closed set of strings is still a string at run time; the compiler is the checker.
 			return "str";
-		case "list":
+		}
+		case "tasks": {
+			return "Any";
+		}
+		case "list": {
 			return `List[${type(ty.of)}]`;
-		case "opt":
+		}
+		case "opt": {
 			return `Optional[${type(ty.of)}]`;
-		case "named":
+		}
+		case "named": {
 			return ty.name;
+		}
 	}
 };
 
@@ -84,22 +98,30 @@ const OPS: Record<string, string> = {
 /** Renders an expression. */
 const expr = (node: Expr): string => {
 	switch (node.k) {
-		case "str":
+		case "str": {
 			return lit(node.value);
-		case "int":
+		}
+		case "int": {
 			return String(node.value);
-		case "bool":
+		}
+		case "bool": {
 			return node.value ? "True" : "False";
-		case "none":
+		}
+		case "none": {
 			return "None";
-		case "ref":
+		}
+		case "ref": {
 			return verbatim.has(node.name) ? node.name : snake(node.name);
-		case "field":
+		}
+		case "field": {
 			return `${expr(node.target)}.${snake(node.name)}`;
-		case "index":
+		}
+		case "index": {
 			return `${expr(node.target)}[${expr(node.index)}]`;
-		case "not":
+		}
+		case "not": {
 			return `not ${expr(node.operand)}`;
+		}
 		case "bin": {
 			// `x == None` works but reads wrong; identity is what the comparison means.
 			if (node.right.k === "none" && (node.op === "==" || node.op === "!="))
@@ -107,19 +129,26 @@ const expr = (node: Expr): string => {
 
 			return `(${expr(node.left)} ${OPS[node.op]} ${expr(node.right)})`;
 		}
-		case "cond":
+		case "cond": {
 			return `(${expr(node.whenTrue)} if ${expr(node.test)} else ${expr(node.whenFalse)})`;
-		case "listOf":
+		}
+		case "listOf": {
 			return `[${node.items.map((item) => expr(item)).join(", ")}]`;
-		case "struct":
+		}
+		case "struct": {
 			return `${node.name}(${node.fields.map((field) => `${snake(field.name)}=${expr(field.value)}`).join(", ")})`;
-		case "optionField":
+		}
+		case "optionField": {
 			// The prologue binds every option read to a local of this name.
 			return `${snake(node.target)}_${snake(node.field)}`;
-		case "call":
+		}
+		case "await": {
+			// The blocking targets have nothing to wait on: the call has already returned.
+			return expr(node.value);
+		}
+		case "call": {
 			return call(node);
-		default:
-			throw new Error(`python: unsupported expression ${node.k}`);
+		}
 	}
 };
 
@@ -131,41 +160,91 @@ const call = (node: Extract<Expr, { k: "call" }>): string => {
 
 	switch (node.callee.name) {
 		case "len":
-		case "listLen":
+		case "listLen": {
 			return `len(${args[0]})`;
-		case "codeAt":
+		}
+		case "codeAt": {
 			return `code_at(${args[0]}, ${args[1]})`;
-		case "slice":
+		}
+		case "slice": {
 			return `${args[0]}[${args[1]}:${args[2]}]`;
-		case "upper":
+		}
+		case "upper": {
 			return `${args[0]}.upper()`;
-		case "trim":
+		}
+		case "trim": {
 			return `js_trim(${args[0]})`;
-		case "padStart":
+		}
+		case "padStart": {
 			return `pad_start(${args[0]}, ${args[1]}, ${args[2]})`;
-		case "repeat":
+		}
+		case "repeat": {
 			return `(${args[0]} * ${args[1]})`;
-		case "classHas":
+		}
+		case "classHas": {
 			return `class_has(${args[0]}, ${args[1]})`;
-		case "keepClass":
+		}
+		case "keepClass": {
 			return `keep_class(${args[0]}, ${args[1]})`;
-		case "patternTest":
+		}
+		case "patternTest": {
 			return `pattern_test(${args[0]}, ${args[1]})`;
-		case "asString":
+		}
+		case "asString": {
 			return `as_string(${args[0]})`;
-		case "isTruthy":
+		}
+		case "isTruthy": {
 			return `is_truthy(${args[0]})`;
-		case "listPush":
+		}
+		case "listPush": {
 			return `${args[0]}.append(${args[1]})`;
-		case "unwrap":
+		}
+		case "unwrap": {
 			// Python has no separate optional value to open.
 			return args[0];
-		case "dataAll":
+		}
+		case "dataAll": {
 			return `data_all(${args[0]})`;
-		case "dataRows":
+		}
+		case "dataRows": {
 			return `data_rows(${args[0]}, ${args[1]})`;
-		default:
+		}
+		case "isNumber": {
+			return `is_number(${args[0]})`;
+		}
+		case "isList": {
+			return `is_list(${args[0]})`;
+		}
+		case "listHas": {
+			return `list_has(${args[0]}, ${args[1]})`;
+		}
+		case "httpGet": {
+			return `http_get(${args.join(", ")})`;
+		}
+		case "jsonString": {
+			return `json_string(${args[0]}, ${args[1]})`;
+		}
+		case "jsonInt": {
+			return `json_int(${args[0]}, ${args[1]})`;
+		}
+		case "jsonTruthy": {
+			return `json_truthy(${args[0]}, ${args[1]})`;
+		}
+		case "jsonIsTrue": {
+			return `json_is_true(${args[0]}, ${args[1]})`;
+		}
+		case "startAll": {
+			return `start_all(${args.join(", ")})`;
+		}
+		case "firstSuccess": {
+			return `first_success(${args[0]})`;
+		}
+		case "anyFailedWith": {
+			return `any_failed_with(${args[0]}, ${args[1]})`;
+		}
+		default: {
 			throw new Error(`python: unsupported runtime call ${node.callee.name}`);
+		}
 	}
 };
 
@@ -180,20 +259,32 @@ const block = (body: Stmt[], indent: string): string => {
 const stmt = (node: Stmt, indent: string): string => {
 	switch (node.k) {
 		case "let":
-		case "assign":
-			return `${indent}${snake(node.k === "let" ? node.name : node.name)} = ${expr(node.value)}`;
+		case "assign": {
+			return `${indent}${snake(node.name)} = ${expr(node.value)}`;
+		}
 		case "if": {
 			const otherwise =
-				node.otherwise.length === 0 ? "" : `\n${indent}else:\n${block(node.otherwise, `${indent}    `)}`;
+				node.otherwise.length === 0
+					? ""
+					: `\n${indent}else:\n${block(node.otherwise, `${indent}    `)}`;
 
 			return `${indent}if ${expr(node.test)}:\n${block(node.then, `${indent}    `)}${otherwise}`;
 		}
-		case "return":
+		case "return": {
 			return node.value === undefined ? `${indent}return` : `${indent}return ${expr(node.value)}`;
-		case "forRange":
+		}
+		case "throw": {
+			return `${indent}raise ${node.error}(${expr(node.message)})`;
+		}
+		case "try": {
+			return `${indent}try:\n${block(node.body, `${indent}    `)}\n${indent}except Exception as ${snake(node.catchName)}:\n${block(node.catchBody, `${indent}    `)}`;
+		}
+		case "forRange": {
 			return `${indent}for ${snake(node.name)} in range(${expr(node.from)}, ${expr(node.until)}):\n${block(node.body, `${indent}    `)}`;
-		case "forOf":
+		}
+		case "forOf": {
 			return `${indent}for ${snake(node.name)} in ${expr(node.iterable)}:\n${block(node.body, `${indent}    `)}`;
+		}
 		case "expr": {
 			const value = node.value;
 
@@ -210,8 +301,6 @@ const stmt = (node: Stmt, indent: string): string => {
 
 			return `${indent}${expr(value)}`;
 		}
-		default:
-			throw new Error(`python: unsupported statement ${node.k}`);
 	}
 };
 
@@ -249,13 +338,16 @@ ${groups}
 )`;
 };
 
+/** Renders an error type. */
+const error = (entry: ErrorDecl): string =>
+	`class ${entry.name}(${entry.base ?? "Exception"}):
+    """${entry.doc === "" ? entry.name : entry.doc.split("\n").join(" ")}"""`;
+
 /** Renders an options record as a dataclass. */
 const struct = (entry: StructDecl): string => {
 	const fields = entry.fields
 		.map((field) => {
-			const declared = entry.isOptions
-				? `Optional[${type(field.ty)}] = None`
-				: type(field.ty);
+			const declared = entry.isOptions ? `Optional[${type(field.ty)}] = None` : type(field.ty);
 
 			return `${field.doc === "" ? "" : `    # ${field.doc}\n`}    ${snake(field.name)}: ${declared}`;
 		})
@@ -330,17 +422,28 @@ from typing import Any, List, Optional
 from .runtime import (
     CharClass,
     PatternStep,
+    any_failed_with,
     as_string,
     class_has,
     code_at,
     data_all,
     data_rows,
+    first_success,
+    http_get,
+    is_list,
+    is_number,
     is_truthy,
     js_trim,
+    json_int,
+    json_is_true,
+    json_string,
+    json_truthy,
     keep_class,
+    list_has,
     make_dataset,
     pad_start,
     pattern_test,
+    start_all,
 )
 
 ${module.charClasses.map((entry) => charClass(entry)).join("\n")}
@@ -350,7 +453,13 @@ ${module.patterns.map((entry) => pattern(entry)).join("\n\n")}
 ${constants}
 
 
-${module.structs.map((entry) => struct(entry)).join("\n\n\n")}
+${module.errors.map((entry) => error(entry)).join("\n\n\n")}
+
+
+${module.structs
+	.filter((entry) => entry.external !== true)
+	.map((entry) => struct(entry))
+	.join("\n\n\n")}
 
 
 ${module.data.map((entry) => data(entry)).join("\n\n")}

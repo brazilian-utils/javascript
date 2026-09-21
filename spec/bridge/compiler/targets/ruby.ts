@@ -6,15 +6,17 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type {
-	CharClass,
-	DataDecl,
-	Expr,
-	FuncDecl,
-	Module,
-	PatternDecl,
-	Stmt,
-	StructDecl,
+
+import {
+	type CharClass,
+	type DataDecl,
+	type ErrorDecl,
+	type Expr,
+	type FuncDecl,
+	type Module,
+	type PatternDecl,
+	type Stmt,
+	type StructDecl,
 } from "../ir.ts";
 import { optionReads, prose, screaming, snake } from "../kit.ts";
 
@@ -59,42 +61,58 @@ const OPS: Record<string, string> = {
 /** Renders an expression. */
 const expr = (node: Expr): string => {
 	switch (node.k) {
-		case "str":
+		case "str": {
 			return lit(node.value);
-		case "int":
+		}
+		case "int": {
 			return String(node.value);
-		case "bool":
+		}
+		case "bool": {
 			return String(node.value);
-		case "none":
+		}
+		case "none": {
 			return "nil";
-		case "ref":
+		}
+		case "ref": {
 			return verbatim.has(node.name) ? screaming(node.name) : snake(node.name);
-		case "field":
+		}
+		case "field": {
 			return `${expr(node.target)}.${snake(node.name)}`;
-		case "index":
+		}
+		case "index": {
 			return `${expr(node.target)}[${expr(node.index)}]`;
-		case "not":
+		}
+		case "not": {
 			return `!${expr(node.operand)}`;
-		case "bin":
+		}
+		case "bin": {
 			// `x == nil` works but `nil?` is what a Ruby reader expects.
 			if (node.right.k === "none" && (node.op === "==" || node.op === "!="))
 				return `${node.op === "!=" ? "!" : ""}${expr(node.left)}.nil?`;
 
 			return `(${expr(node.left)} ${OPS[node.op]} ${expr(node.right)})`;
-		case "cond":
+		}
+		case "cond": {
 			return `(${expr(node.test)} ? ${expr(node.whenTrue)} : ${expr(node.whenFalse)})`;
-		case "listOf":
+		}
+		case "listOf": {
 			return `[${node.items.map((item) => expr(item)).join(", ")}]`;
-		case "struct":
+		}
+		case "struct": {
 			return `${node.name}.new(${node.fields
 				.map((field) => `${snake(field.name)}: ${expr(field.value)}`)
 				.join(", ")})`;
-		case "optionField":
+		}
+		case "optionField": {
 			return `${snake(node.target)}_${snake(node.field)}`;
-		case "call":
+		}
+		case "await": {
+			// The blocking targets have nothing to wait on: the call has already returned.
+			return expr(node.value);
+		}
+		case "call": {
 			return call(node);
-		default:
-			throw new Error(`ruby: unsupported expression ${node.k}`);
+		}
 	}
 };
 
@@ -106,41 +124,91 @@ const call = (node: Extract<Expr, { k: "call" }>): string => {
 
 	switch (node.callee.name) {
 		case "len":
-		case "listLen":
+		case "listLen": {
 			return `${args[0]}.length`;
-		case "codeAt":
+		}
+		case "codeAt": {
 			return `Runtime.code_at(${args[0]}, ${args[1]})`;
-		case "slice":
+		}
+		case "slice": {
 			return `${args[0]}[${args[1]}...${args[2]}]`;
-		case "upper":
+		}
+		case "upper": {
 			return `${args[0]}.upcase`;
-		case "trim":
+		}
+		case "trim": {
 			return `Runtime.js_trim(${args[0]})`;
-		case "padStart":
+		}
+		case "padStart": {
 			return `Runtime.pad_start(${args[0]}, ${args[1]}, ${args[2]})`;
-		case "repeat":
+		}
+		case "repeat": {
 			return `(${args[0]} * ${args[1]})`;
-		case "classHas":
+		}
+		case "classHas": {
 			return `Runtime.class_has(${args[0]}, ${args[1]})`;
-		case "keepClass":
+		}
+		case "keepClass": {
 			return `Runtime.keep_class(${args[0]}, ${args[1]})`;
-		case "patternTest":
+		}
+		case "patternTest": {
 			return `Runtime.pattern_test(${args[0]}, ${args[1]})`;
-		case "asString":
+		}
+		case "asString": {
 			return `Runtime.as_string(${args[0]})`;
-		case "isTruthy":
+		}
+		case "isTruthy": {
 			return `Runtime.is_truthy(${args[0]})`;
-		case "listPush":
+		}
+		case "listPush": {
 			return `${args[0]}.push(${args[1]})`;
-		case "unwrap":
+		}
+		case "unwrap": {
 			// Ruby has no separate optional value to open.
 			return args[0];
-		case "dataAll":
+		}
+		case "dataAll": {
 			return `Runtime.data_all(${args[0]})`;
-		case "dataRows":
+		}
+		case "dataRows": {
 			return `Runtime.data_rows(${args[0]}, ${args[1]})`;
-		default:
+		}
+		case "isNumber": {
+			return `Runtime.is_number(${args[0]})`;
+		}
+		case "isList": {
+			return `Runtime.is_list(${args[0]})`;
+		}
+		case "listHas": {
+			return `Runtime.list_has(${args[0]}, ${args[1]})`;
+		}
+		case "httpGet": {
+			return `Runtime.http_get(${args.join(", ")})`;
+		}
+		case "jsonString": {
+			return `Runtime.json_string(${args[0]}, ${args[1]})`;
+		}
+		case "jsonInt": {
+			return `Runtime.json_int(${args[0]}, ${args[1]})`;
+		}
+		case "jsonTruthy": {
+			return `Runtime.json_truthy(${args[0]}, ${args[1]})`;
+		}
+		case "jsonIsTrue": {
+			return `Runtime.json_is_true(${args[0]}, ${args[1]})`;
+		}
+		case "startAll": {
+			return `Runtime.start_all(method(:${args[0]}), ${args[1]}, ${args[2]})`;
+		}
+		case "firstSuccess": {
+			return `Runtime.first_success(${args[0]})`;
+		}
+		case "anyFailedWith": {
+			return `Runtime.any_failed_with(${args[0]}, ${args[1]})`;
+		}
+		default: {
 			throw new Error(`ruby: unsupported runtime call ${node.callee.name}`);
+		}
 	}
 };
 
@@ -155,20 +223,32 @@ const block = (body: Stmt[], indent: string): string =>
 const stmt = (node: Stmt, indent: string): string => {
 	switch (node.k) {
 		case "let":
-		case "assign":
+		case "assign": {
 			return `${indent}${snake(node.name)} = ${expr(node.value)}`;
+		}
 		case "if": {
 			const otherwise =
-				node.otherwise.length === 0 ? "" : `\n${indent}else\n${block(node.otherwise, `${indent}  `)}`;
+				node.otherwise.length === 0
+					? ""
+					: `\n${indent}else\n${block(node.otherwise, `${indent}  `)}`;
 
 			return `${indent}if ${expr(node.test)}\n${block(node.then, `${indent}  `)}${otherwise}\n${indent}end`;
 		}
-		case "return":
+		case "return": {
 			return node.value === undefined ? `${indent}return` : `${indent}return ${expr(node.value)}`;
-		case "forRange":
+		}
+		case "throw": {
+			return `${indent}raise ${node.error}, ${expr(node.message)}`;
+		}
+		case "try": {
+			return `${indent}begin\n${block(node.body, `${indent}  `)}\n${indent}rescue StandardError => ${snake(node.catchName)}\n${block(node.catchBody, `${indent}  `)}\n${indent}end`;
+		}
+		case "forRange": {
 			return `${indent}(${expr(node.from)}...${expr(node.until)}).each do |${snake(node.name)}|\n${block(node.body, `${indent}  `)}\n${indent}end`;
-		case "forOf":
+		}
+		case "forOf": {
 			return `${indent}${expr(node.iterable)}.each do |${snake(node.name)}|\n${block(node.body, `${indent}  `)}\n${indent}end`;
+		}
 		case "expr": {
 			const value = node.value;
 
@@ -176,17 +256,13 @@ const stmt = (node: Stmt, indent: string): string => {
 				const [subject, kind, fallback] = value.args;
 				const name = subject.k === "ref" ? snake(subject.name) : "";
 				const test =
-					kind.k === "str" && kind.value === "string"
-						? `!${name}.is_a?(String)`
-						: `${name}.nil?`;
+					kind.k === "str" && kind.value === "string" ? `!${name}.is_a?(String)` : `${name}.nil?`;
 
 				return `${indent}return ${expr(fallback)} if ${test}`;
 			}
 
 			return `${indent}${expr(value)}`;
 		}
-		default:
-			throw new Error(`ruby: unsupported statement ${node.k}`);
 	}
 };
 
@@ -208,6 +284,10 @@ const struct = (entry: StructDecl): string =>
 	`    # ${entry.doc}\n    ${entry.name} = Struct.new(${entry.fields
 		.map((field) => `:${snake(field.name)}`)
 		.join(", ")}, keyword_init: true)`;
+
+/** Renders an error type. */
+const error = (entry: ErrorDecl): string =>
+	`    # ${entry.doc === "" ? entry.name : entry.doc}\n    class ${entry.name} < ${entry.base ?? "StandardError"}; end`;
 
 /** Renders a dataset as the table the runtime materialises. */
 const data = (entry: DataDecl): string => {
@@ -290,7 +370,12 @@ ${module.patterns.map((entry) => pattern(entry)).join("\n\n")}
 
 ${constants}
 
-${module.structs.map((entry) => struct(entry)).join("\n\n")}
+${module.errors.map((entry) => error(entry)).join("\n\n")}
+
+${module.structs
+	.filter((entry) => entry.external !== true)
+	.map((entry) => struct(entry))
+	.join("\n\n")}
 
 ${module.data.map((entry) => data(entry)).join("\n\n")}
 

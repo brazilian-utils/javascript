@@ -150,7 +150,8 @@ export default defineConfig({
 		// `CHANGELOG.md` is written by release-please (`* ` bullets); formatting it would fail the
 		// Check workflow on every release PR. `spec/vectors` holds the generated conformance
 		// vectors, written on one line on purpose: pretty printing ~10k expectations would multiply
-		// the file size for a file nobody reads by hand.
+		// the file size for a file nobody reads by hand, and `spec/bridge/source/*.data.json` and
+		// `spec/bridge/out` are the same: a generated table and the generated targets.
 		ignorePatterns: [
 			"dist",
 			"coverage",
@@ -161,6 +162,8 @@ export default defineConfig({
 			"CHANGELOG.md",
 			"spec/vectors",
 			"spec/bench/corpus.json",
+			"**/spec/bridge/out/**",
+			"spec/bridge/source/municipalities.data.json",
 		],
 		singleQuote: false,
 		sortImports: true,
@@ -519,6 +522,53 @@ export default defineConfig({
 					// The generator reads the JSON files it writes itself, whose shape is pinned by
 					// `spec/schema/utility.schema.json`, so the parse results are asserted, not validated.
 					"typescript/no-unsafe-type-assertion": "off",
+				},
+			},
+			{
+				env: {
+					node: true,
+				},
+				files: ["spec/bridge/**/*.ts"],
+				rules: {
+					// `spec/bridge` is a compiler. Its emitters are one big switch over the IR per
+					// language, and their product is source code, so a few of the rules that keep
+					// library code readable work against it here.
+					//
+					// Every emitter is a table of one-line renderers (`const lit`, `const type`,
+					// `const expr`): a `@param`/`@returns` block on each would be three times the
+					// code and say nothing the signature does not.
+					"jsdoc/require-param": "off",
+					"jsdoc/require-returns": "off",
+					// Generated code is built out of template literals that hold template literals:
+					// a function body inside a class body inside a file.
+					"sonarjs/no-nested-template-literals": "off",
+					// The renderers are mutually recursive by nature (`expr` calls `call` calls
+					// `expr`), and each one is a wide, flat switch rather than deep logic.
+					"eslint/no-use-before-define": "off",
+					"eslint/complexity": "off",
+					"sonarjs/cognitive-complexity": "off",
+					"sonarjs/no-nested-conditional": "off",
+					// A switch over the IR ends in a defensive `default` so an unhandled node fails
+					// loudly; the rule reads that as a switch that could have listed every case.
+					"typescript/switch-exhaustiveness-check": "off",
+					"typescript/consistent-return": "off",
+					"sonarjs/no-inconsistent-returns": "off",
+					// The conformance drivers replay recorded cases one at a time on purpose: the
+					// point is to compare answers, not to be fast.
+					"eslint/no-await-in-loop": "off",
+					"promise/prefer-await-to-then": "off",
+					// `source/_std.ts` is the portable standard library: its members are named after
+					// what they shadow in each host, `isNumber` and `repeat` included.
+					"sonarjs/no-built-in-override": "off",
+					"unicorn/prefer-native-coercion-functions": "off",
+					// The emitters read the whole IR, so they import every kind of node.
+					"import/max-dependencies": "off",
+					// `compiler/frontend.ts` walks the parser's AST, which is untyped by design:
+					// oxc hands back plain objects, and the frontend is what gives them a shape.
+					"unicorn/no-abusive-eslint-disable": "off",
+					// `isTruthy` exists for the case where the flag is missing, so a default value
+					// would hide the very thing it is there to answer.
+					"sonarjs/bool-param-default": "off",
 				},
 			},
 			{

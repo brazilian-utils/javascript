@@ -10,6 +10,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+
 import { build } from "esbuild";
 
 const bridge = resolve(import.meta.dirname, "..");
@@ -89,4 +90,6 @@ for (const key of KEYS) {
 writeFileSync(resolve(bridge, "conformance/municipalities.expected.txt"), `${lines.join("\n")}\n`);
 writeFileSync(resolve(bridge, "conformance/municipalities.keys.txt"), `${KEYS.join("\n")}\n`);
 
-console.log(`${KEYS.length} keys, ${lines.length - KEYS.length} rows recorded from the shipped package`);
+console.log(
+	`${KEYS.length} keys, ${lines.length - KEYS.length} rows recorded from the shipped package`,
+);

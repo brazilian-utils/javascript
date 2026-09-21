@@ -11,6 +11,7 @@
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+
 import { build } from "esbuild";
 
 const bridge = resolve(import.meta.dirname, "..");
@@ -64,7 +65,8 @@ const buildCorpus = (generateCnpj: (version?: 1 | 2) => string): (string | numbe
 
 	for (const name of readdirSync(resolve(root, "src/is-valid-cnpj"))) {
 		if (name.endsWith(".test.ts"))
-			for (const literal of literalsOf(resolve(root, "src/is-valid-cnpj", name))) corpus.add(literal);
+			for (const literal of literalsOf(resolve(root, "src/is-valid-cnpj", name)))
+				corpus.add(literal);
 	}
 
 	for (const name of readdirSync(resolve(root, "src/format-cnpj"))) {
@@ -74,7 +76,7 @@ const buildCorpus = (generateCnpj: (version?: 1 | 2) => string): (string | numbe
 
 	for (let index = 0; index < 120; index++) {
 		const version = index % 2 === 0 ? 1 : 2;
-		const cnpj = generateCnpj(version as 1 | 2);
+		const cnpj = generateCnpj(version);
 
 		corpus.add(cnpj);
 		corpus.add(cnpj.toLowerCase());
@@ -145,4 +147,6 @@ for (const input of corpus) {
 rmSync(outDir, { recursive: true, force: true });
 writeFileSync(resolve(bridge, "conformance/vectors.json"), `${JSON.stringify({ cases })}\n`);
 
-console.log(`${corpus.length} inputs, ${cases.length} expectations recorded from the shipped package`);
+console.log(
+	`${corpus.length} inputs, ${cases.length} expectations recorded from the shipped package`,
+);

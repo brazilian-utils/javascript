@@ -7,22 +7,25 @@
  */
 import { readFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
+
 import { parseSync } from "oxc-parser";
-import type {
-	BinaryOp,
-	CharClass,
-	DataDecl,
-	EnumDecl,
-	ErrorDecl,
-	Expr,
-	FuncDecl,
-	Module,
-	Param,
-	PatternDecl,
-	Stmt,
-	StructDecl,
-	Ty,
+
+import {
+	type BinaryOp,
+	type CharClass,
+	type DataDecl,
+	type EnumDecl,
+	type ErrorDecl,
+	type Expr,
+	type FuncDecl,
+	type Module,
+	type Param,
+	type PatternDecl,
+	type Stmt,
+	type StructDecl,
+	type Ty,
 } from "./ir.ts";
+import { walk } from "./kit.ts";
 import { ClassTable, complement, parsePattern, toSteps } from "./regex.ts";
 
 /* eslint-disable */
@@ -51,7 +54,10 @@ type Scope = {
 	/** Module level `const` lists and strings, by name. */
 	constants: Map<string, { ty: Ty; expr: Expr }>;
 	/** Regex literals, by the name they were bound to. */
-	regexes: Map<string, { anchored: boolean; pattern?: string; charClass?: string; keepClass?: string }>;
+	regexes: Map<
+		string,
+		{ anchored: boolean; pattern?: string; charClass?: string; keepClass?: string }
+	>;
 	classes: ClassTable;
 	patterns: PatternDecl[];
 	/** Portable standard library members the module imported. */
@@ -65,10 +71,48 @@ const STD_FUNCTIONS = new Map<string, Ty>([
 	["isTruthy", { k: "bool" }],
 	["dataAll", { k: "list", of: { k: "list", of: { k: "string" } } }],
 	["dataRows", { k: "list", of: { k: "list", of: { k: "string" } } }],
+	["isNumber", { k: "bool" }],
+	["isList", { k: "bool" }],
+	["listHas", { k: "bool" }],
+	["httpGet", { k: "named", name: "HttpResponse" }],
+	["jsonString", { k: "string" }],
+	["jsonInt", { k: "int" }],
+	["jsonTruthy", { k: "bool" }],
+	["jsonIsTrue", { k: "bool" }],
+	["anyFailedWith", { k: "bool" }],
 ]);
 
 /** Members of the portable std that are types or build time only, so never lowered as calls. */
-const STD_NON_CALLS = new Set(["Dataset", "dataset"]);
+const STD_NON_CALLS = new Set([
+	"Dataset",
+	"dataset",
+	"HttpResponse",
+	"Attempts",
+	"Outcome",
+	// Typed where they are lowered, because their types come from the function they are given.
+	"startAll",
+	"firstSuccess",
+]);
+
+/** The std calls that wait on the network, which is what makes a function `async` in some targets. */
+const STD_BLOCKING = new Set(["httpGet", "firstSuccess"]);
+
+/** The record the runtime declares for `httpGet`, so `response.status` reads like any field. */
+const HTTP_RESPONSE: StructDecl = {
+	name: "HttpResponse",
+	doc: "What a provider answered: the HTTP status, whether it counts as a success, and the body.",
+	isOptions: false,
+	external: true,
+	fields: [
+		{
+			name: "status",
+			ty: { k: "int" },
+			doc: "The HTTP status, or 0 when the request never reached the server.",
+		},
+		{ name: "ok", ty: { k: "bool" }, doc: "Whether the status is in the 2xx range." },
+		{ name: "body", ty: { k: "json" }, doc: "The decoded JSON body." },
+	],
+};
 
 const int: Ty = { k: "int" };
 const str: Ty = { k: "string" };
@@ -116,6 +160,8 @@ const readType = (node: Node, scope: Scope): Ty => {
 
 			return fail(node, "only unions of literal numbers or literal strings are in the subset");
 		}
+		case "TSUnknownKeyword":
+			return { k: "json" };
 		case "TSTypeReference": {
 			const name = String((node["typeName"] as Node)["name"]);
 
@@ -142,6 +188,14 @@ const readSources = (doc: string): { role: string; url: string }[] =>
 		url: match[2],
 	}));
 
+/** A doc comment on one line, for the places a target can only write one. */
+const oneLine = (doc: string): string =>
+	doc
+		.split("\n")
+		.join(" ")
+		.replaceAll(/\s{2,}/g, " ")
+		.trim();
+
 /** Pulls the block comment that ends right before `start`, if any. */
 const docBefore = (source: string, start: number): string => {
 	const before = source.slice(0, start);
@@ -149,7 +203,13 @@ const docBefore = (source: string, start: number): string => {
 	const close = before.lastIndexOf("*/");
 
 	if (open === -1 || close < open) return "";
-	if (before.slice(close + 2).trim() !== "" && !before.slice(close + 2).trim().startsWith("export"))
+	if (
+		before.slice(close + 2).trim() !== "" &&
+		!before
+			.slice(close + 2)
+			.trim()
+			.startsWith("export")
+	)
 		return "";
 
 	return before
@@ -201,6 +261,8 @@ const inferType = (expr: Expr, locals: Map<string, Ty>, scope: Scope): Ty => {
 			return inferType(expr.value, locals, scope);
 		case "optionField":
 			return expr.ty;
+		case "none":
+			return { k: "opt", of: str };
 		default:
 			return str;
 	}
@@ -260,7 +322,8 @@ const lowerExpr = (node: Node, ctx: Ctx): Expr => {
 			if (typeof value === "string") return { k: "str", value };
 			if (typeof value === "boolean") return { k: "bool", value };
 			if (typeof value === "number") {
-				if (!Number.isInteger(value)) return fail(current, "only integer literals are in the subset");
+				if (!Number.isInteger(value))
+					return fail(current, "only integer literals are in the subset");
 
 				return { k: "int", value };
 			}
@@ -287,7 +350,8 @@ const lowerExpr = (node: Node, ctx: Ctx): Expr => {
 			return { k: "ref", name };
 		}
 		case "UnaryExpression": {
-			if (current["operator"] === "!") return { k: "not", operand: lowerExpr(current["argument"] as Node, ctx) };
+			if (current["operator"] === "!")
+				return { k: "not", operand: lowerExpr(current["argument"] as Node, ctx) };
 			if (current["operator"] === "-") {
 				const inner = lowerExpr(current["argument"] as Node, ctx);
 
@@ -300,7 +364,8 @@ const lowerExpr = (node: Node, ctx: Ctx): Expr => {
 		case "LogicalExpression": {
 			const op = BINARY_OPS[String(current["operator"])];
 
-			if (op === undefined) return fail(current, `operator \`${String(current["operator"])}\` is outside the subset`);
+			if (op === undefined)
+				return fail(current, `operator \`${String(current["operator"])}\` is outside the subset`);
 
 			const left = lowerExpr(current["left"] as Node, ctx);
 			const right = lowerExpr(current["right"] as Node, ctx);
@@ -321,13 +386,16 @@ const lowerExpr = (node: Node, ctx: Ctx): Expr => {
 			const expressions = current["expressions"] as Node[];
 			let built: Expr = { k: "str", value: String((quasis[0]["value"] as Node)["cooked"]) };
 
+			// The type travels with the node: a template literal is always concatenation, never
+			// the addition the same operator means elsewhere.
 			for (const [index, expression] of expressions.entries()) {
-				built = { k: "bin", op: "+", left: built, right: lowerExpr(expression, ctx) };
+				built = { k: "bin", op: "+", left: built, right: lowerExpr(expression, ctx), ty: str };
 				built = {
 					k: "bin",
 					op: "+",
 					left: built,
 					right: { k: "str", value: String((quasis[index + 1]["value"] as Node)["cooked"]) },
+					ty: str,
 				};
 			}
 
@@ -336,7 +404,11 @@ const lowerExpr = (node: Node, ctx: Ctx): Expr => {
 		case "ArrayExpression": {
 			const items = (current["elements"] as Node[]).map((element) => lowerExpr(element, ctx));
 
-			return { k: "listOf", items, of: items.length > 0 ? inferType(items[0], ctx.locals, ctx.scope) : str };
+			return {
+				k: "listOf",
+				items,
+				of: items.length > 0 ? inferType(items[0], ctx.locals, ctx.scope) : str,
+			};
 		}
 		case "AwaitExpression":
 			return { k: "await", value: lowerExpr(current["argument"] as Node, ctx) };
@@ -372,8 +444,7 @@ const lowerObject = (node: Node, ctx: Ctx): Expr => {
 	});
 	const keys = [...properties.map((property) => property.name)].sort().join(",");
 	const match = [...ctx.scope.structs.values()].find(
-		(candidate) =>
-			[...candidate.fields.map((field) => field.name)].sort().join(",") === keys,
+		(candidate) => [...candidate.fields.map((field) => field.name)].sort().join(",") === keys,
 	);
 
 	if (match === undefined) return fail(node, `no declared record type has the fields \`${keys}\``);
@@ -419,13 +490,24 @@ const lowerMember = (node: Node, ctx: Ctx): Expr => {
 
 		if (field === undefined) return fail(node, `\`${struct.name}\` has no field \`${name}\``);
 
-		return {
+		const read: Expr = {
 			k: "optionField",
 			target: targetName,
 			field: name,
 			ty: field.ty,
-			fallback: field.ty.k === "bool" ? { k: "bool", value: false } : { k: "int", value: -1 },
+			fallback:
+				field.ty.k === "bool"
+					? { k: "bool", value: false }
+					: field.ty.k === "int"
+						? { k: "int", value: -1 }
+						: { k: "none" },
 		};
+
+		// Inside a branch that proved the option present, the read is the value.
+		if (ctx.narrowed.has(`${targetName}.${name}`))
+			return { k: "call", callee: { k: "std", name: "unwrap" }, args: [read], ty: field.ty };
+
+		return read;
 	}
 
 	const target = lowerExpr(object, ctx);
@@ -462,6 +544,52 @@ const lowerCall = (node: Node, ctx: Ctx): Expr => {
 
 	if (callee["type"] === "Identifier") {
 		const name = String(callee["name"]);
+
+		// `startAll` and `firstSuccess` carry the type of whatever the started function returns,
+		// so they are typed here rather than from the table.
+		if (name === "startAll" && ctx.scope.stdImports.has(name)) {
+			const started = String((args[0] as Node)["name"]);
+			const signature = ctx.scope.functions.get(started);
+
+			if (signature === undefined)
+				return fail(node, `\`startAll\` needs a function, not \`${started}\``);
+
+			return {
+				k: "call",
+				callee: { k: "std", name },
+				args: [
+					{ k: "ref", name: started },
+					...args.slice(1).map((argument) => lowerExpr(argument, ctx)),
+				],
+				ty: { k: "tasks", of: signature.ret },
+			};
+		}
+
+		if (name === "firstSuccess" && ctx.scope.stdImports.has(name)) {
+			const attempts = lowerExpr(args[0], ctx);
+			const ty = inferType(attempts, ctx.locals, ctx.scope);
+
+			return {
+				k: "call",
+				callee: { k: "std", name },
+				args: [attempts],
+				ty: { k: "opt", of: ty.k === "tasks" ? ty.of : str },
+			};
+		}
+
+		if (name === "anyFailedWith" && ctx.scope.stdImports.has(name)) {
+			const kind = String((args[1] as Node)["name"]);
+
+			if (!ctx.scope.errors.has(kind)) return fail(node, `\`${kind}\` is not a declared error`);
+
+			return {
+				k: "call",
+				callee: { k: "std", name },
+				args: [lowerExpr(args[0], ctx), { k: "str", value: kind }],
+				ty: bool,
+			};
+		}
+
 		const std = ctx.scope.stdImports.has(name) ? STD_FUNCTIONS.get(name) : undefined;
 
 		if (std !== undefined) {
@@ -506,7 +634,8 @@ const lowerCall = (node: Node, ctx: Ctx): Expr => {
 			};
 		}
 
-		if (regex.charClass === undefined) return fail(node, `\`${regexName}\` needs anchors to be used with .test()`);
+		if (regex.charClass === undefined)
+			return fail(node, `\`${regexName}\` needs anchors to be used with .test()`);
 
 		return {
 			k: "call",
@@ -523,7 +652,7 @@ const lowerCall = (node: Node, ctx: Ctx): Expr => {
 		const replacement = args[1] as Node;
 
 		if (replacement["value"] !== "")
-			return fail(node, "only `replaceAll(pattern, \"\")` is in the subset");
+			return fail(node, 'only `replaceAll(pattern, "")` is in the subset');
 
 		const removed = ctx.scope.regexes.get(patternName);
 
@@ -554,7 +683,8 @@ const lowerCall = (node: Node, ctx: Ctx): Expr => {
 	const mapped = STRING_METHODS[method];
 
 	if (mapped === undefined) return fail(node, `\`.${method}()\` is outside the subset`);
-	if (args.length !== mapped.args) return fail(node, `\`.${method}()\` takes ${mapped.args} argument(s)`);
+	if (args.length !== mapped.args)
+		return fail(node, `\`.${method}()\` takes ${mapped.args} argument(s)`);
 
 	return {
 		k: "call",
@@ -563,6 +693,27 @@ const lowerCall = (node: Node, ctx: Ctx): Expr => {
 		ty: mapped.std === "codeAt" ? int : str,
 	};
 };
+
+/**
+ * Every statement of a body, nested ones included.
+ *
+ * @param {Stmt[]} body - The statements.
+ * @returns {Stmt[]} The flattened list.
+ */
+const allStatements = (body: Stmt[]): Stmt[] =>
+	body.flatMap((statement) => {
+		switch (statement.k) {
+			case "if":
+				return [statement, ...allStatements(statement.then), ...allStatements(statement.otherwise)];
+			case "forOf":
+			case "forRange":
+				return [statement, ...allStatements(statement.body)];
+			case "try":
+				return [statement, ...allStatements(statement.body), ...allStatements(statement.catchBody)];
+			default:
+				return [statement];
+		}
+	});
 
 /**
  * The optionals an `if` test proves present for its `then` branch.
@@ -576,12 +727,17 @@ const lowerCall = (node: Node, ctx: Ctx): Expr => {
  */
 const provenPresent = (test: Expr, ctx: Ctx): string[] => {
 	if (test.k !== "bin") return [];
-	if (test.op === "&&") return [...provenPresent(test.left, ctx), ...provenPresent(test.right, ctx)];
+	if (test.op === "&&")
+		return [...provenPresent(test.left, ctx), ...provenPresent(test.right, ctx)];
 	if (test.op !== "!=") return [];
 
-	const [subject, other] = test.left.k === "none" ? [test.right, test.left] : [test.left, test.right];
+	const [subject, other] =
+		test.left.k === "none" ? [test.right, test.left] : [test.left, test.right];
 
-	if (other.k !== "none" || subject.k !== "ref") return [];
+	if (other.k !== "none") return [];
+	// An option field is optional by declaration, so proving it present narrows it too.
+	if (subject.k === "optionField") return [`${subject.target}.${subject.field}`];
+	if (subject.k !== "ref") return [];
 
 	return ctx.locals.get(subject.name)?.k === "opt" ? [subject.name] : [];
 };
@@ -593,13 +749,15 @@ const provenPresent = (test: Expr, ctx: Ctx): string[] => {
  * @param {Ctx} ctx - The walking context.
  * @returns {Stmt[]} The IR statements.
  */
-const lowerBlock = (nodes: Node[], ctx: Ctx): Stmt[] => nodes.flatMap((node) => lowerStmt(node, ctx));
+const lowerBlock = (nodes: Node[], ctx: Ctx): Stmt[] =>
+	nodes.flatMap((node) => lowerStmt(node, ctx));
 
 /** Recognises the boundary guards the handwritten package has, which only dynamic targets need. */
 const asGuard = (node: Node, ctx: Ctx): Stmt[] | undefined => {
 	const test = node["test"] as Node;
 	const consequent = node["consequent"] as Node;
-	const body = consequent["type"] === "BlockStatement" ? (consequent["body"] as Node[]) : [consequent];
+	const body =
+		consequent["type"] === "BlockStatement" ? (consequent["body"] as Node[]) : [consequent];
 
 	if (body.length !== 1 || body[0]["type"] !== "ReturnStatement") return undefined;
 
@@ -672,7 +830,33 @@ const lowerStmt = (node: Node, ctx: Ctx): Stmt[] => {
 			const expression = node["expression"] as Node;
 
 			if (expression["type"] === "AssignmentExpression") {
-				if (expression["operator"] !== "=") return fail(expression, "only `=` assignment is in the subset");
+				const operator = String(expression["operator"]);
+
+				// `sum += x` is `sum = sum + x`; every target writes the second form.
+				if (operator.length === 2 && operator.endsWith("=")) {
+					const op = BINARY_OPS[operator.slice(0, 1)];
+
+					if (op === undefined)
+						return fail(expression, `\`${operator}\` assignment is outside the subset`);
+
+					const left = lowerExpr(expression["left"] as Node, ctx);
+
+					return [
+						{
+							k: "assign",
+							name: String((expression["left"] as Node)["name"]),
+							value: {
+								k: "bin",
+								op,
+								left,
+								right: lowerExpr(expression["right"] as Node, ctx),
+								ty: inferType(left, ctx.locals, ctx.scope),
+							},
+						},
+					];
+				}
+
+				if (operator !== "=") return fail(expression, "only `=` assignment is in the subset");
 
 				return [
 					{
@@ -713,7 +897,9 @@ const lowerStmt = (node: Node, ctx: Ctx): Stmt[] => {
 						alternate === undefined
 							? []
 							: lowerBlock(
-									alternate["type"] === "BlockStatement" ? (alternate["body"] as Node[]) : [alternate],
+									alternate["type"] === "BlockStatement"
+										? (alternate["body"] as Node[])
+										: [alternate],
 									ctx,
 								),
 				},
@@ -722,7 +908,9 @@ const lowerStmt = (node: Node, ctx: Ctx): Stmt[] => {
 		case "ReturnStatement": {
 			const argument = (node["argument"] as Node | null) ?? undefined;
 
-			return [{ k: "return", value: argument === undefined ? undefined : lowerExpr(argument, ctx) }];
+			return [
+				{ k: "return", value: argument === undefined ? undefined : lowerExpr(argument, ctx) },
+			];
 		}
 		case "ForStatement": {
 			const init = node["init"] as Node;
@@ -752,7 +940,13 @@ const lowerStmt = (node: Node, ctx: Ctx): Stmt[] => {
 			ctx.locals.set(name, ty);
 
 			return [
-				{ k: "forOf", name, ty, iterable, body: lowerBlock((node["body"] as Node)["body"] as Node[], ctx) },
+				{
+					k: "forOf",
+					name,
+					ty,
+					iterable,
+					body: lowerBlock((node["body"] as Node)["body"] as Node[], ctx),
+				},
 			];
 		}
 		case "ThrowStatement": {
@@ -836,6 +1030,8 @@ export const compileModule = (path: string): Module => {
 	const functions: FuncDecl[] = [];
 	const statements = parsed.program.body as unknown as Node[];
 
+	scope.structs.set(HTTP_RESPONSE.name, HTTP_RESPONSE);
+
 	// `import { asString } from "./_std.ts"` brings in the portable standard library, whose
 	// members every target implements natively.
 	for (const statement of statements) {
@@ -860,6 +1056,29 @@ export const compileModule = (path: string): Module => {
 		const exported = statement["type"] === "ExportNamedDeclaration";
 		const declaration = exported ? (statement["declaration"] as Node) : statement;
 
+		if (declaration["type"] === "ClassDeclaration") {
+			const name = String((declaration["id"] as Node)["name"]);
+			const parent = (declaration["superClass"] as Node | null) ?? undefined;
+			const base = parent === undefined ? undefined : String(parent["name"]);
+
+			if ((declaration["body"] as Node | undefined) !== undefined) {
+				const members = ((declaration["body"] as Node)["body"] as Node[]) ?? [];
+
+				if (members.length > 0)
+					fail(declaration, `\`${name}\` has a body; an error type in the subset is only a name`);
+			}
+
+			scope.errors.set(name, {
+				name,
+				doc: oneLine(docBefore(source, (statement["start"] ?? declaration["start"]) as number)),
+				base: base === "Error" ? undefined : base,
+				exported,
+				// Filled in below, once every error of the module is known.
+				kinds: [],
+			});
+			continue;
+		}
+
 		if (declaration["type"] === "TSTypeAliasDeclaration") {
 			const name = String((declaration["id"] as Node)["name"]);
 			const literal = declaration["typeAnnotation"] as Node;
@@ -876,7 +1095,7 @@ export const compileModule = (path: string): Module => {
 
 				scope.enums.set(name, {
 					name,
-					doc: docBefore(source, declaration["start"] as number),
+					doc: oneLine(docBefore(source, declaration["start"] as number)),
 					values,
 				});
 				continue;
@@ -890,7 +1109,7 @@ export const compileModule = (path: string): Module => {
 				return {
 					name: String((member["key"] as Node)["name"]),
 					ty: readType(annotation, scope),
-					doc: docBefore(source, member["start"] as number),
+					doc: oneLine(docBefore(source, member["start"] as number)),
 					// `version?: 1 | 2` keeps its domain so the TypeScript target can print it back.
 					domain:
 						union.length > 0
@@ -901,7 +1120,7 @@ export const compileModule = (path: string): Module => {
 
 			scope.structs.set(name, {
 				name,
-				doc: docBefore(source, declaration["start"] as number),
+				doc: oneLine(docBefore(source, declaration["start"] as number)),
 				fields,
 				isOptions: members.every((member) => member["optional"] === true),
 			});
@@ -952,24 +1171,46 @@ export const compileModule = (path: string): Module => {
 
 				scope.functions.set(name, {
 					params,
-					ret: returnType === null ? { k: "void" } : readType(returnType["typeAnnotation"] as Node, scope),
+					ret:
+						returnType === null
+							? { k: "void" }
+							: readType(returnType["typeAnnotation"] as Node, scope),
 					isAsync: init["async"] === true,
 				});
 				continue;
 			}
 
 			if (init["type"] === "ArrayExpression") {
-				const items = (init["elements"] as Node[]).map((element) => ({
-					k: "int" as const,
-					value: Number(element["value"]),
-				}));
+				const elements = init["elements"] as Node[];
+				const annotation = (entry["id"] as Node)["typeAnnotation"] as Node | null;
+				const declared =
+					annotation === null ? undefined : readType(annotation["typeAnnotation"] as Node, scope);
+				const of: Ty =
+					declared !== undefined && declared.k === "list"
+						? declared.of
+						: typeof elements[0]?.["value"] === "string"
+							? str
+							: int;
+				const items = elements.map((element) =>
+					of.k === "int"
+						? ({ k: "int", value: Number(element["value"]) } as Expr)
+						: ({ k: "str", value: String(element["value"]) } as Expr),
+				);
 
-				scope.constants.set(name, { ty: { k: "list", of: int }, expr: { k: "listOf", items, of: int } });
+				scope.constants.set(name, { ty: { k: "list", of }, expr: { k: "listOf", items, of } });
 				continue;
 			}
 
 			if (init["type"] === "Literal" && typeof init["value"] === "string") {
 				scope.constants.set(name, { ty: str, expr: { k: "str", value: String(init["value"]) } });
+				continue;
+			}
+
+			if (init["type"] === "Literal" && typeof init["value"] === "number") {
+				if (!Number.isInteger(init["value"]))
+					fail(init, `module level \`${name}\` is not an integer`);
+
+				scope.constants.set(name, { ty: int, expr: { k: "int", value: Number(init["value"]) } });
 				continue;
 			}
 
@@ -1014,9 +1255,69 @@ export const compileModule = (path: string): Module => {
 				body: lowerBlock(statementsOfBody, ctx),
 				isAsync: signature.isAsync,
 				exported,
+				blocking: false,
+				throws: false,
 				sources: readSources(doc),
 			});
 		}
+	}
+
+	// Two properties travel up the call graph: a function that waits on the network makes its
+	// callers wait too, and a function that raises makes its callers able to raise. The targets
+	// that colour their functions (`async` in TypeScript, `Result` in Rust) need both.
+	const byName = new Map(functions.map((entry) => [entry.name, entry]));
+
+	for (const entry of functions) {
+		walk(entry.body, (node) => {
+			if (node.k !== "call") return;
+			if (node.callee.k === "std" && STD_BLOCKING.has(node.callee.name)) entry.blocking = true;
+		});
+
+		for (const statement of allStatements(entry.body)) {
+			if (statement.k === "throw") entry.throws = true;
+		}
+	}
+
+	for (let pass = 0; pass < functions.length + 1; pass++) {
+		let changed = false;
+
+		for (const entry of functions) {
+			walk(entry.body, (node) => {
+				if (node.k !== "call") return;
+
+				// `startAll` takes the function itself, so its properties are the caller's too.
+				const called =
+					node.callee.k === "user"
+						? byName.get(node.callee.name)
+						: node.callee.k === "std" && node.callee.name === "startAll" && node.args[0].k === "ref"
+							? byName.get(node.args[0].name)
+							: undefined;
+
+				if (called === undefined) return;
+				if (called.blocking && !entry.blocking) {
+					entry.blocking = true;
+					changed = true;
+				}
+
+				if (called.throws && !entry.throws) {
+					entry.throws = true;
+					changed = true;
+				}
+			});
+		}
+
+		if (!changed) break;
+	}
+
+	for (const entry of scope.errors.values()) {
+		const kinds: string[] = [];
+
+		for (let current: ErrorDecl | undefined = entry; current !== undefined;) {
+			kinds.push(current.name);
+			current = current.base === undefined ? undefined : scope.errors.get(current.base);
+		}
+
+		entry.kinds = kinds;
 	}
 
 	// The module's own doc comment is the first block comment in the file.
