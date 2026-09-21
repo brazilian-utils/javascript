@@ -116,3 +116,37 @@ test("interpolating a non-string is rejected", () => {
 test("a float compared with === is rejected", () => {
 	rejects("E_SIGNATURE", "export function f(left: Float, right: Float): boolean { return left === right; }");
 });
+
+test("a race may not consume randomness", () => {
+	rejects(
+		"E_RACE_EFFECT",
+		`function draw(): Int | undefined {
+	return random.nextU32();
+}
+
+export function f(): Int {
+	return task.race([(): Int | undefined => draw()]) ?? 0;
+}`,
+	);
+});
+
+test("a race may only perform idempotent requests", () => {
+	rejects(
+		"E_RACE_EFFECT",
+		`function send(): string | undefined {
+	const response = http.request({
+		method: "POST",
+		url: "https://example.test/",
+		headers: [],
+		body: "",
+		timeoutMillis: 1000,
+	});
+
+	return response === undefined ? undefined : response.body;
+}
+
+export function f(): string {
+	return task.race([(): string | undefined => send()]) ?? "";
+}`,
+	);
+});

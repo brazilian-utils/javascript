@@ -5,7 +5,6 @@
  * interpreter, the published npm package and each generated target on the same cases.
  */
 
-import { execFileSync } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { compileProject } from "../../engine/src/api.ts";
@@ -178,5 +177,4 @@ function report(name: string, total: number, divergences: readonly Divergence[])
 	if (divergences.length > 5) process.stdout.write(`  … and ${divergences.length - 5} more\n`);
 }
 
-void execFileSync;
 main();

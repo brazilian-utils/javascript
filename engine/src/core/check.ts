@@ -780,6 +780,11 @@ class Checker {
 		return this.checked.get(qualified)?.effects ?? PURE;
 	}
 
+	/** The checked body of a function, for the analyses that have to look through a call. */
+	bodyOf(qualified: string): readonly CStmt[] | undefined {
+		return this.checked.get(qualified)?.body;
+	}
+
 	resolveType(type: HTypeExpr, context?: string): SemType {
 		return this.resolveTypeExpr(type, context);
 	}
@@ -807,7 +812,102 @@ function isCheckedEagerly(signature: FuncSig): boolean {
 	return isEntryPoint(signature) || STDLIB_SURFACE.includes(signature.qualified);
 }
 
+/** Every operation a Core body performs, including inside nested lambdas. */
+function operationsOf(body: readonly CStmt[]): Extract<CExpr, { kind: "op" }>[] {
+	const found: Extract<CExpr, { kind: "op" }>[] = [];
+	const expr = (node: CExpr): void => {
+		switch (node.kind) {
+			case "op":
+				found.push(node);
+				node.args.forEach(expr);
+				return;
+			case "call":
+				node.args.forEach(expr);
+				return;
+			case "record":
+				node.fields.forEach((field) => expr(field.value));
+				return;
+			case "list":
+				node.items.forEach(expr);
+				return;
+			case "field":
+				expr(node.target);
+				return;
+			case "some":
+				expr(node.inner);
+				return;
+			case "cond":
+				expr(node.test);
+				expr(node.then);
+				expr(node.otherwise);
+				return;
+			case "and":
+			case "or":
+				expr(node.left);
+				expr(node.right);
+				return;
+			case "not":
+				expr(node.operand);
+				return;
+			case "lambda":
+				found.push(...operationsOf(node.body));
+				return;
+			default:
+				return;
+		}
+	};
+	const statement = (node: CStmt): void => {
+		switch (node.kind) {
+			case "let":
+				expr(node.init);
+				return;
+			case "assign":
+			case "push":
+				expr(node.value);
+				return;
+			case "setIndex":
+				expr(node.index);
+				expr(node.value);
+				return;
+			case "if":
+				expr(node.test);
+				node.then.forEach(statement);
+				node.otherwise.forEach(statement);
+				return;
+			case "switch":
+				expr(node.subject);
+				node.cases.forEach((entry) => entry.body.forEach(statement));
+				node.otherwise?.forEach(statement);
+				return;
+			case "forRange":
+				expr(node.from);
+				expr(node.to);
+				node.body.forEach(statement);
+				return;
+			case "forEach":
+				expr(node.iterable);
+				node.body.forEach(statement);
+				return;
+			case "return":
+				if (node.value !== undefined) expr(node.value);
+				return;
+			case "fail":
+				node.args.forEach(expr);
+				return;
+			case "expr":
+				expr(node.expr);
+				return;
+			default:
+				return;
+		}
+	};
+	body.forEach(statement);
+	return found;
+}
+
 /** Every function a Core body calls, fully qualified and de-duplicated. */
+const callsOf = (body: readonly CStmt[]): string[] => collectCalls(body);
+
 function collectCalls(body: readonly CStmt[]): string[] {
 	const found = new Set<string>();
 	const expr = (node: CExpr): void => {
@@ -944,9 +1044,6 @@ const MAX_SPECIALIZATIONS = 16;
  * at most 2^22 keeps the value inside 2^53.
  */
 const MAX_WIDENED_STEP = 2n ** 22n;
-
-/** Kept as a number for the bound arithmetic above. */
-const _MAX_WIDENED_STEP_CHECK = MAX_WIDENED_STEP;
 
 type ScopeSnapshot = Map<string, { type: SemType; unwrapped: boolean }>;
 
@@ -1277,7 +1374,7 @@ class FunctionChecker {
 			const step = stepSize(binding.declared, assigned);
 			const platformDomain =
 				binding.declared.kind === "Int" && binding.declared.hi >= SAFE_INT_HI - MAX_WIDENED_STEP;
-			if ((binding.widened === true || platformDomain) && step !== undefined && step <= _MAX_WIDENED_STEP_CHECK) {
+			if ((binding.widened === true || platformDomain) && step !== undefined && step <= MAX_WIDENED_STEP) {
 				this.checker.metricTable.clampedRanges.push(
 					`${statement.span.file}:${statement.span.start} ${typeToString(assigned)} clamped to ${typeToString(binding.declared)}`,
 				);
@@ -1370,7 +1467,7 @@ class FunctionChecker {
 				? to.type.hi - adjust - from.type.lo + 1n
 				: from.type.hi - (to.type.lo + adjust) + 1n;
 
-		const body = this.loopFixpoint(trips, statement.span, () => {
+		const body = this.loopFixpoint(trips, () => {
 			this.scope.set(statement.name, {
 				name: statement.name,
 				declared: counterType,
@@ -1418,7 +1515,7 @@ class FunctionChecker {
 			return [];
 		}
 
-		const body = this.loopFixpoint(trips, statement.span, () => {
+		const body = this.loopFixpoint(trips, () => {
 			this.scope.set(statement.name, {
 				name: statement.name,
 				declared: elem,
@@ -1450,7 +1547,7 @@ class FunctionChecker {
 	 * to the platform-safe domain and the loop is counted in the metrics, because a widened range
 	 * usually means the source should carry a tighter annotation.
 	 */
-	private loopFixpoint(trips: bigint, span: Span, check: () => CStmt[]): CStmt[] {
+	private loopFixpoint(trips: bigint, check: () => CStmt[]): CStmt[] {
 		const entry = this.snapshot();
 		const bounded = trips <= BigInt(MAX_LOOP_ITERATIONS) && trips >= 0n;
 		// The loop head sees the state after at most `trips - 1` completed bodies, so that many
@@ -1477,9 +1574,7 @@ class FunctionChecker {
 			this.widenMutableIntegers();
 		}
 		this.quiet = false;
-		const body = check();
-		void span;
-		return body;
+		return check();
 	}
 
 	private applySnapshot(snapshot: ScopeSnapshot): void {
@@ -1573,11 +1668,11 @@ class FunctionChecker {
 			case "name":
 				return this.name(node.name, node.span);
 			case "member":
-				return this.member(node, expected);
+				return this.member(node);
 			case "index":
 				return this.index(node);
 			case "call":
-				return this.call(node, expected);
+				return this.call(node);
 			case "binary": {
 				if (node.op === "===" || node.op === "!==") return this.equality(node);
 				const left = this.expr(node.left);
@@ -1684,7 +1779,7 @@ class FunctionChecker {
 		return { kind: "lit", value: 0n, type: tNever, span };
 	}
 
-	private member(node: Extract<HExpr, { kind: "member" }>, expected?: SemType): CExpr {
+	private member(node: Extract<HExpr, { kind: "member" }>): CExpr {
 		if (node.target.kind === "name" && INTRINSIC_MODULES.has(node.target.name) && this.scope.get(node.target.name) === undefined) {
 			this.report(
 				"E_INTRINSIC_REF",
@@ -1726,7 +1821,6 @@ class FunctionChecker {
 			);
 			return { kind: "lit", value: 0n, type: tNever, span: node.span };
 		}
-		void expected;
 		this.report("E_MEMBER", `${typeToString(target.type)} has no member \`${node.name}\``, node.span, METHOD_HELP[node.name]);
 		return { kind: "lit", value: 0n, type: tNever, span: node.span };
 	}
@@ -1946,7 +2040,7 @@ class FunctionChecker {
 		return negate ? { kind: "not", operand: result, type: tBool, span } : result;
 	}
 
-	private call(node: Extract<HExpr, { kind: "call" }>, expected?: SemType): CExpr {
+	private call(node: Extract<HExpr, { kind: "call" }>): CExpr {
 		const callee = node.callee;
 
 		// Intrinsic module call: `str.codeAt(value, index)`.
@@ -2005,7 +2099,6 @@ class FunctionChecker {
 			return { kind: "lit", value: 0n, type: tNever, span: node.span };
 		}
 		this.addEffects(instance.effects);
-		void expected;
 		return { kind: "call", fn: instance.name, args, type: instance.ret, span: node.span };
 	}
 
@@ -2155,16 +2248,58 @@ class FunctionChecker {
 		}
 	}
 
+	/**
+	 * A race discards the losers, so only idempotent work belongs inside one: a task may read
+	 * (an Http GET) and may wait, but it may not consume randomness or send anything.
+	 */
 	private checkRaceTasks(args: readonly CExpr[], span: Span): void {
 		const list = args[0];
 		if (list === undefined || list.kind !== "list") return;
 		for (const task of list.items) {
 			if (task.kind !== "lambda") continue;
-			for (const statement of task.body) {
-				void statement;
+			// A task usually delegates to a function, so the walk follows calls: the rule is about
+			// what the task *does*, not about where it is written.
+			for (const op of this.reachableOperations(task.body)) {
+				if (op.op === "random.nextU32") {
+					this.report(
+						"E_RACE_EFFECT",
+						"a task inside `task.race` may not use Random: a losing task's draw would be discarded",
+						op.span,
+						"draw before the race and pass the value in",
+					);
+				}
+				if (op.op !== "http.request") continue;
+				const request = op.args[0];
+				const method =
+					request?.kind === "record"
+						? request.fields.find((field) => field.name === "method")?.value
+						: undefined;
+				if (method?.kind === "lit" && method.value !== "GET") {
+					this.report(
+						"E_RACE_EFFECT",
+						`a task inside \`task.race\` may only perform an idempotent request, not ${String(method.value)}`,
+						op.span,
+						"race the reads, and perform the write once the winner is known",
+					);
+				}
 			}
 		}
-		void span;
+	}
+
+	/** Every operation a body performs, following calls into the functions it reaches. */
+	private reachableOperations(body: readonly CStmt[]): Extract<CExpr, { kind: "op" }>[] {
+		const seen = new Set<string>();
+		const collect = (statements: readonly CStmt[]): Extract<CExpr, { kind: "op" }>[] => {
+			const operations = operationsOf(statements);
+			for (const callee of callsOf(statements)) {
+				if (seen.has(callee)) continue;
+				seen.add(callee);
+				const calleeBody = this.checker.bodyOf(callee);
+				if (calleeBody !== undefined) operations.push(...collect(calleeBody));
+			}
+			return operations;
+		};
+		return collect(body);
 	}
 
 	private regexOf(node: HExpr): NormalizedRegex | undefined {

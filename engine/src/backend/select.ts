@@ -123,7 +123,9 @@ export class LoweringTable {
 		for (const selection of this.selections) {
 			seen.set(`${selection.op}(${selection.args})`, selection);
 		}
-		const rows = [...seen.entries()].sort(([left], [right]) => left.localeCompare(right));
+		const rows = [...seen.values()].sort((left, right) =>
+			`${left.op}(${left.args})`.localeCompare(`${right.op}(${right.args})`),
+		);
 		const lines = [
 			`# Lowering selections — ${target}`,
 			"",
@@ -133,11 +135,10 @@ export class LoweringTable {
 			"| operation | argument types | implementation | why |",
 			"| --- | --- | --- | --- |",
 		];
-		for (const [key, selection] of rows) {
+		for (const selection of rows) {
 			lines.push(
 				`| \`${selection.op}\` | \`${selection.args}\` | ${selection.impl} | ${selection.reason} |`,
 			);
-			void key;
 		}
 		lines.push("");
 		const counts = { native: 0, library: 0, portable: 0 };

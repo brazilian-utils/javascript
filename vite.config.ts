@@ -185,7 +185,16 @@ export default defineConfig({
 			perf: "error",
 			pedantic: "error",
 		},
-		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude", "engine", "core"],
+		ignorePatterns: [
+			"dist",
+			"coverage",
+			"docs",
+			"reports",
+			".stryker-tmp",
+			".claude",
+			"engine",
+			"core",
+		],
 		rules: {
 			"eslint/complexity": ["error", { max: 20 }],
 			"eslint/max-lines": "off",
