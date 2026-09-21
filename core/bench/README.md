@@ -165,9 +165,9 @@ digits-only value -- `brazilian_utils::cpf::validate` rejects anything else befo
 variants. `cnpj::format_cnpj` is left out for the same reason Python's is: it validates the
 checksum and answers `None` for a bad one, while the generated `format_cnpj` never validates.
 
-The generated crate is **correct and slow**: no disagreement on any input, and 50x / 24x the time
-of the handwritten crate. The cost is not spread around, it is one thing. Timed against the
-generated crate directly:
+The generated crate **was correct and slow**: no disagreement on any input, and 50x / 24x the time
+of the handwritten crate. The cost was not spread around, it was one thing. Timed against the
+generated crate directly, before the fix:
 
 | | 200 000 iterations |
 | --- | --- |
@@ -176,12 +176,64 @@ generated crate directly:
 | one `String` clone (baseline) | 3.4 ms |
 | `is_valid_cpf` whole | 339.5 ms |
 
-`std` has no regex, so the Rust target generates its own matcher: a `ReNode` tree walked by an NFA
-simulation that returns a fresh `Vec<usize>` of reachable positions per node per position, sorting
-and deduplicating each one. That interpretation is 79% of the call. The ownership clones the
-generated code sprinkles around (`digits.to_owned()` at each argument) are about 1% -- worth
-knowing, because they are what a reader notices first and they are not the problem.
+`std` has no regex, so the Rust target generated its own matcher: a `ReNode` tree walked by an NFA
+simulation that returned a fresh `Vec<usize>` of reachable positions per node per position, sorting
+and deduplicating each one. That interpretation was 79% of the call.
 
-This is the same shape of defect the Go rows had before they were fixed: work that could be done
-once, or without allocating, done expensively on every call. It is a lowering decision, not
-anything about what the program means, which is why conformance is 4256/4256 either way.
+**The fix.** The engine knows every pattern in a project before it generates any Rust, so there is
+no reason to interpret a pattern tree at call time at all. Each pattern now compiles to a dedicated
+scanner -- straight-line Rust for that exact pattern, no allocation, one forward pass over `&str`
+-- when it is a chain of character-class runs with no alternation, which is every pattern
+`core/source` uses; a pattern that needs more than that (alternation, a repeated group) falls back
+to a backtracking matcher over `&str` slices, also allocation-free, ported directly from the
+engine's own reference regex matcher. `engine/docs/targets/rust.md` has the full account, and
+`engine/src/targets/rust/index.ts`'s "Regex" section and `LOWERING.md`'s `re.test` row name the
+rule that decides which pattern gets which. Re-measured the same way:
+
+| | 200 000 iterations |
+| --- | --- |
+| `support::re_match_3` alone (the CPF pattern's scanner) | 4.4 ms |
+| `keep_digits` alone | 11.2 ms |
+| one `String` clone (baseline) | 2.6 ms |
+| `cpf_check_digit(_, 9)` alone (includes its own `keep_digits`) | 44.9 ms |
+| `is_valid_cpf` whole | 78.0 ms |
+
+The matcher went from 79% of the call to noise: `support::re_match_3` costs about what walking an
+11-character string once should. `isValidCpf` and `isValidCnpj` came down from **50x/24x to
+10.8x/3.6x** the handwritten crate -- a 4.6x and 6.7x speedup respectively, and conformance stayed
+4256/4256 in both idiom modes throughout, because nothing about the fix changes what a pattern
+accepts (`node --test` also still passes `engine/tests/regex.spec.ts`, and every pattern
+`core/source` uses classifies as the scanner shape, so the fallback matcher is unexercised code on
+this project, not a silent second answer to any of these four patterns).
+
+**What is left, and why it is not "the same thing, still there".** The new bottleneck is not the
+regex at all: it is `cpf_check_digit`'s loop, `sum += digit_at(cpf.to_owned(), index)` run 9 or 10
+times per call. Every value in the Core is owned wherever it is bound ([ADR
+0009](../../engine/docs/decisions/0009-rust-values-are-owned.md)), so each call to the
+`digit_at(value: String, ...)` helper needs its own owned copy of the 11-digit string -- one
+`to_owned()` per loop iteration, not one per top-level call, because the loop calls a
+String-taking helper instead of indexing bytes directly. `cpf_check_digit(_, 9)` alone, at 44.9 ms,
+accounts for most of the remaining gap; the other `cpf_check_digit(_, 10)` call, `is_repeated`, and
+two more `digit_at` calls in `is_valid_cpf` itself make up the rest. This is the ownership-clone
+cost the coordinator's original measurement called "about 1%" and asked not to be spent on --
+correct as stated (one clone at one call site is about 1% of the *old*, regex-dominated call) but
+multiplied here by a loop the regex fix does not touch and this task did not ask to: the fix is
+scoped to `re.test`, and ADR 0009's ownership model is explicitly out of scope. `cnpj_check_digit`
+does not have this cost -- its source indexes `cnpj.as_bytes()[index]` directly rather than calling
+a String-taking helper in its loop -- which is exactly why `isValidCnpj`'s gap (3.6x) is so much
+smaller than `isValidCpf`'s (10.8x) despite CNPJ validating more digits: the difference is which
+loop-body shape `core/source` happens to use, not the pattern each one matches.
+
+The mask-tolerance asymmetry the coordinator's note anticipated (`brazilian_utils::cpf::validate`
+rejects anything not already digit-only; the generated core accepts and re-normalizes masked
+input) is real but small next to the above: `re_match_3` still walks the full 11-character input
+once even when it is already digits-only, on the order of a few milliseconds here, not the
+dominant term.
+
+Against Go (`core/bench/README.md`'s Go section above), generated Rust now roughly matches
+`isValidCnpj` (53.5 ms vs. Go's 49.0 ms normalized) but is still behind on `isValidCpf` (79.3 ms
+vs. Go's 39.9 ms normalized) -- both by the same `cpf_check_digit` loop, which Go's target also
+lowers to a String-taking helper call but without Rust's per-call ownership cost to pay for it.
+Closing that gap further means changing how a loop that calls a helper repeatedly is lowered (or
+revisiting ADR 0009's borrowing decision), not anything about `re.test`, and is future work rather
+than part of this fix.

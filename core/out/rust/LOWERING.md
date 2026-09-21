@@ -92,26 +92,26 @@ with, the implementation that was selected, and the rule that decided it.
 | `int.add` | `Int[8..352], Int[15..15]` | native | only candidate, cost none/constant |
 | `int.add` | `Int[9..2147483671], Int[0..3]` | native | only candidate, cost none/constant |
 | `int.add` | `Int[9..9], Int[1..1]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-3506022..3798461], Int[1460..1460]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-3506022..3798461], Int[146096..146096]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-3506022..3798461], Int[36524..36524]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-3508743..3800988], Int[365..365]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-36547261..36546653], Int[5..5]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-36547328..36546742], Int[153..153]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-9600..10399], Int[100..100]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-9600..10399], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-9612..10413], Int[100..100]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[-9612..10413], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[0..469], Int[451..451]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[0..9999], Int[400..400]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[19..20], Int[3..3]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[2..1685], Int[5..5]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[27..28], Int[25..25]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[306..3652364], Int[146097..146097]` | native | only candidate, cost none/constant |
+| `int.div` | `Int[-3506022..3798461], Int[1460..1460]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-3506022..3798461], Int[146096..146096]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-3506022..3798461], Int[36524..36524]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-3508743..3800988], Int[365..365]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-36547261..36546653], Int[5..5]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-36547328..36546742], Int[153..153]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-9600..10399], Int[100..100]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-9600..10399], Int[4..4]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-9612..10413], Int[100..100]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[-9612..10413], Int[4..4]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[0..469], Int[451..451]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[0..9999], Int[400..400]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[19..20], Int[3..3]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[2..1685], Int[5..5]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[27..28], Int[25..25]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
+| `int.div` | `Int[306..3652364], Int[146097..146097]` | native | only candidate, cost none/constant; Rust's `/` truncates toward zero, which is the Core's rule |
 | `int.ge` | `Int[0..1114111], Int[0..0]` | native | only candidate, cost none/constant |
 | `int.ge` | `Int[0..1114111], Int[48..48]` | native | only candidate, cost none/constant |
 | `int.ge` | `Int[0..1114111], Int[65..65]` | native | only candidate, cost none/constant |
@@ -155,18 +155,18 @@ with, the implementation that was selected, and the rule that decided it.
 | `int.min` | `Int[1..20014], Int[9999..9999]` | native | only candidate, cost none/constant |
 | `int.min` | `Int[1..238858], Int[12..12]` | native | only candidate, cost none/constant |
 | `int.min` | `Int[22..62], Int[56..56]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[-14..14], Int[3..3]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..4294967295], Int[10..10]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..810], Int[11..11]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..86], Int[7..7]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..972], Int[11..11]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[1900..2099], Int[19..19]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[23..367], Int[30..30]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[4294967296..4294967296], Int[10..10]` | native | only candidate, cost none/constant |
+| `int.mod` | `Int[-14..14], Int[3..3]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[0..4294967295], Int[10..10]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[0..810], Int[11..11]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[0..86], Int[7..7]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[0..972], Int[11..11]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[1900..2099], Int[19..19]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[23..367], Int[30..30]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
+| `int.mod` | `Int[4294967296..4294967296], Int[10..10]` | native | only candidate, cost none/constant; Rust's `%` takes the sign of the dividend, which is the Core's rule |
 | `int.mul` | `Int[-1..24], Int[146097..146097]` | native | only candidate, cost none/constant |
 | `int.mul` | `Int[-1..24], Int[400..400]` | native | only candidate, cost none/constant |
 | `int.mul` | `Int[-9600..10399], Int[365..365]` | native | only candidate, cost none/constant |
@@ -231,8 +231,8 @@ with, the implementation that was selected, and the rule that decided it.
 | `opt.unwrap` | `Option<AddressInfo>` | native | only candidate, cost none/constant |
 | `opt.unwrap` | `Option<HttpResponse>` | native | only candidate, cost none/constant |
 | `random.nextU32` | `` | native | only candidate, cost none/constant |
-| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear |
-| `re.test` | `String[0..2147483647]` | library | only candidate, cost none/linear |
+| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear; a `chars().filter(...)` pass over explicit ranges, with no regex engine involved |
+| `re.test` | `String[0..2147483647]` | library | only candidate, cost none/linear; a dedicated straight-line scanner (no allocation, one pass) when the pattern is a chain of character-class runs with no alternation and no two adjacent variable-length runs that could overlap; otherwise a backtracking matcher over a static pattern tree, also allocation-free — see engine/src/targets/rust/index.ts's "Regex" section for the rule |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..2147483650]` | library | only candidate, cost none/constant |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..9007199254740991]` | library | only candidate, cost none/constant |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[1..9007199254740992]` | library | only candidate, cost none/constant |
@@ -250,66 +250,66 @@ with, the implementation that was selected, and the rule that decided it.
 | `seq.len` | `List<Int[48..57]>[0..15]` | native | only candidate, cost none/constant |
 | `seq.push` | `` | native | only candidate, cost none/constant |
 | `seq.sortStableBy` | `List<Holiday>[12..13], (Holiday) => CivilDate` | native | only candidate, cost one/nlogn |
-| `str.asciiUpper` | `Ascii[0..2147483647]` | native | only candidate, cost one/linear |
-| `str.asciiUpper` | `String[0..2147483647]` | native | native, cost one/linear; rejected `to_ascii_uppercase` is only ASCII-equivalent on ASCII input |
+| `str.asciiUpper` | `Ascii[0..2147483647]` | native | only candidate, cost one/linear; `to_ascii_uppercase` is only ASCII-equivalent on ASCII input |
+| `str.asciiUpper` | `String[0..2147483647]` | native | native, cost one/linear; mapping only a-z, leaving every other scalar alone, is the Core's rule for any input; rejected `to_ascii_uppercase` is only ASCII-equivalent on ASCII input |
 | `str.charAtOpt` | `Ascii[0..2147483647], Int[0..17]` | library | only candidate, cost one/linear |
 | `str.charAtOpt` | `Ascii[18], Int[0..17]` | library | only candidate, cost one/linear |
-| `str.codeAt` | `Ascii[14], Int[12..12]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Ascii[14], Int[13..13]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[11], Int[0..0]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[11], Int[0..8]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[11], Int[1..10]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[12], Int[0..0]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[12], Int[1..11]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[14], Int[0..0]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[14], Int[0..11]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[14], Int[1..13]` | native | only candidate, cost none/constant |
+| `str.codeAt` | `Ascii[14], Int[12..12]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Ascii[14], Int[13..13]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[11], Int[0..0]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[11], Int[0..8]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[11], Int[1..10]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[12], Int[0..0]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[12], Int[1..11]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[14], Int[0..0]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[14], Int[0..11]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
+| `str.codeAt` | `Digits[14], Int[1..13]` | native | only candidate, cost none/constant; indexing a byte string yields a byte |
 | `str.codeAtOpt` | `Ascii[0..2147483647], Int[0..2147483646]` | library | only candidate, cost none/constant |
 | `str.codePoints` | `Ascii[5]` | library | only candidate, cost one/linear |
 | `str.codePoints` | `Digits[0..15]` | library | only candidate, cost one/linear |
 | `str.codePoints` | `String[0..2147483647]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[0..17], Ascii[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[0..3], Ascii[1..47]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[0..30], Ascii[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[1..31], Ascii[0..16]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[1..4], Ascii[1..47]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[1], Ascii[0..3]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[1], Ascii[3]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[2], Ascii[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[25], Digits[8] matches ^[0-9]{8}$` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[33], Ascii[6]` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[36], Digits[8] matches ^[0-9]{8}$` | library | only candidate, cost one/linear |
-| `str.concat` | `Ascii[4], Ascii[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[1], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[10], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[11], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[12], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[12], Digits[2]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[13], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[2], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[3], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[4], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[5], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[6], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[7], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[8], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[9], Digits[1]` | library | only candidate, cost one/linear |
-| `str.concat` | `Digits[9], Digits[2]` | library | only candidate, cost one/linear |
+| `str.concat` | `Ascii[0..17], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[0..3], Ascii[1..47]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[0..30], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[1..31], Ascii[0..16]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[1..4], Ascii[1..47]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[1], Ascii[0..3]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[1], Ascii[3]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[2], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[25], Digits[8] matches ^[0-9]{8}$` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[33], Ascii[6]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[36], Digits[8] matches ^[0-9]{8}$` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Ascii[4], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[1], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[10], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[11], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[12], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[12], Digits[2]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[13], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[2], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[3], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[4], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[5], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[6], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[7], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[8], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[9], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concat` | `Digits[9], Digits[2]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
 | `str.fromCodePoints` | `List<Int[0..1114111]>[0..2147483647]` | library | only candidate, cost one/linear |
 | `str.fromCodePoints` | `List<Int[0..127]>[0..30]` | library | only candidate, cost one/linear |
 | `str.fromCodePoints` | `List<Int[32..32]>[1..1]` | library | only candidate, cost one/linear |
 | `str.fromInt` | `Int[-9007199254740991..9007199254740991]` | native | only candidate, cost one/linear |
 | `str.fromInt` | `Int[0..9]` | native | only candidate, cost one/linear |
-| `str.len` | `Ascii[0..2147483647]` | native | only candidate, cost none/constant |
-| `str.len` | `Ascii[18]` | native | only candidate, cost none/constant |
-| `str.len` | `Ascii[3..17]` | native | only candidate, cost none/constant |
-| `str.len` | `Digits[0..2147483647]` | native | only candidate, cost none/constant |
-| `str.len` | `Digits[12]` | native | only candidate, cost none/constant |
+| `str.len` | `Ascii[0..2147483647]` | native | only candidate, cost none/constant; `str::len` counts bytes, which equals the scalar count only for ASCII |
+| `str.len` | `Ascii[18]` | native | only candidate, cost none/constant; `str::len` counts bytes, which equals the scalar count only for ASCII |
+| `str.len` | `Ascii[3..17]` | native | only candidate, cost none/constant; `str::len` counts bytes, which equals the scalar count only for ASCII |
+| `str.len` | `Digits[0..2147483647]` | native | only candidate, cost none/constant; `str::len` counts bytes, which equals the scalar count only for ASCII |
+| `str.len` | `Digits[12]` | native | only candidate, cost none/constant; `str::len` counts bytes, which equals the scalar count only for ASCII |
 | `str.padStart` | `Ascii[0..2147483647], Int[0..18], Digits[1]` | library | only candidate, cost one/linear |
 | `str.padStart` | `Ascii[1..17], Int[3..3], Digits[1]` | library | only candidate, cost one/linear |
-| `str.slice` | `Ascii[3..17], Int[0..0], Int[1..15]` | native | only candidate, cost one/linear |
-| `str.slice` | `Ascii[3..17], Int[1..15], Int[3..17]` | native | only candidate, cost one/linear |
-| `str.trim` | `String[0..2147483647]` | native | only candidate, cost one/linear |
-| `task.race` | `List<() => Option<AddressInfo>>[2..2]` | library | only candidate, cost many/linear |
+| `str.slice` | `Ascii[3..17], Int[0..0], Int[1..15]` | native | only candidate, cost one/linear; slicing an ASCII string cuts at byte boundaries, which are scalar boundaries too |
+| `str.slice` | `Ascii[3..17], Int[1..15], Int[3..17]` | native | only candidate, cost one/linear; slicing an ASCII string cuts at byte boundaries, which are scalar boundaries too |
+| `str.trim` | `String[0..2147483647]` | native | only candidate, cost one/linear; `trim_matches` takes the cut set explicitly, so the 25 code points are exact |
+| `task.race` | `List<() => Option<AddressInfo>>[2..2]` | library | only candidate, cost many/linear; `std::thread::scope` plus an `mpsc` channel: one thread per task, first `Some` wins |
 
 Mix: 250 native, 54 library, 2 portable.

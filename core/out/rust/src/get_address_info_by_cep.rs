@@ -133,7 +133,7 @@ pub fn get_address_info_by_cep(
     cep: String,
     env: &dyn Capabilities,
 ) -> Result<AddressInfo, CoreError> {
-    if !(crate::support::re_test(&crate::support::RE_PATTERN_0, &cep)) {
+    if !(crate::support::re_match_0(&cep)) {
         return Err(CoreError::GetAddressInfoByCepValidationError {
             message: "CEP inv\u{e1}lido".to_string(),
         });

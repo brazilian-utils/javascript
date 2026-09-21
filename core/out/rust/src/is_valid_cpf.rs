@@ -10,38 +10,35 @@ use crate::*;
 /// The core takes the value as written, accepting the usual mask characters; turning a host value
 /// into a string is the DX's job.
 pub fn is_valid_cpf(cpf: String) -> bool {
-    if !(crate::support::re_test(
-        &crate::support::RE_PATTERN_3,
-        cpf.trim_matches(|c: char| {
-            matches!(
-                c as u32,
-                9 | 10
-                    | 11
-                    | 12
-                    | 13
-                    | 32
-                    | 160
-                    | 5760
-                    | 8192
-                    | 8193
-                    | 8194
-                    | 8195
-                    | 8196
-                    | 8197
-                    | 8198
-                    | 8199
-                    | 8200
-                    | 8201
-                    | 8202
-                    | 8232
-                    | 8233
-                    | 8239
-                    | 8287
-                    | 12288
-                    | 65279
-            )
-        }),
-    )) {
+    if !(crate::support::re_match_3(cpf.trim_matches(|c: char| {
+        matches!(
+            c as u32,
+            9 | 10
+                | 11
+                | 12
+                | 13
+                | 32
+                | 160
+                | 5760
+                | 8192
+                | 8193
+                | 8194
+                | 8195
+                | 8196
+                | 8197
+                | 8198
+                | 8199
+                | 8200
+                | 8201
+                | 8202
+                | 8232
+                | 8233
+                | 8239
+                | 8287
+                | 12288
+                | 65279
+        )
+    }))) {
         return false;
     }
     let digits = keep_digits(cpf.to_owned());

@@ -65,8 +65,13 @@ function normalizeRanges(ranges: readonly CharRange[]): CharRange[] {
 	return merged;
 }
 
-/** Expands a negated class into positive ranges, so every class is positive after parsing. */
-function complement(ranges: readonly CharRange[]): CharRange[] {
+/**
+ * Expands a negated class into positive ranges, so every class is positive after parsing.
+ * Exported for the Rust target's chain-scanner classifier (`engine/src/targets/rust/index.ts`),
+ * which needs the same complement to decide whether two classes can ever overlap; see that file's
+ * "Regex" section for why.
+ */
+export function complement(ranges: readonly CharRange[]): CharRange[] {
 	const result: CharRange[] = [];
 	let cursor = 0;
 	for (const range of normalizeRanges(ranges)) {

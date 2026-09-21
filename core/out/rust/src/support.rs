@@ -44,6 +44,56 @@ pub fn parse_digits(value: &str) -> Option<i64> {
     value.parse::<i64>().ok()
 }
 
+/// Consumes exactly `count` chars matching `in_class` off the front of `rest`, or answers `None`
+/// without consuming anything. One forward pass, no allocation: this and `re_take_class` below are
+/// the whole of a generated chain-pattern scanner (`re_match_N`, in the "Regex" section of
+/// engine/src/targets/rust/index.ts) — a fixed-count class run in the pattern becomes one call here.
+#[inline]
+fn re_take_fixed(rest: &str, count: usize, in_class: impl Fn(u32) -> bool) -> Option<&str> {
+    let mut consumed = 0usize;
+    let mut taken = 0usize;
+    for c in rest.chars() {
+        if taken == count {
+            break;
+        }
+        if !in_class(c as u32) {
+            return None;
+        }
+        consumed += c.len_utf8();
+        taken += 1;
+    }
+    if taken < count {
+        return None;
+    }
+    Some(&rest[consumed..])
+}
+
+/// Consumes as many chars matching `in_class` as `rest` offers, up to `max` (`usize::MAX` for
+/// unbounded), then answers `None` unless at least `min` were taken. The maximal-munch property
+/// `chainElementsOf` checks at generation time (see the "Regex" section) is what makes always
+/// taking the longest available run — never backing off to try a shorter one — correct here.
+#[inline]
+fn re_take_class(
+    rest: &str,
+    min: usize,
+    max: usize,
+    in_class: impl Fn(u32) -> bool,
+) -> Option<&str> {
+    let mut consumed = 0usize;
+    let mut taken = 0usize;
+    for c in rest.chars() {
+        if taken >= max || !in_class(c as u32) {
+            break;
+        }
+        consumed += c.len_utf8();
+        taken += 1;
+    }
+    if taken < min {
+        return None;
+    }
+    Some(&rest[consumed..])
+}
+
 pub fn pad_start(value: &str, length: i64, pad: &str) -> String {
     let scalars: Vec<char> = value.chars().collect();
     let length = length as usize;
@@ -112,343 +162,240 @@ pub fn date_from_epoch_days(days: i64) -> Option<i64> {
     Some(days)
 }
 
-/// One node of a normalized regex, compiled at engine build time into a `static` value: every
-/// child is a `&'static` reference to a const expression, so rustc places the whole tree in the
-/// binary's read-only data once. There is no run-time compilation step to avoid.
-pub enum ReNode {
-    Class(&'static [(u32, u32)], bool),
-    Seq(&'static [ReNode]),
-    Alt(&'static [ReNode]),
-    Repeat(&'static ReNode, usize, Option<usize>),
+pub fn re_match_0(value: &str) -> bool {
+    let rest = value;
+    let Some(rest) = re_take_fixed(rest, 8, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    rest.is_empty()
 }
-
-fn re_class_matches(ranges: &[(u32, u32)], negated: bool, scalar: u32) -> bool {
-    let hit = ranges.iter().any(|&(lo, hi)| scalar >= lo && scalar <= hi);
-    hit != negated
+pub fn re_match_1(value: &str) -> bool {
+    let rest = value;
+    let Some(rest) = re_take_fixed(rest, 2, |c: u32| {
+        (48..=57).contains(&c) || (65..=90).contains(&c)
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 3, |c: u32| {
+        (48..=57).contains(&c) || (65..=90).contains(&c)
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 3, |c: u32| {
+        (48..=57).contains(&c) || (65..=90).contains(&c)
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 4, |c: u32| {
+        (48..=57).contains(&c) || (65..=90).contains(&c)
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 2, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    rest.is_empty()
 }
-
-/// The positions a partial match of `node` could end at, starting from `pos`. Concatenation,
-/// alternation and repetition all reduce to unioning these position sets, which is what lets this
-/// stay backtracking-free: every reachable position is visited once per node, not per path.
-fn re_ends(node: &'static ReNode, pos: usize, scalars: &[char]) -> Vec<usize> {
-    match node {
-        ReNode::Class(ranges, negated) => {
-            if pos < scalars.len() && re_class_matches(ranges, *negated, scalars[pos] as u32) {
-                vec![pos + 1]
-            } else {
-                vec![]
-            }
-        }
-        ReNode::Seq(items) => {
-            let mut current = vec![pos];
-            for item in items.iter() {
-                let mut next = Vec::new();
-                for &p in &current {
-                    next.extend(re_ends(item, p, scalars));
-                }
-                next.sort_unstable();
-                next.dedup();
-                current = next;
-                if current.is_empty() {
-                    break;
-                }
-            }
-            current
-        }
-        ReNode::Alt(options) => {
-            let mut out = Vec::new();
-            for option in options.iter() {
-                out.extend(re_ends(option, pos, scalars));
-            }
-            out.sort_unstable();
-            out.dedup();
-            out
-        }
-        ReNode::Repeat(item, min, max) => {
-            let limit = max.unwrap_or(usize::MAX);
-            let mut layers: Vec<Vec<usize>> = vec![vec![pos]];
-            let mut count = 0;
-            while count < limit {
-                let mut next = Vec::new();
-                for &p in layers.last().unwrap() {
-                    for end in re_ends(item, p, scalars) {
-                        // A zero-width match of the repeated item would loop forever; a normalized
-                        // pattern never needs one (an empty repeated item is rejected up front).
-                        if end > p {
-                            next.push(end);
-                        }
-                    }
-                }
-                next.sort_unstable();
-                next.dedup();
-                if next.is_empty() {
-                    break;
-                }
-                layers.push(next);
-                count += 1;
-            }
-            let mut out = Vec::new();
-            for (repetitions, positions) in layers.iter().enumerate() {
-                if repetitions >= *min {
-                    out.extend(positions.iter().copied());
-                }
-            }
-            out.sort_unstable();
-            out.dedup();
-            out
-        }
-    }
+pub fn re_match_2(value: &str) -> bool {
+    let rest = value;
+    let Some(rest) = re_take_fixed(rest, 2, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 3, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 3, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 4, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 2, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    rest.is_empty()
 }
-
-/// Whether `value` fully matches `pattern`, anchored at both ends (the only mode the Core admits).
-pub fn re_test(pattern: &'static ReNode, value: &str) -> bool {
-    let scalars: Vec<char> = value.chars().collect();
-    re_ends(pattern, 0, &scalars)
-        .into_iter()
-        .any(|end| end == scalars.len())
+pub fn re_match_3(value: &str) -> bool {
+    let rest = value;
+    let Some(rest) = re_take_fixed(rest, 3, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 3, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 3, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    let Some(rest) = re_take_class(rest, 0, usize::MAX, |c: u32| {
+        (9..=13).contains(&c)
+            || c == 32
+            || (45..=47).contains(&c)
+            || c == 160
+            || c == 5760
+            || (8192..=8202).contains(&c)
+            || (8232..=8233).contains(&c)
+            || c == 8239
+            || c == 8287
+            || c == 12288
+            || c == 65279
+    }) else {
+        return false;
+    };
+    let Some(rest) = re_take_fixed(rest, 2, |c: u32| (48..=57).contains(&c)) else {
+        return false;
+    };
+    rest.is_empty()
 }
-
-pub static RE_PATTERN_0: ReNode = ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 8, Some(8));
-pub static RE_PATTERN_1: ReNode = ReNode::Seq(&[
-    ReNode::Repeat(&ReNode::Class(&[(48, 57), (65, 90)], false), 2, Some(2)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57), (65, 90)], false), 3, Some(3)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57), (65, 90)], false), 3, Some(3)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57), (65, 90)], false), 4, Some(4)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 2, Some(2)),
-]);
-pub static RE_PATTERN_2: ReNode = ReNode::Seq(&[
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 2, Some(2)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 3, Some(3)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 3, Some(3)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 4, Some(4)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 2, Some(2)),
-]);
-pub static RE_PATTERN_3: ReNode = ReNode::Seq(&[
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 3, Some(3)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 3, Some(3)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 3, Some(3)),
-    ReNode::Repeat(
-        &ReNode::Class(
-            &[
-                (9, 13),
-                (32, 32),
-                (45, 47),
-                (160, 160),
-                (5760, 5760),
-                (8192, 8202),
-                (8232, 8233),
-                (8239, 8239),
-                (8287, 8287),
-                (12288, 12288),
-                (65279, 65279),
-            ],
-            false,
-        ),
-        0,
-        None,
-    ),
-    ReNode::Repeat(&ReNode::Class(&[(48, 57)], false), 2, Some(2)),
-]);
 
 /// Runs each task on its own thread and answers the first one that lands `Some`. Cancellation is
 /// best effort and semantically unobservable, exactly as `docs/semantics.md` describes: a losing

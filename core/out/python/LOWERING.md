@@ -102,16 +102,16 @@ with, the implementation that was selected, and the rule that decided it.
 | `int.div` | `Int[-9600..10399], Int[4..4]` | library | library, cost none/constant; rejected `//` floors, so it only matches truncated division when both operands are non-negative |
 | `int.div` | `Int[-9612..10413], Int[100..100]` | library | library, cost none/constant; rejected `//` floors, so it only matches truncated division when both operands are non-negative |
 | `int.div` | `Int[-9612..10413], Int[4..4]` | library | library, cost none/constant; rejected `//` floors, so it only matches truncated division when both operands are non-negative |
-| `int.div` | `Int[0..469], Int[451..451]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[0..9999], Int[400..400]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[19..20], Int[3..3]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[2..1685], Int[5..5]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[27..28], Int[25..25]` | native | only candidate, cost none/constant |
-| `int.div` | `Int[306..3652364], Int[146097..146097]` | native | only candidate, cost none/constant |
+| `int.div` | `Int[0..469], Int[451..451]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[0..9999], Int[400..400]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[19..20], Int[3..3]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[2..1685], Int[5..5]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[27..28], Int[25..25]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
+| `int.div` | `Int[306..3652364], Int[146097..146097]` | native | only candidate, cost none/constant; `//` floors, so it only matches truncated division when both operands are non-negative |
 | `int.ge` | `Int[0..1114111], Int[0..0]` | native | only candidate, cost none/constant |
 | `int.ge` | `Int[0..1114111], Int[48..48]` | native | only candidate, cost none/constant |
 | `int.ge` | `Int[0..1114111], Int[65..65]` | native | only candidate, cost none/constant |
@@ -156,17 +156,17 @@ with, the implementation that was selected, and the rule that decided it.
 | `int.min` | `Int[1..238858], Int[12..12]` | native | only candidate, cost none/constant |
 | `int.min` | `Int[22..62], Int[56..56]` | native | only candidate, cost none/constant |
 | `int.mod` | `Int[-14..14], Int[3..3]` | library | library, cost none/constant; rejected `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
-| `int.mod` | `Int[0..4294967295], Int[10..10]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..810], Int[11..11]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..86], Int[7..7]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..972], Int[11..11]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[1900..2099], Int[19..19]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[23..367], Int[30..30]` | native | only candidate, cost none/constant |
-| `int.mod` | `Int[4294967296..4294967296], Int[10..10]` | native | only candidate, cost none/constant |
+| `int.mod` | `Int[0..4294967295], Int[10..10]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[0..810], Int[11..11]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[0..86], Int[7..7]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[0..972], Int[11..11]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[0..99], Int[4..4]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[107..149], Int[31..31]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[19..20], Int[4..4]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[1900..2099], Int[100..100]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[1900..2099], Int[19..19]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[23..367], Int[30..30]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
+| `int.mod` | `Int[4294967296..4294967296], Int[10..10]` | native | only candidate, cost none/constant; `%` is floored in Python, so it only matches the Core's truncated remainder for non-negative operands |
 | `int.mul` | `Int[-1..24], Int[146097..146097]` | native | only candidate, cost none/constant |
 | `int.mul` | `Int[-1..24], Int[400..400]` | native | only candidate, cost none/constant |
 | `int.mul` | `Int[-9600..10399], Int[365..365]` | native | only candidate, cost none/constant |
@@ -231,8 +231,8 @@ with, the implementation that was selected, and the rule that decided it.
 | `opt.unwrap` | `Option<AddressInfo>` | native | only candidate, cost none/constant |
 | `opt.unwrap` | `Option<HttpResponse>` | native | only candidate, cost none/constant |
 | `random.nextU32` | `` | native | only candidate, cost none/constant |
-| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear |
-| `re.test` | `String[0..2147483647]` | native | only candidate, cost none/linear |
+| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear; re.sub with the negated class is one pass |
+| `re.test` | `String[0..2147483647]` | native | only candidate, cost none/linear; `fullmatch` anchors the whole string, and the normalized pattern uses explicit classes |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..2147483650]` | native | only candidate, cost none/constant |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..9007199254740991]` | native | only candidate, cost none/constant |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[1..9007199254740992]` | native | only candidate, cost none/constant |
@@ -249,21 +249,21 @@ with, the implementation that was selected, and the rule that decided it.
 | `seq.len` | `List<Int[2..9]>[12..12]` | native | only candidate, cost none/constant |
 | `seq.len` | `List<Int[48..57]>[0..15]` | native | only candidate, cost none/constant |
 | `seq.push` | `` | native | only candidate, cost none/constant |
-| `seq.sortStableBy` | `List<Holiday>[12..13], (Holiday) => CivilDate` | native | only candidate, cost one/nlogn |
-| `str.asciiUpper` | `Ascii[0..2147483647]` | native | only candidate, cost one/linear |
-| `str.asciiUpper` | `String[0..2147483647]` | native | native, cost one/linear; rejected `upper()` is only ASCII-equivalent on ASCII input |
+| `seq.sortStableBy` | `List<Holiday>[12..13], (Holiday) => CivilDate` | native | only candidate, cost one/nlogn; `sorted(key=…)` is stable and avoids the comparator wrapper |
+| `str.asciiUpper` | `Ascii[0..2147483647]` | native | only candidate, cost one/linear; `upper()` is only ASCII-equivalent on ASCII input |
+| `str.asciiUpper` | `String[0..2147483647]` | native | native, cost one/linear; one re.sub pass maps a-z and leaves every other scalar alone; rejected `upper()` is only ASCII-equivalent on ASCII input |
 | `str.charAtOpt` | `Ascii[0..2147483647], Int[0..17]` | native | only candidate, cost none/constant |
 | `str.charAtOpt` | `Ascii[18], Int[0..17]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Ascii[14], Int[12..12]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Ascii[14], Int[13..13]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[11], Int[0..0]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[11], Int[0..8]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[11], Int[1..10]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[12], Int[0..0]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[12], Int[1..11]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[14], Int[0..0]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[14], Int[0..11]` | native | only candidate, cost none/constant |
-| `str.codeAt` | `Digits[14], Int[1..13]` | native | only candidate, cost none/constant |
+| `str.codeAt` | `Ascii[14], Int[12..12]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Ascii[14], Int[13..13]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[11], Int[0..0]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[11], Int[0..8]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[11], Int[1..10]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[12], Int[0..0]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[12], Int[1..11]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[14], Int[0..0]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[14], Int[0..11]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
+| `str.codeAt` | `Digits[14], Int[1..13]` | native | only candidate, cost none/constant; indexing by scalar is O(1) and identical to the Core only for ASCII |
 | `str.codeAtOpt` | `Ascii[0..2147483647], Int[0..2147483646]` | native | only candidate, cost none/constant |
 | `str.codePoints` | `Ascii[5]` | native | only candidate, cost one/linear |
 | `str.codePoints` | `Digits[0..15]` | native | only candidate, cost one/linear |
@@ -300,16 +300,16 @@ with, the implementation that was selected, and the rule that decided it.
 | `str.fromCodePoints` | `List<Int[32..32]>[1..1]` | native | only candidate, cost one/linear |
 | `str.fromInt` | `Int[-9007199254740991..9007199254740991]` | native | only candidate, cost one/linear |
 | `str.fromInt` | `Int[0..9]` | native | only candidate, cost one/linear |
-| `str.len` | `Ascii[0..2147483647]` | native | only candidate, cost none/constant |
-| `str.len` | `Ascii[18]` | native | only candidate, cost none/constant |
-| `str.len` | `Ascii[3..17]` | native | only candidate, cost none/constant |
-| `str.len` | `Digits[0..2147483647]` | native | only candidate, cost none/constant |
-| `str.len` | `Digits[12]` | native | only candidate, cost none/constant |
+| `str.len` | `Ascii[0..2147483647]` | native | only candidate, cost none/constant; `len` counts code points in Python, which is the Core's definition |
+| `str.len` | `Ascii[18]` | native | only candidate, cost none/constant; `len` counts code points in Python, which is the Core's definition |
+| `str.len` | `Ascii[3..17]` | native | only candidate, cost none/constant; `len` counts code points in Python, which is the Core's definition |
+| `str.len` | `Digits[0..2147483647]` | native | only candidate, cost none/constant; `len` counts code points in Python, which is the Core's definition |
+| `str.len` | `Digits[12]` | native | only candidate, cost none/constant; `len` counts code points in Python, which is the Core's definition |
 | `str.padStart` | `Ascii[0..2147483647], Int[0..18], Digits[1]` | native | only candidate, cost one/linear |
 | `str.padStart` | `Ascii[1..17], Int[3..3], Digits[1]` | native | only candidate, cost one/linear |
 | `str.slice` | `Ascii[3..17], Int[0..0], Int[1..15]` | native | only candidate, cost one/linear |
 | `str.slice` | `Ascii[3..17], Int[1..15], Int[3..17]` | native | only candidate, cost one/linear |
-| `str.trim` | `String[0..2147483647]` | native | only candidate, cost one/linear |
-| `task.race` | `List<() => Option<AddressInfo>>[2..2]` | library | only candidate, cost many/linear |
+| `str.trim` | `String[0..2147483647]` | native | only candidate, cost one/linear; `strip()` uses Python's own whitespace set, so the 25 code points are passed explicitly |
+| `task.race` | `List<() => Option<AddressInfo>>[2..2]` | library | only candidate, cost many/linear; a ThreadPoolExecutor is the standard library's way to run idempotent requests concurrently |
 
 Mix: 292 native, 12 library, 2 portable.

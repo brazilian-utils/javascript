@@ -3,8 +3,9 @@
  *
  * Rust 2021, standard library only. `std` has no HTTP client and no regex engine, which is the
  * falsification exercise `docs/targets/rust-sketch.md` predicted; both frictions are handled
- * without a crate (a generated `Capabilities` trait for the first, a hand-written matcher over a
- * `static` pattern tree for the second — see the comment above `RE_MATCHER_SUPPORT` below).
+ * without a crate (a generated `Capabilities` trait for the first, a dedicated straight-line
+ * scanner per pattern for the second, with an allocation-free backtracking matcher as the fallback
+ * for a pattern shape a scanner cannot cover — see the "Regex" section below).
  *
  * Ownership. The shared Target AST carries no lifetimes, so this backend does not attempt the
  * sketch's `&str` parameters: every heap value (`String`, `Vec<T>`, a record) is owned wherever it
@@ -29,7 +30,8 @@ import type { Candidate } from "../../backend/select.ts";
 import { LoweringTable, argIsAscii } from "../../backend/select.ts";
 import type { TExpr, TFunc, TModule, TRecord, TStmt } from "../../backend/tast.ts";
 import type { CProgram } from "../../core/ir.ts";
-import type { RegexNode } from "../../regex.ts";
+import type { CharRange, RegexNode } from "../../regex.ts";
+import { complement } from "../../regex.ts";
 import { BUILTIN_RECORDS, TRIM_CODE_POINTS } from "../../intrinsics/index.ts";
 import type { SemType } from "../../types.ts";
 import type { Value } from "../../values.ts";
@@ -271,23 +273,137 @@ function callArg(expr: TExpr, scope: ReadonlyMap<string, SemType>): string {
 }
 
 /* ------------------------------------------------------------------ *
- * Regex: a hand-written matcher over a `static` pattern tree.
+ * Regex: a dedicated matcher per pattern, compiled at engine build time.
  *
- * `std` has no regex engine (the sketch's second predicted friction). The normalized pattern is
- * compiled here, at engine build time, into a `ReNode` value with `&'static` children — a `const`
- * expression, so rustc bakes it into the binary once; matching interprets it at call time without
- * ever re-parsing the source pattern. This is the fix the coordinator's benchmark asked for
- * (Go's `re.test` recompiles from source on every call): there is no per-call compilation step to
- * avoid here, because compilation never happens at run time in the first place.
+ * `std` has no regex engine (the sketch's second predicted friction). The engine knows every
+ * pattern a project uses before it generates a single line of Rust, so there is no reason to make
+ * the binary interpret a pattern tree at call time at all: each normalized pattern is compiled
+ * here into a straight-line matching function (`re_match_N`, below) that only ever tests the exact
+ * classes and counts that pattern names, in the order it names them. This is the fix the
+ * coordinator's benchmark asked for (Go's `re.test` recompiles from source on every call): there
+ * is no per-call compilation step to avoid here, because there is no run-time representation of
+ * the pattern left to interpret.
  *
- * The matcher itself (`RE_MATCHER_SUPPORT`, in support.rs) is one general, hand-written NFA over
- * `ReNode`: it tracks the *set* of positions a partial match could be at, which handles
- * concatenation, alternation and bounded/unbounded repetition without backtracking. It is driver
- * code in the same sense the JSON reader below is: `std` has nothing to build on, so this project
- * builds the one piece of machinery every pattern in it shares.
+ * A "chain" pattern — the shape every pattern in this project actually has — is a top-level
+ * sequence of plain character classes and repeated character classes, with no alternation and no
+ * repeated group. `chainElementsOf` recognizes this shape and additionally requires that any
+ * variable-length run (anything but an exact `{n}` or a bare class) have a class disjoint from
+ * whatever immediately follows it: that is the maximal-munch property that lets the generated
+ * scanner consume a run greedily, to the end of its own class, and never need to back off — the
+ * two adjacent classes can never disagree about where one run ends and the next begins. Every
+ * pattern `core/source` uses is exactly this: a fixed-count digit or alnum run, then a
+ * variable-count mask-character run disjoint from it, repeated. `renderChainScanner` turns the
+ * recognized element list directly into a `pub fn` built from two tiny generic helpers
+ * (`re_take_fixed`/`re_take_class`, in `GENERIC_SUPPORT`) that slice `&str` forward once, with no
+ * allocation anywhere.
+ *
+ * A pattern `chainElementsOf` refuses — alternation anywhere, a repeated group more complex than
+ * one class, or two adjacent variable-length runs whose classes could overlap — falls back to
+ * `re_test`/`ReNode` in `support.rs`: a backtracking matcher, structured exactly like `regex.ts`'s
+ * own reference `matchNode` (greedy, try one more repetition before giving up and continuing), but
+ * over `&str` byte slices instead of a collected `Vec<char>`, so it never allocates either. No
+ * pattern in `core/source` takes this path today (see `LOWERING.md`'s `re.test` row and
+ * `docs/targets/rust.md` for the rule this section implements), but the accepted regex subset is
+ * not fully covered by the scanner, and soundness for whatever a project's patterns turn out to be
+ * matters more than never emitting the fallback.
  * ------------------------------------------------------------------ */
 
-const rePatterns = new Map<string, { readonly name: string; readonly rust: string }>();
+/** One run in a chain pattern: `min === max` (and neither is `null`) means a fixed-count run. */
+type ChainElement = {
+	readonly ranges: readonly CharRange[];
+	readonly negated: boolean;
+	readonly min: number;
+	readonly max: number | null;
+};
+
+function isFixed(element: ChainElement): boolean {
+	return element.max !== null && element.max === element.min;
+}
+
+/** The positive code point set a class actually matches, negation resolved. */
+function effectiveRanges(ranges: readonly CharRange[], negated: boolean): CharRange[] {
+	return negated ? complement(ranges) : [...ranges];
+}
+
+/** Both range lists are already sorted and merged (every class is, from `regex.ts`'s parser). */
+function rangesDisjoint(a: readonly CharRange[], b: readonly CharRange[]): boolean {
+	let i = 0;
+	let j = 0;
+	while (i < a.length && j < b.length) {
+		const x = a[i]!;
+		const y = b[j]!;
+		if (x.hi < y.lo) i++;
+		else if (y.hi < x.lo) j++;
+		else return false;
+	}
+	return true;
+}
+
+/**
+ * Recognizes the "chain" shape (see the section comment) and answers its elements left to right,
+ * or `undefined` when the pattern needs the fallback matcher instead.
+ */
+function chainElementsOf(node: RegexNode): ChainElement[] | undefined {
+	const items: readonly RegexNode[] = node.kind === "seq" ? node.items : [node];
+	const elements: ChainElement[] = [];
+	for (const item of items) {
+		if (item.kind === "class") {
+			elements.push({ ranges: item.ranges, negated: item.negated, min: 1, max: 1 });
+		} else if (item.kind === "repeat" && item.item.kind === "class") {
+			// A `{0}` member matches nothing and never advances; it is pathological enough (and
+			// absent from every real pattern) that falling the whole thing back is simpler than
+			// reasoning about it here.
+			if (item.min === 0 && item.max === 0) return undefined;
+			elements.push({ ranges: item.item.ranges, negated: item.item.negated, min: item.min, max: item.max });
+		} else {
+			// Alternation, or a repeated group that is itself a sequence/alternation/repeat.
+			return undefined;
+		}
+	}
+	for (let i = 0; i < elements.length; i++) {
+		const element = elements[i]!;
+		if (isFixed(element)) continue;
+		if (i === elements.length - 1) continue; // nothing follows: consume the rest, no ambiguity
+		const next = elements[i + 1]!;
+		// Two adjacent variable-length runs would need to negotiate how much each one takes; the
+		// maximal-munch argument above only settles that question one run at a time.
+		if (!isFixed(next)) return undefined;
+		const ownSet = effectiveRanges(element.ranges, element.negated);
+		const nextSet = effectiveRanges(next.ranges, next.negated);
+		if (!rangesDisjoint(ownSet, nextSet)) return undefined;
+	}
+	return elements;
+}
+
+/** `c: u32` inline range test, the same idiom `re.retain` and `manual_range_contains` both use. */
+function classPredicateExpr(ranges: readonly CharRange[], negated: boolean): string {
+	const test = ranges
+		.map((range) => (range.lo === range.hi ? `c == ${range.lo}` : `(${range.lo}..=${range.hi}).contains(&c)`))
+		.join(" || ");
+	const body = test === "" ? "false" : test;
+	return negated ? `!(${body})` : body;
+}
+
+function renderChainScanner(name: string, elements: readonly ChainElement[]): string {
+	const lines: string[] = [`pub fn ${name}(value: &str) -> bool {`];
+	if (elements.length === 0) {
+		// The empty chain: a pattern that only ever matches the empty string.
+		lines.push("\tvalue.is_empty()", "}");
+		return lines.join("\n");
+	}
+	lines.push("\tlet rest = value;");
+	for (const element of elements) {
+		const predicate = `|c: u32| ${classPredicateExpr(element.ranges, element.negated)}`;
+		if (isFixed(element)) {
+			lines.push(`\tlet Some(rest) = re_take_fixed(rest, ${element.min}, ${predicate}) else { return false; };`);
+		} else {
+			const max = element.max === null ? "usize::MAX" : String(element.max);
+			lines.push(`\tlet Some(rest) = re_take_class(rest, ${element.min}, ${max}, ${predicate}) else { return false; };`);
+		}
+	}
+	lines.push("\trest.is_empty()", "}");
+	return lines.join("\n");
+}
 
 function renderReNode(node: RegexNode): string {
 	switch (node.kind) {
@@ -308,13 +424,32 @@ function renderReNode(node: RegexNode): string {
 	}
 }
 
-/** Registers (or reuses) the `static` pattern for one regex, and answers its Rust identifier. */
-function registerPattern(node: RegexNode, source: string): string {
+type RePattern =
+	| { readonly kind: "scanner"; readonly name: string; readonly rust: string }
+	| { readonly kind: "fallback"; readonly name: string; readonly rust: string };
+
+const rePatterns = new Map<string, RePattern>();
+/** Whether any registered pattern took the fallback path — `supportModule` uses this to decide
+ * whether `RE_MATCHER_SUPPORT` (dead weight otherwise) belongs in the emitted `support.rs`. */
+let reFallbackUsed = false;
+
+/** Registers (or reuses) the matcher for one regex, and answers its Rust identifier and kind. */
+function registerPattern(node: RegexNode, source: string): RePattern {
 	const existing = rePatterns.get(source);
-	if (existing !== undefined) return existing.name;
-	const name = `RE_PATTERN_${rePatterns.size}`;
-	rePatterns.set(source, { name, rust: `pub static ${name}: ReNode = ${renderReNode(node)};` });
-	return name;
+	if (existing !== undefined) return existing;
+	const index = rePatterns.size;
+	const elements = chainElementsOf(node);
+	const pattern: RePattern =
+		elements !== undefined
+			? { kind: "scanner", name: `re_match_${index}`, rust: renderChainScanner(`re_match_${index}`, elements) }
+			: {
+					kind: "fallback",
+					name: `RE_PATTERN_${index}`,
+					rust: `pub static RE_PATTERN_${index}: ReNode = ${renderReNode(node)};`,
+				};
+	if (pattern.kind === "fallback") reFallbackUsed = true;
+	rePatterns.set(source, pattern);
+	return pattern;
 }
 
 /* ------------------------------------------------------------------ *
@@ -882,15 +1017,18 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 		// than "native" — not into `std` itself, which is what "native" means throughout this table.
 		impl: "library",
 		because:
-			"a hand-written matcher over a `static` pattern tree, compiled once by rustc rather than " +
-			"recompiled from source text on every call (std has no regex engine at all)",
+			"a dedicated straight-line scanner (no allocation, one pass) when the pattern is a chain " +
+			"of character-class runs with no alternation and no two adjacent variable-length runs " +
+			"that could overlap; otherwise a backtracking matcher over a static pattern tree, also " +
+			"allocation-free — see engine/src/targets/rust/index.ts's \"Regex\" section for the rule",
 		cost: linear,
 		emit: (args, _types, ctx) => {
 			const source = ctx.regex?.source ?? "";
-			const patternName =
-				ctx.regex === undefined ? undefined : registerPattern(ctx.regex.node, source);
-			if (patternName === undefined) return raw("false");
-			return raw(`crate::support::re_test(&crate::support::${patternName}, ${borrowed(args[0]!)})`);
+			const pattern = ctx.regex === undefined ? undefined : registerPattern(ctx.regex.node, source);
+			if (pattern === undefined) return raw("false");
+			return pattern.kind === "scanner"
+				? raw(`crate::support::${pattern.name}(${borrowed(args[0]!)})`)
+				: raw(`crate::support::re_test(&crate::support::${pattern.name}, ${borrowed(args[0]!)})`);
 		},
 	},
 
@@ -1413,7 +1551,20 @@ function importPath(_from: string, to: string): string {
  * hand-written regex matcher.
  * ------------------------------------------------------------------ */
 
-/** One general NFA-style matcher, shared by every pattern in the project (see the comment above). */
+/**
+ * The fallback matcher, for a pattern `chainElementsOf` (in the "Regex" section above) refused. It
+ * is a direct port of \`regex.ts\`'s own reference matcher (\`matchNode\`): continuation-passing
+ * backtracking over \`&str\` byte slices, greedy repeats trying one more repetition before giving up
+ * and continuing. Porting that exact algorithm, rather than a from-scratch one, is what makes this
+ * side sound without a separate proof: it is already what the engine's own tests check every
+ * accepted pattern against.
+ *
+ * There is no allocation anywhere in it. \`Class\` borrows a suffix of its input; \`Seq\` and
+ * \`Repeat\` build their continuations as stack-local closures passed by reference (\`&dyn Fn\`,
+ * never \`Box\`), so backtracking costs stack frames, not heap traffic — the "Vec<char> and a
+ * per-node Vec<usize> on every call" problem this whole fix exists to remove never had to be
+ * replaced with a differently-shaped allocation, because CPS over slices does not need one.
+ */
 const RE_MATCHER_SUPPORT = `
 /// One node of a normalized regex, compiled at engine build time into a \`static\` value: every
 /// child is a \`&'static\` reference to a const expression, so rustc places the whole tree in the
@@ -1430,83 +1581,55 @@ fn re_class_matches(ranges: &[(u32, u32)], negated: bool, scalar: u32) -> bool {
 	hit != negated
 }
 
-/// The positions a partial match of \`node\` could end at, starting from \`pos\`. Concatenation,
-/// alternation and repetition all reduce to unioning these position sets, which is what lets this
-/// stay backtracking-free: every reachable position is visited once per node, not per path.
-fn re_ends(node: &'static ReNode, pos: usize, scalars: &[char]) -> Vec<usize> {
+/// Matches \`node\` at the front of \`rest\`, then hands whatever remains to \`cont\`; answers true for
+/// the first way through \`node\` (greedy branch first) whose continuation also accepts. \`rest\` is
+/// always a UTF-8 boundary slice of the original input, so every step is a borrow, never a copy.
+fn re_match<'a>(node: &'static ReNode, rest: &'a str, cont: &dyn Fn(&'a str) -> bool) -> bool {
 	match node {
-		ReNode::Class(ranges, negated) => {
-			if pos < scalars.len() && re_class_matches(ranges, *negated, scalars[pos] as u32) {
-				vec![pos + 1]
-			} else {
-				vec![]
-			}
-		}
-		ReNode::Seq(items) => {
-			let mut current = vec![pos];
-			for item in items.iter() {
-				let mut next = Vec::new();
-				for &p in &current {
-					next.extend(re_ends(item, p, scalars));
-				}
-				next.sort_unstable();
-				next.dedup();
-				current = next;
-				if current.is_empty() {
-					break;
-				}
-			}
-			current
-		}
-		ReNode::Alt(options) => {
-			let mut out = Vec::new();
-			for option in options.iter() {
-				out.extend(re_ends(option, pos, scalars));
-			}
-			out.sort_unstable();
-			out.dedup();
-			out
-		}
-		ReNode::Repeat(item, min, max) => {
-			let limit = max.unwrap_or(usize::MAX);
-			let mut layers: Vec<Vec<usize>> = vec![vec![pos]];
-			let mut count = 0;
-			while count < limit {
-				let mut next = Vec::new();
-				for &p in layers.last().unwrap() {
-					for end in re_ends(item, p, scalars) {
-						// A zero-width match of the repeated item would loop forever; a normalized
-						// pattern never needs one (an empty repeated item is rejected up front).
-						if end > p {
-							next.push(end);
-						}
-					}
-				}
-				next.sort_unstable();
-				next.dedup();
-				if next.is_empty() {
-					break;
-				}
-				layers.push(next);
-				count += 1;
-			}
-			let mut out = Vec::new();
-			for (repetitions, positions) in layers.iter().enumerate() {
-				if repetitions >= *min {
-					out.extend(positions.iter().copied());
-				}
-			}
-			out.sort_unstable();
-			out.dedup();
-			out
+		ReNode::Class(ranges, negated) => match rest.chars().next() {
+			Some(c) if re_class_matches(ranges, *negated, c as u32) => cont(&rest[c.len_utf8()..]),
+			_ => false,
+		},
+		ReNode::Seq(items) => re_match_seq(items, rest, cont),
+		ReNode::Alt(options) => options.iter().any(|option| re_match(option, rest, cont)),
+		ReNode::Repeat(item, min, max) => re_match_repeat(item, *min, max.unwrap_or(usize::MAX), 0, rest, cont),
+	}
+}
+
+fn re_match_seq<'a>(items: &'static [ReNode], rest: &'a str, cont: &dyn Fn(&'a str) -> bool) -> bool {
+	match items.split_first() {
+		None => cont(rest),
+		Some((first, remaining)) => {
+			let next_cont = move |next: &'a str| re_match_seq(remaining, next, cont);
+			re_match(first, rest, &next_cont)
 		}
 	}
 }
 
+fn re_match_repeat<'a>(
+	item: &'static ReNode,
+	min: usize,
+	limit: usize,
+	count: usize,
+	rest: &'a str,
+	cont: &dyn Fn(&'a str) -> bool,
+) -> bool {
+	if count < limit {
+		let rest_len = rest.len();
+		// A zero-width repetition would loop forever; the accepted subset never needs one (an
+		// empty repeated item is rejected up front), so the length check is just that guard.
+		let advance_cont =
+			move |next: &'a str| next.len() != rest_len && re_match_repeat(item, min, limit, count + 1, next, cont);
+		if re_match(item, rest, &advance_cont) {
+			return true;
+		}
+	}
+	count >= min && cont(rest)
+}
+
 /// Whether \`value\` fully matches \`pattern\`, anchored at both ends (the only mode the Core admits).
 pub fn re_test(pattern: &'static ReNode, value: &str) -> bool {
-	let scalars: Vec<char> = value.chars().collect();
-	re_ends(pattern, 0, &scalars).into_iter().any(|end| end == scalars.len())
+	re_match(pattern, value, &|rest| rest.is_empty())
 }
 `;
 
@@ -1557,6 +1680,51 @@ pub fn parse_digits(value: &str) -> Option<i64> {
 		return None;
 	}
 	value.parse::<i64>().ok()
+}
+
+/// Consumes exactly \`count\` chars matching \`in_class\` off the front of \`rest\`, or answers \`None\`
+/// without consuming anything. One forward pass, no allocation: this and \`re_take_class\` below are
+/// the whole of a generated chain-pattern scanner (\`re_match_N\`, in the "Regex" section of
+/// engine/src/targets/rust/index.ts) — a fixed-count class run in the pattern becomes one call here.
+#[inline]
+fn re_take_fixed(rest: &str, count: usize, in_class: impl Fn(u32) -> bool) -> Option<&str> {
+	let mut consumed = 0usize;
+	let mut taken = 0usize;
+	for c in rest.chars() {
+		if taken == count {
+			break;
+		}
+		if !in_class(c as u32) {
+			return None;
+		}
+		consumed += c.len_utf8();
+		taken += 1;
+	}
+	if taken < count {
+		return None;
+	}
+	Some(&rest[consumed..])
+}
+
+/// Consumes as many chars matching \`in_class\` as \`rest\` offers, up to \`max\` (\`usize::MAX\` for
+/// unbounded), then answers \`None\` unless at least \`min\` were taken. The maximal-munch property
+/// \`chainElementsOf\` checks at generation time (see the "Regex" section) is what makes always
+/// taking the longest available run — never backing off to try a shorter one — correct here.
+#[inline]
+fn re_take_class(rest: &str, min: usize, max: usize, in_class: impl Fn(u32) -> bool) -> Option<&str> {
+	let mut consumed = 0usize;
+	let mut taken = 0usize;
+	for c in rest.chars() {
+		if taken >= max || !in_class(c as u32) {
+			break;
+		}
+		consumed += c.len_utf8();
+		taken += 1;
+	}
+	if taken < min {
+		return None;
+	}
+	Some(&rest[consumed..])
 }
 
 pub fn pad_start(value: &str, length: i64, pad: &str) -> String {
@@ -1709,11 +1877,12 @@ function supportModule(_program: CProgram, needs: SupportNeeds): { path: string;
 		"#![allow(dead_code)]",
 		"",
 		GENERIC_SUPPORT.trim(),
-		"",
-		RE_MATCHER_SUPPORT.trim(),
-		"",
-		...[...rePatterns.values()].map((pattern) => pattern.rust),
 	];
+	// `RE_MATCHER_SUPPORT` backs only the fallback path (see the "Regex" section above); a project
+	// whose patterns all take the dedicated-scanner path, like this one, never needs it, and
+	// `#![allow(dead_code)]` above does not excuse shipping a matcher nothing calls.
+	if (reFallbackUsed) parts.push("", RE_MATCHER_SUPPORT.trim());
+	parts.push("", ...[...rePatterns.values()].map((pattern) => pattern.rust));
 	if (needs.race) parts.push("", RACE_SUPPORT.trim());
 	if (needs.env) parts.push("", CAPABILITIES_SUPPORT.trim());
 	return { path: "src/support.rs", text: `${parts.join("\n")}\n` };

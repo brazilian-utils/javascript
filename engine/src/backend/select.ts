@@ -109,10 +109,14 @@ export class LoweringTable {
 			return IMPL_RANK[left.impl] - IMPL_RANK[right.impl];
 		});
 		const chosen = ordered[0]!;
+		// An unopposed candidate still has a reason, and it used to be dropped: `LOWERING.md` is
+		// supposed to record the rule that decided every selection, not only the ones that had a
+		// rival to reject.
+		const why = chosen.because === undefined ? "" : `; ${chosen.because}`;
 		const reason =
 			rejected.length === 0
-				? `only candidate, cost ${chosen.cost.alloc}/${chosen.cost.time}`
-				: `${chosen.impl}, cost ${chosen.cost.alloc}/${chosen.cost.time}; rejected ${rejected.map((item) => item.because).join(", ")}`;
+				? `only candidate, cost ${chosen.cost.alloc}/${chosen.cost.time}${why}`
+				: `${chosen.impl}, cost ${chosen.cost.alloc}/${chosen.cost.time}${why}; rejected ${rejected.map((item) => item.because).join(", ")}`;
 		this.selections.push({ op, args: args.map(typeToString).join(", "), impl: chosen.impl, reason });
 		return { candidate: chosen, reason, rejected };
 	}

@@ -58,17 +58,42 @@ code point order — like Go, unlike JavaScript's UTF-16 comparison. This is the
 claim and it holds exactly as predicted.
 
 **`re.test`**. `std` has no regex engine — the sketch's second predicted friction, confirmed. The
-fix is a hand-written matcher (`support.rs`'s `re_test`/`re_ends`) that interprets a `ReNode` tree:
-concatenation, alternation and bounded/unbounded repetition all reduce to tracking the *set* of
-positions a partial match could be at, so it is backtracking-free without needing the accepted
-subset's "no ambiguous quantifier" guarantee to prove termination (it holds regardless). Each
-project pattern is a `pub static` `ReNode` value — a `const` expression, so rustc places it in the
-binary's read-only data once, at compile time. This is the fix the cross-language benchmark asked
-for while this backend was being built (see the coordinator's note in the session): Go's
-`regexp.MustCompile` runs on every call, recompiling the pattern from source text; the Rust matcher
-never compiles anything at call time, because there is no source text left to compile by the time
-the binary runs. No new hoisting facility was needed to get there — `static` is the language's own
-answer to "compute this once."
+first fix (landed with this target) was to stop recompiling anything at call time: each project
+pattern became a `pub static` `ReNode` tree, a `const` expression rustc places in the binary's
+read-only data once. That was necessary but not sufficient — a later cross-language benchmark
+(200 000 iterations of `isValidCpf`/`isValidCnpj` against the handwritten `brazilian-utils/rust`
+crate) found the generated code 24-50x slower even with compilation gone, because the *matcher*
+itself, walking that `ReNode` tree, allocated a fresh `Vec<usize>` of reachable positions per node
+per position and sorted and deduplicated each one: dozens of heap allocations per call for a
+14-character input. `support::re_test` alone was 79% of the call.
+
+The engine knows every pattern in a project before it generates a line of Rust, so the real fix is
+to stop interpreting a tree at call time at all. `engine/src/targets/rust/index.ts`'s "Regex"
+section compiles each pattern into one of two things, decided once, at generation time:
+
+- **A dedicated scanner** (`re_match_N`, in `support.rs`), for a pattern that is a top-level chain
+  of character classes and repeated character classes with no alternation and no repeated group —
+  every pattern `core/source` actually uses. `chainElementsOf` additionally requires that any
+  variable-length run have a class disjoint from whatever immediately follows it (maximal munch:
+  the two classes can never disagree about where one run ends and the next begins), which is what
+  lets the emitted scanner consume each run greedily, in one forward pass over `&str`, and never
+  need to back off. It is built from two small generic helpers, `re_take_fixed`/`re_take_class`,
+  that slice the input forward; nothing here allocates.
+- **The fallback matcher** (`re_test`/`ReNode`, still in `support.rs`), for anything
+  `chainElementsOf` refuses — alternation anywhere, or a repeated group more complex than one
+  class. This is no longer the position-set NFA: it is continuation-passing backtracking over
+  `&str` byte slices, a direct port of `regex.ts`'s own reference matcher (`matchNode`), which is
+  what every accepted pattern is already checked against in `engine/tests/regex.spec.ts`. Its
+  continuations are stack-local closures borrowed with `&dyn Fn`, never boxed, so it does not
+  allocate either — the `Vec<char>` `re_test` used to collect the input into, and the per-node
+  `Vec<usize>`, are both just gone, not replaced with a differently-shaped allocation.
+
+No pattern in `core/source` takes the fallback path today; `LOWERING.md`'s `re.test` row and the
+`because` string in `RUST_CANDIDATES` name the rule that decides, so a reviewer does not have to
+infer it from which patterns happen to appear. Re-measured, `support::re_match_3` (the CPF
+pattern's scanner) alone is on the order of the input's own length to walk once — see
+`core/bench/README.md`'s Rust section for the current numbers and what dominates the call now that
+the matcher no longer does.
 
 **`int.max`/`int.min`** detect a nested clamp (`x.max(lo).min(hi)`, the shape the source's own
 `int.min(int.max(x, lo), hi)` prints as by default) and merge it into `.clamp(lo, hi)`, which

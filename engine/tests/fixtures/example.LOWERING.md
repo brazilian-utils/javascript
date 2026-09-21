@@ -21,12 +21,12 @@ with, the implementation that was selected, and the rule that decided it.
 | `int.sub` | `Int[2..19], Int[0..18]` | native | only candidate, cost none/constant |
 | `int.sub` | `Int[48..57], Int[48..48]` | native | only candidate, cost none/constant |
 | `opt.orElse` | `Option<Int[48..57]>, Int[48..48]` | native | only candidate, cost none/constant |
-| `re.test` | `String[0..2147483647]` | native | only candidate, cost none/linear |
+| `re.test` | `String[0..2147483647]` | native | only candidate, cost none/linear; the normalized pattern is inside the compatibility subset |
 | `seq.at` | `List<Int[48..57]>[2..19], Int[0..18]` | native | only candidate, cost none/constant |
 | `seq.len` | `List<Int[0..127]>[0..2147483647]` | native | only candidate, cost none/constant |
 | `seq.len` | `List<Int[48..57]>[2..19]` | native | only candidate, cost none/constant |
 | `seq.push` | `` | native | only candidate, cost none/constant |
-| `str.asciiLower` | `String[0..2147483647]` | native | native, cost one/linear; rejected `toLowerCase` is only ASCII-equivalent on ASCII input |
+| `str.asciiLower` | `String[0..2147483647]` | native | native, cost one/linear; a single regex pass maps A-Z and leaves every other scalar alone; rejected `toLowerCase` is only ASCII-equivalent on ASCII input |
 | `str.codePoints` | `Digits[2..19] matches ^[0-9]{2,19}$` | native | only candidate, cost one/linear |
 | `str.codePoints` | `String[0..2147483647]` | native | only candidate, cost one/linear |
 | `str.fromCodePoints` | `List<Int[0..127]>[0..2147483647]` | native | only candidate, cost one/linear |

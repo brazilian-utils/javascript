@@ -45,8 +45,7 @@ pub fn is_valid_cnpj(cnpj: String, version: String) -> bool {
     if (version == "2") {
         let cleaned = keep_alphanumeric(cnpj.to_owned());
         if (has_letter(cleaned.to_owned()) && ((cleaned.len() as i64) == 14)) {
-            return (crate::support::re_test(
-                &crate::support::RE_PATTERN_1,
+            return (crate::support::re_match_1(
                 &trimmed
                     .chars()
                     .map(|c| {
@@ -64,7 +63,6 @@ pub fn is_valid_cnpj(cnpj: String, version: String) -> bool {
     if ((numeric.len() as i64) != 14) {
         return false;
     }
-    return ((crate::support::re_test(&crate::support::RE_PATTERN_2, &trimmed)
-        && !is_repeated_cnpj(numeric.to_owned()))
+    return ((crate::support::re_match_2(&trimmed) && !is_repeated_cnpj(numeric.to_owned()))
         && has_valid_cnpj_checksum(numeric.to_owned()));
 }
