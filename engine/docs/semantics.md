@@ -361,15 +361,19 @@ Core, rather than testing each spelling's *behavior* separately.
 | `s.charCodeAt(i)` | `str.codeAt(s, i)` |
 | `s.charAt(i)` | `str.charAt(s, i)` |
 | `s[i]` | `str.charAt(s, i)`, or `str.charAtOpt(s, i)` when the index is not proven in range |
+| `s[i] ?? fallback` | `str.charAtOpt(s, i) ?? fallback`, always — see "`??` forces the checked accessor" below |
+| `s[i]?.charCodeAt(0)` | `str.codeAtOpt(s, i)` |
 | `s.slice(a, b)` | `str.slice(s, a, b)` |
 | `s.trim()` | `str.trim(s)` |
 | `s.padStart(n, c)` | `str.padStart(s, n, c)` |
 | `s.length` | `str.len(s)` |
+| `s.toUpperCase()`, `s.toLowerCase()`, on a proven-ASCII string | `str.asciiUpper(s)`, `str.asciiLower(s)` |
 | `[...s]` | `str.codePoints(s)` |
 | `String(n)`, `n.toString()`, for `n: Int` | `str.fromInt(n)` |
 | `s.replace(/[^…]/g, "")` | `re.retain` on the un-negated class |
 | `PATTERN.test(s)`, for a regex literal or constant `PATTERN` | `re.test(PATTERN, s)` |
 | `xs[i]` | `seq.get(xs, i)`, or `seq.at(xs, i)` when the index is not proven in range |
+| `xs[i] ?? fallback` | `seq.at(xs, i) ?? fallback`, always — see "`??` forces the checked accessor" below |
 | `xs.length` | `seq.len(xs)` |
 | `xs.push(v)` | (already the only spelling) |
 | `Math.min(a, b)`, `Math.max`, `Math.abs`, for `Int` operands | `int.min`, `int.max`, `int.abs` |
@@ -379,7 +383,38 @@ Core, rather than testing each spelling's *behavior* separately.
 by the same rule: the unchecked one when the index is proven in range, matching JavaScript's own
 guaranteed-present case exactly, and the checked one otherwise, because JavaScript answers
 `undefined` past the end where Go and Rust panic — the same reason the Core keeps both forms of
-each accessor in the first place (section 3, "checked conversions").
+each accessor in the first place (section 3, "checked conversions"). That rule decides the
+accessor only where a *value* is wanted; see the next paragraph for `?? fallback`.
+
+**`??` forces the checked accessor, regardless of provability.** `xs[i] ?? fallback` and
+`s[i] ?? fallback` always pick `seq.at`/`str.charAtOpt`, even where the index is proven in range
+and a bare `xs[i]` would have picked the unchecked accessor. Under `noUncheckedIndexedAccess`,
+real TypeScript already types a bracket index `T | undefined` no matter what the checker can
+prove about the index (`tsc` has no access to that proof), so writing `?? fallback` is the
+author's own statement, in the language's own terms, that they want the absent case handled —
+not a claim about provability the checker would otherwise have to second-guess. Using the
+provability rule here instead would mean the *same source text*, `xs[i] ?? fallback`, silently
+lowers to a different Core depending on a fact about `xs` the author cannot see from the call
+site, which is exactly the kind of surprise this frontier is built to avoid.
+
+**`s[i]?.charCodeAt(0)` is `str.codeAtOpt`, the checked *numeric* accessor.** `s.charCodeAt(i)`
+alone has no `??` form: it answers `NaN` past the end, not `undefined`, so `s.charCodeAt(i) ??
+fallback` would compile under real `tsc` but never actually take the fallback branch — a
+respelling that changes behavior, which this checker does not admit (compare the `.replace`
+refusal below). But `s[i]` alone already answers `undefined` past the end, and chaining
+`?.charCodeAt(0)` onto it reads the one scalar's code point only when it is present: the exact
+case split `str.codeAtOpt` makes, spelled in ordinary TypeScript. Only this literal shape is
+recognized — a plain (non-optional) bracket index and a literal `0` — since that is what keeps
+the translation total; anything else is `E_OPTIONAL_CHAIN`, whose message for this one shape
+names the accepted spelling directly.
+
+**`s.toUpperCase()`/`s.toLowerCase()` are `str.asciiUpper`/`str.asciiLower` once `s` is proven
+ASCII**, the same gate `requireAsciiPositional` already applies to `charCodeAt`/`charAt`/`slice`
+(section 2.3): JavaScript's case methods run Unicode's full case-folding table, which touches
+scalars outside ASCII that `str.asciiUpper`/`asciiLower` leave alone, and folds those scalars
+differently by target besides. Restricted to a proven-ASCII argument, the two case methods and
+the two intrinsics are the identical function, so the ordinary spelling is sound there and only
+there; an unproven string is `E_UNICODE_CASE`.
 
 Several idiomatic forms carry JavaScript-specific meaning that has no equivalent in Go, Python or
 Rust, and the checker says so instead of lowering them regardless:
@@ -388,6 +423,9 @@ Rust, and the checker says so instead of lowering them regardless:
   `E_UTF16_POSITION`. JavaScript's "position" is a UTF-16 code unit, Python's is a code point and
   Go's is a byte, and the three disagree on every scalar above U+007F; section 2.3 has the
   detail.
+- **`s.toUpperCase()`/`s.toLowerCase()` on a string not proven ASCII** — `E_UNICODE_CASE`. Unicode
+  default case folding touches scalars an ASCII-only table leaves alone, and differs again by
+  target outside U+007F, the same shape of problem as `E_UTF16_POSITION` above.
 - **`Math.random()`** — `E_MATH_RANDOM`. It is a float in [0, 1), and the Random capability offers
   only an unbiased 32-bit `nextU32`; section 4 has the detail.
 - **`new Date(y, m, d)` and its friends** — `E_HOST_DATE`. Zero-indexed months, silent rollover and
