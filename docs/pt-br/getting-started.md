@@ -46,7 +46,7 @@ import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 isValidCpf('1232454233345'); // false
 ```
 
-A [referência de utilitários](pt-br/utilities.md) lista todas as funções, agrupadas por família, com opções e exemplos. Os [exemplos](pt-br/examples.md) mostram um campo de CPF em React, Angular, Vue e JavaScript puro.
+A [referência de utilitários](pt-br/utilities.md) lista todas as funções, agrupadas por família, com opções e exemplos. Os [guias](pt-br/guides/document-field.md) mostram um campo de CPF em React, Angular, Vue e JavaScript puro.
 
 ## Assistentes de IA
 

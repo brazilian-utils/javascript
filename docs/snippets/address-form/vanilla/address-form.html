@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<title>Address from a CEP</title>
+
+<form id="form">
+  <label for="cep">CEP</label>
+  <input
+    id="cep"
+    name="cep"
+    inputmode="numeric"
+    autocomplete="postal-code"
+    placeholder="00000-000"
+    aria-describedby="status"
+  />
+  <!-- On the page from the start, and announced when it gets its text. -->
+  <output id="status"></output>
+
+  <label for="street">Street</label>
+  <input id="street" name="street" autocomplete="address-line1" />
+
+  <label for="neighborhood">Neighborhood</label>
+  <input id="neighborhood" name="neighborhood" />
+
+  <label for="city">City</label>
+  <input id="city" name="city" autocomplete="address-level2" />
+
+  <label for="state">State</label>
+  <input id="state" name="state" autocomplete="address-level1" maxlength="2" />
+</form>
+
+<script type="module">
+  import {
+    formatCep,
+    getAddressInfoByCep,
+    isValidCep,
+  } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/+esm";
+
+  const form = document.getElementById("form");
+  const cep = document.getElementById("cep");
+  const status = document.getElementById("status");
+  const FIELDS = ["street", "neighborhood", "city", "state"];
+
+  const fill = (address) => {
+    for (const field of FIELDS) form.elements[field].value = address[field] ?? "";
+  };
+
+  cep.addEventListener("input", async () => {
+    cep.value = formatCep(cep.value);
+
+    // The lookup is worth a request only once the CEP is complete.
+    if (!isValidCep(cep.value)) return (status.textContent = "");
+
+    status.textContent = "Looking up…";
+
+    try {
+      fill(await getAddressInfoByCep(cep.value));
+      status.textContent = "";
+    } catch {
+      fill({});
+      status.textContent = "No address for this CEP";
+    }
+  });
+</script>

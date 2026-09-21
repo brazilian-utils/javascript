@@ -1,5 +1,6 @@
 * [Getting Started](getting-started.md)
 * [Utilities](utilities.md)
-* Examples
-  * [Document field](examples/document-field.md)
+* Guides
+  * [Document field](guides/document-field.md)
+  * [Address from a CEP](guides/address-form.md)
 * [Migration v1 to v2](migration-v1-to-v2.md)

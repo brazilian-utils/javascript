@@ -28,8 +28,8 @@ deno.lock
 docs/*.html
 !docs/index.html
 docs/pt-br/*.html
-docs/examples/*.html
-docs/pt-br/examples/*.html
+docs/guides/*.html
+docs/pt-br/guides/*.html
 docs/sitemap.xml
 docs/llms.txt
 docs/llms-full.txt

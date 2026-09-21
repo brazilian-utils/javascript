@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Writes the examples the document field page shows (`docs/examples/document-field.md`): one
+ * Writes the examples the document field guide shows (`docs/guides/document-field.md`): one
  * focused example per document and framework, so a reader copies the CPF field, not a generic one
  * that has to be narrowed down first. Every file comes from a template in
  * `docs/snippets/document-field/_templates`, filled in from the table below, together with the
@@ -282,8 +282,10 @@ for (const document of DOCUMENTS) {
 // A page that points at a file which is not there renders whatever the server answers with, so
 // the pages that show these examples are checked against what was just written.
 const PAGES = [
-	join(ROOT, "docs", "examples", "document-field.md"),
-	join(ROOT, "docs", "pt-br", "examples", "document-field.md"),
+	join(ROOT, "docs", "guides", "document-field.md"),
+	join(ROOT, "docs", "pt-br", "guides", "document-field.md"),
+	join(ROOT, "docs", "guides", "address-form.md"),
+	join(ROOT, "docs", "pt-br", "guides", "address-form.md"),
 ];
 const INCLUDE_PATTERN = /\]\((\.[^ )]+) ':include/g;
 const FILE_DIV_PATTERN = /<div class="file"|<\/div>/g;
