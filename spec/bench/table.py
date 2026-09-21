@@ -22,9 +22,14 @@ LABEL = {
     "uniffi-batch": "uniffi-batch",
     "cgo": "cgo",
     "cgo-batch": "cgo-batch",
+    "cext": "**cext**",
+    "cext-batch": "cext-batch",
+    "ffm": "**ffm (Panama)**",
+    "core-direct": "**core-direct**",
 }
 
 LAYOUT = [
+    ("C", "c", ["core-direct"]),
     ("Node", "node", ["handwritten", "generated", "wasm", "wasm-batch"]),
     (
         "Python",
@@ -39,11 +44,14 @@ LAYOUT = [
             "ffi-batch",
             "uniffi",
             "uniffi-batch",
+            "cext",
+            "cext-batch",
         ],
     ),
-    ("Ruby", "ruby", ["handwritten", "generated", "wasm", "wasm-batch", "ffi"]),
+    ("Ruby", "ruby", ["handwritten", "generated", "wasm", "wasm-batch", "ffi", "cext"]),
     ("Go", "go", ["handwritten", "generated", "wasm", "wasm-batch", "cgo", "cgo-batch"]),
-    ("Java", "java", ["handwritten", "generated"]),
+    ("Java", "java", ["handwritten", "generated", "ffm"]),
+    ("C#", "csharp", ["handwritten", "ffi"]),
 ]
 
 
@@ -57,7 +65,8 @@ def main() -> None:
     lines = ["| Language | Arm | ns/op | × hand | valid |", "| --- | --- | ---: | ---: | ---: |"]
 
     for title, lang, arms in LAYOUT:
-        base = by[lang]["handwritten"]["nsPerOp"]
+        # C is the floor: the same core with no boundary, so there is nothing to compare it to.
+        base = by[lang]["handwritten"]["nsPerOp"] if "handwritten" in by[lang] else None
 
         for arm in arms:
             row = by[lang][arm]
@@ -67,11 +76,19 @@ def main() -> None:
                 label = "ffi (Fiddle)"
             if lang == "go" and arm == "wasm":
                 label = "wasm (wazero)"
+            if lang == "csharp" and arm == "ffi":
+                label = "**ffi (P/Invoke)**"
 
-            ratio = row["nsPerOp"] / base
-            emphasise = arm in ("generated", "uniffi")
+            ratio = None if base is None else row["nsPerOp"] / base
+            emphasise = arm in ("generated", "uniffi", "cext", "ffm", "core-direct") or (
+                lang == "csharp" and arm == "ffi"
+            )
             ns = f"**{row['nsPerOp']:.1f}**" if emphasise else f"{row['nsPerOp']:.1f}"
-            rel = f"**{ratio:.2f}**" if emphasise else f"{ratio:.2f}"
+
+            if ratio is None:
+                rel = "—"
+            else:
+                rel = f"**{ratio:.2f}**" if emphasise else f"{ratio:.2f}"
             valid = "—" if arm.endswith("callonly") else str(row["valid"])
 
             if arm == "handwritten" and row["valid"] != 337:

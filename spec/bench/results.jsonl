@@ -35,3 +35,18 @@
 {"lang":"java","arm":"generated","nsPerOp":493.6,"valid":337}
 {"lang": "python", "arm": "uniffi", "nsPerOp": 9064.2, "valid": 337}
 {"lang": "python", "arm": "uniffi-batch", "nsPerOp": 6195.8, "valid": 337}
+{"lang":"c","arm":"core-direct","nsPerOp":47.0,"valid":337}
+{"lang":"c","arm":"core-direct-callonly","nsPerOp":39.5,"valid":1000}
+{"lang": "python", "arm": "cext", "nsPerOp": 65.4, "valid": 337}
+{"lang": "python", "arm": "cext-callonly", "nsPerOp": 66.5, "valid": 1000}
+{"lang": "python", "arm": "cext-batch", "nsPerOp": 235.9, "valid": 337}
+{"lang":"ruby","arm":"cext","nsPerOp":109.3,"valid":337}
+{"lang":"ruby","arm":"cext-callonly","nsPerOp":104.6,"valid":1000}
+{"lang":"ruby","arm":"cext-batch","nsPerOp":465.7,"valid":337}
+{"lang":"java","arm":"ffm","nsPerOp":127.3,"valid":337}
+{"lang":"java","arm":"ffm-callonly","nsPerOp":101.9,"valid":1000}
+{"lang":"java","arm":"ffm-plain-callonly","nsPerOp":102.7,"valid":1000}
+{"lang":"csharp","arm":"handwritten","nsPerOp":330.2,"valid":337}
+{"lang":"csharp","arm":"ffi","nsPerOp":76.4,"valid":337}
+{"lang":"csharp","arm":"ffi-callonly","nsPerOp":40.6,"valid":1000}
+{"lang":"csharp","arm":"ffi-plain-callonly","nsPerOp":41.2,"valid":1000}

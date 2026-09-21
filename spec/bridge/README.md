@@ -104,6 +104,44 @@ The source is straight-line, synchronous TypeScript. Three things are the emitte
   Go, threads and an `mpsc` channel in Rust, virtual threads in Java, and threads with a queue
   in Python and Ruby.
 
+## The eighth target: a C ABI, for the ecosystems that would rather bind
+
+Generated source is not the only way to get one implementation into seven languages. The other
+is one compiled core with a hand-written binding per ecosystem, and
+[`spec/BINDINGS-INVESTIGATION.md`](../BINDINGS-INVESTIGATION.md) measures what that boundary
+actually costs when it is written the way a package writes it rather than the way a script
+does: **~1 ns in C#, 27 ns in Python, ~60 ns in Go, Java and Ruby**, against a validator body
+of 47 ns. In Python and Ruby that is 21× and 18× faster than the generated source.
+
+So the Rust target emits both surfaces from the same source:
+
+```
+out/rust/src/cnpj.rs        the library a Rust caller uses
+out/rust/src/cabi_cnpj.rs   #[no_mangle] extern "C" wrappers over the same functions
+out/rust/include/cnpj.h     the header a binding author reads
+```
+
+```c
+int32_t  cnpj_is_valid_cnpj(const uint8_t *cnpj, size_t len, int64_t version);
+intptr_t cnpj_format_cnpj(const uint8_t *value, size_t len, int64_t version,
+                          int32_t obfuscate, int32_t pad, uint8_t *out, size_t out_len);
+```
+
+Pointers, lengths and integers, nothing owned and nothing allocated across the boundary. An
+option that was not given is its "unset" sentinel — the same one the emitters already compare
+against. A function that answers text writes into the caller's buffer and returns the length.
+
+`conformance/run-all.sh` replays the CNPJ vectors through that ABI from C as an eighth arm
+(5,732 / 5,732), which checks every hand-written binding's target at once: a CPython extension,
+a Ruby C extension, a NuGet package over P/Invoke and a JAR over Panama all call exactly these
+symbols.
+
+What the ABI does **not** cover yet is listed in the generated file itself: a function that
+raises needs an out parameter for the error, one that waits on the network needs a callback or
+a poll, and one that answers a list needs an iterator. `getMunicipalities` and
+`getAddressInfoByCep` are refused rather than guessed at, so today they are generated-source
+only.
+
 ## The subset
 
 The frontend accepts a subset and refuses everything else with a pointed error rather than

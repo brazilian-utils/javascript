@@ -28,3 +28,5 @@ spec/bench/**/target
 spec/bench/harness/go/generated
 spec/bench/harness/java/Cpf.java
 spec/bench/harness/java/SpecRuntime.java
+spec/bench/harness/csharp/bin
+spec/bench/harness/csharp/obj

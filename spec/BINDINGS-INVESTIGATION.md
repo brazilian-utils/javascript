@@ -5,10 +5,23 @@ each language, could Brazilian Utils build the logic once — in Rust, in C, in 
 give every package a **binding** to it? Is there an off the shelf tool for that? And what does it
 cost at run time?
 
+What is being shared either way is the **utility's implementation**, not the published package.
+Every ecosystem keeps writing its own DX by hand: its naming, its option objects, its types, its
+docs. That matters for the answer, because a hand-written binding is then no more hand-written
+code than the wrapper it sits behind.
+
+> **Revised.** The first version of this document concluded that generated source beat every
+> binding. It had only measured the bindings a script reaches for — `ctypes`, Fiddle, a wasm
+> runtime — and not the ones a package ships. A CPython extension is 16× cheaper than `ctypes`
+> and P/Invoke costs about a nanosecond, which changes the answer for four of the seven
+> ecosystems. [§2](#2-the-boundary-costs-more-than-the-work--but-only-over-the-wrong-boundary)
+> has the corrected numbers and what they turn on.
+
 Everything below was measured on this branch. Reproduce with:
 
 ```bash
 bash spec/bench/run-all.sh            # every arm, every language
+bash spec/bench/run-native.sh         # the bindings each ecosystem actually ships
 bash spec/conformance/run-all.sh      # every arm still answers identically
 ```
 
@@ -16,22 +29,46 @@ bash spec/conformance/run-all.sh      # every arm still answers identically
 
 ## The answer
 
-**Generated source wins, and it is not close.** The approach from the previous exploration —
-a language neutral spec compiled to idiomatic source per language — beats every binding strategy
-once distribution is taken into account, and after two emitter fixes it is also _faster than the
-handwritten code it replaces_ in all five languages measured.
+**It depends on the ecosystem, and the deciding factor is not speed.**
 
-A shared binary core is not useless, but it is a second, optional layer: worth it only for a host
-that validates in bulk, never for the npm package, and never as the only implementation.
+The first pass of this document concluded that generated source beat every binding. That
+conclusion was drawn from the wrong measurements: it compared generated source against the
+bindings a _script_ reaches for — `ctypes`, Fiddle, a wasm runtime — and never against the
+bindings a _package_ ships. Those are not the same thing, and they are not close: a CPython
+extension module costs 27 ns per call where `ctypes` costs 433 ns, and P/Invoke with the GC
+transition suppressed costs about 1 ns.
 
-| Strategy                                 | Run time                                             | Ship cost                                                | Verdict                 |
-| ---------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------- | ----------------------- |
-| **Generated native source**              | 0.36×–0.66× of handwritten (i.e. faster)             | none: it is just source                                  | **default**             |
-| Shared core + wasm                       | 0.12×–15.5× depending entirely on the host's runtime | one 9 KB artifact, plus a runtime dependency per package | optional, batch only    |
-| Shared core + C ABI (FFI/cgo)            | 0.10×–0.45×                                          | a native build per platform × arch, per ecosystem        | last resort             |
-| Off the shelf binding generator (UniFFI) | **3.7× slower than plain Python**                    | as above                                                 | rejected on the numbers |
+Measured properly, with the core called the way each ecosystem actually calls native code:
 
----
+| Ecosystem  | Best per call               | Against its own generated source | Boundary cost |
+| ---------- | --------------------------- | -------------------------------- | ------------- |
+| **C#**     | **76 ns** P/Invoke          | 4.3× faster than handwritten     | **~1 ns**     |
+| **Python** | **65 ns** CPython extension | **21× faster**                   | 27 ns         |
+| **Ruby**   | **109 ns** C extension      | **18× faster**                   | 65 ns         |
+| **Java**   | **127 ns** Panama FFM       | 3.9× faster                      | 62 ns         |
+| **Go**     | 119 ns cgo                  | 1.6× faster                      | 58 ns         |
+| **Node**   | 257 ns generated source     | binding not available            | —             |
+| **Rust**   | 47 ns                       | it _is_ the core                 | 0             |
+
+So a C ABI really is close to free in C#, cheap in Python, and about 60 ns everywhere else —
+against a validator body of 47 ns. That is the correction.
+
+What it does **not** change is the recommendation for the npm package, and that turns out to
+decide the shape of the whole thing:
+
+- **JavaScript cannot take a binary core**, because the package is tree shakeable and a wasm
+  module is not. One utility as generated source is 509 bytes and disappears when unused; the
+  wasm core is 9,291 bytes, indivisible, and asynchronous to start. This is not a preference,
+  it is a requirement, so JavaScript gets generated source whatever the other ecosystems do.
+- **Go pays for cgo in something other than nanoseconds.** It loses cross compilation, static
+  binaries and `CGO_ENABLED=0` builds, for a 74 ns gain. Not worth it.
+- **Everywhere else the binding is the better answer**, and the ship cost — a native artifact
+  per platform × arch — is a cost those ecosystems already pay routinely.
+
+Which points at a hybrid rather than a winner, and a smaller tool than either option alone:
+write the utility once, emit **TypeScript** for npm and **Rust** for the shared core, and let
+Python, Ruby, C#, Java and Erlang bind to the compiled core with a hand-written binding. Go
+takes generated source. The full recommendation is [at the end](#recommendation).
 
 ## How it was measured
 
@@ -50,15 +87,19 @@ rustc 1.94.1, OpenJDK 21.0.10, wasmtime-py 48.0.0, wasmtime gem 48.0.1, wazero 1
 
 ### Arms
 
-| Arm             | What it is                                                               |
-| --------------- | ------------------------------------------------------------------------ |
-| `handwritten`   | Idiomatic code a contributor would write in that language, regex and all |
-| `generated`     | The emitter's output for the same spec                                   |
-| `wasm`          | The Rust core compiled to `wasm32-unknown-unknown`, one call per input   |
-| `wasm-batch`    | Same core, the whole corpus in one call                                  |
-| `wasm-callonly` | The boundary alone: same pointer, same length, no marshalling            |
-| `ffi` / `cgo`   | The same core as a `cdylib`, over ctypes / Fiddle / cgo                  |
-| `uniffi`        | The same logic behind UniFFI generated Python bindings                   |
+| Arm             | What it is                                                                |
+| --------------- | ------------------------------------------------------------------------- |
+| `handwritten`   | Idiomatic code a contributor would write in that language, regex and all  |
+| `generated`     | The emitter's output for the same spec                                    |
+| `wasm`          | The Rust core compiled to `wasm32-unknown-unknown`, one call per input    |
+| `wasm-batch`    | Same core, the whole corpus in one call                                   |
+| `wasm-callonly` | The boundary alone: same pointer, same length, no marshalling             |
+| `ffi` / `cgo`   | The same core as a `cdylib`, over ctypes / Fiddle / cgo                   |
+| `uniffi`        | The same logic behind UniFFI generated Python bindings                    |
+| `cext`          | The same core as a CPython extension module / a Ruby C extension          |
+| `ffm`           | The same core over Java's Foreign Function & Memory API, trivial downcall |
+| `ffi` (C#)      | The same core over P/Invoke with `[SuppressGCTransition]`                 |
+| `core-direct`   | The same core called from C: the floor, the work with no boundary at all  |
 
 ---
 
@@ -67,38 +108,45 @@ rustc 1.94.1, OpenJDK 21.0.10, wasmtime-py 48.0.0, wasmtime gem 48.0.1, wazero 1
 Lower is better. `× hand` is the ratio to that language's handwritten arm, so **below 1.00 is
 faster than handwritten**.
 
-| Language | Arm           |      ns/op |   × hand |   valid |
-| -------- | ------------- | ---------: | -------: | ------: |
-| Node     | handwritten   |      386.2 |     1.00 |     337 |
-| Node     | **generated** |  **256.5** | **0.66** |     337 |
-| Node     | wasm          |      224.6 |     0.58 |     337 |
-| Node     | wasm-batch    |      240.5 |     0.62 |     337 |
-| Python   | handwritten   |     2460.6 |     1.00 | **333** |
-| Python   | **generated** | **1366.0** | **0.56** |     337 |
-| Python   | wasm          |    38039.3 |    15.46 |     337 |
-| Python   | wasm-callonly |    30058.9 |    12.22 |       — |
-| Python   | wasm-batch    |      306.3 |     0.12 |     337 |
-| Python   | ffi (ctypes)  |      535.3 |     0.22 |     337 |
-| Python   | ffi-batch     |      239.9 |     0.10 |     337 |
-| Python   | **uniffi**    | **9064.2** | **3.68** |     337 |
-| Python   | uniffi-batch  |     6195.8 |     2.52 |     337 |
-| Ruby     | handwritten   |     3675.8 |     1.00 | **329** |
-| Ruby     | **generated** | **2020.1** | **0.55** |     337 |
-| Ruby     | wasm          |      729.9 |     0.20 |     337 |
-| Ruby     | wasm-batch    |      430.0 |     0.12 |     337 |
-| Ruby     | ffi (Fiddle)  |     1662.1 |     0.45 |     337 |
-| Go       | handwritten   |      446.2 |     1.00 | **334** |
-| Go       | **generated** |  **193.1** | **0.43** |     337 |
-| Go       | wasm (wazero) |      189.1 |     0.42 |     337 |
-| Go       | wasm-batch    |      104.5 |     0.23 |     337 |
-| Go       | cgo           |      119.1 |     0.27 |     337 |
-| Go       | cgo-batch     |       52.6 |     0.12 |     337 |
-| Java     | handwritten   |     1365.3 |     1.00 |     337 |
-| Java     | **generated** |  **493.6** | **0.36** |     337 |
+| Language | Arm                |      ns/op |   × hand |   valid |
+| -------- | ------------------ | ---------: | -------: | ------: |
+| C        | **core-direct**    |   **47.0** |        — |     337 |
+| Node     | handwritten        |      386.2 |     1.00 |     337 |
+| Node     | **generated**      |  **256.5** | **0.66** |     337 |
+| Node     | wasm               |      224.6 |     0.58 |     337 |
+| Node     | wasm-batch         |      240.5 |     0.62 |     337 |
+| Python   | handwritten        |     2460.6 |     1.00 | **333** |
+| Python   | **generated**      | **1366.0** | **0.56** |     337 |
+| Python   | wasm               |    38039.3 |    15.46 |     337 |
+| Python   | wasm-callonly      |    30058.9 |    12.22 |       — |
+| Python   | wasm-batch         |      306.3 |     0.12 |     337 |
+| Python   | ffi (ctypes)       |      535.3 |     0.22 |     337 |
+| Python   | ffi-batch          |      239.9 |     0.10 |     337 |
+| Python   | **uniffi**         | **9064.2** | **3.68** |     337 |
+| Python   | uniffi-batch       |     6195.8 |     2.52 |     337 |
+| Python   | **cext**           |   **65.4** | **0.03** |     337 |
+| Python   | cext-batch         |      235.9 |     0.10 |     337 |
+| Ruby     | handwritten        |     3675.8 |     1.00 | **329** |
+| Ruby     | **generated**      | **2020.1** | **0.55** |     337 |
+| Ruby     | wasm               |      729.9 |     0.20 |     337 |
+| Ruby     | wasm-batch         |      430.0 |     0.12 |     337 |
+| Ruby     | ffi (Fiddle)       |     1662.1 |     0.45 |     337 |
+| Ruby     | **cext**           |  **109.3** | **0.03** |     337 |
+| Go       | handwritten        |      446.2 |     1.00 | **334** |
+| Go       | **generated**      |  **193.1** | **0.43** |     337 |
+| Go       | wasm (wazero)      |      189.1 |     0.42 |     337 |
+| Go       | wasm-batch         |      104.5 |     0.23 |     337 |
+| Go       | cgo                |      119.1 |     0.27 |     337 |
+| Go       | cgo-batch          |       52.6 |     0.12 |     337 |
+| Java     | handwritten        |     1365.3 |     1.00 |     337 |
+| Java     | **generated**      |  **493.6** | **0.36** |     337 |
+| Java     | **ffm (Panama)**   |  **127.3** | **0.09** |     337 |
+| C#       | handwritten        |      330.2 |     1.00 |     337 |
+| C#       | **ffi (P/Invoke)** |   **76.4** | **0.23** |     337 |
 
 ---
 
-## Six findings
+## Seven findings
 
 ### 1. Generated source is faster than handwritten, in every language measured
 
@@ -125,27 +173,45 @@ Python went 6485 → 1366 ns/op; Ruby 15051 → 2020. Conformance stayed at 2229
 **This is the load bearing result for the whole idea**: the emitter is allowed to know things
 about its target language, and the moment it does, generated code stops being a compromise.
 
-### 2. The boundary costs more than the work
+### 2. The boundary costs more than the work — but only over the wrong boundary
 
-The validator itself takes ~100 ns. Look at the `callonly` arms — the same pointer and length every
-time, no marshalling, no string conversion, pure boundary:
+The validator body is 47 ns, measured by calling the same shared library from C
+(`core-direct`). Against that, here is every boundary measured, isolated: the same pointer and
+length every call, no marshalling, minus the 40 ns the same fixed input costs in C.
 
-| Host                        | Boundary cost per call |
-| --------------------------- | ---------------------- |
-| Go → wasm (wazero)          | 104 ns                 |
-| Go → C (cgo)                | 98 ns                  |
-| Ruby → wasm (wasmtime gem)  | 521 ns                 |
-| Ruby → C (Fiddle)           | 1518 ns                |
-| Python → C (ctypes)         | 472 ns                 |
-| Python → wasm (wasmtime-py) | **30059 ns**           |
+| Host          | Mechanism                          | Boundary cost per call |
+| ------------- | ---------------------------------- | ---------------------- |
+| C# → C        | P/Invoke, `[SuppressGCTransition]` | **~1 ns**              |
+| Python → C    | CPython extension module           | **27 ns**              |
+| Go → C        | cgo                                | 58 ns                  |
+| Java → C      | Panama FFM, trivial downcall       | 62 ns                  |
+| Ruby → C      | C extension                        | 65 ns                  |
+| Go → wasm     | wazero                             | 64 ns                  |
+| Python → C    | ctypes                             | 433 ns                 |
+| Ruby → wasm   | wasmtime gem                       | 482 ns                 |
+| Ruby → C      | Fiddle                             | 1,479 ns               |
+| Python → wasm | wasmtime-py 48                     | **30,019 ns**          |
 
-For a function whose body is 100 ns, a boundary of 500–1500 ns means the binding _is_ the cost.
-That is why `ffi` in Python (535 ns) is almost exactly `ffi-callonly` (472 ns): the validation is
-noise next to the call.
+The top half and the bottom half are the same idea over different plumbing, and they differ by
+three orders of magnitude. The first pass of this document measured only the bottom half and
+drew a general conclusion from it; that was wrong.
 
-The corollary is the `batch` arms: amortise one boundary crossing over 1000 inputs and everything
-becomes fast (Python 240 ns/op over ctypes, 306 ns/op over wasm). A shared core is a **bulk
-validation** tool, not a per call one.
+Three details decide which half a binding lands in, and all three are easy to get wrong:
+
+- **C#** needs `[SuppressGCTransition]`. Without it the call still costs only 42 ns rather than
+  41, because .NET's transition is already cheap — this is the one runtime where the naive
+  version is fine.
+- **Java** needs the `MethodHandle` to be `static final` and the off-heap buffer to come from
+  `Arena.global()`. With a shared arena and an instance handle the same call costs 84 ns more,
+  because the JIT cannot fold the downcall stub and pays a liveness check per call.
+  `Linker.Option.isTrivial()` itself is worth about 1 ns here.
+- **Python and Ruby** need a real extension module. `ctypes` is 16× more expensive than a
+  CPython extension; Fiddle is 23× more expensive than a Ruby C extension.
+
+The corollary about batching still holds, and is now less interesting: amortising one crossing
+over 1000 inputs helps the expensive boundaries and _hurts_ the cheap ones. Python's C
+extension is 65 ns per call and 236 ns per call in batch, because packing the buffer in Python
+costs more than the calls it saves.
 
 ### 3. Binding quality varies by 300× between runtimes of the same technology
 
@@ -177,7 +243,7 @@ still slower than plain Python, because the sequence has to be serialised into a
 UniFFI is built for coarse grained APIs — "sync this database", "decrypt this blob" — where a
 microsecond of glue is irrelevant. Brazilian Utils is the opposite: a hundred tiny pure functions.
 
-### 5. The JS package would pay the most and gain the least
+### 5. The JS package would pay the most and gain the least, which settles it
 
 |                                              | Generated source            | Wasm core                                                               |
 | -------------------------------------------- | --------------------------- | ----------------------------------------------------------------------- |
@@ -192,7 +258,27 @@ exchange for 160 ns. The npm package's selling points are exactly what a wasm co
 Cold start, for the record: instantiating the 9 KB module costs 0.025 ms in Node, 3.5 ms in
 Python, 3.8 ms in Ruby — fine for a server, not free for a CLI or a lambda.
 
-### 6. Every handwritten port is already subtly wrong
+### 6. A binding is cheap; a binary is not
+
+Every number above is per call. The cost that decides the question is per release.
+
+Generated source ships as source: it is reviewed in the package's own repository, `git diff`
+shows what changed, a stack trace points at a line, and there is no build matrix at all. A
+shared core ships as an artifact per platform × arch per ecosystem, and needs a release
+pipeline that produces them, a fallback for platforms nobody built, and an ABI that the
+package and the artifact both agree on.
+
+Two ecosystems make that trade badly:
+
+- **JavaScript**, because of §5: no tree shaking, 18× the bytes, asynchronous startup.
+- **Go**, because cgo costs cross compilation, static binaries and `CGO_ENABLED=0` builds — the
+  things a Go library is expected to keep — and buys 74 ns against the generated code.
+
+Four make it well, because they already ship native extensions as a matter of course: Python,
+Ruby, C# and Java. There the speedup is 3.9× to 21×, and the pipeline is one their maintainers
+have built before.
+
+### 7. Every handwritten port is already subtly wrong
 
 Look at the `valid` column. Over the same 1000 inputs, the handwritten arms disagree with the
 spec: Python 333, Ruby 329, Go 334, against 337 for everything generated.
@@ -234,20 +320,48 @@ target.
 
 ## Recommendation
 
-1. **Generated source is the default.** It has no runtime dependency, no build matrix, no cold
-   start, no bundle penalty, it is reviewable by each package's maintainers, and it is now measured
-   faster than the handwritten code in Node, Python, Ruby, Go and Java (0.36×–0.66×).
-2. **Keep the two emitter rules from §1 as a requirement of every new target.** A target is not
-   done until its output is benchmarked against idiomatic handwritten code for that language. The
-   harness in `spec/bench` is the acceptance test.
-3. **Do not put a binary core in the npm package.** §5 is disqualifying on its own.
-4. **A shared wasm core stays an option for one specific case**: a host validating in bulk — a
-   batch importer, an ETL job, a CEP sweep. `wasm-batch` runs at 0.12× of handwritten in Python and
-   Ruby. If that demand ever appears, it should be a separate, optional package
-   (`brazilian-utils-turbo`), never the only implementation, and it should reuse the same spec so
-   the two cannot drift.
-5. **Revisit only if the workload changes.** Bindings win when the work per call grows past a few
-   microseconds. Nothing in this library is close: the heaviest validator here is ~100 ns.
+The unit being shared is the **utility's implementation**, not the published package: every
+ecosystem writes its own DX by hand — its naming, its option objects, its types, its docs —
+over whichever core it gets. That is what makes a hand-written binding acceptable, and it is
+why the answer can differ per ecosystem without the library becoming incoherent.
+
+1. **Write the utility once**, in the portable TypeScript subset
+   ([`spec/bridge`](bridge/README.md)). One implementation, one review, one set of conformance
+   vectors.
+2. **Emit TypeScript for npm.** Not negotiable: the package is tree shakeable and a binary core
+   is not. 509 bytes per utility that disappear when unused, against 9,291 indivisible bytes.
+3. **Emit Rust for the shared core**, compiled to a C ABI. This is the piece that does not
+   exist yet: the Rust emitter produces a library crate, and a `cdylib` with
+   `#[no_mangle] extern "C"` wrappers is a small addition to it.
+4. **Bind to that core from Python, Ruby, C#, Java and Erlang.** 21×, 18×, 4.3×, 3.9× and
+   unmeasured respectively, over a boundary of 1–65 ns. Each binding is hand-written, small,
+   and lives with the DX layer it serves — the same place those packages already keep their
+   hand-written code.
+5. **Give Go generated source.** cgo's cost is not its 58 ns. It is cross compilation, static
+   binaries and `CGO_ENABLED=0`, all of which a Go library is expected to keep, traded for
+   74 ns against the generated code. The wrong trade.
+6. **Keep the other emitters.** They are written and they pass conformance, so they stay as the
+   escape hatch for any ecosystem that would rather not ship a native artifact — and as the
+   reference the bindings are checked against.
+
+The two halves stay honest about each other the same way they do now: every target, generated
+or bound, replays the same vectors recorded from the package this repository ships.
+
+### What the binding route costs to ship
+
+Worth pricing before agreeing to it, because this is where generated source is free and a
+native core is not.
+
+| Ecosystem | Artifact                                    | Notes                                                              |
+| --------- | ------------------------------------------- | ------------------------------------------------------------------ |
+| Python    | wheels per platform × arch, `abi3`          | cibuildwheel; ~10 wheels; an sdist fallback needs a compiler       |
+| Ruby      | native gem per platform, or source gem      | rake-compiler-dock; a source gem compiling on install is normal    |
+| C#        | NuGet with `runtimes/{rid}/native/`         | well-trodden; `SuppressGCTransition` needs .NET 5+                 |
+| Java      | JAR with the library per os-arch, extracted | **needs JDK 22+** for FFM without `--enable-preview`; JNI below it |
+| Erlang    | a NIF, built on install                     | unmeasured here; the same C boundary                               |
+
+None of that is exotic — every one of those ecosystems ships native extensions routinely — but
+it is a release pipeline per package, and it is the reason step 6 exists.
 
 ## What would change the answer
 
@@ -255,6 +369,8 @@ target.
   boundary stops dominating.
 - A host runtime fixing its call overhead — a wasmtime-py that costs 500 ns instead of 30 000 ns
   would make the wasm core competitive per call in Python.
+- Go removing the cost of cgo, or the library deciding it does not care about `CGO_ENABLED=0`.
+  The nanoseconds already favour the binding there; nothing else does.
 - The Component Model reaching the point where `jco` emits tree shakeable JS. Today it does not.
 
 ## Reproducing
@@ -272,5 +388,13 @@ cp target/release/libbrutils_uniffi.so ../.build/uniffi-python/
 python3 ../harness/uniffi_bench.py
 ```
 
-Requires `node`, `python3` (with `wasmtime`), `ruby` (with the `wasmtime` gem), `go`, `cargo` with
-the `wasm32-unknown-unknown` target, and `javac`.
+The native binding arms are a separate script, because they need each ecosystem's build
+toolchain rather than its wasm runtime:
+
+```bash
+bash spec/bench/run-native.sh >> spec/bench/results.jsonl
+```
+
+Requires `node`, `python3` (with `wasmtime` and its development headers), `ruby` (with the
+`wasmtime` gem and its development headers), `go`, `cargo` with the `wasm32-unknown-unknown`
+target, `javac` (21+), `dotnet` (8+) and a C compiler.

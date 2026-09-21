@@ -21,6 +21,7 @@ import {
 	type Ty,
 } from "../ir.ts";
 import { optionReads, prose, pushTargets, screaming, snake } from "../kit.ts";
+import { emit as emitCabi } from "./cabi.ts";
 
 /** The record types of the module being emitted, so a struct literal owns its fields. */
 let structs = new Map<string, StructDecl>();
@@ -566,7 +567,7 @@ fn ${snake(entry.name)}_table() -> &'static runtime::Dataset {
  * @param {Module} module - The compiled module.
  * @returns {Record<string, string>} The files, by path.
  */
-export const emit = (module: Module, modules: Module[] = [module]): Record<string, string> => {
+export const emit = (module: Module, allModules: Module[] = [module]): Record<string, string> => {
 	signatures = new Map(module.functions.map((entry) => [entry.name, entry.params]));
 	structs = new Map(module.structs.map((entry) => [entry.name, entry]));
 	throwing = new Set(module.functions.filter((entry) => entry.throws).map((entry) => entry.name));
@@ -594,14 +595,26 @@ export const emit = (module: Module, modules: Module[] = [module]): Record<strin
 		})
 		.join("\n");
 
+	// The same crate is the library a Rust caller uses and the shared core every other
+	// ecosystem binds to; `cabi.ts` adds the second surface without touching the first.
+	const cabi = emitCabi(module);
+	const modules = [...new Set(allModules.map((entry) => entry.name))];
+
 	return {
+		...cabi,
 		"src/runtime.rs": readFileSync(RUNTIME, "utf8"),
 		"src/lib.rs": `// Code generated from spec/bridge/source. DO NOT EDIT.
 
 //! Generated Brazilian Utils.
 
 pub mod runtime;
-${modules.map((entry) => `pub mod ${entry.name};`).join("\n")}
+${modules.map((name) => `pub mod ${name};`).join("\n")}
+
+// The C ABI, for the ecosystems that bind to this crate instead of generating their own source.
+${allModules
+	.filter((entry) => Object.keys(emitCabi(entry)).length > 0)
+	.map((entry) => `pub mod cabi_${entry.name};`)
+	.join("\n")}
 `,
 		"Cargo.toml": `[package]
 name = "brazilian_utils_bridge"
@@ -615,6 +628,8 @@ ureq = "3"
 
 [lib]
 path = "src/lib.rs"
+# lib for a Rust caller, cdylib and staticlib for every binding that is not Rust.
+crate-type = ["lib", "cdylib", "staticlib"]
 `,
 		[`src/${module.name}.rs`]: `// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
 

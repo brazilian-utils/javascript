@@ -9,6 +9,10 @@
 # over HTTP on a local port and every target is pointed at it through the runtime's
 # BRUTILS_BRIDGE_HTTP_ORIGIN hook.
 #
+# The eighth arm is not a language: it is the C ABI the Rust crate exposes, which is what a
+# hand-written binding in Python, Ruby, C#, Java or Erlang would call instead of generated
+# source. `spec/BINDINGS-INVESTIGATION.md` has the numbers that make that a real option.
+#
 # Usage: `bash spec/bridge/conformance/run-all.sh`
 set -uo pipefail
 
@@ -66,12 +70,15 @@ run rust bash -c "cd '${out}/rust' && cargo run --quiet --release --bin conforma
 step "java"
 run java bash -c "cd '${out}/java' && javac -nowarn -d classes *.java >/dev/null 2>&1 && java -cp classes Conformance ../../conformance/vectors.tsv"
 
+step "c abi (the shared core every hand-written binding calls)"
+run cabi bash -c "cd '${out}/rust' && cargo build --quiet --release 2>/dev/null && gcc -O2 -D_GNU_SOURCE -I. conformance_cabi.c -o conformance_cabi -Ltarget/release -lbrazilian_utils_bridge -Wl,-rpath,'${out}/rust/target/release' && ./conformance_cabi ../../conformance/vectors.tsv"
+
 step "csharp"
 run csharp bash -c "cd '${out}/csharp' && DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet run --verbosity quiet -- ../../conformance/vectors.tsv"
 
 echo
 if [ "${status}" -eq 0 ]; then
-	echo "all seven targets match the JavaScript package"
+	echo "all seven targets, and the C ABI, match the JavaScript package"
 else
 	echo "at least one target diverged"
 fi
