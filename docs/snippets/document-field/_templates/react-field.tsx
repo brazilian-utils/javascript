@@ -17,8 +17,9 @@ export function @@Name@@Field({ value, onChange, errorMessage, ...props }: @@Nam
   const errorId = `${id}-error`;
   const ref = useMask({
     format: @@format@@,
+    parse: @@parse@@,
     value,
-    onChange: (masked) => onChange(@@parseMasked@@),
+    onChange: ({ parsedValue }) => onChange(parsedValue),
   });
 
   return (

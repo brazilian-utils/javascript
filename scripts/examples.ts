@@ -130,7 +130,9 @@ function values(document: Document): Record<string, string> {
 	const format = split(document.format);
 	const validator = split(document.validator);
 	const parser = split(document.parser);
-	// A formatter that takes options is wrapped, so that the mask can call it with a value alone.
+	// A function that takes options is wrapped, so that the mask can call it with a value alone.
+	const parserExpression =
+		parser.rest === "" ? parser.fn : `(value: string) => ${call(parser, "value")}`;
 	const formatter = format.rest === "" ? format.fn : `(value: string) => ${call(format, "value")}`;
 
 	return {
@@ -171,6 +173,7 @@ function values(document: Document): Record<string, string> {
 		parseInput: call(parser, "input.value"),
 		parseMaskedEvent: call(parser, "event.currentTarget.value"),
 		parseMasked: call(parser, "masked"),
+		parse: parserExpression,
 		parseMaskValue: call(parser, "maskValue(event)"),
 		parseMaskedEventVue: call(parser, "(event.target as HTMLInputElement).value"),
 		parseMaskedEventAngular: call(parser, "(event.target as HTMLInputElement).value"),
