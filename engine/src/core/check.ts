@@ -1463,13 +1463,19 @@ class FunctionChecker {
 		const cases: { values: Value[]; body: CStmt[] }[] = [];
 		let otherwise: CStmt[] | undefined;
 		const covered = new Set<string>();
-		const exits: ScopeSnapshot[] = [];
+		// Only a case that falls off its own end reaches the code after the switch; one that always
+		// returns or leaves the enclosing loop (`exitsScope`, mirroring how `if`/`else` tells the two
+		// apart) never gets there, so its ending state is not part of what "after the switch" means.
+		const fallThroughExits: ScopeSnapshot[] = [];
+		const collect = (body: readonly CStmt[]): void => {
+			if (!(this.alwaysReturns(body) || exitsScope(body))) fallThroughExits.push(this.snapshot());
+		};
 		for (const caseNode of statement.cases) {
 			this.restore(entry);
 			const caseBody = this.caseBody(caseNode.body);
 			if (caseNode.test === undefined) {
 				otherwise = this.block(caseBody);
-				exits.push(this.snapshot());
+				collect(otherwise);
 				continue;
 			}
 			const test = this.expr(caseNode.test, subject.type);
@@ -1485,8 +1491,9 @@ class FunctionChecker {
 					binding.type = tEnum(binding.type.name, [value]);
 				}
 			}
-			cases.push({ values: [value], body: this.block(caseBody) });
-			exits.push(this.snapshot());
+			const body = this.block(caseBody);
+			cases.push({ values: [value], body });
+			collect(body);
 		}
 		this.restore(entry);
 		if (subject.type.kind === "Enum" && otherwise === undefined) {
@@ -1500,6 +1507,12 @@ class FunctionChecker {
 				);
 			}
 		}
+		// Every case that can fall off its own end reaches this point, so what a mutable local holds
+		// after the switch has to cover every one of them — exactly the join a loop's fixpoint takes
+		// over `break`/`continue` states (`loopFixpoint`), for the same reason: an effect a branch
+		// produces is only sound to forget once every path that could carry it forward is accounted
+		// for, not merely the path the checker happened to look at last.
+		this.applyJoin(fallThroughExits);
 		return [{ kind: "switch", subject, cases, otherwise, span: statement.span }];
 	}
 

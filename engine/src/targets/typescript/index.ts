@@ -627,16 +627,28 @@ function printStmt(statement: TStmt, depth: number): string {
 				: `${head} else {\n${printBody(statement.otherwise, depth + 1)}\n${pad}}`;
 		}
 		case "switch": {
+			// The Core's `switch` never falls through — each case is a self-contained branch, which
+			// is exactly why the source's own case-closing `break` carries no meaning and is dropped
+			// on the way into Core (see `caseBody` in `core/check.ts`). JavaScript's `switch` is the
+			// opposite: without an explicit `break`, one matching case runs every case below it too.
+			// Printing the Core's cases as bare `case`/`default` blocks would silently reintroduce
+			// the fallthrough the Core specifically does not have, so every case ends with a `break`
+			// here, regardless of whether its own body already exits (a `break` after a `return` is
+			// unreachable, not wrong, and is cheaper to emit unconditionally than to prove unneeded).
+			const closedBody = (body: readonly TStmt[], indent: number): string =>
+				body.length === 0
+					? `${"\t".repeat(indent)}break;`
+					: `${printBody(body, indent)}\n${"\t".repeat(indent)}break;`;
 			const cases = statement.cases
 				.map(
 					(entry) =>
-						`${pad}\t${entry.values.map((value) => `case ${JSON.stringify(value)}:`).join("\n" + pad + "\t")}\n${printBody(entry.body, depth + 2)}`,
+						`${pad}\t${entry.values.map((value) => `case ${JSON.stringify(value)}:`).join("\n" + pad + "\t")}\n${closedBody(entry.body, depth + 2)}`,
 				)
 				.join("\n");
 			const fallback =
 				statement.otherwise === undefined
 					? ""
-					: `\n${pad}\tdefault:\n${printBody(statement.otherwise, depth + 2)}`;
+					: `\n${pad}\tdefault:\n${closedBody(statement.otherwise, depth + 2)}`;
 			return `${pad}switch (${print(statement.subject)}) {\n${cases}${fallback}\n${pad}}`;
 		}
 		case "for": {

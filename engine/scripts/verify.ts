@@ -90,6 +90,13 @@ const steps: Step[] = [
 		run: () => shell(join(ENGINE, "node_modules", ".bin", "tsc"), ["--noEmit", "-p", "tsconfig.json"], ENGINE),
 	},
 	{
+		// A small, fixed seed budget on every verification: no code generation, so it is cheap
+		// enough to run here rather than only on demand. See docs/fuzzing.md for the full story,
+		// and `node scripts/fuzz.ts full` for the slower, deliberately-run four-target comparison.
+		name: "fuzz (fast, checker vs. interpreter)",
+		run: () => shell(process.execPath, [join(ENGINE, "scripts", "fuzz.ts"), "fast", "--seed", "20260921", "--count", "1000"], ENGINE),
+	},
+	{
 		name: "check",
 		run: () => shell(process.execPath, [join(ENGINE, "src", "cli.ts"), "check", "--project", project], project),
 	},

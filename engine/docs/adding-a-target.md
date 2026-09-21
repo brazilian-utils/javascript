@@ -80,3 +80,14 @@ node scripts/verify.ts ../core
 own linters over the output, and runs the differential conformance harness: every case, through
 the generated driver, compared against the reference interpreter. A target is done when that is
 green and a fluent reader would accept the golden files.
+
+Then run the random program generator against the new target on its own, alongside the hand-written
+cases:
+
+```sh
+node scripts/fuzz.ts full --seed 20260921 --count 300 --targets <name>
+```
+
+`fuzz full` does not know which target it is comparing — it generates cases and compares answers,
+the same way for every target — so this gets the new backend the same generated coverage the first
+four had, without writing a second harness. See [fuzzing.md](fuzzing.md).

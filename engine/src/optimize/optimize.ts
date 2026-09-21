@@ -211,7 +211,13 @@ function raiseLoops(body: readonly CStmt[]): CStmt[] {
 			next.body.length === 1 &&
 			next.body[0]!.kind === "assign" &&
 			next.body[0]!.name === statement.name &&
-			!mentionsOutsideFold(next.body[0]!.value, statement.name, next.name)
+			!mentionsOutsideFold(next.body[0]!.value, statement.name, next.name) &&
+			// A fold is a `const`: sound only when nothing after this loop ever reassigns the same
+			// local again. Two (or more) loops over the same accumulator, one raisable and one not,
+			// are an ordinary shape — an author writes one pass that sums and a later pass that
+			// adjusts — and raising only the first one while leaving the rest as plain `acc = …`
+			// would hand every backend a `const` its own later statement reassigns.
+			!isReassignedLater(body.slice(index + 2), statement.name)
 		) {
 			const update = next.body[0]!;
 			const folded: CStmt = {
@@ -313,4 +319,32 @@ function mentionsOutsideFold(expr: CExpr, accumulator: string, element: string):
 	};
 	visit(expr);
 	return bad;
+}
+
+/**
+ * Whether `name` is ever assigned again in `body`, including inside a nested `if`, loop or
+ * `switch`. A lambda's own body is never checked: the subset rejects a closure that captures a
+ * mutable local (`docs/semantics.md` section 7), so a lambda can never be the reassignment this
+ * is looking for.
+ */
+function isReassignedLater(body: readonly CStmt[], name: string): boolean {
+	return body.some((statement): boolean => {
+		switch (statement.kind) {
+			case "assign":
+			case "setIndex":
+				return statement.name === name;
+			case "if":
+				return isReassignedLater(statement.then, name) || isReassignedLater(statement.otherwise, name);
+			case "forRange":
+			case "forEach":
+				return isReassignedLater(statement.body, name);
+			case "switch":
+				return (
+					statement.cases.some((entry) => isReassignedLater(entry.body, name)) ||
+					(statement.otherwise !== undefined && isReassignedLater(statement.otherwise, name))
+				);
+			default:
+				return false;
+		}
+	});
 }

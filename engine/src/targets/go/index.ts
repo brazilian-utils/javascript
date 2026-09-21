@@ -685,8 +685,19 @@ function printStmt(statement: TStmt, depth: number): string {
 			const update = statement.step === 1n ? `${statement.name}++` : statement.step === -1n ? `${statement.name}--` : `${statement.name} += ${statement.step}`;
 			return `${pad}for ${statement.name} := ${print(statement.from)}; ${statement.name} ${comparison} ${print(statement.to)}; ${update} {\n${printBody(statement.body, depth + 1)}\n${pad}}`;
 		}
-		case "forEach":
-			return `${pad}for _, ${statement.name} := range ${print(statement.iterable)} {\n${printBody(statement.body, depth + 1)}\n${pad}}`;
+		case "forEach": {
+			// Go refuses to compile a declared local that nothing reads, and the subset allows a
+			// `for…of` whose body never touches its binding. The decision is made on the printed
+			// body rather than on the AST on purpose: a `raw` emission can carry a reference as
+			// text, invisible to a pass that walks nodes, and this search finds those too. It errs
+			// the safe way — a name that only looks used still gets its binding, which compiles.
+			const body = printBody(statement.body, depth + 1);
+			const reads = new RegExp(`\\b${statement.name}\\b`, "u").test(body);
+			// `for _ := range xs` is not the answer either: Go rejects a `:=` that binds nothing.
+			// A range loop that needs no element is written without the assignment at all.
+			const header = reads ? `for _, ${statement.name} := range ` : "for range ";
+			return `${pad}${header}${print(statement.iterable)} {\n${body}\n${pad}}`;
+		}
 		case "return": {
 			const values = [statement.value === undefined ? undefined : print(statement.value), ...(statement.extra ?? []).map(print)]
 				.filter((item): item is string => item !== undefined)
@@ -1104,11 +1115,15 @@ function errorsModule(program: CProgram): { path: string; text: string } | undef
 
 /** The generated differential driver, plus the module file that makes the output buildable. */
 function driverFiles(_program: CProgram, entries: readonly DriverEntry[]): { path: string; text: string }[] {
-	const decode = (type: SemType, index: number): string => {
+	// One argument, decoded from what `encoding/json` produced. It has to be recursive: a JSON
+	// array always arrives as `[]interface{}`, whatever the element type, so a `List<Int>` cannot
+	// simply be asserted to `[]int` — it has to be walked and converted element by element. The
+	// other three drivers get this for free from their languages' own decoding.
+	const value = (type: SemType, expr: string): string => {
 		if (type.kind === "Record") {
 			const definition = _program.records.get(type.name);
 			const fields = (definition?.fields ?? []).map((field) => {
-				const access = `args[${index}].(map[string]interface{})[${JSON.stringify(field.name)}]`;
+				const access = `${expr}.(map[string]interface{})[${JSON.stringify(field.name)}]`;
 				switch (field.type.kind) {
 					case "Bool":
 						return `${pascal(field.name)}: ${access}.(bool)`;
@@ -1125,21 +1140,36 @@ function driverFiles(_program: CProgram, entries: readonly DriverEntry[]): { pat
 		switch (type.kind) {
 			case "String":
 			case "Enum":
-				return `args[${index}].(string)`;
+				return `${expr}.(string)`;
 			case "Bool":
-				return `args[${index}].(bool)`;
+				return `${expr}.(bool)`;
 			case "Float":
-				return `args[${index}].(float64)`;
+				return `${expr}.(float64)`;
 			case "Int":
 			case "Decimal":
 			case "CivilDate":
 			case "Instant":
 			case "Duration":
-				return `int(args[${index}].(float64))`;
+				return `int(${expr}.(float64))`;
+			case "List": {
+				const elem = goType(type.elem);
+				return [
+					`func(raw interface{}) []${elem} {`,
+					"\titems := raw.([]interface{})",
+					`\tout := make([]${elem}, len(items))`,
+					"\tfor index, item := range items {",
+					`\t\tout[index] = ${value(type.elem, "item")}`,
+					"\t}",
+					"\treturn out",
+					`}(${expr})`,
+				].join("\n");
+			}
 			default:
-				return `args[${index}].(${goType(type)})`;
+				return `${expr}.(${goType(type)})`;
 		}
 	};
+
+	const decode = (type: SemType, index: number): string => value(type, `args[${index}]`);
 
 	const cases = entries.map((entry) => {
 		const call = `${entry.targetName}(${[

@@ -362,6 +362,14 @@ requests.
 
 ## 10. Verification
 
+- **Layer 0 — random program generation.** A generator (`src/fuzz/`, `docs/fuzzing.md`) produces
+  well-typed programs in the subset above, biased toward loops with `break`/`continue`, nested
+  loops, a `switch` inside a loop, and indices derived from a loop counter — the shapes the two
+  soundness bugs found in this codebase both lived in. It runs the reference interpreter's actual
+  answers against the checker's own proven bounds (fast mode, wired into `verify`) and, on demand,
+  the interpreter against all four targets in both idiom modes (full mode), reusing the Layer 3
+  machinery below. This is the layer that goes looking for a bug nobody wrote a test for yet; the
+  fixed 64 cases and two translation-validation programs are what confirms a known one stays fixed.
 - **Layer 1 — reference semantics.** The interpreter is compared against the published package on
   inputs inside the core's domain. Every divergence is classified as an interpreter bug, as
   behavior owned by the DX, or as a documented semantic difference.
