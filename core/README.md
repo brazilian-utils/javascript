@@ -28,7 +28,7 @@ conformance/
 docs/
   contracts.md                what the published package does, measured
   survey.md                   every utility of the package, by feature
-out/                          generated, not committed
+out/                          generated, and committed so it can be read in review
 ```
 
 ## What the core owes, and what the DX owes

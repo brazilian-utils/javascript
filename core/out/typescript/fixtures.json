@@ -1,0 +1,27 @@
+{
+	"https://viacep.com.br/ws/01310100/json/": {
+		"status": 200,
+		"body": "{\"cep\":\"01310-100\",\"logradouro\":\"Avenida Paulista\",\"bairro\":\"Bela Vista\",\"localidade\":\"São Paulo\",\"uf\":\"SP\"}",
+		"latencyMillis": 60
+	},
+	"https://brasilapi.com.br/api/cep/v1/01310100": {
+		"status": 200,
+		"body": "{\"cep\":\"01310100\",\"state\":\"SP\",\"city\":\"São Paulo\",\"neighborhood\":\"Bela Vista\",\"street\":\"Avenida Paulista\"}",
+		"latencyMillis": 20
+	},
+	"https://brasilapi.com.br/api/cep/v1/30130010": {
+		"status": 200,
+		"body": "{\"cep\":\"30130010\",\"state\":\"MG\",\"city\":\"Belo Horizonte\",\"neighborhood\":\"Centro\",\"street\":\"Avenida Afonso Pena\"}",
+		"latencyMillis": 40
+	},
+	"https://viacep.com.br/ws/99999999/json/": {
+		"status": 200,
+		"body": "{\"erro\":true}",
+		"latencyMillis": 10
+	},
+	"https://brasilapi.com.br/api/cep/v1/99999999": {
+		"status": 404,
+		"body": "{\"message\":\"not found\"}",
+		"latencyMillis": 10
+	}
+}

@@ -50,3 +50,9 @@ jobs:
         # conformance harness against the published package and across the three targets.
         run: node ../engine/scripts/verify.ts .
         working-directory: core
+
+      - name: Check the committed output is what the engine emits
+        # `out/` is committed so it can be read in review; the verification above regenerated it,
+        # so a diff here means the sources changed without the output being regenerated.
+        run: git diff --exit-code --stat -- out
+        working-directory: core

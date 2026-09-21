@@ -1,2 +1,10 @@
-out
+# The generated output of the three targets is committed on purpose: reading it is the point of
+# this project, so a reviewer should see what the engine produces without having to run it.
+# `npm run verify` regenerates it and fails if what is committed drifts from what the engine emits.
+#
+# The `--no-idioms` trees are a comparison the verification builds, not an artifact anyone reads,
+# and the interpreter caches are not ours.
+out/*-plain/
+out/**/__pycache__/
+out/**/.ruff_cache/
 node_modules

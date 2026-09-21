@@ -1,0 +1,222 @@
+{
+	"lib/digits.py#keep_alphanumeric": {
+		"module": "lib/digits",
+		"start": 745,
+		"end": 852
+	},
+	"lib/digits.py#keep_digits": {
+		"module": "lib/digits",
+		"start": 572,
+		"end": 651
+	},
+	"lib/digits.py#is_repeated_run": {
+		"module": "lib/digits",
+		"start": 1301,
+		"end": 1526
+	},
+	"lib/digits.py#digit_at": {
+		"module": "lib/digits",
+		"start": 906,
+		"end": 1008
+	},
+	"lib/format.py#pattern_slots": {
+		"module": "lib/format",
+		"start": 1078,
+		"end": 1381
+	},
+	"lib/format.py#format_with_pattern": {
+		"module": "lib/format",
+		"start": 1477,
+		"end": 2074
+	},
+	"lib/format.py#group_thousands": {
+		"module": "lib/format",
+		"start": 664,
+		"end": 1012
+	},
+	"format_cnpj.py#format_cnpj": {
+		"module": "format-cnpj",
+		"start": 967,
+		"end": 1233
+	},
+	"format_currency.py#format_currency": {
+		"module": "format-currency",
+		"start": 966,
+		"end": 1518
+	},
+	"lib/random.py#random_below": {
+		"module": "lib/random",
+		"start": 1137,
+		"end": 1640
+	},
+	"lib/random.py#random_digit": {
+		"module": "lib/random",
+		"start": 1680,
+		"end": 1752
+	},
+	"lib/cnpj.py#random_cnpj_base": {
+		"module": "lib/cnpj",
+		"start": 2280,
+		"end": 2527
+	},
+	"lib/cnpj.py#cnpj_check_digit": {
+		"module": "lib/cnpj",
+		"start": 687,
+		"end": 1194
+	},
+	"lib/cnpj.py#has_letter": {
+		"module": "lib/cnpj",
+		"start": 1718,
+		"end": 1943
+	},
+	"lib/cnpj.py#has_valid_cnpj_checksum": {
+		"module": "lib/cnpj",
+		"start": 1275,
+		"end": 1490
+	},
+	"lib/cnpj.py#is_repeated_cnpj": {
+		"module": "lib/cnpj",
+		"start": 2608,
+		"end": 2829
+	},
+	"generate_cnpj.py#generate_cnpj": {
+		"module": "generate-cnpj",
+		"start": 982,
+		"end": 1581
+	},
+	"lib/cpf.py#random_cpf_base": {
+		"module": "lib/cpf",
+		"start": 999,
+		"end": 1196
+	},
+	"lib/cpf.py#cpf_check_digit": {
+		"module": "lib/cpf",
+		"start": 394,
+		"end": 687
+	},
+	"lib/cpf.py#is_repeated": {
+		"module": "lib/cpf",
+		"start": 1283,
+		"end": 1501
+	},
+	"generate_cpf.py#generate_cpf": {
+		"module": "generate-cpf",
+		"start": 1014,
+		"end": 1576
+	},
+	"get_address_info_by_cep.py#get_with_retry": {
+		"module": "get-address-info-by-cep",
+		"start": 1086,
+		"end": 1491
+	},
+	"get_address_info_by_cep.py#is_ok": {
+		"module": "get-address-info-by-cep",
+		"start": 1529,
+		"end": 1619
+	},
+	"get_address_info_by_cep.py#fetch_via_cep": {
+		"module": "get-address-info-by-cep",
+		"start": 1698,
+		"end": 2297
+	},
+	"get_address_info_by_cep.py#fetch_brasil_api": {
+		"module": "get-address-info-by-cep",
+		"start": 2348,
+		"end": 2954
+	},
+	"get_address_info_by_cep.py#get_address_info_by_cep": {
+		"module": "get-address-info-by-cep",
+		"start": 3379,
+		"end": 3790
+	},
+	"lib/json.py#matches_at": {
+		"module": "lib/json",
+		"start": 582,
+		"end": 843
+	},
+	"lib/json.py#is_space": {
+		"module": "lib/json",
+		"start": 893,
+		"end": 1017
+	},
+	"lib/json.py#hex_value": {
+		"module": "lib/json",
+		"start": 1088,
+		"end": 1596
+	},
+	"lib/json.py#json_string_field": {
+		"module": "lib/json",
+		"start": 1824,
+		"end": 3561
+	},
+	"lib/civil.py#civil_date": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib/easter.py#easter_day_of_march": {
+		"module": "lib/easter",
+		"start": 527,
+		"end": 1126
+	},
+	"lib/easter.py#easter_sunday": {
+		"module": "lib/easter",
+		"start": 1184,
+		"end": 1390
+	},
+	"get_holidays.py#get_holidays": {
+		"module": "get-holidays",
+		"start": 898,
+		"end": 2426
+	},
+	"is_business_day.py#is_business_day": {
+		"module": "is-business-day",
+		"start": 578,
+		"end": 1064
+	},
+	"is_valid_cnpj.py#is_valid_cnpj": {
+		"module": "is-valid-cnpj",
+		"start": 1397,
+		"end": 1930
+	},
+	"is_valid_cpf.py#is_valid_cpf": {
+		"module": "is-valid-cpf",
+		"start": 793,
+		"end": 1150
+	},
+	"std/date.py#floor_div_1": {
+		"module": "std/date",
+		"start": 432,
+		"end": 655
+	},
+	"std/date.py#days_from_civil": {
+		"module": "std/date",
+		"start": 752,
+		"end": 1560
+	},
+	"std/date.py#floor_div": {
+		"module": "std/date",
+		"start": 432,
+		"end": 655
+	},
+	"std/date.py#year_from_days": {
+		"module": "std/date",
+		"start": 1627,
+		"end": 2212
+	},
+	"std/date.py#month_from_days": {
+		"module": "std/date",
+		"start": 2280,
+		"end": 2780
+	},
+	"std/date.py#day_from_days": {
+		"module": "std/date",
+		"start": 2855,
+		"end": 3346
+	},
+	"std/date.py#ymd_to_days": {
+		"module": "std/date",
+		"start": 3922,
+		"end": 4284
+	}
+}

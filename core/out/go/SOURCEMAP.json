@@ -1,0 +1,222 @@
+{
+	"lib_digits.go#keepAlphanumeric": {
+		"module": "lib/digits",
+		"start": 745,
+		"end": 852
+	},
+	"lib_digits.go#keepDigits": {
+		"module": "lib/digits",
+		"start": 572,
+		"end": 651
+	},
+	"lib_digits.go#isRepeatedRun": {
+		"module": "lib/digits",
+		"start": 1301,
+		"end": 1526
+	},
+	"lib_digits.go#digitAt": {
+		"module": "lib/digits",
+		"start": 906,
+		"end": 1008
+	},
+	"lib_format.go#patternSlots": {
+		"module": "lib/format",
+		"start": 1078,
+		"end": 1381
+	},
+	"lib_format.go#formatWithPattern": {
+		"module": "lib/format",
+		"start": 1477,
+		"end": 2074
+	},
+	"lib_format.go#groupThousands": {
+		"module": "lib/format",
+		"start": 664,
+		"end": 1012
+	},
+	"format-cnpj.go#FormatCnpj": {
+		"module": "format-cnpj",
+		"start": 967,
+		"end": 1233
+	},
+	"format-currency.go#FormatCurrency": {
+		"module": "format-currency",
+		"start": 966,
+		"end": 1518
+	},
+	"lib_random.go#randomBelow": {
+		"module": "lib/random",
+		"start": 1137,
+		"end": 1640
+	},
+	"lib_random.go#randomDigit": {
+		"module": "lib/random",
+		"start": 1680,
+		"end": 1752
+	},
+	"lib_cnpj.go#randomCnpjBase": {
+		"module": "lib/cnpj",
+		"start": 2280,
+		"end": 2527
+	},
+	"lib_cnpj.go#cnpjCheckDigit": {
+		"module": "lib/cnpj",
+		"start": 687,
+		"end": 1194
+	},
+	"lib_cnpj.go#hasLetter": {
+		"module": "lib/cnpj",
+		"start": 1718,
+		"end": 1943
+	},
+	"lib_cnpj.go#hasValidCnpjChecksum": {
+		"module": "lib/cnpj",
+		"start": 1275,
+		"end": 1490
+	},
+	"lib_cnpj.go#isRepeatedCnpj": {
+		"module": "lib/cnpj",
+		"start": 2608,
+		"end": 2829
+	},
+	"generate-cnpj.go#GenerateCnpj": {
+		"module": "generate-cnpj",
+		"start": 982,
+		"end": 1581
+	},
+	"lib_cpf.go#randomCpfBase": {
+		"module": "lib/cpf",
+		"start": 999,
+		"end": 1196
+	},
+	"lib_cpf.go#cpfCheckDigit": {
+		"module": "lib/cpf",
+		"start": 394,
+		"end": 687
+	},
+	"lib_cpf.go#isRepeated": {
+		"module": "lib/cpf",
+		"start": 1283,
+		"end": 1501
+	},
+	"generate-cpf.go#GenerateCpf": {
+		"module": "generate-cpf",
+		"start": 1014,
+		"end": 1576
+	},
+	"get-address-info-by-cep.go#getWithRetry": {
+		"module": "get-address-info-by-cep",
+		"start": 1086,
+		"end": 1491
+	},
+	"get-address-info-by-cep.go#isOk": {
+		"module": "get-address-info-by-cep",
+		"start": 1529,
+		"end": 1619
+	},
+	"get-address-info-by-cep.go#fetchViaCep": {
+		"module": "get-address-info-by-cep",
+		"start": 1698,
+		"end": 2297
+	},
+	"get-address-info-by-cep.go#fetchBrasilApi": {
+		"module": "get-address-info-by-cep",
+		"start": 2348,
+		"end": 2954
+	},
+	"get-address-info-by-cep.go#GetAddressInfoByCep": {
+		"module": "get-address-info-by-cep",
+		"start": 3379,
+		"end": 3790
+	},
+	"lib_json.go#matchesAt": {
+		"module": "lib/json",
+		"start": 582,
+		"end": 843
+	},
+	"lib_json.go#isSpace": {
+		"module": "lib/json",
+		"start": 893,
+		"end": 1017
+	},
+	"lib_json.go#hexValue": {
+		"module": "lib/json",
+		"start": 1088,
+		"end": 1596
+	},
+	"lib_json.go#jsonStringField": {
+		"module": "lib/json",
+		"start": 1824,
+		"end": 3561
+	},
+	"lib_civil.go#civilDate": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_easter.go#easterDayOfMarch": {
+		"module": "lib/easter",
+		"start": 527,
+		"end": 1126
+	},
+	"lib_easter.go#easterSunday": {
+		"module": "lib/easter",
+		"start": 1184,
+		"end": 1390
+	},
+	"get-holidays.go#GetHolidays": {
+		"module": "get-holidays",
+		"start": 898,
+		"end": 2426
+	},
+	"is-business-day.go#IsBusinessDay": {
+		"module": "is-business-day",
+		"start": 578,
+		"end": 1064
+	},
+	"is-valid-cnpj.go#IsValidCnpj": {
+		"module": "is-valid-cnpj",
+		"start": 1397,
+		"end": 1930
+	},
+	"is-valid-cpf.go#IsValidCpf": {
+		"module": "is-valid-cpf",
+		"start": 793,
+		"end": 1150
+	},
+	"std_date.go#floorDiv1": {
+		"module": "std/date",
+		"start": 432,
+		"end": 655
+	},
+	"std_date.go#daysFromCivil": {
+		"module": "std/date",
+		"start": 752,
+		"end": 1560
+	},
+	"std_date.go#floorDiv": {
+		"module": "std/date",
+		"start": 432,
+		"end": 655
+	},
+	"std_date.go#yearFromDays": {
+		"module": "std/date",
+		"start": 1627,
+		"end": 2212
+	},
+	"std_date.go#monthFromDays": {
+		"module": "std/date",
+		"start": 2280,
+		"end": 2780
+	},
+	"std_date.go#dayFromDays": {
+		"module": "std/date",
+		"start": 2855,
+		"end": 3346
+	},
+	"std_date.go#ymdToDays": {
+		"module": "std/date",
+		"start": 3922,
+		"end": 4284
+	}
+}

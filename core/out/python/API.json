@@ -1,0 +1,207 @@
+{
+	"functions": [
+		{
+			"name": "format_cnpj",
+			"module": "format_cnpj.py",
+			"params": [
+				{
+					"name": "value",
+					"type": "str"
+				},
+				{
+					"name": "options",
+					"type": "FormatCnpjOptions"
+				}
+			],
+			"returns": "str",
+			"effects": []
+		},
+		{
+			"name": "format_currency",
+			"module": "format_currency.py",
+			"params": [
+				{
+					"name": "value",
+					"type": "int"
+				},
+				{
+					"name": "symbol",
+					"type": "bool"
+				}
+			],
+			"returns": "str",
+			"effects": []
+		},
+		{
+			"name": "generate_cnpj",
+			"module": "generate_cnpj.py",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "str",
+			"effects": [
+				"env"
+			]
+		},
+		{
+			"name": "generate_cpf",
+			"module": "generate_cpf.py",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "str",
+			"effects": [
+				"env"
+			]
+		},
+		{
+			"name": "get_address_info_by_cep",
+			"module": "get_address_info_by_cep.py",
+			"params": [
+				{
+					"name": "cep",
+					"type": "str"
+				},
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "AddressInfo",
+			"effects": [
+				"Fail<GetAddressInfoByCepNotFoundError>",
+				"Fail<GetAddressInfoByCepValidationError>",
+				"env"
+			]
+		},
+		{
+			"name": "get_holidays",
+			"module": "get_holidays.py",
+			"params": [
+				{
+					"name": "year",
+					"type": "int"
+				}
+			],
+			"returns": "List[Holiday]",
+			"effects": []
+		},
+		{
+			"name": "is_business_day",
+			"module": "is_business_day.py",
+			"params": [
+				{
+					"name": "value",
+					"type": "int"
+				},
+				{
+					"name": "include_optional",
+					"type": "bool"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		},
+		{
+			"name": "is_valid_cnpj",
+			"module": "is_valid_cnpj.py",
+			"params": [
+				{
+					"name": "cnpj",
+					"type": "str"
+				},
+				{
+					"name": "version",
+					"type": "Literal[\"1\", \"2\"]"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		},
+		{
+			"name": "is_valid_cpf",
+			"module": "is_valid_cpf.py",
+			"params": [
+				{
+					"name": "cpf",
+					"type": "str"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		}
+	],
+	"records": [
+		{
+			"name": "FormatCnpjOptions",
+			"fields": [
+				{
+					"name": "pad",
+					"type": "bool"
+				},
+				{
+					"name": "version",
+					"type": "Literal[\"1\", \"2\"]"
+				},
+				{
+					"name": "obfuscate",
+					"type": "bool"
+				}
+			]
+		},
+		{
+			"name": "AddressInfo",
+			"fields": [
+				{
+					"name": "cep",
+					"type": "str"
+				},
+				{
+					"name": "state",
+					"type": "str"
+				},
+				{
+					"name": "city",
+					"type": "str"
+				},
+				{
+					"name": "neighborhood",
+					"type": "str"
+				},
+				{
+					"name": "street",
+					"type": "str"
+				}
+			]
+		},
+		{
+			"name": "Holiday",
+			"fields": [
+				{
+					"name": "name",
+					"type": "str"
+				},
+				{
+					"name": "date",
+					"type": "int"
+				},
+				{
+					"name": "type",
+					"type": "Literal[\"national\", \"optional\", \"religious\", \"state\"]"
+				}
+			]
+		}
+	],
+	"errors": [
+		"GetAddressInfoByCepError",
+		"GetAddressInfoByCepNotFoundError",
+		"GetAddressInfoByCepValidationError",
+		"HttpError"
+	]
+}

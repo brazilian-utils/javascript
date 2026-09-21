@@ -1,0 +1,207 @@
+{
+	"functions": [
+		{
+			"name": "FormatCnpj",
+			"module": "format-cnpj.go",
+			"params": [
+				{
+					"name": "value",
+					"type": "string"
+				},
+				{
+					"name": "options",
+					"type": "FormatCnpjOptions"
+				}
+			],
+			"returns": "string",
+			"effects": []
+		},
+		{
+			"name": "FormatCurrency",
+			"module": "format-currency.go",
+			"params": [
+				{
+					"name": "value",
+					"type": "int"
+				},
+				{
+					"name": "symbol",
+					"type": "bool"
+				}
+			],
+			"returns": "string",
+			"effects": []
+		},
+		{
+			"name": "GenerateCnpj",
+			"module": "generate-cnpj.go",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "string",
+			"effects": [
+				"env"
+			]
+		},
+		{
+			"name": "GenerateCpf",
+			"module": "generate-cpf.go",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "string",
+			"effects": [
+				"env"
+			]
+		},
+		{
+			"name": "GetAddressInfoByCep",
+			"module": "get-address-info-by-cep.go",
+			"params": [
+				{
+					"name": "cep",
+					"type": "string"
+				},
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "AddressInfo",
+			"effects": [
+				"Fail<GetAddressInfoByCepNotFoundError>",
+				"Fail<GetAddressInfoByCepValidationError>",
+				"env"
+			]
+		},
+		{
+			"name": "GetHolidays",
+			"module": "get-holidays.go",
+			"params": [
+				{
+					"name": "year",
+					"type": "int"
+				}
+			],
+			"returns": "[]Holiday",
+			"effects": []
+		},
+		{
+			"name": "IsBusinessDay",
+			"module": "is-business-day.go",
+			"params": [
+				{
+					"name": "value",
+					"type": "int"
+				},
+				{
+					"name": "includeOptional",
+					"type": "bool"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		},
+		{
+			"name": "IsValidCnpj",
+			"module": "is-valid-cnpj.go",
+			"params": [
+				{
+					"name": "cnpj",
+					"type": "string"
+				},
+				{
+					"name": "version",
+					"type": "string"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		},
+		{
+			"name": "IsValidCpf",
+			"module": "is-valid-cpf.go",
+			"params": [
+				{
+					"name": "cpf",
+					"type": "string"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		}
+	],
+	"records": [
+		{
+			"name": "FormatCnpjOptions",
+			"fields": [
+				{
+					"name": "Pad",
+					"type": "bool"
+				},
+				{
+					"name": "Version",
+					"type": "string"
+				},
+				{
+					"name": "Obfuscate",
+					"type": "bool"
+				}
+			]
+		},
+		{
+			"name": "AddressInfo",
+			"fields": [
+				{
+					"name": "Cep",
+					"type": "string"
+				},
+				{
+					"name": "State",
+					"type": "string"
+				},
+				{
+					"name": "City",
+					"type": "string"
+				},
+				{
+					"name": "Neighborhood",
+					"type": "string"
+				},
+				{
+					"name": "Street",
+					"type": "string"
+				}
+			]
+		},
+		{
+			"name": "Holiday",
+			"fields": [
+				{
+					"name": "Name",
+					"type": "string"
+				},
+				{
+					"name": "Date",
+					"type": "int"
+				},
+				{
+					"name": "Type",
+					"type": "string"
+				}
+			]
+		}
+	],
+	"errors": [
+		"GetAddressInfoByCepError",
+		"GetAddressInfoByCepNotFoundError",
+		"GetAddressInfoByCepValidationError",
+		"HttpError"
+	]
+}
