@@ -3,6 +3,21 @@
 A utility is one exported function in one file at the source root. Everything it needs that is not
 an intrinsic goes under `source/lib/`.
 
+A plain `function` declared alongside a utility, with no `export`, stays private in every generated
+target — `export` in TypeScript, a leading underscore plus `__all__` in Python, a lower-case
+initial in Go, `pub`/`pub(crate)`/nothing in Rust, decided per function from whether *its own*
+source module exported it, not from whether the utility that happens to call it did. Write such a
+helper the same way you would in the published package: unexported, because it is not part of what
+this file offers the rest of the project.
+
+A utility whose effects reach `Http`, `Clock` or `Random` never takes a capability parameter in its
+own published signature — see `docs/semantics.md` §4.1 and
+[ADR 0011](decisions/0011-public-entry-points-vs-capabilities.md). Nothing about writing the
+utility changes for this: call `http.request(…)`, `clock.now()` or `random.nextU32()` exactly as
+`core/source/get-address-info-by-cep.ts` and `core/source/generate-cpf.ts` do, and never mention an
+environment. The split into a public wrapper and a capability-taking seam happens after checking,
+from the effects the checker already inferred; there is nothing to opt into or write differently.
+
 ## 1. Measure the behavior first
 
 Write down what the existing implementation does, including the parts that look like accidents:

@@ -5,7 +5,7 @@
 import { cnpjCheckDigit, randomCnpjBase } from "./lib/cnpj.ts";
 import { isRepeatedRun } from "./lib/digits.ts";
 import type { Capabilities } from "./capabilities.ts";
-import { raceFirstSome } from "./capabilities.ts";
+import { DEFAULT_CAPABILITIES, raceFirstSome } from "./capabilities.ts";
 
 const generateCnpjTable1: readonly number[] = [
 	5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2,
@@ -24,7 +24,18 @@ const generateCnpjTable2: readonly number[] = [
  * same, followed by its two check digits. The alphanumeric version and a chosen branch are DX
  * concerns layered on the same base and check digit rule, not a different generator.
  */
-export function generateCnpj(env: Capabilities): string {
+export function generateCnpj(): string {
+	return generateCnpjWith(DEFAULT_CAPABILITIES);
+}
+
+/**
+ * `generateCnpj`, taking its capabilities explicitly.
+ *
+ * The public `generateCnpj` calls this with the platform's defaults. Pass your own to
+ * supply a clock, a source of randomness or an HTTP client — which is what the
+ * differential conformance driver does to make a run reproducible.
+ */
+export function generateCnpjWith(env: Capabilities): string {
 	let base: string = randomCnpjBase(env);
 	for (let attempt = 0; attempt < 8; attempt++) {
 		if (!isRepeatedRun(base)) {

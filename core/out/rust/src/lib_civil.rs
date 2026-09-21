@@ -6,6 +6,6 @@
 use crate::*;
 
 /// A fixed day of a year, with the unreachable fallback named once.
-pub fn civil_date(year: i64, month: i64, day: i64) -> i64 {
+pub(crate) fn civil_date(year: i64, month: i64, day: i64) -> i64 {
     return crate::std_date::ymd_to_days(year, month, day).unwrap_or(0.clamp(-719162, 2932896));
 }

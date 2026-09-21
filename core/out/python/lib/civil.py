@@ -5,6 +5,8 @@
 
 from ..std.date import ymd_to_days
 
+__all__ = ["civil_date"]
+
 
 def civil_date(year: int, month: int, day: int) -> int:
     """A fixed day of a year, with the unreachable fallback named once."""

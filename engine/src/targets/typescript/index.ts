@@ -669,7 +669,11 @@ export function printFunction(fn: TFunc): string {
 	const params = fn.params.map((param) => `${param.name}: ${tsType(param.type)}`).join(", ");
 	const ret = fn.isAsync ? `Promise<${tsType(fn.ret)}>` : tsType(fn.ret);
 	const doc = fn.doc === undefined ? "" : `/**\n${fn.doc.split("\n").map((line) => ` * ${line}`.trimEnd()).join("\n")}\n */\n`;
-	return `${doc}export ${fn.isAsync ? "async " : ""}function ${fn.name}(${params}): ${ret} {\n${printBody(fn.body, 1)}\n}`;
+	// `moduleExported` is the source module's own `export`, not `exported` (utility-ness): a
+	// helper never declared `export function` in its source stays a plain, unexported function
+	// here too, even when it is a public utility's own internal implementation detail.
+	const modifier = fn.moduleExported ? "export " : "";
+	return `${doc}${modifier}${fn.isAsync ? "async " : ""}function ${fn.name}(${params}): ${ret} {\n${printBody(fn.body, 1)}\n}`;
 }
 
 export function printRecord(record: TRecord): string {
@@ -823,6 +827,13 @@ export function defaultCapabilities(): Capabilities {
 		},
 	};
 }
+
+/**
+ * The platform default, built once at module load rather than per call — every public wrapper
+ * (\`docs/decisions/0011-public-entry-points-vs-capabilities.md\`) shares this one instance, the
+ * same way a caller who builds their own environment would share it across calls.
+ */
+export const DEFAULT_CAPABILITIES: Capabilities = defaultCapabilities();
 ${race}`;
 	return { path: `capabilities${TYPESCRIPT_CONFIG.fileExtension}`, text };
 }
@@ -1003,5 +1014,10 @@ export const TYPESCRIPT_BACKEND: Backend = {
 			{ from: "SUPPORT", names: types.sort(), typeOnly: true },
 			{ from: "SUPPORT", names: values },
 		];
+	},
+	defaultCapabilities: {
+		ref: { kind: "name", name: "DEFAULT_CAPABILITIES" },
+		imports: [{ from: "SUPPORT", names: ["DEFAULT_CAPABILITIES"] }],
+		seamName: (publicName) => `${publicName}With`,
 	},
 };

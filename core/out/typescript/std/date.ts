@@ -5,7 +5,7 @@
 /**
  * Floor division, which the calendar algorithms need for negative years.
  */
-export function floorDiv1(value: number, divisor: number): number {
+function floorDiv1(value: number, divisor: number): number {
 	const quotient: number = Math.trunc(value / divisor);
 	if (value < 0 && quotient * divisor !== value) {
 		return quotient - 1;

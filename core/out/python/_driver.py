@@ -15,9 +15,9 @@ def encode(value: object) -> object:
 
 from .format_cnpj import FormatCnpjOptions, format_cnpj
 from .format_currency import format_currency
-from .generate_cnpj import generate_cnpj
-from .generate_cpf import generate_cpf
-from .get_address_info_by_cep import get_address_info_by_cep
+from .generate_cnpj import generate_cnpj_with
+from .generate_cpf import generate_cpf_with
+from .get_address_info_by_cep import get_address_info_by_cep_with
 from .get_holidays import get_holidays
 from .is_business_day import is_business_day
 from .is_valid_cnpj import is_valid_cnpj
@@ -102,10 +102,10 @@ HANDLERS = {
         ),
     ),
     "format-currency::formatCurrency": lambda args: format_currency(args[0], args[1]),
-    "generate-cnpj::generateCnpj": lambda args: generate_cnpj(ENVIRONMENT),
-    "generate-cpf::generateCpf": lambda args: generate_cpf(ENVIRONMENT),
+    "generate-cnpj::generateCnpj": lambda args: generate_cnpj_with(ENVIRONMENT),
+    "generate-cpf::generateCpf": lambda args: generate_cpf_with(ENVIRONMENT),
     "get-address-info-by-cep::getAddressInfoByCep": lambda args: (
-        get_address_info_by_cep(args[0], ENVIRONMENT)
+        get_address_info_by_cep_with(args[0], ENVIRONMENT)
     ),
     "get-holidays::getHolidays": lambda args: get_holidays(args[0]),
     "is-business-day::isBusinessDay": lambda args: is_business_day(args[0], args[1]),

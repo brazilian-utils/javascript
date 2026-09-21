@@ -13,7 +13,7 @@ import type {
 	HttpRequest,
 	HttpResponse,
 } from "./capabilities.ts";
-import { raceFirstSome } from "./capabilities.ts";
+import { DEFAULT_CAPABILITIES, raceFirstSome } from "./capabilities.ts";
 
 export type AddressInfo = {
 	/** The 8 digit CEP, no mask. */
@@ -31,7 +31,7 @@ export type AddressInfo = {
 /**
  * One GET, retried the way the published package retries: twice more, 250 ms apart.
  */
-export async function getWithRetry(
+async function getWithRetry(
 	url: string,
 	env: Capabilities,
 ): Promise<HttpResponse | undefined> {
@@ -56,14 +56,14 @@ export async function getWithRetry(
 /**
  * Whether the status is a 2xx.
  */
-export function isOk(status: number): boolean {
+function isOk(status: number): boolean {
 	return status >= 200 && status < 300;
 }
 
 /**
  * ViaCEP answers a JSON object, and marks an unknown CEP with `"erro"`.
  */
-export async function fetchViaCep(
+async function fetchViaCep(
 	cep: string,
 	env: Capabilities,
 ): Promise<AddressInfo | undefined> {
@@ -90,7 +90,7 @@ export async function fetchViaCep(
 /**
  * BrasilAPI answers 404 for an unknown CEP.
  */
-export async function fetchBrasilApi(
+async function fetchBrasilApi(
 	cep: string,
 	env: Capabilities,
 ): Promise<AddressInfo | undefined> {
@@ -122,7 +122,18 @@ export async function fetchBrasilApi(
  * request is retried twice, 250 ms apart, exactly as the published package does. Turning a host
  * value into the 8 digits this takes is the DX's job.
  */
-export async function getAddressInfoByCep(
+export async function getAddressInfoByCep(cep: string): Promise<AddressInfo> {
+	return await getAddressInfoByCepWith(cep, DEFAULT_CAPABILITIES);
+}
+
+/**
+ * `getAddressInfoByCep`, taking its capabilities explicitly.
+ *
+ * The public `getAddressInfoByCep` calls this with the platform's defaults. Pass your own to
+ * supply a clock, a source of randomness or an HTTP client — which is what the
+ * differential conformance driver does to make a run reproducible.
+ */
+export async function getAddressInfoByCepWith(
 	cep: string,
 	env: Capabilities,
 ): Promise<AddressInfo> {

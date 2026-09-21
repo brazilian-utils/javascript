@@ -5,6 +5,8 @@
 
 import re
 
+__all__ = ["keep_alphanumeric", "keep_digits", "is_repeated_run", "digit_at"]
+
 _LIB_DIGITS_PATTERN_1 = re.compile("[^0-9A-Za-z]")
 
 _LIB_DIGITS_PATTERN_2 = re.compile("[^0-9]")

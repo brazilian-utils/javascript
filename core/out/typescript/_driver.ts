@@ -4,9 +4,9 @@
 import { createInterface } from "node:readline";
 import { formatCnpj } from "./format-cnpj.ts";
 import { formatCurrency } from "./format-currency.ts";
-import { generateCnpj } from "./generate-cnpj.ts";
-import { generateCpf } from "./generate-cpf.ts";
-import { getAddressInfoByCep } from "./get-address-info-by-cep.ts";
+import { generateCnpjWith } from "./generate-cnpj.ts";
+import { generateCpfWith } from "./generate-cpf.ts";
+import { getAddressInfoByCepWith } from "./get-address-info-by-cep.ts";
 import { getHolidays } from "./get-holidays.ts";
 import { isBusinessDay } from "./is-business-day.ts";
 import { isValidCnpj } from "./is-valid-cnpj.ts";
@@ -97,11 +97,12 @@ const handlers: Record<string, Handler> = {
 			args[1] as Parameters<typeof formatCurrency>[1],
 		),
 	"generate-cnpj::generateCnpj": (args, env) =>
-		generateCnpj(env as Capabilities),
-	"generate-cpf::generateCpf": (args, env) => generateCpf(env as Capabilities),
+		generateCnpjWith(env as Capabilities),
+	"generate-cpf::generateCpf": (args, env) =>
+		generateCpfWith(env as Capabilities),
 	"get-address-info-by-cep::getAddressInfoByCep": (args, env) =>
-		getAddressInfoByCep(
-			args[0] as Parameters<typeof getAddressInfoByCep>[0],
+		getAddressInfoByCepWith(
+			args[0] as Parameters<typeof getAddressInfoByCepWith>[0],
 			env as Capabilities,
 		),
 	"get-holidays::getHolidays": (args, env) =>

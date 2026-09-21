@@ -7,6 +7,8 @@ from .digits import digit_at
 from .random import random_digit
 from .._support import Capabilities
 
+__all__ = ["random_cpf_base", "cpf_check_digit", "is_repeated"]
+
 
 def random_cpf_base(env: Capabilities) -> str:
     """A random CPF base: 8 digits plus a região fiscal digit, each drawn independently — matches the

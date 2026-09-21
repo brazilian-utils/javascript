@@ -20,14 +20,30 @@
 ## Shape of the output
 
 - ESM only, one module per source module, named exports, no default export.
+- A module exports exactly what its source module exports, no more: a function the source never
+  wrote `export` on (`isOk` alongside `getAddressInfoByCep`, say) prints as a plain, unexported
+  `function`, callable from elsewhere in the same file but invisible to an importer — TypeScript's
+  own notion of a module-private helper, the one every other file in this package already uses.
 - No effect at module load: constant data is inlined as literals, and nothing constructs a `Map`,
-  a `Set` or a `RegExp` at the top level.
+  a `Set` or a `RegExp` at the top level (`capabilities.ts`'s `DEFAULT_CAPABILITIES`, below, is the
+  one deliberate exception).
 - Relative imports carry their extension, so Node runs the generated sources directly.
 - A function that reaches `Http` is `async`, and its callers await it. That colouring is computed
   from the effect set, never written by an author.
 - Domain errors are classes in `errors.ts`, extending a generated `DomainError`.
-- `capabilities.ts` holds the generated default environment (`fetch`, timers, `crypto`) and the
-  `raceFirstSome` helper. It is generated code, not a package: a test passes a different object.
+- `capabilities.ts` holds the generated default environment (`fetch`, timers, `Math.random`) and
+  the `raceFirstSome` helper. It is generated code, not a package: a test passes a different
+  object. `DEFAULT_CAPABILITIES` is that environment built once, at module load, not per call —
+  every public wrapper (below) shares the one instance, the way a caller who builds their own
+  environment would share it across calls rather than rebuild it.
+- **A utility that reaches `Http`, `Clock` or `Random` is a public wrapper over an internal seam**
+  (`docs/semantics.md` §4.1, [ADR 0011](../decisions/0011-public-entry-points-vs-capabilities.md)):
+  `getAddressInfoByCep(cep)` keeps the source's exact signature and calls
+  `getAddressInfoByCepWith(cep, DEFAULT_CAPABILITIES)`, an exported sibling in the same module the
+  differential driver calls directly to inject a fixture-backed fake. Both are `export`ed —
+  the wrapper because it is the utility, the seam because the driver has to reach it from
+  `_driver.ts` — but only the wrapper is listed as a utility in `API.json`; the seam is marked
+  there under `seams` instead.
 
 ## Notable lowerings
 

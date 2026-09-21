@@ -6,7 +6,7 @@
 use crate::*;
 
 /// How many scalars of the value a pattern consumes.
-pub fn pattern_slots(pattern: &str) -> i64 {
+pub(crate) fn pattern_slots(pattern: &str) -> i64 {
     let mut slots = 0;
     for index in 0..(pattern.len() as i64) {
         let symbol = crate::support::char_at(pattern, index).unwrap_or("".to_string());
@@ -18,7 +18,7 @@ pub fn pattern_slots(pattern: &str) -> i64 {
 }
 
 /// Formats a value against a pattern, optionally left padding it with zeros first.
-pub fn format_with_pattern(value: &str, pattern: &str, pad: bool) -> String {
+pub(crate) fn format_with_pattern(value: &str, pattern: &str, pad: bool) -> String {
     let padded = (if pad {
         crate::support::pad_start(value, pattern_slots(pattern), "0")
     } else {
@@ -51,7 +51,7 @@ pub fn format_with_pattern(value: &str, pattern: &str, pad: bool) -> String {
 }
 
 /// Groups the whole part with `.` every three digits, the pt-BR convention.
-pub fn group_thousands(whole: &str) -> String {
+pub(crate) fn group_thousands(whole: &str) -> String {
     let mut out = vec![];
     let scalars = crate::support::code_points(whole);
     for index in 0..(scalars.len() as i64) {

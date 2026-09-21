@@ -84,6 +84,11 @@
 		"start": 982,
 		"end": 1581
 	},
+	"generate_cnpj.py#generate_cnpj_with": {
+		"module": "generate-cnpj",
+		"start": 982,
+		"end": 1581
+	},
 	"lib/cpf.py#random_cpf_base": {
 		"module": "lib/cpf",
 		"start": 999,
@@ -100,6 +105,11 @@
 		"end": 1501
 	},
 	"generate_cpf.py#generate_cpf": {
+		"module": "generate-cpf",
+		"start": 1014,
+		"end": 1576
+	},
+	"generate_cpf.py#generate_cpf_with": {
 		"module": "generate-cpf",
 		"start": 1014,
 		"end": 1576
@@ -125,6 +135,11 @@
 		"end": 2954
 	},
 	"get_address_info_by_cep.py#get_address_info_by_cep": {
+		"module": "get-address-info-by-cep",
+		"start": 3379,
+		"end": 3790
+	},
+	"get_address_info_by_cep.py#get_address_info_by_cep_with": {
 		"module": "get-address-info-by-cep",
 		"start": 3379,
 		"end": 3790

@@ -127,12 +127,32 @@ export type TFunc = {
 	readonly params: readonly TParam[];
 	readonly ret: SemType;
 	readonly body: readonly TStmt[];
+	/** A utility: the published core API. See `CFunc.exported` — unrelated to `moduleExported`. */
 	readonly exported: boolean;
+	/** The source module's own `export` keyword; what a printer turns into its own notion of
+	 *  public (`export`, `pub`, no leading underscore). See `CFunc.moduleExported`. */
+	readonly moduleExported: boolean;
 	readonly doc?: string;
 	readonly isAsync: boolean;
 	/** Domain errors this function may raise; the Go backend turns these into a second return. */
 	readonly fails: readonly string[];
 	readonly usesEnv: boolean;
+	/**
+	 * True for the capability-taking form of an entry point that also has a no-capabilities public
+	 * wrapper, or for an entry point that takes capabilities directly because its target has no
+	 * default to wrap it with. `generate()` uses this to point the differential driver at the form
+	 * that takes fakes and to mark it in `API.json`, rather than listing it as an ordinary utility.
+	 */
+	readonly seam?: boolean;
+	/**
+	 * Set on a synthesized public wrapper (see `docs/decisions/0011-*.md`): the name of the seam
+	 * function in the same module it delegates to. `generate()` uses this to keep the wrapper out
+	 * of the driver's dispatch table — it cannot accept injected fakes, having no capability
+	 * parameter at all.
+	 */
+	readonly seamName?: string;
+	/** Set on a seam (the mirror of `seamName`): the public wrapper's own name, for `API.json`. */
+	readonly wrapperName?: string;
 	/** Provenance: the source module and function this was generated from. */
 	readonly source: { readonly module: string; readonly name: string; readonly start: number; readonly end: number };
 };

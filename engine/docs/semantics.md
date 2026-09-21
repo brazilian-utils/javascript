@@ -196,10 +196,15 @@ Effects are `Pure`, `Fail<E>`, `Http`, `Clock` and `Random`. The last three are 
 
 - An author calls `http.request(…)`, `clock.now()` or `random.nextU32()` and never mentions an
   environment. The compiler infers effects over the call graph and threads a capability record
-  into exactly the functions that transitively need one.
-- Each target generates its own default environment from its standard library — `fetch`,
-  `urllib.request`, `net/http`, the system clock, OS randomness. That is generated code, not a
-  runtime package.
+  into exactly the functions that transitively need one (`analysis/capabilities.ts`).
+- Threading is an internal concern of the generated code, not something a caller of a utility
+  ever sees. An exported utility keeps exactly the signature its source module declares; a
+  capability parameter never reaches that signature (see "The public entry point vs. the
+  capability-taking seam" below). Threading between a utility's own internal helpers is still
+  visible in generated source — an implementation detail worth reading, not one worth hiding.
+- Each target that can build one generates its own default environment from its standard library —
+  `fetch`, `urllib.request`, the system clock, OS randomness — as generated code, not a runtime
+  package. Go and Rust cannot: see below.
 - `Http` answers an `Option`: a transport error or a timeout is absence, and a 4xx or 5xx status
   is an ordinary value. Retry and fallback are then written as ordinary control flow, which the
   subset can express without `catch` (see [ADR 0006](decisions/0006-http-is-an-option.md)).
@@ -208,7 +213,40 @@ Effects are `Pure`, `Fail<E>`, `Http`, `Clock` and `Random`. The last three are 
 - **Async is computed, not written.** The TypeScript backend makes a function `async` exactly when
   it reaches `Http`, and awaits its calls; Python and Go emit blocking code.
 
-### 4.1 Concurrency
+### 4.1 The public entry point vs. the capability-taking seam
+
+A utility whose effects reach `Http`, `Clock` or `Random` is, at the Core level, a function that
+takes a capability record. Its *published* signature is not: the source declares
+`getAddressInfoByCep(cep: string)`, not `getAddressInfoByCep(cep: string, env: Capabilities)`, and
+a drop-in replacement for the package that utility comes from has to keep it that way (see
+[ADR 0011](decisions/0011-public-entry-points-vs-capabilities.md) for the fuller reasoning).
+
+Where a target can build a default environment from its own standard library (TypeScript, Python),
+`generate()` (`backend/generate.ts`, `splitCapabilityEntryPoints`) splits such a utility in two:
+
+- a **public wrapper**, under the utility's own name, with the source's exact signature and no
+  capability parameter. It builds nothing itself — it calls the seam below with a module-level
+  default, built once at load time, never per call.
+- an internal **seam**, named so it reads as one (`generateCpfWith` in TypeScript,
+  `generate_cpf_with` in Python), that still takes the capability record. It is not part of the
+  utility surface `API.json` lists as a normal function — it is marked there, under `seams`,
+  precisely so a reader does not mistake it for one — but it stays reachable (`export`/no leading
+  underscore) because two things need to reach it from outside its own module: the wrapper, and
+  the differential conformance driver, which calls it directly to inject a fixture-backed fake
+  instead of the real environment. This is why the seam, not the wrapper, is what a target's
+  driver dispatch table names.
+
+Where a target cannot build a default without either reaching past its standard library or
+fabricating one (Go, Rust — neither ships an HTTP client, a CSPRNG or a default `Capabilities`
+value anywhere in the generated *library*; the fake either driver builds lives in the driver
+binary, never in `coreout`/`core`), no wrapper is generated. The capability-taking function stays
+the only entry point, under its own original name, and is marked the same way in `API.json`'s
+`seams` list (`hasWrapper: false`) so a DX author sees plainly that this one utility, unlike the
+rest, needs an environment passed in by hand. This is a real, reported gap from drop-in parity,
+not one papered over with a fake standard-library capability that would behave differently from
+what a caller's own environment actually does.
+
+### 4.2 Concurrency
 
 The only primitive is `task.race(tasks)`, admitted because looking a CEP up in several services at
 once needs it.

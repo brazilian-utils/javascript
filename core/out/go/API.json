@@ -137,6 +137,51 @@
 			"effects": []
 		}
 	],
+	"seams": [
+		{
+			"name": "GenerateCnpj",
+			"publicName": "GenerateCnpj",
+			"module": "generate-cnpj.go",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "string",
+			"hasWrapper": false
+		},
+		{
+			"name": "GenerateCpf",
+			"publicName": "GenerateCpf",
+			"module": "generate-cpf.go",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "string",
+			"hasWrapper": false
+		},
+		{
+			"name": "GetAddressInfoByCep",
+			"publicName": "GetAddressInfoByCep",
+			"module": "get-address-info-by-cep.go",
+			"params": [
+				{
+					"name": "cep",
+					"type": "string"
+				},
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "AddressInfo",
+			"hasWrapper": false
+		}
+	],
 	"records": [
 		{
 			"name": "FormatCnpjOptions",

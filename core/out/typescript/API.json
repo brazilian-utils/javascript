@@ -35,26 +35,16 @@
 		{
 			"name": "generateCnpj",
 			"module": "generate-cnpj.ts",
-			"params": [
-				{
-					"name": "env",
-					"type": "Capabilities"
-				}
-			],
+			"params": [],
 			"returns": "string",
-			"effects": ["env"]
+			"effects": []
 		},
 		{
 			"name": "generateCpf",
 			"module": "generate-cpf.ts",
-			"params": [
-				{
-					"name": "env",
-					"type": "Capabilities"
-				}
-			],
+			"params": [],
 			"returns": "string",
-			"effects": ["env"]
+			"effects": []
 		},
 		{
 			"name": "getAddressInfoByCep",
@@ -63,17 +53,12 @@
 				{
 					"name": "cep",
 					"type": "string"
-				},
-				{
-					"name": "env",
-					"type": "Capabilities"
 				}
 			],
 			"returns": "AddressInfo",
 			"effects": [
 				"Fail<GetAddressInfoByCepNotFoundError>",
-				"Fail<GetAddressInfoByCepValidationError>",
-				"env"
+				"Fail<GetAddressInfoByCepValidationError>"
 			]
 		},
 		{
@@ -131,6 +116,51 @@
 			],
 			"returns": "boolean",
 			"effects": []
+		}
+	],
+	"seams": [
+		{
+			"name": "generateCnpjWith",
+			"publicName": "generateCnpj",
+			"module": "generate-cnpj.ts",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "string",
+			"hasWrapper": true
+		},
+		{
+			"name": "generateCpfWith",
+			"publicName": "generateCpf",
+			"module": "generate-cpf.ts",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "string",
+			"hasWrapper": true
+		},
+		{
+			"name": "getAddressInfoByCepWith",
+			"publicName": "getAddressInfoByCep",
+			"module": "get-address-info-by-cep.ts",
+			"params": [
+				{
+					"name": "cep",
+					"type": "string"
+				},
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "AddressInfo",
+			"hasWrapper": true
 		}
 	],
 	"records": [

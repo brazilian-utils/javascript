@@ -1534,7 +1534,16 @@ export function printFunction(fn: TFunc): string {
 	const returnType = fn.fails.length > 0 ? `Result<${rustType(fn.ret)}, CoreError>` : rustType(fn.ret);
 	const doc = fn.doc === undefined ? "" : `${fn.doc.split("\n").map((line) => `/// ${line}`.trimEnd()).join("\n")}\n`;
 	const body = withFnCtx({ ret: fn.ret, fails: fn.fails }, () => printBody(fn.body, scope));
-	return `${doc}pub fn ${fn.name}(${params}) -> ${returnType} {\n${indent(body, 1)}\n}`;
+	// `exported` (a utility) is `pub`, reachable from outside the crate through `lib.rs`'s flat
+	// `pub use module::*;` re-export. `moduleExported` alone — the source module's own `export`,
+	// which a library helper carries so other generated modules can call it — is `pub(crate)`: a
+	// glob re-export silently drops an item that isn't at least as visible as the `pub use` itself
+	// (verified against rustc directly), so this never leaks a library helper past the crate the
+	// way a plain `pub` would. Neither flag set means the source never exported it at all, and
+	// every caller found in `docs/semantics.md`'s survey lives in the same module, so a bare `fn`
+	// — visible only here — is enough.
+	const visibility = fn.exported ? "pub " : fn.moduleExported ? "pub(crate) " : "";
+	return `${doc}${visibility}fn ${fn.name}(${params}) -> ${returnType} {\n${indent(body, 1)}\n}`;
 }
 
 export function printRecord(record: TRecord): string {

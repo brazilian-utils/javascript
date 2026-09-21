@@ -15,7 +15,7 @@ pub struct AddressInfo {
 }
 
 /// One GET, retried the way the published package retries: twice more, 250 ms apart.
-pub fn get_with_retry(url: String, env: &dyn Capabilities) -> Option<HttpResponse> {
+fn get_with_retry(url: String, env: &dyn Capabilities) -> Option<HttpResponse> {
     for attempt in 0..3 {
         if (attempt > 0) {
             env.sleep(250);
@@ -35,12 +35,12 @@ pub fn get_with_retry(url: String, env: &dyn Capabilities) -> Option<HttpRespons
 }
 
 /// Whether the status is a 2xx.
-pub fn is_ok(status: i64) -> bool {
+fn is_ok(status: i64) -> bool {
     return (200..300).contains(&status);
 }
 
 /// ViaCEP answers a JSON object, and marks an unknown CEP with `"erro"`.
-pub fn fetch_via_cep(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
+fn fetch_via_cep(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
     let response = get_with_retry(
         crate::support::concat2(
             &crate::support::concat2("https://viacep.com.br/ws/", cep),
@@ -68,7 +68,7 @@ pub fn fetch_via_cep(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
 }
 
 /// BrasilAPI answers 404 for an unknown CEP.
-pub fn fetch_brasil_api(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
+fn fetch_brasil_api(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
     let response = get_with_retry(
         crate::support::concat2("https://brasilapi.com.br/api/cep/v1/", cep),
         env,

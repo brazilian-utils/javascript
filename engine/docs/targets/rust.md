@@ -34,8 +34,26 @@ a "call" node's `borrowedArgs` (`backend/tast.ts`) are what it hands the lowerer
   and (when the project declares any) `errors`, and re-exports each flatly (`pub use lib_digits::*;`
   and so on). A module calls another's function unqualified — Go's advantage of a single package,
   recovered here through the glob rather than through the language having no module system at all.
+- A utility is `pub` (reachable at the crate root through the flat re-export above). A helper its
+  own source module exports but that is not itself a utility — reachable across generated modules,
+  never meant to be reachable from outside the crate — is `pub(crate)`: visible to the `use
+  crate::*;` every module imports, but a glob re-export silently drops it rather than leaking it
+  further (verified against `rustc` directly: a `pub(crate)` item never surfaces through `pub use
+  module::*;`). A helper never exported at all, called only from within its own module, is a plain
+  `fn` — Rust's own notion of private, and the tightest of the three.
 - `support.rs` holds the `Capabilities` trait and its request/response records, the generic
   sequence and string helpers the capability table names, and the regex matcher (below).
+- **No default `Capabilities`.** `support.rs` declares the trait only — no HTTP client, no clock,
+  no RNG anywhere in the `coreout` crate, on purpose: the library depends on `std` alone. The
+  differential driver's `src/bin/driver.rs` builds its own fixture-backed `FakeCapabilities`, but
+  that fake lives in the driver binary, never in the library crate. This means a utility whose
+  effects reach `Http`, `Clock` or `Random` (`get_address_info_by_cep`, `generate_cpf`,
+  `generate_cnpj`) cannot get the public-wrapper treatment TypeScript and Python give the same
+  utilities (`docs/semantics.md` §4.1) — there is no default to hand a wrapper, and one is not
+  fabricated to manufacture the appearance of parity. The capability-taking function stays the
+  only entry point, under its original name, taking `&dyn Capabilities` as a normal parameter a
+  caller supplies. This is a genuine, reported gap from drop-in replacement, not a defect in this
+  backend's generation — see [ADR 0011](../decisions/0011-public-entry-points-vs-capabilities.md).
 - `errors.rs` holds one flat `CoreError` enum, one variant per declared domain error — not one type
   per utility, which is the other half of ADR 0009.
 - `Fail<E>` is `Result<T, CoreError>`. The shared lowerer's Go-shaped hoist

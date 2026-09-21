@@ -7,6 +7,8 @@ import re
 from .lib.cpf import cpf_check_digit, is_repeated
 from .lib.digits import digit_at, keep_digits
 
+__all__ = ["is_valid_cpf"]
+
 _IS_VALID_CPF_PATTERN_1 = re.compile(
     "[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}"
 )

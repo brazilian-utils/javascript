@@ -5,6 +5,8 @@
 
 from .civil import civil_date
 
+__all__ = ["easter_day_of_march", "easter_sunday"]
+
 
 def easter_day_of_march(year: int) -> int:
     """The day of March (1 to 31) or April (32 to 56) Easter falls on, as a day-of-March offset."""

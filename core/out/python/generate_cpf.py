@@ -5,10 +5,12 @@
 
 from .lib.cpf import cpf_check_digit, random_cpf_base
 from .lib.digits import is_repeated_run
-from ._support import Capabilities
+from ._support import Capabilities, DEFAULT_CAPABILITIES
+
+__all__ = ["generate_cpf", "generate_cpf_with"]
 
 
-def generate_cpf(env: Capabilities) -> str:
+def generate_cpf() -> str:
     """Generates a valid random CPF (Cadastro de Pessoas Físicas): 11 digits, under the check digit
     rule (weights 10..2 and 11..2) the Receita Federal's Manual de Preenchimento da e-Financeira,
     Anexo II specifies.
@@ -17,6 +19,16 @@ def generate_cpf(env: Capabilities) -> str:
     plus a região fiscal digit, also drawn at random here — redrawn while every digit of it is the
     same, followed by its two check digits. The state code option is a DX concern: it only ever
     picks which digit the 9th position draws from, never how the rest of the document is built.
+    """
+    return generate_cpf_with(DEFAULT_CAPABILITIES)
+
+
+def generate_cpf_with(env: Capabilities) -> str:
+    """`generate_cpf`, taking its capabilities explicitly.
+
+    The public `generate_cpf` calls this with the platform's defaults. Pass your own to
+    supply a clock, a source of randomness or an HTTP client — which is what the
+    differential conformance driver does to make a run reproducible.
     """
     base: str = random_cpf_base(env)
     for attempt in range(0, 8):

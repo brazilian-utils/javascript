@@ -105,3 +105,9 @@ class Capabilities:
         # documents doing. A caller who needs unpredictability passes its own
         # capability, the way the conformance harness passes a seeded one.
         return random.getrandbits(32)
+
+
+# The platform default, built once at import time rather than per call — every public
+# wrapper (docs/decisions/0011-public-entry-points-vs-capabilities.md) shares this one
+# instance, the same way a caller who builds their own environment would share it.
+DEFAULT_CAPABILITIES = Capabilities()

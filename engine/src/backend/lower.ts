@@ -251,6 +251,7 @@ class Lowerer {
 				ret: fn.ret,
 				body: this.block(fn.body),
 				exported: fn.exported,
+				moduleExported: fn.moduleExported,
 				doc: fn.doc,
 				isAsync: this.spec.asyncColouring && fn.effects.http,
 				fails: fn.effects.fail,

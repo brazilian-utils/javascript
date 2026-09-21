@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from .lib.digits import keep_alphanumeric, keep_digits
 from .lib.format import format_with_pattern
 
+__all__ = ["format_cnpj"]
+
 
 @dataclass(frozen=True)
 class FormatCnpjOptions:

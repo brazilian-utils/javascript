@@ -6,7 +6,7 @@
 use crate::*;
 
 /// Keeps only the ASCII digits and letters of a value, upper casing the letters.
-pub fn keep_alphanumeric(value: &str) -> String {
+pub(crate) fn keep_alphanumeric(value: &str) -> String {
     return value
         .chars()
         .filter(|&ch| {
@@ -18,7 +18,7 @@ pub fn keep_alphanumeric(value: &str) -> String {
 }
 
 /// Keeps only the ASCII digits of a value, dropping every mask character.
-pub fn keep_digits(value: &str) -> String {
+pub(crate) fn keep_digits(value: &str) -> String {
     return value
         .chars()
         .filter(|&ch| {
@@ -31,7 +31,7 @@ pub fn keep_digits(value: &str) -> String {
 /// Whether every scalar of the value is the same one, for whatever length the caller proved —
 /// `isRepeated` and `isRepeatedCnpj` do the same check for one specific length; this one serves a
 /// generator that has to run it on a base shorter than the document it is building.
-pub fn is_repeated_run(value: &str) -> bool {
+pub(crate) fn is_repeated_run(value: &str) -> bool {
     let first = (value.as_bytes()[0] as i64);
     for index in 1..(value.len() as i64) {
         if ((value.as_bytes()[index as usize] as i64) != first) {
@@ -42,6 +42,6 @@ pub fn is_repeated_run(value: &str) -> bool {
 }
 
 /// The numeric value of one ASCII digit.
-pub fn digit_at(value: &str, index: i64) -> i64 {
+pub(crate) fn digit_at(value: &str, index: i64) -> i64 {
     return ((value.as_bytes()[index as usize] as i64) - 48);
 }

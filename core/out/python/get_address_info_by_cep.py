@@ -10,7 +10,9 @@ import re
 from .lib.digits import keep_digits
 from .lib.json import json_string_field
 from .errors import GetAddressInfoByCepNotFoundError, GetAddressInfoByCepValidationError
-from ._support import Capabilities, HttpRequest, HttpResponse
+from ._support import Capabilities, DEFAULT_CAPABILITIES, HttpRequest, HttpResponse
+
+__all__ = ["get_address_info_by_cep", "get_address_info_by_cep_with"]
 
 
 @dataclass(frozen=True)
@@ -25,7 +27,7 @@ class AddressInfo:
 _GET_ADDRESS_INFO_BY_CEP_PATTERN_1 = re.compile("[0-9]{8}")
 
 
-def get_with_retry(url: str, env: Capabilities) -> Optional[HttpResponse]:
+def _get_with_retry(url: str, env: Capabilities) -> Optional[HttpResponse]:
     """One GET, retried the way the published package retries: twice more, 250 ms apart."""
     for attempt in range(0, 3):
         if attempt > 0:
@@ -40,17 +42,17 @@ def get_with_retry(url: str, env: Capabilities) -> Optional[HttpResponse]:
     return None
 
 
-def is_ok(status: int) -> bool:
+def _is_ok(status: int) -> bool:
     """Whether the status is a 2xx."""
     return (status >= 200) and (status < 300)
 
 
-def fetch_via_cep(cep: str, env: Capabilities) -> Optional[AddressInfo]:
+def _fetch_via_cep(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     """ViaCEP answers a JSON object, and marks an unknown CEP with `"erro"`."""
-    response: Optional[HttpResponse] = get_with_retry(
+    response: Optional[HttpResponse] = _get_with_retry(
         (("https://viacep.com.br/ws/" + cep) + "/json/"), env
     )
-    if (response is None) or (not is_ok(response.status)):
+    if (response is None) or (not _is_ok(response.status)):
         return None
     code: str = (
         __value
@@ -84,12 +86,12 @@ def fetch_via_cep(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     )
 
 
-def fetch_brasil_api(cep: str, env: Capabilities) -> Optional[AddressInfo]:
+def _fetch_brasil_api(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     """BrasilAPI answers 404 for an unknown CEP."""
-    response: Optional[HttpResponse] = get_with_retry(
+    response: Optional[HttpResponse] = _get_with_retry(
         ("https://brasilapi.com.br/api/cep/v1/" + cep), env
     )
-    if (response is None) or (not is_ok(response.status)):
+    if (response is None) or (not _is_ok(response.status)):
         return None
     code: str = (
         __value
@@ -123,7 +125,7 @@ def fetch_brasil_api(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     )
 
 
-def get_address_info_by_cep(cep: str, env: Capabilities) -> AddressInfo:
+def get_address_info_by_cep(cep: str) -> AddressInfo:
     """The address of a CEP, from the first service that answers.
 
     The two services are queried concurrently and the first answer wins; the losing request may
@@ -131,10 +133,20 @@ def get_address_info_by_cep(cep: str, env: Capabilities) -> AddressInfo:
     request is retried twice, 250 ms apart, exactly as the published package does. Turning a host
     value into the 8 digits this takes is the DX's job.
     """
+    return get_address_info_by_cep_with(cep, DEFAULT_CAPABILITIES)
+
+
+def get_address_info_by_cep_with(cep: str, env: Capabilities) -> AddressInfo:
+    """`get_address_info_by_cep`, taking its capabilities explicitly.
+
+    The public `get_address_info_by_cep` calls this with the platform's defaults. Pass your own to
+    supply a clock, a source of randomness or an HTTP client — which is what the
+    differential conformance driver does to make a run reproducible.
+    """
     if not (_GET_ADDRESS_INFO_BY_CEP_PATTERN_1.fullmatch(cep) is not None):
         raise GetAddressInfoByCepValidationError("CEP inv\u00e1lido")
     address: Optional[AddressInfo] = race_first_some(
-        [(lambda: fetch_via_cep(cep, env)), (lambda: fetch_brasil_api(cep, env))]
+        [(lambda: _fetch_via_cep(cep, env)), (lambda: _fetch_brasil_api(cep, env))]
     )
     if address is None:
         raise GetAddressInfoByCepNotFoundError("CEP n\u00e3o encontrado")

@@ -735,6 +735,12 @@ class Checker {
 			body,
 			// "Exported" means part of the published core API: a utility, not a library helper.
 			exported: isEntryPoint(signature) && name === signature.qualified,
+			// The source's own `export` keyword, independent of utility-ness: true for any exported,
+			// unspecialized function, root module or `lib/`. Every utility is module-exported too
+			// (a utility's own `export` is what makes it one), but the reverse does not hold — a
+			// `lib/` function's `export` only ever makes it reachable across generated modules, never
+			// a utility, since `isEntryPoint` excludes anything under a subdirectory.
+			moduleExported: signature.hir.exported && name === signature.qualified,
 			doc: signature.hir.doc,
 			span: signature.hir.span,
 			// The call graph of the Core, not of the source: after specialization a call site

@@ -31,10 +31,11 @@ single-day boolean check with no year-list form and no weekend/business-day conc
 the `skipped` entries below and core/bench/README.md for the full reasoning.
 
 generateCpf and generateCnpj are covered by the "does every value validate" rule described in
-core/bench/README.md, not by equality (both sides draw at random). `python._support.Capabilities`,
-the generated core's own real (non-fixture) environment, backs `next_u32` with `secrets.randbits`,
-a CSPRNG; brutils' generators use the stdlib `random` module, which is not. See the README for
-what that costs.
+core/bench/README.md, not by equality (both sides draw at random). Both are called the same way
+the handwritten port is, with no arguments: `python._support.DEFAULT_CAPABILITIES`, the generated
+core's own real (non-fixture) environment, is what a bare `generate_cpf()`/`generate_cnpj()` call
+now uses internally, built once at import time rather than per call. See the README for what its
+`next_u32` -- `random.getrandbits`, not a CSPRNG -- costs against brutils' own `random` module use.
 """
 
 import importlib.util
@@ -89,7 +90,6 @@ from python import is_valid_cnpj as generated_cnpj_module  # noqa: E402
 from python import format_currency as generated_currency_module  # noqa: E402
 from python import generate_cpf as generated_generate_cpf_module  # noqa: E402
 from python import generate_cnpj as generated_generate_cnpj_module  # noqa: E402
-from python._support import Capabilities as GeneratedCapabilities  # noqa: E402
 
 generated_cpf = generated_cpf_module.is_valid_cpf
 generated_cnpj = generated_cnpj_module.is_valid_cnpj
@@ -259,7 +259,6 @@ rows.append(
 # The agreement check instead: every value either side produces must validate under BOTH
 # validators -- its own port's and the generated core's -- before either side is timed.
 GENERATE_SAMPLES = 500
-generated_capabilities = GeneratedCapabilities()  # built once, like a real caller would
 
 
 def check_generator_agreement(utility, variant, handwritten_generate, handwritten_is_valid, generated_generate, generated_is_valid):
@@ -326,20 +325,20 @@ check_generator_agreement(
 	"generate",
 	handwritten_cpf.generate,
 	handwritten_cpf.is_valid,
-	lambda: generated_generate_cpf(generated_capabilities),
+	lambda: generated_generate_cpf(),
 	generated_cpf,
 )
-compare_generate("generateCpf", handwritten_cpf.generate, lambda: generated_generate_cpf(generated_capabilities))
+compare_generate("generateCpf", handwritten_cpf.generate, lambda: generated_generate_cpf())
 
 check_generator_agreement(
 	"generateCnpj",
 	"generate",
 	handwritten_cnpj.generate,
 	handwritten_cnpj.is_valid,
-	lambda: generated_generate_cnpj(generated_capabilities),
+	lambda: generated_generate_cnpj(),
 	lambda value: generated_cnpj(value, "1"),
 )
-compare_generate("generateCnpj", handwritten_cnpj.generate, lambda: generated_generate_cnpj(generated_capabilities))
+compare_generate("generateCnpj", handwritten_cnpj.generate, lambda: generated_generate_cnpj())
 
 print("\n| utility | variant | handwritten | generated | ratio | budget |")
 print("| --- | --- | --- | --- | --- | --- |")

@@ -5,7 +5,7 @@
 /**
  * Whether `needle` occurs in `points` at `start`.
  */
-export function matchesAt(
+function matchesAt(
 	points: readonly number[],
 	needle: readonly number[],
 	start: number,
@@ -21,14 +21,14 @@ export function matchesAt(
 /**
  * Whether a code point is JSON whitespace.
  */
-export function isSpace(point: number): boolean {
+function isSpace(point: number): boolean {
 	return point === 32 || point === 9 || point === 10 || point === 13;
 }
 
 /**
  * The hexadecimal value of four scalars, for a `\uXXXX` escape.
  */
-export function hexValue(points: readonly number[], start: number): number {
+function hexValue(points: readonly number[], start: number): number {
 	let value: number = 0;
 	for (let offset = 0; offset < 4; offset++) {
 		const point: number = points[start + offset] ?? 48;

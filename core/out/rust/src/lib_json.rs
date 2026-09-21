@@ -6,7 +6,7 @@
 use crate::*;
 
 /// Whether `needle` occurs in `points` at `start`.
-pub fn matches_at(points: &[i64], needle: &[i64], start: i64) -> bool {
+fn matches_at(points: &[i64], needle: &[i64], start: i64) -> bool {
     for offset in 0..(needle.len() as i64) {
         if (crate::support::at(points, (start + offset)).unwrap_or(-1)
             != crate::support::at(needle, offset).unwrap_or(-2))
@@ -18,12 +18,12 @@ pub fn matches_at(points: &[i64], needle: &[i64], start: i64) -> bool {
 }
 
 /// Whether a code point is JSON whitespace.
-pub fn is_space(point: i64) -> bool {
+fn is_space(point: i64) -> bool {
     return ((((point == 32) || (point == 9)) || (point == 10)) || (point == 13));
 }
 
 /// The hexadecimal value of four scalars, for a `\uXXXX` escape.
-pub fn hex_value(points: &[i64], start: i64) -> i64 {
+fn hex_value(points: &[i64], start: i64) -> i64 {
     let mut value = 0;
     for offset in 0..4 {
         let point = crate::support::at(points, (start + offset)).unwrap_or(48);
@@ -47,7 +47,7 @@ pub fn hex_value(points: &[i64], start: i64) -> i64 {
 /// The string value of a top-level JSON field, or absent when the field is missing or is not a
 /// string. Escapes are decoded; a surrogate pair is left as its two escaped halves, which no CEP
 /// provider emits.
-pub fn json_string_field(body: &str, key: &str) -> Option<String> {
+pub(crate) fn json_string_field(body: &str, key: &str) -> Option<String> {
     let points = crate::support::code_points(body);
     let needle = crate::support::code_points(&crate::support::concat2(
         &crate::support::concat2("\"", key),

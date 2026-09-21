@@ -5,8 +5,10 @@
 
 from typing import List, Optional
 
+__all__ = ["json_string_field"]
 
-def matches_at(points: List[int], needle: List[int], start: int) -> bool:
+
+def _matches_at(points: List[int], needle: List[int], start: int) -> bool:
     """Whether `needle` occurs in `points` at `start`."""
     for offset in range(0, len(needle)):
         if (
@@ -16,12 +18,12 @@ def matches_at(points: List[int], needle: List[int], start: int) -> bool:
     return True
 
 
-def is_space(point: int) -> bool:
+def _is_space(point: int) -> bool:
     """Whether a code point is JSON whitespace."""
     return (((point == 32) or (point == 9)) or (point == 10)) or (point == 13)
 
 
-def hex_value(points: List[int], start: int) -> int:
+def _hex_value(points: List[int], start: int) -> int:
     """The hexadecimal value of four scalars, for a `\\uXXXX` escape."""
     value: int = 0
     for offset in range(0, 4):
@@ -49,17 +51,17 @@ def json_string_field(body: str, key: str) -> Optional[str]:
     points: List[int] = [ord(__c) for __c in body]
     needle: List[int] = [ord(__c) for __c in (('"' + key) + '"')]
     for index in range(0, len(points)):
-        if not matches_at(points, needle, index):
+        if not _matches_at(points, needle, index):
             continue
         cursor: int = index + len(needle)
         for skip in range(0, 8):
-            if is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
+            if _is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
                 cursor = cursor + 1
         if (points[cursor] if 0 <= cursor < len(points) else 0) != 58:
             continue
         cursor = cursor + 1
         for skip in range(0, 8):
-            if is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
+            if _is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
                 cursor = cursor + 1
         if (points[cursor] if 0 <= cursor < len(points) else 0) != 34:
             continue
@@ -86,7 +88,7 @@ def json_string_field(body: str, key: str) -> Optional[str]:
                             cursor = cursor + 2
                         else:
                             if escaped == 117:
-                                out.append(hex_value(points, (cursor + 2)))
+                                out.append(_hex_value(points, (cursor + 2)))
                                 cursor = cursor + 6
                             else:
                                 if escaped >= 0:

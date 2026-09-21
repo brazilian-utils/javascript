@@ -6,6 +6,8 @@
 from .lib.digits import keep_digits
 from .lib.format import group_thousands
 
+__all__ = ["format_currency"]
+
 
 def format_currency(value: int, symbol: bool) -> str:
     """Formats an exact amount in Brazilian Real, with two decimal places.

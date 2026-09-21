@@ -173,7 +173,21 @@ export type CFunc = {
 	readonly ret: SemType;
 	readonly effects: EffectSet;
 	readonly body: readonly CStmt[];
+	/**
+	 * True for a utility: an exported function of a source-root module, the published core API.
+	 * Drives what a backend treats as a driver entry point and lists in `API.json`; unrelated to
+	 * whether the function's own source module exported it (see `moduleExported`) — a library
+	 * helper can be reachable across modules without ever being a utility.
+	 */
 	readonly exported: boolean;
+	/**
+	 * True when the source module that declares this function marked it `export`, whatever module
+	 * that is — root or `lib/`. This is the literal per-file fact a backend's printer turns into
+	 * `export`/`pub`/no leading underscore, so a generated module's public surface matches its
+	 * source module's, name for name. False for a specialization (checked against a call site's
+	 * argument types, so no single generated name is "the" export) even when its declaration was.
+	 */
+	readonly moduleExported: boolean;
 	readonly doc?: string;
 	readonly span: Span;
 	/** Functions this one calls, fully qualified. */

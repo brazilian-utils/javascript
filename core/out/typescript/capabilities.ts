@@ -81,6 +81,13 @@ export function defaultCapabilities(): Capabilities {
 }
 
 /**
+ * The platform default, built once at module load rather than per call — every public wrapper
+ * (`docs/decisions/0011-public-entry-points-vs-capabilities.md`) shares this one instance, the
+ * same way a caller who builds their own environment would share it across calls.
+ */
+export const DEFAULT_CAPABILITIES: Capabilities = defaultCapabilities();
+
+/**
  * Takes the first task to answer, discarding the losers, and answers undefined when none does.
  *
  * Cancellation is best effort and semantically unobservable: a losing task may keep running, and

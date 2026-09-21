@@ -6,7 +6,7 @@
 use crate::*;
 
 /// Floor division, which the calendar algorithms need for negative years.
-pub fn floor_div_1(value: i64, divisor: i64) -> i64 {
+fn floor_div_1(value: i64, divisor: i64) -> i64 {
     let quotient = (value / divisor);
     if ((value < 0) && ((quotient * divisor) != value)) {
         return (quotient - 1);
@@ -15,7 +15,7 @@ pub fn floor_div_1(value: i64, divisor: i64) -> i64 {
 }
 
 /// Days since 1970-01-01 for a year, month and day already known to be a real date.
-pub fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
+pub(crate) fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
     let shifted = (if (month <= 2) {
         (year - 1)
     } else {
@@ -35,7 +35,7 @@ pub fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
 }
 
 /// Floor division, which the calendar algorithms need for negative years.
-pub fn floor_div(value: i64, divisor: i64) -> i64 {
+pub(crate) fn floor_div(value: i64, divisor: i64) -> i64 {
     let quotient = (value / divisor);
     if ((value < 0) && ((quotient * divisor) != value)) {
         return (quotient - 1);
@@ -44,7 +44,7 @@ pub fn floor_div(value: i64, divisor: i64) -> i64 {
 }
 
 /// The year of a date given as days since 1970-01-01.
-pub fn year_from_days(days: i64) -> i64 {
+pub(crate) fn year_from_days(days: i64) -> i64 {
     let shifted = (days + 719468);
     let era = floor_div(shifted, 146097);
     let day_of_era = (shifted - (era * 146097));
@@ -69,7 +69,7 @@ pub fn year_from_days(days: i64) -> i64 {
 }
 
 /// The month of a date given as days since 1970-01-01.
-pub fn month_from_days(days: i64) -> i64 {
+pub(crate) fn month_from_days(days: i64) -> i64 {
     let shifted = (days + 719468);
     let era = floor_div(shifted, 146097);
     let day_of_era = (shifted - (era * 146097));
@@ -88,7 +88,7 @@ pub fn month_from_days(days: i64) -> i64 {
 }
 
 /// The day of month of a date given as days since 1970-01-01.
-pub fn day_from_days(days: i64) -> i64 {
+pub(crate) fn day_from_days(days: i64) -> i64 {
     let shifted = (days + 719468);
     let era = floor_div(shifted, 146097);
     let day_of_era = (shifted - (era * 146097));
@@ -106,7 +106,7 @@ pub fn day_from_days(days: i64) -> i64 {
 /// The bounds are checked here rather than in a helper because the checker reads a guard, not a
 /// called predicate: after this `if`, the three components carry the ranges `daysFromCivil`
 /// requires, and the round trip rejects a day the month does not have.
-pub fn ymd_to_days(year: i64, month: i64, day: i64) -> Option<i64> {
+pub(crate) fn ymd_to_days(year: i64, month: i64, day: i64) -> Option<i64> {
     if ((((!(1..=9999).contains(&year) || (month < 1)) || (month > 12)) || (day < 1)) || (day > 31))
     {
         return None;

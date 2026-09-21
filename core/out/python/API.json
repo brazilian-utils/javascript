@@ -35,30 +35,16 @@
 		{
 			"name": "generate_cnpj",
 			"module": "generate_cnpj.py",
-			"params": [
-				{
-					"name": "env",
-					"type": "Capabilities"
-				}
-			],
+			"params": [],
 			"returns": "str",
-			"effects": [
-				"env"
-			]
+			"effects": []
 		},
 		{
 			"name": "generate_cpf",
 			"module": "generate_cpf.py",
-			"params": [
-				{
-					"name": "env",
-					"type": "Capabilities"
-				}
-			],
+			"params": [],
 			"returns": "str",
-			"effects": [
-				"env"
-			]
+			"effects": []
 		},
 		{
 			"name": "get_address_info_by_cep",
@@ -67,17 +53,12 @@
 				{
 					"name": "cep",
 					"type": "str"
-				},
-				{
-					"name": "env",
-					"type": "Capabilities"
 				}
 			],
 			"returns": "AddressInfo",
 			"effects": [
 				"Fail<GetAddressInfoByCepNotFoundError>",
-				"Fail<GetAddressInfoByCepValidationError>",
-				"env"
+				"Fail<GetAddressInfoByCepValidationError>"
 			]
 		},
 		{
@@ -135,6 +116,51 @@
 			],
 			"returns": "bool",
 			"effects": []
+		}
+	],
+	"seams": [
+		{
+			"name": "generate_cnpj_with",
+			"publicName": "generate_cnpj",
+			"module": "generate_cnpj.py",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "str",
+			"hasWrapper": true
+		},
+		{
+			"name": "generate_cpf_with",
+			"publicName": "generate_cpf",
+			"module": "generate_cpf.py",
+			"params": [
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "str",
+			"hasWrapper": true
+		},
+		{
+			"name": "get_address_info_by_cep_with",
+			"publicName": "get_address_info_by_cep",
+			"module": "get_address_info_by_cep.py",
+			"params": [
+				{
+					"name": "cep",
+					"type": "str"
+				},
+				{
+					"name": "env",
+					"type": "Capabilities"
+				}
+			],
+			"returns": "AddressInfo",
+			"hasWrapper": true
 		}
 	],
 	"records": [

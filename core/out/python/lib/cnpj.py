@@ -7,6 +7,14 @@ from typing import List
 from .random import random_digit
 from .._support import Capabilities
 
+__all__ = [
+    "random_cnpj_base",
+    "cnpj_check_digit",
+    "has_letter",
+    "has_valid_cnpj_checksum",
+    "is_repeated_cnpj",
+]
+
 LIB_CNPJ_TABLE_1: List[int] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
 LIB_CNPJ_TABLE_2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]

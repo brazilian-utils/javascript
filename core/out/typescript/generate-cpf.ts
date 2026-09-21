@@ -5,7 +5,7 @@
 import { cpfCheckDigit, randomCpfBase } from "./lib/cpf.ts";
 import { isRepeatedRun } from "./lib/digits.ts";
 import type { Capabilities } from "./capabilities.ts";
-import { raceFirstSome } from "./capabilities.ts";
+import { DEFAULT_CAPABILITIES, raceFirstSome } from "./capabilities.ts";
 
 /**
  * Generates a valid random CPF (Cadastro de Pessoas Físicas): 11 digits, under the check digit
@@ -17,7 +17,18 @@ import { raceFirstSome } from "./capabilities.ts";
  * same, followed by its two check digits. The state code option is a DX concern: it only ever
  * picks which digit the 9th position draws from, never how the rest of the document is built.
  */
-export function generateCpf(env: Capabilities): string {
+export function generateCpf(): string {
+	return generateCpfWith(DEFAULT_CAPABILITIES);
+}
+
+/**
+ * `generateCpf`, taking its capabilities explicitly.
+ *
+ * The public `generateCpf` calls this with the platform's defaults. Pass your own to
+ * supply a clock, a source of randomness or an HTTP client — which is what the
+ * differential conformance driver does to make a run reproducible.
+ */
+export function generateCpfWith(env: Capabilities): string {
 	let base: string = randomCpfBase(env);
 	for (let attempt = 0; attempt < 8; attempt++) {
 		if (!isRepeatedRun(base)) {

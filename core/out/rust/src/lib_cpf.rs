@@ -8,7 +8,7 @@ use crate::*;
 /// A random CPF base: 8 digits plus a região fiscal digit, each drawn independently — matches the
 /// published `generateCpf()` called with no state, where an unset state also draws that 9th digit
 /// at random. Nine separate draws, not a loop, is what lets the result stay exactly 9 digits long.
-pub fn random_cpf_base(env: &dyn Capabilities) -> String {
+pub(crate) fn random_cpf_base(env: &dyn Capabilities) -> String {
     return crate::support::concat2(
         &crate::support::concat2(
             &crate::support::concat2(
@@ -34,7 +34,7 @@ pub fn random_cpf_base(env: &dyn Capabilities) -> String {
 }
 
 /// The check digit of a CPF base, under the Receita Federal rule (weights 10..2 and 11..2).
-pub fn cpf_check_digit(cpf: &str, size: i64) -> i64 {
+pub(crate) fn cpf_check_digit(cpf: &str, size: i64) -> i64 {
     let mut sum = 0;
     for index in 0..size {
         sum += (digit_at(cpf, index) * ((size + 1) - index));
@@ -44,7 +44,7 @@ pub fn cpf_check_digit(cpf: &str, size: i64) -> i64 {
 }
 
 /// Whether every scalar of the value is the same one, e.g. "00000000000".
-pub fn is_repeated(value: &str) -> bool {
+pub(crate) fn is_repeated(value: &str) -> bool {
     let first = (value.as_bytes()[0] as i64);
     for index in 1..11 {
         if ((value.as_bytes()[index as usize] as i64) != first) {

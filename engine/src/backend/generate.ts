@@ -15,7 +15,7 @@ import type { SemType } from "../types.ts";
 import { typeToString } from "../types.ts";
 import { lowerProgram } from "./lower.ts";
 import type { LowerOptions, TargetSpec } from "./lower.ts";
-import type { TImport, TModule } from "./tast.ts";
+import type { TExpr, TFunc, TImport, TModule } from "./tast.ts";
 
 export const ENGINE_VERSION = "0.1.0";
 
@@ -52,6 +52,26 @@ export type Backend = {
 	 * differential harness can drive every target through one protocol.
 	 */
 	readonly driver?: (program: CProgram, entryPoints: readonly DriverEntry[]) => { path: string; text: string }[];
+	/**
+	 * How this target reaches its own platform default capabilities, present only when it has one
+	 * to reach. TypeScript and Python do; Go and Rust ship no concrete implementation in the
+	 * generated core at all — see `docs/decisions/0011-public-entry-points-vs-capabilities.md`.
+	 * When set, `generate` gives every capability-taking entry point a public wrapper under the
+	 * source's own name and no capability parameter, moving the capability-taking implementation
+	 * to an internal seam this expression feeds by default. Absent, the capability-taking form
+	 * stays the only entry point, marked in `API.json` rather than hidden behind a fake.
+	 */
+	readonly defaultCapabilities?: {
+		/**
+		 * A bare reference to a module-level singleton, built once at load time — never a call
+		 * repeated per invocation, which is the whole point of building it once.
+		 */
+		readonly ref: TExpr;
+		/** What a module with a wrapper needs to import to see `ref`. */
+		readonly imports: readonly { from: string; names: readonly string[] }[];
+		/** The seam's own name, derived from the public wrapper's name it stands in for. */
+		readonly seamName: (publicName: string) => string;
+	};
 };
 
 /** One entry point, as the generated driver sees it. */
@@ -88,20 +108,33 @@ export function generate(
 	const moduleOf = new Map<string, string>();
 	for (const fn of program.functions.values()) moduleOf.set(fn.name, fn.module);
 
+	const modules = splitCapabilityEntryPoints(lowered.modules, backend);
+
 	const files: { path: string; text: string }[] = [];
 	const sourceMap: Record<string, { module: string; start: number; end: number }> = {};
 	const api: {
 		functions: { name: string; module: string; params: { name: string; type: string }[]; returns: string; effects: string[] }[];
+		// A capability-taking form: either an entry point's internal seam (its public wrapper is
+		// listed in `functions` instead) or, absent a wrapper, the same entry as `functions` lists,
+		// repeated here so a reader sees it needs capabilities without inferring that from `effects`.
+		seams: {
+			name: string;
+			publicName: string;
+			module: string;
+			params: { name: string; type: string }[];
+			returns: string;
+			hasWrapper: boolean;
+		}[];
 		records: { name: string; fields: { name: string; type: string }[] }[];
 		errors: string[];
-	} = { functions: [], records: [], errors: [] };
+	} = { functions: [], seams: [], records: [], errors: [] };
 
 	const needs: SupportNeeds = {
 		env: [...program.functions.values()].some((fn) => fn.usesEnv),
 		race: [...program.functions.values()].some((fn) => usesOp(fn.body, "task.race")),
 	};
 
-	for (const module of lowered.modules) {
+	for (const module of modules) {
 		const sourcePath = module.sourcePath;
 		const imports = computeImports(
 			module,
@@ -114,6 +147,23 @@ export function generate(
 			lowered.moduleNeeds.get(sourcePath) ?? new Set(),
 			[...(lowered.moduleBuiltins.get(sourcePath) ?? new Set<string>())].sort(),
 		);
+		const hasWrapper = module.functions.some((fn) => fn.seamName !== undefined);
+		if (hasWrapper && backend.defaultCapabilities !== undefined) {
+			for (const item of backend.defaultCapabilities.imports) {
+				// Folded into an existing import from the same place, typed the same way, rather than
+				// a second statement — `supportImport` already returns one untyped import per source
+				// for a target that only ever needs one, and this keeps that target at just the one.
+				const index = imports.findIndex(
+					(candidate) => candidate.from === item.from && candidate.typeOnly !== true,
+				);
+				if (index === -1) {
+					imports.push({ from: item.from, names: [...item.names] });
+				} else {
+					const merged = [...new Set([...imports[index]!.names, ...item.names])].sort();
+					imports[index] = { ...imports[index]!, names: merged };
+				}
+			}
+		}
 		const printed = backend.printModule({
 			...module,
 			imports,
@@ -127,14 +177,25 @@ export function generate(
 				start: fn.source.start,
 				end: fn.source.end,
 			};
-			if (!fn.exported) continue;
-			api.functions.push({
-				name: fn.name,
-				module: module.path,
-				params: fn.params.map((param) => ({ name: param.name, type: backend.renderType(param.type) })),
-				returns: backend.renderType(fn.ret),
-				effects: fn.fails.map((name) => `Fail<${name}>`).concat(fn.usesEnv ? ["env"] : []),
-			});
+			if (fn.exported) {
+				api.functions.push({
+					name: fn.name,
+					module: module.path,
+					params: fn.params.map((param) => ({ name: param.name, type: backend.renderType(param.type) })),
+					returns: backend.renderType(fn.ret),
+					effects: fn.fails.map((name) => `Fail<${name}>`).concat(fn.usesEnv ? ["env"] : []),
+				});
+			}
+			if (fn.seam === true) {
+				api.seams.push({
+					name: fn.name,
+					publicName: fn.wrapperName ?? fn.name, // no wrapper: it is its own public name
+					module: module.path,
+					params: fn.params.map((param) => ({ name: param.name, type: backend.renderType(param.type) })),
+					returns: backend.renderType(fn.ret),
+					hasWrapper: fn.wrapperName !== undefined,
+				});
+			}
 		}
 		for (const record of module.records) {
 			if (api.records.some((item) => item.name === record.name)) continue;
@@ -146,9 +207,12 @@ export function generate(
 	}
 
 	const entries: DriverEntry[] = [];
-	for (const module of lowered.modules) {
+	for (const module of modules) {
 		for (const fn of module.functions) {
-			if (!fn.exported) continue;
+			// The wrapper itself never drives: it has no capability parameter to inject a fake
+			// through, so the differential harness always targets its seam instead (below).
+			if (fn.seamName !== undefined) continue;
+			if (!fn.exported && fn.seam !== true) continue;
 			entries.push({
 				coreName: `${module.sourcePath}::${fn.source.name}`,
 				targetName: fn.name,
@@ -175,6 +239,77 @@ export function generate(
 		api,
 		sourceMap,
 	};
+}
+
+/**
+ * Defect 1's fix (`docs/decisions/0011-public-entry-points-vs-capabilities.md`): capability
+ * threading gives an entry point an `env` parameter the moment it or something it calls reaches
+ * Http, Clock or Random, but the source never declared that parameter, so it cannot stay on the
+ * function a caller imports under the entry point's own name. Where the target can build a
+ * default (`backend.defaultCapabilities`), this splits such an entry point in two: a public
+ * wrapper that keeps the source's exact signature and calls an internal seam — named so it reads
+ * as one — that still takes capabilities and defaults to the platform's own. The seam is what the
+ * differential driver calls directly, to inject fakes (`entries`, below). Where the target cannot
+ * (Go, Rust — see the module comment on `defaultCapabilities`), the function is left as is, only
+ * marked (`seam: true`) so `API.json` documents it as capability-taking rather than an ordinary
+ * utility.
+ */
+function splitCapabilityEntryPoints(modules: readonly TModule[], backend: Backend): TModule[] {
+	const defaults = backend.defaultCapabilities;
+	return modules.map((module) => {
+		let changed = false;
+		const functions = module.functions.flatMap((fn): TFunc[] => {
+			if (!fn.exported || !fn.usesEnv) return [fn];
+			changed = true;
+			if (defaults === undefined) return [{ ...fn, seam: true }];
+
+			const seamName = defaults.seamName(fn.name);
+			const publicParams = fn.params.filter((param) => param.name !== "env");
+			const wrapper: TFunc = {
+				name: fn.name,
+				params: publicParams,
+				ret: fn.ret,
+				body: [
+					{
+						kind: "return",
+						value: {
+							kind: "call",
+							callee: { kind: "name", name: seamName },
+							args: [...publicParams.map((param): TExpr => ({ kind: "name", name: param.name })), defaults.ref],
+							await: fn.isAsync,
+						},
+					},
+				],
+				exported: true,
+				moduleExported: true,
+				doc: fn.doc,
+				isAsync: fn.isAsync,
+				fails: fn.fails,
+				usesEnv: false,
+				seamName,
+				source: fn.source,
+			};
+			// The seam carries its own short note rather than a copy of the utility's documentation:
+			// a reader who reaches it is looking for why it exists, and the utility's own prose is
+			// already right above it on the wrapper.
+			const seamNote =
+				`\`${fn.name}\`, taking its capabilities explicitly.\n\n` +
+				`The public \`${fn.name}\` calls this with the platform's defaults. Pass your own to\n` +
+				"supply a clock, a source of randomness or an HTTP client — which is what the\n" +
+				"differential conformance driver does to make a run reproducible.";
+			const seam: TFunc = {
+				...fn,
+				name: seamName,
+				exported: false,
+				moduleExported: true,
+				seam: true,
+				wrapperName: fn.name,
+				doc: seamNote,
+			};
+			return [wrapper, seam];
+		});
+		return changed ? { ...module, functions } : module;
+	});
 }
 
 /** Whether a Core body mentions an operation, used to decide what support code is needed. */

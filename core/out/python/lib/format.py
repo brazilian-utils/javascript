@@ -6,6 +6,8 @@
 from typing import List
 from .._support import trunc_mod
 
+__all__ = ["pattern_slots", "format_with_pattern", "group_thousands"]
+
 
 def pattern_slots(pattern: str) -> int:
     """How many scalars of the value a pattern consumes."""

@@ -28,7 +28,6 @@ import { getHolidays as generatedGetHolidays, type Holiday as GeneratedHoliday }
 import { isBusinessDay as generatedIsBusinessDay } from "../out/typescript/is-business-day.ts";
 import { generateCpf as generatedGenerateCpf } from "../out/typescript/generate-cpf.ts";
 import { generateCnpj as generatedGenerateCnpj } from "../out/typescript/generate-cnpj.ts";
-import { defaultCapabilities } from "../out/typescript/capabilities.ts";
 import { civilDate } from "../out/typescript/lib/civil.ts";
 
 const BUDGET = 1.5;
@@ -251,7 +250,6 @@ compare(
 // validators -- its own port's and the generated core's -- before either side is timed. A fast
 // generator that mints invalid documents is a defect, not a pass.
 const GENERATE_SAMPLES = 500;
-const capabilities = defaultCapabilities(); // built once, like a real caller would, then reused
 
 function checkGeneratorAgreement(
 	utility: string,
@@ -327,13 +325,13 @@ checkGeneratorAgreement(
 	"generate",
 	() => handwrittenGenerateCpf(),
 	(value) => handwrittenCpf(value),
-	() => generatedGenerateCpf(capabilities),
+	() => generatedGenerateCpf(),
 	(value) => generatedCpf(value),
 );
 compareGenerate(
 	"generateCpf",
 	() => handwrittenGenerateCpf(),
-	() => generatedGenerateCpf(capabilities),
+	() => generatedGenerateCpf(),
 );
 
 checkGeneratorAgreement(
@@ -341,13 +339,13 @@ checkGeneratorAgreement(
 	"generate",
 	() => handwrittenGenerateCnpj(),
 	(value) => handwrittenCnpj(value, { version: 1 }),
-	() => generatedGenerateCnpj(capabilities),
+	() => generatedGenerateCnpj(),
 	(value) => generatedCnpj(value, "1"),
 );
 compareGenerate(
 	"generateCnpj",
 	() => handwrittenGenerateCnpj(),
-	() => generatedGenerateCnpj(capabilities),
+	() => generatedGenerateCnpj(),
 );
 
 process.stdout.write("\n| utility | variant | handwritten | generated | ratio | budget |\n");

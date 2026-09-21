@@ -6,6 +6,8 @@
 from .get_holidays import get_holidays
 from .std.date import year_from_days
 
+__all__ = ["is_business_day"]
+
 
 def is_business_day(value: int, include_optional: bool) -> bool:
     """Whether a date is a Brazilian business day (dia útil).

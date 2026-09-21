@@ -5,10 +5,12 @@
 
 from .lib.cnpj import cnpj_check_digit, random_cnpj_base
 from .lib.digits import is_repeated_run
-from ._support import Capabilities
+from ._support import Capabilities, DEFAULT_CAPABILITIES
+
+__all__ = ["generate_cnpj", "generate_cnpj_with"]
 
 
-def generate_cnpj(env: Capabilities) -> str:
+def generate_cnpj() -> str:
     """Generates a valid random CNPJ (Cadastro Nacional da Pessoa Jurídica) in the numeric format: 14
     digits, under the check digit rule both CNPJ versions share.
 
@@ -16,6 +18,16 @@ def generate_cnpj(env: Capabilities) -> str:
     4-digit branch (the "número de ordem"), redrawn while every digit of the 12-digit base is the
     same, followed by its two check digits. The alphanumeric version and a chosen branch are DX
     concerns layered on the same base and check digit rule, not a different generator.
+    """
+    return generate_cnpj_with(DEFAULT_CAPABILITIES)
+
+
+def generate_cnpj_with(env: Capabilities) -> str:
+    """`generate_cnpj`, taking its capabilities explicitly.
+
+    The public `generate_cnpj` calls this with the platform's defaults. Pass your own to
+    supply a clock, a source of randomness or an HTTP client — which is what the
+    differential conformance driver does to make a run reproducible.
     """
     base: str = random_cnpj_base(env)
     for attempt in range(0, 8):

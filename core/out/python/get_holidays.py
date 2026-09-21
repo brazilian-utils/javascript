@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from .lib.civil import civil_date
 from .lib.easter import easter_sunday
 
+__all__ = ["get_holidays"]
+
 
 @dataclass(frozen=True)
 class Holiday:

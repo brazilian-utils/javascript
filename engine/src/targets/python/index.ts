@@ -13,7 +13,7 @@ import { ENGINE_VERSION } from "../../backend/generate.ts";
 import type { TargetSpec } from "../../backend/lower.ts";
 import type { Candidate } from "../../backend/select.ts";
 import { LoweringTable, argIsAscii } from "../../backend/select.ts";
-import { asciiString } from "../../backend/tast.ts";
+import { asciiString, mapExprs } from "../../backend/tast.ts";
 import type { TExpr, TFunc, TModule, TRecord, TStmt } from "../../backend/tast.ts";
 import type { CProgram } from "../../core/ir.ts";
 import { printRegex } from "../../regex.ts";
@@ -769,7 +769,44 @@ function hoistPatterns(module: TModule, body: string): { body: string; declarati
 	return { body: hoisted, declarations };
 }
 
-export function printModule(module: TModule): string {
+/**
+ * Marks every function its source module never exported as Python's own notion of private: a
+ * leading underscore, on the declaration and on every call site that names it. Every such
+ * function is called only from within its own module (`docs/semantics.md`'s effects section
+ * surveys the whole project), so a module-local rename is enough — nothing outside ever needs the
+ * unprefixed name resolved.
+ */
+function applyPrivacy(module: TModule): TModule {
+	const renamed = new Map<string, string>();
+	for (const fn of module.functions) {
+		if (!fn.moduleExported) renamed.set(fn.name, `_${fn.name}`);
+	}
+	if (renamed.size === 0) return module;
+	const rename = (expr: TExpr): TExpr => {
+		if (expr.kind === "name" && renamed.has(expr.name)) return { ...expr, name: renamed.get(expr.name)! };
+		// A lowering-table candidate (`task.race`'s, among others) can pre-render a fragment of
+		// text at lowering time, baking in whatever name the callee had then — `mapExprs` cannot
+		// see inside it the way it sees a "call" node's own callee, so the same rename repeats here
+		// as a word-boundary substitution, the technique `hoistPatterns` already uses in this file.
+		if (expr.kind === "raw") {
+			let text = expr.text;
+			for (const [from, to] of renamed) text = text.replaceAll(new RegExp(`\\b${from}\\b`, "gu"), to);
+			return text === expr.text ? expr : { ...expr, text };
+		}
+		return expr;
+	};
+	return {
+		...module,
+		functions: module.functions.map((fn) => ({
+			...fn,
+			name: renamed.get(fn.name) ?? fn.name,
+			body: mapExprs(fn.body, rename),
+		})),
+	};
+}
+
+export function printModule(rawModule: TModule): string {
+	const module = applyPrivacy(rawModule);
 	const typingNames = new Set<string>();
 	// Module level constants are upper cased, the way Python names a constant, so every reference
 	// to one has to be upper cased too. Driven by the module's own constants rather than by a
@@ -813,6 +850,13 @@ export function printModule(module: TModule): string {
 		);
 	}
 	parts.push("");
+	// `__all__` names the module's public surface explicitly, on top of the leading underscore
+	// `applyPrivacy` already gave every unexported function — the two devices Python convention
+	// pairs for exactly this, so `from module import *` matches what the source module exported.
+	const publicFunctions = module.functions.filter((fn) => fn.moduleExported).map((fn) => fn.name);
+	if (publicFunctions.length > 0) {
+		parts.push(`__all__ = [${publicFunctions.map((name) => JSON.stringify(name)).join(", ")}]`, "");
+	}
 	if (records !== "") parts.push(records, "");
 	for (const constant of module.constants) {
 		parts.push(`${constant.name.toUpperCase()}: ${pyType(constant.type)} = ${print(constant.value)}`, "");
@@ -936,6 +980,12 @@ function supportModule(_program: CProgram, needs: SupportNeeds): { path: string;
 			"        # documents doing. A caller who needs unpredictability passes its own",
 			"        # capability, the way the conformance harness passes a seeded one.",
 			"        return random.getrandbits(32)",
+			"",
+			"",
+			"# The platform default, built once at import time rather than per call — every public",
+			"# wrapper (docs/decisions/0011-public-entry-points-vs-capabilities.md) shares this one",
+			"# instance, the same way a caller who builds their own environment would share it.",
+			"DEFAULT_CAPABILITIES = Capabilities()",
 			"",
 		);
 	}
@@ -1142,5 +1192,10 @@ export const PYTHON_BACKEND: Backend = {
 		const names = builtins.slice();
 		if (usesEnv && needs.env) names.push("Capabilities");
 		return [{ from: "SUPPORT", names: names.sort() }];
+	},
+	defaultCapabilities: {
+		ref: { kind: "name", name: "DEFAULT_CAPABILITIES" },
+		imports: [{ from: "SUPPORT", names: ["DEFAULT_CAPABILITIES"] }],
+		seamName: (publicName) => `${publicName}_with`,
 	},
 };

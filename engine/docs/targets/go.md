@@ -34,6 +34,17 @@
 - Domain errors are structs in `errors.go` with `Error()` and `Unwrap()` to a package-level
   `ErrDomain`, so `errors.Is` recognizes the family and `errors.As` recognizes the member.
 - `race` is one goroutine per task and a buffered channel.
+- **No default `Capabilities`.** `support.go` declares the interface only — no HTTP client, no
+  clock, no RNG anywhere in `core`, on purpose: the package imports nothing beyond what the
+  utilities' own logic needs. The differential driver's `cmd/driver/main.go` builds its own
+  fixture-backed fake, but that fake lives in the driver binary, never in the library. This means
+  a utility whose effects reach `Http`, `Clock` or `Random` (`GetAddressInfoByCep`, `GenerateCpf`,
+  `GenerateCnpj`) cannot get the public-wrapper treatment TypeScript and Python give the same
+  utilities (`docs/semantics.md` §4.1) — there is no default to hand a wrapper, and one is not
+  fabricated to manufacture the appearance of parity. The capability-taking form stays the only
+  entry point, under its original name, taking `Capabilities` as a normal parameter a caller
+  supplies. This is a genuine, reported gap from drop-in replacement, not a defect in this
+  backend's generation — see [ADR 0011](../decisions/0011-public-entry-points-vs-capabilities.md).
 
 ## Notable lowerings
 

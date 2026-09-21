@@ -5,6 +5,8 @@
 
 from .._support import Capabilities
 
+__all__ = ["random_below", "random_digit"]
+
 
 def random_below(bound: int, env: Capabilities) -> int:
     """A uniform integer in `[0, bound)`, by rejection sampling rather than `% bound`: the modulo of a

@@ -6,7 +6,7 @@
 use crate::*;
 
 /// The day of March (1 to 31) or April (32 to 56) Easter falls on, as a day-of-March offset.
-pub fn easter_day_of_march(year: i64) -> i64 {
+pub(crate) fn easter_day_of_march(year: i64) -> i64 {
     let a = (year % 19);
     let b = (year / 100);
     let c = (year % 100);
@@ -24,7 +24,7 @@ pub fn easter_day_of_march(year: i64) -> i64 {
 }
 
 /// Easter Sunday of a year, as a civil date.
-pub fn easter_sunday(year: i64) -> i64 {
+pub(crate) fn easter_sunday(year: i64) -> i64 {
     let day_of_march = easter_day_of_march(year);
     return (if (day_of_march <= 31) {
         civil_date(year, 3, day_of_march)

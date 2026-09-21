@@ -84,6 +84,11 @@
 		"start": 982,
 		"end": 1581
 	},
+	"generate-cnpj.ts#generateCnpjWith": {
+		"module": "generate-cnpj",
+		"start": 982,
+		"end": 1581
+	},
 	"lib/cpf.ts#randomCpfBase": {
 		"module": "lib/cpf",
 		"start": 999,
@@ -100,6 +105,11 @@
 		"end": 1501
 	},
 	"generate-cpf.ts#generateCpf": {
+		"module": "generate-cpf",
+		"start": 1014,
+		"end": 1576
+	},
+	"generate-cpf.ts#generateCpfWith": {
 		"module": "generate-cpf",
 		"start": 1014,
 		"end": 1576
@@ -125,6 +135,11 @@
 		"end": 2954
 	},
 	"get-address-info-by-cep.ts#getAddressInfoByCep": {
+		"module": "get-address-info-by-cep",
+		"start": 3379,
+		"end": 3790
+	},
+	"get-address-info-by-cep.ts#getAddressInfoByCepWith": {
 		"module": "get-address-info-by-cep",
 		"start": 3379,
 		"end": 3790
