@@ -151,6 +151,7 @@ be handed it, so nothing is skipped for being inconvenient, and the count is vis
 | `isValidCnpj`         | regular expressions, check digits, JavaScript's own type coercion |
 | `formatCnpj`          | a shared mask helper, and three options that interact             |
 | `getAddressInfoByCep` | HTTP, JSON, retries, an error hierarchy, three providers raced    |
+| `getMunicipalities`   | 5,571 baked rows, and a pt-BR order no two targets agree on       |
 
 ## Adding a utility
 
