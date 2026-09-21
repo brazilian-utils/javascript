@@ -2,8 +2,8 @@
 // engine: 0.1.0
 // source: is-valid-cpf
 // content: dae364e11fb3
-import { cpfCheckDigit, isRepeated } from "./lib/cpf.ts";
-import { digitAt, keepDigits } from "./lib/digits.ts";
+import { cpfCheckDigit } from "./lib/cpf.ts";
+import { digitAt } from "./lib/digits.ts";
 
 /**
  * Validates a CPF (Cadastro de Pessoas Físicas).
@@ -19,15 +19,49 @@ export function isValidCpf(cpf: string): boolean {
 	) {
 		return false;
 	}
-	const digits: string = keepDigits(cpf);
+	const _inl150Value: string = cpf;
+	let _inl151Result: string | undefined = undefined;
+	_inl151Result = _inl150Value.replace(/[^0-9]/gu, "");
+	const digits: string = _inl151Result!;
 	if (digits.length !== 11) {
 		return false;
 	}
-	if (isRepeated(digits)) {
+	const _inl154Value: string = digits;
+	let _inl155Result: boolean | undefined = undefined;
+	const _inl152First: number = _inl154Value.charCodeAt(0);
+	for (let _inl153Index = 1; _inl153Index < 11; _inl153Index++) {
+		if (_inl154Value.charCodeAt(_inl153Index) !== _inl152First) {
+			_inl155Result = false;
+		}
+		if (_inl155Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl155Result === undefined) {
+		_inl155Result = true;
+	}
+	if (_inl155Result!) {
 		return false;
 	}
+	const _inl156Value: string = digits;
+	const _inl157Index: number = 9;
+	let _inl158Result: number | undefined = undefined;
+	_inl158Result = _inl156Value.charCodeAt(_inl157Index) - 48;
+	const _inl162Cpf: string = digits;
+	const _inl163Size: number = 9;
+	let _inl164Result: number | undefined = undefined;
+	let _inl159Sum: number = 0;
+	for (let _inl160Index = 0; _inl160Index < _inl163Size; _inl160Index++) {
+		const _inl318Value: string = _inl162Cpf;
+		const _inl319Index: number = _inl160Index;
+		let _inl320Result: number | undefined = undefined;
+		_inl320Result = _inl318Value.charCodeAt(_inl319Index) - 48;
+		_inl159Sum = _inl159Sum + _inl320Result! * (_inl163Size + 1 - _inl160Index);
+	}
+	const _inl161Remainder: number = _inl159Sum % 11;
+	_inl164Result = _inl161Remainder < 2 ? 0 : 11 - _inl161Remainder;
 	return (
-		digitAt(digits, 9) === cpfCheckDigit(digits, 9) &&
+		_inl158Result! === _inl164Result! &&
 		digitAt(digits, 10) === cpfCheckDigit(digits, 10)
 	);
 }

@@ -23,9 +23,21 @@ pub fn generate_cpf(env: &dyn Capabilities) -> String {
     }
     let first_digit = cpf_check_digit(&crate::support::concat2(&base, "00"), 9).to_string();
     let second_digit = cpf_check_digit(
-        &crate::support::concat2(&crate::support::concat2(&base, &first_digit), "0"),
+        &{
+            let mut __buf = String::with_capacity(base.len() + first_digit.len() + "0".len());
+            __buf.push_str(&base);
+            __buf.push_str(&first_digit);
+            __buf.push('0');
+            __buf
+        },
         10,
     )
     .to_string();
-    return crate::support::concat2(&crate::support::concat2(&base, &first_digit), &second_digit);
+    return {
+        let mut __buf = String::with_capacity(base.len() + first_digit.len() + second_digit.len());
+        __buf.push_str(&base);
+        __buf.push_str(&first_digit);
+        __buf.push_str(&second_digit);
+        __buf
+    };
 }

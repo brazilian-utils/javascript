@@ -3,17 +3,6 @@
 // source: std/date
 // content: 8041c981a090
 /**
- * Floor division, which the calendar algorithms need for negative years.
- */
-function floorDiv1(value: number, divisor: number): number {
-	const quotient: number = Math.trunc(value / divisor);
-	if (value < 0 && quotient * divisor !== value) {
-		return quotient - 1;
-	}
-	return quotient;
-}
-
-/**
  * Days since 1970-01-01 for a year, month and day already known to be a real date.
  */
 export function daysFromCivil(
@@ -22,7 +11,17 @@ export function daysFromCivil(
 	day: number,
 ): number {
 	const shifted: number = month <= 2 ? year - 1 : year;
-	const era: number = floorDiv1(shifted, 400);
+	const _inl14Value: number = shifted;
+	const _inl15Divisor: number = 400;
+	let _inl16Result: number | undefined = undefined;
+	const _inl13Quotient: number = Math.trunc(_inl14Value / _inl15Divisor);
+	if (_inl14Value < 0 && _inl13Quotient * _inl15Divisor !== _inl14Value) {
+		_inl16Result = _inl13Quotient - 1;
+	}
+	if (_inl16Result === undefined) {
+		_inl16Result = _inl13Quotient;
+	}
+	const era: number = _inl16Result!;
 	const yearOfEra: number = shifted - era * 400;
 	const monthTerm: number = month > 2 ? month - 3 : month + 9;
 	const dayOfYear: number = Math.trunc((153 * monthTerm + 2) / 5) + day - 1;
@@ -35,22 +34,21 @@ export function daysFromCivil(
 }
 
 /**
- * Floor division, which the calendar algorithms need for negative years.
- */
-export function floorDiv(value: number, divisor: number): number {
-	const quotient: number = Math.trunc(value / divisor);
-	if (value < 0 && quotient * divisor !== value) {
-		return quotient - 1;
-	}
-	return quotient;
-}
-
-/**
  * The year of a date given as days since 1970-01-01.
  */
 export function yearFromDays(days: number): number {
 	const shifted: number = days + 719468;
-	const era: number = floorDiv(shifted, 146097);
+	const _inl2Value: number = shifted;
+	const _inl3Divisor: number = 146097;
+	let _inl4Result: number | undefined = undefined;
+	const _inl1Quotient: number = Math.trunc(_inl2Value / _inl3Divisor);
+	if (_inl2Value < 0 && _inl1Quotient * _inl3Divisor !== _inl2Value) {
+		_inl4Result = _inl1Quotient - 1;
+	}
+	if (_inl4Result === undefined) {
+		_inl4Result = _inl1Quotient;
+	}
+	const era: number = _inl4Result!;
 	const dayOfEra: number = shifted - era * 146097;
 	const yearOfEra: number = Math.trunc(
 		(dayOfEra -
@@ -66,85 +64,4 @@ export function yearFromDays(days: number): number {
 	const monthPrime: number = Math.trunc((5 * dayOfYear + 2) / 153);
 	const month: number = monthPrime < 10 ? monthPrime + 3 : monthPrime - 9;
 	return Math.min(Math.max(month <= 2 ? year + 1 : year, 1), 9999);
-}
-
-/**
- * The month of a date given as days since 1970-01-01.
- */
-export function monthFromDays(days: number): number {
-	const shifted: number = days + 719468;
-	const era: number = floorDiv(shifted, 146097);
-	const dayOfEra: number = shifted - era * 146097;
-	const yearOfEra: number = Math.trunc(
-		(dayOfEra -
-			Math.trunc(dayOfEra / 1460) +
-			Math.trunc(dayOfEra / 36524) -
-			Math.trunc(dayOfEra / 146096)) /
-			365,
-	);
-	const dayOfYear: number =
-		dayOfEra -
-		(365 * yearOfEra + Math.trunc(yearOfEra / 4) - Math.trunc(yearOfEra / 100));
-	const monthPrime: number = Math.trunc((5 * dayOfYear + 2) / 153);
-	return Math.min(
-		Math.max(monthPrime < 10 ? monthPrime + 3 : monthPrime - 9, 1),
-		12,
-	);
-}
-
-/**
- * The day of month of a date given as days since 1970-01-01.
- */
-export function dayFromDays(days: number): number {
-	const shifted: number = days + 719468;
-	const era: number = floorDiv(shifted, 146097);
-	const dayOfEra: number = shifted - era * 146097;
-	const yearOfEra: number = Math.trunc(
-		(dayOfEra -
-			Math.trunc(dayOfEra / 1460) +
-			Math.trunc(dayOfEra / 36524) -
-			Math.trunc(dayOfEra / 146096)) /
-			365,
-	);
-	const dayOfYear: number =
-		dayOfEra -
-		(365 * yearOfEra + Math.trunc(yearOfEra / 4) - Math.trunc(yearOfEra / 100));
-	const monthPrime: number = Math.trunc((5 * dayOfYear + 2) / 153);
-	return Math.min(
-		Math.max(dayOfYear - Math.trunc((153 * monthPrime + 2) / 5) + 1, 1),
-		31,
-	);
-}
-
-/**
- * Days since 1970-01-01, or absent when the components do not name a real date.
- *
- * The bounds are checked here rather than in a helper because the checker reads a guard, not a
- * called predicate: after this `if`, the three components carry the ranges `daysFromCivil`
- * requires, and the round trip rejects a day the month does not have.
- */
-export function ymdToDays(
-	year: number,
-	month: number,
-	day: number,
-): number | undefined {
-	if (
-		year < 1 ||
-		year > 9999 ||
-		month < 1 ||
-		month > 12 ||
-		day < 1 ||
-		day > 31
-	) {
-		return undefined;
-	}
-	const days: number = daysFromCivil(year, month, day);
-	if (
-		yearFromDays(days) !== year ||
-		monthFromDays(days) !== month ||
-		dayFromDays(days) !== day
-	) {
-		return undefined;
-	}
-	return days;
 }

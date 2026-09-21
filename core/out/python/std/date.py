@@ -4,84 +4,97 @@
 # content: 8041c981a090
 
 from typing import Optional
-from .._support import trunc_div
 
-__all__ = [
-    "days_from_civil",
-    "floor_div",
-    "year_from_days",
-    "month_from_days",
-    "day_from_days",
-    "ymd_to_days",
-]
-
-
-def _floor_div_1(value: int, divisor: int) -> int:
-    """Floor division, which the calendar algorithms need for negative years."""
-    quotient: int = value // divisor
-    if (value < 0) and ((quotient * divisor) != value):
-        return quotient - 1
-    return quotient
-
-
-def days_from_civil(year: int, month: int, day: int) -> int:
-    """Days since 1970-01-01 for a year, month and day already known to be a real date."""
-    shifted: int = (year - 1) if (month <= 2) else year
-    era: int = _floor_div_1(shifted, 400)
-    year_of_era: int = shifted - (era * 400)
-    month_term: int = (month - 3) if (month > 2) else (month + 9)
-    day_of_year: int = ((((153 * month_term) + 2) // 5) + day) - 1
-    day_of_era: int = (
-        ((year_of_era * 365) + trunc_div(year_of_era, 4)) - trunc_div(year_of_era, 100)
-    ) + day_of_year
-    return min(max((((era * 146097) + day_of_era) - 719468), -719162), 2932896)
-
-
-def floor_div(value: int, divisor: int) -> int:
-    """Floor division, which the calendar algorithms need for negative years."""
-    quotient: int = value // divisor
-    if (value < 0) and ((quotient * divisor) != value):
-        return quotient - 1
-    return quotient
-
-
-def year_from_days(days: int) -> int:
-    """The year of a date given as days since 1970-01-01."""
-    shifted: int = days + 719468
-    era: int = floor_div(shifted, 146097)
-    day_of_era: int = shifted - (era * 146097)
-    year_of_era: int = trunc_div(
-        (
-            ((day_of_era - trunc_div(day_of_era, 1460)) + trunc_div(day_of_era, 36524))
-            - trunc_div(day_of_era, 146096)
-        ),
-        365,
-    )
-    year: int = year_of_era + (era * 400)
-    day_of_year: int = day_of_era - (
-        ((365 * year_of_era) + trunc_div(year_of_era, 4)) - trunc_div(year_of_era, 100)
-    )
-    month_prime: int = trunc_div(((5 * day_of_year) + 2), 153)
-    month: int = (month_prime + 3) if (month_prime < 10) else (month_prime - 9)
-    return min(max(((year + 1) if (month <= 2) else year), 1), 9999)
+__all__ = ["month_from_days", "day_from_days", "ymd_to_days", "year_from_days"]
 
 
 def month_from_days(days: int) -> int:
     """The month of a date given as days since 1970-01-01."""
     shifted: int = days + 719468
-    era: int = floor_div(shifted, 146097)
+    __inl6_value: int = shifted
+    __inl7_divisor: int = 146097
+    __inl8_result: Optional[int] = None
+    __inl5_quotient: int = __inl6_value // __inl7_divisor
+    if (__inl6_value < 0) and ((__inl5_quotient * __inl7_divisor) != __inl6_value):
+        __inl8_result = __inl5_quotient - 1
+    if __inl8_result is None:
+        __inl8_result = __inl5_quotient
+    era: int = __inl8_result
     day_of_era: int = shifted - (era * 146097)
-    year_of_era: int = trunc_div(
-        (
-            ((day_of_era - trunc_div(day_of_era, 1460)) + trunc_div(day_of_era, 36524))
-            - trunc_div(day_of_era, 146096)
-        ),
-        365,
+    year_of_era: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (
+                __td_a := (
+                    (
+                        (
+                            day_of_era
+                            - (
+                                -(abs(__td_a) // abs(__td_b))
+                                if (
+                                    (__td_a := day_of_era),
+                                    (__td_b := 1460),
+                                    (__td_a < 0) != (__td_b < 0),
+                                )[2]
+                                else abs(__td_a) // abs(__td_b)
+                            )
+                        )
+                        + (
+                            -(abs(__td_a) // abs(__td_b))
+                            if (
+                                (__td_a := day_of_era),
+                                (__td_b := 36524),
+                                (__td_a < 0) != (__td_b < 0),
+                            )[2]
+                            else abs(__td_a) // abs(__td_b)
+                        )
+                    )
+                    - (
+                        -(abs(__td_a) // abs(__td_b))
+                        if (
+                            (__td_a := day_of_era),
+                            (__td_b := 146096),
+                            (__td_a < 0) != (__td_b < 0),
+                        )[2]
+                        else abs(__td_a) // abs(__td_b)
+                    )
+                )
+            ),
+            (__td_b := 365),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
     )
     day_of_year: int = day_of_era - (
-        ((365 * year_of_era) + trunc_div(year_of_era, 4)) - trunc_div(year_of_era, 100)
+        (
+            (365 * year_of_era)
+            + (
+                -(abs(__td_a) // abs(__td_b))
+                if (
+                    (__td_a := year_of_era),
+                    (__td_b := 4),
+                    (__td_a < 0) != (__td_b < 0),
+                )[2]
+                else abs(__td_a) // abs(__td_b)
+            )
+        )
+        - (
+            -(abs(__td_a) // abs(__td_b))
+            if ((__td_a := year_of_era), (__td_b := 100), (__td_a < 0) != (__td_b < 0))[
+                2
+            ]
+            else abs(__td_a) // abs(__td_b)
+        )
     )
-    month_prime: int = trunc_div(((5 * day_of_year) + 2), 153)
+    month_prime: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (__td_a := ((5 * day_of_year) + 2)),
+            (__td_b := 153),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
+    )
     return min(
         max(((month_prime + 3) if (month_prime < 10) else (month_prime - 9)), 1), 12
     )
@@ -90,21 +103,110 @@ def month_from_days(days: int) -> int:
 def day_from_days(days: int) -> int:
     """The day of month of a date given as days since 1970-01-01."""
     shifted: int = days + 719468
-    era: int = floor_div(shifted, 146097)
+    __inl10_value: int = shifted
+    __inl11_divisor: int = 146097
+    __inl12_result: Optional[int] = None
+    __inl9_quotient: int = __inl10_value // __inl11_divisor
+    if (__inl10_value < 0) and ((__inl9_quotient * __inl11_divisor) != __inl10_value):
+        __inl12_result = __inl9_quotient - 1
+    if __inl12_result is None:
+        __inl12_result = __inl9_quotient
+    era: int = __inl12_result
     day_of_era: int = shifted - (era * 146097)
-    year_of_era: int = trunc_div(
-        (
-            ((day_of_era - trunc_div(day_of_era, 1460)) + trunc_div(day_of_era, 36524))
-            - trunc_div(day_of_era, 146096)
-        ),
-        365,
+    year_of_era: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (
+                __td_a := (
+                    (
+                        (
+                            day_of_era
+                            - (
+                                -(abs(__td_a) // abs(__td_b))
+                                if (
+                                    (__td_a := day_of_era),
+                                    (__td_b := 1460),
+                                    (__td_a < 0) != (__td_b < 0),
+                                )[2]
+                                else abs(__td_a) // abs(__td_b)
+                            )
+                        )
+                        + (
+                            -(abs(__td_a) // abs(__td_b))
+                            if (
+                                (__td_a := day_of_era),
+                                (__td_b := 36524),
+                                (__td_a < 0) != (__td_b < 0),
+                            )[2]
+                            else abs(__td_a) // abs(__td_b)
+                        )
+                    )
+                    - (
+                        -(abs(__td_a) // abs(__td_b))
+                        if (
+                            (__td_a := day_of_era),
+                            (__td_b := 146096),
+                            (__td_a < 0) != (__td_b < 0),
+                        )[2]
+                        else abs(__td_a) // abs(__td_b)
+                    )
+                )
+            ),
+            (__td_b := 365),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
     )
     day_of_year: int = day_of_era - (
-        ((365 * year_of_era) + trunc_div(year_of_era, 4)) - trunc_div(year_of_era, 100)
+        (
+            (365 * year_of_era)
+            + (
+                -(abs(__td_a) // abs(__td_b))
+                if (
+                    (__td_a := year_of_era),
+                    (__td_b := 4),
+                    (__td_a < 0) != (__td_b < 0),
+                )[2]
+                else abs(__td_a) // abs(__td_b)
+            )
+        )
+        - (
+            -(abs(__td_a) // abs(__td_b))
+            if ((__td_a := year_of_era), (__td_b := 100), (__td_a < 0) != (__td_b < 0))[
+                2
+            ]
+            else abs(__td_a) // abs(__td_b)
+        )
     )
-    month_prime: int = trunc_div(((5 * day_of_year) + 2), 153)
+    month_prime: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (__td_a := ((5 * day_of_year) + 2)),
+            (__td_b := 153),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
+    )
     return min(
-        max(((day_of_year - trunc_div(((153 * month_prime) + 2), 5)) + 1), 1), 31
+        max(
+            (
+                (
+                    day_of_year
+                    - (
+                        -(abs(__td_a) // abs(__td_b))
+                        if (
+                            (__td_a := ((153 * month_prime) + 2)),
+                            (__td_b := 5),
+                            (__td_a < 0) != (__td_b < 0),
+                        )[2]
+                        else abs(__td_a) // abs(__td_b)
+                    )
+                )
+                + 1
+            ),
+            1,
+        ),
+        31,
     )
 
 
@@ -119,9 +221,250 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
         ((((year < 1) or (year > 9999)) or (month < 1)) or (month > 12)) or (day < 1)
     ) or (day > 31):
         return None
-    days: int = days_from_civil(year, month, day)
-    if ((year_from_days(days) != year) or (month_from_days(days) != month)) or (
+    __inl23_year: int = year
+    __inl24_month: int = month
+    __inl25_day: int = day
+    __inl26_result: Optional[int] = None
+    __inl17_shifted: int = (__inl23_year - 1) if (__inl24_month <= 2) else __inl23_year
+    __inl198_value: int = __inl17_shifted
+    __inl199_divisor: int = 400
+    __inl200_result: Optional[int] = None
+    __inl197_quotient: int = __inl198_value // __inl199_divisor
+    if (__inl198_value < 0) and (
+        (__inl197_quotient * __inl199_divisor) != __inl198_value
+    ):
+        __inl200_result = __inl197_quotient - 1
+    if __inl200_result is None:
+        __inl200_result = __inl197_quotient
+    __inl18_era: int = __inl200_result
+    __inl19_year_of_era: int = __inl17_shifted - (__inl18_era * 400)
+    __inl20_month_term: int = (
+        (__inl24_month - 3) if (__inl24_month > 2) else (__inl24_month + 9)
+    )
+    __inl21_day_of_year: int = (
+        (((153 * __inl20_month_term) + 2) // 5) + __inl25_day
+    ) - 1
+    __inl22_day_of_era: int = (
+        (
+            (__inl19_year_of_era * 365)
+            + (
+                -(abs(__td_a) // abs(__td_b))
+                if (
+                    (__td_a := __inl19_year_of_era),
+                    (__td_b := 4),
+                    (__td_a < 0) != (__td_b < 0),
+                )[2]
+                else abs(__td_a) // abs(__td_b)
+            )
+        )
+        - (
+            -(abs(__td_a) // abs(__td_b))
+            if (
+                (__td_a := __inl19_year_of_era),
+                (__td_b := 100),
+                (__td_a < 0) != (__td_b < 0),
+            )[2]
+            else abs(__td_a) // abs(__td_b)
+        )
+    ) + __inl21_day_of_year
+    __inl26_result = min(
+        max((((__inl18_era * 146097) + __inl22_day_of_era) - 719468), -719162), 2932896
+    )
+    days: int = __inl26_result
+    __inl35_days: int = days
+    __inl36_result: Optional[int] = None
+    __inl27_shifted: int = __inl35_days + 719468
+    __inl202_value: int = __inl27_shifted
+    __inl203_divisor: int = 146097
+    __inl204_result: Optional[int] = None
+    __inl201_quotient: int = __inl202_value // __inl203_divisor
+    if (__inl202_value < 0) and (
+        (__inl201_quotient * __inl203_divisor) != __inl202_value
+    ):
+        __inl204_result = __inl201_quotient - 1
+    if __inl204_result is None:
+        __inl204_result = __inl201_quotient
+    __inl28_era: int = __inl204_result
+    __inl29_day_of_era: int = __inl27_shifted - (__inl28_era * 146097)
+    __inl30_year_of_era: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (
+                __td_a := (
+                    (
+                        (
+                            __inl29_day_of_era
+                            - (
+                                -(abs(__td_a) // abs(__td_b))
+                                if (
+                                    (__td_a := __inl29_day_of_era),
+                                    (__td_b := 1460),
+                                    (__td_a < 0) != (__td_b < 0),
+                                )[2]
+                                else abs(__td_a) // abs(__td_b)
+                            )
+                        )
+                        + (
+                            -(abs(__td_a) // abs(__td_b))
+                            if (
+                                (__td_a := __inl29_day_of_era),
+                                (__td_b := 36524),
+                                (__td_a < 0) != (__td_b < 0),
+                            )[2]
+                            else abs(__td_a) // abs(__td_b)
+                        )
+                    )
+                    - (
+                        -(abs(__td_a) // abs(__td_b))
+                        if (
+                            (__td_a := __inl29_day_of_era),
+                            (__td_b := 146096),
+                            (__td_a < 0) != (__td_b < 0),
+                        )[2]
+                        else abs(__td_a) // abs(__td_b)
+                    )
+                )
+            ),
+            (__td_b := 365),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
+    )
+    __inl31_year: int = __inl30_year_of_era + (__inl28_era * 400)
+    __inl32_day_of_year: int = __inl29_day_of_era - (
+        (
+            (365 * __inl30_year_of_era)
+            + (
+                -(abs(__td_a) // abs(__td_b))
+                if (
+                    (__td_a := __inl30_year_of_era),
+                    (__td_b := 4),
+                    (__td_a < 0) != (__td_b < 0),
+                )[2]
+                else abs(__td_a) // abs(__td_b)
+            )
+        )
+        - (
+            -(abs(__td_a) // abs(__td_b))
+            if (
+                (__td_a := __inl30_year_of_era),
+                (__td_b := 100),
+                (__td_a < 0) != (__td_b < 0),
+            )[2]
+            else abs(__td_a) // abs(__td_b)
+        )
+    )
+    __inl33_month_prime: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (__td_a := ((5 * __inl32_day_of_year) + 2)),
+            (__td_b := 153),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
+    )
+    __inl34_month: int = (
+        (__inl33_month_prime + 3)
+        if (__inl33_month_prime < 10)
+        else (__inl33_month_prime - 9)
+    )
+    __inl36_result = min(
+        max(((__inl31_year + 1) if (__inl34_month <= 2) else __inl31_year), 1), 9999
+    )
+    if ((__inl36_result != year) or (month_from_days(days) != month)) or (
         day_from_days(days) != day
     ):
         return None
     return days
+
+
+def year_from_days(days: int) -> int:
+    """The year of a date given as days since 1970-01-01."""
+    shifted: int = days + 719468
+    __inl2_value: int = shifted
+    __inl3_divisor: int = 146097
+    __inl4_result: Optional[int] = None
+    __inl1_quotient: int = __inl2_value // __inl3_divisor
+    if (__inl2_value < 0) and ((__inl1_quotient * __inl3_divisor) != __inl2_value):
+        __inl4_result = __inl1_quotient - 1
+    if __inl4_result is None:
+        __inl4_result = __inl1_quotient
+    era: int = __inl4_result
+    day_of_era: int = shifted - (era * 146097)
+    year_of_era: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (
+                __td_a := (
+                    (
+                        (
+                            day_of_era
+                            - (
+                                -(abs(__td_a) // abs(__td_b))
+                                if (
+                                    (__td_a := day_of_era),
+                                    (__td_b := 1460),
+                                    (__td_a < 0) != (__td_b < 0),
+                                )[2]
+                                else abs(__td_a) // abs(__td_b)
+                            )
+                        )
+                        + (
+                            -(abs(__td_a) // abs(__td_b))
+                            if (
+                                (__td_a := day_of_era),
+                                (__td_b := 36524),
+                                (__td_a < 0) != (__td_b < 0),
+                            )[2]
+                            else abs(__td_a) // abs(__td_b)
+                        )
+                    )
+                    - (
+                        -(abs(__td_a) // abs(__td_b))
+                        if (
+                            (__td_a := day_of_era),
+                            (__td_b := 146096),
+                            (__td_a < 0) != (__td_b < 0),
+                        )[2]
+                        else abs(__td_a) // abs(__td_b)
+                    )
+                )
+            ),
+            (__td_b := 365),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
+    )
+    year: int = year_of_era + (era * 400)
+    day_of_year: int = day_of_era - (
+        (
+            (365 * year_of_era)
+            + (
+                -(abs(__td_a) // abs(__td_b))
+                if (
+                    (__td_a := year_of_era),
+                    (__td_b := 4),
+                    (__td_a < 0) != (__td_b < 0),
+                )[2]
+                else abs(__td_a) // abs(__td_b)
+            )
+        )
+        - (
+            -(abs(__td_a) // abs(__td_b))
+            if ((__td_a := year_of_era), (__td_b := 100), (__td_a < 0) != (__td_b < 0))[
+                2
+            ]
+            else abs(__td_a) // abs(__td_b)
+        )
+    )
+    month_prime: int = (
+        -(abs(__td_a) // abs(__td_b))
+        if (
+            (__td_a := ((5 * day_of_year) + 2)),
+            (__td_b := 153),
+            (__td_a < 0) != (__td_b < 0),
+        )[2]
+        else abs(__td_a) // abs(__td_b)
+    )
+    month: int = (month_prime + 3) if (month_prime < 10) else (month_prime - 9)
+    return min(max(((year + 1) if (month <= 2) else year), 1), 9999)

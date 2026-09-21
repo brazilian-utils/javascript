@@ -42,10 +42,15 @@ fn is_ok(status: i64) -> bool {
 /// ViaCEP answers a JSON object, and marks an unknown CEP with `"erro"`.
 fn fetch_via_cep(cep: &str, env: &dyn Capabilities) -> Option<AddressInfo> {
     let response = get_with_retry(
-        crate::support::concat2(
-            &crate::support::concat2("https://viacep.com.br/ws/", cep),
-            "/json/",
-        ),
+        {
+            let mut __buf = String::with_capacity(
+                "https://viacep.com.br/ws/".len() + cep.len() + "/json/".len(),
+            );
+            __buf.push_str("https://viacep.com.br/ws/");
+            __buf.push_str(cep);
+            __buf.push_str("/json/");
+            __buf
+        },
         env,
     );
     if (response.is_none() || !is_ok(response.as_ref().unwrap().status.to_owned())) {

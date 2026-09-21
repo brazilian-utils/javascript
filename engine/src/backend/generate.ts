@@ -16,6 +16,8 @@ import { typeToString } from "../types.ts";
 import { lowerProgram } from "./lower.ts";
 import type { LowerOptions, TargetSpec } from "./lower.ts";
 import type { TExpr, TFunc, TImport, TModule } from "./tast.ts";
+import { inlineCalls } from "../optimize/inline.ts";
+import type { InlineBudget } from "../optimize/inline.ts";
 
 export const ENGINE_VERSION = "0.1.0";
 
@@ -72,6 +74,12 @@ export type Backend = {
 		/** The seam's own name, derived from the public wrapper's name it stands in for. */
 		readonly seamName: (publicName: string) => string;
 	};
+	/**
+	 * How aggressively this target's own call-site inlining (`optimize/inline.ts`) should run,
+	 * absent when the target's own compiler already does this job — see that module's header for
+	 * why the budget is per target rather than a single number for every backend.
+	 */
+	readonly inlineBudget?: InlineBudget;
 };
 
 /** One entry point, as the generated driver sees it. */
@@ -104,9 +112,10 @@ export function generate(
 	backend: Backend,
 	options: LowerOptions = {},
 ): GenerateResult {
-	const lowered = lowerProgram(program, backend.spec, { ...options, ...backend.extraLowerOptions?.(program) });
+	const inlined = backend.inlineBudget === undefined ? program : inlineCalls(program, backend.inlineBudget);
+	const lowered = lowerProgram(inlined, backend.spec, { ...options, ...backend.extraLowerOptions?.(inlined) });
 	const moduleOf = new Map<string, string>();
-	for (const fn of program.functions.values()) moduleOf.set(fn.name, fn.module);
+	for (const fn of inlined.functions.values()) moduleOf.set(fn.name, fn.module);
 
 	const modules = splitCapabilityEntryPoints(lowered.modules, backend);
 
@@ -130,8 +139,8 @@ export function generate(
 	} = { functions: [], seams: [], records: [], errors: [] };
 
 	const needs: SupportNeeds = {
-		env: [...program.functions.values()].some((fn) => fn.usesEnv),
-		race: [...program.functions.values()].some((fn) => usesOp(fn.body, "task.race")),
+		env: [...inlined.functions.values()].some((fn) => fn.usesEnv),
+		race: [...inlined.functions.values()].some((fn) => usesOp(fn.body, "task.race")),
 	};
 
 	for (const module of modules) {
@@ -139,7 +148,7 @@ export function generate(
 		const imports = computeImports(
 			module,
 			sourcePath,
-			program,
+			inlined,
 			lowered.functionNames,
 			moduleOf,
 			backend,

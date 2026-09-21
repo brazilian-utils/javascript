@@ -349,7 +349,36 @@ export const GO_CANDIDATES: readonly Candidate[] = [
 			return raw(`strings.Compare(${print(args[0]!)}, ${print(args[1]!)})`);
 		},
 	},
+	{
+		op: "str.codePoints",
+		impl: "native",
+		requires: argIsAscii(0),
+		because: "an ASCII byte is already its own code point, so `[]byte(value)` needs no UTF-8 decode at all, unlike `codePoints`' `range` over the string below",
+		cost: allocating,
+		emit: (args) =>
+			raw(
+				`func() []int { __bs := []byte(${print(args[0]!)}); __pts := make([]int, len(__bs)); for __i, __b := range __bs { __pts[__i] = int(__b) }; return __pts }()`,
+			),
+	},
 	{ op: "str.codePoints", impl: "library", cost: allocating, emit: (args) => raw(`codePoints(${print(args[0]!)})`) },
+	{
+		op: "str.fromCodePoints",
+		impl: "native",
+		requires: (args) => {
+			const elem = args[0];
+			return elem !== undefined && elem.kind === "List" && elem.elem.kind === "Int" && elem.elem.lo >= 0 && elem.elem.hi <= 127;
+		},
+		because:
+			"every code point this project ever builds this way is proven ASCII (`group_thousands`' `out`, " +
+			"`engine/docs/progress.md` §8), so its byte value is its whole UTF-8 encoding -- one []byte " +
+			"built directly and converted once, instead of `fromCodePoints`' []rune round trip below, " +
+			"which lets Go's own UTF-8 encoder re-derive what a byte already was",
+		cost: allocating,
+		emit: (args) =>
+			raw(
+				`string(func() []byte { __pts := ${print(args[0]!)}; __bs := make([]byte, len(__pts)); for __i, __p := range __pts { __bs[__i] = byte(__p) }; return __bs }())`,
+			),
+	},
 	{ op: "str.fromCodePoints", impl: "library", cost: allocating, emit: (args) => raw(`fromCodePoints(${print(args[0]!)})`) },
 	{ op: "str.asAscii", impl: "library", cost: linear, emit: (args) => raw(`asAscii(${print(args[0]!)})`) },
 	{ op: "str.asDigits", impl: "library", cost: linear, emit: (args) => raw(`asDigits(${print(args[0]!)})`) },
@@ -487,23 +516,31 @@ export const GO_CANDIDATES: readonly Candidate[] = [
 	},
 
 	{
+		// A byte-wise pass, not `strings.Map`, when every retained range is ASCII (every class this
+		// project uses is: digits, letters). `strings.Map` decodes the whole input as UTF-8 runes
+		// before the callback ever runs; a byte never needs decoding to be range-tested, and a
+		// multi-byte scalar's bytes are all >= 0x80, so every one of them fails an ASCII range test
+		// on its own and is dropped exactly as decoding and testing the scalar would drop it — a
+		// non-ASCII input keeps working, just without ever paying to decode it
+		// (`engine/docs/progress.md` §8, same reasoning as the Rust target's `re.retain`).
 		op: "re.retain",
 		impl: "native",
-		because: "strings.Map drops a scalar by answering a negative rune, with no regexp engine involved",
+		because: "a byte-wise scan when every retained range is ASCII",
 		cost: allocating,
-		deps: ["strings"],
 		emit: (args, _types, ctx) => {
-			ctx.require("strings");
 			const ranges = ctx.regex === undefined || ctx.regex.node.kind !== "class" ? [] : ctx.regex.node.ranges;
-			const test = ranges
-				.map((range) =>
-					range.lo === range.hi
-						? `scalar == ${range.lo}`
-						: `(scalar >= ${range.lo} && scalar <= ${range.hi})`,
-				)
-				.join(" || ");
+			const asciiTest = (name: string): string =>
+				ranges.length === 0
+					? "false"
+					: ranges.map((range) => (range.lo === range.hi ? `${name} == ${range.lo}` : `(${name} >= ${range.lo} && ${name} <= ${range.hi})`)).join(" || ");
+			if (ranges.every((range) => range.hi <= 127)) {
+				return raw(
+					`func() string { __value := ${print(args[0]!)}; __out := make([]byte, 0, len(__value)); for __i := 0; __i < len(__value); __i++ { __b := __value[__i]; __c := int(__b); if ${asciiTest("__c")} { __out = append(__out, __b) } }; return string(__out) }()`,
+				);
+			}
+			ctx.require("strings");
 			return raw(
-				`strings.Map(func(scalar rune) rune { if ${test === "" ? "false" : test} { return scalar }; return -1 }, ${print(args[0]!)})`,
+				`strings.Map(func(scalar rune) rune { if ${asciiTest("scalar")} { return scalar }; return -1 }, ${print(args[0]!)})`,
 			);
 		},
 	},

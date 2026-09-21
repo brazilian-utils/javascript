@@ -231,7 +231,7 @@ with, the implementation that was selected, and the rule that decided it.
 | `opt.unwrap` | `Option<AddressInfo>` | native | only candidate, cost none/constant |
 | `opt.unwrap` | `Option<HttpResponse>` | native | only candidate, cost none/constant |
 | `random.nextU32` | `` | native | only candidate, cost none/constant |
-| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear; a `chars().filter(...)` pass over explicit ranges, with no regex engine involved |
+| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear; a byte-wise pass, not `.chars()`, when every retained range is ASCII (every class this project uses is: digits, letters) -- `.chars()` decodes the whole input as UTF-8 scalars before the filter ever runs, which was measured as the largest cost in `isValidCpf` once the regex engine itself stopped being one (`engine/docs/progress.md` §8); a byte never needs decoding to be range-tested, and a multi-byte scalar's bytes are all >= 0x80, so every one of them fails an ASCII range test on its own and is dropped exactly as it would be by testing the decoded scalar -- a non-ASCII input keeps working, just without ever paying to decode it |
 | `re.test` | `String[0..2147483647]` | library | only candidate, cost none/linear; a dedicated straight-line scanner (no allocation, one pass) when the pattern is a chain of character-class runs with no alternation and no two adjacent variable-length runs that could overlap; otherwise a backtracking matcher over a static pattern tree, also allocation-free — see engine/src/targets/rust/index.ts's "Regex" section for the rule |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..2147483650]` | library | only candidate, cost none/constant |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..9007199254740991]` | library | only candidate, cost none/constant |
@@ -270,31 +270,18 @@ with, the implementation that was selected, and the rule that decided it.
 | `str.codePoints` | `String[0..2147483647]` | library | only candidate, cost one/linear |
 | `str.concat` | `Ascii[0..17], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
 | `str.concat` | `Ascii[0..3], Ascii[1..47]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[0..30], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[1..31], Ascii[0..16]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[1..4], Ascii[1..47]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[1], Ascii[0..3]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[1], Ascii[3]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
 | `str.concat` | `Ascii[2], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[25], Digits[8] matches ^[0-9]{8}$` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[33], Ascii[6]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
 | `str.concat` | `Ascii[36], Digits[8] matches ^[0-9]{8}$` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Ascii[4], Ascii[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[1], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[10], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[11], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[12], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
 | `str.concat` | `Digits[12], Digits[2]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[13], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[2], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[3], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[4], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[5], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[6], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[7], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[8], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
-| `str.concat` | `Digits[9], Digits[1]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
 | `str.concat` | `Digits[9], Digits[2]` | library | only candidate, cost one/linear; `concat2` borrows both operands, unlike `+`, which would consume the left one |
+| `str.concatAll` | `Ascii[0..30], Ascii[1], Ascii[0..16]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
+| `str.concatAll` | `Ascii[1], Ascii[0..3], Ascii[1..47]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
+| `str.concatAll` | `Ascii[1], Ascii[3], Ascii[1]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
+| `str.concatAll` | `Ascii[25], Digits[8] matches ^[0-9]{8}$, Ascii[6]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
+| `str.concatAll` | `Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
+| `str.concatAll` | `Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1], Digits[1]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
+| `str.concatAll` | `Digits[12], Digits[1], Digits[1]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
+| `str.concatAll` | `Digits[9], Digits[1], Digits[1]` | native | only candidate, cost one/linear; one buffer sized once, not a chain of reallocate-and-copy |
 | `str.fromCodePoints` | `List<Int[0..1114111]>[0..2147483647]` | library | only candidate, cost one/linear |
 | `str.fromCodePoints` | `List<Int[0..127]>[0..30]` | library | only candidate, cost one/linear |
 | `str.fromCodePoints` | `List<Int[32..32]>[1..1]` | library | only candidate, cost one/linear |
@@ -312,4 +299,4 @@ with, the implementation that was selected, and the rule that decided it.
 | `str.trim` | `String[0..2147483647]` | native | only candidate, cost one/linear; `trim_matches` takes the cut set explicitly, so the 25 code points are exact |
 | `task.race` | `List<() => Option<AddressInfo>>[2..2]` | library | only candidate, cost many/linear; `std::thread::scope` plus an `mpsc` channel: one thread per task, first `Some` wins |
 
-Mix: 250 native, 54 library, 2 portable.
+Mix: 258 native, 33 library, 2 portable.

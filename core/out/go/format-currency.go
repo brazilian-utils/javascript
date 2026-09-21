@@ -27,7 +27,14 @@ func FormatCurrency(value int, symbol bool) string {
 	body := ((groupThousands(keepDigits(whole)) + ",") + cents)
 	tmp1 := ""
 	if symbol {
-		tmp1 = ("R$" + fromCodePoints([]int{32}))
+		tmp1 = ("R$" + string(func() []byte {
+			__pts := []int{32}
+			__bs := make([]byte, len(__pts))
+			for __i, __p := range __pts {
+				__bs[__i] = byte(__p)
+			}
+			return __bs
+		}()))
 	} else {
 		tmp1 = ""
 	}

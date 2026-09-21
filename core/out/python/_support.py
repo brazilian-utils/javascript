@@ -8,18 +8,6 @@ from typing import Callable, List, Optional, Sequence, TypeVar
 T = TypeVar("T")
 
 
-def trunc_div(left: int, right: int) -> int:
-    """Truncated division: the Core rounds toward zero, Python floors."""
-    quotient = abs(left) // abs(right)
-    return -quotient if (left < 0) != (right < 0) else quotient
-
-
-def trunc_mod(left: int, right: int) -> int:
-    """Remainder with the sign of the dividend, as in JavaScript, Go, Java and C#."""
-    remainder = abs(left) % abs(right)
-    return -remainder if left < 0 else remainder
-
-
 def race_first_some(tasks: Sequence[Callable[[], Optional[T]]]) -> Optional[T]:
     from concurrent.futures import ThreadPoolExecutor, as_completed
 

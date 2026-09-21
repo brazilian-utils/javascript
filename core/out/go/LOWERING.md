@@ -231,7 +231,7 @@ with, the implementation that was selected, and the rule that decided it.
 | `opt.unwrap` | `Option<AddressInfo>` | native | only candidate, cost none/constant |
 | `opt.unwrap` | `Option<HttpResponse>` | native | only candidate, cost none/constant |
 | `random.nextU32` | `` | native | only candidate, cost none/constant |
-| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear; strings.Map drops a scalar by answering a negative rune, with no regexp engine involved |
+| `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear; a byte-wise scan when every retained range is ASCII |
 | `re.test` | `String[0..2147483647]` | native | only candidate, cost none/linear; the normalized pattern is inside the compatibility subset; \A…\z anchors the whole string |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..2147483650]` | library | only candidate, cost none/constant |
 | `seq.at` | `List<Int[0..1114111]>[0..2147483647], Int[0..9007199254740991]` | library | only candidate, cost none/constant |
@@ -265,9 +265,9 @@ with, the implementation that was selected, and the rule that decided it.
 | `str.codeAt` | `Digits[14], Int[0..11]` | native | only candidate, cost none/constant; indexing a string yields a byte |
 | `str.codeAt` | `Digits[14], Int[1..13]` | native | only candidate, cost none/constant; indexing a string yields a byte |
 | `str.codeAtOpt` | `Ascii[0..2147483647], Int[0..2147483646]` | library | only candidate, cost none/constant |
-| `str.codePoints` | `Ascii[5]` | library | only candidate, cost one/linear |
-| `str.codePoints` | `Digits[0..15]` | library | only candidate, cost one/linear |
-| `str.codePoints` | `String[0..2147483647]` | library | only candidate, cost one/linear |
+| `str.codePoints` | `Ascii[5]` | native | only candidate, cost one/linear; an ASCII byte is already its own code point, so `[]byte(value)` needs no UTF-8 decode at all, unlike `codePoints`' `range` over the string below |
+| `str.codePoints` | `Digits[0..15]` | native | only candidate, cost one/linear; an ASCII byte is already its own code point, so `[]byte(value)` needs no UTF-8 decode at all, unlike `codePoints`' `range` over the string below |
+| `str.codePoints` | `String[0..2147483647]` | library | library, cost one/linear; rejected an ASCII byte is already its own code point, so `[]byte(value)` needs no UTF-8 decode at all, unlike `codePoints`' `range` over the string below |
 | `str.concat` | `Ascii[0..17], Ascii[1]` | native | only candidate, cost one/linear |
 | `str.concat` | `Ascii[0..3], Ascii[1..47]` | native | only candidate, cost one/linear |
 | `str.concat` | `Ascii[0..30], Ascii[1]` | native | only candidate, cost one/linear |
@@ -295,9 +295,9 @@ with, the implementation that was selected, and the rule that decided it.
 | `str.concat` | `Digits[8], Digits[1]` | native | only candidate, cost one/linear |
 | `str.concat` | `Digits[9], Digits[1]` | native | only candidate, cost one/linear |
 | `str.concat` | `Digits[9], Digits[2]` | native | only candidate, cost one/linear |
-| `str.fromCodePoints` | `List<Int[0..1114111]>[0..2147483647]` | library | only candidate, cost one/linear |
-| `str.fromCodePoints` | `List<Int[0..127]>[0..30]` | library | only candidate, cost one/linear |
-| `str.fromCodePoints` | `List<Int[32..32]>[1..1]` | library | only candidate, cost one/linear |
+| `str.fromCodePoints` | `List<Int[0..1114111]>[0..2147483647]` | library | library, cost one/linear; rejected every code point this project ever builds this way is proven ASCII (`group_thousands`' `out`, `engine/docs/progress.md` §8), so its byte value is its whole UTF-8 encoding -- one []byte built directly and converted once, instead of `fromCodePoints`' []rune round trip below, which lets Go's own UTF-8 encoder re-derive what a byte already was |
+| `str.fromCodePoints` | `List<Int[0..127]>[0..30]` | native | only candidate, cost one/linear; every code point this project ever builds this way is proven ASCII (`group_thousands`' `out`, `engine/docs/progress.md` §8), so its byte value is its whole UTF-8 encoding -- one []byte built directly and converted once, instead of `fromCodePoints`' []rune round trip below, which lets Go's own UTF-8 encoder re-derive what a byte already was |
+| `str.fromCodePoints` | `List<Int[32..32]>[1..1]` | native | only candidate, cost one/linear; every code point this project ever builds this way is proven ASCII (`group_thousands`' `out`, `engine/docs/progress.md` §8), so its byte value is its whole UTF-8 encoding -- one []byte built directly and converted once, instead of `fromCodePoints`' []rune round trip below, which lets Go's own UTF-8 encoder re-derive what a byte already was |
 | `str.fromInt` | `Int[-9007199254740991..9007199254740991]` | native | only candidate, cost one/linear |
 | `str.fromInt` | `Int[0..9]` | native | only candidate, cost one/linear |
 | `str.len` | `Ascii[0..2147483647]` | native | only candidate, cost none/constant; `len` counts bytes, which equals the scalar count only for ASCII |
@@ -312,4 +312,4 @@ with, the implementation that was selected, and the rule that decided it.
 | `str.trim` | `String[0..2147483647]` | native | only candidate, cost none/constant; strings.Trim takes the cut set explicitly, so the 25 code points are exact |
 | `task.race` | `List<() => Option<AddressInfo>>[2..2]` | library | only candidate, cost many/linear; goroutines with a context and a channel are the idiomatic form |
 
-Mix: 277 native, 27 library, 2 portable.
+Mix: 281 native, 23 library, 2 portable.

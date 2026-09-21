@@ -7,7 +7,6 @@ from typing import Optional
 from dataclasses import dataclass
 from ._support import race_first_some
 import re
-from .lib.digits import keep_digits
 from .lib.json import json_string_field
 from .errors import GetAddressInfoByCepNotFoundError, GetAddressInfoByCepValidationError
 from ._support import Capabilities, DEFAULT_CAPABILITIES, HttpRequest, HttpResponse
@@ -24,7 +23,9 @@ class AddressInfo:
     street: str
 
 
-_GET_ADDRESS_INFO_BY_CEP_PATTERN_1 = re.compile("[0-9]{8}")
+_GET_ADDRESS_INFO_BY_CEP_PATTERN_1 = re.compile("[^0-9]")
+
+_GET_ADDRESS_INFO_BY_CEP_PATTERN_2 = re.compile("[0-9]{8}")
 
 
 def _get_with_retry(url: str, env: Capabilities) -> Optional[HttpResponse]:
@@ -61,8 +62,11 @@ def _fetch_via_cep(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     )
     if code == "":
         return None
+    __inl125_value: str = code
+    __inl126_result: Optional[str] = None
+    __inl126_result = _GET_ADDRESS_INFO_BY_CEP_PATTERN_1.sub("", __inl125_value)
     return AddressInfo(
-        cep=keep_digits(code),
+        cep=__inl126_result,
         state=(
             __value
             if (__value := json_string_field(response.body, "uf")) is not None
@@ -100,8 +104,11 @@ def _fetch_brasil_api(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     )
     if code == "":
         return None
+    __inl127_value: str = code
+    __inl128_result: Optional[str] = None
+    __inl128_result = _GET_ADDRESS_INFO_BY_CEP_PATTERN_1.sub("", __inl127_value)
     return AddressInfo(
-        cep=keep_digits(code),
+        cep=__inl128_result,
         state=(
             __value
             if (__value := json_string_field(response.body, "state")) is not None
@@ -143,7 +150,7 @@ def get_address_info_by_cep_with(cep: str, env: Capabilities) -> AddressInfo:
     supply a clock, a source of randomness or an HTTP client — which is what the
     differential conformance driver does to make a run reproducible.
     """
-    if not (_GET_ADDRESS_INFO_BY_CEP_PATTERN_1.fullmatch(cep) is not None):
+    if not (_GET_ADDRESS_INFO_BY_CEP_PATTERN_2.fullmatch(cep) is not None):
         raise GetAddressInfoByCepValidationError("CEP inv\u00e1lido")
     address: Optional[AddressInfo] = race_first_some(
         [(lambda: _fetch_via_cep(cep, env)), (lambda: _fetch_brasil_api(cep, env))]

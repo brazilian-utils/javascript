@@ -11,13 +11,13 @@
 	},
 	"src/lib_digits.rs#is_repeated_run": {
 		"module": "lib/digits",
-		"start": 1132,
-		"end": 1355
+		"start": 1135,
+		"end": 1358
 	},
 	"src/lib_digits.rs#digit_at": {
 		"module": "lib/digits",
 		"start": 738,
-		"end": 839
+		"end": 842
 	},
 	"src/lib_format.rs#pattern_slots": {
 		"module": "lib/format",
@@ -112,42 +112,42 @@
 	"src/get_address_info_by_cep.rs#is_ok": {
 		"module": "get-address-info-by-cep",
 		"start": 1529,
-		"end": 1619
+		"end": 1622
 	},
 	"src/get_address_info_by_cep.rs#fetch_via_cep": {
 		"module": "get-address-info-by-cep",
-		"start": 1698,
-		"end": 2297
+		"start": 1701,
+		"end": 2300
 	},
 	"src/get_address_info_by_cep.rs#fetch_brasil_api": {
 		"module": "get-address-info-by-cep",
-		"start": 2348,
-		"end": 2954
+		"start": 2351,
+		"end": 2957
 	},
 	"src/get_address_info_by_cep.rs#get_address_info_by_cep": {
 		"module": "get-address-info-by-cep",
-		"start": 3379,
-		"end": 3786
+		"start": 3382,
+		"end": 3789
 	},
 	"src/lib_json.rs#matches_at": {
 		"module": "lib/json",
 		"start": 582,
-		"end": 1317
+		"end": 1320
 	},
 	"src/lib_json.rs#is_space": {
 		"module": "lib/json",
-		"start": 1367,
-		"end": 1491
+		"start": 1370,
+		"end": 1497
 	},
 	"src/lib_json.rs#hex_value": {
 		"module": "lib/json",
-		"start": 1562,
-		"end": 2063
+		"start": 1568,
+		"end": 2072
 	},
 	"src/lib_json.rs#json_string_field": {
 		"module": "lib/json",
-		"start": 2291,
-		"end": 4230
+		"start": 2300,
+		"end": 4239
 	},
 	"src/lib_civil.rs#civil_date": {
 		"module": "lib/civil",

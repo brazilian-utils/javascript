@@ -2,8 +2,6 @@
 // engine: 0.1.0
 // source: generate-cpf
 // content: 00fc978e8350
-import { cpfCheckDigit, randomCpfBase } from "./lib/cpf.ts";
-import { isRepeatedRun } from "./lib/digits.ts";
 import type { Capabilities } from "./capabilities.ts";
 import { DEFAULT_CAPABILITIES, raceFirstSome } from "./capabilities.ts";
 
@@ -29,17 +27,382 @@ export function generateCpf(): string {
  * differential conformance driver does to make a run reproducible.
  */
 export function generateCpfWith(env: Capabilities): string {
-	let base: string = randomCpfBase(env);
-	for (let attempt = 0; attempt < 8; attempt++) {
-		if (!isRepeatedRun(base)) {
+	let _inl66Result: string | undefined = undefined;
+	let _inl294Result: string | undefined = undefined;
+	const _inl444Bound: number = 10;
+	let _inl445Result: number | undefined = undefined;
+	const _inl441Limit: number = 4294967296 - (4294967296 % _inl444Bound);
+	for (let _inl442Attempt = 0; _inl442Attempt < 32; _inl442Attempt++) {
+		const _inl443Draw: number = env.nextU32();
+		if (_inl443Draw < _inl441Limit) {
+			_inl445Result = _inl443Draw % _inl444Bound;
+		}
+		if (_inl445Result !== undefined) {
 			break;
 		}
-		base = randomCpfBase(env);
 	}
-	const firstDigit: string = cpfCheckDigit(base + "00", 9).toString();
-	const secondDigit: string = cpfCheckDigit(
-		base + firstDigit + "0",
-		10,
-	).toString();
+	if (_inl445Result === undefined) {
+		_inl445Result = env.nextU32() % _inl444Bound;
+	}
+	_inl294Result = _inl445Result!.toString();
+	let _inl295Result: string | undefined = undefined;
+	const _inl449Bound: number = 10;
+	let _inl450Result: number | undefined = undefined;
+	const _inl446Limit: number = 4294967296 - (4294967296 % _inl449Bound);
+	for (let _inl447Attempt = 0; _inl447Attempt < 32; _inl447Attempt++) {
+		const _inl448Draw: number = env.nextU32();
+		if (_inl448Draw < _inl446Limit) {
+			_inl450Result = _inl448Draw % _inl449Bound;
+		}
+		if (_inl450Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl450Result === undefined) {
+		_inl450Result = env.nextU32() % _inl449Bound;
+	}
+	_inl295Result = _inl450Result!.toString();
+	let _inl296Result: string | undefined = undefined;
+	const _inl454Bound: number = 10;
+	let _inl455Result: number | undefined = undefined;
+	const _inl451Limit: number = 4294967296 - (4294967296 % _inl454Bound);
+	for (let _inl452Attempt = 0; _inl452Attempt < 32; _inl452Attempt++) {
+		const _inl453Draw: number = env.nextU32();
+		if (_inl453Draw < _inl451Limit) {
+			_inl455Result = _inl453Draw % _inl454Bound;
+		}
+		if (_inl455Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl455Result === undefined) {
+		_inl455Result = env.nextU32() % _inl454Bound;
+	}
+	_inl296Result = _inl455Result!.toString();
+	let _inl297Result: string | undefined = undefined;
+	const _inl459Bound: number = 10;
+	let _inl460Result: number | undefined = undefined;
+	const _inl456Limit: number = 4294967296 - (4294967296 % _inl459Bound);
+	for (let _inl457Attempt = 0; _inl457Attempt < 32; _inl457Attempt++) {
+		const _inl458Draw: number = env.nextU32();
+		if (_inl458Draw < _inl456Limit) {
+			_inl460Result = _inl458Draw % _inl459Bound;
+		}
+		if (_inl460Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl460Result === undefined) {
+		_inl460Result = env.nextU32() % _inl459Bound;
+	}
+	_inl297Result = _inl460Result!.toString();
+	let _inl298Result: string | undefined = undefined;
+	const _inl464Bound: number = 10;
+	let _inl465Result: number | undefined = undefined;
+	const _inl461Limit: number = 4294967296 - (4294967296 % _inl464Bound);
+	for (let _inl462Attempt = 0; _inl462Attempt < 32; _inl462Attempt++) {
+		const _inl463Draw: number = env.nextU32();
+		if (_inl463Draw < _inl461Limit) {
+			_inl465Result = _inl463Draw % _inl464Bound;
+		}
+		if (_inl465Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl465Result === undefined) {
+		_inl465Result = env.nextU32() % _inl464Bound;
+	}
+	_inl298Result = _inl465Result!.toString();
+	let _inl299Result: string | undefined = undefined;
+	const _inl469Bound: number = 10;
+	let _inl470Result: number | undefined = undefined;
+	const _inl466Limit: number = 4294967296 - (4294967296 % _inl469Bound);
+	for (let _inl467Attempt = 0; _inl467Attempt < 32; _inl467Attempt++) {
+		const _inl468Draw: number = env.nextU32();
+		if (_inl468Draw < _inl466Limit) {
+			_inl470Result = _inl468Draw % _inl469Bound;
+		}
+		if (_inl470Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl470Result === undefined) {
+		_inl470Result = env.nextU32() % _inl469Bound;
+	}
+	_inl299Result = _inl470Result!.toString();
+	let _inl300Result: string | undefined = undefined;
+	const _inl474Bound: number = 10;
+	let _inl475Result: number | undefined = undefined;
+	const _inl471Limit: number = 4294967296 - (4294967296 % _inl474Bound);
+	for (let _inl472Attempt = 0; _inl472Attempt < 32; _inl472Attempt++) {
+		const _inl473Draw: number = env.nextU32();
+		if (_inl473Draw < _inl471Limit) {
+			_inl475Result = _inl473Draw % _inl474Bound;
+		}
+		if (_inl475Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl475Result === undefined) {
+		_inl475Result = env.nextU32() % _inl474Bound;
+	}
+	_inl300Result = _inl475Result!.toString();
+	let _inl301Result: string | undefined = undefined;
+	const _inl479Bound: number = 10;
+	let _inl480Result: number | undefined = undefined;
+	const _inl476Limit: number = 4294967296 - (4294967296 % _inl479Bound);
+	for (let _inl477Attempt = 0; _inl477Attempt < 32; _inl477Attempt++) {
+		const _inl478Draw: number = env.nextU32();
+		if (_inl478Draw < _inl476Limit) {
+			_inl480Result = _inl478Draw % _inl479Bound;
+		}
+		if (_inl480Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl480Result === undefined) {
+		_inl480Result = env.nextU32() % _inl479Bound;
+	}
+	_inl301Result = _inl480Result!.toString();
+	let _inl302Result: string | undefined = undefined;
+	const _inl484Bound: number = 10;
+	let _inl485Result: number | undefined = undefined;
+	const _inl481Limit: number = 4294967296 - (4294967296 % _inl484Bound);
+	for (let _inl482Attempt = 0; _inl482Attempt < 32; _inl482Attempt++) {
+		const _inl483Draw: number = env.nextU32();
+		if (_inl483Draw < _inl481Limit) {
+			_inl485Result = _inl483Draw % _inl484Bound;
+		}
+		if (_inl485Result !== undefined) {
+			break;
+		}
+	}
+	if (_inl485Result === undefined) {
+		_inl485Result = env.nextU32() % _inl484Bound;
+	}
+	_inl302Result = _inl485Result!.toString();
+	_inl66Result =
+		_inl294Result! +
+		_inl295Result! +
+		_inl296Result! +
+		_inl297Result! +
+		_inl298Result! +
+		_inl299Result! +
+		_inl300Result! +
+		_inl301Result! +
+		_inl302Result!;
+	let base: string = _inl66Result!;
+	for (let attempt = 0; attempt < 8; attempt++) {
+		const _inl69Value: string = base;
+		let _inl70Result: boolean | undefined = undefined;
+		const _inl67First: number = _inl69Value.charCodeAt(0);
+		for (let _inl68Index = 1; _inl68Index < _inl69Value.length; _inl68Index++) {
+			if (_inl69Value.charCodeAt(_inl68Index) !== _inl67First) {
+				_inl70Result = false;
+			}
+			if (_inl70Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl70Result === undefined) {
+			_inl70Result = true;
+		}
+		if (!_inl70Result!) {
+			break;
+		}
+		let _inl71Result: string | undefined = undefined;
+		let _inl303Result: string | undefined = undefined;
+		const _inl489Bound: number = 10;
+		let _inl490Result: number | undefined = undefined;
+		const _inl486Limit: number = 4294967296 - (4294967296 % _inl489Bound);
+		for (let _inl487Attempt = 0; _inl487Attempt < 32; _inl487Attempt++) {
+			const _inl488Draw: number = env.nextU32();
+			if (_inl488Draw < _inl486Limit) {
+				_inl490Result = _inl488Draw % _inl489Bound;
+			}
+			if (_inl490Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl490Result === undefined) {
+			_inl490Result = env.nextU32() % _inl489Bound;
+		}
+		_inl303Result = _inl490Result!.toString();
+		let _inl304Result: string | undefined = undefined;
+		const _inl494Bound: number = 10;
+		let _inl495Result: number | undefined = undefined;
+		const _inl491Limit: number = 4294967296 - (4294967296 % _inl494Bound);
+		for (let _inl492Attempt = 0; _inl492Attempt < 32; _inl492Attempt++) {
+			const _inl493Draw: number = env.nextU32();
+			if (_inl493Draw < _inl491Limit) {
+				_inl495Result = _inl493Draw % _inl494Bound;
+			}
+			if (_inl495Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl495Result === undefined) {
+			_inl495Result = env.nextU32() % _inl494Bound;
+		}
+		_inl304Result = _inl495Result!.toString();
+		let _inl305Result: string | undefined = undefined;
+		const _inl499Bound: number = 10;
+		let _inl500Result: number | undefined = undefined;
+		const _inl496Limit: number = 4294967296 - (4294967296 % _inl499Bound);
+		for (let _inl497Attempt = 0; _inl497Attempt < 32; _inl497Attempt++) {
+			const _inl498Draw: number = env.nextU32();
+			if (_inl498Draw < _inl496Limit) {
+				_inl500Result = _inl498Draw % _inl499Bound;
+			}
+			if (_inl500Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl500Result === undefined) {
+			_inl500Result = env.nextU32() % _inl499Bound;
+		}
+		_inl305Result = _inl500Result!.toString();
+		let _inl306Result: string | undefined = undefined;
+		const _inl504Bound: number = 10;
+		let _inl505Result: number | undefined = undefined;
+		const _inl501Limit: number = 4294967296 - (4294967296 % _inl504Bound);
+		for (let _inl502Attempt = 0; _inl502Attempt < 32; _inl502Attempt++) {
+			const _inl503Draw: number = env.nextU32();
+			if (_inl503Draw < _inl501Limit) {
+				_inl505Result = _inl503Draw % _inl504Bound;
+			}
+			if (_inl505Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl505Result === undefined) {
+			_inl505Result = env.nextU32() % _inl504Bound;
+		}
+		_inl306Result = _inl505Result!.toString();
+		let _inl307Result: string | undefined = undefined;
+		const _inl509Bound: number = 10;
+		let _inl510Result: number | undefined = undefined;
+		const _inl506Limit: number = 4294967296 - (4294967296 % _inl509Bound);
+		for (let _inl507Attempt = 0; _inl507Attempt < 32; _inl507Attempt++) {
+			const _inl508Draw: number = env.nextU32();
+			if (_inl508Draw < _inl506Limit) {
+				_inl510Result = _inl508Draw % _inl509Bound;
+			}
+			if (_inl510Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl510Result === undefined) {
+			_inl510Result = env.nextU32() % _inl509Bound;
+		}
+		_inl307Result = _inl510Result!.toString();
+		let _inl308Result: string | undefined = undefined;
+		const _inl514Bound: number = 10;
+		let _inl515Result: number | undefined = undefined;
+		const _inl511Limit: number = 4294967296 - (4294967296 % _inl514Bound);
+		for (let _inl512Attempt = 0; _inl512Attempt < 32; _inl512Attempt++) {
+			const _inl513Draw: number = env.nextU32();
+			if (_inl513Draw < _inl511Limit) {
+				_inl515Result = _inl513Draw % _inl514Bound;
+			}
+			if (_inl515Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl515Result === undefined) {
+			_inl515Result = env.nextU32() % _inl514Bound;
+		}
+		_inl308Result = _inl515Result!.toString();
+		let _inl309Result: string | undefined = undefined;
+		const _inl519Bound: number = 10;
+		let _inl520Result: number | undefined = undefined;
+		const _inl516Limit: number = 4294967296 - (4294967296 % _inl519Bound);
+		for (let _inl517Attempt = 0; _inl517Attempt < 32; _inl517Attempt++) {
+			const _inl518Draw: number = env.nextU32();
+			if (_inl518Draw < _inl516Limit) {
+				_inl520Result = _inl518Draw % _inl519Bound;
+			}
+			if (_inl520Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl520Result === undefined) {
+			_inl520Result = env.nextU32() % _inl519Bound;
+		}
+		_inl309Result = _inl520Result!.toString();
+		let _inl310Result: string | undefined = undefined;
+		const _inl524Bound: number = 10;
+		let _inl525Result: number | undefined = undefined;
+		const _inl521Limit: number = 4294967296 - (4294967296 % _inl524Bound);
+		for (let _inl522Attempt = 0; _inl522Attempt < 32; _inl522Attempt++) {
+			const _inl523Draw: number = env.nextU32();
+			if (_inl523Draw < _inl521Limit) {
+				_inl525Result = _inl523Draw % _inl524Bound;
+			}
+			if (_inl525Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl525Result === undefined) {
+			_inl525Result = env.nextU32() % _inl524Bound;
+		}
+		_inl310Result = _inl525Result!.toString();
+		let _inl311Result: string | undefined = undefined;
+		const _inl529Bound: number = 10;
+		let _inl530Result: number | undefined = undefined;
+		const _inl526Limit: number = 4294967296 - (4294967296 % _inl529Bound);
+		for (let _inl527Attempt = 0; _inl527Attempt < 32; _inl527Attempt++) {
+			const _inl528Draw: number = env.nextU32();
+			if (_inl528Draw < _inl526Limit) {
+				_inl530Result = _inl528Draw % _inl529Bound;
+			}
+			if (_inl530Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl530Result === undefined) {
+			_inl530Result = env.nextU32() % _inl529Bound;
+		}
+		_inl311Result = _inl530Result!.toString();
+		_inl71Result =
+			_inl303Result! +
+			_inl304Result! +
+			_inl305Result! +
+			_inl306Result! +
+			_inl307Result! +
+			_inl308Result! +
+			_inl309Result! +
+			_inl310Result! +
+			_inl311Result!;
+		base = _inl71Result!;
+	}
+	const _inl75Cpf: string = base + "00";
+	const _inl76Size: number = 9;
+	let _inl77Result: number | undefined = undefined;
+	let _inl72Sum: number = 0;
+	for (let _inl73Index = 0; _inl73Index < _inl76Size; _inl73Index++) {
+		const _inl312Value: string = _inl75Cpf;
+		const _inl313Index: number = _inl73Index;
+		let _inl314Result: number | undefined = undefined;
+		_inl314Result = _inl312Value.charCodeAt(_inl313Index) - 48;
+		_inl72Sum = _inl72Sum + _inl314Result! * (_inl76Size + 1 - _inl73Index);
+	}
+	const _inl74Remainder: number = _inl72Sum % 11;
+	_inl77Result = _inl74Remainder < 2 ? 0 : 11 - _inl74Remainder;
+	const firstDigit: string = _inl77Result!.toString();
+	const _inl81Cpf: string = base + firstDigit + "0";
+	const _inl82Size: number = 10;
+	let _inl83Result: number | undefined = undefined;
+	let _inl78Sum: number = 0;
+	for (let _inl79Index = 0; _inl79Index < _inl82Size; _inl79Index++) {
+		const _inl315Value: string = _inl81Cpf;
+		const _inl316Index: number = _inl79Index;
+		let _inl317Result: number | undefined = undefined;
+		_inl317Result = _inl315Value.charCodeAt(_inl316Index) - 48;
+		_inl78Sum = _inl78Sum + _inl317Result! * (_inl82Size + 1 - _inl79Index);
+	}
+	const _inl80Remainder: number = _inl78Sum % 11;
+	_inl83Result = _inl80Remainder < 2 ? 0 : 11 - _inl80Remainder;
+	const secondDigit: string = _inl83Result!.toString();
 	return base + firstDigit + secondDigit;
 }

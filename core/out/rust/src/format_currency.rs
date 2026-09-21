@@ -20,17 +20,27 @@ pub fn format_currency(value: i64, symbol: bool) -> String {
     let cut = ((digits.len() as i64) - 2).max(0);
     let whole = digits[0..cut as usize].to_string();
     let cents = digits[cut as usize..(digits.len() as i64) as usize].to_string();
-    let body = crate::support::concat2(
-        &crate::support::concat2(&group_thousands(&keep_digits(&whole)), ","),
-        &cents,
-    );
+    let body = {
+        let __piece0 = group_thousands(&keep_digits(&whole));
+        let mut __buf = String::with_capacity(__piece0.len() + ",".len() + cents.len());
+        __buf.push_str(&__piece0);
+        __buf.push(',');
+        __buf.push_str(&cents);
+        __buf
+    };
     let prefix = (if symbol {
         crate::support::concat2("R$", &crate::support::from_code_points(&[32]))
     } else {
         "".to_string()
     });
     return (if negative {
-        crate::support::concat2(&crate::support::concat2("-", &prefix), &body)
+        {
+            let mut __buf = String::with_capacity("-".len() + prefix.len() + body.len());
+            __buf.push('-');
+            __buf.push_str(&prefix);
+            __buf.push_str(&body);
+            __buf
+        }
     } else {
         crate::support::concat2(&prefix, &body)
     });

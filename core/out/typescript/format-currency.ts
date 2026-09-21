@@ -2,7 +2,6 @@
 // engine: 0.1.0
 // source: format-currency
 // content: 1e0947bdf328
-import { keepDigits } from "./lib/digits.ts";
 import { groupThousands } from "./lib/format.ts";
 
 /**
@@ -22,7 +21,10 @@ export function formatCurrency(value: number, symbol: boolean): string {
 	const cut: number = Math.max(digits.length - 2, 0);
 	const whole: string = digits.slice(0, cut);
 	const cents: string = digits.slice(cut, digits.length);
-	const body: string = groupThousands(keepDigits(whole)) + "," + cents;
+	const _inl17Value: string = whole;
+	let _inl18Result: string | undefined = undefined;
+	_inl18Result = _inl17Value.replace(/[^0-9]/gu, "");
+	const body: string = groupThousands(_inl18Result!) + "," + cents;
 	const prefix: string = symbol
 		? "R$" + [32].map((point) => String.fromCodePoint(point)).join("")
 		: "";

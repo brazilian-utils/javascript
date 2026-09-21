@@ -26,13 +26,3 @@ export function easterDayOfMarch(year: number): number {
 		56,
 	);
 }
-
-/**
- * Easter Sunday of a year, as a civil date.
- */
-export function easterSunday(year: number): number {
-	const dayOfMarch: number = easterDayOfMarch(year);
-	return dayOfMarch <= 31
-		? civilDate(year, 3, dayOfMarch)
-		: civilDate(year, 4, dayOfMarch - 31);
-}

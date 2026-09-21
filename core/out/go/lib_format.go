@@ -54,12 +54,26 @@ func formatWithPattern(value string, pattern string, pad bool) string {
 // Groups the whole part with `.` every three digits, the pt-BR convention.
 func groupThousands(whole string) string {
 	out := []int{}
-	scalars := codePoints(whole)
+	scalars := func() []int {
+		__bs := []byte(whole)
+		__pts := make([]int, len(__bs))
+		for __i, __b := range __bs {
+			__pts[__i] = int(__b)
+		}
+		return __pts
+	}()
 	for index := 0; index < len(scalars); index++ {
 		if (index > 0) && (((len(scalars) - index) % 3) == 0) {
 			out = append(out, 46)
 		}
 		out = append(out, orElse(at(scalars, index), 48))
 	}
-	return fromCodePoints(out)
+	return string(func() []byte {
+		__pts := out
+		__bs := make([]byte, len(__pts))
+		for __i, __p := range __pts {
+			__bs[__i] = byte(__p)
+		}
+		return __bs
+	}())
 }

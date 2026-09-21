@@ -507,6 +507,20 @@ function borrowed(expr: TExpr): string {
 	return `&${print(expr)}`;
 }
 
+/** A one-scalar string literal as a Rust `char` literal, or `undefined` for anything else. */
+function singleCharLiteral(expr: TExpr): string | undefined {
+	if (expr.kind !== "lit" || typeof expr.value !== "string") return undefined;
+	const scalars = [...expr.value];
+	if (scalars.length !== 1) return undefined;
+	const scalar = scalars[0]!;
+	if (scalar === "\\") return "'\\\\'";
+	if (scalar === "'") return "'\\''";
+	if (scalar === "\n") return "'\\n'";
+	if (scalar === "\t") return "'\\t'";
+	if (scalar === "\r") return "'\\r'";
+	return `'${scalar}'`;
+}
+
 /** `Ordering`'s discriminants are exactly -1/0/1, so a cast is the whole comparison. */
 function orderingAsInt(a: TExpr, b: TExpr): TExpr {
 	return raw(`(${print(a)}.cmp(&${print(b)}) as i64)`);
@@ -632,6 +646,41 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 		// call inside another's arguments, which `clippy::format_in_format_args` (default warn)
 		// catches every time. A plain function call nests without that concern.
 		emit: (args) => raw(`crate::support::concat2(${borrowed(args[0]!)}, ${borrowed(args[1]!)})`),
+	},
+	{
+		// `backend/lower.ts`'s `operation` flattens a `+` chain of three or more pieces into this
+		// before lowering (see its own comment); every intermediate `str.concat` in that chain would
+		// otherwise have reallocated and copied everything to its left, once per additional piece —
+		// `format_currency`'s assembly of `prefix`/`sign`/`body` and each `concat2` in
+		// `random_cpf_base`'s nine-digit chain were exactly that (`engine/docs/progress.md` §8). One
+		// buffer, sized once from every piece's own length, replaces the whole chain.
+		op: "str.concatAll",
+		impl: "native",
+		because: "one buffer sized once, not a chain of reallocate-and-copy",
+		cost: allocating,
+		emit: (args) => {
+			// A piece's length is needed once to size the buffer and once more to push it. `.len()`
+			// auto-derefs, so the bare (unborrowed) form works for sizing regardless of whether a piece
+			// ends up owned or borrowed — the borrow only matters for `push_str`, which needs a `&str`.
+			// A name or a literal is cheap to print twice this way (it is just a reference, or already
+			// a constant); anything else — a call, most often — is bound to a local first, so what it
+			// computes runs once, not twice.
+			const bindings: string[] = [];
+			const pieces = args.map((arg, index) => {
+				if (arg.kind === "lit") return { bare: print(arg), borrow: print(arg), char: singleCharLiteral(arg) };
+				if (arg.kind === "name") return { bare: print(arg), borrow: borrowed(arg), char: undefined };
+				const local = `__piece${index}`;
+				bindings.push(`let ${local} = ${print(arg)};`);
+				return { bare: local, borrow: `&${local}`, char: undefined };
+			});
+			const capacity = pieces.map((piece) => `${piece.bare}.len()`).join(" + ");
+			// `clippy::single_char_add_str` (default warn) wants `push('x')` over `push_str("x")` for a
+			// one-character literal — the one case a piece's own length is already known, too.
+			const pushes = pieces
+				.map((piece) => (piece.char !== undefined ? `__buf.push(${piece.char});` : `__buf.push_str(${piece.borrow});`))
+				.join(" ");
+			return raw(`{ ${bindings.join(" ")} let mut __buf = String::with_capacity(${capacity}); ${pushes} __buf }`);
+		},
 	},
 	{
 		op: "str.codeAt",
@@ -1004,17 +1053,33 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 	{
 		op: "re.retain",
 		impl: "native",
-		because: "a `chars().filter(...)` pass over explicit ranges, with no regex engine involved",
+		because:
+			"a byte-wise pass, not `.chars()`, when every retained range is ASCII (every class this " +
+			"project uses is: digits, letters) -- `.chars()` decodes the whole input as UTF-8 scalars " +
+			"before the filter ever runs, which was measured as the largest cost in `isValidCpf` once " +
+			"the regex engine itself stopped being one (`engine/docs/progress.md` §8); a byte never " +
+			"needs decoding to be range-tested, and a multi-byte scalar's bytes are all >= 0x80, so " +
+			"every one of them fails an ASCII range test on its own and is dropped exactly as it would " +
+			"be by testing the decoded scalar -- a non-ASCII input keeps working, just without ever " +
+			"paying to decode it",
 		cost: allocating,
 		emit: (args, _types, ctx) => {
 			const ranges = ctx.regex === undefined || ctx.regex.node.kind !== "class" ? [] : ctx.regex.node.ranges;
 			// `(lo..=hi).contains(&c)`, not `c >= lo && c <= hi`: the same range the class already
 			// is, and what `clippy::manual_range_contains` (default warn) asks the latter to become.
-			const test = ranges
-				.map((range) => (range.lo === range.hi ? `c == ${range.lo}` : `(${range.lo}..=${range.hi}).contains(&c)`))
-				.join(" || ");
+			const rangeTest = (name: string): string =>
+				ranges.length === 0
+					? "false"
+					: ranges
+							.map((range) => (range.lo === range.hi ? `${name} == ${range.lo}` : `(${range.lo}..=${range.hi}).contains(&${name})`))
+							.join(" || ");
+			if (ranges.every((range) => range.hi <= 127)) {
+				return raw(
+					`String::from_utf8(${print(args[0]!)}.bytes().filter(|&b| { let c = b as u32; ${rangeTest("c")} }).collect::<Vec<u8>>()).unwrap()`,
+				);
+			}
 			return raw(
-				`${print(args[0]!)}.chars().filter(|&ch| { let c = ch as u32; ${test === "" ? "false" : test} }).collect::<String>()`,
+				`${print(args[0]!)}.chars().filter(|&ch| { let c = ch as u32; ${rangeTest("c")} }).collect::<String>()`,
 			);
 		},
 	},
@@ -2591,4 +2656,13 @@ export const RUST_BACKEND: Backend = {
 	renderType: rustType,
 	comment: "//",
 	driver: driverFiles,
+	// Deliberately absent, unlike Python's and TypeScript's: this engine's own call-site inlining
+	// (`optimize/inline.ts`) binds every inlined parameter as an owned local — it has no notion of
+	// a Rust borrow, which is decided later, per call site, by the whole-program pre-pass above. A
+	// measured attempt at a budget here (`engine/docs/progress.md` §8) inserted a `.to_owned()` at
+	// every inlined call, one full string clone per splice — exactly the allocation ADR 0010 exists
+	// to avoid, and by more than the call overhead this pass would have removed. Rust's own
+	// inliner already reaches the shapes that would matter (`cargo build --release`); teaching this
+	// pass to reconstruct ADR 0010's borrow analysis for every inlined splice is future work, not
+	// this one.
 };

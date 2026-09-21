@@ -14,40 +14,47 @@ pub const LIB_CNPJ_TABLE2: &[i64] = &[6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 /// branch also draws those 4 digits at random. Twelve separate draws, not a loop, is what lets the
 /// result stay exactly 12 digits long.
 pub(crate) fn random_cnpj_base(env: &dyn Capabilities) -> String {
-    return crate::support::concat2(
-        &crate::support::concat2(
-            &crate::support::concat2(
-                &crate::support::concat2(
-                    &crate::support::concat2(
-                        &crate::support::concat2(
-                            &crate::support::concat2(
-                                &crate::support::concat2(
-                                    &crate::support::concat2(
-                                        &crate::support::concat2(
-                                            &crate::support::concat2(
-                                                &random_digit(env),
-                                                &random_digit(env),
-                                            ),
-                                            &random_digit(env),
-                                        ),
-                                        &random_digit(env),
-                                    ),
-                                    &random_digit(env),
-                                ),
-                                &random_digit(env),
-                            ),
-                            &random_digit(env),
-                        ),
-                        &random_digit(env),
-                    ),
-                    &random_digit(env),
-                ),
-                &random_digit(env),
-            ),
-            &random_digit(env),
-        ),
-        &random_digit(env),
-    );
+    return {
+        let __piece0 = random_digit(env);
+        let __piece1 = random_digit(env);
+        let __piece2 = random_digit(env);
+        let __piece3 = random_digit(env);
+        let __piece4 = random_digit(env);
+        let __piece5 = random_digit(env);
+        let __piece6 = random_digit(env);
+        let __piece7 = random_digit(env);
+        let __piece8 = random_digit(env);
+        let __piece9 = random_digit(env);
+        let __piece10 = random_digit(env);
+        let __piece11 = random_digit(env);
+        let mut __buf = String::with_capacity(
+            __piece0.len()
+                + __piece1.len()
+                + __piece2.len()
+                + __piece3.len()
+                + __piece4.len()
+                + __piece5.len()
+                + __piece6.len()
+                + __piece7.len()
+                + __piece8.len()
+                + __piece9.len()
+                + __piece10.len()
+                + __piece11.len(),
+        );
+        __buf.push_str(&__piece0);
+        __buf.push_str(&__piece1);
+        __buf.push_str(&__piece2);
+        __buf.push_str(&__piece3);
+        __buf.push_str(&__piece4);
+        __buf.push_str(&__piece5);
+        __buf.push_str(&__piece6);
+        __buf.push_str(&__piece7);
+        __buf.push_str(&__piece8);
+        __buf.push_str(&__piece9);
+        __buf.push_str(&__piece10);
+        __buf.push_str(&__piece11);
+        __buf
+    };
 }
 
 /// The check digit of a CNPJ base, under the rule both versions share.

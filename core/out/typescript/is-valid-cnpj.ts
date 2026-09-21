@@ -2,8 +2,7 @@
 // engine: 0.1.0
 // source: is-valid-cnpj
 // content: 611130f5f12f
-import { hasLetter, hasValidCnpjChecksum, isRepeatedCnpj } from "./lib/cnpj.ts";
-import { keepAlphanumeric, keepDigits } from "./lib/digits.ts";
+import { hasValidCnpjChecksum, isRepeatedCnpj } from "./lib/cnpj.ts";
 
 /**
  * Validates a CNPJ (Cadastro Nacional da Pessoa Jurídica), numeric or alphanumeric.
@@ -15,8 +14,32 @@ import { keepAlphanumeric, keepDigits } from "./lib/digits.ts";
 export function isValidCnpj(cnpj: string, version: "1" | "2"): boolean {
 	const trimmed: string = cnpj.trim();
 	if (version === "2") {
-		const cleaned: string = keepAlphanumeric(cnpj);
-		if (hasLetter(cleaned) && cleaned.length === 14) {
+		const _inl142Value: string = cnpj;
+		let _inl143Result: string | undefined = undefined;
+		_inl143Result = _inl142Value.replace(/[^0-9A-Za-z]/gu, "").toUpperCase();
+		const cleaned: string = _inl143Result!;
+		const _inl146Value: string = cleaned;
+		let _inl147Result: boolean | undefined = undefined;
+		for (
+			let _inl144Index = 0;
+			_inl144Index < _inl146Value.length;
+			_inl144Index++
+		) {
+			const _inl145Point: number =
+				(_inl144Index < _inl146Value.length
+					? _inl146Value.charCodeAt(_inl144Index)
+					: undefined) ?? 0;
+			if (_inl145Point >= 65 && _inl145Point <= 90) {
+				_inl147Result = true;
+			}
+			if (_inl147Result !== undefined) {
+				break;
+			}
+		}
+		if (_inl147Result === undefined) {
+			_inl147Result = false;
+		}
+		if (_inl147Result! && cleaned.length === 14) {
 			return (
 				/^[0-9A-Z]{2}[\x09-\x0d \--/\u00a0\u1680\u2000-\u200a\u2028-\u2029\u202f\u205f\u3000\ufeff]*[0-9A-Z]{3}[\x09-\x0d \--/\u00a0\u1680\u2000-\u200a\u2028-\u2029\u202f\u205f\u3000\ufeff]*[0-9A-Z]{3}[\x09-\x0d \--/\u00a0\u1680\u2000-\u200a\u2028-\u2029\u202f\u205f\u3000\ufeff]*[0-9A-Z]{4}[\x09-\x0d \--/\u00a0\u1680\u2000-\u200a\u2028-\u2029\u202f\u205f\u3000\ufeff]*[0-9]{2}$/u.test(
 					trimmed.replace(/[a-z]/gu, (scalar) => scalar.toUpperCase()),
@@ -24,7 +47,10 @@ export function isValidCnpj(cnpj: string, version: "1" | "2"): boolean {
 			);
 		}
 	}
-	const numeric: string = keepDigits(cnpj);
+	const _inl148Value: string = cnpj;
+	let _inl149Result: string | undefined = undefined;
+	_inl149Result = _inl148Value.replace(/[^0-9]/gu, "");
+	const numeric: string = _inl149Result!;
 	if (numeric.length !== 14) {
 		return false;
 	}

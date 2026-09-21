@@ -2,51 +2,18 @@
 // engine: 0.1.0
 // source: lib/cpf
 // content: 13da32b058ef
-import { digitAt } from "./digits.ts";
-import { randomDigit } from "./random.ts";
-import type { Capabilities } from "../capabilities.ts";
-import { raceFirstSome } from "../capabilities.ts";
-
-/**
- * A random CPF base: 8 digits plus a região fiscal digit, each drawn independently — matches the
- * published `generateCpf()` called with no state, where an unset state also draws that 9th digit
- * at random. Nine separate draws, not a loop, is what lets the result stay exactly 9 digits long.
- */
-export function randomCpfBase(env: Capabilities): string {
-	return (
-		randomDigit(env) +
-		randomDigit(env) +
-		randomDigit(env) +
-		randomDigit(env) +
-		randomDigit(env) +
-		randomDigit(env) +
-		randomDigit(env) +
-		randomDigit(env) +
-		randomDigit(env)
-	);
-}
-
 /**
  * The check digit of a CPF base, under the Receita Federal rule (weights 10..2 and 11..2).
  */
 export function cpfCheckDigit(cpf: string, size: number): number {
 	let sum: number = 0;
 	for (let index = 0; index < size; index++) {
-		sum = sum + digitAt(cpf, index) * (size + 1 - index);
+		const _inl63Value: string = cpf;
+		const _inl64Index: number = index;
+		let _inl65Result: number | undefined = undefined;
+		_inl65Result = _inl63Value.charCodeAt(_inl64Index) - 48;
+		sum = sum + _inl65Result! * (size + 1 - index);
 	}
 	const remainder: number = sum % 11;
 	return remainder < 2 ? 0 : 11 - remainder;
-}
-
-/**
- * Whether every scalar of the value is the same one, e.g. "00000000000".
- */
-export function isRepeated(value: string): boolean {
-	const first: number = value.charCodeAt(0);
-	for (let index = 1; index < 11; index++) {
-		if (value.charCodeAt(index) !== first) {
-			return false;
-		}
-	}
-	return true;
 }

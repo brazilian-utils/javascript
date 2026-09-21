@@ -8,41 +8,6 @@ from typing import List, Optional
 __all__ = ["json_string_field"]
 
 
-def _matches_at(points: List[int], needle: List[int], start: int) -> bool:
-    """Whether `needle` occurs in `points` at `start`."""
-    for offset in range(0, len(needle)):
-        if (
-            points[(start + offset)] if 0 <= (start + offset) < len(points) else -1
-        ) != (needle[offset] if 0 <= offset < len(needle) else -2):
-            return False
-    return True
-
-
-def _is_space(point: int) -> bool:
-    """Whether a code point is JSON whitespace."""
-    return (((point == 32) or (point == 9)) or (point == 10)) or (point == 13)
-
-
-def _hex_value(points: List[int], start: int) -> int:
-    """The hexadecimal value of four scalars, for a `\\uXXXX` escape."""
-    value: int = 0
-    for offset in range(0, 4):
-        point: int = (
-            points[(start + offset)] if 0 <= (start + offset) < len(points) else 48
-        )
-        digit: int = 0
-        if (point >= 48) and (point <= 57):
-            digit = point - 48
-        else:
-            if (point >= 97) and (point <= 102):
-                digit = point - 87
-            else:
-                if (point >= 65) and (point <= 70):
-                    digit = point - 55
-        value = (value * 16) + digit
-    return min(value, 65535)
-
-
 def json_string_field(body: str, key: str) -> Optional[str]:
     """The string value of a top-level JSON field, or absent when the field is missing or is not a
     string. Escapes are decoded; a surrogate pair is left as its two escaped halves, which no CEP
@@ -51,17 +16,48 @@ def json_string_field(body: str, key: str) -> Optional[str]:
     points: List[int] = [ord(__c) for __c in body]
     needle: List[int] = [ord(__c) for __c in (('"' + key) + '"')]
     for index in range(0, len(points)):
-        if not _matches_at(points, needle, index):
+        __inl110_points: List[int] = points
+        __inl111_needle: List[int] = needle
+        __inl112_start: int = index
+        __inl113_result: Optional[bool] = None
+        for __inl109_offset in range(0, len(__inl111_needle)):
+            if (
+                __inl110_points[(__inl112_start + __inl109_offset)]
+                if 0 <= (__inl112_start + __inl109_offset) < len(__inl110_points)
+                else -1
+            ) != (
+                __inl111_needle[__inl109_offset]
+                if 0 <= __inl109_offset < len(__inl111_needle)
+                else -2
+            ):
+                __inl113_result = False
+            if __inl113_result is not None:
+                break
+        if __inl113_result is None:
+            __inl113_result = True
+        if not __inl113_result:
             continue
         cursor: int = index + len(needle)
         for skip in range(0, 8):
-            if _is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
+            __inl114_point: int = points[cursor] if 0 <= cursor < len(points) else 0
+            __inl115_result: Optional[bool] = None
+            __inl115_result = (
+                ((__inl114_point == 32) or (__inl114_point == 9))
+                or (__inl114_point == 10)
+            ) or (__inl114_point == 13)
+            if __inl115_result:
                 cursor = cursor + 1
         if (points[cursor] if 0 <= cursor < len(points) else 0) != 58:
             continue
         cursor = cursor + 1
         for skip in range(0, 8):
-            if _is_space((points[cursor] if 0 <= cursor < len(points) else 0)):
+            __inl116_point: int = points[cursor] if 0 <= cursor < len(points) else 0
+            __inl117_result: Optional[bool] = None
+            __inl117_result = (
+                ((__inl116_point == 32) or (__inl116_point == 9))
+                or (__inl116_point == 10)
+            ) or (__inl116_point == 13)
+            if __inl117_result:
                 cursor = cursor + 1
         if (points[cursor] if 0 <= cursor < len(points) else 0) != 34:
             continue
@@ -88,7 +84,40 @@ def json_string_field(body: str, key: str) -> Optional[str]:
                             cursor = cursor + 2
                         else:
                             if escaped == 117:
-                                out.append(_hex_value(points, (cursor + 2)))
+                                __inl122_points: List[int] = points
+                                __inl123_start: int = cursor + 2
+                                __inl124_result: Optional[int] = None
+                                __inl118_value: int = 0
+                                for __inl119_offset in range(0, 4):
+                                    __inl120_point: int = (
+                                        __inl122_points[
+                                            (__inl123_start + __inl119_offset)
+                                        ]
+                                        if 0
+                                        <= (__inl123_start + __inl119_offset)
+                                        < len(__inl122_points)
+                                        else 48
+                                    )
+                                    __inl121_digit: int = 0
+                                    if (__inl120_point >= 48) and (
+                                        __inl120_point <= 57
+                                    ):
+                                        __inl121_digit = __inl120_point - 48
+                                    else:
+                                        if (__inl120_point >= 97) and (
+                                            __inl120_point <= 102
+                                        ):
+                                            __inl121_digit = __inl120_point - 87
+                                        else:
+                                            if (__inl120_point >= 65) and (
+                                                __inl120_point <= 70
+                                            ):
+                                                __inl121_digit = __inl120_point - 55
+                                    __inl118_value = (
+                                        __inl118_value * 16
+                                    ) + __inl121_digit
+                                __inl124_result = min(__inl118_value, 65535)
+                                out.append(__inl124_result)
                                 cursor = cursor + 6
                             else:
                                 if escaped >= 0:

@@ -3,11 +3,14 @@
 # source: generate-cnpj
 # content: 41b441a54f18
 
-from .lib.cnpj import cnpj_check_digit, random_cnpj_base
-from .lib.digits import is_repeated_run
+from typing import List, Optional
 from ._support import Capabilities, DEFAULT_CAPABILITIES
 
 __all__ = ["generate_cnpj", "generate_cnpj_with"]
+
+GENERATE_CNPJ_TABLE_1: List[int] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+
+GENERATE_CNPJ_TABLE_2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
 
 def generate_cnpj() -> str:
@@ -29,17 +32,411 @@ def generate_cnpj_with(env: Capabilities) -> str:
     supply a clock, a source of randomness or an HTTP client — which is what the
     differential conformance driver does to make a run reproducible.
     """
-    base: str = random_cnpj_base(env)
-    for attempt in range(0, 8):
-        if not is_repeated_run(base):
+    __inl61_result: Optional[str] = None
+    __inl265_result: Optional[str] = None
+    __inl364_bound: int = 10
+    __inl365_result: Optional[int] = None
+    __inl361_limit: int = 4294967296 - (4294967296 % __inl364_bound)
+    for __inl362_attempt in range(0, 32):
+        __inl363_draw: int = env.next_u32()
+        if __inl363_draw < __inl361_limit:
+            __inl365_result = __inl363_draw % __inl364_bound
+        if __inl365_result is not None:
             break
-        base = random_cnpj_base(env)
-    first_digit: str = str(
-        cnpj_check_digit((base + "00"), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
-    )
-    second_digit: str = str(
-        cnpj_check_digit(
-            ((base + first_digit) + "0"), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    if __inl365_result is None:
+        __inl365_result = env.next_u32() % __inl364_bound
+    __inl265_result = str(__inl365_result)
+    __inl266_result: Optional[str] = None
+    __inl369_bound: int = 10
+    __inl370_result: Optional[int] = None
+    __inl366_limit: int = 4294967296 - (4294967296 % __inl369_bound)
+    for __inl367_attempt in range(0, 32):
+        __inl368_draw: int = env.next_u32()
+        if __inl368_draw < __inl366_limit:
+            __inl370_result = __inl368_draw % __inl369_bound
+        if __inl370_result is not None:
+            break
+    if __inl370_result is None:
+        __inl370_result = env.next_u32() % __inl369_bound
+    __inl266_result = str(__inl370_result)
+    __inl267_result: Optional[str] = None
+    __inl374_bound: int = 10
+    __inl375_result: Optional[int] = None
+    __inl371_limit: int = 4294967296 - (4294967296 % __inl374_bound)
+    for __inl372_attempt in range(0, 32):
+        __inl373_draw: int = env.next_u32()
+        if __inl373_draw < __inl371_limit:
+            __inl375_result = __inl373_draw % __inl374_bound
+        if __inl375_result is not None:
+            break
+    if __inl375_result is None:
+        __inl375_result = env.next_u32() % __inl374_bound
+    __inl267_result = str(__inl375_result)
+    __inl268_result: Optional[str] = None
+    __inl379_bound: int = 10
+    __inl380_result: Optional[int] = None
+    __inl376_limit: int = 4294967296 - (4294967296 % __inl379_bound)
+    for __inl377_attempt in range(0, 32):
+        __inl378_draw: int = env.next_u32()
+        if __inl378_draw < __inl376_limit:
+            __inl380_result = __inl378_draw % __inl379_bound
+        if __inl380_result is not None:
+            break
+    if __inl380_result is None:
+        __inl380_result = env.next_u32() % __inl379_bound
+    __inl268_result = str(__inl380_result)
+    __inl269_result: Optional[str] = None
+    __inl384_bound: int = 10
+    __inl385_result: Optional[int] = None
+    __inl381_limit: int = 4294967296 - (4294967296 % __inl384_bound)
+    for __inl382_attempt in range(0, 32):
+        __inl383_draw: int = env.next_u32()
+        if __inl383_draw < __inl381_limit:
+            __inl385_result = __inl383_draw % __inl384_bound
+        if __inl385_result is not None:
+            break
+    if __inl385_result is None:
+        __inl385_result = env.next_u32() % __inl384_bound
+    __inl269_result = str(__inl385_result)
+    __inl270_result: Optional[str] = None
+    __inl389_bound: int = 10
+    __inl390_result: Optional[int] = None
+    __inl386_limit: int = 4294967296 - (4294967296 % __inl389_bound)
+    for __inl387_attempt in range(0, 32):
+        __inl388_draw: int = env.next_u32()
+        if __inl388_draw < __inl386_limit:
+            __inl390_result = __inl388_draw % __inl389_bound
+        if __inl390_result is not None:
+            break
+    if __inl390_result is None:
+        __inl390_result = env.next_u32() % __inl389_bound
+    __inl270_result = str(__inl390_result)
+    __inl271_result: Optional[str] = None
+    __inl394_bound: int = 10
+    __inl395_result: Optional[int] = None
+    __inl391_limit: int = 4294967296 - (4294967296 % __inl394_bound)
+    for __inl392_attempt in range(0, 32):
+        __inl393_draw: int = env.next_u32()
+        if __inl393_draw < __inl391_limit:
+            __inl395_result = __inl393_draw % __inl394_bound
+        if __inl395_result is not None:
+            break
+    if __inl395_result is None:
+        __inl395_result = env.next_u32() % __inl394_bound
+    __inl271_result = str(__inl395_result)
+    __inl272_result: Optional[str] = None
+    __inl399_bound: int = 10
+    __inl400_result: Optional[int] = None
+    __inl396_limit: int = 4294967296 - (4294967296 % __inl399_bound)
+    for __inl397_attempt in range(0, 32):
+        __inl398_draw: int = env.next_u32()
+        if __inl398_draw < __inl396_limit:
+            __inl400_result = __inl398_draw % __inl399_bound
+        if __inl400_result is not None:
+            break
+    if __inl400_result is None:
+        __inl400_result = env.next_u32() % __inl399_bound
+    __inl272_result = str(__inl400_result)
+    __inl273_result: Optional[str] = None
+    __inl404_bound: int = 10
+    __inl405_result: Optional[int] = None
+    __inl401_limit: int = 4294967296 - (4294967296 % __inl404_bound)
+    for __inl402_attempt in range(0, 32):
+        __inl403_draw: int = env.next_u32()
+        if __inl403_draw < __inl401_limit:
+            __inl405_result = __inl403_draw % __inl404_bound
+        if __inl405_result is not None:
+            break
+    if __inl405_result is None:
+        __inl405_result = env.next_u32() % __inl404_bound
+    __inl273_result = str(__inl405_result)
+    __inl274_result: Optional[str] = None
+    __inl409_bound: int = 10
+    __inl410_result: Optional[int] = None
+    __inl406_limit: int = 4294967296 - (4294967296 % __inl409_bound)
+    for __inl407_attempt in range(0, 32):
+        __inl408_draw: int = env.next_u32()
+        if __inl408_draw < __inl406_limit:
+            __inl410_result = __inl408_draw % __inl409_bound
+        if __inl410_result is not None:
+            break
+    if __inl410_result is None:
+        __inl410_result = env.next_u32() % __inl409_bound
+    __inl274_result = str(__inl410_result)
+    __inl275_result: Optional[str] = None
+    __inl414_bound: int = 10
+    __inl415_result: Optional[int] = None
+    __inl411_limit: int = 4294967296 - (4294967296 % __inl414_bound)
+    for __inl412_attempt in range(0, 32):
+        __inl413_draw: int = env.next_u32()
+        if __inl413_draw < __inl411_limit:
+            __inl415_result = __inl413_draw % __inl414_bound
+        if __inl415_result is not None:
+            break
+    if __inl415_result is None:
+        __inl415_result = env.next_u32() % __inl414_bound
+    __inl275_result = str(__inl415_result)
+    __inl276_result: Optional[str] = None
+    __inl419_bound: int = 10
+    __inl420_result: Optional[int] = None
+    __inl416_limit: int = 4294967296 - (4294967296 % __inl419_bound)
+    for __inl417_attempt in range(0, 32):
+        __inl418_draw: int = env.next_u32()
+        if __inl418_draw < __inl416_limit:
+            __inl420_result = __inl418_draw % __inl419_bound
+        if __inl420_result is not None:
+            break
+    if __inl420_result is None:
+        __inl420_result = env.next_u32() % __inl419_bound
+    __inl276_result = str(__inl420_result)
+    __inl61_result = (
+        (
+            (
+                (
+                    (
+                        (
+                            (
+                                (
+                                    (
+                                        (__inl265_result + __inl266_result)
+                                        + __inl267_result
+                                    )
+                                    + __inl268_result
+                                )
+                                + __inl269_result
+                            )
+                            + __inl270_result
+                        )
+                        + __inl271_result
+                    )
+                    + __inl272_result
+                )
+                + __inl273_result
+            )
+            + __inl274_result
         )
-    )
+        + __inl275_result
+    ) + __inl276_result
+    base: str = __inl61_result
+    for attempt in range(0, 8):
+        __inl64_value: str = base
+        __inl65_result: Optional[bool] = None
+        __inl62_first: int = ord(__inl64_value[0])
+        for __inl63_index in range(1, len(__inl64_value)):
+            if ord(__inl64_value[__inl63_index]) != __inl62_first:
+                __inl65_result = False
+            if __inl65_result is not None:
+                break
+        if __inl65_result is None:
+            __inl65_result = True
+        if not __inl65_result:
+            break
+        __inl66_result: Optional[str] = None
+        __inl277_result: Optional[str] = None
+        __inl424_bound: int = 10
+        __inl425_result: Optional[int] = None
+        __inl421_limit: int = 4294967296 - (4294967296 % __inl424_bound)
+        for __inl422_attempt in range(0, 32):
+            __inl423_draw: int = env.next_u32()
+            if __inl423_draw < __inl421_limit:
+                __inl425_result = __inl423_draw % __inl424_bound
+            if __inl425_result is not None:
+                break
+        if __inl425_result is None:
+            __inl425_result = env.next_u32() % __inl424_bound
+        __inl277_result = str(__inl425_result)
+        __inl278_result: Optional[str] = None
+        __inl429_bound: int = 10
+        __inl430_result: Optional[int] = None
+        __inl426_limit: int = 4294967296 - (4294967296 % __inl429_bound)
+        for __inl427_attempt in range(0, 32):
+            __inl428_draw: int = env.next_u32()
+            if __inl428_draw < __inl426_limit:
+                __inl430_result = __inl428_draw % __inl429_bound
+            if __inl430_result is not None:
+                break
+        if __inl430_result is None:
+            __inl430_result = env.next_u32() % __inl429_bound
+        __inl278_result = str(__inl430_result)
+        __inl279_result: Optional[str] = None
+        __inl434_bound: int = 10
+        __inl435_result: Optional[int] = None
+        __inl431_limit: int = 4294967296 - (4294967296 % __inl434_bound)
+        for __inl432_attempt in range(0, 32):
+            __inl433_draw: int = env.next_u32()
+            if __inl433_draw < __inl431_limit:
+                __inl435_result = __inl433_draw % __inl434_bound
+            if __inl435_result is not None:
+                break
+        if __inl435_result is None:
+            __inl435_result = env.next_u32() % __inl434_bound
+        __inl279_result = str(__inl435_result)
+        __inl280_result: Optional[str] = None
+        __inl439_bound: int = 10
+        __inl440_result: Optional[int] = None
+        __inl436_limit: int = 4294967296 - (4294967296 % __inl439_bound)
+        for __inl437_attempt in range(0, 32):
+            __inl438_draw: int = env.next_u32()
+            if __inl438_draw < __inl436_limit:
+                __inl440_result = __inl438_draw % __inl439_bound
+            if __inl440_result is not None:
+                break
+        if __inl440_result is None:
+            __inl440_result = env.next_u32() % __inl439_bound
+        __inl280_result = str(__inl440_result)
+        __inl281_result: Optional[str] = None
+        __inl444_bound: int = 10
+        __inl445_result: Optional[int] = None
+        __inl441_limit: int = 4294967296 - (4294967296 % __inl444_bound)
+        for __inl442_attempt in range(0, 32):
+            __inl443_draw: int = env.next_u32()
+            if __inl443_draw < __inl441_limit:
+                __inl445_result = __inl443_draw % __inl444_bound
+            if __inl445_result is not None:
+                break
+        if __inl445_result is None:
+            __inl445_result = env.next_u32() % __inl444_bound
+        __inl281_result = str(__inl445_result)
+        __inl282_result: Optional[str] = None
+        __inl449_bound: int = 10
+        __inl450_result: Optional[int] = None
+        __inl446_limit: int = 4294967296 - (4294967296 % __inl449_bound)
+        for __inl447_attempt in range(0, 32):
+            __inl448_draw: int = env.next_u32()
+            if __inl448_draw < __inl446_limit:
+                __inl450_result = __inl448_draw % __inl449_bound
+            if __inl450_result is not None:
+                break
+        if __inl450_result is None:
+            __inl450_result = env.next_u32() % __inl449_bound
+        __inl282_result = str(__inl450_result)
+        __inl283_result: Optional[str] = None
+        __inl454_bound: int = 10
+        __inl455_result: Optional[int] = None
+        __inl451_limit: int = 4294967296 - (4294967296 % __inl454_bound)
+        for __inl452_attempt in range(0, 32):
+            __inl453_draw: int = env.next_u32()
+            if __inl453_draw < __inl451_limit:
+                __inl455_result = __inl453_draw % __inl454_bound
+            if __inl455_result is not None:
+                break
+        if __inl455_result is None:
+            __inl455_result = env.next_u32() % __inl454_bound
+        __inl283_result = str(__inl455_result)
+        __inl284_result: Optional[str] = None
+        __inl459_bound: int = 10
+        __inl460_result: Optional[int] = None
+        __inl456_limit: int = 4294967296 - (4294967296 % __inl459_bound)
+        for __inl457_attempt in range(0, 32):
+            __inl458_draw: int = env.next_u32()
+            if __inl458_draw < __inl456_limit:
+                __inl460_result = __inl458_draw % __inl459_bound
+            if __inl460_result is not None:
+                break
+        if __inl460_result is None:
+            __inl460_result = env.next_u32() % __inl459_bound
+        __inl284_result = str(__inl460_result)
+        __inl285_result: Optional[str] = None
+        __inl464_bound: int = 10
+        __inl465_result: Optional[int] = None
+        __inl461_limit: int = 4294967296 - (4294967296 % __inl464_bound)
+        for __inl462_attempt in range(0, 32):
+            __inl463_draw: int = env.next_u32()
+            if __inl463_draw < __inl461_limit:
+                __inl465_result = __inl463_draw % __inl464_bound
+            if __inl465_result is not None:
+                break
+        if __inl465_result is None:
+            __inl465_result = env.next_u32() % __inl464_bound
+        __inl285_result = str(__inl465_result)
+        __inl286_result: Optional[str] = None
+        __inl469_bound: int = 10
+        __inl470_result: Optional[int] = None
+        __inl466_limit: int = 4294967296 - (4294967296 % __inl469_bound)
+        for __inl467_attempt in range(0, 32):
+            __inl468_draw: int = env.next_u32()
+            if __inl468_draw < __inl466_limit:
+                __inl470_result = __inl468_draw % __inl469_bound
+            if __inl470_result is not None:
+                break
+        if __inl470_result is None:
+            __inl470_result = env.next_u32() % __inl469_bound
+        __inl286_result = str(__inl470_result)
+        __inl287_result: Optional[str] = None
+        __inl474_bound: int = 10
+        __inl475_result: Optional[int] = None
+        __inl471_limit: int = 4294967296 - (4294967296 % __inl474_bound)
+        for __inl472_attempt in range(0, 32):
+            __inl473_draw: int = env.next_u32()
+            if __inl473_draw < __inl471_limit:
+                __inl475_result = __inl473_draw % __inl474_bound
+            if __inl475_result is not None:
+                break
+        if __inl475_result is None:
+            __inl475_result = env.next_u32() % __inl474_bound
+        __inl287_result = str(__inl475_result)
+        __inl288_result: Optional[str] = None
+        __inl479_bound: int = 10
+        __inl480_result: Optional[int] = None
+        __inl476_limit: int = 4294967296 - (4294967296 % __inl479_bound)
+        for __inl477_attempt in range(0, 32):
+            __inl478_draw: int = env.next_u32()
+            if __inl478_draw < __inl476_limit:
+                __inl480_result = __inl478_draw % __inl479_bound
+            if __inl480_result is not None:
+                break
+        if __inl480_result is None:
+            __inl480_result = env.next_u32() % __inl479_bound
+        __inl288_result = str(__inl480_result)
+        __inl66_result = (
+            (
+                (
+                    (
+                        (
+                            (
+                                (
+                                    (
+                                        (
+                                            (__inl277_result + __inl278_result)
+                                            + __inl279_result
+                                        )
+                                        + __inl280_result
+                                    )
+                                    + __inl281_result
+                                )
+                                + __inl282_result
+                            )
+                            + __inl283_result
+                        )
+                        + __inl284_result
+                    )
+                    + __inl285_result
+                )
+                + __inl286_result
+            )
+            + __inl287_result
+        ) + __inl288_result
+        base = __inl66_result
+    __inl70_cnpj: str = base + "00"
+    __inl71_weights: List[int] = GENERATE_CNPJ_TABLE_1
+    __inl72_result: Optional[int] = None
+    __inl67_sum: int = 0
+    for __inl68_index in range(0, len(__inl71_weights)):
+        __inl67_sum = __inl67_sum + (
+            (ord(__inl70_cnpj[__inl68_index]) - 48) * __inl71_weights[__inl68_index]
+        )
+    __inl69_remainder: int = __inl67_sum % 11
+    __inl72_result = 0 if (__inl69_remainder < 2) else (11 - __inl69_remainder)
+    first_digit: str = str(__inl72_result)
+    __inl76_cnpj: str = (base + first_digit) + "0"
+    __inl77_weights: List[int] = GENERATE_CNPJ_TABLE_2
+    __inl78_result: Optional[int] = None
+    __inl73_sum: int = 0
+    for __inl74_index in range(0, len(__inl77_weights)):
+        __inl73_sum = __inl73_sum + (
+            (ord(__inl76_cnpj[__inl74_index]) - 48) * __inl77_weights[__inl74_index]
+        )
+    __inl75_remainder: int = __inl73_sum % 11
+    __inl78_result = 0 if (__inl75_remainder < 2) else (11 - __inl75_remainder)
+    second_digit: str = str(__inl78_result)
     return (base + first_digit) + second_digit

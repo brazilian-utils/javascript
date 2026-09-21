@@ -3,57 +3,13 @@
 # source: lib/cnpj
 # content: 78a3fa4783b9
 
-from typing import List
-from .random import random_digit
-from .._support import Capabilities
+from typing import List, Optional
 
-__all__ = [
-    "random_cnpj_base",
-    "cnpj_check_digit",
-    "has_letter",
-    "has_valid_cnpj_checksum",
-    "is_repeated_cnpj",
-]
+__all__ = ["cnpj_check_digit", "has_valid_cnpj_checksum", "is_repeated_cnpj"]
 
 LIB_CNPJ_TABLE_1: List[int] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
 LIB_CNPJ_TABLE_2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-
-
-def random_cnpj_base(env: Capabilities) -> str:
-    """A random numeric CNPJ base: an 8-digit root and a 4-digit branch, each digit drawn
-    independently — matches the published `generateCnpj()` called with no branch, where an unset
-    branch also draws those 4 digits at random. Twelve separate draws, not a loop, is what lets the
-    result stay exactly 12 digits long.
-    """
-    return (
-        (
-            (
-                (
-                    (
-                        (
-                            (
-                                (
-                                    (
-                                        (random_digit(env) + random_digit(env))
-                                        + random_digit(env)
-                                    )
-                                    + random_digit(env)
-                                )
-                                + random_digit(env)
-                            )
-                            + random_digit(env)
-                        )
-                        + random_digit(env)
-                    )
-                    + random_digit(env)
-                )
-                + random_digit(env)
-            )
-            + random_digit(env)
-        )
-        + random_digit(env)
-    ) + random_digit(env)
 
 
 def cnpj_check_digit(cnpj: str, weights: List[int]) -> int:
@@ -65,22 +21,19 @@ def cnpj_check_digit(cnpj: str, weights: List[int]) -> int:
     return 0 if (remainder < 2) else (11 - remainder)
 
 
-def has_letter(value: str) -> bool:
-    """Whether the value holds at least one upper cased ASCII letter.
-
-    The scan reads positions rather than materializing the scalars, which the checked accessor
-    makes safe without a proof about the length.
-    """
-    for index in range(0, len(value)):
-        point: int = ord(value[index]) if 0 <= index < len(value) else 0
-        if (point >= 65) and (point <= 90):
-            return True
-    return False
-
-
 def has_valid_cnpj_checksum(cnpj: str) -> bool:
     """Whether both check digits of a 14 character CNPJ match its base."""
-    return ((ord(cnpj[12]) - 48) == cnpj_check_digit(cnpj, LIB_CNPJ_TABLE_1)) and (
+    __inl171_cnpj: str = cnpj
+    __inl172_weights: List[int] = LIB_CNPJ_TABLE_1
+    __inl173_result: Optional[int] = None
+    __inl168_sum: int = 0
+    for __inl169_index in range(0, len(__inl172_weights)):
+        __inl168_sum = __inl168_sum + (
+            (ord(__inl171_cnpj[__inl169_index]) - 48) * __inl172_weights[__inl169_index]
+        )
+    __inl170_remainder: int = __inl168_sum % 11
+    __inl173_result = 0 if (__inl170_remainder < 2) else (11 - __inl170_remainder)
+    return ((ord(cnpj[12]) - 48) == __inl173_result) and (
         (ord(cnpj[13]) - 48) == cnpj_check_digit(cnpj, LIB_CNPJ_TABLE_2)
     )
 

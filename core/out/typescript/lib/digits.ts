@@ -17,21 +17,6 @@ export function keepDigits(value: string): string {
 }
 
 /**
- * Whether every scalar of the value is the same one, for whatever length the caller proved —
- * `isRepeated` and `isRepeatedCnpj` do the same check for one specific length; this one serves a
- * generator that has to run it on a base shorter than the document it is building.
- */
-export function isRepeatedRun(value: string): boolean {
-	const first: number = value.charCodeAt(0);
-	for (let index = 1; index < value.length; index++) {
-		if (value.charCodeAt(index) !== first) {
-			return false;
-		}
-	}
-	return true;
-}
-
-/**
  * The numeric value of one ASCII digit.
  */
 export function digitAt(value: string, index: number): number {

@@ -3,15 +3,18 @@
 # source: is-valid-cpf
 # content: dae364e11fb3
 
+from typing import Optional
 import re
-from .lib.cpf import cpf_check_digit, is_repeated
-from .lib.digits import digit_at, keep_digits
+from .lib.cpf import cpf_check_digit
+from .lib.digits import digit_at
 
 __all__ = ["is_valid_cpf"]
 
 _IS_VALID_CPF_PATTERN_1 = re.compile(
     "[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}"
 )
+
+_IS_VALID_CPF_PATTERN_2 = re.compile("[^0-9]")
 
 
 def is_valid_cpf(cpf: str) -> bool:
@@ -29,11 +32,42 @@ def is_valid_cpf(cpf: str) -> bool:
         is not None
     ):
         return False
-    digits: str = keep_digits(cpf)
+    __inl182_value: str = cpf
+    __inl183_result: Optional[str] = None
+    __inl183_result = _IS_VALID_CPF_PATTERN_2.sub("", __inl182_value)
+    digits: str = __inl183_result
     if len(digits) != 11:
         return False
-    if is_repeated(digits):
+    __inl186_value: str = digits
+    __inl187_result: Optional[bool] = None
+    __inl184_first: int = ord(__inl186_value[0])
+    for __inl185_index in range(1, 11):
+        if ord(__inl186_value[__inl185_index]) != __inl184_first:
+            __inl187_result = False
+        if __inl187_result is not None:
+            break
+    if __inl187_result is None:
+        __inl187_result = True
+    if __inl187_result:
         return False
-    return (digit_at(digits, 9) == cpf_check_digit(digits, 9)) and (
+    __inl188_value: str = digits
+    __inl189_index: int = 9
+    __inl190_result: Optional[int] = None
+    __inl190_result = ord(__inl188_value[__inl189_index]) - 48
+    __inl194_cpf: str = digits
+    __inl195_size: int = 9
+    __inl196_result: Optional[int] = None
+    __inl191_sum: int = 0
+    for __inl192_index in range(0, __inl195_size):
+        __inl358_value: str = __inl194_cpf
+        __inl359_index: int = __inl192_index
+        __inl360_result: Optional[int] = None
+        __inl360_result = ord(__inl358_value[__inl359_index]) - 48
+        __inl191_sum = __inl191_sum + (
+            __inl360_result * ((__inl195_size + 1) - __inl192_index)
+        )
+    __inl193_remainder: int = __inl191_sum % 11
+    __inl196_result = 0 if (__inl193_remainder < 2) else (11 - __inl193_remainder)
+    return (__inl190_result == __inl196_result) and (
         digit_at(digits, 10) == cpf_check_digit(digits, 10)
     )

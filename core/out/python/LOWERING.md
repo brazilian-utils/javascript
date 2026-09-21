@@ -218,7 +218,10 @@ with, the implementation that was selected, and the rule that decided it.
 | `int.sub` | `Int[65..70], Int[55..55]` | native | only candidate, cost none/constant |
 | `int.sub` | `Int[97..102], Int[87..87]` | native | only candidate, cost none/constant |
 | `opt.isNone` | `Option<AddressInfo>` | native | only candidate, cost none/constant |
+| `opt.isNone` | `Option<Bool>` | native | only candidate, cost none/constant |
 | `opt.isNone` | `Option<HttpResponse>` | native | only candidate, cost none/constant |
+| `opt.isNone` | `Option<Int[-1..24]>` | native | only candidate, cost none/constant |
+| `opt.isNone` | `Option<Int[0..9]>` | native | only candidate, cost none/constant |
 | `opt.orElse` | `Option<Ascii[1]>, Ascii[0]` | native | only candidate, cost none/constant |
 | `opt.orElse` | `Option<CivilDate>, CivilDate` | native | only candidate, cost none/constant |
 | `opt.orElse` | `Option<Int[0..1114111]>, Int[-1..-1]` | native | only candidate, cost none/constant |
@@ -229,7 +232,20 @@ with, the implementation that was selected, and the rule that decided it.
 | `opt.orElse` | `Option<Int[48..57]>, Int[48..48]` | native | only candidate, cost none/constant |
 | `opt.orElse` | `Option<String[0..2147483647]>, Ascii[0]` | native | only candidate, cost none/constant |
 | `opt.unwrap` | `Option<AddressInfo>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Ascii[0..2147483647]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Ascii[0..30]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Bool>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<CivilDate>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Digits[0..2147483647]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Digits[1]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Digits[12]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Digits[9]>` | native | only candidate, cost none/constant |
 | `opt.unwrap` | `Option<HttpResponse>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Int[-1..24]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Int[-719162..2932896]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Int[0..65535]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Int[0..9]>` | native | only candidate, cost none/constant |
+| `opt.unwrap` | `Option<Int[1..9999]>` | native | only candidate, cost none/constant |
 | `random.nextU32` | `` | native | only candidate, cost none/constant |
 | `re.retain` | `String[0..2147483647]` | native | only candidate, cost one/linear; re.sub with the negated class is one pass |
 | `re.test` | `String[0..2147483647]` | native | only candidate, cost none/linear; `fullmatch` anchors the whole string, and the normalized pattern uses explicit classes |
@@ -312,4 +328,4 @@ with, the implementation that was selected, and the rule that decided it.
 | `str.trim` | `String[0..2147483647]` | native | only candidate, cost one/linear; `strip()` uses Python's own whitespace set, so the 25 code points are passed explicitly |
 | `task.race` | `List<() => Option<AddressInfo>>[2..2]` | library | only candidate, cost many/linear; a ThreadPoolExecutor is the standard library's way to run idempotent requests concurrently |
 
-Mix: 292 native, 12 library, 2 portable.
+Mix: 308 native, 12 library, 2 portable.

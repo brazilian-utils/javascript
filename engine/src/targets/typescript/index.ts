@@ -393,15 +393,49 @@ export const TYPESCRIPT_CANDIDATES: readonly Candidate[] = [
 		emit: (args) => raw(`(${print(args[0]!)} >= -719162 && ${print(args[0]!)} <= 2932896 ? ${print(args[0]!)} : undefined)`),
 	},
 	{
+		// `ymdToDays` (the fallback below) computes the day forward and then verifies the round trip
+		// by decomposing it back into year/month/day through three more floor-division-heavy Hinnant
+		// functions — measured at 78% of `getHolidays`' call (`engine/docs/progress.md` §8). The round
+		// trip only exists to answer one question, "is `day` within the month it names", which is
+		// exactly what a days-in-month table already answers directly: once the month and year are in
+		// range, `day` names a real date iff it does not exceed that month's length (28-31, with
+		// February's leap adjustment). That table check plus the single forward computation is
+		// mathematically the same predicate the round trip computes, just without decomposing the
+		// result back out again.
 		op: "date.fromYmd",
 		impl: "portable",
-		cost: linear,
-		sourceFn: "std/date::ymdToDays",
-		emit: (args, _types, ctx) => ({
-			kind: "call",
-			callee: { kind: "name", name: ctx.nameOf("std/date::ymdToDays") },
-			args: [args[0]!, args[1]!, args[2]!],
-		}),
+		cost: cheap,
+		sourceFn: "std/date::daysFromCivil",
+		emit: (args, _types, ctx) => {
+			const dayLimit = (year: string, month: string): string =>
+				`${month} === 2 ? ((${year} % 4 === 0 && ${year} % 100 !== 0) || ${year} % 400 === 0 ? 29 : 28) : (${month} === 4 || ${month} === 6 || ${month} === 9 || ${month} === 11 ? 30 : 31)`;
+			const forward = (year: string, month: string, day: string): TExpr =>
+				({
+					kind: "call",
+					callee: { kind: "name", name: ctx.nameOf("std/date::daysFromCivil") },
+					args: [raw(year), raw(month), raw(day)],
+				}) as TExpr;
+			// A cheap-to-duplicate argument (a name or a literal, never a call or a computed member) is
+			// printed directly, several times, rather than paying for a closure that only exists to
+			// bind it once — the same reasoning `date.fromEpochDays` above already relies on. Anything
+			// else is bound once by an IIFE, so an effectful or otherwise non-trivial expression is
+			// never evaluated twice.
+			if (args.every((arg) => arg.kind === "name" || arg.kind === "lit")) {
+				const year = print(args[0]!);
+				const month = print(args[1]!);
+				const day = print(args[2]!);
+				return raw(
+					`(${year} < 1 || ${year} > 9999 || ${month} < 1 || ${month} > 12 || ${day} < 1 || ${day} > (${dayLimit(year, month)}) ? undefined : ${print(forward(year, month, day))})`,
+				);
+			}
+			return raw(
+				`((y, m, d) => {\n` +
+					`\t\tif (y < 1 || y > 9999 || m < 1 || m > 12 || d < 1) return undefined;\n` +
+					`\t\tconst limit = ${dayLimit("y", "m")};\n` +
+					`\t\treturn d > limit ? undefined : ${print(forward("y", "m", "d"))};\n` +
+					`\t})(${print(args[0]!)}, ${print(args[1]!)}, ${print(args[2]!)})`,
+			);
+		},
 	},
 	{
 		op: "date.year",
@@ -1032,4 +1066,9 @@ export const TYPESCRIPT_BACKEND: Backend = {
 		imports: [{ from: "SUPPORT", names: ["DEFAULT_CAPABILITIES"] }],
 		seamName: (publicName) => `${publicName}With`,
 	},
+	// Measured, not assumed: V8 already inlines a small monomorphic call once it is hot, so this
+	// engine's own call-site inlining (`optimize/inline.ts`) is set conservatively here — see
+	// `engine/docs/progress.md` §8 for the before/after and the bundle-size effect this was weighed
+	// against.
+	inlineBudget: { maxStatements: 6, rounds: 3 },
 };

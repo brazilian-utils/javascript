@@ -11,22 +11,34 @@ import (
 
 // Keeps only the ASCII digits and letters of a value, upper casing the letters.
 func keepAlphanumeric(value string) string {
-	return strings.ToUpper(strings.Map(func(scalar rune) rune {
-		if (scalar >= 48 && scalar <= 57) || (scalar >= 65 && scalar <= 90) || (scalar >= 97 && scalar <= 122) {
-			return scalar
+	return strings.ToUpper(func() string {
+		__value := value
+		__out := make([]byte, 0, len(__value))
+		for __i := 0; __i < len(__value); __i++ {
+			__b := __value[__i]
+			__c := int(__b)
+			if (__c >= 48 && __c <= 57) || (__c >= 65 && __c <= 90) || (__c >= 97 && __c <= 122) {
+				__out = append(__out, __b)
+			}
 		}
-		return -1
-	}, value))
+		return string(__out)
+	}())
 }
 
 // Keeps only the ASCII digits of a value, dropping every mask character.
 func keepDigits(value string) string {
-	return strings.Map(func(scalar rune) rune {
-		if scalar >= 48 && scalar <= 57 {
-			return scalar
+	return func() string {
+		__value := value
+		__out := make([]byte, 0, len(__value))
+		for __i := 0; __i < len(__value); __i++ {
+			__b := __value[__i]
+			__c := int(__b)
+			if __c >= 48 && __c <= 57 {
+				__out = append(__out, __b)
+			}
 		}
-		return -1
-	}, value)
+		return string(__out)
+	}()
 }
 
 // Whether every scalar of the value is the same one, for whatever length the caller proved —

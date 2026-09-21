@@ -9,15 +9,10 @@
 		"start": 397,
 		"end": 481
 	},
-	"lib/digits.ts#isRepeatedRun": {
-		"module": "lib/digits",
-		"start": 1132,
-		"end": 1355
-	},
 	"lib/digits.ts#digitAt": {
 		"module": "lib/digits",
 		"start": 738,
-		"end": 839
+		"end": 842
 	},
 	"lib/format.ts#patternSlots": {
 		"module": "lib/format",
@@ -44,41 +39,6 @@
 		"start": 966,
 		"end": 1499
 	},
-	"lib/random.ts#randomBelow": {
-		"module": "lib/random",
-		"start": 1137,
-		"end": 1640
-	},
-	"lib/random.ts#randomDigit": {
-		"module": "lib/random",
-		"start": 1680,
-		"end": 1747
-	},
-	"lib/cnpj.ts#randomCnpjBase": {
-		"module": "lib/cnpj",
-		"start": 2700,
-		"end": 2947
-	},
-	"lib/cnpj.ts#cnpjCheckDigit": {
-		"module": "lib/cnpj",
-		"start": 687,
-		"end": 1184
-	},
-	"lib/cnpj.ts#hasLetter": {
-		"module": "lib/cnpj",
-		"start": 1706,
-		"end": 2363
-	},
-	"lib/cnpj.ts#hasValidCnpjChecksum": {
-		"module": "lib/cnpj",
-		"start": 1265,
-		"end": 1478
-	},
-	"lib/cnpj.ts#isRepeatedCnpj": {
-		"module": "lib/cnpj",
-		"start": 3028,
-		"end": 3247
-	},
 	"generate-cnpj.ts#generateCnpj": {
 		"module": "generate-cnpj",
 		"start": 982,
@@ -88,21 +48,6 @@
 		"module": "generate-cnpj",
 		"start": 982,
 		"end": 1571
-	},
-	"lib/cpf.ts#randomCpfBase": {
-		"module": "lib/cpf",
-		"start": 999,
-		"end": 1196
-	},
-	"lib/cpf.ts#cpfCheckDigit": {
-		"module": "lib/cpf",
-		"start": 394,
-		"end": 687
-	},
-	"lib/cpf.ts#isRepeated": {
-		"module": "lib/cpf",
-		"start": 1283,
-		"end": 1499
 	},
 	"generate-cpf.ts#generateCpf": {
 		"module": "generate-cpf",
@@ -122,62 +67,47 @@
 	"get-address-info-by-cep.ts#isOk": {
 		"module": "get-address-info-by-cep",
 		"start": 1529,
-		"end": 1619
+		"end": 1622
 	},
 	"get-address-info-by-cep.ts#fetchViaCep": {
 		"module": "get-address-info-by-cep",
-		"start": 1698,
-		"end": 2297
+		"start": 1701,
+		"end": 2300
 	},
 	"get-address-info-by-cep.ts#fetchBrasilApi": {
 		"module": "get-address-info-by-cep",
-		"start": 2348,
-		"end": 2954
+		"start": 2351,
+		"end": 2957
 	},
 	"get-address-info-by-cep.ts#getAddressInfoByCep": {
 		"module": "get-address-info-by-cep",
-		"start": 3379,
-		"end": 3786
+		"start": 3382,
+		"end": 3789
 	},
 	"get-address-info-by-cep.ts#getAddressInfoByCepWith": {
 		"module": "get-address-info-by-cep",
-		"start": 3379,
-		"end": 3786
-	},
-	"lib/json.ts#matchesAt": {
-		"module": "lib/json",
-		"start": 582,
-		"end": 1317
-	},
-	"lib/json.ts#isSpace": {
-		"module": "lib/json",
-		"start": 1367,
-		"end": 1491
+		"start": 3382,
+		"end": 3789
 	},
 	"lib/json.ts#hexValue": {
 		"module": "lib/json",
-		"start": 1562,
-		"end": 2063
+		"start": 1568,
+		"end": 2072
 	},
 	"lib/json.ts#jsonStringField": {
 		"module": "lib/json",
-		"start": 2291,
-		"end": 4230
-	},
-	"lib/civil.ts#civilDate": {
-		"module": "lib/civil",
-		"start": 445,
-		"end": 624
+		"start": 2300,
+		"end": 4239
 	},
 	"lib/easter.ts#easterDayOfMarch": {
 		"module": "lib/easter",
 		"start": 527,
 		"end": 1128
 	},
-	"lib/easter.ts#easterSunday": {
-		"module": "lib/easter",
-		"start": 1186,
-		"end": 1392
+	"lib/civil.ts#civilDate": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
 	},
 	"get-holidays.ts#getHolidays": {
 		"module": "get-holidays",
@@ -189,49 +119,44 @@
 		"start": 578,
 		"end": 1064
 	},
+	"lib/cnpj.ts#cnpjCheckDigit": {
+		"module": "lib/cnpj",
+		"start": 687,
+		"end": 1184
+	},
+	"lib/cnpj.ts#hasValidCnpjChecksum": {
+		"module": "lib/cnpj",
+		"start": 1265,
+		"end": 1478
+	},
+	"lib/cnpj.ts#isRepeatedCnpj": {
+		"module": "lib/cnpj",
+		"start": 3028,
+		"end": 3247
+	},
 	"is-valid-cnpj.ts#isValidCnpj": {
 		"module": "is-valid-cnpj",
 		"start": 1397,
 		"end": 2445
+	},
+	"lib/cpf.ts#cpfCheckDigit": {
+		"module": "lib/cpf",
+		"start": 394,
+		"end": 687
 	},
 	"is-valid-cpf.ts#isValidCpf": {
 		"module": "is-valid-cpf",
 		"start": 793,
 		"end": 1143
 	},
-	"std/date.ts#floorDiv1": {
-		"module": "std/date",
-		"start": 432,
-		"end": 655
-	},
 	"std/date.ts#daysFromCivil": {
 		"module": "std/date",
 		"start": 752,
 		"end": 1560
 	},
-	"std/date.ts#floorDiv": {
-		"module": "std/date",
-		"start": 432,
-		"end": 655
-	},
 	"std/date.ts#yearFromDays": {
 		"module": "std/date",
 		"start": 1627,
 		"end": 2212
-	},
-	"std/date.ts#monthFromDays": {
-		"module": "std/date",
-		"start": 2280,
-		"end": 2780
-	},
-	"std/date.ts#dayFromDays": {
-		"module": "std/date",
-		"start": 2855,
-		"end": 3346
-	},
-	"std/date.ts#ymdToDays": {
-		"module": "std/date",
-		"start": 3922,
-		"end": 4284
 	}
 }

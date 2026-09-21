@@ -3,49 +3,19 @@
 # source: lib/cpf
 # content: 13da32b058ef
 
-from .digits import digit_at
-from .random import random_digit
-from .._support import Capabilities
+from typing import Optional
 
-__all__ = ["random_cpf_base", "cpf_check_digit", "is_repeated"]
-
-
-def random_cpf_base(env: Capabilities) -> str:
-    """A random CPF base: 8 digits plus a região fiscal digit, each drawn independently — matches the
-    published `generateCpf()` called with no state, where an unset state also draws that 9th digit
-    at random. Nine separate draws, not a loop, is what lets the result stay exactly 9 digits long.
-    """
-    return (
-        (
-            (
-                (
-                    (
-                        ((random_digit(env) + random_digit(env)) + random_digit(env))
-                        + random_digit(env)
-                    )
-                    + random_digit(env)
-                )
-                + random_digit(env)
-            )
-            + random_digit(env)
-        )
-        + random_digit(env)
-    ) + random_digit(env)
+__all__ = ["cpf_check_digit"]
 
 
 def cpf_check_digit(cpf: str, size: int) -> int:
     """The check digit of a CPF base, under the Receita Federal rule (weights 10..2 and 11..2)."""
     sum: int = 0
     for index in range(0, size):
-        sum = sum + (digit_at(cpf, index) * ((size + 1) - index))
+        __inl88_value: str = cpf
+        __inl89_index: int = index
+        __inl90_result: Optional[int] = None
+        __inl90_result = ord(__inl88_value[__inl89_index]) - 48
+        sum = sum + (__inl90_result * ((size + 1) - index))
     remainder: int = sum % 11
     return 0 if (remainder < 2) else (11 - remainder)
-
-
-def is_repeated(value: str) -> bool:
-    """Whether every scalar of the value is the same one, e.g. "00000000000"."""
-    first: int = ord(value[0])
-    for index in range(1, 11):
-        if ord(value[index]) != first:
-            return False
-    return True

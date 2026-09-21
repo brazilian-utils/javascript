@@ -3,7 +3,8 @@
 // source: get-holidays
 // content: b4d687034433
 import { civilDate } from "./lib/civil.ts";
-import { easterSunday } from "./lib/easter.ts";
+import { easterDayOfMarch } from "./lib/easter.ts";
+import { daysFromCivil } from "./std/date.ts";
 
 export type Holiday = {
 	/** The holiday name in Brazilian Portuguese. */
@@ -23,54 +24,270 @@ export type Holiday = {
  */
 export function getHolidays(year: number): readonly Holiday[] {
 	let holidays: Holiday[] = [];
-	holidays.push({
-		name: "Ano novo",
-		date: civilDate(year, 1, 1),
-		type: "national",
-	});
-	holidays.push({
-		name: "Tiradentes",
-		date: civilDate(year, 4, 21),
-		type: "national",
-	});
+	const _inl97Year: number = year;
+	const _inl98Month: number = 1;
+	const _inl99Day: number = 1;
+	let _inl100Result: number | undefined = undefined;
+	_inl100Result =
+		(_inl97Year < 1 ||
+		_inl97Year > 9999 ||
+		_inl98Month < 1 ||
+		_inl98Month > 12 ||
+		_inl99Day < 1 ||
+		_inl99Day >
+			(_inl98Month === 2
+				? (_inl97Year % 4 === 0 && _inl97Year % 100 !== 0) ||
+					_inl97Year % 400 === 0
+					? 29
+					: 28
+				: _inl98Month === 4 ||
+					  _inl98Month === 6 ||
+					  _inl98Month === 9 ||
+					  _inl98Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl97Year, _inl98Month, _inl99Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
+	holidays.push({ name: "Ano novo", date: _inl100Result!, type: "national" });
+	const _inl101Year: number = year;
+	const _inl102Month: number = 4;
+	const _inl103Day: number = 21;
+	let _inl104Result: number | undefined = undefined;
+	_inl104Result =
+		(_inl101Year < 1 ||
+		_inl101Year > 9999 ||
+		_inl102Month < 1 ||
+		_inl102Month > 12 ||
+		_inl103Day < 1 ||
+		_inl103Day >
+			(_inl102Month === 2
+				? (_inl101Year % 4 === 0 && _inl101Year % 100 !== 0) ||
+					_inl101Year % 400 === 0
+					? 29
+					: 28
+				: _inl102Month === 4 ||
+					  _inl102Month === 6 ||
+					  _inl102Month === 9 ||
+					  _inl102Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl101Year, _inl102Month, _inl103Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
+	holidays.push({ name: "Tiradentes", date: _inl104Result!, type: "national" });
+	const _inl105Year: number = year;
+	const _inl106Month: number = 5;
+	const _inl107Day: number = 1;
+	let _inl108Result: number | undefined = undefined;
+	_inl108Result =
+		(_inl105Year < 1 ||
+		_inl105Year > 9999 ||
+		_inl106Month < 1 ||
+		_inl106Month > 12 ||
+		_inl107Day < 1 ||
+		_inl107Day >
+			(_inl106Month === 2
+				? (_inl105Year % 4 === 0 && _inl105Year % 100 !== 0) ||
+					_inl105Year % 400 === 0
+					? 29
+					: 28
+				: _inl106Month === 4 ||
+					  _inl106Month === 6 ||
+					  _inl106Month === 9 ||
+					  _inl106Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl105Year, _inl106Month, _inl107Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
 	holidays.push({
 		name: "Dia do trabalhador",
-		date: civilDate(year, 5, 1),
+		date: _inl108Result!,
 		type: "national",
 	});
+	const _inl109Year: number = year;
+	const _inl110Month: number = 9;
+	const _inl111Day: number = 7;
+	let _inl112Result: number | undefined = undefined;
+	_inl112Result =
+		(_inl109Year < 1 ||
+		_inl109Year > 9999 ||
+		_inl110Month < 1 ||
+		_inl110Month > 12 ||
+		_inl111Day < 1 ||
+		_inl111Day >
+			(_inl110Month === 2
+				? (_inl109Year % 4 === 0 && _inl109Year % 100 !== 0) ||
+					_inl109Year % 400 === 0
+					? 29
+					: 28
+				: _inl110Month === 4 ||
+					  _inl110Month === 6 ||
+					  _inl110Month === 9 ||
+					  _inl110Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl109Year, _inl110Month, _inl111Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
 	holidays.push({
 		name: "Independ\u00eancia do Brasil",
-		date: civilDate(year, 9, 7),
+		date: _inl112Result!,
 		type: "national",
 	});
+	const _inl113Year: number = year;
+	const _inl114Month: number = 10;
+	const _inl115Day: number = 12;
+	let _inl116Result: number | undefined = undefined;
+	_inl116Result =
+		(_inl113Year < 1 ||
+		_inl113Year > 9999 ||
+		_inl114Month < 1 ||
+		_inl114Month > 12 ||
+		_inl115Day < 1 ||
+		_inl115Day >
+			(_inl114Month === 2
+				? (_inl113Year % 4 === 0 && _inl113Year % 100 !== 0) ||
+					_inl113Year % 400 === 0
+					? 29
+					: 28
+				: _inl114Month === 4 ||
+					  _inl114Month === 6 ||
+					  _inl114Month === 9 ||
+					  _inl114Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl113Year, _inl114Month, _inl115Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
 	holidays.push({
 		name: "Nossa Senhora Aparecida",
-		date: civilDate(year, 10, 12),
+		date: _inl116Result!,
 		type: "national",
 	});
-	holidays.push({
-		name: "Finados",
-		date: civilDate(year, 11, 2),
-		type: "national",
-	});
+	const _inl117Year: number = year;
+	const _inl118Month: number = 11;
+	const _inl119Day: number = 2;
+	let _inl120Result: number | undefined = undefined;
+	_inl120Result =
+		(_inl117Year < 1 ||
+		_inl117Year > 9999 ||
+		_inl118Month < 1 ||
+		_inl118Month > 12 ||
+		_inl119Day < 1 ||
+		_inl119Day >
+			(_inl118Month === 2
+				? (_inl117Year % 4 === 0 && _inl117Year % 100 !== 0) ||
+					_inl117Year % 400 === 0
+					? 29
+					: 28
+				: _inl118Month === 4 ||
+					  _inl118Month === 6 ||
+					  _inl118Month === 9 ||
+					  _inl118Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl117Year, _inl118Month, _inl119Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
+	holidays.push({ name: "Finados", date: _inl120Result!, type: "national" });
+	const _inl121Year: number = year;
+	const _inl122Month: number = 11;
+	const _inl123Day: number = 15;
+	let _inl124Result: number | undefined = undefined;
+	_inl124Result =
+		(_inl121Year < 1 ||
+		_inl121Year > 9999 ||
+		_inl122Month < 1 ||
+		_inl122Month > 12 ||
+		_inl123Day < 1 ||
+		_inl123Day >
+			(_inl122Month === 2
+				? (_inl121Year % 4 === 0 && _inl121Year % 100 !== 0) ||
+					_inl121Year % 400 === 0
+					? 29
+					: 28
+				: _inl122Month === 4 ||
+					  _inl122Month === 6 ||
+					  _inl122Month === 9 ||
+					  _inl122Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl121Year, _inl122Month, _inl123Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
 	holidays.push({
 		name: "Proclama\u00e7\u00e3o da Rep\u00fablica",
-		date: civilDate(year, 11, 15),
+		date: _inl124Result!,
 		type: "national",
 	});
-	holidays.push({
-		name: "Natal",
-		date: civilDate(year, 12, 25),
-		type: "national",
-	});
+	const _inl125Year: number = year;
+	const _inl126Month: number = 12;
+	const _inl127Day: number = 25;
+	let _inl128Result: number | undefined = undefined;
+	_inl128Result =
+		(_inl125Year < 1 ||
+		_inl125Year > 9999 ||
+		_inl126Month < 1 ||
+		_inl126Month > 12 ||
+		_inl127Day < 1 ||
+		_inl127Day >
+			(_inl126Month === 2
+				? (_inl125Year % 4 === 0 && _inl125Year % 100 !== 0) ||
+					_inl125Year % 400 === 0
+					? 29
+					: 28
+				: _inl126Month === 4 ||
+					  _inl126Month === 6 ||
+					  _inl126Month === 9 ||
+					  _inl126Month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(_inl125Year, _inl126Month, _inl127Day)) ??
+		Math.min(Math.max(0, -719162), 2932896);
+	holidays.push({ name: "Natal", date: _inl128Result!, type: "national" });
 	if (year >= 2024) {
+		const _inl129Year: number = year;
+		const _inl130Month: number = 11;
+		const _inl131Day: number = 20;
+		let _inl132Result: number | undefined = undefined;
+		_inl132Result =
+			(_inl129Year < 1 ||
+			_inl129Year > 9999 ||
+			_inl130Month < 1 ||
+			_inl130Month > 12 ||
+			_inl131Day < 1 ||
+			_inl131Day >
+				(_inl130Month === 2
+					? (_inl129Year % 4 === 0 && _inl129Year % 100 !== 0) ||
+						_inl129Year % 400 === 0
+						? 29
+						: 28
+					: _inl130Month === 4 ||
+						  _inl130Month === 6 ||
+						  _inl130Month === 9 ||
+						  _inl130Month === 11
+						? 30
+						: 31)
+				? undefined
+				: daysFromCivil(_inl129Year, _inl130Month, _inl131Day)) ??
+			Math.min(Math.max(0, -719162), 2932896);
 		holidays.push({
 			name: "Dia da Consci\u00eancia Negra",
-			date: civilDate(year, 11, 20),
+			date: _inl132Result!,
 			type: "national",
 		});
 	}
-	const easter: number = easterSunday(year);
+	const _inl134Year: number = year;
+	let _inl135Result: number | undefined = undefined;
+	const _inl133DayOfMarch: number = easterDayOfMarch(_inl134Year);
+	_inl135Result =
+		_inl133DayOfMarch <= 31
+			? civilDate(_inl134Year, 3, _inl133DayOfMarch)
+			: civilDate(_inl134Year, 4, _inl133DayOfMarch - 31);
+	const easter: number = _inl135Result!;
 	holidays.push({
 		name: "Carnaval (ter\u00e7a-feira)",
 		date:

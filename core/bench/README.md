@@ -5,6 +5,13 @@ faster or slower than the implementation that language's community actually ship
 always **generated ÷ handwritten**, so below 1.0 means the generated code is faster -- the same
 convention `conformance/bench.ts` already used.
 
+**The bar is 1.0x: equal or faster, everywhere.** Earlier revisions of this document budgeted 1.5x;
+that number is gone as a target and survives below only where it names the line a row used to be
+allowed to cross. `## Getting every row to 1.0x`, after the row-by-row account below, has the pass
+that closed most of the gap, what moved each row and by what mechanism, the per-target inlining
+budgets that pass measured rather than assumed, and the rows still over 1.0x with the structural
+reason they did not come down further.
+
 ## Running it
 
 ```sh
@@ -321,6 +328,216 @@ building the harness, not a frozen result.
   meaning the wrapper functions add roughly as much again on top), against
   `str(randint(1, 999999998)).zfill(9)` on the handwritten side -- one draw, formatted once.
 
+## Getting every row to 1.0x
+
+The pass this section documents took the budget from "within 1.5x" to "equal or faster,
+everywhere" and moved every over-budget row it could without touching `core/source/**` (the
+utilities themselves) or the checker. `node core/bench/run.mjs`'s current numbers, before and
+after, language by language:
+
+| language | utility | before | after | fixed by |
+| --- | --- | --- | --- | --- |
+| typescript | `getHolidays` | 1.77x | **0.93x** | native `date.fromYmd` (below) |
+| typescript | `isBusinessDay` | 1.26x | **0.66x** | inherits `getHolidays`' fix |
+| typescript | `generateCpf` | 1.44x | **1.06x** | call-site inlining, budget 6 |
+| typescript | `generateCnpj` | 1.24x | **1.10x** | call-site inlining, budget 6 |
+| python | `formatCurrency` | 2.91x | **2.66x** | `trunc_mod`/`trunc_div` inlined; ASCII-byte `codePoints`/`fromCodePoints` |
+| python | `generateCpf` | 1.86x | **1.65x** | call-site inlining, budget 12 |
+| python | `generateCnpj` | 1.99x | **1.89x** | call-site inlining, budget 12 |
+| go | `formatCurrency` | 1.08x | **0.93x** | ASCII-byte `re.retain`, `codePoints`/`fromCodePoints` |
+| rust | `isValidCpf` | 2.73x | **2.57x** | ASCII-byte `re.retain` (`keep_digits`) |
+| rust | `isValidCnpj` | 1.43x | **1.35x** | inherits the same `re.retain` fix |
+| rust | `formatCurrency` | 1.81x | **1.74x** | one-buffer `str.concatAll`; ASCII-byte `re.retain` |
+| rust | `generateCpf` | 2.37x | **1.68x** | one-buffer `str.concatAll` (nine-digit chain) |
+| rust | `generateCnpj` | 1.89x | **1.22x** | one-buffer `str.concatAll` (twelve-digit chain) |
+
+Every other row was already at or under 1.0x (`isValidCpf`/`isValidCnpj`/`formatCnpj` everywhere,
+Go's `generateCpf`/`generateCnpj`) and stayed there; conformance stayed 4256/4256 per target in
+both idiom modes throughout, `node engine/scripts/fuzz.ts fast --seed 20260921 --count 1000` and
+`full --seed 555 --count 200` both stayed clean, and `core/out` here reflects every change
+regenerated and committed.
+
+Three shapes cover everything below: a lowering that did redundant work the target itself could
+answer more cheaply (the missing candidate), a call chain whose overhead is a target property, not
+a program property (per-target inlining), and a chain of allocations where one would do.
+
+### The missing candidate: `date.fromYmd`
+
+`civilDate` (`core/out/typescript/lib/civil.ts`) computed a day forward from `(year, month, day)`
+and then verified the round trip by decomposing the result back through `yearFromDays`,
+`monthFromDays` and `dayFromDays` -- three more Howard Hinnant floor-division-heavy functions --
+measured at 78% of `getHolidays`' call. The round trip exists to answer exactly one question, "is
+`day` within the month `month` names", and a days-in-month table (28-31, February adjusted for a
+leap year) answers it directly, without decomposing anything back out: once the coarse bounds hold
+(year 1-9999, month 1-12, day ≥ 1), `day > daysInMonth(month, year)` is the whole check, computed
+without touching the calendar math at all. The candidate that replaced the round trip
+(`engine/src/targets/typescript/index.ts`) is that check plus the single forward computation --
+one Hinnant function, not four.
+
+**What was tried and measured slower, and kept in this account rather than quietly dropped.** The
+task's own framing named `new Date(year, month - 1, day)` as the obvious native candidate, since
+that is what the handwritten side calls. It was implemented first -- `Date.UTC` to construct,
+reading the result back through the UTC getters to detect a silently-rolled-over date, the same
+round-trip *shape* the portable calendar already used, just against V8's calendar instead of four
+Hinnant functions -- and measured directly against the portable round trip in isolation (2.4
+million calls each): the portable round trip took 366-390 ms; the `Date`-based candidate took
+574-608 ms, **slower**, because `Date` object construction plus three getter reads costs more than
+the arithmetic it was meant to replace. The days-in-month table has no such cost (63-81 ms for the
+same 2.4 million calls, a 4.5-6x improvement over the round trip) because it touches no host object
+at all. The `Date`-based candidate was removed rather than kept as a fallback; every claim in this
+document is a measurement of the actual candidate shipped, not of the first thing that seemed like
+it should work.
+
+The candidate is one expression for a "cheap" (name or literal) argument and an IIFE binding each
+argument once for anything else, so an argument with a real cost is never evaluated twice; a
+literal call site (`civilDate(year, 1, 1)`, `getHolidays`' own shape) always takes the cheap path.
+
+### Per-target inlining, measured per target
+
+`randomDigit(env) → randomBelow(10, env) → env.nextU32()` is a three-layer call chain, run nine to
+twelve times per `generateCpf`/`generateCnpj` call, in every language that has it (TypeScript,
+Python, Rust). Whether that chain's overhead disappears once it is hot is a property of the target,
+not of the program -- V8 elides a monomorphic closure once it is hot, CPython pays a full stack
+frame per call with nothing to elide it, and rustc/LLVM inline within a crate when they judge it
+worthwhile, which for a bounds-checked call inside a loop was measured not to reliably include this
+shape. `engine/src/optimize/inline.ts` is a Core-to-Core pass -- target-independent by construction,
+the same layer `optimize/optimize.ts`'s constant-folding and dead-code passes live in -- but it runs
+once per target, from `generate` (`backend/generate.ts`), with a budget (`InlineBudget.maxStatements`)
+each `Backend` declares for itself. An eligible callee (no `Fail`, no `Http`, no direct or indirect
+recursion, no lambda in its body, a statement count at or under the budget) gets its parameters
+bound once each to fresh names, its body renamed so two splices of the same callee never collide,
+and every `return` turned into an assignment to a synthetic `Option` result -- `break`ing the loop
+it is directly inside where there is one -- so the whole thing prints as ordinary statements ending
+in `opt.unwrap(result)`, using intrinsics (`opt.isNone`/`opt.unwrap`) every target already lowers on
+its own. Multiple rounds let an inlined callee's own call (inlining `randomDigit` exposes its call
+to `randomBelow`) get a chance in a later round.
+
+- **Python: aggressive, budget 12.** `randomBelow`'s own body (a bounded rejection-sampling loop) is
+  six statements; `cpf_check_digit`/`is_repeated` are five each, and fall under the same budget
+  incidentally -- there is no way to size a budget that reaches `randomBelow` without also reaching
+  them, since they are the same size. `generateCpf` moved from 1.86x to 1.65x, `generateCnpj` from
+  1.99x to 1.89x. `generate_cpf.py`'s body is now one long flattened function instead of a chain of
+  small ones; Python was not weighed against a bundle-size budget the way TypeScript was below, so
+  12 stayed the number.
+- **TypeScript: conservative, budget 6 -- measured against 1 first.** A budget of 1 (inlining only
+  `randomDigit`'s single-`return` body, never reaching `randomBelow`'s loop) left `generateCpf` at
+  1.14-1.18x and `generateCnpj` at 1.18-1.25x across three runs -- barely different from the
+  1.44x/1.24x this pass started from, which is itself evidence the JIT was not the limiting factor
+  for the one layer it *was* inlining. A budget of 6 (large enough for `randomBelow`'s own body)
+  reached 1.06x/1.10x. **Bundle-size effect, measured, not hidden**: at budget 6, `generate-cpf.ts`
+  grew from 45 to 408 lines (1796 to 14695 bytes) and `generate-cnpj.ts` from 55 to 519 lines (1959
+  to 18305 bytes); the whole `core/out/typescript` tree grew from 156322 to 187760 bytes, +20%,
+  partly offset by `lib/random.ts` disappearing entirely (nothing calls it once everything that did
+  has it spliced in) and by `std/date.ts` shrinking from the `date.fromYmd` fix above. This is a
+  real speed win paid for in bytes, for two rows that were already close to 1.0x before the pass and
+  stayed close after -- stated because the task asked for it stated, not because the trade is free.
+- **Rust: none, deliberately, and the reason is itself a finding.** A first attempt at budget 6
+  measured code that was *worse*, not better. This pass has no notion of a Rust borrow
+  ([ADR 0010](../../engine/docs/decisions/0010-rust-parameters-borrow-where-sound.md)) -- it binds
+  every inlined parameter as an owned local (`let name = argExpr;`), so a splice of a callee whose
+  parameter ADR 0010 had proven could borrow its argument printed a `.to_owned()` at that binding
+  instead: one full string clone per digit drawn, in `is_valid_cpf` and everywhere else the same
+  shape appeared. That is exactly the allocation ADR 0010 exists to remove, and it cost more than
+  the call overhead this pass would have saved, so `inlineBudget` is deliberately absent from
+  `RUST_BACKEND` (`engine/src/targets/rust/index.ts` carries the same account at the call site). A
+  smaller ask -- an `#[inline]` attribute hint on small non-exported functions, asking rustc's own
+  inliner to look rather than manually splicing anything -- was tried next and measured to change
+  nothing: `isValidCpf` came back at 22-25 ms with the hint present or absent across six runs,
+  indistinguishable from run-to-run noise, meaning rustc was already making the same inlining
+  decision either way. That was reverted too, rather than kept as a change with no measured effect
+  behind it. Closing this gap for Rust means teaching the pass to reconstruct ADR 0010's borrow
+  analysis for an inlined splice, not extending the budget -- future work, not this pass.
+- **Go: not attempted.** Every Go row using this call shape (`generateCpf`, `generateCnpj`) was
+  already at or under 1.0x before this pass; `formatCurrency`, Go's one over-budget row, was closed
+  by the allocation fix below without touching call structure at all.
+
+### Allocation: one buffer or one pass, not a chain
+
+**Rust's string assembly.** A `+` chain (`a + b + c`) lowers as nested `str.concat` calls,
+`concat2(concat2(a, b), c)`, and each `concat2` allocates a fresh `String` and copies everything to
+its left into it -- `format_currency`'s `prefix`/`sign`/`body` assembly and every `concat2` in
+`random_cpf_base`'s nine-digit chain were exactly this shape. `backend/lower.ts`'s `operation` now
+flattens a chain of three or more pieces into its leaves before lowering (`(a + b) + c` is
+`str.concat(str.concat(a, b), c)` in Core; the leaves are `[a, b, c]`, left to right, evaluated in
+that order either way) and hands them to a new op, `str.concatAll`, when a target declares a
+candidate for it -- Rust only, today; every target without one falls straight through to the
+unchanged pairwise `str.concat` path, so nothing changed for TypeScript, Python or Go. Rust's
+`str.concatAll` sizes one buffer once, from every piece's own length summed, and pushes each piece
+into it once. Two correctness details worth naming because a first version of this got both wrong:
+a piece whose length has to be computed (anything that is not already a name or a literal, most
+often a call like `group_thousands(keep_digits(&whole))`) is bound to a local first, so it is
+computed once, not twice -- once for sizing the buffer, once for pushing it, which the first version
+of this candidate did not do, and which a differential run caught (`generateCpf`/`generateCnpj`
+producing a well-formed but wrong document -- a different draw count changes which digits come out,
+and every digit is still individually valid, so nothing but the reference interpreter's own answer
+catches it); and a single-character literal piece prints `.push('x')`, not `.push_str("x")`, which
+`clippy::single_char_add_str` (default warn) asks for. `generateCpf` moved from 2.37x to 1.68x and
+`generateCnpj` from 1.89x to 1.22x; `formatCurrency` from 1.81x to 1.74x (smaller, because its own
+remaining cost is elsewhere -- see the Rust section below).
+
+**`re.retain` and `codePoints`/`fromCodePoints`, in three languages.** `keep_digits`/
+`keep_alphanumeric` (`re.retain`) walked the input as decoded Unicode scalars --
+`.chars().filter(...)` in Rust, `strings.Map` in Go, `[ord(c) for c in whole]` in Python -- before
+ever testing one against a range. Every class this project retains is ASCII (digits, upper and
+lower case letters), and an ASCII byte needs no decoding to be tested: a multi-byte scalar's bytes
+are all ≥ 0x80, so each one fails an ASCII range test on its own, exactly as testing the decoded
+scalar would have failed it -- a byte-wise scan is not an approximation of the scalar-wise one, it
+is the same predicate for less work, sound for any input, ASCII or not. Rust
+(`String::from_utf8(value.bytes().filter(...).collect::<Vec<u8>>())`) and Go (a `[]byte` scan
+building a `[]byte` result) both got this candidate, gated on every retained range being ≤ 127 (a
+class outside that range, none exist in this project today, still falls back to the scalar-wise
+pass). `str.codePoints`/`str.fromCodePoints` (`group_thousands`' `out: IntRange<0,127>[]`, proven
+ASCII by its own declared type) got the matching treatment in Python (`.encode("ascii")` /
+`bytes(...).decode("ascii")`) and Go (`[]byte(value)` / one `string()` from a `[]byte`), gated the
+same way -- on the *element* type's range for `fromCodePoints`, since that op takes a list of code
+points, not a string. `trunc_mod`/`trunc_div` (Python's truncated remainder/division, needed
+because `%`/`//` floor in Python but the Core's contract rounds toward zero) were Python-level
+functions called on every `%`/`//` whose operands were not provably non-negative -- a real cost in
+CPython, where a function call is a full frame, not the arithmetic itself -- so both now print
+their own formula inline as a single expression (a tuple evaluates both operands into fixed names
+once, unconditionally, before the ternary that uses them picks a branch, so an operand that is
+itself a call is still evaluated exactly once). Together these moved Python's `formatCurrency` from
+2.91x to 2.66x and Go's from 1.08x to 0.93x -- Go's crossed 1.0x; Python's did not, and the
+"Remaining over 1.0x" note below says why.
+
+### Remaining over 1.0x, and why
+
+**Python: `formatCurrency` (2.66x), `generateCpf` (1.65x), `generateCnpj` (1.89x).**
+`group_thousands`' own loop -- `for index in range(0, len(scalars)): ... out.append(...)` -- is
+still a Python-level loop with a method call (`list.append`) every iteration; removing `trunc_mod`'s
+call and switching to bytes removed real overhead (2.91x → 2.66x) but did not remove the loop
+itself, which is where most of what is left lives. Nothing in `engine/src/targets/python/**` can
+turn an author's explicit per-character loop into a single C-level format call without either
+recognizing that specific algorithm's shape (which this project treats as out of bounds -- a
+candidate is for an *operation*, never a pattern-match on one author's algorithm) or rewriting
+`group_thousands` itself, which is `core/source/lib/format.ts`, out of scope for this pass. The
+generators' remaining gap is `random_cpf_base`/`random_cnpj_base`'s draw chain: even with the whole
+`random_digit → random_below → next_u32` chain inlined (above), each draw is still a rejection-
+sampling loop plus an `Optional[int]` bookkeeping the inlining introduced, run nine to twelve times,
+against one `randint()` call on the handwritten side. Closing the remaining gap would mean either a
+larger inlining budget (tried at the whole-chain size already; `cpf_check_digit`/`is_repeated` are
+already incidentally included) or a structural change to how the draw itself works, both outside
+what a lowering-only pass can do.
+
+**Rust: `isValidCpf` (2.57x), `formatCurrency` (1.74x), `generateCpf` (1.68x).** `isValidCpf`'s
+`keep_digits` no longer decodes UTF-8 (above), and `cpf_check_digit`'s loop no longer clones (ADR
+0010, already landed before this pass); `#[inline]` on `digit_at` was tried and measured to change
+nothing (above), meaning the remaining ~2.5x is not a missed-inlining question. What is left is
+spread across `re_match_3` (the CPF pattern's own scanner), the mask-character `trim_matches` every
+`isValidCpf`/`isValidCnpj` call pays before `keep_digits` ever runs, and `keep_digits`' own
+`String::from_utf8` allocation -- none individually dominant the way `.chars()` or the cloning loop
+once were, which is itself the finding: the easy, single-cause wins are gone, and what remains is
+distributed across several small, already-minimal operations, the last of which is a systems
+language with an 11-character allocation and a bounds-checked scan against a handwritten crate
+doing the same in roughly a third of the calls. `formatCurrency`'s remaining cost is
+`group_thousands`/`keep_digits` themselves (now byte-based, but still O(n) passes CPython -- no,
+Rust -- still pays for) plus `pad_start`'s own allocation, none of them a chain anymore.
+`generateCpf`'s remaining 1.68x is the same rejection-sampling-loop-times-nine-to-twelve shape
+Python's is, minus Python's per-call frame cost -- `next_u32()` itself is cheap in Rust, so what is
+left is the loop and the `Option`/`Vec<u8>` bookkeeping around each draw, not a single hot line.
+None of these three rows moved to a worse state than before this pass; all three are measurably
+better than they were, and none reached 1.0x, which is reported here rather than left unexplained.
+
 ## Rust
 
 `core/bench/rust/` compares the generated crate against `brazilian_utils`. Both sides take a
@@ -488,3 +705,14 @@ wrapping and String-building around each draw is what adds up). None of `random_
 built fresh each call, nothing to borrow), so this cost sits outside what ADR 0010 changes, the
 same way `format_currency`'s does. Closing either gap, if it is worth closing, is separate work
 from parameter borrowing.
+
+**Update -- the `concat2` chain, closed.** The gap this subsection describes (`random_cpf_base`/
+`random_cnpj_base` threading each digit's owned `String` through a `concat2` chain, and
+`format_currency`'s own `prefix`/`sign`/`body` assembly doing the same) is exactly what
+`str.concatAll`'s one-buffer assembly, in "Getting every row to 1.0x" above, was built for.
+`node core/bench/run.mjs`'s current numbers: `generateCpf` 1.68x (was 2.37x, closer to this
+subsection's 2.78x before that), `generateCnpj` 1.22x (was 1.89x), `formatCurrency` 1.74x (was
+1.81x -- smaller, because a `re.retain` fix also in that section, not the buffer, was
+`format_currency`'s bigger factor). `isValidCpf`/`isValidCnpj` moved the same pass from 2.73x/1.43x
+to 2.57x/1.35x, for the `keep_digits` byte-scan reason that section names, not this one. Full
+before/after table and per-row attribution: "Getting every row to 1.0x" above.

@@ -9,15 +9,10 @@
 		"start": 397,
 		"end": 481
 	},
-	"lib/digits.py#is_repeated_run": {
-		"module": "lib/digits",
-		"start": 1132,
-		"end": 1355
-	},
 	"lib/digits.py#digit_at": {
 		"module": "lib/digits",
 		"start": 738,
-		"end": 839
+		"end": 842
 	},
 	"lib/format.py#pattern_slots": {
 		"module": "lib/format",
@@ -29,11 +24,6 @@
 		"start": 2182,
 		"end": 2821
 	},
-	"lib/format.py#group_thousands": {
-		"module": "lib/format",
-		"start": 664,
-		"end": 1279
-	},
 	"format_cnpj.py#format_cnpj": {
 		"module": "format-cnpj",
 		"start": 967,
@@ -44,41 +34,6 @@
 		"start": 966,
 		"end": 1499
 	},
-	"lib/random.py#random_below": {
-		"module": "lib/random",
-		"start": 1137,
-		"end": 1640
-	},
-	"lib/random.py#random_digit": {
-		"module": "lib/random",
-		"start": 1680,
-		"end": 1747
-	},
-	"lib/cnpj.py#random_cnpj_base": {
-		"module": "lib/cnpj",
-		"start": 2700,
-		"end": 2947
-	},
-	"lib/cnpj.py#cnpj_check_digit": {
-		"module": "lib/cnpj",
-		"start": 687,
-		"end": 1184
-	},
-	"lib/cnpj.py#has_letter": {
-		"module": "lib/cnpj",
-		"start": 1706,
-		"end": 2363
-	},
-	"lib/cnpj.py#has_valid_cnpj_checksum": {
-		"module": "lib/cnpj",
-		"start": 1265,
-		"end": 1478
-	},
-	"lib/cnpj.py#is_repeated_cnpj": {
-		"module": "lib/cnpj",
-		"start": 3028,
-		"end": 3247
-	},
 	"generate_cnpj.py#generate_cnpj": {
 		"module": "generate-cnpj",
 		"start": 982,
@@ -88,21 +43,6 @@
 		"module": "generate-cnpj",
 		"start": 982,
 		"end": 1571
-	},
-	"lib/cpf.py#random_cpf_base": {
-		"module": "lib/cpf",
-		"start": 999,
-		"end": 1196
-	},
-	"lib/cpf.py#cpf_check_digit": {
-		"module": "lib/cpf",
-		"start": 394,
-		"end": 687
-	},
-	"lib/cpf.py#is_repeated": {
-		"module": "lib/cpf",
-		"start": 1283,
-		"end": 1499
 	},
 	"generate_cpf.py#generate_cpf": {
 		"module": "generate-cpf",
@@ -122,62 +62,42 @@
 	"get_address_info_by_cep.py#is_ok": {
 		"module": "get-address-info-by-cep",
 		"start": 1529,
-		"end": 1619
+		"end": 1622
 	},
 	"get_address_info_by_cep.py#fetch_via_cep": {
 		"module": "get-address-info-by-cep",
-		"start": 1698,
-		"end": 2297
+		"start": 1701,
+		"end": 2300
 	},
 	"get_address_info_by_cep.py#fetch_brasil_api": {
 		"module": "get-address-info-by-cep",
-		"start": 2348,
-		"end": 2954
+		"start": 2351,
+		"end": 2957
 	},
 	"get_address_info_by_cep.py#get_address_info_by_cep": {
 		"module": "get-address-info-by-cep",
-		"start": 3379,
-		"end": 3786
+		"start": 3382,
+		"end": 3789
 	},
 	"get_address_info_by_cep.py#get_address_info_by_cep_with": {
 		"module": "get-address-info-by-cep",
-		"start": 3379,
-		"end": 3786
-	},
-	"lib/json.py#matches_at": {
-		"module": "lib/json",
-		"start": 582,
-		"end": 1317
-	},
-	"lib/json.py#is_space": {
-		"module": "lib/json",
-		"start": 1367,
-		"end": 1491
-	},
-	"lib/json.py#hex_value": {
-		"module": "lib/json",
-		"start": 1562,
-		"end": 2063
+		"start": 3382,
+		"end": 3789
 	},
 	"lib/json.py#json_string_field": {
 		"module": "lib/json",
-		"start": 2291,
-		"end": 4230
-	},
-	"lib/civil.py#civil_date": {
-		"module": "lib/civil",
-		"start": 445,
-		"end": 624
+		"start": 2300,
+		"end": 4239
 	},
 	"lib/easter.py#easter_day_of_march": {
 		"module": "lib/easter",
 		"start": 527,
 		"end": 1128
 	},
-	"lib/easter.py#easter_sunday": {
-		"module": "lib/easter",
-		"start": 1186,
-		"end": 1392
+	"lib/civil.py#civil_date": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
 	},
 	"get_holidays.py#get_holidays": {
 		"module": "get-holidays",
@@ -189,35 +109,35 @@
 		"start": 578,
 		"end": 1064
 	},
+	"lib/cnpj.py#cnpj_check_digit": {
+		"module": "lib/cnpj",
+		"start": 687,
+		"end": 1184
+	},
+	"lib/cnpj.py#has_valid_cnpj_checksum": {
+		"module": "lib/cnpj",
+		"start": 1265,
+		"end": 1478
+	},
+	"lib/cnpj.py#is_repeated_cnpj": {
+		"module": "lib/cnpj",
+		"start": 3028,
+		"end": 3247
+	},
 	"is_valid_cnpj.py#is_valid_cnpj": {
 		"module": "is-valid-cnpj",
 		"start": 1397,
 		"end": 2445
 	},
+	"lib/cpf.py#cpf_check_digit": {
+		"module": "lib/cpf",
+		"start": 394,
+		"end": 687
+	},
 	"is_valid_cpf.py#is_valid_cpf": {
 		"module": "is-valid-cpf",
 		"start": 793,
 		"end": 1143
-	},
-	"std/date.py#floor_div_1": {
-		"module": "std/date",
-		"start": 432,
-		"end": 655
-	},
-	"std/date.py#days_from_civil": {
-		"module": "std/date",
-		"start": 752,
-		"end": 1560
-	},
-	"std/date.py#floor_div": {
-		"module": "std/date",
-		"start": 432,
-		"end": 655
-	},
-	"std/date.py#year_from_days": {
-		"module": "std/date",
-		"start": 1627,
-		"end": 2212
 	},
 	"std/date.py#month_from_days": {
 		"module": "std/date",
@@ -233,5 +153,10 @@
 		"module": "std/date",
 		"start": 3922,
 		"end": 4284
+	},
+	"std/date.py#year_from_days": {
+		"module": "std/date",
+		"start": 1627,
+		"end": 2212
 	}
 }

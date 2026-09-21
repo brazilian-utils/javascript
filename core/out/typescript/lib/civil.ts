@@ -2,11 +2,28 @@
 // engine: 0.1.0
 // source: lib/civil
 // content: 316511928bcc
-import { ymdToDays } from "../std/date.ts";
+import { daysFromCivil } from "../std/date.ts";
 
 /**
  * A fixed day of a year, with the unreachable fallback named once.
  */
 export function civilDate(year: number, month: number, day: number): number {
-	return ymdToDays(year, month, day) ?? Math.min(Math.max(0, -719162), 2932896);
+	return (
+		(year < 1 ||
+		year > 9999 ||
+		month < 1 ||
+		month > 12 ||
+		day < 1 ||
+		day >
+			(month === 2
+				? (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
+					? 29
+					: 28
+				: month === 4 || month === 6 || month === 9 || month === 11
+					? 30
+					: 31)
+			? undefined
+			: daysFromCivil(year, month, day)) ??
+		Math.min(Math.max(0, -719162), 2932896)
+	);
 }

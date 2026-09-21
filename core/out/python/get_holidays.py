@@ -3,10 +3,11 @@
 # source: get-holidays
 # content: b4d687034433
 
-from typing import List, Literal
+from typing import List, Literal, Optional
 from dataclasses import dataclass
 from .lib.civil import civil_date
-from .lib.easter import easter_sunday
+from .lib.easter import easter_day_of_march
+from .std.date import ymd_to_days
 
 __all__ = ["get_holidays"]
 
@@ -26,51 +27,135 @@ def get_holidays(year: int) -> List[Holiday]:
     day keep the order they were built in. State holidays are not part of this pilot.
     """
     holidays: List[Holiday] = []
-    holidays.append(
-        Holiday(name="Ano novo", date=civil_date(year, 1, 1), type="national")
+    __inl129_year: int = year
+    __inl130_month: int = 1
+    __inl131_day: int = 1
+    __inl132_result: Optional[int] = None
+    __inl132_result = (
+        __value
+        if (__value := ymd_to_days(__inl129_year, __inl130_month, __inl131_day))
+        is not None
+        else min(max(0, -719162), 2932896)
+    )
+    holidays.append(Holiday(name="Ano novo", date=__inl132_result, type="national"))
+    __inl133_year: int = year
+    __inl134_month: int = 4
+    __inl135_day: int = 21
+    __inl136_result: Optional[int] = None
+    __inl136_result = (
+        __value
+        if (__value := ymd_to_days(__inl133_year, __inl134_month, __inl135_day))
+        is not None
+        else min(max(0, -719162), 2932896)
+    )
+    holidays.append(Holiday(name="Tiradentes", date=__inl136_result, type="national"))
+    __inl137_year: int = year
+    __inl138_month: int = 5
+    __inl139_day: int = 1
+    __inl140_result: Optional[int] = None
+    __inl140_result = (
+        __value
+        if (__value := ymd_to_days(__inl137_year, __inl138_month, __inl139_day))
+        is not None
+        else min(max(0, -719162), 2932896)
     )
     holidays.append(
-        Holiday(name="Tiradentes", date=civil_date(year, 4, 21), type="national")
+        Holiday(name="Dia do trabalhador", date=__inl140_result, type="national")
     )
-    holidays.append(
-        Holiday(name="Dia do trabalhador", date=civil_date(year, 5, 1), type="national")
+    __inl141_year: int = year
+    __inl142_month: int = 9
+    __inl143_day: int = 7
+    __inl144_result: Optional[int] = None
+    __inl144_result = (
+        __value
+        if (__value := ymd_to_days(__inl141_year, __inl142_month, __inl143_day))
+        is not None
+        else min(max(0, -719162), 2932896)
     )
     holidays.append(
         Holiday(
-            name="Independ\u00eancia do Brasil",
-            date=civil_date(year, 9, 7),
-            type="national",
+            name="Independ\u00eancia do Brasil", date=__inl144_result, type="national"
         )
     )
-    holidays.append(
-        Holiday(
-            name="Nossa Senhora Aparecida",
-            date=civil_date(year, 10, 12),
-            type="national",
-        )
+    __inl145_year: int = year
+    __inl146_month: int = 10
+    __inl147_day: int = 12
+    __inl148_result: Optional[int] = None
+    __inl148_result = (
+        __value
+        if (__value := ymd_to_days(__inl145_year, __inl146_month, __inl147_day))
+        is not None
+        else min(max(0, -719162), 2932896)
     )
     holidays.append(
-        Holiday(name="Finados", date=civil_date(year, 11, 2), type="national")
+        Holiday(name="Nossa Senhora Aparecida", date=__inl148_result, type="national")
+    )
+    __inl149_year: int = year
+    __inl150_month: int = 11
+    __inl151_day: int = 2
+    __inl152_result: Optional[int] = None
+    __inl152_result = (
+        __value
+        if (__value := ymd_to_days(__inl149_year, __inl150_month, __inl151_day))
+        is not None
+        else min(max(0, -719162), 2932896)
+    )
+    holidays.append(Holiday(name="Finados", date=__inl152_result, type="national"))
+    __inl153_year: int = year
+    __inl154_month: int = 11
+    __inl155_day: int = 15
+    __inl156_result: Optional[int] = None
+    __inl156_result = (
+        __value
+        if (__value := ymd_to_days(__inl153_year, __inl154_month, __inl155_day))
+        is not None
+        else min(max(0, -719162), 2932896)
     )
     holidays.append(
         Holiday(
             name="Proclama\u00e7\u00e3o da Rep\u00fablica",
-            date=civil_date(year, 11, 15),
+            date=__inl156_result,
             type="national",
         )
     )
-    holidays.append(
-        Holiday(name="Natal", date=civil_date(year, 12, 25), type="national")
+    __inl157_year: int = year
+    __inl158_month: int = 12
+    __inl159_day: int = 25
+    __inl160_result: Optional[int] = None
+    __inl160_result = (
+        __value
+        if (__value := ymd_to_days(__inl157_year, __inl158_month, __inl159_day))
+        is not None
+        else min(max(0, -719162), 2932896)
     )
+    holidays.append(Holiday(name="Natal", date=__inl160_result, type="national"))
     if year >= 2024:
+        __inl161_year: int = year
+        __inl162_month: int = 11
+        __inl163_day: int = 20
+        __inl164_result: Optional[int] = None
+        __inl164_result = (
+            __value
+            if (__value := ymd_to_days(__inl161_year, __inl162_month, __inl163_day))
+            is not None
+            else min(max(0, -719162), 2932896)
+        )
         holidays.append(
             Holiday(
                 name="Dia da Consci\u00eancia Negra",
-                date=civil_date(year, 11, 20),
+                date=__inl164_result,
                 type="national",
             )
         )
-    easter: int = easter_sunday(year)
+    __inl166_year: int = year
+    __inl167_result: Optional[int] = None
+    __inl165_day_of_march: int = easter_day_of_march(__inl166_year)
+    __inl167_result = (
+        civil_date(__inl166_year, 3, __inl165_day_of_march)
+        if (__inl165_day_of_march <= 31)
+        else civil_date(__inl166_year, 4, (__inl165_day_of_march - 31))
+    )
+    easter: int = __inl167_result
     holidays.append(
         Holiday(
             name="Carnaval (ter\u00e7a-feira)",

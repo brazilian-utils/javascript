@@ -11,13 +11,13 @@
 	},
 	"lib_digits.go#isRepeatedRun": {
 		"module": "lib/digits",
-		"start": 1132,
-		"end": 1355
+		"start": 1135,
+		"end": 1358
 	},
 	"lib_digits.go#digitAt": {
 		"module": "lib/digits",
 		"start": 738,
-		"end": 839
+		"end": 842
 	},
 	"lib_format.go#patternSlots": {
 		"module": "lib/format",
@@ -112,42 +112,42 @@
 	"get-address-info-by-cep.go#isOk": {
 		"module": "get-address-info-by-cep",
 		"start": 1529,
-		"end": 1619
+		"end": 1622
 	},
 	"get-address-info-by-cep.go#fetchViaCep": {
 		"module": "get-address-info-by-cep",
-		"start": 1698,
-		"end": 2297
+		"start": 1701,
+		"end": 2300
 	},
 	"get-address-info-by-cep.go#fetchBrasilApi": {
 		"module": "get-address-info-by-cep",
-		"start": 2348,
-		"end": 2954
+		"start": 2351,
+		"end": 2957
 	},
 	"get-address-info-by-cep.go#GetAddressInfoByCep": {
 		"module": "get-address-info-by-cep",
-		"start": 3379,
-		"end": 3786
+		"start": 3382,
+		"end": 3789
 	},
 	"lib_json.go#matchesAt": {
 		"module": "lib/json",
 		"start": 582,
-		"end": 1317
+		"end": 1320
 	},
 	"lib_json.go#isSpace": {
 		"module": "lib/json",
-		"start": 1367,
-		"end": 1491
+		"start": 1370,
+		"end": 1497
 	},
 	"lib_json.go#hexValue": {
 		"module": "lib/json",
-		"start": 1562,
-		"end": 2063
+		"start": 1568,
+		"end": 2072
 	},
 	"lib_json.go#jsonStringField": {
 		"module": "lib/json",
-		"start": 2291,
-		"end": 4230
+		"start": 2300,
+		"end": 4239
 	},
 	"lib_civil.go#civilDate": {
 		"module": "lib/civil",

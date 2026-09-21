@@ -5,7 +5,7 @@
 
 import re
 
-__all__ = ["keep_alphanumeric", "keep_digits", "is_repeated_run", "digit_at"]
+__all__ = ["keep_alphanumeric", "keep_digits", "digit_at"]
 
 _LIB_DIGITS_PATTERN_1 = re.compile("[^0-9A-Za-z]")
 
@@ -20,18 +20,6 @@ def keep_alphanumeric(value: str) -> str:
 def keep_digits(value: str) -> str:
     """Keeps only the ASCII digits of a value, dropping every mask character."""
     return _LIB_DIGITS_PATTERN_2.sub("", value)
-
-
-def is_repeated_run(value: str) -> bool:
-    """Whether every scalar of the value is the same one, for whatever length the caller proved —
-    `isRepeated` and `isRepeatedCnpj` do the same check for one specific length; this one serves a
-    generator that has to run it on a base shorter than the document it is building.
-    """
-    first: int = ord(value[0])
-    for index in range(1, len(value)):
-        if ord(value[index]) != first:
-            return False
-    return True
 
 
 def digit_at(value: str, index: int) -> int:

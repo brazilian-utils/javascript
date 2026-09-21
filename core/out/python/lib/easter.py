@@ -5,7 +5,7 @@
 
 from .civil import civil_date
 
-__all__ = ["easter_day_of_march", "easter_sunday"]
+__all__ = ["easter_day_of_march"]
 
 
 def easter_day_of_march(year: int) -> int:
@@ -24,13 +24,3 @@ def easter_day_of_march(year: int) -> int:
     m: int = ((a + (11 * h)) + (22 * l)) // 451
     day: int = ((h + l) - (7 * m)) + 114
     return min(max((((day % 31) + 1) + (((day // 31) - 3) * 31)), 22), 56)
-
-
-def easter_sunday(year: int) -> int:
-    """Easter Sunday of a year, as a civil date."""
-    day_of_march: int = easter_day_of_march(year)
-    return (
-        civil_date(year, 3, day_of_march)
-        if (day_of_march <= 31)
-        else civil_date(year, 4, (day_of_march - 31))
-    )

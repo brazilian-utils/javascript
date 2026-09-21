@@ -11,6 +11,7 @@
 import { dependencyClosure } from "../analysis/capabilities.ts";
 import type { BorrowMap } from "../analysis/borrows.ts";
 import type { CExpr, CFunc, CProgram, CStmt } from "../core/ir.ts";
+import type { NormalizedRegex } from "../regex.ts";
 import type { SemType } from "../types.ts";
 import { tBool, tString } from "../types.ts";
 import { BUILTIN_RECORDS } from "../intrinsics/index.ts";
@@ -656,10 +657,27 @@ class Lowerer {
 		}
 	}
 
+	/**
+	 * A chain of `+` on strings is nested `str.concat` ops, two at a time (`(a + b) + c` is
+	 * `str.concat(str.concat(a, b), c)`) — sound, but a target whose `str.concat` allocates a fresh
+	 * buffer per call (Rust: `engine/docs/progress.md` §8) then pays for one reallocation-and-copy
+	 * per piece instead of one buffer sized once. Flattening the chain into its leaves before
+	 * lowering, and handing them to `str.concatAll` when a target declares one, is how that target
+	 * gets to make that one-buffer decision; a target with no such candidate (every one but Rust,
+	 * today) falls straight through to the ordinary pairwise path below, unchanged.
+	 */
 	private operation(expr: Extract<CExpr, { kind: "op" }>): TExpr {
-		const args = expr.args.map((arg) => this.expr(arg));
-		const types = expr.args.map((arg) => arg.type);
+		if (expr.op === "str.concat" && this.spec.table.has("str.concatAll")) {
+			const pieces = flattenConcat(expr);
+			if (pieces.length > 2) {
+				return this.emitOp("str.concatAll", pieces.map((piece) => this.expr(piece)), pieces.map((piece) => piece.type), undefined);
+			}
+		}
 		const op = expr.op === "re.test" ? "re.test" : expr.op;
+		return this.emitOp(op, expr.args.map((arg) => this.expr(arg)), expr.args.map((arg) => arg.type), expr.regex);
+	}
+
+	private emitOp(op: string, args: readonly TExpr[], types: readonly SemType[], regex: NormalizedRegex | undefined): TExpr {
 		const selection = this.spec.table.select(op, types);
 		const candidate = selection.candidate;
 		if (candidate.sourceFn !== undefined) {
@@ -669,9 +687,7 @@ class Lowerer {
 			else set.add(candidate.sourceFn);
 		}
 		const context = this.context();
-		if (expr.regex !== undefined) {
-			return candidate.emit(args, types, { ...context, regex: expr.regex });
-		}
+		if (regex !== undefined) return candidate.emit(args, types, { ...context, regex });
 		return candidate.emit(args, types, context);
 	}
 
@@ -704,6 +720,14 @@ class Lowerer {
 /** Renames free identifiers in a statement list. */
 function mapNames(body: readonly TStmt[], rename: (expr: TExpr) => TExpr): TStmt[] {
 	return mapExprs(body, rename);
+}
+
+/** The leaves of a `str.concat` chain, left to right — see `operation`'s comment on why. */
+function flattenConcat(expr: CExpr): CExpr[] {
+	if (expr.kind === "op" && expr.op === "str.concat") {
+		return [...flattenConcat(expr.args[0]!), ...flattenConcat(expr.args[1]!)];
+	}
+	return [expr];
 }
 
 export type { TExpr, TStmt, TFunc, TModule };

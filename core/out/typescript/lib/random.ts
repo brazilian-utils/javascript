@@ -21,10 +21,3 @@ export function randomBelow(bound: number, env: Capabilities): number {
 	}
 	return env.nextU32() % bound;
 }
-
-/**
- * One random ASCII digit.
- */
-export function randomDigit(env: Capabilities): string {
-	return randomBelow(10, env).toString();
-}

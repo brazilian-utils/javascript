@@ -47,7 +47,14 @@ func hexValue(points []int, start int) int {
 // provider emits.
 func jsonStringField(body string, key string) *string {
 	points := codePoints(body)
-	needle := codePoints((("\"" + key) + "\""))
+	needle := func() []int {
+		__bs := []byte((("\"" + key) + "\""))
+		__pts := make([]int, len(__bs))
+		for __i, __b := range __bs {
+			__pts[__i] = int(__b)
+		}
+		return __pts
+	}()
 	for index := 0; index < len(points); index++ {
 		if !matchesAt(points, needle, index) {
 			continue

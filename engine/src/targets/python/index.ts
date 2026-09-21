@@ -155,13 +155,24 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 		emit: binary("//"),
 	},
 	{
+		// `trunc_div` (`_support.py`) is a Python-level function, and CPython's call overhead — a new
+		// frame, argument binding, a `return` — costs more than the arithmetic it wraps; a modulo or
+		// division whose operands are not provably non-negative pays that on every call, everywhere
+		// in the generated program (`group_thousands`' per-character loop is one such caller, and
+		// most of `formatCurrency`'s gap traced to it — `engine/docs/progress.md` §8). Printing the
+		// same formula inline removes the call. The tuple's job is single evaluation: `left`/`right`
+		// each appear once in the test (bound to `__td_a`/`__td_b`) and once more in whichever branch
+		// the ternary actually takes, never twice in the same executed path, so a non-trivial operand
+		// expression (not just a name) is still evaluated exactly once.
 		op: "int.div",
 		impl: "library",
 		cost: cheap,
-		deps: ["_support"],
-		emit: (args, _types, ctx) => {
-			ctx.require("_support");
-			return raw(`trunc_div(${print(args[0]!)}, ${print(args[1]!)})`);
+		emit: (args) => {
+			const left = print(args[0]!);
+			const right = print(args[1]!);
+			return raw(
+				`(-(abs(__td_a) // abs(__td_b)) if ((__td_a := ${left}), (__td_b := ${right}), (__td_a < 0) != (__td_b < 0))[2] else abs(__td_a) // abs(__td_b))`,
+			);
 		},
 	},
 	{
@@ -173,13 +184,16 @@ export const PYTHON_CANDIDATES: readonly Candidate[] = [
 		emit: binary("%"),
 	},
 	{
+		// Same reasoning as `int.div` above: `trunc_mod`'s own formula, inlined instead of called.
 		op: "int.mod",
 		impl: "library",
 		cost: cheap,
-		deps: ["_support"],
-		emit: (args, _types, ctx) => {
-			ctx.require("_support");
-			return raw(`trunc_mod(${print(args[0]!)}, ${print(args[1]!)})`);
+		emit: (args) => {
+			const left = print(args[0]!);
+			const right = print(args[1]!);
+			return raw(
+				`(-(abs(__tm_a) % abs(__tm_b)) if ((__tm_a := ${left}), (__tm_b := ${right}), __tm_a < 0)[2] else abs(__tm_a) % abs(__tm_b))`,
+			);
 		},
 	},
 	{ op: "int.neg", impl: "native", cost: cheap, emit: (args) => raw(`-${print(args[0]!)}`) },
@@ -833,9 +847,7 @@ export function printModule(rawModule: TModule): string {
 		}
 		// `_support` lives at the package root, so a nested module walks back up to it.
 		const dots = ".".repeat(module.sourcePath.split("/").length);
-		const used = ["trunc_div", "trunc_mod", "race_first_some"].filter((helper) =>
-			new RegExp(`\\b${helper}\\(`).test(text),
-		);
+		const used = ["race_first_some"].filter((helper) => new RegExp(`\\b${helper}\\(`).test(text));
 		if (used.length > 0) parts.push(`from ${dots}_support import ${used.join(", ")}`);
 	}
 	for (const item of module.imports) {
@@ -882,18 +894,6 @@ function supportModule(_program: CProgram, needs: SupportNeeds): { path: string;
 		"from typing import Callable, List, Optional, Sequence, TypeVar",
 		"",
 		"T = TypeVar(\"T\")",
-		"",
-		"",
-		"def trunc_div(left: int, right: int) -> int:",
-		'    """Truncated division: the Core rounds toward zero, Python floors."""',
-		"    quotient = abs(left) // abs(right)",
-		"    return -quotient if (left < 0) != (right < 0) else quotient",
-		"",
-		"",
-		"def trunc_mod(left: int, right: int) -> int:",
-		'    """Remainder with the sign of the dividend, as in JavaScript, Go, Java and C#."""',
-		"    remainder = abs(left) % abs(right)",
-		"    return -remainder if left < 0 else remainder",
 		"",
 	];
 	if (needs.race) {
@@ -1198,4 +1198,9 @@ export const PYTHON_BACKEND: Backend = {
 		imports: [{ from: "SUPPORT", names: ["DEFAULT_CAPABILITIES"] }],
 		seamName: (publicName) => `${publicName}_with`,
 	},
+	// Aggressive: CPython pays a full frame per call (no JIT to elide it), so a chain like
+	// `random_digit` → `random_below` → `next_u32`, called once per digit, is the largest measured
+	// cost in `generateCpf`/`generateCnpj` (`engine/docs/progress.md` §8). `randomBelow`'s own body
+	// (a bounded rejection-sampling loop) is the largest shape this needs to reach, at 6 statements.
+	inlineBudget: { maxStatements: 12, rounds: 3 },
 };

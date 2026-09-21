@@ -3,10 +3,8 @@
 # source: lib/format
 # content: 0038a81c2e4d
 
-from typing import List
-from .._support import trunc_mod
 
-__all__ = ["pattern_slots", "format_with_pattern", "group_thousands"]
+__all__ = ["pattern_slots", "format_with_pattern"]
 
 
 def pattern_slots(pattern: str) -> int:
@@ -39,14 +37,3 @@ def format_with_pattern(value: str, pattern: str, pad: bool) -> str:
             if taken < len(padded):
                 out = out + symbol
     return out
-
-
-def group_thousands(whole: str) -> str:
-    """Groups the whole part with `.` every three digits, the pt-BR convention."""
-    out: List[int] = []
-    scalars: List[int] = [ord(__c) for __c in whole]
-    for index in range(0, len(scalars)):
-        if (index > 0) and (trunc_mod((len(scalars) - index), 3) == 0):
-            out.append(46)
-        out.append((scalars[index] if 0 <= index < len(scalars) else 48))
-    return "".join(chr(__p) for __p in out)
