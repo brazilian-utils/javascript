@@ -1,0 +1,14 @@
+{
+	"name": "@brazilian-utils/bridge",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"description": "Build time tool: compiles the portable TypeScript source under source/ into idiomatic native code for every language Brazilian Utils publishes. Not part of the npm package.",
+	"scripts": {
+		"build": "node compiler/cli.ts",
+		"conformance": "bash conformance/run-all.sh"
+	},
+	"devDependencies": {
+		"oxc-parser": "^0.98.0"
+	}
+}
