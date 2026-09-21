@@ -685,8 +685,10 @@ export function printModule(module: TModule): string {
 	const parts: string[] = [module.header];
 	void module.requires;
 	for (const item of module.imports) {
+		// `capabilities` lives at the output root, so a nested module walks back up to it.
+		const from = item.from === "SUPPORT" ? importPath(module.sourcePath, "capabilities") : item.from;
 		parts.push(
-			`import ${item.typeOnly === true ? "type " : ""}{ ${item.names.join(", ")} } from ${JSON.stringify(item.from)};`,
+			`import ${item.typeOnly === true ? "type " : ""}{ ${item.names.join(", ")} } from ${JSON.stringify(from)};`,
 		);
 	}
 	if (module.imports.length > 0) parts.push("");
@@ -874,16 +876,45 @@ function driverFiles(_program: CProgram, entries: readonly DriverEntry[]): { pat
 			'import { defaultCapabilities, type Capabilities, type HttpRequest, type HttpResponse } from "./capabilities.ts";',
 			"",
 			"/**",
+			" * The reference PCG32: same constants and default seed as `Interpreter`'s, so a draw",
+			" * matches the reference bit for bit. A fresh instance is built for every request, the same",
+			" * way the reference model starts a fresh interpreter — and so a fresh generator — per case.",
+			" */",
+			"class Pcg32 {",
+			"\tprivate state = 0n;",
+			"\tprivate readonly increment = 1442695040888963407n;",
+			"",
+			"\tconstructor(seed: bigint) {",
+			"\t\tthis.next();",
+			"\t\tthis.state = (this.state + seed) & 0xffffffffffffffffn;",
+			"\t\tthis.next();",
+			"\t}",
+			"",
+			"\tnext(): number {",
+			"\t\tconst previous = this.state;",
+			"\t\tthis.state = (previous * 6364136223846793005n + this.increment) & 0xffffffffffffffffn;",
+			"\t\tconst xorshifted = (((previous >> 18n) ^ previous) >> 27n) & 0xffffffffn;",
+			"\t\tconst rotation = previous >> 59n;",
+			"\t\treturn Number(((xorshifted >> rotation) | (xorshifted << ((-rotation) & 31n))) & 0xffffffffn);",
+			"\t}",
+			"}",
+			"",
+			"// The interpreter's own default: its constructor falls back to this seed whenever",
+			"// `Capabilities.seed` is left unset, which is how every conformance case runs it.",
+			"const DEFAULT_SEED = 0x853c49e6748fea9bn;",
+			"",
+			"/**",
 			" * The capability fake the differential harness drives.",
 			" *",
 			" * Responses come from `fixtures.json`, a URL that is not in it models a transport error,",
 			" * and the scripted latency is what decides a race, the same way the reference model's",
-			" * virtual clock decides it.",
+			" * virtual clock decides it. `nextU32` gets a fresh PCG32 per call, matching the reference",
+			" * model's fresh interpreter per case.",
 			" */",
 			"type Fixture = { status: number; body: string; latencyMillis?: number };",
 			"",
-			"function fakeCapabilities(path: string): Capabilities {",
-			"\tconst fixtures = JSON.parse(readFileSync(path, \"utf8\")) as Record<string, Fixture>;",
+			"function fakeCapabilities(fixtures: Record<string, Fixture>): Capabilities {",
+			"\tconst random = new Pcg32(DEFAULT_SEED);",
 			"",
 			"\treturn {",
 			"\t\tasync request(request: HttpRequest): Promise<HttpResponse | undefined> {",
@@ -897,7 +928,7 @@ function driverFiles(_program: CProgram, entries: readonly DriverEntry[]): { pat
 			"\t\t},",
 			"\t\tnow: () => 0,",
 			"\t\tsleep: (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds)),",
-			"\t\tnextU32: () => 0,",
+			"\t\tnextU32: () => random.next(),",
 			"\t};",
 			"}",
 		);
@@ -959,8 +990,8 @@ export const TYPESCRIPT_BACKEND: Backend = {
 		if (usesEnv && needs.env) types.push("Capabilities");
 		const values = usesEnv && needs.race ? ["raceFirstSome"] : [];
 		return [
-			{ from: "./capabilities.ts", names: types.sort(), typeOnly: true },
-			{ from: "./capabilities.ts", names: values },
+			{ from: "SUPPORT", names: types.sort(), typeOnly: true },
+			{ from: "SUPPORT", names: values },
 		];
 	},
 };

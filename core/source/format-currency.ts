@@ -1,4 +1,5 @@
 import { keepDigits } from "./lib/digits";
+import { groupThousands } from "./lib/format";
 
 /**
  * The separator after `R$`.
@@ -8,24 +9,6 @@ import { keepDigits } from "./lib/digits";
  * (docs/contracts.md records the measurement).
  */
 const SPACE = 32;
-
-const GROUP_SIZE = 3;
-
-/** Groups the whole part with `.` every three digits, the pt-BR convention. */
-export function groupThousands(whole: Digits): Ascii {
-	let out: IntRange<0, 127>[] = [];
-	const scalars = str.codePoints(whole);
-
-	for (let index = 0; index < scalars.length; index++) {
-		if (index > 0 && (scalars.length - index) % GROUP_SIZE === 0) {
-			out.push(46);
-		}
-
-		out.push(seq.at(scalars, index) ?? 48);
-	}
-
-	return str.fromCodePoints(out);
-}
 
 /**
  * Formats an exact amount in Brazilian Real, with two decimal places.

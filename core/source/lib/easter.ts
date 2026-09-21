@@ -1,3 +1,5 @@
+import { civilDate } from "./civil";
+
 /**
  * Easter Sunday, with the Meeus/Jones/Butcher (anonymous Gregorian) algorithm.
  *
@@ -24,4 +26,11 @@ export function easterDayOfMarch(year: IntRange<1583, 9999>): IntRange<22, 56> {
 
 	// `day` counts from 1 March: 22 is 22 March, 56 is 25 April, the two ends of the Easter window.
 	return int.min(int.max(day % 31 + 1 + (day / 31 - 3) * 31, 22), 56);
+}
+
+/** Easter Sunday of a year, as a civil date. */
+export function easterSunday(year: IntRange<1900, 2099>): CivilDate {
+	const dayOfMarch = easterDayOfMarch(year);
+
+	return dayOfMarch <= 31 ? civilDate(year, 3, dayOfMarch) : civilDate(year, 4, dayOfMarch - 31);
 }

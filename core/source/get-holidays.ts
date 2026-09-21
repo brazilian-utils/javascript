@@ -1,4 +1,5 @@
-import { easterDayOfMarch } from "./lib/easter";
+import { civilDate } from "./lib/civil";
+import { easterSunday } from "./lib/easter";
 
 /** How a holiday is observed. */
 export type HolidayType = "national" | "optional" | "religious" | "state";
@@ -16,25 +17,6 @@ export type Holiday = {
 /** The first year Dia da Consciência Negra is a national holiday (Lei 14.759/2023). */
 const CONSCIENCIA_NEGRA_SINCE = 2024;
 
-/** Easter Sunday of a year, as a civil date. */
-export function easterSunday(year: IntRange<1900, 2099>): CivilDate {
-	const dayOfMarch = easterDayOfMarch(year);
-
-	return dayOfMarch <= 31
-		? fixed(year, 3, dayOfMarch)
-		: fixed(year, 4, dayOfMarch - 31);
-}
-
-/**
- * A fixed date of a year.
- *
- * The fallback is unreachable for the constants below, which are all real dates; it is there
- * because the core has no unchecked construction, and the checker insists on that being visible.
- */
-function fixed(year: IntRange<1900, 2099>, month: IntRange<1, 12>, day: IntRange<1, 31>): CivilDate {
-	return date.fromYmd(year, month, day) ?? date.clampEpochDays(0);
-}
-
 /**
  * The Brazilian national holidays of a year, sorted by date.
  *
@@ -45,17 +27,17 @@ function fixed(year: IntRange<1900, 2099>, month: IntRange<1, 12>, day: IntRange
 export function getHolidays(year: IntRange<1900, 2099>): List<Holiday> {
 	let holidays: Holiday[] = [];
 
-	holidays.push({ name: "Ano novo", date: fixed(year, 1, 1), type: "national" });
-	holidays.push({ name: "Tiradentes", date: fixed(year, 4, 21), type: "national" });
-	holidays.push({ name: "Dia do trabalhador", date: fixed(year, 5, 1), type: "national" });
-	holidays.push({ name: "Independência do Brasil", date: fixed(year, 9, 7), type: "national" });
-	holidays.push({ name: "Nossa Senhora Aparecida", date: fixed(year, 10, 12), type: "national" });
-	holidays.push({ name: "Finados", date: fixed(year, 11, 2), type: "national" });
-	holidays.push({ name: "Proclamação da República", date: fixed(year, 11, 15), type: "national" });
-	holidays.push({ name: "Natal", date: fixed(year, 12, 25), type: "national" });
+	holidays.push({ name: "Ano novo", date: civilDate(year, 1, 1), type: "national" });
+	holidays.push({ name: "Tiradentes", date: civilDate(year, 4, 21), type: "national" });
+	holidays.push({ name: "Dia do trabalhador", date: civilDate(year, 5, 1), type: "national" });
+	holidays.push({ name: "Independência do Brasil", date: civilDate(year, 9, 7), type: "national" });
+	holidays.push({ name: "Nossa Senhora Aparecida", date: civilDate(year, 10, 12), type: "national" });
+	holidays.push({ name: "Finados", date: civilDate(year, 11, 2), type: "national" });
+	holidays.push({ name: "Proclamação da República", date: civilDate(year, 11, 15), type: "national" });
+	holidays.push({ name: "Natal", date: civilDate(year, 12, 25), type: "national" });
 
 	if (year >= CONSCIENCIA_NEGRA_SINCE) {
-		holidays.push({ name: "Dia da Consciência Negra", date: fixed(year, 11, 20), type: "national" });
+		holidays.push({ name: "Dia da Consciência Negra", date: civilDate(year, 11, 20), type: "national" });
 	}
 
 	const easter = easterSunday(year);
