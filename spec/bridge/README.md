@@ -149,6 +149,7 @@ be handed it, so nothing is skipped for being inconvenient, and the count is vis
 | utility       | what makes it worth porting                                       |
 | ------------- | ----------------------------------------------------------------- |
 | `isValidCnpj` | regular expressions, check digits, JavaScript's own type coercion |
+| `formatCnpj`  | a shared mask helper, and three options that interact             |
 
 ## Adding a utility
 
