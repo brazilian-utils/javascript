@@ -59,6 +59,14 @@ const HOST_GLOBAL_HELP: Record<string, string> = {
 	RegExp: "write a regex literal; patterns are compile-time only",
 };
 
+/**
+ * `Math` methods with a sound, always-Int lowering: every call site the source needs today is
+ * integer arithmetic, and there is no `float.*` counterpart yet (admitting one needs a second
+ * caller, docs/semantics.md "Admission rule for intrinsics"), so the checker rejects a Float
+ * operand instead of silently truncating it.
+ */
+const MATH_METHODS = new Set(["min", "max", "abs", "trunc", "floor"]);
+
 export function parseModule(
 	file: string,
 	path: string,
@@ -650,6 +658,60 @@ class Lowering {
 	 * Expressions
 	 * ---------------------------------------------------------------- */
 
+	/**
+	 * Recognizes the handful of ordinary-JavaScript call shapes that have no vocabulary of their
+	 * own in this subset — `Math.min`/`max`/`abs`/`trunc`/`floor`, `Math.random`, and `String(n)`
+	 * — before the generic `Identifier` lowering below would reject their host global outright,
+	 * with a less specific message than each of these deserves. Returns `undefined` for any other
+	 * call, which falls through to that generic lowering unchanged.
+	 */
+	private specialCall(node: Node, span: Span): HExpr | undefined {
+		const callee = node.callee;
+		if (
+			callee.type === "MemberExpression" &&
+			callee.computed === false &&
+			callee.object.type === "Identifier" &&
+			callee.object.name === "Math"
+		) {
+			const method = callee.property.name as string;
+			if (method === "random") {
+				this.reject(
+					"E_MATH_RANDOM",
+					"`Math.random()` is a float in [0, 1); the Random capability offers only " +
+						"`random.nextU32()`, an unbiased 32-bit draw",
+					node,
+					"call `random.nextU32()` and derive what you need from it in source, the way " +
+						"`lib/random.ts` does — a scaled float would have to round identically in every " +
+						"target to stay unbiased, so there is no built-in shortcut",
+				);
+				return { kind: "float", value: 0, span };
+			}
+			if (MATH_METHODS.has(method)) {
+				return {
+					kind: "call",
+					callee: {
+						kind: "member",
+						target: { kind: "name", name: "Math", span: this.span(callee.object) },
+						name: method,
+						span: this.span(callee),
+					},
+					args: node.arguments.map((arg: Node) => this.expr(arg)),
+					span,
+				};
+			}
+			return undefined;
+		}
+		if (callee.type === "Identifier" && callee.name === "String" && node.arguments.length === 1) {
+			return {
+				kind: "call",
+				callee: { kind: "name", name: "String", span: this.span(callee) },
+				args: [this.expr(node.arguments[0])],
+				span,
+			};
+		}
+		return undefined;
+	}
+
 	private expr(node: Node): HExpr {
 		const span = this.span(node);
 		switch (node.type) {
@@ -705,6 +767,8 @@ class Lowering {
 				if (node.optional === true) {
 					this.reject("E_OPTIONAL_CALL", "`?.()` is outside the subset", node);
 				}
+				const special = this.specialCall(node, span);
+				if (special !== undefined) return special;
 				return {
 					kind: "call",
 					callee: this.expr(node.callee),
@@ -718,13 +782,26 @@ class Lowering {
 					span,
 				};
 			}
-			case "NewExpression":
+			case "NewExpression": {
+				if (node.callee.name === "Date") {
+					this.reject(
+						"E_HOST_DATE",
+						"`new Date(...)` is JavaScript's own host object: months are zero-indexed, an " +
+							"out-of-range component silently rolls over into the next one, and the value is " +
+							"bound to a timezone, none of which a civil date does",
+						node,
+						"call `date.fromYmd(year, month, day)` (month is 1-12, and it answers `undefined` " +
+							"instead of rolling over) and handle the `undefined` case explicitly",
+					);
+					return { kind: "undefined", span };
+				}
 				return {
 					kind: "new",
 					className: node.callee.name,
 					args: node.arguments.map((arg: Node) => this.expr(arg)),
 					span,
 				};
+			}
 			case "BinaryExpression": {
 				const operator = node.operator;
 				if (operator === "==" || operator === "!=") {
@@ -797,12 +874,34 @@ class Lowering {
 					}),
 					span,
 				};
-			case "ArrayExpression":
+			case "ArrayExpression": {
+				const elements: Node[] = node.elements;
+				if (elements.length === 1 && elements[0]?.type === "SpreadElement") {
+					// `[...s]`: JavaScript's array-spread of a string decomposes it into its scalars,
+					// which is exactly `str.codePoints`.
+					return {
+						kind: "call",
+						callee: { kind: "member", target: { kind: "name", name: "str", span }, name: "codePoints", span },
+						args: [this.expr(elements[0].argument)],
+						span,
+					};
+				}
+				if (elements.some((item: Node) => item?.type === "SpreadElement")) {
+					this.reject(
+						"E_ARRAY_SPREAD",
+						"array spread is outside the subset except for `[...s]` on a single string",
+						node,
+						"combine lists with `seq.concat`, and write anything else as an explicit loop or a combinator",
+					);
+				}
 				return {
 					kind: "array",
-					items: node.elements.map((item: Node) => this.expr(item)),
+					items: elements.map((item: Node) =>
+						item?.type === "SpreadElement" ? this.expr(item.argument) : this.expr(item),
+					),
 					span,
 				};
+			}
 			case "ArrowFunctionExpression": {
 				if (node.async === true) this.reject("E_ASYNC", "`async` is computed, not written", node);
 				return {

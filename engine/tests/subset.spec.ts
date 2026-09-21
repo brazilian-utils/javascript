@@ -40,7 +40,9 @@ test("try/catch is rejected", () => {
 });
 
 test("host globals are rejected", () => {
-	rejects("E_HOST_GLOBAL", "export function f(): Float { return Math.random(); }");
+	// `Math.random()` and the other named `Math` members each get their own, more specific
+	// diagnostic (`idioms.spec.ts`); `Math.PI` is not one of those, so it keeps the generic one.
+	rejects("E_HOST_GLOBAL", "export function f(): Float { return Math.PI; }");
 });
 
 test("truthiness is rejected", () => {

@@ -93,6 +93,11 @@ the dividend, which is what JavaScript, Go, Java and C# do. Python's `//` and `%
 the Python backend selects a native lowering only when both operands are proven non-negative and
 a generated helper otherwise. Division and `%` require a divisor proven non-zero.
 
+`Math.min`, `Math.max` and `Math.abs` on an Int are `int.min`, `int.max` and `int.abs`; `Math.trunc`
+and `Math.floor` on an Int are the identity, since an Int is already exact. There is no `float.*`
+counterpart yet — admitting one needs a second caller, section 8's admission rule — so the same
+calls on a `Float` are `E_MATH_FLOAT` rather than a made-up lowering.
+
 ### 2.2 Loops and widening
 
 Every loop has a proven trip count: counted `for` loops and `for…of` only, which is why `while` is
@@ -111,11 +116,18 @@ domain. A step the analysis cannot bound is an error, not a clamp.
 
 A `String` is a sequence of Unicode scalars, and `length` counts scalars.
 
-- Generic strings support iteration by scalar (`str.codePoints`), concatenation, comparison and
-  the intrinsics. They never support positional indexing, because "position" means a UTF-16 code
-  unit in JavaScript, a byte in Go and a code point in Python.
-- `str.codeAt`, `str.charAt` and `str.slice` are admitted only on `Ascii` (and therefore on
-  `Digits`), where the index means the same thing in all three targets and is O(1) in each.
+- Generic strings support iteration by scalar (`str.codePoints`, or `[...s]`), concatenation,
+  comparison and the intrinsics. They never support positional indexing, because "position" means
+  a UTF-16 code unit in JavaScript, a byte in Go and a code point in Python.
+- `str.codeAt`, `str.charAt` and `str.slice` — written `s.charCodeAt(i)`, `s.charAt(i)`/`s[i]` and
+  `s.slice(a, b)` — are admitted only on `Ascii` (and therefore on `Digits`), where the index means
+  the same thing in all three targets and is O(1) in each. On a string that is not proven ASCII
+  these are `E_UTF16_POSITION`, not a silent, target-dependent lowering: JavaScript's position is a
+  UTF-16 code unit, Python's is a code point and Go's is a byte, and the three disagree above
+  U+007F, so there is nothing to lower to. `s[i]` additionally picks between the unchecked
+  accessor and its checked, Option-returning form depending on whether the index is proven in
+  range — the same choice `xs[i]` makes below, and for the same reason: JavaScript answers
+  `undefined` past the end, which only the checked form can mean.
 - `str.trim` removes exactly the 25 code points JavaScript's `String#trim` removes. Python's
   `str.strip()` also removes U+001C to U+001F and U+0085 and does not remove U+FEFF, so the Python
   backend passes the cut set explicitly; Go's `strings.Trim` takes the cut set as an argument
@@ -151,7 +163,10 @@ target as its unscaled integer.
 `CivilDate` is a day on the proleptic Gregorian calendar, years 1 to 9999 — the range Python's
 `date` and C#'s `DateOnly` share — represented everywhere as days since 1970-01-01.
 
-- `date.fromYmd` answers an `Option`: there is no implicit rollover.
+- `date.fromYmd` answers an `Option`: there is no implicit rollover. JavaScript's `new Date(y, m,
+  d)` is `E_HOST_DATE`, not a lowering to it: `Date`'s months are zero-indexed where `fromYmd`'s
+  are 1-12, an out-of-range component silently rolls over into the next one instead of answering
+  `undefined`, and the value is bound to a timezone that a civil date never has.
 - `dayOfWeek` is ISO: Monday is 1 through Sunday is 7.
 - Month arithmetic is not admitted. When it is, it will have to name its overflow policy, because
   JavaScript's `setMonth` rolls over (31 January + 1 month is 3 March) while Java's `plusMonths`
@@ -207,9 +222,16 @@ Effects are `Pure`, `Fail<E>`, `Http`, `Clock` and `Random`. The last three are 
   package. Go and Rust cannot: see below.
 - `Http` answers an `Option`: a transport error or a timeout is absence, and a 4xx or 5xx status
   is an ordinary value. Retry and fallback are then written as ordinary control flow, which the
-  subset can express without `catch` (see [ADR 0006](decisions/0006-http-is-an-option.md)).
+  subset can express without `catch` (see [ADR 0006](decisions/0006-http-is-an-option.md)). Its
+  shape does not match JavaScript's `fetch`, whose Promise-of-`Response` splits the status and the
+  body across two separate awaits and fails by rejecting rather than by answering absent, so a bare
+  `fetch(...)` call keeps the generic host-global diagnostic (`call http.request`) instead of a
+  lowering.
 - `Random` offers only `nextU32`. Everything derived from it — a range by rejection sampling, a
   shuffle — is written in source, so the algorithm and its bias are identical everywhere.
+  `Math.random()`, a float in [0, 1), is `E_MATH_RANDOM` rather than a scaled `nextU32`: the scaling
+  itself would have to round identically in every target to stay unbiased, which is exactly the
+  kind of thing this rule keeps out of the core.
 - **Async is computed, not written.** The TypeScript backend makes a function `async` exactly when
   it reaches `Http`, and awaits its calls; Python and Go emit blocking code.
 
@@ -322,6 +344,65 @@ a target whose `switch` does not swallow it would read it as a loop break instea
 Only locals are mutable. A list may be built with `push` and is frozen when it escapes its
 construction scope, so aliasing behaves identically across Go slices, Python lists, Rust ownership
 and JavaScript arrays.
+
+### 7.1 Idiomatic spellings
+
+Everything above is described in the `str`/`seq`/`re`/`int`/`dec`/`date`/`random`/`task` namespace
+vocabulary because that is what the frontend recognized first. An author writes ordinary
+TypeScript instead, and never has to learn that vocabulary: the frontend (`frontend/lower.ts`,
+`core/check.ts`) recognizes the idiomatic spelling on the left below and lowers it to exactly the
+Core the namespace spelling on the right already produced. Both spellings stay accepted — the
+namespace forms are the older spelling, not a deprecated one — and `tests/idioms.spec.ts` asserts
+the equivalence directly, by checking that the two sides of every row compile to the identical
+Core, rather than testing each spelling's *behavior* separately.
+
+| ordinary TypeScript | namespace form |
+|---|---|
+| `s.charCodeAt(i)` | `str.codeAt(s, i)` |
+| `s.charAt(i)` | `str.charAt(s, i)` |
+| `s[i]` | `str.charAt(s, i)`, or `str.charAtOpt(s, i)` when the index is not proven in range |
+| `s.slice(a, b)` | `str.slice(s, a, b)` |
+| `s.trim()` | `str.trim(s)` |
+| `s.padStart(n, c)` | `str.padStart(s, n, c)` |
+| `s.length` | `str.len(s)` |
+| `[...s]` | `str.codePoints(s)` |
+| `String(n)`, `n.toString()`, for `n: Int` | `str.fromInt(n)` |
+| `s.replace(/[^…]/g, "")` | `re.retain` on the un-negated class |
+| `PATTERN.test(s)`, for a regex literal or constant `PATTERN` | `re.test(PATTERN, s)` |
+| `xs[i]` | `seq.get(xs, i)`, or `seq.at(xs, i)` when the index is not proven in range |
+| `xs.length` | `seq.len(xs)` |
+| `xs.push(v)` | (already the only spelling) |
+| `Math.min(a, b)`, `Math.max`, `Math.abs`, for `Int` operands | `int.min`, `int.max`, `int.abs` |
+| `Math.trunc(n)`, `Math.floor(n)`, for `n: Int` | (the identity; an Int is already exact) |
+
+`s[i]` and `xs[i]` each pick between the unchecked accessor and its checked, Option-returning form
+by the same rule: the unchecked one when the index is proven in range, matching JavaScript's own
+guaranteed-present case exactly, and the checked one otherwise, because JavaScript answers
+`undefined` past the end where Go and Rust panic — the same reason the Core keeps both forms of
+each accessor in the first place (section 3, "checked conversions").
+
+Several idiomatic forms carry JavaScript-specific meaning that has no equivalent in Go, Python or
+Rust, and the checker says so instead of lowering them regardless:
+
+- **`s.charCodeAt(i)`, `s.charAt(i)`, `s[i]` and `s.slice(a, b)` on a string not proven ASCII** —
+  `E_UTF16_POSITION`. JavaScript's "position" is a UTF-16 code unit, Python's is a code point and
+  Go's is a byte, and the three disagree on every scalar above U+007F; section 2.3 has the
+  detail.
+- **`Math.random()`** — `E_MATH_RANDOM`. It is a float in [0, 1), and the Random capability offers
+  only an unbiased 32-bit `nextU32`; section 4 has the detail.
+- **`new Date(y, m, d)` and its friends** — `E_HOST_DATE`. Zero-indexed months, silent rollover and
+  a timezone binding, none of which `date.fromYmd` reproduces; section 2.5 has the detail.
+- **`Math.min`/`max`/`abs`/`trunc`/`floor` on a `Float`** — `E_MATH_FLOAT`. There is no `float.*`
+  counterpart yet (section 2.1); a Float operand needs the comparison or the truncation written in
+  source instead of a made-up lowering.
+- **`[...xs, ...ys]` and every array spread other than `[...s]` on a single string** —
+  `E_ARRAY_SPREAD`. Combining lists is `seq.concat`, a different operation with a different name,
+  not something JavaScript's spread syntax can stand in for.
+- **`.replace` in every shape but a global, empty-replacement match of one negated class** —
+  `E_REPLACE_UNSUPPORTED`. `.replace` runs JavaScript's own replacement algorithm — capture group
+  substitution, a callback, only the first match without `/g/` — which nothing else has to
+  reproduce identically; the one shape that *is* target-independent, dropping every scalar outside
+  a class, is the one the checker accepts.
 
 ---
 

@@ -77,6 +77,13 @@ const STRING_METHODS: Record<string, string> = {
 	split: "str.split",
 };
 
+/**
+ * `String#charCodeAt`, `#charAt` and `#slice` read the string by *position*, which only means the
+ * same thing in every target when the string is proven ASCII (docs/semantics.md, "Strings"); see
+ * `requireAsciiPositional`.
+ */
+const POSITIONAL_STRING_METHODS = new Set(["charCodeAt", "charAt", "slice"]);
+
 const LIST_METHODS: Record<string, string> = {
 	map: "seq.map",
 	filter: "seq.filter",
@@ -1043,6 +1050,36 @@ function singleClassOf(regex: NormalizedRegex): "ascii" | "digits" | undefined {
 	return node.ranges.every((range) => range.hi < 0x80) ? "ascii" : undefined;
 }
 
+/**
+ * Whether `index` is proven inside `[0, subject.min)`, so a positional read of `subject` can
+ * never miss: this is the same test `str.charAt`, `str.codeAt` and `seq.get` each make in their
+ * own signature, duplicated here so the idiomatic `s[i]`/`xs[i]` sugar can choose between the
+ * unchecked accessor and its checked, Option-returning form *before* calling either one.
+ */
+function provablyInRange(
+	index: CExpr,
+	subject: Extract<SemType, { kind: "String" }> | Extract<SemType, { kind: "List" }>,
+): boolean {
+	return index.type.kind === "Int" && index.type.lo >= 0n && index.type.hi < BigInt(subject.min);
+}
+
+/**
+ * The inner text of `source` when it is, in full, a single negated character class such as
+ * `[^0-9]` — the shape `value.replace(/[^0-9]/g, "")` needs to become `re.retain` on the class's
+ * own (un-negated) content. `undefined` when `source` is anything else: a partial pattern, an
+ * escaped `]` as the very first character (rare enough not to special-case), or not a class at
+ * all. Text surgery rather than parsing the class and re-emitting it, because the *bracketed*
+ * content has to survive unchanged for `normalizeRegex` to parse on the retain side.
+ */
+function negatedClassInner(source: string): string | undefined {
+	if (!source.startsWith("[^")) return undefined;
+	let cursor = 2;
+	while (cursor < source.length && source[cursor] !== "]") {
+		cursor += source[cursor] === "\\" ? 2 : 1;
+	}
+	return cursor === source.length - 1 && source[cursor] === "]" ? source.slice(2, cursor) : undefined;
+}
+
 function resolveImportPath(from: string, specifier: string): string {
 	if (!specifier.startsWith(".")) return specifier;
 	const base = from.split("/").slice(0, -1);
@@ -1938,9 +1975,47 @@ class FunctionChecker {
 		const target = this.expr(node.target);
 		const index = this.expr(node.index, tIntDefault());
 		if (target.type.kind === "String") {
-			return this.op("str.charAt", [target, index], node.span);
+			if (!this.requireAsciiPositional(target, "`s[i]`", node.span)) {
+				return { kind: "lit", value: 0n, type: tNever, span: node.span };
+			}
+			// JavaScript answers `undefined` past the end, which is exactly what `str.charAtOpt`
+			// answers; `str.charAt` is picked instead whenever the index is proven in range, so a
+			// caller that already has the proof gets the value back directly, not an Option of it.
+			return provablyInRange(index, target.type)
+				? this.op("str.charAt", [target, index], node.span)
+				: this.op("str.charAtOpt", [target, index], node.span);
 		}
-		return this.op("seq.get", [target, index], node.span);
+		if (target.type.kind === "List") {
+			// Same choice as above, between `seq.get` and its checked form `seq.at`: JavaScript
+			// answers `undefined` past the end where Go and Rust panic, so an unprovable index is a
+			// diagnostic-free Option here rather than a bug the compiler would otherwise have to
+			// reject outright.
+			return provablyInRange(index, target.type)
+				? this.op("seq.get", [target, index], node.span)
+				: this.op("seq.at", [target, index], node.span);
+		}
+		this.report("E_INDEX_TARGET", `${typeToString(target.type)} cannot be indexed`, node.span);
+		return { kind: "lit", value: 0n, type: tNever, span: node.span };
+	}
+
+	/**
+	 * `charCodeAt`, `charAt`, `slice` and the bracket index all read a string by *position*, which
+	 * only means the same thing in every target when the string is proven ASCII: JavaScript's
+	 * position is a UTF-16 code unit, Python's is a code point and Go's is a byte, and the three
+	 * disagree on every scalar above U+007F. An unproven string is a diagnostic here, never a
+	 * silent, target-dependent lowering.
+	 */
+	private requireAsciiPositional(target: CExpr, construct: string, span: Span): boolean {
+		if (target.type.kind === "String" && target.type.cls !== "none") return true;
+		this.report(
+			"E_UTF16_POSITION",
+			`${construct} addresses a string by JavaScript's UTF-16 code unit; Python indexes the ` +
+				"same string by code point and Go by byte, and the three disagree above U+007F",
+			span,
+			"prove the string is ASCII first, for example a regex guard (`if (!PATTERN.test(value)) " +
+				"return …`) or `str.asAscii`, and only then does the position mean the same thing everywhere",
+		);
+		return false;
 	}
 
 	private recordLiteral(node: Extract<HExpr, { kind: "object" }>, expected?: SemType): CExpr {
@@ -2149,6 +2224,98 @@ class FunctionChecker {
 		return negate ? { kind: "not", operand: result, type: tBool, span } : result;
 	}
 
+	/**
+	 * `Math.min`/`max`/`abs`/`trunc`/`floor`. Dispatched to `int.*`: every call site the source
+	 * needs today is integer arithmetic, and there is no `float.*` counterpart yet — admitting one
+	 * needs a second caller (docs/semantics.md, "Admission rule for intrinsics") — so a Float
+	 * operand is rejected rather than silently handled by a made-up lowering. `trunc` and `floor`
+	 * are the identity on an Int, which is already exact, so they never reach an intrinsic at all.
+	 */
+	private mathCall(method: string, args: readonly HExpr[], span: Span): CExpr {
+		const arity = method === "min" || method === "max" ? 2 : 1;
+		if (args.length !== arity) {
+			this.report("E_ARITY", `\`Math.${method}\` takes ${arity} argument(s), got ${args.length}`, span);
+			return { kind: "lit", value: 0n, type: tNever, span };
+		}
+		const checked = args.map((arg) => this.expr(arg));
+		const nonInt = checked.find((arg) => arg.type.kind !== "Int");
+		if (nonInt !== undefined) {
+			this.report(
+				"E_MATH_FLOAT",
+				`\`Math.${method}\` on ${typeToString(nonInt.type)} is outside the subset: there is no \`float.${method}\``,
+				span,
+				"write the comparison explicitly, or keep the value an Int",
+			);
+			return { kind: "lit", value: 0n, type: tNever, span };
+		}
+		if (method === "trunc" || method === "floor") return checked[0]!;
+		return this.op(`int.${method}`, checked, span);
+	}
+
+	/**
+	 * `String(n)`: JavaScript's own stringification, admitted only for an Int argument, which is
+	 * exactly `str.fromInt`. Anything else — a float, a boolean, an object — formats differently in
+	 * every host and keeps the generic host-global rejection.
+	 */
+	private stringCall(args: readonly HExpr[], span: Span): CExpr {
+		if (args.length !== 1) {
+			this.report("E_ARITY", `\`String\` takes 1 argument, got ${args.length}`, span);
+			return { kind: "lit", value: "", type: tNever, span };
+		}
+		const value = this.expr(args[0]!);
+		if (value.type.kind !== "Int") {
+			this.report(
+				"E_HOST_GLOBAL",
+				"`String(...)` is JavaScript's own stringification, which formats a float, a boolean " +
+					"or a record each in its own host-specific way",
+				span,
+				"convert explicitly: `str.fromInt` for an Int, or write the formatting in source for anything else",
+			);
+			return { kind: "lit", value: "", type: tNever, span };
+		}
+		return this.op("str.fromInt", [value], span);
+	}
+
+	/**
+	 * `value.replace(/[^0-9]/g, "")`: JavaScript's `.replace` runs its own replacement algorithm
+	 * (capture group substitution, a callback, only the first match without `/g/`), which nothing
+	 * else has to reproduce identically. The one shape that is target-independent is dropping every
+	 * scalar outside a class — a global match of a single negated class against an empty
+	 * replacement — which is exactly `re.retain` on the class's own (un-negated) content. Anything
+	 * else about the call falls through to `undefined`, which the caller routes to the ordinary
+	 * method-sugar rejection.
+	 */
+	private retainFromReplace(target: HExpr, args: readonly HExpr[], span: Span): CExpr | undefined {
+		if (args.length !== 2) return undefined;
+		const pattern = args[0]!;
+		const replacement = args[1]!;
+		if (pattern.kind !== "regex" || replacement.kind !== "string" || replacement.value !== "") return undefined;
+		if (pattern.flags !== "g") {
+			this.report(
+				"E_REPLACE_UNSUPPORTED",
+				"`.replace` without the `g` flag rewrites only the first match, which the engine has " +
+					"no target-independent way to reproduce",
+				span,
+				"add the `g` flag if you meant to remove every occurrence, which is `re.retain` on the class",
+			);
+			return { kind: "lit", value: "", type: tNever, span };
+		}
+		const inner = negatedClassInner(pattern.source);
+		if (inner === undefined) {
+			this.report(
+				"E_REPLACE_UNSUPPORTED",
+				"`.replace` runs JavaScript's own replacement algorithm, which has no shared meaning " +
+					'across targets; the one shape the engine accepts is `value.replace(/[^…]/g, "")`, ' +
+					"removing every scalar outside a single class",
+				span,
+				"write the pattern as one negated character class, or perform the substitution in source",
+			);
+			return { kind: "lit", value: "", type: tNever, span };
+		}
+		const retained: HExpr = { kind: "regex", source: `^[${inner}]$`, flags: "", span: pattern.span };
+		return this.intrinsicCall("re.retain", [retained, target], span);
+	}
+
 	private call(node: Extract<HExpr, { kind: "call" }>): CExpr {
 		const callee = node.callee;
 
@@ -2160,6 +2327,35 @@ class FunctionChecker {
 			this.scope.get(callee.target.name) === undefined
 		) {
 			return this.intrinsicCall(`${callee.target.name}.${callee.name}`, node.args, node.span);
+		}
+
+		// `Math.min`/`max`/`abs`/`trunc`/`floor`, rewritten by the frontend into this same shape.
+		if (
+			callee.kind === "member" &&
+			callee.target.kind === "name" &&
+			callee.target.name === "Math" &&
+			this.scope.get("Math") === undefined
+		) {
+			return this.mathCall(callee.name, node.args, node.span);
+		}
+
+		// `String(n)`: sound only for an Int argument, where it is exactly `str.fromInt`.
+		if (callee.kind === "name" && callee.name === "String" && this.scope.get("String") === undefined) {
+			return this.stringCall(node.args, node.span);
+		}
+
+		// `value.replace(/[^0-9]/g, "")`: the one `.replace` shape the engine can prove sound,
+		// which is `re.retain` on the class's own content. Any other `.replace` call falls through
+		// to the method sugar below, which rejects it.
+		if (callee.kind === "member" && callee.name === "replace") {
+			const retained = this.retainFromReplace(callee.target, node.args, node.span);
+			if (retained !== undefined) return retained;
+		}
+
+		// `PATTERN.test(value)`, where `PATTERN` is a regex literal or a module level constant
+		// bound to one: the same test `re.test(PATTERN, value)` performs.
+		if (callee.kind === "member" && callee.name === "test" && this.regexOf(callee.target) !== undefined) {
+			return this.intrinsicCall("re.test", [callee.target, ...node.args], node.span);
 		}
 
 		// Method sugar on a value: `value.slice(0, 9)`, `list.map(f)`.
@@ -2218,10 +2414,25 @@ class FunctionChecker {
 	): CExpr {
 		const target = this.expr(callee.target);
 		const method = callee.name;
+		if (target.type.kind === "Int" && method === "toString") {
+			if (args.length !== 0) {
+				this.report(
+					"E_METHOD",
+					"`toString` with a radix is outside the subset: every target formats an Int in base 10",
+					span,
+					"use `str.fromInt`, which is always base 10",
+				);
+				return { kind: "lit", value: "", type: tNever, span };
+			}
+			return this.op("str.fromInt", [target], span);
+		}
 		if (target.type.kind === "String") {
 			const intrinsic = STRING_METHODS[method];
 			if (intrinsic === undefined) {
 				this.report("E_METHOD", `\`${method}\` is outside the subset`, span, METHOD_HELP[method]);
+				return { kind: "lit", value: 0n, type: tNever, span };
+			}
+			if (POSITIONAL_STRING_METHODS.has(method) && !this.requireAsciiPositional(target, `\`${method}\``, span)) {
 				return { kind: "lit", value: 0n, type: tNever, span };
 			}
 			return this.intrinsicCallWith(
