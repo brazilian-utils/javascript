@@ -269,10 +269,17 @@ effectful lambdas inside combinators; generators, custom iterators, `for…in`; 
 constructs outside section 6; recursion.
 
 **Allowed**: `const` and `let` with local mutation; `if`/`else`; counted `for`; `for…of`;
-`return`; `throw` of a declared domain error; `switch` over an `Enum` with exhaustiveness;
-template literals and the ternary operator; immutable records; enums; `Option`; pure module-level
-functions, including pure lambdas passed to combinators; `push` on a local list and assignment to
-a local list element; `dataset`-style constant tables.
+`break` and `continue`; `return`; `throw` of a declared domain error; `switch` over an `Enum` with
+exhaustiveness; template literals and the ternary operator; immutable records; enums; `Option`;
+pure module-level functions, including pure lambdas passed to combinators; `push` on a local list
+and assignment to a local list element; `dataset`-style constant tables.
+
+`break` and `continue` leave the innermost loop, and the state they carry is part of that loop's
+fixpoint: what a local holds when a `continue` is taken reaches the next iteration, and what it
+holds when a `break` is taken reaches the code after the loop, so a range proven for a loop-carried
+value covers every path out of the body. A `switch` case ends with a `break` that closes the case
+and nothing else; a `break` anywhere else inside a case is rejected with `E_SWITCH_BREAK`, because
+a target whose `switch` does not swallow it would read it as a loop break instead.
 
 Only locals are mutable. A list may be built with `push` and is frozen when it escapes its
 construction scope, so aliasing behaves identically across Go slices, Python lists, Rust ownership
