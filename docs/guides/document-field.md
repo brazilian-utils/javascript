@@ -23,6 +23,12 @@ The hook owns the input: it takes the formatter and the value the form holds, ma
 
 </div>
 
+<div class="file" data-file="field.tsx">
+
+[field.tsx](../snippets/document-field/generated/cpf/react/field.tsx ':include :type=code tsx')
+
+</div>
+
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../snippets/document-field/generated/cpf/react/use-mask.ts ':include :type=code ts')
@@ -42,6 +48,12 @@ The hook owns the input: it takes the formatter and the value the form holds, ma
 <div class="file" data-file="cnpj-field.tsx">
 
 [cnpj-field.tsx](../snippets/document-field/generated/cnpj/react/cnpj-field.tsx ':include :type=code tsx')
+
+</div>
+
+<div class="file" data-file="field.tsx">
+
+[field.tsx](../snippets/document-field/generated/cnpj/react/field.tsx ':include :type=code tsx')
 
 </div>
 
@@ -67,6 +79,12 @@ The hook owns the input: it takes the formatter and the value the form holds, ma
 
 </div>
 
+<div class="file" data-file="field.tsx">
+
+[field.tsx](../snippets/document-field/generated/cep/react/field.tsx ':include :type=code tsx')
+
+</div>
+
 <div class="file" data-file="use-mask.ts">
 
 [use-mask.ts](../snippets/document-field/generated/cep/react/use-mask.ts ':include :type=code ts')
@@ -86,6 +104,12 @@ The hook owns the input: it takes the formatter and the value the form holds, ma
 <div class="file" data-file="phone-field.tsx">
 
 [phone-field.tsx](../snippets/document-field/generated/phone/react/phone-field.tsx ':include :type=code tsx')
+
+</div>
+
+<div class="file" data-file="field.tsx">
+
+[field.tsx](../snippets/document-field/generated/phone/react/field.tsx ':include :type=code tsx')
 
 </div>
 
@@ -117,6 +141,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 
 </div>
 
+<div class="file" data-file="field.ts">
+
+[field.ts](../snippets/document-field/generated/cpf/angular/field.ts ':include :type=code ts')
+
+</div>
+
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../snippets/document-field/generated/cpf/angular/mask.directive.ts ':include :type=code ts')
@@ -136,6 +166,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 <div class="file" data-file="cnpj-field.ts">
 
 [cnpj-field.ts](../snippets/document-field/generated/cnpj/angular/cnpj-field.ts ':include :type=code ts')
+
+</div>
+
+<div class="file" data-file="field.ts">
+
+[field.ts](../snippets/document-field/generated/cnpj/angular/field.ts ':include :type=code ts')
 
 </div>
 
@@ -161,6 +197,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 
 </div>
 
+<div class="file" data-file="field.ts">
+
+[field.ts](../snippets/document-field/generated/cep/angular/field.ts ':include :type=code ts')
+
+</div>
+
 <div class="file" data-file="mask.directive.ts">
 
 [mask.directive.ts](../snippets/document-field/generated/cep/angular/mask.directive.ts ':include :type=code ts')
@@ -180,6 +222,12 @@ A `ControlValueAccessor`, so it takes `formControlName` (or `formControl`, or `n
 <div class="file" data-file="phone-field.ts">
 
 [phone-field.ts](../snippets/document-field/generated/phone/angular/phone-field.ts ':include :type=code ts')
+
+</div>
+
+<div class="file" data-file="field.ts">
+
+[field.ts](../snippets/document-field/generated/phone/angular/field.ts ':include :type=code ts')
 
 </div>
 
@@ -211,6 +259,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 
 </div>
 
+<div class="file" data-file="field.vue">
+
+[field.vue](../snippets/document-field/generated/cpf/vue/field.vue ':include :type=code vue')
+
+</div>
+
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../snippets/document-field/generated/cpf/vue/mask.ts ':include :type=code ts')
@@ -230,6 +284,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 <div class="file" data-file="cnpj-field.vue">
 
 [cnpj-field.vue](../snippets/document-field/generated/cnpj/vue/cnpj-field.vue ':include :type=code vue')
+
+</div>
+
+<div class="file" data-file="field.vue">
+
+[field.vue](../snippets/document-field/generated/cnpj/vue/field.vue ':include :type=code vue')
 
 </div>
 
@@ -255,6 +315,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 
 </div>
 
+<div class="file" data-file="field.vue">
+
+[field.vue](../snippets/document-field/generated/cep/vue/field.vue ':include :type=code vue')
+
+</div>
+
 <div class="file" data-file="mask.ts">
 
 [mask.ts](../snippets/document-field/generated/cep/vue/mask.ts ':include :type=code ts')
@@ -274,6 +340,12 @@ The value is the component's `v-model` (`defineModel`), which is what VeeValidat
 <div class="file" data-file="phone-field.vue">
 
 [phone-field.vue](../snippets/document-field/generated/phone/vue/phone-field.vue ':include :type=code vue')
+
+</div>
+
+<div class="file" data-file="field.vue">
+
+[field.vue](../snippets/document-field/generated/phone/vue/field.vue ':include :type=code vue')
 
 </div>
 

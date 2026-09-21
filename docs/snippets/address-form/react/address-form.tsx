@@ -1,5 +1,6 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
 import { CepField } from "./cep-field";
+import { Field } from "./field";
 import { useGetAddressByCep } from "./use-get-address-by-cep";
 
 const EMPTY = { street: "", neighborhood: "", city: "", state: "" };
@@ -11,7 +12,6 @@ const STATUS = {
 };
 
 export function AddressForm() {
-  const id = useId();
   const [cep, setCep] = useState("");
   const [address, setAddress] = useState(EMPTY);
   const lookup = useGetAddressByCep(cep);
@@ -22,18 +22,14 @@ export function AddressForm() {
     if (lookup.status === "failed") setAddress(EMPTY);
   }, [lookup]);
 
+  // The same field the document field guide builds, told what it is about.
   const field = (name: keyof typeof EMPTY, label: string, autoComplete?: string) => (
-    <>
-      <label htmlFor={`${id}-${name}`}>{label}</label>
-      <input
-        id={`${id}-${name}`}
-        autoComplete={autoComplete}
-        value={address[name]}
-        onChange={(event) =>
-          setAddress({ ...address, [name]: event.currentTarget.value })
-        }
-      />
-    </>
+    <Field
+      label={label}
+      autoComplete={autoComplete}
+      value={address[name]}
+      onChange={(value) => setAddress({ ...address, [name]: value })}
+    />
   );
 
   return (

@@ -95,9 +95,9 @@ const SCHEMAS = ["zod", "valibot", "arktype", "standard"] as const;
  * takes: a hook, a directive or a module, whatever that framework reaches for.
  */
 const FRAMEWORKS = [
-	{ name: "react", field: "tsx", form: "tsx", mask: "use-mask.ts" },
-	{ name: "angular", field: "ts", form: "ts", mask: "mask.directive.ts" },
-	{ name: "vue", field: "vue", form: "vue", mask: "mask.ts" },
+	{ name: "react", field: "tsx", form: "tsx", mask: "use-mask.ts", base: "field.tsx" },
+	{ name: "angular", field: "ts", form: "ts", mask: "mask.directive.ts", base: "field.ts" },
+	{ name: "vue", field: "vue", form: "vue", mask: "mask.ts", base: "field.vue" },
 ] as const;
 
 const PLACEHOLDER_PATTERN = /@@(\w+)@@/g;
@@ -240,6 +240,11 @@ for (const document of DOCUMENTS) {
 		mkdirSync(frameworkFolder, { recursive: true });
 
 		writeFileSync(
+			join(frameworkFolder, framework.base),
+			fill(readTemplate(`${framework.name}-base-${framework.base}`), values(document)),
+		);
+
+		writeFileSync(
 			join(frameworkFolder, framework.mask),
 			fill(readTemplate(`mask-${framework.name}.ts`), {
 				...values(document),
@@ -293,6 +298,11 @@ for (const framework of FRAMEWORKS) {
 	writeFileSync(
 		join(folder, framework.mask),
 		fill(readTemplate(`mask-${framework.name}.ts`), values(cep)),
+	);
+
+	writeFileSync(
+		join(folder, framework.base),
+		fill(readTemplate(`${framework.name}-base-${framework.base}`), values(cep)),
 	);
 
 	writeFileSync(

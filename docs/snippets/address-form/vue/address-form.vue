@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { reactive, ref, useId, watch } from "vue";
+import { reactive, ref, watch } from "vue";
 import CepField from "./cep-field.vue";
+import Field from "./field.vue";
 import { useGetAddressByCep } from "./use-get-address-by-cep";
 
 const EMPTY = { street: "", neighborhood: "", city: "", state: "" };
@@ -11,7 +12,6 @@ const STATUS = {
   failed: "No address for this CEP",
 };
 
-const id = useId();
 const cep = ref("");
 const address = reactive({ ...EMPTY });
 const lookup = useGetAddressByCep(cep);
@@ -27,16 +27,10 @@ watch(lookup, (current) => {
   <form @submit.prevent>
     <CepField v-model="cep" :error-message="STATUS[lookup.status]" />
 
-    <label :for="`${id}-street`">Street</label>
-    <input :id="`${id}-street`" v-model="address.street" autocomplete="address-line1" />
-
-    <label :for="`${id}-neighborhood`">Neighborhood</label>
-    <input :id="`${id}-neighborhood`" v-model="address.neighborhood" />
-
-    <label :for="`${id}-city`">City</label>
-    <input :id="`${id}-city`" v-model="address.city" autocomplete="address-level2" />
-
-    <label :for="`${id}-state`">State</label>
-    <input :id="`${id}-state`" v-model="address.state" autocomplete="address-level1" />
+    <!-- The same field the document field guide builds, told what it is about. -->
+    <Field v-model="address.street" label="Street" autocomplete="address-line1" />
+    <Field v-model="address.neighborhood" label="Neighborhood" />
+    <Field v-model="address.city" label="City" autocomplete="address-level2" />
+    <Field v-model="address.state" label="State" autocomplete="address-level1" />
   </form>
 </template>
