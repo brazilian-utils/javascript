@@ -1,38 +1,38 @@
 {
 	"lib_digits.go#keepAlphanumeric": {
 		"module": "lib/digits",
-		"start": 745,
-		"end": 852
+		"start": 575,
+		"end": 686
 	},
 	"lib_digits.go#keepDigits": {
 		"module": "lib/digits",
-		"start": 572,
-		"end": 651
+		"start": 397,
+		"end": 481
 	},
 	"lib_digits.go#isRepeatedRun": {
 		"module": "lib/digits",
-		"start": 1301,
-		"end": 1526
+		"start": 1134,
+		"end": 1357
 	},
 	"lib_digits.go#digitAt": {
 		"module": "lib/digits",
-		"start": 906,
-		"end": 1008
+		"start": 740,
+		"end": 841
 	},
 	"lib_format.go#patternSlots": {
 		"module": "lib/format",
-		"start": 1078,
-		"end": 1381
+		"start": 1345,
+		"end": 1956
 	},
 	"lib_format.go#formatWithPattern": {
 		"module": "lib/format",
-		"start": 1477,
-		"end": 2074
+		"start": 2052,
+		"end": 2802
 	},
 	"lib_format.go#groupThousands": {
 		"module": "lib/format",
 		"start": 664,
-		"end": 1012
+		"end": 1279
 	},
 	"format-cnpj.go#FormatCnpj": {
 		"module": "format-cnpj",
@@ -42,7 +42,7 @@
 	"format-currency.go#FormatCurrency": {
 		"module": "format-currency",
 		"start": 966,
-		"end": 1518
+		"end": 1499
 	},
 	"lib_random.go#randomBelow": {
 		"module": "lib/random",
@@ -52,37 +52,37 @@
 	"lib_random.go#randomDigit": {
 		"module": "lib/random",
 		"start": 1680,
-		"end": 1752
+		"end": 1747
 	},
 	"lib_cnpj.go#randomCnpjBase": {
 		"module": "lib/cnpj",
-		"start": 2280,
-		"end": 2527
+		"start": 2647,
+		"end": 2894
 	},
 	"lib_cnpj.go#cnpjCheckDigit": {
 		"module": "lib/cnpj",
 		"start": 687,
-		"end": 1194
+		"end": 1184
 	},
 	"lib_cnpj.go#hasLetter": {
 		"module": "lib/cnpj",
-		"start": 1718,
-		"end": 1943
+		"start": 1706,
+		"end": 2310
 	},
 	"lib_cnpj.go#hasValidCnpjChecksum": {
 		"module": "lib/cnpj",
-		"start": 1275,
-		"end": 1490
+		"start": 1265,
+		"end": 1478
 	},
 	"lib_cnpj.go#isRepeatedCnpj": {
 		"module": "lib/cnpj",
-		"start": 2608,
-		"end": 2829
+		"start": 2975,
+		"end": 3194
 	},
 	"generate-cnpj.go#GenerateCnpj": {
 		"module": "generate-cnpj",
 		"start": 982,
-		"end": 1581
+		"end": 1571
 	},
 	"lib_cpf.go#randomCpfBase": {
 		"module": "lib/cpf",
@@ -97,12 +97,12 @@
 	"lib_cpf.go#isRepeated": {
 		"module": "lib/cpf",
 		"start": 1283,
-		"end": 1501
+		"end": 1499
 	},
 	"generate-cpf.go#GenerateCpf": {
 		"module": "generate-cpf",
 		"start": 1014,
-		"end": 1576
+		"end": 1566
 	},
 	"get-address-info-by-cep.go#getWithRetry": {
 		"module": "get-address-info-by-cep",
@@ -127,27 +127,27 @@
 	"get-address-info-by-cep.go#GetAddressInfoByCep": {
 		"module": "get-address-info-by-cep",
 		"start": 3379,
-		"end": 3790
+		"end": 3786
 	},
 	"lib_json.go#matchesAt": {
 		"module": "lib/json",
 		"start": 582,
-		"end": 843
+		"end": 1279
 	},
 	"lib_json.go#isSpace": {
 		"module": "lib/json",
-		"start": 893,
-		"end": 1017
+		"start": 1329,
+		"end": 1453
 	},
 	"lib_json.go#hexValue": {
 		"module": "lib/json",
-		"start": 1088,
-		"end": 1596
+		"start": 1524,
+		"end": 2025
 	},
 	"lib_json.go#jsonStringField": {
 		"module": "lib/json",
-		"start": 1824,
-		"end": 3561
+		"start": 2253,
+		"end": 4192
 	},
 	"lib_civil.go#civilDate": {
 		"module": "lib/civil",
@@ -157,12 +157,12 @@
 	"lib_easter.go#easterDayOfMarch": {
 		"module": "lib/easter",
 		"start": 527,
-		"end": 1126
+		"end": 1128
 	},
 	"lib_easter.go#easterSunday": {
 		"module": "lib/easter",
-		"start": 1184,
-		"end": 1390
+		"start": 1186,
+		"end": 1392
 	},
 	"get-holidays.go#GetHolidays": {
 		"module": "get-holidays",
@@ -177,12 +177,12 @@
 	"is-valid-cnpj.go#IsValidCnpj": {
 		"module": "is-valid-cnpj",
 		"start": 1397,
-		"end": 1930
+		"end": 1919
 	},
 	"is-valid-cpf.go#IsValidCpf": {
 		"module": "is-valid-cpf",
 		"start": 793,
-		"end": 1150
+		"end": 1143
 	},
 	"std_date.go#floorDiv1": {
 		"module": "std/date",

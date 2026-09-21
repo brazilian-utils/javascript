@@ -17,7 +17,7 @@ const CPF_LENGTH = 11;
  * into a string is the DX's job.
  */
 export function isValidCpf(cpf: string): boolean {
-	if (!re.test(CPF_FORMAT, str.trim(cpf))) {
+	if (!CPF_FORMAT.test(cpf.trim())) {
 		return false;
 	}
 

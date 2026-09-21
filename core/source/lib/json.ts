@@ -18,7 +18,12 @@ const RETURN = 13;
 /** Whether `needle` occurs in `points` at `start`. */
 function matchesAt(points: List<Int>, needle: List<Int>, start: Int): boolean {
 	for (let offset = 0; offset < needle.length; offset++) {
-		if ((seq.at(points, start + offset) ?? -1) !== (seq.at(needle, offset) ?? -2)) {
+		// `needle[offset]` stays `seq.at`: every call site passes a fixed-length literal key
+		// (`"cep"`, `"uf"`, …), so specialization would prove this loop's index in range and the
+		// bracket sugar would silently pick the *unchecked* accessor — a different Core, not the
+		// same one respelled. `points[start + offset]` has no such proof (the body is any HTTP
+		// response), so the ordinary spelling there stays the checked form on its own.
+		if ((points[start + offset] ?? -1) !== (seq.at(needle, offset) ?? -2)) {
 			return false;
 		}
 	}
@@ -36,7 +41,7 @@ function hexValue(points: List<Int>, start: Int): IntRange<0, 65535> {
 	let value: IntRange<0, 1114111> = 0;
 
 	for (let offset = 0; offset < 4; offset++) {
-		const point = seq.at(points, start + offset) ?? 48;
+		const point = points[start + offset] ?? 48;
 		let digit: IntRange<0, 15> = 0;
 
 		if (point >= 48 && point <= 57) {
@@ -50,7 +55,7 @@ function hexValue(points: List<Int>, start: Int): IntRange<0, 65535> {
 		value = value * 16 + digit;
 	}
 
-	return int.min(value, 65535);
+	return Math.min(value, 65535);
 }
 
 /**
@@ -59,6 +64,9 @@ function hexValue(points: List<Int>, start: Int): IntRange<0, 65535> {
  * provider emits.
  */
 export function jsonStringField(body: string, key: Ascii): string | undefined {
+	// Kept as `str.codePoints`: real TypeScript spreads a string into substrings (`string[]`), not
+	// the numeric code points every scan below compares against, even though the engine's own
+	// checker treats `[...s]` and this call as identical Core.
 	const points = str.codePoints(body);
 	const needle = str.codePoints(`"${key}"`);
 
@@ -72,24 +80,24 @@ export function jsonStringField(body: string, key: Ascii): string | undefined {
 		let cursor: Int = index + needle.length;
 
 		for (let skip = 0; skip < 8; skip++) {
-			if (isSpace(seq.at(points, cursor) ?? 0)) {
+			if (isSpace(points[cursor] ?? 0)) {
 				cursor += 1;
 			}
 		}
 
-		if ((seq.at(points, cursor) ?? 0) !== COLON) {
+		if ((points[cursor] ?? 0) !== COLON) {
 			continue;
 		}
 
 		cursor += 1;
 
 		for (let skip = 0; skip < 8; skip++) {
-			if (isSpace(seq.at(points, cursor) ?? 0)) {
+			if (isSpace(points[cursor] ?? 0)) {
 				cursor += 1;
 			}
 		}
 
-		if ((seq.at(points, cursor) ?? 0) !== QUOTE) {
+		if ((points[cursor] ?? 0) !== QUOTE) {
 			continue;
 		}
 
@@ -98,14 +106,14 @@ export function jsonStringField(body: string, key: Ascii): string | undefined {
 		let out: IntRange<0, 1114111>[] = [];
 
 		for (let step = 0; step < points.length; step++) {
-			const point = seq.at(points, cursor) ?? -1;
+			const point = points[cursor] ?? -1;
 
 			if (point === -1 || point === QUOTE) {
 				return str.fromCodePoints(out);
 			}
 
 			if (point === BACKSLASH) {
-				const escaped = seq.at(points, cursor + 1) ?? -1;
+				const escaped = points[cursor + 1] ?? -1;
 
 				if (escaped === 110) {
 					out.push(NEWLINE);

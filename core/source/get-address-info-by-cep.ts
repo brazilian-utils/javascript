@@ -119,7 +119,7 @@ function fetchBrasilApi(cep: Digits): AddressInfo | undefined {
  * value into the 8 digits this takes is the DX's job.
  */
 export function getAddressInfoByCep(cep: string): AddressInfo {
-	if (!re.test(CEP_FORMAT, cep)) {
+	if (!CEP_FORMAT.test(cep)) {
 		throw new GetAddressInfoByCepValidationError("CEP inválido");
 	}
 

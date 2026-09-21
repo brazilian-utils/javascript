@@ -1,38 +1,38 @@
 {
 	"src/lib_digits.rs#keep_alphanumeric": {
 		"module": "lib/digits",
-		"start": 745,
-		"end": 852
+		"start": 575,
+		"end": 686
 	},
 	"src/lib_digits.rs#keep_digits": {
 		"module": "lib/digits",
-		"start": 572,
-		"end": 651
+		"start": 397,
+		"end": 481
 	},
 	"src/lib_digits.rs#is_repeated_run": {
 		"module": "lib/digits",
-		"start": 1301,
-		"end": 1526
+		"start": 1134,
+		"end": 1357
 	},
 	"src/lib_digits.rs#digit_at": {
 		"module": "lib/digits",
-		"start": 906,
-		"end": 1008
+		"start": 740,
+		"end": 841
 	},
 	"src/lib_format.rs#pattern_slots": {
 		"module": "lib/format",
-		"start": 1078,
-		"end": 1381
+		"start": 1345,
+		"end": 1956
 	},
 	"src/lib_format.rs#format_with_pattern": {
 		"module": "lib/format",
-		"start": 1477,
-		"end": 2074
+		"start": 2052,
+		"end": 2802
 	},
 	"src/lib_format.rs#group_thousands": {
 		"module": "lib/format",
 		"start": 664,
-		"end": 1012
+		"end": 1279
 	},
 	"src/format_cnpj.rs#format_cnpj": {
 		"module": "format-cnpj",
@@ -42,7 +42,7 @@
 	"src/format_currency.rs#format_currency": {
 		"module": "format-currency",
 		"start": 966,
-		"end": 1518
+		"end": 1499
 	},
 	"src/lib_random.rs#random_below": {
 		"module": "lib/random",
@@ -52,37 +52,37 @@
 	"src/lib_random.rs#random_digit": {
 		"module": "lib/random",
 		"start": 1680,
-		"end": 1752
+		"end": 1747
 	},
 	"src/lib_cnpj.rs#random_cnpj_base": {
 		"module": "lib/cnpj",
-		"start": 2280,
-		"end": 2527
+		"start": 2647,
+		"end": 2894
 	},
 	"src/lib_cnpj.rs#cnpj_check_digit": {
 		"module": "lib/cnpj",
 		"start": 687,
-		"end": 1194
+		"end": 1184
 	},
 	"src/lib_cnpj.rs#has_letter": {
 		"module": "lib/cnpj",
-		"start": 1718,
-		"end": 1943
+		"start": 1706,
+		"end": 2310
 	},
 	"src/lib_cnpj.rs#has_valid_cnpj_checksum": {
 		"module": "lib/cnpj",
-		"start": 1275,
-		"end": 1490
+		"start": 1265,
+		"end": 1478
 	},
 	"src/lib_cnpj.rs#is_repeated_cnpj": {
 		"module": "lib/cnpj",
-		"start": 2608,
-		"end": 2829
+		"start": 2975,
+		"end": 3194
 	},
 	"src/generate_cnpj.rs#generate_cnpj": {
 		"module": "generate-cnpj",
 		"start": 982,
-		"end": 1581
+		"end": 1571
 	},
 	"src/lib_cpf.rs#random_cpf_base": {
 		"module": "lib/cpf",
@@ -97,12 +97,12 @@
 	"src/lib_cpf.rs#is_repeated": {
 		"module": "lib/cpf",
 		"start": 1283,
-		"end": 1501
+		"end": 1499
 	},
 	"src/generate_cpf.rs#generate_cpf": {
 		"module": "generate-cpf",
 		"start": 1014,
-		"end": 1576
+		"end": 1566
 	},
 	"src/get_address_info_by_cep.rs#get_with_retry": {
 		"module": "get-address-info-by-cep",
@@ -127,27 +127,27 @@
 	"src/get_address_info_by_cep.rs#get_address_info_by_cep": {
 		"module": "get-address-info-by-cep",
 		"start": 3379,
-		"end": 3790
+		"end": 3786
 	},
 	"src/lib_json.rs#matches_at": {
 		"module": "lib/json",
 		"start": 582,
-		"end": 843
+		"end": 1279
 	},
 	"src/lib_json.rs#is_space": {
 		"module": "lib/json",
-		"start": 893,
-		"end": 1017
+		"start": 1329,
+		"end": 1453
 	},
 	"src/lib_json.rs#hex_value": {
 		"module": "lib/json",
-		"start": 1088,
-		"end": 1596
+		"start": 1524,
+		"end": 2025
 	},
 	"src/lib_json.rs#json_string_field": {
 		"module": "lib/json",
-		"start": 1824,
-		"end": 3561
+		"start": 2253,
+		"end": 4192
 	},
 	"src/lib_civil.rs#civil_date": {
 		"module": "lib/civil",
@@ -157,12 +157,12 @@
 	"src/lib_easter.rs#easter_day_of_march": {
 		"module": "lib/easter",
 		"start": 527,
-		"end": 1126
+		"end": 1128
 	},
 	"src/lib_easter.rs#easter_sunday": {
 		"module": "lib/easter",
-		"start": 1184,
-		"end": 1390
+		"start": 1186,
+		"end": 1392
 	},
 	"src/get_holidays.rs#get_holidays": {
 		"module": "get-holidays",
@@ -177,12 +177,12 @@
 	"src/is_valid_cnpj.rs#is_valid_cnpj": {
 		"module": "is-valid-cnpj",
 		"start": 1397,
-		"end": 1930
+		"end": 1919
 	},
 	"src/is_valid_cpf.rs#is_valid_cpf": {
 		"module": "is-valid-cpf",
 		"start": 793,
-		"end": 1150
+		"end": 1143
 	},
 	"src/std_date.rs#floor_div_1": {
 		"module": "std/date",

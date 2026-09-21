@@ -31,8 +31,8 @@ export function generateCpf(): string {
 
 	// Both calls need a full 11-digit value: the trailing positions a `size` of 9 or 10 never
 	// reads are filled with a placeholder digit purely to satisfy that length.
-	const firstDigit = str.fromInt(cpfCheckDigit(`${base}00`, 9));
-	const secondDigit = str.fromInt(cpfCheckDigit(`${base}${firstDigit}0`, 10));
+	const firstDigit = String(cpfCheckDigit(`${base}00`, 9));
+	const secondDigit = String(cpfCheckDigit(`${base}${firstDigit}0`, 10));
 
 	return `${base}${firstDigit}${secondDigit}`;
 }

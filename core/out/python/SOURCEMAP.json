@@ -1,38 +1,38 @@
 {
 	"lib/digits.py#keep_alphanumeric": {
 		"module": "lib/digits",
-		"start": 745,
-		"end": 852
+		"start": 575,
+		"end": 686
 	},
 	"lib/digits.py#keep_digits": {
 		"module": "lib/digits",
-		"start": 572,
-		"end": 651
+		"start": 397,
+		"end": 481
 	},
 	"lib/digits.py#is_repeated_run": {
 		"module": "lib/digits",
-		"start": 1301,
-		"end": 1526
+		"start": 1134,
+		"end": 1357
 	},
 	"lib/digits.py#digit_at": {
 		"module": "lib/digits",
-		"start": 906,
-		"end": 1008
+		"start": 740,
+		"end": 841
 	},
 	"lib/format.py#pattern_slots": {
 		"module": "lib/format",
-		"start": 1078,
-		"end": 1381
+		"start": 1345,
+		"end": 1956
 	},
 	"lib/format.py#format_with_pattern": {
 		"module": "lib/format",
-		"start": 1477,
-		"end": 2074
+		"start": 2052,
+		"end": 2802
 	},
 	"lib/format.py#group_thousands": {
 		"module": "lib/format",
 		"start": 664,
-		"end": 1012
+		"end": 1279
 	},
 	"format_cnpj.py#format_cnpj": {
 		"module": "format-cnpj",
@@ -42,7 +42,7 @@
 	"format_currency.py#format_currency": {
 		"module": "format-currency",
 		"start": 966,
-		"end": 1518
+		"end": 1499
 	},
 	"lib/random.py#random_below": {
 		"module": "lib/random",
@@ -52,42 +52,42 @@
 	"lib/random.py#random_digit": {
 		"module": "lib/random",
 		"start": 1680,
-		"end": 1752
+		"end": 1747
 	},
 	"lib/cnpj.py#random_cnpj_base": {
 		"module": "lib/cnpj",
-		"start": 2280,
-		"end": 2527
+		"start": 2647,
+		"end": 2894
 	},
 	"lib/cnpj.py#cnpj_check_digit": {
 		"module": "lib/cnpj",
 		"start": 687,
-		"end": 1194
+		"end": 1184
 	},
 	"lib/cnpj.py#has_letter": {
 		"module": "lib/cnpj",
-		"start": 1718,
-		"end": 1943
+		"start": 1706,
+		"end": 2310
 	},
 	"lib/cnpj.py#has_valid_cnpj_checksum": {
 		"module": "lib/cnpj",
-		"start": 1275,
-		"end": 1490
+		"start": 1265,
+		"end": 1478
 	},
 	"lib/cnpj.py#is_repeated_cnpj": {
 		"module": "lib/cnpj",
-		"start": 2608,
-		"end": 2829
+		"start": 2975,
+		"end": 3194
 	},
 	"generate_cnpj.py#generate_cnpj": {
 		"module": "generate-cnpj",
 		"start": 982,
-		"end": 1581
+		"end": 1571
 	},
 	"generate_cnpj.py#generate_cnpj_with": {
 		"module": "generate-cnpj",
 		"start": 982,
-		"end": 1581
+		"end": 1571
 	},
 	"lib/cpf.py#random_cpf_base": {
 		"module": "lib/cpf",
@@ -102,17 +102,17 @@
 	"lib/cpf.py#is_repeated": {
 		"module": "lib/cpf",
 		"start": 1283,
-		"end": 1501
+		"end": 1499
 	},
 	"generate_cpf.py#generate_cpf": {
 		"module": "generate-cpf",
 		"start": 1014,
-		"end": 1576
+		"end": 1566
 	},
 	"generate_cpf.py#generate_cpf_with": {
 		"module": "generate-cpf",
 		"start": 1014,
-		"end": 1576
+		"end": 1566
 	},
 	"get_address_info_by_cep.py#get_with_retry": {
 		"module": "get-address-info-by-cep",
@@ -137,32 +137,32 @@
 	"get_address_info_by_cep.py#get_address_info_by_cep": {
 		"module": "get-address-info-by-cep",
 		"start": 3379,
-		"end": 3790
+		"end": 3786
 	},
 	"get_address_info_by_cep.py#get_address_info_by_cep_with": {
 		"module": "get-address-info-by-cep",
 		"start": 3379,
-		"end": 3790
+		"end": 3786
 	},
 	"lib/json.py#matches_at": {
 		"module": "lib/json",
 		"start": 582,
-		"end": 843
+		"end": 1279
 	},
 	"lib/json.py#is_space": {
 		"module": "lib/json",
-		"start": 893,
-		"end": 1017
+		"start": 1329,
+		"end": 1453
 	},
 	"lib/json.py#hex_value": {
 		"module": "lib/json",
-		"start": 1088,
-		"end": 1596
+		"start": 1524,
+		"end": 2025
 	},
 	"lib/json.py#json_string_field": {
 		"module": "lib/json",
-		"start": 1824,
-		"end": 3561
+		"start": 2253,
+		"end": 4192
 	},
 	"lib/civil.py#civil_date": {
 		"module": "lib/civil",
@@ -172,12 +172,12 @@
 	"lib/easter.py#easter_day_of_march": {
 		"module": "lib/easter",
 		"start": 527,
-		"end": 1126
+		"end": 1128
 	},
 	"lib/easter.py#easter_sunday": {
 		"module": "lib/easter",
-		"start": 1184,
-		"end": 1390
+		"start": 1186,
+		"end": 1392
 	},
 	"get_holidays.py#get_holidays": {
 		"module": "get-holidays",
@@ -192,12 +192,12 @@
 	"is_valid_cnpj.py#is_valid_cnpj": {
 		"module": "is-valid-cnpj",
 		"start": 1397,
-		"end": 1930
+		"end": 1919
 	},
 	"is_valid_cpf.py#is_valid_cpf": {
 		"module": "is-valid-cpf",
 		"start": 793,
-		"end": 1150
+		"end": 1143
 	},
 	"std/date.py#floor_div_1": {
 		"module": "std/date",

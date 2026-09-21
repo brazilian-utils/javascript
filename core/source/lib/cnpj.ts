@@ -20,7 +20,7 @@ export function cnpjCheckDigit(cnpj: AsciiOf<14>, weights: List<IntRange<2, 9>>)
 	let sum: IntRange<-6000, 10000> = 0;
 
 	for (let index = 0; index < weights.length; index++) {
-		sum += (str.codeAt(cnpj, index) - 48) * seq.get(weights, index);
+		sum += (cnpj.charCodeAt(index) - 48) * weights[index];
 	}
 
 	const remainder = sum % 11;
@@ -31,8 +31,8 @@ export function cnpjCheckDigit(cnpj: AsciiOf<14>, weights: List<IntRange<2, 9>>)
 /** Whether both check digits of a 14 character CNPJ match its base. */
 export function hasValidCnpjChecksum(cnpj: AsciiOf<14>): boolean {
 	return (
-		str.codeAt(cnpj, 12) - 48 === cnpjCheckDigit(cnpj, FIRST_WEIGHTS) &&
-		str.codeAt(cnpj, 13) - 48 === cnpjCheckDigit(cnpj, SECOND_WEIGHTS)
+		cnpj.charCodeAt(12) - 48 === cnpjCheckDigit(cnpj, FIRST_WEIGHTS) &&
+		cnpj.charCodeAt(13) - 48 === cnpjCheckDigit(cnpj, SECOND_WEIGHTS)
 	);
 }
 
@@ -44,6 +44,10 @@ export function hasValidCnpjChecksum(cnpj: AsciiOf<14>): boolean {
  */
 export function hasLetter(value: Ascii): boolean {
 	for (let index = 0; index < value.length; index++) {
+		// Kept as `str.codeAtOpt`: the idiom table (semantics.md §7.1) recognizes `value[i]` as
+		// `str.charAtOpt`, the checked *string* accessor, but there is no ordinary spelling for the
+		// checked *numeric* one — `value.charCodeAt(i)` answers `NaN` past the end, not `undefined`,
+		// so it can only stand for the unchecked `str.codeAt`, which this unbounded loop can't prove.
 		const point = str.codeAtOpt(value, index) ?? 0;
 
 		if (point >= 65 && point <= 90) {
@@ -66,10 +70,10 @@ export function randomCnpjBase(): DigitsOf<12> {
 
 /** Whether every character of a 14 character value is the same one. */
 export function isRepeatedCnpj(value: AsciiOf<14>): boolean {
-	const first = str.codeAt(value, 0);
+	const first = value.charCodeAt(0);
 
 	for (let index = 1; index < 14; index++) {
-		if (str.codeAt(value, index) !== first) {
+		if (value.charCodeAt(index) !== first) {
 			return false;
 		}
 	}

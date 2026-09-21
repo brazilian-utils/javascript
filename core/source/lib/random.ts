@@ -41,5 +41,5 @@ export function randomBelow(bound: IntRange<1, 4294967296>): IntRange<0, 4294967
 
 /** One random ASCII digit. */
 export function randomDigit(): Digits {
-	return str.fromInt(randomBelow(10));
+	return String(randomBelow(10));
 }

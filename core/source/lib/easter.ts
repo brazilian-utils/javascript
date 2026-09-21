@@ -25,7 +25,7 @@ export function easterDayOfMarch(year: IntRange<1583, 9999>): IntRange<22, 56> {
 	const day = h + l - 7 * m + 114;
 
 	// `day` counts from 1 March: 22 is 22 March, 56 is 25 April, the two ends of the Easter window.
-	return int.min(int.max(day % 31 + 1 + (day / 31 - 3) * 31, 22), 56);
+	return Math.min(Math.max(day % 31 + 1 + (day / 31 - 3) * 31, 22), 56);
 }
 
 /** Easter Sunday of a year, as a civil date. */

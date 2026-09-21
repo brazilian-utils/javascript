@@ -20,13 +20,13 @@ const CNPJ_LENGTH = 14;
  * missing or unexpected `options.version` onto `"1"` is the DX's job.
  */
 export function isValidCnpj(cnpj: string, version: CnpjVersion): boolean {
-	const trimmed = str.trim(cnpj);
+	const trimmed = cnpj.trim();
 
 	if (version === "2") {
 		const cleaned = keepAlphanumeric(cnpj);
 
 		if (hasLetter(cleaned) && cleaned.length === CNPJ_LENGTH) {
-			return re.test(CNPJ_FORMAT, str.asciiUpper(trimmed)) && hasValidCnpjChecksum(cleaned);
+			return CNPJ_FORMAT.test(str.asciiUpper(trimmed)) && hasValidCnpjChecksum(cleaned);
 		}
 	}
 
@@ -36,5 +36,5 @@ export function isValidCnpj(cnpj: string, version: CnpjVersion): boolean {
 		return false;
 	}
 
-	return re.test(NUMERIC_CNPJ_FORMAT, trimmed) && !isRepeatedCnpj(numeric) && hasValidCnpjChecksum(numeric);
+	return NUMERIC_CNPJ_FORMAT.test(trimmed) && !isRepeatedCnpj(numeric) && hasValidCnpjChecksum(numeric);
 }

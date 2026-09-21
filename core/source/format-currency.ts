@@ -23,10 +23,10 @@ const SPACE = 32;
 export function formatCurrency(value: Decimal<2>, symbol: boolean): string {
 	const negative = dec.isNegative(value);
 	const unscaled = dec.unscaled(dec.abs(value));
-	const digits = str.padStart(str.fromInt(unscaled), 3, "0");
-	const cut = int.max(digits.length - 2, 0);
-	const whole = str.slice(digits, 0, cut);
-	const cents = str.slice(digits, cut, digits.length);
+	const digits = String(unscaled).padStart(3, "0");
+	const cut = Math.max(digits.length - 2, 0);
+	const whole = digits.slice(0, cut);
+	const cents = digits.slice(cut, digits.length);
 	const body = `${groupThousands(keepDigits(whole))},${cents}`;
 	const prefix = symbol ? `R$${str.fromCodePoints([SPACE])}` : "";
 

@@ -32,10 +32,10 @@ export function randomCpfBase(): DigitsOf<9> {
 
 /** Whether every scalar of the value is the same one, e.g. "00000000000". */
 export function isRepeated(value: DigitsOf<11>): boolean {
-	const first = str.codeAt(value, 0);
+	const first = value.charCodeAt(0);
 
 	for (let index = 1; index < 11; index++) {
-		if (str.codeAt(value, index) !== first) {
+		if (value.charCodeAt(index) !== first) {
 			return false;
 		}
 	}

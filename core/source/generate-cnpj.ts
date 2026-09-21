@@ -30,8 +30,8 @@ export function generateCnpj(): string {
 
 	// Both calls need a full 14-character value: the trailing positions the shorter weight list
 	// never reads are filled with a placeholder digit purely to satisfy that length.
-	const firstDigit = str.fromInt(cnpjCheckDigit(`${base}00`, FIRST_WEIGHTS));
-	const secondDigit = str.fromInt(cnpjCheckDigit(`${base}${firstDigit}0`, SECOND_WEIGHTS));
+	const firstDigit = String(cnpjCheckDigit(`${base}00`, FIRST_WEIGHTS));
+	const secondDigit = String(cnpjCheckDigit(`${base}${firstDigit}0`, SECOND_WEIGHTS));
 
 	return `${base}${firstDigit}${secondDigit}`;
 }

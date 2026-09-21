@@ -105,6 +105,7 @@ declare namespace str {
 declare namespace seq {
 	function len<T>(list: readonly T[]): Int;
 	function get<T>(list: readonly T[], index: Int): T;
+	function at<T>(list: readonly T[], index: Int): T | undefined;
 	function map<T, R>(list: readonly T[], fn: (item: T) => R): readonly R[];
 	function filter<T>(list: readonly T[], fn: (item: T) => boolean): readonly T[];
 	function fold<T, A>(list: readonly T[], initial: A, fn: (accumulator: A, item: T) => A): A;
@@ -161,6 +162,7 @@ declare namespace dec {
 declare namespace date {
 	function fromYmd(year: Int, month: Int, day: Int): CivilDate | undefined;
 	function fromEpochDays(days: Int): CivilDate | undefined;
+	function clampEpochDays(days: Int): CivilDate;
 	function toEpochDays(value: CivilDate): Int;
 	function year(value: CivilDate): Int;
 	function month(value: CivilDate): Int;

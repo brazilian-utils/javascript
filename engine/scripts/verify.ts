@@ -187,6 +187,22 @@ const steps: Step[] = [
 			);
 		},
 	},
+	{
+		// Every step above proves the source *compiles* — this proves it *runs*: the migrated
+		// utilities under `source/`, imported and called in plain Node, no engine involved. See
+		// `conformance/run-source.ts` for exactly which utilities that covers and why the rest
+		// cannot run yet.
+		name: "conformance (source, no engine)",
+		run: () => {
+			const runner = join(project, "conformance", "run-source.ts");
+			if (!existsSync(runner)) return { ok: true, output: "skipped: no source conformance runner" };
+			return shell(
+				process.execPath,
+				["--import", join(project, "conformance", "sloppy-imports.mjs"), runner],
+				project,
+			);
+		},
+	},
 ];
 
 let failed = false;
