@@ -1,9 +1,8 @@
 # One core, every language: bindings or generated source?
 
-The follow up question to [EXPLORATION.md](EXPLORATION.md): instead of generating **source** for
-each language, could Brazilian Utils build the logic once — in Rust, in C, in WebAssembly — and
-give every package a **binding** to it? Is there an off the shelf tool for that? And what does it
-cost at run time?
+Instead of generating **source** for each language, could Brazilian Utils build the logic once
+— in Rust, in C, in WebAssembly — and give every package a **binding** to it? Is there an off
+the shelf tool for that? And what does it cost at run time?
 
 What is being shared either way is the **utility's implementation**, not the published package.
 Every ecosystem keeps writing its own DX by hand: its naming, its option objects, its types, its
@@ -17,13 +16,8 @@ code than the wrapper it sits behind.
 > ecosystems. [§2](#2-the-boundary-costs-more-than-the-work--but-only-over-the-wrong-boundary)
 > has the corrected numbers and what they turn on.
 
-Everything below was measured on this branch. Reproduce with:
-
-```bash
-bash spec/bench/run-all.sh            # every arm, every language
-bash spec/bench/run-native.sh         # the bindings each ecosystem actually ships
-bash spec/conformance/run-all.sh      # every arm still answers identically
-```
+Everything below was measured on this branch; [Reproducing](#reproducing) says how to get the
+harness back and re-run it.
 
 ---
 
@@ -72,15 +66,15 @@ takes generated source. The full recommendation is [at the end](#recommendation)
 
 ## How it was measured
 
-One function — `isValidCpf` under the `masked-strict` profile — over a fixed corpus of 1000
-inputs (`spec/bench/corpus.json`): valid CPFs bare and masked, near misses with one digit flipped,
+One function — `isValidCpf` under a single shared profile — over a fixed corpus of 1000
+inputs: valid CPFs bare and masked, near misses with one digit flipped,
 junk, Unicode whitespace, NBSP, ZWNBSP, an emoji, and CPFs written in full width and Arabic-Indic
 digits. Each arm reports the best nanoseconds per call over 7 repetitions after warmup, plus how
 many inputs it called valid — an arm cannot win by doing less work.
 
 Every arm computes the same thing, and the source level arms are generated from the **same
-profile** (`spec/bench/prepare.ts` overrides each package's adopted profile for the run), so the
-comparison is not measuring one package's laxer contract against another's.
+profile** — the harness overrides each package's adopted profile for the run — so the comparison
+is not measuring one package's laxer contract against another's.
 
 Machine: Intel Xeon @ 2.80GHz, 4 vCPU, Linux. Node 22.22.2, Python 3.11.15, Ruby 3.3.6, Go 1.24.7,
 rustc 1.94.1, OpenJDK 21.0.10, wasmtime-py 48.0.0, wasmtime gem 48.0.1, wazero 1.9.0, UniFFI 0.29.
@@ -172,6 +166,12 @@ Python went 6485 → 1366 ns/op; Ruby 15051 → 2020. Conformance stayed at 2229
 
 **This is the load bearing result for the whole idea**: the emitter is allowed to know things
 about its target language, and the moment it does, generated code stops being a compromise.
+
+The `generated` arms came from the first prototype, `spec/codegen`, which described a utility as
+JSON and emitted six languages from it. That prototype is retired — writing a utility as data
+stopped scaling at the third one — and [`spec/bridge`](bridge/README.md) replaced it, so the
+numbers above are a recording rather than something the current tree re-runs. What carried over
+is the rule they established, and every emitter in `spec/bridge` is written to it.
 
 ### 2. The boundary costs more than the work — but only over the wrong boundary
 
@@ -313,8 +313,8 @@ what makes it affordable.**
 functions, six ecosystems that each demand idiomatic naming, zero runtime dependencies, and a
 flagship package that must stay tree shakeable. Every binding generator optimises for the opposite
 shape. The closest thing to prior art is Kaitai Struct, and its model — a declarative spec plus one
-compiler backend per language — is exactly what `spec/codegen` already is, at 350–430 lines per
-target.
+compiler backend per language — is exactly what [`spec/bridge`](bridge/README.md) is, at
+390–660 lines per target.
 
 ---
 
@@ -375,25 +375,21 @@ it is a release pipeline per package, and it is the reason step 6 exists.
 
 ## Reproducing
 
+The harness that produced every number above — the Rust core, the wasm and `cdylib` builds, the
+handwritten and generated arms in six languages, the CPython and Ruby C extensions, the Panama
+and P/Invoke arms, the UniFFI crate and the recorded `results.jsonl` — lived at `spec/bench/`.
+It was removed once it had answered the question, so that what stays in the tree is the engine
+rather than the experiment. It is one command away:
+
 ```bash
-cargo build --release --manifest-path spec/bench/core/Cargo.toml
-cargo build --release --target wasm32-unknown-unknown --manifest-path spec/bench/core/Cargo.toml
+git checkout 3780bd6 -- spec/bench            # the last commit that carries the harness
 bash spec/bench/run-all.sh > spec/bench/results.jsonl
-
-# the UniFFI arm, which needs its own build
-cargo build --release --manifest-path spec/bench/uniffi/Cargo.toml
-cd spec/bench/uniffi && ./target/release/uniffi-bindgen generate \
-  --library target/release/libbrutils_uniffi.so --language python --out-dir ../.build/uniffi-python
-cp target/release/libbrutils_uniffi.so ../.build/uniffi-python/
-python3 ../harness/uniffi_bench.py
-```
-
-The native binding arms are a separate script, because they need each ecosystem's build
-toolchain rather than its wasm runtime:
-
-```bash
 bash spec/bench/run-native.sh >> spec/bench/results.jsonl
+python3 spec/bench/table.py                   # folds the lines into the tables above
 ```
+
+`run-all.sh` also needs `spec/codegen`, the first prototype, which the same commit carries; the
+two were retired together, and the paragraph below §1 says what that means for that finding.
 
 Requires `node`, `python3` (with `wasmtime` and its development headers), `ruby` (with the
 `wasmtime` gem and its development headers), `go`, `cargo` with the `wasm32-unknown-unknown`

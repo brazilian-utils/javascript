@@ -148,10 +148,10 @@ export default defineConfig({
 		// `reports` holds generated output only, the committed API Extractor baseline included:
 		// reformatting its code block would make every `check:api` run report a changed API.
 		// `CHANGELOG.md` is written by release-please (`* ` bullets); formatting it would fail the
-		// Check workflow on every release PR. `spec/vectors` holds the generated conformance
-		// vectors, written on one line on purpose: pretty printing ~10k expectations would multiply
-		// the file size for a file nobody reads by hand, and `spec/bridge/source/*.data.json` and
-		// `spec/bridge/out` are the same: a generated table and the generated targets.
+		// Check workflow on every release PR. `spec/bridge/out` holds the compiler's output, and
+		// `spec/bridge/source/*.data.json` the tables it bakes at build time: both are generated,
+		// and the tables are written on one line on purpose, since pretty printing thousands of
+		// rows would multiply the size of a file nobody reads by hand.
 		ignorePatterns: [
 			"dist",
 			"coverage",
@@ -160,10 +160,8 @@ export default defineConfig({
 			".stryker-tmp",
 			".claude",
 			"CHANGELOG.md",
-			"spec/vectors",
-			"spec/bench/corpus.json",
 			"**/spec/bridge/out/**",
-			"spec/bridge/source/municipalities.data.json",
+			"spec/bridge/source/*.data.json",
 		],
 		singleQuote: false,
 		sortImports: true,
@@ -515,12 +513,11 @@ export default defineConfig({
 				rules: {
 					// The spec tooling is a set of command line programs: their output is the product.
 					"eslint/no-console": "off",
-					// `spec/conformance/upstream.ts` runs the other languages' own toolchains on purpose,
-					// from the developer's PATH, to compare this specification against the packages the
-					// organisation already publishes.
+					// The conformance runners drive each target's own toolchain on purpose, from the
+					// developer's PATH, to check the generated code the way its users would build it.
 					"sonarjs/no-os-command-from-path": "off",
-					// The generator reads the JSON files it writes itself, whose shape is pinned by
-					// `spec/schema/utility.schema.json`, so the parse results are asserted, not validated.
+					// The tooling reads back the JSON it writes itself, so the parse results are
+					// asserted against the shape it just wrote rather than validated.
 					"typescript/no-unsafe-type-assertion": "off",
 				},
 			},
