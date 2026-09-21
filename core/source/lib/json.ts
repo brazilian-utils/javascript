@@ -18,12 +18,13 @@ const RETURN = 13;
 /** Whether `needle` occurs in `points` at `start`. */
 function matchesAt(points: List<Int>, needle: List<Int>, start: Int): boolean {
 	for (let offset = 0; offset < needle.length; offset++) {
-		// `needle[offset]` stays `seq.at`: every call site passes a fixed-length literal key
-		// (`"cep"`, `"uf"`, …), so specialization would prove this loop's index in range and the
-		// bracket sugar would silently pick the *unchecked* accessor — a different Core, not the
-		// same one respelled. `points[start + offset]` has no such proof (the body is any HTTP
-		// response), so the ordinary spelling there stays the checked form on its own.
-		if ((points[start + offset] ?? -1) !== (seq.at(needle, offset) ?? -2)) {
+		// `needle[offset] ?? -2`: every call site passes a fixed-length literal key (`"cep"`,
+		// `"uf"`, …), so specialization proves this loop's index in range for `needle` — but the
+		// `??` picks the checked `seq.at` regardless (see the `logical` handling of `??` on a
+		// bracket index), the same Core the namespace form always produced here. `points[start +
+		// offset]` has no such proof either way (the body is any HTTP response), so it was already
+		// the checked form on its own.
+		if ((points[start + offset] ?? -1) !== (needle[offset] ?? -2)) {
 			return false;
 		}
 	}

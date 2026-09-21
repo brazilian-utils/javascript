@@ -44,11 +44,12 @@ export function hasValidCnpjChecksum(cnpj: AsciiOf<14>): boolean {
  */
 export function hasLetter(value: Ascii): boolean {
 	for (let index = 0; index < value.length; index++) {
-		// Kept as `str.codeAtOpt`: the idiom table (semantics.md §7.1) recognizes `value[i]` as
-		// `str.charAtOpt`, the checked *string* accessor, but there is no ordinary spelling for the
-		// checked *numeric* one — `value.charCodeAt(i)` answers `NaN` past the end, not `undefined`,
-		// so it can only stand for the unchecked `str.codeAt`, which this unbounded loop can't prove.
-		const point = str.codeAtOpt(value, index) ?? 0;
+		// `value[index]?.charCodeAt(0)` is the checked *numeric* accessor: `value.charCodeAt(i)`
+		// alone always answers `NaN` past the end, not `undefined`, but `value[index]` alone already
+		// answers `undefined` there, and `?.charCodeAt(0)` reads the one scalar's code point only
+		// when it is present — the ordinary spelling of `str.codeAtOpt`, which this unbounded loop
+		// needs because the index is never provably in range.
+		const point = value[index]?.charCodeAt(0) ?? 0;
 
 		if (point >= 65 && point <= 90) {
 			return true;

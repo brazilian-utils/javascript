@@ -13,7 +13,7 @@ export function keepDigits(value: string): Digits {
 
 /** Keeps only the ASCII digits and letters of a value, upper casing the letters. */
 export function keepAlphanumeric(value: string): Ascii {
-	return str.asciiUpper(value.replace(/[^0-9A-Za-z]/g, ""));
+	return value.replace(/[^0-9A-Za-z]/g, "").toUpperCase();
 }
 
 /** The numeric value of one ASCII digit. */

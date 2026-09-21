@@ -69,6 +69,27 @@ test("value[i] with an unprovable index is the checked str.charAtOpt, an Option"
 	);
 });
 
+test("value[i] ?? fallback picks the checked str.charAtOpt even with a proven index", () => {
+	sameCore(
+		'export function f(value: AsciiOf<5>, index: IntRange<0, 4>): string { return value[index] ?? ""; }',
+		'export function f(value: AsciiOf<5>, index: IntRange<0, 4>): string { return str.charAtOpt(value, index) ?? ""; }',
+	);
+});
+
+test("value[i]?.charCodeAt(0) is str.codeAtOpt, the checked numeric accessor", () => {
+	sameCore(
+		"export function f(value: Ascii, index: Int): Int | undefined { return value[index]?.charCodeAt(0); }",
+		"export function f(value: Ascii, index: Int): Int | undefined { return str.codeAtOpt(value, index); }",
+	);
+});
+
+test("value[i]?.charCodeAt(0) ?? fallback is str.codeAtOpt ?? fallback, even with a proven index", () => {
+	sameCore(
+		"export function f(value: AsciiOf<5>, index: IntRange<0, 4>): Int { return value[index]?.charCodeAt(0) ?? 0; }",
+		"export function f(value: AsciiOf<5>, index: IntRange<0, 4>): Int { return str.codeAtOpt(value, index) ?? 0; }",
+	);
+});
+
 test("value.slice(a, b) on a proven-ASCII string is str.slice", () => {
 	sameCore(
 		"export function f(value: Ascii, a: IntRange<0, 10>, b: IntRange<0, 10>): string { return value.slice(a, b); }",
@@ -125,6 +146,20 @@ test('value.replace(/[^0-9]/g, "") is re.retain on the class', () => {
 	);
 });
 
+test("value.toUpperCase() on a proven-ASCII string is str.asciiUpper", () => {
+	sameCore(
+		"export function f(value: Ascii): Ascii { return value.toUpperCase(); }",
+		"export function f(value: Ascii): Ascii { return str.asciiUpper(value); }",
+	);
+});
+
+test("value.toLowerCase() on a proven-ASCII string is str.asciiLower", () => {
+	sameCore(
+		"export function f(value: Ascii): Ascii { return value.toLowerCase(); }",
+		"export function f(value: Ascii): Ascii { return str.asciiLower(value); }",
+	);
+});
+
 test("PATTERN.test(value) on a module-level regex constant is re.test", () => {
 	sameCore(
 		"const PATTERN = /^[0-9]+$/;\nexport function f(value: string): boolean { return PATTERN.test(value); }",
@@ -154,6 +189,13 @@ test("xs[i] with an unprovable index is the checked seq.at, an Option", () => {
 	sameCore(
 		"export function f(xs: List<Int>, index: Int): Int | undefined { return xs[index]; }",
 		"export function f(xs: List<Int>, index: Int): Int | undefined { return seq.at(xs, index); }",
+	);
+});
+
+test("xs[i] ?? fallback picks the checked seq.at even with a proven index", () => {
+	sameCore(
+		"export function f(xs: List<Int, 5, 5>, index: IntRange<0, 4>): Int { return xs[index] ?? 0; }",
+		"export function f(xs: List<Int, 5, 5>, index: IntRange<0, 4>): Int { return seq.at(xs, index) ?? 0; }",
 	);
 });
 
@@ -221,6 +263,10 @@ test("slice on a string that is not proven ASCII is rejected", () => {
 	);
 });
 
+test("toUpperCase on a string that is not proven ASCII is rejected, not silently lowered", () => {
+	rejects("E_UNICODE_CASE", "export function f(value: string): string { return value.toUpperCase(); }");
+});
+
 test("Math.random() is rejected: the Random capability offers only nextU32", () => {
 	rejects("E_MATH_RANDOM", "export function f(): Float { return Math.random(); }");
 });
@@ -250,6 +296,13 @@ test(".replace without the g flag is rejected: it would rewrite only the first m
 	rejects(
 		"E_REPLACE_UNSUPPORTED",
 		'export function f(value: string): string { return value.replace(/[^0-9]/, ""); }',
+	);
+});
+
+test("value[index]?.charCodeAt(1) is rejected: only the literal 0 is the codeAtOpt idiom", () => {
+	rejects(
+		"E_OPTIONAL_CHAIN",
+		"export function f(value: Ascii, index: Int): Int | undefined { return value[index]?.charCodeAt(1); }",
 	);
 });
 

@@ -75,6 +75,8 @@ const STRING_METHODS: Record<string, string> = {
 	padStart: "str.padStart",
 	trim: "str.trim",
 	split: "str.split",
+	toUpperCase: "str.asciiUpper",
+	toLowerCase: "str.asciiLower",
 };
 
 /**
@@ -83,6 +85,16 @@ const STRING_METHODS: Record<string, string> = {
  * `requireAsciiPositional`.
  */
 const POSITIONAL_STRING_METHODS = new Set(["charCodeAt", "charAt", "slice"]);
+
+/**
+ * `String#toUpperCase`/`#toLowerCase` run the host's full Unicode case-folding table, which
+ * `str.asciiUpper`/`str.asciiLower`'s own doc names directly: "a proven-ASCII argument unlocks
+ * the host's own case mapping." Outside ASCII the two diverge — Unicode default case folding
+ * touches scalars an ASCII-only table leaves alone, and differs again by target — so, like the
+ * positional methods above, these are only the ordinary spelling of the intrinsic once the
+ * string is proven ASCII; see `requireAsciiCase`.
+ */
+const CASE_STRING_METHODS = new Set(["toUpperCase", "toLowerCase"]);
 
 const LIST_METHODS: Record<string, string> = {
 	map: "seq.map",
@@ -1971,7 +1983,13 @@ class FunctionChecker {
 		return { kind: "lit", value: 0n, type: tNever, span: node.span };
 	}
 
-	private index(node: Extract<HExpr, { kind: "index" }>): CExpr {
+	/**
+	 * `forceChecked` is set by the `??` handling in `logical()`: `xs[i] ?? fallback` names the
+	 * absent case itself, in the language's own terms, so it selects the checked accessor no
+	 * matter what the checker can prove about `i` — provability only decides the accessor for a
+	 * bare `xs[i]` used where a value (not an Option) is required, below.
+	 */
+	private index(node: Extract<HExpr, { kind: "index" }>, forceChecked = false): CExpr {
 		const target = this.expr(node.target);
 		const index = this.expr(node.index, tIntDefault());
 		if (target.type.kind === "String") {
@@ -1981,7 +1999,7 @@ class FunctionChecker {
 			// JavaScript answers `undefined` past the end, which is exactly what `str.charAtOpt`
 			// answers; `str.charAt` is picked instead whenever the index is proven in range, so a
 			// caller that already has the proof gets the value back directly, not an Option of it.
-			return provablyInRange(index, target.type)
+			return !forceChecked && provablyInRange(index, target.type)
 				? this.op("str.charAt", [target, index], node.span)
 				: this.op("str.charAtOpt", [target, index], node.span);
 		}
@@ -1990,7 +2008,7 @@ class FunctionChecker {
 			// answers `undefined` past the end where Go and Rust panic, so an unprovable index is a
 			// diagnostic-free Option here rather than a bug the compiler would otherwise have to
 			// reject outright.
-			return provablyInRange(index, target.type)
+			return !forceChecked && provablyInRange(index, target.type)
 				? this.op("seq.get", [target, index], node.span)
 				: this.op("seq.at", [target, index], node.span);
 		}
@@ -2014,6 +2032,25 @@ class FunctionChecker {
 			span,
 			"prove the string is ASCII first, for example a regex guard (`if (!PATTERN.test(value)) " +
 				"return …`) or `str.asAscii`, and only then does the position mean the same thing everywhere",
+		);
+		return false;
+	}
+
+	/**
+	 * `toUpperCase`/`toLowerCase` only mean the same thing as `str.asciiUpper`/`str.asciiLower`
+	 * once the string is proven ASCII (see `CASE_STRING_METHODS`); an unproven string is a
+	 * diagnostic, never a silent lowering that would run different case tables in different
+	 * targets.
+	 */
+	private requireAsciiCase(target: CExpr, construct: string, span: Span): boolean {
+		if (target.type.kind === "String" && target.type.cls !== "none") return true;
+		this.report(
+			"E_UNICODE_CASE",
+			`${construct} runs JavaScript's full Unicode case mapping, which touches scalars an ` +
+				"ASCII-only case fold leaves alone, and differs again by target outside U+007F",
+			span,
+			"prove the string is ASCII first, for example a regex guard (`if (!PATTERN.test(value)) " +
+				"return …`) or `str.asAscii`, and only then does casing mean the same thing everywhere",
 		);
 		return false;
 	}
@@ -2121,7 +2158,14 @@ class FunctionChecker {
 
 	private logical(node: Extract<HExpr, { kind: "logical" }>): CExpr {
 		if (node.op === "??") {
-			const left = this.expr(node.left);
+			// `xs[i] ?? fallback` / `s[i] ?? fallback`: under `noUncheckedIndexedAccess`, real
+			// TypeScript already types a bracket index `T | undefined` regardless of what the
+			// checker can prove about `i`, and writing `?? fallback` is the author's own statement
+			// that they want the absent case, not a claim about provability — so the bracket picks
+			// the checked accessor here unconditionally. A bare `xs[i]` elsewhere still uses
+			// provability (see `index()`), because there the author is asking for a value, not
+			// choosing between the two.
+			const left = node.left.kind === "index" ? this.index(node.left, true) : this.expr(node.left);
 			if (left.type.kind !== "Option") {
 				this.report(
 					"E_COALESCE",
@@ -2433,6 +2477,9 @@ class FunctionChecker {
 				return { kind: "lit", value: 0n, type: tNever, span };
 			}
 			if (POSITIONAL_STRING_METHODS.has(method) && !this.requireAsciiPositional(target, `\`${method}\``, span)) {
+				return { kind: "lit", value: 0n, type: tNever, span };
+			}
+			if (CASE_STRING_METHODS.has(method) && !this.requireAsciiCase(target, `\`${method}\``, span)) {
 				return { kind: "lit", value: 0n, type: tNever, span };
 			}
 			return this.intrinsicCallWith(

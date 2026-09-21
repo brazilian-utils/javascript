@@ -2,7 +2,7 @@
 	"src/lib_digits.rs#keep_alphanumeric": {
 		"module": "lib/digits",
 		"start": 575,
-		"end": 686
+		"end": 684
 	},
 	"src/lib_digits.rs#keep_digits": {
 		"module": "lib/digits",
@@ -11,23 +11,23 @@
 	},
 	"src/lib_digits.rs#is_repeated_run": {
 		"module": "lib/digits",
-		"start": 1134,
-		"end": 1357
+		"start": 1132,
+		"end": 1355
 	},
 	"src/lib_digits.rs#digit_at": {
 		"module": "lib/digits",
-		"start": 740,
-		"end": 841
+		"start": 738,
+		"end": 839
 	},
 	"src/lib_format.rs#pattern_slots": {
 		"module": "lib/format",
 		"start": 1345,
-		"end": 1956
+		"end": 2086
 	},
 	"src/lib_format.rs#format_with_pattern": {
 		"module": "lib/format",
-		"start": 2052,
-		"end": 2802
+		"start": 2182,
+		"end": 2821
 	},
 	"src/lib_format.rs#group_thousands": {
 		"module": "lib/format",
@@ -56,8 +56,8 @@
 	},
 	"src/lib_cnpj.rs#random_cnpj_base": {
 		"module": "lib/cnpj",
-		"start": 2647,
-		"end": 2894
+		"start": 2700,
+		"end": 2947
 	},
 	"src/lib_cnpj.rs#cnpj_check_digit": {
 		"module": "lib/cnpj",
@@ -67,7 +67,7 @@
 	"src/lib_cnpj.rs#has_letter": {
 		"module": "lib/cnpj",
 		"start": 1706,
-		"end": 2310
+		"end": 2363
 	},
 	"src/lib_cnpj.rs#has_valid_cnpj_checksum": {
 		"module": "lib/cnpj",
@@ -76,8 +76,8 @@
 	},
 	"src/lib_cnpj.rs#is_repeated_cnpj": {
 		"module": "lib/cnpj",
-		"start": 2975,
-		"end": 3194
+		"start": 3028,
+		"end": 3247
 	},
 	"src/generate_cnpj.rs#generate_cnpj": {
 		"module": "generate-cnpj",
@@ -132,22 +132,22 @@
 	"src/lib_json.rs#matches_at": {
 		"module": "lib/json",
 		"start": 582,
-		"end": 1279
+		"end": 1317
 	},
 	"src/lib_json.rs#is_space": {
 		"module": "lib/json",
-		"start": 1329,
-		"end": 1453
+		"start": 1367,
+		"end": 1491
 	},
 	"src/lib_json.rs#hex_value": {
 		"module": "lib/json",
-		"start": 1524,
-		"end": 2025
+		"start": 1562,
+		"end": 2063
 	},
 	"src/lib_json.rs#json_string_field": {
 		"module": "lib/json",
-		"start": 2253,
-		"end": 4192
+		"start": 2291,
+		"end": 4230
 	},
 	"src/lib_civil.rs#civil_date": {
 		"module": "lib/civil",
@@ -177,7 +177,7 @@
 	"src/is_valid_cnpj.rs#is_valid_cnpj": {
 		"module": "is-valid-cnpj",
 		"start": 1397,
-		"end": 1919
+		"end": 2445
 	},
 	"src/is_valid_cpf.rs#is_valid_cpf": {
 		"module": "is-valid-cpf",

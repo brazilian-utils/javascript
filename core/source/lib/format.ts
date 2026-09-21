@@ -38,11 +38,12 @@ export function patternSlots(pattern: Ascii): IntRange<0, 2147483647> {
 	let slots: IntRange<0, 2147483647> = 0;
 
 	for (let index = 0; index < pattern.length; index++) {
-		// Kept as `str.charAtOpt`: `pattern` is always a fixed-length literal at its call sites
-		// (`PATTERN`, `OBFUSCATED_PATTERN`), so specialization proves this loop's index in range,
-		// and `pattern[index]` would silently pick the *unchecked* accessor — a different Core,
-		// not the same one respelled.
-		const symbol = str.charAtOpt(pattern, index) ?? "";
+		// `pattern[index] ?? ""`: `pattern` is always a fixed-length literal at its call sites
+		// (`PATTERN`, `OBFUSCATED_PATTERN`), so specialization proves this loop's index in range —
+		// but the `??` is the author's own statement that the absent case is wanted regardless, so
+		// it picks the checked `str.charAtOpt` unconditionally (see the `logical` handling of `??`
+		// on a bracket index), the same Core the namespace form always produced here.
+		const symbol = pattern[index] ?? "";
 
 		if (symbol === SLOT || symbol === HIDDEN) {
 			slots += 1;
@@ -59,10 +60,9 @@ export function formatWithPattern(value: Ascii, pattern: Ascii, pad: boolean): A
 	let out: Ascii = "";
 	let taken: Int = 0;
 
-	// `pattern[index]` here for the same reason as `patternSlots` above: always a fixed-length
-	// literal at the call site, so the checked accessor stays the namespace form.
+	// `pattern[index] ?? ""` here for the same reason as `patternSlots` above.
 	for (let index = 0; index < pattern.length; index++) {
-		const symbol = str.charAtOpt(pattern, index) ?? "";
+		const symbol = pattern[index] ?? "";
 
 		if (symbol === SLOT || symbol === HIDDEN) {
 			if (taken >= padded.length) {

@@ -709,6 +709,39 @@ class Lowering {
 				span,
 			};
 		}
+		// `value[index]?.charCodeAt(0)` is `str.codeAtOpt(value, index)`: the one ordinary spelling
+		// of the checked *numeric* accessor. `value.charCodeAt(i)` alone always answers `NaN` past
+		// the end, not `undefined`, so it has no `??` form (see the `logical` handling of `xs[i] ??
+		// fallback`); but `value[index]` alone already answers `undefined` there, and chaining
+		// `?.charCodeAt(0)` onto it reads the one scalar's code point only when it is present — the
+		// same case split `str.codeAtOpt` makes, spelled in ordinary TypeScript instead of assumed.
+		// The literal `0` and the plain (non-optional) bracket index are both required: anything
+		// else is not this idiom and falls through to the generic `?.` rejection below, whose
+		// message points back here.
+		if (
+			callee.type === "MemberExpression" &&
+			callee.optional === true &&
+			callee.computed === false &&
+			callee.property.name === "charCodeAt" &&
+			callee.object.type === "MemberExpression" &&
+			callee.object.computed === true &&
+			callee.object.optional !== true &&
+			node.arguments.length === 1 &&
+			node.arguments[0].type === "Literal" &&
+			node.arguments[0].value === 0
+		) {
+			return {
+				kind: "call",
+				callee: {
+					kind: "member",
+					target: { kind: "name", name: "str", span: this.span(callee.object) },
+					name: "codeAtOpt",
+					span: this.span(callee),
+				},
+				args: [this.expr(callee.object.object), this.expr(callee.object.property)],
+				span,
+			};
+		}
 		return undefined;
 	}
 
@@ -755,7 +788,13 @@ class Lowering {
 						"E_OPTIONAL_CHAIN",
 						"`?.` is allowed only on an Option, which the checker narrows explicitly",
 						node,
-						"check for `undefined` first",
+						node.property?.name === "charCodeAt"
+							? "the checked numeric accessor has exactly one ordinary spelling: " +
+								"`value[index]?.charCodeAt(0)`, a plain (non-optional) bracket index and a " +
+								"literal `0` — anything else, including a variable in place of the `0`, is not " +
+								"this idiom and has no honest translation, since `value.charCodeAt(i)` alone " +
+								"answers `NaN` past the end, not `undefined`"
+							: "check for `undefined` first",
 					);
 				}
 				if (node.computed === true) {
@@ -934,6 +973,13 @@ class Lowering {
 				);
 				return this.expr(node.expression);
 			case "ParenthesizedExpression":
+				return this.expr(node.expression);
+			case "ChainExpression":
+				// The parser wraps any expression containing a `?.` in this node, however deep —
+				// `value[index]?.charCodeAt(0)` arrives as `ChainExpression(CallExpression(…))`, not
+				// as the `CallExpression` directly. Unwrapping it here is what lets the `?.` shape
+				// recognized in `specialCall` (and the generic `E_OPTIONAL_CHAIN` rejection for
+				// every other one) ever see the node they match against.
 				return this.expr(node.expression);
 			case "AwaitExpression":
 				this.reject("E_AWAIT", "`await` is computed by the compiler, not written", node);

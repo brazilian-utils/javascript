@@ -26,6 +26,12 @@ export function isValidCnpj(cnpj: string, version: CnpjVersion): boolean {
 		const cleaned = keepAlphanumeric(cnpj);
 
 		if (hasLetter(cleaned) && cleaned.length === CNPJ_LENGTH) {
+			// Kept as `str.asciiUpper`: `.toUpperCase()` is only its ordinary spelling once the
+			// argument is proven ASCII (`requireAsciiCase`, docs/semantics.md §7.1), and `trimmed` is
+			// `cnpj.trim()` on the raw, unsanitized input — it carries no such proof, unlike
+			// `keepAlphanumeric`'s own `str.asciiUpper` call, which now reads `.toUpperCase()`
+			// because its argument is the result of `re.retain`, already typed `Ascii`. Proving
+			// `trimmed` ASCII first would mean restructuring this check, not respelling it.
 			return CNPJ_FORMAT.test(str.asciiUpper(trimmed)) && hasValidCnpjChecksum(cleaned);
 		}
 	}

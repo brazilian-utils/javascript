@@ -9,29 +9,39 @@
  * against. Not every utility can run yet: `format-currency` needs `dec.*` (no exact decimal in
  * JavaScript), `generate-cpf`/`generate-cnpj` need `random.nextU32` (an effect with no unbiased
  * `Math.random` equivalent), `get-holidays`/`is-business-day` need `date.*` (`new Date` is
- * refused), `get-address-info-by-cep` needs `http.request`/`task.race` (no shared meaning with
- * `fetch`'s `Promise<Response>`), and `format-cnpj` unconditionally calls a helper whose checked
- * accessor (`str.charAtOpt` in `patternSlots`/`formatWithPattern`, over the format pattern) has
- * no ordinary spelling — see core/docs/idiomatic-migration.md for the full reasoning on each.
- * `results` below is the exact, closed set this step exercises; a utility is added here only once
- * at least one of its cases can run.
+ * refused), and `get-address-info-by-cep` needs `http.request`/`task.race` (no shared meaning with
+ * `fetch`'s `Promise<Response>`) — see core/docs/idiomatic-migration.md for the full reasoning on
+ * each. `results` below is the exact, closed set this step exercises; a utility is added here only
+ * once at least one of its cases can run.
  *
- * `isValidCpf` is the one utility that runs end to end for every case. `isValidCnpj` is partial:
- * everything except the alphanumeric (version "2") letter-detection helper (`hasLetter`, in
- * `lib/cnpj.ts`) runs, because that helper's index is never provably in range (see its comment),
- * so it keeps the checked `str.codeAtOpt` — the one checked *numeric* accessor the idiom table
- * has no ordinary spelling for. Every case is still attempted rather than pre-filtered, so a case
- * that reaches that line is confirmed to fail with exactly that gap, not silently dropped — a
- * change that fixes or breaks it is caught either way.
+ * `isValidCpf` and `formatCnpj` run end to end for every case: both were blocked, before the
+ * checked accessors (`str.charAtOpt`, `str.codeAtOpt`, `seq.at`) gained ordinary spellings, on a
+ * checked positional read with no provable bound (`formatWithPattern`'s scan of the format
+ * pattern, and `isValidCpf`'s own digit scan) — now `pattern[index] ?? ""` and its kin.
+ *
+ * `isValidCnpj` is partial, but for a different reason than it used to be: the alphanumeric
+ * (version `"2"`) letter-detection helper (`hasLetter`, in `lib/cnpj.ts`) is fully migrated now —
+ * `value[index]?.charCodeAt(0) ?? 0` is the ordinary spelling of the checked *numeric* accessor
+ * `str.codeAtOpt` this migration adds — so it no longer blocks anything. What still does is a
+ * separate, unrelated gap `is-valid-cnpj.ts` documents in place: once a value is confirmed
+ * alphanumeric and the right length, the checker validates its *unsanitized, trimmed* shape with
+ * `CNPJ_FORMAT.test(str.asciiUpper(trimmed))`, and `trimmed` (`cnpj.trim()` on the raw external
+ * input) carries no ASCII proof, so `.toUpperCase()` — the ordinary spelling this migration also
+ * adds for `str.asciiUpper`, but only on a proven-ASCII argument — is not available to it. Every
+ * case is still attempted rather than pre-filtered, so a case that reaches that line is confirmed
+ * to fail with exactly that gap, not silently dropped — a change that fixes or breaks it is
+ * caught either way.
  */
 
 import { isValidCpf as sourceIsValidCpf } from "../source/is-valid-cpf";
 import { isValidCnpj as sourceIsValidCnpj } from "../source/is-valid-cnpj";
+import { formatCnpj as sourceFormatCnpj } from "../source/format-cnpj";
 
 import { isValidCpf as referenceIsValidCpf } from "../../src/is-valid-cpf/is-valid-cpf";
 import { isValidCnpj as referenceIsValidCnpj } from "../../src/is-valid-cnpj/is-valid-cnpj";
+import { formatCnpj as referenceFormatCnpj } from "../../src/format-cnpj/format-cnpj";
 
-import { cnpjCases, cpfCases } from "./cases";
+import { cnpjCases, cpfCases, formatCnpjCases } from "./cases";
 
 /**
  * The `ReferenceError` an unmigrated ambient identifier (`str`, `seq`, `re`, `int`, `dec`,
@@ -107,6 +117,30 @@ const results: Coverage[] = [
 		(args) => sourceIsValidCnpj(args[0] as string, args[1] as "1" | "2"),
 		(args) => referenceIsValidCnpj(args[0] as string, { version: args[1] === "2" ? 2 : 1 }),
 	),
+	run(
+		"format-cnpj::formatCnpj",
+		formatCnpjCases(),
+		(args) => {
+			// `cases.ts` builds the options as an engine `record` Value (`{ fields: {...} }`), the
+			// same shape `conformance/run.ts` unwraps for its own reference call — `formatCnpj`'s
+			// contract wants the plain option record a DX would have already normalized.
+			const fields = (args[1] as { fields: Record<string, boolean | string> }).fields;
+			return sourceFormatCnpj(args[0] as string, {
+				pad: fields["pad"] as boolean,
+				version: fields["version"] === "2" ? "2" : "1",
+				obfuscate: fields["obfuscate"] as boolean,
+			});
+		},
+		(args) => {
+			const fields = (args[1] as { fields: Record<string, boolean | string> }).fields;
+			// The published package's own `version` is numeric (1 | 2), unlike the core's "1" | "2".
+			return referenceFormatCnpj(args[0] as string, {
+				pad: fields["pad"] as boolean,
+				version: fields["version"] === "2" ? 2 : 1,
+				obfuscate: fields["obfuscate"] as boolean,
+			});
+		},
+	),
 ];
 
 /** Utilities this step deliberately does not attempt, and why — see the file header for detail. */
@@ -117,7 +151,6 @@ const NOT_COVERED = [
 	"get-holidays::getHolidays (date.*, new Date has no proleptic-Gregorian equivalent)",
 	"is-business-day::isBusinessDay (date.*, same as get-holidays)",
 	"get-address-info-by-cep::getAddressInfoByCep (http.request/task.race, effects; also needs a live network to compare)",
-	"format-cnpj::formatCnpj (str.charAtOpt over the format pattern, unconditional on every call — see the file header)",
 ];
 
 let failed = false;
@@ -142,10 +175,10 @@ for (const entry of NOT_COVERED) {
 	process.stdout.write(`        ${entry}\n`);
 }
 
-// `isValidCpf` is fully migrated: every case must run for real, none may fall back to the
-// known-gap path, or this step would be quietly certifying less than it claims.
-{
-	const coverage = results.find((entry) => entry.name === "is-valid-cpf::isValidCpf")!;
+// `isValidCpf` and `formatCnpj` are fully migrated: every case must run for real, none may fall
+// back to the known-gap path, or this step would be quietly certifying less than it claims.
+for (const name of ["is-valid-cpf::isValidCpf", "format-cnpj::formatCnpj"]) {
+	const coverage = results.find((entry) => entry.name === name)!;
 	if (coverage.blocked !== 0) {
 		process.stdout.write(`FAILED  ${coverage.name}: expected to run fully, but ${coverage.blocked} case(s) hit an ambient gap\n`);
 		failed = true;
