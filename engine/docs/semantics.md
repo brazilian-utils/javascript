@@ -325,8 +325,8 @@ alternation of overlapping classes under an unbounded quantifier.
 outside an `Option`; `this`, prototypes, getters and setters, classes with bodies; dynamic property
 access; objects used as maps; escaping mutable values; closures that capture mutable locals;
 effectful lambdas inside combinators; generators, custom iterators, `for…in`; `while`; generic
-`try`/`catch`; host globals (`Date`, `Math`, `Intl`, `JSON`, `fetch`, timers, `console`); regex
-constructs outside section 6; recursion.
+`try`/`catch`; host globals (`Date`, `Intl`, `JSON`, `fetch`, timers, `console`, and every `Math`
+member except the handful section 7.1 admits); regex constructs outside section 6; recursion.
 
 **Allowed**: `const` and `let` with local mutation; `if`/`else`; counted `for`; `for…of`;
 `break` and `continue`; `return`; `throw` of a declared domain error; `switch` over an `Enum` with
