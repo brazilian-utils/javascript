@@ -55,6 +55,10 @@ function formattersFor(target: string): Formatter[] {
 			return [{ name: "ruff format", command: "ruff", args: ["format", "--no-cache", "."], probe: ["--version"] }];
 		case "go":
 			return [{ name: "gofmt", command: "gofmt", args: ["-w", "."], probe: ["-h"] }];
+		case "rust":
+			// `cargo fmt` is rustfmt: it runs rustfmt over every file the crate's Cargo.toml lists,
+			// which a bare `rustfmt <files>` invocation would have to enumerate by hand.
+			return [{ name: "rustfmt", command: "cargo", args: ["fmt"], probe: ["fmt", "--version"] }];
 		default:
 			return [];
 	}

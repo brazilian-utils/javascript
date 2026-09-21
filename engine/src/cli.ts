@@ -18,11 +18,13 @@ import type { TargetName } from "./project.ts";
 import { TYPESCRIPT_BACKEND } from "./targets/typescript/index.ts";
 import { PYTHON_BACKEND } from "./targets/python/index.ts";
 import { GO_BACKEND } from "./targets/go/index.ts";
+import { RUST_BACKEND } from "./targets/rust/index.ts";
 
 const BACKENDS = {
 	typescript: TYPESCRIPT_BACKEND,
 	python: PYTHON_BACKEND,
 	go: GO_BACKEND,
+	rust: RUST_BACKEND,
 };
 
 function flag(name: string, fallback?: string): string | undefined {

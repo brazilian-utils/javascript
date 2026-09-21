@@ -1,0 +1,19 @@
+# Benchmarks the generated Rust core against brazilian-utils/rust, the handwritten crate it would
+# replace. Both are path dependencies: the generated one is produced by `npm run build` in `core/`,
+# and the handwritten one is a separate repository checked out beside this one (see
+# core/bench/README.md). Run with `cargo run --release` from this directory.
+[package]
+name = "benchrust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+coreout = { path = "../../out/rust" }
+brazilian_utils = { path = "../../../../brazilian-utils/rust" }
+
+[profile.release]
+# The handwritten and generated sides must be optimized identically for the comparison to mean
+# anything; these are cargo's release defaults, stated rather than assumed.
+opt-level = 3
+lto = false
+codegen-units = 16

@@ -2,7 +2,7 @@
  * The engine is generic.
  *
  * `examples/generic` is a project with no relation to the one that motivated the engine: it is
- * compiled by the same compiler, with the same standard library, and generates the same three
+ * compiled by the same compiler, with the same standard library, and generates the same four
  * targets. This test is what keeps a Brazilian Utils assumption from leaking into the compiler.
  */
 
@@ -15,6 +15,7 @@ import { Interpreter } from "../src/interp/interp.ts";
 import { TYPESCRIPT_BACKEND } from "../src/targets/typescript/index.ts";
 import { PYTHON_BACKEND } from "../src/targets/python/index.ts";
 import { GO_BACKEND } from "../src/targets/go/index.ts";
+import { RUST_BACKEND } from "../src/targets/rust/index.ts";
 
 const EXAMPLE = join(import.meta.dirname, "..", "examples", "generic", "source");
 
@@ -46,7 +47,7 @@ test("a project with no Brazilian anything compiles and runs", () => {
 
 test("the example generates for every target", () => {
 	const compilation = compileProject(EXAMPLE);
-	for (const backend of [TYPESCRIPT_BACKEND, PYTHON_BACKEND, GO_BACKEND]) {
+	for (const backend of [TYPESCRIPT_BACKEND, PYTHON_BACKEND, GO_BACKEND, RUST_BACKEND]) {
 		const result = generate(compilation.program, backend);
 		assert.ok(result.files.length > 0, `${backend.spec.name} generated nothing`);
 		for (const file of result.files) {

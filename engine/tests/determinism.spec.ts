@@ -11,11 +11,12 @@ import { generate } from "../src/backend/generate.ts";
 import { GO_BACKEND } from "../src/targets/go/index.ts";
 import { PYTHON_BACKEND } from "../src/targets/python/index.ts";
 import { TYPESCRIPT_BACKEND } from "../src/targets/typescript/index.ts";
+import { RUST_BACKEND } from "../src/targets/rust/index.ts";
 
 const EXAMPLE = join(import.meta.dirname, "..", "examples", "generic", "source");
 
 test("generating twice produces identical bytes", () => {
-	for (const backend of [TYPESCRIPT_BACKEND, PYTHON_BACKEND, GO_BACKEND]) {
+	for (const backend of [TYPESCRIPT_BACKEND, PYTHON_BACKEND, GO_BACKEND, RUST_BACKEND]) {
 		const first = generate(compileProject(EXAMPLE).program, backend);
 		const second = generate(compileProject(EXAMPLE).program, backend);
 		assert.deepEqual(

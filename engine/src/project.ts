@@ -10,7 +10,7 @@ import { Diagnostics } from "./diagnostics.ts";
 import { parseModule } from "./frontend/lower.ts";
 import type { HModule } from "./hir/ast.ts";
 
-export type TargetName = "typescript" | "python" | "go";
+export type TargetName = "typescript" | "python" | "go" | "rust";
 
 export type ProjectConfig = {
 	/** Human readable name, used in generated file headers. */
@@ -28,7 +28,7 @@ export const DEFAULT_CONFIG: ProjectConfig = {
 	name: "project",
 	sourceRoot: "source",
 	out: "out",
-	targets: ["typescript", "python", "go"],
+	targets: ["typescript", "python", "go", "rust"],
 };
 
 export function loadConfig(path: string): { config: ProjectConfig; root: string } {

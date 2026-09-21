@@ -2,10 +2,11 @@
 	"name": "brazilian-utils-core",
 	"sourceRoot": "source",
 	"out": "out",
-	"targets": ["typescript", "python", "go"],
+	"targets": ["typescript", "python", "go", "rust"],
 	"packages": {
 		"typescript": "core",
 		"python": "_core",
-		"go": "internal/core"
+		"go": "internal/core",
+		"rust": "coreout"
 	}
 }

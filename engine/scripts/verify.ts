@@ -60,7 +60,7 @@ const steps: Step[] = [
 		// checkout drifts from what is in the repository.
 		name: "formatters",
 		run: () => {
-			const missing = ["typescript", "python", "go"].flatMap((target) =>
+			const missing = ["typescript", "python", "go", "rust"].flatMap((target) =>
 				formattersOf(target)
 					.filter((formatter) => !formatter.installed)
 					.map((formatter) => `${target}: ${formatter.name}`),
@@ -155,6 +155,18 @@ const steps: Step[] = [
 	{
 		name: "go vet",
 		run: () => shell("go", ["vet", "./..."], join(project, "out", "go")),
+	},
+	{
+		name: "rust build",
+		run: () => shell("cargo", ["build", "--offline", "--release"], join(project, "out", "rust")),
+	},
+	{
+		name: "rust clippy",
+		run: () => shell("cargo", ["clippy", "--offline", "--", "-D", "warnings"], join(project, "out", "rust")),
+	},
+	{
+		name: "rust fmt check",
+		run: () => shell("cargo", ["fmt", "--check"], join(project, "out", "rust")),
 	},
 	{
 		name: "conformance",

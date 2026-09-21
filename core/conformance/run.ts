@@ -110,6 +110,16 @@ function runners(mode: "idiomatic" | "plain") {
 			cwd: resolve(ROOT, `out/go${suffix}`),
 			directory: resolve(ROOT, `out/go${suffix}`),
 		},
+		{
+			name: `rust${suffix}`,
+			command: "cargo",
+			// `--release`: `task.race` is real threads over a real (if fake) network call, and a
+			// debug build's overflow checks have nothing to catch — every range is already proven,
+			// same as the other three targets — so there is no reason to pay for them here.
+			args: ["run", "--offline", "--release", "--quiet", "--bin", "driver"],
+			cwd: resolve(ROOT, `out/rust${suffix}`),
+			directory: resolve(ROOT, `out/rust${suffix}`),
+		},
 	];
 }
 

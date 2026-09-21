@@ -1,0 +1,207 @@
+{
+	"functions": [
+		{
+			"name": "format_cnpj",
+			"module": "src/format_cnpj.rs",
+			"params": [
+				{
+					"name": "value",
+					"type": "String"
+				},
+				{
+					"name": "options",
+					"type": "FormatCnpjOptions"
+				}
+			],
+			"returns": "String",
+			"effects": []
+		},
+		{
+			"name": "format_currency",
+			"module": "src/format_currency.rs",
+			"params": [
+				{
+					"name": "value",
+					"type": "i64"
+				},
+				{
+					"name": "symbol",
+					"type": "bool"
+				}
+			],
+			"returns": "String",
+			"effects": []
+		},
+		{
+			"name": "generate_cnpj",
+			"module": "src/generate_cnpj.rs",
+			"params": [
+				{
+					"name": "env",
+					"type": "&dyn Capabilities"
+				}
+			],
+			"returns": "String",
+			"effects": [
+				"env"
+			]
+		},
+		{
+			"name": "generate_cpf",
+			"module": "src/generate_cpf.rs",
+			"params": [
+				{
+					"name": "env",
+					"type": "&dyn Capabilities"
+				}
+			],
+			"returns": "String",
+			"effects": [
+				"env"
+			]
+		},
+		{
+			"name": "get_address_info_by_cep",
+			"module": "src/get_address_info_by_cep.rs",
+			"params": [
+				{
+					"name": "cep",
+					"type": "String"
+				},
+				{
+					"name": "env",
+					"type": "&dyn Capabilities"
+				}
+			],
+			"returns": "AddressInfo",
+			"effects": [
+				"Fail<GetAddressInfoByCepNotFoundError>",
+				"Fail<GetAddressInfoByCepValidationError>",
+				"env"
+			]
+		},
+		{
+			"name": "get_holidays",
+			"module": "src/get_holidays.rs",
+			"params": [
+				{
+					"name": "year",
+					"type": "i64"
+				}
+			],
+			"returns": "Vec<Holiday>",
+			"effects": []
+		},
+		{
+			"name": "is_business_day",
+			"module": "src/is_business_day.rs",
+			"params": [
+				{
+					"name": "value",
+					"type": "i64"
+				},
+				{
+					"name": "include_optional",
+					"type": "bool"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		},
+		{
+			"name": "is_valid_cnpj",
+			"module": "src/is_valid_cnpj.rs",
+			"params": [
+				{
+					"name": "cnpj",
+					"type": "String"
+				},
+				{
+					"name": "version",
+					"type": "String"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		},
+		{
+			"name": "is_valid_cpf",
+			"module": "src/is_valid_cpf.rs",
+			"params": [
+				{
+					"name": "cpf",
+					"type": "String"
+				}
+			],
+			"returns": "bool",
+			"effects": []
+		}
+	],
+	"records": [
+		{
+			"name": "FormatCnpjOptions",
+			"fields": [
+				{
+					"name": "pad",
+					"type": "bool"
+				},
+				{
+					"name": "version",
+					"type": "String"
+				},
+				{
+					"name": "obfuscate",
+					"type": "bool"
+				}
+			]
+		},
+		{
+			"name": "AddressInfo",
+			"fields": [
+				{
+					"name": "cep",
+					"type": "String"
+				},
+				{
+					"name": "state",
+					"type": "String"
+				},
+				{
+					"name": "city",
+					"type": "String"
+				},
+				{
+					"name": "neighborhood",
+					"type": "String"
+				},
+				{
+					"name": "street",
+					"type": "String"
+				}
+			]
+		},
+		{
+			"name": "Holiday",
+			"fields": [
+				{
+					"name": "name",
+					"type": "String"
+				},
+				{
+					"name": "date",
+					"type": "i64"
+				},
+				{
+					"name": "r#type",
+					"type": "String"
+				}
+			]
+		}
+	],
+	"errors": [
+		"GetAddressInfoByCepError",
+		"GetAddressInfoByCepNotFoundError",
+		"GetAddressInfoByCepValidationError",
+		"HttpError"
+	]
+}

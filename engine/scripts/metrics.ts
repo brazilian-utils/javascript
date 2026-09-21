@@ -14,6 +14,7 @@ import { generate } from "../src/backend/generate.ts";
 import { GO_BACKEND } from "../src/targets/go/index.ts";
 import { PYTHON_BACKEND } from "../src/targets/python/index.ts";
 import { TYPESCRIPT_BACKEND } from "../src/targets/typescript/index.ts";
+import { RUST_BACKEND } from "../src/targets/rust/index.ts";
 import { typeToString } from "../src/types.ts";
 
 const ENGINE = resolve(import.meta.dirname, "..");
@@ -37,7 +38,7 @@ function linesUnder(root: string, filter: (path: string) => boolean = () => true
 }
 
 const compilation = compileProject(join(project, "source"));
-const backends = [TYPESCRIPT_BACKEND, PYTHON_BACKEND, GO_BACKEND];
+const backends = [TYPESCRIPT_BACKEND, PYTHON_BACKEND, GO_BACKEND, RUST_BACKEND];
 
 const lowering: Record<string, Record<string, number>> = {};
 const generatedLines: Record<string, number> = {};
