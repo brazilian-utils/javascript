@@ -153,6 +153,32 @@ be handed it, so nothing is skipped for being inconvenient, and the count is vis
 | `getAddressInfoByCep` | HTTP, JSON, retries, an error hierarchy, three providers raced    |
 | `getMunicipalities`   | 5,571 baked rows, and a pt-BR order no two targets agree on       |
 
+## Reading the output
+
+`out/` is committed. Everything in it is written by `node compiler/cli.ts` and says
+`DO NOT EDIT` at the top — it is there to be read, because "the compiler emits idiomatic code"
+is a claim worth checking rather than believing. What the targets' own toolchains then build
+from it (`target/`, `classes/`, `obj/`, `bin/`) is not committed.
+
+Where to look, shortest first:
+
+| file                                       | what it shows                                                                                                                                        |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `out/typescript/_bridge/format-cnpj.ts`    | 105 lines: the utility, the mask helper it shares, the two character classes it uses — and not one line of `isValidCnpj`, because pruning dropped it |
+| `out/typescript/_bridge/is-valid-cnpj.ts`  | the other half of that pair: check digits and two compiled patterns, and no mask helper                                                              |
+| `out/rust/include/*.h`                     | the C ABI a hand-written binding reads, with the "unset" sentinels spelled out                                                                       |
+| `out/go/get_address_info_by_cep/`          | `(T, error)` threaded through every call site, and goroutines with a channel for the provider race                                                   |
+| `out/rust/src/get_address_info_by_cep.rs`  | the same utility as `Result<T, runtime::Error>`, with an `mpsc` channel                                                                              |
+| `out/csharp/GetAddressInfoByCepUtility.cs` | the same utility again, `async` all the way down, from source that never says `async`                                                                |
+| `out/*/…get_municipalities…`               | the baked table: ~5,600 lines each, of which the last twenty are the logic                                                                           |
+
+Those seven municipality modules are **85% of the committed output**. That is the honest shape
+of a utility whose difficulty is a dataset, and it is why the table above says where to skip to.
+
+Two commands rewrite `out/`, and between them they cover it: `node compiler/cli.ts` clears each
+target and re-emits the utilities, and `node conformance/drivers.ts` adds the replay programs.
+`bash conformance/run-all.sh` runs both, so a clean checkout and a fresh run agree file for file.
+
 ## Adding a utility
 
 Two files, and nothing else changes:

@@ -183,7 +183,18 @@ export default defineConfig({
 			perf: "error",
 			pedantic: "error",
 		},
-		ignorePatterns: ["dist", "coverage", "docs", "reports", ".stryker-tmp", ".claude"],
+		// `spec/bridge/out` is the compiler's own output, committed so it can be read. Linting
+		// generated code would be linting the emitters at one remove, and the emitters are
+		// already linted.
+		ignorePatterns: [
+			"dist",
+			"coverage",
+			"docs",
+			"reports",
+			".stryker-tmp",
+			".claude",
+			"spec/bridge/out",
+		],
 		rules: {
 			"eslint/complexity": ["error", { max: 20 }],
 			"eslint/max-lines": "off",

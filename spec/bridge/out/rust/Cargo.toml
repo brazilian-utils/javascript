@@ -1,0 +1,14 @@
+[package]
+name = "brazilian_utils_bridge"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde_json = "1"
+ureq = "3"
+
+[lib]
+path = "src/lib.rs"
+# lib for a Rust caller, cdylib and staticlib for every binding that is not Rust.
+crate-type = ["lib", "cdylib", "staticlib"]

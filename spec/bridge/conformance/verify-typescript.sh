@@ -16,6 +16,10 @@ out="${bridge}/out/typescript"
 restore() {
 	rm -rf "${root}/src/_bridge"
 	git -C "${root}" checkout -- src >/dev/null 2>&1
+	# `compiler/cli.ts` clears each target before re-emitting, which drops the replay programs
+	# that are committed alongside the utilities. Put them back, so running this gate leaves
+	# `out/` exactly as the repository has it.
+	node "${bridge}/conformance/drivers.ts" >/dev/null
 }
 
 trap restore EXIT

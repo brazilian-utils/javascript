@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <AssemblyName>BrazilianUtilsBridge</AssemblyName>
+    <RootNamespace>BrazilianUtils.Bridge</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <!-- The boundary guards the dynamically typed hosts need are constants here, so the branch
+         they protect is dead code by construction. -->
+    <NoWarn>CS0162</NoWarn>
+  </PropertyGroup>
+</Project>
