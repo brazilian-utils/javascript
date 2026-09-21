@@ -23,11 +23,29 @@
 // CNPJ is compared at version "1" (numeric) only: brazilian-utils/go has no alphanumeric CNPJ
 // support at all (OnlyNumbers strips letters before the length check), so there is no fair way to
 // exercise the version "2" path against it.
+//
+// formatCurrency has no full-pipeline shape at all: the generated core's contract
+// (core/docs/contracts.md) always takes an already-scaled Decimal<2> int, never a raw float --
+// scaling is DX work, done once outside the core, on both sides equally here. It is therefore
+// "normalized" for the same reason the CPF/CNPJ normalized rows are: pre-processed input on both
+// sides. currency.FormatCurrency also has no symbol option (it always prefixes "R$"), so the
+// generated side is called with symbol=true to match.
+//
+// getHolidays and isBusinessDay are not covered for Go: brazilian-utils/go's date package exposes
+// only date.IsHoliday(time.Time, uf) -- a single-day boolean check, not a function returning a
+// year's list, and it has no weekend/business-day concept at all. There is no fair counterpart, so
+// both rows are left out; see core/bench/README.md.
+//
+// generateCpf and generateCnpj draw at random, so there is no fixed value to compare for equality;
+// see the README for the "does every value validate" rule used instead. NextU32 below is backed by
+// math/rand, the same non-cryptographic generator brazilian-utils/go's own cpf.Generate and
+// cnpj.Generate use, so the RNG choice itself is not what a lopsided ratio would be measuring here.
 package main
 
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"runtime"
 	"time"
@@ -35,7 +53,20 @@ import (
 	core "coreout"
 	hcnpj "github.com/brazilian-utils/go/cnpj"
 	hcpf "github.com/brazilian-utils/go/cpf"
+	hcurrency "github.com/brazilian-utils/go/currency"
 )
+
+// benchCapabilities is the "real" (non-fixture) environment the generated generateCpf/generateCnpj
+// need: only NextU32 is ever called by them, but the Capabilities interface requires all four
+// methods, so the other three are stubs that panic if ever reached.
+type benchCapabilities struct{}
+
+func (benchCapabilities) Request(request core.HttpRequest) *core.HttpResponse {
+	panic("not used by generateCpf/generateCnpj")
+}
+func (benchCapabilities) Now() int              { panic("not used by generateCpf/generateCnpj") }
+func (benchCapabilities) Sleep(milliseconds int) { panic("not used by generateCpf/generateCnpj") }
+func (benchCapabilities) NextU32() int          { return int(rand.Uint32()) }
 
 const budget = 1.5
 const warmup = 20_000
@@ -66,6 +97,17 @@ func mapStrings(in []string, f func(string) string) []string {
 
 var normalizedCPFs = mapStrings(rawCPFs, onlyDigits)
 var normalizedCNPJs = mapStrings(rawCNPJs, onlyDigits)
+
+// Raw floats, the shape currency.FormatCurrency's own callers use. Includes a negative value on
+// purpose -- see the README's "formatCurrency" honesty note for what that turns up.
+var currencyValues = []float64{0, 1234.56, -1234.56, 0.5, 999999.99, 10}
+
+func toCents(value float64) int {
+	if value < 0 {
+		return -int(-value*100 + 0.5)
+	}
+	return int(value*100 + 0.5)
+}
 
 type row struct {
 	Utility       string  `json:"utility"`
@@ -159,6 +201,69 @@ func compareString(utility, variant string, inputs []string, handwritten, genera
 	rows = append(rows, row{utility, variant, handwrittenMs, generatedMs, iterations})
 }
 
+func compareCurrency(utility, variant string, values []float64, handwritten func(float64) string, generated func(float64) string) {
+	for _, v := range values {
+		a := handwritten(v)
+		b := generated(v)
+		if a != b {
+			disagreements = append(disagreements, disagreement{utility, variant, v, a, b})
+		}
+	}
+
+	fmt.Printf("%s (%s)\n", utility, variant)
+	cursor := 0
+	handwrittenMs := measure(func() {
+		handwritten(values[cursor%len(values)])
+		cursor++
+	})
+	fmt.Printf("  handwritten                  %.1f ms\n", handwrittenMs)
+
+	cursor = 0
+	generatedMs := measure(func() {
+		generated(values[cursor%len(values)])
+		cursor++
+	})
+	fmt.Printf("  generated                    %.1f ms\n", generatedMs)
+
+	rows = append(rows, row{utility, variant, handwrittenMs, generatedMs, iterations})
+}
+
+const generateSamples = 500
+
+// checkGeneratorAgreement implements the README's generator agreement rule: generateCpf and
+// generateCnpj draw at random, so there is nothing to compare for equality. Instead, every value
+// either side produces must validate under BOTH validators -- its own port's and the generated
+// core's -- before either side is timed.
+func checkGeneratorAgreement(utility, variant string, handwrittenGenerate func() string, handwrittenIsValid func(string) bool, generatedGenerate func() string, generatedIsValid func(string) bool) {
+	for i := 0; i < generateSamples; i++ {
+		fromHandwritten := handwrittenGenerate()
+		if !handwrittenIsValid(fromHandwritten) {
+			disagreements = append(disagreements, disagreement{utility, variant, fromHandwritten, "rejected by its own port's validator", "n/a"})
+		}
+		if !generatedIsValid(fromHandwritten) {
+			disagreements = append(disagreements, disagreement{utility, variant, fromHandwritten, "valid (own validator)", "rejected by the generated core's validator"})
+		}
+
+		fromGenerated := generatedGenerate()
+		if !generatedIsValid(fromGenerated) {
+			disagreements = append(disagreements, disagreement{utility, variant, fromGenerated, "n/a", "rejected by the generated core's own validator"})
+		}
+		if !handwrittenIsValid(fromGenerated) {
+			disagreements = append(disagreements, disagreement{utility, variant, fromGenerated, "rejected by its own port's validator", "valid (own validator)"})
+		}
+	}
+}
+
+func compareGenerate(utility string, handwrittenGenerate func() string, generatedGenerate func() string) {
+	variant := "generate"
+	fmt.Printf("%s (%s)\n", utility, variant)
+	handwrittenMs := measure(func() { handwrittenGenerate() })
+	fmt.Printf("  handwritten                  %.1f ms\n", handwrittenMs)
+	generatedMs := measure(func() { generatedGenerate() })
+	fmt.Printf("  generated                    %.1f ms\n", generatedMs)
+	rows = append(rows, row{utility, variant, handwrittenMs, generatedMs, iterations})
+}
+
 func main() {
 	compareBool("isValidCpf", "full-pipeline", rawCPFs, hcpf.IsValid, core.IsValidCpf)
 	compareBool("isValidCpf", "normalized", normalizedCPFs, hcpf.IsValid, core.IsValidCpf)
@@ -169,6 +274,19 @@ func main() {
 	compareString("formatCnpj", "full-pipeline", rawCNPJs, hcnpj.Format, func(v string) string {
 		return core.FormatCnpj(v, core.FormatCnpjOptions{Pad: false, Version: "1", Obfuscate: false})
 	})
+
+	compareCurrency("formatCurrency", "normalized", currencyValues, hcurrency.FormatCurrency, func(v float64) string {
+		return core.FormatCurrency(toCents(v), true)
+	})
+
+	env := benchCapabilities{} // built once, like a real caller would, then reused
+	// cnpj.Generate(0) defaults to branch=1 (fixed), not a random branch like the generated core --
+	// irrelevant here, since only validity is being checked, not equality; see the README.
+	checkGeneratorAgreement("generateCpf", "generate", hcpf.Generate, hcpf.IsValid, func() string { return core.GenerateCpf(env) }, core.IsValidCpf)
+	compareGenerate("generateCpf", hcpf.Generate, func() string { return core.GenerateCpf(env) })
+
+	checkGeneratorAgreement("generateCnpj", "generate", func() string { return hcnpj.Generate(0) }, hcnpj.IsValid, func() string { return core.GenerateCnpj(env) }, func(v string) bool { return core.IsValidCnpj(v, "1") })
+	compareGenerate("generateCnpj", func() string { return hcnpj.Generate(0) }, func() string { return core.GenerateCnpj(env) })
 
 	fmt.Println("\n| utility | variant | handwritten | generated | ratio | budget |")
 	fmt.Println("| --- | --- | --- | --- | --- | --- |")
@@ -192,6 +310,14 @@ func main() {
 		{
 			"utility": "formatCnpj (obfuscate/pad/version 2)",
 			"reason":  "the Go port's Format has no pad, obfuscate or alphanumeric option, so only the plain full-pipeline case is comparable",
+		},
+		{
+			"utility": "getHolidays",
+			"reason":  "brazilian-utils/go's date package has no getHolidays: only date.IsHoliday(time.Time, uf), a single-day boolean check, not a function returning a year's list. No comparable counterpart.",
+		},
+		{
+			"utility": "isBusinessDay",
+			"reason":  "brazilian-utils/go has no isBusinessDay or business-day/weekend concept at all -- only date.IsHoliday, which does not consider weekends. No comparable counterpart.",
 		},
 	}
 	fmt.Println("\nSKIPPED:")

@@ -5,7 +5,7 @@
 # The `--no-idioms` trees are a comparison the verification builds, not an artifact anyone reads,
 # and the interpreter and build caches are not ours.
 out/*-plain/
-out/**/__pycache__/
+**/__pycache__/
 out/**/.ruff_cache/
 out/**/target/
 node_modules
