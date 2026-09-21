@@ -1,14 +1,21 @@
 import { toStandardSchema, @@validatorFn@@ } from "@brazilian-utils/brazilian-utils";
+import { useField } from "vee-validate";
 
 /** A @@label@@ as a Standard Schema, with no schema library at all. */
 export const @@kind@@Schema = toStandardSchema(@@validatorFn@@, {
   message: "Enter a valid @@label@@",@@validatorOptions@@
 });
 
-// Every form library takes it as is, the way it takes a Zod, Valibot or ArkType schema:
-// <form.Field name="@@kind@@" validators={{ onChange: @@kind@@Schema }} />   (TanStack Form)
+/**
+ * Every form library that speaks the interface takes it as it is. This is VeeValidate; TanStack
+ * Form takes the same schema as `validators={{ onChange: @@kind@@Schema }}` on a field, and
+ * react-hook-form through `standardSchemaResolver` once the schema covers the whole form.
+ */
+export function use@@Name@@Field() {
+  return useField("@@kind@@", @@kind@@Schema);
+}
 
-// On its own, it validates through the interface of the specification:
+/** On its own, it validates through the interface of the specification. */
 export function parse@@Name@@(value: unknown) {
   const result = @@kind@@Schema["~standard"].validate(value);
 
