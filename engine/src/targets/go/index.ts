@@ -141,7 +141,13 @@ export const GO_CANDIDATES: readonly Candidate[] = [
 	{ op: "float.fromInt", impl: "native", cost: cheap, emit: (args) => raw(`float64(${print(args[0]!)})`) },
 	{ op: "core.eq", impl: "native", cost: cheap, emit: binary("==") },
 
-	{ op: "opt.isNone", impl: "native", cost: cheap, emit: (args) => raw(`${print(args[0]!)} == nil`) },
+	{
+		op: "opt.isNone",
+		impl: "native",
+		cost: cheap,
+		// A binary node rather than a fragment, so negating it prints `!= nil` rather than `!(… == nil)`.
+		emit: (args) => ({ kind: "binary", op: "==", left: args[0]!, right: raw("nil") }),
+	},
 	{
 		op: "opt.unwrap",
 		impl: "native",

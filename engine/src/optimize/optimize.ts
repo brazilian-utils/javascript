@@ -88,8 +88,13 @@ export function foldExpr(expr: CExpr): CExpr {
 			return { ...expr, items: expr.items.map(foldExpr) };
 		case "field":
 			return { ...expr, target: foldExpr(expr.target) };
-		case "some":
-			return { ...expr, inner: foldExpr(expr.inner) };
+		case "some": {
+			const inner = foldExpr(expr.inner);
+			// `some(unwrap(x))` is `x`: the checker inserts the unwrap where it proved the value
+			// present, and re-wrapping it is a round trip every target would otherwise print.
+			if (inner.kind === "op" && inner.op === "opt.unwrap") return inner.args[0]!;
+			return { ...expr, inner };
+		}
 		case "lambda":
 			return { ...expr, body: expr.body.map(foldStmt) };
 		default:
