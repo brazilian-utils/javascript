@@ -1,4 +1,12 @@
-import { Component, Input, computed, forwardRef, signal } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  computed,
+  forwardRef,
+  signal,
+} from "@angular/core";
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { MaskDirective, type MaskChange } from "./mask.directive";
 
@@ -33,7 +41,7 @@ let fields = 0;
       [attr.aria-invalid]="Boolean(errorMessage)"
       [attr.aria-describedby]="errorId"
       (masked)="onMasked($event)"
-      (blur)="onTouched()"
+      (blur)="onBlur()"
     />
     <!-- On the page from the start, and announced when it gets its text. -->
     <p [id]="errorId" role="alert">{{ errorMessage }}</p>
@@ -45,6 +53,17 @@ export class Field implements ControlValueAccessor {
   @Input() autocomplete?: string;
   @Input() placeholder?: string;
   @Input() errorMessage?: string;
+
+  /** What the field shows, for whoever wraps it. */
+  @Input() set value(value: string) {
+    this.text.set(value ?? "");
+  }
+
+  /** What was typed, without its mask, for whoever wraps it. */
+  @Output() readonly valueChange = new EventEmitter<string>();
+
+  /** Left, for whoever wraps this field and answers to a form. */
+  @Output() readonly touched = new EventEmitter<void>();
 
   /** How to mask the field, when it is a field that is masked. */
   @Input() set mask(mask: Mask | undefined) {
@@ -58,19 +77,21 @@ export class Field implements ControlValueAccessor {
   private readonly masking = signal<Mask | undefined>(undefined);
 
   /** The value without its mask, the way a form holds it. */
-  protected readonly value = signal("");
+  protected readonly text = signal("");
   protected readonly disabled = signal(false);
   protected readonly format = computed(
     () => this.masking()?.format ?? ((typed: string) => typed),
   );
-  protected readonly parse = computed(() => this.masking()?.parse ?? ((typed: string) => typed));
-  protected readonly shown = computed(() => this.format()(this.value()));
+  protected readonly parse = computed(
+    () => this.masking()?.parse ?? ((typed: string) => typed),
+  );
+  protected readonly shown = computed(() => this.format()(this.text()));
 
   protected onChange: (value: string) => void = () => {};
   protected onTouched: () => void = () => {};
 
   writeValue(value: string | null): void {
-    this.value.set(value ?? "");
+    this.text.set(value ?? "");
   }
 
   registerOnChange(onChange: (value: string) => void): void {
@@ -85,8 +106,14 @@ export class Field implements ControlValueAccessor {
     this.disabled.set(disabled);
   }
 
+  protected onBlur() {
+    this.onTouched();
+    this.touched.emit();
+  }
+
   protected onMasked({ parsedValue }: MaskChange) {
-    this.value.set(parsedValue);
+    this.text.set(parsedValue);
     this.onChange(parsedValue);
+    this.valueChange.emit(parsedValue);
   }
 }

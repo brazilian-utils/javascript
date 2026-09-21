@@ -4,14 +4,12 @@ import { Field } from "./field";
 import { CepField } from "./cep-field";
 import { addressByCep } from "./address-by-cep";
 
-const EMPTY = { street: "", neighborhood: "", city: "", state: "" };
-
 @Component({
   selector: "app-address-form",
-  imports: [ReactiveFormsModule, CepField, Field],
+  imports: [ReactiveFormsModule, Field, CepField],
   template: `
     <form [formGroup]="form">
-      <app-field cep formControlName="cep" [errorMessage]="status()" />
+      <app-cep-field formControlName="cep" [errorMessage]="status()" />
 
       <!-- The same field the document field guide builds, told what it is about. -->
       <app-field label="Street" autocomplete="address-line1" formControlName="street" />
@@ -30,19 +28,19 @@ export class AddressForm {
     state: new FormControl("", { nonNullable: true }),
   });
 
+  // The control is what the field writes to, so the lookup answers to it.
   private readonly cep = signal("");
   private readonly address = addressByCep(this.cep);
+
+  private readonly typing = this.form.controls.cep.valueChanges.subscribe((cep) =>
+    this.cep.set(cep),
+  );
 
   protected status() {
     if (this.address.isLoading()) return "Looking it up…";
 
     return this.address.error() ? "No address for this CEP" : "";
   }
-
-  // The control is what the field writes to, so the lookup answers to it rather than to an event.
-  private readonly typing = this.form.controls.cep.valueChanges.subscribe((cep) =>
-    this.cep.set(cep),
-  );
 
   // What the lookup found is what the form starts from; it stays editable from there.
   private readonly fill = effect(() => {

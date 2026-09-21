@@ -1,20 +1,53 @@
-import { Directive, inject } from "@angular/core";
+import { Component, Input, forwardRef, signal } from "@angular/core";
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 @@fieldImports@@
 import { Field } from "./field";
 
-/**
- * What makes a field a @@label@@ and nothing else: put `@@kind@@` on the field and it takes the
- * label, the mask and the keyboard of a @@label@@, `<app-field @@kind@@ formControlName="@@kind@@" />`.
- */
-@Directive({ selector: "app-field[@@kind@@]" })
-export class @@Name@@Field {
-  private readonly field = inject(Field, { host: true });
+/** The field of the form, with what makes it a @@label@@ and nothing else. */
+@Component({
+  selector: "app-@@kind@@-field",
+  imports: [Field],
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => @@Name@@Field), multi: true },
+  ],
+  template: `
+    <app-field
+      label="@@label@@"
+      inputMode="@@inputMode@@"
+      autocomplete="@@autocomplete@@"
+      placeholder="@@placeholder@@"
+      [mask]="mask"
+      [errorMessage]="errorMessage"
+      [value]="value()"
+      (valueChange)="onValue($event)"
+      (touched)="onTouched()"
+    />
+  `,
+})
+export class @@Name@@Field implements ControlValueAccessor {
+  /** What the form says is wrong with the value, if anything. */
+  @Input() errorMessage?: string;
 
-  constructor() {
-    this.field.label = "@@label@@";
-    this.field.inputMode = "@@inputMode@@";
-    this.field.autocomplete = "@@autocomplete@@";
-    this.field.placeholder = "@@placeholder@@";
-    this.field.mask = { format: @@format@@, parse: @@parse@@ };
+  protected readonly mask = { format: @@format@@, parse: @@parse@@ };
+  protected readonly value = signal("");
+
+  protected onChange: (value: string) => void = () => {};
+  protected onTouched: () => void = () => {};
+
+  writeValue(value: string | null): void {
+    this.value.set(value ?? "");
+  }
+
+  registerOnChange(onChange: (value: string) => void): void {
+    this.onChange = onChange;
+  }
+
+  registerOnTouched(onTouched: () => void): void {
+    this.onTouched = onTouched;
+  }
+
+  protected onValue(value: string) {
+    this.value.set(value);
+    this.onChange(value);
   }
 }

@@ -7,7 +7,6 @@ import {
   type ValidatorFn,
 } from "@angular/forms";
 @@formImports@@
-import { Field } from "./field";
 import { @@Name@@Field } from "./@@kind@@-field";
 
 export const @@kind@@Validator: ValidatorFn = (control) =>
@@ -15,10 +14,10 @@ export const @@kind@@Validator: ValidatorFn = (control) =>
 
 @Component({
   selector: "app-@@kind@@-form",
-  imports: [ReactiveFormsModule, Field, @@Name@@Field],
+  imports: [ReactiveFormsModule, @@Name@@Field],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <app-field @@kind@@ formControlName="@@kind@@" [errorMessage]="errorMessage()" />
+      <app-@@kind@@-field formControlName="@@kind@@" [errorMessage]="errorMessage()" />
       <button type="submit">Submit</button>
     </form>
   `,

@@ -22,24 +22,34 @@ export function AddressForm() {
     if (lookup.status === "failed") setAddress(EMPTY);
   }, [lookup]);
 
-  // The same field the document field guide builds, told what it is about.
-  const field = (name: keyof typeof EMPTY, label: string, autoComplete?: string) => (
-    <Field
-      label={label}
-      autoComplete={autoComplete}
-      value={address[name]}
-      onChange={(value) => setAddress({ ...address, [name]: value })}
-    />
-  );
-
   return (
     <form onSubmit={(event) => event.preventDefault()}>
       <CepField value={cep} onChange={setCep} errorMessage={STATUS[lookup.status]} />
 
-      {field("street", "Street", "address-line1")}
-      {field("neighborhood", "Neighborhood")}
-      {field("city", "City", "address-level2")}
-      {field("state", "State", "address-level1")}
+      {/* The same field the document field guide builds, told what it is about. */}
+      <Field
+        label="Street"
+        autoComplete="address-line1"
+        value={address.street}
+        onChange={(street) => setAddress({ ...address, street })}
+      />
+      <Field
+        label="Neighborhood"
+        value={address.neighborhood}
+        onChange={(neighborhood) => setAddress({ ...address, neighborhood })}
+      />
+      <Field
+        label="City"
+        autoComplete="address-level2"
+        value={address.city}
+        onChange={(city) => setAddress({ ...address, city })}
+      />
+      <Field
+        label="State"
+        autoComplete="address-level1"
+        value={address.state}
+        onChange={(state) => setAddress({ ...address, state })}
+      />
     </form>
   );
 }
