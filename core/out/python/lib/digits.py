@@ -5,15 +5,19 @@
 
 import re
 
+_LIB_DIGITS_PATTERN_1 = re.compile("[^0-9A-Za-z]")
+
+_LIB_DIGITS_PATTERN_2 = re.compile("[^0-9]")
+
 
 def keep_alphanumeric(value: str) -> str:
     """Keeps only the ASCII digits and letters of a value, upper casing the letters."""
-    return re.sub("[^0-9A-Za-z]", "", value).upper()
+    return _LIB_DIGITS_PATTERN_1.sub("", value).upper()
 
 
 def keep_digits(value: str) -> str:
     """Keeps only the ASCII digits of a value, dropping every mask character."""
-    return re.sub("[^0-9]", "", value)
+    return _LIB_DIGITS_PATTERN_2.sub("", value)
 
 
 def is_repeated_run(value: str) -> bool:

@@ -7,6 +7,10 @@ import re
 from .lib.cpf import cpf_check_digit, is_repeated
 from .lib.digits import digit_at, keep_digits
 
+_IS_VALID_CPF_PATTERN_1 = re.compile(
+    "[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}"
+)
+
 
 def is_valid_cpf(cpf: str) -> bool:
     """Validates a CPF (Cadastro de Pessoas Físicas).
@@ -15,11 +19,10 @@ def is_valid_cpf(cpf: str) -> bool:
     into a string is the DX's job.
     """
     if not (
-        re.fullmatch(
-            "[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}",
+        _IS_VALID_CPF_PATTERN_1.fullmatch(
             cpf.strip(
                 "\t\n\u000b\u000c\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"
-            ),
+            )
         )
         is not None
     ):

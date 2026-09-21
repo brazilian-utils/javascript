@@ -22,6 +22,9 @@ class AddressInfo:
     street: str
 
 
+_GET_ADDRESS_INFO_BY_CEP_PATTERN_1 = re.compile("[0-9]{8}")
+
+
 def get_with_retry(url: str, env: Capabilities) -> Optional[HttpResponse]:
     """One GET, retried the way the published package retries: twice more, 250 ms apart."""
     for attempt in range(0, 3):
@@ -128,7 +131,7 @@ def get_address_info_by_cep(cep: str, env: Capabilities) -> AddressInfo:
     request is retried twice, 250 ms apart, exactly as the published package does. Turning a host
     value into the 8 digits this takes is the DX's job.
     """
-    if not (re.fullmatch("[0-9]{8}", cep) is not None):
+    if not (_GET_ADDRESS_INFO_BY_CEP_PATTERN_1.fullmatch(cep) is not None):
         raise GetAddressInfoByCepValidationError("CEP inv\u00e1lido")
     address: Optional[AddressInfo] = race_first_some(
         [(lambda: fetch_via_cep(cep, env)), (lambda: fetch_brasil_api(cep, env))]

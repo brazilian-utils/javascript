@@ -8,6 +8,16 @@ import re
 from .lib.cnpj import has_letter, has_valid_cnpj_checksum, is_repeated_cnpj
 from .lib.digits import keep_alphanumeric, keep_digits
 
+_IS_VALID_CNPJ_PATTERN_1 = re.compile(
+    "[0-9A-Z]{2}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9A-Z]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9A-Z]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9A-Z]{4}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}"
+)
+
+_IS_VALID_CNPJ_PATTERN_2 = re.compile("[a-z]")
+
+_IS_VALID_CNPJ_PATTERN_3 = re.compile(
+    "[0-9]{2}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{4}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}"
+)
+
 
 def is_valid_cnpj(cnpj: str, version: Literal["1", "2"]) -> bool:
     """Validates a CNPJ (Cadastro Nacional da Pessoa Jurídica), numeric or alphanumeric.
@@ -23,9 +33,10 @@ def is_valid_cnpj(cnpj: str, version: Literal["1", "2"]) -> bool:
         cleaned: str = keep_alphanumeric(cnpj)
         if has_letter(cleaned) and (len(cleaned) == 14):
             return (
-                re.fullmatch(
-                    "[0-9A-Z]{2}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9A-Z]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9A-Z]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9A-Z]{4}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}",
-                    re.sub("[a-z]", lambda match: match.group().upper(), trimmed),
+                _IS_VALID_CNPJ_PATTERN_1.fullmatch(
+                    _IS_VALID_CNPJ_PATTERN_2.sub(
+                        lambda match: match.group().upper(), trimmed
+                    )
                 )
                 is not None
             ) and has_valid_cnpj_checksum(cleaned)
@@ -33,12 +44,6 @@ def is_valid_cnpj(cnpj: str, version: Literal["1", "2"]) -> bool:
     if len(numeric) != 14:
         return False
     return (
-        (
-            re.fullmatch(
-                "[0-9]{2}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{3}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{4}[\\x09-\\x0d \\--/\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]*[0-9]{2}",
-                trimmed,
-            )
-            is not None
-        )
+        (_IS_VALID_CNPJ_PATTERN_3.fullmatch(trimmed) is not None)
         and (not is_repeated_cnpj(numeric))
     ) and has_valid_cnpj_checksum(numeric)

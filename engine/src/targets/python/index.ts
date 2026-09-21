@@ -734,6 +734,41 @@ export function printRecord(record: TRecord): string {
 	return `@dataclass(frozen=True)\nclass ${record.name}:\n${doc}${fields}`;
 }
 
+/** A module path as a Python identifier fragment: `lib/cnpj` becomes `LIB_CNPJ`. */
+function identifierPrefix(sourcePath: string): string {
+	return sourcePath.split(/[^a-zA-Z0-9]+/u).filter((part) => part !== "").join("_").toUpperCase();
+}
+
+/**
+ * Compiles each pattern once, at module level, instead of on every call.
+ *
+ * `re.fullmatch(pattern, value)` and `re.sub(pattern, …)` look the pattern up in `re`'s cache by
+ * its source string on every call, and these patterns are long. Measured, that lookup is about
+ * 50 ms per 200 000 calls for each of the two, against a compiled pattern's method call — roughly
+ * 15% of a validator. The pattern is known when the code is generated, so it is compiled then,
+ * which is also what a Python author would write.
+ *
+ * The names carry the module so a reader can tell where a pattern came from.
+ */
+function hoistPatterns(module: TModule, body: string): { body: string; declarations: string[] } {
+	const names = new Map<string, string>();
+	const prefix = identifierPrefix(module.sourcePath);
+	const hoisted = body.replaceAll(
+		/\bre\.(fullmatch|sub)\((("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*'))(, )/gu,
+		(_match, method: string, literal: string, _double: string, _single: string, tail: string) => {
+			const existing = names.get(literal);
+			const name = existing ?? `_${prefix}_PATTERN_${names.size + 1}`;
+			if (existing === undefined) names.set(literal, name);
+			// `re.sub(pattern, repl, value)` becomes `pattern.sub(repl, value)`: the pattern stops
+			// being an argument, and the separator that followed it goes with it.
+			void tail;
+			return `${name}.${method}(`;
+		},
+	);
+	const declarations = [...names].map(([literal, name]) => `${name} = re.compile(${literal})`);
+	return { body: hoisted, declarations };
+}
+
 export function printModule(module: TModule): string {
 	const typingNames = new Set<string>();
 	// Module level constants are upper cased, the way Python names a constant, so every reference
@@ -744,6 +779,7 @@ export function printModule(module: TModule): string {
 			body.replaceAll(new RegExp(`\\b${constant.name}\\b`, "gu"), constant.name.toUpperCase()),
 		module.functions.map(printFunction).join("\n\n\n"),
 	);
+	const patterns = hoistPatterns(module, text);
 	const records = module.records.map(printRecord).join("\n\n\n");
 	for (const name of ["List", "Optional", "Literal", "Callable", "NoReturn"]) {
 		if (new RegExp(`\\b${name}\\[`).test(`${text}${records}`) || text.includes(`-> ${name}`)) {
@@ -781,7 +817,8 @@ export function printModule(module: TModule): string {
 	for (const constant of module.constants) {
 		parts.push(`${constant.name.toUpperCase()}: ${pyType(constant.type)} = ${print(constant.value)}`, "");
 	}
-	parts.push(text);
+	for (const declaration of patterns.declarations) parts.push(declaration, "");
+	parts.push(patterns.body);
 	return `${parts.join("\n").trimEnd()}\n`;
 }
 
