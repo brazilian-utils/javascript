@@ -20,7 +20,7 @@ import {
 	type StructDecl,
 	type Ty,
 } from "../ir.ts";
-import { optionReads, pascal, prose, screaming } from "../kit.ts";
+import { optionReads, pascal, prose, screaming, snake } from "../kit.ts";
 
 const RUNTIME = resolve(import.meta.dirname, "../runtime/go.go");
 
@@ -454,10 +454,10 @@ export const emit = (module: Module): Record<string, string> => {
 	return {
 		"runtime/runtime.go": readFileSync(RUNTIME, "utf8"),
 		"go.mod": "module brazilianutils/bridge\n\ngo 1.22\n",
-		[`${module.name}/${module.name}.go`]: `// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
+		[`${snake(module.name)}/${snake(module.name)}.go`]: `// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
 
-// Package ${module.name} holds the generated ${module.name} utilities.
-package ${module.name}
+// Package ${snake(module.name)} holds the generated ${module.name} utility.
+package ${snake(module.name)}
 
 import "brazilianutils/bridge/runtime"
 

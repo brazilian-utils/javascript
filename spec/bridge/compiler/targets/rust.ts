@@ -598,7 +598,7 @@ export const emit = (module: Module, allModules: Module[] = [module]): Record<st
 	// The same crate is the library a Rust caller uses and the shared core every other
 	// ecosystem binds to; `cabi.ts` adds the second surface without touching the first.
 	const cabi = emitCabi(module);
-	const modules = [...new Set(allModules.map((entry) => entry.name))];
+	const modules = [...new Set(allModules.map((entry) => snake(entry.name)))];
 
 	return {
 		...cabi,
@@ -613,7 +613,7 @@ ${modules.map((name) => `pub mod ${name};`).join("\n")}
 // The C ABI, for the ecosystems that bind to this crate instead of generating their own source.
 ${allModules
 	.filter((entry) => Object.keys(emitCabi(entry)).length > 0)
-	.map((entry) => `pub mod cabi_${entry.name};`)
+	.map((entry) => `pub mod cabi_${snake(entry.name)};`)
 	.join("\n")}
 `,
 		"Cargo.toml": `[package]
@@ -631,7 +631,7 @@ path = "src/lib.rs"
 # lib for a Rust caller, cdylib and staticlib for every binding that is not Rust.
 crate-type = ["lib", "cdylib", "staticlib"]
 `,
-		[`src/${module.name}.rs`]: `// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
+		[`src/${snake(module.name)}.rs`]: `// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
 
 //! ${module.doc}
 

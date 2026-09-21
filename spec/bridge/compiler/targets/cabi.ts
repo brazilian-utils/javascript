@@ -19,7 +19,7 @@
  * guessed at; those need a richer surface than this POC has.
  */
 import { type Expr, type FuncDecl, type Module, type Ty } from "../ir.ts";
-import { optionReads, snake } from "../kit.ts";
+import { optionReads, screaming, snake } from "../kit.ts";
 
 /** One parameter of the C entry point. */
 type Slot = { name: string; c: string; rust: string };
@@ -35,11 +35,13 @@ const scalarC = (ty: Ty): string => (ty.k === "bool" ? "int32_t" : "int64_t");
 const scalarRust = (ty: Ty): string => (ty.k === "bool" ? "i32" : "i64");
 
 /**
- * The entry point name a C caller sees: `cnpj_is_valid_cnpj`, module prefixed so two utilities
- * can live in one library without colliding.
+ * The entry point name a C caller sees: `is_valid_cnpj`, or `<module>_<function>` for the rare
+ * module that exposes more than one, so two utilities never collide in one library.
  */
 const symbol = (module: Module, entry: FuncDecl): string =>
-	`${snake(module.name)}_${snake(entry.name)}`;
+	snake(module.name) === snake(entry.name)
+		? snake(entry.name)
+		: `${snake(module.name)}_${snake(entry.name)}`;
 
 /**
  * Whether a function can be exposed, and why not when it cannot.
@@ -189,8 +191,8 @@ const header = (module: Module, exposed: FuncDecl[]): string => {
  * is too small nothing is written and the length needed is returned, so the caller can size it
  * and call again.
  */
-#ifndef BRAZILIAN_UTILS_${module.name.toUpperCase()}_H
-#define BRAZILIAN_UTILS_${module.name.toUpperCase()}_H
+#ifndef BRAZILIAN_UTILS_${screaming(module.name)}_H
+#define BRAZILIAN_UTILS_${screaming(module.name)}_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -207,6 +209,59 @@ ${declarations}
 
 #endif
 `;
+};
+
+/** One argument of a C entry point, as a caller has to build it. */
+export type AbiArg =
+	| { k: "text"; param: string }
+	| { k: "scalar"; param: string; ty: Ty }
+	| { k: "option"; field: string; ty: Ty; unset: string };
+
+/** What a caller needs to know to reach one entry point: its symbol, arguments and answer. */
+export type Abi = { symbol: string; args: AbiArg[]; returns: "bool" | "string" };
+
+/**
+ * Describes the C entry point of one function, for a caller that has to build the call.
+ *
+ * @param {Module} module - The compiled module.
+ * @param {FuncDecl} entry - The exported function.
+ * @returns {Abi | undefined} The description, or undefined when the shape cannot cross a C
+ *   boundary at all.
+ */
+export const abiOf = (module: Module, entry: FuncDecl): Abi | undefined => {
+	if (refuse(entry) !== "") return undefined;
+
+	const args: AbiArg[] = [];
+
+	for (const param of entry.params) {
+		if (param.ty.k === "named") continue;
+
+		args.push(
+			param.ty.k === "int" || param.ty.k === "bool"
+				? { k: "scalar", param: param.name, ty: param.ty }
+				: { k: "text", param: param.name },
+		);
+	}
+
+	for (const read of optionReads(entry)) {
+		const ty = read.expr.k === "optionField" ? read.expr.ty : ({ k: "int" } as Ty);
+		const fallback = read.expr.k === "optionField" ? read.expr.fallback : ({ k: "none" } as Expr);
+
+		args.push({
+			k: "option",
+			field: read.field,
+			ty,
+			// The sentinel the body already compares to: a flag is off at zero, and a number is
+			// unset at whatever the source falls back to.
+			unset: ty.k === "bool" ? "0" : String((fallback as Extract<Expr, { k: "int" }>).value ?? -1),
+		});
+	}
+
+	return {
+		symbol: symbol(module, entry),
+		args,
+		returns: entry.ret.k === "bool" ? "bool" : "string",
+	};
 };
 
 /**
@@ -236,7 +291,7 @@ export const emit = (module: Module): Record<string, string> => {
 			: `//\n// Not exposed, because the shapes below need more than pointers and integers:\n${skipped.join("\n")}\n`;
 
 	return {
-		[`src/cabi_${module.name}.rs`]: `// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
+		[`src/cabi_${snake(module.name)}.rs`]: `// Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
 //
 // The C ABI of this module: what a hand-written binding in Python, Ruby, C#, Java or Erlang
 // calls. Everything is a pointer, a length or an integer, and nothing crosses that either side
@@ -246,6 +301,6 @@ use crate::${snake(module.name)};
 
 ${exposed.map((entry) => entryPoint(module, entry)).join("\n\n")}
 `,
-		[`include/${module.name}.h`]: header(module, exposed),
+		[`include/${snake(module.name)}.h`]: header(module, exposed),
 	};
 };

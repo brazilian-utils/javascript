@@ -527,6 +527,9 @@ export default defineConfig({
 				},
 				files: ["spec/bridge/**/*.ts"],
 				rules: {
+					// An emitter is one template per target, and splitting a template in half to
+					// satisfy a line count would hide the shape of the code it writes.
+					"eslint/max-lines-per-function": "off",
 					// `spec/bridge` is a compiler. Its emitters are one big switch over the IR per
 					// language, and their product is source code, so a few of the rules that keep
 					// library code readable work against it here.

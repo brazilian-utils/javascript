@@ -26,6 +26,7 @@ import {
 	type Ty,
 } from "./ir.ts";
 import { walk } from "./kit.ts";
+import { inline, prune } from "./link.ts";
 import { ClassTable, complement, parsePattern, toSteps } from "./regex.ts";
 
 /* eslint-disable */
@@ -1008,7 +1009,7 @@ const registerRegex = (name: string, source: string, scope: Scope): void => {
  * @returns {Module} The IR module.
  */
 export const compileModule = (path: string): Module => {
-	const source = readFileSync(path, "utf8");
+	const source = inline(path);
 	const parsed = parseSync(path, source);
 
 	if (parsed.errors.length > 0) throw new Error(`${path}: ${parsed.errors[0].message}`);
@@ -1039,7 +1040,12 @@ export const compileModule = (path: string): Module => {
 
 		const from = String((statement["source"] as Node)["value"]);
 
-		if (!from.endsWith("_std.ts")) throw new Error(`${path}: only "./_std.ts" can be imported`);
+		// The shared helpers are already spliced into `source` by `inline`, so their names are
+		// ordinary declarations of this module by the time the passes below run.
+		if (from.includes("_internals/")) continue;
+
+		if (!from.endsWith("_std.ts"))
+			throw new Error(`${path}: only "./_std.ts" and "./_internals/*.ts" can be imported`);
 
 		for (const specifier of (statement["specifiers"] as Node[]) ?? []) {
 			const name = String((specifier["imported"] as Node)["name"]);
@@ -1324,7 +1330,7 @@ export const compileModule = (path: string): Module => {
 	const firstComment = source.indexOf("*/");
 	const moduleDoc = firstComment === -1 ? "" : docBefore(source, firstComment + 2);
 
-	return {
+	return prune({
 		name: basename(path, ".ts"),
 		doc: moduleDoc.split("\n")[0] ?? "",
 		charClasses: scope.classes.all() as CharClass[],
@@ -1335,5 +1341,5 @@ export const compileModule = (path: string): Module => {
 		functions,
 		data: [...scope.data.values()],
 		constants: [...scope.constants.entries()].map(([name, entry]) => ({ name, ...entry })),
-	};
+	});
 };

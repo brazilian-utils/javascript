@@ -8,21 +8,31 @@
 import { type Expr, type FuncDecl, type Stmt } from "./ir.ts";
 
 /**
- * Converts a camelCase name to snake_case.
+ * Converts a camelCase or kebab-case name to snake_case.
+ *
+ * Module names are kebab-case, the way the directories under `src/` are, and every other name
+ * the frontend collects is camelCase, so both spellings arrive here.
  *
  * @param {string} name - The name.
  * @returns {string} The converted name.
  */
 export const snake = (name: string): string =>
-	name.replaceAll(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+	name
+		.replaceAll(/([a-z0-9])([A-Z])/g, "$1_$2")
+		.replaceAll("-", "_")
+		.toLowerCase();
 
 /**
- * Converts a name to PascalCase.
+ * Converts a camelCase or kebab-case name to PascalCase.
  *
  * @param {string} name - The name.
  * @returns {string} The converted name.
  */
-export const pascal = (name: string): string => `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+export const pascal = (name: string): string =>
+	name
+		.split(/[-_]/)
+		.map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+		.join("");
 
 /**
  * Converts a camelCase name to kebab-case.
@@ -31,7 +41,10 @@ export const pascal = (name: string): string => `${name.charAt(0).toUpperCase()}
  * @returns {string} The converted name.
  */
 export const kebab = (name: string): string =>
-	name.replaceAll(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+	name
+		.replaceAll(/([a-z0-9])([A-Z])/g, "$1-$2")
+		.replaceAll("_", "-")
+		.toLowerCase();
 
 /**
  * Converts a name to SCREAMING_SNAKE_CASE.

@@ -18,7 +18,7 @@ import {
 	type Stmt,
 	type StructDecl,
 } from "../ir.ts";
-import { optionReads, prose, screaming, snake } from "../kit.ts";
+import { optionReads, pascal, prose, screaming, snake } from "../kit.ts";
 
 const RUNTIME = resolve(import.meta.dirname, "../runtime/ruby.rb");
 const NAMESPACE = "BrazilianUtilsBridge";
@@ -348,14 +348,14 @@ export const emit = (module: Module): Record<string, string> => {
 		...module.data.map((entry) => entry.name),
 	]);
 
-	const moduleName = `${module.name.charAt(0).toUpperCase()}${module.name.slice(1)}`;
+	const moduleName = pascal(module.name);
 	const constants = module.constants
 		.map((entry) => `    ${screaming(entry.name)} = ${expr(entry.expr)}.freeze`)
 		.join("\n");
 
 	return {
 		"lib/brazilian_utils_bridge/runtime.rb": readFileSync(RUNTIME, "utf8"),
-		[`lib/brazilian_utils_bridge/${module.name}.rb`]: `# frozen_string_literal: true
+		[`lib/brazilian_utils_bridge/${snake(module.name)}.rb`]: `# frozen_string_literal: true
 
 # Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
 

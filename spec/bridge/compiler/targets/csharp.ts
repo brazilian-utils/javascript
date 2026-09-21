@@ -545,7 +545,10 @@ export const emit = (module: Module): Record<string, string> => {
 		...module.data.map((entry) => entry.name),
 	]);
 
-	const className = pascal(module.name);
+	// C# refuses a member whose name matches its enclosing type, and a one-function module is
+	// exactly that case, so the class the function lives in carries a suffix. It is scaffolding
+	// either way: the published package wraps these in its own hand-written surface.
+	const className = `${pascal(module.name)}Utility`;
 	const constants = module.constants
 		.map((entry) =>
 			entry.ty.k === "list"

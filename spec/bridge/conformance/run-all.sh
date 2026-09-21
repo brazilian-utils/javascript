@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# Regenerates every target and replays the recorded expectations through all seven of them.
+# Records what the npm package answers, compiles every target, and replays the recording
+# through all of them.
 #
-# Three recordings, all taken from the JavaScript package this repository ships: the CNPJ
-# vectors, the municipality dump, and the CEP scenarios. A green run means the generated code
-# answers exactly what the handwritten code answers, in every language.
+# Nothing here knows which utilities exist. `conformance/record.ts` reads the recorders under
+# `conformance/cases/`, `compiler/cli.ts` compiles whatever is under `source/`, and
+# `conformance/drivers.ts` writes each target's replay program from the compiled signatures.
+# Adding a utility therefore changes this script not at all.
 #
-# The CEP replay needs somewhere to send its requests, so the same scenario table is served
-# over HTTP on a local port and every target is pointed at it through the runtime's
-# BRUTILS_BRIDGE_HTTP_ORIGIN hook.
+# A utility that reaches the network is served locally for the run, over the runtime's
+# `BRUTILS_BRIDGE_HTTP_ORIGIN` hook, so every target talks to the same answers the recording
+# was taken from.
 #
 # The eighth arm is not a language: it is the C ABI the Rust crate exposes, which is what a
 # hand-written binding in Python, Ruby, C#, Java or Erlang would call instead of generated
@@ -37,17 +39,21 @@ run() {
 	fi
 }
 
-step "recording the expectations from the package this repository ships"
-node "${bridge}/conformance/vectors.ts"
-node "${bridge}/conformance/municipalities.ts"
-node "${bridge}/conformance/cep.ts"
+step "recording what the package this repository ships answers"
+node "${bridge}/conformance/record.ts"
 
 step "compiling source/ into every target"
 node "${bridge}/compiler/cli.ts"
 node "${bridge}/conformance/drivers.ts"
 
-step "serving the CEP scenarios on ${BRUTILS_BRIDGE_HTTP_ORIGIN}"
-node "${bridge}/conformance/cep.ts" serve "${port}" &
+if [ ! -f "${out}/typescript/conformance.ts" ]; then
+	echo
+	echo "no utilities under source/: the engine has nothing to replay"
+	exit 0
+fi
+
+step "serving what the generated code talks to, on ${BRUTILS_BRIDGE_HTTP_ORIGIN}"
+node "${bridge}/conformance/serve.ts" "${port}" &
 server=$!
 trap 'kill "${server}" 2>/dev/null' EXIT
 sleep 1
@@ -68,13 +74,13 @@ step "rust"
 run rust bash -c "cd '${out}/rust' && cargo run --quiet --release --bin conformance 2>/dev/null"
 
 step "java"
-run java bash -c "cd '${out}/java' && javac -nowarn -d classes *.java >/dev/null 2>&1 && java -cp classes Conformance ../../conformance/vectors.tsv"
+run java bash -c "cd '${out}/java' && javac -nowarn -d classes *.java >/dev/null 2>&1 && java -cp classes Conformance"
 
 step "c abi (the shared core every hand-written binding calls)"
-run cabi bash -c "cd '${out}/rust' && cargo build --quiet --release 2>/dev/null && gcc -O2 -D_GNU_SOURCE -I. conformance_cabi.c -o conformance_cabi -Ltarget/release -lbrazilian_utils_bridge -Wl,-rpath,'${out}/rust/target/release' && ./conformance_cabi ../../conformance/vectors.tsv"
+run cabi bash -c "cd '${out}/rust' && cargo build --quiet --release 2>/dev/null && gcc -O2 -D_GNU_SOURCE -I. conformance_cabi.c -o conformance_cabi -Ltarget/release -lbrazilian_utils_bridge -Wl,-rpath,'${out}/rust/target/release' && ./conformance_cabi"
 
 step "csharp"
-run csharp bash -c "cd '${out}/csharp' && DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet run --verbosity quiet -- ../../conformance/vectors.tsv"
+run csharp bash -c "cd '${out}/csharp' && DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet run --verbosity quiet"
 
 echo
 if [ "${status}" -eq 0 ]; then

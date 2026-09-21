@@ -411,9 +411,9 @@ export const emit = (module: Module, modules: Module[] = [module]): Record<strin
 	return {
 		"brutils_bridge/runtime.py": readFileSync(RUNTIME, "utf8"),
 		"brutils_bridge/__init__.py": `"""Generated Brazilian Utils."""\n\n${modules
-			.map((entry) => `from .${entry.name} import *  # noqa: F401,F403`)
+			.map((entry) => `from .${snake(entry.name)} import *  # noqa: F401,F403`)
 			.join("\n")}\n`,
-		[`brutils_bridge/${module.name}.py`]: `# Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
+		[`brutils_bridge/${snake(module.name)}.py`]: `# Code generated from spec/bridge/source/${module.name}.ts. DO NOT EDIT.
 """${module.doc}"""
 
 from dataclasses import dataclass
