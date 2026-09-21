@@ -146,8 +146,9 @@ be handed it, so nothing is skipped for being inconvenient, and the count is vis
 
 ## Ported so far
 
-Nothing yet: this is the engine on its own, and each utility is a change of its own on top of
-it. `conformance/run-all.sh` says so rather than passing vacuously.
+| utility       | what makes it worth porting                                       |
+| ------------- | ----------------------------------------------------------------- |
+| `isValidCnpj` | regular expressions, check digits, JavaScript's own type coercion |
 
 ## Adding a utility
 
