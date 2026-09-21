@@ -42,6 +42,26 @@ is a usable table: the operations a project does not use never have to be writte
 Where the language's own function is only conditionally equivalent, say so in `requires` rather
 than in a comment. `String#length` counting UTF-16 code units is a precondition, not a footnote.
 
+### `emit` returning `raw` hides everything inside it
+
+`emit` may return a `raw` node carrying printed text, and every target does for the shapes that
+have no node kind. It costs something: once an argument has been printed into that text, it is a
+string, and no later pass over the Target AST can see it. `hoistConstantTables` lifts a constant
+list out of a function body by walking that AST, so a table that reached a `raw` emission stays
+inline — which is why the generated Go builds its weight table on every call in `generate-cnpj`
+while the generated TypeScript, whose lowering of the same call keeps the argument as a node,
+lifts it to module scope.
+
+Prefer a structured node with the arguments as children (`call`, `method`, `binary`, `ternary`)
+and keep `raw` for leaves. Where the target really needs text around an argument, know that
+anything inside it is final.
+
+The same applies in reverse to work a target wants done once: a pattern, a table, a lookup built
+from a compile-time constant does not belong in the call path. Go compiles its regexes into
+package level `var`s, Python into module level `re.compile`, and Rust turns each into a `static`
+or a dedicated scanner, all decided at generation time. Each of those was a measured defect before
+it was a rule — the Go one cost 79.6x the price of the match it was performing.
+
 ## 4. Write the printer and the support file
 
 The printer renders the Target AST. The support file holds what the engine generates rather than
