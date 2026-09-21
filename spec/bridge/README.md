@@ -146,10 +146,11 @@ be handed it, so nothing is skipped for being inconvenient, and the count is vis
 
 ## Ported so far
 
-| utility       | what makes it worth porting                                       |
-| ------------- | ----------------------------------------------------------------- |
-| `isValidCnpj` | regular expressions, check digits, JavaScript's own type coercion |
-| `formatCnpj`  | a shared mask helper, and three options that interact             |
+| utility               | what makes it worth porting                                       |
+| --------------------- | ----------------------------------------------------------------- |
+| `isValidCnpj`         | regular expressions, check digits, JavaScript's own type coercion |
+| `formatCnpj`          | a shared mask helper, and three options that interact             |
+| `getAddressInfoByCep` | HTTP, JSON, retries, an error hierarchy, three providers raced    |
 
 ## Adding a utility
 
