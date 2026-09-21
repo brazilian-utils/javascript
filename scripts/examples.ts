@@ -161,6 +161,9 @@ function values(document: Document): Record<string, string> {
 		validatorSignal: call(validator, "this.value()"),
 		validatorControl: call(validator, "control.value"),
 		validatorFn: validator.fn,
+		// The schema is a schema of strings, so a validator that takes more than that is narrowed.
+		standardValidator:
+			validator.rest === "" ? validator.fn : `(value: string) => ${call(validator, "value")}`,
 		// Inside a schema the validator is called on the value alone, wrapped when it takes options.
 		validatorArrow:
 			validator.rest === ""

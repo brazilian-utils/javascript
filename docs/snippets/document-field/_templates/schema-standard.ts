@@ -1,27 +1,37 @@
 import { toStandardSchema, @@validatorFn@@ } from "@brazilian-utils/brazilian-utils";
+import { sValidator } from "@hono/standard-validator";
+import { FieldApi, FormApi } from "@tanstack/form-core";
+import { initTRPC } from "@trpc/server";
 import { useField } from "vee-validate";
 
+const isValid = @@standardValidator@@;
+
 /** A @@label@@ as a Standard Schema, with no schema library at all. */
-export const @@kind@@Schema = toStandardSchema(@@validatorFn@@, {
-  message: "Enter a valid @@label@@",@@validatorOptions@@
+export const @@kind@@Schema = toStandardSchema<string>(isValid, {
+  message: "Enter a valid @@label@@",
 });
 
-/**
- * Every form library that speaks the interface takes it as it is. This is VeeValidate; TanStack
- * Form takes the same schema as `validators={{ onChange: @@kind@@Schema }}` on a field, and
- * react-hook-form through `standardSchemaResolver` once the schema covers the whole form.
- */
-export function use@@Name@@Field() {
-  return useField("@@kind@@", @@kind@@Schema);
-}
+// Everything that speaks the interface takes it as it is, next to a Zod, Valibot or ArkType
+// schema. A few of them, all with the same @@kind@@Schema:
 
-/** On its own, it validates through the interface of the specification. */
-export function parse@@Name@@(value: unknown) {
-  const result = @@kind@@Schema["~standard"].validate(value);
+/** VeeValidate: the rules of a field. */
+export const use@@Name@@Field = () => useField("@@kind@@", @@kind@@Schema);
 
-  // The specification allows an asynchronous validator; this one always answers right away.
-  if (result instanceof Promise) throw new TypeError("Unexpected asynchronous validation");
-  if (result.issues) throw new Error(result.issues[0]?.message);
+/** TanStack Form: a field's validator, `validators={{ onChange: @@kind@@Schema }}`. */
+export const @@kind@@Field = new FieldApi({
+  form: new FormApi({ defaultValues: { @@kind@@: "" } }),
+  name: "@@kind@@",
+  validators: { onChange: @@kind@@Schema },
+});
 
-  return result.value;
-}
+/** tRPC: what a procedure takes. */
+export const @@kind@@Procedure = initTRPC
+  .create()
+  .procedure.input(@@kind@@Schema)
+  .query(({ input }) => input);
+
+/** Hono: what a route takes. */
+export const @@kind@@Route = sValidator("param", @@kind@@Schema);
+
+// react-hook-form takes one through `standardSchemaResolver`, once the schema covers the whole
+// form: `useForm({ resolver: standardSchemaResolver(signupSchema) })`.
