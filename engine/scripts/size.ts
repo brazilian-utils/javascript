@@ -18,8 +18,8 @@
  *     that moves whenever it is looked at is not one.
  *
  *   node engine/scripts/size.ts <project> --check
- *     Compare against the committed `SIZE.json` and exit 1 when an export grew past the budget
- *     below. This is what `verify` runs: the trade is checked, not remembered.
+ *     Compare against the committed `SIZE.json` and exit 1 when any export grew at all. This is
+ *     what `verify` runs: the trade is checked, not remembered.
  *
  *   node engine/scripts/size.ts <project> --write
  *     Accept the current measurement as the new baseline.
@@ -32,10 +32,18 @@ import { gzipSync } from "node:zlib";
 
 import { build } from "esbuild";
 
-/** A pre-existing export may grow by this fraction before it counts as a regression. */
-const GROWTH_RATIO = 0.05;
-/** …and by this many gzipped bytes, whichever is larger, so that tiny exports are not noisy. */
-const GROWTH_BYTES = 64;
+/**
+ * How many gzipped bytes a pre-existing export may grow before it counts as a regression.
+ *
+ * Zero, deliberately. Every other target's optimizations are paid for in the currency that target
+ * is judged in, and for this one that currency is bytes a browser downloads: an optimization here
+ * is only an optimization if the bundle does not grow for it. The number is not a tolerance to be
+ * widened when something gets close — a change that needs more room is a change whose trade has to
+ * be argued, measured and written down, and then accepted with `--write`.
+ *
+ * Measured on gzipped output, so it is also not noisy: the same input produces the same bytes.
+ */
+const GROWTH_BYTES = 0;
 
 type Measurement = { minified: number; gzip: number };
 type Snapshot = { exports: Record<string, Measurement>; total: Measurement };
@@ -126,12 +134,12 @@ async function main(): Promise<void> {
 			const previous = base.exports[name];
 			if (previous === undefined) continue;
 			const grew = measurement.gzip - previous.gzip;
-			if (grew > GROWTH_BYTES && grew / previous.gzip > GROWTH_RATIO) {
+			if (grew > GROWTH_BYTES) {
 				regressions.push(`${name}: ${formatBytes(previous.gzip)} -> ${formatBytes(measurement.gzip)} gzip (+${formatBytes(grew)})`);
 			}
 		}
 		const grewTotal = snapshot.total.gzip - base.total.gzip;
-		if (grewTotal > GROWTH_BYTES && grewTotal / base.total.gzip > GROWTH_RATIO) {
+		if (grewTotal > GROWTH_BYTES) {
 			regressions.push(`(all): ${formatBytes(base.total.gzip)} -> ${formatBytes(snapshot.total.gzip)} gzip (+${formatBytes(grewTotal)})`);
 		}
 		if (regressions.length > 0) {
