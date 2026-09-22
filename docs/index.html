@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Brazilian Utils</title>
-  <meta name="description" content="Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more." />
+  <meta name="description" content="Zero-dependency, tree-shakeable utilities for Brazilian data: validate, format, parse and generate CPF, CNPJ, CEP, boleto, Pix, holidays and more." />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#009739" />
@@ -31,7 +31,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Brazilian Utils" />
   <meta property="og:title" content="Brazilian Utils" />
-  <meta property="og:description" content="Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more." />
+  <meta property="og:description" content="Zero-dependency, tree-shakeable utilities for Brazilian data: validate, format, parse and generate CPF, CNPJ, CEP, boleto, Pix, holidays and more." />
   <meta property="og:url" content="https://brazilian-utils.com.br/" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:locale:alternate" content="pt_BR" />
@@ -49,14 +49,14 @@
           "@id": "https://brazilian-utils.com.br/#website",
           "url": "https://brazilian-utils.com.br/",
           "name": "Brazilian Utils",
-          "description": "Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more.",
+          "description": "Zero-dependency, tree-shakeable utilities for Brazilian data: validate, format, parse and generate CPF, CNPJ, CEP, boleto, Pix, holidays and more.",
           "inLanguage": ["en", "pt-BR"]
         },
         {
           "@type": "SoftwareSourceCode",
           "@id": "https://brazilian-utils.com.br/#library",
           "name": "Brazilian Utils",
-          "description": "Zero-dependency, tree-shakeable utils for Brazilian-specific businesses: CPF, CNPJ, boleto, Pix, CEP, holidays and more.",
+          "description": "Zero-dependency, tree-shakeable utilities for Brazilian data: validate, format, parse and generate CPF, CNPJ, CEP, boleto, Pix, holidays and more.",
           "url": "https://brazilian-utils.com.br/",
           "codeRepository": "https://github.com/brazilian-utils/javascript",
           "programmingLanguage": "TypeScript",
@@ -88,19 +88,8 @@
   <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/brazilian-utils/brand/main/favicons/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/brazilian-utils/brand/main/favicons/apple-touch-icon.png" />
 
-  <!-- docsify 5 core theme with the dark add-on always on, the look the site had before v5;
-       add media="(prefers-color-scheme: dark)" to the add-on to follow the system instead -->
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/core.min.css" />
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/addons/core-dark.min.css" />
-  <style>
-    :root {
-      /* The green of the official palette (github.com/brazilian-utils/brand) */
-      --theme-color: #009739;
-      /* The cover page shares the page background instead of the default gradient */
-      --cover-bg: var(--color-bg);
-      --cover-bg-overlay: none;
-    }
-  </style>
+  <!-- The docsify theme and the site's own styles, in one file shared with the live demos -->
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 
 <body class="loading sidebar-chevron-right">
@@ -126,7 +115,12 @@
       },
       alias: {
         '/': 'https://raw.githubusercontent.com/brazilian-utils/javascript/main/README.md',
-        '/pt-br/': '/pt-br/getting-started.md'
+        '/pt-br/': '/pt-br/getting-started.md',
+        // The guides live in a folder; they share their language's sidebar and navbar
+        '/guides/_sidebar.md': '/_sidebar.md',
+        '/guides/_navbar.md': '/_navbar.md',
+        '/pt-br/guides/_sidebar.md': '/pt-br/_sidebar.md',
+        '/pt-br/guides/_navbar.md': '/pt-br/_navbar.md'
       },
       repo: 'brazilian-utils/javascript',
       loadNavbar: true,
@@ -160,6 +154,165 @@
           hook.beforeEach(function (content) {
             var title = vm.frontmatter && vm.frontmatter.title;
             return title ? '# ' + title + '\n\n' + content : content;
+          });
+        },
+        // The framework tabs of an example page, and the select that picks which document the
+        // examples are about: every <div class="example" data-name> is a tab, and every
+        // <div class="variant" data-variant data-demo> inside it is one document. The live demo of
+        // the pair on screen, an iframe of docs/snippets, loads the first time it is shown and is
+        // as tall as its content. Both choices are remembered.
+        function (hook) {
+          hook.doneEach(function () {
+            var panels = [].slice.call(document.querySelectorAll('.example[data-name]'));
+            if (panels.length === 0) return;
+
+            var remember = function (key, value) {
+              try { localStorage.setItem(key, value); } catch (error) {}
+            };
+            var remembered = function (key) {
+              try { return localStorage.getItem(key); } catch (error) { return null; }
+            };
+
+            var variantsOf = function (panel) {
+              return [].slice.call(panel.querySelectorAll('.variant[data-variant]'));
+            };
+
+            var frames = [];
+
+            // Each demo measures itself and posts its height (docs/snippets/live/run.js), so the
+            // frame is exactly as tall as what it runs, message by message.
+            addEventListener('message', function (event) {
+              if (event.origin !== location.origin || !event.data || event.data.type !== 'example-height') return;
+              frames.forEach(function (frame) {
+                if (event.source !== frame.contentWindow) return;
+                frame.style.height = event.data.height + (frame.offsetHeight - frame.clientHeight) + 'px';
+              });
+            });
+
+            // The files of one example, as an editor's tabs: one strip per variant, the file name
+            // on each tab, one file on screen.
+            var addFiles = function (holder) {
+              var files = [].slice.call(holder.querySelectorAll('.file[data-file]'));
+              if (files.length < 2 || holder.querySelector('.file-tabs')) return;
+
+              var strip = document.createElement('div');
+              strip.className = 'file-tabs';
+              strip.setAttribute('role', 'tablist');
+
+              var open = function (name) {
+                files.forEach(function (file, index) {
+                  var selected = file.dataset.file === name;
+                  file.hidden = !selected;
+                  strip.children[index].setAttribute('aria-selected', String(selected));
+                });
+              };
+
+              files.forEach(function (file) {
+                file.setAttribute('role', 'tabpanel');
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.setAttribute('role', 'tab');
+                button.textContent = file.dataset.file;
+                button.addEventListener('click', function () { open(file.dataset.file); });
+                strip.appendChild(button);
+              });
+
+              files[0].parentNode.insertBefore(strip, files[0]);
+              open(files[0].dataset.file);
+            };
+
+            var addDemo = function (holder) {
+              if (!holder.dataset.demo || holder.querySelector('iframe')) return;
+              var frame = document.createElement('iframe');
+              frame.title = 'Live demo';
+              frame.src = holder.dataset.demo;
+              frames.push(frame);
+              // Whatever the page says before the code says what the demo is: the demo comes after
+              // it and before the code, wherever the page happens to keep the two.
+              holder.insertBefore(frame, holder.querySelector('.file, .variant'));
+            };
+
+            var current = { tab: null, variant: null };
+
+            var show = function () {
+              panels.forEach(function (panel, index) {
+                var selected = panel.dataset.name === current.tab;
+                list.children[index].setAttribute('aria-selected', String(selected));
+                panel.hidden = !selected;
+                var variants = variantsOf(panel);
+                if (variants.length === 0) {
+                  if (selected) { addDemo(panel); addFiles(panel); }
+                  return;
+                }
+                variants.forEach(function (variant) {
+                  variant.hidden = variant.dataset.variant !== current.variant;
+                  if (!selected || variant.hidden) return;
+                  addDemo(variant);
+                  addFiles(variant);
+                });
+              });
+              remember('example-tab', current.tab);
+              if (current.variant) remember('example-variant', current.variant);
+            };
+
+            var names = variantsOf(panels[0]).map(function (variant) {
+              return variant.dataset.variant;
+            });
+            var picker = null;
+
+            if (names.length > 0) {
+              picker = document.createElement('label');
+              picker.className = 'example-picker';
+              picker.textContent = document.documentElement.lang === 'pt-BR'
+                ? 'Escolha o documento que você quer ver:'
+                : 'Choose the document you want to see:';
+              var select = document.createElement('select');
+              names.forEach(function (name) {
+                var option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+              });
+              select.addEventListener('change', function () {
+                current.variant = select.value;
+                show();
+              });
+              picker.appendChild(select);
+              current.variant = names.indexOf(remembered('example-variant')) === -1 ? names[0] : remembered('example-variant');
+              select.value = current.variant;
+            }
+
+            // The document is a question the guide asks before the tabs answer which framework,
+            // so it says so in words, on a line of its own above them.
+            if (picker) panels[0].parentNode.insertBefore(picker, panels[0]);
+
+            var tabs = document.createElement('div');
+            tabs.className = 'example-tabs';
+            panels[0].parentNode.insertBefore(tabs, panels[0]);
+
+            var list = document.createElement('div');
+            list.className = 'example-tab-list';
+            list.setAttribute('role', 'tablist');
+            tabs.appendChild(list);
+
+            panels.forEach(function (panel) {
+              panel.setAttribute('role', 'tabpanel');
+              var button = document.createElement('button');
+              button.type = 'button';
+              button.setAttribute('role', 'tab');
+              button.textContent = panel.dataset.name;
+              button.addEventListener('click', function () {
+                current.tab = panel.dataset.name;
+                show();
+              });
+              list.appendChild(button);
+            });
+
+            var saved = remembered('example-tab');
+            current.tab = panels.some(function (panel) { return panel.dataset.name === saved; })
+              ? saved
+              : panels[0].dataset.name;
+            show();
           });
         },
         // Per-page metadata for search engines and link previews: the title, description,
@@ -290,6 +443,11 @@
   <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/front-matter.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@3/dist/docsify-copy-code.min.js"></script>
+  <!-- Grammars docsify's bundled Prism lacks, for the TypeScript, TSX and Vue examples -->
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-typescript.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-jsx.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-tsx.min.js"></script>
+  <script>Prism.languages.vue = Prism.languages.markup;</script>
 
   <!-- Context7 chat widget: a floating assistant that answers from this library's documentation
        indexed at context7.com/brazilian-utils/javascript. Loads asynchronously; the chat only

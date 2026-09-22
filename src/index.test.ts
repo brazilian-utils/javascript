@@ -88,7 +88,17 @@ import {
 	type RegistroProfissionalCouncil,
 	type State,
 	type StateCode,
+	type StandardSchemaV1,
+	type StandardSchemaV1FailureResult,
+	type StandardSchemaV1Issue,
+	type StandardSchemaV1Options,
+	type StandardSchemaV1PathSegment,
+	type StandardSchemaV1Props,
+	type StandardSchemaV1Result,
+	type StandardSchemaV1SuccessResult,
+	type StandardSchemaV1Types,
 	type StateName,
+	type ToStandardSchemaOptions,
 } from "./index";
 import * as brazilianUtils from "./index";
 
@@ -248,6 +258,7 @@ const PUBLIC = [
 	"parseVoterId",
 	"removeAccents",
 	"subBusinessDays",
+	"toStandardSchema",
 ].sort();
 
 const NETWORK_ENTRY_POINTS = new Set(["getAddressInfoByCep", "getCepInfoByAddress"]);
@@ -365,7 +376,17 @@ describe("Public API", () => {
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
 			State: State;
 			StateCode: StateCode;
+			StandardSchemaV1: StandardSchemaV1;
+			StandardSchemaV1FailureResult: StandardSchemaV1FailureResult;
+			StandardSchemaV1Issue: StandardSchemaV1Issue;
+			StandardSchemaV1Options: StandardSchemaV1Options;
+			StandardSchemaV1PathSegment: StandardSchemaV1PathSegment;
+			StandardSchemaV1Props: StandardSchemaV1Props;
+			StandardSchemaV1Result: StandardSchemaV1Result<unknown>;
+			StandardSchemaV1SuccessResult: StandardSchemaV1SuccessResult<unknown>;
+			StandardSchemaV1Types: StandardSchemaV1Types;
 			StateName: StateName;
+			ToStandardSchemaOptions: ToStandardSchemaOptions;
 		}> = {};
 
 		expect(publicTypes).toEqual({});

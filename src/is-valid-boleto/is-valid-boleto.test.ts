@@ -1,8 +1,8 @@
 import * as fc from "fast-check";
 
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
+import { boletos } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generateBoleto } from "../generate-boleto/generate-boleto";
 import { isValidBoleto } from "./is-valid-boleto";
 
 describe("isValidBoleto", () => {
@@ -133,16 +133,16 @@ describe("isValidBoleto", () => {
 
 		test("should accept every generated bank slip", () => {
 			fc.assert(
-				fc.property(fc.constantFrom(...types), (type) => {
-					expect(isValidBoleto(generateBoleto({ type }))).toBe(true);
+				fc.property(fc.gen(), fc.constantFrom(...types), (g, type) => {
+					expect(isValidBoleto(g(boletos, type))).toBe(true);
 				}),
 			);
 		});
 
 		test("should ignore the mask characters of a generated bank slip", () => {
 			fc.assert(
-				fc.property(fc.constantFrom(...types), (type) => {
-					const value = generateBoleto({ type });
+				fc.property(fc.gen(), fc.constantFrom(...types), (g, type) => {
+					const value = g(boletos, type);
 					const masked = `${value.slice(0, 5)}. ${value.slice(5, 20)}-${value.slice(20)}`;
 
 					expect(isValidBoleto(masked)).toBe(true);

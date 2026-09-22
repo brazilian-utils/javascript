@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /snippets/
 
 Sitemap: https://brazilian-utils.com.br/sitemap.xml

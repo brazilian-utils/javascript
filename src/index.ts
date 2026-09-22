@@ -246,6 +246,19 @@ export { parseProcessoJuridico } from "./parse-processo-juridico/parse-processo-
 export { parseVoterId } from "./parse-voter-id/parse-voter-id";
 export { removeAccents } from "./remove-accents/remove-accents";
 export { subBusinessDays } from "./sub-business-days/sub-business-days";
+export {
+	type StandardSchemaV1,
+	type StandardSchemaV1FailureResult,
+	type StandardSchemaV1Issue,
+	type StandardSchemaV1Options,
+	type StandardSchemaV1PathSegment,
+	type StandardSchemaV1Props,
+	type StandardSchemaV1Result,
+	type StandardSchemaV1SuccessResult,
+	type StandardSchemaV1Types,
+	type ToStandardSchemaOptions,
+	toStandardSchema,
+} from "./to-standard-schema/to-standard-schema";
 
 /**
  * The parameters of `generateProcessoJuridico`, the 2.3.0 name of

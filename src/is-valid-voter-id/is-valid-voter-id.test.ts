@@ -1,6 +1,11 @@
 import * as fc from "fast-check";
 
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import {
+	anyValue,
+	digitsOfOtherLength,
+	maskSeparators,
+	voterIds,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { generateVoterId } from "../generate-voter-id/generate-voter-id";
@@ -110,8 +115,8 @@ describe("isValidVoterId", () => {
 	describe("properties", () => {
 		test("should accept a generated voter id whatever mask surrounds its digits", () => {
 			fc.assert(
-				fc.property(maskSeparators([".", " "], 3, 3), (separators) => {
-					const voterId = generateVoterId();
+				fc.property(fc.gen(), maskSeparators([".", " "], 3, 3), (g, separators) => {
+					const voterId = g(voterIds);
 					const head = `${separators[0]}${voterId.slice(0, 8)}${separators[1]}`;
 
 					expect(isValidVoterId(`${head}${voterId.slice(8)}${separators[2]}`)).toBe(true);

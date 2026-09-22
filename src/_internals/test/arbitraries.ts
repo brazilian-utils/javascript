@@ -1,7 +1,31 @@
 import * as fc from "fast-check";
 
+import { type GeneratePhoneType } from "../../generate-phone/generate-phone";
 import { type LicensePlateFormat } from "../../get-format-license-plate/get-format-license-plate";
+import { UF_TO_VOTER_ID_CODE } from "../../is-valid-voter-id/constants";
+import { assembleBoletoArrecadacao } from "../assemble-boleto-arrecadacao/assemble-boleto-arrecadacao";
+import { assembleBoletoBancario } from "../assemble-boleto-bancario/assemble-boleto-bancario";
+import { calculateCnhFirstVerifier } from "../calculate-cnh-first-verifier/calculate-cnh-first-verifier";
+import { calculateCnhSecondVerifier } from "../calculate-cnh-second-verifier/calculate-cnh-second-verifier";
+import { calculateCnpjCheckDigit } from "../calculate-cnpj-check-digit/calculate-cnpj-check-digit";
+import { calculateCpfCheckDigit } from "../calculate-cpf-check-digit/calculate-cpf-check-digit";
+import { calculatePisCheckDigit } from "../calculate-pis-check-digit/calculate-pis-check-digit";
+import { calculateProcessoJuridicoCheckDigits } from "../calculate-processo-juridico-check-digits/calculate-processo-juridico-check-digits";
+import { calculateVoterIdFirstDigit } from "../calculate-voter-id-first-digit/calculate-voter-id-first-digit";
+import { calculateVoterIdSecondDigit } from "../calculate-voter-id-second-digit/calculate-voter-id-second-digit";
+import { VALID_AREA_CODES } from "../constants/area-codes";
+import { ARRECADACAO_SEGMENTS } from "../constants/arrecadacao";
+import { CNPJ_FIRST_DIGIT_WEIGHTS, CNPJ_SECOND_DIGIT_WEIGHTS } from "../constants/cnpj";
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../constants/holidays";
+import { PROCESSO_JURIDICO_TRIBUNALS } from "../constants/processo-juridico";
+import {
+	SERVICE_PHONE_ABBREVIATED_LENGTH,
+	SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH,
+	SERVICE_PHONE_ABBREVIATED_ROOTS,
+	SERVICE_PHONE_NON_GEOGRAPHIC_LENGTH,
+	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH,
+	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
+} from "../constants/service-phone";
 import { DATA as STATES, type StateCode } from "../constants/states";
 
 /**
@@ -182,3 +206,178 @@ export const anyBusinessDayOptions: fc.Arbitrary<unknown> = fc.oneof(
 export const twoDecimalAmounts: fc.Arbitrary<number> = fc
 	.integer({ min: -1_000_000_000, max: 1_000_000_000 })
 	.map((cents) => cents / 100);
+
+/**
+ * Arbitraries of valid documents, for the properties that need one ("a valid CPF stays valid under
+ * any mask"). A property must not call a `generate*` utility for that: those draw from
+ * `Math.random()`, which the seed fast-check reports on a failure does not control, so the failing
+ * document could be neither replayed nor shrunk. These are built from fast-check primitives (the
+ * free digits plus the check digits computed from them) and are drawn inside a property with
+ * `fc.gen()`: `fc.property(fc.gen(), (g) => { const cpf = g(cpfs); ... })`.
+ *
+ * The `generate*` utilities keep their own tests; these do not replace them.
+ */
+
+const NUMERIC = "0123456789";
+
+const ALPHANUMERIC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/**
+ * Strings of `length` characters of `alphabet` that are never one character repeated: the second
+ * character is the first one moved by a non-zero offset, so a document that rejects a repeated
+ * base (`000.000.000-00`) is valid by construction, with nothing filtered out.
+ * @param {string} alphabet The characters to draw from, two or more.
+ * @param {number} length How many characters the string holds, two or more.
+ * @returns {fc.Arbitrary<string>} Strings whose first two characters differ.
+ */
+const unrepeated = (alphabet: string, length: number): fc.Arbitrary<string> =>
+	fc
+		.tuple(
+			fc.integer({ min: 0, max: alphabet.length - 1 }),
+			fc.integer({ min: 1, max: alphabet.length - 1 }),
+			fc.array(fc.integer({ min: 0, max: alphabet.length - 1 }), {
+				minLength: length - 2,
+				maxLength: length - 2,
+			}),
+		)
+		.map(([first, offset, rest]) =>
+			[first, (first + offset) % alphabet.length, ...rest]
+				.map((index) => alphabet.charAt(index))
+				.join(""),
+		);
+
+/**
+ * @returns {fc.Arbitrary<string>} Valid CPFs, unmasked.
+ */
+export const cpfs = (): fc.Arbitrary<string> =>
+	unrepeated(NUMERIC, 9).map((base) => {
+		const first = String(calculateCpfCheckDigit(base));
+		return base + first + String(calculateCpfCheckDigit(base + first));
+	});
+
+/**
+ * @param {1 | 2} [version] The CNPJ version: numeric (`1`, the default) or alphanumeric (`2`).
+ * @returns {fc.Arbitrary<string>} Valid CNPJs of that version, unmasked.
+ */
+export const cnpjs = (version?: 1 | 2): fc.Arbitrary<string> =>
+	unrepeated(version === 2 ? ALPHANUMERIC : NUMERIC, 12).map((base) => {
+		const first = String(calculateCnpjCheckDigit(base, CNPJ_FIRST_DIGIT_WEIGHTS));
+		return base + first + String(calculateCnpjCheckDigit(base + first, CNPJ_SECOND_DIGIT_WEIGHTS));
+	});
+
+/**
+ * @returns {fc.Arbitrary<string>} Valid CNH numbers.
+ */
+export const cnhs = (): fc.Arbitrary<string> =>
+	unrepeated(NUMERIC, 9).map((base) => {
+		const { firstVerifier, decrement } = calculateCnhFirstVerifier(base);
+		return `${base}${firstVerifier}${calculateCnhSecondVerifier({ base, decrement })}`;
+	});
+
+/**
+ * @returns {fc.Arbitrary<string>} Valid PIS/PASEP numbers, unmasked.
+ */
+export const pisNumbers = (): fc.Arbitrary<string> =>
+	unrepeated(NUMERIC, 10).map((base) => `${base}${calculatePisCheckDigit(base)}`);
+
+/** Arbitraries of valid voter IDs and processo numbers, built the same way as the documents. */
+
+/**
+ * @param {StateCode | "ZZ"} [state] The state the voter IDs belong to; any of them by default.
+ * @returns {fc.Arbitrary<string>} Valid voter IDs, unmasked.
+ */
+export const voterIds = (state?: StateCode | "ZZ"): fc.Arbitrary<string> =>
+	fc
+		.tuple(
+			digits(8),
+			state === undefined
+				? fc.constantFrom(...Object.values(UF_TO_VOTER_ID_CODE))
+				: fc.constant(UF_TO_VOTER_ID_CODE[state]),
+		)
+		.map(([sequentialNumber, federativeUnion]) => {
+			const firstDigit = calculateVoterIdFirstDigit({ sequentialNumber, federativeUnion });
+			const secondDigit = calculateVoterIdSecondDigit({ federativeUnion, firstDigit });
+			return `${sequentialNumber}${federativeUnion}${firstDigit}${secondDigit}`;
+		});
+
+/**
+ * @returns {fc.Arbitrary<string>} Valid CNJ processo numbers, unmasked, with the órgão and the
+ * tribunal drawn from the pairs Resolução CNJ nº 65/2008 allows.
+ */
+export const processosJuridicos = (): fc.Arbitrary<string> => {
+	const courtsAndTribunals = [...PROCESSO_JURIDICO_TRIBUNALS].flatMap(([court, tribunals]) =>
+		tribunals.map((tribunal) => `${court}${String(tribunal).padStart(2, "0")}`),
+	);
+
+	return fc
+		.tuple(
+			digits(7),
+			fc.integer({ min: 1000, max: 9999 }),
+			fc.constantFrom(...courtsAndTribunals),
+			digits(4),
+		)
+		.map(([sequential, year, courtAndTribunal, origin]) => {
+			const tail = `${year}${courtAndTribunal}${origin}`;
+			const checkDigits = calculateProcessoJuridicoCheckDigits(sequential + tail);
+			return `${sequential}${String(checkDigits).padStart(2, "0")}${tail}`;
+		});
+};
+
+/** Arbitraries of valid boletos, built the same way as the documents. */
+
+/**
+ * @param {"bancario" | "arrecadacao"} [type] The type of the boletos; bancário by default.
+ * @returns {fc.Arbitrary<string>} Valid linhas digitáveis, unmasked.
+ */
+export const boletos = (type?: "bancario" | "arrecadacao"): fc.Arbitrary<string> =>
+	type === "arrecadacao"
+		? fc
+				.record({
+					segment: fc.constantFrom(...ARRECADACAO_SEGMENTS),
+					useMod11: fc.boolean(),
+					hasEffectiveValue: fc.boolean(),
+					body: digits(40),
+				})
+				.map((parts) => assembleBoletoArrecadacao(parts))
+		: fc
+				.record({ field1: digits(9), field2: digits(10), field3: digits(10), tail: digits(15) })
+				.map((parts) => assembleBoletoBancario(parts));
+
+/** Arbitraries of valid phone numbers, built the same way as the documents. */
+
+/**
+ * @param {readonly string[]} starts The prefixes to draw from.
+ * @param {number} rest How many digits follow the prefix.
+ * @returns {fc.Arbitrary<string>} One of `starts` followed by `rest` digits.
+ */
+const prefixed = (starts: readonly string[], rest: number): fc.Arbitrary<string> =>
+	fc.tuple(fc.constantFrom(...starts), digits(rest)).map((parts) => parts.join(""));
+
+/**
+ * @param {GeneratePhoneType} [type] The type of the numbers; mobile or landline by default.
+ * @returns {fc.Arbitrary<string>} Valid phone numbers, unmasked and without the country code.
+ */
+export const phones = (type?: GeneratePhoneType): fc.Arbitrary<string> => {
+	if (type === "service") {
+		return fc.oneof(
+			prefixed(
+				SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
+				SERVICE_PHONE_NON_GEOGRAPHIC_LENGTH - SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH,
+			),
+			prefixed(
+				SERVICE_PHONE_ABBREVIATED_ROOTS,
+				SERVICE_PHONE_ABBREVIATED_LENGTH - SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH,
+			),
+		);
+	}
+
+	const areaCodes = VALID_AREA_CODES.map(String);
+	const mobile = prefixed(areaCodes, 8).map((value) => `${value.slice(0, 2)}9${value.slice(2)}`);
+	const landline = fc
+		.tuple(fc.constantFrom(...areaCodes), fc.integer({ min: 2, max: 6 }), digits(7))
+		.map((parts) => parts.join(""));
+
+	if (type === "mobile") return mobile;
+
+	return type === "landline" ? landline : fc.oneof(mobile, landline);
+};

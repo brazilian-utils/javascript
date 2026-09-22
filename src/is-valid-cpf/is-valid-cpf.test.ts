@@ -1,7 +1,12 @@
 import * as fc from "fast-check";
 
 import { CPF_LENGTH } from "../_internals/constants/cpf";
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import {
+	anyValue,
+	cpfs,
+	digitsOfOtherLength,
+	maskSeparators,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";
@@ -124,8 +129,8 @@ describe("isValidCpf", () => {
 
 		test("should accept a generated CPF written with any of the documented masks", () => {
 			fc.assert(
-				fc.property(masks, spaces, spaces, (separators, before, after) => {
-					const cpf = generateCpf();
+				fc.property(fc.gen(), masks, spaces, spaces, (g, separators, before, after) => {
+					const cpf = g(cpfs);
 					const body = `${cpf.slice(0, 3)}${separators[0]}${cpf.slice(3, 6)}${separators[1]}${cpf.slice(6, 9)}${separators[2]}${cpf.slice(9)}`;
 
 					expect(isValidCpf(`${before}${body}${after}`)).toBe(isValidCpf(cpf));

@@ -1,0 +1,61 @@
+/*
+ * The stylesheet of the docs site, linked by every page shell and imported by the live demos of
+ * examples.md, so both look the same. docsify 5's core theme with the dark add-on always on, the
+ * look the site had before v5 (add `screen and (prefers-color-scheme: dark)` to the add-on's
+ * import to follow the system instead), then the site's own styles.
+ */
+@import url("https://cdn.jsdelivr.net/npm/docsify@5/dist/themes/core.min.css");
+@import url("https://cdn.jsdelivr.net/npm/docsify@5/dist/themes/addons/core-dark.min.css");
+
+:root {
+  /* The green of the official palette (github.com/brazilian-utils/brand) */
+  --theme-color: #009739;
+  /* The cover page shares the page background instead of the default gradient */
+  --cover-bg: var(--color-bg);
+  --cover-bg-overlay: none;
+}
+
+/* The two questions a guide asks: which document, in words, and then which framework, as tabs */
+.example-picker {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6em; margin: 1.5em 0 0;
+}
+.example-picker select { padding: 0.3em 0.5em; font: inherit; }
+.example-picker + .example-tabs { margin-top: 0.8em; }
+.example-tabs {
+  display: flex; flex-wrap: wrap; gap: 4px; margin: 1.5em 0 0;
+  border-bottom: 1px solid var(--border-color);
+}
+.example-tab-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.example-tabs button {
+  padding: 0.55em 1.1em; border: 0; border-bottom: 2px solid transparent; border-radius: 0;
+  margin-bottom: -1px; background: none; color: inherit; font: inherit; font-weight: 600;
+  opacity: 0.7; cursor: pointer;
+}
+.example-tabs button:hover { opacity: 1; }
+.example-tabs button[aria-selected="true"] {
+  opacity: 1; color: var(--theme-color); border-bottom-color: var(--theme-color);
+}
+.example-tabs button:focus { box-shadow: none; outline: none; }
+.example-tabs button:focus-visible {
+  box-shadow: none; outline: 2px solid var(--theme-color); outline-offset: -2px;
+}
+.variant[hidden] { display: none; }
+.example[hidden] { display: none; }
+.example iframe {
+  display: block; width: 100%; height: 74px; margin: 1em 0;
+  border: 1px solid var(--border-color); border-radius: var(--border-radius);
+}
+
+/* The files of an example, shown like an editor's tabs */
+.file-tabs { display: flex; flex-wrap: wrap; gap: 2px; margin: 1.5em 0 0; }
+.file-tabs button {
+  padding: 0.45em 0.9em; border: 0; border-radius: var(--border-radius) var(--border-radius) 0 0;
+  background: none; color: inherit; cursor: pointer; opacity: 0.65;
+  font: 0.85em var(--font-family-mono);
+}
+.file-tabs button:hover { opacity: 1; }
+.file-tabs button[aria-selected="true"] { opacity: 1; background: var(--code-bg); }
+.file-tabs button:focus { box-shadow: none; outline: none; }
+.file-tabs button:focus-visible { outline: 2px solid var(--theme-color); outline-offset: -2px; }
+.file[hidden] { display: none; }
+.file-tabs + .file pre { margin-top: 0; border-top-left-radius: 0; }

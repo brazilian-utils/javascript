@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { licensePlates } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generateLicensePlate } from "../generate-license-plate/generate-license-plate";
 import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
 import { DIGIT_TO_MERCOSUL_LETTER } from "./constants";
 import { convertLicensePlateToMercosul } from "./convert-license-plate-to-mercosul";
@@ -70,8 +70,8 @@ describe("convertLicensePlateToMercosul", () => {
 	describe("properties", () => {
 		test("should turn every old format plate into a Mercosul one", () => {
 			fc.assert(
-				fc.property(fc.constant("LLLNNNN" as const), (format) => {
-					const plate = generateLicensePlate(format);
+				fc.property(fc.gen(), fc.constant("LLLNNNN" as const), (g, format) => {
+					const plate = g(licensePlates, format);
 					const converted = convertLicensePlateToMercosul(plate);
 
 					expect(getFormatLicensePlate(converted)).toBe("LLLNLNN");
@@ -84,8 +84,8 @@ describe("convertLicensePlateToMercosul", () => {
 
 		test("should convert a plate only once", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("LLLNNNN", "LLLNLNN"), (format) => {
-					const converted = convertLicensePlateToMercosul(generateLicensePlate(format));
+				fc.property(fc.gen(), fc.constantFrom("LLLNNNN", "LLLNLNN"), (g, format) => {
+					const converted = convertLicensePlateToMercosul(g(licensePlates, format));
 
 					expect(convertLicensePlateToMercosul(converted)).toBe("");
 				}),

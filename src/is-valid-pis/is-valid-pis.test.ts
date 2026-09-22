@@ -1,10 +1,14 @@
 import * as fc from "fast-check";
 
 import { PIS_LENGTH } from "../_internals/constants/pis";
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import {
+	anyValue,
+	digitsOfOtherLength,
+	maskSeparators,
+	pisNumbers,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generatePis } from "../generate-pis/generate-pis";
 import { isValidPis } from "./is-valid-pis";
 
 const REPEATED_DIGITS = [
@@ -114,8 +118,8 @@ describe("isValidPis", () => {
 			const masks = maskSeparators([".", "-", "/", " ", "(", ")", ",", "*"], 4, 3);
 
 			fc.assert(
-				fc.property(masks, (separators) => {
-					const pis = generatePis();
+				fc.property(fc.gen(), masks, (g, separators) => {
+					const pis = g(pisNumbers);
 					const head = `${separators[0]}${pis.slice(0, 3)}${separators[1]}`;
 					const tail = `${pis.slice(3, 8)}${separators[2]}${pis.slice(8)}`;
 

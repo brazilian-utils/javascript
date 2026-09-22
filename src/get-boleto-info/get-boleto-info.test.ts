@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { boletos } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { generateBoleto } from "../generate-boleto/generate-boleto";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
 import { type BoletoInfo, type GetBoletoInfoOptions, getBoletoInfo } from "./get-boleto-info";
 
@@ -206,8 +206,8 @@ describe("getBoletoInfo", () => {
 	describe("properties", () => {
 		test("should read the bank code and the amount of a generated bank slip", () => {
 			fc.assert(
-				fc.property(fc.date({ noInvalidDate: true }), (referenceDate) => {
-					const value = generateBoleto();
+				fc.property(fc.gen(), fc.date({ noInvalidDate: true }), (g, referenceDate) => {
+					const value = g(boletos);
 					const info = getBoletoInfo(value, { referenceDate });
 
 					expect(info?.bankCode).toBe(value.slice(0, 3));
@@ -219,8 +219,8 @@ describe("getBoletoInfo", () => {
 
 		test("should describe a generated arrecadação bank slip", () => {
 			fc.assert(
-				fc.property(fc.constant("arrecadacao" as const), (type) => {
-					const info = getBoletoInfo(generateBoleto({ type }));
+				fc.property(fc.gen(), fc.constant("arrecadacao" as const), (g, type) => {
+					const info = getBoletoInfo(g(boletos, type));
 
 					expect(info?.type).toBe("arrecadacao");
 					expect(info?.bankCode).toBe("");

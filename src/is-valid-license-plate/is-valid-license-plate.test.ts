@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { licensePlates } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { generateLicensePlate } from "../generate-license-plate/generate-license-plate";
 import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
 import { isValidLicensePlate } from "./is-valid-license-plate";
 
@@ -83,16 +83,16 @@ describe("isValidLicensePlate", () => {
 
 		test("should accept every generated plate of both formats", () => {
 			fc.assert(
-				fc.property(fc.constantFrom(...formats), (format) => {
-					expect(isValidLicensePlate(generateLicensePlate(format))).toBe(true);
+				fc.property(fc.gen(), fc.constantFrom(...formats), (g, format) => {
+					expect(isValidLicensePlate(g(licensePlates, format))).toBe(true);
 				}),
 			);
 		});
 
 		test("should ignore the separator and the case of a generated plate", () => {
 			fc.assert(
-				fc.property(fc.constantFrom(...formats), (format) => {
-					const plate = generateLicensePlate(format);
+				fc.property(fc.gen(), fc.constantFrom(...formats), (g, format) => {
+					const plate = g(licensePlates, format);
 					const masked = `${plate.slice(0, 3)}-${plate.slice(3)}`;
 
 					expect(isValidLicensePlate(masked.toLowerCase())).toBe(true);

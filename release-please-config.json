@@ -22,6 +22,8 @@
 		{ "type": "style", "section": "Style", "hidden": true }
 	],
 	"packages": {
-		".": {}
+		".": {
+			"extra-files": [{ "type": "json", "path": "jsr.json", "jsonpath": "$.version" }]
+		}
 	}
 }

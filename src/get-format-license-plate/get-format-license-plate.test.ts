@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { licensePlates } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { generateLicensePlate } from "../generate-license-plate/generate-license-plate";
 import { type LicensePlateFormat, getFormatLicensePlate } from "./get-format-license-plate";
 
 describe("getFormatLicensePlate", () => {
@@ -32,8 +32,8 @@ describe("getFormatLicensePlate", () => {
 	describe("properties", () => {
 		test("should name the format of every generated plate", () => {
 			fc.assert(
-				fc.property(fc.constantFrom("LLLNNNN", "LLLNLNN"), (format) => {
-					const plate = generateLicensePlate(format);
+				fc.property(fc.gen(), fc.constantFrom("LLLNNNN", "LLLNLNN"), (g, format) => {
+					const plate = g(licensePlates, format);
 
 					expect(getFormatLicensePlate(plate)).toBe(format);
 					expect(getFormatLicensePlate(plate.toLowerCase())).toBe(format);

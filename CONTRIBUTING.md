@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to Brazilian Utils! This project exists thanks to
 [everyone who contributes](README.md#contributors), and we'd love your help solving the little
-day-to-day problems of building software for Brazilian businesses.
+day-to-day problems of building software for Brazil.
 
 By participating in this project, you agree to abide by our
 [Code of Conduct](CODE_OF_CONDUCT.md).
@@ -42,8 +42,11 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run test:chrome-browser`, `npm run test:firefox-browser`, `npm run test:edge-browser`, `npm run test:safari-browser` | Runs the test suite in real browsers via `vp test --browser.enabled`.                                                                                                                                                                                                    |
 | `npm run build`                                                                                                           | Builds the library for publishing with `vp pack` (also runs attw and publint over the built output).                                                                                                                                                                     |
 | `npm run build:data`                                                                                                      | Regenerates the datasets under `src/_internals/constants` from the IBGE/CONCLA sources (`scripts/data.ts`); run by the scheduled `Update datasets` workflow.                                                                                                             |
-| `npm run build:llms`                                                                                                      | Regenerates `docs/llms.txt` and `docs/llms-full.txt` from the docs (`scripts/llms.ts`); CI fails if they're out of date.                                                                                                                                                 |
-| `npm run build:site`                                                                                                      | Regenerates the per-page copies of `docs/index.html`, `docs/404.html` and `docs/sitemap.xml` from the sidebars (`scripts/site.ts`); CI fails if they're out of date.                                                                                                     |
+| `npm run build:llms`                                                                                                      | Regenerates `docs/llms.txt` and `docs/llms-full.txt` from the docs (`scripts/llms.ts`). Generated at deploy time, not kept in the repository.                                                                                                                            |
+| `npm run build:site`                                                                                                      | Regenerates the per-page copies of `docs/index.html`, `docs/404.html` and `docs/sitemap.xml` from the sidebars (`scripts/site.ts`). Generated at deploy time, not kept in the repository.                                                                                |
+| `npm run build:jsr`                                                                                                       | Regenerates the `exports` of `jsr.json`, one per utility folder (`scripts/jsr.ts`); CI fails if they're out of date.                                                                                                                                                     |
+| `npm run build:docs`                                                                                                      | Runs the three generators of the site above, which is what the Docs workflow deploys and what a Vercel preview builds.                                                                                                                                                   |
+| `npm run build:examples`                                                                                                  | Regenerates the examples of the document field page from their templates (`scripts/examples.ts`). Generated at deploy time, not kept in the repository.                                                                                                                  |
 | `npm run check:dependencies`                                                                                              | Fails if `package.json` declares any runtime `dependencies` (this package ships zero by design).                                                                                                                                                                         |
 | `npm run check:tree-shaking`                                                                                              | Builds nothing; measures the single-import size of every export against `dist` (`scripts/tree-shaking.ts`). Run it after `npm run build` when you change a dataset, and update the bundle-size table in `docs/getting-started.md` / `docs/pt-br/getting-started.md`.     |
 | `npm run check:duplication`                                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                                                                                                                                                          |
@@ -89,6 +92,28 @@ from forks), the maintainers (review, merge, release approval) and the automatio
 builds, tests and publishes, Dependabot and the `Update datasets` workflow open update pull requests, and
 release-please turns merged commits into releases.
 
+## Datasets
+
+The tables under `src/_internals/constants/` fall in two groups, and only the first refreshes
+itself:
+
+- **Generated from an official source** by a script in `scripts/` (`npm run build:data`, run
+  every Monday by the `Update datasets` workflow): banks (Banco Central, `banks.ts`), CBO
+  (`cbo.ts`), CFOP (CONFAZ, `cfop.ts`), municipalities and states (IBGE, `cities.ts`,
+  `states.ts`), CNAE (`cnae.ts`), legal natures (CONCLA, `legal-natures.ts`) and NCM (Siscomex,
+  `ncm.ts`). When a run changes a file, the workflow opens a pull request whose description, written
+  by `scripts/data-summary.ts`, lists per table how many entries were added and removed, with a
+  sample of each. Never edit these files by hand.
+- **Maintained by hand**, because the source is a law or a regulation with no machine-readable
+  form: area codes and their states (Anatel, `area-codes.ts`), service phone prefixes (Anatel,
+  `service-phone.ts`), national and state holidays (`holidays.ts`), the órgãos and tribunals of the
+  processo number (Resolução CNJ nº 65/2008, `processo-juridico.ts`), IBAN lengths per country
+  (`iban.ts`), IBGE state codes (`ibge-uf-codes.ts`), legal nature categories, the CST and CSOSN
+  tables (`src/is-valid-cst`, `src/is-valid-csosn`), the professional councils
+  (`src/is-valid-registro-profissional`), the região fiscal digit of each state
+  (`src/generate-cpf`) and the voter ID state codes (`src/is-valid-voter-id`). A change to one of
+  these cites the act that changed it (`@see Official:`), like any rule.
+
 ## Adding a new utility
 
 Brazilian Utils follows a consistent folder convention for every utility. To add a new one (for
@@ -125,7 +150,11 @@ example `formatSomething`):
    never values computed by the code under test. Close the file with a `describe("properties")`
    block of [fast-check](https://fast-check.dev) properties that hold by specification (a
    generated value is valid, format/parse round-trip, masks never change the verdict, arbitrary
-   input never throws) and a `describe("<name> types")` block that pins the public signature with
+   input never throws); a property that needs a valid document draws it with `fc.gen()` from the
+   arbitraries of `src/_internals/test/arbitraries.ts` (`const cpf = g(cpfs)`), never by calling a
+   `generate*` utility inside the property: those use
+   `Math.random()`, which the seed fast-check reports does not control, so a failure could be
+   neither replayed nor shrunk. Then a `describe("<name> types")` block that pins the public signature with
    `expectTypeOf` (parameters, options and return type; `vp check` fails on a wrong assertion). A
    hot path may also get a `describe("<name> benchmarks")` block of `bench` cases: they are todo
    entries in a normal run and execute with `npx vp test bench --run`. `describe`, `test`,
@@ -139,9 +168,14 @@ example `formatSomething`):
    - `docs/utilities.md` (English)
    - `docs/pt-br/utilities.md` (Portuguese translation)
 
-   Follow the existing format: a `##` heading with the function name, a short description, and a
-   `javascript` code block showing example input/output. Place the new section next to the other
-   utilities in the same domain, keeping both files in the same order.
+   Follow the existing format: a `###` heading with the function name under the `##` family it
+   belongs to, one sentence saying what it does (`llms.txt` indexes that sentence), a few short
+   bullets for the options and the return rules, a `javascript` code block showing example
+   input/output, and a one-line `Source:` (`Fonte:` in Portuguese) with the official reference when
+   there is one. Do not repeat what the Conventions section at the top of the file already says
+   (nothing throws, masked input is accepted, generators use `Math.random()`); the JSDoc is the place
+   for every edge case, the reference is the place for what a caller needs. Keep both files in the
+   same order.
 
    After editing `docs/getting-started.md` or `docs/utilities.md`, run `npm run build:llms` to
    regenerate `docs/llms.txt` and `docs/llms-full.txt` (see [llms.txt](https://llmstxt.org/)) and
@@ -328,25 +362,45 @@ JavaScript/TypeScript features.
 Pages with [docsify](https://docsify.js.org): `docs/index.html` renders the Markdown in the
 browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
 
+- Only what a person writes lives in `docs/`: the `Docs` workflow runs `npm run build:docs` and
+  publishes the result to GitHub Pages, so the page shells, `sitemap.xml`, `llms.txt`,
+  `llms-full.txt` and the generated examples are never committed (and never stale). Run
+  `npm run build:docs` to see the site as it is published; a pull request that touches `docs/` or
+  `scripts/` gets the same build as a Vercel preview.
 - docsify runs in history mode, so every page is a real URL (`/getting-started`,
   `/pt-br/utilities`) that search engines index on its own. GitHub Pages serves each one from a
   copy of `index.html` next to the page (`getting-started.html`) that carries the page's own
   title, description, canonical URL and hreflang pair, and `npm run build:site`
   (`scripts/site.ts`) writes those copies, `404.html` and `sitemap.xml` from the sidebars and the
-  pages' front matter. The Check workflow fails when they are stale, so run it after editing
-  `index.html`, a sidebar or a page's front matter. Links from the hash-router era
-  (`/#/getting-started?id=usage`) are rewritten on load, so nothing out there breaks.
+  pages' front matter. Links from the hash-router era (`/#/getting-started?id=usage`) are
+  rewritten on load, so nothing out there breaks.
 - Every page starts with a front matter block with a quoted `title` and `description` (and
   `keywords`), and has no `#` heading of its own: the plugin in `docs/index.html` turns the title
   into the page's heading and the block feeds the page's metadata (a small wrapper there hands
   the search plugin the same view, so the block never shows up in search results). Scripts read
   the block through `scripts/front-matter.ts`.
+- The site's own CSS is `docs/styles.css`, linked by every shell: styles go there, not in a
+  `<style>` block of `index.html`.
+- The pages under `docs/examples/` show the files of `docs/snippets/`, one tab per framework and
+  one variant per document. Each example is complete on its own, so it can be copied as is, and
+  the live demo of the pair on screen runs that same file: `docs/snippets/live/index.html` takes
+  the files to compile in its query string and `run.js` compiles them in the browser. The demos
+  take their look from `docs/snippets/styles.css`.
+- The examples of the document field page are generated: `npm run build:examples`
+  (`scripts/examples.ts`) fills the templates of `docs/snippets/document-field/_templates` from a
+  table of documents, so the shared mask is written once. Edit a template or the table: the files
+  under `generated/` are written by the build and are not in the repository.
 - `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
-  `docs/llms-full.txt` keep their headings; run `npm run build:llms` after editing a page.
+  `docs/llms-full.txt` keep their headings.
 - Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,
   and `.github/workflows/context7.yml` asks for a refresh when the docs change on `main`.
 
-To preview the site, point a static file server that resolves `/page` to `page.html`, the way
+Every pull request that touches `docs/` or `scripts/` gets a preview deployment on Vercel
+(`vercel.json`), with the URL posted as a comment. The file builds the site the way the Docs
+workflow does (`npm run build:docs`), serves
+`/getting-started` from `getting-started.html` like GitHub Pages does (`cleanUrls`), marks every
+response `noindex` and turns deployments of `main` off: production stays on GitHub Pages. To
+preview the site locally, point a static file server that resolves `/page` to `page.html`, the way
 GitHub Pages does, at `docs/`.
 
 ## Commit messages
@@ -402,7 +456,7 @@ There are no local release commands to run.
    hidden.
 2. A maintainer reviews the release PR (version bump, changelog) and merges it. **Merging the
    release PR is the first confirmation.** Nothing is published yet at this point.
-3. Merging tags the release and publishes a GitHub Release, which triggers the `publish` job in
+3. Merging tags the release and publishes a GitHub Release, which triggers the `publish-npm` job in
    `.github/workflows/release.yml`. That job builds and validates the package and **stages** it on
    npm with `npm stage publish --provenance` (npm Trusted Publishing/OIDC; no npm token is stored
    in the repository). A staged version is not installable yet.
@@ -411,7 +465,16 @@ There are no local release commands to run.
    confirmation** (npm's proof-of-presence); the trusted publisher only allows staged publishing,
    so nothing can reach npm without it.
 
+5. The same release is published to [JSR](https://jsr.io/@brazilian-utils/brazilian-utils) by the
+   `publish-jsr` job, from the TypeScript sources and through OIDC as well. `jsr.json` names what
+   is published; release-please bumps its `version` with `package.json`, and the Deno job of the
+   Tests workflow dry-runs the publication on every pull request.
+
 No local `npm login`/`npm publish` or tagging is ever needed to cut a release.
+
+Every pull request also gets an installable preview build from [pkg.pr.new](https://pkg.pr.new)
+(the `Preview` workflow), with the install command posted as a comment, so a change can be tried
+in a real project before it is merged.
 
 ## Submitting a pull request
 
@@ -467,8 +530,8 @@ the commit messages.
    responses as untrusted. A workflow change keeps actions pinned by SHA, permissions minimal and
    secrets away from pull request code. A new development dependency needs a reason, a maintained
    upstream and a license compatible with MIT.
-7. **Can the next person use it?** The JSDoc and both `docs/utilities.md` files describe what the
-   code does, edge cases included, with an example that is true; the commit message has the right
+7. **Can the next person use it?** The JSDoc describes what the code does, edge cases included,
+   both `docs/utilities.md` files describe what a caller needs, with an example that is true; the commit message has the right
    Conventional Commit type, because the changelog and the version are computed from it.
 
 **Automated pull requests** get the same review with a narrower focus: a Dependabot bump is read
