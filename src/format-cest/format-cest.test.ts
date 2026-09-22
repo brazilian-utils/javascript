@@ -59,7 +59,7 @@ describe("formatCest", () => {
 		});
 	});
 
-	it("should return an empty string for an empty, null or undefined value, even under pad", () => {
+	it("should return an empty string for an empty value, and for null and undefined even under pad", () => {
 		expect(formatCest("")).toBe("");
 		// @ts-expect-error not a string or number
 		expect(formatCest(null)).toBe("");
