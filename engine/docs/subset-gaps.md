@@ -124,6 +124,21 @@ rejected at all today — it is silently read as a required `string`, and the bo
 rather than with the diagnostic this row names. That mistranslation is a real, separate gap this
 row should track going forward, and is unrelated to `number`, so it is left unfixed here.
 
+Confirmed directly against the parser rather than inferred from the diagnostic: `b?: string`
+parses as an `Identifier` carrying `optional: true`, and `params()` reads `name` and
+`typeAnnotation` and nothing else, so the flag is dropped on the floor. `c: boolean = false`
+parses as an `AssignmentPattern`, which `params()` does reject (`E_PARAM_PATTERN`). So of the two
+halves of this row, one is a loud refusal and the other is a **silent miscompile** — the worst
+shape a gap can have, and the reason this row should be closed before the rest of the list.
+
+What both should become, when it is closed: an optional parameter is `Option<T>`, which the Core
+already models end to end, so the only new work is in the frontend. A default parameter keeps a
+required parameter in the Core and substitutes the default expression at every internal call site
+that omits the argument — the classic desugaring, which needs no `Option`, no renaming and no
+change to the body, and which leaves the published signature saying what the author wrote. The
+engine generates the core and never the public DX API (ADR 0011), so an exported utility's default
+belongs to the wrapper, not to the generated signature.
+
 ### Discriminated unions — `E_UNION`, `E_SWITCH_SUBJECT`, `E_MEMBER`
 
 ```ts
