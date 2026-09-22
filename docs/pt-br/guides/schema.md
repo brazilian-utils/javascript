@@ -1,5 +1,5 @@
 ---
-title: "Um schema para um documento"
+title: "Bibliotecas de schema"
 description: "Os validadores do Brazilian Utils dentro de um schema do Zod, do Valibot ou do ArkType, ou como um Standard Schema próprio."
 keywords: ["zod CPF", "valibot CPF", "arktype CPF", "Standard Schema", "toStandardSchema", "validar CNPJ schema"]
 ---
