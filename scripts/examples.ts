@@ -184,11 +184,15 @@ function values(document: Document): Record<string, string> {
 }
 
 /**
- * @param {string} name - A file of `docs/snippets/document-field/_templates`.
+ * A template carries `@@placeholder@@` markers, so it is not the language its name says it is:
+ * `schema/zod.ts` on its own does not parse as TypeScript. The extra `.tmpl` at the end keeps it
+ * out of every tool that walks the repository for `.ts`/`.tsx` files, the declaration build of the
+ * package included, while the extension before it still says what the filled in file will be.
+ * @param {string} name - A file of `docs/snippets/document-field/_templates`, without the `.tmpl`.
  * @returns {string} Its contents.
  */
 function readTemplate(name: string): string {
-	return readFileSync(join(TEMPLATE_DIR, name), "utf8");
+	return readFileSync(join(TEMPLATE_DIR, `${name}.tmpl`), "utf8");
 }
 
 /**
