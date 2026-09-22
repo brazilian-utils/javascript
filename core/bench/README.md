@@ -7,114 +7,7 @@ convention `conformance/bench.ts` already used.
 
 **The bar is 1.0x: equal or faster, everywhere.** Earlier revisions of this document budgeted 1.5x;
 that number is gone as a target and survives below only where it names the line a row used to be
-allowed to cross. `## Rust: five lowerings, measured one at a time
-
-Rust was the worst target by some distance — `isValidCpf` at 2.73x, nothing under 1.0x — and the
-reason turned out not to be one thing. Each of these was timed in isolation first, on a scratch
-crate built against the generated one, and only then written as a candidate:
-
-| lowering | isolated cost, 200k calls | after |
-| --- | ---: | ---: |
-| `re.retain` (`keep_digits`) — a `for` loop into one `String` instead of `.filter().collect::<Vec<u8>>()` then `from_utf8().unwrap()` | 11.4–12.3 ms | 5.4–7.1 ms |
-| `re_take_fixed`/`re_take_class` — test the leading byte directly, decode a `char` only above 0x7F | 6.7 ms | 4.4 ms |
-| `str.padStart`, ASCII-gated — no `Vec<char>` built just to learn a length | 22.8–24.2 ms | 10.4–10.5 ms |
-| `str.codePoints` / `str.fromCodePoints`, ASCII-gated — no decode, no `char::from_u32` round trip | 5.5–5.8 / 11.6–12.1 ms | 3.5–3.6 / 8.0–8.3 ms |
-| `str.fromInt` for a value proven `Int[0..9]` — one ASCII byte instead of the general integer formatter | — | — |
-
-The scanner fix is the one worth noticing: `re_take_fixed` and `re_take_class` are the whole of
-every generated chain-pattern scanner, so making them byte-first speeds up every regex-shaped
-validator this engine will ever emit, not the two rows that motivated it.
-
-Two findings from the same pass that are not speedups:
-
-- `unsafe { String::from_utf8_unchecked(..) }` for `keep_digits` measured 5.4–5.6 ms against the
-  safe loop's 5.4–5.5 ms — indistinguishable. The generated code stays `unsafe`-free, and now for a
-  measured reason rather than a stylistic one.
-- The first version of the `str.fromInt` candidate returned a `raw` text fragment, which stringifies
-  its argument immediately. That broke `hoistConstantTables` (`backend/lower.ts`), which walks the
-  *structured* target AST after every candidate's `emit` has run: a weight table that had been a
-  module-level `const` silently became a `vec![...]` allocated on every call. Conformance did not
-  catch it — the answers were identical — and `cargo clippy`'s `useless_vec` did. The candidate now
-  builds a structured `call` node, which is the discipline the other candidates already follow, and
-  the hoisted constants came back.
-
-## Size is a result too, and it is measured the same way
-
-Speed is not the only thing a generated target is judged on. The npm package this engine generates
-for is tree-shakeable, which
-[ADR 0012](../../engine/docs/decisions/0012-generated-source-not-a-bound-binary.md) records as a
-requirement rather than a preference, so for TypeScript **bytes over the wire are a benchmark
-row** — and a row that is asserted rather than measured is not a row.
-
-`node engine/scripts/size.ts core` measures it the way a consumer's bundler would: one
-single-import entry point per exported utility, bundled and minified by esbuild against
-`core/out/typescript`, then compressed. Raw source bytes are the wrong number (comments, type
-annotations and formatting all vanish first) and the whole tree is the wrong number too (nobody
-imports all of it).
-
-It reports three numbers per export, because they answer different questions and this project has
-already been wrong about which one matters. **Minified** is what the browser parses and the engine
-holds; it is not a transfer size, but it is the only one that tracks parse and compile cost.
-**Gzip** and **brotli** are both transfer sizes, and they disagree: gzip's window makes locally
-repeated text almost free, so an encoding can be meaningfully *shorter raw and larger gzipped* —
-which is not a hypothetical, it is what the measurement below found. Brotli weighs the same source
-differently and is what most CDNs actually serve.
-
-Both transfer encodings are gated at zero growth, since a consumer gets whichever their CDN
-negotiates. Minified is reported and not gated: trading parse cost against transfer size is an
-argument to have, not a threshold to trip. `--check` compares against the committed
-`core/out/typescript/SIZE.json`; `verify` runs it as its `typescript size` step, so the trade is
-checked on every run rather than remembered.
-
-Gzipped bytes per utility, with the pass disabled, under the first (uncapped) inlining budget, and
-under the budget this section settled on:
-
-Gzipped bytes, since that is the metric the three columns below were compared under:
-
-| export | no inlining | uncapped (`maxStatements: 6`) | now (8 / cap 6) |
-| --- | ---: | ---: | ---: |
-| `formatCnpj` | 348 | 348 | **334** |
-| `formatCurrency` | 331 | 333 | **312** |
-| `generateCnpj` | 642 | 1,591 | **629** |
-| `generateCpf` | 623 | 1,343 | **614** |
-| `getAddressInfoByCep` | 1,286 | 1,295 | **1,277** |
-| `getHolidays` | 872 | 1,403 | **817** |
-| `isBusinessDay` | 1,065 | 1,638 | **1,022** |
-| `isValidCnpj` | 512 | 569 | **499** |
-| `isValidCpf` | 342 | 440 | **333** |
-| every export | 3,224 | 5,644 | **3,175** |
-
-Three changes got it there, and each is worth stating separately because only the first is about
-inlining at all.
-
-- **The budget prices an inline instead of only sizing the callee**
-  ([ADR 0013](../../engine/docs/decisions/0013-inlining-pays-for-itself.md)). A callee spliced into
-  its last remaining call site costs nothing — its definition falls out of the dependency closure —
-  while a helper copied to nine call sites costs eight copies of itself. Alongside it, a callee that
-  is one `return <expr>` is now substituted as an expression rather than through a synthetic
-  `Option`, and a straight-line callee is spliced without the early-return sentinel.
-- **Constants the checker already proved are printed as constants.** Specialization (ADR 0004)
-  gives a helper called with a literal a parameter of type `Int[n..n]`, and a read of one *is* that
-  integer — nothing new is decided, the range on the node is the checker's own conclusion. That
-  turns `randomBelow`'s `4294967296 - (4294967296 % bound)` from a modulo per draw into the
-  constant `4294967290`, and it proves two intermediates of the Meeus Easter algorithm constant
-  outright for the years `easterSunday` accepts. Folding then leaves bindings nothing reads and
-  parameters nothing needs, which Go and Rust both refuse to compile, so `optimize.ts` removes
-  both — a parameter only when every call site passes something whose evaluation cannot be
-  noticed. This is where Go's generators moved from 0.57x/0.44x to **0.39x/0.32x**.
-- **A fold over the lowered target AST** (`engine/src/backend/fold.ts`). A lowering is code
-  generation too: TypeScript's `date.fromYmd` expands a month into a days-in-month ladder, so once
-  the month is a constant the ladder is five comparisons and two branches with one possible answer.
-  The Core folder never saw them, because they did not exist when it ran.
-
-One defect surfaced on the way and is worth recording: `writeFiles` never removed generated files a
-later run stopped producing, so a module that disappeared from the dependency closure — which is
-exactly what inlining a helper into its only caller does — stayed on disk and was typechecked,
-benchmarked and committed as though it were still output. Two stale files were in the repository.
-Generated files now carry their own removal: anything under the output directory with this engine's
-header that the current run did not write is deleted, and nothing else is touched.
-
-## Getting every row to 1.0x`, after the row-by-row account below, has the pass
+allowed to cross. `## Getting every row to 1.0x`, after the row-by-row account below, has the pass
 that closed most of the gap, what moved each row and by what mechanism, the per-target inlining
 budgets that pass measured rather than assumed, and the rows still over 1.0x with the structural
 reason they did not come down further.
@@ -541,6 +434,138 @@ exactly what inlining a helper into its only caller does — stayed on disk and 
 benchmarked and committed as though it were still output. Two stale files were in the repository.
 Generated files now carry their own removal: anything under the output directory with this engine's
 header that the current run did not write is deleted, and nothing else is touched.
+
+## A loop is smaller raw and bigger compressed — a wall, not a missed trick
+
+`generateCpf` and `generateCnpj` were still noisy around or over 1.0x after "Getting every row to
+1.0x" (below) closed everything else. Their remaining cost traced to one thing: `randomCpfBase`
+and `randomCnpjBase` build a string by drawing nine (twelve, for CNPJ) digits and converting each
+one individually. A change that looked strictly better was measured against this — the generated
+code is faster *and* the raw file is smaller — and it was still declined, because the one number
+this target is gated on grew. That is worth writing down in full: it is a general fact about what
+this engine's output looks like, not a note about two functions, and the next idea for shrinking
+generated TypeScript by removing repeated call text will hit the same wall.
+
+**The mechanism.** `randomCpfBase`'s source (`core/source/lib/cpf.ts`) is a template literal that
+calls `randomDigit()` nine times, in text, because the Core subset has no unbounded string-building
+loop for an author to reach for, and because writing it as nine separate calls is what lets the
+checker prove the result is exactly nine scalars long (ADR 0013 already covers why the source is
+shaped this way). The generated TypeScript inherits that shape: nine — twelve, for CNPJ —
+textually identical calls, `randomBelow(env).toString() + randomBelow(env).toString() + …`. Textual
+identity is the whole story: the calls draw different values at runtime, but the *source text*
+that makes each call is a verbatim repeat of the one before it, eight or eleven times over.
+
+A candidate lowering (`engine/src/backend/lower.ts`'s `operation`, gated behind a new
+`TargetSpec.loopUnroll` flag set only for TypeScript) recognizes N structurally-identical pieces of
+a `str.concat` chain — same call, same arguments, proven with a `sameExpr` structural comparison —
+and prints one counted loop that runs the call N times instead of N copies of its text. This is
+sound: the call still runs exactly N times, in the same order, so the sequence of draws the
+conformance protocol fixes is unaffected — only how many times the call's *text* appears in the
+file changes, which `randomCpfBase` illustrates:
+
+```ts
+// before: nine copies of the same text
+export function randomCpfBase(env: Capabilities): string {
+	return (
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		// … seven more, identical …
+		randomBelow(env).toString()
+	);
+}
+
+// after: the same call, run nine times by a loop, with the fromCharCode-instead-of-toString+concat
+// insight (below) applied once, inside the loop body, instead of once per digit
+export function randomCpfBase(env: Capabilities): string {
+	let tmp2: number[] = new Array(9);
+	for (let tmp1 = 0; tmp1 < 9; tmp1++) {
+		tmp2[tmp1] = 48 + randomBelow(env);
+	}
+	return String.fromCharCode(...tmp2);
+}
+```
+
+Removing eight or eleven repeats of the same ~15-character substring is a real reduction in raw
+bytes — 66 fewer for `generateCpf`, 112 fewer for `generateCnpj`, minified. It is also, on its own,
+close to *free* to an LZ77-family compressor: gzip's DEFLATE and brotli's own LZ77 stage both
+encode a repeated substring as a short back-reference (a length and a distance) instead of its
+literal bytes, so text repeated eight or eleven times costs only a few compressed bits *per
+repetition*, however long the substring or however verbose the file looks on disk. The loop that
+replaces it — `let t=new Array(9);for(let r=0;r<9;r++)t[r]=48+s(e);return String.fromCharCode(...t)`
+— is short, but it is short, *unique*, once-occurring text: there is nothing in it for a
+back-reference to point at. Trading eight-or-eleven-times-repeated text for shorter unique text is
+a net loss under both codecs even though it is an unambiguous win raw, because the repeated text's
+compressed cost was already close to nothing and the unique text's is not.
+
+**Both variants, measured.** `node engine/scripts/size.ts core` (now — see the note at the end of
+this section — reporting and gating gzip *and* brotli, both at maximum quality) on the committed
+baseline against the loop variant, minified / gzip / brotli, every export:
+
+| export | minified (base → loop) | gzip (base → loop) | brotli (base → loop) |
+| --- | ---: | ---: | ---: |
+| `formatCnpj` | 518 → 518 | 334 → 334 | 292 → 292 |
+| `formatCurrency` | 434 → 434 | 312 → 312 | 267 → 267 |
+| `generateCnpj` | 1,301 → **1,189 (−112)** | 629 → **652 (+23)** | 549 → **568 (+19)** |
+| `generateCpf` | 1,284 → **1,218 (−66)** | 614 → **633 (+19)** | 532 → **551 (+19)** |
+| `getAddressInfoByCep` | 2,855 → 2,855 | 1,277 → 1,277 | 1,149 → 1,149 |
+| `getHolidays` | 2,379 → 2,379 | 817 → 817 | 765 → 765 |
+| `isBusinessDay` | 2,922 → 2,922 | 1,022 → 1,022 | 966 → 966 |
+| `isValidCnpj` | 1,481 → 1,481 | 499 → 499 | 452 → 452 |
+| `isValidCpf` | 760 → 760 | 333 → 332 (−1) | 290 → 291 (+1) |
+| `(all)` | 9,839 → **9,661 (−178)** | 3,175 → **3,192 (+17)** | 2,891 → **2,908 (+17)** |
+
+`generateCpf` and `generateCnpj` are the only rows that move, at every metric, confirmed at the
+bundle level (not just by diffing the generated files — the `(all)` bundle, which puts both
+functions' now-similar loop bodies in the same file where they could in principle compress against
+each other, still grows by the same +17 both codecs agree on). `isValidCpf`'s ∓1 is noise, not a
+third affected row: `isValidCpf` never calls `randomCpfBase` (it imports only `cpfCheckDigit`,
+`cpfCheckDigit1` and `isRepeated` from the same source file), its *minified* byte count is
+identical in both variants, and gzip and brotli move it in opposite directions by one byte each —
+consistent with esbuild's minifier assigning a different short name to some unrelated binding
+because an unrelated part of the same source file changed, not with any real content difference.
+
+Speed, `core/bench/typescript.ts`, generated ÷ handwritten, three runs each:
+
+| row | baseline (unrolled) | loop variant |
+| --- | --- | --- |
+| `generateCpf` | 0.92x – 1.31x (noisy, often over budget) | **0.80x – 0.91x** |
+| `generateCnpj` | 1.19x – 1.31x (always over budget) | **0.68x – 0.85x** |
+
+The loop variant is not a marginal win — both rows go from noisy-around-or-over-1.0x to solidly
+under it, every run, and it is faster than a simpler variant tried first (unrolled
+`String.fromCharCode(48 + randomBelow(env), 48 + randomBelow(env), …)` in place of the
+`.toString()`-and-`+` chain, same number of calls, no loop: 0.88x–0.93x / 0.90x–0.96x, +9/+9 gzip,
+smaller than the loop's own +19/+23 but not zero either).
+
+**Why brotli, and why it agrees.** gzip's window is 32 KiB and it has no notion of "text that looks
+like other text commonly seen on the web" — its preference for local redundancy could plausibly be
+a gzip-specific quirk rather than a real property of what a browser downloads. Brotli has a larger
+window and a static dictionary seeded from common web content, and it is what most CDNs actually
+negotiate today, so it was measured specifically to test whether gzip's verdict was an artifact.
+It was not: brotli (quality 11, with `BROTLI_PARAM_SIZE_HINT` set — the default quality
+understates this, since it is tuned for streaming, not a static asset) grows on both rows and on
+the combined bundle, by an amount close to gzip's own (`generateCpf` +19 under both codecs;
+`generateCnpj` +23 gzip vs. +19 brotli — brotli's dictionary helps a little here, not enough to
+flip the sign; `(all)` +17 under both). Two independent general-purpose compressors, tuned to their
+respective maximums, agree on the direction. That is the basis for the decision below, not one
+codec's number.
+
+**The decision.** This is a real, reproducible, substantial speedup — both over-budget rows move
+solidly under 1.0x — declined on a stated constraint: this file's bar is 1.0x on speed, but
+`engine/scripts/size.ts --check`'s bar is zero gzip *and* zero brotli growth on every export, and
+this change fails both by nine to twenty-three bytes depending on the row and the codec. The engine
+change (`engine/src/backend/lower.ts`'s `sameExpr`/`asAsciiDigitConversion`/`loopConcat` plus a
+`TargetSpec.loopUnroll` flag, `engine/src/targets/typescript/index.ts`'s `loopUnroll: true`) was
+built, measured on both codecs, and reverted rather than shipped past the gate; `core/out/typescript`
+in this repository is the unrolled baseline, unchanged. If the trade above — solidly-faster
+generators for 9–23 bytes of gzip/brotli growth on two exports, nothing else affected — is one
+worth taking, that is a call for a human to make explicitly (with `size.ts --write`, after it
+accepts the new numbers as the baseline), not one this pass makes on its own.
+
+`engine/scripts/size.ts` reports and gates gzip *and* brotli as of this writing (both at maximum
+quality, both required not to grow); a reader checking the numbers above against a future run
+should confirm the tool still measures both before comparing directly, since this section's numbers
+are a snapshot of one measurement rather than something `verify` re-derives on every run.
 
 ## Getting every row to 1.0x
 
