@@ -56,11 +56,12 @@ export class AddressForm {
     return this.address.error() ? "No address for this CEP" : "";
   }
 
-  // What the lookup found is what the form starts from; it stays editable from there.
+  // What the lookup found is what the form starts from; it stays editable from there. Asking a
+  // resource for a value it does not have throws, so it is asked whether it has one first.
   private readonly fill = effect(() => {
-    const found = this.address.value();
+    if (!this.address.hasValue()) return;
 
-    if (found === undefined) return;
+    const found = this.address.value();
 
     this.street.set(found.street);
     this.neighborhood.set(found.neighborhood);
