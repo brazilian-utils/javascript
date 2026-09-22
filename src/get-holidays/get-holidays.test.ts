@@ -2,7 +2,14 @@ import * as fc from "fast-check";
 
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
 import { DATA as STATES, type StateCode } from "../_internals/constants/states";
-import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import {
+	bench,
+	describe,
+	expect,
+	expectTypeOf,
+	inTimeZone,
+	test,
+} from "../_internals/test/runtime";
 import { isBusinessDay } from "../is-business-day/is-business-day";
 import { STATE_HOLIDAYS } from "./constants";
 import { getHolidays, type GetHolidaysParams, type Holiday } from "./get-holidays";
@@ -661,6 +668,17 @@ describe("getHolidays", () => {
 		expect(goHolidays.some((h) => h.name === "Nossa Senhora Sant'Ana")).toBe(false);
 		expect(mtHolidays.some((h) => h.name === "Criação do Estado de Mato Grosso")).toBe(false);
 		expect(rjHolidays.some((h) => h.name === "São Sebastião")).toBe(false);
+	});
+
+	inTimeZone("America/Sao_Paulo", () => {
+		test("should answer for the local days of the current time zone, not of the memoized one", () => {
+			const finados = getHolidays(2018).find((holiday) => holiday.name === "Finados");
+
+			expect(finados?.date.getMonth()).toBe(10);
+			expect(finados?.date.getDate()).toBe(2);
+			expect(finados?.date.getHours()).toBe(0);
+			expect(isBusinessDay(new Date(2018, 10, 2))).toBe(false);
+		});
 	});
 
 	describe("properties", () => {
