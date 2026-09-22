@@ -387,7 +387,7 @@ browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
   the files to compile in its query string and `run.js` compiles them in the browser. The demos
   take their look from `docs/snippets/styles.css`.
 - The examples of the document field page are generated: `npm run build:examples`
-  (`scripts/examples.ts`) fills the templates of `docs/snippets/document-field/_templates` from a
+  (`scripts/examples.ts`) fills the templates of `docs/snippets/document-field/templates` from a
   table of documents, so the shared mask is written once. Edit a template or the table: the files
   under `generated/` are written by the build and are not in the repository. A template ends in
   `.tmpl` (`schema/zod.ts.tmpl`) because its `@@placeholder@@` markers do not parse as the language

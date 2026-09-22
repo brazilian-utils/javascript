@@ -5,7 +5,7 @@
 	"projectTitle": "Brazilian Utils",
 	"description": "Zero-dependency, tree-shakeable utilities for Brazilian data: validate, format, parse and generate CPF, CNPJ, CEP, boleto, Pix, holidays and more.",
 	"folders": ["docs"],
-	"excludeFolders": ["docs/pt-br"],
+	"excludeFolders": ["docs/pt-br", "docs/snippets/document-field/templates"],
 	"excludeFiles": [
 		"CHANGELOG.md",
 		"CODE_OF_CONDUCT.md",
