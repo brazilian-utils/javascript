@@ -235,7 +235,7 @@
             var show = function () {
               panels.forEach(function (panel, index) {
                 var selected = panel.dataset.name === current.tab;
-                tabs.children[index].setAttribute('aria-selected', String(selected));
+                list.children[index].setAttribute('aria-selected', String(selected));
                 panel.hidden = !selected;
                 var variants = variantsOf(panel);
                 if (variants.length === 0) {
@@ -256,9 +256,10 @@
             var names = variantsOf(panels[0]).map(function (variant) {
               return variant.dataset.variant;
             });
+            var picker = null;
 
             if (names.length > 0) {
-              var picker = document.createElement('label');
+              picker = document.createElement('label');
               picker.className = 'example-picker';
               picker.textContent = document.documentElement.lang === 'pt-BR' ? 'Documento' : 'Document';
               var select = document.createElement('select');
@@ -273,15 +274,21 @@
                 show();
               });
               picker.appendChild(select);
-              panels[0].parentNode.insertBefore(picker, panels[0]);
               current.variant = names.indexOf(remembered('example-variant')) === -1 ? names[0] : remembered('example-variant');
               select.value = current.variant;
             }
 
             var tabs = document.createElement('div');
             tabs.className = 'example-tabs';
-            tabs.setAttribute('role', 'tablist');
             panels[0].parentNode.insertBefore(tabs, panels[0]);
+
+            // The picker leads the strip, so the two choices a guide offers sit together.
+            if (picker) tabs.appendChild(picker);
+
+            var list = document.createElement('div');
+            list.className = 'example-tab-list';
+            list.setAttribute('role', 'tablist');
+            tabs.appendChild(list);
 
             panels.forEach(function (panel) {
               panel.setAttribute('role', 'tabpanel');
@@ -293,7 +300,7 @@
                 current.tab = panel.dataset.name;
                 show();
               });
-              tabs.appendChild(button);
+              list.appendChild(button);
             });
 
             var saved = remembered('example-tab');
