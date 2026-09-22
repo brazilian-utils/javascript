@@ -315,6 +315,71 @@
             show();
           });
         },
+        // The two language links of the navbar, pointed at the page on screen: switching the
+        // language keeps the route, its query string and its anchor (/utilities becomes
+        // /pt-br/utilities and back), instead of sending the reader to a home page. `_navbar.md`
+        // stays the source of the labels and of their order, and the link of the language being
+        // read is marked the way docsify marks an active navbar entry; only the `href` changes,
+        // so the navbar is still what the Markdown says.
+        // Every page exists in both languages (the `_sidebar.md` of each lists the same pages,
+        // and `scripts/site.ts` pairs them one by one in the hreflang links and in the sitemap),
+        // so the translated route is a page that answers. The two exceptions go to the other
+        // language's home: the home pages, which are not translations of each other (`/` is the
+        // README and `/pt-br/` shows pt-br/getting-started through `alias`), and a route no
+        // language has, where docsify shows its 404 view and there is nothing to translate.
+        function (hook, vm) {
+          var HOME = { 'en': '/', 'pt-br': '/pt-br/' };
+          // Where each link points for the page on screen, and which language that page is in.
+          var destination = { 'en': HOME['en'], 'pt-br': HOME['pt-br'] };
+          var reading = 'en';
+          var watched = [];
+          // The language a navbar link switches to, from the href `_navbar.md` gives it, kept on
+          // the element so the link is still recognised once its href points at a page.
+          function languageOf(link) {
+            var href = link.getAttribute('href');
+            return link.dataset.language || (href === HOME['pt-br'] ? 'pt-br' : href === HOME['en'] ? 'en' : '');
+          }
+          // The same route in a language, the home pages standing in for each other.
+          function translate(path, language) {
+            var english = path.replace(/^\/pt-br(?=\/|$)/, '') || '/';
+            return english === '/' ? HOME[language] : language === 'pt-br' ? '/pt-br' + english : english;
+          }
+          function rewrite() {
+            var links = document.querySelectorAll('.app-nav a[href], .app-nav-merged a[href]');
+            [].forEach.call(links, function (link) {
+              var language = languageOf(link);
+              if (!language) return;
+              link.dataset.language = language;
+              link.setAttribute('href', destination[language]);
+              if (language === reading) link.setAttribute('aria-current', 'page');
+              else link.removeAttribute('aria-current');
+              (link.closest('li') || link).classList.toggle('active', language === reading);
+            });
+          }
+          hook.doneEach(function () {
+            // docsify's history router leaves an anchor written as `#` in the path and reads one
+            // of its own from `?id=`; the page keeps both as the reader has them, and the route
+            // is translated without the fragment.
+            var path = ((vm.route && vm.route.path) || '/').replace(/#.*$/, '');
+            var missing = !!(vm.route && vm.route.response && vm.route.response.ok === false);
+            reading = /^\/pt-br(\/|$)/.test(path) ? 'pt-br' : 'en';
+            // A home page has no counterpart to carry the place in the page to.
+            var within = missing || translate(path, reading) === HOME[reading] ? '' : location.search + location.hash;
+            Object.keys(HOME).forEach(function (language) {
+              destination[language] = missing ? HOME[language] : translate(path, language) + within;
+            });
+            rewrite();
+            // docsify renders the navbar from its own request, which on some routes answers after
+            // this hook and puts the Markdown's links back; the navbar is written again whenever
+            // that happens, from the same destinations. Watching what the links say, rather than
+            // holding the navbar's markup, leaves `_navbar.md` in charge of it.
+            [].forEach.call(document.querySelectorAll('.app-nav, .app-nav-merged'), function (nav) {
+              if (watched.indexOf(nav) !== -1) return;
+              watched.push(nav);
+              new MutationObserver(rewrite).observe(nav, { childList: true, subtree: true });
+            });
+          });
+        },
         // Per-page metadata for search engines and link previews: the title, description,
         // canonical URL, language and hreflang pair of the page being shown, from its front
         // matter and route. The generated copies of this shell carry the same values statically
