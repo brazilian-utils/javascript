@@ -176,7 +176,6 @@ Parse a CNPJ into the fields the number encodes. Accepts the same input forms as
 
 - **Options** (`GetCnpjInfoOptions`): `version` is read the way `isValidCnpj` reads it, `1` (default) the numeric-only format, `2` both the numeric and the alphanumeric one.
 - Returns a `CnpjInfo`, the 14 positions as Anexo XV lays them out: 8 (`root`, the raiz that identifies the entity) + 4 (`branch`, the establishment, called número de ordem by the Receita Federal) + 2 (`checkDigits`, always numeric). `branch` is named after the `branch` parameter of `generateCnpj`, which fills the same four positions.
-- `format` is `'alphanumeric'` when the root or the branch carries a letter and `'numeric'` otherwise (typed as `CnpjFormat`).
 - `isInitialHeadquarters` tells whether the branch is `0001`, the one the Receita Federal gives the headquarters (matriz) when the root is registered. A filial can later become the headquarters while keeping its número de ordem, so only the Receita Federal registry tells the current headquarters.
 - The fields of an alphanumeric CNPJ are returned upper cased.
 
@@ -188,7 +187,6 @@ getCnpjInfo('12.345.678/0001-95');
 //   root: '12345678',
 //   branch: '0001',
 //   checkDigits: '95',
-//   format: 'numeric',
 //   isInitialHeadquarters: true
 // }
 
@@ -197,7 +195,6 @@ getCnpjInfo('12.abc.345/01de-35', { version: 2 });
 //   root: '12ABC345',
 //   branch: '01DE',
 //   checkDigits: '35',
-//   format: 'alphanumeric',
 //   isInitialHeadquarters: false
 // }
 

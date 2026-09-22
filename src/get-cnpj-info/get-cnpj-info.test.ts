@@ -5,12 +5,7 @@ import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime
 import { formatCnpj } from "../format-cnpj/format-cnpj";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
-import {
-	type CnpjFormat,
-	type CnpjInfo,
-	getCnpjInfo,
-	type GetCnpjInfoOptions,
-} from "./get-cnpj-info";
+import { type CnpjInfo, getCnpjInfo, type GetCnpjInfoOptions } from "./get-cnpj-info";
 
 describe("getCnpjInfo", () => {
 	describe("should return the parsed numeric CNPJ", () => {
@@ -19,7 +14,6 @@ describe("getCnpjInfo", () => {
 				root: "12345678",
 				branch: "0001",
 				checkDigits: "95",
-				format: "numeric",
 				isInitialHeadquarters: true,
 			});
 		});
@@ -29,7 +23,6 @@ describe("getCnpjInfo", () => {
 				root: "12345678",
 				branch: "0002",
 				checkDigits: "76",
-				format: "numeric",
 				isInitialHeadquarters: false,
 			});
 		});
@@ -39,7 +32,6 @@ describe("getCnpjInfo", () => {
 				root: "00000001",
 				branch: "0001",
 				checkDigits: "36",
-				format: "numeric",
 				isInitialHeadquarters: true,
 			});
 		});
@@ -49,7 +41,6 @@ describe("getCnpjInfo", () => {
 				root: "12345678",
 				branch: "0001",
 				checkDigits: "95",
-				format: "numeric",
 				isInitialHeadquarters: true,
 			});
 		});
@@ -59,7 +50,6 @@ describe("getCnpjInfo", () => {
 				root: "12345678",
 				branch: "0002",
 				checkDigits: "76",
-				format: "numeric",
 				isInitialHeadquarters: false,
 			});
 		});
@@ -69,7 +59,6 @@ describe("getCnpjInfo", () => {
 				root: "12345678",
 				branch: "0001",
 				checkDigits: "95",
-				format: "numeric",
 				isInitialHeadquarters: true,
 			});
 		});
@@ -80,7 +69,6 @@ describe("getCnpjInfo", () => {
 				root: "12345678",
 				branch: "0001",
 				checkDigits: "95",
-				format: "numeric",
 				isInitialHeadquarters: true,
 			});
 		});
@@ -92,7 +80,6 @@ describe("getCnpjInfo", () => {
 				root: "12ABC345",
 				branch: "01DE",
 				checkDigits: "35",
-				format: "alphanumeric",
 				isInitialHeadquarters: false,
 			});
 		});
@@ -102,7 +89,6 @@ describe("getCnpjInfo", () => {
 				root: "12ABC345",
 				branch: "01DE",
 				checkDigits: "35",
-				format: "alphanumeric",
 				isInitialHeadquarters: false,
 			});
 		});
@@ -112,7 +98,6 @@ describe("getCnpjInfo", () => {
 				root: "AB12CD34",
 				branch: "0001",
 				checkDigits: "84",
-				format: "alphanumeric",
 				isInitialHeadquarters: true,
 			});
 		});
@@ -122,7 +107,6 @@ describe("getCnpjInfo", () => {
 				root: "AA345678",
 				branch: "000A",
 				checkDigits: "29",
-				format: "alphanumeric",
 				isInitialHeadquarters: false,
 			});
 		});
@@ -132,7 +116,6 @@ describe("getCnpjInfo", () => {
 				root: "12345678",
 				branch: "000A",
 				checkDigits: "08",
-				format: "alphanumeric",
 				isInitialHeadquarters: false,
 			});
 		});
@@ -203,7 +186,6 @@ describe("getCnpjInfo", () => {
 					const parsed = getCnpjInfo(written.toLowerCase(), { version: 2 });
 
 					expect(`${parsed?.root}${parsed?.branch}${parsed?.checkDigits}`).toBe(cnpj);
-					expect(parsed?.format).toBe(/[A-Z]/.test(cnpj) ? "alphanumeric" : "numeric");
 				}),
 			);
 		});
@@ -250,12 +232,10 @@ describe("getCnpjInfo types", () => {
 		expectTypeOf(getCnpjInfo).parameter(1).toEqualTypeOf<GetCnpjInfoOptions | undefined>();
 		expectTypeOf(getCnpjInfo).returns.toEqualTypeOf<CnpjInfo | null>();
 		expectTypeOf<GetCnpjInfoOptions>().toEqualTypeOf<{ version?: 1 | 2 }>();
-		expectTypeOf<CnpjFormat>().toEqualTypeOf<"numeric" | "alphanumeric">();
 		expectTypeOf<CnpjInfo>().toEqualTypeOf<{
 			root: string;
 			branch: string;
 			checkDigits: string;
-			format: CnpjFormat;
 			isInitialHeadquarters: boolean;
 		}>();
 	});

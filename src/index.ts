@@ -116,12 +116,7 @@ export {
 export { type Cfop, getCfop } from "./get-cfop/get-cfop";
 export { getCities } from "./get-cities/get-cities";
 export { type Cnae, getCnae } from "./get-cnae/get-cnae";
-export {
-	type CnpjFormat,
-	type CnpjInfo,
-	getCnpjInfo,
-	type GetCnpjInfoOptions,
-} from "./get-cnpj-info/get-cnpj-info";
+export { type CnpjInfo, getCnpjInfo, type GetCnpjInfoOptions } from "./get-cnpj-info/get-cnpj-info";
 export { type CpfInfo, getCpfInfo } from "./get-cpf-info/get-cpf-info";
 export {
 	getFormatLicensePlate,

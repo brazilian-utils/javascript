@@ -115,14 +115,10 @@ export type Cnae = {
 };
 
 // @public
-export type CnpjFormat = "numeric" | "alphanumeric";
-
-// @public
 export type CnpjInfo = {
     root: string;
     branch: string;
     checkDigits: string;
-    format: CnpjFormat;
     isInitialHeadquarters: boolean;
 };
 

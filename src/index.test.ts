@@ -13,7 +13,6 @@ import {
 	type CertidaoType,
 	type Cfop,
 	type Cnae,
-	type CnpjFormat,
 	type CnpjInfo,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
@@ -312,7 +311,6 @@ describe("Public API", () => {
 			CertidaoType: CertidaoType;
 			Cfop: Cfop;
 			Cnae: Cnae;
-			CnpjFormat: CnpjFormat;
 			CnpjInfo: CnpjInfo;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;

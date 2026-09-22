@@ -1,12 +1,8 @@
-import { CNPJ_LETTER_REGEX } from "../_internals/constants/cnpj";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { isValidCnpj, type IsValidCnpjOptions } from "../is-valid-cnpj/is-valid-cnpj";
 
 /** Options of `getCnpjInfo`. */
 export type GetCnpjInfoOptions = Pick<IsValidCnpjOptions, "version">;
-
-/** How a CNPJ is written: `"numeric"` digits only, `"alphanumeric"` with a letter in the root or the branch. */
-export type CnpjFormat = "numeric" | "alphanumeric";
 
 /** The fields `getCnpjInfo` reads out of a CNPJ. */
 export type CnpjInfo = {
@@ -16,8 +12,6 @@ export type CnpjInfo = {
 	branch: string;
 	/** The 2 numeric check digits (dígitos verificadores), positions 13 and 14. */
 	checkDigits: string;
-	/** `"alphanumeric"` when the root or the branch carries a letter, `"numeric"` otherwise. */
-	format: CnpjFormat;
 	/**
 	 * Whether the branch is `0001`, the one the Receita Federal gives the headquarters (matriz)
 	 * when the root is registered. A filial that later becomes the headquarters keeps its
@@ -64,7 +58,6 @@ const INITIAL_HEADQUARTERS_BRANCH = "0001";
  * //   root: "12345678",
  * //   branch: "0001",
  * //   checkDigits: "95",
- * //   format: "numeric",
  * //   isInitialHeadquarters: true,
  * // }
  *
@@ -73,7 +66,6 @@ const INITIAL_HEADQUARTERS_BRANCH = "0001";
  * //   root: "12ABC345",
  * //   branch: "01DE",
  * //   checkDigits: "35",
- * //   format: "alphanumeric",
  * //   isInitialHeadquarters: false,
  * // }
  *
@@ -104,7 +96,6 @@ export const getCnpjInfo = (value: string, options?: GetCnpjInfoOptions): CnpjIn
 		root: cnpj.slice(0, ROOT_END),
 		branch,
 		checkDigits: cnpj.slice(BRANCH_END),
-		format: CNPJ_LETTER_REGEX.test(cnpj) ? "alphanumeric" : "numeric",
 		isInitialHeadquarters: branch === INITIAL_HEADQUARTERS_BRANCH,
 	};
 };
