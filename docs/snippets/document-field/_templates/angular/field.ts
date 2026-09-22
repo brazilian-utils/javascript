@@ -46,6 +46,9 @@ let fields = 0;
     <!-- On the page from the start, and announced when it gets its text. -->
     <p [id]="errorId" role="alert">{{ errorMessage }}</p>
   `,
+  // A component is an element of its own; this one stands aside so its label, input and message
+  // are laid out by the form around it, one row of it each, the way they are written here.
+  styles: `:host { display: contents; }`,
 })
 export class Field implements ControlValueAccessor {
   @Input({ required: true }) label = "";

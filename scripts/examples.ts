@@ -204,7 +204,7 @@ function indent(code: string, spaces: number): string {
 }
 
 /** The mask, written once and inlined into each hook, directive and listener. */
-const maskBody = readTemplate("_mask-body.ts").trim();
+const maskBody = readTemplate("mask-body.ts").trim();
 
 /**
  * @param {string} template - The template, with `@@name@@` placeholders.
@@ -241,12 +241,12 @@ for (const document of DOCUMENTS) {
 
 		writeFileSync(
 			join(frameworkFolder, framework.base),
-			fill(readTemplate(`${framework.name}-base-${framework.base}`), values(document)),
+			fill(readTemplate(`${framework.name}/${framework.base}`), values(document)),
 		);
 
 		writeFileSync(
 			join(frameworkFolder, framework.mask),
-			fill(readTemplate(`mask-${framework.name}.ts`), {
+			fill(readTemplate(`${framework.name}/mask.ts`), {
 				...values(document),
 			}),
 		);
@@ -255,9 +255,8 @@ for (const document of DOCUMENTS) {
 			["field", framework.field],
 			["form", framework.form],
 		] as const) {
-			const template = readFileSync(
-				join(TEMPLATE_DIR, `${framework.name}-${part}.${extension}`),
-				"utf8",
+			const template = readTemplate(
+				`${framework.name}/${part === "field" ? "document-field" : part}.${extension}`,
 			);
 			const file = `${document.kind}-${part}.${extension}`;
 
@@ -268,7 +267,7 @@ for (const document of DOCUMENTS) {
 	mkdirSync(join(folder, "schema"), { recursive: true });
 
 	for (const schema of SCHEMAS) {
-		const template = readFileSync(join(TEMPLATE_DIR, `schema-${schema}.ts`), "utf8");
+		const template = readTemplate(`schema/${schema}.ts`);
 
 		writeFileSync(
 			join(folder, "schema", `${document.kind}-${schema}.ts`),
@@ -280,7 +279,7 @@ for (const document of DOCUMENTS) {
 
 	writeFileSync(
 		join(folder, "vanilla", `${document.kind}-field.html`),
-		fill(readTemplate("vanilla.html"), values(document)),
+		fill(readTemplate("vanilla/field.html"), values(document)),
 	);
 }
 
@@ -297,17 +296,17 @@ for (const framework of FRAMEWORKS) {
 
 	writeFileSync(
 		join(folder, framework.mask),
-		fill(readTemplate(`mask-${framework.name}.ts`), values(cep)),
+		fill(readTemplate(`${framework.name}/mask.ts`), values(cep)),
 	);
 
 	writeFileSync(
 		join(folder, framework.base),
-		fill(readTemplate(`${framework.name}-base-${framework.base}`), values(cep)),
+		fill(readTemplate(`${framework.name}/${framework.base}`), values(cep)),
 	);
 
 	writeFileSync(
 		join(folder, `cep-field.${framework.field}`),
-		fill(readTemplate(`${framework.name}-field.${framework.field}`), values(cep)),
+		fill(readTemplate(`${framework.name}/document-field.${framework.field}`), values(cep)),
 	);
 }
 

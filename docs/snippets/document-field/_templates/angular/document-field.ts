@@ -23,6 +23,8 @@ import { Field } from "./field";
       (touched)="onTouched()"
     />
   `,
+  // As with the field it wraps: the form around it lays out what is inside.
+  styles: `:host { display: contents; }`,
 })
 export class @@Name@@Field implements ControlValueAccessor {
   /** What the form says is wrong with the value, if anything. */
