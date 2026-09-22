@@ -602,6 +602,9 @@ const renderBreakingCheck = ({
  * @param {Assertion[]} assertions - The assertion behind each line, in file order.
  * @param {Map<string, string>} labels - Short names for the absolute paths in compiler messages.
  * @returns {Promise<string[]>} One message per failed assertion, empty when none failed.
+ * @throws {CheckError} When `tsc` reports an error the generated file cannot explain, and when it
+ * exits non-zero without reporting one at all (a tsconfig error, a missing input, a compiler that
+ * did not start): an empty result would otherwise read as "no breaking change".
  */
 const typeCheck = async (
 	checkDir: string,
@@ -629,13 +632,11 @@ const typeCheck = async (
 	);
 
 	const tsc = join(rootDir, "node_modules", "typescript", "bin", "tsc");
-	const { stdout: output } = await run(process.execPath, [
-		tsc,
-		"-p",
-		checkDir,
-		"--pretty",
-		"false",
-	]);
+	const {
+		ok,
+		stdout: output,
+		stderr,
+	} = await run(process.execPath, [tsc, "-p", checkDir, "--pretty", "false"]);
 
 	const lines = source.split("\n");
 	const byLine = new Map(assertions.map((a) => [lines.indexOf(a.code) + 1, a]));
@@ -652,13 +653,19 @@ const typeCheck = async (
 
 		const [, errorFile = "", lineNumber = "0", message = ""] = match;
 
-		if (resolve(checkDir, errorFile) !== file || !byLine.has(Number(lineNumber))) {
+		if (resolve(rootDir, errorFile) !== file || !byLine.has(Number(lineNumber))) {
 			throw new CheckError(`Unexpected compiler error in the generated check:\n${line}`);
 		}
 
 		current = failures.get(Number(lineNumber)) ?? [];
 		current.push(message);
 		failures.set(Number(lineNumber), current);
+	}
+
+	if (!ok && failures.size === 0) {
+		throw new CheckError(
+			`The generated check did not compile and reported no assertion:\n${output}${stderr}`.trim(),
+		);
 	}
 
 	return [...failures]
