@@ -1,20 +1,31 @@
-import { computed, ref, toValue, type MaybeRefOrGetter } from "vue";
+import { computed, ref, toValue, watch, type MaybeRefOrGetter } from "vue";
 import type { StateCode } from "@brazilian-utils/brazilian-utils";
 
 /**
  * The cities of a state, fetched the first time that state's select is opened. The table is
- * 154 KB, so nothing is fetched until someone means to pick a city, and picking another state
- * only marks what is on screen as no longer this state's — the table itself is fetched once and
- * the browser keeps it.
+ * 154 KB, so nothing is fetched until someone means to pick a city, and the browser keeps the
+ * module once it has it. `import()` takes no signal, so the module is not stopped, only what is
+ * done with it: a table that arrives for a state that is no longer picked, or after the component
+ * is gone, is dropped.
  */
 export function useCitiesOfState(state: MaybeRefOrGetter<string>) {
   const loaded = ref({ state: "", cities: [] as string[] });
-  const loading = ref(false);
+  const asked = ref("");
+  const pending = ref<AbortController>();
 
-  // What was loaded is only this state's cities while it is the state that is picked, which is
-  // also what makes the answer to a state left behind harmless.
+  // Both of these are about the state that is picked, so picking another one leaves the cities of
+  // the old state behind rather than on screen, and its spinner with them.
   const cities = computed(() =>
     loaded.value.state === toValue(state) ? loaded.value.cities : [],
+  );
+  const loading = computed(
+    () => toValue(state) !== "" && asked.value === toValue(state) && cities.value.length === 0,
+  );
+
+  // What is on its way is dropped when another state is picked and when the scope goes.
+  watch(
+    () => toValue(state),
+    (_current, _previous, onCleanup) => onCleanup(() => pending.value?.abort()),
   );
 
   const load = async () => {
@@ -22,12 +33,16 @@ export function useCitiesOfState(state: MaybeRefOrGetter<string>) {
 
     if (!current || loading.value || cities.value.length > 0) return;
 
-    loading.value = true;
+    const controller = new AbortController();
+
+    pending.value = controller;
+    asked.value = current;
 
     const { getCities } = await import("@brazilian-utils/brazilian-utils/get-cities");
 
+    if (controller.signal.aborted) return;
+
     loaded.value = { state: current, cities: getCities(current as StateCode) };
-    loading.value = false;
   };
 
   return { cities, loading, load };
