@@ -15,20 +15,17 @@
   --cover-bg-overlay: none;
 }
 
-/* The framework tabs of a guide, and at the far end of them the document it is about */
+/* The two questions a guide asks: which document, in words, and then which framework, as tabs */
+.example-picker {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6em; margin: 1.5em 0 0;
+}
+.example-picker select { padding: 0.3em 0.5em; font: inherit; }
+.example-picker + .example-tabs { margin-top: 0.8em; }
 .example-tabs {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 1.5em 0 0;
+  display: flex; flex-wrap: wrap; gap: 4px; margin: 1.5em 0 0;
   border-bottom: 1px solid var(--border-color);
 }
 .example-tab-list { display: flex; flex-wrap: wrap; gap: 4px; }
-/* The document is a choice about the whole guide rather than one of the tabs, so it keeps away
-   from them: at the end of the line, quieter, and on a line of its own when there is no room. */
-.example-picker {
-  display: flex; align-items: center; gap: 0.5em; margin-left: auto; padding: 0 0.2em 0.5em;
-  font-size: 0.85em; font-weight: 600; opacity: 0.75;
-}
-.example-picker:hover, .example-picker:focus-within { opacity: 1; }
-.example-picker select { padding: 0.2em 0.4em; font: inherit; }
 .example-tabs button {
   padding: 0.55em 1.1em; border: 0; border-bottom: 2px solid transparent; border-radius: 0;
   margin-bottom: -1px; background: none; color: inherit; font: inherit; font-weight: 600;

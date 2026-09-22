@@ -263,7 +263,9 @@
             if (names.length > 0) {
               picker = document.createElement('label');
               picker.className = 'example-picker';
-              picker.textContent = document.documentElement.lang === 'pt-BR' ? 'Documento' : 'Document';
+              picker.textContent = document.documentElement.lang === 'pt-BR'
+                ? 'Escolha o documento que você quer ver:'
+                : 'Choose the document you want to see:';
               var select = document.createElement('select');
               names.forEach(function (name) {
                 var option = document.createElement('option');
@@ -280,6 +282,10 @@
               select.value = current.variant;
             }
 
+            // The document is a question the guide asks before the tabs answer which framework,
+            // so it says so in words, on a line of its own above them.
+            if (picker) panels[0].parentNode.insertBefore(picker, panels[0]);
+
             var tabs = document.createElement('div');
             tabs.className = 'example-tabs';
             panels[0].parentNode.insertBefore(tabs, panels[0]);
@@ -288,10 +294,6 @@
             list.className = 'example-tab-list';
             list.setAttribute('role', 'tablist');
             tabs.appendChild(list);
-
-            // The tabs are what the strip is for; the document sits at the end of it, out of
-            // their way, where a toolbar keeps the control that is not its navigation.
-            if (picker) tabs.appendChild(picker);
 
             panels.forEach(function (panel) {
               panel.setAttribute('role', 'tabpanel');

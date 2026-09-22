@@ -4,7 +4,7 @@ description: "A field that masks and validates a CPF, CNPJ, CEP or phone number 
 keywords: ["CPF input mask", "CNPJ mask", "CEP mask", "phone mask", "React CPF", "Angular CPF", "Vue CPF", "validate CPF"]
 ---
 
-A field that formats as you type, inside a form that validates. Pick the document and the framework: each example runs the code below it, which you can copy as is.
+A field that formats as you type, inside a form that validates. Each example runs the code below it, which you can copy as is.
 
 The field only masks, and hands the form the value without its mask, with `parse*`, so a form holds `52998224725` and a submit sends that. Validation belongs to the form, which also leaves one error message per field instead of two. The mask is the same everywhere: a formatter takes whatever has been typed so far, and formatting what comes before the caret says where the caret goes, so editing in the middle works.
 

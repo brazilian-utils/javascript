@@ -4,7 +4,7 @@ description: "Um campo que aplica máscara e valida CPF, CNPJ, CEP ou telefone e
 keywords: ["máscara de CPF", "máscara de CNPJ", "máscara de CEP", "máscara de telefone", "CPF React", "CPF Angular", "CPF Vue", "validar CPF"]
 ---
 
-Um campo que formata enquanto você digita, dentro de um formulário que valida. Escolha o documento e o framework: cada exemplo roda o código logo abaixo dele, que pode ser copiado do jeito que está.
+Um campo que formata enquanto você digita, dentro de um formulário que valida. Cada exemplo roda o código logo abaixo dele, que pode ser copiado do jeito que está.
 
 O campo só aplica a máscara e entrega ao formulário o valor sem ela, com `parse*`, então o formulário guarda `52998224725` e é isso que o envio manda. Validar é trabalho do formulário, o que também deixa uma mensagem de erro por campo em vez de duas. A máscara é a mesma em todos: um formatter aceita o que já foi digitado, e formatar o que vem antes do cursor diz para onde ele vai, então editar no meio funciona.
 
