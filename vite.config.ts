@@ -455,6 +455,9 @@ export default defineConfig({
 			{
 				files: ["src/_internals/test/**"],
 				rules: {
+					// The arbitraries assemble valid documents out of the check-digit internals, so
+					// this one file reaches for more modules than a util ever should.
+					"import/max-dependencies": "off",
 					"sonarjs/no-implicit-dependencies": "off",
 					"sonarjs/no-nested-functions": "off",
 					"typescript/consistent-type-definitions": "off",

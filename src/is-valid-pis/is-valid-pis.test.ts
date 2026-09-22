@@ -1,8 +1,12 @@
 import * as fc from "fast-check";
 
 import { PIS_LENGTH } from "../_internals/constants/pis";
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
-import { pisNumbers } from "../_internals/test/document-arbitraries";
+import {
+	anyValue,
+	digitsOfOtherLength,
+	maskSeparators,
+	pisNumbers,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidPis } from "./is-valid-pis";

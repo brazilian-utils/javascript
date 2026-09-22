@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { SERVICE_PHONE_UTILITY_CODES } from "../_internals/constants/service-phone";
-import { phones } from "../_internals/test/phone-arbitraries";
+import { phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidServicePhone } from "./is-valid-service-phone";
 

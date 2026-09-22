@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
-import { cpfs } from "../_internals/test/document-arbitraries";
+import { cpfs } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";

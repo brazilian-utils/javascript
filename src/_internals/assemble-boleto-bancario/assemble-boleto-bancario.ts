@@ -19,7 +19,7 @@ export type BoletoBancarioParts = {
  * over the barcode the line encodes, replaces the first digit of `tail`.
  *
  * Shared by `generateBoleto` and by the `boletos` arbitrary of the test suite
- * (`src/_internals/test/document-arbitraries.ts`), so that both build a boleto the same way, from
+ * (`src/_internals/test/arbitraries.ts`), so that both build a boleto the same way, from
  * random digits or from digits a property-based test can shrink.
  *
  * @param {BoletoBancarioParts} parts - The free digits.

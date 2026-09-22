@@ -2,7 +2,7 @@ import * as fc from "fast-check";
 
 import { ARRECADACAO_LINE_LENGTH } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
-import { boletos } from "../_internals/test/boleto-arbitraries";
+import { boletos } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { type FormatBoletoOptions, formatBoleto } from "./format-boleto";
 

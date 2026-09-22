@@ -1,8 +1,12 @@
 import * as fc from "fast-check";
 
 import { CPF_LENGTH } from "../_internals/constants/cpf";
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
-import { cpfs } from "../_internals/test/document-arbitraries";
+import {
+	anyValue,
+	cpfs,
+	digitsOfOtherLength,
+	maskSeparators,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";

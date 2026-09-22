@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { cpfs } from "../_internals/test/document-arbitraries";
+import { cpfs } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";
 import { isValidPixPayload } from "./is-valid-pix-payload";

@@ -1,8 +1,12 @@
 import * as fc from "fast-check";
 
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import {
+	anyValue,
+	digitsOfOtherLength,
+	maskSeparators,
+	voterIds,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
-import { voterIds } from "../_internals/test/registry-arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { generateVoterId } from "../generate-voter-id/generate-voter-id";
 import { isValidVoterId } from "./is-valid-voter-id";

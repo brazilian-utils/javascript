@@ -1,8 +1,12 @@
 import * as fc from "fast-check";
 
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
-import { cnpjs } from "../_internals/test/document-arbitraries";
+import {
+	anyValue,
+	cnpjs,
+	digitsOfOtherLength,
+	maskSeparators,
+} from "../_internals/test/arbitraries";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { isValidCnpj, type IsValidCnpjOptions } from "./is-valid-cnpj";

@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { boletos } from "../_internals/test/boleto-arbitraries";
+import { boletos } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
 import { type BoletoInfo, type GetBoletoInfoOptions, getBoletoInfo } from "./get-boleto-info";

@@ -4,9 +4,13 @@ import {
 	PROCESSO_JURIDICO_LENGTH,
 	PROCESSO_JURIDICO_TRIBUNALS,
 } from "../_internals/constants/processo-juridico";
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import {
+	anyValue,
+	digitsOfOtherLength,
+	maskSeparators,
+	processosJuridicos,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
-import { processosJuridicos } from "../_internals/test/registry-arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidProcessoJuridico } from "./is-valid-processo-juridico";
 

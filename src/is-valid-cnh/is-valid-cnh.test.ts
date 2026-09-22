@@ -1,7 +1,11 @@
 import * as fc from "fast-check";
 
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
-import { cnhs } from "../_internals/test/document-arbitraries";
+import {
+	anyValue,
+	cnhs,
+	digitsOfOtherLength,
+	maskSeparators,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCnh } from "./is-valid-cnh";

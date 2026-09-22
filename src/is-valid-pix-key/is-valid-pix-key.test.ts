@@ -1,7 +1,6 @@
 import * as fc from "fast-check";
 
-import { cnpjs, cpfs } from "../_internals/test/document-arbitraries";
-import { phones } from "../_internals/test/phone-arbitraries";
+import { cnpjs, cpfs, phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";

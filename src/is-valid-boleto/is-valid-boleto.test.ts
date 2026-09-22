@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
-import { boletos } from "../_internals/test/boleto-arbitraries";
+import { boletos } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidBoleto } from "./is-valid-boleto";
 

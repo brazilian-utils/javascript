@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { phones } from "../_internals/test/phone-arbitraries";
+import { phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import {
 	type IsValidPhoneOptions,

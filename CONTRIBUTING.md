@@ -151,8 +151,8 @@ example `formatSomething`):
    block of [fast-check](https://fast-check.dev) properties that hold by specification (a
    generated value is valid, format/parse round-trip, masks never change the verdict, arbitrary
    input never throws); a property that needs a valid document draws it with `fc.gen()` from the
-   arbitraries in `src/_internals/test/` (`const cpf = g(cpfs)`, from `document-arbitraries.ts` and
-   its siblings), never by calling a `generate*` utility inside the property: those use
+   arbitraries of `src/_internals/test/arbitraries.ts` (`const cpf = g(cpfs)`), never by calling a
+   `generate*` utility inside the property: those use
    `Math.random()`, which the seed fast-check reports does not control, so a failure could be
    neither replayed nor shrunk. Then a `describe("<name> types")` block that pins the public signature with
    `expectTypeOf` (parameters, options and return type; `vp check` fails on a wrong assertion). A
