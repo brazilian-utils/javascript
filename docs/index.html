@@ -227,7 +227,9 @@
               frame.title = 'Live demo';
               frame.src = holder.dataset.demo;
               frames.push(frame);
-              holder.insertBefore(frame, holder.firstChild);
+              // Whatever the page says before the code says what the demo is: the demo comes after
+              // it and before the code, wherever the page happens to keep the two.
+              holder.insertBefore(frame, holder.querySelector('.file, .variant'));
             };
 
             var current = { tab: null, variant: null };
