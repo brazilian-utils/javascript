@@ -49,13 +49,16 @@ fn hex_value(points: &[i64], start: i64) -> i64 {
 /// provider emits.
 pub(crate) fn json_string_field(body: &str, key: &str) -> Option<String> {
     let points = crate::support::code_points(body);
-    let needle = crate::support::code_points(&{
+    let needle = {
         let mut __buf = String::with_capacity("\"".len() + key.len() + "\"".len());
         __buf.push('"');
         __buf.push_str(key);
         __buf.push('"');
         __buf
-    });
+    }
+    .bytes()
+    .map(|b| b as i64)
+    .collect::<Vec<i64>>();
     for index in 0..(points.len() as i64) {
         if !matches_at(&points, &needle, index) {
             continue;

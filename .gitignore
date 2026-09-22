@@ -19,3 +19,6 @@ reports/*
 !reports/api/
 reports/api/*
 !reports/api/brazilian-utils.api.md
+
+# Scratch git worktrees, created when a task is run in isolation from the checkout.
+.claude/worktrees/

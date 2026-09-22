@@ -48,30 +48,39 @@ pub fn parse_digits(value: &str) -> Option<i64> {
 /// without consuming anything. One forward pass, no allocation: this and `re_take_class` below are
 /// the whole of a generated chain-pattern scanner (`re_match_N`, in the "Regex" section of
 /// engine/src/targets/rust/index.ts) — a fixed-count class run in the pattern becomes one call here.
+/// Every class this project matches against is ASCII except the mask-separator whitespace class,
+/// and even that one is ASCII on almost every byte a real caller passes (plain digits, or digits
+/// plus '.', '-', '/' and ' ' -- see `core/source`'s own patterns) -- so the leading byte is tested
+/// directly first; only a byte that starts a multi-byte sequence pays for decoding a full `char`.
 #[inline]
 fn re_take_fixed(rest: &str, count: usize, in_class: impl Fn(u32) -> bool) -> Option<&str> {
-    let mut consumed = 0usize;
+    let bytes = rest.as_bytes();
+    let mut pos = 0usize;
     let mut taken = 0usize;
-    for c in rest.chars() {
-        if taken == count {
-            break;
+    while taken < count {
+        let &b = bytes.get(pos)?;
+        if b < 0x80 {
+            if !in_class(b as u32) {
+                return None;
+            }
+            pos += 1;
+        } else {
+            let ch = rest[pos..].chars().next().unwrap();
+            if !in_class(ch as u32) {
+                return None;
+            }
+            pos += ch.len_utf8();
         }
-        if !in_class(c as u32) {
-            return None;
-        }
-        consumed += c.len_utf8();
         taken += 1;
     }
-    if taken < count {
-        return None;
-    }
-    Some(&rest[consumed..])
+    Some(&rest[pos..])
 }
 
 /// Consumes as many chars matching `in_class` as `rest` offers, up to `max` (`usize::MAX` for
 /// unbounded), then answers `None` unless at least `min` were taken. The maximal-munch property
 /// `chainElementsOf` checks at generation time (see the "Regex" section) is what makes always
-/// taking the longest available run — never backing off to try a shorter one — correct here.
+/// taking the longest available run — never backing off to try a shorter one — correct here. Same
+/// ASCII-first byte test as `re_take_fixed` above, for the same reason.
 #[inline]
 fn re_take_class(
     rest: &str,
@@ -79,19 +88,59 @@ fn re_take_class(
     max: usize,
     in_class: impl Fn(u32) -> bool,
 ) -> Option<&str> {
-    let mut consumed = 0usize;
+    let bytes = rest.as_bytes();
+    let mut pos = 0usize;
     let mut taken = 0usize;
-    for c in rest.chars() {
-        if taken >= max || !in_class(c as u32) {
+    while taken < max {
+        let Some(&b) = bytes.get(pos) else {
             break;
+        };
+        if b < 0x80 {
+            if !in_class(b as u32) {
+                break;
+            }
+            pos += 1;
+        } else {
+            let ch = rest[pos..].chars().next().unwrap();
+            if !in_class(ch as u32) {
+                break;
+            }
+            pos += ch.len_utf8();
         }
-        consumed += c.len_utf8();
         taken += 1;
     }
     if taken < min {
         return None;
     }
-    Some(&rest[consumed..])
+    Some(&rest[pos..])
+}
+
+/// The single-digit fast path `str.fromInt` prefers when the value is proven to be one decimal
+/// digit (see the candidate's own comment in engine/src/targets/rust/index.ts): one ASCII byte
+/// pushed into a one-byte-capacity `String` is the whole job, no general integer formatter needed.
+pub fn digit_char(n: i64) -> String {
+    let mut out = String::with_capacity(1);
+    out.push((n as u8 + b'0') as char);
+    out
+}
+
+/// The ASCII-only fast path `str.padStart` prefers when both `value` and `pad` are proven ASCII
+/// (see the candidate's own comment in engine/src/targets/rust/index.ts): a scalar is a byte, so
+/// the length check is `value.len()` and each missing slot is `pad` pushed wholesale, with no
+/// `Vec<char>` built anywhere -- `pad_start` below builds two just to learn what this already
+/// knows.
+pub fn pad_start_ascii(value: &str, length: i64, pad: &str) -> String {
+    let length = length as usize;
+    if value.len() >= length {
+        return value.to_string();
+    }
+    let missing = length - value.len();
+    let mut out = String::with_capacity(pad.len() * missing + value.len());
+    for _ in 0..missing {
+        out.push_str(pad);
+    }
+    out.push_str(value);
+    out
 }
 
 pub fn pad_start(value: &str, length: i64, pad: &str) -> String {

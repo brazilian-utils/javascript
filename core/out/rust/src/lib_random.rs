@@ -22,5 +22,5 @@ pub(crate) fn random_below(env: &dyn Capabilities) -> i64 {
 
 /// One random ASCII digit.
 pub(crate) fn random_digit(env: &dyn Capabilities) -> String {
-    return random_below(env).to_string();
+    return crate::support::digit_char(random_below(env));
 }

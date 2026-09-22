@@ -16,7 +16,7 @@ use crate::*;
 pub fn format_currency(value: i64, symbol: bool) -> String {
     let negative = (value < 0);
     let unscaled = value.abs();
-    let digits = crate::support::pad_start(&unscaled.to_string(), 3, "0");
+    let digits = crate::support::pad_start_ascii(&unscaled.to_string(), 3, "0");
     let cut = ((digits.len() as i64) - 2).max(0);
     let whole = digits[0..cut as usize].to_string();
     let cents = digits[cut as usize..(digits.len() as i64) as usize].to_string();
@@ -29,7 +29,14 @@ pub fn format_currency(value: i64, symbol: bool) -> String {
         __buf
     };
     let prefix = (if symbol {
-        crate::support::concat2("R$", &crate::support::from_code_points(&[32]))
+        crate::support::concat2("R$", &{
+            let __pts = &[32];
+            let mut __out = String::with_capacity(__pts.len());
+            for &__p in __pts {
+                __out.push(__p as u8 as char);
+            }
+            __out
+        })
     } else {
         "".to_string()
     });

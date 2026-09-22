@@ -24,9 +24,11 @@ pub fn generate_cnpj(env: &dyn Capabilities) -> String {
         }
         base = random_cnpj_base(env);
     }
-    let first_digit =
-        cnpj_check_digit(&crate::support::concat2(&base, "00"), GENERATE_CNPJ_TABLE1).to_string();
-    let second_digit = cnpj_check_digit(
+    let first_digit = crate::support::digit_char(cnpj_check_digit(
+        &crate::support::concat2(&base, "00"),
+        GENERATE_CNPJ_TABLE1,
+    ));
+    let second_digit = crate::support::digit_char(cnpj_check_digit(
         &{
             let mut __buf = String::with_capacity(base.len() + first_digit.len() + "0".len());
             __buf.push_str(&base);
@@ -35,8 +37,7 @@ pub fn generate_cnpj(env: &dyn Capabilities) -> String {
             __buf
         },
         GENERATE_CNPJ_TABLE2,
-    )
-    .to_string();
+    ));
     return {
         let mut __buf = String::with_capacity(base.len() + first_digit.len() + second_digit.len());
         __buf.push_str(&base);

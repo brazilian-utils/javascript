@@ -7,7 +7,38 @@ convention `conformance/bench.ts` already used.
 
 **The bar is 1.0x: equal or faster, everywhere.** Earlier revisions of this document budgeted 1.5x;
 that number is gone as a target and survives below only where it names the line a row used to be
-allowed to cross. `## Size is a result too, and it is measured the same way
+allowed to cross. `## Rust: five lowerings, measured one at a time
+
+Rust was the worst target by some distance — `isValidCpf` at 2.73x, nothing under 1.0x — and the
+reason turned out not to be one thing. Each of these was timed in isolation first, on a scratch
+crate built against the generated one, and only then written as a candidate:
+
+| lowering | isolated cost, 200k calls | after |
+| --- | ---: | ---: |
+| `re.retain` (`keep_digits`) — a `for` loop into one `String` instead of `.filter().collect::<Vec<u8>>()` then `from_utf8().unwrap()` | 11.4–12.3 ms | 5.4–7.1 ms |
+| `re_take_fixed`/`re_take_class` — test the leading byte directly, decode a `char` only above 0x7F | 6.7 ms | 4.4 ms |
+| `str.padStart`, ASCII-gated — no `Vec<char>` built just to learn a length | 22.8–24.2 ms | 10.4–10.5 ms |
+| `str.codePoints` / `str.fromCodePoints`, ASCII-gated — no decode, no `char::from_u32` round trip | 5.5–5.8 / 11.6–12.1 ms | 3.5–3.6 / 8.0–8.3 ms |
+| `str.fromInt` for a value proven `Int[0..9]` — one ASCII byte instead of the general integer formatter | — | — |
+
+The scanner fix is the one worth noticing: `re_take_fixed` and `re_take_class` are the whole of
+every generated chain-pattern scanner, so making them byte-first speeds up every regex-shaped
+validator this engine will ever emit, not the two rows that motivated it.
+
+Two findings from the same pass that are not speedups:
+
+- `unsafe { String::from_utf8_unchecked(..) }` for `keep_digits` measured 5.4–5.6 ms against the
+  safe loop's 5.4–5.5 ms — indistinguishable. The generated code stays `unsafe`-free, and now for a
+  measured reason rather than a stylistic one.
+- The first version of the `str.fromInt` candidate returned a `raw` text fragment, which stringifies
+  its argument immediately. That broke `hoistConstantTables` (`backend/lower.ts`), which walks the
+  *structured* target AST after every candidate's `emit` has run: a weight table that had been a
+  module-level `const` silently became a `vec![...]` allocated on every call. Conformance did not
+  catch it — the answers were identical — and `cargo clippy`'s `useless_vec` did. The candidate now
+  builds a structured `call` node, which is the discipline the other candidates already follow, and
+  the hoisted constants came back.
+
+## Size is a result too, and it is measured the same way
 
 Speed is not the only thing a generated target is judged on. The npm package this engine generates
 for is tree-shakeable, which
@@ -390,6 +421,37 @@ building the harness, not a frozen result.
   meaning the wrapper functions add roughly as much again on top), against
   `str(randint(1, 999999998)).zfill(9)` on the handwritten side -- one draw, formatted once.
 
+## Rust: five lowerings, measured one at a time
+
+Rust was the worst target by some distance — `isValidCpf` at 2.73x, nothing under 1.0x — and the
+reason turned out not to be one thing. Each of these was timed in isolation first, on a scratch
+crate built against the generated one, and only then written as a candidate:
+
+| lowering | isolated cost, 200k calls | after |
+| --- | ---: | ---: |
+| `re.retain` (`keep_digits`) — a `for` loop into one `String` instead of `.filter().collect::<Vec<u8>>()` then `from_utf8().unwrap()` | 11.4–12.3 ms | 5.4–7.1 ms |
+| `re_take_fixed`/`re_take_class` — test the leading byte directly, decode a `char` only above 0x7F | 6.7 ms | 4.4 ms |
+| `str.padStart`, ASCII-gated — no `Vec<char>` built just to learn a length | 22.8–24.2 ms | 10.4–10.5 ms |
+| `str.codePoints` / `str.fromCodePoints`, ASCII-gated — no decode, no `char::from_u32` round trip | 5.5–5.8 / 11.6–12.1 ms | 3.5–3.6 / 8.0–8.3 ms |
+| `str.fromInt` for a value proven `Int[0..9]` — one ASCII byte instead of the general integer formatter | — | — |
+
+The scanner fix is the one worth noticing: `re_take_fixed` and `re_take_class` are the whole of
+every generated chain-pattern scanner, so making them byte-first speeds up every regex-shaped
+validator this engine will ever emit, not the two rows that motivated it.
+
+Two findings from the same pass that are not speedups:
+
+- `unsafe { String::from_utf8_unchecked(..) }` for `keep_digits` measured 5.4–5.6 ms against the
+  safe loop's 5.4–5.5 ms — indistinguishable. The generated code stays `unsafe`-free, and now for a
+  measured reason rather than a stylistic one.
+- The first version of the `str.fromInt` candidate returned a `raw` text fragment, which stringifies
+  its argument immediately. That broke `hoistConstantTables` (`backend/lower.ts`), which walks the
+  *structured* target AST after every candidate's `emit` has run: a weight table that had been a
+  module-level `const` silently became a `vec![...]` allocated on every call. Conformance did not
+  catch it — the answers were identical — and `cargo clippy`'s `useless_vec` did. The candidate now
+  builds a structured `call` node, which is the discipline the other candidates already follow, and
+  the hoisted constants came back.
+
 ## Size is a result too, and it is measured the same way
 
 Speed is not the only thing a generated target is judged on. The npm package this engine generates
@@ -471,9 +533,9 @@ after, language by language:
 | go | `formatCurrency` | 1.08x | **0.92x** | ASCII-byte `re.retain`, `codePoints`/`fromCodePoints` |
 | go | `generateCpf` | 0.57x | **0.39x** | constants the checker proved, and the dead parameters they left |
 | go | `generateCnpj` | 0.44x | **0.32x** | the same fold |
-| rust | `isValidCpf` | 2.73x | **2.57x** | ASCII-byte `re.retain` (`keep_digits`) |
-| rust | `isValidCnpj` | 1.43x | **1.35x** | inherits the same `re.retain` fix |
-| rust | `formatCurrency` | 1.81x | **1.74x** | one-buffer `str.concatAll`; ASCII-byte `re.retain` |
+| rust | `isValidCpf` | 2.73x | **1.44x** | ASCII-byte `re.retain`, then the pass below |
+| rust | `isValidCnpj` | 1.43x | **0.96x** | the same, and now faster than the crate it compares against |
+| rust | `formatCurrency` | 1.81x | **1.05x** | one-buffer `str.concatAll`; ASCII `padStart`/`codePoints` |
 | rust | `generateCpf` | 2.37x | **1.68x** | one-buffer `str.concatAll` (nine-digit chain) |
 | rust | `generateCnpj` | 1.89x | **1.22x** | one-buffer `str.concatAll` (twelve-digit chain) |
 

@@ -7,31 +7,29 @@ use crate::*;
 
 /// Keeps only the ASCII digits and letters of a value, upper casing the letters.
 pub(crate) fn keep_alphanumeric(value: &str) -> String {
-    return String::from_utf8(
-        value
-            .bytes()
-            .filter(|&b| {
-                let c = b as u32;
-                (48..=57).contains(&c) || (65..=90).contains(&c) || (97..=122).contains(&c)
-            })
-            .collect::<Vec<u8>>(),
-    )
-    .unwrap()
+    return {
+        let mut __out = String::with_capacity(value.len());
+        for __b in value.bytes() {
+            if (48..=57).contains(&__b) || (65..=90).contains(&__b) || (97..=122).contains(&__b) {
+                __out.push(__b as char);
+            }
+        }
+        __out
+    }
     .to_ascii_uppercase();
 }
 
 /// Keeps only the ASCII digits of a value, dropping every mask character.
 pub(crate) fn keep_digits(value: &str) -> String {
-    return String::from_utf8(
-        value
-            .bytes()
-            .filter(|&b| {
-                let c = b as u32;
-                (48..=57).contains(&c)
-            })
-            .collect::<Vec<u8>>(),
-    )
-    .unwrap();
+    return {
+        let mut __out = String::with_capacity(value.len());
+        for __b in value.bytes() {
+            if (48..=57).contains(&__b) {
+                __out.push(__b as char);
+            }
+        }
+        __out
+    };
 }
 
 /// Whether every scalar of the value is the same one, for whatever length the caller proved —

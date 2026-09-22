@@ -755,6 +755,22 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 	},
 	{
 		op: "str.padStart",
+		impl: "native",
+		requires: (args) => argIsAscii(0)(args) && argIsAscii(2)(args),
+		because:
+			"when both the value and the pad string are proven ASCII, a scalar count is a byte count, " +
+			"so the length check and the padding loop need no `Vec<char>` at all -- `pad_start` below " +
+			"builds one just to learn `value.len()` and to hand `extend` something to iterate, which " +
+			"was measured at roughly half of `format_currency`'s own cost (`pad_start`'s call on the " +
+			"whole-part digits) for a value this short",
+		cost: allocating,
+		emit: (args) =>
+			raw(
+				`crate::support::pad_start_ascii(${borrowed(args[0]!)}, ${print(args[1]!)}, ${borrowed(args[2]!)})`,
+			),
+	},
+	{
+		op: "str.padStart",
 		impl: "library",
 		cost: allocating,
 		emit: (args) =>
@@ -814,9 +830,38 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 	},
 	{
 		op: "str.codePoints",
+		impl: "native",
+		requires: argIsAscii(0),
+		because:
+			"an ASCII byte is already its own code point, so `.bytes()` needs no UTF-8 decode at all, " +
+			"unlike `code_points`' `.chars()` below",
+		cost: allocating,
+		emit: (args) => raw(`${print(args[0]!)}.bytes().map(|b| b as i64).collect::<Vec<i64>>()`),
+	},
+	{
+		op: "str.codePoints",
 		impl: "library",
 		cost: allocating,
 		emit: (args) => raw(`crate::support::code_points(${borrowed(args[0]!)})`),
+	},
+	{
+		op: "str.fromCodePoints",
+		impl: "native",
+		requires: (args) => {
+			const elem = args[0];
+			return elem !== undefined && elem.kind === "List" && elem.elem.kind === "Int" && elem.elem.lo >= 0 && elem.elem.hi <= 127;
+		},
+		because:
+			"every code point this project ever builds this way is proven ASCII (`group_thousands`'s " +
+			"`out`), so its value is its whole UTF-8 encoding -- pushed straight into the `String` this " +
+			"builds, one byte-as-char per point, instead of `from_code_points`'s `char::from_u32` round " +
+			"trip below, which decodes a full scalar this project never produces",
+		cost: allocating,
+		emit: (args) =>
+			raw(
+				`{ let __pts = ${borrowed(args[0]!)}; let mut __out = String::with_capacity(__pts.len()); ` +
+					`for &__p in __pts { __out.push(__p as u8 as char); } __out }`,
+			),
 	},
 	{
 		op: "str.fromCodePoints",
@@ -848,6 +893,34 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 		impl: "native",
 		cost: allocating,
 		emit: (args) => raw(`${print(args[0]!)}.join(${print(args[1]!)})`),
+	},
+	{
+		op: "str.fromInt",
+		impl: "native",
+		requires: (args) => {
+			const arg = args[0];
+			return arg !== undefined && arg.kind === "Int" && arg.lo >= 0n && arg.hi <= 9n;
+		},
+		because:
+			"a value proven to be a single decimal digit (`randomDigit`'s own call, after " +
+			"specialization narrows `randomBelow`'s result at this call site) needs no general-purpose " +
+			"integer formatter -- one ASCII byte pushed directly is the whole job, where `i64::to_string` " +
+			"below computes a digit count, allocates a buffer sized for it, and writes back to front " +
+			"even for a single digit. A `call` to a small support function, not a `raw` fragment that " +
+			"prints its argument as text immediately: `hoistConstantTables` (`backend/lower.ts`) walks " +
+			"the *structured* Target AST for a list literal to lift into a module-level constant, and " +
+			"only runs after every candidate's own `emit`, so a `raw` fragment that has already flattened " +
+			"an argument's call tree into a source string -- which this candidate's argument sometimes " +
+			"is, e.g. `cnpj_check_digit`'s own weight-table argument in `generate_cnpj` -- would hide a " +
+			"list literal nested inside it from that pass, the same way it stayed hidden before this " +
+			"whole node was a `call` in disguise. `str.fromInt`'s own general candidate below keeps that " +
+			"same discipline (`method`, not `raw`), for the same reason.",
+		cost: allocating,
+		emit: (args) => ({
+			kind: "call",
+			callee: { kind: "raw", text: "crate::support::digit_char" },
+			args: [args[0]!],
+		}),
 	},
 	{
 		op: "str.fromInt",
@@ -1061,7 +1134,14 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 			"needs decoding to be range-tested, and a multi-byte scalar's bytes are all >= 0x80, so " +
 			"every one of them fails an ASCII range test on its own and is dropped exactly as it would " +
 			"be by testing the decoded scalar -- a non-ASCII input keeps working, just without ever " +
-			"paying to decode it",
+			"paying to decode it. The ASCII branch writes straight into the `String` it returns with a " +
+			"plain `for` loop over `.bytes()`, rather than `.bytes().filter(...).collect::<Vec<u8>>()` " +
+			"followed by `String::from_utf8(..).unwrap()`: the iterator-adaptor chain and the `Vec<u8>` " +
+			"it builds only to hand to a UTF-8 validator that then has to re-walk it are both pure " +
+			"overhead here, since every byte the loop pushes is already a range-tested ASCII byte and " +
+			"therefore already valid UTF-8 on its own -- measured at roughly half the cost of the " +
+			"iterator-chain form on an 11-byte input (`is_valid_cpf`'s own `keep_digits` call), with no " +
+			"`unsafe` needed to get there.",
 		cost: allocating,
 		emit: (args, _types, ctx) => {
 			const ranges = ctx.regex === undefined || ctx.regex.node.kind !== "class" ? [] : ctx.regex.node.ranges;
@@ -1074,8 +1154,18 @@ export const RUST_CANDIDATES: readonly Candidate[] = [
 							.map((range) => (range.lo === range.hi ? `${name} == ${range.lo}` : `(${range.lo}..=${range.hi}).contains(&${name})`))
 							.join(" || ");
 			if (ranges.every((range) => range.hi <= 127)) {
+				// `.len()` (to size the buffer) and `.bytes()` (to scan it) both need the source value,
+				// so it is bound to a local first when printing it twice would evaluate it twice -- the
+				// same rule `str.concatAll` above uses. A name or a literal is cheap to print twice (it
+				// is just a reference, or already a constant); anything else, most often a call, is
+				// bound once.
+				const arg = args[0]!;
+				const cheap = arg.kind === "lit" || arg.kind === "name";
+				const source = cheap ? print(arg) : "__retain_src";
+				const binding = cheap ? "" : `let ${source} = ${print(arg)}; `;
 				return raw(
-					`String::from_utf8(${print(args[0]!)}.bytes().filter(|&b| { let c = b as u32; ${rangeTest("c")} }).collect::<Vec<u8>>()).unwrap()`,
+					`{ ${binding}let mut __out = String::with_capacity(${source}.len()); ` +
+						`for __b in ${source}.bytes() { if ${rangeTest("__b")} { __out.push(__b as char); } } __out }`,
 				);
 			}
 			return raw(
@@ -1794,45 +1884,94 @@ pub fn parse_digits(value: &str) -> Option<i64> {
 /// without consuming anything. One forward pass, no allocation: this and \`re_take_class\` below are
 /// the whole of a generated chain-pattern scanner (\`re_match_N\`, in the "Regex" section of
 /// engine/src/targets/rust/index.ts) — a fixed-count class run in the pattern becomes one call here.
+/// Every class this project matches against is ASCII except the mask-separator whitespace class,
+/// and even that one is ASCII on almost every byte a real caller passes (plain digits, or digits
+/// plus '.', '-', '/' and ' ' -- see \`core/source\`'s own patterns) -- so the leading byte is tested
+/// directly first; only a byte that starts a multi-byte sequence pays for decoding a full \`char\`.
 #[inline]
 fn re_take_fixed(rest: &str, count: usize, in_class: impl Fn(u32) -> bool) -> Option<&str> {
-	let mut consumed = 0usize;
+	let bytes = rest.as_bytes();
+	let mut pos = 0usize;
 	let mut taken = 0usize;
-	for c in rest.chars() {
-		if taken == count {
-			break;
+	while taken < count {
+		let &b = bytes.get(pos)?;
+		if b < 0x80 {
+			if !in_class(b as u32) {
+				return None;
+			}
+			pos += 1;
+		} else {
+			let ch = rest[pos..].chars().next().unwrap();
+			if !in_class(ch as u32) {
+				return None;
+			}
+			pos += ch.len_utf8();
 		}
-		if !in_class(c as u32) {
-			return None;
-		}
-		consumed += c.len_utf8();
 		taken += 1;
 	}
-	if taken < count {
-		return None;
-	}
-	Some(&rest[consumed..])
+	Some(&rest[pos..])
 }
 
 /// Consumes as many chars matching \`in_class\` as \`rest\` offers, up to \`max\` (\`usize::MAX\` for
 /// unbounded), then answers \`None\` unless at least \`min\` were taken. The maximal-munch property
 /// \`chainElementsOf\` checks at generation time (see the "Regex" section) is what makes always
-/// taking the longest available run — never backing off to try a shorter one — correct here.
+/// taking the longest available run — never backing off to try a shorter one — correct here. Same
+/// ASCII-first byte test as \`re_take_fixed\` above, for the same reason.
 #[inline]
 fn re_take_class(rest: &str, min: usize, max: usize, in_class: impl Fn(u32) -> bool) -> Option<&str> {
-	let mut consumed = 0usize;
+	let bytes = rest.as_bytes();
+	let mut pos = 0usize;
 	let mut taken = 0usize;
-	for c in rest.chars() {
-		if taken >= max || !in_class(c as u32) {
+	while taken < max {
+		let Some(&b) = bytes.get(pos) else {
 			break;
+		};
+		if b < 0x80 {
+			if !in_class(b as u32) {
+				break;
+			}
+			pos += 1;
+		} else {
+			let ch = rest[pos..].chars().next().unwrap();
+			if !in_class(ch as u32) {
+				break;
+			}
+			pos += ch.len_utf8();
 		}
-		consumed += c.len_utf8();
 		taken += 1;
 	}
 	if taken < min {
 		return None;
 	}
-	Some(&rest[consumed..])
+	Some(&rest[pos..])
+}
+
+/// The single-digit fast path \`str.fromInt\` prefers when the value is proven to be one decimal
+/// digit (see the candidate's own comment in engine/src/targets/rust/index.ts): one ASCII byte
+/// pushed into a one-byte-capacity \`String\` is the whole job, no general integer formatter needed.
+pub fn digit_char(n: i64) -> String {
+	let mut out = String::with_capacity(1);
+	out.push((n as u8 + b'0') as char);
+	out
+}
+
+/// The ASCII-only fast path \`str.padStart\` prefers when both \`value\` and \`pad\` are proven ASCII
+/// (see the candidate's own comment in engine/src/targets/rust/index.ts): a scalar is a byte, so
+/// the length check is \`value.len()\` and each missing slot is \`pad\` pushed wholesale, with no
+/// \`Vec<char>\` built anywhere -- \`pad_start\` below builds two just to learn what this already
+/// knows.
+pub fn pad_start_ascii(value: &str, length: i64, pad: &str) -> String {
+	let length = length as usize;
+	if value.len() >= length {
+		return value.to_string();
+	}
+	let missing = length - value.len();
+	let mut out = String::with_capacity(pad.len() * missing + value.len());
+	for _ in 0..missing {
+		out.push_str(pad);
+	}
+	out.push_str(value);
+	out
 }
 
 pub fn pad_start(value: &str, length: i64, pad: &str) -> String {

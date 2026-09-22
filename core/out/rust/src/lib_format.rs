@@ -20,7 +20,7 @@ pub(crate) fn pattern_slots(pattern: &str) -> i64 {
 /// Formats a value against a pattern, optionally left padding it with zeros first.
 pub(crate) fn format_with_pattern(value: &str, pattern: &str, pad: bool) -> String {
     let padded = (if pad {
-        crate::support::pad_start(value, pattern_slots(pattern), "0")
+        crate::support::pad_start_ascii(value, pattern_slots(pattern), "0")
     } else {
         value.to_owned()
     });
@@ -53,12 +53,19 @@ pub(crate) fn format_with_pattern(value: &str, pattern: &str, pad: bool) -> Stri
 /// Groups the whole part with `.` every three digits, the pt-BR convention.
 pub(crate) fn group_thousands(whole: &str) -> String {
     let mut out = vec![];
-    let scalars = crate::support::code_points(whole);
+    let scalars = whole.bytes().map(|b| b as i64).collect::<Vec<i64>>();
     for index in 0..(scalars.len() as i64) {
         if ((index > 0) && ((((scalars.len() as i64) - index) % 3) == 0)) {
             out.push(46);
         }
         out.push(crate::support::at(&scalars, index).unwrap_or(48));
     }
-    return crate::support::from_code_points(&out);
+    return {
+        let __pts = &out;
+        let mut __out = String::with_capacity(__pts.len());
+        for &__p in __pts {
+            __out.push(__p as u8 as char);
+        }
+        __out
+    };
 }
