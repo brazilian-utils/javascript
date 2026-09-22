@@ -21,6 +21,8 @@ import { citiesOfState } from "./cities-of-state";
       }
     </select>
   `,
+  // A component is an element of its own; this one stands aside so the page lays out its rows.
+  styles: `:host { display: contents; }`,
 })
 export class StateCity {
   // The states are a short list, so they come with the page.

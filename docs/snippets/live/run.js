@@ -203,6 +203,14 @@
     });
   };
 
+  // React and Vue want an element to mount into. It takes no part in the layout, so that an
+  // example lays its rows out against the page the way the Angular one does.
+  var host = function () {
+    var element = document.body.appendChild(document.createElement("div"));
+    element.style.display = "contents";
+    return element;
+  };
+
   var mount = function (module) {
     if (/\.tsx$/.test(example)) {
       return Promise.all([import("react"), import("react-dom/client")]).then(function (react) {
@@ -211,14 +219,13 @@
           var state = react[0].useState("");
           return react[0].createElement(Object.values(module)[0], { value: state[0], onChange: state[1] });
         };
-        var root = document.body.appendChild(document.createElement("div"));
-        react[1].createRoot(root).render(react[0].createElement(Demo));
+        react[1].createRoot(host()).render(react[0].createElement(Demo));
       });
     }
 
     if (/\.vue$/.test(example)) {
       return import("vue").then(function (vue) {
-        vue.createApp(module.default).mount(document.body.appendChild(document.createElement("div")));
+        vue.createApp(module.default).mount(host());
       });
     }
 
