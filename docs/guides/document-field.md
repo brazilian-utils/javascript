@@ -4,12 +4,9 @@ description: "A field that masks and validates a CPF, CNPJ, CEP or phone number 
 keywords: ["CPF input mask", "CNPJ mask", "CEP mask", "phone mask", "React CPF", "Angular CPF", "Vue CPF", "validate CPF"]
 ---
 
-A field that formats as you type, inside a form that validates. Pick the document and the framework: each example is only about that document, and runs the code below it, which you can copy as is.
+A field that formats as you type, inside a form that validates. Pick the document and the framework: each example runs the code below it, which you can copy as is.
 
-The field only masks. It hands the form the value without its mask, with `parse*`, so the form holds `52998224725` and a submit sends that, and it shows the value back formatted. Validation belongs to the form, where the rest of the form's rules live, which also leaves one error message per field instead of two.
-
-The `mask` function is the same in all of them, and it is all a mask needs. A formatter takes whatever has been typed so far, so it can run on every keystroke; replacing a field's value moves the caret to the end, so `mask` puts the caret back next to the character being edited. Formatting what comes before the caret is what says where it goes. A deleted separator becomes a deleted character, which the formatter would otherwise put straight back.
-
+The field only masks, and hands the form the value without its mask, with `parse*`, so a form holds `52998224725` and a submit sends that. Validation belongs to the form, which also leaves one error message per field instead of two. The mask is the same everywhere: a formatter takes whatever has been typed so far, and formatting what comes before the caret says where the caret goes, so editing in the middle works.
 
 <div class="example" data-name="React">
 
@@ -411,122 +408,4 @@ No build step: save it as an `.html` file and open it. It imports the package fr
 
 </div>
 
-<div class="example" data-name="Schema">
-
-No demo here: a schema is the same code everywhere. Any of these plugs into the form libraries of the other tabs through [Standard Schema](https://standardschema.dev), which all of them speak, and `toStandardSchema` gives one field the same interface with no schema library at all:
-
-<div class="variant" data-variant="CPF">
-
-<div class="file" data-file="cpf-zod.ts">
-
-[cpf-zod.ts](../snippets/document-field/generated/cpf/schema/cpf-zod.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cpf-valibot.ts">
-
-[cpf-valibot.ts](../snippets/document-field/generated/cpf/schema/cpf-valibot.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cpf-arktype.ts">
-
-[cpf-arktype.ts](../snippets/document-field/generated/cpf/schema/cpf-arktype.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cpf-standard.ts">
-
-[cpf-standard.ts](../snippets/document-field/generated/cpf/schema/cpf-standard.ts ':include :type=code ts')
-
-</div>
-
-</div>
-
-<div class="variant" data-variant="CNPJ">
-
-<div class="file" data-file="cnpj-zod.ts">
-
-[cnpj-zod.ts](../snippets/document-field/generated/cnpj/schema/cnpj-zod.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cnpj-valibot.ts">
-
-[cnpj-valibot.ts](../snippets/document-field/generated/cnpj/schema/cnpj-valibot.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cnpj-arktype.ts">
-
-[cnpj-arktype.ts](../snippets/document-field/generated/cnpj/schema/cnpj-arktype.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cnpj-standard.ts">
-
-[cnpj-standard.ts](../snippets/document-field/generated/cnpj/schema/cnpj-standard.ts ':include :type=code ts')
-
-</div>
-
-</div>
-
-<div class="variant" data-variant="CEP">
-
-<div class="file" data-file="cep-zod.ts">
-
-[cep-zod.ts](../snippets/document-field/generated/cep/schema/cep-zod.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cep-valibot.ts">
-
-[cep-valibot.ts](../snippets/document-field/generated/cep/schema/cep-valibot.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cep-arktype.ts">
-
-[cep-arktype.ts](../snippets/document-field/generated/cep/schema/cep-arktype.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="cep-standard.ts">
-
-[cep-standard.ts](../snippets/document-field/generated/cep/schema/cep-standard.ts ':include :type=code ts')
-
-</div>
-
-</div>
-
-<div class="variant" data-variant="Phone">
-
-<div class="file" data-file="phone-zod.ts">
-
-[phone-zod.ts](../snippets/document-field/generated/phone/schema/phone-zod.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="phone-valibot.ts">
-
-[phone-valibot.ts](../snippets/document-field/generated/phone/schema/phone-valibot.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="phone-arktype.ts">
-
-[phone-arktype.ts](../snippets/document-field/generated/phone/schema/phone-arktype.ts ':include :type=code ts')
-
-</div>
-
-<div class="file" data-file="phone-standard.ts">
-
-[phone-standard.ts](../snippets/document-field/generated/phone/schema/phone-standard.ts ':include :type=code ts')
-
-</div>
-
-</div>
-
-</div>
-
-The [utilities reference](utilities.md) lists every function.
+The [utilities reference](../utilities.md) lists every function.
