@@ -12,9 +12,7 @@ pub(crate) fn easter_day_of_march(year: i64) -> i64 {
     let c = (year % 100);
     let d = (b / 4);
     let e = (b % 4);
-    let f = ((b + 8) / 25);
-    let g = (((b - f) + 1) / 3);
-    let h = ((((((19 * a) + b) - d) - g) + 15) % 30);
+    let h = ((((((19 * a) + b) - d) - 6) + 15) % 30);
     let i = (c / 4);
     let k = (c % 4);
     let l = (((((32 + (2 * e)) + (2 * i)) - h) - k) % 7);
@@ -27,8 +25,8 @@ pub(crate) fn easter_day_of_march(year: i64) -> i64 {
 pub(crate) fn easter_sunday(year: i64) -> i64 {
     let day_of_march = easter_day_of_march(year);
     return (if (day_of_march <= 31) {
-        civil_date(year, 3, day_of_march)
+        civil_date_9(year, day_of_march)
     } else {
-        civil_date(year, 4, (day_of_march - 31))
+        civil_date_10(year, (day_of_march - 31))
     });
 }

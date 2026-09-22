@@ -1,0 +1,44 @@
+{
+	"exports": {
+		"formatCnpj": {
+			"minified": 518,
+			"gzip": 334
+		},
+		"formatCurrency": {
+			"minified": 434,
+			"gzip": 312
+		},
+		"generateCnpj": {
+			"minified": 1301,
+			"gzip": 629
+		},
+		"generateCpf": {
+			"minified": 1284,
+			"gzip": 614
+		},
+		"getAddressInfoByCep": {
+			"minified": 2855,
+			"gzip": 1277
+		},
+		"getHolidays": {
+			"minified": 2379,
+			"gzip": 817
+		},
+		"isBusinessDay": {
+			"minified": 2922,
+			"gzip": 1022
+		},
+		"isValidCnpj": {
+			"minified": 1481,
+			"gzip": 499
+		},
+		"isValidCpf": {
+			"minified": 760,
+			"gzip": 333
+		}
+	},
+	"total": {
+		"minified": 9839,
+		"gzip": 3175
+	}
+}

@@ -27,5 +27,5 @@ func IsValidCpf(cpf string) bool {
 	if isRepeated(digits) {
 		return false
 	}
-	return ((digitAt(digits, 9) == cpfCheckDigit(digits, 9)) && (digitAt(digits, 10) == cpfCheckDigit(digits, 10)))
+	return ((digitAt2(digits) == cpfCheckDigit(digits)) && (digitAt3(digits) == cpfCheckDigit1(digits)))
 }

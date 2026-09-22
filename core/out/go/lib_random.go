@@ -13,18 +13,18 @@ import (
 // fixed-width draw is biased whenever `bound` does not divide 2^32 evenly, and that bias would
 // have to match, digit for digit, across three unrelated standard libraries to stay invisible.
 // Rejecting the biased tail of the draw removes it instead.
-func randomBelow(bound int, env Capabilities) int {
-	limit := (4294967296 - (4294967296 % bound))
+func randomBelow(env Capabilities) int {
+	limit := 4294967290
 	for attempt := 0; attempt < 32; attempt++ {
 		draw := env.NextU32()
 		if draw < limit {
-			return (draw % bound)
+			return (draw % 10)
 		}
 	}
-	return (env.NextU32() % bound)
+	return (env.NextU32() % 10)
 }
 
 // One random ASCII digit.
 func randomDigit(env Capabilities) string {
-	return strconv.Itoa(randomBelow(10, env))
+	return strconv.Itoa(randomBelow(env))
 }

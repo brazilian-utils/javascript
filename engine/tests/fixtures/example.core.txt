@@ -9,16 +9,16 @@ const slugify::LOWER_Z: Int[122..122]
 const slugify::ZERO: Int[48..48]
 const slugify::NINE: Int[57..57]
 
-fn std/date::floorDiv(value: Int[306..3652364], divisor: Int[146097..146097]): Int[-1..24] ! Pure
-  const quotient: Int[0..24] = int.div(value: Int[306..3652364], divisor: Int[146097..146097]): Int[0..24]
-  if (int.lt(value: Int[306..3652364], 0: Int[0..0]): Bool && !core.eq(int.mul(quotient: Int[0..24], divisor: Int[146097..146097]): Int[0..3506328], value: Int[306..-1]): Bool) {
+fn std/date::floorDiv(value: Int[306..3652364]): Int[-1..24] ! Pure
+  const quotient: Int[0..24] = int.div(value: Int[306..3652364], 146097: Int[146097..146097]): Int[0..24]
+  if (int.lt(value: Int[306..3652364], 0: Int[0..0]): Bool && !core.eq(int.mul(quotient: Int[0..24], 146097: Int[146097..146097]): Int[0..3506328], value: Int[306..-1]): Bool) {
     return int.sub(quotient: Int[0..24], 1: Int[1..1]): Int[-1..23]
   }
   return quotient: Int[0..24]
 
 fn std/date::yearFromDays(days: Int[-719162..2932896]): Int[1..9999] ! Pure
   const shifted: Int[306..3652364] = int.add(days: Int[-719162..2932896], 719468: Int[719468..719468]): Int[306..3652364]
-  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364], 146097: Int[146097..146097])
+  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364])
   const dayOfEra: Int[-3506022..3798461] = int.sub(shifted: Int[306..3652364], int.mul(era: Int[-1..24], 146097: Int[146097..146097]): Int[-146097..3506328]): Int[-3506022..3798461]
   const yearOfEra: Int[-9612..10413] = int.div(int.sub(int.add(int.sub(dayOfEra: Int[-3506022..3798461], int.div(dayOfEra: Int[-3506022..3798461], 1460: Int[1460..1460]): Int[-2401..2601]): Int[-3508623..3800862], int.div(dayOfEra: Int[-3506022..3798461], 36524: Int[36524..36524]): Int[-95..103]): Int[-3508718..3800965], int.div(dayOfEra: Int[-3506022..3798461], 146096: Int[146096..146096]): Int[-23..25]): Int[-3508743..3800988], 365: Int[365..365]): Int[-9612..10413]
   const year: Int[-10012..20013] = int.add(yearOfEra: Int[-9612..10413], int.mul(era: Int[-1..24], 400: Int[400..400]): Int[-400..9600]): Int[-10012..20013]
@@ -29,7 +29,7 @@ fn std/date::yearFromDays(days: Int[-719162..2932896]): Int[1..9999] ! Pure
 
 fn std/date::monthFromDays(days: Int[-719162..2932896]): Int[1..12] ! Pure
   const shifted: Int[306..3652364] = int.add(days: Int[-719162..2932896], 719468: Int[719468..719468]): Int[306..3652364]
-  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364], 146097: Int[146097..146097])
+  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364])
   const dayOfEra: Int[-3506022..3798461] = int.sub(shifted: Int[306..3652364], int.mul(era: Int[-1..24], 146097: Int[146097..146097]): Int[-146097..3506328]): Int[-3506022..3798461]
   const yearOfEra: Int[-9612..10413] = int.div(int.sub(int.add(int.sub(dayOfEra: Int[-3506022..3798461], int.div(dayOfEra: Int[-3506022..3798461], 1460: Int[1460..1460]): Int[-2401..2601]): Int[-3508623..3800862], int.div(dayOfEra: Int[-3506022..3798461], 36524: Int[36524..36524]): Int[-95..103]): Int[-3508718..3800965], int.div(dayOfEra: Int[-3506022..3798461], 146096: Int[146096..146096]): Int[-23..25]): Int[-3508743..3800988], 365: Int[365..365]): Int[-9612..10413]
   const dayOfYear: Int[-7309466..7309348] = int.sub(dayOfEra: Int[-3506022..3798461], int.sub(int.add(int.mul(365: Int[365..365], yearOfEra: Int[-9612..10413]): Int[-3508380..3800745], int.div(yearOfEra: Int[-9612..10413], 4: Int[4..4]): Int[-2403..2603]): Int[-3510783..3803348], int.div(yearOfEra: Int[-9612..10413], 100: Int[100..100]): Int[-96..104]): Int[-3510887..3803444]): Int[-7309466..7309348]
@@ -38,23 +38,23 @@ fn std/date::monthFromDays(days: Int[-719162..2932896]): Int[1..12] ! Pure
 
 fn std/date::dayFromDays(days: Int[-719162..2932896]): Int[1..31] ! Pure
   const shifted: Int[306..3652364] = int.add(days: Int[-719162..2932896], 719468: Int[719468..719468]): Int[306..3652364]
-  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364], 146097: Int[146097..146097])
+  const era: Int[-1..24] = std/date::floorDiv(shifted: Int[306..3652364])
   const dayOfEra: Int[-3506022..3798461] = int.sub(shifted: Int[306..3652364], int.mul(era: Int[-1..24], 146097: Int[146097..146097]): Int[-146097..3506328]): Int[-3506022..3798461]
   const yearOfEra: Int[-9612..10413] = int.div(int.sub(int.add(int.sub(dayOfEra: Int[-3506022..3798461], int.div(dayOfEra: Int[-3506022..3798461], 1460: Int[1460..1460]): Int[-2401..2601]): Int[-3508623..3800862], int.div(dayOfEra: Int[-3506022..3798461], 36524: Int[36524..36524]): Int[-95..103]): Int[-3508718..3800965], int.div(dayOfEra: Int[-3506022..3798461], 146096: Int[146096..146096]): Int[-23..25]): Int[-3508743..3800988], 365: Int[365..365]): Int[-9612..10413]
   const dayOfYear: Int[-7309466..7309348] = int.sub(dayOfEra: Int[-3506022..3798461], int.sub(int.add(int.mul(365: Int[365..365], yearOfEra: Int[-9612..10413]): Int[-3508380..3800745], int.div(yearOfEra: Int[-9612..10413], 4: Int[4..4]): Int[-2403..2603]): Int[-3510783..3803348], int.div(yearOfEra: Int[-9612..10413], 100: Int[100..100]): Int[-96..104]): Int[-3510887..3803444]): Int[-7309466..7309348]
   const monthPrime: Int[-238871..238867] = int.div(int.add(int.mul(5: Int[5..5], dayOfYear: Int[-7309466..7309348]): Int[-36547330..36546740], 2: Int[2..2]): Int[-36547328..36546742], 153: Int[153..153]): Int[-238871..238867]
   return int.min(int.max(int.add(int.sub(dayOfYear: Int[-7309466..7309348], int.div(int.add(int.mul(153: Int[153..153], monthPrime: Int[-238871..238867]): Int[-36547263..36546651], 2: Int[2..2]): Int[-36547261..36546653], 5: Int[5..5]): Int[-7309452..7309330]): Int[-14618796..14618800], 1: Int[1..1]): Int[-14618795..14618801], 1: Int[1..1]): Int[1..14618801], 31: Int[31..31]): Int[1..31]
 
-fn std/date::floorDiv$1(value: Int[0..9999], divisor: Int[400..400]): Int[-1..24] ! Pure
-  const quotient: Int[0..24] = int.div(value: Int[0..9999], divisor: Int[400..400]): Int[0..24]
-  if (int.lt(value: Int[0..9999], 0: Int[0..0]): Bool && !core.eq(int.mul(quotient: Int[0..24], divisor: Int[400..400]): Int[0..9600], value: Int[0..-1]): Bool) {
+fn std/date::floorDiv$1(value: Int[0..9999]): Int[-1..24] ! Pure
+  const quotient: Int[0..24] = int.div(value: Int[0..9999], 400: Int[400..400]): Int[0..24]
+  if (int.lt(value: Int[0..9999], 0: Int[0..0]): Bool && !core.eq(int.mul(quotient: Int[0..24], 400: Int[400..400]): Int[0..9600], value: Int[0..-1]): Bool) {
     return int.sub(quotient: Int[0..24], 1: Int[1..1]): Int[-1..23]
   }
   return quotient: Int[0..24]
 
 fn std/date::daysFromCivil(year: Int[1..9999], month: Int[1..12], day: Int[1..31]): Int[-719162..2932896] ! Pure
   const shifted: Int[0..9999] = (int.le(month: Int[1..12], 2: Int[2..2]): Bool ? int.sub(year: Int[1..9999], 1: Int[1..1]): Int[0..9998] : year: Int[1..9999])
-  const era: Int[-1..24] = std/date::floorDiv$1(shifted: Int[0..9999], 400: Int[400..400])
+  const era: Int[-1..24] = std/date::floorDiv$1(shifted: Int[0..9999])
   const yearOfEra: Int[-9600..10399] = int.sub(shifted: Int[0..9999], int.mul(era: Int[-1..24], 400: Int[400..400]): Int[-400..9600]): Int[-9600..10399]
   const monthTerm: Int[0..11] = (int.gt(month: Int[1..12], 2: Int[2..2]): Bool ? int.sub(month: Int[3..12], 3: Int[3..3]): Int[0..9] : int.add(month: Int[1..2], 9: Int[9..9]): Int[10..11])
   const dayOfYear: Int[0..367] = int.sub(int.add(int.div(int.add(int.mul(153: Int[153..153], monthTerm: Int[0..11]): Int[0..1683], 2: Int[2..2]): Int[2..1685], 5: Int[5..5]): Int[0..337], day: Int[1..31]): Int[1..368], 1: Int[1..1]): Int[0..367]

@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { CompileError } from "../src/diagnostics.ts";
 import type { Diagnostic } from "../src/diagnostics.ts";
 import { compileProject } from "../src/api.ts";
-import type { Compilation } from "../src/api.ts";
+import type { Compilation, CompileOptions } from "../src/api.ts";
 
 export function withProject<T>(files: Record<string, string>, run: (root: string) => T): T {
 	const root = mkdtempSync(join(tmpdir(), "logic-engine-"));
@@ -22,8 +22,8 @@ export function withProject<T>(files: Record<string, string>, run: (root: string
 	}
 }
 
-export function compileSource(files: Record<string, string>): Compilation {
-	return withProject(files, (root) => compileProject(root));
+export function compileSource(files: Record<string, string>, options: CompileOptions = {}): Compilation {
+	return withProject(files, (root) => compileProject(root, options));
 }
 
 /** Compiles a snippet expected to fail, and returns the diagnostics. */

@@ -21,48 +21,48 @@ pub fn get_holidays(year: i64) -> Vec<Holiday> {
     let mut holidays = vec![];
     holidays.push(Holiday {
         name: "Ano novo".to_string(),
-        date: civil_date(year.to_owned(), 1, 1),
+        date: civil_date(year.to_owned()),
         r#type: "national".to_string(),
     });
     holidays.push(Holiday {
         name: "Tiradentes".to_string(),
-        date: civil_date(year.to_owned(), 4, 21),
+        date: civil_date_1(year.to_owned()),
         r#type: "national".to_string(),
     });
     holidays.push(Holiday {
         name: "Dia do trabalhador".to_string(),
-        date: civil_date(year.to_owned(), 5, 1),
+        date: civil_date_2(year.to_owned()),
         r#type: "national".to_string(),
     });
     holidays.push(Holiday {
         name: "Independ\u{ea}ncia do Brasil".to_string(),
-        date: civil_date(year.to_owned(), 9, 7),
+        date: civil_date_3(year.to_owned()),
         r#type: "national".to_string(),
     });
     holidays.push(Holiday {
         name: "Nossa Senhora Aparecida".to_string(),
-        date: civil_date(year.to_owned(), 10, 12),
+        date: civil_date_4(year.to_owned()),
         r#type: "national".to_string(),
     });
     holidays.push(Holiday {
         name: "Finados".to_string(),
-        date: civil_date(year.to_owned(), 11, 2),
+        date: civil_date_5(year.to_owned()),
         r#type: "national".to_string(),
     });
     holidays.push(Holiday {
         name: "Proclama\u{e7}\u{e3}o da Rep\u{fa}blica".to_string(),
-        date: civil_date(year.to_owned(), 11, 15),
+        date: civil_date_6(year.to_owned()),
         r#type: "national".to_string(),
     });
     holidays.push(Holiday {
         name: "Natal".to_string(),
-        date: civil_date(year.to_owned(), 12, 25),
+        date: civil_date_7(year.to_owned()),
         r#type: "national".to_string(),
     });
     if (year >= 2024) {
         holidays.push(Holiday {
             name: "Dia da Consci\u{ea}ncia Negra".to_string(),
-            date: civil_date(year.to_owned(), 11, 20),
+            date: civil_date_8(year.to_owned()),
             r#type: "national".to_string(),
         });
     }

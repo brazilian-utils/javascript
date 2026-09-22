@@ -6,9 +6,9 @@
 package core
 
 // Floor division, which the calendar algorithms need for negative years.
-func floorDiv1(value int, divisor int) int {
-	quotient := (value / divisor)
-	if (value < 0) && ((quotient * divisor) != value) {
+func floorDiv1(value int) int {
+	quotient := (value / 400)
+	if (value < 0) && ((quotient * 400) != value) {
 		return (quotient - 1)
 	}
 	return quotient
@@ -23,7 +23,7 @@ func daysFromCivil(year int, month int, day int) int {
 		tmp1 = year
 	}
 	shifted := tmp1
-	era := floorDiv1(shifted, 400)
+	era := floorDiv1(shifted)
 	yearOfEra := (shifted - (era * 400))
 	tmp2 := 0
 	if month > 2 {
@@ -38,9 +38,9 @@ func daysFromCivil(year int, month int, day int) int {
 }
 
 // Floor division, which the calendar algorithms need for negative years.
-func floorDiv(value int, divisor int) int {
-	quotient := (value / divisor)
-	if (value < 0) && ((quotient * divisor) != value) {
+func floorDiv(value int) int {
+	quotient := (value / 146097)
+	if (value < 0) && ((quotient * 146097) != value) {
 		return (quotient - 1)
 	}
 	return quotient
@@ -49,7 +49,7 @@ func floorDiv(value int, divisor int) int {
 // The year of a date given as days since 1970-01-01.
 func yearFromDays(days int) int {
 	shifted := (days + 719468)
-	era := floorDiv(shifted, 146097)
+	era := floorDiv(shifted)
 	dayOfEra := (shifted - (era * 146097))
 	yearOfEra := ((((dayOfEra - (dayOfEra / 1460)) + (dayOfEra / 36524)) - (dayOfEra / 146096)) / 365)
 	year := (yearOfEra + (era * 400))
@@ -74,7 +74,7 @@ func yearFromDays(days int) int {
 // The month of a date given as days since 1970-01-01.
 func monthFromDays(days int) int {
 	shifted := (days + 719468)
-	era := floorDiv(shifted, 146097)
+	era := floorDiv(shifted)
 	dayOfEra := (shifted - (era * 146097))
 	yearOfEra := ((((dayOfEra - (dayOfEra / 1460)) + (dayOfEra / 36524)) - (dayOfEra / 146096)) / 365)
 	dayOfYear := (dayOfEra - (((365 * yearOfEra) + (yearOfEra / 4)) - (yearOfEra / 100)))
@@ -91,7 +91,7 @@ func monthFromDays(days int) int {
 // The day of month of a date given as days since 1970-01-01.
 func dayFromDays(days int) int {
 	shifted := (days + 719468)
-	era := floorDiv(shifted, 146097)
+	era := floorDiv(shifted)
 	dayOfEra := (shifted - (era * 146097))
 	yearOfEra := ((((dayOfEra - (dayOfEra / 1460)) + (dayOfEra / 36524)) - (dayOfEra / 146096)) / 365)
 	dayOfYear := (dayOfEra - (((365 * yearOfEra) + (yearOfEra / 4)) - (yearOfEra / 100)))

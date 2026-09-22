@@ -2,7 +2,7 @@
 // engine: 0.1.0
 // source: lib/easter
 // content: c99e5cf5c72b
-import { civilDate } from "./civil.ts";
+import { civilDate10 } from "./civil.ts";
 
 /**
  * The day of March (1 to 31) or April (32 to 56) Easter falls on, as a day-of-March offset.
@@ -13,9 +13,7 @@ export function easterDayOfMarch(year: number): number {
 	const c: number = year % 100;
 	const d: number = Math.trunc(b / 4);
 	const e: number = b % 4;
-	const f: number = Math.trunc((b + 8) / 25);
-	const g: number = Math.trunc((b - f + 1) / 3);
-	const h: number = (19 * a + b - d - g + 15) % 30;
+	const h: number = (19 * a + b - d - 6 + 15) % 30;
 	const i: number = Math.trunc(c / 4);
 	const k: number = c % 4;
 	const l: number = (32 + 2 * e + 2 * i - h - k) % 7;

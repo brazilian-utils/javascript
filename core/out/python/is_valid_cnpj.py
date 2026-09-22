@@ -3,11 +3,15 @@
 # source: is-valid-cnpj
 # content: 611130f5f12f
 
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 import re
-from .lib.cnpj import has_valid_cnpj_checksum, is_repeated_cnpj
+from .lib.cnpj import cnpj_check_digit, is_repeated_cnpj
 
 __all__ = ["is_valid_cnpj"]
+
+IS_VALID_CNPJ_TABLE_1: List[int] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+
+IS_VALID_CNPJ_TABLE_2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
 _IS_VALID_CNPJ_PATTERN_1 = re.compile("[^0-9A-Za-z]")
 
@@ -35,25 +39,21 @@ def is_valid_cnpj(cnpj: str, version: Literal["1", "2"]) -> bool:
         "\t\n\u000b\u000c\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"
     )
     if version == "2":
-        __inl174_value: str = cnpj
-        __inl175_result: Optional[str] = None
-        __inl175_result = _IS_VALID_CNPJ_PATTERN_1.sub("", __inl174_value).upper()
-        cleaned: str = __inl175_result
-        __inl178_value: str = cleaned
-        __inl179_result: Optional[bool] = None
-        for __inl176_index in range(0, len(__inl178_value)):
-            __inl177_point: int = (
-                ord(__inl178_value[__inl176_index])
-                if 0 <= __inl176_index < len(__inl178_value)
+        cleaned: str = _IS_VALID_CNPJ_PATTERN_1.sub("", cnpj).upper()
+        __inl114_result: Optional[bool] = None
+        for __inl111_index in range(0, len(cleaned)):
+            __inl112_point: int = (
+                ord(cleaned[__inl111_index])
+                if 0 <= __inl111_index < len(cleaned)
                 else 0
             )
-            if (__inl177_point >= 65) and (__inl177_point <= 90):
-                __inl179_result = True
-            if __inl179_result is not None:
+            if (__inl112_point >= 65) and (__inl112_point <= 90):
+                __inl114_result = True
+            if __inl114_result is not None:
                 break
-        if __inl179_result is None:
-            __inl179_result = False
-        if __inl179_result and (len(cleaned) == 14):
+        if __inl114_result is None:
+            __inl114_result = False
+        if __inl114_result and (len(cleaned) == 14):
             return (
                 _IS_VALID_CNPJ_PATTERN_2.fullmatch(
                     _IS_VALID_CNPJ_PATTERN_3.sub(
@@ -61,14 +61,25 @@ def is_valid_cnpj(cnpj: str, version: Literal["1", "2"]) -> bool:
                     )
                 )
                 is not None
-            ) and has_valid_cnpj_checksum(cleaned)
-    __inl180_value: str = cnpj
-    __inl181_result: Optional[str] = None
-    __inl181_result = _IS_VALID_CNPJ_PATTERN_4.sub("", __inl180_value)
-    numeric: str = __inl181_result
+            ) and (
+                (
+                    (ord(cleaned[12]) - 48)
+                    == cnpj_check_digit(cleaned, IS_VALID_CNPJ_TABLE_1)
+                )
+                and (
+                    (ord(cleaned[13]) - 48)
+                    == cnpj_check_digit(cleaned, IS_VALID_CNPJ_TABLE_2)
+                )
+            )
+    numeric: str = _IS_VALID_CNPJ_PATTERN_4.sub("", cnpj)
     if len(numeric) != 14:
         return False
     return (
         (_IS_VALID_CNPJ_PATTERN_5.fullmatch(trimmed) is not None)
         and (not is_repeated_cnpj(numeric))
-    ) and has_valid_cnpj_checksum(numeric)
+    ) and (
+        ((ord(numeric[12]) - 48) == cnpj_check_digit(numeric, IS_VALID_CNPJ_TABLE_1))
+        and (
+            (ord(numeric[13]) - 48) == cnpj_check_digit(numeric, IS_VALID_CNPJ_TABLE_2)
+        )
+    )

@@ -102,6 +102,15 @@ class Lowerer {
 	 * set once, before a function's body is lowered, not discovered from print-time scope.
 	 */
 	private currentBorrowedParams: ReadonlySet<string> = new Set();
+	/**
+	 * Functions some *other* generated module calls. A source module's own `export` decides a
+	 * function's visibility (`CFunc.moduleExported`), but a specialization (ADR 0004) is not the
+	 * declaration it came from and carries that flag as false — which is right until the
+	 * specialization survives as its own function and is called across a module boundary, where
+	 * the importing file would name something the defining file never made visible. Whatever one
+	 * generated module imports, the module that defines it exports.
+	 */
+	private crossModuleCallees: ReadonlySet<string> = new Set();
 
 	constructor(program: CProgram, spec: TargetSpec, options: LowerOptions) {
 		this.program = program;
@@ -110,6 +119,7 @@ class Lowerer {
 	}
 
 	run(): LoweredProgram {
+		this.crossModuleCallees = this.findCrossModuleCallees();
 		// Two passes: the first discovers which source library functions the selected portable
 		// lowerings need, the second lowers with those functions in the closure and named.
 		this.lowerAll(this.closure(this.program.entryPoints));
@@ -125,6 +135,17 @@ class Lowerer {
 			moduleNeeds: this.moduleNeeds,
 			moduleBuiltins: this.moduleBuiltins,
 		};
+	}
+
+	private findCrossModuleCallees(): ReadonlySet<string> {
+		const found = new Set<string>();
+		for (const caller of this.program.functions.values()) {
+			for (const callee of caller.calls) {
+				const target = this.program.functions.get(callee);
+				if (target !== undefined && target.module !== caller.module) found.add(callee);
+			}
+		}
+		return found;
 	}
 
 	private closure(roots: readonly string[]): CFunc[] {
@@ -252,7 +273,7 @@ class Lowerer {
 				ret: fn.ret,
 				body: this.block(fn.body),
 				exported: fn.exported,
-				moduleExported: fn.moduleExported,
+				moduleExported: fn.moduleExported || this.crossModuleCallees.has(fn.name),
 				doc: fn.doc,
 				isAsync: this.spec.asyncColouring && fn.effects.http,
 				fails: fn.effects.fail,

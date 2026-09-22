@@ -48,6 +48,6 @@ pub fn is_valid_cpf(cpf: &str) -> bool {
     if is_repeated(&digits) {
         return false;
     }
-    return ((digit_at(&digits, 9) == cpf_check_digit(&digits, 9))
-        && (digit_at(&digits, 10) == cpf_check_digit(&digits, 10)));
+    return ((digit_at_2(&digits) == cpf_check_digit(&digits))
+        && (digit_at_3(&digits) == cpf_check_digit_1(&digits)));
 }

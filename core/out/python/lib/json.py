@@ -16,48 +16,35 @@ def json_string_field(body: str, key: str) -> Optional[str]:
     points: List[int] = [ord(__c) for __c in body]
     needle: List[int] = [ord(__c) for __c in (('"' + key) + '"')]
     for index in range(0, len(points)):
-        __inl110_points: List[int] = points
-        __inl111_needle: List[int] = needle
-        __inl112_start: int = index
-        __inl113_result: Optional[bool] = None
-        for __inl109_offset in range(0, len(__inl111_needle)):
+        __inl76_result: Optional[bool] = None
+        for __inl72_offset in range(0, len(needle)):
             if (
-                __inl110_points[(__inl112_start + __inl109_offset)]
-                if 0 <= (__inl112_start + __inl109_offset) < len(__inl110_points)
+                points[(index + __inl72_offset)]
+                if 0 <= (index + __inl72_offset) < len(points)
                 else -1
-            ) != (
-                __inl111_needle[__inl109_offset]
-                if 0 <= __inl109_offset < len(__inl111_needle)
-                else -2
-            ):
-                __inl113_result = False
-            if __inl113_result is not None:
+            ) != (needle[__inl72_offset] if 0 <= __inl72_offset < len(needle) else -2):
+                __inl76_result = False
+            if __inl76_result is not None:
                 break
-        if __inl113_result is None:
-            __inl113_result = True
-        if not __inl113_result:
+        if __inl76_result is None:
+            __inl76_result = True
+        if not __inl76_result:
             continue
         cursor: int = index + len(needle)
         for skip in range(0, 8):
-            __inl114_point: int = points[cursor] if 0 <= cursor < len(points) else 0
-            __inl115_result: Optional[bool] = None
-            __inl115_result = (
-                ((__inl114_point == 32) or (__inl114_point == 9))
-                or (__inl114_point == 10)
-            ) or (__inl114_point == 13)
-            if __inl115_result:
+            __inl77_point: int = points[cursor] if 0 <= cursor < len(points) else 0
+            if (
+                ((__inl77_point == 32) or (__inl77_point == 9)) or (__inl77_point == 10)
+            ) or (__inl77_point == 13):
                 cursor = cursor + 1
         if (points[cursor] if 0 <= cursor < len(points) else 0) != 58:
             continue
         cursor = cursor + 1
         for skip in range(0, 8):
-            __inl116_point: int = points[cursor] if 0 <= cursor < len(points) else 0
-            __inl117_result: Optional[bool] = None
-            __inl117_result = (
-                ((__inl116_point == 32) or (__inl116_point == 9))
-                or (__inl116_point == 10)
-            ) or (__inl116_point == 13)
-            if __inl117_result:
+            __inl78_point: int = points[cursor] if 0 <= cursor < len(points) else 0
+            if (
+                ((__inl78_point == 32) or (__inl78_point == 9)) or (__inl78_point == 10)
+            ) or (__inl78_point == 13):
                 cursor = cursor + 1
         if (points[cursor] if 0 <= cursor < len(points) else 0) != 34:
             continue
@@ -84,40 +71,32 @@ def json_string_field(body: str, key: str) -> Optional[str]:
                             cursor = cursor + 2
                         else:
                             if escaped == 117:
-                                __inl122_points: List[int] = points
-                                __inl123_start: int = cursor + 2
-                                __inl124_result: Optional[int] = None
-                                __inl118_value: int = 0
-                                for __inl119_offset in range(0, 4):
-                                    __inl120_point: int = (
-                                        __inl122_points[
-                                            (__inl123_start + __inl119_offset)
-                                        ]
+                                __inl84_start: int = cursor + 2
+                                __inl79_value: int = 0
+                                for __inl80_offset in range(0, 4):
+                                    __inl81_point: int = (
+                                        points[(__inl84_start + __inl80_offset)]
                                         if 0
-                                        <= (__inl123_start + __inl119_offset)
-                                        < len(__inl122_points)
+                                        <= (__inl84_start + __inl80_offset)
+                                        < len(points)
                                         else 48
                                     )
-                                    __inl121_digit: int = 0
-                                    if (__inl120_point >= 48) and (
-                                        __inl120_point <= 57
-                                    ):
-                                        __inl121_digit = __inl120_point - 48
+                                    __inl82_digit: int = 0
+                                    if (__inl81_point >= 48) and (__inl81_point <= 57):
+                                        __inl82_digit = __inl81_point - 48
                                     else:
-                                        if (__inl120_point >= 97) and (
-                                            __inl120_point <= 102
+                                        if (__inl81_point >= 97) and (
+                                            __inl81_point <= 102
                                         ):
-                                            __inl121_digit = __inl120_point - 87
+                                            __inl82_digit = __inl81_point - 87
                                         else:
-                                            if (__inl120_point >= 65) and (
-                                                __inl120_point <= 70
+                                            if (__inl81_point >= 65) and (
+                                                __inl81_point <= 70
                                             ):
-                                                __inl121_digit = __inl120_point - 55
-                                    __inl118_value = (
-                                        __inl118_value * 16
-                                    ) + __inl121_digit
-                                __inl124_result = min(__inl118_value, 65535)
-                                out.append(__inl124_result)
+                                                __inl82_digit = __inl81_point - 55
+                                    __inl79_value = (__inl79_value * 16) + __inl82_digit
+                                __inl85_result: int = min(__inl79_value, 65535)
+                                out.append(__inl85_result)
                                 cursor = cursor + 6
                             else:
                                 if escaped >= 0:

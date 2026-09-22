@@ -11,15 +11,13 @@ __all__ = ["month_from_days", "day_from_days", "ymd_to_days", "year_from_days"]
 def month_from_days(days: int) -> int:
     """The month of a date given as days since 1970-01-01."""
     shifted: int = days + 719468
-    __inl6_value: int = shifted
-    __inl7_divisor: int = 146097
-    __inl8_result: Optional[int] = None
-    __inl5_quotient: int = __inl6_value // __inl7_divisor
-    if (__inl6_value < 0) and ((__inl5_quotient * __inl7_divisor) != __inl6_value):
-        __inl8_result = __inl5_quotient - 1
-    if __inl8_result is None:
-        __inl8_result = __inl5_quotient
-    era: int = __inl8_result
+    __inl6_result: Optional[int] = None
+    __inl4_quotient: int = shifted // 146097
+    if (shifted < 0) and ((__inl4_quotient * 146097) != shifted):
+        __inl6_result = __inl4_quotient - 1
+    if __inl6_result is None:
+        __inl6_result = __inl4_quotient
+    era: int = __inl6_result
     day_of_era: int = shifted - (era * 146097)
     year_of_era: int = (
         -(abs(__td_a) // abs(__td_b))
@@ -103,15 +101,13 @@ def month_from_days(days: int) -> int:
 def day_from_days(days: int) -> int:
     """The day of month of a date given as days since 1970-01-01."""
     shifted: int = days + 719468
-    __inl10_value: int = shifted
-    __inl11_divisor: int = 146097
-    __inl12_result: Optional[int] = None
-    __inl9_quotient: int = __inl10_value // __inl11_divisor
-    if (__inl10_value < 0) and ((__inl9_quotient * __inl11_divisor) != __inl10_value):
-        __inl12_result = __inl9_quotient - 1
-    if __inl12_result is None:
-        __inl12_result = __inl9_quotient
-    era: int = __inl12_result
+    __inl9_result: Optional[int] = None
+    __inl7_quotient: int = shifted // 146097
+    if (shifted < 0) and ((__inl7_quotient * 146097) != shifted):
+        __inl9_result = __inl7_quotient - 1
+    if __inl9_result is None:
+        __inl9_result = __inl7_quotient
+    era: int = __inl9_result
     day_of_era: int = shifted - (era * 146097)
     year_of_era: int = (
         -(abs(__td_a) // abs(__td_b))
@@ -221,36 +217,24 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
         ((((year < 1) or (year > 9999)) or (month < 1)) or (month > 12)) or (day < 1)
     ) or (day > 31):
         return None
-    __inl23_year: int = year
-    __inl24_month: int = month
-    __inl25_day: int = day
-    __inl26_result: Optional[int] = None
-    __inl17_shifted: int = (__inl23_year - 1) if (__inl24_month <= 2) else __inl23_year
-    __inl198_value: int = __inl17_shifted
-    __inl199_divisor: int = 400
-    __inl200_result: Optional[int] = None
-    __inl197_quotient: int = __inl198_value // __inl199_divisor
-    if (__inl198_value < 0) and (
-        (__inl197_quotient * __inl199_divisor) != __inl198_value
-    ):
-        __inl200_result = __inl197_quotient - 1
-    if __inl200_result is None:
-        __inl200_result = __inl197_quotient
-    __inl18_era: int = __inl200_result
-    __inl19_year_of_era: int = __inl17_shifted - (__inl18_era * 400)
-    __inl20_month_term: int = (
-        (__inl24_month - 3) if (__inl24_month > 2) else (__inl24_month + 9)
-    )
-    __inl21_day_of_year: int = (
-        (((153 * __inl20_month_term) + 2) // 5) + __inl25_day
-    ) - 1
-    __inl22_day_of_era: int = (
+    __inl13_shifted: int = (year - 1) if (month <= 2) else year
+    __inl126_result: Optional[int] = None
+    __inl124_quotient: int = __inl13_shifted // 400
+    if (__inl13_shifted < 0) and ((__inl124_quotient * 400) != __inl13_shifted):
+        __inl126_result = __inl124_quotient - 1
+    if __inl126_result is None:
+        __inl126_result = __inl124_quotient
+    __inl14_era: int = __inl126_result
+    __inl15_year_of_era: int = __inl13_shifted - (__inl14_era * 400)
+    __inl16_month_term: int = (month - 3) if (month > 2) else (month + 9)
+    __inl17_day_of_year: int = ((((153 * __inl16_month_term) + 2) // 5) + day) - 1
+    __inl18_day_of_era: int = (
         (
-            (__inl19_year_of_era * 365)
+            (__inl15_year_of_era * 365)
             + (
                 -(abs(__td_a) // abs(__td_b))
                 if (
-                    (__td_a := __inl19_year_of_era),
+                    (__td_a := __inl15_year_of_era),
                     (__td_b := 4),
                     (__td_a < 0) != (__td_b < 0),
                 )[2]
@@ -260,44 +244,38 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
         - (
             -(abs(__td_a) // abs(__td_b))
             if (
-                (__td_a := __inl19_year_of_era),
+                (__td_a := __inl15_year_of_era),
                 (__td_b := 100),
                 (__td_a < 0) != (__td_b < 0),
             )[2]
             else abs(__td_a) // abs(__td_b)
         )
-    ) + __inl21_day_of_year
-    __inl26_result = min(
-        max((((__inl18_era * 146097) + __inl22_day_of_era) - 719468), -719162), 2932896
+    ) + __inl17_day_of_year
+    __inl22_result: int = min(
+        max((((__inl14_era * 146097) + __inl18_day_of_era) - 719468), -719162), 2932896
     )
-    days: int = __inl26_result
-    __inl35_days: int = days
-    __inl36_result: Optional[int] = None
-    __inl27_shifted: int = __inl35_days + 719468
-    __inl202_value: int = __inl27_shifted
-    __inl203_divisor: int = 146097
-    __inl204_result: Optional[int] = None
-    __inl201_quotient: int = __inl202_value // __inl203_divisor
-    if (__inl202_value < 0) and (
-        (__inl201_quotient * __inl203_divisor) != __inl202_value
-    ):
-        __inl204_result = __inl201_quotient - 1
-    if __inl204_result is None:
-        __inl204_result = __inl201_quotient
-    __inl28_era: int = __inl204_result
-    __inl29_day_of_era: int = __inl27_shifted - (__inl28_era * 146097)
-    __inl30_year_of_era: int = (
+    days: int = __inl22_result
+    __inl23_shifted: int = days + 719468
+    __inl129_result: Optional[int] = None
+    __inl127_quotient: int = __inl23_shifted // 146097
+    if (__inl23_shifted < 0) and ((__inl127_quotient * 146097) != __inl23_shifted):
+        __inl129_result = __inl127_quotient - 1
+    if __inl129_result is None:
+        __inl129_result = __inl127_quotient
+    __inl24_era: int = __inl129_result
+    __inl25_day_of_era: int = __inl23_shifted - (__inl24_era * 146097)
+    __inl26_year_of_era: int = (
         -(abs(__td_a) // abs(__td_b))
         if (
             (
                 __td_a := (
                     (
                         (
-                            __inl29_day_of_era
+                            __inl25_day_of_era
                             - (
                                 -(abs(__td_a) // abs(__td_b))
                                 if (
-                                    (__td_a := __inl29_day_of_era),
+                                    (__td_a := __inl25_day_of_era),
                                     (__td_b := 1460),
                                     (__td_a < 0) != (__td_b < 0),
                                 )[2]
@@ -307,7 +285,7 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
                         + (
                             -(abs(__td_a) // abs(__td_b))
                             if (
-                                (__td_a := __inl29_day_of_era),
+                                (__td_a := __inl25_day_of_era),
                                 (__td_b := 36524),
                                 (__td_a < 0) != (__td_b < 0),
                             )[2]
@@ -317,7 +295,7 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
                     - (
                         -(abs(__td_a) // abs(__td_b))
                         if (
-                            (__td_a := __inl29_day_of_era),
+                            (__td_a := __inl25_day_of_era),
                             (__td_b := 146096),
                             (__td_a < 0) != (__td_b < 0),
                         )[2]
@@ -330,14 +308,14 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
         )[2]
         else abs(__td_a) // abs(__td_b)
     )
-    __inl31_year: int = __inl30_year_of_era + (__inl28_era * 400)
-    __inl32_day_of_year: int = __inl29_day_of_era - (
+    __inl27_year: int = __inl26_year_of_era + (__inl24_era * 400)
+    __inl28_day_of_year: int = __inl25_day_of_era - (
         (
-            (365 * __inl30_year_of_era)
+            (365 * __inl26_year_of_era)
             + (
                 -(abs(__td_a) // abs(__td_b))
                 if (
-                    (__td_a := __inl30_year_of_era),
+                    (__td_a := __inl26_year_of_era),
                     (__td_b := 4),
                     (__td_a < 0) != (__td_b < 0),
                 )[2]
@@ -347,31 +325,31 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
         - (
             -(abs(__td_a) // abs(__td_b))
             if (
-                (__td_a := __inl30_year_of_era),
+                (__td_a := __inl26_year_of_era),
                 (__td_b := 100),
                 (__td_a < 0) != (__td_b < 0),
             )[2]
             else abs(__td_a) // abs(__td_b)
         )
     )
-    __inl33_month_prime: int = (
+    __inl29_month_prime: int = (
         -(abs(__td_a) // abs(__td_b))
         if (
-            (__td_a := ((5 * __inl32_day_of_year) + 2)),
+            (__td_a := ((5 * __inl28_day_of_year) + 2)),
             (__td_b := 153),
             (__td_a < 0) != (__td_b < 0),
         )[2]
         else abs(__td_a) // abs(__td_b)
     )
-    __inl34_month: int = (
-        (__inl33_month_prime + 3)
-        if (__inl33_month_prime < 10)
-        else (__inl33_month_prime - 9)
+    __inl30_month: int = (
+        (__inl29_month_prime + 3)
+        if (__inl29_month_prime < 10)
+        else (__inl29_month_prime - 9)
     )
-    __inl36_result = min(
-        max(((__inl31_year + 1) if (__inl34_month <= 2) else __inl31_year), 1), 9999
+    __inl32_result: int = min(
+        max(((__inl27_year + 1) if (__inl30_month <= 2) else __inl27_year), 1), 9999
     )
-    if ((__inl36_result != year) or (month_from_days(days) != month)) or (
+    if ((__inl32_result != year) or (month_from_days(days) != month)) or (
         day_from_days(days) != day
     ):
         return None
@@ -381,15 +359,13 @@ def ymd_to_days(year: int, month: int, day: int) -> Optional[int]:
 def year_from_days(days: int) -> int:
     """The year of a date given as days since 1970-01-01."""
     shifted: int = days + 719468
-    __inl2_value: int = shifted
-    __inl3_divisor: int = 146097
-    __inl4_result: Optional[int] = None
-    __inl1_quotient: int = __inl2_value // __inl3_divisor
-    if (__inl2_value < 0) and ((__inl1_quotient * __inl3_divisor) != __inl2_value):
-        __inl4_result = __inl1_quotient - 1
-    if __inl4_result is None:
-        __inl4_result = __inl1_quotient
-    era: int = __inl4_result
+    __inl3_result: Optional[int] = None
+    __inl1_quotient: int = shifted // 146097
+    if (shifted < 0) and ((__inl1_quotient * 146097) != shifted):
+        __inl3_result = __inl1_quotient - 1
+    if __inl3_result is None:
+        __inl3_result = __inl1_quotient
+    era: int = __inl3_result
     day_of_era: int = shifted - (era * 146097)
     year_of_era: int = (
         -(abs(__td_a) // abs(__td_b))

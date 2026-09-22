@@ -21,17 +21,14 @@ pub fn generate_cpf(env: &dyn Capabilities) -> String {
         }
         base = random_cpf_base(env);
     }
-    let first_digit = cpf_check_digit(&crate::support::concat2(&base, "00"), 9).to_string();
-    let second_digit = cpf_check_digit(
-        &{
-            let mut __buf = String::with_capacity(base.len() + first_digit.len() + "0".len());
-            __buf.push_str(&base);
-            __buf.push_str(&first_digit);
-            __buf.push('0');
-            __buf
-        },
-        10,
-    )
+    let first_digit = cpf_check_digit(&crate::support::concat2(&base, "00")).to_string();
+    let second_digit = cpf_check_digit_1(&{
+        let mut __buf = String::with_capacity(base.len() + first_digit.len() + "0".len());
+        __buf.push_str(&base);
+        __buf.push_str(&first_digit);
+        __buf.push('0');
+        __buf
+    })
     .to_string();
     return {
         let mut __buf = String::with_capacity(base.len() + first_digit.len() + second_digit.len());

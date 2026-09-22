@@ -5,8 +5,7 @@
 
 from typing import Optional
 import re
-from .lib.cpf import cpf_check_digit
-from .lib.digits import digit_at
+from .lib.cpf import cpf_check_digit_1
 
 __all__ = ["is_valid_cpf"]
 
@@ -32,42 +31,27 @@ def is_valid_cpf(cpf: str) -> bool:
         is not None
     ):
         return False
-    __inl182_value: str = cpf
-    __inl183_result: Optional[str] = None
-    __inl183_result = _IS_VALID_CPF_PATTERN_2.sub("", __inl182_value)
-    digits: str = __inl183_result
+    digits: str = _IS_VALID_CPF_PATTERN_2.sub("", cpf)
     if len(digits) != 11:
         return False
-    __inl186_value: str = digits
-    __inl187_result: Optional[bool] = None
-    __inl184_first: int = ord(__inl186_value[0])
-    for __inl185_index in range(1, 11):
-        if ord(__inl186_value[__inl185_index]) != __inl184_first:
-            __inl187_result = False
-        if __inl187_result is not None:
+    __inl118_result: Optional[bool] = None
+    __inl115_first: int = ord(digits[0])
+    for __inl116_index in range(1, 11):
+        if ord(digits[__inl116_index]) != __inl115_first:
+            __inl118_result = False
+        if __inl118_result is not None:
             break
-    if __inl187_result is None:
-        __inl187_result = True
-    if __inl187_result:
+    if __inl118_result is None:
+        __inl118_result = True
+    if __inl118_result:
         return False
-    __inl188_value: str = digits
-    __inl189_index: int = 9
-    __inl190_result: Optional[int] = None
-    __inl190_result = ord(__inl188_value[__inl189_index]) - 48
-    __inl194_cpf: str = digits
-    __inl195_size: int = 9
-    __inl196_result: Optional[int] = None
-    __inl191_sum: int = 0
-    for __inl192_index in range(0, __inl195_size):
-        __inl358_value: str = __inl194_cpf
-        __inl359_index: int = __inl192_index
-        __inl360_result: Optional[int] = None
-        __inl360_result = ord(__inl358_value[__inl359_index]) - 48
-        __inl191_sum = __inl191_sum + (
-            __inl360_result * ((__inl195_size + 1) - __inl192_index)
+    __inl119_sum: int = 0
+    for __inl120_index in range(0, 9):
+        __inl119_sum = __inl119_sum + (
+            (ord(digits[__inl120_index]) - 48) * (10 - __inl120_index)
         )
-    __inl193_remainder: int = __inl191_sum % 11
-    __inl196_result = 0 if (__inl193_remainder < 2) else (11 - __inl193_remainder)
-    return (__inl190_result == __inl196_result) and (
-        digit_at(digits, 10) == cpf_check_digit(digits, 10)
+    __inl121_remainder: int = __inl119_sum % 11
+    __inl123_result: int = 0 if (__inl121_remainder < 2) else (11 - __inl121_remainder)
+    return ((ord(digits[9]) - 48) == __inl123_result) and (
+        (ord(digits[10]) - 48) == cpf_check_digit_1(digits)
     )

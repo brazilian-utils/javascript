@@ -407,8 +407,25 @@ export const TYPESCRIPT_CANDIDATES: readonly Candidate[] = [
 		cost: cheap,
 		sourceFn: "std/date::daysFromCivil",
 		emit: (args, _types, ctx) => {
-			const dayLimit = (year: string, month: string): string =>
-				`${month} === 2 ? ((${year} % 4 === 0 && ${year} % 100 !== 0) || ${year} % 400 === 0 ? 29 : 28) : (${month} === 4 || ${month} === 6 || ${month} === 9 || ${month} === 11 ? 30 : 31)`;
+			// A month the caller has already settled is the common case once a helper is inlined into
+			// a call site that passes one (`easterSunday` builds a March date), and it decides both
+			// tests below: the range check is then a fact, not code, and the days-in-month ladder
+			// collapses to one number — except in February, where the year still decides. This is the
+			// same folding `backend/fold.ts` does for the target AST, done here because this lowering
+			// emits text, which that pass cannot see into.
+			const literalMonth = ((): number | undefined => {
+				const month = args[1]!;
+				if (month.kind !== "lit") return undefined;
+				if (typeof month.value === "bigint") return Number(month.value);
+				return typeof month.value === "number" && Number.isInteger(month.value) ? month.value : undefined;
+			})();
+			const monthOutOfRange = literalMonth !== undefined && (literalMonth < 1 || literalMonth > 12);
+			const monthTest = (month: string): string => (literalMonth === undefined ? `${month} < 1 || ${month} > 12 || ` : "");
+			const dayLimit = (year: string, month: string): string => {
+				if (literalMonth === 2) return `((${year} % 4 === 0 && ${year} % 100 !== 0) || ${year} % 400 === 0 ? 29 : 28)`;
+				if (literalMonth !== undefined) return String([4, 6, 9, 11].includes(literalMonth) ? 30 : 31);
+				return `${month} === 2 ? ((${year} % 4 === 0 && ${year} % 100 !== 0) || ${year} % 400 === 0 ? 29 : 28) : (${month} === 4 || ${month} === 6 || ${month} === 9 || ${month} === 11 ? 30 : 31)`;
+			};
 			const forward = (year: string, month: string, day: string): TExpr =>
 				({
 					kind: "call",
@@ -424,13 +441,17 @@ export const TYPESCRIPT_CANDIDATES: readonly Candidate[] = [
 				const year = print(args[0]!);
 				const month = print(args[1]!);
 				const day = print(args[2]!);
+				if (monthOutOfRange) return raw("undefined");
 				return raw(
-					`(${year} < 1 || ${year} > 9999 || ${month} < 1 || ${month} > 12 || ${day} < 1 || ${day} > (${dayLimit(year, month)}) ? undefined : ${print(forward(year, month, day))})`,
+					`(${year} < 1 || ${year} > 9999 || ${monthTest(month)}${day} < 1 || ${day} > (${dayLimit(year, month)}) ? undefined : ${print(forward(year, month, day))})`,
 				);
+			}
+			if (monthOutOfRange) {
+				return raw(`((y, m, d) => undefined)(${print(args[0]!)}, ${print(args[1]!)}, ${print(args[2]!)})`);
 			}
 			return raw(
 				`((y, m, d) => {\n` +
-					`\t\tif (y < 1 || y > 9999 || m < 1 || m > 12 || d < 1) return undefined;\n` +
+					`\t\tif (y < 1 || y > 9999 || ${monthTest("m")}d < 1) return undefined;\n` +
 					`\t\tconst limit = ${dayLimit("y", "m")};\n` +
 					`\t\treturn d > limit ? undefined : ${print(forward("y", "m", "d"))};\n` +
 					`\t})(${print(args[0]!)}, ${print(args[1]!)}, ${print(args[2]!)})`,
@@ -1070,5 +1091,5 @@ export const TYPESCRIPT_BACKEND: Backend = {
 	// engine's own call-site inlining (`optimize/inline.ts`) is set conservatively here — see
 	// `engine/docs/progress.md` §8 for the before/after and the bundle-size effect this was weighed
 	// against.
-	inlineBudget: { maxStatements: 6, rounds: 3 },
+	inlineBudget: { maxStatements: 8, rounds: 4, maxDuplicatedNodes: 6 },
 };

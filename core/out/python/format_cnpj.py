@@ -5,7 +5,7 @@
 
 from typing import Literal
 from dataclasses import dataclass
-from .lib.digits import keep_alphanumeric, keep_digits
+import re
 from .lib.format import format_with_pattern
 
 __all__ = ["format_cnpj"]
@@ -18,6 +18,11 @@ class FormatCnpjOptions:
     obfuscate: bool
 
 
+_FORMAT_CNPJ_PATTERN_1 = re.compile("[^0-9A-Za-z]")
+
+_FORMAT_CNPJ_PATTERN_2 = re.compile("[^0-9]")
+
+
 def format_cnpj(value: str, options: FormatCnpjOptions) -> str:
     """Formats a CNPJ value as `00.000.000/0000-00`.
 
@@ -25,7 +30,9 @@ def format_cnpj(value: str, options: FormatCnpjOptions) -> str:
     options object or a truthy non-boolean is the DX's job.
     """
     sanitized: str = (
-        keep_alphanumeric(value) if (options.version == "2") else keep_digits(value)
+        _FORMAT_CNPJ_PATTERN_1.sub("", value).upper()
+        if (options.version == "2")
+        else _FORMAT_CNPJ_PATTERN_2.sub("", value)
     )
     return format_with_pattern(
         sanitized,

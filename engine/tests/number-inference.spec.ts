@@ -64,13 +64,34 @@ test("a library helper's `number` parameter is specialized per call site, exactl
 export function f(value: DigitsOf<4>): IntRange<0, 9> {
 	return digitAt(value, 3);
 }`;
-	const compilation = compileSource({ "utility.ts": source });
+	// Unoptimized, because this is about what the checker proved, and the optimizer acts on that
+	// proof: an `Int[3..3]` parameter is folded to the constant at every read and then dropped from
+	// the signature entirely. The test below covers that half.
+	const compilation = compileSource({ "utility.ts": source }, { noOptimize: true });
 	const specialized = compilation.program.functions.get("utility::digitAt");
 	assert.ok(specialized !== undefined, "the helper was not specialized");
 	assert.equal(typeToString(specialized.params[0]!.type), "Digits[4]");
 	// The index came from the call site (a proven literal 3), not the wide default `number` starts as.
 	assert.equal(typeToString(specialized.params[1]!.type), "Int[3..3]");
 	assert.equal(typeToString(specialized.ret), "Int[0..9]");
+});
+
+test("a parameter proven to be one integer is folded to it and then dropped from the signature", () => {
+	const source = `function digitAt(value: Digits, index: number): number {
+	return value.charCodeAt(index) - 48;
+}
+
+export function f(value: DigitsOf<4>): IntRange<0, 9> {
+	return digitAt(value, 3);
+}`;
+	const specialized = compileSource({ "utility.ts": source }).program.functions.get("utility::digitAt");
+	assert.ok(specialized !== undefined, "the helper was not specialized");
+	// `index` is gone: every read of it became `3`, which left nothing for the parameter to carry.
+	// Go and Rust both refuse to compile an unused parameter, so this is correctness, not tidiness.
+	assert.deepEqual(
+		specialized.params.map((param) => param.name),
+		["value"],
+	);
 });
 
 test("an exported `number` parameter no guard narrows is refused, naming the guard to add", () => {

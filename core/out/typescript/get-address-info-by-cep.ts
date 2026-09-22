@@ -77,11 +77,8 @@ async function fetchViaCep(
 	if (code === "") {
 		return undefined;
 	}
-	const _inl93Value: string = code;
-	let _inl94Result: string | undefined = undefined;
-	_inl94Result = _inl93Value.replace(/[^0-9]/gu, "");
 	return {
-		cep: _inl94Result!,
+		cep: code.replace(/[^0-9]/gu, ""),
 		state: jsonStringField(response!.body, "uf") ?? "",
 		city: jsonStringField(response!.body, "localidade") ?? "",
 		neighborhood: jsonStringField(response!.body, "bairro") ?? "",
@@ -107,11 +104,8 @@ async function fetchBrasilApi(
 	if (code === "") {
 		return undefined;
 	}
-	const _inl95Value: string = code;
-	let _inl96Result: string | undefined = undefined;
-	_inl96Result = _inl95Value.replace(/[^0-9]/gu, "");
 	return {
-		cep: _inl96Result!,
+		cep: code.replace(/[^0-9]/gu, ""),
 		state: jsonStringField(response!.body, "state") ?? "",
 		city: jsonStringField(response!.body, "city") ?? "",
 		neighborhood: jsonStringField(response!.body, "neighborhood") ?? "",

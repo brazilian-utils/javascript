@@ -19,6 +19,16 @@
 		"start": 738,
 		"end": 842
 	},
+	"src/lib_digits.rs#digit_at_2": {
+		"module": "lib/digits",
+		"start": 738,
+		"end": 842
+	},
+	"src/lib_digits.rs#digit_at_3": {
+		"module": "lib/digits",
+		"start": 738,
+		"end": 842
+	},
 	"src/lib_format.rs#pattern_slots": {
 		"module": "lib/format",
 		"start": 1345,
@@ -94,6 +104,11 @@
 		"start": 394,
 		"end": 687
 	},
+	"src/lib_cpf.rs#cpf_check_digit_1": {
+		"module": "lib/cpf",
+		"start": 394,
+		"end": 687
+	},
 	"src/lib_cpf.rs#is_repeated": {
 		"module": "lib/cpf",
 		"start": 1283,
@@ -150,6 +165,56 @@
 		"end": 4239
 	},
 	"src/lib_civil.rs#civil_date": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_1": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_2": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_3": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_4": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_5": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_6": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_7": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_8": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_9": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"src/lib_civil.rs#civil_date_10": {
 		"module": "lib/civil",
 		"start": 445,
 		"end": 624

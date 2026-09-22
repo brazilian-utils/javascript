@@ -9,18 +9,18 @@ use crate::*;
 /// fixed-width draw is biased whenever `bound` does not divide 2^32 evenly, and that bias would
 /// have to match, digit for digit, across three unrelated standard libraries to stay invisible.
 /// Rejecting the biased tail of the draw removes it instead.
-pub(crate) fn random_below(bound: i64, env: &dyn Capabilities) -> i64 {
-    let limit = (4294967296 - (4294967296 % bound));
+pub(crate) fn random_below(env: &dyn Capabilities) -> i64 {
+    let limit = 4294967290;
     for _attempt in 0..32 {
         let draw = env.next_u32();
         if (draw < limit) {
-            return (draw % bound);
+            return (draw % 10);
         }
     }
-    return (env.next_u32() % bound);
+    return (env.next_u32() % 10);
 }
 
 /// One random ASCII digit.
 pub(crate) fn random_digit(env: &dyn Capabilities) -> String {
-    return random_below(10, env).to_string();
+    return random_below(env).to_string();
 }

@@ -25,7 +25,7 @@ func GenerateCpf(env Capabilities) string {
 		}
 		base = randomCpfBase(env)
 	}
-	firstDigit := strconv.Itoa(cpfCheckDigit((base + "00"), 9))
-	secondDigit := strconv.Itoa(cpfCheckDigit(((base + firstDigit) + "0"), 10))
+	firstDigit := strconv.Itoa(cpfCheckDigit((base + "00")))
+	secondDigit := strconv.Itoa(cpfCheckDigit1(((base + firstDigit) + "0")))
 	return ((base + firstDigit) + secondDigit)
 }

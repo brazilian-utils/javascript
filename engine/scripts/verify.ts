@@ -156,6 +156,14 @@ const steps: Step[] = [
 			),
 	},
 	{
+		// The generated TypeScript is shipped to a browser by a tree-shakeable package, so its size
+		// is a result this pipeline has to check rather than a trade to remember. `size.ts` measures
+		// what a consumer's bundler would produce for a single-import entry point and compares it
+		// with the committed `SIZE.json`; a per-export regression past the budget fails here.
+		name: "typescript size",
+		run: () => shell(process.execPath, [join(ENGINE, "scripts", "size.ts"), project, "--check"], project),
+	},
+	{
 		name: "python compile",
 		run: () => shell("python3", ["-m", "compileall", "-q", "."], join(project, "out", "python")),
 	},

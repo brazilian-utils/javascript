@@ -6,9 +6,9 @@
 use crate::*;
 
 /// Floor division, which the calendar algorithms need for negative years.
-fn floor_div_1(value: i64, divisor: i64) -> i64 {
-    let quotient = (value / divisor);
-    if ((value < 0) && ((quotient * divisor) != value)) {
+fn floor_div_1(value: i64) -> i64 {
+    let quotient = (value / 400);
+    if ((value < 0) && ((quotient * 400) != value)) {
         return (quotient - 1);
     }
     return quotient;
@@ -21,7 +21,7 @@ pub(crate) fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
     } else {
         year.to_owned()
     });
-    let era = floor_div_1(shifted, 400);
+    let era = floor_div_1(shifted);
     let year_of_era = (shifted - (era * 400));
     let month_term = (if (month > 2) {
         (month - 3)
@@ -35,9 +35,9 @@ pub(crate) fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
 }
 
 /// Floor division, which the calendar algorithms need for negative years.
-pub(crate) fn floor_div(value: i64, divisor: i64) -> i64 {
-    let quotient = (value / divisor);
-    if ((value < 0) && ((quotient * divisor) != value)) {
+pub(crate) fn floor_div(value: i64) -> i64 {
+    let quotient = (value / 146097);
+    if ((value < 0) && ((quotient * 146097) != value)) {
         return (quotient - 1);
     }
     return quotient;
@@ -46,7 +46,7 @@ pub(crate) fn floor_div(value: i64, divisor: i64) -> i64 {
 /// The year of a date given as days since 1970-01-01.
 pub(crate) fn year_from_days(days: i64) -> i64 {
     let shifted = (days + 719468);
-    let era = floor_div(shifted, 146097);
+    let era = floor_div(shifted);
     let day_of_era = (shifted - (era * 146097));
     let year_of_era = ((((day_of_era - (day_of_era / 1460)) + (day_of_era / 36524))
         - (day_of_era / 146096))
@@ -71,7 +71,7 @@ pub(crate) fn year_from_days(days: i64) -> i64 {
 /// The month of a date given as days since 1970-01-01.
 pub(crate) fn month_from_days(days: i64) -> i64 {
     let shifted = (days + 719468);
-    let era = floor_div(shifted, 146097);
+    let era = floor_div(shifted);
     let day_of_era = (shifted - (era * 146097));
     let year_of_era = ((((day_of_era - (day_of_era / 1460)) + (day_of_era / 36524))
         - (day_of_era / 146096))
@@ -90,7 +90,7 @@ pub(crate) fn month_from_days(days: i64) -> i64 {
 /// The day of month of a date given as days since 1970-01-01.
 pub(crate) fn day_from_days(days: i64) -> i64 {
     let shifted = (days + 719468);
-    let era = floor_div(shifted, 146097);
+    let era = floor_div(shifted);
     let day_of_era = (shifted - (era * 146097));
     let year_of_era = ((((day_of_era - (day_of_era / 1460)) + (day_of_era / 36524))
         - (day_of_era / 146096))

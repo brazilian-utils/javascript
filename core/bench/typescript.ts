@@ -28,7 +28,11 @@ import { getHolidays as generatedGetHolidays, type Holiday as GeneratedHoliday }
 import { isBusinessDay as generatedIsBusinessDay } from "../out/typescript/is-business-day.ts";
 import { generateCpf as generatedGenerateCpf } from "../out/typescript/generate-cpf.ts";
 import { generateCnpj as generatedGenerateCnpj } from "../out/typescript/generate-cnpj.ts";
-import { civilDate } from "../out/typescript/lib/civil.ts";
+// `std/date`'s own conversion rather than `lib/civil`'s `civilDate` wrapper: `civilDate` exists to
+// name an unreachable fallback for a date the caller has not proven valid, and every call to it in
+// the core passes a constant month, so it specializes away (ADR 0004) and has no single name in
+// the output to import. `daysFromCivil` is the std function underneath it and stays put.
+import { daysFromCivil } from "../out/typescript/std/date.ts";
 
 const BUDGET = 1.5;
 const WARMUP = 20_000;
@@ -53,7 +57,7 @@ const HOLIDAY_YEARS = [2024, 2000, 2023, 1987, 2099];
 
 // (year, month, day) tuples, not raw epoch-day integers or `Date`s, so the same triple can be
 // turned into whichever shape each side's API wants -- a `Date` for the handwritten side, a
-// `civilDate` (epoch-day integer) for the generated core, per `docs/contracts.md`'s "local
+// `daysFromCivil` (epoch-day integer) for the generated core, per `docs/contracts.md`'s "local
 // calendar day" convention.
 const BUSINESS_DAY_CASES: readonly { year: number; month: number; day: number }[] = [
 	{ year: 2024, month: 1, day: 2 }, // ordinary Tuesday
@@ -190,7 +194,7 @@ compare(
 		}));
 		const handwrittenProjection = handwritten.map((holiday) => ({
 			name: holiday.name,
-			date: civilDate(holiday.date.getFullYear(), holiday.date.getMonth() + 1, holiday.date.getDate()),
+			date: daysFromCivil(holiday.date.getFullYear(), holiday.date.getMonth() + 1, holiday.date.getDate()),
 			type: holiday.type,
 		}));
 		const equal = JSON.stringify(handwrittenProjection) === JSON.stringify(generatedProjection);
@@ -217,13 +221,13 @@ compare(
 
 // isBusinessDay: full-pipeline. Both sides receive the same (year, month, day) local calendar day,
 // each turned into the shape its own API wants -- a `Date` built from local components for the
-// handwritten side, a `civilDate` epoch-day integer for the generated core.
+// handwritten side, a `daysFromCivil` epoch-day integer for the generated core.
 {
 	const utility = "isBusinessDay";
 	const variant = "full-pipeline";
 	for (const { year, month, day } of BUSINESS_DAY_CASES) {
 		const a = handwrittenIsBusinessDay(new Date(year, month - 1, day));
-		const b = generatedIsBusinessDay(civilDate(year, month, day), true);
+		const b = generatedIsBusinessDay(daysFromCivil(year, month, day), true);
 		if (a !== b) {
 			disagreements.push({ utility, variant, input: { year, month, day }, handwritten: a, generated: b });
 		}
@@ -239,7 +243,7 @@ compare(
 	cursor = 0;
 	const generatedMs = measure(() => {
 		const { year, month, day } = BUSINESS_DAY_CASES[cursor++ % BUSINESS_DAY_CASES.length]!;
-		generatedIsBusinessDay(civilDate(year, month, day), true);
+		generatedIsBusinessDay(daysFromCivil(year, month, day), true);
 	});
 	process.stdout.write(`  generated                    ${generatedMs.toFixed(1)} ms\n`);
 	rows.push({ utility, variant, handwrittenMs, generatedMs, iterations: ITERATIONS });

@@ -1,19 +1,4 @@
 {
-	"lib/digits.py#keep_alphanumeric": {
-		"module": "lib/digits",
-		"start": 575,
-		"end": 684
-	},
-	"lib/digits.py#keep_digits": {
-		"module": "lib/digits",
-		"start": 397,
-		"end": 481
-	},
-	"lib/digits.py#digit_at": {
-		"module": "lib/digits",
-		"start": 738,
-		"end": 842
-	},
 	"lib/format.py#pattern_slots": {
 		"module": "lib/format",
 		"start": 1345,
@@ -89,12 +74,7 @@
 		"start": 2300,
 		"end": 4239
 	},
-	"lib/easter.py#easter_day_of_march": {
-		"module": "lib/easter",
-		"start": 527,
-		"end": 1128
-	},
-	"lib/civil.py#civil_date": {
+	"lib/civil.py#civil_date_10": {
 		"module": "lib/civil",
 		"start": 445,
 		"end": 624
@@ -114,11 +94,6 @@
 		"start": 687,
 		"end": 1184
 	},
-	"lib/cnpj.py#has_valid_cnpj_checksum": {
-		"module": "lib/cnpj",
-		"start": 1265,
-		"end": 1478
-	},
 	"lib/cnpj.py#is_repeated_cnpj": {
 		"module": "lib/cnpj",
 		"start": 3028,
@@ -129,7 +104,7 @@
 		"start": 1397,
 		"end": 2445
 	},
-	"lib/cpf.py#cpf_check_digit": {
+	"lib/cpf.py#cpf_check_digit_1": {
 		"module": "lib/cpf",
 		"start": 394,
 		"end": 687

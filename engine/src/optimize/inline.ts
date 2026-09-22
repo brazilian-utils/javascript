@@ -18,17 +18,49 @@
  * (directly or through another inlined callee) or holds a lambda is left as an ordinary call: none
  * of those are unsound to inline in principle, they are just outside what this pass proves safe in
  * the time it has to prove it.
+ *
+ * Inlining also has a price, and for one target that price is the one the package is judged on.
+ * The generated TypeScript is shipped to a browser and the npm package is tree-shakeable, which
+ * ADR 0012 records as a requirement rather than a preference; a copy of a callee's body is bytes
+ * over the wire, once per copy. So the budget is not only "how big is the callee" but "how much
+ * code does this add", which is what `maxGrowthStatements` bounds. The two questions have
+ * different answers: a callee spliced into its only remaining call site takes its own definition
+ * with it and adds nothing at all, however big it is, while a three-statement helper called nine
+ * times adds eight copies of itself. `engine/scripts/size.ts` measures the result the way a
+ * consumer's bundler would, and `core/bench` measures what it bought.
  */
 
 import type { CExpr, CFunc, CProgram, CStmt } from "../core/ir.ts";
 import type { SemType } from "../types.ts";
 import { tOption } from "../types.ts";
+import { dependencyClosure } from "../analysis/capabilities.ts";
 
 export type InlineBudget = {
 	/** The callee's own statement count (recursive), above which it is left as a call. 0 disables the pass. */
 	readonly maxStatements: number;
 	/** How many times to re-scan for a newly exposed call (e.g. inlining `f` reveals `f`'s own call to `g`). */
 	readonly rounds?: number;
+	/**
+	 * The most Core nodes any one inline may *add* to the program. Absent means unbounded, which
+	 * is what a target compiled ahead of time wants: its cost is frames at run time and nobody
+	 * downloads its source. A target whose output is shipped over the wire sets it, and what it
+	 * says is "duplicate only what is small".
+	 *
+	 * Nodes rather than statements, because the unit has to hold for both shapes this pass emits.
+	 * A one-expression helper is a single statement whether it reads `a + b` or spans half a
+	 * screen, and counting it as one would let the second be copied to nine call sites for the
+	 * price of the first.
+	 *
+	 * An inline that leaves the callee with no call sites at all adds almost nothing however big
+	 * the callee is: its definition is dropped from the dependency closure (`backend/lower.ts`'s
+	 * `closure`) the moment nothing reaches it, so the code moved rather than multiplied, and only
+	 * whatever the splice added on top is counted. `0` therefore means exactly "take the inlines
+	 * that pay for themselves, and no others" — not "inline nothing".
+	 *
+	 * A cap per inline rather than a pool for the whole pass, so the answer does not depend on
+	 * which call site the walk happened to reach first.
+	 */
+	readonly maxDuplicatedNodes?: number;
 };
 
 export function inlineCalls(program: CProgram, budget: InlineBudget): CProgram {
@@ -47,8 +79,12 @@ export function inlineCalls(program: CProgram, budget: InlineBudget): CProgram {
 	for (let round = 0; round < rounds; round++) {
 		let changedThisRound = false;
 		const next = new Map(functions);
+		// Recounted every round, because an inline is itself a call site moving: splicing `f` into
+		// its caller copies every call `f` made, and a round that ran before this one may already
+		// have emptied a callee the next one would otherwise still think is shared.
+		const sites = callSites({ ...program, functions });
 		for (const [name, fn] of functions) {
-			const body = inlineBody(fn.body, { program, budget, recursive, uid, callerName: name });
+			const body = inlineBody(fn.body, { program, budget, recursive, uid, callerName: name, sites });
 			if (body !== fn.body) {
 				changedThisRound = true;
 				next.set(name, { ...fn, body, calls: collectCalls(body) });
@@ -61,12 +97,30 @@ export function inlineCalls(program: CProgram, budget: InlineBudget): CProgram {
 	return { ...program, functions };
 }
 
+/**
+ * How many times each function is called, counted over the functions that will actually be
+ * emitted — the dependency closure of the entry points, the same set `backend/lower.ts` lowers.
+ * A call from a function nobody reaches is not a copy anyone downloads, and counting it would
+ * keep a callee looking shared when its only real caller is about to absorb it.
+ */
+function callSites(program: CProgram): Map<string, number> {
+	const counts = new Map<string, number>();
+	for (const name of dependencyClosure(program, program.entryPoints)) {
+		const fn = program.functions.get(name);
+		if (fn === undefined) continue;
+		countCalls(fn.body, counts);
+	}
+	return counts;
+}
+
 type Ctx = {
 	readonly program: CProgram;
 	readonly budget: InlineBudget;
 	readonly recursive: ReadonlySet<string>;
 	readonly uid: { n: number };
 	readonly callerName: string;
+	/** Call sites per callee at the start of this round, decremented as this round consumes them. */
+	readonly sites: Map<string, number>;
 };
 
 /* ------------------------------------------------------------------ *
@@ -191,6 +245,115 @@ function eligible(callee: CFunc, ctx: Ctx): boolean {
 	if (ctx.recursive.has(callee.name)) return false;
 	if (containsLambda(callee.body)) return false;
 	return statementCount(callee.body) <= ctx.budget.maxStatements;
+}
+
+/**
+ * Whether the budget covers a splice of `spliced` nodes in place of a call to `callee`, and if so,
+ * spends it.
+ *
+ * The price is what is actually emitted, not what the callee's source looks like: a body with an
+ * early `return` grows by the sentinel protocol `flattenSeq` introduces, and a body that is one
+ * expression grows by that expression. Against that, an inline that takes the callee's last call
+ * site refunds the whole definition, which falls out of the dependency closure
+ * (`backend/lower.ts`'s `closure`) the moment nothing reaches it — so a sole-call-site helper is
+ * free exactly when the copy is no bigger than the definition it replaces, and not by assumption.
+ *
+ * An entry point is never refunded: the closure keeps it whether or not anything calls it.
+ */
+function affordable(callee: CFunc, spliced: number, ctx: Ctx): boolean {
+	const cap = ctx.budget.maxDuplicatedNodes;
+	const remaining = ctx.sites.get(callee.name) ?? 0;
+	const lastCall = remaining <= 1 && !ctx.program.entryPoints.includes(callee.name);
+	const growth = spliced - (lastCall ? nodeCount(callee.body) : 0);
+	if (cap !== undefined && growth > cap) return false;
+	ctx.sites.set(callee.name, Math.max(0, remaining - 1));
+	return true;
+}
+
+/** Nodes in a statement list: every statement, and every expression node it holds. */
+function nodeCount(body: readonly CStmt[]): number {
+	let total = 0;
+	for (const statement of body) {
+		total += 1;
+		switch (statement.kind) {
+			case "let":
+				total += exprNodes(statement.init);
+				break;
+			case "assign":
+				total += exprNodes(statement.value);
+				break;
+			case "setIndex":
+				total += exprNodes(statement.index) + exprNodes(statement.value);
+				break;
+			case "push":
+				total += exprNodes(statement.value);
+				break;
+			case "if":
+				total += exprNodes(statement.test) + nodeCount(statement.then) + nodeCount(statement.otherwise);
+				break;
+			case "switch":
+				total += exprNodes(statement.subject);
+				total += statement.cases.reduce((sum, entry) => sum + nodeCount(entry.body), 0);
+				total += statement.otherwise === undefined ? 0 : nodeCount(statement.otherwise);
+				break;
+			case "forRange":
+				total += exprNodes(statement.from) + exprNodes(statement.to) + nodeCount(statement.body);
+				break;
+			case "forEach":
+				total += exprNodes(statement.iterable) + nodeCount(statement.body);
+				break;
+			case "return":
+				total += statement.value === undefined ? 0 : exprNodes(statement.value);
+				break;
+			case "fail":
+				total += statement.args.reduce((sum, arg) => sum + exprNodes(arg), 0);
+				break;
+			case "expr":
+				total += exprNodes(statement.expr);
+				break;
+			default:
+				break;
+		}
+	}
+	return total;
+}
+
+function exprNodes(expr: CExpr): number {
+	switch (expr.kind) {
+		case "lit":
+		case "local":
+		case "none":
+			return 1;
+		case "some":
+			return 1 + exprNodes(expr.inner);
+		case "record":
+			return 1 + expr.fields.reduce((sum, field) => sum + exprNodes(field.value), 0);
+		case "field":
+			return 1 + exprNodes(expr.target);
+		case "list":
+			return 1 + expr.items.reduce((sum, item) => sum + exprNodes(item), 0);
+		case "call":
+		case "op":
+			return 1 + expr.args.reduce((sum, arg) => sum + exprNodes(arg), 0);
+		case "lambda":
+			return 1 + nodeCount(expr.body);
+		case "cond":
+			return 1 + exprNodes(expr.test) + exprNodes(expr.then) + exprNodes(expr.otherwise);
+		case "and":
+		case "or":
+			return 1 + exprNodes(expr.left) + exprNodes(expr.right);
+		case "not":
+			return 1 + exprNodes(expr.operand);
+		default: {
+			const exhaustive: never = expr;
+			return exhaustive;
+		}
+	}
+}
+
+/** Call counts, accumulated into `counts`; `collectCalls` answers the set, this one the tally. */
+function countCalls(body: readonly CStmt[], counts: Map<string, number>): void {
+	for (const name of collectCallsWithRepeats(body)) counts.set(name, (counts.get(name) ?? 0) + 1);
 }
 
 /* ------------------------------------------------------------------ *
@@ -548,9 +711,9 @@ function inlineStmt(statement: CStmt, ctx: Ctx): CStmt[] {
 /**
  * `conditional` is true inside an expression that is not always evaluated — the right side of
  * `&&`/`||`, or either branch of `cond` — where hoisting a call's setup statements ahead of the
- * whole expression would run it unconditionally. A call found there is left as a call; everywhere
- * else (including `cond`'s own `test`, and every argument of an ordinary call/op/record/list,
- * which always run) it is a candidate.
+ * whole expression would run it unconditionally. A call found there is a candidate only for a
+ * splice that needs no statements; everywhere else (including `cond`'s own `test`, and every
+ * argument of an ordinary call/op/record/list, which always run) every splice is.
  */
 function inlineExpr(expr: CExpr, hoisted: CStmt[], ctx: Ctx, conditional: boolean): CExpr {
 	switch (expr.kind) {
@@ -588,8 +751,10 @@ function inlineExpr(expr: CExpr, hoisted: CStmt[], ctx: Ctx, conditional: boolea
 			return expr;
 		case "call": {
 			const withArgsDone: CExpr = { ...expr, args: expr.args.map((arg) => inlineExpr(arg, hoisted, ctx, conditional)) };
-			if (conditional) return withArgsDone;
-			const inlined = tryInline(withArgsDone as Extract<CExpr, { kind: "call" }>, hoisted, ctx);
+			// A splice that needs no statements at all is safe here too, and this is where it helps
+			// most: a one-expression helper called inside a ternary or behind `&&` is exactly the
+			// call a reader expected to see substituted.
+			const inlined = tryInline(withArgsDone as Extract<CExpr, { kind: "call" }>, hoisted, ctx, !conditional);
 			return inlined ?? withArgsDone;
 		}
 		default: {
@@ -599,47 +764,244 @@ function inlineExpr(expr: CExpr, hoisted: CStmt[], ctx: Ctx, conditional: boolea
 	}
 }
 
-function tryInline(call: Extract<CExpr, { kind: "call" }>, hoisted: CStmt[], ctx: Ctx): CExpr | undefined {
+/**
+ * `mayHoist` is false where the call sits in an expression that is not always evaluated — the
+ * right side of `&&`/`||`, either branch of a ternary — and lifting setup statements ahead of the
+ * whole expression would run them unconditionally. Only a splice that needs no statements at all
+ * is taken there.
+ */
+function tryInline(
+	call: Extract<CExpr, { kind: "call" }>,
+	hoisted: CStmt[],
+	ctx: Ctx,
+	mayHoist: boolean,
+): CExpr | undefined {
 	const callee = ctx.program.functions.get(call.fn);
 	if (callee === undefined || !eligible(callee, ctx)) return undefined;
 
-	const renameMap = new Map<string, string>();
 	const fresh = (base: string): string => {
 		ctx.uid.n += 1;
 		return `__inl${ctx.uid.n}_${base}`;
 	};
+
+	const asExpression = tryInlineExpression(call, callee, fresh);
+	if (asExpression !== undefined) {
+		if (!mayHoist && asExpression.hoisted.length > 0) return undefined;
+		const spliced = nodeCount(asExpression.hoisted) + exprNodes(asExpression.value);
+		if (!affordable(callee, spliced, ctx)) return undefined;
+		hoisted.push(...asExpression.hoisted);
+		return asExpression.value;
+	}
+	if (!mayHoist) return undefined;
+
+	const renameMap = new Map<string, string>();
 	const bound = new Set<string>();
 	collectBoundNames(callee.body, bound);
 	for (const name of bound) renameMap.set(name, fresh(name));
 	for (const param of callee.params) renameMap.set(param.name, fresh(param.name));
 
+	const splice: CStmt[] = [];
+	// A parameter the call passes a literal or a local for is substituted rather than bound: the
+	// `let` would only be an alias, and `const _inl117_year = year;` above the body is scaffolding
+	// no author would leave in. Anything else — a call, an arithmetic expression, anything that
+	// may have an effect or cost something — is bound once, in argument order, so the body reading
+	// it twice cannot evaluate it twice. A parameter the callee assigns to needs its own storage
+	// whatever the argument was.
+	const substitution = new Map<string, CExpr>();
 	for (let index = 0; index < callee.params.length; index++) {
 		const param = callee.params[index]!;
 		const arg = call.args[index]!;
-		hoisted.push({
-			kind: "let",
-			name: renameMap.get(param.name)!,
-			mutable: isReassigned(callee.body, param.name),
-			init: arg,
-			type: param.type,
-			span: call.span,
-		});
+		const name = renameMap.get(param.name)!;
+		const reassigned = isReassigned(callee.body, param.name);
+		if (!reassigned && (arg.kind === "lit" || arg.kind === "local")) {
+			substitution.set(name, arg);
+			continue;
+		}
+		splice.push({ kind: "let", name, mutable: reassigned, init: arg, type: param.type, span: call.span });
 	}
 
 	const resultVar = fresh("result");
-	const optionType = tOption(callee.ret);
-	hoisted.push({
-		kind: "let",
-		name: resultVar,
-		mutable: true,
-		init: { kind: "none", type: optionType, span: call.span },
-		type: optionType,
-		span: call.span,
-	});
 	const renamedBody = callee.body.map((statement) => renameStmt(statement, renameMap));
-	hoisted.push(...flattenSeq(renamedBody, resultVar, callee.ret, optionType));
+	const straightLine = trailingReturnOnly(renamedBody);
+	if (straightLine !== undefined) {
+		// The common shape, and the one worth not paying for: every statement runs, then the last
+		// one returns. There is nothing for a sentinel to answer, so the body is spliced as it
+		// stands and the returned expression is bound to one `const`.
+		splice.push(...straightLine.before);
+		splice.push({ kind: "let", name: resultVar, mutable: false, init: straightLine.value, type: callee.ret, span: call.span });
+	} else {
+		const optionType = tOption(callee.ret);
+		splice.push({
+			kind: "let",
+			name: resultVar,
+			mutable: true,
+			init: { kind: "none", type: optionType, span: call.span },
+			type: optionType,
+			span: call.span,
+		});
+		splice.push(...flattenSeq(renamedBody, resultVar, callee.ret, optionType));
+	}
 
+	const substituted = substitution.size === 0 ? splice : splice.map((statement) => substituteStmt(statement, substitution));
+	if (!affordable(callee, nodeCount(substituted), ctx)) return undefined;
+	hoisted.push(...substituted);
+
+	if (straightLine !== undefined) {
+		return { kind: "local", name: resultVar, type: callee.ret, span: call.span };
+	}
+	const optionType = tOption(callee.ret);
 	return { kind: "op", op: "opt.unwrap", args: [{ kind: "local", name: resultVar, type: optionType, span: call.span }], type: call.type, span: call.span };
+}
+
+/**
+ * A body whose only `return` is its last statement: the statements before it, and the value it
+ * returns. Absent when the body returns early anywhere, which is what the sentinel protocol in
+ * `flattenSeq` exists for.
+ */
+function trailingReturnOnly(body: readonly CStmt[]): { before: readonly CStmt[]; value: CExpr } | undefined {
+	const last = body[body.length - 1];
+	if (last === undefined || last.kind !== "return" || last.value === undefined) return undefined;
+	const before = body.slice(0, -1);
+	return stmtsContainReturn(before) ? undefined : { before, value: last.value };
+}
+
+/**
+ * The shape worth having a fast path for: a callee that is one `return <expr>`.
+ *
+ * Substituting it is what a reader means by inlining — `digitAt(cpf, index)` becomes
+ * `cpf.charCodeAt(index) - 48` and nothing else changes. Routing it through the general path
+ * instead would bind each parameter to a `let`, open a synthetic `Option`, assign through it and
+ * unwrap it, which is four statements and a sentinel where the source had an expression: bigger
+ * than the call it replaced, in a target that pays for its output by the byte, and slower to read
+ * in every target. So this case is handled directly and costs only whatever arguments have to be
+ * bound.
+ *
+ * An argument is substituted straight into the body when it is a literal or a local — evaluating
+ * it twice, or at a different point in the body, is not observable and costs nothing. Anything
+ * else is bound to one `let` first, in argument order, because it may have an effect (`env` is
+ * threaded as an ordinary value, so `randomDigit(env)` is an argument that reads the world) and
+ * because a parameter read twice would otherwise evaluate it twice.
+ */
+function tryInlineExpression(
+	call: Extract<CExpr, { kind: "call" }>,
+	callee: CFunc,
+	fresh: (base: string) => string,
+): { value: CExpr; hoisted: CStmt[] } | undefined {
+	if (callee.body.length !== 1) return undefined;
+	const only = callee.body[0]!;
+	if (only.kind !== "return" || only.value === undefined) return undefined;
+
+	const hoisted: CStmt[] = [];
+	const substitution = new Map<string, CExpr>();
+	for (let index = 0; index < callee.params.length; index++) {
+		const param = callee.params[index]!;
+		const arg = call.args[index]!;
+		if (arg.kind === "lit" || arg.kind === "local") {
+			substitution.set(param.name, arg);
+			continue;
+		}
+		const name = fresh(param.name);
+		hoisted.push({ kind: "let", name, mutable: false, init: arg, type: param.type, span: call.span });
+		substitution.set(param.name, { kind: "local", name, type: param.type, span: call.span });
+	}
+
+	return { value: substituteExpr(only.value, substitution), hoisted };
+}
+
+/** `renameStmt`, but mapping a local onto a whole expression rather than onto another name. Only
+ *  ever called with names that are never assigned to, so no assignment target can need rewriting. */
+function substituteStmt(statement: CStmt, map: ReadonlyMap<string, CExpr>): CStmt {
+	switch (statement.kind) {
+		case "let":
+			return { ...statement, init: substituteExpr(statement.init, map) };
+		case "assign":
+			return { ...statement, value: substituteExpr(statement.value, map) };
+		case "setIndex":
+			return { ...statement, index: substituteExpr(statement.index, map), value: substituteExpr(statement.value, map) };
+		case "push":
+			return { ...statement, value: substituteExpr(statement.value, map) };
+		case "if":
+			return {
+				...statement,
+				test: substituteExpr(statement.test, map),
+				then: statement.then.map((item) => substituteStmt(item, map)),
+				otherwise: statement.otherwise.map((item) => substituteStmt(item, map)),
+			};
+		case "switch":
+			return {
+				...statement,
+				subject: substituteExpr(statement.subject, map),
+				cases: statement.cases.map((entry) => ({ ...entry, body: entry.body.map((item) => substituteStmt(item, map)) })),
+				otherwise: statement.otherwise?.map((item) => substituteStmt(item, map)),
+			};
+		case "forRange":
+			return {
+				...statement,
+				from: substituteExpr(statement.from, map),
+				to: substituteExpr(statement.to, map),
+				body: statement.body.map((item) => substituteStmt(item, map)),
+			};
+		case "forEach":
+			return {
+				...statement,
+				iterable: substituteExpr(statement.iterable, map),
+				body: statement.body.map((item) => substituteStmt(item, map)),
+			};
+		case "return":
+			return statement.value === undefined ? statement : { ...statement, value: substituteExpr(statement.value, map) };
+		case "fail":
+			return { ...statement, args: statement.args.map((arg) => substituteExpr(arg, map)) };
+		case "break":
+		case "continue":
+			return statement;
+		case "expr":
+			return { ...statement, expr: substituteExpr(statement.expr, map) };
+		default: {
+			const exhaustive: never = statement;
+			return exhaustive;
+		}
+	}
+}
+
+/** `renameExpr`, but mapping a local onto a whole expression rather than onto another name. */
+function substituteExpr(expr: CExpr, map: ReadonlyMap<string, CExpr>): CExpr {
+	switch (expr.kind) {
+		case "lit":
+		case "none":
+			return expr;
+		case "local":
+			return map.get(expr.name) ?? expr;
+		case "some":
+			return { ...expr, inner: substituteExpr(expr.inner, map) };
+		case "record":
+			return { ...expr, fields: expr.fields.map((field) => ({ ...field, value: substituteExpr(field.value, map) })) };
+		case "field":
+			return { ...expr, target: substituteExpr(expr.target, map) };
+		case "list":
+			return { ...expr, items: expr.items.map((item) => substituteExpr(item, map)) };
+		case "call":
+		case "op":
+			return { ...expr, args: expr.args.map((arg) => substituteExpr(arg, map)) };
+		case "lambda":
+			// Excluded by `containsLambda` before a callee ever reaches this function.
+			return expr;
+		case "cond":
+			return {
+				...expr,
+				test: substituteExpr(expr.test, map),
+				then: substituteExpr(expr.then, map),
+				otherwise: substituteExpr(expr.otherwise, map),
+			};
+		case "and":
+		case "or":
+			return { ...expr, left: substituteExpr(expr.left, map), right: substituteExpr(expr.right, map) };
+		case "not":
+			return { ...expr, operand: substituteExpr(expr.operand, map) };
+		default: {
+			const exhaustive: never = expr;
+			return exhaustive;
+		}
+	}
 }
 
 /* ------------------------------------------------------------------ *
@@ -647,7 +1009,12 @@ function tryInline(call: Extract<CExpr, { kind: "call" }>, hoisted: CStmt[], ctx
  * ------------------------------------------------------------------ */
 
 function collectCalls(body: readonly CStmt[]): string[] {
-	const found = new Set<string>();
+	return [...new Set(collectCallsWithRepeats(body))];
+}
+
+/** Every call in `body`, one entry per call site rather than one per callee. */
+function collectCallsWithRepeats(body: readonly CStmt[]): string[] {
+	const found: string[] = [];
 	const inExpr = (expr: CExpr): void => {
 		switch (expr.kind) {
 			case "some":
@@ -663,7 +1030,7 @@ function collectCalls(body: readonly CStmt[]): string[] {
 				expr.items.forEach(inExpr);
 				return;
 			case "call":
-				found.add(expr.fn);
+				found.push(expr.fn);
 				expr.args.forEach(inExpr);
 				return;
 			case "op":
@@ -737,5 +1104,5 @@ function collectCalls(body: readonly CStmt[]): string[] {
 		}
 	};
 	body.forEach(inStmt);
-	return [...found];
+	return found;
 }

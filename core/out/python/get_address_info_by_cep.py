@@ -62,11 +62,8 @@ def _fetch_via_cep(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     )
     if code == "":
         return None
-    __inl125_value: str = code
-    __inl126_result: Optional[str] = None
-    __inl126_result = _GET_ADDRESS_INFO_BY_CEP_PATTERN_1.sub("", __inl125_value)
     return AddressInfo(
-        cep=__inl126_result,
+        cep=_GET_ADDRESS_INFO_BY_CEP_PATTERN_1.sub("", code),
         state=(
             __value
             if (__value := json_string_field(response.body, "uf")) is not None
@@ -104,11 +101,8 @@ def _fetch_brasil_api(cep: str, env: Capabilities) -> Optional[AddressInfo]:
     )
     if code == "":
         return None
-    __inl127_value: str = code
-    __inl128_result: Optional[str] = None
-    __inl128_result = _GET_ADDRESS_INFO_BY_CEP_PATTERN_1.sub("", __inl127_value)
     return AddressInfo(
-        cep=__inl128_result,
+        cep=_GET_ADDRESS_INFO_BY_CEP_PATTERN_1.sub("", code),
         state=(
             __value
             if (__value := json_string_field(response.body, "state")) is not None

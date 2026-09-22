@@ -11,13 +11,13 @@ import { raceFirstSome } from "../capabilities.ts";
  * have to match, digit for digit, across three unrelated standard libraries to stay invisible.
  * Rejecting the biased tail of the draw removes it instead.
  */
-export function randomBelow(bound: number, env: Capabilities): number {
-	const limit: number = 4294967296 - (4294967296 % bound);
+export function randomBelow(env: Capabilities): number {
+	const limit: number = 4294967290;
 	for (let attempt = 0; attempt < 32; attempt++) {
 		const draw: number = env.nextU32();
 		if (draw < limit) {
-			return draw % bound;
+			return draw % 10;
 		}
 	}
-	return env.nextU32() % bound;
+	return env.nextU32() % 10;
 }

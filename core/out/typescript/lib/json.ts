@@ -3,6 +3,29 @@
 // source: lib/json
 // content: 02cc75dfd626
 /**
+ * Whether `needle` occurs in `points` at `start`.
+ */
+function matchesAt(
+	points: readonly number[],
+	needle: readonly number[],
+	start: number,
+): boolean {
+	for (let offset = 0; offset < needle.length; offset++) {
+		if ((points[start + offset] ?? -1) !== (needle[offset] ?? -2)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Whether a code point is JSON whitespace.
+ */
+function isSpace(point: number): boolean {
+	return point === 32 || point === 9 || point === 10 || point === 13;
+}
+
+/**
  * The hexadecimal value of four scalars, for a `\uXXXX` escape.
  */
 function hexValue(points: readonly number[], start: number): number {
@@ -41,41 +64,12 @@ export function jsonStringField(body: string, key: string): string | undefined {
 		(scalar) => scalar.codePointAt(0)!,
 	);
 	for (let index = 0; index < points.length; index++) {
-		const _inl85Points: readonly number[] = points;
-		const _inl86Needle: readonly number[] = needle;
-		const _inl87Start: number = index;
-		let _inl88Result: boolean | undefined = undefined;
-		for (
-			let _inl84Offset = 0;
-			_inl84Offset < _inl86Needle.length;
-			_inl84Offset++
-		) {
-			if (
-				(_inl85Points[_inl87Start + _inl84Offset] ?? -1) !==
-				(_inl86Needle[_inl84Offset] ?? -2)
-			) {
-				_inl88Result = false;
-			}
-			if (_inl88Result !== undefined) {
-				break;
-			}
-		}
-		if (_inl88Result === undefined) {
-			_inl88Result = true;
-		}
-		if (!_inl88Result!) {
+		if (!matchesAt(points, needle, index)) {
 			continue;
 		}
 		let cursor: number = index + needle.length;
 		for (let skip = 0; skip < 8; skip++) {
-			const _inl89Point: number = points[cursor] ?? 0;
-			let _inl90Result: boolean | undefined = undefined;
-			_inl90Result =
-				_inl89Point === 32 ||
-				_inl89Point === 9 ||
-				_inl89Point === 10 ||
-				_inl89Point === 13;
-			if (_inl90Result!) {
+			if (isSpace(points[cursor] ?? 0)) {
 				cursor = cursor + 1;
 			}
 		}
@@ -84,14 +78,7 @@ export function jsonStringField(body: string, key: string): string | undefined {
 		}
 		cursor = cursor + 1;
 		for (let skip = 0; skip < 8; skip++) {
-			const _inl91Point: number = points[cursor] ?? 0;
-			let _inl92Result: boolean | undefined = undefined;
-			_inl92Result =
-				_inl91Point === 32 ||
-				_inl91Point === 9 ||
-				_inl91Point === 10 ||
-				_inl91Point === 13;
-			if (_inl92Result!) {
+			if (isSpace(points[cursor] ?? 0)) {
 				cursor = cursor + 1;
 			}
 		}

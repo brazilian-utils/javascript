@@ -18,16 +18,16 @@ type Holiday struct {
 // day keep the order they were built in. State holidays are not part of this pilot.
 func GetHolidays(year int) []Holiday {
 	holidays := []Holiday{}
-	holidays = append(holidays, Holiday{Name: "Ano novo", Date: civilDate(year, 1, 1), Type: "national"})
-	holidays = append(holidays, Holiday{Name: "Tiradentes", Date: civilDate(year, 4, 21), Type: "national"})
-	holidays = append(holidays, Holiday{Name: "Dia do trabalhador", Date: civilDate(year, 5, 1), Type: "national"})
-	holidays = append(holidays, Holiday{Name: "Independ\u00eancia do Brasil", Date: civilDate(year, 9, 7), Type: "national"})
-	holidays = append(holidays, Holiday{Name: "Nossa Senhora Aparecida", Date: civilDate(year, 10, 12), Type: "national"})
-	holidays = append(holidays, Holiday{Name: "Finados", Date: civilDate(year, 11, 2), Type: "national"})
-	holidays = append(holidays, Holiday{Name: "Proclama\u00e7\u00e3o da Rep\u00fablica", Date: civilDate(year, 11, 15), Type: "national"})
-	holidays = append(holidays, Holiday{Name: "Natal", Date: civilDate(year, 12, 25), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Ano novo", Date: civilDate(year), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Tiradentes", Date: civilDate1(year), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Dia do trabalhador", Date: civilDate2(year), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Independ\u00eancia do Brasil", Date: civilDate3(year), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Nossa Senhora Aparecida", Date: civilDate4(year), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Finados", Date: civilDate5(year), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Proclama\u00e7\u00e3o da Rep\u00fablica", Date: civilDate6(year), Type: "national"})
+	holidays = append(holidays, Holiday{Name: "Natal", Date: civilDate7(year), Type: "national"})
 	if year >= 2024 {
-		holidays = append(holidays, Holiday{Name: "Dia da Consci\u00eancia Negra", Date: civilDate(year, 11, 20), Type: "national"})
+		holidays = append(holidays, Holiday{Name: "Dia da Consci\u00eancia Negra", Date: civilDate8(year), Type: "national"})
 	}
 	easter := easterSunday(year)
 	holidays = append(holidays, Holiday{Name: "Carnaval (ter\u00e7a-feira)", Date: orElse(dateAddDays(easter, -47), easter), Type: "optional"})

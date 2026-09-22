@@ -3,7 +3,7 @@
 # source: format-currency
 # content: 1e0947bdf328
 
-from typing import List, Optional
+from typing import List
 import re
 
 __all__ = ["format_currency"]
@@ -27,19 +27,15 @@ def format_currency(value: int, symbol: bool) -> str:
     cut: int = max((len(digits) - 2), 0)
     whole: str = digits[0:cut]
     cents: str = digits[cut : len(digits)]
-    __inl37_value: str = whole
-    __inl38_result: Optional[str] = None
-    __inl38_result = _FORMAT_CURRENCY_PATTERN_1.sub("", __inl37_value)
-    __inl42_whole: str = __inl38_result
-    __inl43_result: Optional[str] = None
-    __inl39_out: List[int] = []
-    __inl40_scalars: List[int] = [ord(__c) for __c in __inl42_whole]
-    for __inl41_index in range(0, len(__inl40_scalars)):
-        if (__inl41_index > 0) and (
+    __inl36_whole: str = _FORMAT_CURRENCY_PATTERN_1.sub("", whole)
+    __inl33_out: List[int] = []
+    __inl34_scalars: List[int] = [ord(__c) for __c in __inl36_whole]
+    for __inl35_index in range(0, len(__inl34_scalars)):
+        if (__inl35_index > 0) and (
             (
                 -(abs(__tm_a) % abs(__tm_b))
                 if (
-                    (__tm_a := (len(__inl40_scalars) - __inl41_index)),
+                    (__tm_a := (len(__inl34_scalars) - __inl35_index)),
                     (__tm_b := 3),
                     __tm_a < 0,
                 )[2]
@@ -47,15 +43,15 @@ def format_currency(value: int, symbol: bool) -> str:
             )
             == 0
         ):
-            __inl39_out.append(46)
-        __inl39_out.append(
+            __inl33_out.append(46)
+        __inl33_out.append(
             (
-                __inl40_scalars[__inl41_index]
-                if 0 <= __inl41_index < len(__inl40_scalars)
+                __inl34_scalars[__inl35_index]
+                if 0 <= __inl35_index < len(__inl34_scalars)
                 else 48
             )
         )
-    __inl43_result = "".join(chr(__p) for __p in __inl39_out)
-    body: str = (__inl43_result + ",") + cents
+    __inl37_result: str = "".join(chr(__p) for __p in __inl33_out)
+    body: str = (__inl37_result + ",") + cents
     prefix: str = ("R$" + "".join(chr(__p) for __p in [32])) if symbol else ""
     return (("-" + prefix) + body) if negative else (prefix + body)

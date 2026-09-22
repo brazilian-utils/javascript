@@ -45,21 +45,3 @@ export function formatWithPattern(
 	}
 	return out;
 }
-
-/**
- * Groups the whole part with `.` every three digits, the pt-BR convention.
- */
-export function groupThousands(whole: string): string {
-	let out: number[] = [];
-	const scalars: readonly number[] = Array.from(
-		whole,
-		(scalar) => scalar.codePointAt(0)!,
-	);
-	for (let index = 0; index < scalars.length; index++) {
-		if (index > 0 && (scalars.length - index) % 3 === 0) {
-			out.push(46);
-		}
-		out.push(scalars[index] ?? 48);
-	}
-	return out.map((point) => String.fromCodePoint(point)).join("");
-}

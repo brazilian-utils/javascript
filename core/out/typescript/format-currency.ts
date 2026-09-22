@@ -2,8 +2,6 @@
 // engine: 0.1.0
 // source: format-currency
 // content: 1e0947bdf328
-import { groupThousands } from "./lib/format.ts";
-
 /**
  * Formats an exact amount in Brazilian Real, with two decimal places.
  *
@@ -21,10 +19,22 @@ export function formatCurrency(value: number, symbol: boolean): string {
 	const cut: number = Math.max(digits.length - 2, 0);
 	const whole: string = digits.slice(0, cut);
 	const cents: string = digits.slice(cut, digits.length);
-	const _inl17Value: string = whole;
-	let _inl18Result: string | undefined = undefined;
-	_inl18Result = _inl17Value.replace(/[^0-9]/gu, "");
-	const body: string = groupThousands(_inl18Result!) + "," + cents;
+	const _inl26Whole: string = whole.replace(/[^0-9]/gu, "");
+	let _inl23Out: number[] = [];
+	const _inl24Scalars: readonly number[] = Array.from(
+		_inl26Whole,
+		(scalar) => scalar.codePointAt(0)!,
+	);
+	for (let _inl25Index = 0; _inl25Index < _inl24Scalars.length; _inl25Index++) {
+		if (_inl25Index > 0 && (_inl24Scalars.length - _inl25Index) % 3 === 0) {
+			_inl23Out.push(46);
+		}
+		_inl23Out.push(_inl24Scalars[_inl25Index] ?? 48);
+	}
+	const _inl27Result: string = _inl23Out
+		.map((point) => String.fromCodePoint(point))
+		.join("");
+	const body: string = _inl27Result + "," + cents;
 	const prefix: string = symbol
 		? "R$" + [32].map((point) => String.fromCodePoint(point)).join("")
 		: "";

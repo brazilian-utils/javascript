@@ -19,6 +19,16 @@
 		"start": 738,
 		"end": 842
 	},
+	"lib_digits.go#digitAt2": {
+		"module": "lib/digits",
+		"start": 738,
+		"end": 842
+	},
+	"lib_digits.go#digitAt3": {
+		"module": "lib/digits",
+		"start": 738,
+		"end": 842
+	},
 	"lib_format.go#patternSlots": {
 		"module": "lib/format",
 		"start": 1345,
@@ -94,6 +104,11 @@
 		"start": 394,
 		"end": 687
 	},
+	"lib_cpf.go#cpfCheckDigit1": {
+		"module": "lib/cpf",
+		"start": 394,
+		"end": 687
+	},
 	"lib_cpf.go#isRepeated": {
 		"module": "lib/cpf",
 		"start": 1283,
@@ -150,6 +165,56 @@
 		"end": 4239
 	},
 	"lib_civil.go#civilDate": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate1": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate2": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate3": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate4": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate5": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate6": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate7": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate8": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate9": {
+		"module": "lib/civil",
+		"start": 445,
+		"end": 624
+	},
+	"lib_civil.go#civilDate10": {
 		"module": "lib/civil",
 		"start": 445,
 		"end": 624

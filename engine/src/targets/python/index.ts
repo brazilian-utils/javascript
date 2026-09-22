@@ -832,8 +832,14 @@ export function printModule(rawModule: TModule): string {
 	);
 	const patterns = hoistPatterns(module, text);
 	const records = module.records.map(printRecord).join("\n\n\n");
+	const constants = module.constants
+		.map((constant) => `${constant.name.toUpperCase()}: ${pyType(constant.type)} = ${print(constant.value)}`)
+		.join("\n");
+	// Scanned over everything that is annotated, constants included: a hoisted table is declared
+	// `List[int]` at module level, and which module it lands in moves with whichever function still
+	// reads it, so a module can acquire one without any of its functions mentioning a `List` at all.
 	for (const name of ["List", "Optional", "Literal", "Callable", "NoReturn"]) {
-		if (new RegExp(`\\b${name}\\[`).test(`${text}${records}`) || text.includes(`-> ${name}`)) {
+		if (new RegExp(`\\b${name}\\[`).test(`${text}${records}${constants}`) || text.includes(`-> ${name}`)) {
 			typingNames.add(name);
 		}
 	}
@@ -870,9 +876,7 @@ export function printModule(rawModule: TModule): string {
 		parts.push(`__all__ = [${publicFunctions.map((name) => JSON.stringify(name)).join(", ")}]`, "");
 	}
 	if (records !== "") parts.push(records, "");
-	for (const constant of module.constants) {
-		parts.push(`${constant.name.toUpperCase()}: ${pyType(constant.type)} = ${print(constant.value)}`, "");
-	}
+	if (constants !== "") parts.push(...constants.split("\n").flatMap((line) => [line, ""]));
 	for (const declaration of patterns.declarations) parts.push(declaration, "");
 	parts.push(patterns.body);
 	return `${parts.join("\n").trimEnd()}\n`;

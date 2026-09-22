@@ -2,11 +2,38 @@
 // engine: 0.1.0
 // source: lib/cnpj
 // content: 78a3fa4783b9
+import { randomBelow } from "./random.ts";
+import type { Capabilities } from "../capabilities.ts";
+import { raceFirstSome } from "../capabilities.ts";
+
 const libCnpjTable1: readonly number[] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
 const libCnpjTable2: readonly number[] = [
 	6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2,
 ];
+
+/**
+ * A random numeric CNPJ base: an 8-digit root and a 4-digit branch, each digit drawn
+ * independently — matches the published `generateCnpj()` called with no branch, where an unset
+ * branch also draws those 4 digits at random. Twelve separate draws, not a loop, is what lets the
+ * result stay exactly 12 digits long.
+ */
+export function randomCnpjBase(env: Capabilities): string {
+	return (
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString() +
+		randomBelow(env).toString()
+	);
+}
 
 /**
  * The check digit of a CNPJ base, under the rule both versions share.
@@ -24,27 +51,28 @@ export function cnpjCheckDigit(
 }
 
 /**
+ * Whether the value holds at least one upper cased ASCII letter.
+ *
+ * The scan reads positions rather than materializing the scalars, which the checked accessor
+ * makes safe without a proof about the length.
+ */
+export function hasLetter(value: string): boolean {
+	for (let index = 0; index < value.length; index++) {
+		const point: number =
+			(index < value.length ? value.charCodeAt(index) : undefined) ?? 0;
+		if (point >= 65 && point <= 90) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
  * Whether both check digits of a 14 character CNPJ match its base.
  */
 export function hasValidCnpjChecksum(cnpj: string): boolean {
-	const _inl139Cnpj: string = cnpj;
-	const _inl140Weights: readonly number[] = libCnpjTable1;
-	let _inl141Result: number | undefined = undefined;
-	let _inl136Sum: number = 0;
-	for (
-		let _inl137Index = 0;
-		_inl137Index < _inl140Weights.length;
-		_inl137Index++
-	) {
-		_inl136Sum =
-			_inl136Sum +
-			(_inl139Cnpj.charCodeAt(_inl137Index) - 48) *
-				_inl140Weights[_inl137Index];
-	}
-	const _inl138Remainder: number = _inl136Sum % 11;
-	_inl141Result = _inl138Remainder < 2 ? 0 : 11 - _inl138Remainder;
 	return (
-		cnpj.charCodeAt(12) - 48 === _inl141Result! &&
+		cnpj.charCodeAt(12) - 48 === cnpjCheckDigit(cnpj, libCnpjTable1) &&
 		cnpj.charCodeAt(13) - 48 === cnpjCheckDigit(cnpj, libCnpjTable2)
 	);
 }

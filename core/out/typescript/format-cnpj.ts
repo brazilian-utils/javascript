@@ -2,7 +2,6 @@
 // engine: 0.1.0
 // source: format-cnpj
 // content: 7541034a1f26
-import { keepAlphanumeric, keepDigits } from "./lib/digits.ts";
 import { formatWithPattern } from "./lib/format.ts";
 
 export type FormatCnpjOptions = {
@@ -22,7 +21,9 @@ export type FormatCnpjOptions = {
  */
 export function formatCnpj(value: string, options: FormatCnpjOptions): string {
 	const sanitized: string =
-		options.version === "2" ? keepAlphanumeric(value) : keepDigits(value);
+		options.version === "2"
+			? value.replace(/[^0-9A-Za-z]/gu, "").toUpperCase()
+			: value.replace(/[^0-9]/gu, "");
 	return formatWithPattern(
 		sanitized,
 		options.obfuscate ? "**.000.000/0000-**" : "00.000.000/0000-00",

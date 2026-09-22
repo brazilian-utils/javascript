@@ -12,9 +12,7 @@ func easterDayOfMarch(year int) int {
 	c := (year % 100)
 	d := (b / 4)
 	e := (b % 4)
-	f := ((b + 8) / 25)
-	g := (((b - f) + 1) / 3)
-	h := ((((((19 * a) + b) - d) - g) + 15) % 30)
+	h := ((((((19 * a) + b) - d) - 6) + 15) % 30)
 	i := (c / 4)
 	k := (c % 4)
 	l := (((((32 + (2 * e)) + (2 * i)) - h) - k) % 7)
@@ -28,9 +26,9 @@ func easterSunday(year int) int {
 	dayOfMarch := easterDayOfMarch(year)
 	tmp1 := 0
 	if dayOfMarch <= 31 {
-		tmp1 = civilDate(year, 3, dayOfMarch)
+		tmp1 = civilDate9(year, dayOfMarch)
 	} else {
-		tmp1 = civilDate(year, 4, (dayOfMarch - 31))
+		tmp1 = civilDate10(year, (dayOfMarch - 31))
 	}
 	return tmp1
 }

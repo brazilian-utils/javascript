@@ -3,13 +3,9 @@
 # source: lib/cnpj
 # content: 78a3fa4783b9
 
-from typing import List, Optional
+from typing import List
 
-__all__ = ["cnpj_check_digit", "has_valid_cnpj_checksum", "is_repeated_cnpj"]
-
-LIB_CNPJ_TABLE_1: List[int] = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-
-LIB_CNPJ_TABLE_2: List[int] = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+__all__ = ["cnpj_check_digit", "is_repeated_cnpj"]
 
 
 def cnpj_check_digit(cnpj: str, weights: List[int]) -> int:
@@ -19,23 +15,6 @@ def cnpj_check_digit(cnpj: str, weights: List[int]) -> int:
         sum = sum + ((ord(cnpj[index]) - 48) * weights[index])
     remainder: int = sum % 11
     return 0 if (remainder < 2) else (11 - remainder)
-
-
-def has_valid_cnpj_checksum(cnpj: str) -> bool:
-    """Whether both check digits of a 14 character CNPJ match its base."""
-    __inl171_cnpj: str = cnpj
-    __inl172_weights: List[int] = LIB_CNPJ_TABLE_1
-    __inl173_result: Optional[int] = None
-    __inl168_sum: int = 0
-    for __inl169_index in range(0, len(__inl172_weights)):
-        __inl168_sum = __inl168_sum + (
-            (ord(__inl171_cnpj[__inl169_index]) - 48) * __inl172_weights[__inl169_index]
-        )
-    __inl170_remainder: int = __inl168_sum % 11
-    __inl173_result = 0 if (__inl170_remainder < 2) else (11 - __inl170_remainder)
-    return ((ord(cnpj[12]) - 48) == __inl173_result) and (
-        (ord(cnpj[13]) - 48) == cnpj_check_digit(cnpj, LIB_CNPJ_TABLE_2)
-    )
 
 
 def is_repeated_cnpj(value: str) -> bool:

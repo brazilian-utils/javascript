@@ -7,7 +7,69 @@ convention `conformance/bench.ts` already used.
 
 **The bar is 1.0x: equal or faster, everywhere.** Earlier revisions of this document budgeted 1.5x;
 that number is gone as a target and survives below only where it names the line a row used to be
-allowed to cross. `## Getting every row to 1.0x`, after the row-by-row account below, has the pass
+allowed to cross. `## Size is a result too, and it is measured the same way
+
+Speed is not the only thing a generated target is judged on. The npm package this engine generates
+for is tree-shakeable, which
+[ADR 0012](../../engine/docs/decisions/0012-generated-source-not-a-bound-binary.md) records as a
+requirement rather than a preference, so for TypeScript **bytes over the wire are a benchmark
+row** — and a row that is asserted rather than measured is not a row.
+
+`node engine/scripts/size.ts core` measures it the way a consumer's bundler would: one
+single-import entry point per exported utility, bundled and minified by esbuild against
+`core/out/typescript`, then gzipped. Raw source bytes are the wrong number (comments, type
+annotations and formatting all vanish first) and the whole tree is the wrong number too (nobody
+imports all of it). `--check` compares against the committed `core/out/typescript/SIZE.json` and
+fails on a regression past 5% and 64 bytes; `verify` runs it as its `typescript size` step, so the
+trade is checked on every run rather than remembered.
+
+Gzipped bytes per utility, with the pass disabled, under the first (uncapped) inlining budget, and
+under the budget this section settled on:
+
+| export | no inlining | uncapped (`maxStatements: 6`) | now (8 / cap 6) |
+| --- | ---: | ---: | ---: |
+| `formatCnpj` | 348 | 348 | **334** |
+| `formatCurrency` | 331 | 333 | **312** |
+| `generateCnpj` | 642 | 1,591 | **629** |
+| `generateCpf` | 623 | 1,343 | **614** |
+| `getAddressInfoByCep` | 1,286 | 1,295 | **1,277** |
+| `getHolidays` | 872 | 1,403 | **817** |
+| `isBusinessDay` | 1,065 | 1,638 | **1,022** |
+| `isValidCnpj` | 512 | 569 | **499** |
+| `isValidCpf` | 342 | 440 | **333** |
+| every export | 3,224 | 5,644 | **3,175** |
+
+Three changes got it there, and each is worth stating separately because only the first is about
+inlining at all.
+
+- **The budget prices an inline instead of only sizing the callee**
+  ([ADR 0013](../../engine/docs/decisions/0013-inlining-pays-for-itself.md)). A callee spliced into
+  its last remaining call site costs nothing — its definition falls out of the dependency closure —
+  while a helper copied to nine call sites costs eight copies of itself. Alongside it, a callee that
+  is one `return <expr>` is now substituted as an expression rather than through a synthetic
+  `Option`, and a straight-line callee is spliced without the early-return sentinel.
+- **Constants the checker already proved are printed as constants.** Specialization (ADR 0004)
+  gives a helper called with a literal a parameter of type `Int[n..n]`, and a read of one *is* that
+  integer — nothing new is decided, the range on the node is the checker's own conclusion. That
+  turns `randomBelow`'s `4294967296 - (4294967296 % bound)` from a modulo per draw into the
+  constant `4294967290`, and it proves two intermediates of the Meeus Easter algorithm constant
+  outright for the years `easterSunday` accepts. Folding then leaves bindings nothing reads and
+  parameters nothing needs, which Go and Rust both refuse to compile, so `optimize.ts` removes
+  both — a parameter only when every call site passes something whose evaluation cannot be
+  noticed. This is where Go's generators moved from 0.57x/0.44x to **0.39x/0.32x**.
+- **A fold over the lowered target AST** (`engine/src/backend/fold.ts`). A lowering is code
+  generation too: TypeScript's `date.fromYmd` expands a month into a days-in-month ladder, so once
+  the month is a constant the ladder is five comparisons and two branches with one possible answer.
+  The Core folder never saw them, because they did not exist when it ran.
+
+One defect surfaced on the way and is worth recording: `writeFiles` never removed generated files a
+later run stopped producing, so a module that disappeared from the dependency closure — which is
+exactly what inlining a helper into its only caller does — stayed on disk and was typechecked,
+benchmarked and committed as though it were still output. Two stale files were in the repository.
+Generated files now carry their own removal: anything under the output directory with this engine's
+header that the current run did not write is deleted, and nothing else is touched.
+
+## Getting every row to 1.0x`, after the row-by-row account below, has the pass
 that closed most of the gap, what moved each row and by what mechanism, the per-target inlining
 budgets that pass measured rather than assumed, and the rows still over 1.0x with the structural
 reason they did not come down further.
@@ -328,6 +390,68 @@ building the harness, not a frozen result.
   meaning the wrapper functions add roughly as much again on top), against
   `str(randint(1, 999999998)).zfill(9)` on the handwritten side -- one draw, formatted once.
 
+## Size is a result too, and it is measured the same way
+
+Speed is not the only thing a generated target is judged on. The npm package this engine generates
+for is tree-shakeable, which
+[ADR 0012](../../engine/docs/decisions/0012-generated-source-not-a-bound-binary.md) records as a
+requirement rather than a preference, so for TypeScript **bytes over the wire are a benchmark
+row** — and a row that is asserted rather than measured is not a row.
+
+`node engine/scripts/size.ts core` measures it the way a consumer's bundler would: one
+single-import entry point per exported utility, bundled and minified by esbuild against
+`core/out/typescript`, then gzipped. Raw source bytes are the wrong number (comments, type
+annotations and formatting all vanish first) and the whole tree is the wrong number too (nobody
+imports all of it). `--check` compares against the committed `core/out/typescript/SIZE.json` and
+fails on a regression past 5% and 64 bytes; `verify` runs it as its `typescript size` step, so the
+trade is checked on every run rather than remembered.
+
+Gzipped bytes per utility, with the pass disabled, under the first (uncapped) inlining budget, and
+under the budget this section settled on:
+
+| export | no inlining | uncapped (`maxStatements: 6`) | now (8 / cap 6) |
+| --- | ---: | ---: | ---: |
+| `formatCnpj` | 348 | 348 | **334** |
+| `formatCurrency` | 331 | 333 | **312** |
+| `generateCnpj` | 642 | 1,591 | **629** |
+| `generateCpf` | 623 | 1,343 | **614** |
+| `getAddressInfoByCep` | 1,286 | 1,295 | **1,277** |
+| `getHolidays` | 872 | 1,403 | **817** |
+| `isBusinessDay` | 1,065 | 1,638 | **1,022** |
+| `isValidCnpj` | 512 | 569 | **499** |
+| `isValidCpf` | 342 | 440 | **333** |
+| every export | 3,224 | 5,644 | **3,175** |
+
+Three changes got it there, and each is worth stating separately because only the first is about
+inlining at all.
+
+- **The budget prices an inline instead of only sizing the callee**
+  ([ADR 0013](../../engine/docs/decisions/0013-inlining-pays-for-itself.md)). A callee spliced into
+  its last remaining call site costs nothing — its definition falls out of the dependency closure —
+  while a helper copied to nine call sites costs eight copies of itself. Alongside it, a callee that
+  is one `return <expr>` is now substituted as an expression rather than through a synthetic
+  `Option`, and a straight-line callee is spliced without the early-return sentinel.
+- **Constants the checker already proved are printed as constants.** Specialization (ADR 0004)
+  gives a helper called with a literal a parameter of type `Int[n..n]`, and a read of one *is* that
+  integer — nothing new is decided, the range on the node is the checker's own conclusion. That
+  turns `randomBelow`'s `4294967296 - (4294967296 % bound)` from a modulo per draw into the
+  constant `4294967290`, and it proves two intermediates of the Meeus Easter algorithm constant
+  outright for the years `easterSunday` accepts. Folding then leaves bindings nothing reads and
+  parameters nothing needs, which Go and Rust both refuse to compile, so `optimize.ts` removes
+  both — a parameter only when every call site passes something whose evaluation cannot be
+  noticed. This is where Go's generators moved from 0.57x/0.44x to **0.39x/0.32x**.
+- **A fold over the lowered target AST** (`engine/src/backend/fold.ts`). A lowering is code
+  generation too: TypeScript's `date.fromYmd` expands a month into a days-in-month ladder, so once
+  the month is a constant the ladder is five comparisons and two branches with one possible answer.
+  The Core folder never saw them, because they did not exist when it ran.
+
+One defect surfaced on the way and is worth recording: `writeFiles` never removed generated files a
+later run stopped producing, so a module that disappeared from the dependency closure — which is
+exactly what inlining a helper into its only caller does — stayed on disk and was typechecked,
+benchmarked and committed as though it were still output. Two stale files were in the repository.
+Generated files now carry their own removal: anything under the output directory with this engine's
+header that the current run did not write is deleted, and nothing else is touched.
+
 ## Getting every row to 1.0x
 
 The pass this section documents took the budget from "within 1.5x" to "equal or faster,
@@ -339,12 +463,14 @@ after, language by language:
 | --- | --- | --- | --- | --- |
 | typescript | `getHolidays` | 1.77x | **0.93x** | native `date.fromYmd` (below) |
 | typescript | `isBusinessDay` | 1.26x | **0.66x** | inherits `getHolidays`' fix |
-| typescript | `generateCpf` | 1.44x | **1.06x** | call-site inlining, budget 6 |
-| typescript | `generateCnpj` | 1.24x | **1.10x** | call-site inlining, budget 6 |
+| typescript | `generateCpf` | 1.44x | **1.04-1.28x** | call-site inlining, 8 / cap 6 |
+| typescript | `generateCnpj` | 1.24x | **1.20-1.23x** | call-site inlining, 8 / cap 6 |
 | python | `formatCurrency` | 2.91x | **2.66x** | `trunc_mod`/`trunc_div` inlined; ASCII-byte `codePoints`/`fromCodePoints` |
-| python | `generateCpf` | 1.86x | **1.65x** | call-site inlining, budget 12 |
-| python | `generateCnpj` | 1.99x | **1.89x** | call-site inlining, budget 12 |
-| go | `formatCurrency` | 1.08x | **0.93x** | ASCII-byte `re.retain`, `codePoints`/`fromCodePoints` |
+| python | `generateCpf` | 1.86x | **1.40x** | call-site inlining, budget 12 |
+| python | `generateCnpj` | 1.99x | **1.90x** | call-site inlining, budget 12 |
+| go | `formatCurrency` | 1.08x | **0.92x** | ASCII-byte `re.retain`, `codePoints`/`fromCodePoints` |
+| go | `generateCpf` | 0.57x | **0.39x** | constants the checker proved, and the dead parameters they left |
+| go | `generateCnpj` | 0.44x | **0.32x** | the same fold |
 | rust | `isValidCpf` | 2.73x | **2.57x** | ASCII-byte `re.retain` (`keep_digits`) |
 | rust | `isValidCnpj` | 1.43x | **1.35x** | inherits the same `re.retain` fix |
 | rust | `formatCurrency` | 1.81x | **1.74x** | one-buffer `str.concatAll`; ASCII-byte `re.retain` |
@@ -418,19 +544,32 @@ to `randomBelow`) get a chance in a later round.
   them, since they are the same size. `generateCpf` moved from 1.86x to 1.65x, `generateCnpj` from
   1.99x to 1.89x. `generate_cpf.py`'s body is now one long flattened function instead of a chain of
   small ones; Python was not weighed against a bundle-size budget the way TypeScript was below, so
-  12 stayed the number.
-- **TypeScript: conservative, budget 6 -- measured against 1 first.** A budget of 1 (inlining only
-  `randomDigit`'s single-`return` body, never reaching `randomBelow`'s loop) left `generateCpf` at
-  1.14-1.18x and `generateCnpj` at 1.18-1.25x across three runs -- barely different from the
-  1.44x/1.24x this pass started from, which is itself evidence the JIT was not the limiting factor
-  for the one layer it *was* inlining. A budget of 6 (large enough for `randomBelow`'s own body)
-  reached 1.06x/1.10x. **Bundle-size effect, measured, not hidden**: at budget 6, `generate-cpf.ts`
-  grew from 45 to 408 lines (1796 to 14695 bytes) and `generate-cnpj.ts` from 55 to 519 lines (1959
-  to 18305 bytes); the whole `core/out/typescript` tree grew from 156322 to 187760 bytes, +20%,
-  partly offset by `lib/random.ts` disappearing entirely (nothing calls it once everything that did
-  has it spliced in) and by `std/date.ts` shrinking from the `date.fromYmd` fix above. This is a
-  real speed win paid for in bytes, for two rows that were already close to 1.0x before the pass and
-  stayed close after -- stated because the task asked for it stated, not because the trade is free.
+  12 stayed the number. Re-measured when `maxDuplicatedNodes` arrived, and deliberately left
+  uncapped: at a cap of 6 its generators went to 1.65x/2.11x and at 24 to 1.59x/1.87x, against
+  1.40x/1.90x uncapped, so the cap costs Python exactly what it saves TypeScript. Sweeping
+  `maxStatements` over 6, 9, 12 and 18 moved neither generator row outside noise
+  (`generateCpf` 1.35-1.46x, `generateCnpj` 1.85-1.96x), so 12 stayed rather than churn a number
+  the measurement does not distinguish.
+- **TypeScript: `maxStatements: 8, rounds: 4, maxDuplicatedNodes: 6`, and the cap is the point.**
+  The first version of this budget was `maxStatements: 6` with no cap, and the note here recorded
+  its cost as "+20% of the generated tree" -- raw source bytes, which is the wrong number twice
+  over: comments, type annotations and formatting all vanish before a browser sees any of it, and
+  nobody imports the whole tree. `engine/scripts/size.ts` measures the right one, bundling a
+  single-import entry point per utility with esbuild and gzipping it. Measured that way the
+  uncapped budget cost **+75% across every export and +148% on `generateCnpj` alone**, for two rows
+  it moved by about a tenth each -- inside the run-to-run noise of a generator whose own retry loop
+  is random. `generate-cpf.ts` was 45 lines before the pass and 408 after: nine unrolled copies of
+  a rejection-sampling loop, one per digit.
+
+  `maxDuplicatedNodes` fixes that by pricing an inline rather than only sizing the callee, and
+  [ADR 0013](../../engine/docs/decisions/0013-inlining-pays-for-itself.md) has the mechanism. Both
+  numbers were then swept against the measurement -- the cap at 0, 6, 12, 24 and 48, the statement
+  budget at 6, 8, 10, 12, 16, 24 and 48 -- and 8/6 came out smallest on every single export. The
+  result is that inlining is no longer a trade for this target at all: **every export is smaller
+  than with the pass disabled** (3,175 bytes gzipped across all nine, against 3,224 with no
+  inlining and 5,644 under the uncapped budget), and `generateCpf` still lands at 1.04-1.28x and
+  `generateCnpj` at 1.20-1.23x. `verify`'s `typescript size` step holds it there against the
+  committed `core/out/typescript/SIZE.json`.
 - **Rust: none, deliberately, and the reason is itself a finding.** A first attempt at budget 6
   measured code that was *worse*, not better. This pass has no notion of a Rust borrow
   ([ADR 0010](../../engine/docs/decisions/0010-rust-parameters-borrow-where-sound.md)) -- it binds
