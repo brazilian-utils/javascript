@@ -14,9 +14,9 @@
   </select>
 
   <script type="module">
-    // The states are a short list and come with the page; the cities are 5,571 of them, so that
-    // table is fetched only when a state is picked, and only once.
-    import { getStates } from "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-states/+esm";
+    // Nothing is imported with the page. Opening a select is what says its list is wanted: the
+    // states are 2.5 KB and the cities 154 KB, and the browser keeps each module once it has it.
+    const CDN = "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils";
 
     const states = document.getElementById("state");
     const cities = document.getElementById("city");
@@ -27,41 +27,51 @@
       for (const option of options) select.append(new Option(option.label, option.value));
     };
 
-    fill(
-      states,
-      getStates().map((state) => ({ label: state.name, value: state.code })),
-      "Pick a state",
-    );
+    const loading = (select, message) => {
+      fill(select, [], message);
+      select.setAttribute("aria-busy", "true");
+    };
 
-    // A state picked while the table is on its way wins; the browser fetches the table once.
-    let pending;
+    states.addEventListener("focus", async () => {
+      loading(states, "Loading the states…");
 
-    states.addEventListener("change", async () => {
-      pending?.abort();
-      pending = new AbortController();
-
-      const { signal } = pending;
-      const state = states.value;
-
-      cities.disabled = true;
-
-      if (!state) return fill(cities, [], "Pick a city");
-
-      fill(cities, [], "Loading the cities…");
-      cities.setAttribute("aria-busy", "true");
-
-      const { getCities } =
-        await import("https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils/get-cities/+esm");
-
-      if (signal.aborted) return;
+      const { getStates } = await import(`${CDN}/get-states/+esm`);
 
       fill(
+        states,
+        getStates().map((state) => ({ label: state.name, value: state.code })),
+        "Pick a state",
+      );
+      states.removeAttribute("aria-busy");
+    }, { once: true });
+
+    // The state whose cities are on screen; another state's are fetched when they are asked for.
+    let shown = "";
+
+    cities.addEventListener("focus", async () => {
+      const state = states.value;
+
+      if (state === shown) return;
+
+      shown = state;
+      loading(cities, "Loading the cities…");
+
+      const { getCities } = await import(`${CDN}/get-cities/+esm`);
+
+      // A state picked while the table was on its way is the one whose cities are filled in.
+      fill(
         cities,
-        getCities(state).map((city) => ({ label: city, value: city })),
+        getCities(states.value).map((city) => ({ label: city, value: city })),
         "Pick a city",
       );
-      cities.disabled = false;
+      shown = states.value;
       cities.removeAttribute("aria-busy");
+    });
+
+    states.addEventListener("change", () => {
+      cities.disabled = states.value === "";
+      shown = "";
+      fill(cities, [], "Pick a city");
     });
   </script>
 </html>

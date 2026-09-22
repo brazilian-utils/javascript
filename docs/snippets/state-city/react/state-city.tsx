@@ -1,24 +1,25 @@
 import { useId, useState } from "react";
-import { getStates } from "@brazilian-utils/brazilian-utils/get-states";
 import { useCitiesOfState } from "./use-cities-of-state";
-
-// The states are a short list, so they come with the page.
-const states = getStates();
+import { useStates } from "./use-states";
 
 export function StateCity() {
   const id = useId();
   const [state, setState] = useState("");
-  const { cities, loading } = useCitiesOfState(state);
+  const { states, loading: loadingStates, load: loadStates } = useStates();
+  const { cities, loading: loadingCities, load: loadCities } = useCitiesOfState(state);
 
   return (
     <>
       <label htmlFor={id}>State</label>
+      {/* Opening the select is what says the list is wanted, so that is when it is fetched. */}
       <select
         id={id}
         value={state}
+        aria-busy={loadingStates}
+        onFocus={loadStates}
         onChange={(event) => setState(event.currentTarget.value)}
       >
-        <option value="">Pick a state</option>
+        <option value="">{loadingStates ? "Loading the states…" : "Pick a state"}</option>
         {states.map((current) => (
           <option key={current.code} value={current.code}>
             {current.name}
@@ -27,8 +28,8 @@ export function StateCity() {
       </select>
 
       <label htmlFor={`${id}-city`}>City</label>
-      <select id={`${id}-city`} disabled={cities.length === 0} aria-busy={loading}>
-        <option value="">{loading ? "Loading the cities…" : "Pick a city"}</option>
+      <select id={`${id}-city`} disabled={!state} aria-busy={loadingCities} onFocus={loadCities}>
+        <option value="">{loadingCities ? "Loading the cities…" : "Pick a city"}</option>
         {cities.map((city) => (
           <option key={city} value={city}>
             {city}
