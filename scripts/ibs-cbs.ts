@@ -136,8 +136,21 @@ const toRecords = (rows: string[][]): Row[] => {
 
 const MS_PER_DAY = 86_400_000;
 
-const fromSerialDate = (serial: string): number =>
-	Date.UTC(1899, 11, 30) + Number(serial) * MS_PER_DAY;
+/**
+ * Reads an Excel serial date (days since 30/12/1899) as milliseconds at UTC midnight.
+ * @param {string} serial - The cell as the sheet writes it.
+ * @param {string} header - The column the cell comes from, for the error message.
+ * @returns {number} The date in milliseconds.
+ * @throws {Error} When the cell is not a number, so a malformed date is never read as an open
+ * end of the validity window.
+ */
+const fromSerialDate = (serial: string, header: string): number => {
+	const days = Number(serial);
+
+	if (!Number.isFinite(days)) throw new Error(`${header} is not a serial date: "${serial}"`);
+
+	return Date.UTC(1899, 11, 30) + days * MS_PER_DAY;
+};
 
 /**
  * Whether a row is in force on `today`. `dIniVig` and `dFimVig` are Excel serial dates (days
@@ -145,17 +158,21 @@ const fromSerialDate = (serial: string): number =>
  * Siscomex window. A classification the Informe Técnico excludes is not deleted from the table,
  * it gets a `dFimVig` (220001, 220002 and 220003 in v.1.60), so this is what keeps it out, and a
  * classification published before it starts to apply stays out until its `dIniVig`.
+ *
+ * A date that does not read as a serial number throws instead of being ignored: a malformed
+ * `dFimVig` would otherwise drop the row from the table without a word.
  * @param {Row} row - A classification row.
  * @param {number} today - The reference date, in milliseconds at UTC midnight.
  * @returns {boolean} True when `today` is inside the validity window the row declares.
+ * @throws {Error} When either end of the window is not a serial date.
  */
 const isInForce = (row: Row, today: number): boolean => {
 	const start = row[START_OF_VALIDITY_HEADER];
 	const end = row[END_OF_VALIDITY_HEADER];
 
-	if (start !== undefined && today < fromSerialDate(start)) return false;
+	if (start !== undefined && today < fromSerialDate(start, START_OF_VALIDITY_HEADER)) return false;
 
-	return end === undefined || today <= fromSerialDate(end);
+	return end === undefined || today <= fromSerialDate(end, END_OF_VALIDITY_HEADER);
 };
 
 type Tables = {
