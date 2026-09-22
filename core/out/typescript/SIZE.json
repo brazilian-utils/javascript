@@ -2,43 +2,53 @@
 	"exports": {
 		"formatCnpj": {
 			"minified": 518,
-			"gzip": 334
+			"gzip": 334,
+			"brotli": 292
 		},
 		"formatCurrency": {
 			"minified": 434,
-			"gzip": 312
+			"gzip": 312,
+			"brotli": 267
 		},
 		"generateCnpj": {
 			"minified": 1301,
-			"gzip": 629
+			"gzip": 629,
+			"brotli": 549
 		},
 		"generateCpf": {
 			"minified": 1284,
-			"gzip": 614
+			"gzip": 614,
+			"brotli": 532
 		},
 		"getAddressInfoByCep": {
 			"minified": 2855,
-			"gzip": 1277
+			"gzip": 1277,
+			"brotli": 1149
 		},
 		"getHolidays": {
 			"minified": 2379,
-			"gzip": 817
+			"gzip": 817,
+			"brotli": 765
 		},
 		"isBusinessDay": {
 			"minified": 2922,
-			"gzip": 1022
+			"gzip": 1022,
+			"brotli": 966
 		},
 		"isValidCnpj": {
 			"minified": 1481,
-			"gzip": 499
+			"gzip": 499,
+			"brotli": 452
 		},
 		"isValidCpf": {
 			"minified": 760,
-			"gzip": 333
+			"gzip": 333,
+			"brotli": 290
 		}
 	},
 	"total": {
 		"minified": 9839,
-		"gzip": 3175
+		"gzip": 3175,
+		"brotli": 2891
 	}
 }

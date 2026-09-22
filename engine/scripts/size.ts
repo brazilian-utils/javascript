@@ -28,7 +28,7 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { gzipSync } from "node:zlib";
+import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 
 import { build } from "esbuild";
 
@@ -45,7 +45,19 @@ import { build } from "esbuild";
  */
 const GROWTH_BYTES = 0;
 
-type Measurement = { minified: number; gzip: number };
+/**
+ * Three numbers, because they answer different questions and this project has been wrong about
+ * which one matters before.
+ *
+ * `minified` is what the browser parses and what the JavaScript engine holds — it is not the
+ * transfer size, but it is the only one of the three that tracks parse and compile cost.
+ * `gzip` and `brotli` are both transfer sizes, and they disagree: gzip's window makes locally
+ * repeated text almost free, so a shorter but less repetitive encoding can be smaller raw and
+ * larger gzipped. Brotli's larger window and its static dictionary of common web text weigh the
+ * same source differently, and brotli is what most CDNs actually serve. Both are gated, so a
+ * change has to be no worse under either.
+ */
+type Measurement = { minified: number; gzip: number; brotli: number };
 type Snapshot = { exports: Record<string, Measurement>; total: Measurement };
 
 type ApiFunction = { name: string; module: string; effects: readonly string[] };
@@ -80,7 +92,18 @@ async function measure(outDir: string, entries: readonly { name: string; module:
 			legalComments: "none",
 		});
 		const code = result.outputFiles[0]!.contents;
-		return { minified: code.byteLength, gzip: gzipSync(code, { level: 9 }).byteLength };
+		return {
+			minified: code.byteLength,
+			gzip: gzipSync(code, { level: 9 }).byteLength,
+			// Quality 11 and a size hint, because the defaults are tuned for streaming and would
+			// understate what a CDN serving a static asset produces.
+			brotli: brotliCompressSync(code, {
+				params: {
+					[constants.BROTLI_PARAM_QUALITY]: 11,
+					[constants.BROTLI_PARAM_SIZE_HINT]: code.byteLength,
+				},
+			}).byteLength,
+		};
 	} finally {
 		rmSync(scratch, { recursive: true, force: true });
 	}
@@ -111,15 +134,13 @@ async function main(): Promise<void> {
 	};
 
 	const namePad = Math.max(8, ...rows.map((row) => row.name.length));
-	process.stdout.write(`${"export".padEnd(namePad)}  ${"minified".padStart(10)}  ${"gzip".padStart(8)}\n`);
-	for (const row of rows) {
-		process.stdout.write(
-			`${row.name.padEnd(namePad)}  ${formatBytes(row.measurement.minified).padStart(10)}  ${formatBytes(row.measurement.gzip).padStart(8)}\n`,
-		);
-	}
+	const line = (name: string, measurement: Measurement): string =>
+		`${name.padEnd(namePad)}  ${formatBytes(measurement.minified).padStart(10)}  ${formatBytes(measurement.gzip).padStart(8)}  ${formatBytes(measurement.brotli).padStart(8)}\n`;
 	process.stdout.write(
-		`${"(all)".padEnd(namePad)}  ${formatBytes(total.minified).padStart(10)}  ${formatBytes(total.gzip).padStart(8)}\n`,
+		`${"export".padEnd(namePad)}  ${"minified".padStart(10)}  ${"gzip".padStart(8)}  ${"brotli".padStart(8)}\n`,
 	);
+	for (const row of rows) process.stdout.write(line(row.name, row.measurement));
+	process.stdout.write(line("(all)", total));
 
 	const snapshotPath = join(outDir, "SIZE.json");
 	if (mode === "check") {
@@ -130,18 +151,27 @@ async function main(): Promise<void> {
 		}
 		const base = JSON.parse(readFileSync(snapshotPath, "utf8")) as Snapshot;
 		const regressions: string[] = [];
+		// Both transfer encodings, because a consumer gets whichever their CDN negotiates and the
+		// two do not agree on which source is smaller. `minified` is reported but not gated: it is
+		// a parse cost, not a transfer cost, and a change that trades it against a transfer size is
+		// a trade to argue rather than a threshold to trip.
+		const compared = ["gzip", "brotli"] as const;
+		const check = (label: string, previous: Measurement, current: Measurement): void => {
+			for (const metric of compared) {
+				const grew = current[metric] - previous[metric];
+				if (grew > GROWTH_BYTES) {
+					regressions.push(
+						`${label}: ${formatBytes(previous[metric])} -> ${formatBytes(current[metric])} ${metric} (+${formatBytes(grew)})`,
+					);
+				}
+			}
+		};
 		for (const [name, measurement] of Object.entries(snapshot.exports)) {
 			const previous = base.exports[name];
 			if (previous === undefined) continue;
-			const grew = measurement.gzip - previous.gzip;
-			if (grew > GROWTH_BYTES) {
-				regressions.push(`${name}: ${formatBytes(previous.gzip)} -> ${formatBytes(measurement.gzip)} gzip (+${formatBytes(grew)})`);
-			}
+			check(name, previous, measurement);
 		}
-		const grewTotal = snapshot.total.gzip - base.total.gzip;
-		if (grewTotal > GROWTH_BYTES) {
-			regressions.push(`(all): ${formatBytes(base.total.gzip)} -> ${formatBytes(snapshot.total.gzip)} gzip (+${formatBytes(grewTotal)})`);
-		}
+		check("(all)", base.total, snapshot.total);
 		if (regressions.length > 0) {
 			process.stdout.write(`\n${regressions.length} size regression(s):\n${regressions.map((line) => `  ${line}`).join("\n")}\n`);
 			process.exitCode = 1;

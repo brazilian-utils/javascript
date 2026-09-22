@@ -48,14 +48,28 @@ row** — and a row that is asserted rather than measured is not a row.
 
 `node engine/scripts/size.ts core` measures it the way a consumer's bundler would: one
 single-import entry point per exported utility, bundled and minified by esbuild against
-`core/out/typescript`, then gzipped. Raw source bytes are the wrong number (comments, type
+`core/out/typescript`, then compressed. Raw source bytes are the wrong number (comments, type
 annotations and formatting all vanish first) and the whole tree is the wrong number too (nobody
-imports all of it). `--check` compares against the committed `core/out/typescript/SIZE.json` and
-fails on a regression past 5% and 64 bytes; `verify` runs it as its `typescript size` step, so the
-trade is checked on every run rather than remembered.
+imports all of it).
+
+It reports three numbers per export, because they answer different questions and this project has
+already been wrong about which one matters. **Minified** is what the browser parses and the engine
+holds; it is not a transfer size, but it is the only one that tracks parse and compile cost.
+**Gzip** and **brotli** are both transfer sizes, and they disagree: gzip's window makes locally
+repeated text almost free, so an encoding can be meaningfully *shorter raw and larger gzipped* —
+which is not a hypothetical, it is what the measurement below found. Brotli weighs the same source
+differently and is what most CDNs actually serve.
+
+Both transfer encodings are gated at zero growth, since a consumer gets whichever their CDN
+negotiates. Minified is reported and not gated: trading parse cost against transfer size is an
+argument to have, not a threshold to trip. `--check` compares against the committed
+`core/out/typescript/SIZE.json`; `verify` runs it as its `typescript size` step, so the trade is
+checked on every run rather than remembered.
 
 Gzipped bytes per utility, with the pass disabled, under the first (uncapped) inlining budget, and
 under the budget this section settled on:
+
+Gzipped bytes, since that is the metric the three columns below were compared under:
 
 | export | no inlining | uncapped (`maxStatements: 6`) | now (8 / cap 6) |
 | --- | ---: | ---: | ---: |
@@ -462,14 +476,28 @@ row** — and a row that is asserted rather than measured is not a row.
 
 `node engine/scripts/size.ts core` measures it the way a consumer's bundler would: one
 single-import entry point per exported utility, bundled and minified by esbuild against
-`core/out/typescript`, then gzipped. Raw source bytes are the wrong number (comments, type
+`core/out/typescript`, then compressed. Raw source bytes are the wrong number (comments, type
 annotations and formatting all vanish first) and the whole tree is the wrong number too (nobody
-imports all of it). `--check` compares against the committed `core/out/typescript/SIZE.json` and
-fails on a regression past 5% and 64 bytes; `verify` runs it as its `typescript size` step, so the
-trade is checked on every run rather than remembered.
+imports all of it).
+
+It reports three numbers per export, because they answer different questions and this project has
+already been wrong about which one matters. **Minified** is what the browser parses and the engine
+holds; it is not a transfer size, but it is the only one that tracks parse and compile cost.
+**Gzip** and **brotli** are both transfer sizes, and they disagree: gzip's window makes locally
+repeated text almost free, so an encoding can be meaningfully *shorter raw and larger gzipped* —
+which is not a hypothetical, it is what the measurement below found. Brotli weighs the same source
+differently and is what most CDNs actually serve.
+
+Both transfer encodings are gated at zero growth, since a consumer gets whichever their CDN
+negotiates. Minified is reported and not gated: trading parse cost against transfer size is an
+argument to have, not a threshold to trip. `--check` compares against the committed
+`core/out/typescript/SIZE.json`; `verify` runs it as its `typescript size` step, so the trade is
+checked on every run rather than remembered.
 
 Gzipped bytes per utility, with the pass disabled, under the first (uncapped) inlining budget, and
 under the budget this section settled on:
+
+Gzipped bytes, since that is the metric the three columns below were compared under:
 
 | export | no inlining | uncapped (`maxStatements: 6`) | now (8 / cap 6) |
 | --- | ---: | ---: | ---: |
