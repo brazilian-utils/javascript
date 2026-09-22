@@ -5641,3 +5641,38 @@ export const DATA: Record<StateCode, readonly (readonly [string, string])[]> = {
 		["Xambioá", "1722107"],
 	],
 };
+
+/**
+ * Alternative spellings of a municipality name, keyed by its 7-digit IBGE code, for the
+ * municipalities a source outside the IBGE still spells differently, usually because of a
+ * recent official rename. A municipality with no variant is simply absent, at no extra cost.
+ * Curated by `scripts/cities.ts`.
+ *
+ * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ */
+export const OTHER_NAMES: Readonly<Record<string, readonly string[]>> = {
+	"1400605": ["São Luiz"],
+	"1502954": ["Eldorado dos Carajás"],
+	"1708254": ["Fortaleza do Tabocão"],
+	"2108504": ["Pindaré Mirim"],
+	"2400208": ["Açu"],
+	"2401206": ["Ares"],
+	"2401305": ["Augusto Severo"],
+	"2405306": ["Boa Saúde"],
+	"2408409": ["Olho-D'Água do Borges"],
+	"2606903": ["Iguaraci"],
+	"2608503": ["Lagoa do Itaenga"],
+	"2800100": ["Amparo de São Francisco"],
+	"2922250": ["Muquém de São Francisco"],
+	"2928505": ["Santa Teresinha"],
+	"3105509": ["Barão de Monte Alto"],
+	"3122900": ["Dona Eusébia"],
+	"3145455": ["Olhos D'Água"],
+	"3165206": ["São Thomé das Letras"],
+	"3165560": ["Sem Peixe"],
+	"3506607": ["Biritiba-Mirim"],
+	"3516101": ["Florínia"],
+	"3550001": ["São Luis do Paraitinga"],
+	"4206108": ["Grão Pará"],
+	"5107800": ["Santo Antônio do Leverger"],
+};

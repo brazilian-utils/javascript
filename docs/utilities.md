@@ -1446,7 +1446,7 @@ convertDateToWords('invalid'); // ""
 convertDateToWords('29/02/1900'); // "" (1900 is not a leap year)
 ```
 
-## States and municipalities
+## States and municipalities (cities)
 
 ### getStates
 
@@ -1596,7 +1596,7 @@ Source: [IANA Time Zone Database](https://www.iana.org/time-zones)
 
 ### getMunicipalities
 
-Get the Brazilian municipalities published by the IBGE: every municipality, or only those of one state when `stateCode` is given.
+Get the Brazilian municipalities (cities) published by the IBGE: every municipality, or only those of one state when `stateCode` is given.
 
 - Each municipality (`Municipality`) is `{ code, name, stateCode }`, where `code` is the 7-digit IBGE code. Sorted by name in the "pt-BR" locale.
 - Only an omitted (or `undefined`) `stateCode` asks for the full list: `null` and `''` return `[]`.
@@ -1635,7 +1635,7 @@ Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades
 
 ### getMunicipalityByCode
 
-Look up a Brazilian municipality by its 7-digit IBGE code.
+Look up a Brazilian municipality (city) by its 7-digit IBGE code.
 
 - Accepts the code as a string or a non-negative integer.
 - Returns `{ code, name, stateCode }` (`Municipality`), or `null` when the code is not 7 digits long or matches no municipality.
@@ -1654,6 +1654,30 @@ getMunicipalityByCode('123'); // null (not 7 digits)
 ```
 
 Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
+
+### getMunicipalityByCep
+
+Get the Brazilian municipality (city) a CEP belongs to, from the CEP ranges the Correios assign to each municipality.
+
+- It runs offline: no CEP API is called, so the answer says which municipality owns the range, not whether the CEP is in use.
+- Accepts what `isValidCep` accepts: 8 digits, as a string or a number, with spaces, dots and hyphens ignored. A CEP that starts with `0` has to be a string, and a negative or fractional number is rejected.
+- Returns `{ code, name, stateCode }` (`Municipality`, the same shape `getMunicipalityByCode` returns), or `null` for an invalid CEP or one outside every range.
+- Some municipalities were absorbed into another one's range, or have no dedicated range at all; a state `getStateByCep` resolves can still leave `getMunicipalityByCep` at `null`.
+
+```javascript
+import { getMunicipalityByCep } from '@brazilian-utils/brazilian-utils';
+
+getMunicipalityByCep('01310-100');
+// { code: '3550308', name: 'São Paulo', stateCode: 'SP' }
+
+getMunicipalityByCep(20040020);
+// { code: '3304557', name: 'Rio de Janeiro', stateCode: 'RJ' }
+
+getMunicipalityByCep('00999-999'); // null
+getMunicipalityByCep('12345'); // null
+```
+
+Source: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app/faixa_cep_uf_localidade/index.php)
 
 ### getCities
 

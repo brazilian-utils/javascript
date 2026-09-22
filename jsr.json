@@ -72,6 +72,7 @@
 		"./get-legal-natures-by-category": "./src/get-legal-natures-by-category/get-legal-natures-by-category.ts",
 		"./get-municipalities": "./src/get-municipalities/get-municipalities.ts",
 		"./get-municipality": "./src/get-municipality/get-municipality.ts",
+		"./get-municipality-by-cep": "./src/get-municipality-by-cep/get-municipality-by-cep.ts",
 		"./get-municipality-by-code": "./src/get-municipality-by-code/get-municipality-by-code.ts",
 		"./get-nfe-key-info": "./src/get-nfe-key-info/get-nfe-key-info.ts",
 		"./get-pix-key-info": "./src/get-pix-key-info/get-pix-key-info.ts",

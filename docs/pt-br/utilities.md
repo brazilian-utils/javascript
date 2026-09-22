@@ -1446,7 +1446,7 @@ convertDateToWords('invalid'); // ""
 convertDateToWords('29/02/1900'); // "" (1900 não é bissexto)
 ```
 
-## Estados e municípios
+## Estados e municípios (cidades)
 
 ### getStates
 
@@ -1596,7 +1596,7 @@ Fonte: [IANA Time Zone Database](https://www.iana.org/time-zones)
 
 ### getMunicipalities
 
-Retorna os municípios brasileiros publicados pelo IBGE: todos os municípios, ou só os de um estado quando `stateCode` é informado.
+Retorna os municípios (cidades) brasileiros publicados pelo IBGE: todos os municípios, ou só os de um estado quando `stateCode` é informado.
 
 - Cada município (`Municipality`) é `{ code, name, stateCode }`, onde `code` é o código IBGE de 7 dígitos. Ordenados por nome no locale "pt-BR".
 - Só um `stateCode` omitido (ou `undefined`) pede a lista completa: `null` e `''` retornam `[]`.
@@ -1635,7 +1635,7 @@ Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 
 ### getMunicipalityByCode
 
-Busca um município brasileiro pelo código IBGE de 7 dígitos.
+Busca um município (cidade) brasileiro pelo código IBGE de 7 dígitos.
 
 - Aceita o código como string ou número inteiro não negativo.
 - Retorna `{ code, name, stateCode }` (`Municipality`), ou `null` quando o código não tem 7 dígitos ou não corresponde a nenhum município.
@@ -1654,6 +1654,30 @@ getMunicipalityByCode('123'); // null (não tem 7 dígitos)
 ```
 
 Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
+
+### getMunicipalityByCep
+
+Retorna o município (cidade) brasileiro ao qual um CEP pertence, a partir das faixas de CEP que os Correios atribuem a cada município.
+
+- Funciona offline: nenhuma API de CEP é chamada, então a resposta diz qual município é dono da faixa, não se o CEP está em uso.
+- Aceita o que o `isValidCep` aceita: 8 dígitos, como string ou número, ignorando espaços, pontos e hifens. Um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado.
+- Retorna `{ code, name, stateCode }` (`Municipality`, o mesmo formato que `getMunicipalityByCode` retorna), ou `null` para um CEP inválido ou fora de todas as faixas.
+- Alguns municípios foram absorvidos pela faixa de outro, ou não têm faixa própria; um estado que `getStateByCep` resolve ainda pode deixar `getMunicipalityByCep` em `null`.
+
+```javascript
+import { getMunicipalityByCep } from '@brazilian-utils/brazilian-utils';
+
+getMunicipalityByCep('01310-100');
+// { code: '3550308', name: 'São Paulo', stateCode: 'SP' }
+
+getMunicipalityByCep(20040020);
+// { code: '3304557', name: 'Rio de Janeiro', stateCode: 'RJ' }
+
+getMunicipalityByCep('00999-999'); // null
+getMunicipalityByCep('12345'); // null
+```
+
+Fonte: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app/faixa_cep_uf_localidade/index.php)
 
 ### getCities
 

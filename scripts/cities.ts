@@ -56,6 +56,42 @@ const isCity = (value: unknown): value is City =>
 	"microrregiao" in value &&
 	"regiao-imediata" in value;
 
+/**
+ * Alternative spellings kept for a handful of municipalities whose name changed at the IBGE
+ * more recently than a third party dataset this library cross-checks against, keyed by the
+ * 7-digit IBGE code. Curated by hand from the mismatches found joining
+ * https://gist.githubusercontent.com/hugosenari/ec1a7d88f5bdd01844424dbc9aff9590/raw/9aeb90ef777131ffaf1a6f5381d1f163c9c79b09/ceps.csv
+ * against the IBGE municipalities below (see `scripts/municipality-cep-ranges.ts`); `main`
+ * below fails the build if a code here stops matching a real municipality, so a future IBGE
+ * refresh can never leave a stale entry silently in place.
+ */
+const OTHER_NAMES: Record<string, readonly string[]> = {
+	"1400605": ["São Luiz"],
+	"1502954": ["Eldorado dos Carajás"],
+	"1708254": ["Fortaleza do Tabocão"],
+	"2108504": ["Pindaré Mirim"],
+	"2400208": ["Açu"],
+	"2401206": ["Ares"],
+	"2401305": ["Augusto Severo"],
+	"2405306": ["Boa Saúde"],
+	"2408409": ["Olho-D'Água do Borges"],
+	"2606903": ["Iguaraci"],
+	"2608503": ["Lagoa do Itaenga"],
+	"2800100": ["Amparo de São Francisco"],
+	"2922250": ["Muquém de São Francisco"],
+	"2928505": ["Santa Teresinha"],
+	"3105509": ["Barão de Monte Alto"],
+	"3122900": ["Dona Eusébia"],
+	"3145455": ["Olhos D'Água"],
+	"3165206": ["São Thomé das Letras"],
+	"3165560": ["Sem Peixe"],
+	"3506607": ["Biritiba-Mirim"],
+	"3516101": ["Florínia"],
+	"3550001": ["São Luis do Paraitinga"],
+	"4206108": ["Grão Pará"],
+	"5107800": ["Santo Antônio do Leverger"],
+};
+
 const main = async (): Promise<void> => {
 	const response = await fetchWithRetry(
 		"https://servicodados.ibge.gov.br/api/v1/localidades/municipios",
@@ -104,9 +140,24 @@ const main = async (): Promise<void> => {
 		throw new Error(`IBGE response is missing municipalities for: ${missingStates.join(", ")}`);
 	}
 
+	const knownCodes = new Set(json.map((city) => String(city.id)));
+	const staleOtherNames = Object.keys(OTHER_NAMES).filter((code) => !knownCodes.has(code));
+
+	if (staleOtherNames.length > 0) {
+		throw new Error(`OTHER_NAMES has codes IBGE no longer lists: ${staleOtherNames.join(", ")}`);
+	}
+
+	const otherNamesBody = Object.entries(OTHER_NAMES)
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(
+			([code, names]) =>
+				`\t${JSON.stringify(code)}: [${names.map((name) => JSON.stringify(name)).join(", ")}],`,
+		)
+		.join("\n");
+
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cities.ts"),
-		`import type { StateCode } from "./states";
+		resolve(scriptsDir, "..", "./src/_internals/constants/municipalities.ts"),
+		`import { type StateCode } from "./states";
 
 /**
  * Brazilian municipalities by state, published by the IBGE. \`DATA\` holds, for each state, a
@@ -126,6 +177,18 @@ export type Municipality = {
 
 export const DATA: Record<StateCode, readonly (readonly [string, string])[]> = {
 ${body}
+};
+
+/**
+ * Alternative spellings of a municipality name, keyed by its 7-digit IBGE code, for the
+ * municipalities a source outside the IBGE still spells differently, usually because of a
+ * recent official rename. A municipality with no variant is simply absent, at no extra cost.
+ * Curated by \`scripts/cities.ts\`.
+ *
+ * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ */
+export const OTHER_NAMES: Readonly<Record<string, readonly string[]>> = {
+${otherNamesBody}
 };
 `,
 	);

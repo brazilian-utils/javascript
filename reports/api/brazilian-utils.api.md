@@ -577,6 +577,9 @@ export function getMunicipality(options: GetMunicipalityByNameParams): Promise<s
 export function getMunicipality(options: GetMunicipalityParams): Promise<[string, string] | string | null>;
 
 // @public
+export const getMunicipalityByCep: (value: string | number) => Municipality | null;
+
+// @public
 export const getMunicipalityByCode: (code: string | number) => Municipality | null;
 
 // @public @deprecated

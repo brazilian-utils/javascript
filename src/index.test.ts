@@ -187,6 +187,7 @@ const PUBLIC = [
 	"getLegalNaturesByCategory",
 	"getMunicipalities",
 	"getMunicipality",
+	"getMunicipalityByCep",
 	"getMunicipalityByCode",
 	"getNfeKeyInfo",
 	"getPixKeyInfo",

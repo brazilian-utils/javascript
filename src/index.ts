@@ -10,7 +10,7 @@ import { isValidIe } from "./is-valid-ie/is-valid-ie";
 import { isValidPis } from "./is-valid-pis/is-valid-pis";
 
 export type { Bank } from "./_internals/constants/banks";
-export type { Municipality } from "./_internals/constants/cities";
+export type { Municipality } from "./_internals/constants/municipalities";
 export type { State, StateCode, StateName } from "./_internals/constants/states";
 export type { NumberToWordsGender } from "./_internals/number-to-words/number-to-words";
 export { addBusinessDays } from "./add-business-days/add-business-days";
@@ -146,6 +146,7 @@ export {
 	type GetMunicipalityParams,
 	getMunicipality,
 } from "./get-municipality/get-municipality";
+export { getMunicipalityByCep } from "./get-municipality-by-cep/get-municipality-by-cep";
 export { getMunicipalityByCode } from "./get-municipality-by-code/get-municipality-by-code";
 export {
 	type NfeKeyInfo,

@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { DATA } from "../_internals/constants/cities";
+import { DATA } from "../_internals/constants/municipalities";
 import { type StateCode } from "../_internals/constants/states";
 import { anyGarbage, stateCodes } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
