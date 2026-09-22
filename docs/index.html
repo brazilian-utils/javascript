@@ -282,13 +282,14 @@
             tabs.className = 'example-tabs';
             panels[0].parentNode.insertBefore(tabs, panels[0]);
 
-            // The picker leads the strip, so the two choices a guide offers sit together.
-            if (picker) tabs.appendChild(picker);
-
             var list = document.createElement('div');
             list.className = 'example-tab-list';
             list.setAttribute('role', 'tablist');
             tabs.appendChild(list);
+
+            // The tabs are what the strip is for; the document sits at the end of it, out of
+            // their way, where a toolbar keeps the control that is not its navigation.
+            if (picker) tabs.appendChild(picker);
 
             panels.forEach(function (panel) {
               panel.setAttribute('role', 'tabpanel');
