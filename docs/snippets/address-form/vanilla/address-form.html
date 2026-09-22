@@ -39,10 +39,12 @@
     const form = document.getElementById("form");
     const cep = document.getElementById("cep");
     const status = document.getElementById("status");
-    const FIELDS = ["street", "neighborhood", "city", "state"];
-
+    // A named control of a form is a property of it.
     const fill = (address) => {
-      for (const field of FIELDS) form.elements[field].value = address[field] ?? "";
+      form.street.value = address.street ?? "";
+      form.neighborhood.value = address.neighborhood ?? "";
+      form.city.value = address.city ?? "";
+      form.state.value = address.state ?? "";
     };
 
     // One lookup at a time: a newer CEP makes the answer to the older one worthless.
