@@ -4,6 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
+import { decodeXml } from "./decode-xml.ts";
 import { readXlsxSheet } from "./read-xlsx-sheet.ts";
 import { serializeRecord } from "./serialize-record.ts";
 
@@ -16,6 +17,8 @@ const DOCUMENTATION_URL =
  * The ANEXO B is published under a file name that carries its version and date, e.g.
  * `anexo_b-nbs2-lista_servico_nacional-snnfse-v1-01-20260122.xlsx`, so the link is read from the
  * documentation page instead of being pinned here: a new version is picked up by the next run.
+ * The `href` is read as the page writes it, so it is decoded and resolved against the page before
+ * it is fetched, the way `scripts/ibs-cbs.ts` reads the links of the Portal da NF-e.
  */
 const ANNEX_LINK_REGEX = /href="([^"]*anexo_b-nbs2-lista_servico_nacional[^"]*\.xlsx)"/i;
 
@@ -79,7 +82,8 @@ const main = async (): Promise<void> => {
 
 	if (link === undefined) throw new Error("the NFS-e documentation page links no ANEXO B");
 
-	const workbookResponse = await fetchOk(link, "NFS-e ANEXO B");
+	const annex = new URL(decodeXml(link), DOCUMENTATION_URL).href;
+	const workbookResponse = await fetchOk(annex, "NFS-e ANEXO B");
 	const workbook = await workbookResponse.arrayBuffer();
 	const data = parseSheet(readXlsxSheet(Buffer.from(workbook), SHEET_NAME));
 
