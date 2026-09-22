@@ -43,6 +43,6 @@ export class @@Name@@Form {
   protected submit() {
     if (this.form.invalid) return this.form.markAllAsTouched();
 
-    console.log(this.form.getRawValue());
+    alert(JSON.stringify(this.form.getRawValue(), null, 2));
   }
 }

@@ -9,7 +9,7 @@ export function @@Name@@Form() {
   });
 
   return (
-    <form onSubmit={handleSubmit((values) => console.log(values))}>
+    <form onSubmit={handleSubmit((values) => alert(JSON.stringify(values, null, 2)))}>
       <Controller
         name="@@kind@@"
         control={control}

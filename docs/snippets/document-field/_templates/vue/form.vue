@@ -15,7 +15,7 @@ const [@@kind@@, @@kind@@Attrs] = defineField("@@kind@@", {
   validateOnModelUpdate: false,
 });
 
-const onSubmit = handleSubmit((values) => console.log(values));
+const onSubmit = handleSubmit((values) => alert(JSON.stringify(values, null, 2)));
 </script>
 
 <template>
