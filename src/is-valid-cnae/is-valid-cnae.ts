@@ -1,4 +1,8 @@
-import { getCnae } from "../get-cnae/get-cnae";
+import { CNAE_FORMAT_REGEX, CNAE_SUBCLASSES } from "../_internals/constants/cnae";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { CNAE_LENGTH } from "./constants";
 
 /**
  * Validates if a CNAE (Classificação Nacional de Atividades Econômicas) subclass code
@@ -33,4 +37,12 @@ import { getCnae } from "../get-cnae/get-cnae";
  * @see Official: https://concla.ibge.gov.br/busca-online-cnae.html
  * CONCLA's CNAE search and structure browser, which publishes CNAE-Subclasses 2.3.
  */
-export const isValidCnae = (value: string | number): boolean => getCnae(value) !== null;
+export const isValidCnae = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
+	const subclass = padLookupCode(value, CNAE_LENGTH);
+
+	if (!CNAE_FORMAT_REGEX.test(subclass)) return false;
+
+	return CNAE_SUBCLASSES[sanitizeToDigits(subclass)] !== undefined;
+};

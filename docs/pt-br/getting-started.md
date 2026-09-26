@@ -75,7 +75,7 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 114,2 KB | 24,6 KB |
 | `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 119,1 - 119,2 KB | 30,6 - 30,7 KB |
 | `isValidCest` · `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 116,6 - 117,8 KB | 26,4 - 26,9 KB |
-| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 KB | 21,2 KB |
+| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 - 94,0 KB | 21,1 - 21,2 KB |
 | `isValidNbs` · `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 81,8 KB | 13,8 KB |
 | `isValidCfop` · `getCfop` | descrições das operações do CFOP | 68,9 KB | 6,9 KB |
 | `getClassTrib` | nomes e descrições do cClassTrib (IBS/CBS) | 50,8 KB | 9,6 KB |
