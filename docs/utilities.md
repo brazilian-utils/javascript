@@ -600,6 +600,67 @@ getNfeKeyInfo('35170458716523000119620010000000121000123450');
 getNfeKeyInfo('invalid'); // null
 ```
 
+## SUFRAMA
+
+### isValidSuframa
+
+Check if an Inscrição SUFRAMA is valid. It is the registration number the Superintendência da Zona Franca de Manaus gives to companies with tax incentives, carried by the `ISUF` field of the NF-e recipient.
+
+- The number is `SS.NNNN.LLD`: sector of activity, sequential number, locality of the SUFRAMA unit and check digit.
+- Accepts 8 or 9 digits: an 8 digit value is a number whose sector code lost its leading zero.
+- Returns `false` for a sector code of `00` and for a wrong módulo 11 check digit.
+- The sector and locality codes are not checked against a table, since the manual lists them only as examples.
+- Besides the usual mask characters, `(`, `)`, `,` and `*` are also ignored.
+
+```javascript
+import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
+
+isValidSuframa('123456789'); // true
+isValidSuframa('12.3456.789'); // true
+isValidSuframa('10001018'); // true (same as '010001018')
+isValidSuframa('123456780'); // false
+isValidSuframa('001234560'); // false (sector 00)
+```
+
+### formatSuframa
+
+Format an Inscrição SUFRAMA.
+
+- **Options** (`FormatSuframaOptions`): `pad` left-pads the value with zeros to the full 9 digits before masking (default `false`), which restores the leading zero of an 8 digit value.
+- The mask is progressive, as in the other `format` utilities, so an 8 digit value without `pad` is grouped one position early: use `pad: true` for a value read straight out of the `ISUF` field, which may be stored with 8 digits.
+
+```javascript
+import { formatSuframa } from '@brazilian-utils/brazilian-utils';
+
+formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018'); // 10.0010.18 (8 digits, the mask groups one position early)
+formatSuframa('10001018', { pad: true }); // 01.0001.018
+```
+
+### parseSuframa
+
+Remove Inscrição SUFRAMA formatting, keep only digits, and cap the result to 9 digits.
+
+```javascript
+import { parseSuframa } from '@brazilian-utils/brazilian-utils';
+
+parseSuframa('12.3456.789'); // 123456789
+```
+
+### generateSuframa
+
+Generate a valid random 9 digit Inscrição SUFRAMA.
+
+- The check digit is valid and the sector code is never `00`. The sector and locality codes are random.
+
+```javascript
+import { generateSuframa } from '@brazilian-utils/brazilian-utils';
+
+generateSuframa(); // '205678106'
+```
+
+Source: [NF-e Manual de Orientação do Contribuinte 7.0, Visão Geral](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf) (section 8.4), [MOC 7.0, Anexo I](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-anexo-i-leiaute-e-rv.pdf) (field 79, `E18` `ISUF`, and rule E18-20).
+
 ## Phone
 
 ### isValidPhone
