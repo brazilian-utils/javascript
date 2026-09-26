@@ -78,6 +78,18 @@ describe("formatCnh", () => {
 			expectAlwaysReturnsType(formatCnh, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCnh(2 ** 53)).toBe("");
+		expect(formatCnh(-1)).toBe("");
+		expect(formatCnh(1.5)).toBe("");
+		expect(formatCnh(Number.MAX_VALUE)).toBe("");
+		expect(formatCnh(1e21)).toBe("");
+		expect(formatCnh(Number.NaN)).toBe("");
+		expect(formatCnh(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCnh(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCnh(2 ** 53, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCnh types", () => {

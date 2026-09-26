@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { OBFUSCATED_PATTERN, PATTERN } from "./constants";
 
@@ -14,6 +14,9 @@ export type FormatCnhOptions = {
 /**
  * Formats a Brazilian CNH (Carteira Nacional de Habilitação) number.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CNH number to be formatted.
  * @param {FormatCnhOptions} [options] - Optional options.
  * @param {boolean} [options.pad] - Whether to pad the value with leading zeros.
@@ -26,6 +29,7 @@ export type FormatCnhOptions = {
  * formatCnh("12345678900"); // "123456789-00"
  * formatCnh("8900", { pad: true }); // "000000089-00"
  * formatCnh("12345678900", { obfuscate: true }); // "***456789-**"
+ * formatCnh(2 ** 53); // "" (not a non-negative safe integer)
  * ```
  *
  * Resolução CONTRAN nº 886/2021, art. 4º I, defines the CNH registry number as 9 characters plus
@@ -42,10 +46,10 @@ export type FormatCnhOptions = {
  * verificadores do CPF", the rule `obfuscate` borrows.
  */
 export const formatCnh = (value: string | number, options?: FormatCnhOptions): string =>
-	isNullish(value)
-		? ""
-		: format({
+	isLookupCode(value)
+		? format({
 				pad: options?.pad,
 				value: sanitizeToDigits(value),
 				pattern: (options?.obfuscate ?? false) ? OBFUSCATED_PATTERN : PATTERN,
-			});
+			})
+		: "";

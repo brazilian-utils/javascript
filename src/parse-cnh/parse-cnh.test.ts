@@ -38,6 +38,17 @@ describe("parseCnh", () => {
 			expectAlwaysReturnsType(parseCnh, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCnh(2 ** 53)).toBe("");
+		expect(parseCnh(-1)).toBe("");
+		expect(parseCnh(1.5)).toBe("");
+		expect(parseCnh(Number.MAX_VALUE)).toBe("");
+		expect(parseCnh(1e21)).toBe("");
+		expect(parseCnh(Number.NaN)).toBe("");
+		expect(parseCnh(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCnh(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCnh types", () => {
