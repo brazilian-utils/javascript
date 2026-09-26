@@ -73,7 +73,7 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | `getCities` | nomes dos 5571 municípios do IBGE | 154,3 KB | 49,9 KB |
 | `getMunicipalityByCep` | a tabela de municípios do IBGE acima, mais 5573 faixas de CEP dos Correios | 393,3 KB | 98,8 KB |
 | `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 114,2 KB | 24,6 KB |
-| `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 119,1 KB | 30,6 KB |
+| `isValidCbo` · `getCbo` | títulos das ocupações da CBO 2002 | 119,1 - 119,2 KB | 30,6 - 30,7 KB |
 | `isValidCest` · `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 116,6 - 117,8 KB | 26,4 - 26,9 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93,9 KB | 21,2 KB |
 | `isValidNbs` · `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 81,8 KB | 13,8 KB |
