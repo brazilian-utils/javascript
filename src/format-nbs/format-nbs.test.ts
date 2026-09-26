@@ -70,6 +70,18 @@ describe("formatNbs", () => {
 			expectIdempotent(formatNbs, nineDigits);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatNbs(-101_011_100)).toBe("");
+		expect(formatNbs(-1)).toBe("");
+		expect(formatNbs(1.5)).toBe("");
+		expect(formatNbs(2 ** 53)).toBe("");
+		expect(formatNbs(Number.MAX_VALUE)).toBe("");
+		expect(formatNbs(1e21)).toBe("");
+		expect(formatNbs(Number.NaN)).toBe("");
+		expect(formatNbs(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatNbs(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("formatNbs types", () => {
