@@ -48,6 +48,18 @@ describe("parseCei", () => {
 			expectAlwaysReturnsType(parseCei, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCei(-249_859_674_386)).toBe("");
+		expect(parseCei(-1)).toBe("");
+		expect(parseCei(1.5)).toBe("");
+		expect(parseCei(2 ** 53)).toBe("");
+		expect(parseCei(Number.MAX_VALUE)).toBe("");
+		expect(parseCei(1e21)).toBe("");
+		expect(parseCei(Number.NaN)).toBe("");
+		expect(parseCei(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCei(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCei types", () => {

@@ -1,6 +1,6 @@
 import { CEI_PATTERN } from "../_internals/constants/cei";
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `formatCei`. */
@@ -17,6 +17,9 @@ export type FormatCeiOptions = {
  * Formats progressively, as far as the digits given go, so it can also be used as an input
  * mask while the user is still typing.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CEI value to be formatted.
  * @param {FormatCeiOptions} [options] - Optional formatting options.
  * @param {boolean} [options.pad] - Whether to pad the value with leading zeros up to 12 digits.
@@ -29,6 +32,7 @@ export type FormatCeiOptions = {
  * formatCei(249859674386); // "24.985.96743/86"
  * formatCei("249", { pad: true }); // "00.000.00002/49"
  * formatCei("249"); // "24.9"
+ * formatCei(-249859674386); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno
@@ -37,7 +41,7 @@ export type FormatCeiOptions = {
  * digit cited by `isValidCei` agree on.
  */
 export const formatCei = (value: string | number, options?: FormatCeiOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,

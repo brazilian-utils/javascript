@@ -75,6 +75,19 @@ describe("formatCei", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCei(-249_859_674_386)).toBe("");
+		expect(formatCei(-1)).toBe("");
+		expect(formatCei(1.5)).toBe("");
+		expect(formatCei(2 ** 53)).toBe("");
+		expect(formatCei(Number.MAX_VALUE)).toBe("");
+		expect(formatCei(1e21)).toBe("");
+		expect(formatCei(Number.NaN)).toBe("");
+		expect(formatCei(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCei(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCei(-249_859_674_386, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCei with a nullish value under pad", () => {
