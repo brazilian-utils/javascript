@@ -282,7 +282,7 @@
 	"documentation_quick_start_status": "Met",
 	"documentation_quick_start_justification": "https://brazilian-utils.com.br/getting-started",
 	"documentation_current_status": "Met",
-	"documentation_current_justification": "The docs are checked in CI: llms.txt and the site shells fail the Check workflow when stale, an undocumented export fails the public API check, and a pull request that changes a utility must update both language versions.",
+	"documentation_current_justification": "The docs are checked in CI: the Check workflow rebuilds llms.txt from them on every run, so a doc the generator cannot read fails it, jsr.json fails it when stale, an undocumented export fails the public API check, and a pull request that changes a utility must update both language versions.",
 	"documentation_achievements_status": "Met",
 	"documentation_achievements_justification": "The README links the OpenSSF Best Practices and Scorecard badges: https://github.com/brazilian-utils/javascript#readme",
 	"accessibility_best_practices_status": "Unmet",
