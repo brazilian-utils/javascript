@@ -1,7 +1,7 @@
 import { isValidCnpj } from "../../is-valid-cnpj/is-valid-cnpj";
 import { isValidCpf } from "../../is-valid-cpf/is-valid-cpf";
 import { isValidEmail } from "../../is-valid-email/is-valid-email";
-import { isValidPhone } from "../../is-valid-phone/is-valid-phone";
+import { isValidMobilePhone } from "../../is-valid-mobile-phone/is-valid-mobile-phone";
 import {
 	CPF_SYNTAX_REGEX,
 	EMAIL_MAX_LENGTH,
@@ -44,5 +44,5 @@ export const detectPixKeyType = (value: string): PixKeyType | null => {
 
 	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
 
-	return isValidPhone(normalizePhone(trimmed), { accept: ["mobile"] }) ? "phone" : null;
+	return isValidMobilePhone(normalizePhone(trimmed)) ? "phone" : null;
 };
