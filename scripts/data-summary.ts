@@ -18,6 +18,7 @@ import { writeFileSync } from "node:fs";
 const DATASETS: Record<string, string> = {
 	"src/_internals/constants/banks.ts": "Banks (Banco Central, STR participants)",
 	"src/_internals/constants/cbo.ts": "CBO 2002 occupations (Ministério do Trabalho e Emprego)",
+	"src/_internals/constants/cest.ts": "CEST codes and segments (CONFAZ, Convênio ICMS 142/18)",
 	"src/_internals/constants/cfop.ts": "CFOP codes (CONFAZ, Convênio SINIEF s/nº 1970)",
 	"src/_internals/constants/cnae.ts": "CNAE subclasses (IBGE/CONCLA)",
 	"src/_internals/constants/ibs-cbs.ts":
