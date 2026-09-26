@@ -1,7 +1,9 @@
 import * as fc from "fast-check";
 
-import { NBS_DESCRIPTIONS } from "../_internals/constants/nbs";
+import { NBS_CODES } from "../_internals/constants/nbs";
+import { NBS_DESCRIPTIONS as NBS_DESCRIPTION_LIST } from "../_internals/constants/nbs-descriptions";
 import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { formatNbs } from "../format-nbs/format-nbs";
@@ -12,6 +14,8 @@ const RESIDENTIAL = {
 	code: "101011100",
 	description: "Serviços de construção de edificações residenciais de um e dois pavimentos",
 };
+
+const NBS_DESCRIPTIONS = lookupTable(NBS_CODES, 9, NBS_DESCRIPTION_LIST);
 
 describe("getNbs", () => {
 	it("should return the code for the 9 digits without a mask", () => {

@@ -48,6 +48,7 @@ const generatedFiles = [
 	"./src/_internals/constants/cnae.ts",
 	"./src/_internals/constants/ibs-cbs.ts",
 	"./src/_internals/constants/municipalities.ts",
+	"./src/_internals/constants/nbs-descriptions.ts",
 	"./src/_internals/constants/nbs.ts",
 	"./src/_internals/constants/service-items.ts",
 	"./src/_internals/constants/states.ts",

@@ -1,4 +1,6 @@
-import { NBS_DESCRIPTIONS } from "../_internals/constants/nbs";
+import { NBS_CODES } from "../_internals/constants/nbs";
+import { NBS_DESCRIPTIONS } from "../_internals/constants/nbs-descriptions";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidNbs } from "../is-valid-nbs/is-valid-nbs";
 
@@ -56,5 +58,5 @@ export const getNbs = (value: string | number): Nbs | null => {
 
 	const code = sanitizeToDigits(String(value));
 
-	return { code, description: NBS_DESCRIPTIONS[code] };
+	return { code, description: NBS_DESCRIPTIONS[findCodeIndex(NBS_CODES, code)] };
 };

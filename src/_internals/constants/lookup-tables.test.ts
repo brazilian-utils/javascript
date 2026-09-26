@@ -5,6 +5,8 @@ import { CFOP_CODES } from "./cfop";
 import { CFOP_DESCRIPTIONS } from "./cfop-descriptions";
 import { CNAE_CODES } from "./cnae";
 import { CNAE_DESCRIPTIONS } from "./cnae-descriptions";
+import { NBS_CODES } from "./nbs";
+import { NBS_DESCRIPTIONS } from "./nbs-descriptions";
 
 /**
  * The lookup tables the dataset scripts split into a codes module and a descriptions module:
@@ -14,6 +16,7 @@ const TABLES: { name: string; codes: string; width: number; descriptions: readon
 	{ name: "CBO", codes: CBO_CODES, width: 6, descriptions: CBO_DESCRIPTIONS },
 	{ name: "CNAE", codes: CNAE_CODES, width: 7, descriptions: CNAE_DESCRIPTIONS },
 	{ name: "CFOP", codes: CFOP_CODES, width: 4, descriptions: CFOP_DESCRIPTIONS },
+	{ name: "NBS", codes: NBS_CODES, width: 9, descriptions: NBS_DESCRIPTIONS },
 ];
 
 describe("generated lookup tables", () => {

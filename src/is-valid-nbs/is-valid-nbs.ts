@@ -1,4 +1,5 @@
-import { NBS_DESCRIPTIONS, NBS_FORMAT_REGEX } from "../_internals/constants/nbs";
+import { NBS_CODES, NBS_FORMAT_REGEX } from "../_internals/constants/nbs";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
@@ -41,5 +42,5 @@ export const isValidNbs = (value: string | number): boolean => {
 
 	if (!NBS_FORMAT_REGEX.test(code)) return false;
 
-	return sanitizeToDigits(code) in NBS_DESCRIPTIONS;
+	return findCodeIndex(NBS_CODES, sanitizeToDigits(code)) !== -1;
 };
