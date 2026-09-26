@@ -1,6 +1,6 @@
 {
 	"name": "@brazilian-utils/brazilian-utils",
-	"version": "2.4.0",
+	"version": "2.5.0",
 	"license": "MIT",
 	"exports": {
 		".": "./src/index.ts",
@@ -145,7 +145,15 @@
 		"./to-standard-schema": "./src/to-standard-schema/to-standard-schema.ts"
 	},
 	"publish": {
-		"include": ["LICENSE", "README.md", "jsr.json", "src/**/*.ts"],
-		"exclude": ["src/**/*.test.ts", "src/_internals/test/**"]
+		"include": [
+			"LICENSE",
+			"README.md",
+			"jsr.json",
+			"src/**/*.ts"
+		],
+		"exclude": [
+			"src/**/*.test.ts",
+			"src/_internals/test/**"
+		]
 	}
 }

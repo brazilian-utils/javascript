@@ -1,6 +1,6 @@
 {
 	"name": "@brazilian-utils/brazilian-utils",
-	"version": "2.4.0",
+	"version": "2.5.0",
 	"description": "Zero-dependency, tree-shakeable TypeScript utilities for Brazilian data: validate, format, parse and generate CPF, CNPJ, CEP, boleto, Pix, phone, holidays and more.",
 	"keywords": [
 		"boleto",
