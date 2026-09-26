@@ -1,3 +1,4 @@
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { mod10 } from "../_internals/mod10/mod10";
@@ -197,14 +198,9 @@ const STRUCTURE_ONLY_RULE: BankAccountRule = {
 	digits: null,
 };
 
-const isListedBankCode = (bankCode: string): boolean => {
-	// Stryker disable next-line EqualityOperator: bankCode always has exactly 3 characters here and COMPE_CODES.length is always a multiple of 3, so the extra out-of-range iteration only tests an empty remainder against a 3-character code, which never matches.
-	for (let i = 0; i < COMPE_CODES.length; i += 3) {
-		if (COMPE_CODES.startsWith(bankCode, i)) return true;
-	}
-
-	return false;
-};
+// The lookup is a return value, not a condition: the build inlines an imported constant read in a
+// condition, which copied the whole COMPE_CODES literal into the scan a second time.
+const isListedBankCode = (bankCode: string): boolean => findCodeIndex(COMPE_CODES, bankCode) !== -1;
 
 const findRule = (bankCode: string): BankAccountRule | null => {
 	if (Object.hasOwn(BANK_RULES, bankCode)) return BANK_RULES[bankCode];
