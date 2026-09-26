@@ -34,6 +34,18 @@ describe("parseLegalNature", () => {
 			expectAlwaysReturnsType(parseLegalNature, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseLegalNature(206.2)).toBe("");
+		expect(parseLegalNature(-1)).toBe("");
+		expect(parseLegalNature(1.5)).toBe("");
+		expect(parseLegalNature(2 ** 53)).toBe("");
+		expect(parseLegalNature(Number.MAX_VALUE)).toBe("");
+		expect(parseLegalNature(1e21)).toBe("");
+		expect(parseLegalNature(Number.NaN)).toBe("");
+		expect(parseLegalNature(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseLegalNature(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseLegalNature types", () => {
