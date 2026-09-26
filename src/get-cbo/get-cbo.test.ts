@@ -1,11 +1,15 @@
 import * as fc from "fast-check";
 
-import { CBO_TITLES } from "../_internals/constants/cbo";
+import { CBO_CODES } from "../_internals/constants/cbo";
+import { CBO_DESCRIPTIONS } from "../_internals/constants/cbo-descriptions";
 import { anyGarbage, digitsUpTo } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCbo } from "../is-valid-cbo/is-valid-cbo";
 import { getCbo, type Cbo } from "./get-cbo";
+
+const CBO_TITLES = lookupTable(CBO_CODES, 6, CBO_DESCRIPTIONS);
 
 describe("getCbo", () => {
 	it("should return the occupation for a code without a mask", () => {

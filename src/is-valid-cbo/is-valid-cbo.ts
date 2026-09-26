@@ -1,4 +1,5 @@
-import { CBO_FORMAT_REGEX, CBO_TITLES } from "../_internals/constants/cbo";
+import { CBO_CODES, CBO_FORMAT_REGEX } from "../_internals/constants/cbo";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -36,7 +37,7 @@ import { CBO_LENGTH } from "./constants";
  * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv
  * The CBO 2002 occupation table, as published by the Ministério do Trabalho e Emprego.
  * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
- * Community mirror of the same table, the fallback `CBO_TITLES` was built from before the
+ * Community mirror of the same table, the fallback `CBO_CODES` was built from before the
  * official CSV was used.
  */
 export const isValidCbo = (value: string | number): boolean => {
@@ -46,5 +47,5 @@ export const isValidCbo = (value: string | number): boolean => {
 
 	if (!CBO_FORMAT_REGEX.test(code)) return false;
 
-	return CBO_TITLES[sanitizeToDigits(code)] !== undefined;
+	return findCodeIndex(CBO_CODES, sanitizeToDigits(code)) !== -1;
 };

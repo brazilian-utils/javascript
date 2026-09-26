@@ -1,4 +1,6 @@
-import { CBO_TITLES } from "../_internals/constants/cbo";
+import { CBO_CODES } from "../_internals/constants/cbo";
+import { CBO_DESCRIPTIONS } from "../_internals/constants/cbo-descriptions";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CBO_LENGTH } from "../is-valid-cbo/constants";
@@ -48,7 +50,7 @@ export type Cbo = {
  * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv
  * The CBO 2002 occupation table, as published by the Ministério do Trabalho e Emprego.
  * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
- * Community mirror of the same table, the fallback `CBO_TITLES` was built from before the
+ * Community mirror of the same table, the fallback `CBO_DESCRIPTIONS` was built from before the
  * official CSV was used.
  */
 export const getCbo = (value: string | number): Cbo | null => {
@@ -56,5 +58,5 @@ export const getCbo = (value: string | number): Cbo | null => {
 
 	const code = sanitizeToDigits(padLookupCode(value, CBO_LENGTH));
 
-	return { code, description: CBO_TITLES[code] };
+	return { code, description: CBO_DESCRIPTIONS[findCodeIndex(CBO_CODES, code)] };
 };
