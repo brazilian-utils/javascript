@@ -1,13 +1,17 @@
 import * as fc from "fast-check";
 
-import { SERVICE_ITEM_DESCRIPTIONS } from "../_internals/constants/service-items";
+import { SERVICE_ITEM_DESCRIPTIONS as SERVICE_ITEM_DESCRIPTION_LIST } from "../_internals/constants/service-item-descriptions";
+import { SERVICE_ITEM_CODES } from "../_internals/constants/service-items";
 import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidServiceItem } from "../is-valid-service-item/is-valid-service-item";
 import { getServiceItem, type ServiceItem } from "./get-service-item";
 
 const SYSTEMS = { code: "1.01", description: "Análise e desenvolvimento de sistemas." };
+
+const SERVICE_ITEM_DESCRIPTIONS = lookupTable(SERVICE_ITEM_CODES, 4, SERVICE_ITEM_DESCRIPTION_LIST);
 
 describe("getServiceItem", () => {
 	it("should return the subitem for the form the law prints", () => {
