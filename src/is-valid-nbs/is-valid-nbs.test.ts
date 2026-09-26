@@ -1,4 +1,4 @@
-import { anyGarbage, anyValue } from "../_internals/test/arbitraries";
+import { anyGarbage, anyValue, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidNbs } from "./is-valid-nbs";
@@ -42,6 +42,14 @@ describe("isValidNbs", () => {
 		// @ts-expect-error not a string or number
 		expect(isValidNbs(["101011100"])).toBe(false);
 		expect(isValidNbs(-101_011_100)).toBe(false);
+	});
+
+	it("should reject the keys of Object.prototype", () => {
+		for (const key of PROTOTYPE_KEYS) expect(isValidNbs(key)).toBe(false);
+	});
+
+	it("should ignore surrounding whitespace", () => {
+		expect(isValidNbs("  1.0101.11.00\n")).toBe(true);
 	});
 
 	describe("properties", () => {

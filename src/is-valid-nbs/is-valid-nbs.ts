@@ -1,14 +1,16 @@
-import { getNbs } from "../get-nbs/get-nbs";
+import { NBS_DESCRIPTIONS, NBS_FORMAT_REGEX } from "../_internals/constants/nbs";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /**
  * Checks if a value is a code of the official NBS 2.0 table (Nomenclatura Brasileira de
  * Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio), the code the
  * national NFS-e carries in `cNBS`.
  *
- * Accepts what `getNbs` accepts: the 9 digits or the `N.NNNN.NN.NN` mask, with a single
- * separator between the groups and optional surrounding whitespace, or a non-negative safe
- * integer. Only complete codes are valid; the chapter, position and subposition headings of the
- * nomenclature are not.
+ * Accepts the 9 digits or the `N.NNNN.NN.NN` mask, with a single separator between the groups
+ * and optional surrounding whitespace, or a non-negative safe integer; any other string
+ * (`"1.0101abc11.00"`) is not valid. Only complete codes are valid; the chapter, position and
+ * subposition headings of the nomenclature are not.
  *
  * The table is the NBS 2.0 the MDIC publishes. The ANEXO B of the Sistema Nacional NFS-e lists
  * the same codes except three (`1.0402.29.00`, `1.0403.29.00` and `1.0904.40.00`), so a code
@@ -32,4 +34,12 @@ import { getNbs } from "../get-nbs/get-nbs";
  * @see Official: https://www.gov.br/mdic/pt-br/images/REPOSITORIO/scs/decos/NBS/NBSa_2-0.csv
  * The NBS 2.0 table in CSV.
  */
-export const isValidNbs = (value: string | number): boolean => getNbs(value) !== null;
+export const isValidNbs = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
+	const code = String(value).trim();
+
+	if (!NBS_FORMAT_REGEX.test(code)) return false;
+
+	return sanitizeToDigits(code) in NBS_DESCRIPTIONS;
+};
