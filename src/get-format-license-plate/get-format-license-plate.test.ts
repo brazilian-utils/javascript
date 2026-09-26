@@ -1,7 +1,8 @@
 import * as fc from "fast-check";
 
-import { licensePlates } from "../_internals/test/arbitraries";
+import { asciiAlphanumericText, licensePlates } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { isValidLicensePlate } from "../is-valid-license-plate/is-valid-license-plate";
 import { type LicensePlateFormat, getFormatLicensePlate } from "./get-format-license-plate";
 
 describe("getFormatLicensePlate", () => {
@@ -37,6 +38,24 @@ describe("getFormatLicensePlate", () => {
 
 					expect(getFormatLicensePlate(plate)).toBe(format);
 					expect(getFormatLicensePlate(plate.toLowerCase())).toBe(format);
+				}),
+			);
+		});
+
+		const plates = fc.constantFrom<LicensePlateFormat>("LLLNNNN", "LLLNLNN").chain(licensePlates);
+		const lookupInputs = fc.oneof(
+			plates,
+			plates.map((plate) => `${plate.slice(0, 3)}-${plate.slice(3).toLowerCase()}`),
+			asciiAlphanumericText,
+			fc.anything(),
+		);
+
+		test("should return null exactly when isValidLicensePlate is false", () => {
+			fc.assert(
+				fc.property(lookupInputs, (value) => {
+					expect(getFormatLicensePlate(value as string) === null).toBe(
+						!isValidLicensePlate(value as string),
+					);
 				}),
 			);
 		});

@@ -1,13 +1,14 @@
-import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
+import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
+import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
 
 /**
  * Validates if a Brazilian license plate (placa de carro ou moto) is valid.
  *
  * Supports the old Brazilian format (ABC-1234) and the Mercosul format (ABC1D23), the single
  * sequence Resolução CONTRAN nº 969/2022 defines for every vehicle, motorcycles included.
- * Accepts the usual mask characters (hyphens, spaces) and is case-insensitive, mirroring
- * `getFormatLicensePlate`/`parseLicensePlate` (single source of truth for the supported
- * formats).
+ * Accepts the usual mask characters (hyphens, spaces) and is case-insensitive. The two formats
+ * checked here are the ones `getFormatLicensePlate` names, and it returns `null` exactly when
+ * this returns false.
  *
  * @param {string} value - The license plate value to be validated.
  * @returns {boolean} True if the license plate is valid, false otherwise.
@@ -34,5 +35,10 @@ import { getFormatLicensePlate } from "../get-format-license-plate/get-format-li
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
-export const isValidLicensePlate = (value: string): boolean =>
-	getFormatLicensePlate(value) !== null;
+export const isValidLicensePlate = (value: string): boolean => {
+	if (typeof value !== "string") return false;
+
+	const parsed = sanitizeToAlphanumeric(value);
+
+	return OLD_FORMAT_REGEX.test(parsed) || MERCOSUL_REGEX.test(parsed);
+};
