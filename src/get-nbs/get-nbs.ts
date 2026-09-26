@@ -1,6 +1,6 @@
-import { NBS_DESCRIPTIONS, NBS_FORMAT_REGEX } from "../_internals/constants/nbs";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { NBS_DESCRIPTIONS } from "../_internals/constants/nbs";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { isValidNbs } from "../is-valid-nbs/is-valid-nbs";
 
 /**
  * A code of the NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que
@@ -31,7 +31,7 @@ export type Nbs = {
  *
  * @param {string|number} value - The NBS code to look up, with or without the mask, e.g.
  * `"1.0101.11.00"`, `"101011100"` or `101011100`.
- * @returns {Nbs|null} The matching code, or null when it is unknown or invalid.
+ * @returns {Nbs|null} The matching code, or null exactly when `isValidNbs` is false.
  *
  * @example
  * ```typescript
@@ -52,16 +52,9 @@ export type Nbs = {
  * Sistema Nacional NFS-e, `tiposSimples_v1.01.xsd`: `TSCodNBS` is `[0-9]{9}`.
  */
 export const getNbs = (value: string | number): Nbs | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidNbs(value)) return null;
 
-	const code = String(value).trim();
+	const code = sanitizeToDigits(String(value));
 
-	if (!NBS_FORMAT_REGEX.test(code)) return null;
-
-	const digits = sanitizeToDigits(code);
-	const description = NBS_DESCRIPTIONS[digits];
-
-	if (description === undefined) return null;
-
-	return { code: digits, description };
+	return { code, description: NBS_DESCRIPTIONS[code] };
 };

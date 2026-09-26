@@ -136,6 +136,26 @@ describe("getNbs", () => {
 			);
 		});
 
+		test("should return null exactly when isValidNbs is false", () => {
+			const inputArbitrary = fc.oneof(
+				codeArbitrary,
+				codeArbitrary.map(Number),
+				codeArbitrary.map((code) => formatNbs(code)),
+				codeArbitrary.map((code) => ` ${code.slice(0, -1)}${(Number(code.at(-1)) + 1) % 10}\n`),
+				fc.stringMatching(/^\d[\s.\-/]?\d{4}[\s.\-/]?\d{2}[\s.\-/]?\d{2}$/),
+				fc.constantFrom(...PROTOTYPE_KEYS),
+				fc.anything(),
+			);
+
+			fc.assert(
+				fc.property(inputArbitrary, (value) => {
+					const input = value as string | number;
+
+					expect(getNbs(input) === null).toBe(!isValidNbs(input));
+				}),
+			);
+		});
+
 		test("should only carry 9 digit codes starting with 1 and non-empty descriptions", () => {
 			fc.assert(
 				fc.property(codeArbitrary, (code) => {
