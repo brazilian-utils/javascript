@@ -3,6 +3,7 @@ import * as fc from "fast-check";
 import { anyGarbage, digits, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
+import { isValidGtin } from "../is-valid-gtin/is-valid-gtin";
 import { type GtinInfo, type GtinLength, type GtinType, getGtinInfo } from "./get-gtin-info";
 
 const withCheckDigit = (body: string): string => {
@@ -272,6 +273,38 @@ describe("getGtinInfo", () => {
 						expect(getGtinInfo(gtin)?.isBrazilian).toBe(expected);
 					},
 				),
+			);
+		});
+
+		test("should return null exactly when isValidGtin returns false", () => {
+			const candidates = fc.oneof(
+				gtins,
+				gtins.map((gtin) => ` ${gtin}\n`),
+				gtins.map((gtin) => `${gtin.slice(0, -1)}${(Number(gtin.at(-1)) + 1) % 10}`),
+				digits(9),
+				fc.anything(),
+				anyGarbage,
+				fc.constantFrom(...PROTOTYPE_KEYS),
+			);
+
+			fc.assert(
+				fc.property(candidates, (value) => {
+					expect(getGtinInfo(value as string) === null).toBe(!isValidGtin(value as string));
+				}),
+			);
+		});
+
+		test("should agree with isValidGtin and its lengths option on the length", () => {
+			const values = fc.oneof(gtins, fc.anything());
+			const acceptedLengths = fc.subarray<GtinLength>([8, 12, 13, 14]);
+
+			fc.assert(
+				fc.property(values, acceptedLengths, (value, accepted) => {
+					const parsed = getGtinInfo(value as string);
+					const expected = parsed !== null && accepted.includes(parsed.length);
+
+					expect(isValidGtin(value as string, { lengths: accepted })).toBe(expected);
+				}),
 			);
 		});
 

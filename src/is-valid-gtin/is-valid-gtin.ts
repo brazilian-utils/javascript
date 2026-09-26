@@ -1,6 +1,8 @@
-import { type GtinLength, getGtinInfo } from "../get-gtin-info/get-gtin-info";
+import { mod10 } from "../_internals/mod10/mod10";
+import { DIGITS_REGEX, GTIN_LENGTHS } from "./constants";
 
-export type { GtinLength } from "../get-gtin-info/get-gtin-info";
+/** How many digits a GTIN may be written with. */
+export type GtinLength = 8 | 12 | 13 | 14;
 
 /** Options of `isValidGtin`. */
 export type IsValidGtinOptions = {
@@ -55,11 +57,19 @@ export type IsValidGtinOptions = {
  * ```
  */
 export const isValidGtin = (value: string, options?: IsValidGtinOptions): boolean => {
-	const info = getGtinInfo(value);
+	if (typeof value !== "string") return false;
 
-	if (info === null) return false;
+	const digits = value.trim();
+
+	if (!DIGITS_REGEX.test(digits)) return false;
+
+	const length = GTIN_LENGTHS.find((candidate) => candidate === digits.length);
+
+	if (length === undefined) return false;
 
 	const lengths = options?.lengths;
 
-	return Array.isArray(lengths) ? lengths.includes(info.length) : true;
+	if (Array.isArray(lengths) && !lengths.includes(length)) return false;
+
+	return mod10(digits.slice(0, -1), { variant: "gs1" }) === Number(digits.at(-1));
 };
