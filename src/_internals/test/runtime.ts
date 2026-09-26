@@ -1,5 +1,7 @@
 import { type bench as vitestBench, type expectTypeOf as vitestExpectTypeOf } from "vite-plus/test";
 
+import { createTimeZoneSuite } from "./timezones";
+
 type RuntimeModule = {
 	afterEach: (callback: () => void | Promise<void>) => void;
 	bench: typeof vitestBench;
@@ -24,3 +26,5 @@ const runtimeModule = await loadRuntime();
 
 export const { afterEach, bench, beforeEach, describe, expect, expectTypeOf, it, test, vi } =
 	runtimeModule;
+
+export const inTimeZone = createTimeZoneSuite(runtimeModule);

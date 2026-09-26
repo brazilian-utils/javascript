@@ -8,7 +8,7 @@ import {
 	PROTOTYPE_KEYS,
 } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithArguments } from "../_internals/test/properties";
-import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { describe, expect, expectTypeOf, inTimeZone, it, test } from "../_internals/test/runtime";
 import { addBusinessDays } from "../add-business-days/add-business-days";
 import { type BusinessDayOptions } from "../is-business-day/is-business-day";
 import { subBusinessDays } from "./sub-business-days";
@@ -119,6 +119,57 @@ describe("subBusinessDays", () => {
 				expect(call()).toBeNull();
 			});
 		}
+	});
+
+	describe("the last business day of a month, from the first day of the month after", () => {
+		it("should give Thu 2024-03-28 for March 2024 (Sexta-feira Santa, then a weekend)", () => {
+			expect(subBusinessDays(new Date(2024, 3, 1), 1)).toEqual(new Date(2024, 2, 28));
+		});
+
+		it("should give Fri 2024-08-30 for August 2024 (the 31st is a Saturday)", () => {
+			expect(subBusinessDays(new Date(2024, 8, 1), 1)).toEqual(new Date(2024, 7, 30));
+		});
+
+		it("should skip Corpus Christi on 2018-05-31 by default, and count it when includeOptional is false", () => {
+			expect(subBusinessDays(new Date(2018, 5, 1), 1)).toEqual(new Date(2018, 4, 30));
+			expect(subBusinessDays(new Date(2018, 5, 1), 1, { includeOptional: false })).toEqual(
+				new Date(2018, 4, 31),
+			);
+		});
+
+		it("should skip a state holiday (Dia do Evangélico, 2023-11-30 in DF): Wed 2023-11-29", () => {
+			expect(subBusinessDays(new Date(2023, 11, 1), 1, { stateCode: "DF" })).toEqual(
+				new Date(2023, 10, 29),
+			);
+		});
+
+		it("should count from the end with a larger amount (the 2nd to last of January 2024 is Tue 2024-01-30)", () => {
+			expect(subBusinessDays(new Date(2024, 1, 1), 2)).toEqual(new Date(2024, 0, 30));
+		});
+
+		it("should return null for December 2099, whose day after is in 2100, outside the supported years", () => {
+			expect(subBusinessDays(new Date(2100, 0, 1), 1)).toBeNull();
+		});
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should give Thu 2011-12-29 as the last business day of December 2011, skipping the 30th Samoa never had", () => {
+			expect(subBusinessDays(new Date(2012, 0, 1), 1)).toEqual(new Date(2011, 11, 29));
+		});
+	});
+
+	inTimeZone("Pacific/Apia", () => {
+		it("should walk back over 30 December 2011, the local day Samoa skipped to cross the date line", () => {
+			expect(subBusinessDays(new Date(2012, 0, 5, 12), 4)).toEqual(new Date(2011, 11, 29, 12));
+		});
+	});
+
+	inTimeZone("America/Sao_Paulo", () => {
+		it("should keep the time-of-day across the summer time start of 4 November 2018", () => {
+			expect(subBusinessDays(new Date(2018, 10, 9, 9, 30), 5)).toEqual(
+				new Date(2018, 10, 1, 9, 30),
+			);
+		});
 	});
 
 	describe("properties", () => {

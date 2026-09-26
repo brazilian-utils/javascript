@@ -17,7 +17,10 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * `subBusinessDays`.
  *
  * The time-of-day (hours, minutes, seconds, milliseconds) of `date` is preserved in the result,
- * and `date` itself is never mutated.
+ * daylight saving transitions along the way included, and `date` itself is never mutated. The
+ * one case that cannot be honoured is a time of day the resulting local day does not have, such
+ * as `00:30` on a day whose clocks jump from `00:00` to `01:00`: the result is then the nearest
+ * instant of that day, `01:30`, as in `addBusinessDays`.
  *
  * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
  * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a

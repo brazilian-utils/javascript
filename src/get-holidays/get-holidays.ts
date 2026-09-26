@@ -39,10 +39,34 @@ export type GetHolidaysParams = {
  */
 export type GetHolidaysOptions = GetHolidaysParams;
 
-const cache = new Map<string, Holiday[]>();
+// A holiday is a local calendar day, so the memo keeps the year, month and day rather than the
+// `Date` built from them: a `Date` is an instant, and the same instant falls on another local day
+// once the process time zone changes, which would make a memoized year answer for the wrong days.
+type MemoizedHoliday = {
+	name: string;
+	type: HolidayType;
+	year: number;
+	month: number;
+	day: number;
+};
 
-const cloneHolidays = (holidays: Holiday[]): Holiday[] =>
-	holidays.map((holiday) => ({ ...holiday, date: new Date(holiday.date) }));
+const cache = new Map<string, MemoizedHoliday[]>();
+
+const memoizeHolidays = (holidays: Holiday[]): MemoizedHoliday[] =>
+	holidays.map(({ name, type, date }) => ({
+		name,
+		type,
+		year: date.getFullYear(),
+		month: date.getMonth(),
+		day: date.getDate(),
+	}));
+
+const buildHolidays = (holidays: MemoizedHoliday[]): Holiday[] =>
+	holidays.map(({ name, type, year, month, day }) => ({
+		name,
+		date: new Date(year, month, day),
+		type,
+	}));
 
 const computeHolidays = (year: number, stateCode: StateCode | undefined): Holiday[] => {
 	const holidays: Holiday[] = [];
@@ -247,11 +271,11 @@ export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[
 
 	const cached = cache.get(cacheKey);
 	if (cached) {
-		return cloneHolidays(cached);
+		return buildHolidays(cached);
 	}
 
 	const holidays = computeHolidays(year, normalizedStateCode);
-	cache.set(cacheKey, holidays);
+	cache.set(cacheKey, memoizeHolidays(holidays));
 
-	return cloneHolidays(holidays);
+	return holidays;
 }
