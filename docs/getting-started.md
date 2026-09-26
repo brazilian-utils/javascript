@@ -72,7 +72,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
 | `getCities` | 5571 IBGE municipality names | 154.2 KB | 49.8 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
-| `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
+| `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 - 119.2 KB | 30.6 - 30.7 KB |
 | `isValidCest` · `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 116.6 - 117.8 KB | 26.4 - 26.9 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
 | `isValidNbs` · `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 81.8 KB | 13.8 KB |
