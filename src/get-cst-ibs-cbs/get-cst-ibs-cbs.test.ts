@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { CST_IBS_CBS_TABLE } from "../_internals/constants/ibs-cbs";
-import { anyGarbage } from "../_internals/test/arbitraries";
+import { anyGarbage, digitsUpTo } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCstIbsCbs } from "../is-valid-cst-ibs-cbs/is-valid-cst-ibs-cbs";
@@ -75,6 +75,13 @@ describe("getCstIbsCbs", () => {
 
 	describe("properties", () => {
 		const codeArbitrary = fc.constantFrom(...Object.keys(CST_IBS_CBS_TABLE));
+		const anyValue = fc.oneof(
+			codeArbitrary,
+			fc.integer({ min: 0, max: 1200 }),
+			digitsUpTo(4),
+			fc.anything(),
+			anyGarbage,
+		);
 
 		test("should never throw, regardless of the input", () => {
 			expectNeverThrows(getCstIbsCbs, anyGarbage);
@@ -82,8 +89,10 @@ describe("getCstIbsCbs", () => {
 
 		test("should resolve a value exactly when isValidCstIbsCbs accepts it", () => {
 			fc.assert(
-				fc.property(fc.integer({ min: 0, max: 1200 }), (value) => {
-					expect(getCstIbsCbs(value) !== null).toBe(isValidCstIbsCbs(value));
+				fc.property(anyValue, (value) => {
+					const input = value as string;
+
+					expect(getCstIbsCbs(input) !== null).toBe(isValidCstIbsCbs(input));
 				}),
 			);
 		});
