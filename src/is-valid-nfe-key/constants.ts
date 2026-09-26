@@ -1,5 +1,5 @@
 /**
- * The `mod` (modelo do documento) values `getNfeKeyInfo` supports, every one of them a document
+ * The `mod` (modelo do documento) values `isValidNfeKey` supports, every one of them a document
  * whose "chave de acesso" is the same 44 digit string built the same way: 55 NF-e, 57 CT-e,
  * 58 MDF-e, 62 NFCom, 63 BP-e, 64 GTV-e (the CT-e Guia de Transporte de Valores), 65 NFC-e,
  * 66 NF3e and 67 CT-e OS (Conhecimento de Transporte Eletrônico para Outros Serviços).
@@ -10,7 +10,7 @@
  */
 export const VALID_MODELS = ["55", "57", "58", "62", "63", "64", "65", "66", "67"] as const;
 
-/** One of the `mod` values `getNfeKeyInfo` supports. */
+/** One of the `mod` values `isValidNfeKey` supports. */
 type ValidModel = (typeof VALID_MODELS)[number];
 
 /**
@@ -98,6 +98,12 @@ export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
  */
 export const FORMAT_REGEX = /^\d{4}(?:[\s.\-/]*\d{4})*$/;
 
+/** Position of the model (mod) inside the 44 digit key. */
+export const MODEL_START = 20;
+
+/** End (exclusive) of the model (mod) inside the 44 digit key. */
+export const MODEL_END = 22;
+
 /** Start of the document number (nNF) inside the 44 digit key. */
 export const NUMBER_START = 25;
 
@@ -110,3 +116,18 @@ export const NUMBER_END = 34;
  * model repeats the same regex for its own number field.
  */
 export const ABSENT_NUMBER = "000000000";
+
+/** Position of the emission type (tpEmis) inside the 44 digit key. */
+export const EMISSION_TYPE_INDEX = 34;
+
+/**
+ * Position of `nSiteAutoriz` for the models that carry it, and start of the 8 digit numeric code
+ * (cNF) for every other model.
+ */
+export const AUTHORIZATION_SITE_INDEX = 35;
+
+/** Start of the 7 digit numeric code (cNF) of the models that carry `nSiteAutoriz`. */
+export const SHORT_CODE_START = 36;
+
+/** Position of the check digit (cDV), which is also the end (exclusive) of the numeric code. */
+export const CHECK_DIGIT_INDEX = 43;

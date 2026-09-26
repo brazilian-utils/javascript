@@ -1,4 +1,41 @@
-import { getNfeKeyInfo } from "../get-nfe-key-info/get-nfe-key-info";
+import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
+import { NFE_KEY_LENGTH, XML_ID_PREFIX_REGEX } from "../_internals/constants/nfe-key";
+import { mod11 } from "../_internals/mod11/mod11";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import {
+	ABSENT_NUMBER,
+	AUTHORIZATION_SITE_INDEX,
+	CHECK_DIGIT_INDEX,
+	EMISSION_TYPE_INDEX,
+	EMISSION_TYPES_BY_MODEL,
+	FORBIDDEN_CODES,
+	FORBIDDEN_CODE_MODELS,
+	FORMAT_REGEX,
+	MODEL_END,
+	MODEL_START,
+	NUMBER_END,
+	NUMBER_START,
+	VALID_MODELS,
+} from "./constants";
+
+/**
+ * Rule B03-10 of the NF-e MOC. The two models it covers, NF-e and NFC-e, spend no digit on
+ * `nSiteAutoriz`, so their `cNF` is always the 8 digits before the check digit.
+ *
+ * @param {string} model - The model of the key.
+ * @param {string} digits - The 44 digits of the key.
+ * @returns {boolean} True when the rule turns the numeric code down.
+ */
+const isForbiddenCode = (model: string, digits: string): boolean => {
+	if (!FORBIDDEN_CODE_MODELS.includes(model)) return false;
+
+	const code = digits.slice(AUTHORIZATION_SITE_INDEX, CHECK_DIGIT_INDEX);
+
+	return (
+		FORBIDDEN_CODES.includes(code) ||
+		Number(code) === Number(digits.slice(NUMBER_START, NUMBER_END))
+	);
+};
 
 /**
  * Validates a DF-e (Documento Fiscal eletrônico) access key (chave de acesso).
@@ -66,4 +103,36 @@ import { getNfeKeyInfo } from "../get-nfe-key-info/get-nfe-key-info";
  * isValidNfeKey("35170458716523000119010010000000121000123450"); // false (invalid mod)
  * ```
  */
-export const isValidNfeKey = (value: string): boolean => getNfeKeyInfo(value) !== null;
+export const isValidNfeKey = (value: string): boolean => {
+	if (typeof value !== "string") return false;
+
+	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart();
+
+	if (!FORMAT_REGEX.test(body)) return false;
+
+	const digits = sanitizeToDigits(body);
+
+	if (digits.length !== NFE_KEY_LENGTH) return false;
+
+	if (IBGE_UF_CODES[digits.slice(0, 2)] === undefined) return false;
+
+	const month = Number(digits.slice(4, 6));
+
+	if (month < 1 || month > 12) return false;
+
+	const modelDigits = digits.slice(MODEL_START, MODEL_END);
+	const model = VALID_MODELS.find((candidate) => candidate === modelDigits);
+
+	if (model === undefined) return false;
+
+	if (digits.slice(NUMBER_START, NUMBER_END) === ABSENT_NUMBER) return false;
+
+	if (!EMISSION_TYPES_BY_MODEL[model].includes(Number(digits[EMISSION_TYPE_INDEX]))) return false;
+
+	if (isForbiddenCode(model, digits)) return false;
+
+	return (
+		mod11(digits.slice(0, CHECK_DIGIT_INDEX), { variant: "arrecadacao" }) ===
+		Number(digits[CHECK_DIGIT_INDEX])
+	);
+};

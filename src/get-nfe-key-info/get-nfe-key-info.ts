@@ -1,19 +1,19 @@
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
-import { NFE_KEY_LENGTH, XML_ID_PREFIX_REGEX } from "../_internals/constants/nfe-key";
 import { type StateCode } from "../_internals/constants/states";
-import { mod11 } from "../_internals/mod11/mod11";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
-	ABSENT_NUMBER,
+	AUTHORIZATION_SITE_INDEX,
 	AUTHORIZATION_SITE_MODELS,
-	EMISSION_TYPES_BY_MODEL,
-	FORBIDDEN_CODES,
-	FORBIDDEN_CODE_MODELS,
-	FORMAT_REGEX,
+	CHECK_DIGIT_INDEX,
+	EMISSION_TYPE_INDEX,
+	MODEL_END,
+	MODEL_START,
 	NUMBER_END,
 	NUMBER_START,
+	SHORT_CODE_START,
 	VALID_MODELS,
-} from "./constants";
+} from "../is-valid-nfe-key/constants";
+import { isValidNfeKey } from "../is-valid-nfe-key/is-valid-nfe-key";
+import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -55,19 +55,8 @@ export type NfeKeyInfo = {
 	checkDigit: number;
 };
 
-const EMISSION_TYPE_INDEX = 34;
-
-const AUTHORIZATION_SITE_INDEX = 35;
-
-const SHORT_CODE_START = 36;
-
-const CODE_END = 43;
-
-const CHECK_DIGIT_INDEX = 43;
-
-const isForbiddenCode = (model: string, code: string, number: number): boolean =>
-	FORBIDDEN_CODE_MODELS.includes(model) &&
-	(FORBIDDEN_CODES.includes(code) || Number(code) === number);
+/** `VALID_MODELS` widened to strings, so a model read out of the key can be looked up in it. */
+const MODEL_CODES: readonly string[] = VALID_MODELS;
 
 /**
  * Parses a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) into its fields.
@@ -76,7 +65,7 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  * (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
  * Accepts the same input forms as `isValidNfeKey` (the printed mask of 4 digit groups, split by
  * whitespace, `.`, `-` or `/`, and the `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes
- * of the XML `Id` attribute) and returns `null` when the key is not valid.
+ * of the XML `Id` attribute) and returns `null` exactly when `isValidNfeKey` returns `false`.
  *
  * The emission type (`tpEmis`) is checked against the codes the MOC of that model assigns, so
  * the accepted set changes with the model: 1 to 7 and 9 for NF-e and NFC-e, `{1, 3, 4, 5, 7, 8}`
@@ -137,63 +126,26 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  * ```
  */
 export const getNfeKeyInfo = (value: string): NfeKeyInfo | null => {
-	if (typeof value !== "string") return null;
+	if (!isValidNfeKey(value)) return null;
 
-	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart();
-
-	if (!FORMAT_REGEX.test(body)) return null;
-
-	const digits = sanitizeToDigits(body);
-
-	if (digits.length !== NFE_KEY_LENGTH) return null;
-
-	const uf = digits.slice(0, 2);
-
-	const stateCode = IBGE_UF_CODES[uf];
-
-	if (stateCode === undefined) return null;
-
-	const month = Number(digits.slice(4, 6));
-
-	if (month < 1 || month > 12) return null;
-
-	const modelDigits = digits.slice(20, 22);
-	const model = VALID_MODELS.find((candidate) => candidate === modelDigits);
-
-	if (model === undefined) return null;
-
-	if (digits.slice(NUMBER_START, NUMBER_END) === ABSENT_NUMBER) return null;
-
-	const emissionType = Number(digits[EMISSION_TYPE_INDEX]);
-
-	if (!EMISSION_TYPES_BY_MODEL[model].includes(emissionType)) return null;
-
+	const digits = parseNfeKey(value);
+	const model = VALID_MODELS[MODEL_CODES.indexOf(digits.slice(MODEL_START, MODEL_END))];
 	const hasAuthorizationSite = AUTHORIZATION_SITE_MODELS.includes(model);
-	const code = digits.slice(
-		hasAuthorizationSite ? SHORT_CODE_START : AUTHORIZATION_SITE_INDEX,
-		CODE_END,
-	);
-	const number = Number(digits.slice(NUMBER_START, NUMBER_END));
-
-	if (isForbiddenCode(model, code, number)) return null;
-
-	const checkDigit = Number(digits[CHECK_DIGIT_INDEX]);
-
-	if (mod11(digits.slice(0, CHECK_DIGIT_INDEX), { variant: "arrecadacao" }) !== checkDigit) {
-		return null;
-	}
 
 	const parsed: NfeKeyInfo = {
-		stateCode,
+		stateCode: IBGE_UF_CODES[digits.slice(0, 2)],
 		year: 2000 + Number(digits.slice(2, 4)),
-		month,
+		month: Number(digits.slice(4, 6)),
 		taxId: digits.slice(6, 20),
 		model,
 		series: Number(digits.slice(22, 25)),
-		number,
-		emissionType,
-		code,
-		checkDigit,
+		number: Number(digits.slice(NUMBER_START, NUMBER_END)),
+		emissionType: Number(digits[EMISSION_TYPE_INDEX]),
+		code: digits.slice(
+			hasAuthorizationSite ? SHORT_CODE_START : AUTHORIZATION_SITE_INDEX,
+			CHECK_DIGIT_INDEX,
+		),
+		checkDigit: Number(digits[CHECK_DIGIT_INDEX]),
 	};
 
 	if (hasAuthorizationSite) parsed.authorizationSite = Number(digits[AUTHORIZATION_SITE_INDEX]);

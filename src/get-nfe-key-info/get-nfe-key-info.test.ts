@@ -3,7 +3,12 @@ import * as fc from "fast-check";
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
 import { type StateCode } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { EMISSION_TYPES_BY_MODEL, FORBIDDEN_CODES, VALID_MODELS } from "./constants";
+import {
+	EMISSION_TYPES_BY_MODEL,
+	FORBIDDEN_CODES,
+	VALID_MODELS,
+} from "../is-valid-nfe-key/constants";
+import { isValidNfeKey } from "../is-valid-nfe-key/is-valid-nfe-key";
 import { getNfeKeyInfo, type NfeKeyInfo, type NfeKeyModel } from "./get-nfe-key-info";
 
 const KEY_SP = "35170458716523000119550010000000121000123458";
@@ -237,6 +242,22 @@ describe("getNfeKeyInfo", () => {
 					expect(parsed?.authorizationSite).toBe(hasSite ? Number(tail.charAt(0)) : undefined);
 					expect(parsed?.code).toBe(code);
 					expect(parsed?.checkDigit).toBe(Number(key.charAt(43)));
+				}),
+			);
+		});
+
+		test("should return null exactly when isValidNfeKey returns false", () => {
+			const key = parts.map(([uf, year, month, taxId, document, series, number, tail]) =>
+				buildNfeKey(
+					`${uf}${year}${String(month).padStart(2, "0")}${taxId}${document.model}${series}${String(number).padStart(9, "0")}${document.emissionType}${tail}`,
+				),
+			);
+
+			const input = fc.oneof(key, fc.string(), fc.anything());
+
+			fc.assert(
+				fc.property(input, (value) => {
+					expect(getNfeKeyInfo(value as string) === null).toBe(!isValidNfeKey(value as string));
 				}),
 			);
 		});
