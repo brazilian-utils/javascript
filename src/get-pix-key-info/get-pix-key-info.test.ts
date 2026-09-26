@@ -5,6 +5,7 @@ import { formatCnpj } from "../format-cnpj/format-cnpj";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePhone } from "../generate-phone/generate-phone";
+import { isValidPixKey } from "../is-valid-pix-key/is-valid-pix-key";
 import { type PixKeyInfo, type PixKeyType, getPixKeyInfo } from "./get-pix-key-info";
 
 const AMBIGUOUS = "51998259765";
@@ -341,6 +342,22 @@ describe("getPixKeyInfo", () => {
 					const shouted = getPixKeyInfo(`  ${key.toUpperCase()}  `);
 
 					expect(shouted?.value).toBe(parsed?.value);
+				}),
+			);
+		});
+
+		test("should return null exactly when isValidPixKey returns false, and the type accept filters on", () => {
+			const built = keys.map(([kind, email, evp]) => buildPixKey(kind, email, evp));
+			const input = fc.oneof(built, fc.string(), fc.anything());
+			const accept = fc.subarray([...PIX_KEY_KINDS]);
+
+			fc.assert(
+				fc.property(input, accept, (value, kinds) => {
+					const parsed = getPixKeyInfo(value as string);
+					const isAccepted = parsed !== null && kinds.includes(parsed.type);
+
+					expect(parsed === null).toBe(!isValidPixKey(value as string));
+					expect(isValidPixKey(value as string, { accept: kinds })).toBe(isAccepted);
 				}),
 			);
 		});
