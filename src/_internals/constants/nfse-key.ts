@@ -8,8 +8,15 @@
 export const FORMAT_REGEX = /^(?:nfs)?(\d{50})$/i;
 
 /**
+ * Digits of the key, type `TSChaveNFSe` of the leiaute. Once `isValidNfseKey` accepts a value,
+ * they are the last 50 characters of the trimmed value, after the optional `NFS` prefix.
+ */
+export const NFSE_KEY_LENGTH = 50;
+
+/**
  * The `ambGer` (ambiente gerador) codes of `TSAmbGeradorNFSe`: 1 for the system of the
- * municipality (Prefeitura), 2 for the Sistema Nacional NFS-e (Sefin Nacional).
+ * municipality (Prefeitura), 2 for the Sistema Nacional NFS-e (Sefin Nacional). In code order,
+ * so code `n` sits at index `n - 1`.
  */
 export const GENERATOR_ENVIRONMENTS = [1, 2] as const;
 

@@ -1,4 +1,40 @@
-import { getNfseKeyInfo } from "../get-nfse-key-info/get-nfse-key-info";
+import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
+import {
+	ABSENT_NUMBER,
+	CHECK_DIGIT_INDEX,
+	CODE_START,
+	CPF_PADDING,
+	FORMAT_REGEX,
+	GENERATOR_ENVIRONMENTS,
+	GENERATOR_ENVIRONMENT_INDEX,
+	MONTH_START,
+	NUMBER_START,
+	TAX_ID_START,
+	TAX_ID_TYPES,
+	TAX_ID_TYPE_INDEX,
+	YEAR_START,
+} from "../_internals/constants/nfse-key";
+import { mod11 } from "../_internals/mod11/mod11";
+import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
+import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
+
+/**
+ * Checks the "Inscrição Federal" against its "Tipo de Inscrição Federal" digit: a CNPJ as it is,
+ * a CPF behind its `000` padding, and anything else (an unknown type) rejected.
+ *
+ * @param {string} typeDigit - The "Tipo de Inscrição Federal" digit of the key.
+ * @param {string} registration - The 14 positions of the "Inscrição Federal".
+ * @returns {boolean} True if the registration is a valid CPF or CNPJ of that type.
+ */
+const isValidTaxId = (typeDigit: string, registration: string): boolean => {
+	const taxIdType = TAX_ID_TYPES[typeDigit];
+	if (taxIdType === "cnpj") return isValidCnpj(registration);
+	return (
+		taxIdType === "cpf" &&
+		registration.startsWith(CPF_PADDING) &&
+		isValidCpf(registration.slice(CPF_PADDING.length))
+	);
+};
 
 /**
  * Validates the access key (chave de acesso) of a national NFS-e, the Nota Fiscal de Serviço
@@ -42,4 +78,25 @@ import { getNfseKeyInfo } from "../get-nfse-key-info/get-nfse-key-info";
  * isValidNfseKey("3550308 2 2 58716523000119 0000000000012 2601 135792468 3"); // false (no mask)
  * ```
  */
-export const isValidNfseKey = (value: string): boolean => getNfseKeyInfo(value) !== null;
+export const isValidNfseKey = (value: string): boolean => {
+	if (typeof value !== "string") return false;
+
+	const match = FORMAT_REGEX.exec(value.trim());
+
+	if (match === null) return false;
+
+	const [, digits] = match;
+	const ambGer = Number(digits[GENERATOR_ENVIRONMENT_INDEX]);
+	const month = Number(digits.slice(MONTH_START, CODE_START));
+
+	return (
+		IBGE_UF_CODES[digits.slice(0, 2)] !== undefined &&
+		GENERATOR_ENVIRONMENTS.some((candidate) => candidate === ambGer) &&
+		isValidTaxId(digits[TAX_ID_TYPE_INDEX], digits.slice(TAX_ID_START, NUMBER_START)) &&
+		digits.slice(NUMBER_START, YEAR_START) !== ABSENT_NUMBER &&
+		month >= 1 &&
+		month <= 12 &&
+		mod11(digits.slice(0, CHECK_DIGIT_INDEX), { variant: "arrecadacao" }) ===
+			Number(digits[CHECK_DIGIT_INDEX])
+	);
+};

@@ -1,9 +1,11 @@
 import * as fc from "fast-check";
 
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
+import { type GENERATOR_ENVIRONMENTS } from "../_internals/constants/nfse-key";
 import { type StateCode } from "../_internals/constants/states";
+import { anyText } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { type GENERATOR_ENVIRONMENTS } from "./constants";
+import { isValidNfseKey } from "../is-valid-nfse-key/is-valid-nfse-key";
 import {
 	getNfseKeyInfo,
 	type NfseKeyGeneratorEnvironment,
@@ -257,6 +259,48 @@ describe("getNfseKeyInfo", () => {
 					const accepted = CHECK_DIGITS.filter((digit) => getNfseKeyInfo(`${base}${digit}`));
 
 					expect(accepted).toHaveLength(1);
+				}),
+			);
+		});
+
+		test("should return null exactly when isValidNfseKey rejects a well-formed key with one digit changed", () => {
+			fc.assert(
+				fc.property(
+					parts,
+					fc.integer({ min: 0, max: 49 }),
+					fc.constantFrom(...CHECK_DIGITS),
+					fc.constantFrom("", "NFS", "nfs", " "),
+					(
+						[uf, municipality, ambGer, issuer, number, year, month, code],
+						position,
+						digit,
+						prefix,
+					) => {
+						const body = [
+							uf,
+							municipality,
+							ambGer,
+							issuer.type,
+							issuer.registration,
+							String(number).padStart(13, "0"),
+							year,
+							String(month).padStart(2, "0"),
+							code,
+						].join("");
+						const key = `${body}${expectedCheckDigit(body)}`;
+						const changed = `${prefix}${key.slice(0, position)}${digit}${key.slice(position + 1)}`;
+						expect(getNfseKeyInfo(changed) === null).toBe(!isValidNfseKey(changed));
+					},
+				),
+			);
+		});
+
+		const textOrAnything = fc.oneof(anyText, fc.anything());
+
+		test("should return null exactly when isValidNfseKey rejects any text or any value", () => {
+			fc.assert(
+				fc.property(textOrAnything, (value) => {
+					expect(getNfseKeyInfo(value as string) === null).toBe(!isValidNfseKey(value as string));
 				}),
 			);
 		});
