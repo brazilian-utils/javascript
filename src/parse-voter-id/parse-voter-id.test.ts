@@ -58,6 +58,18 @@ describe("parseVoterId", () => {
 			expectAlwaysReturnsType(parseVoterId, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseVoterId(-123_456_780_124)).toBe("");
+		expect(parseVoterId(-1)).toBe("");
+		expect(parseVoterId(1.5)).toBe("");
+		expect(parseVoterId(2 ** 53)).toBe("");
+		expect(parseVoterId(Number.MAX_VALUE)).toBe("");
+		expect(parseVoterId(1e21)).toBe("");
+		expect(parseVoterId(Number.NaN)).toBe("");
+		expect(parseVoterId(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseVoterId(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseVoterId types", () => {

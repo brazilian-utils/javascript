@@ -105,6 +105,18 @@ describe("formatVoterId", () => {
 			expectAlwaysReturnsType(formatVoterId, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatVoterId(-123_456_780_124)).toBe("");
+		expect(formatVoterId(-1)).toBe("");
+		expect(formatVoterId(1.5)).toBe("");
+		expect(formatVoterId(2 ** 53)).toBe("");
+		expect(formatVoterId(Number.MAX_VALUE)).toBe("");
+		expect(formatVoterId(1e21)).toBe("");
+		expect(formatVoterId(Number.NaN)).toBe("");
+		expect(formatVoterId(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatVoterId(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("formatVoterId types", () => {

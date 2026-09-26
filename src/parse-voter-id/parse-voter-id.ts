@@ -1,4 +1,5 @@
 import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { EXTENDED_LENGTH, LENGTH } from "./constants";
 
@@ -9,6 +10,9 @@ import { EXTENDED_LENGTH, LENGTH } from "./constants";
  * Gerais ("02"), since those states may issue voter ids with a 9-digit sequential number;
  * otherwise keeps up to the usual 12 digits.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The voter id value to be parsed.
  * @returns {string} The voter id value without formatting.
  *
@@ -16,6 +20,7 @@ import { EXTENDED_LENGTH, LENGTH } from "./constants";
  * ```typescript
  * parseVoterId("1234 5678 01 24"); // "123456780124"
  * parseVoterId("1234 5678 8 01 91"); // "1234567880191"
+ * parseVoterId(-123456780124); // "" (not a non-negative safe integer)
  * ```
  *
  * The 13-digit São Paulo/Minas Gerais cap is brutils parity, not published by the TSE. A
@@ -29,6 +34,8 @@ import { EXTENDED_LENGTH, LENGTH } from "./constants";
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const parseVoterId = (value: string | number): string => {
+	if (!isLookupCode(value)) return "";
+
 	const digits = sanitizeToDigits(value);
 
 	const federativeUnion = digits.slice(9, 11);

@@ -1,5 +1,6 @@
 import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
 import { format } from "../_internals/format/format";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { OBFUSCATED_PATTERNS, PATTERNS } from "./constants";
 
@@ -19,6 +20,9 @@ export type FormatVoterIdOptions = {
  * federative union code (the 10th and 11th digits) is "01" (São Paulo) or "02" (Minas Gerais),
  * the two states whose voter ids may carry a 9-digit sequential number.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The voter id value to be formatted.
  * @param {FormatVoterIdOptions} [options] - Optional formatting options.
  * @param {boolean} [options.obfuscate] - If truthy, hides the first 3 digits and the 2 check
@@ -31,6 +35,7 @@ export type FormatVoterIdOptions = {
  * formatVoterId("1234567880191"); // "1234 5678 8 01 91"
  * formatVoterId("123456780124", { obfuscate: true }); // "***4 5678 01 **"
  * formatVoterId("1234567880191", { obfuscate: true }); // "***4 5678 8 01 **"
+ * formatVoterId(-123456780124); // "" (not a non-negative safe integer)
  * ```
  *
  * No authority publishes a masking rule for the voter id, so `obfuscate` applies the one Lei nº
@@ -54,6 +59,8 @@ export type FormatVoterIdOptions = {
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const formatVoterId = (value: string | number, options?: FormatVoterIdOptions): string => {
+	if (!isLookupCode(value)) return "";
+
 	const digits = sanitizeToDigits(value);
 	const federativeUnion = digits.slice(9, 11);
 	const isExtended =
