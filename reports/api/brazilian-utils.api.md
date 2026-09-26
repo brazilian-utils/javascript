@@ -110,6 +110,14 @@ export type Cfop = {
 };
 
 // @public
+export type ClassTrib = {
+    code: string;
+    cst: string;
+    name: string;
+    description: string;
+};
+
+// @public
 export type Cnae = {
     code: string;
     description: string;
@@ -152,6 +160,12 @@ export type CpfInfo = {
     fiscalRegion: string;
     states: StateCode[];
     checkDigits: string;
+};
+
+// @public
+export type CstIbsCbs = {
+    code: string;
+    description: string;
 };
 
 // @public
@@ -525,6 +539,9 @@ export const getCfop: (value: string | number) => Cfop | null;
 export const getCities: (state?: StateCode) => string[];
 
 // @public
+export const getClassTrib: (value: string | number) => ClassTrib | null;
+
+// @public
 export const getCnae: (value: string | number) => Cnae | null;
 
 // @public
@@ -535,6 +552,9 @@ export type GetCnpjInfoOptions = Pick<IsValidCnpjOptions, "version">;
 
 // @public
 export const getCpfInfo: (value: string) => CpfInfo | null;
+
+// @public
+export const getCstIbsCbs: (value: string | number) => CstIbsCbs | null;
 
 // @public
 export const getFormatLicensePlate: (value: string) => LicensePlateFormat | null;
@@ -752,6 +772,14 @@ export type IsValidCertidaoOptions = {
 export const isValidCfop: (value: string | number) => boolean;
 
 // @public
+export const isValidClassTrib: (value: string | number, options?: IsValidClassTribOptions) => boolean;
+
+// @public
+export type IsValidClassTribOptions = {
+    cst?: string | number;
+};
+
+// @public
 export const isValidCnae: (value: string | number) => boolean;
 
 // @public
@@ -788,6 +816,9 @@ export const isValidCsosn: (value: string | number) => boolean;
 
 // @public
 export const isValidCst: (value: string | number, options?: IsValidCstOptions) => boolean;
+
+// @public
+export const isValidCstIbsCbs: (value: string | number) => boolean;
 
 // @public
 export type IsValidCstOptions = {

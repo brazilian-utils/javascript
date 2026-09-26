@@ -116,9 +116,11 @@ export {
 } from "./get-certidao-info/get-certidao-info";
 export { type Cfop, getCfop } from "./get-cfop/get-cfop";
 export { getCities } from "./get-cities/get-cities";
+export { type ClassTrib, getClassTrib } from "./get-class-trib/get-class-trib";
 export { type Cnae, getCnae } from "./get-cnae/get-cnae";
 export { type CnpjInfo, getCnpjInfo, type GetCnpjInfoOptions } from "./get-cnpj-info/get-cnpj-info";
 export { type CpfInfo, getCpfInfo } from "./get-cpf-info/get-cpf-info";
+export { type CstIbsCbs, getCstIbsCbs } from "./get-cst-ibs-cbs/get-cst-ibs-cbs";
 export {
 	getFormatLicensePlate,
 	type LicensePlateFormat,
@@ -200,6 +202,10 @@ export {
 	isValidCertidao,
 } from "./is-valid-certidao/is-valid-certidao";
 export { isValidCfop } from "./is-valid-cfop/is-valid-cfop";
+export {
+	type IsValidClassTribOptions,
+	isValidClassTrib,
+} from "./is-valid-class-trib/is-valid-class-trib";
 export { isValidCnae } from "./is-valid-cnae/is-valid-cnae";
 export { isValidCnh } from "./is-valid-cnh/is-valid-cnh";
 export { isValidCno } from "./is-valid-cno/is-valid-cno";
@@ -209,6 +215,7 @@ export { isValidCpf } from "./is-valid-cpf/is-valid-cpf";
 export { isValidCreditCard } from "./is-valid-credit-card/is-valid-credit-card";
 export { isValidCsosn } from "./is-valid-csosn/is-valid-csosn";
 export { type IsValidCstOptions, isValidCst } from "./is-valid-cst/is-valid-cst";
+export { isValidCstIbsCbs } from "./is-valid-cst-ibs-cbs/is-valid-cst-ibs-cbs";
 export { isValidEmail } from "./is-valid-email/is-valid-email";
 export { type IsValidGtinOptions, isValidGtin } from "./is-valid-gtin/is-valid-gtin";
 export { isValidIban } from "./is-valid-iban/is-valid-iban";

@@ -3023,6 +3023,92 @@ isValidCsosn(-101); // false (not a non-negative safe integer)
 
 Source: [consolidated Anexo III-A of Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70) and [Ajuste SINIEF 03/2010](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2010/aj_003_10).
 
+### isValidCstIbsCbs
+
+Check if a CST-IBS/CBS (Código de Situação Tributária do IBS e da CBS) exists in the official table, the code the field `CST` of the group `IBSCBS` carries in the electronic fiscal documents of the tax reform (Lei Complementar nº 214/2025): NF-e, NFC-e, CT-e, NFS-e and the others.
+
+- The codes in force are `000`, `010`, `011`, `200`, `220`, `221`, `222`, `400`, `410`, `510`, `515`, `550`, `620`, `800`, `810`, `811`, `820` and `830`.
+- It is a function of its own, not a `tax` of `isValidCst`: IBS and CBS share one table, its 3 digit codes collide with the ICMS origin plus Tabela B form (`000`, `200`), and `isValidCst` without a `tax` accepts a code of any table, so adding this one would change what that default accepts.
+- Accepts a string of bare digits with optional surrounding whitespace, or a non-negative safe integer. The field is numeric with 3 digits and has no mask, so any other string is rejected instead of having its digits picked out.
+- A value narrower than 3 digits is left padded with zeros, as a string or as a number, since the codes start with zeros a numeric field drops: `0`, `'0'` and `'000'` are all the code `000`.
+
+```javascript
+import { isValidCstIbsCbs } from '@brazilian-utils/brazilian-utils';
+
+isValidCstIbsCbs('000'); // true
+isValidCstIbsCbs(410); // true
+isValidCstIbsCbs(10); // true (padded to '010')
+isValidCstIbsCbs('100'); // false
+isValidCstIbsCbs('cst200'); // false (not a documented form)
+isValidCstIbsCbs(-200); // false (not a non-negative safe integer)
+```
+
+### getCstIbsCbs
+
+Look a CST-IBS/CBS up and get the description the official CST table gives it. The result is a `CstIbsCbs` record: `{ code, description }`.
+
+- Same table and input rules as `isValidCstIbsCbs`. Returns `null` when the code is unknown or the value is not in a documented form.
+
+```javascript
+import { getCstIbsCbs } from '@brazilian-utils/brazilian-utils';
+
+getCstIbsCbs('000'); // { code: '000', description: 'Tributação integral' }
+getCstIbsCbs(410); // { code: '410', description: 'Imunidade e não incidência' }
+getCstIbsCbs(10); // { code: '010', description: 'Tributação com alíquotas uniformes' }
+getCstIbsCbs('100'); // null
+getCstIbsCbs('cst200'); // null (not a documented form)
+```
+
+### isValidClassTrib
+
+Check if a cClassTrib (Código de Classificação Tributária do IBS e da CBS) exists in the official table, the code the field `cClassTrib` carries next to the CST-IBS/CBS.
+
+- **Options** (`IsValidClassTribOptions`): `cst` is the CST-IBS/CBS the document carries, checked against the classification as well. Omit it to check the cClassTrib alone.
+- Every classification belongs to exactly one CST-IBS/CBS, the first 3 digits of its code, and a document that carries a cClassTrib with another CST is rejected (rejection 1024, "Classificação Tributária do IBS e da CBS incompatível com o CST informado"). A `cst` that is given and is not the CST of the classification, whatever it is, makes the result `false`.
+- Only the classifications in force count: the Informe Técnico 2025.002 excludes a classification by closing its validity (`dFimVig`), as v.1.60 did with `220001`, `220002` and `220003`, and those are rejected. 161 are in force in the version published on 23/06/2026.
+- Accepts a string of bare digits with optional surrounding whitespace, or a non-negative safe integer. The field is numeric with 6 digits and has no mask, so any other string is rejected.
+- A value narrower than 6 digits is left padded with zeros: `1`, `'1'` and `'000001'` are all the code `000001`. `cst` is read the same way, padded to 3 digits.
+- Only the code list is bundled with this function, not the descriptions `getClassTrib` returns.
+
+```javascript
+import { isValidClassTrib } from '@brazilian-utils/brazilian-utils';
+
+isValidClassTrib('200001'); // true
+isValidClassTrib(1); // true (padded to '000001')
+isValidClassTrib('200001', { cst: '200' }); // true
+isValidClassTrib('200001', { cst: '000' }); // false (the classification belongs to CST 200)
+isValidClassTrib('999999'); // false
+isValidClassTrib('220001'); // false (excluded by Informe Técnico 2025.002 v.1.60)
+isValidClassTrib('c200001'); // false (not a documented form)
+```
+
+### getClassTrib
+
+Look a cClassTrib up and get its official classification. The result is a `ClassTrib` record: `{ code, cst, name, description }`.
+
+- Same table and the same rules for reading the code as `isValidClassTrib`. Returns `null` when the code is unknown or the value is not in a documented form.
+- The `cst` option exists only on `isValidClassTrib`, since the entry returned here already carries its CST as `cst`.
+- `cst` is the CST-IBS/CBS the classification belongs to, the first 3 digits of its code; `name` is the short name the official table gives for display (the column "Nome cClassTrib") and `description` the situation it refers to (the column "Descrição cClassTrib").
+- The legal wording the workbook also prints for each row (the article of Lei Complementar nº 214/2025 and of both regulations) is not shipped.
+
+```javascript
+import { getClassTrib } from '@brazilian-utils/brazilian-utils';
+
+getClassTrib('000002');
+// {
+//   code: '000002',
+//   cst: '000',
+//   name: 'Exploração de via',
+//   description: 'Exploração de via, observado o art. 11 da Lei Complementar nº 214, de 2025.',
+// }
+getClassTrib(2)?.code; // '000002'
+getClassTrib('999999'); // null
+getClassTrib('220001'); // null (excluded by Informe Técnico 2025.002 v.1.60)
+getClassTrib('c200001'); // null (not a documented form)
+```
+
+Source: the CST and cClassTrib sheets of the "Tabela de Classificação Tributária do IBS e CBS" workbook the [Portal Nacional da NF-e publishes under "Documentos" > "Diversos"](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9nus=) (the version published on 23/06/2026), divulged by the [Informe Técnico 2025.002](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=) (v.1.60), and the [Nota Técnica 2025.002-RTC](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=), fields UB13 and UB14.
+
 ## GTIN (product barcode)
 
 ### isValidGtin
