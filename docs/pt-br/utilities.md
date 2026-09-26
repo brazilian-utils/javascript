@@ -2211,7 +2211,7 @@ getLegalNature('2208');
 // }
 getLegalNature('3123')?.currentCode; // null (extinto sem sucessor)
 getLegalNature('206-2')?.code; // '2062'
-getLegalNature(206.2)?.category.description; // 'Entidades Empresariais'
+getLegalNature('206.2')?.category.description; // 'Entidades Empresariais'
 getLegalNature('0000'); // null
 ```
 
