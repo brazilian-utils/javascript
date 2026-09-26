@@ -47,9 +47,15 @@ type RunResult = {
 
 const run = (command: string, args: string[], cwd = rootDirectory): Promise<RunResult> =>
 	new Promise((_resolve) => {
-		execFile(command, args, { cwd, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
-			_resolve({ ok: error === null, stdout, stderr: stderr || (error?.message ?? "") });
-		});
+		execFile(
+			command,
+			args,
+			// npm is npm.cmd on Windows, which only a shell resolves; the arguments are fixed strings.
+			{ cwd, maxBuffer: 64 * 1024 * 1024, shell: process.platform === "win32" },
+			(error, stdout, stderr) => {
+				_resolve({ ok: error === null, stdout, stderr: stderr || (error?.message ?? "") });
+			},
+		);
 	});
 
 const packageName = "@brazilian-utils/brazilian-utils";
