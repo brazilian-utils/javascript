@@ -2825,6 +2825,100 @@ parseNcm('8471.30.12'); // '84713012'
 parseNcm('8471'); // '8471' (um código parcial é mantido como está)
 ```
 
+### isValidNbs
+
+Valida um código NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) contra a tabela oficial da NBS 2.0, o código que a NFS-e nacional leva em `cNBS`.
+
+- O código tem 9 dígitos, impressos como `N.NNNN.NN.NN`: o algarismo 1, o capítulo, a posição, os dois níveis de subposição, o item e o subitem.
+- Aceita uma string com os 9 dígitos ou com a máscara, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- Só códigos completos são válidos: os títulos de capítulo (`1.01`), posição (`1.0101`) e subposição (`1.0101.1`) não classificam nada por si sós.
+- O ANEXO B do Sistema Nacional NFS-e lista os mesmos 920 códigos menos três (`1.0402.29.00`, `1.0403.29.00` e `1.0904.40.00`), então um código válido aqui ainda pode ser recusado pela NFS-e.
+
+```javascript
+import { isValidNbs } from '@brazilian-utils/brazilian-utils';
+
+isValidNbs('1.0101.11.00'); // true
+isValidNbs('101011100'); // true
+isValidNbs(101011100); // true
+isValidNbs('1.0101'); // false (título de posição, não um código completo)
+isValidNbs('1.9999.99.99'); // false
+isValidNbs('1.0101abc11.00'); // false (não é uma forma documentada)
+```
+
+### formatNbs
+
+Formata um código NBS (Nomenclatura Brasileira de Serviços) na máscara `N.NNNN.NN.NN` em que a nomenclatura o imprime. Só a estrutura muda; use `isValidNbs` para conferir um código com a tabela.
+
+- Todo código NBS começa com 1, então, diferente do `formatNcm`, não há opção `pad`.
+- No resto, mesmas regras de `formatCnae`: a máscara é aplicada até onde o valor vai, os caracteres fora dela são descartados e um número é lido como a string dos seus dígitos.
+
+```javascript
+import { formatNbs } from '@brazilian-utils/brazilian-utils';
+
+formatNbs('101011100'); // 1.0101.11.00
+formatNbs(101011100); // 1.0101.11.00
+formatNbs('10101'); // 1.0101 (mascarado até onde vai)
+formatNbs('abc101011100'); // 1.0101.11.00 (só os dígitos são lidos)
+```
+
+### getNbs
+
+Consulta um código NBS (Nomenclatura Brasileira de Serviços) e retorna a sua descrição oficial. O resultado é um registro `Nbs`: `{ code, description }`.
+
+- Mesmas regras de `isValidNbs`. `code` são os 9 dígitos, sem a máscara. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+
+```javascript
+import { getNbs } from '@brazilian-utils/brazilian-utils';
+
+getNbs('1.0101.11.00');
+// { code: '101011100', description: 'Serviços de construção de edificações residenciais de um e dois pavimentos' }
+
+getNbs(126050000); // { code: '126050000', description: 'Serviços domésticos' }
+getNbs('1.0101'); // null (título de posição, não um código completo)
+getNbs('1.9999.99.99'); // null
+```
+
+Fonte: [tabela da NBS 2.0 publicada pelo MDIC](https://www.gov.br/mdic/pt-br/assuntos/sdic/comercio-e-servicos/nbs-nomenclatura-brasileira-de-servicos), aprovada pela Portaria Conjunta RFB/SCS 1.429/2018 e alterada pela Portaria Conjunta RFB/SCS 2.000/2018.
+
+### isValidServiceItem
+
+Verifica se um valor é um subitem em vigor da lista de serviços anexa à Lei Complementar 116/2003, a lista dos serviços sobre os quais incide o ISS.
+
+- A lei numera o subitem como o item, um ponto e dois dígitos, de `1.01` a `40.01`.
+- Aceita essa forma, o item preenchido com zero (`'01.01'`) ou os dígitos puros (`'0101'`, `'101'` ou o inteiro `101`), que são os quatro primeiros dígitos do código `cTribNac` da NFS-e nacional, com espaços opcionais nas extremidades.
+- O ponto é o único separador que a lei imprime entre o item e o subitem, então, ao contrário dos códigos com máscara de agrupamento impressa (`isValidCfop`, `isValidNbs`), nada mais é aceito no lugar dele e `'1-01'` é rejeitado.
+- Um número só é lido quando é um inteiro seguro não negativo, então o decimal `1.01` é rejeitado: escreva a forma com ponto como string.
+- Os subitens vetados (`3.01`, `7.14`, `7.15`, `13.01` e `17.07`), os títulos de item, os códigos nacionais de 6 dígitos em que um subitem se desdobra e o item 99 da lista nacional, que não faz parte da lei, não são válidos. Códigos municipais de serviço estão fora do escopo.
+
+```javascript
+import { isValidServiceItem } from '@brazilian-utils/brazilian-utils';
+
+isValidServiceItem('1.01'); // true
+isValidServiceItem('01.01'); // true
+isValidServiceItem('0101'); // true
+isValidServiceItem(101); // true
+isValidServiceItem('3.01'); // false (vetado)
+isValidServiceItem('99.01'); // false (só da lista nacional, não da lei)
+isValidServiceItem(1.01); // false (não é um inteiro seguro não negativo)
+```
+
+### getServiceItem
+
+Consulta um subitem da lista de serviços anexa à Lei Complementar 116/2003 e retorna a sua descrição oficial. O resultado é um registro `ServiceItem`: `{ code, description }`.
+
+- Mesmas regras de `isValidServiceItem`. `code` é a forma em que a lei o imprime (`'1.01'`). Retorna `null` quando o subitem é desconhecido ou o valor não está em uma forma documentada.
+
+```javascript
+import { getServiceItem } from '@brazilian-utils/brazilian-utils';
+
+getServiceItem('1.01'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('0101'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob encomenda.' }
+getServiceItem('3.01'); // null (vetado)
+```
+
+Fonte: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm) e a planilha `LISTA.SERV.NAC.` do [ANEXO B do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), a lista em vigor em formato legível por máquina.
+
 ### isValidCfop
 
 Valida um código CFOP (Código Fiscal de Operações e Prestações) contra a tabela oficial, o Anexo II consolidado do Convênio SINIEF s/nº 1970 em vigor.

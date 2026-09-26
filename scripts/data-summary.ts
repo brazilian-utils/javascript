@@ -21,6 +21,9 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/cfop.ts": "CFOP codes (CONFAZ, Convênio SINIEF s/nº 1970)",
 	"src/_internals/constants/cnae.ts": "CNAE subclasses (IBGE/CONCLA)",
 	"src/_internals/constants/municipalities.ts": "Municipalities (IBGE)",
+	"src/_internals/constants/nbs.ts": "NBS 2.0 descriptions (MDIC)",
+	"src/_internals/constants/service-items.ts":
+		"LC 116/2003 service list (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/states.ts": "States (IBGE)",
 	"src/get-municipality-by-cep/constants.ts":
 		"Municipality CEP ranges (Correios, via a community mirror)",

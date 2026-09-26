@@ -74,8 +74,10 @@ A few utils embed an official dataset and weigh far more than everything else co
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
 | `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
+| `isValidNbs` · `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 81.8 KB | 13.8 KB |
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
+| `isValidServiceItem` · `getServiceItem` | Service list of the Lei Complementar 116/2003 | 27.1 - 27.2 KB | 8.8 - 8.9 KB |
 
 The root of the package is a single ESM module, so a bundler cannot split one of these datasets out of it: importing a heavy util from the root puts its whole dataset in your main bundle, and a dynamic `import()` of the root does not help. To lazy-load one, import it from its own subpath:
 
