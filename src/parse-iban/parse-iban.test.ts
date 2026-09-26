@@ -58,6 +58,17 @@ describe("parseIban", () => {
 			expectAlwaysReturnsType(parseIban, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseIban(Number.NaN)).toBe("");
+		expect(parseIban(-1)).toBe("");
+		expect(parseIban(1.5)).toBe("");
+		expect(parseIban(2 ** 53)).toBe("");
+		expect(parseIban(Number.MAX_VALUE)).toBe("");
+		expect(parseIban(1e21)).toBe("");
+		expect(parseIban(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseIban(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseIban types", () => {

@@ -1,5 +1,5 @@
 import { BR_IBAN_LENGTH } from "../_internals/constants/iban";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 
 /**
@@ -12,6 +12,9 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * shorter value passes through as far as it goes. Use `isValidIban` to check the check digits and
  * `getIbanInfo` to read the fields.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The IBAN to be parsed.
  * @returns {string} Up to 29 uppercase alphanumeric characters, or an empty string when there is
  * no letter or digit at all.
@@ -19,6 +22,7 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * @example
  * ```typescript
  * parseIban("BR15 0000 0000 0000 1093 2840 814P 2"); // "BR1500000000000010932840814P2"
+ * parseIban(Number.NaN); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
@@ -27,4 +31,4 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * Diretrizes de Implementação do IBAN no Brasil, which fix the 29 character Brazilian length.
  */
 export const parseIban = (value: string | number): string =>
-	isNullish(value) ? "" : sanitizeToAlphanumeric(value).slice(0, BR_IBAN_LENGTH);
+	isLookupCode(value) ? sanitizeToAlphanumeric(value).slice(0, BR_IBAN_LENGTH) : "";
