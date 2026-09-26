@@ -1,5 +1,32 @@
+import { CID10_SUBCATEGORIES } from "../_internals/constants/cid10";
 import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
 import { normalizeCid10 } from "../_internals/normalize-cid10/normalize-cid10";
+import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
+
+const CATEGORY_LENGTH = 3;
+
+/**
+ * The index of a listed code in `CID10_DESCRIPTIONS`, which holds every category of
+ * `CID10_SUBCATEGORIES`, in its order, followed by its subcategories: the categories before the
+ * code's own take one description each plus one per subcategory, then the category's own
+ * description comes first and each subcategory follows at the position of its fourth character
+ * plus one (a category, whose fourth character is `""`, is found at 0 and adds no length).
+ *
+ * @param {string} code - A code `isValidCid10` accepts, normalized.
+ * @returns {number} The index of its description.
+ */
+const findDescriptionIndex = (code: string): number => {
+	const category = code.slice(0, CATEGORY_LENGTH);
+	const subcategory = code.slice(CATEGORY_LENGTH);
+	const categories = Object.keys(CID10_SUBCATEGORIES);
+	const preceding = categories.slice(0, categories.indexOf(category));
+	const offset = preceding.reduce(
+		(index, listed) => index + 1 + CID10_SUBCATEGORIES[listed].length,
+		0,
+	);
+
+	return offset + CID10_SUBCATEGORIES[category].indexOf(subcategory) + subcategory.length;
+};
 
 /**
  * A CID-10 (Classificação Internacional de Doenças, 10th revision) category or subcategory.
@@ -44,9 +71,9 @@ export type Cid10 = {
  * The DATASUS page that links the archive and documents its files, columns and encoding.
  */
 export const getCid10 = (value: string): Cid10 | null => {
+	if (!isValidCid10(value)) return null;
+
 	const code = normalizeCid10(value);
 
-	if (!Object.hasOwn(CID10_DESCRIPTIONS, code)) return null;
-
-	return { code, description: CID10_DESCRIPTIONS[code] };
+	return { code, description: CID10_DESCRIPTIONS[findDescriptionIndex(code)] };
 };

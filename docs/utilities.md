@@ -1791,7 +1791,7 @@ Get the names of Brazilian cities: every city, or only those of one state. **Dep
 - Sorted in the "pt-BR" locale.
 - Any falsy `state` asks for the full list, where `getMunicipalities` returns `[]`.
 - `state` is case-sensitive: `'sp'`, like an unknown code, returns `[]`.
-- Embeds all 5571 names (~154.2 KB minified, ~49.8 KB gzipped). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities`.
+- Embeds all 5571 names (~153.4 KB minified, ~49.2 KB gzipped). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -3260,7 +3260,7 @@ Check if a CID-10 code exists in the tables DATASUS publishes, the Brazilian Por
 - Both levels of the classification are valid: the 3 character categories (`A00`) and the 4 character subcategories, written with the dot (`A00.0`) or without it (`A000`).
 - Letter case and surrounding whitespace are ignored. Anything else (another separator, a fifth character, a dagger or asterisk suffix, a value that is not a string) is rejected.
 - The V2008 tables are the only source: a code that is not in them, such as `U07.1` (COVID-19), is not found.
-- Only a table of codes is read (about 27 KB minified), not the descriptions `getCid10` carries.
+- Only a table of codes is read (about 26 KB minified), not the descriptions `getCid10` carries.
 
 ```javascript
 import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
@@ -3309,7 +3309,7 @@ parseCid10('A00'); // 'A00'
 Look a CID-10 code up and get its official Brazilian Portuguese description. The result is a `Cid10` record: `{ code, description }`.
 
 - Same input rules as `isValidCid10`. `code` is upper case and has no dot. Returns `null` when the code is unknown or the value is not in a documented form.
-- This is the heaviest util of the package: it embeds the 2045 categories and 12188 subcategories with their descriptions, about 1 MB minified (147 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
+- This is the heaviest util of the package: it embeds the 2045 categories and 12188 subcategories with their descriptions, about 990 KB minified (124 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
 
 ```javascript
 import { getCid10 } from '@brazilian-utils/brazilian-utils';

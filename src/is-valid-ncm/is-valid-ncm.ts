@@ -5,10 +5,13 @@ import { NCM_CODES, NCM_FORMAT_REGEX } from "./constants";
 
 const NCM_LENGTH = 8;
 
+/** One code of the packed `NCM_CODES`. */
+const NCM_CODE_REGEX = /\d{8}/g;
+
 let cache: Set<string> | undefined;
 
 const getCache = (): Set<string> => {
-	cache ??= new Set(NCM_CODES);
+	cache ??= new Set(NCM_CODES.match(NCM_CODE_REGEX));
 	return cache;
 };
 

@@ -73,6 +73,13 @@ export const PIX_CRC_TAG = "6304";
 
 export const PIX_CRC_LENGTH = 4;
 
+/**
+ * Length of the CRC field as written at the end of a payload: `PIX_CRC_TAG` followed by its
+ * `PIX_CRC_LENGTH` value. A literal, not `PIX_CRC_TAG.length + PIX_CRC_LENGTH`, so a bundle that
+ * never reads it drops it.
+ */
+export const PIX_CRC_FIELD_LENGTH = 8;
+
 export const PIX_URL_MAX_LENGTH = 77;
 
 export const PIX_DESCRIPTION_MAX_LENGTH = 72;

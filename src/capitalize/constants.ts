@@ -88,7 +88,7 @@ export const COMPANY_DESIGNATIONS = [
 ];
 
 /** The document abbreviations that are written in upper case wherever they appear. */
-const DOCUMENT_ABBREVIATIONS = ["CEP", "CNPJ", "CPF", "RG", "UF"];
+export const DOCUMENT_ABBREVIATIONS = ["CEP", "CNPJ", "CPF", "RG", "UF"];
 
 /**
  * Roman numerals that appear inside Brazilian names and addresses ("João Paulo II", "Rua XV de
@@ -96,7 +96,7 @@ const DOCUMENT_ABBREVIATIONS = ["CEP", "CNPJ", "CPF", "RG", "UF"];
  * out because a single letter is already written in upper case by the default rule, and VI is
  * left out because it collides with the pt-BR verb form "vi".
  */
-const ROMAN_NUMERALS = [
+export const ROMAN_NUMERALS = [
 	"II",
 	"III",
 	"IV",
@@ -116,13 +116,6 @@ const ROMAN_NUMERALS = [
 	"XXI",
 	"XXII",
 	"XXIII",
-];
-
-/** Words that are written in upper case wherever they appear, the default `upperCaseWords`. */
-export const UPPER_CASE_WORDS = [
-	...COMPANY_DESIGNATIONS,
-	...DOCUMENT_ABBREVIATIONS,
-	...ROMAN_NUMERALS,
 ];
 
 /**

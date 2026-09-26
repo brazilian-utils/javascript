@@ -1,15 +1,16 @@
-import { STATE_CODES } from "../_internals/constants/state-codes";
+import { isStateCode } from "../_internals/is-state-code/is-state-code";
 import {
 	APOSTROPHE_REGEX,
 	COMPANY_DESIGNATIONS,
+	DOCUMENT_ABBREVIATIONS,
 	ELIDED_PARTICLE,
 	ENCLISIS_REGEX,
 	JOINER_REGEX,
 	PREPOSITIONS,
 	PUNCTUATION_REGEX,
+	ROMAN_NUMERALS,
 	SEPARATOR_REGEX,
 	TRAILING_DESIGNATIONS,
-	UPPER_CASE_WORDS,
 	WHITESPACE_REGEX,
 	WORD_REGEX,
 } from "./constants";
@@ -21,11 +22,6 @@ export type CapitalizeOptions = {
 	/** Words to keep in upper case wherever they appear (default: the Brazilian company designations, document abbreviations and roman numerals). */
 	upperCaseWords?: string[];
 };
-
-const stateCodeSet: Set<string> = new Set(STATE_CODES);
-
-const trailingDesignationSet: Set<string> = new Set(TRAILING_DESIGNATIONS);
-const companyDesignationSet: Set<string> = new Set(COMPANY_DESIGNATIONS);
 
 const toWordSet = (
 	words: unknown,
@@ -135,13 +131,15 @@ const isUpperCasePosition = (
 	ahead: { joined: boolean; designation: string },
 	upperCaseSet: Set<string>,
 ): boolean => {
-	if (!trailingDesignationSet.has(word)) return true;
+	if (!TRAILING_DESIGNATIONS.includes(word)) return true;
 	if (enclitic) return false;
 	if (ahead.designation === "") return true;
 
 	const designation = ahead.designation.toLocaleUpperCase("pt-BR");
 
-	return ahead.joined && companyDesignationSet.has(designation) && upperCaseSet.has(designation);
+	return (
+		ahead.joined && COMPANY_DESIGNATIONS.includes(designation) && upperCaseSet.has(designation)
+	);
 };
 
 /**
@@ -263,8 +261,12 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 		word.toLocaleLowerCase("pt-BR"),
 	);
 
-	const upperCaseSet = toWordSet(upperCaseWords, UPPER_CASE_WORDS, (word) =>
-		word.toLocaleUpperCase("pt-BR"),
+	// The default list is assembled here, not in a module-level constant, so a bundle that never
+	// calls `capitalize` does not keep the spread.
+	const upperCaseSet = toWordSet(
+		upperCaseWords,
+		[...COMPANY_DESIGNATIONS, ...DOCUMENT_ABBREVIATIONS, ...ROMAN_NUMERALS],
+		(word) => word.toLocaleUpperCase("pt-BR"),
 	);
 
 	const tokens = value.trim().split(SEPARATOR_REGEX);
@@ -306,7 +308,7 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 			isUpperCasePosition(upperCaseWord, enclitic, ahead, upperCaseSet)
 		) {
 			output.push(upperCaseWord);
-		} else if (output.at(-1) === "/" && stateCodeSet.has(upperCaseWord)) {
+		} else if (output.at(-1) === "/" && isStateCode(upperCaseWord)) {
 			output.push(upperCaseWord);
 		} else {
 			output.push(capitalizeWord(token));
