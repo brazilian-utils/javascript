@@ -4,6 +4,7 @@ import {
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 } from "../_internals/constants/service-phone";
 import { format } from "../_internals/format/format";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -144,6 +145,9 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * patterns have a fixed number of slots, so under `"e164"` anything past the 11th national
  * digit is dropped.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The phone number to format, either as a string or a number.
  * @param {FormatPhoneOptions} [options] - Optional formatting options.
  * @param {"auto"|"sn"|"nanp"|"e164"|"international"|"service"} options.mask - The mask to apply for formatting the phone number (default: `"sn"`).
@@ -172,6 +176,7 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * formatPhone("11988887766", { mask: "service", obfuscate: true }); // "***********" (not a service number)
  * formatPhone("11987654321"); // "11987-6543" (BEWARE: default "sn" truncates a DDD-prefixed number)
  * formatPhone("11987654321", { obfuscate: true }); // "*****-**43" (BEWARE: truncated too, so "43", not "21")
+ * formatPhone(-11987654321); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.itu.int/rec/T-REC-E.164
@@ -181,6 +186,8 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * as `"*********00"`, the convention `obfuscate` follows for the number of visible digits.
  */
 export const formatPhone = (value: string | number, options?: FormatPhoneOptions): string => {
+	if (!isLookupCode(value)) return "";
+
 	const enhancedValue = sanitizeToDigits(value);
 
 	const serviceDigits = resolveServicePhoneDigits(value);

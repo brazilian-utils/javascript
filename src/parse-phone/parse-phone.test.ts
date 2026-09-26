@@ -97,6 +97,18 @@ describe("parsePhone", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parsePhone(-11_987_654_321)).toBe("");
+		expect(parsePhone(-1)).toBe("");
+		expect(parsePhone(1.5)).toBe("");
+		expect(parsePhone(2 ** 53)).toBe("");
+		expect(parsePhone(Number.MAX_VALUE)).toBe("");
+		expect(parsePhone(1e21)).toBe("");
+		expect(parsePhone(Number.NaN)).toBe("");
+		expect(parsePhone(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parsePhone(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parsePhone types", () => {
