@@ -36,7 +36,7 @@ import {
 	ExtractorMessageCategory,
 } from "@microsoft/api-extractor";
 
-const rootDir = resolve(import.meta.dirname, "..");
+const rootDirectory = resolve(import.meta.dirname, "..");
 
 /** The outcome of a child process: its exit status and output. */
 type RunResult = {
@@ -45,7 +45,7 @@ type RunResult = {
 	stderr: string;
 };
 
-const run = (command: string, args: string[], cwd = rootDir): Promise<RunResult> =>
+const run = (command: string, args: string[], cwd = rootDirectory): Promise<RunResult> =>
 	new Promise((_resolve) => {
 		execFile(command, args, { cwd, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
 			_resolve({ ok: error === null, stdout, stderr: stderr || (error?.message ?? "") });
@@ -110,34 +110,34 @@ const major = (version: string): number => Number.parseInt(version.split(".")[0]
  * Runs API Extractor over one `.d.ts` entry point and returns the path of the report it wrote.
  * @param {object} options - What to extract and where.
  * @param {string} options.configPath - The `api-extractor.json` whose settings are used.
- * @param {string} options.reportDir - The directory the report is written to.
- * @param {string} [options.packageDir] - The root of a package other than this repository (the
+ * @param {string} options.reportDirectory - The directory the report is written to.
+ * @param {string} [options.packageDirectory] - The root of a package other than this repository (the
  * published tarball): its entry point is used, its compiler errors and messages are ignored.
  * @returns {Promise<{ succeeded: boolean; reportPath: string }>} Whether the run had no error, and
  * the report path.
  */
 const extract = async ({
 	configPath,
-	reportDir,
-	packageDir,
+	reportDirectory,
+	packageDirectory,
 }: {
 	configPath: string;
-	reportDir: string;
-	packageDir?: string;
+	reportDirectory: string;
+	packageDirectory?: string;
 }): Promise<{ succeeded: boolean; reportPath: string }> => {
-	await mkdir(reportDir, { recursive: true });
+	await mkdir(reportDirectory, { recursive: true });
 
 	const configObject = ExtractorConfig.loadFile(configPath);
 	configObject.apiReport = {
 		enabled: true,
-		reportFolder: reportDir,
-		reportTempFolder: join(reportDir, "temp"),
+		reportFolder: reportDirectory,
+		reportTempFolder: join(reportDirectory, "temp"),
 		reportFileName,
 	};
 
-	if (packageDir !== undefined) {
-		configObject.projectFolder = packageDir;
-		configObject.mainEntryPointFilePath = join(packageDir, "dist", `${entryName}.d.ts`);
+	if (packageDirectory !== undefined) {
+		configObject.projectFolder = packageDirectory;
+		configObject.mainEntryPointFilePath = join(packageDirectory, "dist", `${entryName}.d.ts`);
 		configObject.compiler = {
 			overrideTsconfig: {
 				compilerOptions: {
@@ -161,8 +161,9 @@ const extract = async ({
 
 	const config = ExtractorConfig.prepare({
 		configObject,
-		configObjectFullPath: packageDir === undefined ? configPath : join(packageDir, "api.json"),
-		packageJsonFullPath: join(packageDir ?? rootDir, "package.json"),
+		configObjectFullPath:
+			packageDirectory === undefined ? configPath : join(packageDirectory, "api.json"),
+		packageJsonFullPath: join(packageDirectory ?? rootDirectory, "package.json"),
 	});
 	const result = Extractor.invoke(config, {
 		localBuild: true,
@@ -174,13 +175,13 @@ const extract = async ({
 				(message.logLevel === ExtractorLogLevel.Error ||
 					message.logLevel === ExtractorLogLevel.Warning);
 
-			if (packageDir === undefined && reported) {
-				console.error(`${message.logLevel}: ${message.formatMessageWithLocation(rootDir)}`);
+			if (packageDirectory === undefined && reported) {
+				console.error(`${message.logLevel}: ${message.formatMessageWithLocation(rootDirectory)}`);
 			}
 		},
 	});
 
-	return { succeeded: result.succeeded, reportPath: join(reportDir, reportFileName) };
+	return { succeeded: result.succeeded, reportPath: join(reportDirectory, reportFileName) };
 };
 
 const DECLARATION_PATTERN =
@@ -340,14 +341,16 @@ const typeRoles = (declarations: Map<string, Declaration>): Map<string, Set<Role
  * Lists the subpath entry points of a package (`dist/<util>.d.ts`, imported as
  * `@brazilian-utils/brazilian-utils/<util>`): every declaration file but the root and the shared
  * chunks the others import.
- * @param {string} distDir - The `dist` directory.
+ * @param {string} distributionDirectory - The `dist` directory.
  * @returns {Promise<Subpaths>} The contents of each entry by subpath, and every declaration file
  * joined (to find what a re-exported name is).
  */
-const readSubpaths = async (distDir: string): Promise<Subpaths> => {
-	const allFiles = await readdir(distDir);
+const readSubpaths = async (distributionDirectory: string): Promise<Subpaths> => {
+	const allFiles = await readdir(distributionDirectory);
 	const files = allFiles.filter((file) => file.endsWith(".d.ts")).sort();
-	const texts = await Promise.all(files.map((file) => readFile(join(distDir, file), "utf8")));
+	const texts = await Promise.all(
+		files.map((file) => readFile(join(distributionDirectory, file), "utf8")),
+	);
 	const entries = new Map(
 		files.map((file, index) => [file.slice(0, -".d.ts".length), texts[index] ?? ""]),
 	);
@@ -410,8 +413,8 @@ const subpathExports = (
 
 const identifier = (value: string): string => value.replaceAll(/[^\w$]/g, "_");
 
-const moduleSpecifier = (fromDir: string, file: string): string => {
-	const path = relative(fromDir, file).replaceAll("\\", "/");
+const moduleSpecifier = (fromDirectory: string, file: string): string => {
+	const path = relative(fromDirectory, file).replaceAll("\\", "/");
 	return path.startsWith(".") ? path : `./${path}`;
 };
 
@@ -443,7 +446,7 @@ const compareSubpath = ({
 	removed: string[];
 }): string[] => {
 	for (const extension of [".js", ".cjs", ".d.ts", ".d.cts"]) {
-		if (!existsSync(join(rootDir, "dist", `${subpath}${extension}`))) {
+		if (!existsSync(join(rootDirectory, "dist", `${subpath}${extension}`))) {
 			removed.push(`subpath "${subpath}": dist/${subpath}${extension} is no longer built`);
 		}
 	}
@@ -476,8 +479,8 @@ const compareSubpath = ({
  * - every subpath entry point still exists and exports the same names, its values with the same
  *   guarantees (its types are the root ones, checked above).
  * @param {object} options - What to compare.
- * @param {string} options.checkDir - The directory the generated file is written to.
- * @param {string} options.baseDir - The published package root.
+ * @param {string} options.checkDirectory - The directory the generated file is written to.
+ * @param {string} options.baseDirectory - The published package root.
  * @param {Map<string, Declaration>} options.base - The published declarations.
  * @param {Map<string, Declaration>} options.head - The declarations of this build.
  * @param {Subpaths} options.baseSubpaths - The published subpath entry points.
@@ -487,15 +490,15 @@ const compareSubpath = ({
  * types whose shape is only shown in the diff (they cannot be named without type arguments).
  */
 const renderBreakingCheck = ({
-	checkDir,
-	baseDir,
+	checkDirectory,
+	baseDirectory,
 	base,
 	head,
 	baseSubpaths,
 	headSubpaths,
 }: {
-	checkDir: string;
-	baseDir: string;
+	checkDirectory: string;
+	baseDirectory: string;
 	base: Map<string, Declaration>;
 	head: Map<string, Declaration>;
 	baseSubpaths: Subpaths;
@@ -525,8 +528,8 @@ const renderBreakingCheck = ({
 		const newAlias = `New${alias}`;
 
 		const file = `${subpath}.js`;
-		const oldSpecifier = moduleSpecifier(checkDir, join(baseDir, "dist", file));
-		const newSpecifier = moduleSpecifier(checkDir, join(rootDir, "dist", file));
+		const oldSpecifier = moduleSpecifier(checkDirectory, join(baseDirectory, "dist", file));
+		const newSpecifier = moduleSpecifier(checkDirectory, join(rootDirectory, "dist", file));
 
 		imports.push(
 			`import type * as ${oldAlias} from "${oldSpecifier}";`,
@@ -597,7 +600,7 @@ const renderBreakingCheck = ({
 
 /**
  * Type-checks the generated file with the repository's `tsc` and maps each error to its reason.
- * @param {string} checkDir - The directory holding the generated file.
+ * @param {string} checkDirectory - The directory holding the generated file.
  * @param {string} source - The generated file contents.
  * @param {Assertion[]} assertions - The assertion behind each line, in file order.
  * @param {Map<string, string>} labels - Short names for the absolute paths in compiler messages.
@@ -607,15 +610,15 @@ const renderBreakingCheck = ({
  * did not start): an empty result would otherwise read as "no breaking change".
  */
 const typeCheck = async (
-	checkDir: string,
+	checkDirectory: string,
 	source: string,
 	assertions: Assertion[],
 	labels: Map<string, string>,
 ): Promise<string[]> => {
-	const file = join(checkDir, "check.ts");
+	const file = join(checkDirectory, "check.ts");
 	await writeFile(file, source);
 	await writeFile(
-		join(checkDir, "tsconfig.json"),
+		join(checkDirectory, "tsconfig.json"),
 		JSON.stringify({
 			compilerOptions: {
 				lib: ["ESNext", "DOM"],
@@ -631,12 +634,12 @@ const typeCheck = async (
 		}),
 	);
 
-	const tsc = join(rootDir, "node_modules", "typescript", "bin", "tsc");
+	const tsc = join(rootDirectory, "node_modules", "typescript", "bin", "tsc");
 	const {
 		ok,
 		stdout: output,
 		stderr,
-	} = await run(process.execPath, [tsc, "-p", checkDir, "--pretty", "false"]);
+	} = await run(process.execPath, [tsc, "-p", checkDirectory, "--pretty", "false"]);
 
 	const lines = source.split("\n");
 	const byLine = new Map(assertions.map((a) => [lines.indexOf(a.code) + 1, a]));
@@ -653,7 +656,7 @@ const typeCheck = async (
 
 		const [, errorFile = "", lineNumber = "0", message = ""] = match;
 
-		if (resolve(rootDir, errorFile) !== file || !byLine.has(Number(lineNumber))) {
+		if (resolve(rootDirectory, errorFile) !== file || !byLine.has(Number(lineNumber))) {
 			throw new CheckError(`Unexpected compiler error in the generated check:\n${line}`);
 		}
 
@@ -848,16 +851,16 @@ const packedFilename = (stdout: string): string => {
 /**
  * Downloads and extracts one published version of the package.
  * @param {string} version - The version to download.
- * @param {string} dir - The directory to extract it into.
+ * @param {string} directory - The directory to extract it into.
  * @returns {Promise<string>} The root of the extracted package.
  */
-const downloadPackage = async (version: string, dir: string): Promise<string> => {
-	await mkdir(dir, { recursive: true });
+const downloadPackage = async (version: string, directory: string): Promise<string> => {
+	await mkdir(directory, { recursive: true });
 
 	const packed = await run(
 		"npm",
-		["pack", `${packageName}@${version}`, "--json", "--pack-destination", dir],
-		dir,
+		["pack", `${packageName}@${version}`, "--json", "--pack-destination", directory],
+		directory,
 	);
 
 	if (!packed.ok) {
@@ -866,16 +869,21 @@ const downloadPackage = async (version: string, dir: string): Promise<string> =>
 		);
 	}
 
-	const extracted = await run("tar", ["-xzf", join(dir, packedFilename(packed.stdout)), "-C", dir]);
-	const packageDir = join(dir, "package");
+	const extracted = await run("tar", [
+		"-xzf",
+		join(directory, packedFilename(packed.stdout)),
+		"-C",
+		directory,
+	]);
+	const packageDirectory = join(directory, "package");
 
-	if (!extracted.ok || !existsSync(join(packageDir, "dist", `${entryName}.d.ts`))) {
+	if (!extracted.ok || !existsSync(join(packageDirectory, "dist", `${entryName}.d.ts`))) {
 		throw new CheckError(
 			`Could not extract dist/${entryName}.d.ts from ${packageName}@${version}.\n${extracted.stderr.trim()}`,
 		);
 	}
 
-	return packageDir;
+	return packageDirectory;
 };
 
 const writeSummary = async (markdown: string): Promise<void> => {
@@ -888,13 +896,13 @@ const writeSummary = async (markdown: string): Promise<void> => {
 	}
 };
 
-const main = async (workDir: string): Promise<number> => {
-	if (!existsSync(join(rootDir, "dist", `${entryName}.d.ts`))) {
+const main = async (workDirectory: string): Promise<number> => {
+	if (!existsSync(join(rootDirectory, "dist", `${entryName}.d.ts`))) {
 		throw new CheckError(`Missing dist/${entryName}.d.ts. Run \`npm run build\` first.`);
 	}
 
-	const configPath = join(rootDir, "api-extractor.json");
-	const head = await extract({ configPath, reportDir: join(workDir, "head") });
+	const configPath = join(rootDirectory, "api-extractor.json");
+	const head = await extract({ configPath, reportDirectory: join(workDirectory, "head") });
 
 	if (!head.succeeded) {
 		console.error(
@@ -914,18 +922,18 @@ const main = async (workDir: string): Promise<number> => {
 		return 0;
 	}
 
-	const localVersion = await readVersion(join(rootDir, "package.json"));
+	const localVersion = await readVersion(join(rootDirectory, "package.json"));
 	console.log(
 		version === localVersion
 			? `Comparing against ${packageName}@${version}, the version package.json is on: the release is the contract, so every change since it is checked.`
 			: `Comparing against ${packageName}@${version} (package.json is at ${localVersion}).`,
 	);
 
-	const baseDir = await downloadPackage(version, join(workDir, "base"));
+	const baseDirectory = await downloadPackage(version, join(workDirectory, "base"));
 	const baseRun = await extract({
 		configPath,
-		reportDir: join(workDir, "base-report"),
-		packageDir: baseDir,
+		reportDirectory: join(workDirectory, "base-report"),
+		packageDirectory: baseDirectory,
 	});
 
 	if (!baseRun.succeeded) {
@@ -934,24 +942,24 @@ const main = async (workDir: string): Promise<number> => {
 
 	const base = parseReport(await readFile(baseRun.reportPath, "utf8"));
 	const current = parseReport(await readFile(head.reportPath, "utf8"));
-	const checkDir = join(workDir, "check");
-	await mkdir(checkDir, { recursive: true });
+	const checkDirectory = join(workDirectory, "check");
+	await mkdir(checkDirectory, { recursive: true });
 
 	const { source, assertions, removed, skipped } = renderBreakingCheck({
-		checkDir,
-		baseDir,
+		checkDirectory,
+		baseDirectory,
 		base,
 		head: current,
-		baseSubpaths: await readSubpaths(join(baseDir, "dist")),
-		headSubpaths: await readSubpaths(join(rootDir, "dist")),
+		baseSubpaths: await readSubpaths(join(baseDirectory, "dist")),
+		headSubpaths: await readSubpaths(join(rootDirectory, "dist")),
 	});
 	const labels = new Map([
-		[join(baseDir, "dist"), `${packageName}@${version}/dist`],
-		[join(rootDir, "dist"), "dist"],
+		[join(baseDirectory, "dist"), `${packageName}@${version}/dist`],
+		[join(rootDirectory, "dist"), "dist"],
 	]);
 	const failures = [
 		...removed.map((reason) => `- ${reason}`),
-		...(await typeCheck(checkDir, source, assertions, labels)),
+		...(await typeCheck(checkDirectory, source, assertions, labels)),
 	];
 	if (skipped.length > 0) {
 		console.log(`Generic types compared in the diff only: ${skipped.join(", ")}.`);
@@ -978,13 +986,13 @@ const main = async (workDir: string): Promise<number> => {
 	return allowed ? 0 : FAILURE_EXIT_CODE;
 };
 
-const workDir = await mkdtemp(join(tmpdir(), "brazilian-utils-api-"));
+const workDirectory = await mkdtemp(join(tmpdir(), "brazilian-utils-api-"));
 
 try {
-	process.exitCode = await main(workDir);
+	process.exitCode = await main(workDirectory);
 } catch (error) {
 	console.error(error instanceof Error ? error.message : String(error));
 	process.exitCode = ERROR_EXIT_CODE;
 } finally {
-	await rm(workDir, { recursive: true, force: true });
+	await rm(workDirectory, { recursive: true, force: true });
 }
