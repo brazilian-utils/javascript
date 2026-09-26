@@ -9,7 +9,7 @@ Brazilian Utils is a zero-dependency library of small utilities for the day-to-d
 ## Why Brazilian Utils
 
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
-- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
+- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 0.5 KB minified (0.3 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
 - **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, all tested in CI.
 - **Written in TypeScript.** Types ship with the package, and every pull request is checked against the last release so the public API never changes silently.
 - **Validated against the official rules.** Every validator cites the specification, law or dataset it implements, and the test suite is mutation-tested, not just covered.
@@ -62,26 +62,30 @@ Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.
 
 ## Bundle size
 
-The package is tree-shakeable: importing one util from the root pulls in only that util's code. `isValidCpf`, for example, adds about 1.4 KB minified (0.8 KB gzipped) to your bundle.
+The package is tree-shakeable: importing one util from the root pulls in only that util's code. `isValidCpf`, for example, adds about 0.5 KB minified (0.3 KB gzipped) to your bundle.
 
 A few utils embed an official dataset and weigh far more than everything else combined:
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
-| `getCid10` | CID-10 V2008 categories and subcategories, with the DATASUS descriptions | 1030.4 KB | 146.9 KB |
-| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
-| `getCities` | 5571 IBGE municipality names | 154.3 KB | 49.9 KB |
-| `getMunicipalityByCep` | The IBGE municipality table above, plus 5573 Correios CEP ranges | 393.3 KB | 98.8 KB |
-| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
-| `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 - 119.2 KB | 30.6 - 30.7 KB |
-| `isValidCest` · `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 116.6 - 117.8 KB | 26.4 - 26.9 KB |
-| `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 - 94.0 KB | 21.1 - 21.2 KB |
-| `isValidNbs` · `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 81.8 KB | 13.8 KB |
-| `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 - 69.0 KB | 6.9 KB |
-| `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.8 KB | 9.6 KB |
-| `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
-| `isValidServiceItem` · `getServiceItem` | Service list of the Lei Complementar 116/2003 | 27.1 - 27.2 KB | 8.8 - 8.9 KB |
-| `isValidCid10` | CID-10 V2008 category and subcategory codes, without the descriptions | 27.0 KB | 7.4 KB |
+| `getCid10` | CID-10 V2008 categories and subcategories, with the DATASUS descriptions | 988.2 KB | 123.5 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 153.6 - 154.0 KB | 49.4 - 49.7 KB |
+| `getCities` | 5571 IBGE municipality names | 153.4 KB | 49.2 KB |
+| `getMunicipalityByCep` | The IBGE municipality table above, plus 5573 Correios CEP ranges | 221.1 KB | 69.9 KB |
+| `getCbo` | CBO 2002 occupation titles | 115.7 KB | 29.5 KB |
+| `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 115.6 KB | 26.1 KB |
+| `getCnae` | CNAE-Subclasses 2.3 | 91.6 KB | 20.0 KB |
+| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 82.6 KB | 22.8 KB |
+| `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 80.6 KB | 13.1 KB |
+| `getCfop` | CFOP operation descriptions | 67.6 KB | 6.3 KB |
+| `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.0 KB | 9.0 KB |
+| `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 37.5 - 37.8 KB | 9.0 - 9.2 KB |
+| `isValidCid10` | CID-10 V2008 category and subcategory codes, without the descriptions | 26.2 KB | 6.8 KB |
+| `getServiceItem` | Service list of the Lei Complementar 116/2003 | 26.1 KB | 8.4 KB |
+| `isValidCbo` | CBO 2002 occupation codes, without the titles | 16.2 KB | 5.5 KB |
+| `isValidCnae` | CNAE-Subclasses 2.3 codes, without the descriptions | 9.6 KB | 3.4 KB |
+| `isValidNbs` | NBS 2.0 codes, without the descriptions | 8.5 KB | 2.3 KB |
+| `isValidCest` | CEST codes, without the descriptions | 7.6 KB | 2.3 KB |
 
 The root of the package is a single ESM module, so a bundler cannot split one of these datasets out of it: importing a heavy util from the root puts its whole dataset in your main bundle, and a dynamic `import()` of the root does not help. To lazy-load one, import it from its own subpath:
 

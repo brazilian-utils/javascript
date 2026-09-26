@@ -1791,7 +1791,7 @@ Retorna os nomes das cidades brasileiras: todas as cidades, ou só as de um esta
 - Ordenadas no locale "pt-BR".
 - Qualquer `state` falsy pede a lista completa, enquanto `getMunicipalities` retorna `[]`.
 - `state` diferencia maiúsculas de minúsculas: `'sp'`, como um código desconhecido, retorna `[]`.
-- Embute os 5571 nomes (~154,2 KB minificado, ~49,8 KB com gzip). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-cities`.
+- Embute os 5571 nomes (~153,4 KB minificado, ~49,2 KB com gzip). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -3260,7 +3260,7 @@ Valida um código CID-10 contra as tabelas que o DATASUS publica, a edição bra
 - Os dois níveis da classificação são válidos: as categorias de 3 caracteres (`A00`) e as subcategorias de 4 caracteres, escritas com o ponto (`A00.0`) ou sem ele (`A000`).
 - Maiúsculas, minúsculas e espaços em volta são ignorados. Qualquer outra coisa (outro separador, um quinto caractere, um sufixo de cruz ou asterisco, um valor que não é string) é rejeitada.
 - As tabelas da V2008 são a única fonte: um código que não está nelas, como `U07.1` (COVID-19), não é encontrado.
-- Só uma tabela de códigos é lida (cerca de 27 KB minificada), não as descrições que `getCid10` carrega.
+- Só uma tabela de códigos é lida (cerca de 26 KB minificada), não as descrições que `getCid10` carrega.
 
 ```javascript
 import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
@@ -3309,7 +3309,7 @@ parseCid10('A00'); // 'A00'
 Busca um código CID-10 e retorna a sua descrição oficial em português. O resultado é um registro `Cid10`: `{ code, description }`.
 
 - Mesmas regras de entrada de `isValidCid10`. O `code` vem em maiúsculas e sem o ponto. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
-- Este é o utilitário mais pesado do pacote: ele embute as 2045 categorias e 12188 subcategorias com suas descrições, cerca de 1 MB minificado (147 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
+- Este é o utilitário mais pesado do pacote: ele embute as 2045 categorias e 12188 subcategorias com suas descrições, cerca de 990 KB minificado (124 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
 
 ```javascript
 import { getCid10 } from '@brazilian-utils/brazilian-utils';
