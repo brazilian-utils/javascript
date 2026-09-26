@@ -67,6 +67,17 @@ describe("parseNfeKey", () => {
 			expectAlwaysReturnsType(parseNfeKey, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseNfeKey(-1)).toBe("");
+		expect(parseNfeKey(1.5)).toBe("");
+		expect(parseNfeKey(2 ** 53)).toBe("");
+		expect(parseNfeKey(Number.MAX_VALUE)).toBe("");
+		expect(parseNfeKey(1e21)).toBe("");
+		expect(parseNfeKey(Number.NaN)).toBe("");
+		expect(parseNfeKey(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseNfeKey(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseNfeKey types", () => {

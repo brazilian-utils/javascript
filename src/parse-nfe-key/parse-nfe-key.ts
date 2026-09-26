@@ -1,4 +1,5 @@
 import { NFE_KEY_LENGTH, XML_ID_PREFIX_REGEX } from "../_internals/constants/nfe-key";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
 
@@ -15,6 +16,9 @@ import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
  * as it goes, so the grouping of a key still being typed can be stripped with it. Use
  * `isValidNfeKey` to check the key and `getNfeKeyInfo` to read its fields.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The access key value to be parsed.
  * @returns {string} Up to 44 digits, or an empty string when there is no digit at all.
  *
@@ -25,6 +29,7 @@ import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
  *
  * parseNfeKey("NFe35170458716523000119550010000000121000123458");
  * // "35170458716523000119550010000000121000123458"
+ * parseNfeKey(-1); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf
@@ -32,6 +37,8 @@ import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
  * and the `Id` attribute the prefixes come from.
  */
 export const parseNfeKey = (value: string | number): string => {
+	if (!isLookupCode(value)) return "";
+
 	// Stryker disable next-line StringLiteral: whatever replaces the prefix is stripped again by sanitizeToDigits unless it carries a digit, and the mutant's literal carries none.
 	const body = toStringSafe(value).trim().replace(XML_ID_PREFIX_REGEX, "");
 
