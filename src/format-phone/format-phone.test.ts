@@ -167,6 +167,91 @@ describe("formatPhone", () => {
 		expect(formatPhone("11988887777", { mask: "bogus" })).toBe("11988-8877");
 	});
 
+	it("should hide the subscriber number except its last 2 digits under the national masks", () => {
+		expect(formatPhone("988887766", { obfuscate: true })).toBe("*****-**66");
+		expect(formatPhone(988_887_766, { obfuscate: true })).toBe("*****-**66");
+		expect(formatPhone("11988887766", { mask: "nanp", obfuscate: true })).toBe("(11) *****-**66");
+		expect(formatPhone("1130001234", { mask: "nanp", obfuscate: true })).toBe("(11) ****-**34");
+		expect(formatPhone("11988887766", { mask: "auto", obfuscate: true })).toBe("(11) *****-**66");
+		expect(formatPhone("1130001234", { mask: "auto", obfuscate: true })).toBe("(11) ****-**34");
+		expect(formatPhone("988887766", { mask: "auto", obfuscate: true })).toBe("*****-**66");
+	});
+
+	it("should truncate a DDD-prefixed value under the default mask before obfuscating it", () => {
+		expect(formatPhone("11988887766", { obfuscate: true })).toBe("*****-**77");
+		expect(formatPhone("11988887766", { mask: "sn", obfuscate: true })).toBe("*****-**77");
+		expect(formatPhone("1130001234", { mask: "sn", obfuscate: true })).toBe("*****-**23");
+	});
+
+	it("should keep the country code and the DDD when obfuscating the international masks", () => {
+		expect(formatPhone("11988887766", { mask: "international", obfuscate: true })).toBe(
+			"+55 11 *****-**66",
+		);
+		expect(formatPhone("+55 11 3000-1234", { mask: "international", obfuscate: true })).toBe(
+			"+55 11 ****-**34",
+		);
+		expect(formatPhone("5511988887766", { mask: "auto", obfuscate: true })).toBe(
+			"+55 11 *****-**66",
+		);
+		expect(formatPhone("11988887766", { mask: "e164", obfuscate: true })).toBe("+5511*******66");
+		expect(formatPhone("1130001234", { mask: "e164", obfuscate: true })).toBe("+5511******34");
+	});
+
+	it("should keep the service prefix and the last 2 digits when obfuscating a service number", () => {
+		expect(formatPhone("08001234567", { mask: "service", obfuscate: true })).toBe("0800 *** **67");
+		expect(formatPhone("03031234567", { mask: "auto", obfuscate: true })).toBe("0303 *** **67");
+		expect(formatPhone("40041234", { mask: "service", obfuscate: true })).toBe("4004-**34");
+		expect(formatPhone("30031234", { mask: "auto", obfuscate: true })).toBe("3003-**34");
+		expect(formatPhone("08001234567", { mask: "e164", obfuscate: true })).toBe("0800 *** **67");
+		expect(formatPhone("40041234", { mask: "international", obfuscate: true })).toBe("4004-**34");
+	});
+
+	it("should return a public utility code whole when obfuscating", () => {
+		expect(formatPhone("190", { mask: "service", obfuscate: true })).toBe("190");
+		expect(formatPhone("190", { mask: "auto", obfuscate: true })).toBe("190");
+	});
+
+	it("should hide entirely a value the service mask does not recognize when obfuscating", () => {
+		expect(formatPhone("11988887766", { mask: "service", obfuscate: true })).toBe("***********");
+		expect(formatPhone("08", { mask: "service", obfuscate: true })).toBe("**");
+		expect(formatPhone("11988887766", { mask: "service" })).toBe("11988887766");
+	});
+
+	it("should obfuscate a partial value as far as it goes", () => {
+		expect(formatPhone("1198", { mask: "nanp", obfuscate: true })).toBe("(11) **");
+		expect(formatPhone("11988", { mask: "international", obfuscate: true })).toBe("+55 11 ***");
+		expect(formatPhone("0800123", { mask: "service", obfuscate: true })).toBe("0800 ***");
+		expect(formatPhone("", { mask: "e164", obfuscate: true })).toBe("");
+		expect(formatPhone("", { mask: "international", obfuscate: true })).toBe("");
+		expect(formatPhone("", { mask: "service", obfuscate: true })).toBe("");
+	});
+
+	it("should drop what does not fit the 11 national digits when obfuscating the e164 mask", () => {
+		expect(formatPhone("119888877660000", { mask: "e164", obfuscate: true })).toBe(
+			"+5511*******66",
+		);
+		expect(formatPhone("119888877660000", { mask: "e164" })).toBe("+55119888877660000");
+	});
+
+	it("should obfuscate on any truthy obfuscate value", () => {
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatPhone("11988887766", { mask: "nanp", obfuscate: 1 })).toBe("(11) *****-**66");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatPhone("11988887766", { mask: "e164", obfuscate: "yes" })).toBe("+5511*******66");
+	});
+
+	it("should behave exactly as without the option when obfuscate is falsy or absent", () => {
+		expect(formatPhone("11988887766", { mask: "nanp", obfuscate: false })).toBe("(11) 98888-7766");
+		expect(formatPhone("11988887766", { mask: "e164", obfuscate: false })).toBe("+5511988887766");
+		expect(formatPhone("08001234567", { mask: "service", obfuscate: false })).toBe("0800 123 4567");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatPhone("11988887766", { mask: "international", obfuscate: 0 })).toBe(
+			"+55 11 98888-7766",
+		);
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatPhone("988887766", { obfuscate: null })).toBe("98888-7766");
+	});
+
 	it("should return an empty string for nullish values", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(formatPhone(null)).toBe("");
@@ -219,12 +304,37 @@ describe("formatPhone", () => {
 			);
 		});
 
+		test("should show only the DDD and the last 2 digits of a generated number when obfuscating", () => {
+			fc.assert(
+				fc.property(fc.gen(), fc.constantFrom(...geographic), (g, type) => {
+					const phone = g(phones, type);
+					const visible = `${phone.slice(0, 2)}${phone.slice(-2)}`;
+					const obfuscated = formatPhone(phone, { mask: "auto", obfuscate: true });
+
+					expect(obfuscated).toMatch(/^\(\d{2}\) \*{4,5}-\*{2}\d{2}$/);
+					expect(obfuscated.replaceAll(/\D/g, "")).toBe(visible);
+					expect(obfuscated).toHaveLength(formatPhone(phone, { mask: "auto" }).length);
+					expect(formatPhone(phone, { mask: "e164", obfuscate: true })).toMatch(
+						/^\+55\d{2}\*{6,7}\d{2}$/,
+					);
+				}),
+			);
+		});
+
 		test("should never throw and always return the phone number as a string", () => {
 			fc.assert(
-				fc.property(fc.string({ unit: "grapheme" }), fc.integer(), (text, number) => {
-					expect(typeof formatPhone(text)).toBe("string");
-					expect(typeof formatPhone(number)).toBe("string");
-				}),
+				fc.property(
+					fc.string({ unit: "grapheme" }),
+					fc.integer(),
+					fc.anything(),
+					(text, number, options) => {
+						expect(typeof formatPhone(text)).toBe("string");
+						expect(typeof formatPhone(number)).toBe("string");
+						expect(typeof formatPhone(text, { mask: "auto", obfuscate: true })).toBe("string");
+						// @ts-expect-error: intentionally invalid options
+						expect(typeof formatPhone(text, options)).toBe("string");
+					},
+				),
 			);
 		});
 	});
@@ -242,5 +352,9 @@ describe("formatPhone types", () => {
 		expectTypeOf<PhoneMask>().toEqualTypeOf<
 			"auto" | "e164" | "international" | "service" | "sn" | "nanp"
 		>();
+	});
+
+	test("should type the obfuscate option as an optional boolean", () => {
+		expectTypeOf<FormatPhoneOptions["obfuscate"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });
