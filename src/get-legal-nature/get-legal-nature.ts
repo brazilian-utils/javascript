@@ -4,6 +4,7 @@ import {
 } from "../_internals/constants/legal-nature-categories";
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
 
 export type { LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
 
@@ -57,9 +58,6 @@ export const buildLegalNature = (code: string, description: string): LegalNature
 		: { ...entry, legacy: false };
 };
 
-const lookUp = (code: string): LegalNature | null =>
-	Object.hasOwn(LEGAL_NATURE, code) ? buildLegalNature(code, LEGAL_NATURE[code]) : null;
-
 /**
  * Looks a Brazilian legal nature (natureza jurídica) code up.
  *
@@ -83,7 +81,8 @@ const lookUp = (code: string): LegalNature | null =>
  *
  * @param {string|number} value - The legal nature code to look up, with or without formatting.
  * @returns {LegalNature|null} The matching legal nature entry, or null when the code is unknown
- * or invalid.
+ * or invalid, which is exactly when `isValidLegalNature` returns false for the string form of the
+ * value (a number is read as the string it prints as).
  *
  * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
@@ -118,5 +117,11 @@ const lookUp = (code: string): LegalNature | null =>
 export const getLegalNature = (value: string | number): LegalNature | null => {
 	if (typeof value !== "string" && typeof value !== "number") return null;
 
-	return lookUp(String(value).replace(SEPARATORS_REGEX, ""));
+	const text = String(value);
+
+	if (!isValidLegalNature(text)) return null;
+
+	const code = text.replace(SEPARATORS_REGEX, "");
+
+	return buildLegalNature(code, LEGAL_NATURE[code]);
 };
