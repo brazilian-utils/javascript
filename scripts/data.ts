@@ -39,6 +39,7 @@ const generatedFiles = [
 	"./src/_internals/constants/banks.ts",
 	"./src/_internals/constants/cbo-descriptions.ts",
 	"./src/_internals/constants/cbo.ts",
+	"./src/_internals/constants/cest-descriptions.ts",
 	"./src/_internals/constants/cest.ts",
 	"./src/_internals/constants/cfop-descriptions.ts",
 	"./src/_internals/constants/cfop.ts",

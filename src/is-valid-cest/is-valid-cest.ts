@@ -1,4 +1,5 @@
-import { CEST_FORMAT_REGEX, CEST_TABLE } from "../_internals/constants/cest";
+import { CEST_CODES, CEST_FORMAT_REGEX } from "../_internals/constants/cest";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -46,5 +47,7 @@ export const isValidCest = (value: string | number): boolean => {
 
 	const cest = padLookupCode(value, CEST_LENGTH);
 
-	return CEST_FORMAT_REGEX.test(cest) && CEST_TABLE[sanitizeToDigits(cest)] !== undefined;
+	if (!CEST_FORMAT_REGEX.test(cest)) return false;
+
+	return findCodeIndex(CEST_CODES, sanitizeToDigits(cest)) !== -1;
 };

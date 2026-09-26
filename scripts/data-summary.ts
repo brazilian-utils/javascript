@@ -20,7 +20,9 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/cbo-descriptions.ts":
 		"CBO 2002 occupation titles (Ministério do Trabalho e Emprego)",
 	"src/_internals/constants/cbo.ts": "CBO 2002 occupation codes (Ministério do Trabalho e Emprego)",
-	"src/_internals/constants/cest.ts": "CEST codes and segments (CONFAZ, Convênio ICMS 142/18)",
+	"src/_internals/constants/cest-descriptions.ts":
+		"CEST descriptions and segments (CONFAZ, Convênio ICMS 142/18)",
+	"src/_internals/constants/cest.ts": "CEST codes (CONFAZ, Convênio ICMS 142/18)",
 	"src/_internals/constants/cfop-descriptions.ts":
 		"CFOP descriptions (CONFAZ, Convênio SINIEF s/nº 1970)",
 	"src/_internals/constants/cfop.ts": "CFOP codes (CONFAZ, Convênio SINIEF s/nº 1970)",
