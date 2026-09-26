@@ -1,12 +1,15 @@
 import * as fc from "fast-check";
 
 import { type Municipality } from "../_internals/constants/municipalities";
+import { decodeCepRanges } from "../_internals/decode-cep-ranges/decode-cep-ranges";
 import { anyGarbage, digits, digitsOfOtherLength } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
-import { CEP_RANGES } from "./constants";
+import { CEP_RANGES as PACKED_CEP_RANGES } from "./constants";
 import { getMunicipalityByCep } from "./get-municipality-by-cep";
+
+const CEP_RANGES = decodeCepRanges(PACKED_CEP_RANGES);
 
 describe("getMunicipalityByCep", () => {
 	it("should return São Paulo for a formatted CEP of Avenida Paulista", () => {

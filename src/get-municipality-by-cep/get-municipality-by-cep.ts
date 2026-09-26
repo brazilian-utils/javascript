@@ -1,9 +1,16 @@
 import { type Municipality } from "../_internals/constants/municipalities";
+import {
+	decodeCepRanges,
+	type MunicipalityCepRange,
+} from "../_internals/decode-cep-ranges/decode-cep-ranges";
 import { findCepRange } from "../_internals/find-cep-range/find-cep-range";
 import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
 import { CEP_RANGES } from "./constants";
 
 export type { Municipality } from "../_internals/constants/municipalities";
+
+/** The decoded CEP ranges, built on the first lookup rather than when the module loads. */
+let ranges: readonly MunicipalityCepRange[] | undefined;
 
 /**
  * Retrieves the Brazilian municipality a CEP (postal code) belongs to, from the CEP ranges the
@@ -43,7 +50,10 @@ export type { Municipality } from "../_internals/constants/municipalities";
  * ```
  */
 export const getMunicipalityByCep = (value: string | number): Municipality | null => {
-	const range = findCepRange(value, CEP_RANGES);
+	// Stryker disable next-line AssignmentOperator: this only memoizes; decoding the constant table again on every call gives the very same ranges.
+	ranges ??= decodeCepRanges(CEP_RANGES);
+
+	const range = findCepRange(value, ranges);
 
 	return range ? getMunicipalityByCode(range.code) : null;
 };
