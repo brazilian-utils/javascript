@@ -1902,7 +1902,7 @@ subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (2nd to last
 
 - An `n` beyond the business days of the month lands in the next month (`addBusinessDays(new Date(2024, 0, 0), 23)` is 2024-02-01, January 2024 has 22); compare `getMonth()` when that matters.
 - This is the banking count (Monday to Friday). The payroll "quinto dia útil" of CLT art. 459 § 1º is counted differently by labour inspection.
-- January 1900 and December 2099 return `null`, since the starting day is outside the supported years.
+- The n-th business day of January 1900 and the last business day of December 2099 return `null`, since the recipe starts from a day outside the supported years (31 December 1899 and 1 January 2100).
 
 ### differenceInBusinessDays
 

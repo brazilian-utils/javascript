@@ -18,8 +18,8 @@ const NOON = 12;
  * for them, so the walk is plain integer arithmetic on days: it always advances, it always stops
  * after `Math.abs(until - from)` days, and no `Date` is ever mutated. That is what makes it safe
  * in every time zone. A walk driven by `date.setDate(date.getDate() + 1)` is not: when the
- * neighbouring local day does not exist (`Pacific/Apia` skipped 30 December 2011, `Pacific/Kiritimati`
- * and `Pacific/Enderbury` 31 December 1994, `Pacific/Kwajalein` 21 August 1993, all of them crossing
+ * neighbouring local day does not exist (`Pacific/Apia` and `Pacific/Fakaofo` skipped 30 December 2011,
+ * `Pacific/Kiritimati` and `Pacific/Enderbury` 31 December 1994, `Pacific/Kwajalein` 21 August 1993, all of them crossing
  * the date line) the runtime re-normalizes onto the same local day, the walk stops advancing and
  * the loop never ends.
  *

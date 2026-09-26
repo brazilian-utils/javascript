@@ -1902,7 +1902,7 @@ subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (penúltimo 
 
 - Um `n` maior que os dias úteis do mês cai no mês seguinte (`addBusinessDays(new Date(2024, 0, 0), 23)` é 2024-02-01, janeiro de 2024 tem 22); compare `getMonth()` quando isso importar.
 - Esta é a contagem bancária (segunda a sexta). O "quinto dia útil" do salário, do art. 459, § 1º, da CLT, é contado de outro jeito pela fiscalização do trabalho.
-- Janeiro de 1900 e dezembro de 2099 retornam `null`, porque o dia de partida sai dos anos suportados.
+- O n-ésimo dia útil de janeiro de 1900 e o último dia útil de dezembro de 2099 retornam `null`, porque a receita parte de um dia fora dos anos suportados (31 de dezembro de 1899 e 1º de janeiro de 2100).
 
 ### differenceInBusinessDays
 
