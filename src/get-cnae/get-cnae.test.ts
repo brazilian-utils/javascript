@@ -1,12 +1,16 @@
 import * as fc from "fast-check";
 
-import { CNAE_SUBCLASSES } from "../_internals/constants/cnae";
+import { CNAE_CODES } from "../_internals/constants/cnae";
+import { CNAE_DESCRIPTIONS } from "../_internals/constants/cnae-descriptions";
 import { anyGarbage, digitsUpTo } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { formatCnae } from "../format-cnae/format-cnae";
 import { isValidCnae } from "../is-valid-cnae/is-valid-cnae";
 import { getCnae, type Cnae } from "./get-cnae";
+
+const CNAE_SUBCLASSES = lookupTable(CNAE_CODES, 7, CNAE_DESCRIPTIONS);
 
 describe("getCnae", () => {
 	it("should return the CNAE entry for a known code as a string", () => {

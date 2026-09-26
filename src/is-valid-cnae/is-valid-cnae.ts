@@ -1,4 +1,5 @@
-import { CNAE_FORMAT_REGEX, CNAE_SUBCLASSES } from "../_internals/constants/cnae";
+import { CNAE_CODES, CNAE_FORMAT_REGEX } from "../_internals/constants/cnae";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -44,5 +45,5 @@ export const isValidCnae = (value: string | number): boolean => {
 
 	if (!CNAE_FORMAT_REGEX.test(subclass)) return false;
 
-	return CNAE_SUBCLASSES[sanitizeToDigits(subclass)] !== undefined;
+	return findCodeIndex(CNAE_CODES, sanitizeToDigits(subclass)) !== -1;
 };

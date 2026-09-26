@@ -1,10 +1,14 @@
 import * as fc from "fast-check";
 
-import { CNAE_SUBCLASSES } from "../_internals/constants/cnae";
+import { CNAE_CODES } from "../_internals/constants/cnae";
+import { CNAE_DESCRIPTIONS } from "../_internals/constants/cnae-descriptions";
 import { anyGarbage } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCnae } from "./is-valid-cnae";
+
+const CNAE_SUBCLASSES = lookupTable(CNAE_CODES, 7, CNAE_DESCRIPTIONS);
 
 describe("isValidCnae", () => {
 	it("should validate a CNAE code without a mask", () => {
