@@ -175,6 +175,28 @@ describe("getLegalNature", () => {
 			);
 		});
 
+		const lookupInputs = fc.oneof(
+			knownCode,
+			knownCode.map((code) => `${code.slice(0, 3)}-${code.slice(3)}`),
+			knownCode.map(Number),
+			knownCode.map((code) => Number(code) / 10),
+			digitsUpTo(6),
+			anyValue,
+			fc.anything(),
+		);
+
+		test("should return null exactly when isValidLegalNature rejects the string form of the value", () => {
+			fc.assert(
+				fc.property(lookupInputs, (value) => {
+					const text = typeof value === "number" ? String(value) : value;
+
+					expect(getLegalNature(value as string) === null).toBe(
+						!isValidLegalNature(text as string),
+					);
+				}),
+			);
+		});
+
 		test("should never throw and always return null or an entry of the table", () => {
 			fc.assert(
 				fc.property(anyValue, (value) => {
