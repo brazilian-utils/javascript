@@ -1,10 +1,14 @@
 import * as fc from "fast-check";
 
-import { CFOP_TABLE } from "../_internals/constants/cfop";
+import { CFOP_CODES } from "../_internals/constants/cfop";
+import { CFOP_DESCRIPTIONS } from "../_internals/constants/cfop-descriptions";
 import { anyGarbage } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCfop } from "./is-valid-cfop";
+
+const CFOP_TABLE = lookupTable(CFOP_CODES, 4, CFOP_DESCRIPTIONS);
 
 describe("isValidCfop", () => {
 	it("should return true for a known CFOP code as a string", () => {
