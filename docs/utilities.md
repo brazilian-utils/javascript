@@ -2419,7 +2419,7 @@ Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de 
 Format the matrícula of a certidão de registro civil into the printed mask of art. 473. The 32 digits are grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
 
 - **Options** (`FormatCertidaoOptions`): `pad` left-pads the value with zeros up to 32 digits (default `false`).
-- A number is accepted, but a full 32-digit matrícula has to be a string.
+- A number is accepted when it is a non-negative safe integer, so a full 32-digit matrícula has to be a string. Any other number returns `''`.
 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
@@ -2428,6 +2428,7 @@ formatCertidao('10453901552013100012021000012321'); // 104539 01 55 2013 1 00012
 formatCertidao('104539.01.55.2013.1.00012.021.0000123-21'); // 104539 01 55 2013 1 00012 021 0000123 21
 formatCertidao('1552010100020112000012087', { pad: true }); // 000000 01 55 2010 1 00020 112 0000120 87
 formatCertidao(104539015520); // 104539 01 55 20 (a number is read as the string of its digits)
+formatCertidao(1045390155.2); // '' (not a non-negative safe integer)
 ```
 
 Source: [art. 473 of the Código Nacional de Normas](https://atos.cnj.jus.br/atos/detalhar/5243).

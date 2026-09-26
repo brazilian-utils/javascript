@@ -55,6 +55,18 @@ describe("parseCertidao", () => {
 			expectAlwaysReturnsType(parseCertidao, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCertidao(1_045_390_155.2)).toBe("");
+		expect(parseCertidao(-1)).toBe("");
+		expect(parseCertidao(1.5)).toBe("");
+		expect(parseCertidao(2 ** 53)).toBe("");
+		expect(parseCertidao(Number.MAX_VALUE)).toBe("");
+		expect(parseCertidao(1e21)).toBe("");
+		expect(parseCertidao(Number.NaN)).toBe("");
+		expect(parseCertidao(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCertidao(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCertidao types", () => {

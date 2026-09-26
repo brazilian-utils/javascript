@@ -2419,7 +2419,7 @@ Fonte: [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justi
 Formata a matrícula de uma certidão de registro civil na máscara impressa do art. 473. Os 32 dígitos são agrupados em 6 2 2 4 1 5 3 7 2 e separados por espaços.
 
 - **Opções** (`FormatCertidaoOptions`): `pad` completa o valor com zeros à esquerda até 32 dígitos (padrão `false`).
-- Um número é aceito, mas uma matrícula completa de 32 dígitos precisa ser uma string.
+- Um número é aceito quando é um inteiro seguro não negativo, então uma matrícula completa de 32 dígitos precisa ser uma string. Qualquer outro número retorna `''`.
 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
@@ -2428,6 +2428,7 @@ formatCertidao('10453901552013100012021000012321'); // 104539 01 55 2013 1 00012
 formatCertidao('104539.01.55.2013.1.00012.021.0000123-21'); // 104539 01 55 2013 1 00012 021 0000123 21
 formatCertidao('1552010100020112000012087', { pad: true }); // 000000 01 55 2010 1 00020 112 0000120 87
 formatCertidao(104539015520); // 104539 01 55 20 (um número é lido como a string dos seus dígitos)
+formatCertidao(1045390155.2); // '' (não é um inteiro seguro não negativo)
 ```
 
 Fonte: [art. 473 do Código Nacional de Normas](https://atos.cnj.jus.br/atos/detalhar/5243).

@@ -1,6 +1,6 @@
 import { CERTIDAO_PATTERN } from "../_internals/constants/certidao";
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `formatCertidao`. */
@@ -17,6 +17,9 @@ export type FormatCertidaoOptions = {
  * digit matrícula has to be a string: that many digits are more than a JavaScript number can hold
  * exactly. At runtime the value is read for its digits and masked as far as they go, like in every
  * formatter of this package, so a partial matrícula still being typed is masked progressively.
+ *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
  *
  * @param {string|number} value - The matrícula value to be formatted.
  * @param {FormatCertidaoOptions} [options] - Optional formatting options.
@@ -35,6 +38,7 @@ export type FormatCertidaoOptions = {
  * // "000000 01 55 2010 1 00020 112 0000120 87"
  *
  * formatCertidao(104539015520); // "104539 01 55 20" (a number is read as the string of its digits)
+ * formatCertidao(1045390155.2); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
@@ -62,10 +66,10 @@ export type FormatCertidaoOptions = {
  * Third reference implementation agreeing on the weights and on the remainder of 10 read as 1.
  */
 export const formatCertidao = (value: string | number, options?: FormatCertidaoOptions): string =>
-	isNullish(value)
-		? ""
-		: format({
+	isLookupCode(value)
+		? format({
 				pad: options?.pad,
 				value: sanitizeToDigits(value),
 				pattern: CERTIDAO_PATTERN,
-			});
+			})
+		: "";
