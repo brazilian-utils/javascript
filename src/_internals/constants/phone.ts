@@ -7,12 +7,11 @@
 
 export const PHONE_COUNTRY_CODE = "55";
 
-const PHONE_INTERNATIONAL_PREFIX = "00";
-
-export const PHONE_COUNTRY_CODE_PREFIXES = [
-	`${PHONE_INTERNATIONAL_PREFIX}${PHONE_COUNTRY_CODE}`,
-	PHONE_COUNTRY_CODE,
-];
+/**
+ * The country code as dialed: after the `00` international prefix, then bare. Plain literals (not a
+ * template built from `PHONE_COUNTRY_CODE`) so a bundle that never reads them drops them.
+ */
+export const PHONE_COUNTRY_CODE_PREFIXES = ["0055", "55"];
 
 export const PHONE_NATIONAL_MIN_LENGTH = 10;
 

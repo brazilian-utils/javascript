@@ -1,5 +1,5 @@
 import { calculateProcessoJuridicoCheckDigits } from "../_internals/calculate-processo-juridico-check-digits/calculate-processo-juridico-check-digits";
-import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-juridico";
+import { getProcessoJuridicoTribunals } from "../_internals/constants/processo-juridico";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { pickRandom } from "../_internals/pick-random/pick-random";
@@ -22,8 +22,6 @@ export type GenerateProcessoJuridicoOptions = GenerateProcessoJuridicoParams;
 
 const MAX_YEAR = 9999;
 const TRIBUNAL_LENGTH = 2;
-
-const COURTS = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
 
 /**
  * Generates a random valid Brazilian Processo Jurídico (court case) number,
@@ -64,8 +62,9 @@ export const generateProcessoJuridico = (
 	if (isNullish(options) || typeof options !== "object") return null;
 
 	const currentYear = new Date().getFullYear();
-	const { year = currentYear, court = pickRandom(COURTS) } = options;
-	const tribunals = PROCESSO_JURIDICO_TRIBUNALS.get(court);
+	const tribunalsByCourt = getProcessoJuridicoTribunals();
+	const { year = currentYear, court = pickRandom([...tribunalsByCourt.keys()]) } = options;
+	const tribunals = tribunalsByCourt.get(court);
 
 	if (!Number.isInteger(year) || year < currentYear || year > MAX_YEAR || tribunals === undefined) {
 		return null;

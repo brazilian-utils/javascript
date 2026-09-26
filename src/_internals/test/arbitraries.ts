@@ -18,7 +18,7 @@ import { VALID_AREA_CODES } from "../constants/area-codes";
 import { ARRECADACAO_SEGMENTS } from "../constants/arrecadacao";
 import { CNPJ_FIRST_DIGIT_WEIGHTS, CNPJ_SECOND_DIGIT_WEIGHTS } from "../constants/cnpj";
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../constants/holidays";
-import { PROCESSO_JURIDICO_TRIBUNALS } from "../constants/processo-juridico";
+import { getProcessoJuridicoTribunals } from "../constants/processo-juridico";
 import {
 	SERVICE_PHONE_ABBREVIATED_LENGTH,
 	SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH,
@@ -330,7 +330,7 @@ export const voterIds = (state?: StateCode | "ZZ"): fc.Arbitrary<string> =>
  * tribunal drawn from the pairs Resolução CNJ nº 65/2008 allows.
  */
 export const processosJuridicos = (): fc.Arbitrary<string> => {
-	const courtsAndTribunals = [...PROCESSO_JURIDICO_TRIBUNALS].flatMap(([court, tribunals]) =>
+	const courtsAndTribunals = [...getProcessoJuridicoTribunals()].flatMap(([court, tribunals]) =>
 		tribunals.map((tribunal) => `${court}${String(tribunal).padStart(2, "0")}`),
 	);
 

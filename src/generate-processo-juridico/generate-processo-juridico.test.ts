@@ -2,7 +2,7 @@ import * as fc from "fast-check";
 
 import {
 	PROCESSO_JURIDICO_LENGTH,
-	PROCESSO_JURIDICO_TRIBUNALS,
+	getProcessoJuridicoTribunals,
 } from "../_internals/constants/processo-juridico";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidProcessoJuridico } from "../is-valid-processo-juridico/is-valid-processo-juridico";
@@ -23,7 +23,7 @@ const expectListedCourtAndTribunal = (value: string | null) => {
 	const court = Number((value as string).charAt(13));
 	const tribunal = Number((value as string).slice(14, 16));
 
-	expect(PROCESSO_JURIDICO_TRIBUNALS.get(court)).toContain(tribunal);
+	expect(getProcessoJuridicoTribunals().get(court)).toContain(tribunal);
 };
 
 describe("generateProcessoJuridico", () => {
@@ -80,7 +80,7 @@ describe("generateProcessoJuridico", () => {
 	});
 
 	it("should draw a tribunal the órgão really has for every court option", () => {
-		for (const court of PROCESSO_JURIDICO_TRIBUNALS.keys()) {
+		for (const court of getProcessoJuridicoTribunals().keys()) {
 			const value = generateProcessoJuridico({ court });
 
 			expectValidGeneratedProcessoJuridico(value);

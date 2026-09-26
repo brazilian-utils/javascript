@@ -59,15 +59,24 @@ const SUPERIOR_COURT = 0;
 /** Conselho da Justiça Federal and Conselho Superior da Justiça do Trabalho (§ 5º, II). */
 const COUNCIL = 90;
 
-/** Tribunal codes (`TR`) Resolução CNJ nº 65/2008 allows under each órgão code (`J`). */
-export const PROCESSO_JURIDICO_TRIBUNALS: ReadonlyMap<number, readonly number[]> = new Map([
-	[1, [SUPERIOR_COURT]],
-	[2, [SUPERIOR_COURT]],
-	[3, [SUPERIOR_COURT]],
-	[4, [...range(1, 6), COUNCIL]],
-	[5, [SUPERIOR_COURT, ...range(1, 24), COUNCIL]],
-	[6, [SUPERIOR_COURT, ...range(1, 27)]],
-	[7, [SUPERIOR_COURT, ...range(1, 12)]],
-	[8, range(1, 27)],
-	[9, [13, 21, 26]],
-]);
+let tribunals: ReadonlyMap<number, readonly number[]> | undefined;
+
+/**
+ * Tribunal codes (`TR`) Resolução CNJ nº 65/2008 allows under each órgão code (`J`). Built on the
+ * first call and kept, instead of at module level, so a bundle that never reads it drops it,
+ * ranges and all.
+ *
+ * @returns {ReadonlyMap<number, readonly number[]>} The tribunal codes of each órgão code.
+ */
+export const getProcessoJuridicoTribunals = (): ReadonlyMap<number, readonly number[]> =>
+	(tribunals ??= new Map([
+		[1, [SUPERIOR_COURT]],
+		[2, [SUPERIOR_COURT]],
+		[3, [SUPERIOR_COURT]],
+		[4, [...range(1, 6), COUNCIL]],
+		[5, [SUPERIOR_COURT, ...range(1, 24), COUNCIL]],
+		[6, [SUPERIOR_COURT, ...range(1, 27)]],
+		[7, [SUPERIOR_COURT, ...range(1, 12)]],
+		[8, range(1, 27)],
+		[9, [13, 21, 26]],
+	]));

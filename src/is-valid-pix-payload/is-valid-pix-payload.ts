@@ -2,6 +2,7 @@ import {
 	PIX_ADDITIONAL_DATA_ID,
 	PIX_COUNTRY_CODE,
 	PIX_COUNTRY_CODE_ID,
+	PIX_CRC_FIELD_LENGTH,
 	PIX_CRC_LENGTH,
 	PIX_CRC_TAG,
 	PIX_DYNAMIC_POINT_OF_INITIATION,
@@ -29,12 +30,10 @@ const AMOUNT_REGEX = /^\d+(?:\.\d{1,2})?$/;
 
 const WITHDRAWAL_FACILITATOR_REGEX = /^\d{8}$/;
 
-const CRC_TAG_LENGTH = PIX_CRC_TAG.length + PIX_CRC_LENGTH;
-
 const isValidCrc = (payload: string): boolean => {
 	const checksum = payload.slice(-PIX_CRC_LENGTH);
 
-	if (payload.slice(-CRC_TAG_LENGTH, -PIX_CRC_LENGTH) !== PIX_CRC_TAG) return false;
+	if (payload.slice(-PIX_CRC_FIELD_LENGTH, -PIX_CRC_LENGTH) !== PIX_CRC_TAG) return false;
 
 	// A checksum that is not four uppercase hexadecimal digits can never equal crc16Ccitt's
 	// always-hexadecimal output, so the comparison below turns it down on its own.
@@ -143,7 +142,7 @@ export const isValidPixPayload = (value: string): boolean => {
 	const payload = value.trim();
 
 	// Stryker disable next-line ConditionalExpression,EqualityOperator: a payload this short has no room left for any of the mandatory fields checked below, so it can never be valid even without this guard
-	if (payload.length <= CRC_TAG_LENGTH || !isValidCrc(payload)) return false;
+	if (payload.length <= PIX_CRC_FIELD_LENGTH || !isValidCrc(payload)) return false;
 
 	const fields = parseTlv(payload);
 

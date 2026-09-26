@@ -1,5 +1,5 @@
 import { calculateProcessoJuridicoCheckDigits } from "../_internals/calculate-processo-juridico-check-digits/calculate-processo-juridico-check-digits";
-import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-juridico";
+import { getProcessoJuridicoTribunals } from "../_internals/constants/processo-juridico";
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import {
 	CHECK_DIGIT_LENGTH,
@@ -25,7 +25,7 @@ const verifyCheckDigit = (value: string): boolean => {
 };
 
 const verifyCourtAndTribunal = (value: string): boolean => {
-	const tribunals = PROCESSO_JURIDICO_TRIBUNALS.get(Number(value.charAt(COURT_POSITION)));
+	const tribunals = getProcessoJuridicoTribunals().get(Number(value.charAt(COURT_POSITION)));
 
 	if (tribunals === undefined) return false;
 
