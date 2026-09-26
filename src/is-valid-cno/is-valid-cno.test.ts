@@ -49,6 +49,11 @@ describe("isValidCno", () => {
 		test("when a check digit of 0 is replaced by another digit (401800097960 of the Receita Federal CNO dataset)", () => {
 			expect(isValidCno("401800097961")).toBe(false);
 		});
+
+		test("when it is a negative or fractional number", () => {
+			expect(isValidCno(-110_840_168_062)).toBe(false);
+			expect(isValidCno(1_108_401_680.62)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {

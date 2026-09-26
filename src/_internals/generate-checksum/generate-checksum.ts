@@ -28,16 +28,16 @@ export function generateChecksum({ base, weight }: GenerateChecksumParams): numb
 
 	let sum = 0;
 
-	const len = digits.length;
+	const length = digits.length;
 
 	if (typeof weight === "number") {
-		let w = weight;
-		for (let i = 0; i < len; i++, w--) {
+		let currentWeight = weight;
+		for (let i = 0; i < length; i++, currentWeight--) {
 			const digit = digits.charCodeAt(i) - 48;
-			sum += digit * w;
+			sum += digit * currentWeight;
 		}
 	} else {
-		for (let i = 0; i < len; i++) {
+		for (let i = 0; i < length; i++) {
 			const digit = digits.charCodeAt(i) - 48;
 			sum += digit * weight[i];
 		}

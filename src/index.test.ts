@@ -471,13 +471,13 @@ describe("Public API contract: never throws on bad input", () => {
 			typeof value === "function" && !isErrorClass(name) && !NETWORK_ENTRY_POINTS.has(name),
 	) as [string, (...args: unknown[]) => unknown][];
 
-	for (const [name, fn] of entries) {
+	for (const [name, utility] of entries) {
 		for (const [label, value] of BAD_INPUTS) {
 			test(`${name} should not throw for ${label}`, async () => {
 				let thrown: unknown;
 
 				try {
-					const result = fn(value);
+					const result = utility(value);
 
 					if (result instanceof Promise) await result;
 				} catch (error) {
@@ -491,7 +491,7 @@ describe("Public API contract: never throws on bad input", () => {
 				let thrown: unknown;
 
 				try {
-					const result = fn("123", value);
+					const result = utility("123", value);
 
 					if (result instanceof Promise) await result;
 				} catch (error) {

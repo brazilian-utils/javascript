@@ -3,7 +3,9 @@ import {
 	type LegalNatureCategory,
 } from "../_internals/constants/legal-nature-categories";
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
 
 export type { LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
 
@@ -57,14 +59,14 @@ export const buildLegalNature = (code: string, description: string): LegalNature
 		: { ...entry, legacy: false };
 };
 
-const lookUp = (code: string): LegalNature | null =>
-	Object.hasOwn(LEGAL_NATURE, code) ? buildLegalNature(code, LEGAL_NATURE[code]) : null;
-
 /**
  * Looks a Brazilian legal nature (natureza jurídica) code up.
  *
- * The usual mask characters (hyphens, dots, whitespace) are stripped before the lookup, from a
- * number as well as from a string, so `getLegalNature(206.2)` resolves like `getLegalNature("206.2")`.
+ * The usual mask characters (hyphens, dots, whitespace) are stripped from a string before the
+ * lookup, so `getLegalNature("206.2")` resolves like `getLegalNature("206-2")`. A number is only
+ * read as a code when it is a non-negative safe integer: its sign and its decimal point are not
+ * mask characters, so `getLegalNature(-2062)` and `getLegalNature(206.2)` return `null` instead
+ * of being read as `2062`.
  *
  * No legal nature code starts with a zero, its first digit is the CONCLA category (1 to 5), so
  * nothing is ever padded here: a number and the string of the same digits are read identically,
@@ -83,7 +85,9 @@ const lookUp = (code: string): LegalNature | null =>
  *
  * @param {string|number} value - The legal nature code to look up, with or without formatting.
  * @returns {LegalNature|null} The matching legal nature entry, or null when the code is unknown
- * or invalid.
+ * or invalid, which is exactly when `isValidLegalNature` returns false for the string form of the
+ * value (a number is read as the string it prints as), or when the value is a number that is not
+ * a non-negative safe integer.
  *
  * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
@@ -111,12 +115,19 @@ const lookUp = (code: string): LegalNature | null =>
  * // }
  * getLegalNature("3123")?.legacy; // true (Partido Político, retired without a successor)
  * getLegalNature("206-2")?.code; // "2062"
- * getLegalNature(206.2)?.category.description; // "Entidades Empresariais"
+ * getLegalNature("206.2")?.category.description; // "Entidades Empresariais"
  * getLegalNature("0000"); // null
+ * getLegalNature(206.2); // null (not a non-negative safe integer)
  * ```
  */
 export const getLegalNature = (value: string | number): LegalNature | null => {
-	if (typeof value !== "string" && typeof value !== "number") return null;
+	if (!isLookupCode(value)) return null;
 
-	return lookUp(String(value).replace(SEPARATORS_REGEX, ""));
+	const text = String(value);
+
+	if (!isValidLegalNature(text)) return null;
+
+	const code = text.replace(SEPARATORS_REGEX, "");
+
+	return buildLegalNature(code, LEGAL_NATURE[code]);
 };

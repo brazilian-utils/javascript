@@ -5,11 +5,11 @@ import { parseFrontMatter } from "./front-matter.ts";
 import { removeUntilStable } from "./remove-until-stable.ts";
 
 const ROOT = join(import.meta.dirname, "..");
-const DOCS_DIR = join(ROOT, "docs");
+const DOCS_DIRECTORY = join(ROOT, "docs");
 const SITE = "https://brazilian-utils.com.br";
-const REPO = "https://github.com/brazilian-utils/javascript";
+const REPOSITORY = "https://github.com/brazilian-utils/javascript";
 
-type UtilSection = {
+type UtilitySection = {
 	name: string;
 	slug: string;
 	description: string;
@@ -76,19 +76,19 @@ function deprecationSentence(paragraph: string): string {
 	return firstSentence(paragraph.slice(markerIndex).replaceAll("**", ""));
 }
 
-const UTIL_HEADING_PATTERN = /^#{2,3} ([a-z][A-Za-z0-9]*)\n/;
+const UTILITY_HEADING_PATTERN = /^#{2,3} ([a-z][A-Za-z0-9]*)\n/;
 
 /**
  * Parses every function section of `utilities.md` into name/slug/description. A function section
- * starts with a `## <fn>` or `### <fn>` heading whose text is a bare identifier; the `##` family
+ * starts with a `## <name>` or `### <name>` heading whose text is a bare identifier; the `##` family
  * headings that group most of them ("CPF", "Pix", ...) are skipped.
- * @param {string} utilitiesMd - The full contents of `utilities.md`.
- * @returns {UtilSection[]} One entry per function section, in document order.
+ * @param {string} utilitiesMarkdown - The full contents of `utilities.md`.
+ * @returns {UtilitySection[]} One entry per function section, in document order.
  */
-function parseUtilities(utilitiesMd: string): UtilSection[] {
-	const sections = utilitiesMd
+function parseUtilities(utilitiesMarkdown: string): UtilitySection[] {
+	const sections = utilitiesMarkdown
 		.split(/^(?=#{2,3} )/m)
-		.filter((section) => UTIL_HEADING_PATTERN.test(section));
+		.filter((section) => UTILITY_HEADING_PATTERN.test(section));
 
 	return sections.map((section) => {
 		const newlineIndex = section.indexOf("\n");
@@ -139,11 +139,11 @@ function subHeadings(markdown: string): string[] {
 /**
  * Reads the util names listed in the "Bundle size" table of `getting-started.md`, so the summary
  * of the dataset-backed utils cannot drift from the table it summarizes.
- * @param {string} gettingStartedMd - The full contents of `getting-started.md`.
+ * @param {string} gettingStartedMarkdown - The full contents of `getting-started.md`.
  * @returns {string[]} The util names of the table, in document order.
  */
-function parseDatasetUtils(gettingStartedMd: string): string[] {
-	const section = /\n## Bundle size\n([\s\S]*?)(?=\n## |$)/.exec(gettingStartedMd)?.[1] ?? "";
+function parseDatasetUtilities(gettingStartedMarkdown: string): string[] {
+	const section = /\n## Bundle size\n([\s\S]*?)(?=\n## |$)/.exec(gettingStartedMarkdown)?.[1] ?? "";
 
 	return section
 		.split("\n")
@@ -173,39 +173,41 @@ const PREFIX_GROUPS: { title: string; test: (name: string) => boolean }[] = [
 	{ title: "Getters (get*)", test: (name) => name.startsWith("get") },
 ];
 
-function groupUtilities(utils: UtilSection[]): { title: string; utils: UtilSection[] }[] {
-	const groups: { title: string; utils: UtilSection[] }[] = PREFIX_GROUPS.map((group) => ({
+function groupUtilities(
+	utilities: UtilitySection[],
+): { title: string; utilities: UtilitySection[] }[] {
+	const groups: { title: string; utilities: UtilitySection[] }[] = PREFIX_GROUPS.map((group) => ({
 		title: group.title,
-		utils: [],
+		utilities: [],
 	}));
-	const other: UtilSection[] = [];
+	const other: UtilitySection[] = [];
 
-	for (const util of utils) {
-		const groupIndex = PREFIX_GROUPS.findIndex((group) => group.test(util.name));
+	for (const utility of utilities) {
+		const groupIndex = PREFIX_GROUPS.findIndex((group) => group.test(utility.name));
 		const matchedGroup = groupIndex === -1 ? undefined : groups[groupIndex];
 
 		if (matchedGroup === undefined) {
-			other.push(util);
+			other.push(utility);
 		} else {
-			matchedGroup.utils.push(util);
+			matchedGroup.utilities.push(utility);
 		}
 	}
 
 	if (other.length > 0) {
-		groups.push({ title: "Other utilities", utils: other });
+		groups.push({ title: "Other utilities", utilities: other });
 	}
 
-	return groups.filter((group) => group.utils.length > 0);
+	return groups.filter((group) => group.utilities.length > 0);
 }
 
-function utilLink(util: UtilSection): string {
-	return `- [${util.name}](${SITE}/utilities.md#${util.slug}): ${util.description}`;
+function utilityLink(utility: UtilitySection): string {
+	return `- [${utility.name}](${SITE}/utilities.md#${utility.slug}): ${utility.description}`;
 }
 
-function buildLlmsTxt(utils: UtilSection[], datasetUtils: string[]): string {
-	const groups = groupUtilities(utils);
+function buildLlmsTxt(utilities: UtilitySection[], datasetUtilities: string[]): string {
+	const groups = groupUtilities(utilities);
 	const groupSections = groups
-		.map((group) => `## ${group.title}\n\n${group.utils.map(utilLink).join("\n")}`)
+		.map((group) => `## ${group.title}\n\n${group.utilities.map(utilityLink).join("\n")}`)
 		.join("\n\n");
 
 	return `# Brazilian Utils
@@ -220,7 +222,7 @@ Install with \`npm install --save @brazilian-utils/brazilian-utils\` (also avail
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 \`\`\`
 
-Every util is also available as its own subpath for lazy-loading/code-splitting, \`@brazilian-utils/brazilian-utils/<kebab-name>\` (kebab-case of the function name, e.g. \`isValidCpf\` maps to \`is-valid-cpf\`) - most useful for the utils that embed an official dataset (${joinNames(datasetUtils)}):
+Every util is also available as its own subpath for lazy-loading/code-splitting, \`@brazilian-utils/brazilian-utils/<kebab-name>\` (kebab-case of the function name, e.g. \`isValidCpf\` maps to \`is-valid-cpf\`) - most useful for the utils that embed an official dataset (${joinNames(datasetUtilities)}):
 
 \`\`\`javascript
 const { getCities } = await import('@brazilian-utils/brazilian-utils/get-cities');
@@ -239,8 +241,8 @@ ${groupSections}
 
 - [Getting started (pt-BR)](${SITE}/pt-br/getting-started.md): Portuguese translation of the getting started guide
 - [Utilities (pt-BR)](${SITE}/pt-br/utilities.md): Portuguese translation of the utilities reference
-- [README on GitHub](${REPO}#readme): project overview and contributor list
-- [CHANGELOG](${REPO}/blob/main/CHANGELOG.md): release history
+- [README on GitHub](${REPOSITORY}#readme): project overview and contributor list
+- [CHANGELOG](${REPOSITORY}/blob/main/CHANGELOG.md): release history
 - [npm package](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils): published versions and download stats
 `;
 }
@@ -271,19 +273,21 @@ function demoteHeadings(markdown: string): string {
 }
 
 function buildLlmsFullTxt(
-	gettingStartedMd: string,
-	utilitiesMd: string,
-	utils: UtilSection[],
+	gettingStartedMarkdown: string,
+	utilitiesMarkdown: string,
+	utilities: UtilitySection[],
 ): string {
 	const toc = [
 		"- [Getting Started](#getting-started)",
-		...subHeadings(gettingStartedMd).map((heading) => `  - [${heading}](#${slugify(heading)})`),
+		...subHeadings(gettingStartedMarkdown).map(
+			(heading) => `  - [${heading}](#${slugify(heading)})`,
+		),
 		"- [Utilities](#utilities)",
-		...utils.map((util) => `  - [${util.name}](#${util.slug})`),
+		...utilities.map((utility) => `  - [${utility.name}](#${utility.slug})`),
 	].join("\n");
 
-	const gettingStarted = demoteHeadings(stripDocsifySyntax(gettingStartedMd));
-	const utilities = demoteHeadings(stripDocsifySyntax(utilitiesMd));
+	const gettingStarted = demoteHeadings(stripDocsifySyntax(gettingStartedMarkdown));
+	const utilitiesReference = demoteHeadings(stripDocsifySyntax(utilitiesMarkdown));
 
 	return `# Brazilian Utils
 
@@ -295,7 +299,7 @@ ${toc}
 
 ${gettingStarted}
 
-${utilities}
+${utilitiesReference}
 `;
 }
 
@@ -314,19 +318,21 @@ function frontMatterToHeading(markdown: string): string {
 }
 
 function main(): void {
-	const gettingStartedMd = frontMatterToHeading(
-		readFileSync(join(DOCS_DIR, "getting-started.md"), "utf8"),
+	const gettingStartedMarkdown = frontMatterToHeading(
+		readFileSync(join(DOCS_DIRECTORY, "getting-started.md"), "utf8"),
 	);
-	const utilitiesMd = frontMatterToHeading(readFileSync(join(DOCS_DIR, "utilities.md"), "utf8"));
-	const utils = parseUtilities(utilitiesMd);
+	const utilitiesMarkdown = frontMatterToHeading(
+		readFileSync(join(DOCS_DIRECTORY, "utilities.md"), "utf8"),
+	);
+	const utilities = parseUtilities(utilitiesMarkdown);
 
 	writeFileSync(
-		join(DOCS_DIR, "llms.txt"),
-		buildLlmsTxt(utils, parseDatasetUtils(gettingStartedMd)),
+		join(DOCS_DIRECTORY, "llms.txt"),
+		buildLlmsTxt(utilities, parseDatasetUtilities(gettingStartedMarkdown)),
 	);
 	writeFileSync(
-		join(DOCS_DIR, "llms-full.txt"),
-		buildLlmsFullTxt(gettingStartedMd, utilitiesMd, utils),
+		join(DOCS_DIRECTORY, "llms-full.txt"),
+		buildLlmsFullTxt(gettingStartedMarkdown, utilitiesMarkdown, utilities),
 	);
 }
 

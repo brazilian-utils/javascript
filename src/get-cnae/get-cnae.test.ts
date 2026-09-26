@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { CNAE_SUBCLASSES } from "../_internals/constants/cnae";
-import { anyGarbage } from "../_internals/test/arbitraries";
+import { anyGarbage, digitsUpTo } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { formatCnae } from "../format-cnae/format-cnae";
@@ -94,6 +94,23 @@ describe("getCnae", () => {
 
 		test("should never throw, regardless of the input", () => {
 			expectNeverThrows(getCnae, anyGarbage);
+		});
+
+		const lookupInputs = fc.oneof(
+			codeArbitrary,
+			codeArbitrary.map((code) => `${code.slice(0, 4)}-${code[4]}/${code.slice(5)}`),
+			fc.nat({ max: 9_999_999 }),
+			digitsUpTo(9),
+			anyGarbage,
+			fc.anything(),
+		);
+
+		test("should return null exactly when isValidCnae is false", () => {
+			fc.assert(
+				fc.property(lookupInputs, (value) => {
+					expect(getCnae(value as string) === null).toBe(!isValidCnae(value as string));
+				}),
+			);
 		});
 
 		test("should resolve every known code, as a string or a number, and agree with formatCnae and isValidCnae", () => {

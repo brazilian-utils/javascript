@@ -30,9 +30,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 export const isValidPis = (pis: string): boolean => {
 	if (typeof pis !== "string") return false;
 
-	const hasInvalidChars = /[^0-9\s().,*/-]/.test(pis);
+	const hasInvalidCharacters = /[^0-9\s().,*/-]/.test(pis);
 
-	if (hasInvalidChars) return false;
+	if (hasInvalidCharacters) return false;
 
 	const digits = sanitizeToDigits(pis);
 

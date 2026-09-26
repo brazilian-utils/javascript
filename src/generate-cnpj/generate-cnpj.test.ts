@@ -157,14 +157,14 @@ describe("generateCnpj", () => {
 		});
 
 		test("should generate alphanumeric CNPJs including E, O, T and U, which a previously restricted alphabet excluded even though isValidCnpj accepts them (the official RFB example '12.ABC.345/01DE-35' contains an E)", () => {
-			const usedChars = new Set<string>();
+			const usedCharacters = new Set<string>();
 			for (let i = 0; i < 1000; i++) {
-				for (const char of generateCnpj(2)) {
-					usedChars.add(char);
+				for (const character of generateCnpj(2)) {
+					usedCharacters.add(character);
 				}
 			}
-			for (const char of ["E", "O", "T", "U"]) {
-				expect(usedChars.has(char)).toBe(true);
+			for (const character of ["E", "O", "T", "U"]) {
+				expect(usedCharacters.has(character)).toBe(true);
 			}
 		});
 	});
@@ -192,7 +192,7 @@ describe("generateCnpj", () => {
 		});
 
 		test("should keep the ordem block numeric on the alphanumeric version, with letters in the raiz", () => {
-			const raizChars = new Set<string>();
+			const raizCharacters = new Set<string>();
 
 			for (let index = 0; index < 100; index++) {
 				const cnpj = generateCnpj({ version: 2, branch: 9999 });
@@ -201,12 +201,12 @@ describe("generateCnpj", () => {
 				expect(cnpj.slice(8, 12)).toBe("9999");
 				expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
 
-				for (const char of cnpj.slice(0, 8)) {
-					raizChars.add(char);
+				for (const character of cnpj.slice(0, 8)) {
+					raizCharacters.add(character);
 				}
 			}
 
-			expect([...raizChars].some((char) => /[A-Z]/.test(char))).toBe(true);
+			expect([...raizCharacters].some((character) => /[A-Z]/.test(character))).toBe(true);
 		});
 
 		test("should generate a numeric CNPJ with a branch when the version is 1", () => {

@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { decodeEntities } from "./decode-entities.ts";
 import { fetchSortedRecord } from "./fetch-sorted-record.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 /**
  * CONFAZ prints the text in force with the `A5-1TextoAcordo` class and keeps every superseded
@@ -98,7 +98,7 @@ const main = async (): Promise<void> => {
 	);
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cfop.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/cfop.ts"),
 		`/**
  * CFOP (Código Fiscal de Operações e Prestações) table, indexed by the 4 digit code.
  *

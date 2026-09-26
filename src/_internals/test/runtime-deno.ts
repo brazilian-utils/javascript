@@ -171,7 +171,7 @@ function createMock(implementation?: MockImplementation): MockFunction {
 	const calls: unknown[][] = [];
 	let currentImplementation = implementation;
 
-	const baseFn = (...args: unknown[]): unknown => {
+	const baseFunction = (...args: unknown[]): unknown => {
 		calls.push(args);
 
 		if (queue.length > 0) {
@@ -189,7 +189,7 @@ function createMock(implementation?: MockImplementation): MockFunction {
 		return undefined;
 	};
 
-	const mockFn: MockFunction = Object.assign(baseFn, {
+	const mockFunction: MockFunction = Object.assign(baseFunction, {
 		mock: { calls },
 		mockClear: (): void => {
 			calls.length = 0;
@@ -202,7 +202,7 @@ function createMock(implementation?: MockImplementation): MockFunction {
 		mockResolvedValueOnce: (value: unknown): MockFunction => {
 			queue.push(() => Promise.resolve(value));
 
-			return mockFn;
+			return mockFunction;
 		},
 		mockRejectedValueOnce: (value: unknown): MockFunction => {
 			queue.push(async () => {
@@ -211,12 +211,12 @@ function createMock(implementation?: MockImplementation): MockFunction {
 				throw value;
 			});
 
-			return mockFn;
+			return mockFunction;
 		},
 		mockResolvedValue: (value: unknown): MockFunction => {
 			currentImplementation = (): Promise<unknown> => Promise.resolve(value);
 
-			return mockFn;
+			return mockFunction;
 		},
 		mockRejectedValue: (value: unknown): MockFunction => {
 			currentImplementation = async (): Promise<unknown> => {
@@ -225,18 +225,18 @@ function createMock(implementation?: MockImplementation): MockFunction {
 				throw value;
 			};
 
-			return mockFn;
+			return mockFunction;
 		},
 		mockImplementation: (nextImplementation: MockImplementation): MockFunction => {
 			currentImplementation = nextImplementation;
 
-			return mockFn;
+			return mockFunction;
 		},
 	});
 
-	registeredMocks.add(mockFn);
+	registeredMocks.add(mockFunction);
 
-	return mockFn;
+	return mockFunction;
 }
 
 type ThrowExpectation = RegExp | string | Error | (new (...args: any[]) => unknown);
@@ -634,8 +634,8 @@ export const expect = createExpect;
 export const vi = {
 	fn: createMock,
 	restoreAllMocks: (): void => {
-		for (const mockFn of registeredMocks) {
-			mockFn.mockReset();
+		for (const mockFunction of registeredMocks) {
+			mockFunction.mockReset();
 		}
 	},
 };

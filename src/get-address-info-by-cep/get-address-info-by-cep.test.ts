@@ -255,6 +255,16 @@ describe("getAddressInfoByCep", () => {
 				expectDefaultAddress(result);
 			});
 
+			it("should throw GetAddressInfoByCepValidationError for a negative or fractional number, without a request", async () => {
+				await expect(getAddressInfoByCep(-1_310_100)).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+				await expect(getAddressInfoByCep(131_010.1)).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+				expect(fetchMock).not.toHaveBeenCalled();
+			});
+
 			it("should accept CEP with mask", async () => {
 				const result = await getAddressInfoByCep(VALID_CEP_MASKED);
 

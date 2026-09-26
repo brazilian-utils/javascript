@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { fetchSortedRecord } from "./fetch-sorted-record.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 /** The official CSV is published in ISO-8859-1, not UTF-8. */
 const CBO_CSV_DECODER = new TextDecoder("iso-8859-1");
@@ -60,7 +60,7 @@ const main = async (): Promise<void> => {
 	);
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cbo.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/cbo.ts"),
 		`/**
  * CBO 2002 (Classificação Brasileira de Ocupações) titles, indexed by the raw 6 digit code.
  *

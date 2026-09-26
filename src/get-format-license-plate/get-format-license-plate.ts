@@ -1,5 +1,6 @@
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
-import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
+import { OLD_FORMAT_REGEX } from "../is-valid-license-plate/constants";
+import { isValidLicensePlate } from "../is-valid-license-plate/is-valid-license-plate";
 
 /** The Brazilian license plate formats `getFormatLicensePlate` can identify: the old `LLLNNNN` and the Mercosul `LLLNLNN`. */
 export type LicensePlateFormat = "LLLNNNN" | "LLLNLNN";
@@ -17,7 +18,7 @@ export type LicensePlateFormat = "LLLNNNN" | "LLLNLNN";
  *
  * @param {string} value - The license plate value to be checked.
  * @returns {LicensePlateFormat | null} The identified format, or `null` when it doesn't match
- * any supported format.
+ * any supported format, which is exactly when `isValidLicensePlate` returns false.
  *
  * @example
  * ```typescript
@@ -39,12 +40,7 @@ export type LicensePlateFormat = "LLLNNNN" | "LLLNLNN";
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
 export const getFormatLicensePlate = (value: string): LicensePlateFormat | null => {
-	if (typeof value !== "string") return null;
+	if (!isValidLicensePlate(value)) return null;
 
-	const parsed = sanitizeToAlphanumeric(value);
-
-	if (OLD_FORMAT_REGEX.test(parsed)) return "LLLNNNN";
-	if (MERCOSUL_REGEX.test(parsed)) return "LLLNLNN";
-
-	return null;
+	return OLD_FORMAT_REGEX.test(sanitizeToAlphanumeric(value)) ? "LLLNNNN" : "LLLNLNN";
 };

@@ -1,9 +1,8 @@
-import { CBO_FORMAT_REGEX, CBO_TITLES } from "../_internals/constants/cbo";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { CBO_TITLES } from "../_internals/constants/cbo";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-const CBO_LENGTH = 6;
+import { CBO_LENGTH } from "../is-valid-cbo/constants";
+import { isValidCbo } from "../is-valid-cbo/is-valid-cbo";
 
 /**
  * A CBO (Classificação Brasileira de Ocupações) occupation.
@@ -33,7 +32,8 @@ export type Cbo = {
  *
  * @param {string|number} value - The CBO code to look up, with or without the hyphen
  * mask, e.g. `"2124-05"`, `"212405"` or `212405`.
- * @returns {Cbo|null} The matching occupation, or null when the code is unknown or invalid.
+ * @returns {Cbo|null} The matching occupation, or null when the code is unknown or invalid,
+ * which is exactly when `isValidCbo` returns false.
  *
  * @example
  * ```typescript
@@ -52,16 +52,9 @@ export type Cbo = {
  * official CSV was used.
  */
 export const getCbo = (value: string | number): Cbo | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidCbo(value)) return null;
 
-	const code = padLookupCode(value, CBO_LENGTH);
+	const code = sanitizeToDigits(padLookupCode(value, CBO_LENGTH));
 
-	if (!CBO_FORMAT_REGEX.test(code)) return null;
-
-	const digits = sanitizeToDigits(code);
-	const description = CBO_TITLES[digits];
-
-	if (description === undefined) return null;
-
-	return { code: digits, description };
+	return { code, description: CBO_TITLES[code] };
 };

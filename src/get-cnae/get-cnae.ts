@@ -1,9 +1,8 @@
-import { CNAE_FORMAT_REGEX, CNAE_SUBCLASSES } from "../_internals/constants/cnae";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { CNAE_SUBCLASSES } from "../_internals/constants/cnae";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-const CNAE_LENGTH = 7;
+import { CNAE_LENGTH } from "../is-valid-cnae/constants";
+import { isValidCnae } from "../is-valid-cnae/is-valid-cnae";
 
 /**
  * A CNAE (Classificação Nacional de Atividades Econômicas) subclass.
@@ -36,7 +35,8 @@ export type Cnae = {
  *
  * @param {string|number} value - The CNAE code to look up, with or without the
  * `NNNN-N/NN` mask.
- * @returns {Cnae|null} The matching subclass, or null when the code is unknown or invalid.
+ * @returns {Cnae|null} The matching subclass, or null when the code is unknown or invalid,
+ * which is exactly when `isValidCnae` returns false.
  *
  * @example
  * ```typescript
@@ -54,16 +54,9 @@ export type Cnae = {
  * CONCLA's CNAE search and structure browser, which publishes CNAE-Subclasses 2.3.
  */
 export const getCnae = (value: string | number): Cnae | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidCnae(value)) return null;
 
-	const subclass = padLookupCode(value, CNAE_LENGTH);
+	const code = sanitizeToDigits(padLookupCode(value, CNAE_LENGTH));
 
-	if (!CNAE_FORMAT_REGEX.test(subclass)) return null;
-
-	const digits = sanitizeToDigits(subclass);
-	const description = CNAE_SUBCLASSES[digits];
-
-	if (description === undefined) return null;
-
-	return { code: digits, description };
+	return { code, description: CNAE_SUBCLASSES[code] };
 };

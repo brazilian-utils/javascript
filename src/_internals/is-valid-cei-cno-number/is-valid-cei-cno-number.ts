@@ -1,5 +1,6 @@
 import { calculateCeiCheckDigit } from "../calculate-cei-check-digit/calculate-cei-check-digit";
 import { CEI_BASE_LENGTH, CEI_FORMAT_REGEX } from "../constants/cei";
+import { isLookupCode } from "../is-lookup-code/is-lookup-code";
 import { isRepeatedDigits } from "../is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
 import { toStringSafe } from "../to-string-safe/to-string-safe";
@@ -49,6 +50,8 @@ import { toStringSafe } from "../to-string-safe/to-string-safe";
  * Second, independent reference implementation agreeing with the first.
  */
 export const isValidCeiCnoNumber = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
 	const digits = sanitizeToDigits(value);
 
 	if (!CEI_FORMAT_REGEX.test(toStringSafe(value).trim())) return false;

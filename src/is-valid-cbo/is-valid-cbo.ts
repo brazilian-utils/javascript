@@ -1,4 +1,8 @@
-import { getCbo } from "../get-cbo/get-cbo";
+import { CBO_FORMAT_REGEX, CBO_TITLES } from "../_internals/constants/cbo";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { CBO_LENGTH } from "./constants";
 
 /**
  * Validates if a CBO (Classificação Brasileira de Ocupações) code exists in the official
@@ -35,4 +39,12 @@ import { getCbo } from "../get-cbo/get-cbo";
  * Community mirror of the same table, the fallback `CBO_TITLES` was built from before the
  * official CSV was used.
  */
-export const isValidCbo = (value: string | number): boolean => getCbo(value) !== null;
+export const isValidCbo = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
+	const code = padLookupCode(value, CBO_LENGTH);
+
+	if (!CBO_FORMAT_REGEX.test(code)) return false;
+
+	return CBO_TITLES[sanitizeToDigits(code)] !== undefined;
+};

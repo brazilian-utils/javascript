@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { DATA as STATES } from "../src/_internals/constants/states.ts";
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 const STATE_CODES = STATES.map((state) => state.code);
 
@@ -155,7 +155,7 @@ const main = async (): Promise<void> => {
 		.join("\n");
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/municipalities.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/municipalities.ts"),
 		`import { type StateCode } from "./states";
 
 /**

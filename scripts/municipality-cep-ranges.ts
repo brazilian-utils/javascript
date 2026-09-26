@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 // Every `src/` module imports its siblings without a file extension, the convention the
 // bundler resolves; a plain `node` process (this script) cannot resolve those on its own. This
@@ -199,7 +199,7 @@ const main = async (): Promise<void> => {
 		.join("\n");
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/get-municipality-by-cep/constants.ts"),
+		resolve(scriptsDirectory, "..", "./src/get-municipality-by-cep/constants.ts"),
 		`/** One range of CEPs assigned by the Correios to a municipality. */
 type MunicipalityCepRange = {
 	/** 7-digit IBGE code of the municipality that owns the range. */
