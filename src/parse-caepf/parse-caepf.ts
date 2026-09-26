@@ -1,4 +1,4 @@
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { LENGTH } from "./constants";
 
@@ -10,12 +10,16 @@ import { LENGTH } from "./constants";
  * is capped at; a shorter value passes through as far as it goes. Use `isValidCaepf` to check the
  * number itself.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CAEPF value to be parsed.
  * @returns {string} Up to 14 digits, or an empty string when there is no digit at all.
  *
  * @example
  * ```typescript
  * parseCaepf("293.118.610/001-84"); // "29311861000184"
+ * parseCaepf(-41142260000101); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
@@ -23,4 +27,4 @@ import { LENGTH } from "./constants";
  * the mask; the mask is the one the sources cited by `isValidCaepf` agree on.
  */
 export const parseCaepf = (value: string | number): string =>
-	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, LENGTH);
+	isLookupCode(value) ? sanitizeToDigits(value).slice(0, LENGTH) : "";
