@@ -111,7 +111,7 @@ itself:
   (`iban.ts`), IBGE state codes (`ibge-uf-codes.ts`), legal nature categories, the CST and CSOSN
   tables (`src/is-valid-cst`, `src/is-valid-csosn`), the professional councils
   (`src/is-valid-registro-profissional`), the região fiscal digit of each state
-  (`src/generate-cpf`) and the voter ID state codes (`src/is-valid-voter-id`). A change to one of
+  (`src/_internals/constants/cpf.ts`) and the voter ID state codes (`src/is-valid-voter-id`). A change to one of
   these cites the act that changed it (`@see Official:`), like any rule.
 
 ## Adding a new utility
