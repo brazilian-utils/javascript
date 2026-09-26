@@ -2,6 +2,7 @@ import * as fc from "fast-check";
 
 import { type GeneratePhoneType } from "../../generate-phone/generate-phone";
 import { type LicensePlateFormat } from "../../get-format-license-plate/get-format-license-plate";
+import { type BusinessDayOptions, isBusinessDay } from "../../is-business-day/is-business-day";
 import { UF_TO_VOTER_ID_CODE } from "../../is-valid-voter-id/constants";
 import { assembleBoletoArrecadacao } from "../assemble-boleto-arrecadacao/assemble-boleto-arrecadacao";
 import { assembleBoletoBancario } from "../assemble-boleto-bancario/assemble-boleto-bancario";
@@ -168,6 +169,25 @@ export const businessDayDates: fc.Arbitrary<Date> = fc.date({
 	max: new Date(2050, 11, 31),
 	noInvalidDate: true,
 });
+
+/**
+ * A month inside the range the business day utils are exercised over, with every business day it
+ * has at 00:00 local time, found by asking `isBusinessDay` about each day in turn: the brute force
+ * answer the month recipes of `addBusinessDays`/`subBusinessDays` are checked against.
+ */
+export const businessDayMonths = (
+	options?: BusinessDayOptions,
+): fc.Arbitrary<{ year: number; month: number; businessDays: Date[] }> =>
+	fc
+		.record({ year: fc.integer({ min: 1950, max: 2050 }), month: fc.integer({ min: 0, max: 11 }) })
+		.map(({ year, month }) => ({
+			year,
+			month,
+			businessDays: Array.from(
+				{ length: new Date(year, month + 1, 0).getDate() },
+				(_, index) => new Date(year, month, index + 1),
+			).filter((day) => isBusinessDay(day, options)),
+		}));
 
 /**
  * `Object.prototype`'s own keys: the ones a lookup must resolve as unknown rather than reach

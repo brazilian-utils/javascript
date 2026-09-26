@@ -5,6 +5,7 @@ import {
 	anyBusinessDayDate,
 	anyBusinessDayOptions,
 	businessDayDates,
+	businessDayMonths,
 	PROTOTYPE_KEYS,
 } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithArguments } from "../_internals/test/properties";
@@ -239,8 +240,66 @@ describe("addBusinessDays", () => {
 		});
 	});
 
+	describe("the n-th business day of a month, from the last day of the month before", () => {
+		it("should give the 5th business day of January 2024 (Jan 1 is Ano novo): Mon 2024-01-08", () => {
+			expect(addBusinessDays(new Date(2024, 0, 0), 5)).toEqual(new Date(2024, 0, 8));
+		});
+
+		it("should give the 1st business day when the 1st of the month is a holiday: Tue 2024-01-02", () => {
+			expect(addBusinessDays(new Date(2024, 0, 0), 1)).toEqual(new Date(2024, 0, 2));
+		});
+
+		it("should skip Carnaval for the 10th business day of February 2024 (Thu 2024-02-15), and count it when includeOptional is false (Wed 2024-02-14)", () => {
+			expect(addBusinessDays(new Date(2024, 1, 0), 10)).toEqual(new Date(2024, 1, 15));
+			expect(addBusinessDays(new Date(2024, 1, 0), 10, { includeOptional: false })).toEqual(
+				new Date(2024, 1, 14),
+			);
+		});
+
+		it("should skip a state holiday for the 7th business day of July 2024 in SP (Wed 2024-07-10)", () => {
+			expect(addBusinessDays(new Date(2024, 6, 0), 7, { stateCode: "SP" })).toEqual(
+				new Date(2024, 6, 10),
+			);
+		});
+
+		it("should spill into the next month when the month has fewer business days (January 2024 has 22, the 23rd is Thu 2024-02-01)", () => {
+			expect(addBusinessDays(new Date(2024, 0, 0), 22)).toEqual(new Date(2024, 0, 31));
+			expect(addBusinessDays(new Date(2024, 0, 0), 23)).toEqual(new Date(2024, 1, 1));
+		});
+
+		it("should return null for January 1900, whose day before is in 1899, outside the supported years", () => {
+			expect(addBusinessDays(new Date(1900, 0, 0), 1)).toBeNull();
+		});
+	});
+
 	describe("properties", () => {
 		const amounts = fc.integer({ min: -200, max: 200 });
+
+		test("should give the n-th business day of the month from the last day of the month before", () => {
+			fc.assert(
+				fc.property(
+					businessDayMonths(),
+					fc.integer({ min: 1, max: 23 }),
+					({ year, month, businessDays }, n) => {
+						const result = addBusinessDays(new Date(year, month, 0), n);
+
+						if (n <= businessDays.length) {
+							expect(result).toEqual(businessDays[n - 1]);
+						} else {
+							expect(result?.getMonth()).toBe((month + 1) % 12);
+						}
+					},
+				),
+			);
+		});
+
+		test("should give the last business day of the month, walking back 1 from the first day of the month after", () => {
+			fc.assert(
+				fc.property(businessDayMonths(), ({ year, month, businessDays }) => {
+					expect(addBusinessDays(new Date(year, month + 1, 1), -1)).toEqual(businessDays.at(-1));
+				}),
+			);
+		});
 
 		test("should never throw, regardless of the input, prototype chain state codes included", () => {
 			expectNeverThrowsWithArguments(

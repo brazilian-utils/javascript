@@ -1886,6 +1886,24 @@ subBusinessDays(new Date('not a date'), 1); // null
 subBusinessDays(new Date(2024, 0, 2), 1.5); // null (not an integer)
 ```
 
+To get the n-th business day of a month, or the last one, start from the day just outside the month:
+
+```javascript
+import { addBusinessDays, subBusinessDays } from '@brazilian-utils/brazilian-utils';
+
+// n-th business day of the month: add n from the last day of the month before
+addBusinessDays(new Date(2024, 0, 0), 5); // Date, 2024-01-08 00:00 (5th business day of January 2024)
+addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-15 00:00 (10th of February 2024, Carnaval skipped)
+
+// last business day of the month: subtract 1 from the first day of the month after
+subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 is Sexta-feira Santa, then a weekend)
+subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (2nd to last of January 2024)
+```
+
+- An `n` beyond the business days of the month lands in the next month (`addBusinessDays(new Date(2024, 0, 0), 23)` is 2024-02-01, January 2024 has 22); compare `getMonth()` when that matters.
+- This is the banking count (Monday to Friday). The payroll "quinto dia útil" of CLT art. 459 § 1º is counted differently by labour inspection.
+- January 1900 and December 2099 return `null`, since the starting day is outside the supported years.
+
 ### differenceInBusinessDays
 
 Count the Brazilian business days (dias úteis) between two dates. Signature: `differenceInBusinessDays(laterDate, earlierDate, options?)`, the same as date-fns.

@@ -1886,6 +1886,24 @@ subBusinessDays(new Date('not a date'), 1); // null
 subBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
 ```
 
+Para o n-ésimo dia útil de um mês, ou o último, comece do dia logo fora do mês:
+
+```javascript
+import { addBusinessDays, subBusinessDays } from '@brazilian-utils/brazilian-utils';
+
+// n-ésimo dia útil do mês: some n a partir do último dia do mês anterior
+addBusinessDays(new Date(2024, 0, 0), 5); // Date, 2024-01-08 00:00 (5º dia útil de janeiro de 2024)
+addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-15 00:00 (10º de fevereiro de 2024, Carnaval pulado)
+
+// último dia útil do mês: subtraia 1 a partir do primeiro dia do mês seguinte
+subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 é Sexta-feira Santa, seguida de um fim de semana)
+subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (penúltimo de janeiro de 2024)
+```
+
+- Um `n` maior que os dias úteis do mês cai no mês seguinte (`addBusinessDays(new Date(2024, 0, 0), 23)` é 2024-02-01, janeiro de 2024 tem 22); compare `getMonth()` quando isso importar.
+- Esta é a contagem bancária (segunda a sexta). O "quinto dia útil" do salário, do art. 459, § 1º, da CLT, é contado de outro jeito pela fiscalização do trabalho.
+- Janeiro de 1900 e dezembro de 2099 retornam `null`, porque o dia de partida sai dos anos suportados.
+
 ### differenceInBusinessDays
 
 Conta os dias úteis entre duas datas. Assinatura: `differenceInBusinessDays(laterDate, earlierDate, options?)`, a mesma do date-fns.
