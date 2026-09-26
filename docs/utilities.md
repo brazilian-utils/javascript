@@ -2783,7 +2783,7 @@ formatNcm('8471'); // 8471 (masked as far as it goes)
 formatNcm('847130'); // 8471.30
 formatNcm('8471', { pad: true }); // 0000.84.71 (padded to 8 digits first)
 formatNcm('abc8471'); // 8471 (only the digits are read)
-formatNcm(-84713012); // 8471.30.12
+formatNcm(-84713012); // '' (not a non-negative safe integer)
 ```
 
 ### parseNcm

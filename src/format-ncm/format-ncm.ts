@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `formatNcm`. */
@@ -22,11 +22,12 @@ export type FormatNcmOptions = {
  * `pad: true`, so `formatNcm(8471)` gives `"8471"` and `formatNcm(8471, { pad: true })` gives
  * `"0000.84.71"`.
  *
- * Like every formatter of this package, the value is read for its digits and masked as far as
- * they go: characters outside the mask are dropped (`formatNcm("abc8471")` gives
- * `"8471"`) and a number is read as the string of its digits, sign and decimal point
- * included (`formatNcm(-84713012)` gives `"8471.30.12"`). This is the input-mask contract of
- * `formatCpf`; use `isValidNcm` to check a code.
+ * Like every formatter of this package, a string is read for its digits and masked as far as
+ * they go: characters outside the mask are dropped (`formatNcm("abc8471")` gives `"8471"`),
+ * which is the input-mask contract of `formatCpf`. A number is only read when it is a
+ * non-negative safe integer: its sign and decimal point are not mask characters, so a negative,
+ * fractional, not finite or unsafe number gives an empty string instead of the digits of its
+ * string (`formatNcm(-84713012)` gives `""`). Use `isValidNcm` to check a code.
  *
  * @param {string|number} value - The NCM code to be formatted.
  * @param {FormatNcmOptions} [options] - Optional formatting options.
@@ -42,13 +43,13 @@ export type FormatNcmOptions = {
  * formatNcm("847130"); // "8471.30"
  * formatNcm("8471", { pad: true }); // "0000.84.71" (padded to 8 digits first)
  * formatNcm("abc8471"); // "8471" (only the digits are read)
- * formatNcm(-84713012); // "8471.30.12"
+ * formatNcm(-84713012); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json
  */
 export const formatNcm = (value: string | number, options?: FormatNcmOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,

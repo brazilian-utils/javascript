@@ -2783,7 +2783,7 @@ formatNcm('8471'); // 8471 (máscara aplicada até onde o valor vai)
 formatNcm('847130'); // 8471.30
 formatNcm('8471', { pad: true }); // 0000.84.71 (completado até 8 dígitos antes)
 formatNcm('abc8471'); // 8471 (só os dígitos são lidos)
-formatNcm(-84713012); // 8471.30.12
+formatNcm(-84713012); // '' (não é um inteiro seguro não negativo)
 ```
 
 ### parseNcm
