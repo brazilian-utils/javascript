@@ -3,6 +3,7 @@ import {
 	type LegalNatureCategory,
 } from "../_internals/constants/legal-nature-categories";
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
 
@@ -61,8 +62,11 @@ export const buildLegalNature = (code: string, description: string): LegalNature
 /**
  * Looks a Brazilian legal nature (natureza jurídica) code up.
  *
- * The usual mask characters (hyphens, dots, whitespace) are stripped before the lookup, from a
- * number as well as from a string, so `getLegalNature(206.2)` resolves like `getLegalNature("206.2")`.
+ * The usual mask characters (hyphens, dots, whitespace) are stripped from a string before the
+ * lookup, so `getLegalNature("206.2")` resolves like `getLegalNature("206-2")`. A number is only
+ * read as a code when it is a non-negative safe integer: its sign and its decimal point are not
+ * mask characters, so `getLegalNature(-2062)` and `getLegalNature(206.2)` return `null` instead
+ * of being read as `2062`.
  *
  * No legal nature code starts with a zero, its first digit is the CONCLA category (1 to 5), so
  * nothing is ever padded here: a number and the string of the same digits are read identically,
@@ -110,12 +114,13 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  * // }
  * getLegalNature("3123")?.legacy; // true (Partido Político, retired without a successor)
  * getLegalNature("206-2")?.code; // "2062"
- * getLegalNature(206.2)?.category.description; // "Entidades Empresariais"
+ * getLegalNature("206.2")?.category.description; // "Entidades Empresariais"
  * getLegalNature("0000"); // null
+ * getLegalNature(206.2); // null (not a non-negative safe integer)
  * ```
  */
 export const getLegalNature = (value: string | number): LegalNature | null => {
-	if (typeof value !== "string" && typeof value !== "number") return null;
+	if (!isLookupCode(value)) return null;
 
 	const text = String(value);
 
