@@ -1,4 +1,5 @@
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
@@ -33,6 +34,8 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * the repeated-base rejection included, so the calculation follows the reference implementations
  * cited below.
  *
+ * A number is only read as a CAEPF when it is a non-negative safe integer.
+ *
  * @param {string|number} value - The CAEPF value to be validated.
  * @returns {boolean} True if the CAEPF is valid, false otherwise.
  *
@@ -44,6 +47,7 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * isValidCaepf("29311861000185"); // false (invalid check digits)
  * isValidCaepf("00000000000000"); // false (repeated base digits)
  * isValidCaepf("00000000000012"); // false (repeated base digits)
+ * isValidCaepf(293118610001.84); // false (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
@@ -58,6 +62,8 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * Third reference implementation.
  */
 export const isValidCaepf = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
 	const digits = sanitizeToDigits(value);
 
 	if (!CAEPF_FORMAT_REGEX.test(toStringSafe(value).trim())) return false;
