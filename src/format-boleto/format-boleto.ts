@@ -1,6 +1,6 @@
 import { ARRECADACAO_LINE_LENGTH, ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { ARRECADACAO_PATTERN, BANCARIO_PATTERN } from "./constants";
 
@@ -19,6 +19,9 @@ export type FormatBoletoOptions = {
  * *barcode* has no display grouping defined by FEBRABAN (§04 describes positions, not a
  * printed form), so it keeps the published "cobrança bancária" grouping.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The value to be formatted, either as a string or a number.
  * @param {FormatBoletoOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - Whether to pad the value with leading zeros.
@@ -31,6 +34,7 @@ export type FormatBoletoOptions = {
  *
  * formatBoleto("826300000011098800100702024102024000000205104519");
  * // "82630000001-1 09880010070-2 02410202400-0 00020510451-9"
+ * formatBoleto(1e21); // "" (not a non-negative safe integer)
  * ```
  *
  * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
@@ -44,7 +48,7 @@ export type FormatBoletoOptions = {
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const formatBoleto = (value: string | number, options?: FormatBoletoOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	const digits = sanitizeToDigits(value);
 

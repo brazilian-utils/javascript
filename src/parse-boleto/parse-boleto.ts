@@ -1,5 +1,6 @@
 import { ARRECADACAO_LINE_LENGTH, ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /**
@@ -7,6 +8,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * Bank slips starting with `8` are "arrecadação" (convênio/tributos) slips, whose linha
  * digitável has 48 digits instead of the 47 of a "cobrança bancária" slip.
+ *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
  *
  * @param {string|number} value - The boleto value to be parsed.
  * @returns {string} The boleto value without formatting.
@@ -18,6 +22,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * parseBoleto("82630000001-1 09880010070-2 02410202400-0 00020510451-9");
  * // "826300000011098800100702024102024000000205104519"
+ * parseBoleto(1e21); // "" (not a non-negative safe integer)
  * ```
  *
  * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
@@ -31,6 +36,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const parseBoleto = (value: string | number): string => {
+	if (!isLookupCode(value)) return "";
+
 	const digits = sanitizeToDigits(value);
 
 	return digits.slice(

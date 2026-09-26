@@ -211,6 +211,18 @@ describe("formatBoleto", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatBoleto(1e21)).toBe("");
+		expect(formatBoleto(-1)).toBe("");
+		expect(formatBoleto(1.5)).toBe("");
+		expect(formatBoleto(2 ** 53)).toBe("");
+		expect(formatBoleto(Number.MAX_VALUE)).toBe("");
+		expect(formatBoleto(Number.NaN)).toBe("");
+		expect(formatBoleto(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatBoleto(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatBoleto(1e21, { pad: true })).toBe("");
+	});
 });
 
 describe("formatBoleto with a nullish value under pad", () => {

@@ -92,6 +92,17 @@ describe("parseBoleto", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseBoleto(1e21)).toBe("");
+		expect(parseBoleto(-1)).toBe("");
+		expect(parseBoleto(1.5)).toBe("");
+		expect(parseBoleto(2 ** 53)).toBe("");
+		expect(parseBoleto(Number.MAX_VALUE)).toBe("");
+		expect(parseBoleto(Number.NaN)).toBe("");
+		expect(parseBoleto(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseBoleto(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseBoleto benchmarks", () => {
