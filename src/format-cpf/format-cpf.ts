@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { OBFUSCATED_PATTERN, PATTERN } from "./constants";
 
@@ -14,6 +14,9 @@ export type FormatCpfOptions = {
 /**
  * Formats a given CPF (Cadastro de Pessoas Físicas) value according to the Brazilian standard.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CPF value to be formatted. It can be a string or a number.
  * @param {FormatCpfOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - If true, the value will be padded with leading zeros if necessary.
@@ -27,13 +30,14 @@ export type FormatCpfOptions = {
  * formatCpf(12345678909); // "123.456.789-09"
  * formatCpf("123456789", { pad: true }); // "001.234.567-89"
  * formatCpf("12345678909", { obfuscate: true }); // "***.456.789-**"
+ * formatCpf(123456789.09); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const formatCpf = (value: string | number, options?: FormatCpfOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,
