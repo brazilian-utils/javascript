@@ -50,6 +50,18 @@ describe("parseSuframa", () => {
 			expectAlwaysReturnsType(parseSuframa, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseSuframa(10_123_456.7)).toBe("");
+		expect(parseSuframa(-1)).toBe("");
+		expect(parseSuframa(1.5)).toBe("");
+		expect(parseSuframa(2 ** 53)).toBe("");
+		expect(parseSuframa(Number.MAX_VALUE)).toBe("");
+		expect(parseSuframa(1e21)).toBe("");
+		expect(parseSuframa(Number.NaN)).toBe("");
+		expect(parseSuframa(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseSuframa(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseSuframa types", () => {

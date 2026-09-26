@@ -90,6 +90,19 @@ describe("formatSuframa", () => {
 			expectAlwaysReturnsType(formatSuframa, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatSuframa(-101_234_567)).toBe("");
+		expect(formatSuframa(-1)).toBe("");
+		expect(formatSuframa(1.5)).toBe("");
+		expect(formatSuframa(2 ** 53)).toBe("");
+		expect(formatSuframa(Number.MAX_VALUE)).toBe("");
+		expect(formatSuframa(1e21)).toBe("");
+		expect(formatSuframa(Number.NaN)).toBe("");
+		expect(formatSuframa(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatSuframa(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatSuframa(-101_234_567, { pad: true })).toBe("");
+	});
 });
 
 describe("formatSuframa types", () => {
