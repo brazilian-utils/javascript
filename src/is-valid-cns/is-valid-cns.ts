@@ -5,6 +5,7 @@ import {
 	CNS_FORMAT_REGEX,
 } from "../_internals/constants/cns";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 const DEFINITIVE_FIRST_DIGIT_REGEX = /^[12]/;
@@ -47,6 +48,8 @@ const isValidProvisional = (digits: string): boolean =>
  * among the digits or a separator inside a group included, is rejected instead of being read
  * past.
  *
+ * A number is only read as a CNS when it is a non-negative safe integer.
+ *
  * @param {string|number} value - The CNS value to be validated.
  * @returns {boolean} True if the CNS is valid, false otherwise.
  *
@@ -58,6 +61,7 @@ const isValidProvisional = (digits: string): boolean =>
  * isValidCns("123.4567-8901/0000"); // true (any of the mask characters)
  * isValidCns("123456789010001"); // false (wrong check digit)
  * isValidCns("12345678901"); // false (wrong length)
+ * isValidCns(13945721823.0006); // false (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/
@@ -70,7 +74,7 @@ const isValidProvisional = (digits: string): boolean =>
  * weighted sum checks out.
  */
 export const isValidCns = (value: string | number): boolean => {
-	if (typeof value !== "string" && typeof value !== "number") return false;
+	if (!isLookupCode(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 

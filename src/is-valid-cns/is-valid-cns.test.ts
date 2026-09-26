@@ -104,6 +104,11 @@ describe("isValidCns", () => {
 		test("when the 15 digits are grouped outside the printed 3-4-4-4 mask", () => {
 			expect(isValidCns("1234 5678 9010 000")).toBe(false);
 		});
+
+		test("when it is a negative or fractional number", () => {
+			expect(isValidCns(-139_457_218_230_006)).toBe(false);
+			expect(isValidCns(13_945_721_823.0006)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
