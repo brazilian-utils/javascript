@@ -53,8 +53,7 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run check:unused`                                                                                                    | Runs [knip](https://knip.dev): unused files, exports, types and dependencies fail.                                                                                                                                                                                       |
 | `npm run test:mutation`                                                                                                   | Runs [Stryker](https://stryker-mutator.io) mutation tests (`stryker run`); pass `-- --mutate src/<util>/<util>.ts` for one file.                                                                                                                                         |
 | `npm run bench`                                                                                                           | Runs the `describe("… benchmarks")` blocks with vitest in benchmark mode (`vp test bench --run`); they register nothing in test mode.                                                                                                                                    |
-| `npm run check:api`                                                                                                       | Builds the package and runs API Extractor over `dist/brazilian-utils.d.ts`: a public type without a doc comment, a type the API refers to without exporting, or a public signature that differs from the committed baseline `reports/api/brazilian-utils.api.md`, fails. |
-| `npm run check:api:update`                                                                                                | Rewrites the committed API Extractor baseline `reports/api/brazilian-utils.api.md` from the current build; run it when a public signature changes on purpose and commit the new report.                                                                                  |
+| `npm run check:api`                                                                                                       | Builds the package and runs `scripts/api.ts`: API Extractor fails on an undocumented public declaration or an unexported type the API refers to, a breaking change against the last release on npm fails, and the API diff is shown ([details](#public-api-validation)). |
 | `npm run check:commits`                                                                                                   | Checks the commit messages since `origin/main` with commitlint (Conventional Commits).                                                                                                                                                                                   |
 | `npm run check:lockfile`                                                                                                  | Checks `package-lock.json` only resolves to the npm registry over HTTPS with integrity hashes (lockfile-lint).                                                                                                                                                           |
 | `npm run check:vex`                                                                                                       | Checks that every advisory suppressed for `audit-ci` and OSV-Scanner has a `not_affected` statement in `openvex.json`, and nothing else does.                                                                                                                            |
@@ -308,16 +307,56 @@ pull request so the CI result is not a surprise.
 
 ## Public API validation
 
-[API Extractor](https://api-extractor.com) runs over the bundled `dist/brazilian-utils.d.ts` in CI
-(`npm run check:api`). It fails when a type the public API refers to is not itself exported (a
-consumer could not name it) and when an exported function, type or class has no doc comment. It
-also compares the public API against the reviewed baseline committed at
-`reports/api/brazilian-utils.api.md` (the only file of the ignored `reports/` folder that is
-committed) and fails when the two differ, so a change to a public signature has to be reviewed in
-the diff of that report: run `npm run check:api:update` to write the new baseline and commit it
-along with the change. On top of that, the public signatures are pinned by the
-`describe("<name> types")` blocks in the tests, and the `src/index.test.ts` export map catches an
-export that goes missing.
+`npm run check:api` builds the package and runs `scripts/api.ts`, which CI runs on every pull
+request and push to `main`. Nothing it writes lands in the repository: every report goes to a
+temporary directory that is deleted at the end, so there is no file to regenerate or commit.
+
+1. [API Extractor](https://api-extractor.com) runs over the bundled `dist/brazilian-utils.d.ts`
+   with the settings of `api-extractor.json`. It fails when a type the public API refers to is not
+   itself exported (`ae-forgotten-export`: a consumer could not name it), when an exported
+   function, type or class has no doc comment (`ae-undocumented`), and on any compiler error in the
+   bundled declarations.
+2. The script downloads the last release (`npm pack @brazilian-utils/brazilian-utils@latest`) and
+   generates a TypeScript file that only compiles when this build can replace it, type-checked with
+   the repository's `tsc`. A breaking change fails the job:
+   - an export of the release (value or type, at the root or in a subpath entry point such as
+     `@brazilian-utils/brazilian-utils/is-valid-cpf`) that is no longer exported, or a subpath
+     whose `.js`, `.cjs`, `.d.ts` or `.d.cts` file is no longer built;
+   - a value that is not assignable to the released one (`const _: typeof Old.x = New.x`): a
+     parameter that became required or narrower, a new required parameter, a return type that
+     widened (`boolean` to `boolean | null`), an overload that went away;
+   - a function whose return type narrowed (`Bank | null` to `Bank`) or whose returned object gained
+     a required property: a consumer that stored the result in an inferred variable
+     (`let bank = getBankByCode(code)`) and later assigns the old type to it (`bank = null`) stops
+     compiling. The returns of all overloads (up to four) are compared as one union;
+   - an exported type that rejects a value the released one accepts (a removed union member, a
+     property that became required or narrower, a new required property);
+   - an exported type that consumers get back (it appears in a return type, a thrown class, or a
+     type reached from one) or that no function uses, and that now accepts a value the released one
+     rejects (a new union member, a removed or widened property): code that reads it, such as an
+     exhaustive `switch`, does not handle the new value. A type that only appears in parameters (an
+     `*Options` or `*Params` type) may widen freely, and a deprecated alias
+     (`type GetHolidaysOptions = GetHolidaysParams`) follows the type it renames.
+
+   What stays allowed: new exports, new optional parameters, new optional properties, parameters
+   and input types that accept more values. When `package.json` is already on a higher major
+   version than the release, breaking changes are listed but do not fail. The check needs network
+   access and exits with code 2 when the registry cannot be reached; a package that was never
+   published skips it.
+
+3. The declarations added, removed and changed since the release, taken from the API Extractor
+   reports of both builds, are printed as a diff and, in CI, added to the job summary of the
+   `Check` workflow, which is where a reviewer reads the API changes of a pull request. This part
+   never fails.
+
+The limits of a type-level check: it proves that code which compiled against the release still
+compiles, not that it behaves the same (a changed default, a different result for the same input or
+a new exception are caught only by the tests), and it assumes consumers use `strict` TypeScript.
+Roles are inferred from where a type is written in the signatures, so a type that only appears
+inside a callback parameter is treated as an input although it flows out. Generic types (none
+today) cannot be named without type arguments and only show up in the diff. On top of that, the
+public signatures are pinned by the `describe("<name> types")` blocks in the tests, and the
+`src/index.test.ts` export map catches an export that goes missing.
 
 ## Supply chain
 
@@ -449,7 +488,9 @@ This library is used in production by many projects, so please do not introduce 
 (renamed/removed exports, changed function signatures, changed default behavior) without first
 opening an issue or discussion to align on the approach with maintainers. If a breaking change is
 unavoidable, call it out explicitly in the PR description (and use a `feat!`/`fix!` or
-`BREAKING CHANGE:` footer in the commit, per Conventional Commits).
+`BREAKING CHANGE:` footer in the commit, per Conventional Commits). `npm run check:api` fails on a
+breaking change against the last release ([Public API validation](#public-api-validation)) until
+`package.json` is on the next major version, so such a pull request is merged deliberately.
 
 ## Releasing
 
@@ -510,7 +551,7 @@ to what no tool can judge.
 
 **What CI already decided.** A reviewer does not re-check these; a red check is a "not yet":
 formatting, lint and types (`vp check`), the tests on every runtime, 100% coverage and mutation
-score, duplicated code (jscpd), unused files and exports (knip), the public API report, bundle size
+score, duplicated code (jscpd), unused files and exports (knip), the public API check, bundle size
 per export (the tree-shaking report), the lockfile, known vulnerabilities (`audit-ci`,
 OSV-Scanner), CodeQL, the workflow linters, stale generated files (`llms.txt`, the site shells) and
 the commit messages.
@@ -527,6 +568,9 @@ the commit messages.
    `false`, `format*`/`parse*` return `""`, getters return `null` or `[]`, and there is a property
    test that says so. No renamed or removed export, no changed default, no narrower accepted input
    ([Breaking changes](#breaking-changes)); a rename keeps the old name as a `@deprecated` alias.
+   The job summary of the `Check` workflow lists every public declaration the pull request adds,
+   removes or changes against the last release; read it to confirm the API change is the intended
+   one.
 3. **Does it fit the project?** One utility per folder named after it, shared logic in
    `src/_internals/` instead of a copy, `XxxOptions`/`XxxParams` naming, datasets generated by a
    script and never edited by hand, and nothing in the change the pull request does not need.

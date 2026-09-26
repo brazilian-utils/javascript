@@ -36,7 +36,7 @@ Brazilian Utils is a zero-dependency library of small utilities for the day-to-d
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
 - **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
 - **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, all tested in CI.
-- **Written in TypeScript.** Types ship with the package, and an API report tracks the public API so nothing changes silently.
+- **Written in TypeScript.** Types ship with the package, and every pull request is checked against the last release so the public API never changes silently.
 - **Validated against the official rules.** Every validator cites the specification, law or dataset it implements, and the test suite is mutation-tested, not just covered.
 - **Documented in English and Portuguese**, with an `llms.txt` for AI assistants.
 
