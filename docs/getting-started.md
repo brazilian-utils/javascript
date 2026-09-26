@@ -68,6 +68,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
+| `getCid10` | CID-10 V2008 categories and subcategories, with the DATASUS descriptions | 1030.4 KB | 146.9 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
 | `getCities` | 5571 IBGE municipality names | 154.3 KB | 49.9 KB |
 | `getMunicipalityByCep` | The IBGE municipality table above, plus 5573 Correios CEP ranges | 393.3 KB | 98.8 KB |
@@ -80,6 +81,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 | `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.8 KB | 9.6 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
 | `isValidServiceItem` · `getServiceItem` | Service list of the Lei Complementar 116/2003 | 27.1 - 27.2 KB | 8.8 - 8.9 KB |
+| `isValidCid10` | CID-10 V2008 category and subcategory codes, without the descriptions | 27.0 KB | 7.4 KB |
 
 The root of the package is a single ESM module, so a bundler cannot split one of these datasets out of it: importing a heavy util from the root puts its whole dataset in your main bundle, and a dynamic `import()` of the root does not help. To lazy-load one, import it from its own subpath:
 

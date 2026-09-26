@@ -13,6 +13,7 @@ import {
 	type CertidaoType,
 	type Cest,
 	type Cfop,
+	type Cid10,
 	type ClassTrib,
 	type Cnae,
 	type CnpjInfo,
@@ -145,6 +146,7 @@ const PUBLIC = [
 	"formatCep",
 	"formatCertidao",
 	"formatCest",
+	"formatCid10",
 	"formatCnae",
 	"formatCnh",
 	"formatCno",
@@ -193,6 +195,7 @@ const PUBLIC = [
 	"getCertidaoInfo",
 	"getCest",
 	"getCfop",
+	"getCid10",
 	"getCities",
 	"getClassTrib",
 	"getCnae",
@@ -236,6 +239,7 @@ const PUBLIC = [
 	"isValidCertidao",
 	"isValidCest",
 	"isValidCfop",
+	"isValidCid10",
 	"isValidClassTrib",
 	"isValidCnae",
 	"isValidCnh",
@@ -284,6 +288,7 @@ const PUBLIC = [
 	"parseCertidao",
 	"parseCest",
 	"parseCfop",
+	"parseCid10",
 	"parseCnae",
 	"parseCnh",
 	"parseCno",
@@ -348,6 +353,7 @@ describe("Public API", () => {
 			CertidaoType: CertidaoType;
 			Cest: Cest;
 			Cfop: Cfop;
+			Cid10: Cid10;
 			ClassTrib: ClassTrib;
 			Cnae: Cnae;
 			CnpjInfo: CnpjInfo;

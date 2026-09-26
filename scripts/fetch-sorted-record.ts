@@ -1,4 +1,5 @@
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
+import { sortRecord } from "./sort-record.ts";
 
 /**
  * Fetches a dataset with retry, fails when the response is not ok, and returns the parsed
@@ -23,12 +24,5 @@ export const fetchSortedRecord = async <T>(
 		throw new Error(`${label} request failed with status ${response.status}`);
 	}
 
-	const data = await parse(response);
-	const sorted: Record<string, T> = {};
-
-	for (const key of Object.keys(data).sort()) {
-		sorted[key] = data[key];
-	}
-
-	return sorted;
+	return sortRecord(await parse(response));
 };
