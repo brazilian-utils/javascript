@@ -5,7 +5,6 @@ import {
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
-import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
 
 export type { LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
 
@@ -123,11 +122,11 @@ export const buildLegalNature = (code: string, description: string): LegalNature
 export const getLegalNature = (value: string | number): LegalNature | null => {
 	if (!isLookupCode(value)) return null;
 
-	const text = String(value);
+	// The same check as isValidLegalNature, made on the description table this lookup reads anyway,
+	// so the code list isValidLegalNature is checked against is not bundled on top of it.
+	const code = String(value).replace(SEPARATORS_REGEX, "");
 
-	if (!isValidLegalNature(text)) return null;
-
-	const code = text.replace(SEPARATORS_REGEX, "");
+	if (!Object.hasOwn(LEGAL_NATURE, code)) return null;
 
 	return buildLegalNature(code, LEGAL_NATURE[code]);
 };

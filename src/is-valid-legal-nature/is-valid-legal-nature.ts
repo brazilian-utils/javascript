@@ -1,5 +1,8 @@
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
-import { LEGAL_NATURE } from "./constants";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
+import { LEGAL_NATURE_CODES } from "./constants";
+
+const CODE_LENGTH = 4;
 
 /**
  * Validates if a Brazilian legal nature (natureza jurídica) code exists.
@@ -37,5 +40,7 @@ export const isValidLegalNature = (code: string): boolean => {
 
 	const normalized = code.replace(SEPARATORS_REGEX, "");
 
-	return Object.hasOwn(LEGAL_NATURE, normalized);
+	if (normalized.length !== CODE_LENGTH) return false;
+
+	return findCodeIndex(LEGAL_NATURE_CODES, normalized) !== -1;
 };
