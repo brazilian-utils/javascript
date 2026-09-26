@@ -1,17 +1,15 @@
-import { mod10 } from "../_internals/mod10/mod10";
+import { GTIN_LENGTHS } from "../is-valid-gtin/constants";
+import { type GtinLength, isValidGtin } from "../is-valid-gtin/is-valid-gtin";
 import {
 	BRAZILIAN_PREFIXES,
-	DIGITS_REGEX,
 	GS1_8_PADDING,
-	GTIN_LENGTHS,
 	GTIN_TYPES,
 	NORMALIZED_LENGTH,
 	RESTRICTED_GS1_8_PREFIX_REGEX,
 	RESTRICTED_PREFIX_REGEX,
 } from "./constants";
 
-/** How many digits a GTIN may be written with. */
-export type GtinLength = 8 | 12 | 13 | 14;
+export type { GtinLength } from "../is-valid-gtin/is-valid-gtin";
 
 /** The GS1 name of each GTIN structure. */
 export type GtinType = "GTIN-8" | "GTIN-12" | "GTIN-13" | "GTIN-14";
@@ -53,8 +51,9 @@ const PREFIX_LENGTH = 3;
  * must be a string of 8, 12, 13 or 14 digits, surrounding whitespace aside, whose last digit is
  * the GS1 modulo 10 check digit: weights 3 and 1 alternating from the right, the sum subtracted
  * from the nearest equal or higher multiple of ten. Anything else returns `null`, including the
- * `"SEM GTIN"` literal the NF-e uses for a product without one. Leading zeros count, so the value
- * is never read from a number.
+ * `"SEM GTIN"` literal the NF-e uses for a product without one: it returns `null` exactly when
+ * `isValidGtin` (with no options) returns false. Leading zeros count, so the value is never read
+ * from a number.
  *
  * `type` and `length` describe the value as it was written. The prefix is read the way the
  * "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14
@@ -101,20 +100,13 @@ const PREFIX_LENGTH = 3;
  * ```
  */
 export const getGtinInfo = (value: string): GtinInfo | null => {
-	if (typeof value !== "string") return null;
+	if (!isValidGtin(value)) return null;
 
 	const digits = value.trim();
-
-	if (!DIGITS_REGEX.test(digits)) return null;
-
-	const length = GTIN_LENGTHS.find((candidate) => candidate === digits.length);
-
-	if (length === undefined) return null;
-
+	// isValidGtin already vouched for the length, so the index always names one of GTIN_LENGTHS: the
+	// lookup only gives back the same number typed as a GtinLength.
+	const length = GTIN_LENGTHS[(GTIN_LENGTHS as readonly number[]).indexOf(digits.length)];
 	const checkDigit = Number(digits.at(-1));
-
-	if (mod10(digits.slice(0, -1), { variant: "gs1" }) !== checkDigit) return null;
-
 	const normalized = digits.padStart(NORMALIZED_LENGTH, "0");
 	const isGs1Eight = normalized.startsWith(GS1_8_PADDING);
 	const start = isGs1Eight ? GS1_8_PREFIX_START : PREFIX_START;
