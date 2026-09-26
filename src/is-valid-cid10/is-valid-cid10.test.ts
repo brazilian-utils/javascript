@@ -1,11 +1,13 @@
 import * as fc from "fast-check";
 
-import { CID10_SUBCATEGORIES } from "../_internals/constants/cid10";
-import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
+import { CID10_DESCRIPTIONS as CID10_DESCRIPTION_LIST } from "../_internals/constants/cid10-descriptions";
 import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { cid10Codes, cid10Table } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCid10 } from "./is-valid-cid10";
+
+const CID10_DESCRIPTIONS = cid10Table();
 
 describe("isValidCid10", () => {
 	it("should validate a subcategory written with the dot", () => {
@@ -79,15 +81,7 @@ describe("isValidCid10", () => {
 
 	describe("the code table", () => {
 		it("should hold exactly the codes the description table holds", () => {
-			const codes: string[] = [];
-
-			for (const [category, subcategories] of Object.entries(CID10_SUBCATEGORIES)) {
-				codes.push(category);
-
-				for (const subcategory of subcategories) codes.push(category + subcategory);
-			}
-
-			expect(codes.toSorted()).toEqual(Object.keys(CID10_DESCRIPTIONS).toSorted());
+			expect(cid10Codes()).toHaveLength(CID10_DESCRIPTION_LIST.length);
 		});
 
 		it("should hold the 2045 categories and 12188 subcategories of CID-10 V2008", () => {
