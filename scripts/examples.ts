@@ -4,7 +4,7 @@
  * Writes the examples the document field guide shows (`docs/guides/document-field.md`): one
  * focused example per document and framework, so a reader copies the CPF field, not a generic one
  * that has to be narrowed down first. Every file comes from a template in
- * `docs/snippets/document-field/_templates`, filled in from the table below, together with the
+ * `docs/snippets/document-field/templates`, filled in from the table below, together with the
  * `mask` function they share. One page runs them all in the browser, `docs/snippets/live`, told
  * which files to compile by its query string. The Check workflow fails when these are stale.
  *
@@ -17,7 +17,7 @@ import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
 const EXAMPLE_DIR = join(ROOT, "docs", "snippets", "document-field");
-const TEMPLATE_DIR = join(EXAMPLE_DIR, "_templates");
+const TEMPLATE_DIR = join(EXAMPLE_DIR, "templates");
 
 type Document = {
 	/** The kebab-case name of the document, which names its folder and its files. */
@@ -184,11 +184,15 @@ function values(document: Document): Record<string, string> {
 }
 
 /**
- * @param {string} name - A file of `docs/snippets/document-field/_templates`.
+ * A template carries `@@placeholder@@` markers, so it is not the language its name says it is:
+ * `schema/zod.ts` on its own does not parse as TypeScript. The extra `.tmpl` at the end keeps it
+ * out of every tool that walks the repository for `.ts`/`.tsx` files, the declaration build of the
+ * package included, while the extension before it still says what the filled in file will be.
+ * @param {string} name - A file of `docs/snippets/document-field/templates`, without the `.tmpl`.
  * @returns {string} Its contents.
  */
 function readTemplate(name: string): string {
-	return readFileSync(join(TEMPLATE_DIR, name), "utf8");
+	return readFileSync(join(TEMPLATE_DIR, `${name}.tmpl`), "utf8");
 }
 
 /**
