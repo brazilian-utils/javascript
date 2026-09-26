@@ -13,12 +13,17 @@ export const GTIN_TYPES: Record<GtinLength, GtinType> = {
 export const NORMALIZED_LENGTH = 14;
 
 /**
- * The six zeros a GTIN-8 gets in the 14 digit form. GS1 leaves the prefixes 0000001 to 0000099
- * unused so that no longer GTIN collides with one (General Specifications, table 1-4), and the
- * "Tabela Prefixo GS1" of the Portal da NF-e reads the prefix the same way: from positions 7 to 9
- * when the first six are zeros, from positions 2 to 4 otherwise.
+ * The five zeros a GTIN-8 gets after the first digit of the 14 digit form: that digit is the
+ * padding zero of a bare GTIN-8, or the indicator digit of a GTIN-14 that packs one, and is never
+ * part of the prefix. GS1 leaves the prefixes 0000001 to 0000099 unused so that no longer GTIN
+ * collides with one (General Specifications, table 1-4), and the "Tabela Prefixo GS1" of the
+ * Portal da NF-e reads the prefix the same way: from positions 7 to 9 after those zeros, from
+ * positions 2 to 4 otherwise.
  */
-export const GS1_8_PADDING = "000000";
+export const GS1_8_PADDING = "00000";
+
+/** Where the GS1-8 padding starts in the 14 digit form: right after the padding or indicator digit. */
+export const GS1_8_PADDING_START = 1;
 
 /** The GS1 Prefixes of GS1 Brasil, the ones NT 2021.003 calls "prefixo do Brasil". */
 export const BRAZILIAN_PREFIXES: readonly string[] = ["789", "790"];

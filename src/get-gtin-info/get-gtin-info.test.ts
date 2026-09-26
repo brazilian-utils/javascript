@@ -178,6 +178,17 @@ describe("getGtinInfo", () => {
 			});
 		});
 
+		test("for a GTIN-14 that packs a GTIN-8 behind an indicator digit, reading the GS1-8 Prefix", () => {
+			expect(getGtinInfo("10000078912349")).toEqual({
+				type: "GTIN-14",
+				length: 14,
+				prefix: "789",
+				isBrazilian: true,
+				isRestrictedCirculation: false,
+				checkDigit: 9,
+			});
+		});
+
 		test("with surrounding whitespace", () => {
 			expect(getGtinInfo("  7890000000017\n")?.prefix).toBe("789");
 		});
@@ -211,6 +222,10 @@ describe("getGtinInfo", () => {
 		test("for the GS1-8 Prefixes 000 to 099 and 200 to 299", () => {
 			expect(getGtinInfo("01234565")?.isRestrictedCirculation).toBe(true);
 			expect(getGtinInfo("20000004")?.isRestrictedCirculation).toBe(true);
+		});
+
+		test("for a GS1-8 Prefix packed in a GTIN-14 behind an indicator digit", () => {
+			expect(getGtinInfo("10000008912340")?.isRestrictedCirculation).toBe(true);
 		});
 
 		test("for the GS1 Prefix 0000000, which reads as a GS1-8 Prefix that starts with zero", () => {
