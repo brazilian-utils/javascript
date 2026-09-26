@@ -1,5 +1,5 @@
 import { NFSE_KEY_LENGTH } from "../_internals/constants/nfse-key";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /**
@@ -13,6 +13,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * The result is capped at the 50 digits of an access key; a shorter value passes through as far
  * as it goes. Use `isValidNfseKey` to check the key and `getNfseKeyInfo` to read its fields.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The access key value to be parsed.
  * @returns {string} Up to 50 digits, or an empty string when there is no digit at all.
  *
@@ -23,6 +26,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * parseNfseKey("3550308 2 2 58716523000119 0000000000012 2601 135792468 3");
  * // "35503082258716523000119000000000001226011357924683"
+ * parseNfseKey(-1); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual
@@ -33,4 +37,4 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * digits.
  */
 export const parseNfseKey = (value: string | number): string =>
-	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, NFSE_KEY_LENGTH);
+	isLookupCode(value) ? sanitizeToDigits(value).slice(0, NFSE_KEY_LENGTH) : "";
