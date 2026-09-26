@@ -17,7 +17,9 @@ import { writeFileSync } from "node:fs";
 /** The source each generated file is rebuilt from, as named in the file's own header. */
 const DATASETS: Record<string, string> = {
 	"src/_internals/constants/banks.ts": "Banks (Banco Central, STR participants)",
-	"src/_internals/constants/cbo.ts": "CBO 2002 occupations (Ministério do Trabalho e Emprego)",
+	"src/_internals/constants/cbo-descriptions.ts":
+		"CBO 2002 occupation titles (Ministério do Trabalho e Emprego)",
+	"src/_internals/constants/cbo.ts": "CBO 2002 occupation codes (Ministério do Trabalho e Emprego)",
 	"src/_internals/constants/cest.ts": "CEST codes and segments (CONFAZ, Convênio ICMS 142/18)",
 	"src/_internals/constants/cfop.ts": "CFOP codes (CONFAZ, Convênio SINIEF s/nº 1970)",
 	"src/_internals/constants/cid10-descriptions.ts": "CID-10 descriptions (DATASUS)",
@@ -37,6 +39,8 @@ const DATASETS: Record<string, string> = {
 };
 
 const SAMPLE_SIZE = 15;
+
+const LINE_CONTINUATION_REGEX = /\\$/;
 
 /**
  * Runs a command of the toolchain (resolved from `PATH`, as `scripts/data.ts` does with `node` and
@@ -60,8 +64,11 @@ const changedLines = (file: string): { added: string[]; removed: string[] } => {
 
 	for (const line of diff.split("\n")) {
 		if (line.startsWith("+++") || line.startsWith("---")) continue;
-		if (line.startsWith("+")) added.push(line.slice(1).trim());
-		if (line.startsWith("-")) removed.push(line.slice(1).trim());
+		// A packed code table ends every code line with a line continuation, left out of the sample.
+		const entry = line.slice(1).trim().replace(LINE_CONTINUATION_REGEX, "");
+
+		if (line.startsWith("+")) added.push(entry);
+		if (line.startsWith("-")) removed.push(entry);
 	}
 
 	return { added: added.filter(Boolean), removed: removed.filter(Boolean) };
