@@ -57,6 +57,18 @@ describe("parseCnpj", () => {
 			expectAlwaysReturnsType(parseCnpj, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCnpj(-11_222_333_000_181)).toBe("");
+		expect(parseCnpj(-1)).toBe("");
+		expect(parseCnpj(1.5)).toBe("");
+		expect(parseCnpj(2 ** 53)).toBe("");
+		expect(parseCnpj(Number.MAX_VALUE)).toBe("");
+		expect(parseCnpj(1e21)).toBe("");
+		expect(parseCnpj(Number.NaN)).toBe("");
+		expect(parseCnpj(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCnpj(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCnpj types", () => {

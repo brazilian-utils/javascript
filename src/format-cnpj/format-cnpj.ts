@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeCnpj } from "../_internals/sanitize-cnpj/sanitize-cnpj";
 import { OBFUSCATED_PATTERN, PATTERN } from "./constants";
 
@@ -15,6 +15,9 @@ export type FormatCnpjOptions = {
 
 /**
  * Formats a given CNPJ (Cadastro Nacional da Pessoa Jurídica) value according to the specified options.
+ *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
  *
  * @param {string|number} value - The CNPJ value to be formatted. It can be a string or a number.
  * @param {FormatCnpjOptions} [options] - Optional configuration for formatting the CNPJ.
@@ -32,6 +35,7 @@ export type FormatCnpjOptions = {
  * formatCnpj("12345678", { pad: true }); // "00.000.012/3456-78"
  * formatCnpj("q0SLFMBD7VX439", { version: 2 }); // "Q0.SLF.MBD/7VX4-39"
  * formatCnpj("12345678000195", { obfuscate: true }); // "**.345.678/0001-**"
+ * formatCnpj(-11222333000181); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
@@ -39,7 +43,7 @@ export type FormatCnpjOptions = {
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
  */
 export const formatCnpj = (value: string | number, options?: FormatCnpjOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,

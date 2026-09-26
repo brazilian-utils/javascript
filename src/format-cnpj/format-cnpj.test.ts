@@ -193,6 +193,19 @@ describe("formatCnpj", () => {
 			expectAlwaysReturnsType(formatCnpj, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCnpj(-11_222_333_000_181)).toBe("");
+		expect(formatCnpj(-1)).toBe("");
+		expect(formatCnpj(1.5)).toBe("");
+		expect(formatCnpj(2 ** 53)).toBe("");
+		expect(formatCnpj(Number.MAX_VALUE)).toBe("");
+		expect(formatCnpj(1e21)).toBe("");
+		expect(formatCnpj(Number.NaN)).toBe("");
+		expect(formatCnpj(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCnpj(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCnpj(-11_222_333_000_181, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCnpj with a nullish value under pad", () => {
