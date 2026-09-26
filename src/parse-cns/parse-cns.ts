@@ -1,4 +1,4 @@
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { LENGTH } from "./constants";
 
@@ -9,12 +9,16 @@ import { LENGTH } from "./constants";
  * capped at; a shorter value passes through as far as it goes, so the parser can strip the mask
  * off an input still being typed. Use `isValidCns` to check the number itself.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CNS value to be parsed.
  * @returns {string} Up to 15 digits, or an empty string when there is no digit at all.
  *
  * @example
  * ```typescript
  * parseCns("123 4567 8901 0000"); // "123456789010000"
+ * parseCns(-123456789010000); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/
@@ -24,4 +28,4 @@ import { LENGTH } from "./constants";
  * e-SUS APS documentation of the same DATASUS algorithm, reachable without a browser.
  */
 export const parseCns = (value: string | number): string =>
-	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, LENGTH);
+	isLookupCode(value) ? sanitizeToDigits(value).slice(0, LENGTH) : "";

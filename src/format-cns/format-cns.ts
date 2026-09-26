@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `formatCns`. */
@@ -12,6 +12,9 @@ export type FormatCnsOptions = {
  * Formats a CNS (Cartão Nacional de Saúde) number into the common display groups of 3-4-4-4
  * digits separated by spaces.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CNS value to be formatted. It can be a string or a number.
  * @param {FormatCnsOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - If true, pads the value with leading zeros if necessary.
@@ -22,6 +25,7 @@ export type FormatCnsOptions = {
  * formatCns("123456789010000"); // "123 4567 8901 0000"
  * formatCns(123456789010000); // "123 4567 8901 0000"
  * formatCns("89010001", { pad: true }); // "000 0000 8901 0001"
+ * formatCns(-123456789010000); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/
@@ -34,10 +38,10 @@ export type FormatCnsOptions = {
  * weighted sum checks out.
  */
 export const formatCns = (value: string | number, options?: FormatCnsOptions): string =>
-	isNullish(value)
-		? ""
-		: format({
+	isLookupCode(value)
+		? format({
 				pad: options?.pad,
 				value: sanitizeToDigits(value),
 				pattern: "000 0000 0000 0000",
-			});
+			})
+		: "";
