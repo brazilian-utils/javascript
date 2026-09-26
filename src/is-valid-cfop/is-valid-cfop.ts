@@ -1,4 +1,5 @@
-import { CFOP_FORMAT_REGEX, CFOP_TABLE } from "../_internals/constants/cfop";
+import { CFOP_CODES, CFOP_FORMAT_REGEX } from "../_internals/constants/cfop";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
@@ -55,5 +56,5 @@ export const isValidCfop = (value: string | number): boolean => {
 
 	if (!CFOP_FORMAT_REGEX.test(code)) return false;
 
-	return sanitizeToDigits(code) in CFOP_TABLE;
+	return findCodeIndex(CFOP_CODES, sanitizeToDigits(code)) !== -1;
 };

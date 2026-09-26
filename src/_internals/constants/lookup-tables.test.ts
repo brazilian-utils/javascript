@@ -1,6 +1,8 @@
 import { describe, expect, test } from "../test/runtime";
 import { CBO_CODES } from "./cbo";
 import { CBO_DESCRIPTIONS } from "./cbo-descriptions";
+import { CFOP_CODES } from "./cfop";
+import { CFOP_DESCRIPTIONS } from "./cfop-descriptions";
 import { CNAE_CODES } from "./cnae";
 import { CNAE_DESCRIPTIONS } from "./cnae-descriptions";
 
@@ -11,6 +13,7 @@ import { CNAE_DESCRIPTIONS } from "./cnae-descriptions";
 const TABLES: { name: string; codes: string; width: number; descriptions: readonly unknown[] }[] = [
 	{ name: "CBO", codes: CBO_CODES, width: 6, descriptions: CBO_DESCRIPTIONS },
 	{ name: "CNAE", codes: CNAE_CODES, width: 7, descriptions: CNAE_DESCRIPTIONS },
+	{ name: "CFOP", codes: CFOP_CODES, width: 4, descriptions: CFOP_DESCRIPTIONS },
 ];
 
 describe("generated lookup tables", () => {
