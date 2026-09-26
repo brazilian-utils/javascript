@@ -131,14 +131,24 @@ describe("isValidGtin", () => {
 
 		test("should accept exactly one check digit for any 12 digit body", () => {
 			fc.assert(
-				fc.property(fc.stringMatching(/^[0-9]{12}$/), (body) => {
-					const accepted = Array.from({ length: 10 }, (_, digit) => `${body}${digit}`).filter(
-						(candidate) => isValidGtin(candidate),
-					);
+				fc.property(
+					fc.stringMatching(/^[0-9]{12}$/).filter((body) => /[1-9]/.test(body)),
+					(body) => {
+						const accepted = Array.from({ length: 10 }, (_, digit) => `${body}${digit}`).filter(
+							(candidate) => isValidGtin(candidate),
+						);
 
-					expect(accepted).toHaveLength(1);
-				}),
+						expect(accepted).toHaveLength(1);
+					},
+				),
 			);
+		});
+
+		test("should accept no check digit at all for a body of zeros only", () => {
+			expect(isValidGtin("0000000000000")).toBe(false);
+			expect(isValidGtin("00000000")).toBe(false);
+			expect(isValidGtin("000000000000")).toBe(false);
+			expect(isValidGtin("00000000000000")).toBe(false);
 		});
 
 		test("should never accept with a list of lengths what it turns down without one", () => {

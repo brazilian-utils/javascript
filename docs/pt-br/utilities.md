@@ -2781,6 +2781,7 @@ isValidGtin('7890000000018'); // false (dígito verificador errado)
 isValidGtin('17890000000014', { lengths: [8, 12, 13] }); // false (GTIN-14 não aceito)
 isValidGtin('7 890000 000017'); // false (somente dígitos)
 isValidGtin('SEM GTIN'); // false
+isValidGtin('0000000000000'); // false (só zeros, nunca alocado pelo GS1)
 ```
 
 ### getGtinInfo

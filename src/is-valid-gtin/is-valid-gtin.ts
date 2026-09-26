@@ -1,5 +1,5 @@
 import { mod10 } from "../_internals/mod10/mod10";
-import { DIGITS_REGEX, GTIN_LENGTHS } from "./constants";
+import { ALL_ZEROS_REGEX, DIGITS_REGEX, GTIN_LENGTHS } from "./constants";
 
 /** How many digits a GTIN may be written with. */
 export type GtinLength = 8 | 12 | 13 | 14;
@@ -54,6 +54,7 @@ export type IsValidGtinOptions = {
  * isValidGtin("7890000000018"); // false (wrong check digit)
  * isValidGtin("17890000000014", { lengths: [8, 12, 13] }); // false (GTIN-14 not accepted)
  * isValidGtin("SEM GTIN"); // false
+ * isValidGtin("0000000000000"); // false (zeros only, never allocated by GS1)
  * ```
  */
 export const isValidGtin = (value: string, options?: IsValidGtinOptions): boolean => {
@@ -61,7 +62,7 @@ export const isValidGtin = (value: string, options?: IsValidGtinOptions): boolea
 
 	const digits = value.trim();
 
-	if (!DIGITS_REGEX.test(digits)) return false;
+	if (!DIGITS_REGEX.test(digits) || ALL_ZEROS_REGEX.test(digits)) return false;
 
 	const length = GTIN_LENGTHS.find((candidate) => candidate === digits.length);
 
