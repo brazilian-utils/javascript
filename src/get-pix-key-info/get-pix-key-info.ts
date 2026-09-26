@@ -1,15 +1,13 @@
 import { PHONE_COUNTRY_CODE } from "../_internals/constants/phone";
+import {
+	type PixKeyType,
+	detectPixKeyType,
+} from "../_internals/detect-pix-key-type/detect-pix-key-type";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
-import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
-import { isValidEmail } from "../is-valid-email/is-valid-email";
-import { isValidPhone } from "../is-valid-phone/is-valid-phone";
 import { parseCnpj } from "../parse-cnpj/parse-cnpj";
-import { CPF_SYNTAX_REGEX, EMAIL_MAX_LENGTH, EVP_REGEX, PHONE_SYNTAX_REGEX } from "./constants";
 
-/** The kinds of Pix key `getPixKeyInfo` recognizes. */
-export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
+export type { PixKeyType } from "../_internals/detect-pix-key-type/detect-pix-key-type";
 
 /** A Pix key recognized by `getPixKeyInfo`, normalized to the canonical DICT form of its kind. */
 export type PixKeyInfo = {
@@ -19,21 +17,13 @@ export type PixKeyInfo = {
 	value: string;
 };
 
-/**
- * Reads a value written as a phone number, i.e. one holding nothing but digits and the
- * characters of the usual masks, as the E.164 mobile key of the DICT.
- *
- * @param {string} trimmed - The trimmed value to read.
- * @returns {PixKeyInfo|null} The phone key, or `null` when the value is not a mobile number.
- */
-const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
-	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
-
-	const national = normalizePhone(trimmed);
-
-	return isValidPhone(national, { accept: ["mobile"] })
-		? { type: "phone", value: `+${PHONE_COUNTRY_CODE}${national}` }
-		: null;
+/** Writes a trimmed value, already known to be a key of each kind, in the canonical DICT form. */
+const NORMALIZERS: Readonly<Record<PixKeyType, (trimmed: string) => string>> = {
+	cpf: sanitizeToDigits,
+	cnpj: (trimmed) => parseCnpj(trimmed, { version: 2 }),
+	email: (trimmed) => trimmed.toLowerCase(),
+	phone: (trimmed) => `+${PHONE_COUNTRY_CODE}${normalizePhone(trimmed)}`,
+	evp: (trimmed) => trimmed.toLowerCase(),
 };
 
 /**
@@ -67,7 +57,8 @@ const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
  * a CPF, even when its digits carry a valid CPF check digit.
  *
  * @param {string} value - The Pix key to be parsed.
- * @returns {PixKeyInfo|null} The normalized key, or `null` when the value is not a valid Pix key.
+ * @returns {PixKeyInfo|null} The normalized key, or `null` exactly when `isValidPixKey` returns
+ * `false` for the value.
  *
  * @example
  * ```typescript
@@ -88,29 +79,9 @@ const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
  * Pix (SPI) OpenAPI spec.
  */
 export const getPixKeyInfo = (value: string): PixKeyInfo | null => {
-	if (typeof value !== "string") return null;
+	const type = detectPixKeyType(value);
 
-	const trimmed = value.trim();
+	if (type === null) return null;
 
-	if (EVP_REGEX.test(trimmed)) return { type: "evp", value: trimmed.toLowerCase() };
-
-	if (trimmed.includes("@")) {
-		const email = trimmed.toLowerCase();
-
-		return isValidEmail(email) && email.length <= EMAIL_MAX_LENGTH
-			? { type: "email", value: email }
-			: null;
-	}
-
-	if (isValidCnpj(trimmed, { version: 2 })) {
-		return { type: "cnpj", value: parseCnpj(trimmed, { version: 2 }) };
-	}
-
-	if (CPF_SYNTAX_REGEX.test(trimmed)) {
-		const digits = sanitizeToDigits(trimmed);
-
-		if (isValidCpf(digits)) return { type: "cpf", value: digits };
-	}
-
-	return resolvePhoneKey(trimmed);
+	return { type, value: NORMALIZERS[type](value.trim()) };
 };
