@@ -274,8 +274,8 @@ const main = async (): Promise<void> => {
  *
  * Table version:
  * "${table.title}",
- * the workbook of the Portal Nacional da NF-e ("Documentos" > "Diversos"), divulged by Informe
- * Técnico 2025.002 v.${informe.groups[0]} (published on ${informe.publishedAt}). The generator always reads the
+ * the workbook of the Portal Nacional da NF-e ("Documentos" > "Diversos"), read with the newest
+ * Informe Técnico 2025.002 listed, v.${informe.groups[0]} (published on ${informe.publishedAt}). The generator always reads the
  * newest workbook listed and records it here, so a refresh that picks a new version up shows in
  * this header.
  *
@@ -284,7 +284,7 @@ const main = async (): Promise<void> => {
  * @see Official: ${table.url}
  * ${table.title}.
  * @see Official: ${informe.url}
- * Informe Técnico 2025.002 v.${informe.groups[0]}, which defines the columns of both tables.
+ * Informe Técnico 2025.002 v.${informe.groups[0]}, the newest version listed, which defines the columns of both tables.
  * @see Official: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9nus=
  * "Documentos" > "Diversos" of the Portal Nacional da NF-e, where every table version is listed.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm
