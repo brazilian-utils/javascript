@@ -3,8 +3,10 @@ import * as fc from "fast-check";
 import { anyGarbage } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { NCM_CODES } from "./constants";
+import { NCM_CODES as PACKED_NCM_CODES } from "./constants";
 import { isValidNcm } from "./is-valid-ncm";
+
+const NCM_CODES = PACKED_NCM_CODES.match(/\d{8}/g) ?? [];
 
 describe("isValidNcm", () => {
 	it("should validate an NCM code without a mask (cerveja de malte)", () => {
