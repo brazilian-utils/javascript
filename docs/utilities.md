@@ -1830,7 +1830,10 @@ isHoliday(); // false
 
 Check if a date is a Brazilian business day (dia útil): not a Saturday, a Sunday or a holiday `getHolidays` lists for its local calendar day.
 
-- **Options** (`BusinessDayOptions`, shared by every business day util): `includeOptional` (default `true`) also counts the `"optional"` holidays, Carnaval and Corpus Christi, as non-business days; `stateCode` also counts that state's holidays.
+- **Options** (`BusinessDayOptions`, shared by every business day util): `includeOptional` (default `true`) also counts the `"optional"` holidays, Carnaval and Corpus Christi, as non-business days; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also counts that state's holidays.
+- `includeSaturday` off is the Monday to Friday count banks and courts use. On, it is the labour law count of the payroll deadline of CLT art. 459 § 1º, the one labour inspection reads through Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
+- Sunday and holidays are still excluded with `includeSaturday` on, so a holiday that falls on a Saturday is still not a business day.
+- The "inclusive o municipal" part of that rule is not covered: `getHolidays` carries national and state holidays only, so a municipal holiday counts here as an ordinary business day. Remove the municipal holidays yourself when a count has to be exact for one municipality.
 - Returns `false` when `value` is not a valid `Date` or its year is outside 1900 to 2099, or when `stateCode` is present and not a string.
 
 ```javascript
@@ -1839,6 +1842,9 @@ import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
 isBusinessDay(new Date(2024, 0, 2)); // true (Tuesday, not a holiday)
 isBusinessDay(new Date(2024, 0, 1)); // false (Ano novo)
 isBusinessDay(new Date(2024, 0, 6)); // false (Saturday)
+isBusinessDay(new Date(2024, 0, 6), { includeSaturday: true }); // true (labour law count)
+isBusinessDay(new Date(2024, 8, 7), { includeSaturday: true }); // false (Independência, a holiday on a Saturday)
+isBusinessDay(new Date(2024, 0, 7), { includeSaturday: true }); // false (Sunday is never included)
 isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, optional holiday, counts by default)
 isBusinessDay(new Date(2024, 1, 13), { includeOptional: false }); // true
 isBusinessDay(new Date(2024, 6, 9), { stateCode: 'SP' }); // false (Revolução Constitucionalista)
@@ -1850,7 +1856,7 @@ isBusinessDay(new Date('not a date')); // false
 
 Add a number of Brazilian business days (dias úteis) to a date, skipping Saturdays, Sundays and the holidays `isBusinessDay` skips. Signature: `addBusinessDays(date, amount, options?)`, the same as date-fns.
 
-- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval and Corpus Christi; `stateCode` also skips that state's holidays.
+- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
 - Returns a new `Date`, time of day preserved; `date` is never mutated.
 - An `amount` of `0` returns the same date, even on a weekend or holiday. A negative `amount` walks backwards.
 - Returns `null` when `date` is invalid, `amount` is not a finite integer, `stateCode` is not a string, or the result leaves the years 1900 to 2099.
@@ -1862,6 +1868,8 @@ addBusinessDays(new Date(2024, 0, 2, 12), 1); // Date, 2024-01-03 12:00 (next da
 addBusinessDays(new Date(2024, 11, 31, 12), 1); // Date, 2025-01-02 12:00 (2025-01-01 is Ano novo, skipped)
 addBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-04 12:00 (walks backwards)
 addBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (unchanged, even though Saturday is not a business day)
+addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: true }); // Date, 2024-01-06 12:00 (labour law count, Saturday counts)
+addBusinessDays(new Date(2024, 10, 1, 12), 1, { includeSaturday: true }); // Date, 2024-11-04 12:00 (2024-11-02 is Finados, a holiday on a Saturday)
 addBusinessDays(new Date(2024, 6, 8, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-10 12:00 (2024-07-09 is Revolução Constitucionalista in SP, skipped)
 addBusinessDays(new Date('not a date'), 1); // null
 addBusinessDays(new Date(2024, 0, 2), 1.5); // null (not an integer)
@@ -1881,6 +1889,8 @@ subBusinessDays(new Date(2024, 0, 8, 12), 1); // Date, 2024-01-05 12:00 (walks b
 subBusinessDays(new Date(2025, 0, 2, 12), 1); // Date, 2024-12-31 12:00 (2025-01-01 is Ano novo, skipped)
 subBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-08 12:00 (walks forwards)
 subBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (unchanged, even though Saturday is not a business day)
+subBusinessDays(new Date(2024, 0, 8, 12), 1, { includeSaturday: true }); // Date, 2024-01-06 12:00 (labour law count, Saturday counts)
+subBusinessDays(new Date(2024, 10, 4, 12), 1, { includeSaturday: true }); // Date, 2024-11-01 12:00 (2024-11-02 is Finados, a holiday on a Saturday)
 subBusinessDays(new Date(2024, 6, 10, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-08 12:00 (2024-07-09 is Revolução Constitucionalista in SP, skipped)
 subBusinessDays(new Date('not a date'), 1); // null
 subBusinessDays(new Date(2024, 0, 2), 1.5); // null (not an integer)
@@ -1898,17 +1908,22 @@ addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-15 00:00 (10th of Fe
 // last business day of the month: subtract 1 from the first day of the month after
 subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 is Sexta-feira Santa, then a weekend)
 subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (2nd to last of January 2024)
+
+// payroll deadline of CLT art. 459 § 1º: the 5th business day in the labour law count
+addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, a Saturday, counts; the banking count gives 2024-03-07)
+addBusinessDays(new Date(2024, 10, 0), 5, { includeSaturday: true }); // Date, 2024-11-07 00:00 (2024-11-02 is Finados, a holiday on a Saturday)
+subBusinessDays(new Date(2024, 8, 1), 1, { includeSaturday: true }); // Date, 2024-08-31 00:00 (last business day of August 2024, a Saturday)
 ```
 
 - An `n` beyond the business days of the month lands in the next month (`addBusinessDays(new Date(2024, 0, 0), 23)` is 2024-02-01, January 2024 has 22); compare `getMonth()` when that matters.
-- This is the banking count (Monday to Friday). The payroll "quinto dia útil" of CLT art. 459 § 1º is counted differently by labour inspection.
+- The payroll "quinto dia útil" of CLT art. 459 § 1º is the labour law count: pass `{ includeSaturday: true }`. Municipal holidays, which that count also excludes, are not known to the library, so a municipal holiday early in the month still has to be accounted for by the caller.
 - The n-th business day of January 1900 and the last business day of December 2099 return `null`, since the recipe starts from a day outside the supported years (31 December 1899 and 1 January 2100).
 
 ### differenceInBusinessDays
 
 Count the Brazilian business days (dias úteis) between two dates. Signature: `differenceInBusinessDays(laterDate, earlierDate, options?)`, the same as date-fns.
 
-- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval and Corpus Christi; `stateCode` also skips that state's holidays.
+- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
 - Counts `earlierDate` when it is a business day and every business day strictly between the two dates; `laterDate` is never counted. The time of day is ignored.
 - The result is negative when `laterDate` is before `earlierDate`, and `0` on the same calendar day.
 - Returns `null` when either date is not a valid `Date` or is outside the years 1900 to 2099, or `stateCode` is not a string.
@@ -1920,6 +1935,9 @@ differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 1)); // 0 (Jan 
 differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (Jan 2 counted, a Tuesday; Jan 3 is not)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (the later date comes first, so the count is negative)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (same day)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (banking count, 2024-01-02 to 2024-01-05)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (2024-01-06, a Saturday, also counts)
+differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (2024-11-02 is Finados, a holiday on a Saturday)
 differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: 'SP' }); // 1 (2024-07-09 is a state holiday in SP)
 differenceInBusinessDays(new Date(), new Date('not a date')); // null
 ```
