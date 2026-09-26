@@ -1,11 +1,12 @@
-const HOST_LABEL = "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
-
-const PATH_CHARACTER = "(?:%[0-9a-f]{2}|[a-z0-9._~!$&'()*+,;=:@-])";
-
-const PIX_URL_REGEX = new RegExp(
-	`^${HOST_LABEL}(?:\\.${HOST_LABEL})+(?:/${PATH_CHARACTER}*)*$`,
-	"i",
-);
+/**
+ * A host name of dot-separated labels (each alphanumeric, with inner hyphens), followed by any
+ * number of `/` path segments of unreserved and sub-delimiter characters or percent-encoded
+ * octets. A literal, not a `new RegExp` built from pieces, so a bundle that never calls
+ * `isValidPixUrl` drops it.
+ */
+const PIX_URL_REGEX =
+	// eslint-disable-next-line sonarjs/regex-complexity -- the literal spells out the host label twice; splitting it would bring back the runtime `new RegExp` this literal replaces.
+	/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:\/(?:%[0-9a-f]{2}|[a-z0-9._~!$&'()*+,;=:@-])*)*$/i;
 
 /**
  * Checks whether a value is a Pix PSP location, the value of field 26-25 of a dynamic BR Code:

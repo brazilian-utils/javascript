@@ -2,7 +2,7 @@ import * as fc from "fast-check";
 
 import {
 	PROCESSO_JURIDICO_LENGTH,
-	PROCESSO_JURIDICO_TRIBUNALS,
+	getProcessoJuridicoTribunals,
 } from "../_internals/constants/processo-juridico";
 import {
 	anyValue,
@@ -182,14 +182,14 @@ describe("isValidProcessoJuridico", () => {
 		});
 
 		test("should reject every tribunal the órgão of the value does not have", () => {
-			const courts = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
+			const courts = [...getProcessoJuridicoTribunals().keys()];
 
 			fc.assert(
 				fc.property(
 					fc.constantFrom(...courts),
 					fc.integer({ min: 0, max: 99 }),
 					(court, tribunal) => {
-						fc.pre(!(PROCESSO_JURIDICO_TRIBUNALS.get(court) as number[]).includes(tribunal));
+						fc.pre(!(getProcessoJuridicoTribunals().get(court) as number[]).includes(tribunal));
 
 						const base = `00001002008${court}${String(tribunal).padStart(2, "0")}0000`;
 						const checkDigits = (98n - ((BigInt(base) * 100n) % 97n)).toString().padStart(2, "0");
