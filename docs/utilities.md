@@ -2965,7 +2965,7 @@ isValidCest(-100100); // false (not a non-negative safe integer)
 Format a CEST (Código Especificador da Substituição Tributária) in the `NN.NNN.NN` form the annexes of Convênio ICMS 142/18 print. Only the structure changes; use `isValidCest` to check a code against the annexes.
 
 - **Options** (`FormatCestOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code.
-- Same rules as `formatNcm`: without `pad` the mask is applied as far as the value goes, which is what an input being typed into needs, characters outside it are dropped, and a number is read as the string of its digits, so it is only padded under `pad: true`.
+- Same rules as `formatNcm`: without `pad` the mask is applied as far as the value goes, which is what an input being typed into needs, characters outside it are dropped, and a number is read as the string of its digits, so it is only padded under `pad: true`. A number is only read when it is a non-negative safe integer; any other number returns `''`.
 
 ```javascript
 import { formatCest } from '@brazilian-utils/brazilian-utils';
@@ -2975,6 +2975,7 @@ formatCest(2899900); // 28.999.00
 formatCest('01001'); // 01.001 (masked as far as it goes)
 formatCest(100100, { pad: true }); // 01.001.00 (padded to 7 digits first)
 formatCest('abc0100100'); // 01.001.00 (only the digits are read)
+formatCest(-2899900); // '' (not a non-negative safe integer)
 ```
 
 ### parseCest

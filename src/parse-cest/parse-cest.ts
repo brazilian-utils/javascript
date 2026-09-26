@@ -1,4 +1,4 @@
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { LENGTH } from "./constants";
 
@@ -12,6 +12,9 @@ import { LENGTH } from "./constants";
  * written out. Use `isValidCest` or `getCest`, which do pad a bare numeric code, to check a code
  * against the official annexes.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CEST to be parsed.
  * @returns {string} Up to 7 digits, or an empty string when there is no digit at all.
  *
@@ -19,6 +22,7 @@ import { LENGTH } from "./constants";
  * ```typescript
  * parseCest("01.001.00"); // "0100100"
  * parseCest("28.999"); // "28999"
+ * parseCest(28999.00001); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18
@@ -26,4 +30,4 @@ import { LENGTH } from "./constants";
  * codes in the "NN.NNN.NN" form.
  */
 export const parseCest = (value: string | number): string =>
-	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, LENGTH);
+	isLookupCode(value) ? sanitizeToDigits(value).slice(0, LENGTH) : "";

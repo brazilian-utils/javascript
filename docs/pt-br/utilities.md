@@ -2965,7 +2965,7 @@ isValidCest(-100100); // false (não é um inteiro seguro não negativo)
 Formata um CEST (Código Especificador da Substituição Tributária) na forma `NN.NNN.NN` que os anexos do Convênio ICMS 142/18 imprimem. Só a estrutura muda; use `isValidCest` para conferir um código com os anexos.
 
 - **Opções** (`FormatCestOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 7 dígitos de um código completo.
-- Mesmas regras de `formatNcm`: sem `pad` a máscara é aplicada até onde o valor vai, que é o que um campo sendo digitado precisa, os caracteres fora dela são descartados e um número é lido como a string dos seus dígitos, ou seja, só é completado com `pad: true`.
+- Mesmas regras de `formatNcm`: sem `pad` a máscara é aplicada até onde o valor vai, que é o que um campo sendo digitado precisa, os caracteres fora dela são descartados e um número é lido como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Um número só é lido quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
 
 ```javascript
 import { formatCest } from '@brazilian-utils/brazilian-utils';
@@ -2975,6 +2975,7 @@ formatCest(2899900); // 28.999.00
 formatCest('01001'); // 01.001 (máscara aplicada até onde o valor vai)
 formatCest(100100, { pad: true }); // 01.001.00 (completado até 7 dígitos antes)
 formatCest('abc0100100'); // 01.001.00 (só os dígitos são lidos)
+formatCest(-2899900); // '' (não é um inteiro seguro não negativo)
 ```
 
 ### parseCest

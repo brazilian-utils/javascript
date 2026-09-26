@@ -72,7 +72,18 @@ describe("formatCest", () => {
 	it("should read only the digits of a value with other characters, like formatCpf", () => {
 		expect(formatCest("abc0100100")).toBe("01.001.00");
 		expect(formatCest("01-001/00")).toBe("01.001.00");
-		expect(formatCest(-2_899_900)).toBe("28.999.00");
+	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCest(-2_899_900)).toBe("");
+		expect(formatCest(289_990.1)).toBe("");
+		expect(formatCest(2 ** 53)).toBe("");
+		expect(formatCest(Number.MAX_VALUE)).toBe("");
+		expect(formatCest(1e21)).toBe("");
+		expect(formatCest(Number.NaN)).toBe("");
+		expect(formatCest(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCest(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCest(-2_899_900, { pad: true })).toBe("");
 	});
 
 	it("should return an empty string for a null-prototype object", () => {

@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `formatCest`. */
@@ -24,10 +24,12 @@ export type FormatCestOptions = {
  * `formatCest(100100)` gives `"10.010.0"` and `formatCest(100100, { pad: true })` gives
  * `"01.001.00"`.
  *
- * Like every formatter of this package, the value is read for its digits and masked as far as
+ * Like every formatter of this package, a string is read for its digits and masked as far as
  * they go: characters outside the mask are dropped (`formatCest("abc0100100")` gives
- * `"01.001.00"`) and a number is read as the string of its digits, sign and decimal point
- * included. This is the input-mask contract of `formatCpf`; use `isValidCest` to check a code.
+ * `"01.001.00"`), which is the input-mask contract of `formatCpf`. A number is only read when
+ * it is a non-negative safe integer: its sign and decimal point are not mask characters, so a
+ * negative, fractional, not finite or unsafe number gives an empty string instead of the digits
+ * of its string (`formatCest(-2899900)` gives `""`). Use `isValidCest` to check a code.
  *
  * @param {string|number} value - The CEST to be formatted.
  * @param {FormatCestOptions} [options] - Optional formatting options.
@@ -42,6 +44,7 @@ export type FormatCestOptions = {
  * formatCest("01001"); // "01.001" (partial values are masked as far as they go)
  * formatCest(100100, { pad: true }); // "01.001.00" (padded to 7 digits first)
  * formatCest("abc0100100"); // "01.001.00" (only the digits are read)
+ * formatCest(-2899900); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18
@@ -49,7 +52,7 @@ export type FormatCestOptions = {
  * to XXVI, which print the codes in the "NN.NNN.NN" form.
  */
 export const formatCest = (value: string | number, options?: FormatCestOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,
