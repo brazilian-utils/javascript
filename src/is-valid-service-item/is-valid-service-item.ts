@@ -1,8 +1,9 @@
 import {
-	SERVICE_ITEM_DESCRIPTIONS,
+	SERVICE_ITEM_CODES,
 	SERVICE_ITEM_FORMAT_REGEX,
 	SERVICE_ITEM_LENGTH,
 } from "../_internals/constants/service-items";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
@@ -40,5 +41,10 @@ export const isValidServiceItem = (value: string | number): boolean => {
 
 	if (!SERVICE_ITEM_FORMAT_REGEX.test(written)) return false;
 
-	return sanitizeToDigits(written).padStart(SERVICE_ITEM_LENGTH, "0") in SERVICE_ITEM_DESCRIPTIONS;
+	return (
+		findCodeIndex(
+			SERVICE_ITEM_CODES,
+			sanitizeToDigits(written).padStart(SERVICE_ITEM_LENGTH, "0"),
+		) !== -1
+	);
 };

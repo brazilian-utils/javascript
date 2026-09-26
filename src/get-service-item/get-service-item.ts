@@ -1,7 +1,6 @@
-import {
-	SERVICE_ITEM_DESCRIPTIONS,
-	SERVICE_ITEM_LENGTH,
-} from "../_internals/constants/service-items";
+import { SERVICE_ITEM_DESCRIPTIONS } from "../_internals/constants/service-item-descriptions";
+import { SERVICE_ITEM_CODES, SERVICE_ITEM_LENGTH } from "../_internals/constants/service-items";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidServiceItem } from "../is-valid-service-item/is-valid-service-item";
 
@@ -62,6 +61,6 @@ export const getServiceItem = (value: string | number): ServiceItem | null => {
 
 	return {
 		code: `${Number(digits.slice(0, ITEM_LENGTH))}.${digits.slice(ITEM_LENGTH)}`,
-		description: SERVICE_ITEM_DESCRIPTIONS[digits],
+		description: SERVICE_ITEM_DESCRIPTIONS[findCodeIndex(SERVICE_ITEM_CODES, digits)],
 	};
 };

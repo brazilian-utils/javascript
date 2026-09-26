@@ -50,6 +50,7 @@ const generatedFiles = [
 	"./src/_internals/constants/municipalities.ts",
 	"./src/_internals/constants/nbs-descriptions.ts",
 	"./src/_internals/constants/nbs.ts",
+	"./src/_internals/constants/service-item-descriptions.ts",
 	"./src/_internals/constants/service-items.ts",
 	"./src/_internals/constants/states.ts",
 	"./src/get-municipality-by-cep/constants.ts",

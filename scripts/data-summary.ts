@@ -33,8 +33,10 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/municipalities.ts": "Municipalities (IBGE)",
 	"src/_internals/constants/nbs-descriptions.ts": "NBS 2.0 descriptions (MDIC)",
 	"src/_internals/constants/nbs.ts": "NBS 2.0 codes (MDIC)",
+	"src/_internals/constants/service-item-descriptions.ts":
+		"LC 116/2003 service list descriptions (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/service-items.ts":
-		"LC 116/2003 service list (Sistema Nacional NFS-e, ANEXO B)",
+		"LC 116/2003 service list subitems (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/states.ts": "States (IBGE)",
 	"src/get-municipality-by-cep/constants.ts":
 		"Municipality CEP ranges (Correios, via a community mirror)",
