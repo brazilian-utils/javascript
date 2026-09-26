@@ -70,7 +70,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 | --- | --- | --- | --- |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
 | `getCities` | 5571 IBGE municipality names | 154.3 KB | 49.9 KB |
-| `getMunicipalityByCep` | The IBGE municipality table above, plus 5574 Correios CEP ranges | 393.3 KB | 98.8 KB |
+| `getMunicipalityByCep` | The IBGE municipality table above, plus 5573 Correios CEP ranges | 393.3 KB | 98.8 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
 | `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |

@@ -5643,12 +5643,12 @@ export const DATA: Record<StateCode, readonly (readonly [string, string])[]> = {
 };
 
 /**
- * Alternative spellings of a municipality name, keyed by its 7-digit IBGE code, for the
- * municipalities a source outside the IBGE still spells differently, usually because of a
- * recent official rename. A municipality with no variant is simply absent, at no extra cost.
- * Curated by `scripts/cities.ts`.
+ * Alternative spellings of a municipality name, keyed by its 7-digit IBGE code: the spellings
+ * the Correios CEP range mirror uses where it differs from the IBGE, mostly hyphen and accent
+ * variants (Biritiba Mirim, Grão-Pará) and a couple of older names. A municipality with no
+ * variant is simply absent, at no extra cost. Curated by `scripts/cities.ts`.
  *
- * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ * @see Based on: https://gist.github.com/hugosenari/ec1a7d88f5bdd01844424dbc9aff9590
  */
 export const OTHER_NAMES: Readonly<Record<string, readonly string[]>> = {
 	"1400605": ["São Luiz"],

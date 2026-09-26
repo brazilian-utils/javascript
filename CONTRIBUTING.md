@@ -94,8 +94,8 @@ release-please turns merged commits into releases.
 
 ## Datasets
 
-The tables under `src/_internals/constants/` fall in two groups, and only the first refreshes
-itself:
+The tables under `src/_internals/constants/` fall in three groups, and only the first two refresh
+themselves:
 
 - **Generated from an official source** by a script in `scripts/` (`npm run build:data`, run
   every Monday by the `Update datasets` workflow): banks (Banco Central, `banks.ts`), CBO
@@ -104,7 +104,7 @@ itself:
   `ncm.ts`). When a run changes a file, the workflow opens a pull request whose description, written
   by `scripts/data-summary.ts`, lists per table how many entries were added and removed, with a
   sample of each. Never edit these files by hand.
-- **Generated from a fetchable mirror of an official source**, the same way, but pinned to a
+- **Generated from a fetchable mirror of an official source**, by the same `npm run build:data` run (after the municipalities, which it is joined against), but pinned to a
   specific revision of the mirror because the official source itself cannot be fetched by a
   script: the CEP range of each municipality (Correios "Busca Faixa de CEP", via a community CSV
   mirror of its answers, `municipality-cep-ranges.ts`, writing `src/get-municipality-by-cep/constants.ts`).

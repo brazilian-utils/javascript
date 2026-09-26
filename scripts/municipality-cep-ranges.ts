@@ -5,7 +5,6 @@ import { register } from "node:module";
 import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
-import { removeAccents } from "../src/remove-accents/remove-accents.ts";
 
 const scriptsDir = import.meta.dirname;
 
@@ -37,15 +36,10 @@ const { DATA, OTHER_NAMES } = await import("../src/_internals/constants/municipa
 
 type StateCode = keyof typeof DATA;
 
-const WHITESPACE_RUN_REGEX = /\s+/g;
-
-// Same composition as `normalizeMunicipalityName`, reimplemented from the `removeAccents`
-// primitive it is itself built from: that helper's own import of `removeAccents` omits the
-// file extension (the convention every `src/` module follows, resolved by the bundler), which
-// a plain `node` process run from `scripts/` cannot resolve, unlike every other `scripts/`
-// import, which always carries its extension.
-const normalizeMunicipalityName = (value: string): string =>
-	removeAccents(value).replaceAll(WHITESPACE_RUN_REGEX, " ").trim().toUpperCase();
+// The same helper getMunicipalityByCep matches names with, loaded through the hook above like
+// the dataset, so the table is built with exactly the normalization it is read with.
+const { normalizeMunicipalityName } =
+	await import("../src/_internals/normalize-municipality-name/normalize-municipality-name.ts");
 
 // Pinned to a specific commit of the gist, so a re-run always reads the exact CSV this table
 // was cross-checked against; bumping it is a deliberate, reviewed change.
