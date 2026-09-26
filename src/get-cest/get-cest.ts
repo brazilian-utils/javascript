@@ -1,7 +1,7 @@
-import { CEST_FORMAT_REGEX, CEST_SEGMENTS, CEST_TABLE } from "../_internals/constants/cest";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { CEST_SEGMENTS, CEST_TABLE } from "../_internals/constants/cest";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { isValidCest } from "../is-valid-cest/is-valid-cest";
 
 const CEST_LENGTH = 7;
 const SEGMENT_LENGTH = 2;
@@ -42,7 +42,8 @@ export type Cest = {
  *
  * @param {string|number} value - The CEST to look up, with or without the `NN.NNN.NN` mask,
  * e.g. `"05.001.00"`, `"0500100"` or `500100`.
- * @returns {Cest|null} The matching entry, or null when the code is unknown or invalid.
+ * @returns {Cest|null} The matching entry, or null when the code is unknown or invalid, which is
+ * exactly when `isValidCest` returns false.
  *
  * @example
  * ```typescript
@@ -59,16 +60,13 @@ export type Cest = {
  * segments) and Anexos II to XXVI (the codes and their descriptions).
  */
 export const getCest = (value: string | number): Cest | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidCest(value)) return null;
 
-	const cest = padLookupCode(value, CEST_LENGTH);
+	const code = sanitizeToDigits(padLookupCode(value, CEST_LENGTH));
 
-	if (!CEST_FORMAT_REGEX.test(cest)) return null;
-
-	const code = sanitizeToDigits(cest);
-	const description = CEST_TABLE[code];
-
-	if (description === undefined) return null;
-
-	return { code, description, segment: CEST_SEGMENTS[code.slice(0, SEGMENT_LENGTH)] };
+	return {
+		code,
+		description: CEST_TABLE[code],
+		segment: CEST_SEGMENTS[code.slice(0, SEGMENT_LENGTH)],
+	};
 };
