@@ -231,13 +231,14 @@ isValidCep('12345'); // false (invalid length)
 Format a CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)).
 
 - **Options** (`FormatCepOptions`): `pad` left-pads the value with zeros to 8 digits before masking (default `false`).
-- A CEP that starts with `0` given as a number loses that zero: pass a string or use `pad`.
+- A CEP that starts with `0` given as a number loses that zero: pass a string or use `pad`. A number is only read when it is a non-negative safe integer; any other number returns `''`.
 
 ```javascript
 import { formatCep } from '@brazilian-utils/brazilian-utils';
 
 formatCep('92500000'); // 92500-000
 formatCep('9250000', { pad: true }); // 09250-000
+formatCep(-92500000); // '' (not a non-negative safe integer)
 ```
 
 ### parseCep

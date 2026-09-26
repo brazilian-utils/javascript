@@ -231,13 +231,14 @@ isValidCep('12345'); // false (tamanho inválido)
 Formata um CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)).
 
 - **Opções** (`FormatCepOptions`): `pad` preenche o valor com zeros à esquerda até 8 dígitos antes de aplicar a máscara (padrão `false`).
-- Um CEP que começa com `0` passado como número perde esse zero: passe uma string ou use `pad`.
+- Um CEP que começa com `0` passado como número perde esse zero: passe uma string ou use `pad`. Um número só é lido quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
 
 ```javascript
 import { formatCep } from '@brazilian-utils/brazilian-utils';
 
 formatCep('92500000'); // 92500-000
 formatCep('9250000', { pad: true }); // 09250-000
+formatCep(-92500000); // '' (não é um inteiro seguro não negativo)
 ```
 
 ### parseCep
