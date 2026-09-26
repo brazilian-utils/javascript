@@ -19,6 +19,8 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * calculation follows the reference implementations cited below, cross-checked against the CNO
  * open data of the Receita Federal.
  *
+ * A number is only read as a CEI when it is a non-negative safe integer.
+ *
  * @param {string|number} value - The CEI value to be validated.
  * @returns {boolean} True if the CEI is valid, false otherwise.
  *
@@ -29,6 +31,7 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * isValidCei(249859674386); // true
  * isValidCei("24.985.96743/68"); // false (invalid check digit)
  * isValidCei("000000000000"); // false (repeated digits)
+ * isValidCei(2772971181.87); // false (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno
