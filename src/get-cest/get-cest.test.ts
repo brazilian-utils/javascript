@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { CEST_SEGMENTS, CEST_TABLE } from "../_internals/constants/cest";
-import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { anyGarbage, digitsUpTo, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCest } from "../is-valid-cest/is-valid-cest";
@@ -139,6 +139,25 @@ describe("getCest", () => {
 					expect(getCest(Number(code))).toEqual(expected);
 					expect(typeof expected.segment).toBe("string");
 					expect(isValidCest(code)).toBe(true);
+				}),
+			);
+		});
+
+		test("should return null exactly when isValidCest returns false", () => {
+			const valueArbitrary = fc.oneof(
+				codeArbitrary,
+				codeArbitrary.map((code) => `${code.slice(0, 2)}.${code.slice(2, 5)}.${code.slice(5)}`),
+				codeArbitrary.map(Number),
+				digitsUpTo(9),
+				fc.nat(),
+				fc.constantFrom(...PROTOTYPE_KEYS),
+				anyGarbage,
+				fc.anything(),
+			);
+
+			fc.assert(
+				fc.property(valueArbitrary, (value) => {
+					expect(getCest(value as string) === null).toBe(!isValidCest(value as string));
 				}),
 			);
 		});

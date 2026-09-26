@@ -1,4 +1,9 @@
-import { getCest } from "../get-cest/get-cest";
+import { CEST_FORMAT_REGEX, CEST_TABLE } from "../_internals/constants/cest";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+
+const CEST_LENGTH = 7;
 
 /**
  * Validates if a CEST (Código Especificador da Substituição Tributária) is listed in the annexes
@@ -37,4 +42,10 @@ import { getCest } from "../get-cest/get-cest";
  * Convênio ICMS 142/18, the consolidated text: cláusula sexta, IV (the 7 digits) and Anexos II
  * to XXVI (the codes).
  */
-export const isValidCest = (value: string | number): boolean => getCest(value) !== null;
+export const isValidCest = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
+	const cest = padLookupCode(value, CEST_LENGTH);
+
+	return CEST_FORMAT_REGEX.test(cest) && CEST_TABLE[sanitizeToDigits(cest)] !== undefined;
+};
