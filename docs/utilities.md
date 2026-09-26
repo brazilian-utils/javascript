@@ -210,7 +210,7 @@ Source: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda
 
 Check if a CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) is valid.
 
-- Accepts a `string` or a `number`. A CEP that starts with `0` has to be a string, since a number cannot keep the leading zero.
+- Accepts a `string` or a `number`. A CEP that starts with `0` has to be a string, since a number cannot keep the leading zero, and a number is only read when it is a non-negative safe integer.
 - Spaces, dots and hyphens are ignored. Any other character makes the value invalid.
 
 ```javascript
@@ -221,6 +221,7 @@ isValidCep('92500-000'); // true (hyphen between groups)
 isValidCep('92.500-000'); // true (dot and hyphen)
 isValidCep('013 10 100'); // true (spaces anywhere between the digits)
 isValidCep(20040020); // true (number input)
+isValidCep(-20040020); // false (not a non-negative safe integer)
 isValidCep('9250000A'); // false (letters are rejected)
 isValidCep('12345'); // false (invalid length)
 ```
@@ -264,7 +265,7 @@ generateCep(); // '92500000'
 Fetch the address of a CEP from several providers at once and resolve to the first successful answer. The result is an `AddressInfo`: `cep`, `state`, `city`, `neighborhood` and `street`.
 
 - **Options** (`GetAddressInfoByCepOptions`): `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated and left out of the default list.
-- Accepts a string or a number. A number is left-padded with zeros to 8 digits.
+- Accepts a string or a number. A number is left-padded with zeros to 8 digits; a negative or fractional one is rejected with `GetAddressInfoByCepValidationError` before any request is made.
 - Retries transient network failures per provider.
 - Rejects with `GetAddressInfoByCepValidationError` when the CEP is invalid or `providers` names no known provider, with `GetAddressInfoByCepNotFoundError` when every provider failed and at least one reported the CEP as unknown, and with `GetAddressInfoByCepServiceError` when every provider failed for another reason.
 - All three extend `GetAddressInfoByCepError`, so one `catch` covers them.
@@ -2246,6 +2247,7 @@ getLegalNature('2208');
 getLegalNature('3123')?.currentCode; // null (retired without a successor)
 getLegalNature('206-2')?.code; // '2062'
 getLegalNature('206.2')?.category.description; // 'Entidades Empresariais'
+getLegalNature(206.2); // null (a number is only read when it is a non-negative safe integer: write the dotted form as a string)
 getLegalNature('0000'); // null
 ```
 
@@ -2375,6 +2377,7 @@ isValidCns('123456789010000'); // true (definitive)
 isValidCns('100000000060018'); // true (definitive, raw check digit 10, suffix 001)
 isValidCns('700000000000005'); // true (provisional)
 isValidCns('123.4567-8901/0000'); // true (any of the mask characters)
+isValidCns(-123456789010000); // false (not a non-negative safe integer)
 isValidCns('123456789010001'); // false (wrong check digit)
 isValidCns('12345678901'); // false (wrong length)
 isValidCns('abc123456789010000'); // false (not written as a CNS)
@@ -2531,6 +2534,7 @@ import { isValidCei } from '@brazilian-utils/brazilian-utils';
 isValidCei('11.583.00249/85'); // true
 isValidCei('277297118187'); // true
 isValidCei(249859674386); // true
+isValidCei(-249859674386); // false (not a non-negative safe integer)
 isValidCei('24.985.96743/68'); // false (invalid check digit)
 isValidCei('000000000000'); // false (repeated digits)
 ```
@@ -2573,6 +2577,7 @@ import { isValidCno } from '@brazilian-utils/brazilian-utils';
 isValidCno('11.084.01680/62'); // true
 isValidCno('111130137368'); // true
 isValidCno(401800097960); // true
+isValidCno(-401800097960); // false (not a non-negative safe integer)
 isValidCno('110840168063'); // false (invalid check digit)
 isValidCno('000000000000'); // false (repeated digits)
 ```
@@ -2616,6 +2621,7 @@ import { isValidCaepf } from '@brazilian-utils/brazilian-utils';
 isValidCaepf('293.118.610/001-84'); // true
 isValidCaepf('41142260000101'); // true
 isValidCaepf(29311861000184); // true
+isValidCaepf(-29311861000184); // false (not a non-negative safe integer)
 isValidCaepf('29311861000185'); // false (invalid check digits)
 isValidCaepf('00000000000000'); // false (repeated base digits)
 isValidCaepf('00000000000012'); // false (repeated base digits)

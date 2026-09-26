@@ -86,7 +86,8 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  * @param {string|number} value - The legal nature code to look up, with or without formatting.
  * @returns {LegalNature|null} The matching legal nature entry, or null when the code is unknown
  * or invalid, which is exactly when `isValidLegalNature` returns false for the string form of the
- * value (a number is read as the string it prints as).
+ * value (a number is read as the string it prints as), or when the value is a number that is not
+ * a non-negative safe integer.
  *
  * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
