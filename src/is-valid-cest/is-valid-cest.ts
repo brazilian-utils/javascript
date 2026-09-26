@@ -2,8 +2,7 @@ import { CEST_FORMAT_REGEX, CEST_TABLE } from "../_internals/constants/cest";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-const CEST_LENGTH = 7;
+import { CEST_LENGTH } from "./constants";
 
 /**
  * Validates if a CEST (Código Especificador da Substituição Tributária) is listed in the annexes

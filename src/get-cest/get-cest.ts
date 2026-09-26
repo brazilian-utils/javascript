@@ -1,9 +1,9 @@
 import { CEST_SEGMENTS, CEST_TABLE } from "../_internals/constants/cest";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { CEST_LENGTH } from "../is-valid-cest/constants";
 import { isValidCest } from "../is-valid-cest/is-valid-cest";
 
-const CEST_LENGTH = 7;
 const SEGMENT_LENGTH = 2;
 
 /**
