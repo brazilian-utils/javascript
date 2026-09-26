@@ -14,8 +14,8 @@ export type IsValidPixKeyOptions = {
  *
  * A value is valid when it is recognized, by the rules `getPixKeyInfo` documents, as a CPF, a
  * CNPJ, an e-mail address, a Brazilian mobile phone number or a random key (EVP), and when that
- * kind is listed in `options.accept`. The manual registers a "número de telefone celular", so a landline is not
- * a valid phone key.
+ * kind is listed in `options.accept`. The manual registers a "número de telefone celular", so a
+ * landline is not a valid phone key.
  *
  * @param {string} value - The Pix key to validate.
  * @param {IsValidPixKeyOptions} [options] - Optional validation options.
