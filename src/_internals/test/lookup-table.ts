@@ -1,3 +1,5 @@
+import { CID10_SUBCATEGORIES } from "../constants/cid10";
+import { CID10_DESCRIPTIONS } from "../constants/cid10-descriptions";
 import { expect } from "./runtime";
 
 /**
@@ -46,3 +48,30 @@ export const expectAlignedLookupTable = (
 		expect(typeof description === "string" && description.trim() !== "").toBe(true);
 	}
 };
+
+/**
+ * Every CID-10 code of `CID10_SUBCATEGORIES`, in its order: each category followed by its
+ * subcategories, the order `CID10_DESCRIPTIONS` is aligned with.
+ *
+ * @returns {string[]} The codes, without the dot.
+ */
+export const cid10Codes = (): string[] => {
+	const codes: string[] = [];
+
+	for (const [category, subcategories] of Object.entries(CID10_SUBCATEGORIES)) {
+		codes.push(category);
+
+		for (const subcategory of subcategories) codes.push(category + subcategory);
+	}
+
+	return codes;
+};
+
+/**
+ * The CID-10 descriptions keyed by code, the way the table was shipped before it became an array
+ * aligned with `cid10Codes`.
+ *
+ * @returns {Record<string, string>} The description of every code, without the dot.
+ */
+export const cid10Table = (): Record<string, string> =>
+	Object.fromEntries(cid10Codes().map((code, index) => [code, CID10_DESCRIPTIONS[index]]));

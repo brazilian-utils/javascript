@@ -1,11 +1,13 @@
 import * as fc from "fast-check";
 
-import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
 import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { cid10Table } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
 import { getCid10, type Cid10 } from "./get-cid10";
+
+const CID10_DESCRIPTIONS = cid10Table();
 
 describe("getCid10", () => {
 	it("should return a subcategory written with the dot", () => {
