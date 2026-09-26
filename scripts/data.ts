@@ -3,7 +3,7 @@
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 const run = (command: string, args: string[]): Promise<number | null> =>
 	new Promise((_resolve) => {
@@ -53,7 +53,7 @@ const generatedFiles = [
 ];
 
 const results = await Promise.all(
-	generators.map((generator) => run("node", [resolve(scriptsDir, generator)])),
+	generators.map((generator) => run("node", [resolve(scriptsDirectory, generator)])),
 );
 
 // Lint and format before checking the generators, so a failing generator never leaves

@@ -6,10 +6,10 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 import { CHECK_DIGIT_POSITION, CONVERT_POSITIONS, PARTIALS } from "./constants";
 
 const isValidPartials = (digits: string): boolean => {
-	for (const { start, end, checkIdx } of PARTIALS) {
+	for (const { start, end, checkIndex } of PARTIALS) {
 		const partial = digits.slice(start, end);
 		const expected = mod10(partial);
-		if (digits.charCodeAt(checkIdx) - 48 !== expected) return false;
+		if (digits.charCodeAt(checkIndex) - 48 !== expected) return false;
 	}
 	return true;
 };

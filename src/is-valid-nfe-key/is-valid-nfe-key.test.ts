@@ -165,8 +165,8 @@ describe("isValidNfeKey", () => {
 		});
 
 		test("when the check digit does not match", () => {
-			const brokenDv = `${VALID_B.slice(0, 43)}${VALID_B.at(-1) === "8" ? "7" : "8"}`;
-			expect(isValidNfeKey(brokenDv)).toBe(false);
+			const brokenCheckDigit = `${VALID_B.slice(0, 43)}${VALID_B.at(-1) === "8" ? "7" : "8"}`;
+			expect(isValidNfeKey(brokenCheckDigit)).toBe(false);
 		});
 
 		test("when there is garbage before the digits, since the format is anchored at the start", () => {

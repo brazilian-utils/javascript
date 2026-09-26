@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 type State = {
 	id: number;
@@ -76,7 +76,7 @@ const main = async (): Promise<void> => {
 		}));
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/states.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/states.ts"),
 		`/**
  * One Brazilian state, as returned by \`getStates\`, \`getStateByIbgeCode\` and the other state
  * utils. Every state is its own member of the union, so the fields of a state are tied to each
@@ -108,7 +108,7 @@ export const DATA: readonly State[] = ${JSON.stringify(states)};`,
 	);
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/state-codes.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/state-codes.ts"),
 		`import { type StateCode } from "./states";
 
 /**

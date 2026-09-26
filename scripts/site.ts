@@ -16,7 +16,7 @@ import { parseFrontMatter } from "./front-matter.ts";
  */
 
 const ROOT = join(import.meta.dirname, "..");
-const DOCS_DIR = join(ROOT, "docs");
+const DOCS_DIRECTORY = join(ROOT, "docs");
 const SITE = "https://brazilian-utils.com.br";
 const SITE_NAME = "Brazilian Utils";
 
@@ -60,7 +60,7 @@ type Alternate = { hreflang: string; href: string };
  * @returns {string[]} The page paths, in sidebar order.
  */
 function sidebarPaths(folder: string): string[] {
-	const sidebar = readFileSync(join(DOCS_DIR, folder, "_sidebar.md"), "utf8");
+	const sidebar = readFileSync(join(DOCS_DIRECTORY, folder, "_sidebar.md"), "utf8");
 
 	return [...sidebar.matchAll(SIDEBAR_LINK_PATTERN)].map(([, target]) => `/${target ?? ""}`);
 }
@@ -71,7 +71,7 @@ function sidebarPaths(folder: string): string[] {
  * @returns {{ title: string; description: string }} The two fields, empty when absent.
  */
 function frontMatter(markdown: string): { title: string; description: string } {
-	const { fields } = parseFrontMatter(readFileSync(join(DOCS_DIR, markdown), "utf8"));
+	const { fields } = parseFrontMatter(readFileSync(join(DOCS_DIRECTORY, markdown), "utf8"));
 
 	return { title: fields["title"] ?? "", description: fields["description"] ?? "" };
 }
@@ -253,16 +253,16 @@ ${entries.join("\n")}
 }
 
 function main(): void {
-	const shell = readFileSync(join(DOCS_DIR, "index.html"), "utf8");
+	const shell = readFileSync(join(DOCS_DIRECTORY, "index.html"), "utf8");
 	const sitePages = pages();
 
 	for (const page of sitePages) {
-		const file = join(DOCS_DIR, shellFile(page.path));
+		const file = join(DOCS_DIRECTORY, shellFile(page.path));
 		mkdirSync(dirname(file), { recursive: true });
 		writeFileSync(file, pageShell(shell, page));
 	}
 
-	writeFileSync(join(DOCS_DIR, "404.html"), notFoundShell(shell));
+	writeFileSync(join(DOCS_DIRECTORY, "404.html"), notFoundShell(shell));
 
 	// The home page is `index.html` itself; `/pt-br/` canonicalizes to its entry page, so the sitemap
 	// lists the canonical paths once.
@@ -275,7 +275,7 @@ function main(): void {
 		markdown: HOME_MARKDOWN,
 	};
 	const canonicalPages = sitePages.filter((page) => page.path === page.canonicalPath);
-	writeFileSync(join(DOCS_DIR, "sitemap.xml"), buildSitemap([home, ...canonicalPages]));
+	writeFileSync(join(DOCS_DIRECTORY, "sitemap.xml"), buildSitemap([home, ...canonicalPages]));
 }
 
 main();

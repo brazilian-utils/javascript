@@ -37,8 +37,8 @@ describe("generateRandomNumber", () => {
 	test("should generate numbers within valid range (0-9)", () => {
 		for (let i = 0; i < 100; i++) {
 			const result = generateRandomNumber(5);
-			for (const char of result) {
-				const digit = Number.parseInt(char, 10);
+			for (const character of result) {
+				const digit = Number.parseInt(character, 10);
 				expect(digit).toBeGreaterThanOrEqual(0);
 				expect(digit).toBeLessThanOrEqual(9);
 			}

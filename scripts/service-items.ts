@@ -8,7 +8,7 @@ import { decodeXml } from "./decode-xml.ts";
 import { readXlsxSheet } from "./read-xlsx-sheet.ts";
 import { serializeRecord } from "./serialize-record.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 const DOCUMENTATION_URL =
 	"https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual";
@@ -92,7 +92,7 @@ const main = async (): Promise<void> => {
 	}
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/service-items.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/service-items.ts"),
 		`/**
  * The subitems in force of the service list annexed to the Lei Complementar 116/2003, indexed by
  * the raw 4 digits of the subitem (\`0101\` for \`1.01\`), the first four digits of the national

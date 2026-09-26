@@ -7,8 +7,8 @@ import { defineConfig } from "vite-plus";
 import { type PackUserConfig } from "vite-plus/pack";
 import { webdriverio } from "vite-plus/test/browser-webdriverio";
 
-const rootDir = import.meta.dirname;
-const srcDir = resolve(rootDir, "src");
+const rootDirectory = import.meta.dirname;
+const sourceDirectory = resolve(rootDirectory, "src");
 
 type PackPlugin = Extract<NonNullable<PackUserConfig["plugins"]>, unknown[]>[number];
 
@@ -64,14 +64,14 @@ const minifyUmdChunk = (): PackPlugin => ({
  * IBGE dataset) instead of the whole root bundle, with no bespoke entry file to maintain per
  * util.
  */
-const utilEntryNames = readdirSync(srcDir, { withFileTypes: true })
+const utilityEntryNames = readdirSync(sourceDirectory, { withFileTypes: true })
 	.filter((entry) => entry.isDirectory() && !entry.name.startsWith("_"))
 	.map((entry) => entry.name)
-	.filter((name) => existsSync(resolve(srcDir, name, `${name}.ts`)))
+	.filter((name) => existsSync(resolve(sourceDirectory, name, `${name}.ts`)))
 	.toSorted();
 
-const utilEntries = Object.fromEntries(
-	utilEntryNames.map((name) => [name, resolve(srcDir, name, `${name}.ts`)]),
+const utilityEntries = Object.fromEntries(
+	utilityEntryNames.map((name) => [name, resolve(sourceDirectory, name, `${name}.ts`)]),
 );
 
 /**
@@ -562,7 +562,7 @@ export default defineConfig({
 	pack: [
 		{
 			...sharedPack,
-			entry: { "brazilian-utils": resolve(rootDir, "src/index.ts") },
+			entry: { "brazilian-utils": resolve(rootDirectory, "src/index.ts") },
 			format: ["es", "umd"],
 			globalName: "BrazilianUtils",
 			plugins: [minifyUmdChunk(), emitCjsDtsTwin()],
@@ -570,7 +570,7 @@ export default defineConfig({
 		{
 			...sharedPack,
 			sourcemap: false,
-			entry: utilEntries,
+			entry: utilityEntries,
 			format: ["es", "cjs"],
 		},
 	],

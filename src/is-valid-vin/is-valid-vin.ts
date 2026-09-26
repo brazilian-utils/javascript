@@ -65,17 +65,17 @@ export const isValidVin = (value: string): boolean => {
 	if (isRepeatedDigits(vin)) return false;
 
 	// Stryker disable next-line StringLiteral: generateChecksum strips this to digits, so it's inert.
-	let translitDigits = "";
+	let transliteratedDigits = "";
 
-	for (const char of vin) {
-		if (!(char in VIN_TRANSLITERATION)) return false;
+	for (const character of vin) {
+		if (!(character in VIN_TRANSLITERATION)) return false;
 
-		translitDigits += VIN_TRANSLITERATION[char];
+		transliteratedDigits += VIN_TRANSLITERATION[character];
 	}
 
 	const checkDigit = vin[VIN_CHECK_DIGIT_POSITION];
 
-	const remainder = generateChecksum({ base: translitDigits, weight: VIN_WEIGHTS }) % 11;
+	const remainder = generateChecksum({ base: transliteratedDigits, weight: VIN_WEIGHTS }) % 11;
 	const expected = remainder === 10 ? "X" : String(remainder);
 
 	return expected === checkDigit;

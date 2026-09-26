@@ -101,34 +101,34 @@ export const digitsOfOtherLength = (maxLength: number, lengths: number[]): fc.Ar
 	digitsUpTo(maxLength).filter((value) => !lengths.includes(value.length));
 
 /**
- * @param {string[]} maskChars The characters a separator is built from.
+ * @param {string[]} maskCharacters The characters a separator is built from.
  * @param {number} count How many separators the generated array holds.
  * @param {number} maxLength The largest length of a single separator.
  * @returns {fc.Arbitrary<string[]>} Arrays of exactly `count` separators.
  */
 export const maskSeparators = (
-	maskChars: string[],
+	maskCharacters: string[],
 	count: number,
 	maxLength: number,
 ): fc.Arbitrary<string[]> =>
-	fc.array(fc.string({ unit: fc.constantFrom(...maskChars), maxLength }), {
+	fc.array(fc.string({ unit: fc.constantFrom(...maskCharacters), maxLength }), {
 		minLength: count,
 		maxLength: count,
 	});
 
 /**
  * @param {fc.Arbitrary<string>} source The values to spread the mask over.
- * @param {string[]} maskChars The characters a separator is built from.
+ * @param {string[]} maskCharacters The characters a separator is built from.
  * @param {number} maxLength The largest length of a single separator.
  * @returns {fc.Arbitrary<string>} Values of `source` with a separator around every character.
  */
 export const maskedValues = (
 	source: fc.Arbitrary<string>,
-	maskChars: string[],
+	maskCharacters: string[],
 	maxLength: number,
 ): fc.Arbitrary<string> =>
 	source.chain((value) =>
-		maskSeparators(maskChars, value.length + 1, maxLength).map((separators) =>
+		maskSeparators(maskCharacters, value.length + 1, maxLength).map((separators) =>
 			interleave(value, separators),
 		),
 	);

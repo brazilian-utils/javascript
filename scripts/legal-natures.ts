@@ -6,7 +6,7 @@ import { inflateSync } from "node:zlib";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 const SOURCE_URL =
 	"https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf";
@@ -87,12 +87,12 @@ const inflateStreams = (pdf: Buffer): string[] => {
 };
 
 const unescapePdfString = (value: string): string =>
-	value.replaceAll(/\\([0-7]{1,3})|\\(.)/g, (_match, octal?: string, char?: string) => {
+	value.replaceAll(/\\([0-7]{1,3})|\\(.)/g, (_match, octal?: string, character?: string) => {
 		if (octal !== undefined) return String.fromCharCode(Number.parseInt(octal, 8));
-		if (char === "n") return "\n";
-		if (char === "r") return "\r";
-		if (char === "t") return "\t";
-		return char ?? "";
+		if (character === "n") return "\n";
+		if (character === "r") return "\r";
+		if (character === "t") return "\t";
+		return character ?? "";
 	});
 
 /**
@@ -238,7 +238,7 @@ const main = async (): Promise<void> => {
 		.map(([code]) => code);
 
 	await writeFile(
-		resolve(scriptsDir, "..", OUTPUT_PATH),
+		resolve(scriptsDirectory, "..", OUTPUT_PATH),
 		`/**
  * Tabela de Natureza Jurídica 2021 (IBGE/CONCLA), indexed by the four digit code.
  *

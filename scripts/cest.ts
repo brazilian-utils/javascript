@@ -7,7 +7,7 @@ import { decodeEntities } from "./decode-entities.ts";
 import { fetchSortedRecord } from "./fetch-sorted-record.ts";
 import { removeUntilStable } from "./remove-until-stable.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 const SOURCE_URL = "https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18";
 
@@ -296,7 +296,7 @@ const main = async (): Promise<void> => {
 	}
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cest.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/cest.ts"),
 		`/**
  * CEST (Código Especificador da Substituição Tributária) table, indexed by the 7 digit code.
  *

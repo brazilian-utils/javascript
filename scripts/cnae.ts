@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { fetchSortedRecord } from "./fetch-sorted-record.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 type CnaeSubclass = {
 	id: string;
@@ -40,7 +40,7 @@ const main = async (): Promise<void> => {
 	);
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cnae.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/cnae.ts"),
 		`/**
  * CNAE-Subclasses 2.3 (Classificação Nacional de Atividades Econômicas) subclasses, indexed by
  * the raw 7 digit code, mapping to the official subclass description.

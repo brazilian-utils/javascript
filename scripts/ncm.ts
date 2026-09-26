@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 type NcmEntry = {
 	Codigo: string;
@@ -106,7 +106,7 @@ const main = async (): Promise<void> => {
 	const uniqueSortedCodes = [...new Set(codes)].sort();
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/is-valid-ncm/constants.ts"),
+		resolve(scriptsDirectory, "..", "./src/is-valid-ncm/constants.ts"),
 		`/**
  * NCM (Nomenclatura Comum do Mercosul) 8 digit codes in force on the generation date, sorted
  * ascending. A code is included when the generation date falls within its Siscomex

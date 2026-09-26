@@ -8,7 +8,7 @@ import { inflateRawSync } from "node:zlib";
 
 import { sortRecord } from "./sort-record.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 /** The official CSVs are published in ISO-8859-1, not UTF-8. */
 const CID10_CSV_DECODER = new TextDecoder("iso-8859-1");
@@ -244,7 +244,7 @@ const main = async (): Promise<void> => {
 	const subcategories = groupSubcategories(Object.keys(sorted));
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cid10-descriptions.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/cid10-descriptions.ts"),
 		`/**
  * CID-10 (Classificação Estatística Internacional de Doenças e Problemas Relacionados à Saúde,
  * 10th revision) descriptions in Brazilian Portuguese, indexed by the code without the dot: the
@@ -270,7 +270,7 @@ export const CID10_DESCRIPTIONS: Record<string, string> = ${JSON.stringify(sorte
 	);
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cid10.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/cid10.ts"),
 		`/**
  * Every CID-10 category, with the fourth characters of its subcategories: \`A00: "019"\` stands
  * for \`A00.0\`, \`A00.1\` and \`A00.9\`, and an empty string for a category that is not

@@ -16,8 +16,8 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
-const EXAMPLE_DIR = join(ROOT, "docs", "snippets", "document-field");
-const TEMPLATE_DIR = join(EXAMPLE_DIR, "templates");
+const EXAMPLE_DIRECTORY = join(ROOT, "docs", "snippets", "document-field");
+const TEMPLATE_DIRECTORY = join(EXAMPLE_DIRECTORY, "templates");
 
 type Document = {
 	/** The kebab-case name of the document, which names its folder and its files. */
@@ -105,21 +105,24 @@ const MASK_BODY_PATTERN = /^([ \t]*)@@maskBody@@$/m;
 
 /**
  * @param {string} source - A function and the arguments after the value, `formatCnpj, { version: 2 }`.
- * @returns {{ fn: string; rest: string }} The function on its own, and the remaining arguments.
+ * @returns {{ functionName: string; rest: string }} The function on its own, and the remaining arguments.
  */
-function split(source: string): { fn: string; rest: string } {
-	const [fn = "", ...args] = source.split(", ");
+function split(source: string): { functionName: string; rest: string } {
+	const [functionName = "", ...args] = source.split(", ");
 
-	return { fn, rest: args.length === 0 ? "" : `, ${args.join(", ")}` };
+	return { functionName, rest: args.length === 0 ? "" : `, ${args.join(", ")}` };
 }
 
 /**
- * @param {{ fn: string; rest: string }} target - A function and its arguments after the value.
+ * @param {{ functionName: string; rest: string }} target - A function and its arguments after the value.
  * @param {string} value - What to pass as the value.
  * @returns {string} The call, `formatCnpj(value, { version: 2 })`.
  */
-function call({ fn, rest }: { fn: string; rest: string }, value: string): string {
-	return `${fn}(${value}${rest})`;
+function call(
+	{ functionName, rest }: { functionName: string; rest: string },
+	value: string,
+): string {
+	return `${functionName}(${value}${rest})`;
 }
 
 /**
@@ -132,8 +135,9 @@ function values(document: Document): Record<string, string> {
 	const parser = split(document.parser);
 	// A function that takes options is wrapped, so that the mask can call it with a value alone.
 	const parserExpression =
-		parser.rest === "" ? parser.fn : `(value: string) => ${call(parser, "value")}`;
-	const formatter = format.rest === "" ? format.fn : `(value: string) => ${call(format, "value")}`;
+		parser.rest === "" ? parser.functionName : `(value: string) => ${call(parser, "value")}`;
+	const formatter =
+		format.rest === "" ? format.functionName : `(value: string) => ${call(format, "value")}`;
 
 	return {
 		kind: document.kind,
@@ -143,10 +147,10 @@ function values(document: Document): Record<string, string> {
 		length: String(document.placeholder.length),
 		inputMode: document.inputMode,
 		autocomplete: document.autocomplete,
-		names: [format.fn, validator.fn, parser.fn].join(", "),
-		fieldImports: `import { ${[format.fn, parser.fn].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
-		imports: `import { ${[format.fn, validator.fn].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
-		formImports: `import { ${validator.fn} } from "@brazilian-utils/brazilian-utils";`,
+		names: [format.functionName, validator.functionName, parser.functionName].join(", "),
+		fieldImports: `import { ${[format.functionName, parser.functionName].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
+		imports: `import { ${[format.functionName, validator.functionName].join(", ")} } from "@brazilian-utils/brazilian-utils";`,
+		formImports: `import { ${validator.functionName} } from "@brazilian-utils/brazilian-utils";`,
 		format: formatter,
 		// The plain JavaScript example takes the same formatter without the type of its parameter.
 		formatJs: formatter.replace("(value: string)", "(value)"),
@@ -160,18 +164,20 @@ function values(document: Document): Record<string, string> {
 		validatorText: call(validator, "text.value"),
 		validatorSignal: call(validator, "this.value()"),
 		validatorControl: call(validator, "control.value"),
-		validatorFn: validator.fn,
+		validatorName: validator.functionName,
 		// The schema is a schema of strings, so a validator that takes more than that is narrowed.
 		standardValidator:
-			validator.rest === "" ? validator.fn : `(value: string) => ${call(validator, "value")}`,
+			validator.rest === ""
+				? validator.functionName
+				: `(value: string) => ${call(validator, "value")}`,
 		// Inside a schema the validator is called on the value alone, wrapped when it takes options.
 		validatorArrow:
 			validator.rest === ""
-				? validator.fn
+				? validator.functionName
 				: `(${document.kind}) => ${call(validator, document.kind)}`,
 		// Valibot's `check` takes a validator of `string` alone, so the call is always wrapped.
 		validatorLambda: `(${document.kind}) => ${call(validator, document.kind)}`,
-		validatorCtx: call(validator, document.kind),
+		validatorContext: call(validator, document.kind),
 		validatorOptions: validator.rest === "" ? "" : `\n  options:${validator.rest.slice(1)},`,
 		parseInput: call(parser, "input.value"),
 		parseMaskedEvent: call(parser, "event.currentTarget.value"),
@@ -192,7 +198,7 @@ function values(document: Document): Record<string, string> {
  * @returns {string} Its contents.
  */
 function readTemplate(name: string): string {
-	return readFileSync(join(TEMPLATE_DIR, `${name}.tmpl`), "utf8");
+	return readFileSync(join(TEMPLATE_DIRECTORY, `${name}.tmpl`), "utf8");
 }
 
 /**
@@ -230,10 +236,10 @@ function fill(template: string, substitutions: Record<string, string>): string {
 	});
 }
 
-rmSync(join(EXAMPLE_DIR, "generated"), { force: true, recursive: true });
+rmSync(join(EXAMPLE_DIRECTORY, "generated"), { force: true, recursive: true });
 
 for (const document of DOCUMENTS) {
-	const folder = join(EXAMPLE_DIR, "generated", document.kind);
+	const folder = join(EXAMPLE_DIRECTORY, "generated", document.kind);
 
 	mkdirSync(folder, { recursive: true });
 
@@ -290,13 +296,13 @@ for (const document of DOCUMENTS) {
 // The address guide types a CEP into the very field the document field guide builds, so that
 // field and its mask are written there too, from the same templates. The guide shows neither: it
 // says where they come from and gets on with the lookup.
-const ADDRESS_DIR = join(ROOT, "docs", "snippets", "address-form");
+const ADDRESS_DIRECTORY = join(ROOT, "docs", "snippets", "address-form");
 const cep = DOCUMENTS.find((document) => document.kind === "cep");
 
 if (cep === undefined) throw new Error("The address guide needs the CEP of the documents table");
 
 for (const framework of FRAMEWORKS) {
-	const folder = join(ADDRESS_DIR, framework.name);
+	const folder = join(ADDRESS_DIRECTORY, framework.name);
 
 	writeFileSync(
 		join(folder, framework.mask),

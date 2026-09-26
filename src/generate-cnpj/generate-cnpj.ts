@@ -11,7 +11,7 @@ const MIN_BRANCH = 1;
 
 const MAX_BRANCH = 9999;
 
-const VALID_CNPJ_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const VALID_CNPJ_CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 /**
  * The parameters `generateCnpj` accepts, an alternative to passing the version positionally.
@@ -33,12 +33,14 @@ export type GenerateCnpjParams = {
 	branch?: number;
 };
 
-const generateRandomCnpjChars = (length: number): string => {
-	let chars = "";
+const generateRandomCnpjCharacters = (length: number): string => {
+	let characters = "";
 	for (let i = 0; i < length; i++) {
-		chars += VALID_CNPJ_CHARS.charAt(Math.floor(Math.random() * VALID_CNPJ_CHARS.length));
+		characters += VALID_CNPJ_CHARACTERS.charAt(
+			Math.floor(Math.random() * VALID_CNPJ_CHARACTERS.length),
+		);
 	}
-	return chars;
+	return characters;
 };
 
 // `Number.isInteger` as a type guard, so an out of range `branch` narrows to `number`.
@@ -121,6 +123,6 @@ export const generateCnpj = (versionOrParams: 1 | 2 | GenerateCnpjParams = 1): s
 
 	return generateCnpjWith(
 		params.branch,
-		params.version === 2 ? generateRandomCnpjChars : generateRandomNumber,
+		params.version === 2 ? generateRandomCnpjCharacters : generateRandomNumber,
 	);
 };
