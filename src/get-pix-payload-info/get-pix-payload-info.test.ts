@@ -5,6 +5,7 @@ import { cpfs } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";
+import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
 import {
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
@@ -318,6 +319,15 @@ describe("getPixPayloadInfo", () => {
 	});
 
 	describe("should parse a static payload", () => {
+		test("should read a payload surrounded by whitespace, as pasted from a Pix copia e cola", () => {
+			expect(getPixPayloadInfo(` \t${BACEN_STATIC}\n `)).toStrictEqual({
+				key: "123e4567-e12b-12d1-a456-426655440000",
+				merchantName: "Fulano de Tal",
+				merchantCity: "BRASILIA",
+				pointOfInitiation: "static",
+			});
+		});
+
 		test("should ignore the transaction amount and the txid of a dynamic payload, which belong to the PSP location", () => {
 			expect(
 				getPixPayloadInfo(
@@ -575,6 +585,36 @@ describe("getPixPayloadInfo", () => {
 					const broken = `${(payload ?? "").slice(0, -4)}${crc.slice(0, index)}${replacement}${crc.slice(index + 1)}`;
 
 					expect(getPixPayloadInfo(broken)).toBeNull();
+				}),
+			);
+		});
+
+		test("should return null exactly when isValidPixPayload returns false", () => {
+			const generated = fc
+				.tuple(names, fc.uuid(), fc.option(fc.stringMatching(/^[1-9]\d{0,3}\.\d{2}$/)))
+				.map(([merchantName, key, amount]) =>
+					generatePixPayload({
+						key,
+						merchantName,
+						merchantCity: "BRASILIA",
+						...(amount === null ? {} : { amount: Number(amount) }),
+					}),
+				);
+			const fixtures = fc.constantFrom(
+				BACEN_STATIC,
+				BACEN_DYNAMIC,
+				BACEN_COMPOSITE,
+				BRCODE_MANUAL,
+				COMMUNITY_STATIC,
+				KEY_MARKED_SINGLE_USE,
+			);
+			const input = fc.oneof(generated, fixtures, fc.string(), fc.anything());
+
+			fc.assert(
+				fc.property(input, (value) => {
+					const isValid = isValidPixPayload(value as string);
+
+					expect(getPixPayloadInfo(value as string) === null).toBe(!isValid);
 				}),
 			);
 		});
