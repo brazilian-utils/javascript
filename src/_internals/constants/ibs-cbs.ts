@@ -4,8 +4,8 @@
  *
  * Table version:
  * "Tabela de Classificação Tributária do IBS e CBS - Publicada em 23/06/2026",
- * the workbook of the Portal Nacional da NF-e ("Documentos" > "Diversos"), divulged by Informe
- * Técnico 2025.002 v.1.60 (published on 2026-06-23). The generator always reads the
+ * the workbook of the Portal Nacional da NF-e ("Documentos" > "Diversos"), read with the newest
+ * Informe Técnico 2025.002 listed, v.1.60 (published on 2026-06-23). The generator always reads the
  * newest workbook listed and records it here, so a refresh that picks a new version up shows in
  * this header.
  *
@@ -14,7 +14,7 @@
  * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=D5b4Ov84WDg=
  * Tabela de Classificação Tributária do IBS e CBS - Publicada em 23/06/2026.
  * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=jxTMMQeEVM8=
- * Informe Técnico 2025.002 v.1.60, which defines the columns of both tables.
+ * Informe Técnico 2025.002 v.1.60, the newest version listed, which defines the columns of both tables.
  * @see Official: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9nus=
  * "Documentos" > "Diversos" of the Portal Nacional da NF-e, where every table version is listed.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm
