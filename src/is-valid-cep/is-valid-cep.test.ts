@@ -50,6 +50,11 @@ describe("isValidCep", () => {
 			expect(isValidCep("abc01310100")).toBe(false);
 			expect(isValidCep("0131010a")).toBe(false);
 		});
+
+		test("when it is a negative or fractional number", () => {
+			expect(isValidCep(-20_040_020)).toBe(false);
+			expect(isValidCep(2_004_002.1)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {

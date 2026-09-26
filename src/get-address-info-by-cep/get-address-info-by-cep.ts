@@ -1,4 +1,5 @@
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
 
@@ -185,6 +186,10 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  * back the moment its own failure lands, and therefore the moment an all-failed rejection can
  * surface.
  *
+ * A number is only read as a CEP when it is a non-negative safe integer: a sign or a decimal
+ * point would otherwise be dropped and another CEP looked up, so such a number is rejected
+ * before any request is made.
+ *
  * @param {string|number} cep - The CEP (Brazilian postal code) to search for. Can be a string or number.
  * @param {GetAddressInfoByCepOptions} options - Optional configuration for the function.
  * @param {CepProvider[]} options.providers - List of providers to use. Defaults to `["viacep", "brasilapi"]`
@@ -210,6 +215,9 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  *
  * // Using number input
  * const address = await getAddressInfoByCep(1310100);
+ *
+ * // A negative or fractional number is rejected
+ * await getAddressInfoByCep(-1310100); // throws GetAddressInfoByCepValidationError
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
@@ -230,7 +238,7 @@ export const getAddressInfoByCep = async (
 		cepString = cepString.padStart(8, "0");
 	}
 
-	if (!isValidCep(cepString)) {
+	if (!isLookupCode(cep) || !isValidCep(cepString)) {
 		throw new GetAddressInfoByCepValidationError("CEP inválido");
 	}
 
