@@ -1,23 +1,20 @@
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
-import { type StateCode } from "../_internals/constants/states";
-import { mod11 } from "../_internals/mod11/mod11";
-import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
-import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 import {
-	ABSENT_NUMBER,
 	CHECK_DIGIT_INDEX,
 	CODE_START,
 	CPF_PADDING,
-	FORMAT_REGEX,
 	GENERATOR_ENVIRONMENTS,
 	GENERATOR_ENVIRONMENT_INDEX,
 	MONTH_START,
+	NFSE_KEY_LENGTH,
 	NUMBER_START,
 	TAX_ID_START,
 	TAX_ID_TYPES,
 	TAX_ID_TYPE_INDEX,
 	YEAR_START,
-} from "./constants";
+} from "../_internals/constants/nfse-key";
+import { type StateCode } from "../_internals/constants/states";
+import { isValidNfseKey } from "../is-valid-nfse-key/is-valid-nfse-key";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -56,14 +53,6 @@ export type NfseKeyInfo = {
 	checkDigit: number;
 };
 
-const readTaxId = (taxIdType: NfseKeyTaxIdType, registration: string): string | null => {
-	if (taxIdType === "cnpj") return isValidCnpj(registration) ? registration : null;
-
-	const cpf = registration.slice(CPF_PADDING.length);
-
-	return registration.startsWith(CPF_PADDING) && isValidCpf(cpf) ? cpf : null;
-};
-
 /**
  * Parses the access key (chave de acesso) of a national NFS-e, the Nota Fiscal de Serviço
  * eletrônica of the Sistema Nacional NFS-e, into its fields.
@@ -76,7 +65,8 @@ const readTaxId = (taxIdType: NfseKeyTaxIdType, registration: string): string | 
  * so a separator anywhere in it is rejected instead of being stripped. The keys of the
  * municipal NFS-e models that are not the national standard are out of scope.
  *
- * What is checked: the first two digits of the municipality code are an IBGE UF code, `ambGer`
+ * The key is checked by `isValidNfseKey`, and `null` comes back exactly when it returns false.
+ * What it checks: the first two digits of the municipality code are an IBGE UF code, `ambGer`
  * is 1 or 2, the registration type is 1 (CPF, the 11 digits left padded with `000`) or 2
  * (CNPJ) and the CPF or CNPJ has valid check digits of its own (rules E1280 and E1284 of the
  * ANEXO I reject an NFS-e whose issuer fails them), `nNFSe` is not all zeros, the month is 01
@@ -93,7 +83,7 @@ const readTaxId = (taxIdType: NfseKeyTaxIdType, registration: string): string | 
  * registration, but no official document states how a letter enters the check digit of the key.
  *
  * @param {string} value - The access key value to be parsed.
- * @returns {NfseKeyInfo | null} The parsed access key, or `null` when it is not valid.
+ * @returns {NfseKeyInfo | null} The parsed access key, or `null` when `isValidNfseKey` rejects it.
  *
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual
  * Sistema Nacional NFS-e, current technical documentation: `NFSe-ESQUEMAS_XSD-v1.01`
@@ -122,44 +112,22 @@ const readTaxId = (taxIdType: NfseKeyTaxIdType, registration: string): string | 
  * ```
  */
 export const getNfseKeyInfo = (value: string): NfseKeyInfo | null => {
-	if (typeof value !== "string") return null;
+	if (!isValidNfseKey(value)) return null;
 
-	const match = FORMAT_REGEX.exec(value.trim());
-
-	if (match === null) return null;
-
-	const [, digits] = match;
-	const stateCode = IBGE_UF_CODES[digits.slice(0, 2)];
-	const ambGer = Number(digits[GENERATOR_ENVIRONMENT_INDEX]);
-	const generatorEnvironment = GENERATOR_ENVIRONMENTS.find((candidate) => candidate === ambGer);
+	const digits = value.trim().slice(-NFSE_KEY_LENGTH);
 	const taxIdType = TAX_ID_TYPES[digits[TAX_ID_TYPE_INDEX]];
-
-	if (stateCode === undefined || generatorEnvironment === undefined || taxIdType === undefined) {
-		return null;
-	}
-
-	const taxId = readTaxId(taxIdType, digits.slice(TAX_ID_START, NUMBER_START));
-	const numberDigits = digits.slice(NUMBER_START, YEAR_START);
-	const month = Number(digits.slice(MONTH_START, CODE_START));
-
-	if (taxId === null || numberDigits === ABSENT_NUMBER || month < 1 || month > 12) return null;
-
-	const checkDigit = Number(digits[CHECK_DIGIT_INDEX]);
-
-	if (mod11(digits.slice(0, CHECK_DIGIT_INDEX), { variant: "arrecadacao" }) !== checkDigit) {
-		return null;
-	}
+	const taxIdStart = taxIdType === "cpf" ? TAX_ID_START + CPF_PADDING.length : TAX_ID_START;
 
 	return {
 		municipalityCode: digits.slice(0, GENERATOR_ENVIRONMENT_INDEX),
-		stateCode,
-		generatorEnvironment,
+		stateCode: IBGE_UF_CODES[digits.slice(0, 2)],
+		generatorEnvironment: GENERATOR_ENVIRONMENTS[Number(digits[GENERATOR_ENVIRONMENT_INDEX]) - 1],
 		taxIdType,
-		taxId,
-		number: Number(numberDigits),
+		taxId: digits.slice(taxIdStart, NUMBER_START),
+		number: Number(digits.slice(NUMBER_START, YEAR_START)),
 		year: 2000 + Number(digits.slice(YEAR_START, MONTH_START)),
-		month,
+		month: Number(digits.slice(MONTH_START, CODE_START)),
 		code: digits.slice(CODE_START, CHECK_DIGIT_INDEX),
-		checkDigit,
+		checkDigit: Number(digits[CHECK_DIGIT_INDEX]),
 	};
 };
