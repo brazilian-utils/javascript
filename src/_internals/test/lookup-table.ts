@@ -1,3 +1,5 @@
+import { expect } from "./runtime";
+
 /**
  * Rebuilds the `code -> description` record of a generated lookup table from its two halves, the
  * fixed-width codes written back to back and the descriptions aligned with them, so a test can
@@ -19,3 +21,28 @@ export const lookupTable = <T>(
 			description,
 		]),
 	);
+
+/**
+ * Expects a generated lookup table to stay aligned: one description per code, codes of the table
+ * width only, in strictly ascending order, and a non-empty text in every description (every
+ * member of it, for a table whose description is a tuple).
+ *
+ * @param {string} codes - The codes of the table, back to back.
+ * @param {number} width - The width of every code.
+ * @param {readonly unknown[]} descriptions - The description of each code, at the index of that code.
+ */
+export const expectAlignedLookupTable = (
+	codes: string,
+	width: number,
+	descriptions: readonly unknown[],
+): void => {
+	const list = codes.match(new RegExp(`.{${width}}`, "g")) ?? [];
+
+	expect(list.join("")).toBe(codes);
+	expect(list).toHaveLength(descriptions.length);
+	expect(list.every((code, index) => index === 0 || list[index - 1] < code)).toBe(true);
+
+	for (const description of descriptions.flat()) {
+		expect(typeof description === "string" && description.trim() !== "").toBe(true);
+	}
+};
