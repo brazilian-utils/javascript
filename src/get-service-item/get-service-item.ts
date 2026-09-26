@@ -1,11 +1,9 @@
 import {
 	SERVICE_ITEM_DESCRIPTIONS,
-	SERVICE_ITEM_FORMAT_REGEX,
+	SERVICE_ITEM_LENGTH,
 } from "../_internals/constants/service-items";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-const SUBITEM_LENGTH = 4;
+import { isValidServiceItem } from "../is-valid-service-item/is-valid-service-item";
 
 const ITEM_LENGTH = 2;
 
@@ -37,7 +35,8 @@ export type ServiceItem = {
  *
  * @param {string|number} value - The subitem to look up, e.g. `"1.01"`, `"01.01"`, `"0101"` or
  * `101`.
- * @returns {ServiceItem|null} The matching subitem, or null when it is unknown or invalid.
+ * @returns {ServiceItem|null} The matching subitem, or null exactly when `isValidServiceItem` is
+ * false.
  *
  * @example
  * ```typescript
@@ -57,19 +56,12 @@ export type ServiceItem = {
  * 116/2003) e 2 para Desdobro Nacional".
  */
 export const getServiceItem = (value: string | number): ServiceItem | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidServiceItem(value)) return null;
 
-	const written = String(value).trim();
-
-	if (!SERVICE_ITEM_FORMAT_REGEX.test(written)) return null;
-
-	const digits = sanitizeToDigits(written).padStart(SUBITEM_LENGTH, "0");
-	const description = SERVICE_ITEM_DESCRIPTIONS[digits];
-
-	if (description === undefined) return null;
+	const digits = sanitizeToDigits(String(value)).padStart(SERVICE_ITEM_LENGTH, "0");
 
 	return {
 		code: `${Number(digits.slice(0, ITEM_LENGTH))}.${digits.slice(ITEM_LENGTH)}`,
-		description,
+		description: SERVICE_ITEM_DESCRIPTIONS[digits],
 	};
 };

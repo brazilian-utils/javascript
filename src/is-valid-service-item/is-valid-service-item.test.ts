@@ -1,4 +1,4 @@
-import { anyGarbage, anyValue } from "../_internals/test/arbitraries";
+import { anyGarbage, anyValue, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidServiceItem } from "./is-valid-service-item";
@@ -40,6 +40,19 @@ describe("isValidServiceItem", () => {
 		// @ts-expect-error not a string or number
 		expect(isValidServiceItem(["1.01"])).toBe(false);
 		expect(isValidServiceItem(1.01)).toBe(false);
+	});
+
+	it("should validate the bare digits of an item with one digit", () => {
+		expect(isValidServiceItem("101")).toBe(true);
+		expect(isValidServiceItem("1.01")).toBe(true);
+	});
+
+	it("should ignore surrounding whitespace", () => {
+		expect(isValidServiceItem("  1.01\n")).toBe(true);
+	});
+
+	it("should reject the keys of Object.prototype", () => {
+		for (const key of PROTOTYPE_KEYS) expect(isValidServiceItem(key)).toBe(false);
 	});
 
 	describe("properties", () => {

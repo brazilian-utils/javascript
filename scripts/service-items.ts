@@ -119,6 +119,9 @@ export const SERVICE_ITEM_DESCRIPTIONS: Record<string, string> = ${serializeReco
  * subitem, with the dot the law prints between them or without it.
  */
 export const SERVICE_ITEM_FORMAT_REGEX = /^\\d{1,2}\\.?\\d{2}$/;
+
+/** Digits of a subitem the table is keyed by: two of the item and two of the subitem. */
+export const SERVICE_ITEM_LENGTH = 4;
 `,
 	);
 };

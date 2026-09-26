@@ -134,6 +134,25 @@ describe("getServiceItem", () => {
 			);
 		});
 
+		test("should return null exactly when isValidServiceItem is false", () => {
+			const inputArbitrary = fc.oneof(
+				keyArbitrary,
+				keyArbitrary.map(Number),
+				keyArbitrary.map((key) => ` ${Number(key.slice(0, 2))}.${key.slice(2)}\n`),
+				fc.stringMatching(/^\d{1,2}\.?\d{2}$/),
+				fc.constantFrom(...PROTOTYPE_KEYS),
+				fc.anything(),
+			);
+
+			fc.assert(
+				fc.property(inputArbitrary, (value) => {
+					const input = value as string | number;
+
+					expect(getServiceItem(input) === null).toBe(!isValidServiceItem(input));
+				}),
+			);
+		});
+
 		test("should only carry items 01 to 40 and non-empty descriptions", () => {
 			fc.assert(
 				fc.property(keyArbitrary, (key) => {
