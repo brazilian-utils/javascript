@@ -65,6 +65,12 @@ export const MASKS: PhoneMasks = {
 };
 
 /**
+ * The obfuscated `"international"` pattern of a mobile number, without the `+55` prefix, kept
+ * apart so that `obfuscatePixKey`, whose phone keys are always mobile numbers, reads it alone.
+ */
+export const OBFUSCATED_INTERNATIONAL_MOBILE_MASK = "00 *****-**00";
+
+/**
  * The gov.br account (acesso.gov.br) shows the registered mobile as "*********00": only the last
  * 2 digits stay visible. These patterns keep that count and also keep the prefix that names a
  * region or a service instead of a subscriber, the DDD, the `0800`-like code or the `300X`/`400X`
@@ -78,7 +84,7 @@ export const OBFUSCATED_MASKS: PhoneMasks = {
 	nanpLandline: "(00) ****-**00",
 	international: {
 		landline: "00 ****-**00",
-		mobile: "00 *****-**00",
+		mobile: OBFUSCATED_INTERNATIONAL_MOBILE_MASK,
 	},
 	service: {
 		abbreviated: "0000-**00",

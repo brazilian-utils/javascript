@@ -1,6 +1,10 @@
+import { format } from "../_internals/format/format";
 import { formatCnpj } from "../format-cnpj/format-cnpj";
 import { formatCpf } from "../format-cpf/format-cpf";
-import { formatPhone } from "../format-phone/format-phone";
+import {
+	INTERNATIONAL_PREFIX,
+	OBFUSCATED_INTERNATIONAL_MOBILE_MASK,
+} from "../format-phone/constants";
 import { getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 import { obfuscateEmail } from "../obfuscate-email/obfuscate-email";
 
@@ -53,7 +57,12 @@ export const obfuscatePixKey = (value: string): string => {
 	if (key.type === "cnpj") return formatCnpj(key.value, { version: 2, obfuscate: true });
 
 	if (key.type === "phone") {
-		return formatPhone(key.value, { mask: "international", obfuscate: true });
+		// A phone key is always `+55` and a valid 11 digit mobile number, so this is the output of
+		// `formatPhone(key.value, { mask: "international", obfuscate: true })` without the mask
+		// resolution, the landline pattern and the service number branch it never reaches.
+		const national = key.value.slice(INTERNATIONAL_PREFIX.length);
+
+		return `${INTERNATIONAL_PREFIX} ${format({ value: national, pattern: OBFUSCATED_INTERNATIONAL_MOBILE_MASK })}`;
 	}
 
 	return key.type === "email" ? obfuscateEmail(key.value) : key.value;
