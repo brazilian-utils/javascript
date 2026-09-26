@@ -6,172 +6,172 @@ type UnknownInputFunction = (value: never) => unknown;
 
 /**
  * Asserts the util never throws, whatever the arbitrary produces.
- * @param {UnknownInputFunction} fn The util under test.
+ * @param {UnknownInputFunction} utility The utility under test.
  * @param {fc.Arbitrary<unknown>} arbitrary The values to feed it.
  * @returns {void} Nothing.
  */
 export const expectNeverThrows = (
-	fn: UnknownInputFunction,
+	utility: UnknownInputFunction,
 	arbitrary: fc.Arbitrary<unknown>,
 ): void => {
 	fc.assert(
 		fc.property(arbitrary, (value) => {
-			expect(() => fn(value as never)).not.toThrow();
+			expect(() => utility(value as never)).not.toThrow();
 		}),
 	);
 };
 
 /**
  * Asserts the util never throws for any pair of value and options the arbitraries produce.
- * @param {Function} fn The util under test.
+ * @param {Function} utility The utility under test.
  * @param {fc.Arbitrary<unknown>} values The values to feed it.
  * @param {fc.Arbitrary<unknown>} options The options to feed it.
  * @returns {void} Nothing.
  */
 export const expectNeverThrowsWithOptions = (
-	fn: (value: never, options: never) => unknown,
+	utility: (value: never, options: never) => unknown,
 	values: fc.Arbitrary<unknown>,
 	options: fc.Arbitrary<unknown>,
 ): void => {
 	fc.assert(
 		fc.property(values, options, (value, currentOptions) => {
-			expect(() => fn(value as never, currentOptions as never)).not.toThrow();
+			expect(() => utility(value as never, currentOptions as never)).not.toThrow();
 		}),
 	);
 };
 
 /**
  * Asserts the util never throws for any argument list the arbitrary produces.
- * @param {Function} fn The util under test.
+ * @param {Function} utility The utility under test.
  * @param {fc.Arbitrary<unknown[]>} argumentLists The argument lists to spread into it.
  * @returns {void} Nothing.
  */
 export const expectNeverThrowsWithArguments = (
-	fn: (...args: never[]) => unknown,
+	utility: (...args: never[]) => unknown,
 	argumentLists: fc.Arbitrary<unknown[]>,
 ): void => {
 	fc.assert(
 		fc.property(argumentLists, (values) => {
-			expect(() => fn(...(values as never[]))).not.toThrow();
+			expect(() => utility(...(values as never[]))).not.toThrow();
 		}),
 	);
 };
 
 /**
  * Asserts the util always returns a value of `expectedType`, whatever the arbitrary produces.
- * @param {UnknownInputFunction} fn The util under test.
+ * @param {UnknownInputFunction} utility The utility under test.
  * @param {string} expectedType The `typeof` the util is expected to return.
  * @param {fc.Arbitrary<unknown>} arbitrary The values to feed it.
  * @returns {void} Nothing.
  */
 export const expectAlwaysReturnsType = (
-	fn: UnknownInputFunction,
+	utility: UnknownInputFunction,
 	expectedType: "boolean" | "number" | "string",
 	arbitrary: fc.Arbitrary<unknown>,
 ): void => {
 	fc.assert(
 		fc.property(arbitrary, (value) => {
-			expect(typeof fn(value as never)).toBe(expectedType);
+			expect(typeof utility(value as never)).toBe(expectedType);
 		}),
 	);
 };
 
 /**
  * Asserts the validator answers `verdict` for every value the arbitrary produces.
- * @param {Function} fn The validator under test.
+ * @param {Function} utility The validator under test.
  * @param {fc.Arbitrary<string>} arbitrary The values to feed it.
  * @param {boolean} verdict The answer it must give.
  * @returns {void} Nothing.
  */
 const expectVerdict = (
-	fn: (value: string) => boolean,
+	utility: (value: string) => boolean,
 	arbitrary: fc.Arbitrary<string>,
 	verdict: boolean,
 ): void => {
 	fc.assert(
 		fc.property(arbitrary, (value) => {
-			expect(fn(value)).toBe(verdict);
+			expect(utility(value)).toBe(verdict);
 		}),
 	);
 };
 
 /**
  * Asserts the validator accepts every value the arbitrary produces.
- * @param {Function} fn The validator under test.
+ * @param {Function} utility The validator under test.
  * @param {fc.Arbitrary<string>} arbitrary The values it must accept.
  * @returns {void} Nothing.
  */
 export const expectAccepted = (
-	fn: (value: string) => boolean,
+	utility: (value: string) => boolean,
 	arbitrary: fc.Arbitrary<string>,
 ): void => {
-	expectVerdict(fn, arbitrary, true);
+	expectVerdict(utility, arbitrary, true);
 };
 
 /**
  * Asserts the validator rejects every value the arbitrary produces.
- * @param {Function} fn The validator under test.
+ * @param {Function} utility The validator under test.
  * @param {fc.Arbitrary<string>} arbitrary The values it must reject.
  * @returns {void} Nothing.
  */
 export const expectRejected = (
-	fn: (value: string) => boolean,
+	utility: (value: string) => boolean,
 	arbitrary: fc.Arbitrary<string>,
 ): void => {
-	expectVerdict(fn, arbitrary, false);
+	expectVerdict(utility, arbitrary, false);
 };
 
 /**
  * Asserts the util's output always matches `pattern`.
- * @param {Function} fn The util under test.
+ * @param {Function} utility The utility under test.
  * @param {RegExp} pattern The shape the output must have.
  * @param {fc.Arbitrary<string>} arbitrary The values to feed it.
  * @returns {void} Nothing.
  */
 export const expectMatchesPattern = (
-	fn: (value: string) => string,
+	utility: (value: string) => string,
 	pattern: RegExp,
 	arbitrary: fc.Arbitrary<string>,
 ): void => {
 	fc.assert(
 		fc.property(arbitrary, (value) => {
-			expect(fn(value)).toMatch(pattern);
+			expect(utility(value)).toMatch(pattern);
 		}),
 	);
 };
 
 /**
  * Asserts applying the util twice gives the same result as applying it once.
- * @param {Function} fn The util under test.
+ * @param {Function} utility The utility under test.
  * @param {fc.Arbitrary<string>} arbitrary The values to feed it.
  * @returns {void} Nothing.
  */
 export const expectIdempotent = (
-	fn: (value: string) => string,
+	utility: (value: string) => string,
 	arbitrary: fc.Arbitrary<string>,
 ): void => {
 	fc.assert(
 		fc.property(arbitrary, (value) => {
-			const once = fn(value);
+			const once = utility(value);
 
-			expect(fn(once)).toBe(once);
+			expect(utility(once)).toBe(once);
 		}),
 	);
 };
 
 /**
  * Asserts the util treats an uppercased value exactly like the value it was given.
- * @param {Function} fn The util under test.
+ * @param {Function} utility The utility under test.
  * @param {fc.Arbitrary<string>} arbitrary The values to feed it.
  * @returns {void} Nothing.
  */
 export const expectCaseInsensitive = (
-	fn: (value: string) => string,
+	utility: (value: string) => string,
 	arbitrary: fc.Arbitrary<string>,
 ): void => {
 	fc.assert(
 		fc.property(arbitrary, (value) => {
-			expect(fn(value.toUpperCase())).toBe(fn(value));
+			expect(utility(value.toUpperCase())).toBe(utility(value));
 		}),
 	);
 };

@@ -1,9 +1,9 @@
-import { @@validatorFn@@ } from "@brazilian-utils/brazilian-utils";
+import { @@validatorName@@ } from "@brazilian-utils/brazilian-utils";
 import { type } from "arktype";
 
 /** A @@label@@, reusable wherever a schema needs one. */
 export const @@kind@@Schema = type("string").narrow(
-  (@@kind@@, ctx) => @@validatorCtx@@ || ctx.mustBe("a valid @@label@@"),
+  (@@kind@@, ctx) => @@validatorContext@@ || ctx.mustBe("a valid @@label@@"),
 );
 
 export const signupSchema = type({
