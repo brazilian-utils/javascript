@@ -77,7 +77,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 | `isValidCest` · `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 116.6 - 117.8 KB | 26.4 - 26.9 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 - 94.0 KB | 21.1 - 21.2 KB |
 | `isValidNbs` · `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 81.8 KB | 13.8 KB |
-| `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
+| `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 - 69.0 KB | 6.9 KB |
 | `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.8 KB | 9.6 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
 | `isValidServiceItem` · `getServiceItem` | Service list of the Lei Complementar 116/2003 | 27.1 - 27.2 KB | 8.8 - 8.9 KB |
