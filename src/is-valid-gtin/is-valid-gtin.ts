@@ -1,4 +1,4 @@
-import { mod10 } from "../_internals/mod10/mod10";
+import { gs1CheckDigit } from "../_internals/gs1-check-digit/gs1-check-digit";
 import { DIGITS_REGEX, GTIN_LENGTHS } from "./constants";
 
 /** How many digits a GTIN may be written with. */
@@ -71,5 +71,5 @@ export const isValidGtin = (value: string, options?: IsValidGtinOptions): boolea
 
 	if (Array.isArray(lengths) && !lengths.includes(length)) return false;
 
-	return mod10(digits.slice(0, -1), { variant: "gs1" }) === Number(digits.at(-1));
+	return gs1CheckDigit(digits.slice(0, -1)) === Number(digits.at(-1));
 };
