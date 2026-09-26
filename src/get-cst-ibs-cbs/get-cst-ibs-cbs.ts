@@ -1,10 +1,6 @@
-import {
-	CST_IBS_CBS_FORMAT_REGEX,
-	CST_IBS_CBS_LENGTH,
-	CST_IBS_CBS_TABLE,
-} from "../_internals/constants/ibs-cbs";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { CST_IBS_CBS_LENGTH, CST_IBS_CBS_TABLE } from "../_internals/constants/ibs-cbs";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
+import { isValidCstIbsCbs } from "../is-valid-cst-ibs-cbs/is-valid-cst-ibs-cbs";
 
 /**
  * A CST-IBS/CBS (Código de Situação Tributária do IBS e da CBS) code.
@@ -31,7 +27,8 @@ export type CstIbsCbs = {
  * the codes start with zeros a numeric field drops: `0`, `"0"` and `"000"` are all the code `000`.
  *
  * @param {string|number} value - The CST-IBS/CBS to look up, e.g. `"200"`, `"000"` or `200`.
- * @returns {CstIbsCbs|null} The matching entry, or null when the code is unknown or invalid.
+ * @returns {CstIbsCbs|null} The matching entry, or null exactly when `isValidCstIbsCbs` rejects
+ * the value.
  *
  * @example
  * ```typescript
@@ -58,15 +55,9 @@ export type CstIbsCbs = {
  * Lei Complementar nº 214/2025, which institutes the IBS and the CBS.
  */
 export const getCstIbsCbs = (value: string | number): CstIbsCbs | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidCstIbsCbs(value)) return null;
 
 	const code = padLookupCode(value, CST_IBS_CBS_LENGTH);
 
-	if (!CST_IBS_CBS_FORMAT_REGEX.test(code)) return null;
-
-	const description = CST_IBS_CBS_TABLE[code];
-
-	if (description === undefined) return null;
-
-	return { code, description };
+	return { code, description: CST_IBS_CBS_TABLE[code] };
 };
