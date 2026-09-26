@@ -73,6 +73,37 @@ generateCpf('SP'); // the 9th digit is 8, the SP região fiscal code
 generateCpf('MG'); // the 9th digit is 6, the MG região fiscal code
 ```
 
+### getCpfInfo
+
+Read the fields a CPF encodes, as a `CpfInfo`: the 8 digit `base`, the `fiscalRegion` digit (the 9th digit, the Região Fiscal of the Receita Federal the CPF was registered in, `"1"` to `"9"` and `"0"` for the 10ª), the `states` of that region (`StateCode[]`, sorted by state name) and the 2 `checkDigits`. Accepts the same masked or unmasked input as `isValidCpf` and returns `null` for anything that is not a valid CPF. The region is the one of the address given at the first registration: it says nothing about where the holder was born, lives today or asked for the number, and a region with more than one state does not tell which of them it was.
+
+| `fiscalRegion` | `states` |
+| --- | --- |
+| `"1"` | DF, GO, MT, MS, TO |
+| `"2"` | AC, AP, AM, PA, RO, RR |
+| `"3"` | CE, MA, PI |
+| `"4"` | AL, PB, PE, RN |
+| `"5"` | BA, SE |
+| `"6"` | MG |
+| `"7"` | ES, RJ |
+| `"8"` | SP |
+| `"9"` | PR, SC |
+| `"0"` | RS |
+
+```javascript
+import { getCpfInfo } from '@brazilian-utils/brazilian-utils';
+
+getCpfInfo('123.456.789-09');
+// {
+//   base: '12345678',
+//   fiscalRegion: '9',
+//   states: ['PR', 'SC'],
+//   checkDigits: '09',
+// }
+
+getCpfInfo('12345678900'); // null (invalid check digits)
+```
+
 Source: [Receita Federal, "Cadastros: CPF e CNPJ"](https://www.gov.br/receitafederal/pt-br/assuntos/educacao-fiscal/educacao_fiscal/folhetos-orientativos/cadastros-dig.pdf).
 
 ## CNPJ

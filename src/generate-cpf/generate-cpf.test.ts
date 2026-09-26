@@ -1,11 +1,10 @@
 import * as fc from "fast-check";
 
-import { CPF_LENGTH } from "../_internals/constants/cpf";
+import { CPF_FISCAL_REGION_BY_STATE, CPF_LENGTH } from "../_internals/constants/cpf";
 import { DATA, type StateCode } from "../_internals/constants/states";
 import { PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
-import { STATE_CODES } from "./constants";
 import { generateCpf } from "./generate-cpf";
 
 describe("generateCpf", () => {
@@ -50,15 +49,15 @@ describe("generateCpf", () => {
 		}
 	});
 
-	test("should embed the literal STATE_CODES digit at the 9th position, not a random one", () => {
+	test("should embed the literal CPF_FISCAL_REGION_BY_STATE digit at the 9th position, not a random one", () => {
 		for (let i = 0; i < 20; i++) {
-			expect(generateCpf("SP")[8]).toBe(STATE_CODES.SP);
+			expect(generateCpf("SP")[8]).toBe(CPF_FISCAL_REGION_BY_STATE.SP);
 		}
 	});
 
 	test("should embed the 1st região fiscal digit for the states the Receita Federal groups there", () => {
-		expect(STATE_CODES.MS).toBe("1");
-		expect(STATE_CODES.MT).toBe("1");
+		expect(CPF_FISCAL_REGION_BY_STATE.MS).toBe("1");
+		expect(CPF_FISCAL_REGION_BY_STATE.MT).toBe("1");
 		expect(generateCpf("MS")[8]).toBe("1");
 		expect(generateCpf("MT")[8]).toBe("1");
 	});
@@ -102,7 +101,7 @@ describe("generateCpf", () => {
 					const cpf = generateCpf(state);
 
 					expect(cpf).toHaveLength(CPF_LENGTH);
-					expect(cpf[8]).toBe(STATE_CODES[state]);
+					expect(cpf[8]).toBe(CPF_FISCAL_REGION_BY_STATE[state]);
 					expect(isValidCpf(cpf)).toBe(true);
 				}),
 			);
