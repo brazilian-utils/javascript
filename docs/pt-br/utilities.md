@@ -2701,7 +2701,7 @@ Fonte: [CNAE-Subclasses 2.3 na CONCLA/IBGE](https://concla.ibge.gov.br/busca-onl
 Formata um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas). Só a estrutura muda; use `isValidCnae` para conferir um código com a tabela.
 
 - **Opções** (`FormatCnaeOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 7 dígitos de um código completo. Sem ele a máscara é aplicada até onde o valor vai.
-- Caracteres fora da máscara são descartados, e um número é lido como a string dos seus dígitos. Retorna `''` quando não há dígito algum.
+- Caracteres fora da máscara são descartados, e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo: um número negativo, fracionário ou inseguro retorna `''`, já que o sinal e o ponto decimal não são caracteres da máscara. Retorna `''` quando não há dígito algum.
 
 ```javascript
 import { formatCnae } from '@brazilian-utils/brazilian-utils';
@@ -2712,7 +2712,7 @@ formatCnae('62015'); // 6201-5
 formatCnae('62', { pad: true }); // 0000-0/62 (completado até 7 dígitos antes)
 formatCnae(111301, { pad: true }); // 0111-3/01
 formatCnae('abc6201501'); // 6201-5/01 (só os dígitos são lidos)
-formatCnae(-6201501); // 6201-5/01
+formatCnae(-6201501); // '' (não é um inteiro seguro não negativo)
 ```
 
 ### parseCnae

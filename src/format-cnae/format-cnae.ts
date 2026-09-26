@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /** Options of `formatCnae`. */
@@ -22,11 +22,12 @@ export type FormatCnaeOptions = {
  * `pad: true`, so `formatCnae(111301)` gives `"1113-0/1"` and `formatCnae(111301, { pad: true })`
  * gives `"0111-3/01"`.
  *
- * Like every formatter of this package, the value is read for its digits and masked as far as
+ * Like every formatter of this package, a string is read for its digits and masked as far as
  * they go: characters outside the mask are dropped (`formatCnae("abc6201501")` gives
- * `"6201-5/01"`) and a number is read as the string of its digits, sign and decimal point
- * included (`formatCnae(-6201501)` gives `"6201-5/01"`). This is the input-mask contract of
- * `formatCpf`; use `isValidCnae` to check a code.
+ * `"6201-5/01"`), which is the input-mask contract of `formatCpf`. A number is only read when
+ * it is a non-negative safe integer: its sign and decimal point are not mask characters, so a
+ * negative, fractional, not finite or unsafe number gives an empty string instead of the digits
+ * of its string (`formatCnae(-6201501)` gives `""`). Use `isValidCnae` to check a code.
  *
  * @param {string|number} value - The CNAE code to be formatted.
  * @param {FormatCnaeOptions} [options] - Optional formatting options.
@@ -42,13 +43,13 @@ export type FormatCnaeOptions = {
  * formatCnae("62015"); // "6201-5"
  * formatCnae("62", { pad: true }); // "0000-0/62" (padded to 7 digits first)
  * formatCnae("abc6201501"); // "6201-5/01" (only the digits are read)
- * formatCnae(-6201501); // "6201-5/01"
+ * formatCnae(-6201501); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/v2/cnae/subclasses
  */
 export const formatCnae = (value: string | number, options?: FormatCnaeOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,

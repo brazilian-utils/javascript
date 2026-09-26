@@ -52,6 +52,18 @@ describe("parseCnae", () => {
 			expectAlwaysReturnsType(parseCnae, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCnae(620_150.1)).toBe("");
+		expect(parseCnae(-1)).toBe("");
+		expect(parseCnae(1.5)).toBe("");
+		expect(parseCnae(2 ** 53)).toBe("");
+		expect(parseCnae(Number.MAX_VALUE)).toBe("");
+		expect(parseCnae(1e21)).toBe("");
+		expect(parseCnae(Number.NaN)).toBe("");
+		expect(parseCnae(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCnae(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCnae types", () => {

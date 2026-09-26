@@ -86,10 +86,16 @@ describe("formatCnae", () => {
 		expect(formatCnae("62.01-5/01")).toBe("6201-5/01");
 	});
 
-	it("should read a signed or fractional number as the string of its digits, like formatCpf", () => {
-		expect(formatCnae(-6_201_501)).toBe("6201-5/01");
-		expect(formatCnae(620_150.1)).toBe("6201-5/01");
-		expect(formatCnae(2 ** 53)).toBe("9007-1/99");
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCnae(-6_201_501)).toBe("");
+		expect(formatCnae(620_150.1)).toBe("");
+		expect(formatCnae(2 ** 53)).toBe("");
+		expect(formatCnae(Number.MAX_VALUE)).toBe("");
+		expect(formatCnae(1e21)).toBe("");
+		expect(formatCnae(Number.NaN)).toBe("");
+		expect(formatCnae(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCnae(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCnae(-6_201_501, { pad: true })).toBe("");
 	});
 
 	it("should return an empty string for a null-prototype object", () => {

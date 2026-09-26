@@ -2701,7 +2701,7 @@ Source: [CNAE-Subclasses 2.3 at CONCLA/IBGE](https://concla.ibge.gov.br/busca-on
 Format a CNAE (Classificação Nacional de Atividades Econômicas) subclass code. Only the structure changes; use `isValidCnae` to check a code against the table.
 
 - **Options** (`FormatCnaeOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code. Without it the mask is applied as far as the value goes.
-- Characters outside the mask are dropped, and a number is read as the string of its digits. Returns `''` when there is no digit at all.
+- Characters outside the mask are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer: a negative, fractional or unsafe number returns `''`, since its sign and decimal point are not mask characters. Returns `''` when there is no digit at all.
 
 ```javascript
 import { formatCnae } from '@brazilian-utils/brazilian-utils';
@@ -2712,7 +2712,7 @@ formatCnae('62015'); // 6201-5
 formatCnae('62', { pad: true }); // 0000-0/62 (padded to 7 digits first)
 formatCnae(111301, { pad: true }); // 0111-3/01
 formatCnae('abc6201501'); // 6201-5/01 (only the digits are read)
-formatCnae(-6201501); // 6201-5/01
+formatCnae(-6201501); // '' (not a non-negative safe integer)
 ```
 
 ### parseCnae
