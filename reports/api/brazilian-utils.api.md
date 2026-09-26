@@ -577,6 +577,9 @@ export function getMunicipality(options: GetMunicipalityByNameParams): Promise<s
 export function getMunicipality(options: GetMunicipalityParams): Promise<[string, string] | string | null>;
 
 // @public
+export const getMunicipalityByCep: (value: string | number) => Municipality | null;
+
+// @public
 export const getMunicipalityByCode: (code: string | number) => Municipality | null;
 
 // @public @deprecated
@@ -610,6 +613,9 @@ export const getPixKeyInfo: (value: string) => PixKeyInfo | null;
 
 // @public
 export const getPixPayloadInfo: (value: string) => PixPayloadInfo | null;
+
+// @public
+export const getStateByCep: (value: string | number) => State | null;
 
 // @public
 export const getStateByIbgeCode: (code: string | number) => State | null;

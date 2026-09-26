@@ -34,9 +34,10 @@ const generatedFiles = [
 	"./src/_internals/constants/banks.ts",
 	"./src/_internals/constants/cbo.ts",
 	"./src/_internals/constants/cfop.ts",
-	"./src/_internals/constants/cities.ts",
 	"./src/_internals/constants/cnae.ts",
+	"./src/_internals/constants/municipalities.ts",
 	"./src/_internals/constants/states.ts",
+	"./src/get-municipality-by-cep/constants.ts",
 	"./src/is-valid-legal-nature/constants.ts",
 	"./src/is-valid-ncm/constants.ts",
 ];
@@ -44,6 +45,10 @@ const generatedFiles = [
 const results = await Promise.all(
 	generators.map((generator) => run("node", [resolve(scriptsDir, generator)])),
 );
+
+// The CEP ranges are joined against the municipality table cities.ts has just rewritten, so
+// they are generated after it rather than alongside it.
+results.push(await run("node", [resolve(scriptsDir, "municipality-cep-ranges.ts")]));
 
 // Lint and format before checking the generators, so a failing generator never leaves
 // unformatted files behind in the working tree. `vp fmt` runs last because `vp lint --fix`
