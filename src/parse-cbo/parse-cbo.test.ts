@@ -46,6 +46,18 @@ describe("parseCbo", () => {
 			expectAlwaysReturnsType(parseCbo, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCbo(2124.05)).toBe("");
+		expect(parseCbo(-1)).toBe("");
+		expect(parseCbo(1.5)).toBe("");
+		expect(parseCbo(2 ** 53)).toBe("");
+		expect(parseCbo(Number.MAX_VALUE)).toBe("");
+		expect(parseCbo(1e21)).toBe("");
+		expect(parseCbo(Number.NaN)).toBe("");
+		expect(parseCbo(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCbo(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCbo types", () => {
