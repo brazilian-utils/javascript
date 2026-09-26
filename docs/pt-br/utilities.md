@@ -2812,7 +2812,7 @@ isValidGtin('SEM GTIN'); // false
 Extrai os campos de um GTIN, como um `GtinInfo`.
 
 - Retorna `null` quando o valor não é um GTIN válido, sob as mesmas regras de `isValidGtin`.
-- O prefixo é lido como a "Tabela Prefixo GS1" do Portal da NF-e orienta: o valor é preenchido com zeros à esquerda até 14 dígitos, e o prefixo são as posições 7 a 9 quando as seis primeiras são zeros (um GTIN-8) e as posições 2 a 4 caso contrário. Um GTIN-12 tem, portanto, um prefixo que começa com `0`, e um GTIN-14 tem o prefixo do GTIN-13 que ele agrupa, depois do dígito indicador.
+- O prefixo é lido como a "Tabela Prefixo GS1" do Portal da NF-e orienta: o valor é preenchido com zeros à esquerda até 14 dígitos, e o prefixo são as posições 7 a 9 quando as posições 2 a 6 são zeros (um GTIN-8, ou um GTIN-14 que agrupa um) e as posições 2 a 4 caso contrário. O primeiro dígito, o zero de preenchimento ou o dígito indicador, nunca faz parte do prefixo, então um GTIN-12 tem um prefixo que começa com `0`, e um GTIN-14 tem o prefixo do GTIN que ele agrupa.
 
 | Campo | Descrição |
 | --- | --- |

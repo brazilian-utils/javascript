@@ -2812,7 +2812,7 @@ isValidGtin('SEM GTIN'); // false
 Parse a GTIN into its fields, as a `GtinInfo`.
 
 - Returns `null` when the value is not a valid GTIN, under the same rules as `isValidGtin`.
-- The prefix is read the way the "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14 digits, and the prefix is positions 7 to 9 when the first six are zeros (a GTIN-8) and positions 2 to 4 otherwise. A GTIN-12 therefore has a prefix that starts with `0`, and a GTIN-14 has the prefix of the GTIN-13 it packs, after the indicator digit.
+- The prefix is read the way the "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14 digits, and the prefix is positions 7 to 9 when positions 2 to 6 are zeros (a GTIN-8, or a GTIN-14 that packs one) and positions 2 to 4 otherwise. The first digit, the padding zero or the indicator digit, is never part of the prefix, so a GTIN-12 has a prefix that starts with `0`, and a GTIN-14 has the prefix of the GTIN it packs.
 
 | Field | Description |
 | --- | --- |

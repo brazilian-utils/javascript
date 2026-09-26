@@ -3,6 +3,7 @@ import { type GtinLength, isValidGtin } from "../is-valid-gtin/is-valid-gtin";
 import {
 	BRAZILIAN_PREFIXES,
 	GS1_8_PADDING,
+	GS1_8_PADDING_START,
 	GTIN_TYPES,
 	NORMALIZED_LENGTH,
 	RESTRICTED_GS1_8_PREFIX_REGEX,
@@ -21,8 +22,8 @@ export type GtinInfo = {
 	/** How many digits the value was written with. */
 	length: GtinLength;
 	/**
-	 * The three digit GS1 Prefix, or a GS1-8 Prefix when the first six digits of the 14 digit form
-	 * are zeros, which covers every GTIN-8 and the GS1 Prefix 0000000. It names the GS1 Member
+	 * The three digit GS1 Prefix, or a GS1-8 Prefix when digits 2 to 6 of the 14 digit form are
+	 * zeros, which covers every GTIN-8, a GTIN-14 that packs one and the GS1 Prefix 0000000. It names the GS1 Member
 	 * Organisation that licensed the number, not the country of origin.
 	 */
 	prefix: string;
@@ -57,9 +58,10 @@ const PREFIX_LENGTH = 3;
  *
  * `type` and `length` describe the value as it was written. The prefix is read the way the
  * "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14
- * digits, and the prefix is positions 7 to 9 when the first six are zeros (a GTIN-8) and
- * positions 2 to 4 otherwise. A GTIN-12 therefore has a prefix that starts with `0`, and a
- * GTIN-14 has the prefix of the GTIN-13 it packs, after the indicator digit.
+ * digits, and the prefix is positions 7 to 9 when positions 2 to 6 are zeros (a GTIN-8, or a
+ * GTIN-14 that packs one) and positions 2 to 4 otherwise. The first digit is the padding zero or
+ * the indicator digit and is never part of the prefix, so a GTIN-12 has a prefix that starts with
+ * `0`, and a GTIN-14 has the prefix of the GTIN it packs.
  *
  * Only the prefixes of GS1 Brasil (789 and 790) and the Restricted Circulation Number ranges of
  * the General Specifications are told apart, since both are fixed by a standard or a rule. The
@@ -108,7 +110,7 @@ export const getGtinInfo = (value: string): GtinInfo | null => {
 	const length = GTIN_LENGTHS[(GTIN_LENGTHS as readonly number[]).indexOf(digits.length)];
 	const checkDigit = Number(digits.at(-1));
 	const normalized = digits.padStart(NORMALIZED_LENGTH, "0");
-	const isGs1Eight = normalized.startsWith(GS1_8_PADDING);
+	const isGs1Eight = normalized.startsWith(GS1_8_PADDING, GS1_8_PADDING_START);
 	const start = isGs1Eight ? GS1_8_PREFIX_START : PREFIX_START;
 	const prefix = normalized.slice(start, start + PREFIX_LENGTH);
 	const restrictedRegex = isGs1Eight ? RESTRICTED_GS1_8_PREFIX_REGEX : RESTRICTED_PREFIX_REGEX;
