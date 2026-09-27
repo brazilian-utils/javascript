@@ -26,6 +26,28 @@ type NationalHolidayEntry = HolidayPeriod & {
 export const CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR = 2024;
 
 /**
+ * The name the first round of the elections is emitted under, the feriado nacional of art. 380
+ * of the Código Eleitoral.
+ */
+export const ELECTION_HOLIDAY_NAME = "Eleições (primeiro turno)";
+
+/**
+ * First year the first round of every even year's elections falls on a date the Constitution
+ * fixes: EC nº 16, de 04/06/1997, set it on the first Sunday of October (arts. 28, 29, II, and 77)
+ * and the 1998 general elections were the first held under it.
+ */
+export const ELECTION_SINCE_YEAR = 1998;
+
+/**
+ * Years whose first round the Constitution moved off the first Sunday of October, as `[month,
+ * day]` pairs (month 1 to 12): art. 1º of EC nº 107, de 02/07/2020, "As eleições municipais
+ * previstas para outubro de 2020 realizar-se-ão no dia 15 de novembro, em primeiro turno".
+ */
+export const ELECTION_DATE_OVERRIDES: ReadonlyMap<number, readonly [number, number]> = new Map([
+	[2020, [11, 15]],
+]);
+
+/**
  * The name the 20 November entries are emitted under, national and state alike.
  *
  * No law spells it exactly this way. Art. 1º of Lei 14.759/2023 calls the national holiday "Dia

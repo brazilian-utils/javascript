@@ -2,7 +2,14 @@ import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/ho
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { resolveStateHolidayDate } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
-import { FIXED_HOLIDAYS, type HolidayPeriod, STATE_HOLIDAYS } from "./constants";
+import {
+	ELECTION_DATE_OVERRIDES,
+	ELECTION_HOLIDAY_NAME,
+	ELECTION_SINCE_YEAR,
+	FIXED_HOLIDAYS,
+	type HolidayPeriod,
+	STATE_HOLIDAYS,
+} from "./constants";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -80,6 +87,28 @@ const isInForce = (year: number, { since, until }: HolidayPeriod): boolean => {
 	return true;
 };
 
+const DAYS_IN_WEEK = 7;
+const OCTOBER = 9;
+
+/**
+ * The date of the first round of the elections of `year`: the first Sunday of October, unless
+ * `ELECTION_DATE_OVERRIDES` carries another date for that year.
+ *
+ * @param {number} year - An even year from `ELECTION_SINCE_YEAR` on.
+ * @returns {Date} The election day, at local midnight.
+ */
+const resolveElectionDate = (year: number): Date => {
+	const override = ELECTION_DATE_OVERRIDES.get(year);
+
+	if (override !== undefined) return new Date(year, override[0] - 1, override[1]);
+
+	// Sunday is weekday 0, so the days from 1 October to the first Sunday are 7 minus its weekday,
+	// or none when 1 October is already a Sunday.
+	const firstOfOctober = new Date(year, OCTOBER, 1).getDay();
+
+	return new Date(year, OCTOBER, 1 + ((DAYS_IN_WEEK - firstOfOctober) % DAYS_IN_WEEK));
+};
+
 const computeHolidays = (year: number, stateCode: StateCode | undefined): Holiday[] => {
 	const holidays: Holiday[] = [];
 
@@ -89,6 +118,14 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		holidays.push({
 			name: entry.name,
 			date: new Date(year, entry.month - 1, entry.day),
+			type: "national",
+		});
+	}
+
+	if (year >= ELECTION_SINCE_YEAR && year % 2 === 0) {
+		holidays.push({
+			name: ELECTION_HOLIDAY_NAME,
+			date: resolveElectionDate(year),
 			type: "national",
 		});
 	}
@@ -178,6 +215,19 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * well and only Lei 10.607/2002 put it back (up to 2.4.0 Finados was listed every year).
  * `FIXED_HOLIDAYS` in `src/get-holidays/constants.ts` cites the decree or law behind each period.
  *
+ * The first round of the elections is a national holiday in the even years from 1998 on, typed
+ * `"national"` and named `"Eleições (primeiro turno)"`: art. 380 of the Código Eleitoral makes a
+ * feriado nacional of "o dia em que se realizarem eleições de data fixada pela Constituição
+ * Federal", and since EC nº 16/1997 the Constitution fixes the first round on the first Sunday of
+ * October (arts. 28, 29, II, and 77), which EC nº 107/2020 moved to 15 November for 2020 alone. It
+ * always falls on a Sunday, so it changes what `getHolidays` and `isHoliday` answer and never what
+ * the business day utils count. The second round, "no último domingo de outubro ... se houver", is
+ * left out: whether it is held depends on the first round's results, and only in the states and
+ * municipalities where one is needed, so its date is not a holiday a year alone can establish.
+ * Earlier elections are not listed either: before 1998 their dates were set by ordinary law or
+ * counted back from the end of the term, and Lei 1.266/1950, art. 1º, which made the day of the
+ * general elections a feriado nacional, was revoked by Lei 10.607/2002.
+ *
  * If `stateCode` is provided but is not a valid/known state code, it is ignored and
  * only national holidays are returned (this mirrors passing no `stateCode` at all,
  * and is kept for backwards compatibility). The lookup is an own-property one, so a
@@ -245,6 +295,22 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
  * Lei 14.759/2023, nationalized Dia da Consciência Negra (20 November) from
  * `CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR` (2024) onward.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l4737compilado.htm
+ * Código Eleitoral (Lei 4.737/1965), art. 380: "Será feriado nacional o dia em que se realizarem
+ * eleições de data fixada pela Constituição Federal; nos demais casos, serão as eleições marcadas
+ * para um domingo ou dia já considerado feriado por lei anterior".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm
+ * Constituição Federal, art. 77, in the wording of EC nº 16/1997: the presidential election
+ * "realizar-se-á, simultaneamente, no primeiro domingo de outubro, em primeiro turno, e no último
+ * domingo de outubro, em segundo turno, se houver"; arts. 28 and 29, II, fix the same first
+ * Sunday of October for governors and mayors.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc16.htm
+ * EC nº 16, de 04/06/1997, which gave arts. 28, 29, II, and 77 that wording, first applied to the
+ * 1998 elections.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc107.htm
+ * EC nº 107, de 02/07/2020, art. 1º: "As eleições municipais previstas para outubro de 2020
+ * realizar-se-ão no dia 15 de novembro, em primeiro turno, e no dia 29 de novembro de 2020, em
+ * segundo turno, onde houver".
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm
  * Lei 9.093/1995, the framework law authorizing one state civil holiday (art. 1º, II, "a data
  * magna do Estado fixada em lei estadual") and up to four municipal religious holidays, "neste

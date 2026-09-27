@@ -47,6 +47,10 @@ export type IsHolidayOptions = IsHolidayParams;
  * on, as Lei SC nº 11.213/1999 introduced, save for 2004, the year art. 3º of Lei SC nº
  * 12.906/2004 left that date without a transfer clause. Lei SC nº 18.531/2022 now carries both.
  *
+ * The first round of the elections, a feriado nacional under art. 380 of the Código Eleitoral, is
+ * one of the holidays `getHolidays` lists, on the first Sunday of October of every even year from
+ * 1998 on (15 November in 2020), so `isHoliday` is true on that Sunday; the second round is not.
+ *
  * @param {IsHolidayParams} [options] - Options for the check.
  * @param {Date} options.targetDate - The date to check.
  * @param {StateCode} [options.stateCode] - Optional Brazilian state code to also consider state holidays.

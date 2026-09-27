@@ -11,6 +11,7 @@ import {
 	test,
 } from "../_internals/test/runtime";
 import { isBusinessDay } from "../is-business-day/is-business-day";
+import { isHoliday } from "../is-holiday/is-holiday";
 import { STATE_HOLIDAYS } from "./constants";
 import {
 	getHolidays,
@@ -875,11 +876,61 @@ describe("getHolidays", () => {
 		}
 	});
 
-	test("should return 14 holidays for 2024: 9 fixed holidays (including Consciência Negra) plus 5 Easter-related holidays", () => {
+	test("should return 15 holidays for 2024: 9 fixed holidays (including Consciência Negra), the first round of the elections and 5 Easter-related holidays", () => {
 		const year = 2024;
 		const holidays = getHolidays(year);
 
-		expect(holidays.length).toBe(14);
+		expect(holidays.length).toBe(15);
+	});
+
+	test("should list the first round of the elections as a national holiday on the first Sunday of October of every even year from 1998 on (Código Eleitoral, art. 380; CF arts. 28, 29, II, and 77 in the wording of EC nº 16/1997), matching the dates the elections were held", () => {
+		const elections = [
+			[1998, 9, 4],
+			[2000, 9, 1],
+			[2002, 9, 6],
+			[2018, 9, 7],
+			[2022, 9, 2],
+			[2024, 9, 6],
+			[2026, 9, 4],
+		] as const;
+
+		for (const [year, month, day] of elections) {
+			expect(getHolidays(year)).toContainEqual({
+				name: "Eleições (primeiro turno)",
+				date: new Date(year, month, day),
+				type: "national",
+			});
+			expect(
+				getHolidays(year).filter((holiday) => holiday.name === "Eleições (primeiro turno)"),
+			).toHaveLength(1);
+		}
+	});
+
+	test("should list the 2020 first round on 15 November, the date EC nº 107/2020 moved it to, and not on 4 October", () => {
+		const holidays = getHolidays(2020);
+
+		expect(holidays).toContainEqual({
+			name: "Eleições (primeiro turno)",
+			date: new Date(2020, 10, 15),
+			type: "national",
+		});
+		expect(holidays).toContainEqual({
+			name: "Proclamação da República",
+			date: new Date(2020, 10, 15),
+			type: "national",
+		});
+		expect(isHoliday({ targetDate: new Date(2020, 9, 4) })).toBe(false);
+	});
+
+	test("should not list an election day in odd years, before 1998, or for the second round (1996 and 1997 have none, 2024-10-27 is not a holiday)", () => {
+		for (const year of [1996, 1997, 1999, 2023, 2025]) {
+			expect(
+				getHolidays(year).filter((holiday) => holiday.name === "Eleições (primeiro turno)"),
+			).toEqual([]);
+		}
+
+		expect(isHoliday({ targetDate: new Date(2024, 9, 27) })).toBe(false);
+		expect(isHoliday({ targetDate: new Date(2024, 9, 6) })).toBe(true);
 	});
 
 	test("should list both Carnaval days as optional, the Monday at Easter minus 48 and the Tuesday at Easter minus 47, as every federal portaria does (Portaria MGI nº 8.617/2023: 12 and 13 February 2024; Portaria MGI nº 11.460/2025: 16 and 17 February 2026)", () => {

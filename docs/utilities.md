@@ -1857,6 +1857,7 @@ Get the Brazilian holidays of a year: the national ones and, with a `stateCode`,
 
 - Each holiday is a `Holiday` whose `type` (`HolidayType`) is `"national"`, `"state"`, `"optional"` or `"religious"`. Holidays are sorted by date.
 - "Dia da Consciência Negra", Nov 20, is national from 2024 on.
+- The first round of the elections, "Eleições (primeiro turno)", is a national holiday in the even years from 1998 on (Código Eleitoral, art. 380): the first Sunday of October, or Nov 15 in 2020 (EC nº 107/2020). The second round is left out, since it is held only where one is needed. Being a Sunday, it never changes a business day count.
 - Each national holiday is listed only for the years a federal norm declared it: Nossa Senhora Aparecida from 1980, Natal from 1922, Dia do trabalhador from 1925, Tiradentes up to 1930, from 1933 to 1948 and from 1951, and Finados up to 1948 and from 2003. Lei nº 662/1949 left Finados out of the feriados nacionais that Decreto-lei nº 486/1938 listed, and only Lei nº 10.607/2002 put it back (the Câmara report on its bill: "Só inova ao sugerir o dia de finados"); up to 2.4.0 it was listed every year.
 - The `"optional"` entries are the whole-day pontos facultativos of the federal calendar (Portaria MGI): Carnaval Monday and Tuesday and Corpus Christi, the same three days the financial market skips (Resolução CMN nº 4.880/2020). The partial ones are left out: Quarta-feira de Cinzas (until 14h), Oct 28 (Dia do Servidor Público) and the Dec 24 and Dec 31 afternoons.
 - Per-state rules (SC's Sunday shift, DF's Corpus Christi and RJ's Carnaval Tuesday typed `"state"`, dates that stopped being holidays) follow each state's law; see the source for the list.
@@ -1875,6 +1876,7 @@ getHolidays(2024);
 //   { name: 'Carnaval (terça-feira)', date: Date('2024-02-13'), type: 'optional' },
 //   { name: 'Sexta-feira Santa', date: Date('2024-03-29'), type: 'national' },
 //   { name: 'Páscoa', date: Date('2024-03-31'), type: 'religious' },
+//   { name: 'Eleições (primeiro turno)', date: Date('2024-10-06'), type: 'national' },
 //   { name: 'Dia da Consciência Negra', date: Date('2024-11-20'), type: 'national' },
 //   // ... more holidays
 // ]
