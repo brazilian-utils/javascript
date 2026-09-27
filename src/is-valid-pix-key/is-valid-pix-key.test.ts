@@ -48,6 +48,10 @@ describe("isValidPixKey", () => {
 			expect(isValidPixKey("11257245286")).toBe(false);
 			expect(isValidPixKey("fulano@")).toBe(false);
 		});
+
+		test("when the e-mail carries a &, which DICT API 2.6.0 took out of the pattern", () => {
+			expect(isValidPixKey("a&b@example.com")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -66,12 +70,7 @@ describe("isValidPixKey", () => {
 		});
 
 		test("for an e-mail that only matches the DICT pattern, not isValidEmail", () => {
-			for (const email of [
-				"a&b@example.com",
-				"a{b}@example.com",
-				".ab@example.com",
-				"a@localhost",
-			]) {
+			for (const email of ["a{b}@example.com", ".ab@example.com", "a@localhost"]) {
 				expect(isValidPixKey(email)).toBe(true);
 			}
 		});

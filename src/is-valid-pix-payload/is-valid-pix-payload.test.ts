@@ -119,7 +119,7 @@ describe("isValidPixPayload", () => {
 				"12ABC34501DE35",
 				"+5561912345678",
 				"fulano_da_silva.recebedor@example.com",
-				"a&b@example.com",
+				"a{b}@example.com",
 				"123e4567-e12b-12d1-a456-426655440000",
 			]) {
 				expect(isValidPixPayload(withKey(key))).toBe(true);

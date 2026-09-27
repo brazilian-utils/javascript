@@ -77,6 +77,10 @@ describe("getPixKeyInfo", () => {
 			expect(getPixKeyInfo("fulano@@example.com")).toBeNull();
 		});
 
+		test("when the e-mail carries a &, which DICT API 2.6.0 took out of the pattern", () => {
+			expect(getPixKeyInfo("a&b@example.com")).toBeNull();
+		});
+
 		test("when a domain label is longer than the 63 characters of the DICT pattern", () => {
 			expect(getPixKeyInfo(`a@${"b".repeat(64)}.com`)).toBeNull();
 		});
@@ -198,7 +202,6 @@ describe("getPixKeyInfo", () => {
 
 		test("when it only matches the DICT pattern, not isValidEmail", () => {
 			for (const email of [
-				"a&b@example.com",
 				"a!b@example.com",
 				"a#b@example.com",
 				"a$b@example.com",

@@ -29,7 +29,7 @@ export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
  * Manual de Padrões para Iniciação do Pix, §2.5.1: "A regra para formatação das chaves Pix no BR
  * Code [...] segue estritamente as regras definidas no Manual Operacional do DICT".
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
- * DICT API v1.8.0, tag "Chave", type `EMAIL`: the pattern and "E-mail deve possuir no máximo 77
+ * DICT API 2.12.1, tag "Chave", type `EMAIL`: the pattern and "E-mail deve possuir no máximo 77
  * caracteres e deve ser em minúsculo".
  */
 export const detectPixKeyType = (value: string): PixKeyType | null => {

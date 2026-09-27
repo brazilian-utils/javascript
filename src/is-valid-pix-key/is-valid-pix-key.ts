@@ -34,9 +34,10 @@ export type IsValidPixKeyOptions = {
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
- * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
- * reference. Tag "Chave", type `EMAIL`: "E-mail deve possuir no máximo 77 caracteres e deve
- * ser em minúsculo", with the pattern this library applies verbatim.
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification 2.12.1, key
+ * format reference. Tag "Chave", type `EMAIL`: "E-mail deve possuir no máximo 77 caracteres e
+ * deve ser em minúsculo", with the pattern this library applies verbatim, which has had no `&`
+ * since version 2.6.0.
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  */

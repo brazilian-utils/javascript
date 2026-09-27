@@ -441,7 +441,7 @@ isValidPixKey('123.456.789-09', { accept: ['email', 'evp'] }); // false
 isValidPixKey('not a key'); // false
 ```
 
-Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html), [pix-api](https://github.com/bacen/pix-api).
+Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API 2.12.1](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html) and its [changelog](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/changelog.html), [pix-api](https://github.com/bacen/pix-api).
 
 ### getPixKeyInfo
 
@@ -450,14 +450,15 @@ Identify a Pix key and normalize it to the canonical form the DICT expects insid
 - Returns a `PixKeyInfo` with the `type` (`PixKeyType`) and the `value`.
 - The canonical `value` is digits for a CPF or CNPJ (letters upper-cased), a lowercase e-mail, an E.164 phone or a lowercase UUID.
 - An 11 digit value valid as both CPF and mobile phone is read as a CPF, unless written as a phone (`+55` prefix or DDD in parentheses).
-- An e-mail is checked, once lowercased, against the pattern the DICT API registers and its 77 character limit, not against `isValidEmail`: the local part may carry any of ``.!#$&'*+/=?^_`{|}~-``, dots included anywhere, and the domain may be a single label (`a@localhost`).
+- An e-mail is checked, once lowercased, against the pattern the DICT API registers and its 77 character limit, not against `isValidEmail`: the local part may carry any of ``.!#$'*+/=?^_`{|}~-``, dots included anywhere, and the domain may be a single label (`a@localhost`). The pattern is the one of DICT API 2.12.1, which has had no `&` since version 2.6.0 (27/09/2025): up to 2.4.0 `a&b@example.com` was accepted, following the obsolete 1.8.0 of the GitHub repository.
 
 ```javascript
 import { getPixKeyInfo } from '@brazilian-utils/brazilian-utils';
 
 getPixKeyInfo('123.456.789-09'); // { type: 'cpf', value: '12345678909' }
 getPixKeyInfo('Fulano@Example.COM '); // { type: 'email', value: 'fulano@example.com' }
-getPixKeyInfo('a&b@example.com'); // { type: 'email', value: 'a&b@example.com' } (DICT pattern, isValidEmail rejects it)
+getPixKeyInfo('a{b}@example.com'); // { type: 'email', value: 'a{b}@example.com' } (DICT pattern, isValidEmail rejects it)
+getPixKeyInfo('a&b@example.com'); // null (no & since DICT API 2.6.0)
 getPixKeyInfo('(11) 98765-4321'); // { type: 'phone', value: '+5511987654321' }
 getPixKeyInfo('71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D');
 // { type: 'evp', value: '71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d' }
@@ -466,7 +467,7 @@ getPixKeyInfo('51998259765'); // { type: 'cpf', value: '51998259765' } (also a v
 getPixKeyInfo('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
 ```
 
-Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html).
+Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API 2.12.1](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html) and its [changelog](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/changelog.html).
 
 ### isValidPixPayload
 
