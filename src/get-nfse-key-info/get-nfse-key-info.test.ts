@@ -22,6 +22,7 @@ const ISSUERS: { type: string; registration: string; taxIdType: string; taxId: s
 	{ type: "1", registration: "00040364478829", taxIdType: "cpf", taxId: "40364478829" },
 	{ type: "2", registration: "58716523000119", taxIdType: "cnpj", taxId: "58716523000119" },
 	{ type: "2", registration: "00000000000191", taxIdType: "cnpj", taxId: "00000000000191" },
+	{ type: "2", registration: "12ABC34501DE35", taxIdType: "cnpj", taxId: "12ABC34501DE35" },
 ];
 
 const expectedCheckDigit = (body: string): number => {
@@ -29,7 +30,7 @@ const expectedCheckDigit = (body: string): number => {
 	let weight = 2;
 
 	for (let index = body.length - 1; index >= 0; index -= 1) {
-		sum += Number(body.charAt(index)) * weight;
+		sum += (body.charCodeAt(index) - 48) * weight;
 		weight = weight === 9 ? 2 : weight + 1;
 	}
 
@@ -133,8 +134,12 @@ describe("getNfseKeyInfo", () => {
 			expect(getNfseKeyInfo("35503082258716523000119000000000001226131357924684")).toBeNull();
 		});
 
-		test("when the CNPJ is alphanumeric, which no official document gives a check digit rule for", () => {
-			expect(getNfseKeyInfo("355030822AB716523000119000000000001226011357924683")).toBeNull();
+		test("when an alphanumeric CNPJ has wrong check digits of its own, even with a matching key check digit", () => {
+			expect(getNfseKeyInfo("35503082212ABC34501DE36000000000001226091357924689")).toBeNull();
+		});
+
+		test("when the registration type says CPF and the registration carries letters, even with a matching key check digit", () => {
+			expect(getNfseKeyInfo("355030821000ABC4478829000000000001226091357924685")).toBeNull();
 		});
 	});
 
@@ -167,6 +172,27 @@ describe("getNfseKeyInfo", () => {
 				code: "048440725",
 				checkDigit: 5,
 			});
+		});
+
+		test("for a key of an alphanumeric CNPJ issuer (the Receita Federal example 12.ABC.345/01DE-35)", () => {
+			expect(getNfseKeyInfo("35503082212ABC34501DE35000000000001226091357924682")).toEqual({
+				municipalityCode: "3550308",
+				stateCode: "SP",
+				generatorEnvironment: 2,
+				taxIdType: "cnpj",
+				taxId: "12ABC34501DE35",
+				number: 12,
+				year: 2026,
+				month: 9,
+				code: "135792468",
+				checkDigit: 2,
+			});
+		});
+
+		test("upper casing the CNPJ of a key written in lower case", () => {
+			expect(getNfseKeyInfo("nfs35503082212abc34501de35000000000001226091357924682")?.taxId).toBe(
+				"12ABC34501DE35",
+			);
 		});
 
 		test("accepting the NFS prefix of the XML Id attribute, in any case, and surrounding whitespace", () => {

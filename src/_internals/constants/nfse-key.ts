@@ -1,15 +1,22 @@
 /**
- * Shape of the key: one block of 50 digits, the pattern of `TSChaveNFSe` in
- * `tiposSimples_v1.01.xsd`, optionally behind the `NFS` literal the `Id` attribute of `infNFSe`
- * puts in front of it (`TSIdNFSe`). The DANFSe prints the key the same way ("em único bloco
- * contendo 50 dígitos", Nota Técnica SE/CGNFS-e 008, item 2.1.1), so there is no mask to accept.
- * The digits are the first capture group.
+ * Shape of the key: 50 characters, all digits but the 14 of the "Inscrição Federal", which may
+ * also be the upper case letters of an alphanumeric CNPJ, optionally behind the `NFS` literal the
+ * `Id` attribute of `infNFSe` puts in front of it. It follows `TSIdNFSe` of
+ * `tiposSimples_v1.01.xsd` (bundle 20260727), `NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}`, whose letter
+ * window is the registration of the key structure. `TSChaveNFSe` of the same file,
+ * `[0-9]{6}([0-9A-Z]{14})[0-9]{30}`, puts the window at positions 7 to 20 instead, which
+ * contradicts that structure (the registration is at 10 to 23), `TSIdNFSe`, `TSIdDPS` and
+ * `TSIdPedRegEvt`, so it is not followed. The key has no printed mask (the DANFSe prints it "em
+ * único bloco", Nota Técnica SE/CGNFS-e 008, item 2.1.1), so there is no separator to accept.
+ * Case-insensitive, as `isValidCnpj` with version 2 is: the callers upper case the key, which is
+ * the first capture group. Whether a letter may stand in the registration at all is left to the
+ * registration type, since only a CNPJ (type 2) can carry one.
  */
-export const FORMAT_REGEX = /^(?:nfs)?(\d{50})$/i;
+export const FORMAT_REGEX = /^(?:nfs)?(\d{9}[\dA-Z]{14}\d{27})$/i;
 
 /**
- * Digits of the key, type `TSChaveNFSe` of the leiaute. Once `isValidNfseKey` accepts a value,
- * they are the last 50 characters of the trimmed value, after the optional `NFS` prefix.
+ * Characters of the key, type `TSChaveNFSe` of the leiaute. Once `isValidNfseKey` accepts a
+ * value, they are the last 50 characters of the trimmed value, after the optional `NFS` prefix.
  */
 export const NFSE_KEY_LENGTH = 50;
 
@@ -35,13 +42,13 @@ export const CPF_PADDING = "000";
  */
 export const ABSENT_NUMBER = "0000000000000";
 
-/** Position of `ambGer` inside the 50 digit key. */
+/** Position of `ambGer` inside the 50 character key. */
 export const GENERATOR_ENVIRONMENT_INDEX = 7;
 
-/** Position of the "Tipo de Inscrição Federal" inside the 50 digit key. */
+/** Position of the "Tipo de Inscrição Federal" inside the 50 character key. */
 export const TAX_ID_TYPE_INDEX = 8;
 
-/** Start of the "Inscrição Federal" inside the 50 digit key. */
+/** Start of the "Inscrição Federal" inside the 50 character key. */
 export const TAX_ID_START = 9;
 
 /** Start of the NFS-e number (`nNFSe`), which is also the end of the "Inscrição Federal". */

@@ -640,14 +640,14 @@ getNfeKeyInfo('invalid'); // null
 
 Verifica se a chave de acesso de uma NFS-e nacional, a Nota Fiscal de Serviço eletrônica do Sistema Nacional NFS-e, é válida.
 
-- A chave é um bloco único de 50 dígitos, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`.
+- A chave é um bloco único de 50 caracteres, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, todos dígitos exceto um CNPJ alfanumérico na Inscrição Federal.
 - O literal `NFS` que o atributo `Id` de `infNFSe` coloca antes da chave é retirado, junto com os espaços nas extremidades.
-- A chave não tem máscara impressa, já que o DANFSe a imprime em um único bloco de 50 dígitos, então, diferente do `isValidNfeKey`, um separador em qualquer ponto dela é rejeitado em vez de removido.
+- A chave não tem máscara impressa, já que o DANFSe a imprime em um único bloco, então, diferente do `isValidNfeKey`, um separador em qualquer ponto dela é rejeitado em vez de removido.
 - O código do município precisa começar com um código IBGE de UF; ele não é consultado na tabela do IBGE.
-- O `ambGer` precisa ser `1` (o sistema do município) ou `2` (o Sistema Nacional NFS-e), e o tipo de inscrição `1` (um CPF, preenchido com `000` à esquerda) ou `2` (um CNPJ), com um CPF ou CNPJ cujos próprios dígitos verificadores sejam válidos.
+- O `ambGer` precisa ser `1` (o sistema do município) ou `2` (o Sistema Nacional NFS-e), e o tipo de inscrição `1` (um CPF, preenchido com `000` à esquerda) ou `2` (um CNPJ, numérico ou alfanumérico), com um CPF ou CNPJ cujos próprios dígitos verificadores sejam válidos. Letras só são aceitas em um CNPJ, e minúsculas são lidas como maiúsculas, como o `isValidCnpj` com `{ version: 2 }` as lê.
 - O `nNFSe` não pode ser todo de zeros e o mês precisa estar entre 01 e 12.
-- O dígito verificador é um módulo 11 sobre os 49 primeiros dígitos, pesos de 2 a 9 ciclando a partir da direita, em que resto 0 ou 1 dá 0.
-- Chaves com CNPJ alfanumérico ainda não são aceitas: nenhum documento oficial diz como uma letra entra no dígito verificador da chave.
+- O dígito verificador é um módulo 11 sobre os 49 primeiros caracteres, pesos de 2 a 9 ciclando a partir da direita, em que resto 0 ou 1 dá 0. Uma letra vale o seu código ASCII menos 48 (`A` vale 17): nenhum documento da NFS-e diz isso, então a regra vem por analogia com a chave da NF-e da Nota Técnica Conjunta 2025.001 e com os próprios dígitos verificadores do CNPJ.
+- As letras seguem o `TSIdNFSe` do pacote de esquemas de 27/07/2026, nas posições da Inscrição Federal (10 a 23). O `TSChaveNFSe` do mesmo pacote as coloca nas posições 7 a 20, o que contradiz a estrutura da chave, e não é seguido.
 - Os modelos municipais de NFS-e que não são o padrão nacional estão fora do escopo.
 
 ```javascript
@@ -656,6 +656,7 @@ import { isValidNfseKey } from '@brazilian-utils/brazilian-utils';
 isValidNfseKey('35503082258716523000119000000000001226011357924683'); // true (emitente com CNPJ, SP)
 isValidNfseKey('NFS35503082258716523000119000000000001226011357924683'); // true (prefixo Id do XML)
 isValidNfseKey('43149021100040364478829000000000105725120484407255'); // true (emitente com CPF, RS)
+isValidNfseKey('35503082212ABC34501DE35000000000001226091357924682'); // true (emitente com CNPJ alfanumérico)
 isValidNfseKey('35503082258716523000119000000000001226011357924684'); // false (dígito verificador)
 isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // false (a chave não tem máscara)
 ```
@@ -682,7 +683,7 @@ Interpreta a chave de acesso de uma NFS-e nacional e retorna seus campos, como u
 
 - Retorna `municipalityCode`, `stateCode`, `generatorEnvironment`, `taxIdType`, `taxId`, `number`, `year`, `month`, `code` e `checkDigit`.
 - O `generatorEnvironment` é um `NfseKeyGeneratorEnvironment`: `1` o sistema do município, `2` o Sistema Nacional NFS-e.
-- O `taxIdType` é um `NfseKeyTaxIdType`, `'cpf'` ou `'cnpj'`, e o `taxId` é o CPF de 11 dígitos, sem o `000` que o preenche na chave, ou o CNPJ de 14 dígitos.
+- O `taxIdType` é um `NfseKeyTaxIdType`, `'cpf'` ou `'cnpj'`, e o `taxId` é o CPF de 11 dígitos, sem o `000` que o preenche na chave, ou o CNPJ de 14 caracteres, numérico ou alfanumérico, em maiúsculas.
 - Retorna `null` quando a chave não é válida.
 
 ```javascript
@@ -696,10 +697,14 @@ getNfseKeyInfo('43149021100040364478829000000000105725120484407255');
 // { municipalityCode: '4314902', stateCode: 'RS', generatorEnvironment: 1, taxIdType: 'cpf',
 //   taxId: '40364478829', number: 1057, year: 2025, month: 12, code: '048440725', checkDigit: 5 }
 
+getNfseKeyInfo('35503082212ABC34501DE35000000000001226091357924682');
+// { municipalityCode: '3550308', stateCode: 'SP', generatorEnvironment: 2, taxIdType: 'cnpj',
+//   taxId: '12ABC34501DE35', number: 12, year: 2026, month: 9, code: '135792468', checkDigit: 2 }
+
 getNfseKeyInfo('invalid'); // null
 ```
 
-Fonte: a [documentação técnica do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), cujos tipos de esquema `TSIdNFSe` e `TSChaveNFSe` e o campo `NFSe/infNFSe/id` do ANEXO I definem o leiaute e as regras E1280 e E1284, o [manual da emissão por decisão administrativa ou judicial](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/manual-contribuintes-emissor-publico-api-emissao-decisao-administrativa-e-judicial.pdf), que nomeia o dígito verificador de módulo 11, e a [Nota Técnica SE/CGNFS-e 008](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf) (item 2.1.1), que imprime a chave em bloco único.
+Fonte: a [documentação técnica do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), cujos tipos de esquema `TSIdNFSe` e `TSChaveNFSe` e o campo `NFSe/infNFSe/id` do ANEXO I definem o leiaute e as regras E1280 e E1284, o [manual da emissão por decisão administrativa ou judicial](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/manual-contribuintes-emissor-publico-api-emissao-decisao-administrativa-e-judicial.pdf), que nomeia o dígito verificador de módulo 11, a [Nota Técnica SE/CGNFS-e 008](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf) (item 2.1.1), que imprime a chave em bloco único, os [esquemas atualizados para o CNPJ alfanumérico](https://www.gov.br/nfse/pt-br/noticias/plataforma-nfs-e-disponibiliza-novas-evolucoes-em-producao-restrita-e-divulga-cronograma-de-implantacao) (pacote v1.01-20260727, em produção desde 10/08/2026) e a [Nota Técnica Conjunta 2025.001](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ=), cuja regra de ASCII menos 48 da chave da NF-e o dígito verificador empresta.
 
 ## SUFRAMA
 
