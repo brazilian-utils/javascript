@@ -294,6 +294,22 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		source: "Lei AL nº 7.530/2013, art. 2º, promulgated on 08/04/2014",
 	},
 	{
+		stateCode: "MA",
+		name: "Dia Internacional da Mulher",
+		type: "state",
+		year: 2026,
+		listed: false,
+		source: "Lei MA nº 12.800, de 19/03/2026, published after that year's 8 March",
+	},
+	{
+		stateCode: "MA",
+		name: "Dia Internacional da Mulher",
+		type: "state",
+		year: 2027,
+		listed: true,
+		source: "Lei MA nº 12.800, de 19/03/2026",
+	},
+	{
 		stateCode: "AP",
 		name: "Dia de São José",
 		type: "state",

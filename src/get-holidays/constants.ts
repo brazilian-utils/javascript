@@ -372,6 +372,12 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * TJMA, "TJMA julga constitucional lei que tornou Corpus Christi feriado estadual" (06/03/2024):
  * the Órgão Especial "reconheceu como constitucional a Lei nº 11.539, de 21 de setembro de 2021
  * ... que incluiu o feriado de Corpus Christi entre os feriados estaduais", by unanimity.
+ * @see Official: http://arquivos.al.ma.leg.br:8080/ged/legislacao/LEI_12800
+ * Lei MA nº 12.800, de 19/03/2026, art. 1º: "Fica instituído o dia 8 de março, Dia Internacional
+ * da Mulher, como feriado estadual a ser celebrado anualmente", in force on its publication, after
+ * that year's date, so listed from 2027. The press reports an ADI against it filed with the TJMA
+ * on 30/03/2026; no decision was located. Maranhão's 28 August, which Lei MA nº 10.100/2014 makes
+ * a "feriado estadual aos bancários" only, is not a general holiday and has no entry.
  * @see Official: https://www.al.mt.gov.br/norma-juridica/urn:lex:br;mato.grosso:estadual:lei.ordinaria:2002-12-27;7879
  * Lei MT nº 7.879, de 27/12/2002, Dia da Consciência Negra (state holiday from 2003 until it
  * became national in 2024). Art. 1º, as published in the Diário Oficial do Estado de Mato Grosso of
@@ -623,6 +629,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	MA: [
 		{ name: "Adesão do Maranhão à Independência", day: 28, month: 7, since: 1965 },
 		{ name: "Corpus Christi", easterOffset: 60, since: 2024 },
+		{ name: "Dia Internacional da Mulher", day: 8, month: 3, since: 2027 },
 	],
 	MT: [
 		{
