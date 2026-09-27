@@ -11,8 +11,9 @@ import { CERTIDAO_TYPES } from "./constants";
  * Art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça (Provimento
  * CNJ nº 149/2023, as amended by the Provimentos CN nº 182/2024 and nº 237/2026) lists only the
  * codes 1 to 7, from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos relativos ao registro
- * civil)". `"emancipation"` and `"interdiction"`, the codes 8 and 9 of some community references,
- * are never returned: the official table has no such codes, so `isValidCertidao` rejects a
+ * civil)". `"emancipation"` and `"interdiction"`, the codes 8 and 9 of the Provimento CNJ nº 3/2009
+ * (revoked by the Provimento CNJ nº 63/2017) that some community references still list, are never
+ * returned: the table in force has no such codes, so `isValidCertidao` rejects a
  * matrícula carrying them and `getCertidaoInfo` returns `null` for it. They stay in this union
  * only so that code written against 2.4.0, which accepted them, still compiles; listing them in
  * `isValidCertidao`'s `accept` matches nothing.
@@ -106,7 +107,11 @@ export type CertidaoInfo = {
  * structure: "a matrícula, de inserção obrigatória nas certidões (primeira e demais vias) emitidas
  * pelos Cartórios de Registro Civil das Pessoas Naturais a partir de 1º de janeiro de 2010, é
  * formada pelos seguintes elementos", incisos I to IX fixing the same 6 + 2 + 2 + 4 + 1 + 5 + 3 +
- * 7 + 2 positions art. 473 carries today (revoked; historical).
+ * 7 + 2 positions art. 473 carries today (revoked by the Provimento CNJ nº 63/2017; historical).
+ * Its inciso V also listed "8: Livro E (Desdobrado para registro específico das Emancipações)"
+ * and "9: Livro E (Desdobrado para registro específico das Interdições)", which art. 473, V no
+ * longer has, and its inciso IX had the check digits "formado automaticamente por meio do
+ * programa" the CNJ Corregedoria handed to the registrars, whose algorithm was never published.
  * @see Based on: http://ghiorzi.org/DVnew.htm
  * Worked example of the two check digits (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts

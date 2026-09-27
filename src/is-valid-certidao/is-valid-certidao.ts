@@ -42,12 +42,19 @@ const getCheckDigit = (value: string): number => {
  * 0, 1, ... In both passes the check digit is the remainder itself, with a remainder of 10 read
  * as 1.
  *
+ * No official document publishes that algorithm. Art. 473, IX only names the "Número do dígito
+ * verificador (31º e 32º números da matrícula)"; the Provimento CNJ nº 3/2009 had it "formado
+ * automaticamente por meio do programa" the CNJ Corregedoria distributed to the registrars; the
+ * Caixa's Cadastro NIS layout says only that the 2 digits are "calculados pelo módulo 11". The
+ * weights and the remainder rule follow the community references cited as `Based on:`.
+ *
  * The book-type digit (fifteenth position of the matrícula) always has to name one of the seven
  * books of art. 473, V, codes 1 to 7 (see `CertidaoType`, reused from `getCertidaoInfo`), so a
  * matrícula whose digit is `0`, `8` or `9` is rejected however good its check digits are, the same
  * way `getCertidaoInfo` returns `null` for it. `options.accept` narrows that further to the listed
  * types; when it is omitted, or when it is not an array, every book type is accepted.
- * `"emancipation"` and `"interdiction"` (the codes 8 and 9 some community references list) are
+ * `"emancipation"` and `"interdiction"` (the codes 8 and 9 of the revoked Provimento CNJ nº 3/2009, which some community references
+ * still list) are
  * still part of `CertidaoType` but match no matrícula.
  *
  * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
@@ -87,7 +94,11 @@ const getCheckDigit = (value: string): number => {
  * structure: "a matrícula, de inserção obrigatória nas certidões (primeira e demais vias) emitidas
  * pelos Cartórios de Registro Civil das Pessoas Naturais a partir de 1º de janeiro de 2010, é
  * formada pelos seguintes elementos", incisos I to IX fixing the same 6 + 2 + 2 + 4 + 1 + 5 + 3 +
- * 7 + 2 positions art. 473 carries today (revoked; historical).
+ * 7 + 2 positions art. 473 carries today (revoked by the Provimento CNJ nº 63/2017; historical).
+ * Its inciso V also listed "8: Livro E (Desdobrado para registro específico das Emancipações)"
+ * and "9: Livro E (Desdobrado para registro específico das Interdições)", which art. 473, V no
+ * longer has, and its inciso IX had the check digits "formado automaticamente por meio do
+ * programa" the CNJ Corregedoria handed to the registrars, whose algorithm was never published.
  * @see Based on: http://ghiorzi.org/DVnew.htm
  * Worked example of the two check digits (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts

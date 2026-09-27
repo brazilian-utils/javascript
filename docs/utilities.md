@@ -2461,6 +2461,7 @@ The matrícula has 32 digits, printed as `000000 00 00 0000 0 00000 000 0000000 
 - **Options** (`IsValidCertidaoOptions`): `accept` narrows the valid book types (`CertidaoType`) to the listed ones (default: every type).
 - The serviço must be `55`, and the book-type digit must be one of the seven books of art. 473, V, codes 1 to 7 (`0`, `8` and `9` are rejected). `"emancipation"` and `"interdiction"` are still `CertidaoType` members but match no matrícula.
 - Accepts the value masked or not, with whitespace between and around the groups.
+- No official document publishes the check digit algorithm: art. 473, IX only names the two digits, the revoked Provimento CNJ nº 3/2009 had them computed by a program the CNJ handed to the registrars, and the Caixa's Cadastro NIS layout says only "módulo 11". The weights and the remainder rule follow the community references below.
 
 ```javascript
 import { isValidCertidao } from '@brazilian-utils/brazilian-utils';
@@ -2512,7 +2513,7 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 Parse the matrícula of a certidão de registro civil into its fields. Accepts the same input forms as `isValidCertidao` and returns `null` when the matrícula is not valid.
 
 - Returns `null` also for a serviço other than `55` and for a book code outside 1 to 7.
-- Art. 473, V lists only the book codes 1 to 7, from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos relativos ao registro civil)". The codes 8 (emancipação) and 9 (interdição) some community references list are not in it and are rejected.
+- Art. 473, V lists only the book codes 1 to 7, from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos relativos ao registro civil)". The codes 8 (emancipação) and 9 (interdição) of the Provimento CNJ nº 3/2009, revoked by the Provimento CNJ nº 63/2017 and still listed by some community references, are not in it and are rejected, even on a certidão printed between 2010 and 2017.
 
 The `CertidaoInfo` result carries:
 
@@ -2549,7 +2550,7 @@ getCertidaoInfo('104539 01 55 2013 1 00012 021 0000123 21');
 getCertidaoInfo('invalid'); // null
 ```
 
-Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243); book codes 8 and 9 per [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts).
+Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243); book codes 8 and 9 per the revoked [Provimento CNJ nº 3/2009, art. 7º](https://atos.cnj.jus.br/atos/detalhar/1310), still listed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts).
 
 ## CEI, CNO and CAEPF
 

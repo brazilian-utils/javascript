@@ -8,9 +8,11 @@
  * Justiça (Provimento CNJ nº 149/2023, as amended by the Provimentos CN nº 182/2024 and nº
  * 237/2026), the tipo do livro in the 15th position of the matrícula, from "1: Livro A
  * (Nascimento)" to "7: Livro E (Demais atos relativos ao registro civil)". The codes 8
- * (emancipação) and 9 (interdição) some community references list (ghiorzi.org, the Casilhero
- * support class) are not in it, emancipações and interdições being among the acts of Livro E, so
- * a matrícula carrying 8 or 9 is rejected.
+ * (emancipação) and 9 (interdição) come from the Provimento CNJ nº 3/2009, art. 7º, V, revoked by
+ * the Provimento CNJ nº 63/2017, and are still listed by some community references (ghiorzi.org,
+ * the Casilhero support class). They are not in the table in force, emancipações and interdições
+ * being among the acts of Livro E, so a matrícula carrying 8 or 9 is rejected, even one printed
+ * between 2010 and 2017 under the revoked table.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
  * Código Nacional de Normas da Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento
@@ -28,9 +30,14 @@
  * structure: "a matrícula, de inserção obrigatória nas certidões (primeira e demais vias) emitidas
  * pelos Cartórios de Registro Civil das Pessoas Naturais a partir de 1º de janeiro de 2010, é
  * formada pelos seguintes elementos", incisos I to IX fixing the same 6 + 2 + 2 + 4 + 1 + 5 + 3 +
- * 7 + 2 positions art. 473 carries today (revoked; historical).
+ * 7 + 2 positions art. 473 carries today (revoked by the Provimento CNJ nº 63/2017; historical).
+ * Its inciso V also listed "8: Livro E (Desdobrado para registro específico das Emancipações)"
+ * and "9: Livro E (Desdobrado para registro específico das Interdições)", which art. 473, V no
+ * longer has, and its inciso IX had the check digits "formado automaticamente por meio do
+ * programa" the CNJ Corregedoria handed to the registrars, whose algorithm was never published.
  * @see Based on: http://ghiorzi.org/DVnew.htm
- * Description of the books and their codes; its codes 8 and 9 are not in the official table.
+ * Description of the books and their codes; its codes 8 and 9 are those of the revoked
+ * Provimento CNJ nº 3/2009, not of the table in force.
  */
 export const CERTIDAO_TYPES = [
 	"birth",

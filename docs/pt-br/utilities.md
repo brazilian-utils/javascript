@@ -2461,6 +2461,7 @@ A matrícula tem 32 dígitos, impressos como `000000 00 00 0000 0 00000 000 0000
 - **Opções** (`IsValidCertidaoOptions`): `accept` restringe os tipos de livro válidos (`CertidaoType`) aos listados (padrão: todos os tipos).
 - O serviço precisa ser `55`, e o dígito do tipo de livro precisa ser um dos sete livros do art. 473, V, códigos 1 a 7 (`0`, `8` e `9` são rejeitados). `"emancipation"` e `"interdiction"` continuam membros de `CertidaoType`, mas não correspondem a nenhuma matrícula.
 - Aceita o valor com ou sem máscara, com espaços entre e ao redor dos grupos.
+- Nenhum documento oficial publica o algoritmo dos dígitos verificadores: o art. 473, IX só nomeia os dois dígitos, o revogado Provimento CNJ nº 3/2009 mandava calculá-los com um programa que o CNJ entregava aos registradores e o leiaute do Cadastro NIS da Caixa diz só "módulo 11". Os pesos e a regra do resto seguem as referências da comunidade abaixo.
 
 ```javascript
 import { isValidCertidao } from '@brazilian-utils/brazilian-utils';
@@ -2512,7 +2513,7 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 Extrai os campos da matrícula de uma certidão de registro civil. Aceita as mesmas formas de entrada de `isValidCertidao` e retorna `null` quando a matrícula é inválida.
 
 - Retorna `null` também para um serviço diferente de `55` e para um código de livro fora de 1 a 7.
-- O art. 473, V lista apenas os códigos de livro de 1 a 7, de "1: Livro A (Nascimento)" a "7: Livro E (Demais atos relativos ao registro civil)". Os códigos 8 (emancipação) e 9 (interdição) que algumas referências da comunidade listam não estão nele e são rejeitados.
+- O art. 473, V lista apenas os códigos de livro de 1 a 7, de "1: Livro A (Nascimento)" a "7: Livro E (Demais atos relativos ao registro civil)". Os códigos 8 (emancipação) e 9 (interdição) do Provimento CNJ nº 3/2009, revogado pelo Provimento CNJ nº 63/2017 e ainda listados por algumas referências da comunidade, não estão nele e são rejeitados, mesmo numa certidão emitida entre 2010 e 2017.
 
 O resultado `CertidaoInfo` traz:
 
@@ -2549,7 +2550,7 @@ getCertidaoInfo('104539 01 55 2013 1 00012 021 0000123 21');
 getCertidaoInfo('invalid'); // null
 ```
 
-Fonte: [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243); códigos de livro 8 e 9 conforme o [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e o [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts).
+Fonte: [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243); códigos de livro 8 e 9 conforme o revogado [Provimento CNJ nº 3/2009, art. 7º](https://atos.cnj.jus.br/atos/detalhar/1310), ainda listados pelo [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e o [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts).
 
 ## CEI, CNO e CAEPF
 
