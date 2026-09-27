@@ -3474,18 +3474,21 @@ Fonte: [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/up
 
 ### isValidVin
 
-Valida um VIN (Vehicle Identification Number / chassi). É uma verificação estrutural no padrão norte-americano, não um validador universal de VINs brasileiros.
+Valida um VIN (Vehicle Identification Number / chassi). Por padrão segue a regra brasileira (Resolução CONTRAN nº 968/2022, ABNT NBR 6066 / ISO 3779): 17 caracteres, o WMI, o VDS e o VIS, cada um algarismo ou letra maiúscula exceto `I`, `O` e `Q`.
 
-- Confere o tamanho de 17 caracteres, as letras excluídas `I`, `O` e `Q` e o dígito verificador na 9ª posição.
-- As normas brasileiras não exigem o dígito verificador, então muitos VINs fabricados no Brasil não passam nele.
+- **Opções** (`IsValidVinOptions`): `checkDigit: true` também exige as regras norte-americanas do 49 CFR 565.15, o dígito verificador na 9ª posição e um código de ano-modelo diferente de `U`, `Z` e `0` na 10ª. Use para o VIN de um veículo fabricado para os Estados Unidos ou o Canadá.
+- As normas brasileiras não exigem o dígito verificador, e muitos VINs fabricados no Brasil não o têm. Até a 2.4.0 ele era sempre exigido; passe `{ checkDigit: true }` para manter esse comportamento.
+- Não diferencia maiúsculas de minúsculas e ignora espaços ao redor; um valor de um único caractere repetido é rejeitado.
 
 ```javascript
 import { isValidVin } from '@brazilian-utils/brazilian-utils';
 
-isValidVin('1HGCM82633A004352'); // true
-isValidVin('1m8gdm9axkp042788'); // true (dígito verificador X, minúsculo)
-isValidVin('1HGCM82633A004353'); // false (dígito verificador inválido)
-isValidVin('00000000000000000'); // false (todos os caracteres iguais, ainda que o dígito feche)
+isValidVin('9BWZZZ377VT004251'); // true (VIN brasileiro, sem dígito verificador)
+isValidVin('9BWZZZ377VT004251', { checkDigit: true }); // false (o 9º caractere não é o dígito verificador)
+isValidVin('1HGCM82633A004352', { checkDigit: true }); // true
+isValidVin('1m8gdm9axkp042788', { checkDigit: true }); // true (dígito verificador X, minúsculo)
+isValidVin('1HGCM82633A004353', { checkDigit: true }); // false (dígito verificador inválido)
+isValidVin('00000000000000000'); // false (todos os caracteres iguais)
 isValidVin('1HGCM8263IA004352'); // false (contém a letra excluída I)
 isValidVin('1HGCM82633A00435'); // false (16 caracteres)
 ```

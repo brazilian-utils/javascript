@@ -3474,18 +3474,21 @@ Source: [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/u
 
 ### isValidVin
 
-Check if a VIN (Vehicle Identification Number / chassi) is valid. This is a North-American-style structural check, not a universal validator of Brazilian VINs.
+Check if a VIN (Vehicle Identification Number / chassi) is valid. By default it follows the Brazilian rule (Resolução CONTRAN nº 968/2022, ABNT NBR 6066 / ISO 3779): 17 characters, the WMI, the VDS and the VIS, each a digit or a capital letter other than `I`, `O` and `Q`.
 
-- Checks the 17-character length, the excluded letters `I`, `O` and `Q`, and the check digit at position 9.
-- Brazilian rules do not mandate the check digit, so many Brazilian-built VINs fail it.
+- **Options** (`IsValidVinOptions`): `checkDigit: true` also enforces the North-American rules of 49 CFR 565.15, the check digit at position 9 and a model year code other than `U`, `Z` or `0` at position 10. Use it for a VIN of a vehicle built for the United States or Canada.
+- Brazilian rules do not mandate the check digit, and many Brazilian-built VINs do not carry one. Up to 2.4.0 it was always enforced; pass `{ checkDigit: true }` to keep that behaviour.
+- Case-insensitive and trims surrounding whitespace; a value of one repeated character is rejected.
 
 ```javascript
 import { isValidVin } from '@brazilian-utils/brazilian-utils';
 
-isValidVin('1HGCM82633A004352'); // true
-isValidVin('1m8gdm9axkp042788'); // true (check digit X, lowercase)
-isValidVin('1HGCM82633A004353'); // false (bad check digit)
-isValidVin('00000000000000000'); // false (every character the same, though the check digit matches)
+isValidVin('9BWZZZ377VT004251'); // true (Brazilian VIN, no check digit)
+isValidVin('9BWZZZ377VT004251', { checkDigit: true }); // false (its 9th character is not the check digit)
+isValidVin('1HGCM82633A004352', { checkDigit: true }); // true
+isValidVin('1m8gdm9axkp042788', { checkDigit: true }); // true (check digit X, lowercase)
+isValidVin('1HGCM82633A004353', { checkDigit: true }); // false (bad check digit)
+isValidVin('00000000000000000'); // false (every character the same)
 isValidVin('1HGCM8263IA004352'); // false (contains the excluded letter I)
 isValidVin('1HGCM82633A00435'); // false (16 characters)
 ```

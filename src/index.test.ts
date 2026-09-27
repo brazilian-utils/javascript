@@ -84,6 +84,7 @@ import {
 	type IsValidPhoneOptions,
 	type IsValidPixKeyOptions,
 	type IsValidRegistroProfissionalParams,
+	type IsValidVinOptions,
 	type LegalNature,
 	type LegalNatureCategory,
 	type LicensePlateFormat,
@@ -421,6 +422,7 @@ describe("Public API", () => {
 			IsValidPhoneOptions: IsValidPhoneOptions;
 			IsValidPixKeyOptions: IsValidPixKeyOptions;
 			IsValidRegistroProfissionalParams: IsValidRegistroProfissionalParams;
+			IsValidVinOptions: IsValidVinOptions;
 			LegalNature: LegalNature;
 			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;

@@ -256,7 +256,7 @@ export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
 export { isValidServiceItem } from "./is-valid-service-item/is-valid-service-item";
 export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-phone";
 export { isValidSuframa } from "./is-valid-suframa/is-valid-suframa";
-export { isValidVin } from "./is-valid-vin/is-valid-vin";
+export { type IsValidVinOptions, isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
 export { parseBoleto } from "./parse-boleto/parse-boleto";
 export { parseCaepf } from "./parse-caepf/parse-caepf";
