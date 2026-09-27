@@ -24,47 +24,43 @@ describe("isValidVoterId", () => {
 		expect(isValidVoterId("102385010671")).toBe(true);
 	});
 
-	it("should validate a real 13-digit voter id (São Paulo, 9-digit sequential)", () => {
-		expect(isValidVoterId("1234567880191")).toBe(true);
+	it("should reject a 13-digit value, since a voter id has at most 12 digits", () => {
+		// The São Paulo/Minas Gerais 9-digit sequential form 2.4.0 accepted: the resolution caps the id at 12 digits.
+		expect(isValidVoterId("1234567880191")).toBe(false);
+		expect(isValidVoterId("1234 5678 8 01 91")).toBe(false);
+		expect(isValidVoterId("0123456780191")).toBe(false);
+		expect(isValidVoterId("123456780191")).toBe(true);
 	});
 
-	it("should ignore the ninth sequential digit when checking a 13-digit voter id, as brutils does", () => {
-		const variants = [
-			"1234567800191",
-			"1234567810191",
-			"1234567820191",
-			"1234567830191",
-			"1234567840191",
-			"1234567850191",
-			"1234567860191",
-			"1234567870191",
-			"1234567880191",
-			"1234567890191",
-		];
-
-		for (const variant of variants) {
-			expect(isValidVoterId(variant)).toBe(true);
-		}
-
-		expect(isValidVoterId("1234567880192")).toBe(false);
+	it("should accept a voter id issued without the leading zeros of its sequential number", () => {
+		// 00012345: 1·5 + 2·6 + 3·7 + 4·8 + 5·9 = 115 ≡ 5; UF 01: 0·7 + 1·8 + 5·9 = 53 ≡ 9
+		expect(isValidVoterId("000123450159")).toBe(true);
+		expect(isValidVoterId("00123450159")).toBe(true);
+		expect(isValidVoterId("123450159")).toBe(true);
+		expect(isValidVoterId("1 2345 01 59")).toBe(true);
+		expect(isValidVoterId("12345 01 59")).toBe(true);
+		expect(isValidVoterId("123450158")).toBe(false);
 	});
 
-	it("should reject a 13-digit value whose UF cannot carry a 9-digit sequential number", () => {
-		expect(isValidVoterId("1234567890396")).toBe(false);
-		expect(isValidVoterId("123456780396")).toBe(true);
+	it("should accept a sequential number of every length from 1 to 8 digits once its zeros are dropped", () => {
+		// 00000012, UF 28: 1·8 + 2·9 = 26 ≡ 4; 2·7 + 8·8 + 4·9 = 114 ≡ 4
+		expect(isValidVoterId("122844")).toBe(true);
+		// 00001234, UF 06: 1·6 + 2·7 + 3·8 + 4·9 = 80 ≡ 3; 6·8 + 3·9 = 75 ≡ 9
+		expect(isValidVoterId("12340639")).toBe(true);
+		expect(isValidVoterId("1234 06 39")).toBe(true);
 	});
 
-	it("should reject a value with more than 13 digits even when the first 8 and the last 4 match", () => {
-		expect(isValidVoterId("12345678980191")).toBe(false);
-		expect(isValidVoterId("1234567880191")).toBe(true);
+	it("should accept the shortest form, a single sequential digit, and nothing shorter", () => {
+		// 00000001: 1·9 = 9; UF 01: 0·7 + 1·8 + 9·9 = 89 ≡ 1
+		expect(isValidVoterId("10191")).toBe(true);
+		expect(isValidVoterId("000000010191")).toBe(true);
+		// 00000000 (UF 01): remainder 0 → 1 for SP; 8 + 9 = 17 ≡ 6
+		expect(isValidVoterId("000000000116")).toBe(true);
+		expect(isValidVoterId("0116")).toBe(false);
 	});
 
 	it("should return false when the UF code is outside 01-28", () => {
 		expect(isValidVoterId("123456789900")).toBe(false);
-	});
-
-	it("should return false for a 13-digit voter id whose UF is not 01 or 02", () => {
-		expect(isValidVoterId("1234567890345")).toBe(false);
 	});
 
 	it("should reject a value with a letter attached to the digits", () => {
@@ -79,7 +75,14 @@ describe("isValidVoterId", () => {
 	it("should accept the documented whitespace and dot masks", () => {
 		expect(isValidVoterId("1023 8501 06 71")).toBe(true);
 		expect(isValidVoterId("1023.8501.06.71")).toBe(true);
-		expect(isValidVoterId("1234 5678 8 01 91")).toBe(true);
+		expect(isValidVoterId("0001.2345.01.59")).toBe(true);
+	});
+
+	it("should only accept separators between the groups of a sequential number grouped from the right", () => {
+		// 01234567: 1·3 + 2·4 + 3·5 + 4·6 + 5·7 + 6·8 + 7·9 = 196 ≡ 9; UF 01: 8 + 81 = 89 ≡ 1
+		expect(isValidVoterId("123 4567 01 91")).toBe(true);
+		expect(isValidVoterId("1234 567 01 91")).toBe(false);
+		expect(isValidVoterId("1234 5678 0 1 91")).toBe(false);
 	});
 
 	it("should return false for null, undefined, a number or an empty string", () => {
@@ -97,9 +100,14 @@ describe("isValidVoterId", () => {
 		expect(isValidVoterId(102_385_010_671)).toBe(false);
 	});
 
-	it("should reject a value whose length is neither 12 nor 13, even when its checksum would otherwise match", () => {
-		expect(isValidVoterId("000010191")).toBe(false);
+	it("should reject a value longer than 12 digits, even when its checksum would otherwise match", () => {
 		expect(isValidVoterId("1234567890370")).toBe(false);
+		expect(isValidVoterId("0000000000191")).toBe(false);
+	});
+
+	it("should read a 9-digit value as the id without its leading zeros", () => {
+		// 2.4.0 rejected it for its length; it is 000000010191 without the leading zeros
+		expect(isValidVoterId("000010191")).toBe(true);
 	});
 
 	it("should reject the UF code boundaries 0 and 29, even when the checksum would otherwise match", () => {
@@ -124,8 +132,19 @@ describe("isValidVoterId", () => {
 			);
 		});
 
-		test("should reject any digits only value that is neither 12 nor 13 digits long", () => {
-			expectRejected(isValidVoterId, digitsOfOtherLength(26, [12, 13]));
+		test("should reject any digits only value longer than 12 digits or shorter than 5", () => {
+			expectRejected(isValidVoterId, digitsOfOtherLength(26, [5, 6, 7, 8, 9, 10, 11, 12]));
+		});
+
+		test("should accept a generated voter id with any number of its leading zeros dropped", () => {
+			fc.assert(
+				fc.property(voterIds(), fc.nat(8), (voterId, dropped) => {
+					const zeros = /^0*/.exec(voterId)?.[0].length ?? 0;
+					const shortened = voterId.slice(Math.min(dropped, zeros, 7));
+
+					expect(isValidVoterId(shortened)).toBe(true);
+				}),
+			);
 		});
 
 		test("should never throw and always return a boolean", () => {

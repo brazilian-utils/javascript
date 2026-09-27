@@ -29,7 +29,7 @@ const getFederativeUnion = (state: StateCode | "ZZ"): string =>
  * for, or `"ZZ"` for a voter id issued abroad. Defaults to `"ZZ"` when omitted or unknown, a key
  * of the prototype chain (`"__proto__"`, `"constructor"`) and a value that is not a string
  * included, so a malformed state never throws.
- * @returns {string} A valid 12-digit voter id string without formatting.
+ * @returns {string} A valid 12-digit voter id string without formatting, leading zeros kept.
  *
  * @example
  * ```typescript
@@ -38,14 +38,22 @@ const getFederativeUnion = (state: StateCode | "ZZ"): string =>
  * generateVoterId("XX" as StateCode); // falls back to "ZZ" instead of throwing
  * ```
  *
- * Resolução TSE nº 23.659/2021, art. 36, parágrafo único, confirms the federative union table and
- * the two-step módulo 11 structure; the weights themselves are not published by the TSE and follow
- * the community reference cited as `Based on:`.
+ * The 8-digit sequential number is always returned with its leading zeros, so the result has 12
+ * digits. The TSE drops those zeros when it issues a voter id; the same id without them (e.g.
+ * "123450159" for "000123450159") is accepted by `isValidVoterId` too, and `parseVoterId` keeps
+ * whichever form it is given.
+ *
+ * Resolução TSE nº 23.659/2021, art. 36, confirms the structure ("composto de até 12 algarismos",
+ * the first eight sequential), the federative union table and the two-step módulo 11 structure;
+ * the weights themselves are not published by the TSE and follow the community reference cited as
+ * `Based on:`.
  *
  * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser.
  *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
+ * Resolução TSE nº 23.659/2021, art. 36: "os oito primeiros algarismos serão sequenciais,
+ * desprezando-se, na emissão, os zeros à esquerda".
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
  */
 export const generateVoterId = (

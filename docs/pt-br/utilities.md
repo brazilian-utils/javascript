@@ -2278,9 +2278,10 @@ getLegalNaturesByCategory('9'); // []
 
 ### isValidVoterId
 
-Valida um título de eleitor. Aceita o título padrão de 12 dígitos e o título de 13 dígitos expedido por São Paulo (UF `01`) e Minas Gerais (UF `02`).
+Valida um título de eleitor. Um título tem no máximo 12 dígitos, então um valor de 13 dígitos é rejeitado.
 
 - Um título é um número sequencial de 8 dígitos, um código de unidade federativa de 2 dígitos (`01` a `28`) e 2 dígitos verificadores.
+- O TSE despreza os zeros à esquerda do número sequencial na emissão, então um valor mais curto é lido como o título sem eles e completado com zeros à esquerda até 12 dígitos antes da validação (`123450159` é validado como `000123450159`). É preciso ao menos um dígito sequencial: o menor valor aceito tem 5 dígitos.
 - Espaços e pontos são aceitos ao redor e entre os grupos. Qualquer outro caractere, inclusive um hífen, invalida o valor.
 
 ```javascript
@@ -2290,19 +2291,20 @@ const voterId = generateVoterId('SP');
 
 isValidVoterId(voterId); // true
 isValidVoterId('102385010671'); // true (12 dígitos)
-isValidVoterId('1234567880191'); // true (13 dígitos, São Paulo)
+isValidVoterId('123450159'); // true (000123450159 emitido sem os zeros à esquerda)
+isValidVoterId('1234567880191'); // false (13 dígitos, mais que os 12 que o TSE permite)
 isValidVoterId('123456780124'); // false (dígitos verificadores inválidos)
 ```
 
-Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) e [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
+Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021) ("composto de até 12 algarismos", "os oito primeiros algarismos serão sequenciais, desprezando-se, na emissão, os zeros à esquerda"), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) e [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
 
 ### formatVoterId
 
 Formata um título de eleitor com o agrupamento de 12 dígitos `0000 0000 00 00`.
 
-- **Opções** (`FormatVoterIdOptions`): `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa.
-- O agrupamento de 13 dígitos `0000 0000 0 00 00` só é usado quando o valor tem mais de 12 dígitos e o código da UF (o 10º e o 11º dígitos) é `01` ou `02`.
-- Os dígitos além da última posição do padrão são descartados.
+- **Opções** (`FormatVoterIdOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos, restaurando os zeros de um título emitido sem eles; `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa.
+- Sem `pad`, um valor mais curto é formatado a partir da esquerda, como um título digitado pela metade.
+- Os dígitos além do 12º são descartados.
 - Nenhuma autoridade publica uma regra de mascaramento para o título de eleitor, então o `obfuscate` usa a que a Lei nº 12.309/2010, art. 87, § 5º define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura.
 
 ```javascript
@@ -2310,18 +2312,19 @@ import { formatVoterId } from '@brazilian-utils/brazilian-utils';
 
 formatVoterId('123456780175'); // '1234 5678 01 75'
 formatVoterId('123456780175', { obfuscate: true }); // '***4 5678 01 **'
-formatVoterId('1234567880191'); // '1234 5678 8 01 91' (título de 13 dígitos SP/MG)
+formatVoterId('123450159', { pad: true }); // '0001 2345 01 59'
+formatVoterId('123450159'); // '1234 5015 9' (lido como um título digitado pela metade)
 ```
 
 ### parseVoterId
 
-Remove a formatação do título de eleitor, mantém apenas os dígitos e limita o resultado a 12 dígitos (13 quando os dígitos da UF identificam São Paulo ou Minas Gerais).
+Remove a formatação do título de eleitor, mantém apenas os dígitos e limita o resultado a 12 dígitos. Um valor mais curto é mantido como está, sem acrescentar zeros à esquerda.
 
 ```javascript
 import { parseVoterId } from '@brazilian-utils/brazilian-utils';
 
 parseVoterId('1234 5678 01 75'); // '123456780175'
-parseVoterId('1234 5678 8 01 91'); // '1234567880191' (título de 13 dígitos SP/MG)
+parseVoterId('12345 01 59'); // '123450159'
 ```
 
 ### generateVoterId
@@ -2329,7 +2332,7 @@ parseVoterId('1234 5678 8 01 91'); // '1234567880191' (título de 13 dígitos SP
 Gera um título de eleitor válido aleatório. O argumento opcional `state` (`StateCode`, ou `"ZZ"` para um título expedido no exterior) define o código de unidade federativa.
 
 - Uma UF desconhecida, ou um valor que não seja string, usa `"ZZ"` (UF `28`).
-- O resultado sempre tem 12 dígitos, nunca a forma de 13 dígitos de São Paulo ou Minas Gerais.
+- O resultado sempre tem 12 dígitos, com os zeros à esquerda do número sequencial; o mesmo título sem eles também é válido.
 
 ```javascript
 import { generateVoterId } from '@brazilian-utils/brazilian-utils';

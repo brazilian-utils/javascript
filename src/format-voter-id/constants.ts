@@ -1,7 +1,4 @@
-export const PATTERNS = {
-	standard: "0000 0000 00 00",
-	extended: "0000 0000 0 00 00",
-};
+export const PATTERN = "0000 0000 00 00";
 
 /**
  * No authority publishes a masking rule for the título de eleitor, so this applies the rule Lei
@@ -10,7 +7,4 @@ export const PATTERNS = {
  * sequential number and the 2 check digits are hidden, e.g. "***4 5678 01 **". The federative
  * union code stays visible.
  */
-export const OBFUSCATED_PATTERNS = {
-	standard: "***0 0000 00 **",
-	extended: "***0 0000 0 00 **",
-};
+export const OBFUSCATED_PATTERN = "***0 0000 00 **";

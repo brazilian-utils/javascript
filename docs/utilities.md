@@ -2278,9 +2278,10 @@ getLegalNaturesByCategory('9'); // []
 
 ### isValidVoterId
 
-Check if a voter ID number is valid. Accepts the standard 12-digit id and the 13-digit id issued by São Paulo (UF `01`) and Minas Gerais (UF `02`).
+Check if a voter ID number is valid. A voter ID has at most 12 digits, so a 13-digit value is rejected.
 
 - A voter ID is an 8-digit sequential number, a 2-digit federative union code (`01` to `28`) and 2 check digits.
+- The TSE drops the leading zeros of the sequential number when it issues the ID, so a shorter value is read as the ID without them and left padded with zeros to 12 digits before it is checked (`123450159` is checked as `000123450159`). At least one sequential digit is required: the shortest accepted value has 5 digits.
 - Whitespace and dots are accepted around and between the groups. Any other character, a hyphen included, makes the value invalid.
 
 ```javascript
@@ -2290,19 +2291,20 @@ const voterId = generateVoterId('SP');
 
 isValidVoterId(voterId); // true
 isValidVoterId('102385010671'); // true (12 digits)
-isValidVoterId('1234567880191'); // true (13 digits, São Paulo)
+isValidVoterId('123450159'); // true (000123450159 issued without its leading zeros)
+isValidVoterId('1234567880191'); // false (13 digits, more than the 12 the TSE allows)
 isValidVoterId('123456780124'); // false (invalid check digits)
 ```
 
-Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) and [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
+Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021) ("composto de até 12 algarismos", "os oito primeiros algarismos serão sequenciais, desprezando-se, na emissão, os zeros à esquerda"), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) and [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
 
 ### formatVoterId
 
 Format a voter ID number with the 12-digit grouping `0000 0000 00 00`.
 
-- **Options** (`FormatVoterIdOptions`): `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible.
-- The 13-digit grouping `0000 0000 0 00 00` is used only when the value has more than 12 digits and its UF code (the 10th and 11th digits) is `01` or `02`.
-- Digits past the last slot of the pattern are dropped.
+- **Options** (`FormatVoterIdOptions`): `pad` left pads the value with zeros up to 12 digits, restoring the leading zeros of a voter ID issued without them; `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible.
+- Without `pad`, a shorter value is formatted from the left, as a partially typed ID.
+- Digits past the 12th are dropped.
 - No authority publishes a masking rule for the voter ID, so `obfuscate` applies the one Lei nº 12.309/2010, art. 87, § 5º sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure.
 
 ```javascript
@@ -2310,18 +2312,19 @@ import { formatVoterId } from '@brazilian-utils/brazilian-utils';
 
 formatVoterId('123456780175'); // '1234 5678 01 75'
 formatVoterId('123456780175', { obfuscate: true }); // '***4 5678 01 **'
-formatVoterId('1234567880191'); // '1234 5678 8 01 91' (13-digit SP/MG voter id)
+formatVoterId('123450159', { pad: true }); // '0001 2345 01 59'
+formatVoterId('123450159'); // '1234 5015 9' (read as a partially typed ID)
 ```
 
 ### parseVoterId
 
-Remove voter ID formatting, keep only digits, and cap the result to 12 digits (13 when the UF digits identify São Paulo or Minas Gerais).
+Remove voter ID formatting, keep only digits, and cap the result to 12 digits. A shorter value is kept as it is, without adding leading zeros.
 
 ```javascript
 import { parseVoterId } from '@brazilian-utils/brazilian-utils';
 
 parseVoterId('1234 5678 01 75'); // '123456780175'
-parseVoterId('1234 5678 8 01 91'); // '1234567880191' (13-digit SP/MG voter id)
+parseVoterId('12345 01 59'); // '123450159'
 ```
 
 ### generateVoterId
@@ -2329,7 +2332,7 @@ parseVoterId('1234 5678 8 01 91'); // '1234567880191' (13-digit SP/MG voter id)
 Generate a valid random voter ID number. The optional `state` argument (`StateCode`, or `"ZZ"` for a voter ID issued abroad) sets the federative union code.
 
 - An unknown state, or a value that is not a string, falls back to `"ZZ"` (UF `28`).
-- The result always has 12 digits, never the 13-digit São Paulo or Minas Gerais form.
+- The result always has 12 digits, the leading zeros of the sequential number included; the same ID without them is valid too.
 
 ```javascript
 import { generateVoterId } from '@brazilian-utils/brazilian-utils';
