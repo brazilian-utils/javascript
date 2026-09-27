@@ -38,6 +38,10 @@ export type FormatCnpjOptions = {
  * formatCnpj(-11222333000181); // "" (not a non-negative safe integer)
  * ```
  *
+ * `obfuscate` is a convention of this library, not an official rule: no law or Receita Federal
+ * act sets a masking rule for the CNPJ, whose data are public. It hides the first 2 characters
+ * and the 2 check digits, after the rule the Leis de Diretrizes Orçamentárias set for the CPF.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico

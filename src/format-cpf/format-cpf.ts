@@ -33,7 +33,16 @@ export type FormatCpfOptions = {
  * formatCpf(123456789.09); // "" (not a non-negative safe integer)
  * ```
  *
+ * `obfuscate` follows the rule the Leis de Diretrizes Orçamentárias set for publishing a CPF: the
+ * first 3 digits and the 2 check digits are hidden.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm
+ * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
+ * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set
+ * by Lei nº 12.309/2010 (LDO 2011), art. 87, § 5º, and repeated by the LDOs after it.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm
+ * Lei nº 15.321/2025, the LDO for 2026.
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const formatCpf = (value: string | number, options?: FormatCpfOptions): string => {

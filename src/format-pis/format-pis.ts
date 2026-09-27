@@ -33,16 +33,20 @@ export type FormatPisOptions = {
  * formatPis(100.1); // "" (not a non-negative safe integer)
  * ```
  *
- * No authority publishes a masking rule for the PIS, so `obfuscate` applies the one Lei nº
- * 12.309/2010, art. 87, § 5º, sets for the CPF, a number with the same structure: the first 3
+ * No authority publishes a masking rule for the PIS, so `obfuscate` applies the one the Leis de
+ * Diretrizes Orçamentárias set for publishing a CPF, a number with the same structure: the first 3
  * digits and the check digit are hidden.
  *
  * @see Official: https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/inscricao
  * @see Official: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-manual-de-orientacao-do-esocial-vs-2-4.pdf
  * @see Official: https://www.sirc.gov.br/wp-content/uploads/manual_sirc_recomendacoes_tecnicas_v7.pdf
- * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm
- * Lei nº 12.309/2010, art. 87, § 5º: "ocultar os três primeiros dígitos e os dois dígitos
- * verificadores do CPF", the rule `obfuscate` borrows.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm
+ * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
+ * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set
+ * by Lei nº 12.309/2010 (LDO 2011), art. 87, § 5º, and repeated by the LDOs after it: the CPF
+ * rule `obfuscate` borrows.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm
+ * Lei nº 15.321/2025, the LDO for 2026.
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/pis.py
  */
 export const formatPis = (value: string | number, options?: FormatPisOptions): string =>

@@ -36,14 +36,18 @@ export type FormatCnhOptions = {
  * 2 security check digits, which is the layout this mask reproduces; no official text publishes
  * the check-digit weights used to compute them.
  *
- * No authority publishes a masking rule for the CNH either, so `obfuscate` applies the one Lei nº
- * 12.309/2010, art. 87, § 5º, sets for the CPF, a number with the same structure: the first 3
- * digits and the 2 check digits are hidden.
+ * No authority publishes a masking rule for the CNH either, so `obfuscate` applies the one the
+ * Leis de Diretrizes Orçamentárias set for publishing a CPF, a number with the same structure: the
+ * first 3 digits and the 2 check digits are hidden.
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf
- * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm
- * Lei nº 12.309/2010, art. 87, § 5º: "ocultar os três primeiros dígitos e os dois dígitos
- * verificadores do CPF", the rule `obfuscate` borrows.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm
+ * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
+ * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set
+ * by Lei nº 12.309/2010 (LDO 2011), art. 87, § 5º, and repeated by the LDOs after it: the CPF
+ * rule `obfuscate` borrows.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm
+ * Lei nº 15.321/2025, the LDO for 2026.
  */
 export const formatCnh = (value: string | number, options?: FormatCnhOptions): string =>
 	isLookupCode(value)

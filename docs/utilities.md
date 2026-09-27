@@ -38,7 +38,7 @@ isValidCpf('111 444 777 35'); // true (whitespace mask)
 Format a CPF.
 
 - **Options** (`FormatCpfOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits.
-- `obfuscate` is applied after `pad`.
+- `obfuscate` is applied after `pad`. It follows the rule the Leis de Diretrizes Orçamentárias set for publishing a CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), first set by Lei nº 12.309/2010, art. 87, § 5º; [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the LDO for 2026).
 
 ```javascript
 import { formatCpf } from '@brazilian-utils/brazilian-utils';
@@ -130,7 +130,7 @@ Format a CNPJ.
 
 - **Options** (`FormatCnpjOptions`): `pad` left-pads the value with zeros to 14 characters before masking (default `false`); `version` picks the format, `1` (default) numeric only, `2` alphanumeric; `obfuscate` hides the first 2 digits and the 2 check digits.
 - Version `2` keeps letters (upper-cased) and digits; version `1` keeps digits only.
-- `obfuscate` works in both versions and is applied after `pad`.
+- `obfuscate` works in both versions and is applied after `pad`. It is a convention of this library, not an official rule: no law or Receita Federal act sets a masking rule for the CNPJ, whose data are public; it hides the first 2 characters and the 2 check digits, after the CPF rule.
 
 ```javascript
 import { formatCnpj } from '@brazilian-utils/brazilian-utils';
@@ -1113,7 +1113,7 @@ Format a PIS.
 
 - **Options** (`FormatPisOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the check digit.
 - `obfuscate` is applied after `pad`.
-- No authority publishes a masking rule for the PIS, so `obfuscate` applies the one Lei nº 12.309/2010, art. 87, § 5º sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure.
+- No authority publishes a masking rule for the PIS, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
@@ -1143,7 +1143,7 @@ import { generatePis } from '@brazilian-utils/brazilian-utils';
 generatePis(); // '91077906857'
 ```
 
-Source: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), the CPF masking rule `obfuscate` borrows.
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the one for 2026).
 
 ## Processo jurídico
 
@@ -2109,7 +2109,7 @@ Format a CNH.
 
 - **Options** (`FormatCnhOptions`): `pad` left-pads the value with zeros to the full 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits.
 - `obfuscate` is applied after `pad`.
-- No authority publishes a masking rule for the CNH, so `obfuscate` applies the one Lei nº 12.309/2010, art. 87, § 5º sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure.
+- No authority publishes a masking rule for the CNH, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
@@ -2139,7 +2139,7 @@ import { generateCnh } from '@brazilian-utils/brazilian-utils';
 generateCnh(); // '02650306461'
 ```
 
-Source: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), the CPF masking rule `obfuscate` borrows.
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the one for 2026).
 
 ## Legal nature
 
@@ -2311,7 +2311,7 @@ Format a voter ID number with the 12-digit grouping `0000 0000 00 00`.
 - **Options** (`FormatVoterIdOptions`): `pad` left pads the value with zeros up to 12 digits, restoring the leading zeros of a voter ID issued without them; `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible.
 - Without `pad`, a shorter value is formatted from the left, as a partially typed ID.
 - Digits past the 12th are dropped.
-- No authority publishes a masking rule for the voter ID, so `obfuscate` applies the one Lei nº 12.309/2010, art. 87, § 5º sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure.
+- No authority publishes a masking rule for the voter ID, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
@@ -2348,7 +2348,7 @@ generateVoterId('SP'); // valid random voter ID for Sao Paulo
 generateVoterId('XX'); // falls back to "ZZ" instead of throwing
 ```
 
-Source: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), the CPF masking rule `obfuscate` borrows.
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the one for 2026).
 
 ## CNS
 

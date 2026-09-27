@@ -40,9 +40,9 @@ export type FormatVoterIdOptions = {
  * formatVoterId(-123456780124); // "" (not a non-negative safe integer)
  * ```
  *
- * No authority publishes a masking rule for the voter id, so `obfuscate` applies the one Lei nº
- * 12.309/2010, art. 87, § 5º, sets for the CPF, a number with the same structure: the first 3
- * digits and the 2 check digits are hidden, and the federative union code stays visible.
+ * No authority publishes a masking rule for the voter id, so `obfuscate` applies the one the Leis
+ * de Diretrizes Orçamentárias set for publishing a CPF, a number with the same structure: the
+ * first 3 digits and the 2 check digits are hidden, and the federative union code stays visible.
  *
  * Resolução TSE nº 23.659/2021, art. 36, gives the voter id "até 12 algarismos", its first eight
  * "sequenciais, desprezando-se, na emissão, os zeros à esquerda", so there is no 13-digit
@@ -54,9 +54,13 @@ export type FormatVoterIdOptions = {
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
  * Resolução TSE nº 23.659/2021, art. 36: "composto de até 12 algarismos", "os oito primeiros
  * algarismos serão sequenciais, desprezando-se, na emissão, os zeros à esquerda".
- * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm
- * Lei nº 12.309/2010, art. 87, § 5º: "ocultar os três primeiros dígitos e os dois dígitos
- * verificadores do CPF", the rule `obfuscate` borrows.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm
+ * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
+ * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set
+ * by Lei nº 12.309/2010 (LDO 2011), art. 87, § 5º, and repeated by the LDOs after it: the CPF
+ * rule `obfuscate` borrows.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm
+ * Lei nº 15.321/2025, the LDO for 2026.
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const formatVoterId = (value: string | number, options?: FormatVoterIdOptions): string =>

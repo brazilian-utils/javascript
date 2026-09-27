@@ -38,7 +38,7 @@ isValidCpf('111 444 777 35'); // true (máscara com espaços)
 Formata um CPF.
 
 - **Opções** (`FormatCpfOptions`): `pad` preenche o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores.
-- `obfuscate` é aplicada após o `pad`.
+- `obfuscate` é aplicada após o `pad`. Segue a regra que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), regra criada pela Lei nº 12.309/2010, art. 87, § 5º; a LDO de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
 
 ```javascript
 import { formatCpf } from '@brazilian-utils/brazilian-utils';
@@ -130,7 +130,7 @@ Formata um CNPJ.
 
 - **Opções** (`FormatCnpjOptions`): `pad` preenche o valor com zeros à esquerda até 14 caracteres antes de aplicar a máscara (padrão `false`); `version` escolhe o formato, `1` (padrão) apenas numérico, `2` alfanumérico; `obfuscate` esconde os 2 primeiros dígitos e os 2 dígitos verificadores.
 - A versão `2` mantém letras (em maiúsculas) e dígitos; a versão `1` mantém apenas dígitos.
-- `obfuscate` vale para as duas versões e é aplicada após o `pad`.
+- `obfuscate` vale para as duas versões e é aplicada após o `pad`. É uma convenção desta biblioteca, não uma regra oficial: nenhuma lei ou ato da Receita Federal define mascaramento para o CNPJ, cujos dados são públicos; ela esconde os 2 primeiros caracteres e os 2 dígitos verificadores, à semelhança da regra do CPF.
 
 ```javascript
 import { formatCnpj } from '@brazilian-utils/brazilian-utils';
@@ -1113,7 +1113,7 @@ Formata um PIS.
 
 - **Opções** (`FormatPisOptions`): `pad` completa o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e o dígito verificador.
 - O `obfuscate` é aplicado depois do `pad`.
-- Nenhuma autoridade publica uma regra de mascaramento para o PIS, então o `obfuscate` usa a que a Lei nº 12.309/2010, art. 87, § 5º define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura.
+- Nenhuma autoridade publica uma regra de mascaramento para o PIS, então o `obfuscate` usa a que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, regra criada pela Lei nº 12.309/2010, art. 87, § 5º), um número com a mesma estrutura.
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
@@ -1143,7 +1143,7 @@ import { generatePis } from '@brazilian-utils/brazilian-utils';
 generatePis(); // '91077906857'
 ```
 
-Fonte: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada.
+Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
 
 ## Processo jurídico
 
@@ -2109,7 +2109,7 @@ Formata uma CNH.
 
 - **Opções** (`FormatCnhOptions`): `pad` completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores.
 - O `obfuscate` é aplicado depois do `pad`.
-- Nenhuma autoridade publica uma regra de mascaramento para a CNH, então o `obfuscate` usa a que a Lei nº 12.309/2010, art. 87, § 5º define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura.
+- Nenhuma autoridade publica uma regra de mascaramento para a CNH, então o `obfuscate` usa a que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, regra criada pela Lei nº 12.309/2010, art. 87, § 5º), um número com a mesma estrutura.
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
@@ -2139,7 +2139,7 @@ import { generateCnh } from '@brazilian-utils/brazilian-utils';
 generateCnh(); // '02650306461'
 ```
 
-Fonte: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada.
+Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
 
 ## Natureza jurídica
 
@@ -2311,7 +2311,7 @@ Formata um título de eleitor com o agrupamento de 12 dígitos `0000 0000 00 00`
 - **Opções** (`FormatVoterIdOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos, restaurando os zeros de um título emitido sem eles; `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa.
 - Sem `pad`, um valor mais curto é formatado a partir da esquerda, como um título digitado pela metade.
 - Os dígitos além do 12º são descartados.
-- Nenhuma autoridade publica uma regra de mascaramento para o título de eleitor, então o `obfuscate` usa a que a Lei nº 12.309/2010, art. 87, § 5º define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura.
+- Nenhuma autoridade publica uma regra de mascaramento para o título de eleitor, então o `obfuscate` usa a que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, regra criada pela Lei nº 12.309/2010, art. 87, § 5º), um número com a mesma estrutura.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
@@ -2348,7 +2348,7 @@ generateVoterId('SP'); // título de eleitor aleatório válido de São Paulo
 generateVoterId('XX'); // usa "ZZ" em vez de lançar erro
 ```
 
-Fonte: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada.
+Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
 
 ## CNS
 
