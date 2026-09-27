@@ -3360,12 +3360,13 @@ Check if an inscrição estadual (state registration) is valid for a state. **De
 - Takes a single object (`IsValidIeParams`): `value` is the registration and `stateCode` the state it belongs to (a `StateCode`, case-insensitive).
 - Some states have special cases, a prefix or format the SINTEGRA page does not print or a deliberate deviation from it (details and sources in the JSDoc in `src/is-valid-ie`):
   - GO: the prefixes 10, 11, 15 and 20 to 29 (SEFAZ-GO has issued 20 to new companies since 13/01/2023).
+  - MT: 11 digits, or the 9 digits SEFAZ-MT now issues, read as the 11 digit form padded with two zeros.
   - PA: the prefixes 15 and 75 to 79. MS: the prefixes 28 and 50.
   - DF: the 13 digit AC rule under the prefix 07.
   - SP: the produtor rural form `P0MMMSSSSD000`.
   - TO: 11 digits, with the tipo digits, or 9 digits.
   - PE: only the 9 digit eFisco form. AL: the third digit is not restricted. RJ: the 8 digit length and the weights come from the SINTEGRA validator.
-- An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it: AM, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE and SP, plus BA with 8 or 9 digits and TO with 9 digits.
+- An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it: AM, CE, ES, MG, PB, PE, PI, PR, RJ, RS, SC, SE and SP, plus BA with 8 or 9 digits, MT with 9 or 11 digits and TO with 9 digits.
 
 ```javascript
 import { isValidIe } from '@brazilian-utils/brazilian-utils';
@@ -3375,6 +3376,7 @@ isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true (produtor rural)
 isValidIe({ value: '0187634580933', stateCode: 'AC' }); // false
 isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
 isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefix 20)
+isValidIe({ value: '130000019', stateCode: 'MT' }); // true (9 digits)
 ```
 
 Source: [SINTEGRA state pages](http://www.sintegra.gov.br/insc_est.html) and the [SEFAZ-GO roteiro de crítica](https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/).

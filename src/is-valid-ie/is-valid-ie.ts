@@ -246,14 +246,22 @@ const validateMG: IeValidator = (ie: string) => {
 	);
 };
 
+// SEFAZ-MT now issues 9 digits and SINTEGRA prints 11: the 9 digit form is the 11 digit one
+// without its two leading zeros, which add nothing to the weighted sum, so it is padded back.
 const validateMT: IeValidator = (ie: string) => {
-	if (!checkLength(ie, 11)) return false;
+	if (!checkLength(ie, [9, 11])) return false;
 
-	const body = ie.slice(0, 10);
-	const sum = calculateWeightedSum({ source: ie, length: body.length, startWeight: 3, wrapTo: 9 });
+	const padded = ie.padStart(11, "0");
+	const body = padded.slice(0, 10);
+	const sum = calculateWeightedSum({
+		source: padded,
+		length: body.length,
+		startWeight: 3,
+		wrapTo: 9,
+	});
 	const digit = calculateMod11CheckDigit(sum);
 
-	return Number.parseInt(ie.charAt(10), 10) === digit;
+	return Number.parseInt(padded.charAt(10), 10) === digit;
 };
 
 const validateMS: IeValidator = (ie) => validateMod11Ie(ie, MS_PREFIXES);
@@ -484,6 +492,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   registration 11094402; the two sources agree on the weights and the modulus.
  * - RJ: the SINTEGRA page publishes only the modulus rule; the 8 digit length and the weights
  *   2, 7, 6, 5, 4, 3 and 2 come from the SINTEGRA validator itself, not from the page.
+ * - MT: 9 digits, the form Portaria SEFAZ-MT nº 5/2014 now prescribes, or the 11 digits the
+ *   SINTEGRA page prints. The 9 digit form is read as the 11 digit one padded with two leading
+ *   zeros, which the weights 3 and 2 turn into nothing, so "130000019" and "00130000019" are the
+ *   same registration.
  * - SP: characters other than "P" and digits are rejected on purpose, a deliberate deviation
  *   from the Regra Geral of the SINTEGRA page, which ignores them instead.
  * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
@@ -494,11 +506,12 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   weights 9 down to 2 to the first eight digits; it is 2.3.0 behavior kept for compatibility
  *   and no published SEFAZ-TO roteiro covers it.
  * - An all zero registration is accepted for every state whose published formula yields a
- *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS,
- *   SC, SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which reject repeated
- *   digits. AM is on that list through the second branch of its published formula only: the
- *   page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma", gives 11 for an all zero
- *   registration, while the "resto <= 1 ⇒ 0" branch, the one implemented here, gives 0.
+ *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT with 9 or 11 digits, PB,
+ *   PE, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which
+ *   reject repeated digits. AM is on that list through the second branch of its published
+ *   formula only: the page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma", gives 11 for
+ *   an all zero registration, while the "resto <= 1 ⇒ 0" branch, the one implemented here,
+ *   gives 0.
  *
  * The state can also be passed first and the registration second, `isValidIe('SP', '110042490114')`,
  * the 2.3.0 form, which still works and is deprecated. The two forms are told apart by the first
@@ -517,6 +530,7 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * isValidIe({ value: '12345', stateCode: 'RJ' }); // false
  * isValidIe({ value: '109161793', stateCode: 'go' as StateCode }); // true (case-insensitive)
  * isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefix 20)
+ * isValidIe({ value: '130000019', stateCode: 'MT' }); // true (9 digits)
  * ```
  *
  * @see Official: http://www.sintegra.gov.br/insc_est.html
@@ -539,6 +553,11 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MG.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MS.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
+ * "FORMATO: NNNNNNNNNN-D", weights 3, 2 and 9 down to 2, example "0013000001-9": the 11 digit form.
+ * @see Official: http://app1.sefaz.mt.gov.br/0325677500623408/07FA81BED2760C6B84256710004D3940/C59132C6A174B94384258272006C6488
+ * Portaria SEFAZ-MT nº 5/2014, art. 6º, as worded by Portaria nº 86/2023: "A identificação
+ * numérica do contribuinte no CCE/MT é composta de 9 (nove) dígitos, sendo os 8 (oito) primeiros
+ * sequenciais e o último algarismo configura o dígito verificador."
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PB.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PE.html

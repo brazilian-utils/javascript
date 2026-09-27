@@ -390,8 +390,29 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "12345678901", stateCode: "MT" })).toBe(false);
 		});
 
-		test("should return false when the length is different from 11", () => {
+		test("should return false when the length is different from 9 or 11", () => {
 			expect(isValidIe({ value: "1234567890112", stateCode: "MT" })).toBe(false);
+		});
+
+		test("should return true for the 9 digit form Portaria SEFAZ-MT nº 5/2014 art. 6º prescribes", () => {
+			// Padded to 00130000019: 9 x 1 + 8 x 3 + 2 x 1 = 35, 35 % 11 = 2, 11 - 2 = 9
+			expect(isValidIe({ value: "130000019", stateCode: "MT" })).toBe(true);
+			expect(isValidIe({ value: "13.000.001-9", stateCode: "MT" })).toBe(true);
+			expect(isValidIe({ value: "00130000019", stateCode: "MT" })).toBe(true);
+		});
+
+		test("should return true for an all zero registration in the 9 digit form, as in the 11 digit one", () => {
+			expect(isValidIe({ value: "000000000", stateCode: "MT" })).toBe(true);
+			expect(isValidIe({ value: "00000000000", stateCode: "MT" })).toBe(true);
+		});
+
+		test("should return false for a 9 digit IE with an incorrect verified digit", () => {
+			expect(isValidIe({ value: "130000010", stateCode: "MT" })).toBe(false);
+		});
+
+		test("should return false for 8 or 10 digits, even though padding them to 11 would give a valid checksum", () => {
+			expect(isValidIe({ value: "30000017", stateCode: "MT" })).toBe(false);
+			expect(isValidIe({ value: "0130000019", stateCode: "MT" })).toBe(false);
 		});
 
 		test("should return false when the length is 12, even though the first ten digits alone would form a valid checksum", () => {
