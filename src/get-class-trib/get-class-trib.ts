@@ -39,8 +39,14 @@ export type ClassTrib = {
  * since the codes start with zeros a numeric field drops: `1`, `"1"` and `"000001"` are all the
  * code `000001`.
  *
+ * It reads the table itself rather than starting with `isValidClassTrib`, the rule the other
+ * getters follow: `isValidClassTrib` checks the codes-only list precisely so that it does not
+ * bundle the descriptions, and calling it here would put that list in this bundle on top of the
+ * table, which already answers the same question.
+ *
  * @param {string|number} value - The cClassTrib to look up, e.g. `"200001"` or `200001`.
- * @returns {ClassTrib|null} The matching entry, or null when the code is unknown or invalid.
+ * @returns {ClassTrib|null} The matching entry, or null exactly when `isValidClassTrib` (called
+ * without `cst`) returns false.
  *
  * @example
  * ```typescript
