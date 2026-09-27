@@ -12,6 +12,7 @@ These rules hold for every function unless its section says otherwise.
 
 - **Nothing throws on bad input** (`null`, `undefined`, the wrong type): `isValid*` return `false`, `format*` and `parse*` return `''`, single-item `get*` return `null`, list `get*` return `[]`. The only exceptions are the async `getAddressInfoByCep` and `getCepInfoByAddress`, which reject with typed errors.
 - **Validators accept the value masked or not**: the usual mask characters (`.`, `-`, `/`) and spaces between or around the groups are ignored, so there is no need to strip formatting first.
+- **A number is read only when it is a non-negative safe integer**: the functions that take `string | number` treat a negative, fractional, non-finite or unsafe number as bad input (`isValidCep(-20040020)` is `false`, `formatCpf(-1)` and `parseCpf(1.5)` are `''`), since in a number `-` and `.` are not mask characters.
 - **Formatters mask as far as the value goes**, so they also work as input masks while the user types. `parse*` functions do the reverse and keep only the meaningful characters.
 - **Generators use `Math.random()`**, so they are fine for tests and fixtures and never for anything security-related.
 - **Getters return a new array or object on every call**, so mutating a result never affects the next call.

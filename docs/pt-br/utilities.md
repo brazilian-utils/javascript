@@ -12,6 +12,7 @@ Estas regras valem para todas as funções, a não ser que a seção diga o cont
 
 - **Nada lança erro com entrada inválida** (`null`, `undefined`, tipo errado): `isValid*` retornam `false`, `format*` e `parse*` retornam `''`, `get*` de um item retornam `null`, `get*` de lista retornam `[]`. As únicas exceções são as assíncronas `getAddressInfoByCep` e `getCepInfoByAddress`, que rejeitam com erros tipados.
 - **Validadores aceitam o valor com ou sem máscara**: os caracteres de máscara usuais (`.`, `-`, `/`) e espaços entre ou ao redor dos grupos são ignorados, então não é preciso limpar a formatação antes.
+- **Um número só é lido quando é um inteiro seguro não negativo**: as funções que recebem `string | number` tratam um número negativo, fracionário, não finito ou inseguro como entrada inválida (`isValidCep(-20040020)` é `false`, `formatCpf(-1)` e `parseCpf(1.5)` são `''`), já que num número `-` e `.` não são caracteres de máscara.
 - **Formatadores aplicam a máscara até onde o valor vai**, então também servem como máscara de digitação. As funções `parse*` fazem o inverso e mantêm só os caracteres que importam.
 - **Geradores usam `Math.random()`**, então servem para testes e dados de exemplo e nunca para nada relacionado a segurança.
 - **Getters retornam um array ou objeto novo a cada chamada**, então alterar um resultado nunca afeta a chamada seguinte.
