@@ -3227,6 +3227,7 @@ Check if a GTIN (Global Trade Item Number, the number under an EAN/UPC barcode) 
 - The value must be a string of 8, 12, 13 or 14 digits, surrounding whitespace aside, whose last digit is the GS1 modulo 10 check digit: weights 3 and 1 alternating from the right, the sum subtracted from the nearest equal or higher multiple of ten. That is what rules I03-10 and I12-10 of SEFAZ Nota Técnica 2021.003 check (rejections 611 and 612).
 - Leading zeros count, so a number is never accepted, and a masked value (`'7 890000 000017'`) is rejected instead of having its digits picked out.
 - The `'SEM GTIN'` literal the NF-e uses for a product without a GTIN is not a GTIN, so it is not valid here: test for it before calling.
+- A value of zeros only is rejected, although its check digit is valid. That is a rule of this library, not of the NF-e or GS1: rejection 611 is only the check digit, and the GS1 General Specifications (release 26.0, table 1-4) reserve the GS1 Prefix `0000000` for Restricted Circulation Numbers within a company rather than forbid it. Zeros are rejected as the usual placeholder for a missing GTIN.
 - The prefix does not change the verdict. Restricted Circulation Numbers (prefixes 02, 04 and 20 to 29, the codes a shop prints on its own scale labels) and the ISSN, ISBN and coupon ranges share the structure and the check digit, and the "Tabela Prefixo GS1" SEFAZ validates `cEAN` against lists them as valid; use `getGtinInfo` to tell them apart.
 - The prefix is not checked against the list of GS1 Member Organisations either: GS1 keeps assigning ranges, so a copy of that list would turn down valid numbers as it ages. Whether the number is registered (the Cadastro Centralizado de GTIN lookup SEFAZ runs for the 789 and 790 prefixes) cannot be checked offline.
 
@@ -3242,7 +3243,7 @@ isValidGtin('7890000000018'); // false (wrong check digit)
 isValidGtin('17890000000014', { lengths: [8, 12, 13] }); // false (GTIN-14 not accepted)
 isValidGtin('7 890000 000017'); // false (digits only)
 isValidGtin('SEM GTIN'); // false
-isValidGtin('0000000000000'); // false (zeros only, never allocated by GS1)
+isValidGtin('0000000000000'); // false (zeros only, a rule of this library)
 ```
 
 ### getGtinInfo

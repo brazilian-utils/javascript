@@ -144,7 +144,7 @@ describe("isValidGtin", () => {
 			);
 		});
 
-		test("should accept no check digit at all for a body of zeros only", () => {
+		test("should reject a value of zeros only, a rule of this library that no NF-e rejection states", () => {
 			expect(isValidGtin("0000000000000")).toBe(false);
 			expect(isValidGtin("00000000")).toBe(false);
 			expect(isValidGtin("000000000000")).toBe(false);
