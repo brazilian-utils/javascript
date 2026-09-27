@@ -663,7 +663,9 @@ isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // 
 
 ### parseNfseKey
 
-Remove tudo o que não é dígito da chave de acesso de uma NFS-e nacional, inclusive o prefixo `NFS` do atributo `Id` do XML, e limita o resultado a 50 dígitos.
+Remove tudo o que não é dígito ou letra de um CNPJ alfanumérico da chave de acesso de uma NFS-e nacional e limita o resultado a 50 caracteres.
+
+- As letras ficam em maiúsculas, como faz o `parseCnpj` com `{ version: 2 }`, e as letras antes do primeiro dígito são descartadas, inclusive o prefixo `NFS` do atributo `Id` do XML, já que a chave começa com dígitos. O `isValidNfseKey` verifica se as letras que restam estão em um CNPJ.
 
 - Essa é a forma em que o leiaute guarda a chave e a que o DANFSe imprime, um bloco único, e por isso não existe `formatNfseKey`.
 
@@ -675,6 +677,9 @@ parseNfseKey('NFS35503082258716523000119000000000001226011357924683');
 
 parseNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3');
 // '35503082258716523000119000000000001226011357924683'
+
+parseNfseKey('nfs3550308 2 2 12.abc.345/01de-35 0000000000012 2609 135792468 2');
+// '35503082212ABC34501DE35000000000001226091357924682'
 ```
 
 ### getNfseKeyInfo

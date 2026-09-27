@@ -8,6 +8,7 @@ import { describe, expect, expectTypeOf, it, test } from "../_internals/test/run
 import { parseNfseKey } from "./parse-nfse-key";
 
 const KEY = "35503082258716523000119000000000001226011357924683";
+const KEY_ALPHANUMERIC = "35503082212ABC34501DE35000000000001226091357924682";
 
 describe("parseNfseKey", () => {
 	it("should keep a bare access key as it is", () => {
@@ -19,7 +20,20 @@ describe("parseNfseKey", () => {
 		expect(parseNfseKey(`  nfs${KEY}`)).toBe(KEY);
 	});
 
-	it("should remove non numeric characters", () => {
+	it("should keep the letters of an alphanumeric CNPJ, upper cased", () => {
+		expect(parseNfseKey(KEY_ALPHANUMERIC)).toBe(KEY_ALPHANUMERIC);
+		expect(parseNfseKey(`NFS${KEY_ALPHANUMERIC}`)).toBe(KEY_ALPHANUMERIC);
+		expect(parseNfseKey("nfs3550308 2 2 12.abc.345/01de-35 0000000000012 2609 135792468 2")).toBe(
+			KEY_ALPHANUMERIC,
+		);
+	});
+
+	it("should drop every letter in front of the first digit, since the key opens with digits", () => {
+		expect(parseNfseKey(`chave ${KEY}`)).toBe(KEY);
+		expect(parseNfseKey("NF")).toBe("");
+	});
+
+	it("should remove the characters that are neither digits nor letters", () => {
 		expect(parseNfseKey("3550308 2 2 58716523000119 0000000000012 2601 135792468 3")).toBe(KEY);
 		expect(parseNfseKey("3550308.2.2.58716523000119/0000000000012-2601-135792468-3")).toBe(KEY);
 	});
@@ -49,8 +63,8 @@ describe("parseNfseKey", () => {
 	});
 
 	describe("properties", () => {
-		test("should return at most the digits of an access key", () => {
-			expectMatchesPattern(parseNfseKey, /^\d{0,50}$/, anyText);
+		test("should return at most the characters of an access key, opening with a digit", () => {
+			expectMatchesPattern(parseNfseKey, /^(?:\d[\dA-Z]{0,49})?$/, anyText);
 		});
 
 		test("should be idempotent", () => {

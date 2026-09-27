@@ -1,23 +1,33 @@
 import { NFSE_KEY_LENGTH } from "../_internals/constants/nfse-key";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 
 /**
- * Removes everything but the digits from the access key (chave de acesso) of a national NFS-e.
+ * The letters in front of the first digit. The key opens with nine digits (`TSIdNFSe`,
+ * `NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}`), so none of them is part of it: the `NFS` prefix is one.
+ */
+const LEADING_LETTERS_REGEX = /^[A-Z]+/;
+
+/**
+ * Removes everything but the digits and the letters of an alphanumeric CNPJ from the access key
+ * (chave de acesso) of a national NFS-e.
  *
- * The `NFS` literal the `Id` attribute of `infNFSe` puts in front of the key goes away with
- * every other character that is not a digit. The result is
- * the form the leiaute stores the key in (`TSChaveNFSe`) and the one the DANFSe prints, a
- * single block of digits, so this package has no `formatNfseKey`.
+ * Every character that is not `0-9` or `A-Z` goes away, lower case letters are upper cased (as
+ * `parseCnpj` with version 2 reads them) and the letters in front of the first digit are dropped
+ * with the `NFS` literal the `Id` attribute of `infNFSe` puts there, since the key opens with
+ * digits. The result is the form the leiaute stores the key in and the one the DANFSe prints, a
+ * single block, so this package has no `formatNfseKey`. Letters are kept wherever they stand
+ * after the first digit; `isValidNfseKey` checks that they only stand in a CNPJ.
  *
- * The result is capped at the 50 digits of an access key; a shorter value passes through as far
- * as it goes. Use `isValidNfseKey` to check the key and `getNfseKeyInfo` to read its fields.
+ * The result is capped at the 50 characters of an access key; a shorter value passes through as
+ * far as it goes. Use `isValidNfseKey` to check the key and `getNfseKeyInfo` to read its fields.
  *
  * A number is only read when it is a non-negative safe integer; any other number (negative,
  * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
  *
  * @param {string|number} value - The access key value to be parsed.
- * @returns {string} Up to 50 digits, or an empty string when there is no digit at all.
+ * @returns {string} Up to 50 digits and upper case letters, or an empty string when there is no
+ * digit at all.
  *
  * @example
  * ```typescript
@@ -26,15 +36,24 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * parseNfseKey("3550308 2 2 58716523000119 0000000000012 2601 135792468 3");
  * // "35503082258716523000119000000000001226011357924683"
+ *
+ * parseNfseKey("nfs3550308 2 2 12.abc.345/01de-35 0000000000012 2609 135792468 2");
+ * // "35503082212ABC34501DE35000000000001226091357924682"
  * parseNfseKey(-1); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual
  * Sistema Nacional NFS-e, current technical documentation: `NFSe-ESQUEMAS_XSD-v1.01`
- * (`tiposSimples_v1.01.xsd`), types `TSChaveNFSe` (50 digits) and `TSIdNFSe` (the `NFS` prefix).
+ * (`tiposSimples_v1.01.xsd`), types `TSChaveNFSe` (50 characters) and `TSIdNFSe` (the `NFS`
+ * prefix).
+ * @see Official: https://www.gov.br/nfse/pt-br/noticias/plataforma-nfs-e-disponibiliza-novas-evolucoes-em-producao-restrita-e-divulga-cronograma-de-implantacao
+ * Portal NFS-e, 2026-07-27: "os novos schemas XML atualizados para o CNPJ Alfanumérico". In that
+ * bundle (v1.01-20260727, read through the byte-pinned mirror https://github.com/fm-s/open-nfse),
+ * `TSIdNFSe` is "NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}".
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf
- * Nota Técnica SE/CGNFS-e 008 (DANFSe), item 2.1.1: the key is printed as a single block of 50
- * digits.
+ * Nota Técnica SE/CGNFS-e 008 (DANFSe), item 2.1.1: the key is printed as a single block.
  */
 export const parseNfseKey = (value: string | number): string =>
-	isLookupCode(value) ? sanitizeToDigits(value).slice(0, NFSE_KEY_LENGTH) : "";
+	isLookupCode(value)
+		? sanitizeToAlphanumeric(value).replace(LEADING_LETTERS_REGEX, "").slice(0, NFSE_KEY_LENGTH)
+		: "";
