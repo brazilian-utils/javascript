@@ -12,6 +12,24 @@ const STATE_CODES = DATA.map((state) => state.code);
 
 describe("isValidRegistroProfissional", () => {
 	describe("should return false", () => {
+		test("for a CRO number of art. 115 whose sigla, category or suffix is not one it lists", () => {
+			for (const value of [
+				"CRO-XX 12345",
+				"CRO-SP-ABC 1234",
+				"CRO-SP-PV 1234-IS",
+				"CRO-SP-TSB 1234-R",
+				"CRO-SP-CLM 1234-R",
+				"CRO 12345",
+				"CRM-SP 12345",
+			]) {
+				expect(isValidRegistroProfissional({ value, council: "CRO" })).toBe(false);
+			}
+
+			expect(
+				isValidRegistroProfissional({ value: "CRO-RJ 12345", council: "CRO", stateCode: "SP" }),
+			).toBe(false);
+		});
+
 		test("when value is null", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidRegistroProfissional({ value: null, council: "OAB" })).toBe(false);
@@ -138,6 +156,28 @@ describe("isValidRegistroProfissional", () => {
 
 		test("for a valid CRO number", () => {
 			expect(isValidRegistroProfissional({ value: "12345/MG", council: "CRO" })).toBe(true);
+		});
+
+		test("for a CRO number in the form of the Consolidação das Normas do CFO, art. 115, § 1º", () => {
+			for (const value of [
+				"CRO-SP 12345",
+				"CRO-SP-TPD 1234",
+				"CRO-SP-TSB 1234",
+				"CRO-SP-ASB 1234",
+				"CRO-SP-APD 1234",
+				"CRO-SP-CLM 1234",
+				"CRO-SP-CLF 1234",
+				"CRO-SP-LPM 1234",
+				"CRO-SP-LPF 1234",
+				"CRO-SP-PV 1234",
+				"CRO-SP-T 1234",
+				"CRO-SP 12345-IS",
+				"CRO-SP-TSB 1234-IS",
+				"CRO-SP 12345-R",
+				"CRO-SP-TPD 1234-R",
+			]) {
+				expect(isValidRegistroProfissional({ value, council: "CRO", stateCode: "SP" })).toBe(true);
+			}
 		});
 
 		test("for a valid CRP number, ignoring params.stateCode", () => {

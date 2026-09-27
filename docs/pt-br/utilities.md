@@ -3508,10 +3508,10 @@ Fonte: [ISO/IEC 7812-1](https://www.iso.org/standard/70484.html).
 Verifica a estrutura de um número de registro em conselho profissional (registro/inscrição profissional). Só a quantidade de dígitos e a UF são conferidas, nunca o dígito verificador, nem no CRC.
 
 - Recebe um objeto (`IsValidRegistroProfissionalParams`): `value`, `council` (`RegistroProfissionalCouncil`: `"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e `stateCode` opcional (UF esperada).
-- `"OAB"` e `"CRM"`: 4 a 6 dígitos mais a UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 a 6 dígitos (`12345/SP`).
-- `"CRP"`: código regional de 2 dígitos (`01` a `24`) mais 4 a 6 dígitos (`06/12345`); `stateCode` é ignorado.
-- `"CRC"`: UF, 6 dígitos, tipo de registro (`O` ou `P`) e dígito verificador (`SP-123456/O-3`); transferência acrescenta `T` ou `S` e a UF destino (`SP-123456/O-3 T-MG`). `stateCode` confere a UF de origem.
-- Formatos de OAB, CRM, CRO e CRP são convencionais (nenhum é publicado); CREA não é coberto.
+- `"OAB"` e `"CRM"`: 4 a 6 dígitos mais a UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 a 6 dígitos (`12345/SP`), ou a forma da Consolidação das Normas do CFO (Resolução CFO-63/2005), art. 115, § 1º: a sigla do Conselho Regional antes, ligada por hífen à categoria (`TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV`, `T`) quando houver, depois o número, seguido de `-IS` na secundária ou `-R` na remida (`CRO-SP 12345`, `CRO-SP-TPD 1234`, `CRO-SP 12345-IS`). Até a 2.4.0 essa forma era rejeitada.
+- `"CRP"`: código regional de 2 dígitos (`01` a `24`) mais 4 a 6 dígitos (`06/12345`); `stateCode` é ignorado. O sistema CFP tem 24 regionais; o CRP-25 (Amapá) é só uma proposta.
+- `"CRC"`: UF, 6 dígitos, tipo de registro (`O` ou `P`) e dígito verificador (`SP-123456/O-3`); transferência acrescenta `T` ou `S` e a UF destino (`SP-123456/O-3 T-MG`). `stateCode` confere a UF de origem. Essa forma e os registros `P`/`S` vêm do Manual de Registro de 2009; a Resolução CFC nº 1.707/2023, em vigor, só fixa uma numeração "única e sequencial em cada CRC" e o `T` da transferência, e o algoritmo do dígito verificador não é publicado.
+- As quantidades de dígitos de OAB, CRM, CRO e CRP são convencionais: a OAB e o CFM não publicam formato, e nem o art. 115 do CFO nem o CFP fixam quantidade de dígitos. CREA não é coberto.
 
 ```javascript
 import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
@@ -3519,13 +3519,14 @@ import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
 isValidRegistroProfissional({ value: '123456/SP', council: 'OAB' }); // true
 isValidRegistroProfissional({ value: '123456-RJ', council: 'OAB', stateCode: 'SP' }); // false (UF divergente)
 isValidRegistroProfissional({ value: '123456', council: 'OAB' }); // false (sem UF)
+isValidRegistroProfissional({ value: 'CRO-SP-TPD 1234', council: 'CRO' }); // true (art. 115 das normas do CFO)
 isValidRegistroProfissional({ value: '06/12345', council: 'CRP' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3', council: 'CRC' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3 T-MG', council: 'CRC' }); // true (registro transferido)
 isValidRegistroProfissional({ value: 'SP-123456/T-3', council: 'CRC' }); // false ("T" não é tipo de registro)
 ```
 
-Fonte: [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf), [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), [regionais do CFP](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/).
+Fonte: [Consolidação das Normas do CFO, art. 115](https://transparencia.cfo.org.br/wp-content/uploads/2023/09/Consolida%C3%A7%C3%A3o-das-Normas-Atualizado-emsetembro-de-2023.pdf), [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf), [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), [regionais do CFP](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/).
 
 ## VIN
 

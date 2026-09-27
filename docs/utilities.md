@@ -3508,10 +3508,10 @@ Source: [ISO/IEC 7812-1](https://www.iso.org/standard/70484.html).
 Check the structure of a professional council registration number (registro/inscrição profissional). Only the digit count and the UF are checked, never a check digit, even for CRC.
 
 - Takes an object (`IsValidRegistroProfissionalParams`): `value`, `council` (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` or `"CRC"`, a `RegistroProfissionalCouncil`) and an optional `stateCode` (expected UF).
-- `"OAB"` and `"CRM"`: 4 to 6 digits plus the UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 to 6 digits (`12345/SP`).
-- `"CRP"`: a 2-digit regional code (`01` to `24`) plus 4 to 6 digits (`06/12345`); `stateCode` is ignored.
-- `"CRC"`: UF, 6 digits, tipo de registro (`O` or `P`) and check digit (`SP-123456/O-3`); a transfer appends `T` or `S` and the destination UF (`SP-123456/O-3 T-MG`). `stateCode` matches the originating UF.
-- The OAB, CRM, CRO and CRP shapes are conventional (no published format). CREA is not covered.
+- `"OAB"` and `"CRM"`: 4 to 6 digits plus the UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 to 6 digits (`12345/SP`), or the form of the Consolidação das Normas do CFO (Resolução CFO-63/2005), art. 115, § 1º: the sigla of the Conselho Regional first, joined by a hyphen to the category (`TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV`, `T`) when there is one, then the number, followed by `-IS` for a secundária or `-R` for a remida (`CRO-SP 12345`, `CRO-SP-TPD 1234`, `CRO-SP 12345-IS`). Up to 2.4.0 this form was rejected.
+- `"CRP"`: a 2-digit regional code (`01` to `24`) plus 4 to 6 digits (`06/12345`); `stateCode` is ignored. The CFP system has 24 regionals; the CRP-25 (Amapá) is only a proposal.
+- `"CRC"`: UF, 6 digits, tipo de registro (`O` or `P`) and check digit (`SP-123456/O-3`); a transfer appends `T` or `S` and the destination UF (`SP-123456/O-3 T-MG`). `stateCode` matches the originating UF. This shape and the `P`/`S` registrations come from the Manual de Registro of 2009; Resolução CFC nº 1.707/2023, in force, only sets a numbering "única e sequencial em cada CRC" and the `T` of the transfer, and the check digit algorithm is not published.
+- The digit counts of the OAB, CRM, CRO and CRP numbers are conventional: the OAB and the CFM publish no format, and neither the CFO's art. 115 nor the CFP fixes a digit count. CREA is not covered.
 
 ```javascript
 import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
@@ -3519,13 +3519,14 @@ import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
 isValidRegistroProfissional({ value: '123456/SP', council: 'OAB' }); // true
 isValidRegistroProfissional({ value: '123456-RJ', council: 'OAB', stateCode: 'SP' }); // false (UF mismatch)
 isValidRegistroProfissional({ value: '123456', council: 'OAB' }); // false (no UF)
+isValidRegistroProfissional({ value: 'CRO-SP-TPD 1234', council: 'CRO' }); // true (art. 115 of the CFO norms)
 isValidRegistroProfissional({ value: '06/12345', council: 'CRP' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3', council: 'CRC' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3 T-MG', council: 'CRC' }); // true (registro transferido)
 isValidRegistroProfissional({ value: 'SP-123456/T-3', council: 'CRC' }); // false ("T" is not a tipo de registro)
 ```
 
-Source: [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf), [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), [CFP regional councils](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/).
+Source: [Consolidação das Normas do CFO, art. 115](https://transparencia.cfo.org.br/wp-content/uploads/2023/09/Consolida%C3%A7%C3%A3o-das-Normas-Atualizado-emsetembro-de-2023.pdf), [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf), [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), [CFP regional councils](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/).
 
 ## VIN
 
