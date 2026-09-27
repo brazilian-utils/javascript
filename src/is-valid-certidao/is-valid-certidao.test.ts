@@ -69,13 +69,6 @@ describe("isValidCertidao", () => {
 			expect(isValidCertidao("10453901552013000012021000012387")).toBe(false);
 		});
 
-		test("when the book code is 8 or 9, outside the table of art. 473, V, even with matching check digits", () => {
-			// 2.4.0 accepted both, as emancipação and interdição; code 7, the last official one, stays valid
-			expect(isValidCertidao("10453901552013700012021000012315")).toBe(true);
-			expect(isValidCertidao("10453901552013800012021000012343")).toBe(false);
-			expect(isValidCertidao("10453901552013900012021000012398")).toBe(false);
-		});
-
 		test("when the serviço is not the 55 of art. 473, III, even with matching check digits", () => {
 			expect(isValidCertidao("09400301542011100110002005191744")).toBe(false);
 			expect(isValidCertidao("094003 01 56 2011 1 00110 002 0051917 42")).toBe(false);
@@ -83,6 +76,13 @@ describe("isValidCertidao", () => {
 	});
 
 	describe("should return true", () => {
+		test("for the book codes 7, 8 and 9: art. 473, V, and the revoked Provimento CNJ nº 3/2009, art. 7º, V", () => {
+			// 8 (emancipações) and 9 (interdições) are on certidões issued under the Provimento nº 3/2009
+			expect(isValidCertidao("10453901552013700012021000012315")).toBe(true);
+			expect(isValidCertidao("10453901552013800012021000012343")).toBe(true);
+			expect(isValidCertidao("10453901552013900012021000012398")).toBe(true);
+		});
+
 		test("for 104539.01.55.2013.1.00012.021.0000123-21, the worked example of ghiorzi.org/DVnew.htm", () => {
 			expect(isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21")).toBe(true);
 			expect(isValidCertidao("10453901552013100012021000012321")).toBe(true);
@@ -156,14 +156,16 @@ describe("isValidCertidao", () => {
 			);
 		});
 
-		test("should return false for book code 9 even when interdiction is accepted", () => {
-			// 2.4.0 returned true: book code 9 is not in the table of art. 473, V
+		test("should accept the book codes 8 and 9 of the Provimento CNJ nº 3/2009 when their types are accepted", () => {
 			expect(
 				isValidCertidao("10453901552013900012021000012398", { accept: ["interdiction"] }),
-			).toBe(false);
+			).toBe(true);
 			expect(
 				isValidCertidao("10453901552013800012021000012343", { accept: ["emancipation"] }),
-			).toBe(false);
+			).toBe(true);
+			expect(isValidCertidao("10453901552013800012021000012343", { accept: ["other"] })).toBe(
+				false,
+			);
 		});
 
 		test("should return false when the book code is 0, outside the seven books of the Provimento, and accept is given", () => {
@@ -198,11 +200,11 @@ describe("isValidCertidao", () => {
 	});
 
 	describe("properties", () => {
-		const bases = fc.stringMatching(/^[0-9]{8}55[0-9]{4}[1-7][0-9]{15}$/);
+		const bases = fc.stringMatching(/^[0-9]{8}55[0-9]{4}[1-9][0-9]{15}$/);
 
 		const books = fc.tuple(
 			fc.stringMatching(/^[0-9]{8}55[0-9]{4}$/),
-			fc.integer({ min: 1, max: 7 }),
+			fc.integer({ min: 1, max: 9 }),
 			fc.stringMatching(/^[0-9]{15}$/),
 		);
 
@@ -239,11 +241,11 @@ describe("isValidCertidao", () => {
 			);
 		});
 
-		test("should reject any book code outside 1 to 7 whatever its check digits", () => {
+		test("should reject the book code 0 whatever its check digits", () => {
 			fc.assert(
 				fc.property(
 					fc.stringMatching(/^[0-9]{8}55[0-9]{4}$/),
-					fc.constantFrom(0, 8, 9),
+					fc.constant(0),
 					fc.stringMatching(/^[0-9]{15}$/),
 					(head, typeCode, tail) => {
 						const base = `${head}${typeCode}${tail}`;

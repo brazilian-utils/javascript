@@ -2466,7 +2466,7 @@ A matrícula tem 32 dígitos, impressos como `000000 00 00 0000 0 00000 000 0000
 | 2 | dígitos verificadores |
 
 - **Opções** (`IsValidCertidaoOptions`): `accept` restringe os tipos de livro válidos (`CertidaoType`) aos listados (padrão: todos os tipos).
-- O serviço precisa ser `55`, e o dígito do tipo de livro precisa ser um dos sete livros do art. 473, V, códigos 1 a 7 (`0`, `8` e `9` são rejeitados). `"emancipation"` e `"interdiction"` continuam membros de `CertidaoType`, mas não correspondem a nenhuma matrícula.
+- O serviço precisa ser `55`, e o dígito do tipo de livro um dos códigos de 1 a 9: 1 a 7 são os livros do art. 473, V (Provimento CNJ nº 149/2023, redação do Provimento CN nº 182/2024); 8 (`"emancipation"`, Livro E desdobrado para emancipações) e 9 (`"interdiction"`, Livro E desdobrado para interdições) vêm do Provimento CNJ nº 3/2009, art. 7º, revogado pelo Provimento CNJ nº 63/2017, e são mantidos para que as certidões emitidas sob ele a partir de 2010 continuem válidas. `0` é rejeitado.
 - Aceita o valor com ou sem máscara, com espaços entre e ao redor dos grupos.
 - Nenhum documento oficial publica o algoritmo dos dígitos verificadores: o art. 473, IX só nomeia os dois dígitos, o revogado Provimento CNJ nº 3/2009 mandava calculá-los com um programa que o CNJ entregava aos registradores e o leiaute do Cadastro NIS da Caixa diz só "módulo 11". Os pesos e a regra do resto seguem as referências da comunidade abaixo.
 
@@ -2477,7 +2477,8 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21'); // true
 isValidCertidao('09430001552010100020112000012087'); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 22'); // false (dígitos verificadores inválidos)
 isValidCertidao('09400301542011100110002005191744'); // false (serviço diferente de 55)
-isValidCertidao('10453901552013900012021000012398'); // false (o código de livro 9 não está no art. 473, V)
+isValidCertidao('10453901552013900012021000012398'); // true (código de livro 9, Provimento CNJ nº 3/2009)
+isValidCertidao('10453901552013000012021000012387'); // false (o código de livro 0 não nomeia livro)
 isValidCertidao('123456'); // false (tamanho inválido)
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['birth'] }); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] }); // false
@@ -2519,8 +2520,8 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 
 Extrai os campos da matrícula de uma certidão de registro civil. Aceita as mesmas formas de entrada de `isValidCertidao` e retorna `null` quando a matrícula é inválida.
 
-- Retorna `null` também para um serviço diferente de `55` e para um código de livro fora de 1 a 7.
-- O art. 473, V lista apenas os códigos de livro de 1 a 7, de "1: Livro A (Nascimento)" a "7: Livro E (Demais atos relativos ao registro civil)". Os códigos 8 (emancipação) e 9 (interdição) do Provimento CNJ nº 3/2009, revogado pelo Provimento CNJ nº 63/2017 e ainda listados por algumas referências da comunidade, não estão nele e são rejeitados, mesmo numa certidão emitida entre 2010 e 2017.
+- Retorna `null` também para um serviço diferente de `55` e para o código de livro `0`.
+- O art. 473, V lista os códigos de livro de 1 a 7, de "1: Livro A (Nascimento)" a "7: Livro E (Demais atos relativos ao registro civil)". Os códigos 8 (emancipação) e 9 (interdição) do Provimento CNJ nº 3/2009, art. 7º, revogado pelo Provimento CNJ nº 63/2017, não estão nele, mas continuam sendo lidos, como `"emancipation"` e `"interdiction"`, já que as certidões emitidas sob ele a partir de 2010 os trazem e continuam sendo documentos válidos.
 
 O resultado `CertidaoInfo` traz:
 
@@ -2530,8 +2531,8 @@ O resultado `CertidaoInfo` traz:
 | `acervo` | Acervo a que o livro pertence: `"01"` acervo próprio, `"02"` em diante um por acervo incorporado. O art. 473, §§ 3º a 5º separa os incorporados pela data em que a serventia de origem foi extinta ou desativada. Até 31/12/2009: o CNS da unidade incorporadora e um código de acervo a partir de `"02"`, um por incorporação. A partir de 01/01/2010: o CNS da própria unidade incorporada e o código `"01"`, considerado acervo próprio dessa unidade. Um acervo fracionado entre duas ou mais serventias sucessoras leva o CNS próprio de cada sucessora com o código `"02"`. |
 | `service` | Serviço prestado pela serventia, sempre `"55"`, o registro civil das pessoas naturais. |
 | `year` | Ano do registro, com 4 dígitos. |
-| `type` | Livro a que o ato pertence: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, ou `"other"`. `"emancipation"` e `"interdiction"` continuam na união `CertidaoType` por compatibilidade, mas nunca são retornados. |
-| `typeCode` | Código bruto do livro, de 1 a 7, como impresso na décima quinta posição da matrícula. |
+| `type` | Livro a que o ato pertence: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, `"other"`, ou, para os códigos 8 e 9 do Provimento CNJ nº 3/2009, `"emancipation"` e `"interdiction"`. |
+| `typeCode` | Código bruto do livro, de 1 a 9, como impresso na décima quinta posição da matrícula. |
 | `book` | Número do livro, com 5 dígitos e zeros à esquerda. |
 | `page` | Número da folha, com 3 dígitos e zeros à esquerda. |
 | `term` | Número do termo, com 7 dígitos e zeros à esquerda. |

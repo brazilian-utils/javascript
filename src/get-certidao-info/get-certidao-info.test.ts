@@ -42,12 +42,6 @@ describe("getCertidaoInfo", () => {
 			expect(getCertidaoInfo("10453901552013000012021000012387")).toBeNull();
 		});
 
-		test("when the book code is 8 or 9, outside the table of art. 473, V", () => {
-			// 2.4.0 returned "emancipation" and "interdiction"
-			expect(getCertidaoInfo("10453901552013800012021000012343")).toBeNull();
-			expect(getCertidaoInfo("10453901552013900012021000012398")).toBeNull();
-		});
-
 		test("when the serviço is not the 55 of art. 473, III, even with matching check digits", () => {
 			expect(getCertidaoInfo("09400301542011100110002005191744")).toBeNull();
 		});
@@ -59,6 +53,26 @@ describe("getCertidaoInfo", () => {
 	});
 
 	describe("should return the parsed matrícula", () => {
+		test("for an emancipation act, book code 8 of the revoked Provimento CNJ nº 3/2009", () => {
+			expect(getCertidaoInfo("10453901552013800012021000012343")).toEqual({
+				registryCns: "104539",
+				acervo: "01",
+				service: "55",
+				year: 2013,
+				type: "emancipation",
+				typeCode: 8,
+				book: "00012",
+				page: "021",
+				term: "0000123",
+				checkDigits: "43",
+			});
+		});
+
+		test("for an interdiction act, book code 9 of the revoked Provimento CNJ nº 3/2009", () => {
+			expect(getCertidaoInfo("10453901552013900012021000012398")?.type).toBe("interdiction");
+			expect(getCertidaoInfo("10453901552013900012021000012398")?.typeCode).toBe(9);
+		});
+
 		test("for 104539.01.55.2013.1.00012.021.0000123-21, the worked example of ghiorzi.org/DVnew.htm", () => {
 			expect(getCertidaoInfo("104539 01 55 2013 1 00012 021 0000123 21")).toEqual({
 				registryCns: "104539",

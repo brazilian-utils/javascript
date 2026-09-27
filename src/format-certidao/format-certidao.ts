@@ -60,8 +60,9 @@ export type FormatCertidaoOptions = {
  * 7 + 2 positions art. 473 carries today (revoked by the Provimento CNJ nº 63/2017; historical).
  * Its inciso V also listed "8: Livro E (Desdobrado para registro específico das Emancipações)"
  * and "9: Livro E (Desdobrado para registro específico das Interdições)", which art. 473, V no
- * longer has, and its inciso IX had the check digits "formado automaticamente por meio do
- * programa" the CNJ Corregedoria handed to the registrars, whose algorithm was never published.
+ * longer has but which are still accepted, the certidões issued under it carrying them, and its
+ * inciso IX had the check digits "formado automaticamente por meio do programa" the CNJ
+ * Corregedoria handed to the registrars, whose algorithm was never published.
  * @see Based on: http://ghiorzi.org/DVnew.htm
  * Worked example of the two check digits (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts
