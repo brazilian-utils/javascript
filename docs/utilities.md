@@ -2091,7 +2091,7 @@ generatePassport(); // 'RY393097'
 Check if a CNH is valid. Spaces, dots and hyphens are ignored; any other character makes the value invalid.
 
 - A value whose 11 digits are all the same is rejected, so `'11111111111'` is invalid.
-- The first check digit keeps a remainder of 1 as `1`, as real registry numbers do. Resolução CONTRAN nº 886/2021 says `0`.
+- The first check digit keeps a remainder of 1 as `1`, as real registry numbers do. Resolução CONTRAN nº 886/2021, art. 4º § 1º, whose remainder of 0 or 1 gives `0`, speaks of "O dígito verificador" without naming the number: written in the singular right after the Número do Espelho da CNH (the only number of the article with a single check digit), it reads best as that digit's rule, but it is worded generically and gives no weights, so it is no source for the 2 check digits of the registry number; no official text publishes their weights. Resoluções CONTRAN nº 976/2022, nº 998/2023 and nº 1.006/2024 amend Resolução nº 886/2021, none of them in art. 4º.
 
 ```javascript
 import { isValidCnh } from '@brazilian-utils/brazilian-utils';

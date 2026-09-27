@@ -2091,7 +2091,7 @@ generatePassport(); // 'RY393097'
 Valida uma CNH. Espaços, pontos e hífens são ignorados; qualquer outro caractere invalida o valor.
 
 - Um valor cujos 11 dígitos são todos iguais é rejeitado, então `'11111111111'` é inválido.
-- O primeiro dígito verificador mantém o resto 1 como `1`, como nos números reais de registro. A Resolução CONTRAN nº 886/2021 diz `0`.
+- O primeiro dígito verificador mantém o resto 1 como `1`, como nos números reais de registro. O art. 4º, § 1º, da Resolução CONTRAN nº 886/2021, em que o resto 0 ou 1 dá `0`, fala em "O dígito verificador" sem dizer de qual número: escrito no singular logo depois do Número do Espelho da CNH (o único número do artigo com um só dígito verificador), ele se lê melhor como a regra desse dígito, mas a redação é genérica e não traz pesos, então não serve de fonte para os 2 dígitos verificadores do número de registro; nenhum texto oficial publica os pesos deles. As Resoluções CONTRAN nº 976/2022, nº 998/2023 e nº 1.006/2024 alteram a Resolução nº 886/2021, nenhuma delas no art. 4º.
 
 ```javascript
 import { isValidCnh } from '@brazilian-utils/brazilian-utils';
