@@ -3358,7 +3358,13 @@ removeAccents(''); // ''
 Check if an inscrição estadual (state registration) is valid for a state. **Deprecated:** the positional form `isValidIe(stateCode, ie)` still works but is deprecated; use the object form `isValidIe({ value, stateCode })`.
 
 - Takes a single object (`IsValidIeParams`): `value` is the registration and `stateCode` the state it belongs to (a `StateCode`, case-insensitive).
-- GO, PA, MS, SP, TO, DF, PE, AL and RJ have special cases (extra prefixes or formats, or a deviation from the SINTEGRA page); see the JSDoc in `src/is-valid-ie` for the details.
+- Some states have special cases, a prefix or format the SINTEGRA page does not print or a deliberate deviation from it (details and sources in the JSDoc in `src/is-valid-ie`):
+  - GO: the prefixes 10, 11, 15 and 20 to 29 (SEFAZ-GO has issued 20 to new companies since 13/01/2023).
+  - PA: the prefixes 15 and 75 to 79. MS: the prefixes 28 and 50.
+  - DF: the 13 digit AC rule under the prefix 07.
+  - SP: the produtor rural form `P0MMMSSSSD000`.
+  - TO: 11 digits, with the tipo digits, or 9 digits.
+  - PE: only the 9 digit eFisco form. AL: the third digit is not restricted. RJ: the 8 digit length and the weights come from the SINTEGRA validator.
 - An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it: AM, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE and SP, plus BA with 8 or 9 digits and TO with 9 digits.
 
 ```javascript
@@ -3368,6 +3374,7 @@ isValidIe({ value: '110042490114', stateCode: 'SP' }); // true
 isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true (produtor rural)
 isValidIe({ value: '0187634580933', stateCode: 'AC' }); // false
 isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
+isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefix 20)
 ```
 
 Source: [SINTEGRA state pages](http://www.sintegra.gov.br/insc_est.html) and the [SEFAZ-GO roteiro de crítica](https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/).

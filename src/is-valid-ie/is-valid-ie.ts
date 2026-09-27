@@ -478,9 +478,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * Per state notes, all of them deliberate and unchanged since 2.3.0:
  * - DF: the SINTEGRA page is published but empty, and no SEFAZ-DF roteiro is published either,
  *   so DF follows the 13 digit AC rule under the prefix 07.
- * - GO: the SINTEGRA page is superseded by the SEFAZ-GO roteiro, which is the source of the
- *   prefixes 10, 11 and 15, of the 10103105 to 10119997 range and of the dual digit
- *   registration 11094402.
+ * - GO: the prefixes are 10, 11, 15 and 20 to 29. The SINTEGRA page gives 10, 11 and 20 to 29,
+ *   and SEFAZ-GO has issued 20 to new companies since 13/01/2023, when the range starting with 10
+ *   ran out. The SEFAZ-GO roteiro adds 15, the 10103105 to 10119997 range and the dual digit
+ *   registration 11094402; the two sources agree on the weights and the modulus.
  * - RJ: the SINTEGRA page publishes only the modulus rule; the 8 digit length and the weights
  *   2, 7, 6, 5, 4, 3 and 2 come from the SINTEGRA validator itself, not from the page.
  * - SP: characters other than "P" and digits are rejected on purpose, a deliberate deviation
@@ -515,6 +516,7 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true
  * isValidIe({ value: '12345', stateCode: 'RJ' }); // false
  * isValidIe({ value: '109161793', stateCode: 'go' as StateCode }); // true (case-insensitive)
+ * isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefix 20)
  * ```
  *
  * @see Official: http://www.sintegra.gov.br/insc_est.html
@@ -530,8 +532,9 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * prefix 07.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
- * Superseded for Goiás by the SEFAZ-GO roteiro below: this page still gives the prefixes as
- * 10, 11 or 20 to 29 and knows nothing of the special ranges.
+ * "8 dígitos (ABCDEFGH) + 1 dígito verificador (I); onde AB pode ser igual a 10 ou 11 ou 20 a
+ * 29": the source of the prefixes 20 to 29, which SEFAZ-GO now issues (see its notice below).
+ * The prefix 15 and the special ranges come from the SEFAZ-GO roteiro below.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MG.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MS.html
@@ -556,7 +559,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * the 9 digit form the validator also accepts is not covered by this page or by any other
  * published SEFAZ-TO roteiro.
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
- * SEFAZ-GO's roteiro de crítica, the source of the Goiás prefixes and special ranges.
+ * SEFAZ-GO's roteiro de crítica, the source of the prefix 15 and of the special ranges.
+ * @see Official: https://goias.gov.br/economia/contribuintes-goianos-passam-a-ter-novo-numero-de-inscricao-estadual/
+ * SEFAZ-GO notice: company (Pessoa Jurídica) registrations made from 13/01/2023 start with 20,
+ * the range starting with 10 having run out; those of Pessoas Físicas still start with 11.
  */
 export function isValidIe(params: IsValidIeParams): boolean;
 /**

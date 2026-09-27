@@ -264,12 +264,29 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "109161794", stateCode: "GO" })).toBe(false);
 		});
 
-		test("should return false when the IE does not start with 10, 11 or 15", () => {
+		test("should return false when the IE does not start with 10, 11, 15 or 20 to 29", () => {
 			expect(isValidIe({ value: "121031131", stateCode: "GO" })).toBe(false);
 		});
 
-		test("should return false for prefixes 20 to 29, which the current SEFAZ-GO rule does not accept", () => {
-			expect(isValidIe({ value: "209876549", stateCode: "GO" })).toBe(false);
+		test("should return true for the prefix 20, the one SEFAZ-GO issues to companies since 13/01/2023", () => {
+			// 2 x 9 = 18, 18 % 11 = 7, 11 - 7 = 4
+			expect(isValidIe({ value: "200000004", stateCode: "GO" })).toBe(true);
+			expect(isValidIe({ value: "209876549", stateCode: "GO" })).toBe(true);
+		});
+
+		test("should return true for every prefix from 20 to 29 the SINTEGRA page lists", () => {
+			expect(isValidIe({ value: "210000007", stateCode: "GO" })).toBe(true);
+			expect(isValidIe({ value: "290000009", stateCode: "GO" })).toBe(true);
+			expect(isValidIe({ value: "299999998", stateCode: "GO" })).toBe(true);
+		});
+
+		test("should return false for the prefixes 19 and 30, just outside 20 to 29, even with a matching digit", () => {
+			expect(isValidIe({ value: "190000007", stateCode: "GO" })).toBe(false);
+			expect(isValidIe({ value: "300000006", stateCode: "GO" })).toBe(false);
+		});
+
+		test("should return false for a prefix 20 registration with an incorrect digit", () => {
+			expect(isValidIe({ value: "200000005", stateCode: "GO" })).toBe(false);
 		});
 
 		test("should return false when the length is different from 9", () => {

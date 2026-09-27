@@ -8,7 +8,25 @@ export const AL_PREFIXES = ["24"];
 
 export const BA_MOD_10_DIGITS = [0, 1, 2, 3, 4, 5, 8];
 
-export const GO_PREFIXES = ["10", "11", "15"];
+/**
+ * 10, 11 and 15 from the SEFAZ-GO roteiro de crítica; 20 to 29 from the SINTEGRA page ("AB pode ser
+ * igual a 10 ou 11 ou 20 a 29"), the range SEFAZ-GO has issued to companies since 13/01/2023.
+ */
+export const GO_PREFIXES = [
+	"10",
+	"11",
+	"15",
+	"20",
+	"21",
+	"22",
+	"23",
+	"24",
+	"25",
+	"26",
+	"27",
+	"28",
+	"29",
+];
 
 export const GO_DUAL_DIGIT_IE = 11_094_402;
 
