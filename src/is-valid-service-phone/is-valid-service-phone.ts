@@ -14,7 +14,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * Service numbers are dialed without a DDD, so they are validated by prefix and length alone:
  * - the Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900`, each followed by
- *   7 digits (11 in total, the shorter, extinct `0800` + 6 form is rejected);
+ *   7 digits (11 in total, the shorter, extinct `0800` + 6 form is rejected): the 10 digit CNG
+ *   series of Resolução Anatel nº 749/2022 art. 18, dialed behind the Prefixo Nacional `0` (art.
+ *   28);
  * - the abbreviated `300X` and `400X` numbers, followed by 4 digits, e.g. `3003-1234`. Anatel
  *   withdrew the 4-digit codes rather than allocating them (Resolução nº 86/1998 art. 43 I and
  *   Ato nº 43.151/2004 art. 2º II both ordered them released), so the accepted roots are the

@@ -943,7 +943,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 Check if a phone number is a valid Brazilian service number, dialed without a DDD. Only the structure is checked: the number does not have to be assigned to anyone.
 
-- The Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` followed by 7 digits (11 in total).
+- The Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` followed by 7 digits (11 in total): the 10 digit series of Resolução Anatel 749/2022, art. 18, dialed behind the `0` prefix (art. 28).
 - The abbreviated `300X`/`400X` numbers, 8 digits. Other carrier prefixes such as `4020` and `4062` are rejected.
 - The 3 digit public utility codes Anatel has designated (e.g. `190`, `192`). `112` and `911` are not among them and are rejected.
 

@@ -10,8 +10,10 @@
  *   total and never a DDD. `800` is toll-free for the caller, `300` and `303` split the cost
  *   (`303` marks subscribers that generate call bursts, such as telemarketing), `500` is for
  *   donation campaigns by non-profits and `900` for paid value-added services. The 10-digit
- *   `0800` + 6 form is extinct: Resolução nº 709/2019 art. 2º ordered every CNG migrated to the
- *   11-digit format. `900` is currently held in reserva técnica (Ato nº 12.712/2024, item 12.1),
+ *   `0800` + 6 form is extinct: art. 18 gives the CNG 10 digits, [N10…N1], so the dialed form is
+ *   always 11. Resolução nº 709/2019 is not the source of these rules: it approves the
+ *   Regulamento Geral de Numeração, and its art. 2º, which ordered the CNG migrated to the format
+ *   of art. 44 of Resolução nº 86/1998, was revoked by Resolução nº 769/2024. `900` is currently held in reserva técnica (Ato nº 12.712/2024, item 12.1),
  *   and `500` encodes the donation amount in its last two digits (item 10.6), a rule this
  *   library does not enforce, since it validates structure only.
  * - **Código de Acesso a Serviços de Utilidade Pública (SUP)**, art. 13-14: 3 digits, with the
@@ -37,7 +39,9 @@
  * is the grouping used on gov.br, and `4004-1234` the one carriers print.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
- * Resolução Anatel nº 749/2022, the Regulamento de Numeração in force.
+ * Resolução Anatel nº 749/2022, the Regulamento de Numeração in force: art. 18, the CNG series
+ * `300`, `303`, `500`, `800` and `900` in the format [N10…N1], and art. 28, their dialing as
+ * ["0"N10…N1].
  * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151
  * Ato Anatel nº 43.151/2004, whose Anexo is the consolidated SUP designation table.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2140-ato-12712
