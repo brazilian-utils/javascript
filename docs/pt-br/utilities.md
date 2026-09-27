@@ -115,6 +115,7 @@ Valida um CNPJ.
 - **Opções** (`IsValidCnpjOptions`): `version` escolhe o formato aceito: `1` (padrão) apenas numérico, `2` numérico e alfanumérico. Qualquer outro valor é lido como `1`.
 - Um número reservado (todos os dígitos iguais) é rejeitado nas duas versões; a versão `2` não tem lista de reservados para letras.
 - O conjunto oficial de caracteres do CNPJ alfanumérico são as letras maiúsculas de `A` a `Z` e os algarismos (os 2 dígitos verificadores são sempre algarismos). Uma letra minúscula só é aceita como normalização da entrada, como um caractere de máscara: a entrada é convertida para maiúsculas antes.
+- O Ex1 da pergunta 23 do perguntas e respostas da Receita Federal sobre o CNPJ alfanumérico, `AA345678/0003-29`, tem erro de impressão: os dígitos verificadores dele são `86`, então ele é rejeitado.
 
 ```javascript
 import { isValidCnpj } from '@brazilian-utils/brazilian-utils';
@@ -123,7 +124,7 @@ isValidCnpj('15515147234255'); // false
 isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (lido como Q0SLFMBD7VX439)
 ```
 
-Fonte: [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
+Fonte: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=141102) (Anexo XV da IN RFB nº 2.119/2022, pesos "da direita para esquerda" conforme a retificação no DOU de 25/10/2024), [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
 
 ### formatCnpj
 

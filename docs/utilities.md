@@ -115,6 +115,7 @@ Check if a CNPJ is valid.
 - **Options** (`IsValidCnpjOptions`): `version` picks the accepted format: `1` (default) numeric only, `2` numeric and alphanumeric. Any other value is read as `1`.
 - A reserved number (all digits the same) is rejected under both versions; version `2` has no reserved list for letters.
 - The official character set of the alphanumeric CNPJ is the capital letters `A` to `Z` and the digits (the 2 check digits are always digits). A lower case letter is accepted only as input normalization, like a mask character: the input is upper-cased first.
+- The Ex1 of question 23 of the Receita Federal's Q&A on the alphanumeric CNPJ, `AA345678/0003-29`, is a misprint: its check digits are `86`, so it is rejected.
 
 ```javascript
 import { isValidCnpj } from '@brazilian-utils/brazilian-utils';
@@ -123,7 +124,7 @@ isValidCnpj('15515147234255'); // false
 isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (read as Q0SLFMBD7VX439)
 ```
 
-Source: [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
+Source: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=141102) (Anexo XV of IN RFB nº 2.119/2022, weights "da direita para esquerda" as corrected by the retificação in the DOU of 25/10/2024), [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
 
 ### formatCnpj
 
