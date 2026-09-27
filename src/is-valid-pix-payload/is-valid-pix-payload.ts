@@ -12,6 +12,7 @@ import {
 	PIX_MERCHANT_NAME_ID,
 	PIX_PAYLOAD_FORMAT_INDICATOR,
 	PIX_PAYLOAD_FORMAT_INDICATOR_ID,
+	PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT,
 	PIX_POINT_OF_INITIATION_ID,
 	PIX_STATIC_POINT_OF_INITIATION,
 	PIX_TRANSACTION_AMOUNT_ID,
@@ -88,8 +89,9 @@ const isValidAdditionalData = (additionalData: string | undefined): boolean =>
  * Validates a Pix BR Code payload, the string behind a Pix QR Code and behind "Pix copia e
  * cola".
  *
- * The payload is valid when its TLV (tag-length-value) structure is well-formed, when the
- * mandatory objects are present and well-formed (payload format indicator `01`, a merchant
+ * The payload is valid when its TLV (tag-length-value) structure is well-formed, when it
+ * starts with the payload format indicator `000201`, when the mandatory objects are present and
+ * well-formed (that indicator, not repeated with another value later on, a merchant
  * category code of 4 digits, currency `986`, country `BR`, merchant name and merchant city), when one of
  * the "Merchant Account Information" templates (IDs 26 to 51) carries the `br.gov.bcb.pix` GUI
  * together with a key (static QR Code) or a URL (dynamic QR Code), and when the CRC-16 matches
@@ -133,7 +135,8 @@ const isValidAdditionalData = (additionalData: string | undefined): boolean =>
  * @see Official: https://www.emvco.com/terms-of-use/?u=/wp-content/uploads/documents/EMVCo-Merchant-Presented-QR-Specification-v1-1.pdf
  * EMV® QRCPS-MPM v1.1, cited by the Pix manual, "Data Objects Under the Root of a QR Code":
  * Merchant Category Code `"52"`, format `N` (numeric), length `"04"`, "As defined by [ISO
- * 18245]".
+ * 18245]"; "Position of Data Objects": "The Payload Format Indicator (ID "00") shall be the
+ * first data object in the QR Code".
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
@@ -151,6 +154,7 @@ export const isValidPixPayload = (value: string): boolean => {
 
 	if (!fields) return false;
 
+	if (!payload.startsWith(PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT)) return false;
 	if (fields[PIX_PAYLOAD_FORMAT_INDICATOR_ID] !== PIX_PAYLOAD_FORMAT_INDICATOR) return false;
 	if (!isValidPointOfInitiation(fields)) return false;
 	// An absent code reads as "undefined", which is not 4 digits either.

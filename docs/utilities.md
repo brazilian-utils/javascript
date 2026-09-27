@@ -463,6 +463,7 @@ Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/cont
 
 Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid. The key itself is not checked; use `isValidPixKey`.
 
+- The payload must start with the format indicator `000201`.
 - The TLV structure, the CRC-16 and the mandatory objects (format indicator, a 4 digit category code, currency, country, merchant name and city) are checked.
 - One "Merchant Account Information" template (IDs 26 to 51) must carry the `br.gov.bcb.pix` GUI with a key (static) or a PSP URL (dynamic), never both.
 - Objects `01` (Point of Initiation Method) and `62` (Additional Data Field) are optional; `01` must be `11` or `12` when present.

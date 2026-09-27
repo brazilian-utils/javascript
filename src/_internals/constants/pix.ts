@@ -15,6 +15,13 @@ export const PIX_PAYLOAD_FORMAT_INDICATOR_ID = "00";
 
 export const PIX_PAYLOAD_FORMAT_INDICATOR = "01";
 
+/**
+ * The Payload Format Indicator object as the EMV® QRCPS-MPM requires it at the very start of
+ * the payload: "The Payload Format Indicator (ID "00") shall be the first data object in the QR
+ * Code".
+ */
+export const PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT = "000201";
+
 export const PIX_POINT_OF_INITIATION_ID = "01";
 
 export const PIX_STATIC_POINT_OF_INITIATION = "11";

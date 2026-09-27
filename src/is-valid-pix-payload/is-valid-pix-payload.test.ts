@@ -163,6 +163,20 @@ describe("isValidPixPayload", () => {
 			).toBe(false);
 		});
 
+		test("when the payload format indicator is not the first object", () => {
+			const rest = STATIC_BODY.slice("000201".length);
+
+			expect(isValidPixPayload(withCrc(`000201${rest}`))).toBe(true);
+			const afterMerchantAccountInformation = `${rest.slice(0, 62)}000201${rest.slice(62)}`;
+
+			expect(isValidPixPayload(withCrc(afterMerchantAccountInformation))).toBe(false);
+			expect(isValidPixPayload(withCrc(`${rest}000201`))).toBe(false);
+		});
+
+		test("when the payload format indicator is repeated later with another value", () => {
+			expect(isValidPixPayload(withCrc(`${STATIC_BODY}000202`))).toBe(false);
+		});
+
 		test("when the point of initiation method is neither 11 nor 12", () => {
 			expect(
 				isValidPixPayload(
