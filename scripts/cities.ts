@@ -105,8 +105,8 @@ const main = async (): Promise<void> => {
 	}
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/cities.ts"),
-		`import type { StateCode } from "./states";
+		resolve(scriptsDir, "..", "./src/_internals/constants/municipalities.ts"),
+		`import { type StateCode } from "./states";
 
 /**
  * Brazilian municipalities by state, published by the IBGE. \`DATA\` holds, for each state, a

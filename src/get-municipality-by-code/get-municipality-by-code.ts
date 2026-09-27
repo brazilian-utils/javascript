@@ -1,9 +1,9 @@
-import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/cities";
+import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
 import { DATA } from "../_internals/constants/states";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
-export type { Municipality } from "../_internals/constants/cities";
+export type { Municipality } from "../_internals/constants/municipalities";
 
 /**
  * Looks up a Brazilian municipality by its 7 digit IBGE code, published by the IBGE.

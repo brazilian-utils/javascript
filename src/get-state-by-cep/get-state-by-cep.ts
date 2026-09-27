@@ -1,7 +1,5 @@
 import { DATA, type State } from "../_internals/constants/states";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
-import { isValidCep } from "../is-valid-cep/is-valid-cep";
-import { parseCep } from "../parse-cep/parse-cep";
+import { findCepRange } from "../_internals/find-cep-range/find-cep-range";
 import { CEP_RANGES } from "./constants";
 
 export type { State } from "../_internals/constants/states";
@@ -43,11 +41,7 @@ export type { State } from "../_internals/constants/states";
  * ```
  */
 export const getStateByCep = (value: string | number): State | null => {
-	if (!isLookupCode(value) || !isValidCep(value)) return null;
-
-	const cep = Number(parseCep(value));
-
-	const range = CEP_RANGES.find((entry) => cep >= entry.start && cep <= entry.end);
+	const range = findCepRange(value, CEP_RANGES);
 	const state = range && DATA.find((entry) => entry.code === range.state);
 
 	return state ? { ...state } : null;
