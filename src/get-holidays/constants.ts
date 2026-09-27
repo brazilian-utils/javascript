@@ -158,8 +158,12 @@ const AL_EMANCIPACAO_FERIADO_SINCE_YEAR = 2024;
  */
 const AL_DIA_DO_EVANGELICO_SINCE_YEAR = 2014;
 
-/** First year Paraíba's 26 July is no longer a holiday: Lei PB nº 10.601/2015 revoked its basis on 17/12/2015. */
-const PB_MORTE_JOAO_PESSOA_UNTIL_YEAR = 2016;
+/**
+ * First year Paraíba's 26 July and the 5 August of Lei PB nº 3.489/1967 are no longer holidays
+ * under that law: Lei PB nº 10.601/2015 revoked its art. 2º on 17/12/2015 and made 5 August the
+ * Data Magna from 2016.
+ */
+const PB_LEI_3489_ARTICLE_2_UNTIL_YEAR = 2016;
 
 /** First year Tocantins' 18 March is no longer a holiday: Lei TO nº 2.013/2009 repealed the feriado clause on 18/02/2009. */
 const TO_AUTONOMIA_UNTIL_YEAR = 2009;
@@ -397,8 +401,14 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * also revoked art. 2º of Lei PB nº 3.489, de 30/08/1967, the basis of the 26/07 Morte de João
  * Pessoa entry, which is therefore emitted from 1968 up to 2015. That art. 2º read "São
  * considerados feriados estaduais o 5 de agosto, em comemoração à fundação da Paraíba, em 1585, e
- * o 26 de julho, em homenagem a memória do ex-Presidente João Pessoa"; its 5 August, under that
- * other name, is not carried before 2016.
+ * o 26 de julho, em homenagem a memória do ex-Presidente João Pessoa", so 5 August was already a
+ * feriado estadual under it: from 1968 to 2015 it is emitted as "Fundação da Paraíba", the name
+ * that law gives it (up to 2.4.0 it was not carried before 2016). Lei PB nº 3.489/1967 entered
+ * into force on its publication (DOE 03/09/1967), after that year's date. Lei PB nº 14.171, de
+ * 11/12/2025, which declares 20 November a feriado estadual, has no entry: the date has been the
+ * national holiday of Lei 14.759/2023 since 2024.
+ * @see Official: https://sapl.al.pb.leg.br/media/sapl/public/normajuridica/1967/2945/2945_texto_integral.pdf
+ * Lei PB nº 3.489, de 30/08/1967, the scanned text of the law, art. 2º as quoted above.
  * @see Official: https://www.legislacao.pr.gov.br/legislacao/pesquisarAto.do?action=exibir&codAto=134573
  * Lei PR nº 18.384/2014, Emancipação Política do Paraná (19/12), a data comemorativa its own text
  * says is "não se constituindo em feriado civil", nor a ponto facultativo it declares, so Paraná
@@ -647,14 +657,21 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			name: "Data Magna do Estado da Paraíba",
 			day: 5,
 			month: 8,
-			since: PB_MORTE_JOAO_PESSOA_UNTIL_YEAR,
+			since: PB_LEI_3489_ARTICLE_2_UNTIL_YEAR,
+		},
+		{
+			name: "Fundação da Paraíba",
+			day: 5,
+			month: 8,
+			since: 1968,
+			until: PB_LEI_3489_ARTICLE_2_UNTIL_YEAR,
 		},
 		{
 			name: "Morte de João Pessoa",
 			day: 26,
 			month: 7,
 			since: 1968,
-			until: PB_MORTE_JOAO_PESSOA_UNTIL_YEAR,
+			until: PB_LEI_3489_ARTICLE_2_UNTIL_YEAR,
 		},
 	],
 
