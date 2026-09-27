@@ -1,5 +1,5 @@
+import { completeState } from "../_internals/complete-state/complete-state";
 import { DATA, type State } from "../_internals/constants/states";
-import { copyState } from "../_internals/copy-state/copy-state";
 import { findCepRange } from "../_internals/find-cep-range/find-cep-range";
 import { CEP_RANGES } from "./constants";
 
@@ -45,5 +45,5 @@ export const getStateByCep = (value: string | number): State | null => {
 	const range = findCepRange(value, CEP_RANGES);
 	const state = range && DATA.find((entry) => entry.code === range.state);
 
-	return state ? copyState(state) : null;
+	return state ? completeState(state) : null;
 };

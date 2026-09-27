@@ -1,5 +1,5 @@
+import { completeState } from "../_internals/complete-state/complete-state";
 import { DATA, type State } from "../_internals/constants/states";
-import { copyState } from "../_internals/copy-state/copy-state";
 
 export type { State } from "../_internals/constants/states";
 
@@ -24,4 +24,4 @@ export type { State } from "../_internals/constants/states";
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const getStates = (): State[] => DATA.map((state) => copyState(state));
+export const getStates = (): State[] => DATA.map((state) => completeState(state));

@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
 
+import { completeState } from "../_internals/complete-state/complete-state";
 import { DATA, type State, type StateCode, type StateName } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
@@ -71,7 +72,7 @@ describe("getStates", () => {
 		const second = getStates();
 
 		expect(second.at(0)?.name).not.toBe("X");
-		expect(second).toEqual(DATA.map((state) => Object.assign({}, state)));
+		expect(second).toEqual(DATA.map((state) => completeState(state)));
 	});
 
 	it("should copy the capital too, so mutating it does not leak between calls", () => {
@@ -80,7 +81,7 @@ describe("getStates", () => {
 		Object.assign(first?.capital ?? {}, { name: "X" });
 
 		expect(getStates().at(0)?.capital).toEqual({ code: "1200401", name: "Rio Branco" });
-		expect(DATA.at(0)?.capital.name).toBe("Rio Branco");
+		expect(DATA.at(0)).not.toHaveProperty("capital");
 	});
 
 	it("should give the Distrito Federal Brasília, the code of the whole district", () => {

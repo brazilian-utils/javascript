@@ -1,12 +1,12 @@
 import { type Municipality } from "../_internals/constants/municipalities";
-import { DATA } from "../_internals/constants/states";
+import { STATE_CAPITALS } from "../_internals/constants/state-capitals";
+import { isStateCode } from "../_internals/is-state-code/is-state-code";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 
 /**
  * Retrieves the capital of a Brazilian state, as the same `{ code, name, stateCode }` that
- * `getMunicipalityByCode` returns for it: the `capital` of the state `getStates` returns, with the
- * state code added. The match is case-insensitive and ignores leading and
+ * `getMunicipalityByCode` returns for it. The match is case-insensitive and ignores leading and
  * trailing whitespace, like `getTimezoneByState`.
  *
  * For the Distrito Federal, which has no municipalities, the capital is Brasília, with the code
@@ -33,9 +33,9 @@ export const getStateCapital = (stateCode: string): Municipality | null => {
 
 	const normalized = stateCode.trim().toUpperCase();
 
-	const state = DATA.find((entry) => entry.code === normalized);
+	if (!isStateCode(normalized)) return null;
 
-	return state
-		? { code: state.capital.code, name: state.capital.name, stateCode: state.code }
-		: null;
+	const [name, code] = STATE_CAPITALS[normalized];
+
+	return { code, name, stateCode: normalized };
 };

@@ -1,9 +1,10 @@
 import * as fc from "fast-check";
 
-import { DATA as STATES, type State } from "../_internals/constants/states";
+import { type State } from "../_internals/constants/states";
 import { anyGarbage, digits, digitsOfOtherLength } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { getStateByIbgeCode } from "../get-state-by-ibge-code/get-state-by-ibge-code";
 import { CEP_RANGES } from "./constants";
 import { getStateByCep } from "./get-state-by-cep";
 
@@ -42,7 +43,7 @@ const RANGE_BOUNDARIES: [string, string, string][] = [
 
 describe("getStateByCep", () => {
 	it("should return São Paulo for a formatted CEP of Avenida Paulista", () => {
-		expect(getStateByCep("01310-100")).toEqual(STATES.find((state) => state.code === "SP"));
+		expect(getStateByCep("01310-100")).toEqual(getStateByIbgeCode(35));
 	});
 
 	it("should return Rio de Janeiro for a CEP given as a number", () => {

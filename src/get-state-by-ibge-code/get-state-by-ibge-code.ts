@@ -1,5 +1,5 @@
+import { completeState } from "../_internals/complete-state/complete-state";
 import { DATA, type State } from "../_internals/constants/states";
-import { copyState } from "../_internals/copy-state/copy-state";
 import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 
 export type { State } from "../_internals/constants/states";
@@ -48,5 +48,5 @@ export const getStateByIbgeCode = (code: string | number): State | null => {
 
 	const state = DATA.find((entry) => entry.ibgeCode === numericCode);
 
-	return state ? copyState(state) : null;
+	return state ? completeState(state) : null;
 };
