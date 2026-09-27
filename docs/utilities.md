@@ -2130,7 +2130,7 @@ generatePassport(); // 'RY393097'
 Check if a CNH is valid. Spaces, dots and hyphens are ignored; any other character makes the value invalid.
 
 - A value whose 11 digits are all the same is rejected, so `'11111111111'` is invalid.
-- The first check digit keeps a remainder of 1 as `1`, as real registry numbers do. Resolução CONTRAN nº 886/2021, art. 4º § 1º, whose remainder of 0 or 1 gives `0`, speaks of "O dígito verificador" without naming the number: written in the singular right after the Número do Espelho da CNH (the only number of the article with a single check digit), it reads best as that digit's rule, but it is worded generically and gives no weights, so it is no source for the 2 check digits of the registry number; no official text publishes their weights. Resoluções CONTRAN nº 976/2022, nº 998/2023 and nº 1.006/2024 amend Resolução nº 886/2021, none of them in art. 4º.
+- The first check digit keeps a remainder of 1 as `1`, as real registry numbers do. Resolução CONTRAN nº 886/2021, art. 4º § 1º, whose remainder of 0 or 1 gives `0`, speaks of "O dígito verificador" without naming the number: written in the singular right after the Número do Espelho da CNH (the only number of the article with a single check digit), it reads best as that digit's rule, but it is worded generically and gives no weights, so it is no source for the 2 check digits of the registry number; no official text publishes their weights. Resoluções CONTRAN nº 976/2022, nº 998/2023 and nº 1.006/2024 amend Resolução nº 886/2021, none of them in art. 4º. Resolução CONTRAN nº 1.020/2025, the newer habilitação norm, repeats the layout in its art. 10 ("nove caracteres e dois dígitos verificadores") with no check digit rule and does not revoke the 886 (art. 140).
 
 ```javascript
 import { isValidCnh } from '@brazilian-utils/brazilian-utils';
@@ -2140,7 +2140,7 @@ isValidCnh('000000001-19'); // true (hyphen before the check digits)
 isValidCnh('ab00000000119'); // false (letters are rejected)
 ```
 
-Source: [Resolução CONTRAN nº 886/2021, art. 4º](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf); weights per [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/).
+Source: [Resolução CONTRAN nº 886/2021, art. 4º](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf), [Resolução CONTRAN nº 1.020/2025, art. 10](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf); weights per [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/).
 
 ### formatCnh
 

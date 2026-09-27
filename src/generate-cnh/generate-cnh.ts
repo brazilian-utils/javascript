@@ -29,10 +29,19 @@ import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-d
  * a valid CNH). Resoluções CONTRAN nº 976/2022, nº 998/2023 and nº 1.006/2024 amend Resolução nº
  * 886/2021, but none of them touches art. 4º.
  *
+ * Resolução CONTRAN nº 1.020/2025, the newer habilitação norm, repeats the layout in its art. 10
+ * ("nove caracteres e dois dígitos verificadores") without any check digit rule, and its art. 140
+ * does not revoke Resolução nº 886/2021, so art. 4º § 1º of the 886 stays the only official text
+ * on the calculation.
+ *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf
  * Resolução CONTRAN nº 886/2021, art. 4º, I: the Número do Registro Nacional, of "9 (nove)
  * caracteres" and "2 (dois) dígitos verificadores de segurança"; the Número do Espelho da CNH of
  * the same article has 9 characters and 1 check digit, the one § 1º most likely computes.
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf
+ * Resolução CONTRAN nº 1.020, de 1º de dezembro de 2025 (DOU of 09/12/2025), art. 10: the same
+ * three numbers, the registro nacional "composto de nove caracteres e dois dígitos verificadores",
+ * with no "módulo 11" rule and no weights; its art. 140 does not revoke Resolução nº 886/2021.
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/
  */
 export const generateCnh = (): string => {

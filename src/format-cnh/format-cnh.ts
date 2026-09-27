@@ -34,13 +34,18 @@ export type FormatCnhOptions = {
  *
  * Resolução CONTRAN nº 886/2021, art. 4º I, defines the CNH registry number as 9 characters plus
  * 2 security check digits, which is the layout this mask reproduces; no official text publishes
- * the check-digit weights used to compute them.
+ * the check-digit weights used to compute them. Resolução CONTRAN nº 1.020/2025, art. 10, repeats
+ * the same layout ("nove caracteres e dois dígitos verificadores") and does not revoke the 886.
  *
  * No authority publishes a masking rule for the CNH either, so `obfuscate` applies the one the
  * Leis de Diretrizes Orçamentárias set for publishing a CPF, a number with the same structure: the
  * first 3 digits and the 2 check digits are hidden.
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf
+ * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf
+ * Resolução CONTRAN nº 1.020, de 1º de dezembro de 2025 (DOU of 09/12/2025), art. 10: the same
+ * three numbers, the registro nacional "composto de nove caracteres e dois dígitos verificadores",
+ * with no "módulo 11" rule and no weights; its art. 140 does not revoke Resolução nº 886/2021.
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm
  * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
  * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set
