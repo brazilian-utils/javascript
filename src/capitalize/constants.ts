@@ -153,6 +153,22 @@ export const WORD_REGEX = /[^\s/'’‘(){}[\]"“”:;,-]/;
  */
 export const JOINER_REGEX = /^(?:\s+|[-/'’‘])$/;
 
+/**
+ * The separators a municipality is written with before its Federative Unit at the end of an
+ * address line, besides the `/` of `"Porto Alegre/RS"`: the spaced hyphen or en dash of the
+ * Correios' "Cidade – UF" (`"São Paulo – SP"`) and the comma of `"Curitiba, PR"`. A state code
+ * right after one of them is upper case only as the last word of the value, where it can only be
+ * the UF; elsewhere the same two letters may be an ordinary word.
+ *
+ * @see Official: https://www.correios.com.br/enviar/correspondencia/arquivos/nacional/guia-tecnico-de-enderecamento-de-correspondencias.pdf
+ * Correios, Endereçamento de Correspondências, Guia Técnico, versão 1.4 (03/05/2021): the
+ * locality line carries the name of the locality and the sigla of the UF, separated by a hyphen or
+ * dash, "São Paulo – SP".
+ * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/guia-de-enderecamento/guia-de-enderecamento
+ * The Correios page that publishes the guide.
+ */
+export const UF_SEPARATORS = [" - ", " – ", ", "];
+
 /** The apostrophe that elides the particle of `d'Oeste` and marks the English possessive of `Bob's`. */
 export const APOSTROPHE_REGEX = /^['’‘]$/;
 

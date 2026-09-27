@@ -3310,7 +3310,7 @@ Transforma em maiúscula a primeira letra de cada palavra, do jeito que se escre
 - **Opções** (`CapitalizeOptions`): `lowerCaseWords`, palavras mantidas em minúsculas entre duas palavras, por padrão preposições e artigos como `de`, `da`, `do`, `e`; `upperCaseWords`, palavras sempre em maiúsculas, por padrão designações societárias e abreviações como `LTDA`, `S.A.`, `ME`, `CNPJ` e algarismos romanos. Uma lista substitui a padrão.
 - Palavras se separam em espaços, `-`, `/`, apóstrofos e pontuação colada; espaços repetidos viram um só.
 - Palavra minúscula que é a primeira, a última ou precede pontuação é designativo e mantém a maiúscula.
-- `ME` só vira maiúsculas como designação (última palavra ou antes de outra); `SA` sem pontos fica como está (o sobrenome Sá). Sigla de estado após `/` vira maiúsculas mesmo com `upperCaseWords` informado.
+- `ME` só vira maiúsculas como designação (última palavra ou antes de outra); `SA` sem pontos fica como está (o sobrenome Sá). Sigla de estado após `/` vira maiúsculas mesmo com `upperCaseWords` informado, assim como a que termina o valor depois de `-` ou `–` entre espaços ou de `, `, o "Cidade – UF" dos Correios.
 
 ```javascript
 import { capitalize } from '@brazilian-utils/brazilian-utils';
@@ -3330,6 +3330,7 @@ capitalize('(empresa) ltda'); // (Empresa) LTDA
 capitalize('luiz von schmidt'); // Luiz von Schmidt
 capitalize('santana/rs'); // Santana/RS ("RS" é sigla de estado logo depois de uma "/")
 capitalize('porto alegre/rs'); // Porto Alegre/RS
+capitalize('brasília - df'); // Brasília - DF (sigla de estado como última palavra depois de " - ", " – " ou ", ")
 capitalize('santana rs'); // Santana Rs (sem "/", "rs" é só uma palavra)
 capitalize('rua xv de novembro'); // Rua XV de Novembro (algarismo romano, "de" fica em minúsculas)
 capitalize('joão paulo ii'); // João Paulo II

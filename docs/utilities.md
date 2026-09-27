@@ -3310,7 +3310,7 @@ Capitalize the first letter of each word, the way a Brazilian name, company name
 - **Options** (`CapitalizeOptions`): `lowerCaseWords`, words kept in lower case between two words, by default prepositions and articles such as `de`, `da`, `do`, `e`; `upperCaseWords`, words always in upper case, by default company designations and abbreviations such as `LTDA`, `S.A.`, `ME`, `CNPJ` and roman numerals. A list replaces its default.
 - Words split at whitespace, `-`, `/`, apostrophes and adjoining punctuation; whitespace runs collapse into one space.
 - A lower-case word that is first, last or followed by punctuation is a designator and keeps its capital.
-- `ME` is upper-cased only as a designation (last word, or before another designation); `SA` without dots is left alone (the surname Sá). A state code after a `/` is upper-cased even with `upperCaseWords` given.
+- `ME` is upper-cased only as a designation (last word, or before another designation); `SA` without dots is left alone (the surname Sá). A state code after a `/` is upper-cased even with `upperCaseWords` given, and so is one that ends the value after a spaced `-`, a spaced `–` or a `, `, the Correios' "Cidade – UF".
 
 ```javascript
 import { capitalize } from '@brazilian-utils/brazilian-utils';
@@ -3330,6 +3330,7 @@ capitalize('(empresa) ltda'); // (Empresa) LTDA
 capitalize('luiz von schmidt'); // Luiz von Schmidt
 capitalize('santana/rs'); // Santana/RS ("RS" is a state code right after a "/")
 capitalize('porto alegre/rs'); // Porto Alegre/RS
+capitalize('brasília - df'); // Brasília - DF (a state code as the last word after " - ", " – " or ", ")
 capitalize('santana rs'); // Santana Rs (no "/", so "rs" is just a word)
 capitalize('rua xv de novembro'); // Rua XV de Novembro (roman numeral, "de" stays lower case)
 capitalize('joão paulo ii'); // João Paulo II

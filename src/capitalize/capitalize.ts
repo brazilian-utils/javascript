@@ -9,6 +9,7 @@ import {
 	PUNCTUATION_REGEX,
 	SEPARATOR_REGEX,
 	TRAILING_DESIGNATIONS,
+	UF_SEPARATORS,
 	UPPER_CASE_WORDS,
 	WHITESPACE_REGEX,
 	WORD_REGEX,
@@ -145,6 +146,27 @@ const isUpperCasePosition = (
 };
 
 /**
+ * Whether a state code stands where it is the Federative Unit of an address: right after a `/`
+ * wherever it appears (`"Porto Alegre/RS"`), or as the last word of the value right after one of
+ * `UF_SEPARATORS` (`"Brasília - DF"`, `"São Paulo – SP"`, `"Curitiba, PR"`).
+ *
+ * @param {string[]} output - What has been written so far.
+ * @param {{ joined: boolean; designation: string }} ahead - What follows the word (`designation` is `""` when it is the last one).
+ * @returns {boolean} `true` when a state code there is the UF.
+ */
+const isStateCodePosition = (
+	output: string[],
+	ahead: { joined: boolean; designation: string },
+): boolean => {
+	if (output.at(-1) === "/") return true;
+	if (ahead.designation !== "") return false;
+
+	const written = output.join("");
+
+	return UF_SEPARATORS.some((separator) => written.endsWith(separator));
+};
+
+/**
  * A word with its first letter in upper case and the rest in lower case, letter by code point. A
  * first letter whose upper case is more than one character (`ß` becomes `SS`, the `ﬁ` ligature
  * becomes `FI`) keeps its case: expanding it would drop or add letters, and a second pass over
@@ -207,7 +229,12 @@ const capitalizeWord = (word: string): string => {
  *   Brazilian state, the way a municipality and its Federative Unit are written together, so
  *   `"porto alegre/rs"` becomes `"Porto Alegre/RS"` while `"santana/br"` becomes `"Santana/Br"`.
  *   A state code that does not follow a `/` is left alone (`"santana rs"` becomes
- *   `"Santana Rs"`), and so is any other two letter word.
+ *   `"Santana Rs"`), and so is any other two letter word. As the last word of the value, a state
+ *   code is also converted after a spaced hyphen or en dash or after a comma, the "Cidade – UF" of
+ *   the Correios' addressing guide, so `"brasília - df"` becomes `"Brasília - DF"`, `"são paulo –
+ *   sp"` becomes `"São Paulo – SP"` and `"curitiba, pr"` becomes `"Curitiba, PR"`; anywhere else
+ *   after those separators the two letters are an ordinary word (`"rs - centro"` stays
+ *   `"Rs - Centro"`).
  * - All other words are capitalized (first letter upper case, rest lower case), letter by letter:
  *   `"İSTANBUL"` becomes `"İstanbul"`, and a first letter whose upper case is two letters (`ß`,
  *   the `ﬁ` ligature) keeps its case, so `"straße"` becomes `"Straße"` and `"ßa"` stays `"ßa"`.
@@ -249,6 +276,7 @@ const capitalizeWord = (word: string): string => {
  * capitalize("casa de carnes s/a"); // "Casa de Carnes S/A"
  * capitalize("MOGI-GUAÇU"); // "Mogi-Guaçu"
  * capitalize("santana/rs"); // "Santana/RS"
+ * capitalize("brasília - df"); // "Brasília - DF"
  * capitalize("rua xv de novembro"); // "Rua XV de Novembro"
  * capitalize("empresa ltda", { upperCaseWords: [] }); // "Empresa Ltda"
  * capitalize("joao\tsilva"); // "Joao Silva"
@@ -306,7 +334,7 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 			isUpperCasePosition(upperCaseWord, enclitic, ahead, upperCaseSet)
 		) {
 			output.push(upperCaseWord);
-		} else if (output.at(-1) === "/" && stateCodeSet.has(upperCaseWord)) {
+		} else if (stateCodeSet.has(upperCaseWord) && isStateCodePosition(output, ahead)) {
 			output.push(upperCaseWord);
 		} else {
 			output.push(capitalizeWord(token));
