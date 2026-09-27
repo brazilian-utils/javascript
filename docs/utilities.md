@@ -1134,6 +1134,7 @@ generateRenavam(); // '12345678900'
 Check if a PIS is valid. Accepts the value masked or not.
 
 - A value whose digits are all the same is rejected.
+- The check digit uses the weights 3, 2, 9, 8, 7, 6, 5, 4, 3 and 2 and módulo 11. No official document found publishes them: the eSocial and SIRC manuals say only that the number has 11 digits and a módulo 11 check digit, and the Caixa layouts ask for a "Número de PIS/PASEP válido" without saying how it is computed. The weights follow [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/pis.py).
 
 ```javascript
 import { isValidPis } from '@brazilian-utils/brazilian-utils';

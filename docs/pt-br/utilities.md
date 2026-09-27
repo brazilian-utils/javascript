@@ -1134,6 +1134,7 @@ generateRenavam(); // '12345678900'
 Valida um PIS. Aceita o valor com ou sem máscara.
 
 - Um valor com todos os dígitos iguais é rejeitado.
+- O dígito verificador usa os pesos 3, 2, 9, 8, 7, 6, 5, 4, 3 e 2 e módulo 11. Nenhum documento oficial encontrado publica esses pesos: os manuais do eSocial e do SIRC dizem só que o número tem 11 dígitos e dígito verificador módulo 11, e os leiautes da Caixa pedem um "Número de PIS/PASEP válido" sem dizer como ele é calculado. Os pesos seguem o [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/pis.py).
 
 ```javascript
 import { isValidPis } from '@brazilian-utils/brazilian-utils';
