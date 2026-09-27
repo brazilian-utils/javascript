@@ -982,7 +982,7 @@ getAreaCodeInfo(-11); // null
 getAreaCodeInfo(1.1); // null
 ```
 
-Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais).
+Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [tabela da Anatel dos Códigos Nacionais por município (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ### getAreaCodesByState
 
@@ -1002,7 +1002,7 @@ getAreaCodesByState('SC'); // [42, 47, 48, 49]
 getAreaCodesByState('XX'); // []
 ```
 
-Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais).
+Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [tabela da Anatel dos Códigos Nacionais por município (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ## Placa de veículo
 
