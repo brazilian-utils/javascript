@@ -195,6 +195,20 @@ describe("isValidPixPayload", () => {
 		});
 	});
 
+	test("should accept a payload with a PSP location whose 62-05 is filled, since §2.7 has the payer ignore it", () => {
+		expect(isValidPixPayload(BACEN_DYNAMIC)).toBe(true);
+
+		for (const txid of ["ABC123", "7978c0c97ea847e78e8849634473c1f1", "RP12345678-2019"]) {
+			const field = `05${String(txid.length).padStart(2, "0")}${txid}`;
+			const body = BACEN_DYNAMIC.slice(0, -8).replace(
+				"62070503***",
+				`62${String(field.length).padStart(2, "0")}${field}`,
+			);
+
+			expect(isValidPixPayload(withCrc(body))).toBe(true);
+		}
+	});
+
 	describe("should return false", () => {
 		test("when it is an empty or blank string", () => {
 			expect(isValidPixPayload("")).toBe(false);
@@ -416,13 +430,6 @@ describe("isValidPixPayload", () => {
 			expect(isValidPixPayload(withTxid("Um Id"))).toBe(false);
 			expect(isValidPixPayload(withTxid("pedido_42"))).toBe(false);
 			expect(isValidPixPayload(withTxid("**"))).toBe(false);
-		});
-
-		test("when a payload with a PSP location carries a txid instead of *** (§2.7)", () => {
-			expect(isValidPixPayload(BACEN_DYNAMIC)).toBe(true);
-			const withTxidBody = BACEN_DYNAMIC.slice(0, -8).replace("62070503***", "62100506ABC123");
-
-			expect(isValidPixPayload(withCrc(withTxidBody))).toBe(false);
 		});
 
 		test("when the payloads are taken as published, with a txid and a city the Pix manual does not allow", () => {

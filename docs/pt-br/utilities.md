@@ -482,7 +482,7 @@ Valida um payload de BR Code Pix (a string por trás de um QR Code Pix e do "Pix
 - O nome do recebedor tem no máximo 25 caracteres e a cidade no máximo 15; o país é `BR` em maiúsculas.
 - Nenhum manual do BCB diz se o CRC ou o `BR` podem estar em minúsculas: a única regra de caixa que eles dão é a do GUI, e todos os exemplos oficiais escrevem os dois em maiúsculas. Aceitar CRC em minúsculas (`1d3d`) e rejeitar `br` são escolhas desta biblioteca, como na 2.4.0.
 - O objeto `01` (Point of Initiation Method) é opcional e precisa ser `11` ou `12` quando presente.
-- O objeto `62` (Additional Data Field) é obrigatório e traz o `txid` (62-05), "sempre presente em um BR Code": `***` ou de 1 a 25 letras e dígitos (§2.6.2), e sempre `***` com URL do PSP (§2.7).
+- O objeto `62` (Additional Data Field) é obrigatório e traz o `txid` (62-05), "sempre presente em um BR Code": `***` ou de 1 a 25 letras e dígitos (§2.6.2); com URL do PSP qualquer valor vale, já que o §2.7 manda o pagador ignorá-lo. O `-` do exemplo `RP12345678-2019` do Manual do BR Code está fora do conjunto de caracteres do Pix do §2.6.2, então esse exemplo estático é rejeitado.
 - Um valor (`54`) é feito de dígitos com um `.` opcional e no máximo duas casas decimais (`98.73`, `98` e `98.` são os exemplos do EMV), com no máximo 13 caracteres, e maior que zero, exceto num BR Code de Pix Saque (`fss` de 8 dígitos no subobjeto 26-03) e junto de uma URL do PSP, em que a API Pix lhe dá `0.00` (o Manual do BR Code traz `"0"` entre os exemplos).
 - Os Unreserved Templates (IDs 80 a 99) são ignorados.
 
@@ -506,7 +506,7 @@ Interpreta um payload de BR Code Pix e retorna seus campos. Aceita o que `isVali
 - Retorna um `PixPayloadInfo`: `merchantName`, `merchantCity`, `pointOfInitiation` e `key` (estático) ou `url` (dinâmico).
 - `amount`, `txid`, `description` e `withdrawalFacilitator` (o `fss` do Pix Saque) só aparecem quando o payload os traz; `txid` fica ausente para o marcador `***`.
 - `pointOfInitiation` (`PixPointOfInitiation`) é `"dynamic"` quando o payload traz uma localização de PSP (o QR Code dinâmico do manual do Pix, §2.4.2) ou se marca como de uso único com o objeto `01` = `"12"` (§2.7.2); senão, `"static"`. Um payload com chave e `01` = `"12"` é, portanto, `"dynamic"`; `url` e `key` distinguem os dois tipos de QR Code do manual.
-- Com localização de PSP, `amount` é ignorado e `txid` é sempre `***`, como manda o §2.7 do manual.
+- Com localização de PSP, `amount` e `txid` são ignorados e ficam de fora, como manda o §2.7 do manual ("Se preenchidos, seu conteúdo deve ser ignorado").
 
 ```javascript
 import { getPixPayloadInfo } from '@brazilian-utils/brazilian-utils';

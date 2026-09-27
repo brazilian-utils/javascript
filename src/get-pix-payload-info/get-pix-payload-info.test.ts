@@ -203,6 +203,15 @@ const buildPayloadWithMerchantCity = (merchantCity: string): string => {
 };
 
 describe("getPixPayloadInfo", () => {
+	test("should read a dynamic payload whose 62-05 is filled, leaving the ignored txid out (§2.7)", () => {
+		const location = tlv("00", "br.gov.bcb.pix") + tlv("25", DYNAMIC_URL);
+
+		expect(getPixPayloadInfo(buildPayload(location, DYNAMIC_TXID))).toStrictEqual(
+			getPixPayloadInfo(buildPayload(location)),
+		);
+		expect(getPixPayloadInfo(buildPayload(location, DYNAMIC_TXID))).not.toHaveProperty("txid");
+	});
+
 	describe("should return null", () => {
 		test("when it is an empty or blank string", () => {
 			expect(getPixPayloadInfo("")).toBeNull();
@@ -316,13 +325,6 @@ describe("getPixPayloadInfo", () => {
 			expect(getPixPayloadInfo(withTxid("RP12345678 2019"))).toBeNull();
 			expect(getPixPayloadInfo(withTxid("**"))).toBeNull();
 			expect(getPixPayloadInfo(withTxid("****"))).toBeNull();
-		});
-
-		test("when a dynamic payload carries a txid instead of the *** marker", () => {
-			const location = tlv("00", "br.gov.bcb.pix") + tlv("25", DYNAMIC_URL);
-
-			expect(getPixPayloadInfo(buildPayload(location))).not.toBeNull();
-			expect(getPixPayloadInfo(buildPayload(location, DYNAMIC_TXID))).toBeNull();
 		});
 
 		test("when the key is not written in the DICT form", () => {

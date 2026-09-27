@@ -102,7 +102,8 @@ const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): bo
 
 	if (txid === undefined) return false;
 
-	return txid === PIX_ABSENT_TXID || (!isDynamic && PIX_TXID_REGEX.test(txid));
+	// With a PSP location the payer ignores whatever 62-05 carries (§2.7), so any value stands.
+	return isDynamic || txid === PIX_ABSENT_TXID || PIX_TXID_REGEX.test(txid);
 };
 
 /**
@@ -148,10 +149,12 @@ const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): bo
  * - the "Additional Data Field Template" (`62`) carries a `txid` (62-05), "sempre presente em
  *   um BR Code" (§2.6, footnote 21): `***` when there is none (footnote 25), or 1 to 25 letters
  *   and digits (§2.6.2: "limitado a 25 caracteres", "Letras minúsculas [...] Letras maiúsculas
- *   [...] Dígitos decimais"). A payload with a PSP location carries `***`: "Os campos Valor e
- *   Identificador da Transação (txid) não devem ser preenchidos no QR Code dinâmico" (§2.7).
- *   Its transaction amount is only checked for its format, since the same paragraph has the
- *   payer ignore it ("Se preenchidos, seu conteúdo deve ser ignorado");
+ *   [...] Dígitos decimais"). Next to a PSP location only its presence is checked: "Os campos
+ *   Valor e Identificador da Transação (txid) não devem ser preenchidos no QR Code dinâmico. Se
+ *   preenchidos, seu conteúdo deve ser ignorado" (§2.7), so a filled txid does not make the
+ *   payload invalid, as in 2.4.0, and the transaction amount is only checked for its format.
+ *   The static rule excludes the `-` of the Manual do BR Code v2.0.1 example
+ *   (`RP12345678-2019`), whose §2.6.2 character set is the Pix-specific rule for the field;
  * - the CRC-16 (`63`) closes the payload and matches it. No official source states the case of
  *   its hexadecimal digits: the Manual do BR Code only says "4 nibbles do resultado. Exemplo:
  *   0xAC05 => “AC05”", and every example of both BCB manuals is upper case. Reading `"1d3d"` as

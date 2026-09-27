@@ -78,9 +78,10 @@ const readTlv = (value: string): TlvFields => ({ ...parseTlv(value) });
  * PSP location of at most 77 characters (§2.5.2), a merchant name of at most 25 characters and
  * a merchant city of at most 15, and an "Additional Data Field Template" (62) that always
  * carries the `txid` (62-05), "sempre presente em um BR Code" (§2.6, footnote 21), either the
- * `***` marker or 1 to 25 letters and digits (§2.6.2), and always `***` next to a PSP location
- * (§2.7: "Os campos Valor e Identificador da Transação (txid) não devem ser preenchidos no QR
- * Code dinâmico"). `txid` is left out for the `***` marker.
+ * `***` marker or 1 to 25 letters and digits (§2.6.2). Next to a PSP location its content is
+ * ignored (§2.7: "Os campos Valor e Identificador da Transação (txid) não devem ser preenchidos
+ * no QR Code dinâmico. Se preenchidos, seu conteúdo deve ser ignorado"), so `txid` is left out
+ * there, as `amount` is, and for the `***` marker.
  *
  * Whether the key is registered in the DICT is only settled at payment time, so a key in the
  * right form is read even when no account holds it.
@@ -176,7 +177,7 @@ export const getPixPayloadInfo = (value: string): PixPayloadInfo | null => {
 	if (withdrawalFacilitator !== undefined) pix.withdrawalFacilitator = withdrawalFacilitator;
 
 	if (amount !== undefined && url === undefined) pix.amount = Number(amount);
-	if (txid !== PIX_ABSENT_TXID) pix.txid = txid;
+	if (txid !== PIX_ABSENT_TXID && url === undefined) pix.txid = txid;
 
 	return pix;
 };
