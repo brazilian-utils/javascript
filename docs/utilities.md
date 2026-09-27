@@ -1859,7 +1859,7 @@ Get the Brazilian holidays of a year: the national ones and, with a `stateCode`,
 - "Dia da Consciência Negra", Nov 20, is national from 2024 on.
 - Each national holiday is listed only for the years a federal norm declared it: Nossa Senhora Aparecida from 1980, Natal from 1922, Dia do trabalhador from 1925, Tiradentes up to 1930, from 1933 to 1948 and from 1951, and Finados up to 1948 and from 2003. Lei nº 662/1949 left Finados out of the feriados nacionais that Decreto-lei nº 486/1938 listed, and only Lei nº 10.607/2002 put it back (the Câmara report on its bill: "Só inova ao sugerir o dia de finados"); up to 2.4.0 it was listed every year.
 - The `"optional"` entries are the whole-day pontos facultativos of the federal calendar (Portaria MGI): Carnaval Monday and Tuesday and Corpus Christi, the same three days the financial market skips (Resolução CMN nº 4.880/2020). The partial ones are left out: Quarta-feira de Cinzas (until 14h), Oct 28 (Dia do Servidor Público) and the Dec 24 and Dec 31 afternoons.
-- Per-state rules (SC's Sunday shift, DF's Corpus Christi, dates that stopped being holidays) follow each state's law; see the source for the list.
+- Per-state rules (SC's Sunday shift, DF's Corpus Christi and RJ's Carnaval Tuesday typed `"state"`, dates that stopped being holidays) follow each state's law; see the source for the list.
 - Each state holiday is listed only from the first year its state law applied (SP's Jul 9 from 1997, RJ's São Jorge from 2008, SC's Aug 11 from 2004), so an older year has fewer state holidays.
 - An unknown or non-string `stateCode` is ignored and only national holidays are returned.
 - Returns `[]` when the year is not an integer from 1900 to 2099, or when the argument is neither a number nor an object.

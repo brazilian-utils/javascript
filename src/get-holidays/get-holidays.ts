@@ -187,7 +187,9 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * When a state entry falls on the same date as a national one and carries the same name, the
  * state entry replaces it instead of being listed twice: this is how the Distrito Federal's
  * Corpus Christi, a feriado under Lei distrital nº 72/1989 art. 1º parágrafo único, comes back
- * typed `"state"` for `stateCode: "DF"` while staying `"optional"` everywhere else.
+ * typed `"state"` for `stateCode: "DF"` while staying `"optional"` everywhere else, and how Rio de
+ * Janeiro's Carnaval Tuesday, a feriado estadual under Lei RJ nº 5.243/2008 from 2009 on, comes
+ * back typed `"state"` for `stateCode: "RJ"`.
  *
  * Only one state holiday per UF is a feriado civil under Lei 9.093/1995 art. 1º, II, which
  * authorizes "a data magna do Estado fixada em lei estadual" in the singular; the other entries

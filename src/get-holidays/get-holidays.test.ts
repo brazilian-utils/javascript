@@ -26,6 +26,10 @@ function scNamesIn(year: number): string[] {
 	return getHolidays({ year, stateCode: "SC" }).map((holiday) => holiday.name);
 }
 
+function carnavalIn(year: number, stateCode: StateCode): Holiday[] {
+	return getHolidays({ year, stateCode }).filter((holiday) => holiday.name.startsWith("Carnaval"));
+}
+
 function carnaval(year: number): Holiday[] {
 	return getHolidays(year).filter((holiday) => holiday.name.startsWith("Carnaval"));
 }
@@ -1233,6 +1237,22 @@ describe("getHolidays", () => {
 		expect(getHolidays({ year: 2024, stateCode: "SP" })).toContainEqual({
 			name: "Corpus Christi",
 			date: new Date(2024, 4, 30),
+			type: "optional",
+		});
+	});
+
+	test("should replace the national optional Carnaval Tuesday with an RJ state entry from 2009 on, Lei RJ nº 5.243, de 14/05/2008, coming after the 2008 Carnaval (Tue 2008-02-05, Tue 2009-02-24), without listing the date twice", () => {
+		expect(carnavalIn(2008, "RJ")).toEqual([
+			{ name: "Carnaval (segunda-feira)", date: new Date(2008, 1, 4), type: "optional" },
+			{ name: "Carnaval (terça-feira)", date: new Date(2008, 1, 5), type: "optional" },
+		]);
+		expect(carnavalIn(2009, "RJ")).toEqual([
+			{ name: "Carnaval (segunda-feira)", date: new Date(2009, 1, 23), type: "optional" },
+			{ name: "Carnaval (terça-feira)", date: new Date(2009, 1, 24), type: "state" },
+		]);
+		expect(carnavalIn(2009, "SP")).toContainEqual({
+			name: "Carnaval (terça-feira)",
+			date: new Date(2009, 1, 24),
 			type: "optional",
 		});
 	});

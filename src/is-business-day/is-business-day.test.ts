@@ -91,6 +91,18 @@ describe("isBusinessDay", () => {
 			expect(isBusinessDay(new Date(2025, 7, 17, 12), { stateCode: "SC" })).toBe(false);
 		});
 
+		it("should treat the Carnaval Tuesday as a non-business day in RJ even with includeOptional false, since Lei RJ nº 5.243/2008 declares it a feriado estadual, while the Monday stays optional", () => {
+			const rj = { stateCode: "RJ", includeOptional: false } as const;
+
+			expect(isBusinessDay(new Date(2024, 1, 13, 12), rj)).toBe(false);
+			expect(isBusinessDay(new Date(2024, 1, 12, 12), rj)).toBe(true);
+			expect(
+				isBusinessDay(new Date(2024, 1, 13, 12), { stateCode: "SP", includeOptional: false }),
+			).toBe(true);
+			expect(isBusinessDay(new Date(2008, 1, 5, 12), rj)).toBe(true);
+			expect(isBusinessDay(new Date(2009, 1, 24, 12), rj)).toBe(false);
+		});
+
 		it("should treat Corpus Christi as a non-business day in the DF even with includeOptional false, since Lei distrital nº 72/1989 declares it a feriado", () => {
 			expect(
 				isBusinessDay(new Date(2024, 4, 30, 12), { stateCode: "DF", includeOptional: false }),

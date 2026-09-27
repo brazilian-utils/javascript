@@ -306,6 +306,12 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://sapl.al.pi.leg.br/norma/5849
  * Lei PI nº 176, de 30/08/1937, Dia do Piauí (19/10), listed from 1937: "19 de Outubro será
  * feriado estadual, com a denominação de DIA DO PIAUHY"
+ * @see Official: http://alerjln1.alerj.rj.gov.br/contlei.nsf/f25edae7e64db53b032564fe005262ef/063f7c027766eab48325744a007a4ab0?OpenDocument
+ * Lei RJ nº 5.243, de 14/05/2008, art. 1º, which "Institui, no âmbito do Estado do Rio de Janeiro,
+ * a terça-feira de carnaval como Feriado Estadual", in force on its publication. That year's
+ * Carnaval (5 February 2008) had already passed, so the entry is listed from 2009, under the name
+ * of the national Carnaval Tuesday it replaces. The STF ADI 4131 against it was não conhecida
+ * (cited below), so the law stands. The Monday stays a ponto facultativo in the state.
  * @see Official: http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/c8aa0900025feef6032564ec0060dfff/1baf90ca125ff96f8325740a00776600
  * Lei RJ nº 5.198, de 05/03/2008, São Jorge (23/04), listed from 2008: the ALERJ text of the law. Its Ficha Técnica records
  * no ação de inconstitucionalidade; the STF case is cited separately below.
@@ -530,6 +536,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	PE: [{ name: "Revolução Pernambucana", day: 6, month: 3, since: 2018 }],
 	PI: [{ name: "Dia do Piauí", day: 19, month: 10, since: 1937 }],
 	RJ: [
+		{ name: "Carnaval (terça-feira)", easterOffset: -47, since: 2009 },
 		{ name: "São Jorge", day: 23, month: 4, since: 2008 },
 		{
 			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
