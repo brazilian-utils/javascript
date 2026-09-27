@@ -726,8 +726,9 @@ Formata um número de telefone de acordo com os padrões brasileiros. Se `value`
 - `"e164"` e `"international"` removem antes o código de país, como `parsePhone`, e recaem para `"service"` para um número de serviço.
 - `"service"`: os Códigos Não Geográficos (`0800 123 4567`) e os números abreviados `300X`/`400X` (`4004-1234`).
 - `"auto"`: `"service"` para um número de serviço, `"international"` quando `value` traz código de país, senão `"nanp"` para mais de 9 dígitos, ou `"sn"`.
-- O `obfuscate` mantém os 2 últimos dígitos, a contagem que a conta gov.br usa para o celular cadastrado, e mantém o prefixo que indica uma região ou um serviço, e não um assinante: o DDD, o código do tipo `0800` e a raiz `300X`/`400X`.
-- Um código de utilidade pública de 3 dígitos (`190`) não identifica ninguém e é devolvido como está; um valor que a máscara `"service"` não reconhece é escondido por inteiro. Os padrões ofuscados têm um número fixo de posições, então em `"e164"` o que passa do 11º dígito nacional é descartado.
+- O `obfuscate` mantém 2 dígitos, a contagem que a conta gov.br usa para o celular cadastrado, e mantém o prefixo que indica uma região ou um serviço, e não um assinante: o DDD, o código do tipo `0800` e a raiz `300X`/`400X`.
+- Os 2 dígitos são os últimos que cabem na própria máscara, então na máscara padrão `"sn"` um valor com DDD é truncado antes, igual ao que acontece sem `obfuscate`, e o par visível é o 8º e o 9º dígito, e não os 2 últimos de `value`.
+- Um código de utilidade pública de 3 dígitos (`190`) não identifica ninguém e é devolvido como está; num valor que a máscara `"service"` não reconhece cada dígito vira um `*`, o que esconde os dígitos, mas não quantos eram. Os padrões ofuscados têm um número fixo de posições, então em `"e164"` o que passa do 11º dígito nacional é descartado.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -750,6 +751,8 @@ formatPhone('+5511987654321', { mask: 'auto', obfuscate: true }); // +55 11 ****
 formatPhone('11987654321', { mask: 'e164', obfuscate: true }); // +5511*******21
 formatPhone('08001234567', { mask: 'service', obfuscate: true }); // 0800 *** **67
 formatPhone('40041234', { mask: 'service', obfuscate: true }); // 4004-**34
+formatPhone('11988887766', { mask: 'service', obfuscate: true }); // *********** (não é número de serviço)
+formatPhone('11987654321', { obfuscate: true }); // *****-**43 (CUIDADO: a "sn" trunca antes, então "43", e não "21")
 formatPhone('11900000000'); // 11900-0000 (CUIDADO: a máscara padrão "sn" trunca um número com DDD)
 ```
 
