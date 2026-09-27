@@ -564,8 +564,27 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "288625706", stateCode: "PE" })).toBe(true);
 		});
 
-		test("should return false when the length is different from 9 digits", () => {
+		test("should return false when the length is neither 9 nor 14 digits", () => {
 			expect(isValidIe({ value: "0925870110", stateCode: "PE" })).toBe(false);
+			expect(isValidIe({ value: "1810010000004", stateCode: "PE" })).toBe(false);
+			expect(isValidIe({ value: "181001000000490", stateCode: "PE" })).toBe(false);
+		});
+
+		test("should return true for the old 14 digit CACEPE number, the SINTEGRA page's worked example", () => {
+			// (5 x 1) + (4 x 8) + (3 x 1) + (9 x 1) + (2 x 4) = 57, 57 % 11 = 2, 11 - 2 = 9
+			expect(isValidIe({ value: "18.1.001.0000004-9", stateCode: "PE" })).toBe(true);
+		});
+
+		test("should return false for the old 14 digit CACEPE number with an incorrect digit", () => {
+			expect(isValidIe({ value: "18100100000048", stateCode: "PE" })).toBe(false);
+		});
+
+		test("should subtract 10 from a difference above 9 in the old 14 digit CACEPE number", () => {
+			// remainder 1: 11 - 1 = 10, less 10 = 0
+			expect(isValidIe({ value: "00001000000000", stateCode: "PE" })).toBe(true);
+			// remainder 0: 11 - 0 = 11, less 10 = 1
+			expect(isValidIe({ value: "00000000000001", stateCode: "PE" })).toBe(true);
+			expect(isValidIe({ value: "00000000000000", stateCode: "PE" })).toBe(false);
 		});
 
 		test("should return false when the digit is incorrect", () => {
@@ -880,6 +899,7 @@ describe("isValidIe", () => {
 			["PA", "75000002-3"],
 			["PB", "06000001-5"],
 			["PE", "0321418-40"],
+			["PE", "18.1.001.0000004-9"],
 			["PI", "012345679"],
 			["PR", "123.45678-50"],
 			["RJ", "99.999.99-3"],

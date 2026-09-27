@@ -16,6 +16,7 @@ import {
 	MA_PREFIXES,
 	MS_PREFIXES,
 	PA_PREFIXES,
+	PE_LEGACY_WEIGHTS,
 	SP_FIRST_WEIGHTS,
 	SP_SECOND_WEIGHTS,
 	TO_TYPES,
@@ -65,6 +66,16 @@ const calculateWeightedSum = ({
 		if (wrapTo !== undefined && weight === 1) {
 			weight = wrapTo;
 		}
+	}
+
+	return sum;
+};
+
+const sumWithWeights = (body: string, weights: readonly number[]): number => {
+	let sum = 0;
+
+	for (let i = 0; i < body.length; i++) {
+		sum += (body.charCodeAt(i) - 48) * weights[i];
 	}
 
 	return sum;
@@ -272,7 +283,16 @@ const validateMS: IeValidator = (ie) => validateMod11Ie(ie, MS_PREFIXES);
 
 const validatePA: IeValidator = (ie) => validateMod11Ie(ie, PA_PREFIXES);
 
+// The old 14 digit CACEPE number: 13 principal digits and one check digit, `11 - remainder`,
+// less 10 when that is above 9 (a remainder of 1 gives 0 and a remainder of 0 gives 1).
+const validatePELegacy = (ie: string): boolean => {
+	const digit = 11 - (sumWithWeights(ie.slice(0, 13), PE_LEGACY_WEIGHTS) % 11);
+
+	return Number.parseInt(ie.charAt(13), 10) === (digit > 9 ? digit - 10 : digit);
+};
+
 const validatePE: IeValidator = (ie: string) => {
+	if (checkLength(ie, 14)) return validatePELegacy(ie);
 	if (!checkLength(ie, 9)) return false;
 
 	const body = ie.slice(0, 7);
@@ -394,15 +414,8 @@ const validateRS: IeValidator = (ie: string) => {
 	return Number.parseInt(ie.charAt(9), 10) === digit;
 };
 
-const calculateSpCheckDigit = (body: string, weights: readonly number[]): number => {
-	let sum = 0;
-
-	for (let i = 0; i < body.length; i++) {
-		sum += (body.charCodeAt(i) - 48) * weights[i];
-	}
-
-	return (sum % 11) % 10;
-};
+const calculateSpCheckDigit = (body: string, weights: readonly number[]): number =>
+	(sumWithWeights(body, weights) % 11) % 10;
 
 const validateSP: IeValidator = (ie: string) => {
 	if (SP_RURAL_PATTERN.test(ie)) {
@@ -521,19 +534,24 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   0 (Normal), 3 (Produtor Rural), 5 (Substituta), 7 (Micro-Empresa Ambulante) or
  *   8 (Micro-Empresa). The page gives the list as the meaning of that digit without calling it
  *   closed; no SEFAZ-AL text gives another value.
- * - PE: only the current 9 digit eFisco format is accepted; the old 14 digit CACEPE format
- *   documented on the same page is not.
+ * - PE: the 9 digit eFisco number (7 digits and 2 check digits) and the old 14 digit CACEPE
+ *   number (13 digits and 1 check digit), both on the SINTEGRA page. Portaria SF nº 087/2007
+ *   converted every 14 digit number into a 9 digit one (the first 6 digits dropped, the next 7
+ *   kept, a new pair of check digits) but set no date after which the old number is void:
+ *   Portaria SF nº 124/2008 removed the end date for its use in the e-Fisco systems, and the
+ *   SEFAZ-PE consolidated legislation still lists Portaria 087/2007 in force. Only AIDFs granted
+ *   from 10/07/2007 on must print the new number.
  * - TO: the SINTEGRA page documents the 11 digit form, the one carrying the tipo digits in
  *   positions 3 and 4, which are left out of the sum. The 9 digit form, the one SEFAZ-TO issued
  *   from Portaria SEFAZ-TO nº 676/2002 on, is that number without the tipo digits: the same
  *   modulus 11 rule with weights 9 down to 2 applies to its first eight digits.
  * - An all zero registration is accepted for every state whose published formula yields a
  *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT with 9 or 11 digits, PB,
- *   PE, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which
- *   reject repeated digits. AM is on that list through the second branch of its published
- *   formula only: the page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma", gives 11 for
- *   an all zero registration, while the "resto <= 1 ⇒ 0" branch, the one implemented here,
- *   gives 0.
+ *   PE with 9 digits, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike isValidCpf and
+ *   isValidCnpj, which reject repeated digits. AM is on that list through the second branch of
+ *   its published formula only: the page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma",
+ *   gives 11 for an all zero registration, while the "resto <= 1 ⇒ 0" branch, the one
+ *   implemented here, gives 0.
  *
  * The state can also be passed first and the registration second, `isValidIe('SP', '110042490114')`,
  * the 2.3.0 form, which still works and is deprecated. The two forms are told apart by the first
@@ -614,6 +632,18 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * http://www.sintegra.gov.br/Cad_Estados/cad_PA.html".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PB.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PE.html
+ * eFisco: weights 8 down to 2, then 9 down to 2, "Se o resto da divisão for igual a 1 ou 0, o
+ * primeiro dígito será igual a zero", worked example 0321418-40. "Inscrição Estadual Antiga": "O
+ * número de inscrição estadual no Cadastro de Contribuintes do Estado de Pernambuco - CACEPE
+ * possui 14 algarismos (dígitos), sendo 13 principais e 1 verificador", weights 5, 4, 3, 2, 1, 9
+ * down to 2, "Quando essa diferença for maior que "9", subtraia "10" unidades", worked example
+ * 18.1.001.0000004-9.
+ * @see Official: https://www.sefaz.pe.gov.br/Legislacao/Tributaria/Documents/Legislacao/Portarias/2007/Port087_2007.htm
+ * Portaria SF nº 087/2007, item I: the CACEPE number, "constituído de 14 (quatorze) algarismos,
+ * passa a ter 9 (nove)"; item III: from 10/07/2007 new AIDFs print "apenas da nova inscrição".
+ * @see Official: https://www.sefaz.pe.gov.br/Legislacao/Tributaria/Documents/legislacao/Portarias/2008/Port124_2008.htm
+ * Portaria SF nº 124/2008: "a conveniência de não estabelecer termo final em relação ao prazo
+ * referente à utilização da antiga inscrição".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PI.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PR.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RJ.html

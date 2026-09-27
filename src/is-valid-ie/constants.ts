@@ -56,6 +56,12 @@ export const MS_PREFIXES = ["28", "50"];
  */
 export const PA_PREFIXES = ["15", "75", "76", "77", "78", "79"];
 
+/**
+ * The weights of the old 14 digit CACEPE number on the SINTEGRA PE page ("Dígito Verificador da
+ * Inscrição Estadual Antiga"), from the first of its 13 principal digits to the last.
+ */
+export const PE_LEGACY_WEIGHTS = [5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2];
+
 export const SP_FIRST_WEIGHTS = [1, 3, 4, 5, 6, 7, 8, 10];
 
 export const SP_SECOND_WEIGHTS = [3, 2, 10, 9, 8, 7, 6, 5, 4, 3, 2];
