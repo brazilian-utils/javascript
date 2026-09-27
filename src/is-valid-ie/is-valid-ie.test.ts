@@ -60,6 +60,22 @@ describe("isValidIe", () => {
 		test("should return true for another valid IE", () => {
 			expect(isValidIe({ value: "240000005", stateCode: "AL" })).toBe(true);
 		});
+
+		test("should return true for every tipo de empresa the SINTEGRA page lists: 0, 3, 5, 7 and 8", () => {
+			expect(isValidIe({ value: "240000005", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "243000006", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "245000003", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "247000000", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "248000004", stateCode: "AL" })).toBe(true);
+		});
+
+		test("should return false for a tipo de empresa the page does not list, even with a matching digit", () => {
+			expect(isValidIe({ value: "241000009", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "242000002", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "244000000", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "246000007", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "249000008", stateCode: "AL" })).toBe(false);
+		});
 	});
 
 	describe("AP", () => {

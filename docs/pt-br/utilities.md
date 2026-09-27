@@ -3419,7 +3419,8 @@ Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posic
   - SP: o formato de produtor rural `P0MMMSSSSD000`, com o zero depois do `P`; o `P` pode ser minúsculo.
   - TO: 11 dígitos, com os dígitos de tipo, ou os 9 dígitos que a SEFAZ-TO atribui desde a Portaria SEFAZ-TO nº 676/2002.
   - MG: um primeiro dígito verificador 10, de uma soma que já é múltiplo de dez, é lido como 0.
-  - PE: só o formato eFisco de 9 dígitos. AL: o terceiro dígito não é restrito.
+  - PE: só o formato eFisco de 9 dígitos.
+  - AL: o terceiro dígito, o tipo de empresa, deve ser 0, 3, 5, 7 ou 8, os valores que a página do SINTEGRA lista.
 - Uma inscrição só de zeros é aceita em todo estado cuja fórmula publicada produz dígito verificador 0 para ela: AM, CE, ES, MG, PB, PE, PI, PR, RJ, RS, SC, SE e SP, mais BA com 8 ou 9 dígitos, MT com 9 ou 11 dígitos e TO com 9 dígitos.
 
 ```javascript

@@ -3419,7 +3419,8 @@ Check if an inscrição estadual (state registration) is valid for a state. **De
   - SP: the produtor rural form `P0MMMSSSSD000`, the zero after the `P` included; the `P` may be written in lower case.
   - TO: 11 digits, with the tipo digits, or the 9 digits SEFAZ-TO has issued since Portaria SEFAZ-TO nº 676/2002.
   - MG: a first check digit of 10, from a sum that is already a multiple of ten, is read as 0.
-  - PE: only the 9 digit eFisco form. AL: the third digit is not restricted.
+  - PE: only the 9 digit eFisco form.
+  - AL: the third digit, the tipo de empresa, must be 0, 3, 5, 7 or 8, the values the SINTEGRA page lists.
 - An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it: AM, CE, ES, MG, PB, PE, PI, PR, RJ, RS, SC, SE and SP, plus BA with 8 or 9 digits, MT with 9 or 11 digits and TO with 9 digits.
 
 ```javascript

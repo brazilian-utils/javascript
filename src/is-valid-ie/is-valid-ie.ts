@@ -5,6 +5,7 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
 	AC_PREFIXES,
+	AL_COMPANY_TYPES,
 	AL_PREFIXES,
 	BA_MOD_10_DIGITS,
 	DF_PREFIXES,
@@ -129,7 +130,8 @@ const validateAC: IeValidator = (ie) => validateAcDfRule(ie, AC_PREFIXES);
 // AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
 // which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
 // 1 and `11 - remainder` for every other one.
-const validateAL: IeValidator = (ie) => validateMod11Ie(ie, AL_PREFIXES);
+const validateAL: IeValidator = (ie) =>
+	AL_COMPANY_TYPES.includes(ie.charAt(2)) && validateMod11Ie(ie, AL_PREFIXES);
 
 const validateAP: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
@@ -515,7 +517,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   it says. A produtor rural registration is "P" then "0MMMSSSSD000", the zero included. The
  *   "P" may be written in lower case: the registration is upper-cased before it is checked, a
  *   convenience the page does not forbid, since it only tells which characters to ignore.
- * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
+ * - AL: the third digit is the tipo de empresa and must be one of the five the SINTEGRA page lists,
+ *   0 (Normal), 3 (Produtor Rural), 5 (Substituta), 7 (Micro-Empresa Ambulante) or
+ *   8 (Micro-Empresa). The page gives the list as the meaning of that digit without calling it
+ *   closed; no SEFAZ-AL text gives another value.
  * - PE: only the current 9 digit eFisco format is accepted; the old 14 digit CACEPE format
  *   documented on the same page is not.
  * - TO: the SINTEGRA page documents the 11 digit form, the one carrying the tipo digits in
@@ -553,6 +558,8 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/insc_est.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AC.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AL.html
+ * "FORMAÇÃO: 24XNNNNND, sendo: 24 – Código do Estado; X – Tipo de empresa (0-Normal, 3-Produtor
+ * Rural, 5-Substituta, 7- Micro-Empresa Ambulante, 8-Micro-Empresa)".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AM.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AP.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_BA.html

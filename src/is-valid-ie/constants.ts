@@ -8,6 +8,12 @@ export const AC_PREFIXES = ["01"];
 
 export const AL_PREFIXES = ["24"];
 
+/**
+ * The tipo de empresa, the third digit of an AL registration, as the SINTEGRA AL page lists it:
+ * "0-Normal, 3-Produtor Rural, 5-Substituta, 7- Micro-Empresa Ambulante, 8-Micro-Empresa".
+ */
+export const AL_COMPANY_TYPES = ["0", "3", "5", "7", "8"];
+
 export const BA_MOD_10_DIGITS = [0, 1, 2, 3, 4, 5, 8];
 
 /** 07 on the SINTEGRA page; 08 since the numbers starting with 07 ran out. */
