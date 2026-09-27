@@ -21,9 +21,10 @@ export type Cid10 = {
  * ignored. Anything else (`"A00-0"`, `"A00.00"`, a dagger or asterisk suffix, a value that is
  * not a string) is rejected instead of having a code picked out of it.
  *
- * The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV: a code that is
- * not in those files, such as the COVID-19 codes the WHO added after 2008 (`U07.1`, `U07.2`,
- * `U09.9` and `U10.9`), is not found.
+ * The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV, plus the `U07`
+ * category of the CID-10 table DATASUS keeps for the SIM (`U07`, `U07.0`, `U07.1` and `U07.2`,
+ * the COVID-19 codes among them), which the V2008 files predate. A code in neither, such as
+ * `U09.9` and `U10.9`, which the WHO added later, is not found.
  *
  * @param {string} value - The CID-10 code to look up, e.g. `"A00.0"`, `"A000"` or `"A00"`.
  * @returns {Cid10|null} The matching category or subcategory, or null when the code is unknown
@@ -34,6 +35,7 @@ export type Cid10 = {
  * getCid10("A00.0"); // { code: "A000", description: "Cólera devida a Vibrio cholerae 01, biótipo cholerae" }
  * getCid10("a000"); // { code: "A000", description: "Cólera devida a Vibrio cholerae 01, biótipo cholerae" }
  * getCid10("A00"); // { code: "A00", description: "Cólera" }
+ * getCid10("U07.1"); // { code: "U071", description: "Infecção pelo novo Coronavírus (COVID-19)" }
  * getCid10("A00.5"); // null (A00 has no subcategory 5)
  * getCid10("A00-0"); // null (not a documented form)
  * ```
@@ -43,6 +45,9 @@ export type Cid10 = {
  * published by DATASUS (Ministério da Saúde).
  * @see Official: http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm
  * The DATASUS page that links the archive and documents its files, columns and encoding.
+ * @see Official: ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/TABELAS/CID10.DBF
+ * The CID-10 table of the SIM (Sistema de Informações sobre Mortalidade), source of the `U07`
+ * codes the V2008 files lack.
  */
 export const getCid10 = (value: string): Cid10 | null => {
 	const code = normalizeCid10(value);

@@ -45,11 +45,17 @@ describe("isValidCid10", () => {
 		expect(isValidCid10("I109")).toBe(false);
 	});
 
+	it("should accept the U07 codes the SIM table adds to the V2008 files", () => {
+		expect(isValidCid10("U07")).toBe(true);
+		expect(isValidCid10("U07.0")).toBe(true);
+		expect(isValidCid10("U07.1")).toBe(true);
+		expect(isValidCid10("u072")).toBe(true);
+		expect(isValidCid10("U07.3")).toBe(false);
+	});
+
 	it("should reject a category the table does not have", () => {
 		expect(isValidCid10("A10")).toBe(false);
 		expect(isValidCid10("A10.0")).toBe(false);
-		expect(isValidCid10("U07.1")).toBe(false);
-		expect(isValidCid10("U07.2")).toBe(false);
 		expect(isValidCid10("U09.9")).toBe(false);
 		expect(isValidCid10("U10.9")).toBe(false);
 	});
@@ -93,11 +99,11 @@ describe("isValidCid10", () => {
 			expect(codes.toSorted()).toEqual(Object.keys(CID10_DESCRIPTIONS).toSorted());
 		});
 
-		it("should hold the 2045 categories and 12188 subcategories of CID-10 V2008", () => {
+		it("should hold the 2045 categories and 12188 subcategories of CID-10 V2008, plus U07 and its 3 subcategories", () => {
 			const codes = Object.keys(CID10_DESCRIPTIONS);
 
-			expect(codes.filter((code) => code.length === 3)).toHaveLength(2045);
-			expect(codes.filter((code) => code.length === 4)).toHaveLength(12_188);
+			expect(codes.filter((code) => code.length === 3)).toHaveLength(2046);
+			expect(codes.filter((code) => code.length === 4)).toHaveLength(12_191);
 		});
 	});
 

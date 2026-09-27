@@ -63,10 +63,24 @@ describe("getCid10", () => {
 		expect(getCid10("I10.0")).toBeNull();
 	});
 
+	it("should find the U07 codes the SIM table adds to the V2008 files", () => {
+		expect(getCid10("U07")).toEqual({ code: "U07", description: "Uso emergencial do U07" });
+		expect(getCid10("U07.0")).toEqual({
+			code: "U070",
+			description: "Doença por cigarro eletrônico",
+		});
+		expect(getCid10("U07.1")).toEqual({
+			code: "U071",
+			description: "Infecção pelo novo Coronavírus (COVID-19)",
+		});
+		expect(getCid10("U07.2")).toEqual({
+			code: "U072",
+			description: "COVID-19, vírus não identificado",
+		});
+	});
+
 	it("should return null for a category the table does not have", () => {
 		expect(getCid10("A10")).toBeNull();
-		expect(getCid10("U07.1")).toBeNull();
-		expect(getCid10("U07.2")).toBeNull();
 		expect(getCid10("U09.9")).toBeNull();
 		expect(getCid10("U10.9")).toBeNull();
 	});

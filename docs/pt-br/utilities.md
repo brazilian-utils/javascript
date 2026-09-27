@@ -3291,7 +3291,7 @@ Valida um código CID-10 contra as tabelas que o DATASUS publica, a edição bra
 
 - Os dois níveis da classificação são válidos: as categorias de 3 caracteres (`A00`) e as subcategorias de 4 caracteres, escritas com o ponto (`A00.0`) ou sem ele (`A000`).
 - Maiúsculas, minúsculas e espaços em volta são ignorados. Qualquer outra coisa (outro separador, um quinto caractere, um sufixo de cruz ou asterisco, um valor que não é string) é rejeitada.
-- As tabelas V2008 do DATASUS são a única fonte, então um código que não está nelas não é encontrado; os códigos de COVID-19 que a OMS acrescentou depois de 2008 não são encontrados: `U07.1` (COVID-19, vírus identificado), `U07.2` (vírus não identificado), `U09.9` (condição pós-COVID-19) e `U10.9` (síndrome inflamatória multissistêmica associada à COVID-19).
+- As tabelas são as V2008 do DATASUS, mais a categoria `U07` da tabela da CID-10 que o DATASUS mantém para o SIM (`U07`, `U07.0`, `U07.1` COVID-19 com vírus identificado e `U07.2` vírus não identificado), que as V2008 não têm. Um código que não está em nenhuma delas não é encontrado, como `U09.9` (condição pós-COVID-19) e `U10.9` (síndrome inflamatória multissistêmica associada à COVID-19). Até a 2.4.0 os códigos `U07` também não eram encontrados.
 - Só uma tabela de códigos é lida (cerca de 27 KB minificada), não as descrições que `getCid10` carrega.
 
 ```javascript
@@ -3341,8 +3341,8 @@ parseCid10('A00'); // 'A00'
 Busca um código CID-10 e retorna a sua descrição oficial em português. O resultado é um registro `Cid10`: `{ code, description }`.
 
 - Mesmas regras de entrada de `isValidCid10`. O `code` vem em maiúsculas e sem o ponto. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
-- Mesma tabela de `isValidCid10`, a V2008 do DATASUS: os códigos de COVID-19 que a OMS acrescentou depois de 2008 não são encontrados: `U07.1` (COVID-19, vírus identificado), `U07.2` (vírus não identificado), `U09.9` (condição pós-COVID-19) e `U10.9` (síndrome inflamatória multissistêmica associada à COVID-19).
-- Este é o utilitário mais pesado do pacote: ele embute as 2045 categorias e 12188 subcategorias com suas descrições, cerca de 1 MB minificado (147 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
+- Mesma tabela de `isValidCid10`: a V2008 do DATASUS mais os códigos `U07` da tabela do SIM (`getCid10('U07.1')` é `{ code: 'U071', description: 'Infecção pelo novo Coronavírus (COVID-19)' }`); `U09.9` e `U10.9` não são encontrados.
+- Este é o utilitário mais pesado do pacote: ele embute as 2046 categorias e 12191 subcategorias com suas descrições, cerca de 1 MB minificado (147 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
 
 ```javascript
 import { getCid10 } from '@brazilian-utils/brazilian-utils';
@@ -3354,7 +3354,7 @@ getCid10('A00.5'); // null
 getCid10('A00-0'); // null (não é uma forma documentada)
 ```
 
-Fonte: [tabelas da CID-10 V2008 que o DATASUS publica em CSV](http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm).
+Fonte: [tabelas da CID-10 V2008 que o DATASUS publica em CSV](http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm) e a [tabela da CID-10 do SIM](ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/TABELAS/CID10.DBF) para os códigos `U07`.
 
 ## Texto
 

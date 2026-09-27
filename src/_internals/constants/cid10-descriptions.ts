@@ -8,6 +8,10 @@
  * the `DESCRICAO` column, as published. A category with no subcategory is listed by both files
  * with the same description and shows up once here.
  *
+ * The V2008 files predate the `U07` category the WHO opened for emergency use. Its codes, `U07`,
+ * `U07.0`, `U07.1` and `U07.2` (the COVID-19 ones), are added from the CID-10 table of the
+ * SIM (Sistema de Informações sobre Mortalidade), `CID10.DBF`, which DATASUS keeps on its FTP.
+ *
  * This table is about 1 MB, so it has a module of its own: `CID10_SUBCATEGORIES`, which holds
  * the same codes without the descriptions, lives in `cid10.ts` and never loads this one.
  *
@@ -17,6 +21,8 @@
  * The CID-10 tables in CSV, as published by DATASUS (Ministério da Saúde).
  * @see Official: http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm
  * The DATASUS page that links the archive and documents its files, columns and encoding.
+ * @see Official: ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/TABELAS/CID10.DBF
+ * The CID-10 table of the SIM, source of the `U07` codes.
  */
 export const CID10_DESCRIPTIONS: Record<string, string> = {
 	A00: "Cólera",
@@ -9845,6 +9851,10 @@ export const CID10_DESCRIPTIONS: Record<string, string> = {
 	T983: "Seqüelas de complicações dos cuidados médicos e cirúrgicos não classificados em outra parte",
 	U04: "Síndrome respiratória aguda grave [severe acute respiratory syndrome SARS]",
 	U049: "Síndrome respiratória aguda grave [Severe acute respiratory syndrome) [SARS], não especificada",
+	U07: "Uso emergencial do U07",
+	U070: "Doença por cigarro eletrônico",
+	U071: "Infecção pelo novo Coronavírus (COVID-19)",
+	U072: "COVID-19, vírus não identificado",
 	U80: "Agente resistente à penicilina e antibióticos relacionados",
 	U800: "Agente resistente à penicilina",
 	U801: "Agente resistente à meticilina",
