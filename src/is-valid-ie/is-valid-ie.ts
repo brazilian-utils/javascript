@@ -101,7 +101,7 @@ const calculateDfCheckDigit = (body: string): number => {
 	return calculateMod11CheckDigit(sum);
 };
 
-const SP_RURAL_PATTERN = /^P\d{12}$/;
+const SP_RURAL_PATTERN = /^P0\d{11}$/;
 const SP_COMPANY_PATTERN = /^\d{12}$/;
 
 /**
@@ -505,8 +505,11 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * - PA: the prefixes are 15, the one the SINTEGRA page gives ("15: Número Padrão Pará"), and 75,
  *   which SEFA-PA has issued since October 2024. No official text announces 76 to 79, so they are
  *   rejected.
- * - SP: characters other than "P" and digits are rejected on purpose, a deliberate deviation
- *   from the Regra Geral of the SINTEGRA page, which ignores them instead.
+ * - SP: letters other than "P" are rejected on purpose, a deliberate deviation from the Regra
+ *   Geral of the SINTEGRA page, which ignores them instead; punctuation and spaces are ignored as
+ *   it says. A produtor rural registration is "P" then "0MMMSSSSD000", the zero included. The
+ *   "P" may be written in lower case: the registration is upper-cased before it is checked, a
+ *   convenience the page does not forbid, since it only tells which characters to ignore.
  * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
  * - PE: only the current 9 digit eFisco format is accepted; the old 14 digit CACEPE format
  *   documented on the same page is not.
@@ -601,6 +604,8 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SC.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SP.html
+ * Item II, produtor rural: "Inicia sempre com "P" e apresenta a sequência 0MMMSSSSD000", the
+ * source of the zero required after the "P".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_TO.html
  * Documents only the 11 digit form, with the tipo digits 01, 02, 03 and 99 in positions 3 and 4;
  * the 9 digit form the validator also accepts is not covered by this page or by any other

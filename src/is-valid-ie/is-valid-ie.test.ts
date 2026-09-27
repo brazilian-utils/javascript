@@ -768,6 +768,18 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "P011004244002", stateCode: "SP" })).toBe(false);
 		});
 
+		test("should return false for a produtor rural IE whose second character is not the 0 of P0MMMSSSSD000, even with a matching digit", () => {
+			expect(isValidIe({ value: "P790674670712", stateCode: "SP" })).toBe(false);
+			expect(isValidIe({ value: "P111004244002", stateCode: "SP" })).toBe(false);
+			expect(isValidIe({ value: "p790674670712", stateCode: "SP" })).toBe(false);
+		});
+
+		test("should return true for a produtor rural IE starting with P0, the boundary of the rule", () => {
+			// 1 x 3 + 1 x 4 + 4 x 7 + 2 x 8 + 4 x 10 = 91, 91 % 11 = 3
+			expect(isValidIe({ value: "P011004243002", stateCode: "SP" })).toBe(true);
+			expect(isValidIe({ value: "P000000000000", stateCode: "SP" })).toBe(true);
+		});
+
 		test("should return false for a produtor rural IE with a length different from 13", () => {
 			expect(isValidIe({ value: "P01100424300", stateCode: "SP" })).toBe(false);
 		});
