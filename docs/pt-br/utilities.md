@@ -3412,7 +3412,7 @@ Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posic
 
 - Recebe um único objeto (`IsValidIeParams`): `value` é a inscrição e `stateCode` o estado ao qual ela pertence (um `StateCode`, sem diferenciar maiúsculas de minúsculas).
 - Alguns estados têm casos especiais, um prefixo ou formato que a página do SINTEGRA não traz ou um desvio proposital dela (detalhes e fontes no JSDoc em `src/is-valid-ie`):
-  - GO: os prefixos 10, 11, 15 e 20 a 29 (a SEFAZ-GO atribui 20 às novas empresas desde 13/01/2023).
+  - GO: os prefixos 10, 11, 15 e 20 a 29, a união de fontes que divergem: a norma (IN nº 946/09-GSF, art. 39, I, na redação da IN nº 1.535/22-GSE) traz 10, 20 e 11, a página do SINTEGRA 10, 11 e 20 a 29, o roteiro de crítica de 2012 10, 11 e 15.
   - MT: 11 dígitos, ou os 9 dígitos que a SEFAZ-MT atribui hoje, lidos como a forma de 11 dígitos com dois zeros à esquerda.
   - PA: os prefixos 15 e 75 a 79 que a página do SINTEGRA lista (a SEFA-PA atribui 75 desde 07/10/2024). MS: os prefixos 28 e 50 (50 do cadastro e-CCE da SEFAZ-MS).
   - DF: a regra de 13 dígitos do AC com os prefixos 07 e 08 (o DF passou a 08 quando os números iniciados por 07 acabaram).
@@ -3435,7 +3435,7 @@ isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefixo 20)
 isValidIe({ value: '130000019', stateCode: 'MT' }); // true (9 dígitos)
 ```
 
-Fonte: [páginas dos estados no SINTEGRA](http://www.sintegra.gov.br/insc_est.html) e o [roteiro de crítica da SEFAZ-GO](https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/).
+Fonte: [páginas dos estados no SINTEGRA](http://www.sintegra.gov.br/insc_est.html), o [roteiro de crítica de Goiás](https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/) e a [IN nº 946/09-GSF](https://appasp.economia.go.gov.br/Legislacao/arquivos/secretario/in/IN_0946_2009.htm).
 
 ## E-mail
 

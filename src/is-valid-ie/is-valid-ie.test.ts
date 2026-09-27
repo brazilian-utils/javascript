@@ -303,7 +303,7 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "121031131", stateCode: "GO" })).toBe(false);
 		});
 
-		test("should return true for the prefix 20, the one SEFAZ-GO issues to companies since 13/01/2023", () => {
+		test("should return true for the prefix 20, the one the Secretaria da Economia issues to companies since 13/01/2023", () => {
 			// 2 x 9 = 18, 18 % 11 = 7, 11 - 7 = 4
 			expect(isValidIe({ value: "200000004", stateCode: "GO" })).toBe(true);
 			expect(isValidIe({ value: "209876549", stateCode: "GO" })).toBe(true);

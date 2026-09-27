@@ -20,8 +20,10 @@ export const BA_MOD_10_DIGITS = [0, 1, 2, 3, 4, 5, 8];
 export const DF_PREFIXES = ["07", "08"];
 
 /**
- * 10, 11 and 15 from the SEFAZ-GO roteiro de crítica; 20 to 29 from the SINTEGRA page ("AB pode ser
- * igual a 10 ou 11 ou 20 a 29"), the range SEFAZ-GO has issued to companies since 13/01/2023.
+ * The union of three official sources that disagree: IN nº 946/09-GSF, art. 39, I (as worded by
+ * IN nº 1.535/22-GSE) gives 10 and 20 (pessoa jurídica) and 11 (pessoa física); the SINTEGRA GO
+ * page gives "10 ou 11 ou 20 a 29"; the Secretaria da Economia's roteiro de crítica (2012) gives
+ * "10 ou 11 ou 15". No norm names 15 or 21 to 29.
  */
 export const GO_PREFIXES = [
 	"10",

@@ -507,10 +507,14 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   SEFAZ-DF act announces that change: its own rule sheet (2013) still calls 07 a "campo fixo",
  *   while the CF/DF validator of its service portal checks the 13 digits and both check digits
  *   and not the prefix. The prefix 08 rests on that validator and on the software notes below.
- * - GO: the prefixes are 10, 11, 15 and 20 to 29. The SINTEGRA page gives 10, 11 and 20 to 29,
- *   and SEFAZ-GO has issued 20 to new companies since 13/01/2023, when the range starting with 10
- *   ran out. The SEFAZ-GO roteiro adds 15, the 10103105 to 10119997 range and the dual digit
- *   registration 11094402; the two sources agree on the weights and the modulus.
+ * - GO: the official sources disagree on the prefixes, so all of them are accepted: 10, 11, 15 and
+ *   20 to 29. The norm, IN nº 946/09-GSF, art. 39, I, as worded by IN nº 1.535/22-GSE (in force
+ *   since 26/10/2022), gives 10 and 20 for a pessoa jurídica and 11 for a pessoa física; the
+ *   Secretaria da Economia has issued 20 to new companies since 13/01/2023, when the range
+ *   starting with 10 ran out. The SINTEGRA page (updated 02/09/2022) gives "10 ou 11 ou 20 a 29".
+ *   The Secretaria's roteiro de crítica (published 20/08/2012) gives "10 ou 11 ou 15", the
+ *   10103105 to 10119997 range and the dual digit registration 11094402. No norm names 15 or 21
+ *   to 29. The sources agree on the weights and the modulus.
  * - MG: the first check digit is the sum of the product digits subtracted from "a primeira dezena
  *   exata imediatamente superior". A sum that is already a multiple of ten is read as its own
  *   ten, so the digit is 0 rather than 10, the only reading that yields a single digit.
@@ -609,9 +613,15 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * Reports of valid DF registrations starting with 08 being rejected.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
- * "8 dígitos (ABCDEFGH) + 1 dígito verificador (I); onde AB pode ser igual a 10 ou 11 ou 20 a
- * 29": the source of the prefixes 20 to 29, which SEFAZ-GO now issues (see its notice below).
- * The prefix 15 and the special ranges come from the SEFAZ-GO roteiro below.
+ * Updated 02/09/2022: "8 dígitos (ABCDEFGH) + 1 dígito verificador (I); onde AB pode ser igual a
+ * 10 ou 11 ou 20 a 29", the only source of the prefixes 21 to 29. The prefix 15 and the special
+ * ranges come from the roteiro below.
+ * @see Official: https://appasp.economia.go.gov.br/Legislacao/arquivos/secretario/in/IN_0946_2009.htm
+ * IN nº 946/09-GSF, art. 39, I, as worded by IN nº 1.535/22-GSE: "os 2 (dois) primeiros formam
+ * os números 10 (dez) ou 20 (vinte), que identificam o contribuinte pessoa jurídica, ou 11 (onze),
+ * que identifica o contribuinte pessoa física".
+ * @see Official: https://appasp.economia.go.gov.br/Legislacao/arquivos/secretario/in/IN_1535_2022.htm
+ * IN nº 1.535/22-GSE (DOE 26/10/2022), art. 1º, the wording above.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MG.html
  * D1: "Subtrai-se o resultado da soma do item anterior, da primeira dezena exata imediatamente
@@ -677,10 +687,12 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * number granted under the earlier rules could only be used until their validity date, and the
  * last digit of the registration is its check digit.
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
- * SEFAZ-GO's roteiro de crítica, the source of the prefix 15 and of the special ranges.
+ * The Secretaria da Economia's roteiro de crítica (20/08/2012): "onde AB pode ser igual a 10 ou
+ * 11 ou 15", the only source of the prefix 15 and of the special ranges.
  * @see Official: https://goias.gov.br/economia/contribuintes-goianos-passam-a-ter-novo-numero-de-inscricao-estadual/
- * SEFAZ-GO notice: company (Pessoa Jurídica) registrations made from 13/01/2023 start with 20,
- * the range starting with 10 having run out; those of Pessoas Físicas still start with 11.
+ * Secretaria da Economia notice (20/01/2023): company (Pessoa Jurídica) registrations made from
+ * 13/01/2023 start with 20, "a faixa de numeração iniciada com o dígito 10 se esgotou"; those of
+ * Pessoas Físicas still start with 11.
  */
 export function isValidIe(params: IsValidIeParams): boolean;
 /**
