@@ -59,9 +59,20 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  *
  * An alphanumeric CNPJ is accepted since the schema bundle of 2026-07-27 widened the key to it
  * (in production since 2026-08-10). Letters are read in upper case, lower case input included,
- * as `isValidCnpj` with version 2 reads them. No NFS-e document states how a letter enters the
- * check digit of the key, so it is taken by analogy with the NF-e key (NT Conjunta 2025.001) and
- * the CNPJ's own check digits: each character counts as its ASCII code minus 48, `A` as 17.
+ * as `isValidCnpj` with version 2 reads them. No official document states how a letter enters
+ * the check digit of the key: none of the NFS-e technical notes (001 to 009), the Anexo I v1.01
+ * nor the Perguntas e Respostas v1.00 of 08/09/2026 (which still calls the key "50 dígitos
+ * numéricos") does, and NT Conjunta 2025.001, whose ASCII minus 48 rule covers the DF-e key,
+ * lists its scope as "NFe, NFCe, CTe, CTe OS, GTVe, MDFe, BPe, BPe TM, NF3e e NFCom", leaving the
+ * NFS-e out. The rule used here is an analogy with that NT and with the CNPJ's own check digits,
+ * not an official rule: each character counts as its ASCII code minus 48, `A` as 17. For a key
+ * of digits only it gives the same digit as before.
+ *
+ * The schema of the key itself is no guide either: in the bundle of 27/07/2026 `TSChaveNFSe`
+ * is `[0-9]{6}([0-9A-Z]{14})[0-9]{30}`, letters at positions 7 to 20, while the Inscrição
+ * Federal sits at 10 to 23 (as `TSIdNFSe` of the same file has it), so the letter window of the
+ * key type is in the wrong place. The production bundle of 09/02/2026 still types the key
+ * `[0-9]{50}`.
  *
  * @param {string} value - The access key value to be validated.
  * @returns {boolean} True if the access key is valid, false otherwise.
@@ -80,16 +91,21 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  * "DPS[0-9]{7}(1[0-9]{14}|2[0-9A-Z]{14})[0-9]{20}" and `TSIdPedRegEvt`
  * "PRE[0-9]{8}(1[0-9]{14}|2[0-9A-Z]{14})[0-9]{33}". `TSChaveNFSe`,
  * "[0-9]{6}([0-9A-Z]{14})[0-9]{30}", misplaces the letter window (positions 7 to 20 instead of
- * the registration's 10 to 23) and is not followed. Read through the byte-pinned mirror
- * https://github.com/fm-s/open-nfse (`schemas/1.01`), whose log of the official "Atualizações e
- * Implantações" page reads "CNPJ alfanumérico em produção desde 10/08/2026".
+ * the registration's 10 to 23) and is not followed.
+ * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/producao-restrita/esquemas-nfse-rtc-v1-01-20260727.zip
+ * The schema bundle v1.01-20260727 itself, on the "Produção Restrita" page of the Portal NFS-e.
+ * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/atualizacoes-e-implantacoes
+ * "Atualizações e Implantações": "PRODUÇÃO 10/08/2026 Evolução para tratamento do CNPJ
+ * alfanumérico".
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * Receita Federal, cálculo do DV do CNPJ alfanumérico: each character is worth its ASCII code
  * minus 48, the value this key's check digit gives a letter by analogy.
  * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ=
  * Nota Técnica Conjunta 2025.001 (CNPJ alfanumérico), for the 44 character DF-e key: "O cálculo
  * do DV da chave de acesso deverá aplicar a mesma lógica da validação do CNPJ Alfa, trocando
- * todos os caracteres [...] pelos números correspondentes da tabela ASCII subtraindo 48".
+ * todos os caracteres [...] pelos números correspondentes da tabela ASCII subtraindo 48". Its
+ * §1 limits it to "NFe, NFCe, CTe, CTe OS, GTVe, MDFe, BPe, BPe TM, NF3e e NFCom": the NFS-e is
+ * not among them, so it is applied here by analogy only.
  *
  * @example
  * ```typescript
