@@ -38,20 +38,27 @@ const FORMAT_REGEX = /^[\s.]*(?:(?:\d{1,4}[\s.]*)?\d{4}|\d{1,3})[\s.]*\d{2}[\s.]
  * isValidVoterId("ab102385010671"); // false (invalid format)
  * ```
  *
- * Resolução TSE nº 23.659/2021, art. 36, sets the structure: "composto de até 12 algarismos",
- * "os oito primeiros algarismos serão sequenciais, desprezando-se, na emissão, os zeros à
+ * Resolução TSE nº 23.659/2021, art. 36, sets the structure: "composto por até 12 algarismos",
+ * "os oito primeiros algarismos serão sequenciados, desprezando-se, na emissão, os zeros à
  * esquerda", then the federative union code and two check digits, the first one "calculado
  * sobre o número sequencial" and the second one over the federative union code followed by the
- * first check digit. Resolução TSE nº 21.538/2003, art. 12, parágrafo único, had the same text. The
- * weights used in each step and the São Paulo/Minas Gerais remainder rule are not published by
- * the TSE and follow the community references cited as `Based on:`.
+ * first check digit, both "determinados com base no 'Módulo 11'". Resolução TSE nº 21.538/2003,
+ * art. 12, parágrafo único, had the same text and the same federative union table; it was revoked
+ * by Resolução TSE nº 23.659/2021, art. 140, which is the one in force.
+ *
+ * Neither resolution gives the weights of each step, what a remainder of 0, 1 or 10 turns into,
+ * or any rule of its own for São Paulo and Minas Gerais: the weights and the rule that turns a
+ * remainder of 0 into 1 for the codes 01 (São Paulo) and 02 (Minas Gerais) have no official
+ * source and follow the community references cited as `Based on:`.
  *
  * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser.
  *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
- * Resolução TSE nº 23.659/2021, art. 36: "composto de até 12 algarismos", "os oito primeiros
- * algarismos serão sequenciais, desprezando-se, na emissão, os zeros à esquerda".
+ * Resolução TSE nº 23.659/2021, art. 36: "composto por até 12 algarismos", "os oito primeiros
+ * algarismos serão sequenciados, desprezando-se, na emissão, os zeros à esquerda", the table of
+ * the federative union codes 01 to 28 and the two check digits "determinados com base no
+ * 'Módulo 11'".
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */

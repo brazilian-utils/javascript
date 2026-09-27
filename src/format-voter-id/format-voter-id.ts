@@ -45,15 +45,15 @@ export type FormatVoterIdOptions = {
  * first 3 digits and the 2 check digits are hidden, and the federative union code stays visible.
  *
  * Resolução TSE nº 23.659/2021, art. 36, gives the voter id "até 12 algarismos", its first eight
- * "sequenciais, desprezando-se, na emissão, os zeros à esquerda", so there is no 13-digit
+ * "sequenciados, desprezando-se, na emissão, os zeros à esquerda", so there is no 13-digit
  * grouping.
  *
  * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser.
  *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
- * Resolução TSE nº 23.659/2021, art. 36: "composto de até 12 algarismos", "os oito primeiros
- * algarismos serão sequenciais, desprezando-se, na emissão, os zeros à esquerda".
+ * Resolução TSE nº 23.659/2021, art. 36: "composto por até 12 algarismos", "os oito primeiros
+ * algarismos serão sequenciados, desprezando-se, na emissão, os zeros à esquerda".
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm
  * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
  * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set

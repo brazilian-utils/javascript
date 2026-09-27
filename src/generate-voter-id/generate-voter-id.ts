@@ -43,16 +43,17 @@ const getFederativeUnion = (state: StateCode | "ZZ"): string =>
  * "123450159" for "000123450159") is accepted by `isValidVoterId` too, and `parseVoterId` keeps
  * whichever form it is given.
  *
- * Resolução TSE nº 23.659/2021, art. 36, confirms the structure ("composto de até 12 algarismos",
+ * Resolução TSE nº 23.659/2021, art. 36, confirms the structure ("composto por até 12 algarismos",
  * the first eight sequential), the federative union table and the two-step módulo 11 structure;
- * the weights themselves are not published by the TSE and follow the community reference cited as
- * `Based on:`.
+ * the weights themselves and the São Paulo and Minas Gerais remainder rule have no official
+ * source (the resolution, like the Resolução TSE nº 21.538/2003 it revoked, says only "Módulo
+ * 11") and follow the community reference cited as `Based on:`.
  *
  * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser.
  *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
- * Resolução TSE nº 23.659/2021, art. 36: "os oito primeiros algarismos serão sequenciais,
+ * Resolução TSE nº 23.659/2021, art. 36: "os oito primeiros algarismos serão sequenciados,
  * desprezando-se, na emissão, os zeros à esquerda".
  * @see Based on: https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/
  */

@@ -2326,6 +2326,7 @@ Check if a voter ID number is valid. A voter ID has at most 12 digits, so a 13-d
 - A voter ID is an 8-digit sequential number, a 2-digit federative union code (`01` to `28`) and 2 check digits.
 - The TSE drops the leading zeros of the sequential number when it issues the ID, so a shorter value is read as the ID without them and left padded with zeros to 12 digits before it is checked (`123450159` is checked as `000123450159`). At least one sequential digit is required: the shortest accepted value has 5 digits.
 - Whitespace and dots are accepted around and between the groups. Any other character, a hyphen included, makes the value invalid.
+- Resolução TSE nº 23.659/2021, art. 36, which revoked Resolução TSE nº 21.538/2003 (art. 140), fixes the layout, the federative union table and two check digits "determinados com base no 'Módulo 11'". It gives no weights and no rule per state: the weights, and the rule that turns a remainder of 0 into 1 for São Paulo (`01`) and Minas Gerais (`02`), have no official source and follow the community references below.
 
 ```javascript
 import { generateVoterId, isValidVoterId } from '@brazilian-utils/brazilian-utils';
@@ -2339,7 +2340,7 @@ isValidVoterId('1234567880191'); // false (13 digits, more than the 12 the TSE a
 isValidVoterId('123456780124'); // false (invalid check digits)
 ```
 
-Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021) ("composto de até 12 algarismos", "os oito primeiros algarismos serão sequenciais, desprezando-se, na emissão, os zeros à esquerda"), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) and [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
+Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021) ("composto por até 12 algarismos", "os oito primeiros algarismos serão sequenciados, desprezando-se, na emissão, os zeros à esquerda"), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) and [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
 
 ### formatVoterId
 

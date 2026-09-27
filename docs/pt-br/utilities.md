@@ -2326,6 +2326,7 @@ Valida um título de eleitor. Um título tem no máximo 12 dígitos, então um v
 - Um título é um número sequencial de 8 dígitos, um código de unidade federativa de 2 dígitos (`01` a `28`) e 2 dígitos verificadores.
 - O TSE despreza os zeros à esquerda do número sequencial na emissão, então um valor mais curto é lido como o título sem eles e completado com zeros à esquerda até 12 dígitos antes da validação (`123450159` é validado como `000123450159`). É preciso ao menos um dígito sequencial: o menor valor aceito tem 5 dígitos.
 - Espaços e pontos são aceitos ao redor e entre os grupos. Qualquer outro caractere, inclusive um hífen, invalida o valor.
+- A Resolução TSE nº 23.659/2021, art. 36, que revogou a Resolução TSE nº 21.538/2003 (art. 140), fixa o layout, a tabela das unidades federativas e dois dígitos verificadores "determinados com base no 'Módulo 11'". Ela não traz pesos nem regra por estado: os pesos e a regra que troca o resto 0 por 1 para São Paulo (`01`) e Minas Gerais (`02`) não têm fonte oficial e seguem as referências da comunidade abaixo.
 
 ```javascript
 import { generateVoterId, isValidVoterId } from '@brazilian-utils/brazilian-utils';
@@ -2339,7 +2340,7 @@ isValidVoterId('1234567880191'); // false (13 dígitos, mais que os 12 que o TSE
 isValidVoterId('123456780124'); // false (dígitos verificadores inválidos)
 ```
 
-Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021) ("composto de até 12 algarismos", "os oito primeiros algarismos serão sequenciais, desprezando-se, na emissão, os zeros à esquerda"), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) e [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
+Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021) ("composto por até 12 algarismos", "os oito primeiros algarismos serão sequenciados, desprezando-se, na emissão, os zeros à esquerda"), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) e [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
 
 ### formatVoterId
 

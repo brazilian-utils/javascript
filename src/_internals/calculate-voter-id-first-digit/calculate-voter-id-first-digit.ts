@@ -14,8 +14,10 @@ export type CalculateVoterIdFirstDigitParams = {
  *
  * Resolução TSE nº 23.659/2021, art. 36, computes it over the sequential number, "o primeiro
  * calculado sobre o número sequencial": its eight digits are weighted 2..9 from left to right
- * and summed modulo 11. The weights and the remainder rules are not published by the TSE and
- * follow the community references the voter id functions cite as `Based on:`.
+ * and summed modulo 11. The weights and the remainder rules, the São Paulo and Minas Gerais
+ * rule that turns a remainder of 0 into 1 included, have no official source: the resolution says
+ * only "Módulo 11". They follow the community references the voter id functions cite as
+ * `Based on:`.
  *
  * @param {CalculateVoterIdFirstDigitParams} params - The calculation parameters.
  * @param {string} params.sequentialNumber - The 8 digit sequential number, leading zeros included.

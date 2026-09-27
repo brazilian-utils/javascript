@@ -31,7 +31,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * client, so it has to be opened in a browser.
  *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
- * Resolução TSE nº 23.659/2021, art. 36: "composto de até 12 algarismos".
+ * Resolução TSE nº 23.659/2021, art. 36: "composto por até 12 algarismos".
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const parseVoterId = (value: string | number): string => {
