@@ -697,7 +697,9 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SP.html
  * Item II, produtor rural: "Inicia sempre com "P" e apresenta a sequência 0MMMSSSSD000", the
- * source of the zero required after the "P".
+ * source of the zero required after the "P"; worked example P-01100424.3/002 (P011004243002).
+ * The page's closing line, "Fica então formada a inscrição P-011000424.3/002", has one "0" too
+ * many (14 characters) and is not a valid registration.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_TO.html
  * "Aplica-se o cálculo "módulo 11" com os algarismos 1,2,5,6,7,8,9,10 da Inscrição Estadual";
  * "Os dígitos "3" e "4" não entram no cálculo", which may only be 01, 02, 03 or 99.

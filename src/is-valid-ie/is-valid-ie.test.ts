@@ -821,6 +821,11 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "P000000000000", stateCode: "SP" })).toBe(true);
 		});
 
+		test("should return false for the SINTEGRA page's closing line P-011000424.3/002, which has one 0 too many", () => {
+			expect(isValidIe({ value: "P-011000424.3/002", stateCode: "SP" })).toBe(false);
+			expect(isValidIe({ value: "P011004243002", stateCode: "SP" })).toBe(true);
+		});
+
 		test("should return false for a produtor rural IE with a length different from 13", () => {
 			expect(isValidIe({ value: "P01100424300", stateCode: "SP" })).toBe(false);
 		});
