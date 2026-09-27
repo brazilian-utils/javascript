@@ -28,8 +28,11 @@
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/4781
  * Resolução CNJ nº 477, de 10 de outubro de 2022, art. 1º: "nos processos da Justiça Federal, os
  * Tribunais Regionais Federais devem ser identificados no campo (TR) pelos números de 01 a 06,
- * observadas as respectivas regiões". Its Anexo II prints `0000100-15.2008.406.0000` for the TRF
- * da 6ª Região.
+ * observadas as respectivas regiões". Its Anexo II prints the TRF da 6ª Região example as
+ * `0000100-15.2008.406.0000`, J and TR run together and its numbers, as the Anexo says, fictitious:
+ * in the `NNNNNNN-DD.AAAA.J.TR.OOOO` form of Resolução CNJ nº 65/2008 that number is written
+ * `0000100-DD.2008.4.06.0000`, and its verifying digits are 68, not 15:
+ * `0000100-68.2008.4.06.0000`.
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14226.htm
  * Lei nº 14.226, de 20 de outubro de 2021, art. 1º: "É criado o Tribunal Regional Federal da 6ª
  * Região, com sede em Belo Horizonte e jurisdição no Estado de Minas Gerais", the court Resolução

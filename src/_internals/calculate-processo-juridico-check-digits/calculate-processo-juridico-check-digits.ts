@@ -13,7 +13,7 @@ const HEAD_LENGTH = 11;
  * the 100), which is the same remainder without ever leaving the safe integer range.
  *
  * @param {string} base - The 18 digits of the number without its verifying digits (`NNNNNNNAAAAJTROOOO`).
- * @returns {number} The verifying digits as one number, 1 to 98.
+ * @returns {number} The verifying digits as one number, 2 to 98: the remainder by 97 is 0 to 96.
  *
  * @example
  * ```typescript
