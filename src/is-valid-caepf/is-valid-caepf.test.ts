@@ -78,6 +78,10 @@ describe("isValidCaepf", () => {
 	});
 
 	describe("should return true", () => {
+		test("for 00000002500171, the example of SERPRO's documentation of the Receita Federal's CAEPF cadastro", () => {
+			expect(isValidCaepf("00000002500171")).toBe(true);
+		});
+
 		test("for 293.118.610/001-84 (Casilhero/brazilian-validators CaepfTest, from ghiorzi.org)", () => {
 			expect(isValidCaepf("293.118.610/001-84")).toBe(true);
 			expect(isValidCaepf("29311861000184")).toBe(true);

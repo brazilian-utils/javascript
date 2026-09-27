@@ -2562,6 +2562,7 @@ Fonte: [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justi
 Valida um número de CEI (Cadastro Específico do INSS). O CEI identifica o empregador sem CNPJ, como uma obra ou um produtor rural.
 
 - Layout: 12 dígitos impressos como `00.000.00000/00`, 11 dígitos de base e um dígito verificador.
+- Só os 12 dígitos são oficiais: nenhuma norma, leiaute ou manual da Receita Federal publica o dígito verificador, que segue as referências da comunidade abaixo e confere com a base aberta do CNO e com o exemplo `000000336854` do SERPRO.
 
 ```javascript
 import { isValidCei } from '@brazilian-utils/brazilian-utils';
@@ -2574,7 +2575,7 @@ isValidCei('24.985.96743/68'); // false (dígito verificador inválido)
 isValidCei('000000000000'); // false (dígitos repetidos)
 ```
 
-Fonte: [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php), [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs) e a [base de dados aberta do CNO](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
+Fonte: [SERPRO, cadastro CNO](https://bcadastros.serpro.gov.br/documentacao/cadastro_cno/) (12 posições), [MOS do eSocial S-1.3, item 9.1](https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-s-1-3-consolidada-ate-a-no-s-1-3-07-2026.pdf) (o CNO mantém o número do CEI); dígito verificador conforme o [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php), [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs) e a [base de dados aberta do CNO](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
 
 ### formatCei
 
@@ -2617,7 +2618,7 @@ isValidCno('110840168063'); // false (dígito verificador inválido)
 isValidCno('000000000000'); // false (dígitos repetidos)
 ```
 
-Fonte: [página do CNO da Receita Federal](https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno) e a [base de dados aberta do CNO](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
+Fonte: [página do CNO da Receita Federal](https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno), [SERPRO, cadastro CNO](https://bcadastros.serpro.gov.br/documentacao/cadastro_cno/), [MOS do eSocial S-1.3, item 9.1](https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-s-1-3-consolidada-ate-a-no-s-1-3-07-2026.pdf) e a [base de dados aberta do CNO](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
 
 ### formatCno
 
@@ -2649,6 +2650,7 @@ Valida um número de CAEPF (Cadastro de Atividade Econômica da Pessoa Física).
 
 - Layout: 14 dígitos impressos como `000.000.000/000-00`: a base de 9 dígitos do CPF do titular, um número de ordem de 3 dígitos e 2 dígitos verificadores.
 - Os dois dígitos verificadores seguem o módulo 11 do CNPJ; o par é então somado a 12, com retorno a zero acima de 99.
+- Só as 14 posições e a base do CPF são oficiais (SERPRO: "9 primeiros números do CPF + número de inscrição resumido" de 5 posições). A divisão dessas 5 em número de ordem e 2 dígitos verificadores, a regra do dígito e a soma de 12 vêm das referências da comunidade abaixo; elas conferem com o exemplo `00000002500171` do SERPRO.
 
 ```javascript
 import { isValidCaepf } from '@brazilian-utils/brazilian-utils';
@@ -2662,7 +2664,7 @@ isValidCaepf('00000000000000'); // false (dígitos da base repetidos)
 isValidCaepf('00000000000012'); // false (dígitos da base repetidos)
 ```
 
-Fonte: [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
+Fonte: [SERPRO, cadastro CAEPF](https://bcadastros.serpro.gov.br/documentacao/cadastro_caepf/) (14 posições); dígitos verificadores conforme o [ghiorzi.org](http://ghiorzi.org/DVnew.htm) e o [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
 
 ### formatCaepf
 

@@ -57,6 +57,10 @@ describe("isValidCno", () => {
 	});
 
 	describe("should return true", () => {
+		test("for 000000336854, the example of SERPRO's documentation of the Receita Federal's CNO cadastro", () => {
+			expect(isValidCno("000000336854")).toBe(true);
+		});
+
 		test("for 110840168062, an obra in Botelhos/MG of the Receita Federal CNO open dataset", () => {
 			expect(isValidCno("110840168062")).toBe(true);
 			expect(isValidCno("11.084.01680/62")).toBe(true);

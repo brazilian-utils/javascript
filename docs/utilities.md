@@ -2562,6 +2562,7 @@ Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de 
 Check if a CEI (Cadastro Específico do INSS) number is valid. The CEI identifies an employer with no CNPJ, such as a construction work or a rural producer.
 
 - Layout: 12 digits printed as `00.000.00000/00`, 11 base digits and one check digit.
+- Only the 12 digits are official: no norm, layout or manual of the Receita Federal publishes the check digit, which follows the community references below and agrees with the CNO open dataset and with SERPRO's example `000000336854`.
 
 ```javascript
 import { isValidCei } from '@brazilian-utils/brazilian-utils';
@@ -2574,7 +2575,7 @@ isValidCei('24.985.96743/68'); // false (invalid check digit)
 isValidCei('000000000000'); // false (repeated digits)
 ```
 
-Source: [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php), [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
+Source: [SERPRO, CNO cadastro](https://bcadastros.serpro.gov.br/documentacao/cadastro_cno/) (12 positions), [eSocial MOS S-1.3, item 9.1](https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-s-1-3-consolidada-ate-a-no-s-1-3-07-2026.pdf) (the CNO keeps the CEI number); check digit per [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php), [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
 
 ### formatCei
 
@@ -2617,7 +2618,7 @@ isValidCno('110840168063'); // false (invalid check digit)
 isValidCno('000000000000'); // false (repeated digits)
 ```
 
-Source: [CNO page of the Receita Federal](https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
+Source: [CNO page of the Receita Federal](https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno), [SERPRO, CNO cadastro](https://bcadastros.serpro.gov.br/documentacao/cadastro_cno/), [eSocial MOS S-1.3, item 9.1](https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-s-1-3-consolidada-ate-a-no-s-1-3-07-2026.pdf) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
 
 ### formatCno
 
@@ -2649,6 +2650,7 @@ Check if a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number is 
 
 - Layout: 14 digits printed as `000.000.000/000-00`: the 9-digit CPF base of the holder, a 3-digit sequence and 2 check digits.
 - Both check digits follow the CNPJ's modulus 11; the pair is then shifted by 12, wrapping around 100.
+- Only the 14 positions and the CPF base are official (SERPRO: "9 primeiros números do CPF + número de inscrição resumido" of 5 positions). The split of those 5 into a sequence and 2 check digits, the check digit rule and the shift of 12 come from the community references below; they agree with SERPRO's example `00000002500171`.
 
 ```javascript
 import { isValidCaepf } from '@brazilian-utils/brazilian-utils';
@@ -2662,7 +2664,7 @@ isValidCaepf('00000000000000'); // false (repeated base digits)
 isValidCaepf('00000000000012'); // false (repeated base digits)
 ```
 
-Source: [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
+Source: [SERPRO, CAEPF cadastro](https://bcadastros.serpro.gov.br/documentacao/cadastro_caepf/) (14 positions); check digits per [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
 
 ### formatCaepf
 

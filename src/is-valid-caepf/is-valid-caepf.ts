@@ -19,7 +19,11 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  *
  * The CAEPF replaced the CEI for individuals who hire employees, such as rural producers and
  * notary officials. It has 14 digits printed as "000.000.000/000-00": the 9 digit CPF base of
- * the holder, a 3 digit sequence for the holder's several registrations and 2 check digits.
+ * the holder, a 3 digit sequence for the holder's several registrations and 2 check digits. The
+ * 14 positions and the CPF base are official (SERPRO's documentation of the Receita Federal's
+ * cadastro: "9 primeiros números do CPF + número de inscrição resumido"); the split of the last 5
+ * into a sequence and 2 check digits is not, and comes with the check digit rule from the
+ * references cited below.
  * Both check digits are the CNPJ's modulus 11 in the formulation of the cited reference: the
  * weights cycle from 9 down to 2 from the right and the check digit is the remainder itself,
  * with a remainder of 10 read as 0 — the same digit the CNPJ's 2-to-9 weights with
@@ -31,8 +35,10 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * well-formed `"00000000000012"` is invalid.
  *
  * The Receita Federal does not publish the check digit rule of the CAEPF, the shift of 12 and
- * the repeated-base rejection included, so the calculation follows the reference implementations
- * cited below.
+ * the repeated-base rejection included: no norm (IN RFB nº 1.828/2018), layout or manual found
+ * has it, and the eSocial only checks that the number is "constante das bases da RFB". The
+ * calculation follows the reference implementations cited below; it agrees with the one official
+ * example found, SERPRO's `"00000002500171"`.
  *
  * A number is only read as a CAEPF when it is a non-negative safe integer.
  *
@@ -53,6 +59,11 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
  * The registry's own page at the Receita Federal, which describes the cadastro but publishes
  * neither the 14 digit layout nor the check digit rule.
+ * @see Official: https://bcadastros.serpro.gov.br/documentacao/cadastro_caepf/
+ * SERPRO, documentation of the Receita Federal's Cadastro Compartilhado (bCadastros), CAEPF:
+ * "nroAepfCompleto — Número de inscrição completo (14 posições: 9 primeiros números do CPF +
+ * número de inscrição resumido)", with the example "00000002500171", which the rule here accepts.
+ * Neither it nor the IN RFB nº 1.828/2018, the norm of the CAEPF, gives a check digit rule.
  * @see Based on: http://ghiorzi.org/DVnew.htm
  * Description of the CAEPF layout and of the
  * shift of 12 applied to the check digit pair.
