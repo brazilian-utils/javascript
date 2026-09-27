@@ -224,10 +224,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Catarina's shift (`nextSundayWhenWeekday`, from
  * `SC_ALEXANDRIA_TRANSFER_SINCE_YEAR` on for 25 November, apart from the
  * `SC_ALEXANDRIA_TRANSFER_GAP_YEAR` gap, and from `SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR` on for
- * 11 August). Of the shifts left out, Acre moves feriados falling from
- * Tuesday to Thursday on to the following Friday (Lei AC nº 2.126, de 19/06/2009, except the
- * Aniversário do Acre on 15/06 and the Revolução Acreana on 06/08, a date this table has no entry
- * for because no state law declaring it a feriado was located), and the
+ * 11 August). Of the shifts left out, Acre's law moves feriados falling from Tuesday to Thursday
+ * on to the Friday (Lei AC nº 2.126/2009, in the wording of Lei AC nº 2.247/2009, the Aniversário
+ * do Acre on 15/06 excepted), but the state's own annual calendar decrees apply it unevenly (see
+ * the `@see` below), so the two official sources conflict and the statutory date is kept; and the
  * Goiás executive may move 26/07 and 28/10 to a nearby dia útil by decree (Lei GO nº 20.756/2020,
  * art. 269, § 1º), neither of which can be resolved from a year alone; São Paulo moved 09/07 to
  * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry.
@@ -242,9 +242,22 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Lei AC nº 3.137, de 27/06/2016, which creates the Dia Estadual do Católico on 20 January as a
  * feriado estadual, listed from 2017, the first 20 January after the law.
  * @see Official: https://legis.ac.gov.br/detalhar/6247
- * Lei AC nº 2.126, de 19/06/2009, the Friday transfer of the Acre feriados that fall from Tuesday
- * to Thursday, with the Aniversário do Acre (15/06) and the Revolução Acreana (06/08) as its
- * exceptions; not modelled, as said above.
+ * Lei AC nº 2.126, de 19/06/2009, "dispõe sobre o adiamento de feriados". Its original art. 1º
+ * moved to Friday the feriados estaduais "que caírem nos demais dias úteis, à exceção dos alusivos
+ * ao aniversário do Estado do Acre (15 de junho) e da Revolução Acreana (6 de agosto)"; its
+ * parágrafo único: "Quando da ocorrência de mais de um feriado na semana, serão comemorados em dias
+ * subseqüentes, de forma tal que o repouso e o lazer deem-se de forma contínua".
+ * @see Official: https://app.al.ac.leg.br/legisla-e/legislacao/visualizar/8517
+ * Lei AC nº 2.247, de 21/12/2009 (DOE 30/12/2009), which gave that art. 1º its current wording:
+ * "Serão comemorados por adiamento, nas sextas-feiras, os feriados estaduais que caírem entre as
+ * terças e quintas-feiras, à exceção do alusivo ao aniversário do Estado do Acre". Not modelled,
+ * because the annual decrees that apply it do not agree with it or with each other: Decreto AC nº
+ * 7.613/2020 (calendar of 2021) moved 20/01 (a Wednesday) to Friday 22/01 but brought 17/11 (a
+ * Wednesday) forward to Tuesday 16/11; Decreto AC nº 11.610/2024 (2025) moved 23/01 (a Thursday)
+ * to 24/01; Decreto AC nº 11.809/2025 (2026) moved 20/01 (a Tuesday) to Thursday 22/01, Friday 23/01
+ * being the Dia do Evangélico, and left 17/11 (a Tuesday) on its date. The 06/08 the original
+ * wording excepted, the Início da Revolução Acreana, is only a ponto facultativo in those decrees,
+ * and no state law declaring it a feriado was located, so it has no entry.
  * @see Official: https://legis.ac.gov.br/detalhar/1087
  * Lei AC nº 1.538, de 29/01/2004, Dia do Evangélico (23/01), listed from 2005
  * @see Official: https://legis.ac.gov.br/detalhar/1828

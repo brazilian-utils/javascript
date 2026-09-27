@@ -252,9 +252,11 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * Friday, 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
  * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it, except in 2004, the
  * year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause. Outside those ranges
- * each holiday stays on 11 August or 25 November. Acre's Tuesday-to-Thursday shift and the Goiás
- * decrees that may move 26/07 and 28/10 are not modelled, because neither can be resolved from a
- * year alone.
+ * each holiday stays on 11 August or 25 November. Acre's shift of the feriados falling Tuesday to
+ * Thursday to the Friday (Lei AC nº 2.126/2009) is not modelled, because the state's own annual
+ * decrees apply it unevenly (in 2026 they move 20 January and leave 17 November, a Tuesday, where
+ * it is), and neither are the Goiás decrees that may move 26/07 and 28/10, which cannot be
+ * resolved from a year alone.
  *
  * Each state entry is listed only from the first year the state norm cited for it applied, and up
  * to the last one, so a year before a state's law has no entry for it: 11 August in Santa Catarina
