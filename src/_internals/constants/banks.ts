@@ -604,7 +604,11 @@ export const BANKS: Bank[] = [
 	},
 	{ code: "513", ispb: "44728700", name: "ATF SOCIEDADE DE CRÉDITO DIRETO S.A." },
 	{ code: "514", ispb: "73302408", name: "EXIM SOCIEDADE CORRETORA DE CÂMBIO LTDA" },
-	{ code: "516", ispb: "36583700", name: "QISTA S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO" },
+	{
+		code: "516",
+		ispb: "36583700",
+		name: "PLACARPAY S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
+	},
 	{ code: "517", ispb: "03816413", name: "PAGUEVELOZ INSTITUIÇÃO DE PAGAMENTO LTDA." },
 	{
 		code: "518",
@@ -840,7 +844,7 @@ export const BANKS: Bank[] = [
 	{ code: "688", ispb: "43978697", name: "KIKAI SOCIEDADE DE CRÉDITO DIRETO S.A." },
 	{ code: "690", ispb: "16814330", name: "BK INSTITUIÇÃO DE PAGAMENTO S.A." },
 	{ code: "691", ispb: "49686505", name: "WASU - WALLET SUPPORT INSTITUIÇÃO DE PAGAMENTO LTDA" },
-	{ code: "692", ispb: "56198117", name: "SQUID SOCIEDADE DE CRÉDITO DIRETO S.A." },
+	{ code: "692", ispb: "56198117", name: "ZYDI SOCIEDADE DE CRÉDITO DIRETO S.A." },
 	{ code: "693", ispb: "32820711", name: "EFEX INSTITUIÇÃO DE PAGAMENTO S.A." },
 	{ code: "694", ispb: "54811417", name: "WOOVI INSTITUICAO DE PAGAMENTO LTDA" },
 	{ code: "695", ispb: "35523352", name: "BEES INSTITUICAO DE PAGAMENTO LTDA." },
