@@ -142,8 +142,9 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * the default `"sn"` a DDD-prefixed value is truncated first, exactly as it is without
  * `obfuscate`, and the visible pair is the 8th and 9th digit rather than the last 2 of `value`.
  * The prefix that names a region or a service instead of a subscriber also stays: the DDD, the
- * `0800`-like code and the `300X`/`400X` root. A 3 digit public utility code (`190`) identifies
- * no one and is returned as it is, and a value the `"service"` mask does not recognize has
+ * `0800`-like code and the `300X`/`400X` root. Under the `"service"`, `"auto"`, `"e164"` and
+ * `"international"` masks a 3 digit public utility code (`190`) identifies no one and is
+ * returned as it is (the other masks read it as an ordinary short number), and a value the `"service"` mask does not recognize has
  * every digit replaced by a `*`, which hides the digits but not how many there were. The
  * patterns have a fixed number of slots, so under `"e164"` anything past the 11th national
  * digit is dropped.

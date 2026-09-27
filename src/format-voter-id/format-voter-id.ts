@@ -29,7 +29,9 @@ export type FormatVoterIdOptions = {
  * @param {boolean} [options.pad] - If true, left pads the value with zeros up to 12 digits,
  * restoring the leading zeros of a voter id issued without them.
  * @param {boolean} [options.obfuscate] - If truthy, hides the first 3 digits and the 2 check
- * digits. Read for truthiness, so a non-boolean such as `1` obfuscates too.
+ * digits. Read for truthiness, so a non-boolean such as `1` obfuscates too. The mask hides by
+ * position, so pass `pad` with it for a voter id given as a number, which has lost its leading
+ * zeros.
  * @returns {string} The formatted voter id string.
  *
  * @example

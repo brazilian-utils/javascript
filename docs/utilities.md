@@ -848,7 +848,7 @@ Format a phone number according to Brazilian patterns. If `value` includes a DDD
 - `obfuscate` is a convention of this library, not an official rule: no law, Anatel act or [ANPD guidance](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) sets which digits of a phone number to show ("não há um padrão para o mascaramento"), and the [Banco Central](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) forbids masking a Pix key, a phone number included, when the DICT lookup returns it.
 - `obfuscate` keeps 2 digits, the count the gov.br account shows for a registered mobile, and keeps the prefix that names a region or a service instead of a subscriber: the DDD, the `0800`-like code and the `300X`/`400X` root.
 - The 2 digits are the last ones the mask itself has room for, so under the default `"sn"` a DDD-prefixed value is truncated first, exactly as it is without `obfuscate`, and the visible pair is the 8th and 9th digit rather than the last 2 of `value`.
-- A 3 digit public utility code (`190`) identifies no one and is returned as it is; a value the `"service"` mask does not recognize has every digit replaced by a `*`, which hides the digits but not how many there were. The obfuscated patterns have a fixed number of slots, so under `"e164"` anything past the 11th national digit is dropped.
+- Under the `"service"`, `"auto"`, `"e164"` and `"international"` masks a 3 digit public utility code (`190`) identifies no one and is returned as it is (the other masks read it as an ordinary short number); a value the `"service"` mask does not recognize has every digit replaced by a `*`, which hides the digits but not how many there were. The obfuscated patterns have a fixed number of slots, so under `"e164"` anything past the 11th national digit is dropped.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -2357,7 +2357,7 @@ Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legisl
 
 Format a voter ID number with the 12-digit grouping `0000 0000 00 00`.
 
-- **Options** (`FormatVoterIdOptions`): `pad` left pads the value with zeros up to 12 digits, restoring the leading zeros of a voter ID issued without them; `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible.
+- **Options** (`FormatVoterIdOptions`): `pad` left pads the value with zeros up to 12 digits, restoring the leading zeros of a voter ID issued without them; `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible. The mask hides by position, so pass `pad` with `obfuscate` for a voter ID given as a number, which has lost its leading zeros: without it the mask shifts onto the check digits.
 - Without `pad`, a shorter value is formatted from the left, as a partially typed ID.
 - Digits past the 12th are dropped.
 - No authority publishes a masking rule for the voter ID, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.

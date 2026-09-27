@@ -848,7 +848,7 @@ Formata um número de telefone de acordo com os padrões brasileiros. Se `value`
 - O `obfuscate` é uma convenção desta biblioteca, não uma regra oficial: nenhuma lei, ato da Anatel ou orientação da [ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) define quais dígitos de um telefone mostrar ("não há um padrão para o mascaramento"), e o [Banco Central](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) proíbe mascarar a chave Pix, inclusive telefone, no retorno da consulta ao DICT.
 - O `obfuscate` mantém 2 dígitos, a contagem que a conta gov.br usa para o celular cadastrado, e mantém o prefixo que indica uma região ou um serviço, e não um assinante: o DDD, o código do tipo `0800` e a raiz `300X`/`400X`.
 - Os 2 dígitos são os últimos que cabem na própria máscara, então na máscara padrão `"sn"` um valor com DDD é truncado antes, igual ao que acontece sem `obfuscate`, e o par visível é o 8º e o 9º dígito, e não os 2 últimos de `value`.
-- Um código de utilidade pública de 3 dígitos (`190`) não identifica ninguém e é devolvido como está; num valor que a máscara `"service"` não reconhece cada dígito vira um `*`, o que esconde os dígitos, mas não quantos eram. Os padrões ofuscados têm um número fixo de posições, então em `"e164"` o que passa do 11º dígito nacional é descartado.
+- Nas máscaras `"service"`, `"auto"`, `"e164"` e `"international"` um código de utilidade pública de 3 dígitos (`190`) não identifica ninguém e é devolvido como está (as outras máscaras o leem como um número curto qualquer); num valor que a máscara `"service"` não reconhece cada dígito vira um `*`, o que esconde os dígitos, mas não quantos eram. Os padrões ofuscados têm um número fixo de posições, então em `"e164"` o que passa do 11º dígito nacional é descartado.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -2357,7 +2357,7 @@ Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legisla
 
 Formata um título de eleitor com o agrupamento de 12 dígitos `0000 0000 00 00`.
 
-- **Opções** (`FormatVoterIdOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos, restaurando os zeros de um título emitido sem eles; `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa.
+- **Opções** (`FormatVoterIdOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos, restaurando os zeros de um título emitido sem eles; `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa. A máscara esconde por posição, então use `pad` junto com `obfuscate` para um título passado como número, que perdeu os zeros à esquerda: sem ele a máscara cai sobre os dígitos verificadores.
 - Sem `pad`, um valor mais curto é formatado a partir da esquerda, como um título digitado pela metade.
 - Os dígitos além do 12º são descartados.
 - Nenhuma autoridade publica uma regra de mascaramento para o título de eleitor, então o `obfuscate` usa a que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, regra criada pela Lei nº 12.309/2010, art. 87, § 5º), um número com a mesma estrutura.
