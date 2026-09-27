@@ -16,6 +16,11 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * The manual lists sector and locality codes only as examples, so they are not checked against a
  * table.
  *
+ * The rule is published by the NF-e Manual de Orientação do Contribuinte (CONFAZ/ENCAT), not by
+ * the SUFRAMA: its Resolução CAS nº 64/2021, art. 5º, only says the inscrição is "um número de
+ * identificação e controle gerado por ocasião do cadastramento", permanent and never reused, and
+ * neither its cadastro FAQ nor the CADSUF manual gives a layout or a check digit.
+ *
  * @param {string} suframa - The Inscrição SUFRAMA to validate.
  * @returns {boolean} True if the Inscrição SUFRAMA is valid, false otherwise.
  *

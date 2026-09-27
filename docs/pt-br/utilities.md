@@ -759,6 +759,7 @@ Valida uma Inscrição SUFRAMA. É o número de registro que a Superintendência
 - Aceita 8 ou 9 dígitos: um valor de 8 dígitos é um número cujo código de setor perdeu o zero à esquerda.
 - Retorna `false` para um código de setor `00` e para um dígito verificador módulo 11 errado.
 - Os códigos de setor e de localidade não são conferidos com uma tabela, pois o manual os lista apenas como exemplos.
+- A regra vem do Manual de Orientação do Contribuinte da NF-e (CONFAZ/ENCAT), não da SUFRAMA, cuja Resolução CAS nº 64/2021, art. 5º, só chama a inscrição de "um número de identificação e controle" e não traz layout nem dígito verificador.
 - Além dos caracteres de máscara usuais, `(`, `)`, `,` e `*` também são ignorados.
 
 ```javascript

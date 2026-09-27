@@ -759,6 +759,7 @@ Check if an Inscrição SUFRAMA is valid. It is the registration number the Supe
 - Accepts 8 or 9 digits: an 8 digit value is a number whose sector code lost its leading zero.
 - Returns `false` for a sector code of `00` and for a wrong módulo 11 check digit.
 - The sector and locality codes are not checked against a table, since the manual lists them only as examples.
+- The rule comes from the NF-e Manual de Orientação do Contribuinte (CONFAZ/ENCAT), not from the SUFRAMA, whose Resolução CAS nº 64/2021, art. 5º, only calls the inscrição "um número de identificação e controle" and gives no layout or check digit.
 - Besides the usual mask characters, `(`, `)`, `,` and `*` are also ignored.
 
 ```javascript
