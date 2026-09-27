@@ -556,10 +556,14 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   Portaria SF nº 124/2008 removed the end date for its use in the e-Fisco systems, and the
  *   SEFAZ-PE consolidated legislation still lists Portaria 087/2007 in force. Only AIDFs granted
  *   from 10/07/2007 on must print the new number.
- * - TO: the SINTEGRA page documents the 11 digit form, the one carrying the tipo digits in
- *   positions 3 and 4, which are left out of the sum. The 9 digit form, the one SEFAZ-TO issued
- *   from Portaria SEFAZ-TO nº 676/2002 on, is that number without the tipo digits: the same
- *   modulus 11 rule with weights 9 down to 2 applies to its first eight digits.
+ * - TO: the 9 digit form is the one in force: Portaria SEFAZ-TO nº 676/2002, art. 3º, and the
+ *   RICMS-TO (Decreto nº 2.912/2006), art. 90, give "nove dígitos": the state prefix (2), the
+ *   sequential number (6) and the check digit (1). SEFAZ-TO's roteiro checks it with weights 9
+ *   down to 2 over the first eight digits. Neither norm fixes the prefix, so it is not checked.
+ *   The SINTEGRA page documents only the old 11 digit form, whose tipo digits in positions 3 and
+ *   4 are left out of the sum and may only be 01, 02, 03 or 99; it is still accepted, although
+ *   the Portaria let it be used only until the validity of the forms that carry it and, in the
+ *   transit of goods, until 31/12/2004.
  * - An all zero registration is accepted for every state whose published formula yields a
  *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT with 9 or 11 digits, PB,
  *   PE with 9 digits, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike isValidCpf and
@@ -689,13 +693,18 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_TO.html
  * "Aplica-se o cálculo "módulo 11" com os algarismos 1,2,5,6,7,8,9,10 da Inscrição Estadual";
  * "Os dígitos "3" e "4" não entram no cálculo", which may only be 01, 02, 03 or 99.
- * @see Official: http://www2.sefaz.to.gov.br/Servicos/Sintegra/calinse.htm
- * SEFAZ-TO's own "Cálculo da Inscrição Estadual", the same modulus 11 rule with the weights 9
- * down to 2.
+ * @see Official: https://web.archive.org/web/20240625000620id_/http://www2.sefaz.to.gov.br/Servicos/Sintegra/calinse.htm
+ * SEFAZ-TO's own roteiro (archived copy of 25/06/2024; the original address no longer serves
+ * it): "Cálculo da Inscrição Estadual Nova (Em vigor desde junho de 2.002)", worked example
+ * 29 022783 6, weights 9 down to 2, "SE O RESTO DA DIVISÃO FOR MENOR QUE DOIS DÍGITO = ZERO".
  * @see Official: https://dtri.sefaz.to.gov.br/legislacao/ntributaria/portarias/sefaz/Portaria676-02.htm
- * Portaria SEFAZ-TO nº 676/2002, the source of the 9 digit form: forms carrying the eleven digit
- * number granted under the earlier rules could only be used until their validity date, and the
- * last digit of the registration is its check digit.
+ * Portaria SEFAZ-TO nº 676/2002, art. 3º: "o número de inscrição estadual é composto de nove
+ * dígitos que representam: I – os dois primeiros algarismos, o prefixo do Estado; II – os seis
+ * seguintes, o número seqüencial da inscrição; III – o último algarismo, o dígito verificador ou
+ * de segurança"; § 2º and § 4º limit the use of the eleven digit number.
+ * @see Official: https://dtri.sefaz.to.gov.br/legislacao/ntributaria/decretos/Decreto2.912-06.htm
+ * RICMS-TO, Decreto nº 2.912/2006, art. 90, unchanged up to Decreto nº 7.219/2026: the same nine
+ * digits as the Portaria's art. 3º.
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
  * The Secretaria da Economia's roteiro de crítica (20/08/2012): "onde AB pode ser igual a 10 ou
  * 11 ou 15", the only source of the prefix 15 and of the special ranges.

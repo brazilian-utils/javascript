@@ -72,4 +72,9 @@ export const SP_FIRST_WEIGHTS = [1, 3, 4, 5, 6, 7, 8, 10];
 
 export const SP_SECOND_WEIGHTS = [3, 2, 10, 9, 8, 7, 6, 5, 4, 3, 2];
 
+/**
+ * The tipo digits (positions 3 and 4) of the old 11 digit TO form, as the SINTEGRA TO page lists
+ * them: 01 Produtor Rural, 02 Indústria e Comércio, 03 Empresas Rudimentares, 99 Empresas do
+ * Cadastro Antigo (suspensas). The 9 digit form in force has no tipo digits.
+ */
 export const TO_TYPES = ["01", "02", "03", "99"];

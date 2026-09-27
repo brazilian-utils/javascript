@@ -922,6 +922,7 @@ describe("isValidIe", () => {
 			["SP", "110.042.490.114"],
 			["SP", "P-01100424.3/002"],
 			["TO", "29010227836"],
+			["TO", "29 022783 6"],
 		];
 
 		test("should accept every worked example the SINTEGRA pages print", () => {

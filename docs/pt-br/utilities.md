@@ -3417,7 +3417,7 @@ Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posic
   - PA: os prefixos 15 e 75 a 79 que a página do SINTEGRA lista (a SEFA-PA atribui 75 desde 07/10/2024). MS: os prefixos 28 e 50 que a página do SINTEGRA traz (o 50 também está em um comunicado da SEFAZ-MS sobre o e-CCE; a única norma, a Resolução/SEF nº 1.344/1999, traz só o 28).
   - DF: a regra de 13 dígitos do AC com os prefixos 07 e 08 (o DF passou a 08 quando os números iniciados por 07 acabaram).
   - SP: o formato de produtor rural `P0MMMSSSSD000`, com o zero depois do `P`; o `P` pode ser minúsculo.
-  - TO: 11 dígitos, com os dígitos de tipo, ou os 9 dígitos que a SEFAZ-TO atribui desde a Portaria SEFAZ-TO nº 676/2002.
+  - TO: os 9 dígitos em vigor (Portaria SEFAZ-TO nº 676/2002, art. 3º; RICMS-TO, Decreto nº 2.912/2006, art. 90), ou os antigos 11 dígitos que a página do SINTEGRA documenta, com os dígitos de tipo 01, 02, 03 ou 99.
   - AM: a regra do dígito verificador da página tem dois ramos e não define "Resto"; a biblioteca o lê como a soma módulo 11 e dá 0 a uma soma 0 ou 1, a regra comum de módulo 11.
   - MG: um primeiro dígito verificador 10, de uma soma que já é múltiplo de dez, é lido como 0.
   - PE: o formato eFisco de 9 dígitos e o antigo formato CACEPE de 14 dígitos, ambos na página do SINTEGRA (a Portaria SF nº 087/2007 converteu os números antigos, mas não fixou data a partir da qual deixam de valer).
