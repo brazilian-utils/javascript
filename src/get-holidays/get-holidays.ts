@@ -346,10 +346,14 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * financial market does not skip, the 24 and 31 December entries cover only their afternoons, and
  * the bridge days a given year adds next to a Thursday or Tuesday holiday (20 April and 5 June in
  * 2026) are one-off decisions no rule can derive from the year.
- * @see Based on: https://www.legisweb.com.br/legislacao/?id=453975
- * Portaria MGI nº 8.617, de 26/12/2023 (DOU of 28/12/2023), the 2024 calendar quoted above for the
- * two Carnaval days, as LegisWeb reproduces it; the Imprensa Nacional page of the act could not be
- * reached.
+ * @see Official: https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-8.617-de-26-de-dezembro-de-2023-533937211
+ * Portaria MGI nº 8.617, de 26/12/2023 (DOU of 28/12/2023, Seção 1, p. 148), the 2024 calendar,
+ * art. 1º, II and III, quoted above for the two Carnaval days.
+ * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-9.783-de-27-de-dezembro-de-2024-604395869
+ * Portaria MGI nº 9.783, de 27/12/2024 (DOU of 30/12/2024, Seção 1, p. 794), the 2025 calendar,
+ * art. 1º: "II - 3 de março, Carnaval (ponto facultativo); III - 4 de março, Carnaval (ponto
+ * facultativo)". The three portarias of 2024 to 2026 list both Carnaval days as ponto
+ * facultativo and never as feriado nacional, and none of their later amendments touches them.
  * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20CMN&numero=4880
  * Resolução CMN nº 4.880/2020, art. 6º, which FEBRABAN's bank holiday calendar follows: besides
  * Saturdays, Sundays and the national holidays, the financial market does not count as dias úteis

@@ -1108,10 +1108,14 @@ describe("getHolidays", () => {
 		expect(isHoliday({ targetDate: new Date(2024, 9, 6) })).toBe(true);
 	});
 
-	test("should list both Carnaval days as optional, the Monday at Easter minus 48 and the Tuesday at Easter minus 47, as every federal portaria does (Portaria MGI nº 8.617/2023: 12 and 13 February 2024; Portaria MGI nº 11.460/2025: 16 and 17 February 2026)", () => {
+	test("should list both Carnaval days as optional, the Monday at Easter minus 48 and the Tuesday at Easter minus 47, as every federal portaria does (Portaria MGI nº 8.617/2023: 12 and 13 February 2024; Portaria MGI nº 9.783/2024: 3 and 4 March 2025; Portaria MGI nº 11.460/2025: 16 and 17 February 2026)", () => {
 		expect(carnaval(2024)).toEqual([
 			{ name: "Carnaval (segunda-feira)", date: new Date(2024, 1, 12), type: "optional" },
 			{ name: "Carnaval (terça-feira)", date: new Date(2024, 1, 13), type: "optional" },
+		]);
+		expect(carnaval(2025)).toEqual([
+			{ name: "Carnaval (segunda-feira)", date: new Date(2025, 2, 3), type: "optional" },
+			{ name: "Carnaval (terça-feira)", date: new Date(2025, 2, 4), type: "optional" },
 		]);
 		expect(carnaval(2026)).toEqual([
 			{ name: "Carnaval (segunda-feira)", date: new Date(2026, 1, 16), type: "optional" },

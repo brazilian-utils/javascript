@@ -159,7 +159,10 @@ const SATURDAY = 6;
  * facultativo); 17 de fevereiro Carnaval (ponto facultativo)") and Corpus Christi being ponto
  * facultativo, which is what `includeOptional` switches on. The exception, Páscoa, has no entry in
  * the portaria; `getHolidays` derives Easter Sunday arithmetically with the Meeus/Jones/Butcher
- * algorithm, and it never affects this function because Easter is always a Sunday.
+ * algorithm, and it never affects this function because Easter is always a Sunday. The 2024 and
+ * 2025 calendars, Portaria MGI nº 8.617/2023 (DOU of 28/12/2023) and Portaria MGI nº 9.783/2024
+ * (DOU of 30/12/2024), list the two Carnaval days the same way, as ponto facultativo and never as
+ * feriado nacional (the `getHolidays` JSDoc links them).
  */
 export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolean => {
 	if (!isValidDate(value)) return false;
