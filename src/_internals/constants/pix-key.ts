@@ -15,10 +15,12 @@ export const PIX_EMAIL_REGEX =
 	/^[a-z0-9.!#$&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/;
 
 /**
- * A DICT random key (EVP) is a lowercase UUID written with its punctuation. The DICT issues
- * version 4 UUIDs, but neither the registered pattern nor the example of the manual
- * (`123e4567-e12b-12d1-a456-426655440000`, whose version nibble is `1`) constrains the
- * version, so the version and variant nibbles are not enforced.
+ * A DICT random key (EVP) is a lowercase UUID written with its punctuation, which the DICT
+ * itself generates ("é gerado pelo DICT", DICT API, tag "Chave"). Neither the pattern the DICT
+ * API registers (`[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`) nor its example
+ * (`123e4567-e89b-12d3-a456-426655440000`) nor the one of the Pix manual
+ * (`123e4567-e12b-12d1-a456-426655440000`), both with the version nibble `1`, constrains the
+ * UUID version, so the version and variant nibbles are not enforced.
  */
 export const EVP_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

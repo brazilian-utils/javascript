@@ -42,9 +42,10 @@ const NORMALIZERS: Readonly<Record<PixKeyType, (trimmed: string) => string>> = {
  *   are recognized; a landline is not a Pix key. Masked, bare and `+55` prefixed inputs are
  *   all accepted;
  * - `evp`: the random key, a lowercase UUID written with its punctuation (8-4-4-4-12
- *   hexadecimal digits). The DICT issues version 4 UUIDs, but neither the pattern the manual
- *   registers nor its own example (`123e4567-e12b-12d1-a456-426655440000`, whose version
- *   nibble is `1`) constrains the version, so the version and variant nibbles are not enforced.
+ *   hexadecimal digits), which the DICT generates. Neither the pattern the DICT API registers
+ *   nor its example (`123e4567-e89b-12d3-a456-426655440000`) nor the one of the Pix manual
+ *   (`123e4567-e12b-12d1-a456-426655440000`), both with the version nibble `1`, constrains the
+ *   UUID version, so the version and variant nibbles are not enforced.
  *
  * The CPF and the phone number are recognized by the way they are written, not only by the
  * digits they carry: a value is read as a CPF when it is the bare 11 digits or the documented

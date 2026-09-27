@@ -17,9 +17,18 @@ import { type TlvFields, parseTlv } from "../_internals/parse-tlv/parse-tlv";
 import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
 
 /**
- * How a Pix BR Code is meant to be presented for payment: `"dynamic"` when it carries a PSP
- * location or when the "Point of Initiation Method" object (`01`) is `"12"`, the value the
- * Manual do BR Code reads as "só pode ser utilizado uma vez"; `"static"` otherwise.
+ * `"dynamic"` or `"static"`, from two different signals of a BR Code:
+ * - a PSP location in 26-25, which is what makes a QR Code dynamic in the Manual de Padrões
+ *   para Iniciação do Pix (§2.4.2: it "é configurado com uma URL que é acessada no momento de
+ *   sua leitura"), as opposed to the static one that carries the key (§2.4.1);
+ * - the "Point of Initiation Method" (`01`) set to `"12"`, which the EMV® QRCPS-MPM uses "when
+ *   a new QR Code is shown for each transaction" (`"11"`: "the same QR Code is shown for more
+ *   than one transaction") and the Pix manual reads as "não deve ser iniciado mais de um
+ *   pagamento com este mesmo QR Code" (§2.7.2).
+ *
+ * It is `"dynamic"` when either is present and `"static"` when neither is, so a payload that
+ * carries a key and `01` = `"12"` (a static QR Code in the §2.4 sense, marked single use) is
+ * reported as `"dynamic"`. `url` and `key` tell the two §2.4 kinds apart.
  */
 export type PixPointOfInitiation = "static" | "dynamic";
 
@@ -44,7 +53,10 @@ export type PixPayloadInfo = {
 	amount?: number;
 	/** Transaction ID, absent when the payload carries the `***` marker. */
 	txid?: string;
-	/** Whether the payload is presented as a single use one ("dynamic") or not ("static"). */
+	/**
+	 * `"dynamic"` when the payload carries a PSP location (`url`) or marks itself single use
+	 * with `01` = `"12"`, `"static"` otherwise; see `PixPointOfInitiation`.
+	 */
 	pointOfInitiation: PixPointOfInitiation;
 };
 

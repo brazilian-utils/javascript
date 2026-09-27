@@ -492,7 +492,7 @@ Parse a Pix BR Code payload into its fields. Accepts what `isValidPixPayload` ac
 
 - Returns a `PixPayloadInfo`: `merchantName`, `merchantCity`, `pointOfInitiation` and either `key` (static) or `url` (dynamic).
 - `amount`, `txid`, `description` and `withdrawalFacilitator` (the `fss` of a Pix Saque) are present only when the payload carries them. `txid` is absent for the `***` marker.
-- `pointOfInitiation` (`PixPointOfInitiation`) is `"dynamic"` when the payload carries a PSP location or object `01` is `"12"`, `"static"` otherwise.
+- `pointOfInitiation` (`PixPointOfInitiation`) is `"dynamic"` when the payload carries a PSP location (a dynamic QR Code in the Pix manual, §2.4.2) or marks itself single use with object `01` = `"12"` (§2.7.2), `"static"` otherwise. A key payload with `01` = `"12"` is therefore `"dynamic"`; `url` and `key` tell the two kinds of QR Code of the manual apart.
 - With a PSP location, `amount` is ignored and `txid` is always `***`, as §2.7 of the manual mandates.
 
 ```javascript
