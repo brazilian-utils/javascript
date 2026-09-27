@@ -1450,6 +1450,23 @@ describe("getHolidays", () => {
 		});
 	});
 
+	test("should replace the national optional Corpus Christi with an MA state entry from 2024 on, Lei MA nº 11.539/2021 having been upheld by the TJMA on 06/03/2024, and keep it optional in 2023", () => {
+		expect(
+			getHolidays({ year: 2024, stateCode: "MA" }).filter((h) => h.name === "Corpus Christi"),
+		).toEqual([{ name: "Corpus Christi", date: new Date(2024, 4, 30), type: "state" }]);
+
+		expect(
+			getHolidays({ year: 2023, stateCode: "MA" }).filter((h) => h.name === "Corpus Christi"),
+		).toEqual([{ name: "Corpus Christi", date: new Date(2023, 5, 8), type: "optional" }]);
+
+		expect(isBusinessDay(new Date(2026, 5, 4), { stateCode: "MA", includeOptional: false })).toBe(
+			false,
+		);
+		expect(isBusinessDay(new Date(2026, 5, 4), { stateCode: "PI", includeOptional: false })).toBe(
+			true,
+		);
+	});
+
 	test("should replace the national optional Corpus Christi with a DF state entry, which Lei distrital nº 72/1989 art. 1º parágrafo único declares a feriado, without listing the date twice", () => {
 		const dfHolidays = getHolidays({ year: 2024, stateCode: "DF" });
 		const nationalHolidays = getHolidays(2024);

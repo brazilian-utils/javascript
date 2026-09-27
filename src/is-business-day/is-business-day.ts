@@ -74,9 +74,10 @@ const SATURDAY = 6;
  *   non-string value that stands for "no state" instead. `addBusinessDays`, `subBusinessDays`
  *   and `differenceInBusinessDays` reject the same value with `null`.
  *
- * Three state rules change what `includeOptional: false` answers. The Distrito Federal declares
- * Corpus Christi a feriado (Lei distrital nº 72/1989, art. 1º parágrafo único), so with
- * `stateCode: "DF"` it is typed `"state"` and still counts; Rio de Janeiro declares the Carnaval
+ * Three state rules change what `includeOptional: false` answers. The Distrito Federal and, from
+ * 2024 on, Maranhão declare Corpus Christi a feriado (Lei distrital nº 72/1989, art. 1º parágrafo
+ * único; Lei MA nº 11.539/2021), so with `stateCode: "DF"` or `"MA"` it is typed `"state"` and
+ * still counts; Rio de Janeiro declares the Carnaval
  * Tuesday a feriado estadual (Lei RJ nº 5.243/2008, from 2009 on), so with `stateCode: "RJ"` it
  * still counts while the Monday does not; and Santa Catarina's two holidays
  * are observed on the following Sunday when they fall Monday to Friday (Lei SC nº 18.531/2022),

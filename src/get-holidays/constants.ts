@@ -359,6 +359,19 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://arquivos.al.ma.leg.br:8443/ged/legislacao/LEI_2457
  * Lei MA nº 2.457, de 02/10/1964, Adesão do Maranhão à Independência (28/07), listed from 1965:
  * "É feriado estadual o dia 28 de julho, data magna do Estado"
+ * @see Official: http://arquivos.al.ma.leg.br:8080/ged/legislacao/LEI_11539
+ * Lei MA nº 11.539, de 21/09/2021, promulgated by the Assembleia Legislativa, art. 1º: "Fica
+ * considerado Feriado Estadual Religioso, o Feriado de Corpus Christi" (Easter plus 60). A
+ * cautelar of the TJMA suspended it on an ADI brought by Fecomércio-MA, Fiema and the Associação
+ * Comercial do Maranhão, and the Órgão Especial judged that ADI improcedente on 06/03/2024,
+ * revoking the cautelar (cited next). The date the cautelar was granted was not located, so
+ * whether the 2022 and 2023 dates were in force cannot be established: the entry starts in 2024,
+ * the first Corpus Christi after the judgment. It replaces the national optional entry typed
+ * `"state"`, as the Distrito Federal one does. Missing up to 2.4.0.
+ * @see Official: https://www.tjma.jus.br/midia/tj/noticia/512660/tjma-julga-constitucional-lei-que-tornou-corpus-christi-feriado-estadual
+ * TJMA, "TJMA julga constitucional lei que tornou Corpus Christi feriado estadual" (06/03/2024):
+ * the Órgão Especial "reconheceu como constitucional a Lei nº 11.539, de 21 de setembro de 2021
+ * ... que incluiu o feriado de Corpus Christi entre os feriados estaduais", by unanimity.
  * @see Official: https://www.al.mt.gov.br/norma-juridica/urn:lex:br;mato.grosso:estadual:lei.ordinaria:2002-12-27;7879
  * Lei MT nº 7.879, de 27/12/2002, Dia da Consciência Negra (state holiday from 2003 until it
  * became national in 2024). Art. 1º, as published in the Diário Oficial do Estado de Mato Grosso of
@@ -607,7 +620,10 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 		{ name: "Lançamento da Pedra Fundamental de Goiânia", day: 24, month: 10, since: 1988 },
 		{ name: "Dia do Servidor Público", day: 28, month: 10, since: 1988 },
 	],
-	MA: [{ name: "Adesão do Maranhão à Independência", day: 28, month: 7, since: 1965 }],
+	MA: [
+		{ name: "Adesão do Maranhão à Independência", day: 28, month: 7, since: 1965 },
+		{ name: "Corpus Christi", easterOffset: 60, since: 2024 },
+	],
 	MT: [
 		{
 			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
