@@ -573,9 +573,11 @@ Check if a DF-e access key (chave de acesso) is valid. Covers every DF-e with a 
 | NF-e (55), NFC-e (65) | 1 to 7 and 9 |
 | CT-e (57) | 1, 3, 4, 5, 7, 8 |
 | CT-e OS (67) | 1, 5, 7, 8 |
-| GTV-e (64) | 1, 2, 7, 8 |
+| GTV-e (64) | 1, 2, 7, 8 (see below) |
 | MDF-e (58) | 1, 2, 3 |
 | BP-e (63), NF3e (66), NFCom (62) | 1, 2 |
+
+For the GTV-e, the current CT-e schema package (PL_CTe_400_RTC) enumerates `tpEmis` 1 (normal) and 2 (contingência off-line) only; the earlier PL_CTe_400 also had 7 and 8 (autorização pela SVC-RS and SVC-SP). The key carries no schema version, so the library accepts all four, and the keys of GTV-e authorised under the earlier package keep validating.
 
 ```javascript
 import { isValidNfeKey } from '@brazilian-utils/brazilian-utils';

@@ -26,7 +26,9 @@ type ValidModel = (typeof VALID_MODELS)[number];
  * 5 contingência FS-DA, 7 autorização pela SVC-RS and 8 autorização pela SVC-SP. CT-e OS
  * (field D27) drops 3 and 4, and the GTV-e (field D15) uses 1, 2 contingência off-line, 7 and
  * 8. Rule G011 of the same annex, "(7=SVC-RS e 8=SVC-SP)", is what makes 8 a real code here,
- * even though the NF-e MOC never assigns it.
+ * even though the NF-e MOC never assigns it. The current package, PL_CTe_400_RTC, enumerates only
+ * 1 and 2 for the GTV-e; 7 and 8 are kept so the keys of GTV-e authorised under the earlier
+ * PL_CTe_400 still validate, since a key carries no schema version.
  *
  * MDF-e (MDF-e MOC 3.00b Anexo I, domain D7): 1 normal, 2 contingência off-line and 3 Regime
  * Especial NFF. NFCom, BP-e and NF3e (their own Anexo I, domain D7): 1 normal and

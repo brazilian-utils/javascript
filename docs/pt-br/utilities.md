@@ -573,9 +573,11 @@ Valida uma chave de acesso de DF-e. Cobre todo DF-e com chave de acesso de 44 ca
 | NF-e (55), NFC-e (65) | 1 a 7 e 9 |
 | CT-e (57) | 1, 3, 4, 5, 7, 8 |
 | CT-e OS (67) | 1, 5, 7, 8 |
-| GTV-e (64) | 1, 2, 7, 8 |
+| GTV-e (64) | 1, 2, 7, 8 (veja abaixo) |
 | MDF-e (58) | 1, 2, 3 |
 | BP-e (63), NF3e (66), NFCom (62) | 1, 2 |
+
+Para a GTV-e, o pacote de schemas atual do CT-e (PL_CTe_400_RTC) enumera apenas os `tpEmis` 1 (normal) e 2 (contingência off-line); o PL_CTe_400 anterior também tinha 7 e 8 (autorização pela SVC-RS e pela SVC-SP). A chave não traz a versão do schema, então a biblioteca aceita os quatro, e as chaves de GTV-e autorizadas sob o pacote anterior continuam válidas.
 
 ```javascript
 import { isValidNfeKey } from '@brazilian-utils/brazilian-utils';
