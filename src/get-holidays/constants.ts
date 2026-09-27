@@ -207,8 +207,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
 /**
  * Feriados estaduais, um `@see` por entrada.
  *
- * Entries typed `"optional"` are the pontos facultativos a state norm cited here declares; the one
- * left is Alagoas' 16 September of 2020 to 2023. The federal pontos facultativos (Carnaval Monday
+ * Entries typed `"optional"` are the pontos facultativos a state norm cited here declares:
+ * Alagoas' 16 September of 2020 to 2023, Amazonas' 8 December and Pernambuco's 6 March of 2008
+ * and 2009. The federal pontos facultativos (Carnaval Monday
  * and Tuesday, Corpus Christi) are emitted by `getHolidays` itself, and together they are what
  * `includeOptional` switches on.
  *
@@ -349,10 +350,14 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Zumbi dos Palmares e Dia Nacional da Consciência Negra, como feriado estadual".
  * @see Official: https://sapl.cmm.am.gov.br/norma/3932
  * Lei Municipal de Manaus nº 496/1999, Nossa Senhora da Conceição (08/12): "INSTITUI feriado
- * religioso no Município de Manaus no dia 8 de dezembro". No state norm declaring 08/12 was
- * located in the ALEAM records, so Amazonas has no entry for it: a municipal holiday of the
- * capital is not a state one, and the table carries no municipal holidays. Earlier versions
- * listed it as an optional state day.
+ * religioso no Município de Manaus no dia 8 de dezembro". No state law makes 08/12 a holiday: it
+ * is a municipal holiday of the capital. The state declares it a ponto facultativo in its own
+ * offices by decree (DOE-AM of 02/12/2025: "DECLARAR ponto facultativo nas repartições públicas,
+ * autarquias e fundações do Estado, no dia 08 de dezembro de 2025"), so it is listed as
+ * `"optional"`, as in 2.4.0. Only the 2025 decree was located; the other years keep the 2.4.0
+ * entry, since no source says otherwise.
+ * @see Official: https://diario.imprensaoficial.am.gov.br/portal/edicoes/download/17974
+ * DOE-AM of 02/12/2025, the decree quoted above.
  * @see Official: https://www.legislabahia.ba.gov.br/documentos/constituicao-do-estado-da-bahia-de-05-de-outubro-de-1989
  * Constituição Estadual da BA, de 05/10/1989, art. 6º § 3º, Independência da Bahia (02/07),
  * listed from 1990: "O Dois de Julho, data magna da Bahia ..., é feriado em todo o território do
@@ -447,21 +452,30 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * considerados feriados estaduais o 5 de agosto, em comemoração à fundação da Paraíba, em 1585, e
  * o 26 de julho, em homenagem a memória do ex-Presidente João Pessoa", so 5 August was already a
  * feriado estadual under it: from 1968 to 2015 it is emitted as "Fundação da Paraíba", the name
- * that law gives it (up to 2.4.0 it was not carried before 2016). Lei PB nº 3.489/1967 entered
+ * that law gives it (2.4.0 listed 05/08 in every year, as "Data Magna do Estado da Paraíba"). Lei PB nº 3.489/1967 entered
  * into force on its publication (DOE 03/09/1967), after that year's date. Lei PB nº 14.171, de
  * 11/12/2025, which declares 20 November a feriado estadual, has no entry: the date has been the
  * national holiday of Lei 14.759/2023 since 2024.
  * @see Official: https://sapl.al.pb.leg.br/media/sapl/public/normajuridica/1967/2945/2945_texto_integral.pdf
  * Lei PB nº 3.489, de 30/08/1967, the scanned text of the law, art. 2º as quoted above.
  * @see Official: https://www.legislacao.pr.gov.br/legislacao/pesquisarAto.do?action=exibir&codAto=134573
- * Lei PR nº 18.384/2014, Emancipação Política do Paraná (19/12), a data comemorativa its own text
- * says is "não se constituindo em feriado civil", nor a ponto facultativo it declares, so Paraná
- * has no entry. Earlier versions listed it as an optional state day.
+ * Lei PR nº 18.384, de 17/12/2014, Emancipação Política do Paraná (19/12), a data comemorativa its
+ * own text says is "não se constituindo em feriado civil", nor a ponto facultativo it declares.
+ * Its art. 3º revoked the Lei PR nº 4.658, de 18/12/1962 (DO 21/12/1962), whose art. 1º read "Fica
+ * consagrada a data de 19 de Dezembro como feriado estadual", so 19/12 is listed from 1963, the
+ * first one after that law, up to 2013, the last one before its revocation.
+ * @see Official: https://www.legislacao.pr.gov.br/legislacao/exibirAto.do?action=localizarAto&codTipoAto=1&nroAto=4658&dataAto=18%2F12%2F1962&tipoVisualizacao=original
+ * Lei PR nº 4.658, de 18/12/1962, art. 1º, as quoted above.
  * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?tiponorma=1&numero=16241&complemento=0&ano=2017&tipo=&url=
  * Lei PE nº 16.241, de 14/12/2017, art. 49, Revolução Pernambucana (06/03), listed from 2018: "Dia 6 de março: Data Magna do
  * Estado de Pernambuco e feriado civil no âmbito do Estado de Pernambuco". Revoked the Lei PE nº
  * 16.059, de 08/06/2017, cited here before, which had itself superseded the movable "primeiro
- * domingo de março" of Lei PE nº 13.835/2009, always a Sunday.
+ * domingo de março" of Lei PE nº 13.835/2009, always a Sunday. Before it, Lei PE nº 13.386, de
+ * 24/12/2007, art. 1º, "Fica instituído o dia 06 (seis) de março como data Magna do Estado de
+ * Pernambuco", gave the date "a condição de ponto facultativo", so 06/03 is listed as `"optional"`
+ * in 2008 and 2009.
+ * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?tiponorma=1&numero=13386&complemento=0&ano=2007&tipo=&url=
+ * Lei PE nº 13.386, de 24/12/2007, as quoted above.
  * @see Official: https://sapl.al.pi.leg.br/norma/5849
  * Lei PI nº 176, de 30/08/1937, Dia do Piauí (19/10), listed from 1937: "19 de Outubro será
  * feriado estadual, com a denominação de DIA DO PIAUHY"
@@ -604,7 +618,7 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Independência de Sergipe e à comemoração popular e tradicional da mesma independência". EC nº
  * 20, de 31/05/2000, rewrote it to "Será feriado estadual o dia 08 de julho, data consagrada à
  * Independência de Sergipe". So Independência de Sergipe (08/07) is listed from 1990, the first 8
- * July after the Constitution (up to 2.4.0 from 2000, the year of the amendment), and the
+ * July after the Constitution (2.4.0 listed it in every year), and the
  * Comemoração Popular da Independência de Sergipe (24/10) from 1989, nineteen days after the
  * Constitution, up to 1999.
  * @see Official: https://www.al.to.leg.br/arquivo/15717
@@ -688,6 +702,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			since: 2010,
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 		},
+		{ name: "Nossa Senhora da Conceição", day: 8, month: 12, type: "optional" },
 	],
 	BA: [{ name: "Independência da Bahia", day: 2, month: 7, since: 1990 }],
 	CE: [{ name: "Abolição da Escravidão no Ceará", day: 25, month: 3, since: 2012 }],
@@ -741,8 +756,19 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 		},
 	],
 
-	PE: [{ name: "Revolução Pernambucana", day: 6, month: 3, since: 2018 }],
+	PE: [
+		{
+			name: "Revolução Pernambucana",
+			day: 6,
+			month: 3,
+			type: "optional",
+			since: 2008,
+			until: 2010,
+		},
+		{ name: "Revolução Pernambucana", day: 6, month: 3, since: 2018 },
+	],
 	PI: [{ name: "Dia do Piauí", day: 19, month: 10, since: 1937 }],
+	PR: [{ name: "Emancipação Política do Paraná", day: 19, month: 12, since: 1963, until: 2014 }],
 	RJ: [
 		{ name: "Carnaval (terça-feira)", easterOffset: -47, since: 2009 },
 		{ name: "São Jorge", day: 23, month: 4, since: 2008 },

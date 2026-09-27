@@ -984,6 +984,19 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 	},
 ];
 
+/**
+ * The entries `getHolidays` lists for a state on one day of a year.
+ * @param {StateCode} stateCode - The state.
+ * @param {number} month - The month, 0 based.
+ * @param {number} day - The day of the month.
+ * @param {number} year - The year.
+ * @returns {Holiday[]} The entries on that day.
+ */
+const statesHolidaysOn = (stateCode: StateCode, month: number, day: number, year: number) =>
+	getHolidays({ year, stateCode }).filter(
+		(holiday) => holiday.date.getMonth() === month && holiday.date.getDate() === day,
+	);
+
 describe("getHolidays", () => {
 	test("should return fixed holidays for the given year", () => {
 		const year = 2024;
@@ -1397,30 +1410,55 @@ describe("getHolidays", () => {
 		expect(secondHoliday.name).not.toBe("MUTATED");
 		expect(secondHoliday.date.getFullYear()).toBe(2024);
 	});
-	test("should not list AM's 8 December, a municipal holiday of Manaus (Lei Municipal nº 496/1999), nor PR's 19 December, which Lei PR nº 18.384/2014 declares 'não se constituindo em feriado civil', so both are business days", () => {
-		for (const [stateCode, month, day] of [
-			["AM", 11, 8],
-			["PR", 11, 19],
-		] as const) {
-			expect(
-				getHolidays({ year: 2024, stateCode }).filter(
-					(holiday) => holiday.date.getMonth() === month && holiday.date.getDate() === day,
-				),
-			).toEqual([]);
-		}
+	test("should list AM's 8 December as a state ponto facultativo, which the state declares by decree (DOE-AM 02/12/2025) for its offices, as in 2.4.0", () => {
+		expect(
+			getHolidays({ year: 2025, stateCode: "AM" }).filter(
+				(holiday) => holiday.date.getMonth() === 11 && holiday.date.getDate() === 8,
+			),
+		).toEqual([
+			{ name: "Nossa Senhora da Conceição", date: new Date(2025, 11, 8), type: "optional" },
+		]);
+		expect(isBusinessDay(new Date(2025, 11, 8, 12), { stateCode: "AM" })).toBe(false);
+		expect(
+			isBusinessDay(new Date(2025, 11, 8, 12), { stateCode: "AM", includeOptional: false }),
+		).toBe(true);
+	});
 
-		expect(isBusinessDay(new Date(2025, 11, 8, 12), { stateCode: "AM" })).toBe(true);
+	test("should list PR's 19 December from 1963 to 2013 under Lei PR nº 4.658/1962, and not after Lei PR nº 18.384/2014 revoked it ('não se constituindo em feriado civil')", () => {
+		expect(statesHolidaysOn("PR", 11, 19, 1962)).toEqual([]);
+		expect(statesHolidaysOn("PR", 11, 19, 1963)).toEqual([
+			{ name: "Emancipação Política do Paraná", date: new Date(1963, 11, 19), type: "state" },
+		]);
+		expect(statesHolidaysOn("PR", 11, 19, 2013)).toHaveLength(1);
+		expect(statesHolidaysOn("PR", 11, 19, 2014)).toEqual([]);
+		expect(isBusinessDay(new Date(2013, 11, 19, 12), { stateCode: "PR" })).toBe(false);
 		expect(isBusinessDay(new Date(2025, 11, 19, 12), { stateCode: "PR" })).toBe(true);
 	});
 
-	test("should keep the state optional entries to the one the table sources, AL's 16 September of 2020 to 2023", () => {
+	test("should list PE's 6 March as a ponto facultativo in 2008 and 2009 under Lei PE nº 13.386/2007, and as a state holiday from 2018", () => {
+		expect(statesHolidaysOn("PE", 2, 6, 2007)).toEqual([]);
+		expect(statesHolidaysOn("PE", 2, 6, 2008)).toEqual([
+			{ name: "Revolução Pernambucana", date: new Date(2008, 2, 6), type: "optional" },
+		]);
+		expect(statesHolidaysOn("PE", 2, 6, 2009)).toHaveLength(1);
+		expect(statesHolidaysOn("PE", 2, 6, 2010)).toEqual([]);
+		expect(statesHolidaysOn("PE", 2, 6, 2018)).toEqual([
+			{ name: "Revolução Pernambucana", date: new Date(2018, 2, 6), type: "state" },
+		]);
+	});
+
+	test("should keep the state optional entries to the ones a state norm declares: AL's 16 September of 2020 to 2023, AM's 8 December and PE's 6 March of 2008 and 2009", () => {
 		const optionalStateEntries = Object.entries(STATE_HOLIDAYS).flatMap(([stateCode, entries]) =>
 			entries
 				.filter((entry) => entry.type === "optional")
 				.map((entry) => `${stateCode} ${entry.name}`),
 		);
 
-		expect(optionalStateEntries).toEqual(["AL Emancipação Política de Alagoas"]);
+		expect(optionalStateEntries).toEqual([
+			"AL Emancipação Política de Alagoas",
+			"AM Nossa Senhora da Conceição",
+			"PE Revolução Pernambucana",
+		]);
 	});
 
 	test("should apply state laws for Consciência Negra before it became national", () => {

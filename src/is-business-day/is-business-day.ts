@@ -34,8 +34,9 @@ const SATURDAY = 6;
  *
  * `options.includeOptional` defaults to `true`: holidays whose `Holiday.type` is
  * `"optional"` (Carnaval Monday and Tuesday and Corpus Christi, the federal pontos facultativos
- * `getHolidays` lists, plus the state pontos facultativos its table sources, today only Alagoas'
- * 16 September of 2020 to 2023) are treated as non-business days even though they are not
+ * `getHolidays` lists, plus the state pontos facultativos its table sources: Alagoas' 16
+ * September of 2020 to 2023, Amazonas' 8 December and Pernambuco's 6 March of 2008 and 2009) are
+ * treated as non-business days even though they are not
  * statutory holidays. Pass `false` to only treat statutory (`"national"` and `"state"`) holidays as
  * non-business days. The partial pontos facultativos of the federal calendar (the Quarta-feira de
  * Cinzas morning, 28 October, the 24 and 31 December afternoons) are business days either way.

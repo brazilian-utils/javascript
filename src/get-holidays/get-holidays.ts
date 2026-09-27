@@ -207,8 +207,9 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * per `year`/`stateCode` combination; the returned array (and each `Holiday.date`) is
  * always a fresh copy, so mutating it never affects subsequent calls.
  *
- * Each national holiday is listed only for the years a federal norm declared it, so the older
- * years of the supported range differ from today's list: Nossa Senhora Aparecida is listed from
+ * Each fixed-date national holiday is listed only for the years a federal norm declared it
+ * (Sexta-feira Santa, which the federal calendar portarias list as a feriado nacional, is listed
+ * every year), so the older years of the supported range differ from today's list: Nossa Senhora Aparecida is listed from
  * 1980 (Lei 6.802/1980), Natal from 1922 and Dia do trabalhador from 1925, Tiradentes up to 1930,
  * from 1933 to 1948 and from 1951, since Lei 662/1949 left it out of its list until Lei
  * 1.266/1950 restored it, and Finados up to 1948 and from 2003, since Lei 662/1949 left it out as
