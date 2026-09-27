@@ -757,7 +757,7 @@ Fonte: a [documentação técnica do Sistema Nacional NFS-e](https://www.gov.br/
 Valida uma Inscrição SUFRAMA. É o número de registro que a Superintendência da Zona Franca de Manaus dá às empresas com incentivo fiscal, informado no campo `ISUF` do destinatário da NF-e.
 
 - O número tem a forma `SS.NNNN.LLD`: setor de atividade, número sequencial, localidade da unidade da SUFRAMA e dígito verificador.
-- Aceita 8 ou 9 dígitos: um valor de 8 dígitos é um número cujo código de setor perdeu o zero à esquerda.
+- Aceita 8 ou 9 dígitos. O MOC só diz que o código de setor "pode começar por '0'"; ler um valor de 8 dígitos como um cujo código de setor perdeu esse zero é uma inferência desta biblioteca.
 - Retorna `false` para um código de setor `00` e para um dígito verificador módulo 11 errado.
 - Os códigos de setor e de localidade não são conferidos com uma tabela, pois o manual os lista apenas como exemplos.
 - A regra vem do Manual de Orientação do Contribuinte da NF-e (CONFAZ/ENCAT), não da SUFRAMA, cuja Resolução CAS nº 64/2021, art. 5º, só chama a inscrição de "um número de identificação e controle" e não traz layout nem dígito verificador.

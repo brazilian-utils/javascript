@@ -9,8 +9,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * The number is `SS.NNNN.LLD`: sector of activity, sequential number, locality of the SUFRAMA
  * unit that registered the company and check digit. The NF-e field is numeric with 8 or 9
- * positions, because a sector code such as `01` loses its leading zero, so an 8 digit value is
- * read with that zero back in place. The sector code can never be `00`. The check digit is módulo
+ * positions and the MOC only says "SS pode começar por '0'"; reading an 8 digit value as one whose
+ * sector code lost its leading zero, and putting that zero back, is this library's inference. The sector code can never be `00`. The check digit is módulo
  * 11 with weights 2 to 9 from right to left, and is 0 when the remainder is 0 or 1.
  *
  * The manual lists sector and locality codes only as examples, so they are not checked against a

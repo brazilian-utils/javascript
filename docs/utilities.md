@@ -757,7 +757,7 @@ Source: the [technical documentation of the Sistema Nacional NFS-e](https://www.
 Check if an Inscrição SUFRAMA is valid. It is the registration number the Superintendência da Zona Franca de Manaus gives to companies with tax incentives, carried by the `ISUF` field of the NF-e recipient.
 
 - The number is `SS.NNNN.LLD`: sector of activity, sequential number, locality of the SUFRAMA unit and check digit.
-- Accepts 8 or 9 digits: an 8 digit value is a number whose sector code lost its leading zero.
+- Accepts 8 or 9 digits. The MOC only says the sector code "pode começar por '0'"; reading an 8 digit value as one whose sector code lost that zero is this library's inference.
 - Returns `false` for a sector code of `00` and for a wrong módulo 11 check digit.
 - The sector and locality codes are not checked against a table, since the manual lists them only as examples.
 - The rule comes from the NF-e Manual de Orientação do Contribuinte (CONFAZ/ENCAT), not from the SUFRAMA, whose Resolução CAS nº 64/2021, art. 5º, only calls the inscrição "um número de identificação e controle" and gives no layout or check digit.
