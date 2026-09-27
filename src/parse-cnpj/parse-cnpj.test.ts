@@ -18,6 +18,11 @@ describe("parseCnpj", () => {
 		expect(parseCnpj("Q0.SLF.MBD/7VX4-39", { version: 2 })).toBe("Q0SLFMBD7VX439");
 	});
 
+	it("should upper-case lower case letters for version 2, the official set being A to Z", () => {
+		expect(parseCnpj("12.abc.345/01de-35", { version: 2 })).toBe("12ABC34501DE35");
+		expect(parseCnpj("q0slfmbd7vx439", { version: 2 })).toBe("Q0SLFMBD7VX439");
+	});
+
 	it("should ignore digits after the CNPJ length", () => {
 		expect(parseCnpj("46843485000186123")).toBe("46843485000186");
 	});

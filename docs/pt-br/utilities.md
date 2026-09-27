@@ -114,12 +114,13 @@ Valida um CNPJ.
 
 - **Opções** (`IsValidCnpjOptions`): `version` escolhe o formato aceito: `1` (padrão) apenas numérico, `2` numérico e alfanumérico. Qualquer outro valor é lido como `1`.
 - Um número reservado (todos os dígitos iguais) é rejeitado nas duas versões; a versão `2` não tem lista de reservados para letras.
+- O conjunto oficial de caracteres do CNPJ alfanumérico são as letras maiúsculas de `A` a `Z` e os algarismos (os 2 dígitos verificadores são sempre algarismos). Uma letra minúscula só é aceita como normalização da entrada, como um caractere de máscara: a entrada é convertida para maiúsculas antes.
 
 ```javascript
 import { isValidCnpj } from '@brazilian-utils/brazilian-utils';
 
 isValidCnpj('15515147234255'); // false
-isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (alfanumérico minúsculo)
+isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (lido como Q0SLFMBD7VX439)
 ```
 
 Fonte: [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
@@ -129,7 +130,7 @@ Fonte: [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal
 Formata um CNPJ.
 
 - **Opções** (`FormatCnpjOptions`): `pad` preenche o valor com zeros à esquerda até 14 caracteres antes de aplicar a máscara (padrão `false`); `version` escolhe o formato, `1` (padrão) apenas numérico, `2` alfanumérico; `obfuscate` esconde os 2 primeiros dígitos e os 2 dígitos verificadores.
-- A versão `2` mantém letras (em maiúsculas) e dígitos; a versão `1` mantém apenas dígitos.
+- A versão `2` mantém letras e dígitos, com uma letra minúscula convertida para maiúscula antes, já que o conjunto oficial é de `A` a `Z`; a versão `1` mantém apenas dígitos.
 - `obfuscate` vale para as duas versões e é aplicada após o `pad`. É uma convenção desta biblioteca, não uma regra oficial: nenhuma lei ou ato da Receita Federal define mascaramento para o CNPJ, cujos dados são públicos; ela esconde os 2 primeiros caracteres e os 2 dígitos verificadores, à semelhança da regra do CPF.
 
 ```javascript
@@ -145,7 +146,7 @@ formatCnpj('12345678000195', { obfuscate: true }); // **.345.678/0001-**
 
 Remove a formatação do CNPJ, retorna um valor normalizado e limita o resultado a 14 caracteres.
 
-- **Opções** (`ParseCnpjOptions`): `version` escolhe o formato: `1` (padrão) mantém apenas dígitos, `2` mantém letras e dígitos, em maiúsculas.
+- **Opções** (`ParseCnpjOptions`): `version` escolhe o formato: `1` (padrão) mantém apenas dígitos, `2` mantém letras e dígitos, com uma letra minúscula convertida para maiúscula, já que o conjunto oficial é de `A` a `Z` (`parseCnpj('12.abc.345/01de-35', { version: 2 })` retorna `'12ABC34501DE35'`).
 
 ```javascript
 import { parseCnpj } from '@brazilian-utils/brazilian-utils';

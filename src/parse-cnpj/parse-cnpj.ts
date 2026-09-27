@@ -24,9 +24,19 @@ export type ParseCnpjOptions = Pick<FormatCnpjOptions, "version">;
  * parseCnpj(-11222333000181); // "" (not a non-negative safe integer)
  * ```
  *
+ * The official character set of the alphanumeric CNPJ is the capital letters `A` to `Z` and the
+ * digits in the 12 base positions, and digits only in the 2 check digits (Receita Federal, CNPJ
+ * alfanumérico, and its DV manual, which reads a letter by its ASCII code). A lower case letter is
+ * not part of it: under `version: 2` this function accepts one only as input normalization, the
+ * way it accepts mask characters, and upper-cases the input before returning it, so
+ * `parseCnpj("12.abc.345/01de-35", { version: 2 })` returns `"12ABC34501DE35"`.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
+ * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf
+ * Receita Federal, CNPJ alfanumérico, perguntas e respostas: the base positions take the digits 0
+ * to 9 and the capital letters A to Z, the 2 check digits stay numeric.
  */
 export const parseCnpj = (value: string | number, options?: ParseCnpjOptions): string =>
 	isLookupCode(value) ? sanitizeCnpj(value, options?.version).slice(0, CNPJ_LENGTH) : "";

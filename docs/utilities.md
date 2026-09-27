@@ -114,12 +114,13 @@ Check if a CNPJ is valid.
 
 - **Options** (`IsValidCnpjOptions`): `version` picks the accepted format: `1` (default) numeric only, `2` numeric and alphanumeric. Any other value is read as `1`.
 - A reserved number (all digits the same) is rejected under both versions; version `2` has no reserved list for letters.
+- The official character set of the alphanumeric CNPJ is the capital letters `A` to `Z` and the digits (the 2 check digits are always digits). A lower case letter is accepted only as input normalization, like a mask character: the input is upper-cased first.
 
 ```javascript
 import { isValidCnpj } from '@brazilian-utils/brazilian-utils';
 
 isValidCnpj('15515147234255'); // false
-isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (lowercase alphanumeric)
+isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (read as Q0SLFMBD7VX439)
 ```
 
 Source: [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
@@ -129,7 +130,7 @@ Source: [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafedera
 Format a CNPJ.
 
 - **Options** (`FormatCnpjOptions`): `pad` left-pads the value with zeros to 14 characters before masking (default `false`); `version` picks the format, `1` (default) numeric only, `2` alphanumeric; `obfuscate` hides the first 2 digits and the 2 check digits.
-- Version `2` keeps letters (upper-cased) and digits; version `1` keeps digits only.
+- Version `2` keeps letters and digits, a lower case letter upper-cased first since the official set is `A` to `Z`; version `1` keeps digits only.
 - `obfuscate` works in both versions and is applied after `pad`. It is a convention of this library, not an official rule: no law or Receita Federal act sets a masking rule for the CNPJ, whose data are public; it hides the first 2 characters and the 2 check digits, after the CPF rule.
 
 ```javascript
@@ -145,7 +146,7 @@ formatCnpj('12345678000195', { obfuscate: true }); // **.345.678/0001-**
 
 Remove CNPJ formatting, return a normalized value, and cap the result to 14 characters.
 
-- **Options** (`ParseCnpjOptions`): `version` picks the format: `1` (default) keeps digits only, `2` keeps letters and digits, upper-cased.
+- **Options** (`ParseCnpjOptions`): `version` picks the format: `1` (default) keeps digits only, `2` keeps letters and digits, a lower case letter upper-cased since the official set is `A` to `Z` (`parseCnpj('12.abc.345/01de-35', { version: 2 })` returns `'12ABC34501DE35'`).
 
 ```javascript
 import { parseCnpj } from '@brazilian-utils/brazilian-utils';

@@ -115,6 +115,11 @@ describe("formatCnpj", () => {
 		expect(formatCnpj("q0SLFMBD7VX439", { version: 2 })).toBe("Q0.SLF.MBD/7VX4-39");
 	});
 
+	it("should upper-case lower case letters for version 2, the official set being A to Z", () => {
+		expect(formatCnpj("q0slfmbd7vx439", { version: 2 })).toBe("Q0.SLF.MBD/7VX4-39");
+		expect(formatCnpj("12abc34501de35", { version: 2 })).toBe("12.ABC.345/01DE-35");
+	});
+
 	it("should remove non-alphanumeric characters for version 2", () => {
 		expect(formatCnpj("46.?ABC843.485/0001-86abc", { version: 2 })).toBe("46.ABC.843/4850-00");
 	});
