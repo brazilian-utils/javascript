@@ -1,4 +1,3 @@
-import { completeState } from "../_internals/complete-state/complete-state";
 import { DATA, type State } from "../_internals/constants/states";
 import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 
@@ -29,9 +28,9 @@ export type { State } from "../_internals/constants/states";
  *
  * @example
  * ```typescript
- * getStateByIbgeCode("35"); // { code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35, regionIbgeCode: 3, capital: { code: "3550308", name: "São Paulo" } }
- * getStateByIbgeCode(35); // { code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35, regionIbgeCode: 3, capital: { code: "3550308", name: "São Paulo" } }
- * getStateByIbgeCode("11"); // { code: "RO", name: "Rondônia", regionCode: "N", regionName: "Norte", ibgeCode: 11, regionIbgeCode: 1, capital: { code: "1100205", name: "Porto Velho" } }
+ * getStateByIbgeCode("35"); // { code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35 }
+ * getStateByIbgeCode(35); // { code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35 }
+ * getStateByIbgeCode("11"); // { code: "RO", name: "Rondônia", regionCode: "N", regionName: "Norte", ibgeCode: 11 }
  * getStateByIbgeCode("00"); // null
  * getStateByIbgeCode(""); // null
  * getStateByIbgeCode(-35); // null
@@ -48,5 +47,5 @@ export const getStateByIbgeCode = (code: string | number): State | null => {
 
 	const state = DATA.find((entry) => entry.ibgeCode === numericCode);
 
-	return state ? completeState(state) : null;
+	return state ? { ...state } : null;
 };

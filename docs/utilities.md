@@ -1655,44 +1655,43 @@ convertDateToWords('29/02/1900'); // "" (1900 is not a leap year)
 
 ### getStates
 
-Get all Brazilian states, each with its two-letter code, name, region code, region name, 2-digit IBGE code (`cUF`), the IBGE identifier of its region (`regionIbgeCode`) and its capital (`capital`, the 7-digit IBGE code and the name of the municipality).
+Get all Brazilian states, each with its two-letter code, name, region code, region name and 2-digit IBGE code (`cUF`).
 
 - Sorted by name in the "pt-BR" locale.
 - Exports the `State`, `StateCode` and `StateName` types. `State` is a discriminated union: narrowing it by `code` also narrows the other fields.
-- `regionIbgeCode` and `capital` are always filled, but optional in the `State` type so that a `State` built for 2.4.0 still type-checks; they become required in the next major version.
 
 ```javascript
 import { getStates } from '@brazilian-utils/brazilian-utils';
 
 getStates();
 // [
-//   { code: 'AC', name: 'Acre', regionCode: 'N', regionName: 'Norte', ibgeCode: 12, regionIbgeCode: 1, capital: { code: '1200401', name: 'Rio Branco' } },
-//   { code: 'AL', name: 'Alagoas', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 27, regionIbgeCode: 2, capital: { code: '2704302', name: 'Maceió' } },
-//   { code: 'AP', name: 'Amapá', regionCode: 'N', regionName: 'Norte', ibgeCode: 16, regionIbgeCode: 1, capital: { code: '1600303', name: 'Macapá' } },
-//   { code: 'AM', name: 'Amazonas', regionCode: 'N', regionName: 'Norte', ibgeCode: 13, regionIbgeCode: 1, capital: { code: '1302603', name: 'Manaus' } },
-//   { code: 'BA', name: 'Bahia', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 29, regionIbgeCode: 2, capital: { code: '2927408', name: 'Salvador' } },
-//   { code: 'CE', name: 'Ceará', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 23, regionIbgeCode: 2, capital: { code: '2304400', name: 'Fortaleza' } },
-//   { code: 'DF', name: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 53, regionIbgeCode: 5, capital: { code: '5300108', name: 'Brasília' } },
-//   { code: 'ES', name: 'Espírito Santo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 32, regionIbgeCode: 3, capital: { code: '3205309', name: 'Vitória' } },
-//   { code: 'GO', name: 'Goiás', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 52, regionIbgeCode: 5, capital: { code: '5208707', name: 'Goiânia' } },
-//   { code: 'MA', name: 'Maranhão', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 21, regionIbgeCode: 2, capital: { code: '2111300', name: 'São Luís' } },
-//   { code: 'MT', name: 'Mato Grosso', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 51, regionIbgeCode: 5, capital: { code: '5103403', name: 'Cuiabá' } },
-//   { code: 'MS', name: 'Mato Grosso do Sul', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 50, regionIbgeCode: 5, capital: { code: '5002704', name: 'Campo Grande' } },
-//   { code: 'MG', name: 'Minas Gerais', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 31, regionIbgeCode: 3, capital: { code: '3106200', name: 'Belo Horizonte' } },
-//   { code: 'PA', name: 'Pará', regionCode: 'N', regionName: 'Norte', ibgeCode: 15, regionIbgeCode: 1, capital: { code: '1501402', name: 'Belém' } },
-//   { code: 'PB', name: 'Paraíba', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 25, regionIbgeCode: 2, capital: { code: '2507507', name: 'João Pessoa' } },
-//   { code: 'PR', name: 'Paraná', regionCode: 'S', regionName: 'Sul', ibgeCode: 41, regionIbgeCode: 4, capital: { code: '4106902', name: 'Curitiba' } },
-//   { code: 'PE', name: 'Pernambuco', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 26, regionIbgeCode: 2, capital: { code: '2611606', name: 'Recife' } },
-//   { code: 'PI', name: 'Piauí', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 22, regionIbgeCode: 2, capital: { code: '2211001', name: 'Teresina' } },
-//   { code: 'RJ', name: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 33, regionIbgeCode: 3, capital: { code: '3304557', name: 'Rio de Janeiro' } },
-//   { code: 'RN', name: 'Rio Grande do Norte', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 24, regionIbgeCode: 2, capital: { code: '2408102', name: 'Natal' } },
-//   { code: 'RS', name: 'Rio Grande do Sul', regionCode: 'S', regionName: 'Sul', ibgeCode: 43, regionIbgeCode: 4, capital: { code: '4314902', name: 'Porto Alegre' } },
-//   { code: 'RO', name: 'Rondônia', regionCode: 'N', regionName: 'Norte', ibgeCode: 11, regionIbgeCode: 1, capital: { code: '1100205', name: 'Porto Velho' } },
-//   { code: 'RR', name: 'Roraima', regionCode: 'N', regionName: 'Norte', ibgeCode: 14, regionIbgeCode: 1, capital: { code: '1400100', name: 'Boa Vista' } },
-//   { code: 'SC', name: 'Santa Catarina', regionCode: 'S', regionName: 'Sul', ibgeCode: 42, regionIbgeCode: 4, capital: { code: '4205407', name: 'Florianópolis' } },
-//   { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35, regionIbgeCode: 3, capital: { code: '3550308', name: 'São Paulo' } },
-//   { code: 'SE', name: 'Sergipe', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 28, regionIbgeCode: 2, capital: { code: '2800308', name: 'Aracaju' } },
-//   { code: 'TO', name: 'Tocantins', regionCode: 'N', regionName: 'Norte', ibgeCode: 17, regionIbgeCode: 1, capital: { code: '1721000', name: 'Palmas' } },
+//   { code: 'AC', name: 'Acre', regionCode: 'N', regionName: 'Norte', ibgeCode: 12 },
+//   { code: 'AL', name: 'Alagoas', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 27 },
+//   { code: 'AP', name: 'Amapá', regionCode: 'N', regionName: 'Norte', ibgeCode: 16 },
+//   { code: 'AM', name: 'Amazonas', regionCode: 'N', regionName: 'Norte', ibgeCode: 13 },
+//   { code: 'BA', name: 'Bahia', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 29 },
+//   { code: 'CE', name: 'Ceará', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 23 },
+//   { code: 'DF', name: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 53 },
+//   { code: 'ES', name: 'Espírito Santo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 32 },
+//   { code: 'GO', name: 'Goiás', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 52 },
+//   { code: 'MA', name: 'Maranhão', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 21 },
+//   { code: 'MT', name: 'Mato Grosso', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 51 },
+//   { code: 'MS', name: 'Mato Grosso do Sul', regionCode: 'CO', regionName: 'Centro-Oeste', ibgeCode: 50 },
+//   { code: 'MG', name: 'Minas Gerais', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 31 },
+//   { code: 'PA', name: 'Pará', regionCode: 'N', regionName: 'Norte', ibgeCode: 15 },
+//   { code: 'PB', name: 'Paraíba', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 25 },
+//   { code: 'PR', name: 'Paraná', regionCode: 'S', regionName: 'Sul', ibgeCode: 41 },
+//   { code: 'PE', name: 'Pernambuco', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 26 },
+//   { code: 'PI', name: 'Piauí', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 22 },
+//   { code: 'RJ', name: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 33 },
+//   { code: 'RN', name: 'Rio Grande do Norte', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 24 },
+//   { code: 'RS', name: 'Rio Grande do Sul', regionCode: 'S', regionName: 'Sul', ibgeCode: 43 },
+//   { code: 'RO', name: 'Rondônia', regionCode: 'N', regionName: 'Norte', ibgeCode: 11 },
+//   { code: 'RR', name: 'Roraima', regionCode: 'N', regionName: 'Norte', ibgeCode: 14 },
+//   { code: 'SC', name: 'Santa Catarina', regionCode: 'S', regionName: 'Sul', ibgeCode: 42 },
+//   { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35 },
+//   { code: 'SE', name: 'Sergipe', regionCode: 'NE', regionName: 'Nordeste', ibgeCode: 28 },
+//   { code: 'TO', name: 'Tocantins', regionCode: 'N', regionName: 'Norte', ibgeCode: 17 },
 // ]
 ```
 
@@ -1712,7 +1711,7 @@ Get the Brazilian state a CEP belongs to, from the CEP ranges the Correios assig
 import { getStateByCep } from '@brazilian-utils/brazilian-utils';
 
 getStateByCep('01310-100');
-// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35, regionIbgeCode: 3, capital: { code: '3550308', name: 'São Paulo' } }
+// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35 }
 
 getStateByCep(20040020);
 // { code: 'RJ', name: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 33 }
@@ -1737,10 +1736,10 @@ Get the Brazilian state whose 2-digit IBGE code (`cUF`, the Código da Unidade d
 import { getStateByIbgeCode } from '@brazilian-utils/brazilian-utils';
 
 getStateByIbgeCode('35');
-// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35, regionIbgeCode: 3, capital: { code: '3550308', name: 'São Paulo' } }
+// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35 }
 
 getStateByIbgeCode(11);
-// { code: 'RO', name: 'Rondônia', regionCode: 'N', regionName: 'Norte', ibgeCode: 11, regionIbgeCode: 1, capital: { code: '1100205', name: 'Porto Velho' } }
+// { code: 'RO', name: 'Rondônia', regionCode: 'N', regionName: 'Norte', ibgeCode: 11 }
 
 getStateByIbgeCode('00'); // null
 getStateByIbgeCode(-35); // null

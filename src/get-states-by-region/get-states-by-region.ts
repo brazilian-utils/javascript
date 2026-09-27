@@ -1,4 +1,3 @@
-import { completeState } from "../_internals/complete-state/complete-state";
 import { DATA, type State } from "../_internals/constants/states";
 
 export type { State } from "../_internals/constants/states";
@@ -32,6 +31,6 @@ export const getStatesByRegion = (regionCode: string): State[] => {
 	const normalized = regionCode.trim().toUpperCase();
 
 	return DATA.filter((state) => state.regionCode === normalized).map((state) =>
-		completeState(state),
+		Object.assign({}, state),
 	);
 };

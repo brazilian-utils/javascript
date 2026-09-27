@@ -14,14 +14,17 @@ describe("getStateByIbgeCode", () => {
 			regionCode: "SE",
 			regionName: "Sudeste",
 			ibgeCode: 35,
-			regionIbgeCode: 3,
-			capital: { code: "3550308", name: "São Paulo" },
 		});
 	});
 
 	it("should return São Paulo for the number code 35", () => {
-		expect(getStateByIbgeCode(35)).toEqual(getStateByIbgeCode("35"));
-		expect(getStateByIbgeCode(35)?.code).toBe("SP");
+		expect(getStateByIbgeCode(35)).toEqual({
+			code: "SP",
+			name: "São Paulo",
+			regionCode: "SE",
+			regionName: "Sudeste",
+			ibgeCode: 35,
+		});
 	});
 
 	it("should return Rondônia for the code 11, the first cUF in the IBGE table", () => {

@@ -1,10 +1,7 @@
 import * as fc from "fast-check";
 
-import { completeState } from "../_internals/complete-state/complete-state";
 import { DATA, type State, type StateCode, type StateName } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
-import { getRegions } from "../get-regions/get-regions";
 import { getStateByIbgeCode } from "../get-state-by-ibge-code/get-state-by-ibge-code";
 import { getStateCodeByName } from "../get-state-code-by-name/get-state-code-by-name";
 import { getStateNameByCode } from "../get-state-name-by-code/get-state-name-by-code";
@@ -72,23 +69,7 @@ describe("getStates", () => {
 		const second = getStates();
 
 		expect(second.at(0)?.name).not.toBe("X");
-		expect(second).toEqual(DATA.map((state) => completeState(state)));
-	});
-
-	it("should copy the capital too, so mutating it does not leak between calls", () => {
-		const [first] = getStates();
-
-		Object.assign(first?.capital ?? {}, { name: "X" });
-
-		expect(getStates().at(0)?.capital).toEqual({ code: "1200401", name: "Rio Branco" });
-		expect(DATA.at(0)).not.toHaveProperty("capital");
-	});
-
-	it("should give the Distrito Federal Brasília, the code of the whole district", () => {
-		expect(getStates().find((state) => state.code === "DF")?.capital).toEqual({
-			code: "5300108",
-			name: "Brasília",
-		});
+		expect(second).toEqual(DATA.map((state) => Object.assign({}, state)));
 	});
 
 	describe("properties", () => {
@@ -105,29 +86,6 @@ describe("getStates", () => {
 			fc.assert(
 				fc.property(stateArbitrary(), (state) => {
 					expect(getStateByIbgeCode(state.ibgeCode)).toEqual(state);
-				}),
-			);
-		});
-
-		test("should have a capital that getMunicipalityByCode finds in the same state", () => {
-			fc.assert(
-				fc.property(stateArbitrary(), (state) => {
-					expect(getMunicipalityByCode(state.capital?.code ?? "")).toEqual({
-						code: state.capital?.code,
-						name: state.capital?.name,
-						stateCode: state.code,
-					});
-				}),
-			);
-		});
-
-		test("should have the regionIbgeCode of its region, the first digit of its ibgeCode", () => {
-			fc.assert(
-				fc.property(stateArbitrary(), (state) => {
-					const region = getRegions().find((entry) => entry.code === state.regionCode);
-
-					expect(state.regionIbgeCode).toBe(region?.ibgeCode);
-					expect(state.regionIbgeCode).toBe(Math.floor(state.ibgeCode / 10));
 				}),
 			);
 		});
@@ -151,10 +109,6 @@ describe("getStates types", () => {
 		expectTypeOf<Extract<State, { code: "SP" }>["regionCode"]>().toEqualTypeOf<"SE">();
 		expectTypeOf<Extract<State, { code: "SP" }>["regionName"]>().toEqualTypeOf<"Sudeste">();
 		expectTypeOf<Extract<State, { code: "SP" }>["ibgeCode"]>().toEqualTypeOf<35>();
-		expectTypeOf<Extract<State, { code: "SP" }>["regionIbgeCode"]>().toEqualTypeOf<3 | undefined>();
-		expectTypeOf<Extract<State, { code: "SP" }>["capital"]>().toEqualTypeOf<
-			{ readonly code: "3550308"; readonly name: "São Paulo" } | undefined
-		>();
 		expectTypeOf<Extract<State, { code: "AC" }>["name"]>().toEqualTypeOf<"Acre">();
 		expectTypeOf<Extract<State, { code: "SP"; name: "Acre" }>>().toEqualTypeOf<never>();
 	});
