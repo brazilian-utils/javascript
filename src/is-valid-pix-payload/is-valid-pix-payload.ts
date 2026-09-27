@@ -51,15 +51,12 @@ const isValidPointOfInitiation = (fields: TlvFields): boolean => {
 	);
 };
 
-const isFilled = (value: string | undefined): boolean => value !== undefined && value !== "";
-
 const isValidMerchantAccountInformation = (merchantAccountInformation: TlvFields): boolean => {
 	const key = merchantAccountInformation[PIX_KEY_ID];
 	const url = merchantAccountInformation[PIX_URL_ID];
 	const withdrawalFacilitator = merchantAccountInformation[PIX_WITHDRAWAL_FACILITATOR_ID];
 
 	if ((key === undefined) === (url === undefined)) return false;
-	if (key !== undefined && !key) return false;
 	if (url !== undefined && !isValidPixUrl(url)) return false;
 	if (withdrawalFacilitator !== undefined && url !== undefined) return false;
 
@@ -154,8 +151,8 @@ export const isValidPixPayload = (value: string): boolean => {
 	if (fields[PIX_MERCHANT_CATEGORY_CODE_ID] === undefined) return false;
 	if (fields[PIX_TRANSACTION_CURRENCY_ID] !== PIX_TRANSACTION_CURRENCY) return false;
 	if (fields[PIX_COUNTRY_CODE_ID]?.toUpperCase() !== PIX_COUNTRY_CODE) return false;
-	if (!isFilled(fields[PIX_MERCHANT_NAME_ID])) return false;
-	if (!isFilled(fields[PIX_MERCHANT_CITY_ID])) return false;
+	if (fields[PIX_MERCHANT_NAME_ID] === undefined) return false;
+	if (fields[PIX_MERCHANT_CITY_ID] === undefined) return false;
 
 	const merchantAccountInformation = findPixMerchantAccountInformation(fields);
 

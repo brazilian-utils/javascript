@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
 
+import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
 import { cpfs } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generatePixPayload } from "../generate-pix-payload/generate-pix-payload";
@@ -19,6 +20,14 @@ const BRCODE_MANUAL =
 
 const COMMUNITY_STATIC =
 	"00020126580014br.gov.bcb.pix0136bee05743-4291-4f3c-9259-595df1307ba1520400005303986540510.005802BR5914Alexandre Lima6019Presidente Prudente62180514Um-Id-Qualquer6304D475";
+
+const STATIC_BODY = BACEN_STATIC.slice(0, -8);
+
+const withCrc = (body: string): string => {
+	const withoutCrc = `${body}6304`;
+
+	return withoutCrc + crc16Ccitt(withoutCrc);
+};
 
 describe("isValidPixPayload", () => {
 	describe("should return true", () => {
@@ -136,6 +145,14 @@ describe("isValidPixPayload", () => {
 		test("when the TLV structure is malformed", () => {
 			expect(isValidPixPayload("00020126990014br.gov.bcb.pix6304BEFF")).toBe(false);
 			expect(isValidPixPayload("000X016304EAB2")).toBe(false);
+		});
+
+		test("when an object declares the length 00, below the 01 to 99 of the EMV specification", () => {
+			expect(isValidPixPayload(withCrc(STATIC_BODY))).toBe(true);
+			expect(isValidPixPayload(withCrc(`${STATIC_BODY}6100`))).toBe(false);
+			const emptyTxid = STATIC_BODY.replace("62070503***", "62040500");
+
+			expect(isValidPixPayload(withCrc(emptyTxid))).toBe(false);
 		});
 
 		test("when the payload format indicator is not 01", () => {

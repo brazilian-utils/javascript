@@ -15,11 +15,15 @@ describe("formatTlv", () => {
 		expect(formatTlv({ id: "62", value: "" })).toBe("6200");
 	});
 
-	test("should round-trip through parseTlv", () => {
-		for (let length = 0; length <= 99; length++) {
+	test("should round-trip through parseTlv for every length from 01 to 99", () => {
+		for (let length = 1; length <= 99; length++) {
 			const value = "x".repeat(length);
 
 			expect(parseTlv(formatTlv({ id: "26", value }))).toEqual({ "26": value });
 		}
+	});
+
+	test("should not round-trip an empty value, since parseTlv rejects the length 00", () => {
+		expect(parseTlv(formatTlv({ id: "26", value: "" }))).toBeNull();
 	});
 });
