@@ -32,7 +32,8 @@ export const CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR = 2024;
  * Nacional de Zumbi e da Consciência Negra", and the state laws behind the pre-2024 entries of
  * Mato Grosso, Rio de Janeiro and Amazonas are worded alike to each other: each institutes 20
  * November as a feriado estadual and names the date after the federal commemorative one, "Dia
- * Nacional da Consciência Negra" (see the `@see` entries below for the three texts). The form
+ * Nacional da Consciência Negra" (see the `@see` entries below for the three texts), while the
+ * older Alagoas law names the date after Zumbi dos Palmares alone. The form
  * below drops a "Nacional" that would read as wrong on a state entry, is the one 2.3.0 already
  * emitted for the national holiday, and keeps the name continuous across the 2023/2024 boundary
  * where the state entries give way to the national one. Amapá is the exception: art. 1º of its
@@ -212,6 +213,13 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Lei AL nº 5.508, de 07/07/1993, São João (24/06), listed from 1994
  * @see Official: https://sapl.al.al.leg.br/norma/3364
  * Lei AL nº 5.509, de 07/07/1993, São Pedro (29/06), listed from 1994
+ * @see Based on: https://www.legisweb.com.br/legislacao/?id=116708
+ * Lei AL nº 5.724, de 01/08/1995, art. 1º, which considers "Feriado Estadual o dia 20 de novembro -
+ * Morte do Líder Negro Zumbi dos Palmares" (state holiday from 1995, the law predating that year's
+ * date, until it became national in 2024). The law names the date after Zumbi alone; the entry
+ * carries `CONSCIENCIA_NEGRA_HOLIDAY_NAME`, the name the other pre-2024 state entries and the
+ * national one share. The ALE-AL SAPL record of the law could not be reached, so the text was read
+ * in the LegisWeb reproduction cited here.
  * @see Official: https://sapl.al.al.leg.br/norma/3117
  * Lei AL nº 9.358, de 26/08/2024, Emancipação Política de Alagoas (16/09): "DISPÕE SOBRE O FERIADO
  * ESTADUAL DA EMANCIPAÇÃO POLÍTICA DO ESTADO DE ALAGOAS - DIA 16 DE SETEMBRO". Until 2023 the date
@@ -455,6 +463,13 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	AL: [
 		{ name: "São João", day: 24, month: 6, since: 1994 },
 		{ name: "São Pedro", day: 29, month: 6, since: 1994 },
+		{
+			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
+			day: 20,
+			month: 11,
+			since: 1995,
+			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
+		},
 		{
 			name: "Emancipação Política de Alagoas",
 			day: 16,

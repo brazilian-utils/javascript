@@ -12,7 +12,12 @@ import {
 } from "../_internals/test/runtime";
 import { isBusinessDay } from "../is-business-day/is-business-day";
 import { STATE_HOLIDAYS } from "./constants";
-import { getHolidays, type GetHolidaysParams, type Holiday } from "./get-holidays";
+import {
+	getHolidays,
+	type GetHolidaysParams,
+	type Holiday,
+	type HolidayType,
+} from "./get-holidays";
 
 const PROTOTYPE_KEYS = Object.getOwnPropertyNames(Object.prototype);
 
@@ -76,7 +81,7 @@ const NATIONAL_HOLIDAY_PERIODS: {
 const STATE_HOLIDAY_FIRST_YEARS: {
 	stateCode: StateCode;
 	name: string;
-	type: "state" | "optional";
+	type: HolidayType;
 	year: number;
 	listed: boolean;
 	source: string;
@@ -192,6 +197,46 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		year: 1994,
 		listed: true,
 		source: "Lei AL nº 5.509, de 07/07/1993",
+	},
+	{
+		stateCode: "AL",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 1994,
+		listed: false,
+		source: "Lei AL nº 5.724, de 01/08/1995",
+	},
+	{
+		stateCode: "AL",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 1995,
+		listed: true,
+		source: "Lei AL nº 5.724, de 01/08/1995",
+	},
+	{
+		stateCode: "AL",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 2023,
+		listed: true,
+		source: "Lei AL nº 5.724, de 01/08/1995",
+	},
+	{
+		stateCode: "AL",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 2024,
+		listed: false,
+		source: "Lei AL nº 5.724/1995, superseded by the national holiday of Lei nº 14.759/2023",
+	},
+	{
+		stateCode: "AL",
+		name: "Dia da Consciência Negra",
+		type: "national",
+		year: 2024,
+		listed: true,
+		source: "Lei nº 14.759/2023",
 	},
 	{
 		stateCode: "AL",
