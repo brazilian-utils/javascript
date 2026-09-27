@@ -216,6 +216,86 @@ describe("getAddressInfoByCep", () => {
 			vi.restoreAllMocks();
 		});
 
+		describe("cancellation", () => {
+			const hangUntilAborted = (): void => {
+				fetchMock.mockImplementation(
+					(_input: FetchInput, init?: RequestInit) =>
+						new Promise((_resolve, reject) => {
+							init?.signal?.addEventListener("abort", () => {
+								reject(new Error("aborted", { cause: init.signal?.reason }));
+							});
+						}),
+				);
+			};
+
+			it("should hand every request a signal", async () => {
+				await getAddressInfoByCep(VALID_CEP);
+
+				for (const call of fetchMock.mock.calls) {
+					expect((call[1] as RequestInit | undefined)?.signal).toBeInstanceOf(AbortSignal);
+				}
+			});
+
+			it("should reject with GetAddressInfoByCepServiceError once timeoutMs runs out", async () => {
+				hangUntilAborted();
+
+				await expect(getAddressInfoByCep(VALID_CEP, { timeoutMs: 10 })).rejects.toThrow(
+					GetAddressInfoByCepServiceError,
+				);
+			});
+
+			it("should reject with the reason of options.signal when it aborts", async () => {
+				hangUntilAborted();
+				const controller = new AbortController();
+				const reason = new Error("cancelled by the caller");
+				const lookup = getAddressInfoByCep(VALID_CEP, { signal: controller.signal });
+
+				controller.abort(reason);
+
+				await expect(lookup).rejects.toBe(reason);
+			});
+
+			it("should reject with the reason of an already aborted signal, without a request", async () => {
+				const reason = new Error("cancelled before the lookup");
+
+				await expect(
+					getAddressInfoByCep(VALID_CEP, { signal: AbortSignal.abort(reason) }),
+				).rejects.toBe(reason);
+				expect(fetchMock).not.toHaveBeenCalled();
+			});
+
+			it("should resolve as before when the signal never aborts and the time limit is not reached", async () => {
+				const controller = new AbortController();
+				const result = await getAddressInfoByCep(VALID_CEP, {
+					signal: controller.signal,
+					timeoutMs: 60_000,
+				});
+
+				expectDefaultAddress(result);
+			});
+
+			it("should stop listening to options.signal once the lookup settles", async () => {
+				const controller = new AbortController();
+				const listeners = new Set<unknown>();
+				const signal = controller.signal;
+				const addEventListener = signal.addEventListener.bind(signal);
+				const removeEventListener = signal.removeEventListener.bind(signal);
+
+				signal.addEventListener = (type: string, listener: EventListener, options?: unknown) => {
+					listeners.add(listener);
+					addEventListener(type, listener, options as AddEventListenerOptions);
+				};
+				signal.removeEventListener = (type: string, listener: EventListener) => {
+					listeners.delete(listener);
+					removeEventListener(type, listener);
+				};
+
+				await getAddressInfoByCep(VALID_CEP, { signal });
+
+				expect(listeners.size).toBe(0);
+			});
+		});
+
 		describe("validation", () => {
 			it("should throw GetAddressInfoByCepValidationError for invalid CEP format", async () => {
 				await expect(getAddressInfoByCep("12345")).rejects.toThrow(
@@ -270,6 +350,61 @@ describe("getAddressInfoByCep", () => {
 
 				expect(result).toBeDefined();
 				expect(result.cep).toBe(VALID_CEP);
+			});
+
+			it("should reject a CEP with a letter or another character isValidCep turns down, without a request", async () => {
+				await expect(getAddressInfoByCep("abc01310100")).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+				await expect(getAddressInfoByCep("01310/100")).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+				await expect(getAddressInfoByCep("CEP 01310-100")).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+				expect(fetchMock).not.toHaveBeenCalled();
+			});
+
+			it("should accept a CEP masked with dots and whitespace, the separators isValidCep accepts", async () => {
+				const result = await getAddressInfoByCep(" 01.310-100 ");
+
+				expect(result.cep).toBe(VALID_CEP);
+				expect(requestUrl(fetchMock.mock.calls[0]?.[0] as FetchInput)).toContain(VALID_CEP);
+			});
+
+			it("should reject a number below 1000000, which no CEP pads to, without a request", async () => {
+				await expect(getAddressInfoByCep(123)).rejects.toThrow(GetAddressInfoByCepValidationError);
+				await expect(getAddressInfoByCep(999_999)).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+				await expect(getAddressInfoByCep(0)).rejects.toThrow(GetAddressInfoByCepValidationError);
+				expect(fetchMock).not.toHaveBeenCalled();
+			});
+
+			it("should pad 1000000, the lowest CEP the Correios assign, to 01000-000", async () => {
+				await getAddressInfoByCep(1_000_000, { providers: ["viacep"] });
+
+				expect(requestUrl(fetchMock.mock.calls[0]?.[0] as FetchInput)).toBe(
+					"https://viacep.com.br/ws/01000000/json/",
+				);
+			});
+
+			it("should reject a number past 8 digits", async () => {
+				await expect(getAddressInfoByCep(100_000_000)).rejects.toThrow(
+					GetAddressInfoByCepValidationError,
+				);
+			});
+
+			it("should reject a timeoutMs that is not a positive finite number, without a request", async () => {
+				await Promise.all(
+					[0, -1, Number.NaN, Number.POSITIVE_INFINITY, "1000"].map((timeoutMs) =>
+						expect(
+							// @ts-expect-error: intentionally invalid input
+							getAddressInfoByCep(VALID_CEP, { timeoutMs }),
+						).rejects.toThrow("Tempo limite inválido"),
+					),
+				);
+				expect(fetchMock).not.toHaveBeenCalled();
 			});
 		});
 
@@ -549,6 +684,39 @@ describe("getAddressInfoByCep", () => {
 
 				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
 					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepServiceError when BrasilAPI answers 404 but another provider failed to answer", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ errors: [{ message: "CEP não encontrado" }] }, 404),
+					viacep: new Error("Network error"),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP)).rejects.toThrow(
+					GetAddressInfoByCepServiceError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when BrasilAPI answers 404 and ViaCEP does not know the CEP either", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ errors: [{ message: "CEP não encontrado" }] }, 404),
+					viacep: createJsonResponse({ erro: true }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP)).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepServiceError when BrasilAPI answers 404 and ViaCEP answers an error status", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ errors: [{ message: "CEP não encontrado" }] }, 404),
+					viacep: createJsonResponse({}, 500),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP)).rejects.toThrow(
+					GetAddressInfoByCepServiceError,
 				);
 			});
 

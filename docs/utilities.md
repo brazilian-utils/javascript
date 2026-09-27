@@ -270,10 +270,14 @@ generateCep(); // '92500000'
 
 Fetch the address of a CEP from several providers at once and resolve to the first successful answer. The result is an `AddressInfo`: `cep`, `state`, `city`, `neighborhood` and `street`.
 
-- **Options** (`GetAddressInfoByCepOptions`): `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated and left out of the default list.
-- Accepts a string or a number. A number is left-padded with zeros to 8 digits; a negative or fractional one is rejected with `GetAddressInfoByCepValidationError` before any request is made.
+- **Options** (`GetAddressInfoByCepOptions`):
+  - `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated and left out of the default list.
+  - `timeoutMs` (`number`) bounds the whole lookup, retries included (default: no limit). When it runs out, every request is aborted and the call rejects with `GetAddressInfoByCepServiceError`.
+  - `signal` (`AbortSignal`) cancels the lookup; the call rejects with `signal.reason`, the same as `fetch`.
+- Accepts what `isValidCep` accepts: 8 digits, with spaces, dots and hyphens ignored; any other character makes the CEP invalid. A number is left-padded with zeros to 8 digits, since it cannot carry the leading zero of a São Paulo CEP, but only from `1000000` (`01000-000`, the lowest CEP the Correios assign) up. A smaller, negative or fractional number is rejected with `GetAddressInfoByCepValidationError` before any request is made.
 - Retries transient network failures per provider.
-- Rejects with `GetAddressInfoByCepValidationError` when the CEP is invalid or `providers` names no known provider, with `GetAddressInfoByCepNotFoundError` when every provider failed and at least one reported the CEP as unknown, and with `GetAddressInfoByCepServiceError` when every provider failed for another reason.
+- Rejects with `GetAddressInfoByCepValidationError` when the CEP is invalid, `providers` names no known provider or `timeoutMs` is not a positive finite number, with `GetAddressInfoByCepNotFoundError` when every provider failed and at least one reported the CEP as unknown, and with `GetAddressInfoByCepServiceError` when every provider failed for another reason.
+- BrasilAPI answers 404 both for an unknown CEP and when the services behind it are down, so its 404 only counts as "unknown CEP" when no other provider failed to answer.
 - All three extend `GetAddressInfoByCepError`, so one `catch` covers them.
 
 ```javascript
@@ -290,6 +294,9 @@ const addressFromProviders = await getAddressInfoByCep('01310-100', {
 
 // Using number input (will be padded automatically)
 const addressFromNumber = await getAddressInfoByCep(1310100);
+
+// Giving up after 5 seconds
+const addressWithinFiveSeconds = await getAddressInfoByCep('01310100', { timeoutMs: 5000 });
 ```
 
 ### getCepInfoByAddress
@@ -969,6 +976,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 Get the state and region a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração. Accepts a string or a non-negative integer.
 
+- A string may wrap the DDD in parentheses (`'(11)'`) and carry spaces and hyphens; any other character (`'1e1'`, `'DDD 11'`) returns `null`.
 - Returns an `AreaCodeInfo`: `areaCode`, `stateCode`, `stateName`, `regionCode`, `regionName` and `stateCodes`. Returns `null` when the DDD is not in use.
 - `stateCode` is the state the DDD is seated in. For the four DDDs that straddle a border (61, 42, 47 and 49) `stateCodes` also lists the other state, the seat first.
 
@@ -976,7 +984,6 @@ Get the state and region a Brazilian DDD (area code) belongs to, out of the 67 D
 import { getAreaCodeInfo } from '@brazilian-utils/brazilian-utils';
 
 getAreaCodeInfo('11');
-- A string may wrap the DDD in parentheses (`'(11)'`) and carry spaces and hyphens; any other character (`'1e1'`, `'DDD 11'`) returns `null`.
 // { areaCode: 11, stateCode: 'SP', stateName: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', stateCodes: ['SP'] }
 
 getAreaCodeInfo(21);
@@ -986,6 +993,7 @@ getAreaCodeInfo('61');
 // { areaCode: 61, stateCode: 'DF', stateName: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', stateCodes: ['DF', 'GO'] }
 
 getAreaCodeInfo('00'); // null
+getAreaCodeInfo('1e1'); // null
 getAreaCodeInfo(-11); // null
 getAreaCodeInfo(1.1); // null
 ```
@@ -993,7 +1001,6 @@ getAreaCodeInfo(1.1); // null
 Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ### getAreaCodesByState
-getAreaCodeInfo('1e1'); // null
 
 Get every DDD (area code) that serves a given Brazilian state, under the Anatel Plano Geral de Numeração. The match is case-insensitive and the result is sorted in ascending order.
 
@@ -1389,6 +1396,7 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 Look a Brazilian bank up by its compensation code (COMPE), from the Banco Central do Brasil STR participants list. Accepts a `string` or a `number`.
 
+- A string may carry spaces and hyphens; any other character (`'1e0'`, `'1.0'`) returns `null`.
 - Returns the matching `Bank`, or `null` when no bank has that code.
 
 ```javascript
@@ -1396,7 +1404,6 @@ import { getBankByCode } from '@brazilian-utils/brazilian-utils';
 
 getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
 getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
-- A string may carry spaces and hyphens; any other character (`'1e0'`, `'1.0'`) returns `null`.
 getBankByCode('999'); // null
 ```
 

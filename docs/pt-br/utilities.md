@@ -270,10 +270,14 @@ generateCep(); // '92500000'
 
 Busca o endereço de um CEP em vários provedores ao mesmo tempo e resolve com a primeira resposta bem-sucedida. O resultado é um `AddressInfo`: `cep`, `state`, `city`, `neighborhood` e `street`.
 
-- **Opções** (`GetAddressInfoByCepOptions`): `providers` (`CepProvider[]`) lista os provedores a disputar (padrão `['viacep', 'brasilapi']`). `'widenet'` está descontinuado e fica fora da lista padrão.
-- Aceita string ou número. Um número é preenchido com zeros à esquerda até 8 dígitos; um negativo ou fracionário é rejeitado com `GetAddressInfoByCepValidationError` antes de qualquer requisição.
+- **Opções** (`GetAddressInfoByCepOptions`):
+  - `providers` (`CepProvider[]`) lista os provedores a disputar (padrão `['viacep', 'brasilapi']`). `'widenet'` está descontinuado e fica fora da lista padrão.
+  - `timeoutMs` (`number`) limita a busca inteira, tentativas incluídas (padrão: sem limite). Quando o tempo acaba, todas as requisições são abortadas e a chamada rejeita com `GetAddressInfoByCepServiceError`.
+  - `signal` (`AbortSignal`) cancela a busca; a chamada rejeita com `signal.reason`, como o `fetch`.
+- Aceita o que o `isValidCep` aceita: 8 dígitos, ignorando espaços, pontos e hífens; qualquer outro caractere torna o CEP inválido. Um número é preenchido com zeros à esquerda até 8 dígitos, já que não carrega o zero inicial de um CEP de São Paulo, mas só a partir de `1000000` (`01000-000`, o menor CEP que os Correios atribuem). Um número menor, negativo ou fracionário é rejeitado com `GetAddressInfoByCepValidationError` antes de qualquer requisição.
 - Repete falhas transitórias de rede por provedor.
-- Rejeita com `GetAddressInfoByCepValidationError` quando o CEP é inválido ou `providers` não nomeia nenhum provedor conhecido, com `GetAddressInfoByCepNotFoundError` quando todos os provedores falharam e pelo menos um informou que o CEP é desconhecido, e com `GetAddressInfoByCepServiceError` quando todos os provedores falharam por outro motivo.
+- Rejeita com `GetAddressInfoByCepValidationError` quando o CEP é inválido, `providers` não nomeia nenhum provedor conhecido ou `timeoutMs` não é um número finito positivo, com `GetAddressInfoByCepNotFoundError` quando todos os provedores falharam e pelo menos um informou que o CEP é desconhecido, e com `GetAddressInfoByCepServiceError` quando todos os provedores falharam por outro motivo.
+- A BrasilAPI responde 404 tanto para um CEP desconhecido quanto quando os serviços por trás dela estão fora do ar, então o 404 dela só conta como "CEP desconhecido" quando nenhum outro provedor deixou de responder.
 - Os três estendem `GetAddressInfoByCepError`, então um único `catch` cobre todos.
 
 ```javascript
@@ -290,6 +294,9 @@ const addressFromProviders = await getAddressInfoByCep('01310-100', {
 
 // Usando número como entrada (será preenchido automaticamente com zeros à esquerda)
 const addressFromNumber = await getAddressInfoByCep(1310100);
+
+// Desistindo depois de 5 segundos
+const addressWithinFiveSeconds = await getAddressInfoByCep('01310100', { timeoutMs: 5000 });
 ```
 
 ### getCepInfoByAddress
@@ -969,6 +976,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 Retorna o estado e a região a que um DDD brasileiro (código de área) pertence, dentre os 67 DDDs em uso no Plano Geral de Numeração da Anatel. Aceita string ou número inteiro não negativo.
 
+- Uma string pode trazer o DDD entre parênteses (`'(11)'`) e ter espaços e hífens; qualquer outro caractere (`'1e1'`, `'DDD 11'`) retorna `null`.
 - Retorna um `AreaCodeInfo`: `areaCode`, `stateCode`, `stateName`, `regionCode`, `regionName` e `stateCodes`. Retorna `null` quando o DDD não está em uso.
 - `stateCode` é o estado sede do DDD. Para os quatro DDDs que cruzam uma divisa (61, 42, 47 e 49) `stateCodes` lista também o outro estado, a sede primeiro.
 
@@ -976,7 +984,6 @@ Retorna o estado e a região a que um DDD brasileiro (código de área) pertence
 import { getAreaCodeInfo } from '@brazilian-utils/brazilian-utils';
 
 getAreaCodeInfo('11');
-- Uma string pode trazer o DDD entre parênteses (`'(11)'`) e ter espaços e hífens; qualquer outro caractere (`'1e1'`, `'DDD 11'`) retorna `null`.
 // { areaCode: 11, stateCode: 'SP', stateName: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', stateCodes: ['SP'] }
 
 getAreaCodeInfo(21);
@@ -986,6 +993,7 @@ getAreaCodeInfo('61');
 // { areaCode: 61, stateCode: 'DF', stateName: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', stateCodes: ['DF', 'GO'] }
 
 getAreaCodeInfo('00'); // null
+getAreaCodeInfo('1e1'); // null
 getAreaCodeInfo(-11); // null
 getAreaCodeInfo(1.1); // null
 ```
@@ -993,7 +1001,6 @@ getAreaCodeInfo(1.1); // null
 Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [tabela da Anatel dos Códigos Nacionais por município (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ### getAreaCodesByState
-getAreaCodeInfo('1e1'); // null
 
 Retorna todos os DDDs (códigos de área) que atendem um estado brasileiro, dentro do Plano Geral de Numeração da Anatel. A comparação não diferencia maiúsculas de minúsculas e o resultado vem em ordem crescente.
 
@@ -1389,6 +1396,7 @@ Fonte: [lista de participantes do STR](https://www.bcb.gov.br/content/estabilida
 
 Busca um banco brasileiro pelo seu código de compensação (COMPE), a partir da lista de participantes do STR do Banco Central do Brasil. Aceita `string` ou `number`.
 
+- Uma string pode ter espaços e hífens; qualquer outro caractere (`'1e0'`, `'1.0'`) retorna `null`.
 - Retorna o `Bank` correspondente, ou `null` quando nenhum banco tem esse código.
 
 ```javascript
@@ -1396,7 +1404,6 @@ import { getBankByCode } from '@brazilian-utils/brazilian-utils';
 
 getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
 getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
-- Uma string pode ter espaços e hífens; qualquer outro caractere (`'1e0'`, `'1.0'`) retorna `null`.
 getBankByCode('999'); // null
 ```
 
