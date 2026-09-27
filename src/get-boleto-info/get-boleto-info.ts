@@ -144,16 +144,19 @@ export type GetBoletoInfoOptions = {
  * remainder gives 0, 10 or 11, i.e. when the remainder is 0 or 1) of the 47 digit cobrança
  * bancária slip, including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
  * Arrecadação/Recebimento com Utilização do Código de Barras" and the FEBRABAN layout index
- * cover the arrecadação slip. The 22/02/2025 reset of the fator de vencimento is in neither:
- * the Bradesco cobrança layout manual below reproduces the FEBRABAN rule. See
+ * cover the arrecadação slip. The 22/02/2025 reset of the fator de vencimento is in neither,
+ * and no FEBRABAN communiqué on it is published: the rule is only in bank manuals, such as the
+ * Bradesco cobrança layout manual below (Versão 17). See
  * `src/get-boleto-info/constants.ts` for the fator de vencimento cycle base date and reset.
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
+ * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  * @see Based on: https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf
- * Bradesco "Layout da Cobrança" manual: base date 07/10/1997, 03/07/2000 = 1000, 21/02/2025 = 9999
- * and a restart at 1000 on 22/02/2025.
+ * Bradesco "Layout da Cobrança" manual, Versão 17: base date 07/10/1997, 03/07/2000 = 1000,
+ * 21/02/2025 = 9999 and a restart at 1000 on 22/02/2025.
  */
 export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): BoletoInfo | null => {
 	if (!isValidBoleto(value)) return null;

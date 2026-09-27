@@ -344,7 +344,7 @@ isValidBoleto('00170000010114971860168524522114275860000102656'); // false (cód
 isValidBoleto('98800000060114971860168524522114100000018236120'); // true (Situação 2: bank 988, moeda 0, ISPB)
 ```
 
-Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
 
 ### formatBoleto
 
@@ -362,7 +362,7 @@ formatBoleto('846100000005246100291102005460339004695895061080'); // 84610000000
 formatBoleto('84610000000246100291100054603390069589506108'); // 84610.00000 02461.002911 00054.603390 0 69589506108 (44 digit arrecadação barcode keeps the bancária mask)
 ```
 
-Source: [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf).
+Source: [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026).
 
 ### parseBoleto
 
@@ -394,7 +394,7 @@ Extract information from a boleto (amount, expiration date, bank code). Returns 
 
 - **Options** (`GetBoletoInfoOptions`): `referenceDate` resolves the "fator de vencimento" cycle as of that date instead of now.
 - Returns a `BoletoInfo`: `amount` in cents, `expirationDate` and the three digit `bankCode`. `expirationDate` is `null` when the slip carries no fator de vencimento (a factor below `1000`).
-- The fator de vencimento cycle reset on 22/02/2025, so a factor can mean either of two dates 9000 days apart. `referenceDate` picks between them; pass it whenever the answer has to stay stable.
+- The fator de vencimento cycle reset on 22/02/2025, so a factor can mean either of two dates 9000 days apart. No FEBRABAN communiqué on the reset is published; the rule is in bank manuals, such as [Bradesco's](https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf) (Versão 17). `referenceDate` picks between them; pass it whenever the answer has to stay stable.
 - A boleto de arrecadação has `bankCode: ''` and `expirationDate: null`, plus `type: 'arrecadacao'`, `segment`, `value` (the amount in reais) and `hasEffectiveValue`.
 - A FEBRABAN Convenção da Cobrança "Situação 2" slip (bank code `988`, código de moeda `0`) carries the issuer's ISPB where the amount would be: it comes back as `ispb`, with `amount: 0`.
 
@@ -418,7 +418,7 @@ getBoletoInfo('846100000005246100291102005460339004695895061080');
 getBoletoInfo('invalid'); // null
 ```
 
-Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
 
 ## Pix
 

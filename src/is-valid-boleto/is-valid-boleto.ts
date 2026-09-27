@@ -89,6 +89,8 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * Número Código 988": position 04 "Zero", positions 06 to 09 "Zeros", positions 10 to 19 "ISPB
  * com zeros a esquerda".
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
+ * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const isValidBoleto = (value: string): boolean => {

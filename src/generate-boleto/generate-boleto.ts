@@ -78,6 +78,8 @@ const generateArrecadacao = (): string =>
  * Carta-Circular BCB nº 2.926/2000, anexo, layout of the barcode: position 04, "código da
  * moeda", 9 (real); positions 06 to 09, the fator de vencimento counted from 07/10/1997.
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
+ * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const generateBoleto = (params?: GenerateBoletoParams): string =>
