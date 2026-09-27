@@ -37,9 +37,10 @@ export type FormatBoletoOptions = {
  * formatBoleto(1e21); // "" (not a non-negative safe integer)
  * ```
  *
- * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
- * check digit (using 1 for remainders 0, 10 and 1) of the 47 digit cobrança bancária slip,
- * including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
+ * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields, the código de moeda
+ * `9` (real) in position 4 of the barcode and the módulo 11 check digit (1 when 11 minus the
+ * remainder gives 0, 10 or 11, i.e. when the remainder is 0 or 1) of the 47 digit cobrança
+ * bancária slip, including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
  * Arrecadação/Recebimento com Utilização do Código de Barras" and the FEBRABAN layout index
  * cover the arrecadação slip.
  *

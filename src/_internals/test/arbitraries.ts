@@ -365,7 +365,13 @@ export const boletos = (type?: "bancario" | "arrecadacao"): fc.Arbitrary<string>
 				})
 				.map((parts) => assembleBoletoArrecadacao(parts))
 		: fc
-				.record({ field1: digits(9), field2: digits(10), field3: digits(10), tail: digits(15) })
+				.record({
+					// Bank code, the código de moeda 9 (real) and the start of the free field.
+					field1: fc.tuple(digits(3), digits(5)).map(([bank, free]) => `${bank}9${free}`),
+					field2: digits(10),
+					field3: digits(10),
+					tail: digits(15),
+				})
 				.map((parts) => assembleBoletoBancario(parts));
 
 /** Arbitraries of valid phone numbers, built the same way as the documents. */

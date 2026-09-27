@@ -31,6 +31,24 @@ const drawArrecadacaoIdentifier = (algorithmDraw: number, valueDraw: number): st
 	}
 };
 
+/**
+ * Generates a bancário slip with every `Math.random` draw fixed at `draw`, so each random digit
+ * is `floor(draw * 10)` and the fator de vencimento draw is `floor(draw * 9001)`.
+ * @param {number} draw - The value every draw returns.
+ * @returns {string} The generated linha digitável.
+ */
+const drawBancarioWith = (draw: number): string => {
+	const originalRandom = Math.random;
+
+	try {
+		Math.random = (): number => draw;
+
+		return generateBoleto();
+	} finally {
+		Math.random = originalRandom;
+	}
+};
+
 describe("generateBoleto", () => {
 	test("should generate a valid boleto", () => {
 		const boleto = generateBoleto();
@@ -68,6 +86,40 @@ describe("generateBoleto", () => {
 			boletos.add(boleto);
 		}
 		expect(boletos.size).toBe(100);
+	});
+
+	describe("cobrança bancária", () => {
+		test("should always write the código de moeda 9 (real) in position 4, Carta-Circular BCB nº 2.926/2000", () => {
+			for (let i = 0; i < 100; i++) {
+				expect(generateBoleto()[3]).toBe("9");
+			}
+			expect(drawBancarioWith(0.9999)[3]).toBe("9");
+		});
+
+		test("should draw the fator de vencimento 0000 (no due date) on the lowest draw", () => {
+			// Every digit 0 and the factor 0000: campo 1 "000900000" + DV 1, DV geral 7.
+			expect(drawBancarioWith(0)).toBe("00090000010000000000000000000000700000000000000");
+			expect(getBoletoInfo(drawBancarioWith(0))?.expirationDate).toBeNull();
+		});
+
+		test("should skip 0001 to 0999 and draw 1000 right after 0000", () => {
+			// floor(0.0002 * 9001) = 1, the first factor after 0000: 1000, not 0001. DV geral 1.
+			expect(drawBancarioWith(0.0002)).toBe("00090000010000000000000000000000110000000000000");
+			expect(drawBancarioWith(0.0002).slice(33, 37)).toBe("1000");
+		});
+
+		test("should draw 9999 on the highest draw", () => {
+			// floor(0.9999 * 9001) = 9000, factor 9999; every other digit 9. DV geral 7.
+			expect(drawBancarioWith(0.9999)).toBe("99999999999999999999099999999990799999999999999");
+		});
+
+		test("should never draw a factor from 0001 to 0999, which maps to no date", () => {
+			for (let i = 0; i < 200; i++) {
+				const factor = Number(generateBoleto().slice(33, 37));
+
+				expect(factor === 0 || (factor >= 1000 && factor <= 9999)).toBe(true);
+			}
+		});
 	});
 
 	describe("arrecadação", () => {

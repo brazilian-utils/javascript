@@ -333,16 +333,18 @@ const ceps = await getCepInfoByAddress({
 Check if a boleto ([brazilian payment method](https://en.wikipedia.org/wiki/Boleto)) is valid.
 
 - Accepts the 47 digit "cobrança bancária" linha digitável and, for the "boleto de arrecadação", either its 48 digit linha digitável or its 44 digit barcode.
-- The código de moeda (position 4 of the cobrança bancária barcode) is not checked.
+- The código de moeda (position 4 of the cobrança bancária barcode and linha digitável) must be `9` (real), the only code Carta-Circular BCB nº 2.926/2000 assigns. The one exception is the "Situação 2" slip of the FEBRABAN Convenção da Cobrança, issued by an institution identified only by its ISPB: bank code `988`, código de moeda `0`, fator de vencimento `0000` and the ISPB, padded with zeros, where the amount would be. Any other digit is rejected.
 
 ```javascript
 import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
 
 isValidBoleto('00190000090114971860168524522114675860000102656'); // true
 isValidBoleto('846100000005246100291102005460339004695895061080'); // true (boleto de arrecadação)
+isValidBoleto('00170000010114971860168524522114275860000102656'); // false (código de moeda 7)
+isValidBoleto('98800000060114971860168524522114100000018236120'); // true (Situação 2: bank 988, moeda 0, ISPB)
 ```
 
-Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf).
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
 
 ### formatBoleto
 
@@ -377,6 +379,7 @@ parseBoleto('00190.00009 01149.718601 68524.522114 6 75860000102656'); // 001900
 Generate a valid random boleto.
 
 - Pass `{ type: 'arrecadacao' }` (`GenerateBoletoParams`) for a 48 digit boleto de arrecadação instead of the default `'bancario'` (cobrança bancária, 47 digits).
+- A cobrança bancária slip carries the código de moeda `9` and a fator de vencimento of `0000` (no due date) or `1000` to `9999`; `0001` to `0999` denote no date.
 
 ```javascript
 import { generateBoleto } from '@brazilian-utils/brazilian-utils';
@@ -393,6 +396,7 @@ Extract information from a boleto (amount, expiration date, bank code). Returns 
 - Returns a `BoletoInfo`: `amount` in cents, `expirationDate` and the three digit `bankCode`. `expirationDate` is `null` when the slip carries no fator de vencimento (a factor below `1000`).
 - The fator de vencimento cycle reset on 22/02/2025, so a factor can mean either of two dates 9000 days apart. `referenceDate` picks between them; pass it whenever the answer has to stay stable.
 - A boleto de arrecadação has `bankCode: ''` and `expirationDate: null`, plus `type: 'arrecadacao'`, `segment`, `value` (the amount in reais) and `hasEffectiveValue`.
+- A FEBRABAN Convenção da Cobrança "Situação 2" slip (bank code `988`, código de moeda `0`) carries the issuer's ISPB where the amount would be: it comes back as `ispb`, with `amount: 0`.
 
 ```javascript
 import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
@@ -405,13 +409,16 @@ getBoletoInfo('00190000090114971860168524522114675860000102656', {
 });
 // Resolves the fator de vencimento cycle as of 2018-07-01
 
+getBoletoInfo('98800000060114971860168524522114100000018236120');
+// { amount: 0, expirationDate: null, bankCode: '988', ispb: '18236120' }
+
 getBoletoInfo('846100000005246100291102005460339004695895061080');
 // { amount: 2461, expirationDate: null, bankCode: '', type: 'arrecadacao', segment: 4, value: 24.61, hasEffectiveValue: true }
 
 getBoletoInfo('invalid'); // null
 ```
 
-Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf).
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
 
 ## Pix
 
