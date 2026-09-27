@@ -3534,8 +3534,9 @@ Source: [Consolidação das Normas do CFO, art. 115](https://transparencia.cfo.o
 
 ### isValidVin
 
-Check if a VIN (Vehicle Identification Number / chassi) is valid. By default it follows the Brazilian rule (Resolução CONTRAN nº 968/2022, ABNT NBR 6066 / ISO 3779): 17 characters, the WMI, the VDS and the VIS, each a digit or a capital letter other than `I`, `O` and `Q`.
+Check if a VIN (Vehicle Identification Number / chassi) is valid. By default it checks 17 characters in the three sections of Resolução CONTRAN nº 968/2022, art. 3º (the WMI, the VDS and the VIS), each a digit or a capital letter other than `I`, `O` and `Q`.
 
+- The `I`, `O` and `Q` exclusion comes from ISO 3779, not from the resolution: it lists no forbidden character and refers the engraving to ABNT NBR 6066:2022 (art. 5º), a paid standard with no official free copy. The regularization VINs of its Anexo II (WMI `XXX`) are written without those letters, so they pass.
 - **Options** (`IsValidVinOptions`): `checkDigit: true` also enforces the North-American rules of 49 CFR 565.15, the check digit at position 9 and a model year code other than `U`, `Z` or `0` at position 10. Use it for a VIN of a vehicle built for the United States or Canada.
 - Brazilian rules do not mandate the check digit, and many Brazilian-built VINs do not carry one. Up to 2.4.0 it was always enforced; pass `{ checkDigit: true }` to keep that behaviour.
 - Case-insensitive and trims surrounding whitespace; a value of one repeated character is rejected.

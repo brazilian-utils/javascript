@@ -3534,8 +3534,9 @@ Fonte: [Consolidação das Normas do CFO, art. 115](https://transparencia.cfo.or
 
 ### isValidVin
 
-Valida um VIN (Vehicle Identification Number / chassi). Por padrão segue a regra brasileira (Resolução CONTRAN nº 968/2022, ABNT NBR 6066 / ISO 3779): 17 caracteres, o WMI, o VDS e o VIS, cada um algarismo ou letra maiúscula exceto `I`, `O` e `Q`.
+Valida um VIN (Vehicle Identification Number / chassi). Por padrão confere 17 caracteres nas três seções da Resolução CONTRAN nº 968/2022, art. 3º (o WMI, o VDS e o VIS), cada um algarismo ou letra maiúscula exceto `I`, `O` e `Q`.
 
+- A exclusão de `I`, `O` e `Q` vem da ISO 3779, não da resolução: ela não lista caractere proibido e remete a gravação à ABNT NBR 6066:2022 (art. 5º), norma paga sem cópia oficial gratuita. Os VINs de regularização do Anexo II dela (WMI `XXX`) são escritos sem essas letras, então passam.
 - **Opções** (`IsValidVinOptions`): `checkDigit: true` também exige as regras norte-americanas do 49 CFR 565.15, o dígito verificador na 9ª posição e um código de ano-modelo diferente de `U`, `Z` e `0` na 10ª. Use para o VIN de um veículo fabricado para os Estados Unidos ou o Canadá.
 - As normas brasileiras não exigem o dígito verificador, e muitos VINs fabricados no Brasil não o têm. Até a 2.4.0 ele era sempre exigido; passe `{ checkDigit: true }` para manter esse comportamento.
 - Não diferencia maiúsculas de minúsculas e ignora espaços ao redor; um valor de um único caractere repetido é rejeitado.

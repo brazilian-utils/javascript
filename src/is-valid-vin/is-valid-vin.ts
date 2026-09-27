@@ -22,11 +22,13 @@ export type IsValidVinOptions = {
 /**
  * Validates a VIN (Vehicle Identification Number / chassi).
  *
- * By default checks the Brazilian rule of Resolução CONTRAN nº 968/2022 and ABNT NBR 6066 /
- * ISO 3779:2009: 17 characters (the WMI, the VDS and the VIS), each a digit or a capital letter
- * other than `I`, `O` and `Q`. Neither the resolution nor the standard mandates a check digit,
- * and many Brazilian-built VINs do not carry one, so `isValidVin("9BWZZZ377VT004251")`, a
- * Volkswagen built in Brazil, is valid.
+ * By default checks 17 characters in the three sections of Resolução CONTRAN nº 968/2022, art. 3º
+ * (the WMI, the VDS and the VIS), each a digit or a capital letter other than `I`, `O` and `Q`.
+ * The `I`, `O` and `Q` exclusion comes from ISO 3779:2009, not from the resolution, which lists no
+ * forbidden character and refers the engraving to ABNT NBR 6066:2022 (art. 5º), a paid standard
+ * with no official free copy; the regularization VINs of its Anexo II are written without those
+ * letters. The resolution does not mandate a check digit, and many Brazilian-built VINs do not
+ * carry one, so `isValidVin("9BWZZZ377VT004251")`, a Volkswagen built in Brazil, is valid.
  *
  * `{ checkDigit: true }` adds the North-American rules of 49 CFR 565.15 (SAE J853): the 9th
  * character has to be the weighted MOD 11 check digit (`0` to `9` or `X`) of the transliterated
@@ -69,11 +71,12 @@ export type IsValidVinOptions = {
  * abstract rather than its text.
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9682022.pdf
- * Resolução CONTRAN nº 968, de 20 de junho de 2022, art. 3º: the VIN is a "combinação de 17
- * caracteres" in three sections (WMI, VDS and VIS), with no check digit; art. 50, II revoked
- * Resolução nº 24/1998 from 1 January 2025.
+ * Resolução CONTRAN nº 968, de 20 de junho de 2022, art. 3º, I to IV: the VIN is a "combinação de
+ * 17 caracteres" in three sections (WMI, VDS and VIS, of 3, 6 and 8 characters), with no check
+ * digit and no forbidden character; art. 5º refers the engraving to ABNT NBR 6066:2022; art. 50,
+ * II revoked Resolução nº 24/1998 from 1 January 2025.
  * @see Official: https://www.iso.org/standard/52200.html
- * ISO 3779:2009, the VIN content and structure ABNT NBR 6066 follows.
+ * ISO 3779:2009, the VIN content and structure, source of the `I`, `O` and `Q` exclusion.
  * @see Official: https://www.ecfr.gov/current/title-49/section-565.15
  * 49 CFR 565.15: "The check digit, zero through nine (0-9) or the letter "X" shall appear in VIN
  * position nine (9)", and the model year code of position ten, which leaves out `U`, `Z` and `0`;
