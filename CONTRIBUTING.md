@@ -104,8 +104,12 @@ itself:
 - **Generated from an official source** by a script in `scripts/` (`npm run build:data`, run
   every Monday by the `Update datasets` workflow): banks (Banco Central, `banks.ts`), CBO
   (`cbo.ts`), CFOP (CONFAZ, `cfop.ts`), municipalities and states (IBGE, `cities.ts`,
-  `states.ts`), CNAE (`cnae.ts`), legal natures (CONCLA, `legal-natures.ts`) and NCM (Siscomex,
-  `ncm.ts`). When a run changes a file, the workflow opens a pull request whose description, written
+  `states.ts`), the DDD of every municipality (Anatel, `area-codes.ts`), CNAE (`cnae.ts`), legal
+  natures (CONCLA, `legal-natures.ts`) and NCM (Siscomex, `ncm.ts`). The CBO is the one table
+  read from a file kept in the repository, `scripts/data/cbo2002-ocupacao.csv`: the MTE serves
+  its current release only after a reCAPTCHA, so a new release is downloaded by hand from
+  https://cbo.mte.gov.br/cbosite/pages/downloads.jsf ("Estrutura CBO (CSV)"), reviewed, copied
+  over that file and its digest put in `CBO_CSV_SHA256` of `scripts/cbo.ts`. When a run changes a file, the workflow opens a pull request whose description, written
   by `scripts/data-summary.ts`, lists per table how many entries were added and removed, with a
   sample of each. Never edit these files by hand.
 - **Maintained by hand**, because the source is a law or a regulation with no machine-readable

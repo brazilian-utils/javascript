@@ -2772,7 +2772,7 @@ isValidCbo('2124abc05'); // false (not a documented form)
 isValidCbo(-212405); // false (not a non-negative safe integer)
 ```
 
-Source: [CBO 2002 occupation table published by the MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
+Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Up to 2.4.0 the table came from the older gov.br release (06/06/2025): 37 occupations were missing, and 6 the MTE has since dropped (225142, 322105, 322115, 322120, 322125 and 782820) are no longer valid.
 
 ### parseCbo
 
@@ -2802,7 +2802,7 @@ getCbo('000000'); // null
 getCbo('2124abc05'); // null (not a documented form)
 ```
 
-Source: [CBO 2002 occupation table published by the MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
+Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Up to 2.4.0 the table came from the older gov.br release (06/06/2025): 37 occupations were missing, and 6 the MTE has since dropped (225142, 322105, 322115, 322120, 322125 and 782820) are no longer valid.
 
 ### isValidCnae
 

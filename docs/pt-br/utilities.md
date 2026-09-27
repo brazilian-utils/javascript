@@ -2772,7 +2772,7 @@ isValidCbo('2124abc05'); // false (não é uma forma documentada)
 isValidCbo(-212405); // false (não é um inteiro seguro não negativo)
 ```
 
-Fonte: [tabela de ocupações da CBO 2002 publicada pelo MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
+Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos de 10/07/2026, 2.725 ocupações)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Até a 2.4.0 a tabela vinha da versão mais antiga do gov.br (06/06/2025): faltavam 37 ocupações, e 6 que o MTE retirou depois (225142, 322105, 322115, 322120, 322125 e 782820) deixam de ser válidas.
 
 ### parseCbo
 
@@ -2802,7 +2802,7 @@ getCbo('000000'); // null
 getCbo('2124abc05'); // null (não é uma forma documentada)
 ```
 
-Fonte: [tabela de ocupações da CBO 2002 publicada pelo MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
+Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos de 10/07/2026, 2.725 ocupações)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Até a 2.4.0 a tabela vinha da versão mais antiga do gov.br (06/06/2025): faltavam 37 ocupações, e 6 que o MTE retirou depois (225142, 322105, 322115, 322120, 322125 e 782820) deixam de ser válidas.
 
 ### isValidCnae
 

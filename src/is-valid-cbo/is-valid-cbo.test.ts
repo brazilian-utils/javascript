@@ -38,6 +38,16 @@ describe("isValidCbo", () => {
 		expect(isValidCbo(" 212405 ")).toBe(true);
 	});
 
+	it("should accept an occupation the MTE added after the older gov.br release (782325, Motorista de transporte por aplicativos)", () => {
+		expect(isValidCbo("782325")).toBe(true);
+		expect(isValidCbo("142360")).toBe(true);
+	});
+
+	it("should reject an occupation the MTE has dropped (322105 and 782820)", () => {
+		expect(isValidCbo("322105")).toBe(false);
+		expect(isValidCbo("782820")).toBe(false);
+	});
+
 	it("should accept a code the official CSV carries and the community mirror did not (142135)", () => {
 		expect(isValidCbo("142135")).toBe(true);
 	});

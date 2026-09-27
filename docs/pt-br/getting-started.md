@@ -72,7 +72,7 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 municípios do IBGE, com o DDD de cada um (Anatel) | 165,0 - 167,8 KB | 52,1 - 52,8 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 153,6 - 154,0 KB | 49,4 - 49,7 KB |
 | `getCities` | nomes dos 5571 municípios do IBGE | 153,4 KB | 49,2 KB |
-| `getCbo` | títulos das ocupações da CBO 2002 | 115,7 KB | 29,5 KB |
+| `getCbo` | títulos das ocupações da CBO 2002 | 117,3 KB | 29,9 KB |
 | `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 115,5 KB | 26,1 KB |
 | `getCnae` | CNAE-Subclasses 2.3 | 91,6 KB | 20,0 KB |
 | `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 82,6 KB | 22,8 KB |

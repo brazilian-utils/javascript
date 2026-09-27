@@ -72,7 +72,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 | `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 IBGE municipalities, with the DDD of each (Anatel) | 165.0 - 167.8 KB | 52.1 - 52.8 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 153.6 - 154.0 KB | 49.4 - 49.7 KB |
 | `getCities` | 5571 IBGE municipality names | 153.4 KB | 49.2 KB |
-| `getCbo` | CBO 2002 occupation titles | 115.7 KB | 29.5 KB |
+| `getCbo` | CBO 2002 occupation titles | 117.3 KB | 29.9 KB |
 | `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 115.5 KB | 26.1 KB |
 | `getCnae` | CNAE-Subclasses 2.3 | 91.6 KB | 20.0 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 82.6 KB | 22.8 KB |

@@ -1,0 +1,2726 @@
+CODIGO;TITULO
+010105;Oficial general da aeronáutica
+010110;Oficial general do exército
+010115;Oficial general da marinha
+010205;Oficial da aeronáutica
+010210;Oficial do exército
+010215;Oficial da marinha
+010305;Praça da aeronáutica
+010310;Praça do exército
+010315;Praça da marinha
+020105;Coronel da polícia militar
+020110;Tenente-coronel da polícia militar
+020115;Major da polícia militar
+020205;Capitão da polícia militar
+020305;Primeiro tenente de polícia militar
+020310;Segundo tenente de polícia militar
+021105;Subtenente da policia militar
+021110;Sargento da policia militar
+021205;Cabo da polícia militar
+021210;Soldado da polícia militar
+030105;Coronel bombeiro militar
+030110;Major bombeiro militar
+030115;Tenente-coronel bombeiro militar
+030205;Capitão bombeiro militar
+030305;Tenente do corpo de bombeiros militar
+031105;Subtenente bombeiro militar
+031110;Sargento bombeiro militar
+031205;Cabo bombeiro militar
+031210;Soldado bombeiro militar
+111105;Senador
+111110;Deputado federal
+111115;Deputado estadual e distrital
+111120;Vereador
+111205;Presidente da república
+111210;Vice-presidente da república
+111215;Ministro de estado
+111220;Secretário - executivo
+111225;Membro superior do poder executivo
+111230;Governador de estado
+111235;Governador do distrito federal
+111240;Vice-governador de estado
+111245;Vice-governador do distrito federal
+111250;Prefeito
+111255;Vice-prefeito
+111305;Ministro do supremo tribunal federal
+111310;Ministro do superior tribunal de justiça
+111315;Ministro do  superior tribunal militar
+111320;Ministro do  superior tribunal do trabalho
+111325;Juiz de direito
+111330;Juiz federal
+111335;Juiz auditor federal - justiça militar
+111340;Juiz auditor estadual - justiça militar
+111345;Juiz do trabalho
+111405;Dirigente do serviço público federal
+111410;Dirigente do serviço público estadual e distrital
+111415;Dirigente do serviço público municipal
+111505;Especialista de políticas públicas e gestão governamental - eppgg
+111510;Analista de planejamento e orçamento - apo
+113005;Cacique
+113010;Líder de comunidade caiçara
+113015;Membro de liderança quilombola
+114105;Dirigente de partido político
+114205;Dirigente de entidade de trabalhadores
+114210;Dirigente de entidade patronal
+114305;Dirigente e administrador de organização religiosa
+114405;Dirigente e administrador de organização da sociedade civil sem fins lucrativos
+121005;Diretor de planejamento estratégico
+121010;Diretor geral de empresa e organizações (exceto do terceiro setor)
+122105;Diretor de produção e operações em empresa agropecuária
+122110;Diretor de produção e operações em empresa aquícola
+122115;Diretor de produção e operações em empresa florestal
+122120;Diretor de produção e operações em empresa pesqueira
+122205;Diretor de produção e operações da indústria de transformação, extração mineral e utilidades
+122305;Diretor de operações de obras pública e civil
+122405;Diretor de operações comerciais (comércio atacadista e varejista)
+122505;Diretor de  produção e operações de alimentação
+122510;Diretor de  produção e operações de hotel
+122515;Diretor de  produção e operações de turismo
+122520;Turismólogo
+122605;Diretor de operações de correios
+122610;Diretor de operações de serviços de armazenamento
+122615;Diretor de operações de serviços de telecomunicações
+122620;Diretor de operações de serviços de transporte
+122705;Diretor comercial em operações de intermediação financeira
+122710;Diretor de produtos bancários
+122715;Diretor de crédito rural
+122720;Diretor de câmbio e comércio exterior
+122725;Diretor de compliance
+122730;Diretor de crédito (exceto crédito imobiliário)
+122735;Diretor de crédito imobiliário
+122740;Diretor de leasing
+122745;Diretor de mercado de capitais
+122750;Diretor de recuperação de créditos em operações de intermediação financeira
+122755;Diretor de riscos de mercado
+123105;Diretor administrativo
+123110;Diretor administrativo e financeiro
+123115;Diretor financeiro
+123205;Diretor de recursos humanos
+123210;Diretor de relações de trabalho
+123305;Diretor comercial
+123310;Diretor de marketing
+123405;Diretor de suprimentos
+123410;Diretor de suprimentos no serviço público
+123605;Diretor de tecnologia da informação
+123705;Diretor de pesquisa, desenvolvimento e inovação - pdi
+123805;Diretor de manutenção
+131105;Diretor de serviços culturais
+131110;Diretor de serviços sociais
+131115;Gerente de serviços culturais
+131120;Gerente de serviços sociais
+131205;Diretor de serviços de saúde
+131210;Gerente de serviços de saúde
+131215;Tecnólogo em gestão hospitalar
+131220;Gerontólogo
+131225;Sanitarista
+131305;Diretor de instituição educacional da área privada
+131310;Diretor de instituição educacional pública
+131315;Gerente de instituição educacional da área privada
+131320;Gerente de serviços educacionais da área pública
+141105;Gerente de produção e operações aquícolas
+141110;Gerente de produção e operações  florestais
+141115;Gerente de produção e operações agropecuárias
+141120;Gerente de produção e operações pesqueiras
+141205;Gerente de produção e operações
+141305;Gerente de produção e operações da construção civil e obras públicas
+141405;Comerciante atacadista
+141410;Comerciante varejista
+141415;Gerente de loja e supermercado
+141420;Gerente de operações de serviços de assistência técnica
+141505;Gerente de hotel
+141510;Gerente de restaurante
+141515;Gerente de bar
+141520;Gerente de pensão
+141525;Gerente de turismo
+141605;Gerente de operações de transportes
+141610;Gerente de operações de correios e telecomunicações
+141615;Gerente de logística (armazenagem e distribuição)
+141705;Gerente de produtos bancários
+141710;Gerente de agência bancária
+141715;Gerente de câmbio e comércio exterior
+141720;Gerente de crédito e cobrança
+141725;Gerente de crédito imobiliário
+141730;Gerente de crédito rural
+141735;Gerente de recuperação de crédito
+141805;Gerente de administração em aeroportos
+141810;Gerente de empresa aérea e empresa de serviços auxiliares ao transporte aéreo (esata) em aeroportos
+141815;Gerente de operações em aeroportos
+141820;Gerente de operações de cargas
+141825;Gerente de segurança da aviação civil
+141830;Gerente de segurança operacional (aviação civil)
+142105;Gerente administrativo
+142110;Gerente de riscos
+142115;Gerente financeiro
+142120;Tecnólogo em gestão administrativo- financeira
+142125;Analista de compliance
+142130;Analista de riscos
+142135;Oficial de proteção de dados pessoais (dpo)
+142140;Profissional de facility management
+142205;Gerente de recursos humanos
+142210;Gerente de departamento pessoal
+142305;Gerente comercial
+142310;Gerente de comunicação
+142315;Gerente de marketing
+142320;Gerente de vendas
+142325;Relações públicas
+142330;Analista de negócios
+142335;Analista de pesquisa de mercado
+142340;Ouvidor
+142345;Profissional de relações institucionais e governamentais
+142350;Profissonal de relações internacionais
+142355;Analista de e-commerce
+142360;Analista de sucesso do cliente - customer success
+142365;Analista de experiência do cliente - customer experience
+142405;Gerente de compras
+142410;Gerente de cadeia de suprimentos
+142415;Gerente de almoxarifado
+142505;Gerente de infraestrutura de tecnologia da informação
+142510;Gerente de desenvolvimento de sistemas
+142515;Gerente de operação de tecnologia da informação
+142520;Gerente de projetos de tecnologia da informação
+142525;Gerente de segurança da informação
+142530;Gerente de suporte técnico de tecnologia da informação
+142535;Tecnólogo em gestão da tecnologia da informação
+142605;Gerente de pesquisa, desenvolvimento e inovação (pdi)
+142610;Especialista em desenvolvimento de cigarros
+142705;Gerente de projetos e serviços de manutenção
+142710;Tecnólogo em sistemas biomédicos
+201105;Bioengenheiro
+201110;Biotecnologista
+201115;Geneticista
+201205;Pesquisador em metrologia
+201210;Especialista em calibrações metrológicas
+201215;Especialista em ensaios metrológicos
+201220;Especialista em instrumentação metrológica
+201225;Especialista em materiais de referência metrológica
+202105;Engenheiro mecatrônico
+202110;Engenheiro de controle e automação
+202115;Tecnólogo em mecatrônica
+202120;Tecnólogo em automação industrial
+203005;Pesquisador em biologia ambiental
+203010;Pesquisador em biologia animal
+203015;Pesquisador em biologia de microorganismos e parasitas
+203020;Pesquisador em biologia humana
+203025;Pesquisador em biologia vegetal
+203105;Pesquisador em ciências da computação e informática
+203110;Pesquisador em ciências da terra e meio ambiente
+203115;Pesquisador em física
+203120;Pesquisador em matemática
+203125;Pesquisador em química
+203205;Pesquisador de engenharia civil
+203210;Pesquisador de engenharia e tecnologia (outras áreas da engenharia)
+203215;Pesquisador de engenharia elétrica e eletrônica
+203220;Pesquisador de engenharia mecânica
+203225;Pesquisador de engenharia metalúrgica, de minas e de materiais
+203230;Pesquisador de engenharia química
+203305;Pesquisador de clínica médica
+203310;Pesquisador de medicina básica
+203315;Pesquisador em medicina veterinária
+203320;Pesquisador em saúde coletiva
+203405;Pesquisador em ciências agronômicas
+203410;Pesquisador em ciências da pesca e aquicultura
+203415;Pesquisador em ciências da zootecnia
+203420;Pesquisador em ciências florestais
+203505;Pesquisador em ciências sociais
+203510;Pesquisador em economia
+203515;Pesquisador em ciências da educação
+203520;Pesquisador em história
+203525;Pesquisador em psicologia
+204105;Perito criminal
+204110;Perito judicial
+211105;Atuário
+211110;Especialista em pesquisa operacional
+211115;Matemático
+211120;Matemático aplicado
+211205;Estatístico
+211210;Estatístico (estatística aplicada)
+211215;Estatístico teórico
+211220;Cientista de dados
+212205;Engenheiro de aplicativos em computação
+212210;Engenheiro de equipamentos em computação
+212215;Engenheiros de sistemas operacionais em computação
+212305;Administrador de banco de dados
+212310;Administrador de redes
+212315;Administrador de sistemas operacionais
+212320;Administrador em segurança da informação
+212405;Analista de desenvolvimento de sistemas
+212410;Analista de redes e de comunicação de dados
+212415;Analista de sistemas de automação
+212420;Analista de suporte computacional
+212425;Arquiteto de soluções de tecnologia da informação
+212430;Analista de testes de tecnologia da informação
+213105;Físico
+213110;Físico (acústica)
+213115;Físico (atômica e molecular)
+213120;Físico (cosmologia)
+213125;Físico (estatística e matemática)
+213130;Físico (fluidos)
+213135;Físico (instrumentação)
+213140;Físico (matéria condensada)
+213145;Físico (materiais)
+213150;Físico (medicina)
+213155;Físico (nuclear e reatores)
+213160;Físico (óptica)
+213165;Físico (partículas e campos)
+213170;Físico (plasma)
+213175;Físico (térmica)
+213205;Químico
+213210;Químico industrial
+213215;Tecnólogo em processos químicos
+213305;Astrônomo
+213310;Geofísico espacial
+213315;Meteorologista
+213405;Geólogo
+213410;Geólogo de engenharia
+213415;Geofísico
+213420;Geoquímico
+213425;Hidrogeólogo
+213430;Paleontólogo
+213435;Petrógrafo
+213440;Oceanógrafo
+214005;Engenheiro ambiental
+214010;Tecnólogo em meio ambiente
+214105;Arquiteto de edificações
+214110;Arquiteto de interiores
+214115;Arquiteto de patrimônio
+214120;Arquiteto paisagista
+214125;Arquiteto urbanista
+214130;Urbanista
+214205;Engenheiro civil
+214210;Engenheiro civil (aeroportos)
+214215;Engenheiro civil (edificações)
+214220;Engenheiro civil (estruturas metálicas)
+214225;Engenheiro civil (ferrovias e metrovias)
+214230;Engenheiro civil (geotécnia)
+214235;Engenheiro civil (hidrologia)
+214240;Engenheiro civil (hidráulica)
+214245;Engenheiro civil (pontes e viadutos)
+214250;Engenheiro civil (portos e vias navegáveis)
+214255;Engenheiro civil (rodovias)
+214260;Engenheiro civil (saneamento)
+214265;Engenheiro civil (túneis)
+214270;Engenheiro civil (transportes e trânsito)
+214280;Tecnólogo em construção civil
+214305;Engenheiro eletricista
+214310;Engenheiro eletrônico
+214315;Engenheiro eletricista de manutenção
+214320;Engenheiro eletricista de projetos
+214325;Engenheiro eletrônico de manutenção
+214330;Engenheiro eletrônico de projetos
+214335;Engenheiro de manutenção de telecomunicações
+214340;Engenheiro de telecomunicações
+214345;Engenheiro projetista de telecomunicações
+214350;Engenheiro de redes de comunicação
+214360;Tecnólogo em eletricidade
+214365;Tecnólogo em eletrônica
+214370;Tecnólogo em telecomunicações
+214375;Engenheiro de energia
+214380;Engenheiro biomédico
+214405;Engenheiro mecânico
+214410;Engenheiro mecânico automotivo
+214415;Engenheiro mecânico (energia nuclear)
+214420;Engenheiro mecânico industrial
+214425;Engenheiro aeronáutico
+214430;Engenheiro naval
+214435;Tecnólogo em fabricação mecânica
+214505;Engenheiro químico
+214510;Engenheiro químico (indústria química)
+214515;Engenheiro químico (mineração, metalurgia, siderurgia, cimenteira e cerâmica)
+214520;Engenheiro químico (papel e celulose)
+214525;Engenheiro químico (petróleo e borracha)
+214530;Engenheiro químico (utilidades e meio ambiente)
+214535;Tecnólogo em produção sucroalcooleira
+214540;Engenheiro têxtil
+214605;Engenheiro de materiais
+214610;Engenheiro metalurgista
+214615;Tecnólogo em metalurgia
+214705;Engenheiro de minas
+214710;Engenheiro de minas (beneficiamento)
+214715;Engenheiro de minas (lavra a céu aberto)
+214720;Engenheiro de minas (lavra subterrânea)
+214725;Engenheiro de minas (pesquisa mineral)
+214730;Engenheiro de minas (planejamento)
+214735;Engenheiro de minas (processo)
+214740;Engenheiro de minas (projeto)
+214745;Tecnólogo em petróleo e gás
+214750;Tecnólogo em rochas ornamentais
+214805;Engenheiro agrimensor
+214810;Engenheiro cartógrafo
+214905;Engenheiro de produção
+214910;Engenheiro de controle de qualidade
+214915;Engenheiro de segurança do trabalho
+214920;Engenheiro de riscos
+214925;Engenheiro de tempos e movimentos
+214930;Tecnólogo em produção industrial
+214935;Tecnólogo em segurança do trabalho
+214940;Higienista ocupacional
+214945;Engenheiro de logistica
+214950;Ergonomista
+215105;Agente de manobra e docagem
+215110;Capitão de manobra da marinha mercante
+215115;Comandante da marinha mercante
+215120;Coordenador de operações de combate à poluição no meio aquaviário
+215125;Imediato da marinha mercante
+215130;Inspetor de terminal
+215135;Inspetor naval
+215140;Oficial de quarto de navegação da marinha mercante
+215145;Prático de portos da marinha mercante
+215150;Vistoriador naval
+215205;Oficial superior de máquinas da marinha mercante
+215210;Primeiro oficial de máquinas da marinha mercante
+215215;Segundo oficial de máquinas da marinha mercante
+215220;Superintendente técnico no transporte aquaviário
+215305;Piloto de aeronaves
+215310;Piloto de ensaios em vôo
+215315;Instrutor de vôo
+221105;Biólogo
+221110;Biólogo em meio ambiente e biodiversidade
+221115;Biólogo em saúde
+221205;Biomédico
+222105;Engenheiro agrícola
+222110;Engenheiro agrônomo
+222115;Engenheiro de pesca
+222120;Engenheiro florestal
+222125;Tecnólogo em agronegócio
+222130;Agroecólogo
+222135;Tecnólogo em agroecologia
+222140;Engenheiro de biossistemas
+222205;Engenheiro de alimentos
+222215;Tecnólogo em alimentos
+223204;Cirurgião dentista - auditor
+223208;Cirurgião dentista - clínico geral
+223212;Cirurgião dentista - endodontista
+223216;Cirurgião dentista - epidemiologista
+223220;Cirurgião dentista - estomatologista
+223224;Cirurgião dentista - implantodontista
+223228;Cirurgião dentista - odontogeriatra
+223232;Cirurgião dentista - odontologista legal
+223236;Cirurgião dentista - odontopediatra
+223240;Cirurgião dentista - ortopedista e ortodontista
+223244;Cirurgião dentista - patologista bucal
+223248;Cirurgião dentista - periodontista
+223252;Cirurgião dentista - protesiólogo bucomaxilofacial
+223256;Cirurgião dentista - protesista
+223260;Cirurgião dentista - radiologista
+223264;Cirurgião dentista - reabilitador oral
+223268;Cirurgião dentista - traumatologista bucomaxilofacial
+223272;Cirurgião dentista de saúde coletiva
+223276;Cirurgião dentista - odontologia do trabalho
+223280;Cirurgião dentista - dentística
+223284;Cirurgião dentista - disfunção temporomandibular e dor orofacial
+223288;Cirurgião dentista - odontologia para pacientes com necessidades especiais
+223293;Cirurgião-dentista da estratégia de saúde da família
+223305;Médico veterinário
+223310;Zootecnista
+223405;Farmacêutico
+223415;Farmacêutico analista clínico
+223420;Farmacêutico de alimentos
+223425;Farmacêutico práticas integrativas e complementares
+223430;Farmacêutico em saúde pública
+223435;Farmacêutico industrial
+223440;Farmacêutico toxicologista
+223445;Farmacêutico hospitalar e clínico
+223505;Enfermeiro
+223510;Enfermeiro auditor
+223515;Enfermeiro de bordo
+223520;Enfermeiro de centro cirúrgico
+223525;Enfermeiro de terapia intensiva
+223530;Enfermeiro do trabalho
+223535;Enfermeiro nefrologista
+223540;Enfermeiro neonatologista
+223545;Enfermeiro obstétrico
+223550;Enfermeiro psiquiátrico
+223555;Enfermeiro puericultor e pediátrico
+223560;Enfermeiro sanitarista
+223565;Enfermeiro da estratégia de saúde da família
+223570;Perfusionista
+223575;Obstetriz
+223580;Enfermeiro estomaterapeuta
+223585;Enfermeiro forense
+223605;Fisioterapeuta geral
+223625;Fisioterapeuta respiratória
+223630;Fisioterapeuta neurofuncional
+223635;Fisioterapeuta traumato-ortopédica funcional
+223640;Fisioterapeuta osteopata
+223645;Fisioterapeuta quiropraxista
+223650;Fisioterapeuta acupunturista
+223655;Fisioterapeuta esportivo
+223660;Fisioterapeuta  do trabalho
+223705;Dietista
+223710;Nutricionista
+223810;Fonoaudiólogo geral
+223815;Fonoaudiólogo educacional
+223820;Fonoaudiólogo em audiologia
+223825;Fonoaudiólogo em disfagia
+223830;Fonoaudiólogo em linguagem
+223835;Fonoaudiólogo em motricidade orofacial
+223840;Fonoaudiólogo em saúde coletiva
+223845;Fonoaudiólogo em voz
+223905;Terapeuta ocupacional
+223910;Ortoptista
+223915;Psicomotricista
+224105;Avaliador físico
+224110;Ludomotricista
+224115;Preparador de atleta
+224120;Preparador físico
+224125;Técnico de desporto individual e coletivo (exceto futebol)
+224130;Técnico de laboratório e fiscalização desportiva
+224135;Treinador profissional de futebol
+224140;Profissional de educação física na saúde
+225103;Médico infectologista
+225105;Médico acupunturista
+225106;Médico legista e perito médico
+225109;Médico nefrologista
+225110;Médico alergista e imunologista
+225112;Médico neurologista
+225115;Médico angiologista
+225118;Médico nutrologista
+225120;Médico cardiologista
+225121;Médico oncologista clínico
+225122;Médico oncologista pediátrico
+225124;Médico pediatra
+225125;Médico clínico
+225127;Médico pneumologista
+225130;Médico de família e comunidade
+225133;Médico psiquiatra
+225135;Médico dermatologista
+225136;Médico reumatologista
+225139;Médico em medicina preventiva e social
+225140;Médico do trabalho
+225145;Médico em medicina do tráfego
+225148;Médico anatomopatologista
+225150;Médico em medicina intensiva
+225151;Médico anestesiologista
+225154;Médico antroposófico
+225155;Médico endocrinologista e metabologista
+225157;Médico emergencista
+225160;Médico fisiatra
+225165;Médico gastroenterologista
+225170;Médico generalista
+225175;Médico geneticista
+225180;Médico geriatra
+225185;Médico hematologista
+225195;Médico homeopata
+225203;Médico em cirurgia vascular
+225210;Médico cirurgião cardiovascular
+225215;Médico cirurgião de cabeça e pescoço
+225220;Médico cirurgião do aparelho digestivo
+225225;Médico cirurgião geral
+225230;Médico cirurgião pediátrico
+225235;Médico cirurgião plástico
+225240;Médico cirurgião torácico
+225250;Médico ginecologista e obstetra
+225255;Médico mastologista
+225260;Médico neurocirurgião
+225265;Médico oftalmologista
+225270;Médico ortopedista e traumatologista
+225275;Médico otorrinolaringologista
+225280;Médico coloproctologista
+225285;Médico urologista
+225290;Médico cancerologista cirurgíco
+225295;Médico cirurgião da mão
+225305;Médico citopatologista
+225310;Médico em endoscopia
+225315;Médico em medicina nuclear
+225320;Médico em radiologia e diagnóstico por imagem
+225325;Médico patologista
+225330;Médico radioterapeuta
+225335;Médico patologista clínico / medicina laboratorial
+225340;Médico hemoterapeuta
+225345;Médico hiperbarista
+225350;Médico neurofisiologista clínico
+225355;Médico radiologista intervencionista
+226105;Quiropraxista
+226110;Osteopata
+226305;Musicoterapeuta
+226310;Arteterapeuta
+226315;Equoterapeuta
+226320;Naturólogo
+231105;Professor de nível superior na educação infantil (quatro a seis anos)
+231110;Professor de nível superior na educação infantil (zero a três anos)
+231205;Professor da  educação de jovens e adultos do ensino fundamental (primeira a quarta série)
+231210;Professor de nível superior do ensino fundamental (primeira a quarta série)
+231305;Professor de ciências exatas e naturais do ensino fundamental
+231310;Professor de educação artística do ensino fundamental
+231315;Professor de educação física do ensino fundamental
+231320;Professor de geografia do ensino fundamental
+231325;Professor de história do ensino fundamental
+231330;Professor de língua estrangeira moderna do ensino fundamental
+231335;Professor de língua portuguesa do ensino fundamental
+231340;Professor de matemática do ensino fundamental
+232105;Professor de artes no ensino médio
+232110;Professor de biologia no ensino médio
+232115;Professor de disciplinas pedagógicas no ensino médio
+232120;Professor de educação física no ensino médio
+232125;Professor de filosofia no ensino médio
+232130;Professor de física no ensino médio
+232135;Professor de geografia no ensino médio
+232140;Professor de história no ensino médio
+232145;Professor de língua e literatura brasileira no ensino médio
+232150;Professor de língua estrangeira moderna no ensino médio
+232155;Professor de matemática no ensino médio
+232160;Professor de psicologia no ensino médio
+232165;Professor de química no ensino médio
+232170;Professor de sociologia no ensino médio
+233105;Professor de educação ambiental no ensino profissional
+233110;Professor de desenho técnico do ensino profissional
+233115;Professor de técnicas agrícolas
+233120;Professor de técnicas comerciais e secretariais
+233125;Professor de técnicas de enfermagem
+233130;Professor de técnicas industriais
+233135;Professor de tecnologia e cálculo técnico
+233205;Instrutor de aprendizagem e treinamento agropecuário
+233210;Instrutor de aprendizagem e treinamento industrial
+233215;Instrutor de aprendizagem e treinamento comercial
+233220;Professor instrutor de ensino e aprendizagem agroflorestal
+233225;Professor instrutor de aprendizagem em serviços
+234105;Professor de matemática aplicada (no ensino superior)
+234110;Professor de matemática pura (no ensino superior)
+234115;Professor de estatística (no ensino superior)
+234120;Professor de computação (no ensino superior)
+234125;Professor de pesquisa operacional (no ensino superior)
+234205;Professor de física (ensino superior)
+234210;Professor de química (ensino superior)
+234215;Professor de astronomia (ensino superior)
+234305;Professor de arquitetura
+234310;Professor de engenharia
+234315;Professor de geofísica
+234320;Professor de geologia
+234405;Professor de ciências biológicas do ensino superior
+234410;Professor de educação física no ensino superior
+234415;Professor de enfermagem do ensino superior
+234420;Professor de farmácia e bioquímica
+234425;Professor de fisioterapia
+234430;Professor de fonoaudiologia
+234435;Professor de medicina
+234440;Professor de medicina veterinária
+234445;Professor de nutrição
+234450;Professor de odontologia
+234455;Professor de terapia ocupacional
+234460;Professor de zootecnia do ensino superior
+234505;Professor de ensino superior na área de didática
+234510;Professor de ensino superior na área de orientação educacional
+234515;Professor de ensino superior na área de pesquisa educacional
+234520;Professor de ensino superior na área de prática de ensino
+234604;Professor de língua alemã
+234608;Professor de língua italiana
+234612;Professor de língua francesa
+234616;Professor de língua inglesa
+234620;Professor de língua espanhola
+234624;Professor de língua portuguesa
+234628;Professor de literatura brasileira
+234632;Professor de literatura portuguesa
+234636;Professor de literatura alemã
+234640;Professor de literatura comparada
+234644;Professor de literatura espanhola
+234648;Professor de literatura francesa
+234652;Professor de literatura inglesa
+234656;Professor de literatura italiana
+234660;Professor de literatura de línguas estrangeiras modernas
+234664;Professor de outras línguas e literaturas
+234668;Professor de línguas estrangeiras modernas
+234672;Professor de linguística e linguística aplicada
+234676;Professor de filologia e crítica textual
+234680;Professor de semiótica
+234684;Professor de teoria da literatura
+234689;Professor de língua brasileira de sinais (libras)
+234705;Professor de antropologia do ensino superior
+234710;Professor de arquivologia do ensino superior
+234715;Professor de biblioteconomia do ensino superior
+234720;Professor de ciência política do ensino superior
+234725;Professor de comunicação social do ensino superior
+234730;Professor de direito do ensino superior
+234735;Professor de filosofia do ensino superior
+234740;Professor de geografia do ensino superior
+234745;Professor de história do ensino superior
+234750;Professor de jornalismo do ensino superior
+234755;Professor de museologia do ensino superior
+234760;Professor de psicologia do ensino superior
+234765;Professor de serviço social do ensino superior
+234770;Professor de sociologia do ensino superior
+234805;Professor de economia
+234810;Professor de administração
+234815;Professor de contabilidade
+234905;Professor de artes do espetáculo no ensino superior
+234910;Professor de artes visuais no ensino superior (artes plásticas e multimídia)
+234915;Professor de música no ensino superior
+239205;Professor de alunos com deficiência auditiva e surdos
+239210;Professor de alunos com deficiência física
+239215;Professor de alunos com deficiência mental
+239220;Professor de alunos com deficiência múltipla
+239225;Professor de alunos com deficiência visual
+239405;Coordenador pedagógico
+239410;Orientador educacional
+239415;Pedagogo
+239420;Professor de técnicas e recursos audiovisuais
+239425;Psicopedagogo
+239430;Supervisor de ensino
+239435;Designer educacional
+239440;Neuropsicopedagogo clinico
+239445;Neuropsicopedagogo institucional
+241005;Advogado
+241010;Advogado de empresa
+241015;Advogado (direito civil)
+241020;Advogado (direito público)
+241025;Advogado (direito penal)
+241030;Advogado (áreas especiais)
+241035;Advogado (direito do trabalho)
+241040;Consultor jurídico
+241205;Advogado da união
+241210;Procurador autárquico
+241215;Procurador da fazenda nacional
+241220;Procurador do estado
+241225;Procurador do município
+241230;Procurador federal
+241235;Procurador fundacional
+241305;Oficial de registro de contratos marítimos
+241310;Oficial do registro civil de pessoas jurídicas
+241315;Oficial do registro civil de pessoas naturais
+241320;Oficial do registro de distribuições
+241325;Oficial do registro de imóveis
+241330;Oficial do registro de títulos e documentos
+241335;Tabelião de notas
+241340;Tabelião de protestos
+241405;Conselheiro julgador
+242205;Procurador da república
+242210;Procurador de justiça
+242215;Procurador de justiça militar
+242220;Procurador do trabalho
+242225;Procurador regional da república
+242230;Procurador regional do trabalho
+242235;Promotor de justiça
+242240;Subprocurador-geral da justiça militar
+242245;Subprocurador-geral da república
+242250;Subprocurador-geral do trabalho
+242305;Delegado de polícia
+242405;Defensor público
+242410;Procurador da assistência judiciária
+242905;Oficial de inteligência
+242910;Oficial técnico de inteligência
+251105;Antropólogo
+251110;Arqueólogo
+251115;Cientista político
+251120;Sociólogo
+251205;Economista
+251210;Economista agroindustrial
+251215;Economista financeiro
+251220;Economista industrial
+251225;Economista do setor público
+251230;Economista ambiental
+251235;Economista regional e urbano
+251305;Geógrafo
+251405;Filósofo
+251505;Psicólogo educacional
+251510;Psicólogo clínico
+251515;Psicólogo do esporte
+251520;Psicólogo hospitalar
+251525;Psicólogo jurídico
+251530;Psicólogo social
+251535;Psicólogo do trânsito
+251540;Psicólogo do trabalho
+251545;Neuropsicólogo
+251550;Psicanalista
+251555;Psicólogo acupunturista
+251605;Assistente social
+251610;Economista doméstico
+252105;Administrador
+252205;Auditor (contadores e afins)
+252210;Contador
+252215;Perito contábil
+252305;Secretário executivo
+252310;Secretário bilíngue
+252315;Secretário trilíngue
+252320;Tecnólogo em secretariado escolar
+252405;Analista de recursos humanos
+252505;Administrador de fundos e carteiras de investimento
+252510;Analista de câmbio
+252515;Analista de cobrança (instituições financeiras)
+252525;Analista de crédito (instituições financeiras)
+252530;Analista de crédito rural
+252535;Analista de leasing
+252540;Analista de produtos bancários
+252545;Analista financeiro (instituições financeiras)
+252550;Profissional de relações com investidores
+252605;Gestor em segurança
+252705;Analista de pcp (programação e controle da produção)
+252710;Analista de planejamento de materias
+252715;Analista de logistica
+252720;Analista de projetos logisticos
+252725;Analista de gestão de estoque
+253110;Redator de publicidade
+253115;Publicitário
+253120;Diretor de mídia (publicidade)
+253125;Diretor de arte (publicidade)
+253130;Diretor de criação
+253135;Diretor de contas (publicidade)
+253140;Agenciador de propaganda
+253205;Gerente de captação (fundos e investimentos institucionais)
+253210;Gerente de clientes especiais (private)
+253215;Gerente de contas - pessoa física e jurídica
+253220;Gerente de grandes contas (corporate)
+253225;Operador de negócios
+253305;Corretor de valores, ativos financeiros, mercadorias e derivativos
+253405;Analista de mídias sociais
+253410;Influenciador digital
+254105;Auditor-fiscal da receita federal
+254110;Técnico da receita federal
+254205;Auditor-fiscal da previdência social
+254305;Auditor-fiscal do trabalho
+254310;Agente de higiene e segurança
+254405;Fiscal de tributos estadual
+254410;Fiscal de tributos municipal
+254415;Técnico de tributos estadual
+254420;Técnico de tributos municipal
+254505;Fiscal de atividades urbanas
+261105;Arquivista pesquisador (jornalismo)
+261110;Assessor de imprensa
+261115;Diretor de redação
+261120;Editor
+261125;Jornalista
+261130;Produtor de texto
+261135;Repórter (exclusive rádio e televisão)
+261140;Revisor de texto
+261205;Bibliotecário
+261210;Documentalista
+261215;Analista de informações (pesquisador de informações de rede)
+261305;Arquivista
+261310;Museólogo
+261405;Filólogo
+261410;Intérprete
+261415;Linguista
+261420;Tradutor
+261425;Intérprete de língua de sinais
+261430;Audiodescritor
+261505;Autor-roteirista
+261510;Crítico
+261515;Escritor de ficção
+261520;Escritor de não ficção
+261525;Poeta
+261530;Redator de textos técnicos
+261605;Editor de jornal
+261610;Editor de livro
+261615;Editor de mídia eletrônica
+261620;Editor de revista
+261625;Editor de revista científica
+261705;Âncora de mídias audiovisuais
+261710;Comentarista de mídias audiovisuais
+261715;Locutor de mídias audiovisuais
+261730;Repórter de mídias audiovisuais
+261805;Fotógrafo
+261810;Fotógrafo publicitário
+261815;Fotógrafo retratista
+261820;Repórter fotográfico
+261905;Continuista
+261910;Assistente de direção (tv)
+262105;Produtor cultural
+262110;Produtor cinematográfico
+262115;Produtor de rádio
+262120;Produtor de teatro
+262125;Produtor de televisão
+262130;Tecnólogo em produção fonográfica
+262135;Tecnólogo em produção audiovisual
+262205;Diretor de cinema
+262210;Diretor de programas de rádio
+262215;Diretor de programas de televisão
+262220;Diretor teatral
+262225;Diretor de programação
+262230;Diretor de produção
+262235;Diretor artístico
+262240;Diretor de elenco (audiovisual)
+262245;Diretor de animação (audiovisual)
+262305;Cenógrafo carnavalesco e de festas populares
+262310;Cenógrafo de cinema
+262315;Cenógrafo de eventos
+262320;Cenógrafo de teatro
+262325;Cenógrafo de tv
+262330;Diretor de arte
+262335;Produtor de arte (audiovisual)
+262405;Artista (artes visuais)
+262410;Desenhista industrial gráfico (designer gráfico)
+262415;Conservador-restaurador de bens  culturais
+262420;Desenhista industrial de produto (designer de produto)
+262425;Desenhista industrial de produto de moda (designer de moda)
+262430;Artista visual de jogos eletrônicos
+262435;Designer de jogos eletrônicos
+262440;Designer de narrativa de jogos eletrônicos
+262505;Ator
+262605;Compositor
+262610;Músico arranjador
+262615;Músico regente
+262620;Musicólogo
+262705;Músico intérprete cantor
+262710;Músico intérprete instrumentista
+262805;Assistente de coreografia
+262810;Bailarino (exceto danças populares)
+262815;Coreógrafo
+262820;Dramaturgo de dança
+262825;Ensaiador de dança
+262830;Professor de dança
+262905;Decorador de interiores de nível superior
+263105;Ministro de culto religioso
+263110;Missionário
+263115;Teólogo
+271105;Chefe de cozinha
+271110;Tecnólogo em gastronomia
+300105;Técnico em mecatrônica - automação da manufatura
+300110;Técnico em mecatrônica - robótica
+300305;Técnico em eletromecânica
+301105;Técnico de laboratório industrial
+301110;Técnico de laboratório de análises físico-químicas (materiais de construção)
+301115;Técnico químico de petróleo
+301205;Técnico de apoio à bioengenharia
+311105;Técnico químico
+311110;Técnico de celulose e papel
+311115;Técnico em curtimento
+311205;Técnico em petroquímica
+311305;Técnico em materiais, produtos cerâmicos e vidros
+311405;Técnico em borracha
+311410;Técnico em plástico
+311505;Técnico de controle de meio ambiente
+311510;Técnico de meteorologia
+311515;Técnico de utilidade (produção e distribuição de vapor, gases, óleos, combustíveis, energia)
+311520;Técnico em tratamento de efluentes
+311605;Técnico têxtil
+311610;Técnico têxtil (tratamentos químicos)
+311615;Técnico têxtil de fiação
+311620;Técnico têxtil de malharia
+311625;Técnico têxtil de tecelagem
+311705;Colorista de papel
+311710;Colorista têxtil
+311715;Preparador de tintas
+311720;Preparador de tintas (fábrica de tecidos)
+311725;Tingidor de couros
+312105;Técnico de obras civis
+312205;Técnico de estradas
+312210;Técnico de saneamento
+312305;Técnico em agrimensura
+312310;Técnico em geodésia e cartografia
+312315;Técnico em hidrografia
+312320;Topógrafo
+313105;Eletrotécnico
+313110;Eletrotécnico (produção de energia)
+313115;Eletrotécnico na fabricação, montagem e instalação de máquinas e equipamentos
+313120;Técnico de manutenção elétrica
+313125;Técnico de manutenção elétrica de máquina
+313130;Técnico eletricista
+313205;Técnico de manutenção eletrônica
+313210;Técnico de manutenção eletrônica (circuitos de máquinas com comando numérico)
+313215;Técnico eletrônico
+313220;Técnico em manutenção de equipamentos de informática
+313305;Técnico de comunicação de dados (telecomunicações)
+313310;Técnico de rede (telecomunicações)
+313315;Técnico de telecomunicações (telefonia)
+313320;Técnico de transmissão (telecomunicações)
+313405;Técnico em calibração
+313410;Técnico em instrumentação
+313415;Encarregado de manutenção de instrumentos de controle, medição e similares
+313505;Técnico em fotônica
+314105;Técnico em mecânica de precisão
+314110;Técnico mecânico
+314115;Técnico mecânico (calefação, ventilação, refrigeração e climatização)
+314120;Técnico mecânico (máquinas)
+314125;Técnico mecânico (motores)
+314205;Técnico mecânico na fabricação de ferramentas
+314210;Técnico mecânico na manutenção de ferramentas
+314305;Técnico em automobilística
+314310;Técnico mecânico (aeronaves)
+314315;Técnico mecânico (embarcações)
+314405;Técnico de manutenção de sistemas e instrumentos
+314410;Técnico em manutenção de máquinas
+314610;Técnico em caldeiraria
+314615;Técnico em estruturas metálicas
+314620;Técnico em soldagem
+314625;Tecnólogo em soldagem
+314705;Técnico de acabamento em siderurgia
+314710;Técnico de aciaria em siderurgia
+314715;Técnico de fundição em siderurgia
+314720;Técnico de laminação em siderurgia
+314725;Técnico de redução na siderurgia (primeira fusão)
+314730;Técnico de refratário em siderurgia
+314805;Inspetor de equipamentos
+314810;Inspetor de fabricação
+314815;Inspetor de ensaios não destrutivos
+314825;Inspetor de dutos
+314830;Inspetor de controle dimensional
+314835;Inspetor de pintura
+314840;Inspetor de manutenção
+314845;Inspetor de soldagem
+316105;Técnico em geofísica
+316110;Técnico em geologia
+316115;Técnico em geoquímica
+316120;Técnico em geotecnia
+316305;Técnico de mineração
+316310;Técnico de mineração (óleo e petróleo)
+316315;Técnico em processamento mineral (exceto petróleo)
+316320;Técnico em pesquisa mineral
+316325;Técnico de produção em refino de petróleo
+316330;Técnico em planejamento de lavra de minas
+316335;Desincrustador (poços de petróleo)
+316340;Cimentador (poços de petróleo)
+317105;Desenvolvedor web (técnico)
+317110;Desenvolvedor de sistemas de tecnologia da informação (técnico)
+317115;Programador de máquinas - ferramenta com comando numérico
+317120;Desenvolvedor de aplicativos
+317205;Operador de computador
+317210;Técnico de suporte ao usuário de tecnologia da informação
+318005;Desenhista técnico
+318010;Desenhista copista
+318015;Desenhista detalhista
+318105;Desenhista técnico (arquitetura)
+318110;Desenhista técnico (cartografia)
+318115;Desenhista técnico (construção civil)
+318120;Desenhista técnico (instalações hidrossanitárias)
+318205;Desenhista técnico mecânico
+318210;Desenhista técnico aeronáutico
+318215;Desenhista técnico naval
+318305;Desenhista técnico (eletricidade e eletrônica)
+318310;Desenhista técnico (calefação, ventilação e refrigeração)
+318405;Desenhista técnico (artes gráficas)
+318410;Desenhista técnico (ilustrações artísticas)
+318415;Desenhista técnico (ilustrações técnicas)
+318420;Desenhista técnico (indústria têxtil)
+318425;Desenhista técnico (mobiliário)
+318430;Desenhista técnico de embalagens, maquetes e leiautes
+318505;Desenhista projetista de arquitetura
+318510;Desenhista projetista de construção civil
+318605;Desenhista projetista de máquinas
+318610;Desenhista projetista mecânico
+318705;Desenhista projetista de eletricidade
+318710;Desenhista projetista eletrônico
+318805;Projetista de móveis
+318810;Modelista de roupas
+318815;Modelista de calçados
+319105;Técnico em calçados e artefatos de couro
+319110;Técnico em confecções do vestuário
+319205;Técnico do mobiliário
+320105;Técnico em bioterismo
+320110;Técnico em histologia
+321105;Técnico agrícola
+321110;Técnico agropecuário
+321205;Técnico em madeira
+321210;Técnico florestal
+321305;Técnico em piscicultura
+321310;Técnico em carcinicultura
+321315;Técnico em mitilicultura
+321320;Técnico em ranicultura
+322110;Podólogo
+322130;Esteticista
+322135;Doula
+322140;Instrutor de pilates
+322205;Técnico de enfermagem
+322210;Técnico de enfermagem de terapia intensiva
+322215;Técnico de enfermagem do trabalho
+322220;Técnico de enfermagem psiquiátrica
+322225;Instrumentador cirúrgico
+322230;Auxiliar de enfermagem
+322235;Auxiliar de enfermagem do trabalho
+322240;Auxiliar de saúde (navegação marítima)
+322245;Técnico de enfermagem da estratégia de saúde da família
+322250;Auxiliar de enfermagem da estratégia de saúde da família
+322255;Técnico em agente comunitário de saúde
+322305;Técnico em óptica e optometria
+322405;Técnico em saúde bucal
+322410;Protético dentário
+322415;Auxiliar em saúde bucal
+322420;Auxiliar de prótese dentária
+322425;Técnico em saúde bucal da estratégia de saúde da família
+322430;Auxiliar em saúde bucal da estratégia de saúde da família
+322505;Técnico de ortopedia
+322605;Técnico de imobilização ortopédica
+322705;Técnico em acupuntura
+322710;Técnico em quiropraxia
+322715;Massoterapeuta
+322720;Terapeuta holístico
+322725;Facilitador de biodança
+322730;Terapeuta reiki
+322735;Instrutor de yoga
+322740;Instrutor de meditação
+322745;Facilitador de grupos de movimento(bioernergética)
+323105;Técnico em pecuária
+324105;Técnico em métodos eletrográficos em encefalografia
+324110;Técnico em métodos gráficos em cardiologia
+324115;Técnico em radiologia e imagenologia
+324120;Tecnólogo em radiologia
+324125;Tecnólogo oftálmico
+324130;Técnico em espirometria
+324135;Técnico em polissonografia
+324140;Dosimetrista clínico
+324205;Técnico em patologia clínica
+324215;Citotécnico
+324220;Técnico em hemoterapia
+325005;Enólogo
+325010;Aromista
+325015;Perfumista
+325105;Auxiliar técnico em laboratório de farmácia
+325110;Técnico em laboratório de farmácia
+325115;Técnico em farmácia
+325205;Técnico de alimentos
+325210;Técnico em nutrição e dietética
+325305;Técnico em biotecnologia
+325310;Técnico em imunobiológicos
+328105;Embalsamador
+328110;Taxidermista
+331105;Professor de nível médio na educação infantil
+331110;Auxiliar de desenvolvimento infantil
+331205;Professor de nível médio no ensino fundamental
+331305;Professor de nível médio no ensino profissionalizante
+332105;Professor leigo no ensino fundamental
+332205;Professor prático no ensino profissionalizante
+333105;Instrutor de auto-escola
+333110;Instrutor de cursos livres
+333115;Professores de cursos livres
+333120;Mestre das culturas populares e tradicionais
+334105;Inspetor de alunos de escola privada
+334110;Inspetor de alunos de escola pública
+334115;Monitor de transporte escolar
+341105;Piloto comercial (exceto linhas aéreas)
+341110;Piloto comercial de helicóptero (exceto linhas aéreas)
+341115;Mecânico de voo
+341120;Piloto agrícola
+341205;Contramestre de cabotagem
+341210;Mestre de cabotagem
+341215;Mestre fluvial
+341220;Patrão de pesca de alto-mar
+341225;Patrão de pesca na navegação interior
+341230;Piloto fluvial
+341235;Técnico em sinalização náutica
+341240;Técnicos em manobras e equipamentos de convés
+341245;Técnico em sinais navais
+341250;Auxiliar técnico de sinalização náutica
+341305;Condutor maquinista motorista fluvial
+341310;Condutor de máquinas
+341315;Eletricista de bordo
+341320;Condutor de máquinas (bombeador)
+341325;Condutor de máquinas (mecânico)
+342105;Analista de transporte em comércio exterior
+342110;Operador de transporte multimodal
+342115;Controlador de serviços de máquinas e veículos
+342120;Afretador
+342125;Tecnólogo em logística de transporte
+342205;Ajudante de despachante aduaneiro
+342210;Despachante aduaneiro
+342215;Analista de desembaraço aduaneiro
+342305;Chefe de serviço de transporte rodoviário (passageiros e cargas)
+342310;Inspetor de serviços de transportes rodoviários (passageiros e cargas)
+342315;Supervisor de carga e descarga
+342405;Agente de estação (ferrovia e metrô)
+342410;Operador de centro de controle (ferrovia e metrô)
+342505;Controlador de tráfego aéreo
+342510;Despachante operacional de voo
+342515;Fiscal de aviação civil (fac)
+342530;Inspetor de aviação civil
+342535;Operador de atendimento aeroviário
+342540;Supervisor da administração de aeroportos
+342545;Supervisor de empresa aérea em aeroportos
+342550;Agente de proteção de aviação civil
+342555;Fiscal de pista de aeroporto
+342560;Operador de rampa ( transporte aéreo)
+342605;Chefe de estação portuária
+342610;Supervisor de operações portuárias
+351105;Técnico de contabilidade
+351110;Chefe de contabilidade (técnico)
+351115;Consultor contábil (técnico)
+351305;Técnico em administração
+351310;Técnico em administração de comércio exterior
+351315;Agente de recrutamento e seleção
+351405;Escrevente
+351410;Escrivão judicial
+351415;Escrivão extra - judicial
+351420;Escrivão de polícia
+351425;Oficial de justiça
+351430;Auxiliar de serviços jurídicos
+351435;Mediador de conflitos
+351440;Árbitro extrajudicial
+351505;Técnico em secretariado
+351510;Taquígrafo
+351515;Estenotipista
+351605;Técnico de segurança do trabalho
+351610;Técnico em higiene ocupacional
+351705;Analista de seguros (técnico)
+351710;Analista de sinistros
+351715;Assistente comercial de seguros
+351720;Assistente técnico de seguros
+351725;Inspetor de risco
+351730;Inspetor de sinistros
+351735;Técnico de resseguros
+351740;Técnico de seguros
+351805;Detetive profissional
+351810;Investigador de polícia
+351815;Papiloscopista policial
+351905;Agente de inteligência
+351910;Agente técnico de inteligência
+352205;Agente de defesa ambiental
+352210;Agente de saúde pública
+352305;Metrologista
+352310;Agente fiscal de qualidade
+352315;Agente fiscal metrológico
+352320;Agente fiscal têxtil
+352405;Agente de direitos autorais
+352410;Avaliador de produtos dos meios de comunicação
+352420;Técnico em serviços jurídicos na área de direito autoral
+353205;Técnico de operações e serviços bancários - câmbio
+353210;Técnico de operações e serviços bancários - crédito imobiliário
+353215;Técnico de operações e serviços bancários - crédito rural
+353220;Técnico de operações e serviços bancários - leasing
+353225;Técnico de operações e serviços bancários - renda fixa e variável
+353230;Tesoureiro de banco
+353235;Chefe de serviços bancários
+354120;Agente de vendas de serviços
+354125;Assistente de vendas
+354130;Promotor de vendas especializado
+354135;Técnico de vendas
+354140;Técnico em atendimento e vendas
+354145;Vendedor pracista
+354150;Propagandista de produtos famacêuticos
+354205;Comprador
+354210;Supervisor de compras
+354305;Analista de exportação e importação
+354405;Leiloeiro
+354410;Avaliador de imóveis
+354415;Avaliador de bens móveis
+354505;Corretor de seguros
+354605;Corretor de imóveis
+354610;Corretor de grãos
+354705;Representante comercial autônomo
+354805;Técnico em turismo
+354810;Operador de turismo
+354815;Agente de viagem
+354820;Organizador de evento
+354825;Cerimonialista
+371105;Auxiliar de biblioteca
+371110;Técnico em biblioteconomia
+371205;Colecionador de selos e moedas
+371210;Técnico em museologia
+371305;Técnico em programação visual
+371310;Técnico gráfico
+371405;Recreador de acantonamento
+371410;Recreador
+371415;Brinquedista
+372105;Diretor de fotografia
+372110;Iluminador (televisão)
+372115;Operador de câmera de televisão
+372205;Operador de rede de teleprocessamento
+372210;Radiotelegrafista
+373105;Operador de mídia audiovisual
+373130;Técnico de sistemas audiovisuais
+373135;Operador de controle mestre
+373140;Coordenador de programação
+373145;Assistente de operações audiovisuais
+373220;Supervisor técnico operacional de sistemas de televisão e produtoras de vídeo
+373225;Supervisor de operações (mídias audiovisuais)
+373230;Supervisor técnico (mídias audiovisuais)
+374105;Técnico em gravação de áudio
+374110;Técnico em instalação de equipamentos de áudio
+374115;Técnico em masterização de áudio
+374120;Projetista de som
+374125;Técnico em sonorização
+374130;Técnico em mixagem de áudio
+374135;Projetista de sistemas de áudio
+374140;Microfonista
+374145;Dj (disc jockey)
+374150;Sonoplasta
+374155;Analista musical
+374205;Cenotécnico (cinema, vídeo, televisão, teatro e espetáculos)
+374210;Maquinista de cinema e vídeo
+374215;Maquinista de teatro e espetáculos
+374305;Operador de projetor cinematográfico
+374310;Operador-mantenedor de projetor cinematográfico
+374405;Editor de mídia audiovisual
+374410;Finalizador de filmes
+374415;Finalizador de vídeo
+374420;Montador de filmes
+374425;Diretor de imagens (tv)
+375105;Designer de interiores
+375110;Designer de vitrines
+375115;Visual merchandiser
+375120;Decorador de eventos
+375125;Produtor de moda
+375130;Profissional de organização (personal organizer)
+376105;Dançarino tradicional
+376110;Dançarino popular
+376205;Acrobata
+376210;Artista aéreo
+376215;Artista de circo (outros)
+376220;Contorcionista
+376225;Domador de animais (circense)
+376230;Equilibrista
+376235;Mágico
+376240;Malabarista
+376245;Palhaço
+376250;Titeriteiro
+376255;Trapezista
+376305;Apresentador de eventos
+376310;Apresentador de festas populares
+376315;Apresentador de programas de rádio
+376320;Apresentador de programas de televisão
+376325;Apresentador de circo
+376330;Mestre de cerimônias
+376405;Modelo artístico
+376410;Modelo de modas
+376415;Modelo publicitário
+377105;Atleta profissional (outras modalidades)
+377110;Atleta profissional de futebol
+377115;Atleta profissional de golfe
+377120;Atleta profissional de luta
+377125;Atleta profissional de tênis
+377130;Jóquei
+377135;Piloto de competição automobilística
+377140;Profissional de atletismo
+377145;Pugilista
+377205;Árbitro desportivo
+377210;Árbitro de atletismo
+377215;Árbitro de basquete
+377220;Árbitro de futebol
+377225;Árbitro de futebol de salão
+377230;Árbitro de judô
+377235;Árbitro de karatê
+377240;Árbitro de poló aquático
+377245;Árbitro de vôlei
+391105;Cronoanalista
+391110;Cronometrista
+391115;Controlador de entrada e saída
+391120;Planejista
+391125;Técnico de planejamento de produção
+391130;Técnico de planejamento e programação da manutenção
+391135;Técnico de matéria-prima e material
+391140;Analista de manutenção aeronáutica
+391145;Analista de planejamento de manutenção
+391205;Inspetor de qualidade
+391210;Técnico de garantia da qualidade
+391215;Operador de inspeção de qualidade
+391220;Técnico de painel de controle
+391225;Escolhedor de papel
+391230;Técnico operacional de serviços de correios
+395105;Técnico de apoio em pesquisa e desenvolvimento (exceto agropecuário e florestal)
+395110;Técnico de apoio em pesquisa e desenvolvimento agropecuário florestal
+410105;Supervisor administrativo
+410205;Supervisor de almoxarifado
+410210;Supervisor de câmbio
+410215;Supervisor de contas a pagar
+410220;Supervisor de controle patrimonial
+410225;Supervisor de crédito e cobrança
+410230;Supervisor de orçamento
+410235;Supervisor de tesouraria
+410240;Supervisor de logística
+411005;Auxiliar de escritório
+411010;Assistente administrativo
+411015;Atendente de judiciário
+411020;Auxiliar de judiciário
+411025;Auxiliar de cartório
+411030;Auxiliar de pessoal
+411035;Auxiliar de estatística
+411040;Auxiliar de seguros
+411045;Auxiliar de serviços de importação e exportação
+411050;Agente de microcrédito
+411055;Captador de recursos
+412105;Datilógrafo
+412110;Digitador
+412115;Operador de mensagens de telecomunicações (correios)
+412120;Supervisor de digitação e operação
+412205;Contínuo
+413105;Analista de folha de pagamento
+413110;Auxiliar de contabilidade
+413115;Auxiliar de faturamento
+413205;Atendente de agência
+413210;Caixa de banco
+413215;Compensador de banco
+413220;Conferente de serviços bancários
+413225;Escriturário de banco
+413230;Operador de cobrança bancária
+414105;Almoxarife
+414110;Armazenista
+414115;Balanceiro
+414120;Conferente mercadoria (exceto carga e descarga)
+414125;Estoquista
+414135;Expedidor de mercadorias
+414140;Auxiliar de logística
+414205;Apontador de mão de obra
+414210;Apontador de produção
+414215;Conferente de carga e descarga
+415105;Arquivista de documentos
+415115;Codificador de dados
+415120;Fitotecário
+415125;Kardexista
+415130;Operador de máquina copiadora (exceto operador de gráfica rápida)
+415205;Carteiro
+415210;Operador de triagem e transbordo
+415215;Entregador de publicações
+415305;Registrador de câncer
+415310;Analista de informação em saúde
+420105;Supervisor de caixas e bilheteiros (exceto caixa de banco)
+420110;Supervisor de cobrança
+420115;Supervisor de coletadores de apostas e de jogos
+420120;Supervisor de coleta de dados em pesquisa
+420125;Supervisor de recepcionistas
+420130;Supervisor de telefonistas
+420135;Supervisor de telemarketing e atendimento
+421105;Atendente comercial (agência postal)
+421110;Bilheteiro de transportes coletivos
+421115;Bilheteiro no serviço de diversões
+421120;Emissor de passagens
+421125;Operador de caixa
+421205;Recebedor de apostas (loteria)
+421210;Recebedor de apostas (turfe)
+421305;Cobrador externo
+421310;Cobrador interno
+421315;Localizador (cobrador)
+422105;Recepcionista, em geral
+422110;Recepcionista de consultório médico ou dentário
+422115;Recepcionista de seguro saúde
+422120;Recepcionista de hotel
+422125;Recepcionista de banco
+422130;Concierge
+422205;Telefonista
+422210;Teleoperador
+422220;Operador de rádio-chamada
+422305;Operador de telemarketing ativo
+422310;Operador de telemarketing ativo e receptivo
+422315;Operador de telemarketing receptivo
+422320;Operador de telemarketing técnico
+422330;Teleatendente de emergência
+422335;Monitor de teleatendimento
+423105;Despachante documentalista
+423110;Despachante de trânsito
+423115;Vistoriador veicular
+424105;Entrevistador censitário e de pesquisas amostrais
+424110;Entrevistador de pesquisa de opinião e mídia
+424115;Entrevistador de pesquisas de mercado
+424120;Entrevistador de preços
+424125;Escriturário  em  estatística
+424130;Entrevistador social
+424205;Coordenador de provas (concurso, avaliação, exame)
+424210;Aplicador de provas (concurso, avaliação,exame)
+510105;Supervisor de transportes
+510110;Administrador de edifícios
+510115;Supervisor de andar
+510120;Chefe de portaria de hotel
+510130;Chefe de bar
+510135;Maître
+510205;Supervisor de lavanderia
+510305;Supervisor de bombeiros
+510310;Supervisor de vigilantes
+511105;Comissário de vôo
+511110;Comissário de trem
+511115;Taifeiro (exceto militares)
+511205;Fiscal de transportes coletivos (exceto trem)
+511210;Despachante de transportes coletivos (exceto trem)
+511215;Cobrador de transportes coletivos (exceto trem)
+511220;Bilheteiro (estações de metrô, ferroviárias e assemelhadas)
+511405;Guia de turismo
+511505;Condutor de turismo de aventura
+511510;Condutor de turismo de pesca
+511515;Condutor turismo náutico
+512105;Empregado  doméstico  nos serviços gerais
+512110;Empregado doméstico  arrumador
+512115;Empregado doméstico  faxineiro
+512120;Empregado doméstico diarista
+513105;Mordomo de residência
+513110;Mordomo de hotelaria
+513115;Governanta de hotelaria
+513205;Cozinheiro geral
+513210;Cozinheiro do serviço doméstico
+513215;Cozinheiro industrial
+513220;Cozinheiro de hospital
+513225;Cozinheiro de embarcações
+513305;Camareiro de teatro
+513310;Camareiro de televisão
+513315;Camareiro  de hotel
+513320;Camareiro de embarcações
+513325;Guarda-roupeiro de cinema
+513405;Garçom
+513410;Sommelier
+513415;Cumim
+513420;Barman
+513425;Copeiro
+513430;Copeiro de hospital
+513435;Atendente de lanchonete
+513440;Barista
+513505;Auxiliar nos serviços de alimentação
+513510;Lactarista
+513605;Churrasqueiro
+513610;Pizzaiolo
+513615;Sushiman
+514105;Ascensorista
+514110;Garagista
+514115;Sacristão
+514120;Zelador de edifício
+514205;Coletor de lixo domiciliar
+514215;Varredor de rua
+514225;Trabalhador de serviços de limpeza e conservação de áreas públicas
+514230;Coletor de resíduos sólidos de serviços de saúde
+514305;Limpador de vidros
+514310;Auxiliar de manutenção predial
+514315;Limpador de fachadas
+514320;Faxineiro
+514325;Trabalhador da manutenção de edificações
+514330;Limpador de piscinas
+514335;Hidrojatista
+515105;Agente comunitário de saúde
+515110;Atendente de enfermagem
+515115;Parteira tradicional
+515120;Visitador sanitário
+515125;Agente indígena de saúde
+515130;Agente indígena de saneamento
+515135;Socorrista (exceto médicos e enfermeiros)
+515140;Agente de combate às endemias
+515205;Auxiliar de banco de sangue
+515210;Auxiliar de farmácia de manipulação
+515215;Auxiliar de laboratório de análises clínicas
+515220;Auxiliar de laboratório de imunobiológicos
+515225;Auxiliar de produção farmacêutica
+515305;Educador social
+515310;Agente de ação social
+515315;Monitor de dependente químico
+515320;Conselheiro tutelar
+515325;Sócioeducador
+515330;Monitor de ressocialização prisional
+515335;Mediador intercultural
+516105;Barbeiro
+516110;Cabeleireiro
+516120;Manicure/pedicure
+516125;Maquiador
+516130;Maquiador de caracterização
+516145;Designer de unhas
+516150;Designer de sobrancelhas
+516155;Designer de cílios
+516160;Confeccionador de perucas
+516165;Trancista
+516205;Babá
+516210;Cuidador de idosos
+516215;Mãe social
+516220;Cuidador em saúde
+516305;Lavadeiro, em geral
+516310;Lavador de roupas à máquina
+516315;Lavador de artefatos de tapeçaria
+516320;Limpador a seco, à máquina
+516325;Passador de roupas em geral
+516330;Tingidor de roupas
+516335;Conferente-expedidor de roupas (lavanderias)
+516340;Atendente de lavanderia
+516345;Auxiliar de lavanderia
+516405;Lavador de roupas e artefatos à mão
+516410;Limpador de roupas a seco, à mão
+516415;Passador de roupas, à mão
+516505;Agente funerário
+516605;Operador de forno (serviços funerários)
+516610;Sepultador
+516705;Astrólogo
+516710;Numerólogo
+516805;Esotérico
+516810;Paranormal
+516815;Ufólogo
+516905;Tatuador
+516910;Micropigmentador
+516915;Body piercer
+517105;Bombeiro de aeródromo
+517110;Bombeiro civil
+517115;Salva-vidas
+517120;Brigadista florestal
+517125;Chefe de brigada
+517130;Agente de proteção e defesa civil
+517205;Agente de polícia federal
+517210;Policial rodoviário federal
+517215;Guarda civil municipal
+517220;Agente de trânsito
+517225;Policial legislativo
+517230;Policial penal
+517235;Guarda portuário
+517305;Vigilante aeroportuário
+517310;Agente de segurança
+517320;Vigilante florestal
+517325;Vigilante portuário
+517330;Vigilante patrimonial
+517405;Porteiro (hotel)
+517410;Porteiro de edifícios
+517415;Agente de portaria
+517420;Vigia
+517425;Fiscal de loja
+519105;Ciclista mensageiro
+519110;Motofretista
+519115;Mototaxista
+519205;Catador de material reciclável
+519210;Selecionador de material reciclável
+519215;Operador de prensa de material reciclável
+519305;Auxiliar de serviços em saúde animal
+519310;Esteticista de animais domésticos
+519315;Banhista de animais domésticos
+519320;Tosador de animais domésticos
+519325;Monitor de animais domésticos
+519330;Condutor de cães domésticos
+519805;Profissional do sexo
+519905;Cartazeiro
+519910;Controlador de pragas
+519915;Engraxate
+519920;Gandula
+519925;Guardador de veículos
+519930;Lavador de garrafas, vidros e outros utensílios
+519935;Lavador de veículos
+519940;Leiturista
+519945;Recepcionista de casas de espetáculos
+520105;Supervisor de vendas de serviços
+520110;Supervisor de vendas de produtos
+521105;Vendedor em comércio atacadista
+521110;Vendedor de comércio varejista
+521115;Promotor de vendas
+521120;Demonstrador de mercadorias
+521125;Repositor de mercadorias
+521130;Atendente de farmácia - balconista
+521135;Frentista
+521140;Atendente de lojas e mercados
+523105;Instalador de cortinas e persianas, portas sanfonadas e boxe
+523110;Instalador de som e acessórios de veículos
+523115;Chaveiro
+523120;Aplicador de vinil autoadesivo
+523125;Estampador de placa de identificação veicular (epiv)
+524105;Vendedor em domicílio
+524205;Feirante
+524210;Jornaleiro (em banca de jornal)
+524215;Vendedor  permissionário
+524305;Vendedor ambulante
+524310;Pipoqueiro ambulante
+524315;Baiana de acarajé
+611005;Produtor agropecuário, em geral
+612005;Produtor agrícola polivalente
+612105;Produtor de arroz
+612110;Produtor de cana-de-açúcar
+612115;Produtor de cereais de inverno
+612120;Produtor de gramíneas forrageiras
+612125;Produtor de milho e sorgo
+612205;Produtor de algodão
+612210;Produtor de curauá
+612215;Produtor de juta
+612220;Produtor de rami
+612225;Produtor de sisal
+612305;Produtor na olericultura de legumes
+612310;Produtor na olericultura de raízes, bulbos e tubérculos
+612315;Produtor na olericultura de talos, folhas e flores
+612320;Produtor na olericultura de frutos e sementes
+612405;Produtor de flores de corte
+612410;Produtor de flores em vaso
+612415;Produtor de forrações
+612420;Produtor de plantas ornamentais
+612505;Produtor de árvores frutíferas
+612510;Produtor de espécies frutíferas rasteiras
+612515;Produtor de espécies frutíferas trepadeiras
+612605;Cafeicultor
+612610;Produtor de cacau
+612615;Produtor de erva-mate
+612620;Produtor de fumo
+612625;Produtor de guaraná
+612705;Produtor da cultura de amendoim
+612710;Produtor da cultura de canola
+612715;Produtor da cultura de coco-da-baia
+612720;Produtor da cultura de dendê
+612725;Produtor da cultura de girassol
+612730;Produtor da cultura de linho
+612735;Produtor da cultura de mamona
+612740;Produtor da cultura de soja
+612805;Produtor de especiarias
+612810;Produtor de plantas aromáticas e medicinais
+613005;Criador em pecuária polivalente
+613010;Criador de animais domésticos
+613105;Criador de asininos e muares
+613110;Criador de bovinos (corte)
+613115;Criador de bovinos (leite)
+613120;Criador de bubalinos (corte)
+613125;Criador de bubalinos (leite)
+613130;Criador de equínos
+613205;Criador de caprinos
+613210;Criador de ovinos
+613215;Criador de suínos
+613305;Avicultor
+613310;Cunicultor
+613405;Apicultor
+613410;Criador de animais produtores de veneno
+613415;Minhocultor
+613420;Sericultor
+620105;Supervisor de exploração agrícola
+620110;Supervisor de exploração agropecuária
+620115;Supervisor de exploração pecuária
+621005;Trabalhador agropecuário em geral
+622005;Caseiro (agricultura)
+622010;Jardineiro
+622015;Trabalhador na produção de mudas e sementes
+622020;Trabalhador volante da agricultura
+622105;Trabalhador da cultura de arroz
+622110;Trabalhador da cultura de cana-de-açúcar
+622115;Trabalhador da cultura de milho e sorgo
+622120;Trabalhador da cultura de trigo, aveia, cevada e triticale
+622205;Trabalhador da cultura de algodão
+622210;Trabalhador da cultura de sisal
+622215;Trabalhador da cultura do rami
+622305;Trabalhador na olericultura (frutos e sementes)
+622310;Trabalhador na olericultura (legumes)
+622315;Trabalhador na olericultura (raízes, bulbos e tubérculos)
+622320;Trabalhador na olericultura (talos, folhas e flores)
+622405;Trabalhador no cultivo de flores e folhagens de corte
+622410;Trabalhador no cultivo de flores em vaso
+622415;Trabalhador no cultivo de forrações
+622420;Trabalhador no cultivo de mudas
+622425;Trabalhador no cultivo de plantas ornamentais
+622505;Trabalhador no cultivo de árvores frutíferas
+622510;Trabalhador no cultivo de espécies frutíferas rasteiras
+622515;Trabalhador no cultivo de trepadeiras frutíferas
+622605;Trabalhador da cultura de cacau
+622610;Trabalhador da cultura de café
+622615;Trabalhador da cultura de erva-mate
+622620;Trabalhador da cultura de fumo
+622625;Trabalhador da cultura de guaraná
+622705;Trabalhador na cultura de amendoim
+622710;Trabalhador na cultura de canola
+622715;Trabalhador na cultura de coco-da-baía
+622720;Trabalhador na cultura de dendê
+622725;Trabalhador na cultura de mamona
+622730;Trabalhador na cultura de soja
+622735;Trabalhador na cultura do girassol
+622740;Trabalhador na cultura do linho
+622805;Trabalhador da cultura de especiarias
+622810;Trabalhador da cultura de plantas aromáticas e medicinais
+623005;Adestrador de animais
+623010;Inseminador
+623015;Trabalhador de pecuária polivalente
+623020;Tratador de animais
+623025;Casqueador de animais
+623030;Ferrador de animais
+623035;Instrutor de mobilidade com cães-guia
+623105;Trabalhador da pecuária (asininos e muares)
+623110;Trabalhador da pecuária (bovinos corte)
+623115;Trabalhador da pecuária (bovinos leite)
+623120;Trabalhador da pecuária (bubalinos)
+623125;Trabalhador da pecuária (equinos)
+623205;Trabalhador da caprinocultura
+623210;Trabalhador da ovinocultura
+623215;Trabalhador da suinocultura
+623305;Trabalhador da avicultura de corte
+623310;Trabalhador da avicultura de postura
+623315;Operador de incubadora de ovos
+623320;Trabalhador da cunicultura
+623325;Sexador
+623405;Trabalhador em criatórios de animais produtores de veneno
+623410;Trabalhador na apicultura
+623415;Trabalhador na minhocultura
+623420;Trabalhador na sericicultura
+630105;Supervisor da aqüicultura
+630110;Supervisor da área florestal
+631005;Catador de caranguejos e siris
+631010;Catador de mariscos
+631015;Pescador artesanal de lagostas
+631020;Pescador artesanal de peixes e camarões
+631105;Pescador artesanal de água doce
+631205;Pescador industrial
+631210;Pescador profissional
+631305;Criador de camarões
+631310;Criador de jacarés
+631315;Criador de mexilhões
+631320;Criador de ostras
+631325;Criador de peixes
+631330;Criador de quelônios
+631335;Criador de rãs
+631405;Gelador industrial
+631410;Gelador profissional
+631415;Proeiro
+631420;Redeiro (pesca)
+632005;Guia florestal
+632010;Raizeiro
+632015;Viveirista florestal
+632105;Classificador de toras
+632110;Cubador de madeira
+632115;Identificador florestal
+632120;Operador de motosserra
+632125;Trabalhador de extração florestal, em geral
+632205;Seringueiro
+632210;Trabalhador da exploração de espécies produtoras de gomas não elásticas
+632215;Trabalhador da exploração de resinas
+632305;Trabalhador da exploração de andiroba
+632310;Trabalhador da exploração de babaçu
+632315;Trabalhador da exploração de bacaba
+632320;Trabalhador da exploração de buriti
+632325;Trabalhador da exploração de carnaúba
+632330;Trabalhador da exploração de coco-da-praia
+632335;Trabalhador da exploração de copaíba
+632340;Trabalhador da exploração de malva (pãina)
+632345;Trabalhador da exploração de murumuru
+632350;Trabalhador da exploração de oiticica
+632355;Trabalhador da exploração de ouricuri
+632360;Trabalhador da exploração de pequi
+632365;Trabalhador da exploração de piaçava
+632370;Trabalhador da exploração de tucum
+632405;Trabalhador da exploração de açaí
+632410;Trabalhador da exploração de castanha
+632415;Trabalhador da exploração de pinhão
+632420;Trabalhador da exploração de pupunha
+632505;Trabalhador da exploração de árvores e arbustos produtores de substâncias aromáticas, medicinais e tóxicas
+632510;Trabalhador da exploração de cipós produtores de substâncias aromáticas, medicinais e tóxicas
+632515;Trabalhador da exploração de madeiras tanantes
+632520;Trabalhador da exploração de raízes produtoras de substâncias aromáticas, medicinais e tóxicas
+632525;Trabalhador da extração de substâncias aromáticas, medicinais e tóxicas, em geral
+632605;Carvoeiro
+632610;Carbonizador
+632615;Ajudante de carvoaria
+641005;Operador de colheitadeira
+641010;Operador de máquinas de beneficiamento de produtos agrícolas
+641015;Tratorista agrícola
+642005;Operador de colhedor florestal
+642010;Operador de máquinas florestais estáticas
+642015;Operador de trator florestal
+643005;Trabalhador na operação de sistema de irrigação localizada (microaspersão e gotejamento)
+643010;Trabalhador na operação de sistema de irrigação por aspersão (pivô central)
+643015;Trabalhador na operação de sistemas convencionais de irrigação por aspersão
+643020;Trabalhador na operação de sistemas de irrigação e aspersão (alto propelido)
+643025;Trabalhador na operação de sistemas de irrigação por superfície e drenagem
+710105;Supervisor de apoio operacional na mineração
+710110;Supervisor de extração de sal
+710115;Supervisor de perfuração e desmonte
+710120;Supervisor de produção na mineração
+710125;Supervisor de transporte na mineração
+710205;Mestre (construção civil)
+710210;Mestre de linhas (ferrovias)
+710215;Inspetor de terraplenagem
+710220;Supervisor de usina de concreto
+710225;Fiscal de pátio de usina de concreto
+711105;Amostrador de minérios
+711110;Canteiro
+711115;Destroçador de pedra
+711120;Detonador
+711125;Escorador de minas
+711130;Mineiro
+711205;Operador de caminhão (minas e pedreiras)
+711210;Operador de pá carregadeira
+711215;Operador de máquina cortadora (minas e pedreiras)
+711220;Operador de máquina de extração contínua (minas de carvão)
+711225;Operador de máquina perfuradora (minas e pedreiras)
+711230;Operador de máquina perfuratriz
+711235;Operador de motoniveladora (extração de minerais sólidos)
+711240;Operador de schutthecar
+711245;Operador de trator (minas e pedreiras)
+711305;Operador de sonda a percussão
+711310;Operador de sonda rotativa
+711315;Sondador (poços de petróleo e gás)
+711320;Sondador de poços (exceto de petróleo e gás)
+711325;Plataformista (petróleo)
+711330;Torrista (petróleo)
+711405;Garimpeiro
+711410;Operador de salina (sal marinho)
+712105;Moleiro de minérios
+712110;Operador de aparelho de flotação
+712115;Operador de aparelho de precipitação (minas de ouro ou prata)
+712120;Operador de britador de mandíbulas
+712125;Operador de espessador
+712130;Operador de jig (minas)
+712135;Operador de peneiras hidráulicas
+712205;Cortador de pedras
+712210;Gravador de inscrições em pedra
+712215;Gravador de relevos em pedra
+712220;Polidor de pedras
+712225;Torneiro (lavra de pedra)
+712230;Traçador de pedras
+715105;Operador de bate-estacas
+715110;Operador de compactadora de solos
+715115;Operador de escavadeira
+715120;Operador de máquina de abrir valas
+715125;Operador de máquinas de construção civil e mineração
+715130;Operador de motoniveladora
+715135;Operador de pá carregadeira
+715140;Operador de pavimentadora (asfalto, concreto e materiais similares)
+715145;Operador de trator de lâmina
+715205;Calceteiro
+715210;Pedreiro
+715215;Pedreiro (chaminés industriais)
+715220;Pedreiro (material refratário)
+715225;Pedreiro (mineração)
+715230;Pedreiro de edificações
+715305;Armador de estrutura de concreto
+715310;Moldador de corpos de prova em usinas de concreto
+715315;Armador de estrutura de concreto armado
+715405;Operador de betoneira
+715410;Operador de bomba de concreto
+715415;Operador de central de concreto
+715420;Operador de usina de asfalto
+715505;Carpinteiro
+715510;Carpinteiro (esquadrias)
+715515;Carpinteiro (cenários)
+715520;Carpinteiro (mineração)
+715525;Carpinteiro de obras
+715530;Carpinteiro (telhados)
+715535;Carpinteiro de fôrmas para concreto
+715540;Carpinteiro de obras civis de arte (pontes, túneis, barragens)
+715545;Montador de andaimes (edificações)
+715605;Eletricista de instalações (cenários)
+715610;Eletricista de instalações (edifícios)
+715615;Eletricista de instalações
+715705;Aplicador de asfalto impermeabilizante (coberturas)
+715710;Instalador de isolantes acústicos
+715715;Instalador de isolantes térmicos (refrigeração e climatização)
+715720;Instalador de isolantes térmicos de caldeira e tubulações
+715725;Instalador de material isolante, à mão (edificações)
+715730;Instalador de material isolante, à máquina (edificações)
+716105;Acabador de superfícies de concreto
+716110;Revestidor de superfícies de concreto
+716205;Telhador (telhas de argila e materiais similares)
+716210;Telhador (telhas de fibrocimento)
+716215;Telhador (telhas metálicas)
+716220;Telhador (telhas plásticas)
+716305;Vidraceiro
+716310;Vidraceiro (edificações)
+716315;Vidraceiro (vitrais)
+716405;Gesseiro
+716505;Assentador de revestimentos e laminados de madeira
+716510;Assentador de revestimentos cerâmicos
+716515;Pastilheiro
+716520;Lustrador de piso
+716525;Assentador de mármores, granitos e outras pedras decorativas
+716530;Mosaísta
+716535;Taqueiro
+716540;Rejuntador de revestimentos
+716605;Calafetador
+716610;Pintor de obras
+716615;Revestidor de interiores (papel, material plástico e emborrachados)
+717005;Demolidor de edificações
+717010;Operador de martelete
+717015;Poceiro (edificações)
+717020;Servente de obras
+717025;Vibradorista
+720105;Mestre (afiador de ferramentas)
+720110;Mestre de caldeiraria
+720115;Mestre de ferramentaria
+720120;Mestre de forjaria
+720125;Mestre de fundição
+720130;Mestre de galvanoplastia
+720135;Mestre de pintura (tratamento de superfícies)
+720140;Mestre de soldagem
+720145;Mestre de trefilação de metais
+720150;Mestre de usinagem
+720155;Mestre serralheiro
+720160;Supervisor de controle de tratamento térmico
+720205;Mestre (construção naval)
+720210;Mestre (indústria de automotores e material de transportes)
+720215;Mestre (indústria de máquinas e outros equipamentos mecânicos)
+720220;Mestre de construção de fornos
+721105;Ferramenteiro
+721110;Ferramenteiro de mandris, calibradores e outros dispositivos
+721115;Modelador de metais (fundição)
+721205;Operador de máquina de eletroerosão
+721210;Operador de máquinas operatrizes
+721215;Operador de máquinas-ferramenta convencionais
+721220;Operador de usinagem convencional por abrasão
+721225;Preparador de máquinas-ferramenta
+721305;Afiador de cardas
+721310;Afiador de cutelaria
+721315;Afiador de ferramentas
+721320;Afiador de serras
+721325;Polidor de metais
+721405;Operador de centro de usinagem com comando numérico
+721410;Operador de fresadora com comando numérico
+721415;Operador de mandriladora com comando numérico
+721420;Operador de máquina eletroerosão, à fio, com comando numérico
+721425;Operador de retificadora com comando numérico
+721430;Operador de torno com comando numérico
+722105;Forjador
+722110;Forjador a martelo
+722115;Forjador prensista
+722205;Fundidor de metais
+722210;Operador de lingotamento
+722215;Operador de acabamento de peças fundidas
+722220;Operador de máquina de fundição
+722230;Operador de vazamento
+722235;Preparador de panelas
+722305;Macheiro, a mão
+722310;Macheiro, a  máquina
+722315;Moldador e fundição, a mão
+722320;Moldador em fundição, a máquina
+722325;Operador de equipamentos de preparação de areia
+722330;Operador de máquina de moldar automatizada
+722405;Cableador
+722410;Estirador de tubos de metal sem costura
+722415;Trefilador de metais, à máquina
+723105;Cementador de metais
+723110;Normalizador de metais e de compósitos
+723115;Operador de equipamento para resfriamento
+723120;Operador de forno de tratamento térmico de metais
+723125;Temperador de metais e de compósitos
+723205;Decapador
+723210;Fosfatizador
+723215;Galvanizador
+723220;Metalizador, à pistola
+723225;Metalizador (banho quente)
+723230;Operador de máquina recobridora de arame
+723235;Operador de zincagem (processo eletrolítico)
+723240;Oxidador
+723305;Operador de equipamento de secagem de pintura
+723310;Pintor a pincel e rolo (exceto obras e estruturas metálicas)
+723315;Pintor de estruturas metálicas
+723320;Pintor de veículos (fabricação)
+723325;Pintor por imersão
+723330;Pintor, a  pistola (exceto obras e estruturas metálicas)
+724105;Assentador de canalização (edificações)
+724110;Encanador
+724115;Instalador de tubulações
+724120;Instalador de tubulações (aeronaves)
+724125;Instalador de tubulações (embarcações)
+724130;Instalador de tubulações de gás combustível (produção e distribuição)
+724135;Instalador de tubulações de vapor (produção e distribuição)
+724205;Montador de estruturas metálicas
+724210;Montador de estruturas metálicas de embarcações
+724215;Rebitador a  martelo pneumático
+724220;Preparador de estruturas metálicas
+724225;Riscador de estruturas metálicas
+724230;Rebitador, a  mão
+724305;Brasador
+724310;Oxicortador a mão e a  máquina
+724315;Soldador
+724320;Soldador a  oxigás
+724325;Soldador elétrico
+724405;Caldeireiro (chapas de cobre)
+724410;Caldeireiro (chapas de ferro e aço)
+724415;Chapeador
+724420;Chapeador de carrocerias metálicas (fabricação)
+724425;Chapeador naval
+724430;Chapeador de aeronaves
+724435;Funileiro industrial
+724440;Serralheiro
+724505;Operador de máquina de cilindrar chapas
+724510;Operador de máquina de dobrar chapas
+724515;Prensista (operador de prensa)
+724605;Operador de laços de cabos de aço
+724610;Trançador de cabos de aço
+725005;Ajustador ferramenteiro
+725010;Ajustador mecânico
+725015;Ajustador mecânico (usinagem em bancada e em máquinas-ferramentas)
+725020;Ajustador mecânico em bancada
+725025;Ajustador naval (reparo e construção)
+725030;Operador de manutenção e recarga de extintor de incêndio
+725105;Montador de máquinas, motores e acessórios (montagem em série)
+725205;Montador de máquinas
+725210;Montador de máquinas gráficas
+725215;Montador de máquinas operatrizes para madeira
+725220;Montador de máquinas têxteis
+725225;Montador de máquinas-ferramentas (usinagem de metais)
+725305;Montador de equipamento de levantamento
+725310;Montador de máquinas agrícolas
+725315;Montador de máquinas de minas e pedreiras
+725320;Montador de máquinas de terraplenagem
+725405;Mecânico montador de motores de aeronaves
+725410;Mecânico montador de motores de embarcações
+725415;Mecânico montador de motores de explosão e diesel
+725420;Mecânico montador de turboalimentadores
+725505;Montador de veículos (linha de montagem)
+725510;Operador de time de montagem
+725605;Montador de estruturas de aeronaves
+725610;Montador de sistemas de combustível de aeronaves
+725705;Mecânico de refrigeração e climatização
+730105;Supervisor de montagem e instalação eletroeletrônica
+731105;Montador de equipamentos eletroeletrônicos odonto-médico-hospitalares
+731110;Montador de equipamentos eletrônicos (computadores e equipamentos auxiliares)
+731115;Montador de equipamentos eletroeletrônicos (instrumentos de medição)
+731120;Montador de equipamentos eletroeletrônicos (aparelhos eletrodomésticos)
+731125;Montador de equipamentos elétricos (centrais elétricas)
+731130;Montador de equipamentos elétricos (motores e dínamos)
+731135;Montador de equipamentos elétricos
+731140;Montador de equipamentos eletrônicos (instalações de sinalização)
+731145;Montador de equipamentos eletroeletrônicos (máquinas industriais)
+731150;Montador de equipamentos eletrônicos
+731155;Montador de equipamentos elétricos (elevadores e equipamentos similares)
+731160;Montador de equipamentos elétricos (transformadores)
+731165;Bobinador eletricista, à mão
+731170;Bobinador eletricista, à máquina
+731175;Operador de linha de montagem (aparelhos elétricos)
+731180;Operador de linha de montagem (aparelhos eletrônicos)
+731205;Montador de equipamentos eletrônicos (estação de rádio, tv e equipamentos de radar)
+731305;Instalador-reparador de equipamentos de comutação em telefonia
+731310;Instalador-reparador de equipamentos de energia em telefonia
+731315;Instalador-reparador de equipamentos de transmissão em telefonia
+731320;Instalador-reparador de linhas e aparelhos de telecomunicações
+731325;Instalador-reparador de redes e cabos telefônicos
+731330;Reparador de aparelhos de telecomunicações em laboratório
+732105;Eletricista de manutenção de linhas elétricas, telefônicas e de comunicação de dados
+732110;Emendador de cabos elétricos e telefônicos (aéreos e subterrâneos)
+732115;Examinador de cabos, linhas elétricas e telefônicas
+732120;Instalador de linhas elétricas de alta e baixa tensão (rede aérea e subterrânea)
+732125;Instalador eletricista (tração de veículos)
+732130;Instalador-reparador de redes telefônicas e de comunicação de dados
+732135;Ligador de linhas de comunicação de voz e dados
+732140;Instalador de sistemas fotovoltaicos
+740105;Supervisor da mecânica de precisão
+740110;Supervisor de fabricação de instrumentos musicais
+741105;Ajustador de instrumentos de precisão
+741110;Montador de instrumentos de óptica
+741115;Montador de instrumentos de precisão
+741120;Relojoeiro (fabricação)
+741125;Relojoeiro (reparação)
+742105;Afinador de instrumentos musicais
+742110;Confeccionador de acordeão
+742115;Confeccionador de instrumentos de corda
+742120;Confeccionador de instrumentos de percussão (pele, couro ou plástico)
+742125;Confeccionador de instrumentos de sopro (madeira)
+742130;Confeccionador de instrumentos de sopro (metal)
+742135;Confeccionador de órgão
+742140;Confeccionador de piano acústico
+750105;Supervisor de joalheria
+750205;Supervisor da indústria de minerais não metálicos (exceto os derivados de petróleo e carvão)
+751005;Engastador (jóias)
+751010;Joalheiro
+751015;Joalheiro (reparações)
+751020;Lapidador (joias)
+751105;Bate-folha a  máquina
+751110;Fundidor (joalheria e ourivesaria)
+751115;Gravador (joalheria e ourivesaria)
+751120;Laminador de metais preciosos à máquina
+751125;Ourives
+751130;Trefilador (joalheria e ourivesaria)
+752105;Artesão modelador (vidros)
+752110;Moldador (vidros)
+752115;Soprador de vidro
+752120;Transformador de tubos de vidro
+752205;Aplicador serigráfico em vidros
+752210;Cortador de vidro
+752215;Gravador de vidro a  água-forte
+752220;Gravador de vidro a  esmeril
+752225;Gravador de vidro a  jato de areia
+752230;Lapidador de vidros e cristais
+752235;Surfassagista
+752305;Ceramista
+752310;Ceramista (torno de pedal e motor)
+752315;Ceramista (torno semiautomático)
+752320;Ceramista modelador
+752325;Ceramista moldador
+752330;Ceramista prensador
+752405;Decorador de cerâmica
+752410;Decorador de vidro
+752415;Decorador de vidro, a pincel
+752420;Operador de esmaltadeira
+752425;Operador de espelhamento
+752430;Pintor de cerâmica, a  pincel
+760105;Contramestre de acabamento (indústria têxtil)
+760110;Contramestre de fiação (indústria têxtil)
+760115;Contramestre de malharia (indústria têxtil)
+760120;Contramestre de tecelagem (indústria têxtil)
+760125;Mestre (indústria têxtil e de confecções)
+760205;Supervisor de curtimento
+760305;Encarregado de corte na confecção do vestuário
+760310;Encarregado de costura na confecção do vestuário
+760405;Supervisor  (indústria de calçados e artefatos de couro)
+760505;Supervisor da confecção de artefatos de tecidos, couros e afins
+760605;Supervisor das artes gráficas (indústria editorial e gráfica)
+761005;Operador polivalente da indústria têxtil
+761105;Classificador de fibras têxteis
+761110;Lavador de lã
+761205;Operador de abertura (fiação)
+761210;Operador de binadeira
+761215;Operador de bobinadeira
+761220;Operador de cardas
+761225;Operador de conicaleira
+761230;Operador de filatório
+761235;Operador de laminadeira e reunideira
+761240;Operador de maçaroqueira
+761245;Operador de open-end
+761250;Operador de passador (fiação)
+761255;Operador de penteadeira
+761260;Operador de retorcedeira
+761303;Tecelão (redes)
+761306;Tecelão (rendas e bordados)
+761309;Tecelão (tear automático)
+761312;Tecelão (tear jacquard)
+761315;Tecelão (tear mecânico de maquineta)
+761318;Tecelão (tear mecânico de xadrez)
+761321;Tecelão (tear mecânico liso)
+761324;Tecelão (tear mecânico, exceto jacquard)
+761327;Tecelão de malhas, a  máquina
+761330;Tecelão de malhas (máquina circular)
+761333;Tecelão de malhas (máquina retilínea)
+761336;Tecelão de meias, a  máquina
+761339;Tecelão de meias (máquina circular)
+761342;Tecelão de meias (máquina retilínea)
+761345;Tecelão de tapetes, a  máquina
+761348;Operador de engomadeira de urdume
+761351;Operador de espuladeira
+761354;Operador de máquina de cordoalha
+761357;Operador de urdideira
+761360;Passamaneiro a  máquina
+761363;Remetedor de fios
+761366;Picotador de cartões jacquard
+761405;Alvejador (tecidos)
+761410;Estampador de tecido
+761415;Operador de calandras (tecidos)
+761420;Operador de chamuscadeira de tecidos
+761425;Operador de impermeabilizador de tecidos
+761430;Operador de máquina de lavar fios e tecidos
+761435;Operador de rameuse
+761805;Inspetor de estamparia (produção têxtil)
+761810;Revisor de fios (produção têxtil)
+761815;Revisor de tecidos acabados
+761820;Revisor de tecidos crus
+762005;Trabalhador polivalente do curtimento de couros e peles
+762105;Classificador de peles
+762110;Descarnador de couros
+762115;Estirador de couros e peles (preparação)
+762120;Fuloneiro
+762125;Rachador de couros
+762205;Curtidor (couros e peles)
+762210;Classificador de couros
+762215;Enxugador de couros
+762220;Rebaixador de couros
+762305;Estirador de couros e peles (acabamento)
+762310;Fuloneiro no acabamento de couros e peles
+762315;Lixador de couros e peles
+762320;Matizador de couros e peles
+762325;Operador de máquinas do acabamento de couros e peles
+762330;Prensador de couros e peles
+762335;Palecionador de couros e peles
+762340;Preparador de couros curtidos
+762345;Vaqueador de couros e peles
+763005;Alfaiate
+763010;Costureira de peças sob encomenda
+763015;Costureira de reparação de roupas
+763020;Costureiro de roupa de couro e pele
+763105;Auxiliar de corte (preparação da confecção de roupas)
+763110;Cortador de roupas
+763115;Enfestador de roupas
+763120;Riscador de roupas
+763125;Ajudante de confecção
+763205;Costureiro de roupas de couro e pele, a  máquina na  confecção em série
+763210;Costureiro na confecção em série
+763215;Costureiro, a  máquina  na confecção em série
+763305;Arrematadeira
+763310;Bordador, à máquina
+763315;Marcador de peças confeccionadas para bordar
+763320;Operador de máquina de costura para acabamento
+763325;Passadeira de peças confeccionadas
+764005;Trabalhador polivalente da confecção de calçados
+764105;Cortador de calçados, a  máquina (exceto solas e palmilhas)
+764110;Cortador de solas e palmilhas, a  máquina
+764115;Preparador de calçados
+764120;Preparador de solas e palmilhas
+764205;Costurador de calçados, a  máquina
+764210;Montador de calçados
+764305;Acabador de calçados
+765005;Confeccionador de artefatos de couro (exceto sapatos)
+765010;Chapeleiro de senhoras
+765015;Boneleiro
+765105;Cortador de artefatos de couro (exceto roupas e calçados)
+765110;Cortador de tapeçaria
+765205;Colchoeiro (confecção de colchões)
+765215;Confeccionador de brinquedos de pano
+765225;Confeccionador de velas náuticas, barracas e toldos
+765230;Estofador de aviões
+765235;Estofador de móveis
+765240;Tapeceiro de autos
+765310;Costurador de artefatos de couro, à máquina (exceto roupas e calçados)
+765315;Montador de artefatos de couro (exceto roupas e calçados)
+765405;Trabalhador do acabamento de artefatos de tecidos e couros
+766105;Copiador de chapa
+766115;Gravador de matriz para flexografia (clicherista)
+766120;Editor de texto e imagem
+766125;Montador de fotolito (analógico e digital)
+766130;Gravador de matriz para rotogravura (eletromecânico e químico)
+766135;Gravador de matriz calcográfica
+766140;Gravador de matriz serigráfica
+766145;Operador de sistemas de prova (analógico e digital)
+766150;Operador de processo de tratamento de imagem
+766155;Programador visual gráfico
+766205;Impressor (serigrafia)
+766210;Impressor calcográfico
+766215;Impressor de ofsete (plano e rotativo)
+766220;Impressor de rotativa
+766225;Impressor de rotogravura
+766230;Impressor digital
+766235;Impressor flexográfico
+766240;Impressor letterset
+766245;Impressor tampográfico
+766250;Impressor tipográfico
+766305;Acabador de embalagens (flexíveis e cartotécnicas)
+766310;Impressor de corte e vinco
+766315;Operador de acabamento (indústria gráfica)
+766320;Operador de guilhotina (corte de papel)
+766325;Preparador de matrizes de corte e vinco
+766405;Laboratorista fotográfico
+766410;Revelador de filmes fotográficos, em preto e branco
+766415;Revelador de filmes fotográficos, em cores
+766420;Auxiliar de radiologia (revelação fotográfica)
+768105;Tecelão (tear manual)
+768110;Tecelão de tapetes, à mão
+768115;Tricoteiro, à mão
+768120;Redeiro
+768125;Chapeleiro (chapéus de palha)
+768130;Crocheteiro, a  mão
+768205;Bordador, à mão
+768210;Cerzidor
+768305;Artífice do couro
+768310;Cortador de calçados, à mão (exceto solas)
+768315;Costurador de artefatos de couro, à mão (exceto roupas e calçados)
+768320;Sapateiro (calçados sob medida)
+768325;Seleiro
+768605;Tipógrafo
+768610;Linotipista
+768615;Monotipista
+768620;Paginador
+768625;Pintor de letreiros
+768630;Confeccionador de carimbos de borracha
+768705;Encadernador e gravador de capas e lombadas
+768710;Restaurador de livros
+770105;Encarregado de produção (indústria de madeira e mobiliário)
+770110;Encarregado de carpintaria
+771105;Marceneiro
+771110;Modelador de madeira
+771115;Maquetista na marcenaria
+771120;Tanoeiro
+772105;Classificador de madeira
+772110;Impregnador de madeira
+772115;Operador de secagem de madeira
+773105;Cortador de laminados de madeira
+773110;Operador de serras no desdobramento de madeira
+773115;Serrador de bordas no desdobramento de madeira
+773120;Serrador de madeira
+773125;Serrador de madeira (serra circular múltipla)
+773130;Serrador de madeira (serra de fita múltipla)
+773205;Operador de máquina intercaladora de placas (compensados)
+773210;Prensista de aglomerados
+773215;Prensista de compensados
+773220;Preparador de aglomerantes
+773305;Operador de desempenadeira na usinagem convencional de madeira
+773310;Operador de entalhadeira (usinagem de madeira)
+773315;Operador de fresadora (usinagem de madeira)
+773320;Operador de lixadeira (usinagem de madeira)
+773325;Operador de máquina de usinagem madeira, em geral
+773330;Operador de molduradora (usinagem de madeira)
+773335;Operador de plaina desengrossadeira
+773340;Operador de serras (usinagem de madeira)
+773345;Operador de torno automático (usinagem de madeira)
+773350;Operador de tupia (usinagem de madeira)
+773355;Torneiro na usinagem convencional de madeira
+773405;Operador de máquina bordatriz
+773410;Operador de máquina de cortina d´água (produção de móveis)
+773415;Operador de máquina de usinagem de madeira (produção em série)
+773420;Operador de prensa de alta frequência na produção de painéis de madeira
+773505;Operador de centro de usinagem de madeira (cnc)
+773510;Operador de máquinas de usinar madeira (cnc)
+774105;Montador de móveis e artefatos de madeira
+775105;Entalhador  de madeira
+775110;Folheador de móveis de madeira
+775115;Lustrador de peças de madeira
+775120;Marcheteiro
+776405;Cesteiro
+776410;Confeccionador de escovas, pincéis e produtos similares (à mão)
+776415;Confeccionador de escovas, pincéis e produtos similares (à máquina)
+776420;Confeccionador de móveis de vime, junco e bambu
+776425;Esteireiro
+776430;Vassoureiro
+777105;Carpinteiro naval (construção de pequenas embarcações)
+777110;Carpinteiro naval (embarcações)
+777115;Carpinteiro naval (estaleiros)
+777205;Carpinteiro de carretas
+777210;Carpinteiro de carrocerias
+780105;Supervisor de embalagem e etiquetagem
+781105;Condutor de processos robotizados de pintura
+781110;Condutor de processos robotizados de soldagem
+781305;Operador de veículos subaquáticos controlados remotamente
+781310;Operador de aeronaves não tripuladas
+781705;Mergulhador profissional (raso e profundo)
+782105;Operador de draga
+782110;Operador de guindaste (fixo)
+782115;Operador de guindaste móvel
+782120;Operador de máquina rodoferroviária
+782125;Operador de monta-cargas (construção civil)
+782130;Operador de ponte rolante
+782135;Operador de pórtico rolante
+782140;Operador de talha elétrica
+782145;Sinaleiro (ponte rolante)
+782205;Guincheiro (construção civil)
+782210;Operador de docagem
+782220;Operador de empilhadeira
+782305;Motorista de carro de passeio
+782310;Motorista de furgão ou veículo similar
+782315;Motorista de táxi
+782320;Condutor de ambulância
+782325;Motorista de transporte por aplicativos
+782405;Motorista de ônibus rodoviário
+782410;Motorista de ônibus urbano
+782415;Motorista de trólebus
+782420;Condutor escolar (terrestre)
+782505;Caminhoneiro autônomo (rotas regionais e internacionais)
+782510;Motorista de caminhão (rotas regionais e internacionais)
+782515;Motorista operacional de guincho
+782605;Operador de trem de metrô
+782610;Maquinista de trem
+782615;Maquinista de trem metropolitano
+782620;Motorneiro
+782625;Auxiliar de maquinista de trem
+782630;Operador de teleférico (passageiros)
+782705;Marinheiro de convés (marítimo e fluviário)
+782710;Marinheiro de máquinas
+782715;Moço de convés
+782720;Moço de máquinas
+782725;Marinheiro de esporte e recreio
+782730;Marinheiro auxiliar de convés (marítimo e aquaviário)
+782735;Marinheiro auxiliar de máquinas (marítimo e aquaviário)
+782805;Condutor de veículos de tração animal (ruas e estradas)
+782810;Tropeiro
+782815;Boiadeiro
+783105;Agente de pátio
+783110;Manobrador
+783205;Carregador (aeronaves)
+783210;Carregador (armazém)
+783215;Carregador (veículos de transportes terrestres)
+783220;Estivador
+783225;Ajudante de motorista
+783230;Bloqueiro (trabalhador portuário)
+783235;Trabalhador portuário de capatazia
+783240;Amarrador e desamarrador de embarcações
+784105;Embalador, a mão
+784110;Embalador, a máquina
+784115;Operador de máquina de etiquetar
+784120;Operador de máquina de envasar líquidos
+784125;Operador de prensa de enfardamento
+784205;Alimentador de linha de produção
+791105;Artesão bordador
+791110;Artesão ceramista
+791115;Artesão com material reciclável
+791120;Artesão confeccionador de biojóias e ecojóias
+791125;Artesão do couro
+791130;Artesão escultor
+791135;Artesão moveleiro (exceto reciclado)
+791140;Artesão tecelão
+791145;Artesão trançador
+791150;Artesão crocheteiro
+791155;Artesão tricoteiro
+791160;Artesão rendeiro
+810105;Mestre (indústria petroquímica e carboquímica)
+810110;Mestre de produção química
+810205;Mestre (indústria de borracha e plástico)
+810305;Mestre de produção farmacêutica
+811005;Operador de processos químicos e petroquímicos
+811010;Operador de sala de controle de instalações químicas, petroquímicas e afins
+811105;Moleiro (tratamentos químicos e afins)
+811110;Operador de máquina misturadeira (tratamentos químicos e afins)
+811115;Operador de britadeira (tratamentos químicos e afins)
+811120;Operador de concentração
+811125;Trabalhador da fabricação de resinas e vernizes
+811130;Trabalhador de fabricação de tintas
+811205;Operador de calcinação (tratamento químico e afins)
+811215;Operador de tratamento químico de materiais radioativos
+811305;Operador de centrifugadora (tratamentos químicos e afins)
+811310;Operador de exploração de petróleo
+811315;Operador de filtro de secagem (mineração)
+811320;Operador de filtro de tambor rotativo (tratamentos químicos e afins)
+811325;Operador de filtro-esteira (mineração)
+811330;Operador de filtro-prensa (tratamentos químicos e afins)
+811335;Operador de filtros de parafina (tratamentos químicos e afins)
+811405;Destilador de madeira
+811410;Destilador de produtos químicos por batelada (exceto petróleo)
+811415;Operador de destilação de produtos químicos por processo contínuo (exceto petróleo)
+811420;Operador de aparelho de reação e conversão (produtos químicos, exceto petróleo)
+811425;Operador de equipamento de destilação de álcool
+811430;Operador de evaporador na destilação
+811505;Operador de painel de controle (refinação de petróleo)
+811510;Operador de transferência e estocagem - na refinação do petróleo
+811605;Operador de britador de coque
+811610;Operador de carro de apagamento e coque
+811615;Operador de destilação e subprodutos de coque
+811620;Operador de enfornamento e desenfornamento de coque
+811625;Operador de exaustor (coqueria)
+811630;Operador de painel de controle (coqueificação)
+811635;Operador de preservação e controle térmico
+811640;Operador de reator de coque de petróleo
+811645;Operador de refrigeração (coqueria)
+811650;Operador de sistema de reversão (coqueria)
+811705;Bamburista
+811710;Calandrista de borracha
+811715;Confeccionador de pneumáticos
+811725;Confeccionador de velas por imersão
+811735;Confeccionador de velas por moldagem
+811745;Laminador de plástico
+811750;Moldador de borracha por compressão
+811760;Moldador de plástico por compressão
+811770;Moldador de plástico por injeção
+811775;Trefilador de borracha
+811805;Operador de máquina de produtos farmacêuticos
+811810;Drageador (medicamentos)
+811815;Operador de máquina de fabricação de cosméticos
+811820;Operador de máquina de fabricação de produtos de higiene e limpeza (sabão, sabonete, detergente, absorvente, fraldas cotonetes e outros)
+812105;Pirotécnico
+812110;Trabalhador da fabricação de munição e explosivos
+813105;Cilindrista (petroquímica e afins)
+813110;Operador de calandra (química, petroquímica e afins)
+813115;Operador de extrusora (química, petroquímica e afins)
+813120;Operador de processo (química, petroquímica e afins)
+813125;Operador de produção (química, petroquímica e afins)
+813130;Técnico de operação (química, petroquímica e afins)
+818105;Assistente de laboratório industrial
+818110;Auxiliar de laboratório de análises físico-químicas
+820105;Mestre de siderurgia
+820110;Mestre de aciaria
+820115;Mestre de alto-forno
+820120;Mestre de forno elétrico
+820125;Mestre de laminação
+820205;Supervisor de fabricação de produtos cerâmicos, porcelanatos e afins
+820210;Supervisor de fabricação de produtos de vidro
+821105;Operador de centro de controle ( sinterização)
+821110;Operador de máquina de sinterizar
+821205;Forneiro e operador (alto-forno)
+821210;Forneiro e operador (conversor a oxigênio)
+821215;Forneiro e operador (forno elétrico)
+821220;Forneiro e operador (refino de metais não-ferrosos)
+821225;Forneiro e operador de forno de redução direta
+821230;Operador de aciaria (basculamento de convertedor)
+821235;Operador de aciaria (dessulfuração de gusa)
+821240;Operador de aciaria (recebimento de gusa)
+821245;Operador de área de corrida
+821250;Operador de desgaseificação
+821255;Soprador de convertedor
+821305;Operador de laminador
+821310;Operador de laminador de barras a frio
+821315;Operador de laminador de barras a quente
+821320;Operador de laminador de metais não-ferrosos
+821325;Operador de laminador de tubos
+821330;Operador de montagem de cilindros e mancais
+821335;Recuperador de guias e cilindros
+821405;Encarregado de acabamento de chapas e metais  (têmpera)
+821410;Escarfador
+821415;Marcador de produtos (siderúrgico e metalúrgico)
+821420;Operador de bobinadeira de tiras a quente, no acabamento de chapas e metais
+821425;Operador de cabine de laminação (fio-máquina)
+821430;Operador de escória e sucata
+821435;Operador de jato abrasivo
+821440;Operador de tesoura mecânica e máquina de corte, no acabamento de chapas e metais
+821445;Preparador de sucata e aparas
+821450;Rebarbador de metal
+822105;Forneiro de cubilô
+822110;Forneiro de forno-poço
+822115;Forneiro de fundição (forno de redução)
+822120;Forneiro de reaquecimento e tratamento térmico na metalurgia
+822125;Forneiro de revérbero
+823105;Preparador de massa (fabricação de abrasivos)
+823110;Preparador de massa (fabricação de vidro)
+823115;Preparador de massa de argila
+823120;Preparador de barbotina
+823125;Preparador de esmaltes (cerâmica)
+823130;Preparador de aditivos
+823135;Operador de atomizador
+823210;Extrusor de fios ou fibras de vidro
+823215;Forneiro na fundição de vidro
+823220;Forneiro no recozimento de vidro
+823230;Moldador de abrasivos na fabricação de cerâmica, vidro e porcelana
+823235;Operador de banho metálico de vidro por flutuação
+823240;Operador de máquina de soprar vidro
+823245;Operador de máquina extrusora de varetas e tubos de vidro
+823250;Operador de prensa de moldar vidro
+823255;Temperador de vidro
+823265;Trabalhador na fabricação de produtos abrasivos
+823305;Classificador e empilhador de tijolos refratários
+823315;Forneiro (materiais de construção)
+823320;Trabalhador da elaboração de pré-fabricados (fibrocimento sem amianto)
+823325;Trabalhador da elaboração de pré-fabricados (concreto armado)
+823330;Trabalhador da fabricação de pedras artificiais
+828105;Oleiro (fabricação de telhas)
+828110;Oleiro (fabricação de tijolos)
+830105;Mestre (indústria de celulose, papel e papelão)
+831105;Cilindreiro na preparação de pasta para fabricação de papel
+831110;Operador de branqueador de pasta para fabricação de papel
+831115;Operador de digestor de pasta para fabricação de papel
+831120;Operador de lavagem e depuração de pasta para fabricação de papel
+831125;Operador de máquina de secar celulose
+832105;Calandrista de papel
+832110;Operador de cortadeira de papel
+832115;Operador de máquina de fabricar papel  (fase úmida)
+832120;Operador de máquina de fabricar papel (fase seca)
+832125;Operador de máquina de fabricar papel e papelão
+832135;Operador de rebobinadeira na fabricação de papel e papelão
+833105;Cartonageiro, a máquina
+833110;Confeccionador de bolsas, sacos e sacolas e papel, a máquina
+833115;Confeccionador de sacos de celofane, a máquina
+833120;Operador de máquina de cortar e dobrar papelão
+833125;Operador de prensa de embutir papelão
+833205;Cartonageiro, a mão (caixas de papelão)
+840105;Supervisor de produção da indústria alimentícia
+840110;Supervisor da indústria de bebidas
+840115;Supervisor da indústria de fumo
+840120;Chefe de confeitaria
+841105;Moleiro de cereais (exceto arroz)
+841110;Moleiro de especiarias
+841115;Operador de processo de moagem
+841205;Moedor de sal
+841210;Refinador de sal
+841305;Operador de cristalização na refinação de açucar
+841310;Operador de equipamentos de refinação de açúcar (processo contínuo)
+841315;Operador de moenda na fabricação de açúcar
+841320;Operador de tratamento de calda na refinação de açúcar
+841408;Cozinhador (conservação de alimentos)
+841416;Cozinhador de carnes
+841420;Cozinhador de frutas e legumes
+841428;Cozinhador de pescado
+841432;Desidratador de alimentos
+841440;Esterilizador de alimentos
+841444;Hidrogenador de óleos e gorduras
+841448;Lagareiro
+841456;Operador de câmaras frias
+841460;Operador de preparação de grãos vegetais (óleos e gorduras)
+841464;Prensador de frutas (exceto oleaginosas)
+841468;Preparador de rações
+841472;Refinador de óleo e gordura
+841476;Trabalhador de fabricação de margarina
+841484;Trabalhador de preparação de pescados (limpeza)
+841505;Trabalhador de tratamento do leite e fabricação de laticínios e afins
+841605;Misturador de café
+841610;Torrador de café
+841615;Moedor de café
+841620;Operador de extração de café solúvel
+841625;Torrador de cacau
+841630;Misturador de chá ou mate
+841705;Alambiqueiro
+841710;Filtrador de cerveja
+841715;Fermentador
+841720;Trabalhador de fabricação de vinhos
+841725;Malteiro (germinação)
+841730;Cozinhador de malte
+841735;Dessecador de malte
+841740;Vinagreiro
+841745;Xaropeiro
+841805;Operador de forno (fabricação de pães, biscoitos e similares)
+841810;Operador de máquinas de fabricação de doces, salgados e massas alimentícias
+841815;Operador de máquinas de fabricação de chocolates e achocolatados
+842105;Preparador de melado e essência de fumo
+842110;Processador de fumo
+842115;Classificador de fumo
+842120;Auxiliar de processamento de fumo
+842125;Operador de máquina (fabricação de cigarros)
+842135;Operador de máquina de preparação de matéria prima para produção de cigarros
+842205;Preparador de fumo na fabricação de charutos
+842210;Operador de máquina de fabricar charutos e cigarrilhas
+842215;Classificador de charutos
+842220;Cortador de charutos
+842225;Celofanista na fabricação de charutos
+842230;Charuteiro a mão
+842235;Degustador de charutos
+848105;Defumador de carnes e pescados
+848110;Salgador de alimentos
+848115;Salsicheiro (fabricação de lingüiça, salsicha e produtos similares)
+848205;Pasteurizador
+848210;Queijeiro na fabricação de laticínio
+848215;Manteigueiro na fabricação de laticínio
+848305;Padeiro
+848310;Confeiteiro
+848315;Masseiro (massas alimentícias)
+848325;Trabalhador de fabricação de sorvete
+848405;Degustador de café
+848410;Degustador de chá
+848415;Degustador de derivados de cacau
+848420;Degustador de vinhos ou licores
+848425;Classificador de grãos
+848505;Abatedor
+848510;Açougueiro
+848515;Desossador
+848520;Magarefe
+848525;Retalhador de carne
+848605;Trabalhador do beneficiamento de fumo
+860105;Supervisor de manutenção eletromecânica (utilidades)
+860110;Supervisor de operação de fluidos (distribuição, captação, tratamento de água, gases, vapor)
+860115;Supervisor de operação elétrica (geração, transmissão e distribuição de energia elétrica)
+861105;Operador de central hidrelétrica
+861110;Operador de quadro de distribuição de energia elétrica
+861115;Operador de central termoelétrica
+861120;Operador de reator nuclear
+861205;Operador de subestação
+862105;Foguista (locomotivas a vapor)
+862110;Maquinista de embarcações
+862115;Operador de bateria de gás de hulha
+862120;Operador de caldeira
+862130;Operador de compressor de ar
+862140;Operador de estação de bombeamento
+862150;Operador de máquinas fixas, em geral
+862155;Operador de utilidade (produção e distribuição de vapor, gás, óleo, combustível, energia, oxigênio)
+862160;Operador de abastecimento de combustível de aeronave
+862205;Operador de estação de captação, tratamento e distribuição de água
+862305;Operador de estação de tratamento de água e efluentes
+862310;Operador de forno de incineração no tratamento de água, efluentes e resíduos industriais
+862405;Operador de instalação de extração, processamento, envasamento e distribuição de gases
+862505;Operador de instalação de refrigeração
+862510;Operador de refrigeração com amônia
+862515;Operador de instalação de ar-condicionado
+910105;Encarregado de manutenção mecânica de sistemas operacionais
+910110;Supervisor de manutenção de aparelhos térmicos, de climatização e de refrigeração
+910115;Supervisor de manutenção de bombas, motores, compressores e equipamentos de transmissão
+910120;Supervisor de manutenção de máquinas gráficas
+910125;Supervisor de manutenção de máquinas industriais têxteis
+910130;Supervisor de manutenção de máquinas operatrizes e de usinagem
+910205;Supervisor da manutenção e reparação de veículos leves
+910210;Supervisor da manutenção e reparação de veículos pesados
+910905;Supervisor de reparos linhas férreas
+910910;Supervisor de manutenção de vias férreas
+911105;Mecânico de manutenção de bomba injetora (exceto de veículos automotores)
+911110;Mecânico de manutenção de bombas
+911115;Mecânico de manutenção de compressores de ar
+911120;Mecânico de manutenção de motores diesel (exceto de veículos automotores)
+911125;Mecânico de manutenção de redutores
+911130;Mecânico de manutenção de turbinas (exceto de aeronaves)
+911135;Mecânico de manutenção de turbocompressores
+911205;Mecânico de manutenção e instalação de aparelhos de climatização e  refrigeração
+911305;Mecânico de manutenção de máquinas, em geral
+911310;Mecânico de manutenção de máquinas gráficas
+911315;Mecânico de manutenção de máquinas operatrizes (lavra de madeira)
+911320;Mecânico de manutenção de máquinas têxteis
+911325;Mecânico de manutenção de máquinas-ferramentas (usinagem de metais)
+913105;Mecânico de manutenção de aparelhos de levantamento
+913110;Mecânico de manutenção de equipamento de mineração
+913115;Mecânico de manutenção de máquinas agrícolas
+913120;Mecânico de manutenção de máquinas de construção e terraplenagem
+913125;Vulcanizador de correias transportadoras
+914105;Mecânico de manutenção de aeronaves, em geral
+914110;Mecânico de manutenção de sistema hidráulico de aeronaves (serviços de pista e hangar)
+914205;Mecânico de manutenção de motores e equipamentos navais
+914305;Mecânico de manutenção de veículos ferroviários
+914405;Mecânico de manutenção de automóveis e veículos similares
+914410;Mecânico de manutenção de empilhadeiras e outros veículos de cargas leves
+914415;Mecânico de manutenção de motocicletas
+914420;Mecânico de manutenção de tratores
+914425;Mecânico de veículos automotores a diesel (exceto tratores)
+915105;Técnico em manutenção de instrumentos de medição e precisão
+915110;Técnico em manutenção de hidrômetros
+915115;Técnico em manutenção de balanças
+915205;Restaurador de instrumentos musicais (exceto cordas arcadas)
+915210;Reparador de instrumentos musicais
+915215;Luthier (restauração de cordas arcadas)
+915305;Técnico em manutenção de equipamentos e instrumentos odonto-médico-hospitalares
+915405;Reparador de equipamentos fotográficos
+919105;Lubrificador industrial
+919110;Lubrificador de veículos automotores (exceto embarcações)
+919115;Lubrificador de embarcações
+919205;Mecânico de manutenção de máquinas cortadoras de grama, roçadeiras, motosserras e similares
+919305;Mecânico de manutenção de aparelhos esportivos e de ginástica
+919310;Mecânico de manutenção de bicicletas e veículos similares
+919315;Montador de bicicletas
+950105;Supervisor de manutenção elétrica de alta tensão industrial
+950110;Supervisor de manutenção eletromecânica industrial, comercial e predial
+950205;Encarregado de manutenção eletroeletrônica de veículos
+950305;Supervisor de manutenção eletromecânica
+951105;Eletricista de manutenção eletroeletrônica
+951305;Instalador de sistemas eletroeletrônicos de segurança
+951310;Mantenedor de sistemas eletroeletrônicos de segurança
+951315;Monitor de sistemas eletrônicos de segurança interno
+951320;Monitor de sistemas eletrônicos de segurança externo
+953105;Eletricista de instalações (aeronaves)
+953110;Eletricista de instalações (embarcações)
+953115;Eletricista de instalações (veículos automotores e máquinas operatrizes, exceto aeronaves e embarcações)
+954105;Eletromecânico de manutenção de elevadores
+954110;Eletromecânico de manutenção de escadas rolantes
+954115;Eletromecânico de manutenção de portas automáticas
+954120;Mecânico de manutenção de instalações mecânicas de edifícios
+954125;Operador eletromecânico
+954205;Reparador de aparelhos eletrodomésticos (exceto imagem e som)
+954210;Reparador de rádio, tv e som
+954305;Reparador de equipamentos de escritório
+991105;Conservador de via permanente (trilhos)
+991110;Inspetor de via permanente (trilhos)
+991115;Operador de máquinas especiais em conservação de via permanente (trilhos)
+991120;Soldador aluminotérmico em conservação de trilhos
+991205;Mantenedor de equipamentos de parques de diversões e similares
+991305;Funileiro de veículos (reparação)
+991310;Montador de veículos (reparação)
+991315;Pintor de veículos (reparação)
+992105;Alinhador veicular
+992110;Balanceador
+992115;Borracheiro
+992120;Lavador de peças
+992205;Encarregado geral de operações de conservação de vias permanentes (exceto trilhos)
+992210;Encarregado de equipe de conservação de vias permanentes (exceto trilhos)
+992215;Operador de ceifadeira na conservação de vias permanentes
+992220;Pedreiro de conservação de vias permanentes (exceto trilhos)
+992225;Auxiliar geral de conservação de vias permanentes (exceto trilhos)
