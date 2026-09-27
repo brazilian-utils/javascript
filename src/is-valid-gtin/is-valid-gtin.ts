@@ -24,8 +24,9 @@ export type IsValidGtinOptions = {
  *
  * The prefix does not change the verdict: Restricted Circulation Numbers (prefixes 02, 04 and 20
  * to 29, the codes a shop prints on its own scale labels) and the ISSN, ISBN and coupon ranges
- * share the structure and the check digit, and the "Tabela Prefixo GS1" SEFAZ validates `cEAN`
- * against lists them as valid. `getGtinInfo` tells the restricted and the Brazilian prefixes
+ * share the structure and the check digit. SEFAZ checks the prefix against its own "Tabela
+ * Prefixo GS1" (rules I03-20 and I12-20), which could not be read to say which ranges it accepts.
+ * `getGtinInfo` tells the restricted and the Brazilian prefixes
  * apart for the caller that needs to. Whether the number is registered with GS1 (the Cadastro
  * Centralizado de GTIN lookup of rules 9I03-10 and 9I12-10) cannot be checked offline.
  *
@@ -51,7 +52,8 @@ export type IsValidGtinOptions = {
  * fields I03 `cEAN` and I12 `cEANTrib`, rules I03-10 and I12-10 (rejections 611 and 612, "com
  * dígito de controle inválido").
  * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D
- * "Tabela Prefixo GS1" of the Portal da NF-e, the prefix ranges rules I03-20 and I12-20 accept.
+ * "Tabela Prefixo GS1" of the Portal da NF-e, the table rules I03-20 and I12-20 check the prefix
+ * against (not readable from where this was written, so its contents are not relied on).
  *
  * @example
  * ```typescript

@@ -3267,13 +3267,13 @@ isValidGtin('0000000000000'); // false (só zeros, regra desta biblioteca)
 Extrai os campos de um GTIN, como um `GtinInfo`.
 
 - Retorna `null` quando o valor não é um GTIN válido, sob as mesmas regras de `isValidGtin`.
-- O prefixo é lido como a "Tabela Prefixo GS1" do Portal da NF-e orienta: o valor é preenchido com zeros à esquerda até 14 dígitos, e o prefixo são as posições 7 a 9 quando as posições 2 a 6 são zeros (um GTIN-8, ou um GTIN-14 que agrupa um) e as posições 2 a 4 caso contrário. O primeiro dígito, o zero de preenchimento ou o dígito indicador, nunca faz parte do prefixo, então um GTIN-12 tem um prefixo que começa com `0`, e um GTIN-14 tem o prefixo do GTIN que ele agrupa.
+- O prefixo é lido como as GS1 General Specifications (tabelas 1-4, 1-5 e 1-9) organizam os números: o valor é preenchido com zeros à esquerda até 14 dígitos, e o prefixo são as posições 7 a 9 quando as posições 2 a 6 são zeros (um GTIN-8, ou um GTIN-14 que agrupa um) e as posições 2 a 4 caso contrário. O primeiro dígito, o zero de preenchimento ou o dígito indicador, nunca faz parte do prefixo, então um GTIN-12 tem um prefixo que começa com `0`, e um GTIN-14 tem o prefixo do GTIN que ele agrupa.
 
 | Campo | Descrição |
 | --- | --- |
 | `type` | `'GTIN-8'`, `'GTIN-12'`, `'GTIN-13'` ou `'GTIN-14'` (`GtinType`), conforme o tamanho com que o valor foi escrito |
 | `length` | `8`, `12`, `13` ou `14` (`GtinLength`) |
-| `prefix` | O Prefixo GS1 de três dígitos, ou um Prefixo GS1-8 quando os seis primeiros dígitos da forma de 14 dígitos são zeros, o que cobre todo GTIN-8 e o Prefixo GS1 `0000000`. Identifica a Organização Membro da GS1 que licenciou o número, não o país de origem |
+| `prefix` | O Prefixo GS1 de três dígitos, ou um Prefixo GS1-8 quando as posições 2 a 6 da forma de 14 dígitos são zeros, o que cobre todo GTIN-8, um GTIN-14 que agrupa um e o Prefixo GS1 `0000000`. Identifica a Organização Membro da GS1 que licenciou o número, não o país de origem |
 | `isBrazilian` | `true` quando o prefixo é um dos da GS1 Brasil, `789` ou `790`, o que a NT 2021.003 chama de "prefixo do Brasil" |
 | `isRestrictedCirculation` | `true` quando o prefixo está em uma faixa que a GS1 reserva para Números de Circulação Restrita (Prefixos GS1 02, 04 e 20 a 29; Prefixos GS1-8 000 a 099 e 200 a 299, faixa em que também cai o Prefixo GS1 `0000000`, já que sua forma de 14 dígitos começa com seis zeros), ou seja, o número só é único dentro de uma empresa ou região |
 | `checkDigit` | O dígito verificador módulo 10, o último dígito |

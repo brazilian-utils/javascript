@@ -3267,13 +3267,13 @@ isValidGtin('0000000000000'); // false (zeros only, a rule of this library)
 Parse a GTIN into its fields, as a `GtinInfo`.
 
 - Returns `null` when the value is not a valid GTIN, under the same rules as `isValidGtin`.
-- The prefix is read the way the "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14 digits, and the prefix is positions 7 to 9 when positions 2 to 6 are zeros (a GTIN-8, or a GTIN-14 that packs one) and positions 2 to 4 otherwise. The first digit, the padding zero or the indicator digit, is never part of the prefix, so a GTIN-12 has a prefix that starts with `0`, and a GTIN-14 has the prefix of the GTIN it packs.
+- The prefix is read as the GS1 General Specifications (tables 1-4, 1-5 and 1-9) lay the numbers out: the value is left padded with zeros to 14 digits, and the prefix is positions 7 to 9 when positions 2 to 6 are zeros (a GTIN-8, or a GTIN-14 that packs one) and positions 2 to 4 otherwise. The first digit, the padding zero or the indicator digit, is never part of the prefix, so a GTIN-12 has a prefix that starts with `0`, and a GTIN-14 has the prefix of the GTIN it packs.
 
 | Field | Description |
 | --- | --- |
 | `type` | `'GTIN-8'`, `'GTIN-12'`, `'GTIN-13'` or `'GTIN-14'` (`GtinType`), from the length the value was written with |
 | `length` | `8`, `12`, `13` or `14` (`GtinLength`) |
-| `prefix` | The three digit GS1 Prefix, or a GS1-8 Prefix when the first six digits of the 14 digit form are zeros, which covers every GTIN-8 and the GS1 Prefix `0000000`. It names the GS1 Member Organisation that licensed the number, not the country of origin |
+| `prefix` | The three digit GS1 Prefix, or a GS1-8 Prefix when positions 2 to 6 of the 14 digit form are zeros, which covers every GTIN-8, a GTIN-14 that packs one and the GS1 Prefix `0000000`. It names the GS1 Member Organisation that licensed the number, not the country of origin |
 | `isBrazilian` | `true` when the prefix is one of GS1 Brasil, `789` or `790`, what NT 2021.003 calls "prefixo do Brasil" |
 | `isRestrictedCirculation` | `true` when the prefix is in a range GS1 sets aside for Restricted Circulation Numbers (GS1 Prefixes 02, 04 and 20 to 29; GS1-8 Prefixes 000 to 099 and 200 to 299, which is also where the GS1 Prefix `0000000` lands, since its 14 digit form starts with six zeros), so the number is only unique inside a company or region |
 | `checkDigit` | The modulo 10 check digit, the last digit |
