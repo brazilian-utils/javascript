@@ -304,6 +304,22 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		source: "Constituição Estadual do AP, de 20/12/1991",
 	},
 	{
+		stateCode: "AP",
+		name: "Dia Estadual da Consciência Negra",
+		type: "state",
+		year: 2007,
+		listed: false,
+		source: "Lei AP nº 1.169, de 27/12/2007, published after that year's 20 November",
+	},
+	{
+		stateCode: "AP",
+		name: "Dia Estadual da Consciência Negra",
+		type: "state",
+		year: 2008,
+		listed: true,
+		source: "Lei AP nº 1.169, de 27/12/2007",
+	},
+	{
 		stateCode: "AM",
 		name: "Elevação do Amazonas à categoria de Província",
 		type: "state",

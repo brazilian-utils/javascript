@@ -270,8 +270,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * (13/09), listed from 1992: "O dia 13 de Setembro, data magna do Amapá, é feriado em todo o
  * território do Estado".
  * @see Official: https://al.ap.leg.br/ver_texto_lei.php?iddocumento=22214
- * Lei AP nº 1.169/2007, Dia Estadual da Consciência Negra (state holiday until it became national
- * in 2024)
+ * Lei AP nº 1.169, de 27/12/2007 (DOE nº 4157, de 27/12/2007), art. 1º: "Fica declarado feriado no
+ * Estado do Amapá o dia vinte de novembro, data em que se comemora o DIA ESTADUAL DA CONSCIÊNCIA
+ * NEGRA". In force on its publication, after that year's 20 November, so it is listed from 2008
+ * (up to 2.4.0 from 2007) until it became national in 2024.
  * @see Official: https://sapl.al.am.leg.br/norma/8919
  * Lei AM nº 25, de 21/12/1977, Elevação do Amazonas à categoria de Província (05/09), listed
  * from 1978
@@ -531,7 +533,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			name: "Dia Estadual da Consciência Negra",
 			day: 20,
 			month: 11,
-			since: 2007,
+			since: 2008,
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 		},
 	],
