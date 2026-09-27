@@ -689,6 +689,47 @@ describe("isValidBankAccount", () => {
 					}),
 				).toBe(true);
 			});
+
+			test("when a 12 digit account carries its own digit, the Caixa CNAB 400 note NE051 example (000000109990, digit 6)", () => {
+				expect(
+					isValidBankAccount({
+						bankCode: "104",
+						agency: "0161",
+						account: "000000109990",
+						digit: "6",
+					}),
+				).toBe(true);
+			});
+
+			test("when a 12 digit account carries the agency/account digit, the Caixa CNAB 400 note NE052 example (0161 + 000000109990, digit 5)", () => {
+				expect(
+					isValidBankAccount({
+						bankCode: "104",
+						agency: "0161",
+						account: "000000109990",
+						digit: "5",
+					}),
+				).toBe(true);
+			});
+
+			test("but not when a 12 digit account carries neither digit", () => {
+				for (const digit of ["0", "1", "2", "3", "4", "7", "8", "9"]) {
+					expect(
+						isValidBankAccount({ bankCode: "104", agency: "0161", account: "000000109990", digit }),
+					).toBe(false);
+				}
+			});
+
+			test("when a 12 digit account's digit comes out above 9 it is 0 (account 000000000006: sum 12, remainder 1, 11 - 1 = 10)", () => {
+				expect(
+					isValidBankAccount({
+						bankCode: "104",
+						agency: "0000",
+						account: "000000000006",
+						digit: "0",
+					}),
+				).toBe(true);
+			});
 		});
 
 		describe("generic validation with a two digit check", () => {

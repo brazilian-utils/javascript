@@ -234,8 +234,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * below), a date no rule derives from the year; São Paulo moved 09/07 to
  * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry, and so are
  * Piauí's 19/10 of 2020 and 2021, brought forward to 15/05/2020 and 18/03/2021 by Leis PI nº
- * 7.371/2020 and 7.490/2021, and Tocantins' 05/10/2026, which the executive moved to 09/10 for its
- * own offices under Lei TO nº 1.088/1999 (both cited below).
+ * 7.371/2020 and 7.490/2021, Tocantins' 05/10/2026, which the executive moved to 09/10 for its
+ * own offices under Lei TO nº 1.088/1999 (both cited below), and Goiás' 28/10/2026, moved to 30/10
+ * by Decreto GO nº 10.987, de 10/09/2026, under the same § 1º.
  *
  * Every entry starts (`since`) in the first year the norm cited for it was in force on the date,
  * and one that lost its basis stops (`until`, exclusive) in the first year it no longer applied, so
@@ -510,6 +511,18 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * STF ADI 4131, cited here before as pending against Lei RJ nº 4.007/2002, in fact sought "a
  * declaração de inconstitucionalidade da Lei n. 5.243, do Estado do Rio de Janeiro, de 14 de maio
  * de 2008" and was não conhecida on 21/09/2018 (trânsito em julgado 25/10/2018).
+ * @see Official: https://alerjln1.alerj.rj.gov.br/contlei.nsf/f25edae7e64db53b032564fe005262ef/46837e4d22b01f3503258d2c0048abda?OpenDocument
+ * Lei RJ nº 11.002, de 22/10/2025 (DO nº 196, 23/10/2025), art. 1º: "Fica instituído, no âmbito
+ * do Estado do Rio de Janeiro, o Dia de Corpus Christi como feriado estadual, a ser celebrado na
+ * primeira quinta-feira após decorridos sessenta dias do domingo de Páscoa", Easter plus 60, in
+ * force on its publication, so listed from 2026. It replaces the national optional entry typed
+ * `"state"`, as the Distrito Federal and Maranhão ones do. Missing up to 2.4.0.
+ * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=7434201
+ * STF ADI 7898, brought by the CNC against Lei RJ nº 11.002/2025: "julgou improcedente o pedido
+ * formulado na presente ação direta de inconstitucionalidade ... Plenário, Sessão Virtual de
+ * 12.6.2026 a 19.6.2026", by unanimity; trânsito em julgado 13/08/2026. Rio de Janeiro's other two
+ * state holiday laws voided by the STF have no entry: Lei RJ nº 8.174/2018 (second Sunday of May,
+ * ADI 6133) and Lei RJ nº 8.217/2018 (Ash Wednesday for bank workers only, ADI 6083).
  * @see Official: http://www.al.rn.leg.br/storage/legislacao//arq5064574f632ec.pdf
  * Lei RN nº 8.913, de 06/12/2006, Mártires de Cunhaú e Uruaçu (03/10), listed from 2007, the
  * single entry of Rio Grande do Norte: a "Resumo da Lei" search for "feriado" in the ALRN legislation base
@@ -772,6 +785,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	RJ: [
 		{ name: "Carnaval (terça-feira)", easterOffset: -47, since: 2009 },
 		{ name: "São Jorge", day: 23, month: 4, since: 2008 },
+		{ name: "Corpus Christi", easterOffset: 60, since: 2026 },
 		{
 			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
 			day: 20,

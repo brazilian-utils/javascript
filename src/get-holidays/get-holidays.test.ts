@@ -1580,6 +1580,23 @@ describe("getHolidays", () => {
 		});
 	});
 
+	test("should replace the national optional Corpus Christi with an RJ state entry from 2026 on, Lei RJ nº 11.002/2025 having been upheld by the STF in ADI 7898, and keep it optional in 2025", () => {
+		expect(
+			getHolidays({ year: 2026, stateCode: "RJ" }).filter((h) => h.name === "Corpus Christi"),
+		).toEqual([{ name: "Corpus Christi", date: new Date(2026, 5, 4), type: "state" }]);
+
+		expect(
+			getHolidays({ year: 2025, stateCode: "RJ" }).filter((h) => h.name === "Corpus Christi"),
+		).toEqual([{ name: "Corpus Christi", date: new Date(2025, 5, 19), type: "optional" }]);
+
+		expect(isBusinessDay(new Date(2026, 5, 4), { stateCode: "RJ", includeOptional: false })).toBe(
+			false,
+		);
+		expect(isBusinessDay(new Date(2025, 5, 19), { stateCode: "RJ", includeOptional: false })).toBe(
+			true,
+		);
+	});
+
 	test("should replace the national optional Corpus Christi with an MA state entry from 2024 on, Lei MA nº 11.539/2021 having been upheld by the TJMA on 06/03/2024, and keep it optional in 2023", () => {
 		expect(
 			getHolidays({ year: 2024, stateCode: "MA" }).filter((h) => h.name === "Corpus Christi"),
