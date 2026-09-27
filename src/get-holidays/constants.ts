@@ -229,7 +229,8 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * do Acre on 15/06 excepted), but the state's own annual calendar decrees apply it unevenly (see
  * the `@see` below), so the two official sources conflict and the statutory date is kept; and the
  * Goiás executive may move 26/07 and 28/10 to a nearby dia útil by decree (Lei GO nº 20.756/2020,
- * art. 269, § 1º), neither of which can be resolved from a year alone; São Paulo moved 09/07 to
+ * art. 269, § 1º), and has moved 26/07 by a decree of its own every year since 2022 (see the `@see`
+ * below), a date no rule derives from the year; São Paulo moved 09/07 to
  * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry.
  *
  * Every entry starts (`since`) in the first year the norm cited for it was in force on the date,
@@ -368,7 +369,19 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * consagrado à fundação da cidade de Goiás; b) 24 de outubro, comemorativo ao lançamento da pedra
  * fundamental de Goiânia; c) 28 de outubro, consagrado ao servidor público". The law is of
  * 28/01/2020 and entered into force on 28/07/2020, after that year's 26 July, so 26/07 is listed
- * from 2021.
+ * from 2021. These are days of the servants' statute, whose caput reads "não haverá expediente em
+ * nenhuma repartição ou serviço do Estado ... nos seguintes feriados"; no Goiás law fixing a data
+ * magna as the feriado civil of Lei 9.093/1995, art. 1º, II was located (a search of the Casa
+ * Civil legislation base for "data magna" returns nothing). The entries are kept as the "feriados
+ * estaduais" that statute names. Its § 1º: "Fica o Chefe do Poder Executivo autorizado a
+ * transferir os feriados de que tratam as alíneas "a" e "c" do inciso II deste artigo para outro
+ * dia útil próximo".
+ * @see Official: https://legisla.casacivil.go.gov.br/api/v2/pesquisa/legislacoes/115759
+ * Decreto GO nº 10.935, de 23/06/2026, art. 2º: "Fica transferido para o dia 20 de julho de 2026 o
+ * feriado consagrado à fundação da Cidade de Goiás". The Casa Civil base holds one such decree per
+ * year: nº 10.118 (2022, to 25/07), nº 10.288 (2023, to 24/07), nº 10.481 (2024, to 22/07), nº
+ * 10.709 (2025, to 28/07) and nº 10.935 (2026, to 20/07). The entry keeps the statutory 26/07,
+ * since the observed date is only known once each year's decree is out.
  * @see Official: https://legisla.casacivil.go.gov.br/pesquisa_legislacao/83678/lei-10460
  * Lei GO nº 10.460, de 22/02/1988, the servants' statute Lei GO nº 20.756/2020 replaced, which
  * already declared 24/10 and 28/10, so both are listed from 1988. Whether it also carried 26/07
