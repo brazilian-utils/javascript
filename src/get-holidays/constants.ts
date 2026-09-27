@@ -291,7 +291,11 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * was only a ponto facultativo of the state's annual calendar decrees; the optional entry starts in
  * 2020, the year of the one decree cited, Decreto AL nº 68.782, de 30/12/2019, which "dispõe
  * sobre os feriados nacionais e estaduais para o exercício de 2020, define os pontos facultativos".
- * The earlier annual decrees were not located.
+ * The earlier annual decrees were not located. A 2026 check against the official sources could
+ * neither reach this SAPL record nor find the law elsewhere: Decreto AL nº 106.093, de 29/12/2025
+ * (the 2026 calendar), lists "16 de setembro, Emancipação Política de Alagoas (feriado estadual)"
+ * but cites only Leis AL nº 5.508/1993, 5.509/1993, 5.724/1995 and 7.530/2013. The entry is kept
+ * as it is.
  * @see Official: https://diario.imprensaoficial.al.gov.br/apinova/api/editions/downloadPdf/24602
  * Lei AL nº 7.530, de 08/08/2013 (DOE-AL de 09/08/2013, p. 89), art. 1º: "Fica instituído o Dia
  * Estadual do Evangélico, a ser comemorado no dia 30 de novembro de cada ano". Its art. 2º, which
@@ -335,7 +339,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * (up to 2.4.0 from 2007) until it became national in 2024.
  * @see Official: https://sapl.al.am.leg.br/norma/8919
  * Lei AM nº 25, de 21/12/1977, Elevação do Amazonas à categoria de Província (05/09), listed
- * from 1978
+ * from 1978. The ALEAM record has the ementa "DECLARA feriado estadual o dia 05 de setembro" and
+ * no text; the state's decrees date the law "de 09 de dezembro de 1977" instead (DOE-AM of
+ * 29/08/2024). Either date gives 1978 as the first year.
  * @see Official: https://sapl.al.am.leg.br/norma/2873
  * Lei AM nº 84/2010, Dia da Consciência Negra (state holiday until it became national in 2024).
  * Its ementa carries the same wording as the Mato Grosso and Rio de Janeiro laws: "INSTITUI no
@@ -350,8 +356,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://www.legislabahia.ba.gov.br/documentos/constituicao-do-estado-da-bahia-de-05-de-outubro-de-1989
  * Constituição Estadual da BA, de 05/10/1989, art. 6º § 3º, Independência da Bahia (02/07),
  * listed from 1990: "O Dois de Julho, data magna da Bahia ..., é feriado em todo o território do
- * Estado". The date is older as a holiday than that text, but no earlier state norm declaring it
- * was located.
+ * Estado". The date is older as a holiday than that text: the Casa Civil's calendar of 2026
+ * (LegislaBahia, feriados2026.pdf) cites "Lei Estadual 38, de 03.01.1936" for it, but that law's
+ * text was not located, so the entry starts at the Constitution.
  * @see Official: https://belt.al.ce.gov.br/index.php/constituicao-do-ceara/emendas-a-constituicao-do-ceara/item/5643-emenda-constitucional-n-73-de-1-de-dezembro-de-2011-d-o-06-12-11
  * Constituição Estadual do CE, art. 18 par. único (EC nº 73, de 01/12/2011, DO 06/12/2011),
  * Abolição da Escravidão no Ceará (25/03), listed from 2012: the text fixes the data magna, and
@@ -360,7 +367,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Lei distrital nº 72, de 27/12/1989, listed from 1990: art. 1º, I, Fundação de Brasília (21/04),
  * and art. 1º par. único,
  * Corpus Christi: "São, igualmente feriados, a Sexta-feira da Paixão e Corpus Christi, datas
- * móveis".
+ * móveis". Its art. 1º, II also makes 12/10, "data consagrada a Nossa Senhora Aparecida,
+ * Padroeira de Brasília", a feriado; that day and the Sexta-feira da Paixão have no DF entry of
+ * their own, since the national entries of the same name already make them holidays (Decreto DF
+ * nº 48.117/2025, the 2026 calendar, calls the Paixão a "feriado nacional" too).
  * @see Official: https://www.sinj.df.gov.br/sinj/Norma/48922/Lei_963_1995.html
  * Lei distrital nº 963, de 04/12/1995, Dia do Evangélico (30/11), listed from 1996
  * @see Official: https://www3.al.es.gov.br/Arquivo/Documents/legislacao/html/LEI110102019.html
@@ -411,6 +421,11 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * that year's date, so listed from 2027. The press reports an ADI against it filed with the TJMA
  * on 30/03/2026; no decision was located. Maranhão's 28 August, which Lei MA nº 10.100/2014 makes
  * a "feriado estadual aos bancários" only, is not a general holiday and has no entry.
+ * @see Official: https://www.almg.gov.br/atividade-parlamentar/leis/legislacao-mineira/lei/texto/?tipo=CON&num=1989&ano=1989&comp=&cons=1
+ * Constituição Estadual de MG, art. 256 (EC nº 89/2011): "São considerados: I - data magna do
+ * Estado o dia 21 de abril, Dia de Tiradentes; II - Dia de Minas o dia 16 de julho; III - Dia dos
+ * Gerais o dia 8 de dezembro". The data magna falls on the national Tiradentes and 16/07 and 08/12
+ * are not declared feriados, so Minas Gerais has no entry.
  * @see Official: https://www.al.mt.gov.br/norma-juridica/urn:lex:br;mato.grosso:estadual:lei.ordinaria:2002-12-27;7879
  * Lei MT nº 7.879, de 27/12/2002, Dia da Consciência Negra (state holiday from 2003 until it
  * became national in 2024). Art. 1º, as published in the Diário Oficial do Estado de Mato Grosso of
@@ -463,7 +478,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * (cited below), so the law stands. The Monday stays a ponto facultativo in the state.
  * @see Official: http://alerjln1.alerj.rj.gov.br/CONTLEI.NSF/c8aa0900025feef6032564ec0060dfff/1baf90ca125ff96f8325740a00776600
  * Lei RJ nº 5.198, de 05/03/2008, São Jorge (23/04), listed from 2008: the ALERJ text of the law. Its Ficha Técnica records
- * no ação de inconstitucionalidade; the STF case is cited separately below.
+ * no ação de inconstitucionalidade; the STF case is cited separately below. Rio de Janeiro's Dia do
+ * Comércio (third Monday of October), which the annex of Lei RJ nº 5.645/2010 labels "FERIADO",
+ * has no entry: the law behind it, Lei RJ nº 160/1977, only says it "será comemorado".
  * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=2624787
  * STF ADI 4092, which upheld that law. Decisão de julgamento of 28/08/2023, Tribunal Pleno,
  * sessão virtual: "O Tribunal, por maioria, declarou a constitucionalidade da Lei do Estado do Rio
@@ -511,7 +528,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * O DIA 4 DE JANEIRO DATA MAGNA E FERIADO CIVIL ESTADUAL". Lei RO nº 3.170/2013, cited here before, is a
  * supplementary credit law: "AUTORIZA O PODER EXECUTIVO A ABRIR CRÉDITO SUPLEMENTAR POR ANULAÇÃO
  * ... EM FAVOR DAS UNIDADES ORÇAMENTÁRIAS: DEPARTAMENTO DE ESTRADAS E RODAGEM - DER/RO,
- * SECRETARIA DE ESTADO DE ASSISTÊNCIA SOCIAL - SEAS", nothing to do with holidays.
+ * SECRETARIA DE ESTADO DE ASSISTÊNCIA SOCIAL - SEAS", nothing to do with holidays. Lei RO nº
+ * 2.291/2010 revoked Decreto-Lei RO nº 39, de 31/12/1982, under which 04/01 was already a
+ * holiday; that decree's text was not located, so the entry starts at the 2010 law.
  * @see Official: https://sapl.al.ro.leg.br/norma/3003
  * Lei RO nº 1.026, de 20/12/2001, the other law cited for Rondônia, whose art. 1º did create a
  * second feriado estadual — "Fica instituído feriado no Estado de Rondônia, o dia 18 de junho,
