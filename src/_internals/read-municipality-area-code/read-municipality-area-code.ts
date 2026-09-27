@@ -4,12 +4,12 @@ import { type StateCode } from "../constants/states";
 
 const AREA_CODE_LENGTH = 2;
 
-const sortedCodes = new Map<StateCode, string[]>();
+const indexes = new Map<StateCode, Record<string, number>>();
 
 /**
  * Reads the DDD of a municipality out of `MUNICIPALITY_AREA_CODES`, which holds the DDDs of each
- * state in ascending order of the municipality code. The sorted codes of each state are built on
- * its first lookup and kept.
+ * state in ascending order of the municipality code. The DDDs of each state are indexed by
+ * municipality code on its first lookup, and the index is kept.
  *
  * @param {StateCode} stateCode - The state of the municipality.
  * @param {string} code - The 7 digit IBGE code of a municipality of that state.
@@ -21,15 +21,22 @@ const sortedCodes = new Map<StateCode, string[]>();
  * ```
  */
 export const readMunicipalityAreaCode = (stateCode: StateCode, code: string): number => {
-	let codes = sortedCodes.get(stateCode);
+	let index = indexes.get(stateCode);
 
-	// Stryker disable next-line ConditionalExpression: this guard only memoizes; CITIES_DATA is a module level constant that is never written to, so sorting the codes again on every lookup gives the same array, and the repeated work is unobservable.
-	if (codes === undefined) {
-		codes = CITIES_DATA[stateCode].map(([, municipalityCode]) => municipalityCode).sort();
-		sortedCodes.set(stateCode, codes);
+	// Stryker disable next-line ConditionalExpression: this guard only memoizes; CITIES_DATA and MUNICIPALITY_AREA_CODES are module level constants that are never written to, so rebuilding the index on every lookup gives the same entries, and the repeated work is unobservable.
+	if (index === undefined) {
+		const areaCodes = MUNICIPALITY_AREA_CODES[stateCode];
+		const codes = CITIES_DATA[stateCode].map(([, municipalityCode]) => municipalityCode).sort();
+
+		index = Object.fromEntries(
+			codes.map((municipalityCode, position) => {
+				const start = position * AREA_CODE_LENGTH;
+
+				return [municipalityCode, Number(areaCodes.slice(start, start + AREA_CODE_LENGTH))];
+			}),
+		);
+		indexes.set(stateCode, index);
 	}
 
-	const start = codes.indexOf(code) * AREA_CODE_LENGTH;
-
-	return Number(MUNICIPALITY_AREA_CODES[stateCode].slice(start, start + AREA_CODE_LENGTH));
+	return index[code];
 };

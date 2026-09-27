@@ -79,18 +79,22 @@ describe("getMunicipalitiesByAreaCode", () => {
 			expectNeverThrows(getMunicipalitiesByAreaCode, anyGarbage);
 		});
 
-		test("should agree with getAreaCodeByMunicipalityCode on every DDD", () => {
+		test("should list a municipality under the DDD getAreaCodeByMunicipalityCode gives it", () => {
+			const municipalityArbitrary = fc.constantFrom(...getMunicipalities());
+
 			fc.assert(
-				fc.property(fc.constantFrom(...VALID_AREA_CODES), (areaCode) => {
-					const municipalities = getMunicipalitiesByAreaCode(areaCode);
+				fc.property(municipalityArbitrary, (municipality) => {
+					const areaCode = getAreaCodeByMunicipalityCode(municipality.code) ?? 0;
 
-					expect(municipalities.length).toBeGreaterThan(0);
-
-					for (const { code } of municipalities) {
-						expect(getAreaCodeByMunicipalityCode(code)).toBe(areaCode);
-					}
+					expect(getMunicipalitiesByAreaCode(areaCode)).toContainEqual(municipality);
 				}),
 			);
+		});
+
+		test("should list at least one municipality for every DDD in use", () => {
+			for (const areaCode of VALID_AREA_CODES) {
+				expect(getMunicipalitiesByAreaCode(areaCode).length).toBeGreaterThan(0);
+			}
 		});
 
 		test("should list every municipality under exactly one DDD", () => {
