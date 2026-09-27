@@ -3416,6 +3416,7 @@ Check if an inscrição estadual (state registration) is valid for a state. **De
   - MT: 11 digits, or the 9 digits Portaria SEFAZ-MT nº 59/2025 (art. 8º, § 1º) prescribes, read as the 11 digit form padded with two zeros (no official text gives the check digit rule of the 9 digit form).
   - PA: the prefixes 15 and 75 to 79 the SINTEGRA page lists (SEFA-PA has issued 75 since 07/10/2024). MS: the prefixes 28 and 50 the SINTEGRA page gives (50 is also in a SEFAZ-MS e-CCE communiqué; the only norm, Resolução/SEF nº 1.344/1999, gives 28 alone).
   - DF: the 13 digit AC rule under the prefixes 07 and 08. The SINTEGRA page does not call 07 fixed; SEFAZ-DF's rule sheet calls it a "campo fixo". DF moved to 08 when the numbers starting with 07 ran out.
+  - RR: the prefix 24, which the SINTEGRA page does not write as a rule: it is read from the page's ten examples.
   - SP: the produtor rural form `P0MMMSSSSD000`, the zero after the `P` included; the `P` may be written in lower case.
   - TO: the 9 digits in force (Portaria SEFAZ-TO nº 676/2002, art. 3º; RICMS-TO, Decreto nº 2.912/2006, art. 90), or the old 11 digits the SINTEGRA page documents, with the tipo digits 01, 02, 03 or 99.
   - AM: the page's check digit rule has two branches and leaves "Resto" undefined; the library reads it as the sum modulo 11 and gives 0 to a sum of 0 or 1, the shared modulus 11 rule.

@@ -535,6 +535,9 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   Pará", and the same for 75, 76, 77, 78 and 79). SEFA-PA's notice of 08/10/2024 announces 75
  *   alone and points to that page for the details; no SEFA-PA notice or act names 76 to 79, which
  *   rest on the page only.
+ * - RR: the prefix 24 is required. The SINTEGRA page only says "os dois primeiros indicativos do
+ *   Estado da Federação" and never writes 24; the prefix is read from its ten valid examples and
+ *   its worked example, which all start with 24.
  * - SP: letters other than "P" are rejected on purpose, a deliberate deviation from the Regra
  *   Geral of the SINTEGRA page, which ignores them instead; punctuation and spaces are ignored as
  *   it says. A produtor rural registration is "P" then "0MMMSSSSD000", the zero included. The
@@ -687,6 +690,8 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RN.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RO.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RR.html
+ * "O Número de Inscrição Estadual é composto por 9 Dígitos, sendo os dois primeiros indicativos
+ * do Estado da Federação", "Dígito Verificador de módulo 9", examples 24006628-1 to 24001340-7.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RS.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SC.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_SE.html
