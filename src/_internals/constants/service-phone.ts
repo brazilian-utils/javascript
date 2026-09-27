@@ -18,12 +18,20 @@
  *   library does not enforce, since it validates structure only.
  * - **Código de Acesso a Serviços de Utilidade Pública (SUP)**, art. 13-14: 3 digits, with the
  *   whole `1N₂N₁` range destined to SUP and every other 3-digit series held in reserva técnica.
- *   Individual codes are designated one by one by Anatel Ato, the consolidated table being the
- *   Anexo of Ato nº 43.151/2004, so the codes below are the ones Anatel has designated rather
- *   than the full `100`-`199` range. `112` and `911` are *not* among them: `911` is not even
- *   inside the `1N₂N₁` address space art. 13 destines to SUP, and neither code appears in the
- *   Anexo of Ato nº 43.151/2004 or in Ato nº 12.712/2024. Their routing on Brazilian handsets is
- *   a GSM convention of the handset, not an Anatel designation, so both are rejected here.
+ *   Individual codes are designated one by one by Anatel Ato (art. 14). The last consolidated
+ *   act is Ato nº 43.151/2004, still marked in force, but no later act consolidates the codes
+ *   designated since (Ato nº 12.712/2024 only sets the procedure and lists none), so the current
+ *   official list is the one Anatel publishes on its gov.br "Serviços de Utilidade Pública e de
+ *   Emergência" page (modified on 22/06/2023) and, older, in the open data set
+ *   `Servico_Utilidade_Publica_Apoio_STFC` (2019). The codes below are the union of that page
+ *   and the Anexo of Ato nº 43.151/2004, not the full `100`-`199` range. `141` is kept although
+ *   the page no longer lists it, because the Ato that designates it is still in force (the
+ *   service it named, the CVV, now answers on `188`). Some codes take an extension the
+ *   structure check does not read (`103+`, `105+`, `106+`, `133+1`, `135+8`, `174+6`), so only
+ *   their 3 digit root is matched. The page lists "Polícia Militar - SOMENTE CELULAR 112/911":
+ *   `112` is inside the `1N₂N₁` range and is accepted; `911` is not, and art. 13 holds every
+ *   series outside `1N₂N₁` in reserva técnica, so the two official texts conflict on it and it
+ *   stays rejected, as up to 2.4.0.
  * - **The abbreviated `300X`/`400X` numbers** (`3003-1234`, `4004-1234`) are *not* a regulatory
  *   category at all. They are ordinary 8-digit geographic STFC user numbers (art. 11 assigns
  *   `2`-`6` as the first digit of a fixed-line number) whose 4-digit prefix a carrier licenses
@@ -42,8 +50,13 @@
  * Resolução Anatel nº 749/2022, the Regulamento de Numeração in force: art. 18, the CNG series
  * `300`, `303`, `500`, `800` and `900` in the format [N10…N1], and art. 28, their dialing as
  * ["0"N10…N1].
+ * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia
+ * Anatel, "Serviços de Utilidade Pública e de Emergência (SUP)", modified on 22/06/2023: the
+ * current list of designated codes.
+ * @see Official: https://www.anatel.gov.br/dadosabertos/PDA/Servico_Utilidade_Publica_Apoio_STFC/Servico_Utilidade_Publica_Apoio_STFC.csv
+ * Anatel open data, the same list as of 2019.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151
- * Ato Anatel nº 43.151/2004, whose Anexo is the consolidated SUP designation table.
+ * Ato Anatel nº 43.151/2004, whose Anexo is the last consolidated SUP designation act.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2140-ato-12712
  * Ato Anatel nº 12.712, de 04/09/2024, art. 1º: the Procedimento para a Atribuição e Designação
  * de Recursos de Numeração (Anexo I), in force since 03/12/2024, whose items 10.6 and 12.1 carry
@@ -79,6 +92,7 @@ export const SERVICE_PHONE_UTILITY_CODES: readonly string[] = [
 	"105",
 	"106",
 	"111",
+	"112",
 	"115",
 	"116",
 	"117",

@@ -945,7 +945,7 @@ Check if a phone number is a valid Brazilian service number, dialed without a DD
 
 - The Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` followed by 7 digits (11 in total): the 10 digit series of Resolução Anatel 749/2022, art. 18, dialed behind the `0` prefix (art. 28).
 - The abbreviated `300X`/`400X` numbers, 8 digits. Other carrier prefixes such as `4020` and `4062` are rejected.
-- The 3 digit public utility codes Anatel has designated (e.g. `190`, `192`). `112` and `911` are not among them and are rejected.
+- The 3 digit public utility codes Anatel has designated (e.g. `190`, `192`), as listed on the [Anatel SUP page](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia) (modified on 22/06/2023) and in the Anexo of Ato 43.151/2004, the last consolidated act. The page lists `112/911` for the Polícia Militar on handsets: `112` is accepted; `911` is rejected, since Resolução 749/2022, art. 13, holds every series outside `1XX` in reserva técnica. Up to 2.4.0 `112` was rejected too.
 
 ```javascript
 import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
@@ -956,7 +956,7 @@ isValidServicePhone('190'); // true
 isValidServicePhone('11987654321'); // false (geographic number)
 ```
 
-Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel SUP page](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
 
 ### getAreaCodeInfo
 

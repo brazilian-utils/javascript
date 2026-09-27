@@ -24,11 +24,12 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *   "Número Único" carrier prefixes in market use, such as `4020` and `4062`, are out of scope
  *   and are rejected;
  * - the 3-digit Códigos de Acesso a Serviços de Utilidade Pública that Anatel has designated,
- *   e.g. `190` and `192`, the consolidated table being the Anexo of Ato nº 43.151/2004.
- *   Undesignated codes in the `1XX` range are rejected, and so are `112` and `911`: Anatel
- *   designates neither, and `911` is not even inside the `1N₂N₁` range Resolução nº 749/2022
- *   art. 13 destines to public utility services. Handsets route both by GSM convention, which
- *   is not a numbering designation.
+ *   e.g. `190` and `192`, as listed on Anatel's gov.br SUP page (modified on 22/06/2023) and in
+ *   the Anexo of Ato nº 43.151/2004, the last consolidated act. Undesignated codes in the `1XX`
+ *   range are rejected. The page lists `112/911` for the Polícia Militar on handsets: `112` is
+ *   accepted, while `911` stays rejected, since it is not inside the `1N₂N₁` range Resolução nº
+ *   749/2022 art. 13 destines to public utility services (every other series is reserva
+ *   técnica), a conflict between the two official texts that keeps the 2.4.0 answer.
  *
  * Only the structure is checked: the number does not have to be assigned to anyone, and the
  * `0500` rule that encodes a donation amount in the last two digits is not enforced.
@@ -46,6 +47,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * Resolução Anatel nº 749/2022, arts. 13, 14, 18 and 28.
+ * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia
+ * Anatel, "Serviços de Utilidade Pública e de Emergência (SUP)", modified on 22/06/2023, the
+ * current list of the 3-digit public utility codes.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151
  * Ato Anatel nº 43.151/2004, whose Anexo designates the 3-digit public utility codes.
  */

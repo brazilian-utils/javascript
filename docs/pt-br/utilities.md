@@ -945,7 +945,7 @@ Valida um número de serviço brasileiro, discado sem DDD. Apenas a estrutura é
 
 - Os Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` e `0900` seguidos de 7 dígitos (11 no total): as séries de 10 dígitos da Resolução Anatel 749/2022, art. 18, discadas atrás do prefixo `0` (art. 28).
 - Os números abreviados `300X`/`400X`, com 8 dígitos. Outros prefixos de operadora, como `4020` e `4062`, são rejeitados.
-- Os códigos de utilidade pública de 3 dígitos designados pela Anatel (ex.: `190`, `192`). O `112` e o `911` não estão entre eles e são rejeitados.
+- Os códigos de utilidade pública de 3 dígitos designados pela Anatel (ex.: `190`, `192`), conforme a [página de SUP da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia) (modificada em 22/06/2023) e o Anexo do Ato 43.151/2004, o último ato consolidado. A página lista `112/911` para a Polícia Militar no celular: o `112` é aceito; o `911` é rejeitado, porque a Resolução 749/2022, art. 13, deixa toda série fora de `1XX` em reserva técnica. Até a 2.4.0 o `112` também era rejeitado.
 
 ```javascript
 import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
@@ -956,7 +956,7 @@ isValidServicePhone('190'); // true
 isValidServicePhone('11987654321'); // false (número geográfico)
 ```
 
-Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
+Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [página de SUP da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
 
 ### getAreaCodeInfo
 
