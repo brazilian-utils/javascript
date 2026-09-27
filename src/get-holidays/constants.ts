@@ -231,7 +231,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Goiás executive may move 26/07 and 28/10 to a nearby dia útil by decree (Lei GO nº 20.756/2020,
  * art. 269, § 1º), and has moved 26/07 by a decree of its own every year since 2022 (see the `@see`
  * below), a date no rule derives from the year; São Paulo moved 09/07 to
- * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry.
+ * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry, and so are
+ * Piauí's 19/10 of 2020 and 2021, brought forward to 15/05/2020 and 18/03/2021 by Leis PI nº
+ * 7.371/2020 and 7.490/2021, and Tocantins' 05/10/2026, which the executive moved to 09/10 for its
+ * own offices under Lei TO nº 1.088/1999 (both cited below).
  *
  * Every entry starts (`since`) in the first year the norm cited for it was in force on the date,
  * and one that lost its basis stops (`until`, exclusive) in the first year it no longer applied, so
@@ -447,6 +450,11 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://sapl.al.pi.leg.br/norma/5849
  * Lei PI nº 176, de 30/08/1937, Dia do Piauí (19/10), listed from 1937: "19 de Outubro será
  * feriado estadual, com a denominação de DIA DO PIAUHY"
+ * @see Official: https://sapl.al.pi.leg.br/norma/pesquisar?ementa=feriado
+ * The ALEPI search for "feriado", which lists Lei PI nº 176/1937 as "Norma sem alterações
+ * posteriores" and the two one-year laws that moved its date: Lei PI nº 7.371, de 11/05/2020, to
+ * 15/05/2020, and Lei PI nº 7.490, de 17/03/2021, "ANTECIPA PARA O DIA 18 DE MARÇO DO ANO EM CURSO,
+ * O FERIADO ALUSIVO AO DIA DO PIAUÍ". Neither is carried: each applies to one year only.
  * @see Official: http://alerjln1.alerj.rj.gov.br/contlei.nsf/f25edae7e64db53b032564fe005262ef/063f7c027766eab48325744a007a4ab0?OpenDocument
  * Lei RJ nº 5.243, de 14/05/2008, art. 1º, which "Institui, no âmbito do Estado do Rio de Janeiro,
  * a terça-feira de carnaval como Feriado Estadual", in force on its publication. That year's
@@ -589,6 +597,12 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * from 1994
  * @see Official: https://www.al.to.leg.br/arquivo/6358
  * Lei TO nº 98, de 17/11/1989, Criação do Estado do Tocantins (05/10), listed from 1990
+ * @see Official: https://www.al.to.leg.br/arquivos/7336.pdf
+ * Lei TO nº 1.088, de 23/09/1999, art. 1º: "Fica o Chefe do Poder Executivo autorizado a antecipar
+ * ou prorrogar feriados e dias santificados, sempre que convier aos interesses do serviço
+ * público". Under it the executive moved 05/10/2026 to 09/10/2026 (Decreto TO nº 7.238/2026, per
+ * the press; its official text could not be loaded from the DOE-TO site). Such a decree is a
+ * one-year move for the state's own offices, so the statutory 05/10 is kept.
  */
 export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	AC: [
