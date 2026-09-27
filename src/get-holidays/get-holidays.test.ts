@@ -199,6 +199,22 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		source: "Lei AL nº 5.509, de 07/07/1993",
 	},
 	{
+		stateCode: "AC",
+		name: "Dia do Católico",
+		type: "state",
+		year: 2016,
+		listed: false,
+		source: "Lei AC nº 3.137, de 27/06/2016",
+	},
+	{
+		stateCode: "AC",
+		name: "Dia do Católico",
+		type: "state",
+		year: 2017,
+		listed: true,
+		source: "Lei AC nº 3.137, de 27/06/2016",
+	},
+	{
 		stateCode: "AL",
 		name: "Dia da Consciência Negra",
 		type: "state",
@@ -1300,6 +1316,16 @@ describe("getHolidays", () => {
 			date: new Date(2009, 1, 24),
 			type: "optional",
 		});
+	});
+
+	test("should list Acre's Dia do Católico on its statutory 20 January (Lei AC nº 3.137/2016; the Friday transfer of Lei AC nº 2.126/2009 is not modelled), so Monday 2025-01-20 is not a business day in AC", () => {
+		expect(getHolidays({ year: 2025, stateCode: "AC" })).toContainEqual({
+			name: "Dia do Católico",
+			date: new Date(2025, 0, 20),
+			type: "state",
+		});
+		expect(isBusinessDay(new Date(2025, 0, 20, 12), { stateCode: "AC" })).toBe(false);
+		expect(isBusinessDay(new Date(2025, 0, 20, 12), { stateCode: "AM" })).toBe(true);
 	});
 
 	test("should list DF's Fundação de Brasília (Lei distrital nº 72/1989, art. 1º, I) next to the national Tiradentes, which falls on the same 21 April under a different name", () => {

@@ -186,7 +186,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * `SC_ALEXANDRIA_TRANSFER_SINCE_YEAR` on for 25 November, apart from the
  * `SC_ALEXANDRIA_TRANSFER_GAP_YEAR` gap, and from `SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR` on for
  * 11 August): Acre moves feriados falling from
- * Tuesday to Thursday on to the following Friday (Lei AC nº 2.126/2009, except 15/06), and the
+ * Tuesday to Thursday on to the following Friday (Lei AC nº 2.126, de 19/06/2009, except the
+ * Aniversário do Acre on 15/06 and the Revolução Acreana on 06/08, a date this table has no entry
+ * for because no state law declaring it a feriado was located), and the
  * Goiás executive may move 26/07 and 28/10 to a nearby dia útil by decree (Lei GO nº 20.756/2020,
  * art. 269, § 1º), neither of which can be resolved from a year alone; São Paulo moved 09/07 to
  * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry.
@@ -197,6 +199,13 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * older norm that could not be located (the 02/07 of Bahia before its 1989 Constitution is the
  * clearest case), the entry starts at the norm cited here all the same.
  *
+ * @see Official: https://legis.ac.gov.br/detalhar/2249
+ * Lei AC nº 3.137, de 27/06/2016, which creates the Dia Estadual do Católico on 20 January as a
+ * feriado estadual, listed from 2017, the first 20 January after the law.
+ * @see Official: https://legis.ac.gov.br/detalhar/6247
+ * Lei AC nº 2.126, de 19/06/2009, the Friday transfer of the Acre feriados that fall from Tuesday
+ * to Thursday, with the Aniversário do Acre (15/06) and the Revolução Acreana (06/08) as its
+ * exceptions; not modelled, as said above.
  * @see Official: https://legis.ac.gov.br/detalhar/1087
  * Lei AC nº 1.538, de 29/01/2004, Dia do Evangélico (23/01), listed from 2005
  * @see Official: https://legis.ac.gov.br/detalhar/1828
@@ -454,6 +463,7 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  */
 export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	AC: [
+		{ name: "Dia do Católico", day: 20, month: 1, since: 2017 },
 		{ name: "Dia do Evangélico", day: 23, month: 1, since: 2005 },
 		{ name: "Dia Internacional da Mulher", day: 8, month: 3, since: 2002 },
 		{ name: "Aniversário do Acre", day: 15, month: 6, since: 1965 },
