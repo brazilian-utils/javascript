@@ -77,8 +77,16 @@ describe("getStateByIbgeCode", () => {
 		expect(getStateByIbgeCode()).toBeNull();
 	});
 
-	it("should ignore non-digit characters around the code", () => {
+	it("should ignore whitespace and hyphens around the code", () => {
 		expect(getStateByIbgeCode(" 35 ")?.code).toBe("SP");
+		expect(getStateByIbgeCode("-35-")?.code).toBe("SP");
+	});
+
+	it("should return null for a code with any other character, not strip it", () => {
+		expect(getStateByIbgeCode("x11")).toBeNull();
+		expect(getStateByIbgeCode("R$ 35")).toBeNull();
+		expect(getStateByIbgeCode("3.5")).toBeNull();
+		expect(getStateByIbgeCode("35/")).toBeNull();
 	});
 
 	describe("properties", () => {
@@ -86,10 +94,10 @@ describe("getStateByIbgeCode", () => {
 			expectNeverThrows(getStateByIbgeCode, anyGarbage);
 		});
 
-		test("should resolve every known ibgeCode regardless of surrounding non-digit noise", () => {
+		test("should resolve every known ibgeCode regardless of surrounding whitespace and hyphens", () => {
 			const knownIbgeCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.ibgeCode));
 			const noiseArbitrary = fc
-				.array(fc.constantFrom(" ", "-", ".", "/", "R", "$", "a", "Z"))
+				.array(fc.constantFrom(" ", "-", "\t"))
 				.map((characters) => characters.join(""));
 
 			fc.assert(
@@ -101,6 +109,18 @@ describe("getStateByIbgeCode", () => {
 						expect(getStateByIbgeCode(`${prefix}${ibgeCode}${suffix}`)?.ibgeCode).toBe(ibgeCode);
 					},
 				),
+			);
+		});
+
+		test("should return null for every known ibgeCode next to a letter", () => {
+			const knownIbgeCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.ibgeCode));
+			const letterArbitrary = fc.constantFrom("a", "Z", "e", "x");
+
+			fc.assert(
+				fc.property(knownIbgeCodeArbitrary, letterArbitrary, (ibgeCode, letter) => {
+					expect(getStateByIbgeCode(`${letter}${ibgeCode}`)).toBeNull();
+					expect(getStateByIbgeCode(`${ibgeCode}${letter}`)).toBeNull();
+				}),
 			);
 		});
 	});

@@ -69,8 +69,16 @@ describe("getBankByCode", () => {
 			expect(getBankByCode("00001")).toBeNull();
 		});
 
-		test("when the code sanitizes to an empty string", () => {
+		test("when the code has no digits", () => {
 			expect(getBankByCode("abc")).toBeNull();
+			expect(getBankByCode(" - ")).toBeNull();
+		});
+
+		test("when the code has a character other than a digit, whitespace or a hyphen", () => {
+			expect(getBankByCode("1e0")).toBeNull();
+			expect(getBankByCode("1.0")).toBeNull();
+			expect(getBankByCode("0x1")).toBeNull();
+			expect(getBankByCode("341/")).toBeNull();
 		});
 
 		test("when the code is an empty string", () => {

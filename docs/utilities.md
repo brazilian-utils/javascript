@@ -976,6 +976,7 @@ Get the state and region a Brazilian DDD (area code) belongs to, out of the 67 D
 import { getAreaCodeInfo } from '@brazilian-utils/brazilian-utils';
 
 getAreaCodeInfo('11');
+- A string may wrap the DDD in parentheses (`'(11)'`) and carry spaces and hyphens; any other character (`'1e1'`, `'DDD 11'`) returns `null`.
 // { areaCode: 11, stateCode: 'SP', stateName: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', stateCodes: ['SP'] }
 
 getAreaCodeInfo(21);
@@ -992,6 +993,7 @@ getAreaCodeInfo(1.1); // null
 Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ### getAreaCodesByState
+getAreaCodeInfo('1e1'); // null
 
 Get every DDD (area code) that serves a given Brazilian state, under the Anatel Plano Geral de Numeração. The match is case-insensitive and the result is sorted in ascending order.
 
@@ -1394,6 +1396,7 @@ import { getBankByCode } from '@brazilian-utils/brazilian-utils';
 
 getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
 getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
+- A string may carry spaces and hyphens; any other character (`'1e0'`, `'1.0'`) returns `null`.
 getBankByCode('999'); // null
 ```
 
@@ -1401,7 +1404,9 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 ### getBankByIspb
 
-Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code of every SPB participant. Accepts a `string` or a `number`, with or without leading zeros.
+Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 character code of every SPB participant. Accepts a `string` or a `number`, with or without leading zeros.
+
+- Since Resolução BCB nº 585/2026 an ISPB may hold letters, so a string of 8 letters and digits is looked up as it is, in upper or lower case. Spaces and hyphens are ignored; any other character returns `null`, and a letter is never stripped (`'0000000A'` is not `'00000000'`).
 
 - Returns the matching `Bank`, or `null` when no bank has that ISPB. The base only carries institutions that also have a COMPE code.
 
@@ -1678,7 +1683,7 @@ Source: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app
 Get the Brazilian state whose 2-digit IBGE code (`cUF`, the Código da Unidade da Federação) matches the given value.
 
 - This is the UF code in the first field of a DF-e access key (chave de acesso), the one `isValidNfeKey` covers.
-- Accepts a string or a non-negative integer.
+- Accepts a string or a non-negative integer. A string may carry spaces and hyphens; any other character (`'x11'`) returns `null`.
 - Returns `null` when the code matches no state. Exports the `State` type.
 
 ```javascript
@@ -1791,7 +1796,7 @@ Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades
 
 Look up a Brazilian municipality by its 7-digit IBGE code.
 
-- Accepts the code as a string or a non-negative integer.
+- Accepts the code as a string or a non-negative integer. A string may carry spaces and hyphens; any other character returns `null`.
 - Returns `{ code, name, stateCode }` (`Municipality`), or `null` when the code is not 7 digits long or matches no municipality.
 
 ```javascript

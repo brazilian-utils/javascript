@@ -976,6 +976,7 @@ Retorna o estado e a região a que um DDD brasileiro (código de área) pertence
 import { getAreaCodeInfo } from '@brazilian-utils/brazilian-utils';
 
 getAreaCodeInfo('11');
+- Uma string pode trazer o DDD entre parênteses (`'(11)'`) e ter espaços e hífens; qualquer outro caractere (`'1e1'`, `'DDD 11'`) retorna `null`.
 // { areaCode: 11, stateCode: 'SP', stateName: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', stateCodes: ['SP'] }
 
 getAreaCodeInfo(21);
@@ -992,6 +993,7 @@ getAreaCodeInfo(1.1); // null
 Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [tabela da Anatel dos Códigos Nacionais por município (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ### getAreaCodesByState
+getAreaCodeInfo('1e1'); // null
 
 Retorna todos os DDDs (códigos de área) que atendem um estado brasileiro, dentro do Plano Geral de Numeração da Anatel. A comparação não diferencia maiúsculas de minúsculas e o resultado vem em ordem crescente.
 
@@ -1394,6 +1396,7 @@ import { getBankByCode } from '@brazilian-utils/brazilian-utils';
 
 getBankByCode('001'); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
 getBankByCode(1); // { code: '001', ispb: '00000000', name: 'Banco do Brasil S.A.' }
+- Uma string pode ter espaços e hífens; qualquer outro caractere (`'1e0'`, `'1.0'`) retorna `null`.
 getBankByCode('999'); // null
 ```
 
@@ -1401,7 +1404,9 @@ Fonte: [lista de participantes do STR](https://www.bcb.gov.br/content/estabilida
 
 ### getBankByIspb
 
-Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 dígitos de todo participante do SPB. Aceita `string` ou `number`, com ou sem zeros à esquerda.
+Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 caracteres de todo participante do SPB. Aceita `string` ou `number`, com ou sem zeros à esquerda.
+
+- Desde a Resolução BCB nº 585/2026 o ISPB pode ter letras, então uma string de 8 letras e dígitos é buscada como está, em maiúsculas ou minúsculas. Espaços e hífens são ignorados; qualquer outro caractere retorna `null`, e uma letra nunca é descartada (`'0000000A'` não é `'00000000'`).
 
 - Retorna o `Bank` correspondente, ou `null` quando nenhum banco tem esse ISPB. A base só traz as instituições que também têm código COMPE.
 
@@ -1678,7 +1683,7 @@ Fonte: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app/
 Retorna o estado brasileiro cujo código IBGE de 2 dígitos (`cUF`, o Código da Unidade da Federação) corresponde ao valor informado.
 
 - É o código de UF do primeiro campo de uma chave de acesso de DF-e, a que `isValidNfeKey` cobre.
-- Aceita string ou número inteiro não negativo.
+- Aceita string ou número inteiro não negativo. Uma string pode ter espaços e hífens; qualquer outro caractere (`'x11'`) retorna `null`.
 - Retorna `null` quando o código não corresponde a nenhum estado. Exporta o tipo `State`.
 
 ```javascript
@@ -1791,7 +1796,7 @@ Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 
 Busca um município brasileiro pelo código IBGE de 7 dígitos.
 
-- Aceita o código como string ou número inteiro não negativo.
+- Aceita o código como string ou número inteiro não negativo. Uma string pode ter espaços e hífens; qualquer outro caractere retorna `null`.
 - Retorna `{ code, name, stateCode }` (`Municipality`), ou `null` quando o código não tem 7 dígitos ou não corresponde a nenhum município.
 
 ```javascript

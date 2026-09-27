@@ -73,8 +73,24 @@ describe("getBankByIspb", () => {
 			expect(getBankByIspb("0000000000")).toBeNull();
 		});
 
-		test("when the ispb sanitizes to an empty string", () => {
+		test("when the ispb has letters and fewer than 8 characters", () => {
 			expect(getBankByIspb("abc")).toBeNull();
+		});
+
+		test("when the ispb has a letter, instead of reading its digits as another ISPB", () => {
+			expect(getBankByIspb("0000000A")).toBeNull();
+			expect(getBankByIspb("A0000000")).toBeNull();
+			expect(getBankByIspb("a0000000")).toBeNull();
+		});
+
+		test("when the ispb has a character other than a letter, a digit, whitespace or a hyphen", () => {
+			expect(getBankByIspb("0000.0000")).toBeNull();
+			expect(getBankByIspb("0000/0000")).toBeNull();
+			expect(getBankByIspb("1e0")).toBeNull();
+		});
+
+		test("when the ispb is only separators", () => {
+			expect(getBankByIspb(" - ")).toBeNull();
 		});
 
 		test("when the ispb is an empty string", () => {

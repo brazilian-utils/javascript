@@ -107,6 +107,14 @@ describe("getMunicipality", () => {
 			await expect(getMunicipality({ code: "3550308?x=1" })).resolves.toBeNull();
 		});
 
+		it("should return null for a code with a letter, instead of reading its digits", async () => {
+			await expect(getMunicipality({ code: "11abc00015" })).resolves.toBeNull();
+		});
+
+		it("should ignore whitespace and hyphens in a code", async () => {
+			await expect(getMunicipality({ code: " 355-030-8 " })).resolves.toEqual(["São Paulo", "SP"]);
+		});
+
 		it("should return null for a code that is neither a string nor a number", async () => {
 			// @ts-expect-error: intentionally invalid input
 			await expect(getMunicipality({ code: null })).resolves.toBeNull();
