@@ -45,6 +45,12 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR3860701190000010000012345C1")).toBe(true);
 		});
 
+		test("for an ISPB with letters, the 'oito caracteres alfanuméricos' of Resolução BCB 585/2026 art. 2 III", () => {
+			expect(isValidIban("BR1012AB34CD000010932840814P2")).toBe(true);
+			expect(isValidIban("BR170000000A000010000012345C2")).toBe(true);
+			expect(isValidIban("br1012ab34cd000010932840814p2")).toBe(true);
+		});
+
 		test("for a valid IBAN whose account type is a letter other than C or P", () => {
 			expect(isValidIban("BR5400000000000010932840814D2")).toBe(true);
 			expect(isValidIban("BR7800000000000010932840814S2")).toBe(true);
@@ -80,7 +86,7 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR150000000000001093284081412")).toBe(false);
 		});
 
-		test("when the owner indicator is 0, which Circular 3.625 art. 2 § 1 does not assign, even though the check digits match", () => {
+		test("when the owner indicator is 0, which Resolução BCB 585/2026 art. 2 § 1 does not assign, even though the check digits match", () => {
 			expect(isValidIban("BR6900000000000010932840814P0")).toBe(false);
 		});
 
@@ -89,7 +95,8 @@ describe("isValidIban", () => {
 		});
 
 		test("when a digit position holds a letter instead, even if the check digits happen to match", () => {
-			expect(isValidIban("BR170000000A000010000012345C2")).toBe(false);
+			expect(isValidIban("BR32000000000000A0000012345C2")).toBe(false);
+			expect(isValidIban("BR320000000000001000001234AC2")).toBe(false);
 		});
 
 		test("when it carries a character outside the print format", () => {

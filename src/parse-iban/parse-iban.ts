@@ -25,8 +25,11 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * parseIban(Number.NaN); // "" (not a non-negative safe integer)
  * ```
  *
+ * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585
+ * Resolução BCB nº 585, de 24/08/2026 (DOU 25/08/2026), art. 2º, which revoked Circular BCB nº
+ * 3.625/2013 and keeps its layout, with an alphanumeric ISPB.
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
- * Circular BCB nº 3.625/2013
+ * Circular BCB nº 3.625/2013 (revoked), the original layout
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf
  * Diretrizes de Implementação do IBAN no Brasil, which fix the 29 character Brazilian length.
  */

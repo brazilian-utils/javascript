@@ -30,8 +30,11 @@ import { GROUP_SIZE } from "./constants";
  * formatIban("BR15 0000-0000.0000/1093 2840 814P-2"); // "BR15 0000 0000 0000 1093 2840 814P 2"
  * ```
  *
+ * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585
+ * Resolução BCB nº 585, de 24/08/2026 (DOU 25/08/2026), art. 2º, which revoked Circular BCB nº
+ * 3.625/2013 and keeps its layout, with an alphanumeric ISPB.
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
- * Circular BCB nº 3.625/2013
+ * Circular BCB nº 3.625/2013 (revoked), the original layout
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf
  * Diretrizes de Implementação do IBAN no Brasil
  */

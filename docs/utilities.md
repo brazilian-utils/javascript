@@ -1411,7 +1411,8 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 Check if a Brazilian IBAN (International Bank Account Number) is valid. Only Brazilian IBANs (country code `BR`) are recognized; any other country returns `false`.
 
-- Layout, 29 characters: `BR`, 2 check digits (ISO 7064 MOD 97-10), 8 digit ISPB, 5 digit branch, 10 digit account, 1 letter account type, 1 owner indicator.
+- Layout, 29 characters (Resolução BCB 585/2026, art. 2º, which revoked Circular BCB 3.625/2013 and kept its layout): `BR`, 2 check digits (ISO 7064 MOD 97-10), 8 character ISPB, 5 digit branch, 10 digit account, 1 letter account type, 1 owner indicator.
+- The ISPB may hold letters: the Resolução makes it "oito caracteres alfanuméricos", where the Circular said "numéricos". Up to 2.4.0 only digits were accepted.
 - Account type: any letter, usually `C` or `P`. Owner: `1` to `9`, then `A` to `Z`.
 - Accepts the compact form or groups of 4 split by one whitespace, `.`, `-` or `/`, in any case.
 
@@ -1421,12 +1422,13 @@ import { isValidIban } from '@brazilian-utils/brazilian-utils';
 isValidIban('BR1500000000000010932840814P2'); // true
 isValidIban('BR15 0000 0000 0000 1093 2840 814P 2'); // true (grouping spaces)
 isValidIban('BR15-0000-0000-0000-1093-2840-814P-2'); // true (any of the mask characters)
+isValidIban('BR1012AB34CD000010932840814P2'); // true (alphanumeric ISPB)
 isValidIban('BR1500000000000010932840814P3'); // false (bad check digits)
 isValidIban('BR15 000 00000 0000 1093 2840 814P 2'); // false (a separator inside a group)
 isValidIban('DE89370400440532013000'); // false (non Brazilian IBAN)
 ```
 
-Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
+Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), which revoked [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
 
 ### formatIban
 
@@ -1479,7 +1481,7 @@ getIbanInfo('DE89370400440532013000'); // null (non Brazilian IBAN)
 getIbanInfo('BR15 000 00000 0000 1093 2840 814P 2'); // null (a separator inside a group)
 ```
 
-Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
+Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), which revoked [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
 
 ## Currency, numbers and dates in words
 

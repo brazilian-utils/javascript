@@ -77,6 +77,18 @@ describe("getIbanInfo", () => {
 			});
 		});
 
+		test("for an ISPB with letters, which Resolução BCB 585/2026 allows", () => {
+			expect(getIbanInfo("BR10 12AB 34CD 0000 1093 2840 814P 2")).toEqual({
+				countryCode: "BR",
+				checkDigits: "10",
+				bankIspb: "12AB34CD",
+				branch: "00001",
+				account: "0932840814",
+				accountType: "P",
+				owner: "2",
+			});
+		});
+
 		test("for a valid IBAN with an account type letter other than C or P", () => {
 			expect(getIbanInfo("BR5400000000000010932840814D2")).toEqual({
 				countryCode: "BR",
@@ -111,7 +123,7 @@ describe("getIbanInfo", () => {
 			expect(getIbanInfo("BR150000000000001093284081412")).toBeNull();
 		});
 
-		test("when the owner indicator is 0, which Circular 3.625 art. 2 § 1 does not assign, even though the check digits match", () => {
+		test("when the owner indicator is 0, which Resolução BCB 585/2026 art. 2 § 1 does not assign, even though the check digits match", () => {
 			expect(getIbanInfo("BR6900000000000010932840814P0")).toBeNull();
 		});
 

@@ -7,15 +7,18 @@ export type IbanInfo = {
 	countryCode: "BR";
 	/** The 2 digit ISO 7064 MOD 97-10 check digits. */
 	checkDigits: string;
-	/** The 8 digit ISPB (Identificador do Sistema de Pagamentos Brasileiro) of the institution. */
+	/**
+	 * The 8 character ISPB (Identificador do Sistema de Pagamentos Brasileiro) of the institution,
+	 * digits or, since Resolução BCB nº 585/2026, upper case letters too.
+	 */
 	bankIspb: string;
 	/** The 5 digit branch (agência) number, zero-padded. */
 	branch: string;
 	/** The 10 digit account (conta) number, zero-padded. */
 	account: string;
 	/**
-	 * The 1 letter account type, as published in the "Dicionário de Tipos" of the Catálogo de
-	 * Mensagens e de Arquivos do SFN. `"C"` (conta corrente) and `"P"` (conta poupança) are the
+	 * The 1 letter account type, as published in the "dicionário de tipos" of the Catálogo de
+	 * Serviços do Sistema Financeiro Nacional. `"C"` (conta corrente) and `"P"` (conta poupança) are the
 	 * usual values, but any letter is allowed.
 	 */
 	accountType: string;
@@ -44,7 +47,7 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * Parses a Brazilian IBAN (International Bank Account Number) into its fields.
  *
  * The 29 character Brazilian IBAN is laid out as 2 (country code, always `BR`) + 2 (ISO 7064
- * MOD 97-10 check digits) + 8 (ISPB) + 5 (branch) + 10 (account) + 1 (account type, any letter,
+ * MOD 97-10 check digits) + 8 (ISPB, alphanumeric) + 5 (branch) + 10 (account) + 1 (account type, any letter,
  * usually `C` for conta corrente or `P` for conta poupança) + 1 (owner indicator, `1` to `9`
  * then `A` to `Z`). Only
  * Brazilian IBANs are supported: the field layout of the other ISO 13616 countries is out of
@@ -79,8 +82,11 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * getIbanInfo("BR15 000 00000 0000 1093 2840 814P 2"); // null (a separator inside a group)
  * ```
  *
+ * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585
+ * Resolução BCB nº 585, de 24/08/2026 (DOU 25/08/2026), art. 2º, which revoked Circular BCB nº
+ * 3.625/2013 and keeps its layout, with an alphanumeric ISPB.
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
- * Circular BCB nº 3.625/2013
+ * Circular BCB nº 3.625/2013 (revoked), the original layout
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf
  * Diretrizes de Implementação do IBAN no Brasil
  * @see Official: https://www.iso.org/standard/81090.html
