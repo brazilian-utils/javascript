@@ -41,8 +41,10 @@ export type FormatCpfOptions = {
  * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
  * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set
  * by Lei nº 12.309/2010 (LDO 2011), art. 87, § 5º, and repeated by the LDOs after it.
- * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm
- * Lei nº 15.321/2025, the LDO for 2026.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163
+ * Lei nº 15.321/2025, the LDO for 2026, art. 163: the CPF published under its arts. 160 and 162
+ * is disclosed so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores do
+ * número de inscrição no CPF", the same rule.
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const formatCpf = (value: string | number, options?: FormatCpfOptions): string => {

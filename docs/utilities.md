@@ -38,7 +38,7 @@ isValidCpf('111 444 777 35'); // true (whitespace mask)
 Format a CPF.
 
 - **Options** (`FormatCpfOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits.
-- `obfuscate` is applied after `pad`. It follows the rule the Leis de Diretrizes Orçamentárias set for publishing a CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), first set by Lei nº 12.309/2010, art. 87, § 5º; [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the LDO for 2026).
+- `obfuscate` is applied after `pad`. It follows the rule the Leis de Diretrizes Orçamentárias set for publishing a CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), first set by Lei nº 12.309/2010, art. 87, § 5º; [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the LDO for 2026, repeats it).
 
 ```javascript
 import { formatCpf } from '@brazilian-utils/brazilian-utils';
@@ -1183,7 +1183,7 @@ import { generatePis } from '@brazilian-utils/brazilian-utils';
 generatePis(); // '91077906857'
 ```
 
-Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the one for 2026).
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the one for 2026, repeats it).
 
 ## Processo jurídico
 
@@ -2183,7 +2183,7 @@ import { generateCnh } from '@brazilian-utils/brazilian-utils';
 generateCnh(); // '02650306461'
 ```
 
-Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the one for 2026).
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the one for 2026, repeats it).
 
 ## Legal nature
 
@@ -2393,7 +2393,7 @@ generateVoterId('SP'); // valid random voter ID for Sao Paulo
 generateVoterId('XX'); // falls back to "ZZ" instead of throwing
 ```
 
-Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm) is the one for 2026).
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the one for 2026, repeats it).
 
 ## CNS
 

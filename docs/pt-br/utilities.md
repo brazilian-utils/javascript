@@ -38,7 +38,7 @@ isValidCpf('111 444 777 35'); // true (máscara com espaços)
 Formata um CPF.
 
 - **Opções** (`FormatCpfOptions`): `pad` preenche o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores.
-- `obfuscate` é aplicada após o `pad`. Segue a regra que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), regra criada pela Lei nº 12.309/2010, art. 87, § 5º; a LDO de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
+- `obfuscate` é aplicada após o `pad`. Segue a regra que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), regra criada pela Lei nº 12.309/2010, art. 87, § 5º; a LDO de 2026, [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), a repete).
 
 ```javascript
 import { formatCpf } from '@brazilian-utils/brazilian-utils';
@@ -1183,7 +1183,7 @@ import { generatePis } from '@brazilian-utils/brazilian-utils';
 generatePis(); // '91077906857'
 ```
 
-Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
+Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026, [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), a repete).
 
 ## Processo jurídico
 
@@ -2183,7 +2183,7 @@ import { generateCnh } from '@brazilian-utils/brazilian-utils';
 generateCnh(); // '02650306461'
 ```
 
-Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
+Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026, [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), a repete).
 
 ## Natureza jurídica
 
@@ -2393,7 +2393,7 @@ generateVoterId('SP'); // título de eleitor aleatório válido de São Paulo
 generateVoterId('XX'); // usa "ZZ" em vez de lançar erro
 ```
 
-Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026 é a [Lei nº 15.321/2025](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15321.htm)).
+Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026, [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), a repete).
 
 ## CNS
 
