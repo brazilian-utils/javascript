@@ -1,6 +1,6 @@
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { LENGTH } from "./constants";
+import { CEST_LENGTH } from "../is-valid-cest/constants";
 
 /**
  * Removes CEST (Código Especificador da Substituição Tributária) formatting characters and
@@ -30,4 +30,4 @@ import { LENGTH } from "./constants";
  * codes in the "NN.NNN.NN" form.
  */
 export const parseCest = (value: string | number): string =>
-	isLookupCode(value) ? sanitizeToDigits(value).slice(0, LENGTH) : "";
+	isLookupCode(value) ? sanitizeToDigits(value).slice(0, CEST_LENGTH) : "";
