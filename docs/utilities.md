@@ -160,6 +160,7 @@ Generate a valid random CNPJ.
 
 - The first argument is either the version, `1` (default) numeric or `2` alphanumeric, or a `GenerateCnpjParams` object with `version` plus `branch`.
 - `branch` is the "número de ordem" (filial) block, an integer from 1 to 9999 (random by default). An invalid `branch` is ignored. The block stays numeric in both versions.
+- A random ordem block is never `0000`: the establishments of a root are numbered from `0001`, the matriz, on, so that block is never assigned.
 
 ```javascript
 import { generateCnpj } from '@brazilian-utils/brazilian-utils'

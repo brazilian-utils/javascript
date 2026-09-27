@@ -160,6 +160,7 @@ Gera um CNPJ válido aleatório.
 
 - O primeiro argumento é a versão, `1` (padrão) numérico ou `2` alfanumérico, ou um objeto `GenerateCnpjParams` com `version` mais `branch`.
 - `branch` é o bloco do "número de ordem" (filial), um inteiro de 1 a 9999 (aleatório por padrão). Um `branch` inválido é ignorado. O bloco continua numérico nas duas versões.
+- Um bloco de ordem aleatório nunca é `0000`: os estabelecimentos de uma raiz são numerados a partir de `0001`, a matriz, então esse bloco nunca é atribuído.
 
 ```javascript
 import { generateCnpj } from '@brazilian-utils/brazilian-utils'
