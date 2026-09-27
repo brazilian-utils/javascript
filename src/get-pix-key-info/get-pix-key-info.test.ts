@@ -68,7 +68,17 @@ describe("getPixKeyInfo", () => {
 		test("when it is an invalid e-mail", () => {
 			expect(getPixKeyInfo("fulano@")).toBeNull();
 			expect(getPixKeyInfo("@example.com")).toBeNull();
-			expect(getPixKeyInfo("fulano@example")).toBeNull();
+			expect(getPixKeyInfo("fulano@example.com.")).toBeNull();
+			expect(getPixKeyInfo("fulano@-example.com")).toBeNull();
+			expect(getPixKeyInfo("fulano@example-.com")).toBeNull();
+			expect(getPixKeyInfo("fulano@exa_mple.com")).toBeNull();
+			expect(getPixKeyInfo("ful%ano@example.com")).toBeNull();
+			expect(getPixKeyInfo('"fulano"@example.com')).toBeNull();
+			expect(getPixKeyInfo("fulano@@example.com")).toBeNull();
+		});
+
+		test("when a domain label is longer than the 63 characters of the DICT pattern", () => {
+			expect(getPixKeyInfo(`a@${"b".repeat(64)}.com`)).toBeNull();
 		});
 
 		test("when the e-mail is longer than 77 characters", () => {
@@ -184,6 +194,41 @@ describe("getPixKeyInfo", () => {
 				type: "email",
 				value: "fulano@example.com",
 			});
+		});
+
+		test("when it only matches the DICT pattern, not isValidEmail", () => {
+			for (const email of [
+				"a&b@example.com",
+				"a!b@example.com",
+				"a#b@example.com",
+				"a$b@example.com",
+				"a*b@example.com",
+				"a/b@example.com",
+				"a=b@example.com",
+				"a?b@example.com",
+				"a^b@example.com",
+				"a`b@example.com",
+				"a{b}@example.com",
+				"a|b@example.com",
+				"a~b@example.com",
+				".ab@example.com",
+				"a..b@example.com",
+				"ab.@example.com",
+				"a@localhost",
+				"a@example.123",
+			]) {
+				expect(getPixKeyInfo(email)).toEqual({ type: "email", value: email });
+			}
+		});
+
+		test("when it is the single label domain isValidEmail rejects, lowercased", () => {
+			expect(getPixKeyInfo("Fulano@Example")).toEqual({ type: "email", value: "fulano@example" });
+		});
+
+		test("when a domain label is exactly 63 characters long", () => {
+			const email = `a@${"b".repeat(63)}.com`;
+
+			expect(getPixKeyInfo(email)).toEqual({ type: "email", value: email });
 		});
 
 		test("when it is exactly 77 characters long", () => {

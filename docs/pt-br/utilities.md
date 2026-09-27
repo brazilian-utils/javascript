@@ -441,13 +441,14 @@ Identifica uma chave Pix e a normaliza para a forma canônica que o DICT espera 
 - Retorna um `PixKeyInfo` com o `type` (`PixKeyType`) e o `value`.
 - O `value` canônico é só dígitos para CPF ou CNPJ (letras maiúsculas), e-mail minúsculo, celular em E.164 ou UUID minúsculo.
 - Um valor de 11 dígitos válido como CPF e celular é lido como CPF, salvo se escrito como telefone (prefixo `+55` ou DDD entre parênteses).
-- Um e-mail com mais de 77 caracteres é rejeitado.
+- Um e-mail é conferido, já em minúsculas, contra a expressão regular que a API do DICT registra e o limite de 77 caracteres, não contra `isValidEmail`: a parte local pode ter qualquer um de ``.!#$&'*+/=?^_`{|}~-``, pontos em qualquer posição inclusive, e o domínio pode ter um só rótulo (`a@localhost`).
 
 ```javascript
 import { getPixKeyInfo } from '@brazilian-utils/brazilian-utils';
 
 getPixKeyInfo('123.456.789-09'); // { type: 'cpf', value: '12345678909' }
 getPixKeyInfo('Fulano@Example.COM '); // { type: 'email', value: 'fulano@example.com' }
+getPixKeyInfo('a&b@example.com'); // { type: 'email', value: 'a&b@example.com' } (expressão do DICT, isValidEmail o rejeita)
 getPixKeyInfo('(11) 98765-4321'); // { type: 'phone', value: '+5511987654321' }
 getPixKeyInfo('71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D');
 // { type: 'evp', value: '71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d' }

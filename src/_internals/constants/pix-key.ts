@@ -1,4 +1,18 @@
+/**
+ * The longest e-mail key the DICT registers: "E-mail deve possuir no máximo 77 caracteres e deve
+ * ser em minúsculo" (DICT API, tag "Chave").
+ */
 export const EMAIL_MAX_LENGTH = 77;
+
+/**
+ * The regular expression the DICT API registers for an e-mail key, verbatim (DICT API, tag
+ * "Chave", type `EMAIL`), which requires the address in lowercase ("deve ser em minúsculo"). It
+ * is not the syntax `isValidEmail` checks: the local part may carry any of
+ * ``.!#$&'*+/=?^_`{|}~-``, with dots anywhere (`.ab`, `a..b`, `ab.`), and the domain may be a
+ * single label (`a@localhost`) or end in a numeric one (`a@example.123`).
+ */
+export const PIX_EMAIL_REGEX =
+	/^[a-z0-9.!#$&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/;
 
 /**
  * A DICT random key (EVP) is a lowercase UUID written with its punctuation. The DICT issues

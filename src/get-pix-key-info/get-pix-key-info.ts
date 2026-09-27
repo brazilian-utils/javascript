@@ -33,7 +33,10 @@ const NORMALIZERS: Readonly<Record<PixKeyType, (trimmed: string) => string>> = {
  * The canonical forms are the ones listed in "Formatação das chaves do DICT no BR Code":
  * - `cpf`: 11 digits, no mask;
  * - `cnpj`: 14 characters, no mask, uppercase for the alphanumeric format;
- * - `email`: trimmed and lowercased, at most 77 characters;
+ * - `email`: trimmed and lowercased, matching the pattern the DICT API registers for an e-mail
+ *   key and at most 77 characters. That pattern is not the syntax `isValidEmail` checks: the
+ *   local part may carry any of ``.!#$&'*+/=?^_`{|}~-``, dots included anywhere, and the domain
+ *   may be a single label, so `"a&b@example.com"` and `"a@localhost"` are e-mail keys;
  * - `phone`: E.164, `+55` followed by the DDD and the subscriber number, so at most 14
  *   characters. The manual registers a "número de telefone celular", so only mobile numbers
  *   are recognized; a landline is not a Pix key. Masked, bare and `+55` prefixed inputs are
@@ -74,7 +77,8 @@ const NORMALIZERS: Readonly<Record<PixKeyType, (trimmed: string) => string>> = {
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
  * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
- * reference.
+ * reference. Tag "Chave", type `EMAIL`: "E-mail deve possuir no máximo 77 caracteres e deve
+ * ser em minúsculo", with the pattern this library applies verbatim.
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  */

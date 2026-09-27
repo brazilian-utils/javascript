@@ -14,6 +14,11 @@ describe("detectPixKeyType", () => {
 		expect(detectPixKeyType("Kelvin@example.com")).toBe("email");
 	});
 
+	test("should check an e-mail address against the DICT pattern, not isValidEmail", () => {
+		expect(detectPixKeyType("A{B}@Example.123")).toBe("email");
+		expect(detectPixKeyType("a b@example.com")).toBeNull();
+	});
+
 	test("should read a value valid both as a CPF and as a mobile number as a CPF", () => {
 		expect(detectPixKeyType("51998259765")).toBe("cpf");
 		expect(detectPixKeyType("+5551998259765")).toBe("phone");
