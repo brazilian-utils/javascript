@@ -188,10 +188,13 @@ export {
 } from "./get-pix-payload-info/get-pix-payload-info";
 export { type ServiceItem, getServiceItem } from "./get-service-item/get-service-item";
 export { getStateByCep } from "./get-state-by-cep/get-state-by-cep";
+export { type Region, type RegionCode, getRegions } from "./get-regions/get-regions";
 export { getStateByIbgeCode } from "./get-state-by-ibge-code/get-state-by-ibge-code";
 export { getStateCodeByName } from "./get-state-code-by-name/get-state-code-by-name";
 export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-code";
+export { getStateCapital } from "./get-state-capital/get-state-capital";
 export { getStates } from "./get-states/get-states";
+export { getStatesByRegion } from "./get-states-by-region/get-states-by-region";
 export { getTimezoneByState } from "./get-timezone-by-state/get-timezone-by-state";
 export { type BusinessDayOptions, isBusinessDay } from "./is-business-day/is-business-day";
 export { type IsHolidayParams, isHoliday } from "./is-holiday/is-holiday";

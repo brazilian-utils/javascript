@@ -1780,6 +1780,58 @@ getStateNameByCode('  Rj  '); // 'Rio de Janeiro'
 getStateNameByCode('ZZ'); // null
 ```
 
+### getStateCapital
+
+Get the capital of a Brazilian state, as the same `{ code, name, stateCode }` (`Municipality`) that `getMunicipalityByCode` returns for it.
+
+- The match ignores case and surrounding whitespace. Returns `null` when no state matches.
+- For the Distrito Federal, which has no municipalities, the capital is Brasília, with the code the IBGE gives the whole district.
+
+```javascript
+import { getStateCapital } from '@brazilian-utils/brazilian-utils';
+
+getStateCapital('SP'); // { code: '3550308', name: 'São Paulo', stateCode: 'SP' }
+getStateCapital('to'); // { code: '1721000', name: 'Palmas', stateCode: 'TO' }
+getStateCapital('ZZ'); // null
+```
+
+Source: [IBGE, Anuário Estatístico do Brasil, table 1.1.1.2 (state capitals, 2025)](https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html).
+
+### getRegions
+
+Get the five Brazilian regions (Grandes Regiões), each with its code (the same `regionCode` every state carries), name and IBGE identifier, in the order of that identifier. Exports the `Region` and `RegionCode` types.
+
+```javascript
+import { getRegions } from '@brazilian-utils/brazilian-utils';
+
+getRegions();
+// [
+//   { code: 'N', name: 'Norte', ibgeCode: 1 },
+//   { code: 'NE', name: 'Nordeste', ibgeCode: 2 },
+//   { code: 'SE', name: 'Sudeste', ibgeCode: 3 },
+//   { code: 'S', name: 'Sul', ibgeCode: 4 },
+//   { code: 'CO', name: 'Centro-Oeste', ibgeCode: 5 },
+// ]
+```
+
+Source: [IBGE, API de Localidades, `regioes`](https://servicodados.ibge.gov.br/api/v1/localidades/regioes).
+
+### getStatesByRegion
+
+Get the states of a region, given its code (`'N'`, `'NE'`, `'SE'`, `'S'` or `'CO'`), sorted by name the way `getStates` sorts them.
+
+- The match ignores case and surrounding whitespace. Returns `[]` when no region matches.
+
+```javascript
+import { getStatesByRegion } from '@brazilian-utils/brazilian-utils';
+
+getStatesByRegion('S').map((state) => state.code); // ['PR', 'RS', 'SC']
+getStatesByRegion('co').map((state) => state.code); // ['DF', 'GO', 'MT', 'MS']
+getStatesByRegion('X'); // []
+```
+
+Source: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/api/v1/localidades/estados).
+
 ### getTimezoneByState
 
 Get the IANA time zone name (tzdata zone) of a Brazilian state: the zone of its capital.

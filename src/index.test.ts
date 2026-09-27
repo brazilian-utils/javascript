@@ -106,6 +106,8 @@ import {
 	type PixKeyType,
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
+	type Region,
+	type RegionCode,
 	type RegistroProfissionalCouncil,
 	type ServiceItem,
 	type State,
@@ -225,10 +227,13 @@ const PUBLIC = [
 	"getPixPayloadInfo",
 	"getServiceItem",
 	"getStateByCep",
+	"getRegions",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
 	"getStateNameByCode",
+	"getStateCapital",
 	"getStates",
+	"getStatesByRegion",
 	"getTimezoneByState",
 	"isBusinessDay",
 	"isHoliday",
@@ -451,6 +456,8 @@ describe("Public API", () => {
 			PixKeyType: PixKeyType;
 			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
+			Region: Region;
+			RegionCode: RegionCode;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
 			ServiceItem: ServiceItem;
 			State: State;

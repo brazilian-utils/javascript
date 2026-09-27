@@ -1780,6 +1780,58 @@ getStateNameByCode('  Rj  '); // 'Rio de Janeiro'
 getStateNameByCode('ZZ'); // null
 ```
 
+### getStateCapital
+
+Retorna a capital de um estado brasileiro, no mesmo formato `{ code, name, stateCode }` (`Municipality`) que o `getMunicipalityByCode` retorna para ela.
+
+- A busca ignora maiúsculas e minúsculas e os espaços nas pontas. Retorna `null` quando nenhum estado corresponde.
+- Para o Distrito Federal, que não tem municípios, a capital é Brasília, com o código que o IBGE dá ao distrito todo.
+
+```javascript
+import { getStateCapital } from '@brazilian-utils/brazilian-utils';
+
+getStateCapital('SP'); // { code: '3550308', name: 'São Paulo', stateCode: 'SP' }
+getStateCapital('to'); // { code: '1721000', name: 'Palmas', stateCode: 'TO' }
+getStateCapital('ZZ'); // null
+```
+
+Fonte: [IBGE, Anuário Estatístico do Brasil, tabela 1.1.1.2 (capitais, 2025)](https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html).
+
+### getRegions
+
+Retorna as cinco Grandes Regiões do Brasil, cada uma com o código (o mesmo `regionCode` de cada estado), o nome e o identificador do IBGE, na ordem desse identificador. Exporta os tipos `Region` e `RegionCode`.
+
+```javascript
+import { getRegions } from '@brazilian-utils/brazilian-utils';
+
+getRegions();
+// [
+//   { code: 'N', name: 'Norte', ibgeCode: 1 },
+//   { code: 'NE', name: 'Nordeste', ibgeCode: 2 },
+//   { code: 'SE', name: 'Sudeste', ibgeCode: 3 },
+//   { code: 'S', name: 'Sul', ibgeCode: 4 },
+//   { code: 'CO', name: 'Centro-Oeste', ibgeCode: 5 },
+// ]
+```
+
+Fonte: [IBGE, API de Localidades, `regioes`](https://servicodados.ibge.gov.br/api/v1/localidades/regioes).
+
+### getStatesByRegion
+
+Retorna os estados de uma região, dado o código dela (`'N'`, `'NE'`, `'SE'`, `'S'` ou `'CO'`), em ordem alfabética, como o `getStates` ordena.
+
+- A busca ignora maiúsculas e minúsculas e os espaços nas pontas. Retorna `[]` quando nenhuma região corresponde.
+
+```javascript
+import { getStatesByRegion } from '@brazilian-utils/brazilian-utils';
+
+getStatesByRegion('S').map((state) => state.code); // ['PR', 'RS', 'SC']
+getStatesByRegion('co').map((state) => state.code); // ['DF', 'GO', 'MT', 'MS']
+getStatesByRegion('X'); // []
+```
+
+Fonte: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/api/v1/localidades/estados).
+
 ### getTimezoneByState
 
 Retorna o nome do fuso horário IANA (zona do tzdata) de um estado brasileiro: o fuso da sua capital.
