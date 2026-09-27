@@ -3418,6 +3418,7 @@ Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posic
   - DF: a regra de 13 dígitos do AC com os prefixos 07 e 08 (o DF passou a 08 quando os números iniciados por 07 acabaram).
   - SP: o formato de produtor rural `P0MMMSSSSD000`, com o zero depois do `P`; o `P` pode ser minúsculo.
   - TO: 11 dígitos, com os dígitos de tipo, ou os 9 dígitos que a SEFAZ-TO atribui desde a Portaria SEFAZ-TO nº 676/2002.
+  - AM: a regra do dígito verificador da página tem dois ramos e não define "Resto"; a biblioteca o lê como a soma módulo 11 e dá 0 a uma soma 0 ou 1, a regra comum de módulo 11.
   - MG: um primeiro dígito verificador 10, de uma soma que já é múltiplo de dez, é lido como 0.
   - PE: o formato eFisco de 9 dígitos e o antigo formato CACEPE de 14 dígitos, ambos na página do SINTEGRA (a Portaria SF nº 087/2007 converteu os números antigos, mas não fixou data a partir da qual deixam de valer).
   - AL: o terceiro dígito, o tipo de empresa, deve ser 0, 3, 5, 7 ou 8, os valores que a página do SINTEGRA lista.

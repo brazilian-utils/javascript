@@ -534,6 +534,13 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   0 (Normal), 3 (Produtor Rural), 5 (Substituta), 7 (Micro-Empresa Ambulante) or
  *   8 (Micro-Empresa). The page gives the list as the meaning of that digit without calling it
  *   closed; no SEFAZ-AL text gives another value.
+ * - AM: the SINTEGRA page gives two branches: "Se Soma < 11 Então Dígito = 11 - Soma" and
+ *   "Senão Quociente = Soma / 11; Se Resto < ou = 1 Então Dígito = 0 Senão Dígito = 11 - Resto".
+ *   It does not define "Resto" and does not say what happens to a Soma of 0 or 1, for which the
+ *   first branch gives 11 or 10, not a digit. This library's reading: "Resto" is Soma modulo 11,
+ *   and a Soma of 0 or 1 falls under "Resto < ou = 1", giving 0. For a Soma of 2 to 10 both
+ *   branches give the same digit, so AM uses the shared modulus 11 rule (weights 9 down to 2, a
+ *   remainder of 0 or 1 giving 0).
  * - PE: the 9 digit eFisco number (7 digits and 2 check digits) and the old 14 digit CACEPE
  *   number (13 digits and 1 check digit), both on the SINTEGRA page. Portaria SF nº 087/2007
  *   converted every 14 digit number into a 9 digit one (the first 6 digits dropped, the next 7
@@ -548,10 +555,8 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * - An all zero registration is accepted for every state whose published formula yields a
  *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT with 9 or 11 digits, PB,
  *   PE with 9 digits, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike isValidCpf and
- *   isValidCnpj, which reject repeated digits. AM is on that list through the second branch of
- *   its published formula only: the page's first branch, "Se Soma < 11 Então Dígito = 11 - Soma",
- *   gives 11 for an all zero registration, while the "resto <= 1 ⇒ 0" branch, the one
- *   implemented here, gives 0.
+ *   isValidCnpj, which reject repeated digits. AM is on that list through this library's reading
+ *   of its formula (see the AM note): the page's first branch alone would give 11.
  *
  * The state can also be passed first and the registration second, `isValidIe('SP', '110042490114')`,
  * the 2.3.0 form, which still works and is deprecated. The two forms are told apart by the first
@@ -579,6 +584,8 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * "FORMAÇÃO: 24XNNNNND, sendo: 24 – Código do Estado; X – Tipo de empresa (0-Normal, 3-Produtor
  * Rural, 5-Substituta, 7- Micro-Empresa Ambulante, 8-Micro-Empresa)".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AM.html
+ * "Soma = (Hx9)+(Gx8)+(Fx7)+(Ex6)+(Dx5)+(Cx4)+(Bx3)+(Ax2); Se Soma < 11 Então Dígito = 11 - Soma;
+ * Senão Quociente = Soma / 11; Se Resto < ou = 1 Então Dígito = 0; Senão Dígito = 11 - Resto".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_AP.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_BA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_CE.html

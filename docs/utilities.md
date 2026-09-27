@@ -3418,6 +3418,7 @@ Check if an inscrição estadual (state registration) is valid for a state. **De
   - DF: the 13 digit AC rule under the prefixes 07 and 08 (DF moved to 08 when the numbers starting with 07 ran out).
   - SP: the produtor rural form `P0MMMSSSSD000`, the zero after the `P` included; the `P` may be written in lower case.
   - TO: 11 digits, with the tipo digits, or the 9 digits SEFAZ-TO has issued since Portaria SEFAZ-TO nº 676/2002.
+  - AM: the page's check digit rule has two branches and leaves "Resto" undefined; the library reads it as the sum modulo 11 and gives 0 to a sum of 0 or 1, the shared modulus 11 rule.
   - MG: a first check digit of 10, from a sum that is already a multiple of ten, is read as 0.
   - PE: the 9 digit eFisco form and the old 14 digit CACEPE form, both on the SINTEGRA page (Portaria SF nº 087/2007 converted the old numbers but set no date after which they are void).
   - AL: the third digit, the tipo de empresa, must be 0, 3, 5, 7 or 8, the values the SINTEGRA page lists.
