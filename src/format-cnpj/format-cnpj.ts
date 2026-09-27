@@ -46,8 +46,10 @@ export type FormatCnpjOptions = {
  * `formatCnpj("q0slfmbd7vx439", { version: 2 })` returns `"Q0.SLF.MBD/7VX4-39"`.
  *
  * `obfuscate` is a convention of this library, not an official rule: no law or Receita Federal
- * act sets a masking rule for the CNPJ, whose data are public. It hides the first 2 characters
- * and the 2 check digits, after the rule the Leis de Diretrizes Orçamentárias set for the CPF.
+ * act sets a masking rule for the CNPJ, whose data are public, the ANPD says "não há um padrão
+ * para o mascaramento", and the Banco Central's Pix rules show the CNPJ in full where they mask
+ * the CPF. It hides the first 2 characters and the 2 check digits, after the rule the Leis de
+ * Diretrizes Orçamentárias set for the CPF.
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
@@ -55,6 +57,14 @@ export type FormatCnpjOptions = {
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf
  * Receita Federal, CNPJ alfanumérico, perguntas e respostas: the base positions take the digits 0
  * to 9 and the capital letters A to Z, the 2 check digits stay numeric.
+ * @see Official: https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf
+ * ANPD, Estudo Técnico sobre Anonimização de Dados na LGPD (v1.0, November 2023), "Técnica de
+ * Mascaramento": "como não há um padrão para o mascaramento, é possível que partes distintas dos
+ * dados estejam visíveis".
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf
+ * Banco Central, Pix, Requisitos Mínimos para a Experiência do Usuário: "CPF mascarado (ex:
+ * ***.777.888-**) /CNPJ", the CNPJ shown in full, and "Não deverá haver qualquer mascaramento de
+ * chave Pix no retorno da consulta ao DICT".
  */
 export const formatCnpj = (value: string | number, options?: FormatCnpjOptions): string => {
 	if (!isLookupCode(value)) return "";

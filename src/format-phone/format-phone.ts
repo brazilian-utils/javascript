@@ -133,9 +133,12 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * outside the union falls back to the default `"sn"` instead of throwing.
  *
  * `options.obfuscate` hides the subscriber number under every mask, for the places where a
- * number is shown to someone who should only recognize it (LGPD, art. 6º III, necessidade). The
- * gov.br account shows the registered mobile as `"*********00"`, only the last 2 digits, and
- * this keeps that count. The 2 digits are the last ones the mask itself has room for, so under
+ * number is shown to someone who should only recognize it (LGPD, art. 6º III, necessidade). It is
+ * a convention of this library, not an official rule: no law, Anatel act or ANPD guidance sets
+ * which digits of a phone number to show (the ANPD says "não há um padrão para o mascaramento"),
+ * and the Banco Central forbids masking a Pix key, a phone number included, when the DICT lookup
+ * returns it. The gov.br account shows the registered mobile as `"*********00"`, only the last 2
+ * digits, and this keeps that count. The 2 digits are the last ones the mask itself has room for, so under
  * the default `"sn"` a DDD-prefixed value is truncated first, exactly as it is without
  * `obfuscate`, and the visible pair is the 8th and 9th digit rather than the last 2 of `value`.
  * The prefix that names a region or a service instead of a subscriber also stays: the DDD, the
@@ -184,6 +187,14 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * @see Official: https://acesso.gov.br/faq/_perguntasdafaq/formarrecuperarconta.html
  * The gov.br account FAQ, whose "Recuperar senha com celular" screen shows the registered mobile
  * as `"*********00"`, the convention `obfuscate` follows for the number of visible digits.
+ * @see Official: https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf
+ * ANPD, Estudo Técnico sobre Anonimização de Dados na LGPD (v1.0, November 2023), "Técnica de
+ * Mascaramento": "como não há um padrão para o mascaramento, é possível que partes distintas dos
+ * dados estejam visíveis".
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf
+ * Banco Central, Pix, Requisitos Mínimos para a Experiência do Usuário: "CPF mascarado (ex:
+ * ***.777.888-**) /CNPJ", the CNPJ shown in full, and "Não deverá haver qualquer mascaramento de
+ * chave Pix no retorno da consulta ao DICT".
  */
 export const formatPhone = (value: string | number, options?: FormatPhoneOptions): string => {
 	if (!isLookupCode(value)) return "";
