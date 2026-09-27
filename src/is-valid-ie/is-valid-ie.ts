@@ -516,7 +516,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   starting with 10 ran out. The SINTEGRA page (updated 02/09/2022) gives "10 ou 11 ou 20 a 29".
  *   The Secretaria's roteiro de crítica (published 20/08/2012) gives "10 ou 11 ou 15", the
  *   10103105 to 10119997 range and the dual digit registration 11094402. No norm names 15 or 21
- *   to 29. The sources agree on the weights and the modulus.
+ *   to 29. The sources agree on the weights and the modulus, not on the remainder 1: the SINTEGRA
+ *   page (2022) always reads a remainder of 0 or 1 as 0, while the 2012 roteiro reads a remainder
+ *   of 1 as 1 in the range 10103105 to 10119997 and accepts both digits for 11094402. This
+ *   library follows the roteiro, as 2.4.0 did, so `101031050` is rejected.
  * - MG: the first check digit is the sum of the product digits subtracted from "a primeira dezena
  *   exata imediatamente superior". A sum that is already a multiple of ten is read as its own
  *   ten, so the digit is 0 rather than 10, the only reading that yields a single digit.
