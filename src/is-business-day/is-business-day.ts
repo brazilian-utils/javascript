@@ -14,7 +14,7 @@ export type BusinessDayOptions = {
 	stateCode?: StateCode;
 	/** Whether optional-type holidays (`Holiday.type === "optional"`: the federal pontos facultativos Carnaval Monday and Tuesday and Corpus Christi, and the state ones `getHolidays` lists) count as non-business days (default: `true`). */
 	includeOptional?: boolean;
-	/** Whether Saturday counts as a business day, the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I (default: `false`, a Monday to Friday count). */
+	/** Whether Saturday counts as a business day, the payroll deadline count of Instrução Normativa MTP nº 2/2021, art. 14, I, "na contagem dos dias será incluído o sábado" (default: `false`, a Monday to Friday count). */
 	includeSaturday?: boolean;
 };
 
@@ -150,10 +150,17 @@ const SATURDAY = 6;
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13105.htm
  * CPC (Lei 13.105/2015), art. 216: "Além dos declarados em lei, são feriados, para efeito forense,
  * os sábados, os domingos e os dias em que não haja expediente forense".
- * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf
- * Instrução Normativa MTP nº 2, de 8 de novembro de 2021, art. 14, I: the rule `includeSaturday`
- * implements, verbatim "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o
- * feriado, inclusive o municipal".
+ * @see Official: https://www.in.gov.br/web/dou/-/instrucao-normativa-359448244
+ * Instrução Normativa MTP nº 2, de 8 de novembro de 2021 (DOU of 12/11/2021, in force from
+ * 10/12/2021), art. 14, I: the rule `includeSaturday` implements, verbatim "na contagem dos dias
+ * será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal". The caput
+ * frames it as guidance to the labour inspection on the payroll deadline alone: "Para efeito de
+ * orientação quanto ao prazo para o pagamento dos salários, os Auditores-Fiscais do Trabalho
+ * deverão observar o seguinte". No later act amends art. 14 (the retificação of 07/12/2021, IN
+ * GMTP/MTP nº 2 and nº 3/2022 and IN SIT/MTE nº 2/2025 touch other articles). Its inciso II asks
+ * for the wages to be "à disposição do empregado até o quinto dia útil" when paid through a bank,
+ * which does not open on a Saturday (Resolução CMN nº 4.880/2020, art. 6º); the IN does not settle
+ * that case.
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
  * pontos facultativos: the source of the Easter-derived entries but one, namely Sexta-feira Santa
