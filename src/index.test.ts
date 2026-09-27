@@ -70,6 +70,7 @@ import {
 	type Holiday,
 	type HolidayType,
 	type IbanInfo,
+	type IsbnInfo,
 	type IsHolidayOptions,
 	type IsHolidayParams,
 	type IsValidBankAccountOptions,
@@ -156,6 +157,7 @@ const PUBLIC = [
 	"formatCpf",
 	"formatCurrency",
 	"formatIban",
+	"formatIsbn",
 	"formatLegalNature",
 	"formatLicensePlate",
 	"formatNbs",
@@ -208,6 +210,7 @@ const PUBLIC = [
 	"getGtinInfo",
 	"getHolidays",
 	"getIbanInfo",
+	"getIsbnInfo",
 	"getLegalNature",
 	"getLegalNatures",
 	"getLegalNaturesByCategory",
@@ -257,6 +260,7 @@ const PUBLIC = [
 	"isValidGtin",
 	"isValidIE",
 	"isValidIban",
+	"isValidIsbn",
 	"isValidIe",
 	"isValidLandlinePhone",
 	"isValidLegalNature",
@@ -297,6 +301,7 @@ const PUBLIC = [
 	"parseCpf",
 	"parseCurrency",
 	"parseIban",
+	"parseIsbn",
 	"parseLegalNature",
 	"parseLicensePlate",
 	"parseNcm",
@@ -410,6 +415,7 @@ describe("Public API", () => {
 			Holiday: Holiday;
 			HolidayType: HolidayType;
 			IbanInfo: IbanInfo;
+			IsbnInfo: IsbnInfo;
 			IsHolidayOptions: IsHolidayOptions;
 			IsHolidayParams: IsHolidayParams;
 			IsValidBankAccountOptions: IsValidBankAccountOptions;

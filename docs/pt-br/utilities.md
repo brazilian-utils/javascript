@@ -3351,6 +3351,79 @@ getGtinInfo('7890000000018'); // null (dígito verificador errado)
 
 Fonte: [GS1 General Specifications](https://ref.gs1.org/standards/genspecs/), [calculadora de dígito verificador da GS1](https://www.gs1.org/services/how-calculate-check-digit-manually), [Nota Técnica 2021.003 da SEFAZ](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D) e [Tabela Prefixo GS1](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D) do Portal da NF-e.
 
+## ISBN
+
+O ISBN (International Standard Book Number) tem 13 dígitos desde 2007: o prefixo GS1 (`978`, ou `979` para as faixas mais novas), o grupo de registro (`85` e `65` para o Brasil), o registrante (a editora), a publicação e um dígito verificador. O ISBN de 10 dígitos não é aceito: o Manual do Usuário do ISBN atual (7ª edição) e a Agência Brasileira do ISBN só definem a forma de 13 dígitos.
+
+### isValidIsbn
+
+Verifica se um ISBN-13 é válido: o prefixo `978` ou `979` e o dígito verificador módulo 10 do Manual do Usuário do ISBN (os 12 primeiros dígitos com pesos alternados 1 e 3, a mesma regra do GTIN-13).
+
+- O valor pode vir impresso: o rótulo `ISBN` na frente (`ISBN`, `ISBN-13`, com ou sem dois-pontos) e um único hífen ou espaço entre dois dígitos são aceitos; qualquer outra coisa, inclusive separadores seguidos, torna o valor inválido.
+- Não verifica se o grupo e o registrante estão atribuídos; veja `getIsbnInfo`.
+- O exemplo impresso da Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, não traz o dígito que a regra dá (`0`), então é rejeitado.
+
+```javascript
+import { isValidIsbn } from '@brazilian-utils/brazilian-utils';
+
+isValidIsbn('9788533302273'); // true
+isValidIsbn('ISBN 978-65-89999-01-0'); // true
+isValidIsbn('978-85-333-0227-4'); // false (dígito verificador errado)
+isValidIsbn('8533302276'); // false (a forma de 10 dígitos)
+```
+
+### parseIsbn
+
+Remove o rótulo `ISBN`, os hífens e todo caractere que não seja dígito, mantendo no máximo 13 dígitos. O rótulo sai primeiro, então o `13` de `ISBN-13` não fica.
+
+```javascript
+import { parseIsbn } from '@brazilian-utils/brazilian-utils';
+
+parseIsbn('ISBN-13: 978-85-333-0227-3'); // '9788533302273'
+```
+
+### getIsbnInfo
+
+Divide um ISBN-13 válido nos seus elementos, como um `IsbnInfo`, seguindo as faixas que a Agência Internacional do ISBN publica (a RangeMessage), que dão os comprimentos variáveis do grupo e do registrante.
+
+- Retorna `null` quando o valor não é válido pelo `isValidIsbn`, ou quando o grupo ou o registrante cai numa faixa ainda não atribuída.
+- As faixas são atualizadas pelo workflow de datasets.
+
+| Campo | Descrição |
+| --- | --- |
+| `isbn` | Os 13 dígitos |
+| `prefix` | `'978'` ou `'979'` |
+| `registrationGroup` | O país, região ou área de idioma, por exemplo `'85'` ou `'65'` para o Brasil |
+| `registrant` | A editora ou selo dentro do grupo |
+| `publication` | A edição dentro do registrante |
+| `checkDigit` | O dígito verificador, o último dígito |
+| `agency` | A agência que a Agência Internacional do ISBN lista para o grupo, por exemplo `'Brazil'` ou `'English language'` |
+| `isBrazilian` | `true` para os grupos da Agência Brasileira do ISBN, `85` e `65` |
+
+```javascript
+import { getIsbnInfo } from '@brazilian-utils/brazilian-utils';
+
+getIsbnInfo('ISBN 978-65-89999-01-0');
+// { isbn: '9786589999010', prefix: '978', registrationGroup: '65', registrant: '89999',
+//   publication: '01', checkDigit: 0, agency: 'Brazil', isBrazilian: true }
+
+getIsbnInfo('9780306406157')?.agency; // 'English language'
+```
+
+### formatIsbn
+
+Coloca os hífens de um ISBN-13 entre os seus elementos, como o `getIsbnInfo` o divide. Os comprimentos dos elementos variam, então um valor parcial ou inválido, ou numa faixa ainda não atribuída, retorna `''`. O rótulo `ISBN` não é acrescentado.
+
+```javascript
+import { formatIsbn } from '@brazilian-utils/brazilian-utils';
+
+formatIsbn('9788533302273'); // '978-85-333-0227-3'
+formatIsbn('9780306406157'); // '978-0-306-40615-7'
+formatIsbn('978853330227'); // ''
+```
+
+Fonte: [Manual do Usuário do ISBN, 7ª edição](https://www.isbn-international.org/content/isbn-users-manual/29), [faixas do ISBN (RangeMessage)](https://www.isbn-international.org/range_file_generation) da Agência Internacional do ISBN e a [Agência Brasileira do ISBN](https://www.cblservicos.org.br/isbn/estrutura/).
+
 ## CID-10
 
 ### isValidCid10

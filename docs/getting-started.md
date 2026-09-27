@@ -80,6 +80,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 | `getCfop` | CFOP operation descriptions | 67.6 KB | 6.3 KB |
 | `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.0 KB | 9.0 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 37.6 - 37.8 KB | 9.0 - 9.2 KB |
+| `getIsbnInfo` · `formatIsbn` | ISBN ranges of the International ISBN Agency (RangeMessage) | 27.0 - 27.1 KB | 6.2 KB |
 | `isValidCid10` | CID-10 V2008 category and subcategory codes plus the SIM `U07` codes, without the descriptions | 26.2 KB | 6.8 KB |
 | `getServiceItem` | Service list of the Lei Complementar 116/2003 | 26.1 KB | 8.4 KB |
 | `isValidCbo` | CBO 2002 occupation codes, without the titles | 16.2 KB | 5.5 KB |

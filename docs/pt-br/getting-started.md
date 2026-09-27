@@ -80,6 +80,7 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | `getCfop` | descrições das operações do CFOP | 67,6 KB | 6,3 KB |
 | `getClassTrib` | nomes e descrições do cClassTrib (IBS/CBS) | 50,0 KB | 9,0 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 37,6 - 37,8 KB | 9,0 - 9,2 KB |
+| `getIsbnInfo` · `formatIsbn` | faixas do ISBN da Agência Internacional do ISBN (RangeMessage) | 27,0 - 27,1 KB | 6,2 KB |
 | `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, sem as descrições | 26,2 KB | 6,8 KB |
 | `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 26,1 KB | 8,4 KB |
 | `isValidCbo` | códigos das ocupações da CBO 2002, sem os títulos | 16,2 KB | 5,5 KB |

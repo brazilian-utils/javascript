@@ -41,6 +41,7 @@ export { type FormatCnsOptions, formatCns } from "./format-cns/format-cns";
 export { type FormatCpfOptions, formatCpf } from "./format-cpf/format-cpf";
 export { type FormatCurrencyOptions, formatCurrency } from "./format-currency/format-currency";
 export { formatIban } from "./format-iban/format-iban";
+export { formatIsbn } from "./format-isbn/format-isbn";
 export {
 	type FormatLegalNatureOptions,
 	formatLegalNature,
@@ -136,6 +137,7 @@ export {
 	type GtinType,
 	getGtinInfo,
 } from "./get-gtin-info/get-gtin-info";
+export { type IsbnInfo, getIsbnInfo } from "./get-isbn-info/get-isbn-info";
 export {
 	type GetHolidaysParams,
 	type Holiday,
@@ -225,6 +227,7 @@ export { type IsValidCstOptions, isValidCst } from "./is-valid-cst/is-valid-cst"
 export { isValidCstIbsCbs } from "./is-valid-cst-ibs-cbs/is-valid-cst-ibs-cbs";
 export { isValidEmail } from "./is-valid-email/is-valid-email";
 export { type IsValidGtinOptions, isValidGtin } from "./is-valid-gtin/is-valid-gtin";
+export { isValidIsbn } from "./is-valid-isbn/is-valid-isbn";
 export { isValidIban } from "./is-valid-iban/is-valid-iban";
 export { type IsValidIeParams, isValidIe } from "./is-valid-ie/is-valid-ie";
 export { isValidLandlinePhone } from "./is-valid-landline-phone/is-valid-landline-phone";
@@ -277,6 +280,7 @@ export { parseCns } from "./parse-cns/parse-cns";
 export { parseCpf } from "./parse-cpf/parse-cpf";
 export { type ParseCurrencyOptions, parseCurrency } from "./parse-currency/parse-currency";
 export { parseIban } from "./parse-iban/parse-iban";
+export { parseIsbn } from "./parse-isbn/parse-isbn";
 export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
 export { parseNcm } from "./parse-ncm/parse-ncm";

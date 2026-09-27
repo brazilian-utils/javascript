@@ -104,7 +104,8 @@ itself:
 - **Generated from an official source** by a script in `scripts/` (`npm run build:data`, run
   every Monday by the `Update datasets` workflow): banks (Banco Central, `banks.ts`), CBO
   (`cbo.ts`), CFOP (CONFAZ, `cfop.ts`), municipalities and states (IBGE, `cities.ts`,
-  `states.ts`), the DDD of every municipality (Anatel, `area-codes.ts`), CNAE (`cnae.ts`), legal
+  `states.ts`), the DDD of every municipality (Anatel, `area-codes.ts`), the ISBN ranges (International ISBN
+  Agency, `isbn.ts`), CNAE (`cnae.ts`), legal
   natures (CONCLA, `legal-natures.ts`) and NCM (Siscomex, `ncm.ts`). The CBO is the one table
   read from a file kept in the repository, `scripts/data/cbo2002-ocupacao.csv`: the MTE serves
   its current release only after a reCAPTCHA, so a new release is downloaded by hand from
