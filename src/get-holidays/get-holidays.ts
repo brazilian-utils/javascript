@@ -197,9 +197,16 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * Friday, 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
  * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it, except in 2004, the
  * year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause. Outside those ranges
- * each holiday stays on 11 August or 25 November. Acre's Tuesday-to-Thursday shift and the Goiás decrees
- * that may move 26/07 and 28/10 are not modelled, because neither can be resolved from a year
- * alone.
+ * each holiday stays on 11 August or 25 November. Acre's Tuesday-to-Thursday shift and the Goiás
+ * decrees that may move 26/07 and 28/10 are not modelled, because neither can be resolved from a
+ * year alone.
+ *
+ * Each state entry is listed only from the first year the state norm cited for it applied, and up
+ * to the last one, so a year before a state's law has no entry for it: 11 August in Santa Catarina
+ * starts in 2004 (Lei SC nº 12.906/2004) and 25 November in 1997 (Lei SC nº 10.306/1996), São
+ * Paulo's 9 July in 1997 (Lei SP nº 9.497/1997), Rio de Janeiro's São Jorge in 2008 (Lei RJ nº
+ * 5.198/2008). The first year of every entry is given next to its law in
+ * `src/get-holidays/constants.ts`.
  *
  * @param {number} year - The year for which to retrieve holidays (must be between 1900 and 2099)
  * @returns {Holiday[]} An array of holidays sorted by date

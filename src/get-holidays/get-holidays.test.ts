@@ -22,6 +22,10 @@ function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
 	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
 }
 
+function scNamesIn(year: number): string[] {
+	return getHolidays({ year, stateCode: "SC" }).map((holiday) => holiday.name);
+}
+
 function carnaval(year: number): Holiday[] {
 	return getHolidays(year).filter((holiday) => holiday.name.startsWith("Carnaval"));
 }
@@ -63,6 +67,680 @@ const NATIONAL_HOLIDAY_PERIODS: {
 	{ name: "Ano novo", month: 0, day: 1, year: 1900, listed: true },
 	{ name: "Independência do Brasil", month: 8, day: 7, year: 1900, listed: true },
 	{ name: "Proclamação da República", month: 10, day: 15, year: 1900, listed: true },
+];
+
+const STATE_HOLIDAY_FIRST_YEARS: {
+	stateCode: StateCode;
+	name: string;
+	type: "state" | "optional";
+	year: number;
+	listed: boolean;
+	source: string;
+}[] = [
+	{
+		stateCode: "AC",
+		name: "Dia do Evangélico",
+		type: "state",
+		year: 2004,
+		listed: false,
+		source: "Lei AC nº 1.538, de 29/01/2004",
+	},
+	{
+		stateCode: "AC",
+		name: "Dia do Evangélico",
+		type: "state",
+		year: 2005,
+		listed: true,
+		source: "Lei AC nº 1.538, de 29/01/2004",
+	},
+	{
+		stateCode: "AC",
+		name: "Dia Internacional da Mulher",
+		type: "state",
+		year: 2001,
+		listed: false,
+		source: "Lei AC nº 1.411, de 14/09/2001",
+	},
+	{
+		stateCode: "AC",
+		name: "Dia Internacional da Mulher",
+		type: "state",
+		year: 2002,
+		listed: true,
+		source: "Lei AC nº 1.411, de 14/09/2001",
+	},
+	{
+		stateCode: "AC",
+		name: "Aniversário do Acre",
+		type: "state",
+		year: 1964,
+		listed: false,
+		source: "Lei AC nº 14, de 02/09/1964",
+	},
+	{
+		stateCode: "AC",
+		name: "Aniversário do Acre",
+		type: "state",
+		year: 1965,
+		listed: true,
+		source: "Lei AC nº 14, de 02/09/1964",
+	},
+	{
+		stateCode: "AC",
+		name: "Dia da Amazônia",
+		type: "state",
+		year: 1968,
+		listed: false,
+		source: "Lei AC nº 243, de 04/12/1968",
+	},
+	{
+		stateCode: "AC",
+		name: "Dia da Amazônia",
+		type: "state",
+		year: 1969,
+		listed: true,
+		source: "Lei AC nº 243, de 04/12/1968",
+	},
+	{
+		stateCode: "AC",
+		name: "Assinatura do Tratado de Petrópolis",
+		type: "state",
+		year: 1965,
+		listed: false,
+		source: "Lei AC nº 57, de 14/12/1965",
+	},
+	{
+		stateCode: "AC",
+		name: "Assinatura do Tratado de Petrópolis",
+		type: "state",
+		year: 1966,
+		listed: true,
+		source: "Lei AC nº 57, de 14/12/1965",
+	},
+	{
+		stateCode: "AL",
+		name: "São João",
+		type: "state",
+		year: 1993,
+		listed: false,
+		source: "Lei AL nº 5.508, de 07/07/1993",
+	},
+	{
+		stateCode: "AL",
+		name: "São João",
+		type: "state",
+		year: 1994,
+		listed: true,
+		source: "Lei AL nº 5.508, de 07/07/1993",
+	},
+	{
+		stateCode: "AL",
+		name: "São Pedro",
+		type: "state",
+		year: 1993,
+		listed: false,
+		source: "Lei AL nº 5.509, de 07/07/1993",
+	},
+	{
+		stateCode: "AL",
+		name: "São Pedro",
+		type: "state",
+		year: 1994,
+		listed: true,
+		source: "Lei AL nº 5.509, de 07/07/1993",
+	},
+	{
+		stateCode: "AL",
+		name: "Emancipação Política de Alagoas",
+		type: "optional",
+		year: 2019,
+		listed: false,
+		source: "Decreto AL nº 68.782, de 30/12/2019, the 2020 calendar",
+	},
+	{
+		stateCode: "AL",
+		name: "Emancipação Política de Alagoas",
+		type: "optional",
+		year: 2020,
+		listed: true,
+		source: "Decreto AL nº 68.782, de 30/12/2019, the 2020 calendar",
+	},
+	{
+		stateCode: "AP",
+		name: "Dia de São José",
+		type: "state",
+		year: 2002,
+		listed: false,
+		source: "Lei AP nº 667, de 16/04/2002",
+	},
+	{
+		stateCode: "AP",
+		name: "Dia de São José",
+		type: "state",
+		year: 2003,
+		listed: true,
+		source: "Lei AP nº 667, de 16/04/2002",
+	},
+	{
+		stateCode: "AP",
+		name: "Criação do Território Federal do Amapá",
+		type: "state",
+		year: 1991,
+		listed: false,
+		source: "Constituição Estadual do AP, de 20/12/1991",
+	},
+	{
+		stateCode: "AP",
+		name: "Criação do Território Federal do Amapá",
+		type: "state",
+		year: 1992,
+		listed: true,
+		source: "Constituição Estadual do AP, de 20/12/1991",
+	},
+	{
+		stateCode: "AM",
+		name: "Elevação do Amazonas à categoria de Província",
+		type: "state",
+		year: 1977,
+		listed: false,
+		source: "Lei AM nº 25, de 21/12/1977",
+	},
+	{
+		stateCode: "AM",
+		name: "Elevação do Amazonas à categoria de Província",
+		type: "state",
+		year: 1978,
+		listed: true,
+		source: "Lei AM nº 25, de 21/12/1977",
+	},
+	{
+		stateCode: "BA",
+		name: "Independência da Bahia",
+		type: "state",
+		year: 1989,
+		listed: false,
+		source: "Constituição Estadual da BA, de 05/10/1989",
+	},
+	{
+		stateCode: "BA",
+		name: "Independência da Bahia",
+		type: "state",
+		year: 1990,
+		listed: true,
+		source: "Constituição Estadual da BA, de 05/10/1989",
+	},
+	{
+		stateCode: "CE",
+		name: "Abolição da Escravidão no Ceará",
+		type: "state",
+		year: 2011,
+		listed: false,
+		source: "EC CE nº 73, de 01/12/2011",
+	},
+	{
+		stateCode: "CE",
+		name: "Abolição da Escravidão no Ceará",
+		type: "state",
+		year: 2012,
+		listed: true,
+		source: "EC CE nº 73, de 01/12/2011",
+	},
+	{
+		stateCode: "DF",
+		name: "Fundação de Brasília",
+		type: "state",
+		year: 1989,
+		listed: false,
+		source: "Lei distrital nº 72, de 27/12/1989",
+	},
+	{
+		stateCode: "DF",
+		name: "Fundação de Brasília",
+		type: "state",
+		year: 1990,
+		listed: true,
+		source: "Lei distrital nº 72, de 27/12/1989",
+	},
+	{
+		stateCode: "DF",
+		name: "Corpus Christi",
+		type: "state",
+		year: 1989,
+		listed: false,
+		source: "Lei distrital nº 72, de 27/12/1989",
+	},
+	{
+		stateCode: "DF",
+		name: "Corpus Christi",
+		type: "optional",
+		year: 1989,
+		listed: true,
+		source: "Lei distrital nº 72, de 27/12/1989 (the national ponto facultativo)",
+	},
+	{
+		stateCode: "DF",
+		name: "Corpus Christi",
+		type: "state",
+		year: 1990,
+		listed: true,
+		source: "Lei distrital nº 72, de 27/12/1989",
+	},
+	{
+		stateCode: "DF",
+		name: "Dia do Evangélico",
+		type: "state",
+		year: 1995,
+		listed: false,
+		source: "Lei distrital nº 963, de 04/12/1995",
+	},
+	{
+		stateCode: "DF",
+		name: "Dia do Evangélico",
+		type: "state",
+		year: 1996,
+		listed: true,
+		source: "Lei distrital nº 963, de 04/12/1995",
+	},
+	{
+		stateCode: "ES",
+		name: "Nossa Senhora da Penha",
+		type: "state",
+		year: 2019,
+		listed: false,
+		source: "Lei ES nº 11.010, de 03/07/2019",
+	},
+	{
+		stateCode: "ES",
+		name: "Nossa Senhora da Penha",
+		type: "state",
+		year: 2020,
+		listed: true,
+		source: "Lei ES nº 11.010, de 03/07/2019",
+	},
+	{
+		stateCode: "GO",
+		name: "Fundação da Cidade de Goiás",
+		type: "state",
+		year: 2020,
+		listed: false,
+		source: "Lei GO nº 20.756/2020, in force from 28/07/2020",
+	},
+	{
+		stateCode: "GO",
+		name: "Fundação da Cidade de Goiás",
+		type: "state",
+		year: 2021,
+		listed: true,
+		source: "Lei GO nº 20.756/2020, in force from 28/07/2020",
+	},
+	{
+		stateCode: "GO",
+		name: "Lançamento da Pedra Fundamental de Goiânia",
+		type: "state",
+		year: 1987,
+		listed: false,
+		source: "Lei GO nº 10.460, de 22/02/1988",
+	},
+	{
+		stateCode: "GO",
+		name: "Lançamento da Pedra Fundamental de Goiânia",
+		type: "state",
+		year: 1988,
+		listed: true,
+		source: "Lei GO nº 10.460, de 22/02/1988",
+	},
+	{
+		stateCode: "GO",
+		name: "Dia do Servidor Público",
+		type: "state",
+		year: 1987,
+		listed: false,
+		source: "Lei GO nº 10.460, de 22/02/1988",
+	},
+	{
+		stateCode: "GO",
+		name: "Dia do Servidor Público",
+		type: "state",
+		year: 1988,
+		listed: true,
+		source: "Lei GO nº 10.460, de 22/02/1988",
+	},
+	{
+		stateCode: "MA",
+		name: "Adesão do Maranhão à Independência",
+		type: "state",
+		year: 1964,
+		listed: false,
+		source: "Lei MA nº 2.457, de 02/10/1964",
+	},
+	{
+		stateCode: "MA",
+		name: "Adesão do Maranhão à Independência",
+		type: "state",
+		year: 1965,
+		listed: true,
+		source: "Lei MA nº 2.457, de 02/10/1964",
+	},
+	{
+		stateCode: "MT",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 2002,
+		listed: false,
+		source: "Lei MT nº 7.879, de 27/12/2002",
+	},
+	{
+		stateCode: "MT",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 2003,
+		listed: true,
+		source: "Lei MT nº 7.879, de 27/12/2002",
+	},
+	{
+		stateCode: "MS",
+		name: "Criação do Estado de Mato Grosso do Sul",
+		type: "state",
+		year: 1979,
+		listed: false,
+		source: "Lei MS nº 10, de 29/10/1979",
+	},
+	{
+		stateCode: "MS",
+		name: "Criação do Estado de Mato Grosso do Sul",
+		type: "state",
+		year: 1980,
+		listed: true,
+		source: "Lei MS nº 10, de 29/10/1979",
+	},
+	{
+		stateCode: "PA",
+		name: "Adesão do Pará à Independência",
+		type: "state",
+		year: 1996,
+		listed: false,
+		source: "Lei PA nº 5.999, de 10/09/1996",
+	},
+	{
+		stateCode: "PA",
+		name: "Adesão do Pará à Independência",
+		type: "state",
+		year: 1997,
+		listed: true,
+		source: "Lei PA nº 5.999, de 10/09/1996",
+	},
+	{
+		stateCode: "PB",
+		name: "Data Magna do Estado da Paraíba",
+		type: "state",
+		year: 2015,
+		listed: false,
+		source: "Lei PB nº 10.601, de 16/12/2015",
+	},
+	{
+		stateCode: "PB",
+		name: "Data Magna do Estado da Paraíba",
+		type: "state",
+		year: 2016,
+		listed: true,
+		source: "Lei PB nº 10.601, de 16/12/2015",
+	},
+	{
+		stateCode: "PB",
+		name: "Morte de João Pessoa",
+		type: "state",
+		year: 1967,
+		listed: false,
+		source: "Lei PB nº 3.489, de 30/08/1967",
+	},
+	{
+		stateCode: "PB",
+		name: "Morte de João Pessoa",
+		type: "state",
+		year: 1968,
+		listed: true,
+		source: "Lei PB nº 3.489, de 30/08/1967",
+	},
+	{
+		stateCode: "PE",
+		name: "Revolução Pernambucana",
+		type: "state",
+		year: 2017,
+		listed: false,
+		source: "Lei PE nº 16.059, de 08/06/2017",
+	},
+	{
+		stateCode: "PE",
+		name: "Revolução Pernambucana",
+		type: "state",
+		year: 2018,
+		listed: true,
+		source: "Lei PE nº 16.059, de 08/06/2017",
+	},
+	{
+		stateCode: "PI",
+		name: "Dia do Piauí",
+		type: "state",
+		year: 1936,
+		listed: false,
+		source: "Lei PI nº 176, de 30/08/1937",
+	},
+	{
+		stateCode: "PI",
+		name: "Dia do Piauí",
+		type: "state",
+		year: 1937,
+		listed: true,
+		source: "Lei PI nº 176, de 30/08/1937",
+	},
+	{
+		stateCode: "RJ",
+		name: "São Jorge",
+		type: "state",
+		year: 2007,
+		listed: false,
+		source: "Lei RJ nº 5.198, de 05/03/2008",
+	},
+	{
+		stateCode: "RJ",
+		name: "São Jorge",
+		type: "state",
+		year: 2008,
+		listed: true,
+		source: "Lei RJ nº 5.198, de 05/03/2008",
+	},
+	{
+		stateCode: "RJ",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 2001,
+		listed: false,
+		source: "Lei RJ nº 4.007, de 11/11/2002",
+	},
+	{
+		stateCode: "RJ",
+		name: "Dia da Consciência Negra",
+		type: "state",
+		year: 2002,
+		listed: true,
+		source: "Lei RJ nº 4.007, de 11/11/2002",
+	},
+	{
+		stateCode: "RN",
+		name: "Mártires de Cunhaú e Uruaçu",
+		type: "state",
+		year: 2006,
+		listed: false,
+		source: "Lei RN nº 8.913, de 06/12/2006",
+	},
+	{
+		stateCode: "RN",
+		name: "Mártires de Cunhaú e Uruaçu",
+		type: "state",
+		year: 2007,
+		listed: true,
+		source: "Lei RN nº 8.913, de 06/12/2006",
+	},
+	{
+		stateCode: "RS",
+		name: "Revolução Farroupilha",
+		type: "state",
+		year: 1994,
+		listed: false,
+		source: "Decreto RS nº 36.180, de 18/09/1995, and EC RS nº 11, de 03/10/1995",
+	},
+	{
+		stateCode: "RS",
+		name: "Revolução Farroupilha",
+		type: "state",
+		year: 1995,
+		listed: true,
+		source: "Decreto RS nº 36.180, de 18/09/1995, and EC RS nº 11, de 03/10/1995",
+	},
+	{
+		stateCode: "RO",
+		name: "Criação do Estado de Rondônia",
+		type: "state",
+		year: 2010,
+		listed: false,
+		source: "Lei RO nº 2.291, de 22/04/2010",
+	},
+	{
+		stateCode: "RO",
+		name: "Criação do Estado de Rondônia",
+		type: "state",
+		year: 2011,
+		listed: true,
+		source: "Lei RO nº 2.291, de 22/04/2010",
+	},
+	{
+		stateCode: "RR",
+		name: "Criação do Estado de Roraima",
+		type: "state",
+		year: 1991,
+		listed: false,
+		source: "Constituição Estadual de RR, de 31/12/1991",
+	},
+	{
+		stateCode: "RR",
+		name: "Criação do Estado de Roraima",
+		type: "state",
+		year: 1992,
+		listed: true,
+		source: "Constituição Estadual de RR, de 31/12/1991",
+	},
+	{
+		stateCode: "SC",
+		name: "Dia do Estado de Santa Catarina",
+		type: "state",
+		year: 2003,
+		listed: false,
+		source: "Lei SC nº 12.906, de 22/01/2004",
+	},
+	{
+		stateCode: "SC",
+		name: "Dia do Estado de Santa Catarina",
+		type: "state",
+		year: 2004,
+		listed: true,
+		source: "Lei SC nº 12.906, de 22/01/2004",
+	},
+	{
+		stateCode: "SC",
+		name: "Dia de Santa Catarina de Alexandria",
+		type: "state",
+		year: 1996,
+		listed: false,
+		source: "Lei SC nº 10.306, of December 1996",
+	},
+	{
+		stateCode: "SC",
+		name: "Dia de Santa Catarina de Alexandria",
+		type: "state",
+		year: 1997,
+		listed: true,
+		source: "Lei SC nº 10.306, of December 1996",
+	},
+	{
+		stateCode: "SP",
+		name: "Revolução Constitucionalista",
+		type: "state",
+		year: 1996,
+		listed: false,
+		source: "Lei SP nº 9.497, de 05/03/1997",
+	},
+	{
+		stateCode: "SP",
+		name: "Revolução Constitucionalista",
+		type: "state",
+		year: 1997,
+		listed: true,
+		source: "Lei SP nº 9.497, de 05/03/1997",
+	},
+	{
+		stateCode: "SE",
+		name: "Independência de Sergipe",
+		type: "state",
+		year: 1999,
+		listed: false,
+		source: "EC SE nº 20, de 31/05/2000",
+	},
+	{
+		stateCode: "SE",
+		name: "Independência de Sergipe",
+		type: "state",
+		year: 2000,
+		listed: true,
+		source: "EC SE nº 20, de 31/05/2000",
+	},
+	{
+		stateCode: "TO",
+		name: "Autonomia do Estado do Tocantins",
+		type: "state",
+		year: 1997,
+		listed: false,
+		source: "Lei TO nº 960, de 17/03/1998",
+	},
+	{
+		stateCode: "TO",
+		name: "Autonomia do Estado do Tocantins",
+		type: "state",
+		year: 1998,
+		listed: true,
+		source: "Lei TO nº 960, de 17/03/1998",
+	},
+	{
+		stateCode: "TO",
+		name: "Padroeira do Estado (Nossa Senhora da Natividade)",
+		type: "state",
+		year: 1993,
+		listed: false,
+		source: "Lei TO nº 627, de 28/12/1993",
+	},
+	{
+		stateCode: "TO",
+		name: "Padroeira do Estado (Nossa Senhora da Natividade)",
+		type: "state",
+		year: 1994,
+		listed: true,
+		source: "Lei TO nº 627, de 28/12/1993",
+	},
+	{
+		stateCode: "TO",
+		name: "Criação do Estado do Tocantins",
+		type: "state",
+		year: 1989,
+		listed: false,
+		source: "Lei TO nº 98, de 17/11/1989",
+	},
+	{
+		stateCode: "TO",
+		name: "Criação do Estado do Tocantins",
+		type: "state",
+		year: 1990,
+		listed: true,
+		source: "Lei TO nº 98, de 17/11/1989",
+	},
 ];
 
 describe("getHolidays", () => {
@@ -607,12 +1285,9 @@ describe("getHolidays", () => {
 		});
 	});
 
-	test("should keep the Santa Catarina 11 August holiday on its statutory weekday before 2005, the year Lei SC nº 13.408/2005 extended the transfer to it (11/08/2003 is a Monday)", () => {
-		expect(getHolidays({ year: 2003, stateCode: "SC" })).toContainEqual({
-			name: "Dia do Estado de Santa Catarina",
-			date: new Date(2003, 7, 11),
-			type: "state",
-		});
+	test("should list no Santa Catarina 11 August before 2004, the year Lei SC nº 12.906/2004 made it a holiday (11/08/2003, a Monday, is an ordinary day)", () => {
+		expect(scNamesIn(2003)).not.toContain("Dia do Estado de Santa Catarina");
+		expect(isBusinessDay(new Date(2003, 7, 11, 12), { stateCode: "SC" })).toBe(true);
 	});
 
 	test("should keep the Santa Catarina 25 November holiday on its statutory weekday before 1999, the year Lei SC nº 11.213/1999 introduced its transfer (25/11/1998 is a Wednesday)", () => {
@@ -669,17 +1344,28 @@ describe("getHolidays", () => {
 	});
 
 	test("should list each Santa Catarina holiday exactly once in every year the four 25 November ranges and the two 11 August ranges border on", () => {
-		for (const year of [1998, 1999, 2003, 2004, 2005, 2025]) {
-			const names = getHolidays({ year, stateCode: "SC" }).map((holiday) => holiday.name);
+		for (const year of [1997, 1998, 1999, 2003, 2004, 2005, 2025]) {
+			expect(
+				scNamesIn(year).filter((name) => name === "Dia de Santa Catarina de Alexandria"),
+			).toEqual(["Dia de Santa Catarina de Alexandria"]);
+		}
 
-			expect(names.filter((name) => name === "Dia do Estado de Santa Catarina")).toEqual([
+		for (const year of [2004, 2005, 2025]) {
+			expect(scNamesIn(year).filter((name) => name === "Dia do Estado de Santa Catarina")).toEqual([
 				"Dia do Estado de Santa Catarina",
-			]);
-			expect(names.filter((name) => name === "Dia de Santa Catarina de Alexandria")).toEqual([
-				"Dia de Santa Catarina de Alexandria",
 			]);
 		}
 	});
+
+	for (const { stateCode, name, type, year, listed, source } of STATE_HOLIDAY_FIRST_YEARS) {
+		test(`should ${listed ? "list" : "not list"} ${stateCode}'s ${name} typed ${type} in ${year} (${source})`, () => {
+			const matching = getHolidays({ year, stateCode }).filter(
+				(holiday) => holiday.name === name && holiday.type === type,
+			);
+
+			expect(matching).toHaveLength(listed ? 1 : 0);
+		});
+	}
 
 	test("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
 		const nationalHolidays = getHolidays(2024);
@@ -733,7 +1419,10 @@ describe("getHolidays", () => {
 			expect(roHolidays.filter((h) => h.date.getMonth() === 5 && h.date.getDate() === 18)).toEqual(
 				[],
 			);
-			expect(roHolidays).toContainEqual({
+		}
+
+		for (const year of [2019, 2024]) {
+			expect(getHolidays({ year, stateCode: "RO" })).toContainEqual({
 				name: "Criação do Estado de Rondônia",
 				date: new Date(year, 0, 4),
 				type: "state",
