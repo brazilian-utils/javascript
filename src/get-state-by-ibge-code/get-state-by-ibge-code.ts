@@ -40,6 +40,7 @@ export type { State } from "../_internals/constants/states";
 export const getStateByIbgeCode = (code: string | number): State | null => {
 	const digits = readLookupDigits(code);
 
+	// Stryker disable next-line ConditionalExpression: without this guard a null reads as the code 0, which no state has, so the lookup below returns null all the same; the guard only spares it.
 	if (digits === null) return null;
 
 	const numericCode = Number(digits);

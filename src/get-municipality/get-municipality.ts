@@ -49,6 +49,7 @@ let codeIndex: Map<string, [string, string]> | undefined;
 const getMunicipalityByCode = (code: string | number): [string, string] | null => {
 	const digits = readLookupDigits(code);
 
+	// Stryker disable next-line ConditionalExpression: without this guard a null misses the index, whose keys are all strings, so the lookup below returns null all the same; the guard also narrows the type of `digits`.
 	if (digits === null) return null;
 
 	// Stryker disable next-line ConditionalExpression: this guard only memoizes; CITIES_DATA is a module level constant that is never written to, so rebuilding the index on every call produces the very same entries, and each lookup already returns a fresh copy of the pair, leaving the repeated work unobservable.

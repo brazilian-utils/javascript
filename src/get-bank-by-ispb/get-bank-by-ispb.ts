@@ -6,10 +6,6 @@ export type { Bank } from "../_internals/constants/banks";
 
 const ISPB_LENGTH = 8;
 
-const DIGITS_REGEX = /^\d+$/;
-
-const ISPB_REGEX = /^[\dA-Z]{8}$/;
-
 /**
  * Looks up a Brazilian bank by its ISPB (Identificador do Sistema de Pagamentos Brasileiro),
  * the 8 digit code that identifies every participant of the SPB, published by Banco Central do
@@ -20,9 +16,9 @@ const ISPB_REGEX = /^[\dA-Z]{8}$/;
  * The ISPB is read the way `isValidIban` reads the one inside an IBAN: 8 characters that may be
  * letters as well as digits, since Resolução BCB nº 585/2026 art. 2º III made it "oito
  * caracteres alfanuméricos", upper or lower case. Whitespace and hyphens are dropped, and
- * a value of bare digits is left padded with zeros, so `0` is the ISPB `00000000`. Any other
- * character, or a value longer than 8 characters, makes it something other than an ISPB, so
- * `null` is returned instead of having the character stripped: up to 2.4.0 `"0000000A"` and
+ * a shorter value is left padded with zeros, so `0` is the ISPB `00000000`. The value is then
+ * matched as it is, so any other character, or a value longer than 8 characters, finds no ISPB
+ * and returns `null` instead of having the character stripped: up to 2.4.0 `"0000000A"` and
  * `"A0000000"` were read as `00000000`, the ISPB of Banco do Brasil.
  *
  * @param {string|number} value - The bank's ISPB, with or without leading zeros.
@@ -48,10 +44,11 @@ export const getBankByIspb = (value: string | number): Bank | null => {
 
 	// Stryker disable next-line MethodExpression: no ISPB in BANKS has a letter yet, so a lower case letter misses the table whether or not it is folded to upper case.
 	const code = String(value).replaceAll(LOOKUP_SEPARATORS_REGEX, "").toUpperCase();
-	const ispb = DIGITS_REGEX.test(code) ? code.padStart(ISPB_LENGTH, "0") : code;
 
-	if (!ISPB_REGEX.test(ispb)) return null;
+	// An empty value would pad to 00000000, the ISPB of Banco do Brasil.
+	if (code === "") return null;
 
+	const ispb = code.padStart(ISPB_LENGTH, "0");
 	const bank = BANKS.find((candidate) => candidate.ispb === ispb);
 
 	return bank ? { ...bank } : null;

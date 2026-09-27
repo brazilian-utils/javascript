@@ -263,18 +263,40 @@ const readProviders = (providers: GetAddressInfoByCepOptions["providers"]): CepP
 /**
  * Reads `options.timeoutMs`.
  *
- * @param {unknown} timeoutMs - The `options.timeoutMs` given.
+ * `Number.isFinite` never coerces its argument, so it also turns down a value that is not a
+ * number at all, such as `"1000"`.
+ *
+ * @param {number} [timeoutMs] - The `options.timeoutMs` given.
  * @returns {number|undefined} The time limit, or `undefined` for none.
  * @throws {GetAddressInfoByCepValidationError} When it is given and is not a positive finite number.
  */
-const readTimeout = (timeoutMs: unknown): number | undefined => {
+const readTimeout = (timeoutMs: number | undefined): number | undefined => {
 	if (timeoutMs === undefined) return undefined;
 
-	if (typeof timeoutMs !== "number" || !Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+	if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
 		throw new GetAddressInfoByCepValidationError("Tempo limite inválido");
 	}
 
 	return timeoutMs;
+};
+
+/**
+ * Aborts `controller` with the reason of `signal` when `signal` aborts.
+ *
+ * @param {AbortSignal} signal - The caller's signal.
+ * @param {AbortController} controller - The controller whose signal every request gets.
+ * @returns {() => void} Stops forwarding, so a lookup that settled leaves no listener behind.
+ */
+const forwardAbort = (signal: AbortSignal, controller: AbortController): (() => void) => {
+	const abort = (): void => {
+		controller.abort(signal.reason);
+	};
+
+	signal.addEventListener("abort", abort);
+
+	return () => {
+		signal.removeEventListener("abort", abort);
+	};
 };
 
 /**
@@ -293,16 +315,14 @@ const raceProviders = async (
 	signal: AbortSignal,
 ): Promise<AddressInfo> => {
 	let notFound = false;
-	let ambiguousNotFound = false;
 	let serviceFailed = false;
 
 	const providerPromises = providers.map(async (provider) => {
 		try {
 			return await providerMap[provider](cep, signal);
 		} catch (error) {
-			if (error instanceof AmbiguousNotFoundError) ambiguousNotFound = true;
-			else if (error instanceof GetAddressInfoByCepNotFoundError) notFound = true;
-			else serviceFailed = true;
+			if (!(error instanceof GetAddressInfoByCepNotFoundError)) serviceFailed = true;
+			else if (!(error instanceof AmbiguousNotFoundError)) notFound = true;
 			throw error;
 		}
 	});
@@ -310,7 +330,8 @@ const raceProviders = async (
 	try {
 		return await Promise.any(providerPromises);
 	} catch {
-		if (notFound || (ambiguousNotFound && !serviceFailed)) {
+		// Every provider failed, so when none failed to answer, every one of them said "not found".
+		if (notFound || !serviceFailed) {
 			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
 		}
 
@@ -407,12 +428,7 @@ export const getAddressInfoByCep = async (
 	signal?.throwIfAborted();
 
 	const controller = new AbortController();
-	const abortWithCallerReason = (): void => {
-		controller.abort(signal?.reason);
-	};
-
-	signal?.addEventListener("abort", abortWithCallerReason, { once: true });
-
+	const stopForwarding = signal === undefined ? undefined : forwardAbort(signal, controller);
 	const timer =
 		timeoutMs === undefined
 			? undefined
@@ -428,6 +444,6 @@ export const getAddressInfoByCep = async (
 		throw error;
 	} finally {
 		clearTimeout(timer);
-		signal?.removeEventListener("abort", abortWithCallerReason);
+		stopForwarding?.();
 	}
 };

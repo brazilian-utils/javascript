@@ -100,6 +100,7 @@ describe("getAreaCodeInfo", () => {
 
 	it("should ignore a parentheses mask around the DDD", () => {
 		expect(getAreaCodeInfo("(11)")?.stateCode).toBe("SP");
+		expect(getAreaCodeInfo(" (11) ")?.stateCode).toBe("SP");
 	});
 
 	it("should return null for a DDD with any other character, not strip it", () => {
@@ -108,6 +109,8 @@ describe("getAreaCodeInfo", () => {
 		expect(getAreaCodeInfo("DDD 11")).toBeNull();
 		expect(getAreaCodeInfo("1.1")).toBeNull();
 		expect(getAreaCodeInfo("((11))")).toBeNull();
+		expect(getAreaCodeInfo("1(1)")).toBeNull();
+		expect(getAreaCodeInfo("(1)1")).toBeNull();
 	});
 
 	it("should return null for a string with no digits, even inside parentheses", () => {

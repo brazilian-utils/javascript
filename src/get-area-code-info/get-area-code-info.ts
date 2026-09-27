@@ -88,6 +88,7 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 		typeof areaCode === "string" ? areaCode.trim().replace(PARENTHESES_REGEX, "$1") : areaCode;
 	const digits = readLookupDigits(unwrapped);
 
+	// Stryker disable next-line ConditionalExpression: without this guard a null reads as the DDD 0, which no state has, so the lookup below returns null all the same; the guard only spares it.
 	if (digits === null) return null;
 
 	const numericAreaCode = Number(digits);

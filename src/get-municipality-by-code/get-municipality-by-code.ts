@@ -33,6 +33,7 @@ export type { Municipality } from "../_internals/constants/municipalities";
 export const getMunicipalityByCode = (code: string | number): Municipality | null => {
 	const digits = readLookupDigits(code);
 
+	// Stryker disable next-line ConditionalExpression: without this guard a null matches no municipality code, all strings, so the loop below returns null all the same; the guard also narrows the type of `digits`.
 	if (digits === null) return null;
 
 	// Every real municipality code is exactly 7 digits, so a `digits` of the wrong length simply

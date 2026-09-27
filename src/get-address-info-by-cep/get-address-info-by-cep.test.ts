@@ -228,12 +228,16 @@ describe("getAddressInfoByCep", () => {
 				);
 			};
 
-			it("should hand every request a signal", async () => {
-				await getAddressInfoByCep(VALID_CEP);
+			const requestSignal = (index: number): AbortSignal | null | undefined =>
+				(fetchMock.mock.calls[index]?.[1] as RequestInit | undefined)?.signal;
 
-				for (const call of fetchMock.mock.calls) {
-					expect((call[1] as RequestInit | undefined)?.signal).toBeInstanceOf(AbortSignal);
-				}
+			it("should hand every request of every provider a signal", async () => {
+				await getAddressInfoByCep(VALID_CEP, { providers: ["viacep", "widenet", "brasilapi"] });
+
+				expect(fetchMock).toHaveBeenCalledTimes(3);
+				expect(requestSignal(0)).toBeInstanceOf(AbortSignal);
+				expect(requestSignal(1)).toBeInstanceOf(AbortSignal);
+				expect(requestSignal(2)).toBeInstanceOf(AbortSignal);
 			});
 
 			it("should reject with GetAddressInfoByCepServiceError once timeoutMs runs out", async () => {
@@ -252,7 +256,7 @@ describe("getAddressInfoByCep", () => {
 
 				controller.abort(reason);
 
-				await expect(lookup).rejects.toBe(reason);
+				await expect(lookup).rejects.toThrow(reason);
 			});
 
 			it("should reject with the reason of an already aborted signal, without a request", async () => {
@@ -260,7 +264,7 @@ describe("getAddressInfoByCep", () => {
 
 				await expect(
 					getAddressInfoByCep(VALID_CEP, { signal: AbortSignal.abort(reason) }),
-				).rejects.toBe(reason);
+				).rejects.toThrow(reason);
 				expect(fetchMock).not.toHaveBeenCalled();
 			});
 
@@ -276,23 +280,41 @@ describe("getAddressInfoByCep", () => {
 
 			it("should stop listening to options.signal once the lookup settles", async () => {
 				const controller = new AbortController();
-				const listeners = new Set<unknown>();
-				const signal = controller.signal;
-				const addEventListener = signal.addEventListener.bind(signal);
-				const removeEventListener = signal.removeEventListener.bind(signal);
 
-				signal.addEventListener = (type: string, listener: EventListener, options?: unknown) => {
-					listeners.add(listener);
-					addEventListener(type, listener, options as AddEventListenerOptions);
-				};
-				signal.removeEventListener = (type: string, listener: EventListener) => {
-					listeners.delete(listener);
-					removeEventListener(type, listener);
-				};
+				await getAddressInfoByCep(VALID_CEP, {
+					providers: ["viacep"],
+					signal: controller.signal,
+				});
+				controller.abort(new Error("cancelled after the lookup"));
 
-				await getAddressInfoByCep(VALID_CEP, { signal });
+				expect(requestSignal(0)?.aborted).toBe(false);
+			});
 
-				expect(listeners.size).toBe(0);
+			it("should clear the time limit once the lookup settles", async () => {
+				await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"], timeoutMs: 10 });
+				await new Promise((resolve) => {
+					setTimeout(resolve, 30);
+				});
+
+				expect(requestSignal(0)?.aborted).toBe(false);
+			});
+
+			it("should set no time limit without timeoutMs", async () => {
+				fetchMock.mockImplementation(
+					(_input: FetchInput, init?: RequestInit) =>
+						new Promise((resolve, reject) => {
+							const timer = setTimeout(() => {
+								resolve(createJsonResponse(viacepPayload));
+							}, 20);
+
+							init?.signal?.addEventListener("abort", () => {
+								clearTimeout(timer);
+								reject(new Error("aborted", { cause: init.signal?.reason }));
+							});
+						}),
+				);
+
+				expectDefaultAddress(await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] }));
 			});
 		});
 
@@ -374,6 +396,7 @@ describe("getAddressInfoByCep", () => {
 
 			it("should reject a number below 1000000, which no CEP pads to, without a request", async () => {
 				await expect(getAddressInfoByCep(123)).rejects.toThrow(GetAddressInfoByCepValidationError);
+				await expect(getAddressInfoByCep(123)).rejects.toThrow("CEP inválido");
 				await expect(getAddressInfoByCep(999_999)).rejects.toThrow(
 					GetAddressInfoByCepValidationError,
 				);
