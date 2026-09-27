@@ -467,7 +467,7 @@ Valida um payload de BR Code Pix (a string por trás de um QR Code Pix e do "Pix
 - A estrutura TLV, o CRC-16 e os objetos obrigatórios (format indicator, category code de 4 dígitos, moeda, país, nome e cidade do recebedor) são verificados.
 - Um template "Merchant Account Information" (IDs 26 a 51) precisa trazer o GUI `br.gov.bcb.pix` com uma chave (estático) ou a URL do PSP (dinâmico), nunca os dois.
 - Os objetos `01` (Point of Initiation Method) e `62` (Additional Data Field) são opcionais; `01` precisa ser `11` ou `12` quando presente.
-- Um valor (`54`) precisa ser maior que zero, exceto num BR Code de Pix Saque (`fss` de 8 dígitos no subobjeto 26-03).
+- Um valor (`54`) é feito de dígitos com um `.` opcional e no máximo duas casas decimais (`98.73`, `98` e `98.` são os exemplos do EMV), com no máximo 13 caracteres, e maior que zero, exceto num BR Code de Pix Saque (`fss` de 8 dígitos no subobjeto 26-03) e junto de uma URL do PSP, em que a API Pix lhe dá `0.00` (o Manual do BR Code traz `"0"` entre os exemplos).
 - Os Unreserved Templates (IDs 80 a 99) são ignorados.
 
 ```javascript

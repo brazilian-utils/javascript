@@ -29,6 +29,14 @@ const withCrc = (body: string): string => {
 	return withoutCrc + crc16Ccitt(withoutCrc);
 };
 
+const withAmount = (amount: string): string =>
+	withCrc(
+		STATIC_BODY.replace(
+			"5303986",
+			`530398654${amount.length.toString().padStart(2, "0")}${amount}`,
+		),
+	);
+
 describe("isValidPixPayload", () => {
 	describe("should return true", () => {
 		test("for the static QR Code example in the Bacen 'Manual de Padrões para Iniciação do Pix'", () => {
@@ -91,12 +99,40 @@ describe("isValidPixPayload", () => {
 			).toBe(true);
 		});
 
-		test("for a Pix Saque BR Code, whose fss (26-03) goes with a transaction amount of zero", () => {
+		test("for a Pix Saque BR Code, whose fss (26-03) goes with the amount of the withdrawal", () => {
+			expect(
+				isValidPixPayload(
+					withCrc(
+						"00020126700014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-426655440000030812345678520400005303986540550.005802BR5913Fulano de Tal6008BRASILIA62070503***",
+					),
+				),
+			).toBe(true);
+		});
+
+		test("for a Pix Saque BR Code with a transaction amount of zero, the 0.00 the Pix API has a saque state", () => {
 			expect(
 				isValidPixPayload(
 					"00020126700014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000003081234567852040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***63043A07",
 				),
 			).toBe(true);
+		});
+
+		test("for a dynamic payload with a transaction amount of zero, which the payer ignores", () => {
+			expect(
+				isValidPixPayload(
+					withCrc(
+						"00020126480014br.gov.bcb.pix2526pix.example.com/qr/v2/123452040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***",
+					),
+				),
+			).toBe(true);
+		});
+
+		test("when the amount carries the decimal mark with no decimals, as the EMV examples allow", () => {
+			expect(isValidPixPayload(withAmount("98."))).toBe(true);
+			expect(isValidPixPayload(withAmount("98"))).toBe(true);
+			expect(isValidPixPayload(withAmount("98.7"))).toBe(true);
+			expect(isValidPixPayload(withAmount("98.73"))).toBe(true);
+			expect(isValidPixPayload(withAmount("0.01"))).toBe(true);
 		});
 	});
 
@@ -185,18 +221,39 @@ describe("isValidPixPayload", () => {
 			).toBe(false);
 		});
 
-		test("when a key payload states a transaction amount of zero without the fss of a Pix Saque", () => {
+		test("when a key payload states a transaction amount of zero", () => {
 			expect(
 				isValidPixPayload(
 					"00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000052040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***63042451",
 				),
 			).toBe(false);
+			expect(isValidPixPayload(withAmount("0"))).toBe(false);
+			expect(isValidPixPayload(withAmount("0."))).toBe(false);
+			expect(isValidPixPayload(withAmount("00.00"))).toBe(false);
+		});
+
+		test("when the amount is not digits with at most one decimal mark and two decimals", () => {
+			expect(isValidPixPayload(withAmount(".5"))).toBe(false);
+			expect(isValidPixPayload(withAmount("98.."))).toBe(false);
+			expect(isValidPixPayload(withAmount("9.8.7"))).toBe(false);
+			expect(isValidPixPayload(withAmount("98.735"))).toBe(false);
+			expect(isValidPixPayload(withAmount("98,73"))).toBe(false);
+			expect(isValidPixPayload(withAmount("3 705"))).toBe(false);
+			expect(isValidPixPayload(withAmount("x98"))).toBe(false);
+		});
+
+		test("when the amount is longer than 13 characters", () => {
+			expect(isValidPixPayload(withAmount("9999999999.99"))).toBe(true);
+			expect(isValidPixPayload(withAmount("99999999999.9"))).toBe(true);
+			expect(isValidPixPayload(withAmount("99999999999.99"))).toBe(false);
 		});
 
 		test("when the fss of a Pix Saque is not the 8 digits of an ISPB", () => {
 			expect(
 				isValidPixPayload(
-					"00020126690014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400000307123456752040000530398654040.005802BR5913Fulano de Tal6008BRASILIA62070503***630450C2",
+					withCrc(
+						"00020126690014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400000307123456752040000530398654050.005802BR5913Fulano de Tal6008BRASILIA62070503***",
+					),
 				),
 			).toBe(false);
 		});

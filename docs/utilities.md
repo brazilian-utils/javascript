@@ -467,7 +467,7 @@ Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix 
 - The TLV structure, the CRC-16 and the mandatory objects (format indicator, a 4 digit category code, currency, country, merchant name and city) are checked.
 - One "Merchant Account Information" template (IDs 26 to 51) must carry the `br.gov.bcb.pix` GUI with a key (static) or a PSP URL (dynamic), never both.
 - Objects `01` (Point of Initiation Method) and `62` (Additional Data Field) are optional; `01` must be `11` or `12` when present.
-- An amount (`54`) must be greater than zero, except in a Pix Saque BR Code (8 digit `fss` in sub-object 26-03).
+- An amount (`54`) is digits with an optional `.` and at most two decimals (`98.73`, `98` and `98.` are the EMV examples), at most 13 characters, and greater than zero, except in a Pix Saque BR Code (8 digit `fss` in sub-object 26-03) and next to a PSP location, where the Pix API gives it `0.00` (the Manual do BR Code lists `"0"` among its examples).
 - Unreserved Templates (IDs 80 to 99) are ignored.
 
 ```javascript

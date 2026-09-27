@@ -250,9 +250,9 @@ describe("getPixPayloadInfo", () => {
 		});
 
 		test("when the fss of a Pix Saque is not the 8 digits of an ISPB", () => {
-			expect(getPixPayloadInfo(buildWithdrawalPayload("1234567", "0.00"))).toBeNull();
-			expect(getPixPayloadInfo(buildWithdrawalPayload("123456789", "0.00"))).toBeNull();
-			expect(getPixPayloadInfo(buildWithdrawalPayload("1234567x", "0.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildWithdrawalPayload("1234567", "50.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildWithdrawalPayload("123456789", "50.00"))).toBeNull();
+			expect(getPixPayloadInfo(buildWithdrawalPayload("1234567x", "50.00"))).toBeNull();
 		});
 
 		test("when the fss of a Pix Saque is written next to a PSP location", () => {
@@ -302,11 +302,12 @@ describe("getPixPayloadInfo", () => {
 			expect(getPixPayloadInfo(buildPayloadWithAmount("1.234"))).toBeNull();
 		});
 
-		test("when a key payload states a transaction amount of zero without the fss of a Pix Saque", () => {
+		test("when a key payload states a transaction amount of zero", () => {
 			expect(hasValidCrc(buildPayloadWithAmount("0.00"))).toBe(true);
 			expect(getPixPayloadInfo(buildPayloadWithAmount("0.00"))).toBeNull();
 			expect(getPixPayloadInfo(buildPayloadWithAmount("0"))).toBeNull();
 			expect(getPixPayloadInfo(buildPayloadWithAmount("0.0"))).toBeNull();
+			expect(getPixPayloadInfo(buildPayloadWithAmount("0."))).toBeNull();
 		});
 
 		test("when the merchant name is present but empty", () => {
@@ -341,15 +342,6 @@ describe("getPixPayloadInfo", () => {
 			});
 		});
 
-		test("should accept a transaction amount of zero in a dynamic payload, whose amount the PSP location settles", () => {
-			expect(getPixPayloadInfo(buildDynamicPayloadWithAmount("0.00"))).toEqual({
-				url: DYNAMIC_URL,
-				merchantName: "Fulano de Tal",
-				merchantCity: "BRASILIA",
-				pointOfInitiation: "dynamic",
-			});
-		});
-
 		test("from the static QR Code example in the Bacen 'Manual de Padrões para Iniciação do Pix', with no key of its own for a field the payload does not carry", () => {
 			expect(getPixPayloadInfo(BACEN_STATIC)).toStrictEqual({
 				key: "123e4567-e12b-12d1-a456-426655440000",
@@ -359,27 +351,40 @@ describe("getPixPayloadInfo", () => {
 			});
 		});
 
-		test("for a Pix Saque BR Code, reading back the fss (26-03) of §2.6 with a transaction amount of zero", () => {
+		test("for a Pix Saque BR Code, reading back the fss (26-03) of §2.6 with the amount of the withdrawal", () => {
 			expect(
-				getPixPayloadInfo(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0.00")),
+				getPixPayloadInfo(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "50.00")),
 			).toEqual({
 				key: "12345678909",
 				withdrawalFacilitator: "12345678",
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
-				amount: 0,
+				amount: 50,
 				pointOfInitiation: "static",
 			});
 		});
 
-		test("for a Pix Saque BR Code whose amount is written as the plain '0' of the BR Code field table", () => {
-			expect(getPixPayloadInfo(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, "0"))).toEqual({
-				key: "12345678909",
-				withdrawalFacilitator: "12345678",
+		test("for a Pix Saque BR Code with a transaction amount of zero, written '0.00' as the Pix API has a saque state it or '0' as in the Manual do BR Code field table", () => {
+			for (const amount of ["0.00", "0"]) {
+				expect(
+					getPixPayloadInfo(buildWithdrawalPayload(WITHDRAWAL_FACILITATOR_ISPB, amount)),
+				).toEqual({
+					key: "12345678909",
+					withdrawalFacilitator: "12345678",
+					merchantName: "Fulano de Tal",
+					merchantCity: "BRASILIA",
+					amount: 0,
+					pointOfInitiation: "static",
+				});
+			}
+		});
+
+		test("for a dynamic payload with a transaction amount of zero, which the PSP location settles and the payer ignores", () => {
+			expect(getPixPayloadInfo(buildDynamicPayloadWithAmount("0.00"))).toEqual({
+				url: DYNAMIC_URL,
 				merchantName: "Fulano de Tal",
 				merchantCity: "BRASILIA",
-				amount: 0,
-				pointOfInitiation: "static",
+				pointOfInitiation: "dynamic",
 			});
 		});
 
@@ -446,6 +451,11 @@ describe("getPixPayloadInfo", () => {
 
 		test("accepting a transaction amount written as a whole number, with no decimal point", () => {
 			expect(getPixPayloadInfo(buildPayloadWithAmount("100"))?.amount).toBe(100);
+		});
+
+		test("accepting a transaction amount with the decimal mark and no decimals, an EMV example", () => {
+			expect(getPixPayloadInfo(buildPayloadWithAmount("98."))?.amount).toBe(98);
+			expect(getPixPayloadInfo(buildPayloadWithAmount("98.7"))?.amount).toBe(98.7);
 		});
 
 		test("without a key property when the payload is dynamic (carries a url instead)", () => {

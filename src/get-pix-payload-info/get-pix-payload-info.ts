@@ -99,15 +99,17 @@ const readTxid = (additionalData: string | undefined): string | undefined => {
  * transaction amount (54) and the `txid` (62-05) are ignored, as the manual mandates, because
  * the PSP location is the source of truth for both.
  *
- * A payload built around a Pix key that carries the transaction amount (54) must state an
- * amount greater than zero, unless it is a Pix Saque BR Code: §2.6 of the Pix manual puts the
- * ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`) of the same
- * template this parser already reads, and states that "a presença do campo fss, com um ISPB
- * válido […] indica que esse é um QR Code para Pix Saque", whose amount is settled at payment
- * time. So `54` set to `"0"` or `"0.00"` is accepted together with `fss` and rejected without
- * it; that rejection is a deliberate restriction of this library, not a rule of the manual,
- * whose field table allows `"0"` in any payload. A `fss` that is not 8 digits is rejected, and
- * so is a `fss` written next to a PSP location: §2.7 of the Manual de Padrões para Iniciação do
+ * The transaction amount (54), when present, follows the EMV® QRCPS-MPM: digits with an
+ * optional `.` decimal mark that "may be present even if there are no decimals" (`"98."` reads
+ * as 98), at most two decimals and 13 characters. It may be zero (Manual do BR Code, Tabela 1:
+ * "Ex.: "0", "1.00", "123.99"") in a Pix Saque BR Code and next to a PSP location, the payloads
+ * the Pix API gives a zero amount to ("Para cobranças imediatas que representem um saque: deve
+ * apresentar o valor 0.00 (zero)"); a payload built around a key alone must state one greater
+ * than zero, as the EMV has it ("shall be different from zero"). §2.6 of the Pix manual puts the
+ * ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`) and states that "a
+ * presença do campo fss, com um ISPB válido […] indica que esse é um QR Code para Pix Saque";
+ * `withdrawalFacilitator` reads the `fss` back. A `fss` that is not 8 digits is
+ * rejected, and so is a `fss` written next to a PSP location: §2.7 of the Manual de Padrões para Iniciação do
  * Pix maps the dynamic QR Code to exactly two sub-objects, `00` (GUI) and `25` (URL), while
  * `fss` belongs to the static template of §2.6, whose §2.6.1 states that "não há funcionalidade
  * de Pix Troco para QR Codes estáticos, apenas para QR Codes dinâmicos".
@@ -131,7 +133,14 @@ const readTxid = (additionalData: string | undefined): string | undefined => {
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
+ * Manual do BR Code v2.0.1, Tabela 1, `54` Transaction Amount.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
+ * Manual de Padrões para Iniciação do Pix v2.10.0, §2.6, §2.7 and the `valor.original` of the
+ * Pix API.
+ * @see Official: https://www.emvco.com/terms-of-use/?u=/wp-content/uploads/documents/EMVCo-Merchant-Presented-QR-Specification-v1-1.pdf
+ * EMV® QRCPS-MPM v1.1, cited by the Pix manual, "Transaction Amount (ID "54")": "If present,
+ * the Transaction Amount shall be different from zero [...] the "." character may be present
+ * even if there are no decimals"; its valid examples are "98.73", "98" and "98.".
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
