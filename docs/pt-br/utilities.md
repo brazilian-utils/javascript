@@ -2082,6 +2082,7 @@ differenceInBusinessDays(new Date(), new Date('not a date')); // null
 Valida um número de passaporte brasileiro: 2 letras seguidas de 6 dígitos.
 
 - Não há dígito verificador, então um número bem formado não é necessariamente um passaporte real.
+- As 2 letras (a "série") e os 6 dígitos vêm do FAQ da Polícia Federal; nenhuma norma define o número (nem o Decreto nº 5.978/2006 nem a IN nº 173-DG/PF/2020, alterada até a IN nº 283/2024), e o FAQ não lista letra proibida.
 
 ```javascript
 import { isValidPassport } from '@brazilian-utils/brazilian-utils';

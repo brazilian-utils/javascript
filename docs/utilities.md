@@ -2082,6 +2082,7 @@ differenceInBusinessDays(new Date(), new Date('not a date')); // null
 Check if a Brazilian passport number is valid: 2 letters followed by 6 digits.
 
 - There is no check digit, so a well-formed number is not necessarily a real passport.
+- The 2 letters (the "série") and 6 digits come from the Polícia Federal's FAQ; no norm defines the number (neither the Decreto nº 5.978/2006 nor the IN nº 173-DG/PF/2020, as amended up to the IN nº 283/2024), and the FAQ lists no forbidden letter.
 
 ```javascript
 import { isValidPassport } from '@brazilian-utils/brazilian-utils';
