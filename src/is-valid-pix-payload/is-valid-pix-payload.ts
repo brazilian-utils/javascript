@@ -129,7 +129,11 @@ const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): bo
  *     characters of the template leave next to the GUI), never next to a `fss`, which belongs to the static template of §2.6 (§2.7 maps the dynamic QR Code to
  *     `00` and `25`);
  * - the merchant category code (`52`) is 4 digits, the currency (`53`) is `986` and the
- *   country (`58`) is `BR`, the ISO 3166-1 alpha-2 code the EMV refers to, as ISO writes it;
+ *   country (`58`) is `BR`, the ISO 3166-1 alpha-2 code the EMV refers to, as ISO writes it.
+ *   Neither the Manual do BR Code (v2.0.1, Tabela 1: `58` "“BR” – Código de país ISO3166-1 alpha
+ *   2") nor the Manual de Padrões (v2.10.0) says whether `br` is accepted: the only case rule
+ *   either states is for the GUI, and every official example writes `BR`, so `br` is rejected,
+ *   a choice of this library;
  * - the merchant name (`59`) has at most 25 characters and the merchant city (`60`) at most 15
  *   (EMV "var. up to 25" and "var. up to 15");
  * - a transaction amount (`54`), when present, is digits with an optional `.` decimal mark,
@@ -148,8 +152,11 @@ const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): bo
  *   Identificador da Transação (txid) não devem ser preenchidos no QR Code dinâmico" (§2.7).
  *   Its transaction amount is only checked for its format, since the same paragraph has the
  *   payer ignore it ("Se preenchidos, seu conteúdo deve ser ignorado");
- * - the CRC-16 (`63`) closes the payload and matches it. Neither the EMV nor the manual states
- *   the case of its hexadecimal digits, so `"1d3d"` is read as `"1D3D"`.
+ * - the CRC-16 (`63`) closes the payload and matches it. No official source states the case of
+ *   its hexadecimal digits: the Manual do BR Code only says "4 nibbles do resultado. Exemplo:
+ *   0xAC05 => “AC05”", and every example of both BCB manuals is upper case. Reading `"1d3d"` as
+ *   `"1D3D"` is a choice of this library, kept from 2.4.0; `generatePixPayload` always writes
+ *   upper case.
  *
  * Whether the key is registered in the DICT is not something a payload can tell: "Um QR Code
  * estático pode potencialmente ser gerado com uma chave inválida, mas será um QR Code

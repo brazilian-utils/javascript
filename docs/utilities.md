@@ -478,6 +478,7 @@ Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix 
 - One "Merchant Account Information" template (IDs 26 to 51) must carry the `br.gov.bcb.pix` GUI with a key (static) or a PSP URL (dynamic), never both.
 - The key is written in the DICT form (§2.5.1): the one `getPixKeyInfo` returns unchanged, so `12345678909` passes and `123.456.789-09` does not. Whether it is registered cannot be told from the payload. The PSP URL has at most 77 characters (§2.5.2).
 - The merchant name has at most 25 characters and the city at most 15; the country is `BR` in uppercase.
+- No BCB manual states the case of the CRC or of `BR`: the only case rule they give is for the GUI, and every official example writes both in uppercase. Accepting a lowercase CRC (`1d3d`) and rejecting `br` are choices of this library, as in 2.4.0.
 - Object `01` (Point of Initiation Method) is optional and must be `11` or `12` when present.
 - Object `62` (Additional Data Field) is mandatory and carries the `txid` (62-05), "sempre presente em um BR Code": `***` or 1 to 25 letters and digits (§2.6.2), and always `***` with a PSP URL (§2.7).
 - An amount (`54`) is digits with an optional `.` and at most two decimals (`98.73`, `98` and `98.` are the EMV examples), at most 13 characters, and greater than zero, except in a Pix Saque BR Code (8 digit `fss` in sub-object 26-03) and next to a PSP location, where the Pix API gives it `0.00` (the Manual do BR Code lists `"0"` among its examples).
