@@ -265,6 +265,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * The earlier annual decrees were not located.
  * @see Official: https://al.ap.leg.br/ver_texto_lei.php?iddocumento=17488
  * Lei AP nº 667, de 16/04/2002, art. 1º par. único, Dia de São José (19/03), listed from 2003
+ * @see Official: https://www.al.ap.leg.br/ver_texto_lei.php?iddocumento=77794
+ * Lei AP nº 2.213, de 11/07/2017 (DOE nº 6479, de 11/07/2017), Dia de Cabralzinho (15/05), listed
+ * from 2018, the first 15 May after the law: "Fica instituído como Feriado Estadual, o dia 15 de
+ * maio "Dia de Cabralzinho"". Missing up to 2.4.0.
  * @see Official: https://silegis.al.ap.leg.br/proposicaopdf/2CEatualizadaeconsolidadaateEC071comSumario.pdf
  * Constituição Estadual do AP, de 20/12/1991, art. 355, Criação do Território Federal do Amapá
  * (13/09), listed from 1992: "O dia 13 de Setembro, data magna do Amapá, é feriado em todo o
@@ -528,6 +532,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	],
 	AP: [
 		{ name: "Dia de São José", day: 19, month: 3, since: 2003 },
+		{ name: "Dia de Cabralzinho", day: 15, month: 5, since: 2018 },
 		{ name: "Criação do Território Federal do Amapá", day: 13, month: 9, since: 1992 },
 		{
 			name: "Dia Estadual da Consciência Negra",

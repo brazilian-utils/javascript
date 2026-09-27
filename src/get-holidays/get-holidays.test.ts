@@ -305,6 +305,22 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 	},
 	{
 		stateCode: "AP",
+		name: "Dia de Cabralzinho",
+		type: "state",
+		year: 2017,
+		listed: false,
+		source: "Lei AP nº 2.213, de 11/07/2017, published after that year's 15 May",
+	},
+	{
+		stateCode: "AP",
+		name: "Dia de Cabralzinho",
+		type: "state",
+		year: 2018,
+		listed: true,
+		source: "Lei AP nº 2.213, de 11/07/2017",
+	},
+	{
+		stateCode: "AP",
 		name: "Dia Estadual da Consciência Negra",
 		type: "state",
 		year: 2007,
