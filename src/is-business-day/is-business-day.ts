@@ -12,7 +12,7 @@ export type { StateCode } from "../_internals/constants/states";
 export type BusinessDayOptions = {
 	/** Two letter state code whose state holidays are also treated as non-business days (default: national holidays only). */
 	stateCode?: StateCode;
-	/** Whether optional-type holidays (`Holiday.type === "optional"`, e.g. Carnaval, Corpus Christi) count as non-business days (default: `true`). */
+	/** Whether optional-type holidays (`Holiday.type === "optional"`: the federal pontos facultativos Carnaval Monday and Tuesday and Corpus Christi, and the state ones `getHolidays` lists) count as non-business days (default: `true`). */
 	includeOptional?: boolean;
 	/** Whether Saturday counts as a business day, the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I (default: `false`, the Monday to Friday banking count). */
 	includeSaturday?: boolean;
@@ -34,8 +34,9 @@ const SATURDAY = 6;
  *
  * `options.includeOptional` defaults to `true`: holidays whose `Holiday.type` is
  * `"optional"` (Carnaval Monday and Tuesday and Corpus Christi, the federal pontos facultativos
- * `getHolidays` lists) are treated as non-business days even though they are not statutory
- * holidays. Pass `false` to only treat statutory (`"national"` and `"state"`) holidays as
+ * `getHolidays` lists, plus the state pontos facultativos its table sources, today only Alagoas'
+ * 16 September of 2020 to 2023) are treated as non-business days even though they are not
+ * statutory holidays. Pass `false` to only treat statutory (`"national"` and `"state"`) holidays as
  * non-business days. The partial pontos facultativos of the federal calendar (the Quarta-feira de
  * Cinzas morning, 28 October, the 24 and 31 December afternoons) are business days either way.
  *

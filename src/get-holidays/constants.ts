@@ -197,6 +197,11 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
 /**
  * Feriados estaduais, um `@see` por entrada.
  *
+ * Entries typed `"optional"` are the pontos facultativos a state norm cited here declares; the one
+ * left is Alagoas' 16 September of 2020 to 2023. The federal pontos facultativos (Carnaval Monday
+ * and Tuesday, Corpus Christi) are emitted by `getHolidays` itself, and together they are what
+ * `includeOptional` switches on.
+ *
  * Only one of these is a feriado civil under art. 1º, II of Lei 9.093/1995, which authorizes
  * "a data magna do Estado fixada em lei estadual", in the singular. The remaining entries rest
  * on ordinary state laws (and, for a few states, on the state constitution) that declare further
@@ -278,8 +283,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://sapl.cmm.am.gov.br/norma/3932
  * Lei Municipal de Manaus nº 496/1999, Nossa Senhora da Conceição (08/12): "INSTITUI feriado
  * religioso no Município de Manaus no dia 8 de dezembro". No state norm declaring 08/12 was
- * located in the ALEAM records, so the entry is reported as an optional day, not as a feriado
- * estadual.
+ * located in the ALEAM records, so Amazonas has no entry for it: a municipal holiday of the
+ * capital is not a state one, and the table carries no municipal holidays. Earlier versions
+ * listed it as an optional state day.
  * @see Official: https://www.legislabahia.ba.gov.br/documentos/constituicao-do-estado-da-bahia-de-05-de-outubro-de-1989
  * Constituição Estadual da BA, de 05/10/1989, art. 6º § 3º, Independência da Bahia (02/07),
  * listed from 1990: "O Dois de Julho, data magna da Bahia ..., é feriado em todo o território do
@@ -335,8 +341,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * o 26 de julho, em homenagem a memória do ex-Presidente João Pessoa"; its 5 August, under that
  * other name, is not carried before 2016.
  * @see Official: https://www.legislacao.pr.gov.br/legislacao/pesquisarAto.do?action=exibir&codAto=134573
- * Lei PR nº 18.384/2014, Emancipação Política do Paraná (19/12), expressly "não se constituindo em
- * feriado civil"
+ * Lei PR nº 18.384/2014, Emancipação Política do Paraná (19/12), a data comemorativa its own text
+ * says is "não se constituindo em feriado civil", nor a ponto facultativo it declares, so Paraná
+ * has no entry. Earlier versions listed it as an optional state day.
  * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?tiponorma=1&numero=16241&complemento=0&ano=2017&tipo=&url=
  * Lei PE nº 16.241, de 14/12/2017, art. 49, Revolução Pernambucana (06/03), listed from 2018: "Dia 6 de março: Data Magna do
  * Estado de Pernambuco e feriado civil no âmbito do Estado de Pernambuco". Revoked the Lei PE nº
@@ -537,7 +544,6 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			since: 2010,
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 		},
-		{ name: "Nossa Senhora da Conceição", day: 8, month: 12, type: "optional" },
 	],
 	BA: [{ name: "Independência da Bahia", day: 2, month: 7, since: 1990 }],
 	CE: [{ name: "Abolição da Escravidão no Ceará", day: 25, month: 3, since: 2012 }],
@@ -579,7 +585,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			until: PB_MORTE_JOAO_PESSOA_UNTIL_YEAR,
 		},
 	],
-	PR: [{ name: "Emancipação Política do Paraná", day: 19, month: 12, type: "optional" }],
+
 	PE: [{ name: "Revolução Pernambucana", day: 6, month: 3, since: 2018 }],
 	PI: [{ name: "Dia do Piauí", day: 19, month: 10, since: 1937 }],
 	RJ: [

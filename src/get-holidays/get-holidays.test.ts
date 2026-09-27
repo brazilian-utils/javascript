@@ -1218,13 +1218,30 @@ describe("getHolidays", () => {
 		expect(secondHoliday.name).not.toBe("MUTATED");
 		expect(secondHoliday.date.getFullYear()).toBe(2024);
 	});
-	test("should keep Nossa Senhora da Conceição for AM as an optional day, as the state calendar decree does", () => {
-		const holiday = getHolidays({ year: 2024, stateCode: "AM" }).find(
-			(h) => h.name === "Nossa Senhora da Conceição",
+	test("should not list AM's 8 December, a municipal holiday of Manaus (Lei Municipal nº 496/1999), nor PR's 19 December, which Lei PR nº 18.384/2014 declares 'não se constituindo em feriado civil', so both are business days", () => {
+		for (const [stateCode, month, day] of [
+			["AM", 11, 8],
+			["PR", 11, 19],
+		] as const) {
+			expect(
+				getHolidays({ year: 2024, stateCode }).filter(
+					(holiday) => holiday.date.getMonth() === month && holiday.date.getDate() === day,
+				),
+			).toEqual([]);
+		}
+
+		expect(isBusinessDay(new Date(2025, 11, 8, 12), { stateCode: "AM" })).toBe(true);
+		expect(isBusinessDay(new Date(2025, 11, 19, 12), { stateCode: "PR" })).toBe(true);
+	});
+
+	test("should keep the state optional entries to the one the table sources, AL's 16 September of 2020 to 2023", () => {
+		const optionalStateEntries = Object.entries(STATE_HOLIDAYS).flatMap(([stateCode, entries]) =>
+			entries
+				.filter((entry) => entry.type === "optional")
+				.map((entry) => `${stateCode} ${entry.name}`),
 		);
 
-		expect(holiday?.type).toBe("optional");
-		expect(holiday?.date).toEqual(new Date(2024, 11, 8));
+		expect(optionalStateEntries).toEqual(["AL Emancipação Política de Alagoas"]);
 	});
 
 	test("should apply state laws for Consciência Negra before it became national", () => {
