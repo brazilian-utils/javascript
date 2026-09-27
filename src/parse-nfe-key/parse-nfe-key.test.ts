@@ -45,14 +45,42 @@ describe("parseNfeKey", () => {
 		expect(parseNfeKey("3517 0458")).toBe("35170458");
 	});
 
+	describe("with the alphanumeric CNPJ of NT Conjunta 2025.001", () => {
+		const ALPHANUMERIC = "35260712ABC34501DE35550010000001231102030403";
+
+		it("should keep the letters in positions 7 to 18 instead of dropping them", () => {
+			expect(parseNfeKey("3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403")).toBe(
+				ALPHANUMERIC,
+			);
+			expect(parseNfeKey(`NFe${ALPHANUMERIC}`)).toBe(ALPHANUMERIC);
+		});
+
+		it("should upper case them", () => {
+			expect(parseNfeKey(ALPHANUMERIC.toLowerCase())).toBe(ALPHANUMERIC);
+		});
+
+		it("should drop a letter in positions 1 to 6 and from position 19 on", () => {
+			expect(parseNfeKey("35260A")).toBe("35260");
+			expect(parseNfeKey("35260712ABC34501DEA5")).toBe("35260712ABC34501DE5");
+		});
+
+		it("should undo formatNfeKey", () => {
+			expect(parseNfeKey(formatNfeKey(ALPHANUMERIC))).toBe(ALPHANUMERIC);
+		});
+	});
+
 	it("should return an empty string for null", () => {
 		// @ts-expect-error not a string or number
 		expect(parseNfeKey(null)).toBe("");
 	});
 
 	describe("properties", () => {
-		test("should return at most the digits of an access key", () => {
-			expectMatchesPattern(parseNfeKey, /^\d{0,44}$/, anyText);
+		test("should return at most the 44 characters of an access key, letters only in positions 7 to 18", () => {
+			expectMatchesPattern(
+				parseNfeKey,
+				/^(?:\d{0,6}|\d{6}[0-9A-Z]{1,12}|\d{6}[0-9A-Z]{12}\d{1,26})$/,
+				anyText,
+			);
 		});
 
 		test("should undo formatNfeKey", () => {

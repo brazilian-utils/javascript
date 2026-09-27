@@ -151,6 +151,27 @@ describe("getNfeKeyInfo", () => {
 			expect(getNfeKeyInfo(KEY_CPF_PADDED)?.taxId).toHaveLength(14);
 		});
 
+		test("for the alphanumeric CNPJ of NT Conjunta 2025.001, reading its letters into taxId", () => {
+			// cUF 35, AAMM 2607, CNPJ 12ABC34501DE35, mod 55, serie 001, nNF 123, tpEmis 1,
+			// cNF 10203040; cDV 3 from the ASCII-minus-48 weighted sum 756 (756 mod 11 = 8).
+			expect(getNfeKeyInfo("35260712ABC34501DE35550010000001231102030403")).toEqual({
+				stateCode: "SP",
+				year: 2026,
+				month: 7,
+				taxId: "12ABC34501DE35",
+				model: "55",
+				series: 1,
+				number: 123,
+				emissionType: 1,
+				code: "10203040",
+				checkDigit: 3,
+			});
+			expect(getNfeKeyInfo("35260712abc34501de35550010000001231102030403")?.taxId).toBe(
+				"12ABC34501DE35",
+			);
+			expect(getNfeKeyInfo("35260712ABC34501DEA5550010000001231102030408")).toBeNull();
+		});
+
 		test("for tpEmis 9, the off-line NFC-e contingency, same shape as the SP key with the tpEmis field changed and the check digit recalculated", () => {
 			expect(getNfeKeyInfo("35170458716523000119550010000000129000123453")?.emissionType).toBe(9);
 		});

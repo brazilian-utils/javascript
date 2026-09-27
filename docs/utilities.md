@@ -552,13 +552,14 @@ Source: [Manual do BR Code](https://www.bcb.gov.br/content/estabilidadefinanceir
 
 ### isValidNfeKey
 
-Check if a DF-e access key (chave de acesso) is valid. Covers every DF-e with a 44 digit access key; the CF-e-SAT (59) is out.
+Check if a DF-e access key (chave de acesso) is valid. Covers every DF-e with a 44 character access key; the CF-e-SAT (59) is out.
 
 - Models: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
-- The 44 digits may be grouped in 4 by whitespace, `.`, `-` or `/`. The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
+- Every character is a digit except positions 7 to 18, the root and order of the issuer's CNPJ, which may hold the letters of an alphanumeric CNPJ: the current schemas (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) type the key as `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, in production for the NF-e from 01/07/2026 (NT 2026.004). A letter anywhere else, the CNPJ check digits in positions 19 and 20 included, is rejected. The schema admits upper case only; lower case is read as upper case, as `isValidCnpj` does with `{ version: 2 }`.
+- The 44 characters may be grouped in 4 by whitespace, `.`, `-` or `/`. The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
 - `tpEmis` must be one the MOC of that model assigns (table below).
 - For NF-e and NFC-e the `cNF` must pass rule B03-10 of the MOC (no repeated or sequential values, not the document number).
-- A document number of all zeros is rejected. The check digit is a modulus 11 over the first 43 digits.
+- A document number of all zeros is rejected. The check digit is a modulus 11 over the first 43 characters, each valued at its ASCII code minus 48 (`A` = 17 ... `Z` = 42), as NT Conjunta 2025.001 sets it.
 
 | Model | `tpEmis` accepted |
 | --- | --- |
@@ -577,6 +578,8 @@ isValidNfeKey('NFe35170458716523000119550010000000121000123458'); // true (XML I
 isValidNfeKey('CTe35170458716523000119570010000000128000123452'); // true (CT-e authorised by the SVC-SP)
 isValidNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'); // true (masked)
 isValidNfeKey('3517.0458.7165.2300.0119.5500.1000.0000.1210.0012.3458'); // true (any of the mask characters)
+isValidNfeKey('35260712ABC34501DE35550010000001231102030403'); // true (alphanumeric CNPJ 12ABC34501DE35)
+isValidNfeKey('35260712ABC34501DEA5550010000001231102030408'); // false (a letter in position 19, a CNPJ check digit)
 isValidNfeKey('351 70458716523000119550010000000121000123458'); // false (a separator inside a group of 4)
 isValidNfeKey('99170458716523000119550010000000121000123458'); // false (invalid cUF)
 isValidNfeKey('35170458716523000119010010000000121000123450'); // false (invalid mod)
@@ -584,14 +587,15 @@ isValidNfeKey('35170458716523000119550010000000128000123455'); // false (the NF-
 isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 00000000, rule B03-10)
 ```
 
-Source: [MOC NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), [NF-e schemas](https://dfe-portal.svrs.rs.gov.br/NFE/Documentos) and the MOCs cited in `src/is-valid-nfe-key/is-valid-nfe-key.ts`.
+Source: [MOC NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), [NF-e schemas](https://dfe-portal.svrs.rs.gov.br/NFE/Documentos), [NT Conjunta 2025.001](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ%3D) (CNPJ alfanumérico) and the MOCs cited in `src/is-valid-nfe-key/is-valid-nfe-key.ts`.
 
 ### formatNfeKey
 
-Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 digits separated by spaces, the form the DANFE, DACTE, DAMDFE, DABPE, DANF3E and DANFE-COM print it in.
+Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 characters separated by spaces, the form the DANFE, DACTE, DAMDFE, DABPE, DANF3E and DANFE-COM print it in.
 
-- **Options** (`FormatNfeKeyOptions`): `pad` left pads the value with zeros up to the 44 digits of a complete access key (default `false`).
-- A masked or partial key is grouped as far as its digits go.
+- **Options** (`FormatNfeKeyOptions`): `pad` left pads the value with zeros up to the 44 characters of a complete access key (default `false`).
+- A masked or partial key is grouped as far as its characters go.
+- The letters of an alphanumeric CNPJ are kept, upper cased, in positions 7 to 18; a letter anywhere else is dropped.
 - Use `isValidNfeKey` to check a key.
 
 ```javascript
@@ -599,6 +603,9 @@ import { formatNfeKey } from '@brazilian-utils/brazilian-utils';
 
 formatNfeKey('35170458716523000119550010000000121000123458');
 // '3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'
+
+formatNfeKey('35260712abc34501de35550010000001231102030403');
+// '3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403' (alphanumeric CNPJ)
 
 formatNfeKey('12345'); // '1234 5'
 
@@ -608,7 +615,9 @@ formatNfeKey('12345', { pad: true });
 
 ### parseNfeKey
 
-Remove the formatting of a DF-e access key (chave de acesso), keep only digits, and cap the result to 44 digits.
+Remove the formatting of a DF-e access key (chave de acesso), keep only its characters, and cap the result to 44 characters.
+
+- The characters kept are the digits and, in positions 7 to 18, the letters of an alphanumeric CNPJ, upper cased; a letter anywhere else is dropped.
 
 - The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
 
@@ -620,6 +629,9 @@ parseNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458');
 
 parseNfeKey('NFe35170458716523000119550010000000121000123458');
 // '35170458716523000119550010000000121000123458'
+
+parseNfeKey('3526 0712 abc3 4501 de35 5500 1000 0001 2311 0203 0403');
+// '35260712ABC34501DE35550010000001231102030403' (alphanumeric CNPJ)
 ```
 
 ### getNfeKeyInfo
@@ -628,6 +640,7 @@ Parse a DF-e access key into its fields. Accepts the same input forms as `isVali
 
 - Returns an `NfeKeyInfo`: `stateCode`, `year`, `month`, `taxId`, `model` (`NfeKeyModel`), `series`, `number`, `emissionType`, `code` and `checkDigit`.
 - For NFCom and NF3e (models `'62'` and `'66'`) the result also carries `authorizationSite` and `code` is 7 digits instead of 8.
+- `taxId` is the 14 characters of positions 7 to 20 as written: a numeric CNPJ, an alphanumeric CNPJ (upper cased), or a CPF left padded with zeros. A `taxId` with a letter is always an alphanumeric CNPJ; a padded CPF and a CNPJ starting with `000` look alike, so check it with `isValidCpf` or `isValidCnpj` when the type matters.
 
 ```javascript
 import { getNfeKeyInfo } from '@brazilian-utils/brazilian-utils';
@@ -639,6 +652,10 @@ getNfeKeyInfo('35170458716523000119550010000000121000123458');
 getNfeKeyInfo('35170458716523000119620010000000121000123450');
 // { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
 //   series: 1, number: 12, emissionType: 1, code: '0012345', checkDigit: 0, authorizationSite: 0 }
+
+getNfeKeyInfo('35260712ABC34501DE35550010000001231102030403');
+// { stateCode: 'SP', year: 2026, month: 7, taxId: '12ABC34501DE35', model: '55',
+//   series: 1, number: 123, emissionType: 1, code: '10203040', checkDigit: 3 }
 
 getNfeKeyInfo('invalid'); // null
 ```

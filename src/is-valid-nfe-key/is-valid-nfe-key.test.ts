@@ -239,6 +239,67 @@ describe("isValidNfeKey", () => {
 		}
 	});
 
+	describe("with the alphanumeric CNPJ of NT Conjunta 2025.001 (TChNFe [0-9]{6}[0-9A-Z]{12}[0-9]{26})", () => {
+		// cUF 35, AAMM 2607, CNPJ 12ABC34501DE35, mod 55, serie 001, nNF 123, tpEmis 1,
+		// cNF 10203040. Check digit by hand, each character at its ASCII code minus 48 (A=17, B=18,
+		// C=19, D=20, E=21), weights 2-9 from the right: the weighted sum is 756, 756 mod 11 = 8,
+		// so cDV = 11 - 8 = 3.
+		const ALPHANUMERIC = "35260712ABC34501DE35550010000001231102030403";
+
+		test("should accept the key of CNPJ 12ABC34501DE35", () => {
+			expect(isValidNfeKey(ALPHANUMERIC)).toBe(true);
+		});
+
+		test("should accept it masked in groups of 4 and behind the XML Id prefix", () => {
+			expect(isValidNfeKey("3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403")).toBe(true);
+			expect(isValidNfeKey("3526.0712.ABC3.4501.DE35.5500.1000.0001.2311.0203.0403")).toBe(true);
+			expect(isValidNfeKey(`NFe${ALPHANUMERIC}`)).toBe(true);
+		});
+
+		test("should reject a separator inside a group of 4 of it", () => {
+			expect(isValidNfeKey("3526 0712 AB C3 4501 DE35 5500 1000 0001 2311 0203 0403")).toBe(false);
+		});
+
+		test("should read lower case letters as upper case, the case folding isValidCnpj applies to version 2", () => {
+			expect(isValidNfeKey(ALPHANUMERIC.toLowerCase())).toBe(true);
+			expect(isValidNfeKey("35260712abC34501dE35550010000001231102030403")).toBe(true);
+		});
+
+		test("should accept a letter in position 7 and in position 18, the two ends of the CNPJ root and order", () => {
+			// Same fields with A in position 7 and Z in position 18: cDV recalculated to 9.
+			expect(isValidNfeKey("352607A2ABC34501DZ35550010000001231102030409")).toBe(true);
+		});
+
+		test("should reject a letter in positions 1 to 6", () => {
+			// Letter in position 6 (the month) and in position 3 (the year), cDV recalculated.
+			expect(isValidNfeKey("35260A12ABC34501DE35550010000001231102030400")).toBe(false);
+			expect(isValidNfeKey("35A60712ABC34501DE35550010000001231102030406")).toBe(false);
+		});
+
+		test("should reject a letter in positions 19 and 20, the CNPJ check digits", () => {
+			expect(isValidNfeKey("35260712ABC34501DEA5550010000001231102030408")).toBe(false);
+			expect(isValidNfeKey("35260712ABC34501DE3A550010000001231102030405")).toBe(false);
+		});
+
+		test("should reject a letter after position 20, in the model or the document number", () => {
+			expect(isValidNfeKey("35260712ABC34501DE35A50010000001231102030406")).toBe(false);
+			expect(isValidNfeKey("35260712ABC34501DE355500100000A1231102030400")).toBe(false);
+		});
+
+		test("should accept the alphanumeric CNPJ in the key of the other models, NFCom and CT-e", () => {
+			expect(isValidNfeKey("35260712ABC34501DE35620010000001231102030405")).toBe(true);
+			expect(isValidNfeKey("35260712ABC34501DE35570010000001231102030400")).toBe(true);
+		});
+
+		test("should compute the check digit with the letters valued at their ASCII code minus 48", () => {
+			const accepted = NFE_CHECK_DIGITS.filter((digit) =>
+				isValidNfeKey(`${ALPHANUMERIC.slice(0, 43)}${digit}`),
+			);
+
+			expect(accepted).toEqual(["3"]);
+		});
+	});
+
 	describe("properties", () => {
 		test("should accept at most one check digit for any 43 digit base", () => {
 			fc.assert(

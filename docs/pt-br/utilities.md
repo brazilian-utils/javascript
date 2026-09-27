@@ -552,13 +552,14 @@ Fonte: [Manual do BR Code](https://www.bcb.gov.br/content/estabilidadefinanceira
 
 ### isValidNfeKey
 
-Valida uma chave de acesso de DF-e. Cobre todo DF-e com chave de acesso de 44 dígitos; o CF-e-SAT (59) fica de fora.
+Valida uma chave de acesso de DF-e. Cobre todo DF-e com chave de acesso de 44 caracteres; o CF-e-SAT (59) fica de fora.
 
 - Modelos: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) e NFCom (62).
-- Os 44 dígitos podem ser agrupados de 4 em 4 por espaço, `.`, `-` ou `/`. Os prefixos `Id` do XML (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) são removidos antes.
+- Todo caractere é dígito, exceto as posições 7 a 18, a raiz e a ordem do CNPJ do emitente, que podem trazer as letras de um CNPJ alfanumérico: os schemas atuais (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) tipam a chave como `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, em produção na NF-e a partir de 01/07/2026 (NT 2026.004). Uma letra em qualquer outra posição, incluídos os dígitos verificadores do CNPJ nas posições 19 e 20, é rejeitada. O schema só admite maiúsculas; minúsculas são lidas como maiúsculas, como `isValidCnpj` faz com `{ version: 2 }`.
+- Os 44 caracteres podem ser agrupados de 4 em 4 por espaço, `.`, `-` ou `/`. Os prefixos `Id` do XML (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) são removidos antes.
 - `tpEmis` precisa ser um dos que o MOC do modelo atribui (tabela abaixo).
 - Para NF-e e NFC-e o `cNF` precisa passar na regra B03-10 do MOC (sem valores repetidos ou sequenciais, diferente do número do documento).
-- Um número de documento todo zerado é rejeitado. O dígito verificador é um módulo 11 sobre os 43 primeiros dígitos.
+- Um número de documento todo zerado é rejeitado. O dígito verificador é um módulo 11 sobre os 43 primeiros caracteres, cada um valendo seu código ASCII menos 48 (`A` = 17 ... `Z` = 42), como a NT Conjunta 2025.001 define.
 
 | Modelo | `tpEmis` aceitos |
 | --- | --- |
@@ -577,6 +578,8 @@ isValidNfeKey('NFe35170458716523000119550010000000121000123458'); // true (prefi
 isValidNfeKey('CTe35170458716523000119570010000000128000123452'); // true (CT-e autorizado pela SVC-SP)
 isValidNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'); // true (com máscara)
 isValidNfeKey('3517.0458.7165.2300.0119.5500.1000.0000.1210.0012.3458'); // true (qualquer um dos caracteres de máscara)
+isValidNfeKey('35260712ABC34501DE35550010000001231102030403'); // true (CNPJ alfanumérico 12ABC34501DE35)
+isValidNfeKey('35260712ABC34501DEA5550010000001231102030408'); // false (letra na posição 19, dígito verificador do CNPJ)
 isValidNfeKey('351 70458716523000119550010000000121000123458'); // false (separador dentro de um grupo de 4)
 isValidNfeKey('99170458716523000119550010000000121000123458'); // false (cUF inválido)
 isValidNfeKey('35170458716523000119010010000000121000123450'); // false (modelo inválido)
@@ -584,14 +587,15 @@ isValidNfeKey('35170458716523000119550010000000128000123455'); // false (o MOC d
 isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 00000000, regra B03-10)
 ```
 
-Fonte: [MOC da NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), [schemas da NF-e](https://dfe-portal.svrs.rs.gov.br/NFE/Documentos) e os MOCs citados em `src/is-valid-nfe-key/is-valid-nfe-key.ts`.
+Fonte: [MOC da NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), [schemas da NF-e](https://dfe-portal.svrs.rs.gov.br/NFE/Documentos), [NT Conjunta 2025.001](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ%3D) (CNPJ alfanumérico) e os MOCs citados em `src/is-valid-nfe-key/is-valid-nfe-key.ts`.
 
 ### formatNfeKey
 
-Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 dígitos separados por espaço. É a forma em que o DANFE, o DACTE, o DAMDFE, o DABPE, o DANF3E e o DANFE-COM a imprimem.
+Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 caracteres separados por espaço. É a forma em que o DANFE, o DACTE, o DAMDFE, o DABPE, o DANF3E e o DANFE-COM a imprimem.
 
-- **Opções** (`FormatNfeKeyOptions`): `pad` preenche o valor com zeros à esquerda até os 44 dígitos de uma chave de acesso completa (padrão `false`).
-- Uma chave com máscara ou parcial é agrupada até onde os dígitos vão.
+- **Opções** (`FormatNfeKeyOptions`): `pad` preenche o valor com zeros à esquerda até os 44 caracteres de uma chave de acesso completa (padrão `false`).
+- Uma chave com máscara ou parcial é agrupada até onde os caracteres vão.
+- As letras de um CNPJ alfanumérico são mantidas, em maiúsculas, nas posições 7 a 18; uma letra em qualquer outra posição é descartada.
 - Use `isValidNfeKey` para verificar uma chave.
 
 ```javascript
@@ -599,6 +603,9 @@ import { formatNfeKey } from '@brazilian-utils/brazilian-utils';
 
 formatNfeKey('35170458716523000119550010000000121000123458');
 // '3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'
+
+formatNfeKey('35260712abc34501de35550010000001231102030403');
+// '3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403' (CNPJ alfanumérico)
 
 formatNfeKey('12345'); // '1234 5'
 
@@ -608,7 +615,9 @@ formatNfeKey('12345', { pad: true });
 
 ### parseNfeKey
 
-Remove a formatação de uma chave de acesso de DF-e (chave de acesso), mantém apenas os dígitos e limita o resultado a 44 dígitos.
+Remove a formatação de uma chave de acesso de DF-e (chave de acesso), mantém apenas os seus caracteres e limita o resultado a 44 caracteres.
+
+- Os caracteres mantidos são os dígitos e, nas posições 7 a 18, as letras de um CNPJ alfanumérico, em maiúsculas; uma letra em qualquer outra posição é descartada.
 
 - Os prefixos `Id` do XML (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) são removidos antes.
 
@@ -620,6 +629,9 @@ parseNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458');
 
 parseNfeKey('NFe35170458716523000119550010000000121000123458');
 // '35170458716523000119550010000000121000123458'
+
+parseNfeKey('3526 0712 abc3 4501 de35 5500 1000 0001 2311 0203 0403');
+// '35260712ABC34501DE35550010000001231102030403' (CNPJ alfanumérico)
 ```
 
 ### getNfeKeyInfo
@@ -628,6 +640,7 @@ Interpreta uma chave de acesso de DF-e e retorna seus campos. Aceita as mesmas f
 
 - Retorna um `NfeKeyInfo`: `stateCode`, `year`, `month`, `taxId`, `model` (`NfeKeyModel`), `series`, `number`, `emissionType`, `code` e `checkDigit`.
 - Para NFCom e NF3e (modelos `'62'` e `'66'`) o resultado também traz `authorizationSite` e o `code` tem 7 dígitos em vez de 8.
+- `taxId` são os 14 caracteres das posições 7 a 20 como escritos: um CNPJ numérico, um CNPJ alfanumérico (em maiúsculas) ou um CPF completado com zeros à esquerda. Um `taxId` com letra é sempre um CNPJ alfanumérico; um CPF completado e um CNPJ que começa com `000` se parecem, então verifique com `isValidCpf` ou `isValidCnpj` quando o tipo importar.
 
 ```javascript
 import { getNfeKeyInfo } from '@brazilian-utils/brazilian-utils';
@@ -639,6 +652,10 @@ getNfeKeyInfo('35170458716523000119550010000000121000123458');
 getNfeKeyInfo('35170458716523000119620010000000121000123450');
 // { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
 //   series: 1, number: 12, emissionType: 1, code: '0012345', checkDigit: 0, authorizationSite: 0 }
+
+getNfeKeyInfo('35260712ABC34501DE35550010000001231102030403');
+// { stateCode: 'SP', year: 2026, month: 7, taxId: '12ABC34501DE35', model: '55',
+//   series: 1, number: 123, emissionType: 1, code: '10203040', checkDigit: 3 }
 
 getNfeKeyInfo('invalid'); // null
 ```

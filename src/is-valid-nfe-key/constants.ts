@@ -1,6 +1,6 @@
 /**
  * The `mod` (modelo do documento) values `isValidNfeKey` supports, every one of them a document
- * whose "chave de acesso" is the same 44 digit string built the same way: 55 NF-e, 57 CT-e,
+ * whose "chave de acesso" is the same 44 character string built the same way: 55 NF-e, 57 CT-e,
  * 58 MDF-e, 62 NFCom, 63 BP-e, 64 GTV-e (the CT-e Guia de Transporte de Valores), 65 NFC-e,
  * 66 NF3e and 67 CT-e OS (Conhecimento de Transporte Eletrônico para Outros Serviços).
  *
@@ -90,24 +90,26 @@ export const FORBIDDEN_CODES: readonly string[] = [
 export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
 
 /**
- * Shape the key has to be written in once the prefix is stripped: the digits, optionally split
- * into the printed groups of 4 by whitespace or the usual mask characters, a run of them between
- * two groups included, the same rule the CPF, CNPJ, CAEPF and CNS regexes of this library follow.
- * A separator inside a group of 4, or any other character, is rejected instead of being stripped.
- * The group count is left open so the 44 digit length is still checked where the key is read.
+ * Shape the key has to be written in once the prefix is stripped and its letters upper cased:
+ * the characters, optionally split into the printed groups of 4 by whitespace or the usual mask
+ * characters, a run of them between two groups included, the same rule the CPF, CNPJ, CAEPF and
+ * CNS regexes of this library follow. A separator inside a group of 4, or any other character, is
+ * rejected instead of being stripped. The groups take letters too, so a key with an alphanumeric
+ * CNPJ can be grouped like any other; which positions may hold one, and the 44 character length,
+ * are checked against `NFE_KEY_REGEX` once the separators are gone.
  */
-export const FORMAT_REGEX = /^\d{4}(?:[\s.\-/]*\d{4})*$/;
+export const FORMAT_REGEX = /^[0-9A-Z]{4}(?:[\s.\-/]*[0-9A-Z]{4})*$/;
 
-/** Position of the model (mod) inside the 44 digit key. */
+/** Position of the model (mod) inside the 44 character key. */
 export const MODEL_START = 20;
 
-/** End (exclusive) of the model (mod) inside the 44 digit key. */
+/** End (exclusive) of the model (mod) inside the 44 character key. */
 export const MODEL_END = 22;
 
-/** Start of the document number (nNF) inside the 44 digit key. */
+/** Start of the document number (nNF) inside the 44 character key. */
 export const NUMBER_START = 25;
 
-/** End (exclusive) of the document number (nNF) inside the 44 digit key. */
+/** End (exclusive) of the document number (nNF) inside the 44 character key. */
 export const NUMBER_END = 34;
 
 /**
@@ -117,7 +119,7 @@ export const NUMBER_END = 34;
  */
 export const ABSENT_NUMBER = "000000000";
 
-/** Position of the emission type (tpEmis) inside the 44 digit key. */
+/** Position of the emission type (tpEmis) inside the 44 character key. */
 export const EMISSION_TYPE_INDEX = 34;
 
 /**
