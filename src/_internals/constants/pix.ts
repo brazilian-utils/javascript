@@ -82,6 +82,12 @@ export const PIX_TXID_ID = "05";
 
 export const PIX_ABSENT_TXID = "***";
 
+/**
+ * A `txid` (62-05): "limitado a 25 caracteres", of the letters `a`-`z` and `A`-`Z` and the digits
+ * `0`-`9` (Manual de Padrões para Iniciação do Pix, §2.6.2).
+ */
+export const PIX_TXID_REGEX = /^[A-Za-z0-9]{1,25}$/;
+
 export const PIX_CRC_TAG = "6304";
 
 export const PIX_CRC_LENGTH = 4;

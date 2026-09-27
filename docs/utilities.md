@@ -461,12 +461,15 @@ Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/cont
 
 ### isValidPixPayload
 
-Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid. The key itself is not checked; use `isValidPixKey`.
+Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid under the Manual de Padrões para Iniciação do Pix and, where it is silent, the EMV QR Code specification it builds on.
 
 - The payload must start with the format indicator `000201`.
 - The TLV structure, the CRC-16 and the mandatory objects (format indicator, a 4 digit category code, currency, country, merchant name and city) are checked.
 - One "Merchant Account Information" template (IDs 26 to 51) must carry the `br.gov.bcb.pix` GUI with a key (static) or a PSP URL (dynamic), never both.
-- Objects `01` (Point of Initiation Method) and `62` (Additional Data Field) are optional; `01` must be `11` or `12` when present.
+- The key is written in the DICT form (§2.5.1): the one `getPixKeyInfo` returns unchanged, so `12345678909` passes and `123.456.789-09` does not. Whether it is registered cannot be told from the payload. The PSP URL has at most 77 characters (§2.5.2).
+- The merchant name has at most 25 characters and the city at most 15; the country is `BR` in uppercase.
+- Object `01` (Point of Initiation Method) is optional and must be `11` or `12` when present.
+- Object `62` (Additional Data Field) is mandatory and carries the `txid` (62-05), "sempre presente em um BR Code": `***` or 1 to 25 letters and digits (§2.6.2), and always `***` with a PSP URL (§2.7).
 - An amount (`54`) is digits with an optional `.` and at most two decimals (`98.73`, `98` and `98.` are the EMV examples), at most 13 characters, and greater than zero, except in a Pix Saque BR Code (8 digit `fss` in sub-object 26-03) and next to a PSP location, where the Pix API gives it `0.00` (the Manual do BR Code lists `"0"` among its examples).
 - Unreserved Templates (IDs 80 to 99) are ignored.
 
@@ -490,7 +493,7 @@ Parse a Pix BR Code payload into its fields. Accepts what `isValidPixPayload` ac
 - Returns a `PixPayloadInfo`: `merchantName`, `merchantCity`, `pointOfInitiation` and either `key` (static) or `url` (dynamic).
 - `amount`, `txid`, `description` and `withdrawalFacilitator` (the `fss` of a Pix Saque) are present only when the payload carries them. `txid` is absent for the `***` marker.
 - `pointOfInitiation` (`PixPointOfInitiation`) is `"dynamic"` when the payload carries a PSP location or object `01` is `"12"`, `"static"` otherwise.
-- With a PSP location, `amount` and `txid` are ignored, as the manual mandates.
+- With a PSP location, `amount` is ignored and `txid` is always `***`, as §2.7 of the manual mandates.
 
 ```javascript
 import { getPixPayloadInfo } from '@brazilian-utils/brazilian-utils';

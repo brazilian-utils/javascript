@@ -1,4 +1,5 @@
 import {
+	PIX_ABSENT_TXID,
 	PIX_ADDITIONAL_DATA_ID,
 	PIX_COUNTRY_CODE,
 	PIX_COUNTRY_CODE_ID,
@@ -9,7 +10,9 @@ import {
 	PIX_MERCHANT_CATEGORY_CODE_ID,
 	PIX_MERCHANT_CATEGORY_CODE_REGEX,
 	PIX_MERCHANT_CITY_ID,
+	PIX_MERCHANT_CITY_MAX_LENGTH,
 	PIX_MERCHANT_NAME_ID,
+	PIX_MERCHANT_NAME_MAX_LENGTH,
 	PIX_PAYLOAD_FORMAT_INDICATOR,
 	PIX_PAYLOAD_FORMAT_INDICATOR_ID,
 	PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT,
@@ -19,6 +22,8 @@ import {
 	PIX_TRANSACTION_AMOUNT_MAX_LENGTH,
 	PIX_TRANSACTION_CURRENCY,
 	PIX_TRANSACTION_CURRENCY_ID,
+	PIX_TXID_ID,
+	PIX_TXID_REGEX,
 	PIX_URL_ID,
 	PIX_WITHDRAWAL_FACILITATOR_ID,
 } from "../_internals/constants/pix";
@@ -26,6 +31,7 @@ import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
 import { findPixMerchantAccountInformation } from "../_internals/find-pix-merchant-account-information/find-pix-merchant-account-information";
 import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
 import { type TlvFields, parseTlv } from "../_internals/parse-tlv/parse-tlv";
+import { getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 
 const AMOUNT_REGEX = /^\d+(?:\.\d{0,2})?$/;
 
@@ -58,12 +64,15 @@ const isValidMerchantAccountInformation = (merchantAccountInformation: TlvFields
 	const url = merchantAccountInformation[PIX_URL_ID];
 	const withdrawalFacilitator = merchantAccountInformation[PIX_WITHDRAWAL_FACILITATOR_ID];
 
-	if ((key === undefined) === (url === undefined)) return false;
-	if (url !== undefined && !isValidPixUrl(url)) return false;
-	if (withdrawalFacilitator !== undefined && url !== undefined) return false;
+	if (url !== undefined) {
+		return key === undefined && withdrawalFacilitator === undefined && isValidPixUrl(url);
+	}
 
 	return (
-		withdrawalFacilitator === undefined || WITHDRAWAL_FACILITATOR_REGEX.test(withdrawalFacilitator)
+		key !== undefined &&
+		getPixKeyInfo(key)?.value === key &&
+		(withdrawalFacilitator === undefined ||
+			WITHDRAWAL_FACILITATOR_REGEX.test(withdrawalFacilitator))
 	);
 };
 
@@ -85,46 +94,73 @@ const isValidAmount = (
 			merchantAccountInformation[PIX_URL_ID] !== undefined ||
 			merchantAccountInformation[PIX_WITHDRAWAL_FACILITATOR_ID] !== undefined));
 
-const isValidAdditionalData = (additionalData: string | undefined): boolean =>
-	additionalData === undefined || parseTlv(additionalData) !== null;
+const isWithin = (value: string | undefined, maxLength: number): boolean =>
+	value !== undefined && value.length <= maxLength;
+
+const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): boolean => {
+	const txid = additionalData === undefined ? undefined : parseTlv(additionalData)?.[PIX_TXID_ID];
+
+	if (txid === undefined) return false;
+
+	return txid === PIX_ABSENT_TXID || (!isDynamic && PIX_TXID_REGEX.test(txid));
+};
 
 /**
  * Validates a Pix BR Code payload, the string behind a Pix QR Code and behind "Pix copia e
- * cola".
+ * cola", against the Manual de Padrões para Iniciação do Pix and, where the manual is silent,
+ * the EMV® QRCPS-MPM it builds on.
  *
- * The payload is valid when its TLV (tag-length-value) structure is well-formed, when it
- * starts with the payload format indicator `000201`, when the mandatory objects are present and
- * well-formed (that indicator, not repeated with another value later on, a merchant
- * category code of 4 digits, currency `986`, country `BR`, merchant name and merchant city), when one of
- * the "Merchant Account Information" templates (IDs 26 to 51) carries the `br.gov.bcb.pix` GUI
- * together with a key (static QR Code) or a URL (dynamic QR Code), and when the CRC-16 matches
- * the rest of the payload. The "Point of Initiation Method" object (`01`) is advisory: the
- * Manual do BR Code marks it `Uso: O` and only assigns a meaning to the value `"12"`, so it may
- * be absent from either shape and only a value outside `{"11", "12"}` makes the payload
- * invalid. A transaction amount (`54`), when present, is written the way the EMV® QRCPS-MPM
- * prescribes: digits with an optional `.` decimal mark, which "may be present even if there are
- * no decimals" (`"98.73"`, `"98"` and `"98."` are its examples), at most two decimals (the
- * exponent of the real) and at most 13 characters. It may be zero (the Manual do BR Code,
- * Tabela 1, gives `"0"` as an example) in a Pix Saque BR Code, one carrying the ISPB of the
- * "facilitador de serviço de saque" in sub-object 26-03 (`fss`, §2.6), and in a payload with a
- * PSP location: the Pix API has "cobranças imediatas que representem um saque" state "o valor
- * 0.00 (zero)", and allows zero in any charge whose `valor.modalidadeAlteracao` is 1. A payload
- * built around a key alone must state an amount greater than zero, the EMV rule ("shall be
- * different from zero") where the BCB assigns zero no meaning. A `fss` written next to a PSP
- * location makes the payload
- * invalid: §2.7 of the Manual de Padrões para Iniciação do Pix maps the dynamic QR Code to
- * exactly two sub-objects, `00` (GUI) and `25` (URL), and `fss` belongs to the static template
- * of §2.6.
+ * The payload is valid when:
+ * - it is well-formed TLV (tag-length-value), every length from `01` to `99` (EMV);
+ * - it starts with the payload format indicator `000201` (EMV: "shall be the first data
+ *   object"), and no later object `00` says otherwise;
+ * - the "Point of Initiation Method" (`01`), "opcional" in the manual (§2.7.2), is absent,
+ *   `"11"` or `"12"` (EMV);
+ * - one of the "Merchant Account Information" templates (IDs 26 to 51) carries the
+ *   `br.gov.bcb.pix` GUI, compared without regard to case (§2.5: "O GUI [...] é case
+ *   insensitive"), with exactly one of:
+ *   - a Pix key (26-01) written in the DICT form: "A regra para formatação das chaves Pix no
+ *     BR Code [...] segue estritamente as regras definidas no Manual Operacional do DICT"
+ *     (§2.5.1), i.e. a key `getPixKeyInfo` recognizes and writes back unchanged
+ *     (`"12345678909"`, `"+5561912345678"`, a lowercase e-mail or UUID, never a mask), and
+ *     optionally the 8 digit ISPB of a Pix Saque facilitator (`fss`, 26-03, §2.6);
+ *   - a PSP location (26-25), a host and path of at most 77 characters (§2.5.2: "O tamanho
+ *     máximo da URL completa (sem o prefixo de protocolo) é de 77 caracteres", all the 99
+ *     characters of the template leave next to the GUI), never next to a `fss`, which belongs to the static template of §2.6 (§2.7 maps the dynamic QR Code to
+ *     `00` and `25`);
+ * - the merchant category code (`52`) is 4 digits, the currency (`53`) is `986` and the
+ *   country (`58`) is `BR`, the ISO 3166-1 alpha-2 code the EMV refers to, as ISO writes it;
+ * - the merchant name (`59`) has at most 25 characters and the merchant city (`60`) at most 15
+ *   (EMV "var. up to 25" and "var. up to 15");
+ * - a transaction amount (`54`), when present, is digits with an optional `.` decimal mark,
+ *   which "may be present even if there are no decimals" (`"98.73"`, `"98"` and `"98."` are the
+ *   EMV examples), at most two decimals and 13 characters. It may be zero (the Manual do BR
+ *   Code, Tabela 1, gives `"0"` as an example) in a Pix Saque BR Code, one with a `fss`, and in
+ *   a payload with a PSP location: the Pix API has "cobranças imediatas que representem um
+ *   saque" state "o valor 0.00 (zero)", and allows zero in any charge whose
+ *   `valor.modalidadeAlteracao` is 1. A payload built around a key alone must state an amount
+ *   greater than zero, the EMV rule ("shall be different from zero") where the BCB assigns zero
+ *   no meaning; up to 2.4.0 the rule was the same;
+ * - the "Additional Data Field Template" (`62`) carries a `txid` (62-05), "sempre presente em
+ *   um BR Code" (§2.6, footnote 21): `***` when there is none (footnote 25), or 1 to 25 letters
+ *   and digits (§2.6.2: "limitado a 25 caracteres", "Letras minúsculas [...] Letras maiúsculas
+ *   [...] Dígitos decimais"). A payload with a PSP location carries `***`: "Os campos Valor e
+ *   Identificador da Transação (txid) não devem ser preenchidos no QR Code dinâmico" (§2.7).
+ *   Its transaction amount is only checked for its format, since the same paragraph has the
+ *   payer ignore it ("Se preenchidos, seu conteúdo deve ser ignorado");
+ * - the CRC-16 (`63`) closes the payload and matches it. Neither the EMV nor the manual states
+ *   the case of its hexadecimal digits, so `"1d3d"` is read as `"1D3D"`.
  *
- * The key itself is not checked against the DICT formats: the manual states a static QR Code
- * can be generated with a key that is not (or is no longer) registered, so use `isValidPixKey`
- * when that matters.
+ * Whether the key is registered in the DICT is not something a payload can tell: "Um QR Code
+ * estático pode potencialmente ser gerado com uma chave inválida, mas será um QR Code
+ * inválido" (§2.4.1, footnote 5).
  *
  * Unreserved Templates (IDs 80 to 99) are ignored. The "QR Code composto" of Pix Automático
  * (Pix recorrente) writes its recurrence location in one of them: when such a payload also
- * carries a payment location in 26-25, as the composite example of the Pix manual does, it is
- * accepted here and read as an ordinary dynamic payload, its recurrence location dropped. Only
- * a payload with no Pix template at all in IDs 26 to 51 is reported as invalid.
+ * carries a key or a payment location in IDs 26 to 51, as the composite examples of §2.8 do,
+ * it is accepted here and read as an ordinary static or dynamic payload, its recurrence
+ * location dropped. A composite that carries only the recurrence, with no key or payment
+ * location in IDs 26 to 51, is reported as invalid.
  *
  * @param {string} value - The BR Code payload to validate.
  * @returns {boolean} True if the payload is a valid Pix BR Code, false otherwise.
@@ -140,22 +176,23 @@ const isValidAdditionalData = (additionalData: string | undefined): boolean =>
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
- * Manual de Padrões para Iniciação do Pix v2.10.0, §2.6 and §2.7, and the `valor.original` of
- * the Pix API: "Para cobranças imediatas que não envolvam saque ou troco: deve apresentar
- * valores maiores do que zero, exceto no caso de o campo valor.modalidadeAlteracao apresentar
- * valor 1; Para cobranças imediatas que representem um saque: deve apresentar o valor 0.00
- * (zero)".
+ * Manual de Padrões para Iniciação do Pix v2.10.0, §2.4 to §2.8, quoted above, and the
+ * `valor.original` of the Pix API: "Para cobranças imediatas que não envolvam saque ou troco:
+ * deve apresentar valores maiores do que zero, exceto no caso de o campo
+ * valor.modalidadeAlteracao apresentar valor 1; Para cobranças imediatas que representem um
+ * saque: deve apresentar o valor 0.00 (zero)".
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * Manual do BR Code v2.0.1, Tabela 1: `54` Transaction Amount, "01..13", "valor da transação.
  * Ex.: "0", "1.00", "123.99"".
  * @see Official: https://www.emvco.com/terms-of-use/?u=/wp-content/uploads/documents/EMVCo-Merchant-Presented-QR-Specification-v1-1.pdf
  * EMV® QRCPS-MPM v1.1, cited by the Pix manual, "Data Objects Under the Root of a QR Code":
  * Merchant Category Code `"52"`, format `N` (numeric), length `"04"`, "As defined by [ISO
- * 18245]"; "Position of Data Objects": "The Payload Format Indicator (ID "00") shall be the
- * first data object in the QR Code"; "Transaction Amount (ID "54")": "If present, the
- * Transaction Amount shall be different from zero, shall only include (numeric) digits "0" to
- * "9" and may contain a single "." character as the decimal mark [...] the "." character may be
- * present even if there are no decimals".
+ * 18245]"; Country Code `"58"`, "as defined by [ISO 3166-1 alpha 2]"; Merchant Name `"59"`,
+ * "var. up to "25""; Merchant City `"60"`, "var. up to "15""; "Position of Data Objects": "The
+ * Payload Format Indicator (ID "00") shall be the first data object in the QR Code";
+ * "Transaction Amount (ID "54")": "If present, the Transaction Amount shall be different from
+ * zero, shall only include (numeric) digits "0" to "9" and may contain a single "." character
+ * as the decimal mark [...] the "." character may be present even if there are no decimals".
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
@@ -180,9 +217,9 @@ export const isValidPixPayload = (value: string): boolean => {
 	if (!PIX_MERCHANT_CATEGORY_CODE_REGEX.test(String(fields[PIX_MERCHANT_CATEGORY_CODE_ID])))
 		return false;
 	if (fields[PIX_TRANSACTION_CURRENCY_ID] !== PIX_TRANSACTION_CURRENCY) return false;
-	if (fields[PIX_COUNTRY_CODE_ID]?.toUpperCase() !== PIX_COUNTRY_CODE) return false;
-	if (fields[PIX_MERCHANT_NAME_ID] === undefined) return false;
-	if (fields[PIX_MERCHANT_CITY_ID] === undefined) return false;
+	if (fields[PIX_COUNTRY_CODE_ID] !== PIX_COUNTRY_CODE) return false;
+	if (!isWithin(fields[PIX_MERCHANT_NAME_ID], PIX_MERCHANT_NAME_MAX_LENGTH)) return false;
+	if (!isWithin(fields[PIX_MERCHANT_CITY_ID], PIX_MERCHANT_CITY_MAX_LENGTH)) return false;
 
 	const merchantAccountInformation = findPixMerchantAccountInformation(fields);
 
@@ -190,5 +227,8 @@ export const isValidPixPayload = (value: string): boolean => {
 	if (!isValidMerchantAccountInformation(merchantAccountInformation)) return false;
 	if (!isValidAmount(fields[PIX_TRANSACTION_AMOUNT_ID], merchantAccountInformation)) return false;
 
-	return isValidAdditionalData(fields[PIX_ADDITIONAL_DATA_ID]);
+	return isValidTxid(
+		fields[PIX_ADDITIONAL_DATA_ID],
+		merchantAccountInformation[PIX_URL_ID] !== undefined,
+	);
 };

@@ -26,6 +26,7 @@ import {
 	PIX_TRANSACTION_CURRENCY,
 	PIX_TRANSACTION_CURRENCY_ID,
 	PIX_TXID_ID,
+	PIX_TXID_REGEX,
 	PIX_URL_ID,
 	PIX_URL_MAX_LENGTH,
 } from "../_internals/constants/pix";
@@ -40,7 +41,6 @@ import {
 	AMOUNT_REGEX,
 	AMOUNT_COMPARISON_DECIMAL_PLACES,
 	TLV_OVERHEAD,
-	TXID_REGEX,
 } from "./constants";
 
 /** The parameters `generatePixPayload` takes to build a Pix BR Code. */
@@ -126,7 +126,7 @@ const resolveFormattedAmount = (
 	)
 		return null;
 
-	if (txid !== undefined && (typeof txid !== "string" || !TXID_REGEX.test(txid))) return null;
+	if (txid !== undefined && (typeof txid !== "string" || !PIX_TXID_REGEX.test(txid))) return null;
 
 	return formattedAmount;
 };
@@ -167,6 +167,10 @@ const resolveFormattedAmount = (
  * `params.amount` is written with the two decimal places the BR Code takes, so an amount that
  * does not survive that round trip (`0.005`, `123.456`) is refused rather than rounded into a
  * payload that asks the payer for a different sum.
+ *
+ * Every payload returned here is one `isValidPixPayload` accepts: the key in its DICT form,
+ * the name and city within 25 and 15 characters, the 62-05 `txid` always written (`***` when
+ * none is given, and always for a dynamic payload) and a non-zero amount.
  *
  * @param {GeneratePixPayloadParams} params - The parameters of the payload.
  * @param {string} [params.key] - The Pix key of the receiver. Required unless `url` is given.
