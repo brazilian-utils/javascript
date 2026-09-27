@@ -53,7 +53,8 @@ const COURTS = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
  * generateProcessoJuridico({ court: 10 }); // null (no such órgão)
  * ```
  *
- * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits, and
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout, its check digits (art. 1º,
+ * § 2º, and the algorithm in its Anexo VIII, "CÁLCULO DO DÍGITO VERIFICADOR"), and
  * closes the list of órgão (`J`) and tribunal (`TR`) codes in art. 1º, § 4º and § 5º.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119

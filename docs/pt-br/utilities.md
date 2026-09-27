@@ -1203,7 +1203,7 @@ isValidProcessoJuridico('0000100-23.2008.8.28.0000'); // false (não existe 28º
 isValidProcessoJuridico('ab00020802520125150049'); // false (letras são rejeitadas)
 ```
 
-Fonte: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119).
+Fonte: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119), art. 1º (layout, `J` e `TR`) e Anexo VIII ("CÁLCULO DO DÍGITO VERIFICADOR"); o TRF da 6ª Região (`4.06`) conforme a [Resolução CNJ nº 477/2022](https://atos.cnj.jus.br/atos/detalhar/4781).
 
 ### formatProcessoJuridico
 

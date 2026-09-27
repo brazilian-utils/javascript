@@ -25,7 +25,8 @@ export type FormatProcessoJuridicoOptions = {
  * formatProcessoJuridico(-1); // "" (not a non-negative safe integer)
  * ```
  *
- * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits.
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits,
+ * whose algorithm is in its Anexo VIII.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */
