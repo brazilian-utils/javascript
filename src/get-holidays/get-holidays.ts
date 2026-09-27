@@ -355,10 +355,13 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * facultativo)". The three portarias of 2024 to 2026 list both Carnaval days as ponto
  * facultativo and never as feriado nacional, and none of their later amendments touches them.
  * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20CMN&numero=4880
- * Resolução CMN nº 4.880/2020, art. 6º, which FEBRABAN's bank holiday calendar follows: besides
- * Saturdays, Sundays and the national holidays, the financial market does not count as dias úteis
- * the "segunda-feira e terça-feira de Carnaval" and the "dia dedicado a Corpus Christi", the same
- * three days typed `optional` here.
+ * Resolução CMN nº 4.880, de 23/12/2020 (DOU of 24/12/2020, in force from 01/03/2021), art. 6º,
+ * which FEBRABAN's bank holiday calendar follows: "Não são considerados dias úteis, para fins de
+ * operações praticadas no mercado financeiro e de prestação de informações ao Banco Central do
+ * Brasil, os sábados, domingos e feriados de âmbito nacional, bem como: I - a segunda-feira e a
+ * terça-feira de Carnaval; e II - o dia dedicado a Corpus Christi", the same three days typed
+ * `optional` here. The Quarta-feira de Cinzas is not in that list: art. 2º, § 1º, II only allows a
+ * "horário especial de atendimento" on it, so it stays a dia útil for the financial market too.
  */
 export function getHolidays(year: number): Holiday[];
 /**

@@ -136,9 +136,11 @@ const SATURDAY = 6;
  * CLT art. 459 § 1º (wording given by Lei 7.855/1989), the "quinto dia útil do mês subsequente ao
  * vencido" payroll deadline that `includeSaturday` exists for.
  * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20CMN&numero=4880
- * Resolução CMN nº 4.880/2020, art. 6º: besides Saturdays, Sundays and the national holidays, the
- * financial market does not count as dias úteis the "segunda-feira e terça-feira de Carnaval" and
- * the "dia dedicado a Corpus Christi".
+ * Resolução CMN nº 4.880/2020, art. 6º: "Não são considerados dias úteis, para fins de operações
+ * praticadas no mercado financeiro e de prestação de informações ao Banco Central do Brasil, os
+ * sábados, domingos e feriados de âmbito nacional, bem como: I - a segunda-feira e a terça-feira
+ * de Carnaval; e II - o dia dedicado a Corpus Christi". The Quarta-feira de Cinzas is not listed,
+ * so it is a dia útil for the financial market as well.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l5010.htm
  * Lei 5.010/1966, art. 62: "Além dos fixados em lei, serão feriados na Justiça Federal, inclusive
  * nos Tribunais Superiores: I - os dias compreendidos entre 20 de dezembro e 6 de janeiro,
