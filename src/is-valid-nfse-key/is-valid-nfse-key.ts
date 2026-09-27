@@ -57,8 +57,10 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  * first 49 characters, weights 2 to 9 cycling from the right, where a remainder of 0 or 1 gives
  * 0. `getNfseKeyInfo` states what each rule is taken from.
  *
- * An alphanumeric CNPJ is accepted since the schema bundle of 2026-07-27 widened the key to it
- * (in production since 2026-08-10). Letters are read in upper case, lower case input included,
+ * An alphanumeric CNPJ is accepted since the restricted-production (RTC) schema bundle of
+ * 2026-07-27 widened the key to it. The service has handled the alphanumeric CNPJ in production
+ * since 2026-08-10 ("Atualizações e Implantações"), while the production bundle of the "Documentação
+ * atual" page (2026-02-09) still types the key as digits only. Letters are read in upper case, lower case input included,
  * as `isValidCnpj` with version 2 reads them. No official document states how a letter enters
  * the check digit of the key: none of the NFS-e technical notes (001 to 009), the Anexo I v1.01
  * nor the Perguntas e Respostas v1.00 of 08/09/2026 (which still calls the key "50 dígitos
