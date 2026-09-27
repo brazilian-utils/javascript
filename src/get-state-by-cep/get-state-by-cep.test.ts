@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { type State } from "../_internals/constants/states";
+import { DATA as STATES, type State } from "../_internals/constants/states";
 import { anyGarbage, digits, digitsOfOtherLength } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
@@ -42,13 +42,7 @@ const RANGE_BOUNDARIES: [string, string, string][] = [
 
 describe("getStateByCep", () => {
 	it("should return São Paulo for a formatted CEP of Avenida Paulista", () => {
-		expect(getStateByCep("01310-100")).toEqual({
-			code: "SP",
-			name: "São Paulo",
-			regionCode: "SE",
-			regionName: "Sudeste",
-			ibgeCode: 35,
-		});
+		expect(getStateByCep("01310-100")).toEqual(STATES.find((state) => state.code === "SP"));
 	});
 
 	it("should return Rio de Janeiro for a CEP given as a number", () => {
@@ -58,6 +52,8 @@ describe("getStateByCep", () => {
 			regionCode: "SE",
 			regionName: "Sudeste",
 			ibgeCode: 33,
+			regionIbgeCode: 3,
+			capital: { code: "3304557", name: "Rio de Janeiro" },
 		});
 	});
 

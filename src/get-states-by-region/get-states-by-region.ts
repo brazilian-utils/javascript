@@ -1,4 +1,5 @@
 import { DATA, type State } from "../_internals/constants/states";
+import { copyState } from "../_internals/copy-state/copy-state";
 
 export type { State } from "../_internals/constants/states";
 
@@ -30,7 +31,5 @@ export const getStatesByRegion = (regionCode: string): State[] => {
 
 	const normalized = regionCode.trim().toUpperCase();
 
-	return DATA.filter((state) => state.regionCode === normalized).map((state) =>
-		Object.assign({}, state),
-	);
+	return DATA.filter((state) => state.regionCode === normalized).map((state) => copyState(state));
 };

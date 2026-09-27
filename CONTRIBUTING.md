@@ -117,8 +117,8 @@ itself:
   form: area codes and their states (Anatel, `area-codes.ts`), service phone prefixes (Anatel,
   `service-phone.ts`), national and state holidays (`holidays.ts`), the órgãos and tribunals of the
   processo number (Resolução CNJ nº 65/2008, `processo-juridico.ts`), IBAN lengths per country
-  (`iban.ts`), IBGE state codes (`ibge-uf-codes.ts`), the state capitals and the regions (IBGE,
-  `state-capitals.ts`, `regions.ts`), legal nature categories, the CST and CSOSN
+  (`iban.ts`), IBGE state codes (`ibge-uf-codes.ts`), the states with their regions and capitals
+  (IBGE, `states.ts`, `regions.ts`), legal nature categories, the CST and CSOSN
   tables (`src/is-valid-cst`, `src/is-valid-csosn`), the professional councils
   (`src/is-valid-registro-profissional`), the região fiscal digit of each state
   (`src/_internals/constants/cpf.ts`) and the voter ID state codes (`src/is-valid-voter-id`). A change to one of

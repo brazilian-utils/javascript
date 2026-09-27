@@ -1,4 +1,5 @@
 import { DATA, type State } from "../_internals/constants/states";
+import { copyState } from "../_internals/copy-state/copy-state";
 import { findCepRange } from "../_internals/find-cep-range/find-cep-range";
 import { CEP_RANGES } from "./constants";
 
@@ -31,7 +32,7 @@ export type { State } from "../_internals/constants/states";
  *
  * @example
  * ```typescript
- * getStateByCep("01310-100"); // { code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35 }
+ * getStateByCep("01310-100"); // { code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35, regionIbgeCode: 3, capital: { code: "3550308", name: "São Paulo" } }
  * getStateByCep(20040020); // { code: "RJ", name: "Rio de Janeiro", regionCode: "SE", regionName: "Sudeste", ibgeCode: 33 }
  * getStateByCep("69300-000")?.code; // "RR"
  * getStateByCep("72800-000")?.code; // "GO"
@@ -44,5 +45,5 @@ export const getStateByCep = (value: string | number): State | null => {
 	const range = findCepRange(value, CEP_RANGES);
 	const state = range && DATA.find((entry) => entry.code === range.state);
 
-	return state ? { ...state } : null;
+	return state ? copyState(state) : null;
 };

@@ -7,8 +7,15 @@
  *
  * Each member has the two letter code of the state (`code`, e.g. `"SP"`), its full name
  * (`name`, e.g. `"São Paulo"`), the code and the full name of the region it belongs to
- * (`regionCode` and `regionName`, e.g. `"SE"` and `"Sudeste"`) and the 2 digit IBGE code of the
- * Federative Unit (`ibgeCode`, the "cUF", e.g. `35`).
+ * (`regionCode` and `regionName`, e.g. `"SE"` and `"Sudeste"`), the 2 digit IBGE code of the
+ * Federative Unit (`ibgeCode`, the "cUF", e.g. `35`), the IBGE identifier of its region
+ * (`regionIbgeCode`, the first digit of `ibgeCode`, e.g. `3`) and its capital (`capital`, the 7 digit
+ * IBGE code and the name of the municipality, e.g. `{ code: "3550308", name: "São Paulo" }`; for
+ * the Distrito Federal, which has no municipalities, Brasília with the code of the whole district).
+ *
+ * `regionIbgeCode` and `capital` came after 2.4.0: every state util fills them, but they are
+ * optional in the type so that a `State` built before them still type-checks. They become
+ * required in the next major version.
  */
 export type State =
 	| {
@@ -17,6 +24,8 @@ export type State =
 			readonly regionCode: "N";
 			readonly regionName: "Norte";
 			readonly ibgeCode: 12;
+			readonly regionIbgeCode?: 1;
+			readonly capital?: { readonly code: "1200401"; readonly name: "Rio Branco" };
 	  }
 	| {
 			readonly code: "AL";
@@ -24,6 +33,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 27;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2704302"; readonly name: "Maceió" };
 	  }
 	| {
 			readonly code: "AP";
@@ -31,6 +42,8 @@ export type State =
 			readonly regionCode: "N";
 			readonly regionName: "Norte";
 			readonly ibgeCode: 16;
+			readonly regionIbgeCode?: 1;
+			readonly capital?: { readonly code: "1600303"; readonly name: "Macapá" };
 	  }
 	| {
 			readonly code: "AM";
@@ -38,6 +51,8 @@ export type State =
 			readonly regionCode: "N";
 			readonly regionName: "Norte";
 			readonly ibgeCode: 13;
+			readonly regionIbgeCode?: 1;
+			readonly capital?: { readonly code: "1302603"; readonly name: "Manaus" };
 	  }
 	| {
 			readonly code: "BA";
@@ -45,6 +60,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 29;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2927408"; readonly name: "Salvador" };
 	  }
 	| {
 			readonly code: "CE";
@@ -52,6 +69,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 23;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2304400"; readonly name: "Fortaleza" };
 	  }
 	| {
 			readonly code: "DF";
@@ -59,6 +78,8 @@ export type State =
 			readonly regionCode: "CO";
 			readonly regionName: "Centro-Oeste";
 			readonly ibgeCode: 53;
+			readonly regionIbgeCode?: 5;
+			readonly capital?: { readonly code: "5300108"; readonly name: "Brasília" };
 	  }
 	| {
 			readonly code: "ES";
@@ -66,6 +87,8 @@ export type State =
 			readonly regionCode: "SE";
 			readonly regionName: "Sudeste";
 			readonly ibgeCode: 32;
+			readonly regionIbgeCode?: 3;
+			readonly capital?: { readonly code: "3205309"; readonly name: "Vitória" };
 	  }
 	| {
 			readonly code: "GO";
@@ -73,6 +96,8 @@ export type State =
 			readonly regionCode: "CO";
 			readonly regionName: "Centro-Oeste";
 			readonly ibgeCode: 52;
+			readonly regionIbgeCode?: 5;
+			readonly capital?: { readonly code: "5208707"; readonly name: "Goiânia" };
 	  }
 	| {
 			readonly code: "MA";
@@ -80,6 +105,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 21;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2111300"; readonly name: "São Luís" };
 	  }
 	| {
 			readonly code: "MT";
@@ -87,6 +114,8 @@ export type State =
 			readonly regionCode: "CO";
 			readonly regionName: "Centro-Oeste";
 			readonly ibgeCode: 51;
+			readonly regionIbgeCode?: 5;
+			readonly capital?: { readonly code: "5103403"; readonly name: "Cuiabá" };
 	  }
 	| {
 			readonly code: "MS";
@@ -94,6 +123,8 @@ export type State =
 			readonly regionCode: "CO";
 			readonly regionName: "Centro-Oeste";
 			readonly ibgeCode: 50;
+			readonly regionIbgeCode?: 5;
+			readonly capital?: { readonly code: "5002704"; readonly name: "Campo Grande" };
 	  }
 	| {
 			readonly code: "MG";
@@ -101,6 +132,8 @@ export type State =
 			readonly regionCode: "SE";
 			readonly regionName: "Sudeste";
 			readonly ibgeCode: 31;
+			readonly regionIbgeCode?: 3;
+			readonly capital?: { readonly code: "3106200"; readonly name: "Belo Horizonte" };
 	  }
 	| {
 			readonly code: "PA";
@@ -108,6 +141,8 @@ export type State =
 			readonly regionCode: "N";
 			readonly regionName: "Norte";
 			readonly ibgeCode: 15;
+			readonly regionIbgeCode?: 1;
+			readonly capital?: { readonly code: "1501402"; readonly name: "Belém" };
 	  }
 	| {
 			readonly code: "PB";
@@ -115,6 +150,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 25;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2507507"; readonly name: "João Pessoa" };
 	  }
 	| {
 			readonly code: "PR";
@@ -122,6 +159,8 @@ export type State =
 			readonly regionCode: "S";
 			readonly regionName: "Sul";
 			readonly ibgeCode: 41;
+			readonly regionIbgeCode?: 4;
+			readonly capital?: { readonly code: "4106902"; readonly name: "Curitiba" };
 	  }
 	| {
 			readonly code: "PE";
@@ -129,6 +168,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 26;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2611606"; readonly name: "Recife" };
 	  }
 	| {
 			readonly code: "PI";
@@ -136,6 +177,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 22;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2211001"; readonly name: "Teresina" };
 	  }
 	| {
 			readonly code: "RJ";
@@ -143,6 +186,8 @@ export type State =
 			readonly regionCode: "SE";
 			readonly regionName: "Sudeste";
 			readonly ibgeCode: 33;
+			readonly regionIbgeCode?: 3;
+			readonly capital?: { readonly code: "3304557"; readonly name: "Rio de Janeiro" };
 	  }
 	| {
 			readonly code: "RN";
@@ -150,6 +195,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 24;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2408102"; readonly name: "Natal" };
 	  }
 	| {
 			readonly code: "RS";
@@ -157,6 +204,8 @@ export type State =
 			readonly regionCode: "S";
 			readonly regionName: "Sul";
 			readonly ibgeCode: 43;
+			readonly regionIbgeCode?: 4;
+			readonly capital?: { readonly code: "4314902"; readonly name: "Porto Alegre" };
 	  }
 	| {
 			readonly code: "RO";
@@ -164,6 +213,8 @@ export type State =
 			readonly regionCode: "N";
 			readonly regionName: "Norte";
 			readonly ibgeCode: 11;
+			readonly regionIbgeCode?: 1;
+			readonly capital?: { readonly code: "1100205"; readonly name: "Porto Velho" };
 	  }
 	| {
 			readonly code: "RR";
@@ -171,6 +222,8 @@ export type State =
 			readonly regionCode: "N";
 			readonly regionName: "Norte";
 			readonly ibgeCode: 14;
+			readonly regionIbgeCode?: 1;
+			readonly capital?: { readonly code: "1400100"; readonly name: "Boa Vista" };
 	  }
 	| {
 			readonly code: "SC";
@@ -178,6 +231,8 @@ export type State =
 			readonly regionCode: "S";
 			readonly regionName: "Sul";
 			readonly ibgeCode: 42;
+			readonly regionIbgeCode?: 4;
+			readonly capital?: { readonly code: "4205407"; readonly name: "Florianópolis" };
 	  }
 	| {
 			readonly code: "SP";
@@ -185,6 +240,8 @@ export type State =
 			readonly regionCode: "SE";
 			readonly regionName: "Sudeste";
 			readonly ibgeCode: 35;
+			readonly regionIbgeCode?: 3;
+			readonly capital?: { readonly code: "3550308"; readonly name: "São Paulo" };
 	  }
 	| {
 			readonly code: "SE";
@@ -192,6 +249,8 @@ export type State =
 			readonly regionCode: "NE";
 			readonly regionName: "Nordeste";
 			readonly ibgeCode: 28;
+			readonly regionIbgeCode?: 2;
+			readonly capital?: { readonly code: "2800308"; readonly name: "Aracaju" };
 	  }
 	| {
 			readonly code: "TO";
@@ -199,6 +258,8 @@ export type State =
 			readonly regionCode: "N";
 			readonly regionName: "Norte";
 			readonly ibgeCode: 17;
+			readonly regionIbgeCode?: 1;
+			readonly capital?: { readonly code: "1721000"; readonly name: "Palmas" };
 	  };
 
 /** The two letter code of each Brazilian state, as published by the IBGE. */
@@ -210,54 +271,260 @@ export type StateName = State["name"];
 /**
  * Brazilian states published by the IBGE, sorted by name with `localeCompare` in the "pt-BR"
  * locale. `ibgeCode` is the 2-digit IBGE code of the Federative Unit ("cUF"), the same code
- * found in the first field of every DF-e access key (chave de acesso).
+ * found in the first field of every DF-e access key (chave de acesso). Every entry fills the
+ * optional fields of `State` too.
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ * @see Official: https://servicodados.ibge.gov.br/api/v1/localidades/regioes
+ * IBGE, API de Localidades, `regioes`: the identifier of each region.
+ * @see Official: https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html
+ * IBGE, Anuário Estatístico do Brasil, Tabela 1.1.1.2, "Localização geográfica, altitude e
+ * distância a Brasília, segundo os Municípios das Capitais - 2025": one capital per state.
+ * @see Official: https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip
+ * IBGE, Divisão Territorial Brasileira 2025, the municipality codes of the capitals.
  */
-export const DATA: readonly State[] = [
-	{ code: "AC", name: "Acre", regionCode: "N", regionName: "Norte", ibgeCode: 12 },
-	{ code: "AL", name: "Alagoas", regionCode: "NE", regionName: "Nordeste", ibgeCode: 27 },
-	{ code: "AP", name: "Amapá", regionCode: "N", regionName: "Norte", ibgeCode: 16 },
-	{ code: "AM", name: "Amazonas", regionCode: "N", regionName: "Norte", ibgeCode: 13 },
-	{ code: "BA", name: "Bahia", regionCode: "NE", regionName: "Nordeste", ibgeCode: 29 },
-	{ code: "CE", name: "Ceará", regionCode: "NE", regionName: "Nordeste", ibgeCode: 23 },
+export const DATA: readonly Required<State>[] = [
+	{
+		code: "AC",
+		name: "Acre",
+		regionCode: "N",
+		regionName: "Norte",
+		ibgeCode: 12,
+		regionIbgeCode: 1,
+		capital: { code: "1200401", name: "Rio Branco" },
+	},
+	{
+		code: "AL",
+		name: "Alagoas",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 27,
+		regionIbgeCode: 2,
+		capital: { code: "2704302", name: "Maceió" },
+	},
+	{
+		code: "AP",
+		name: "Amapá",
+		regionCode: "N",
+		regionName: "Norte",
+		ibgeCode: 16,
+		regionIbgeCode: 1,
+		capital: { code: "1600303", name: "Macapá" },
+	},
+	{
+		code: "AM",
+		name: "Amazonas",
+		regionCode: "N",
+		regionName: "Norte",
+		ibgeCode: 13,
+		regionIbgeCode: 1,
+		capital: { code: "1302603", name: "Manaus" },
+	},
+	{
+		code: "BA",
+		name: "Bahia",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 29,
+		regionIbgeCode: 2,
+		capital: { code: "2927408", name: "Salvador" },
+	},
+	{
+		code: "CE",
+		name: "Ceará",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 23,
+		regionIbgeCode: 2,
+		capital: { code: "2304400", name: "Fortaleza" },
+	},
 	{
 		code: "DF",
 		name: "Distrito Federal",
 		regionCode: "CO",
 		regionName: "Centro-Oeste",
 		ibgeCode: 53,
+		regionIbgeCode: 5,
+		capital: { code: "5300108", name: "Brasília" },
 	},
-	{ code: "ES", name: "Espírito Santo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 32 },
-	{ code: "GO", name: "Goiás", regionCode: "CO", regionName: "Centro-Oeste", ibgeCode: 52 },
-	{ code: "MA", name: "Maranhão", regionCode: "NE", regionName: "Nordeste", ibgeCode: 21 },
-	{ code: "MT", name: "Mato Grosso", regionCode: "CO", regionName: "Centro-Oeste", ibgeCode: 51 },
+	{
+		code: "ES",
+		name: "Espírito Santo",
+		regionCode: "SE",
+		regionName: "Sudeste",
+		ibgeCode: 32,
+		regionIbgeCode: 3,
+		capital: { code: "3205309", name: "Vitória" },
+	},
+	{
+		code: "GO",
+		name: "Goiás",
+		regionCode: "CO",
+		regionName: "Centro-Oeste",
+		ibgeCode: 52,
+		regionIbgeCode: 5,
+		capital: { code: "5208707", name: "Goiânia" },
+	},
+	{
+		code: "MA",
+		name: "Maranhão",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 21,
+		regionIbgeCode: 2,
+		capital: { code: "2111300", name: "São Luís" },
+	},
+	{
+		code: "MT",
+		name: "Mato Grosso",
+		regionCode: "CO",
+		regionName: "Centro-Oeste",
+		ibgeCode: 51,
+		regionIbgeCode: 5,
+		capital: { code: "5103403", name: "Cuiabá" },
+	},
 	{
 		code: "MS",
 		name: "Mato Grosso do Sul",
 		regionCode: "CO",
 		regionName: "Centro-Oeste",
 		ibgeCode: 50,
+		regionIbgeCode: 5,
+		capital: { code: "5002704", name: "Campo Grande" },
 	},
-	{ code: "MG", name: "Minas Gerais", regionCode: "SE", regionName: "Sudeste", ibgeCode: 31 },
-	{ code: "PA", name: "Pará", regionCode: "N", regionName: "Norte", ibgeCode: 15 },
-	{ code: "PB", name: "Paraíba", regionCode: "NE", regionName: "Nordeste", ibgeCode: 25 },
-	{ code: "PR", name: "Paraná", regionCode: "S", regionName: "Sul", ibgeCode: 41 },
-	{ code: "PE", name: "Pernambuco", regionCode: "NE", regionName: "Nordeste", ibgeCode: 26 },
-	{ code: "PI", name: "Piauí", regionCode: "NE", regionName: "Nordeste", ibgeCode: 22 },
-	{ code: "RJ", name: "Rio de Janeiro", regionCode: "SE", regionName: "Sudeste", ibgeCode: 33 },
+	{
+		code: "MG",
+		name: "Minas Gerais",
+		regionCode: "SE",
+		regionName: "Sudeste",
+		ibgeCode: 31,
+		regionIbgeCode: 3,
+		capital: { code: "3106200", name: "Belo Horizonte" },
+	},
+	{
+		code: "PA",
+		name: "Pará",
+		regionCode: "N",
+		regionName: "Norte",
+		ibgeCode: 15,
+		regionIbgeCode: 1,
+		capital: { code: "1501402", name: "Belém" },
+	},
+	{
+		code: "PB",
+		name: "Paraíba",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 25,
+		regionIbgeCode: 2,
+		capital: { code: "2507507", name: "João Pessoa" },
+	},
+	{
+		code: "PR",
+		name: "Paraná",
+		regionCode: "S",
+		regionName: "Sul",
+		ibgeCode: 41,
+		regionIbgeCode: 4,
+		capital: { code: "4106902", name: "Curitiba" },
+	},
+	{
+		code: "PE",
+		name: "Pernambuco",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 26,
+		regionIbgeCode: 2,
+		capital: { code: "2611606", name: "Recife" },
+	},
+	{
+		code: "PI",
+		name: "Piauí",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 22,
+		regionIbgeCode: 2,
+		capital: { code: "2211001", name: "Teresina" },
+	},
+	{
+		code: "RJ",
+		name: "Rio de Janeiro",
+		regionCode: "SE",
+		regionName: "Sudeste",
+		ibgeCode: 33,
+		regionIbgeCode: 3,
+		capital: { code: "3304557", name: "Rio de Janeiro" },
+	},
 	{
 		code: "RN",
 		name: "Rio Grande do Norte",
 		regionCode: "NE",
 		regionName: "Nordeste",
 		ibgeCode: 24,
+		regionIbgeCode: 2,
+		capital: { code: "2408102", name: "Natal" },
 	},
-	{ code: "RS", name: "Rio Grande do Sul", regionCode: "S", regionName: "Sul", ibgeCode: 43 },
-	{ code: "RO", name: "Rondônia", regionCode: "N", regionName: "Norte", ibgeCode: 11 },
-	{ code: "RR", name: "Roraima", regionCode: "N", regionName: "Norte", ibgeCode: 14 },
-	{ code: "SC", name: "Santa Catarina", regionCode: "S", regionName: "Sul", ibgeCode: 42 },
-	{ code: "SP", name: "São Paulo", regionCode: "SE", regionName: "Sudeste", ibgeCode: 35 },
-	{ code: "SE", name: "Sergipe", regionCode: "NE", regionName: "Nordeste", ibgeCode: 28 },
-	{ code: "TO", name: "Tocantins", regionCode: "N", regionName: "Norte", ibgeCode: 17 },
+	{
+		code: "RS",
+		name: "Rio Grande do Sul",
+		regionCode: "S",
+		regionName: "Sul",
+		ibgeCode: 43,
+		regionIbgeCode: 4,
+		capital: { code: "4314902", name: "Porto Alegre" },
+	},
+	{
+		code: "RO",
+		name: "Rondônia",
+		regionCode: "N",
+		regionName: "Norte",
+		ibgeCode: 11,
+		regionIbgeCode: 1,
+		capital: { code: "1100205", name: "Porto Velho" },
+	},
+	{
+		code: "RR",
+		name: "Roraima",
+		regionCode: "N",
+		regionName: "Norte",
+		ibgeCode: 14,
+		regionIbgeCode: 1,
+		capital: { code: "1400100", name: "Boa Vista" },
+	},
+	{
+		code: "SC",
+		name: "Santa Catarina",
+		regionCode: "S",
+		regionName: "Sul",
+		ibgeCode: 42,
+		regionIbgeCode: 4,
+		capital: { code: "4205407", name: "Florianópolis" },
+	},
+	{
+		code: "SP",
+		name: "São Paulo",
+		regionCode: "SE",
+		regionName: "Sudeste",
+		ibgeCode: 35,
+		regionIbgeCode: 3,
+		capital: { code: "3550308", name: "São Paulo" },
+	},
+	{
+		code: "SE",
+		name: "Sergipe",
+		regionCode: "NE",
+		regionName: "Nordeste",
+		ibgeCode: 28,
+		regionIbgeCode: 2,
+		capital: { code: "2800308", name: "Aracaju" },
+	},
+	{
+		code: "TO",
+		name: "Tocantins",
+		regionCode: "N",
+		regionName: "Norte",
+		ibgeCode: 17,
+		regionIbgeCode: 1,
+		capital: { code: "1721000", name: "Palmas" },
+	},
 ];

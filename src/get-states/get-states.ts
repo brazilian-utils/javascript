@@ -1,4 +1,5 @@
 import { DATA, type State } from "../_internals/constants/states";
+import { copyState } from "../_internals/copy-state/copy-state";
 
 export type { State } from "../_internals/constants/states";
 
@@ -18,9 +19,9 @@ export type { State } from "../_internals/constants/states";
  *
  * @example
  * ```typescript
- * getStates()[0]; // { code: "AC", name: "Acre", regionCode: "N", regionName: "Norte", ibgeCode: 12 }
+ * getStates()[0]; // { code: "AC", name: "Acre", regionCode: "N", regionName: "Norte", ibgeCode: 12, regionIbgeCode: 1, capital: { code: "1200401", name: "Rio Branco" } }
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
-export const getStates = (): State[] => DATA.map((state) => Object.assign({}, state));
+export const getStates = (): State[] => DATA.map((state) => copyState(state));
