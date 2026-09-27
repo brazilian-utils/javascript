@@ -43,6 +43,12 @@ export const PIX_MERCHANT_CATEGORY_CODE_ID = "52";
 
 export const PIX_MERCHANT_CATEGORY_CODE = "0000";
 
+/**
+ * The Merchant Category Code (ID `52`) is a numeric (`N`) object of length `04` in the EMV®
+ * QRCPS-MPM, a code of ISO 18245; the Pix manual writes `0000` ("não informado") in its examples.
+ */
+export const PIX_MERCHANT_CATEGORY_CODE_REGEX = /^\d{4}$/;
+
 export const PIX_TRANSACTION_CURRENCY_ID = "53";
 
 export const PIX_TRANSACTION_CURRENCY = "986";

@@ -211,6 +211,21 @@ describe("isValidPixPayload", () => {
 			).toBe(false);
 		});
 
+		test("when the merchant category code is not 4 digits", () => {
+			const withCode = (code: string): string =>
+				withCrc(
+					STATIC_BODY.replace("52040000", `52${code.length.toString().padStart(2, "0")}${code}`),
+				);
+
+			expect(isValidPixPayload(withCode("0000"))).toBe(true);
+			expect(isValidPixPayload(withCode("5812"))).toBe(true);
+			expect(isValidPixPayload(withCode("abcd"))).toBe(false);
+			expect(isValidPixPayload(withCode("58a2"))).toBe(false);
+			expect(isValidPixPayload(withCode("581"))).toBe(false);
+			expect(isValidPixPayload(withCode("58123"))).toBe(false);
+			expect(isValidPixPayload(withCode("x5812"))).toBe(false);
+		});
+
 		test("when the merchant name is missing", () => {
 			expect(
 				isValidPixPayload(

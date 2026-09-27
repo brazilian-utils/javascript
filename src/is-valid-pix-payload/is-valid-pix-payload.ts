@@ -7,6 +7,7 @@ import {
 	PIX_DYNAMIC_POINT_OF_INITIATION,
 	PIX_KEY_ID,
 	PIX_MERCHANT_CATEGORY_CODE_ID,
+	PIX_MERCHANT_CATEGORY_CODE_REGEX,
 	PIX_MERCHANT_CITY_ID,
 	PIX_MERCHANT_NAME_ID,
 	PIX_PAYLOAD_FORMAT_INDICATOR,
@@ -88,8 +89,8 @@ const isValidAdditionalData = (additionalData: string | undefined): boolean =>
  * cola".
  *
  * The payload is valid when its TLV (tag-length-value) structure is well-formed, when the
- * mandatory objects are present and well-formed (payload format indicator `01`, merchant
- * category code, currency `986`, country `BR`, merchant name and merchant city), when one of
+ * mandatory objects are present and well-formed (payload format indicator `01`, a merchant
+ * category code of 4 digits, currency `986`, country `BR`, merchant name and merchant city), when one of
  * the "Merchant Account Information" templates (IDs 26 to 51) carries the `br.gov.bcb.pix` GUI
  * together with a key (static QR Code) or a URL (dynamic QR Code), and when the CRC-16 matches
  * the rest of the payload. The "Point of Initiation Method" object (`01`) is advisory: the
@@ -129,6 +130,10 @@ const isValidAdditionalData = (additionalData: string | undefined): boolean =>
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
+ * @see Official: https://www.emvco.com/terms-of-use/?u=/wp-content/uploads/documents/EMVCo-Merchant-Presented-QR-Specification-v1-1.pdf
+ * EMV® QRCPS-MPM v1.1, cited by the Pix manual, "Data Objects Under the Root of a QR Code":
+ * Merchant Category Code `"52"`, format `N` (numeric), length `"04"`, "As defined by [ISO
+ * 18245]".
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
@@ -148,7 +153,9 @@ export const isValidPixPayload = (value: string): boolean => {
 
 	if (fields[PIX_PAYLOAD_FORMAT_INDICATOR_ID] !== PIX_PAYLOAD_FORMAT_INDICATOR) return false;
 	if (!isValidPointOfInitiation(fields)) return false;
-	if (fields[PIX_MERCHANT_CATEGORY_CODE_ID] === undefined) return false;
+	// An absent code reads as "undefined", which is not 4 digits either.
+	if (!PIX_MERCHANT_CATEGORY_CODE_REGEX.test(String(fields[PIX_MERCHANT_CATEGORY_CODE_ID])))
+		return false;
 	if (fields[PIX_TRANSACTION_CURRENCY_ID] !== PIX_TRANSACTION_CURRENCY) return false;
 	if (fields[PIX_COUNTRY_CODE_ID]?.toUpperCase() !== PIX_COUNTRY_CODE) return false;
 	if (fields[PIX_MERCHANT_NAME_ID] === undefined) return false;
