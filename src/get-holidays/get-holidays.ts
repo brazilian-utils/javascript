@@ -244,8 +244,10 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * Only one state holiday per UF is a feriado civil under Lei 9.093/1995 art. 1º, II, which
  * authorizes "a data magna do Estado fixada em lei estadual" in the singular; the other entries
  * of `STATE_HOLIDAYS` rest on ordinary state laws and are reported because they are observed in
- * practice. The date returned is the statutory one. Santa Catarina's two holidays are the only
- * observance shift the table models: each moves to the following Sunday when it falls Monday to
+ * practice. The date returned is the statutory one, save for two observance shifts the state laws
+ * spell out. Alagoas' 30 November moves back to the Monday when it falls on a Tuesday and on to
+ * the Friday when it falls on a Thursday (Lei AL nº 7.530/2013, art. 2º parágrafo único, from
+ * 2014 on). Santa Catarina's two holidays each move to the following Sunday when they fall Monday to
  * Friday, 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
  * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it, except in 2004, the
  * year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause. Outside those ranges

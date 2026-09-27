@@ -16,9 +16,17 @@ export type HolidayDateRule = (
 	 * falls on a weekday (Monday to Friday), as Santa Catarina's two state holidays do.
 	 */
 	nextSundayWhenWeekday?: boolean;
+	/**
+	 * Whether the holiday is observed on the Monday before when the date the rule resolves to falls
+	 * on a Tuesday, and on the Friday after when it falls on a Thursday, as Alagoas' 30 November
+	 * does.
+	 */
+	tuesdayToMondayThursdayToFriday?: boolean;
 };
 
 const SUNDAY = 0;
+const TUESDAY = 2;
+const THURSDAY = 4;
 const SATURDAY = 6;
 const DAYS_IN_WEEK = 7;
 
@@ -60,10 +68,23 @@ function moveToNextSundayWhenWeekday(date: Date): Date {
 	return observed;
 }
 
+function moveTuesdayToMondayThursdayToFriday(date: Date): Date {
+	const weekday = date.getDay();
+
+	if (weekday !== TUESDAY && weekday !== THURSDAY) return date;
+
+	const observed = new Date(date);
+	observed.setDate(date.getDate() + (weekday === TUESDAY ? -1 : 1));
+
+	return observed;
+}
+
 /**
  * Resolves the date of a holiday in a given year: a fixed `day`/`month` pair, or an offset in
  * days from Easter Sunday, computed with the Meeus/Jones/Butcher algorithm. When the rule sets
- * `nextSundayWhenWeekday`, a date landing on a weekday is moved on to the following Sunday.
+ * `nextSundayWhenWeekday`, a date landing on a weekday is moved on to the following Sunday; when
+ * it sets `tuesdayToMondayThursdayToFriday`, a Tuesday is moved back to the Monday and a Thursday
+ * on to the Friday.
  *
  * @param {number} year - The four digit year.
  * @param {HolidayDateRule} rule - The fixed date or the Easter offset of the holiday.
@@ -76,6 +97,7 @@ function moveToNextSundayWhenWeekday(date: Date): Date {
  * resolveStateHolidayDate(2024, { easterOffset: 60 }); // 2024-05-30 (Corpus Christi)
  * resolveStateHolidayDate(2024, { day: 9, month: 7 }); // 2024-07-09
  * resolveStateHolidayDate(2025, { day: 11, month: 8, nextSundayWhenWeekday: true }); // 2025-08-17
+ * resolveStateHolidayDate(2027, { day: 30, month: 11, tuesdayToMondayThursdayToFriday: true }); // 2027-11-29
  * ```
  *
  * @see Based on: https://en.wikipedia.org/wiki/Date_of_Easter#Anonymous_Gregorian_algorithm
@@ -86,5 +108,9 @@ export const resolveStateHolidayDate = (year: number, rule: HolidayDateRule): Da
 			? calculateHolidayFromEaster(year, rule.easterOffset)
 			: new Date(year, rule.month - 1, rule.day);
 
-	return rule.nextSundayWhenWeekday === true ? moveToNextSundayWhenWeekday(date) : date;
+	if (rule.nextSundayWhenWeekday === true) return moveToNextSundayWhenWeekday(date);
+
+	return rule.tuesdayToMondayThursdayToFriday === true
+		? moveTuesdayToMondayThursdayToFriday(date)
+		: date;
 };

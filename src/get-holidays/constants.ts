@@ -152,6 +152,12 @@ export const FIXED_HOLIDAYS: readonly NationalHolidayEntry[] = [
 /** First year Alagoas' 16 September is a feriado estadual, not a ponto facultativo (Lei AL nº 9.358/2024). */
 const AL_EMANCIPACAO_FERIADO_SINCE_YEAR = 2024;
 
+/**
+ * First year Alagoas' 30 November is a feriado estadual: art. 2º of Lei AL nº 7.530/2013, vetoed on
+ * sanction, was promulgated by the Assembleia Legislativa on 08/04/2014.
+ */
+const AL_DIA_DO_EVANGELICO_SINCE_YEAR = 2014;
+
 /** First year Paraíba's 26 July is no longer a holiday: Lei PB nº 10.601/2015 revoked its basis on 17/12/2015. */
 const PB_MORTE_JOAO_PESSOA_UNTIL_YEAR = 2016;
 
@@ -208,11 +214,13 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * feriados estaduais; the library reports them because they are observed in practice, not
  * because art. 1º, II covers them.
  *
- * The statutory date is what is emitted. Four states shift the observed date and only Santa
- * Catarina's shift is modelled here (`nextSundayWhenWeekday`, from
+ * The statutory date is what is emitted, save for the two shifts modelled here: Alagoas' 30
+ * November moves back to Monday from a Tuesday and on to Friday from a Thursday
+ * (`tuesdayToMondayThursdayToFriday`, Lei AL nº 7.530/2013, art. 2º parágrafo único), and Santa
+ * Catarina's shift (`nextSundayWhenWeekday`, from
  * `SC_ALEXANDRIA_TRANSFER_SINCE_YEAR` on for 25 November, apart from the
  * `SC_ALEXANDRIA_TRANSFER_GAP_YEAR` gap, and from `SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR` on for
- * 11 August): Acre moves feriados falling from
+ * 11 August). Of the shifts left out, Acre moves feriados falling from
  * Tuesday to Thursday on to the following Friday (Lei AC nº 2.126, de 19/06/2009, except the
  * Aniversário do Acre on 15/06 and the Revolução Acreana on 06/08, a date this table has no entry
  * for because no state law declaring it a feriado was located), and the
@@ -263,6 +271,19 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * 2020, the year of the one decree cited, Decreto AL nº 68.782, de 30/12/2019, which "dispõe
  * sobre os feriados nacionais e estaduais para o exercício de 2020, define os pontos facultativos".
  * The earlier annual decrees were not located.
+ * @see Official: https://diario.imprensaoficial.al.gov.br/apinova/api/editions/downloadPdf/24602
+ * Lei AL nº 7.530, de 08/08/2013 (DOE-AL de 09/08/2013, p. 89), art. 1º: "Fica instituído o Dia
+ * Estadual do Evangélico, a ser comemorado no dia 30 de novembro de cada ano". Its art. 2º, which
+ * makes the date a feriado, was vetoed on sanction and is cited next.
+ * @see Official: https://diario.imprensaoficial.al.gov.br/apinova/api/editions/downloadPdf/24776
+ * The same art. 2º and its parágrafo único, promulgated by the Presidente da Assembleia Legislativa
+ * on 08/04/2014 after the veto was overridden (DOE-AL de 28/04/2014, p. 43): "Art. 2º- Em alusão à
+ * data comemorativa de que trata esta Lei, fica declarado feriado estadual no dia 30 de novembro.
+ * Parágrafo único: acaso o dia 30 de novembro recaia em uma terça-feira ou quinta-feira, o
+ * feriado ficará antecipado para a segunda-feira ou adiado para a sexta-feira, respectivamente."
+ * Listed from 2014, the first 30 November after the promulgation, and moved as the parágrafo
+ * único says (`tuesdayToMondayThursdayToFriday`). The annual Decreto AL nº 106.093/2025, for 2026,
+ * cites the law among the four state laws it applies. Missing up to 2.4.0.
  * @see Official: https://al.ap.leg.br/ver_texto_lei.php?iddocumento=17488
  * Lei AP nº 667, de 16/04/2002, art. 1º par. único, Dia de São José (19/03), listed from 2003
  * @see Official: https://www.al.ap.leg.br/ver_texto_lei.php?iddocumento=77794
@@ -541,6 +562,13 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			day: 16,
 			month: 9,
 			since: AL_EMANCIPACAO_FERIADO_SINCE_YEAR,
+		},
+		{
+			name: "Dia Estadual do Evangélico",
+			day: 30,
+			month: 11,
+			tuesdayToMondayThursdayToFriday: true,
+			since: AL_DIA_DO_EVANGELICO_SINCE_YEAR,
 		},
 	],
 	AP: [

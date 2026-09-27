@@ -41,8 +41,9 @@ export type IsHolidayOptions = IsHolidayParams;
  *   when that date is a national holiday. `undefined`, or an absent property, is the only
  *   non-string value that stands for "no state" instead.
  *
- * The date a state holiday is checked against is the statutory one, except for Santa Catarina's
- * two holidays, which `getHolidays` moves to the following Sunday when they fall Monday to
+ * The date a state holiday is checked against is the statutory one, except for Alagoas' 30
+ * November, which `getHolidays` moves back to the Monday from a Tuesday and on to the Friday from a
+ * Thursday (Lei AL nº 7.530/2013, art. 2º parágrafo único), and for Santa Catarina's two holidays, which `getHolidays` moves to the following Sunday when they fall Monday to
  * Friday: 11 August from 2005 on, as Lei SC nº 13.408/2005 introduced, and 25 November from 1999
  * on, as Lei SC nº 11.213/1999 introduced, save for 2004, the year art. 3º of Lei SC nº
  * 12.906/2004 left that date without a transfer clause. Lei SC nº 18.531/2022 now carries both.

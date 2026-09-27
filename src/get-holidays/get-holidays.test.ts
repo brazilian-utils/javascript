@@ -36,6 +36,12 @@ function carnavalIn(year: number, stateCode: StateCode): Holiday[] {
 	return getHolidays({ year, stateCode }).filter((holiday) => holiday.name.startsWith("Carnaval"));
 }
 
+function alEvangelicoIn(year: number): Holiday[] {
+	return getHolidays({ year, stateCode: "AL" }).filter(
+		(holiday) => holiday.name === "Dia Estadual do Evangélico",
+	);
+}
+
 function carnaval(year: number): Holiday[] {
 	return getHolidays(year).filter((holiday) => holiday.name.startsWith("Carnaval"));
 }
@@ -272,6 +278,22 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		source: "Decreto AL nº 68.782, de 30/12/2019, the 2020 calendar",
 	},
 	{
+		stateCode: "AL",
+		name: "Dia Estadual do Evangélico",
+		type: "state",
+		year: 2013,
+		listed: false,
+		source: "Lei AL nº 7.530/2013, whose art. 2º was vetoed until its promulgation on 08/04/2014",
+	},
+	{
+		stateCode: "AL",
+		name: "Dia Estadual do Evangélico",
+		type: "state",
+		year: 2014,
+		listed: true,
+		source: "Lei AL nº 7.530/2013, art. 2º, promulgated on 08/04/2014",
+	},
+	{
 		stateCode: "AP",
 		name: "Dia de São José",
 		type: "state",
@@ -349,7 +371,8 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		type: "state",
 		year: 2019,
 		listed: false,
-		source: "Lei AP nº 2.430, de 23/07/2019, revoked Lei AP nº 1.696/2012 before that year's 25 July",
+		source:
+			"Lei AP nº 2.430, de 23/07/2019, revoked Lei AP nº 1.696/2012 before that year's 25 July",
 	},
 	{
 		stateCode: "AP",
@@ -1391,6 +1414,20 @@ describe("getHolidays", () => {
 				(h) => h.name === "Emancipação Política de Alagoas",
 			),
 		).toHaveLength(1);
+	});
+
+	test("should move AL's Dia Estadual do Evangélico back to Monday from a Tuesday and on to Friday from a Thursday, as Lei AL nº 7.530/2013, art. 2º parágrafo único requires (30/11/2027 is a Tuesday, 30/11/2023 a Thursday, 30/11/2022 a Wednesday)", () => {
+		expect(alEvangelicoIn(2027)).toEqual([
+			{ name: "Dia Estadual do Evangélico", date: new Date(2027, 10, 29), type: "state" },
+		]);
+		expect(alEvangelicoIn(2023)).toEqual([
+			{ name: "Dia Estadual do Evangélico", date: new Date(2023, 11, 1), type: "state" },
+		]);
+		expect(alEvangelicoIn(2022)).toEqual([
+			{ name: "Dia Estadual do Evangélico", date: new Date(2022, 10, 30), type: "state" },
+		]);
+		expect(isBusinessDay(new Date(2027, 10, 30), { stateCode: "AL" })).toBe(true);
+		expect(isBusinessDay(new Date(2027, 10, 29), { stateCode: "AL" })).toBe(false);
 	});
 
 	test("should list the three Goiás state holidays of Lei GO nº 20.756/2020, art. 269, II", () => {

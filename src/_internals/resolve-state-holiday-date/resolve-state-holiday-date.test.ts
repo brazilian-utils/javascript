@@ -45,6 +45,21 @@ describe("resolveStateHolidayDate", () => {
 		expect(resolveStateHolidayDate(2029, rule)).toEqual(new Date(2029, 10, 25));
 	});
 
+	test("should move a Tuesday back to the Monday and a Thursday on to the Friday, across a month boundary too", () => {
+		const rule = { day: 30, month: 11, tuesdayToMondayThursdayToFriday: true };
+
+		expect(resolveStateHolidayDate(2027, rule)).toEqual(new Date(2027, 10, 29));
+		expect(resolveStateHolidayDate(2023, rule)).toEqual(new Date(2023, 11, 1));
+	});
+
+	test("should leave a Monday, Wednesday, Friday, Saturday or Sunday date where it is under the Tuesday and Thursday rule", () => {
+		const rule = { day: 30, month: 11, tuesdayToMondayThursdayToFriday: true };
+
+		for (const year of [2015, 2022, 2029, 2024, 2025]) {
+			expect(resolveStateHolidayDate(year, rule)).toEqual(new Date(year, 10, 30));
+		}
+	});
+
 	test("should move an Easter derived date landing Monday to Friday on to the following Sunday", () => {
 		expect(
 			resolveStateHolidayDate(2024, { easterOffset: 60, nextSundayWhenWeekday: true }),
