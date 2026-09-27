@@ -43,7 +43,8 @@ export const MA_PREFIXES = ["12"];
 
 export const MS_PREFIXES = ["28", "50"];
 
-export const PA_PREFIXES = ["15", "75", "76", "77", "78", "79"];
+/** 15 on the SINTEGRA page; 75 since October 2024, when SEFA-PA ran out of numbers starting with 15. */
+export const PA_PREFIXES = ["15", "75"];
 
 export const SP_FIRST_WEIGHTS = [1, 3, 4, 5, 6, 7, 8, 10];
 

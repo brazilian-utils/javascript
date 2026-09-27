@@ -502,6 +502,9 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   SINTEGRA page prints. The 9 digit form is read as the 11 digit one padded with two leading
  *   zeros, which the weights 3 and 2 turn into nothing, so "130000019" and "00130000019" are the
  *   same registration.
+ * - PA: the prefixes are 15, the one the SINTEGRA page gives ("15: Número Padrão Pará"), and 75,
+ *   which SEFA-PA has issued since October 2024. No official text announces 76 to 79, so they are
+ *   rejected.
  * - SP: characters other than "P" and digits are rejected on purpose, a deliberate deviation
  *   from the Regra Geral of the SINTEGRA page, which ignores them instead.
  * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
@@ -579,6 +582,11 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * numérica do contribuinte no CCE/MT é composta de 9 (nove) dígitos, sendo os 8 (oito) primeiros
  * sequenciais e o último algarismo configura o dígito verificador."
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PA.html
+ * "Composição: 15-999999-5", "15: Número Padrão Pará", weights 2 to 9 from the right.
+ * @see Official: https://agenciapara.com.br/noticia/60231/novas-inscricoes-estaduais-poderao-ser-iniciadas-pelo-numero-75
+ * Agência Pará (Governo do Pará), "Novas Inscrições Estaduais poderão ser iniciadas pelo número
+ * 75": from October 2024 SEFA-PA issues registrations starting with 75, the numbers starting with
+ * 15 running out, with the same number of digits.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PB.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PI.html

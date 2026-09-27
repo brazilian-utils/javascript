@@ -482,15 +482,27 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "150000030", stateCode: "PA" })).toBe(true);
 		});
 
-		test("should return true for IEs with prefixes 75 to 79", () => {
+		test("should return true for the prefix 75, which SEFA-PA has issued since October 2024", () => {
+			// 7 x 9 + 5 x 8 = 103, 103 % 11 = 4, 11 - 4 = 7
+			expect(isValidIe({ value: "750000007", stateCode: "PA" })).toBe(true);
 			expect(isValidIe({ value: "750000023", stateCode: "PA" })).toBe(true);
-			expect(isValidIe({ value: "760000000", stateCode: "PA" })).toBe(true);
-			expect(isValidIe({ value: "770000002", stateCode: "PA" })).toBe(true);
-			expect(isValidIe({ value: "780000005", stateCode: "PA" })).toBe(true);
-			expect(isValidIe({ value: "790000008", stateCode: "PA" })).toBe(true);
+			expect(isValidIe({ value: "759999996", stateCode: "PA" })).toBe(true);
 		});
 
-		test("should return false when the IE does not start with 15, 75, 76, 77, 78 or 79", () => {
+		test("should return false for the prefixes 76 to 79, which no official text announces, even with a matching digit", () => {
+			expect(isValidIe({ value: "760000000", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "770000002", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "780000005", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "790000008", stateCode: "PA" })).toBe(false);
+		});
+
+		test("should return false for the prefixes 74, 14 and 16, next to 75 and 15, even with a matching digit", () => {
+			expect(isValidIe({ value: "740000004", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "140000003", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "160000009", stateCode: "PA" })).toBe(false);
+		});
+
+		test("should return false when the IE does not start with 15 or 75", () => {
 			expect(isValidIe({ value: "120000008", stateCode: "PA" })).toBe(false);
 		});
 
