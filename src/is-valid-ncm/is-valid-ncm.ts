@@ -43,6 +43,8 @@ const getCache = (): Set<string> => {
  * ```
  *
  * @see Official: https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json
+ * Nomenclature of the Portal Único Siscomex. The bundled codes are the 10,515 eight digit codes of
+ * the file "Vigente em 26/09/2026", whose latest act is Resolução Gecex nº 926/2026.
  */
 export const isValidNcm = (value: string | number): boolean => {
 	if (!isLookupCode(value)) return false;

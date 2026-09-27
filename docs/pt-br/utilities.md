@@ -1746,7 +1746,7 @@ Retorna os municípios brasileiros publicados pelo IBGE: todos os municípios, o
 - Cada município (`Municipality`) é `{ code, name, stateCode }`, onde `code` é o código IBGE de 7 dígitos. Ordenados por nome no locale "pt-BR".
 - Só um `stateCode` omitido (ou `undefined`) pede a lista completa: `null` e `''` retornam `[]`.
 - `stateCode` diferencia maiúsculas de minúsculas: `'sp'`, como um código desconhecido, retorna `[]`.
-- Embute todos os 5571 municípios. Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-municipalities`.
+- Embute todos os 5571 municípios, os mesmos códigos da [Divisão Territorial Brasileira 2025](https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip) do IBGE (data base 31/12/2025). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-municipalities`.
 
 ```javascript
 import { getMunicipalities } from '@brazilian-utils/brazilian-utils';
@@ -2826,7 +2826,7 @@ isValidNcm('abc01012100'); // false (não é uma forma documentada)
 isValidNcm(-84713012); // false (não é um inteiro seguro não negativo)
 ```
 
-Fonte: [nomenclatura NCM publicada pelo Portal Único Siscomex](https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json).
+Fonte: [nomenclatura NCM publicada pelo Portal Único Siscomex](https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json); os 10.515 códigos embutidos são os do arquivo "Vigente em 26/09/2026" (Resolução Gecex nº 926/2026).
 
 ### formatNcm
 
@@ -2952,7 +2952,7 @@ getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob enc
 getServiceItem('3.01'); // null (vetado)
 ```
 
-Fonte: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm) e a planilha `LISTA.SERV.NAC.` do [ANEXO B do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), a lista em vigor em formato legível por máquina.
+Fonte: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm), cuja lista foi alterada pela última vez pela Lei Complementar 183/2021, e a planilha `LISTA.SERV.NAC.` do [ANEXO B do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), a lista em vigor em formato legível por máquina.
 
 ### isValidCfop
 

@@ -1746,7 +1746,7 @@ Get the Brazilian municipalities published by the IBGE: every municipality, or o
 - Each municipality (`Municipality`) is `{ code, name, stateCode }`, where `code` is the 7-digit IBGE code. Sorted by name in the "pt-BR" locale.
 - Only an omitted (or `undefined`) `stateCode` asks for the full list: `null` and `''` return `[]`.
 - `stateCode` is case-sensitive: `'sp'`, like an unknown code, returns `[]`.
-- Embeds all 5571 municipalities. See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-municipalities`.
+- Embeds all 5571 municipalities, the same codes as the IBGE [Divisão Territorial Brasileira 2025](https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip) (data base 31/12/2025). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-municipalities`.
 
 ```javascript
 import { getMunicipalities } from '@brazilian-utils/brazilian-utils';
@@ -2826,7 +2826,7 @@ isValidNcm('abc01012100'); // false (not a documented form)
 isValidNcm(-84713012); // false (not a non-negative safe integer)
 ```
 
-Source: [NCM nomenclature published by the Portal Único Siscomex](https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json).
+Source: [NCM nomenclature published by the Portal Único Siscomex](https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json); the bundled 10,515 codes are those of the file "Vigente em 26/09/2026" (Resolução Gecex nº 926/2026).
 
 ### formatNcm
 
@@ -2952,7 +2952,7 @@ getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob enc
 getServiceItem('3.01'); // null (vetoed)
 ```
 
-Source: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm) and the sheet `LISTA.SERV.NAC.` of the [ANEXO B of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), the list in force in machine readable form.
+Source: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm), whose list was last amended by Lei Complementar 183/2021, and the sheet `LISTA.SERV.NAC.` of the [ANEXO B of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), the list in force in machine readable form.
 
 ### isValidCfop
 

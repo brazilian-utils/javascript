@@ -23,6 +23,9 @@ export type { Municipality } from "../_internals/constants/municipalities";
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ * @see Official: https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip
+ * IBGE, Divisão Territorial Brasileira 2025 (data base 31/12/2025): the same 5,571 municipality
+ * codes as the bundled table.
  */
 export const getMunicipalityByCode = (code: string | number): Municipality | null => {
 	if (!isLookupCode(code)) return null;

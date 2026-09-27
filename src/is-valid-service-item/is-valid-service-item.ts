@@ -28,7 +28,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * ```
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm
- * Lei Complementar 116/2003, "Lista de serviços anexa".
+ * Lei Complementar 116/2003, "Lista de serviços anexa", last amended by Lei Complementar 183/2021
+ * (subitem 11.05); the later LC 214/2025 and LC 218/2025 changed the body of the law, not the
+ * list.
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual
  * Sistema Nacional NFS-e, `ANEXO_B-NBS2-LISTA_SERVICO_NACIONAL`, sheet `LISTA.SERV.NAC.`: the
  * list in force in machine readable form.
