@@ -521,10 +521,11 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * - MS: the prefixes are 28, the one the SINTEGRA page gives ("o primeiro dígito será sempre
  *   representado pelo número 2", "o segundo dígito será sempre representado pelo número 8"),
  *   and 50, which SEFAZ-MS issues under its e-CCE register, with the same rule.
- * - MT: 9 digits, the form Portaria SEFAZ-MT nº 5/2014 now prescribes, or the 11 digits the
- *   SINTEGRA page prints. The 9 digit form is read as the 11 digit one padded with two leading
- *   zeros, which the weights 3 and 2 turn into nothing, so "130000019" and "00130000019" are the
- *   same registration.
+ * - MT: 9 digits, the form Portaria SEFAZ-MT nº 59/2025, art. 8º, § 1º prescribes (as did
+ *   art. 6º of Portaria nº 5/2014, which it revoked), or the 11 digits the SINTEGRA page prints.
+ *   No norm fixes the prefix. No official text gives the check digit rule of the 9 digit form:
+ *   this library reads it as the 11 digit one padded with two leading zeros, which the weights 3
+ *   and 2 turn into nothing, so "130000019" and "00130000019" are the same registration.
  * - PA: the prefixes are 15 and 75 to 79, the six the SINTEGRA page lists ("15: Número Padrão
  *   Pará", and the same for 75, 76, 77, 78 and 79). SEFA-PA's notice of 08/10/2024 announces 75
  *   alone and points to that page for the details; no SEFA-PA notice or act names 76 to 79, which
@@ -634,10 +635,11 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * range reserved to a registration type. No SEFAZ-MS page carrying that text could be reached.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
  * "FORMATO: NNNNNNNNNN-D", weights 3, 2 and 9 down to 2, example "0013000001-9": the 11 digit form.
- * @see Official: http://app1.sefaz.mt.gov.br/0325677500623408/07FA81BED2760C6B84256710004D3940/C59132C6A174B94384258272006C6488
- * Portaria SEFAZ-MT nº 5/2014, art. 6º, as worded by Portaria nº 86/2023: "A identificação
- * numérica do contribuinte no CCE/MT é composta de 9 (nove) dígitos, sendo os 8 (oito) primeiros
- * sequenciais e o último algarismo configura o dígito verificador."
+ * @see Official: https://app1.sefaz.mt.gov.br/Sistema/Legislacao/legislacaotribut.nsf/173e6c0d2202fdcb03258b1700659f1e/0d06efc6c2fa7bc303258c6c004c4788
+ * Portaria SEFAZ-MT nº 59/2025 (DOE 14/04/2025), art. 8º, § 1º: "A identificação numérica do
+ * contribuinte no CCE/MT é composta de 9 (nove) dígitos, sendo os 8 (oito) primeiros sequenciais
+ * e o último algarismo configura o dígito verificador." Its art. 59 revokes Portaria nº 5/2014,
+ * whose art. 6º, as worded by Portaria nº 86/2023, said the same.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PA.html
  * Updated 11/06/2024: "Composição: 15NNNNNN-D; 75NNNNNN-D; 76NNNNNN-D; 77NNNNNN-D; 78NNNNNN-D;
  * 79 NNNNNN-D", each "Número Padrão Pará", weights 2 to 9 from the right, "Se o resto da divisão

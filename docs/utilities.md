@@ -3413,7 +3413,7 @@ Check if an inscrição estadual (state registration) is valid for a state. **De
 - Takes a single object (`IsValidIeParams`): `value` is the registration and `stateCode` the state it belongs to (a `StateCode`, case-insensitive).
 - Some states have special cases, a prefix or format the SINTEGRA page does not print or a deliberate deviation from it (details and sources in the JSDoc in `src/is-valid-ie`):
   - GO: the prefixes 10, 11, 15 and 20 to 29, the union of sources that disagree: the norm (IN nº 946/09-GSF, art. 39, I, as worded by IN nº 1.535/22-GSE) gives 10, 20 and 11, the SINTEGRA page 10, 11 and 20 to 29, the 2012 roteiro de crítica 10, 11 and 15.
-  - MT: 11 digits, or the 9 digits SEFAZ-MT now issues, read as the 11 digit form padded with two zeros.
+  - MT: 11 digits, or the 9 digits Portaria SEFAZ-MT nº 59/2025 (art. 8º, § 1º) prescribes, read as the 11 digit form padded with two zeros (no official text gives the check digit rule of the 9 digit form).
   - PA: the prefixes 15 and 75 to 79 the SINTEGRA page lists (SEFA-PA has issued 75 since 07/10/2024). MS: the prefixes 28 and 50 (50 from the SEFAZ-MS e-CCE register).
   - DF: the 13 digit AC rule under the prefixes 07 and 08 (DF moved to 08 when the numbers starting with 07 ran out).
   - SP: the produtor rural form `P0MMMSSSSD000`, the zero after the `P` included; the `P` may be written in lower case.

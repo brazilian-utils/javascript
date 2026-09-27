@@ -429,7 +429,7 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "1234567890112", stateCode: "MT" })).toBe(false);
 		});
 
-		test("should return true for the 9 digit form Portaria SEFAZ-MT nº 5/2014 art. 6º prescribes", () => {
+		test("should return true for the 9 digit form Portaria SEFAZ-MT nº 59/2025 art. 8º § 1º prescribes", () => {
 			// Padded to 00130000019: 9 x 1 + 8 x 3 + 2 x 1 = 35, 35 % 11 = 2, 11 - 2 = 9
 			expect(isValidIe({ value: "130000019", stateCode: "MT" })).toBe(true);
 			expect(isValidIe({ value: "13.000.001-9", stateCode: "MT" })).toBe(true);
