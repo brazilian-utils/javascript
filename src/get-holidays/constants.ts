@@ -544,9 +544,14 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * so this single-year entry is the one place the table reports a holiday under
  * `CONSCIENCIA_NEGRA_HOLIDAY_NAME` where the law itself says "Dia Estadual".
  * @see Official: https://aleselegis.al.se.leg.br/Arquivo/Documents/legislacao/html/CE11989.html
- * Constituição Estadual de SE, art. 269 (EC nº 20, de 31/05/2000), Independência de Sergipe
- * (08/07), listed from 2000: "Será
- * feriado estadual o dia 08 de julho, data consagrada à Independência de Sergipe".
+ * Constituição Estadual de SE, de 05/10/1989, art. 269. Its original wording made two feriados
+ * estaduais: "Serão feriados estaduais o dia 08 de julho e 24 de outubro, datas consagradas à
+ * Independência de Sergipe e à comemoração popular e tradicional da mesma independência". EC nº
+ * 20, de 31/05/2000, rewrote it to "Será feriado estadual o dia 08 de julho, data consagrada à
+ * Independência de Sergipe". So Independência de Sergipe (08/07) is listed from 1990, the first 8
+ * July after the Constitution (up to 2.4.0 from 2000, the year of the amendment), and the
+ * Comemoração Popular da Independência de Sergipe (24/10) from 1989, nineteen days after the
+ * Constitution, up to 1999.
  * @see Official: https://www.al.to.leg.br/arquivo/15717
  * Lei TO nº 960, de 17/03/1998, whose art. 1º caput only institutes the Dia da Autonomia (18/03);
  * the feriado estadual sat in the parágrafo único, so it is listed from 1998.
@@ -747,7 +752,16 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 		},
 	],
-	SE: [{ name: "Independência de Sergipe", day: 8, month: 7, since: 2000 }],
+	SE: [
+		{ name: "Independência de Sergipe", day: 8, month: 7, since: 1990 },
+		{
+			name: "Comemoração Popular da Independência de Sergipe",
+			day: 24,
+			month: 10,
+			since: 1989,
+			until: 2000,
+		},
+	],
 	TO: [
 		{
 			name: "Autonomia do Estado do Tocantins",
