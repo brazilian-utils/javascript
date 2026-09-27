@@ -15,7 +15,8 @@ const CATEGORY_LENGTH = 3;
  *
  * The check reads a table of codes only, so it does not cost the descriptions `getCid10`
  * carries. The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV: a code
- * that is not in those files, such as `U07.1` (COVID-19), is not valid here.
+ * that is not in those files, such as the COVID-19 codes the WHO added after 2008 (`U07.1`,
+ * `U07.2`, `U09.9` and `U10.9`), is not valid here.
  *
  * @param {string} value - The CID-10 code to be validated, e.g. `"A00.0"`, `"A000"` or `"A00"`.
  * @returns {boolean} True when the code is a known category or subcategory, false otherwise.

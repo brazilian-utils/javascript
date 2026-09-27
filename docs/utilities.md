@@ -3278,7 +3278,7 @@ Check if a CID-10 code exists in the tables DATASUS publishes, the Brazilian Por
 
 - Both levels of the classification are valid: the 3 character categories (`A00`) and the 4 character subcategories, written with the dot (`A00.0`) or without it (`A000`).
 - Letter case and surrounding whitespace are ignored. Anything else (another separator, a fifth character, a dagger or asterisk suffix, a value that is not a string) is rejected.
-- The V2008 tables are the only source: a code that is not in them, such as `U07.1` (COVID-19), is not found.
+- The DATASUS V2008 tables are the only source, so a code that is not in them is not found; the COVID-19 codes the WHO added after 2008 are not found: `U07.1` (COVID-19, virus identified), `U07.2` (virus not identified), `U09.9` (post COVID-19 condition) and `U10.9` (multisystem inflammatory syndrome associated with COVID-19).
 - Only a table of codes is read (about 27 KB minified), not the descriptions `getCid10` carries.
 
 ```javascript
@@ -3328,6 +3328,7 @@ parseCid10('A00'); // 'A00'
 Look a CID-10 code up and get its official Brazilian Portuguese description. The result is a `Cid10` record: `{ code, description }`.
 
 - Same input rules as `isValidCid10`. `code` is upper case and has no dot. Returns `null` when the code is unknown or the value is not in a documented form.
+- Same table as `isValidCid10`, the DATASUS V2008 one: the COVID-19 codes the WHO added after 2008 are not found: `U07.1` (COVID-19, virus identified), `U07.2` (virus not identified), `U09.9` (post COVID-19 condition) and `U10.9` (multisystem inflammatory syndrome associated with COVID-19).
 - This is the heaviest util of the package: it embeds the 2045 categories and 12188 subcategories with their descriptions, about 1 MB minified (147 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
 
 ```javascript

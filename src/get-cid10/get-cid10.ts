@@ -22,7 +22,8 @@ export type Cid10 = {
  * not a string) is rejected instead of having a code picked out of it.
  *
  * The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV: a code that is
- * not in those files, such as `U07.1` (COVID-19), is not found.
+ * not in those files, such as the COVID-19 codes the WHO added after 2008 (`U07.1`, `U07.2`,
+ * `U09.9` and `U10.9`), is not found.
  *
  * @param {string} value - The CID-10 code to look up, e.g. `"A00.0"`, `"A000"` or `"A00"`.
  * @returns {Cid10|null} The matching category or subcategory, or null when the code is unknown

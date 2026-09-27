@@ -66,6 +66,9 @@ describe("getCid10", () => {
 	it("should return null for a category the table does not have", () => {
 		expect(getCid10("A10")).toBeNull();
 		expect(getCid10("U07.1")).toBeNull();
+		expect(getCid10("U07.2")).toBeNull();
+		expect(getCid10("U09.9")).toBeNull();
+		expect(getCid10("U10.9")).toBeNull();
 	});
 
 	it("should return null for a value that is not written in a documented form", () => {

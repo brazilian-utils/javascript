@@ -49,6 +49,9 @@ describe("isValidCid10", () => {
 		expect(isValidCid10("A10")).toBe(false);
 		expect(isValidCid10("A10.0")).toBe(false);
 		expect(isValidCid10("U07.1")).toBe(false);
+		expect(isValidCid10("U07.2")).toBe(false);
+		expect(isValidCid10("U09.9")).toBe(false);
+		expect(isValidCid10("U10.9")).toBe(false);
 	});
 
 	it("should reject a value that is not written in a documented form", () => {
