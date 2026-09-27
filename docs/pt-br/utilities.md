@@ -1857,6 +1857,7 @@ Retorna os feriados brasileiros de um ano: os nacionais e, com um `stateCode`, t
 
 - Cada feriado é um `Holiday` cujo `type` (`HolidayType`) é `"national"`, `"state"`, `"optional"` ou `"religious"`. Os feriados vêm ordenados por data.
 - O "Dia da Consciência Negra", 20/11, é nacional a partir de 2024.
+- Cada feriado nacional só é listado nos anos em que uma norma federal o declarava: Nossa Senhora Aparecida a partir de 1980, Natal a partir de 1922, Dia do trabalhador a partir de 1925, Tiradentes até 1930, de 1933 a 1948 e a partir de 1951, e Finados até 1948 e a partir de 2003. A Lei nº 662/1949 deixou Finados fora dos feriados nacionais que o Decreto-lei nº 486/1938 listava, e só a Lei nº 10.607/2002 o recolocou (o parecer da Câmara sobre o projeto: "Só inova ao sugerir o dia de finados"); até a 2.4.0 ele era listado em todos os anos.
 - As entradas `"optional"` são os pontos facultativos de dia inteiro do calendário federal (Portaria MGI): a segunda e a terça-feira de Carnaval e o Corpus Christi, os mesmos três dias que o mercado financeiro não conta como úteis (Resolução CMN nº 4.880/2020). Os parciais ficam de fora: a Quarta-feira de Cinzas (até as 14h), 28/10 (Dia do Servidor Público) e as tardes de 24/12 e 31/12.
 - As regras por estado (o deslocamento para domingo em SC, o Corpus Christi no DF, datas que deixaram de ser feriado) seguem a lei de cada estado; veja a fonte para a lista.
 - Um `stateCode` desconhecido ou que não é string é ignorado e só os feriados nacionais são retornados.

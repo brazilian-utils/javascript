@@ -2,23 +2,26 @@ import { type StateCode } from "../_internals/constants/states";
 import { type HolidayDateRule } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
 import { type HolidayType } from "./get-holidays";
 
-type StateHolidayEntry = HolidayDateRule & {
-	name: string;
-	type?: HolidayType;
+/**
+ * The years a holiday entry is in force: from `since` (inclusive) up to `until` (exclusive). An
+ * absent bound leaves that side open.
+ */
+export type HolidayPeriod = {
 	since?: number;
 	until?: number;
 };
 
-export const FIXED_HOLIDAYS = {
-	"Ano novo": { day: 1, month: 1 },
-	Tiradentes: { day: 21, month: 4 },
-	"Dia do trabalhador": { day: 1, month: 5 },
-	"Independência do Brasil": { day: 7, month: 9 },
-	"Nossa Senhora Aparecida": { day: 12, month: 10 },
-	Finados: { day: 2, month: 11 },
-	"Proclamação da República": { day: 15, month: 11 },
-	Natal: { day: 25, month: 12 },
-} as const;
+type StateHolidayEntry = HolidayDateRule &
+	HolidayPeriod & {
+		name: string;
+		type?: HolidayType;
+	};
+
+type NationalHolidayEntry = HolidayPeriod & {
+	name: string;
+	day: number;
+	month: number;
+};
 
 export const CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR = 2024;
 
@@ -37,6 +40,91 @@ export const CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR = 2024;
  * carries the name its own law uses.
  */
 export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
+
+/**
+ * The fixed-date feriados nacionais, each emitted only for the years a federal norm declared it.
+ * A holiday with a gap in its history is listed once per period. The supported years start in
+ * 1900, under the republican calendar of Decreto nº 155-B/1890; its 3 May, 13 May, 14 July and
+ * 12 October ("descobrimento da América") entries, all dropped by Decreto nº 19.488/1930, are not
+ * carried.
+ *
+ * - Ano novo, Independência do Brasil and Proclamação da República: every supported year
+ *   (Decreto nº 155-B/1890, Decreto nº 19.488/1930, Lei nº 662/1949).
+ * - Tiradentes: Decreto nº 155-B/1890 up to 1930, since Decreto nº 19.488, de 15/12/1930, left
+ *   it out of its list; Decreto nº 22.647, de 17/04/1933, restored it from 1933; Lei nº 662/1949,
+ *   in force from its publication on 13/04/1949, left it out again, and art. 3º of Lei nº 1.266,
+ *   de 08/12/1950, restored it from 1951 on.
+ * - Dia do trabalhador: from 1925, the first 1 May after Decreto nº 4.859, de 26/09/1924.
+ * - Nossa Senhora Aparecida: from 1980, Lei nº 6.802, de 30/06/1980.
+ * - Finados: up to 1948 and from 2003 on. Decreto nº 155-B/1890, Decreto nº 19.488/1930 and
+ *   Decreto-lei nº 486/1938 declared it up to 1948; Lei nº 662/1949, which regulated the whole
+ *   list of feriados nacionais and revoked "as disposições em contrário", left it out, and no
+ *   federal norm declared it again until Lei nº 10.607, de 19/12/2002, added it to that list from
+ *   2003 on. The Câmara report on the bill behind Lei nº 10.607/2002 (PL nº 3.721/2000) reads the
+ *   law the same way: "Só inova ao sugerir o dia de finados". Up to 2.4.0 it was listed every
+ *   year.
+ * - Natal: from 1922, Decreto nº 4.497, de 19/01/1922.
+ * - Dia da Consciência Negra: from `CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR`, Lei nº 14.759/2023.
+ *
+ * @see Official: https://www.planalto.gov.br/ccivil_03/decreto/1851-1899/D155-B.htm
+ * Decreto nº 155-B, de 14/01/1890, the first republican calendar: 1 January, 21 April, 3 May, 13
+ * May, 14 July, 7 September, 12 October, 2 November and 15 November.
+ * @see Official: https://www.lexml.gov.br/urn/urn:lex:br:federal:decreto:1922-01-19;4497
+ * Decreto nº 4.497, de 19/01/1922, which added 25 December to the feriados nacionais.
+ * @see Official: https://www.lexml.gov.br/urn/urn:lex:br:federal:decreto:1924-09-26;4859
+ * Decreto nº 4.859, de 26/09/1924, which declared 1 May a feriado nacional.
+ * @see Official: https://www2.camara.leg.br/legin/fed/decret/1930-1939/decreto-19488-15-dezembro-1930-508040-publicacaooriginal-1-pe.html
+ * Decreto nº 19.488, de 15/12/1930, art. 1º: "São considerados feriados nacionais os seguintes
+ * dias: 1º de janeiro, consagrado à comemoração da fraternidade universal; 1º de maio, consagrado
+ * à confraternidade universal das classes operárias; 7 de setembro, consagrado à comemoração da
+ * Independência do Brasil; 2 de novembro, consagrado à comemoração dos mortos; 15 de novembro,
+ * consagrado à comemoração do advento da República; 25 de dezembro, consagrado à comemoração da
+ * unidade espiritual dos povos christãos".
+ * @see Official: https://www2.camara.leg.br/legin/fed/decret/1930-1939/decreto-22647-17-abril-1933-558774-publicacaooriginal-80337-pe.html
+ * Decreto nº 22.647, de 17/04/1933, which restored the feriado nacional of 21 April, dedicated to
+ * the memory of the martyrs of liberty in the person of Tiradentes, four days before that year's
+ * date.
+ * @see Official: https://www2.camara.leg.br/legin/fed/declei/1930-1939/decreto-lei-486-10-junho-1938-349693-publicacaooriginal-1-pe.html
+ * Decreto-lei nº 486, de 10/06/1938 (DOU 11/06/1938), art. 1º: "São feriados nacionais os
+ * seguintes dias: 1 de janeiro […]; 21 de abril […]; 1 de maio […]; 7 de setembro […]; 2 de
+ * novembro - dedicado à comemoração dos mortos; 15 de novembro […]; 25 de dezembro […]".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
+ * Lei nº 662, de 06/04/1949 (DOU 13/04/1949), art. 1º in its original wording: "São feriados
+ * nacionais os dias 1º de janeiro, 1º de maio, 7 de setembro, 15 de novembro e 25 de dezembro";
+ * art. 4º: "revogadas as disposições em contrário".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/L1266.htm
+ * Lei nº 1.266, de 08/12/1950, art. 3º: "É feriado nacional o dia 21 de abril, consagrado à
+ * glorificação de Tiradentes".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
+ * Lei nº 6.802, de 30/06/1980, art. 1º: "É declarado feriado nacional o dia 12 de outubro, para
+ * culto público e oficial a Nossa Senhora Aparecida, Padroeira do Brasil".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
+ * Lei nº 10.607, de 19/12/2002, which gave art. 1º of Lei nº 662/1949 its current list: "1º de
+ * janeiro, 21 de abril, 1º de maio, 7 de setembro, 2 de novembro, 15 de novembro e 25 de
+ * dezembro".
+ * @see Official: https://www2.camara.leg.br/legin/fed/lei/2002/lei-10607-19-dezembro-2002-473572-norma-pl.html
+ * Lei nº 10.607/2002 came from PL nº 3.721/2000; the report of the Comissão de Educação,
+ * Cultura e Desporto on it (30/05/2001) says the bill "Só inova ao sugerir o dia de finados".
+ */
+export const FIXED_HOLIDAYS: readonly NationalHolidayEntry[] = [
+	{ name: "Ano novo", day: 1, month: 1 },
+	{ name: "Tiradentes", day: 21, month: 4, until: 1931 },
+	{ name: "Tiradentes", day: 21, month: 4, since: 1933, until: 1949 },
+	{ name: "Tiradentes", day: 21, month: 4, since: 1951 },
+	{ name: "Dia do trabalhador", day: 1, month: 5, since: 1925 },
+	{ name: "Independência do Brasil", day: 7, month: 9 },
+	{ name: "Nossa Senhora Aparecida", day: 12, month: 10, since: 1980 },
+	{ name: "Finados", day: 2, month: 11, until: 1949 },
+	{ name: "Finados", day: 2, month: 11, since: 2003 },
+	{ name: "Proclamação da República", day: 15, month: 11 },
+	{
+		name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
+		day: 20,
+		month: 11,
+		since: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
+	},
+	{ name: "Natal", day: 25, month: 12, since: 1922 },
+];
 
 /** First year Alagoas' 16 September is a feriado estadual, not a ponto facultativo (Lei AL nº 9.358/2024). */
 const AL_EMANCIPACAO_FERIADO_SINCE_YEAR = 2024;

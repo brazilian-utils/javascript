@@ -111,7 +111,8 @@ const SATURDAY = 6;
  * Lei 10.607/2002, added Finados (2 November) and folded in Tiradentes (21 April), which had
  * been national since art. 3º of the Lei 1.266/1950 it revoked.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
- * Lei 6.802/1980, declared Nossa Senhora Aparecida a national holiday.
+ * Lei 6.802/1980, declared Nossa Senhora Aparecida a national holiday, listed from 1980 on; each
+ * national holiday is listed only for the years a federal norm declared it (see `getHolidays`).
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
  * Lei 14.759/2023, nationalized Dia da Consciência Negra from 2024.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm

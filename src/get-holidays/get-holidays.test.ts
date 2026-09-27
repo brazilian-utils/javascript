@@ -26,6 +26,45 @@ function carnaval(year: number): Holiday[] {
 	return getHolidays(year).filter((holiday) => holiday.name.startsWith("Carnaval"));
 }
 
+const NATIONAL_HOLIDAY_PERIODS: {
+	name: string;
+	month: number;
+	day: number;
+	year: number;
+	listed: boolean;
+}[] = [
+	// Tiradentes: Decreto nº 155-B/1890 up to 1930, dropped by Decreto nº 19.488/1930, restored by
+	// Decreto nº 22.647/1933, dropped by Lei nº 662/1949, restored by Lei nº 1.266/1950 from 1951.
+	{ name: "Tiradentes", month: 3, day: 21, year: 1930, listed: true },
+	{ name: "Tiradentes", month: 3, day: 21, year: 1931, listed: false },
+	{ name: "Tiradentes", month: 3, day: 21, year: 1932, listed: false },
+	{ name: "Tiradentes", month: 3, day: 21, year: 1933, listed: true },
+	{ name: "Tiradentes", month: 3, day: 21, year: 1948, listed: true },
+	{ name: "Tiradentes", month: 3, day: 21, year: 1949, listed: false },
+	{ name: "Tiradentes", month: 3, day: 21, year: 1950, listed: false },
+	{ name: "Tiradentes", month: 3, day: 21, year: 1951, listed: true },
+	// Dia do trabalhador: Decreto nº 4.859, de 26/09/1924.
+	{ name: "Dia do trabalhador", month: 4, day: 1, year: 1924, listed: false },
+	{ name: "Dia do trabalhador", month: 4, day: 1, year: 1925, listed: true },
+	// Nossa Senhora Aparecida: Lei nº 6.802, de 30/06/1980.
+	{ name: "Nossa Senhora Aparecida", month: 9, day: 12, year: 1979, listed: false },
+	{ name: "Nossa Senhora Aparecida", month: 9, day: 12, year: 1980, listed: true },
+	// Finados: Decreto nº 155-B/1890, Decreto nº 19.488/1930 and Decreto-lei nº 486/1938 up to
+	// Lei nº 662/1949, which left it out, then Lei nº 10.607/2002.
+	{ name: "Finados", month: 10, day: 2, year: 1900, listed: true },
+	{ name: "Finados", month: 10, day: 2, year: 1948, listed: true },
+	{ name: "Finados", month: 10, day: 2, year: 1949, listed: false },
+	{ name: "Finados", month: 10, day: 2, year: 2002, listed: false },
+	{ name: "Finados", month: 10, day: 2, year: 2003, listed: true },
+	// Natal: Decreto nº 4.497, de 19/01/1922.
+	{ name: "Natal", month: 11, day: 25, year: 1921, listed: false },
+	{ name: "Natal", month: 11, day: 25, year: 1922, listed: true },
+	// In force in every supported year.
+	{ name: "Ano novo", month: 0, day: 1, year: 1900, listed: true },
+	{ name: "Independência do Brasil", month: 8, day: 7, year: 1900, listed: true },
+	{ name: "Proclamação da República", month: 10, day: 15, year: 1900, listed: true },
+];
+
 describe("getHolidays", () => {
 	test("should return fixed holidays for the given year", () => {
 		const year = 2024;
@@ -56,6 +95,23 @@ describe("getHolidays", () => {
 				(holiday) => holiday.name === "Dia da Consciência Negra" && holiday.type === "national",
 			),
 		).toBeUndefined();
+	});
+
+	for (const { name, month, day, year, listed } of NATIONAL_HOLIDAY_PERIODS) {
+		test(`should ${listed ? "list" : "not list"} ${name} in ${year}, following the federal norm in force that year`, () => {
+			const holiday = { name, date: new Date(year, month, day), type: "national" };
+
+			if (listed) {
+				expect(getHolidays(year)).toContainEqual(holiday);
+			} else {
+				expect(getHolidays(year).filter((entry) => entry.name === name)).toEqual([]);
+			}
+		});
+	}
+
+	test("should count 2 November 1990, a Friday between Lei nº 662/1949 and Lei nº 10.607/2002, as a business day, since no federal norm declared Finados then, and keep 2 November 2004, a Tuesday, a holiday", () => {
+		expect(isBusinessDay(new Date(1990, 10, 2, 12))).toBe(true);
+		expect(isBusinessDay(new Date(2004, 10, 2, 12))).toBe(false);
 	});
 
 	test("should calculate Easter-related holidays correctly, including Corpus Christi 60 days after Easter Sunday (independently verified: Easter 2031 is Sun 2031-04-13)", () => {

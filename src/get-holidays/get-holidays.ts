@@ -2,12 +2,7 @@ import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/ho
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { resolveStateHolidayDate } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
-import {
-	CONSCIENCIA_NEGRA_HOLIDAY_NAME,
-	CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
-	FIXED_HOLIDAYS,
-	STATE_HOLIDAYS,
-} from "./constants";
+import { FIXED_HOLIDAYS, type HolidayPeriod, STATE_HOLIDAYS } from "./constants";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -68,21 +63,32 @@ const buildHolidays = (holidays: MemoizedHoliday[]): Holiday[] =>
 		type,
 	}));
 
+/**
+ * Whether a holiday entry is in force in `year`: from its `since` (inclusive) up to its `until`
+ * (exclusive), an absent bound leaving that side open.
+ *
+ * @param {number} year - The year being computed.
+ * @param {HolidayPeriod} period - The entry's bounds.
+ * @returns {boolean} `true` when the entry applies to `year`.
+ */
+const isInForce = (year: number, { since, until }: HolidayPeriod): boolean => {
+	// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
+	if (since !== undefined && year < since) return false;
+	// Stryker disable next-line ConditionalExpression: `until` is undefined for most entries, and `year >= undefined` is already always false, so the explicit `until !== undefined` guard never changes the outcome
+	if (until !== undefined && year >= until) return false;
+
+	return true;
+};
+
 const computeHolidays = (year: number, stateCode: StateCode | undefined): Holiday[] => {
 	const holidays: Holiday[] = [];
 
-	for (const [name, { day, month }] of Object.entries(FIXED_HOLIDAYS)) {
-		holidays.push({
-			name,
-			date: new Date(year, month - 1, day),
-			type: "national",
-		});
-	}
+	for (const entry of FIXED_HOLIDAYS) {
+		if (!isInForce(year, entry)) continue;
 
-	if (year >= CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR) {
 		holidays.push({
-			name: CONSCIENCIA_NEGRA_HOLIDAY_NAME,
-			date: new Date(year, 10, 20),
+			name: entry.name,
+			date: new Date(year, entry.month - 1, entry.day),
 			type: "national",
 		});
 	}
@@ -126,12 +132,9 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 
 	if (stateHolidays) {
 		for (const entry of stateHolidays) {
-			const { name, type, since, until } = entry;
-			// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
-			if (since !== undefined && year < since) continue;
-			// Stryker disable next-line ConditionalExpression: `until` is undefined for most entries, and `year >= undefined` is already always false, so the explicit `until !== undefined` guard never changes the outcome
-			if (until !== undefined && year >= until) continue;
+			if (!isInForce(year, entry)) continue;
 
+			const { name, type } = entry;
 			const date = resolveStateHolidayDate(year, entry);
 			const stateHoliday: Holiday = { name, date, type: type ?? "state" };
 			// Name and date together are the identity of a holiday here: a state entry only replaces
@@ -166,6 +169,14 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * Holidays are returned sorted by date (chronological order). Results are memoized
  * per `year`/`stateCode` combination; the returned array (and each `Holiday.date`) is
  * always a fresh copy, so mutating it never affects subsequent calls.
+ *
+ * Each national holiday is listed only for the years a federal norm declared it, so the older
+ * years of the supported range differ from today's list: Nossa Senhora Aparecida is listed from
+ * 1980 (Lei 6.802/1980), Natal from 1922 and Dia do trabalhador from 1925, Tiradentes up to 1930,
+ * from 1933 to 1948 and from 1951, since Lei 662/1949 left it out of its list until Lei
+ * 1.266/1950 restored it, and Finados up to 1948 and from 2003, since Lei 662/1949 left it out as
+ * well and only Lei 10.607/2002 put it back (up to 2.4.0 Finados was listed every year).
+ * `FIXED_HOLIDAYS` in `src/get-holidays/constants.ts` cites the decree or law behind each period.
  *
  * If `stateCode` is provided but is not a valid/known state code, it is ignored and
  * only national holidays are returned (this mirrors passing no `stateCode` at all,
@@ -207,17 +218,21 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
  * Lei 662/1949, the base national holidays law (Ano novo, Dia do trabalhador, Independência do
- * Brasil, Proclamação da República, Natal).
+ * Brasil, Proclamação da República, Natal), whose original list left out the Tiradentes and
+ * Finados of the decrees before it. The decrees behind the years before 1949 are cited on
+ * `FIXED_HOLIDAYS`.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/2002/l10607.htm
  * Lei 10.607/2002, rewrote that art. 1º into the list in force: it added Finados (2 November)
- * to the national holidays and folded in Tiradentes (21 April), already national since art. 3º
- * of Lei 1.266/1950, which its own art. 3º revoked.
+ * to the list of national holidays, absent from it since 1949, and folded in
+ * Tiradentes (21 April), already national
+ * since art. 3º of Lei 1.266/1950, which its own art. 3º revoked.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/L1266.htm
  * Lei 1.266/1950, art. 3º, which first made Tiradentes a national holiday: "É feriado nacional o
  * dia 21 de abril, consagrado à glorificação de Tiradentes". Revoked by Lei 10.607/2002 only
  * after that law had carried 21 April into Lei 662/1949.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
- * Lei 6.802/1980, declared Nossa Senhora Aparecida (12 October) a national holiday.
+ * Lei 6.802, de 30/06/1980, declared Nossa Senhora Aparecida (12 October) a national holiday,
+ * listed from 1980 on.
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
  * Lei 14.759/2023, nationalized Dia da Consciência Negra (20 November) from
  * `CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR` (2024) onward.
