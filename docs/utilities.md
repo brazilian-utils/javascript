@@ -2397,7 +2397,7 @@ Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_a
 Check if a CNS (Cartão Nacional de Saúde) number is valid, the SUS (Sistema Único de Saúde) identifier of a user, health professional or health facility. The value must be the 15 digits, optionally split into the printed groups of 3-4-4-4 by whitespace, `.`, `-` or `/`.
 
 - Definitive cards start with 1 or 2, provisional ones with 7, 8 or 9; each has its own modulus 11 rule.
-- A number starting with 5 is rejected, following ANVISA.
+- A number starting with 5 is rejected. The DATASUS validation routines ([Wayback Machine copy](https://web.archive.org/web/20190106003442/http://cartaonet.datasus.gov.br/Rotina_JavaScript.doc) of the file the cartaonet.datasus.gov.br site published) cover only the numbers that start with 1 or 2 (definitive) and with 7, 8 or 9 (provisional), as ANVISA does; no official document names the prefix 5, which the e-SUS APS page accepts.
 
 ```javascript
 import { isValidCns } from '@brazilian-utils/brazilian-utils';
@@ -2412,7 +2412,7 @@ isValidCns('12345678901'); // false (wrong length)
 isValidCns('abc123456789010000'); // false (not written as a CNS)
 ```
 
-Source: [ANVISA CNS validation page](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/) and the [e-SUS APS page](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html).
+Source: [DATASUS validation routines](https://web.archive.org/web/20190106003442/http://cartaonet.datasus.gov.br/Rotina_JavaScript.doc) (Wayback Machine copy), [ANVISA CNS validation page](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/) and the [e-SUS APS page](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html).
 
 ### formatCns
 

@@ -21,6 +21,10 @@ import { LENGTH } from "./constants";
  * parseCns(-123456789010000); // "" (not a non-negative safe integer)
  * ```
  *
+ * @see Official: https://web.archive.org/web/20190106003442/http://cartaonet.datasus.gov.br/Rotina_JavaScript.doc
+ * DATASUS, "Rotina de validação de CNS e Número Provisório" (Wayback Machine copy of the official
+ * file, cartaonet.datasus.gov.br being gone), which checks 15 digits: the 16th digit printed on
+ * the card is "o número da via do cartão" and is not typed in.
  * @see Official: https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/
  * ANVISA's validation routines, which fix the 15 digit length. The page sits behind a bot filter
  * and answers HTTP 403 to every non-browser client, so it has to be opened in a browser.

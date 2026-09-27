@@ -2397,7 +2397,7 @@ Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_at
 Valida um número de CNS (Cartão Nacional de Saúde), o identificador do SUS (Sistema Único de Saúde) de um usuário, profissional ou estabelecimento de saúde. O valor precisa ser os 15 dígitos, opcionalmente separados nos grupos impressos de 3-4-4-4 por espaço, `.`, `-` ou `/`.
 
 - Cartões definitivos começam com 1 ou 2, provisórios com 7, 8 ou 9; cada um tem sua própria regra de módulo 11.
-- Um número iniciado em 5 é rejeitado, seguindo a ANVISA.
+- Um número iniciado em 5 é rejeitado. As rotinas de validação do DATASUS ([cópia no Wayback Machine](https://web.archive.org/web/20190106003442/http://cartaonet.datasus.gov.br/Rotina_JavaScript.doc) do arquivo que o site cartaonet.datasus.gov.br publicava) cobrem só os números iniciados em 1 ou 2 (definitivo) e em 7, 8 ou 9 (provisório), como a ANVISA; nenhum documento oficial cita o prefixo 5, que a página do e-SUS APS aceita.
 
 ```javascript
 import { isValidCns } from '@brazilian-utils/brazilian-utils';
@@ -2412,7 +2412,7 @@ isValidCns('12345678901'); // false (tamanho inválido)
 isValidCns('abc123456789010000'); // false (não escrito como um CNS)
 ```
 
-Fonte: [página de validação de CNS da ANVISA](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/) e a [página do e-SUS APS](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html).
+Fonte: [rotinas de validação do DATASUS](https://web.archive.org/web/20190106003442/http://cartaonet.datasus.gov.br/Rotina_JavaScript.doc) (cópia no Wayback Machine), [página de validação de CNS da ANVISA](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/) e a [página do e-SUS APS](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html).
 
 ### formatCns
 
