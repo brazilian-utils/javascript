@@ -260,7 +260,11 @@ const sanitizeCheckDigit = (value: string): string =>
  * Central, of another government body or of Febraban sets any of these rules: the compendium
  * is a private compilation of the rules of each bank, and Nubank publishes no rule at all;
  * its Verhoeff digit is the one the open source validators listed below derived from real
- * accounts.
+ * accounts. The FEBRABAN Layout Padrão CNAB 240 v11.0 (11/09/2026), notes G009, G011 and G012,
+ * defines each of the agency, account and agency/account check digits only as a "código adotado
+ * pelo Banco responsável pela conta corrente", allows it to be alphanumeric and a 2 position
+ * account digit, and gives no algorithm; the DICT API of the Banco Central takes the account
+ * "incluindo verificador. Se verificador for letra, substituir por 0" and computes nothing.
  *
  * Banks validated by structure only, because no check digit rule of theirs is known:
  * Inter (077), Ailos (085), XP (102), Unicred (136), Stone (197), BTG Pactual (208),
@@ -290,6 +294,9 @@ const sanitizeCheckDigit = (value: string): string =>
  * on the next release.
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
+ * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20padrao%20CNAB240%20V%2011_0%20-%202026_09_11.pdf
+ * FEBRABAN, Layout Padrão CNAB 240 v11.0 (11/09/2026), notes G009 to G012: "Código adotado pelo
+ * Banco", with no algorithm.
  * @see Based on: https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf
  * Icatu Seguros compendium of per bank agency/account check digit rules.
  * @see Based on: https://github.com/ajmiciano/banktools-br/tree/master/lib/banktools-br/banks

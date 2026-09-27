@@ -1253,6 +1253,7 @@ Check if a Brazilian bank account is valid. The `bankCode` must be a Banco Centr
 - **Params** (`IsValidBankAccountParams`, all strings): `bankCode` (3 digits), `agency` (1-5 digits), `account` (1-13 digits) and `digit` (1-2 characters, or `X` for Banco do Brasil and `P` for Bradesco).
 - A listed bank is validated in one of three ways: by a check digit rule, by structure only, or by a generic mod10/mod11 fallback.
 - No act of the Banco Central, of another government body or of Febraban sets these check digit rules. Those of banks 001, 033, 041, 104, 237, 341, 399 and 745 come from the "Regras de Validação de dígito verificador de agência e conta corrente" compendium of Icatu Seguros, a private compilation of each bank's rule. Nubank publishes no rule: its Verhoeff digit is the one open source validators derived from real accounts.
+- The only official texts on these digits say there is no common rule: the FEBRABAN [Layout Padrão CNAB 240 v11.0](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20padrao%20CNAB240%20V%2011_0%20-%202026_09_11.pdf) (11/09/2026), notes G009, G011 and G012, calls each of them a "código adotado pelo Banco" and gives no algorithm, and the DICT API of the Banco Central takes the account with its digit and computes nothing.
 
 Banks validated by a check digit rule:
 

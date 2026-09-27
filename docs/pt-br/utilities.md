@@ -1253,6 +1253,7 @@ Valida uma conta bancária brasileira. O `bankCode` precisa ser um participante 
 - **Parâmetros** (`IsValidBankAccountParams`, todos strings): `bankCode` (3 dígitos), `agency` (1-5 dígitos), `account` (1-13 dígitos) e `digit` (1-2 caracteres, ou `X` para o Banco do Brasil e `P` para o Bradesco).
 - Um banco da lista é validado de uma de três formas: por uma regra de dígito verificador, apenas pela estrutura ou por um fallback genérico mod10/mod11.
 - Nenhum ato do Banco Central, de outro órgão de governo ou da Febraban define essas regras de dígito verificador. As dos bancos 001, 033, 041, 104, 237, 341, 399 e 745 vêm do compêndio "Regras de Validação de dígito verificador de agência e conta corrente" da Icatu Seguros, uma compilação privada da regra de cada banco. O Nubank não publica regra: o dígito de Verhoeff é o que validadores de código aberto deduziram de contas reais.
+- Os únicos textos oficiais sobre esses dígitos dizem que não há regra comum: o [Layout Padrão CNAB 240 v11.0](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20padrao%20CNAB240%20V%2011_0%20-%202026_09_11.pdf) da FEBRABAN (11/09/2026), notas G009, G011 e G012, chama cada um deles de "código adotado pelo Banco" e não dá algoritmo, e a API do DICT do Banco Central recebe a conta com o dígito e não calcula nada.
 
 Bancos validados por uma regra de dígito verificador:
 
