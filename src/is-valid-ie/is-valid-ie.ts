@@ -4,8 +4,10 @@ import { mod10 } from "../_internals/mod10/mod10";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
+	AC_PREFIXES,
 	AL_PREFIXES,
 	BA_MOD_10_DIGITS,
+	DF_PREFIXES,
 	GO_DUAL_DIGIT_IE,
 	GO_PREFIXES,
 	GO_SPECIAL_RANGE_END,
@@ -103,14 +105,14 @@ const SP_RURAL_PATTERN = /^P\d{12}$/;
 const SP_COMPANY_PATTERN = /^\d{12}$/;
 
 /**
- * The 13 digit rule AC and DF share, each under its own prefix.
+ * The 13 digit rule AC and DF share, each under its own prefixes.
  * @param {string} ie - The sanitized registration.
- * @param {string} prefix - The two digits the state's registrations start with.
- * @returns {boolean} True when the registration follows the rule under that prefix.
+ * @param {readonly string[]} prefixes - The two digits the state's registrations may start with.
+ * @returns {boolean} True when the registration follows the rule under one of those prefixes.
  */
-const validateAcDfRule = (ie: string, prefix: string): boolean => {
+const validateAcDfRule = (ie: string, prefixes: readonly string[]): boolean => {
 	if (!checkLength(ie, 13)) return false;
-	if (!ie.startsWith(prefix)) return false;
+	if (!startsWithAny(ie, prefixes)) return false;
 
 	const body = ie.slice(0, 11);
 	const firstDigit = calculateDfCheckDigit(body);
@@ -122,7 +124,7 @@ const validateAcDfRule = (ie: string, prefix: string): boolean => {
 	);
 };
 
-const validateAC: IeValidator = (ie) => validateAcDfRule(ie, "01");
+const validateAC: IeValidator = (ie) => validateAcDfRule(ie, AC_PREFIXES);
 
 // AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
 // which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
@@ -190,7 +192,7 @@ const validateBA: IeValidator = (ie: string) => {
 	);
 };
 
-const validateDF: IeValidator = (ie) => validateAcDfRule(ie, "07");
+const validateDF: IeValidator = (ie) => validateAcDfRule(ie, DF_PREFIXES);
 
 const validateGO: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 9)) return false;
@@ -484,8 +486,12 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * Validates a Brazilian state tax registration number (IE).
  *
  * Per state notes, all of them deliberate and unchanged since 2.3.0:
- * - DF: the SINTEGRA page is published but empty, and no SEFAZ-DF roteiro is published either,
- *   so DF follows the 13 digit AC rule under the prefix 07.
+ * - DF: the SINTEGRA page gives the format "07 300001 001 - DD" and the AC rule (weights 4, 3, 2,
+ *   9 down to 2, then 5, 4, 3, 2, 9 down to 2, a 10 or 11 read as 0). The prefix 08 is accepted
+ *   too, under the same rule: DF moved to 08 when the numbers starting with 07 ran out. No
+ *   SEFAZ-DF act announces that change: its own rule sheet (2013) still calls 07 a "campo fixo",
+ *   while the CF/DF validator of its service portal checks the 13 digits and both check digits
+ *   and not the prefix. The prefix 08 rests on that validator and on the software notes below.
  * - GO: the prefixes are 10, 11, 15 and 20 to 29. The SINTEGRA page gives 10, 11 and 20 to 29,
  *   and SEFAZ-GO has issued 20 to new companies since 13/01/2023, when the range starting with 10
  *   ran out. The SEFAZ-GO roteiro adds 15, the 10103105 to 10119997 range and the dual digit
@@ -541,9 +547,23 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_BA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_CE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_DF.html
- * The page is published but empty: it carries no format, no weights and no worked example,
- * and no SEFAZ-DF roteiro is published either, so DF follows the 13 digit AC rule under the
- * prefix 07.
+ * The rule is an image: "07 300001 001 - DD", "multiplicar cada algarismo da inscrição, da direita
+ * para a esquerda, pela seqüência de 2 a 9", "se o resultado obtido for igual a 10 ou 11, o
+ * primeiro dígito verificador será igual a zero", worked example 073.00001.001-09.
+ * @see Official: https://static.fazenda.df.gov.br/arquivos/im1_numero_inscricao_cfdf_sintegra.gif
+ * SEFAZ-DF, "Cálculo do Digito Verificador do CFDF" (2013): "07 00001 001 - DD: 07 = campo
+ * fixo; 00001 = número seqüencial; 001 = 001, se matriz; 002, 003, ..., se filial(is)", and the
+ * same módulo 11 rule as the SINTEGRA page.
+ * @see Official: https://ww1.receita.fazenda.df.gov.br/iss/situcao-cadastral
+ * Receita DF service portal: its CF/DF validator requires 13 digits and recomputes both check
+ * digits (weights 2 to 9 from the right, a remainder of 0 or 1 giving 0), whatever the prefix.
+ * @see Based on: https://tdn.totvs.com/pages/viewpage.action?pageId=566472384
+ * TOTVS release note DFWKFOUNDATION-4046: DF registrations may start with 07 or 08, the numbers
+ * starting with 07 having run out at 07.999.999, and per the DF tax authority the check digit
+ * rule did not change.
+ * @see Based on: https://github.com/caelum/caelum-stella/issues/267
+ * @see Based on: https://github.com/caelum/caelum-stella/issues/269
+ * Reports of valid DF registrations starting with 08 being rejected.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
  * "8 dígitos (ABCDEFGH) + 1 dígito verificador (I); onde AB pode ser igual a 10 ou 11 ou 20 a

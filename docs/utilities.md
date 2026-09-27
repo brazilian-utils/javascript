@@ -3362,7 +3362,7 @@ Check if an inscrição estadual (state registration) is valid for a state. **De
   - GO: the prefixes 10, 11, 15 and 20 to 29 (SEFAZ-GO has issued 20 to new companies since 13/01/2023).
   - MT: 11 digits, or the 9 digits SEFAZ-MT now issues, read as the 11 digit form padded with two zeros.
   - PA: the prefixes 15 and 75 to 79. MS: the prefixes 28 and 50.
-  - DF: the 13 digit AC rule under the prefix 07.
+  - DF: the 13 digit AC rule under the prefixes 07 and 08 (DF moved to 08 when the numbers starting with 07 ran out).
   - SP: the produtor rural form `P0MMMSSSSD000`.
   - TO: 11 digits, with the tipo digits, or 9 digits.
   - PE: only the 9 digit eFisco form. AL: the third digit is not restricted. RJ: the 8 digit length and the weights come from the SINTEGRA validator.

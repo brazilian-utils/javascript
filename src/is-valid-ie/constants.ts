@@ -4,9 +4,14 @@
  * @see Official: http://www.sintegra.gov.br/insc_est.html
  */
 
+export const AC_PREFIXES = ["01"];
+
 export const AL_PREFIXES = ["24"];
 
 export const BA_MOD_10_DIGITS = [0, 1, 2, 3, 4, 5, 8];
+
+/** 07 on the SINTEGRA page; 08 since the numbers starting with 07 ran out. */
+export const DF_PREFIXES = ["07", "08"];
 
 /**
  * 10, 11 and 15 from the SEFAZ-GO roteiro de crítica; 20 to 29 from the SINTEGRA page ("AB pode ser

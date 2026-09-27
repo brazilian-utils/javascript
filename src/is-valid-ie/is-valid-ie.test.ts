@@ -207,8 +207,27 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "0754002000508", stateCode: "DF" })).toBe(true);
 		});
 
-		test("should return false when the IE does not start with 07", () => {
+		test("should return false when the IE does not start with 07 or 08", () => {
 			expect(isValidIe({ value: "0108368143017", stateCode: "DF" })).toBe(false);
+		});
+
+		test("should return true for the prefix 08, which DF moved to when the 07 numbers ran out", () => {
+			// 8 x 3 + 3 x 2 + 1 x 5 + 1 x 2 = 37, 37 % 11 = 4, 11 - 4 = 7
+			// 8 x 4 + 3 x 3 + 1 x 6 + 1 x 3 + 7 x 2 = 64, 64 % 11 = 9, 11 - 9 = 2
+			expect(isValidIe({ value: "0830000100172", stateCode: "DF" })).toBe(true);
+			expect(isValidIe({ value: "08.300001.001-72", stateCode: "DF" })).toBe(true);
+			expect(isValidIe({ value: "0800000000176", stateCode: "DF" })).toBe(true);
+			expect(isValidIe({ value: "0899999900145", stateCode: "DF" })).toBe(true);
+		});
+
+		test("should return false for the prefixes 06 and 09, just outside 07 and 08, even with matching digits", () => {
+			expect(isValidIe({ value: "0630000100129", stateCode: "DF" })).toBe(false);
+			expect(isValidIe({ value: "0930000100144", stateCode: "DF" })).toBe(false);
+		});
+
+		test("should return false for a prefix 08 registration with an incorrect verifier digit", () => {
+			expect(isValidIe({ value: "0830000100173", stateCode: "DF" })).toBe(false);
+			expect(isValidIe({ value: "0830000100182", stateCode: "DF" })).toBe(false);
 		});
 
 		test("should return false when the length is not 13 digits", () => {
@@ -805,6 +824,7 @@ describe("isValidIe", () => {
 			["BA", "612345-57"],
 			["BA", "1000003-06"],
 			["CE", "06000001-5"],
+			["DF", "073.00001.001-09"],
 			["ES", "999999990"],
 			["GO", "10.987.654-7"],
 			["MA", "120000385"],
