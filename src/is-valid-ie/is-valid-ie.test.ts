@@ -489,20 +489,26 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "759999996", stateCode: "PA" })).toBe(true);
 		});
 
-		test("should return false for the prefixes 76 to 79, which no official text announces, even with a matching digit", () => {
-			expect(isValidIe({ value: "760000000", stateCode: "PA" })).toBe(false);
-			expect(isValidIe({ value: "770000002", stateCode: "PA" })).toBe(false);
-			expect(isValidIe({ value: "780000005", stateCode: "PA" })).toBe(false);
-			expect(isValidIe({ value: "790000008", stateCode: "PA" })).toBe(false);
+		test("should return true for the prefixes 76 to 79, which the SINTEGRA page lists", () => {
+			expect(isValidIe({ value: "760000000", stateCode: "PA" })).toBe(true);
+			expect(isValidIe({ value: "770000002", stateCode: "PA" })).toBe(true);
+			expect(isValidIe({ value: "780000005", stateCode: "PA" })).toBe(true);
+			expect(isValidIe({ value: "790000008", stateCode: "PA" })).toBe(true);
 		});
 
-		test("should return false for the prefixes 74, 14 and 16, next to 75 and 15, even with a matching digit", () => {
+		test("should return false for a prefix 76 to 79 registration with an incorrect digit", () => {
+			expect(isValidIe({ value: "760000001", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "790000009", stateCode: "PA" })).toBe(false);
+		});
+
+		test("should return false for the prefixes 74, 80, 14 and 16, next to 75 to 79 and 15, even with a matching digit", () => {
 			expect(isValidIe({ value: "740000004", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "800000005", stateCode: "PA" })).toBe(false);
 			expect(isValidIe({ value: "140000003", stateCode: "PA" })).toBe(false);
 			expect(isValidIe({ value: "160000009", stateCode: "PA" })).toBe(false);
 		});
 
-		test("should return false when the IE does not start with 15 or 75", () => {
+		test("should return false when the IE does not start with 15 or 75 to 79", () => {
 			expect(isValidIe({ value: "120000008", stateCode: "PA" })).toBe(false);
 		});
 

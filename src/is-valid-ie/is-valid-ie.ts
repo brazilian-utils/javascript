@@ -506,9 +506,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   SINTEGRA page prints. The 9 digit form is read as the 11 digit one padded with two leading
  *   zeros, which the weights 3 and 2 turn into nothing, so "130000019" and "00130000019" are the
  *   same registration.
- * - PA: the prefixes are 15, the one the SINTEGRA page gives ("15: Número Padrão Pará"), and 75,
- *   which SEFA-PA has issued since October 2024. No official text announces 76 to 79, so they are
- *   rejected.
+ * - PA: the prefixes are 15 and 75 to 79, the six the SINTEGRA page lists ("15: Número Padrão
+ *   Pará", and the same for 75, 76, 77, 78 and 79). SEFA-PA's notice of 08/10/2024 announces 75
+ *   alone and points to that page for the details; no SEFA-PA notice or act names 76 to 79, which
+ *   rest on the page only.
  * - SP: letters other than "P" are rejected on purpose, a deliberate deviation from the Regra
  *   Geral of the SINTEGRA page, which ignores them instead; punctuation and spaces are ignored as
  *   it says. A produtor rural registration is "P" then "0MMMSSSSD000", the zero included. The
@@ -596,11 +597,14 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * numérica do contribuinte no CCE/MT é composta de 9 (nove) dígitos, sendo os 8 (oito) primeiros
  * sequenciais e o último algarismo configura o dígito verificador."
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PA.html
- * "Composição: 15-999999-5", "15: Número Padrão Pará", weights 2 to 9 from the right.
- * @see Official: https://agenciapara.com.br/noticia/60231/novas-inscricoes-estaduais-poderao-ser-iniciadas-pelo-numero-75
- * Agência Pará (Governo do Pará), "Novas Inscrições Estaduais poderão ser iniciadas pelo número
- * 75": from October 2024 SEFA-PA issues registrations starting with 75, the numbers starting with
- * 15 running out, with the same number of digits.
+ * Updated 11/06/2024: "Composição: 15NNNNNN-D; 75NNNNNN-D; 76NNNNNN-D; 77NNNNNN-D; 78NNNNNN-D;
+ * 79 NNNNNN-D", each "Número Padrão Pará", weights 2 to 9 from the right, "Se o resto da divisão
+ * é 0 ou 1, o dígito é 0", worked examples 15999999-5 and 75000002-3.
+ * @see Official: https://site-sefa-wordpress.sefa.pa.gov.br/2024/10/08/inscricoes-estaduais-podem-iniciar-com-numeracao-75/
+ * SEFA-PA, "Inscrições estaduais podem iniciar com numeração 75" (08/10/2024): "A partir do dia
+ * 07/10/2024 as novas Inscrições Estaduais [...] também poderão ser iniciadas pelo número "75"",
+ * "75.XXX.XXX-X", and "O detalhamento sobre a IE do Pará está no seguinte link:
+ * http://www.sintegra.gov.br/Cad_Estados/cad_PA.html".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PB.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PI.html
