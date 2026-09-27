@@ -787,6 +787,7 @@ Fonte: [Manual de Orientação do Contribuinte da NF-e 7.0, Visão Geral](https:
 Valida um número de telefone (celular ou fixo). Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`.
 
 - **Opções** (`IsValidPhoneOptions`): `accept` (`PhoneType[]`, padrão `['mobile', 'landline']`) define quais tipos de número são aceitos; inclua `'service'` para os números que `isValidServicePhone` reconhece. `version` (`PhoneVersion`, padrão `1`) é repassado a `isValidMobilePhone`.
+- Um celular precisa começar com 7, 8 ou 9 nas duas versões (Resolução Anatel 749/2022, art. 12, I, "a"), então um 6 inicial é rejeitado; até a 2.4.0 a versão padrão o aceitava.
 
 ```javascript
 import { isValidPhone } from '@brazilian-utils/brazilian-utils';
@@ -794,6 +795,7 @@ import { isValidPhone } from '@brazilian-utils/brazilian-utils';
 isValidPhone('11900000000'); // true
 isValidPhone('11712345678', { version: 2 }); // true (7, 8 e 9 são todos SMP)
 isValidPhone('11700123456', { version: 2 }); // false (a série 700 é de satélite)
+isValidPhone('11612345678'); // false (6 não é SMP)
 isValidPhone('+55 11 98765-4321'); // true (código de país aceito)
 isValidPhone('08001234567'); // false (números de serviço não são aceitos por padrão)
 isValidPhone('08001234567', { accept: ['service'] }); // true
@@ -877,19 +879,22 @@ generatePhone('service'); // '08001234567' ou '40041234'
 
 Valida um número de telefone celular. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`.
 
-- **Opções** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, padrão `1`) escolhe a regra de numeração: `1` aceita 6, 7, 8 ou 9 como primeiro dígito; `2` segue a Resolução Anatel 749/2022, aceita só 7, 8 ou 9 e rejeita a série `700`.
+- **Opções** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, padrão `1`) escolhe a regra de numeração. As duas seguem a Resolução Anatel 749/2022, art. 12, I, "a" (`"7", "8" e "9": Serviço Móvel Pessoal (SMP)`) e aceitam só 7, 8 ou 9 como primeiro dígito; `1` também aceita a série `700`, `2` a rejeita por ser de satélite (art. 12, II, "a").
+- Até a 2.4.0 a versão `1` também aceitava 6 como primeiro dígito, que não é SMP.
+- A Resolução Anatel 777/2025, art. 22, torna a série `700` "SMGS e SMP por Satélite" a partir de 1º de março de 2027; até lá `version: 2` continua a rejeitá-la.
 
 ```javascript
 import { isValidMobilePhone } from '@brazilian-utils/brazilian-utils';
 
 isValidMobilePhone('11900000000'); // true
-isValidMobilePhone('11712345678', { version: 1 }); // true (formato antigo)
+isValidMobilePhone('11712345678', { version: 1 }); // true
 isValidMobilePhone('11712345678', { version: 2 }); // true (7 também é SMP)
-isValidMobilePhone('11612345678', { version: 2 }); // false (6 é Reserva Técnica)
+isValidMobilePhone('11612345678'); // false (6 não é SMP, em nenhuma das versões)
+isValidMobilePhone('11700123456'); // true (a versão 1 mantém a série 700)
 isValidMobilePhone('11700123456', { version: 2 }); // false (a série 700 é de satélite)
 ```
 
-Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749).
+Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749) e [Resolução Anatel nº 777/2025](https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777), art. 22.
 
 ### isValidLandlinePhone
 

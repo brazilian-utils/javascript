@@ -65,6 +65,12 @@ describe("isValidPhone", () => {
 			expect(isValidPhone("11700123456", { version: 2 })).toBe(false);
 		});
 
+		test("when the mobile number starts with 6, which is not SMP, under the default version too", () => {
+			// 2.4.0 returned true for the default version 1
+			expect(isValidPhone("11612345678")).toBe(false);
+			expect(isValidPhone("11612345678", { version: 1 })).toBe(false);
+		});
+
 		test("when the kind is not accepted", () => {
 			expect(isValidPhone("11987654321", { accept: ["landline"] })).toBe(false);
 			expect(isValidPhone("1130000000", { accept: ["mobile"] })).toBe(false);
@@ -88,6 +94,7 @@ describe("isValidPhone", () => {
 
 		test("when is a valid mobile phone version 1", () => {
 			expect(isValidPhone("11712345678", { version: 1 })).toBe(true);
+			expect(isValidPhone("11700123456")).toBe(true);
 		});
 
 		test("when it carries the country code", () => {
