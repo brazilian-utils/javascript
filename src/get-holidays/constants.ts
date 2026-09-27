@@ -531,7 +531,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Lei SC nº 18.531/2022, the in-force consolidation, whose Anexo Único carries both Santa Catarina
  * holidays and the Sunday transfer: "Sempre que o dia 11 de agosto coincidir com dia útil da
  * semana, o feriado e os eventos alusivos à data serão transferidos para o domingo subsequente"
- * and the same clause for 25 de novembro.
+ * and the same clause for 25 de novembro. The law does not say whether a Saturday is a "dia útil
+ * da semana"; the table reads it as not one (Monday to Friday move, a Saturday date stays), the
+ * reading under which the clause keeps the holiday on a day off either way.
  * @see Official: http://leis.alesc.sc.gov.br/html/1996/10306_1996_lei.html
  * Lei SC nº 10.306, of December 1996, which made 25 November the data magna after that year's
  * date, so it is listed from 1997, and whose art. 1º reads, in the wording of Lei SC nº
