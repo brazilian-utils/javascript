@@ -2413,7 +2413,7 @@ The matrícula has 32 digits, printed as `000000 00 00 0000 0 00000 000 0000000 
 | 2 | dígitos verificadores |
 
 - **Options** (`IsValidCertidaoOptions`): `accept` narrows the valid book types (`CertidaoType`) to the listed ones (default: every type).
-- The serviço must be `55`, and the book-type digit must be one of the nine books (`0` is rejected).
+- The serviço must be `55`, and the book-type digit must be one of the seven books of art. 473, V, codes 1 to 7 (`0`, `8` and `9` are rejected). `"emancipation"` and `"interdiction"` are still `CertidaoType` members but match no matrícula.
 - Accepts the value masked or not, with whitespace between and around the groups.
 
 ```javascript
@@ -2423,6 +2423,7 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21'); // true
 isValidCertidao('09430001552010100020112000012087'); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 22'); // false (invalid check digits)
 isValidCertidao('09400301542011100110002005191744'); // false (serviço is not 55)
+isValidCertidao('10453901552013900012021000012398'); // false (book code 9 is not in art. 473, V)
 isValidCertidao('123456'); // false (wrong length)
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['birth'] }); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] }); // false
@@ -2464,8 +2465,8 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 
 Parse the matrícula of a certidão de registro civil into its fields. Accepts the same input forms as `isValidCertidao` and returns `null` when the matrícula is not valid.
 
-- Returns `null` also for a serviço other than `55` and for a book code outside 1 to 9.
-- Art. 473, V lists only the book codes 1 to 7. The codes 8 (emancipação) and 9 (interdição) are also accepted.
+- Returns `null` also for a serviço other than `55` and for a book code outside 1 to 7.
+- Art. 473, V lists only the book codes 1 to 7, from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos relativos ao registro civil)". The codes 8 (emancipação) and 9 (interdição) some community references list are not in it and are rejected.
 
 The `CertidaoInfo` result carries:
 
@@ -2475,8 +2476,8 @@ The `CertidaoInfo` result carries:
 | `acervo` | Acervo the book belongs to: `"01"` the serventia's own, `"02"` and up one per acervo it absorbed. Art. 473, §§ 3º to 5º splits the absorbed ones by the date the origin serventia was extinguished or deactivated. Up to 31/12/2009: the CNS of the incorporating unit and an acervo code from `"02"` up, one per incorporation. From 01/01/2010 on: the CNS of the incorporated unit itself and the code `"01"`, counted as that unit's own acervo. An acervo split between two or more successor serventias gets each successor's own CNS with the code `"02"`. |
 | `service` | Service rendered by the serventia, always `"55"`, the registro civil das pessoas naturais. |
 | `year` | Four digit year the act was recorded. |
-| `type` | The book the act belongs to: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, `"other"`, `"emancipation"` or `"interdiction"`. |
-| `typeCode` | Raw book code, 1 to 9, as printed in the fifteenth position of the matrícula. |
+| `type` | The book the act belongs to: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, or `"other"`. `"emancipation"` and `"interdiction"` stay in the `CertidaoType` union for compatibility but are never returned. |
+| `typeCode` | Raw book code, 1 to 7, as printed in the fifteenth position of the matrícula. |
 | `book` | The 5 digit book (livro) number, zero padded. |
 | `page` | The 3 digit page (folha) number, zero padded. |
 | `term` | The 7 digit term (termo) number, zero padded. |

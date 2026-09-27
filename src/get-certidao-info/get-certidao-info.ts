@@ -4,16 +4,22 @@ import { isValidCertidao } from "../is-valid-certidao/is-valid-certidao";
 import { CERTIDAO_TYPES } from "./constants";
 
 /**
- * The nine books (tipo do livro) a matrícula de registro civil can point to, in the order of the
- * codes 1 to 9. `getCertidaoInfo` names the book of a matrícula with one of these, and
- * `isValidCertidao` accepts a list of them.
+ * The books (tipo do livro) a matrícula de registro civil can point to. `getCertidaoInfo` names
+ * the book of a matrícula with one of the first seven, codes 1 to 7, and `isValidCertidao`
+ * accepts a list of them.
  *
- * The in-force art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça
- * lists only the codes 1 to 7, and no CNJ primary text reachable today publishes the other two:
- * the Anexo IV of the revoked Provimento CNJ nº 63/2017 lists the same seven. The codes 8
- * (`"emancipation"`) and 9 (`"interdiction"`) come from the `Based on:` references below: ghiorzi.org and
- * validation-br both print the nine book list. They are kept because matrículas carrying them
- * circulate.
+ * Art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça (Provimento
+ * CNJ nº 149/2023, as amended by the Provimentos CN nº 182/2024 and nº 237/2026) lists only the
+ * codes 1 to 7, from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos relativos ao registro
+ * civil)". `"emancipation"` and `"interdiction"`, the codes 8 and 9 of some community references,
+ * are never returned: the official table has no such codes, so `isValidCertidao` rejects a
+ * matrícula carrying them and `getCertidaoInfo` returns `null` for it. They stay in this union
+ * only so that code written against 2.4.0, which accepted them, still compiles; listing them in
+ * `isValidCertidao`'s `accept` matches nothing.
+ *
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
+ * Provimento CNJ nº 149/2023, art. 473, V: "1: Livro A (Nascimento)" to "7: Livro E (Demais atos
+ * relativos ao registro civil)".
  */
 export type CertidaoType =
 	| "birth"
@@ -23,7 +29,9 @@ export type CertidaoType =
 	| "stillbirth"
 	| "banns"
 	| "other"
+	/** Never returned: book code 8 is not in the official table (see `CertidaoType`). */
 	| "emancipation"
+	/** Never returned: book code 9 is not in the official table (see `CertidaoType`). */
 	| "interdiction";
 
 /** The fields `getCertidaoInfo` reads out of the matrícula of a certidão de registro civil. */
@@ -47,7 +55,7 @@ export type CertidaoInfo = {
 	year: number;
 	/** The book the act belongs to, as an English name. */
 	type: CertidaoType;
-	/** Raw book code, 1 to 9, as printed in the fifteenth position of the matrícula. */
+	/** Raw book code, 1 to 7, as printed in the fifteenth position of the matrícula. */
 	typeCode: number;
 	/** The 5 digit book (livro) number, zero padded. */
 	book: string;
@@ -64,8 +72,8 @@ export type CertidaoInfo = {
  *
  * Accepts the same input forms as `isValidCertidao` and returns `null` when the matrícula is
  * not valid, which includes a serviço other than the `55` art. 473, III fixes for the registro
- * civil das pessoas naturais, and a book code that is not one of the nine books defined by the
- * Provimento, since an unknown book cannot be named.
+ * civil das pessoas naturais, and a book code that is not one of the seven books of art. 473, V
+ * (0, 8 or 9), since an unknown book cannot be named.
  *
  * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
  * hold, so a numeric argument always gives `null` instead of being read as a rounded value.

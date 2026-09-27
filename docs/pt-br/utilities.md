@@ -2413,7 +2413,7 @@ A matrícula tem 32 dígitos, impressos como `000000 00 00 0000 0 00000 000 0000
 | 2 | dígitos verificadores |
 
 - **Opções** (`IsValidCertidaoOptions`): `accept` restringe os tipos de livro válidos (`CertidaoType`) aos listados (padrão: todos os tipos).
-- O serviço precisa ser `55`, e o dígito do tipo de livro precisa ser um dos nove livros (`0` é rejeitado).
+- O serviço precisa ser `55`, e o dígito do tipo de livro precisa ser um dos sete livros do art. 473, V, códigos 1 a 7 (`0`, `8` e `9` são rejeitados). `"emancipation"` e `"interdiction"` continuam membros de `CertidaoType`, mas não correspondem a nenhuma matrícula.
 - Aceita o valor com ou sem máscara, com espaços entre e ao redor dos grupos.
 
 ```javascript
@@ -2423,6 +2423,7 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21'); // true
 isValidCertidao('09430001552010100020112000012087'); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 22'); // false (dígitos verificadores inválidos)
 isValidCertidao('09400301542011100110002005191744'); // false (serviço diferente de 55)
+isValidCertidao('10453901552013900012021000012398'); // false (o código de livro 9 não está no art. 473, V)
 isValidCertidao('123456'); // false (tamanho inválido)
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['birth'] }); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] }); // false
@@ -2464,8 +2465,8 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 
 Extrai os campos da matrícula de uma certidão de registro civil. Aceita as mesmas formas de entrada de `isValidCertidao` e retorna `null` quando a matrícula é inválida.
 
-- Retorna `null` também para um serviço diferente de `55` e para um código de livro fora de 1 a 9.
-- O art. 473, V lista apenas os códigos de livro de 1 a 7. Os códigos 8 (emancipação) e 9 (interdição) também são aceitos.
+- Retorna `null` também para um serviço diferente de `55` e para um código de livro fora de 1 a 7.
+- O art. 473, V lista apenas os códigos de livro de 1 a 7, de "1: Livro A (Nascimento)" a "7: Livro E (Demais atos relativos ao registro civil)". Os códigos 8 (emancipação) e 9 (interdição) que algumas referências da comunidade listam não estão nele e são rejeitados.
 
 O resultado `CertidaoInfo` traz:
 
@@ -2475,8 +2476,8 @@ O resultado `CertidaoInfo` traz:
 | `acervo` | Acervo a que o livro pertence: `"01"` acervo próprio, `"02"` em diante um por acervo incorporado. O art. 473, §§ 3º a 5º separa os incorporados pela data em que a serventia de origem foi extinta ou desativada. Até 31/12/2009: o CNS da unidade incorporadora e um código de acervo a partir de `"02"`, um por incorporação. A partir de 01/01/2010: o CNS da própria unidade incorporada e o código `"01"`, considerado acervo próprio dessa unidade. Um acervo fracionado entre duas ou mais serventias sucessoras leva o CNS próprio de cada sucessora com o código `"02"`. |
 | `service` | Serviço prestado pela serventia, sempre `"55"`, o registro civil das pessoas naturais. |
 | `year` | Ano do registro, com 4 dígitos. |
-| `type` | Livro a que o ato pertence: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, `"other"`, `"emancipation"` ou `"interdiction"`. |
-| `typeCode` | Código bruto do livro, de 1 a 9, como impresso na décima quinta posição da matrícula. |
+| `type` | Livro a que o ato pertence: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, ou `"other"`. `"emancipation"` e `"interdiction"` continuam na união `CertidaoType` por compatibilidade, mas nunca são retornados. |
+| `typeCode` | Código bruto do livro, de 1 a 7, como impresso na décima quinta posição da matrícula. |
 | `book` | Número do livro, com 5 dígitos e zeros à esquerda. |
 | `page` | Número da folha, com 3 dígitos e zeros à esquerda. |
 | `term` | Número do termo, com 7 dígitos e zeros à esquerda. |

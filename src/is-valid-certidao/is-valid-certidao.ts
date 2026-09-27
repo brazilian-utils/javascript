@@ -42,11 +42,13 @@ const getCheckDigit = (value: string): number => {
  * 0, 1, ... In both passes the check digit is the remainder itself, with a remainder of 10 read
  * as 1.
  *
- * The book-type digit (fifteenth position of the matrícula) always has to name one of the nine
- * books (see `CertidaoType`, reused from `getCertidaoInfo`), so a matrícula whose digit is `0` is
- * rejected however good its check digits are, the same way `getCertidaoInfo` returns `null` for
- * it. `options.accept` narrows that further to the listed types; when it is omitted, or when it
- * is not an array, every book type is accepted.
+ * The book-type digit (fifteenth position of the matrícula) always has to name one of the seven
+ * books of art. 473, V, codes 1 to 7 (see `CertidaoType`, reused from `getCertidaoInfo`), so a
+ * matrícula whose digit is `0`, `8` or `9` is rejected however good its check digits are, the same
+ * way `getCertidaoInfo` returns `null` for it. `options.accept` narrows that further to the listed
+ * types; when it is omitted, or when it is not an array, every book type is accepted.
+ * `"emancipation"` and `"interdiction"` (the codes 8 and 9 some community references list) are
+ * still part of `CertidaoType` but match no matrícula.
  *
  * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
  * hold, so a numeric argument is always rejected instead of being read as a rounded value.
@@ -62,6 +64,7 @@ const getCheckDigit = (value: string): number => {
  * isValidCertidao("09430001552010100020112000012087"); // true
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 22"); // false (invalid check digits)
  * isValidCertidao("09400301542011100110002005191744"); // false (serviço is not 55)
+ * isValidCertidao("10453901552013900012021000012398"); // false (book code 9 is not in art. 473, V)
  * isValidCertidao("123456"); // false (wrong length)
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: ["birth"] }); // true
  * isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21", { accept: ["death"] }); // false
@@ -70,7 +73,8 @@ const getCheckDigit = (value: string): number => {
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
  * Código Nacional de Normas da Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento
  * CNJ nº 149/2023), art. 473 as currently published: the in-force layout of the 32 digit
- * matrícula. Inciso II and §§ 1º and 3º to 5º carry the redação of the Provimento CN nº 237, de
+ * matrícula, its inciso V listing the book codes "1: Livro A (Nascimento)" to "7: Livro E (Demais
+ * atos relativos ao registro civil)". Inciso II and §§ 1º and 3º to 5º carry the redação of the Provimento CN nº 237, de
  * 13/07/2026; the rest of the article, § 2º included, and the digit layout this library depends
  * on, come from the Provimento CN nº 182, de 17/09/2024.
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/1311
