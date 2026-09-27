@@ -35,7 +35,17 @@ const isValidChecksum = (cpf: string): boolean =>
  * cited below in its place; its Receita Federal permalink redirects into the norms viewer, which
  * has to be opened in a browser.
  *
+ * The norm of the CPF itself, Instrução Normativa RFB nº 2.172/2024, says nothing about the check
+ * digits. The reserved numbers come from the Receita Federal's DJE arrecadação layout, whose CPF
+ * field needs "os 2 dígitos verificadores consistentes, validados conforme rotina específica" and
+ * lists "000.000.000-00, 111.111.111-11, [...] 999.999.999-99" as not valid.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
+ * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=135611
+ * Instrução Normativa RFB nº 2.172/2024, the norm of the CPF: no rule for the check digits.
+ * @see Official: http://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=36307
+ * Receita Federal, leiaute DJE (version DJE/004 of 10/06/2002), field "Número CPF ou CNPJ": the 10
+ * CPFs whose 11 digits are all the same are not valid.
  * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=151372
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
