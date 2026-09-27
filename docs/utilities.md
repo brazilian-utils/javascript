@@ -908,7 +908,7 @@ Check if a mobile phone number is valid. A Brazilian country code (`+55`, `0055`
 
 - **Options** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, default `1`) picks the numbering rule. Both follow Resolução Anatel 749/2022, art. 12, I, "a" (`"7", "8" e "9": Serviço Móvel Pessoal (SMP)`) and accept only a first digit of 7, 8 or 9; `1` also accepts the `700` series, `2` rejects it as satellite (art. 12, II, "a").
 - Up to 2.4.0 version `1` also accepted a first digit of 6, which is not SMP.
-- Resolução Anatel 777/2025, art. 22, makes the `700` series "SMGS e SMP por Satélite" from 1 March 2027; `version: 2` still rejects it until then.
+- Scheduled change, not applied yet: Resolução Anatel 777/2025, art. 22, rewrites art. 12 with effect from 1 March 2027. A first digit of `6` becomes SCM (not a mobile), only `8` and `9` stay SMP, the `700` series becomes "SMGS e SMP por Satélite" and any other `7` number becomes reserva técnica. From that date a `version: 2` that follows it will have to accept only `8` and `9`, plus the `700` series as satellite SMP.
 
 ```javascript
 import { isValidMobilePhone } from '@brazilian-utils/brazilian-utils';
@@ -927,12 +927,17 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 Check if a landline phone number is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`.
 
+- The number is the DDD plus 8 digits starting with `2` to `6`, the STFC and SCM range of Resolução Anatel 749/2022, art. 11, I, "a".
+- Scheduled change, not applied yet: from 1 March 2027 Resolução Anatel 777/2025, art. 21, leaves only `2` to `5` to the STFC, and the SCM moves to 9 digit numbers starting with `6`. From that date a landline starting with `6` will have to be rejected.
+
 ```javascript
 import { isValidLandlinePhone } from '@brazilian-utils/brazilian-utils';
 
 isValidLandlinePhone('1130000000'); // true
 isValidLandlinePhone('+55 11 3000-0000'); // true (country code accepted)
 ```
+
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), art. 11, and [Resolução Anatel nº 777/2025](https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777), art. 21.
 
 ### isValidServicePhone
 

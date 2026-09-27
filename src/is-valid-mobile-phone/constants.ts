@@ -13,13 +13,18 @@ export const MOBILE_VALID_FIRST_NUMBERS = [7, 8, 9];
  * The `700` series version 2 rejects: art. 12, II, "a" of Resolução Anatel nº 749/2022 gives it to
  * the Serviço Móvel Global por Satélite (SMGS), not to the SMP.
  *
- * Resolução Anatel nº 777/2025, art. 22, rewrites that item so that from 1 March 2027 the `700`
- * series is "SMGS e SMP por Satélite": from that date a `700` number can be an SMP mobile number
- * too, and version 2 may have to accept it. Nothing changes before then.
+ * Resolução Anatel nº 777/2025, art. 22, rewrites the whole of art. 12 with effect from 1 March
+ * 2027 (the date the Anatel compiled text gives it, after Acórdão nº 202/2025): N9 "6" becomes
+ * the Serviço de Comunicação Multimídia (SCM), only "8" and "9" stay SMP, the `700` series
+ * becomes "SMGS e SMP por Satélite", and every other first digit, a "7" outside `700` included,
+ * becomes reserva técnica. That rule is scheduled, not in force, so neither version applies it
+ * yet. A version 2 that follows it from that date will need to accept only 8 and 9 as the first
+ * digit, plus the `700` series as satellite SMP, and to reject every other `7` number; 6 stays
+ * rejected, now as SCM.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777
- * Resolução Anatel nº 777/2025, art. 22: the `700` series becomes "SMGS e SMP por Satélite" on 1
+ * Resolução Anatel nº 777/2025, art. 22: the new art. 12 of Resolução nº 749/2022, in force on 1
  * March 2027.
  */
 export const MOBILE_SATELLITE_PREFIX = "700";

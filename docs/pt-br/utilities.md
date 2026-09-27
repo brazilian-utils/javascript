@@ -908,7 +908,7 @@ Valida um número de telefone celular. Um código de país brasileiro (`+55`, `0
 
 - **Opções** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, padrão `1`) escolhe a regra de numeração. As duas seguem a Resolução Anatel 749/2022, art. 12, I, "a" (`"7", "8" e "9": Serviço Móvel Pessoal (SMP)`) e aceitam só 7, 8 ou 9 como primeiro dígito; `1` também aceita a série `700`, `2` a rejeita por ser de satélite (art. 12, II, "a").
 - Até a 2.4.0 a versão `1` também aceitava 6 como primeiro dígito, que não é SMP.
-- A Resolução Anatel 777/2025, art. 22, torna a série `700` "SMGS e SMP por Satélite" a partir de 1º de março de 2027; até lá `version: 2` continua a rejeitá-la.
+- Mudança agendada, ainda não aplicada: a Resolução Anatel 777/2025, art. 22, reescreve o art. 12 a partir de 1º de março de 2027. O primeiro dígito `6` passa a ser SCM (não é celular), só `8` e `9` continuam SMP, a série `700` passa a ser "SMGS e SMP por Satélite" e qualquer outro número com `7` vira reserva técnica. A partir dessa data, uma `version: 2` que siga essa regra terá de aceitar só `8` e `9`, além da série `700` como SMP por satélite.
 
 ```javascript
 import { isValidMobilePhone } from '@brazilian-utils/brazilian-utils';
@@ -927,12 +927,17 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 Valida um número de telefone fixo. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`.
 
+- O número é o DDD mais 8 dígitos começando com `2` a `6`, a faixa de STFC e SCM da Resolução Anatel 749/2022, art. 11, I, "a".
+- Mudança agendada, ainda não aplicada: a partir de 1º de março de 2027 a Resolução Anatel 777/2025, art. 21, deixa só `2` a `5` para o STFC, e o SCM passa para números de 9 dígitos começando com `6`. A partir dessa data, um fixo começando com `6` terá de ser rejeitado.
+
 ```javascript
 import { isValidLandlinePhone } from '@brazilian-utils/brazilian-utils';
 
 isValidLandlinePhone('1130000000'); // true
 isValidLandlinePhone('+55 11 3000-0000'); // true (código de país aceito)
 ```
+
+Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), art. 11, e [Resolução Anatel nº 777/2025](https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777), art. 21.
 
 ### isValidServicePhone
 

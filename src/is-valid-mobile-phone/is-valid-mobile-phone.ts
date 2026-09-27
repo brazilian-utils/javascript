@@ -55,12 +55,18 @@ const isValidMobileFirstNumber = (value: string, version?: PhoneVersion): boolea
  *
  * That ressalva is art. 12, II, "a", `“700”: Serviço Móvel Global por Satélite (SMGS)`: the
  * `700` series is not SMP, so `version: 2` rejects `isValidMobilePhone("11700123456")`.
- * `version: 1` does not carve the series out and accepts it, for 2.3.0 compatibility. Resolução
- * Anatel nº 777/2025, art. 22, makes the series "SMGS e SMP por Satélite" from 1 March 2027.
+ * `version: 1` does not carve the series out and accepts it, for 2.3.0 compatibility.
+ *
+ * Resolução Anatel nº 777/2025, art. 22, gives art. 12 a new wording in force on 1 March 2027:
+ * "6" SCM, "8" and "9" SMP, `700` "SMGS e SMP por Satélite", and every other first digit,
+ * including a "7" outside `700`, reserva técnica. It is scheduled, not in force, so it is not
+ * applied yet; from that date a `version: 2` that follows it will have to accept only 8 and 9
+ * (plus the `700` series, as satellite SMP) and reject the other `7` numbers.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * Resolução Anatel nº 749/2022, art. 12, I, "a": `“7”, "8" e “9”: Serviço Móvel Pessoal (SMP)`.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777
+ * Resolução Anatel nº 777/2025, art. 22: the art. 12 in force on 1 March 2027.
  */
 export const isValidMobilePhone = (value: string, options?: IsValidMobilePhoneOptions): boolean => {
 	if (typeof value !== "string") return false;
