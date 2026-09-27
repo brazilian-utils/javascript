@@ -3334,6 +3334,7 @@ capitalize('brasília - df'); // Brasília - DF (a state code as the last word a
 capitalize('santana rs'); // Santana Rs (no "/", so "rs" is just a word)
 capitalize('rua xv de novembro'); // Rua XV de Novembro (roman numeral, "de" stays lower case)
 capitalize('joão paulo ii'); // João Paulo II
+capitalize('rua xxiv de maio'); // Rua XXIV de Maio (roman numerals from II to XXXIX, except VI, the verb "vi")
 capitalize('de'); // De (a preposition keeps its capital when it is the first word)
 capitalize('empresa ltda', { upperCaseWords: [] }); // Empresa Ltda (the list given replaces the default one)
 capitalize('josé Ama MARIA', { lowerCaseWords: ['ama'] }); // José ama Maria

@@ -3334,6 +3334,7 @@ capitalize('brasília - df'); // Brasília - DF (sigla de estado como última pa
 capitalize('santana rs'); // Santana Rs (sem "/", "rs" é só uma palavra)
 capitalize('rua xv de novembro'); // Rua XV de Novembro (algarismo romano, "de" fica em minúsculas)
 capitalize('joão paulo ii'); // João Paulo II
+capitalize('rua xxiv de maio'); // Rua XXIV de Maio (algarismos romanos de II a XXXIX, exceto VI, o verbo "vi")
 capitalize('de'); // De (uma preposição mantém a maiúscula quando é a primeira palavra)
 capitalize('empresa ltda', { upperCaseWords: [] }); // Empresa Ltda (a lista informada substitui a padrão)
 capitalize('josé Ama MARIA', { lowerCaseWords: ['ama'] }); // José ama Maria

@@ -92,9 +92,13 @@ const DOCUMENT_ABBREVIATIONS = ["CEP", "CNPJ", "CPF", "RG", "UF"];
 
 /**
  * Roman numerals that appear inside Brazilian names and addresses ("João Paulo II", "Rua XV de
- * Novembro", "Avenida Papa João XXIII"). The single letter numerals (V, X, L, C, D, M) are left
- * out because a single letter is already written in upper case by the default rule, and VI is
- * left out because it collides with the pt-BR verb form "vi".
+ * Novembro", "Avenida Papa João XXIII", "Rua XXIV de Maio", "Rua XXV de Março"): every numeral
+ * from II to XXXIX, the ones written with I, V and X alone. The bound stops before XL because
+ * from there the numerals take L, C, D and M, which spell pt-BR words and abbreviations ("li",
+ * "xl", "cd", "mil", "dc"), and the dates and ordinals of street names stay below 40. The single
+ * letter numerals (V, X, L, C, D, M) are left out because a single letter is already written in
+ * upper case by the default rule, and VI is left out because it collides with the pt-BR verb form
+ * "vi".
  */
 const ROMAN_NUMERALS = [
 	"II",
@@ -116,6 +120,22 @@ const ROMAN_NUMERALS = [
 	"XXI",
 	"XXII",
 	"XXIII",
+	"XXIV",
+	"XXV",
+	"XXVI",
+	"XXVII",
+	"XXVIII",
+	"XXIX",
+	"XXX",
+	"XXXI",
+	"XXXII",
+	"XXXIII",
+	"XXXIV",
+	"XXXV",
+	"XXXVI",
+	"XXXVII",
+	"XXXVIII",
+	"XXXIX",
 ];
 
 /** Words that are written in upper case wherever they appear, the default `upperCaseWords`. */

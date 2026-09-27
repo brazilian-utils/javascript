@@ -184,6 +184,17 @@ describe("capitalize", () => {
 			expect(capitalize("joão paulo ii")).toBe("João Paulo II");
 			expect(capitalize("rua xv de novembro")).toBe("Rua XV de Novembro");
 			expect(capitalize("avenida papa joão xxiii")).toBe("Avenida Papa João XXIII");
+			expect(capitalize("rua xxiv de maio")).toBe("Rua XXIV de Maio");
+			expect(capitalize("rua xxv de março")).toBe("Rua XXV de Março");
+			expect(capitalize("praça xxix de junho")).toBe("Praça XXIX de Junho");
+			expect(capitalize("rua xxxi de março")).toBe("Rua XXXI de Março");
+			expect(capitalize("capítulo xxxix")).toBe("Capítulo XXXIX");
+		});
+
+		test("when a roman numeral is past XXXIX, uses a letter other than I, V and X, or is VI, it is an ordinary word", () => {
+			expect(capitalize("capítulo xl")).toBe("Capítulo Xl");
+			expect(capitalize("eu li o livro")).toBe("Eu Li o Livro");
+			expect(capitalize("eu vi maria")).toBe("Eu Vi Maria");
 		});
 
 		test("when a word list given in the options replaces the default one", () => {

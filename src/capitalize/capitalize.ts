@@ -216,8 +216,9 @@ const capitalizeWord = (word: string): string => {
  *   default list is the company designations and document abbreviations that are written in upper
  *   case in Brazilian usage (`LTDA`, `S.A.`, `S/A`, `S.S.`, `S/S`, `ME`, `EPP`, `MEI`, `EIRELI`,
  *   `CIA`, `SCP`, `CNPJ`, `CPF`, `RG`, `CEP`, `UF`) plus the roman numerals that appear in names
- *   and addresses (`II` through `XXIII`, except `VI`, so `"joão paulo ii"` becomes
- *   `"João Paulo II"` and `"rua xv de novembro"` becomes `"Rua XV de Novembro"`). `ME` is also
+ *   and addresses (`II` through `XXXIX`, the numerals written with `I`, `V` and `X` alone, except
+ *   `VI`, so `"joão paulo ii"` becomes `"João Paulo II"`, `"rua xv de novembro"` becomes `"Rua XV
+ *   de Novembro"` and `"rua xxiv de maio"` becomes `"Rua XXIV de Maio"`). `ME` is also
  *   the pt-BR pronoun "me", so it is only upper cased in the designation position, as the last
  *   word of the value (`"fulano comércio me"` becomes `"Fulano Comércio ME"`) or right before
  *   another designation (`"fulano me epp"` becomes `"Fulano ME EPP"`); anywhere else it is an
@@ -278,6 +279,7 @@ const capitalizeWord = (word: string): string => {
  * capitalize("santana/rs"); // "Santana/RS"
  * capitalize("brasília - df"); // "Brasília - DF"
  * capitalize("rua xv de novembro"); // "Rua XV de Novembro"
+ * capitalize("rua xxiv de maio"); // "Rua XXIV de Maio"
  * capitalize("empresa ltda", { upperCaseWords: [] }); // "Empresa Ltda"
  * capitalize("joao\tsilva"); // "Joao Silva"
  * ```
