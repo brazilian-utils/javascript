@@ -102,8 +102,8 @@ describe("subBusinessDays", () => {
 	});
 
 	describe("includeOptional", () => {
-		it("should walk back over Carnaval 2024-02-13 by default (Wed 2024-02-14 - 1 -> Mon 2024-02-12)", () => {
-			expect(subBusinessDays(new Date(2024, 1, 14, 12), 1)).toEqual(new Date(2024, 1, 12, 12));
+		it("should walk back over both Carnaval days, Tue 2024-02-13 and Mon 2024-02-12, by default (Wed 2024-02-14 - 1 -> Fri 2024-02-09)", () => {
+			expect(subBusinessDays(new Date(2024, 1, 14, 12), 1)).toEqual(new Date(2024, 1, 9, 12));
 		});
 
 		it("should stop on Carnaval 2024-02-13 when includeOptional is false", () => {

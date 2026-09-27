@@ -33,9 +33,11 @@ const SATURDAY = 6;
  * specific local day, for the same reason documented in `isHoliday`.
  *
  * `options.includeOptional` defaults to `true`: holidays whose `Holiday.type` is
- * `"optional"` (Carnaval and Corpus Christi) are treated as non-business days even though
- * they are not statutory holidays. Pass `false` to only treat statutory (`"national"` and
- * `"state"`) holidays as non-business days.
+ * `"optional"` (Carnaval Monday and Tuesday and Corpus Christi, the federal pontos facultativos
+ * `getHolidays` lists) are treated as non-business days even though they are not statutory
+ * holidays. Pass `false` to only treat statutory (`"national"` and `"state"`) holidays as
+ * non-business days. The partial pontos facultativos of the federal calendar (the Quarta-feira de
+ * Cinzas morning, 28 October, the 24 and 31 December afternoons) are business days either way.
  *
  * `options.includeSaturday` defaults to `false`, the Monday to Friday count banks and courts
  * use. Pass `true` for the labour law count of the payroll deadline of CLT art. 459 § 1º ("até o
@@ -90,7 +92,8 @@ const SATURDAY = 6;
  * isBusinessDay(new Date(2024, 0, 6), { includeSaturday: true }); // true (labour law count)
  * isBusinessDay(new Date(2024, 8, 7), { includeSaturday: true }); // false (Independência, a holiday on a Saturday)
  * isBusinessDay(new Date(2024, 0, 7), { includeSaturday: true }); // false (Sunday is never included)
- * isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, optional holiday, counted by default)
+ * isBusinessDay(new Date(2024, 1, 12)); // false (Carnaval Monday, optional holiday, counted by default)
+ * isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval Tuesday, optional holiday, counted by default)
  * isBusinessDay(new Date(2024, 1, 13), { includeOptional: false }); // true
  * isBusinessDay(new Date(2024, 6, 9), { stateCode: "SP" }); // false (Revolução Constitucionalista)
  * isBusinessDay(new Date(2024, 6, 9)); // true (state holiday ignored without stateCode)
@@ -125,9 +128,10 @@ const SATURDAY = 6;
  * feriado, inclusive o municipal".
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
- * pontos facultativos: the source of three of the four Easter-derived entries, namely
- * Sexta-feira Santa being observed nationally and Carnaval and Corpus Christi being ponto
- * facultativo, which is what `includeOptional` switches on. The fourth, Páscoa, has no entry in
+ * pontos facultativos: the source of the Easter-derived entries but one, namely Sexta-feira Santa
+ * being observed nationally and the Carnaval Monday and Tuesday ("16 de fevereiro Carnaval (ponto
+ * facultativo); 17 de fevereiro Carnaval (ponto facultativo)") and Corpus Christi being ponto
+ * facultativo, which is what `includeOptional` switches on. The exception, Páscoa, has no entry in
  * the portaria; `getHolidays` derives Easter Sunday arithmetically with the Meeus/Jones/Butcher
  * algorithm, and it never affects this function because Easter is always a Sunday.
  */

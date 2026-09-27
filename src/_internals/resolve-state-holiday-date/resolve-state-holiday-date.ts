@@ -1,7 +1,7 @@
 /** How a holiday's date is defined: a fixed day and month, or an offset in days from Easter Sunday. */
 export type HolidayDateRule = (
 	| {
-			/** Offset in days from Easter Sunday (Carnaval is -47, Corpus Christi is 60); Easter itself is 0. */
+			/** Offset in days from Easter Sunday (Carnaval Monday is -48 and Tuesday -47, Corpus Christi is 60); Easter itself is 0. */
 			easterOffset: number;
 	  }
 	| {

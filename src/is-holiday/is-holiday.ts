@@ -77,11 +77,15 @@ export type IsHolidayOptions = IsHolidayParams;
  * Lei 9.093/1995, the framework law authorizing state and municipal holidays.
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
- * pontos facultativos, the source behind three of the four Easter-derived entries: Sexta-feira
- * Santa, Carnaval and Corpus Christi. Páscoa is not one of them; the portaria never mentions
- * Easter Sunday, whose date `getHolidays` derives arithmetically with the Meeus/Jones/Butcher
- * algorithm. See the `getHolidays` JSDoc for why Sexta-feira Santa is typed `national` without a
- * law of its own.
+ * pontos facultativos, the source behind the Easter-derived entries but one: Sexta-feira Santa,
+ * both Carnaval days ("16 de fevereiro Carnaval (ponto facultativo); 17 de fevereiro Carnaval
+ * (ponto facultativo)", emitted as `"Carnaval (segunda-feira)"` and `"Carnaval (terça-feira)"`)
+ * and Corpus Christi. Páscoa is the exception; the portaria never mentions Easter Sunday, whose
+ * date `getHolidays` derives arithmetically with the Meeus/Jones/Butcher algorithm. The
+ * portaria's partial pontos facultativos (the Quarta-feira de Cinzas morning, the Dia do Servidor
+ * Público on 28 October, the 24 and 31 December afternoons) are left out. See the `getHolidays`
+ * JSDoc for why Sexta-feira Santa is typed `national` without a law of its own and for why those
+ * days are left out.
  */
 export const isHoliday = (options?: IsHolidayParams): boolean => {
 	if (isNullish(options) || typeof options !== "object") {

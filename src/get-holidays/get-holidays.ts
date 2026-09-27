@@ -91,6 +91,11 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 
 	holidays.push(
 		{
+			name: "Carnaval (segunda-feira)",
+			date: resolveStateHolidayDate(year, { easterOffset: -48 }),
+			type: "optional",
+		},
+		{
 			name: "Carnaval (terça-feira)",
 			date: resolveStateHolidayDate(year, { easterOffset: -47 }),
 			type: "optional",
@@ -223,18 +228,38 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * `STATE_HOLIDAYS`.
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
- * pontos facultativos, reissued every December. It is the source of the typing of three of the
- * four entries derived from Easter, which no federal law declares: "Paixão de Cristo (feriado
- * nacional)" (Easter minus 2, emitted as `"Sexta-feira Santa"` typed `national`), "Carnaval (ponto
- * facultativo)" (Easter minus 47) and "Corpus Christi (ponto facultativo)" (Easter plus 60), both
- * typed `optional`. Sexta-feira Santa has no statutory basis of its own: Lei 9.093/1995 art. 2º
- * places it among the *municipal* religious holidays, and it is typed `national` here because the
- * portaria observes it nationwide. The fourth entry, Easter Sunday itself, is emitted as
- * `"Páscoa"` typed `religious` and has no normative basis at all: the portaria never mentions it,
- * no federal law declares it, and its date is derived arithmetically by `resolveStateHolidayDate`
- * with the Meeus/Jones/Butcher algorithm. It is a convenience entry, listed because callers
- * computing a liturgical calendar expect it, not because it is a holiday anyone observes as a day
- * off.
+ * pontos facultativos, reissued every December. It is the source of the typing of the entries
+ * derived from Easter, which no federal law declares: "Paixão de Cristo (feriado nacional)"
+ * (Easter minus 2, emitted as `"Sexta-feira Santa"` typed `national`), the two Carnaval days,
+ * "16 de fevereiro Carnaval (ponto facultativo); 17 de fevereiro Carnaval (ponto facultativo)"
+ * (Easter minus 48 and minus 47, emitted as `"Carnaval (segunda-feira)"` and `"Carnaval
+ * (terça-feira)"`), and "Corpus Christi (ponto facultativo)" (Easter plus 60), all three typed
+ * `optional`. Every portaria lists both Carnaval days: Portaria MGI nº 8.617/2023, for 2024, reads
+ * "12 de fevereiro Carnaval (ponto facultativo); 13 de fevereiro Carnaval (ponto facultativo); 14
+ * de fevereiro Quarta-Feira de Cinzas (ponto facultativo até as 14 horas)". Sexta-feira Santa has
+ * no statutory basis of its own: Lei 9.093/1995 art. 2º places it among the *municipal* religious
+ * holidays, and it is typed `national` here because the portaria observes it nationwide. The
+ * remaining entry, Easter Sunday itself, is emitted as `"Páscoa"` typed `religious` and has no
+ * normative basis at all: the portaria never mentions it, no federal law declares it, and its date
+ * is derived arithmetically by `resolveStateHolidayDate` with the Meeus/Jones/Butcher algorithm.
+ * It is a convenience entry, listed because callers computing a liturgical calendar expect it, not
+ * because it is a holiday anyone observes as a day off.
+ *
+ * The portaria's other pontos facultativos are left out, because each is partial or concerns the
+ * servants alone: the Quarta-feira de Cinzas is one only "até as 14 horas", 28 October is the Dia
+ * do Servidor Público of Lei 8.112/1990, art. 236, a date about the servants themselves that the
+ * financial market does not skip, the 24 and 31 December entries cover only their afternoons, and
+ * the bridge days a given year adds next to a Thursday or Tuesday holiday (20 April and 5 June in
+ * 2026) are one-off decisions no rule can derive from the year.
+ * @see Based on: https://www.legisweb.com.br/legislacao/?id=453975
+ * Portaria MGI nº 8.617, de 26/12/2023 (DOU of 28/12/2023), the 2024 calendar quoted above for the
+ * two Carnaval days, as LegisWeb reproduces it; the Imprensa Nacional page of the act could not be
+ * reached.
+ * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20CMN&numero=4880
+ * Resolução CMN nº 4.880/2020, art. 6º, which FEBRABAN's bank holiday calendar follows: besides
+ * Saturdays, Sundays and the national holidays, the financial market does not count as dias úteis
+ * the "segunda-feira e terça-feira de Carnaval" and the "dia dedicado a Corpus Christi", the same
+ * three days typed `optional` here.
  */
 export function getHolidays(year: number): Holiday[];
 /**

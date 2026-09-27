@@ -12,10 +12,10 @@ import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-bu
 import { differenceInBusinessDays } from "./difference-in-business-days";
 
 describe("differenceInBusinessDays", () => {
-	it("should match the date-fns differenceInBusinessDays example (2014-07-20 minus 2014-01-10 is 136 weekdays, https://date-fns.org/docs/differenceInBusinessDays) minus the 5 Brazilian holidays that fall on a weekday in between (Carnaval, Sexta-feira Santa, Tiradentes, Dia do trabalhador and Corpus Christi)", () => {
+	it("should match the date-fns differenceInBusinessDays example (2014-07-20 minus 2014-01-10 is 136 weekdays, https://date-fns.org/docs/differenceInBusinessDays) minus the 6 Brazilian holidays that fall on a weekday in between (Carnaval Monday 2014-03-03 and Tuesday 2014-03-04, Sexta-feira Santa, Tiradentes, Dia do trabalhador and Corpus Christi)", () => {
 		const result = differenceInBusinessDays(new Date(2014, 6, 20), new Date(2014, 0, 10));
 
-		expect(result).toBe(131);
+		expect(result).toBe(130);
 	});
 
 	it("should return 0 for the same calendar day", () => {
@@ -87,11 +87,12 @@ describe("differenceInBusinessDays", () => {
 	});
 
 	describe("includeOptional", () => {
-		it("should skip Carnaval 2024-02-13 by default (includeOptional defaults to true)", () => {
-			expect(differenceInBusinessDays(new Date(2024, 1, 14), new Date(2024, 1, 12))).toBe(1);
+		it("should skip both Carnaval days, Mon 2024-02-12 and Tue 2024-02-13, by default (includeOptional defaults to true)", () => {
+			expect(differenceInBusinessDays(new Date(2024, 1, 14), new Date(2024, 1, 12))).toBe(0);
+			expect(differenceInBusinessDays(new Date(2024, 1, 14), new Date(2024, 1, 9))).toBe(1);
 		});
 
-		it("should count Carnaval 2024-02-13 as a business day when includeOptional is false", () => {
+		it("should count both Carnaval days, Mon 2024-02-12 and Tue 2024-02-13, as business days when includeOptional is false", () => {
 			const result = differenceInBusinessDays(new Date(2024, 1, 14), new Date(2024, 1, 12), {
 				includeOptional: false,
 			});

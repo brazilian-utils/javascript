@@ -1857,6 +1857,7 @@ Retorna os feriados brasileiros de um ano: os nacionais e, com um `stateCode`, t
 
 - Cada feriado é um `Holiday` cujo `type` (`HolidayType`) é `"national"`, `"state"`, `"optional"` ou `"religious"`. Os feriados vêm ordenados por data.
 - O "Dia da Consciência Negra", 20/11, é nacional a partir de 2024.
+- As entradas `"optional"` são os pontos facultativos de dia inteiro do calendário federal (Portaria MGI): a segunda e a terça-feira de Carnaval e o Corpus Christi, os mesmos três dias que o mercado financeiro não conta como úteis (Resolução CMN nº 4.880/2020). Os parciais ficam de fora: a Quarta-feira de Cinzas (até as 14h), 28/10 (Dia do Servidor Público) e as tardes de 24/12 e 31/12.
 - As regras por estado (o deslocamento para domingo em SC, o Corpus Christi no DF, datas que deixaram de ser feriado) seguem a lei de cada estado; veja a fonte para a lista.
 - Um `stateCode` desconhecido ou que não é string é ignorado e só os feriados nacionais são retornados.
 - Retorna `[]` quando o ano não é um inteiro de 1900 a 2099, ou quando o argumento não é nem número nem objeto.
@@ -1868,6 +1869,7 @@ import { getHolidays } from '@brazilian-utils/brazilian-utils';
 getHolidays(2024);
 // [
 //   { name: 'Ano novo', date: Date('2024-01-01'), type: 'national' },
+//   { name: 'Carnaval (segunda-feira)', date: Date('2024-02-12'), type: 'optional' },
 //   { name: 'Carnaval (terça-feira)', date: Date('2024-02-13'), type: 'optional' },
 //   { name: 'Sexta-feira Santa', date: Date('2024-03-29'), type: 'national' },
 //   { name: 'Páscoa', date: Date('2024-03-31'), type: 'religious' },
@@ -1902,7 +1904,7 @@ isHoliday(); // false
 
 Verifica se uma data é dia útil no Brasil: não é sábado, domingo nem um feriado que `getHolidays` lista para o seu dia de calendário local.
 
-- **Opções** (`BusinessDayOptions`, as mesmas de todos os utilitários de dias úteis): `includeOptional` (padrão `true`) também conta os feriados `"optional"`, Carnaval e Corpus Christi, como dias não úteis; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também conta os feriados daquele estado.
+- **Opções** (`BusinessDayOptions`, as mesmas de todos os utilitários de dias úteis): `includeOptional` (padrão `true`) também conta os feriados `"optional"`, a segunda e a terça-feira de Carnaval e o Corpus Christi, como dias não úteis; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também conta os feriados daquele estado.
 - Com `includeSaturday` desligado, é a contagem de segunda a sexta usada por bancos e tribunais. Ligado, é a contagem trabalhista do prazo de pagamento do salário do art. 459, § 1º, da CLT, a que a fiscalização do trabalho lê pela Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
 - Com `includeSaturday` ligado, o domingo e os feriados continuam excluídos, então um feriado que cai em um sábado continua não sendo dia útil.
 - O trecho "inclusive o municipal" dessa regra não é coberto: `getHolidays` tem apenas feriados nacionais e estaduais, então um feriado municipal é contado aqui como dia útil comum. Retire os feriados municipais por conta própria quando a contagem precisar ser exata para um município.
@@ -1917,7 +1919,8 @@ isBusinessDay(new Date(2024, 0, 6)); // false (sábado)
 isBusinessDay(new Date(2024, 0, 6), { includeSaturday: true }); // true (contagem trabalhista)
 isBusinessDay(new Date(2024, 8, 7), { includeSaturday: true }); // false (Independência, feriado em um sábado)
 isBusinessDay(new Date(2024, 0, 7), { includeSaturday: true }); // false (o domingo nunca é incluído)
-isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, feriado facultativo, conta por padrão)
+isBusinessDay(new Date(2024, 1, 12)); // false (segunda-feira de Carnaval, feriado facultativo, conta por padrão)
+isBusinessDay(new Date(2024, 1, 13)); // false (terça-feira de Carnaval, feriado facultativo, conta por padrão)
 isBusinessDay(new Date(2024, 1, 13), { includeOptional: false }); // true
 isBusinessDay(new Date(2024, 6, 9), { stateCode: 'SP' }); // false (Revolução Constitucionalista)
 isBusinessDay(new Date(2024, 6, 9)); // true (feriado estadual ignorado sem stateCode)
@@ -1928,7 +1931,7 @@ isBusinessDay(new Date('not a date')); // false
 
 Soma dias úteis a uma data, pulando sábados, domingos e os feriados que `isBusinessDay` considera. Assinatura: `addBusinessDays(date, amount, options?)`, a mesma do date-fns.
 
-- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula Carnaval e Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
+- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula a segunda e a terça-feira de Carnaval e o Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
 - Retorna um novo `Date`, com o horário preservado; `date` não é alterado.
 - `amount` igual a `0` retorna a mesma data, mesmo em fim de semana ou feriado. Um `amount` negativo anda para trás.
 - Retorna `null` quando `date` é inválido, `amount` não é um inteiro finito, `stateCode` não é string ou o resultado sai dos anos de 1900 a 2099.
@@ -1975,7 +1978,7 @@ import { addBusinessDays, subBusinessDays } from '@brazilian-utils/brazilian-uti
 
 // n-ésimo dia útil do mês: some n a partir do último dia do mês anterior
 addBusinessDays(new Date(2024, 0, 0), 5); // Date, 2024-01-08 00:00 (5º dia útil de janeiro de 2024)
-addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-15 00:00 (10º de fevereiro de 2024, Carnaval pulado)
+addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-16 00:00 (10º de fevereiro de 2024, segunda e terça-feira de Carnaval puladas)
 
 // último dia útil do mês: subtraia 1 a partir do primeiro dia do mês seguinte
 subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 é Sexta-feira Santa, seguida de um fim de semana)
@@ -1995,7 +1998,7 @@ subBusinessDays(new Date(2024, 8, 1), 1, { includeSaturday: true }); // Date, 20
 
 Conta os dias úteis entre duas datas. Assinatura: `differenceInBusinessDays(laterDate, earlierDate, options?)`, a mesma do date-fns.
 
-- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula Carnaval e Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
+- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula a segunda e a terça-feira de Carnaval e o Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
 - Conta `earlierDate` quando é dia útil e cada dia útil estritamente entre as duas datas; `laterDate` nunca é contado. O horário é ignorado.
 - O resultado é negativo quando `laterDate` é anterior a `earlierDate`, e `0` no mesmo dia de calendário.
 - Retorna `null` quando uma das datas não é um `Date` válido ou está fora dos anos de 1900 a 2099, ou quando `stateCode` não é string.

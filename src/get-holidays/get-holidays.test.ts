@@ -22,6 +22,10 @@ function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
 	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
 }
 
+function carnaval(year: number): Holiday[] {
+	return getHolidays(year).filter((holiday) => holiday.name.startsWith("Carnaval"));
+}
+
 describe("getHolidays", () => {
 	test("should return fixed holidays for the given year", () => {
 		const year = 2024;
@@ -61,6 +65,7 @@ describe("getHolidays", () => {
 		const easterDate = new Date(2031, 3, 13);
 		const expectedHolidays = [
 			{ name: "Páscoa", date: easterDate, type: "religious" },
+			{ name: "Carnaval (segunda-feira)", date: new Date(2031, 1, 24), type: "optional" },
 			{ name: "Carnaval (terça-feira)", date: new Date(2031, 1, 25), type: "optional" },
 			{ name: "Sexta-feira Santa", date: new Date(2031, 3, 11), type: "national" },
 			{ name: "Corpus Christi", date: new Date(2031, 5, 12), type: "optional" },
@@ -71,11 +76,34 @@ describe("getHolidays", () => {
 		}
 	});
 
-	test("should return 13 holidays for 2024: 9 fixed holidays (including Consciência Negra) plus 4 Easter-related holidays", () => {
+	test("should return 14 holidays for 2024: 9 fixed holidays (including Consciência Negra) plus 5 Easter-related holidays", () => {
 		const year = 2024;
 		const holidays = getHolidays(year);
 
-		expect(holidays.length).toBe(13);
+		expect(holidays.length).toBe(14);
+	});
+
+	test("should list both Carnaval days as optional, the Monday at Easter minus 48 and the Tuesday at Easter minus 47, as every federal portaria does (Portaria MGI nº 8.617/2023: 12 and 13 February 2024; Portaria MGI nº 11.460/2025: 16 and 17 February 2026)", () => {
+		expect(carnaval(2024)).toEqual([
+			{ name: "Carnaval (segunda-feira)", date: new Date(2024, 1, 12), type: "optional" },
+			{ name: "Carnaval (terça-feira)", date: new Date(2024, 1, 13), type: "optional" },
+		]);
+		expect(carnaval(2026)).toEqual([
+			{ name: "Carnaval (segunda-feira)", date: new Date(2026, 1, 16), type: "optional" },
+			{ name: "Carnaval (terça-feira)", date: new Date(2026, 1, 17), type: "optional" },
+		]);
+	});
+
+	test("should leave out the partial pontos facultativos of the federal calendar: Quarta-feira de Cinzas (until 14h), 28 October (Dia do Servidor Público) and the 24 and 31 December afternoons", () => {
+		const days = getHolidays(2024).map((holiday) => [
+			holiday.date.getMonth(),
+			holiday.date.getDate(),
+		]);
+
+		expect(days).not.toContainEqual([1, 14]);
+		expect(days).not.toContainEqual([9, 28]);
+		expect(days).not.toContainEqual([11, 24]);
+		expect(days).not.toContainEqual([11, 31]);
 	});
 
 	test("should calculate Easter Sunday correctly across widely spaced years (independently verified via the Anonymous Gregorian algorithm: 1900-04-15, 1954-04-18, 2075-04-07)", () => {

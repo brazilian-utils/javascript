@@ -110,6 +110,16 @@ describe("isBusinessDay", () => {
 			expect(isBusinessDay(new Date(2024, 1, 13, 12), { includeOptional: false })).toBe(true);
 		});
 
+		it("should return false for Carnaval Monday by default and true when includeOptional is false, the ponto facultativo of Portaria MGI nº 8.617/2023 (2024-02-12) and Portaria MGI nº 11.460/2025 (2026-02-16), and a non-business day of Resolução CMN nº 4.880/2020, art. 6º", () => {
+			expect(isBusinessDay(new Date(2024, 1, 12, 12))).toBe(false);
+			expect(isBusinessDay(new Date(2024, 1, 12, 12), { includeOptional: false })).toBe(true);
+			expect(isBusinessDay(new Date(2026, 1, 16, 12))).toBe(false);
+		});
+
+		it("should keep Quarta-feira de Cinzas 2024-02-14 a business day, a ponto facultativo only until 14h", () => {
+			expect(isBusinessDay(new Date(2024, 1, 14, 12))).toBe(true);
+		});
+
 		it("should still return false for a national (non-optional) holiday when includeOptional is false", () => {
 			expect(isBusinessDay(new Date(2024, 0, 1, 12), { includeOptional: false })).toBe(false);
 		});
