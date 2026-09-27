@@ -1105,6 +1105,7 @@ Fonte: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/a
 Valida um RENAVAM (Registro Nacional de Veículos Automotores). Aceita o formato antigo (9 dígitos) e o formato novo (11 dígitos).
 
 - Espaços, pontos e hífens são ignorados; qualquer outro caractere invalida o valor.
+- O dígito verificador é o da Portaria DENATRAN nº 27/2013, art. 1º: "10 dígitos e um dígito verificador, calculado através do módulo 11, peso 9", lido como os pesos 3, 2, 9, 8, 7, 6, 5, 4, 3 e 2. A portaria não escreve os pesos um a um nem diz o que fazer com resto 0, 1 ou 10, o que segue o [validation-br](https://github.com/klawdyo/validation-br/blob/main/src/renavam.ts) e o [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/renavam.py); completar com zeros um código de 9 dígitos até 11 é prática de mercado.
 
 ```javascript
 import { isValidRenavam } from '@brazilian-utils/brazilian-utils';
@@ -1116,6 +1117,8 @@ isValidRenavam('12345678901'); // false (checksum inválido)
 isValidRenavam('00000000000'); // false (dígitos repetidos)
 isValidRenavam('ab00639884962'); // false (letras são rejeitadas)
 ```
+
+Fonte: [Portaria DENATRAN nº 27/2013](https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2013/portaria0272013.pdf).
 
 ### generateRenavam
 
