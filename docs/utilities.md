@@ -1211,9 +1211,10 @@ Source: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119)
 Check if a Brazilian bank account is valid. The `bankCode` must be a Banco Central STR participant (the list `getBankByCode` uses).
 
 - **Params** (`IsValidBankAccountParams`, all strings): `bankCode` (3 digits), `agency` (1-5 digits), `account` (1-13 digits) and `digit` (1-2 characters, or `X` for Banco do Brasil and `P` for Bradesco).
-- A listed bank is validated in one of three ways: by its published check digit algorithm, by structure only, or by a generic mod10/mod11 fallback.
+- A listed bank is validated in one of three ways: by a check digit rule, by structure only, or by a generic mod10/mod11 fallback.
+- No act of the Banco Central, of another government body or of Febraban sets these check digit rules. Those of banks 001, 033, 041, 104, 237, 341, 399 and 745 come from the "Regras de Validação de dígito verificador de agência e conta corrente" compendium of Icatu Seguros, a private compilation of each bank's rule. Nubank publishes no rule: its Verhoeff digit is the one open source validators derived from real accounts.
 
-Banks validated by their published check digit algorithm:
+Banks validated by a check digit rule:
 
 | Bank | Code | Agency | Account | Notes |
 | --- | --- | --- | --- | --- |
@@ -1222,12 +1223,12 @@ Banks validated by their published check digit algorithm:
 | Banrisul | `041` | 4 digits | 9 digits | weights `3,2,4,7,6,5,4,3,2`; remainder 0 gives `0` and remainder 1 gives `6`; `account` is tipo (2 digits) + conta (7 digits) |
 | Caixa Econômica Federal | `104` | 4 digits | 11 digits | mod11 over agency + account; `account` is operação (3 digits) + conta (8 digits) |
 | Bradesco | `237` | 4 digits | 7 digits | mod11 with weights 2..7 cycling from the right; remainder 0 gives `0` and remainder 1 gives `"P"` |
-| Nubank | `260` | 4 digits | 5-13 digits | Verhoeff check digit over the account, leading zeros dropped |
+| Nubank | `260` | 4 digits | 5-13 digits | Verhoeff check digit over the account, leading zeros dropped (no published rule; see above) |
 | Itaú Unibanco | `341` | 4 digits | 5 digits | mod10 over agency + account |
 | HSBC / Kirton Bank | `399` | 4 digits | 6 digits | weights `8,9,2,3,4,5,6,7,8,9` over agency + account; remainder 10 gives `0` |
 | Citibank | `745` | 4 digits | 10 digits | weights `11..2` over the account; remainder 0 or 1 gives `0` |
 
-Banks validated by structure only (a single numeric `digit` is enough):
+Banks validated by structure only, since no check digit rule of theirs is known (a single numeric `digit` is enough):
 
 | Bank | Code | | Bank | Code |
 | --- | --- | --- | --- | --- |
@@ -1310,7 +1311,7 @@ isValidBankAccount({
 }); // true (Banco ABC Brasil, generic mod10 fallback)
 ```
 
-Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv), [Regras de Validação de dígito verificador](https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf).
+Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv) (official). Based on: the Icatu Seguros compendium [Regras de Validação de dígito verificador de agência e conta corrente](https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf) and, for Nubank, [bran_checker](https://github.com/Xerpa/bran_checker/tree/master/lib/banks).
 
 ### getBanks
 

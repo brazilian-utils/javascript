@@ -22,7 +22,7 @@ const LISTED_CODES = new Set(
 	),
 );
 
-/** The bank codes `isValidBankAccount` validates with a published check digit algorithm. */
+/** The bank codes `isValidBankAccount` validates with a check digit rule. */
 const ALGORITHM_BANK_CODES = ["001", "033", "041", "104", "237", "260", "341", "399", "745"];
 
 const CHECK_CHARACTERS = [...Array.from({ length: 10 }, (_, digit) => String(digit)), "X", "P"];

@@ -252,12 +252,17 @@ const sanitizeCheckDigit = (value: string): string =>
  * Validates a Brazilian bank account. The bank code must belong to the Banco Central do Brasil
  * STR participants list, otherwise the account is rejected.
  *
- * Banks validated by their published check digit algorithm:
+ * Banks validated by a check digit rule:
  * Banco do Brasil (001), Santander (033), Banrisul (041), Caixa Econômica Federal (104),
- * Bradesco (237), Nubank (260, Verhoeff), Itaú Unibanco (341), HSBC/Kirton (399) and
- * Citibank (745).
+ * Bradesco (237), Itaú Unibanco (341), HSBC/Kirton (399) and Citibank (745), with the rules
+ * of the "Regras de Validação de dígito verificador de agência e conta corrente" compendium
+ * of Icatu Seguros, and Nubank (260), with a Verhoeff check digit. No act of the Banco
+ * Central, of another government body or of Febraban sets any of these rules: the compendium
+ * is a private compilation of the rules of each bank, and Nubank publishes no rule at all;
+ * its Verhoeff digit is the one the open source validators listed below derived from real
+ * accounts.
  *
- * Banks validated by structure only, because they publish no check digit rule:
+ * Banks validated by structure only, because no check digit rule of theirs is known:
  * Inter (077), Ailos (085), XP (102), Unicred (136), Stone (197), BTG Pactual (208),
  * Original (212), PagBank (290), BMG (318), Mercado Pago (323), C6 (336), PicPay (380),
  * Cora (403), Pan (623), BV (655), Daycoval (707), Sicredi (748) and Sicoob (756).

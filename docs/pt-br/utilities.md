@@ -1211,9 +1211,10 @@ Fonte: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119).
 Valida uma conta bancária brasileira. O `bankCode` precisa ser um participante do STR do Banco Central (a lista que `getBankByCode` usa).
 
 - **Parâmetros** (`IsValidBankAccountParams`, todos strings): `bankCode` (3 dígitos), `agency` (1-5 dígitos), `account` (1-13 dígitos) e `digit` (1-2 caracteres, ou `X` para o Banco do Brasil e `P` para o Bradesco).
-- Um banco da lista é validado de uma de três formas: pelo algoritmo de dígito verificador publicado, apenas pela estrutura ou por um fallback genérico mod10/mod11.
+- Um banco da lista é validado de uma de três formas: por uma regra de dígito verificador, apenas pela estrutura ou por um fallback genérico mod10/mod11.
+- Nenhum ato do Banco Central, de outro órgão de governo ou da Febraban define essas regras de dígito verificador. As dos bancos 001, 033, 041, 104, 237, 341, 399 e 745 vêm do compêndio "Regras de Validação de dígito verificador de agência e conta corrente" da Icatu Seguros, uma compilação privada da regra de cada banco. O Nubank não publica regra: o dígito de Verhoeff é o que validadores de código aberto deduziram de contas reais.
 
-Bancos validados pelo algoritmo de dígito verificador publicado:
+Bancos validados por uma regra de dígito verificador:
 
 | Banco | Código | Agência | Conta | Observações |
 | --- | --- | --- | --- | --- |
@@ -1222,12 +1223,12 @@ Bancos validados pelo algoritmo de dígito verificador publicado:
 | Banrisul | `041` | 4 dígitos | 9 dígitos | pesos `3,2,4,7,6,5,4,3,2`; resto 0 gera `0` e resto 1 gera `6`; `account` é tipo (2 dígitos) + conta (7 dígitos) |
 | Caixa Econômica Federal | `104` | 4 dígitos | 11 dígitos | mod11 sobre agência + conta; `account` é operação (3 dígitos) + conta (8 dígitos) |
 | Bradesco | `237` | 4 dígitos | 7 dígitos | mod11 com pesos 2..7 ciclando da direita para a esquerda; resto 0 gera `0` e resto 1 gera `"P"` |
-| Nubank | `260` | 4 dígitos | 5-13 dígitos | dígito de Verhoeff sobre a conta, ignorando zeros à esquerda |
+| Nubank | `260` | 4 dígitos | 5-13 dígitos | dígito de Verhoeff sobre a conta, ignorando zeros à esquerda (sem regra publicada; veja acima) |
 | Itaú Unibanco | `341` | 4 dígitos | 5 dígitos | mod10 sobre agência + conta |
 | HSBC / Kirton Bank | `399` | 4 dígitos | 6 dígitos | pesos `8,9,2,3,4,5,6,7,8,9` sobre agência + conta; resto 10 gera `0` |
 | Citibank | `745` | 4 dígitos | 10 dígitos | pesos `11..2` sobre a conta; resto 0 ou 1 gera `0` |
 
-Bancos validados apenas pela estrutura (um único `digit` numérico basta):
+Bancos validados apenas pela estrutura, já que não se conhece regra de dígito verificador deles (um único `digit` numérico basta):
 
 | Banco | Código | | Banco | Código |
 | --- | --- | --- | --- | --- |
@@ -1310,7 +1311,7 @@ isValidBankAccount({
 }); // true (Banco ABC Brasil, fallback genérico mod10)
 ```
 
-Fonte: [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv), [Regras de Validação de dígito verificador](https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf).
+Fonte: [lista de participantes do STR](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv) (oficial). Baseado em: o compêndio da Icatu Seguros [Regras de Validação de dígito verificador de agência e conta corrente](https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf) e, para o Nubank, o [bran_checker](https://github.com/Xerpa/bran_checker/tree/master/lib/banks).
 
 ### getBanks
 
