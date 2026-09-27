@@ -269,6 +269,19 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Lei AP nº 2.213, de 11/07/2017 (DOE nº 6479, de 11/07/2017), Dia de Cabralzinho (15/05), listed
  * from 2018, the first 15 May after the law: "Fica instituído como Feriado Estadual, o dia 15 de
  * maio "Dia de Cabralzinho"". Missing up to 2.4.0.
+ * @see Official: https://www.al.ap.leg.br/ver_texto_lei.php?iddocumento=35896
+ * Lei AP nº 1.696, de 09/07/2012 (DOE nº 5264, de 10/07/2012), Dia de São Tiago (25/07): "Fica
+ * instituído como Feriado Estadual, o dia 25 de julho, "Dia de São Tiago"", in force on its
+ * publication, so listed from 2012. The ALAP record notes an "Ação Direta de Inconstitucionalidade
+ * nº 4820/2012" against it, whose outcome could not be checked (the STF portal refuses the
+ * connection).
+ * @see Official: https://www.al.ap.leg.br/ver_texto_lei.php?iddocumento=96475
+ * Lei AP nº 2.430, de 23/07/2019 (DOE nº 6965, de 23/07/2019), which keeps 25 July only as a
+ * "data comemorativa" and, by its art. 3º, "Fica revogada a Lei Estadual nº 1.696, de 9 de julho
+ * de 2012", in force on its publication two days before that year's date, so the São Tiago entry
+ * stops after 2018. Two other Amapá dates are not holidays: 05/10, whose Lei AP nº 1.204/2008
+ * says the commemoration "não inclui dispensa de trabalho", and 25/11, which Lei AP nº 393/1997
+ * makes a feriado only "para as pessoas que sejam doadoras de sangue voluntárias e permanentes".
  * @see Official: https://silegis.al.ap.leg.br/proposicaopdf/2CEatualizadaeconsolidadaateEC071comSumario.pdf
  * Constituição Estadual do AP, de 20/12/1991, art. 355, Criação do Território Federal do Amapá
  * (13/09), listed from 1992: "O dia 13 de Setembro, data magna do Amapá, é feriado em todo o
@@ -533,6 +546,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	AP: [
 		{ name: "Dia de São José", day: 19, month: 3, since: 2003 },
 		{ name: "Dia de Cabralzinho", day: 15, month: 5, since: 2018 },
+		{ name: "Dia de São Tiago", day: 25, month: 7, since: 2012, until: 2019 },
 		{ name: "Criação do Território Federal do Amapá", day: 13, month: 9, since: 1992 },
 		{
 			name: "Dia Estadual da Consciência Negra",
