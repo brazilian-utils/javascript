@@ -480,7 +480,7 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "0280000006", stateCode: "MS" })).toBe(false);
 		});
 
-		test("should return false when the IE does not start with 28", () => {
+		test("should return false when the IE does not start with 28 or 50", () => {
 			expect(isValidIe({ value: "853511942", stateCode: "MS" })).toBe(false);
 		});
 	});

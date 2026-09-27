@@ -49,6 +49,10 @@ export const GO_SPECIAL_RANGE_END = 10_119_997;
 
 export const MA_PREFIXES = ["12"];
 
+/**
+ * 28 and 50 from the SINTEGRA MS page (2024) and a SEFAZ-MS e-CCE communiqué; Resolução/SEF
+ * nº 1.344/1999, the only norm, gives 28 alone.
+ */
 export const MS_PREFIXES = ["28", "50"];
 
 /**

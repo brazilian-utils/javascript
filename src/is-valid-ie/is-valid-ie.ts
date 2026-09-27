@@ -518,9 +518,12 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * - MG: the first check digit is the sum of the product digits subtracted from "a primeira dezena
  *   exata imediatamente superior". A sum that is already a multiple of ten is read as its own
  *   ten, so the digit is 0 rather than 10, the only reading that yields a single digit.
- * - MS: the prefixes are 28, the one the SINTEGRA page gives ("o primeiro dígito será sempre
- *   representado pelo número 2", "o segundo dígito será sempre representado pelo número 8"),
- *   and 50, which SEFAZ-MS issues under its e-CCE register, with the same rule.
+ * - MS: the prefixes are 28 and 50, the two the SINTEGRA page gives (updated 19/04/2024: "Os dois
+ *   primeiros dígitos serão sempre representados pelos números "28" ou "50""); a SEFAZ-MS
+ *   communiqué on its e-CCE register says new company registrations start with 50. The only norm,
+ *   Resolução/SEF nº 1.344/1999, art. 1º, still gives 28 alone ("o primeiro dígito será sempre
+ *   representado pelo número 2", "o segundo dígito será sempre representado pelo número 8"); no
+ *   act amending it could be found. The check digit rule is the same in all of them.
  * - MT: 9 digits, the form Portaria SEFAZ-MT nº 59/2025, art. 8º, § 1º prescribes (as did
  *   art. 6º of Portaria nº 5/2014, which it revoked), or the 11 digits the SINTEGRA page prints.
  *   No norm fixes the prefix. No official text gives the check digit rule of the 9 digit form:
@@ -628,11 +631,16 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * D1: "Subtrai-se o resultado da soma do item anterior, da primeira dezena exata imediatamente
  * superior"; a sum that is a multiple of ten gives 0 (see the MG note above).
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MS.html
- * "I – o primeiro dígito será sempre representado pelo número 2; II - o segundo dígito será
- * sempre representado pelo número 8": the prefix 28.
+ * Updated 19/04/2024: "Os dois primeiros dígitos serão sempre representados pelos números "28" ou
+ * "50"", then the formula of Resolução/SEF nº 1.344/1999, art. 2º.
+ * @see Official: https://aacpdappls.net.ms.gov.br/appls/legislacao/serc/legato.nsf/e5c724b4c70cb1da04256b1f005348a8/54d078bcf5f3198a04256ad60073bf8b?OpenDocument
+ * Resolução/SEF nº 1.344/1999 (DOE 18/05/1999), art. 1º: "I – o primeiro dígito será sempre
+ * representado pelo número 2; II - o segundo dígito será sempre representado pelo número 8": the
+ * prefix 28 alone; art. 2º: the check digit rule.
  * @see Based on: https://crcms.org.br/sefaz-ms-vai-adotar-novo-sistema-de-cadastro-fiscal-o-e-cce-veja-o-que-vai-mudar-2/
- * CRC-MS relaying SEFAZ-MS on the e-CCE register: registrations start with 28 or 50, with no
- * range reserved to a registration type. No SEFAZ-MS page carrying that text could be reached.
+ * CRC-MS (03/09/2025) relaying a SEFAZ-MS communiqué on the e-CCE register: new company (CCIS)
+ * registrations "será iniciada com o dígito 50", those of the Cadastro da Agropecuária keep 28,
+ * with no range reserved to a registration type. No SEFAZ-MS page carrying that text was found.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
  * "FORMATO: NNNNNNNNNN-D", weights 3, 2 and 9 down to 2, example "0013000001-9": the 11 digit form.
  * @see Official: https://app1.sefaz.mt.gov.br/Sistema/Legislacao/legislacaotribut.nsf/173e6c0d2202fdcb03258b1700659f1e/0d06efc6c2fa7bc303258c6c004c4788
