@@ -92,6 +92,7 @@ export {
 	GetAddressInfoByCepValidationError,
 	getAddressInfoByCep,
 } from "./get-address-info-by-cep/get-address-info-by-cep";
+export { getAreaCodeByMunicipalityCode } from "./get-area-code-by-municipality-code/get-area-code-by-municipality-code";
 export { type AreaCodeInfo, getAreaCodeInfo } from "./get-area-code-info/get-area-code-info";
 export { getAreaCodesByState } from "./get-area-codes-by-state/get-area-codes-by-state";
 export { getBankByCode } from "./get-bank-by-code/get-bank-by-code";
@@ -153,6 +154,7 @@ export {
 	getLegalNaturesByCategory,
 } from "./get-legal-natures-by-category/get-legal-natures-by-category";
 export { getMunicipalities } from "./get-municipalities/get-municipalities";
+export { getMunicipalitiesByAreaCode } from "./get-municipalities-by-area-code/get-municipalities-by-area-code";
 export {
 	type GetMunicipalityByCodeParams,
 	type GetMunicipalityByNameParams,

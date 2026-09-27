@@ -20,6 +20,7 @@ const run = (command: string, args: string[]): Promise<number | null> =>
 	});
 
 const generators = [
+	"area-codes.ts",
 	"banks.ts",
 	"cbo.ts",
 	"cest.ts",
@@ -36,6 +37,7 @@ const generators = [
 ];
 
 const generatedFiles = [
+	"./src/_internals/constants/municipality-area-codes.ts",
 	"./src/_internals/constants/banks.ts",
 	"./src/_internals/constants/cbo-descriptions.ts",
 	"./src/_internals/constants/cbo.ts",

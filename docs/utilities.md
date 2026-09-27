@@ -972,6 +972,25 @@ isValidServicePhone('11987654321'); // false (geographic number)
 
 Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel SUP page](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
 
+### getAreaCodeByMunicipalityCode
+
+Get the DDD (area code) a Brazilian municipality dials, given its 7-digit IBGE code, from the Anatel table of the Códigos Nacionais in force.
+
+- Accepts the code the way `getMunicipalityByCode` does: a string (spaces and hyphens ignored) or a non-negative integer.
+- Returns the DDD as a number, or `null` when the code is not a municipality. Every one of the 5,571 municipalities has exactly one DDD.
+- A DDD mostly follows state lines. The exceptions: 61 also covers 12 municipalities of Goiás around Brasília, and Porto União (SC) dials 42, Rio Negro (PR) 47 and Barracão (PR) 49.
+
+```javascript
+import { getAreaCodeByMunicipalityCode } from '@brazilian-utils/brazilian-utils';
+
+getAreaCodeByMunicipalityCode('3550308'); // 11 (São Paulo/SP)
+getAreaCodeByMunicipalityCode(3304557); // 21 (Rio de Janeiro/RJ)
+getAreaCodeByMunicipalityCode('4122305'); // 47 (Rio Negro/PR)
+getAreaCodeByMunicipalityCode('0000000'); // null
+```
+
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
 ### getAreaCodeInfo
 
 Get the state and region a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração. Accepts a string or a non-negative integer.
@@ -1019,6 +1038,25 @@ getAreaCodesByState('XX'); // []
 ```
 
 Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
+### getMunicipalitiesByAreaCode
+
+List the Brazilian municipalities that dial a given DDD (area code), from the Anatel table of the Códigos Nacionais in force.
+
+- Accepts the DDD the way `getAreaCodeInfo` does: a string (parentheses, spaces and hyphens allowed) or a non-negative integer.
+- Returns an array of `{ code, name, stateCode }` (`Municipality`): the seat state's municipalities first, then those of the other state the DDD crosses into, each state's sorted by name. Returns `[]` when the DDD is not in use.
+
+```javascript
+import { getMunicipalitiesByAreaCode } from '@brazilian-utils/brazilian-utils';
+
+getMunicipalitiesByAreaCode(68).length; // 22 (every municipality of Acre)
+getMunicipalitiesByAreaCode('(61)').length; // 13 (Brasília and 12 municipalities of Goiás)
+getMunicipalitiesByAreaCode('47').at(-1); // { code: '4122305', name: 'Rio Negro', stateCode: 'PR' }
+getMunicipalitiesByAreaCode('20'); // []
+```
+
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
 
 ## License plate
 

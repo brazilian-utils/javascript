@@ -972,6 +972,25 @@ isValidServicePhone('11987654321'); // false (número geográfico)
 
 Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [página de SUP da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
 
+### getAreaCodeByMunicipalityCode
+
+Retorna o DDD (código de área) de um município brasileiro a partir do código IBGE de 7 dígitos, segundo a tabela da Anatel dos Códigos Nacionais em vigor.
+
+- Aceita o código como o `getMunicipalityByCode`: string (ignorando espaços e hífens) ou número inteiro não negativo.
+- Retorna o DDD como número, ou `null` quando o código não é de um município. Cada um dos 5.571 municípios tem exatamente um DDD.
+- O DDD quase sempre segue a divisa dos estados. As exceções: o 61 também cobre 12 municípios de Goiás no entorno de Brasília, e Porto União (SC) usa o 42, Rio Negro (PR) o 47 e Barracão (PR) o 49.
+
+```javascript
+import { getAreaCodeByMunicipalityCode } from '@brazilian-utils/brazilian-utils';
+
+getAreaCodeByMunicipalityCode('3550308'); // 11 (São Paulo/SP)
+getAreaCodeByMunicipalityCode(3304557); // 21 (Rio de Janeiro/RJ)
+getAreaCodeByMunicipalityCode('4122305'); // 47 (Rio Negro/PR)
+getAreaCodeByMunicipalityCode('0000000'); // null
+```
+
+Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [tabela da Anatel dos Códigos Nacionais por município (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
 ### getAreaCodeInfo
 
 Retorna o estado e a região a que um DDD brasileiro (código de área) pertence, dentre os 67 DDDs em uso no Plano Geral de Numeração da Anatel. Aceita string ou número inteiro não negativo.
@@ -1019,6 +1038,25 @@ getAreaCodesByState('XX'); // []
 ```
 
 Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [tabela da Anatel dos Códigos Nacionais por município (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
+### getMunicipalitiesByAreaCode
+
+Lista os municípios brasileiros que usam um DDD (código de área), segundo a tabela da Anatel dos Códigos Nacionais em vigor.
+
+- Aceita o DDD como o `getAreaCodeInfo`: string (com parênteses, espaços e hífens) ou número inteiro não negativo.
+- Retorna um array de `{ code, name, stateCode }` (`Municipality`): primeiro os municípios do estado sede, depois os do outro estado em que o DDD entra, cada estado em ordem alfabética. Retorna `[]` quando o DDD não está em uso.
+
+```javascript
+import { getMunicipalitiesByAreaCode } from '@brazilian-utils/brazilian-utils';
+
+getMunicipalitiesByAreaCode(68).length; // 22 (todos os municípios do Acre)
+getMunicipalitiesByAreaCode('(61)').length; // 13 (Brasília e 12 municípios de Goiás)
+getMunicipalitiesByAreaCode('47').at(-1); // { code: '4122305', name: 'Rio Negro', stateCode: 'PR' }
+getMunicipalitiesByAreaCode('20'); // []
+```
+
+Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Códigos Nacionais da Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [tabela da Anatel dos Códigos Nacionais por município (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
 
 ## Placa de veículo
 

@@ -69,6 +69,7 @@ A few utils embed an official dataset and weigh far more than everything else co
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
 | `getCid10` | CID-10 V2008 categories and subcategories plus the SIM `U07` codes, with the DATASUS descriptions | 988.3 KB | 123.6 KB |
+| `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 IBGE municipalities, with the DDD of each (Anatel) | 165.0 - 167.8 KB | 52.1 - 52.8 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 153.6 - 154.0 KB | 49.4 - 49.7 KB |
 | `getCities` | 5571 IBGE municipality names | 153.4 KB | 49.2 KB |
 | `getCbo` | CBO 2002 occupation titles | 115.7 KB | 29.5 KB |
