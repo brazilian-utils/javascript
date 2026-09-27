@@ -3415,7 +3415,7 @@ Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posic
   - GO: os prefixos 10, 11, 15 e 20 a 29, a união de fontes que divergem: a norma (IN nº 946/09-GSF, art. 39, I, na redação da IN nº 1.535/22-GSE) traz 10, 20 e 11, a página do SINTEGRA 10, 11 e 20 a 29, o roteiro de crítica de 2012 10, 11 e 15.
   - MT: 11 dígitos, ou os 9 dígitos que a Portaria SEFAZ-MT nº 59/2025 (art. 8º, § 1º) prevê, lidos como a forma de 11 dígitos com dois zeros à esquerda (nenhum texto oficial traz a regra do dígito verificador da forma de 9 dígitos).
   - PA: os prefixos 15 e 75 a 79 que a página do SINTEGRA lista (a SEFA-PA atribui 75 desde 07/10/2024). MS: os prefixos 28 e 50 que a página do SINTEGRA traz (o 50 também está em um comunicado da SEFAZ-MS sobre o e-CCE; a única norma, a Resolução/SEF nº 1.344/1999, traz só o 28).
-  - DF: a regra de 13 dígitos do AC com os prefixos 07 e 08 (o DF passou a 08 quando os números iniciados por 07 acabaram).
+  - DF: a regra de 13 dígitos do AC com os prefixos 07 e 08. A página do SINTEGRA não diz que o 07 é fixo; a folha de regras da SEFAZ-DF o chama de "campo fixo". O DF passou a 08 quando os números iniciados por 07 acabaram.
   - SP: o formato de produtor rural `P0MMMSSSSD000`, com o zero depois do `P`; o `P` pode ser minúsculo.
   - TO: os 9 dígitos em vigor (Portaria SEFAZ-TO nº 676/2002, art. 3º; RICMS-TO, Decreto nº 2.912/2006, art. 90), ou os antigos 11 dígitos que a página do SINTEGRA documenta, com os dígitos de tipo 01, 02, 03 ou 99.
   - AM: a regra do dígito verificador da página tem dois ramos e não define "Resto"; a biblioteca o lê como a soma módulo 11 e dá 0 a uma soma 0 ou 1, a regra comum de módulo 11.

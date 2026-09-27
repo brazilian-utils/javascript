@@ -16,7 +16,10 @@ export const AL_COMPANY_TYPES = ["0", "3", "5", "7", "8"];
 
 export const BA_MOD_10_DIGITS = [0, 1, 2, 3, 4, 5, 8];
 
-/** 07 on the SINTEGRA page; 08 since the numbers starting with 07 ran out. */
+/**
+ * 07, the "campo fixo" of SEFAZ-DF's rule sheet and the start of the SINTEGRA example (which does
+ * not call it fixed); 08 since the numbers starting with 07 ran out.
+ */
 export const DF_PREFIXES = ["07", "08"];
 
 /**

@@ -502,11 +502,13 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *
  * Per state notes:
  * - DF: the SINTEGRA page gives the format "07 300001 001 - DD" and the AC rule (weights 4, 3, 2,
- *   9 down to 2, then 5, 4, 3, 2, 9 down to 2, a 10 or 11 read as 0). The prefix 08 is accepted
- *   too, under the same rule: DF moved to 08 when the numbers starting with 07 ran out. No
- *   SEFAZ-DF act announces that change: its own rule sheet (2013) still calls 07 a "campo fixo",
- *   while the CF/DF validator of its service portal checks the 13 digits and both check digits
- *   and not the prefix. The prefix 08 rests on that validator and on the software notes below.
+ *   9 down to 2, then 5, 4, 3, 2, 9 down to 2, a 10 or 11 read as 0). It does not say 07 is
+ *   fixed: its bracket marks "07 300001" as a whole as the "número seqüencial". SEFAZ-DF's own
+ *   rule sheet (2013) does: "07 = campo fixo". The prefixes 07 and 08 are accepted, under the
+ *   same rule: DF moved to 08 when the numbers starting with 07 ran out. No SEFAZ-DF act
+ *   announces that change, and its rule sheet still says 07; the CF/DF validator of its service
+ *   portal checks the 13 digits and both check digits and not the prefix. The prefix 08 rests on
+ *   that validator and on the software notes below.
  * - GO: the official sources disagree on the prefixes, so all of them are accepted: 10, 11, 15 and
  *   20 to 29. The norm, IN nº 946/09-GSF, art. 39, I, as worded by IN nº 1.535/22-GSE (in force
  *   since 26/10/2022), gives 10 and 20 for a pessoa jurídica and 11 for a pessoa física; the
@@ -602,9 +604,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_BA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_CE.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_DF.html
- * The rule is an image: "07 300001 001 - DD", "multiplicar cada algarismo da inscrição, da direita
- * para a esquerda, pela seqüência de 2 a 9", "se o resultado obtido for igual a 10 ou 11, o
- * primeiro dígito verificador será igual a zero", worked example 073.00001.001-09.
+ * The rule is an image: "07 300001 001 - DD", "07 300001" bracketed as "número seqüencial",
+ * "001, se matriz; 002, 003, ..., se filial(is)", "multiplicar cada algarismo da inscrição, da
+ * direita para a esquerda, pela seqüência de 2 a 9", "se o resultado obtido for igual a 10 ou
+ * 11, o primeiro dígito verificador será igual a zero", worked example 073.00001.001-09.
  * @see Official: https://static.fazenda.df.gov.br/arquivos/im1_numero_inscricao_cfdf_sintegra.gif
  * SEFAZ-DF, "Cálculo do Digito Verificador do CFDF" (2013): "07 00001 001 - DD: 07 = campo
  * fixo; 00001 = número seqüencial; 001 = 001, se matriz; 002, 003, ..., se filial(is)", and the
