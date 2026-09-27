@@ -22,7 +22,7 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * as `00:30` on a day whose clocks jump from `00:00` to `01:00`: the result is then the nearest
  * instant of that day, `01:30`, as in `addBusinessDays`.
  *
- * `options.includeSaturday` defaults to `false`, the Monday to Friday banking count. Pass `true`
+ * `options.includeSaturday` defaults to `false`, a Monday to Friday count. Pass `true`
  * for the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I, which includes
  * Saturday and still excludes Sunday and holidays, so a holiday that falls on a Saturday is never
  * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal

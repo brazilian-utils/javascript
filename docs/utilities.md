@@ -1909,7 +1909,7 @@ isHoliday(); // false
 Check if a date is a Brazilian business day (dia útil): not a Saturday, a Sunday or a holiday `getHolidays` lists for its local calendar day.
 
 - **Options** (`BusinessDayOptions`, shared by every business day util): `includeOptional` (default `true`) also counts the `"optional"` holidays, Carnaval Monday and Tuesday and Corpus Christi, as non-business days; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also counts that state's holidays.
-- `includeSaturday` off is the Monday to Friday count banks and courts use. On, it is the labour law count of the payroll deadline of CLT art. 459 § 1º, the one labour inspection reads through Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
+- `includeSaturday` off is a Monday to Friday count. It is not by itself the calendar of banks or courts: the financial market also skips Carnaval Monday and Tuesday and Corpus Christi (Resolução CMN nº 4.880/2020, art. 6º), which the default `includeOptional` covers, and banks close on local holidays; the federal courts also close from Dec 20 to Jan 6, from Holy Wednesday to Easter, on Carnaval Monday and Tuesday, Aug 11, Nov 1 and 2 and Dec 8 (Lei nº 5.010/1966, art. 62), and procedural deadlines follow each court's calendar (CPC art. 216). On, it is the labour law count of the payroll deadline of CLT art. 459 § 1º, the one labour inspection reads through Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
 - Sunday and holidays are still excluded with `includeSaturday` on, so a holiday that falls on a Saturday is still not a business day.
 - The "inclusive o municipal" part of that rule is not covered: `getHolidays` carries national and state holidays only, so a municipal holiday counts here as an ordinary business day. Remove the municipal holidays yourself when a count has to be exact for one municipality.
 - Returns `false` when `value` is not a valid `Date` or its year is outside 1900 to 2099, or when `stateCode` is present and not a string.
@@ -1989,7 +1989,7 @@ subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 
 subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (2nd to last of January 2024)
 
 // payroll deadline of CLT art. 459 § 1º: the 5th business day in the labour law count
-addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, a Saturday, counts; the banking count gives 2024-03-07)
+addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, a Saturday, counts; the Monday to Friday count gives 2024-03-07)
 addBusinessDays(new Date(2024, 10, 0), 5, { includeSaturday: true }); // Date, 2024-11-07 00:00 (2024-11-02 is Finados, a holiday on a Saturday)
 subBusinessDays(new Date(2024, 8, 1), 1, { includeSaturday: true }); // Date, 2024-08-31 00:00 (last business day of August 2024, a Saturday)
 ```
@@ -2014,7 +2014,7 @@ differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 1)); // 0 (Jan 
 differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (Jan 2 counted, a Tuesday; Jan 3 is not)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (the later date comes first, so the count is negative)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (same day)
-differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (banking count, 2024-01-02 to 2024-01-05)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (Monday to Friday count, 2024-01-02 to 2024-01-05)
 differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (2024-01-06, a Saturday, also counts)
 differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (2024-11-02 is Finados, a holiday on a Saturday)
 differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: 'SP' }); // 1 (2024-07-09 is a state holiday in SP)

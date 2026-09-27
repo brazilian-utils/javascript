@@ -1909,7 +1909,7 @@ isHoliday(); // false
 Verifica se uma data é dia útil no Brasil: não é sábado, domingo nem um feriado que `getHolidays` lista para o seu dia de calendário local.
 
 - **Opções** (`BusinessDayOptions`, as mesmas de todos os utilitários de dias úteis): `includeOptional` (padrão `true`) também conta os feriados `"optional"`, a segunda e a terça-feira de Carnaval e o Corpus Christi, como dias não úteis; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também conta os feriados daquele estado.
-- Com `includeSaturday` desligado, é a contagem de segunda a sexta usada por bancos e tribunais. Ligado, é a contagem trabalhista do prazo de pagamento do salário do art. 459, § 1º, da CLT, a que a fiscalização do trabalho lê pela Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
+- Com `includeSaturday` desligado, é uma contagem de segunda a sexta. Ela não é, por si só, o calendário de bancos ou tribunais: o mercado financeiro também não conta a segunda e a terça-feira de Carnaval e o Corpus Christi (Resolução CMN nº 4.880/2020, art. 6º), que o `includeOptional` padrão cobre, e os bancos fecham nos feriados locais; a Justiça Federal também fecha de 20/12 a 6/1, de quarta-feira santa ao domingo de Páscoa, na segunda e na terça-feira de Carnaval, em 11/8, 1º e 2/11 e 8/12 (Lei nº 5.010/1966, art. 62), e os prazos processuais seguem o calendário de cada tribunal (CPC, art. 216). Ligado, é a contagem trabalhista do prazo de pagamento do salário do art. 459, § 1º, da CLT, a que a fiscalização do trabalho lê pela Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
 - Com `includeSaturday` ligado, o domingo e os feriados continuam excluídos, então um feriado que cai em um sábado continua não sendo dia útil.
 - O trecho "inclusive o municipal" dessa regra não é coberto: `getHolidays` tem apenas feriados nacionais e estaduais, então um feriado municipal é contado aqui como dia útil comum. Retire os feriados municipais por conta própria quando a contagem precisar ser exata para um município.
 - Retorna `false` quando `value` não é um `Date` válido ou o seu ano está fora de 1900 a 2099, ou quando `stateCode` está presente e não é string.
@@ -1989,7 +1989,7 @@ subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 
 subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (penúltimo de janeiro de 2024)
 
 // prazo do salário do art. 459, § 1º, da CLT: o 5º dia útil na contagem trabalhista
-addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, um sábado, conta; a contagem bancária dá 2024-03-07)
+addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, um sábado, conta; a contagem de segunda a sexta dá 2024-03-07)
 addBusinessDays(new Date(2024, 10, 0), 5, { includeSaturday: true }); // Date, 2024-11-07 00:00 (2024-11-02 é Finados, um feriado num sábado)
 subBusinessDays(new Date(2024, 8, 1), 1, { includeSaturday: true }); // Date, 2024-08-31 00:00 (último dia útil de agosto de 2024, um sábado)
 ```
@@ -2014,7 +2014,7 @@ differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 1)); // 0 (01/0
 differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (02/01 contado, uma terça-feira; 03/01 não)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (a data posterior vem primeiro, então a contagem é negativa)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (mesmo dia)
-differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (contagem bancária, de 2024-01-02 a 2024-01-05)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (contagem de segunda a sexta, de 2024-01-02 a 2024-01-05)
 differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (2024-01-06, um sábado, também conta)
 differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (2024-11-02 é Finados, feriado em um sábado)
 differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: 'SP' }); // 1 (09/07/2024 é feriado estadual em SP)

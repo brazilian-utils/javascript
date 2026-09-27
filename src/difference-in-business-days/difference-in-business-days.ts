@@ -25,7 +25,7 @@ const toLocalDayTimestamp = (date: Date): number =>
  * A business day is a day for which `isBusinessDay` returns `true` (not a Saturday, a Sunday,
  * or a Brazilian holiday; `options.includeSaturday` keeps Saturday), evaluated with the same `options`.
  *
- * `options.includeSaturday` defaults to `false`, the Monday to Friday banking count. Pass `true`
+ * `options.includeSaturday` defaults to `false`, a Monday to Friday count. Pass `true`
  * for the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I, which includes
  * Saturday and still excludes Sunday and holidays, so a holiday that falls on a Saturday is never
  * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
@@ -55,7 +55,7 @@ const toLocalDayTimestamp = (date: Date): number =>
  * differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (Jan 2 counted, a Tuesday; Jan 3 is not)
  * differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (the later date comes first, so the count is negative)
  * differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (same day)
- * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (Jan 2 to Jan 5, banking count)
+ * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (Jan 2 to Jan 5, Monday to Friday count)
  * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (Jan 6, a Saturday, also counts)
  * differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (Nov 2 is Finados, a holiday on a Saturday)
  * differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: "SP" }); // 1 (Jul 9 is a state holiday in SP)

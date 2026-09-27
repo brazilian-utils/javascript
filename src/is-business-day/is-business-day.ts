@@ -14,7 +14,7 @@ export type BusinessDayOptions = {
 	stateCode?: StateCode;
 	/** Whether optional-type holidays (`Holiday.type === "optional"`: the federal pontos facultativos Carnaval Monday and Tuesday and Corpus Christi, and the state ones `getHolidays` lists) count as non-business days (default: `true`). */
 	includeOptional?: boolean;
-	/** Whether Saturday counts as a business day, the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I (default: `false`, the Monday to Friday banking count). */
+	/** Whether Saturday counts as a business day, the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I (default: `false`, a Monday to Friday count). */
 	includeSaturday?: boolean;
 };
 
@@ -40,8 +40,16 @@ const SATURDAY = 6;
  * non-business days. The partial pontos facultativos of the federal calendar (the Quarta-feira de
  * Cinzas morning, 28 October, the 24 and 31 December afternoons) are business days either way.
  *
- * `options.includeSaturday` defaults to `false`, the Monday to Friday count banks and courts
- * use. Pass `true` for the labour law count of the payroll deadline of CLT art. 459 § 1º ("até o
+ * `options.includeSaturday` defaults to `false`, a Monday to Friday count less the holidays
+ * above. That is not by itself the calendar of banks or of courts. The financial market also
+ * skips the Carnaval Monday and Tuesday and Corpus Christi (Resolução CMN nº 4.880/2020, art. 6º),
+ * which the default `includeOptional: true` covers, and a bank closes on the local holidays of its
+ * branch. The federal courts close as well on the days of Lei 5.010/1966, art. 62 (20 December
+ * to 6 January, Holy Wednesday to Easter Sunday, Carnaval Monday and Tuesday, 11 August, 1 and 2
+ * November, 8 December), and a procedural deadline counts only dias úteis, CPC art. 216 treating
+ * as feriados "os sábados, os domingos e os dias em que não haja expediente forense", which
+ * depends on each court's own calendar; neither calendar is reproduced here. Pass `true` for the
+ * labour law count of the payroll deadline of CLT art. 459 § 1º ("até o
  * quinto dia útil do mês subsequente ao vencido"), which the labour inspection reads through
  * Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado,
  * excluindo-se o domingo e o feriado, inclusive o municipal". Sunday and holidays are still
@@ -126,6 +134,19 @@ const SATURDAY = 6;
  * @see Official: https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm
  * CLT art. 459 § 1º (wording given by Lei 7.855/1989), the "quinto dia útil do mês subsequente ao
  * vencido" payroll deadline that `includeSaturday` exists for.
+ * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20CMN&numero=4880
+ * Resolução CMN nº 4.880/2020, art. 6º: besides Saturdays, Sundays and the national holidays, the
+ * financial market does not count as dias úteis the "segunda-feira e terça-feira de Carnaval" and
+ * the "dia dedicado a Corpus Christi".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l5010.htm
+ * Lei 5.010/1966, art. 62: "Além dos fixados em lei, serão feriados na Justiça Federal, inclusive
+ * nos Tribunais Superiores: I - os dias compreendidos entre 20 de dezembro e 6 de janeiro,
+ * inclusive; II - os dias da Semana Santa, compreendidos entre a quarta-feira e o Domingo de
+ * Páscoa; III - os dias de segunda e terça-feira de Carnaval; IV - os dias 11 de agosto, 1º e 2 de
+ * novembro e 8 de dezembro".
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13105.htm
+ * CPC (Lei 13.105/2015), art. 216: "Além dos declarados em lei, são feriados, para efeito forense,
+ * os sábados, os domingos e os dias em que não haja expediente forense".
  * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/in-2-de-8-denovembro-de-2021.pdf
  * Instrução Normativa MTP nº 2, de 8 de novembro de 2021, art. 14, I: the rule `includeSaturday`
  * implements, verbatim "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o
