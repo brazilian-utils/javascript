@@ -485,7 +485,7 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
 /**
  * Validates a Brazilian state tax registration number (IE).
  *
- * Per state notes, all of them deliberate and unchanged since 2.3.0:
+ * Per state notes:
  * - DF: the SINTEGRA page gives the format "07 300001 001 - DD" and the AC rule (weights 4, 3, 2,
  *   9 down to 2, then 5, 4, 3, 2, 9 down to 2, a 10 or 11 read as 0). The prefix 08 is accepted
  *   too, under the same rule: DF moved to 08 when the numbers starting with 07 ran out. No
@@ -496,8 +496,12 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  *   and SEFAZ-GO has issued 20 to new companies since 13/01/2023, when the range starting with 10
  *   ran out. The SEFAZ-GO roteiro adds 15, the 10103105 to 10119997 range and the dual digit
  *   registration 11094402; the two sources agree on the weights and the modulus.
- * - RJ: the SINTEGRA page publishes only the modulus rule; the 8 digit length and the weights
- *   2, 7, 6, 5, 4, 3 and 2 come from the SINTEGRA validator itself, not from the page.
+ * - MG: the first check digit is the sum of the product digits subtracted from "a primeira dezena
+ *   exata imediatamente superior". A sum that is already a multiple of ten is read as its own
+ *   ten, so the digit is 0 rather than 10, the only reading that yields a single digit.
+ * - MS: the prefixes are 28, the one the SINTEGRA page gives ("o primeiro dígito será sempre
+ *   representado pelo número 2", "o segundo dígito será sempre representado pelo número 8"),
+ *   and 50, which SEFAZ-MS issues under its e-CCE register, with the same rule.
  * - MT: 9 digits, the form Portaria SEFAZ-MT nº 5/2014 now prescribes, or the 11 digits the
  *   SINTEGRA page prints. The 9 digit form is read as the 11 digit one padded with two leading
  *   zeros, which the weights 3 and 2 turn into nothing, so "130000019" and "00130000019" are the
@@ -513,10 +517,10 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * - AL: the tipo de empresa digit (third position) is not restricted to 0, 3, 5, 7 and 8.
  * - PE: only the current 9 digit eFisco format is accepted; the old 14 digit CACEPE format
  *   documented on the same page is not.
- * - TO: the SINTEGRA page documents only the 11 digit form, the one carrying the tipo digits in
- *   positions 3 and 4. The 9 digit form is also accepted, applying the same modulus 11 rule with
- *   weights 9 down to 2 to the first eight digits; it is 2.3.0 behavior kept for compatibility
- *   and no published SEFAZ-TO roteiro covers it.
+ * - TO: the SINTEGRA page documents the 11 digit form, the one carrying the tipo digits in
+ *   positions 3 and 4, which are left out of the sum. The 9 digit form, the one SEFAZ-TO issued
+ *   from Portaria SEFAZ-TO nº 676/2002 on, is that number without the tipo digits: the same
+ *   modulus 11 rule with weights 9 down to 2 applies to its first eight digits.
  * - An all zero registration is accepted for every state whose published formula yields a
  *   check digit of 0 for it (AM, BA with 8 or 9 digits, CE, ES, MG, MT with 9 or 11 digits, PB,
  *   PE, PI, PR, RJ, RS, SC, SE, SP and TO with 9 digits), unlike isValidCpf and isValidCnpj, which
@@ -577,7 +581,14 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * The prefix 15 and the special ranges come from the SEFAZ-GO roteiro below.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MA.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MG.html
+ * D1: "Subtrai-se o resultado da soma do item anterior, da primeira dezena exata imediatamente
+ * superior"; a sum that is a multiple of ten gives 0 (see the MG note above).
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MS.html
+ * "I – o primeiro dígito será sempre representado pelo número 2; II - o segundo dígito será
+ * sempre representado pelo número 8": the prefix 28.
+ * @see Based on: https://crcms.org.br/sefaz-ms-vai-adotar-novo-sistema-de-cadastro-fiscal-o-e-cce-veja-o-que-vai-mudar-2/
+ * CRC-MS relaying SEFAZ-MS on the e-CCE register: registrations start with 28 or 50, with no
+ * range reserved to a registration type. No SEFAZ-MS page carrying that text could be reached.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
  * "FORMATO: NNNNNNNNNN-D", weights 3, 2 and 9 down to 2, example "0013000001-9": the 11 digit form.
  * @see Official: http://app1.sefaz.mt.gov.br/0325677500623408/07FA81BED2760C6B84256710004D3940/C59132C6A174B94384258272006C6488
@@ -595,8 +606,9 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PI.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_PR.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RJ.html
- * Publishes only the modulus rule: the 8 digit length and the weights 2, 7, 6, 5, 4, 3 and 2
- * come from the SINTEGRA validator itself, not from this page.
+ * The rule is an image: the mask "99.999.99-3" (8 digits), the sum "(N1x2)+(N2x7)+(N3x6)+(N4x5)
+ * +(N5x4)+(N6x3)+(N7x2)" divided by 11, and "Se o resto da divisão por 11 for menor ou igual à 1
+ * (um), Então o dígito verificador será = 0 (zero)".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RN.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RO.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RR.html
@@ -607,9 +619,15 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * Item II, produtor rural: "Inicia sempre com "P" e apresenta a sequência 0MMMSSSSD000", the
  * source of the zero required after the "P".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_TO.html
- * Documents only the 11 digit form, with the tipo digits 01, 02, 03 and 99 in positions 3 and 4;
- * the 9 digit form the validator also accepts is not covered by this page or by any other
- * published SEFAZ-TO roteiro.
+ * "Aplica-se o cálculo "módulo 11" com os algarismos 1,2,5,6,7,8,9,10 da Inscrição Estadual";
+ * "Os dígitos "3" e "4" não entram no cálculo", which may only be 01, 02, 03 or 99.
+ * @see Official: http://www2.sefaz.to.gov.br/Servicos/Sintegra/calinse.htm
+ * SEFAZ-TO's own "Cálculo da Inscrição Estadual", the same modulus 11 rule with the weights 9
+ * down to 2.
+ * @see Official: https://dtri.sefaz.to.gov.br/legislacao/ntributaria/portarias/sefaz/Portaria676-02.htm
+ * Portaria SEFAZ-TO nº 676/2002, the source of the 9 digit form: forms carrying the eleven digit
+ * number granted under the earlier rules could only be used until their validity date, and the
+ * last digit of the registration is its check digit.
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
  * SEFAZ-GO's roteiro de crítica, the source of the prefix 15 and of the special ranges.
  * @see Official: https://goias.gov.br/economia/contribuintes-goianos-passam-a-ter-novo-numero-de-inscricao-estadual/

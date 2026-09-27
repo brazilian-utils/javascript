@@ -3361,11 +3361,12 @@ Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posic
 - Alguns estados têm casos especiais, um prefixo ou formato que a página do SINTEGRA não traz ou um desvio proposital dela (detalhes e fontes no JSDoc em `src/is-valid-ie`):
   - GO: os prefixos 10, 11, 15 e 20 a 29 (a SEFAZ-GO atribui 20 às novas empresas desde 13/01/2023).
   - MT: 11 dígitos, ou os 9 dígitos que a SEFAZ-MT atribui hoje, lidos como a forma de 11 dígitos com dois zeros à esquerda.
-  - PA: os prefixos 15 e 75 (a SEFA-PA atribui 75 desde outubro de 2024). MS: os prefixos 28 e 50.
+  - PA: os prefixos 15 e 75 (a SEFA-PA atribui 75 desde outubro de 2024). MS: os prefixos 28 e 50 (50 do cadastro e-CCE da SEFAZ-MS).
   - DF: a regra de 13 dígitos do AC com os prefixos 07 e 08 (o DF passou a 08 quando os números iniciados por 07 acabaram).
   - SP: o formato de produtor rural `P0MMMSSSSD000`, com o zero depois do `P`; o `P` pode ser minúsculo.
-  - TO: 11 dígitos, com os dígitos de tipo, ou 9 dígitos.
-  - PE: só o formato eFisco de 9 dígitos. AL: o terceiro dígito não é restrito. RJ: o tamanho de 8 dígitos e os pesos vêm do validador do SINTEGRA.
+  - TO: 11 dígitos, com os dígitos de tipo, ou os 9 dígitos que a SEFAZ-TO atribui desde a Portaria SEFAZ-TO nº 676/2002.
+  - MG: um primeiro dígito verificador 10, de uma soma que já é múltiplo de dez, é lido como 0.
+  - PE: só o formato eFisco de 9 dígitos. AL: o terceiro dígito não é restrito.
 - Uma inscrição só de zeros é aceita em todo estado cuja fórmula publicada produz dígito verificador 0 para ela: AM, CE, ES, MG, PB, PE, PI, PR, RJ, RS, SC, SE e SP, mais BA com 8 ou 9 dígitos, MT com 9 ou 11 dígitos e TO com 9 dígitos.
 
 ```javascript
