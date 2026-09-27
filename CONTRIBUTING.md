@@ -183,7 +183,8 @@ example `formatSomething`):
 
    After editing `docs/getting-started.md` or `docs/utilities.md`, run `npm run build:llms` to
    regenerate `docs/llms.txt` and `docs/llms-full.txt` (see [llms.txt](https://llmstxt.org/)) and
-   commit the result. CI fails the build if these files are stale.
+   check the result. The two files are built at deploy time and never committed; CI runs the
+   generator, which fails only when a docs file it reads is missing.
 
 6. If the utility is based on an official Brazilian specification/document (e.g. a government
    validation algorithm), link to the authoritative source in the code comment (`@see`) or PR
@@ -547,8 +548,8 @@ to what no tool can judge.
 formatting, lint and types (`vp check`), the tests on every runtime, 100% coverage and mutation
 score, duplicated code (jscpd), unused files and exports (knip), the public API check, bundle size
 per export (the tree-shaking report), the lockfile, known vulnerabilities (`audit-ci`,
-OSV-Scanner), CodeQL, the workflow linters, stale generated files (`llms.txt`, the site shells) and
-the commit messages.
+OSV-Scanner), CodeQL, the workflow linters, stale committed generated files (`jsr.json`), the
+`llms.txt` generator running and the commit messages.
 
 **What the reviewer checks**, in this order:
 

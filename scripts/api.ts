@@ -27,7 +27,7 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { appendFile, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, relative, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve } from "node:path";
 
 import {
 	Extractor,
@@ -47,16 +47,43 @@ type RunResult = {
 
 const run = (command: string, args: string[], cwd = rootDirectory): Promise<RunResult> =>
 	new Promise((_resolve) => {
+		execFile(command, args, { cwd, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
+			_resolve({ ok: error === null, stdout, stderr: stderr || (error?.message ?? "") });
+		});
+	});
+
+/**
+ * Runs npm without a shell. Under `npm run`, `npm_execpath` is npm's own JavaScript entry point,
+ * so it runs on this Node, quoting every argument (a temporary directory under a user name with
+ * a space included). Outside npm the command is `npm`, which on Windows is `npm.cmd` and only a
+ * shell resolves; only then is the shell used, and every argument is quoted for it.
+ * @param {string[]} args - The npm arguments.
+ * @param {string} [cwd] - The working directory.
+ * @returns {Promise<RunResult>} The outcome.
+ */
+const runNpm = (args: string[], cwd = rootDirectory): Promise<RunResult> => {
+	const npmCli = process.env["npm_execpath"];
+
+	if (npmCli !== undefined && /\.[cm]?js$/.test(npmCli)) {
+		return run(process.execPath, [npmCli, ...args], cwd);
+	}
+
+	if (process.platform !== "win32") return run("npm", args, cwd);
+
+	const quoted = args.map((arg) => JSON.stringify(arg)).join(" ");
+
+	return new Promise((_resolve) => {
+		// oxlint-disable-next-line sonarjs/os-command -- npm.cmd needs a shell on Windows; every argument is quoted
 		execFile(
-			command,
-			args,
-			// npm is npm.cmd on Windows, which only a shell resolves; the arguments are fixed strings.
-			{ cwd, maxBuffer: 64 * 1024 * 1024, shell: process.platform === "win32" },
+			`npm ${quoted}`,
+			[],
+			{ cwd, maxBuffer: 64 * 1024 * 1024, shell: true },
 			(error, stdout, stderr) => {
 				_resolve({ ok: error === null, stdout, stderr: stderr || (error?.message ?? "") });
 			},
 		);
 	});
+};
 
 const packageName = "@brazilian-utils/brazilian-utils";
 const entryName = "brazilian-utils";
@@ -345,25 +372,30 @@ const typeRoles = (declarations: Map<string, Declaration>): Map<string, Set<Role
 
 /**
  * Lists the subpath entry points of a package (`dist/<util>.d.ts`, imported as
- * `@brazilian-utils/brazilian-utils/<util>`): every declaration file but the root and the shared
- * chunks the others import.
+ * `@brazilian-utils/brazilian-utils/<util>`): every name the build ships as all four of `.js`,
+ * `.cjs`, `.d.ts` and `.d.cts`, but the root. A shared chunk never qualifies, since each format
+ * names its chunks with a hash of its own (`banks-0wedgr1-.d.ts` next to `banks-DzUsNo6a.js`),
+ * while an entry point another one imports from (`format-cnpj`, imported by `parse-cnpj`'s
+ * declarations) still does.
  * @param {string} distributionDirectory - The `dist` directory.
  * @returns {Promise<Subpaths>} The contents of each entry by subpath, and every declaration file
  * joined (to find what a re-exported name is).
  */
 const readSubpaths = async (distributionDirectory: string): Promise<Subpaths> => {
-	const allFiles = await readdir(distributionDirectory);
-	const files = allFiles.filter((file) => file.endsWith(".d.ts")).sort();
+	const allFiles = new Set(await readdir(distributionDirectory));
+	const files = [...allFiles].filter((file) => file.endsWith(".d.ts")).sort();
 	const texts = await Promise.all(
 		files.map((file) => readFile(join(distributionDirectory, file), "utf8")),
 	);
-	const entries = new Map(
-		files.map((file, index) => [file.slice(0, -".d.ts".length), texts[index] ?? ""]),
-	);
+	const entries = new Map<string, string>();
 
-	entries.delete(entryName);
-	for (const text of texts) {
-		for (const [, chunk = ""] of text.matchAll(/from "\.\/([^"]+)\.js"/g)) entries.delete(chunk);
+	for (const [index, file] of files.entries()) {
+		const name = file.slice(0, -".d.ts".length);
+		const isEntryPoint = [".js", ".cjs", ".d.cts"].every((extension) =>
+			allFiles.has(`${name}${extension}`),
+		);
+
+		if (name !== entryName && isEntryPoint) entries.set(name, texts[index] ?? "");
 	}
 
 	return { entries, sources: texts.join("\n") };
@@ -419,9 +451,22 @@ const subpathExports = (
 
 const identifier = (value: string): string => value.replaceAll(/[^\w$]/g, "_");
 
+/**
+ * The import specifier of `file` from a module in `fromDirectory`. On Windows the two may sit on
+ * different drives (the temporary directory on C:, the checkout on D: on the GitHub runners),
+ * where no relative path exists, so the absolute path is written instead, with forward slashes.
+ * @param {string} fromDirectory - The directory of the importing module.
+ * @param {string} file - The module to import.
+ * @returns {string} The specifier.
+ */
 const moduleSpecifier = (fromDirectory: string, file: string): string => {
-	const path = relative(fromDirectory, file).replaceAll("\\", "/");
-	return path.startsWith(".") ? path : `./${path}`;
+	const path = relative(fromDirectory, file);
+
+	const posixPath = path.replaceAll("\\", "/");
+
+	if (isAbsolute(path)) return posixPath;
+
+	return posixPath.startsWith(".") ? posixPath : `./${posixPath}`;
 };
 
 /**
@@ -807,10 +852,6 @@ const renderDiff = (
 };
 
 /**
- * Asks the registry for the version behind the `latest` tag.
- * @returns {Promise<string | null>} The version, or null when the package was never published.
- */
-/**
  * Keeps the lines of an npm failure that say what went wrong, without the stack and log path.
  * @param {string} stderr - The npm error output.
  * @returns {string} The error code and message lines.
@@ -823,8 +864,12 @@ const npmError = (stderr: string): string => {
 	return lines.length > 0 ? lines.join("\n") : stderr.trim();
 };
 
+/**
+ * Asks the registry for the version behind the `latest` tag.
+ * @returns {Promise<string | null>} The version, or null when the package was never published.
+ */
 const latestVersion = async (): Promise<string | null> => {
-	const result = await run("npm", ["view", `${packageName}@latest`, "version", "--json"]);
+	const result = await runNpm(["view", `${packageName}@latest`, "version", "--json"]);
 
 	if (!result.ok) {
 		if (/\bE404\b/.test(`${result.stdout}${result.stderr}`)) return null;
@@ -863,8 +908,7 @@ const packedFilename = (stdout: string): string => {
 const downloadPackage = async (version: string, directory: string): Promise<string> => {
 	await mkdir(directory, { recursive: true });
 
-	const packed = await run(
-		"npm",
+	const packed = await runNpm(
 		["pack", `${packageName}@${version}`, "--json", "--pack-destination", directory],
 		directory,
 	);
