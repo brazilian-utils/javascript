@@ -40,11 +40,12 @@ export const packCodes = (codes: readonly string[]): string => {
 	}
 
 	let previous = 0;
-	const differences = codes.map((code) => {
+	const differences = codes.map((code, index) => {
 		const value = Number(code);
 
-		if (value <= previous && code !== first)
-			throw new Error(`lookup table code ${code} is out of order`);
+		if (index > 0 && value <= previous) {
+			throw new Error(`lookup table code ${code} is out of order or repeated`);
+		}
 
 		const difference = (value - previous).toString(36);
 		previous = value;

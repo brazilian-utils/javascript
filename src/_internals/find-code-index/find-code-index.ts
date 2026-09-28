@@ -36,7 +36,7 @@ const readTable = (codes: string): CodeTable => {
  * one before it, in base 36 and separated by commas (`"3:1,2,1"` holds `"001"`, `"003"` and
  * `"004"`). A validator bundles that string alone, and a getter reads the description at the same
  * index of the aligned descriptions array, which only the getter bundles. The table is unpacked
- * once, on its first lookup.
+ * once, on its first lookup, and searched by bisection.
  *
  * Only a code of exactly the table width, digits only, can be found.
  *
@@ -56,5 +56,17 @@ export const findCodeIndex = (codes: string, code: string): number => {
 
 	if (code.length !== width || !/^\d+$/.test(code)) return -1;
 
-	return values.indexOf(Number(code));
+	const value = Number(code);
+	let low = 0;
+	let high = values.length;
+
+	// A bisection over the ascending codes: the first index whose code is not below `value`.
+	while (low < high) {
+		const middle = (low + high) >>> 1;
+
+		if (values[middle] < value) low = middle + 1;
+		else high = middle;
+	}
+
+	return values[low] === value ? low : -1;
 };
