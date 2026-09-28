@@ -9,9 +9,7 @@ export type { Municipality } from "../_internals/constants/municipalities";
  *
  * A `code` given as a number must be a non-negative integer: a sign and a decimal point are
  * not digits, so `-3550308` and `355030.8` are rejected instead of being read as `3550308`. A
- * string may carry whitespace and hyphens; any other character makes it something other than a
- * code, so `"11abc00015"` returns `null` instead of having the letters stripped, as it was up to
- * 2.4.0.
+ * string has any non-digit characters stripped, so `"3550308 SP"` is the code `3550308`.
  *
  * @param {string|number} code - The 7 digit IBGE municipality code, as a string or a number.
  * @returns {Municipality|null} A fresh copy of the matching municipality, or `null` when
@@ -22,7 +20,6 @@ export type { Municipality } from "../_internals/constants/municipalities";
  * getMunicipalityByCode("3550308"); // { code: "3550308", name: "São Paulo", stateCode: "SP" }
  * getMunicipalityByCode(3550308); // { code: "3550308", name: "São Paulo", stateCode: "SP" }
  * getMunicipalityByCode("0000000"); // null
- * getMunicipalityByCode("11abc00015"); // null (not read as 1100015)
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades

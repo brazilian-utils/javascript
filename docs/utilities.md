@@ -274,7 +274,7 @@ Fetch the address of a CEP from several providers at once and resolve to the fir
   - `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated and left out of the default list.
   - `timeoutMs` (`number`) bounds the whole lookup, retries included (default: no limit). When it runs out, every request is aborted and the call rejects with `GetAddressInfoByCepServiceError`.
   - `signal` (`AbortSignal`) cancels the lookup; the call rejects with `signal.reason`, the same as `fetch`.
-- Accepts what `isValidCep` accepts: 8 digits, with spaces, dots and hyphens ignored; any other character makes the CEP invalid. A number is left-padded with zeros to 8 digits, since it cannot carry the leading zero of a São Paulo CEP, but only from `1000000` (`01000-000`, the lowest CEP the Correios assign) up. A smaller, negative or fractional number is rejected with `GetAddressInfoByCepValidationError` before any request is made.
+- Accepts a string or a number. A string has any non-digit characters stripped (`'CEP 01310-100'` is `01310100`) and has to leave 8 digits. A number is left-padded with zeros to 8 digits, since it cannot carry the leading zero of a São Paulo CEP, but only from `1000000` (`01000-000`, the lowest CEP the Correios assign) up. A smaller, negative or fractional number is rejected with `GetAddressInfoByCepValidationError` before any request is made.
 - Retries transient network failures per provider.
 - Rejects with `GetAddressInfoByCepValidationError` when the CEP is invalid, `providers` names no known provider or `timeoutMs` is not a positive finite number, with `GetAddressInfoByCepNotFoundError` when every provider failed and at least one reported the CEP as unknown, and with `GetAddressInfoByCepServiceError` when every provider failed for another reason.
 - BrasilAPI answers 404 both for an unknown CEP and when the services behind it are down, so its 404 only counts as "unknown CEP" when no other provider failed to answer.
@@ -995,7 +995,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 Get the state and region a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração. Accepts a string or a non-negative integer.
 
-- A string may wrap the DDD in parentheses (`'(11)'`) and carry spaces and hyphens; any other character (`'1e1'`, `'DDD 11'`) returns `null`.
+- A string has any non-digit characters stripped, so `'(11)'`, `'0xx11'` and `'DDD 11'` are the DDD 11.
 - Returns an `AreaCodeInfo`: `areaCode`, `stateCode`, `stateName`, `regionCode`, `regionName` and `stateCodes`. Returns `null` when the DDD is not in use.
 - `stateCode` is the state the DDD is seated in. For the four DDDs that straddle a border (61, 42, 47 and 49) `stateCodes` also lists the other state, the seat first.
 
@@ -1012,7 +1012,7 @@ getAreaCodeInfo('61');
 // { areaCode: 61, stateCode: 'DF', stateName: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', stateCodes: ['DF', 'GO'] }
 
 getAreaCodeInfo('00'); // null
-getAreaCodeInfo('1e1'); // null
+getAreaCodeInfo('(0xx11)'); // the same as '11'
 getAreaCodeInfo(-11); // null
 getAreaCodeInfo(1.1); // null
 ```
@@ -1435,7 +1435,7 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 Look a Brazilian bank up by its compensation code (COMPE), from the Banco Central do Brasil STR participants list. Accepts a `string` or a `number`.
 
-- A string may carry spaces and hyphens; any other character (`'1e0'`, `'1.0'`) returns `null`.
+- A string has any non-digit characters stripped before the code is padded to 3 digits.
 - Returns the matching `Bank`, or `null` when no bank has that code.
 
 ```javascript
@@ -1452,7 +1452,7 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 character code of every SPB participant. Accepts a `string` or a `number`, with or without leading zeros.
 
-- Since Resolução BCB nº 585/2026 an ISPB may hold letters, so a string of 8 letters and digits is looked up as it is, in upper or lower case. Spaces and hyphens are ignored; any other character returns `null`, and a letter is never stripped (`'0000000A'` is not `'00000000'`).
+- Since Resolução BCB nº 585/2026 an ISPB may hold letters, so a string of 8 letters and digits is looked up as it is, in upper or lower case. Any character that is neither a letter nor a digit is ignored (`'00.000.000'` is `'00000000'`), and a letter is never stripped (`'0000000A'` is not `'00000000'`).
 
 - Returns the matching `Bank`, or `null` when no bank has that ISPB. The base only carries institutions that also have a COMPE code.
 
@@ -1729,7 +1729,7 @@ Source: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app
 Get the Brazilian state whose 2-digit IBGE code (`cUF`, the Código da Unidade da Federação) matches the given value.
 
 - This is the UF code in the first field of a DF-e access key (chave de acesso), the one `isValidNfeKey` covers.
-- Accepts a string or a non-negative integer. A string may carry spaces and hyphens; any other character (`'x11'`) returns `null`.
+- Accepts a string or a non-negative integer, with any non-digit characters of a string stripped (`'35/SP'` is `35`).
 - Returns `null` when the code matches no state. Exports the `State` type.
 
 ```javascript
@@ -1894,7 +1894,7 @@ Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades
 
 Look up a Brazilian municipality by its 7-digit IBGE code.
 
-- Accepts the code as a string or a non-negative integer. A string may carry spaces and hyphens; any other character returns `null`.
+- Accepts the code as a string or a non-negative integer, with any non-digit characters of a string stripped.
 - Returns `{ code, name, stateCode }` (`Municipality`), or `null` when the code is not 7 digits long or matches no municipality.
 
 ```javascript
