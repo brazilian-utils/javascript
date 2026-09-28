@@ -77,6 +77,11 @@ describe("isValidRenavam", () => {
 			expect(isValidRenavam("0063988/4962")).toBe(false);
 		});
 
+		test("when it is a negative or fractional number", () => {
+			expect(isValidRenavam(-639_884_962)).toBe(false);
+			expect(isValidRenavam(63_988_496.2)).toBe(false);
+		});
+
 		test("when every digit is the same", () => {
 			expect(isValidRenavam("00000000000")).toBe(false);
 			expect(isValidRenavam("000000000")).toBe(false);
