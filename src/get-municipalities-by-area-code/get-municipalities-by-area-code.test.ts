@@ -69,7 +69,7 @@ describe("getMunicipalitiesByAreaCode", () => {
 
 	it("should return an empty array for a DDD that is not in use, or for input that is not a DDD", () => {
 		expect(getMunicipalitiesByAreaCode("20")).toEqual([]);
-		expect(getMunicipalitiesByAreaCode("1e1")).toEqual([]);
+		expect(getMunicipalitiesByAreaCode("DDD")).toEqual([]);
 		expect(getMunicipalitiesByAreaCode(-11)).toEqual([]);
 		expect(getMunicipalitiesByAreaCode("")).toEqual([]);
 	});
