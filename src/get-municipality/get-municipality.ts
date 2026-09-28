@@ -1,9 +1,7 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
-import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
-import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
 import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { getCodeByMunicipalityName } from "../get-code-by-municipality-name/get-code-by-municipality-name";
 
 /** The `getMunicipality` query by IBGE municipality code. */
 export type GetMunicipalityByCodeParams = {
@@ -71,27 +69,6 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 	return entry ? [...entry] : null;
 };
 
-const getMunicipalityCodeByName = ({
-	municipalityName,
-	uf,
-}: GetMunicipalityByNameParams): string | null => {
-	const normalizedUf = normalizeStateCode(uf);
-
-	// Every real state code is exactly 2 uppercase letters, so a malformed `normalizedUf` (wrong
-	// length, digits, ...) simply finds no match below; there is no need to pre-validate its shape.
-	if (!hasOwnKey(CITIES_DATA, normalizedUf)) return null;
-
-	// `removeAccents` (and so `normalizeMunicipalityName`) already folds a non-string or empty
-	// `municipalityName` down to `""`, which no real municipality name normalizes to, so there is
-	// no need to pre-validate `municipalityName` here first.
-	const normalizedName = normalizeMunicipalityName(municipalityName);
-	const match = CITIES_DATA[normalizedUf].find(
-		([name]) => normalizeMunicipalityName(name) === normalizedName,
-	);
-
-	return match ? match[1] : null;
-};
-
 /**
  * Looks a Brazilian municipality up by its IBGE code in the offline IBGE "localidades" dataset.
  *
@@ -99,8 +76,7 @@ const getMunicipalityCodeByName = ({
  * digits, so `-3550308` and `355030.8` are rejected instead of being read as `3550308`. A string
  * has any non-digit characters stripped, the same as `getMunicipalityByCode`.
  *
- * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
- * municipality by name is up to the application, over `getMunicipalities`.
+ * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline.
  *
  * @param {GetMunicipalityByCodeParams} options - The `{ code }` query.
  * @returns {Promise<[string, string] | null>} A fresh `[name, uf]` pair, which the caller owns
@@ -126,8 +102,8 @@ export function getMunicipality(
  * not, since only the runs that are there collapse. The casing is folded to upper case, the
  * direction Unicode expands `"ß"` to `"SS"` in, so `"Paßos"` matches `"Passos"`.
  *
- * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
- * municipality by name is up to the application, over `getMunicipalities`.
+ * @deprecated Use `getCodeByMunicipalityName` instead, which is synchronous and matches the
+ * name the same way.
  *
  * @param {GetMunicipalityByNameParams} options - The `{ municipalityName, uf }` query.
  * @returns {Promise<string | null>} The 7 digit IBGE code, or null when the state code or the
@@ -150,8 +126,8 @@ export function getMunicipality(options: GetMunicipalityByNameParams): Promise<s
  * `uf` it resolves the IBGE code. Validation failures and unknown municipalities are reported
  * as `null`.
  *
- * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
- * municipality by name is up to the application, over `getMunicipalities`.
+ * @deprecated Use `getMunicipalityByCode` or `getCodeByMunicipalityName` instead, which are
+ * synchronous and offline.
  *
  * @param {GetMunicipalityParams} options - Either `{ code }` or `{ municipalityName, uf }`.
  * @returns {Promise<[string, string] | string | null>} The `[name, uf]` pair when looking up
@@ -183,5 +159,5 @@ export function getMunicipality(
 		return Promise.resolve(getMunicipalityByCode(options.code));
 	}
 
-	return Promise.resolve(getMunicipalityCodeByName(options));
+	return Promise.resolve(getCodeByMunicipalityName(options.municipalityName, options.uf));
 }

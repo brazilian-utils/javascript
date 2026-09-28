@@ -71,6 +71,7 @@
 		"./get-class-trib": "./src/get-class-trib/get-class-trib.ts",
 		"./get-cnae": "./src/get-cnae/get-cnae.ts",
 		"./get-cnpj-info": "./src/get-cnpj-info/get-cnpj-info.ts",
+		"./get-code-by-municipality-name": "./src/get-code-by-municipality-name/get-code-by-municipality-name.ts",
 		"./get-cpf-info": "./src/get-cpf-info/get-cpf-info.ts",
 		"./get-cst-ibs-cbs": "./src/get-cst-ibs-cbs/get-cst-ibs-cbs.ts",
 		"./get-format-license-plate": "./src/get-format-license-plate/get-format-license-plate.ts",

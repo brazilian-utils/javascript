@@ -1917,6 +1917,27 @@ getMunicipalityByCode('123'); // null (não tem 7 dígitos)
 
 Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 
+### getCodeByMunicipalityName
+
+Busca o código IBGE de 7 dígitos de um município brasileiro pelo nome e pela sigla do estado. É a versão offline e síncrona do `get_code_by_municipality_name` da biblioteca Python, que consulta a API do IBGE pela rede.
+
+- O nome ignora acentos, cedilha e maiúsculas/minúsculas. Sequências de espaços viram um só e os espaços em volta são removidos, mas um nome escrito sem um espaço que o nome do IBGE tem não é encontrado (`'saopaulo'`).
+- A sigla do estado ignora maiúsculas/minúsculas e espaços em volta, como em todo util que recebe UF. Ela é obrigatória, porque o mesmo nome pode ser de municípios de estados diferentes (`'Bom Jesus'` existe no PI, no RS e em outros estados).
+- Retorna o código como string, ou `null` quando a sigla não é de um estado ou nenhum município daquele estado tem esse nome.
+- Embute os 5571 municípios, a mesma tabela de `getMunicipalityByCode`. Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-code-by-municipality-name`.
+
+```javascript
+import { getCodeByMunicipalityName } from '@brazilian-utils/brazilian-utils';
+
+getCodeByMunicipalityName('Conceição do Coité', 'Ba'); // '2908408'
+getCodeByMunicipalityName('sao paulo', 'sp'); // '3550308'
+getCodeByMunicipalityName('Bom Jesus', 'RS'); // '4302303'
+getCodeByMunicipalityName('São Paulo', 'RJ'); // null (não há São Paulo no Rio de Janeiro)
+getCodeByMunicipalityName('Município Inexistente', 'RS'); // null
+```
+
+Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
+
 ### getCities
 
 Retorna os nomes das cidades brasileiras: todas as cidades, ou só as de um estado. **Descontinuada:** use `getMunicipalities` no lugar.
@@ -1966,7 +1987,7 @@ Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 
 ### getMunicipality
 
-Busca informações de município por código IBGE, ou um código IBGE a partir do nome do município e UF. **Descontinuada:** use `getMunicipalityByCode` no lugar, que é síncrona e offline; casar um município pelo nome fica a cargo da aplicação, sobre `getMunicipalities`.
+Busca informações de município por código IBGE, ou um código IBGE a partir do nome do município e UF. **Descontinuada:** use `getMunicipalityByCode` para um código e `getCodeByMunicipalityName` para um nome, que são síncronas e offline.
 
 - Uma única função cobre as duas direções, dependendo se `options` tem `code` ou `municipalityName`/`uf`. A busca é offline: nenhuma requisição de rede é feita.
 - A comparação do nome ignora acentos, não diferencia maiúsculas de minúsculas e reduz espaços repetidos a um só.

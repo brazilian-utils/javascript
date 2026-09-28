@@ -207,6 +207,7 @@ const PUBLIC = [
 	"getClassTrib",
 	"getCnae",
 	"getCnpjInfo",
+	"getCodeByMunicipalityName",
 	"getCpfInfo",
 	"getCstIbsCbs",
 	"getFormatLicensePlate",
