@@ -1064,6 +1064,8 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 Check if a license plate is valid. Accepts the old Brazilian format (`ABC-1234`) and the Mercosul format (`ABC1D23`), with or without a hyphen or space, in any case.
 
+The optional `format` restricts the check to one of them: `"LLLNNNN"` for the old format or `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. It works like the `type` argument of the Python library's `is_valid`. Without it, or with any other value, a plate in either format is valid.
+
 ```javascript
 import { isValidLicensePlate } from '@brazilian-utils/brazilian-utils';
 
@@ -1073,6 +1075,9 @@ isValidLicensePlate('ABC 1234'); // true (whitespace mask)
 isValidLicensePlate('ABC1D23'); // true (Mercosul format)
 isValidLicensePlate('ABC12D3'); // false (not a Mercosul sequence)
 isValidLicensePlate('ABC1234EXTRA'); // false (too many characters)
+isValidLicensePlate('ABC1D23', { format: 'LLLNLNN' }); // true
+isValidLicensePlate('ABC1234', { format: 'LLLNLNN' }); // false (an old format plate)
+isValidLicensePlate('ABC-1234', { format: 'LLLNNNN' }); // true
 ```
 
 Source: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf), [Anexos](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf).

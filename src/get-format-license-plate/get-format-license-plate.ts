@@ -1,9 +1,8 @@
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
-import { OLD_FORMAT_REGEX } from "../is-valid-license-plate/constants";
+import { OLD_FORMAT_REGEX, type LicensePlateFormat } from "../is-valid-license-plate/constants";
 import { isValidLicensePlate } from "../is-valid-license-plate/is-valid-license-plate";
 
-/** The Brazilian license plate formats `getFormatLicensePlate` can identify: the old `LLLNNNN` and the Mercosul `LLLNLNN`. */
-export type LicensePlateFormat = "LLLNNNN" | "LLLNLNN";
+export type { LicensePlateFormat } from "../is-valid-license-plate/constants";
 
 /**
  * Identifies the format of a Brazilian license plate (placa de carro ou moto).

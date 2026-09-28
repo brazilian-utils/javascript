@@ -2,8 +2,13 @@ import * as fc from "fast-check";
 
 import { licensePlates } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { generateLicensePlate } from "../generate-license-plate/generate-license-plate";
 import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
-import { isValidLicensePlate } from "./is-valid-license-plate";
+import {
+	type IsValidLicensePlateOptions,
+	type LicensePlateFormat,
+	isValidLicensePlate,
+} from "./is-valid-license-plate";
 
 describe("isValidLicensePlate", () => {
 	describe("should return false", () => {
@@ -119,9 +124,74 @@ describe("isValidLicensePlate", () => {
 	});
 });
 
+describe("isValidLicensePlate with a format", () => {
+	it("should accept only a Mercosul plate with the LLLNLNN format", () => {
+		expect(isValidLicensePlate("ABC1D23", { format: "LLLNLNN" })).toBe(true);
+		expect(isValidLicensePlate("abc-1d23", { format: "LLLNLNN" })).toBe(true);
+		expect(isValidLicensePlate("ABC1234", { format: "LLLNLNN" })).toBe(false);
+	});
+
+	it("should accept only an old format plate with the LLLNNNN format", () => {
+		expect(isValidLicensePlate("ABC1234", { format: "LLLNNNN" })).toBe(true);
+		expect(isValidLicensePlate("abc 1234", { format: "LLLNNNN" })).toBe(true);
+		expect(isValidLicensePlate("ABC1D23", { format: "LLLNNNN" })).toBe(false);
+	});
+
+	it("should still reject a plate that follows neither format", () => {
+		expect(isValidLicensePlate("ABC12D3", { format: "LLLNLNN" })).toBe(false);
+		expect(isValidLicensePlate("ABC12D3", { format: "LLLNNNN" })).toBe(false);
+	});
+
+	it("should accept either format without a format, as the Python library does without a type", () => {
+		expect(isValidLicensePlate("ABC1234", {})).toBe(true);
+		expect(isValidLicensePlate("ABC1D23", { format: undefined })).toBe(true);
+	});
+
+	it("should accept either format for a format outside the two, as the Python library does for an unknown type", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidLicensePlate("ABC1234", { format: "mercosul" })).toBe(true);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidLicensePlate("ABC1D23", { format: "lllnnnn" })).toBe(true);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidLicensePlate("ABC1D23", null)).toBe(true);
+	});
+
+	describe("properties", () => {
+		test("should accept a plate with its own format and reject it with the other", () => {
+			fc.assert(
+				fc.property(fc.constantFrom<LicensePlateFormat>("LLLNNNN", "LLLNLNN"), (format) => {
+					const plate = generateLicensePlate(format);
+					const other: LicensePlateFormat = format === "LLLNNNN" ? "LLLNLNN" : "LLLNNNN";
+
+					expect(isValidLicensePlate(plate, { format })).toBe(true);
+					expect(isValidLicensePlate(plate, { format: other })).toBe(false);
+				}),
+			);
+		});
+
+		test("should agree with getFormatLicensePlate on every value and format", () => {
+			fc.assert(
+				fc.property(
+					fc.string({ unit: "grapheme" }),
+					fc.constantFrom<LicensePlateFormat>("LLLNNNN", "LLLNLNN"),
+					(value, format) => {
+						expect(isValidLicensePlate(value, { format })).toBe(
+							getFormatLicensePlate(value) === format,
+						);
+					},
+				),
+			);
+		});
+	});
+});
+
 describe("isValidLicensePlate types", () => {
-	test("should take a string and return a boolean", () => {
+	test("should take a string and optional options, and return a boolean", () => {
 		expectTypeOf(isValidLicensePlate).parameter(0).toEqualTypeOf<string>();
+		expectTypeOf(isValidLicensePlate)
+			.parameter(1)
+			.toEqualTypeOf<IsValidLicensePlateOptions | undefined>();
+		expectTypeOf<IsValidLicensePlateOptions>().toEqualTypeOf<{ format?: LicensePlateFormat }>();
 		expectTypeOf(isValidLicensePlate).returns.toEqualTypeOf<boolean>();
 	});
 });

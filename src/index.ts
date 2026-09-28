@@ -235,7 +235,10 @@ export { isValidIban } from "./is-valid-iban/is-valid-iban";
 export { type IsValidIeParams, isValidIe } from "./is-valid-ie/is-valid-ie";
 export { isValidLandlinePhone } from "./is-valid-landline-phone/is-valid-landline-phone";
 export { isValidLegalNature } from "./is-valid-legal-nature/is-valid-legal-nature";
-export { isValidLicensePlate } from "./is-valid-license-plate/is-valid-license-plate";
+export {
+	type IsValidLicensePlateOptions,
+	isValidLicensePlate,
+} from "./is-valid-license-plate/is-valid-license-plate";
 export {
 	type IsValidMobilePhoneOptions,
 	isValidMobilePhone,

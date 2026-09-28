@@ -1,5 +1,17 @@
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
-import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
+import { MERCOSUL_REGEX, OLD_FORMAT_REGEX, type LicensePlateFormat } from "./constants";
+
+export type { LicensePlateFormat } from "./constants";
+
+/** Options for `isValidLicensePlate`. */
+export type IsValidLicensePlateOptions = {
+	/**
+	 * The one format the plate must follow: `"LLLNNNN"` for the old Brazilian format or
+	 * `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. Left out, or
+	 * any other value, and either format is accepted.
+	 */
+	format?: LicensePlateFormat;
+};
 
 /**
  * Validates if a Brazilian license plate (placa de carro ou moto) is valid.
@@ -10,7 +22,12 @@ import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
  * checked here are the ones `getFormatLicensePlate` names, and it returns `null` exactly when
  * this returns false.
  *
+ * `options.format` restricts the check to one of them, `"LLLNNNN"` or `"LLLNLNN"`, as the
+ * `type` argument of the Python library's `is_valid` does. Without it, or with any other value,
+ * a plate in either format is valid.
+ *
  * @param {string} value - The license plate value to be validated.
+ * @param {IsValidLicensePlateOptions} [options] - `format`, the one format to accept.
  * @returns {boolean} True if the license plate is valid, false otherwise.
  *
  * @example
@@ -20,6 +37,9 @@ import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
  * isValidLicensePlate("ABC 1234"); // true (whitespace mask)
  * isValidLicensePlate("abc1d23"); // true (Mercosul format)
  * isValidLicensePlate("ABC12D3"); // false (not a Mercosul sequence)
+ * isValidLicensePlate("ABC1D23", { format: "LLLNLNN" }); // true
+ * isValidLicensePlate("ABC1234", { format: "LLLNLNN" }); // false (an old format plate)
+ * isValidLicensePlate("ABC-1234", { format: "LLLNNNN" }); // true
  * isValidLicensePlate("ABC1234EXTRA"); // false (too many characters)
  * isValidLicensePlate("invalid"); // false
  * ```
@@ -35,10 +55,18 @@ import { MERCOSUL_REGEX, OLD_FORMAT_REGEX } from "./constants";
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
-export const isValidLicensePlate = (value: string): boolean => {
+export const isValidLicensePlate = (
+	value: string,
+	options?: IsValidLicensePlateOptions,
+): boolean => {
 	if (typeof value !== "string") return false;
 
 	const parsed = sanitizeToAlphanumeric(value);
+	const format = options?.format;
 
-	return OLD_FORMAT_REGEX.test(parsed) || MERCOSUL_REGEX.test(parsed);
+	// A format of the two excludes the other one; no format, or any other value, excludes neither.
+	return (
+		(format !== "LLLNLNN" && OLD_FORMAT_REGEX.test(parsed)) ||
+		(format !== "LLLNNNN" && MERCOSUL_REGEX.test(parsed))
+	);
 };
