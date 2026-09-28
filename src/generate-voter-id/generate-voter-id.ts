@@ -2,7 +2,8 @@ import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-fir
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
 import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
-import { readStateCode } from "../_internals/read-state-code/read-state-code";
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
 
 export type { StateCode } from "../_internals/constants/states";
@@ -16,8 +17,11 @@ export type { StateCode } from "../_internals/constants/states";
  * @param {StateCode | "ZZ"} state - The state the voter id is generated for.
  * @returns {string} The two digit federative union code of that state, or `"ZZ"`'s own code.
  */
-const getFederativeUnion = (state: StateCode | "ZZ"): string =>
-	UF_TO_VOTER_ID_CODE[readStateCode(state) ?? "ZZ"];
+const getFederativeUnion = (state: StateCode | "ZZ"): string => {
+	const code = normalizeStateCode(state);
+
+	return hasOwnKey(UF_TO_VOTER_ID_CODE, code) ? UF_TO_VOTER_ID_CODE[code] : UF_TO_VOTER_ID_CODE.ZZ;
+};
 
 /**
  * Generates a valid random Brazilian voter id (título de eleitor).

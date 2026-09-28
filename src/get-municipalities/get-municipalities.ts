@@ -1,7 +1,8 @@
 import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
 import { STATE_CODES } from "../_internals/constants/state-codes";
 import { type StateCode } from "../_internals/constants/states";
-import { readStateCode } from "../_internals/read-state-code/read-state-code";
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 export type { StateCode } from "../_internals/constants/states";
@@ -52,7 +53,7 @@ export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 		);
 	}
 
-	const code = readStateCode(stateCode);
+	const code = normalizeStateCode(stateCode);
 
-	return code === null ? [] : buildMunicipalities(code);
+	return hasOwnKey(CITIES_DATA, code) ? buildMunicipalities(code) : [];
 };

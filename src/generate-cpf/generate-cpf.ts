@@ -2,8 +2,9 @@ import { calculateCpfCheckDigit } from "../_internals/calculate-cpf-check-digit/
 import { CPF_BASE_LENGTH, CPF_FISCAL_REGION_BY_STATE } from "../_internals/constants/cpf";
 import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
-import { readStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -17,9 +18,11 @@ export type { StateCode } from "../_internals/constants/states";
  * @returns {string} The região fiscal digit of that state, or a random digit.
  */
 const getStateCode = (state?: StateCode): string => {
-	const code = readStateCode(state);
+	const code = normalizeStateCode(state);
 
-	return code === null ? generateRandomNumber(1) : CPF_FISCAL_REGION_BY_STATE[code];
+	return hasOwnKey(CPF_FISCAL_REGION_BY_STATE, code)
+		? CPF_FISCAL_REGION_BY_STATE[code]
+		: generateRandomNumber(1);
 };
 
 /**
