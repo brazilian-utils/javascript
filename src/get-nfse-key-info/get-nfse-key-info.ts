@@ -90,8 +90,7 @@ export type NfseKeyInfo = {
  * notes 001 to 009, the Anexo I and the Perguntas e Respostas of 08/09/2026 do not, and Nota
  * Técnica Conjunta 2025.001 lists the DF-e it covers without the NFS-e. By analogy with that NT
  * and the CNPJ's own check digits, each character counts as its ASCII code minus 48 (`A` is
- * 17). `isValidNfseKey` cites the sources, and why
- * `TSChaveNFSe`, which puts the letter window at positions 7 to 20, is not followed.
+ * 17). `isValidNfseKey` cites the sources.
  *
  * @param {string} value - The access key value to be parsed.
  * @returns {NfseKeyInfo | null} The parsed access key, or `null` when `isValidNfseKey` rejects it.
