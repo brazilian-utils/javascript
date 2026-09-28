@@ -89,10 +89,11 @@ export const renderCfop = (table: Record<string, string>): Record<string, string
 
 	return {
 		"./src/_internals/constants/cfop.ts": `/**
- * CFOP (Código Fiscal de Operações e Prestações) codes: the 4 digits of every operable code, back
- * to back in ascending order, which \`findCodeIndex\` reads. The official description of a code is
- * at the same index of \`CFOP_DESCRIPTIONS\`, a module of its own (\`cfop-descriptions.ts\`) so
- * that checking a code does not bundle the descriptions.
+ * CFOP (Código Fiscal de Operações e Prestações) codes: the 4 digits of every operable code, in
+ * ascending order, packed as base 36 differences by \`packCodes\` (scripts/lookup-table.ts), which
+ * \`findCodeIndex\` reads. The official description of a code is at the same index of
+ * \`CFOP_DESCRIPTIONS\`, a module of its own (\`cfop-descriptions.ts\`) so that checking a code
+ * does not bundle the descriptions.
  *
  * Built from the consolidated Anexo II of Convênio SINIEF s/nº of 15 December 1970, the text in
  * force (given its current wording by Ajuste SINIEF 03/24 and last amended by Ajuste SINIEF

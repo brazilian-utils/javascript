@@ -4,6 +4,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
+import { serializeCodes } from "./lookup-table.ts";
 
 const scriptsDirectory = import.meta.dirname;
 
@@ -183,17 +184,19 @@ export type Bank = {
 
 export const BANKS: Bank[] = ${JSON.stringify(sorted)};`;
 
-	const compeCodes = sorted.map((bank) => bank.code).join("");
+	const compeCodes = serializeCodes(sorted.map((bank) => bank.code));
 	const constantsPath = resolve(scriptsDirectory, "..", "./src/is-valid-bank-account/constants.ts");
 	const constants = await readFile(constantsPath, "utf8");
-	const literal = (compeCodes.match(/.{1,90}/g) ?? []).map((chunk) => `\t"${chunk}"`).join(" +\n");
-	const compeCodesPattern = /export const COMPE_CODES =\n(?:\t"\d*" \+\n)*\t"\d*";/;
+	const compeCodesPattern = /export const COMPE_CODES =\n\t"[\d:,a-z\\\n]*";/;
 
 	if (!compeCodesPattern.test(constants)) {
 		throw new Error("COMPE_CODES literal not found in src/is-valid-bank-account/constants.ts");
 	}
 
-	const updated = constants.replace(compeCodesPattern, `export const COMPE_CODES =\n${literal};`);
+	const updated = constants.replace(
+		compeCodesPattern,
+		`export const COMPE_CODES =\n\t${compeCodes};`,
+	);
 
 	console.log(`Generated ${sorted.length} banks from ${source}`);
 

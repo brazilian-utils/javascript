@@ -31,10 +31,11 @@ export const renderCnae = (subclasses: Record<string, string>): Record<string, s
 
 	return {
 		"./src/_internals/constants/cnae.ts": `/**
- * CNAE-Subclasses 2.3 (Classificação Nacional de Atividades Econômicas) subclass codes: the raw
- * 7 digits of every subclass, back to back in ascending order, which \`findCodeIndex\` reads. The
- * official description of a subclass is at the same index of \`CNAE_DESCRIPTIONS\`, a module of
- * its own (\`cnae-descriptions.ts\`) so that checking a code does not bundle the descriptions.
+ * CNAE-Subclasses 2.3 (Classificação Nacional de Atividades Econômicas) subclass codes: the raw 7
+ * digits of every subclass, in ascending order, packed as base 36 differences by \`packCodes\`
+ * (scripts/lookup-table.ts), which \`findCodeIndex\` reads. The official description of a subclass
+ * is at the same index of \`CNAE_DESCRIPTIONS\`, a module of its own (\`cnae-descriptions.ts\`) so
+ * that checking a code does not bundle the descriptions.
  *
  * 2.3 is the current subclass revision of CNAE 2.0: CONCLA's own CNAE browser lists it as
  * "CNAE-Subclasses 2.3" under "CNAE 2.0 (Res 02/2010)" and tells anyone opening an older table

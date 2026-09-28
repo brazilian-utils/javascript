@@ -270,10 +270,11 @@ export const renderCest = (
 
 	return {
 		"./src/_internals/constants/cest.ts": `/**
- * CEST (Código Especificador da Substituição Tributária) codes: the 7 digits of every code, back
- * to back in ascending order, which \`findCodeIndex\` reads. The description of a code is at the
- * same index of \`CEST_DESCRIPTIONS\`, a module of its own (\`cest-descriptions.ts\`, with the
- * segment names) so that checking a code does not bundle the descriptions.
+ * CEST (Código Especificador da Substituição Tributária) codes: the 7 digits of every code, in
+ * ascending order, packed as base 36 differences by \`packCodes\` (scripts/lookup-table.ts), which
+ * \`findCodeIndex\` reads. The description of a code is at the same index of \`CEST_DESCRIPTIONS\`,
+ * a module of its own (\`cest-descriptions.ts\`, with the segment names) so that checking a code
+ * does not bundle the descriptions.
  *
  * Built from Anexos II to XXVI of Convênio ICMS 142/18, the consolidated text in force, which
  * CONFAZ heads with this line:

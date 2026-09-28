@@ -1,6 +1,7 @@
 import * as fc from "fast-check";
 
 import { BANKS } from "../_internals/constants/banks";
+import { unpackCodes } from "../_internals/test/lookup-table";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { COMPE_CODES, STRUCTURE_ONLY_BANK_CODES } from "./constants";
 import {
@@ -16,11 +17,7 @@ const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
 	digit: "5",
 };
 
-const LISTED_CODES = new Set(
-	Array.from({ length: COMPE_CODES.length / 3 }, (_, index) =>
-		COMPE_CODES.slice(index * 3, index * 3 + 3),
-	),
-);
+const LISTED_CODES = new Set(unpackCodes(COMPE_CODES));
 
 /** The bank codes `isValidBankAccount` validates with a check digit rule. */
 const ALGORITHM_BANK_CODES = ["001", "033", "041", "104", "237", "260", "341", "399", "745"];
@@ -1598,8 +1595,8 @@ describe("isValidBankAccount", () => {
 			).toBe(true);
 		});
 
-		test("should accept the last bank code of COMPE_CODES, which an endsWith based scan would never reach", () => {
-			const lastCode = COMPE_CODES.slice(-3);
+		test("should accept the last bank code of COMPE_CODES, the upper end of the bisection", () => {
+			const lastCode = unpackCodes(COMPE_CODES).at(-1) ?? "";
 
 			expect(BANKS.some((bank) => bank.code === lastCode)).toBe(true);
 
@@ -1616,11 +1613,10 @@ describe("isValidBankAccount", () => {
 
 	describe("COMPE_CODES", () => {
 		test("should hold every code of the Banco Central STR participants list, in the same order", () => {
-			expect(COMPE_CODES).toBe(BANKS.map((bank) => bank.code).join(""));
+			expect(unpackCodes(COMPE_CODES)).toStrictEqual(BANKS.map((bank) => bank.code));
 		});
 
-		test("should reject 030, which only appears as a misaligned substring of the concatenated codes", () => {
-			expect(COMPE_CODES.includes("030")).toBe(true);
+		test("should reject 030, a code the participants list does not hold", () => {
 			expect(BANKS.some((bank) => bank.code === "030")).toBe(false);
 
 			expect(

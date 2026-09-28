@@ -1,19 +1,10 @@
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { NCM_CODES, NCM_FORMAT_REGEX } from "./constants";
 
 const NCM_LENGTH = 8;
-
-/** One code of the packed `NCM_CODES`. */
-const NCM_CODE_REGEX = /\d{8}/g;
-
-let cache: Set<string> | undefined;
-
-const getCache = (): Set<string> => {
-	cache ??= new Set(NCM_CODES.match(NCM_CODE_REGEX));
-	return cache;
-};
 
 /**
  * Validates if a NCM (Nomenclatura Comum do Mercosul) code exists in the official table.
@@ -56,5 +47,5 @@ export const isValidNcm = (value: string | number): boolean => {
 
 	if (!NCM_FORMAT_REGEX.test(code)) return false;
 
-	return getCache().has(sanitizeToDigits(code));
+	return findCodeIndex(NCM_CODES, sanitizeToDigits(code)) !== -1;
 };

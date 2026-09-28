@@ -24,21 +24,47 @@ export const splitRecord = <T>(data: Record<string, T>): LookupTable<T> => {
 };
 
 /**
- * Writes codes of one fixed width as the source of a single string literal that holds them back
- * to back, which `findCodeIndex` reads. Each code sits on a line of its own, ended by a line
- * continuation that adds nothing to the value, so a refresh diffs to the codes that changed.
- * @param {string[]} codes - The codes, in the order they are looked up in.
- * @returns {string} The string literal.
+ * Packs ascending numeric codes of one fixed width into the text `findCodeIndex` reads: the width,
+ * a colon, then each code as its difference from the one before it (the first from zero), in base
+ * 36 and separated by commas. The differences of a dense table are one or two characters where the
+ * codes are six to nine digits, so the table ships about a third of the bytes it would as the codes
+ * written back to back.
+ * @param {string[]} codes - The codes, in ascending order, every one the same number of digits.
+ * @returns {string} The packed table, e.g. `"3:1,2,1"` for `["001", "003", "004"]`.
  */
-export const serializeCodes = (codes: readonly string[]): string => {
+export const packCodes = (codes: readonly string[]): string => {
 	const [first = ""] = codes;
 
-	if (first === "" || codes.some((code) => code.length !== first.length || !/^\w+$/.test(code))) {
-		throw new Error("lookup table codes are not all word characters of one width");
+	if (first === "" || codes.some((code) => code.length !== first.length || !/^\d+$/.test(code))) {
+		throw new Error("lookup table codes are not all digits of one width");
 	}
 
-	return `"${codes.join("\\\n")}"`;
+	let previous = 0;
+	const differences = codes.map((code) => {
+		const value = Number(code);
+
+		if (value <= previous && code !== first)
+			throw new Error(`lookup table code ${code} is out of order`);
+
+		const difference = (value - previous).toString(36);
+		previous = value;
+
+		return difference;
+	});
+
+	return `${first.length}:${differences.join(",")}`;
 };
+
+/**
+ * Writes codes of one fixed width as the source of a single string literal that holds them
+ * packed by `packCodes`, which `findCodeIndex` reads. Each difference sits on a line of its own,
+ * ended by a line continuation that adds nothing to the value, so a refresh diffs to the codes
+ * that changed (and the one after each).
+ * @param {string[]} codes - The codes, in ascending order.
+ * @returns {string} The string literal.
+ */
+export const serializeCodes = (codes: readonly string[]): string =>
+	`"${packCodes(codes).replaceAll(",", ",\\\n")}"`;
 
 /**
  * Writes every generated file of a dataset, relative to the repository root.

@@ -107,10 +107,10 @@ export const renderNbs = (table: Record<string, string>): Record<string, string>
 	return {
 		"./src/_internals/constants/nbs.ts": `/**
  * NBS 2.0 (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam
- * Variações no Patrimônio) codes: the raw 9 digits of every complete code, back to back in
- * ascending order, which \`findCodeIndex\` reads. The official description of a code is at the
- * same index of \`NBS_DESCRIPTIONS\`, a module of its own (\`nbs-descriptions.ts\`) so that
- * checking a code does not bundle the descriptions.
+ * Variações no Patrimônio) codes: the raw 9 digits of every complete code, in ascending order,
+ * packed as base 36 differences by \`packCodes\` (scripts/lookup-table.ts), which \`findCodeIndex\`
+ * reads. The official description of a code is at the same index of \`NBS_DESCRIPTIONS\`, a module
+ * of its own (\`nbs-descriptions.ts\`) so that checking a code does not bundle the descriptions.
  *
  * Built from the official \`NBSa_2-0.csv\` the MDIC publishes on gov.br, a plain
  * \`NBS 2.0;DESCRIÇÃO\` CSV in ISO-8859-1, the version 2.0 as amended by the Portaria Conjunta

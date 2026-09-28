@@ -91,10 +91,10 @@ export const renderServiceItems = (
 		"./src/_internals/constants/service-items.ts": `/**
  * The subitems in force of the service list annexed to the Lei Complementar 116/2003: the raw 4
  * digits of every subitem (\`0101\` for \`1.01\`, the first four digits of the national
- * \`cTribNac\` code), back to back in ascending order, which \`findCodeIndex\` reads. The
- * description of a subitem is at the same index of \`SERVICE_ITEM_DESCRIPTIONS\`, a module of its
- * own (\`service-item-descriptions.ts\`) so that checking a subitem does not bundle the
- * descriptions.
+ * \`cTribNac\` code), in ascending order, packed as base 36 differences by \`packCodes\`
+ * (scripts/lookup-table.ts), which \`findCodeIndex\` reads. The description of a subitem is at the
+ * same index of \`SERVICE_ITEM_DESCRIPTIONS\`, a module of its own
+ * (\`service-item-descriptions.ts\`) so that checking a subitem does not bundle the descriptions.
  *
  * Built from the sheet \`${SHEET_NAME}\` of the \`ANEXO_B-NBS2-LISTA_SERVICO_NACIONAL\` workbook
  * of the Sistema Nacional NFS-e, which prints the list in force, vetoed subitems left out and

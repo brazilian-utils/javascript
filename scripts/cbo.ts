@@ -72,9 +72,10 @@ export const renderCbo = (titles: Record<string, string>): Record<string, string
 	return {
 		"./src/_internals/constants/cbo.ts": `/**
  * CBO 2002 (Classificação Brasileira de Ocupações) occupation codes: the raw 6 digits of every
- * code, back to back in ascending order, which \`findCodeIndex\` reads. The title of a code is at
- * the same index of \`CBO_DESCRIPTIONS\`, a module of its own (\`cbo-descriptions.ts\`) so that
- * checking a code does not bundle the titles.
+ * code, in ascending order, packed as base 36 differences by \`packCodes\`
+ * (scripts/lookup-table.ts), which \`findCodeIndex\` reads. The title of a code is at the same
+ * index of \`CBO_DESCRIPTIONS\`, a module of its own (\`cbo-descriptions.ts\`) so that checking a
+ * code does not bundle the titles.
  *
  * Built from \`CBO2002 - Ocupacao.csv\` of the "Estrutura CBO (CSV)" archive the Ministério do
  * Trabalho e Emprego serves on the CBO site (files dated 10/07/2026), a plain \`CODIGO;TITULO\`

@@ -72,21 +72,21 @@ A few utils embed an official dataset and weigh far more than everything else co
 | `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 IBGE municipalities, with the DDD of each (Anatel) | 165.0 - 167.8 KB | 52.1 - 52.8 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 153.6 - 154.0 KB | 49.4 - 49.7 KB |
 | `getCities` | 5571 IBGE municipality names | 153.4 KB | 49.2 KB |
-| `getCbo` | CBO 2002 occupation titles | 117.3 KB | 29.9 KB |
-| `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 115.5 KB | 26.1 KB |
-| `getCnae` | CNAE-Subclasses 2.3 | 91.6 KB | 20.0 KB |
-| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 82.6 KB | 22.8 KB |
-| `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 80.6 KB | 13.1 KB |
-| `getCfop` | CFOP operation descriptions | 67.6 KB | 6.3 KB |
+| `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 111.5 KB | 24.0 KB |
+| `getCbo` | CBO 2002 occupation titles | 107.6 KB | 24.7 KB |
+| `getCnae` | CNAE-Subclasses 2.3 | 86.6 KB | 17.9 KB |
+| `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 75.5 KB | 11.5 KB |
+| `getCfop` | CFOP operation descriptions | 66.7 KB | 5.2 KB |
 | `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.0 KB | 9.0 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 37.6 - 37.8 KB | 9.0 - 9.2 KB |
+| `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 29.6 KB | 8.9 KB |
 | `getIsbnInfo` · `formatIsbn` | ISBN ranges of the International ISBN Agency (RangeMessage) | 27.0 - 27.1 KB | 6.2 KB |
 | `isValidCid10` | CID-10 V2008 category and subcategory codes plus the SIM `U07` codes, without the descriptions | 26.2 KB | 6.8 KB |
-| `getServiceItem` | Service list of the Lei Complementar 116/2003 | 26.1 KB | 8.4 KB |
-| `isValidCbo` | CBO 2002 occupation codes, without the titles | 16.2 KB | 5.5 KB |
-| `isValidCnae` | CNAE-Subclasses 2.3 codes, without the descriptions | 9.6 KB | 3.4 KB |
-| `isValidNbs` | NBS 2.0 codes, without the descriptions | 8.5 KB | 2.3 KB |
-| `isValidCest` | CEST codes, without the descriptions | 7.6 KB | 2.3 KB |
+| `getServiceItem` | Service list of the Lei Complementar 116/2003 | 26.0 KB | 8.0 KB |
+| `isValidCbo` | CBO 2002 occupation codes, without the titles | 6.6 KB | 1.7 KB |
+| `isValidCnae` | CNAE-Subclasses 2.3 codes, without the descriptions | 4.5 KB | 1.9 KB |
+| `isValidCest` | CEST codes, without the descriptions | 3.5 KB | 0.8 KB |
+| `isValidNbs` | NBS 2.0 codes, without the descriptions | 3.4 KB | 1.2 KB |
 
 The root of the package is a single ESM module, so a bundler cannot split one of these datasets out of it: importing a heavy util from the root puts its whole dataset in your main bundle, and a dynamic `import()` of the root does not help. To lazy-load one, import it from its own subpath:
 

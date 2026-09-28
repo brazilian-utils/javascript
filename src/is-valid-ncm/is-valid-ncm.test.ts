@@ -1,12 +1,13 @@
 import * as fc from "fast-check";
 
 import { anyGarbage } from "../_internals/test/arbitraries";
+import { unpackCodes } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { NCM_CODES as PACKED_NCM_CODES } from "./constants";
 import { isValidNcm } from "./is-valid-ncm";
 
-const NCM_CODES = PACKED_NCM_CODES.match(/\d{8}/g) ?? [];
+const NCM_CODES = unpackCodes(PACKED_NCM_CODES);
 
 describe("isValidNcm", () => {
 	it("should validate an NCM code without a mask (cerveja de malte)", () => {

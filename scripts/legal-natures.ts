@@ -254,9 +254,10 @@ ${stringifyEntries(legacyDescriptions)}
 };
 
 /**
- * The four digit code of every entry of \`LEGAL_NATURE\`, the official and the legacy ones, back to
- * back in ascending order, which \`findCodeIndex\` reads: \`isValidLegalNature\` checks a code
- * against it without bundling the descriptions.
+ * The four digit code of every entry of \`LEGAL_NATURE\`, the official and the legacy ones, in
+ * ascending order, packed as base 36 differences by \`packCodes\` (scripts/lookup-table.ts), which
+ * \`findCodeIndex\` reads: \`isValidLegalNature\` checks a code against it without bundling the
+ * descriptions.
  */
 export const LEGAL_NATURE_CODES = ${serializeCodes(Object.keys({ ...current, ...legacyDescriptions }).sort())};
 

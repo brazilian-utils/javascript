@@ -72,21 +72,21 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 municípios do IBGE, com o DDD de cada um (Anatel) | 165,0 - 167,8 KB | 52,1 - 52,8 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 153,6 - 154,0 KB | 49,4 - 49,7 KB |
 | `getCities` | nomes dos 5571 municípios do IBGE | 153,4 KB | 49,2 KB |
-| `getCbo` | títulos das ocupações da CBO 2002 | 117,3 KB | 29,9 KB |
-| `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 115,5 KB | 26,1 KB |
-| `getCnae` | CNAE-Subclasses 2.3 | 91,6 KB | 20,0 KB |
-| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 82,6 KB | 22,8 KB |
-| `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 80,6 KB | 13,1 KB |
-| `getCfop` | descrições das operações do CFOP | 67,6 KB | 6,3 KB |
+| `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 111,5 KB | 24,0 KB |
+| `getCbo` | títulos das ocupações da CBO 2002 | 107,6 KB | 24,7 KB |
+| `getCnae` | CNAE-Subclasses 2.3 | 86,6 KB | 17,9 KB |
+| `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 75,5 KB | 11,5 KB |
+| `getCfop` | descrições das operações do CFOP | 66,7 KB | 5,2 KB |
 | `getClassTrib` | nomes e descrições do cClassTrib (IBS/CBS) | 50,0 KB | 9,0 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 37,6 - 37,8 KB | 9,0 - 9,2 KB |
+| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 29,6 KB | 8,9 KB |
 | `getIsbnInfo` · `formatIsbn` | faixas do ISBN da Agência Internacional do ISBN (RangeMessage) | 27,0 - 27,1 KB | 6,2 KB |
 | `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, sem as descrições | 26,2 KB | 6,8 KB |
-| `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 26,1 KB | 8,4 KB |
-| `isValidCbo` | códigos das ocupações da CBO 2002, sem os títulos | 16,2 KB | 5,5 KB |
-| `isValidCnae` | códigos da CNAE-Subclasses 2.3, sem as descrições | 9,6 KB | 3,4 KB |
-| `isValidNbs` | códigos da NBS 2.0, sem as descrições | 8,5 KB | 2,3 KB |
-| `isValidCest` | códigos do CEST, sem as descrições | 7,6 KB | 2,3 KB |
+| `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 26,0 KB | 8,0 KB |
+| `isValidCbo` | códigos das ocupações da CBO 2002, sem os títulos | 6,6 KB | 1,7 KB |
+| `isValidCnae` | códigos da CNAE-Subclasses 2.3, sem as descrições | 4,5 KB | 1,9 KB |
+| `isValidCest` | códigos do CEST, sem as descrições | 3,5 KB | 0,8 KB |
+| `isValidNbs` | códigos da NBS 2.0, sem as descrições | 3,4 KB | 1,2 KB |
 
 A raiz do pacote é um único módulo ESM, então o bundler não consegue separar uma dessas bases de dados dele: importar um utilitário pesado da raiz coloca a base inteira no seu bundle principal, e um `import()` dinâmico da raiz não ajuda. Para carregar sob demanda, importe do subpath próprio:
 
