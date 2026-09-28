@@ -105,7 +105,7 @@ jobs:
   test-browsers:
     name: Test on Browsers (${{ matrix.browser }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     strategy:
       # A flake in one browser must not cancel the others, or its cause is lost.
       fail-fast: false
@@ -123,26 +123,32 @@ jobs:
 
       # Chromium under the webdriverio provider sometimes loses a test iframe: the run either fails
       # at once with "Cannot connect to the iframe" / "Failed to fetch dynamically imported module",
-      # or prints nothing more until the job timeout. A whole run takes 1 to 3 minutes, so a first
-      # attempt that times out after 5 minutes, or fails with one of those two errors, is run once
-      # more. Any other failure, including a failing assertion, fails the step on the first attempt.
+      # or prints nothing more until it is killed. A whole run takes 1 to 3 minutes, so an attempt
+      # that times out, or fails with one of those two errors, is run again, up to three attempts.
+      # The iframes are lost when many test files load at once, so the retries run one file at a
+      # time. Any other failure, including a failing assertion, fails the step at once.
       - name: Run tests in ${{ matrix.browser }}
         env:
           BROWSER: ${{ matrix.browser }}
         run: |
           attempt() {
-            timeout 300 vp test --browser.enabled --browser.name="$BROWSER" 2>&1 | tee browser-tests.log
+            timeout "$1" vp test --browser.enabled --browser.name="$BROWSER" "${@:2}" 2>&1 | tee browser-tests.log
             return "${PIPESTATUS[0]}"
           }
 
-          attempt && exit 0
+          lost_iframe() {
+            [ "$1" -eq 124 ] || grep -qE "Cannot connect to the iframe|Failed to fetch dynamically imported module" browser-tests.log
+          }
+
+          attempt 300 && exit 0
           status=$?
 
-          if [ "$status" -eq 124 ] || grep -qE "Cannot connect to the iframe|Failed to fetch dynamically imported module" browser-tests.log; then
-            echo "::warning::The $BROWSER test run lost a test iframe (exit $status); running it once more."
-            attempt
-            exit $?
-          fi
+          for retry in 1 2; do
+            lost_iframe "$status" || exit "$status"
+            echo "::warning::The $BROWSER test run lost a test iframe (exit $status); retry $retry of 2, one file at a time."
+            attempt 420 --no-file-parallelism && exit 0
+            status=$?
+          done
 
           exit "$status"
 
