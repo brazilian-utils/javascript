@@ -3360,6 +3360,7 @@ O ISBN (International Standard Book Number) tem 13 dígitos desde 2007: o prefix
 Verifica se um ISBN-13 é válido: o prefixo `978` ou `979` e o dígito verificador módulo 10 do Manual do Usuário do ISBN (os 12 primeiros dígitos com pesos alternados 1 e 3, a mesma regra do GTIN-13).
 
 - O valor pode vir impresso: o rótulo `ISBN` na frente (`ISBN`, `ISBN-13`, com ou sem dois-pontos) e um único hífen ou espaço entre dois dígitos são aceitos; qualquer outra coisa, inclusive separadores seguidos, torna o valor inválido.
+- Um número `979-0` é um ISMN (partitura impressa), não um ISBN: a RangeMessage não dá grupo de ISBN a essa faixa, então ele é rejeitado.
 - Não verifica se o grupo e o registrante estão atribuídos; veja `getIsbnInfo`.
 - O exemplo impresso da Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, não traz o dígito que a regra dá (`0`), então é rejeitado.
 

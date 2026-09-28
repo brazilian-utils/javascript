@@ -74,10 +74,10 @@ describe("getIsbnInfo", () => {
 		});
 	});
 
-	it("should return null for a group not assigned yet (979-0), although the check digit is valid", () => {
+	it("should return null for 979-0, the ISMN range, which isValidIsbn rejects too", () => {
 		const isbn = withCheckDigit("979000000000");
 
-		expect(isValidIsbn(isbn)).toBe(true);
+		expect(isValidIsbn(isbn)).toBe(false);
 		expect(getIsbnInfo(isbn)).toBeNull();
 	});
 
