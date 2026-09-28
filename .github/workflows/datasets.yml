@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   update-datasets:
-    name: Update IBGE/CONCLA datasets
+    name: Update the embedded datasets
     runs-on: ubuntu-latest
     # Only this job pushes the dataset branch and opens the pull request.
     permissions:
@@ -43,14 +43,17 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Written outside the workspace, so the pull request does not pick the file up as a change.
+      - name: Summarize what changed
+        if: steps.diff.outputs.changed == 'true'
+        run: node scripts/data-summary.ts "$RUNNER_TEMP/dataset-summary.md"
+
       - name: Open pull request
         if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
-          commit-message: "chore(data): update IBGE/CONCLA datasets"
+          commit-message: "chore(data): update the embedded datasets"
           branch: chore/update-datasets
           base: ${{ github.event.repository.default_branch }}
-          title: "chore(data): update IBGE/CONCLA datasets"
-          body: |
-            Automated weekly refresh of the cities, states and legal-natures
-            datasets sourced from IBGE/CONCLA.
+          title: "chore(data): update the embedded datasets"
+          body-path: ${{ runner.temp }}/dataset-summary.md

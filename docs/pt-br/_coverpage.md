@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/brazilian-utils/brand/main/logos/logo-js.svg" alt="Brazilian Utils" width="360"/>
 
-> Biblioteca de utilitários para o negócio brasileiro.
+> Utilitários para dados brasileiros: CPF, CNPJ, CEP, boleto, Pix, feriados e mais.
 
 - Zero dependências de runtime
 - Tree-shakeable, um import por utilitário

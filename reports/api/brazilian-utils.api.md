@@ -980,6 +980,55 @@ export type RegistroProfissionalCouncil = "OAB" | "CRM" | "CRO" | "CRP" | "CRC";
 export const removeAccents: (value: string) => string;
 
 // @public
+export type StandardSchemaV1<Input = unknown, Output = Input> = {
+    readonly "~standard": StandardSchemaV1Props<Input, Output>;
+};
+
+// @public
+export type StandardSchemaV1FailureResult = {
+    readonly issues: readonly StandardSchemaV1Issue[];
+};
+
+// @public
+export type StandardSchemaV1Issue = {
+    readonly message: string;
+    readonly path?: readonly (PropertyKey | StandardSchemaV1PathSegment)[];
+};
+
+// @public
+export type StandardSchemaV1Options = {
+    readonly libraryOptions?: Record<string, unknown>;
+};
+
+// @public
+export type StandardSchemaV1PathSegment = {
+    readonly key: PropertyKey;
+};
+
+// @public
+export type StandardSchemaV1Props<Input = unknown, Output = Input> = {
+    readonly version: 1;
+    readonly vendor: string;
+    readonly validate: (value: unknown, options?: StandardSchemaV1Options) => StandardSchemaV1Result<Output> | Promise<StandardSchemaV1Result<Output>>;
+    readonly types?: StandardSchemaV1Types<Input, Output>;
+};
+
+// @public
+export type StandardSchemaV1Result<Output> = StandardSchemaV1SuccessResult<Output> | StandardSchemaV1FailureResult;
+
+// @public
+export type StandardSchemaV1SuccessResult<Output> = {
+    readonly value: Output;
+    readonly issues?: undefined;
+};
+
+// @public
+export type StandardSchemaV1Types<Input = unknown, Output = Input> = {
+    readonly input: Input;
+    readonly output: Output;
+};
+
+// @public
 export type State = {
     readonly code: "AC";
     readonly name: "Acre";
@@ -1152,6 +1201,15 @@ export type StateName = State["name"];
 
 // @public
 export const subBusinessDays: (date: Date, amount: number, options?: BusinessDayOptions) => Date | null;
+
+// @public
+export const toStandardSchema: <Value, Options = undefined>(validate: (value: Value, options?: Options) => boolean, config?: ToStandardSchemaOptions<Options>) => StandardSchemaV1<Value>;
+
+// @public
+export type ToStandardSchemaOptions<Options = undefined> = {
+    options?: Options;
+    message?: string;
+};
 
 // (No @packageDocumentation comment for this package)
 

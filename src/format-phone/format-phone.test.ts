@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
+import { phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { generatePhone } from "../generate-phone/generate-phone";
 import { parsePhone } from "../parse-phone/parse-phone";
 import { type FormatPhoneOptions, type PhoneMask, formatPhone } from "./format-phone";
 
@@ -183,8 +183,8 @@ describe("formatPhone", () => {
 
 		test("should print a generated number in E.164 and read it back", () => {
 			fc.assert(
-				fc.property(fc.constantFrom(...geographic), (type) => {
-					const phone = generatePhone(type);
+				fc.property(fc.gen(), fc.constantFrom(...geographic), (g, type) => {
+					const phone = g(phones, type);
 					const formatted = formatPhone(phone, { mask: "e164" });
 
 					expect(formatted).toBe(`+55${phone}`);
@@ -195,8 +195,8 @@ describe("formatPhone", () => {
 
 		test("should keep every digit of a generated number under the auto mask", () => {
 			fc.assert(
-				fc.property(fc.constantFrom(...geographic), (type) => {
-					const phone = generatePhone(type);
+				fc.property(fc.gen(), fc.constantFrom(...geographic), (g, type) => {
+					const phone = g(phones, type);
 					const international = formatPhone(phone, { mask: "international" });
 
 					expect(parsePhone(formatPhone(phone, { mask: "auto" }))).toBe(phone);

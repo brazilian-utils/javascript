@@ -1,7 +1,7 @@
-import { ARRECADACAO_PRODUCT, ARRECADACAO_SEGMENTS } from "../_internals/constants/arrecadacao";
+import { assembleBoletoArrecadacao } from "../_internals/assemble-boleto-arrecadacao/assemble-boleto-arrecadacao";
+import { assembleBoletoBancario } from "../_internals/assemble-boleto-bancario/assemble-boleto-bancario";
+import { ARRECADACAO_SEGMENTS } from "../_internals/constants/arrecadacao";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
-import { mod10 } from "../_internals/mod10/mod10";
-import { mod11 } from "../_internals/mod11/mod11";
 
 /** The parameters of `generateBoleto`. */
 export type GenerateBoletoParams = {
@@ -9,63 +9,21 @@ export type GenerateBoletoParams = {
 	type?: "bancario" | "arrecadacao";
 };
 
-const ARRECADACAO_VALUE_IDENTIFIERS = {
-	mod10: { effective: "6", reference: "7" },
-	mod11: { effective: "8", reference: "9" },
-};
+const generateBancario = (): string =>
+	assembleBoletoBancario({
+		field1: generateRandomNumber(9),
+		field2: generateRandomNumber(10),
+		field3: generateRandomNumber(10),
+		tail: generateRandomNumber(15),
+	});
 
-const generateBancario = (): string => {
-	const p1Base = generateRandomNumber(9);
-	const p2Base = generateRandomNumber(10);
-	const p3Base = generateRandomNumber(10);
-	const lastDigits = generateRandomNumber(15);
-
-	const line =
-		p1Base +
-		mod10(p1Base).toString() +
-		p2Base +
-		mod10(p2Base).toString() +
-		p3Base +
-		mod10(p3Base).toString() +
-		lastDigits;
-
-	const boletoWithoutCheck =
-		line.slice(0, 4) +
-		line.slice(33, 47) +
-		line.slice(4, 9) +
-		line.slice(10, 20) +
-		line.slice(21, 31);
-
-	const mainCheck = mod11(boletoWithoutCheck);
-
-	return line.slice(0, 32) + mainCheck.toString() + line.slice(33);
-};
-
-const generateArrecadacao = (): string => {
-	const segment = ARRECADACAO_SEGMENTS[Math.floor(Math.random() * ARRECADACAO_SEGMENTS.length)];
-	const useMod11 = Math.random() < 0.5;
-	const hasEffectiveValue = Math.random() < 0.5;
-	const checkDigit = useMod11
-		? (value: string): number => mod11(value, { variant: "arrecadacao" })
-		: mod10;
-	const identifier =
-		ARRECADACAO_VALUE_IDENTIFIERS[useMod11 ? "mod11" : "mod10"][
-			hasEffectiveValue ? "effective" : "reference"
-		];
-
-	const body = generateRandomNumber(40);
-	const head = `${ARRECADACAO_PRODUCT}${segment}${identifier}`;
-	const barcode = head + checkDigit(head + body) + body;
-
-	let line = "";
-
-	for (let block = 0; block < 4; block++) {
-		const value = barcode.slice(block * 11, block * 11 + 11);
-		line += value + checkDigit(value);
-	}
-
-	return line;
-};
+const generateArrecadacao = (): string =>
+	assembleBoletoArrecadacao({
+		segment: ARRECADACAO_SEGMENTS[Math.floor(Math.random() * ARRECADACAO_SEGMENTS.length)],
+		useMod11: Math.random() < 0.5,
+		hasEffectiveValue: Math.random() < 0.5,
+		body: generateRandomNumber(40),
+	});
 
 /**
  * Generates a valid random Brazilian bank slip (boleto) number.

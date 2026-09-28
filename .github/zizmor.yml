@@ -7,8 +7,10 @@ rules:
     ignore:
       - build.yml
       - check.yml
+      - docs.yml
       - datasets.yml
       - live-tests.yml
       - mutation.yml
+      - preview.yml
       - release.yml
       - tests.yml

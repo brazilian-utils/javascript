@@ -1,7 +1,12 @@
 import * as fc from "fast-check";
 
 import { CNPJ_LENGTH } from "../_internals/constants/cnpj";
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import {
+	anyValue,
+	cnpjs,
+	digitsOfOtherLength,
+	maskSeparators,
+} from "../_internals/test/arbitraries";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { isValidCnpj, type IsValidCnpjOptions } from "./is-valid-cnpj";
@@ -172,8 +177,8 @@ describe("isValidCnpj", () => {
 
 		test("should accept a generated CNPJ written with any of the documented masks", () => {
 			fc.assert(
-				fc.property(version, masks, (currentVersion, separators) => {
-					const cnpj = generateCnpj(currentVersion);
+				fc.property(fc.gen(), version, masks, (g, currentVersion, separators) => {
+					const cnpj = g(cnpjs, currentVersion);
 					const head = `${cnpj.slice(0, 2)}${separators[0]}${cnpj.slice(2, 5)}`;
 					const body = `${separators[1]}${cnpj.slice(5, 8)}${separators[2]}`;
 					const tail = `${cnpj.slice(8, 12)}${separators[3]}${cnpj.slice(12)}`;

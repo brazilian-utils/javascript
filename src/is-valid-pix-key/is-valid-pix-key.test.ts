@@ -1,9 +1,9 @@
 import * as fc from "fast-check";
 
+import { cnpjs, cpfs, phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
-import { generatePhone } from "../generate-phone/generate-phone";
 import { type PixKeyType, getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
 import { type IsValidPixKeyOptions, isValidPixKey } from "./is-valid-pix-key";
 
@@ -110,10 +110,10 @@ describe("isValidPixKey", () => {
 
 		test("should accept every kind of key the DICT defines", () => {
 			fc.assert(
-				fc.property(emails, fc.uuid(), (email, evp) => {
-					const phone = `+55${generatePhone("mobile")}`;
+				fc.property(fc.gen(), emails, fc.uuid(), (g, email, evp) => {
+					const phone = `+55${g(phones, "mobile")}`;
 
-					for (const key of [generateCpf(), generateCnpj(), email, evp, phone]) {
+					for (const key of [g(cpfs), g(cnpjs), email, evp, phone]) {
 						expect(isValidPixKey(key)).toBe(true);
 					}
 				}),

@@ -1,9 +1,13 @@
 import * as fc from "fast-check";
 
-import { anyValue, digitsOfOtherLength, maskSeparators } from "../_internals/test/arbitraries";
+import {
+	anyValue,
+	cnhs,
+	digitsOfOtherLength,
+	maskSeparators,
+} from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType, expectRejected } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { generateCnh } from "../generate-cnh/generate-cnh";
 import { isValidCnh } from "./is-valid-cnh";
 
 describe("isValidCnh", () => {
@@ -49,8 +53,8 @@ describe("isValidCnh", () => {
 	describe("properties", () => {
 		test("should accept a generated CNH whatever mask characters surround its digits", () => {
 			fc.assert(
-				fc.property(maskSeparators([".", "-", " "], 3, 3), (separators) => {
-					const cnh = generateCnh();
+				fc.property(fc.gen(), maskSeparators([".", "-", " "], 3, 3), (g, separators) => {
+					const cnh = g(cnhs);
 					const base = `${separators[0]}${cnh.slice(0, 9)}${separators[1]}`;
 
 					expect(isValidCnh(`${base}${cnh.slice(9)}${separators[2]}`)).toBe(true);

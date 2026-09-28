@@ -1,7 +1,7 @@
 <div align="center">
 <img src="https://raw.githubusercontent.com/brazilian-utils/brand/main/github-hero/github-hero-js.png" width="100%" alt="Brazilian Utils" />
 
-<p>Utils library for Brazilian-specific businesses.</p>
+<p>Utilities for Brazilian data: CPF, CNPJ, CEP, boleto, Pix, holidays and more.</p>
 
 [📖 Documentation](https://brazilian-utils.com.br/getting-started)
 
@@ -29,46 +29,24 @@
 
 # Getting Started
 
-Brazilian Utils is a library focused on solving problems that we face daily in the development of applications for the Brazilian business.
+Brazilian Utils is a zero-dependency library of small utilities for the day-to-day problems of building software for Brazil: validating, formatting, parsing and generating CPF, CNPJ, CEP, boleto, Pix, phone numbers, holidays and more.
 
 ## Why Brazilian Utils
 
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
-- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped); every util is also its own subpath entry (`@brazilian-utils/brazilian-utils/get-cities`) for the heavy ones.
-- **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, tested in CI on every one of them.
-- **Written in TypeScript.** Types ship with the package; the public API is tracked by an API report so nothing changes silently.
-- **Validated against the official rules.** Every validator cites the specification, law or dataset it implements (`@see` in the docs), and the test suite is mutation-tested, not just covered.
+- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
+- **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, all tested in CI.
+- **Written in TypeScript.** Types ship with the package, and an API report tracks the public API so nothing changes silently.
+- **Validated against the official rules.** Every validator cites the specification, law or dataset it implements, and the test suite is mutation-tested, not just covered.
 - **Documented in English and Portuguese**, with an `llms.txt` for AI assistants.
 
 ## Installation
 
-You can install **Brazilian Utils** in a few ways:
-
-as npm package:
-
 ```bash
-npm install --save @brazilian-utils/brazilian-utils
+npm install @brazilian-utils/brazilian-utils
 ```
 
-with yarn package manager:
-
-```bash
-yarn add @brazilian-utils/brazilian-utils
-```
-
-with pnpm:
-
-```bash
-pnpm add @brazilian-utils/brazilian-utils
-```
-
-with bun:
-
-```bash
-bun add @brazilian-utils/brazilian-utils
-```
-
-or `<script>` tag (global `BrazilianUtils`):
+The same package works with `yarn add`, `pnpm add` and `bun add`. In a plain `<script>` tag it exposes the global `BrazilianUtils`:
 
 ```html
 <script src="https://unpkg.com/@brazilian-utils/brazilian-utils/dist/brazilian-utils.umd.cjs"></script>
@@ -76,9 +54,9 @@ or `<script>` tag (global `BrazilianUtils`):
 
 ### Runtime support
 
-The supported range is the `engines` field in `package.json`; every row below is exercised by the [Tests workflow](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml?query=branch%3Amain) on every pull request.
+The supported range is the `engines` field in `package.json`; every row below runs in the [Tests workflow](https://github.com/brazilian-utils/javascript/actions/workflows/tests.yml?query=branch%3Amain) on every pull request.
 
-| Runtime  | Supported                 | Covered in CI                 |
+| Runtime  | Supported                 | Tested in CI                  |
 | -------- | ------------------------- | ----------------------------- |
 | Node.js  | `^20.19.0 \|\| >=22.12.0` | 20, 22, 24, 26                |
 | Bun      | latest                    | latest                        |
@@ -87,7 +65,7 @@ The supported range is the `engines` field in `package.json`; every row below is
 
 ## Usage
 
-To use a utility, import the required function, as shown below:
+Import the function you need:
 
 ```javascript
 import { isValidCpf } from "@brazilian-utils/brazilian-utils";
@@ -95,7 +73,7 @@ import { isValidCpf } from "@brazilian-utils/brazilian-utils";
 isValidCpf("1232454233345"); // false
 ```
 
-You can check a list of utilities [by clicking here](https://brazilian-utils.com.br/utilities).
+The [utilities reference](https://brazilian-utils.com.br/utilities) lists every function, grouped by family, with its options and examples.
 
 - Using an AI coding assistant? The docs are indexed on Context7 as [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript), and [llms.txt](https://brazilian-utils.com.br/llms.txt) lists every util for other tools. See [AI assistants](https://brazilian-utils.com.br/getting-started?id=ai-assistants).
 - The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](https://brazilian-utils.com.br/getting-started?id=bundle-size).

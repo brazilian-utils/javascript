@@ -10,7 +10,7 @@ type Api = typeof api;
 
 type Callable = (...args: never[]) => unknown;
 
-type ObjectOf<Value> = Value extends Date | readonly unknown[]
+type ObjectOf<Value> = Value extends Date | readonly unknown[] | Callable
 	? never
 	: Value extends object
 		? Value

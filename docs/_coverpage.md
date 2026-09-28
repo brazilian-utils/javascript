@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/brazilian-utils/brand/main/logos/logo-js.svg" alt="Brazilian Utils" width="360"/>
 
-> Utils library for Brazilian-specific businesses.
+> Utilities for Brazilian data: CPF, CNPJ, CEP, boleto, Pix, holidays and more.
 
 - Zero runtime dependencies
 - Tree-shakeable, one import per util

@@ -1,0 +1,88 @@
+/*
+ * The live demos of the guides: the site's own stylesheet, so a demo looks like the page around it
+ * (docsify already styles the controls), plus the layout of a form and the state of its fields.
+ * The examples themselves carry no classes: everything here is addressed by element.
+ */
+@import url("../styles.css");
+
+:root {
+  --invalid-color: #e5534b;
+  --muted-color: light-dark(#6e7781, #8b949e);
+}
+
+/* The theme lays a page out to fill the window; a demo is only as tall as its content. */
+html,
+body {
+  height: auto;
+  min-height: 0;
+}
+
+body {
+  padding: 20px;
+}
+
+/* One row per field: its label, then the control, then whatever the field has to say. */
+body,
+form {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 20ch) 1fr;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+form {
+  grid-column: 1 / -1;
+  padding: 0;
+}
+
+label {
+  grid-column: 1;
+  justify-self: end;
+  font-weight: 600;
+}
+
+input,
+select {
+  grid-column: 2;
+  width: 100%;
+  padding: 0.4em 0.65em;
+  font-family: var(--font-family-mono);
+}
+
+select {
+  font-family: inherit;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--theme-color);
+}
+
+/* What a field has to say sits next to it, and keeps its row when it has nothing to say. */
+output,
+p {
+  grid-column: 3;
+  margin: 0;
+  min-height: 1lh;
+  font-size: var(--font-size-s, 0.875em);
+  color: var(--muted-color);
+}
+
+p[role="alert"]:not(:empty) {
+  color: var(--invalid-color);
+}
+
+output:not(:empty) {
+  color: var(--theme-color);
+}
+
+button {
+  grid-column: 2;
+  justify-self: start;
+  padding: 0.45em 1.2em;
+}
+
+input[aria-invalid="true"] {
+  border-color: var(--invalid-color);
+}

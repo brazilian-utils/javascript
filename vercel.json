@@ -1,0 +1,24 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": null,
+	"installCommand": "npm ci",
+	"buildCommand": "npm run build:docs",
+	"outputDirectory": "docs",
+	"cleanUrls": true,
+	"ignoreCommand": "test -n \"$VERCEL_GIT_PREVIOUS_SHA\" && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- docs scripts package.json vercel.json 2>/dev/null || exit 1",
+	"git": {
+		"deploymentEnabled": {
+			"main": false
+		}
+	},
+	"headers": [
+		{
+			"source": "/(.*)",
+			"headers": [
+				{ "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+				{ "key": "X-Content-Type-Options", "value": "nosniff" },
+				{ "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+			]
+		}
+	]
+}

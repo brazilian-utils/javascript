@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>State and city</title>
+
+  <label for="state">State</label>
+  <select id="state">
+    <option value="">Pick a state</option>
+  </select>
+
+  <label for="city">City</label>
+  <select id="city" disabled>
+    <option value="">Pick a city</option>
+  </select>
+
+  <script type="module">
+    // Nothing is imported with the page. Opening a select is what says its list is wanted: the
+    // states are 2.5 KB and the cities 154 KB, and the browser keeps each module once it has it.
+    const CDN = "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils";
+
+    const states = document.getElementById("state");
+    const cities = document.getElementById("city");
+
+    const fill = (select, options, placeholder) => {
+      select.replaceChildren(new Option(placeholder, ""));
+
+      for (const option of options) select.append(new Option(option.label, option.value));
+    };
+
+    const loading = (select, message) => {
+      fill(select, [], message);
+      select.setAttribute("aria-busy", "true");
+    };
+
+    states.addEventListener("focus", async () => {
+      loading(states, "Loading the states…");
+
+      const { getStates } = await import(`${CDN}/get-states/+esm`);
+
+      fill(
+        states,
+        getStates().map((state) => ({ label: state.name, value: state.code })),
+        "Pick a state",
+      );
+      states.removeAttribute("aria-busy");
+    }, { once: true });
+
+    // The state whose cities are on screen; another state's are fetched when they are asked for.
+    // `import()` takes no signal, so the module is not stopped, only what is done with it: a table
+    // that arrives for a state that is no longer picked is dropped.
+    let shown = "";
+    let pending;
+
+    cities.addEventListener("focus", async () => {
+      const state = states.value;
+
+      if (state === shown) return;
+
+      pending?.abort();
+      pending = new AbortController();
+
+      const { signal } = pending;
+
+      shown = state;
+      loading(cities, "Loading the cities…");
+
+      const { getCities } = await import(`${CDN}/get-cities/+esm`);
+
+      if (signal.aborted) return;
+
+      fill(
+        cities,
+        getCities(state).map((city) => ({ label: city, value: city })),
+        "Pick a city",
+      );
+      cities.removeAttribute("aria-busy");
+    });
+
+    states.addEventListener("change", () => {
+      pending?.abort();
+      cities.disabled = states.value === "";
+      shown = "";
+      fill(cities, [], "Pick a city");
+    });
+  </script>
+</html>
