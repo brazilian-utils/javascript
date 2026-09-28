@@ -4,8 +4,6 @@ import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-d
 
 export type { State, StateCode, StateName } from "../_internals/constants/states";
 
-const PARENTHESES_REGEX = /^\((.*)\)$/;
-
 /** The state, and the region it belongs to, that `getAreaCodeInfo` returns for a DDD. */
 export type AreaCodeInfo = {
 	/** The DDD (area code) as a number, e.g. `11`. */
@@ -39,13 +37,11 @@ export type AreaCodeInfo = {
  * the seat does hold every municipality but the one named.
  *
  * A `areaCode` given as a number must be a non-negative integer: a sign and a decimal point
- * are not digits, so `-11` and `1.1` are rejected instead of being read as `11`. A string may
- * wrap the DDD in parentheses, the way a phone number prints it, and carry whitespace and
- * hyphens; any other character makes it something other than a DDD, so `"1e1"`, `"a1b1"` and
- * `"DDD 11"` return `null` instead of having the character stripped, as they were up to 2.4.0.
+ * are not digits, so `-11` and `1.1` are rejected instead of being read as `11`. A string has
+ * any non-digit characters stripped, so `"(11)"`, `"0xx11"` and `"DDD 11"` are the DDD 11.
  *
  * @param {string|number} areaCode - The DDD to look up. Accepts a string or a non-negative
- * integer number; a string may be wrapped in parentheses and carry whitespace and hyphens.
+ * integer number, with any non-digit characters stripped before matching.
  * @returns {AreaCodeInfo|null} The area code info, or `null` when `areaCode` is not one of the
  * 67 DDDs in use under the Plano Geral de Numeração.
  *
@@ -78,15 +74,12 @@ export type AreaCodeInfo = {
  * // { areaCode: 61, stateCode: "DF", stateName: "Distrito Federal", regionCode: "CO", regionName: "Centro-Oeste", stateCodes: ["DF", "GO"] }
  *
  * getAreaCodeInfo("00"); // null
- * getAreaCodeInfo("(11)"); // the same as "11"
+ * getAreaCodeInfo("(0xx11)"); // the same as "11"
  * getAreaCodeInfo(-11); // null
- * getAreaCodeInfo("1e1"); // null (not read as 11)
  * ```
  */
 export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null => {
-	const unwrapped =
-		typeof areaCode === "string" ? areaCode.trim().replace(PARENTHESES_REGEX, "$1") : areaCode;
-	const digits = readLookupDigits(unwrapped);
+	const digits = readLookupDigits(areaCode);
 
 	// Stryker disable next-line ConditionalExpression: without this guard a null reads as the DDD 0, which no state has, so the lookup below returns null all the same; the guard only spares it.
 	if (digits === null) return null;

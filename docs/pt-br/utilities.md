@@ -274,7 +274,7 @@ Busca o endereço de um CEP em vários provedores ao mesmo tempo e resolve com a
   - `providers` (`CepProvider[]`) lista os provedores a disputar (padrão `['viacep', 'brasilapi']`). `'widenet'` está descontinuado e fica fora da lista padrão.
   - `timeoutMs` (`number`) limita a busca inteira, tentativas incluídas (padrão: sem limite). Quando o tempo acaba, todas as requisições são abortadas e a chamada rejeita com `GetAddressInfoByCepServiceError`.
   - `signal` (`AbortSignal`) cancela a busca; a chamada rejeita com `signal.reason`, como o `fetch`.
-- Aceita o que o `isValidCep` aceita: 8 dígitos, ignorando espaços, pontos e hífens; qualquer outro caractere torna o CEP inválido. Um número é preenchido com zeros à esquerda até 8 dígitos, já que não carrega o zero inicial de um CEP de São Paulo, mas só a partir de `1000000` (`01000-000`, o menor CEP que os Correios atribuem). Um número menor, negativo ou fracionário é rejeitado com `GetAddressInfoByCepValidationError` antes de qualquer requisição.
+- Aceita string ou número. Uma string tem removido todo caractere que não é dígito (`'CEP 01310-100'` é `01310100`) e precisa sobrar com 8 dígitos. Um número é preenchido com zeros à esquerda até 8 dígitos, já que não carrega o zero inicial de um CEP de São Paulo, mas só a partir de `1000000` (`01000-000`, o menor CEP que os Correios atribuem). Um número menor, negativo ou fracionário é rejeitado com `GetAddressInfoByCepValidationError` antes de qualquer requisição.
 - Repete falhas transitórias de rede por provedor.
 - Rejeita com `GetAddressInfoByCepValidationError` quando o CEP é inválido, `providers` não nomeia nenhum provedor conhecido ou `timeoutMs` não é um número finito positivo, com `GetAddressInfoByCepNotFoundError` quando todos os provedores falharam e pelo menos um informou que o CEP é desconhecido, e com `GetAddressInfoByCepServiceError` quando todos os provedores falharam por outro motivo.
 - A BrasilAPI responde 404 tanto para um CEP desconhecido quanto quando os serviços por trás dela estão fora do ar, então o 404 dela só conta como "CEP desconhecido" quando nenhum outro provedor deixou de responder.
@@ -995,7 +995,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 Retorna o estado e a região a que um DDD brasileiro (código de área) pertence, dentre os 67 DDDs em uso no Plano Geral de Numeração da Anatel. Aceita string ou número inteiro não negativo.
 
-- Uma string pode trazer o DDD entre parênteses (`'(11)'`) e ter espaços e hífens; qualquer outro caractere (`'1e1'`, `'DDD 11'`) retorna `null`.
+- Uma string tem removido todo caractere que não é dígito, então `'(11)'`, `'0xx11'` e `'DDD 11'` são o DDD 11.
 - Retorna um `AreaCodeInfo`: `areaCode`, `stateCode`, `stateName`, `regionCode`, `regionName` e `stateCodes`. Retorna `null` quando o DDD não está em uso.
 - `stateCode` é o estado sede do DDD. Para os quatro DDDs que cruzam uma divisa (61, 42, 47 e 49) `stateCodes` lista também o outro estado, a sede primeiro.
 
@@ -1012,7 +1012,7 @@ getAreaCodeInfo('61');
 // { areaCode: 61, stateCode: 'DF', stateName: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', stateCodes: ['DF', 'GO'] }
 
 getAreaCodeInfo('00'); // null
-getAreaCodeInfo('1e1'); // null
+getAreaCodeInfo('(0xx11)'); // o mesmo que '11'
 getAreaCodeInfo(-11); // null
 getAreaCodeInfo(1.1); // null
 ```
@@ -1434,7 +1434,7 @@ Fonte: [lista de participantes do STR](https://www.bcb.gov.br/content/estabilida
 
 Busca um banco brasileiro pelo seu código de compensação (COMPE), a partir da lista de participantes do STR do Banco Central do Brasil. Aceita `string` ou `number`.
 
-- Uma string pode ter espaços e hífens; qualquer outro caractere (`'1e0'`, `'1.0'`) retorna `null`.
+- Uma string tem removido todo caractere que não é dígito antes de o código ser completado para 3 dígitos.
 - Retorna o `Bank` correspondente, ou `null` quando nenhum banco tem esse código.
 
 ```javascript
@@ -1451,7 +1451,7 @@ Fonte: [lista de participantes do STR](https://www.bcb.gov.br/content/estabilida
 
 Busca um banco brasileiro pelo seu ISPB (Identificador do Sistema de Pagamentos Brasileiro), o código de 8 caracteres de todo participante do SPB. Aceita `string` ou `number`, com ou sem zeros à esquerda.
 
-- Desde a Resolução BCB nº 585/2026 o ISPB pode ter letras, então uma string de 8 letras e dígitos é buscada como está, em maiúsculas ou minúsculas. Espaços e hífens são ignorados; qualquer outro caractere retorna `null`, e uma letra nunca é descartada (`'0000000A'` não é `'00000000'`).
+- Desde a Resolução BCB nº 585/2026 o ISPB pode ter letras, então uma string de 8 letras e dígitos é buscada como está, em maiúsculas ou minúsculas. Todo caractere que não é letra nem dígito é ignorado (`'00.000.000'` é `'00000000'`), e uma letra nunca é descartada (`'0000000A'` não é `'00000000'`).
 
 - Retorna o `Bank` correspondente, ou `null` quando nenhum banco tem esse ISPB. A base só traz as instituições que também têm código COMPE.
 
@@ -1728,7 +1728,7 @@ Fonte: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app/
 Retorna o estado brasileiro cujo código IBGE de 2 dígitos (`cUF`, o Código da Unidade da Federação) corresponde ao valor informado.
 
 - É o código de UF do primeiro campo de uma chave de acesso de DF-e, a que `isValidNfeKey` cobre.
-- Aceita string ou número inteiro não negativo. Uma string pode ter espaços e hífens; qualquer outro caractere (`'x11'`) retorna `null`.
+- Aceita string ou número inteiro não negativo, com todo caractere que não é dígito removido da string (`'35/SP'` é `35`).
 - Retorna `null` quando o código não corresponde a nenhum estado. Exporta o tipo `State`.
 
 ```javascript
@@ -1841,7 +1841,7 @@ Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 
 Busca um município brasileiro pelo código IBGE de 7 dígitos.
 
-- Aceita o código como string ou número inteiro não negativo. Uma string pode ter espaços e hífens; qualquer outro caractere retorna `null`.
+- Aceita o código como string ou número inteiro não negativo, com todo caractere que não é dígito removido da string.
 - Retorna `{ code, name, stateCode }` (`Municipality`), ou `null` quando o código não tem 7 dígitos ou não corresponde a nenhum município.
 
 ```javascript

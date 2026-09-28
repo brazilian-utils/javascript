@@ -5,6 +5,12 @@ import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime
 import { getBankByIspb } from "./get-bank-by-ispb";
 
 describe("getBankByIspb", () => {
+	test("should drop every character that is neither a letter nor a digit, as up to 2.4.0", () => {
+		expect(getBankByIspb("00.000.000")?.code).toBe("001");
+		expect(getBankByIspb("0000/0000")?.code).toBe("001");
+		expect(getBankByIspb(" 60.701.190 ")?.code).toBe("341");
+	});
+
 	describe("should return null for a negative or fractional number", () => {
 		test("whose digits would otherwise match a bank", () => {
 			expect(getBankByIspb(-208)).toBeNull();
@@ -83,10 +89,9 @@ describe("getBankByIspb", () => {
 			expect(getBankByIspb("a0000000")).toBeNull();
 		});
 
-		test("when the ispb has a character other than a letter, a digit, whitespace or a hyphen", () => {
-			expect(getBankByIspb("0000.0000")).toBeNull();
-			expect(getBankByIspb("0000/0000")).toBeNull();
+		test("when the ispb, stripped of anything but letters and digits, is no ISPB", () => {
 			expect(getBankByIspb("1e0")).toBeNull();
+			expect(getBankByIspb("ISPB 00000000")).toBeNull();
 		});
 
 		test("when the ispb is only separators", () => {
