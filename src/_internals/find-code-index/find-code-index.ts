@@ -12,6 +12,7 @@ const tables = new Map<string, CodeTable>();
 const readTable = (codes: string): CodeTable => {
 	const cached = tables.get(codes);
 
+	// Stryker disable next-line ConditionalExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
 	if (cached !== undefined) return cached;
 
 	const separator = codes.indexOf(":");
