@@ -82,11 +82,11 @@ describe("getStateByIbgeCode", () => {
 		expect(getStateByIbgeCode("-35-")?.code).toBe("SP");
 	});
 
-	it("should return null for a code with any other character, not strip it", () => {
-		expect(getStateByIbgeCode("x11")).toBeNull();
-		expect(getStateByIbgeCode("R$ 35")).toBeNull();
-		expect(getStateByIbgeCode("3.5")).toBeNull();
-		expect(getStateByIbgeCode("35/")).toBeNull();
+	it("should strip any non-digit character of a string, as up to 2.4.0", () => {
+		expect(getStateByIbgeCode("x11")?.code).toBe("RO");
+		expect(getStateByIbgeCode("35/SP")?.code).toBe("SP");
+		expect(getStateByIbgeCode("R$ 35")?.code).toBe("SP");
+		expect(getStateByIbgeCode("3.5")?.code).toBe("SP");
 	});
 
 	describe("properties", () => {
@@ -112,14 +112,14 @@ describe("getStateByIbgeCode", () => {
 			);
 		});
 
-		test("should return null for every known ibgeCode next to a letter", () => {
+		test("should find every known ibgeCode next to a letter, stripping it", () => {
 			const knownIbgeCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.ibgeCode));
 			const letterArbitrary = fc.constantFrom("a", "Z", "e", "x");
 
 			fc.assert(
 				fc.property(knownIbgeCodeArbitrary, letterArbitrary, (ibgeCode, letter) => {
-					expect(getStateByIbgeCode(`${letter}${ibgeCode}`)).toBeNull();
-					expect(getStateByIbgeCode(`${ibgeCode}${letter}`)).toBeNull();
+					expect(getStateByIbgeCode(`${letter}${ibgeCode}`)?.ibgeCode).toBe(ibgeCode);
+					expect(getStateByIbgeCode(`${ibgeCode}${letter}`)?.ibgeCode).toBe(ibgeCode);
 				}),
 			);
 		});
