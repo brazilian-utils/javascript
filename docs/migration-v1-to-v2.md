@@ -117,7 +117,7 @@ Required before upgrading:
 Recommended before v3.0.0:
 
 - [ ] Rename the imports and calls in the table above to camelCase.
-- [ ] Replace `getCities` with `getMunicipalities` and `getMunicipality` with `getMunicipalityByCode`.
+- [ ] Replace `getCities` with `getMunicipalities` and `getMunicipality` with `getMunicipalityByCode` (by code) or `getCodeByMunicipalityName` (by name).
 - [ ] Call `isValidIe({ value, stateCode })` instead of `isValidIe(stateCode, ie)`.
 - [ ] Import the `*Params` type names instead of the `*Options` aliases of the single-object-argument functions.
 - [ ] Drop `'widenet'` from the `providers` of `getAddressInfoByCep` (the service is gone).

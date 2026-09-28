@@ -3,8 +3,10 @@ import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
 import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
-/** Options for `getCodeByMunicipalityName`. */
-export type GetCodeByMunicipalityNameOptions = {
+/** The `getCodeByMunicipalityName` query: a municipality name and the code of its state. */
+export type GetCodeByMunicipalityNameParams = {
+	/** The municipality name, accents, casing and runs of whitespace ignored. */
+	municipalityName: string;
 	/** The two letter code of the state the municipality belongs to, e.g. `"BA"`, in any case. */
 	stateCode: string;
 };
@@ -16,25 +18,24 @@ export type GetCodeByMunicipalityNameOptions = {
  * The name ignores accents and casing (`ç` is read as `c`), and every run of whitespace
  * collapses into a single space, so `"conceicao  do coite"` matches `"Conceição do Coité"`; a
  * name written without a space the dataset carries does not match. The casing is folded to upper
- * case, the direction Unicode expands `"ß"` to `"SS"` in. `options.stateCode` ignores casing
+ * case, the direction Unicode expands `"ß"` to `"SS"` in. `stateCode` ignores casing
  * and surrounding whitespace, as every util that takes a state does. The same name in another state
  * is another municipality, so the state code is required.
  *
  * It is the synchronous, offline counterpart of `get_code_by_municipality_name` of the Python
  * library, which asks the IBGE API over the network.
  *
- * @param {string} municipalityName - The municipality name.
- * @param {GetCodeByMunicipalityNameOptions} options - `stateCode`, the two letter code of the
- * state it belongs to, e.g. `"BA"`.
+ * @param {GetCodeByMunicipalityNameParams} params - `municipalityName`, the municipality name,
+ * and `stateCode`, the two letter code of the state it belongs to, e.g. `"BA"`.
  * @returns {string|null} The 7 digit IBGE code, or `null` when the state code is not a state or
  * no municipality of that state has that name.
  *
  * @example
  * ```typescript
- * getCodeByMunicipalityName("Conceição do Coité", { stateCode: "Ba" }); // "2908408"
- * getCodeByMunicipalityName("sao paulo", { stateCode: "sp" }); // "3550308"
- * getCodeByMunicipalityName("São Paulo", { stateCode: "RJ" }); // null (no São Paulo in Rio de Janeiro)
- * getCodeByMunicipalityName("Município Inexistente", { stateCode: "RS" }); // null
+ * getCodeByMunicipalityName({ municipalityName: "Conceição do Coité", stateCode: "Ba" }); // "2908408"
+ * getCodeByMunicipalityName({ municipalityName: "sao paulo", stateCode: "sp" }); // "3550308"
+ * getCodeByMunicipalityName({ municipalityName: "São Paulo", stateCode: "RJ" }); // null (no São Paulo in Rio de Janeiro)
+ * getCodeByMunicipalityName({ municipalityName: "Município Inexistente", stateCode: "RS" }); // null
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
@@ -43,18 +44,17 @@ export type GetCodeByMunicipalityNameOptions = {
  * as the bundled table.
  */
 export const getCodeByMunicipalityName = (
-	municipalityName: string,
-	options: GetCodeByMunicipalityNameOptions,
+	params: GetCodeByMunicipalityNameParams,
 ): string | null => {
 	// `normalizeStateCode` folds anything that is not a string to `""`, which is no state, so a
-	// missing or malformed `options` needs no check of its own.
-	const normalizedStateCode = normalizeStateCode(options?.stateCode);
+	// missing or malformed `params` needs no check of its own.
+	const normalizedStateCode = normalizeStateCode(params?.stateCode);
 
 	if (!hasOwnKey(CITIES_DATA, normalizedStateCode)) return null;
 
 	// `normalizeMunicipalityName` folds a value that is not a string, or an empty one, down to
 	// `""`, which no municipality name normalizes to, so it needs no check of its own here.
-	const normalizedName = normalizeMunicipalityName(municipalityName);
+	const normalizedName = normalizeMunicipalityName(params.municipalityName);
 	const match = CITIES_DATA[normalizedStateCode].find(
 		([name]) => normalizeMunicipalityName(name) === normalizedName,
 	);

@@ -54,6 +54,7 @@ import {
 	type GetCepInfoByAddressOptions,
 	type GetCepInfoByAddressParams,
 	type GetCnpjInfoOptions,
+	type GetCodeByMunicipalityNameParams,
 	type GetHolidaysOptions,
 	type GetHolidaysParams,
 	type GetLegalNaturesByCategoryOptions,
@@ -406,6 +407,7 @@ describe("Public API", () => {
 			GetCepInfoByAddressOptions: GetCepInfoByAddressOptions;
 			GetCepInfoByAddressParams: GetCepInfoByAddressParams;
 			GetCnpjInfoOptions: GetCnpjInfoOptions;
+			GetCodeByMunicipalityNameParams: GetCodeByMunicipalityNameParams;
 			GetHolidaysOptions: GetHolidaysOptions;
 			GetHolidaysParams: GetHolidaysParams;
 			GetLegalNaturesByCategoryOptions: GetLegalNaturesByCategoryOptions;

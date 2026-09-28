@@ -160,6 +160,9 @@ export function getMunicipality(
 	}
 
 	return Promise.resolve(
-		getCodeByMunicipalityName(options.municipalityName, { stateCode: options.uf }),
+		getCodeByMunicipalityName({
+			municipalityName: options.municipalityName,
+			stateCode: options.uf,
+		}),
 	);
 }

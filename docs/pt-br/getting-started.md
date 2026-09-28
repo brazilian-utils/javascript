@@ -70,7 +70,7 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 | --- | --- | --- | --- |
 | `getCid10` | categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, com as descrições do DATASUS | 988,3 KB | 123,6 KB |
 | `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 municípios do IBGE, com o DDD de cada um (Anatel) | 165,0 - 167,8 KB | 52,1 - 52,8 KB |
-| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 153,6 - 154,1 KB | 49,4 - 49,8 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 153,6 - 154,2 KB | 49,4 - 49,8 KB |
 | `getCities` | nomes dos 5571 municípios do IBGE | 153,4 KB | 49,2 KB |
 | `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 111,5 KB | 24,0 KB |
 | `getCbo` | títulos das ocupações da CBO 2002 | 107,6 KB | 24,7 KB |
