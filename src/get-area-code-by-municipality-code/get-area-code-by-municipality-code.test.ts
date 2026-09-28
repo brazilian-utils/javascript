@@ -43,8 +43,12 @@ describe("getAreaCodeByMunicipalityCode", () => {
 		expect(getAreaCodeByMunicipalityCode("")).toBeNull();
 	});
 
-	it("should return null for a code with a letter, a negative or a fractional number", () => {
-		expect(getAreaCodeByMunicipalityCode("355030a8")).toBeNull();
+	it("should strip any non-digit character of a string code, as getMunicipalityByCode does", () => {
+		expect(getAreaCodeByMunicipalityCode("3550308 SP")).toBe(11);
+	});
+
+	it("should return null for a code with no digit, a negative or a fractional number", () => {
+		expect(getAreaCodeByMunicipalityCode("SP")).toBeNull();
 		expect(getAreaCodeByMunicipalityCode(-3_550_308)).toBeNull();
 		expect(getAreaCodeByMunicipalityCode(355_030.8)).toBeNull();
 	});
