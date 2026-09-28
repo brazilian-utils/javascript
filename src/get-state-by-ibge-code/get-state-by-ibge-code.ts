@@ -12,12 +12,10 @@ export type { State } from "../_internals/constants/states";
  * (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
  *
  * A `code` given as a number must be a non-negative integer: a sign and a decimal point are
- * not digits, so `-35` and `3.5` are rejected instead of being read as `35`. A string may carry
- * whitespace and hyphens; any other character makes it something other than a code, so
- * `"x11"` returns `null` instead of having the letter stripped, as it was up to 2.4.0.
+ * not digits, so `-35` and `3.5` are rejected instead of being read as `35`.
  *
  * @param {string|number} code - The 2-digit IBGE UF code. Accepts a string or a non-negative
- * integer number; a string may carry whitespace and hyphens.
+ * integer number, with any non-digit characters stripped before matching.
  * @returns {State|null} The matching `State` object, or `null` when `code` is not a known
  * IBGE UF code.
  *
@@ -34,7 +32,6 @@ export type { State } from "../_internals/constants/states";
  * getStateByIbgeCode("00"); // null
  * getStateByIbgeCode(""); // null
  * getStateByIbgeCode(-35); // null
- * getStateByIbgeCode("x11"); // null (not read as 11)
  * ```
  */
 export const getStateByIbgeCode = (code: string | number): State | null => {
