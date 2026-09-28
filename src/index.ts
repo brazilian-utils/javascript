@@ -125,7 +125,10 @@ export { getCities } from "./get-cities/get-cities";
 export { type ClassTrib, getClassTrib } from "./get-class-trib/get-class-trib";
 export { type Cnae, getCnae } from "./get-cnae/get-cnae";
 export { type CnpjInfo, getCnpjInfo, type GetCnpjInfoOptions } from "./get-cnpj-info/get-cnpj-info";
-export { getCodeByMunicipalityName } from "./get-code-by-municipality-name/get-code-by-municipality-name";
+export {
+	getCodeByMunicipalityName,
+	type GetCodeByMunicipalityNameOptions,
+} from "./get-code-by-municipality-name/get-code-by-municipality-name";
 export { type CpfInfo, getCpfInfo } from "./get-cpf-info/get-cpf-info";
 export { type CstIbsCbs, getCstIbsCbs } from "./get-cst-ibs-cbs/get-cst-ibs-cbs";
 export {

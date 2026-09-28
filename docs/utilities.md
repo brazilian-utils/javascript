@@ -1922,18 +1922,18 @@ Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades
 Look up the 7-digit IBGE code of a Brazilian municipality by its name and the code of its state. It is the offline, synchronous counterpart of `get_code_by_municipality_name` in the Python library, which queries the IBGE API over the network.
 
 - The name ignores accents, the cedilla and letter case. Runs of whitespace collapse and the surrounding whitespace is trimmed, but a name written without a space the IBGE name has does not match (`'saopaulo'`).
-- The state code ignores letter case and surrounding whitespace, as every util that takes a state does. It is required, since the same name can belong to municipalities of different states (`'Bom Jesus'` exists in PI, RS and other states).
+- The second argument is `{ stateCode }` (`GetCodeByMunicipalityNameOptions`). The state code ignores letter case and surrounding whitespace, as every util that takes a state does. It is required, since the same name can belong to municipalities of different states (`'Bom Jesus'` exists in PI, RS and other states).
 - Returns the code as a string, or `null` when the state code is not a state or no municipality of that state has that name.
 - Embeds the 5571 municipalities, the same table as `getMunicipalityByCode`. See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-code-by-municipality-name`.
 
 ```javascript
 import { getCodeByMunicipalityName } from '@brazilian-utils/brazilian-utils';
 
-getCodeByMunicipalityName('Conceição do Coité', 'Ba'); // '2908408'
-getCodeByMunicipalityName('sao paulo', 'sp'); // '3550308'
-getCodeByMunicipalityName('Bom Jesus', 'RS'); // '4302303'
-getCodeByMunicipalityName('São Paulo', 'RJ'); // null (no São Paulo in Rio de Janeiro)
-getCodeByMunicipalityName('Município Inexistente', 'RS'); // null
+getCodeByMunicipalityName('Conceição do Coité', { stateCode: 'Ba' }); // '2908408'
+getCodeByMunicipalityName('sao paulo', { stateCode: 'sp' }); // '3550308'
+getCodeByMunicipalityName('Bom Jesus', { stateCode: 'RS' }); // '4302303'
+getCodeByMunicipalityName('São Paulo', { stateCode: 'RJ' }); // null (no São Paulo in Rio de Janeiro)
+getCodeByMunicipalityName('Município Inexistente', { stateCode: 'RS' }); // null
 ```
 
 Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)

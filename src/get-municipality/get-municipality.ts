@@ -159,5 +159,7 @@ export function getMunicipality(
 		return Promise.resolve(getMunicipalityByCode(options.code));
 	}
 
-	return Promise.resolve(getCodeByMunicipalityName(options.municipalityName, options.uf));
+	return Promise.resolve(
+		getCodeByMunicipalityName(options.municipalityName, { stateCode: options.uf }),
+	);
 }
