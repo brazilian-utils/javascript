@@ -9,10 +9,8 @@ const CODE_LENGTH = 3;
  * Looks up a Brazilian bank by its compensation code (COMPE), published by Banco Central do
  * Brasil in the STR (Sistema de Transferência de Reservas) participants list.
  *
- * Whitespace and hyphens are dropped and the code is left padded with zeros, so `1`,
- * `"1"` and `"0-01"` are all `"001"`. Any other character makes the value something other than
- * a code, so `null` is returned instead of having the character stripped: up to 2.4.0 `"1e0"`
- * and `"1.0"` were read as `"010"`.
+ * Any non-digit characters of a string are stripped and the code is left padded with zeros, so
+ * `1`, `"1"` and `"0-01"` are all `"001"`.
  *
  * @param {string|number} code - The bank's COMPE code, with or without leading zeros.
  * @returns {Bank|null} A fresh copy of the matching bank, or `null` when no bank has that code.
@@ -22,7 +20,6 @@ const CODE_LENGTH = 3;
  * getBankByCode("001"); // { code: "001", ispb: "00000000", name: "Banco do Brasil S.A." }
  * getBankByCode(1); // { code: "001", ispb: "00000000", name: "Banco do Brasil S.A." }
  * getBankByCode("999"); // null
- * getBankByCode("1e0"); // null (not read as the code 010)
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv

@@ -107,8 +107,8 @@ describe("getMunicipality", () => {
 			await expect(getMunicipality({ code: "3550308?x=1" })).resolves.toBeNull();
 		});
 
-		it("should return null for a code with a letter, instead of reading its digits", async () => {
-			await expect(getMunicipality({ code: "11abc00015" })).resolves.toBeNull();
+		it("should strip any non-digit character of a code, as up to 2.4.0", async () => {
+			await expect(getMunicipality({ code: "3550308 SP" })).resolves.toEqual(["São Paulo", "SP"]);
 		});
 
 		it("should ignore whitespace and hyphens in a code", async () => {
