@@ -7,6 +7,9 @@ import { ISBN_LABEL_REGEX } from "../parse-isbn/constants";
  */
 const ISBN_REGEX = /^9[\s-]?7[\s-]?[89](?:[\s-]?\d){10}$/;
 
+/** The prefix 979-0, given to the ISMN (printed music), not to the ISBN. */
+const ISMN_PREFIX = "9790";
+
 /**
  * Checks whether a value is a valid ISBN-13 (International Standard Book Number).
  *
@@ -21,8 +24,9 @@ const ISBN_REGEX = /^9[\s-]?7[\s-]?[89](?:[\s-]?\d){10}$/;
  *
  * The 10 digit ISBN, replaced by the 13 digit one in 2007, is not accepted: the current ISBN
  * Users' Manual (7th edition) and the Agência Brasileira do ISBN only define the 13 digit form.
- * Whether the registration group and the registrant are assigned is not checked here; see
- * `getIsbnInfo`.
+ * A 979-0 number is an ISMN (International Standard Music Number, for printed music), which
+ * shares the GS1 prefix 979 but is not an ISBN, so it is rejected. Whether the registration group
+ * and the registrant are assigned is not checked here; see `getIsbnInfo`.
  *
  * @param {string} value - The ISBN to check.
  * @returns {boolean} True when `value` is a valid ISBN-13, false otherwise, including for a value
@@ -35,6 +39,7 @@ const ISBN_REGEX = /^9[\s-]?7[\s-]?[89](?:[\s-]?\d){10}$/;
  * isValidIsbn("978-65-89999-01-3"); // false (wrong check digit)
  * isValidIsbn("8533302274"); // false (the 10 digit form)
  * isValidIsbn("9776589999014"); // false (977 is not an ISBN prefix)
+ * isValidIsbn("9790260000438"); // false (979-0 is an ISMN, not an ISBN)
  * ```
  *
  * @see Official: https://www.isbn-international.org/content/isbn-users-manual/29
@@ -48,6 +53,9 @@ const ISBN_REGEX = /^9[\s-]?7[\s-]?[89](?:[\s-]?\d){10}$/;
  * meio de um cálculo utilizando um algoritmo de módulo 10", and the groups 85 and 65 for Brazil.
  * Its printed example, "ISBN 978-65-89999-01-3", does not carry the check digit that rule gives
  * (0), so it is not a valid ISBN; the examples here use 978-65-89999-01-0.
+ * @see Official: https://www.isbn-international.org/export_rangemessage.xml
+ * International ISBN Agency, RangeMessage: the EAN.UCC prefix 979 gives the range 0000000-0999999
+ * (979-0) a length of 0, so no ISBN starts with it; that range is the ISMN's.
  */
 export const isValidIsbn = (value: string): boolean => {
 	if (typeof value !== "string") return false;
@@ -57,6 +65,8 @@ export const isValidIsbn = (value: string): boolean => {
 	if (!ISBN_REGEX.test(printed)) return false;
 
 	const digits = printed.replaceAll(/[\s-]/g, "");
+
+	if (digits.startsWith(ISMN_PREFIX)) return false;
 
 	return gs1CheckDigit(digits.slice(0, -1)) === Number(digits.at(-1));
 };

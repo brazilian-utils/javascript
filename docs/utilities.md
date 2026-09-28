@@ -3412,6 +3412,7 @@ The ISBN (International Standard Book Number) has 13 digits since 2007: the GS1 
 Check if an ISBN-13 is valid: the `978` or `979` prefix and the modulus 10 check digit of the ISBN Users' Manual (the first 12 digits weighed alternately 1 and 3, the same rule as a GTIN-13).
 
 - The value may be printed: an `ISBN` label in front (`ISBN`, `ISBN-13`, optionally followed by a colon) and a single hyphen or space between two digits are accepted; anything else, a run of separators included, makes the value invalid.
+- A `979-0` number is an ISMN (printed music), not an ISBN: the RangeMessage gives that range no ISBN group, so it is rejected.
 - Whether the group and the registrant are assigned is not checked; see `getIsbnInfo`.
 - The printed example of the Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, does not carry the check digit the rule gives (`0`), so it is rejected.
 
