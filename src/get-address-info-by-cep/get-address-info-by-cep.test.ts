@@ -374,14 +374,16 @@ describe("getAddressInfoByCep", () => {
 				expect(result.cep).toBe(VALID_CEP);
 			});
 
-			it("should reject a CEP with a letter or another character isValidCep turns down, without a request", async () => {
-				await expect(getAddressInfoByCep("abc01310100")).rejects.toThrow(
+			it("should strip any non-digit character of a string CEP, as up to 2.4.0", async () => {
+				expectDefaultAddress(await getAddressInfoByCep("CEP 01310-100"));
+				expectDefaultAddress(await getAddressInfoByCep("01310/100"));
+			});
+
+			it("should reject a string whose digits are not the 8 of a CEP, without a request", async () => {
+				await expect(getAddressInfoByCep("CEP 0131-100")).rejects.toThrow(
 					GetAddressInfoByCepValidationError,
 				);
-				await expect(getAddressInfoByCep("01310/100")).rejects.toThrow(
-					GetAddressInfoByCepValidationError,
-				);
-				await expect(getAddressInfoByCep("CEP 01310-100")).rejects.toThrow(
+				await expect(getAddressInfoByCep("CEP")).rejects.toThrow(
 					GetAddressInfoByCepValidationError,
 				);
 				expect(fetchMock).not.toHaveBeenCalled();

@@ -1,6 +1,7 @@
 import { CEP_LENGTH } from "../_internals/constants/cep";
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
 import { parseCep } from "../parse-cep/parse-cep";
 
@@ -217,7 +218,8 @@ const DEFAULT_PROVIDERS: readonly CepProvider[] = ["viacep", "brasilapi"];
 
 /**
  * Reads the CEP `getAddressInfoByCep` looks up, as 8 bare digits, under the rules its JSDoc
- * gives: those of `isValidCep`, with a number from `LOWEST_CEP` up left padded to 8 digits.
+ * gives: a string has any non-digit characters stripped, as up to 2.4.0, and has to leave the 8
+ * digits of a CEP; a number from `LOWEST_CEP` up is left padded to 8 digits.
  *
  * @param {unknown} cep - The CEP given.
  * @returns {string} The 8 digits of the CEP.
@@ -228,7 +230,8 @@ const readCep = (cep: unknown): string => {
 		throw new GetAddressInfoByCepValidationError("CEP inválido");
 	}
 
-	const cepValue = typeof cep === "number" ? String(cep).padStart(CEP_LENGTH, "0") : cep;
+	const cepValue =
+		typeof cep === "number" ? String(cep).padStart(CEP_LENGTH, "0") : sanitizeToDigits(cep);
 
 	if (!isValidCep(cepValue)) {
 		throw new GetAddressInfoByCepValidationError("CEP inválido");
@@ -350,9 +353,8 @@ const raceProviders = async (
  * back the moment its own failure lands, and therefore the moment an all-failed rejection can
  * surface.
  *
- * The CEP is accepted under the same rules as `isValidCep`: 8 digits, with whitespace, dots and
- * hyphens ignored, so a letter or any other character rejects it instead of being stripped (up
- * to 2.4.0 `"abc01310100"` was looked up as `01310-100`). A number is only read as a CEP when it
+ * A string CEP has any non-digit characters stripped, as up to 2.4.0, so `"CEP 01310-100"` is
+ * looked up as `01310-100`, and what is left has to be the 8 digits of a CEP. A number is only read as a CEP when it
  * is a non-negative safe integer: a sign or a decimal point would otherwise be dropped and
  * another CEP looked up, so such a number is rejected before any request is made. A number
  * cannot carry the leading zero of a São Paulo CEP, so it is left padded to 8 digits, but only

@@ -103,14 +103,15 @@ describe("getAreaCodeInfo", () => {
 		expect(getAreaCodeInfo(" (11) ")?.stateCode).toBe("SP");
 	});
 
-	it("should return null for a DDD with any other character, not strip it", () => {
-		expect(getAreaCodeInfo("1e1")).toBeNull();
-		expect(getAreaCodeInfo("a1b1")).toBeNull();
-		expect(getAreaCodeInfo("DDD 11")).toBeNull();
-		expect(getAreaCodeInfo("1.1")).toBeNull();
-		expect(getAreaCodeInfo("((11))")).toBeNull();
-		expect(getAreaCodeInfo("1(1)")).toBeNull();
-		expect(getAreaCodeInfo("(1)1")).toBeNull();
+	it("should strip any non-digit character of a string, as up to 2.4.0", () => {
+		for (const value of ["(11)", "0xx11", "(0xx11)", "DDD 11", "11-", "1.1"]) {
+			expect(getAreaCodeInfo(value)?.areaCode).toBe(11);
+		}
+	});
+
+	it("should return null for a string with no digit", () => {
+		expect(getAreaCodeInfo("DDD")).toBeNull();
+		expect(getAreaCodeInfo("()")).toBeNull();
 	});
 
 	it("should return null for a string with no digits, even inside parentheses", () => {

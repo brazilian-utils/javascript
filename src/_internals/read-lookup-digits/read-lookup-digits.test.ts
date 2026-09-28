@@ -18,14 +18,16 @@ describe("readLookupDigits", () => {
 		expect(readLookupDigits(3_550_308)).toBe("3550308");
 	});
 
-	test("should reject a string with any other character instead of stripping it", () => {
-		expect(readLookupDigits("1e1")).toBeNull();
-		expect(readLookupDigits("1.1")).toBeNull();
-		expect(readLookupDigits("a1b1")).toBeNull();
-		expect(readLookupDigits("DDD 11")).toBeNull();
-		expect(readLookupDigits("R$ 35")).toBeNull();
-		expect(readLookupDigits("35/")).toBeNull();
-		expect(readLookupDigits("0000000A")).toBeNull();
+	test("should strip any non-digit character of a string, as up to 2.4.0", () => {
+		expect(readLookupDigits("(0xx11)")).toBe("011");
+		expect(readLookupDigits("DDD 11")).toBe("11");
+		expect(readLookupDigits("R$ 35")).toBe("35");
+		expect(readLookupDigits("35/SP")).toBe("35");
+	});
+
+	test("should return null for a string with no digit", () => {
+		expect(readLookupDigits("DDD")).toBeNull();
+		expect(readLookupDigits("")).toBeNull();
 	});
 
 	test("should reject a string with no digit left", () => {
