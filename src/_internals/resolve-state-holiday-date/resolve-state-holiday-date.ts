@@ -1,4 +1,7 @@
-/** How a holiday's date is defined: a fixed day and month, or an offset in days from Easter Sunday. */
+/**
+ * How a holiday's date is defined: a fixed day and month, an offset in days from Easter Sunday,
+ * or the first Sunday of a month.
+ */
 export type HolidayDateRule = (
 	| {
 			/** Offset in days from Easter Sunday (Carnaval Monday is -48 and Tuesday -47, Corpus Christi is 60); Easter itself is 0. */
@@ -10,12 +13,16 @@ export type HolidayDateRule = (
 			/** Month, 1 to 12, used together with `day`. */
 			month: number;
 	  }
+	| {
+			/** Month, 1 to 12, whose first Sunday is the holiday, as Pernambuco's data magna of 2010 to 2017 was. */
+			firstSundayOfMonth: number;
+	  }
 ) & {
 	/**
 	 * Whether the holiday is observed on the following Sunday when the date the rule resolves to
-	 * falls on a weekday (Monday to Friday), as Santa Catarina's two state holidays do.
+	 * is not a Sunday (Monday to Saturday), as Santa Catarina's two state holidays are.
 	 */
-	nextSundayWhenWeekday?: boolean;
+	nextSundayUnlessSunday?: boolean;
 	/**
 	 * Whether the holiday is observed on the Monday before when the date the rule resolves to falls
 	 * on a Tuesday, and on the Friday after when it falls on a Thursday, as Alagoas' 30 November
@@ -27,7 +34,6 @@ export type HolidayDateRule = (
 const SUNDAY = 0;
 const TUESDAY = 2;
 const THURSDAY = 4;
-const SATURDAY = 6;
 const DAYS_IN_WEEK = 7;
 
 function calculateEaster(year: number): Date {
@@ -57,15 +63,23 @@ function calculateHolidayFromEaster(year: number, offset: number): Date {
 	return holidayDate;
 }
 
-function moveToNextSundayWhenWeekday(date: Date): Date {
+function moveToNextSundayUnlessSunday(date: Date): Date {
 	const weekday = date.getDay();
 
-	if (weekday === SUNDAY || weekday === SATURDAY) return date;
+	if (weekday === SUNDAY) return date;
 
 	const observed = new Date(date);
 	observed.setDate(date.getDate() + (DAYS_IN_WEEK - weekday));
 
 	return observed;
+}
+
+function calculateFirstSundayOfMonth(year: number, month: number): Date {
+	// Sunday is weekday 0, so the days from the 1st to the first Sunday are 7 minus its weekday,
+	// or none when the 1st is already a Sunday.
+	const firstWeekday = new Date(year, month - 1, 1).getDay();
+
+	return new Date(year, month - 1, 1 + ((DAYS_IN_WEEK - firstWeekday) % DAYS_IN_WEEK));
 }
 
 function moveTuesdayToMondayThursdayToFriday(date: Date): Date {
@@ -80,35 +94,42 @@ function moveTuesdayToMondayThursdayToFriday(date: Date): Date {
 }
 
 /**
- * Resolves the date of a holiday in a given year: a fixed `day`/`month` pair, or an offset in
- * days from Easter Sunday, computed with the Meeus/Jones/Butcher algorithm. When the rule sets
- * `nextSundayWhenWeekday`, a date landing on a weekday is moved on to the following Sunday; when
+ * Resolves the date of a holiday in a given year: a fixed `day`/`month` pair, an offset in days
+ * from Easter Sunday, computed with the Meeus/Jones/Butcher algorithm, or the first Sunday of a
+ * month. When the rule sets `nextSundayUnlessSunday`, a date landing Monday to Saturday is moved
+ * on to the following Sunday; when
  * it sets `tuesdayToMondayThursdayToFriday`, a Tuesday is moved back to the Monday and a Thursday
  * on to the Friday.
  *
  * @param {number} year - The four digit year.
- * @param {HolidayDateRule} rule - The fixed date or the Easter offset of the holiday.
+ * @param {HolidayDateRule} rule - The fixed date, the Easter offset or the month of the holiday.
  * @returns {Date} The holiday date in the local time zone.
- * @throws {Error} When the rule defines neither `easterOffset` nor both `day` and `month`.
  *
  * @example
  * ```typescript
  * resolveStateHolidayDate(2024, { easterOffset: 0 }); // 2024-03-31 (Easter Sunday)
  * resolveStateHolidayDate(2024, { easterOffset: 60 }); // 2024-05-30 (Corpus Christi)
  * resolveStateHolidayDate(2024, { day: 9, month: 7 }); // 2024-07-09
- * resolveStateHolidayDate(2025, { day: 11, month: 8, nextSundayWhenWeekday: true }); // 2025-08-17
+ * resolveStateHolidayDate(2025, { day: 11, month: 8, nextSundayUnlessSunday: true }); // 2025-08-17
+ * resolveStateHolidayDate(2018, { day: 11, month: 8, nextSundayUnlessSunday: true }); // 2018-08-12 (from a Saturday)
+ * resolveStateHolidayDate(2015, { firstSundayOfMonth: 3 }); // 2015-03-01
  * resolveStateHolidayDate(2027, { day: 30, month: 11, tuesdayToMondayThursdayToFriday: true }); // 2027-11-29
  * ```
  *
  * @see Based on: https://en.wikipedia.org/wiki/Date_of_Easter#Anonymous_Gregorian_algorithm
  */
 export const resolveStateHolidayDate = (year: number, rule: HolidayDateRule): Date => {
-	const date =
-		"easterOffset" in rule
-			? calculateHolidayFromEaster(year, rule.easterOffset)
-			: new Date(year, rule.month - 1, rule.day);
+	let date: Date;
 
-	if (rule.nextSundayWhenWeekday === true) return moveToNextSundayWhenWeekday(date);
+	if ("easterOffset" in rule) {
+		date = calculateHolidayFromEaster(year, rule.easterOffset);
+	} else if ("firstSundayOfMonth" in rule) {
+		date = calculateFirstSundayOfMonth(year, rule.firstSundayOfMonth);
+	} else {
+		date = new Date(year, rule.month - 1, rule.day);
+	}
+
+	if (rule.nextSundayUnlessSunday === true) return moveToNextSundayUnlessSunday(date);
 
 	return rule.tuesdayToMondayThursdayToFriday === true
 		? moveTuesdayToMondayThursdayToFriday(date)
