@@ -40,13 +40,13 @@ export type IsHolidayOptions = IsHolidayParams;
  * The date a state holiday is checked against is the statutory one, except for Alagoas' 30
  * November, which `getHolidays` moves back to the Monday from a Tuesday and on to the Friday from a
  * Thursday (Lei AL nº 7.530/2013, art. 2º parágrafo único), and for Santa Catarina's two holidays, which `getHolidays` moves to the following Sunday when they fall Monday to
- * Friday: 11 August from 2005 on, as Lei SC nº 13.408/2005 introduced, and 25 November from 1999
- * on, as Lei SC nº 11.213/1999 introduced, save for 2004, the year art. 3º of Lei SC nº
- * 12.906/2004 left that date without a transfer clause. Lei SC nº 18.531/2022 now carries both.
+ * Saturday: 11 August from 2005 on, as Lei SC nº 13.408/2005 introduced, and 25 November from 1999
+ * on, as Lei SC nº 11.213/1999 introduced. Lei SC nº 18.531/2022 now carries both.
  *
  * The first round of the elections, a feriado nacional under art. 380 of the Código Eleitoral, is
  * one of the holidays `getHolidays` lists, on the first Sunday of October of every even year from
  * 1998 on (15 November in 2020), so `isHoliday` is true on that Sunday; the second round is not.
+ * So are the weekday general elections of 1955, 1958, 1990 and 1994, under Lei 1.266/1950.
  *
  * @param {IsHolidayParams} [options] - Options for the check.
  * @param {Date} options.targetDate - The date to check.
