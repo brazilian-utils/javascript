@@ -1,10 +1,12 @@
 import { BANKS, type Bank } from "../_internals/constants/banks";
-import { LOOKUP_SEPARATORS_REGEX } from "../_internals/constants/separators";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 
 export type { Bank } from "../_internals/constants/banks";
 
 const ISPB_LENGTH = 8;
+
+/** Every character that is neither a letter nor a digit, dropped from an ISPB. */
+const NON_ALPHANUMERIC_REGEX = /[^\da-z]/gi;
 
 /**
  * Looks up a Brazilian bank by its ISPB (Identificador do Sistema de Pagamentos Brasileiro),
@@ -15,11 +17,12 @@ const ISPB_LENGTH = 8;
  *
  * The ISPB is read the way `isValidIban` reads the one inside an IBAN: 8 characters that may be
  * letters as well as digits, since Resolução BCB nº 585/2026 art. 2º III made it "oito
- * caracteres alfanuméricos", upper or lower case. Whitespace and hyphens are dropped, and
- * a shorter value is left padded with zeros, so `0` is the ISPB `00000000`. The value is then
- * matched as it is, so any other character, or a value longer than 8 characters, finds no ISPB
- * and returns `null` instead of having the character stripped: up to 2.4.0 `"0000000A"` and
- * `"A0000000"` were read as `00000000`, the ISPB of Banco do Brasil.
+ * caracteres alfanuméricos", upper or lower case. Every character that is neither a letter nor
+ * a digit is dropped, as up to 2.4.0 (so the ISPB may be printed with the CNPJ root mask,
+ * `"00.000.000"`), and a shorter value is left padded with zeros, so `0` is the ISPB `00000000`.
+ * A letter is part of the ISPB, so it is never stripped: up to 2.4.0 `"0000000A"` and
+ * `"A0000000"` were read as `00000000`, the ISPB of Banco do Brasil, and a value longer than 8
+ * characters finds no ISPB.
  *
  * @param {string|number} value - The bank's ISPB, with or without leading zeros.
  * @returns {Bank|null} A fresh copy of the matching bank, or `null` when no bank has that ISPB.
@@ -43,7 +46,7 @@ export const getBankByIspb = (value: string | number): Bank | null => {
 	if (!isLookupCode(value)) return null;
 
 	// Stryker disable next-line MethodExpression: no ISPB in BANKS has a letter yet, so a lower case letter misses the table whether or not it is folded to upper case.
-	const code = String(value).replaceAll(LOOKUP_SEPARATORS_REGEX, "").toUpperCase();
+	const code = String(value).replaceAll(NON_ALPHANUMERIC_REGEX, "").toUpperCase();
 
 	// An empty value would pad to 00000000, the ISPB of Banco do Brasil.
 	if (code === "") return null;

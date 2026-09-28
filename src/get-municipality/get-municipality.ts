@@ -100,9 +100,7 @@ const getMunicipalityCodeByName = ({
  *
  * A `code` given as a number must be a non-negative integer: a sign and a decimal point are not
  * digits, so `-3550308` and `355030.8` are rejected instead of being read as `3550308`. A string
- * may carry whitespace and hyphens, the same as `getMunicipalityByCode`; any other character
- * makes it something other than a code, so it resolves to null instead of having the character
- * stripped, as it was up to 2.4.0.
+ * has any non-digit characters stripped, the same as `getMunicipalityByCode`.
  *
  * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
  * municipality by name is up to the application, over `getMunicipalities`.
