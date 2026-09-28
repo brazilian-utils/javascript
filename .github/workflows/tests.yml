@@ -107,6 +107,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
+      # A flake in one browser must not cancel the others, or its cause is lost.
+      fail-fast: false
       matrix:
         browser: [edge, chrome, firefox]
 
@@ -119,8 +121,30 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
+      # Chromium under the webdriverio provider sometimes loses a test iframe: the run either fails
+      # at once with "Cannot connect to the iframe" / "Failed to fetch dynamically imported module",
+      # or prints nothing more until the job timeout. A whole run takes 1 to 3 minutes, so a first
+      # attempt that times out after 5 minutes, or fails with one of those two errors, is run once
+      # more. Any other failure, including a failing assertion, fails the step on the first attempt.
       - name: Run tests in ${{ matrix.browser }}
-        run: vp test --browser.enabled --browser.name=${{ matrix.browser }}
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          attempt() {
+            timeout 300 vp test --browser.enabled --browser.name="$BROWSER" 2>&1 | tee browser-tests.log
+            return "${PIPESTATUS[0]}"
+          }
+
+          attempt && exit 0
+          status=$?
+
+          if [ "$status" -eq 124 ] || grep -qE "Cannot connect to the iframe|Failed to fetch dynamically imported module" browser-tests.log; then
+            echo "::warning::The $BROWSER test run lost a test iframe (exit $status); running it once more."
+            attempt
+            exit $?
+          fi
+
+          exit "$status"
 
   test-safari:
     name: Test on Browsers (safari)
