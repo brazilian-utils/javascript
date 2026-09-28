@@ -5,8 +5,8 @@ import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipal
  * Looks up the DDD (area code, the Código Nacional of the Plano Geral de Numeração) in force for
  * a Brazilian municipality, given its 7 digit IBGE code.
  *
- * The code is read the way `getMunicipalityByCode` reads it: a string of digits that may carry
- * whitespace and hyphens, or a non-negative integer number. Every one of the 5,571 municipalities
+ * The code is read the way `getMunicipalityByCode` reads it: a string, with any non-digit
+ * characters stripped, or a non-negative integer number. Every one of the 5,571 municipalities
  * has exactly one DDD, so `null` only means the code is not a municipality.
  *
  * A DDD mostly follows state lines, with four exceptions: 61, the DDD of Brasília, also covers

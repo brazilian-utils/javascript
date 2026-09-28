@@ -8,8 +8,8 @@ export type { Municipality } from "../_internals/constants/municipalities";
  * Lists the Brazilian municipalities that dial a given DDD (area code, the Código Nacional of the
  * Plano Geral de Numeração).
  *
- * The DDD is read the way `getAreaCodeInfo` reads it: a string that may wrap it in parentheses
- * and carry whitespace and hyphens, or a non-negative integer number. The municipalities come
+ * The DDD is read the way `getAreaCodeInfo` reads it: a string, with any non-digit characters
+ * stripped, or a non-negative integer number. The municipalities come
  * state by state, the state the DDD is seated in first and then the others of
  * `AreaCodeInfo.stateCodes`, each state's sorted by name the way `getMunicipalities` sorts them.
  * Four DDDs cross a state line: 61 also covers 12 municipalities of Goiás around Brasília, 42
