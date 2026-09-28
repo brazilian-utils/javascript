@@ -7,8 +7,8 @@ import { defineConfig } from "vite-plus";
 import { type PackUserConfig } from "vite-plus/pack";
 import { webdriverio } from "vite-plus/test/browser-webdriverio";
 
-const rootDir = import.meta.dirname;
-const srcDir = resolve(rootDir, "src");
+const rootDirectory = import.meta.dirname;
+const sourceDirectory = resolve(rootDirectory, "src");
 
 type PackPlugin = Extract<NonNullable<PackUserConfig["plugins"]>, unknown[]>[number];
 
@@ -65,7 +65,7 @@ const externalizeLibrary = (): PackPlugin => ({
 	name: "brazilian-utils:externalize-library",
 	resolveId(source, importer) {
 		if (importer === undefined) return null;
-		if (resolve(dirname(importer), source) !== resolve(srcDir, "index")) return null;
+		if (resolve(dirname(importer), source) !== resolve(sourceDirectory, "index")) return null;
 		return { id: "./brazilian-utils.js", external: true };
 	},
 });
@@ -79,14 +79,14 @@ const externalizeLibrary = (): PackPlugin => ({
  * IBGE dataset) instead of the whole root bundle, with no bespoke entry file to maintain per
  * util.
  */
-const utilEntryNames = readdirSync(srcDir, { withFileTypes: true })
+const utilityEntryNames = readdirSync(sourceDirectory, { withFileTypes: true })
 	.filter((entry) => entry.isDirectory() && !entry.name.startsWith("_"))
 	.map((entry) => entry.name)
-	.filter((name) => existsSync(resolve(srcDir, name, `${name}.ts`)))
+	.filter((name) => existsSync(resolve(sourceDirectory, name, `${name}.ts`)))
 	.toSorted();
 
-const utilEntries = Object.fromEntries(
-	utilEntryNames.map((name) => [name, resolve(srcDir, name, `${name}.ts`)]),
+const utilityEntries = Object.fromEntries(
+	utilityEntryNames.map((name) => [name, resolve(sourceDirectory, name, `${name}.ts`)]),
 );
 
 /**
@@ -590,7 +590,7 @@ export default defineConfig({
 	pack: [
 		{
 			...sharedPack,
-			entry: { "brazilian-utils": resolve(rootDir, "src/index.ts") },
+			entry: { "brazilian-utils": resolve(rootDirectory, "src/index.ts") },
 			format: ["es", "umd"],
 			globalName: "BrazilianUtils",
 			plugins: [minifyUmdChunk(), emitCjsDtsTwin()],
@@ -598,7 +598,7 @@ export default defineConfig({
 		{
 			...sharedPack,
 			sourcemap: false,
-			entry: utilEntries,
+			entry: utilityEntries,
 			format: ["es", "cjs"],
 		},
 		// The command line: one ESM file with a shebang, no declarations (it exports nothing) and
@@ -609,7 +609,7 @@ export default defineConfig({
 			...sharedPack,
 			sourcemap: false,
 			dts: false,
-			entry: { cli: resolve(rootDir, "src/_cli/bin/bin.ts") },
+			entry: { cli: resolve(rootDirectory, "src/_cli/bin/bin.ts") },
 			format: ["es"],
 			plugins: [externalizeLibrary()],
 		},
