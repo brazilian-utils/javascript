@@ -3,10 +3,7 @@
  * also be the upper case letters of an alphanumeric CNPJ, optionally behind the `NFS` literal the
  * `Id` attribute of `infNFSe` puts in front of it. It follows `TSIdNFSe` of
  * `tiposSimples_v1.01.xsd` (bundle 20260727), `NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}`, whose letter
- * window is the registration of the key structure. `TSChaveNFSe` of the same file,
- * `[0-9]{6}([0-9A-Z]{14})[0-9]{30}`, puts the window at positions 7 to 20 instead, which
- * contradicts that structure (the registration is at 10 to 23), `TSIdNFSe`, `TSIdDPS` and
- * `TSIdPedRegEvt`, so it is not followed. The key has no printed mask (the DANFSe prints it "em
+ * window is the registration of the key structure. The key has no printed mask (the DANFSe prints it "em
  * único bloco", Nota Técnica SE/CGNFS-e 008, item 2.1.1), so there is no separator to accept.
  * Case-insensitive, as `isValidCnpj` with version 2 is: the callers upper case the key, which is
  * the first capture group. Whether a letter may stand in the registration at all is left to the

@@ -647,7 +647,7 @@ Verifica se a chave de acesso de uma NFS-e nacional, a Nota Fiscal de Serviço e
 - O `ambGer` precisa ser `1` (o sistema do município) ou `2` (o Sistema Nacional NFS-e), e o tipo de inscrição `1` (um CPF, preenchido com `000` à esquerda) ou `2` (um CNPJ, numérico ou alfanumérico), com um CPF ou CNPJ cujos próprios dígitos verificadores sejam válidos. Letras só são aceitas em um CNPJ, e minúsculas são lidas como maiúsculas, como o `isValidCnpj` com `{ version: 2 }` as lê.
 - O `nNFSe` não pode ser todo de zeros e o mês precisa estar entre 01 e 12.
 - O dígito verificador é um módulo 11 sobre os 49 primeiros caracteres, pesos de 2 a 9 ciclando a partir da direita, em que resto 0 ou 1 dá 0. Uma letra vale o seu código ASCII menos 48 (`A` vale 17): nenhum documento da NFS-e diz isso, então a regra vem por analogia com a chave da NF-e da Nota Técnica Conjunta 2025.001 e com os próprios dígitos verificadores do CNPJ.
-- As letras seguem o `TSIdNFSe` do pacote de esquemas de 27/07/2026, nas posições da Inscrição Federal (10 a 23). O `TSChaveNFSe` do mesmo pacote as coloca nas posições 7 a 20, o que contradiz a estrutura da chave, e não é seguido.
+- As letras seguem o `TSIdNFSe` do pacote de esquemas de 27/07/2026, nas posições da Inscrição Federal (10 a 23).
 - Os modelos municipais de NFS-e que não são o padrão nacional estão fora do escopo.
 
 ```javascript
