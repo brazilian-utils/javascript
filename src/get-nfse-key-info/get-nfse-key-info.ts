@@ -87,8 +87,7 @@ export type NfseKeyInfo = {
  * upper case, as `isValidCnpj` with version 2 reads it, and `taxId` comes back upper cased. No
  * NFS-e document states how a letter enters the check digit of the key; by analogy with the
  * NF-e key (Nota Técnica Conjunta 2025.001) and the CNPJ's own check digits, each character
- * counts as its ASCII code minus 48 (`A` is 17). `isValidNfseKey` cites the sources, and why
- * `TSChaveNFSe`, which puts the letter window at positions 7 to 20, is not followed.
+ * counts as its ASCII code minus 48 (`A` is 17). `isValidNfseKey` cites the sources.
  *
  * @param {string} value - The access key value to be parsed.
  * @returns {NfseKeyInfo | null} The parsed access key, or `null` when `isValidNfseKey` rejects it.
