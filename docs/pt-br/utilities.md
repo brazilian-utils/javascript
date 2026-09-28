@@ -976,7 +976,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 Retorna o DDD (código de área) de um município brasileiro a partir do código IBGE de 7 dígitos, segundo a tabela da Anatel dos Códigos Nacionais em vigor.
 
-- Aceita o código como o `getMunicipalityByCode`: string (ignorando espaços e hífens) ou número inteiro não negativo.
+- Aceita o código como o `getMunicipalityByCode`: string (com todo caractere que não é dígito removido) ou número inteiro não negativo.
 - Retorna o DDD como número, ou `null` quando o código não é de um município. Cada um dos 5.571 municípios tem exatamente um DDD.
 - O DDD quase sempre segue a divisa dos estados. As exceções: o 61 também cobre 12 municípios de Goiás no entorno de Brasília, e Porto União (SC) usa o 42, Rio Negro (PR) o 47 e Barracão (PR) o 49.
 
@@ -1043,7 +1043,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 Lista os municípios brasileiros que usam um DDD (código de área), segundo a tabela da Anatel dos Códigos Nacionais em vigor.
 
-- Aceita o DDD como o `getAreaCodeInfo`: string (com parênteses, espaços e hífens) ou número inteiro não negativo.
+- Aceita o DDD como o `getAreaCodeInfo`: string (com todo caractere que não é dígito removido) ou número inteiro não negativo.
 - Retorna um array de `{ code, name, stateCode }` (`Municipality`): primeiro os municípios do estado sede, depois os do outro estado em que o DDD entra, cada estado em ordem alfabética. Retorna `[]` quando o DDD não está em uso.
 
 ```javascript
