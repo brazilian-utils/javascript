@@ -1,5 +1,6 @@
 import { calculateRenavamCheckDigit } from "../_internals/calculate-renavam-check-digit/calculate-renavam-check-digit";
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 
 const RENAVAM_LENGTH = 11;
@@ -20,6 +21,7 @@ const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
  * Spaces, dots and hyphens are ignored, so every punctuated form of a RENAVAM is accepted, but
  * any other character, a letter in particular, makes the value invalid. A registration whose
  * digits are all the same (`"00000000000"`) is rejected as well, matching both references below.
+ * A number is only read as a RENAVAM when it is a non-negative safe integer.
  *
  * @param {string} renavam - The RENAVAM value to be validated.
  * @returns {boolean} True if the RENAVAM is valid, false otherwise.
@@ -32,6 +34,7 @@ const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
  * isValidRenavam("12345678901"); // false (invalid checksum)
  * isValidRenavam("00000000000"); // false (repeated digits)
  * isValidRenavam("ab00639884962"); // false (invalid format)
+ * isValidRenavam(-639884962); // false (not a non-negative safe integer)
  * ```
  *
  * The Código de Trânsito Brasileiro creates the RENAVAM registry but does not define its check
@@ -42,7 +45,7 @@ const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/renavam.py
  */
 export const isValidRenavam = (renavam: string | number): boolean => {
-	if (typeof renavam !== "string" && typeof renavam !== "number") return false;
+	if (!isLookupCode(renavam)) return false;
 
 	const digits = renavam.toString().replace(SEPARATORS_REGEX, "");
 
