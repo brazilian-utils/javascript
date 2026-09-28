@@ -647,7 +647,7 @@ Check if the access key (chave de acesso) of a national NFS-e, the Nota Fiscal d
 - `ambGer` must be `1` (the system of the municipality) or `2` (the Sistema Nacional NFS-e), and the registration type `1` (a CPF, left padded with `000`) or `2` (a CNPJ, numeric or alphanumeric), with a CPF or CNPJ whose own check digits are valid. Letters are accepted in a CNPJ only, and lower case is read as upper case, as `isValidCnpj` with `{ version: 2 }` reads it.
 - `nNFSe` must not be all zeros and the month must be 01 to 12.
 - The check digit is a modulus 11 over the first 49 characters, weights 2 to 9 cycling from the right, where a remainder of 0 or 1 gives 0. A letter counts as its ASCII code minus 48 (`A` is 17): no NFS-e document states it, so it is taken by analogy with the NF-e key of Nota Técnica Conjunta 2025.001 and the CNPJ's own check digits.
-- The letters follow `TSIdNFSe` of the schema bundle of 2026-07-27, in the positions of the Inscrição Federal (10 to 23). `TSChaveNFSe` of the same bundle puts them at positions 7 to 20, which contradicts the structure of the key, and is not followed.
+- The letters follow `TSIdNFSe` of the schema bundle of 2026-07-27, in the positions of the Inscrição Federal (10 to 23).
 - The municipal NFS-e models that are not the national standard are out of scope.
 
 ```javascript
