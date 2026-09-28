@@ -2,14 +2,12 @@ import { isValidCnpj } from "../../is-valid-cnpj/is-valid-cnpj";
 import { isValidCpf } from "../../is-valid-cpf/is-valid-cpf";
 import { isValidMobilePhone } from "../../is-valid-mobile-phone/is-valid-mobile-phone";
 import {
-	CPF_SYNTAX_REGEX,
 	EMAIL_MAX_LENGTH,
 	EVP_REGEX,
 	PHONE_SYNTAX_REGEX,
 	PIX_EMAIL_REGEX,
 } from "../constants/pix-key";
 import { normalizePhone } from "../normalize-phone/normalize-phone";
-import { sanitizeToDigits } from "../sanitize-to-digits/sanitize-to-digits";
 
 /** The kinds of Pix key `getPixKeyInfo` recognizes. */
 export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
@@ -47,7 +45,7 @@ export const detectPixKeyType = (value: string): PixKeyType | null => {
 
 	if (isValidCnpj(trimmed, { version: 2 })) return "cnpj";
 
-	if (CPF_SYNTAX_REGEX.test(trimmed) && isValidCpf(sanitizeToDigits(trimmed))) return "cpf";
+	if (isValidCpf(trimmed)) return "cpf";
 
 	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
 

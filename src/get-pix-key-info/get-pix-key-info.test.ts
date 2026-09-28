@@ -122,11 +122,16 @@ describe("getPixKeyInfo", () => {
 
 		test("when a CPF is written with separators outside the documented positions", () => {
 			expect(getPixKeyInfo("1.2.3.4.5.6.7.8.9.0.9")).toBeNull();
-			expect(getPixKeyInfo("123/456/789/09")).toBeNull();
+			expect(getPixKeyInfo("1234/56789/09")).toBeNull();
 		});
 	});
 
 	describe("should return a CPF", () => {
+		test("when its groups are split by any of the mask characters isValidCpf reads", () => {
+			expect(getPixKeyInfo("123/456/789/09")).toEqual({ type: "cpf", value: "12345678909" });
+			expect(getPixKeyInfo("123 - 456.789 09")).toEqual({ type: "cpf", value: "12345678909" });
+		});
+
 		test("when it is masked", () => {
 			expect(getPixKeyInfo("123.456.789-09")).toEqual({ type: "cpf", value: "12345678909" });
 		});

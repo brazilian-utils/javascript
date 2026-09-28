@@ -8,7 +8,7 @@ const FORMAT_REGEX = /^\d{11}$/;
 /**
  * Validates if a CNH (Carteira Nacional de Habilitação, the Brazilian driver's license number) is valid.
  *
- * Spaces, dots and hyphens are ignored, so every punctuated form of a CNH is accepted, but any
+ * Spaces, dots, hyphens and slashes are ignored, so every punctuated form of a CNH is accepted, but any
  * other character, a letter in particular, makes the value invalid.
  *
  * @param {string} value - The CNH value to be validated.

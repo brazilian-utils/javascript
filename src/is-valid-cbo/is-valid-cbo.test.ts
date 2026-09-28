@@ -56,8 +56,9 @@ describe("isValidCbo", () => {
 		expect(isValidCbo("223150")).toBe(false);
 	});
 
-	it("should reject a group boundary written with more than one separator (2124--05)", () => {
-		expect(isValidCbo("2124--05")).toBe(false);
+	it("should accept a group boundary written with a run of separators (2124--05), as isValidCpf does", () => {
+		expect(isValidCbo("2124--05")).toBe(true);
+		expect(isValidCbo("2124-0-5")).toBe(false);
 		expect(isValidCbo("2124-05")).toBe(true);
 		expect(isValidCbo("2124 05")).toBe(true);
 	});

@@ -18,7 +18,7 @@ const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
  *
  * The validation uses a checksum algorithm based on modulo 11.
  *
- * Spaces, dots and hyphens are ignored, so every punctuated form of a RENAVAM is accepted, but
+ * Spaces, dots, hyphens and slashes are ignored, so every punctuated form of a RENAVAM is accepted, but
  * any other character, a letter in particular, makes the value invalid. A registration whose
  * digits are all the same (`"00000000000"`) is rejected as well, matching both references below.
  * A number is only read as a RENAVAM when it is a non-negative safe integer.

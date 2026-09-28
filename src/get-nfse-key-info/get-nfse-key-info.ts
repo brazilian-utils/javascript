@@ -6,7 +6,6 @@ import {
 	GENERATOR_ENVIRONMENTS,
 	GENERATOR_ENVIRONMENT_INDEX,
 	MONTH_START,
-	NFSE_KEY_LENGTH,
 	NUMBER_START,
 	TAX_ID_START,
 	TAX_ID_TYPES,
@@ -14,6 +13,7 @@ import {
 	YEAR_START,
 } from "../_internals/constants/nfse-key";
 import { type StateCode } from "../_internals/constants/states";
+import { readNfseKey } from "../_internals/read-nfse-key/read-nfse-key";
 import { isValidNfseKey } from "../is-valid-nfse-key/is-valid-nfse-key";
 
 export type { StateCode } from "../_internals/constants/states";
@@ -127,9 +127,11 @@ export type NfseKeyInfo = {
  * ```
  */
 export const getNfseKeyInfo = (value: string): NfseKeyInfo | null => {
-	if (!isValidNfseKey(value)) return null;
+	// The bare key `isValidNfseKey` reads out of the value, whichever of its forms it is written in.
+	const key = typeof value === "string" ? readNfseKey(value) : null;
 
-	const key = value.trim().slice(-NFSE_KEY_LENGTH).toUpperCase();
+	// Stryker disable next-line ConditionalExpression: the null check only narrows the type; a value `readNfseKey` cannot read is one `isValidNfseKey` turns down as well.
+	if (key === null || !isValidNfseKey(key)) return null;
 	const taxIdType = TAX_ID_TYPES[key[TAX_ID_TYPE_INDEX]];
 	const taxIdStart = taxIdType === "cpf" ? TAX_ID_START + CPF_PADDING.length : TAX_ID_START;
 

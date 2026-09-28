@@ -9,7 +9,7 @@ import {
 	TRIBUNAL_START_POSITION,
 } from "./constants";
 
-const FORMAT_REGEX = /^\d{7}[\s.-]*\d{2}[\s.-]*\d{4}[\s.-]*\d[\s.-]*\d{2}[\s.-]*\d{4}$/;
+const FORMAT_REGEX = /^\d{7}[\s.\-/]*\d{2}[\s.\-/]*\d{4}[\s.\-/]*\d[\s.\-/]*\d{2}[\s.\-/]*\d{4}$/;
 
 const verifyCheckDigit = (value: string): boolean => {
 	const verificationDigits = Number.parseInt(
@@ -44,7 +44,7 @@ const verifyCourtAndTribunal = (value: string): boolean => {
  * only read as four digits: art. 1º, § 6º leaves its codification to each tribunal, so there is
  * no central list to check it against.
  *
- * The CNJ mask separators (whitespace, `.` and `-`) are accepted between the
+ * The CNJ mask separators (whitespace, `.` and `-`), and `/` as `isValidCpf` reads it, are accepted between the
  * `NNNNNNN-DD.AAAA.J.TR.OOOO` fields, and whitespace around the value is ignored, but any other
  * character, a letter in particular, makes the value invalid.
  *

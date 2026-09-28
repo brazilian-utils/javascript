@@ -91,7 +91,8 @@ describe("isValidCfop", () => {
 
 	it("should return false for a string that is not a documented form", () => {
 		expect(isValidCfop("abc5102")).toBe(false);
-		expect(isValidCfop("5..102")).toBe(false);
+		expect(isValidCfop("5..102")).toBe(true);
+		expect(isValidCfop("51.02")).toBe(false);
 	});
 
 	it("should return false for a number that is not a non-negative safe integer", () => {

@@ -66,12 +66,16 @@ describe("isValidIsbn", () => {
 		expect(isValidIsbn(`${body}${gs1CheckDigit(body)}`)).toBe(false);
 	});
 
-	it("should reject a run of separators, a leading or trailing one and any other character", () => {
-		expect(isValidIsbn("978--85-333-0227-3")).toBe(false);
+	it("should accept any of the mask characters isValidCpf reads between two digits, alone or in a run", () => {
+		expect(isValidIsbn("978--85-333-0227-3")).toBe(true);
+		expect(isValidIsbn("978.85.333.0227.3")).toBe(true);
+		expect(isValidIsbn("978/8533302273")).toBe(true);
+	});
+
+	it("should reject a leading or trailing separator and any other character", () => {
 		expect(isValidIsbn("-978-85-333-0227-3")).toBe(false);
 		expect(isValidIsbn("978-85-333-0227-3-")).toBe(false);
-		expect(isValidIsbn("978.85.333.0227.3")).toBe(false);
-		expect(isValidIsbn("978/8533302273")).toBe(false);
+		expect(isValidIsbn("978_85_333_0227_3")).toBe(false);
 	});
 
 	it("should reject the wrong number of digits", () => {

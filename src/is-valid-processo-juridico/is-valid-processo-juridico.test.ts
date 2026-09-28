@@ -53,8 +53,8 @@ describe("isValidProcessoJuridico", () => {
 			expect(isValidProcessoJuridico("00020802520125150049ab")).toBe(false);
 		});
 
-		test("when the mask uses a character the CNJ layout does not carry", () => {
-			expect(isValidProcessoJuridico("0002080/25.2012.5.15.0049")).toBe(false);
+		test("when the mask uses a character outside whitespace, `.`, `-` and `/`", () => {
+			expect(isValidProcessoJuridico("0002080_25.2012.5.15.0049")).toBe(false);
 		});
 
 		test("when a mask separator falls outside the CNJ field boundaries", () => {
@@ -97,6 +97,7 @@ describe("isValidProcessoJuridico", () => {
 
 		test("when is a processo juridico valid with the CNJ mask", () => {
 			expect(isValidProcessoJuridico("0002080-25.2012.5.15.0049")).toBe(true);
+			expect(isValidProcessoJuridico("0002080/25.2012.5.15.0049")).toBe(true);
 		});
 
 		test("when a masked processo juridico is surrounded by whitespace", () => {

@@ -49,7 +49,8 @@ describe("isValidLegalNature", () => {
 	it("should reject any character other than digits and the mask", () => {
 		expect(isValidLegalNature("2062a")).toBe(false);
 		expect(isValidLegalNature("a2062")).toBe(false);
-		expect(isValidLegalNature("20/62")).toBe(false);
+		expect(isValidLegalNature("20_62")).toBe(false);
+		expect(isValidLegalNature("206/2")).toBe(true);
 		expect(isValidLegalNature(" 206-2 ")).toBe(true);
 		expect(isValidLegalNature("206.2")).toBe(true);
 	});

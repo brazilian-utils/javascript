@@ -71,7 +71,8 @@ describe("isValidNcm", () => {
 
 	it("should return false for a string that is not a documented form", () => {
 		expect(isValidNcm("abc01012100")).toBe(false);
-		expect(isValidNcm("2203..00.00")).toBe(false);
+		expect(isValidNcm("2203..00.00")).toBe(true);
+		expect(isValidNcm("220.300.00")).toBe(false);
 	});
 
 	it("should return false for a number that is not a non-negative safe integer", () => {

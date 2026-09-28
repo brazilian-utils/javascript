@@ -26,7 +26,7 @@ export type Nbs = {
  * headings classify nothing by themselves and give `null`.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 9
- * digits, or the `N.NNNN.NN.NN` mask, with a single separator between the groups and optional
+ * digits, or the `N.NNNN.NN.NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
  * surrounding whitespace. Anything else (`"1.0101abc11.00"`) is rejected instead of having its
  * digits picked out. A number is only read as a code when it is a non-negative safe integer.
  * Every code starts with 1, so nothing is padded.

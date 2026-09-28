@@ -97,7 +97,6 @@ describe("getCest", () => {
 	it("should return null for a string that is not a documented form", () => {
 		expect(getCest("")).toBeNull();
 		expect(getCest("abc0500100")).toBeNull();
-		expect(getCest("05..001.00")).toBeNull();
 		expect(getCest("050.01.00")).toBeNull();
 	});
 

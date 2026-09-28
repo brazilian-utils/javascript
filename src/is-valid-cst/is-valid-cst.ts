@@ -62,8 +62,9 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
  * does not know.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 2
- * digits of a Tabela B code, or the 3 digits of the ICMS form with an optional single
- * separator after the origin digit, plus optional surrounding whitespace. The origin digit is
+ * digits of a Tabela B code, or the 3 digits of the ICMS form with optional separators
+ * (whitespace, `.`, `-` or `/`, any run of them, as `isValidCpf` reads its mask) after the origin
+ * digit, plus optional surrounding whitespace. The origin digit is
  * the only boundary a printed CST has, so `"0 10"` and `"1-10"` are read while `"0-0"`,
  * `"11-0"` and `"00-"` are not. Anything else (`"abc110"`) is rejected instead of having its
  * digits picked out. A number is

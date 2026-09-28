@@ -152,7 +152,7 @@ describe("getCfop", () => {
 
 	it("should return null for a string that is not a documented form", () => {
 		expect(getCfop("abc5102")).toBeNull();
-		expect(getCfop("5..102")).toBeNull();
+		expect(getCfop("51.02")).toBeNull();
 	});
 
 	it("should return null for a number that is not a non-negative safe integer", () => {

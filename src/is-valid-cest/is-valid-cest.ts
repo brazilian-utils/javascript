@@ -15,7 +15,7 @@ import { CEST_LENGTH } from "./constants";
  * a state applies the regime to it.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NN.NNN.NN` form the annexes print, with a single separator (space, `.`, `-`
+ * digits, or the `NN.NNN.NN` form the annexes print, with separators (alone or in a run: space, `.`, `-`
  * or `/`) between the groups and optional surrounding whitespace. A number is only read as a
  * code when it is a non-negative safe integer.
  *

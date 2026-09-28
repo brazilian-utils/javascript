@@ -5,7 +5,7 @@ import { ISBN_LABEL_REGEX } from "../parse-isbn/constants";
  * The 13 digits of an ISBN, starting with a GS1 prefix of the ISBN system (978 or 979), with at
  * most one hyphen or whitespace between two digits.
  */
-const ISBN_REGEX = /^9[\s-]?7[\s-]?[89](?:[\s-]?\d){10}$/;
+const ISBN_REGEX = /^9[\s.\-/]*7[\s.\-/]*[89](?:[\s.\-/]*\d){10}$/;
 
 /** The prefix 979-0, given to the ISMN (printed music), not to the ISBN. */
 const ISMN_PREFIX = "9790";
@@ -19,8 +19,9 @@ const ISMN_PREFIX = "9790";
  * and the digit that brings the sum to a multiple of 10, the same rule as a GTIN-13.
  *
  * The value may be printed: an "ISBN" label in front ("ISBN", "ISBN-13", optionally followed by a
- * colon) and a single hyphen or whitespace between two digits are accepted; anything else, a run
- * of separators included, is not.
+ * colon) and separators between two digits (whitespace, `.`, `-` or `/`, alone or in a run, the
+ * mask characters `isValidCpf` reads; the ISBN groups vary in length, so any two digits may be a
+ * boundary) are accepted; anything else, a leading or trailing separator included, is not.
  *
  * The 10 digit ISBN, replaced by the 13 digit one in 2007, is not accepted: the current ISBN
  * Users' Manual (7th edition) and the Agência Brasileira do ISBN only define the 13 digit form.
@@ -64,7 +65,7 @@ export const isValidIsbn = (value: string): boolean => {
 
 	if (!ISBN_REGEX.test(printed)) return false;
 
-	const digits = printed.replaceAll(/[\s-]/g, "");
+	const digits = printed.replaceAll(/[\s.\-/]/g, "");
 
 	if (digits.startsWith(ISMN_PREFIX)) return false;
 

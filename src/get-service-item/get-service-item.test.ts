@@ -84,8 +84,6 @@ describe("getServiceItem", () => {
 
 	it("should return null for a string that is not written in a documented form", () => {
 		expect(getServiceItem("1.1")).toBeNull();
-		expect(getServiceItem("1..01")).toBeNull();
-		expect(getServiceItem("1-01")).toBeNull();
 		expect(getServiceItem("1,01")).toBeNull();
 		expect(getServiceItem("x1.01")).toBeNull();
 		expect(getServiceItem("1.01x")).toBeNull();

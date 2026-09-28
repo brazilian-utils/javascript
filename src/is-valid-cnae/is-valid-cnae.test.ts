@@ -38,8 +38,9 @@ describe("isValidCnae", () => {
 		expect(isValidCnae(" 6201501 ")).toBe(true);
 	});
 
-	it("should reject a group boundary written with more than one separator (6201--5//01)", () => {
-		expect(isValidCnae("6201--5//01")).toBe(false);
+	it("should accept a group boundary written with a run of separators (6201--5//01), as isValidCpf does", () => {
+		expect(isValidCnae("6201--5//01")).toBe(true);
+		expect(isValidCnae("620-15/01")).toBe(false);
 		expect(isValidCnae("6201-5/01")).toBe(true);
 	});
 

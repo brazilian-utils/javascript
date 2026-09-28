@@ -25,7 +25,7 @@ export type Cfop = {
  * titles rather than codes a document can carry, so they give `null`.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 4
- * digits, or the `N.NNN` form the annex prints, with a single separator between the groups
+ * digits, or the `N.NNN` form the annex prints, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask)
  * and optional surrounding whitespace. Anything else (`"abc5102"`) is rejected instead of
  * having its digits picked out. A number is only read as a code when it is a non-negative
  * safe integer, since a sign, a decimal point or a rounded magnitude would otherwise be read

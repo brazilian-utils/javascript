@@ -10,7 +10,7 @@ import { CBO_LENGTH } from "./constants";
  * CBO 2002 table.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 6
- * digits, or the `NNNN-NN` mask, with a single separator between the groups and optional
+ * digits, or the `NNNN-NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *

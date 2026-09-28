@@ -2,14 +2,15 @@ import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-fir
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
 import { VOTER_ID_LENGTH } from "../_internals/constants/voter-id";
 
-const SEPARATORS_REGEX = /[\s.]/g;
+const SEPARATORS_REGEX = /[\s.\-/]/g;
 
 /**
  * The sequential number is either written in full as "0000 0000" or, without its leading zeros,
  * as 1 to 7 digits grouped from the right the same way ("123 4567", "1234"); the federative union
  * code and the check digits follow as two groups of 2.
  */
-const FORMAT_REGEX = /^[\s.]*(?:(?:\d{1,4}[\s.]*)?\d{4}|\d{1,3})[\s.]*\d{2}[\s.]*\d{2}[\s.]*$/;
+const FORMAT_REGEX =
+	/^[\s.\-/]*(?:(?:\d{1,4}[\s.\-/]*)?\d{4}|\d{1,3})[\s.\-/]*\d{2}[\s.\-/]*\d{2}[\s.\-/]*$/;
 
 /**
  * Validates if a Brazilian voter id (título de eleitor) is valid.
@@ -21,8 +22,9 @@ const FORMAT_REGEX = /^[\s.]*(?:(?:\d{1,4}[\s.]*)?\d{4}|\d{1,3})[\s.]*\d{2}[\s.]
  * "000123450159". At least one sequential digit is required, so the shortest accepted value has
  * 5 digits. A 13-digit value is rejected: the resolution allows no more than 12 digits.
  *
- * Whitespace and dots are accepted around and between the "0000 0000 00 00" groups, but any
- * other character, a letter in particular, makes the value invalid.
+ * Whitespace, dots, hyphens and slashes, the mask characters `isValidCpf` reads, are accepted
+ * around and between the "0000 0000 00 00" groups, but any other character, a letter in
+ * particular, makes the value invalid.
  *
  * @param {string} value - The voter id value to be validated.
  * @returns {boolean} True if the voter id is valid, false otherwise.

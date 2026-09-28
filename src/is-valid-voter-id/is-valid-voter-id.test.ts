@@ -68,12 +68,14 @@ describe("isValidVoterId", () => {
 		expect(isValidVoterId("102385010671ab")).toBe(false);
 	});
 
-	it("should reject a mask that is not whitespace or a dot", () => {
-		expect(isValidVoterId("1023-8501-06-71")).toBe(false);
+	it("should reject a mask character outside whitespace, `.`, `-` and `/`", () => {
+		expect(isValidVoterId("1023_8501_06_71")).toBe(false);
+		expect(isValidVoterId("1023-8501-06-71")).toBe(true);
 	});
 
 	it("should accept the documented whitespace and dot masks", () => {
 		expect(isValidVoterId("1023 8501 06 71")).toBe(true);
+		expect(isValidVoterId("1023-8501/06-71")).toBe(true);
 		expect(isValidVoterId("1023.8501.06.71")).toBe(true);
 		expect(isValidVoterId("0001.2345.01.59")).toBe(true);
 	});

@@ -2751,4 +2751,4 @@ ly,\
  * Shape a CBO code has to be written in: the 6 digits, optionally split into the printed
  * groups of 4 and 2 by a single whitespace or mask character.
  */
-export const CBO_FORMAT_REGEX = /^\d{4}[\s.\-/]?\d{2}$/;
+export const CBO_FORMAT_REGEX = /^\d{4}[\s.\-/]*\d{2}$/;

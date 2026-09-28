@@ -62,8 +62,11 @@ describe("getCbo", () => {
 		expect(getCbo("223150")).toBeNull();
 	});
 
-	it("should reject a group boundary written with more than one separator (2124--05)", () => {
-		expect(getCbo("2124--05")).toBeNull();
+	it("should read a group boundary written with a run of separators (2124--05), as isValidCpf does", () => {
+		expect(getCbo("2124--05")).toEqual({
+			code: "212405",
+			description: "Analista de desenvolvimento de sistemas",
+		});
 		expect(getCbo("2124-05")).toEqual({
 			code: "212405",
 			description: "Analista de desenvolvimento de sistemas",

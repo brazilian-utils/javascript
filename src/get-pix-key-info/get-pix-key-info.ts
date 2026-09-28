@@ -50,8 +50,8 @@ const NORMALIZERS: Readonly<Record<PixKeyType, (trimmed: string) => string>> = {
  *   UUID version, so the version and variant nibbles are not enforced.
  *
  * The CPF and the phone number are recognized by the way they are written, not only by the
- * digits they carry: a value is read as a CPF when it is the bare 11 digits or the documented
- * mask, and as a phone number when it holds nothing but digits, spaces and the `+`, `-`, `(`,
+ * digits they carry: a value is read as a CPF when `isValidCpf` accepts it (the bare 11 digits,
+ * or the 3-3-3-2 groups split by whitespace, `.`, `-` or `/`), and as a phone number when it holds nothing but digits, spaces and the `+`, `-`, `(`,
  * `)` and `.` of the usual masks. Surrounding text is not stripped away, so
  * `"abc123.456.789-09"` is not a CPF key.
  *

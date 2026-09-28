@@ -78,12 +78,17 @@ describe("isValidNfseKey", () => {
 			expect(isValidNfseKey(`${KEY_CNPJ}3`)).toBe(false);
 		});
 
-		test("when it is split by separators, since the key has no mask", () => {
+		test("when a separator sits inside a field", () => {
+			expect(isValidNfseKey("355030 82258716523000119000000000001226011357924683")).toBe(false);
+			expect(isValidNfseKey("35503082258716523000119000000000001226011357924 683")).toBe(false);
+		});
+
+		test("should accept the mask characters isValidCpf reads at the boundaries of its fields", () => {
 			expect(isValidNfseKey("3550308 2 2 58716523000119 0000000000012 2601 135792468 3")).toBe(
-				false,
+				true,
 			);
 			expect(isValidNfseKey("3550308.2.2.58716523000119.0000000000012.2601.135792468-3")).toBe(
-				false,
+				true,
 			);
 		});
 

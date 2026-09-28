@@ -10,7 +10,7 @@ import { CNAE_LENGTH } from "./constants";
  * exists in the official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with a single separator (space, `.`, `-` or `/`) between the groups and optional
+ * digits, or the `NNNN-N/NN` mask, with separators (space, `.`, `-` or `/`, alone or in a run) between the groups and optional
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *

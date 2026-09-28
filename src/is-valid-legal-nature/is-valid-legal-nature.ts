@@ -5,7 +5,7 @@ import { LEGAL_NATURE_CODES } from "./constants";
 /**
  * Validates if a Brazilian legal nature (natureza jurídica) code exists.
  *
- * Only the usual mask characters (hyphens, dots, whitespace) are tolerated around the 4
+ * Only the usual mask characters (hyphens, dots, slashes, whitespace) are tolerated around the 4
  * digits. Any other character makes the value invalid, so `"2062a"` is rejected instead of
  * being read as `"2062"`.
  *

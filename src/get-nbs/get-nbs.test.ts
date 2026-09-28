@@ -83,10 +83,10 @@ describe("getNbs", () => {
 		expect(getNbs("000000000")).toBeNull();
 	});
 
-	it("should return null for a group boundary written with more than one separator", () => {
-		expect(getNbs("1..0101.11.00")).toBeNull();
-		expect(getNbs("1.0101..11.00")).toBeNull();
-		expect(getNbs("1.0101.11..00")).toBeNull();
+	it("should read a group boundary written with a run of separators, as isValidCpf does", () => {
+		expect(getNbs("1..0101.11.00")).toEqual(getNbs("1.0101.11.00"));
+		expect(getNbs("1.0101 - 11/.00")).toEqual(getNbs("1.0101.11.00"));
+		expect(getNbs("1.0101.11.00")).not.toBeNull();
 	});
 
 	it("should return null for a string that is not written in a documented form", () => {

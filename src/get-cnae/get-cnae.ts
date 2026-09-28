@@ -21,7 +21,7 @@ export type Cnae = {
  * official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with a single separator (space, `.`, `-` or `/`) between the groups and optional
+ * digits, or the `NNNN-N/NN` mask, with separators (space, `.`, `-` or `/`, alone or in a run) between the groups and optional
  * surrounding whitespace. Anything else (`"0111abc301"`) is rejected instead of having its
  * digits picked out. A number is only read as a code when it is a non-negative safe integer,
  * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the

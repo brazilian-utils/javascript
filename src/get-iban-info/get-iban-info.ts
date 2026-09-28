@@ -54,10 +54,10 @@ const ACCOUNT_TYPE_END = ACCOUNT_END + ACCOUNT_TYPE_LENGTH;
  * scope, so a well-formed non `BR` IBAN also returns `null`.
  *
  * Accepts the same input forms as `isValidIban`, compact or in the ISO 13616 print format (groups
- * of 4 split by a single whitespace, `.`, `-` or `/`), in either case with optional surrounding
- * whitespace and in any case, and returns `null` whenever `isValidIban` would return `false`,
- * including a value carrying a separator away from a group boundary, a run of separators or any
- * character other than letters and digits.
+ * of 4 split by whitespace, `.`, `-` or `/`, alone or in a run), in either case with optional
+ * surrounding whitespace and in any case, and returns `null` whenever `isValidIban` would return
+ * `false`, including a value carrying a separator away from a group boundary or any character other
+ * than letters and digits.
  *
  * @param {string} value - The IBAN to be parsed.
  * @returns {IbanInfo|null} The parsed IBAN, or `null` when it is not a valid Brazilian IBAN.

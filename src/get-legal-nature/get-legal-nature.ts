@@ -61,7 +61,7 @@ export const buildLegalNature = (code: string, description: string): LegalNature
 /**
  * Looks a Brazilian legal nature (natureza jurídica) code up.
  *
- * The usual mask characters (hyphens, dots, whitespace) are stripped from a string before the
+ * The usual mask characters (hyphens, dots, slashes, whitespace) are stripped from a string before the
  * lookup, so `getLegalNature("206.2")` resolves like `getLegalNature("206-2")`. A number is only
  * read as a code when it is a non-negative safe integer: its sign and its decimal point are not
  * mask characters, so `getLegalNature(-2062)` and `getLegalNature(206.2)` return `null` instead

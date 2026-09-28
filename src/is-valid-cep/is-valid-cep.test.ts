@@ -66,6 +66,10 @@ describe("isValidCep", () => {
 			expect(isValidCep("01310-100")).toBe(true);
 		});
 
+		test("when the mask uses a slash, one of the mask characters isValidCpf reads", () => {
+			expect(isValidCep("01310/100")).toBe(true);
+		});
+
 		test("when is a CEP valid as a number", () => {
 			expect(isValidCep(20_040_020)).toBe(true);
 		});

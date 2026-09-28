@@ -1067,4 +1067,4 @@ go,\
  * specification by a single whitespace or mask character, the way the annexes print them
  * ("01.001.00").
  */
-export const CEST_FORMAT_REGEX = /^\d{2}[\s.\-/]?\d{3}[\s.\-/]?\d{2}$/;
+export const CEST_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{2}$/;

@@ -62,6 +62,16 @@ describe("isValidSuframa", () => {
 		test("when it contains letters or special characters", () => {
 			expect(isValidSuframa("12345678A9")).toBe(false);
 			expect(isValidSuframa("12#3456#789")).toBe(false);
+			expect(isValidSuframa("(12)3456789")).toBe(false);
+			expect(isValidSuframa("12,3456,789")).toBe(false);
+			expect(isValidSuframa("12*3456*789")).toBe(false);
+		});
+
+		test("when a separator sits inside a field or before or after the value", () => {
+			expect(isValidSuframa("1.23456789")).toBe(false);
+			expect(isValidSuframa("123.456.789")).toBe(false);
+			expect(isValidSuframa("-123456789")).toBe(false);
+			expect(isValidSuframa("123456789.")).toBe(false);
 			expect(isValidSuframa("abcdefghi")).toBe(false);
 		});
 
@@ -104,6 +114,7 @@ describe("isValidSuframa", () => {
 			expect(isValidSuframa("12.3456.789")).toBe(true);
 			expect(isValidSuframa("20.5678.10-6")).toBe(true);
 			expect(isValidSuframa("20 5678 10 6")).toBe(true);
+			expect(isValidSuframa(" 20--5678//10 6 ")).toBe(true);
 		});
 
 		test("when it has 8 digits because the sector code lost its leading zero", () => {
@@ -125,16 +136,16 @@ describe("isValidSuframa", () => {
 	});
 
 	describe("properties", () => {
-		test("should accept a generated Inscrição SUFRAMA written with any of the accepted mask characters", () => {
-			const masks = maskSeparators([".", "-", "/", " ", "(", ")", ",", "*"], 4, 3);
+		test("should accept a generated Inscrição SUFRAMA with any run of the mask characters between its fields", () => {
+			const masks = maskSeparators([".", "-", "/", " "], 3, 3);
 
 			fc.assert(
 				fc.property(masks, (separators) => {
 					const suframa = generateSuframa();
-					const head = `${separators[0]}${suframa.slice(0, 2)}${separators[1]}`;
-					const tail = `${suframa.slice(2, 6)}${separators[2]}${suframa.slice(6)}`;
+					const head = `${suframa.slice(0, 2)}${separators[0]}${suframa.slice(2, 6)}`;
+					const tail = `${separators[1]}${suframa.slice(6, 8)}${separators[2]}${suframa.slice(8)}`;
 
-					expect(isValidSuframa(`${head}${tail}${separators[3]}`)).toBe(true);
+					expect(isValidSuframa(`${head}${tail}`)).toBe(true);
 				}),
 			);
 		});

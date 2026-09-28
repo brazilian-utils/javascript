@@ -73,8 +73,8 @@ describe("isValidRenavam", () => {
 			expect(isValidRenavam("ab00639884962")).toBe(false);
 		});
 
-		test("when the mask uses a character other than whitespace, a dot or a hyphen", () => {
-			expect(isValidRenavam("0063988/4962")).toBe(false);
+		test("when the mask uses a character other than whitespace, a dot, a hyphen or a slash", () => {
+			expect(isValidRenavam("0063988_4962")).toBe(false);
 		});
 
 		test("when it is a negative or fractional number", () => {
@@ -109,6 +109,7 @@ describe("isValidRenavam", () => {
 
 		test("when is a RENAVAM valid with the usual mask characters", () => {
 			expect(isValidRenavam("0063988.4962")).toBe(true);
+			expect(isValidRenavam("0063988/4962")).toBe(true);
 			expect(isValidRenavam("00639884-962")).toBe(true);
 			expect(isValidRenavam(" 00639884962 ")).toBe(true);
 		});

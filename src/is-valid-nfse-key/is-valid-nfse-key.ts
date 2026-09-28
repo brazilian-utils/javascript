@@ -4,7 +4,6 @@ import {
 	CHECK_DIGIT_INDEX,
 	CODE_START,
 	CPF_PADDING,
-	FORMAT_REGEX,
 	GENERATOR_ENVIRONMENTS,
 	GENERATOR_ENVIRONMENT_INDEX,
 	MONTH_START,
@@ -15,6 +14,7 @@ import {
 	YEAR_START,
 } from "../_internals/constants/nfse-key";
 import { mod11 } from "../_internals/mod11/mod11";
+import { readNfseKey } from "../_internals/read-nfse-key/read-nfse-key";
 import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
 import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 
@@ -46,7 +46,10 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  * `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4)
  * Cód.Num.(9) DV(1)`, all digits except an alphanumeric CNPJ in the "Inscrição Federal". The
  * `NFS` literal the `Id` attribute of `infNFSe` puts in front of it is stripped, with
- * surrounding whitespace. The key has no printed mask (the DANFSe prints it as a single block), so a separator anywhere in it is rejected instead of being stripped. The keys
+ * surrounding whitespace. The DANFSe prints the key as a single block, so it has no printed mask;
+ * the boundaries of those fields are where the mask characters `isValidCpf` reads are accepted
+ * (whitespace, `.`, `-` or `/`, alone or in a run), while one inside a field makes the value
+ * invalid. The keys
  * of the municipal NFS-e models that are not the national standard are out of scope, and so is
  * the 44 digit DF-e key, which `isValidNfeKey` covers.
  *
@@ -108,17 +111,17 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  * isValidNfseKey("43149021100040364478829000000000105725120484407255"); // true (CPF issuer, RS)
  * isValidNfseKey("35503082212ABC34501DE35000000000001226091357924682"); // true (alphanumeric CNPJ)
  * isValidNfseKey("35503082258716523000119000000000001226011357924684"); // false (check digit)
- * isValidNfseKey("3550308 2 2 58716523000119 0000000000012 2601 135792468 3"); // false (no mask)
+ * isValidNfseKey("3550308 2 2 58716523000119 0000000000012 2601 135792468 3"); // true (fields split)
+ * isValidNfseKey("355030 82258716523000119000000000001226011357924683"); // false (inside a field)
  * ```
  */
 export const isValidNfseKey = (value: string): boolean => {
 	if (typeof value !== "string") return false;
 
-	const match = FORMAT_REGEX.exec(value.trim());
+	const key = readNfseKey(value);
 
-	if (match === null) return false;
+	if (key === null) return false;
 
-	const key = match[1].toUpperCase();
 	const ambGer = Number(key[GENERATOR_ENVIRONMENT_INDEX]);
 	const month = Number(key.slice(MONTH_START, CODE_START));
 

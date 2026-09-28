@@ -6,7 +6,7 @@ const CEP_REGEX = /^\d{8}$/;
 /**
  * Validates if a CEP (Brazilian postal code) is valid.
  *
- * Spaces, dots and hyphens are ignored, so every punctuated form of a CEP is accepted, but
+ * Spaces, dots, hyphens and slashes are ignored, so every punctuated form of a CEP is accepted, but
  * any other character, a letter in particular, makes the value invalid.
  *
  * A number is only read as a CEP when it is a non-negative safe integer.

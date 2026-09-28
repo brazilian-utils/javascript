@@ -18,6 +18,11 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR15 0000 0000 0000 1093 2840 814P 2")).toBe(true);
 		});
 
+		test("for groups separated by a run of mask characters, as isValidCpf reads its mask", () => {
+			expect(isValidIban("BR15 0000 0000 0000 1093 2840  814P 2")).toBe(true);
+			expect(isValidIban("BR15 0000 0000 0000 1093 2840 .-814P 2")).toBe(true);
+		});
+
 		test("for a value whose ISO 13616 groups are split by any of the mask characters", () => {
 			expect(isValidIban("BR15.0000.0000.0000.1093.2840.814P.2")).toBe(true);
 			expect(isValidIban("BR15-0000-0000-0000-1093-2840-814P-2")).toBe(true);
@@ -109,11 +114,6 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR15 000 00000 0000 1093 2840 814P 2")).toBe(false);
 			expect(isValidIban("BR1 50000000000001093 2840 814P 2")).toBe(false);
 			expect(isValidIban("BR15 0000 0000 0000 1093 2840 814 P2")).toBe(false);
-		});
-
-		test("when the groups are separated by more than one separator", () => {
-			expect(isValidIban("BR15 0000 0000 0000 1093 2840  814P 2")).toBe(false);
-			expect(isValidIban("BR15 0000 0000 0000 1093 2840 .-814P 2")).toBe(false);
 		});
 
 		test("when it is an empty string", () => {

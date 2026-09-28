@@ -28,10 +28,10 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * `"BR1500000000000010932840814P2"`, or the ISO 13616 print format, letters and digits in groups
  * of 4 (the last one shorter), with optional surrounding whitespace either way. The groups may be
  * split by whitespace, `.`, `-` or `/`, the interchangeable mask characters `isValidCpf` and
- * `isValidCnpj` accept, so `"BR1500000000000010932840814P-2"` reads as the same IBAN. Only a
- * separator away from a group boundary, a run of separators (ISO 13616 prints a single one) or a
- * character outside letters and digits makes the value something other than an IBAN, so
- * `"BR15 0000 0000 0000 1093 2840  814P 2"` and `"BR15 000 00000 0000 1093 2840 814P 2"` are
+ * `isValidCnpj` accept, alone or in a run as they read them (ISO 13616 prints a single space), so
+ * `"BR1500000000000010932840814P-2"` and `"BR15 0000 0000 0000 1093 2840  814P 2"` read as the same
+ * IBAN. Only a separator away from a group boundary or a character outside letters and digits
+ * makes the value something other than an IBAN, so `"BR15 000 00000 0000 1093 2840 814P 2"` is
  * rejected instead of having the offending character stripped.
  *
  * The last character is the owner indicator, `1` for the first or only holder up to `9` for the
