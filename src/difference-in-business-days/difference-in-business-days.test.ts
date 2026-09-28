@@ -189,24 +189,24 @@ describe("differenceInBusinessDays", () => {
 			expect(differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), "SP")).toBe(2);
 		});
 
-		it("should ignore a stateCode that is not a known state", () => {
-			const result = differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2), {
-				// @ts-expect-error: intentionally invalid input
-				stateCode: "XX",
-			});
-
-			expect(result).toBe(1);
-		});
-
-		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
-			for (const stateCode of PROTOTYPE_KEYS) {
+		it("should return null for a string that is not a state code, a prototype chain key or an empty one included", () => {
+			for (const stateCode of [...PROTOTYPE_KEYS, "XX", ""]) {
 				expect(
 					differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2), {
 						// @ts-expect-error: intentionally invalid input
 						stateCode,
 					}),
-				).toBe(1);
+				).toBeNull();
 			}
+		});
+
+		it("should read the state code ignoring case and surrounding whitespace", () => {
+			expect(
+				differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), {
+					// @ts-expect-error: a lower case state code is read as its upper case form
+					stateCode: "sp ",
+				}),
+			).toBe(1);
 		});
 	});
 

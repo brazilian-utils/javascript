@@ -79,20 +79,16 @@ describe("isHoliday", () => {
 		expect(isHoliday({ targetDate: new Date(2024, 1, 1) })).toBe(false);
 	});
 
-	it("should ignore an unknown stateCode and fall back to national holidays", () => {
-		// @ts-expect-error: intentionally invalid input
-		expect(isHoliday({ targetDate: new Date(2024, 0, 1), stateCode: "XX" })).toBe(true);
-		// @ts-expect-error: intentionally invalid input
-		expect(isHoliday({ targetDate: new Date(2024, 5, 10), stateCode: "XX" })).toBe(false);
+	it("should reject a string that is not a state code, a prototype chain key or an empty one included, even on a national holiday", () => {
+		for (const stateCode of [...PROTOTYPE_KEYS, "XX", ""]) {
+			// @ts-expect-error: intentionally invalid input
+			expect(isHoliday({ targetDate: new Date(2024, 0, 1), stateCode })).toBe(false);
+		}
 	});
 
-	it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
-		for (const stateCode of PROTOTYPE_KEYS) {
-			// @ts-expect-error: intentionally invalid input
-			expect(isHoliday({ targetDate: new Date(2024, 0, 1), stateCode })).toBe(true);
-			// @ts-expect-error: intentionally invalid input
-			expect(isHoliday({ targetDate: new Date(2024, 5, 10), stateCode })).toBe(false);
-		}
+	it("should read the state code ignoring case and surrounding whitespace", () => {
+		// @ts-expect-error: a lower case state code is read as its upper case form
+		expect(isHoliday({ targetDate: new Date(2024, 6, 9), stateCode: " sp" })).toBe(true);
 	});
 
 	describe("local calendar date vs UTC instant", () => {

@@ -30,16 +30,12 @@ export type IsHolidayOptions = IsHolidayParams;
  * "2024-12-24" in local time, so build `targetDate` from local components
  * (`new Date(2024, 11, 25)`) or from a full ISO datetime when you mean a specific local day.
  *
- * An invalid `stateCode` is treated in two different ways, depending on its type:
- *
- * - a string that is not a known state code is ignored, and only national holidays are
- *   considered, the same behavior as `getHolidays`. The lookup is an own-property one, so a
- *   prototype-chain key such as `"__proto__"` or `"constructor"` is an unknown state code like
- *   any other;
- * - a `stateCode` that is present and is not a string at all (a number, `null`, an object) is
- *   rejected rather than ignored: `isHoliday` returns `false` without looking at the date, even
- *   when that date is a national holiday. `undefined`, or an absent property, is the only
- *   non-string value that stands for "no state" instead.
+ * `stateCode` is read as `getHolidays` reads it: letter case and surrounding whitespace are
+ * ignored, and a `stateCode` that is present and is not the code of a Brazilian state (an unknown
+ * string such as `"XX"`, an empty string, a prototype-chain key such as `"__proto__"`, a value
+ * that is not a string) is rejected: `isHoliday` returns `false` without looking at the date, even
+ * when that date is a national holiday. `undefined`, or an absent property, is the only value that
+ * stands for "no state".
  *
  * The date a state holiday is checked against is the statutory one, except for Alagoas' 30
  * November, which `getHolidays` moves back to the Monday from a Tuesday and on to the Friday from a
@@ -56,8 +52,8 @@ export type IsHolidayOptions = IsHolidayParams;
  * @param {Date} options.targetDate - The date to check.
  * @param {StateCode} [options.stateCode] - Optional Brazilian state code to also consider state holidays.
  * @returns {boolean} True when the date is a holiday, false otherwise. Bad input also returns
- * false: missing `options`, a `targetDate` that is not a valid `Date`, or a non-string
- * `stateCode`.
+ * false: missing `options`, a `targetDate` that is not a valid `Date`, or a `stateCode` that is
+ * present and is not a state code.
  *
  * @example
  * ```typescript
@@ -101,10 +97,6 @@ export const isHoliday = (options?: IsHolidayParams): boolean => {
 	const { targetDate, stateCode } = options;
 
 	if (!isValidDate(targetDate)) return false;
-
-	if (stateCode !== undefined && typeof stateCode !== "string") {
-		return false;
-	}
 
 	const year = targetDate.getFullYear();
 	return getHolidays({ year, stateCode }).some(

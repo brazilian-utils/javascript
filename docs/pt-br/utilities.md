@@ -2025,7 +2025,7 @@ Retorna os feriados brasileiros de um ano: os nacionais e, com um `stateCode`, t
 - Outros deslocamentos não são aplicados e a data da lei é a retornada: a lei do AC adia para a sexta-feira os feriados que caem de terça a quinta (Lei AC nº 2.126/2009), mas os próprios decretos anuais do estado a aplicam de forma desigual (em 2026 o 20/1 é adiado e o 17/11, uma terça, fica na data).
 - As três datas de GO (26/7, 24/10, 28/10) são os "feriados estaduais" do estatuto dos servidores do estado (Lei GO nº 20.756/2020, art. 269, II); não foi achada lei goiana que fixe uma data magna como feriado civil. O governador transfere o 26/7 por decreto todo ano (2025: 28/7; 2026: 20/7), então o 26/7 da lei, que é o retornado aqui, em geral não é o dia observado.
 - Cada feriado estadual só é listado a partir do primeiro ano em que a sua lei estadual se aplicava (o 9 de julho de SP a partir de 1997, o São Jorge do RJ a partir de 2008, o 11 de agosto de SC a partir de 2004), então um ano mais antigo tem menos feriados estaduais.
-- Um `stateCode` desconhecido ou que não é string é ignorado e só os feriados nacionais são retornados.
+- `stateCode` ignora maiúsculas/minúsculas e espaços nas pontas (`'sp'` é `'SP'`). Só um `stateCode` omitido (ou `undefined`) pede apenas os feriados nacionais: qualquer outro valor que não seja uma sigla de estado (`'XX'`, `''`, um valor que não é string) retorna `[]`. Até a 2.4.0 um código desconhecido era ignorado e os feriados nacionais eram retornados, então um erro de digitação como `'sp'` perdia os feriados do estado sem aviso.
 - Retorna `[]` quando o ano não é um inteiro de 1900 a 2099, ou quando o argumento não é nem número nem objeto.
 
 ```javascript
@@ -2056,8 +2056,8 @@ Fonte: `src/get-holidays/constants.ts`, [Lei nº 662/1949](https://www.planalto.
 Verifica se uma data é feriado brasileiro. Aceita `{ targetDate, stateCode? }` (`IsHolidayParams`).
 
 - A verificação usa a data de calendário local de `targetDate`, não o seu instante UTC.
-- `stateCode` também considera os feriados daquele estado. Um código desconhecido é ignorado, como em `getHolidays`.
-- Retorna `false` quando `targetDate` está ausente ou não é um `Date` válido, ou quando `stateCode` está presente e não é string.
+- `stateCode` também considera os feriados daquele estado, lido como em `getHolidays` (maiúsculas/minúsculas e espaços nas pontas são ignorados).
+- Retorna `false` quando `targetDate` está ausente ou não é um `Date` válido, ou quando `stateCode` está presente e não é uma sigla de estado (`'XX'`, `''`, um valor que não é string), mesmo num feriado nacional.
 
 ```javascript
 import { isHoliday } from '@brazilian-utils/brazilian-utils';
@@ -2075,7 +2075,7 @@ Verifica se uma data é dia útil no Brasil: não é sábado, domingo nem um fer
 - Com `includeSaturday` desligado, é uma contagem de segunda a sexta. Ela não é, por si só, o calendário de bancos ou tribunais: o mercado financeiro também não conta a segunda e a terça-feira de Carnaval e o Corpus Christi (Resolução CMN nº 4.880/2020, art. 6º), que o `includeOptional` padrão cobre, e os bancos fecham nos feriados locais; a Justiça Federal também fecha de 20/12 a 6/1, de quarta-feira santa ao domingo de Páscoa, na segunda e na terça-feira de Carnaval, em 11/8, 1º e 2/11 e 8/12 (Lei nº 5.010/1966, art. 62), e os prazos processuais seguem o calendário de cada tribunal (CPC, art. 216). Ligado, é a contagem trabalhista do prazo de pagamento do salário do art. 459, § 1º, da CLT, a que a fiscalização do trabalho lê pela Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
 - Com `includeSaturday` ligado, o domingo e os feriados continuam excluídos, então um feriado que cai em um sábado continua não sendo dia útil.
 - O trecho "inclusive o municipal" dessa regra não é coberto: `getHolidays` tem apenas feriados nacionais e estaduais, então um feriado municipal é contado aqui como dia útil comum. Retire os feriados municipais por conta própria quando a contagem precisar ser exata para um município.
-- Retorna `false` quando `value` não é um `Date` válido ou o seu ano está fora de 1900 a 2099, ou quando `stateCode` está presente e não é string.
+- Retorna `false` quando `value` não é um `Date` válido ou o seu ano está fora de 1900 a 2099, ou quando `stateCode` está presente e não é uma sigla de estado (`'XX'`, `''`, um valor que não é string). Maiúsculas/minúsculas e espaços nas pontas de `stateCode` são ignorados.
 
 ```javascript
 import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
@@ -2101,7 +2101,7 @@ Soma dias úteis a uma data, pulando sábados, domingos e os feriados que `isBus
 - **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula a segunda e a terça-feira de Carnaval e o Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
 - Retorna um novo `Date`, com o horário preservado; `date` não é alterado.
 - `amount` igual a `0` retorna a mesma data, mesmo em fim de semana ou feriado. Um `amount` negativo anda para trás.
-- Retorna `null` quando `date` é inválido, `amount` não é um inteiro finito, `stateCode` não é string ou o resultado sai dos anos de 1900 a 2099.
+- Retorna `null` quando `date` é inválido, `amount` não é um inteiro finito, `stateCode` está presente e não é uma sigla de estado ou o resultado sai dos anos de 1900 a 2099.
 
 ```javascript
 import { addBusinessDays } from '@brazilian-utils/brazilian-utils';
@@ -2168,7 +2168,7 @@ Conta os dias úteis entre duas datas. Assinatura: `differenceInBusinessDays(lat
 - **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula a segunda e a terça-feira de Carnaval e o Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
 - Conta `earlierDate` quando é dia útil e cada dia útil estritamente entre as duas datas; `laterDate` nunca é contado. O horário é ignorado.
 - O resultado é negativo quando `laterDate` é anterior a `earlierDate`, e `0` no mesmo dia de calendário.
-- Retorna `null` quando uma das datas não é um `Date` válido ou está fora dos anos de 1900 a 2099, ou quando `stateCode` não é string.
+- Retorna `null` quando uma das datas não é um `Date` válido ou está fora dos anos de 1900 a 2099, ou quando `stateCode` está presente e não é uma sigla de estado.
 
 ```javascript
 import { differenceInBusinessDays } from '@brazilian-utils/brazilian-utils';

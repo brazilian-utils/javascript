@@ -1,6 +1,7 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
 import { resolveStateHolidayDate } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
 import {
 	ELECTION_DATE_OVERRIDES,
@@ -160,12 +161,10 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 		},
 	);
 
-	// An own entry lookup, so a prototype chain key ("toString", "__proto__", ...) is an unknown
-	// state code like any other. `getHolidays` only passes a string or `undefined` down here.
-	// Stryker disable next-line ConditionalExpression: `Object.hasOwn` reads an `undefined` key as the string "undefined", which is no state code either, so the guard only narrows the type.
-	const hasStateHolidays = stateCode !== undefined && Object.hasOwn(STATE_HOLIDAYS, stateCode);
-
-	const stateHolidays = hasStateHolidays ? STATE_HOLIDAYS[stateCode] : undefined;
+	// `getHolidays` only passes a state code or `undefined` down here (`readHolidayStateCode`
+	// rejected everything else), so a prototype chain key never reaches this lookup.
+	// Stryker disable next-line ConditionalExpression: `STATE_HOLIDAYS` has no "undefined" key, so indexing it with `undefined` also gives `undefined`; the check only narrows the type.
+	const stateHolidays = stateCode === undefined ? undefined : STATE_HOLIDAYS[stateCode];
 
 	if (stateHolidays) {
 		for (const entry of stateHolidays) {
@@ -229,11 +228,13 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * counted back from the end of the term, and Lei 1.266/1950, art. 1º, which made the day of the
  * general elections a feriado nacional, was revoked by Lei 10.607/2002.
  *
- * If `stateCode` is provided but is not a valid/known state code, it is ignored and
- * only national holidays are returned (this mirrors passing no `stateCode` at all,
- * and is kept for backwards compatibility). The lookup is an own-property one, so a
- * prototype-chain key such as `"__proto__"`, `"constructor"` or `"toString"` is an unknown
- * state code like any other rather than a crash.
+ * `stateCode` is matched ignoring letter case and surrounding whitespace, like the other state
+ * utils, so `"sp"` lists the São Paulo holidays. Only an omitted (or `undefined`) `stateCode`
+ * asks for the national holidays alone: any other value that is not the code of a Brazilian
+ * state (an unknown string such as `"XX"`, an empty string, a prototype-chain key such as
+ * `"__proto__"`, a value that is not a string) returns an empty array, as a year outside the
+ * supported range does. Up to 2.4.0 such a code was ignored and the national holidays were
+ * returned, so a typo silently dropped the state's holidays.
  *
  * When a state entry falls on the same date as a national one and carries the same name, the
  * state entry replaces it instead of being listed twice: this is how the Distrito Federal's
@@ -392,7 +393,9 @@ export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[
 		return [];
 	}
 
-	const normalizedStateCode = typeof stateCode === "string" ? stateCode : undefined;
+	const normalizedStateCode = readHolidayStateCode(stateCode);
+
+	if (normalizedStateCode === null) return [];
 
 	// Stryker disable next-line StringLiteral: the exact fallback text is never observable outside this module; it only has to be a value no real StateCode equals, which any fixed string satisfies
 	const cacheKey = `${year}|${normalizedStateCode ?? ""}`;

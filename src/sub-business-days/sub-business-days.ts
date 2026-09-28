@@ -28,10 +28,11 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
  * holidays, which `getHolidays` does not carry.
  *
- * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
- * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
- * prototype-chain key such as `"__proto__"` is an unknown state code like any other. An `options`
- * that is not an object at all is ignored, exactly as `isBusinessDay` ignores it.
+ * `options.stateCode` is read as `isBusinessDay` reads it: letter case and surrounding
+ * whitespace are ignored, and a `stateCode` that is present and is not a state code (`"XX"`, an
+ * empty string, a prototype-chain key such as `"__proto__"`, a value that is not a string)
+ * returns `null`. An `options` that is not an object at all is ignored, exactly as
+ * `isBusinessDay` ignores it.
  *
  * Only years from 1900 through 2099 are supported, the range `getHolidays` computes. A `date`
  * outside it, or a walk that leaves it, returns `null`.
@@ -44,7 +45,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {Date | null} A new `Date`, `amount` business days before `date`. `null` on bad input:
  * a `date` that is not a valid `Date` or is outside 1900-2099, an `amount` that is not a finite
- * integer, a `stateCode` that is not a string, or a walk that leaves the supported years.
+ * integer, a `stateCode` that is present and is not a state code, or a walk that leaves the
+ * supported years.
  *
  * @example
  * ```typescript

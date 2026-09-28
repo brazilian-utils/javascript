@@ -86,12 +86,10 @@ describe("subBusinessDays", () => {
 			expect(subBusinessDays(new Date(2024, 6, 10, 12), 1)).toEqual(new Date(2024, 6, 9, 12));
 		});
 
-		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
-			for (const stateCode of PROTOTYPE_KEYS) {
+		it("should return null for a string that is not a state code, a prototype chain key or an empty one included", () => {
+			for (const stateCode of [...PROTOTYPE_KEYS, "XX", ""]) {
 				// @ts-expect-error: intentionally invalid input
-				expect(subBusinessDays(new Date(2024, 0, 5, 12), 1, { stateCode })).toEqual(
-					new Date(2024, 0, 4, 12),
-				);
+				expect(subBusinessDays(new Date(2024, 0, 5, 12), 1, { stateCode })).toBeNull();
 			}
 		});
 

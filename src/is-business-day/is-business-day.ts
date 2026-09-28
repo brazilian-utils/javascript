@@ -1,6 +1,7 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
+import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
 import { getHolidays } from "../get-holidays/get-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
@@ -62,18 +63,13 @@ const SATURDAY = 6;
  * a business day here while the labour inspection would exclude it. A count that must be exact
  * for a municipality has to remove its municipal holidays on top of this option.
  *
- * An invalid `options.stateCode` is treated in two different ways, depending on its type, the
- * same split `isHoliday` makes:
- *
- * - a string that is not a known state code is ignored, and only national holidays are
- *   considered, the same behavior as `getHolidays`. The lookup is an own-property one, so a
- *   prototype-chain key such as `"__proto__"` or `"constructor"` is an unknown state code like
- *   any other;
- * - a `stateCode` that is present and is not a string at all (a number, `null`, an object) is
- *   rejected rather than ignored: `isBusinessDay` returns `false` without looking at the date,
- *   even when that date is an ordinary Tuesday. `undefined`, or an absent property, is the only
- *   non-string value that stands for "no state" instead. `addBusinessDays`, `subBusinessDays`
- *   and `differenceInBusinessDays` reject the same value with `null`.
+ * `options.stateCode` is read as `getHolidays` reads it: letter case and surrounding whitespace
+ * are ignored, and a `stateCode` that is present and is not the code of a Brazilian state (an
+ * unknown string such as `"XX"`, an empty string, a prototype-chain key such as `"__proto__"`, a
+ * value that is not a string) is rejected: `isBusinessDay` returns `false` without looking at the
+ * date, even when that date is an ordinary Tuesday. `undefined`, or an absent property, is the
+ * only value that stands for "no state". `addBusinessDays`, `subBusinessDays` and
+ * `differenceInBusinessDays` reject the same value with `null`.
  *
  * Three state rules change what `includeOptional: false` answers. The Distrito Federal, Maranhão
  * from 2024 on and Rio de Janeiro from 2026 on declare Corpus Christi a feriado (Lei distrital nº
@@ -95,7 +91,7 @@ const SATURDAY = 6;
  * @returns {boolean} True when `value` is a business day, false otherwise. Bad input also
  * returns false: a `value` that is not a valid `Date` (including non-`Date` values), a
  * `value` outside the supported 1900-2099 range, or a `stateCode` that is present and is not a
- * string.
+ * state code.
  *
  * @example
  * ```typescript
@@ -177,9 +173,9 @@ const SATURDAY = 6;
 export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolean => {
 	if (!isValidDate(value)) return false;
 
-	const stateCode = options?.stateCode;
+	const stateCode = readHolidayStateCode(options?.stateCode);
 
-	if (stateCode !== undefined && typeof stateCode !== "string") return false;
+	if (stateCode === null) return false;
 
 	const year = value.getFullYear();
 

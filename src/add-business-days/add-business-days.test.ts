@@ -240,13 +240,18 @@ describe("addBusinessDays", () => {
 			expect(addBusinessDays(new Date(2024, 6, 8, 12), 1, "SP")).toEqual(new Date(2024, 6, 9, 12));
 		});
 
-		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
-			for (const stateCode of PROTOTYPE_KEYS) {
-				expect(
-					// @ts-expect-error: intentionally invalid input
-					addBusinessDays(new Date(2024, 0, 2, 12), 1, { stateCode }),
-				).toEqual(new Date(2024, 0, 3, 12));
+		it("should return null for a string that is not a state code, a prototype chain key or an empty one included", () => {
+			for (const stateCode of [...PROTOTYPE_KEYS, "XX", ""]) {
+				// @ts-expect-error: intentionally invalid input
+				expect(addBusinessDays(new Date(2024, 0, 2, 12), 1, { stateCode })).toBeNull();
 			}
+		});
+
+		it("should read the state code ignoring case and surrounding whitespace", () => {
+			expect(
+				// @ts-expect-error: a lower case state code is read as its upper case form
+				addBusinessDays(new Date(2024, 6, 8, 12), 1, { stateCode: " sp " }),
+			).toEqual(new Date(2024, 6, 10, 12));
 		});
 	});
 

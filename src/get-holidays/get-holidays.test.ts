@@ -1202,12 +1202,17 @@ describe("getHolidays", () => {
 		expect(getHolidays(null)).toEqual([]);
 	});
 
-	test("should read a prototype chain key as an unknown state code and list the national holidays only", () => {
-		const national = getHolidays(2024);
-
+	test("should return an empty array for a prototype chain key, like any other unknown state code", () => {
 		for (const stateCode of ["toString", "constructor", "__proto__", "hasOwnProperty"]) {
-			expect(getHolidays({ year: 2024, stateCode: stateCode as StateCode })).toEqual(national);
+			expect(getHolidays({ year: 2024, stateCode: stateCode as StateCode })).toEqual([]);
 		}
+	});
+
+	test("should read the state code ignoring case and surrounding whitespace", () => {
+		const saoPaulo = getHolidays({ year: 2024, stateCode: "SP" });
+
+		expect(getHolidays({ year: 2024, stateCode: "sp" as StateCode })).toEqual(saoPaulo);
+		expect(getHolidays({ year: 2024, stateCode: " Sp\t" as StateCode })).toEqual(saoPaulo);
 	});
 
 	test('should return an empty array when called with a function, even one carrying a year property (typeof yearOrOptions !== "object" must reject it, not just isNullish)', () => {
@@ -1225,12 +1230,9 @@ describe("getHolidays", () => {
 		}
 	});
 
-	test("should ignore a non-primitive (String object) stateCode and return national-only holidays", () => {
-		const nationalHolidays = getHolidays(2024);
+	test("should return an empty array for a non-primitive (String object) stateCode", () => {
 		// @ts-expect-error: intentionally invalid input
-		const holidays = getHolidays({ year: 2024, stateCode: new String("SP") });
-
-		expect(holidays).toEqual(nationalHolidays);
+		expect(getHolidays({ year: 2024, stateCode: new String("SP") })).toEqual([]);
 	});
 
 	test("should compute independent results per year instead of colliding on a shared cache key", () => {
@@ -1371,20 +1373,20 @@ describe("getHolidays", () => {
 		expect(mgHolidays.some((h) => h.name === "Aniversário de Minas Gerais")).toBe(false);
 	});
 
-	test("should ignore an unknown stateCode and return national-only holidays", () => {
-		const nationalHolidays = getHolidays(2024);
+	test("should return an empty array for a string that is not a state code, an empty one included", () => {
 		// @ts-expect-error: intentionally invalid input
-		const holidays = getHolidays({ year: 2024, stateCode: "XX" });
-
-		expect(holidays).toEqual(nationalHolidays);
+		expect(getHolidays({ year: 2024, stateCode: "XX" })).toEqual([]);
+		// @ts-expect-error: intentionally invalid input
+		expect(getHolidays({ year: 2024, stateCode: "" })).toEqual([]);
 	});
 
-	test("should ignore a non-string stateCode and return national-only holidays", () => {
-		const nationalHolidays = getHolidays(2024);
+	test("should return an empty array for a stateCode that is not a string", () => {
 		// @ts-expect-error: intentionally invalid input
-		const holidays = getHolidays({ year: 2024, stateCode: 123 });
+		expect(getHolidays({ year: 2024, stateCode: 123 })).toEqual([]);
+	});
 
-		expect(holidays).toEqual(nationalHolidays);
+	test("should read an explicit undefined stateCode as the national holidays only", () => {
+		expect(getHolidays({ year: 2024, stateCode: undefined })).toEqual(getHolidays(2024));
 	});
 
 	test("should return a fresh copy on every call so mutation cannot leak between calls", () => {
@@ -1791,12 +1793,10 @@ describe("getHolidays", () => {
 		});
 	}
 
-	test("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
-		const nationalHolidays = getHolidays(2024);
-
+	test("should reject a prototype chain key instead of throwing", () => {
 		for (const stateCode of PROTOTYPE_KEYS) {
 			// @ts-expect-error: intentionally invalid input
-			expect(getHolidays({ year: 2024, stateCode })).toEqual(nationalHolidays);
+			expect(getHolidays({ year: 2024, stateCode })).toEqual([]);
 		}
 	});
 
@@ -1919,13 +1919,9 @@ describe("getHolidays", () => {
 			);
 		});
 
-		test("should return the national holidays for a state code that is not a string, an object without a primitive value included", () => {
-			const national = getHolidays(2024);
-
-			expect(getHolidays({ year: 2024, stateCode: Object.create(null) as never })).toEqual(
-				national,
-			);
-			expect(getHolidays({ year: 2024, stateCode: ["SP"] as never })).toEqual(national);
+		test("should return an empty array for a state code that is not a string, an object without a primitive value included", () => {
+			expect(getHolidays({ year: 2024, stateCode: Object.create(null) as never })).toEqual([]);
+			expect(getHolidays({ year: 2024, stateCode: ["SP"] as never })).toEqual([]);
 		});
 	});
 });

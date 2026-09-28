@@ -1,6 +1,7 @@
 import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
+import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 
 export type { BusinessDayOptions } from "../is-business-day/is-business-day";
@@ -31,10 +32,11 @@ const toLocalDayTimestamp = (date: Date): number =>
  * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
  * holidays, which `getHolidays` does not carry.
  *
- * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
- * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
- * prototype-chain key such as `"__proto__"` is an unknown state code like any other. An `options`
- * that is not an object at all is ignored, exactly as `isBusinessDay` ignores it.
+ * `options.stateCode` is read as `isBusinessDay` reads it: letter case and surrounding
+ * whitespace are ignored, and a `stateCode` that is present and is not a state code (`"XX"`, an
+ * empty string, a prototype-chain key such as `"__proto__"`, a value that is not a string)
+ * returns `null`. An `options` that is not an object at all is ignored, exactly as
+ * `isBusinessDay` ignores it.
  *
  * Only years from 1900 through 2099 are supported, the range `getHolidays` computes; a
  * `laterDate` or `earlierDate` outside it returns `null`.
@@ -47,7 +49,7 @@ const toLocalDayTimestamp = (date: Date): number =>
  * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {number | null} The number of business days between the two dates, or `null` on bad
  * input: a `laterDate`/`earlierDate` that is not a valid `Date` or is outside 1900-2099, or a
- * `stateCode` that is not a string.
+ * `stateCode` that is present and is not a state code.
  *
  * @example
  * ```typescript
@@ -80,9 +82,7 @@ export const differenceInBusinessDays = (
 	if (!isValidDate(laterDate)) return null;
 	if (!isValidDate(earlierDate)) return null;
 
-	const stateCode = options?.stateCode;
-
-	if (stateCode !== undefined && typeof stateCode !== "string") return null;
+	if (readHolidayStateCode(options?.stateCode) === null) return null;
 
 	if (!isSupportedHolidayYear(laterDate.getFullYear())) return null;
 	if (!isSupportedHolidayYear(earlierDate.getFullYear())) return null;

@@ -2025,7 +2025,7 @@ Get the Brazilian holidays of a year: the national ones and, with a `stateCode`,
 - Other shifts are not applied and the statutory date is returned: AC's law moves the feriados falling Tuesday to Thursday to the Friday (Lei AC nº 2.126/2009), but the state's own yearly decrees apply it unevenly (2026 moves Jan 20 and leaves Nov 17, a Tuesday, in place).
 - GO's three dates (Jul 26, Oct 24, Oct 28) are the "feriados estaduais" of the state servants' statute (Lei GO nº 20.756/2020, art. 269, II); no Goiás law fixing a data magna as a civil holiday was found. The governor moves Jul 26 by decree every year (2025: Jul 28; 2026: Jul 20), so the statutory Jul 26 returned here is usually not the day observed.
 - Each state holiday is listed only from the first year its state law applied (SP's Jul 9 from 1997, RJ's São Jorge from 2008, SC's Aug 11 from 2004), so an older year has fewer state holidays.
-- An unknown or non-string `stateCode` is ignored and only national holidays are returned.
+- `stateCode` ignores letter case and surrounding whitespace (`'sp'` is `'SP'`). Only an omitted (or `undefined`) `stateCode` asks for the national holidays alone: any other value that is not a state code (`'XX'`, `''`, a value that is not a string) returns `[]`. Up to 2.4.0 an unknown code was ignored and the national holidays were returned, so a typo such as `'sp'` silently dropped the state's holidays.
 - Returns `[]` when the year is not an integer from 1900 to 2099, or when the argument is neither a number nor an object.
 
 ```javascript
@@ -2056,8 +2056,8 @@ Source: `src/get-holidays/constants.ts`, [Lei nº 662/1949](https://www.planalto
 Check if a date is a Brazilian holiday. Accepts `{ targetDate, stateCode? }` (`IsHolidayParams`).
 
 - The check uses `targetDate`'s local calendar date, not its UTC instant.
-- `stateCode` also considers that state's holidays. An unknown code is ignored, as in `getHolidays`.
-- Returns `false` when `targetDate` is missing or not a valid `Date`, or when `stateCode` is present and not a string.
+- `stateCode` also considers that state's holidays, read as in `getHolidays` (letter case and surrounding whitespace are ignored).
+- Returns `false` when `targetDate` is missing or not a valid `Date`, or when `stateCode` is present and is not a state code (`'XX'`, `''`, a value that is not a string), even on a national holiday.
 
 ```javascript
 import { isHoliday } from '@brazilian-utils/brazilian-utils';
@@ -2075,7 +2075,7 @@ Check if a date is a Brazilian business day (dia útil): not a Saturday, a Sunda
 - `includeSaturday` off is a Monday to Friday count. It is not by itself the calendar of banks or courts: the financial market also skips Carnaval Monday and Tuesday and Corpus Christi (Resolução CMN nº 4.880/2020, art. 6º), which the default `includeOptional` covers, and banks close on local holidays; the federal courts also close from Dec 20 to Jan 6, from Holy Wednesday to Easter, on Carnaval Monday and Tuesday, Aug 11, Nov 1 and 2 and Dec 8 (Lei nº 5.010/1966, art. 62), and procedural deadlines follow each court's calendar (CPC art. 216). On, it is the labour law count of the payroll deadline of CLT art. 459 § 1º, the one labour inspection reads through Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
 - Sunday and holidays are still excluded with `includeSaturday` on, so a holiday that falls on a Saturday is still not a business day.
 - The "inclusive o municipal" part of that rule is not covered: `getHolidays` carries national and state holidays only, so a municipal holiday counts here as an ordinary business day. Remove the municipal holidays yourself when a count has to be exact for one municipality.
-- Returns `false` when `value` is not a valid `Date` or its year is outside 1900 to 2099, or when `stateCode` is present and not a string.
+- Returns `false` when `value` is not a valid `Date` or its year is outside 1900 to 2099, or when `stateCode` is present and is not a state code (`'XX'`, `''`, a value that is not a string). Letter case and surrounding whitespace in `stateCode` are ignored.
 
 ```javascript
 import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
@@ -2101,7 +2101,7 @@ Add a number of Brazilian business days (dias úteis) to a date, skipping Saturd
 - **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval Monday and Tuesday and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
 - Returns a new `Date`, time of day preserved; `date` is never mutated.
 - An `amount` of `0` returns the same date, even on a weekend or holiday. A negative `amount` walks backwards.
-- Returns `null` when `date` is invalid, `amount` is not a finite integer, `stateCode` is not a string, or the result leaves the years 1900 to 2099.
+- Returns `null` when `date` is invalid, `amount` is not a finite integer, `stateCode` is present and is not a state code, or the result leaves the years 1900 to 2099.
 
 ```javascript
 import { addBusinessDays } from '@brazilian-utils/brazilian-utils';
@@ -2168,7 +2168,7 @@ Count the Brazilian business days (dias úteis) between two dates. Signature: `d
 - **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval Monday and Tuesday and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
 - Counts `earlierDate` when it is a business day and every business day strictly between the two dates; `laterDate` is never counted. The time of day is ignored.
 - The result is negative when `laterDate` is before `earlierDate`, and `0` on the same calendar day.
-- Returns `null` when either date is not a valid `Date` or is outside the years 1900 to 2099, or `stateCode` is not a string.
+- Returns `null` when either date is not a valid `Date` or is outside the years 1900 to 2099, or `stateCode` is present and is not a state code.
 
 ```javascript
 import { differenceInBusinessDays } from '@brazilian-utils/brazilian-utils';
