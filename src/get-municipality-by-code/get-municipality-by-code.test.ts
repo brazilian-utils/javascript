@@ -85,10 +85,10 @@ describe("getMunicipalityByCode", () => {
 		expect(getMunicipalityByCode(Number.POSITIVE_INFINITY)).toBeNull();
 	});
 
-	it("should return null for a code with any other character, not strip it", () => {
-		expect(getMunicipalityByCode("11abc00015")).toBeNull();
-		expect(getMunicipalityByCode("355.030.8")).toBeNull();
-		expect(getMunicipalityByCode("3550308/")).toBeNull();
+	it("should strip any non-digit character of a string, as up to 2.4.0", () => {
+		expect(getMunicipalityByCode("3550308 SP")?.name).toBe("São Paulo");
+		expect(getMunicipalityByCode("355.030.8")?.name).toBe("São Paulo");
+		expect(getMunicipalityByCode("3550308/")?.name).toBe("São Paulo");
 	});
 
 	it("should ignore hyphens before validating the length", () => {
