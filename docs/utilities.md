@@ -976,7 +976,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 Get the DDD (area code) a Brazilian municipality dials, given its 7-digit IBGE code, from the Anatel table of the Códigos Nacionais in force.
 
-- Accepts the code the way `getMunicipalityByCode` does: a string (spaces and hyphens ignored) or a non-negative integer.
+- Accepts the code the way `getMunicipalityByCode` does: a string (any non-digit characters stripped) or a non-negative integer.
 - Returns the DDD as a number, or `null` when the code is not a municipality. Every one of the 5,571 municipalities has exactly one DDD.
 - A DDD mostly follows state lines. The exceptions: 61 also covers 12 municipalities of Goiás around Brasília, and Porto União (SC) dials 42, Rio Negro (PR) 47 and Barracão (PR) 49.
 
@@ -1043,7 +1043,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 List the Brazilian municipalities that dial a given DDD (area code), from the Anatel table of the Códigos Nacionais in force.
 
-- Accepts the DDD the way `getAreaCodeInfo` does: a string (parentheses, spaces and hyphens allowed) or a non-negative integer.
+- Accepts the DDD the way `getAreaCodeInfo` does: a string (any non-digit characters stripped) or a non-negative integer.
 - Returns an array of `{ code, name, stateCode }` (`Municipality`): the seat state's municipalities first, then those of the other state the DDD crosses into, each state's sorted by name. Returns `[]` when the DDD is not in use.
 
 ```javascript
