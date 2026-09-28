@@ -1,6 +1,7 @@
 import { type Municipality } from "../_internals/constants/municipalities";
 import { STATE_CAPITALS } from "../_internals/constants/state-capitals";
-import { isStateCode } from "../_internals/is-state-code/is-state-code";
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 
@@ -29,11 +30,9 @@ export type { Municipality } from "../_internals/constants/municipalities";
  * distância a Brasília, segundo os Municípios das Capitais - 2025".
  */
 export const getStateCapital = (stateCode: string): Municipality | null => {
-	if (typeof stateCode !== "string") return null;
+	const normalized = normalizeStateCode(stateCode);
 
-	const normalized = stateCode.trim().toUpperCase();
-
-	if (!isStateCode(normalized)) return null;
+	if (!hasOwnKey(STATE_CAPITALS, normalized)) return null;
 
 	const [name, code] = STATE_CAPITALS[normalized];
 

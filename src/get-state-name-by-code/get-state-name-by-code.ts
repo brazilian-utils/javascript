@@ -1,4 +1,5 @@
 import { DATA, type StateName } from "../_internals/constants/states";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { StateName } from "../_internals/constants/states";
 
@@ -24,9 +25,7 @@ export type { StateName } from "../_internals/constants/states";
  * ```
  */
 export const getStateNameByCode = (code: string): StateName | null => {
-	if (typeof code !== "string") return null;
-
-	const normalized = code.trim().toUpperCase();
+	const normalized = normalizeStateCode(code);
 
 	const state = DATA.find((entry) => entry.code === normalized);
 

@@ -1,8 +1,9 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
-import { type StateCode } from "../_internals/constants/states";
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
 import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
 /** The `getMunicipality` query by IBGE municipality code. */
 export type GetMunicipalityByCodeParams = {
@@ -70,19 +71,15 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 	return entry ? [...entry] : null;
 };
 
-const isStateCode = (value: string): value is StateCode => Object.hasOwn(CITIES_DATA, value);
-
 const getMunicipalityCodeByName = ({
 	municipalityName,
 	uf,
 }: GetMunicipalityByNameParams): string | null => {
-	if (typeof uf !== "string") return null;
-
-	const normalizedUf = uf.trim().toUpperCase();
+	const normalizedUf = normalizeStateCode(uf);
 
 	// Every real state code is exactly 2 uppercase letters, so a malformed `normalizedUf` (wrong
 	// length, digits, ...) simply finds no match below; there is no need to pre-validate its shape.
-	if (!isStateCode(normalizedUf)) return null;
+	if (!hasOwnKey(CITIES_DATA, normalizedUf)) return null;
 
 	// `removeAccents` (and so `normalizeMunicipalityName`) already folds a non-string or empty
 	// `municipalityName` down to `""`, which no real municipality name normalizes to, so there is
