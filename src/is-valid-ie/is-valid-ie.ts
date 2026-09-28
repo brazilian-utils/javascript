@@ -1,6 +1,8 @@
 import { type StateCode } from "../_internals/constants/states";
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { mod10 } from "../_internals/mod10/mod10";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
@@ -451,7 +453,7 @@ const validateTO: IeValidator = (ie: string) => {
 	return Number.parseInt(ie.charAt(position), 10) === digit;
 };
 
-const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
+const IE_VALIDATORS = {
 	AC: validateAC,
 	AL: validateAL,
 	AP: validateAP,
@@ -482,19 +484,15 @@ const IE_VALIDATORS: Record<string, IeValidator | undefined> = {
 } satisfies Record<StateCode, IeValidator>;
 
 const validateIe = (stateCode: unknown, value: unknown): boolean => {
-	if (typeof stateCode !== "string") return false;
 	if (typeof value !== "string") return false;
 
-	const normalizedStateCode = stateCode.toUpperCase();
+	const normalizedStateCode = normalizeStateCode(stateCode);
 
-	const validator = Object.hasOwn(IE_VALIDATORS, normalizedStateCode)
-		? IE_VALIDATORS[normalizedStateCode]
-		: undefined;
-	if (!validator) return false;
+	if (!hasOwnKey(IE_VALIDATORS, normalizedStateCode)) return false;
 
 	const sanitize = normalizedStateCode === "SP" ? sanitizeToAlphanumeric : sanitizeToDigits;
 
-	return validator(sanitize(value));
+	return IE_VALIDATORS[normalizedStateCode](sanitize(value));
 };
 
 /**
@@ -594,6 +592,7 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true
  * isValidIe({ value: '12345', stateCode: 'RJ' }); // false
  * isValidIe({ value: '109161793', stateCode: 'go' as StateCode }); // true (case-insensitive)
+ * isValidIe({ value: '109161793', stateCode: ' GO ' as StateCode }); // true (surrounding whitespace ignored)
  * isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefix 20)
  * isValidIe({ value: '130000019', stateCode: 'MT' }); // true (9 digits)
  * ```
