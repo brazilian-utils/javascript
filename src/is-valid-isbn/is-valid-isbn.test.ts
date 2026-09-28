@@ -7,6 +7,16 @@ import { describe, expect, expectTypeOf, it, test } from "../_internals/test/run
 import { isValidIsbn } from "./is-valid-isbn";
 
 describe("isValidIsbn", () => {
+	test("should reject an ISMN, which starts with 979-0, even with a valid check digit", () => {
+		expect(isValidIsbn("9790260000438")).toBe(false);
+		expect(isValidIsbn("979-0-2600-0043-8")).toBe(false);
+		expect(isValidIsbn("979 0 2600 0043 8")).toBe(false);
+	});
+
+	test("should still accept an ISBN with the prefix 979 in another group", () => {
+		expect(isValidIsbn("9798886450026")).toBe(true);
+	});
+
 	it("should accept the ISBN Users' Manual example, 978-92-95055-12-4", () => {
 		expect(isValidIsbn("9789295055124")).toBe(true);
 		expect(isValidIsbn("978-92-95055-12-4")).toBe(true);
@@ -83,13 +93,15 @@ describe("isValidIsbn", () => {
 			expectNeverThrows(isValidIsbn, anyGarbage);
 		});
 
-		test("should accept every 978 or 979 body completed with its check digit, and no other digit", () => {
+		test("should accept every 978 or 979 body (but 979-0, the ISMN) completed with its check digit, and no other digit", () => {
 			fc.assert(
 				fc.property(
 					fc.constantFrom("978", "979"),
 					fc.stringMatching(/^\d{9}$/),
 					fc.integer({ min: 1, max: 9 }),
 					(prefix, rest, shift) => {
+						fc.pre(!`${prefix}${rest}`.startsWith("9790"));
+
 						const body = `${prefix}${rest}`;
 						const digit = gs1CheckDigit(body);
 

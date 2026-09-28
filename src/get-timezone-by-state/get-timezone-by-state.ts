@@ -1,3 +1,5 @@
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 import { STATE_TIMEZONES } from "./constants";
 
 /**
@@ -35,9 +37,7 @@ import { STATE_TIMEZONES } from "./constants";
  * ```
  */
 export const getTimezoneByState = (stateCode: string): string | null => {
-	if (typeof stateCode !== "string") return null;
+	const normalized = normalizeStateCode(stateCode);
 
-	const normalized = stateCode.trim().toUpperCase();
-
-	return Object.hasOwn(STATE_TIMEZONES, normalized) ? STATE_TIMEZONES[normalized] : null;
+	return hasOwnKey(STATE_TIMEZONES, normalized) ? STATE_TIMEZONES[normalized] : null;
 };

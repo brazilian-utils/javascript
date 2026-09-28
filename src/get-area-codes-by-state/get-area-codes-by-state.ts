@@ -1,4 +1,5 @@
 import { AREA_CODE_SECONDARY_STATES, AREA_CODE_STATES } from "../_internals/constants/area-codes";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
 /**
  * Retrieves every DDD (area code) that serves a given Brazilian state, under the Plano Geral
@@ -44,9 +45,7 @@ import { AREA_CODE_SECONDARY_STATES, AREA_CODE_STATES } from "../_internals/cons
  * Anexo of Resolução nº 263/2001, revoked, and still the table Anatel's page links to.
  */
 export const getAreaCodesByState = (stateCode: string): number[] => {
-	if (typeof stateCode !== "string") return [];
-
-	const normalized = stateCode.trim().toUpperCase();
+	const normalized = normalizeStateCode(stateCode);
 
 	const areaCodes: number[] = [];
 
