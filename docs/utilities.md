@@ -453,7 +453,7 @@ Identify a Pix key and normalize it to the canonical form the DICT expects insid
 - Returns a `PixKeyInfo` with the `type` (`PixKeyType`) and the `value`.
 - The canonical `value` is digits for a CPF or CNPJ (letters upper-cased), a lowercase e-mail, an E.164 phone or a lowercase UUID.
 - An 11 digit value valid as both CPF and mobile phone is read as a CPF, unless written as a phone (`+55` prefix or DDD in parentheses).
-- An e-mail is checked, once lowercased, against the pattern the DICT API registers and its 77 character limit, not against `isValidEmail`: the local part may carry any of ``.!#$'*+/=?^_`{|}~-``, dots included anywhere, and the domain may be a single label (`a@localhost`). The pattern is the one of DICT API 2.12.1, which has had no `&` since version 2.6.0 (27/09/2025): up to 2.4.0 `a&b@example.com` was accepted, following the obsolete 1.8.0 of the GitHub repository.
+- An e-mail is checked, once lowercased, against the pattern the DICT API registers and its 77 character limit, not against `isValidEmail`: the local part may carry any of ``.!#$'*+/=?^_`{|}~-``, dots included anywhere, and the domain may be a single label (`a@localhost`). The pattern is the one of DICT API 2.12.1, which has had no `&` since version 2.6.0 (27/09/2025).
 
 ```javascript
 import { getPixKeyInfo } from '@brazilian-utils/brazilian-utils';
