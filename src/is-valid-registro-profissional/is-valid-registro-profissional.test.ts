@@ -11,6 +11,17 @@ import {
 const STATE_CODES = DATA.map((state) => state.code);
 
 describe("isValidRegistroProfissional", () => {
+	test("should read the expected state code ignoring case and surrounding whitespace", () => {
+		expect(
+			// @ts-expect-error: a lower case state code is read as its upper case form
+			isValidRegistroProfissional({ value: "123456-SP", council: "OAB", stateCode: " sp " }),
+		).toBe(true);
+		expect(
+			// @ts-expect-error: a lower case state code is read as its upper case form
+			isValidRegistroProfissional({ value: "123456-RJ", council: "OAB", stateCode: "sp" }),
+		).toBe(false);
+	});
+
 	describe("should return false", () => {
 		test("for a CRO number of art. 115 whose sigla, category or suffix is not one it lists", () => {
 			for (const value of [

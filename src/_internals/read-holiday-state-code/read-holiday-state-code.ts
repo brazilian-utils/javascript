@@ -1,5 +1,5 @@
 import { type StateCode } from "../constants/states";
-import { isStateCode } from "../is-state-code/is-state-code";
+import { readStateCode } from "../read-state-code/read-state-code";
 
 /**
  * Reads the `stateCode` option of the holiday and business day utils. The match is
@@ -22,12 +22,5 @@ import { isStateCode } from "../is-state-code/is-state-code";
  * readHolidayStateCode(""); // null
  * ```
  */
-export const readHolidayStateCode = (value: unknown): StateCode | undefined | null => {
-	if (value === undefined) return undefined;
-
-	if (typeof value !== "string") return null;
-
-	const normalized = value.trim().toUpperCase();
-
-	return isStateCode(normalized) ? normalized : null;
-};
+export const readHolidayStateCode = (value: unknown): StateCode | undefined | null =>
+	value === undefined ? undefined : readStateCode(value);

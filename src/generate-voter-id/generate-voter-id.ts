@@ -2,6 +2,7 @@ import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-fir
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
 import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
+import { readStateCode } from "../_internals/read-state-code/read-state-code";
 import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
 
 export type { StateCode } from "../_internals/constants/states";
@@ -16,9 +17,7 @@ export type { StateCode } from "../_internals/constants/states";
  * @returns {string} The two digit federative union code of that state, or `"ZZ"`'s own code.
  */
 const getFederativeUnion = (state: StateCode | "ZZ"): string =>
-	typeof state === "string" && Object.hasOwn(UF_TO_VOTER_ID_CODE, state)
-		? UF_TO_VOTER_ID_CODE[state]
-		: UF_TO_VOTER_ID_CODE.ZZ;
+	UF_TO_VOTER_ID_CODE[readStateCode(state) ?? "ZZ"];
 
 /**
  * Generates a valid random Brazilian voter id (título de eleitor).
@@ -26,7 +25,8 @@ const getFederativeUnion = (state: StateCode | "ZZ"): string =>
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
  * @param {StateCode | "ZZ"} state - Optional. The Brazilian state code to generate a voter id
- * for, or `"ZZ"` for a voter id issued abroad. Defaults to `"ZZ"` when omitted or unknown, a key
+ * for, or `"ZZ"` for a voter id issued abroad, letter case and surrounding whitespace ignored
+ * (`"sp"` is `"SP"`). Defaults to `"ZZ"` when omitted or unknown, a key
  * of the prototype chain (`"__proto__"`, `"constructor"`) and a value that is not a string
  * included, so a malformed state never throws.
  * @returns {string} A valid 12-digit voter id string without formatting, leading zeros kept.

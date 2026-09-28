@@ -65,7 +65,7 @@ parseCpf('746.506.880-00'); // 74650688000
 Generate a valid random CPF.
 
 - The optional `state` argument (`StateCode`, e.g. `"SP"`) fixes the região fiscal digit (the 9th) to that state's code.
-- Without `state`, or with an unknown code, a random região fiscal digit is drawn.
+- `state` ignores letter case and surrounding whitespace (`'sp'` is `'SP'`). Without `state`, or with an unknown code, a random região fiscal digit is drawn.
 
 ```javascript
 import { generateCpf } from '@brazilian-utils/brazilian-utils'
@@ -1857,7 +1857,7 @@ Get the Brazilian municipalities published by the IBGE: every municipality, or o
 
 - Each municipality (`Municipality`) is `{ code, name, stateCode }`, where `code` is the 7-digit IBGE code. Sorted by name in the "pt-BR" locale.
 - Only an omitted (or `undefined`) `stateCode` asks for the full list: `null` and `''` return `[]`.
-- `stateCode` is case-sensitive: `'sp'`, like an unknown code, returns `[]`.
+- `stateCode` ignores letter case and surrounding whitespace: `'sp'` returns the São Paulo municipalities, as `'SP'` does (up to 2.4.0 it returned `[]`).
 - Embeds all 5571 municipalities, the same codes as the IBGE [Divisão Territorial Brasileira 2025](https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip) (data base 31/12/2025). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-municipalities`.
 
 ```javascript
@@ -1918,7 +1918,7 @@ Get the names of Brazilian cities: every city, or only those of one state. **Dep
 
 - Sorted in the "pt-BR" locale.
 - Any falsy `state` asks for the full list, where `getMunicipalities` returns `[]`.
-- `state` is case-sensitive: `'sp'`, like an unknown code, returns `[]`.
+- `state` ignores letter case and surrounding whitespace: `'sp'` returns the São Paulo cities, as `'SP'` does (up to 2.4.0 it returned `[]`).
 - Embeds all 5571 names (~153.4 KB minified, ~49.2 KB gzipped). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
@@ -2490,7 +2490,7 @@ parseVoterId('12345 01 59'); // '123450159'
 
 Generate a valid random voter ID number. The optional `state` argument (`StateCode`, or `"ZZ"` for a voter ID issued abroad) sets the federative union code.
 
-- An unknown state, or a value that is not a string, falls back to `"ZZ"` (UF `28`).
+- `state` ignores letter case and surrounding whitespace (`'sp'` is `'SP'`). An unknown state, or a value that is not a string, falls back to `"ZZ"` (UF `28`).
 - The result always has 12 digits, the leading zeros of the sequential number included; the same ID without them is valid too.
 
 ```javascript
@@ -3691,7 +3691,7 @@ Source: [ISO/IEC 7812-1](https://www.iso.org/standard/70484.html).
 
 Check the structure of a professional council registration number (registro/inscrição profissional). Only the digit count and the UF are checked, never a check digit, even for CRC.
 
-- Takes an object (`IsValidRegistroProfissionalParams`): `value`, `council` (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` or `"CRC"`, a `RegistroProfissionalCouncil`) and an optional `stateCode` (expected UF).
+- Takes an object (`IsValidRegistroProfissionalParams`): `value`, `council` (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` or `"CRC"`, a `RegistroProfissionalCouncil`) and an optional `stateCode` (expected UF, letter case and surrounding whitespace ignored).
 - `"OAB"` and `"CRM"`: 4 to 6 digits plus the UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 to 6 digits (`12345/SP`), or the form of the Consolidação das Normas do CFO (Resolução CFO-63/2005), art. 115, § 1º: the sigla of the Conselho Regional first, joined by a hyphen to the category (`TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV`, `T`) when there is one, then the number, followed by `-IS` for a secundária or `-R` for a remida (`CRO-SP 12345`, `CRO-SP-TPD 1234`, `CRO-SP 12345-IS`). Up to 2.4.0 this form was rejected.
 - `"CRP"`: a 2-digit regional code (`01` to `24`) plus 4 to 6 digits (`06/12345`); `stateCode` is ignored. The CFP system has 24 regionals; the CRP-25 (Amapá) is only a proposal.
 - `"CRC"`: UF, 6 digits, tipo de registro (`O` or `P`) and check digit (`SP-123456/O-3`); a transfer appends `T` or `S` and the destination UF (`SP-123456/O-3 T-MG`). `stateCode` matches the originating UF. This shape and the `P`/`S` registrations come from the Manual de Registro of 2009; Resolução CFC nº 1.707/2023, in force, only sets a numbering "única e sequencial em cada CRC" and the `T` of the transfer, and the check digit algorithm is not published.

@@ -18,6 +18,15 @@ const KNOWN_STATE_MUNICIPALITY_COUNTS: Partial<Record<StateCode, number>> = {
 };
 
 describe("getMunicipalities", () => {
+	test("should read the state code ignoring case and surrounding whitespace", () => {
+		const saoPaulo = getMunicipalities("SP");
+
+		// @ts-expect-error: a lower case state code is read as its upper case form
+		expect(getMunicipalities("sp")).toEqual(saoPaulo);
+		// @ts-expect-error: a lower case state code is read as its upper case form
+		expect(getMunicipalities(" Sp\t")).toEqual(saoPaulo);
+	});
+
 	it("should return every municipality when no state is given", () => {
 		expect(getMunicipalities().length).toBe(NUMBER_OF_BRAZILIAN_MUNICIPALITIES);
 	});

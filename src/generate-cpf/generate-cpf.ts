@@ -3,6 +3,7 @@ import { CPF_BASE_LENGTH, CPF_FISCAL_REGION_BY_STATE } from "../_internals/const
 import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
+import { readStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -16,11 +17,9 @@ export type { StateCode } from "../_internals/constants/states";
  * @returns {string} The região fiscal digit of that state, or a random digit.
  */
 const getStateCode = (state?: StateCode): string => {
-	if (typeof state === "string" && Object.hasOwn(CPF_FISCAL_REGION_BY_STATE, state)) {
-		return CPF_FISCAL_REGION_BY_STATE[state];
-	}
+	const code = readStateCode(state);
 
-	return generateRandomNumber(1);
+	return code === null ? generateRandomNumber(1) : CPF_FISCAL_REGION_BY_STATE[code];
 };
 
 /**
@@ -28,7 +27,8 @@ const getStateCode = (state?: StateCode): string => {
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @param {StateCode} [state] - The Brazilian state code to generate a CPF for. An unknown state
+ * @param {StateCode} [state] - The Brazilian state code to generate a CPF for, letter case and
+ * surrounding whitespace ignored (`"sp"` is `"SP"`). An unknown state
  * draws a random região fiscal digit instead of throwing, a key of the prototype chain
  * (`"__proto__"`, `"constructor"`) and a value with no string conversion included.
  * @returns {string} A valid 11-digit CPF string without formatting.

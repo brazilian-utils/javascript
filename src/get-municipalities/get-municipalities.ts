@@ -1,6 +1,7 @@
 import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
 import { STATE_CODES } from "../_internals/constants/state-codes";
 import { type StateCode } from "../_internals/constants/states";
+import { readStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 export type { StateCode } from "../_internals/constants/states";
@@ -21,10 +22,10 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  * looser and treats every falsy `state` as "no state given", so `getCities(null)` returns the
  * full list where `getMunicipalities(null)` returns `[]`.
  *
- * The state code is matched exactly, case included: `getMunicipalities("sp")` returns `[]` where
- * `getMunicipalities("SP")` returns the 645 São Paulo municipalities. `getMunicipalities` and
- * `getCities` are the only state-taking lookups that are case-sensitive; `getStateNameByCode`,
- * `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
+ * The state code is matched ignoring letter case and surrounding whitespace, like
+ * `getStateNameByCode`, `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality`:
+ * `getMunicipalities("sp")` returns the 645 São Paulo municipalities, as `"SP"` does. Up to 2.4.0
+ * the match was case-sensitive and `"sp"` returned `[]`.
  *
  * @param {StateCode} [stateCode] - The two letter code of the Brazilian state to filter by.
  * @returns {Municipality[]} A fresh array of fresh `Municipality` objects. Empty when
@@ -35,7 +36,7 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  * getMunicipalities("SP")[0]; // { code: "3500105", name: "Adamantina", stateCode: "SP" }
  * getMunicipalities().length; // every municipality of every state
  * getMunicipalities("ZZ"); // []
- * getMunicipalities("sp"); // [] (the state code is case-sensitive here)
+ * getMunicipalities(" sp ").length; // 645 (case and surrounding whitespace are ignored)
  * getMunicipalities(null); // [] (only an omitted state code asks for the full list)
  * ```
  *
@@ -51,7 +52,7 @@ export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 		);
 	}
 
-	if (typeof stateCode !== "string" || !Object.hasOwn(CITIES_DATA, stateCode)) return [];
+	const code = readStateCode(stateCode);
 
-	return buildMunicipalities(stateCode);
+	return code === null ? [] : buildMunicipalities(code);
 };

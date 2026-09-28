@@ -65,7 +65,7 @@ parseCpf('746.506.880-00'); // 74650688000
 Gera um CPF válido aleatório.
 
 - O argumento opcional `state` (`StateCode`, ex. `"SP"`) fixa o dígito da região fiscal (o 9º) no código desse estado.
-- Sem `state`, ou com um código desconhecido, um dígito de região fiscal aleatório é sorteado.
+- `state` ignora maiúsculas/minúsculas e espaços nas pontas (`'sp'` é `'SP'`). Sem `state`, ou com um código desconhecido, um dígito de região fiscal aleatório é sorteado.
 
 ```javascript
 import { generateCpf } from '@brazilian-utils/brazilian-utils'
@@ -1857,7 +1857,7 @@ Retorna os municípios brasileiros publicados pelo IBGE: todos os municípios, o
 
 - Cada município (`Municipality`) é `{ code, name, stateCode }`, onde `code` é o código IBGE de 7 dígitos. Ordenados por nome no locale "pt-BR".
 - Só um `stateCode` omitido (ou `undefined`) pede a lista completa: `null` e `''` retornam `[]`.
-- `stateCode` diferencia maiúsculas de minúsculas: `'sp'`, como um código desconhecido, retorna `[]`.
+- `stateCode` ignora maiúsculas/minúsculas e espaços nas pontas: `'sp'` retorna os municípios de São Paulo, como `'SP'` (até a 2.4.0 retornava `[]`).
 - Embute todos os 5571 municípios, os mesmos códigos da [Divisão Territorial Brasileira 2025](https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip) do IBGE (data base 31/12/2025). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-municipalities`.
 
 ```javascript
@@ -1918,7 +1918,7 @@ Retorna os nomes das cidades brasileiras: todas as cidades, ou só as de um esta
 
 - Ordenadas no locale "pt-BR".
 - Qualquer `state` falsy pede a lista completa, enquanto `getMunicipalities` retorna `[]`.
-- `state` diferencia maiúsculas de minúsculas: `'sp'`, como um código desconhecido, retorna `[]`.
+- `state` ignora maiúsculas/minúsculas e espaços nas pontas: `'sp'` retorna as cidades de São Paulo, como `'SP'` (até a 2.4.0 retornava `[]`).
 - Embute os 5571 nomes (~153,4 KB minificado, ~49,2 KB com gzip). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
@@ -2490,7 +2490,7 @@ parseVoterId('12345 01 59'); // '123450159'
 
 Gera um título de eleitor válido aleatório. O argumento opcional `state` (`StateCode`, ou `"ZZ"` para um título expedido no exterior) define o código de unidade federativa.
 
-- Uma UF desconhecida, ou um valor que não seja string, usa `"ZZ"` (UF `28`).
+- `state` ignora maiúsculas/minúsculas e espaços nas pontas (`'sp'` é `'SP'`). Uma UF desconhecida, ou um valor que não seja string, usa `"ZZ"` (UF `28`).
 - O resultado sempre tem 12 dígitos, com os zeros à esquerda do número sequencial; o mesmo título sem eles também é válido.
 
 ```javascript
@@ -3691,7 +3691,7 @@ Fonte: [ISO/IEC 7812-1](https://www.iso.org/standard/70484.html).
 
 Verifica a estrutura de um número de registro em conselho profissional (registro/inscrição profissional). Só a quantidade de dígitos e a UF são conferidas, nunca o dígito verificador, nem no CRC.
 
-- Recebe um objeto (`IsValidRegistroProfissionalParams`): `value`, `council` (`RegistroProfissionalCouncil`: `"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e `stateCode` opcional (UF esperada).
+- Recebe um objeto (`IsValidRegistroProfissionalParams`): `value`, `council` (`RegistroProfissionalCouncil`: `"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e `stateCode` opcional (UF esperada, sem diferenciar maiúsculas/minúsculas e ignorando espaços nas pontas).
 - `"OAB"` e `"CRM"`: 4 a 6 dígitos mais a UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 a 6 dígitos (`12345/SP`), ou a forma da Consolidação das Normas do CFO (Resolução CFO-63/2005), art. 115, § 1º: a sigla do Conselho Regional antes, ligada por hífen à categoria (`TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV`, `T`) quando houver, depois o número, seguido de `-IS` na secundária ou `-R` na remida (`CRO-SP 12345`, `CRO-SP-TPD 1234`, `CRO-SP 12345-IS`). Até a 2.4.0 essa forma era rejeitada.
 - `"CRP"`: código regional de 2 dígitos (`01` a `24`) mais 4 a 6 dígitos (`06/12345`); `stateCode` é ignorado. O sistema CFP tem 24 regionais; o CRP-25 (Amapá) é só uma proposta.
 - `"CRC"`: UF, 6 dígitos, tipo de registro (`O` ou `P`) e dígito verificador (`SP-123456/O-3`); transferência acrescenta `T` ou `S` e a UF destino (`SP-123456/O-3 T-MG`). `stateCode` confere a UF de origem. Essa forma e os registros `P`/`S` vêm do Manual de Registro de 2009; a Resolução CFC nº 1.707/2023, em vigor, só fixa uma numeração "única e sequencial em cada CRC" e o `T` da transferência, e o algoritmo do dígito verificador não é publicado.

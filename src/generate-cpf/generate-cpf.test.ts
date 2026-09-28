@@ -8,6 +8,13 @@ import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 import { generateCpf } from "./generate-cpf";
 
 describe("generateCpf", () => {
+	test("should read the state code ignoring case and surrounding whitespace", () => {
+		for (let run = 0; run < 20; run += 1) {
+			// @ts-expect-error: a lower case state code is read as its upper case form
+			expect(generateCpf(" sp ").charAt(8)).toBe(CPF_FISCAL_REGION_BY_STATE.SP);
+		}
+	});
+
 	test(`should have the right length without mask (${CPF_LENGTH})`, () => {
 		expect(generateCpf().length).toBe(CPF_LENGTH);
 	});

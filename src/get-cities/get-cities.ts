@@ -1,5 +1,6 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
 import { type StateCode } from "../_internals/constants/states";
+import { readStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -17,10 +18,9 @@ let allCitiesCache: string[] | undefined;
  * every city. The sibling `getMunicipalities` is stricter and only reads an omitted (or
  * `undefined`) state code that way, returning `[]` for `null` and `""`.
  *
- * The state code is matched exactly, case included: `getCities("sp")` returns `[]` where
- * `getCities("SP")` returns the 645 São Paulo cities. `getCities` and `getMunicipalities` are
- * the only state-taking lookups that are case-sensitive; `getStateNameByCode`,
- * `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
+ * The state code is matched ignoring letter case and surrounding whitespace, like every other
+ * state util: `getCities("sp")` returns the 645 São Paulo cities, as `"SP"` does. Up to 2.4.0 the
+ * match was case-sensitive and `"sp"` returned `[]`.
  *
  * @deprecated Use `getMunicipalities` instead.
  *
@@ -30,7 +30,7 @@ let allCitiesCache: string[] | undefined;
  * @example
  * ```typescript
  * getCities("SP")[0]; // "Adamantina"
- * getCities("sp"); // [] (the state code is case-sensitive here)
+ * getCities("sp").length; // 645 (case and surrounding whitespace are ignored)
  * getCities().length; // every city of every state
  * ```
  *
@@ -49,7 +49,7 @@ export const getCities = (state?: StateCode): string[] => {
 		return [...allCitiesCache];
 	}
 
-	if (typeof state !== "string" || !Object.hasOwn(CITIES_DATA, state)) return [];
+	const code = readStateCode(state);
 
-	return CITIES_DATA[state].map(([name]) => name);
+	return code === null ? [] : CITIES_DATA[code].map(([name]) => name);
 };

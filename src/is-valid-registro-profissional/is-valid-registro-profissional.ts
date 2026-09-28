@@ -1,6 +1,7 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isStateCode } from "../_internals/is-state-code/is-state-code";
+import { readStateCode } from "../_internals/read-state-code/read-state-code";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import {
 	CRC_REGEX,
@@ -107,7 +108,8 @@ const isKnownCroCategory = (category: string, suffix: string | undefined): boole
  * @param {IsValidRegistroProfissionalParams} params - The registration to be validated.
  * @param {string} params.value - The registration number, e.g. `"123456/SP"`.
  * @param {RegistroProfissionalCouncil} params.council - The issuing council.
- * @param {string} [params.stateCode] - The expected UF, ignored for `"CRP"`.
+ * @param {string} [params.stateCode] - The expected UF, letter case and surrounding whitespace
+ * ignored (`"sp"` is `"SP"`); ignored for `"CRP"`.
  * @returns {boolean} True if the value has the structure of a registration number for the
  * given council, false otherwise.
  *
@@ -184,5 +186,5 @@ export const isValidRegistroProfissional = (params: IsValidRegistroProfissionalP
 
 	if (!isStateCode(uf)) return false;
 
-	return !stateCode || uf === stateCode;
+	return !stateCode || uf === readStateCode(stateCode);
 };
