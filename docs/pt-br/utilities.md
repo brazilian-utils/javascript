@@ -460,7 +460,7 @@ Identifica uma chave Pix e a normaliza para a forma canônica que o DICT espera 
 - Retorna um `PixKeyInfo` com o `type` (`PixKeyType`) e o `value`.
 - O `value` canônico é só dígitos para CPF ou CNPJ (letras maiúsculas), e-mail minúsculo, celular em E.164 ou UUID minúsculo.
 - Um valor de 11 dígitos válido como CPF e celular é lido como CPF, salvo se escrito como telefone (prefixo `+55` ou DDD entre parênteses).
-- Um e-mail é conferido, já em minúsculas, contra a expressão regular que a API do DICT registra e o limite de 77 caracteres, não contra `isValidEmail`: a parte local pode ter qualquer um de ``.!#$'*+/=?^_`{|}~-``, pontos em qualquer posição inclusive, e o domínio pode ter um só rótulo (`a@localhost`). A expressão é a da API do DICT 2.12.1, que não tem `&` desde a versão 2.6.0 (27/09/2025): até a 2.4.0 `a&b@example.com` era aceito, pela versão 1.8.0 do repositório do GitHub, hoje obsoleta.
+- Um e-mail é conferido, já em minúsculas, contra a expressão regular que a API do DICT registra e o limite de 77 caracteres, não contra `isValidEmail`: a parte local pode ter qualquer um de ``.!#$'*+/=?^_`{|}~-``, pontos em qualquer posição inclusive, e o domínio pode ter um só rótulo (`a@localhost`). A expressão é a da API do DICT 2.12.1, que não tem `&` desde a versão 2.6.0 (27/09/2025).
 
 ```javascript
 import { getPixKeyInfo } from '@brazilian-utils/brazilian-utils';
