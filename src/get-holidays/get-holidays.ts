@@ -212,7 +212,10 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * 1980 (Lei 6.802/1980), Natal from 1922 and Dia do trabalhador from 1925, Tiradentes up to 1930,
  * from 1933 to 1948 and from 1951, since Lei 662/1949 left it out of its list until Lei
  * 1.266/1950 restored it, and Finados up to 1948 and from 2003, since Lei 662/1949 left it out as
- * well and only Lei 10.607/2002 put it back (up to 2.4.0 Finados was listed every year).
+ * well and only Lei 10.607/2002 put it back (up to 2.4.0 Finados was listed every year). The
+ * other festas nacionais of the first republican calendar (Decreto 155-B/1890 and Decreto
+ * 3/1891: 24 February, 3 May, 13 May, 14 July and 12 October) are listed up to 1930, and 3 May,
+ * 16 July and 12 October again for the years Lei 108/1935 declared them (up to 2.4.0 none was).
  * `FIXED_HOLIDAYS` in `src/get-holidays/constants.ts` cites the decree or law behind each period.
  *
  * The first round of the elections is a national holiday in the even years from 1998 on, typed
@@ -224,9 +227,12 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * the business day utils count. The second round, "no último domingo de outubro ... se houver", is
  * left out: whether it is held depends on the first round's results, and only in the states and
  * municipalities where one is needed, so its date is not a holiday a year alone can establish.
- * Earlier elections are not listed either: before 1998 their dates were set by ordinary law or
- * counted back from the end of the term, and Lei 1.266/1950, art. 1º, which made the day of the
- * general elections a feriado nacional, was revoked by Lei 10.607/2002.
+ * Before 1998 the day of the general elections was a feriado nacional under Lei 1.266/1950, art.
+ * 1º, until Lei 10.607/2002 revoked it; those that fell on a weekday are listed on their own dates:
+ * 03/10/1955 and 03/10/1958 as `"Eleições gerais"`, and 03/10/1990 and 03/10/1994 as
+ * `"Eleições (primeiro turno)"` (up to 2.4.0 none was). 03/10/1960 is left out, since no official
+ * text located dates that year's presidential election, and so is the municipal election of
+ * 03/10/1996, which the Distrito Federal did not hold.
  *
  * `stateCode` is matched ignoring letter case and surrounding whitespace, like the other state
  * utils, so `"sp"` lists the São Paulo holidays. Only an omitted (or `undefined`) `stateCode`
@@ -246,15 +252,18 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  *
  * Only one state holiday per UF is a feriado civil under Lei 9.093/1995 art. 1º, II, which
  * authorizes "a data magna do Estado fixada em lei estadual" in the singular; the other entries
- * of `STATE_HOLIDAYS` rest on ordinary state laws and are reported because they are observed in
+ * of `STATE_HOLIDAYS` rest on ordinary state laws (Alagoas' 16 September, before Lei AL nº
+ * 9.358/2024, on the state's calendar decrees alone) and are reported because they are observed in
  * practice. The date returned is the statutory one, save for two observance shifts the state laws
  * spell out. Alagoas' 30 November moves back to the Monday when it falls on a Tuesday and on to
  * the Friday when it falls on a Thursday (Lei AL nº 7.530/2013, art. 2º parágrafo único, from
  * 2014 on). Santa Catarina's two holidays each move to the following Sunday when they fall Monday to
- * Friday, 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
- * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it, except in 2004, the
- * year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause. Outside those ranges
- * each holiday stays on 11 August or 25 November. Acre's shift of the feriados falling Tuesday to
+ * Saturday (Decreto SC nº 1.460/2018 moved a Saturday 11 August; up to 2.4.0 a Saturday date
+ * stayed), 11 August from 2005 on, when Lei SC nº 13.408/2005 extended the transfer to it, and
+ * 25 November from 1999 on, when Lei SC nº 11.213/1999 first introduced it (up to 2.4.0 not in
+ * 2004). Outside those ranges each holiday stays on 11 August or 25 November. Pernambuco's data
+ * magna fell on the first Sunday of March from 2010 to 2017 (Lei PE nº 13.835/2009), and on 6
+ * March from 2018. Acre's shift of the feriados falling Tuesday to
  * Thursday to the Friday (Lei AC nº 2.126/2009) is not modelled, because the state's own annual
  * decrees apply it unevenly (in 2026 they move 20 January and leave 17 November, a Tuesday, where
  * it is), and neither are the Goiás decrees that may move 26/07 and 28/10, which cannot be
@@ -265,7 +274,9 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
  * starts in 2004 (Lei SC nº 12.906/2004) and 25 November in 1997 (Lei SC nº 10.306/1996), São
  * Paulo's 9 July in 1997 (Lei SP nº 9.497/1997), Rio de Janeiro's São Jorge in 2008 (Lei RJ nº
  * 5.198/2008). The first year of every entry is given next to its law in
- * `src/get-holidays/constants.ts`.
+ * `src/get-holidays/constants.ts`. A state law the STF declared unconstitutional has no entry in
+ * any year: Rondônia's 18 June (ADI 3940) and Amapá's 25 July (ADI 4820; up to 2.4.0 listed from
+ * 2012).
  *
  * @param {number} year - The year for which to retrieve holidays (must be between 1900 and 2099)
  * @returns {Holiday[]} An array of holidays sorted by date

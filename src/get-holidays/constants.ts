@@ -32,9 +32,16 @@ export const CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR = 2024;
 export const ELECTION_HOLIDAY_NAME = "Eleições (primeiro turno)";
 
 /**
+ * The name the single-round general elections of 1955 and 1958 are emitted under, the "eleições
+ * gerais" of Lei nº 1.266/1950, art. 1º; the Constitutions of the time had no second round.
+ */
+export const ELECTION_GENERAL_HOLIDAY_NAME = "Eleições gerais";
+
+/**
  * First year the first round of every even year's elections falls on a date the Constitution
  * fixes: EC nº 16, de 04/06/1997, set it on the first Sunday of October (arts. 28, 29, II, and 77)
- * and the 1998 general elections were the first held under it.
+ * and the 1998 general elections were the first held under it. The general elections before it
+ * that fell on a weekday are dated one by one in `FIXED_HOLIDAYS`.
  */
 export const ELECTION_SINCE_YEAR = 1998;
 
@@ -67,12 +74,28 @@ export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
 /**
  * The fixed-date feriados nacionais, each emitted only for the years a federal norm declared it.
  * A holiday with a gap in its history is listed once per period. The supported years start in
- * 1900, under the republican calendar of Decreto nº 155-B/1890; its 3 May, 13 May, 14 July and
- * 12 October ("descobrimento da América") entries, all dropped by Decreto nº 19.488/1930, are not
- * carried.
+ * 1900, under the republican calendar of Decreto nº 155-B/1890.
  *
  * - Ano novo, Independência do Brasil and Proclamação da República: every supported year
  *   (Decreto nº 155-B/1890, Decreto nº 19.488/1930, Lei nº 662/1949).
+ * - The other "dias de festa nacional" of Decreto nº 155-B/1890, 3 May (descoberta do Brasil), 13
+ *   May (fraternidade dos Brasileiros), 14 July (República, Liberdade e Independência dos povos
+ *   americanos) and 12 October (descoberta da América), and 24 February (promulgação da
+ *   Constituição), which Decreto nº 3/1891 added: up to 1930. The decree gives each day a dedication
+ *   and no short name, so the names are taken from those dedications. Decreto nº 19.488, de
+ *   15/12/1930 (DOU 18/12/1930), set out to "reduzir os dias feriados" those acts had declared and
+ *   left all five out of its list, so it read "festa nacional" as feriado too.
+ * - Lei nº 108, de 29/10/1935 (DOU 05/11/1935), brought 3 May back and added 16 July (promulgação
+ *   da Constituição de 1934) and 12 October, and Decreto-lei nº 486, de 10/06/1938 (DOU 11/06/1938),
+ *   left the three out again: 3 May from 1936 to 1938, 16 July and 12 October in 1936 and 1937.
+ * - The general elections held on a weekday while Lei nº 1.266/1950, art. 1º, made their day a
+ *   feriado nacional (up to Lei nº 10.607/2002, which revoked it): 03/10/1955, which Lei nº
+ *   2.550/1955, art. 80, also declares one in so many words, 03/10/1958, 03/10/1990 and
+ *   03/10/1994. The others fell on a Sunday or on 15 November. Two are left out: 03/10/1960, since
+ *   no official text located states the date of that year's presidential election (Lei nº
+ *   3.752/1960 only fixes the Guanabara one on it), and 03/10/1996, a municipal election held in
+ *   every municipality at once, which the Distrito Federal has none of, so whether it counts as
+ *   "eleições gerais em todo o País" is left open.
  * - Tiradentes: Decreto nº 155-B/1890 up to 1930, since Decreto nº 19.488, de 15/12/1930, left
  *   it out of its list; Decreto nº 22.647, de 17/04/1933, restored it from 1933; Lei nº 662/1949,
  *   in force from its publication on 13/04/1949, left it out again, and art. 3º of Lei nº 1.266,
@@ -90,8 +113,15 @@ export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
  * - Dia da Consciência Negra: from `CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR`, Lei nº 14.759/2023.
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/decreto/1851-1899/D155-B.htm
- * Decreto nº 155-B, de 14/01/1890, the first republican calendar: 1 January, 21 April, 3 May, 13
- * May, 14 July, 7 September, 12 October, 2 November and 15 November.
+ * Decreto nº 155-B, de 14/01/1890, the first republican calendar: "São considerados dias de festa
+ * nacional": 1 January, 21 April, "3 de maio, consagrado á commemoração da descoberta do Brazil",
+ * "13 de maio, consagrado á commemoração da fraternidade dos Brazileiros", "14 de julho,
+ * consagrado á commemoração da Republica, da Liberdade e da Independencia dos povos americanos",
+ * 7 September, "12 de outubro, consagrado á commemoração da descoberta da America", 2 November and
+ * 15 November. Formally revoked only by Decreto nº 11, de 18/01/1991, Anexo IV.
+ * @see Official: https://www2.camara.leg.br/legin/fed/decret/1824-1899/decreto-3-28-fevereiro-1891-503824-publicacaooriginal-1-pe.html
+ * Decreto nº 3, de 28/02/1891: "declarar de festa nacional o dia 24 de fevereiro, commemorativo da
+ * promulgação da Constituição da Republica".
  * @see Official: https://www.lexml.gov.br/urn/urn:lex:br:federal:decreto:1922-01-19;4497
  * Decreto nº 4.497, de 19/01/1922, which added 25 December to the feriados nacionais.
  * @see Official: https://www.lexml.gov.br/urn/urn:lex:br:federal:decreto:1924-09-26;4859
@@ -102,7 +132,13 @@ export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
  * à confraternidade universal das classes operárias; 7 de setembro, consagrado à comemoração da
  * Independência do Brasil; 2 de novembro, consagrado à comemoração dos mortos; 15 de novembro,
  * consagrado à comemoração do advento da República; 25 de dezembro, consagrado à comemoração da
- * unidade espiritual dos povos christãos".
+ * unidade espiritual dos povos christãos". Its first considerando names Decreto nº 155-B/1890 and
+ * the decrees that added to it; the third, "podem e devem ser reduzidos os dias feriados".
+ * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%20108-1935?OpenDocument
+ * Lei nº 108, de 29/10/1935 (DOU 05/11/1935), art. 1º: "São considerados feriados nacionaes os
+ * seguintes dias:" 1 January, 21 April, 1 May, "3 de maio, commemoração da descoberta do Brasil",
+ * "16 de julho, commemoração da data em que foi promulgada a Constituição Federal", 7 September,
+ * "12 de outubro, commemoração da descoberta da America", 2 November, 15 November and 25 December.
  * @see Official: https://www2.camara.leg.br/legin/fed/decret/1930-1939/decreto-22647-17-abril-1933-558774-publicacaooriginal-80337-pe.html
  * Decreto nº 22.647, de 17/04/1933, which restored the feriado nacional of 21 April, dedicated to
  * the memory of the martyrs of liberty in the person of Tiradentes, four days before that year's
@@ -116,8 +152,20 @@ export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
  * nacionais os dias 1º de janeiro, 1º de maio, 7 de setembro, 15 de novembro e 25 de dezembro";
  * art. 4º: "revogadas as disposições em contrário".
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/L1266.htm
- * Lei nº 1.266, de 08/12/1950, art. 3º: "É feriado nacional o dia 21 de abril, consagrado à
- * glorificação de Tiradentes".
+ * Lei nº 1.266, de 08/12/1950 (DOU 12/12/1950), art. 1º: "Será feriado nacional o dia em que se
+ * realizarem eleições gerais em todo o País"; art. 3º: "É feriado nacional o dia 21 de abril,
+ * consagrado à glorificação de Tiradentes". Revoked by art. 3º of Lei nº 10.607/2002.
+ * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%202.550-1955?OpenDocument
+ * Lei nº 2.550, de 25/07/1955, art. 80: "Será feriado nacional o dia 3 de outubro de 1955."
+ * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%203.338-1957?OpenDocument
+ * Lei nº 3.338/1957, art. 9º: "Para as eleições que se realizarem em 3 de outubro de 1958", a Friday.
+ * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%208.214-1991?OpenDocument
+ * Lei nº 8.214/1991, art. 1º, which counts the parties "que tenham elegido, em 3 de outubro de 1990,
+ * [...] representante para o Congresso Nacional", a Wednesday; that date follows from the original
+ * wording of arts. 28 and 77 of the Constitution ("noventa dias antes do término do mandato").
+ * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%208.713-1993?OpenDocument
+ * Lei nº 8.713, de 30/09/1993, art. 1º: the general elections "serão realizadas simultaneamente, em
+ * todo o País, no dia 3 de outubro de 1994", a Monday.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
  * Lei nº 6.802, de 30/06/1980, art. 1º: "É declarado feriado nacional o dia 12 de outubro, para
  * culto público e oficial a Nossa Senhora Aparecida, Padroeira do Brasil".
@@ -131,11 +179,28 @@ export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
  */
 export const FIXED_HOLIDAYS: readonly NationalHolidayEntry[] = [
 	{ name: "Ano novo", day: 1, month: 1 },
+	{ name: "Promulgação da Constituição da República", day: 24, month: 2, until: 1931 },
 	{ name: "Tiradentes", day: 21, month: 4, until: 1931 },
 	{ name: "Tiradentes", day: 21, month: 4, since: 1933, until: 1949 },
 	{ name: "Tiradentes", day: 21, month: 4, since: 1951 },
 	{ name: "Dia do trabalhador", day: 1, month: 5, since: 1925 },
+	{ name: "Descobrimento do Brasil", day: 3, month: 5, until: 1931 },
+	{ name: "Descobrimento do Brasil", day: 3, month: 5, since: 1936, until: 1939 },
+	{ name: "Fraternidade dos Brasileiros", day: 13, month: 5, until: 1931 },
+	{
+		name: "República, Liberdade e Independência dos Povos Americanos",
+		day: 14,
+		month: 7,
+		until: 1931,
+	},
+	{ name: "Promulgação da Constituição Federal", day: 16, month: 7, since: 1936, until: 1938 },
 	{ name: "Independência do Brasil", day: 7, month: 9 },
+	{ name: ELECTION_GENERAL_HOLIDAY_NAME, day: 3, month: 10, since: 1955, until: 1956 },
+	{ name: ELECTION_GENERAL_HOLIDAY_NAME, day: 3, month: 10, since: 1958, until: 1959 },
+	{ name: ELECTION_HOLIDAY_NAME, day: 3, month: 10, since: 1990, until: 1991 },
+	{ name: ELECTION_HOLIDAY_NAME, day: 3, month: 10, since: 1994, until: 1995 },
+	{ name: "Descobrimento da América", day: 12, month: 10, until: 1931 },
+	{ name: "Descobrimento da América", day: 12, month: 10, since: 1936, until: 1938 },
 	{ name: "Nossa Senhora Aparecida", day: 12, month: 10, since: 1980 },
 	{ name: "Finados", day: 2, month: 11, until: 1949 },
 	{ name: "Finados", day: 2, month: 11, since: 2003 },
@@ -148,9 +213,6 @@ export const FIXED_HOLIDAYS: readonly NationalHolidayEntry[] = [
 	},
 	{ name: "Natal", day: 25, month: 12, since: 1922 },
 ];
-
-/** First year Alagoas' 16 September is a feriado estadual, not a ponto facultativo (Lei AL nº 9.358/2024). */
-const AL_EMANCIPACAO_FERIADO_SINCE_YEAR = 2024;
 
 /**
  * First year Alagoas' 30 November is a feriado estadual: art. 2º of Lei AL nº 7.530/2013, vetoed on
@@ -184,17 +246,11 @@ const SC_DIA_DO_ESTADO_SINCE_YEAR = 2004;
  * First year Santa Catarina's 25 November moves to the following Sunday: Lei SC nº 11.213, de
  * 11/11/1999, added the transfer clause to Lei SC nº 10.306/1996 and, by its art. 2º, entered
  * into force on the day it was published (DO 16.290, de 12/11/1999), thirteen days before that
- * year's 25 November.
+ * year's 25 November. Art. 3º of Lei SC nº 12.906/2004 revoked Lei SC nº 11.213/1999, but the
+ * clause it had already written into Lei SC nº 10.306/1996 stays in the ALESC compilation of that
+ * law, under the note "Redação incluída pela Lei n. 11.213, de 1999", so 2004 transfers too.
  */
 const SC_ALEXANDRIA_TRANSFER_SINCE_YEAR = 1999;
-
-/**
- * The one year Santa Catarina's 25 November is observed on the statutory date again: art. 3º of
- * Lei SC nº 12.906, de 22/01/2004, revoked Lei SC nº 11.213/1999 outright and its own art. 1º did
- * not carry the transfer clause forward, leaving 2004 without one until Lei SC nº 13.408/2005
- * reinstated it.
- */
-const SC_ALEXANDRIA_TRANSFER_GAP_YEAR = 2004;
 
 /**
  * First year Santa Catarina's 11 August and 25 November both move to the following Sunday: Lei SC
@@ -208,8 +264,7 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * Feriados estaduais, um `@see` por entrada.
  *
  * Entries typed `"optional"` are the pontos facultativos a state norm cited here declares:
- * Alagoas' 16 September of 2020 to 2023, Amazonas' 8 December and Pernambuco's 6 March of 2008
- * and 2009. The federal pontos facultativos (Carnaval Monday
+ * Amazonas' 8 December and Pernambuco's 6 March of 2008 and 2009. The federal pontos facultativos (Carnaval Monday
  * and Tuesday, Corpus Christi) are emitted by `getHolidays` itself, and together they are what
  * `includeOptional` switches on.
  *
@@ -222,21 +277,24 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * The statutory date is what is emitted, save for the two shifts modelled here: Alagoas' 30
  * November moves back to Monday from a Tuesday and on to Friday from a Thursday
  * (`tuesdayToMondayThursdayToFriday`, Lei AL nº 7.530/2013, art. 2º parágrafo único), and Santa
- * Catarina's shift (`nextSundayWhenWeekday`, from
- * `SC_ALEXANDRIA_TRANSFER_SINCE_YEAR` on for 25 November, apart from the
- * `SC_ALEXANDRIA_TRANSFER_GAP_YEAR` gap, and from `SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR` on for
- * 11 August). Of the shifts left out, Acre's law moves feriados falling from Tuesday to Thursday
- * on to the Friday (Lei AC nº 2.126/2009, in the wording of Lei AC nº 2.247/2009, the Aniversário
- * do Acre on 15/06 excepted), but the state's own annual calendar decrees apply it unevenly (see
- * the `@see` below), so the two official sources conflict and the statutory date is kept; and the
+ * Catarina's shift to the following Sunday (`nextSundayUnlessSunday`, from
+ * `SC_ALEXANDRIA_TRANSFER_SINCE_YEAR` on for 25 November and from
+ * `SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR` on for 11 August), which moves a Saturday date too, as
+ * Decreto SC nº 1.460/2018 did with 11/08/2018. Of the shifts left out, Acre's law moves feriados
+ * falling from Tuesday to Thursday on to the Friday (Lei AC nº 2.126/2009, in the wording of Lei AC
+ * nº 2.247/2009, the Aniversário do Acre on 15/06 excepted), but the state's own annual calendar
+ * decrees apply it unevenly (see the `@see` below), so the two official sources conflict and the
+ * statutory date is kept; and the
  * Goiás executive may move 26/07 and 28/10 to a nearby dia útil by decree (Lei GO nº 20.756/2020,
  * art. 269, § 1º), and has moved 26/07 by a decree of its own every year since 2022 (see the `@see`
- * below), a date no rule derives from the year; São Paulo moved 09/07 to
+ * below), a date no rule derives from the year, and 28/10 by decree most years too (to 25/10 in
+ * 2019, 30/10 in 2020, 27/10 in 2025 and 30/10 in 2026); Rondônia moved 04/01/2022 to 03/01/2022
+ * (Decreto RO nº 26.739/2021, art. 4º); São Paulo moved 09/07 to
  * 25/05 for 2020 alone (Lei SP nº 17.264/2020), a one-off this table does not carry, and so are
  * Piauí's 19/10 of 2020 and 2021, brought forward to 15/05/2020 and 18/03/2021 by Leis PI nº
- * 7.371/2020 and 7.490/2021, Tocantins' 05/10/2026, which the executive moved to 09/10 for its
- * own offices under Lei TO nº 1.088/1999 (both cited below), and Goiás' 28/10/2026, moved to 30/10
- * by Decreto GO nº 10.987, de 10/09/2026, under the same § 1º.
+ * 7.371/2020 and 7.490/2021, and Tocantins' 05/10/2026, which the executive moved to 09/10 for its
+ * own offices under Lei TO nº 1.088/1999 (both cited below), and Sergipe's 08/07/2020, brought
+ * forward to 22/05/2020 by Lei SE nº 8.679/2020.
  *
  * Every entry starts (`since`) in the first year the norm cited for it was in force on the date,
  * and one that lost its basis stops (`until`, exclusive) in the first year it no longer applied, so
@@ -247,21 +305,23 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://legis.ac.gov.br/detalhar/2249
  * Lei AC nº 3.137, de 27/06/2016, which creates the Dia Estadual do Católico on 20 January as a
  * feriado estadual, listed from 2017, the first 20 January after the law.
- * @see Official: https://legis.ac.gov.br/detalhar/6247
- * Lei AC nº 2.126, de 19/06/2009, "dispõe sobre o adiamento de feriados". Its original art. 1º
+ * @see Official: https://legis.ac.gov.br/detalhar/274
+ * Lei AC nº 2.126, de 19/06/2009 (DOE-AC 24/06/2009), "dispõe sobre o adiamento de feriados". Its original art. 1º
  * moved to Friday the feriados estaduais "que caírem nos demais dias úteis, à exceção dos alusivos
  * ao aniversário do Estado do Acre (15 de junho) e da Revolução Acreana (6 de agosto)"; its
  * parágrafo único: "Quando da ocorrência de mais de um feriado na semana, serão comemorados em dias
  * subseqüentes, de forma tal que o repouso e o lazer deem-se de forma contínua".
- * @see Official: https://app.al.ac.leg.br/legisla-e/legislacao/visualizar/8517
+ * @see Official: https://legis.ac.gov.br/detalhar/414
  * Lei AC nº 2.247, de 21/12/2009 (DOE 30/12/2009), which gave that art. 1º its current wording:
  * "Serão comemorados por adiamento, nas sextas-feiras, os feriados estaduais que caírem entre as
- * terças e quintas-feiras, à exceção do alusivo ao aniversário do Estado do Acre". Not modelled,
- * because the annual decrees that apply it do not agree with it or with each other: Decreto AC nº
- * 7.613/2020 (calendar of 2021) moved 20/01 (a Wednesday) to Friday 22/01 but brought 17/11 (a
- * Wednesday) forward to Tuesday 16/11; Decreto AC nº 11.610/2024 (2025) moved 23/01 (a Thursday)
- * to 24/01; Decreto AC nº 11.809/2025 (2026) moved 20/01 (a Tuesday) to Thursday 22/01, Friday 23/01
- * being the Dia do Evangélico, and left 17/11 (a Tuesday) on its date. The 06/08 the original
+ * terças e quintas-feiras, à exceção do alusivo ao aniversário do Estado do Acre"; it rewrote the
+ * caput only, so the parágrafo único above stands. Not modelled, because the annual decrees that
+ * apply it do not agree with it or with each other: Decreto AC nº 7.613/2020 (calendar of 2021)
+ * moved 20/01 (a Wednesday) to Friday 22/01 but brought 17/11 (a Wednesday) forward to Tuesday
+ * 16/11; Decreto AC nº 11.393/2024 (2024) moved 23/01 (a Tuesday) to 26/01 and 05/09 (a Thursday)
+ * to 06/09; Decreto AC nº 11.610/2024 (2025) moved 23/01 (a Thursday) to 24/01; Decreto AC nº
+ * 11.809/2025 (2026) moved 20/01 (a Tuesday) to Thursday 22/01, Friday 23/01 being the Dia do
+ * Evangélico, and left 17/11 (a Tuesday) on its date. The 06/08 the original
  * wording excepted, the Início da Revolução Acreana, is only a ponto facultativo in those decrees,
  * and no state law declaring it a feriado was located, so it has no entry.
  * @see Official: https://legis.ac.gov.br/detalhar/1087
@@ -287,17 +347,24 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * carries `CONSCIENCIA_NEGRA_HOLIDAY_NAME`, the name the other pre-2024 state entries and the
  * national one share. The ALE-AL SAPL record of the law could not be reached, so the text was read
  * in the LegisWeb reproduction cited here.
- * @see Official: https://sapl.al.al.leg.br/norma/3117
- * Lei AL nº 9.358, de 26/08/2024, Emancipação Política de Alagoas (16/09): "DISPÕE SOBRE O FERIADO
- * ESTADUAL DA EMANCIPAÇÃO POLÍTICA DO ESTADO DE ALAGOAS - DIA 16 DE SETEMBRO". Until 2023 the date
- * was only a ponto facultativo of the state's annual calendar decrees; the optional entry starts in
- * 2020, the year of the one decree cited, Decreto AL nº 68.782, de 30/12/2019, which "dispõe
- * sobre os feriados nacionais e estaduais para o exercício de 2020, define os pontos facultativos".
- * The earlier annual decrees were not located. A 2026 check against the official sources could
- * neither reach this SAPL record nor find the law elsewhere: Decreto AL nº 106.093, de 29/12/2025
- * (the 2026 calendar), lists "16 de setembro, Emancipação Política de Alagoas (feriado estadual)"
- * but cites only Leis AL nº 5.508/1993, 5.509/1993, 5.724/1995 and 7.530/2013. The entry is kept
- * as it is.
+ * @see Official: https://sapl.al.al.leg.br/media/sapl/public/normajuridica/2024/3117/lei_no_9.358_de_26_de_agosto_de_2024.pdf
+ * Lei AL nº 9.358, de 26/08/2024 (DOE suplementar de 28/08/2024), art. 1º: "Fica considerado
+ * Feriado Estadual no Estado de Alagoas, para fins do que dispõe a Lei Federal nº 9.093, de 12 de
+ * setembro de 1995, a data de 16 de setembro – Dia da Emancipação Política do Estado de Alagoas".
+ * Before it no state law made the date a holiday, but the state's annual calendar decrees list it
+ * as one, "16 de setembro, Emancipação Política de Alagoas (feriado estadual)", next to the dates
+ * they mark "(ponto facultativo)": Decreto AL nº 9.215, de 10/12/2010 (DOE-AL 13/12/2010, the
+ * calendar of 2011), cited next, is the earliest whose text was read, so the entry starts in 2011
+ * (up to 2.4.0 the date had no entry, and 2020 to 2023 were typed `"optional"`). The same label
+ * shows in the DOE-AL search for the calendars published in 2008, 2009, 2011, 2012, 2013 and 2016,
+ * and a despacho of the Gabinete Civil (DOE-AL 07/11/1995, p. 9) calls the date "dia feriado em
+ * todo o Estado" by an act of D. João VI of 16/09/1817; neither reaches back far enough, with a
+ * text read, to start the entry earlier.
+ * @see Official: https://diario.imprensaoficial.al.gov.br/apinova/api/editions/downloadPdf/23955
+ * Decreto AL nº 9.215, de 10/12/2010 (DOE-AL 13/12/2010, p. 1), the calendar of 2011: "XII –16 de
+ * setembro, Emancipação Política de Alagoas (feriado estadual)". The calendars of 2020 to 2023
+ * carry the same item: Decretos AL nº 68.782/2019, 72.527/2020, 76.819, de 03/01/2022, and
+ * 86.020/2022.
  * @see Official: https://diario.imprensaoficial.al.gov.br/apinova/api/editions/downloadPdf/24602
  * Lei AL nº 7.530, de 08/08/2013 (DOE-AL de 09/08/2013, p. 89), art. 1º: "Fica instituído o Dia
  * Estadual do Evangélico, a ser comemorado no dia 30 de novembro de cada ano". Its art. 2º, which
@@ -319,15 +386,15 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * maio "Dia de Cabralzinho"". Missing up to 2.4.0.
  * @see Official: https://www.al.ap.leg.br/ver_texto_lei.php?iddocumento=35896
  * Lei AP nº 1.696, de 09/07/2012 (DOE nº 5264, de 10/07/2012), Dia de São Tiago (25/07): "Fica
- * instituído como Feriado Estadual, o dia 25 de julho, "Dia de São Tiago"", in force on its
- * publication, so listed from 2012. The ALAP record notes an "Ação Direta de Inconstitucionalidade
- * nº 4820/2012" against it, whose outcome could not be checked (the STF portal refuses the
- * connection).
- * @see Official: https://www.al.ap.leg.br/ver_texto_lei.php?iddocumento=96475
- * Lei AP nº 2.430, de 23/07/2019 (DOE nº 6965, de 23/07/2019), which keeps 25 July only as a
- * "data comemorativa" and, by its art. 3º, "Fica revogada a Lei Estadual nº 1.696, de 9 de julho
- * de 2012", in force on its publication two days before that year's date, so the São Tiago entry
- * stops after 2018. Two other Amapá dates are not holidays: 05/10, whose Lei AP nº 1.204/2008
+ * instituído como Feriado Estadual, o dia 25 de julho, "Dia de São Tiago"". The STF struck it down
+ * (ADI 4820, cited next), so 25/07 has no entry in any year; up to 2.4.0 it was listed from 2012.
+ * Lei AP nº 2.430, de 23/07/2019, later kept 25 July only as a "data comemorativa".
+ * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=4275522
+ * STF ADI 4820, brought by the Governador do Amapá. Decisão de julgamento of 20/09/2018, Tribunal
+ * Pleno: "O Tribunal, por unanimidade, julgou procedente o pedido formulado na ação direta para
+ * declarar a inconstitucionalidade da Lei n 1.696/2012 do Estado do Amapá, nos termos do voto do
+ * Relator"; trânsito em julgado 12/12/2018. The declaration is erga omnes and ex tunc, as for
+ * Rondônia's 18/06 (ADI 3940). Two other Amapá dates are not holidays: 05/10, whose Lei AP nº 1.204/2008
  * says the commemoration "não inclui dispensa de trabalho", and 25/11, which Lei AP nº 393/1997
  * makes a feriado only "para as pessoas que sejam doadoras de sangue voluntárias e permanentes".
  * @see Official: https://silegis.al.ap.leg.br/proposicaopdf/2CEatualizadaeconsolidadaateEC071comSumario.pdf
@@ -384,11 +451,12 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * (padroeira do estado, "sempre na segunda-feira, oitavo dia posterior ao domingo de Páscoa"),
  * listed from 2020, the first of those Mondays after the law
  * @see Official: https://legisla.casacivil.go.gov.br/pesquisa_legislacao/100979/lei-20756
- * Lei GO nº 20.756/2020, art. 269, II, the three feriados estaduais of Goiás: "a) 26 de julho,
+ * Lei GO nº 20.756/2020, art. 269, II, the feriados estaduais of Goiás in force: "a) 26 de julho,
  * consagrado à fundação da cidade de Goiás; b) 24 de outubro, comemorativo ao lançamento da pedra
- * fundamental de Goiânia; c) 28 de outubro, consagrado ao servidor público". The law is of
- * 28/01/2020 and entered into force on 28/07/2020, after that year's 26 July, so 26/07 is listed
- * from 2021. These are days of the servants' statute, whose caput reads "não haverá expediente em
+ * fundamental de Goiânia; c) 28 de outubro, consagrado ao servidor público". It took over on
+ * 28/07/2020 from Lei GO nº 10.460/1988 and that one from Lei GO nº 9.990/1986 (both cited below),
+ * whose art. 254 and 346 carried the same three dates, so all three are listed from 1986. These are
+ * days of the servants' statute, whose caput reads "não haverá expediente em
  * nenhuma repartição ou serviço do Estado ... nos seguintes feriados"; no Goiás law fixing a data
  * magna as the feriado civil of Lei 9.093/1995, art. 1º, II was located (a search of the Casa
  * Civil legislation base for "data magna" returns nothing). The entries are kept as the "feriados
@@ -401,10 +469,20 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * year: nº 10.118 (2022, to 25/07), nº 10.288 (2023, to 24/07), nº 10.481 (2024, to 22/07), nº
  * 10.709 (2025, to 28/07) and nº 10.935 (2026, to 20/07). The entry keeps the statutory 26/07,
  * since the observed date is only known once each year's decree is out.
- * @see Official: https://legisla.casacivil.go.gov.br/pesquisa_legislacao/83678/lei-10460
- * Lei GO nº 10.460, de 22/02/1988, the servants' statute Lei GO nº 20.756/2020 replaced, which
- * already declared 24/10 and 28/10, so both are listed from 1988. Whether it also carried 26/07
- * could not be confirmed, so that date starts with Lei GO nº 20.756/2020.
+ * @see Official: https://legisla.casacivil.go.gov.br/api/v2/pesquisa/legislacoes/83678
+ * Lei GO nº 10.460, de 22/02/1988 (DOE 29/02/1988), the servants' statute Lei GO nº 20.756/2020
+ * replaced, art. 346, II, in its original wording (the compiled text marks no amendment to it): "a)
+ * 26 (vinte e seis) de julho, consagrado à fundação da cidade de Goiás; b) 24 (vinte e quatro) de
+ * outubro, comemorativo ao lançamento da pedra fundamental de Goiânia; c) 28 (vinte e oito) de
+ * outubro, consagrado ao funcionário público; d) 2 (dois) de novembro, dedicado ao culto dos
+ * mortos". Up to 2.4.0 26/07 was listed from 2021 only.
+ * @see Official: https://legisla.casacivil.go.gov.br/api/v2/pesquisa/legislacoes/85539
+ * Lei GO nº 9.990, de 31/01/1986 (DOE 27/02/1986), the statute before it, in force "no dia 1º de
+ * março de 1986" (art. 275), art. 254, II, "estaduais": the same four dates, 26 July, 24 October,
+ * 28 October and "2 (dois) de novembro, dedicado à comemoração dos mortos". So the three dates
+ * start in 1986, and 2 November is a Goiás feriado estadual from 1986 to 2002, the years Finados was
+ * not a feriado nacional; from 2003 the national entry covers it (Lei GO nº 20.756/2020 moved it to
+ * its list of national ones, art. 269, I).
  * @see Official: https://arquivos.al.ma.leg.br:8443/ged/legislacao/LEI_2457
  * Lei MA nº 2.457, de 02/10/1964, Adesão do Maranhão à Independência (28/07), listed from 1965:
  * "É feriado estadual o dia 28 de julho, data magna do Estado"
@@ -458,7 +536,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * 11/12/2025, which declares 20 November a feriado estadual, has no entry: the date has been the
  * national holiday of Lei 14.759/2023 since 2024.
  * @see Official: https://sapl.al.pb.leg.br/media/sapl/public/normajuridica/1967/2945/2945_texto_integral.pdf
- * Lei PB nº 3.489, de 30/08/1967, the scanned text of the law, art. 2º as quoted above.
+ * Lei PB nº 3.489, de 30/08/1967, the scanned text of the law, art. 2º as quoted above. Its entries
+ * are kept although the TRT-13 held, in 2015, that the law "nunca teve força normativa" (proc.
+ * 0161000-98.2013.5.13.0023; the court's news of August 2015 and July 2016 report it, the judgment
+ * itself sits behind a CAPTCHA): the law's own text declares the two dates feriados estaduais.
  * @see Official: https://www.legislacao.pr.gov.br/legislacao/pesquisarAto.do?action=exibir&codAto=134573
  * Lei PR nº 18.384, de 17/12/2014, Emancipação Política do Paraná (19/12), a data comemorativa its
  * own text says is "não se constituindo em feriado civil", nor a ponto facultativo it declares.
@@ -470,13 +551,22 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?tiponorma=1&numero=16241&complemento=0&ano=2017&tipo=&url=
  * Lei PE nº 16.241, de 14/12/2017, art. 49, Revolução Pernambucana (06/03), listed from 2018: "Dia 6 de março: Data Magna do
  * Estado de Pernambuco e feriado civil no âmbito do Estado de Pernambuco". Revoked the Lei PE nº
- * 16.059, de 08/06/2017, cited here before, which had itself superseded the movable "primeiro
- * domingo de março" of Lei PE nº 13.835/2009, always a Sunday. Before it, Lei PE nº 13.386, de
+ * 16.059, de 08/06/2017, which fixed 6 March as "Data Magna e feriado civil" and, by its art. 6º,
+ * revoked Leis PE nº 13.386/2007 and 13.835/2009. Before it, Lei PE nº 13.386, de
  * 24/12/2007, art. 1º, "Fica instituído o dia 06 (seis) de março como data Magna do Estado de
  * Pernambuco", gave the date "a condição de ponto facultativo", so 06/03 is listed as `"optional"`
  * in 2008 and 2009.
  * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?tiponorma=1&numero=13386&complemento=0&ano=2007&tipo=&url=
  * Lei PE nº 13.386, de 24/12/2007, as quoted above.
+ * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?ano=2009&complemento=0&numero=13835&tipo=&tiponorma=1&url=
+ * Lei PE nº 13.835, de 02/07/2009, which rewrote art. 1º of Lei PE nº 13.386/2007: "Fica instituído
+ * o 1º (primeiro) domingo do mês de março, como Data Magna do Estado de Pernambuco, de acordo com Lei
+ * Federal nº 9.093, de 12 de setembro de 1995", the feriado civil of that law, and revoked its art.
+ * 2º, the ponto facultativo. Listed from 2010, the first such Sunday after it, to 2017: Lei PE nº
+ * 16.059/2017 came on 08/06/2017, after that year's Sunday (05/03/2017). Always a Sunday, so it never
+ * changes a business day count. Missing up to 2.4.0.
+ * @see Official: https://legis.alepe.pe.gov.br/texto.aspx?ano=2017&complemento=0&numero=16059&tipo=&tiponorma=1&url=
+ * Lei PE nº 16.059, de 08/06/2017, as quoted above.
  * @see Official: https://sapl.al.pi.leg.br/norma/5849
  * Lei PI nº 176, de 30/08/1937, Dia do Piauí (19/10), listed from 1937: "19 de Outubro será
  * feriado estadual, com a denominação de DIA DO PIAUHY"
@@ -556,8 +646,14 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * supplementary credit law: "AUTORIZA O PODER EXECUTIVO A ABRIR CRÉDITO SUPLEMENTAR POR ANULAÇÃO
  * ... EM FAVOR DAS UNIDADES ORÇAMENTÁRIAS: DEPARTAMENTO DE ESTRADAS E RODAGEM - DER/RO,
  * SECRETARIA DE ESTADO DE ASSISTÊNCIA SOCIAL - SEAS", nothing to do with holidays. Lei RO nº
- * 2.291/2010 revoked Decreto-Lei RO nº 39, de 31/12/1982, under which 04/01 was already a
- * holiday; that decree's text was not located, so the entry starts at the 2010 law.
+ * 2.291/2010, art. 2º, "Fica revogado o Decreto-Lei nº 39, de 31 de dezembro de 1982", the norm
+ * that first made the date a holiday (cited next), so the entry runs on from 1983.
+ * @see Official: https://ditel.casacivil.ro.gov.br/COTEL/Livros/Files/DL39.pdf
+ * Decreto-Lei RO nº 39, de 31/12/1982, "INSTITUI O DIA 04 DE JANEIRO FERIADO ESTADUAL", art. 1º:
+ * "Fica instituído o dia 04 de janeiro de cada ano para comemorar a criação do Estado de Rondônia,
+ * passando esta data a ser considerada feriado estadual". Listed from 1983 (up to 2.4.0 from
+ * 2011). Decreto RO nº 26.739/2021, art. 4º, moved the 2022 date to Monday 03/01 for that year
+ * alone, which the table does not carry.
  * @see Official: https://sapl.al.ro.leg.br/norma/3003
  * Lei RO nº 1.026, de 20/12/2001, the other law cited for Rondônia, whose art. 1º did create a
  * second feriado estadual — "Fica instituído feriado no Estado de Rondônia, o dia 18 de junho,
@@ -578,15 +674,22 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * holidays and the Sunday transfer: "Sempre que o dia 11 de agosto coincidir com dia útil da
  * semana, o feriado e os eventos alusivos à data serão transferidos para o domingo subsequente"
  * and the same clause for 25 de novembro. The law does not say whether a Saturday is a "dia útil
- * da semana"; the table reads it as not one (Monday to Friday move, a Saturday date stays), the
- * reading under which the clause keeps the holiday on a day off either way.
- * @see Official: http://leis.alesc.sc.gov.br/html/1996/10306_1996_lei.html
- * Lei SC nº 10.306, of December 1996, which made 25 November the data magna after that year's
- * date, so it is listed from 1997, and whose art. 1º reads, in the wording of Lei SC nº
+ * da semana"; the one official act that settles a Saturday, Decreto SC nº 1.460/2018 (cited next),
+ * moved it, so a Saturday date moves to the Sunday too (up to 2.4.0 it stayed on the Saturday).
+ * No act settles a Saturday 25 November (the calendar decrees, Decreto SC nº 16/2023 included, do
+ * not list that date), so it follows the same clause the same way.
+ * @see Official: https://leis.alesc.sc.gov.br/ato-normativo/executivo/48922
+ * Decreto SC nº 1.460, de 29/01/2018, the calendar of 2018, art. 1º: "VIII – 11 de agosto, sábado,
+ * Data Magna do Estado de Santa Catarina (feriado estadual)"; parágrafo único: "O feriado e os
+ * eventos alusivos à data de que trata o inciso VIII do caput deste artigo serão transferidos para o
+ * domingo subsequente".
+ * @see Official: http://leis.alesc.sc.gov.br/html/1996/10306_1996_Lei.html
+ * Lei SC nº 10.306, de 26/12/1996 (DO 15.582 de 26/12/1996), which made 25 November the data magna
+ * after that year's date, so it is listed from 1997, and whose art. 1º reads, in the wording of Lei SC nº
  * 12.906/2004 that added 11 August from 2004 on: "É considerada data
  * magna do Estado o dia 11 de agosto, Dia do Estado de Santa Catarina, e dia de Santa Catarina de
  * Alexandria, dia 25 de novembro".
- * @see Official: http://leis.alesc.sc.gov.br/html/1999/11213_1999_lei.html
+ * @see Official: http://leis.alesc.sc.gov.br/html/1999/11213_1999_Lei.html
  * Lei SC nº 11.213, de 11 de novembro de 1999, which added to art. 1º of Lei SC nº 10.306/1996 the
  * parágrafo único transferring 25 November alone: "Sempre que o dia 25 de novembro coincidir com
  * dia útil da semana, o feriado e os eventos alusivos à data serão transferidos para o domingo
@@ -597,9 +700,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: http://leis.alesc.sc.gov.br/html/2004/12906_2004_lei.html
  * Lei SC nº 12.906, de 22 de janeiro de 2004, which added 11 August to the caput of art. 1º of Lei
  * SC nº 10.306/1996 and, by its art. 3º, "Revoga-se a Lei nº 11.213, de 11 de novembro de 1999"
- * without restating the transfer clause. It entered into force on the day it was published (DO
- * 17.320, de 22/01/2004), before that year's 25 November, so 2004 is the one year in which neither
- * date is transferred.
+ * without restating the transfer clause. The clause Lei SC nº 11.213/1999 had written into Lei SC
+ * nº 10.306/1996 stays in the ALESC compilation of that law all the same, so 25 November keeps
+ * moving in 2004 (up to 2.4.0 it stayed on that year's Thursday); 11 August, which the clause did not
+ * cover, stays on its date in 2004.
  * @see Official: http://leis.alesc.sc.gov.br/html/2005/13408_2005_lei.html
  * Lei SC nº 13.408, de 15/07/2005, which reinstated the parágrafo único, this time transferring
  * both dates to the following Sunday, and, by its art. 2º, entered into force on the day it was
@@ -607,8 +711,8 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * coincidirem com dias úteis da semana, os feriados e os eventos alusivos às datas serão
  * transferidos para o domingo subseqüente". Both of that year's dates fall after it. The two
  * holidays are therefore split by year: 11 August is fixed in 2004, its first year, and
- * transferring from 2005 on, while 25 November is fixed from 1997 to 1998, transferring from 1999
- * to 2003, fixed again in 2004 and transferring from 2005 on. Lei SC nº 16.719/2015, cited here before, was revoked by Lei SC nº
+ * transferring from 2005 on, while 25 November is fixed from 1997 to 1998 and transferring from 1999
+ * on. Lei SC nº 16.719/2015, cited here before, was revoked by Lei SC nº
  * 17.335/2017, itself consolidated and revoked by Lei SC nº 18.531/2022.
  * @see Official: https://www.al.sp.gov.br/repositorio/legislacao/lei/1997/lei-9497-05.03.1997.html
  * Lei SP nº 9.497, de 05/03/1997, Revolução Constitucionalista (09/07), listed from 1997, art. 1º: "Fica
@@ -671,20 +775,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			since: 1995,
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 		},
-		{
-			name: "Emancipação Política de Alagoas",
-			day: 16,
-			month: 9,
-			type: "optional",
-			since: 2020,
-			until: AL_EMANCIPACAO_FERIADO_SINCE_YEAR,
-		},
-		{
-			name: "Emancipação Política de Alagoas",
-			day: 16,
-			month: 9,
-			since: AL_EMANCIPACAO_FERIADO_SINCE_YEAR,
-		},
+		{ name: "Emancipação Política de Alagoas", day: 16, month: 9, since: 2011 },
 		{
 			name: "Dia Estadual do Evangélico",
 			day: 30,
@@ -696,7 +787,6 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	AP: [
 		{ name: "Dia de São José", day: 19, month: 3, since: 2003 },
 		{ name: "Dia de Cabralzinho", day: 15, month: 5, since: 2018 },
-		{ name: "Dia de São Tiago", day: 25, month: 7, since: 2012, until: 2019 },
 		{ name: "Criação do Território Federal do Amapá", day: 13, month: 9, since: 1992 },
 		{
 			name: "Dia Estadual da Consciência Negra",
@@ -726,9 +816,10 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	],
 	ES: [{ name: "Nossa Senhora da Penha", easterOffset: 8, since: 2020 }],
 	GO: [
-		{ name: "Fundação da Cidade de Goiás", day: 26, month: 7, since: 2021 },
-		{ name: "Lançamento da Pedra Fundamental de Goiânia", day: 24, month: 10, since: 1988 },
-		{ name: "Dia do Servidor Público", day: 28, month: 10, since: 1988 },
+		{ name: "Fundação da Cidade de Goiás", day: 26, month: 7, since: 1986 },
+		{ name: "Lançamento da Pedra Fundamental de Goiânia", day: 24, month: 10, since: 1986 },
+		{ name: "Dia do Servidor Público", day: 28, month: 10, since: 1986 },
+		{ name: "Finados", day: 2, month: 11, since: 1986, until: 2003 },
 	],
 	MA: [
 		{ name: "Adesão do Maranhão à Independência", day: 28, month: 7, since: 1965 },
@@ -778,6 +869,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			since: 2008,
 			until: 2010,
 		},
+		{ name: "Revolução Pernambucana", firstSundayOfMonth: 3, since: 2010, until: 2018 },
 		{ name: "Revolução Pernambucana", day: 6, month: 3, since: 2018 },
 	],
 	PI: [{ name: "Dia do Piauí", day: 19, month: 10, since: 1937 }],
@@ -796,7 +888,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 	],
 	RN: [{ name: "Mártires de Cunhaú e Uruaçu", day: 3, month: 10, since: 2007 }],
 	RS: [{ name: "Revolução Farroupilha", day: 20, month: 9, since: 1995 }],
-	RO: [{ name: "Criação do Estado de Rondônia", day: 4, month: 1, since: 2011 }],
+	RO: [{ name: "Criação do Estado de Rondônia", day: 4, month: 1, since: 1983 }],
 	RR: [{ name: "Criação do Estado de Roraima", day: 5, month: 10, since: 1992 }],
 	SC: [
 		{
@@ -810,7 +902,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			name: "Dia do Estado de Santa Catarina",
 			day: 11,
 			month: 8,
-			nextSundayWhenWeekday: true,
+			nextSundayUnlessSunday: true,
 			since: SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR,
 		},
 		{
@@ -824,23 +916,8 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			name: "Dia de Santa Catarina de Alexandria",
 			day: 25,
 			month: 11,
-			nextSundayWhenWeekday: true,
+			nextSundayUnlessSunday: true,
 			since: SC_ALEXANDRIA_TRANSFER_SINCE_YEAR,
-			until: SC_ALEXANDRIA_TRANSFER_GAP_YEAR,
-		},
-		{
-			name: "Dia de Santa Catarina de Alexandria",
-			day: 25,
-			month: 11,
-			since: SC_ALEXANDRIA_TRANSFER_GAP_YEAR,
-			until: SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR,
-		},
-		{
-			name: "Dia de Santa Catarina de Alexandria",
-			day: 25,
-			month: 11,
-			nextSundayWhenWeekday: true,
-			since: SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR,
 		},
 	],
 	SP: [

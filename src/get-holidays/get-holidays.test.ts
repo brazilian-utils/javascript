@@ -42,6 +42,12 @@ function alEvangelicoIn(year: number): Holiday[] {
 	);
 }
 
+function peMagnaIn(year: number): Holiday[] {
+	return getHolidays({ year, stateCode: "PE" }).filter(
+		(holiday) => holiday.name === "Revolução Pernambucana",
+	);
+}
+
 function carnaval(year: number): Holiday[] {
 	return getHolidays(year).filter((holiday) => holiday.name.startsWith("Carnaval"));
 }
@@ -79,6 +85,59 @@ const NATIONAL_HOLIDAY_PERIODS: {
 	// Natal: Decreto nº 4.497, de 19/01/1922.
 	{ name: "Natal", month: 11, day: 25, year: 1921, listed: false },
 	{ name: "Natal", month: 11, day: 25, year: 1922, listed: true },
+	// The other festas nacionais of Decreto nº 155-B/1890 and Decreto nº 3/1891, dropped by
+	// Decreto nº 19.488/1930; 3 May, 16 July and 12 October again under Lei nº 108/1935, until
+	// Decreto-lei nº 486/1938.
+	{ name: "Promulgação da Constituição da República", month: 1, day: 24, year: 1930, listed: true },
+	{
+		name: "Promulgação da Constituição da República",
+		month: 1,
+		day: 24,
+		year: 1931,
+		listed: false,
+	},
+	{ name: "Descobrimento do Brasil", month: 4, day: 3, year: 1900, listed: true },
+	{ name: "Descobrimento do Brasil", month: 4, day: 3, year: 1930, listed: true },
+	{ name: "Descobrimento do Brasil", month: 4, day: 3, year: 1931, listed: false },
+	{ name: "Descobrimento do Brasil", month: 4, day: 3, year: 1935, listed: false },
+	{ name: "Descobrimento do Brasil", month: 4, day: 3, year: 1936, listed: true },
+	{ name: "Descobrimento do Brasil", month: 4, day: 3, year: 1938, listed: true },
+	{ name: "Descobrimento do Brasil", month: 4, day: 3, year: 1939, listed: false },
+	{ name: "Fraternidade dos Brasileiros", month: 4, day: 13, year: 1930, listed: true },
+	{ name: "Fraternidade dos Brasileiros", month: 4, day: 13, year: 1931, listed: false },
+	{
+		name: "República, Liberdade e Independência dos Povos Americanos",
+		month: 6,
+		day: 14,
+		year: 1930,
+		listed: true,
+	},
+	{
+		name: "República, Liberdade e Independência dos Povos Americanos",
+		month: 6,
+		day: 14,
+		year: 1931,
+		listed: false,
+	},
+	{ name: "Promulgação da Constituição Federal", month: 6, day: 16, year: 1935, listed: false },
+	{ name: "Promulgação da Constituição Federal", month: 6, day: 16, year: 1936, listed: true },
+	{ name: "Promulgação da Constituição Federal", month: 6, day: 16, year: 1937, listed: true },
+	{ name: "Promulgação da Constituição Federal", month: 6, day: 16, year: 1938, listed: false },
+	{ name: "Descobrimento da América", month: 9, day: 12, year: 1930, listed: true },
+	{ name: "Descobrimento da América", month: 9, day: 12, year: 1931, listed: false },
+	{ name: "Descobrimento da América", month: 9, day: 12, year: 1935, listed: false },
+	{ name: "Descobrimento da América", month: 9, day: 12, year: 1936, listed: true },
+	{ name: "Descobrimento da América", month: 9, day: 12, year: 1937, listed: true },
+	{ name: "Descobrimento da América", month: 9, day: 12, year: 1938, listed: false },
+	// Weekday general elections under Lei nº 1.266/1950, art. 1º (1955 also under Lei nº
+	// 2.550/1955, art. 80).
+	{ name: "Eleições gerais", month: 9, day: 3, year: 1950, listed: false },
+	{ name: "Eleições gerais", month: 9, day: 3, year: 1955, listed: true },
+	{ name: "Eleições gerais", month: 9, day: 3, year: 1958, listed: true },
+	{ name: "Eleições gerais", month: 9, day: 3, year: 1960, listed: false },
+	{ name: "Eleições (primeiro turno)", month: 9, day: 3, year: 1990, listed: true },
+	{ name: "Eleições (primeiro turno)", month: 9, day: 3, year: 1994, listed: true },
+	{ name: "Eleições (primeiro turno)", month: 9, day: 3, year: 1996, listed: false },
 	// In force in every supported year.
 	{ name: "Ano novo", month: 0, day: 1, year: 1900, listed: true },
 	{ name: "Independência do Brasil", month: 8, day: 7, year: 1900, listed: true },
@@ -264,18 +323,26 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 	{
 		stateCode: "AL",
 		name: "Emancipação Política de Alagoas",
-		type: "optional",
-		year: 2019,
+		type: "state",
+		year: 2010,
 		listed: false,
-		source: "Decreto AL nº 68.782, de 30/12/2019, the 2020 calendar",
+		source: "Decreto AL nº 9.215, de 10/12/2010, the 2011 calendar",
 	},
 	{
 		stateCode: "AL",
 		name: "Emancipação Política de Alagoas",
-		type: "optional",
+		type: "state",
+		year: 2011,
+		listed: true,
+		source: "Decreto AL nº 9.215, de 10/12/2010, the 2011 calendar",
+	},
+	{
+		stateCode: "AL",
+		name: "Emancipação Política de Alagoas",
+		type: "state",
 		year: 2020,
 		listed: true,
-		source: "Decreto AL nº 68.782, de 30/12/2019, the 2020 calendar",
+		source: 'Decreto AL nº 68.782, de 30/12/2019, the 2020 calendar: "(feriado estadual)"',
 	},
 	{
 		stateCode: "AL",
@@ -393,34 +460,17 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		stateCode: "AP",
 		name: "Dia de São Tiago",
 		type: "state",
-		year: 2011,
-		listed: false,
-		source: "Lei AP nº 1.696, de 09/07/2012",
-	},
-	{
-		stateCode: "AP",
-		name: "Dia de São Tiago",
-		type: "state",
 		year: 2012,
-		listed: true,
-		source: "Lei AP nº 1.696, de 09/07/2012, in force from 10/07/2012",
+		listed: false,
+		source: "STF ADI 4820 voided Lei AP nº 1.696/2012 ex tunc",
 	},
 	{
 		stateCode: "AP",
 		name: "Dia de São Tiago",
 		type: "state",
 		year: 2018,
-		listed: true,
-		source: "Lei AP nº 1.696, de 09/07/2012",
-	},
-	{
-		stateCode: "AP",
-		name: "Dia de São Tiago",
-		type: "state",
-		year: 2019,
 		listed: false,
-		source:
-			"Lei AP nº 2.430, de 23/07/2019, revoked Lei AP nº 1.696/2012 before that year's 25 July",
+		source: "STF ADI 4820 voided Lei AP nº 1.696/2012 ex tunc",
 	},
 	{
 		stateCode: "AP",
@@ -562,49 +612,89 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		stateCode: "GO",
 		name: "Fundação da Cidade de Goiás",
 		type: "state",
-		year: 2020,
+		year: 1985,
 		listed: false,
-		source: "Lei GO nº 20.756/2020, in force from 28/07/2020",
+		source: "Lei GO nº 9.990, de 31/01/1986, in force from 01/03/1986",
 	},
 	{
 		stateCode: "GO",
 		name: "Fundação da Cidade de Goiás",
 		type: "state",
-		year: 2021,
+		year: 1986,
 		listed: true,
-		source: "Lei GO nº 20.756/2020, in force from 28/07/2020",
+		source: "Lei GO nº 9.990, de 31/01/1986, in force from 01/03/1986",
+	},
+	{
+		stateCode: "GO",
+		name: "Fundação da Cidade de Goiás",
+		type: "state",
+		year: 2020,
+		listed: true,
+		source: "Lei GO nº 10.460/1988, art. 346, II, a, up to 27/07/2020",
 	},
 	{
 		stateCode: "GO",
 		name: "Lançamento da Pedra Fundamental de Goiânia",
 		type: "state",
-		year: 1987,
+		year: 1985,
 		listed: false,
-		source: "Lei GO nº 10.460, de 22/02/1988",
+		source: "Lei GO nº 9.990, de 31/01/1986, in force from 01/03/1986",
 	},
 	{
 		stateCode: "GO",
 		name: "Lançamento da Pedra Fundamental de Goiânia",
 		type: "state",
-		year: 1988,
+		year: 1986,
 		listed: true,
-		source: "Lei GO nº 10.460, de 22/02/1988",
+		source: "Lei GO nº 9.990, de 31/01/1986, in force from 01/03/1986",
 	},
 	{
 		stateCode: "GO",
 		name: "Dia do Servidor Público",
 		type: "state",
-		year: 1987,
+		year: 1985,
 		listed: false,
-		source: "Lei GO nº 10.460, de 22/02/1988",
+		source: "Lei GO nº 9.990, de 31/01/1986, in force from 01/03/1986",
 	},
 	{
 		stateCode: "GO",
 		name: "Dia do Servidor Público",
 		type: "state",
-		year: 1988,
+		year: 1986,
 		listed: true,
-		source: "Lei GO nº 10.460, de 22/02/1988",
+		source: "Lei GO nº 9.990, de 31/01/1986, in force from 01/03/1986",
+	},
+	{
+		stateCode: "GO",
+		name: "Finados",
+		type: "state",
+		year: 1985,
+		listed: false,
+		source: "Lei GO nº 9.990, de 31/01/1986, in force from 01/03/1986",
+	},
+	{
+		stateCode: "GO",
+		name: "Finados",
+		type: "state",
+		year: 1986,
+		listed: true,
+		source: "Lei GO nº 9.990/1986, art. 254, II, d",
+	},
+	{
+		stateCode: "GO",
+		name: "Finados",
+		type: "state",
+		year: 2002,
+		listed: true,
+		source: "Lei GO nº 10.460/1988, art. 346, II, d",
+	},
+	{
+		stateCode: "GO",
+		name: "Finados",
+		type: "state",
+		year: 2003,
+		listed: false,
+		source: "Lei nº 10.607/2002 made Finados national again from 2003",
 	},
 	{
 		stateCode: "MA",
@@ -706,9 +796,25 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		stateCode: "PE",
 		name: "Revolução Pernambucana",
 		type: "state",
-		year: 2017,
+		year: 2009,
 		listed: false,
-		source: "Lei PE nº 16.059, de 08/06/2017",
+		source: "Lei PE nº 13.835, de 02/07/2009",
+	},
+	{
+		stateCode: "PE",
+		name: "Revolução Pernambucana",
+		type: "state",
+		year: 2010,
+		listed: true,
+		source: "Lei PE nº 13.835, de 02/07/2009, the first Sunday of March",
+	},
+	{
+		stateCode: "PE",
+		name: "Revolução Pernambucana",
+		type: "state",
+		year: 2017,
+		listed: true,
+		source: "Lei PE nº 13.835/2009, until Lei PE nº 16.059, de 08/06/2017",
 	},
 	{
 		stateCode: "PE",
@@ -802,9 +908,17 @@ const STATE_HOLIDAY_FIRST_YEARS: {
 		stateCode: "RO",
 		name: "Criação do Estado de Rondônia",
 		type: "state",
-		year: 2010,
+		year: 1982,
 		listed: false,
-		source: "Lei RO nº 2.291, de 22/04/2010",
+		source: "Decreto-Lei RO nº 39, de 31/12/1982",
+	},
+	{
+		stateCode: "RO",
+		name: "Criação do Estado de Rondônia",
+		type: "state",
+		year: 1983,
+		listed: true,
+		source: "Decreto-Lei RO nº 39, de 31/12/1982",
 	},
 	{
 		stateCode: "RO",
@@ -1110,8 +1224,8 @@ describe("getHolidays", () => {
 		expect(isHoliday({ targetDate: new Date(2020, 9, 4) })).toBe(false);
 	});
 
-	test("should not list an election day in odd years, before 1998, or for the second round (1996 and 1997 have none, 2024-10-27 is not a holiday)", () => {
-		for (const year of [1996, 1997, 1999, 2023, 2025]) {
+	test("should not list an election day in odd years, in the even years before 1998 whose elections fell on a Sunday or are not dated by a law read, or for the second round (1996 and 1997 have none, 2024-10-27 is not a holiday)", () => {
+		for (const year of [1992, 1996, 1997, 1999, 2023, 2025]) {
 			expect(
 				getHolidays(year).filter((holiday) => holiday.name === "Eleições (primeiro turno)"),
 			).toEqual([]);
@@ -1449,7 +1563,25 @@ describe("getHolidays", () => {
 		]);
 	});
 
-	test("should keep the state optional entries to the ones a state norm declares: AL's 16 September of 2020 to 2023, AM's 8 December and PE's 6 March of 2008 and 2009", () => {
+	test("should list PE's data magna on the first Sunday of March from 2010 to 2017 under Lei PE nº 13.835/2009, until Lei PE nº 16.059/2017 fixed 6 March", () => {
+		expect(peMagnaIn(2009)).toEqual([
+			{ name: "Revolução Pernambucana", date: new Date(2009, 2, 6), type: "optional" },
+		]);
+		expect(peMagnaIn(2010)).toEqual([
+			{ name: "Revolução Pernambucana", date: new Date(2010, 2, 7), type: "state" },
+		]);
+		expect(peMagnaIn(2015)).toEqual([
+			{ name: "Revolução Pernambucana", date: new Date(2015, 2, 1), type: "state" },
+		]);
+		expect(peMagnaIn(2017)).toEqual([
+			{ name: "Revolução Pernambucana", date: new Date(2017, 2, 5), type: "state" },
+		]);
+		expect(peMagnaIn(2018)).toEqual([
+			{ name: "Revolução Pernambucana", date: new Date(2018, 2, 6), type: "state" },
+		]);
+	});
+
+	test("should keep the state optional entries to the ones a state norm declares: AM's 8 December and PE's 6 March of 2008 and 2009", () => {
 		const optionalStateEntries = Object.entries(STATE_HOLIDAYS).flatMap(([stateCode, entries]) =>
 			entries
 				.filter((entry) => entry.type === "optional")
@@ -1457,7 +1589,6 @@ describe("getHolidays", () => {
 		);
 
 		expect(optionalStateEntries).toEqual([
-			"AL Emancipação Política de Alagoas",
 			"AM Nossa Senhora da Conceição",
 			"PE Revolução Pernambucana",
 		]);
@@ -1528,12 +1659,16 @@ describe("getHolidays", () => {
 		});
 	});
 
-	test("should type AL's 16 September as a feriado estadual from 2024 on (Lei AL nº 9.358/2024) and as an optional day before it (Decreto AL nº 68.782/2019)", () => {
+	test("should type AL's 16 September as a feriado estadual both before Lei AL nº 9.358/2024, as the calendar decrees label it (Decreto AL nº 86.020/2022, for 2023), and after it", () => {
 		expect(getHolidays({ year: 2023, stateCode: "AL" })).toContainEqual({
 			name: "Emancipação Política de Alagoas",
 			date: new Date(2023, 8, 16),
-			type: "optional",
+			type: "state",
 		});
+		expect(isBusinessDay(new Date(2023, 8, 15, 12), { stateCode: "AL" })).toBe(true);
+		expect(
+			isBusinessDay(new Date(2021, 8, 16, 12), { stateCode: "AL", includeOptional: false }),
+		).toBe(false);
 
 		expect(getHolidays({ year: 2024, stateCode: "AL" })).toContainEqual({
 			name: "Emancipação Política de Alagoas",
@@ -1693,7 +1828,7 @@ describe("getHolidays", () => {
 		});
 	});
 
-	test("should keep both Santa Catarina holidays on their statutory date in a year they already fall on a weekend (11/08/2024 is a Sunday, 25/11/2029 a Sunday and 25/11/2028 a Saturday)", () => {
+	test("should keep both Santa Catarina holidays on their statutory date in a year they already fall on a Sunday (11/08/2024 and 25/11/2029 are Sundays)", () => {
 		expect(getHolidays({ year: 2024, stateCode: "SC" })).toContainEqual({
 			name: "Dia do Estado de Santa Catarina",
 			date: new Date(2024, 7, 11),
@@ -1704,11 +1839,22 @@ describe("getHolidays", () => {
 			date: new Date(2029, 10, 25),
 			type: "state",
 		});
-		expect(getHolidays({ year: 2028, stateCode: "SC" })).toContainEqual({
-			name: "Dia de Santa Catarina de Alexandria",
-			date: new Date(2028, 10, 25),
+	});
+
+	test("should move a Santa Catarina holiday falling on a Saturday to the Sunday, as Decreto SC nº 1.460/2018 did with 11/08/2018 (25/11/2028 is a Saturday too)", () => {
+		expect(getHolidays({ year: 2018, stateCode: "SC" })).toContainEqual({
+			name: "Dia do Estado de Santa Catarina",
+			date: new Date(2018, 7, 12),
 			type: "state",
 		});
+		expect(getHolidays({ year: 2028, stateCode: "SC" })).toContainEqual({
+			name: "Dia de Santa Catarina de Alexandria",
+			date: new Date(2028, 10, 26),
+			type: "state",
+		});
+		expect(
+			isBusinessDay(new Date(2018, 7, 11, 12), { stateCode: "SC", includeSaturday: true }),
+		).toBe(true);
 	});
 
 	test("should list no Santa Catarina 11 August before 2004, the year Lei SC nº 12.906/2004 made it a holiday (11/08/2003, a Monday, is an ordinary day)", () => {
@@ -1740,15 +1886,15 @@ describe("getHolidays", () => {
 		});
 	});
 
-	test("should keep the Santa Catarina 25 November holiday on its statutory weekday in 2004, the one year art. 3º of Lei SC nº 12.906/2004 left it without a transfer clause (25/11/2004 is a Thursday)", () => {
+	test("should keep moving the Santa Catarina 25 November holiday in 2004, since the clause Lei SC nº 11.213/1999 wrote into Lei SC nº 10.306/1996 stays in its ALESC compilation (25/11/2004 is a Thursday)", () => {
 		expect(getHolidays({ year: 2004, stateCode: "SC" })).toContainEqual({
 			name: "Dia de Santa Catarina de Alexandria",
-			date: new Date(2004, 10, 25),
+			date: new Date(2004, 10, 28),
 			type: "state",
 		});
 	});
 
-	test("should move the Santa Catarina 25 November holiday again from 2005 on, the year Lei SC nº 13.408/2005 reinstated the transfer (25/11/2005 is a Friday)", () => {
+	test("should keep moving the Santa Catarina 25 November holiday in 2005, under the clause Lei SC nº 13.408/2005 restated for both dates (25/11/2005 is a Friday)", () => {
 		expect(getHolidays({ year: 2005, stateCode: "SC" })).toContainEqual({
 			name: "Dia de Santa Catarina de Alexandria",
 			date: new Date(2005, 10, 27),

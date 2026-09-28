@@ -35,8 +35,8 @@ const SATURDAY = 6;
  *
  * `options.includeOptional` defaults to `true`: holidays whose `Holiday.type` is
  * `"optional"` (Carnaval Monday and Tuesday and Corpus Christi, the federal pontos facultativos
- * `getHolidays` lists, plus the state pontos facultativos its table sources: Alagoas' 16
- * September of 2020 to 2023, Amazonas' 8 December and Pernambuco's 6 March of 2008 and 2009) are
+ * `getHolidays` lists, plus the state pontos facultativos its table sources: Amazonas' 8 December
+ * and Pernambuco's 6 March of 2008 and 2009) are
  * treated as non-business days even though they are not
  * statutory holidays. Pass `false` to only treat statutory (`"national"` and `"state"`) holidays as
  * non-business days. The partial pontos facultativos of the federal calendar (the Quarta-feira de
@@ -77,8 +77,9 @@ const SATURDAY = 6;
  * `stateCode: "DF"`, `"MA"` or `"RJ"` it is typed `"state"` and still counts; Rio de Janeiro declares the Carnaval
  * Tuesday a feriado estadual (Lei RJ nº 5.243/2008, from 2009 on), so with `stateCode: "RJ"` it
  * still counts while the Monday does not; and Santa Catarina's two holidays
- * are observed on the following Sunday when they fall Monday to Friday (Lei SC nº 18.531/2022),
- * so 11 August 2025, a Monday, is a business day there.
+ * are observed on the following Sunday when they fall Monday to Saturday (Lei SC nº 18.531/2022;
+ * Decreto SC nº 1.460/2018 for a Saturday), so 11 August 2025, a Monday, is a business day there,
+ * and so is 11 August 2018, a Saturday, with `includeSaturday`.
  *
  * Only years from 1900 through 2099 are supported, the range `getHolidays` computes; a date
  * outside it returns `false` rather than silently treating every weekday as a business day.
