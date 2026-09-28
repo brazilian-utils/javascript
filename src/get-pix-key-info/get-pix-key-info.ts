@@ -38,7 +38,7 @@ const NORMALIZERS: Readonly<Record<PixKeyType, (trimmed: string) => string>> = {
  *   `isValidEmail` checks: the local part may carry any of ``.!#$'*+/=?^_`{|}~-``, dots included
  *   anywhere, and the domain may be a single label, so `"a{b}@example.com"` and `"a@localhost"`
  *   are e-mail keys. The `&` was taken out of the pattern in version 2.6.0 of the DICT API, so
- *   `"a&b@example.com"` is not a key (it was up to 2.4.0);
+ *   `"a&b@example.com"` is not a key;
  * - `phone`: E.164, `+55` followed by the DDD and the subscriber number, so at most 14
  *   characters. The manual registers a "número de telefone celular", so only mobile numbers
  *   are recognized; a landline is not a Pix key. Masked, bare and `+55` prefixed inputs are
