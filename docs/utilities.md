@@ -3615,7 +3615,7 @@ removeAccents(''); // ''
 
 Check if an inscrição estadual (state registration) is valid for a state. **Deprecated:** the positional form `isValidIe(stateCode, ie)` still works but is deprecated; use the object form `isValidIe({ value, stateCode })`.
 
-- Takes a single object (`IsValidIeParams`): `value` is the registration and `stateCode` the state it belongs to (a `StateCode`, case-insensitive).
+- Takes a single object (`IsValidIeParams`): `value` is the registration and `stateCode` the state it belongs to (a `StateCode`, case-insensitive, with surrounding whitespace ignored).
 - Some states have special cases, a prefix or format the SINTEGRA page does not print or a deliberate deviation from it (details and sources in the JSDoc in `src/is-valid-ie`):
   - GO: the prefixes 10, 11, 15 and 20 to 29, the union of sources that disagree: the norm (IN nº 946/09-GSF, art. 39, I, as worded by IN nº 1.535/22-GSE) gives 10, 20 and 11, the SINTEGRA page 10, 11 and 20 to 29, the 2012 roteiro de crítica 10, 11 and 15. The check digit follows the roteiro, as in 2.4.0: a remainder of 1 gives 1 in the range 10103105 to 10119997, and 11094402 takes either digit, special cases the SINTEGRA page (2022) does not have.
   - MT: 11 digits, or the 9 digits Portaria SEFAZ-MT nº 59/2025 (art. 8º, § 1º) prescribes, read as the 11 digit form padded with two zeros (no official text gives the check digit rule of the 9 digit form).
@@ -3637,6 +3637,7 @@ isValidIe({ value: '110042490114', stateCode: 'SP' }); // true
 isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true (produtor rural)
 isValidIe({ value: '0187634580933', stateCode: 'AC' }); // false
 isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
+isValidIe({ value: '109161793', stateCode: ' GO ' }); // true (surrounding whitespace ignored)
 isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefix 20)
 isValidIe({ value: '130000019', stateCode: 'MT' }); // true (9 digits)
 ```

@@ -967,6 +967,17 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "109161793", stateCode: "go" })).toBe(true);
 		});
 
+		test("should ignore whitespace around the state code, as the other utils that take a state do", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe({ value: "110042490114", stateCode: " sp " })).toBe(true);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe({ value: "109161793", stateCode: "\tGo\n" })).toBe(true);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe(" rj ", "625X45372")).toBe(true);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe({ value: "110042490114", stateCode: " " })).toBe(false);
+		});
+
 		test("should return false for missing arguments", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe({ value: "110042490114", stateCode: null })).toBe(false);

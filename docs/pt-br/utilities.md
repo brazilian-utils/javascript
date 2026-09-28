@@ -3615,7 +3615,7 @@ removeAccents(''); // ''
 
 Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posicional `isValidIe(stateCode, ie)` continua funcionando, mas está descontinuada; use a forma com objeto `isValidIe({ value, stateCode })`.
 
-- Recebe um único objeto (`IsValidIeParams`): `value` é a inscrição e `stateCode` o estado ao qual ela pertence (um `StateCode`, sem diferenciar maiúsculas de minúsculas).
+- Recebe um único objeto (`IsValidIeParams`): `value` é a inscrição e `stateCode` o estado ao qual ela pertence (um `StateCode`, sem diferenciar maiúsculas de minúsculas e ignorando espaços em volta).
 - Alguns estados têm casos especiais, um prefixo ou formato que a página do SINTEGRA não traz ou um desvio proposital dela (detalhes e fontes no JSDoc em `src/is-valid-ie`):
   - GO: os prefixos 10, 11, 15 e 20 a 29, a união de fontes que divergem: a norma (IN nº 946/09-GSF, art. 39, I, na redação da IN nº 1.535/22-GSE) traz 10, 20 e 11, a página do SINTEGRA 10, 11 e 20 a 29, o roteiro de crítica de 2012 10, 11 e 15. O dígito verificador segue o roteiro, como na 2.4.0: resto 1 dá 1 na faixa 10103105 a 10119997, e 11094402 aceita os dois dígitos, casos especiais que a página do SINTEGRA (2022) não tem.
   - MT: 11 dígitos, ou os 9 dígitos que a Portaria SEFAZ-MT nº 59/2025 (art. 8º, § 1º) prevê, lidos como a forma de 11 dígitos com dois zeros à esquerda (nenhum texto oficial traz a regra do dígito verificador da forma de 9 dígitos).
@@ -3637,6 +3637,7 @@ isValidIe({ value: '110042490114', stateCode: 'SP' }); // true
 isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true (produtor rural)
 isValidIe({ value: '0187634580933', stateCode: 'AC' }); // false
 isValidIe({ value: '109161793', stateCode: 'go' }); // true (não diferencia maiúsculas de minúsculas)
+isValidIe({ value: '109161793', stateCode: ' GO ' }); // true (espaços em volta são ignorados)
 isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefixo 20)
 isValidIe({ value: '130000019', stateCode: 'MT' }); // true (9 dígitos)
 ```
