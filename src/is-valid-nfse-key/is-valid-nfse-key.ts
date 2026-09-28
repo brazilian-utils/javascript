@@ -70,18 +70,12 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  * not an official rule: each character counts as its ASCII code minus 48, `A` as 17. For a key
  * of digits only it gives the same digit as before.
  *
- * The schema of the key itself is no guide either: in the bundle of 27/07/2026 `TSChaveNFSe`
- * is `[0-9]{6}([0-9A-Z]{14})[0-9]{30}`, letters at positions 7 to 20, while the Inscrição
- * Federal sits at 10 to 23 (as `TSIdNFSe` of the same file has it), so the letter window of the
- * key type is in the wrong place. The production bundle of 09/02/2026 still types the key
- * `[0-9]{50}`.
- *
  * @param {string} value - The access key value to be validated.
  * @returns {boolean} True if the access key is valid, false otherwise.
  *
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual
  * Sistema Nacional NFS-e, current technical documentation: `NFSe-ESQUEMAS_XSD-v1.01`
- * (`tiposSimples_v1.01.xsd`: `TSIdNFSe`, `TSChaveNFSe`) and `ANEXO_I-SEFIN_ADN-DPS_NFSe-SNNFSe`
+ * (`tiposSimples_v1.01.xsd`: `TSIdNFSe`) and `ANEXO_I-SEFIN_ADN-DPS_NFSe-SNNFSe`
  * v1.01 (field `NFSe/infNFSe/id`, rules E1263, E1280, E1284 and E0042).
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/manual-contribuintes-emissor-publico-api-emissao-decisao-administrativa-e-judicial.pdf
  * Manual de Contribuintes, Emissão por Decisão Administrativa ou Judicial, field `id`: "O dígito
@@ -91,9 +85,7 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  * os novos schemas XML atualizados para o CNPJ Alfanumérico". That bundle, `NFSe-ESQUEMAS_XSD`
  * v1.01-20260727, `tiposSimples_v1.01.xsd`: `TSIdNFSe` "NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}", `TSIdDPS`
  * "DPS[0-9]{7}(1[0-9]{14}|2[0-9A-Z]{14})[0-9]{20}" and `TSIdPedRegEvt`
- * "PRE[0-9]{8}(1[0-9]{14}|2[0-9A-Z]{14})[0-9]{33}". `TSChaveNFSe`,
- * "[0-9]{6}([0-9A-Z]{14})[0-9]{30}", misplaces the letter window (positions 7 to 20 instead of
- * the registration's 10 to 23) and is not followed.
+ * "PRE[0-9]{8}(1[0-9]{14}|2[0-9A-Z]{14})[0-9]{33}".
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/producao-restrita/esquemas-nfse-rtc-v1-01-20260727.zip
  * The schema bundle v1.01-20260727 itself, on the "Produção Restrita" page of the Portal NFS-e.
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/atualizacoes-e-implantacoes
