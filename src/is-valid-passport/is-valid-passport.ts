@@ -30,7 +30,6 @@ import { PASSPORT_REGEX } from "./constants";
  * Viagem) nor the IN nº 173-DG/PF/2020, as amended up to the IN nº 283/2024, defines the number,
  * and the FAQ lists no forbidden letter, so none is rejected.
  *
- * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e
  */
 export const isValidPassport = (passport: string | number): boolean => {

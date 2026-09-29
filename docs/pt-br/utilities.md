@@ -68,7 +68,7 @@ Gera um CPF válido aleatório.
 - `state` ignora maiúsculas/minúsculas e espaços nas pontas (`'sp'` é `'SP'`). Sem `state`, ou com um código desconhecido, um dígito de região fiscal aleatório é sorteado.
 
 ```javascript
-import { generateCpf } from '@brazilian-utils/brazilian-utils'
+import { generateCpf } from '@brazilian-utils/brazilian-utils';
 
 generateCpf();
 generateCpf('SP'); // o 9º dígito é 8, o código da região fiscal de SP
@@ -168,7 +168,7 @@ Gera um CNPJ válido aleatório.
 - Um bloco de ordem aleatório nunca é `0000`: os estabelecimentos de uma raiz são numerados a partir de `0001`, a matriz, então esse bloco nunca é atribuído.
 
 ```javascript
-import { generateCnpj } from '@brazilian-utils/brazilian-utils'
+import { generateCnpj } from '@brazilian-utils/brazilian-utils';
 
 generateCnpj();
 generateCnpj(2); // CNPJ alfanumérico, ex. 'Q0SLFMBD7VX439'
@@ -217,7 +217,7 @@ Fonte: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.
 Valida um CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)).
 
 - Aceita `string` ou `number`. Um CEP que começa com `0` precisa ser string, já que um número não preserva o zero à esquerda, e um número só é lido quando é um inteiro seguro não negativo.
-- Espaços, pontos, hifens e barras são ignorados. Qualquer outro caractere invalida o valor.
+- Espaços, pontos, hífens e barras são ignorados. Qualquer outro caractere invalida o valor.
 - `getAddressInfoByCep` e `formatCep` com `pad: true` são mais tolerantes com números: preenchem um número com zeros à esquerda até 8 dígitos (`1310100` vira `01310-100`), enquanto `isValidCep` e `getStateByCep` leem `1310100` como 7 dígitos e o rejeitam.
 
 ```javascript
@@ -1763,7 +1763,7 @@ Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 Retorna o estado brasileiro ao qual um CEP pertence, a partir das faixas de CEP que os Correios atribuem a cada UF (a "Faixa de CEP" de cada UF).
 
 - Funciona offline: nenhuma API de CEP é chamada, então a resposta diz qual estado é dono da faixa, não se o CEP está em uso.
-- Aceita o que o `isValidCep` aceita: 8 dígitos, como string ou número, ignorando espaços, pontos, hifens e barras. Um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado. `getAddressInfoByCep` e `formatCep` com `pad: true` preenchem números com zeros à esquerda (`1310100` vira `01310-100`).
+- Aceita o que o `isValidCep` aceita: 8 dígitos, como string ou número, ignorando espaços, pontos, hífens e barras. Um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado. `getAddressInfoByCep` e `formatCep` com `pad: true` preenchem números com zeros à esquerda (`1310100` vira `01310-100`).
 - Amazonas, Distrito Federal e Goiás têm duas faixas cada, e nenhuma faixa estadual cobre `00000-000` a `00999-999` nem `78900-000` a `78999-999`.
 - A faixa é o bloco que pertence ao estado, não uma garantia de que todo CEP dentro dela está em uso: `10000-000` está sem uso dentro da faixa de São Paulo e ainda assim responde São Paulo.
 - Retorna `null` para um CEP inválido ou fora de todas as faixas. Exporta o tipo `State`.
@@ -2299,7 +2299,7 @@ isValidPassport('AB-123.456'); // true (símbolos são ignorados)
 isValidPassport('12345678'); // false
 ```
 
-Fonte: [Polícia Federal](https://www.gov.br/pf/pt-br/assuntos/passaporte) e seu [FAQ](https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e).
+Fonte: [FAQ da Polícia Federal](https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e).
 
 ### formatPassport
 
@@ -3365,7 +3365,7 @@ Valida um código de CST (Código de Situação Tributária) para um tributo. In
 
 - **Opções** (`IsValidCstOptions`): `tax` escolhe a tabela. Omitido, ou fora desses quatro valores, todas as tabelas são aceitas; um `options` `null` ou que não seja objeto é lido como ausente.
 - Aceita uma string com os 2 dígitos de um código da Tabela B ou os 3 dígitos da forma do ICMS, ou um número. A forma do ICMS pode ter qualquer sequência de separadores (espaço, `.`, `-` ou `/`) depois do dígito de origem.
-- Um único dígito é completado até a forma de 3 dígitos do ICMS; um valor de 2 dígitos é um código da Tabela B e nunca é lido como origem mais um dígito (`'10'` é o código da Tabela B `10`), enquanto o número `7` é o código ICMS `007`.
+- Um único dígito é completado até a forma de 3 dígitos do ICMS; um valor de 2 dígitos é um código da Tabela B e nunca é lido como origem mais um dígito (`'10'` é o código da Tabela B `10`), enquanto o número `7` é lido como o código ICMS `007`, que não está na tabela, então dá `false`.
 
 ```javascript
 import { isValidCst } from '@brazilian-utils/brazilian-utils';

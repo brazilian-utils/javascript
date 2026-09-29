@@ -93,4 +93,4 @@ Sem build: salve como um arquivo `.html` e abra. Cada subpath é um módulo pró
 
 </div>
 
-A [introdução](pt-br/getting-started.md#bundle-size) lista todos os utilitários que embutem uma tabela e valem um subpath próprio.
+A [introdução](pt-br/getting-started.md#tamanho-do-bundle) lista todos os utilitários que embutem uma tabela e valem um subpath próprio.

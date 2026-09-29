@@ -18,7 +18,7 @@ const MODULUS = 11;
  * calculateCpfCheckDigit("1234567890"); // 9
  * ```
  *
- * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cpf
+ * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
  */
 export const calculateCpfCheckDigit = (base: string): number => {
 	let sum = 0;

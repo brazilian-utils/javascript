@@ -68,7 +68,7 @@ Generate a valid random CPF.
 - `state` ignores letter case and surrounding whitespace (`'sp'` is `'SP'`). Without `state`, or with an unknown code, a random região fiscal digit is drawn.
 
 ```javascript
-import { generateCpf } from '@brazilian-utils/brazilian-utils'
+import { generateCpf } from '@brazilian-utils/brazilian-utils';
 
 generateCpf();
 generateCpf('SP'); // the 9th digit is 8, the SP região fiscal code
@@ -168,7 +168,7 @@ Generate a valid random CNPJ.
 - A random ordem block is never `0000`: the establishments of a root are numbered from `0001`, the matriz, on, so that block is never assigned.
 
 ```javascript
-import { generateCnpj } from '@brazilian-utils/brazilian-utils'
+import { generateCnpj } from '@brazilian-utils/brazilian-utils';
 
 generateCnpj();
 generateCnpj(2); // alphanumeric CNPJ, e.g. 'Q0SLFMBD7VX439'
@@ -358,7 +358,6 @@ Check if a boleto ([brazilian payment method](https://en.wikipedia.org/wiki/Bole
 ```javascript
 import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
 
-isValidBoleto('00196758600001026560000001149718606852452211'); // true (cobrança bancária barcode)
 isValidBoleto('00190000090114971860168524522114675860000102656'); // true
 isValidBoleto('00196758600001026560000001149718606852452211'); // true (cobrança bancária barcode)
 isValidBoleto('846100000005246100291102005460339004695895061080'); // true (boleto de arrecadação)
@@ -2300,7 +2299,7 @@ isValidPassport('AB-123.456'); // true (symbols are ignored)
 isValidPassport('12345678'); // false
 ```
 
-Source: [Polícia Federal](https://www.gov.br/pf/pt-br/assuntos/passaporte) and its [FAQ](https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e).
+Source: [Polícia Federal FAQ](https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e).
 
 ### formatPassport
 
@@ -3366,7 +3365,7 @@ Check if a CST (Código de Situação Tributária) code is valid for a given tax
 
 - **Options** (`IsValidCstOptions`): `tax` picks the table. Omitted, or outside those four values, every table is accepted; a `null` or non-object `options` is read as none.
 - Accepts a string with the 2 digits of a Tabela B code or the 3 digits of the ICMS form, or a number. The ICMS form may have any run of separators (space, `.`, `-` or `/`) after the origin digit.
-- A single digit is padded to the 3-digit ICMS form; a 2-digit value is a Tabela B code and is never read as an origin plus a digit (`'10'` is the Tabela B code `10`), while the number `7` is the ICMS code `007`.
+- A single digit is padded to the 3-digit ICMS form; a 2-digit value is a Tabela B code and is never read as an origin plus a digit (`'10'` is the Tabela B code `10`), while the number `7` is read as the ICMS code `007`, which is not in the table, so it is `false`.
 
 ```javascript
 import { isValidCst } from '@brazilian-utils/brazilian-utils';

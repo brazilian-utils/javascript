@@ -732,10 +732,6 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
  * The Secretaria da Economia's roteiro de crítica (20/08/2012): "onde AB pode ser igual a 10 ou
  * 11 ou 15", the only source of the prefix 15 and of the special ranges.
- * @see Official: https://goias.gov.br/economia/contribuintes-goianos-passam-a-ter-novo-numero-de-inscricao-estadual/
- * Secretaria da Economia notice (20/01/2023): company (Pessoa Jurídica) registrations made from
- * 13/01/2023 start with 20, "a faixa de numeração iniciada com o dígito 10 se esgotou"; those of
- * Pessoas Físicas still start with 11.
  * @see Based on: https://tdn.totvs.com/pages/viewpage.action?pageId=566472384
  * TOTVS release note DFWKFOUNDATION-4046: DF registrations may start with 07 or 08, the numbers
  * starting with 07 having run out at 07.999.999, and per the DF tax authority the check digit
