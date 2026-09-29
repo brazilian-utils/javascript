@@ -74,9 +74,15 @@ function moveToNextSundayUnlessSunday(date: Date): Date {
 	return observed;
 }
 
+/**
+ * The first Sunday of a month. Sunday is weekday 0, so the days from the 1st to the first Sunday
+ * are 7 minus its weekday, or none when the 1st is already a Sunday.
+ *
+ * @param {number} year - The year.
+ * @param {number} month - The month, 1 to 12.
+ * @returns {Date} The first Sunday, at local midnight.
+ */
 function calculateFirstSundayOfMonth(year: number, month: number): Date {
-	// Sunday is weekday 0, so the days from the 1st to the first Sunday are 7 minus its weekday,
-	// or none when the 1st is already a Sunday.
 	const firstWeekday = new Date(year, month - 1, 1).getDay();
 
 	return new Date(year, month - 1, 1 + ((DAYS_IN_WEEK - firstWeekday) % DAYS_IN_WEEK));
