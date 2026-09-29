@@ -896,7 +896,8 @@ Source: [ITU-T E.164](https://www.itu.int/rec/T-REC-E.164), [Resolução Anatel 
 
 Remove phone formatting, keep only digits, and cap the result to 11 digits.
 
-- A Brazilian country code (`+55`, `0055` or a bare `55`) is stripped first, but only when 10 or 11 digits are left (DDD plus subscriber number), so area code 55 is not mistaken for it.
+- An explicit country code (`+55` or `0055`) is always stripped first, even while the number is still being typed (`+55 11 9` gives `119`; up to 2.4.0 it gave `55119`). A bare `55` is stripped only when 10 or 11 digits are left (DDD plus subscriber number), so area code 55 is not mistaken for it.
+- Accepts a string or a non-negative safe integer; any other number (negative, fractional, not finite or unsafe) gives an empty string.
 
 ```javascript
 import { parsePhone } from '@brazilian-utils/brazilian-utils';
@@ -904,6 +905,7 @@ import { parsePhone } from '@brazilian-utils/brazilian-utils';
 parsePhone('(11) 90000-0000'); // 11900000000
 parsePhone('+55 (11) 98765-4321'); // 11987654321
 parsePhone('5511987654321'); // 11987654321
+parsePhone('+55 11 9'); // 119 (explicit country code, number still short)
 parsePhone('55987654321'); // 55987654321 (area code 55, not mistaken for the +55 country code)
 ```
 

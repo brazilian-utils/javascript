@@ -896,7 +896,8 @@ Fonte: [ITU-T E.164](https://www.itu.int/rec/T-REC-E.164), [Resolução Anatel n
 
 Remove a formatação do telefone, mantém apenas os dígitos e limita o resultado a 11 dígitos.
 
-- Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é removido antes, mas só quando sobram 10 ou 11 dígitos (DDD mais número assinante), então o DDD 55 não é confundido com ele.
+- Um código de país explícito (`+55` ou `0055`) é sempre removido antes, mesmo com o número ainda sendo digitado (`+55 11 9` resulta em `119`; até a 2.4.0 resultava em `55119`). Um `55` isolado só é removido quando sobram 10 ou 11 dígitos (DDD mais número assinante), então o DDD 55 não é confundido com ele.
+- Aceita string ou número inteiro seguro não negativo; qualquer outro número (negativo, fracionário, não finito ou inseguro) resulta em string vazia.
 
 ```javascript
 import { parsePhone } from '@brazilian-utils/brazilian-utils';
@@ -904,6 +905,7 @@ import { parsePhone } from '@brazilian-utils/brazilian-utils';
 parsePhone('(11) 90000-0000'); // 11900000000
 parsePhone('+55 (11) 98765-4321'); // 11987654321
 parsePhone('5511987654321'); // 11987654321
+parsePhone('+55 11 9'); // 119 (código de país explícito, número ainda curto)
 parsePhone('55987654321'); // 55987654321 (DDD 55, não confundido com o código de país +55)
 ```
 
