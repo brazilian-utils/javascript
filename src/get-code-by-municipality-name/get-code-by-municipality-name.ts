@@ -2,8 +2,9 @@ import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
 import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
-import { readMunicipalityCodes } from "../_internals/read-municipality-codes/read-municipality-codes";
-import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
+import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
+
+let codesByName: Map<string, Map<string, string>> | undefined;
 
 /** The `getCodeByMunicipalityName` query: a municipality name and the code of its state. */
 export type GetCodeByMunicipalityNameParams = {
@@ -54,9 +55,24 @@ export const getCodeByMunicipalityName = (
 	if (!hasOwnKey(MUNICIPALITY_NAMES, normalizedStateCode)) return null;
 
 	const normalizedName = normalizeMunicipalityName(params.municipalityName);
-	const index = unpackTexts(MUNICIPALITY_NAMES[normalizedStateCode]).findIndex(
-		(name) => normalizeMunicipalityName(name) === normalizedName,
-	);
 
-	return index === -1 ? null : readMunicipalityCodes(normalizedStateCode)[index];
+	codesByName ??= new Map();
+
+	let index = codesByName.get(normalizedStateCode);
+
+	if (!index) {
+		index = new Map();
+
+		const municipalities = readMunicipalities(normalizedStateCode);
+
+		for (let position = municipalities.length - 1; position >= 0; position--) {
+			const [name, code] = municipalities[position];
+
+			index.set(normalizeMunicipalityName(name), code);
+		}
+
+		codesByName.set(normalizedStateCode, index);
+	}
+
+	return index.get(normalizedName) ?? null;
 };

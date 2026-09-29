@@ -21,4 +21,5 @@ export type { Bank } from "../_internals/constants/banks";
  * @see Based on: https://brasilapi.com.br/api/banks/v1
  * Fallback source used by the dataset generator (`scripts/banks.ts`) when the Bacen CSV request fails.
  */
-export const getBanks = (): Bank[] => readBanks().map((bank) => Object.assign({}, bank));
+export const getBanks = (): Bank[] =>
+	readBanks().map(({ code, ispb, name }) => ({ code, ispb, name }));

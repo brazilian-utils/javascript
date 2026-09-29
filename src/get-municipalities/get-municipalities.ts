@@ -9,6 +9,8 @@ import { readMunicipalities } from "../_internals/read-municipalities/read-munic
 export type { Municipality } from "../_internals/constants/municipalities";
 export type { StateCode } from "../_internals/constants/states";
 
+let sortedMunicipalities: Municipality[] | undefined;
+
 const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
 	readMunicipalities(stateCode).map(([name, code]) => ({ code, name, stateCode }));
 
@@ -50,9 +52,15 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  */
 export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 	if (stateCode === undefined) {
-		return STATE_CODES.flatMap((code) => buildMunicipalities(code)).sort((a, b) =>
+		sortedMunicipalities ??= STATE_CODES.flatMap((code) => buildMunicipalities(code)).sort((a, b) =>
 			a.name.localeCompare(b.name, "pt-BR"),
 		);
+
+		return sortedMunicipalities.map(({ code, name, stateCode: state }) => ({
+			code,
+			name,
+			stateCode: state,
+		}));
 	}
 
 	const code = normalizeStateCode(stateCode);

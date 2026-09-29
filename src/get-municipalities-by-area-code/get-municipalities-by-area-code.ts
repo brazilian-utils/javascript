@@ -1,9 +1,14 @@
 import { type Municipality } from "../_internals/constants/municipalities";
+import { type StateCode } from "../_internals/constants/states";
 import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
 import { readMunicipalityAreaCode } from "../_internals/read-municipality-area-code/read-municipality-area-code";
 import { getAreaCodeInfo } from "../get-area-code-info/get-area-code-info";
 
 export type { Municipality } from "../_internals/constants/municipalities";
+
+let municipalitiesByAreaCode:
+	| Map<number, [name: string, code: string, stateCode: StateCode][]>
+	| undefined;
 
 /**
  * Lists the Brazilian municipalities that dial a given DDD (area code, the Código Nacional of the
@@ -38,9 +43,18 @@ export const getMunicipalitiesByAreaCode = (areaCode: string | number): Municipa
 
 	if (info === null) return [];
 
-	return info.stateCodes.flatMap((stateCode) =>
-		readMunicipalities(stateCode)
-			.filter(([, code]) => readMunicipalityAreaCode(stateCode, code) === info.areaCode)
-			.map(([name, code]) => ({ code, name, stateCode })),
-	);
+	municipalitiesByAreaCode ??= new Map();
+
+	let entries = municipalitiesByAreaCode.get(info.areaCode);
+
+	if (!entries) {
+		entries = info.stateCodes.flatMap((stateCode) =>
+			readMunicipalities(stateCode)
+				.filter(([, code]) => readMunicipalityAreaCode(stateCode, code) === info.areaCode)
+				.map(([name, code]): [string, string, StateCode] => [name, code, stateCode]),
+		);
+		municipalitiesByAreaCode.set(info.areaCode, entries);
+	}
+
+	return entries.map(([name, code, stateCode]) => ({ code, name, stateCode }));
 };

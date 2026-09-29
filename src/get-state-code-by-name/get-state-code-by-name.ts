@@ -6,6 +6,8 @@ export type { StateCode } from "../_internals/constants/states";
 const normalizeName = (value: string): string =>
 	removeAccents(value).replaceAll(/\s+/g, " ").trim().toLowerCase();
 
+let codesByName: Map<string, StateCode> | undefined;
+
 /**
  * Retrieves the two-letter code (sigla) of a Brazilian state given its full name.
  *
@@ -34,9 +36,13 @@ const normalizeName = (value: string): string =>
  * ```
  */
 export const getStateCodeByName = (name: string): StateCode | null => {
-	const normalized = normalizeName(name);
+	if (!codesByName) {
+		codesByName = new Map();
 
-	const state = DATA.find((entry) => normalizeName(entry.name) === normalized);
+		for (let position = DATA.length - 1; position >= 0; position--) {
+			codesByName.set(normalizeName(DATA[position].name), DATA[position].code);
+		}
+	}
 
-	return state ? state.code : null;
+	return codesByName.get(normalizeName(name)) ?? null;
 };

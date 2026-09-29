@@ -6,6 +6,23 @@ import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
 
 const CATEGORY_LENGTH = 3;
 
+let categoryOffsets: Record<string, number> | undefined;
+
+const readCategoryOffsets = (): Record<string, number> => {
+	if (!categoryOffsets) {
+		categoryOffsets = {};
+
+		let offset = 0;
+
+		for (const [category, subcategories] of Object.entries(readCid10Subcategories())) {
+			categoryOffsets[category] = offset;
+			offset += 1 + subcategories.length;
+		}
+	}
+
+	return categoryOffsets;
+};
+
 /**
  * The index of a listed code in `CID10_DESCRIPTIONS`, which holds every category of
  * `CID10_SUBCATEGORIES`, in its order, followed by its subcategories: the categories before the
@@ -20,9 +37,7 @@ const findDescriptionIndex = (code: string): number => {
 	const category = code.slice(0, CATEGORY_LENGTH);
 	const subcategory = code.slice(CATEGORY_LENGTH);
 	const subcategories = readCid10Subcategories();
-	const categories = Object.keys(subcategories);
-	const preceding = categories.slice(0, categories.indexOf(category));
-	const offset = preceding.reduce((index, listed) => index + 1 + subcategories[listed].length, 0);
+	const offset = readCategoryOffsets()[category];
 
 	return offset + subcategories[category].indexOf(subcategory) + subcategory.length;
 };
