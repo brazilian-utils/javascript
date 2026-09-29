@@ -172,6 +172,7 @@
 		"./parse-isbn": "./src/parse-isbn/parse-isbn.ts",
 		"./parse-legal-nature": "./src/parse-legal-nature/parse-legal-nature.ts",
 		"./parse-license-plate": "./src/parse-license-plate/parse-license-plate.ts",
+		"./parse-nbs": "./src/parse-nbs/parse-nbs.ts",
 		"./parse-ncm": "./src/parse-ncm/parse-ncm.ts",
 		"./parse-nfe-key": "./src/parse-nfe-key/parse-nfe-key.ts",
 		"./parse-nfse-key": "./src/parse-nfse-key/parse-nfse-key.ts",

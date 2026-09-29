@@ -3139,6 +3139,18 @@ formatNbs('abc101011100'); // 1.0101.11.00 (only the digits are read)
 formatNbs(-101011100); // '' (not a non-negative safe integer)
 ```
 
+### parseNbs
+
+Remove NBS (Nomenclatura Brasileira de Serviços) formatting, keep only digits, and cap the result to the 9 digits of a complete code.
+
+- Same rules as `parseCbo`: nothing is left padded here.
+
+```javascript
+import { parseNbs } from '@brazilian-utils/brazilian-utils';
+
+parseNbs('1.0101.11.00'); // '101011100'
+```
+
 ### getNbs
 
 Look an NBS (Nomenclatura Brasileira de Serviços) code up and get its official description. The result is an `Nbs` record: `{ code, description }`.

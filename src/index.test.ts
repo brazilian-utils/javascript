@@ -315,6 +315,7 @@ const PUBLIC = [
 	"parseIban",
 	"parseIsbn",
 	"parseLegalNature",
+	"parseNbs",
 	"parseLicensePlate",
 	"parseNcm",
 	"parseNfeKey",

@@ -294,6 +294,7 @@ export { type ParseCurrencyOptions, parseCurrency } from "./parse-currency/parse
 export { parseIban } from "./parse-iban/parse-iban";
 export { parseIsbn } from "./parse-isbn/parse-isbn";
 export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
+export { parseNbs } from "./parse-nbs/parse-nbs";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
 export { parseNcm } from "./parse-ncm/parse-ncm";
 export { parseNfeKey } from "./parse-nfe-key/parse-nfe-key";

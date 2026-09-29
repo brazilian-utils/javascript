@@ -3138,6 +3138,18 @@ formatNbs('abc101011100'); // 1.0101.11.00 (só os dígitos são lidos)
 formatNbs(-101011100); // '' (não é um inteiro seguro não negativo)
 ```
 
+### parseNbs
+
+Remove a formatação do NBS (Nomenclatura Brasileira de Serviços), mantém apenas os dígitos e limita o resultado aos 9 dígitos de um código completo.
+
+- Mesmas regras de `parseCbo`: nada é completado com zeros à esquerda aqui.
+
+```javascript
+import { parseNbs } from '@brazilian-utils/brazilian-utils';
+
+parseNbs('1.0101.11.00'); // '101011100'
+```
+
 ### getNbs
 
 Consulta um código NBS (Nomenclatura Brasileira de Serviços) e retorna a sua descrição oficial. O resultado é um registro `Nbs`: `{ code, description }`.
