@@ -63,12 +63,7 @@ export const generateLicensePlate = (
 
 	for (let i = 0; i < safeFormat.length; i++) {
 		if (safeFormat.charAt(i) === "L") {
-			plate += randomLetter(
-				// Stryker disable next-line ConditionalExpression: in `LLLNNNN` the character at MERCOSUL_LETTER_INDEX is a digit, so this branch never runs for it and the format check can never change which alphabet is used.
-				safeFormat === DEFAULT_FORMAT && i === MERCOSUL_LETTER_INDEX
-					? NEW_MERCOSUL_LETTERS
-					: LETTERS,
-			);
+			plate += randomLetter(i === MERCOSUL_LETTER_INDEX ? NEW_MERCOSUL_LETTERS : LETTERS);
 		} else {
 			plate += randomDigit();
 		}

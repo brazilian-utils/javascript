@@ -11,14 +11,8 @@ export type FormatCurrencyOptions = {
 
 let formatters: Map<string, Intl.NumberFormat> | undefined;
 
-const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => {
-	const key = `${symbol}|${precision}`;
-	const cached = formatters?.get(key);
-
-	// Stryker disable next-line ConditionalExpression: this is a performance cache; a freshly constructed Intl.NumberFormat with the same options formats identically to a cached one, so skipping the cache never changes the output
-	if (cached) return cached;
-
-	const formatter = new Intl.NumberFormat("pt-BR", {
+const buildFormatter = (symbol: boolean, precision: number): Intl.NumberFormat =>
+	new Intl.NumberFormat("pt-BR", {
 		style: symbol ? "currency" : "decimal",
 		currency: "BRL",
 		currencyDisplay: symbol ? "symbol" : undefined,
@@ -26,12 +20,26 @@ const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => 
 		minimumFractionDigits: precision,
 	});
 
-	// Stryker disable next-line CallExpression: this is a performance cache; not populating it only means the next call rebuilds an equivalent formatter, which formats identically
-	formatters ??= new Map();
+const storeFormatter = (
+	cache: Map<string, Intl.NumberFormat>,
+	key: string,
+	symbol: boolean,
+	precision: number,
+): Intl.NumberFormat => {
+	const formatter = buildFormatter(symbol, precision);
+
 	// Stryker disable next-line CallExpression: this is a performance cache; not storing the formatter only means the next call builds an equivalent one, which formats identically.
-	formatters.set(key, formatter);
+	cache.set(key, formatter);
 
 	return formatter;
+};
+
+const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => {
+	formatters ??= new Map();
+
+	const key = `${symbol}|${precision}`;
+
+	return formatters.get(key) ?? storeFormatter(formatters, key, symbol, precision);
 };
 
 const toNumber = (value: unknown, precision: number): number => {
