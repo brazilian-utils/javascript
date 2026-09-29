@@ -121,12 +121,14 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      # Chromium under the webdriverio provider sometimes loses a test iframe: the run either fails
-      # at once with "Cannot connect to the iframe" / "Failed to fetch dynamically imported module",
-      # or prints nothing more until it is killed. A whole run takes 1 to 3 minutes, so an attempt
-      # that times out, or fails with one of those two errors, is run again, up to three attempts.
-      # The iframes are lost when many test files load at once, so the retries run one file at a
-      # time. Any other failure, including a failing assertion, fails the step at once.
+      # Chromium under the webdriverio provider loses a test iframe when many test files load at
+      # once: the run either fails at once with "Cannot connect to the iframe" / "Failed to fetch
+      # dynamically imported module", or prints nothing more until it is killed. With test files in
+      # parallel that happened on most Chrome and Edge runs, which then sat silent until the timeout
+      # before retrying; one file at a time they finish in about a minute, faster than Firefox in
+      # parallel. So Chrome and Edge run one file at a time from the start. An attempt that still
+      # times out, or fails with one of those two errors, is run again one file at a time, up to
+      # three attempts. Any other failure, including a failing assertion, fails the step at once.
       - name: Run tests in ${{ matrix.browser }}
         env:
           BROWSER: ${{ matrix.browser }}
@@ -140,13 +142,18 @@ jobs:
             [ "$1" -eq 124 ] || grep -qE "Cannot connect to the iframe|Failed to fetch dynamically imported module" browser-tests.log
           }
 
-          attempt 300 && exit 0
+          first_attempt=()
+          case "$BROWSER" in
+            chrome | edge) first_attempt=(--no-file-parallelism) ;;
+          esac
+
+          attempt 240 "${first_attempt[@]}" && exit 0
           status=$?
 
           for retry in 1 2; do
             lost_iframe "$status" || exit "$status"
             echo "::warning::The $BROWSER test run lost a test iframe (exit $status); retry $retry of 2, one file at a time."
-            attempt 420 --no-file-parallelism && exit 0
+            attempt 300 --no-file-parallelism && exit 0
             status=$?
           done
 
