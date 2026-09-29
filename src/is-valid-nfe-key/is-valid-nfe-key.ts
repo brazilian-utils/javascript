@@ -141,7 +141,7 @@ export const isValidNfeKey = (value: string): boolean => {
 
 	if (!FORMAT_REGEX.test(body)) return false;
 
-	const key = sanitizeToAlphanumeric(body).toUpperCase();
+	const key = sanitizeToAlphanumeric(body);
 
 	if (!NFE_KEY_REGEX.test(key)) return false;
 
