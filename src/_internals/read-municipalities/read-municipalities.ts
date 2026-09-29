@@ -1,6 +1,7 @@
 import { MUNICIPALITY_NAMES } from "../constants/municipality-names";
 import { type StateCode } from "../constants/states";
 import { readMunicipalityCodes } from "../read-municipality-codes/read-municipality-codes";
+import { unpackTexts } from "../unpack-texts/unpack-texts";
 
 const cache: Partial<Record<StateCode, readonly (readonly [string, string])[]>> = {};
 
@@ -26,9 +27,9 @@ export const readMunicipalities = (
 	if (cached !== undefined) return cached;
 
 	const codes = readMunicipalityCodes(stateCode);
-	const municipalities = MUNICIPALITY_NAMES[stateCode]
-		.split("|")
-		.map((name, index): readonly [string, string] => [name, codes[index]]);
+	const municipalities = unpackTexts(MUNICIPALITY_NAMES[stateCode]).map(
+		(name, index): readonly [string, string] => [name, codes[index]],
+	);
 
 	cache[stateCode] = municipalities;
 

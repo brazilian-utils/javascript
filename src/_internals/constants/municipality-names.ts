@@ -2,7 +2,8 @@ import { type StateCode } from "./states";
 
 /**
  * The name of every Brazilian municipality, published by the IBGE, for each state: the names
- * joined by `|`, sorted with `localeCompare` in the "pt-BR" locale. The code of the n-th name
+ * packed by `packTexts` (scripts/lookup-table.ts), which `unpackTexts` reads, sorted with
+ * `localeCompare` in the "pt-BR" locale. The code of the n-th name
  * is the n-th of `MUNICIPALITY_CODES` (`municipality-codes.ts`), a module of its own so that
  * reading the codes does not bundle the names.
  *
@@ -11,5575 +12,5575 @@ import { type StateCode } from "./states";
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
  */
 export const MUNICIPALITY_NAMES: Record<StateCode, string> = {
-	AC: "Acrelândia|\
-Assis Brasil|\
-Brasiléia|\
-Bujari|\
-Capixaba|\
-Cruzeiro do Sul|\
-Epitaciolândia|\
-Feijó|\
-Jordão|\
-Mâncio Lima|\
-Manoel Urbano|\
-Marechal Thaumaturgo|\
-Plácido de Castro|\
-Porto Acre|\
-Porto Walter|\
-Rio Branco|\
-Rodrigues Alves|\
-Santa Rosa do Purus|\
-Sena Madureira|\
-Senador Guiomard|\
-Tarauacá|\
-Xapuri",
-	AL: "Água Branca|\
-Anadia|\
-Arapiraca|\
-Atalaia|\
-Barra de Santo Antônio|\
-Barra de São Miguel|\
-Batalha|\
-Belém|\
-Belo Monte|\
-Boca da Mata|\
-Branquinha|\
-Cacimbinhas|\
-Cajueiro|\
-Campestre|\
-Campo Alegre|\
-Campo Grande|\
-Canapi|\
-Capela|\
-Carneiros|\
-Chã Preta|\
-Coité do Nóia|\
-Colônia Leopoldina|\
-Coqueiro Seco|\
-Coruripe|\
-Craíbas|\
-Delmiro Gouveia|\
-Dois Riachos|\
-Estrela de Alagoas|\
-Feira Grande|\
-Feliz Deserto|\
-Flexeiras|\
-Girau do Ponciano|\
-Ibateguara|\
-Igaci|\
-Igreja Nova|\
-Inhapi|\
-Jacaré dos Homens|\
-Jacuípe|\
-Japaratinga|\
-Jaramataia|\
-Jequiá da Praia|\
-Joaquim Gomes|\
-Jundiá|\
-Junqueiro|\
-Lagoa da Canoa|\
-Limoeiro de Anadia|\
-Maceió|\
-Major Isidoro|\
-Mar Vermelho|\
-Maragogi|\
-Maravilha|\
-Marechal Deodoro|\
-Maribondo|\
-Mata Grande|\
-Matriz de Camaragibe|\
-Messias|\
-Minador do Negrão|\
-Monteirópolis|\
-Murici|\
-Novo Lino|\
-Olho d'Água das Flores|\
-Olho d'Água do Casado|\
-Olho d'Água Grande|\
-Olivença|\
-Ouro Branco|\
-Palestina|\
-Palmeira dos Índios|\
-Pão de Açúcar|\
-Pariconha|\
-Paripueira|\
-Passo de Camaragibe|\
-Paulo Jacinto|\
-Penedo|\
-Piaçabuçu|\
-Pilar|\
-Pindoba|\
-Piranhas|\
-Poço das Trincheiras|\
-Porto Calvo|\
-Porto de Pedras|\
-Porto Real do Colégio|\
-Quebrangulo|\
-Rio Largo|\
-Roteiro|\
-Santa Luzia do Norte|\
-Santana do Ipanema|\
-Santana do Mundaú|\
-São Brás|\
-São José da Laje|\
-São José da Tapera|\
-São Luís do Quitunde|\
-São Miguel dos Campos|\
-São Miguel dos Milagres|\
-São Sebastião|\
-Satuba|\
-Senador Rui Palmeira|\
-Tanque d'Arca|\
-Taquarana|\
-Teotônio Vilela|\
-Traipu|\
-União dos Palmares|\
-Viçosa",
-	AM: "Alvarães|\
-Amaturá|\
-Anamã|\
-Anori|\
-Apuí|\
-Atalaia do Norte|\
-Autazes|\
-Barcelos|\
-Barreirinha|\
-Benjamin Constant|\
-Beruri|\
-Boa Vista do Ramos|\
-Boca do Acre|\
-Borba|\
-Caapiranga|\
-Canutama|\
-Carauari|\
-Careiro|\
-Careiro da Várzea|\
-Coari|\
-Codajás|\
-Eirunepé|\
-Envira|\
-Fonte Boa|\
-Guajará|\
-Humaitá|\
-Ipixuna|\
-Iranduba|\
-Itacoatiara|\
-Itamarati|\
-Itapiranga|\
-Japurá|\
-Juruá|\
-Jutaí|\
-Lábrea|\
-Manacapuru|\
-Manaquiri|\
-Manaus|\
-Manicoré|\
-Maraã|\
-Maués|\
-Nhamundá|\
-Nova Olinda do Norte|\
-Novo Airão|\
-Novo Aripuanã|\
-Parintins|\
-Pauini|\
-Presidente Figueiredo|\
-Rio Preto da Eva|\
-Santa Isabel do Rio Negro|\
-Santo Antônio do Içá|\
-São Gabriel da Cachoeira|\
-São Paulo de Olivença|\
-São Sebastião do Uatumã|\
-Silves|\
-Tabatinga|\
-Tapauá|\
-Tefé|\
-Tonantins|\
-Uarini|\
-Urucará|\
-Urucurituba",
-	AP: "Amapá|\
-Calçoene|\
-Cutias|\
-Ferreira Gomes|\
-Itaubal|\
-Laranjal do Jari|\
-Macapá|\
-Mazagão|\
-Oiapoque|\
-Pedra Branca do Amapari|\
-Porto Grande|\
-Pracuúba|\
-Santana|\
-Serra do Navio|\
-Tartarugalzinho|\
-Vitória do Jari",
-	BA: "Abaíra|\
-Abaré|\
-Acajutiba|\
-Adustina|\
-Água Fria|\
-Aiquara|\
-Alagoinhas|\
-Alcobaça|\
-Almadina|\
-Amargosa|\
-Amélia Rodrigues|\
-América Dourada|\
-Anagé|\
-Andaraí|\
-Andorinha|\
-Angical|\
-Anguera|\
-Antas|\
-Antônio Cardoso|\
-Antônio Gonçalves|\
-Aporá|\
-Apuarema|\
-Araçás|\
-Aracatu|\
-Araci|\
-Aramari|\
-Arataca|\
-Aratuípe|\
-Aurelino Leal|\
-Baianópolis|\
-Baixa Grande|\
-Banzaê|\
-Barra|\
-Barra da Estiva|\
-Barra do Choça|\
-Barra do Mendes|\
-Barra do Rocha|\
-Barreiras|\
-Barro Alto|\
-Barro Preto|\
-Barrocas|\
-Belmonte|\
-Belo Campo|\
-Biritinga|\
-Boa Nova|\
-Boa Vista do Tupim|\
-Bom Jesus da Lapa|\
-Bom Jesus da Serra|\
-Boninal|\
-Bonito|\
-Boquira|\
-Botuporã|\
-Brejões|\
-Brejolândia|\
-Brotas de Macaúbas|\
-Brumado|\
-Buerarema|\
-Buritirama|\
-Caatiba|\
-Cabaceiras do Paraguaçu|\
-Cachoeira|\
-Caculé|\
-Caém|\
-Caetanos|\
-Caetité|\
-Cafarnaum|\
-Cairu|\
-Caldeirão Grande|\
-Camacan|\
-Camaçari|\
-Camamu|\
-Campo Alegre de Lourdes|\
-Campo Formoso|\
-Canápolis|\
-Canarana|\
-Canavieiras|\
-Candeal|\
-Candeias|\
-Candiba|\
-Cândido Sales|\
-Cansanção|\
-Canudos|\
-Capela do Alto Alegre|\
-Capim Grosso|\
-Caraíbas|\
-Caravelas|\
-Cardeal da Silva|\
-Carinhanha|\
-Casa Nova|\
-Castro Alves|\
-Catolândia|\
-Catu|\
-Caturama|\
-Central|\
-Chorrochó|\
-Cícero Dantas|\
-Cipó|\
-Coaraci|\
-Cocos|\
-Conceição da Feira|\
-Conceição do Almeida|\
-Conceição do Coité|\
-Conceição do Jacuípe|\
-Conde|\
-Condeúba|\
-Contendas do Sincorá|\
-Coração de Maria|\
-Cordeiros|\
-Coribe|\
-Coronel João Sá|\
-Correntina|\
-Cotegipe|\
-Cravolândia|\
-Crisópolis|\
-Cristópolis|\
-Cruz das Almas|\
-Curaçá|\
-Dário Meira|\
-Dias d'Ávila|\
-Dom Basílio|\
-Dom Macedo Costa|\
-Elísio Medrado|\
-Encruzilhada|\
-Entre Rios|\
-Érico Cardoso|\
-Esplanada|\
-Euclides da Cunha|\
-Eunápolis|\
-Fátima|\
-Feira da Mata|\
-Feira de Santana|\
-Filadélfia|\
-Firmino Alves|\
-Floresta Azul|\
-Formosa do Rio Preto|\
-Gandu|\
-Gavião|\
-Gentio do Ouro|\
-Glória|\
-Gongogi|\
-Governador Mangabeira|\
-Guajeru|\
-Guanambi|\
-Guaratinga|\
-Heliópolis|\
-Iaçu|\
-Ibiassucê|\
-Ibicaraí|\
-Ibicoara|\
-Ibicuí|\
-Ibipeba|\
-Ibipitanga|\
-Ibiquera|\
-Ibirapitanga|\
-Ibirapuã|\
-Ibirataia|\
-Ibitiara|\
-Ibititá|\
-Ibotirama|\
-Ichu|\
-Igaporã|\
-Igrapiúna|\
-Iguaí|\
-Ilhéus|\
-Inhambupe|\
-Ipecaetá|\
-Ipiaú|\
-Ipirá|\
-Ipupiara|\
-Irajuba|\
-Iramaia|\
-Iraquara|\
-Irará|\
-Irecê|\
-Itabela|\
-Itaberaba|\
-Itabuna|\
-Itacaré|\
-Itaeté|\
-Itagi|\
-Itagibá|\
-Itagimirim|\
-Itaguaçu da Bahia|\
-Itaju do Colônia|\
-Itajuípe|\
-Itamaraju|\
-Itamari|\
-Itambé|\
-Itanagra|\
-Itanhém|\
-Itaparica|\
-Itapé|\
-Itapebi|\
-Itapetinga|\
-Itapicuru|\
-Itapitanga|\
-Itaquara|\
-Itarantim|\
-Itatim|\
-Itiruçu|\
-Itiúba|\
-Itororó|\
-Ituaçu|\
-Ituberá|\
-Iuiu|\
-Jaborandi|\
-Jacaraci|\
-Jacobina|\
-Jaguaquara|\
-Jaguarari|\
-Jaguaripe|\
-Jandaíra|\
-Jequié|\
-Jeremoabo|\
-Jiquiriçá|\
-Jitaúna|\
-João Dourado|\
-Juazeiro|\
-Jucuruçu|\
-Jussara|\
-Jussari|\
-Jussiape|\
-Lafaiete Coutinho|\
-Lagoa Real|\
-Laje|\
-Lajedão|\
-Lajedinho|\
-Lajedo do Tabocal|\
-Lamarão|\
-Lapão|\
-Lauro de Freitas|\
-Lençóis|\
-Licínio de Almeida|\
-Livramento de Nossa Senhora|\
-Luís Eduardo Magalhães|\
-Macajuba|\
-Macarani|\
-Macaúbas|\
-Macururé|\
-Madre de Deus|\
-Maetinga|\
-Maiquinique|\
-Mairi|\
-Malhada|\
-Malhada de Pedras|\
-Manoel Vitorino|\
-Mansidão|\
-Maracás|\
-Maragogipe|\
-Maraú|\
-Marcionílio Souza|\
-Mascote|\
-Mata de São João|\
-Matina|\
-Medeiros Neto|\
-Miguel Calmon|\
-Milagres|\
-Mirangaba|\
-Mirante|\
-Monte Santo|\
-Morpará|\
-Morro do Chapéu|\
-Mortugaba|\
-Mucugê|\
-Mucuri|\
-Mulungu do Morro|\
-Mundo Novo|\
-Muniz Ferreira|\
-Muquém do São Francisco|\
-Muritiba|\
-Mutuípe|\
-Nazaré|\
-Nilo Peçanha|\
-Nordestina|\
-Nova Canaã|\
-Nova Fátima|\
-Nova Ibiá|\
-Nova Itarana|\
-Nova Redenção|\
-Nova Soure|\
-Nova Viçosa|\
-Novo Horizonte|\
-Novo Triunfo|\
-Olindina|\
-Oliveira dos Brejinhos|\
-Ouriçangas|\
-Ourolândia|\
-Palmas de Monte Alto|\
-Palmeiras|\
-Paramirim|\
-Paratinga|\
-Paripiranga|\
-Pau Brasil|\
-Paulo Afonso|\
-Pé de Serra|\
-Pedrão|\
-Pedro Alexandre|\
-Piatã|\
-Pilão Arcado|\
-Pindaí|\
-Pindobaçu|\
-Pintadas|\
-Piraí do Norte|\
-Piripá|\
-Piritiba|\
-Planaltino|\
-Planalto|\
-Poções|\
-Pojuca|\
-Ponto Novo|\
-Porto Seguro|\
-Potiraguá|\
-Prado|\
-Presidente Dutra|\
-Presidente Jânio Quadros|\
-Presidente Tancredo Neves|\
-Queimadas|\
-Quijingue|\
-Quixabeira|\
-Rafael Jambeiro|\
-Remanso|\
-Retirolândia|\
-Riachão das Neves|\
-Riachão do Jacuípe|\
-Riacho de Santana|\
-Ribeira do Amparo|\
-Ribeira do Pombal|\
-Ribeirão do Largo|\
-Rio de Contas|\
-Rio do Antônio|\
-Rio do Pires|\
-Rio Real|\
-Rodelas|\
-Ruy Barbosa|\
-Salinas da Margarida|\
-Salvador|\
-Santa Bárbara|\
-Santa Brígida|\
-Santa Cruz Cabrália|\
-Santa Cruz da Vitória|\
-Santa Inês|\
-Santa Luzia|\
-Santa Maria da Vitória|\
-Santa Rita de Cássia|\
-Santa Terezinha|\
-Santaluz|\
-Santana|\
-Santanópolis|\
-Santo Amaro|\
-Santo Antônio de Jesus|\
-Santo Estêvão|\
-São Desidério|\
-São Domingos|\
-São Felipe|\
-São Félix|\
-São Félix do Coribe|\
-São Francisco do Conde|\
-São Gabriel|\
-São Gonçalo dos Campos|\
-São José da Vitória|\
-São José do Jacuípe|\
-São Miguel das Matas|\
-São Sebastião do Passé|\
-Sapeaçu|\
-Sátiro Dias|\
-Saubara|\
-Saúde|\
-Seabra|\
-Sebastião Laranjeiras|\
-Senhor do Bonfim|\
-Sento Sé|\
-Serra do Ramalho|\
-Serra Dourada|\
-Serra Preta|\
-Serrinha|\
-Serrolândia|\
-Simões Filho|\
-Sítio do Mato|\
-Sítio do Quinto|\
-Sobradinho|\
-Souto Soares|\
-Tabocas do Brejo Velho|\
-Tanhaçu|\
-Tanque Novo|\
-Tanquinho|\
-Taperoá|\
-Tapiramutá|\
-Teixeira de Freitas|\
-Teodoro Sampaio|\
-Teofilândia|\
-Teolândia|\
-Terra Nova|\
-Tremedal|\
-Tucano|\
-Uauá|\
-Ubaíra|\
-Ubaitaba|\
-Ubatã|\
-Uibaí|\
-Umburanas|\
-Una|\
-Urandi|\
-Uruçuca|\
-Utinga|\
-Valença|\
-Valente|\
-Várzea da Roça|\
-Várzea do Poço|\
-Várzea Nova|\
-Varzedo|\
-Vera Cruz|\
-Vereda|\
-Vitória da Conquista|\
-Wagner|\
-Wanderley|\
-Wenceslau Guimarães|\
-Xique-Xique",
-	CE: "Abaiara|\
-Acarape|\
-Acaraú|\
-Acopiara|\
-Aiuaba|\
-Alcântaras|\
-Altaneira|\
-Alto Santo|\
-Amontada|\
-Antonina do Norte|\
-Apuiarés|\
-Aquiraz|\
-Aracati|\
-Aracoiaba|\
-Ararendá|\
-Araripe|\
-Aratuba|\
-Arneiroz|\
-Assaré|\
-Aurora|\
-Baixio|\
-Banabuiú|\
-Barbalha|\
-Barreira|\
-Barro|\
-Barroquinha|\
-Baturité|\
-Beberibe|\
-Bela Cruz|\
-Boa Viagem|\
-Brejo Santo|\
-Camocim|\
-Campos Sales|\
-Canindé|\
-Capistrano|\
-Caridade|\
-Cariré|\
-Caririaçu|\
-Cariús|\
-Carnaubal|\
-Cascavel|\
-Catarina|\
-Catunda|\
-Caucaia|\
-Cedro|\
-Chaval|\
-Choró|\
-Chorozinho|\
-Coreaú|\
-Crateús|\
-Crato|\
-Croatá|\
-Cruz|\
-Deputado Irapuan Pinheiro|\
-Ereré|\
-Eusébio|\
-Farias Brito|\
-Forquilha|\
-Fortaleza|\
-Fortim|\
-Frecheirinha|\
-General Sampaio|\
-Graça|\
-Granja|\
-Granjeiro|\
-Groaíras|\
-Guaiúba|\
-Guaraciaba do Norte|\
-Guaramiranga|\
-Hidrolândia|\
-Horizonte|\
-Ibaretama|\
-Ibiapina|\
-Ibicuitinga|\
-Icapuí|\
-Icó|\
-Iguatu|\
-Independência|\
-Ipaporanga|\
-Ipaumirim|\
-Ipu|\
-Ipueiras|\
-Iracema|\
-Irauçuba|\
-Itaiçaba|\
-Itaitinga|\
-Itapajé|\
-Itapipoca|\
-Itapiúna|\
-Itarema|\
-Itatira|\
-Jaguaretama|\
-Jaguaribara|\
-Jaguaribe|\
-Jaguaruana|\
-Jardim|\
-Jati|\
-Jijoca de Jericoacoara|\
-Juazeiro do Norte|\
-Jucás|\
-Lavras da Mangabeira|\
-Limoeiro do Norte|\
-Madalena|\
-Maracanaú|\
-Maranguape|\
-Marco|\
-Martinópole|\
-Massapê|\
-Mauriti|\
-Meruoca|\
-Milagres|\
-Milhã|\
-Miraíma|\
-Missão Velha|\
-Mombaça|\
-Monsenhor Tabosa|\
-Morada Nova|\
-Moraújo|\
-Morrinhos|\
-Mucambo|\
-Mulungu|\
-Nova Olinda|\
-Nova Russas|\
-Novo Oriente|\
-Ocara|\
-Orós|\
-Pacajus|\
-Pacatuba|\
-Pacoti|\
-Pacujá|\
-Palhano|\
-Palmácia|\
-Paracuru|\
-Paraipaba|\
-Parambu|\
-Paramoti|\
-Pedra Branca|\
-Penaforte|\
-Pentecoste|\
-Pereiro|\
-Pindoretama|\
-Piquet Carneiro|\
-Pires Ferreira|\
-Poranga|\
-Porteiras|\
-Potengi|\
-Potiretama|\
-Quiterianópolis|\
-Quixadá|\
-Quixelô|\
-Quixeramobim|\
-Quixeré|\
-Redenção|\
-Reriutaba|\
-Russas|\
-Saboeiro|\
-Salitre|\
-Santa Quitéria|\
-Santana do Acaraú|\
-Santana do Cariri|\
-São Benedito|\
-São Gonçalo do Amarante|\
-São João do Jaguaribe|\
-São Luís do Curu|\
-Senador Pompeu|\
-Senador Sá|\
-Sobral|\
-Solonópole|\
-Tabuleiro do Norte|\
-Tamboril|\
-Tarrafas|\
-Tauá|\
-Tejuçuoca|\
-Tianguá|\
-Trairi|\
-Tururu|\
-Ubajara|\
-Umari|\
-Umirim|\
-Uruburetama|\
-Uruoca|\
-Varjota|\
-Várzea Alegre|\
-Viçosa do Ceará",
-	DF: "Brasília",
-	ES: "Afonso Cláudio|\
-Água Doce do Norte|\
-Águia Branca|\
-Alegre|\
-Alfredo Chaves|\
-Alto Rio Novo|\
-Anchieta|\
-Apiacá|\
-Aracruz|\
-Atílio Vivácqua|\
-Baixo Guandu|\
-Barra de São Francisco|\
-Boa Esperança|\
-Bom Jesus do Norte|\
-Brejetuba|\
-Cachoeiro de Itapemirim|\
-Cariacica|\
-Castelo|\
-Colatina|\
-Conceição da Barra|\
-Conceição do Castelo|\
-Divino de São Lourenço|\
-Domingos Martins|\
-Dores do Rio Preto|\
-Ecoporanga|\
-Fundão|\
-Governador Lindenberg|\
-Guaçuí|\
-Guarapari|\
-Ibatiba|\
-Ibiraçu|\
-Ibitirama|\
-Iconha|\
-Irupi|\
-Itaguaçu|\
-Itapemirim|\
-Itarana|\
-Iúna|\
-Jaguaré|\
-Jerônimo Monteiro|\
-João Neiva|\
-Laranja da Terra|\
-Linhares|\
-Mantenópolis|\
-Marataízes|\
-Marechal Floriano|\
-Marilândia|\
-Mimoso do Sul|\
-Montanha|\
-Mucurici|\
-Muniz Freire|\
-Muqui|\
-Nova Venécia|\
-Pancas|\
-Pedro Canário|\
-Pinheiros|\
-Piúma|\
-Ponto Belo|\
-Presidente Kennedy|\
-Rio Bananal|\
-Rio Novo do Sul|\
-Santa Leopoldina|\
-Santa Maria de Jetibá|\
-Santa Teresa|\
-São Domingos do Norte|\
-São Gabriel da Palha|\
-São José do Calçado|\
-São Mateus|\
-São Roque do Canaã|\
-Serra|\
-Sooretama|\
-Vargem Alta|\
-Venda Nova do Imigrante|\
-Viana|\
-Vila Pavão|\
-Vila Valério|\
-Vila Velha|\
-Vitória",
-	GO: "Abadia de Goiás|\
-Abadiânia|\
-Acreúna|\
-Adelândia|\
-Água Fria de Goiás|\
-Água Limpa|\
-Águas Lindas de Goiás|\
-Alexânia|\
-Aloândia|\
-Alto Horizonte|\
-Alto Paraíso de Goiás|\
-Alvorada do Norte|\
-Amaralina|\
-Americano do Brasil|\
-Amorinópolis|\
-Anápolis|\
-Anhanguera|\
-Anicuns|\
-Aparecida de Goiânia|\
-Aparecida do Rio Doce|\
-Aporé|\
-Araçu|\
-Aragarças|\
-Aragoiânia|\
-Araguapaz|\
-Arenópolis|\
-Aruanã|\
-Aurilândia|\
-Avelinópolis|\
-Baliza|\
-Barro Alto|\
-Bela Vista de Goiás|\
-Bom Jardim de Goiás|\
-Bom Jesus de Goiás|\
-Bonfinópolis|\
-Bonópolis|\
-Brazabrantes|\
-Britânia|\
-Buriti Alegre|\
-Buriti de Goiás|\
-Buritinópolis|\
-Cabeceiras|\
-Cachoeira Alta|\
-Cachoeira de Goiás|\
-Cachoeira Dourada|\
-Caçu|\
-Caiapônia|\
-Caldas Novas|\
-Caldazinha|\
-Campestre de Goiás|\
-Campinaçu|\
-Campinorte|\
-Campo Alegre de Goiás|\
-Campo Limpo de Goiás|\
-Campos Belos|\
-Campos Verdes|\
-Carmo do Rio Verde|\
-Castelândia|\
-Catalão|\
-Caturaí|\
-Cavalcante|\
-Ceres|\
-Cezarina|\
-Chapadão do Céu|\
-Cidade Ocidental|\
-Cocalzinho de Goiás|\
-Colinas do Sul|\
-Córrego do Ouro|\
-Corumbá de Goiás|\
-Corumbaíba|\
-Cristalina|\
-Cristianópolis|\
-Crixás|\
-Cromínia|\
-Cumari|\
-Damianópolis|\
-Damolândia|\
-Davinópolis|\
-Diorama|\
-Divinópolis de Goiás|\
-Doverlândia|\
-Edealina|\
-Edéia|\
-Estrela do Norte|\
-Faina|\
-Fazenda Nova|\
-Firminópolis|\
-Flores de Goiás|\
-Formosa|\
-Formoso|\
-Gameleira de Goiás|\
-Goianápolis|\
-Goiandira|\
-Goianésia|\
-Goiânia|\
-Goianira|\
-Goiás|\
-Goiatuba|\
-Gouvelândia|\
-Guapó|\
-Guaraíta|\
-Guarani de Goiás|\
-Guarinos|\
-Heitoraí|\
-Hidrolândia|\
-Hidrolina|\
-Iaciara|\
-Inaciolândia|\
-Indiara|\
-Inhumas|\
-Ipameri|\
-Ipiranga de Goiás|\
-Iporá|\
-Israelândia|\
-Itaberaí|\
-Itaguari|\
-Itaguaru|\
-Itajá|\
-Itapaci|\
-Itapirapuã|\
-Itapuranga|\
-Itarumã|\
-Itauçu|\
-Itumbiara|\
-Ivolândia|\
-Jandaia|\
-Jaraguá|\
-Jataí|\
-Jaupaci|\
-Jesúpolis|\
-Joviânia|\
-Jussara|\
-Lagoa Santa|\
-Leopoldo de Bulhões|\
-Luziânia|\
-Mairipotaba|\
-Mambaí|\
-Mara Rosa|\
-Marzagão|\
-Matrinchã|\
-Maurilândia|\
-Mimoso de Goiás|\
-Minaçu|\
-Mineiros|\
-Moiporá|\
-Monte Alegre de Goiás|\
-Montes Claros de Goiás|\
-Montividiu|\
-Montividiu do Norte|\
-Morrinhos|\
-Morro Agudo de Goiás|\
-Mossâmedes|\
-Mozarlândia|\
-Mundo Novo|\
-Mutunópolis|\
-Nazário|\
-Nerópolis|\
-Niquelândia|\
-Nova América|\
-Nova Aurora|\
-Nova Crixás|\
-Nova Glória|\
-Nova Iguaçu de Goiás|\
-Nova Roma|\
-Nova Veneza|\
-Novo Brasil|\
-Novo Gama|\
-Novo Planalto|\
-Orizona|\
-Ouro Verde de Goiás|\
-Ouvidor|\
-Padre Bernardo|\
-Palestina de Goiás|\
-Palmeiras de Goiás|\
-Palmelo|\
-Palminópolis|\
-Panamá|\
-Paranaiguara|\
-Paraúna|\
-Perolândia|\
-Petrolina de Goiás|\
-Pilar de Goiás|\
-Piracanjuba|\
-Piranhas|\
-Pirenópolis|\
-Pires do Rio|\
-Planaltina|\
-Pontalina|\
-Porangatu|\
-Porteirão|\
-Portelândia|\
-Posse|\
-Professor Jamil|\
-Quirinópolis|\
-Rialma|\
-Rianápolis|\
-Rio Quente|\
-Rio Verde|\
-Rubiataba|\
-Sanclerlândia|\
-Santa Bárbara de Goiás|\
-Santa Cruz de Goiás|\
-Santa Fé de Goiás|\
-Santa Helena de Goiás|\
-Santa Isabel|\
-Santa Rita do Araguaia|\
-Santa Rita do Novo Destino|\
-Santa Rosa de Goiás|\
-Santa Tereza de Goiás|\
-Santa Terezinha de Goiás|\
-Santo Antônio da Barra|\
-Santo Antônio de Goiás|\
-Santo Antônio do Descoberto|\
-São Domingos|\
-São Francisco de Goiás|\
-São João d'Aliança|\
-São João da Paraúna|\
-São Luís de Montes Belos|\
-São Luiz do Norte|\
-São Miguel do Araguaia|\
-São Miguel do Passa Quatro|\
-São Patrício|\
-São Simão|\
-Senador Canedo|\
-Serranópolis|\
-Silvânia|\
-Simolândia|\
-Sítio d'Abadia|\
-Taquaral de Goiás|\
-Teresina de Goiás|\
-Terezópolis de Goiás|\
-Três Ranchos|\
-Trindade|\
-Trombas|\
-Turvânia|\
-Turvelândia|\
-Uirapuru|\
-Uruaçu|\
-Uruana|\
-Urutaí|\
-Valparaíso de Goiás|\
-Varjão|\
-Vianópolis|\
-Vicentinópolis|\
-Vila Boa|\
-Vila Propício",
-	MA: "Açailândia|\
-Afonso Cunha|\
-Água Doce do Maranhão|\
-Alcântara|\
-Aldeias Altas|\
-Altamira do Maranhão|\
-Alto Alegre do Maranhão|\
-Alto Alegre do Pindaré|\
-Alto Parnaíba|\
-Amapá do Maranhão|\
-Amarante do Maranhão|\
-Anajatuba|\
-Anapurus|\
-Apicum-Açu|\
-Araguanã|\
-Araioses|\
-Arame|\
-Arari|\
-Axixá|\
-Bacabal|\
-Bacabeira|\
-Bacuri|\
-Bacurituba|\
-Balsas|\
-Barão de Grajaú|\
-Barra do Corda|\
-Barreirinhas|\
-Bela Vista do Maranhão|\
-Belágua|\
-Benedito Leite|\
-Bequimão|\
-Bernardo do Mearim|\
-Boa Vista do Gurupi|\
-Bom Jardim|\
-Bom Jesus das Selvas|\
-Bom Lugar|\
-Brejo|\
-Brejo de Areia|\
-Buriti|\
-Buriti Bravo|\
-Buriticupu|\
-Buritirana|\
-Cachoeira Grande|\
-Cajapió|\
-Cajari|\
-Campestre do Maranhão|\
-Cândido Mendes|\
-Cantanhede|\
-Capinzal do Norte|\
-Carolina|\
-Carutapera|\
-Caxias|\
-Cedral|\
-Central do Maranhão|\
-Centro do Guilherme|\
-Centro Novo do Maranhão|\
-Chapadinha|\
-Cidelândia|\
-Codó|\
-Coelho Neto|\
-Colinas|\
-Conceição do Lago-Açu|\
-Coroatá|\
-Cururupu|\
-Davinópolis|\
-Dom Pedro|\
-Duque Bacelar|\
-Esperantinópolis|\
-Estreito|\
-Feira Nova do Maranhão|\
-Fernando Falcão|\
-Formosa da Serra Negra|\
-Fortaleza dos Nogueiras|\
-Fortuna|\
-Godofredo Viana|\
-Gonçalves Dias|\
-Governador Archer|\
-Governador Edison Lobão|\
-Governador Eugênio Barros|\
-Governador Luiz Rocha|\
-Governador Newton Bello|\
-Governador Nunes Freire|\
-Graça Aranha|\
-Grajaú|\
-Guimarães|\
-Humberto de Campos|\
-Icatu|\
-Igarapé do Meio|\
-Igarapé Grande|\
-Imperatriz|\
-Itaipava do Grajaú|\
-Itapecuru Mirim|\
-Itinga do Maranhão|\
-Jatobá|\
-Jenipapo dos Vieiras|\
-João Lisboa|\
-Joselândia|\
-Junco do Maranhão|\
-Lago da Pedra|\
-Lago do Junco|\
-Lago dos Rodrigues|\
-Lago Verde|\
-Lagoa do Mato|\
-Lagoa Grande do Maranhão|\
-Lajeado Novo|\
-Lima Campos|\
-Loreto|\
-Luís Domingues|\
-Magalhães de Almeida|\
-Maracaçumé|\
-Marajá do Sena|\
-Maranhãozinho|\
-Mata Roma|\
-Matinha|\
-Matões|\
-Matões do Norte|\
-Milagres do Maranhão|\
-Mirador|\
-Miranda do Norte|\
-Mirinzal|\
-Monção|\
-Montes Altos|\
-Morros|\
-Nina Rodrigues|\
-Nova Colinas|\
-Nova Iorque|\
-Nova Olinda do Maranhão|\
-Olho d'Água das Cunhãs|\
-Olinda Nova do Maranhão|\
-Paço do Lumiar|\
-Palmeirândia|\
-Paraibano|\
-Parnarama|\
-Passagem Franca|\
-Pastos Bons|\
-Paulino Neves|\
-Paulo Ramos|\
-Pedreiras|\
-Pedro do Rosário|\
-Penalva|\
-Peri Mirim|\
-Peritoró|\
-Pindaré-Mirim|\
-Pinheiro|\
-Pio XII|\
-Pirapemas|\
-Poção de Pedras|\
-Porto Franco|\
-Porto Rico do Maranhão|\
-Presidente Dutra|\
-Presidente Juscelino|\
-Presidente Médici|\
-Presidente Sarney|\
-Presidente Vargas|\
-Primeira Cruz|\
-Raposa|\
-Riachão|\
-Ribamar Fiquene|\
-Rosário|\
-Sambaíba|\
-Santa Filomena do Maranhão|\
-Santa Helena|\
-Santa Inês|\
-Santa Luzia|\
-Santa Luzia do Paruá|\
-Santa Quitéria do Maranhão|\
-Santa Rita|\
-Santana do Maranhão|\
-Santo Amaro do Maranhão|\
-Santo Antônio dos Lopes|\
-São Benedito do Rio Preto|\
-São Bento|\
-São Bernardo|\
-São Domingos do Azeitão|\
-São Domingos do Maranhão|\
-São Félix de Balsas|\
-São Francisco do Brejão|\
-São Francisco do Maranhão|\
-São João Batista|\
-São João do Carú|\
-São João do Paraíso|\
-São João do Soter|\
-São João dos Patos|\
-São José de Ribamar|\
-São José dos Basílios|\
-São Luís|\
-São Luís Gonzaga do Maranhão|\
-São Mateus do Maranhão|\
-São Pedro da Água Branca|\
-São Pedro dos Crentes|\
-São Raimundo das Mangabeiras|\
-São Raimundo do Doca Bezerra|\
-São Roberto|\
-São Vicente Ferrer|\
-Satubinha|\
-Senador Alexandre Costa|\
-Senador La Rocque|\
-Serrano do Maranhão|\
-Sítio Novo|\
-Sucupira do Norte|\
-Sucupira do Riachão|\
-Tasso Fragoso|\
-Timbiras|\
-Timon|\
-Trizidela do Vale|\
-Tufilândia|\
-Tuntum|\
-Turiaçu|\
-Turilândia|\
-Tutóia|\
-Urbano Santos|\
-Vargem Grande|\
-Viana|\
-Vila Nova dos Martírios|\
-Vitória do Mearim|\
-Vitorino Freire|\
-Zé Doca",
-	MG: "Abadia dos Dourados|\
-Abaeté|\
-Abre Campo|\
-Acaiaca|\
-Açucena|\
-Água Boa|\
-Água Comprida|\
-Aguanil|\
-Águas Formosas|\
-Águas Vermelhas|\
-Aimorés|\
-Aiuruoca|\
-Alagoa|\
-Albertina|\
-Além Paraíba|\
-Alfenas|\
-Alfredo Vasconcelos|\
-Almenara|\
-Alpercata|\
-Alpinópolis|\
-Alterosa|\
-Alto Caparaó|\
-Alto Jequitibá|\
-Alto Rio Doce|\
-Alvarenga|\
-Alvinópolis|\
-Alvorada de Minas|\
-Amparo do Serra|\
-Andradas|\
-Andrelândia|\
-Angelândia|\
-Antônio Carlos|\
-Antônio Dias|\
-Antônio Prado de Minas|\
-Araçaí|\
-Aracitaba|\
-Araçuaí|\
-Araguari|\
-Arantina|\
-Araponga|\
-Araporã|\
-Arapuá|\
-Araújos|\
-Araxá|\
-Arceburgo|\
-Arcos|\
-Areado|\
-Argirita|\
-Aricanduva|\
-Arinos|\
-Astolfo Dutra|\
-Ataléia|\
-Augusto de Lima|\
-Baependi|\
-Baldim|\
-Bambuí|\
-Bandeira|\
-Bandeira do Sul|\
-Barão de Cocais|\
-Barão do Monte Alto|\
-Barbacena|\
-Barra Longa|\
-Barroso|\
-Bela Vista de Minas|\
-Belmiro Braga|\
-Belo Horizonte|\
-Belo Oriente|\
-Belo Vale|\
-Berilo|\
-Berizal|\
-Bertópolis|\
-Betim|\
-Bias Fortes|\
-Bicas|\
-Biquinhas|\
-Boa Esperança|\
-Bocaina de Minas|\
-Bocaiúva|\
-Bom Despacho|\
-Bom Jardim de Minas|\
-Bom Jesus da Penha|\
-Bom Jesus do Amparo|\
-Bom Jesus do Galho|\
-Bom Repouso|\
-Bom Sucesso|\
-Bonfim|\
-Bonfinópolis de Minas|\
-Bonito de Minas|\
-Borda da Mata|\
-Botelhos|\
-Botumirim|\
-Brás Pires|\
-Brasilândia de Minas|\
-Brasília de Minas|\
-Braúnas|\
-Brazópolis|\
-Brumadinho|\
-Bueno Brandão|\
-Buenópolis|\
-Bugre|\
-Buritis|\
-Buritizeiro|\
-Cabeceira Grande|\
-Cabo Verde|\
-Cachoeira da Prata|\
-Cachoeira de Minas|\
-Cachoeira de Pajeú|\
-Cachoeira Dourada|\
-Caetanópolis|\
-Caeté|\
-Caiana|\
-Cajuri|\
-Caldas|\
-Camacho|\
-Camanducaia|\
-Cambuí|\
-Cambuquira|\
-Campanário|\
-Campanha|\
-Campestre|\
-Campina Verde|\
-Campo Azul|\
-Campo Belo|\
-Campo do Meio|\
-Campo Florido|\
-Campos Altos|\
-Campos Gerais|\
-Cana Verde|\
-Canaã|\
-Canápolis|\
-Candeias|\
-Cantagalo|\
-Caparaó|\
-Capela Nova|\
-Capelinha|\
-Capetinga|\
-Capim Branco|\
-Capinópolis|\
-Capitão Andrade|\
-Capitão Enéas|\
-Capitólio|\
-Caputira|\
-Caraí|\
-Caranaíba|\
-Carandaí|\
-Carangola|\
-Caratinga|\
-Carbonita|\
-Careaçu|\
-Carlos Chagas|\
-Carmésia|\
-Carmo da Cachoeira|\
-Carmo da Mata|\
-Carmo de Minas|\
-Carmo do Cajuru|\
-Carmo do Paranaíba|\
-Carmo do Rio Claro|\
-Carmópolis de Minas|\
-Carneirinho|\
-Carrancas|\
-Carvalhópolis|\
-Carvalhos|\
-Casa Grande|\
-Cascalho Rico|\
-Cássia|\
-Cataguases|\
-Catas Altas|\
-Catas Altas da Noruega|\
-Catuji|\
-Catuti|\
-Caxambu|\
-Cedro do Abaeté|\
-Central de Minas|\
-Centralina|\
-Chácara|\
-Chalé|\
-Chapada do Norte|\
-Chapada Gaúcha|\
-Chiador|\
-Cipotânea|\
-Claraval|\
-Claro dos Poções|\
-Cláudio|\
-Coimbra|\
-Coluna|\
-Comendador Gomes|\
-Comercinho|\
-Conceição da Aparecida|\
-Conceição da Barra de Minas|\
-Conceição das Alagoas|\
-Conceição das Pedras|\
-Conceição de Ipanema|\
-Conceição do Mato Dentro|\
-Conceição do Pará|\
-Conceição do Rio Verde|\
-Conceição dos Ouros|\
-Cônego Marinho|\
-Confins|\
-Congonhal|\
-Congonhas|\
-Congonhas do Norte|\
-Conquista|\
-Conselheiro Lafaiete|\
-Conselheiro Pena|\
-Consolação|\
-Contagem|\
-Coqueiral|\
-Coração de Jesus|\
-Cordisburgo|\
-Cordislândia|\
-Corinto|\
-Coroaci|\
-Coromandel|\
-Coronel Fabriciano|\
-Coronel Murta|\
-Coronel Pacheco|\
-Coronel Xavier Chaves|\
-Córrego Danta|\
-Córrego do Bom Jesus|\
-Córrego Fundo|\
-Córrego Novo|\
-Couto de Magalhães de Minas|\
-Crisólita|\
-Cristais|\
-Cristália|\
-Cristiano Otoni|\
-Cristina|\
-Crucilândia|\
-Cruzeiro da Fortaleza|\
-Cruzília|\
-Cuparaque|\
-Curral de Dentro|\
-Curvelo|\
-Datas|\
-Delfim Moreira|\
-Delfinópolis|\
-Delta|\
-Descoberto|\
-Desterro de Entre Rios|\
-Desterro do Melo|\
-Diamantina|\
-Diogo de Vasconcelos|\
-Dionísio|\
-Divinésia|\
-Divino|\
-Divino das Laranjeiras|\
-Divinolândia de Minas|\
-Divinópolis|\
-Divisa Alegre|\
-Divisa Nova|\
-Divisópolis|\
-Dom Bosco|\
-Dom Cavati|\
-Dom Joaquim|\
-Dom Silvério|\
-Dom Viçoso|\
-Dona Euzébia|\
-Dores de Campos|\
-Dores de Guanhães|\
-Dores do Indaiá|\
-Dores do Turvo|\
-Doresópolis|\
-Douradoquara|\
-Durandé|\
-Elói Mendes|\
-Engenheiro Caldas|\
-Engenheiro Navarro|\
-Entre Folhas|\
-Entre Rios de Minas|\
-Ervália|\
-Esmeraldas|\
-Espera Feliz|\
-Espinosa|\
-Espírito Santo do Dourado|\
-Estiva|\
-Estrela Dalva|\
-Estrela do Indaiá|\
-Estrela do Sul|\
-Eugenópolis|\
-Ewbank da Câmara|\
-Extrema|\
-Fama|\
-Faria Lemos|\
-Felício dos Santos|\
-Felisburgo|\
-Felixlândia|\
-Fernandes Tourinho|\
-Ferros|\
-Fervedouro|\
-Florestal|\
-Formiga|\
-Formoso|\
-Fortaleza de Minas|\
-Fortuna de Minas|\
-Francisco Badaró|\
-Francisco Dumont|\
-Francisco Sá|\
-Franciscópolis|\
-Frei Gaspar|\
-Frei Inocêncio|\
-Frei Lagonegro|\
-Fronteira|\
-Fronteira dos Vales|\
-Fruta de Leite|\
-Frutal|\
-Funilândia|\
-Galiléia|\
-Gameleiras|\
-Glaucilândia|\
-Goiabeira|\
-Goianá|\
-Gonçalves|\
-Gonzaga|\
-Gouveia|\
-Governador Valadares|\
-Grão Mogol|\
-Grupiara|\
-Guanhães|\
-Guapé|\
-Guaraciaba|\
-Guaraciama|\
-Guaranésia|\
-Guarani|\
-Guarará|\
-Guarda-Mor|\
-Guaxupé|\
-Guidoval|\
-Guimarânia|\
-Guiricema|\
-Gurinhatã|\
-Heliodora|\
-Iapu|\
-Ibertioga|\
-Ibiá|\
-Ibiaí|\
-Ibiracatu|\
-Ibiraci|\
-Ibirité|\
-Ibitiúra de Minas|\
-Ibituruna|\
-Icaraí de Minas|\
-Igarapé|\
-Igaratinga|\
-Iguatama|\
-Ijaci|\
-Ilicínea|\
-Imbé de Minas|\
-Inconfidentes|\
-Indaiabira|\
-Indianópolis|\
-Ingaí|\
-Inhapim|\
-Inhaúma|\
-Inimutaba|\
-Ipaba|\
-Ipanema|\
-Ipatinga|\
-Ipiaçu|\
-Ipuiúna|\
-Iraí de Minas|\
-Itabira|\
-Itabirinha|\
-Itabirito|\
-Itacambira|\
-Itacarambi|\
-Itaguara|\
-Itaipé|\
-Itajubá|\
-Itamarandiba|\
-Itamarati de Minas|\
-Itambacuri|\
-Itambé do Mato Dentro|\
-Itamogi|\
-Itamonte|\
-Itanhandu|\
-Itanhomi|\
-Itaobim|\
-Itapagipe|\
-Itapecerica|\
-Itapeva|\
-Itatiaiuçu|\
-Itaú de Minas|\
-Itaúna|\
-Itaverava|\
-Itinga|\
-Itueta|\
-Ituiutaba|\
-Itumirim|\
-Iturama|\
-Itutinga|\
-Jaboticatubas|\
-Jacinto|\
-Jacuí|\
-Jacutinga|\
-Jaguaraçu|\
-Jaíba|\
-Jampruca|\
-Janaúba|\
-Januária|\
-Japaraíba|\
-Japonvar|\
-Jeceaba|\
-Jenipapo de Minas|\
-Jequeri|\
-Jequitaí|\
-Jequitibá|\
-Jequitinhonha|\
-Jesuânia|\
-Joaíma|\
-Joanésia|\
-João Monlevade|\
-João Pinheiro|\
-Joaquim Felício|\
-Jordânia|\
-José Gonçalves de Minas|\
-José Raydan|\
-Josenópolis|\
-Juatuba|\
-Juiz de Fora|\
-Juramento|\
-Juruaia|\
-Juvenília|\
-Ladainha|\
-Lagamar|\
-Lagoa da Prata|\
-Lagoa dos Patos|\
-Lagoa Dourada|\
-Lagoa Formosa|\
-Lagoa Grande|\
-Lagoa Santa|\
-Lajinha|\
-Lambari|\
-Lamim|\
-Laranjal|\
-Lassance|\
-Lavras|\
-Leandro Ferreira|\
-Leme do Prado|\
-Leopoldina|\
-Liberdade|\
-Lima Duarte|\
-Limeira do Oeste|\
-Lontra|\
-Luisburgo|\
-Luislândia|\
-Luminárias|\
-Luz|\
-Machacalis|\
-Machado|\
-Madre de Deus de Minas|\
-Malacacheta|\
-Mamonas|\
-Manga|\
-Manhuaçu|\
-Manhumirim|\
-Mantena|\
-Mar de Espanha|\
-Maravilhas|\
-Maria da Fé|\
-Mariana|\
-Marilac|\
-Mário Campos|\
-Maripá de Minas|\
-Marliéria|\
-Marmelópolis|\
-Martinho Campos|\
-Martins Soares|\
-Mata Verde|\
-Materlândia|\
-Mateus Leme|\
-Mathias Lobato|\
-Matias Barbosa|\
-Matias Cardoso|\
-Matipó|\
-Mato Verde|\
-Matozinhos|\
-Matutina|\
-Medeiros|\
-Medina|\
-Mendes Pimentel|\
-Mercês|\
-Mesquita|\
-Minas Novas|\
-Minduri|\
-Mirabela|\
-Miradouro|\
-Miraí|\
-Miravânia|\
-Moeda|\
-Moema|\
-Monjolos|\
-Monsenhor Paulo|\
-Montalvânia|\
-Monte Alegre de Minas|\
-Monte Azul|\
-Monte Belo|\
-Monte Carmelo|\
-Monte Formoso|\
-Monte Santo de Minas|\
-Monte Sião|\
-Montes Claros|\
-Montezuma|\
-Morada Nova de Minas|\
-Morro da Garça|\
-Morro do Pilar|\
-Munhoz|\
-Muriaé|\
-Mutum|\
-Muzambinho|\
-Nacip Raydan|\
-Nanuque|\
-Naque|\
-Natalândia|\
-Natércia|\
-Nazareno|\
-Nepomuceno|\
-Ninheira|\
-Nova Belém|\
-Nova Era|\
-Nova Lima|\
-Nova Módica|\
-Nova Ponte|\
-Nova Porteirinha|\
-Nova Resende|\
-Nova Serrana|\
-Nova União|\
-Novo Cruzeiro|\
-Novo Oriente de Minas|\
-Novorizonte|\
-Olaria|\
-Olhos-d'Água|\
-Olímpio Noronha|\
-Oliveira|\
-Oliveira Fortes|\
-Onça de Pitangui|\
-Oratórios|\
-Orizânia|\
-Ouro Branco|\
-Ouro Fino|\
-Ouro Preto|\
-Ouro Verde de Minas|\
-Padre Carvalho|\
-Padre Paraíso|\
-Pai Pedro|\
-Paineiras|\
-Pains|\
-Paiva|\
-Palma|\
-Palmópolis|\
-Papagaios|\
-Pará de Minas|\
-Paracatu|\
-Paraguaçu|\
-Paraisópolis|\
-Paraopeba|\
-Passa Quatro|\
-Passa Tempo|\
-Passa Vinte|\
-Passabém|\
-Passos|\
-Patis|\
-Patos de Minas|\
-Patrocínio|\
-Patrocínio do Muriaé|\
-Paula Cândido|\
-Paulistas|\
-Pavão|\
-Peçanha|\
-Pedra Azul|\
-Pedra Bonita|\
-Pedra do Anta|\
-Pedra do Indaiá|\
-Pedra Dourada|\
-Pedralva|\
-Pedras de Maria da Cruz|\
-Pedrinópolis|\
-Pedro Leopoldo|\
-Pedro Teixeira|\
-Pequeri|\
-Pequi|\
-Perdigão|\
-Perdizes|\
-Perdões|\
-Periquito|\
-Pescador|\
-Piau|\
-Piedade de Caratinga|\
-Piedade de Ponte Nova|\
-Piedade do Rio Grande|\
-Piedade dos Gerais|\
-Pimenta|\
-Pingo-d'Água|\
-Pintópolis|\
-Piracema|\
-Pirajuba|\
-Piranga|\
-Piranguçu|\
-Piranguinho|\
-Pirapetinga|\
-Pirapora|\
-Piraúba|\
-Pitangui|\
-Piumhi|\
-Planura|\
-Poço Fundo|\
-Poços de Caldas|\
-Pocrane|\
-Pompéu|\
-Ponte Nova|\
-Ponto Chique|\
-Ponto dos Volantes|\
-Porteirinha|\
-Porto Firme|\
-Poté|\
-Pouso Alegre|\
-Pouso Alto|\
-Prados|\
-Prata|\
-Pratápolis|\
-Pratinha|\
-Presidente Bernardes|\
-Presidente Juscelino|\
-Presidente Kubitschek|\
-Presidente Olegário|\
-Prudente de Morais|\
-Quartel Geral|\
-Queluzito|\
-Raposos|\
-Raul Soares|\
-Recreio|\
-Reduto|\
-Resende Costa|\
-Resplendor|\
-Ressaquinha|\
-Riachinho|\
-Riacho dos Machados|\
-Ribeirão das Neves|\
-Ribeirão Vermelho|\
-Rio Acima|\
-Rio Casca|\
-Rio do Prado|\
-Rio Doce|\
-Rio Espera|\
-Rio Manso|\
-Rio Novo|\
-Rio Paranaíba|\
-Rio Pardo de Minas|\
-Rio Piracicaba|\
-Rio Pomba|\
-Rio Preto|\
-Rio Vermelho|\
-Ritápolis|\
-Rochedo de Minas|\
-Rodeiro|\
-Romaria|\
-Rosário da Limeira|\
-Rubelita|\
-Rubim|\
-Sabará|\
-Sabinópolis|\
-Sacramento|\
-Salinas|\
-Salto da Divisa|\
-Santa Bárbara|\
-Santa Bárbara do Leste|\
-Santa Bárbara do Monte Verde|\
-Santa Bárbara do Tugúrio|\
-Santa Cruz de Minas|\
-Santa Cruz de Salinas|\
-Santa Cruz do Escalvado|\
-Santa Efigênia de Minas|\
-Santa Fé de Minas|\
-Santa Helena de Minas|\
-Santa Juliana|\
-Santa Luzia|\
-Santa Margarida|\
-Santa Maria de Itabira|\
-Santa Maria do Salto|\
-Santa Maria do Suaçuí|\
-Santa Rita de Caldas|\
-Santa Rita de Ibitipoca|\
-Santa Rita de Jacutinga|\
-Santa Rita de Minas|\
-Santa Rita do Itueto|\
-Santa Rita do Sapucaí|\
-Santa Rosa da Serra|\
-Santa Vitória|\
-Santana da Vargem|\
-Santana de Cataguases|\
-Santana de Pirapama|\
-Santana do Deserto|\
-Santana do Garambéu|\
-Santana do Jacaré|\
-Santana do Manhuaçu|\
-Santana do Paraíso|\
-Santana do Riacho|\
-Santana dos Montes|\
-Santo Antônio do Amparo|\
-Santo Antônio do Aventureiro|\
-Santo Antônio do Grama|\
-Santo Antônio do Itambé|\
-Santo Antônio do Jacinto|\
-Santo Antônio do Monte|\
-Santo Antônio do Retiro|\
-Santo Antônio do Rio Abaixo|\
-Santo Hipólito|\
-Santos Dumont|\
-São Bento Abade|\
-São Brás do Suaçuí|\
-São Domingos das Dores|\
-São Domingos do Prata|\
-São Félix de Minas|\
-São Francisco|\
-São Francisco de Paula|\
-São Francisco de Sales|\
-São Francisco do Glória|\
-São Geraldo|\
-São Geraldo da Piedade|\
-São Geraldo do Baixio|\
-São Gonçalo do Abaeté|\
-São Gonçalo do Pará|\
-São Gonçalo do Rio Abaixo|\
-São Gonçalo do Rio Preto|\
-São Gonçalo do Sapucaí|\
-São Gotardo|\
-São João Batista do Glória|\
-São João da Lagoa|\
-São João da Mata|\
-São João da Ponte|\
-São João das Missões|\
-São João del Rei|\
-São João do Manhuaçu|\
-São João do Manteninha|\
-São João do Oriente|\
-São João do Pacuí|\
-São João do Paraíso|\
-São João Evangelista|\
-São João Nepomuceno|\
-São Joaquim de Bicas|\
-São José da Barra|\
-São José da Lapa|\
-São José da Safira|\
-São José da Varginha|\
-São José do Alegre|\
-São José do Divino|\
-São José do Goiabal|\
-São José do Jacuri|\
-São José do Mantimento|\
-São Lourenço|\
-São Miguel do Anta|\
-São Pedro da União|\
-São Pedro do Suaçuí|\
-São Pedro dos Ferros|\
-São Romão|\
-São Roque de Minas|\
-São Sebastião da Bela Vista|\
-São Sebastião da Vargem Alegre|\
-São Sebastião do Anta|\
-São Sebastião do Maranhão|\
-São Sebastião do Oeste|\
-São Sebastião do Paraíso|\
-São Sebastião do Rio Preto|\
-São Sebastião do Rio Verde|\
-São Tiago|\
-São Tomás de Aquino|\
-São Tomé das Letras|\
-São Vicente de Minas|\
-Sapucaí-Mirim|\
-Sardoá|\
-Sarzedo|\
-Sem-Peixe|\
-Senador Amaral|\
-Senador Cortes|\
-Senador Firmino|\
-Senador José Bento|\
-Senador Modestino Gonçalves|\
-Senhora de Oliveira|\
-Senhora do Porto|\
-Senhora dos Remédios|\
-Sericita|\
-Seritinga|\
-Serra Azul de Minas|\
-Serra da Saudade|\
-Serra do Salitre|\
-Serra dos Aimorés|\
-Serrania|\
-Serranópolis de Minas|\
-Serranos|\
-Serro|\
-Sete Lagoas|\
-Setubinha|\
-Silveirânia|\
-Silvianópolis|\
-Simão Pereira|\
-Simonésia|\
-Sobrália|\
-Soledade de Minas|\
-Tabuleiro|\
-Taiobeiras|\
-Taparuba|\
-Tapira|\
-Tapiraí|\
-Taquaraçu de Minas|\
-Tarumirim|\
-Teixeiras|\
-Teófilo Otoni|\
-Timóteo|\
-Tiradentes|\
-Tiros|\
-Tocantins|\
-Tocos do Moji|\
-Toledo|\
-Tombos|\
-Três Corações|\
-Três Marias|\
-Três Pontas|\
-Tumiritinga|\
-Tupaciguara|\
-Turmalina|\
-Turvolândia|\
-Ubá|\
-Ubaí|\
-Ubaporanga|\
-Uberaba|\
-Uberlândia|\
-Umburatiba|\
-Unaí|\
-União de Minas|\
-Uruana de Minas|\
-Urucânia|\
-Urucuia|\
-Vargem Alegre|\
-Vargem Bonita|\
-Vargem Grande do Rio Pardo|\
-Varginha|\
-Varjão de Minas|\
-Várzea da Palma|\
-Varzelândia|\
-Vazante|\
-Verdelândia|\
-Veredinha|\
-Veríssimo|\
-Vermelho Novo|\
-Vespasiano|\
-Viçosa|\
-Vieiras|\
-Virgem da Lapa|\
-Virgínia|\
-Virginópolis|\
-Virgolândia|\
-Visconde do Rio Branco|\
-Volta Grande|\
-Wenceslau Braz",
-	MS: "Água Clara|\
-Alcinópolis|\
-Amambai|\
-Anastácio|\
-Anaurilândia|\
-Angélica|\
-Antônio João|\
-Aparecida do Taboado|\
-Aquidauana|\
-Aral Moreira|\
-Bandeirantes|\
-Bataguassu|\
-Batayporã|\
-Bela Vista|\
-Bodoquena|\
-Bonito|\
-Brasilândia|\
-Caarapó|\
-Camapuã|\
-Campo Grande|\
-Caracol|\
-Cassilândia|\
-Chapadão do Sul|\
-Corguinho|\
-Coronel Sapucaia|\
-Corumbá|\
-Costa Rica|\
-Coxim|\
-Deodápolis|\
-Dois Irmãos do Buriti|\
-Douradina|\
-Dourados|\
-Eldorado|\
-Fátima do Sul|\
-Figueirão|\
-Glória de Dourados|\
-Guia Lopes da Laguna|\
-Iguatemi|\
-Inocência|\
-Itaporã|\
-Itaquiraí|\
-Ivinhema|\
-Japorã|\
-Jaraguari|\
-Jardim|\
-Jateí|\
-Juti|\
-Ladário|\
-Laguna Carapã|\
-Maracaju|\
-Miranda|\
-Mundo Novo|\
-Naviraí|\
-Nioaque|\
-Nova Alvorada do Sul|\
-Nova Andradina|\
-Novo Horizonte do Sul|\
-Paraíso das Águas|\
-Paranaíba|\
-Paranhos|\
-Pedro Gomes|\
-Ponta Porã|\
-Porto Murtinho|\
-Ribas do Rio Pardo|\
-Rio Brilhante|\
-Rio Negro|\
-Rio Verde de Mato Grosso|\
-Rochedo|\
-Santa Rita do Pardo|\
-São Gabriel do Oeste|\
-Selvíria|\
-Sete Quedas|\
-Sidrolândia|\
-Sonora|\
-Tacuru|\
-Taquarussu|\
-Terenos|\
-Três Lagoas|\
-Vicentina",
-	MT: "Acorizal|\
-Água Boa|\
-Alta Floresta|\
-Alto Araguaia|\
-Alto Boa Vista|\
-Alto Garças|\
-Alto Paraguai|\
-Alto Taquari|\
-Apiacás|\
-Araguaiana|\
-Araguainha|\
-Araputanga|\
-Arenápolis|\
-Aripuanã|\
-Barão de Melgaço|\
-Barra do Bugres|\
-Barra do Garças|\
-Boa Esperança do Norte|\
-Bom Jesus do Araguaia|\
-Brasnorte|\
-Cáceres|\
-Campinápolis|\
-Campo Novo do Parecis|\
-Campo Verde|\
-Campos de Júlio|\
-Canabrava do Norte|\
-Canarana|\
-Carlinda|\
-Castanheira|\
-Chapada dos Guimarães|\
-Cláudia|\
-Cocalinho|\
-Colíder|\
-Colniza|\
-Comodoro|\
-Confresa|\
-Conquista D'Oeste|\
-Cotriguaçu|\
-Cuiabá|\
-Curvelândia|\
-Denise|\
-Diamantino|\
-Dom Aquino|\
-Feliz Natal|\
-Figueirópolis D'Oeste|\
-Gaúcha do Norte|\
-General Carneiro|\
-Glória D'Oeste|\
-Guarantã do Norte|\
-Guiratinga|\
-Indiavaí|\
-Ipiranga do Norte|\
-Itanhangá|\
-Itaúba|\
-Itiquira|\
-Jaciara|\
-Jangada|\
-Jauru|\
-Juara|\
-Juína|\
-Juruena|\
-Juscimeira|\
-Lambari D'Oeste|\
-Lucas do Rio Verde|\
-Luciara|\
-Marcelândia|\
-Matupá|\
-Mirassol d'Oeste|\
-Nobres|\
-Nortelândia|\
-Nossa Senhora do Livramento|\
-Nova Bandeirantes|\
-Nova Brasilândia|\
-Nova Canaã do Norte|\
-Nova Guarita|\
-Nova Lacerda|\
-Nova Marilândia|\
-Nova Maringá|\
-Nova Monte Verde|\
-Nova Mutum|\
-Nova Nazaré|\
-Nova Olímpia|\
-Nova Santa Helena|\
-Nova Ubiratã|\
-Nova Xavantina|\
-Novo Horizonte do Norte|\
-Novo Mundo|\
-Novo Santo Antônio|\
-Novo São Joaquim|\
-Paranaíta|\
-Paranatinga|\
-Pedra Preta|\
-Peixoto de Azevedo|\
-Planalto da Serra|\
-Poconé|\
-Pontal do Araguaia|\
-Ponte Branca|\
-Pontes e Lacerda|\
-Porto Alegre do Norte|\
-Porto dos Gaúchos|\
-Porto Esperidião|\
-Porto Estrela|\
-Poxoréu|\
-Primavera do Leste|\
-Querência|\
-Reserva do Cabaçal|\
-Ribeirão Cascalheira|\
-Ribeirãozinho|\
-Rio Branco|\
-Rondolândia|\
-Rondonópolis|\
-Rosário Oeste|\
-Salto do Céu|\
-Santa Carmem|\
-Santa Cruz do Xingu|\
-Santa Rita do Trivelato|\
-Santa Terezinha|\
-Santo Afonso|\
-Santo Antônio de Leverger|\
-Santo Antônio do Leste|\
-São Félix do Araguaia|\
-São José do Povo|\
-São José do Rio Claro|\
-São José do Xingu|\
-São José dos Quatro Marcos|\
-São Pedro da Cipa|\
-Sapezal|\
-Serra Nova Dourada|\
-Sinop|\
-Sorriso|\
-Tabaporã|\
-Tangará da Serra|\
-Tapurah|\
-Terra Nova do Norte|\
-Tesouro|\
-Torixoréu|\
-União do Sul|\
-Vale de São Domingos|\
-Várzea Grande|\
-Vera|\
-Vila Bela da Santíssima Trindade|\
-Vila Rica",
-	PA: "Abaetetuba|\
-Abel Figueiredo|\
-Acará|\
-Afuá|\
-Água Azul do Norte|\
-Alenquer|\
-Almeirim|\
-Altamira|\
-Anajás|\
-Ananindeua|\
-Anapu|\
-Augusto Corrêa|\
-Aurora do Pará|\
-Aveiro|\
-Bagre|\
-Baião|\
-Bannach|\
-Barcarena|\
-Belém|\
-Belterra|\
-Benevides|\
-Bom Jesus do Tocantins|\
-Bonito|\
-Bragança|\
-Brasil Novo|\
-Brejo Grande do Araguaia|\
-Breu Branco|\
-Breves|\
-Bujaru|\
-Cachoeira do Arari|\
-Cachoeira do Piriá|\
-Cametá|\
-Canaã dos Carajás|\
-Capanema|\
-Capitão Poço|\
-Castanhal|\
-Chaves|\
-Colares|\
-Conceição do Araguaia|\
-Concórdia do Pará|\
-Cumaru do Norte|\
-Curionópolis|\
-Curralinho|\
-Curuá|\
-Curuçá|\
-Dom Eliseu|\
-Eldorado do Carajás|\
-Faro|\
-Floresta do Araguaia|\
-Garrafão do Norte|\
-Goianésia do Pará|\
-Gurupá|\
-Igarapé-Açu|\
-Igarapé-Miri|\
-Inhangapi|\
-Ipixuna do Pará|\
-Irituia|\
-Itaituba|\
-Itupiranga|\
-Jacareacanga|\
-Jacundá|\
-Juruti|\
-Limoeiro do Ajuru|\
-Mãe do Rio|\
-Magalhães Barata|\
-Marabá|\
-Maracanã|\
-Marapanim|\
-Marituba|\
-Medicilândia|\
-Melgaço|\
-Mocajuba|\
-Moju|\
-Mojuí dos Campos|\
-Monte Alegre|\
-Muaná|\
-Nova Esperança do Piriá|\
-Nova Ipixuna|\
-Nova Timboteua|\
-Novo Progresso|\
-Novo Repartimento|\
-Óbidos|\
-Oeiras do Pará|\
-Oriximiná|\
-Ourém|\
-Ourilândia do Norte|\
-Pacajá|\
-Palestina do Pará|\
-Paragominas|\
-Parauapebas|\
-Pau D'Arco|\
-Peixe-Boi|\
-Piçarra|\
-Placas|\
-Ponta de Pedras|\
-Portel|\
-Porto de Moz|\
-Prainha|\
-Primavera|\
-Quatipuru|\
-Redenção|\
-Rio Maria|\
-Rondon do Pará|\
-Rurópolis|\
-Salinópolis|\
-Salvaterra|\
-Santa Bárbara do Pará|\
-Santa Cruz do Arari|\
-Santa Izabel do Pará|\
-Santa Luzia do Pará|\
-Santa Maria das Barreiras|\
-Santa Maria do Pará|\
-Santana do Araguaia|\
-Santarém|\
-Santarém Novo|\
-Santo Antônio do Tauá|\
-São Caetano de Odivelas|\
-São Domingos do Araguaia|\
-São Domingos do Capim|\
-São Félix do Xingu|\
-São Francisco do Pará|\
-São Geraldo do Araguaia|\
-São João da Ponta|\
-São João de Pirabas|\
-São João do Araguaia|\
-São Miguel do Guamá|\
-São Sebastião da Boa Vista|\
-Sapucaia|\
-Senador José Porfírio|\
-Soure|\
-Tailândia|\
-Terra Alta|\
-Terra Santa|\
-Tomé-Açu|\
-Tracuateua|\
-Trairão|\
-Tucumã|\
-Tucuruí|\
-Ulianópolis|\
-Uruará|\
-Vigia|\
-Viseu|\
-Vitória do Xingu|\
-Xinguara",
-	PB: "Água Branca|\
-Aguiar|\
-Alagoa Grande|\
-Alagoa Nova|\
-Alagoinha|\
-Alcantil|\
-Algodão de Jandaíra|\
-Alhandra|\
-Amparo|\
-Aparecida|\
-Araçagi|\
-Arara|\
-Araruna|\
-Areia|\
-Areia de Baraúnas|\
-Areial|\
-Aroeiras|\
-Assunção|\
-Baía da Traição|\
-Bananeiras|\
-Baraúna|\
-Barra de Santa Rosa|\
-Barra de Santana|\
-Barra de São Miguel|\
-Bayeux|\
-Belém|\
-Belém do Brejo do Cruz|\
-Bernardino Batista|\
-Boa Ventura|\
-Boa Vista|\
-Bom Jesus|\
-Bom Sucesso|\
-Bonito de Santa Fé|\
-Boqueirão|\
-Borborema|\
-Brejo do Cruz|\
-Brejo dos Santos|\
-Caaporã|\
-Cabaceiras|\
-Cabedelo|\
-Cachoeira dos Índios|\
-Cacimba de Areia|\
-Cacimba de Dentro|\
-Cacimbas|\
-Caiçara|\
-Cajazeiras|\
-Cajazeirinhas|\
-Caldas Brandão|\
-Camalaú|\
-Campina Grande|\
-Capim|\
-Caraúbas|\
-Carrapateira|\
-Casserengue|\
-Catingueira|\
-Catolé do Rocha|\
-Caturité|\
-Conceição|\
-Condado|\
-Conde|\
-Congo|\
-Coremas|\
-Coxixola|\
-Cruz do Espírito Santo|\
-Cubati|\
-Cuité|\
-Cuité de Mamanguape|\
-Cuitegi|\
-Curral de Cima|\
-Curral Velho|\
-Damião|\
-Desterro|\
-Diamante|\
-Dona Inês|\
-Duas Estradas|\
-Emas|\
-Esperança|\
-Fagundes|\
-Frei Martinho|\
-Gado Bravo|\
-Guarabira|\
-Gurinhém|\
-Gurjão|\
-Ibiara|\
-Igaracy|\
-Imaculada|\
-Ingá|\
-Itabaiana|\
-Itaporanga|\
-Itapororoca|\
-Itatuba|\
-Jacaraú|\
-Jericó|\
-João Pessoa|\
-Joca Claudino|\
-Juarez Távora|\
-Juazeirinho|\
-Junco do Seridó|\
-Juripiranga|\
-Juru|\
-Lagoa|\
-Lagoa de Dentro|\
-Lagoa Seca|\
-Lastro|\
-Livramento|\
-Logradouro|\
-Lucena|\
-Mãe d'Água|\
-Malta|\
-Mamanguape|\
-Manaíra|\
-Marcação|\
-Mari|\
-Marizópolis|\
-Massaranduba|\
-Mataraca|\
-Matinhas|\
-Mato Grosso|\
-Maturéia|\
-Mogeiro|\
-Montadas|\
-Monte Horebe|\
-Monteiro|\
-Mulungu|\
-Natuba|\
-Nazarezinho|\
-Nova Floresta|\
-Nova Olinda|\
-Nova Palmeira|\
-Olho d'Água|\
-Olivedos|\
-Ouro Velho|\
-Parari|\
-Passagem|\
-Patos|\
-Paulista|\
-Pedra Branca|\
-Pedra Lavrada|\
-Pedras de Fogo|\
-Pedro Régis|\
-Piancó|\
-Picuí|\
-Pilar|\
-Pilões|\
-Pilõezinhos|\
-Pirpirituba|\
-Pitimbu|\
-Pocinhos|\
-Poço Dantas|\
-Poço de José de Moura|\
-Pombal|\
-Prata|\
-Princesa Isabel|\
-Puxinanã|\
-Queimadas|\
-Quixaba|\
-Remígio|\
-Riachão|\
-Riachão do Bacamarte|\
-Riachão do Poço|\
-Riacho de Santo Antônio|\
-Riacho dos Cavalos|\
-Rio Tinto|\
-Salgadinho|\
-Salgado de São Félix|\
-Santa Cecília|\
-Santa Cruz|\
-Santa Helena|\
-Santa Inês|\
-Santa Luzia|\
-Santa Rita|\
-Santa Teresinha|\
-Santana de Mangueira|\
-Santana dos Garrotes|\
-Santo André|\
-São Bentinho|\
-São Bento|\
-São Domingos|\
-São Domingos do Cariri|\
-São Francisco|\
-São João do Cariri|\
-São João do Rio do Peixe|\
-São João do Tigre|\
-São José da Lagoa Tapada|\
-São José de Caiana|\
-São José de Espinharas|\
-São José de Piranhas|\
-São José de Princesa|\
-São José do Bonfim|\
-São José do Brejo do Cruz|\
-São José do Sabugi|\
-São José dos Cordeiros|\
-São José dos Ramos|\
-São Mamede|\
-São Miguel de Taipu|\
-São Sebastião de Lagoa de Roça|\
-São Sebastião do Umbuzeiro|\
-São Vicente do Seridó|\
-Sapé|\
-Serra Branca|\
-Serra da Raiz|\
-Serra Grande|\
-Serra Redonda|\
-Serraria|\
-Sertãozinho|\
-Sobrado|\
-Solânea|\
-Soledade|\
-Sossêgo|\
-Sousa|\
-Sumé|\
-Tacima|\
-Taperoá|\
-Tavares|\
-Teixeira|\
-Tenório|\
-Triunfo|\
-Uiraúna|\
-Umbuzeiro|\
-Várzea|\
-Vieirópolis|\
-Vista Serrana|\
-Zabelê",
-	PE: "Abreu e Lima|\
-Afogados da Ingazeira|\
-Afrânio|\
-Agrestina|\
-Água Preta|\
-Águas Belas|\
-Alagoinha|\
-Aliança|\
-Altinho|\
-Amaraji|\
-Angelim|\
-Araçoiaba|\
-Araripina|\
-Arcoverde|\
-Barra de Guabiraba|\
-Barreiros|\
-Belém de Maria|\
-Belém do São Francisco|\
-Belo Jardim|\
-Betânia|\
-Bezerros|\
-Bodocó|\
-Bom Conselho|\
-Bom Jardim|\
-Bonito|\
-Brejão|\
-Brejinho|\
-Brejo da Madre de Deus|\
-Buenos Aires|\
-Buíque|\
-Cabo de Santo Agostinho|\
-Cabrobó|\
-Cachoeirinha|\
-Caetés|\
-Calçado|\
-Calumbi|\
-Camaragibe|\
-Camocim de São Félix|\
-Camutanga|\
-Canhotinho|\
-Capoeiras|\
-Carnaíba|\
-Carnaubeira da Penha|\
-Carpina|\
-Caruaru|\
-Casinhas|\
-Catende|\
-Cedro|\
-Chã de Alegria|\
-Chã Grande|\
-Condado|\
-Correntes|\
-Cortês|\
-Cumaru|\
-Cupira|\
-Custódia|\
-Dormentes|\
-Escada|\
-Exu|\
-Feira Nova|\
-Fernando de Noronha|\
-Ferreiros|\
-Flores|\
-Floresta|\
-Frei Miguelinho|\
-Gameleira|\
-Garanhuns|\
-Glória do Goitá|\
-Goiana|\
-Granito|\
-Gravatá|\
-Iati|\
-Ibimirim|\
-Ibirajuba|\
-Igarassu|\
-Iguaracy|\
-Ilha de Itamaracá|\
-Inajá|\
-Ingazeira|\
-Ipojuca|\
-Ipubi|\
-Itacuruba|\
-Itaíba|\
-Itambé|\
-Itapetim|\
-Itapissuma|\
-Itaquitinga|\
-Jaboatão dos Guararapes|\
-Jaqueira|\
-Jataúba|\
-Jatobá|\
-João Alfredo|\
-Joaquim Nabuco|\
-Jucati|\
-Jupi|\
-Jurema|\
-Lagoa de Itaenga|\
-Lagoa do Carro|\
-Lagoa do Ouro|\
-Lagoa dos Gatos|\
-Lagoa Grande|\
-Lajedo|\
-Limoeiro|\
-Macaparana|\
-Machados|\
-Manari|\
-Maraial|\
-Mirandiba|\
-Moreilândia|\
-Moreno|\
-Nazaré da Mata|\
-Olinda|\
-Orobó|\
-Orocó|\
-Ouricuri|\
-Palmares|\
-Palmeirina|\
-Panelas|\
-Paranatama|\
-Parnamirim|\
-Passira|\
-Paudalho|\
-Paulista|\
-Pedra|\
-Pesqueira|\
-Petrolândia|\
-Petrolina|\
-Poção|\
-Pombos|\
-Primavera|\
-Quipapá|\
-Quixaba|\
-Recife|\
-Riacho das Almas|\
-Ribeirão|\
-Rio Formoso|\
-Sairé|\
-Salgadinho|\
-Salgueiro|\
-Saloá|\
-Sanharó|\
-Santa Cruz|\
-Santa Cruz da Baixa Verde|\
-Santa Cruz do Capibaribe|\
-Santa Filomena|\
-Santa Maria da Boa Vista|\
-Santa Maria do Cambucá|\
-Santa Terezinha|\
-São Benedito do Sul|\
-São Bento do Una|\
-São Caitano|\
-São João|\
-São Joaquim do Monte|\
-São José da Coroa Grande|\
-São José do Belmonte|\
-São José do Egito|\
-São Lourenço da Mata|\
-São Vicente Férrer|\
-Serra Talhada|\
-Serrita|\
-Sertânia|\
-Sirinhaém|\
-Solidão|\
-Surubim|\
-Tabira|\
-Tacaimbó|\
-Tacaratu|\
-Tamandaré|\
-Taquaritinga do Norte|\
-Terezinha|\
-Terra Nova|\
-Timbaúba|\
-Toritama|\
-Tracunhaém|\
-Trindade|\
-Triunfo|\
-Tupanatinga|\
-Tuparetama|\
-Venturosa|\
-Verdejante|\
-Vertente do Lério|\
-Vertentes|\
-Vicência|\
-Vitória de Santo Antão|\
-Xexéu",
-	PI: "Acauã|\
-Agricolândia|\
-Água Branca|\
-Alagoinha do Piauí|\
-Alegrete do Piauí|\
-Alto Longá|\
-Altos|\
-Alvorada do Gurguéia|\
-Amarante|\
-Angical do Piauí|\
-Anísio de Abreu|\
-Antônio Almeida|\
-Aroazes|\
-Aroeiras do Itaim|\
-Arraial|\
-Assunção do Piauí|\
-Avelino Lopes|\
-Baixa Grande do Ribeiro|\
-Barra D'Alcântara|\
-Barras|\
-Barreiras do Piauí|\
-Barro Duro|\
-Batalha|\
-Bela Vista do Piauí|\
-Belém do Piauí|\
-Beneditinos|\
-Bertolínia|\
-Betânia do Piauí|\
-Boa Hora|\
-Bocaina|\
-Bom Jesus|\
-Bom Princípio do Piauí|\
-Bonfim do Piauí|\
-Boqueirão do Piauí|\
-Brasileira|\
-Brejo do Piauí|\
-Buriti dos Lopes|\
-Buriti dos Montes|\
-Cabeceiras do Piauí|\
-Cajazeiras do Piauí|\
-Cajueiro da Praia|\
-Caldeirão Grande do Piauí|\
-Campinas do Piauí|\
-Campo Alegre do Fidalgo|\
-Campo Grande do Piauí|\
-Campo Largo do Piauí|\
-Campo Maior|\
-Canavieira|\
-Canto do Buriti|\
-Capitão de Campos|\
-Capitão Gervásio Oliveira|\
-Caracol|\
-Caraúbas do Piauí|\
-Caridade do Piauí|\
-Castelo do Piauí|\
-Caxingó|\
-Cocal|\
-Cocal de Telha|\
-Cocal dos Alves|\
-Coivaras|\
-Colônia do Gurguéia|\
-Colônia do Piauí|\
-Conceição do Canindé|\
-Coronel José Dias|\
-Corrente|\
-Cristalândia do Piauí|\
-Cristino Castro|\
-Curimatá|\
-Currais|\
-Curral Novo do Piauí|\
-Curralinhos|\
-Demerval Lobão|\
-Dirceu Arcoverde|\
-Dom Expedito Lopes|\
-Dom Inocêncio|\
-Domingos Mourão|\
-Elesbão Veloso|\
-Eliseu Martins|\
-Esperantina|\
-Fartura do Piauí|\
-Flores do Piauí|\
-Floresta do Piauí|\
-Floriano|\
-Francinópolis|\
-Francisco Ayres|\
-Francisco Macedo|\
-Francisco Santos|\
-Fronteiras|\
-Geminiano|\
-Gilbués|\
-Guadalupe|\
-Guaribas|\
-Hugo Napoleão|\
-Ilha Grande|\
-Inhuma|\
-Ipiranga do Piauí|\
-Isaías Coelho|\
-Itainópolis|\
-Itaueira|\
-Jacobina do Piauí|\
-Jaicós|\
-Jardim do Mulato|\
-Jatobá do Piauí|\
-Jerumenha|\
-João Costa|\
-Joaquim Pires|\
-Joca Marques|\
-José de Freitas|\
-Juazeiro do Piauí|\
-Júlio Borges|\
-Jurema|\
-Lagoa Alegre|\
-Lagoa de São Francisco|\
-Lagoa do Barro do Piauí|\
-Lagoa do Piauí|\
-Lagoa do Sítio|\
-Lagoinha do Piauí|\
-Landri Sales|\
-Luís Correia|\
-Luzilândia|\
-Madeiro|\
-Manoel Emídio|\
-Marcolândia|\
-Marcos Parente|\
-Massapê do Piauí|\
-Matias Olímpio|\
-Miguel Alves|\
-Miguel Leão|\
-Milton Brandão|\
-Monsenhor Gil|\
-Monsenhor Hipólito|\
-Monte Alegre do Piauí|\
-Morro Cabeça no Tempo|\
-Morro do Chapéu do Piauí|\
-Murici dos Portelas|\
-Nazaré do Piauí|\
-Nazária|\
-Nossa Senhora de Nazaré|\
-Nossa Senhora dos Remédios|\
-Nova Santa Rita|\
-Novo Oriente do Piauí|\
-Novo Santo Antônio|\
-Oeiras|\
-Olho D'Água do Piauí|\
-Padre Marcos|\
-Paes Landim|\
-Pajeú do Piauí|\
-Palmeira do Piauí|\
-Palmeirais|\
-Paquetá|\
-Parnaguá|\
-Parnaíba|\
-Passagem Franca do Piauí|\
-Patos do Piauí|\
-Pau D'Arco do Piauí|\
-Paulistana|\
-Pavussu|\
-Pedro II|\
-Pedro Laurentino|\
-Picos|\
-Pimenteiras|\
-Pio IX|\
-Piracuruca|\
-Piripiri|\
-Porto|\
-Porto Alegre do Piauí|\
-Prata do Piauí|\
-Queimada Nova|\
-Redenção do Gurguéia|\
-Regeneração|\
-Riacho Frio|\
-Ribeira do Piauí|\
-Ribeiro Gonçalves|\
-Rio Grande do Piauí|\
-Santa Cruz do Piauí|\
-Santa Cruz dos Milagres|\
-Santa Filomena|\
-Santa Luz|\
-Santa Rosa do Piauí|\
-Santana do Piauí|\
-Santo Antônio de Lisboa|\
-Santo Antônio dos Milagres|\
-Santo Inácio do Piauí|\
-São Braz do Piauí|\
-São Félix do Piauí|\
-São Francisco de Assis do Piauí|\
-São Francisco do Piauí|\
-São Gonçalo do Gurguéia|\
-São Gonçalo do Piauí|\
-São João da Canabrava|\
-São João da Fronteira|\
-São João da Serra|\
-São João da Varjota|\
-São João do Arraial|\
-São João do Piauí|\
-São José do Divino|\
-São José do Peixe|\
-São José do Piauí|\
-São Julião|\
-São Lourenço do Piauí|\
-São Luis do Piauí|\
-São Miguel da Baixa Grande|\
-São Miguel do Fidalgo|\
-São Miguel do Tapuio|\
-São Pedro do Piauí|\
-São Raimundo Nonato|\
-Sebastião Barros|\
-Sebastião Leal|\
-Sigefredo Pacheco|\
-Simões|\
-Simplício Mendes|\
-Socorro do Piauí|\
-Sussuapara|\
-Tamboril do Piauí|\
-Tanque do Piauí|\
-Teresina|\
-União|\
-Uruçuí|\
-Valença do Piauí|\
-Várzea Branca|\
-Várzea Grande|\
-Vera Mendes|\
-Vila Nova do Piauí|\
-Wall Ferraz",
-	PR: "Abatiá|\
-Adrianópolis|\
-Agudos do Sul|\
-Almirante Tamandaré|\
-Altamira do Paraná|\
-Alto Paraíso|\
-Alto Paraná|\
-Alto Piquiri|\
-Altônia|\
-Alvorada do Sul|\
-Amaporã|\
-Ampére|\
-Anahy|\
-Andirá|\
-Ângulo|\
-Antonina|\
-Antônio Olinto|\
-Apucarana|\
-Arapongas|\
-Arapoti|\
-Arapuã|\
-Araruna|\
-Araucária|\
-Ariranha do Ivaí|\
-Assaí|\
-Assis Chateaubriand|\
-Astorga|\
-Atalaia|\
-Balsa Nova|\
-Bandeirantes|\
-Barbosa Ferraz|\
-Barra do Jacaré|\
-Barracão|\
-Bela Vista da Caroba|\
-Bela Vista do Paraíso|\
-Bituruna|\
-Boa Esperança|\
-Boa Esperança do Iguaçu|\
-Boa Ventura de São Roque|\
-Boa Vista da Aparecida|\
-Bocaiúva do Sul|\
-Bom Jesus do Sul|\
-Bom Sucesso|\
-Bom Sucesso do Sul|\
-Borrazópolis|\
-Braganey|\
-Brasilândia do Sul|\
-Cafeara|\
-Cafelândia|\
-Cafezal do Sul|\
-Califórnia|\
-Cambará|\
-Cambé|\
-Cambira|\
-Campina da Lagoa|\
-Campina do Simão|\
-Campina Grande do Sul|\
-Campo Bonito|\
-Campo do Tenente|\
-Campo Largo|\
-Campo Magro|\
-Campo Mourão|\
-Cândido de Abreu|\
-Candói|\
-Cantagalo|\
-Capanema|\
-Capitão Leônidas Marques|\
-Carambeí|\
-Carlópolis|\
-Cascavel|\
-Castro|\
-Catanduvas|\
-Centenário do Sul|\
-Cerro Azul|\
-Céu Azul|\
-Chopinzinho|\
-Cianorte|\
-Cidade Gaúcha|\
-Clevelândia|\
-Colombo|\
-Colorado|\
-Congonhinhas|\
-Conselheiro Mairinck|\
-Contenda|\
-Corbélia|\
-Cornélio Procópio|\
-Coronel Domingos Soares|\
-Coronel Vivida|\
-Corumbataí do Sul|\
-Cruz Machado|\
-Cruzeiro do Iguaçu|\
-Cruzeiro do Oeste|\
-Cruzeiro do Sul|\
-Cruzmaltina|\
-Curitiba|\
-Curiúva|\
-Diamante D'Oeste|\
-Diamante do Norte|\
-Diamante do Sul|\
-Dois Vizinhos|\
-Douradina|\
-Doutor Camargo|\
-Doutor Ulysses|\
-Enéas Marques|\
-Engenheiro Beltrão|\
-Entre Rios do Oeste|\
-Esperança Nova|\
-Espigão Alto do Iguaçu|\
-Farol|\
-Faxinal|\
-Fazenda Rio Grande|\
-Fênix|\
-Fernandes Pinheiro|\
-Figueira|\
-Flor da Serra do Sul|\
-Floraí|\
-Floresta|\
-Florestópolis|\
-Flórida|\
-Formosa do Oeste|\
-Foz do Iguaçu|\
-Foz do Jordão|\
-Francisco Alves|\
-Francisco Beltrão|\
-General Carneiro|\
-Godoy Moreira|\
-Goioerê|\
-Goioxim|\
-Grandes Rios|\
-Guaíra|\
-Guairaçá|\
-Guamiranga|\
-Guapirama|\
-Guaporema|\
-Guaraci|\
-Guaraniaçu|\
-Guarapuava|\
-Guaraqueçaba|\
-Guaratuba|\
-Honório Serpa|\
-Ibaiti|\
-Ibema|\
-Ibiporã|\
-Icaraíma|\
-Iguaraçu|\
-Iguatu|\
-Imbaú|\
-Imbituva|\
-Inácio Martins|\
-Inajá|\
-Indianópolis|\
-Ipiranga|\
-Iporã|\
-Iracema do Oeste|\
-Irati|\
-Iretama|\
-Itaguajé|\
-Itaipulândia|\
-Itambaracá|\
-Itambé|\
-Itapejara d'Oeste|\
-Itaperuçu|\
-Itaúna do Sul|\
-Ivaí|\
-Ivaiporã|\
-Ivaté|\
-Ivatuba|\
-Jaboti|\
-Jacarezinho|\
-Jaguapitã|\
-Jaguariaíva|\
-Jandaia do Sul|\
-Janiópolis|\
-Japira|\
-Japurá|\
-Jardim Alegre|\
-Jardim Olinda|\
-Jataizinho|\
-Jesuítas|\
-Joaquim Távora|\
-Jundiaí do Sul|\
-Juranda|\
-Jussara|\
-Kaloré|\
-Lapa|\
-Laranjal|\
-Laranjeiras do Sul|\
-Leópolis|\
-Lidianópolis|\
-Lindoeste|\
-Loanda|\
-Lobato|\
-Londrina|\
-Luiziana|\
-Lunardelli|\
-Lupionópolis|\
-Mallet|\
-Mamborê|\
-Mandaguaçu|\
-Mandaguari|\
-Mandirituba|\
-Manfrinópolis|\
-Mangueirinha|\
-Manoel Ribas|\
-Marechal Cândido Rondon|\
-Maria Helena|\
-Marialva|\
-Marilândia do Sul|\
-Marilena|\
-Mariluz|\
-Maringá|\
-Mariópolis|\
-Maripá|\
-Marmeleiro|\
-Marquinho|\
-Marumbi|\
-Matelândia|\
-Matinhos|\
-Mato Rico|\
-Mauá da Serra|\
-Medianeira|\
-Mercedes|\
-Mirador|\
-Miraselva|\
-Missal|\
-Moreira Sales|\
-Morretes|\
-Munhoz de Melo|\
-Nossa Senhora das Graças|\
-Nova Aliança do Ivaí|\
-Nova América da Colina|\
-Nova Aurora|\
-Nova Cantu|\
-Nova Esperança|\
-Nova Esperança do Sudoeste|\
-Nova Fátima|\
-Nova Laranjeiras|\
-Nova Londrina|\
-Nova Olímpia|\
-Nova Prata do Iguaçu|\
-Nova Santa Bárbara|\
-Nova Santa Rosa|\
-Nova Tebas|\
-Novo Itacolomi|\
-Ortigueira|\
-Ourizona|\
-Ouro Verde do Oeste|\
-Paiçandu|\
-Palmas|\
-Palmeira|\
-Palmital|\
-Palotina|\
-Paraíso do Norte|\
-Paranacity|\
-Paranaguá|\
-Paranapoema|\
-Paranavaí|\
-Pato Bragado|\
-Pato Branco|\
-Paula Freitas|\
-Paulo Frontin|\
-Peabiru|\
-Perobal|\
-Pérola|\
-Pérola d'Oeste|\
-Piên|\
-Pinhais|\
-Pinhal de São Bento|\
-Pinhalão|\
-Pinhão|\
-Piraí do Sul|\
-Piraquara|\
-Pitanga|\
-Pitangueiras|\
-Planaltina do Paraná|\
-Planalto|\
-Ponta Grossa|\
-Pontal do Paraná|\
-Porecatu|\
-Porto Amazonas|\
-Porto Barreiro|\
-Porto Rico|\
-Porto Vitória|\
-Prado Ferreira|\
-Pranchita|\
-Presidente Castelo Branco|\
-Primeiro de Maio|\
-Prudentópolis|\
-Quarto Centenário|\
-Quatiguá|\
-Quatro Barras|\
-Quatro Pontes|\
-Quedas do Iguaçu|\
-Querência do Norte|\
-Quinta do Sol|\
-Quitandinha|\
-Ramilândia|\
-Rancho Alegre|\
-Rancho Alegre D'Oeste|\
-Realeza|\
-Rebouças|\
-Renascença|\
-Reserva|\
-Reserva do Iguaçu|\
-Ribeirão Claro|\
-Ribeirão do Pinhal|\
-Rio Azul|\
-Rio Bom|\
-Rio Bonito do Iguaçu|\
-Rio Branco do Ivaí|\
-Rio Branco do Sul|\
-Rio Negro|\
-Rolândia|\
-Roncador|\
-Rondon|\
-Rosário do Ivaí|\
-Sabáudia|\
-Salgado Filho|\
-Salto do Itararé|\
-Salto do Lontra|\
-Santa Amélia|\
-Santa Cecília do Pavão|\
-Santa Cruz de Monte Castelo|\
-Santa Fé|\
-Santa Helena|\
-Santa Inês|\
-Santa Isabel do Ivaí|\
-Santa Izabel do Oeste|\
-Santa Lúcia|\
-Santa Maria do Oeste|\
-Santa Mariana|\
-Santa Mônica|\
-Santa Tereza do Oeste|\
-Santa Terezinha de Itaipu|\
-Santana do Itararé|\
-Santo Antônio da Platina|\
-Santo Antônio do Caiuá|\
-Santo Antônio do Paraíso|\
-Santo Antônio do Sudoeste|\
-Santo Inácio|\
-São Carlos do Ivaí|\
-São Jerônimo da Serra|\
-São João|\
-São João do Caiuá|\
-São João do Ivaí|\
-São João do Triunfo|\
-São Jorge d'Oeste|\
-São Jorge do Ivaí|\
-São Jorge do Patrocínio|\
-São José da Boa Vista|\
-São José das Palmeiras|\
-São José dos Pinhais|\
-São Manoel do Paraná|\
-São Mateus do Sul|\
-São Miguel do Iguaçu|\
-São Pedro do Iguaçu|\
-São Pedro do Ivaí|\
-São Pedro do Paraná|\
-São Sebastião da Amoreira|\
-São Tomé|\
-Sapopema|\
-Sarandi|\
-Saudade do Iguaçu|\
-Sengés|\
-Serranópolis do Iguaçu|\
-Sertaneja|\
-Sertanópolis|\
-Siqueira Campos|\
-Sulina|\
-Tamarana|\
-Tamboara|\
-Tapejara|\
-Tapira|\
-Teixeira Soares|\
-Telêmaco Borba|\
-Terra Boa|\
-Terra Rica|\
-Terra Roxa|\
-Tibagi|\
-Tijucas do Sul|\
-Toledo|\
-Tomazina|\
-Três Barras do Paraná|\
-Tunas do Paraná|\
-Tuneiras do Oeste|\
-Tupãssi|\
-Turvo|\
-Ubiratã|\
-Umuarama|\
-União da Vitória|\
-Uniflor|\
-Uraí|\
-Ventania|\
-Vera Cruz do Oeste|\
-Verê|\
-Virmond|\
-Vitorino|\
-Wenceslau Braz|\
-Xambrê",
-	RJ: "Angra dos Reis|\
-Aperibé|\
-Araruama|\
-Areal|\
-Armação dos Búzios|\
-Arraial do Cabo|\
-Barra do Piraí|\
-Barra Mansa|\
-Belford Roxo|\
-Bom Jardim|\
-Bom Jesus do Itabapoana|\
-Cabo Frio|\
-Cachoeiras de Macacu|\
-Cambuci|\
-Campos dos Goytacazes|\
-Cantagalo|\
-Carapebus|\
-Cardoso Moreira|\
-Carmo|\
-Casimiro de Abreu|\
-Comendador Levy Gasparian|\
-Conceição de Macabu|\
-Cordeiro|\
-Duas Barras|\
-Duque de Caxias|\
-Engenheiro Paulo de Frontin|\
-Guapimirim|\
-Iguaba Grande|\
-Itaboraí|\
-Itaguaí|\
-Italva|\
-Itaocara|\
-Itaperuna|\
-Itatiaia|\
-Japeri|\
-Laje do Muriaé|\
-Macaé|\
-Macuco|\
-Magé|\
-Mangaratiba|\
-Maricá|\
-Mendes|\
-Mesquita|\
-Miguel Pereira|\
-Miracema|\
-Natividade|\
-Nilópolis|\
-Niterói|\
-Nova Friburgo|\
-Nova Iguaçu|\
-Paracambi|\
-Paraíba do Sul|\
-Paraty|\
-Paty do Alferes|\
-Petrópolis|\
-Pinheiral|\
-Piraí|\
-Porciúncula|\
-Porto Real|\
-Quatis|\
-Queimados|\
-Quissamã|\
-Resende|\
-Rio Bonito|\
-Rio Claro|\
-Rio das Flores|\
-Rio das Ostras|\
-Rio de Janeiro|\
-Santa Maria Madalena|\
-Santo Antônio de Pádua|\
-São Fidélis|\
-São Francisco de Itabapoana|\
-São Gonçalo|\
-São João da Barra|\
-São João de Meriti|\
-São José de Ubá|\
-São José do Vale do Rio Preto|\
-São Pedro da Aldeia|\
-São Sebastião do Alto|\
-Sapucaia|\
-Saquarema|\
-Seropédica|\
-Silva Jardim|\
-Sumidouro|\
-Tanguá|\
-Teresópolis|\
-Trajano de Moraes|\
-Três Rios|\
-Valença|\
-Varre-Sai|\
-Vassouras|\
-Volta Redonda",
-	RN: "Acari|\
-Afonso Bezerra|\
-Água Nova|\
-Alexandria|\
-Almino Afonso|\
-Alto do Rodrigues|\
-Angicos|\
-Antônio Martins|\
-Apodi|\
-Areia Branca|\
-Arez|\
-Assú|\
-Baía Formosa|\
-Baraúna|\
-Barcelona|\
-Bento Fernandes|\
-Bodó|\
-Bom Jesus|\
-Brejinho|\
-Caiçara do Norte|\
-Caiçara do Rio do Vento|\
-Caicó|\
-Campo Grande|\
-Campo Redondo|\
-Canguaretama|\
-Caraúbas|\
-Carnaúba dos Dantas|\
-Carnaubais|\
-Ceará-Mirim|\
-Cerro Corá|\
-Coronel Ezequiel|\
-Coronel João Pessoa|\
-Cruzeta|\
-Currais Novos|\
-Doutor Severiano|\
-Encanto|\
-Equador|\
-Espírito Santo|\
-Extremoz|\
-Felipe Guerra|\
-Fernando Pedroza|\
-Florânia|\
-Francisco Dantas|\
-Frutuoso Gomes|\
-Galinhos|\
-Goianinha|\
-Governador Dix-Sept Rosado|\
-Grossos|\
-Guamaré|\
-Ielmo Marinho|\
-Ipanguaçu|\
-Ipueira|\
-Itajá|\
-Itaú|\
-Jaçanã|\
-Jandaíra|\
-Janduís|\
-Januário Cicco|\
-Japi|\
-Jardim de Angicos|\
-Jardim de Piranhas|\
-Jardim do Seridó|\
-João Câmara|\
-João Dias|\
-José da Penha|\
-Jucurutu|\
-Jundiá|\
-Lagoa d'Anta|\
-Lagoa de Pedras|\
-Lagoa de Velhos|\
-Lagoa Nova|\
-Lagoa Salgada|\
-Lajes|\
-Lajes Pintadas|\
-Lucrécia|\
-Luís Gomes|\
-Macaíba|\
-Macau|\
-Major Sales|\
-Marcelino Vieira|\
-Martins|\
-Maxaranguape|\
-Messias Targino|\
-Montanhas|\
-Monte Alegre|\
-Monte das Gameleiras|\
-Mossoró|\
-Natal|\
-Nísia Floresta|\
-Nova Cruz|\
-Olho d'Água do Borges|\
-Ouro Branco|\
-Paraná|\
-Paraú|\
-Parazinho|\
-Parelhas|\
-Parnamirim|\
-Passa e Fica|\
-Passagem|\
-Patu|\
-Pau dos Ferros|\
-Pedra Grande|\
-Pedra Preta|\
-Pedro Avelino|\
-Pedro Velho|\
-Pendências|\
-Pilões|\
-Poço Branco|\
-Portalegre|\
-Porto do Mangue|\
-Pureza|\
-Rafael Fernandes|\
-Rafael Godeiro|\
-Riacho da Cruz|\
-Riacho de Santana|\
-Riachuelo|\
-Rio do Fogo|\
-Rodolfo Fernandes|\
-Ruy Barbosa|\
-Santa Cruz|\
-Santa Maria|\
-Santana do Matos|\
-Santana do Seridó|\
-Santo Antônio|\
-São Bento do Norte|\
-São Bento do Trairí|\
-São Fernando|\
-São Francisco do Oeste|\
-São Gonçalo do Amarante|\
-São João do Sabugi|\
-São José de Mipibu|\
-São José do Campestre|\
-São José do Seridó|\
-São Miguel|\
-São Miguel do Gostoso|\
-São Paulo do Potengi|\
-São Pedro|\
-São Rafael|\
-São Tomé|\
-São Vicente|\
-Senador Elói de Souza|\
-Senador Georgino Avelino|\
-Serra Caiada|\
-Serra de São Bento|\
-Serra do Mel|\
-Serra Negra do Norte|\
-Serrinha|\
-Serrinha dos Pintos|\
-Severiano Melo|\
-Sítio Novo|\
-Taboleiro Grande|\
-Taipu|\
-Tangará|\
-Tenente Ananias|\
-Tenente Laurentino Cruz|\
-Tibau|\
-Tibau do Sul|\
-Timbaúba dos Batistas|\
-Touros|\
-Triunfo Potiguar|\
-Umarizal|\
-Upanema|\
-Várzea|\
-Venha-Ver|\
-Vera Cruz|\
-Viçosa|\
-Vila Flor",
-	RO: "Alta Floresta D'Oeste|\
-Alto Alegre dos Parecis|\
-Alto Paraíso|\
-Alvorada D'Oeste|\
-Ariquemes|\
-Buritis|\
-Cabixi|\
-Cacaulândia|\
-Cacoal|\
-Campo Novo de Rondônia|\
-Candeias do Jamari|\
-Castanheiras|\
-Cerejeiras|\
-Chupinguaia|\
-Colorado do Oeste|\
-Corumbiara|\
-Costa Marques|\
-Cujubim|\
-Espigão D'Oeste|\
-Governador Jorge Teixeira|\
-Guajará-Mirim|\
-Itapuã do Oeste|\
-Jaru|\
-Ji-Paraná|\
-Machadinho D'Oeste|\
-Ministro Andreazza|\
-Mirante da Serra|\
-Monte Negro|\
-Nova Brasilândia D'Oeste|\
-Nova Mamoré|\
-Nova União|\
-Novo Horizonte do Oeste|\
-Ouro Preto do Oeste|\
-Parecis|\
-Pimenta Bueno|\
-Pimenteiras do Oeste|\
-Porto Velho|\
-Presidente Médici|\
-Primavera de Rondônia|\
-Rio Crespo|\
-Rolim de Moura|\
-Santa Luzia D'Oeste|\
-São Felipe D'Oeste|\
-São Francisco do Guaporé|\
-São Miguel do Guaporé|\
-Seringueiras|\
-Teixeirópolis|\
-Theobroma|\
-Urupá|\
-Vale do Anari|\
-Vale do Paraíso|\
-Vilhena",
-	RR: "Alto Alegre|\
-Amajari|\
-Boa Vista|\
-Bonfim|\
-Cantá|\
-Caracaraí|\
-Caroebe|\
-Iracema|\
-Mucajaí|\
-Normandia|\
-Pacaraima|\
-Rorainópolis|\
-São João da Baliza|\
-São Luiz do Anauá|\
-Uiramutã",
-	RS: "Aceguá|\
-Água Santa|\
-Agudo|\
-Ajuricaba|\
-Alecrim|\
-Alegrete|\
-Alegria|\
-Almirante Tamandaré do Sul|\
-Alpestre|\
-Alto Alegre|\
-Alto Feliz|\
-Alvorada|\
-Amaral Ferrador|\
-Ametista do Sul|\
-André da Rocha|\
-Anta Gorda|\
-Antônio Prado|\
-Arambaré|\
-Araricá|\
-Aratiba|\
-Arroio do Meio|\
-Arroio do Padre|\
-Arroio do Sal|\
-Arroio do Tigre|\
-Arroio dos Ratos|\
-Arroio Grande|\
-Arvorezinha|\
-Augusto Pestana|\
-Áurea|\
-Bagé|\
-Balneário Pinhal|\
-Barão|\
-Barão de Cotegipe|\
-Barão do Triunfo|\
-Barra do Guarita|\
-Barra do Quaraí|\
-Barra do Ribeiro|\
-Barra do Rio Azul|\
-Barra Funda|\
-Barracão|\
-Barros Cassal|\
-Benjamin Constant do Sul|\
-Bento Gonçalves|\
-Boa Vista das Missões|\
-Boa Vista do Buricá|\
-Boa Vista do Cadeado|\
-Boa Vista do Incra|\
-Boa Vista do Sul|\
-Bom Jesus|\
-Bom Princípio|\
-Bom Progresso|\
-Bom Retiro do Sul|\
-Boqueirão do Leão|\
-Bossoroca|\
-Bozano|\
-Braga|\
-Brochier|\
-Butiá|\
-Caçapava do Sul|\
-Cacequi|\
-Cachoeira do Sul|\
-Cachoeirinha|\
-Cacique Doble|\
-Caibaté|\
-Caiçara|\
-Camaquã|\
-Camargo|\
-Cambará do Sul|\
-Campestre da Serra|\
-Campina das Missões|\
-Campinas do Sul|\
-Campo Bom|\
-Campo Novo|\
-Campos Borges|\
-Candelária|\
-Cândido Godói|\
-Candiota|\
-Canela|\
-Canguçu|\
-Canoas|\
-Canudos do Vale|\
-Capão Bonito do Sul|\
-Capão da Canoa|\
-Capão do Cipó|\
-Capão do Leão|\
-Capela de Santana|\
-Capitão|\
-Capivari do Sul|\
-Caraá|\
-Carazinho|\
-Carlos Barbosa|\
-Carlos Gomes|\
-Casca|\
-Caseiros|\
-Catuípe|\
-Caxias do Sul|\
-Centenário|\
-Cerrito|\
-Cerro Branco|\
-Cerro Grande|\
-Cerro Grande do Sul|\
-Cerro Largo|\
-Chapada|\
-Charqueadas|\
-Charrua|\
-Chiapetta|\
-Chuí|\
-Chuvisca|\
-Cidreira|\
-Ciríaco|\
-Colinas|\
-Colorado|\
-Condor|\
-Constantina|\
-Coqueiro Baixo|\
-Coqueiros do Sul|\
-Coronel Barros|\
-Coronel Bicaco|\
-Coronel Pilar|\
-Cotiporã|\
-Coxilha|\
-Crissiumal|\
-Cristal|\
-Cristal do Sul|\
-Cruz Alta|\
-Cruzaltense|\
-Cruzeiro do Sul|\
-David Canabarro|\
-Derrubadas|\
-Dezesseis de Novembro|\
-Dilermando de Aguiar|\
-Dois Irmãos|\
-Dois Irmãos das Missões|\
-Dois Lajeados|\
-Dom Feliciano|\
-Dom Pedrito|\
-Dom Pedro de Alcântara|\
-Dona Francisca|\
-Doutor Maurício Cardoso|\
-Doutor Ricardo|\
-Eldorado do Sul|\
-Encantado|\
-Encruzilhada do Sul|\
-Engenho Velho|\
-Entre Rios do Sul|\
-Entre-Ijuís|\
-Erebango|\
-Erechim|\
-Ernestina|\
-Erval Grande|\
-Erval Seco|\
-Esmeralda|\
-Esperança do Sul|\
-Espumoso|\
-Estação|\
-Estância Velha|\
-Esteio|\
-Estrela|\
-Estrela Velha|\
-Eugênio de Castro|\
-Fagundes Varela|\
-Farroupilha|\
-Faxinal do Soturno|\
-Faxinalzinho|\
-Fazenda Vilanova|\
-Feliz|\
-Flores da Cunha|\
-Floriano Peixoto|\
-Fontoura Xavier|\
-Formigueiro|\
-Forquetinha|\
-Fortaleza dos Valos|\
-Frederico Westphalen|\
-Garibaldi|\
-Garruchos|\
-Gaurama|\
-General Câmara|\
-Gentil|\
-Getúlio Vargas|\
-Giruá|\
-Glorinha|\
-Gramado|\
-Gramado dos Loureiros|\
-Gramado Xavier|\
-Gravataí|\
-Guabiju|\
-Guaíba|\
-Guaporé|\
-Guarani das Missões|\
-Harmonia|\
-Herval|\
-Herveiras|\
-Horizontina|\
-Hulha Negra|\
-Humaitá|\
-Ibarama|\
-Ibiaçá|\
-Ibiraiaras|\
-Ibirapuitã|\
-Ibirubá|\
-Igrejinha|\
-Ijuí|\
-Ilópolis|\
-Imbé|\
-Imigrante|\
-Independência|\
-Inhacorá|\
-Ipê|\
-Ipiranga do Sul|\
-Iraí|\
-Itaara|\
-Itacurubi|\
-Itapuca|\
-Itaqui|\
-Itati|\
-Itatiba do Sul|\
-Ivorá|\
-Ivoti|\
-Jaboticaba|\
-Jacuizinho|\
-Jacutinga|\
-Jaguarão|\
-Jaguari|\
-Jaquirana|\
-Jari|\
-Jóia|\
-Júlio de Castilhos|\
-Lagoa Bonita do Sul|\
-Lagoa dos Três Cantos|\
-Lagoa Vermelha|\
-Lagoão|\
-Lajeado|\
-Lajeado do Bugre|\
-Lavras do Sul|\
-Liberato Salzano|\
-Lindolfo Collor|\
-Linha Nova|\
-Maçambará|\
-Machadinho|\
-Mampituba|\
-Manoel Viana|\
-Maquiné|\
-Maratá|\
-Marau|\
-Marcelino Ramos|\
-Mariana Pimentel|\
-Mariano Moro|\
-Marques de Souza|\
-Mata|\
-Mato Castelhano|\
-Mato Leitão|\
-Mato Queimado|\
-Maximiliano de Almeida|\
-Minas do Leão|\
-Miraguaí|\
-Montauri|\
-Monte Alegre dos Campos|\
-Monte Belo do Sul|\
-Montenegro|\
-Mormaço|\
-Morrinhos do Sul|\
-Morro Redondo|\
-Morro Reuter|\
-Mostardas|\
-Muçum|\
-Muitos Capões|\
-Muliterno|\
-Não-Me-Toque|\
-Nicolau Vergueiro|\
-Nonoai|\
-Nova Alvorada|\
-Nova Araçá|\
-Nova Bassano|\
-Nova Boa Vista|\
-Nova Bréscia|\
-Nova Candelária|\
-Nova Esperança do Sul|\
-Nova Hartz|\
-Nova Pádua|\
-Nova Palma|\
-Nova Petrópolis|\
-Nova Prata|\
-Nova Ramada|\
-Nova Roma do Sul|\
-Nova Santa Rita|\
-Novo Barreiro|\
-Novo Cabrais|\
-Novo Hamburgo|\
-Novo Machado|\
-Novo Tiradentes|\
-Novo Xingu|\
-Osório|\
-Paim Filho|\
-Palmares do Sul|\
-Palmeira das Missões|\
-Palmitinho|\
-Panambi|\
-Pantano Grande|\
-Paraí|\
-Paraíso do Sul|\
-Pareci Novo|\
-Parobé|\
-Passa Sete|\
-Passo do Sobrado|\
-Passo Fundo|\
-Paulo Bento|\
-Paverama|\
-Pedras Altas|\
-Pedro Osório|\
-Pejuçara|\
-Pelotas|\
-Picada Café|\
-Pinhal|\
-Pinhal da Serra|\
-Pinhal Grande|\
-Pinheirinho do Vale|\
-Pinheiro Machado|\
-Pinto Bandeira|\
-Pirapó|\
-Piratini|\
-Planalto|\
-Poço das Antas|\
-Pontão|\
-Ponte Preta|\
-Portão|\
-Porto Alegre|\
-Porto Lucena|\
-Porto Mauá|\
-Porto Vera Cruz|\
-Porto Xavier|\
-Pouso Novo|\
-Presidente Lucena|\
-Progresso|\
-Protásio Alves|\
-Putinga|\
-Quaraí|\
-Quatro Irmãos|\
-Quevedos|\
-Quinze de Novembro|\
-Redentora|\
-Relvado|\
-Restinga Sêca|\
-Rio dos Índios|\
-Rio Grande|\
-Rio Pardo|\
-Riozinho|\
-Roca Sales|\
-Rodeio Bonito|\
-Rolador|\
-Rolante|\
-Ronda Alta|\
-Rondinha|\
-Roque Gonzales|\
-Rosário do Sul|\
-Sagrada Família|\
-Saldanha Marinho|\
-Salto do Jacuí|\
-Salvador das Missões|\
-Salvador do Sul|\
-Sananduva|\
-Sant'Ana do Livramento|\
-Santa Bárbara do Sul|\
-Santa Cecília do Sul|\
-Santa Clara do Sul|\
-Santa Cruz do Sul|\
-Santa Margarida do Sul|\
-Santa Maria|\
-Santa Maria do Herval|\
-Santa Rosa|\
-Santa Tereza|\
-Santa Vitória do Palmar|\
-Santana da Boa Vista|\
-Santiago|\
-Santo Ângelo|\
-Santo Antônio da Patrulha|\
-Santo Antônio das Missões|\
-Santo Antônio do Palma|\
-Santo Antônio do Planalto|\
-Santo Augusto|\
-Santo Cristo|\
-Santo Expedito do Sul|\
-São Borja|\
-São Domingos do Sul|\
-São Francisco de Assis|\
-São Francisco de Paula|\
-São Gabriel|\
-São Jerônimo|\
-São João da Urtiga|\
-São João do Polêsine|\
-São Jorge|\
-São José das Missões|\
-São José do Herval|\
-São José do Hortêncio|\
-São José do Inhacorá|\
-São José do Norte|\
-São José do Ouro|\
-São José do Sul|\
-São José dos Ausentes|\
-São Leopoldo|\
-São Lourenço do Sul|\
-São Luiz Gonzaga|\
-São Marcos|\
-São Martinho|\
-São Martinho da Serra|\
-São Miguel das Missões|\
-São Nicolau|\
-São Paulo das Missões|\
-São Pedro da Serra|\
-São Pedro das Missões|\
-São Pedro do Butiá|\
-São Pedro do Sul|\
-São Sebastião do Caí|\
-São Sepé|\
-São Valentim|\
-São Valentim do Sul|\
-São Valério do Sul|\
-São Vendelino|\
-São Vicente do Sul|\
-Sapiranga|\
-Sapucaia do Sul|\
-Sarandi|\
-Seberi|\
-Sede Nova|\
-Segredo|\
-Selbach|\
-Senador Salgado Filho|\
-Sentinela do Sul|\
-Serafina Corrêa|\
-Sério|\
-Sertão|\
-Sertão Santana|\
-Sete de Setembro|\
-Severiano de Almeida|\
-Silveira Martins|\
-Sinimbu|\
-Sobradinho|\
-Soledade|\
-Tabaí|\
-Tapejara|\
-Tapera|\
-Tapes|\
-Taquara|\
-Taquari|\
-Taquaruçu do Sul|\
-Tavares|\
-Tenente Portela|\
-Terra de Areia|\
-Teutônia|\
-Tio Hugo|\
-Tiradentes do Sul|\
-Toropi|\
-Torres|\
-Tramandaí|\
-Travesseiro|\
-Três Arroios|\
-Três Cachoeiras|\
-Três Coroas|\
-Três de Maio|\
-Três Forquilhas|\
-Três Palmeiras|\
-Três Passos|\
-Trindade do Sul|\
-Triunfo|\
-Tucunduva|\
-Tunas|\
-Tupanci do Sul|\
-Tupanciretã|\
-Tupandi|\
-Tuparendi|\
-Turuçu|\
-Ubiretama|\
-União da Serra|\
-Unistalda|\
-Uruguaiana|\
-Vacaria|\
-Vale do Sol|\
-Vale Real|\
-Vale Verde|\
-Vanini|\
-Venâncio Aires|\
-Vera Cruz|\
-Veranópolis|\
-Vespasiano Corrêa|\
-Viadutos|\
-Viamão|\
-Vicente Dutra|\
-Victor Graeff|\
-Vila Flores|\
-Vila Lângaro|\
-Vila Maria|\
-Vila Nova do Sul|\
-Vista Alegre|\
-Vista Alegre do Prata|\
-Vista Gaúcha|\
-Vitória das Missões|\
-Westfália|\
-Xangri-lá",
-	SC: "Abdon Batista|\
-Abelardo Luz|\
-Agrolândia|\
-Agronômica|\
-Água Doce|\
-Águas de Chapecó|\
-Águas Frias|\
-Águas Mornas|\
-Alfredo Wagner|\
-Alto Bela Vista|\
-Anchieta|\
-Angelina|\
-Anita Garibaldi|\
-Anitápolis|\
-Antônio Carlos|\
-Apiúna|\
-Arabutã|\
-Araquari|\
-Araranguá|\
-Armazém|\
-Arroio Trinta|\
-Arvoredo|\
-Ascurra|\
-Atalanta|\
-Aurora|\
-Balneário Arroio do Silva|\
-Balneário Barra do Sul|\
-Balneário Camboriú|\
-Balneário Gaivota|\
-Balneário Piçarras|\
-Balneário Rincão|\
-Bandeirante|\
-Barra Bonita|\
-Barra Velha|\
-Bela Vista do Toldo|\
-Belmonte|\
-Benedito Novo|\
-Biguaçu|\
-Blumenau|\
-Bocaina do Sul|\
-Bom Jardim da Serra|\
-Bom Jesus|\
-Bom Jesus do Oeste|\
-Bom Retiro|\
-Bombinhas|\
-Botuverá|\
-Braço do Norte|\
-Braço do Trombudo|\
-Brunópolis|\
-Brusque|\
-Caçador|\
-Caibi|\
-Calmon|\
-Camboriú|\
-Campo Alegre|\
-Campo Belo do Sul|\
-Campo Erê|\
-Campos Novos|\
-Canelinha|\
-Canoinhas|\
-Capão Alto|\
-Capinzal|\
-Capivari de Baixo|\
-Catanduvas|\
-Caxambu do Sul|\
-Celso Ramos|\
-Cerro Negro|\
-Chapadão do Lageado|\
-Chapecó|\
-Cocal do Sul|\
-Concórdia|\
-Cordilheira Alta|\
-Coronel Freitas|\
-Coronel Martins|\
-Correia Pinto|\
-Corupá|\
-Criciúma|\
-Cunha Porã|\
-Cunhataí|\
-Curitibanos|\
-Descanso|\
-Dionísio Cerqueira|\
-Dona Emma|\
-Doutor Pedrinho|\
-Entre Rios|\
-Ermo|\
-Erval Velho|\
-Faxinal dos Guedes|\
-Flor do Sertão|\
-Florianópolis|\
-Formosa do Sul|\
-Forquilhinha|\
-Fraiburgo|\
-Frei Rogério|\
-Galvão|\
-Garopaba|\
-Garuva|\
-Gaspar|\
-Governador Celso Ramos|\
-Grão-Pará|\
-Gravatal|\
-Guabiruba|\
-Guaraciaba|\
-Guaramirim|\
-Guarujá do Sul|\
-Guatambú|\
-Herval d'Oeste|\
-Ibiam|\
-Ibicaré|\
-Ibirama|\
-Içara|\
-Ilhota|\
-Imaruí|\
-Imbituba|\
-Imbuia|\
-Indaial|\
-Iomerê|\
-Ipira|\
-Iporã do Oeste|\
-Ipuaçu|\
-Ipumirim|\
-Iraceminha|\
-Irani|\
-Irati|\
-Irineópolis|\
-Itá|\
-Itaiópolis|\
-Itajaí|\
-Itapema|\
-Itapiranga|\
-Itapoá|\
-Ituporanga|\
-Jaborá|\
-Jacinto Machado|\
-Jaguaruna|\
-Jaraguá do Sul|\
-Jardinópolis|\
-Joaçaba|\
-Joinville|\
-José Boiteux|\
-Jupiá|\
-Lacerdópolis|\
-Lages|\
-Laguna|\
-Lajeado Grande|\
-Laurentino|\
-Lauro Müller|\
-Lebon Régis|\
-Leoberto Leal|\
-Lindóia do Sul|\
-Lontras|\
-Luiz Alves|\
-Luzerna|\
-Macieira|\
-Mafra|\
-Major Gercino|\
-Major Vieira|\
-Maracajá|\
-Maravilha|\
-Marema|\
-Massaranduba|\
-Matos Costa|\
-Meleiro|\
-Mirim Doce|\
-Modelo|\
-Mondaí|\
-Monte Carlo|\
-Monte Castelo|\
-Morro da Fumaça|\
-Morro Grande|\
-Navegantes|\
-Nova Erechim|\
-Nova Itaberaba|\
-Nova Trento|\
-Nova Veneza|\
-Novo Horizonte|\
-Orleans|\
-Otacílio Costa|\
-Ouro|\
-Ouro Verde|\
-Paial|\
-Painel|\
-Palhoça|\
-Palma Sola|\
-Palmeira|\
-Palmitos|\
-Papanduva|\
-Paraíso|\
-Passo de Torres|\
-Passos Maia|\
-Paulo Lopes|\
-Pedras Grandes|\
-Penha|\
-Peritiba|\
-Pescaria Brava|\
-Petrolândia|\
-Pinhalzinho|\
-Pinheiro Preto|\
-Piratuba|\
-Planalto Alegre|\
-Pomerode|\
-Ponte Alta|\
-Ponte Alta do Norte|\
-Ponte Serrada|\
-Porto Belo|\
-Porto União|\
-Pouso Redondo|\
-Praia Grande|\
-Presidente Castello Branco|\
-Presidente Getúlio|\
-Presidente Nereu|\
-Princesa|\
-Quilombo|\
-Rancho Queimado|\
-Rio das Antas|\
-Rio do Campo|\
-Rio do Oeste|\
-Rio do Sul|\
-Rio dos Cedros|\
-Rio Fortuna|\
-Rio Negrinho|\
-Rio Rufino|\
-Riqueza|\
-Rodeio|\
-Romelândia|\
-Salete|\
-Saltinho|\
-Salto Veloso|\
-Sangão|\
-Santa Cecília|\
-Santa Helena|\
-Santa Rosa de Lima|\
-Santa Rosa do Sul|\
-Santa Terezinha|\
-Santa Terezinha do Progresso|\
-Santiago do Sul|\
-Santo Amaro da Imperatriz|\
-São Bento do Sul|\
-São Bernardino|\
-São Bonifácio|\
-São Carlos|\
-São Cristóvão do Sul|\
-São Domingos|\
-São Francisco do Sul|\
-São João Batista|\
-São João do Itaperiú|\
-São João do Oeste|\
-São João do Sul|\
-São Joaquim|\
-São José|\
-São José do Cedro|\
-São José do Cerrito|\
-São Lourenço do Oeste|\
-São Ludgero|\
-São Martinho|\
-São Miguel da Boa Vista|\
-São Miguel do Oeste|\
-São Pedro de Alcântara|\
-Saudades|\
-Schroeder|\
-Seara|\
-Serra Alta|\
-Siderópolis|\
-Sombrio|\
-Sul Brasil|\
-Taió|\
-Tangará|\
-Tigrinhos|\
-Tijucas|\
-Timbé do Sul|\
-Timbó|\
-Timbó Grande|\
-Três Barras|\
-Treviso|\
-Treze de Maio|\
-Treze Tílias|\
-Trombudo Central|\
-Tubarão|\
-Tunápolis|\
-Turvo|\
-União do Oeste|\
-Urubici|\
-Urupema|\
-Urussanga|\
-Vargeão|\
-Vargem|\
-Vargem Bonita|\
-Vidal Ramos|\
-Videira|\
-Vitor Meireles|\
-Witmarsum|\
-Xanxerê|\
-Xavantina|\
-Xaxim|\
-Zortéa",
-	SE: "Amparo do São Francisco|\
-Aquidabã|\
-Aracaju|\
-Arauá|\
-Areia Branca|\
-Barra dos Coqueiros|\
-Boquim|\
-Brejo Grande|\
-Campo do Brito|\
-Canhoba|\
-Canindé de São Francisco|\
-Capela|\
-Carira|\
-Carmópolis|\
-Cedro de São João|\
-Cristinápolis|\
-Cumbe|\
-Divina Pastora|\
-Estância|\
-Feira Nova|\
-Frei Paulo|\
-Gararu|\
-General Maynard|\
-Graccho Cardoso|\
-Ilha das Flores|\
-Indiaroba|\
-Itabaiana|\
-Itabaianinha|\
-Itabi|\
-Itaporanga d'Ajuda|\
-Japaratuba|\
-Japoatã|\
-Lagarto|\
-Laranjeiras|\
-Macambira|\
-Malhada dos Bois|\
-Malhador|\
-Maruim|\
-Moita Bonita|\
-Monte Alegre de Sergipe|\
-Muribeca|\
-Neópolis|\
-Nossa Senhora Aparecida|\
-Nossa Senhora da Glória|\
-Nossa Senhora das Dores|\
-Nossa Senhora de Lourdes|\
-Nossa Senhora do Socorro|\
-Pacatuba|\
-Pedra Mole|\
-Pedrinhas|\
-Pinhão|\
-Pirambu|\
-Poço Redondo|\
-Poço Verde|\
-Porto da Folha|\
-Propriá|\
-Riachão do Dantas|\
-Riachuelo|\
-Ribeirópolis|\
-Rosário do Catete|\
-Salgado|\
-Santa Luzia do Itanhy|\
-Santa Rosa de Lima|\
-Santana do São Francisco|\
-Santo Amaro das Brotas|\
-São Cristóvão|\
-São Domingos|\
-São Francisco|\
-São Miguel do Aleixo|\
-Simão Dias|\
-Siriri|\
-Telha|\
-Tobias Barreto|\
-Tomar do Geru|\
-Umbaúba",
-	SP: "Adamantina|\
-Adolfo|\
-Aguaí|\
-Águas da Prata|\
-Águas de Lindóia|\
-Águas de Santa Bárbara|\
-Águas de São Pedro|\
-Agudos|\
-Alambari|\
-Alfredo Marcondes|\
-Altair|\
-Altinópolis|\
-Alto Alegre|\
-Alumínio|\
-Álvares Florence|\
-Álvares Machado|\
-Álvaro de Carvalho|\
-Alvinlândia|\
-Americana|\
-Américo Brasiliense|\
-Américo de Campos|\
-Amparo|\
-Analândia|\
-Andradina|\
-Angatuba|\
-Anhembi|\
-Anhumas|\
-Aparecida|\
-Aparecida d'Oeste|\
-Apiaí|\
-Araçariguama|\
-Araçatuba|\
-Araçoiaba da Serra|\
-Aramina|\
-Arandu|\
-Arapeí|\
-Araraquara|\
-Araras|\
-Arco-Íris|\
-Arealva|\
-Areias|\
-Areiópolis|\
-Ariranha|\
-Artur Nogueira|\
-Arujá|\
-Aspásia|\
-Assis|\
-Atibaia|\
-Auriflama|\
-Avaí|\
-Avanhandava|\
-Avaré|\
-Bady Bassitt|\
-Balbinos|\
-Bálsamo|\
-Bananal|\
-Barão de Antonina|\
-Barbosa|\
-Bariri|\
-Barra Bonita|\
-Barra do Chapéu|\
-Barra do Turvo|\
-Barretos|\
-Barrinha|\
-Barueri|\
-Bastos|\
-Batatais|\
-Bauru|\
-Bebedouro|\
-Bento de Abreu|\
-Bernardino de Campos|\
-Bertioga|\
-Bilac|\
-Birigui|\
-Biritiba Mirim|\
-Boa Esperança do Sul|\
-Bocaina|\
-Bofete|\
-Boituva|\
-Bom Jesus dos Perdões|\
-Bom Sucesso de Itararé|\
-Borá|\
-Boracéia|\
-Borborema|\
-Borebi|\
-Botucatu|\
-Bragança Paulista|\
-Braúna|\
-Brejo Alegre|\
-Brodowski|\
-Brotas|\
-Buri|\
-Buritama|\
-Buritizal|\
-Cabrália Paulista|\
-Cabreúva|\
-Caçapava|\
-Cachoeira Paulista|\
-Caconde|\
-Cafelândia|\
-Caiabu|\
-Caieiras|\
-Caiuá|\
-Cajamar|\
-Cajati|\
-Cajobi|\
-Cajuru|\
-Campina do Monte Alegre|\
-Campinas|\
-Campo Limpo Paulista|\
-Campos do Jordão|\
-Campos Novos Paulista|\
-Cananéia|\
-Canas|\
-Cândido Mota|\
-Cândido Rodrigues|\
-Canitar|\
-Capão Bonito|\
-Capela do Alto|\
-Capivari|\
-Caraguatatuba|\
-Carapicuíba|\
-Cardoso|\
-Casa Branca|\
-Cássia dos Coqueiros|\
-Castilho|\
-Catanduva|\
-Catiguá|\
-Cedral|\
-Cerqueira César|\
-Cerquilho|\
-Cesário Lange|\
-Charqueada|\
-Chavantes|\
-Clementina|\
-Colina|\
-Colômbia|\
-Conchal|\
-Conchas|\
-Cordeirópolis|\
-Coroados|\
-Coronel Macedo|\
-Corumbataí|\
-Cosmópolis|\
-Cosmorama|\
-Cotia|\
-Cravinhos|\
-Cristais Paulista|\
-Cruzália|\
-Cruzeiro|\
-Cubatão|\
-Cunha|\
-Descalvado|\
-Diadema|\
-Dirce Reis|\
-Divinolândia|\
-Dobrada|\
-Dois Córregos|\
-Dolcinópolis|\
-Dourado|\
-Dracena|\
-Duartina|\
-Dumont|\
-Echaporã|\
-Eldorado|\
-Elias Fausto|\
-Elisiário|\
-Embaúba|\
-Embu das Artes|\
-Embu-Guaçu|\
-Emilianópolis|\
-Engenheiro Coelho|\
-Espírito Santo do Pinhal|\
-Espírito Santo do Turvo|\
-Estiva Gerbi|\
-Estrela d'Oeste|\
-Estrela do Norte|\
-Euclides da Cunha Paulista|\
-Fartura|\
-Fernando Prestes|\
-Fernandópolis|\
-Fernão|\
-Ferraz de Vasconcelos|\
-Flora Rica|\
-Floreal|\
-Flórida Paulista|\
-Florínea|\
-Franca|\
-Francisco Morato|\
-Franco da Rocha|\
-Gabriel Monteiro|\
-Gália|\
-Garça|\
-Gastão Vidigal|\
-Gavião Peixoto|\
-General Salgado|\
-Getulina|\
-Glicério|\
-Guaiçara|\
-Guaimbê|\
-Guaíra|\
-Guapiaçu|\
-Guapiara|\
-Guará|\
-Guaraçaí|\
-Guaraci|\
-Guarani d'Oeste|\
-Guarantã|\
-Guararapes|\
-Guararema|\
-Guaratinguetá|\
-Guareí|\
-Guariba|\
-Guarujá|\
-Guarulhos|\
-Guatapará|\
-Guzolândia|\
-Herculândia|\
-Holambra|\
-Hortolândia|\
-Iacanga|\
-Iacri|\
-Iaras|\
-Ibaté|\
-Ibirá|\
-Ibirarema|\
-Ibitinga|\
-Ibiúna|\
-Icém|\
-Iepê|\
-Igaraçu do Tietê|\
-Igarapava|\
-Igaratá|\
-Iguape|\
-Ilha Comprida|\
-Ilha Solteira|\
-Ilhabela|\
-Indaiatuba|\
-Indiana|\
-Indiaporã|\
-Inúbia Paulista|\
-Ipaussu|\
-Iperó|\
-Ipeúna|\
-Ipiguá|\
-Iporanga|\
-Ipuã|\
-Iracemápolis|\
-Irapuã|\
-Irapuru|\
-Itaberá|\
-Itaí|\
-Itajobi|\
-Itaju|\
-Itanhaém|\
-Itaoca|\
-Itapecerica da Serra|\
-Itapetininga|\
-Itapeva|\
-Itapevi|\
-Itapira|\
-Itapirapuã Paulista|\
-Itápolis|\
-Itaporanga|\
-Itapuí|\
-Itapura|\
-Itaquaquecetuba|\
-Itararé|\
-Itariri|\
-Itatiba|\
-Itatinga|\
-Itirapina|\
-Itirapuã|\
-Itobi|\
-Itu|\
-Itupeva|\
-Ituverava|\
-Jaborandi|\
-Jaboticabal|\
-Jacareí|\
-Jaci|\
-Jacupiranga|\
-Jaguariúna|\
-Jales|\
-Jambeiro|\
-Jandira|\
-Jardinópolis|\
-Jarinu|\
-Jaú|\
-Jeriquara|\
-Joanópolis|\
-João Ramalho|\
-José Bonifácio|\
-Júlio Mesquita|\
-Jumirim|\
-Jundiaí|\
-Junqueirópolis|\
-Juquiá|\
-Juquitiba|\
-Lagoinha|\
-Laranjal Paulista|\
-Lavínia|\
-Lavrinhas|\
-Leme|\
-Lençóis Paulista|\
-Limeira|\
-Lindóia|\
-Lins|\
-Lorena|\
-Lourdes|\
-Louveira|\
-Lucélia|\
-Lucianópolis|\
-Luís Antônio|\
-Luiziânia|\
-Lupércio|\
-Lutécia|\
-Macatuba|\
-Macaubal|\
-Macedônia|\
-Magda|\
-Mairinque|\
-Mairiporã|\
-Manduri|\
-Marabá Paulista|\
-Maracaí|\
-Marapoama|\
-Mariápolis|\
-Marília|\
-Marinópolis|\
-Martinópolis|\
-Matão|\
-Mauá|\
-Mendonça|\
-Meridiano|\
-Mesópolis|\
-Miguelópolis|\
-Mineiros do Tietê|\
-Mira Estrela|\
-Miracatu|\
-Mirandópolis|\
-Mirante do Paranapanema|\
-Mirassol|\
-Mirassolândia|\
-Mococa|\
-Mogi das Cruzes|\
-Mogi Guaçu|\
-Mogi Mirim|\
-Mombuca|\
-Monções|\
-Mongaguá|\
-Monte Alegre do Sul|\
-Monte Alto|\
-Monte Aprazível|\
-Monte Azul Paulista|\
-Monte Castelo|\
-Monte Mor|\
-Monteiro Lobato|\
-Morro Agudo|\
-Morungaba|\
-Motuca|\
-Murutinga do Sul|\
-Nantes|\
-Narandiba|\
-Natividade da Serra|\
-Nazaré Paulista|\
-Neves Paulista|\
-Nhandeara|\
-Nipoã|\
-Nova Aliança|\
-Nova Campina|\
-Nova Canaã Paulista|\
-Nova Castilho|\
-Nova Europa|\
-Nova Granada|\
-Nova Guataporanga|\
-Nova Independência|\
-Nova Luzitânia|\
-Nova Odessa|\
-Novais|\
-Novo Horizonte|\
-Nuporanga|\
-Ocauçu|\
-Óleo|\
-Olímpia|\
-Onda Verde|\
-Oriente|\
-Orindiúva|\
-Orlândia|\
-Osasco|\
-Oscar Bressane|\
-Osvaldo Cruz|\
-Ourinhos|\
-Ouro Verde|\
-Ouroeste|\
-Pacaembu|\
-Palestina|\
-Palmares Paulista|\
-Palmeira d'Oeste|\
-Palmital|\
-Panorama|\
-Paraguaçu Paulista|\
-Paraibuna|\
-Paraíso|\
-Paranapanema|\
-Paranapuã|\
-Parapuã|\
-Pardinho|\
-Pariquera-Açu|\
-Parisi|\
-Patrocínio Paulista|\
-Paulicéia|\
-Paulínia|\
-Paulistânia|\
-Paulo de Faria|\
-Pederneiras|\
-Pedra Bela|\
-Pedranópolis|\
-Pedregulho|\
-Pedreira|\
-Pedrinhas Paulista|\
-Pedro de Toledo|\
-Penápolis|\
-Pereira Barreto|\
-Pereiras|\
-Peruíbe|\
-Piacatu|\
-Piedade|\
-Pilar do Sul|\
-Pindamonhangaba|\
-Pindorama|\
-Pinhalzinho|\
-Piquerobi|\
-Piquete|\
-Piracaia|\
-Piracicaba|\
-Piraju|\
-Pirajuí|\
-Pirangi|\
-Pirapora do Bom Jesus|\
-Pirapozinho|\
-Pirassununga|\
-Piratininga|\
-Pitangueiras|\
-Planalto|\
-Platina|\
-Poá|\
-Poloni|\
-Pompéia|\
-Pongaí|\
-Pontal|\
-Pontalinda|\
-Pontes Gestal|\
-Populina|\
-Porangaba|\
-Porto Feliz|\
-Porto Ferreira|\
-Potim|\
-Potirendaba|\
-Pracinha|\
-Pradópolis|\
-Praia Grande|\
-Pratânia|\
-Presidente Alves|\
-Presidente Bernardes|\
-Presidente Epitácio|\
-Presidente Prudente|\
-Presidente Venceslau|\
-Promissão|\
-Quadra|\
-Quatá|\
-Queiroz|\
-Queluz|\
-Quintana|\
-Rafard|\
-Rancharia|\
-Redenção da Serra|\
-Regente Feijó|\
-Reginópolis|\
-Registro|\
-Restinga|\
-Ribeira|\
-Ribeirão Bonito|\
-Ribeirão Branco|\
-Ribeirão Corrente|\
-Ribeirão do Sul|\
-Ribeirão dos Índios|\
-Ribeirão Grande|\
-Ribeirão Pires|\
-Ribeirão Preto|\
-Rifaina|\
-Rincão|\
-Rinópolis|\
-Rio Claro|\
-Rio das Pedras|\
-Rio Grande da Serra|\
-Riolândia|\
-Riversul|\
-Rosana|\
-Roseira|\
-Rubiácea|\
-Rubinéia|\
-Sabino|\
-Sagres|\
-Sales|\
-Sales Oliveira|\
-Salesópolis|\
-Salmourão|\
-Saltinho|\
-Salto|\
-Salto de Pirapora|\
-Salto Grande|\
-Sandovalina|\
-Santa Adélia|\
-Santa Albertina|\
-Santa Bárbara d'Oeste|\
-Santa Branca|\
-Santa Clara d'Oeste|\
-Santa Cruz da Conceição|\
-Santa Cruz da Esperança|\
-Santa Cruz das Palmeiras|\
-Santa Cruz do Rio Pardo|\
-Santa Ernestina|\
-Santa Fé do Sul|\
-Santa Gertrudes|\
-Santa Isabel|\
-Santa Lúcia|\
-Santa Maria da Serra|\
-Santa Mercedes|\
-Santa Rita d'Oeste|\
-Santa Rita do Passa Quatro|\
-Santa Rosa de Viterbo|\
-Santa Salete|\
-Santana da Ponte Pensa|\
-Santana de Parnaíba|\
-Santo Anastácio|\
-Santo André|\
-Santo Antônio da Alegria|\
-Santo Antônio de Posse|\
-Santo Antônio do Aracanguá|\
-Santo Antônio do Jardim|\
-Santo Antônio do Pinhal|\
-Santo Expedito|\
-Santópolis do Aguapeí|\
-Santos|\
-São Bento do Sapucaí|\
-São Bernardo do Campo|\
-São Caetano do Sul|\
-São Carlos|\
-São Francisco|\
-São João da Boa Vista|\
-São João das Duas Pontes|\
-São João de Iracema|\
-São João do Pau d'Alho|\
-São Joaquim da Barra|\
-São José da Bela Vista|\
-São José do Barreiro|\
-São José do Rio Pardo|\
-São José do Rio Preto|\
-São José dos Campos|\
-São Lourenço da Serra|\
-São Luiz do Paraitinga|\
-São Manuel|\
-São Miguel Arcanjo|\
-São Paulo|\
-São Pedro|\
-São Pedro do Turvo|\
-São Roque|\
-São Sebastião|\
-São Sebastião da Grama|\
-São Simão|\
-São Vicente|\
-Sarapuí|\
-Sarutaiá|\
-Sebastianópolis do Sul|\
-Serra Azul|\
-Serra Negra|\
-Serrana|\
-Sertãozinho|\
-Sete Barras|\
-Severínia|\
-Silveiras|\
-Socorro|\
-Sorocaba|\
-Sud Mennucci|\
-Sumaré|\
-Suzanápolis|\
-Suzano|\
-Tabapuã|\
-Tabatinga|\
-Taboão da Serra|\
-Taciba|\
-Taguaí|\
-Taiaçu|\
-Taiúva|\
-Tambaú|\
-Tanabi|\
-Tapiraí|\
-Tapiratiba|\
-Taquaral|\
-Taquaritinga|\
-Taquarituba|\
-Taquarivaí|\
-Tarabai|\
-Tarumã|\
-Tatuí|\
-Taubaté|\
-Tejupá|\
-Teodoro Sampaio|\
-Terra Roxa|\
-Tietê|\
-Timburi|\
-Torre de Pedra|\
-Torrinha|\
-Trabiju|\
-Tremembé|\
-Três Fronteiras|\
-Tuiuti|\
-Tupã|\
-Tupi Paulista|\
-Turiúba|\
-Turmalina|\
-Ubarana|\
-Ubatuba|\
-Ubirajara|\
-Uchoa|\
-União Paulista|\
-Urânia|\
-Uru|\
-Urupês|\
-Valentim Gentil|\
-Valinhos|\
-Valparaíso|\
-Vargem|\
-Vargem Grande do Sul|\
-Vargem Grande Paulista|\
-Várzea Paulista|\
-Vera Cruz|\
-Vinhedo|\
-Viradouro|\
-Vista Alegre do Alto|\
-Vitória Brasil|\
-Votorantim|\
-Votuporanga|\
-Zacarias",
-	TO: "Abreulândia|\
-Aguiarnópolis|\
-Aliança do Tocantins|\
-Almas|\
-Alvorada|\
-Ananás|\
-Angico|\
-Aparecida do Rio Negro|\
-Aragominas|\
-Araguacema|\
-Araguaçu|\
-Araguaína|\
-Araguanã|\
-Araguatins|\
-Arapoema|\
-Arraias|\
-Augustinópolis|\
-Aurora do Tocantins|\
-Axixá do Tocantins|\
-Babaçulândia|\
-Bandeirantes do Tocantins|\
-Barra do Ouro|\
-Barrolândia|\
-Bernardo Sayão|\
-Bom Jesus do Tocantins|\
-Brasilândia do Tocantins|\
-Brejinho de Nazaré|\
-Buriti do Tocantins|\
-Cachoeirinha|\
-Campos Lindos|\
-Cariri do Tocantins|\
-Carmolândia|\
-Carrasco Bonito|\
-Caseara|\
-Centenário|\
-Chapada da Natividade|\
-Chapada de Areia|\
-Colinas do Tocantins|\
-Colméia|\
-Combinado|\
-Conceição do Tocantins|\
-Couto Magalhães|\
-Cristalândia|\
-Crixás do Tocantins|\
-Darcinópolis|\
-Dianópolis|\
-Divinópolis do Tocantins|\
-Dois Irmãos do Tocantins|\
-Dueré|\
-Esperantina|\
-Fátima|\
-Figueirópolis|\
-Filadélfia|\
-Formoso do Araguaia|\
-Goianorte|\
-Goiatins|\
-Guaraí|\
-Gurupi|\
-Ipueiras|\
-Itacajá|\
-Itaguatins|\
-Itapiratins|\
-Itaporã do Tocantins|\
-Jaú do Tocantins|\
-Juarina|\
-Lagoa da Confusão|\
-Lagoa do Tocantins|\
-Lajeado|\
-Lavandeira|\
-Lizarda|\
-Luzinópolis|\
-Marianópolis do Tocantins|\
-Mateiros|\
-Maurilândia do Tocantins|\
-Miracema do Tocantins|\
-Miranorte|\
-Monte do Carmo|\
-Monte Santo do Tocantins|\
-Muricilândia|\
-Natividade|\
-Nazaré|\
-Nova Olinda|\
-Nova Rosalândia|\
-Novo Acordo|\
-Novo Alegre|\
-Novo Jardim|\
-Oliveira de Fátima|\
-Palmas|\
-Palmeirante|\
-Palmeiras do Tocantins|\
-Palmeirópolis|\
-Paraíso do Tocantins|\
-Paranã|\
-Pau D'Arco|\
-Pedro Afonso|\
-Peixe|\
-Pequizeiro|\
-Pindorama do Tocantins|\
-Piraquê|\
-Pium|\
-Ponte Alta do Bom Jesus|\
-Ponte Alta do Tocantins|\
-Porto Alegre do Tocantins|\
-Porto Nacional|\
-Praia Norte|\
-Presidente Kennedy|\
-Pugmil|\
-Recursolândia|\
-Riachinho|\
-Rio da Conceição|\
-Rio dos Bois|\
-Rio Sono|\
-Sampaio|\
-Sandolândia|\
-Santa Fé do Araguaia|\
-Santa Maria do Tocantins|\
-Santa Rita do Tocantins|\
-Santa Rosa do Tocantins|\
-Santa Tereza do Tocantins|\
-Santa Terezinha do Tocantins|\
-São Bento do Tocantins|\
-São Félix do Tocantins|\
-São Miguel do Tocantins|\
-São Salvador do Tocantins|\
-São Sebastião do Tocantins|\
-São Valério|\
-Silvanópolis|\
-Sítio Novo do Tocantins|\
-Sucupira|\
-Tabocão|\
-Taguatinga|\
-Taipas do Tocantins|\
-Talismã|\
-Tocantínia|\
-Tocantinópolis|\
-Tupirama|\
-Tupiratins|\
-Wanderlândia|\
-Xambioá",
+	AC: "0Acrelândia\n\
+1ssis Brasil\n\
+0Brasiléia\n\
+1ujari\n\
+0Capixaba\n\
+1ruzeiro do Sul\n\
+0Epitaciolândia\n\
+0Feijó\n\
+0Jordão\n\
+0Mâncio Lima\n\
+1anoel Urbano\n\
+2rechal Thaumaturgo\n\
+0Plácido de Castro\n\
+1orto Acre\n\
+6Walter\n\
+0Rio Branco\n\
+1odrigues Alves\n\
+0Santa Rosa do Purus\n\
+1ena Madureira\n\
+4dor Guiomard\n\
+0Tarauacá\n\
+0Xapuri",
+	AL: "0Água Branca\n\
+0Anadia\n\
+1rapiraca\n\
+1talaia\n\
+0Barra de Santo Antônio\n\
+aão Miguel\n\
+2talha\n\
+1elém\n\
+3o Monte\n\
+1oca da Mata\n\
+1ranquinha\n\
+0Cacimbinhas\n\
+2jueiro\n\
+2mpestre\n\
+4o Alegre\n\
+6Grande\n\
+2napi\n\
+2pela\n\
+2rneiros\n\
+1hã Preta\n\
+1oité do Nóia\n\
+2lônia Leopoldina\n\
+2queiro Seco\n\
+2ruripe\n\
+1raíbas\n\
+0Delmiro Gouveia\n\
+1ois Riachos\n\
+0Estrela de Alagoas\n\
+0Feira Grande\n\
+2liz Deserto\n\
+1lexeiras\n\
+0Girau do Ponciano\n\
+0Ibateguara\n\
+1gaci\n\
+2reja Nova\n\
+1nhapi\n\
+0Jacaré dos Homens\n\
+3uípe\n\
+2paratinga\n\
+2ramataia\n\
+1equiá da Praia\n\
+1oaquim Gomes\n\
+1undiá\n\
+3queiro\n\
+0Lagoa da Canoa\n\
+1imoeiro de Anadia\n\
+0Maceió\n\
+2jor Isidoro\n\
+2r Vermelho\n\
+3agogi\n\
+4vilha\n\
+3echal Deodoro\n\
+3ibondo\n\
+2ta Grande\n\
+3riz de Camaragibe\n\
+1essias\n\
+1inador do Negrão\n\
+1onteirópolis\n\
+1urici\n\
+0Novo Lino\n\
+0Olho d'Água das Flores\n\
+do Casado\n\
+cGrande\n\
+2ivença\n\
+1uro Branco\n\
+0Palestina\n\
+3meira dos Índios\n\
+1ão de Açúcar\n\
+1ariconha\n\
+4pueira\n\
+2sso de Camaragibe\n\
+2ulo Jacinto\n\
+1enedo\n\
+1iaçabuçu\n\
+2lar\n\
+2ndoba\n\
+2ranhas\n\
+1oço das Trincheiras\n\
+2rto Calvo\n\
+6de Pedras\n\
+6Real do Colégio\n\
+0Quebrangulo\n\
+0Rio Largo\n\
+1oteiro\n\
+0Santa Luzia do Norte\n\
+5na do Ipanema\n\
+bMundaú\n\
+1ão Brás\n\
+4José da Laje\n\
+cTapera\n\
+4Luís do Quitunde\n\
+4Miguel dos Campos\n\
+fMilagres\n\
+4Sebastião\n\
+1atuba\n\
+1enador Rui Palmeira\n\
+0Tanque d'Arca\n\
+2quarana\n\
+1eotônio Vilela\n\
+1raipu\n\
+0União dos Palmares\n\
+0Viçosa",
+	AM: "0Alvarães\n\
+1maturá\n\
+1namã\n\
+2ori\n\
+1puí\n\
+1talaia do Norte\n\
+1utazes\n\
+0Barcelos\n\
+3reirinha\n\
+1enjamin Constant\n\
+2ruri\n\
+1oa Vista do Ramos\n\
+2ca do Acre\n\
+2rba\n\
+0Caapiranga\n\
+2nutama\n\
+2rauari\n\
+3eiro\n\
+7 da Várzea\n\
+1oari\n\
+2dajás\n\
+0Eirunepé\n\
+1nvira\n\
+0Fonte Boa\n\
+0Guajará\n\
+0Humaitá\n\
+0Ipixuna\n\
+1randuba\n\
+1tacoatiara\n\
+3marati\n\
+3piranga\n\
+0Japurá\n\
+1uruá\n\
+2taí\n\
+0Lábrea\n\
+0Manacapuru\n\
+4quiri\n\
+4us\n\
+3icoré\n\
+2raã\n\
+2ués\n\
+0Nhamundá\n\
+1ova Olinda do Norte\n\
+3o Airão\n\
+6ripuanã\n\
+0Parintins\n\
+2uini\n\
+1residente Figueiredo\n\
+0Rio Preto da Eva\n\
+0Santa Isabel do Rio Negro\n\
+4o Antônio do Içá\n\
+1ão Gabriel da Cachoeira\n\
+4Paulo de Olivença\n\
+4Sebastião do Uatumã\n\
+1ilves\n\
+0Tabatinga\n\
+2pauá\n\
+1efé\n\
+1onantins\n\
+0Uarini\n\
+1rucará\n\
+4urituba",
+	AP: "0Amapá\n\
+0Calçoene\n\
+1utias\n\
+0Ferreira Gomes\n\
+0Itaubal\n\
+0Laranjal do Jari\n\
+0Macapá\n\
+2zagão\n\
+0Oiapoque\n\
+0Pedra Branca do Amapari\n\
+1orto Grande\n\
+1racuúba\n\
+0Santana\n\
+1erra do Navio\n\
+0Tartarugalzinho\n\
+0Vitória do Jari",
+	BA: "0Abaíra\n\
+3ré\n\
+1cajutiba\n\
+1dustina\n\
+0Água Fria\n\
+0Aiquara\n\
+1lagoinhas\n\
+2cobaça\n\
+2madina\n\
+1margosa\n\
+2élia Rodrigues\n\
+3rica Dourada\n\
+1nagé\n\
+2daraí\n\
+3orinha\n\
+2gical\n\
+3uera\n\
+2tas\n\
+3ônio Cardoso\n\
+8Gonçalves\n\
+1porá\n\
+2uarema\n\
+1raçás\n\
+3catu\n\
+4i\n\
+3mari\n\
+3taca\n\
+4uípe\n\
+1urelino Leal\n\
+0Baianópolis\n\
+3xa Grande\n\
+2nzaê\n\
+2rra\n\
+5 da Estiva\n\
+7o Choça\n\
+9Mendes\n\
+9Rocha\n\
+4eiras\n\
+4o Alto\n\
+6Preto\n\
+5cas\n\
+1elmonte\n\
+3o Campo\n\
+1iritinga\n\
+1oa Nova\n\
+4Vista do Tupim\n\
+2m Jesus da Lapa\n\
+dSerra\n\
+2ninal\n\
+4to\n\
+2quira\n\
+2tuporã\n\
+1rejões\n\
+4olândia\n\
+2otas de Macaúbas\n\
+2umado\n\
+1uerarema\n\
+2ritirama\n\
+0Caatiba\n\
+2baceiras do Paraguaçu\n\
+2choeira\n\
+3ulé\n\
+2ém\n\
+2etanos\n\
+4ité\n\
+2farnaum\n\
+2iru\n\
+2ldeirão Grande\n\
+2macan\n\
+4çari\n\
+4mu\n\
+3po Alegre de Lourdes\n\
+6Formoso\n\
+2nápolis\n\
+3arana\n\
+4vieiras\n\
+3deal\n\
+5ias\n\
+4iba\n\
+1ândido Sales\n\
+1ansanção\n\
+3udos\n\
+2pela do Alto Alegre\n\
+3im Grosso\n\
+2raíbas\n\
+4velas\n\
+3deal da Silva\n\
+3inhanha\n\
+2sa Nova\n\
+3tro Alves\n\
+2tolândia\n\
+3u\n\
+4rama\n\
+1entral\n\
+1horrochó\n\
+1ícero Dantas\n\
+1ipó\n\
+1oaraci\n\
+2cos\n\
+2nceição da Feira\n\
+bo Almeida\n\
+dCoité\n\
+dJacuípe\n\
+3de\n\
+5úba\n\
+3tendas do Sincorá\n\
+2ração de Maria\n\
+3deiros\n\
+3ibe\n\
+3onel João Sá\n\
+3rentina\n\
+2tegipe\n\
+1ravolândia\n\
+2isópolis\n\
+4tópolis\n\
+2uz das Almas\n\
+1uraçá\n\
+0Dário Meira\n\
+1ias d'Ávila\n\
+1om Basílio\n\
+4Macedo Costa\n\
+0Elísio Medrado\n\
+1ncruzilhada\n\
+2tre Rios\n\
+0Érico Cardoso\n\
+0Esplanada\n\
+1uclides da Cunha\n\
+2nápolis\n\
+0Fátima\n\
+1eira da Mata\n\
+7e Santana\n\
+1iladélfia\n\
+2rmino Alves\n\
+1loresta Azul\n\
+1ormosa do Rio Preto\n\
+0Gandu\n\
+2vião\n\
+1entio do Ouro\n\
+1lória\n\
+1ongogi\n\
+2vernador Mangabeira\n\
+1uajeru\n\
+3nambi\n\
+3ratinga\n\
+0Heliópolis\n\
+0Iaçu\n\
+1biassucê\n\
+3caraí\n\
+4oara\n\
+4uí\n\
+3peba\n\
+4itanga\n\
+3quera\n\
+3rapitanga\n\
+6uã\n\
+5taia\n\
+3tiara\n\
+5tá\n\
+2otirama\n\
+1chu\n\
+1gaporã\n\
+2rapiúna\n\
+2uaí\n\
+1lhéus\n\
+1nhambupe\n\
+1pecaetá\n\
+2iaú\n\
+3rá\n\
+2upiara\n\
+1rajuba\n\
+3maia\n\
+3quara\n\
+3rá\n\
+2ecê\n\
+1tabela\n\
+5raba\n\
+4una\n\
+3caré\n\
+3eté\n\
+3gi\n\
+5bá\n\
+5mirim\n\
+4uaçu da Bahia\n\
+3ju do Colônia\n\
+5ípe\n\
+3maraju\n\
+6i\n\
+4bé\n\
+3nagra\n\
+4hém\n\
+3parica\n\
+4é\n\
+4ebi\n\
+5tinga\n\
+4icuru\n\
+5tanga\n\
+3quara\n\
+3rantim\n\
+3tim\n\
+2iruçu\n\
+3úba\n\
+2ororó\n\
+2uaçu\n\
+3berá\n\
+1uiu\n\
+0Jaborandi\n\
+2caraci\n\
+3obina\n\
+2guaquara\n\
+5rari\n\
+6ipe\n\
+2ndaíra\n\
+1equié\n\
+2remoabo\n\
+1iquiriçá\n\
+2taúna\n\
+1oão Dourado\n\
+1uazeiro\n\
+2curuçu\n\
+2ssara\n\
+6i\n\
+4iape\n\
+0Lafaiete Coutinho\n\
+2goa Real\n\
+2je\n\
+4dão\n\
+5inho\n\
+5o do Tabocal\n\
+2marão\n\
+2pão\n\
+2uro de Freitas\n\
+1ençóis\n\
+1icínio de Almeida\n\
+2vramento de Nossa Senhora\n\
+1uís Eduardo Magalhães\n\
+0Macajuba\n\
+4rani\n\
+4úbas\n\
+3ururé\n\
+2dre de Deus\n\
+2etinga\n\
+2iquinique\n\
+3ri\n\
+2lhada\n\
+7 de Pedras\n\
+2noel Vitorino\n\
+3sidão\n\
+2racás\n\
+4gogipe\n\
+4ú\n\
+3cionílio Souza\n\
+2scote\n\
+2ta de São João\n\
+3ina\n\
+1edeiros Neto\n\
+1iguel Calmon\n\
+2lagres\n\
+2rangaba\n\
+5te\n\
+1onte Santo\n\
+2rpará\n\
+3ro do Chapéu\n\
+3tugaba\n\
+1ucugê\n\
+4ri\n\
+2lungu do Morro\n\
+2ndo Novo\n\
+3iz Ferreira\n\
+2quém do São Francisco\n\
+2ritiba\n\
+2tuípe\n\
+0Nazaré\n\
+1ilo Peçanha\n\
+1ordestina\n\
+2va Canaã\n\
+5Fátima\n\
+5Ibiá\n\
+6tarana\n\
+5Redenção\n\
+5Soure\n\
+5Viçosa\n\
+3o Horizonte\n\
+5Triunfo\n\
+0Olindina\n\
+3veira dos Brejinhos\n\
+1uriçangas\n\
+3olândia\n\
+0Palmas de Monte Alto\n\
+4eiras\n\
+2ramirim\n\
+4tinga\n\
+3ipiranga\n\
+2u Brasil\n\
+3lo Afonso\n\
+1é de Serra\n\
+1edrão\n\
+4o Alexandre\n\
+1iatã\n\
+2lão Arcado\n\
+2ndaí\n\
+4obaçu\n\
+3tadas\n\
+2raí do Norte\n\
+3ipá\n\
+4tiba\n\
+1lanaltino\n\
+7o\n\
+1oções\n\
+2juca\n\
+2nto Novo\n\
+2rto Seguro\n\
+2tiraguá\n\
+1rado\n\
+2esidente Dutra\n\
+bJânio Quadros\n\
+bTancredo Neves\n\
+0Queimadas\n\
+2ijingue\n\
+3xabeira\n\
+0Rafael Jambeiro\n\
+1emanso\n\
+2tirolândia\n\
+1iachão das Neves\n\
+9o Jacuípe\n\
+5o de Santana\n\
+2beira do Amparo\n\
+bPombal\n\
+6ão do Largo\n\
+2o de Contas\n\
+5o Antônio\n\
+7Pires\n\
+4Real\n\
+1odelas\n\
+1uy Barbosa\n\
+0Salinas da Margarida\n\
+3vador\n\
+2nta Bárbara\n\
+7rígida\n\
+6Cruz Cabrália\n\
+bda Vitória\n\
+6Inês\n\
+6Luzia\n\
+6Maria da Vitória\n\
+6Rita de Cássia\n\
+6Terezinha\n\
+5luz\n\
+5na\n\
+6ópolis\n\
+4o Amaro\n\
+7ntônio de Jesus\n\
+6Estêvão\n\
+1ão Desidério\n\
+5omingos\n\
+4Felipe\n\
+5élix\n\
+9 do Coribe\n\
+5rancisco do Conde\n\
+4Gabriel\n\
+5onçalo dos Campos\n\
+4José da Vitória\n\
+ao Jacuípe\n\
+4Miguel das Matas\n\
+4Sebastião do Passé\n\
+1apeaçu\n\
+1átiro Dias\n\
+1aubara\n\
+2úde\n\
+1eabra\n\
+2bastião Laranjeiras\n\
+2nhor do Bonfim\n\
+3to Sé\n\
+2rra do Ramalho\n\
+6Dourada\n\
+6Preta\n\
+4inha\n\
+4olândia\n\
+1imões Filho\n\
+1ítio do Mato\n\
+9Quinto\n\
+1obradinho\n\
+2uto Soares\n\
+0Tabocas do Brejo Velho\n\
+2nhaçu\n\
+3que Novo\n\
+5inho\n\
+2peroá\n\
+3iramutá\n\
+1eixeira de Freitas\n\
+2odoro Sampaio\n\
+3filândia\n\
+3lândia\n\
+2rra Nova\n\
+1remedal\n\
+1ucano\n\
+0Uauá\n\
+1baíra\n\
+3itaba\n\
+3tã\n\
+1ibaí\n\
+1mburanas\n\
+1na\n\
+1randi\n\
+2uçuca\n\
+1tinga\n\
+0Valença\n\
+5te\n\
+1árzea da Roça\n\
+8o Poço\n\
+7Nova\n\
+1arzedo\n\
+1era Cruz\n\
+3eda\n\
+1itória da Conquista\n\
+0Wagner\n\
+2nderley\n\
+1enceslau Guimarães\n\
+0Xique-Xique",
+	CE: "0Abaiara\n\
+1carape\n\
+5ú\n\
+2opiara\n\
+1iuaba\n\
+1lcântaras\n\
+2taneira\n\
+3o Santo\n\
+1montada\n\
+1ntonina do Norte\n\
+1puiarés\n\
+1quiraz\n\
+1racati\n\
+4oiaba\n\
+3rendá\n\
+4ipe\n\
+3tuba\n\
+2neiroz\n\
+1ssaré\n\
+1urora\n\
+0Baixio\n\
+2nabuiú\n\
+2rbalha\n\
+3reira\n\
+4o\n\
+5quinha\n\
+2turité\n\
+1eberibe\n\
+2la Cruz\n\
+1oa Viagem\n\
+1rejo Santo\n\
+0Camocim\n\
+3pos Sales\n\
+2nindé\n\
+2pistrano\n\
+2ridade\n\
+4ré\n\
+5iaçu\n\
+4ús\n\
+3naubal\n\
+2scavel\n\
+2tarina\n\
+3unda\n\
+2ucaia\n\
+1edro\n\
+1haval\n\
+2oró\n\
+4ozinho\n\
+1oreaú\n\
+1rateús\n\
+4o\n\
+2oatá\n\
+2uz\n\
+0Deputado Irapuan Pinheiro\n\
+0Ereré\n\
+1usébio\n\
+0Farias Brito\n\
+1orquilha\n\
+3taleza\n\
+4im\n\
+1recheirinha\n\
+0General Sampaio\n\
+1raça\n\
+3nja\n\
+5eiro\n\
+2oaíras\n\
+1uaiúba\n\
+3raciaba do Norte\n\
+5miranga\n\
+0Hidrolândia\n\
+1orizonte\n\
+0Ibaretama\n\
+2iapina\n\
+3cuitinga\n\
+1capuí\n\
+2ó\n\
+1guatu\n\
+1ndependência\n\
+1paporanga\n\
+3umirim\n\
+2u\n\
+3eiras\n\
+1racema\n\
+3uçuba\n\
+1taiçaba\n\
+4tinga\n\
+3pajé\n\
+4ipoca\n\
+5úna\n\
+3rema\n\
+3tira\n\
+0Jaguaretama\n\
+6ibara\n\
+8e\n\
+6uana\n\
+2rdim\n\
+2ti\n\
+1ijoca de Jericoacoara\n\
+1uazeiro do Norte\n\
+2cás\n\
+0Lavras da Mangabeira\n\
+1imoeiro do Norte\n\
+0Madalena\n\
+2racanaú\n\
+4nguape\n\
+3co\n\
+3tinópole\n\
+2ssapê\n\
+2uriti\n\
+1eruoca\n\
+1ilagres\n\
+3hã\n\
+2raíma\n\
+2ssão Velha\n\
+1ombaça\n\
+2nsenhor Tabosa\n\
+2rada Nova\n\
+4újo\n\
+3rinhos\n\
+1ucambo\n\
+2lungu\n\
+0Nova Olinda\n\
+5Russas\n\
+3o Oriente\n\
+0Ocara\n\
+1rós\n\
+0Pacajus\n\
+4tuba\n\
+3oti\n\
+3ujá\n\
+2lhano\n\
+3mácia\n\
+2racuru\n\
+4ipaba\n\
+4mbu\n\
+5oti\n\
+1edra Branca\n\
+2naforte\n\
+3tecoste\n\
+2reiro\n\
+1indoretama\n\
+2quet Carneiro\n\
+2res Ferreira\n\
+1oranga\n\
+3teiras\n\
+2tengi\n\
+3iretama\n\
+0Quiterianópolis\n\
+3xadá\n\
+4elô\n\
+5ramobim\n\
+6é\n\
+0Redenção\n\
+2riutaba\n\
+1ussas\n\
+0Saboeiro\n\
+2litre\n\
+2nta Quitéria\n\
+5na do Acaraú\n\
+bCariri\n\
+1ão Benedito\n\
+4Gonçalo do Amarante\n\
+4João do Jaguaribe\n\
+4Luís do Curu\n\
+1enador Pompeu\n\
+8Sá\n\
+1obral\n\
+2lonópole\n\
+0Tabuleiro do Norte\n\
+2mboril\n\
+2rrafas\n\
+2uá\n\
+1ejuçuoca\n\
+1ianguá\n\
+1rairi\n\
+1ururu\n\
+0Ubajara\n\
+1mari\n\
+2irim\n\
+1ruburetama\n\
+3oca\n\
+0Varjota\n\
+1árzea Alegre\n\
+1içosa do Ceará",
+	DF: "0Brasília",
+	ES: "0Afonso Cláudio\n\
+0Água Doce do Norte\n\
+3ia Branca\n\
+0Alegre\n\
+2fredo Chaves\n\
+2to Rio Novo\n\
+1nchieta\n\
+1piacá\n\
+1racruz\n\
+1tílio Vivácqua\n\
+0Baixo Guandu\n\
+2rra de São Francisco\n\
+1oa Esperança\n\
+2m Jesus do Norte\n\
+1rejetuba\n\
+0Cachoeiro de Itapemirim\n\
+2riacica\n\
+2stelo\n\
+1olatina\n\
+2nceição da Barra\n\
+bo Castelo\n\
+0Divino de São Lourenço\n\
+1omingos Martins\n\
+2res do Rio Preto\n\
+0Ecoporanga\n\
+0Fundão\n\
+0Governador Lindenberg\n\
+1uaçuí\n\
+3rapari\n\
+0Ibatiba\n\
+2iraçu\n\
+3tirama\n\
+1conha\n\
+1rupi\n\
+1taguaçu\n\
+3pemirim\n\
+3rana\n\
+1úna\n\
+0Jaguaré\n\
+1erônimo Monteiro\n\
+1oão Neiva\n\
+0Laranja da Terra\n\
+1inhares\n\
+0Mantenópolis\n\
+2rataízes\n\
+3echal Floriano\n\
+3ilândia\n\
+1imoso do Sul\n\
+1ontanha\n\
+1ucurici\n\
+2niz Freire\n\
+2qui\n\
+0Nova Venécia\n\
+0Pancas\n\
+1edro Canário\n\
+1inheiros\n\
+2úma\n\
+1onto Belo\n\
+1residente Kennedy\n\
+0Rio Bananal\n\
+4Novo do Sul\n\
+0Santa Leopoldina\n\
+6Maria de Jetibá\n\
+6Teresa\n\
+1ão Domingos do Norte\n\
+4Gabriel da Palha\n\
+4José do Calçado\n\
+4Mateus\n\
+4Roque do Canaã\n\
+1erra\n\
+1ooretama\n\
+0Vargem Alta\n\
+1enda Nova do Imigrante\n\
+1iana\n\
+2la Pavão\n\
+5Valério\n\
+6elha\n\
+2tória",
+	GO: "0Abadia de Goiás\n\
+5ânia\n\
+1creúna\n\
+1delândia\n\
+0Água Fria de Goiás\n\
+5Limpa\n\
+4s Lindas de Goiás\n\
+0Alexânia\n\
+2oândia\n\
+2to Horizonte\n\
+5Paraíso de Goiás\n\
+2vorada do Norte\n\
+1maralina\n\
+2ericano do Brasil\n\
+2orinópolis\n\
+1nápolis\n\
+2hanguera\n\
+2icuns\n\
+1parecida de Goiânia\n\
+bo Rio Doce\n\
+2oré\n\
+1raçu\n\
+3garças\n\
+4oiânia\n\
+4uapaz\n\
+2enópolis\n\
+2uanã\n\
+1urilândia\n\
+1velinópolis\n\
+0Baliza\n\
+2rro Alto\n\
+1ela Vista de Goiás\n\
+1om Jardim de Goiás\n\
+5esus de Goiás\n\
+2nfinópolis\n\
+3ópolis\n\
+1razabrantes\n\
+2itânia\n\
+1uriti Alegre\n\
+7de Goiás\n\
+6nópolis\n\
+0Cabeceiras\n\
+2choeira Alta\n\
+ade Goiás\n\
+aDourada\n\
+2çu\n\
+2iapônia\n\
+2ldas Novas\n\
+5zinha\n\
+2mpestre de Goiás\n\
+4inaçu\n\
+6orte\n\
+4o Alegre de Goiás\n\
+6Limpo de Goiás\n\
+5s Belos\n\
+7Verdes\n\
+2rmo do Rio Verde\n\
+2stelândia\n\
+2talão\n\
+3uraí\n\
+2valcante\n\
+1eres\n\
+2zarina\n\
+1hapadão do Céu\n\
+1idade Ocidental\n\
+1ocalzinho de Goiás\n\
+2linas do Sul\n\
+1órrego do Ouro\n\
+1orumbá de Goiás\n\
+6aíba\n\
+1ristalina\n\
+5ianópolis\n\
+3xás\n\
+2omínia\n\
+1umari\n\
+0Damianópolis\n\
+3olândia\n\
+2vinópolis\n\
+1iorama\n\
+2vinópolis de Goiás\n\
+1overlândia\n\
+0Edealina\n\
+2éia\n\
+1strela do Norte\n\
+0Faina\n\
+2zenda Nova\n\
+1irminópolis\n\
+1lores de Goiás\n\
+1ormosa\n\
+6o\n\
+0Gameleira de Goiás\n\
+1oianápolis\n\
+5dira\n\
+5ésia\n\
+3ânia\n\
+3anira\n\
+3ás\n\
+3atuba\n\
+2uvelândia\n\
+1uapó\n\
+3raíta\n\
+5ni de Goiás\n\
+4inos\n\
+0Heitoraí\n\
+1idrolândia\n\
+6ina\n\
+0Iaciara\n\
+1naciolândia\n\
+2diara\n\
+2humas\n\
+1pameri\n\
+2iranga de Goiás\n\
+2orá\n\
+1sraelândia\n\
+1taberaí\n\
+3guari\n\
+7u\n\
+3já\n\
+3paci\n\
+4irapuã\n\
+4uranga\n\
+3rumã\n\
+3uçu\n\
+2umbiara\n\
+1volândia\n\
+0Jandaia\n\
+2raguá\n\
+2taí\n\
+2upaci\n\
+1esúpolis\n\
+1oviânia\n\
+1ussara\n\
+0Lagoa Santa\n\
+1eopoldo de Bulhões\n\
+1uziânia\n\
+0Mairipotaba\n\
+2mbaí\n\
+2ra Rosa\n\
+3zagão\n\
+2trinchã\n\
+2urilândia\n\
+1imoso de Goiás\n\
+2naçu\n\
+3eiros\n\
+1oiporá\n\
+2nte Alegre de Goiás\n\
+5s Claros de Goiás\n\
+4ividiu\n\
+a do Norte\n\
+2rrinhos\n\
+4o Agudo de Goiás\n\
+2ssâmedes\n\
+2zarlândia\n\
+1undo Novo\n\
+2tunópolis\n\
+0Nazário\n\
+1erópolis\n\
+1iquelândia\n\
+1ova América\n\
+6urora\n\
+5Crixás\n\
+5Glória\n\
+5Iguaçu de Goiás\n\
+5Roma\n\
+5Veneza\n\
+3o Brasil\n\
+5Gama\n\
+5Planalto\n\
+0Orizona\n\
+1uro Verde de Goiás\n\
+2vidor\n\
+0Padre Bernardo\n\
+2lestina de Goiás\n\
+3meiras de Goiás\n\
+5lo\n\
+4inópolis\n\
+2namá\n\
+2ranaiguara\n\
+4úna\n\
+1erolândia\n\
+2trolina de Goiás\n\
+1ilar de Goiás\n\
+2racanjuba\n\
+4nhas\n\
+3enópolis\n\
+4s do Rio\n\
+1lanaltina\n\
+1ontalina\n\
+2rangatu\n\
+3teirão\n\
+5lândia\n\
+2sse\n\
+1rofessor Jamil\n\
+0Quirinópolis\n\
+0Rialma\n\
+3nápolis\n\
+2o Quente\n\
+4Verde\n\
+1ubiataba\n\
+0Sanclerlândia\n\
+3ta Bárbara de Goiás\n\
+6Cruz de Goiás\n\
+6Fé de Goiás\n\
+6Helena de Goiás\n\
+6Isabel\n\
+6Rita do Araguaia\n\
+eNovo Destino\n\
+7osa de Goiás\n\
+6Tereza de Goiás\n\
+binha de Goiás\n\
+4o Antônio da Barra\n\
+fe Goiás\n\
+fo Descoberto\n\
+1ão Domingos\n\
+4Francisco de Goiás\n\
+4João d'Aliança\n\
+aa Paraúna\n\
+4Luís de Montes Belos\n\
+6iz do Norte\n\
+4Miguel do Araguaia\n\
+ePassa Quatro\n\
+4Patrício\n\
+4Simão\n\
+1enador Canedo\n\
+2rranópolis\n\
+1ilvânia\n\
+2molândia\n\
+1ítio d'Abadia\n\
+0Taquaral de Goiás\n\
+1eresina de Goiás\n\
+4zópolis de Goiás\n\
+1rês Ranchos\n\
+2indade\n\
+2ombas\n\
+1urvânia\n\
+4elândia\n\
+0Uirapuru\n\
+1ruaçu\n\
+4na\n\
+3taí\n\
+0Valparaíso de Goiás\n\
+2rjão\n\
+1ianópolis\n\
+2centinópolis\n\
+2la Boa\n\
+5Propício",
+	MA: "0Açailândia\n\
+1fonso Cunha\n\
+0Água Doce do Maranhão\n\
+0Alcântara\n\
+2deias Altas\n\
+2tamira do Maranhão\n\
+3o Alegre do Maranhão\n\
+fPindaré\n\
+5Parnaíba\n\
+1mapá do Maranhão\n\
+3rante do Maranhão\n\
+1najatuba\n\
+3purus\n\
+1picum-Açu\n\
+1raguanã\n\
+3ioses\n\
+3me\n\
+3ri\n\
+1xixá\n\
+0Bacabal\n\
+5eira\n\
+3uri\n\
+6tuba\n\
+2lsas\n\
+2rão de Grajaú\n\
+3ra do Corda\n\
+4eirinhas\n\
+1ela Vista do Maranhão\n\
+3água\n\
+2nedito Leite\n\
+2quimão\n\
+2rnardo do Mearim\n\
+1oa Vista do Gurupi\n\
+2m Jardim\n\
+5esus das Selvas\n\
+4Lugar\n\
+1rejo\n\
+5 de Areia\n\
+1uriti\n\
+6 Bravo\n\
+6cupu\n\
+6rana\n\
+0Cachoeira Grande\n\
+2japió\n\
+4ri\n\
+2mpestre do Maranhão\n\
+1ândido Mendes\n\
+1antanhede\n\
+2pinzal do Norte\n\
+2rolina\n\
+3utapera\n\
+2xias\n\
+1edral\n\
+2ntral do Maranhão\n\
+5o do Guilherme\n\
+7Novo do Maranhão\n\
+1hapadinha\n\
+1idelândia\n\
+1odó\n\
+2elho Neto\n\
+2linas\n\
+2nceição do Lago-Açu\n\
+2roatá\n\
+1ururupu\n\
+0Davinópolis\n\
+1om Pedro\n\
+1uque Bacelar\n\
+0Esperantinópolis\n\
+2treito\n\
+0Feira Nova do Maranhão\n\
+2rnando Falcão\n\
+1ormosa da Serra Negra\n\
+3taleza dos Nogueiras\n\
+4una\n\
+0Godofredo Viana\n\
+2nçalves Dias\n\
+2vernador Archer\n\
+bEdison Lobão\n\
+cugênio Barros\n\
+bLuiz Rocha\n\
+bNewton Bello\n\
+cunes Freire\n\
+1raça Aranha\n\
+3jaú\n\
+1uimarães\n\
+0Humberto de Campos\n\
+0Icatu\n\
+1garapé do Meio\n\
+8Grande\n\
+1mperatriz\n\
+1taipava do Grajaú\n\
+3pecuru Mirim\n\
+2inga do Maranhão\n\
+0Jatobá\n\
+1enipapo dos Vieiras\n\
+1oão Lisboa\n\
+2selândia\n\
+1unco do Maranhão\n\
+0Lago da Pedra\n\
+6o Junco\n\
+7s Rodrigues\n\
+5Verde\n\
+4a do Mato\n\
+6Grande do Maranhão\n\
+2jeado Novo\n\
+1ima Campos\n\
+1oreto\n\
+1uís Domingues\n\
+0Magalhães de Almeida\n\
+2racaçumé\n\
+4já do Sena\n\
+4nhãozinho\n\
+2ta Roma\n\
+3inha\n\
+3ões\n\
+6 do Norte\n\
+1ilagres do Maranhão\n\
+2rador\n\
+4nda do Norte\n\
+3inzal\n\
+1onção\n\
+3tes Altos\n\
+2rros\n\
+0Nina Rodrigues\n\
+1ova Colinas\n\
+5Iorque\n\
+5Olinda do Maranhão\n\
+0Olho d'Água das Cunhãs\n\
+2inda Nova do Maranhão\n\
+0Paço do Lumiar\n\
+2lmeirândia\n\
+2raibano\n\
+3narama\n\
+2ssagem Franca\n\
+3tos Bons\n\
+2ulino Neves\n\
+4o Ramos\n\
+1edreiras\n\
+4o do Rosário\n\
+2nalva\n\
+2ri Mirim\n\
+4toró\n\
+1indaré-Mirim\n\
+3heiro\n\
+2o XII\n\
+2rapemas\n\
+1oção de Pedras\n\
+2rto Franco\n\
+6Rico do Maranhão\n\
+1residente Dutra\n\
+bJuscelino\n\
+bMédici\n\
+bSarney\n\
+bVargas\n\
+2imeira Cruz\n\
+0Raposa\n\
+1iachão\n\
+2bamar Fiquene\n\
+1osário\n\
+0Sambaíba\n\
+2nta Filomena do Maranhão\n\
+6Helena\n\
+6Inês\n\
+6Luzia\n\
+b do Paruá\n\
+6Quitéria do Maranhão\n\
+6Rita\n\
+5na do Maranhão\n\
+4o Amaro do Maranhão\n\
+7ntônio dos Lopes\n\
+1ão Benedito do Rio Preto\n\
+7to\n\
+6rnardo\n\
+4Domingos do Azeitão\n\
+gMaranhão\n\
+4Félix de Balsas\n\
+5rancisco do Brejão\n\
+hMaranhão\n\
+4João Batista\n\
+9do Carú\n\
+cParaíso\n\
+cSoter\n\
+bs Patos\n\
+6sé de Ribamar\n\
+aos Basílios\n\
+4Luís\n\
+8 Gonzaga do Maranhão\n\
+4Mateus do Maranhão\n\
+4Pedro da Água Branca\n\
+bos Crentes\n\
+4Raimundo das Mangabeiras\n\
+eo Doca Bezerra\n\
+5oberto\n\
+4Vicente Ferrer\n\
+1atubinha\n\
+1enador Alexandre Costa\n\
+8La Rocque\n\
+2rrano do Maranhão\n\
+1ítio Novo\n\
+1ucupira do Norte\n\
+cRiachão\n\
+0Tasso Fragoso\n\
+1imbiras\n\
+3on\n\
+1rizidela do Vale\n\
+1ufilândia\n\
+2ntum\n\
+2riaçu\n\
+4lândia\n\
+2tóia\n\
+0Urbano Santos\n\
+0Vargem Grande\n\
+1iana\n\
+2la Nova dos Martírios\n\
+2tória do Mearim\n\
+3orino Freire\n\
+0Zé Doca",
+	MG: "0Abadia dos Dourados\n\
+3eté\n\
+2re Campo\n\
+1caiaca\n\
+1çucena\n\
+0Água Boa\n\
+5Comprida\n\
+0Aguanil\n\
+0Águas Formosas\n\
+6Vermelhas\n\
+0Aimorés\n\
+2uruoca\n\
+1lagoa\n\
+2bertina\n\
+2ém Paraíba\n\
+2fenas\n\
+3redo Vasconcelos\n\
+2menara\n\
+2percata\n\
+3inópolis\n\
+2terosa\n\
+3o Caparaó\n\
+5Jequitibá\n\
+5Rio Doce\n\
+2varenga\n\
+3inópolis\n\
+3orada de Minas\n\
+1mparo do Serra\n\
+1ndradas\n\
+4elândia\n\
+2gelândia\n\
+2tônio Carlos\n\
+8Dias\n\
+8Prado de Minas\n\
+1raçaí\n\
+3citaba\n\
+3çuaí\n\
+3guari\n\
+3ntina\n\
+3ponga\n\
+5rã\n\
+4uá\n\
+3újos\n\
+3xá\n\
+2ceburgo\n\
+3os\n\
+2eado\n\
+2girita\n\
+2icanduva\n\
+3nos\n\
+1stolfo Dutra\n\
+1taléia\n\
+1ugusto de Lima\n\
+0Baependi\n\
+2ldim\n\
+2mbuí\n\
+2ndeira\n\
+8 do Sul\n\
+2rão de Cocais\n\
+7o Monte Alto\n\
+3bacena\n\
+3ra Longa\n\
+4oso\n\
+1ela Vista de Minas\n\
+3miro Braga\n\
+3o Horizonte\n\
+5Oriente\n\
+5Vale\n\
+2rilo\n\
+4zal\n\
+3tópolis\n\
+2tim\n\
+1ias Fortes\n\
+2cas\n\
+2quinhas\n\
+1oa Esperança\n\
+2caina de Minas\n\
+5úva\n\
+2m Despacho\n\
+4Jardim de Minas\n\
+5esus da Penha\n\
+bo Amparo\n\
+dGalho\n\
+4Repouso\n\
+4Sucesso\n\
+2nfim\n\
+5nópolis de Minas\n\
+3ito de Minas\n\
+2rda da Mata\n\
+2telhos\n\
+3umirim\n\
+1rás Pires\n\
+2asilândia de Minas\n\
+4ília de Minas\n\
+3únas\n\
+3zópolis\n\
+2umadinho\n\
+1ueno Brandão\n\
+4ópolis\n\
+2gre\n\
+2ritis\n\
+6zeiro\n\
+0Cabeceira Grande\n\
+3o Verde\n\
+2choeira da Prata\n\
+be Minas\n\
+dPajeú\n\
+aDourada\n\
+2etanópolis\n\
+4é\n\
+2iana\n\
+2juri\n\
+2ldas\n\
+2macho\n\
+4nducaia\n\
+3buí\n\
+5quira\n\
+3panário\n\
+6ha\n\
+4estre\n\
+4ina Verde\n\
+4o Azul\n\
+6Belo\n\
+6do Meio\n\
+6Florido\n\
+5s Altos\n\
+7Gerais\n\
+2na Verde\n\
+4ã\n\
+3ápolis\n\
+3deias\n\
+3tagalo\n\
+2paraó\n\
+3ela Nova\n\
+5inha\n\
+4tinga\n\
+3im Branco\n\
+4nópolis\n\
+4tão Andrade\n\
+8Enéas\n\
+5ólio\n\
+3utira\n\
+2raí\n\
+4naíba\n\
+5daí\n\
+5gola\n\
+4tinga\n\
+3bonita\n\
+3eaçu\n\
+3los Chagas\n\
+3mésia\n\
+4o da Cachoeira\n\
+9Mata\n\
+7e Minas\n\
+7o Cajuru\n\
+9Paranaíba\n\
+9Rio Claro\n\
+4ópolis de Minas\n\
+3neirinho\n\
+3rancas\n\
+3valhópolis\n\
+7os\n\
+2sa Grande\n\
+3calho Rico\n\
+1ássia\n\
+1ataguases\n\
+4s Altas\n\
+b da Noruega\n\
+3uji\n\
+4ti\n\
+2xambu\n\
+1edro do Abaeté\n\
+2ntral de Minas\n\
+7ina\n\
+1hácara\n\
+2alé\n\
+3pada do Norte\n\
+8Gaúcha\n\
+2iador\n\
+1ipotânea\n\
+1laraval\n\
+4o dos Poções\n\
+2áudio\n\
+1oimbra\n\
+2luna\n\
+2mendador Gomes\n\
+4rcinho\n\
+2nceição da Aparecida\n\
+dBarra de Minas\n\
+cs Alagoas\n\
+ePedras\n\
+be Ipanema\n\
+bo Mato Dentro\n\
+dPará\n\
+dRio Verde\n\
+cs Ouros\n\
+1ônego Marinho\n\
+1onfins\n\
+3gonhal\n\
+8s\n\
+9 do Norte\n\
+3quista\n\
+3selheiro Lafaiete\n\
+cPena\n\
+4olação\n\
+3tagem\n\
+2queiral\n\
+2ração de Jesus\n\
+3disburgo\n\
+6lândia\n\
+3into\n\
+3oaci\n\
+4mandel\n\
+4nel Fabriciano\n\
+8Murta\n\
+8Pacheco\n\
+8Xavier Chaves\n\
+1órrego Danta\n\
+8do Bom Jesus\n\
+8Fundo\n\
+8Novo\n\
+1outo de Magalhães de Minas\n\
+1risólita\n\
+4tais\n\
+5ália\n\
+5iano Otoni\n\
+6na\n\
+2ucilândia\n\
+3zeiro da Fortaleza\n\
+4ília\n\
+1uparaque\n\
+2rral de Dentro\n\
+3velo\n\
+0Datas\n\
+1elfim Moreira\n\
+5nópolis\n\
+3ta\n\
+2scoberto\n\
+3terro de Entre Rios\n\
+ao Melo\n\
+1iamantina\n\
+2ogo de Vasconcelos\n\
+3nísio\n\
+2vinésia\n\
+5o\n\
+6 das Laranjeiras\n\
+6lândia de Minas\n\
+5ópolis\n\
+4sa Alegre\n\
+7Nova\n\
+5ópolis\n\
+1om Bosco\n\
+4Cavati\n\
+4Joaquim\n\
+4Silvério\n\
+4Viçoso\n\
+2na Euzébia\n\
+2res de Campos\n\
+9Guanhães\n\
+7o Indaiá\n\
+9Turvo\n\
+5ópolis\n\
+2uradoquara\n\
+1urandé\n\
+0Elói Mendes\n\
+1ngenheiro Caldas\n\
+bNavarro\n\
+2tre Folhas\n\
+6Rios de Minas\n\
+1rvália\n\
+1smeraldas\n\
+2pera Feliz\n\
+3inosa\n\
+3írito Santo do Dourado\n\
+2tiva\n\
+3rela Dalva\n\
+8do Indaiá\n\
+bSul\n\
+1ugenópolis\n\
+1wbank da Câmara\n\
+1xtrema\n\
+0Fama\n\
+2ria Lemos\n\
+1elício dos Santos\n\
+3isburgo\n\
+4xlândia\n\
+2rnandes Tourinho\n\
+3ros\n\
+3vedouro\n\
+1lorestal\n\
+1ormiga\n\
+4oso\n\
+3taleza de Minas\n\
+4una de Minas\n\
+1rancisco Badaró\n\
+aDumont\n\
+aSá\n\
+8ópolis\n\
+2ei Gaspar\n\
+5Inocêncio\n\
+5Lagonegro\n\
+2onteira\n\
+9 dos Vales\n\
+2uta de Leite\n\
+5l\n\
+1unilândia\n\
+0Galiléia\n\
+2meleiras\n\
+1laucilândia\n\
+1oiabeira\n\
+4ná\n\
+2nçalves\n\
+3zaga\n\
+2uveia\n\
+2vernador Valadares\n\
+1rão Mogol\n\
+2upiara\n\
+1uanhães\n\
+3pé\n\
+3raciaba\n\
+8ma\n\
+5nésia\n\
+6i\n\
+5rá\n\
+4da-Mor\n\
+3xupé\n\
+2idoval\n\
+3marânia\n\
+3ricema\n\
+2rinhatã\n\
+0Heliodora\n\
+0Iapu\n\
+1bertioga\n\
+2iá\n\
+3aí\n\
+3racatu\n\
+6i\n\
+4ité\n\
+3tiúra de Minas\n\
+4uruna\n\
+1caraí de Minas\n\
+1garapé\n\
+5tinga\n\
+2uatama\n\
+1jaci\n\
+1licínea\n\
+1mbé de Minas\n\
+1nconfidentes\n\
+2daiabira\n\
+3ianópolis\n\
+2gaí\n\
+2hapim\n\
+4úma\n\
+2imutaba\n\
+1paba\n\
+3nema\n\
+3tinga\n\
+2iaçu\n\
+2uiúna\n\
+1raí de Minas\n\
+1tabira\n\
+6inha\n\
+7to\n\
+3cambira\n\
+5rambi\n\
+3guara\n\
+3ipé\n\
+3jubá\n\
+3marandiba\n\
+7ti de Minas\n\
+4bacuri\n\
+5é do Mato Dentro\n\
+4ogi\n\
+5nte\n\
+3nhandu\n\
+5omi\n\
+3obim\n\
+3pagipe\n\
+4ecerica\n\
+5va\n\
+3tiaiuçu\n\
+3ú de Minas\n\
+4na\n\
+3verava\n\
+2inga\n\
+2ueta\n\
+3iutaba\n\
+3mirim\n\
+3rama\n\
+3tinga\n\
+0Jaboticatubas\n\
+2cinto\n\
+3uí\n\
+4tinga\n\
+2guaraçu\n\
+2íba\n\
+2mpruca\n\
+2naúba\n\
+3uária\n\
+2paraíba\n\
+3onvar\n\
+1eceaba\n\
+2nipapo de Minas\n\
+2queri\n\
+4itaí\n\
+6ibá\n\
+7nhonha\n\
+2suânia\n\
+1oaíma\n\
+3nésia\n\
+2ão Monlevade\n\
+5Pinheiro\n\
+2aquim Felício\n\
+2rdânia\n\
+2sé Gonçalves de Minas\n\
+5Raydan\n\
+3enópolis\n\
+1uatuba\n\
+2iz de Fora\n\
+2ramento\n\
+3uaia\n\
+2venília\n\
+0Ladainha\n\
+2gamar\n\
+3oa da Prata\n\
+7os Patos\n\
+6Dourada\n\
+6Formosa\n\
+6Grande\n\
+6Santa\n\
+2jinha\n\
+2mbari\n\
+3im\n\
+2ranjal\n\
+2ssance\n\
+2vras\n\
+1eandro Ferreira\n\
+2me do Prado\n\
+2opoldina\n\
+1iberdade\n\
+2ma Duarte\n\
+3eira do Oeste\n\
+1ontra\n\
+1uisburgo\n\
+4lândia\n\
+2minárias\n\
+2z\n\
+0Machacalis\n\
+5do\n\
+2dre de Deus de Minas\n\
+2lacacheta\n\
+2monas\n\
+2nga\n\
+3huaçu\n\
+5mirim\n\
+3tena\n\
+2r de Espanha\n\
+3avilhas\n\
+3ia da Fé\n\
+5na\n\
+4lac\n\
+1ário Campos\n\
+1aripá de Minas\n\
+3liéria\n\
+3melópolis\n\
+3tinho Campos\n\
+6s Soares\n\
+2ta Verde\n\
+3erlândia\n\
+4us Leme\n\
+3hias Lobato\n\
+3ias Barbosa\n\
+7Cardoso\n\
+4pó\n\
+3o Verde\n\
+4zinhos\n\
+3utina\n\
+1edeiros\n\
+3ina\n\
+2ndes Pimentel\n\
+2rcês\n\
+2squita\n\
+1inas Novas\n\
+3duri\n\
+2rabela\n\
+4douro\n\
+4í\n\
+4vânia\n\
+1oeda\n\
+3ma\n\
+2njolos\n\
+3senhor Paulo\n\
+3talvânia\n\
+4e Alegre de Minas\n\
+7zul\n\
+6Belo\n\
+6Carmelo\n\
+6Formoso\n\
+6Santo de Minas\n\
+7ião\n\
+5s Claros\n\
+5zuma\n\
+2rada Nova de Minas\n\
+3ro da Garça\n\
+7o Pilar\n\
+1unhoz\n\
+2riaé\n\
+2tum\n\
+2zambinho\n\
+0Nacip Raydan\n\
+2nuque\n\
+2que\n\
+2talândia\n\
+3ércia\n\
+2zareno\n\
+1epomuceno\n\
+1inheira\n\
+1ova Belém\n\
+5Era\n\
+5Lima\n\
+5Módica\n\
+5Ponte\n\
+7rteirinha\n\
+5Resende\n\
+5Serrana\n\
+5União\n\
+3o Cruzeiro\n\
+5Oriente de Minas\n\
+4rizonte\n\
+0Olaria\n\
+2hos-d'Água\n\
+2ímpio Noronha\n\
+2iveira\n\
+8 Fortes\n\
+1nça de Pitangui\n\
+1ratórios\n\
+2izânia\n\
+1uro Branco\n\
+5Fino\n\
+5Preto\n\
+5Verde de Minas\n\
+0Padre Carvalho\n\
+6Paraíso\n\
+2i Pedro\n\
+3neiras\n\
+4s\n\
+3va\n\
+2lma\n\
+4ópolis\n\
+2pagaios\n\
+2rá de Minas\n\
+3acatu\n\
+4guaçu\n\
+4isópolis\n\
+4opeba\n\
+2ssa Quatro\n\
+6Tempo\n\
+6Vinte\n\
+5bém\n\
+4os\n\
+2tis\n\
+3os de Minas\n\
+3rocínio\n\
+a do Muriaé\n\
+2ula Cândido\n\
+4istas\n\
+2vão\n\
+1eçanha\n\
+2dra Azul\n\
+6Bonita\n\
+6do Anta\n\
+9Indaiá\n\
+6Dourada\n\
+5lva\n\
+5s de Maria da Cruz\n\
+4inópolis\n\
+4o Leopoldo\n\
+6Teixeira\n\
+2queri\n\
+4i\n\
+2rdigão\n\
+5zes\n\
+4ões\n\
+3iquito\n\
+2scador\n\
+1iau\n\
+2edade de Caratinga\n\
+bPonte Nova\n\
+9o Rio Grande\n\
+as Gerais\n\
+2menta\n\
+2ngo-d'Água\n\
+3tópolis\n\
+2racema\n\
+4juba\n\
+4nga\n\
+6uçu\n\
+7inho\n\
+4petinga\n\
+5ora\n\
+4úba\n\
+2tangui\n\
+2umhi\n\
+1lanura\n\
+1oço Fundo\n\
+4s de Caldas\n\
+2crane\n\
+2mpéu\n\
+2nte Nova\n\
+4o Chique\n\
+6dos Volantes\n\
+2rteirinha\n\
+4o Firme\n\
+2té\n\
+2uso Alegre\n\
+8to\n\
+1rados\n\
+3ta\n\
+4ápolis\n\
+4inha\n\
+2esidente Bernardes\n\
+bJuscelino\n\
+bKubitschek\n\
+bOlegário\n\
+2udente de Morais\n\
+0Quartel Geral\n\
+2eluzito\n\
+0Raposos\n\
+2ul Soares\n\
+1ecreio\n\
+2duto\n\
+2sende Costa\n\
+3plendor\n\
+3saquinha\n\
+1iachinho\n\
+5o dos Machados\n\
+2beirão das Neves\n\
+9Vermelho\n\
+2o Acima\n\
+4Casca\n\
+4do Prado\n\
+4Doce\n\
+4Espera\n\
+4Manso\n\
+4Novo\n\
+4Paranaíba\n\
+7do de Minas\n\
+5iracicaba\n\
+5omba\n\
+5reto\n\
+4Vermelho\n\
+2tápolis\n\
+1ochedo de Minas\n\
+2deiro\n\
+2maria\n\
+2sário da Limeira\n\
+1ubelita\n\
+3im\n\
+0Sabará\n\
+3inópolis\n\
+2cramento\n\
+2linas\n\
+3to da Divisa\n\
+2nta Bárbara\n\
+d do Leste\n\
+hMonte Verde\n\
+hTugúrio\n\
+6Cruz de Minas\n\
+eSalinas\n\
+co Escalvado\n\
+6Efigênia de Minas\n\
+6Fé de Minas\n\
+6Helena de Minas\n\
+6Juliana\n\
+6Luzia\n\
+6Margarida\n\
+9ia de Itabira\n\
+do Salto\n\
+guaçuí\n\
+6Rita de Caldas\n\
+eIbitipoca\n\
+eJacutinga\n\
+eMinas\n\
+co Itueto\n\
+eSapucaí\n\
+7osa da Serra\n\
+6Vitória\n\
+5na da Vargem\n\
+9e Cataguases\n\
+bPirapama\n\
+9o Deserto\n\
+bGarambéu\n\
+bJacaré\n\
+bManhuaçu\n\
+bParaíso\n\
+bRiacho\n\
+as Montes\n\
+4o Antônio do Amparo\n\
+iventureiro\n\
+hGrama\n\
+hItambé\n\
+hJacinto\n\
+hMonte\n\
+hRetiro\n\
+iio Abaixo\n\
+6Hipólito\n\
+5s Dumont\n\
+1ão Bento Abade\n\
+5rás do Suaçuí\n\
+4Domingos das Dores\n\
+eo Prata\n\
+4Félix de Minas\n\
+5rancisco\n\
+d de Paula\n\
+hSales\n\
+fo Glória\n\
+4Geraldo\n\
+b da Piedade\n\
+do Baixio\n\
+5onçalo do Abaeté\n\
+fPará\n\
+fRio Abaixo\n\
+jPreto\n\
+fSapucaí\n\
+6tardo\n\
+4João Batista do Glória\n\
+9da Lagoa\n\
+cMata\n\
+cPonte\n\
+bs Missões\n\
+ael Rei\n\
+ao Manhuaçu\n\
+fteninha\n\
+cOriente\n\
+cPacuí\n\
+eraíso\n\
+9Evangelista\n\
+9Nepomuceno\n\
+6aquim de Bicas\n\
+6sé da Barra\n\
+cLapa\n\
+cSafira\n\
+cVarginha\n\
+ao Alegre\n\
+cDivino\n\
+cGoiabal\n\
+cJacuri\n\
+cMantimento\n\
+4Lourenço\n\
+4Miguel do Anta\n\
+4Pedro da União\n\
+bo Suaçuí\n\
+cs Ferros\n\
+4Romão\n\
+6que de Minas\n\
+4Sebastião da Bela Vista\n\
+hVargem Alegre\n\
+fo Anta\n\
+hMaranhão\n\
+hOeste\n\
+hParaíso\n\
+hRio Preto\n\
+lVerde\n\
+4Tiago\n\
+5omás de Aquino\n\
+7é das Letras\n\
+4Vicente de Minas\n\
+1apucaí-Mirim\n\
+2rdoá\n\
+3zedo\n\
+1em-Peixe\n\
+2nador Amaral\n\
+8Cortes\n\
+8Firmino\n\
+8José Bento\n\
+8Modestino Gonçalves\n\
+3hora de Oliveira\n\
+9o Porto\n\
+as Remédios\n\
+2ricita\n\
+4tinga\n\
+3ra Azul de Minas\n\
+6da Saudade\n\
+7o Salitre\n\
+8s Aimorés\n\
+5nia\n\
+6ópolis de Minas\n\
+6os\n\
+4o\n\
+2te Lagoas\n\
+3ubinha\n\
+1ilveirânia\n\
+4ianópolis\n\
+2mão Pereira\n\
+3onésia\n\
+1obrália\n\
+2ledade de Minas\n\
+0Tabuleiro\n\
+2iobeiras\n\
+2paruba\n\
+3ira\n\
+6í\n\
+2quaraçu de Minas\n\
+2rumirim\n\
+1eixeiras\n\
+2ófilo Otoni\n\
+1imóteo\n\
+2radentes\n\
+3os\n\
+1ocantins\n\
+3os do Moji\n\
+2ledo\n\
+2mbos\n\
+1rês Corações\n\
+5Marias\n\
+5Pontas\n\
+1umiritinga\n\
+2paciguara\n\
+2rmalina\n\
+3volândia\n\
+0Ubá\n\
+2aí\n\
+3poranga\n\
+2eraba\n\
+4lândia\n\
+1mburatiba\n\
+1naí\n\
+2ião de Minas\n\
+1ruana de Minas\n\
+3cânia\n\
+4uia\n\
+0Vargem Alegre\n\
+7Bonita\n\
+7Grande do Rio Pardo\n\
+4inha\n\
+3jão de Minas\n\
+1árzea da Palma\n\
+1arzelândia\n\
+2zante\n\
+1erdelândia\n\
+3edinha\n\
+3íssimo\n\
+3melho Novo\n\
+2spasiano\n\
+1içosa\n\
+2eiras\n\
+2rgem da Lapa\n\
+4ínia\n\
+4inópolis\n\
+4olândia\n\
+2sconde do Rio Branco\n\
+1olta Grande\n\
+0Wenceslau Braz",
+	MS: "0Água Clara\n\
+0Alcinópolis\n\
+1mambai\n\
+1nastácio\n\
+3urilândia\n\
+2gélica\n\
+2tônio João\n\
+1parecida do Taboado\n\
+1quidauana\n\
+1ral Moreira\n\
+0Bandeirantes\n\
+2taguassu\n\
+4yporã\n\
+1ela Vista\n\
+1odoquena\n\
+2nito\n\
+1rasilândia\n\
+0Caarapó\n\
+2mapuã\n\
+3po Grande\n\
+2racol\n\
+2ssilândia\n\
+1hapadão do Sul\n\
+1orguinho\n\
+3onel Sapucaia\n\
+3umbá\n\
+2sta Rica\n\
+2xim\n\
+0Deodápolis\n\
+1ois Irmãos do Buriti\n\
+2uradina\n\
+6os\n\
+0Eldorado\n\
+0Fátima do Sul\n\
+1igueirão\n\
+0Glória de Dourados\n\
+1uia Lopes da Laguna\n\
+0Iguatemi\n\
+1nocência\n\
+1taporã\n\
+3quiraí\n\
+1vinhema\n\
+0Japorã\n\
+2raguari\n\
+3dim\n\
+2teí\n\
+1uti\n\
+0Ladário\n\
+2guna Carapã\n\
+0Maracaju\n\
+1iranda\n\
+1undo Novo\n\
+0Naviraí\n\
+1ioaque\n\
+1ova Alvorada do Sul\n\
+6ndradina\n\
+3o Horizonte do Sul\n\
+0Paraíso das Águas\n\
+4naíba\n\
+5hos\n\
+1edro Gomes\n\
+1onta Porã\n\
+2rto Murtinho\n\
+0Ribas do Rio Pardo\n\
+2o Brilhante\n\
+4Negro\n\
+4Verde de Mato Grosso\n\
+1ochedo\n\
+0Santa Rita do Pardo\n\
+1ão Gabriel do Oeste\n\
+1elvíria\n\
+2te Quedas\n\
+1idrolândia\n\
+1onora\n\
+0Tacuru\n\
+2quarussu\n\
+1erenos\n\
+1rês Lagoas\n\
+0Vicentina",
+	MT: "0Acorizal\n\
+0Água Boa\n\
+0Alta Floresta\n\
+3o Araguaia\n\
+5Boa Vista\n\
+5Garças\n\
+5Paraguai\n\
+5Taquari\n\
+1piacás\n\
+1raguaiana\n\
+7nha\n\
+3putanga\n\
+2enápolis\n\
+2ipuanã\n\
+0Barão de Melgaço\n\
+3ra do Bugres\n\
+9Garças\n\
+1oa Esperança do Norte\n\
+2m Jesus do Araguaia\n\
+1rasnorte\n\
+0Cáceres\n\
+1ampinápolis\n\
+4o Novo do Parecis\n\
+6Verde\n\
+5s de Júlio\n\
+2nabrava do Norte\n\
+4rana\n\
+2rlinda\n\
+2stanheira\n\
+1hapada dos Guimarães\n\
+1láudia\n\
+1ocalinho\n\
+2líder\n\
+3niza\n\
+2modoro\n\
+2nfresa\n\
+3quista D'Oeste\n\
+2triguaçu\n\
+1uiabá\n\
+2rvelândia\n\
+0Denise\n\
+1iamantino\n\
+1om Aquino\n\
+0Feliz Natal\n\
+1igueirópolis D'Oeste\n\
+0Gaúcha do Norte\n\
+1eneral Carneiro\n\
+1lória D'Oeste\n\
+1uarantã do Norte\n\
+2iratinga\n\
+0Indiavaí\n\
+1piranga do Norte\n\
+1tanhangá\n\
+3úba\n\
+2iquira\n\
+0Jaciara\n\
+2ngada\n\
+2uru\n\
+1uara\n\
+2ína\n\
+2ruena\n\
+2scimeira\n\
+0Lambari D'Oeste\n\
+1ucas do Rio Verde\n\
+3iara\n\
+0Marcelândia\n\
+2tupá\n\
+1irassol d'Oeste\n\
+0Nobres\n\
+2rtelândia\n\
+2ssa Senhora do Livramento\n\
+2va Bandeirantes\n\
+6rasilândia\n\
+5Canaã do Norte\n\
+5Guarita\n\
+5Lacerda\n\
+5Marilândia\n\
+9ngá\n\
+6onte Verde\n\
+6utum\n\
+5Nazaré\n\
+5Olímpia\n\
+5Santa Helena\n\
+5Ubiratã\n\
+5Xavantina\n\
+3o Horizonte do Norte\n\
+5Mundo\n\
+5Santo Antônio\n\
+6ão Joaquim\n\
+0Paranaíta\n\
+6tinga\n\
+1edra Preta\n\
+2ixoto de Azevedo\n\
+1lanalto da Serra\n\
+1oconé\n\
+2ntal do Araguaia\n\
+4e Branca\n\
+5s e Lacerda\n\
+2rto Alegre do Norte\n\
+6dos Gaúchos\n\
+6Esperidião\n\
+8trela\n\
+2xoréu\n\
+1rimavera do Leste\n\
+0Querência\n\
+0Reserva do Cabaçal\n\
+1ibeirão Cascalheira\n\
+8zinho\n\
+2o Branco\n\
+1ondolândia\n\
+5nópolis\n\
+2sário Oeste\n\
+0Salto do Céu\n\
+2nta Carmem\n\
+7ruz do Xingu\n\
+6Rita do Trivelato\n\
+6Terezinha\n\
+4o Afonso\n\
+7ntônio de Leverger\n\
+fo Leste\n\
+1ão Félix do Araguaia\n\
+4José do Povo\n\
+cRio Claro\n\
+cXingu\n\
+bs Quatro Marcos\n\
+4Pedro da Cipa\n\
+1apezal\n\
+1erra Nova Dourada\n\
+1inop\n\
+1orriso\n\
+0Tabaporã\n\
+2ngará da Serra\n\
+2purah\n\
+1erra Nova do Norte\n\
+2souro\n\
+1orixoréu\n\
+0União do Sul\n\
+0Vale de São Domingos\n\
+1árzea Grande\n\
+1era\n\
+1ila Bela da Santíssima Trindade\n\
+5Rica",
+	PA: "0Abaetetuba\n\
+2el Figueiredo\n\
+1cará\n\
+1fuá\n\
+0Água Azul do Norte\n\
+0Alenquer\n\
+2meirim\n\
+2tamira\n\
+1najás\n\
+3nindeua\n\
+3pu\n\
+1ugusto Corrêa\n\
+2rora do Pará\n\
+1veiro\n\
+0Bagre\n\
+2ião\n\
+2nnach\n\
+2rcarena\n\
+1elém\n\
+3terra\n\
+2nevides\n\
+1om Jesus do Tocantins\n\
+2nito\n\
+1ragança\n\
+3sil Novo\n\
+2ejo Grande do Araguaia\n\
+3u Branco\n\
+3ves\n\
+1ujaru\n\
+0Cachoeira do Arari\n\
+dPiriá\n\
+2metá\n\
+2naã dos Carajás\n\
+2panema\n\
+3itão Poço\n\
+2stanhal\n\
+1haves\n\
+1olares\n\
+2nceição do Araguaia\n\
+4órdia do Pará\n\
+1umaru do Norte\n\
+2rionópolis\n\
+3ralinho\n\
+3uá\n\
+4çá\n\
+0Dom Eliseu\n\
+0Eldorado do Carajás\n\
+0Faro\n\
+1loresta do Araguaia\n\
+0Garrafão do Norte\n\
+1oianésia do Pará\n\
+1urupá\n\
+0Igarapé-Açu\n\
+8Miri\n\
+1nhangapi\n\
+1pixuna do Pará\n\
+1rituia\n\
+1taituba\n\
+2upiranga\n\
+0Jacareacanga\n\
+3undá\n\
+1uruti\n\
+0Limoeiro do Ajuru\n\
+0Mãe do Rio\n\
+1agalhães Barata\n\
+2rabá\n\
+4canã\n\
+4panim\n\
+3ituba\n\
+1edicilândia\n\
+2lgaço\n\
+1ocajuba\n\
+2ju\n\
+4í dos Campos\n\
+2nte Alegre\n\
+1uaná\n\
+0Nova Esperança do Piriá\n\
+5Ipixuna\n\
+5Timboteua\n\
+3o Progresso\n\
+5Repartimento\n\
+0Óbidos\n\
+0Oeiras do Pará\n\
+1riximiná\n\
+1urém\n\
+3ilândia do Norte\n\
+0Pacajá\n\
+2lestina do Pará\n\
+2ragominas\n\
+4uapebas\n\
+2u D'Arco\n\
+1eixe-Boi\n\
+1içarra\n\
+1lacas\n\
+1onta de Pedras\n\
+2rtel\n\
+4o de Moz\n\
+1rainha\n\
+2imavera\n\
+0Quatipuru\n\
+0Redenção\n\
+1io Maria\n\
+1ondon do Pará\n\
+1urópolis\n\
+0Salinópolis\n\
+3vaterra\n\
+2nta Bárbara do Pará\n\
+6Cruz do Arari\n\
+6Izabel do Pará\n\
+6Luzia do Pará\n\
+6Maria das Barreiras\n\
+do Pará\n\
+5na do Araguaia\n\
+5rém\n\
+8 Novo\n\
+4o Antônio do Tauá\n\
+1ão Caetano de Odivelas\n\
+4Domingos do Araguaia\n\
+gCapim\n\
+4Félix do Xingu\n\
+5rancisco do Pará\n\
+4Geraldo do Araguaia\n\
+4João da Ponta\n\
+ae Pirabas\n\
+ao Araguaia\n\
+4Miguel do Guamá\n\
+4Sebastião da Boa Vista\n\
+1apucaia\n\
+1enador José Porfírio\n\
+1oure\n\
+0Tailândia\n\
+1erra Alta\n\
+6Santa\n\
+1omé-Açu\n\
+1racuateua\n\
+3irão\n\
+1ucumã\n\
+4ruí\n\
+0Ulianópolis\n\
+1ruará\n\
+0Vigia\n\
+2seu\n\
+2tória do Xingu\n\
+0Xinguara",
+	PB: "0Água Branca\n\
+0Aguiar\n\
+1lagoa Grande\n\
+7Nova\n\
+5inha\n\
+2cantil\n\
+2godão de Jandaíra\n\
+2handra\n\
+1mparo\n\
+1parecida\n\
+1raçagi\n\
+3ra\n\
+4una\n\
+2eia\n\
+5 de Baraúnas\n\
+5l\n\
+2oeiras\n\
+1ssunção\n\
+0Baía da Traição\n\
+2naneiras\n\
+2raúna\n\
+3ra de Santa Rosa\n\
+ena\n\
+aão Miguel\n\
+2yeux\n\
+1elém\n\
+5 do Brejo do Cruz\n\
+2rnardino Batista\n\
+1oa Ventura\n\
+5ista\n\
+2m Jesus\n\
+4Sucesso\n\
+2nito de Santa Fé\n\
+2queirão\n\
+2rborema\n\
+1rejo do Cruz\n\
+8s Santos\n\
+0Caaporã\n\
+2baceiras\n\
+3edelo\n\
+2choeira dos Índios\n\
+3imba de Areia\n\
+bDentro\n\
+7s\n\
+2içara\n\
+2jazeiras\n\
+8inhas\n\
+2ldas Brandão\n\
+2malaú\n\
+3pina Grande\n\
+2pim\n\
+2raúbas\n\
+3rapateira\n\
+2sserengue\n\
+2tingueira\n\
+3olé do Rocha\n\
+3urité\n\
+1onceição\n\
+3dado\n\
+4e\n\
+3go\n\
+2remas\n\
+2xixola\n\
+1ruz do Espírito Santo\n\
+1ubati\n\
+2ité\n\
+5 de Mamanguape\n\
+4egi\n\
+2rral de Cima\n\
+7Velho\n\
+0Damião\n\
+1esterro\n\
+1iamante\n\
+1ona Inês\n\
+1uas Estradas\n\
+0Emas\n\
+1sperança\n\
+0Fagundes\n\
+1rei Martinho\n\
+0Gado Bravo\n\
+1uarabira\n\
+2rinhém\n\
+3jão\n\
+0Ibiara\n\
+1garacy\n\
+1maculada\n\
+1ngá\n\
+1tabaiana\n\
+3poranga\n\
+6oroca\n\
+3tuba\n\
+0Jacaraú\n\
+1ericó\n\
+1oão Pessoa\n\
+2ca Claudino\n\
+1uarez Távora\n\
+3zeirinho\n\
+2nco do Seridó\n\
+2ripiranga\n\
+3u\n\
+0Lagoa\n\
+5 de Dentro\n\
+6Seca\n\
+2stro\n\
+1ivramento\n\
+1ogradouro\n\
+1ucena\n\
+0Mãe d'Água\n\
+1alta\n\
+2manguape\n\
+2naíra\n\
+2rcação\n\
+3i\n\
+4zópolis\n\
+2ssaranduba\n\
+2taraca\n\
+3inhas\n\
+3o Grosso\n\
+3uréia\n\
+1ogeiro\n\
+2ntadas\n\
+4e Horebe\n\
+5iro\n\
+1ulungu\n\
+0Natuba\n\
+2zarezinho\n\
+1ova Floresta\n\
+5Olinda\n\
+5Palmeira\n\
+0Olho d'Água\n\
+2ivedos\n\
+1uro Velho\n\
+0Parari\n\
+2ssagem\n\
+2tos\n\
+2ulista\n\
+1edra Branca\n\
+6Lavrada\n\
+5s de Fogo\n\
+4o Régis\n\
+1iancó\n\
+2cuí\n\
+2lar\n\
+3ões\n\
+5zinhos\n\
+2rpirituba\n\
+2timbu\n\
+1ocinhos\n\
+2ço Dantas\n\
+5de José de Moura\n\
+2mbal\n\
+1rata\n\
+2incesa Isabel\n\
+1uxinanã\n\
+0Queimadas\n\
+2ixaba\n\
+0Remígio\n\
+1iachão\n\
+7 do Bacamarte\n\
+bPoço\n\
+5o de Santo Antônio\n\
+8os Cavalos\n\
+2o Tinto\n\
+0Salgadinho\n\
+6o de São Félix\n\
+2nta Cecília\n\
+7ruz\n\
+6Helena\n\
+6Inês\n\
+6Luzia\n\
+6Rita\n\
+6Teresinha\n\
+5na de Mangueira\n\
+9os Garrotes\n\
+4o André\n\
+1ão Bentinho\n\
+8o\n\
+4Domingos\n\
+c do Cariri\n\
+4Francisco\n\
+4João do Cariri\n\
+cRio do Peixe\n\
+cTigre\n\
+6sé da Lagoa Tapada\n\
+ae Caiana\n\
+cEspinharas\n\
+cPiranhas\n\
+drincesa\n\
+ao Bonfim\n\
+drejo do Cruz\n\
+cSabugi\n\
+bs Cordeiros\n\
+dRamos\n\
+4Mamede\n\
+5iguel de Taipu\n\
+4Sebastião de Lagoa de Roça\n\
+fo Umbuzeiro\n\
+4Vicente do Seridó\n\
+1apé\n\
+1erra Branca\n\
+6da Raiz\n\
+6Grande\n\
+6Redonda\n\
+5ria\n\
+3tãozinho\n\
+1obrado\n\
+2lânea\n\
+3edade\n\
+2ssêgo\n\
+2usa\n\
+1umé\n\
+0Tacima\n\
+2peroá\n\
+2vares\n\
+1eixeira\n\
+2nório\n\
+1riunfo\n\
+0Uiraúna\n\
+1mbuzeiro\n\
+0Várzea\n\
+1ieirópolis\n\
+2sta Serrana\n\
+0Zabelê",
+	PE: "0Abreu e Lima\n\
+1fogados da Ingazeira\n\
+2rânio\n\
+1grestina\n\
+0Água Preta\n\
+4s Belas\n\
+0Alagoinha\n\
+2iança\n\
+2tinho\n\
+1maraji\n\
+1ngelim\n\
+1raçoiaba\n\
+3ripina\n\
+2coverde\n\
+0Barra de Guabiraba\n\
+4eiros\n\
+1elém de Maria\n\
+7o São Francisco\n\
+3o Jardim\n\
+2tânia\n\
+2zerros\n\
+1odocó\n\
+2m Conselho\n\
+4Jardim\n\
+2nito\n\
+1rejão\n\
+4inho\n\
+4o da Madre de Deus\n\
+1uenos Aires\n\
+2íque\n\
+0Cabo de Santo Agostinho\n\
+3robó\n\
+2choeirinha\n\
+2etés\n\
+2lçado\n\
+3umbi\n\
+2maragibe\n\
+3ocim de São Félix\n\
+3utanga\n\
+2nhotinho\n\
+2poeiras\n\
+2rnaíba\n\
+5ubeira da Penha\n\
+3pina\n\
+3uaru\n\
+2sinhas\n\
+2tende\n\
+1edro\n\
+1hã de Alegria\n\
+4Grande\n\
+1ondado\n\
+2rrentes\n\
+3tês\n\
+1umaru\n\
+2pira\n\
+2stódia\n\
+0Dormentes\n\
+0Escada\n\
+1xu\n\
+0Feira Nova\n\
+2rnando de Noronha\n\
+3reiros\n\
+1lores\n\
+6ta\n\
+1rei Miguelinho\n\
+0Gameleira\n\
+2ranhuns\n\
+1lória do Goitá\n\
+1oiana\n\
+1ranito\n\
+3vatá\n\
+0Iati\n\
+1bimirim\n\
+3rajuba\n\
+1garassu\n\
+2uaracy\n\
+1lha de Itamaracá\n\
+1najá\n\
+2gazeira\n\
+1pojuca\n\
+2ubi\n\
+1tacuruba\n\
+3íba\n\
+3mbé\n\
+3petim\n\
+4issuma\n\
+3quitinga\n\
+0Jaboatão dos Guararapes\n\
+2queira\n\
+2taúba\n\
+3obá\n\
+1oão Alfredo\n\
+2aquim Nabuco\n\
+1ucati\n\
+2pi\n\
+2rema\n\
+0Lagoa de Itaenga\n\
+7o Carro\n\
+9Ouro\n\
+8s Gatos\n\
+6Grande\n\
+2jedo\n\
+1imoeiro\n\
+0Macaparana\n\
+3hados\n\
+2nari\n\
+2raial\n\
+1irandiba\n\
+1oreilândia\n\
+4no\n\
+0Nazaré da Mata\n\
+0Olinda\n\
+1robó\n\
+3có\n\
+1uricuri\n\
+0Palmares\n\
+4eirina\n\
+2nelas\n\
+2ranatama\n\
+3namirim\n\
+2ssira\n\
+2udalho\n\
+3lista\n\
+1edra\n\
+2squeira\n\
+2trolândia\n\
+6ina\n\
+1oção\n\
+2mbos\n\
+1rimavera\n\
+0Quipapá\n\
+3xaba\n\
+0Recife\n\
+1iacho das Almas\n\
+2beirão\n\
+2o Formoso\n\
+0Sairé\n\
+2lgadinho\n\
+4ueiro\n\
+3oá\n\
+2nharó\n\
+3ta Cruz\n\
+a da Baixa Verde\n\
+co Capibaribe\n\
+6Filomena\n\
+6Maria da Boa Vista\n\
+do Cambucá\n\
+6Terezinha\n\
+1ão Benedito do Sul\n\
+7to do Una\n\
+4Caitano\n\
+4João\n\
+6aquim do Monte\n\
+6sé da Coroa Grande\n\
+ao Belmonte\n\
+cEgito\n\
+4Lourenço da Mata\n\
+4Vicente Férrer\n\
+1erra Talhada\n\
+4ita\n\
+3tânia\n\
+1irinhaém\n\
+1olidão\n\
+1urubim\n\
+0Tabira\n\
+2caimbó\n\
+4ratu\n\
+2mandaré\n\
+2quaritinga do Norte\n\
+1erezinha\n\
+3ra Nova\n\
+1imbaúba\n\
+1oritama\n\
+1racunhaém\n\
+2indade\n\
+3unfo\n\
+1upanatinga\n\
+4retama\n\
+0Venturosa\n\
+2rdejante\n\
+3tente do Lério\n\
+8s\n\
+1icência\n\
+2tória de Santo Antão\n\
+0Xexéu",
+	PI: "0Acauã\n\
+1gricolândia\n\
+0Água Branca\n\
+0Alagoinha do Piauí\n\
+2egrete do Piauí\n\
+2to Longá\n\
+4s\n\
+2vorada do Gurguéia\n\
+1marante\n\
+1ngical do Piauí\n\
+2ísio de Abreu\n\
+2tônio Almeida\n\
+1roazes\n\
+3eiras do Itaim\n\
+2raial\n\
+1ssunção do Piauí\n\
+1velino Lopes\n\
+0Baixa Grande do Ribeiro\n\
+2rra D'Alcântara\n\
+5s\n\
+4eiras do Piauí\n\
+4o Duro\n\
+2talha\n\
+1ela Vista do Piauí\n\
+3ém do Piauí\n\
+2neditinos\n\
+2rtolínia\n\
+2tânia do Piauí\n\
+1oa Hora\n\
+2caina\n\
+2m Jesus\n\
+4Princípio do Piauí\n\
+2nfim do Piauí\n\
+2queirão do Piauí\n\
+1rasileira\n\
+2ejo do Piauí\n\
+1uriti dos Lopes\n\
+bMontes\n\
+0Cabeceiras do Piauí\n\
+2jazeiras do Piauí\n\
+3ueiro da Praia\n\
+2ldeirão Grande do Piauí\n\
+2mpinas do Piauí\n\
+4o Alegre do Fidalgo\n\
+6Grande do Piauí\n\
+6Largo do Piauí\n\
+6Maior\n\
+2navieira\n\
+3to do Buriti\n\
+2pitão de Campos\n\
+8Gervásio Oliveira\n\
+2racol\n\
+4úbas do Piauí\n\
+3idade do Piauí\n\
+2stelo do Piauí\n\
+2xingó\n\
+1ocal\n\
+5 de Telha\n\
+7os Alves\n\
+2ivaras\n\
+2lônia do Gurguéia\n\
+bPiauí\n\
+2nceição do Canindé\n\
+2ronel José Dias\n\
+3rente\n\
+1ristalândia do Piauí\n\
+5ino Castro\n\
+1urimatá\n\
+3rais\n\
+5l Novo do Piauí\n\
+6inhos\n\
+0Demerval Lobão\n\
+1irceu Arcoverde\n\
+1om Expedito Lopes\n\
+4Inocêncio\n\
+3ingos Mourão\n\
+0Elesbão Veloso\n\
+2iseu Martins\n\
+1sperantina\n\
+0Fartura do Piauí\n\
+1lores do Piauí\n\
+6ta do Piauí\n\
+4iano\n\
+1rancinópolis\n\
+6sco Ayres\n\
+aMacedo\n\
+aSantos\n\
+2onteiras\n\
+0Geminiano\n\
+1ilbués\n\
+1uadalupe\n\
+3ribas\n\
+0Hugo Napoleão\n\
+0Ilha Grande\n\
+1nhuma\n\
+1piranga do Piauí\n\
+1saías Coelho\n\
+1tainópolis\n\
+3ueira\n\
+0Jacobina do Piauí\n\
+2icós\n\
+2rdim do Mulato\n\
+2tobá do Piauí\n\
+1erumenha\n\
+1oão Costa\n\
+2aquim Pires\n\
+2ca Marques\n\
+2sé de Freitas\n\
+1uazeiro do Piauí\n\
+1úlio Borges\n\
+1urema\n\
+0Lagoa Alegre\n\
+6de São Francisco\n\
+7o Barro do Piauí\n\
+9Piauí\n\
+9Sítio\n\
+4inha do Piauí\n\
+2ndri Sales\n\
+1uís Correia\n\
+2zilândia\n\
+0Madeiro\n\
+2noel Emídio\n\
+2rcolândia\n\
+5s Parente\n\
+2ssapê do Piauí\n\
+2tias Olímpio\n\
+1iguel Alves\n\
+7Leão\n\
+2lton Brandão\n\
+1onsenhor Gil\n\
+aHipólito\n\
+3te Alegre do Piauí\n\
+2rro Cabeça no Tempo\n\
+6do Chapéu do Piauí\n\
+1urici dos Portelas\n\
+0Nazaré do Piauí\n\
+3ária\n\
+1ossa Senhora de Nazaré\n\
+fos Remédios\n\
+2va Santa Rita\n\
+3o Oriente do Piauí\n\
+5Santo Antônio\n\
+0Oeiras\n\
+1lho D'Água do Piauí\n\
+0Padre Marcos\n\
+2es Landim\n\
+2jeú do Piauí\n\
+2lmeira do Piauí\n\
+8is\n\
+2quetá\n\
+2rnaguá\n\
+5íba\n\
+2ssagem Franca do Piauí\n\
+2tos do Piauí\n\
+2u D'Arco do Piauí\n\
+3listana\n\
+2vussu\n\
+1edro II\n\
+6Laurentino\n\
+1icos\n\
+2menteiras\n\
+2o IX\n\
+2racuruca\n\
+3ipiri\n\
+1orto\n\
+5 Alegre do Piauí\n\
+1rata do Piauí\n\
+0Queimada Nova\n\
+0Redenção do Gurguéia\n\
+2generação\n\
+1iacho Frio\n\
+2beira do Piauí\n\
+6o Gonçalves\n\
+2o Grande do Piauí\n\
+0Santa Cruz do Piauí\n\
+ds Milagres\n\
+6Filomena\n\
+6Luz\n\
+6Rosa do Piauí\n\
+5na do Piauí\n\
+4o Antônio de Lisboa\n\
+fos Milagres\n\
+6Inácio do Piauí\n\
+1ão Braz do Piauí\n\
+4Félix do Piauí\n\
+5rancisco de Assis do Piauí\n\
+fo Piauí\n\
+4Gonçalo do Gurguéia\n\
+fPiauí\n\
+4João da Canabrava\n\
+cFronteira\n\
+cSerra\n\
+cVarjota\n\
+ao Arraial\n\
+cPiauí\n\
+6sé do Divino\n\
+cPeixe\n\
+diauí\n\
+5ulião\n\
+4Lourenço do Piauí\n\
+5uis do Piauí\n\
+4Miguel da Baixa Grande\n\
+co Fidalgo\n\
+eTapuio\n\
+4Pedro do Piauí\n\
+4Raimundo Nonato\n\
+1ebastião Barros\n\
+aLeal\n\
+1igefredo Pacheco\n\
+2mões\n\
+3plício Mendes\n\
+1ocorro do Piauí\n\
+1ussuapara\n\
+0Tamboril do Piauí\n\
+2nque do Piauí\n\
+1eresina\n\
+0União\n\
+1ruçuí\n\
+0Valença do Piauí\n\
+1árzea Branca\n\
+7Grande\n\
+1era Mendes\n\
+1ila Nova do Piauí\n\
+0Wall Ferraz",
+	PR: "0Abatiá\n\
+1drianópolis\n\
+1gudos do Sul\n\
+1lmirante Tamandaré\n\
+2tamira do Paraná\n\
+3o Paraíso\n\
+9ná\n\
+6iquiri\n\
+3ônia\n\
+2vorada do Sul\n\
+1maporã\n\
+2pére\n\
+1nahy\n\
+2dirá\n\
+0Ângulo\n\
+0Antonina\n\
+3ônio Olinto\n\
+1pucarana\n\
+1rapongas\n\
+5ti\n\
+4uã\n\
+3runa\n\
+3ucária\n\
+2iranha do Ivaí\n\
+1ssaí\n\
+3is Chateaubriand\n\
+2torga\n\
+1talaia\n\
+0Balsa Nova\n\
+2ndeirantes\n\
+2rbosa Ferraz\n\
+3ra do Jacaré\n\
+5cão\n\
+1ela Vista da Caroba\n\
+co Paraíso\n\
+1ituruna\n\
+1oa Esperança\n\
+d do Iguaçu\n\
+4Ventura de São Roque\n\
+5ista da Aparecida\n\
+2caiúva do Sul\n\
+2m Jesus do Sul\n\
+4Sucesso\n\
+b do Sul\n\
+2rrazópolis\n\
+1raganey\n\
+3silândia do Sul\n\
+0Cafeara\n\
+4lândia\n\
+4zal do Sul\n\
+2lifórnia\n\
+2mbará\n\
+4é\n\
+4ira\n\
+3pina da Lagoa\n\
+9o Simão\n\
+8Grande do Sul\n\
+4o Bonito\n\
+6do Tenente\n\
+6Largo\n\
+6Magro\n\
+7ourão\n\
+1ândido de Abreu\n\
+1andói\n\
+3tagalo\n\
+2panema\n\
+3itão Leônidas Marques\n\
+2rambeí\n\
+3lópolis\n\
+2scavel\n\
+3tro\n\
+2tanduvas\n\
+1entenário do Sul\n\
+2rro Azul\n\
+1éu Azul\n\
+1hopinzinho\n\
+1ianorte\n\
+2dade Gaúcha\n\
+1levelândia\n\
+1olombo\n\
+4rado\n\
+2ngonhinhas\n\
+3selheiro Mairinck\n\
+3tenda\n\
+2rbélia\n\
+3nélio Procópio\n\
+3onel Domingos Soares\n\
+8Vivida\n\
+3umbataí do Sul\n\
+1ruz Machado\n\
+4eiro do Iguaçu\n\
+cOeste\n\
+cSul\n\
+4maltina\n\
+1uritiba\n\
+4úva\n\
+0Diamante D'Oeste\n\
+9do Norte\n\
+cSul\n\
+1ois Vizinhos\n\
+2uradina\n\
+3tor Camargo\n\
+7Ulysses\n\
+0Enéas Marques\n\
+2genheiro Beltrão\n\
+2tre Rios do Oeste\n\
+1sperança Nova\n\
+3igão Alto do Iguaçu\n\
+0Farol\n\
+2xinal\n\
+2zenda Rio Grande\n\
+1ênix\n\
+1ernandes Pinheiro\n\
+1igueira\n\
+1lor da Serra do Sul\n\
+4aí\n\
+4esta\n\
+7ópolis\n\
+2órida\n\
+1ormosa do Oeste\n\
+2z do Iguaçu\n\
+7Jordão\n\
+1rancisco Alves\n\
+aBeltrão\n\
+0General Carneiro\n\
+1odoy Moreira\n\
+2ioerê\n\
+4xim\n\
+1randes Rios\n\
+1uaíra\n\
+3iraçá\n\
+3miranga\n\
+3pirama\n\
+4orema\n\
+3raci\n\
+5niaçu\n\
+5puava\n\
+5queçaba\n\
+5tuba\n\
+0Honório Serpa\n\
+0Ibaiti\n\
+2ema\n\
+2iporã\n\
+1caraíma\n\
+1guaraçu\n\
+4tu\n\
+1mbaú\n\
+3ituva\n\
+1nácio Martins\n\
+2ajá\n\
+2dianópolis\n\
+1piranga\n\
+2orã\n\
+1racema do Oeste\n\
+3ti\n\
+2etama\n\
+1taguajé\n\
+3ipulândia\n\
+3mbaracá\n\
+5é\n\
+3pejara d'Oeste\n\
+5ruçu\n\
+3úna do Sul\n\
+1vaí\n\
+3iporã\n\
+3té\n\
+4uba\n\
+0Jaboti\n\
+2carezinho\n\
+2guapitã\n\
+5riaíva\n\
+2ndaia do Sul\n\
+3iópolis\n\
+2pira\n\
+3urá\n\
+2rdim Alegre\n\
+7Olinda\n\
+2taizinho\n\
+1esuítas\n\
+1oaquim Távora\n\
+1undiaí do Sul\n\
+2randa\n\
+2ssara\n\
+0Kaloré\n\
+0Lapa\n\
+2ranjal\n\
+6eiras do Sul\n\
+1eópolis\n\
+1idianópolis\n\
+2ndoeste\n\
+1oanda\n\
+2bato\n\
+2ndrina\n\
+1uiziana\n\
+2nardelli\n\
+2pionópolis\n\
+0Mallet\n\
+2mborê\n\
+2ndaguaçu\n\
+8ri\n\
+4irituba\n\
+3frinópolis\n\
+3gueirinha\n\
+3oel Ribas\n\
+2rechal Cândido Rondon\n\
+3ia Helena\n\
+5lva\n\
+4lândia do Sul\n\
+5ena\n\
+5uz\n\
+4ngá\n\
+4ópolis\n\
+4pá\n\
+3meleiro\n\
+3quinho\n\
+3umbi\n\
+2telândia\n\
+3inhos\n\
+3o Rico\n\
+2uá da Serra\n\
+1edianeira\n\
+2rcedes\n\
+1irador\n\
+4selva\n\
+2ssal\n\
+1oreira Sales\n\
+3retes\n\
+1unhoz de Melo\n\
+0Nossa Senhora das Graças\n\
+2va Aliança do Ivaí\n\
+6mérica da Colina\n\
+6urora\n\
+5Cantu\n\
+5Esperança\n\
+e do Sudoeste\n\
+5Fátima\n\
+5Laranjeiras\n\
+6ondrina\n\
+5Olímpia\n\
+5Prata do Iguaçu\n\
+5Santa Bárbara\n\
+bRosa\n\
+5Tebas\n\
+3o Itacolomi\n\
+0Ortigueira\n\
+1urizona\n\
+3o Verde do Oeste\n\
+0Paiçandu\n\
+2lmas\n\
+4eira\n\
+4ital\n\
+3otina\n\
+2raíso do Norte\n\
+4nacity\n\
+6guá\n\
+6poema\n\
+6vaí\n\
+2to Bragado\n\
+8nco\n\
+2ula Freitas\n\
+4o Frontin\n\
+1eabiru\n\
+2robal\n\
+1érola\n\
+6 d'Oeste\n\
+1iên\n\
+2nhais\n\
+5l de São Bento\n\
+6ão\n\
+4ão\n\
+2raí do Sul\n\
+4quara\n\
+2tanga\n\
+6ueiras\n\
+1lanaltina do Paraná\n\
+7o\n\
+1onta Grossa\n\
+5l do Paraná\n\
+2recatu\n\
+3to Amazonas\n\
+6Barreiro\n\
+6Rico\n\
+6Vitória\n\
+1rado Ferreira\n\
+3nchita\n\
+2esidente Castelo Branco\n\
+2imeiro de Maio\n\
+2udentópolis\n\
+0Quarto Centenário\n\
+3tiguá\n\
+4ro Barras\n\
+7Pontes\n\
+2edas do Iguaçu\n\
+3rência do Norte\n\
+2inta do Sol\n\
+3tandinha\n\
+0Ramilândia\n\
+2ncho Alegre\n\
+d D'Oeste\n\
+1ealeza\n\
+2bouças\n\
+2nascença\n\
+2serva\n\
+7 do Iguaçu\n\
+1ibeirão Claro\n\
+9do Pinhal\n\
+2o Azul\n\
+4Bom\n\
+6nito do Iguaçu\n\
+5ranco do Ivaí\n\
+eSul\n\
+4Negro\n\
+1olândia\n\
+2ncador\n\
+3don\n\
+2sário do Ivaí\n\
+0Sabáudia\n\
+2lgado Filho\n\
+3to do Itararé\n\
+9Lontra\n\
+2nta Amélia\n\
+6Cecília do Pavão\n\
+7ruz de Monte Castelo\n\
+6Fé\n\
+6Helena\n\
+6Inês\n\
+7sabel do Ivaí\n\
+7zabel do Oeste\n\
+6Lúcia\n\
+6Maria do Oeste\n\
+bna\n\
+7ônica\n\
+6Tereza do Oeste\n\
+binha de Itaipu\n\
+5na do Itararé\n\
+4o Antônio da Platina\n\
+fo Caiuá\n\
+hParaíso\n\
+hSudoeste\n\
+6Inácio\n\
+1ão Carlos do Ivaí\n\
+4Jerônimo da Serra\n\
+5oão\n\
+8 do Caiuá\n\
+cIvaí\n\
+cTriunfo\n\
+6rge d'Oeste\n\
+bo Ivaí\n\
+dPatrocínio\n\
+6sé da Boa Vista\n\
+bs Palmeiras\n\
+aos Pinhais\n\
+4Manoel do Paraná\n\
+6teus do Sul\n\
+5iguel do Iguaçu\n\
+4Pedro do Iguaçu\n\
+evaí\n\
+dParaná\n\
+4Sebastião da Amoreira\n\
+4Tomé\n\
+1apopema\n\
+2randi\n\
+2udade do Iguaçu\n\
+1engés\n\
+2rranópolis do Iguaçu\n\
+3taneja\n\
+6ópolis\n\
+1iqueira Campos\n\
+1ulina\n\
+0Tamarana\n\
+3boara\n\
+2pejara\n\
+3ira\n\
+1eixeira Soares\n\
+2lêmaco Borba\n\
+2rra Boa\n\
+6Rica\n\
+7oxa\n\
+1ibagi\n\
+2jucas do Sul\n\
+1oledo\n\
+2mazina\n\
+1rês Barras do Paraná\n\
+1unas do Paraná\n\
+3eiras do Oeste\n\
+2pãssi\n\
+2rvo\n\
+0Ubiratã\n\
+1muarama\n\
+1nião da Vitória\n\
+3flor\n\
+1raí\n\
+0Ventania\n\
+2ra Cruz do Oeste\n\
+3ê\n\
+1irmond\n\
+2torino\n\
+0Wenceslau Braz\n\
+0Xambrê",
+	RJ: "0Angra dos Reis\n\
+1peribé\n\
+1raruama\n\
+2eal\n\
+2mação dos Búzios\n\
+2raial do Cabo\n\
+0Barra do Piraí\n\
+6Mansa\n\
+1elford Roxo\n\
+1om Jardim\n\
+5esus do Itabapoana\n\
+0Cabo Frio\n\
+2choeiras de Macacu\n\
+2mbuci\n\
+3pos dos Goytacazes\n\
+2ntagalo\n\
+2rapebus\n\
+3doso Moreira\n\
+3mo\n\
+2simiro de Abreu\n\
+1omendador Levy Gasparian\n\
+2nceição de Macabu\n\
+2rdeiro\n\
+0Duas Barras\n\
+2que de Caxias\n\
+0Engenheiro Paulo de Frontin\n\
+0Guapimirim\n\
+0Iguaba Grande\n\
+1taboraí\n\
+3guaí\n\
+3lva\n\
+3ocara\n\
+3peruna\n\
+3tiaia\n\
+0Japeri\n\
+0Laje do Muriaé\n\
+0Macaé\n\
+3uco\n\
+2gé\n\
+2ngaratiba\n\
+2ricá\n\
+1endes\n\
+2squita\n\
+1iguel Pereira\n\
+2racema\n\
+0Natividade\n\
+1ilópolis\n\
+2terói\n\
+1ova Friburgo\n\
+5Iguaçu\n\
+0Paracambi\n\
+4íba do Sul\n\
+4ty\n\
+2ty do Alferes\n\
+1etrópolis\n\
+1inheiral\n\
+2raí\n\
+1orciúncula\n\
+3to Real\n\
+0Quatis\n\
+2eimados\n\
+2issamã\n\
+0Resende\n\
+1io Bonito\n\
+4Claro\n\
+4das Flores\n\
+8Ostras\n\
+5e Janeiro\n\
+0Santa Maria Madalena\n\
+4o Antônio de Pádua\n\
+1ão Fidélis\n\
+5rancisco de Itabapoana\n\
+4Gonçalo\n\
+4João da Barra\n\
+ae Meriti\n\
+6sé de Ubá\n\
+ao Vale do Rio Preto\n\
+4Pedro da Aldeia\n\
+4Sebastião do Alto\n\
+1apucaia\n\
+2quarema\n\
+1eropédica\n\
+1ilva Jardim\n\
+1umidouro\n\
+0Tanguá\n\
+1eresópolis\n\
+1rajano de Moraes\n\
+2ês Rios\n\
+0Valença\n\
+2rre-Sai\n\
+2ssouras\n\
+1olta Redonda",
+	RN: "0Acari\n\
+1fonso Bezerra\n\
+0Água Nova\n\
+0Alexandria\n\
+2mino Afonso\n\
+2to do Rodrigues\n\
+1ngicos\n\
+2tônio Martins\n\
+1podi\n\
+1reia Branca\n\
+3z\n\
+1ssú\n\
+0Baía Formosa\n\
+2raúna\n\
+3celona\n\
+1ento Fernandes\n\
+1odó\n\
+2m Jesus\n\
+1rejinho\n\
+0Caiçara do Norte\n\
+bRio do Vento\n\
+3có\n\
+2mpo Grande\n\
+6Redondo\n\
+2nguaretama\n\
+2raúbas\n\
+3naúba dos Dantas\n\
+5ubais\n\
+1eará-Mirim\n\
+2rro Corá\n\
+1oronel Ezequiel\n\
+8João Pessoa\n\
+1ruzeta\n\
+1urrais Novos\n\
+0Doutor Severiano\n\
+0Encanto\n\
+1quador\n\
+1spírito Santo\n\
+1xtremoz\n\
+0Felipe Guerra\n\
+2rnando Pedroza\n\
+1lorânia\n\
+1rancisco Dantas\n\
+2utuoso Gomes\n\
+0Galinhos\n\
+1oianinha\n\
+2vernador Dix-Sept Rosado\n\
+1rossos\n\
+1uamaré\n\
+0Ielmo Marinho\n\
+1panguaçu\n\
+2ueira\n\
+1tajá\n\
+3ú\n\
+0Jaçanã\n\
+2ndaíra\n\
+4uís\n\
+3uário Cicco\n\
+2pi\n\
+2rdim de Angicos\n\
+aPiranhas\n\
+8o Seridó\n\
+1oão Câmara\n\
+5Dias\n\
+2sé da Penha\n\
+1ucurutu\n\
+2ndiá\n\
+0Lagoa d'Anta\n\
+7e Pedras\n\
+9Velhos\n\
+6Nova\n\
+6Salgada\n\
+2jes\n\
+5 Pintadas\n\
+1ucrécia\n\
+2ís Gomes\n\
+0Macaíba\n\
+4u\n\
+2jor Sales\n\
+2rcelino Vieira\n\
+3tins\n\
+2xaranguape\n\
+1essias Targino\n\
+1ontanhas\n\
+4e Alegre\n\
+6das Gameleiras\n\
+2ssoró\n\
+0Natal\n\
+1ísia Floresta\n\
+1ova Cruz\n\
+0Olho d'Água do Borges\n\
+1uro Branco\n\
+0Paraná\n\
+4ú\n\
+4zinho\n\
+3elhas\n\
+3namirim\n\
+2ssa e Fica\n\
+5gem\n\
+2tu\n\
+2u dos Ferros\n\
+1edra Grande\n\
+6Preta\n\
+4o Avelino\n\
+6Velho\n\
+2ndências\n\
+1ilões\n\
+1oço Branco\n\
+2rtalegre\n\
+4o do Mangue\n\
+1ureza\n\
+0Rafael Fernandes\n\
+7Godeiro\n\
+1iacho da Cruz\n\
+8e Santana\n\
+5uelo\n\
+2o do Fogo\n\
+1odolfo Fernandes\n\
+1uy Barbosa\n\
+0Santa Cruz\n\
+6Maria\n\
+5na do Matos\n\
+bSeridó\n\
+4o Antônio\n\
+1ão Bento do Norte\n\
+dTrairí\n\
+4Fernando\n\
+5rancisco do Oeste\n\
+4Gonçalo do Amarante\n\
+4João do Sabugi\n\
+6sé de Mipibu\n\
+ao Campestre\n\
+cSeridó\n\
+4Miguel\n\
+a do Gostoso\n\
+4Paulo do Potengi\n\
+5edro\n\
+4Rafael\n\
+4Tomé\n\
+4Vicente\n\
+1enador Elói de Souza\n\
+8Georgino Avelino\n\
+2rra Caiada\n\
+6de São Bento\n\
+7o Mel\n\
+6Negra do Norte\n\
+4inha\n\
+8 dos Pintos\n\
+2veriano Melo\n\
+1ítio Novo\n\
+0Taboleiro Grande\n\
+2ipu\n\
+2ngará\n\
+1enente Ananias\n\
+8Laurentino Cruz\n\
+1ibau\n\
+5 do Sul\n\
+2mbaúba dos Batistas\n\
+1ouros\n\
+1riunfo Potiguar\n\
+0Umarizal\n\
+1panema\n\
+0Várzea\n\
+1enha-Ver\n\
+2ra Cruz\n\
+1içosa\n\
+2la Flor",
+	RO: "0Alta Floresta D'Oeste\n\
+3o Alegre dos Parecis\n\
+5Paraíso\n\
+2vorada D'Oeste\n\
+1riquemes\n\
+0Buritis\n\
+0Cabixi\n\
+2caulândia\n\
+3oal\n\
+2mpo Novo de Rondônia\n\
+2ndeias do Jamari\n\
+2stanheiras\n\
+1erejeiras\n\
+1hupinguaia\n\
+1olorado do Oeste\n\
+2rumbiara\n\
+2sta Marques\n\
+1ujubim\n\
+0Espigão D'Oeste\n\
+0Governador Jorge Teixeira\n\
+1uajará-Mirim\n\
+0Itapuã do Oeste\n\
+0Jaru\n\
+1i-Paraná\n\
+0Machadinho D'Oeste\n\
+1inistro Andreazza\n\
+2rante da Serra\n\
+1onte Negro\n\
+0Nova Brasilândia D'Oeste\n\
+5Mamoré\n\
+5União\n\
+3o Horizonte do Oeste\n\
+0Ouro Preto do Oeste\n\
+0Parecis\n\
+1imenta Bueno\n\
+6eiras do Oeste\n\
+1orto Velho\n\
+1residente Médici\n\
+2imavera de Rondônia\n\
+0Rio Crespo\n\
+1olim de Moura\n\
+0Santa Luzia D'Oeste\n\
+1ão Felipe D'Oeste\n\
+5rancisco do Guaporé\n\
+4Miguel do Guaporé\n\
+1eringueiras\n\
+0Teixeirópolis\n\
+1heobroma\n\
+0Urupá\n\
+0Vale do Anari\n\
+8Paraíso\n\
+1ilhena",
+	RR: "0Alto Alegre\n\
+1majari\n\
+0Boa Vista\n\
+2nfim\n\
+0Cantá\n\
+2racaraí\n\
+3oebe\n\
+0Iracema\n\
+0Mucajaí\n\
+0Normandia\n\
+0Pacaraima\n\
+0Rorainópolis\n\
+0São João da Baliza\n\
+4Luiz do Anauá\n\
+0Uiramutã",
+	RS: "0Aceguá\n\
+0Água Santa\n\
+0Agudo\n\
+1juricaba\n\
+1lecrim\n\
+3grete\n\
+5ia\n\
+2mirante Tamandaré do Sul\n\
+2pestre\n\
+2to Alegre\n\
+5Feliz\n\
+2vorada\n\
+1maral Ferrador\n\
+2etista do Sul\n\
+1ndré da Rocha\n\
+2ta Gorda\n\
+3ônio Prado\n\
+1rambaré\n\
+3ricá\n\
+3tiba\n\
+2roio do Meio\n\
+aPadre\n\
+aSal\n\
+aTigre\n\
+9s Ratos\n\
+7Grande\n\
+2vorezinha\n\
+1ugusto Pestana\n\
+0Áurea\n\
+0Bagé\n\
+2lneário Pinhal\n\
+2rão\n\
+5 de Cotegipe\n\
+7o Triunfo\n\
+3ra do Guarita\n\
+9Quaraí\n\
+9Ribeiro\n\
+bo Azul\n\
+6Funda\n\
+5cão\n\
+4os Cassal\n\
+1enjamin Constant do Sul\n\
+3to Gonçalves\n\
+1oa Vista das Missões\n\
+bo Buricá\n\
+dCadeado\n\
+dIncra\n\
+dSul\n\
+2m Jesus\n\
+4Princípio\n\
+6ogresso\n\
+4Retiro do Sul\n\
+2queirão do Leão\n\
+2ssoroca\n\
+2zano\n\
+1raga\n\
+2ochier\n\
+1utiá\n\
+0Caçapava do Sul\n\
+2cequi\n\
+3hoeira do Sul\n\
+8inha\n\
+3ique Doble\n\
+2ibaté\n\
+3çara\n\
+2maquã\n\
+4rgo\n\
+3bará do Sul\n\
+3pestre da Serra\n\
+4ina das Missões\n\
+7s do Sul\n\
+4o Bom\n\
+6Novo\n\
+5s Borges\n\
+2ndelária\n\
+1ândido Godói\n\
+1andiota\n\
+3ela\n\
+3guçu\n\
+3oas\n\
+3udos do Vale\n\
+2pão Bonito do Sul\n\
+6da Canoa\n\
+7o Cipó\n\
+9Leão\n\
+3ela de Santana\n\
+3itão\n\
+4vari do Sul\n\
+2raá\n\
+4zinho\n\
+3los Barbosa\n\
+7Gomes\n\
+2sca\n\
+3eiros\n\
+2tuípe\n\
+2xias do Sul\n\
+1entenário\n\
+2rrito\n\
+4o Branco\n\
+6Grande\n\
+c do Sul\n\
+6Largo\n\
+1hapada\n\
+3rqueadas\n\
+4rua\n\
+2iapetta\n\
+2uí\n\
+3visca\n\
+1idreira\n\
+2ríaco\n\
+1olinas\n\
+3orado\n\
+2ndor\n\
+3stantina\n\
+2queiro Baixo\n\
+8s do Sul\n\
+2ronel Barros\n\
+9icaco\n\
+8Pilar\n\
+2tiporã\n\
+2xilha\n\
+1rissiumal\n\
+4tal\n\
+7 do Sul\n\
+2uz Alta\n\
+4altense\n\
+4eiro do Sul\n\
+0David Canabarro\n\
+1errubadas\n\
+2zesseis de Novembro\n\
+1ilermando de Aguiar\n\
+1ois Irmãos\n\
+b das Missões\n\
+5Lajeados\n\
+2m Feliciano\n\
+4Pedrito\n\
+8o de Alcântara\n\
+2na Francisca\n\
+2utor Maurício Cardoso\n\
+7Ricardo\n\
+0Eldorado do Sul\n\
+1ncantado\n\
+3ruzilhada do Sul\n\
+2genho Velho\n\
+2tre Rios do Sul\n\
+5-Ijuís\n\
+1rebango\n\
+3chim\n\
+2nestina\n\
+2val Grande\n\
+6Seco\n\
+1smeralda\n\
+2perança do Sul\n\
+3umoso\n\
+2tação\n\
+3ância Velha\n\
+3eio\n\
+3rela\n\
+7 Velha\n\
+1ugênio de Castro\n\
+0Fagundes Varela\n\
+2rroupilha\n\
+2xinal do Soturno\n\
+7zinho\n\
+2zenda Vilanova\n\
+1eliz\n\
+1lores da Cunha\n\
+4iano Peixoto\n\
+1ontoura Xavier\n\
+2rmigueiro\n\
+3quetinha\n\
+3taleza dos Valos\n\
+1rederico Westphalen\n\
+0Garibaldi\n\
+3ruchos\n\
+2urama\n\
+1eneral Câmara\n\
+3til\n\
+2túlio Vargas\n\
+1iruá\n\
+1lorinha\n\
+1ramado\n\
+7 dos Loureiros\n\
+8Xavier\n\
+3vataí\n\
+1uabiju\n\
+3íba\n\
+3poré\n\
+3rani das Missões\n\
+0Harmonia\n\
+1erval\n\
+4eiras\n\
+1orizontina\n\
+1ulha Negra\n\
+2maitá\n\
+0Ibarama\n\
+2iaçá\n\
+3raiaras\n\
+5puitã\n\
+4ubá\n\
+1grejinha\n\
+1juí\n\
+1lópolis\n\
+1mbé\n\
+2igrante\n\
+1ndependência\n\
+2hacorá\n\
+1pê\n\
+2iranga do Sul\n\
+1raí\n\
+1taara\n\
+3curubi\n\
+3puca\n\
+3qui\n\
+3ti\n\
+5ba do Sul\n\
+1vorá\n\
+3ti\n\
+0Jaboticaba\n\
+2cuizinho\n\
+4tinga\n\
+2guarão\n\
+6i\n\
+2quirana\n\
+2ri\n\
+1óia\n\
+1úlio de Castilhos\n\
+0Lagoa Bonita do Sul\n\
+6dos Três Cantos\n\
+6Vermelha\n\
+4ão\n\
+2jeado\n\
+7 do Bugre\n\
+2vras do Sul\n\
+1iberato Salzano\n\
+2ndolfo Collor\n\
+3ha Nova\n\
+0Maçambará\n\
+2chadinho\n\
+2mpituba\n\
+2noel Viana\n\
+2quiné\n\
+2ratá\n\
+4u\n\
+3celino Ramos\n\
+3iana Pimentel\n\
+6o Moro\n\
+3ques de Souza\n\
+2ta\n\
+3o Castelhano\n\
+5Leitão\n\
+5Queimado\n\
+2ximiliano de Almeida\n\
+1inas do Leão\n\
+2raguaí\n\
+1ontauri\n\
+4e Alegre dos Campos\n\
+6Belo do Sul\n\
+5negro\n\
+2rmaço\n\
+3rinhos do Sul\n\
+4o Redondo\n\
+8uter\n\
+2stardas\n\
+1uçum\n\
+2itos Capões\n\
+2literno\n\
+0Não-Me-Toque\n\
+1icolau Vergueiro\n\
+1onoai\n\
+2va Alvorada\n\
+6raçá\n\
+5Bassano\n\
+6oa Vista\n\
+6réscia\n\
+5Candelária\n\
+5Esperança do Sul\n\
+5Hartz\n\
+5Pádua\n\
+6alma\n\
+6etrópolis\n\
+6rata\n\
+5Ramada\n\
+6oma do Sul\n\
+5Santa Rita\n\
+3o Barreiro\n\
+5Cabrais\n\
+5Hamburgo\n\
+5Machado\n\
+5Tiradentes\n\
+5Xingu\n\
+0Osório\n\
+0Paim Filho\n\
+2lmares do Sul\n\
+4eira das Missões\n\
+4itinho\n\
+2nambi\n\
+3tano Grande\n\
+2raí\n\
+5so do Sul\n\
+3eci Novo\n\
+3obé\n\
+2ssa Sete\n\
+4o do Sobrado\n\
+6Fundo\n\
+2ulo Bento\n\
+2verama\n\
+1edras Altas\n\
+4o Osório\n\
+2juçara\n\
+2lotas\n\
+1icada Café\n\
+2nhal\n\
+6 da Serra\n\
+7Grande\n\
+4eirinho do Vale\n\
+7o Machado\n\
+3to Bandeira\n\
+2rapó\n\
+4tini\n\
+1lanalto\n\
+1oço das Antas\n\
+2ntão\n\
+4e Preta\n\
+2rtão\n\
+4o Alegre\n\
+6Lucena\n\
+6Mauá\n\
+6Vera Cruz\n\
+6Xavier\n\
+2uso Novo\n\
+1residente Lucena\n\
+2ogresso\n\
+3tásio Alves\n\
+1utinga\n\
+0Quaraí\n\
+3tro Irmãos\n\
+2evedos\n\
+2inze de Novembro\n\
+0Redentora\n\
+2lvado\n\
+2stinga Sêca\n\
+1io dos Índios\n\
+4Grande\n\
+4Pardo\n\
+3zinho\n\
+1oca Sales\n\
+2deio Bonito\n\
+2lador\n\
+4nte\n\
+2nda Alta\n\
+4inha\n\
+2que Gonzales\n\
+2sário do Sul\n\
+0Sagrada Família\n\
+2ldanha Marinho\n\
+3to do Jacuí\n\
+3vador das Missões\n\
+ao Sul\n\
+2nanduva\n\
+3t'Ana do Livramento\n\
+4a Bárbara do Sul\n\
+6Cecília do Sul\n\
+7lara do Sul\n\
+7ruz do Sul\n\
+6Margarida do Sul\n\
+9ia\n\
+b do Herval\n\
+6Rosa\n\
+6Tereza\n\
+6Vitória do Palmar\n\
+5na da Boa Vista\n\
+4iago\n\
+4o Ângelo\n\
+6Antônio da Patrulha\n\
+gs Missões\n\
+fo Palma\n\
+ilanalto\n\
+7ugusto\n\
+6Cristo\n\
+6Expedito do Sul\n\
+1ão Borja\n\
+4Domingos do Sul\n\
+4Francisco de Assis\n\
+hPaula\n\
+4Gabriel\n\
+4Jerônimo\n\
+5oão da Urtiga\n\
+ao Polêsine\n\
+6rge\n\
+6sé das Missões\n\
+ao Herval\n\
+dortêncio\n\
+cInhacorá\n\
+cNorte\n\
+cOuro\n\
+cSul\n\
+bs Ausentes\n\
+4Leopoldo\n\
+5ourenço do Sul\n\
+5uiz Gonzaga\n\
+4Marcos\n\
+7tinho\n\
+c da Serra\n\
+5iguel das Missões\n\
+4Nicolau\n\
+4Paulo das Missões\n\
+5edro da Serra\n\
+cs Missões\n\
+bo Butiá\n\
+dSul\n\
+4Sebastião do Caí\n\
+6pé\n\
+4Valentim\n\
+c do Sul\n\
+7ério do Sul\n\
+5endelino\n\
+5icente do Sul\n\
+1apiranga\n\
+3ucaia do Sul\n\
+2randi\n\
+1eberi\n\
+2de Nova\n\
+2gredo\n\
+2lbach\n\
+2nador Salgado Filho\n\
+3tinela do Sul\n\
+2rafina Corrêa\n\
+1ério\n\
+1ertão\n\
+6 Santana\n\
+2te de Setembro\n\
+2veriano de Almeida\n\
+1ilveira Martins\n\
+2nimbu\n\
+1obradinho\n\
+2ledade\n\
+0Tabaí\n\
+2pejara\n\
+4ra\n\
+4s\n\
+2quara\n\
+6i\n\
+6uçu do Sul\n\
+2vares\n\
+1enente Portela\n\
+2rra de Areia\n\
+2utônia\n\
+1io Hugo\n\
+2radentes do Sul\n\
+1oropi\n\
+3res\n\
+1ramandaí\n\
+3vesseiro\n\
+2ês Arroios\n\
+5Cachoeiras\n\
+6oroas\n\
+5de Maio\n\
+5Forquilhas\n\
+5Palmeiras\n\
+7ssos\n\
+2indade do Sul\n\
+3unfo\n\
+1ucunduva\n\
+2nas\n\
+2panci do Sul\n\
+7retã\n\
+5di\n\
+4rendi\n\
+2ruçu\n\
+0Ubiretama\n\
+1nião da Serra\n\
+3stalda\n\
+1ruguaiana\n\
+0Vacaria\n\
+2le do Sol\n\
+5Real\n\
+5Verde\n\
+2nini\n\
+1enâncio Aires\n\
+2ra Cruz\n\
+4nópolis\n\
+2spasiano Corrêa\n\
+1iadutos\n\
+3mão\n\
+2cente Dutra\n\
+3tor Graeff\n\
+2la Flores\n\
+5Lângaro\n\
+5Maria\n\
+5Nova do Sul\n\
+2sta Alegre\n\
+c do Prata\n\
+6Gaúcha\n\
+2tória das Missões\n\
+0Westfália\n\
+0Xangri-lá",
+	SC: "0Abdon Batista\n\
+2elardo Luz\n\
+1grolândia\n\
+4nômica\n\
+0Água Doce\n\
+4s de Chapecó\n\
+6Frias\n\
+6Mornas\n\
+0Alfredo Wagner\n\
+2to Bela Vista\n\
+1nchieta\n\
+2gelina\n\
+2ita Garibaldi\n\
+4ápolis\n\
+2tônio Carlos\n\
+1piúna\n\
+1rabutã\n\
+3quari\n\
+3ranguá\n\
+2mazém\n\
+2roio Trinta\n\
+2voredo\n\
+1scurra\n\
+1talanta\n\
+1urora\n\
+0Balneário Arroio do Silva\n\
+aBarra do Sul\n\
+aCamboriú\n\
+aGaivota\n\
+aPiçarras\n\
+aRincão\n\
+2ndeirante\n\
+2rra Bonita\n\
+6Velha\n\
+1ela Vista do Toldo\n\
+3monte\n\
+2nedito Novo\n\
+1iguaçu\n\
+1lumenau\n\
+1ocaina do Sul\n\
+2m Jardim da Serra\n\
+5esus\n\
+9 do Oeste\n\
+4Retiro\n\
+3binhas\n\
+2tuverá\n\
+1raço do Norte\n\
+9Trombudo\n\
+2unópolis\n\
+3sque\n\
+0Caçador\n\
+2ibi\n\
+2lmon\n\
+2mboriú\n\
+3po Alegre\n\
+6Belo do Sul\n\
+6Erê\n\
+5s Novos\n\
+2nelinha\n\
+3oinhas\n\
+2pão Alto\n\
+3inzal\n\
+4vari de Baixo\n\
+2tanduvas\n\
+2xambu do Sul\n\
+1elso Ramos\n\
+2rro Negro\n\
+1hapadão do Lageado\n\
+4ecó\n\
+1ocal do Sul\n\
+2ncórdia\n\
+2rdilheira Alta\n\
+3onel Freitas\n\
+8Martins\n\
+3reia Pinto\n\
+3upá\n\
+1riciúma\n\
+1unha Porã\n\
+5taí\n\
+2ritibanos\n\
+0Descanso\n\
+1ionísio Cerqueira\n\
+1ona Emma\n\
+2utor Pedrinho\n\
+0Entre Rios\n\
+1rmo\n\
+2val Velho\n\
+0Faxinal dos Guedes\n\
+1lor do Sertão\n\
+4ianópolis\n\
+1ormosa do Sul\n\
+3quilhinha\n\
+1raiburgo\n\
+2ei Rogério\n\
+0Galvão\n\
+2ropaba\n\
+3uva\n\
+2spar\n\
+1overnador Celso Ramos\n\
+1rão-Pará\n\
+2avatal\n\
+1uabiruba\n\
+3raciaba\n\
+5mirim\n\
+4ujá do Sul\n\
+3tambú\n\
+0Herval d'Oeste\n\
+0Ibiam\n\
+3caré\n\
+3rama\n\
+1çara\n\
+1lhota\n\
+1maruí\n\
+2bituba\n\
+3uia\n\
+1ndaial\n\
+1omerê\n\
+1pira\n\
+2orã do Oeste\n\
+2uaçu\n\
+3mirim\n\
+1raceminha\n\
+3ni\n\
+3ti\n\
+2ineópolis\n\
+1tá\n\
+2aiópolis\n\
+3jaí\n\
+3pema\n\
+4iranga\n\
+4oá\n\
+2uporanga\n\
+0Jaborá\n\
+2cinto Machado\n\
+2guaruna\n\
+2raguá do Sul\n\
+3dinópolis\n\
+1oaçaba\n\
+2inville\n\
+2sé Boiteux\n\
+1upiá\n\
+0Lacerdópolis\n\
+2ges\n\
+3una\n\
+2jeado Grande\n\
+2urentino\n\
+4o Müller\n\
+1ebon Régis\n\
+2oberto Leal\n\
+1indóia do Sul\n\
+1ontras\n\
+1uiz Alves\n\
+2zerna\n\
+0Macieira\n\
+2fra\n\
+2jor Gercino\n\
+6Vieira\n\
+2racajá\n\
+4vilha\n\
+3ema\n\
+2ssaranduba\n\
+2tos Costa\n\
+1eleiro\n\
+1irim Doce\n\
+1odelo\n\
+2ndaí\n\
+3te Carlo\n\
+8stelo\n\
+2rro da Fumaça\n\
+6Grande\n\
+0Navegantes\n\
+1ova Erechim\n\
+5Itaberaba\n\
+5Trento\n\
+5Veneza\n\
+3o Horizonte\n\
+0Orleans\n\
+1tacílio Costa\n\
+1uro\n\
+4 Verde\n\
+0Paial\n\
+3nel\n\
+2lhoça\n\
+3ma Sola\n\
+4eira\n\
+4itos\n\
+2panduva\n\
+2raíso\n\
+2sso de Torres\n\
+5s Maia\n\
+2ulo Lopes\n\
+1edras Grandes\n\
+2nha\n\
+2ritiba\n\
+2scaria Brava\n\
+2trolândia\n\
+1inhalzinho\n\
+4eiro Preto\n\
+2ratuba\n\
+1lanalto Alegre\n\
+1omerode\n\
+2nte Alta\n\
+a do Norte\n\
+6Serrada\n\
+2rto Belo\n\
+6União\n\
+2uso Redondo\n\
+1raia Grande\n\
+2esidente Castello Branco\n\
+bGetúlio\n\
+bNereu\n\
+2incesa\n\
+0Quilombo\n\
+0Rancho Queimado\n\
+1io das Antas\n\
+5o Campo\n\
+7Oeste\n\
+7Sul\n\
+6s Cedros\n\
+4Fortuna\n\
+4Negrinho\n\
+4Rufino\n\
+2queza\n\
+1odeio\n\
+2melândia\n\
+0Salete\n\
+3tinho\n\
+4o Veloso\n\
+2ngão\n\
+3ta Cecília\n\
+6Helena\n\
+6Rosa de Lima\n\
+co Sul\n\
+6Terezinha\n\
+f do Progresso\n\
+4iago do Sul\n\
+4o Amaro da Imperatriz\n\
+1ão Bento do Sul\n\
+6rnardino\n\
+5onifácio\n\
+4Carlos\n\
+5ristóvão do Sul\n\
+4Domingos\n\
+4Francisco do Sul\n\
+4João Batista\n\
+9do Itaperiú\n\
+cOeste\n\
+cSul\n\
+6aquim\n\
+6sé\n\
+8 do Cedro\n\
+errito\n\
+4Lourenço do Oeste\n\
+5udgero\n\
+4Martinho\n\
+5iguel da Boa Vista\n\
+co Oeste\n\
+4Pedro de Alcântara\n\
+1audades\n\
+1chroeder\n\
+1eara\n\
+2rra Alta\n\
+1iderópolis\n\
+1ombrio\n\
+1ul Brasil\n\
+0Taió\n\
+2ngará\n\
+1igrinhos\n\
+2jucas\n\
+2mbé do Sul\n\
+4ó\n\
+5 Grande\n\
+1rês Barras\n\
+2eviso\n\
+3ze de Maio\n\
+6Tílias\n\
+2ombudo Central\n\
+1ubarão\n\
+2nápolis\n\
+2rvo\n\
+0União do Oeste\n\
+1rubici\n\
+3pema\n\
+3ssanga\n\
+0Vargeão\n\
+5m\n\
+6 Bonita\n\
+1idal Ramos\n\
+3eira\n\
+2tor Meireles\n\
+0Witmarsum\n\
+0Xanxerê\n\
+2vantina\n\
+2xim\n\
+0Zortéa",
+	SE: "0Amparo do São Francisco\n\
+1quidabã\n\
+1racaju\n\
+3uá\n\
+2eia Branca\n\
+0Barra dos Coqueiros\n\
+1oquim\n\
+1rejo Grande\n\
+0Campo do Brito\n\
+2nhoba\n\
+3indé de São Francisco\n\
+2pela\n\
+2rira\n\
+3mópolis\n\
+1edro de São João\n\
+1ristinápolis\n\
+1umbe\n\
+0Divina Pastora\n\
+0Estância\n\
+0Feira Nova\n\
+1rei Paulo\n\
+0Gararu\n\
+1eneral Maynard\n\
+1raccho Cardoso\n\
+0Ilha das Flores\n\
+1ndiaroba\n\
+1tabaiana\n\
+8inha\n\
+4i\n\
+3poranga d'Ajuda\n\
+0Japaratuba\n\
+3oatã\n\
+0Lagarto\n\
+2ranjeiras\n\
+0Macambira\n\
+2lhada dos Bois\n\
+6or\n\
+2ruim\n\
+1oita Bonita\n\
+2nte Alegre de Sergipe\n\
+1uribeca\n\
+0Neópolis\n\
+1ossa Senhora Aparecida\n\
+eda Glória\n\
+gs Dores\n\
+fe Lourdes\n\
+fo Socorro\n\
+0Pacatuba\n\
+1edra Mole\n\
+4inhas\n\
+1inhão\n\
+2rambu\n\
+1oço Redondo\n\
+5Verde\n\
+2rto da Folha\n\
+1ropriá\n\
+0Riachão do Dantas\n\
+5uelo\n\
+2beirópolis\n\
+1osário do Catete\n\
+0Salgado\n\
+2nta Luzia do Itanhy\n\
+6Rosa de Lima\n\
+5na do São Francisco\n\
+4o Amaro das Brotas\n\
+1ão Cristóvão\n\
+4Domingos\n\
+4Francisco\n\
+4Miguel do Aleixo\n\
+1imão Dias\n\
+2riri\n\
+0Telha\n\
+1obias Barreto\n\
+2mar do Geru\n\
+0Umbaúba",
+	SP: "0Adamantina\n\
+2olfo\n\
+1guaí\n\
+0Águas da Prata\n\
+7e Lindóia\n\
+9Santa Bárbara\n\
+aão Pedro\n\
+0Agudos\n\
+1lambari\n\
+2fredo Marcondes\n\
+2tair\n\
+3inópolis\n\
+3o Alegre\n\
+2umínio\n\
+0Álvares Florence\n\
+8Machado\n\
+5o de Carvalho\n\
+0Alvinlândia\n\
+1mericana\n\
+2érico Brasiliense\n\
+8de Campos\n\
+2paro\n\
+1nalândia\n\
+2dradina\n\
+2gatuba\n\
+2hembi\n\
+3umas\n\
+1parecida\n\
+9 d'Oeste\n\
+2iaí\n\
+1raçariguama\n\
+5tuba\n\
+4oiaba da Serra\n\
+3mina\n\
+3ndu\n\
+3peí\n\
+3raquara\n\
+5s\n\
+2co-Íris\n\
+2ealva\n\
+3ias\n\
+4ópolis\n\
+2iranha\n\
+2tur Nogueira\n\
+2ujá\n\
+1spásia\n\
+2sis\n\
+1tibaia\n\
+1uriflama\n\
+1vaí\n\
+3nhandava\n\
+3ré\n\
+0Bady Bassitt\n\
+2lbinos\n\
+1álsamo\n\
+1ananal\n\
+2rão de Antonina\n\
+3bosa\n\
+3iri\n\
+3ra Bonita\n\
+6do Chapéu\n\
+9Turvo\n\
+4etos\n\
+4inha\n\
+3ueri\n\
+2stos\n\
+2tatais\n\
+2uru\n\
+1ebedouro\n\
+2nto de Abreu\n\
+2rnardino de Campos\n\
+3tioga\n\
+1ilac\n\
+2rigui\n\
+4tiba Mirim\n\
+1oa Esperança do Sul\n\
+2caina\n\
+2fete\n\
+2ituva\n\
+2m Jesus dos Perdões\n\
+4Sucesso de Itararé\n\
+2rá\n\
+3acéia\n\
+3borema\n\
+3ebi\n\
+2tucatu\n\
+1ragança Paulista\n\
+3úna\n\
+2ejo Alegre\n\
+2odowski\n\
+3tas\n\
+1uri\n\
+4tama\n\
+5izal\n\
+0Cabrália Paulista\n\
+4eúva\n\
+2çapava\n\
+2choeira Paulista\n\
+3onde\n\
+2felândia\n\
+2iabu\n\
+3eiras\n\
+3uá\n\
+2jamar\n\
+4ti\n\
+3obi\n\
+3uru\n\
+2mpina do Monte Alegre\n\
+7s\n\
+4o Limpo Paulista\n\
+5s do Jordão\n\
+7Novos Paulista\n\
+2nanéia\n\
+4s\n\
+1ândido Mota\n\
+8Rodrigues\n\
+1anitar\n\
+2pão Bonito\n\
+3ela do Alto\n\
+3ivari\n\
+2raguatatuba\n\
+4picuíba\n\
+3doso\n\
+2sa Branca\n\
+1ássia dos Coqueiros\n\
+1astilho\n\
+2tanduva\n\
+3iguá\n\
+1edral\n\
+2rqueira César\n\
+5ilho\n\
+2sário Lange\n\
+1harqueada\n\
+3vantes\n\
+1lementina\n\
+1olina\n\
+3ômbia\n\
+2nchal\n\
+6s\n\
+2rdeirópolis\n\
+3oados\n\
+4nel Macedo\n\
+3umbataí\n\
+2smópolis\n\
+4orama\n\
+2tia\n\
+1ravinhos\n\
+2istais Paulista\n\
+2uzália\n\
+4eiro\n\
+1ubatão\n\
+2nha\n\
+0Descalvado\n\
+1iadema\n\
+2rce Reis\n\
+2vinolândia\n\
+1obrada\n\
+2is Córregos\n\
+2lcinópolis\n\
+2urado\n\
+1racena\n\
+1uartina\n\
+2mont\n\
+0Echaporã\n\
+1ldorado\n\
+2ias Fausto\n\
+3siário\n\
+1mbaúba\n\
+3u das Artes\n\
+4-Guaçu\n\
+2ilianópolis\n\
+1ngenheiro Coelho\n\
+1spírito Santo do Pinhal\n\
+iTurvo\n\
+2tiva Gerbi\n\
+3rela d'Oeste\n\
+9o Norte\n\
+1uclides da Cunha Paulista\n\
+0Fartura\n\
+1ernando Prestes\n\
+7ópolis\n\
+4ão\n\
+3raz de Vasconcelos\n\
+1lora Rica\n\
+4eal\n\
+2órida Paulista\n\
+2orínea\n\
+1ranca\n\
+5isco Morato\n\
+5o da Rocha\n\
+0Gabriel Monteiro\n\
+1ália\n\
+1arça\n\
+2stão Vidigal\n\
+2vião Peixoto\n\
+1eneral Salgado\n\
+2tulina\n\
+1licério\n\
+1uaiçara\n\
+4mbê\n\
+3íra\n\
+3piaçu\n\
+6ra\n\
+3rá\n\
+4açaí\n\
+5ci\n\
+5ni d'Oeste\n\
+6tã\n\
+5rapes\n\
+6ema\n\
+5tinguetá\n\
+4eí\n\
+4iba\n\
+4ujá\n\
+5lhos\n\
+3tapará\n\
+2zolândia\n\
+0Herculândia\n\
+1olambra\n\
+2rtolândia\n\
+0Iacanga\n\
+3ri\n\
+2ras\n\
+1baté\n\
+2irá\n\
+4arema\n\
+3tinga\n\
+3úna\n\
+1cém\n\
+1epê\n\
+1garaçu do Tietê\n\
+5pava\n\
+5tá\n\
+2uape\n\
+1lha Comprida\n\
+5Solteira\n\
+4bela\n\
+1ndaiatuba\n\
+3iana\n\
+5porã\n\
+2úbia Paulista\n\
+1paussu\n\
+2eró\n\
+3úna\n\
+2iguá\n\
+2oranga\n\
+2uã\n\
+1racemápolis\n\
+3puã\n\
+5ru\n\
+1taberá\n\
+3í\n\
+3jobi\n\
+4u\n\
+3nhaém\n\
+3oca\n\
+3pecerica da Serra\n\
+5tininga\n\
+5va\n\
+6i\n\
+4ira\n\
+7puã Paulista\n\
+2ápolis\n\
+2aporanga\n\
+4uí\n\
+5ra\n\
+3quaquecetuba\n\
+3raré\n\
+4iri\n\
+3tiba\n\
+5nga\n\
+2irapina\n\
+6uã\n\
+2obi\n\
+2u\n\
+3peva\n\
+3verava\n\
+0Jaborandi\n\
+4ticabal\n\
+2careí\n\
+3i\n\
+3upiranga\n\
+2guariúna\n\
+2les\n\
+2mbeiro\n\
+2ndira\n\
+2rdinópolis\n\
+3inu\n\
+2ú\n\
+1eriquara\n\
+1oanópolis\n\
+2ão Ramalho\n\
+2sé Bonifácio\n\
+1úlio Mesquita\n\
+1umirim\n\
+2ndiaí\n\
+3queirópolis\n\
+2quiá\n\
+5tiba\n\
+0Lagoinha\n\
+2ranjal Paulista\n\
+2vínia\n\
+3rinhas\n\
+1eme\n\
+2nçóis Paulista\n\
+1imeira\n\
+2ndóia\n\
+3s\n\
+1orena\n\
+2urdes\n\
+3veira\n\
+1ucélia\n\
+3ianópolis\n\
+2ís Antônio\n\
+2iziânia\n\
+2pércio\n\
+2técia\n\
+0Macatuba\n\
+4ubal\n\
+3edônia\n\
+2gda\n\
+2irinque\n\
+5porã\n\
+2nduri\n\
+2rabá Paulista\n\
+4caí\n\
+4poama\n\
+3iápolis\n\
+3ília\n\
+3inópolis\n\
+3tinópolis\n\
+2tão\n\
+2uá\n\
+1endonça\n\
+2ridiano\n\
+2sópolis\n\
+1iguelópolis\n\
+2neiros do Tietê\n\
+2ra Estrela\n\
+4catu\n\
+4ndópolis\n\
+5te do Paranapanema\n\
+4ssol\n\
+8ândia\n\
+1ococa\n\
+2gi das Cruzes\n\
+5Guaçu\n\
+5Mirim\n\
+2mbuca\n\
+2nções\n\
+3gaguá\n\
+3te Alegre do Sul\n\
+8to\n\
+7prazível\n\
+7zul Paulista\n\
+6Castelo\n\
+6Mor\n\
+5iro Lobato\n\
+2rro Agudo\n\
+3ungaba\n\
+2tuca\n\
+1urutinga do Sul\n\
+0Nantes\n\
+2randiba\n\
+2tividade da Serra\n\
+2zaré Paulista\n\
+1eves Paulista\n\
+1handeara\n\
+1ipoã\n\
+1ova Aliança\n\
+5Campina\n\
+7naã Paulista\n\
+7stilho\n\
+5Europa\n\
+5Granada\n\
+6uataporanga\n\
+5Independência\n\
+5Luzitânia\n\
+5Odessa\n\
+4is\n\
+3o Horizonte\n\
+1uporanga\n\
+0Ocauçu\n\
+0Óleo\n\
+0Olímpia\n\
+1nda Verde\n\
+1riente\n\
+3ndiúva\n\
+2lândia\n\
+1sasco\n\
+2car Bressane\n\
+2valdo Cruz\n\
+1urinhos\n\
+3o Verde\n\
+4este\n\
+0Pacaembu\n\
+2lestina\n\
+3mares Paulista\n\
+4eira d'Oeste\n\
+4ital\n\
+2norama\n\
+2raguaçu Paulista\n\
+4ibuna\n\
+4íso\n\
+4napanema\n\
+7uã\n\
+4puã\n\
+3dinho\n\
+3iquera-Açu\n\
+4si\n\
+2trocínio Paulista\n\
+2ulicéia\n\
+4ínia\n\
+4istânia\n\
+4o de Faria\n\
+1ederneiras\n\
+3ra Bela\n\
+5nópolis\n\
+4egulho\n\
+5ira\n\
+4inhas Paulista\n\
+4o de Toledo\n\
+2nápolis\n\
+2reira Barreto\n\
+7s\n\
+3uíbe\n\
+1iacatu\n\
+2edade\n\
+2lar do Sul\n\
+2ndamonhangaba\n\
+4orama\n\
+3halzinho\n\
+2querobi\n\
+5te\n\
+2racaia\n\
+5icaba\n\
+4ju\n\
+6í\n\
+4ngi\n\
+4pora do Bom Jesus\n\
+6zinho\n\
+4ssununga\n\
+4tininga\n\
+2tangueiras\n\
+1lanalto\n\
+3tina\n\
+1oá\n\
+2loni\n\
+2mpéia\n\
+2ngaí\n\
+3tal\n\
+6inda\n\
+4es Gestal\n\
+2pulina\n\
+2rangaba\n\
+3to Feliz\n\
+8rreira\n\
+2tim\n\
+4rendaba\n\
+1racinha\n\
+3dópolis\n\
+3ia Grande\n\
+3tânia\n\
+2esidente Alves\n\
+bBernardes\n\
+bEpitácio\n\
+bPrudente\n\
+bVenceslau\n\
+2omissão\n\
+0Quadra\n\
+3tá\n\
+2eiroz\n\
+3luz\n\
+2intana\n\
+0Rafard\n\
+2ncharia\n\
+1edenção da Serra\n\
+2gente Feijó\n\
+3inópolis\n\
+4stro\n\
+2stinga\n\
+1ibeira\n\
+6ão Bonito\n\
+aranco\n\
+9Corrente\n\
+9do Sul\n\
+bs Índios\n\
+9Grande\n\
+9Pires\n\
+areto\n\
+2faina\n\
+2ncão\n\
+3ópolis\n\
+2o Claro\n\
+4das Pedras\n\
+4Grande da Serra\n\
+3lândia\n\
+2versul\n\
+1osana\n\
+3eira\n\
+1ubiácea\n\
+4néia\n\
+0Sabino\n\
+2gres\n\
+2les\n\
+5 Oliveira\n\
+5ópolis\n\
+3mourão\n\
+3tinho\n\
+4o\n\
+5 de Pirapora\n\
+6Grande\n\
+2ndovalina\n\
+3ta Adélia\n\
+7lbertina\n\
+6Bárbara d'Oeste\n\
+7ranca\n\
+6Clara d'Oeste\n\
+7ruz da Conceição\n\
+eEsperança\n\
+ds Palmeiras\n\
+co Rio Pardo\n\
+6Ernestina\n\
+6Fé do Sul\n\
+6Gertrudes\n\
+6Isabel\n\
+6Lúcia\n\
+6Maria da Serra\n\
+7ercedes\n\
+6Rita d'Oeste\n\
+co Passa Quatro\n\
+7osa de Viterbo\n\
+6Salete\n\
+5na da Ponte Pensa\n\
+9e Parnaíba\n\
+4o Anastácio\n\
+8dré\n\
+8tônio da Alegria\n\
+fe Posse\n\
+fo Aracanguá\n\
+hJardim\n\
+hPinhal\n\
+6Expedito\n\
+4ópolis do Aguapeí\n\
+4os\n\
+1ão Bento do Sapucaí\n\
+6rnardo do Campo\n\
+4Caetano do Sul\n\
+6rlos\n\
+4Francisco\n\
+4João da Boa Vista\n\
+bs Duas Pontes\n\
+ae Iracema\n\
+ao Pau d'Alho\n\
+6aquim da Barra\n\
+6sé da Bela Vista\n\
+ao Barreiro\n\
+cRio Pardo\n\
+hreto\n\
+bs Campos\n\
+4Lourenço da Serra\n\
+5uiz do Paraitinga\n\
+4Manuel\n\
+5iguel Arcanjo\n\
+4Paulo\n\
+5edro\n\
+9 do Turvo\n\
+4Roque\n\
+4Sebastião\n\
+d da Grama\n\
+5imão\n\
+4Vicente\n\
+1arapuí\n\
+3utaiá\n\
+1ebastianópolis do Sul\n\
+2rra Azul\n\
+6Negra\n\
+5na\n\
+3tãozinho\n\
+2te Barras\n\
+2verínia\n\
+1ilveiras\n\
+1ocorro\n\
+2rocaba\n\
+1ud Mennucci\n\
+2maré\n\
+2zanápolis\n\
+5o\n\
+0Tabapuã\n\
+4tinga\n\
+3oão da Serra\n\
+2ciba\n\
+2guaí\n\
+2iaçu\n\
+3úva\n\
+2mbaú\n\
+2nabi\n\
+2piraí\n\
+6tiba\n\
+2quaral\n\
+6itinga\n\
+8uba\n\
+7vaí\n\
+2rabai\n\
+3umã\n\
+2tuí\n\
+2ubaté\n\
+1ejupá\n\
+2odoro Sampaio\n\
+2rra Roxa\n\
+1ietê\n\
+2mburi\n\
+1orre de Pedra\n\
+4inha\n\
+1rabiju\n\
+2emembé\n\
+2ês Fronteiras\n\
+1uiuti\n\
+2pã\n\
+3i Paulista\n\
+2riúba\n\
+3malina\n\
+0Ubarana\n\
+3tuba\n\
+2irajara\n\
+1choa\n\
+1nião Paulista\n\
+1rânia\n\
+2u\n\
+3pês\n\
+0Valentim Gentil\n\
+3inhos\n\
+3paraíso\n\
+2rgem\n\
+6 Grande do Sul\n\
+ePaulista\n\
+1árzea Paulista\n\
+1era Cruz\n\
+1inhedo\n\
+2radouro\n\
+2sta Alegre do Alto\n\
+2tória Brasil\n\
+1otorantim\n\
+3uporanga\n\
+0Zacarias",
+	TO: "0Abreulândia\n\
+1guiarnópolis\n\
+1liança do Tocantins\n\
+2mas\n\
+2vorada\n\
+1nanás\n\
+2gico\n\
+1parecida do Rio Negro\n\
+1ragominas\n\
+4uacema\n\
+6çu\n\
+6ína\n\
+6nã\n\
+6tins\n\
+3poema\n\
+2raias\n\
+1ugustinópolis\n\
+2rora do Tocantins\n\
+1xixá do Tocantins\n\
+0Babaçulândia\n\
+2ndeirantes do Tocantins\n\
+2rra do Ouro\n\
+4olândia\n\
+1ernardo Sayão\n\
+1om Jesus do Tocantins\n\
+1rasilândia do Tocantins\n\
+2ejinho de Nazaré\n\
+1uriti do Tocantins\n\
+0Cachoeirinha\n\
+2mpos Lindos\n\
+2riri do Tocantins\n\
+3molândia\n\
+3rasco Bonito\n\
+2seara\n\
+1entenário\n\
+1hapada da Natividade\n\
+9e Areia\n\
+1olinas do Tocantins\n\
+3méia\n\
+2mbinado\n\
+2nceição do Tocantins\n\
+2uto Magalhães\n\
+1ristalândia\n\
+3xás do Tocantins\n\
+0Darcinópolis\n\
+1ianópolis\n\
+2vinópolis do Tocantins\n\
+1ois Irmãos do Tocantins\n\
+1ueré\n\
+0Esperantina\n\
+0Fátima\n\
+1igueirópolis\n\
+2ladélfia\n\
+1ormoso do Araguaia\n\
+0Goianorte\n\
+4tins\n\
+1uaraí\n\
+2rupi\n\
+0Ipueiras\n\
+1tacajá\n\
+3guatins\n\
+3piratins\n\
+4orã do Tocantins\n\
+0Jaú do Tocantins\n\
+1uarina\n\
+0Lagoa da Confusão\n\
+7o Tocantins\n\
+2jeado\n\
+2vandeira\n\
+1izarda\n\
+1uzinópolis\n\
+0Marianópolis do Tocantins\n\
+2teiros\n\
+2urilândia do Tocantins\n\
+1iracema do Tocantins\n\
+4norte\n\
+1onte do Carmo\n\
+6Santo do Tocantins\n\
+1uricilândia\n\
+0Natividade\n\
+2zaré\n\
+1ova Olinda\n\
+5Rosalândia\n\
+3o Acordo\n\
+6legre\n\
+5Jardim\n\
+0Oliveira de Fátima\n\
+0Palmas\n\
+4eirante\n\
+8s do Tocantins\n\
+7ópolis\n\
+2raíso do Tocantins\n\
+4nã\n\
+2u D'Arco\n\
+1edro Afonso\n\
+2ixe\n\
+2quizeiro\n\
+1indorama do Tocantins\n\
+2raquê\n\
+2um\n\
+1onte Alta do Bom Jesus\n\
+eTocantins\n\
+2rto Alegre do Tocantins\n\
+6Nacional\n\
+1raia Norte\n\
+2esidente Kennedy\n\
+1ugmil\n\
+0Recursolândia\n\
+1iachinho\n\
+2o da Conceição\n\
+5os Bois\n\
+4Sono\n\
+0Sampaio\n\
+2ndolândia\n\
+3ta Fé do Araguaia\n\
+6Maria do Tocantins\n\
+6Rita do Tocantins\n\
+7osa do Tocantins\n\
+6Tereza do Tocantins\n\
+binha do Tocantins\n\
+1ão Bento do Tocantins\n\
+4Félix do Tocantins\n\
+4Miguel do Tocantins\n\
+4Salvador do Tocantins\n\
+5ebastião do Tocantins\n\
+4Valério\n\
+1ilvanópolis\n\
+1ítio Novo do Tocantins\n\
+1ucupira\n\
+0Tabocão\n\
+2guatinga\n\
+2ipas do Tocantins\n\
+2lismã\n\
+1ocantínia\n\
+6inópolis\n\
+1upirama\n\
+6tins\n\
+0Wanderlândia\n\
+0Xambioá",
 };

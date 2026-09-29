@@ -2,6 +2,7 @@ import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
 import { type StateCode } from "../_internals/constants/states";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -43,7 +44,7 @@ let allCitiesCache: string[] | undefined;
 export const getCities = (state?: StateCode): string[] => {
 	if (!state) {
 		allCitiesCache ??= Object.values(MUNICIPALITY_NAMES)
-			.flatMap((names) => names.split("|"))
+			.flatMap((names) => unpackTexts(names))
 			.sort((a, b) => a.localeCompare(b, "pt-BR"));
 
 		return [...allCitiesCache];
@@ -51,5 +52,5 @@ export const getCities = (state?: StateCode): string[] => {
 
 	const code = normalizeStateCode(state);
 
-	return hasOwnKey(MUNICIPALITY_NAMES, code) ? MUNICIPALITY_NAMES[code].split("|") : [];
+	return hasOwnKey(MUNICIPALITY_NAMES, code) ? [...unpackTexts(MUNICIPALITY_NAMES[code])] : [];
 };

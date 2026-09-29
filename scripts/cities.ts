@@ -3,7 +3,7 @@
 import { calculateMunicipalityCheckDigit } from "../src/_internals/calculate-municipality-check-digit/calculate-municipality-check-digit.ts";
 import { DATA as STATES } from "../src/_internals/constants/states.ts";
 import { fetchWithRetry } from "../src/_internals/fetch-with-retry/fetch-with-retry.ts";
-import { runAsEntryPoint, writeGeneratedFiles } from "./lookup-table.ts";
+import { runAsEntryPoint, serializeTexts, writeGeneratedFiles } from "./lookup-table.ts";
 
 const STATE_CODES = STATES.map((state) => state.code);
 
@@ -88,9 +88,9 @@ const continued = (parts: readonly string[], separator: string): string => {
 };
 
 /**
- * Renders the modules the municipalities are shipped as: for each state, its names joined by
- * `|` and its codes packed by `packMunicipalityCodes`, both in the order of the names, which
- * are sorted with `localeCompare` in the "pt-BR" locale.
+ * Renders the modules the municipalities are shipped as: for each state, its names packed by
+ * `packTexts` and its codes packed by `packMunicipalityCodes`, both in the order of the names,
+ * which are sorted with `localeCompare` in the "pt-BR" locale.
  * @param {Record<string, [string, string][]>} byState - The `[name, ibgeCode]` pairs of each state.
  * @returns {Record<string, string>} The content of the generated files, by their paths.
  */
@@ -101,16 +101,9 @@ export const renderMunicipalities = (
 	const sorted = (state: string): [string, string][] =>
 		[...(byState[state] ?? [])].sort(([a], [b]) => a.localeCompare(b, "pt-BR"));
 
-	const names = states.map((state) => {
-		const stateNames = sorted(state).map(([name]) => {
-			if (/[|"\\\n]/.test(name))
-				throw new Error(`municipality name ${name} has a reserved character`);
-
-			return name;
-		});
-
-		return `\t${state}: ${continued(stateNames, "|")},`;
-	});
+	const names = states.map(
+		(state) => `\t${state}: ${serializeTexts(sorted(state).map(([name]) => name))},`,
+	);
 	const codes = states.map((state) => {
 		const packed = packMunicipalityCodes(sorted(state).map(([, code]) => code));
 
@@ -122,7 +115,8 @@ export const renderMunicipalities = (
 
 /**
  * The name of every Brazilian municipality, published by the IBGE, for each state: the names
- * joined by \`|\`, sorted with \`localeCompare\` in the "pt-BR" locale. The code of the n-th name
+ * packed by \`packTexts\` (scripts/lookup-table.ts), which \`unpackTexts\` reads, sorted with
+ * \`localeCompare\` in the "pt-BR" locale. The code of the n-th name
  * is the n-th of \`MUNICIPALITY_CODES\` (\`municipality-codes.ts\`), a module of its own so that
  * reading the codes does not bundle the names.
  *

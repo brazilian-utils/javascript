@@ -3,6 +3,7 @@ import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
 import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 import { readMunicipalityCodes } from "../_internals/read-municipality-codes/read-municipality-codes";
 import { readMunicipalityStateCode } from "../_internals/read-municipality-state-code/read-municipality-state-code";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 
@@ -43,5 +44,5 @@ export const getMunicipalityByCode = (code: string | number): Municipality | nul
 
 	return index === -1
 		? null
-		: { code: digits, name: MUNICIPALITY_NAMES[stateCode].split("|")[index], stateCode };
+		: { code: digits, name: unpackTexts(MUNICIPALITY_NAMES[stateCode])[index], stateCode };
 };
