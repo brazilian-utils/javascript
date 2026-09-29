@@ -1095,12 +1095,15 @@ Fonte: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/a
 Formata uma placa. Placas antigas brasileiras (`LLLNNNN`) recebem hífen; placas Mercosul (`LLLNLNN`) são retornadas sem separador.
 
 - Retorna `''` quando o valor não pode iniciar uma placa válida.
+- Um valor parcial é formatado progressivamente, então a função serve como máscara de entrada: o hífen aparece assim que o quarto caractere é um dígito, e um quinto caractere que é letra mantém a forma Mercosul.
 
 ```javascript
 import { formatLicensePlate } from '@brazilian-utils/brazilian-utils';
 
 formatLicensePlate('abc1234'); // 'ABC-1234'
 formatLicensePlate('abc1d23'); // 'ABC1D23'
+formatLicensePlate('abc1'); // 'ABC-1' (um valor parcial é formatado até onde vai)
+formatLicensePlate('abc1d'); // 'ABC1D'
 ```
 
 ### parseLicensePlate
@@ -1279,8 +1282,8 @@ Formata um número de processo jurídico na máscara do CNJ `NNNNNNN-DD.AAAA.J.T
 ```javascript
 import { formatProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
-formatProcessoJuridico('00020802520125150049'); // 0002080-25.2012.5.15.0049
-formatProcessoJuridico('20802520125150049', { pad: true }); // 0002080-25.2012.5.15.0049
+formatProcessoJuridico('00020802520125150049'); // '0002080-25.2012.5.15.0049'
+formatProcessoJuridico('20802520125150049', { pad: true }); // '0002080-25.2012.5.15.0049'
 ```
 
 Fonte: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119).
@@ -1292,7 +1295,7 @@ Remove a formatação do processo jurídico, mantém apenas os dígitos e limita
 ```javascript
 import { parseProcessoJuridico } from '@brazilian-utils/brazilian-utils';
 
-parseProcessoJuridico('0002080-25.2012.5.15.0049'); // 00020802520125150049
+parseProcessoJuridico('0002080-25.2012.5.15.0049'); // '00020802520125150049'
 ```
 
 ### generateProcessoJuridico
@@ -2650,10 +2653,10 @@ Formata a matrícula de uma certidão de registro civil na máscara impressa do 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
 
-formatCertidao('10453901552013100012021000012321'); // 104539 01 55 2013 1 00012 021 0000123 21
-formatCertidao('104539.01.55.2013.1.00012.021.0000123-21'); // 104539 01 55 2013 1 00012 021 0000123 21
-formatCertidao('1552010100020112000012087', { pad: true }); // 000000 01 55 2010 1 00020 112 0000120 87
-formatCertidao(104539015520); // 104539 01 55 20 (um número é lido como a string dos seus dígitos)
+formatCertidao('10453901552013100012021000012321'); // '104539 01 55 2013 1 00012 021 0000123 21'
+formatCertidao('104539.01.55.2013.1.00012.021.0000123-21'); // '104539 01 55 2013 1 00012 021 0000123 21'
+formatCertidao('1552010100020112000012087', { pad: true }); // '000000 01 55 2010 1 00020 112 0000120 87'
+formatCertidao(104539015520); // '104539 01 55 20' (um número é lido como a string dos seus dígitos)
 formatCertidao(1045390155.2); // '' (não é um inteiro seguro não negativo)
 ```
 
@@ -3776,7 +3779,7 @@ Valida um VIN (Vehicle Identification Number / chassi). Por padrão confere 17 c
 - A exclusão de `I`, `O` e `Q` vem da ISO 3779, não da resolução: ela não lista caractere proibido e remete a gravação à ABNT NBR 6066:2022 (art. 5º), norma paga sem cópia oficial gratuita. Os VINs de regularização do Anexo II dela (WMI `XXX`) são escritos sem essas letras, então passam.
 - **Opções** (`IsValidVinOptions`): `checkDigit: true` também exige as regras norte-americanas do 49 CFR 565.15, o dígito verificador na 9ª posição e um código de ano-modelo diferente de `U`, `Z` e `0` na 10ª. Use para o VIN de um veículo fabricado para os Estados Unidos ou o Canadá.
 - As normas brasileiras não exigem o dígito verificador, e muitos VINs fabricados no Brasil não o têm. Até a 2.4.0 ele era sempre exigido; passe `{ checkDigit: true }` para manter esse comportamento.
-- Não diferencia maiúsculas de minúsculas e ignora espaços ao redor; um valor de um único caractere repetido é rejeitado. Só contam letras ASCII e algarismos: uma letra não ASCII que vira letra ASCII em maiúsculas (`ſ`, `ß`) é rejeitada.
+- Não diferencia maiúsculas de minúsculas e ignora espaços ao redor; um valor de um único caractere repetido é rejeitado. Um VIN é impresso em uma sequência contínua, então espaço, `.`, `-` ou `/` entre os caracteres é rejeitado em vez de removido. Só contam letras ASCII e algarismos: uma letra não ASCII que vira letra ASCII em maiúsculas (`ſ`, `ß`) é rejeitada.
 
 ```javascript
 import { isValidVin } from '@brazilian-utils/brazilian-utils';
@@ -3789,6 +3792,7 @@ isValidVin('1HGCM82633A004353', { checkDigit: true }); // false (dígito verific
 isValidVin('00000000000000000'); // false (todos os caracteres iguais)
 isValidVin('1HGCM8263IA004352'); // false (contém a letra excluída I)
 isValidVin('1HGCM82633A00435'); // false (16 caracteres)
+isValidVin('1HGCM 82633 A004352'); // false (um separador entre os caracteres)
 ```
 
 Fonte: [ISO 3779:2009](https://www.iso.org/standard/52200.html), [49 CFR 565.15](https://www.ecfr.gov/current/title-49/section-565.15) e [Resolução CONTRAN nº 968/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9682022.pdf).
