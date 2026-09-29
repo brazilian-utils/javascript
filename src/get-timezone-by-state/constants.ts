@@ -1,3 +1,5 @@
+import { type StateCode } from "../_internals/constants/states";
+
 /**
  * IANA time zone database (tzdata) name for each Brazilian state, chosen as the zone of the
  * state capital per the official `zone1970.tab` comments (some tzdata zones span more than
@@ -10,14 +12,16 @@
  * UTC-02:00 offset is out of scope here.
  *
  * @see Official: https://www.iana.org/time-zones
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12876.htm
+ * Lei 12.876/2013, which set the legal time zones of Brazil again, Acre and the south-west of Amazonas included.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d8112.htm
+ * Decreto 8.112/2013, which regulates the legal time of Brazil.
  * @see Based on: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab
- * (IANA tz
- * database data file, `BR` rows)
+ * IANA tz database data file, `BR` rows.
  * @see Based on: https://en.wikipedia.org/wiki/Time_in_Brazil
- * Used to confirm the state
- * coverage of each zone.
+ * Used to confirm the state coverage of each zone.
  */
-export const STATE_TIMEZONES: Record<string, string> = {
+export const STATE_TIMEZONES: Record<StateCode, string> = {
 	AC: "America/Rio_Branco",
 	AL: "America/Maceio",
 	AM: "America/Manaus",

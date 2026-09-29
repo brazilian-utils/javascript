@@ -1890,6 +1890,7 @@ Source: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/a
 
 Get the IANA time zone name (tzdata zone) of a Brazilian state: the zone of its capital.
 
+- Some states straddle more than one zone, and the capital's zone says nothing about the rest: the west of Amazonas (`America/Eirunepe`, UTC-5) and the west of Pará (`America/Santarem`, UTC-3) are not represented, and Fernando de Noronha (`America/Noronha`, UTC-2), a district of Pernambuco, resolves as Recife (UTC-3). The offsets follow the capitals: Acre UTC-5; Amazonas, Roraima, Rondônia, Mato Grosso and Mato Grosso do Sul UTC-4; the other states UTC-3.
 - The match ignores case and surrounding whitespace.
 - Returns `null` when no state matches.
 
@@ -1903,7 +1904,7 @@ getTimezoneByState('PE'); // 'America/Recife'
 getTimezoneByState('ZZ'); // null
 ```
 
-Source: [IANA Time Zone Database](https://www.iana.org/time-zones)
+Source: [IANA Time Zone Database](https://www.iana.org/time-zones), [Lei 12.876/2013](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12876.htm) and [Decreto 8.112/2013](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d8112.htm).
 
 ### getMunicipalities
 

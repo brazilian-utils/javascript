@@ -1889,6 +1889,7 @@ Fonte: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/ap
 
 Retorna o nome do fuso horário IANA (zona do tzdata) de um estado brasileiro: o fuso da sua capital.
 
+- Alguns estados abrangem mais de um fuso, e o fuso da capital não diz nada sobre o resto: o oeste do Amazonas (`America/Eirunepe`, UTC-5) e o oeste do Pará (`America/Santarem`, UTC-3) não são representados, e Fernando de Noronha (`America/Noronha`, UTC-2), distrito de Pernambuco, resolve como Recife (UTC-3). Os deslocamentos seguem as capitais: Acre UTC-5; Amazonas, Roraima, Rondônia, Mato Grosso e Mato Grosso do Sul UTC-4; os demais estados UTC-3.
 - A comparação não diferencia maiúsculas de minúsculas e remove os espaços nas pontas.
 - Retorna `null` quando nenhum estado corresponde.
 
@@ -1902,7 +1903,7 @@ getTimezoneByState('PE'); // 'America/Recife'
 getTimezoneByState('ZZ'); // null
 ```
 
-Fonte: [IANA Time Zone Database](https://www.iana.org/time-zones)
+Fonte: [IANA Time Zone Database](https://www.iana.org/time-zones), [Lei 12.876/2013](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12876.htm) e [Decreto 8.112/2013](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d8112.htm).
 
 ### getMunicipalities
 
