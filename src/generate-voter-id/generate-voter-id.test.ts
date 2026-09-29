@@ -1,9 +1,9 @@
 import * as fc from "fast-check";
 
 import { type StateCode } from "../_internals/constants/states";
+import { UF_TO_VOTER_ID_CODE } from "../_internals/constants/voter-id";
 import { PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
 import { isValidVoterId } from "../is-valid-voter-id/is-valid-voter-id";
 import { generateVoterId } from "./generate-voter-id";
 

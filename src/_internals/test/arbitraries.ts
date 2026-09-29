@@ -3,7 +3,6 @@ import * as fc from "fast-check";
 import { type GeneratePhoneType } from "../../generate-phone/generate-phone";
 import { type LicensePlateFormat } from "../../get-format-license-plate/get-format-license-plate";
 import { type BusinessDayOptions, isBusinessDay } from "../../is-business-day/is-business-day";
-import { UF_TO_VOTER_ID_CODE } from "../../is-valid-voter-id/constants";
 import { assembleBoletoArrecadacao } from "../assemble-boleto-arrecadacao/assemble-boleto-arrecadacao";
 import { assembleBoletoBancario } from "../assemble-boleto-bancario/assemble-boleto-bancario";
 import { calculateCnhFirstVerifier } from "../calculate-cnh-first-verifier/calculate-cnh-first-verifier";
@@ -28,6 +27,7 @@ import {
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 } from "../constants/service-phone";
 import { DATA as STATES, type StateCode } from "../constants/states";
+import { UF_TO_VOTER_ID_CODE } from "../constants/voter-id";
 
 /**
  * Spreads `separators` around every character of `value`: one before the first character, one

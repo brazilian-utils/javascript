@@ -140,9 +140,14 @@ const validateAcDfRule = (ie: string, prefixes: readonly string[]): boolean => {
 
 const validateAC: IeValidator = (ie) => validateAcDfRule(ie, AC_PREFIXES);
 
-// AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
-// which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
-// 1 and `11 - remainder` for every other one.
+/**
+ * AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
+ * which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
+ * 1 and `11 - remainder` for every other one.
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validateAL: IeValidator = (ie) =>
 	AL_COMPANY_TYPES.includes(ie.charAt(2)) && validateMod11Ie(ie, AL_PREFIXES);
 
@@ -238,14 +243,19 @@ const validateGO: IeValidator = (ie: string) => {
 
 const validateMA: IeValidator = (ie) => validateMod11Ie(ie, MA_PREFIXES);
 
+/**
+ * The first digit doubles every second character from the right and adds the digits of each
+ * product, the modulus 10 rule `mod10` implements.
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validateMG: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 13)) return false;
 
 	const body = ie.slice(0, 11);
 	const bodyWithZero = `${body.slice(0, 3)}0${body.slice(3)}`;
 
-	// The first digit doubles every second character from the right and adds the digits of each
-	// product, the modulus 10 rule `mod10` implements.
 	const firstDigit = mod10(bodyWithZero);
 
 	const bodyWithFirst = body + firstDigit;
@@ -263,8 +273,13 @@ const validateMG: IeValidator = (ie: string) => {
 	);
 };
 
-// SEFAZ-MT now issues 9 digits and SINTEGRA prints 11: the 9 digit form is the 11 digit one
-// without its two leading zeros, which add nothing to the weighted sum, so it is padded back.
+/**
+ * SEFAZ-MT now issues 9 digits and SINTEGRA prints 11: the 9 digit form is the 11 digit one
+ * without its two leading zeros, which add nothing to the weighted sum, so it is padded back.
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validateMT: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [9, 11])) return false;
 
@@ -285,8 +300,13 @@ const validateMS: IeValidator = (ie) => validateMod11Ie(ie, MS_PREFIXES);
 
 const validatePA: IeValidator = (ie) => validateMod11Ie(ie, PA_PREFIXES);
 
-// The old 14 digit CACEPE number: 13 principal digits and one check digit, `11 - remainder`,
-// less 10 when that is above 9 (a remainder of 1 gives 0 and a remainder of 0 gives 1).
+/**
+ * The old 14 digit CACEPE number: 13 principal digits and one check digit, `11 - remainder`,
+ * less 10 when that is above 9 (a remainder of 1 gives 0 and a remainder of 0 gives 1).
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validatePELegacy = (ie: string): boolean => {
 	const digit = 11 - (sumWithWeights(ie.slice(0, 13), PE_LEGACY_WEIGHTS) % 11);
 
@@ -737,13 +757,14 @@ export function isValidIe(params: IsValidIeParams): boolean;
  * @param {string} ie - The state registration number to validate
  * @returns {boolean} True if the state registration number is valid, false otherwise
  *
+ * The two call forms are told apart by the first argument alone: a string is the state code of
+ * the deprecated `(stateCode, ie)` form, anything else is read as the parameters object of the
+ * current one (a primitive has no `stateCode`, so it fails the validation like any bad input).
+ *
  * @deprecated Use the object form, `isValidIe({ value, stateCode })`.
  */
 export function isValidIe(stateCode: StateCode, ie: string): boolean;
 export function isValidIe(paramsOrStateCode: IsValidIeParams | StateCode, ie?: string): boolean {
-	// The two call forms are told apart by the first argument alone: a string is the state code of
-	// the deprecated `(stateCode, ie)` form, anything else is read as the parameters object of the
-	// current one (a primitive has no `stateCode`, so it fails the validation like any bad input).
 	if (typeof paramsOrStateCode === "string") return validateIe(paramsOrStateCode, ie);
 	if (isNullish(paramsOrStateCode)) return false;
 

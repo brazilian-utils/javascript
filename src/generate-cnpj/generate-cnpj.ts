@@ -49,7 +49,11 @@ const generateRandomCnpjCharacters = (length: number): string => {
 	return characters;
 };
 
-// `Number.isInteger` as a type guard, so an out of range `branch` narrows to `number`.
+/**
+ * `Number.isInteger` as a type guard, so an out of range `branch` narrows to `number`.
+ * @param {unknown} value - The value to test.
+ * @returns {boolean} True if the value is an integer.
+ */
 const isInteger = (value: unknown): value is number => Number.isInteger(value);
 
 const isBranchInRange = (branch: number | undefined): branch is number =>

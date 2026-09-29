@@ -1,10 +1,6 @@
-import { SUFRAMA_LENGTH } from "../_internals/constants/suframa";
+import { SUFRAMA_FORMAT_REGEX, SUFRAMA_LENGTH } from "../_internals/constants/suframa";
 import { mod11 } from "../_internals/mod11/mod11";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-// The `SS.NNNN.LLD` fields, the sector with or without its leading zero, split as `isValidCpf`
-// splits its groups: any run of whitespace, `.`, `-` or `/` between two fields.
-const FORMAT_REGEX = /^\d{1,2}[\s.\-/]*\d{4}[\s.\-/]*\d{2}[\s.\-/]*\d$/;
 
 /**
  * Validates an Inscrição SUFRAMA, the registration number the Superintendência da Zona Franca de
@@ -53,7 +49,7 @@ export const isValidSuframa = (suframa: string): boolean => {
 
 	const trimmed = suframa.trim();
 
-	if (!FORMAT_REGEX.test(trimmed)) return false;
+	if (!SUFRAMA_FORMAT_REGEX.test(trimmed)) return false;
 
 	const full = sanitizeToDigits(trimmed).padStart(SUFRAMA_LENGTH, "0");
 

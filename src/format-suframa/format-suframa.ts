@@ -1,6 +1,7 @@
 import { format } from "../_internals/format/format";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { PATTERN } from "./constants";
 
 /** Options of `formatSuframa`. */
 export type FormatSuframaOptions = {
@@ -42,6 +43,6 @@ export const formatSuframa = (value: string | number, options?: FormatSuframaOpt
 		? format({
 				pad: options?.pad,
 				value: sanitizeToDigits(value),
-				pattern: "00.0000.000",
+				pattern: PATTERN,
 			})
 		: "";
