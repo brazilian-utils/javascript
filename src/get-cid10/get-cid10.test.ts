@@ -1,11 +1,13 @@
 import * as fc from "fast-check";
 
-import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
 import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { cid10Table } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
 import { getCid10, type Cid10 } from "./get-cid10";
+
+const CID10_DESCRIPTIONS = cid10Table();
 
 describe("getCid10", () => {
 	it("should return a subcategory written with the dot", () => {
@@ -63,9 +65,26 @@ describe("getCid10", () => {
 		expect(getCid10("I10.0")).toBeNull();
 	});
 
+	it("should find the U07 codes the SIM table adds to the V2008 files", () => {
+		expect(getCid10("U07")).toEqual({ code: "U07", description: "Uso emergencial do U07" });
+		expect(getCid10("U07.0")).toEqual({
+			code: "U070",
+			description: "Doença por cigarro eletrônico",
+		});
+		expect(getCid10("U07.1")).toEqual({
+			code: "U071",
+			description: "Infecção pelo novo Coronavírus (COVID-19)",
+		});
+		expect(getCid10("U07.2")).toEqual({
+			code: "U072",
+			description: "COVID-19, vírus não identificado",
+		});
+	});
+
 	it("should return null for a category the table does not have", () => {
 		expect(getCid10("A10")).toBeNull();
-		expect(getCid10("U07.1")).toBeNull();
+		expect(getCid10("U09.9")).toBeNull();
+		expect(getCid10("U10.9")).toBeNull();
 	});
 
 	it("should return null for a value that is not written in a documented form", () => {

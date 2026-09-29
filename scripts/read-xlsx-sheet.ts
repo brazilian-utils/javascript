@@ -323,3 +323,13 @@ export const readXlsxSheets = (workbook: Buffer): Map<string, string[][]> => {
 
 	return new Map(opened.sheets.map((sheet) => [sheet.name, readSheet(opened, sheet)]));
 };
+
+/**
+ * Reads one file of a zip archive as UTF-8, for a dataset published as a zipped CSV rather than
+ * as a workbook.
+ * @param {Buffer} archive - The `.zip` file.
+ * @param {string} path - The path of the file inside the archive.
+ * @returns {string} The content of the file.
+ */
+export const readZipFile = (archive: Buffer, path: string): string =>
+	readFile(unzip(archive), path);

@@ -1,10 +1,14 @@
 import * as fc from "fast-check";
 
-import { CNAE_SUBCLASSES } from "../_internals/constants/cnae";
+import { CNAE_CODES } from "../_internals/constants/cnae";
+import { CNAE_DESCRIPTIONS } from "../_internals/constants/cnae-descriptions";
 import { anyGarbage } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCnae } from "./is-valid-cnae";
+
+const CNAE_SUBCLASSES = lookupTable(CNAE_CODES, 7, CNAE_DESCRIPTIONS);
 
 describe("isValidCnae", () => {
 	it("should validate a CNAE code without a mask", () => {
@@ -34,8 +38,9 @@ describe("isValidCnae", () => {
 		expect(isValidCnae(" 6201501 ")).toBe(true);
 	});
 
-	it("should reject a group boundary written with more than one separator (6201--5//01)", () => {
-		expect(isValidCnae("6201--5//01")).toBe(false);
+	it("should accept a group boundary written with a run of separators (6201--5//01), as isValidCpf does", () => {
+		expect(isValidCnae("6201--5//01")).toBe(true);
+		expect(isValidCnae("620-15/01")).toBe(false);
 		expect(isValidCnae("6201-5/01")).toBe(true);
 	});
 

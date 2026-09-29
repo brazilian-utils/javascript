@@ -56,8 +56,8 @@ const PREFIX_LENGTH = 3;
  * `isValidGtin` (with no options) returns false. Leading zeros count, so the value is never read
  * from a number.
  *
- * `type` and `length` describe the value as it was written. The prefix is read the way the
- * "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14
+ * `type` and `length` describe the value as it was written. The prefix is read as the GS1
+ * General Specifications (tables 1-4, 1-5 and 1-9) lay the numbers out: the value is left padded with zeros to 14
  * digits, and the prefix is positions 7 to 9 when positions 2 to 6 are zeros (a GTIN-8, or a
  * GTIN-14 that packs one) and positions 2 to 4 otherwise. The first digit is the padding zero or
  * the indicator digit and is never part of the prefix, so a GTIN-12 has a prefix that starts with
@@ -67,8 +67,8 @@ const PREFIX_LENGTH = 3;
  * the General Specifications are told apart, since both are fixed by a standard or a rule. The
  * prefix is not checked against the list of Member Organisations: GS1 keeps assigning ranges, so
  * a copy of that list would turn down valid numbers as it ages. SEFAZ does run that check
- * (rules I03-20 and I12-20 of NT 2021.003, against its own "Tabela Prefixo GS1", which lists the
- * restricted and special ranges as valid) and, for the 789 and 790 prefixes, looks the number up
+ * (rules I03-20 and I12-20 of NT 2021.003, against its own "Tabela Prefixo GS1", whose contents
+ * could not be read, so which ranges it accepts is not stated here) and, for the 789 and 790 prefixes, looks the number up
  * in the Cadastro Centralizado de GTIN, which no offline check can stand in for.
  *
  * @param {string} value - The GTIN to be parsed, digits only.
@@ -84,8 +84,8 @@ const PREFIX_LENGTH = 3;
  * `cEANTrib`, rules I03-10, I03-20, I12-10, I12-20, 9I03-10 and 9I12-10 ("prefixo do Brasil
  * (iniciado em 789 ou 790)").
  * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D
- * "Tabela Prefixo GS1" of the Portal da NF-e: how to read the prefix from the 14 digit form, and
- * the range 789 to 790 for GS1 Brasil.
+ * "Tabela Prefixo GS1" of the Portal da NF-e, the table rules I03-20 and I12-20 check the prefix
+ * against; its contents are not relied on here.
  *
  * @example
  * ```typescript

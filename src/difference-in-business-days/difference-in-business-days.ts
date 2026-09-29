@@ -1,6 +1,7 @@
 import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
+import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
 import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
 
 export type { BusinessDayOptions } from "../is-business-day/is-business-day";
@@ -25,16 +26,17 @@ const toLocalDayTimestamp = (date: Date): number =>
  * A business day is a day for which `isBusinessDay` returns `true` (not a Saturday, a Sunday,
  * or a Brazilian holiday; `options.includeSaturday` keeps Saturday), evaluated with the same `options`.
  *
- * `options.includeSaturday` defaults to `false`, the Monday to Friday banking count. Pass `true`
+ * `options.includeSaturday` defaults to `false`, a Monday to Friday count. Pass `true`
  * for the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I, which includes
  * Saturday and still excludes Sunday and holidays, so a holiday that falls on a Saturday is never
  * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
  * holidays, which `getHolidays` does not carry.
  *
- * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
- * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
- * prototype-chain key such as `"__proto__"` is an unknown state code like any other. An `options`
- * that is not an object at all is ignored, exactly as `isBusinessDay` ignores it.
+ * `options.stateCode` is read as `isBusinessDay` reads it: letter case and surrounding
+ * whitespace are ignored, and a `stateCode` that is present and is not a state code (`"XX"`, an
+ * empty string, a prototype-chain key such as `"__proto__"`, a value that is not a string)
+ * returns `null`. An `options` that is not an object at all is ignored, exactly as
+ * `isBusinessDay` ignores it.
  *
  * Only years from 1900 through 2099 are supported, the range `getHolidays` computes; a
  * `laterDate` or `earlierDate` outside it returns `null`.
@@ -47,7 +49,7 @@ const toLocalDayTimestamp = (date: Date): number =>
  * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {number | null} The number of business days between the two dates, or `null` on bad
  * input: a `laterDate`/`earlierDate` that is not a valid `Date` or is outside 1900-2099, or a
- * `stateCode` that is not a string.
+ * `stateCode` that is present and is not a state code.
  *
  * @example
  * ```typescript
@@ -55,7 +57,7 @@ const toLocalDayTimestamp = (date: Date): number =>
  * differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (Jan 2 counted, a Tuesday; Jan 3 is not)
  * differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (the later date comes first, so the count is negative)
  * differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (same day)
- * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (Jan 2 to Jan 5, banking count)
+ * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (Jan 2 to Jan 5, Monday to Friday count)
  * differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (Jan 6, a Saturday, also counts)
  * differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (Nov 2 is Finados, a holiday on a Saturday)
  * differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: "SP" }); // 1 (Jul 9 is a state holiday in SP)
@@ -80,9 +82,7 @@ export const differenceInBusinessDays = (
 	if (!isValidDate(laterDate)) return null;
 	if (!isValidDate(earlierDate)) return null;
 
-	const stateCode = options?.stateCode;
-
-	if (stateCode !== undefined && typeof stateCode !== "string") return null;
+	if (readHolidayStateCode(options?.stateCode) === null) return null;
 
 	if (!isSupportedHolidayYear(laterDate.getFullYear())) return null;
 	if (!isSupportedHolidayYear(earlierDate.getFullYear())) return null;

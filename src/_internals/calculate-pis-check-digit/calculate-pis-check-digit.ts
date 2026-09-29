@@ -8,7 +8,9 @@ const MODULUS = 11;
  *
  * The ten base digits are multiplied by the weights 3, 2, 9, 8, 7, 6, 5, 4, 3 and 2, from left to
  * right. The check digit is 11 minus the remainder of the weighted sum by 11, or 0 when that
- * difference is 10 or 11.
+ * difference is 10 or 11. No official document found publishes these weights: the Caixa layouts
+ * only ask for a "Número de PIS/PASEP válido", so the rule follows the community reference
+ * `isValidPis` cites as `Based on:`.
  *
  * @param {string} base - The ten digits that precede the check digit.
  * @returns {number} The check digit, 0 to 9.

@@ -19,6 +19,15 @@ const KNOWN_STATE_CITY_COUNTS: Record<string, number> = {
 };
 
 describe("getCities", () => {
+	test("should read the state code ignoring case and surrounding whitespace", () => {
+		const saoPaulo = getCities("SP");
+
+		// @ts-expect-error: a lower case state code is read as its upper case form
+		expect(getCities("sp")).toEqual(saoPaulo);
+		// @ts-expect-error: a lower case state code is read as its upper case form
+		expect(getCities(" Sp\t")).toEqual(saoPaulo);
+	});
+
 	it("should match a hand-written list of city names at the start and end of the sorted list", () => {
 		const cities = getCities();
 

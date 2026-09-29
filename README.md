@@ -34,7 +34,7 @@ Brazilian Utils is a zero-dependency library of small utilities for the day-to-d
 ## Why Brazilian Utils
 
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
-- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
+- **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 0.5 KB minified (0.3 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
 - **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, all tested in CI.
 - **Written in TypeScript.** Types ship with the package, and every pull request is checked against the last release so the public API never changes silently.
 - **Validated against the official rules.** Every validator cites the specification, law or dataset it implements, and the test suite is mutation-tested, not just covered.
@@ -143,7 +143,7 @@ Our "thank you" goes to these wonderful people ([emoji key](https://github.com/k
     <td align="center"><a href="https://github.com/vicentevendramin"><img src="https://github.com/vicentevendramin.png?size=100" width="100px;" alt=""/><br /><sub><b>Vicente Vendramin</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=vicentevendramin" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/joaopedroassad"><img src="https://github.com/joaopedroassad.png?size=100" width="100px;" alt=""/><br /><sub><b>Joao Assad</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/JanderSilv"><img src="https://github.com/JanderSilv.png?size=100" width="100px;" alt=""/><br /><sub><b>Jander Silva</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=JanderSilv" title="Code">💻</a></td>
-    <td></td>
+    <td align="center"><a href="https://github.com/kwy404"><img src="https://github.com/kwy404.png?size=100" width="100px;" alt=""/><br /><sub><b>kwy404</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=kwy404" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=kwy404" title="Tests">⚠️</a></td>
     <td></td>
     <td></td>
     <td></td>

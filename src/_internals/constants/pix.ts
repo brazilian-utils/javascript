@@ -15,6 +15,13 @@ export const PIX_PAYLOAD_FORMAT_INDICATOR_ID = "00";
 
 export const PIX_PAYLOAD_FORMAT_INDICATOR = "01";
 
+/**
+ * The Payload Format Indicator object as the EMV® QRCPS-MPM requires it at the very start of
+ * the payload: "The Payload Format Indicator (ID "00") shall be the first data object in the QR
+ * Code".
+ */
+export const PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT = "000201";
+
 export const PIX_POINT_OF_INITIATION_ID = "01";
 
 export const PIX_STATIC_POINT_OF_INITIATION = "11";
@@ -43,6 +50,12 @@ export const PIX_MERCHANT_CATEGORY_CODE_ID = "52";
 
 export const PIX_MERCHANT_CATEGORY_CODE = "0000";
 
+/**
+ * The Merchant Category Code (ID `52`) is a numeric (`N`) object of length `04` in the EMV®
+ * QRCPS-MPM, a code of ISO 18245; the Pix manual writes `0000` ("não informado") in its examples.
+ */
+export const PIX_MERCHANT_CATEGORY_CODE_REGEX = /^\d{4}$/;
+
 export const PIX_TRANSACTION_CURRENCY_ID = "53";
 
 export const PIX_TRANSACTION_CURRENCY = "986";
@@ -69,9 +82,22 @@ export const PIX_TXID_ID = "05";
 
 export const PIX_ABSENT_TXID = "***";
 
+/**
+ * A `txid` (62-05): "limitado a 25 caracteres", of the letters `a`-`z` and `A`-`Z` and the digits
+ * `0`-`9` (Manual de Padrões para Iniciação do Pix, §2.6.2).
+ */
+export const PIX_TXID_REGEX = /^[A-Za-z0-9]{1,25}$/;
+
 export const PIX_CRC_TAG = "6304";
 
 export const PIX_CRC_LENGTH = 4;
+
+/**
+ * Length of the CRC field as written at the end of a payload: `PIX_CRC_TAG` followed by its
+ * `PIX_CRC_LENGTH` value. A literal, not `PIX_CRC_TAG.length + PIX_CRC_LENGTH`, so a bundle that
+ * never reads it drops it.
+ */
+export const PIX_CRC_FIELD_LENGTH = 8;
 
 export const PIX_URL_MAX_LENGTH = 77;
 

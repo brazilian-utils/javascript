@@ -14,8 +14,10 @@ const CATEGORY_LENGTH = 3;
  * not a string) is rejected.
  *
  * The check reads a table of codes only, so it does not cost the descriptions `getCid10`
- * carries. The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV: a code
- * that is not in those files, such as `U07.1` (COVID-19), is not valid here.
+ * carries. The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV, plus the
+ * `U07` category of the CID-10 table DATASUS keeps for the SIM (`U07`, `U07.0`, `U07.1` and
+ * `U07.2`, the COVID-19 codes among them), which the V2008 files predate. A code in neither, such
+ * as `U09.9` and `U10.9`, which the WHO added later, is not valid here.
  *
  * @param {string} value - The CID-10 code to be validated, e.g. `"A00.0"`, `"A000"` or `"A00"`.
  * @returns {boolean} True when the code is a known category or subcategory, false otherwise.
@@ -25,6 +27,7 @@ const CATEGORY_LENGTH = 3;
  * isValidCid10("A00.0"); // true
  * isValidCid10("a000"); // true
  * isValidCid10("A00"); // true
+ * isValidCid10("U07.1"); // true (COVID-19, from the SIM table)
  * isValidCid10("A00.5"); // false (A00 has no subcategory 5)
  * isValidCid10("A00-0"); // false (not a documented form)
  * ```
@@ -34,6 +37,9 @@ const CATEGORY_LENGTH = 3;
  * published by DATASUS (Ministério da Saúde).
  * @see Official: http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm
  * The DATASUS page that links the archive and documents its files, columns and encoding.
+ * @see Official: ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/TABELAS/CID10.DBF
+ * The CID-10 table of the SIM (Sistema de Informações sobre Mortalidade), source of the `U07`
+ * codes the V2008 files lack.
  */
 export const isValidCid10 = (value: string): boolean => {
 	const code = normalizeCid10(value);

@@ -56,9 +56,18 @@ describe("isBusinessDay", () => {
 			expect(isBusinessDay(new Date(2024, 6, 9, 12))).toBe(true);
 		});
 
-		it("should ignore an unknown stateCode and fall back to national holidays", () => {
+		it("should reject a string that is not a state code, an empty one included", () => {
 			// @ts-expect-error: intentionally invalid input
-			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: "XX" })).toBe(true);
+			expect(isBusinessDay(new Date(2024, 6, 10, 12), { stateCode: "XX" })).toBe(false);
+			// @ts-expect-error: intentionally invalid input
+			expect(isBusinessDay(new Date(2024, 6, 10, 12), { stateCode: "" })).toBe(false);
+		});
+
+		it("should read the state code ignoring case and surrounding whitespace", () => {
+			// @ts-expect-error: a lower case state code is read as its upper case form
+			expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode: " sp " })).toBe(false);
+			// @ts-expect-error: a lower case state code is read as its upper case form
+			expect(isBusinessDay(new Date(2024, 6, 10, 12), { stateCode: "sp" })).toBe(true);
 		});
 
 		it("should return false for a stateCode that is present and is not a string, as isHoliday does, instead of ignoring it", () => {
@@ -77,18 +86,28 @@ describe("isBusinessDay", () => {
 			expect(isBusinessDay(new Date(2024, 0, 1, 12), { stateCode: undefined })).toBe(false);
 		});
 
-		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
+		it("should reject a prototype chain key like any other unknown stateCode instead of throwing", () => {
 			for (const stateCode of PROTOTYPE_KEYS) {
 				// @ts-expect-error: intentionally invalid input
-				expect(isBusinessDay(new Date(2024, 6, 9, 12), { stateCode })).toBe(true);
-				// @ts-expect-error: intentionally invalid input
-				expect(isBusinessDay(new Date(2024, 0, 1, 12), { stateCode })).toBe(false);
+				expect(isBusinessDay(new Date(2024, 6, 10, 12), { stateCode })).toBe(false);
 			}
 		});
 
 		it("should treat Monday 11/08/2025 as a business day in SC, since Lei SC nº 18.531/2022 moves the feriado to Sunday 17/08", () => {
 			expect(isBusinessDay(new Date(2025, 7, 11, 12), { stateCode: "SC" })).toBe(true);
 			expect(isBusinessDay(new Date(2025, 7, 17, 12), { stateCode: "SC" })).toBe(false);
+		});
+
+		it("should treat the Carnaval Tuesday as a non-business day in RJ even with includeOptional false, since Lei RJ nº 5.243/2008 declares it a feriado estadual, while the Monday stays optional", () => {
+			const rj = { stateCode: "RJ", includeOptional: false } as const;
+
+			expect(isBusinessDay(new Date(2024, 1, 13, 12), rj)).toBe(false);
+			expect(isBusinessDay(new Date(2024, 1, 12, 12), rj)).toBe(true);
+			expect(
+				isBusinessDay(new Date(2024, 1, 13, 12), { stateCode: "SP", includeOptional: false }),
+			).toBe(true);
+			expect(isBusinessDay(new Date(2008, 1, 5, 12), rj)).toBe(true);
+			expect(isBusinessDay(new Date(2009, 1, 24, 12), rj)).toBe(false);
 		});
 
 		it("should treat Corpus Christi as a non-business day in the DF even with includeOptional false, since Lei distrital nº 72/1989 declares it a feriado", () => {
@@ -108,6 +127,16 @@ describe("isBusinessDay", () => {
 
 		it("should return true for Carnaval 2024-02-13 when includeOptional is false", () => {
 			expect(isBusinessDay(new Date(2024, 1, 13, 12), { includeOptional: false })).toBe(true);
+		});
+
+		it("should return false for Carnaval Monday by default and true when includeOptional is false, the ponto facultativo of Portaria MGI nº 8.617/2023 (2024-02-12) and Portaria MGI nº 11.460/2025 (2026-02-16), and a non-business day of Resolução CMN nº 4.880/2020, art. 6º", () => {
+			expect(isBusinessDay(new Date(2024, 1, 12, 12))).toBe(false);
+			expect(isBusinessDay(new Date(2024, 1, 12, 12), { includeOptional: false })).toBe(true);
+			expect(isBusinessDay(new Date(2026, 1, 16, 12))).toBe(false);
+		});
+
+		it("should keep Quarta-feira de Cinzas 2024-02-14 a business day, a ponto facultativo only until 14h", () => {
+			expect(isBusinessDay(new Date(2024, 1, 14, 12))).toBe(true);
 		});
 
 		it("should still return false for a national (non-optional) holiday when includeOptional is false", () => {

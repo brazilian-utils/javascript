@@ -88,15 +88,19 @@ export const COMPANY_DESIGNATIONS = [
 ];
 
 /** The document abbreviations that are written in upper case wherever they appear. */
-const DOCUMENT_ABBREVIATIONS = ["CEP", "CNPJ", "CPF", "RG", "UF"];
+export const DOCUMENT_ABBREVIATIONS = ["CEP", "CNPJ", "CPF", "RG", "UF"];
 
 /**
  * Roman numerals that appear inside Brazilian names and addresses ("João Paulo II", "Rua XV de
- * Novembro", "Avenida Papa João XXIII"). The single letter numerals (V, X, L, C, D, M) are left
- * out because a single letter is already written in upper case by the default rule, and VI is
- * left out because it collides with the pt-BR verb form "vi".
+ * Novembro", "Avenida Papa João XXIII", "Rua XXIV de Maio", "Rua XXV de Março"): every numeral
+ * from II to XXXIX, the ones written with I, V and X alone. The bound stops before XL because
+ * from there the numerals take L, C, D and M, which spell pt-BR words and abbreviations ("li",
+ * "xl", "cd", "mil", "dc"), and the dates and ordinals of street names stay below 40. The single
+ * letter numerals (V, X, L, C, D, M) are left out because a single letter is already written in
+ * upper case by the default rule, and VI is left out because it collides with the pt-BR verb form
+ * "vi".
  */
-const ROMAN_NUMERALS = [
+export const ROMAN_NUMERALS = [
 	"II",
 	"III",
 	"IV",
@@ -116,13 +120,22 @@ const ROMAN_NUMERALS = [
 	"XXI",
 	"XXII",
 	"XXIII",
-];
-
-/** Words that are written in upper case wherever they appear, the default `upperCaseWords`. */
-export const UPPER_CASE_WORDS = [
-	...COMPANY_DESIGNATIONS,
-	...DOCUMENT_ABBREVIATIONS,
-	...ROMAN_NUMERALS,
+	"XXIV",
+	"XXV",
+	"XXVI",
+	"XXVII",
+	"XXVIII",
+	"XXIX",
+	"XXX",
+	"XXXI",
+	"XXXII",
+	"XXXIII",
+	"XXXIV",
+	"XXXV",
+	"XXXVI",
+	"XXXVII",
+	"XXXVIII",
+	"XXXIX",
 ];
 
 /**
@@ -152,6 +165,22 @@ export const WORD_REGEX = /[^\s/'’‘(){}[\]"“”:;,-]/;
  * is a designator ("Rua D", "Quadra A, Lote B") and keeps its capital.
  */
 export const JOINER_REGEX = /^(?:\s+|[-/'’‘])$/;
+
+/**
+ * The separators a municipality is written with before its Federative Unit at the end of an
+ * address line, besides the `/` of `"Porto Alegre/RS"`: the spaced hyphen or en dash of the
+ * Correios' "Cidade – UF" (`"São Paulo – SP"`) and the comma of `"Curitiba, PR"`. A state code
+ * right after one of them is upper case only as the last word of the value, where it can only be
+ * the UF; elsewhere the same two letters may be an ordinary word.
+ *
+ * @see Official: https://www.correios.com.br/enviar/correspondencia/arquivos/nacional/guia-tecnico-de-enderecamento-de-correspondencias.pdf
+ * Correios, Endereçamento de Correspondências, Guia Técnico, versão 1.4 (03/05/2021): the
+ * locality line carries the name of the locality and the sigla of the UF, separated by a hyphen or
+ * dash, "São Paulo – SP".
+ * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/guia-de-enderecamento/guia-de-enderecamento
+ * The Correios page that publishes the guide.
+ */
+export const UF_SEPARATORS = [" - ", " – ", ", "];
 
 /** The apostrophe that elides the particle of `d'Oeste` and marks the English possessive of `Bob's`. */
 export const APOSTROPHE_REGEX = /^['’‘]$/;

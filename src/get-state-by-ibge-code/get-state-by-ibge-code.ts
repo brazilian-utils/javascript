@@ -1,6 +1,5 @@
 import { DATA, type State } from "../_internals/constants/states";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 
 export type { State } from "../_internals/constants/states";
 
@@ -36,9 +35,10 @@ export type { State } from "../_internals/constants/states";
  * ```
  */
 export const getStateByIbgeCode = (code: string | number): State | null => {
-	if (!isLookupCode(code)) return null;
+	const digits = readLookupDigits(code);
 
-	const digits = sanitizeToDigits(code);
+	// Stryker disable next-line ConditionalExpression: without this guard a null reads as the code 0, which no state has, so the lookup below returns null all the same; the guard only spares it.
+	if (digits === null) return null;
 
 	const numericCode = Number(digits);
 

@@ -41,13 +41,13 @@ export const format = ({ pad, value, pattern }: FormatParams): string => {
 		paddedValue = value.padStart(pattern.length - separatorsLength, "0");
 	}
 
-	for (const char of pattern) {
-		if (char === "0" || char === "*") {
+	for (const character of pattern) {
+		if (character === "0" || character === "*") {
 			if (valueIndex >= paddedValue.length) break;
-			formatted += char === "*" ? "*" : paddedValue[valueIndex];
+			formatted += character === "*" ? "*" : paddedValue[valueIndex];
 			valueIndex++;
 		} else if (valueIndex < paddedValue.length) {
-			formatted += char;
+			formatted += character;
 		}
 	}
 

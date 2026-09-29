@@ -137,6 +137,19 @@ describe("formatCpf", () => {
 			expectAlwaysReturnsType(formatCpf, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCpf(123_456_789.09)).toBe("");
+		expect(formatCpf(-1)).toBe("");
+		expect(formatCpf(1.5)).toBe("");
+		expect(formatCpf(2 ** 53)).toBe("");
+		expect(formatCpf(Number.MAX_VALUE)).toBe("");
+		expect(formatCpf(1e21)).toBe("");
+		expect(formatCpf(Number.NaN)).toBe("");
+		expect(formatCpf(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCpf(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCpf(123_456_789.09, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCpf with a nullish value under pad", () => {

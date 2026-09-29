@@ -1,4 +1,5 @@
-import { CEST_FORMAT_REGEX, CEST_TABLE } from "../_internals/constants/cest";
+import { CEST_CODES, CEST_FORMAT_REGEX } from "../_internals/constants/cest";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -14,7 +15,7 @@ import { CEST_LENGTH } from "./constants";
  * a state applies the regime to it.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NN.NNN.NN` form the annexes print, with a single separator (space, `.`, `-`
+ * digits, or the `NN.NNN.NN` form the annexes print, with separators (alone or in a run: space, `.`, `-`
  * or `/`) between the groups and optional surrounding whitespace. A number is only read as a
  * code when it is a non-negative safe integer.
  *
@@ -46,5 +47,7 @@ export const isValidCest = (value: string | number): boolean => {
 
 	const cest = padLookupCode(value, CEST_LENGTH);
 
-	return CEST_FORMAT_REGEX.test(cest) && CEST_TABLE[sanitizeToDigits(cest)] !== undefined;
+	if (!CEST_FORMAT_REGEX.test(cest)) return false;
+
+	return findCodeIndex(CEST_CODES, sanitizeToDigits(cest)) !== -1;
 };

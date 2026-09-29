@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { OBFUSCATED_PATTERN, PATTERN } from "./constants";
 
@@ -14,6 +14,9 @@ export type FormatCpfOptions = {
 /**
  * Formats a given CPF (Cadastro de Pessoas Físicas) value according to the Brazilian standard.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CPF value to be formatted. It can be a string or a number.
  * @param {FormatCpfOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - If true, the value will be padded with leading zeros if necessary.
@@ -27,13 +30,25 @@ export type FormatCpfOptions = {
  * formatCpf(12345678909); // "123.456.789-09"
  * formatCpf("123456789", { pad: true }); // "001.234.567-89"
  * formatCpf("12345678909", { obfuscate: true }); // "***.456.789-**"
+ * formatCpf(123456789.09); // "" (not a non-negative safe integer)
  * ```
  *
+ * `obfuscate` follows the rule the Leis de Diretrizes Orçamentárias set for publishing a CPF: the
+ * first 3 digits and the 2 check digits are hidden.
+ *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm
+ * Lei nº 14.194/2021 (LDO 2022), art. 149: the CPF of the terceirizados it publishes is disclosed
+ * so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores", the rule first set
+ * by Lei nº 12.309/2010 (LDO 2011), art. 87, § 5º, and repeated by the LDOs after it.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163
+ * Lei nº 15.321/2025, the LDO for 2026, art. 163: the CPF published under its arts. 160 and 162
+ * is disclosed so as to "ocultar os três primeiros dígitos e os dois dígitos verificadores do
+ * número de inscrição no CPF", the same rule.
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const formatCpf = (value: string | number, options?: FormatCpfOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,

@@ -2,7 +2,7 @@ import * as fc from "fast-check";
 
 import {
 	PROCESSO_JURIDICO_LENGTH,
-	PROCESSO_JURIDICO_TRIBUNALS,
+	getProcessoJuridicoTribunals,
 } from "../_internals/constants/processo-juridico";
 import {
 	anyValue,
@@ -53,8 +53,8 @@ describe("isValidProcessoJuridico", () => {
 			expect(isValidProcessoJuridico("00020802520125150049ab")).toBe(false);
 		});
 
-		test("when the mask uses a character the CNJ layout does not carry", () => {
-			expect(isValidProcessoJuridico("0002080/25.2012.5.15.0049")).toBe(false);
+		test("when the mask uses a character outside whitespace, `.`, `-` and `/`", () => {
+			expect(isValidProcessoJuridico("0002080_25.2012.5.15.0049")).toBe(false);
 		});
 
 		test("when a mask separator falls outside the CNJ field boundaries", () => {
@@ -97,6 +97,7 @@ describe("isValidProcessoJuridico", () => {
 
 		test("when is a processo juridico valid with the CNJ mask", () => {
 			expect(isValidProcessoJuridico("0002080-25.2012.5.15.0049")).toBe(true);
+			expect(isValidProcessoJuridico("0002080/25.2012.5.15.0049")).toBe(true);
 		});
 
 		test("when a masked processo juridico is surrounded by whitespace", () => {
@@ -182,14 +183,14 @@ describe("isValidProcessoJuridico", () => {
 		});
 
 		test("should reject every tribunal the órgão of the value does not have", () => {
-			const courts = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
+			const courts = [...getProcessoJuridicoTribunals().keys()];
 
 			fc.assert(
 				fc.property(
 					fc.constantFrom(...courts),
 					fc.integer({ min: 0, max: 99 }),
 					(court, tribunal) => {
-						fc.pre(!(PROCESSO_JURIDICO_TRIBUNALS.get(court) as number[]).includes(tribunal));
+						fc.pre(!(getProcessoJuridicoTribunals().get(court) as number[]).includes(tribunal));
 
 						const base = `00001002008${court}${String(tribunal).padStart(2, "0")}0000`;
 						const checkDigits = (98n - ((BigInt(base) * 100n) % 97n)).toString().padStart(2, "0");

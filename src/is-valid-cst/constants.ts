@@ -104,4 +104,4 @@ export const PIS_COFINS_CST_CODES = [
  * apart ("0 10"). That is the only boundary a printed CST has: the Tabela B code is a single
  * two digit code, so a separator inside it, or a trailing one, is not a CST.
  */
-export const CST_FORMAT_REGEX = /^(?:\d{2}|\d[\s.\-/]?\d{2})$/;
+export const CST_FORMAT_REGEX = /^(?:\d{2}|\d[\s.\-/]*\d{2})$/;

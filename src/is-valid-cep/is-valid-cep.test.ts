@@ -50,6 +50,11 @@ describe("isValidCep", () => {
 			expect(isValidCep("abc01310100")).toBe(false);
 			expect(isValidCep("0131010a")).toBe(false);
 		});
+
+		test("when it is a negative or fractional number", () => {
+			expect(isValidCep(-20_040_020)).toBe(false);
+			expect(isValidCep(2_004_002.1)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
@@ -59,6 +64,10 @@ describe("isValidCep", () => {
 
 		test("when is a CEP valid with mask", () => {
 			expect(isValidCep("01310-100")).toBe(true);
+		});
+
+		test("when the mask uses a slash, one of the mask characters isValidCpf reads", () => {
+			expect(isValidCep("01310/100")).toBe(true);
 		});
 
 		test("when is a CEP valid as a number", () => {

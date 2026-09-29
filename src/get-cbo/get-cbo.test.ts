@@ -1,11 +1,15 @@
 import * as fc from "fast-check";
 
-import { CBO_TITLES } from "../_internals/constants/cbo";
-import { anyGarbage } from "../_internals/test/arbitraries";
+import { CBO_CODES } from "../_internals/constants/cbo";
+import { CBO_DESCRIPTIONS } from "../_internals/constants/cbo-descriptions";
+import { anyGarbage, digitsUpTo } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCbo } from "../is-valid-cbo/is-valid-cbo";
 import { getCbo, type Cbo } from "./get-cbo";
+
+const CBO_TITLES = lookupTable(CBO_CODES, 6, CBO_DESCRIPTIONS);
 
 describe("getCbo", () => {
 	it("should return the occupation for a code without a mask", () => {
@@ -58,8 +62,11 @@ describe("getCbo", () => {
 		expect(getCbo("223150")).toBeNull();
 	});
 
-	it("should reject a group boundary written with more than one separator (2124--05)", () => {
-		expect(getCbo("2124--05")).toBeNull();
+	it("should read a group boundary written with a run of separators (2124--05), as isValidCpf does", () => {
+		expect(getCbo("2124--05")).toEqual({
+			code: "212405",
+			description: "Analista de desenvolvimento de sistemas",
+		});
 		expect(getCbo("2124-05")).toEqual({
 			code: "212405",
 			description: "Analista de desenvolvimento de sistemas",
@@ -128,6 +135,23 @@ describe("getCbo", () => {
 					expect(getCbo(Number(code))).toEqual(expected);
 					expect(getCbo(unpadded)).toEqual(expected);
 					expect(isValidCbo(code)).toBe(true);
+				}),
+			);
+		});
+
+		const lookupInputs = fc.oneof(
+			codeArbitrary,
+			codeArbitrary.map((code) => `${code.slice(0, 4)}-${code.slice(4)}`),
+			fc.nat({ max: 999_999 }),
+			digitsUpTo(8),
+			anyGarbage,
+			fc.anything(),
+		);
+
+		test("should return null exactly when isValidCbo is false", () => {
+			fc.assert(
+				fc.property(lookupInputs, (value) => {
+					expect(getCbo(value as string) === null).toBe(!isValidCbo(value as string));
 				}),
 			);
 		});

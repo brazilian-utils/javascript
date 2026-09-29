@@ -1,11 +1,15 @@
 import * as fc from "fast-check";
 
-import { CFOP_TABLE } from "../_internals/constants/cfop";
-import { anyGarbage } from "../_internals/test/arbitraries";
+import { CFOP_CODES } from "../_internals/constants/cfop";
+import { CFOP_DESCRIPTIONS } from "../_internals/constants/cfop-descriptions";
+import { anyGarbage, digitsUpTo } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCfop } from "../is-valid-cfop/is-valid-cfop";
 import { getCfop, type Cfop } from "./get-cfop";
+
+const CFOP_TABLE = lookupTable(CFOP_CODES, 4, CFOP_DESCRIPTIONS);
 
 describe("getCfop", () => {
 	it("should return the CFOP entry for a known code as a string", () => {
@@ -148,7 +152,7 @@ describe("getCfop", () => {
 
 	it("should return null for a string that is not a documented form", () => {
 		expect(getCfop("abc5102")).toBeNull();
-		expect(getCfop("5..102")).toBeNull();
+		expect(getCfop("51.02")).toBeNull();
 	});
 
 	it("should return null for a number that is not a non-negative safe integer", () => {
@@ -166,6 +170,23 @@ describe("getCfop", () => {
 
 		test("should never throw, regardless of the input", () => {
 			expectNeverThrows(getCfop, anyGarbage);
+		});
+
+		const lookupInputs = fc.oneof(
+			codeArbitrary,
+			codeArbitrary.map((code) => ` ${code[0]}.${code.slice(1)} `),
+			fc.nat({ max: 99_999 }),
+			digitsUpTo(6),
+			anyGarbage,
+			fc.anything(),
+		);
+
+		test("should return null exactly when isValidCfop is false", () => {
+			fc.assert(
+				fc.property(lookupInputs, (value) => {
+					expect(getCfop(value as string) === null).toBe(!isValidCfop(value as string));
+				}),
+			);
 		});
 
 		test("should resolve every known code, as a string or a number, and agree with isValidCfop", () => {

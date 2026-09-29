@@ -103,6 +103,13 @@ describe("isValidCnpj", () => {
 			expect(isValidCnpj("00000000000000", { version: 2 })).toBe(false);
 		});
 
+		test("when it is the Ex1 of the Receita Federal Q&A as printed, whose check digits are 86, not 29", () => {
+			// Perguntas e respostas do CNPJ alfanumérico, question 23: "Ex1: AA345678/0003-29". The
+			// IN RFB nº 2.229/2024 algorithm gives 86 for AA3456780003; 29 belongs to Ex2.
+			expect(isValidCnpj("AA345678/0003-29", { version: 2 })).toBe(false);
+			expect(isValidCnpj("AA345678/0003-86", { version: 2 })).toBe(true);
+		});
+
 		test("when an alphanumeric CNPJ is too short", () => {
 			expect(isValidCnpj("AB.1C2.D3E/4F5G-3")).toBe(false);
 		});
@@ -154,6 +161,14 @@ describe("isValidCnpj", () => {
 
 		test("when an alphanumeric CNPJ uses a whitespace separator at every group boundary", () => {
 			expect(isValidCnpj("1Z 000 000 0000 39", { version: 2 })).toBe(true);
+		});
+
+		test("when it is one of the examples of the Receita Federal's own reference code and Q&A", () => {
+			expect(isValidCnpj("12.ABC.345/01DE-35", { version: 2 })).toBe(true);
+			expect(isValidCnpj("ABCDEFGHIJKL80", { version: 2 })).toBe(true);
+			expect(isValidCnpj("AA345678/000A-29", { version: 2 })).toBe(true);
+			expect(isValidCnpj("12.345.678/000A-08", { version: 2 })).toBe(true);
+			expect(isValidCnpj("ABCDEFGHIJKL81", { version: 2 })).toBe(false);
 		});
 
 		test("when is a lowercase alphanumeric CNPJ", () => {

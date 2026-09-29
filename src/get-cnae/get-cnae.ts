@@ -1,9 +1,10 @@
-import { CNAE_FORMAT_REGEX, CNAE_SUBCLASSES } from "../_internals/constants/cnae";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { CNAE_CODES } from "../_internals/constants/cnae";
+import { CNAE_DESCRIPTIONS } from "../_internals/constants/cnae-descriptions";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-const CNAE_LENGTH = 7;
+import { CNAE_LENGTH } from "../is-valid-cnae/constants";
+import { isValidCnae } from "../is-valid-cnae/is-valid-cnae";
 
 /**
  * A CNAE (Classificação Nacional de Atividades Econômicas) subclass.
@@ -20,7 +21,7 @@ export type Cnae = {
  * official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with a single separator (space, `.`, `-` or `/`) between the groups and optional
+ * digits, or the `NNNN-N/NN` mask, with separators (space, `.`, `-` or `/`, alone or in a run) between the groups and optional
  * surrounding whitespace. Anything else (`"0111abc301"`) is rejected instead of having its
  * digits picked out. A number is only read as a code when it is a non-negative safe integer,
  * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
@@ -36,7 +37,8 @@ export type Cnae = {
  *
  * @param {string|number} value - The CNAE code to look up, with or without the
  * `NNNN-N/NN` mask.
- * @returns {Cnae|null} The matching subclass, or null when the code is unknown or invalid.
+ * @returns {Cnae|null} The matching subclass, or null when the code is unknown or invalid,
+ * which is exactly when `isValidCnae` returns false.
  *
  * @example
  * ```typescript
@@ -54,16 +56,9 @@ export type Cnae = {
  * CONCLA's CNAE search and structure browser, which publishes CNAE-Subclasses 2.3.
  */
 export const getCnae = (value: string | number): Cnae | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidCnae(value)) return null;
 
-	const subclass = padLookupCode(value, CNAE_LENGTH);
+	const code = sanitizeToDigits(padLookupCode(value, CNAE_LENGTH));
 
-	if (!CNAE_FORMAT_REGEX.test(subclass)) return null;
-
-	const digits = sanitizeToDigits(subclass);
-	const description = CNAE_SUBCLASSES[digits];
-
-	if (description === undefined) return null;
-
-	return { code: digits, description };
+	return { code, description: CNAE_DESCRIPTIONS[findCodeIndex(CNAE_CODES, code)] };
 };

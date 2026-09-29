@@ -1,4 +1,6 @@
-import { CEST_SEGMENTS, CEST_TABLE } from "../_internals/constants/cest";
+import { CEST_CODES } from "../_internals/constants/cest";
+import { CEST_DESCRIPTIONS, CEST_SEGMENTS } from "../_internals/constants/cest-descriptions";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CEST_LENGTH } from "../is-valid-cest/constants";
@@ -29,7 +31,7 @@ export type Cest = {
  * A CEST has 7 digits: the first two are the segment, the third to the fifth the item of the
  * segment and the last two the specification of the item (cláusula sexta, IV). A string is only
  * read as a code when it is written in one of the documented forms: the 7 digits, or the
- * `NN.NNN.NN` form the annexes print, with a single separator between the groups and optional
+ * `NN.NNN.NN` form the annexes print, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
  * surrounding whitespace. Anything else (`"abc0500100"`) is rejected instead of having its
  * digits picked out. A number is only read as a code when it is a non-negative safe integer,
  * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
@@ -66,7 +68,7 @@ export const getCest = (value: string | number): Cest | null => {
 
 	return {
 		code,
-		description: CEST_TABLE[code],
+		description: CEST_DESCRIPTIONS[findCodeIndex(CEST_CODES, code)],
 		segment: CEST_SEGMENTS[code.slice(0, SEGMENT_LENGTH)],
 	};
 };

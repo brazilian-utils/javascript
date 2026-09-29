@@ -1,10 +1,14 @@
 import * as fc from "fast-check";
 
-import { CEST_TABLE } from "../_internals/constants/cest";
+import { CEST_CODES } from "../_internals/constants/cest";
+import { CEST_DESCRIPTIONS } from "../_internals/constants/cest-descriptions";
 import { anyGarbage, digitsOfOtherLength } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows, expectRejected } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCest } from "./is-valid-cest";
+
+const CEST_TABLE = lookupTable(CEST_CODES, 7, CEST_DESCRIPTIONS);
 
 describe("isValidCest", () => {
 	it("should validate a CEST without a mask", () => {

@@ -23,6 +23,11 @@ describe("isValidPixUrl", () => {
 			expect(isValidPixUrl("pix.example.com/%2F")).toBe(true);
 			expect(isValidPixUrl("pix.example.com/%2f")).toBe(true);
 		});
+
+		test("for host labels of a single character", () => {
+			expect(isValidPixUrl("a.example.com")).toBe(true);
+			expect(isValidPixUrl("pix.b/qr")).toBe(true);
+		});
 	});
 
 	describe("should return false", () => {

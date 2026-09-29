@@ -65,7 +65,7 @@ describe("isValidCertidao", () => {
 			expect(isValidCertidao(1_045_390_155)).toBe(false);
 		});
 
-		test("when the book code is 0, outside the nine books, even with matching check digits", () => {
+		test("when the book code is 0, outside the seven books, even with matching check digits", () => {
 			expect(isValidCertidao("10453901552013000012021000012387")).toBe(false);
 		});
 
@@ -76,6 +76,13 @@ describe("isValidCertidao", () => {
 	});
 
 	describe("should return true", () => {
+		test("for the book codes 7, 8 and 9: art. 473, V, and the revoked Provimento CNJ nº 3/2009, art. 7º, V", () => {
+			// 8 (emancipações) and 9 (interdições) are on certidões issued under the Provimento nº 3/2009
+			expect(isValidCertidao("10453901552013700012021000012315")).toBe(true);
+			expect(isValidCertidao("10453901552013800012021000012343")).toBe(true);
+			expect(isValidCertidao("10453901552013900012021000012398")).toBe(true);
+		});
+
 		test("for 104539.01.55.2013.1.00012.021.0000123-21, the worked example of ghiorzi.org/DVnew.htm", () => {
 			expect(isValidCertidao("104539 01 55 2013 1 00012 021 0000123 21")).toBe(true);
 			expect(isValidCertidao("10453901552013100012021000012321")).toBe(true);
@@ -149,13 +156,19 @@ describe("isValidCertidao", () => {
 			);
 		});
 
-		test("should return true for an interdiction act (book code 9) when accepted", () => {
+		test("should accept the book codes 8 and 9 of the Provimento CNJ nº 3/2009 when their types are accepted", () => {
 			expect(
 				isValidCertidao("10453901552013900012021000012398", { accept: ["interdiction"] }),
 			).toBe(true);
+			expect(
+				isValidCertidao("10453901552013800012021000012343", { accept: ["emancipation"] }),
+			).toBe(true);
+			expect(isValidCertidao("10453901552013800012021000012343", { accept: ["other"] })).toBe(
+				false,
+			);
 		});
 
-		test("should return false when the book code is 0, outside the nine books of the Provimento, and accept is given", () => {
+		test("should return false when the book code is 0, outside the seven books of the Provimento, and accept is given", () => {
 			expect(isValidCertidao("10453901552013000012021000012387", { accept: ["birth"] })).toBe(
 				false,
 			);
@@ -225,6 +238,21 @@ describe("isValidCertidao", () => {
 					expect(isValidCertidao(value, { accept: [type] })).toBe(true);
 					expect(isValidCertidao(value, { accept: [] })).toBe(false);
 				}),
+			);
+		});
+
+		test("should reject the book code 0 whatever its check digits", () => {
+			fc.assert(
+				fc.property(
+					fc.stringMatching(/^[0-9]{8}55[0-9]{4}$/),
+					fc.constant(0),
+					fc.stringMatching(/^[0-9]{15}$/),
+					(head, typeCode, tail) => {
+						const base = `${head}${typeCode}${tail}`;
+
+						expect(CHECK_DIGIT_PAIRS.some((pair) => isValidCertidao(`${base}${pair}`))).toBe(false);
+					},
+				),
 			);
 		});
 

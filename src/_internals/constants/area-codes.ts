@@ -13,10 +13,17 @@ import { type StateCode } from "./states";
  * approved; Anatel publishes it on the gov.br page below, which lists the codes actually
  * allocated and links, under "POR MUNICÍPIO", to the Anexo of Resolução Anatel nº 263/2001,
  * giving the Código Nacional of every municipality. That Anexo was parsed to derive both
- * tables.
+ * tables, and both were checked against the table Anatel publishes today, `Codigos_Nacionais.csv`
+ * of the Painel de Dados de Áreas Tarifárias (21/09/2026): the same 67 codes, each with the same
+ * state, and the same four cross-border codes, 42, 47, 49 and 61.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Official: https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais
+ * Anatel, Painel de Dados de Áreas Tarifárias, "Códigos Nacionais", the page the Anatel FAQ
+ * points to for the CN of every municipality ("67 (sessenta e sete) áreas de numeração").
+ * @see Official: https://www.anatel.gov.br/dadosabertos/paineis_de_dados/areastarifarias/pgcn.zip
+ * `Codigos_Nacionais.csv` of 21/09/2026, the CN of all 5,571 municipalities in force.
  * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
  * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
  * @see Based on: https://brasilapi.com.br/docs#tag/DDD
@@ -113,9 +120,16 @@ export const AREA_CODE_STATES: Record<number, StateCode> = {
  * every municipality, as later amended by Resolução nº 580/2012 (Vila Boa, 62 to 61),
  * Resolução nº 644/2014 (Porto União, 49 to 42) and Resolução nº 701/2018 (Rio Negro, 41 to
  * 47, and Barracão, 46 to 49). No other Código Nacional in that Anexo covers more than one
- * state.
+ * state, and the current Anatel table (`Codigos_Nacionais.csv`, 21/09/2026) lists the same four
+ * and no other: 42 PR (56) + SC (1), 47 SC (78) + PR (1), 49 SC (149) + PR (1), 61 DF (1) + GO
+ * (12).
  *
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Official: https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais
+ * Anatel, Painel de Dados de Áreas Tarifárias, "Códigos Nacionais", the page the Anatel FAQ
+ * points to for the CN of every municipality ("67 (sessenta e sete) áreas de numeração").
+ * @see Official: https://www.anatel.gov.br/dadosabertos/paineis_de_dados/areastarifarias/pgcn.zip
+ * `Codigos_Nacionais.csv` of 21/09/2026, the CN of all 5,571 municipalities in force.
  * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
  * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
  */

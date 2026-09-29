@@ -1,5 +1,7 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
 import { type StateCode } from "../_internals/constants/states";
+import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
+import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -17,10 +19,9 @@ let allCitiesCache: string[] | undefined;
  * every city. The sibling `getMunicipalities` is stricter and only reads an omitted (or
  * `undefined`) state code that way, returning `[]` for `null` and `""`.
  *
- * The state code is matched exactly, case included: `getCities("sp")` returns `[]` where
- * `getCities("SP")` returns the 645 São Paulo cities. `getCities` and `getMunicipalities` are
- * the only state-taking lookups that are case-sensitive; `getStateNameByCode`,
- * `getTimezoneByState`, `getAreaCodesByState` and `getMunicipality` all fold case.
+ * The state code is matched ignoring letter case and surrounding whitespace, like every other
+ * state util: `getCities("sp")` returns the 645 São Paulo cities, as `"SP"` does. Up to 2.4.0 the
+ * match was case-sensitive and `"sp"` returned `[]`.
  *
  * @deprecated Use `getMunicipalities` instead.
  *
@@ -30,11 +31,14 @@ let allCitiesCache: string[] | undefined;
  * @example
  * ```typescript
  * getCities("SP")[0]; // "Adamantina"
- * getCities("sp"); // [] (the state code is case-sensitive here)
+ * getCities("sp").length; // 645 (case and surrounding whitespace are ignored)
  * getCities().length; // every city of every state
  * ```
  *
  * @see Official: https://servicodados.ibge.gov.br/api/docs/localidades
+ * @see Official: https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip
+ * IBGE, Divisão Territorial Brasileira 2025 (data base 31/12/2025): the same 5,571 municipality
+ * codes as the bundled table.
  */
 export const getCities = (state?: StateCode): string[] => {
 	if (!state) {
@@ -46,7 +50,7 @@ export const getCities = (state?: StateCode): string[] => {
 		return [...allCitiesCache];
 	}
 
-	if (typeof state !== "string" || !Object.hasOwn(CITIES_DATA, state)) return [];
+	const code = normalizeStateCode(state);
 
-	return CITIES_DATA[state].map(([name]) => name);
+	return hasOwnKey(CITIES_DATA, code) ? CITIES_DATA[code].map(([name]) => name) : [];
 };

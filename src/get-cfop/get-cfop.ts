@@ -1,6 +1,8 @@
-import { CFOP_FORMAT_REGEX, CFOP_TABLE } from "../_internals/constants/cfop";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { CFOP_CODES } from "../_internals/constants/cfop";
+import { CFOP_DESCRIPTIONS } from "../_internals/constants/cfop-descriptions";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { isValidCfop } from "../is-valid-cfop/is-valid-cfop";
 
 /**
  * A CFOP (Código Fiscal de Operações e Prestações) code.
@@ -23,7 +25,7 @@ export type Cfop = {
  * titles rather than codes a document can carry, so they give `null`.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 4
- * digits, or the `N.NNN` form the annex prints, with a single separator between the groups
+ * digits, or the `N.NNN` form the annex prints, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask)
  * and optional surrounding whitespace. Anything else (`"abc5102"`) is rejected instead of
  * having its digits picked out. A number is only read as a code when it is a non-negative
  * safe integer, since a sign, a decimal point or a rounded magnitude would otherwise be read
@@ -36,7 +38,7 @@ export type Cfop = {
  * @param {string|number} value - The CFOP code to look up, with or without the `N.NNN` mask,
  * e.g. `"1.101"`, `"1101"` or `1101`.
  * @returns {Cfop|null} The matching CFOP entry, or null when the code is unknown or
- * invalid.
+ * invalid, which is exactly when `isValidCfop` returns false.
  *
  * @example
  * ```typescript
@@ -58,16 +60,9 @@ export type Cfop = {
  * Ajuste SINIEF 07/01, the historical text that gave the CFOP its 4 digit form.
  */
 export const getCfop = (value: string | number): Cfop | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidCfop(value)) return null;
 
-	const code = String(value).trim();
+	const code = sanitizeToDigits(value);
 
-	if (!CFOP_FORMAT_REGEX.test(code)) return null;
-
-	const digits = sanitizeToDigits(code);
-	const description = CFOP_TABLE[digits];
-
-	if (description === undefined) return null;
-
-	return { code: digits, description };
+	return { code, description: CFOP_DESCRIPTIONS[findCodeIndex(CFOP_CODES, code)] };
 };

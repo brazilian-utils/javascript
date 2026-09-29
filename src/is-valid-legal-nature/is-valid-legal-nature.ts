@@ -1,10 +1,11 @@
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
-import { LEGAL_NATURE } from "./constants";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
+import { LEGAL_NATURE_CODES } from "./constants";
 
 /**
  * Validates if a Brazilian legal nature (natureza jurídica) code exists.
  *
- * Only the usual mask characters (hyphens, dots, whitespace) are tolerated around the 4
+ * Only the usual mask characters (hyphens, dots, slashes, whitespace) are tolerated around the 4
  * digits. Any other character makes the value invalid, so `"2062a"` is rejected instead of
  * being read as `"2062"`.
  *
@@ -37,5 +38,5 @@ export const isValidLegalNature = (code: string): boolean => {
 
 	const normalized = code.replace(SEPARATORS_REGEX, "");
 
-	return Object.hasOwn(LEGAL_NATURE, normalized);
+	return findCodeIndex(LEGAL_NATURE_CODES, normalized) !== -1;
 };

@@ -70,6 +70,19 @@ describe("formatCns", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCns(-123_456_789_010_000)).toBe("");
+		expect(formatCns(-1)).toBe("");
+		expect(formatCns(1.5)).toBe("");
+		expect(formatCns(2 ** 53)).toBe("");
+		expect(formatCns(Number.MAX_VALUE)).toBe("");
+		expect(formatCns(1e21)).toBe("");
+		expect(formatCns(Number.NaN)).toBe("");
+		expect(formatCns(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCns(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCns(-123_456_789_010_000, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCns types", () => {

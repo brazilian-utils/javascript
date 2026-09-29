@@ -1,19 +1,19 @@
 import { IBGE_UF_CODES } from "../_internals/constants/ibge-uf-codes";
-import { NFE_KEY_LENGTH, XML_ID_PREFIX_REGEX } from "../_internals/constants/nfe-key";
 import { type StateCode } from "../_internals/constants/states";
-import { mod11 } from "../_internals/mod11/mod11";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
-	ABSENT_NUMBER,
+	AUTHORIZATION_SITE_INDEX,
 	AUTHORIZATION_SITE_MODELS,
-	EMISSION_TYPES_BY_MODEL,
-	FORBIDDEN_CODES,
-	FORBIDDEN_CODE_MODELS,
-	FORMAT_REGEX,
+	CHECK_DIGIT_INDEX,
+	EMISSION_TYPE_INDEX,
+	MODEL_END,
+	MODEL_START,
 	NUMBER_END,
 	NUMBER_START,
+	SHORT_CODE_START,
 	VALID_MODELS,
-} from "./constants";
+} from "../is-valid-nfe-key/constants";
+import { isValidNfeKey } from "../is-valid-nfe-key/is-valid-nfe-key";
+import { parseNfeKey } from "../parse-nfe-key/parse-nfe-key";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -34,7 +34,10 @@ export type NfeKeyInfo = {
 	year: number;
 	/** Issue month, 1 to 12. */
 	month: number;
-	/** The 14 digit CNPJ (or zero padded CPF) of the issuer. */
+	/**
+	 * The 14 character CNPJ of the issuer, numeric or alphanumeric (upper case letters in its
+	 * first 12 characters), or its 11 digit CPF left padded with zeros to 14.
+	 */
 	taxId: string;
 	/** Document model: "55" NF-e, "57" CT-e, "58" MDF-e, "62" NFCom, "63" BP-e, "64" GTV-e, "65" NFC-e, "66" NF3e, "67" CT-e OS. */
 	model: NfeKeyModel;
@@ -55,28 +58,24 @@ export type NfeKeyInfo = {
 	checkDigit: number;
 };
 
-const EMISSION_TYPE_INDEX = 34;
-
-const AUTHORIZATION_SITE_INDEX = 35;
-
-const SHORT_CODE_START = 36;
-
-const CODE_END = 43;
-
-const CHECK_DIGIT_INDEX = 43;
-
-const isForbiddenCode = (model: string, code: string, number: number): boolean =>
-	FORBIDDEN_CODE_MODELS.includes(model) &&
-	(FORBIDDEN_CODES.includes(code) || Number(code) === number);
+/** `VALID_MODELS` widened to strings, so a model read out of the key can be looked up in it. */
+const MODEL_CODES: readonly string[] = VALID_MODELS;
 
 /**
  * Parses a DF-e (Documento Fiscal eletrônico) access key (chave de acesso) into its fields.
  *
- * Covers every document whose access key is the same 44 digit string: NF-e (modelo 55), NFC-e
+ * Covers every document whose access key is the same 44 character string: NF-e (modelo 55), NFC-e
  * (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
  * Accepts the same input forms as `isValidNfeKey` (the printed mask of 4 digit groups, split by
  * whitespace, `.`, `-` or `/`, and the `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes
- * of the XML `Id` attribute) and returns `null` when the key is not valid.
+ * of the XML `Id` attribute) and returns `null` exactly when `isValidNfeKey` returns `false`.
+ *
+ * `taxId` is read as written in positions 7 to 20: a numeric CNPJ, an alphanumeric CNPJ (whose
+ * letters, positions 7 to 18 of the key, come back upper cased; the current schemas type the key
+ * as `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`), or a CPF left padded with zeros to 14 digits, the form the
+ * NF-e gives a CPF issuer. No field tells a padded CPF from a CNPJ that starts with `000`, so
+ * `taxId` is returned whole and the caller that needs the document type reads it with
+ * `isValidCpf` or `isValidCnpj`; a `taxId` with a letter is always an alphanumeric CNPJ.
  *
  * The emission type (`tpEmis`) is checked against the codes the MOC of that model assigns, so
  * the accepted set changes with the model: 1 to 7 and 9 for NF-e and NFC-e, `{1, 3, 4, 5, 7, 8}`
@@ -104,7 +103,12 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  * Manual de Orientação do Contribuinte (MOC) NF-e, "chave de acesso".
  * @see Official: https://dfe-portal.svrs.rs.gov.br/NFE/Documentos
  * NF-e schema package (PL_010b, NT2025.002 v1.30): `tiposBasico_v4.00.xsd`, the `TNF` and
- * `TCodUfIBGE` types.
+ * `TCodUfIBGE` types, and `TChNFe`, the 44 character key `<xs:pattern value="[0-9]{6}[0-9A-Z]{12}[0-9]{26}"/>`
+ * (PL_009 had `[0-9]{44}`), in production from 01/07/2026 under NT 2026.004 v1.01.
+ * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ%3D
+ * Nota Técnica Conjunta 2025.001 (CNPJ alfanumérico nos DF-e): positions 7 to 18 of the key take
+ * the letters of the alphanumeric CNPJ, and the check digit is computed "considerando o valor
+ * decimal dos caracteres com base na tabela ASCII, subtraindo-se 48".
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2007/AJ_009_07
  * Ajuste SINIEF 09/07, cláusula primeira, caput: the CT-e, modelo 57.
  * @see Official: https://www.confaz.fazenda.gov.br/legislacao/ajustes/2019/AJ036_19
@@ -133,67 +137,34 @@ const isForbiddenCode = (model: string, code: string, number: number): boolean =
  * // { stateCode: "SP", year: 2017, month: 4, taxId: "58716523000119", model: "55",
  * //   series: 1, number: 12, emissionType: 1, code: "00012345", checkDigit: 8 }
  *
+ * getNfeKeyInfo("35260712ABC34501DE35550010000001231102030403");
+ * // { stateCode: "SP", year: 2026, month: 7, taxId: "12ABC34501DE35", model: "55",
+ * //   series: 1, number: 123, emissionType: 1, code: "10203040", checkDigit: 3 }
+ *
  * getNfeKeyInfo("invalid"); // null
  * ```
  */
 export const getNfeKeyInfo = (value: string): NfeKeyInfo | null => {
-	if (typeof value !== "string") return null;
+	if (!isValidNfeKey(value)) return null;
 
-	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart();
-
-	if (!FORMAT_REGEX.test(body)) return null;
-
-	const digits = sanitizeToDigits(body);
-
-	if (digits.length !== NFE_KEY_LENGTH) return null;
-
-	const uf = digits.slice(0, 2);
-
-	const stateCode = IBGE_UF_CODES[uf];
-
-	if (stateCode === undefined) return null;
-
-	const month = Number(digits.slice(4, 6));
-
-	if (month < 1 || month > 12) return null;
-
-	const modelDigits = digits.slice(20, 22);
-	const model = VALID_MODELS.find((candidate) => candidate === modelDigits);
-
-	if (model === undefined) return null;
-
-	if (digits.slice(NUMBER_START, NUMBER_END) === ABSENT_NUMBER) return null;
-
-	const emissionType = Number(digits[EMISSION_TYPE_INDEX]);
-
-	if (!EMISSION_TYPES_BY_MODEL[model].includes(emissionType)) return null;
-
+	const digits = parseNfeKey(value);
+	const model = VALID_MODELS[MODEL_CODES.indexOf(digits.slice(MODEL_START, MODEL_END))];
 	const hasAuthorizationSite = AUTHORIZATION_SITE_MODELS.includes(model);
-	const code = digits.slice(
-		hasAuthorizationSite ? SHORT_CODE_START : AUTHORIZATION_SITE_INDEX,
-		CODE_END,
-	);
-	const number = Number(digits.slice(NUMBER_START, NUMBER_END));
-
-	if (isForbiddenCode(model, code, number)) return null;
-
-	const checkDigit = Number(digits[CHECK_DIGIT_INDEX]);
-
-	if (mod11(digits.slice(0, CHECK_DIGIT_INDEX), { variant: "arrecadacao" }) !== checkDigit) {
-		return null;
-	}
 
 	const parsed: NfeKeyInfo = {
-		stateCode,
+		stateCode: IBGE_UF_CODES[digits.slice(0, 2)],
 		year: 2000 + Number(digits.slice(2, 4)),
-		month,
+		month: Number(digits.slice(4, 6)),
 		taxId: digits.slice(6, 20),
 		model,
 		series: Number(digits.slice(22, 25)),
-		number,
-		emissionType,
-		code,
-		checkDigit,
+		number: Number(digits.slice(NUMBER_START, NUMBER_END)),
+		emissionType: Number(digits[EMISSION_TYPE_INDEX]),
+		code: digits.slice(
+			hasAuthorizationSite ? SHORT_CODE_START : AUTHORIZATION_SITE_INDEX,
+			CHECK_DIGIT_INDEX,
+		),
+		checkDigit: Number(digits[CHECK_DIGIT_INDEX]),
 	};
 
 	if (hasAuthorizationSite) parsed.authorizationSite = Number(digits[AUTHORIZATION_SITE_INDEX]);

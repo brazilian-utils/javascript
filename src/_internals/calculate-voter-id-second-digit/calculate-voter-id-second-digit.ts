@@ -1,4 +1,4 @@
-import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../constants/voter-id";
+import { REMAINDER_ZERO_FEDERATIVE_UNION_CODES } from "../constants/voter-id";
 
 export type CalculateVoterIdSecondDigitParams = {
 	/** The 2 digit federative unit code of the voter ID. */
@@ -31,7 +31,7 @@ export const calculateVoterIdSecondDigit = ({
 
 	const remainder = sum % 11;
 
-	if (remainder === 0 && NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion)) {
+	if (remainder === 0 && REMAINDER_ZERO_FEDERATIVE_UNION_CODES.includes(federativeUnion)) {
 		return 1;
 	}
 

@@ -1,13 +1,17 @@
-import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../_internals/constants/voter-id";
+import { VOTER_ID_LENGTH } from "../_internals/constants/voter-id";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { EXTENDED_LENGTH, LENGTH } from "./constants";
 
 /**
  * Removes voter id (título de eleitor) formatting characters and returns only digits.
  *
- * Keeps up to 13 digits when the 10th and 11th digits identify São Paulo ("01") or Minas
- * Gerais ("02"), since those states may issue voter ids with a 9-digit sequential number;
- * otherwise keeps up to the usual 12 digits.
+ * Keeps up to the 12 digits a voter id may have and drops anything past them. A value with fewer
+ * digits is returned as it is, not padded: a voter id issued without the leading zeros of its
+ * sequential number keeps that shorter form, which `isValidVoterId` accepts; `formatVoterId` with
+ * `pad: true` restores the zeros.
+ *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
  *
  * @param {string|number} value - The voter id value to be parsed.
  * @returns {string} The voter id value without formatting.
@@ -15,27 +19,23 @@ import { EXTENDED_LENGTH, LENGTH } from "./constants";
  * @example
  * ```typescript
  * parseVoterId("1234 5678 01 24"); // "123456780124"
- * parseVoterId("1234 5678 8 01 91"); // "1234567880191"
+ * parseVoterId("1234 5678 01 24 99"); // "123456780124" (digits past the 12th are dropped)
+ * parseVoterId("12345 01 59"); // "123450159" (no leading zeros are added)
+ * parseVoterId(-123456780124); // "" (not a non-negative safe integer)
  * ```
  *
- * The 13-digit São Paulo/Minas Gerais cap is brutils parity, not published by the TSE. A
- * 14-or-more-digit input whose 10th and 11th digits are "01"/"02" is read as a 13-digit São Paulo
- * or Minas Gerais id and capped at 13 digits, discarding anything past that.
+ * Resolução TSE nº 23.659/2021, art. 36, gives the voter id "até 12 algarismos", so no 13-digit
+ * form is kept.
  *
  * The TSE resolution page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser.
  *
  * @see Official: https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021
+ * Resolução TSE nº 23.659/2021, art. 36: "composto por até 12 algarismos".
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py
  */
 export const parseVoterId = (value: string | number): string => {
-	const digits = sanitizeToDigits(value);
+	if (!isLookupCode(value)) return "";
 
-	const federativeUnion = digits.slice(9, 11);
-
-	const maxLength = NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion)
-		? EXTENDED_LENGTH
-		: LENGTH;
-
-	return digits.slice(0, maxLength);
+	return sanitizeToDigits(value).slice(0, VOTER_ID_LENGTH);
 };

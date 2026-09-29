@@ -67,6 +67,19 @@ describe("formatCno", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCno(-401_800_097_960)).toBe("");
+		expect(formatCno(-1)).toBe("");
+		expect(formatCno(1.5)).toBe("");
+		expect(formatCno(2 ** 53)).toBe("");
+		expect(formatCno(Number.MAX_VALUE)).toBe("");
+		expect(formatCno(1e21)).toBe("");
+		expect(formatCno(Number.NaN)).toBe("");
+		expect(formatCno(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCno(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCno(-401_800_097_960, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCno with a nullish value under pad", () => {

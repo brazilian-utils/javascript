@@ -85,6 +85,18 @@ describe("formatProcessoJuridico", () => {
 			expectAlwaysReturnsType(formatProcessoJuridico, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatProcessoJuridico(-1)).toBe("");
+		expect(formatProcessoJuridico(1.5)).toBe("");
+		expect(formatProcessoJuridico(2 ** 53)).toBe("");
+		expect(formatProcessoJuridico(Number.MAX_VALUE)).toBe("");
+		expect(formatProcessoJuridico(1e21)).toBe("");
+		expect(formatProcessoJuridico(Number.NaN)).toBe("");
+		expect(formatProcessoJuridico(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatProcessoJuridico(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatProcessoJuridico(-1, { pad: true })).toBe("");
+	});
 });
 
 describe("formatProcessoJuridico types", () => {

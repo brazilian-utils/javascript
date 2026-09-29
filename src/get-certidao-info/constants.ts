@@ -5,12 +5,14 @@
  * (proclamas), Livro E (demais atos), Livro E desdobrado para emancipações and Livro E
  * desdobrado para interdições.
  *
- * The in-force art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça
- * lists only the codes 1 to 7, and no CNJ primary text reachable today publishes the other two:
- * the Anexo IV of the revoked Provimento CNJ nº 63/2017 lists the same seven. The codes 8
- * (emancipação) and 9 (interdição) come from the `Based on:` references below: ghiorzi.org prints
- * the nine book list and the cited Casilhero support class maps the same nine. They are kept
- * because matrículas carrying them circulate.
+ * The codes 1 to 7 are the table in force, art. 473, V of the Código Nacional de Normas da
+ * Corregedoria Nacional de Justiça (Provimento CNJ nº 149/2023, inciso V in the redação of the
+ * Provimento CN nº 182/2024), from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos
+ * relativos ao registro civil)". The codes 8 and 9 come from the Provimento CNJ nº 3/2009, art.
+ * 7º, V: "8: Livro E (Desdobrado para registro específico das Emancipações)" and "9: Livro E
+ * (Desdobrado para registro específico das Interdições)". That provimento was revoked by the
+ * Provimento CNJ nº 63/2017, but the certidões issued under it from 2010 on carry those
+ * matrículas and are still valid documents, so both codes are kept.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
  * Código Nacional de Normas da Corregedoria Nacional de Justiça - Foro Extrajudicial (Provimento
@@ -28,11 +30,14 @@
  * structure: "a matrícula, de inserção obrigatória nas certidões (primeira e demais vias) emitidas
  * pelos Cartórios de Registro Civil das Pessoas Naturais a partir de 1º de janeiro de 2010, é
  * formada pelos seguintes elementos", incisos I to IX fixing the same 6 + 2 + 2 + 4 + 1 + 5 + 3 +
- * 7 + 2 positions art. 473 carries today (revoked; historical).
+ * 7 + 2 positions art. 473 carries today (revoked by the Provimento CNJ nº 63/2017; historical).
+ * Its inciso V also listed "8: Livro E (Desdobrado para registro específico das Emancipações)"
+ * and "9: Livro E (Desdobrado para registro específico das Interdições)", which art. 473, V no
+ * longer has but which are still accepted, the certidões issued under it carrying them, and its
+ * inciso IX had the check digits "formado automaticamente por meio do programa" the CNJ
+ * Corregedoria handed to the registrars, whose algorithm was never published.
  * @see Based on: http://ghiorzi.org/DVnew.htm
  * Description of the nine books and their codes.
- * @see Based on: https://github.com/Casilhero/brazilian-validators/blob/main/src/Support/CertidaoInfo.php
- * Reference implementation agreeing on the same nine books, in the same order.
  */
 export const CERTIDAO_TYPES = [
 	"birth",

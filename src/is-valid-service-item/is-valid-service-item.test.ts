@@ -26,9 +26,15 @@ describe("isValidServiceItem", () => {
 		expect(isValidServiceItem("010101")).toBe(false);
 	});
 
+	it("should accept the mask characters isValidCpf reads at the one boundary, alone or in a run", () => {
+		expect(isValidServiceItem("1-01")).toBe(true);
+		expect(isValidServiceItem("1 01")).toBe(true);
+		expect(isValidServiceItem("1..01")).toBe(true);
+	});
+
 	it("should reject a malformed value", () => {
 		expect(isValidServiceItem("1.1")).toBe(false);
-		expect(isValidServiceItem("1-01")).toBe(false);
+		expect(isValidServiceItem("1_01")).toBe(false);
 		expect(isValidServiceItem("")).toBe(false);
 	});
 

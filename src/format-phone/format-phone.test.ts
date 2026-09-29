@@ -338,6 +338,18 @@ describe("formatPhone", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatPhone(-11_987_654_321)).toBe("");
+		expect(formatPhone(-1)).toBe("");
+		expect(formatPhone(1.5)).toBe("");
+		expect(formatPhone(2 ** 53)).toBe("");
+		expect(formatPhone(Number.MAX_VALUE)).toBe("");
+		expect(formatPhone(1e21)).toBe("");
+		expect(formatPhone(Number.NaN)).toBe("");
+		expect(formatPhone(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatPhone(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("formatPhone types", () => {

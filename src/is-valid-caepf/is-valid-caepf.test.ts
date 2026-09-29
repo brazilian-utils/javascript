@@ -70,9 +70,18 @@ describe("isValidCaepf", () => {
 		test("when the shift of 12 is not applied (29311861000172 instead of 29311861000184)", () => {
 			expect(isValidCaepf("29311861000172")).toBe(false);
 		});
+
+		test("when it is a negative or fractional number", () => {
+			expect(isValidCaepf(-29_311_861_000_184)).toBe(false);
+			expect(isValidCaepf(293_118_610_001.84)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
+		test("for 00000002500171, the example of SERPRO's documentation of the Receita Federal's CAEPF cadastro", () => {
+			expect(isValidCaepf("00000002500171")).toBe(true);
+		});
+
 		test("for 293.118.610/001-84 (Casilhero/brazilian-validators CaepfTest, from ghiorzi.org)", () => {
 			expect(isValidCaepf("293.118.610/001-84")).toBe(true);
 			expect(isValidCaepf("29311861000184")).toBe(true);

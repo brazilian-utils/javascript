@@ -1,6 +1,7 @@
 import * as fc from "fast-check";
 
 import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
+import { anyText, cnpjs, cpfs, phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
@@ -497,6 +498,51 @@ describe("generatePixPayload", () => {
 
 					expect(generatePixPayload({ key: CPF_KEY, url, merchantName, merchantCity })).toBeNull();
 					expect(generatePixPayload({ merchantName, merchantCity })).toBeNull();
+				}),
+			);
+		});
+
+		test("should never generate a payload isValidPixPayload rejects, whatever it is given", () => {
+			const emails = fc.stringMatching(
+				/^[a-zA-Z0-9.!#$&'*+/=?^_`{|}~-]{1,20}@[a-z0-9]{1,10}\.[a-z]{2,3}$/,
+			);
+			const keys = fc.oneof(
+				cpfs(),
+				cpfs().map(
+					(cpf) => `${cpf.slice(0, 3)}.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-${cpf.slice(9)}`,
+				),
+				cnpjs(),
+				cnpjs(2),
+				phones("mobile"),
+				phones("mobile").map((phone) => `+55 ${phone}`),
+				emails,
+				fc.uuid(),
+				fc.uuid().map((uuid) => uuid.toUpperCase()),
+				anyText,
+			);
+			const params = fc.record(
+				{
+					key: keys,
+					url: fc.oneof(urls, anyText),
+					merchantName: fc.oneof(names, anyText),
+					merchantCity: fc.oneof(cities, fc.string({ unit: "grapheme", minLength: 16 })),
+					amount: fc.oneof(
+						cents.map((value) => value / 100),
+						fc.double(),
+					),
+					txid: fc.oneof(txids, anyText),
+					description: anyText,
+				},
+				{ requiredKeys: ["merchantName", "merchantCity"] },
+			);
+
+			fc.assert(
+				fc.property(params, (pix) => {
+					const payload = generatePixPayload(pix);
+
+					fc.pre(payload !== null);
+
+					expect(isValidPixPayload(payload ?? "")).toBe(true);
 				}),
 			);
 		});

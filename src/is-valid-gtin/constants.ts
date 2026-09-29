@@ -4,10 +4,15 @@ import { type GtinLength } from "./is-valid-gtin";
 export const DIGITS_REGEX = /^\d+$/;
 
 /**
- * A GTIN of zeros only. Its check digit works out (the GS1 check digit of zeros is zero), but GS1
- * never allocates it: every GTIN carries a GS1 Company Prefix, and the prefix 0000000 of table 1-4
- * of the General Specifications only ever holds a GTIN-8 behind it, never zeros. The NF-e leiaute
- * reserves the literal "SEM GTIN" for an item with no GTIN, so zeros are a placeholder, not a code.
+ * A GTIN of zeros only, which `isValidGtin` rejects by a rule of this library, not of an official
+ * source. Its check digit works out (the GS1 check digit of zeros is zero), so rule I03-10 of the
+ * NF-e (rejection 611, "cEAN com dígito de controle inválido", NT 2021.003 v1.50) lets it through,
+ * and no NF-e rule or technical note rejects a GTIN of zeros. The GS1 General Specifications
+ * (release 26.0) do not forbid it either: table 1-4 reserves the GS1 Prefix 0000000 "to issue
+ * Restricted Circulation Numbers within a company", and table 1-5 the GS1-8 Prefixes 000 to 099,
+ * so a GTIN of zeros is a company-internal RCN, not a number GS1 allocates for open trade. The
+ * NF-e leiaute reserves the literal "SEM GTIN" for an item with no GTIN, so zeros are almost
+ * always a placeholder, which is why they are rejected; the other RCN are accepted.
  */
 export const ALL_ZEROS_REGEX = /^0+$/;
 

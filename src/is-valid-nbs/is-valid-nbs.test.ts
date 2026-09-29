@@ -30,7 +30,7 @@ describe("isValidNbs", () => {
 
 	it("should reject a malformed value", () => {
 		expect(isValidNbs("1.0101abc11.00")).toBe(false);
-		expect(isValidNbs("1..0101.11.00")).toBe(false);
+		expect(isValidNbs("10..101.11.00")).toBe(false);
 		expect(isValidNbs("")).toBe(false);
 	});
 

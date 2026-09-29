@@ -1,11 +1,15 @@
 import * as fc from "fast-check";
 
-import { CEST_SEGMENTS, CEST_TABLE } from "../_internals/constants/cest";
+import { CEST_CODES } from "../_internals/constants/cest";
+import { CEST_DESCRIPTIONS, CEST_SEGMENTS } from "../_internals/constants/cest-descriptions";
 import { anyGarbage, digitsUpTo, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { lookupTable } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCest } from "../is-valid-cest/is-valid-cest";
 import { getCest, type Cest } from "./get-cest";
+
+const CEST_TABLE = lookupTable(CEST_CODES, 7, CEST_DESCRIPTIONS);
 
 describe("getCest", () => {
 	it("should return the entry for a known code written as 7 digits", () => {
@@ -93,7 +97,6 @@ describe("getCest", () => {
 	it("should return null for a string that is not a documented form", () => {
 		expect(getCest("")).toBeNull();
 		expect(getCest("abc0500100")).toBeNull();
-		expect(getCest("05..001.00")).toBeNull();
 		expect(getCest("050.01.00")).toBeNull();
 	});
 

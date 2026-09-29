@@ -48,8 +48,10 @@ const LEADING_LETTERS_REGEX = /^[A-Z]+/;
  * prefix).
  * @see Official: https://www.gov.br/nfse/pt-br/noticias/plataforma-nfs-e-disponibiliza-novas-evolucoes-em-producao-restrita-e-divulga-cronograma-de-implantacao
  * Portal NFS-e, 2026-07-27: "os novos schemas XML atualizados para o CNPJ Alfanumérico". In that
- * bundle (v1.01-20260727, read through the byte-pinned mirror https://github.com/fm-s/open-nfse),
- * `TSIdNFSe` is "NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}".
+ * restricted-production bundle (v1.01-20260727,
+ * https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/producao-restrita/esquemas-nfse-rtc-v1-01-20260727.zip),
+ * `TSIdNFSe` is "NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}"; the production bundle of 2026-02-09 still has
+ * "NFS[0-9]{50}".
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf
  * Nota Técnica SE/CGNFS-e 008 (DANFSe), item 2.1.1: the key is printed as a single block.
  */

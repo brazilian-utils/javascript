@@ -54,6 +54,7 @@ import {
 	type GetCepInfoByAddressOptions,
 	type GetCepInfoByAddressParams,
 	type GetCnpjInfoOptions,
+	type GetCodeByMunicipalityNameParams,
 	type GetHolidaysOptions,
 	type GetHolidaysParams,
 	type GetLegalNaturesByCategoryOptions,
@@ -70,6 +71,7 @@ import {
 	type Holiday,
 	type HolidayType,
 	type IbanInfo,
+	type IsbnInfo,
 	type IsHolidayOptions,
 	type IsHolidayParams,
 	type IsValidBankAccountOptions,
@@ -80,10 +82,12 @@ import {
 	type IsValidCstOptions,
 	type IsValidGtinOptions,
 	type IsValidIeParams,
+	type IsValidLicensePlateOptions,
 	type IsValidMobilePhoneOptions,
 	type IsValidPhoneOptions,
 	type IsValidPixKeyOptions,
 	type IsValidRegistroProfissionalParams,
+	type IsValidVinOptions,
 	type LegalNature,
 	type LegalNatureCategory,
 	type LicensePlateFormat,
@@ -104,6 +108,8 @@ import {
 	type PixKeyType,
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
+	type Region,
+	type RegionCode,
 	type RegistroProfissionalCouncil,
 	type ServiceItem,
 	type State,
@@ -155,6 +161,7 @@ const PUBLIC = [
 	"formatCpf",
 	"formatCurrency",
 	"formatIban",
+	"formatIsbn",
 	"formatLegalNature",
 	"formatLicensePlate",
 	"formatNbs",
@@ -184,6 +191,7 @@ const PUBLIC = [
 	"generateSuframa",
 	"generateVoterId",
 	"getAddressInfoByCep",
+	"getAreaCodeByMunicipalityCode",
 	"getAreaCodeInfo",
 	"getAreaCodesByState",
 	"getBankByCode",
@@ -200,16 +208,19 @@ const PUBLIC = [
 	"getClassTrib",
 	"getCnae",
 	"getCnpjInfo",
+	"getCodeByMunicipalityName",
 	"getCpfInfo",
 	"getCstIbsCbs",
 	"getFormatLicensePlate",
 	"getGtinInfo",
 	"getHolidays",
 	"getIbanInfo",
+	"getIsbnInfo",
 	"getLegalNature",
 	"getLegalNatures",
 	"getLegalNaturesByCategory",
 	"getMunicipalities",
+	"getMunicipalitiesByAreaCode",
 	"getMunicipality",
 	"getMunicipalityByCode",
 	"getNbs",
@@ -219,10 +230,13 @@ const PUBLIC = [
 	"getPixPayloadInfo",
 	"getServiceItem",
 	"getStateByCep",
+	"getRegions",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
 	"getStateNameByCode",
+	"getStateCapital",
 	"getStates",
+	"getStatesByRegion",
 	"getTimezoneByState",
 	"isBusinessDay",
 	"isHoliday",
@@ -254,6 +268,7 @@ const PUBLIC = [
 	"isValidGtin",
 	"isValidIE",
 	"isValidIban",
+	"isValidIsbn",
 	"isValidIe",
 	"isValidLandlinePhone",
 	"isValidLegalNature",
@@ -294,6 +309,7 @@ const PUBLIC = [
 	"parseCpf",
 	"parseCurrency",
 	"parseIban",
+	"parseIsbn",
 	"parseLegalNature",
 	"parseLicensePlate",
 	"parseNcm",
@@ -391,6 +407,7 @@ describe("Public API", () => {
 			GetCepInfoByAddressOptions: GetCepInfoByAddressOptions;
 			GetCepInfoByAddressParams: GetCepInfoByAddressParams;
 			GetCnpjInfoOptions: GetCnpjInfoOptions;
+			GetCodeByMunicipalityNameParams: GetCodeByMunicipalityNameParams;
 			GetHolidaysOptions: GetHolidaysOptions;
 			GetHolidaysParams: GetHolidaysParams;
 			GetLegalNaturesByCategoryOptions: GetLegalNaturesByCategoryOptions;
@@ -407,6 +424,7 @@ describe("Public API", () => {
 			Holiday: Holiday;
 			HolidayType: HolidayType;
 			IbanInfo: IbanInfo;
+			IsbnInfo: IsbnInfo;
 			IsHolidayOptions: IsHolidayOptions;
 			IsHolidayParams: IsHolidayParams;
 			IsValidBankAccountOptions: IsValidBankAccountOptions;
@@ -417,10 +435,12 @@ describe("Public API", () => {
 			IsValidCstOptions: IsValidCstOptions;
 			IsValidGtinOptions: IsValidGtinOptions;
 			IsValidIeParams: IsValidIeParams;
+			IsValidLicensePlateOptions: IsValidLicensePlateOptions;
 			IsValidMobilePhoneOptions: IsValidMobilePhoneOptions;
 			IsValidPhoneOptions: IsValidPhoneOptions;
 			IsValidPixKeyOptions: IsValidPixKeyOptions;
 			IsValidRegistroProfissionalParams: IsValidRegistroProfissionalParams;
+			IsValidVinOptions: IsValidVinOptions;
 			LegalNature: LegalNature;
 			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;
@@ -441,6 +461,8 @@ describe("Public API", () => {
 			PixKeyType: PixKeyType;
 			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
+			Region: Region;
+			RegionCode: RegionCode;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
 			ServiceItem: ServiceItem;
 			State: State;
@@ -468,13 +490,13 @@ describe("Public API contract: never throws on bad input", () => {
 			typeof value === "function" && !isErrorClass(name) && !NETWORK_ENTRY_POINTS.has(name),
 	) as [string, (...args: unknown[]) => unknown][];
 
-	for (const [name, fn] of entries) {
+	for (const [name, utility] of entries) {
 		for (const [label, value] of BAD_INPUTS) {
 			test(`${name} should not throw for ${label}`, async () => {
 				let thrown: unknown;
 
 				try {
-					const result = fn(value);
+					const result = utility(value);
 
 					if (result instanceof Promise) await result;
 				} catch (error) {
@@ -488,7 +510,7 @@ describe("Public API contract: never throws on bad input", () => {
 				let thrown: unknown;
 
 				try {
-					const result = fn("123", value);
+					const result = utility("123", value);
 
 					if (result instanceof Promise) await result;
 				} catch (error) {

@@ -1,9 +1,10 @@
-import { CBO_FORMAT_REGEX, CBO_TITLES } from "../_internals/constants/cbo";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { CBO_CODES } from "../_internals/constants/cbo";
+import { CBO_DESCRIPTIONS } from "../_internals/constants/cbo-descriptions";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-
-const CBO_LENGTH = 6;
+import { CBO_LENGTH } from "../is-valid-cbo/constants";
+import { isValidCbo } from "../is-valid-cbo/is-valid-cbo";
 
 /**
  * A CBO (Classificação Brasileira de Ocupações) occupation.
@@ -20,7 +21,7 @@ export type Cbo = {
  * table.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 6
- * digits, or the `NNNN-NN` mask, with a single separator between the groups and optional
+ * digits, or the `NNNN-NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
  * surrounding whitespace. Anything else (`"2124abc05"`) is rejected instead of having its
  * digits picked out. A number is only read as a code when it is a non-negative safe integer,
  * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
@@ -33,7 +34,8 @@ export type Cbo = {
  *
  * @param {string|number} value - The CBO code to look up, with or without the hyphen
  * mask, e.g. `"2124-05"`, `"212405"` or `212405`.
- * @returns {Cbo|null} The matching occupation, or null when the code is unknown or invalid.
+ * @returns {Cbo|null} The matching occupation, or null when the code is unknown or invalid,
+ * which is exactly when `isValidCbo` returns false.
  *
  * @example
  * ```typescript
@@ -45,23 +47,20 @@ export type Cbo = {
  * getCbo(-212405); // null (not a non-negative safe integer)
  * ```
  *
- * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv
- * The CBO 2002 occupation table, as published by the Ministério do Trabalho e Emprego.
+ * @see Official: https://cbo.mte.gov.br/cbosite/pages/downloads.jsf
+ * "Estrutura CBO (CSV)", the CBO 2002 tables the Ministério do Trabalho e Emprego publishes (files
+ * of 10/07/2026, 2,725 occupations). Up to 2.4.0 the table came from the older gov.br release
+ * (06/06/2025), which lacked 37 occupations, among them 782325 (Motorista de transporte por
+ * aplicativos), and still listed 6 the MTE has since dropped (225142, 322105, 322115, 322120,
+ * 322125 and 782820), which are no longer valid.
  * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
- * Community mirror of the same table, the fallback `CBO_TITLES` was built from before the
+ * Community mirror of the same table, the fallback `CBO_DESCRIPTIONS` was built from before the
  * official CSV was used.
  */
 export const getCbo = (value: string | number): Cbo | null => {
-	if (!isLookupCode(value)) return null;
+	if (!isValidCbo(value)) return null;
 
-	const code = padLookupCode(value, CBO_LENGTH);
+	const code = sanitizeToDigits(padLookupCode(value, CBO_LENGTH));
 
-	if (!CBO_FORMAT_REGEX.test(code)) return null;
-
-	const digits = sanitizeToDigits(code);
-	const description = CBO_TITLES[digits];
-
-	if (description === undefined) return null;
-
-	return { code: digits, description };
+	return { code, description: CBO_DESCRIPTIONS[findCodeIndex(CBO_CODES, code)] };
 };

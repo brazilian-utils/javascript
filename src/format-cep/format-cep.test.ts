@@ -57,6 +57,19 @@ describe("formatCep", () => {
 			expectAlwaysReturnsType(formatCep, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCep(-20_040_020)).toBe("");
+		expect(formatCep(-1)).toBe("");
+		expect(formatCep(1.5)).toBe("");
+		expect(formatCep(2 ** 53)).toBe("");
+		expect(formatCep(Number.MAX_VALUE)).toBe("");
+		expect(formatCep(1e21)).toBe("");
+		expect(formatCep(Number.NaN)).toBe("");
+		expect(formatCep(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCep(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCep(-20_040_020, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCep types", () => {

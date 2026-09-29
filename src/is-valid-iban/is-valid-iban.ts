@@ -28,15 +28,19 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * `"BR1500000000000010932840814P2"`, or the ISO 13616 print format, letters and digits in groups
  * of 4 (the last one shorter), with optional surrounding whitespace either way. The groups may be
  * split by whitespace, `.`, `-` or `/`, the interchangeable mask characters `isValidCpf` and
- * `isValidCnpj` accept, so `"BR1500000000000010932840814P-2"` reads as the same IBAN. Only a
- * separator away from a group boundary, a run of separators (ISO 13616 prints a single one) or a
- * character outside letters and digits makes the value something other than an IBAN, so
- * `"BR15 0000 0000 0000 1093 2840  814P 2"` and `"BR15 000 00000 0000 1093 2840 814P 2"` are
+ * `isValidCnpj` accept, alone or in a run as they read them (ISO 13616 prints a single space), so
+ * `"BR1500000000000010932840814P-2"` and `"BR15 0000 0000 0000 1093 2840  814P 2"` read as the same
+ * IBAN. Only a separator away from a group boundary or a character outside letters and digits
+ * makes the value something other than an IBAN, so `"BR15 000 00000 0000 1093 2840 814P 2"` is
  * rejected instead of having the offending character stripped.
  *
  * The last character is the owner indicator, `1` for the first or only holder up to `9` for the
- * ninth and then `A` to `Z` from the tenth, per Circular BCB nº 3.625/2013 art. 2º § 1º, so a
- * value ending in `0` is rejected.
+ * ninth and then `A` to `Z` from the tenth, per Resolução BCB nº 585/2026 art. 2º § 1º (the
+ * same rule as the revoked Circular BCB nº 3.625/2013), so a value ending in `0` is rejected.
+ *
+ * The 8 character ISPB may hold letters: art. 2º III of the Resolução makes it "oito
+ * caracteres alfanuméricos", where the Circular said "numéricos". Up to 2.4.0 a letter there was
+ * rejected.
  *
  * @param {string} value - The IBAN to be validated.
  * @returns {boolean} True when `value` is a structurally valid Brazilian IBAN whose ISO 7064
@@ -48,13 +52,17 @@ const hasValidCheckDigits = (iban: string): boolean => {
  * isValidIban("BR15 0000 0000 0000 1093 2840 814P 2"); // true (grouping spaces)
  * isValidIban("BR15-0000-0000-0000-1093-2840-814P-2"); // true (any of the mask characters)
  * isValidIban("br1500000000000010932840814p2"); // true (case-insensitive)
+ * isValidIban("BR1012AB34CD000010932840814P2"); // true (alphanumeric ISPB)
  * isValidIban("BR1500000000000010932840814P3"); // false (bad check digits)
  * isValidIban("BR15 000 00000 0000 1093 2840 814P 2"); // false (a separator inside a group)
  * isValidIban("DE89370400440532013000"); // false (non Brazilian IBAN)
  * ```
  *
+ * @see Official: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585
+ * Resolução BCB nº 585, de 24/08/2026 (DOU 25/08/2026), art. 2º, which revoked Circular BCB nº
+ * 3.625/2013 and keeps its layout, with an alphanumeric ISPB.
  * @see Official: https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf
- * Circular BCB nº 3.625/2013
+ * Circular BCB nº 3.625/2013 (revoked), the original layout
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf
  * Diretrizes de Implementação do IBAN no Brasil
  * @see Official: https://www.iso.org/standard/81090.html

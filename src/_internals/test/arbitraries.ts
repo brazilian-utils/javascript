@@ -18,7 +18,7 @@ import { VALID_AREA_CODES } from "../constants/area-codes";
 import { ARRECADACAO_SEGMENTS } from "../constants/arrecadacao";
 import { CNPJ_FIRST_DIGIT_WEIGHTS, CNPJ_SECOND_DIGIT_WEIGHTS } from "../constants/cnpj";
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../constants/holidays";
-import { PROCESSO_JURIDICO_TRIBUNALS } from "../constants/processo-juridico";
+import { getProcessoJuridicoTribunals } from "../constants/processo-juridico";
 import {
 	SERVICE_PHONE_ABBREVIATED_LENGTH,
 	SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH,
@@ -101,34 +101,34 @@ export const digitsOfOtherLength = (maxLength: number, lengths: number[]): fc.Ar
 	digitsUpTo(maxLength).filter((value) => !lengths.includes(value.length));
 
 /**
- * @param {string[]} maskChars The characters a separator is built from.
+ * @param {string[]} maskCharacters The characters a separator is built from.
  * @param {number} count How many separators the generated array holds.
  * @param {number} maxLength The largest length of a single separator.
  * @returns {fc.Arbitrary<string[]>} Arrays of exactly `count` separators.
  */
 export const maskSeparators = (
-	maskChars: string[],
+	maskCharacters: string[],
 	count: number,
 	maxLength: number,
 ): fc.Arbitrary<string[]> =>
-	fc.array(fc.string({ unit: fc.constantFrom(...maskChars), maxLength }), {
+	fc.array(fc.string({ unit: fc.constantFrom(...maskCharacters), maxLength }), {
 		minLength: count,
 		maxLength: count,
 	});
 
 /**
  * @param {fc.Arbitrary<string>} source The values to spread the mask over.
- * @param {string[]} maskChars The characters a separator is built from.
+ * @param {string[]} maskCharacters The characters a separator is built from.
  * @param {number} maxLength The largest length of a single separator.
  * @returns {fc.Arbitrary<string>} Values of `source` with a separator around every character.
  */
 export const maskedValues = (
 	source: fc.Arbitrary<string>,
-	maskChars: string[],
+	maskCharacters: string[],
 	maxLength: number,
 ): fc.Arbitrary<string> =>
 	source.chain((value) =>
-		maskSeparators(maskChars, value.length + 1, maxLength).map((separators) =>
+		maskSeparators(maskCharacters, value.length + 1, maxLength).map((separators) =>
 			interleave(value, separators),
 		),
 	);
@@ -330,7 +330,7 @@ export const voterIds = (state?: StateCode | "ZZ"): fc.Arbitrary<string> =>
  * tribunal drawn from the pairs Resolução CNJ nº 65/2008 allows.
  */
 export const processosJuridicos = (): fc.Arbitrary<string> => {
-	const courtsAndTribunals = [...PROCESSO_JURIDICO_TRIBUNALS].flatMap(([court, tribunals]) =>
+	const courtsAndTribunals = [...getProcessoJuridicoTribunals()].flatMap(([court, tribunals]) =>
 		tribunals.map((tribunal) => `${court}${String(tribunal).padStart(2, "0")}`),
 	);
 
@@ -365,7 +365,13 @@ export const boletos = (type?: "bancario" | "arrecadacao"): fc.Arbitrary<string>
 				})
 				.map((parts) => assembleBoletoArrecadacao(parts))
 		: fc
-				.record({ field1: digits(9), field2: digits(10), field3: digits(10), tail: digits(15) })
+				.record({
+					// Bank code, the código de moeda 9 (real) and the start of the free field.
+					field1: fc.tuple(digits(3), digits(5)).map(([bank, free]) => `${bank}9${free}`),
+					field2: digits(10),
+					field3: digits(10),
+					tail: digits(15),
+				})
 				.map((parts) => assembleBoletoBancario(parts));
 
 /** Arbitraries of valid phone numbers, built the same way as the documents. */

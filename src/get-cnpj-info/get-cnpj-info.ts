@@ -79,7 +79,8 @@ const INITIAL_HEADQUARTERS_BRANCH = "0001";
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf
  * Receita Federal Q&A on the alphanumeric CNPJ: questions 21 and 23 (root and branch), 25 (the
  * branch `0001` and the headquarters) and the `AA345678/000A-29` and `12.345.678/000A-08`
- * examples.
+ * examples. Its Ex1, `AA345678/0003-29`, is a misprint (the check digits of `AA3456780003` are
+ * 86), so it is not used.
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * Check digit manual, source of the `12.ABC.345/01DE-35` example.
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico

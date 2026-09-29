@@ -1,9 +1,7 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
-import { type StateCode } from "../_internals/constants/states";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
-import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
+import { getCodeByMunicipalityName } from "../get-code-by-municipality-name/get-code-by-municipality-name";
 
 /** The `getMunicipality` query by IBGE municipality code. */
 export type GetMunicipalityByCodeParams = {
@@ -48,7 +46,10 @@ export type GetMunicipalityOptions = GetMunicipalityParams;
 let codeIndex: Map<string, [string, string]> | undefined;
 
 const getMunicipalityByCode = (code: string | number): [string, string] | null => {
-	if (!isLookupCode(code)) return null;
+	const digits = readLookupDigits(code);
+
+	// Stryker disable next-line ConditionalExpression: without this guard a null misses the index, whose keys are all strings, so the lookup below returns null all the same; the guard also narrows the type of `digits`.
+	if (digits === null) return null;
 
 	// Stryker disable next-line ConditionalExpression: this guard only memoizes; CITIES_DATA is a module level constant that is never written to, so rebuilding the index on every call produces the very same entries, and each lookup already returns a fresh copy of the pair, leaving the repeated work unobservable.
 	if (!codeIndex) {
@@ -61,47 +62,21 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 		}
 	}
 
-	// `Map#get` never throws and simply misses for a key of the wrong shape (a malformed, too
-	// short or too long code), so only the sign and the decimal point of a numeric `code`, which
-	// `sanitizeToDigits` would silently drop, have to be pre-validated above.
-	const entry = codeIndex.get(sanitizeToDigits(code));
+	// `Map#get` never throws and simply misses for a key of the wrong length, so only the
+	// characters `readLookupDigits` turns down have to be checked above.
+	const entry = codeIndex.get(digits);
 
 	return entry ? [...entry] : null;
-};
-
-const isStateCode = (value: string): value is StateCode => Object.hasOwn(CITIES_DATA, value);
-
-const getMunicipalityCodeByName = ({
-	municipalityName,
-	uf,
-}: GetMunicipalityByNameParams): string | null => {
-	if (typeof uf !== "string") return null;
-
-	const normalizedUf = uf.trim().toUpperCase();
-
-	// Every real state code is exactly 2 uppercase letters, so a malformed `normalizedUf` (wrong
-	// length, digits, ...) simply finds no match below; there is no need to pre-validate its shape.
-	if (!isStateCode(normalizedUf)) return null;
-
-	// `removeAccents` (and so `normalizeMunicipalityName`) already folds a non-string or empty
-	// `municipalityName` down to `""`, which no real municipality name normalizes to, so there is
-	// no need to pre-validate `municipalityName` here first.
-	const normalizedName = normalizeMunicipalityName(municipalityName);
-	const match = CITIES_DATA[normalizedUf].find(
-		([name]) => normalizeMunicipalityName(name) === normalizedName,
-	);
-
-	return match ? match[1] : null;
 };
 
 /**
  * Looks a Brazilian municipality up by its IBGE code in the offline IBGE "localidades" dataset.
  *
  * A `code` given as a number must be a non-negative integer: a sign and a decimal point are not
- * digits, so `-3550308` and `355030.8` are rejected instead of being read as `3550308`.
+ * digits, so `-3550308` and `355030.8` are rejected instead of being read as `3550308`. A string
+ * has any non-digit characters stripped, the same as `getMunicipalityByCode`.
  *
- * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
- * municipality by name is up to the application, over `getMunicipalities`.
+ * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline.
  *
  * @param {GetMunicipalityByCodeParams} options - The `{ code }` query.
  * @returns {Promise<[string, string] | null>} A fresh `[name, uf]` pair, which the caller owns
@@ -127,8 +102,8 @@ export function getMunicipality(
  * not, since only the runs that are there collapse. The casing is folded to upper case, the
  * direction Unicode expands `"ß"` to `"SS"` in, so `"Paßos"` matches `"Passos"`.
  *
- * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
- * municipality by name is up to the application, over `getMunicipalities`.
+ * @deprecated Use `getCodeByMunicipalityName` instead, which is synchronous and matches the
+ * name the same way.
  *
  * @param {GetMunicipalityByNameParams} options - The `{ municipalityName, uf }` query.
  * @returns {Promise<string | null>} The 7 digit IBGE code, or null when the state code or the
@@ -151,8 +126,8 @@ export function getMunicipality(options: GetMunicipalityByNameParams): Promise<s
  * `uf` it resolves the IBGE code. Validation failures and unknown municipalities are reported
  * as `null`.
  *
- * @deprecated Use `getMunicipalityByCode` instead, which is synchronous and offline; matching a
- * municipality by name is up to the application, over `getMunicipalities`.
+ * @deprecated Use `getMunicipalityByCode` or `getCodeByMunicipalityName` instead, which are
+ * synchronous and offline.
  *
  * @param {GetMunicipalityParams} options - Either `{ code }` or `{ municipalityName, uf }`.
  * @returns {Promise<[string, string] | string | null>} The `[name, uf]` pair when looking up
@@ -184,5 +159,10 @@ export function getMunicipality(
 		return Promise.resolve(getMunicipalityByCode(options.code));
 	}
 
-	return Promise.resolve(getMunicipalityCodeByName(options));
+	return Promise.resolve(
+		getCodeByMunicipalityName({
+			municipalityName: options.municipalityName,
+			stateCode: options.uf,
+		}),
+	);
 }

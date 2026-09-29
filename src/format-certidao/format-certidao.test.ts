@@ -106,6 +106,19 @@ describe("formatCertidao", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCertidao(1_045_390_155.2)).toBe("");
+		expect(formatCertidao(-1)).toBe("");
+		expect(formatCertidao(1.5)).toBe("");
+		expect(formatCertidao(2 ** 53)).toBe("");
+		expect(formatCertidao(Number.MAX_VALUE)).toBe("");
+		expect(formatCertidao(1e21)).toBe("");
+		expect(formatCertidao(Number.NaN)).toBe("");
+		expect(formatCertidao(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCertidao(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCertidao(1_045_390_155.2, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCertidao types", () => {

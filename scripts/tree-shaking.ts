@@ -44,7 +44,7 @@ import { gzipSync } from "node:zlib";
 
 import { build } from "esbuild";
 
-const rootDir = resolve(import.meta.dirname, "..");
+const rootDirectory = resolve(import.meta.dirname, "..");
 const packageName = "@brazilian-utils/brazilian-utils";
 
 /** Exit code of a comparison that could not be carried out (missing build, unreadable base). */
@@ -124,7 +124,7 @@ const parseArgs = (argv: string[]): Args => {
 const mapWithConcurrency = async <T, R>(
 	items: readonly T[],
 	limit: number,
-	fn: (item: T) => Promise<R>,
+	transform: (item: T) => Promise<R>,
 ): Promise<R[]> => {
 	const results: R[] = Array.from({ length: items.length });
 	let cursor = 0;
@@ -139,7 +139,7 @@ const mapWithConcurrency = async <T, R>(
 			if (item !== undefined) {
 				// Each worker of the pool processes its items one after the other on purpose.
 				// eslint-disable-next-line no-await-in-loop
-				results[index] = await fn(item);
+				results[index] = await transform(item);
 			}
 		}
 	};
@@ -153,12 +153,12 @@ const mapWithConcurrency = async <T, R>(
 const bundleSource = async (
 	source: string,
 	sourcefile: string,
-	resolveDir: string,
+	resolveDirectory: string,
 ): Promise<Uint8Array> => {
 	const result = await build({
 		stdin: {
 			contents: source,
-			resolveDir,
+			resolveDir: resolveDirectory,
 			sourcefile,
 			loader: "js",
 		},
@@ -180,9 +180,9 @@ const bundleSource = async (
 const measure = async (
 	name: string,
 	source: string,
-	resolveDir: string,
+	resolveDirectory: string,
 ): Promise<Measurement & { name: string }> => {
-	const contents = await bundleSource(source, `${name}.mjs`, resolveDir);
+	const contents = await bundleSource(source, `${name}.mjs`, resolveDirectory);
 	return {
 		name,
 		bytes: contents.byteLength,
@@ -194,21 +194,21 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 	typeof value === "object" && value !== null;
 
 const loadExports = async (
-	distEntry: string,
+	distributionEntry: string,
 ): Promise<{ testable: string[]; aliasOf: Map<string, string> }> => {
-	const mod: unknown = await import(pathToFileURL(distEntry).href);
+	const moduleNamespace: unknown = await import(pathToFileURL(distributionEntry).href);
 
-	if (!isRecord(mod)) {
-		throw new Error(`Unexpected default export shape for ${distEntry}`);
+	if (!isRecord(moduleNamespace)) {
+		throw new Error(`Unexpected default export shape for ${distributionEntry}`);
 	}
 
-	const functionExports = Object.keys(mod)
-		.filter((name) => typeof mod[name] === "function")
+	const functionExports = Object.keys(moduleNamespace)
+		.filter((name) => typeof moduleNamespace[name] === "function")
 		.sort();
 
 	const groups = new Map<unknown, string[]>();
 	for (const name of functionExports) {
-		const value = mod[name];
+		const value = moduleNamespace[name];
 		const group = groups.get(value);
 		if (group) group.push(name);
 		else groups.set(value, [name]);
@@ -229,13 +229,13 @@ const loadExports = async (
 	return { testable, aliasOf };
 };
 
-const consumerResolveDir = async (packageRoot: string): Promise<string> => {
-	if (packageRoot === rootDir) return rootDir;
+const consumerResolveDirectory = async (packageRoot: string): Promise<string> => {
+	if (packageRoot === rootDirectory) return rootDirectory;
 
-	const consumerDir = await mkdtemp(join(tmpdir(), "tree-shaking-"));
-	await mkdir(join(consumerDir, "node_modules", "@brazilian-utils"), { recursive: true });
-	await symlink(packageRoot, join(consumerDir, "node_modules", packageName));
-	return consumerDir;
+	const consumerDirectory = await mkdtemp(join(tmpdir(), "tree-shaking-"));
+	await mkdir(join(consumerDirectory, "node_modules", "@brazilian-utils"), { recursive: true });
+	await symlink(packageRoot, join(consumerDirectory, "node_modules", packageName));
+	return consumerDirectory;
 };
 
 const importSource = (names: string[]): string =>
@@ -247,16 +247,16 @@ const measureExports = async (
 	full: Measurement;
 	exports: Record<string, Measurement>;
 	aliasOf: Map<string, string>;
-	resolveDir: string;
+	resolveDirectory: string;
 }> => {
-	const distEntry = resolve(packageRoot, "dist/brazilian-utils.js");
-	if (!existsSync(distEntry)) {
-		console.error(`Missing ${distEntry}. Run \`npm run build\` first.`);
+	const distributionEntry = resolve(packageRoot, "dist/brazilian-utils.js");
+	if (!existsSync(distributionEntry)) {
+		console.error(`Missing ${distributionEntry}. Run \`npm run build\` first.`);
 		process.exit(COMPARISON_ERROR_EXIT_CODE);
 	}
 
-	const { testable, aliasOf } = await loadExports(distEntry);
-	const resolveDir = await consumerResolveDir(packageRoot);
+	const { testable, aliasOf } = await loadExports(distributionEntry);
+	const resolveDirectory = await consumerResolveDirectory(packageRoot);
 
 	const [full, ...measurements] = await mapWithConcurrency(
 		[
@@ -264,7 +264,7 @@ const measureExports = async (
 			...testable.map((name) => ({ name, names: [name] })),
 		],
 		CONCURRENCY,
-		({ name, names }) => measure(name, importSource(names), resolveDir),
+		({ name, names }) => measure(name, importSource(names), resolveDirectory),
 	);
 
 	if (full === undefined) {
@@ -279,19 +279,24 @@ const measureExports = async (
 		if (targetMeasurement !== undefined) exportsMap[alias] = targetMeasurement;
 	}
 
-	return { full: { bytes: full.bytes, gzip: full.gzip }, exports: exportsMap, aliasOf, resolveDir };
+	return {
+		full: { bytes: full.bytes, gzip: full.gzip },
+		exports: exportsMap,
+		aliasOf,
+		resolveDirectory,
+	};
 };
 
 /**
  * Bundles one named import of every name in `names` at once, the way a consumer using that whole
  * API surface would.
  * @param {string[]} names - The export names to bundle together.
- * @param {string} resolveDir - The directory esbuild resolves the bundled import from.
+ * @param {string} resolveDirectory - The directory esbuild resolves the bundled import from.
  * @returns {Promise<Measurement>} The bundled size, in bytes and gzip bytes.
  */
-const measureNames = async (names: string[], resolveDir: string): Promise<Measurement> => {
+const measureNames = async (names: string[], resolveDirectory: string): Promise<Measurement> => {
 	if (names.length === 0) return { bytes: 0, gzip: 0 };
-	const { bytes, gzip } = await measure("__existing__", importSource(names), resolveDir);
+	const { bytes, gzip } = await measure("__existing__", importSource(names), resolveDirectory);
 	return { bytes, gzip };
 };
 
@@ -583,9 +588,14 @@ const readSnapshot = async (path: string): Promise<Snapshot> => {
 const main = async (): Promise<void> => {
 	const args = parseArgs(process.argv.slice(2));
 	const packageRoot =
-		args.dist === undefined || args.dist === "" ? rootDir : resolve(process.cwd(), args.dist);
+		args.dist === undefined || args.dist === "" ? rootDirectory : resolve(process.cwd(), args.dist);
 
-	const { full, exports: exportsMap, aliasOf, resolveDir } = await measureExports(packageRoot);
+	const {
+		full,
+		exports: exportsMap,
+		aliasOf,
+		resolveDirectory,
+	} = await measureExports(packageRoot);
 
 	if (args.json !== undefined && args.json !== "") {
 		const snapshot: Snapshot = { full, exports: exportsMap };
@@ -595,7 +605,7 @@ const main = async (): Promise<void> => {
 			const survivingNames = Object.keys(exportsMap)
 				.filter((name) => name in other.exports && !aliasOf.has(name))
 				.sort();
-			snapshot.surviving = await measureNames(survivingNames, resolveDir);
+			snapshot.surviving = await measureNames(survivingNames, resolveDirectory);
 		}
 
 		await writeFile(resolve(process.cwd(), args.json), `${JSON.stringify(snapshot, null, "\t")}\n`);
@@ -607,7 +617,7 @@ const main = async (): Promise<void> => {
 		const existingNames = Object.keys(base.exports)
 			.filter((name) => name in exportsMap && !aliasOf.has(name))
 			.sort();
-		const existing = await measureNames(existingNames, resolveDir);
+		const existing = await measureNames(existingNames, resolveDirectory);
 		const result = compareSnapshots(base, head, existing);
 		const markdown = renderMarkdown(base, head, existing, result);
 

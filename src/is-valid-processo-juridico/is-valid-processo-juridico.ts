@@ -1,5 +1,5 @@
 import { calculateProcessoJuridicoCheckDigits } from "../_internals/calculate-processo-juridico-check-digits/calculate-processo-juridico-check-digits";
-import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-juridico";
+import { getProcessoJuridicoTribunals } from "../_internals/constants/processo-juridico";
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import {
 	CHECK_DIGIT_LENGTH,
@@ -9,7 +9,7 @@ import {
 	TRIBUNAL_START_POSITION,
 } from "./constants";
 
-const FORMAT_REGEX = /^\d{7}[\s.-]*\d{2}[\s.-]*\d{4}[\s.-]*\d[\s.-]*\d{2}[\s.-]*\d{4}$/;
+const FORMAT_REGEX = /^\d{7}[\s.\-/]*\d{2}[\s.\-/]*\d{4}[\s.\-/]*\d[\s.\-/]*\d{2}[\s.\-/]*\d{4}$/;
 
 const verifyCheckDigit = (value: string): boolean => {
 	const verificationDigits = Number.parseInt(
@@ -25,7 +25,7 @@ const verifyCheckDigit = (value: string): boolean => {
 };
 
 const verifyCourtAndTribunal = (value: string): boolean => {
-	const tribunals = PROCESSO_JURIDICO_TRIBUNALS.get(Number(value.charAt(COURT_POSITION)));
+	const tribunals = getProcessoJuridicoTribunals().get(Number(value.charAt(COURT_POSITION)));
 
 	if (tribunals === undefined) return false;
 
@@ -44,7 +44,7 @@ const verifyCourtAndTribunal = (value: string): boolean => {
  * only read as four digits: art. 1º, § 6º leaves its codification to each tribunal, so there is
  * no central list to check it against.
  *
- * The CNJ mask separators (whitespace, `.` and `-`) are accepted between the
+ * The CNJ mask separators (whitespace, `.` and `-`), and `/` as `isValidCpf` reads it, are accepted between the
  * `NNNNNNN-DD.AAAA.J.TR.OOOO` fields, and whitespace around the value is ignored, but any other
  * character, a letter in particular, makes the value invalid.
  *
@@ -60,7 +60,8 @@ const verifyCourtAndTribunal = (value: string): boolean => {
  * isValidProcessoJuridico("ab00020802520125150049"); // false (invalid format)
  * ```
  *
- * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits, and
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout, its check digits (art. 1º,
+ * § 2º, and the algorithm in its Anexo VIII, "CÁLCULO DO DÍGITO VERIFICADOR"), and
  * closes the list of órgão (`J`) and tribunal (`TR`) codes in art. 1º, § 4º and § 5º.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119

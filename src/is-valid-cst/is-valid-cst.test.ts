@@ -209,8 +209,9 @@ describe("isValidCst", () => {
 		expect(isValidCst("0/10", { tax: "icms" })).toBe(true);
 	});
 
-	it("should return false when more than one separator sits between two digits", () => {
-		expect(isValidCst("1--10", { tax: "icms" })).toBe(false);
+	it("should accept a run of separators after the origin digit, as isValidCpf does between its groups", () => {
+		expect(isValidCst("1--10", { tax: "icms" })).toBe(true);
+		expect(isValidCst("0 . 10", { tax: "icms" })).toBe(true);
 	});
 
 	it("should return false when a separator does not sit right after the origin digit", () => {

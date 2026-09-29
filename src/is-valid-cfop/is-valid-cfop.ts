@@ -1,4 +1,5 @@
-import { CFOP_FORMAT_REGEX, CFOP_TABLE } from "../_internals/constants/cfop";
+import { CFOP_CODES, CFOP_FORMAT_REGEX } from "../_internals/constants/cfop";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
@@ -14,7 +15,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * than codes a document can carry, so they are rejected.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 4
- * digits, or the `N.NNN` form the annex prints, with a single separator between the groups
+ * digits, or the `N.NNN` form the annex prints, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask)
  * and optional surrounding whitespace. Anything else (`"abc5102"`) is rejected instead of
  * having its digits picked out. A number is only read as a code when it is a non-negative
  * safe integer, since a sign, a decimal point or a rounded magnitude would otherwise be read
@@ -55,5 +56,5 @@ export const isValidCfop = (value: string | number): boolean => {
 
 	if (!CFOP_FORMAT_REGEX.test(code)) return false;
 
-	return sanitizeToDigits(code) in CFOP_TABLE;
+	return findCodeIndex(CFOP_CODES, sanitizeToDigits(code)) !== -1;
 };

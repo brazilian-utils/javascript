@@ -42,6 +42,17 @@ describe("parseProcessoJuridico", () => {
 			expectAlwaysReturnsType(parseProcessoJuridico, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseProcessoJuridico(-1)).toBe("");
+		expect(parseProcessoJuridico(1.5)).toBe("");
+		expect(parseProcessoJuridico(2 ** 53)).toBe("");
+		expect(parseProcessoJuridico(Number.MAX_VALUE)).toBe("");
+		expect(parseProcessoJuridico(1e21)).toBe("");
+		expect(parseProcessoJuridico(Number.NaN)).toBe("");
+		expect(parseProcessoJuridico(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseProcessoJuridico(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseProcessoJuridico types", () => {

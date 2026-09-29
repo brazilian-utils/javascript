@@ -9,6 +9,10 @@ const REMAINDER_TWO_DRAWS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
 
 const BRANCH_FALLBACK_DRAWS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2];
 
+const UNASSIGNED_BRANCH_DRAWS = [
+	1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1,
+];
+
 const INVALID_BRANCHES: [string, number][] = [
 	["0, below the first ordem", 0],
 	["10000, past the last ordem", 10_000],
@@ -93,6 +97,22 @@ describe("generateCnpj", () => {
 			}
 		});
 
+		test("should draw again when the random ordem block comes out as 0000, which is never assigned", () => {
+			// 2.4.0 returned "12345678000004" for the first draw, 123456780000 (sums 220 ≡ 0 → 0, 216 ≡ 7 → 4)
+			const cnpj = generateWithForcedDraws(UNASSIGNED_BRANCH_DRAWS, 10, () => generateCnpj(1));
+
+			// 123456780001: 1·5+2·4+3·3+4·2+5·9+6·8+7·7+8·6+1·2 = 222 ≡ 2 → 9;
+			// 1234567800019: 1·6+2·5+3·4+4·3+5·2+6·9+7·8+8·7+1·3+9·2 = 237 ≡ 6 → 5
+			expect(cnpj).toBe("12345678000195");
+		});
+
+		test("should draw the alphanumeric ordem block again when it comes out as 0000", () => {
+			const cnpj = generateWithForcedDraws(UNASSIGNED_BRANCH_DRAWS, 36, () => generateCnpj(2));
+
+			expect(cnpj).toBe("12345678000195");
+			expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
+		});
+
 		test("should compute the first check digit as 9 when the weighted sum leaves remainder 2", () => {
 			const cnpj = generateWithForcedDraws(REMAINDER_TWO_DRAWS, 10, () => generateCnpj(1));
 
@@ -157,14 +177,14 @@ describe("generateCnpj", () => {
 		});
 
 		test("should generate alphanumeric CNPJs including E, O, T and U, which a previously restricted alphabet excluded even though isValidCnpj accepts them (the official RFB example '12.ABC.345/01DE-35' contains an E)", () => {
-			const usedChars = new Set<string>();
+			const usedCharacters = new Set<string>();
 			for (let i = 0; i < 1000; i++) {
-				for (const char of generateCnpj(2)) {
-					usedChars.add(char);
+				for (const character of generateCnpj(2)) {
+					usedCharacters.add(character);
 				}
 			}
-			for (const char of ["E", "O", "T", "U"]) {
-				expect(usedChars.has(char)).toBe(true);
+			for (const character of ["E", "O", "T", "U"]) {
+				expect(usedCharacters.has(character)).toBe(true);
 			}
 		});
 	});
@@ -192,7 +212,7 @@ describe("generateCnpj", () => {
 		});
 
 		test("should keep the ordem block numeric on the alphanumeric version, with letters in the raiz", () => {
-			const raizChars = new Set<string>();
+			const raizCharacters = new Set<string>();
 
 			for (let index = 0; index < 100; index++) {
 				const cnpj = generateCnpj({ version: 2, branch: 9999 });
@@ -201,12 +221,12 @@ describe("generateCnpj", () => {
 				expect(cnpj.slice(8, 12)).toBe("9999");
 				expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
 
-				for (const char of cnpj.slice(0, 8)) {
-					raizChars.add(char);
+				for (const character of cnpj.slice(0, 8)) {
+					raizCharacters.add(character);
 				}
 			}
 
-			expect([...raizChars].some((char) => /[A-Z]/.test(char))).toBe(true);
+			expect([...raizCharacters].some((character) => /[A-Z]/.test(character))).toBe(true);
 		});
 
 		test("should generate a numeric CNPJ with a branch when the version is 1", () => {
@@ -283,6 +303,33 @@ describe("generateCnpj", () => {
 						expect(isValidCnpj(cnpj, { version: 2 })).toBe(true);
 					}
 				}),
+			);
+		});
+
+		test("should never write the unassigned ordem 0000, whatever root comes before it", () => {
+			const draw = fc.integer({ min: 0, max: 9 });
+			const roots = fc.array(draw, { minLength: 8, maxLength: 8 });
+			const branches = fc
+				.array(draw, { minLength: 4, maxLength: 4 })
+				.filter((branch) => branch.some((digit) => digit !== 0));
+
+			fc.assert(
+				fc.property(
+					roots,
+					branches,
+					fc.constantFrom(1 as const, 2 as const),
+					(root, branch, version) => {
+						fc.pre(new Set([...root, ...branch]).size > 1);
+
+						const draws = [...root, 0, 0, 0, 0, ...root, ...branch];
+						const cnpj = generateWithForcedDraws(draws, version === 2 ? 36 : 10, () =>
+							generateCnpj(version),
+						);
+
+						expect(cnpj.slice(8, 12)).toBe(branch.join(""));
+						expect(isValidCnpj(cnpj, { version })).toBe(true);
+					},
+				),
 			);
 		});
 

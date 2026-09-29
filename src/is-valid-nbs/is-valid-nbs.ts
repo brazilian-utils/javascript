@@ -1,4 +1,5 @@
-import { NBS_DESCRIPTIONS, NBS_FORMAT_REGEX } from "../_internals/constants/nbs";
+import { NBS_CODES, NBS_FORMAT_REGEX } from "../_internals/constants/nbs";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
@@ -7,7 +8,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio), the code the
  * national NFS-e carries in `cNBS`.
  *
- * Accepts the 9 digits or the `N.NNNN.NN.NN` mask, with a single separator between the groups
+ * Accepts the 9 digits or the `N.NNNN.NN.NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask)
  * and optional surrounding whitespace, or a non-negative safe integer; any other string
  * (`"1.0101abc11.00"`) is not valid. Only complete codes are valid; the chapter, position and
  * subposition headings of the nomenclature are not.
@@ -41,5 +42,5 @@ export const isValidNbs = (value: string | number): boolean => {
 
 	if (!NBS_FORMAT_REGEX.test(code)) return false;
 
-	return sanitizeToDigits(code) in NBS_DESCRIPTIONS;
+	return findCodeIndex(NBS_CODES, sanitizeToDigits(code)) !== -1;
 };

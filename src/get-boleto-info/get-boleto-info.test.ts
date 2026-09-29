@@ -65,6 +65,15 @@ describe("getBoletoInfo", () => {
 			);
 		});
 
+		test("when it is a FEBRABAN Convenção da Cobrança Situação 2 slip (bank 988, moeda 0, factor 0000, ISPB 18236120 in positions 10 to 19 of the barcode), reading the ISPB instead of an amount", () => {
+			expect(getBoletoInfo("98800000060114971860168524522114100000018236120")).toStrictEqual({
+				amount: 0,
+				expirationDate: null,
+				bankCode: "988",
+				ispb: "18236120",
+			});
+		});
+
 		test("when the amount field is all zeros (same fixture as the 'valid without mask' boleto, amount positions 37-46 zeroed and the main check digit recalculated)", () => {
 			expect(getBoletoInfo("00190000090114971860168524522114675860000000000")?.amount).toBe(0);
 		});
@@ -266,6 +275,7 @@ describe("getBoletoInfo types", () => {
 			amount: number;
 			expirationDate: Date | null;
 			bankCode: string;
+			ispb?: string;
 			type?: "arrecadacao";
 			segment?: number;
 			value?: number;

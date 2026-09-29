@@ -1,11 +1,16 @@
-import { getCbo } from "../get-cbo/get-cbo";
+import { CBO_CODES, CBO_FORMAT_REGEX } from "../_internals/constants/cbo";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { CBO_LENGTH } from "./constants";
 
 /**
  * Validates if a CBO (Classificação Brasileira de Ocupações) code exists in the official
  * CBO 2002 table.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 6
- * digits, or the `NNNN-NN` mask, with a single separator between the groups and optional
+ * digits, or the `NNNN-NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *
@@ -29,10 +34,22 @@ import { getCbo } from "../get-cbo/get-cbo";
  * isValidCbo(-212405); // false (not a non-negative safe integer)
  * ```
  *
- * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv
- * The CBO 2002 occupation table, as published by the Ministério do Trabalho e Emprego.
+ * @see Official: https://cbo.mte.gov.br/cbosite/pages/downloads.jsf
+ * "Estrutura CBO (CSV)", the CBO 2002 tables the Ministério do Trabalho e Emprego publishes (files
+ * of 10/07/2026, 2,725 occupations). Up to 2.4.0 the table came from the older gov.br release
+ * (06/06/2025), which lacked 37 occupations, among them 782325 (Motorista de transporte por
+ * aplicativos), and still listed 6 the MTE has since dropped (225142, 322105, 322115, 322120,
+ * 322125 and 782820), which are no longer valid.
  * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
- * Community mirror of the same table, the fallback `CBO_TITLES` was built from before the
+ * Community mirror of the same table, the fallback `CBO_CODES` was built from before the
  * official CSV was used.
  */
-export const isValidCbo = (value: string | number): boolean => getCbo(value) !== null;
+export const isValidCbo = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
+	const code = padLookupCode(value, CBO_LENGTH);
+
+	if (!CBO_FORMAT_REGEX.test(code)) return false;
+
+	return findCodeIndex(CBO_CODES, sanitizeToDigits(code)) !== -1;
+};

@@ -22,31 +22,31 @@ describe("formatVoterId", () => {
 		expect(formatVoterId("123456780124")).toBe("1234 5678 01 24");
 	});
 
-	it("should use the 13-digit grouping once the sequential number has 9 digits (São Paulo/Minas Gerais)", () => {
-		expect(formatVoterId("1234567880191")).toBe("1234 5678 8 01 91");
-		expect(formatVoterId("1234567880299")).toBe("1234 5678 8 02 99");
+	it("should use the 12-digit grouping for every value, São Paulo (01) and Minas Gerais (02) included", () => {
+		// 2.4.0 grouped these as "1234 5678 8 01 91" / "1234 5678 8 02 99": a voter id has at most 12 digits
+		expect(formatVoterId("1234567880191")).toBe("1234 5678 80 19");
+		expect(formatVoterId("1234567880299")).toBe("1234 5678 80 29");
 	});
 
-	it("should drop the digits past the last slot of the pattern", () => {
-		expect(formatVoterId("1234567880191")).toBe("1234 5678 8 01 91");
-		expect(formatVoterId("12345678801912")).toBe("1234 5678 8 01 91");
-		expect(formatVoterId("123456788019123")).toBe("1234 5678 8 01 91");
+	it("should drop the digits past the 12th", () => {
+		expect(formatVoterId("12345678801912")).toBe("1234 5678 80 19");
 		expect(formatVoterId("12345678803991")).toBe("1234 5678 80 39");
 	});
 
-	it("should keep the 12-digit grouping for a 13-digit value whose UF cannot carry 9 sequential digits", () => {
-		expect(formatVoterId("1234567880399")).toBe("1234 5678 80 39");
-	});
-
-	it("should keep using the 12-digit grouping for inputs with 12 digits or fewer", () => {
-		expect(formatVoterId("123456788")).toBe("1234 5678 8");
-		expect(formatVoterId("123456788019")).toBe("1234 5678 80 19");
+	it("should restore the leading zeros of a voter id issued without them when pad is true", () => {
+		expect(formatVoterId("123450159", { pad: true })).toBe("0001 2345 01 59");
+		expect(formatVoterId(123_450_159, { pad: true })).toBe("0001 2345 01 59");
+		expect(formatVoterId("10191", { pad: true })).toBe("0000 0001 01 91");
+		expect(formatVoterId("123456780124", { pad: true })).toBe("1234 5678 01 24");
+		expect(formatVoterId("123450159", { pad: true, obfuscate: true })).toBe("***1 2345 01 **");
+		expect(formatVoterId("123450159", { pad: false })).toBe("1234 5015 9");
+		expect(formatVoterId("123450159")).toBe("1234 5015 9");
 	});
 
 	it("should hide the first 3 digits and the 2 check digits when obfuscate is truthy", () => {
 		expect(formatVoterId("123456780124", { obfuscate: true })).toBe("***4 5678 01 **");
 		expect(formatVoterId(123_456_780_124, { obfuscate: true })).toBe("***4 5678 01 **");
-		expect(formatVoterId("1234567880191", { obfuscate: true })).toBe("***4 5678 8 01 **");
+		expect(formatVoterId("1234567880191", { obfuscate: true })).toBe("***4 5678 80 **");
 		expect(formatVoterId("1234567880399", { obfuscate: true })).toBe("***4 5678 80 **");
 		expect(formatVoterId("12345", { obfuscate: true })).toBe("***4 5");
 		// @ts-expect-error: intentionally not a boolean
@@ -55,9 +55,9 @@ describe("formatVoterId", () => {
 
 	it("should behave exactly as without the option when obfuscate is falsy", () => {
 		expect(formatVoterId("123456780124", { obfuscate: false })).toBe("1234 5678 01 24");
-		expect(formatVoterId("1234567880191", {})).toBe("1234 5678 8 01 91");
+		expect(formatVoterId("123456780124", {})).toBe("1234 5678 01 24");
 		// @ts-expect-error: intentionally not a boolean
-		expect(formatVoterId("1234567880191", { obfuscate: 0 })).toBe("1234 5678 8 01 91");
+		expect(formatVoterId("123456780124", { obfuscate: 0 })).toBe("1234 5678 01 24");
 	});
 
 	it("should return an empty string for null or undefined", () => {
@@ -68,7 +68,7 @@ describe("formatVoterId", () => {
 	});
 
 	describe("properties", () => {
-		const upToAVoterId = digitsUpTo(13);
+		const upToAVoterId = digitsUpTo(12);
 
 		test("should only add spaces, never change the digits", () => {
 			fc.assert(
@@ -78,25 +78,22 @@ describe("formatVoterId", () => {
 			);
 		});
 
-		test("should use the grouping documented for each of the two lengths", () => {
+		test("should use the documented grouping for 12 digits", () => {
 			fc.assert(
-				fc.property(digits(12), digits(9), fc.constantFrom("01", "02"), (short, sequential, uf) => {
-					const extended = `${sequential}${uf}00`;
-
-					expect(formatVoterId(short)).toMatch(/^\d{4} \d{4} \d{2} \d{2}$/);
-					expect(formatVoterId(extended)).toMatch(/^\d{4} \d{4} \d \d{2} \d{2}$/);
-					expect(formatVoterId(short, { obfuscate: true })).toMatch(/^\*{3}\d \d{4} \d{2} \*{2}$/);
-					expect(formatVoterId(extended, { obfuscate: true })).toMatch(
-						/^\*{3}\d \d{4} \d \d{2} \*{2}$/,
-					);
+				fc.property(digits(12), (value) => {
+					expect(formatVoterId(value)).toMatch(/^\d{4} \d{4} \d{2} \d{2}$/);
+					expect(formatVoterId(value, { obfuscate: true })).toMatch(/^\*{3}\d \d{4} \d{2} \*{2}$/);
 				}),
 			);
 		});
 
-		test("should keep the 12-digit grouping for 13 digits when the UF is not 01 or 02", () => {
+		test("should pad any shorter value to the 12-digit grouping, keeping its digits last", () => {
 			fc.assert(
-				fc.property(digits(9), fc.constantFrom("03", "10", "28", "99"), (sequential, uf) => {
-					expect(formatVoterId(`${sequential}${uf}00`)).toMatch(/^\d{4} \d{4} \d{2} \d{2}$/);
+				fc.property(digitsUpTo(12), (value) => {
+					const formatted = formatVoterId(value, { pad: true });
+
+					expect(formatted).toMatch(/^\d{4} \d{4} \d{2} \d{2}$/);
+					expect(formatted.replaceAll(" ", "")).toBe(value.padStart(12, "0"));
 				}),
 			);
 		});
@@ -104,6 +101,18 @@ describe("formatVoterId", () => {
 		test("should never throw and always return a string", () => {
 			expectAlwaysReturnsType(formatVoterId, "string", anyValue);
 		});
+	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatVoterId(-123_456_780_124)).toBe("");
+		expect(formatVoterId(-1)).toBe("");
+		expect(formatVoterId(1.5)).toBe("");
+		expect(formatVoterId(2 ** 53)).toBe("");
+		expect(formatVoterId(Number.MAX_VALUE)).toBe("");
+		expect(formatVoterId(1e21)).toBe("");
+		expect(formatVoterId(Number.NaN)).toBe("");
+		expect(formatVoterId(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatVoterId(Number.NEGATIVE_INFINITY)).toBe("");
 	});
 });
 
@@ -114,7 +123,8 @@ describe("formatVoterId types", () => {
 		expectTypeOf(formatVoterId).returns.toEqualTypeOf<string>();
 	});
 
-	test("should type the obfuscate option as an optional boolean", () => {
+	test("should type the obfuscate and pad options as optional booleans", () => {
 		expectTypeOf<FormatVoterIdOptions["obfuscate"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf<FormatVoterIdOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

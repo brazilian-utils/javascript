@@ -1,9 +1,9 @@
-import { NINE_DIGIT_FEDERATIVE_UNION_CODES } from "../constants/voter-id";
+import { REMAINDER_ZERO_FEDERATIVE_UNION_CODES } from "../constants/voter-id";
 
 const SEQUENTIAL_LENGTH = 8;
 
 export type CalculateVoterIdFirstDigitParams = {
-	/** The sequential part of the voter ID, 8 digits (9 for some São Paulo/Minas Gerais ids). */
+	/** The sequential part of the voter ID, 8 digits with its leading zeros. */
 	sequentialNumber: string;
 	/** The 2 digit federative unit code of the voter ID. */
 	federativeUnion: string;
@@ -12,13 +12,15 @@ export type CalculateVoterIdFirstDigitParams = {
 /**
  * Calculates the first verification digit of a Brazilian voter id (título de eleitor).
  *
- * The first eight sequential digits are weighted 2..9 from left to right and summed modulo
- * 11. São Paulo (01) and Minas Gerais (02) issued some ids with a nine digit sequential
- * number; the check digits of those ids are still computed from the first eight digits, the
- * ninth one is not part of the calculation (brutils does the same).
+ * Resolução TSE nº 23.659/2021, art. 36, computes it over the sequential number, "o primeiro
+ * calculado sobre o número sequencial": its eight digits are weighted 2..9 from left to right
+ * and summed modulo 11. The weights and the remainder rules, the São Paulo and Minas Gerais
+ * rule that turns a remainder of 0 into 1 included, have no official source: the resolution says
+ * only "Módulo 11". They follow the community references the voter id functions cite as
+ * `Based on:`.
  *
  * @param {CalculateVoterIdFirstDigitParams} params - The calculation parameters.
- * @param {string} params.sequentialNumber - The 8 or 9 digit sequential number; only the first 8 digits count.
+ * @param {string} params.sequentialNumber - The 8 digit sequential number, leading zeros included.
  * @param {string} params.federativeUnion - The 2-digit federative union code.
  * @returns {number} The calculated first verification digit (0-9).
  *
@@ -42,7 +44,7 @@ export const calculateVoterIdFirstDigit = ({
 
 	const remainder = sum % 11;
 
-	if (remainder === 0 && NINE_DIGIT_FEDERATIVE_UNION_CODES.includes(federativeUnion)) {
+	if (remainder === 0 && REMAINDER_ZERO_FEDERATIVE_UNION_CODES.includes(federativeUnion)) {
 		return 1;
 	}
 

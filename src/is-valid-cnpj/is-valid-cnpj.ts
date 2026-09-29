@@ -47,16 +47,41 @@ const isValidChecksum = (cnpj: string): boolean =>
  * // Version 2 (alphanumeric)
  * isValidCnpj("Q0.SLF.MBD/7VX4-39", { version: 2 }); // true (alphanumeric)
  * isValidCnpj("Q0SLFMBD7VX439", { version: 2 }); // true (alphanumeric)
- * isValidCnpj("q0slfmbd7vx439", { version: 2 }); // true (case-insensitive)
+ * isValidCnpj("q0slfmbd7vx439", { version: 2 }); // true (upper-cased first)
  * ```
+ *
+ * The official character set of the alphanumeric CNPJ is the capital letters `A` to `Z` and the
+ * digits in the 12 base positions, and digits only in the 2 check digits (Receita Federal, CNPJ
+ * alfanumérico, and its DV manual, which reads a letter by its ASCII code). A lower case letter is
+ * not part of it: under `version: 2` this function accepts one only as input normalization, the
+ * way it accepts mask characters, and upper-cases the input before checking it, so
+ * `"q0slfmbd7vx439"` is read as `"Q0SLFMBD7VX439"`.
  *
  * Version 2 has no reserved-value list because the Receita Federal manual defines none for the
  * alphanumeric format, so a repeated-character alphanumeric base (e.g. all `A`s) that passes the
  * checksum is accepted, unlike the numeric reserved numbers rejected under version 1.
  *
+ * The rule itself is the Anexo XV of IN RFB nº 2.119/2022, added by Instrução Normativa RFB
+ * nº 2.229/2024: 12 alphanumeric positions and 2 numeric check digits, each character read as its
+ * ASCII code minus 48, weights 2 to 9 "atribuídos da direita para esquerda" and restarting after
+ * the 8th character, and a check digit of 0 when the remainder by 11 is 0 or 1. The IN as first
+ * printed in the DOU of 16/10/2024 said "da esquerda para direita"; the retificação printed in the
+ * DOU of 25/10/2024 corrected it to the right-to-left order the worked example `12.ABC.345/01DE-35`
+ * and this function use.
+ *
+ * The Ex1 of question 23 of the Receita Federal's Q&A, "AA345678/0003-29", is a misprint: the
+ * algorithm above gives it the check digits 86 (29 belongs to its Ex2, `AA345678/000A-29`), so
+ * `isValidCnpj("AA345678/0003-29", { version: 2 })` is `false`.
+ *
+ * @see Official: http://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=141102
+ * Instrução Normativa RFB nº 2.229, de 15 de outubro de 2024, and the retificação of its Anexo
+ * Único in the DOU of 25/10/2024 (item 4.2.1: weights "atribuídos da direita para esquerda").
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
+ * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf
+ * Receita Federal, CNPJ alfanumérico, perguntas e respostas: the base positions take the digits 0
+ * to 9 and the capital letters A to Z, the 2 check digits stay numeric.
  */
 export const isValidCnpj = (cnpj: string, options?: IsValidCnpjOptions): boolean => {
 	if (typeof cnpj !== "string") return false;

@@ -38,8 +38,9 @@ describe("isValidCnh", () => {
 		expect(isValidCnh("00000000119ab")).toBe(false);
 	});
 
-	it("should return false when the mask uses a character other than whitespace, a dot or a hyphen", () => {
-		expect(isValidCnh("000000001/19")).toBe(false);
+	it("should accept a slash among the mask characters, as isValidCpf does, and reject any other character", () => {
+		expect(isValidCnh("000000001/19")).toBe(true);
+		expect(isValidCnh("000000001_19")).toBe(false);
 	});
 
 	it("should return false for falsy or non-string values", () => {

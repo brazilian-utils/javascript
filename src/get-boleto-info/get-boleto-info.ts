@@ -1,3 +1,4 @@
+import { ISPB_INDEX, ISPB_ONLY_PREFIX } from "../_internals/constants/boleto";
 import { parseArrecadacao } from "../_internals/parse-arrecadacao/parse-arrecadacao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
@@ -15,12 +16,17 @@ import {
 
 /** The fields `getBoletoInfo` reads out of a bank slip (boleto). */
 export type BoletoInfo = {
-	/** Amount in cents. */
+	/** Amount in cents; `0` for a Situação 2 slip, which carries the `ispb` in its place. */
 	amount: number;
 	/** Due date read from the "fator de vencimento", or `null` when the bank slip carries none. */
 	expirationDate: Date | null;
 	/** Three digit bank code (COMPE), empty for an arrecadação bank slip. */
 	bankCode: string;
+	/**
+	 * The 8 digit ISPB of the institution that issued a FEBRABAN Convenção da Cobrança "Situação 2"
+	 * slip (bank code `988`, código de moeda `0`), present only on such a slip.
+	 */
+	ispb?: string;
 	/** Present and set to "arrecadacao" only for convênio/tributos bank slips. */
 	type?: "arrecadacao";
 	/** Arrecadação segment (1 to 7, or 9 for the bank's own use), the kind of biller the bank slip belongs to. */
@@ -108,6 +114,10 @@ export type GetBoletoInfoOptions = {
  * the first cycle, so a `referenceDate` older than the scheme itself still resolves a factor to
  * the oldest date that factor can denote rather than to one before the 07/10/1997 base date.
  *
+ * A FEBRABAN Convenção da Cobrança "Situação 2" slip, issued by an institution identified only
+ * by its ISPB (bank code `988`, código de moeda `0`, see `isValidBoleto`), carries that ISPB where
+ * the amount would be: it comes back as `ispb`, with `amount` set to `0`.
+ *
  * @param {string} value - The boleto digitable line (can be with or without mask).
  * @param {GetBoletoInfoOptions} [options] - Optional options.
  * @param {Date} options.referenceDate - Date used to resolve the "fator de vencimento" cycle. Defaults to now.
@@ -120,26 +130,33 @@ export type GetBoletoInfoOptions = {
  * });
  * // { amount: 102656, expirationDate: new Date(2018, 6, 15), bankCode: '001' }
  *
+ * getBoletoInfo('98800000060114971860168524522114100000018236120');
+ * // { amount: 0, expirationDate: null, bankCode: '988', ispb: '18236120' }
+ *
  * getBoletoInfo('846100000005246100291102005460339004695895061080');
  * // { amount: 2461, expirationDate: null, bankCode: '', type: 'arrecadacao', segment: 4, value: 24.61, hasEffectiveValue: true }
  *
  * getBoletoInfo('invalid'); // null
  * ```
  *
- * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
- * check digit (using 1 for remainders 0, 10 and 1) of the 47 digit cobrança bancária slip,
- * including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
+ * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields, the código de moeda
+ * `9` (real) in position 4 of the barcode and the módulo 11 check digit (1 when 11 minus the
+ * remainder gives 0, 10 or 11, i.e. when the remainder is 0 or 1) of the 47 digit cobrança
+ * bancária slip, including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
  * Arrecadação/Recebimento com Utilização do Código de Barras" and the FEBRABAN layout index
- * cover the arrecadação slip. The 22/02/2025 reset of the fator de vencimento is in neither:
- * the Bradesco cobrança layout manual below reproduces the FEBRABAN rule. See
+ * cover the arrecadação slip. The 22/02/2025 reset of the fator de vencimento is in neither,
+ * and no FEBRABAN communiqué on it is published: the rule is only in bank manuals, such as the
+ * Bradesco cobrança layout manual below (Versão 17). See
  * `src/get-boleto-info/constants.ts` for the fator de vencimento cycle base date and reset.
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
+ * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  * @see Based on: https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf
- * Bradesco "Layout da Cobrança" manual: base date 07/10/1997, 03/07/2000 = 1000, 21/02/2025 = 9999
- * and a restart at 1000 on 22/02/2025.
+ * Bradesco "Layout da Cobrança" manual, Versão 17: base date 07/10/1997, 03/07/2000 = 1000,
+ * 21/02/2025 = 9999 and a restart at 1000 on 22/02/2025.
  */
 export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): BoletoInfo | null => {
 	if (!isValidBoleto(value)) return null;
@@ -166,6 +183,10 @@ export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): Bo
 		Number(sanitized.slice(33, 37)),
 		options?.referenceDate ?? new Date(),
 	);
+
+	if (sanitized.startsWith(ISPB_ONLY_PREFIX)) {
+		return { amount: 0, expirationDate, bankCode, ispb: sanitized.slice(ISPB_INDEX) };
+	}
 
 	const amount = Number(sanitized.slice(37, 47));
 

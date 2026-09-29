@@ -1,15 +1,36 @@
-import { getFormatLicensePlate } from "../get-format-license-plate/get-format-license-plate";
+import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
+import { MERCOSUL_REGEX, OLD_FORMAT_REGEX, type LicensePlateFormat } from "./constants";
+
+export type { LicensePlateFormat } from "./constants";
+
+/** Options for `isValidLicensePlate`. */
+export type IsValidLicensePlateOptions = {
+	/**
+	 * The one format the plate must follow: `"LLLNNNN"` for the old Brazilian format or
+	 * `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. Left out, or
+	 * any other value, and either format is accepted.
+	 */
+	format?: LicensePlateFormat;
+};
 
 /**
  * Validates if a Brazilian license plate (placa de carro ou moto) is valid.
  *
  * Supports the old Brazilian format (ABC-1234) and the Mercosul format (ABC1D23), the single
  * sequence Resolução CONTRAN nº 969/2022 defines for every vehicle, motorcycles included.
- * Accepts the usual mask characters (hyphens, spaces) and is case-insensitive, mirroring
- * `getFormatLicensePlate`/`parseLicensePlate` (single source of truth for the supported
- * formats).
+ * Accepts the usual mask characters (hyphens, spaces) and is case-insensitive. The two formats
+ * checked here are the ones `getFormatLicensePlate` names, and it returns `null` exactly when
+ * this returns false.
+ *
+ * `options.format` restricts the check to one of them, `"LLLNNNN"` or `"LLLNLNN"`, as the
+ * `type` argument of the Python library's `is_valid` does with its own names, `"old_format"` and
+ * `"mercosul"`. Those Python names are not formats here: without `format`, or with any other
+ * value, a plate in either format is valid.
  *
  * @param {string} value - The license plate value to be validated.
+ * @param {IsValidLicensePlateOptions} [options] - The validation options.
+ * @param {LicensePlateFormat} [options.format] - The one format to accept, `"LLLNNNN"` (old) or
+ * `"LLLNLNN"` (Mercosul).
  * @returns {boolean} True if the license plate is valid, false otherwise.
  *
  * @example
@@ -19,6 +40,9 @@ import { getFormatLicensePlate } from "../get-format-license-plate/get-format-li
  * isValidLicensePlate("ABC 1234"); // true (whitespace mask)
  * isValidLicensePlate("abc1d23"); // true (Mercosul format)
  * isValidLicensePlate("ABC12D3"); // false (not a Mercosul sequence)
+ * isValidLicensePlate("ABC1D23", { format: "LLLNLNN" }); // true
+ * isValidLicensePlate("ABC1234", { format: "LLLNLNN" }); // false (an old format plate)
+ * isValidLicensePlate("ABC-1234", { format: "LLLNNNN" }); // true
  * isValidLicensePlate("ABC1234EXTRA"); // false (too many characters)
  * isValidLicensePlate("invalid"); // false
  * ```
@@ -34,5 +58,18 @@ import { getFormatLicensePlate } from "../get-format-license-plate/get-format-li
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
  */
-export const isValidLicensePlate = (value: string): boolean =>
-	getFormatLicensePlate(value) !== null;
+export const isValidLicensePlate = (
+	value: string,
+	options?: IsValidLicensePlateOptions,
+): boolean => {
+	if (typeof value !== "string") return false;
+
+	const parsed = sanitizeToAlphanumeric(value);
+	const format = options?.format;
+
+	// A format of the two excludes the other one; no format, or any other value, excludes neither.
+	return (
+		(format !== "LLLNLNN" && OLD_FORMAT_REGEX.test(parsed)) ||
+		(format !== "LLLNNNN" && MERCOSUL_REGEX.test(parsed))
+	);
+};

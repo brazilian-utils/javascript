@@ -38,6 +38,18 @@ describe("parseCep", () => {
 			expectAlwaysReturnsType(parseCep, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCep(-20_040_020)).toBe("");
+		expect(parseCep(-1)).toBe("");
+		expect(parseCep(1.5)).toBe("");
+		expect(parseCep(2 ** 53)).toBe("");
+		expect(parseCep(Number.MAX_VALUE)).toBe("");
+		expect(parseCep(1e21)).toBe("");
+		expect(parseCep(Number.NaN)).toBe("");
+		expect(parseCep(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCep(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCep types", () => {

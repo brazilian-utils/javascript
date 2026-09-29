@@ -1,11 +1,13 @@
 import * as fc from "fast-check";
 
-import { CID10_SUBCATEGORIES } from "../_internals/constants/cid10";
-import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
+import { CID10_DESCRIPTIONS as CID10_DESCRIPTION_LIST } from "../_internals/constants/cid10-descriptions";
 import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
+import { cid10Codes, cid10Table } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { isValidCid10 } from "./is-valid-cid10";
+
+const CID10_DESCRIPTIONS = cid10Table();
 
 describe("isValidCid10", () => {
 	it("should validate a subcategory written with the dot", () => {
@@ -45,10 +47,19 @@ describe("isValidCid10", () => {
 		expect(isValidCid10("I109")).toBe(false);
 	});
 
+	it("should accept the U07 codes the SIM table adds to the V2008 files", () => {
+		expect(isValidCid10("U07")).toBe(true);
+		expect(isValidCid10("U07.0")).toBe(true);
+		expect(isValidCid10("U07.1")).toBe(true);
+		expect(isValidCid10("u072")).toBe(true);
+		expect(isValidCid10("U07.3")).toBe(false);
+	});
+
 	it("should reject a category the table does not have", () => {
 		expect(isValidCid10("A10")).toBe(false);
 		expect(isValidCid10("A10.0")).toBe(false);
-		expect(isValidCid10("U07.1")).toBe(false);
+		expect(isValidCid10("U09.9")).toBe(false);
+		expect(isValidCid10("U10.9")).toBe(false);
 	});
 
 	it("should reject a value that is not written in a documented form", () => {
@@ -79,22 +90,14 @@ describe("isValidCid10", () => {
 
 	describe("the code table", () => {
 		it("should hold exactly the codes the description table holds", () => {
-			const codes: string[] = [];
-
-			for (const [category, subcategories] of Object.entries(CID10_SUBCATEGORIES)) {
-				codes.push(category);
-
-				for (const subcategory of subcategories) codes.push(category + subcategory);
-			}
-
-			expect(codes.toSorted()).toEqual(Object.keys(CID10_DESCRIPTIONS).toSorted());
+			expect(cid10Codes()).toHaveLength(CID10_DESCRIPTION_LIST.length);
 		});
 
-		it("should hold the 2045 categories and 12188 subcategories of CID-10 V2008", () => {
+		it("should hold the 2045 categories and 12188 subcategories of CID-10 V2008, plus U07 and its 3 subcategories", () => {
 			const codes = Object.keys(CID10_DESCRIPTIONS);
 
-			expect(codes.filter((code) => code.length === 3)).toHaveLength(2045);
-			expect(codes.filter((code) => code.length === 4)).toHaveLength(12_188);
+			expect(codes.filter((code) => code.length === 3)).toHaveLength(2046);
+			expect(codes.filter((code) => code.length === 4)).toHaveLength(12_191);
 		});
 	});
 

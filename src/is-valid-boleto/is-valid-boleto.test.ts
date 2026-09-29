@@ -50,22 +50,45 @@ describe("isValidBoleto", () => {
 			expect(isValidBoleto("00190000090114971860168524522114975860000102656")).toBe(false);
 		});
 
+		test("when the código de moeda is not 9 (same fixture as the boleto valid without mask, with the moeda in barcode position 4 changed and both the campo 1 check digit and the DV geral recalculated): Carta-Circular BCB nº 2.926/2000 assigns only 9 (real)", () => {
+			// Moeda 7: campo 1 "001700000" + DV 1, DV geral 2.
+			expect(isValidBoleto("00170000010114971860168524522114275860000102656")).toBe(false);
+			// Moeda 8: campo 1 DV 0, DV geral 4.
+			expect(isValidBoleto("00180000000114971860168524522114475860000102656")).toBe(false);
+			expect(isValidBoleto("0017000001 01149.718601 68524.522114 2 75860000102656")).toBe(false);
+			// Moeda 0 outside the Situação 2 layout: campo 1 DV 8, DV geral 1.
+			expect(isValidBoleto("00100000080114971860168524522114175860000102656")).toBe(false);
+		});
+
+		test("when the código de moeda is 0 but the rest of the FEBRABAN Situação 2 layout (bank 988, factor 0000, ISPB padded with zeros) is not followed, check digits recalculated each time", () => {
+			// Bank 001 instead of 988.
+			expect(isValidBoleto("00100000080114971860168524522114800000018236120")).toBe(false);
+			// Factor 7586 instead of 0000.
+			expect(isValidBoleto("98800000060114971860168524522114775860018236120")).toBe(false);
+			// Positions 10 and 11 of the barcode "10" instead of the zeros padding the ISPB.
+			expect(isValidBoleto("98800000060114971860168524522114700001018236120")).toBe(false);
+		});
+
 		test(`when length is greater than ${BOLETO_LENGTH}, even with extra digits appended to an otherwise valid boleto`, () => {
 			expect(isValidBoleto("00190000090114971860168524522114675860000102656999")).toBe(false);
 		});
 	});
 
 	describe("should return true", () => {
+		test("when it is a FEBRABAN Convenção da Cobrança Situação 2 slip: bank 988, moeda 0, factor 0000 and ISPB 18236120 padded with zeros (campo 1 DV 6, DV geral 1)", () => {
+			expect(isValidBoleto("98800000060114971860168524522114100000018236120")).toBe(true);
+		});
+
+		test("when bank 988 uses the código de moeda 9 (campo 1 DV 7, DV geral 9)", () => {
+			expect(isValidBoleto("98890000070114971860168524522114975860000102656")).toBe(true);
+		});
+
 		test("when is a boleto valid without mask", () => {
 			expect(isValidBoleto("00190000090114971860168524522114675860000102656")).toBe(true);
 		});
 
 		test("when is a boleto valid with mask", () => {
 			expect(isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656")).toBe(true);
-		});
-
-		test("when the código de moeda is not 9 (same fixture as the boleto valid without mask, with the moeda in barcode position 4 changed to 7 and both the campo 1 and the DV geral recalculated): Carta-Circular BCB nº 2.926/2000 fixes that position at 9, and the leniency kept from 2.3.0 accepts any other digit", () => {
-			expect(isValidBoleto("00170000010114971860168524522114275860000102656")).toBe(true);
 		});
 	});
 

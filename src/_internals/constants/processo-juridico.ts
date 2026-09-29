@@ -28,8 +28,11 @@
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/4781
  * Resolução CNJ nº 477, de 10 de outubro de 2022, art. 1º: "nos processos da Justiça Federal, os
  * Tribunais Regionais Federais devem ser identificados no campo (TR) pelos números de 01 a 06,
- * observadas as respectivas regiões". Its Anexo II prints `0000100-15.2008.406.0000` for the TRF
- * da 6ª Região.
+ * observadas as respectivas regiões". Its Anexo II prints the TRF da 6ª Região example as
+ * `0000100-15.2008.406.0000`, J and TR run together and its numbers, as the Anexo says, fictitious:
+ * in the `NNNNNNN-DD.AAAA.J.TR.OOOO` form of Resolução CNJ nº 65/2008 that number is written
+ * `0000100-DD.2008.4.06.0000`, and its verifying digits are 68, not 15:
+ * `0000100-68.2008.4.06.0000`.
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14226.htm
  * Lei nº 14.226, de 20 de outubro de 2021, art. 1º: "É criado o Tribunal Regional Federal da 6ª
  * Região, com sede em Belo Horizonte e jurisdição no Estado de Minas Gerais", the court Resolução
@@ -59,15 +62,24 @@ const SUPERIOR_COURT = 0;
 /** Conselho da Justiça Federal and Conselho Superior da Justiça do Trabalho (§ 5º, II). */
 const COUNCIL = 90;
 
-/** Tribunal codes (`TR`) Resolução CNJ nº 65/2008 allows under each órgão code (`J`). */
-export const PROCESSO_JURIDICO_TRIBUNALS: ReadonlyMap<number, readonly number[]> = new Map([
-	[1, [SUPERIOR_COURT]],
-	[2, [SUPERIOR_COURT]],
-	[3, [SUPERIOR_COURT]],
-	[4, [...range(1, 6), COUNCIL]],
-	[5, [SUPERIOR_COURT, ...range(1, 24), COUNCIL]],
-	[6, [SUPERIOR_COURT, ...range(1, 27)]],
-	[7, [SUPERIOR_COURT, ...range(1, 12)]],
-	[8, range(1, 27)],
-	[9, [13, 21, 26]],
-]);
+let tribunals: ReadonlyMap<number, readonly number[]> | undefined;
+
+/**
+ * Tribunal codes (`TR`) Resolução CNJ nº 65/2008 allows under each órgão code (`J`). Built on the
+ * first call and kept, instead of at module level, so a bundle that never reads it drops it,
+ * ranges and all.
+ *
+ * @returns {ReadonlyMap<number, readonly number[]>} The tribunal codes of each órgão code.
+ */
+export const getProcessoJuridicoTribunals = (): ReadonlyMap<number, readonly number[]> =>
+	(tribunals ??= new Map([
+		[1, [SUPERIOR_COURT]],
+		[2, [SUPERIOR_COURT]],
+		[3, [SUPERIOR_COURT]],
+		[4, [...range(1, 6), COUNCIL]],
+		[5, [SUPERIOR_COURT, ...range(1, 24), COUNCIL]],
+		[6, [SUPERIOR_COURT, ...range(1, 27)]],
+		[7, [SUPERIOR_COURT, ...range(1, 12)]],
+		[8, range(1, 27)],
+		[9, [13, 21, 26]],
+	]));

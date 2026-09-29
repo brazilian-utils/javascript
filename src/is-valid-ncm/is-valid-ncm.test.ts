@@ -1,10 +1,13 @@
 import * as fc from "fast-check";
 
 import { anyGarbage } from "../_internals/test/arbitraries";
+import { unpackCodes } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { NCM_CODES } from "./constants";
+import { NCM_CODES as PACKED_NCM_CODES } from "./constants";
 import { isValidNcm } from "./is-valid-ncm";
+
+const NCM_CODES = unpackCodes(PACKED_NCM_CODES);
 
 describe("isValidNcm", () => {
 	it("should validate an NCM code without a mask (cerveja de malte)", () => {
@@ -68,7 +71,8 @@ describe("isValidNcm", () => {
 
 	it("should return false for a string that is not a documented form", () => {
 		expect(isValidNcm("abc01012100")).toBe(false);
-		expect(isValidNcm("2203..00.00")).toBe(false);
+		expect(isValidNcm("2203..00.00")).toBe(true);
+		expect(isValidNcm("220.300.00")).toBe(false);
 	});
 
 	it("should return false for a number that is not a non-negative safe integer", () => {

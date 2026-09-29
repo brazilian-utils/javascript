@@ -23,6 +23,3 @@ export const AMOUNT_COMPARISON_DECIMAL_PLACES = 10;
  * length.
  */
 export const TLV_OVERHEAD = 4;
-
-/** The characters the Pix manual allows in a `txid`, capped at the 25 the BR Code holds. */
-export const TXID_REGEX = /^[A-Za-z0-9]{1,25}$/;

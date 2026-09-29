@@ -15,9 +15,14 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * included; anything else, a letter among the digits included, is rejected instead of being
  * read past.
  *
- * The Receita Federal does not publish the check digit rule of the CEI/CNO numbering, so the
- * calculation follows the reference implementations cited below, cross-checked against the CNO
- * open data of the Receita Federal.
+ * The Receita Federal does not publish the check digit rule of the CEI/CNO numbering: no norm
+ * (IN RFB nº 2.061/2021), layout or manual found has it, and the eSocial only checks that the
+ * number is "constante das bases da RFB". Only the 12 positions and the CNO keeping the CEI
+ * number are official. The calculation follows the reference implementations cited below,
+ * cross-checked against the CNO open data of the Receita Federal and SERPRO's example
+ * `"000000336854"`.
+ *
+ * A number is only read as a CEI when it is a non-negative safe integer.
  *
  * @param {string|number} value - The CEI value to be validated.
  * @returns {boolean} True if the CEI is valid, false otherwise.
@@ -29,11 +34,20 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * isValidCei(249859674386); // true
  * isValidCei("24.985.96743/68"); // false (invalid check digit)
  * isValidCei("000000000000"); // false (repeated digits)
+ * isValidCei(2772971181.87); // false (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno
  * The registry's own page at the Receita Federal, which describes the cadastro but publishes
  * neither the mask nor the check digit rule.
+ * @see Official: https://bcadastros.serpro.gov.br/documentacao/cadastro_cno/
+ * SERPRO, documentation of the Receita Federal's Cadastro Compartilhado (bCadastros), CNO: "cno —
+ * Número de inscrição da obra", 12 positions, with the example "000000336854", which the rule
+ * here accepts. Neither it nor the IN RFB nº 2.061/2021, the norm of the CNO, gives a check digit
+ * rule.
+ * @see Official: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-s-1-3-consolidada-ate-a-no-s-1-3-07-2026.pdf
+ * Manual de Orientação do eSocial S-1.3, item 9.1: "O número de inscrição no CNO permanece o
+ * mesmo número do CEI".
  * @see Official: https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno
  * Cadastro Nacional de Obras (CNO), dados abertos da Receita Federal: the catalogue entry for the
  * dataset this rule was cross-checked against and where the test vectors come from. The check was

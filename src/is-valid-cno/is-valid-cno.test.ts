@@ -49,9 +49,18 @@ describe("isValidCno", () => {
 		test("when a check digit of 0 is replaced by another digit (401800097960 of the Receita Federal CNO dataset)", () => {
 			expect(isValidCno("401800097961")).toBe(false);
 		});
+
+		test("when it is a negative or fractional number", () => {
+			expect(isValidCno(-110_840_168_062)).toBe(false);
+			expect(isValidCno(1_108_401_680.62)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
+		test("for 000000336854, the example of SERPRO's documentation of the Receita Federal's CNO cadastro", () => {
+			expect(isValidCno("000000336854")).toBe(true);
+		});
+
 		test("for 110840168062, an obra in Botelhos/MG of the Receita Federal CNO open dataset", () => {
 			expect(isValidCno("110840168062")).toBe(true);
 			expect(isValidCno("11.084.01680/62")).toBe(true);

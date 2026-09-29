@@ -75,11 +75,16 @@ describe("getNfseKeyInfo", () => {
 			expect(getNfseKeyInfo(`NFSe${KEY_SP}`)).toBeNull();
 		});
 
-		test("when it is split by separators, since the key has no mask", () => {
-			expect(
-				getNfseKeyInfo("3550308 2 2 58716523000119 0000000000012 2601 135792468 3"),
-			).toBeNull();
+		test("when a separator sits inside a field or between the NFS prefix and the key", () => {
+			expect(getNfseKeyInfo("355030 82258716523000119000000000001226011357924683")).toBeNull();
 			expect(getNfseKeyInfo(`NFS ${KEY_SP}`)).toBeNull();
+		});
+
+		test("should read a key split at the boundaries of its fields, as isValidNfseKey does", () => {
+			expect(getNfseKeyInfo("3550308 2 2 58716523000119 0000000000012 2601 135792468 3")).toEqual(
+				getNfseKeyInfo(KEY_SP),
+			);
+			expect(getNfseKeyInfo(KEY_SP)).not.toBeNull();
 		});
 
 		test("when the check digit does not match", () => {

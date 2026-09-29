@@ -122,6 +122,114 @@ export const LEGAL_NATURE: Record<string, string> = {
 };
 
 /**
+ * The four digit code of every entry of `LEGAL_NATURE`, the official and the legacy ones, in
+ * ascending order, packed as base 36 differences by `packCodes` (scripts/lookup-table.ts), which
+ * `findCodeIndex` reads: `isValidLegalNature` checks a code against it without bundling the
+ * descriptions.
+ */
+export const LEGAL_NATURE_CODES =
+	"4:s7,\
+8,\
+8,\
+9,\
+i,\
+8,\
+8,\
+8,\
+m,\
+8,\
+8,\
+j,\
+8,\
+8,\
+8,\
+8,\
+9,\
+i,\
+c,\
+i,\
+8,\
+8,\
+8,\
+8,\
+j,\
+8,\
+8,\
+e,\
+8,\
+8,\
+8,\
+8,\
+im,\
+r,\
+8,\
+8,\
+8,\
+8,\
+6,\
+d,\
+8,\
+3,\
+r,\
+8,\
+8,\
+8,\
+9,\
+i,\
+g,\
+e,\
+8,\
+8,\
+8,\
+8,\
+j,\
+8,\
+8,\
+8,\
+8,\
+e,\
+8,\
+8,\
+9,\
+i,\
+8,\
+iu,\
+8,\
+8,\
+j,\
+8,\
+8,\
+8,\
+e,\
+8,\
+8,\
+8,\
+21,\
+8,\
+8,\
+j,\
+8,\
+8,\
+8,\
+8,\
+9,\
+i,\
+3,\
+9,\
+i,\
+in,\
+f,\
+8,\
+1n,\
+9,\
+l,\
+9,\
+oi,\
+8,\
+j,\
+8";
+
+/**
  * The code each legacy legal nature code corresponds to today, or `null` when the revision that
  * retired it published no successor, indexed by the legacy code.
  *

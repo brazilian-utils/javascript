@@ -5,6 +5,7 @@ import { formatCnpj } from "../format-cnpj/format-cnpj";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
 import { generatePhone } from "../generate-phone/generate-phone";
+import { isValidPixKey } from "../is-valid-pix-key/is-valid-pix-key";
 import { type PixKeyInfo, type PixKeyType, getPixKeyInfo } from "./get-pix-key-info";
 
 const AMBIGUOUS = "51998259765";
@@ -67,7 +68,21 @@ describe("getPixKeyInfo", () => {
 		test("when it is an invalid e-mail", () => {
 			expect(getPixKeyInfo("fulano@")).toBeNull();
 			expect(getPixKeyInfo("@example.com")).toBeNull();
-			expect(getPixKeyInfo("fulano@example")).toBeNull();
+			expect(getPixKeyInfo("fulano@example.com.")).toBeNull();
+			expect(getPixKeyInfo("fulano@-example.com")).toBeNull();
+			expect(getPixKeyInfo("fulano@example-.com")).toBeNull();
+			expect(getPixKeyInfo("fulano@exa_mple.com")).toBeNull();
+			expect(getPixKeyInfo("ful%ano@example.com")).toBeNull();
+			expect(getPixKeyInfo('"fulano"@example.com')).toBeNull();
+			expect(getPixKeyInfo("fulano@@example.com")).toBeNull();
+		});
+
+		test("when the e-mail carries a &, which DICT API 2.6.0 took out of the pattern", () => {
+			expect(getPixKeyInfo("a&b@example.com")).toBeNull();
+		});
+
+		test("when a domain label is longer than the 63 characters of the DICT pattern", () => {
+			expect(getPixKeyInfo(`a@${"b".repeat(64)}.com`)).toBeNull();
 		});
 
 		test("when the e-mail is longer than 77 characters", () => {
@@ -107,11 +122,16 @@ describe("getPixKeyInfo", () => {
 
 		test("when a CPF is written with separators outside the documented positions", () => {
 			expect(getPixKeyInfo("1.2.3.4.5.6.7.8.9.0.9")).toBeNull();
-			expect(getPixKeyInfo("123/456/789/09")).toBeNull();
+			expect(getPixKeyInfo("1234/56789/09")).toBeNull();
 		});
 	});
 
 	describe("should return a CPF", () => {
+		test("when its groups are split by any of the mask characters isValidCpf reads", () => {
+			expect(getPixKeyInfo("123/456/789/09")).toEqual({ type: "cpf", value: "12345678909" });
+			expect(getPixKeyInfo("123 - 456.789 09")).toEqual({ type: "cpf", value: "12345678909" });
+		});
+
 		test("when it is masked", () => {
 			expect(getPixKeyInfo("123.456.789-09")).toEqual({ type: "cpf", value: "12345678909" });
 		});
@@ -183,6 +203,40 @@ describe("getPixKeyInfo", () => {
 				type: "email",
 				value: "fulano@example.com",
 			});
+		});
+
+		test("when it only matches the DICT pattern, not isValidEmail", () => {
+			for (const email of [
+				"a!b@example.com",
+				"a#b@example.com",
+				"a$b@example.com",
+				"a*b@example.com",
+				"a/b@example.com",
+				"a=b@example.com",
+				"a?b@example.com",
+				"a^b@example.com",
+				"a`b@example.com",
+				"a{b}@example.com",
+				"a|b@example.com",
+				"a~b@example.com",
+				".ab@example.com",
+				"a..b@example.com",
+				"ab.@example.com",
+				"a@localhost",
+				"a@example.123",
+			]) {
+				expect(getPixKeyInfo(email)).toEqual({ type: "email", value: email });
+			}
+		});
+
+		test("when it is the single label domain isValidEmail rejects, lowercased", () => {
+			expect(getPixKeyInfo("Fulano@Example")).toEqual({ type: "email", value: "fulano@example" });
+		});
+
+		test("when a domain label is exactly 63 characters long", () => {
+			const email = `a@${"b".repeat(63)}.com`;
+
+			expect(getPixKeyInfo(email)).toEqual({ type: "email", value: email });
 		});
 
 		test("when it is exactly 77 characters long", () => {
@@ -341,6 +395,22 @@ describe("getPixKeyInfo", () => {
 					const shouted = getPixKeyInfo(`  ${key.toUpperCase()}  `);
 
 					expect(shouted?.value).toBe(parsed?.value);
+				}),
+			);
+		});
+
+		test("should return null exactly when isValidPixKey returns false, and the type accept filters on", () => {
+			const built = keys.map(([kind, email, evp]) => buildPixKey(kind, email, evp));
+			const input = fc.oneof(built, fc.string(), fc.anything());
+			const accept = fc.subarray([...PIX_KEY_KINDS]);
+
+			fc.assert(
+				fc.property(input, accept, (value, kinds) => {
+					const parsed = getPixKeyInfo(value as string);
+					const isAccepted = parsed !== null && kinds.includes(parsed.type);
+
+					expect(parsed === null).toBe(!isValidPixKey(value as string));
+					expect(isValidPixKey(value as string, { accept: kinds })).toBe(isAccepted);
 				}),
 			);
 		});

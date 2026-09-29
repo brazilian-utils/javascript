@@ -63,19 +63,31 @@ describe("formatPis", () => {
 		expect(formatPis(1_000_000_000_000)).toBe("100.00000.00-0");
 	});
 
-	it("when it is a float number", () => {
+	it("when it is a short integer number", () => {
 		expect(formatPis(1)).toBe("1");
 		expect(formatPis(10)).toBe("10");
 		expect(formatPis(100)).toBe("100");
-		expect(formatPis(100.1)).toBe("100.1");
-		expect(formatPis(100.11)).toBe("100.11");
-		expect(formatPis(100.101)).toBe("100.101");
-		expect(formatPis(100.1001)).toBe("100.1001");
-		expect(formatPis(100.10001)).toBe("100.10001");
-		expect(formatPis(100.100001)).toBe("100.10000.1");
-		expect(formatPis(100.1000001)).toBe("100.10000.01");
-		expect(formatPis(100.10000001)).toBe("100.10000.00-1");
-		expect(formatPis(100.100000001)).toBe("100.10000.00-0");
+	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatPis(100.1)).toBe("");
+		expect(formatPis(100.11)).toBe("");
+		expect(formatPis(100.101)).toBe("");
+		expect(formatPis(100.1001)).toBe("");
+		expect(formatPis(100.10001)).toBe("");
+		expect(formatPis(100.100001)).toBe("");
+		expect(formatPis(100.1000001)).toBe("");
+		expect(formatPis(100.10000001)).toBe("");
+		expect(formatPis(100.100000001)).toBe("");
+		expect(formatPis(-12_345_678_901)).toBe("");
+		expect(formatPis(2 ** 53)).toBe("");
+		expect(formatPis(Number.MAX_VALUE)).toBe("");
+		expect(formatPis(1e21)).toBe("");
+		expect(formatPis(Number.NaN)).toBe("");
+		expect(formatPis(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatPis(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatPis(100.1, { pad: true })).toBe("");
+		expect(formatPis(100.1, { obfuscate: true })).toBe("");
 	});
 
 	it(`should NOT add digits after the PIS length (${PIS_LENGTH})`, () => {

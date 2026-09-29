@@ -104,15 +104,21 @@ itself:
 - **Generated from an official source** by a script in `scripts/` (`npm run build:data`, run
   every Monday by the `Update datasets` workflow): banks (Banco Central, `banks.ts`), CBO
   (`cbo.ts`), CFOP (CONFAZ, `cfop.ts`), municipalities and states (IBGE, `cities.ts`,
-  `states.ts`), CNAE (`cnae.ts`), legal natures (CONCLA, `legal-natures.ts`) and NCM (Siscomex,
-  `ncm.ts`). When a run changes a file, the workflow opens a pull request whose description, written
+  `states.ts`), the DDD of every municipality (Anatel, `area-codes.ts`), the ISBN ranges (International ISBN
+  Agency, `isbn.ts`), CNAE (`cnae.ts`), legal
+  natures (CONCLA, `legal-natures.ts`) and NCM (Siscomex, `ncm.ts`). The CBO is the one table
+  read from a file kept in the repository, `scripts/data/cbo2002-ocupacao.csv`: the MTE serves
+  its current release only after a reCAPTCHA, so a new release is downloaded by hand from
+  https://cbo.mte.gov.br/cbosite/pages/downloads.jsf ("Estrutura CBO (CSV)"), reviewed, copied
+  over that file and its digest put in `CBO_CSV_SHA256` of `scripts/cbo.ts`. When a run changes a file, the workflow opens a pull request whose description, written
   by `scripts/data-summary.ts`, lists per table how many entries were added and removed, with a
   sample of each. Never edit these files by hand.
 - **Maintained by hand**, because the source is a law or a regulation with no machine-readable
   form: area codes and their states (Anatel, `area-codes.ts`), service phone prefixes (Anatel,
   `service-phone.ts`), national and state holidays (`holidays.ts`), the órgãos and tribunals of the
   processo number (Resolução CNJ nº 65/2008, `processo-juridico.ts`), IBAN lengths per country
-  (`iban.ts`), IBGE state codes (`ibge-uf-codes.ts`), legal nature categories, the CST and CSOSN
+  (`iban.ts`), IBGE state codes (`ibge-uf-codes.ts`), the state capitals and the regions (IBGE,
+  `state-capitals.ts`, `regions.ts`), legal nature categories, the CST and CSOSN
   tables (`src/is-valid-cst`, `src/is-valid-csosn`), the professional councils
   (`src/is-valid-registro-profissional`), the região fiscal digit of each state
   (`src/_internals/constants/cpf.ts`) and the voter ID state codes (`src/is-valid-voter-id`). A change to one of

@@ -17,24 +17,39 @@ import { writeFileSync } from "node:fs";
 /** The source each generated file is rebuilt from, as named in the file's own header. */
 const DATASETS: Record<string, string> = {
 	"src/_internals/constants/banks.ts": "Banks (Banco Central, STR participants)",
-	"src/_internals/constants/cbo.ts": "CBO 2002 occupations (Ministério do Trabalho e Emprego)",
-	"src/_internals/constants/cest.ts": "CEST codes and segments (CONFAZ, Convênio ICMS 142/18)",
+	"src/_internals/constants/cbo-descriptions.ts":
+		"CBO 2002 occupation titles (Ministério do Trabalho e Emprego)",
+	"src/_internals/constants/cbo.ts": "CBO 2002 occupation codes (Ministério do Trabalho e Emprego)",
+	"src/_internals/constants/cest-descriptions.ts":
+		"CEST descriptions and segments (CONFAZ, Convênio ICMS 142/18)",
+	"src/_internals/constants/cest.ts": "CEST codes (CONFAZ, Convênio ICMS 142/18)",
+	"src/_internals/constants/cfop-descriptions.ts":
+		"CFOP descriptions (CONFAZ, Convênio SINIEF s/nº 1970)",
 	"src/_internals/constants/cfop.ts": "CFOP codes (CONFAZ, Convênio SINIEF s/nº 1970)",
 	"src/_internals/constants/cid10-descriptions.ts": "CID-10 descriptions (DATASUS)",
 	"src/_internals/constants/cid10.ts": "CID-10 codes (DATASUS)",
-	"src/_internals/constants/cnae.ts": "CNAE subclasses (IBGE/CONCLA)",
+	"src/_internals/constants/cnae-descriptions.ts": "CNAE subclass descriptions (IBGE/CONCLA)",
+	"src/_internals/constants/cnae.ts": "CNAE subclass codes (IBGE/CONCLA)",
 	"src/_internals/constants/ibs-cbs.ts":
 		"CST-IBS/CBS and cClassTrib (Portal Nacional da NF-e, Informe Técnico 2025.002)",
+	"src/_internals/constants/isbn-ranges.ts": "ISBN ranges (International ISBN Agency)",
 	"src/_internals/constants/municipalities.ts": "Municipalities (IBGE)",
-	"src/_internals/constants/nbs.ts": "NBS 2.0 descriptions (MDIC)",
+	"src/_internals/constants/municipality-area-codes.ts":
+		"DDD of every municipality (Anatel, Códigos Nacionais)",
+	"src/_internals/constants/nbs-descriptions.ts": "NBS 2.0 descriptions (MDIC)",
+	"src/_internals/constants/nbs.ts": "NBS 2.0 codes (MDIC)",
+	"src/_internals/constants/service-item-descriptions.ts":
+		"LC 116/2003 service list descriptions (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/service-items.ts":
-		"LC 116/2003 service list (Sistema Nacional NFS-e, ANEXO B)",
+		"LC 116/2003 service list subitems (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/states.ts": "States (IBGE)",
 	"src/is-valid-legal-nature/constants.ts": "Legal natures (IBGE/CONCLA)",
 	"src/is-valid-ncm/constants.ts": "NCM codes (Siscomex)",
 };
 
 const SAMPLE_SIZE = 15;
+
+const LINE_CONTINUATION_REGEX = /\\$/;
 
 /**
  * Runs a command of the toolchain (resolved from `PATH`, as `scripts/data.ts` does with `node` and
@@ -58,8 +73,11 @@ const changedLines = (file: string): { added: string[]; removed: string[] } => {
 
 	for (const line of diff.split("\n")) {
 		if (line.startsWith("+++") || line.startsWith("---")) continue;
-		if (line.startsWith("+")) added.push(line.slice(1).trim());
-		if (line.startsWith("-")) removed.push(line.slice(1).trim());
+		// A packed code table ends every code line with a line continuation, left out of the sample.
+		const entry = line.slice(1).trim().replace(LINE_CONTINUATION_REGEX, "");
+
+		if (line.startsWith("+")) added.push(entry);
+		if (line.startsWith("-")) removed.push(entry);
 	}
 
 	return { added: added.filter(Boolean), removed: removed.filter(Boolean) };

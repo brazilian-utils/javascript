@@ -1,15 +1,13 @@
 import { PHONE_COUNTRY_CODE } from "../_internals/constants/phone";
+import {
+	type PixKeyType,
+	detectPixKeyType,
+} from "../_internals/detect-pix-key-type/detect-pix-key-type";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { isValidCnpj } from "../is-valid-cnpj/is-valid-cnpj";
-import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
-import { isValidEmail } from "../is-valid-email/is-valid-email";
-import { isValidPhone } from "../is-valid-phone/is-valid-phone";
 import { parseCnpj } from "../parse-cnpj/parse-cnpj";
-import { CPF_SYNTAX_REGEX, EMAIL_MAX_LENGTH, EVP_REGEX, PHONE_SYNTAX_REGEX } from "./constants";
 
-/** The kinds of Pix key `getPixKeyInfo` recognizes. */
-export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
+export type { PixKeyType } from "../_internals/detect-pix-key-type/detect-pix-key-type";
 
 /** A Pix key recognized by `getPixKeyInfo`, normalized to the canonical DICT form of its kind. */
 export type PixKeyInfo = {
@@ -19,21 +17,13 @@ export type PixKeyInfo = {
 	value: string;
 };
 
-/**
- * Reads a value written as a phone number, i.e. one holding nothing but digits and the
- * characters of the usual masks, as the E.164 mobile key of the DICT.
- *
- * @param {string} trimmed - The trimmed value to read.
- * @returns {PixKeyInfo|null} The phone key, or `null` when the value is not a mobile number.
- */
-const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
-	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
-
-	const national = normalizePhone(trimmed);
-
-	return isValidPhone(national, { accept: ["mobile"] })
-		? { type: "phone", value: `+${PHONE_COUNTRY_CODE}${national}` }
-		: null;
+/** Writes a trimmed value, already known to be a key of each kind, in the canonical DICT form. */
+const NORMALIZERS: Readonly<Record<PixKeyType, (trimmed: string) => string>> = {
+	cpf: sanitizeToDigits,
+	cnpj: (trimmed) => parseCnpj(trimmed, { version: 2 }),
+	email: (trimmed) => trimmed.toLowerCase(),
+	phone: (trimmed) => `+${PHONE_COUNTRY_CODE}${normalizePhone(trimmed)}`,
+	evp: (trimmed) => trimmed.toLowerCase(),
 };
 
 /**
@@ -43,19 +33,25 @@ const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
  * The canonical forms are the ones listed in "Formatação das chaves do DICT no BR Code":
  * - `cpf`: 11 digits, no mask;
  * - `cnpj`: 14 characters, no mask, uppercase for the alphanumeric format;
- * - `email`: trimmed and lowercased, at most 77 characters;
+ * - `email`: trimmed and lowercased, matching the pattern the DICT API registers for an e-mail
+ *   key (DICT API 2.12.1) and at most 77 characters. That pattern is not the syntax
+ *   `isValidEmail` checks: the local part may carry any of ``.!#$'*+/=?^_`{|}~-``, dots included
+ *   anywhere, and the domain may be a single label, so `"a{b}@example.com"` and `"a@localhost"`
+ *   are e-mail keys. The `&` was taken out of the pattern in version 2.6.0 of the DICT API, so
+ *   `"a&b@example.com"` is not a key;
  * - `phone`: E.164, `+55` followed by the DDD and the subscriber number, so at most 14
  *   characters. The manual registers a "número de telefone celular", so only mobile numbers
  *   are recognized; a landline is not a Pix key. Masked, bare and `+55` prefixed inputs are
  *   all accepted;
  * - `evp`: the random key, a lowercase UUID written with its punctuation (8-4-4-4-12
- *   hexadecimal digits). The DICT issues version 4 UUIDs, but neither the pattern the manual
- *   registers nor its own example (`123e4567-e12b-12d1-a456-426655440000`, whose version
- *   nibble is `1`) constrains the version, so the version and variant nibbles are not enforced.
+ *   hexadecimal digits), which the DICT generates. Neither the pattern the DICT API registers
+ *   nor its example (`123e4567-e89b-12d3-a456-426655440000`) nor the one of the Pix manual
+ *   (`123e4567-e12b-12d1-a456-426655440000`), both with the version nibble `1`, constrains the
+ *   UUID version, so the version and variant nibbles are not enforced.
  *
  * The CPF and the phone number are recognized by the way they are written, not only by the
- * digits they carry: a value is read as a CPF when it is the bare 11 digits or the documented
- * mask, and as a phone number when it holds nothing but digits, spaces and the `+`, `-`, `(`,
+ * digits they carry: a value is read as a CPF when `isValidCpf` accepts it (the bare 11 digits,
+ * or the 3-3-3-2 groups split by whitespace, `.`, `-` or `/`), and as a phone number when it holds nothing but digits, spaces and the `+`, `-`, `(`,
  * `)` and `.` of the usual masks. Surrounding text is not stripped away, so
  * `"abc123.456.789-09"` is not a CPF key.
  *
@@ -67,7 +63,8 @@ const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
  * a CPF, even when its digits carry a valid CPF check digit.
  *
  * @param {string} value - The Pix key to be parsed.
- * @returns {PixKeyInfo|null} The normalized key, or `null` when the value is not a valid Pix key.
+ * @returns {PixKeyInfo|null} The normalized key, or `null` exactly when `isValidPixKey` returns
+ * `false` for the value.
  *
  * @example
  * ```typescript
@@ -82,35 +79,17 @@ const resolvePhoneKey = (trimmed: string): PixKeyInfo | null => {
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
- * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
- * reference.
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification 2.12.1, key
+ * format reference. Tag "Chave", type `EMAIL`: "E-mail deve possuir no máximo 77 caracteres e
+ * deve ser em minúsculo", with the pattern this library applies verbatim, which has had no `&`
+ * since version 2.6.0.
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  */
 export const getPixKeyInfo = (value: string): PixKeyInfo | null => {
-	if (typeof value !== "string") return null;
+	const type = detectPixKeyType(value);
 
-	const trimmed = value.trim();
+	if (type === null) return null;
 
-	if (EVP_REGEX.test(trimmed)) return { type: "evp", value: trimmed.toLowerCase() };
-
-	if (trimmed.includes("@")) {
-		const email = trimmed.toLowerCase();
-
-		return isValidEmail(email) && email.length <= EMAIL_MAX_LENGTH
-			? { type: "email", value: email }
-			: null;
-	}
-
-	if (isValidCnpj(trimmed, { version: 2 })) {
-		return { type: "cnpj", value: parseCnpj(trimmed, { version: 2 }) };
-	}
-
-	if (CPF_SYNTAX_REGEX.test(trimmed)) {
-		const digits = sanitizeToDigits(trimmed);
-
-		if (isValidCpf(digits)) return { type: "cpf", value: digits };
-	}
-
-	return resolvePhoneKey(trimmed);
+	return { type, value: NORMALIZERS[type](value.trim()) };
 };

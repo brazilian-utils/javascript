@@ -18,6 +18,11 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR15 0000 0000 0000 1093 2840 814P 2")).toBe(true);
 		});
 
+		test("for groups separated by a run of mask characters, as isValidCpf reads its mask", () => {
+			expect(isValidIban("BR15 0000 0000 0000 1093 2840  814P 2")).toBe(true);
+			expect(isValidIban("BR15 0000 0000 0000 1093 2840 .-814P 2")).toBe(true);
+		});
+
 		test("for a value whose ISO 13616 groups are split by any of the mask characters", () => {
 			expect(isValidIban("BR15.0000.0000.0000.1093.2840.814P.2")).toBe(true);
 			expect(isValidIban("BR15-0000-0000-0000-1093-2840-814P-2")).toBe(true);
@@ -43,6 +48,12 @@ describe("isValidIban", () => {
 
 		test("for a valid IBAN with a corrente (C) account type", () => {
 			expect(isValidIban("BR3860701190000010000012345C1")).toBe(true);
+		});
+
+		test("for an ISPB with letters, the 'oito caracteres alfanuméricos' of Resolução BCB 585/2026 art. 2 III", () => {
+			expect(isValidIban("BR1012AB34CD000010932840814P2")).toBe(true);
+			expect(isValidIban("BR170000000A000010000012345C2")).toBe(true);
+			expect(isValidIban("br1012ab34cd000010932840814p2")).toBe(true);
 		});
 
 		test("for a valid IBAN whose account type is a letter other than C or P", () => {
@@ -80,7 +91,7 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR150000000000001093284081412")).toBe(false);
 		});
 
-		test("when the owner indicator is 0, which Circular 3.625 art. 2 § 1 does not assign, even though the check digits match", () => {
+		test("when the owner indicator is 0, which Resolução BCB 585/2026 art. 2 § 1 does not assign, even though the check digits match", () => {
 			expect(isValidIban("BR6900000000000010932840814P0")).toBe(false);
 		});
 
@@ -89,7 +100,8 @@ describe("isValidIban", () => {
 		});
 
 		test("when a digit position holds a letter instead, even if the check digits happen to match", () => {
-			expect(isValidIban("BR170000000A000010000012345C2")).toBe(false);
+			expect(isValidIban("BR32000000000000A0000012345C2")).toBe(false);
+			expect(isValidIban("BR320000000000001000001234AC2")).toBe(false);
 		});
 
 		test("when it carries a character outside the print format", () => {
@@ -102,11 +114,6 @@ describe("isValidIban", () => {
 			expect(isValidIban("BR15 000 00000 0000 1093 2840 814P 2")).toBe(false);
 			expect(isValidIban("BR1 50000000000001093 2840 814P 2")).toBe(false);
 			expect(isValidIban("BR15 0000 0000 0000 1093 2840 814 P2")).toBe(false);
-		});
-
-		test("when the groups are separated by more than one separator", () => {
-			expect(isValidIban("BR15 0000 0000 0000 1093 2840  814P 2")).toBe(false);
-			expect(isValidIban("BR15 0000 0000 0000 1093 2840 .-814P 2")).toBe(false);
 		});
 
 		test("when it is an empty string", () => {

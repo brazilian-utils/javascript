@@ -64,6 +64,11 @@ describe("isValidCei", () => {
 		test("when only the check digit is wrong (11.583.00249/85 with a 4)", () => {
 			expect(isValidCei("115830024984")).toBe(false);
 		});
+
+		test("when it is a negative or fractional number", () => {
+			expect(isValidCei(-277_297_118_187)).toBe(false);
+			expect(isValidCei(2_772_971_181.87)).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {

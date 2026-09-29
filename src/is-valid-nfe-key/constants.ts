@@ -1,6 +1,6 @@
 /**
- * The `mod` (modelo do documento) values `getNfeKeyInfo` supports, every one of them a document
- * whose "chave de acesso" is the same 44 digit string built the same way: 55 NF-e, 57 CT-e,
+ * The `mod` (modelo do documento) values `isValidNfeKey` supports, every one of them a document
+ * whose "chave de acesso" is the same 44 character string built the same way: 55 NF-e, 57 CT-e,
  * 58 MDF-e, 62 NFCom, 63 BP-e, 64 GTV-e (the CT-e Guia de Transporte de Valores), 65 NFC-e,
  * 66 NF3e and 67 CT-e OS (Conhecimento de Transporte Eletrônico para Outros Serviços).
  *
@@ -10,7 +10,7 @@
  */
 export const VALID_MODELS = ["55", "57", "58", "62", "63", "64", "65", "66", "67"] as const;
 
-/** One of the `mod` values `getNfeKeyInfo` supports. */
+/** One of the `mod` values `isValidNfeKey` supports. */
 type ValidModel = (typeof VALID_MODELS)[number];
 
 /**
@@ -26,7 +26,9 @@ type ValidModel = (typeof VALID_MODELS)[number];
  * 5 contingência FS-DA, 7 autorização pela SVC-RS and 8 autorização pela SVC-SP. CT-e OS
  * (field D27) drops 3 and 4, and the GTV-e (field D15) uses 1, 2 contingência off-line, 7 and
  * 8. Rule G011 of the same annex, "(7=SVC-RS e 8=SVC-SP)", is what makes 8 a real code here,
- * even though the NF-e MOC never assigns it.
+ * even though the NF-e MOC never assigns it. The current package, PL_CTe_400_RTC, enumerates only
+ * 1 and 2 for the GTV-e; 7 and 8 are kept so the keys of GTV-e authorised under the earlier
+ * PL_CTe_400 still validate, since a key carries no schema version.
  *
  * MDF-e (MDF-e MOC 3.00b Anexo I, domain D7): 1 normal, 2 contingência off-line and 3 Regime
  * Especial NFF. NFCom, BP-e and NF3e (their own Anexo I, domain D7): 1 normal and
@@ -90,18 +92,26 @@ export const FORBIDDEN_CODES: readonly string[] = [
 export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
 
 /**
- * Shape the key has to be written in once the prefix is stripped: the digits, optionally split
- * into the printed groups of 4 by whitespace or the usual mask characters, a run of them between
- * two groups included, the same rule the CPF, CNPJ, CAEPF and CNS regexes of this library follow.
- * A separator inside a group of 4, or any other character, is rejected instead of being stripped.
- * The group count is left open so the 44 digit length is still checked where the key is read.
+ * Shape the key has to be written in once the prefix is stripped and its letters upper cased:
+ * the characters, optionally split into the printed groups of 4 by whitespace or the usual mask
+ * characters, a run of them between two groups included, the same rule the CPF, CNPJ, CAEPF and
+ * CNS regexes of this library follow. A separator inside a group of 4, or any other character, is
+ * rejected instead of being stripped. The groups take letters too, so a key with an alphanumeric
+ * CNPJ can be grouped like any other; which positions may hold one, and the 44 character length,
+ * are checked against `NFE_KEY_REGEX` once the separators are gone.
  */
-export const FORMAT_REGEX = /^\d{4}(?:[\s.\-/]*\d{4})*$/;
+export const FORMAT_REGEX = /^[0-9A-Z]{4}(?:[\s.\-/]*[0-9A-Z]{4})*$/;
 
-/** Start of the document number (nNF) inside the 44 digit key. */
+/** Position of the model (mod) inside the 44 character key. */
+export const MODEL_START = 20;
+
+/** End (exclusive) of the model (mod) inside the 44 character key. */
+export const MODEL_END = 22;
+
+/** Start of the document number (nNF) inside the 44 character key. */
 export const NUMBER_START = 25;
 
-/** End (exclusive) of the document number (nNF) inside the 44 digit key. */
+/** End (exclusive) of the document number (nNF) inside the 44 character key. */
 export const NUMBER_END = 34;
 
 /**
@@ -110,3 +120,18 @@ export const NUMBER_END = 34;
  * model repeats the same regex for its own number field.
  */
 export const ABSENT_NUMBER = "000000000";
+
+/** Position of the emission type (tpEmis) inside the 44 character key. */
+export const EMISSION_TYPE_INDEX = 34;
+
+/**
+ * Position of `nSiteAutoriz` for the models that carry it, and start of the 8 digit numeric code
+ * (cNF) for every other model.
+ */
+export const AUTHORIZATION_SITE_INDEX = 35;
+
+/** Start of the 7 digit numeric code (cNF) of the models that carry `nSiteAutoriz`. */
+export const SHORT_CODE_START = 36;
+
+/** Position of the check digit (cDV), which is also the end (exclusive) of the numeric code. */
+export const CHECK_DIGIT_INDEX = 43;

@@ -18,6 +18,11 @@ describe("parseCnpj", () => {
 		expect(parseCnpj("Q0.SLF.MBD/7VX4-39", { version: 2 })).toBe("Q0SLFMBD7VX439");
 	});
 
+	it("should upper-case lower case letters for version 2, the official set being A to Z", () => {
+		expect(parseCnpj("12.abc.345/01de-35", { version: 2 })).toBe("12ABC34501DE35");
+		expect(parseCnpj("q0slfmbd7vx439", { version: 2 })).toBe("Q0SLFMBD7VX439");
+	});
+
 	it("should ignore digits after the CNPJ length", () => {
 		expect(parseCnpj("46843485000186123")).toBe("46843485000186");
 	});
@@ -56,6 +61,18 @@ describe("parseCnpj", () => {
 		test("should never throw and always return a string", () => {
 			expectAlwaysReturnsType(parseCnpj, "string", anyValue);
 		});
+	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCnpj(-11_222_333_000_181)).toBe("");
+		expect(parseCnpj(-1)).toBe("");
+		expect(parseCnpj(1.5)).toBe("");
+		expect(parseCnpj(2 ** 53)).toBe("");
+		expect(parseCnpj(Number.MAX_VALUE)).toBe("");
+		expect(parseCnpj(1e21)).toBe("");
+		expect(parseCnpj(Number.NaN)).toBe("");
+		expect(parseCnpj(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCnpj(Number.NEGATIVE_INFINITY)).toBe("");
 	});
 });
 

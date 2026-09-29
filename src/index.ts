@@ -41,6 +41,7 @@ export { type FormatCnsOptions, formatCns } from "./format-cns/format-cns";
 export { type FormatCpfOptions, formatCpf } from "./format-cpf/format-cpf";
 export { type FormatCurrencyOptions, formatCurrency } from "./format-currency/format-currency";
 export { formatIban } from "./format-iban/format-iban";
+export { formatIsbn } from "./format-isbn/format-isbn";
 export {
 	type FormatLegalNatureOptions,
 	formatLegalNature,
@@ -92,6 +93,7 @@ export {
 	GetAddressInfoByCepValidationError,
 	getAddressInfoByCep,
 } from "./get-address-info-by-cep/get-address-info-by-cep";
+export { getAreaCodeByMunicipalityCode } from "./get-area-code-by-municipality-code/get-area-code-by-municipality-code";
 export { type AreaCodeInfo, getAreaCodeInfo } from "./get-area-code-info/get-area-code-info";
 export { getAreaCodesByState } from "./get-area-codes-by-state/get-area-codes-by-state";
 export { getBankByCode } from "./get-bank-by-code/get-bank-by-code";
@@ -123,6 +125,10 @@ export { getCities } from "./get-cities/get-cities";
 export { type ClassTrib, getClassTrib } from "./get-class-trib/get-class-trib";
 export { type Cnae, getCnae } from "./get-cnae/get-cnae";
 export { type CnpjInfo, getCnpjInfo, type GetCnpjInfoOptions } from "./get-cnpj-info/get-cnpj-info";
+export {
+	getCodeByMunicipalityName,
+	type GetCodeByMunicipalityNameParams,
+} from "./get-code-by-municipality-name/get-code-by-municipality-name";
 export { type CpfInfo, getCpfInfo } from "./get-cpf-info/get-cpf-info";
 export { type CstIbsCbs, getCstIbsCbs } from "./get-cst-ibs-cbs/get-cst-ibs-cbs";
 export {
@@ -135,6 +141,7 @@ export {
 	type GtinType,
 	getGtinInfo,
 } from "./get-gtin-info/get-gtin-info";
+export { type IsbnInfo, getIsbnInfo } from "./get-isbn-info/get-isbn-info";
 export {
 	type GetHolidaysParams,
 	type Holiday,
@@ -153,6 +160,7 @@ export {
 	getLegalNaturesByCategory,
 } from "./get-legal-natures-by-category/get-legal-natures-by-category";
 export { getMunicipalities } from "./get-municipalities/get-municipalities";
+export { getMunicipalitiesByAreaCode } from "./get-municipalities-by-area-code/get-municipalities-by-area-code";
 export {
 	type GetMunicipalityByCodeParams,
 	type GetMunicipalityByNameParams,
@@ -184,10 +192,13 @@ export {
 } from "./get-pix-payload-info/get-pix-payload-info";
 export { type ServiceItem, getServiceItem } from "./get-service-item/get-service-item";
 export { getStateByCep } from "./get-state-by-cep/get-state-by-cep";
+export { type Region, type RegionCode, getRegions } from "./get-regions/get-regions";
 export { getStateByIbgeCode } from "./get-state-by-ibge-code/get-state-by-ibge-code";
 export { getStateCodeByName } from "./get-state-code-by-name/get-state-code-by-name";
 export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-code";
+export { getStateCapital } from "./get-state-capital/get-state-capital";
 export { getStates } from "./get-states/get-states";
+export { getStatesByRegion } from "./get-states-by-region/get-states-by-region";
 export { getTimezoneByState } from "./get-timezone-by-state/get-timezone-by-state";
 export { type BusinessDayOptions, isBusinessDay } from "./is-business-day/is-business-day";
 export { type IsHolidayParams, isHoliday } from "./is-holiday/is-holiday";
@@ -223,11 +234,15 @@ export { type IsValidCstOptions, isValidCst } from "./is-valid-cst/is-valid-cst"
 export { isValidCstIbsCbs } from "./is-valid-cst-ibs-cbs/is-valid-cst-ibs-cbs";
 export { isValidEmail } from "./is-valid-email/is-valid-email";
 export { type IsValidGtinOptions, isValidGtin } from "./is-valid-gtin/is-valid-gtin";
+export { isValidIsbn } from "./is-valid-isbn/is-valid-isbn";
 export { isValidIban } from "./is-valid-iban/is-valid-iban";
 export { type IsValidIeParams, isValidIe } from "./is-valid-ie/is-valid-ie";
 export { isValidLandlinePhone } from "./is-valid-landline-phone/is-valid-landline-phone";
 export { isValidLegalNature } from "./is-valid-legal-nature/is-valid-legal-nature";
-export { isValidLicensePlate } from "./is-valid-license-plate/is-valid-license-plate";
+export {
+	type IsValidLicensePlateOptions,
+	isValidLicensePlate,
+} from "./is-valid-license-plate/is-valid-license-plate";
 export {
 	type IsValidMobilePhoneOptions,
 	isValidMobilePhone,
@@ -256,7 +271,7 @@ export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
 export { isValidServiceItem } from "./is-valid-service-item/is-valid-service-item";
 export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-phone";
 export { isValidSuframa } from "./is-valid-suframa/is-valid-suframa";
-export { isValidVin } from "./is-valid-vin/is-valid-vin";
+export { type IsValidVinOptions, isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
 export { parseBoleto } from "./parse-boleto/parse-boleto";
 export { parseCaepf } from "./parse-caepf/parse-caepf";
@@ -275,6 +290,7 @@ export { parseCns } from "./parse-cns/parse-cns";
 export { parseCpf } from "./parse-cpf/parse-cpf";
 export { type ParseCurrencyOptions, parseCurrency } from "./parse-currency/parse-currency";
 export { parseIban } from "./parse-iban/parse-iban";
+export { parseIsbn } from "./parse-isbn/parse-isbn";
 export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
 export { parseNcm } from "./parse-ncm/parse-ncm";

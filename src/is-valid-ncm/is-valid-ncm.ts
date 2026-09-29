@@ -1,3 +1,4 @@
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
@@ -5,18 +6,11 @@ import { NCM_CODES, NCM_FORMAT_REGEX } from "./constants";
 
 const NCM_LENGTH = 8;
 
-let cache: Set<string> | undefined;
-
-const getCache = (): Set<string> => {
-	cache ??= new Set(NCM_CODES);
-	return cache;
-};
-
 /**
  * Validates if a NCM (Nomenclatura Comum do Mercosul) code exists in the official table.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 8
- * digits, or the `NNNN.NN.NN` mask, with a single separator between the groups and optional
+ * digits, or the `NNNN.NN.NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
  * surrounding whitespace. Anything else (`"abc01012100"`) is rejected instead of having its
  * digits picked out. A number is only read as a code when it is a non-negative safe integer,
  * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
@@ -43,6 +37,8 @@ const getCache = (): Set<string> => {
  * ```
  *
  * @see Official: https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json
+ * Nomenclature of the Portal Único Siscomex. The bundled codes are the 10,515 eight digit codes of
+ * the file "Vigente em 26/09/2026", whose latest act is Resolução Gecex nº 926/2026.
  */
 export const isValidNcm = (value: string | number): boolean => {
 	if (!isLookupCode(value)) return false;
@@ -51,5 +47,5 @@ export const isValidNcm = (value: string | number): boolean => {
 
 	if (!NCM_FORMAT_REGEX.test(code)) return false;
 
-	return getCache().has(sanitizeToDigits(code));
+	return findCodeIndex(NCM_CODES, sanitizeToDigits(code)) !== -1;
 };

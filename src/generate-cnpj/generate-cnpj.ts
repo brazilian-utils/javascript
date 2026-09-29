@@ -11,7 +11,13 @@ const MIN_BRANCH = 1;
 
 const MAX_BRANCH = 9999;
 
-const VALID_CNPJ_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+/**
+ * The ordem block no establishment is given: the establishments of a CNPJ root are numbered from
+ * "0001", the matriz, on, so a random block that comes out as "0000" is drawn again.
+ */
+const UNASSIGNED_BRANCH = "0000";
+
+const VALID_CNPJ_CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 /**
  * The parameters `generateCnpj` accepts, an alternative to passing the version positionally.
@@ -33,12 +39,14 @@ export type GenerateCnpjParams = {
 	branch?: number;
 };
 
-const generateRandomCnpjChars = (length: number): string => {
-	let chars = "";
+const generateRandomCnpjCharacters = (length: number): string => {
+	let characters = "";
 	for (let i = 0; i < length; i++) {
-		chars += VALID_CNPJ_CHARS.charAt(Math.floor(Math.random() * VALID_CNPJ_CHARS.length));
+		characters += VALID_CNPJ_CHARACTERS.charAt(
+			Math.floor(Math.random() * VALID_CNPJ_CHARACTERS.length),
+		);
 	}
-	return chars;
+	return characters;
 };
 
 // `Number.isInteger` as a type guard, so an out of range `branch` narrows to `number`.
@@ -56,9 +64,12 @@ const generateBase = (
 		? branch.toString().padStart(BRANCH_LENGTH, "0")
 		: generatePart(BRANCH_LENGTH));
 
-const generateNonRepeatedBase = (generate: () => string): string => {
+const isUsableBase = (base: string): boolean =>
+	!isRepeatedDigits(base) && base.slice(ROOT_LENGTH) !== UNASSIGNED_BRANCH;
+
+const generateUsableBase = (generate: () => string): string => {
 	let base = generate();
-	while (isRepeatedDigits(base)) {
+	while (!isUsableBase(base)) {
 		base = generate();
 	}
 	return base;
@@ -68,7 +79,7 @@ const generateCnpjWith = (
 	branch: number | undefined,
 	generatePart: (length: number) => string,
 ): string => {
-	const base = generateNonRepeatedBase(() => generateBase(branch, generatePart));
+	const base = generateUsableBase(() => generateBase(branch, generatePart));
 	const firstCheckDigit = String(calculateCnpjCheckDigit(base, CNPJ_FIRST_DIGIT_WEIGHTS));
 	const secondCheckDigit = String(
 		calculateCnpjCheckDigit(base + firstCheckDigit, CNPJ_SECOND_DIGIT_WEIGHTS),
@@ -89,6 +100,11 @@ const isGenerateCnpjParams = (
  * The first argument is either the version, as it has always been, or a `GenerateCnpjParams`
  * object carrying that same version plus the "número de ordem" (filial) block to write in
  * positions 9 to 12.
+ *
+ * A random ordem block is never "0000": the establishments of a root are numbered from "0001",
+ * the matriz, on, so that block is never assigned and a draw that comes out as "0000" is made
+ * again, the way a base of one repeated character is. Up to 2.4.0 about 1 in 10,000 numeric
+ * CNPJs came out with it.
  *
  * @param {1 | 2 | GenerateCnpjParams} [versionOrParams] - The version of the CNPJ to be
  * generated: `1` for the numeric CNPJ and `2` for the alphanumeric one, or an options object.
@@ -113,6 +129,9 @@ const isGenerateCnpjParams = (
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj
  * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf
  * @see Official: https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico
+ * @see Official: https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf
+ * Receita Federal, CNPJ alfanumérico, perguntas e respostas: positions 9 to 12 are the "ordem do
+ * estabelecimento", the matriz being the ordem 0001 and the filiais the ones after it.
  */
 export const generateCnpj = (versionOrParams: 1 | 2 | GenerateCnpjParams = 1): string => {
 	const params: GenerateCnpjParams = isGenerateCnpjParams(versionOrParams)
@@ -121,6 +140,6 @@ export const generateCnpj = (versionOrParams: 1 | 2 | GenerateCnpjParams = 1): s
 
 	return generateCnpjWith(
 		params.branch,
-		params.version === 2 ? generateRandomCnpjChars : generateRandomNumber,
+		params.version === 2 ? generateRandomCnpjCharacters : generateRandomNumber,
 	);
 };

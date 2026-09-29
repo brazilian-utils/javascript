@@ -78,6 +78,24 @@ describe("capitalize", () => {
 			expect(capitalize("são paulo/sp")).toBe("São Paulo/SP");
 		});
 
+		test("when a state code ends the value after a spaced hyphen, an en dash or a comma, the Correios' 'Cidade – UF'", () => {
+			expect(capitalize("brasília - df")).toBe("Brasília - DF");
+			expect(capitalize("são paulo – sp")).toBe("São Paulo – SP");
+			expect(capitalize("curitiba, pr")).toBe("Curitiba, PR");
+			expect(capitalize("rua x, 10, centro, recife - pe")).toBe("Rua X, 10, Centro, Recife - PE");
+			expect(capitalize("BRASÍLIA - DF", { upperCaseWords: [] })).toBe("Brasília - DF");
+		});
+
+		test("when a state code after those separators is not the last word, or the separator is not spaced, it is an ordinary word", () => {
+			expect(capitalize("rs - centro")).toBe("Rs - Centro");
+			expect(capitalize("brasília - df sul")).toBe("Brasília - Df Sul");
+			expect(capitalize("brasília-df")).toBe("Brasília-Df");
+			expect(capitalize("brasília -df")).toBe("Brasília -Df");
+			expect(capitalize("brasília,df")).toBe("Brasília,Df");
+			expect(capitalize("brasília - br")).toBe("Brasília - Br");
+			expect(capitalize("- df")).toBe("- Df");
+		});
+
 		test("when a word is bound by an apostrophe or by punctuation", () => {
 			expect(capitalize("santa bárbara d'oeste")).toBe("Santa Bárbara d'Oeste");
 			expect(capitalize("SANTA BÁRBARA D'OESTE")).toBe("Santa Bárbara d'Oeste");
@@ -166,6 +184,17 @@ describe("capitalize", () => {
 			expect(capitalize("joão paulo ii")).toBe("João Paulo II");
 			expect(capitalize("rua xv de novembro")).toBe("Rua XV de Novembro");
 			expect(capitalize("avenida papa joão xxiii")).toBe("Avenida Papa João XXIII");
+			expect(capitalize("rua xxiv de maio")).toBe("Rua XXIV de Maio");
+			expect(capitalize("rua xxv de março")).toBe("Rua XXV de Março");
+			expect(capitalize("praça xxix de junho")).toBe("Praça XXIX de Junho");
+			expect(capitalize("rua xxxi de março")).toBe("Rua XXXI de Março");
+			expect(capitalize("capítulo xxxix")).toBe("Capítulo XXXIX");
+		});
+
+		test("when a roman numeral is past XXXIX, uses a letter other than I, V and X, or is VI, it is an ordinary word", () => {
+			expect(capitalize("capítulo xl")).toBe("Capítulo Xl");
+			expect(capitalize("eu li o livro")).toBe("Eu Li o Livro");
+			expect(capitalize("eu vi maria")).toBe("Eu Vi Maria");
 		});
 
 		test("when a word list given in the options replaces the default one", () => {

@@ -1,5 +1,5 @@
 import { PHONE_NATIONAL_MAX_LENGTH } from "../_internals/constants/phone";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 
 /**
@@ -12,6 +12,9 @@ import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
  * digits, so its `55` is read as the DDD. The rule is length-based, not sign-based, which
  * makes `"+5511987654321"`, `"005511987654321"` and `"5511987654321"` all parse alike.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The phone value to be parsed.
  * @returns {string} The phone value without formatting.
  *
@@ -21,10 +24,11 @@ import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
  * parsePhone("+55 (11) 98765-4321"); // "11987654321"
  * parsePhone("5511987654321"); // "11987654321"
  * parsePhone("55987654321"); // "55987654321" (area code 55, country code kept out of it)
+ * parsePhone(-11987654321); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.itu.int/rec/T-REC-E.164
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const parsePhone = (value: string | number): string =>
-	isNullish(value) ? "" : normalizePhone(value).slice(0, PHONE_NATIONAL_MAX_LENGTH);
+	isLookupCode(value) ? normalizePhone(value).slice(0, PHONE_NATIONAL_MAX_LENGTH) : "";

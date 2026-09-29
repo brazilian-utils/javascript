@@ -1,5 +1,32 @@
+import { CID10_SUBCATEGORIES } from "../_internals/constants/cid10";
 import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
 import { normalizeCid10 } from "../_internals/normalize-cid10/normalize-cid10";
+import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
+
+const CATEGORY_LENGTH = 3;
+
+/**
+ * The index of a listed code in `CID10_DESCRIPTIONS`, which holds every category of
+ * `CID10_SUBCATEGORIES`, in its order, followed by its subcategories: the categories before the
+ * code's own take one description each plus one per subcategory, then the category's own
+ * description comes first and each subcategory follows at the position of its fourth character
+ * plus one (a category, whose fourth character is `""`, is found at 0 and adds no length).
+ *
+ * @param {string} code - A code `isValidCid10` accepts, normalized.
+ * @returns {number} The index of its description.
+ */
+const findDescriptionIndex = (code: string): number => {
+	const category = code.slice(0, CATEGORY_LENGTH);
+	const subcategory = code.slice(CATEGORY_LENGTH);
+	const categories = Object.keys(CID10_SUBCATEGORIES);
+	const preceding = categories.slice(0, categories.indexOf(category));
+	const offset = preceding.reduce(
+		(index, listed) => index + 1 + CID10_SUBCATEGORIES[listed].length,
+		0,
+	);
+
+	return offset + CID10_SUBCATEGORIES[category].indexOf(subcategory) + subcategory.length;
+};
 
 /**
  * A CID-10 (Classificação Internacional de Doenças, 10th revision) category or subcategory.
@@ -21,8 +48,10 @@ export type Cid10 = {
  * ignored. Anything else (`"A00-0"`, `"A00.00"`, a dagger or asterisk suffix, a value that is
  * not a string) is rejected instead of having a code picked out of it.
  *
- * The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV: a code that is
- * not in those files, such as `U07.1` (COVID-19), is not found.
+ * The tables are the CID-10 V2008 files, the revision DATASUS publishes as CSV, plus the `U07`
+ * category of the CID-10 table DATASUS keeps for the SIM (`U07`, `U07.0`, `U07.1` and `U07.2`,
+ * the COVID-19 codes among them), which the V2008 files predate. A code in neither, such as
+ * `U09.9` and `U10.9`, which the WHO added later, is not found.
  *
  * @param {string} value - The CID-10 code to look up, e.g. `"A00.0"`, `"A000"` or `"A00"`.
  * @returns {Cid10|null} The matching category or subcategory, or null when the code is unknown
@@ -33,6 +62,7 @@ export type Cid10 = {
  * getCid10("A00.0"); // { code: "A000", description: "Cólera devida a Vibrio cholerae 01, biótipo cholerae" }
  * getCid10("a000"); // { code: "A000", description: "Cólera devida a Vibrio cholerae 01, biótipo cholerae" }
  * getCid10("A00"); // { code: "A00", description: "Cólera" }
+ * getCid10("U07.1"); // { code: "U071", description: "Infecção pelo novo Coronavírus (COVID-19)" }
  * getCid10("A00.5"); // null (A00 has no subcategory 5)
  * getCid10("A00-0"); // null (not a documented form)
  * ```
@@ -42,11 +72,14 @@ export type Cid10 = {
  * published by DATASUS (Ministério da Saúde).
  * @see Official: http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm
  * The DATASUS page that links the archive and documents its files, columns and encoding.
+ * @see Official: ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/TABELAS/CID10.DBF
+ * The CID-10 table of the SIM (Sistema de Informações sobre Mortalidade), source of the `U07`
+ * codes the V2008 files lack.
  */
 export const getCid10 = (value: string): Cid10 | null => {
+	if (!isValidCid10(value)) return null;
+
 	const code = normalizeCid10(value);
 
-	if (!Object.hasOwn(CID10_DESCRIPTIONS, code)) return null;
-
-	return { code, description: CID10_DESCRIPTIONS[code] };
+	return { code, description: CID10_DESCRIPTIONS[findDescriptionIndex(code)] };
 };

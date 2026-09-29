@@ -8,6 +8,11 @@ import { isValidVoterId } from "../is-valid-voter-id/is-valid-voter-id";
 import { generateVoterId } from "./generate-voter-id";
 
 describe("generateVoterId", () => {
+	test("should read the state code ignoring case and surrounding whitespace", () => {
+		// @ts-expect-error: a lower case state code is read as its upper case form
+		expect(generateVoterId(" sp ").slice(8, 10)).toBe(UF_TO_VOTER_ID_CODE.SP);
+	});
+
 	it("should generate valid voter ids", () => {
 		for (let i = 0; i < 50; i++) {
 			expect(isValidVoterId(generateVoterId())).toBe(true);

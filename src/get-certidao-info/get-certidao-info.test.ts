@@ -38,7 +38,7 @@ describe("getCertidaoInfo", () => {
 			expect(getCertidaoInfo("not-a-matricula")).toBeNull();
 		});
 
-		test("when the book code is 0, outside the nine books of the Provimento", () => {
+		test("when the book code is 0, outside the seven books of the Provimento", () => {
 			expect(getCertidaoInfo("10453901552013000012021000012387")).toBeNull();
 		});
 
@@ -53,6 +53,26 @@ describe("getCertidaoInfo", () => {
 	});
 
 	describe("should return the parsed matrícula", () => {
+		test("for an emancipation act, book code 8 of the revoked Provimento CNJ nº 3/2009", () => {
+			expect(getCertidaoInfo("10453901552013800012021000012343")).toEqual({
+				registryCns: "104539",
+				acervo: "01",
+				service: "55",
+				year: 2013,
+				type: "emancipation",
+				typeCode: 8,
+				book: "00012",
+				page: "021",
+				term: "0000123",
+				checkDigits: "43",
+			});
+		});
+
+		test("for an interdiction act, book code 9 of the revoked Provimento CNJ nº 3/2009", () => {
+			expect(getCertidaoInfo("10453901552013900012021000012398")?.type).toBe("interdiction");
+			expect(getCertidaoInfo("10453901552013900012021000012398")?.typeCode).toBe(9);
+		});
+
 		test("for 104539.01.55.2013.1.00012.021.0000123-21, the worked example of ghiorzi.org/DVnew.htm", () => {
 			expect(getCertidaoInfo("104539 01 55 2013 1 00012 021 0000123 21")).toEqual({
 				registryCns: "104539",
@@ -107,14 +127,6 @@ describe("getCertidaoInfo", () => {
 			expect(getCertidaoInfo("10453901552013700012021000012315")?.type).toBe("other");
 		});
 
-		test("for an emancipation act, book code 8", () => {
-			expect(getCertidaoInfo("10453901552013800012021000012343")?.type).toBe("emancipation");
-		});
-
-		test("for an interdiction act, book code 9", () => {
-			expect(getCertidaoInfo("10453901552013900012021000012398")?.type).toBe("interdiction");
-		});
-
 		test("for a matrícula whose first modulus 11 remainder is 10 (826683 01 55 2015 2 09245 842 9990114 18)", () => {
 			expect(getCertidaoInfo("82668301552015209245842999011418")).toEqual({
 				registryCns: "826683",
@@ -137,7 +149,7 @@ describe("getCertidaoInfo", () => {
 			fc.stringMatching(/^[0-9]{2}$/),
 			fc.constant("55"),
 			fc.integer({ min: 1000, max: 9999 }),
-			fc.integer({ min: 1, max: 9 }),
+			fc.integer({ min: 1, max: 7 }),
 			fc.stringMatching(/^[0-9]{5}$/),
 			fc.stringMatching(/^[0-9]{3}$/),
 			fc.stringMatching(/^[0-9]{7}$/),

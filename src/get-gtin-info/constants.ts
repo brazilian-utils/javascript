@@ -16,9 +16,8 @@ export const NORMALIZED_LENGTH = 14;
  * The five zeros a GTIN-8 gets after the first digit of the 14 digit form: that digit is the
  * padding zero of a bare GTIN-8, or the indicator digit of a GTIN-14 that packs one, and is never
  * part of the prefix. GS1 leaves the prefixes 0000001 to 0000099 unused so that no longer GTIN
- * collides with one (General Specifications, table 1-4), and the "Tabela Prefixo GS1" of the
- * Portal da NF-e reads the prefix the same way: from positions 7 to 9 after those zeros, from
- * positions 2 to 4 otherwise.
+ * collides with one (General Specifications, table 1-4), so the prefix is read from positions 7
+ * to 9 after those zeros, from positions 2 to 4 otherwise.
  */
 export const GS1_8_PADDING = "00000";
 

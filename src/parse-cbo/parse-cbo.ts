@@ -1,4 +1,4 @@
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { LENGTH } from "./constants";
 
@@ -11,16 +11,24 @@ import { LENGTH } from "./constants";
  * as `010205` has to be written out. Use `getCbo` or `isValidCbo`, which do pad a bare numeric
  * code, to look an occupation up.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CBO code to be parsed.
  * @returns {string} Up to 6 digits, or an empty string when there is no digit at all.
  *
  * @example
  * ```typescript
  * parseCbo("2124-05"); // "212405"
+ * parseCbo(2124.05); // "" (not a non-negative safe integer)
  * ```
  *
- * @see Official: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv
- * The CBO 2002 occupation table, as published by the Ministério do Trabalho e Emprego.
+ * @see Official: https://cbo.mte.gov.br/cbosite/pages/downloads.jsf
+ * "Estrutura CBO (CSV)", the CBO 2002 tables the Ministério do Trabalho e Emprego publishes (files
+ * of 10/07/2026, 2,725 occupations). Up to 2.4.0 the table came from the older gov.br release
+ * (06/06/2025), which lacked 37 occupations, among them 782325 (Motorista de transporte por
+ * aplicativos), and still listed 6 the MTE has since dropped (225142, 322105, 322115, 322120,
+ * 322125 and 782820), which are no longer valid.
  */
 export const parseCbo = (value: string | number): string =>
-	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, LENGTH);
+	isLookupCode(value) ? sanitizeToDigits(value).slice(0, LENGTH) : "";

@@ -1,10 +1,12 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isStateCode } from "../_internals/is-state-code/is-state-code";
+import { readStateCode } from "../_internals/read-state-code/read-state-code";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import {
 	CRC_REGEX,
 	CRO_REGEX,
+	CRO_SUFFIXES_BY_CATEGORY,
 	CRP_MAX_REGION,
 	CRP_MIN_REGION,
 	CRP_REGEX,
@@ -38,6 +40,10 @@ const isKnownCrpRegion = (value: string): boolean => {
 	return region >= CRP_MIN_REGION && region <= CRP_MAX_REGION;
 };
 
+const isKnownCroCategory = (category: string, suffix: string | undefined): boolean =>
+	Object.hasOwn(CRO_SUFFIXES_BY_CATEGORY, category) &&
+	(suffix === undefined || CRO_SUFFIXES_BY_CATEGORY[category].includes(suffix));
+
 /**
  * Checks the structure of a professional council registration number (registro/inscrição
  * profissional).
@@ -50,7 +56,11 @@ const isKnownCrpRegion = (value: string): boolean => {
  * Supported councils and what is validated:
  * - `"OAB"` (Ordem dos Advogados do Brasil): 4 to 6 digits + UF, e.g. `"123456/SP"`.
  * - `"CRM"` (Conselho Regional de Medicina): 4 to 6 digits + UF, e.g. `"123456-SP"`.
- * - `"CRO"` (Conselho Regional de Odontologia): 3 to 6 digits + UF, e.g. `"12345/SP"`.
+ * - `"CRO"` (Conselho Regional de Odontologia): 3 to 6 digits + UF, e.g. `"12345/SP"`, or the
+ *   form of the Consolidação das Normas do CFO, art. 115, § 1º: the sigla of the Conselho
+ *   Regional first, joined by a hyphen to the category of the inscrição when there is one, then
+ *   the number, with `-IS` for a secundária and `-R` for a remida, e.g. `"CRO-SP 12345"`,
+ *   `"CRO-SP-TPD 1234"`, `"CRO-SP-PV 1234"`, `"CRO-SP 12345-IS"`.
  * - `"CRP"` (Conselho Regional de Psicologia): 2 digit regional code + 4 to 6 digits, e.g.
  *   `"06/12345"`. The regional code must be one of the 24 Conselhos Regionais of the CFP
  *   system, CRP-01 to CRP-24. It is not a literal UF (some regions cover more than one state),
@@ -70,15 +80,25 @@ const isKnownCrpRegion = (value: string): boolean => {
  * unification (RNP) its registration number format could not be confirmed from an official,
  * publicly documented source.
  *
- * Only the CRC shape and the CRP regional codes rest on a published source: the CFP page lists
- * the 24 Conselhos Regionais and nothing else, so the 4 to 6 digit body of a CRP number is as
- * unsourced as the OAB, CRM and CRO ranges. The OAB, the CFM and the CFO do not publish the
- * format of the numbers their seccionais and regionais issue, so the digit ranges accepted for
- * `"OAB"`, `"CRM"` and `"CRO"` are conventional rather than normative, and two counterexamples
- * are known: the OAB/SP public search field is `maxlength="7"` and rejects only inputs of two
- * characters or fewer, and the CFM's Manual de Procedimentos Administrativos documents a `300`
- * prefixed CRM for foreign-trained physicians and a trailing `P` for inscrição provisória,
- * neither of which the accepted shape can express.
+ * Only the CRO form of art. 115, the CRC shape and the CRP regional codes rest on a published
+ * source. The CFO's Consolidação das Normas (Resolução CFO-63/2005), art. 115, § 1º, has each
+ * number "precedido da sigla do Conselho Regional", with the category letters listed above, but
+ * no digit count, so the 3 to 6 digits of both CRO shapes and the number-then-UF shape are
+ * conventional. The CFP page lists the 24 Conselhos Regionais and nothing else (the CRP-25 of
+ * Amapá is only a 2023 proposal of the CRP-10), so the 4 to 6 digit body of a CRP number is as
+ * unsourced as the OAB and CRM ranges. The CRC shape `UF-000000/O-D` is the one of the Manual de
+ * Registro of 2009; the Resolução CFC nº 1.707/2023 in force only says that "a numeração do
+ * Registro Originário será única e sequencial em cada CRC" and adds the `T` of the transfer, and
+ * no longer has the Provisório (`P`) and Secundário (`S`) registrations the manual describes,
+ * which are still accepted for the numbers issued under it; the manual's check digit is
+ * "calculado de forma automatizada pelo sistema de cadastro" and its algorithm is not published.
+ * The OAB (Provimento nº 95/2000, Regulamento Geral) and the CFM (Decreto nº 44.045/1958, art.
+ * 9º) do not publish the format of the numbers their seccionais and regionais issue, so the digit
+ * ranges accepted for `"OAB"` and `"CRM"` are conventional rather than normative, and two
+ * counterexamples are known: the OAB/SP public search field is `maxlength="7"` and rejects only
+ * inputs of two characters or fewer, and the CFM's Manual de Procedimentos Administrativos
+ * documents a `300` prefixed CRM for foreign-trained physicians and a trailing `P` for inscrição
+ * provisória, neither of which the accepted shape can express.
  *
  * Everything it needs travels in a single object, the shape `isValidBankAccount` takes: a
  * registration number means nothing without the council that issued it, so the two are read
@@ -88,7 +108,8 @@ const isKnownCrpRegion = (value: string): boolean => {
  * @param {IsValidRegistroProfissionalParams} params - The registration to be validated.
  * @param {string} params.value - The registration number, e.g. `"123456/SP"`.
  * @param {RegistroProfissionalCouncil} params.council - The issuing council.
- * @param {string} [params.stateCode] - The expected UF, ignored for `"CRP"`.
+ * @param {string} [params.stateCode] - The expected UF, letter case and surrounding whitespace
+ * ignored (`"sp"` is `"SP"`); ignored for `"CRP"`.
  * @returns {boolean} True if the value has the structure of a registration number for the
  * given council, false otherwise.
  *
@@ -97,6 +118,7 @@ const isKnownCrpRegion = (value: string): boolean => {
  * isValidRegistroProfissional({ value: "123456/SP", council: "OAB" }); // true
  * isValidRegistroProfissional({ value: "123456-SP", council: "OAB", stateCode: "SP" }); // true
  * isValidRegistroProfissional({ value: "123456-RJ", council: "OAB", stateCode: "SP" }); // false (UF mismatch)
+ * isValidRegistroProfissional({ value: "CRO-SP-TPD 1234", council: "CRO" }); // true (CFO art. 115)
  * isValidRegistroProfissional({ value: "06/12345", council: "CRP" }); // true
  * isValidRegistroProfissional({ value: "SP-123456/O-3", council: "CRC" }); // true
  * isValidRegistroProfissional({ value: "SP-123456/O-3 T-MG", council: "CRC" }); // true (transferido)
@@ -118,15 +140,23 @@ const isKnownCrpRegion = (value: string): boolean => {
  * Conselho Federal de Psicologia: the 24 Conselhos Regionais of the system, numbered CRP-01 to
  * CRP-24. The page establishes the regional codes only; it publishes no length for the inscription
  * number itself.
- * @see Official: https://www.oab.org.br/
- * Ordem dos Advogados do Brasil (OAB), the federal body that regulates the profession, which
- * publishes no format for the número de inscrição and the seccional.
- * @see Official: https://portal.cfm.org.br/
- * Conselho Federal de Medicina (CFM), the autarquia federal that regulates the profession, which
- * publishes no format for the registration number and the UF.
- * @see Official: https://cfo.org.br/
- * Conselho Federal de Odontologia (CFO), the autarquia federal that regulates the profession,
- * which publishes no format for the registration number and the UF.
+ * @see Official: https://www.oab.org.br/util/print?numero=95/2000&print=Legislacao&origem=Provimentos
+ * Provimento nº 95/2000 of the Conselho Federal da OAB (Cadastro Nacional dos Advogados), art. 2º,
+ * parágrafo único, as worded by the Provimento nº 227/2024: the CNA keeps "o número e o tipo de
+ * inscrição na OAB (advogado, estagiário ou suplementar)", with no format for the number.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/decreto/1950-1969/d44045.htm
+ * Decreto nº 44.045/1958, art. 9º, the regulation of the Conselhos de Medicina: a "carteira
+ * profissional numerada" with the "número da inscrição anotada nesse Conselho Regional", and no
+ * format for it.
+ * @see Official: https://transparencia.cfo.org.br/wp-content/uploads/2023/09/Consolida%C3%A7%C3%A3o-das-Normas-Atualizado-emsetembro-de-2023.pdf
+ * Consolidação das Normas para Procedimentos nos Conselhos de Odontologia (Resolução CFO-63/2005,
+ * updated to September 2023), art. 115, § 1º: "o número de inscrição principal atribuído a
+ * cirurgião-dentista será precedido da sigla do Conselho Regional", the other categories "ligada
+ * por hífen às letras" `TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV` and `T`, the
+ * secundária "seguido das letras 'IS', ligadas por hífen" and the remida "seguida da letra 'R'".
+ * @see Official: https://transparencia.cfp.org.br/wp-content/uploads/2025/12/Classificacao-de-Portes-dos-CRPs-2026.csv
+ * Conselho Federal de Psicologia, classification of the CRPs for 2026 (Resolução CFP nº 08/2024):
+ * the same 24 regionals, CRP 01 to CRP 24.
  */
 export const isValidRegistroProfissional = (params: IsValidRegistroProfissionalParams): boolean => {
 	if (isNullish(params)) return false;
@@ -143,9 +173,12 @@ export const isValidRegistroProfissional = (params: IsValidRegistroProfissionalP
 
 	if (!match?.groups) return false;
 
-	const { region, uf, transferUf } = match.groups;
+	const { region, uf: trailingUf, councilUf, category, suffix, transferUf } = match.groups;
+	const uf = trailingUf ?? councilUf;
 
 	if (region !== undefined && !isKnownCrpRegion(region)) return false;
+
+	if (councilUf !== undefined && !isKnownCroCategory(category ?? "", suffix)) return false;
 
 	if (transferUf !== undefined && !isStateCode(transferUf)) return false;
 
@@ -153,5 +186,5 @@ export const isValidRegistroProfissional = (params: IsValidRegistroProfissionalP
 
 	if (!isStateCode(uf)) return false;
 
-	return !stateCode || uf === stateCode;
+	return !stateCode || uf === readStateCode(stateCode);
 };

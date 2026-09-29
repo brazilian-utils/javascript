@@ -3,7 +3,7 @@
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 const run = (command: string, args: string[]): Promise<number | null> =>
 	new Promise((_resolve) => {
@@ -20,6 +20,7 @@ const run = (command: string, args: string[]): Promise<number | null> =>
 	});
 
 const generators = [
+	"area-codes.ts",
 	"banks.ts",
 	"cbo.ts",
 	"cest.ts",
@@ -28,6 +29,7 @@ const generators = [
 	"cities.ts",
 	"cnae.ts",
 	"ibs-cbs.ts",
+	"isbn.ts",
 	"legal-natures.ts",
 	"nbs.ts",
 	"ncm.ts",
@@ -36,16 +38,24 @@ const generators = [
 ];
 
 const generatedFiles = [
+	"./src/_internals/constants/municipality-area-codes.ts",
 	"./src/_internals/constants/banks.ts",
+	"./src/_internals/constants/cbo-descriptions.ts",
 	"./src/_internals/constants/cbo.ts",
+	"./src/_internals/constants/cest-descriptions.ts",
 	"./src/_internals/constants/cest.ts",
+	"./src/_internals/constants/cfop-descriptions.ts",
 	"./src/_internals/constants/cfop.ts",
 	"./src/_internals/constants/cid10-descriptions.ts",
 	"./src/_internals/constants/cid10.ts",
+	"./src/_internals/constants/cnae-descriptions.ts",
 	"./src/_internals/constants/cnae.ts",
 	"./src/_internals/constants/ibs-cbs.ts",
+	"./src/_internals/constants/isbn-ranges.ts",
 	"./src/_internals/constants/municipalities.ts",
+	"./src/_internals/constants/nbs-descriptions.ts",
 	"./src/_internals/constants/nbs.ts",
+	"./src/_internals/constants/service-item-descriptions.ts",
 	"./src/_internals/constants/service-items.ts",
 	"./src/_internals/constants/states.ts",
 	"./src/is-valid-legal-nature/constants.ts",
@@ -53,7 +63,7 @@ const generatedFiles = [
 ];
 
 const results = await Promise.all(
-	generators.map((generator) => run("node", [resolve(scriptsDir, generator)])),
+	generators.map((generator) => run("node", [resolve(scriptsDirectory, generator)])),
 );
 
 // Lint and format before checking the generators, so a failing generator never leaves

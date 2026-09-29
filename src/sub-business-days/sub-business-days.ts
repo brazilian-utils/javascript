@@ -22,16 +22,17 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * as `00:30` on a day whose clocks jump from `00:00` to `01:00`: the result is then the nearest
  * instant of that day, `01:30`, as in `addBusinessDays`.
  *
- * `options.includeSaturday` defaults to `false`, the Monday to Friday banking count. Pass `true`
+ * `options.includeSaturday` defaults to `false`, a Monday to Friday count. Pass `true`
  * for the labour law count of Instrução Normativa MTP nº 2/2021, art. 14, I, which includes
  * Saturday and still excludes Sunday and holidays, so a holiday that falls on a Saturday is never
  * counted. See `isBusinessDay` for the law behind it and for what it does not cover: municipal
  * holidays, which `getHolidays` does not carry.
  *
- * If `options.stateCode` is provided but is not a valid/known state code, it is ignored and only
- * national holidays are considered (same behavior as `getHolidays`/`isBusinessDay`), so a
- * prototype-chain key such as `"__proto__"` is an unknown state code like any other. An `options`
- * that is not an object at all is ignored, exactly as `isBusinessDay` ignores it.
+ * `options.stateCode` is read as `isBusinessDay` reads it: letter case and surrounding
+ * whitespace are ignored, and a `stateCode` that is present and is not a state code (`"XX"`, an
+ * empty string, a prototype-chain key such as `"__proto__"`, a value that is not a string)
+ * returns `null`. An `options` that is not an object at all is ignored, exactly as
+ * `isBusinessDay` ignores it.
  *
  * Only years from 1900 through 2099 are supported, the range `getHolidays` computes. A `date`
  * outside it, or a walk that leaves it, returns `null`.
@@ -44,7 +45,8 @@ export type { BusinessDayOptions } from "../is-business-day/is-business-day";
  * @param {boolean} [options.includeSaturday] - Whether Saturday counts as a business day (default: `false`).
  * @returns {Date | null} A new `Date`, `amount` business days before `date`. `null` on bad input:
  * a `date` that is not a valid `Date` or is outside 1900-2099, an `amount` that is not a finite
- * integer, a `stateCode` that is not a string, or a walk that leaves the supported years.
+ * integer, a `stateCode` that is present and is not a state code, or a walk that leaves the
+ * supported years.
  *
  * @example
  * ```typescript

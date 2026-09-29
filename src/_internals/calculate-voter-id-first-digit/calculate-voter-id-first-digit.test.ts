@@ -8,19 +8,18 @@ describe("calculateVoterIdFirstDigit", () => {
 		).toBe(7);
 	});
 
-	test("should calculate the first digit for a 9-digit sequential number (SP)", () => {
+	test("should calculate the first digit over the 8 sequential digits (SP)", () => {
+		// 1·2 + 2·3 + 3·4 + 4·5 + 5·6 + 6·7 + 7·8 + 8·9 = 240, 240 mod 11 = 9
 		expect(
-			calculateVoterIdFirstDigit({ sequentialNumber: "123456788", federativeUnion: "01" }),
+			calculateVoterIdFirstDigit({ sequentialNumber: "12345678", federativeUnion: "01" }),
 		).toBe(9);
 	});
 
-	test("should ignore the ninth sequential digit", () => {
+	test("should weigh the leading zeros of the sequential number as zeros", () => {
+		// 1·5 + 2·6 + 3·7 + 4·8 + 5·9 = 115, 115 mod 11 = 5
 		expect(
-			calculateVoterIdFirstDigit({ sequentialNumber: "123456780", federativeUnion: "01" }),
-		).toBe(9);
-		expect(
-			calculateVoterIdFirstDigit({ sequentialNumber: "123456783", federativeUnion: "01" }),
-		).toBe(9);
+			calculateVoterIdFirstDigit({ sequentialNumber: "00012345", federativeUnion: "01" }),
+		).toBe(5);
 	});
 
 	test("should apply the SP/MG rule when the remainder is 0", () => {

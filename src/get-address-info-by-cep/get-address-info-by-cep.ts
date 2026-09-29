@@ -1,6 +1,9 @@
+import { CEP_LENGTH } from "../_internals/constants/cep";
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
+import { parseCep } from "../parse-cep/parse-cep";
 
 /** Base class of every error `getAddressInfoByCep` rejects with. */
 export class GetAddressInfoByCepError extends Error {
@@ -59,6 +62,18 @@ export type GetAddressInfoByCepOptions = {
 	 * requested explicitly).
 	 */
 	providers?: CepProvider[];
+	/**
+	 * Cancels the lookup: every request in flight is aborted and the promise rejects with
+	 * `signal.reason`, the same as `fetch` does. A signal that is already aborted rejects before
+	 * any request is made.
+	 */
+	signal?: AbortSignal;
+	/**
+	 * How long, in milliseconds, the whole lookup may take, retries included, before every request
+	 * in flight is aborted and the promise rejects with `GetAddressInfoByCepServiceError` (default:
+	 * no limit). Must be a positive finite number.
+	 */
+	timeoutMs?: number;
 };
 
 type ProviderPayload = Record<string, unknown>;
@@ -69,9 +84,30 @@ type ProviderPayload = Record<string, unknown>;
  * not-found signal is an HTTP status and the only one that needs it mapped before `response.ok`
  * turns it into a service failure.
  *
+ * BrasilAPI answers the same 404 when the services behind it could not be reached, and rewrites
+ * their connection errors into "not found" messages, so the status alone cannot tell a CEP that
+ * does not exist from an outage. It is therefore read as `AmbiguousNotFoundError`, which only
+ * turns into `GetAddressInfoByCepNotFoundError` when no other provider failed to answer.
+ *
  * @see Based on: https://brasilapi.com.br/docs#tag/CEP
+ * @see Based on: https://github.com/BrasilAPI/BrasilAPI/blob/main/pages/api/cep/v1/%5Bcep%5D.js
+ * Every `service_error` of the services behind it, a connection failure included, is answered
+ * with `NotFoundError`, the 404.
  */
 const BRASIL_API_NOT_FOUND_STATUS = 404;
+
+/**
+ * The lowest CEP the Correios assign: the São Paulo range starts at `01000-000`, and no range
+ * covers `00000-000` to `00999-999`. A number cannot carry the leading zero of a São Paulo CEP,
+ * so a number is left padded to 8 digits, but one below this is not a CEP with its leading zeros
+ * lost: `123` is not the CEP `00000-123`.
+ *
+ * @see Official: https://buscacepinter.correios.com.br/app/faixa_cep_uf_localidade/index.php
+ */
+const LOWEST_CEP = 1_000_000;
+
+/** A not-found answer that an outage could also have produced; see `BRASIL_API_NOT_FOUND_STATUS`. */
+class AmbiguousNotFoundError extends GetAddressInfoByCepNotFoundError {}
 
 const asString = (value: unknown): string => (typeof value === "string" ? value : "");
 
@@ -81,8 +117,8 @@ const readPayload = async (response: Response): Promise<ProviderPayload> => {
 	return Object.assign<ProviderPayload, unknown>({}, data);
 };
 
-const fetchViaCep = async (cep: string): Promise<AddressInfo> => {
-	const response = await fetchWithRetry(`https://viacep.com.br/ws/${cep}/json/`);
+const fetchViaCep = async (cep: string, signal: AbortSignal): Promise<AddressInfo> => {
+	const response = await fetchWithRetry(`https://viacep.com.br/ws/${cep}/json/`, { signal });
 
 	if (!response.ok) {
 		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
@@ -108,9 +144,10 @@ const fetchViaCep = async (cep: string): Promise<AddressInfo> => {
 	};
 };
 
-const fetchWidenet = async (cep: string): Promise<AddressInfo> => {
+const fetchWidenet = async (cep: string, signal: AbortSignal): Promise<AddressInfo> => {
 	const response = await fetchWithRetry(
 		`https://apps.widenet.com.br/busca-cep/api/cep/${cep}.json`,
+		{ signal },
 	);
 
 	if (!response.ok) {
@@ -137,13 +174,13 @@ const fetchWidenet = async (cep: string): Promise<AddressInfo> => {
 	};
 };
 
-const fetchBrasilApi = async (cep: string): Promise<AddressInfo> => {
-	const response = await fetchWithRetry(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+const fetchBrasilApi = async (cep: string, signal: AbortSignal): Promise<AddressInfo> => {
+	const response = await fetchWithRetry(`https://brasilapi.com.br/api/cep/v1/${cep}`, { signal });
 
 	if (response.status === BRASIL_API_NOT_FOUND_STATUS) {
-		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
-		// is checked when aggregating provider failures below, so this message is never observable.
-		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
+		// Stryker disable next-line StringLiteral: only the class of a provider failure is checked
+		// when aggregating provider failures below, so this message is never observable.
+		throw new AmbiguousNotFoundError("CEP não encontrado");
 	}
 
 	if (!response.ok) {
@@ -170,10 +207,141 @@ const fetchBrasilApi = async (cep: string): Promise<AddressInfo> => {
 	};
 };
 
-const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = {
-	viacep: fetchViaCep,
-	widenet: fetchWidenet,
-	brasilapi: fetchBrasilApi,
+const providerMap: Record<CepProvider, (cep: string, signal: AbortSignal) => Promise<AddressInfo>> =
+	{
+		viacep: fetchViaCep,
+		widenet: fetchWidenet,
+		brasilapi: fetchBrasilApi,
+	};
+
+const DEFAULT_PROVIDERS: readonly CepProvider[] = ["viacep", "brasilapi"];
+
+/**
+ * Reads the CEP `getAddressInfoByCep` looks up, as 8 bare digits, under the rules its JSDoc
+ * gives: a string has any non-digit characters stripped, as up to 2.4.0, and has to leave the 8
+ * digits of a CEP; a number from `LOWEST_CEP` up is left padded to 8 digits.
+ *
+ * @param {unknown} cep - The CEP given.
+ * @returns {string} The 8 digits of the CEP.
+ * @throws {GetAddressInfoByCepValidationError} When the value is not a CEP.
+ */
+const readCep = (cep: unknown): string => {
+	if (!isLookupCode(cep) || (typeof cep === "number" && cep < LOWEST_CEP)) {
+		throw new GetAddressInfoByCepValidationError("CEP inválido");
+	}
+
+	const cepValue =
+		typeof cep === "number" ? String(cep).padStart(CEP_LENGTH, "0") : sanitizeToDigits(cep);
+
+	if (!isValidCep(cepValue)) {
+		throw new GetAddressInfoByCepValidationError("CEP inválido");
+	}
+
+	return parseCep(cepValue);
+};
+
+/**
+ * Reads `options.providers`, dropping the names of unknown providers.
+ *
+ * @param {CepProvider[]} [providers] - The `options.providers` given.
+ * @returns {CepProvider[]} The providers to race.
+ * @throws {GetAddressInfoByCepValidationError} When no known provider is left.
+ */
+const readProviders = (providers: GetAddressInfoByCepOptions["providers"]): CepProvider[] => {
+	if (providers === undefined) return [...DEFAULT_PROVIDERS];
+
+	// An empty array also filters down to no provider, which reports the same validation error, so
+	// there is no dedicated check for it here.
+	const known = Array.isArray(providers)
+		? providers.filter((provider) => Object.hasOwn(providerMap, provider))
+		: [];
+
+	if (known.length === 0) {
+		throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
+	}
+
+	return known;
+};
+
+/**
+ * Reads `options.timeoutMs`.
+ *
+ * `Number.isFinite` never coerces its argument, so it also turns down a value that is not a
+ * number at all, such as `"1000"`.
+ *
+ * @param {number} [timeoutMs] - The `options.timeoutMs` given.
+ * @returns {number|undefined} The time limit, or `undefined` for none.
+ * @throws {GetAddressInfoByCepValidationError} When it is given and is not a positive finite number.
+ */
+const readTimeout = (timeoutMs: number | undefined): number | undefined => {
+	if (timeoutMs === undefined) return undefined;
+
+	if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+		throw new GetAddressInfoByCepValidationError("Tempo limite inválido");
+	}
+
+	return timeoutMs;
+};
+
+/**
+ * Aborts `controller` with the reason of `signal` when `signal` aborts.
+ *
+ * @param {AbortSignal} signal - The caller's signal.
+ * @param {AbortController} controller - The controller whose signal every request gets.
+ * @returns {() => void} Stops forwarding, so a lookup that settled leaves no listener behind.
+ */
+const forwardAbort = (signal: AbortSignal, controller: AbortController): (() => void) => {
+	const abort = (): void => {
+		controller.abort(signal.reason);
+	};
+
+	signal.addEventListener("abort", abort);
+
+	return () => {
+		signal.removeEventListener("abort", abort);
+	};
+};
+
+/**
+ * Races the providers for one CEP and turns their failures into the error `getAddressInfoByCep`
+ * rejects with. A reliable "not found" wins over a service failure; BrasilAPI's 404 only wins when
+ * no provider failed to answer (see `BRASIL_API_NOT_FOUND_STATUS`).
+ *
+ * @param {CepProvider[]} providers - The providers to race.
+ * @param {string} cep - The 8 digits of the CEP.
+ * @param {AbortSignal} signal - Aborts every request.
+ * @returns {Promise<AddressInfo>} The first address a provider answers with.
+ */
+const raceProviders = async (
+	providers: CepProvider[],
+	cep: string,
+	signal: AbortSignal,
+): Promise<AddressInfo> => {
+	let notFound = false;
+	let serviceFailed = false;
+
+	const providerPromises = providers.map(async (provider) => {
+		try {
+			return await providerMap[provider](cep, signal);
+		} catch (error) {
+			if (!(error instanceof GetAddressInfoByCepNotFoundError)) serviceFailed = true;
+			else if (!(error instanceof AmbiguousNotFoundError)) notFound = true;
+			throw error;
+		}
+	});
+
+	try {
+		return await Promise.any(providerPromises);
+	} catch {
+		// Every provider failed, so when none failed to answer, every one of them said "not found".
+		if (notFound || !serviceFailed) {
+			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
+		}
+
+		throw new GetAddressInfoByCepServiceError(
+			"Todos os serviços estão fora de serviço ou indisponíveis",
+		);
+	}
 };
 
 /**
@@ -185,18 +353,41 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  * back the moment its own failure lands, and therefore the moment an all-failed rejection can
  * surface.
  *
+ * A string CEP has any non-digit characters stripped, as up to 2.4.0, so `"CEP 01310-100"` is
+ * looked up as `01310-100`, and what is left has to be the 8 digits of a CEP. A number is only read as a CEP when it
+ * is a non-negative safe integer: a sign or a decimal point would otherwise be dropped and
+ * another CEP looked up, so such a number is rejected before any request is made. A number
+ * cannot carry the leading zero of a São Paulo CEP, so it is left padded to 8 digits, but only
+ * from `1000000` (`01000-000`, the lowest CEP the Correios assign) up: a smaller number is
+ * rejected instead of being looked up as a CEP starting with `00`, as it was up to 2.4.0.
+ *
+ * A "not found" answer only wins over a service failure when it is reliable: ViaCEP's and
+ * Widenet's are, but BrasilAPI answers 404 both for an unknown CEP and when the services behind
+ * it are down. Its 404 is therefore reported as `GetAddressInfoByCepNotFoundError` only when no
+ * other provider failed to answer; next to a network failure it is reported as
+ * `GetAddressInfoByCepServiceError`. Up to 2.4.0 it always won, so an outage could be reported
+ * as an unknown CEP.
+ *
+ * No request has a time limit of its own. Pass `options.timeoutMs` to bound the whole lookup, or
+ * `options.signal` to cancel it.
+ *
  * @param {string|number} cep - The CEP (Brazilian postal code) to search for. Can be a string or number.
  * @param {GetAddressInfoByCepOptions} options - Optional configuration for the function.
  * @param {CepProvider[]} options.providers - List of providers to use. Defaults to `["viacep", "brasilapi"]`
  * if not specified (the deprecated `"widenet"` provider is excluded from the default list, but can still
  * be requested explicitly).
+ * @param {AbortSignal} options.signal - Cancels the lookup, rejecting with `signal.reason`.
+ * @param {number} options.timeoutMs - Time limit of the whole lookup, in milliseconds.
  * @returns {Promise<AddressInfo>} A promise that resolves to the address information.
- * @throws {GetAddressInfoByCepValidationError} If the CEP format is invalid, or if
- * `options.providers` is given and names no known provider: an empty array, an array of unknown
- * names, and a value that is not an array at all (`null` included) all reject this way rather
- * than with a raw `TypeError`.
+ * @throws {GetAddressInfoByCepValidationError} If the CEP format is invalid, if
+ * `options.providers` is given and names no known provider (an empty array, an array of unknown
+ * names, and a value that is not an array at all, `null` included, all reject this way rather
+ * than with a raw `TypeError`), or if `options.timeoutMs` is given and is not a positive finite
+ * number.
  * @throws {GetAddressInfoByCepNotFoundError} If the CEP is not found in any of the services.
- * @throws {GetAddressInfoByCepServiceError} If all services are unavailable.
+ * @throws {GetAddressInfoByCepServiceError} If all services are unavailable, or
+ * `options.timeoutMs` ran out first.
+ * @throws {unknown} `options.signal.reason`, when the signal aborts the lookup.
  *
  * @example
  * ```typescript
@@ -210,6 +401,15 @@ const providerMap: Record<CepProvider, (cep: string) => Promise<AddressInfo>> = 
  *
  * // Using number input
  * const address = await getAddressInfoByCep(1310100);
+ *
+ * // A negative or fractional number is rejected
+ * await getAddressInfoByCep(-1310100); // throws GetAddressInfoByCepValidationError
+ *
+ * // So is a number below 1000000, which no CEP pads to
+ * await getAddressInfoByCep(123); // throws GetAddressInfoByCepValidationError
+ *
+ * // Giving up after 5 seconds
+ * await getAddressInfoByCep("01310100", { timeoutMs: 5000 });
  * ```
  *
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
@@ -222,51 +422,30 @@ export const getAddressInfoByCep = async (
 	cep: string | number,
 	options?: GetAddressInfoByCepOptions,
 ): Promise<AddressInfo> => {
-	let cepString = sanitizeToDigits(cep);
+	const cepString = readCep(cep);
+	const providersToUse = readProviders(options?.providers);
+	const timeoutMs = readTimeout(options?.timeoutMs);
+	const signal = options?.signal;
 
-	if (typeof cep === "number") {
-		// `padStart` is a no-op when `cepString` is already 8 characters or longer, so there is no
-		// need to check its length here first.
-		cepString = cepString.padStart(8, "0");
-	}
+	signal?.throwIfAborted();
 
-	if (!isValidCep(cepString)) {
-		throw new GetAddressInfoByCepValidationError("CEP inválido");
-	}
-
-	let providersToUse: CepProvider[];
-	if (options?.providers === undefined) {
-		providersToUse = ["viacep", "brasilapi"];
-	} else if (Array.isArray(options.providers)) {
-		// An empty `options.providers` array also filters down to an empty `providersToUse` below,
-		// which already reports the same validation error, so there is no dedicated check for it here.
-		providersToUse = options.providers.filter((provider) => Object.hasOwn(providerMap, provider));
-		if (providersToUse.length === 0) {
-			throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
-		}
-	} else {
-		throw new GetAddressInfoByCepValidationError("Nenhum provedor válido especificado");
-	}
-
-	let notFound = false;
-	const providerPromises = providersToUse.map(async (provider) => {
-		try {
-			return await providerMap[provider](cepString);
-		} catch (error) {
-			if (error instanceof GetAddressInfoByCepNotFoundError) notFound = true;
-			throw error;
-		}
-	});
+	const controller = new AbortController();
+	const stopForwarding = signal === undefined ? undefined : forwardAbort(signal, controller);
+	const timer =
+		timeoutMs === undefined
+			? undefined
+			: setTimeout(() => {
+					controller.abort();
+				}, timeoutMs);
 
 	try {
-		return await Promise.any(providerPromises);
-	} catch {
-		if (notFound) {
-			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
-		}
+		return await raceProviders(providersToUse, cepString, controller.signal);
+	} catch (error) {
+		signal?.throwIfAborted();
 
-		throw new GetAddressInfoByCepServiceError(
-			"Todos os serviços estão fora de serviço ou indisponíveis",
-		);
+		throw error;
+	} finally {
+		clearTimeout(timer);
+		stopForwarding?.();
 	}
 };

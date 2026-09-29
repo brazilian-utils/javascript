@@ -9,7 +9,7 @@ import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-pho
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
 import { DEFAULT_ACCEPT } from "./constants";
 
-/** The Brazilian mobile numbering rule to enforce over the 11 digit number: `1` the legacy one (6, 7, 8 or 9), `2` the current one (7, 8 or 9, without the `700` series). */
+/** The Brazilian mobile numbering rule to enforce over the 11 digit number: both take a first number digit of 7, 8 or 9; `1` also takes the `700` series, `2` leaves it out. */
 export type PhoneVersion = 1 | 2;
 
 /** The kinds of Brazilian phone number `isValidPhone` can accept. */
@@ -33,9 +33,10 @@ export type IsValidPhoneOptions = {
  * `["mobile", "landline"]`, i.e. geographic numbers only. Add `"service"` to also accept the
  * non-geographic numbers recognized by `isValidServicePhone`; pass `[]` to accept none.
  *
- * `options.version` is forwarded to `isValidMobilePhone` and only affects mobile numbers:
- * `1` (the default) accepts a first number digit of 6, 7, 8 or 9, and `2` the 7, 8 and 9 of
- * Resolução Anatel nº 749/2022, art. 12, I, "a", minus its `700` satellite series.
+ * `options.version` is forwarded to `isValidMobilePhone` and only affects mobile numbers: both
+ * versions take the first number digits 7, 8 and 9 of Resolução Anatel nº 749/2022, art. 12, I,
+ * "a", so a leading 6 is rejected (up to 2.4.0 the default `1` accepted it); `2` also leaves out
+ * the `700` satellite series, which `1` (the default) keeps.
  *
  * @param {string} value - The phone number to validate.
  * @param {IsValidPhoneOptions} options - Optional validation options.
@@ -49,6 +50,7 @@ export type IsValidPhoneOptions = {
  * isValidPhone("11987654321", { version: 2 }); // true
  * isValidPhone("11712345678", { version: 2 }); // true (7 is SMP as well)
  * isValidPhone("11700123456", { version: 2 }); // false (the 700 series is satellite)
+ * isValidPhone("11612345678"); // false (6 is not SMP)
  * isValidPhone("1130000000"); // true (landline)
  * isValidPhone("+55 11 98765-4321"); // true
  * isValidPhone("08001234567"); // false (service numbers are not accepted by default)

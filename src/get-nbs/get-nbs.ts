@@ -1,4 +1,6 @@
-import { NBS_DESCRIPTIONS } from "../_internals/constants/nbs";
+import { NBS_CODES } from "../_internals/constants/nbs";
+import { NBS_DESCRIPTIONS } from "../_internals/constants/nbs-descriptions";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidNbs } from "../is-valid-nbs/is-valid-nbs";
 
@@ -24,7 +26,7 @@ export type Nbs = {
  * headings classify nothing by themselves and give `null`.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 9
- * digits, or the `N.NNNN.NN.NN` mask, with a single separator between the groups and optional
+ * digits, or the `N.NNNN.NN.NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
  * surrounding whitespace. Anything else (`"1.0101abc11.00"`) is rejected instead of having its
  * digits picked out. A number is only read as a code when it is a non-negative safe integer.
  * Every code starts with 1, so nothing is padded.
@@ -56,5 +58,5 @@ export const getNbs = (value: string | number): Nbs | null => {
 
 	const code = sanitizeToDigits(String(value));
 
-	return { code, description: NBS_DESCRIPTIONS[code] };
+	return { code, description: NBS_DESCRIPTIONS[findCodeIndex(NBS_CODES, code)] };
 };

@@ -1,40 +1,34 @@
 import {
 	PIX_ABSENT_TXID,
 	PIX_ADDITIONAL_DATA_ID,
-	PIX_COUNTRY_CODE,
-	PIX_COUNTRY_CODE_ID,
-	PIX_CRC_LENGTH,
-	PIX_CRC_TAG,
 	PIX_DESCRIPTION_ID,
 	PIX_DYNAMIC_POINT_OF_INITIATION,
-	PIX_GUI,
-	PIX_GUI_ID,
 	PIX_KEY_ID,
-	PIX_MERCHANT_ACCOUNT_INFORMATION_FIRST_ID,
-	PIX_MERCHANT_ACCOUNT_INFORMATION_LAST_ID,
-	PIX_MERCHANT_CATEGORY_CODE_ID,
 	PIX_MERCHANT_CITY_ID,
 	PIX_MERCHANT_NAME_ID,
-	PIX_PAYLOAD_FORMAT_INDICATOR,
-	PIX_PAYLOAD_FORMAT_INDICATOR_ID,
 	PIX_POINT_OF_INITIATION_ID,
-	PIX_STATIC_POINT_OF_INITIATION,
 	PIX_TRANSACTION_AMOUNT_ID,
-	PIX_TRANSACTION_AMOUNT_MAX_LENGTH,
-	PIX_TRANSACTION_CURRENCY,
-	PIX_TRANSACTION_CURRENCY_ID,
 	PIX_TXID_ID,
 	PIX_URL_ID,
 	PIX_WITHDRAWAL_FACILITATOR_ID,
 } from "../_internals/constants/pix";
-import { crc16Ccitt } from "../_internals/crc16-ccitt/crc16-ccitt";
-import { isValidPixUrl } from "../_internals/is-valid-pix-url/is-valid-pix-url";
+import { findPixMerchantAccountInformation } from "../_internals/find-pix-merchant-account-information/find-pix-merchant-account-information";
 import { type TlvFields, parseTlv } from "../_internals/parse-tlv/parse-tlv";
+import { isValidPixPayload } from "../is-valid-pix-payload/is-valid-pix-payload";
 
 /**
- * How a Pix BR Code is meant to be presented for payment: `"dynamic"` when it carries a PSP
- * location or when the "Point of Initiation Method" object (`01`) is `"12"`, the value the
- * Manual do BR Code reads as "só pode ser utilizado uma vez"; `"static"` otherwise.
+ * `"dynamic"` or `"static"`, from two different signals of a BR Code:
+ * - a PSP location in 26-25, which is what makes a QR Code dynamic in the Manual de Padrões
+ *   para Iniciação do Pix (§2.4.2: it "é configurado com uma URL que é acessada no momento de
+ *   sua leitura"), as opposed to the static one that carries the key (§2.4.1);
+ * - the "Point of Initiation Method" (`01`) set to `"12"`, which the EMV® QRCPS-MPM uses "when
+ *   a new QR Code is shown for each transaction" (`"11"`: "the same QR Code is shown for more
+ *   than one transaction") and the Pix manual reads as "não deve ser iniciado mais de um
+ *   pagamento com este mesmo QR Code" (§2.7.2).
+ *
+ * It is `"dynamic"` when either is present and `"static"` when neither is, so a payload that
+ * carries a key and `01` = `"12"` (a static QR Code in the §2.4 sense, marked single use) is
+ * reported as `"dynamic"`. `url` and `key` tell the two §2.4 kinds apart.
  */
 export type PixPointOfInitiation = "static" | "dynamic";
 
@@ -59,194 +53,72 @@ export type PixPayloadInfo = {
 	amount?: number;
 	/** Transaction ID, absent when the payload carries the `***` marker. */
 	txid?: string;
-	/** Whether the payload is presented as a single use one ("dynamic") or not ("static"). */
+	/**
+	 * `"dynamic"` when the payload carries a PSP location (`url`) or marks itself single use
+	 * with `01` = `"12"`, `"static"` otherwise; see `PixPointOfInitiation`.
+	 */
 	pointOfInitiation: PixPointOfInitiation;
 };
 
-const AMOUNT_REGEX = /^\d+(?:\.\d{1,2})?$/;
-
-const WITHDRAWAL_FACILITATOR_REGEX = /^\d{8}$/;
-
-const CRC_TAG_LENGTH = PIX_CRC_TAG.length + PIX_CRC_LENGTH;
-
-const findMerchantAccountInformation = (fields: TlvFields): TlvFields | null => {
-	for (
-		let id = PIX_MERCHANT_ACCOUNT_INFORMATION_FIRST_ID;
-		id <= PIX_MERCHANT_ACCOUNT_INFORMATION_LAST_ID;
-		id++
-	) {
-		const template = fields[id.toString()];
-
-		if (template === undefined) continue;
-
-		const objects = parseTlv(template);
-
-		if (objects?.[PIX_GUI_ID]?.toLowerCase() === PIX_GUI) return objects;
-	}
-
-	return null;
-};
-
-const isValidCrc = (payload: string): boolean => {
-	const checksum = payload.slice(-PIX_CRC_LENGTH);
-
-	if (payload.slice(-CRC_TAG_LENGTH, -PIX_CRC_LENGTH) !== PIX_CRC_TAG) return false;
-
-	// A checksum that is not four uppercase hexadecimal digits can never equal crc16Ccitt's
-	// always-hexadecimal output, so the comparison below turns it down on its own.
-	return crc16Ccitt(payload.slice(0, -PIX_CRC_LENGTH)) === checksum.toUpperCase();
-};
-
-const resolvePointOfInitiation = (fields: TlvFields): string | undefined | null => {
-	const pointOfInitiation = fields[PIX_POINT_OF_INITIATION_ID];
-
-	if (
-		pointOfInitiation !== undefined &&
-		pointOfInitiation !== PIX_STATIC_POINT_OF_INITIATION &&
-		pointOfInitiation !== PIX_DYNAMIC_POINT_OF_INITIATION
-	) {
-		return null;
-	}
-
-	return pointOfInitiation;
-};
-
-const isValidAmount = (
-	amount: string | undefined,
-	{ url, withdrawalFacilitator }: MerchantKeyInfo,
-): boolean => {
-	if (amount === undefined) return true;
-
-	if (!AMOUNT_REGEX.test(amount) || amount.length > PIX_TRANSACTION_AMOUNT_MAX_LENGTH) return false;
-
-	return url !== undefined || withdrawalFacilitator !== undefined || Number(amount) > 0;
-};
-
-type MerchantKeyInfo = {
-	key?: string;
-	url?: string;
-	description?: string;
-	withdrawalFacilitator?: string;
-};
-
-const resolveMerchantKeyInfo = (fields: TlvFields): MerchantKeyInfo | null => {
-	const merchantAccountInformation = findMerchantAccountInformation(fields);
-
-	if (!merchantAccountInformation) return null;
-
-	const key = merchantAccountInformation[PIX_KEY_ID];
-	const url = merchantAccountInformation[PIX_URL_ID];
-	const description = merchantAccountInformation[PIX_DESCRIPTION_ID];
-	const withdrawalFacilitator = merchantAccountInformation[PIX_WITHDRAWAL_FACILITATOR_ID];
-
-	if ((key === undefined) === (url === undefined)) return null;
-	if (key !== undefined && !key) return null;
-	if (url !== undefined && !isValidPixUrl(url)) return null;
-	if (withdrawalFacilitator !== undefined && url !== undefined) return null;
-	if (
-		withdrawalFacilitator !== undefined &&
-		!WITHDRAWAL_FACILITATOR_REGEX.test(withdrawalFacilitator)
-	) {
-		return null;
-	}
-
-	return { key, url, description, withdrawalFacilitator };
-};
-
-const resolveTxid = (fields: TlvFields): string | undefined | null => {
-	const additionalData = fields[PIX_ADDITIONAL_DATA_ID];
-
-	if (additionalData === undefined) return undefined;
-
-	const objects = parseTlv(additionalData);
-
-	if (!objects) return null;
-
-	return objects[PIX_TXID_ID];
-};
-
-type OptionalPixFields = MerchantKeyInfo & {
-	amount?: string;
-	txid?: string;
-	pointOfInitiation?: string;
-};
-
-const buildPixPayload = (
-	merchantName: string,
-	merchantCity: string,
-	optional: OptionalPixFields,
-): PixPayloadInfo => {
-	const { key, url, description, withdrawalFacilitator, amount, txid, pointOfInitiation } =
-		optional;
-	const isDynamic = url !== undefined || pointOfInitiation === PIX_DYNAMIC_POINT_OF_INITIATION;
-	const pix: PixPayloadInfo = {
-		merchantName,
-		merchantCity,
-		pointOfInitiation: isDynamic ? "dynamic" : "static",
-	};
-
-	if (key !== undefined) pix.key = key;
-	if (url !== undefined) pix.url = url;
-	if (description !== undefined) pix.description = description;
-	if (withdrawalFacilitator !== undefined) pix.withdrawalFacilitator = withdrawalFacilitator;
-
-	if (amount !== undefined && url === undefined) pix.amount = Number(amount);
-	if (txid !== undefined && txid !== PIX_ABSENT_TXID && url === undefined) pix.txid = txid;
-
-	return pix;
-};
+/**
+ * Reads a TLV string `isValidPixPayload` has already found well-formed. The spread turns the
+ * `null` `parseTlv` gives for a malformed string, which cannot happen here, into `{}`, so the
+ * result is typed as the objects without a branch nothing could ever take.
+ *
+ * @param {string} value - A TLV string `isValidPixPayload` has already parsed.
+ * @returns {TlvFields} The objects of the string, keyed by ID.
+ */
+const readTlv = (value: string): TlvFields => ({ ...parseTlv(value) });
 
 /**
  * Parses a Pix BR Code payload, the string behind a Pix QR Code and behind "Pix copia e cola".
  *
- * The payload is rejected when its TLV (tag-length-value) structure is malformed, when the CRC
- * does not match, when a mandatory object is missing or malformed, or when none of the
- * "Merchant Account Information" templates (IDs 26 to 51) carries the `br.gov.bcb.pix` GUI
- * together with either a key (static) or a URL (dynamic).
+ * The payload is read only when `isValidPixPayload` accepts it, under the rules of the Manual
+ * de Padrões para Iniciação do Pix documented there: a Pix key in the DICT form (§2.5.1) or a
+ * PSP location of at most 77 characters (§2.5.2), a merchant name of at most 25 characters and
+ * a merchant city of at most 15, and an "Additional Data Field Template" (62) that always
+ * carries the `txid` (62-05), "sempre presente em um BR Code" (§2.6, footnote 21), either the
+ * `***` marker or 1 to 25 letters and digits (§2.6.2). Next to a PSP location its content is
+ * ignored (§2.7: "Os campos Valor e Identificador da Transação (txid) não devem ser preenchidos
+ * no QR Code dinâmico. Se preenchidos, seu conteúdo deve ser ignorado"), so `txid` is left out
+ * there, as `amount` is, and for the `***` marker.
  *
- * The Pix key itself is not validated: the manual states a static QR Code can be generated
- * with a key that no longer exists in the DICT, so key ownership is only settled at payment
- * time. The "Additional Data Field Template" (ID 62) is mandatory in the BR Code table but
- * optional in the EMV® specification it refers to, so it is accepted when absent. The lengths
- * the manual reserves for the merchant name (25), the merchant city (15) and the `txid` (25)
- * are generator side limits, enforced by `generatePixPayload`; payloads in the wild routinely
- * overrun them, so they are not enforced here, and neither is the 77 character limit of the
- * Pix key field (26-01).
+ * Whether the key is registered in the DICT is only settled at payment time, so a key in the
+ * right form is read even when no account holds it.
  *
  * Unreserved Templates (IDs 80 to 99) are ignored. The "QR Code composto" of Pix Automático
  * (Pix recorrente) writes its recurrence location in one of them: when such a payload also
- * carries a payment location in 26-25, as the composite example of the Pix manual does, it is
- * parsed here as an ordinary dynamic payload and its recurrence location is dropped, so a
- * consumer that has to tell the two apart cannot rely on this parser. Only a payload with no
- * Pix template at all in IDs 26 to 51 returns `null`.
+ * carries a key or a payment location in IDs 26 to 51, as the composite examples of §2.8 do,
+ * it is parsed here as an ordinary static or dynamic payload and its recurrence location is
+ * dropped, so a consumer that has to tell the two apart cannot rely on this parser. A
+ * composite that carries only the recurrence returns `null`.
  *
- * The merchant account information must carry exactly one of a Pix key (26-01) or a PSP
- * location (26-25); the location is checked with the same host and path rule
- * `generatePixPayload` applies. The "Point of Initiation Method" object (`01`) is advisory, as
- * the Manual do BR Code marks it `Uso: O` and only assigns a meaning to the value `"12"`
- * ("Se o valor 12 estiver presente, significa que o BR Code só pode ser utilizado uma vez"):
- * it may be absent from either shape, and only a value outside `{"11", "12"}` is rejected.
- * `pointOfInitiation` is reported as `"dynamic"` when the payload carries a PSP location or
- * when `01` is `"12"`, and as `"static"` otherwise. When the payload carries a PSP location the
- * transaction amount (54) and the `txid` (62-05) are ignored, as the manual mandates, because
- * the PSP location is the source of truth for both.
+ * The "Point of Initiation Method" object (`01`) is optional ("O campo BR Code 01 (Point of
+ * Initiation Method), opcional", §2.7.2) and, when present, `"11"` or `"12"`. `pointOfInitiation`
+ * is reported as `"dynamic"` when the payload carries a PSP location or when `01` is `"12"`,
+ * and as `"static"` otherwise. When the payload carries a PSP location its transaction amount
+ * (54) is left out, since §2.7 has the payer ignore it ("Se preenchidos, seu conteúdo deve ser
+ * ignorado"): the PSP location is the source of truth.
  *
- * A payload built around a Pix key that carries the transaction amount (54) must state an
- * amount greater than zero, unless it is a Pix Saque BR Code: §2.6 of the Pix manual puts the
- * ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`) of the same
- * template this parser already reads, and states that "a presença do campo fss, com um ISPB
- * válido […] indica que esse é um QR Code para Pix Saque", whose amount is settled at payment
- * time. So `54` set to `"0"` or `"0.00"` is accepted together with `fss` and rejected without
- * it; that rejection is a deliberate restriction of this library, not a rule of the manual,
- * whose field table allows `"0"` in any payload. A `fss` that is not 8 digits is rejected, and
- * so is a `fss` written next to a PSP location: §2.7 of the Manual de Padrões para Iniciação do
- * Pix maps the dynamic QR Code to exactly two sub-objects, `00` (GUI) and `25` (URL), while
- * `fss` belongs to the static template of §2.6, whose §2.6.1 states that "não há funcionalidade
- * de Pix Troco para QR Codes estáticos, apenas para QR Codes dinâmicos".
+ * The transaction amount (54), when present, follows the EMV® QRCPS-MPM: digits with an
+ * optional `.` decimal mark that "may be present even if there are no decimals" (`"98."` reads
+ * as 98), at most two decimals and 13 characters. It may be zero (Manual do BR Code, Tabela 1:
+ * "Ex.: "0", "1.00", "123.99"") in a Pix Saque BR Code and next to a PSP location, the payloads
+ * the Pix API gives a zero amount to ("Para cobranças imediatas que representem um saque: deve
+ * apresentar o valor 0.00 (zero)"); a payload built around a key alone must state one greater
+ * than zero, as the EMV has it ("shall be different from zero"). §2.6 of the Pix manual puts the
+ * ISPB of the "facilitador de serviço de saque" in sub-object 26-03 (`fss`) and states that "a
+ * presença do campo fss, com um ISPB válido […] indica que esse é um QR Code para Pix Saque";
+ * `withdrawalFacilitator` reads the `fss` back. A `fss` that is not 8 digits is
+ * rejected, and so is a `fss` written next to a PSP location: §2.7 of the Manual de Padrões
+ * para Iniciação do Pix maps the dynamic QR Code to exactly two sub-objects, `00` (GUI) and
+ * `25` (URL), while `fss` belongs to the static template of §2.6, whose §2.6.1 states that
+ * "não há funcionalidade de Pix Troco para QR Codes estáticos, apenas para QR Codes
+ * dinâmicos".
  *
  * @param {string} value - The BR Code payload to be parsed.
- * @returns {PixPayloadInfo|null} The Pix data of the payload, or `null` when it is not a valid Pix
- * BR Code.
+ * @returns {PixPayloadInfo|null} The Pix data of the payload, or `null` exactly when
+ * `isValidPixPayload` returns `false`.
  *
  * @example
  * ```typescript
@@ -263,58 +135,49 @@ const buildPixPayload = (
  * ```
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
+ * Manual do BR Code v2.0.1, Tabela 1, `54` Transaction Amount.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
+ * Manual de Padrões para Iniciação do Pix v2.10.0, §2.6, §2.7 and the `valor.original` of the
+ * Pix API.
+ * @see Official: https://www.emvco.com/terms-of-use/?u=/wp-content/uploads/documents/EMVCo-Merchant-Presented-QR-Specification-v1-1.pdf
+ * EMV® QRCPS-MPM v1.1, cited by the Pix manual, "Transaction Amount (ID "54")": "If present,
+ * the Transaction Amount shall be different from zero [...] the "." character may be present
+ * even if there are no decimals"; its valid examples are "98.73", "98" and "98.".
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
  * DICT (Diretório de Identificadores de Contas Transacionais) API specification.
  */
 export const getPixPayloadInfo = (value: string): PixPayloadInfo | null => {
-	if (typeof value !== "string") return null;
+	if (!isValidPixPayload(value)) return null;
 
-	const payload = value.trim();
-
-	// Stryker disable next-line ConditionalExpression,EqualityOperator: a payload this short has no room left for any of the mandatory fields checked below, so it can never parse to a non-null result even without this guard
-	if (payload.length <= CRC_TAG_LENGTH || !isValidCrc(payload)) return null;
-
-	const fields = parseTlv(payload);
-
-	if (!fields) return null;
-
-	if (fields[PIX_PAYLOAD_FORMAT_INDICATOR_ID] !== PIX_PAYLOAD_FORMAT_INDICATOR) return null;
-
-	const pointOfInitiation = resolvePointOfInitiation(fields);
-
-	if (pointOfInitiation === null) return null;
-
-	if (fields[PIX_MERCHANT_CATEGORY_CODE_ID] === undefined) return null;
-	if (fields[PIX_TRANSACTION_CURRENCY_ID] !== PIX_TRANSACTION_CURRENCY) return null;
-	if (fields[PIX_COUNTRY_CODE_ID]?.toUpperCase() !== PIX_COUNTRY_CODE) return null;
-
-	const merchantName = fields[PIX_MERCHANT_NAME_ID];
-
-	if (merchantName === undefined || merchantName === "") return null;
-
-	const merchantCity = fields[PIX_MERCHANT_CITY_ID];
-
-	if (merchantCity === undefined || merchantCity === "") return null;
-
-	const merchantKeyInfo = resolveMerchantKeyInfo(fields);
-
-	if (!merchantKeyInfo) return null;
-
+	const fields = readTlv(value.trim());
+	const merchantAccountInformation: TlvFields = {
+		...findPixMerchantAccountInformation(fields),
+	};
+	const url = merchantAccountInformation[PIX_URL_ID];
 	const amount = fields[PIX_TRANSACTION_AMOUNT_ID];
+	// isValidPixPayload has checked that 62 is there and carries 62-05.
+	const txid = String(readTlv(String(fields[PIX_ADDITIONAL_DATA_ID]))[PIX_TXID_ID]);
+	const isDynamic =
+		url !== undefined || fields[PIX_POINT_OF_INITIATION_ID] === PIX_DYNAMIC_POINT_OF_INITIATION;
+	const pix: PixPayloadInfo = {
+		// isValidPixPayload has checked that both are there and not empty.
+		merchantName: String(fields[PIX_MERCHANT_NAME_ID]),
+		merchantCity: String(fields[PIX_MERCHANT_CITY_ID]),
+		pointOfInitiation: isDynamic ? "dynamic" : "static",
+	};
+	const key = merchantAccountInformation[PIX_KEY_ID];
+	const description = merchantAccountInformation[PIX_DESCRIPTION_ID];
+	const withdrawalFacilitator = merchantAccountInformation[PIX_WITHDRAWAL_FACILITATOR_ID];
 
-	if (!isValidAmount(amount, merchantKeyInfo)) return null;
+	if (key !== undefined) pix.key = key;
+	if (url !== undefined) pix.url = url;
+	if (description !== undefined) pix.description = description;
+	if (withdrawalFacilitator !== undefined) pix.withdrawalFacilitator = withdrawalFacilitator;
 
-	const txid = resolveTxid(fields);
+	if (amount !== undefined && url === undefined) pix.amount = Number(amount);
+	if (txid !== PIX_ABSENT_TXID && url === undefined) pix.txid = txid;
 
-	if (txid === null) return null;
-
-	return buildPixPayload(merchantName, merchantCity, {
-		...merchantKeyInfo,
-		amount,
-		txid,
-		pointOfInitiation,
-	});
+	return pix;
 };

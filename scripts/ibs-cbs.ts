@@ -8,7 +8,7 @@ import { decodeXml } from "./decode-xml.ts";
 import { readXlsxSheets } from "./read-xlsx-sheet.ts";
 import { serializeRecord } from "./serialize-record.ts";
 
-const scriptsDir = import.meta.dirname;
+const scriptsDirectory = import.meta.dirname;
 
 const PORTAL = "https://www.nfe.fazenda.gov.br/portal/";
 
@@ -267,7 +267,7 @@ const main = async (): Promise<void> => {
 	}
 
 	await writeFile(
-		resolve(scriptsDir, "..", "./src/_internals/constants/ibs-cbs.ts"),
+		resolve(scriptsDirectory, "..", "./src/_internals/constants/ibs-cbs.ts"),
 		`/**
  * CST-IBS/CBS (Código de Situação Tributária do IBS e da CBS) table, indexed by the 3 digit
  * code, with the description the official table gives each one.

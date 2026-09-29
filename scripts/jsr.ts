@@ -15,18 +15,18 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
-const SRC_DIR = join(ROOT, "src");
+const SOURCE_DIRECTORY = join(ROOT, "src");
 const JSR_PATH = join(ROOT, "jsr.json");
 
-const utilNames = readdirSync(SRC_DIR, { withFileTypes: true })
+const utilityNames = readdirSync(SOURCE_DIRECTORY, { withFileTypes: true })
 	.filter((entry) => entry.isDirectory() && !entry.name.startsWith("_"))
 	.map((entry) => entry.name)
-	.filter((name) => existsSync(join(SRC_DIR, name, `${name}.ts`)))
+	.filter((name) => existsSync(join(SOURCE_DIRECTORY, name, `${name}.ts`)))
 	.toSorted();
 
 const exports: Record<string, string> = { ".": "./src/index.ts" };
 
-for (const name of utilNames) {
+for (const name of utilityNames) {
 	exports[`./${name}`] = `./src/${name}/${name}.ts`;
 }
 

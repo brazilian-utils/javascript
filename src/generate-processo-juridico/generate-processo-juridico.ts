@@ -1,5 +1,5 @@
 import { calculateProcessoJuridicoCheckDigits } from "../_internals/calculate-processo-juridico-check-digits/calculate-processo-juridico-check-digits";
-import { PROCESSO_JURIDICO_TRIBUNALS } from "../_internals/constants/processo-juridico";
+import { getProcessoJuridicoTribunals } from "../_internals/constants/processo-juridico";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { pickRandom } from "../_internals/pick-random/pick-random";
@@ -22,8 +22,6 @@ export type GenerateProcessoJuridicoOptions = GenerateProcessoJuridicoParams;
 
 const MAX_YEAR = 9999;
 const TRIBUNAL_LENGTH = 2;
-
-const COURTS = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
 
 /**
  * Generates a random valid Brazilian Processo Jurídico (court case) number,
@@ -53,7 +51,8 @@ const COURTS = [...PROCESSO_JURIDICO_TRIBUNALS.keys()];
  * generateProcessoJuridico({ court: 10 }); // null (no such órgão)
  * ```
  *
- * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout and its check digits, and
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout, its check digits (art. 1º,
+ * § 2º, and the algorithm in its Anexo VIII, "CÁLCULO DO DÍGITO VERIFICADOR"), and
  * closes the list of órgão (`J`) and tribunal (`TR`) codes in art. 1º, § 4º and § 5º.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
@@ -64,8 +63,9 @@ export const generateProcessoJuridico = (
 	if (isNullish(options) || typeof options !== "object") return null;
 
 	const currentYear = new Date().getFullYear();
-	const { year = currentYear, court = pickRandom(COURTS) } = options;
-	const tribunals = PROCESSO_JURIDICO_TRIBUNALS.get(court);
+	const tribunalsByCourt = getProcessoJuridicoTribunals();
+	const { year = currentYear, court = pickRandom([...tribunalsByCourt.keys()]) } = options;
+	const tribunals = tribunalsByCourt.get(court);
 
 	if (!Number.isInteger(year) || year < currentYear || year > MAX_YEAR || tribunals === undefined) {
 		return null;

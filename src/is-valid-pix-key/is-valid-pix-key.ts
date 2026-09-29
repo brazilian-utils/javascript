@@ -1,4 +1,7 @@
-import { type PixKeyType, getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
+import {
+	type PixKeyType,
+	detectPixKeyType,
+} from "../_internals/detect-pix-key-type/detect-pix-key-type";
 
 /** Options of `isValidPixKey`. */
 export type IsValidPixKeyOptions = {
@@ -9,10 +12,10 @@ export type IsValidPixKeyOptions = {
 /**
  * Validates a Pix key (chave Pix) against the DICT key formats.
  *
- * A value is valid when `getPixKeyInfo` recognizes it as a CPF, a CNPJ, an e-mail address, a
- * Brazilian mobile phone number or a random key (EVP), and when that kind is listed in
- * `options.accept`. The manual registers a "número de telefone celular", so a landline is not
- * a valid phone key.
+ * A value is valid when it is recognized, by the rules `getPixKeyInfo` documents, as a CPF, a
+ * CNPJ, an e-mail address, a Brazilian mobile phone number or a random key (EVP), and when that
+ * kind is listed in `options.accept`. The manual registers a "número de telefone celular", so a
+ * landline is not a valid phone key.
  *
  * @param {string} value - The Pix key to validate.
  * @param {IsValidPixKeyOptions} [options] - Optional validation options.
@@ -31,17 +34,19 @@ export type IsValidPixKeyOptions = {
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
- * DICT (Diretório de Identificadores de Contas Transacionais) API specification, key format
- * reference.
+ * DICT (Diretório de Identificadores de Contas Transacionais) API specification 2.12.1, key
+ * format reference. Tag "Chave", type `EMAIL`: "E-mail deve possuir no máximo 77 caracteres e
+ * deve ser em minúsculo", with the pattern this library applies verbatim, which has had no `&`
+ * since version 2.6.0.
  * @see Official: https://github.com/bacen/pix-api
  * Pix (SPI) OpenAPI spec.
  */
 export const isValidPixKey = (value: string, options?: IsValidPixKeyOptions): boolean => {
-	const key = getPixKeyInfo(value);
+	const type = detectPixKeyType(value);
 
-	if (!key) return false;
+	if (type === null) return false;
 
 	const accept = options?.accept;
 
-	return Array.isArray(accept) ? accept.includes(key.type) : true;
+	return Array.isArray(accept) ? accept.includes(type) : true;
 };

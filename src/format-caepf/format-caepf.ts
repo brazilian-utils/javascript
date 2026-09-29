@@ -1,5 +1,5 @@
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { PATTERN } from "./constants";
 
@@ -16,6 +16,9 @@ export type FormatCaepfOptions = {
  * Formats progressively, as far as the digits given go, so it can also be used as an input
  * mask while the user is still typing.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The CAEPF value to be formatted.
  * @param {FormatCaepfOptions} [options] - Optional formatting options.
  * @param {boolean} [options.pad] - Whether to pad the value with leading zeros up to 14 digits.
@@ -28,6 +31,7 @@ export type FormatCaepfOptions = {
  * formatCaepf(41142260000101); // "411.422.600/001-01"
  * formatCaepf("184", { pad: true }); // "000.000.000/001-84"
  * formatCaepf("184"); // "184"
+ * formatCaepf(-41142260000101); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/caepf
@@ -35,7 +39,7 @@ export type FormatCaepfOptions = {
  * print the mask; the mask below is the one the sources cited by `isValidCaepf` agree on.
  */
 export const formatCaepf = (value: string | number, options?: FormatCaepfOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	return format({
 		pad: options?.pad,

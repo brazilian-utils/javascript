@@ -5,9 +5,13 @@
  * (6, 7, 8 or 9), 04 overall check digit (modulus 10 or 11 per position 03), 05-15 amount,
  * 16-19 issuing company, 20-44 free field. The linha digitável splits the barcode into
  * 4 blocks of 11 digits, each one followed by its own check digit (§03-E). There is no
- * segment 8 nor 0, and 9 is reserved for the banks themselves.
+ * segment 8 nor 0, and 9 is reserved for the banks themselves. Versão 08 adds the alphanumeric
+ * CNPJ: positions 16-23 may carry a CNPJ only when it is numeric, and segment 6 gets no new
+ * codes; the structure checked here is unchanged.
  *
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
+ * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".
  */
 
 export const ARRECADACAO_PRODUCT = "8";

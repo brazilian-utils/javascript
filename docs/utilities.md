@@ -12,6 +12,7 @@ These rules hold for every function unless its section says otherwise.
 
 - **Nothing throws on bad input** (`null`, `undefined`, the wrong type): `isValid*` return `false`, `format*` and `parse*` return `''`, single-item `get*` return `null`, list `get*` return `[]`. The only exceptions are the async `getAddressInfoByCep` and `getCepInfoByAddress`, which reject with typed errors.
 - **Validators accept the value masked or not**: the usual mask characters (`.`, `-`, `/`) and spaces between or around the groups are ignored, so there is no need to strip formatting first.
+- **A number is read only when it is a non-negative safe integer**: the functions that take `string | number` treat a negative, fractional, non-finite or unsafe number as bad input (`isValidCep(-20040020)` is `false`, `formatCpf(-1)` and `parseCpf(1.5)` are `''`), since in a number `-` and `.` are not mask characters.
 - **Formatters mask as far as the value goes**, so they also work as input masks while the user types. `parse*` functions do the reverse and keep only the meaningful characters.
 - **Generators use `Math.random()`**, so they are fine for tests and fixtures and never for anything security-related.
 - **Getters return a new array or object on every call**, so mutating a result never affects the next call.
@@ -25,6 +26,7 @@ These rules hold for every function unless its section says otherwise.
 Check if a CPF is valid.
 
 - Returns `false` for a reserved number (all digits the same, such as `00000000000`) and for a wrong check digit.
+- The reserved numbers are the ones the Receita Federal's [DJE layout](http://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=36307) lists as not valid. The CPF's own norm, [IN RFB nº 2.172/2024](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=135611), has no check digit rule; the rule is the one of the Receita Federal's e-Financeira manual (Anexo II, `REGRA_VALIDA_CPF`, approved by the Ato Declaratório Executivo Cofis nº 10/2026).
 
 ```javascript
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';
@@ -38,7 +40,7 @@ isValidCpf('111 444 777 35'); // true (whitespace mask)
 Format a CPF.
 
 - **Options** (`FormatCpfOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits.
-- `obfuscate` is applied after `pad`.
+- `obfuscate` is applied after `pad`. It follows the rule the Leis de Diretrizes Orçamentárias set for publishing a CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), first set by Lei nº 12.309/2010, art. 87, § 5º; [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the LDO for 2026, repeats it).
 
 ```javascript
 import { formatCpf } from '@brazilian-utils/brazilian-utils';
@@ -63,7 +65,7 @@ parseCpf('746.506.880-00'); // 74650688000
 Generate a valid random CPF.
 
 - The optional `state` argument (`StateCode`, e.g. `"SP"`) fixes the região fiscal digit (the 9th) to that state's code.
-- Without `state`, or with an unknown code, a random região fiscal digit is drawn.
+- `state` ignores letter case and surrounding whitespace (`'sp'` is `'SP'`). Without `state`, or with an unknown code, a random região fiscal digit is drawn.
 
 ```javascript
 import { generateCpf } from '@brazilian-utils/brazilian-utils'
@@ -114,23 +116,25 @@ Check if a CNPJ is valid.
 
 - **Options** (`IsValidCnpjOptions`): `version` picks the accepted format: `1` (default) numeric only, `2` numeric and alphanumeric. Any other value is read as `1`.
 - A reserved number (all digits the same) is rejected under both versions; version `2` has no reserved list for letters.
+- The official character set of the alphanumeric CNPJ is the capital letters `A` to `Z` and the digits (the 2 check digits are always digits). A lower case letter is accepted only as input normalization, like a mask character: the input is upper-cased first.
+- The Ex1 of question 23 of the Receita Federal's Q&A on the alphanumeric CNPJ, `AA345678/0003-29`, is a misprint: its check digits are `86`, so it is rejected.
 
 ```javascript
 import { isValidCnpj } from '@brazilian-utils/brazilian-utils';
 
 isValidCnpj('15515147234255'); // false
-isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (lowercase alphanumeric)
+isValidCnpj('q0slfmbd7vx439', { version: 2 }); // true (read as Q0SLFMBD7VX439)
 ```
 
-Source: [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
+Source: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=141102) (Anexo XV of IN RFB nº 2.119/2022, weights "da direita para esquerda" as corrected by the retificação in the DOU of 25/10/2024), [Receita Federal, Manual do DV do CNPJ](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf), [CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico).
 
 ### formatCnpj
 
 Format a CNPJ.
 
 - **Options** (`FormatCnpjOptions`): `pad` left-pads the value with zeros to 14 characters before masking (default `false`); `version` picks the format, `1` (default) numeric only, `2` alphanumeric; `obfuscate` hides the first 2 digits and the 2 check digits.
-- Version `2` keeps letters (upper-cased) and digits; version `1` keeps digits only.
-- `obfuscate` works in both versions and is applied after `pad`.
+- Version `2` keeps letters and digits, a lower case letter upper-cased first since the official set is `A` to `Z`; version `1` keeps digits only.
+- `obfuscate` works in both versions and is applied after `pad`. It is a convention of this library, not an official rule: no law or Receita Federal act sets a masking rule for the CNPJ, whose data are public, the [ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) says "não há um padrão para o mascaramento", and the [Banco Central's Pix rules](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) show the CNPJ in full where they mask the CPF; it hides the first 2 characters and the 2 check digits, after the CPF rule.
 
 ```javascript
 import { formatCnpj } from '@brazilian-utils/brazilian-utils';
@@ -145,7 +149,7 @@ formatCnpj('12345678000195', { obfuscate: true }); // **.345.678/0001-**
 
 Remove CNPJ formatting, return a normalized value, and cap the result to 14 characters.
 
-- **Options** (`ParseCnpjOptions`): `version` picks the format: `1` (default) keeps digits only, `2` keeps letters and digits, upper-cased.
+- **Options** (`ParseCnpjOptions`): `version` picks the format: `1` (default) keeps digits only, `2` keeps letters and digits, a lower case letter upper-cased since the official set is `A` to `Z` (`parseCnpj('12.abc.345/01de-35', { version: 2 })` returns `'12ABC34501DE35'`).
 
 ```javascript
 import { parseCnpj } from '@brazilian-utils/brazilian-utils';
@@ -160,6 +164,7 @@ Generate a valid random CNPJ.
 
 - The first argument is either the version, `1` (default) numeric or `2` alphanumeric, or a `GenerateCnpjParams` object with `version` plus `branch`.
 - `branch` is the "número de ordem" (filial) block, an integer from 1 to 9999 (random by default). An invalid `branch` is ignored. The block stays numeric in both versions.
+- A random ordem block is never `0000`: the establishments of a root are numbered from `0001`, the matriz, on, so that block is never assigned.
 
 ```javascript
 import { generateCnpj } from '@brazilian-utils/brazilian-utils'
@@ -210,7 +215,7 @@ Source: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda
 
 Check if a CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) is valid.
 
-- Accepts a `string` or a `number`. A CEP that starts with `0` has to be a string, since a number cannot keep the leading zero.
+- Accepts a `string` or a `number`. A CEP that starts with `0` has to be a string, since a number cannot keep the leading zero, and a number is only read when it is a non-negative safe integer.
 - Spaces, dots and hyphens are ignored. Any other character makes the value invalid.
 
 ```javascript
@@ -221,6 +226,7 @@ isValidCep('92500-000'); // true (hyphen between groups)
 isValidCep('92.500-000'); // true (dot and hyphen)
 isValidCep('013 10 100'); // true (spaces anywhere between the digits)
 isValidCep(20040020); // true (number input)
+isValidCep(-20040020); // false (not a non-negative safe integer)
 isValidCep('9250000A'); // false (letters are rejected)
 isValidCep('12345'); // false (invalid length)
 ```
@@ -230,13 +236,14 @@ isValidCep('12345'); // false (invalid length)
 Format a CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)).
 
 - **Options** (`FormatCepOptions`): `pad` left-pads the value with zeros to 8 digits before masking (default `false`).
-- A CEP that starts with `0` given as a number loses that zero: pass a string or use `pad`.
+- A CEP that starts with `0` given as a number loses that zero: pass a string or use `pad`. A number is only read when it is a non-negative safe integer; any other number returns `''`.
 
 ```javascript
 import { formatCep } from '@brazilian-utils/brazilian-utils';
 
 formatCep('92500000'); // 92500-000
 formatCep('9250000', { pad: true }); // 09250-000
+formatCep(-92500000); // '' (not a non-negative safe integer)
 ```
 
 ### parseCep
@@ -263,10 +270,14 @@ generateCep(); // '92500000'
 
 Fetch the address of a CEP from several providers at once and resolve to the first successful answer. The result is an `AddressInfo`: `cep`, `state`, `city`, `neighborhood` and `street`.
 
-- **Options** (`GetAddressInfoByCepOptions`): `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated and left out of the default list.
-- Accepts a string or a number. A number is left-padded with zeros to 8 digits.
+- **Options** (`GetAddressInfoByCepOptions`):
+  - `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated and left out of the default list.
+  - `timeoutMs` (`number`) bounds the whole lookup, retries included (default: no limit). When it runs out, every request is aborted and the call rejects with `GetAddressInfoByCepServiceError`.
+  - `signal` (`AbortSignal`) cancels the lookup; the call rejects with `signal.reason`, the same as `fetch`.
+- Accepts a string or a number. A string has any non-digit characters stripped (`'CEP 01310-100'` is `01310100`) and has to leave 8 digits. A number is left-padded with zeros to 8 digits, since it cannot carry the leading zero of a São Paulo CEP, but only from `1000000` (`01000-000`, the lowest CEP the Correios assign) up. A smaller, negative or fractional number is rejected with `GetAddressInfoByCepValidationError` before any request is made.
 - Retries transient network failures per provider.
-- Rejects with `GetAddressInfoByCepValidationError` when the CEP is invalid or `providers` names no known provider, with `GetAddressInfoByCepNotFoundError` when every provider failed and at least one reported the CEP as unknown, and with `GetAddressInfoByCepServiceError` when every provider failed for another reason.
+- Rejects with `GetAddressInfoByCepValidationError` when the CEP is invalid, `providers` names no known provider or `timeoutMs` is not a positive finite number, with `GetAddressInfoByCepNotFoundError` when every provider failed and at least one reported the CEP as unknown, and with `GetAddressInfoByCepServiceError` when every provider failed for another reason.
+- BrasilAPI answers 404 both for an unknown CEP and when the services behind it are down, so its 404 only counts as "unknown CEP" when no other provider failed to answer.
 - All three extend `GetAddressInfoByCepError`, so one `catch` covers them.
 
 ```javascript
@@ -283,6 +294,9 @@ const addressFromProviders = await getAddressInfoByCep('01310-100', {
 
 // Using number input (will be padded automatically)
 const addressFromNumber = await getAddressInfoByCep(1310100);
+
+// Giving up after 5 seconds
+const addressWithinFiveSeconds = await getAddressInfoByCep('01310100', { timeoutMs: 5000 });
 ```
 
 ### getCepInfoByAddress
@@ -329,16 +343,18 @@ const ceps = await getCepInfoByAddress({
 Check if a boleto ([brazilian payment method](https://en.wikipedia.org/wiki/Boleto)) is valid.
 
 - Accepts the 47 digit "cobrança bancária" linha digitável and, for the "boleto de arrecadação", either its 48 digit linha digitável or its 44 digit barcode.
-- The código de moeda (position 4 of the cobrança bancária barcode) is not checked.
+- The código de moeda (position 4 of the cobrança bancária barcode and linha digitável) must be `9` (real), the only code Carta-Circular BCB nº 2.926/2000 assigns. The one exception is the "Situação 2" slip of the FEBRABAN Convenção da Cobrança, issued by an institution identified only by its ISPB: bank code `988`, código de moeda `0`, fator de vencimento `0000` and the ISPB, padded with zeros, where the amount would be. Any other digit is rejected.
 
 ```javascript
 import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
 
 isValidBoleto('00190000090114971860168524522114675860000102656'); // true
 isValidBoleto('846100000005246100291102005460339004695895061080'); // true (boleto de arrecadação)
+isValidBoleto('00170000010114971860168524522114275860000102656'); // false (código de moeda 7)
+isValidBoleto('98800000060114971860168524522114100000018236120'); // true (Situação 2: bank 988, moeda 0, ISPB)
 ```
 
-Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf).
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
 
 ### formatBoleto
 
@@ -356,7 +372,7 @@ formatBoleto('846100000005246100291102005460339004695895061080'); // 84610000000
 formatBoleto('84610000000246100291100054603390069589506108'); // 84610.00000 02461.002911 00054.603390 0 69589506108 (44 digit arrecadação barcode keeps the bancária mask)
 ```
 
-Source: [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf).
+Source: [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026).
 
 ### parseBoleto
 
@@ -373,6 +389,7 @@ parseBoleto('00190.00009 01149.718601 68524.522114 6 75860000102656'); // 001900
 Generate a valid random boleto.
 
 - Pass `{ type: 'arrecadacao' }` (`GenerateBoletoParams`) for a 48 digit boleto de arrecadação instead of the default `'bancario'` (cobrança bancária, 47 digits).
+- A cobrança bancária slip carries the código de moeda `9` and a fator de vencimento of `0000` (no due date) or `1000` to `9999`; `0001` to `0999` denote no date.
 
 ```javascript
 import { generateBoleto } from '@brazilian-utils/brazilian-utils';
@@ -387,8 +404,9 @@ Extract information from a boleto (amount, expiration date, bank code). Returns 
 
 - **Options** (`GetBoletoInfoOptions`): `referenceDate` resolves the "fator de vencimento" cycle as of that date instead of now.
 - Returns a `BoletoInfo`: `amount` in cents, `expirationDate` and the three digit `bankCode`. `expirationDate` is `null` when the slip carries no fator de vencimento (a factor below `1000`).
-- The fator de vencimento cycle reset on 22/02/2025, so a factor can mean either of two dates 9000 days apart. `referenceDate` picks between them; pass it whenever the answer has to stay stable.
+- The fator de vencimento cycle reset on 22/02/2025, so a factor can mean either of two dates 9000 days apart. No FEBRABAN communiqué on the reset is published; the rule is in bank manuals, such as [Bradesco's](https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf) (Versão 17). `referenceDate` picks between them; pass it whenever the answer has to stay stable.
 - A boleto de arrecadação has `bankCode: ''` and `expirationDate: null`, plus `type: 'arrecadacao'`, `segment`, `value` (the amount in reais) and `hasEffectiveValue`.
+- A FEBRABAN Convenção da Cobrança "Situação 2" slip (bank code `988`, código de moeda `0`) carries the issuer's ISPB where the amount would be: it comes back as `ispb`, with `amount: 0`.
 
 ```javascript
 import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
@@ -401,13 +419,16 @@ getBoletoInfo('00190000090114971860168524522114675860000102656', {
 });
 // Resolves the fator de vencimento cycle as of 2018-07-01
 
+getBoletoInfo('98800000060114971860168524522114100000018236120');
+// { amount: 0, expirationDate: null, bankCode: '988', ispb: '18236120' }
+
 getBoletoInfo('846100000005246100291102005460339004695895061080');
 // { amount: 2461, expirationDate: null, bankCode: '', type: 'arrecadacao', segment: 4, value: 24.61, hasEffectiveValue: true }
 
 getBoletoInfo('invalid'); // null
 ```
 
-Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf).
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026), [FEBRABAN, Convenção da Cobrança](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf).
 
 ## Pix
 
@@ -430,7 +451,7 @@ isValidPixKey('123.456.789-09', { accept: ['email', 'evp'] }); // false
 isValidPixKey('not a key'); // false
 ```
 
-Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html), [pix-api](https://github.com/bacen/pix-api).
+Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API 2.12.1](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html) and its [changelog](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/changelog.html), [pix-api](https://github.com/bacen/pix-api).
 
 ### getPixKeyInfo
 
@@ -439,13 +460,15 @@ Identify a Pix key and normalize it to the canonical form the DICT expects insid
 - Returns a `PixKeyInfo` with the `type` (`PixKeyType`) and the `value`.
 - The canonical `value` is digits for a CPF or CNPJ (letters upper-cased), a lowercase e-mail, an E.164 phone or a lowercase UUID.
 - An 11 digit value valid as both CPF and mobile phone is read as a CPF, unless written as a phone (`+55` prefix or DDD in parentheses).
-- An e-mail longer than 77 characters is rejected.
+- An e-mail is checked, once lowercased, against the pattern the DICT API registers and its 77 character limit, not against `isValidEmail`: the local part may carry any of ``.!#$'*+/=?^_`{|}~-``, dots included anywhere, and the domain may be a single label (`a@localhost`). The pattern is the one of DICT API 2.12.1, which has had no `&` since version 2.6.0 (27/09/2025).
 
 ```javascript
 import { getPixKeyInfo } from '@brazilian-utils/brazilian-utils';
 
 getPixKeyInfo('123.456.789-09'); // { type: 'cpf', value: '12345678909' }
 getPixKeyInfo('Fulano@Example.COM '); // { type: 'email', value: 'fulano@example.com' }
+getPixKeyInfo('a{b}@example.com'); // { type: 'email', value: 'a{b}@example.com' } (DICT pattern, isValidEmail rejects it)
+getPixKeyInfo('a&b@example.com'); // null (no & since DICT API 2.6.0)
 getPixKeyInfo('(11) 98765-4321'); // { type: 'phone', value: '+5511987654321' }
 getPixKeyInfo('71C7D9BE-4B85-4E43-9F1C-1F3B8B4E9A2D');
 // { type: 'evp', value: '71c7d9be-4b85-4e43-9f1c-1f3b8b4e9a2d' }
@@ -454,16 +477,21 @@ getPixKeyInfo('51998259765'); // { type: 'cpf', value: '51998259765' } (also a v
 getPixKeyInfo('+5551998259765'); // { type: 'phone', value: '+5551998259765' }
 ```
 
-Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html).
+Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf), [DICT API 2.12.1](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html) and its [changelog](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/changelog.html).
 
 ### isValidPixPayload
 
-Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid. The key itself is not checked; use `isValidPixKey`.
+Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid under the Manual de Padrões para Iniciação do Pix and, where it is silent, the EMV QR Code specification it builds on.
 
-- The TLV structure, the CRC-16 and the mandatory objects (format indicator, category code, currency, country, merchant name and city) are checked.
+- The payload must start with the format indicator `000201`.
+- The TLV structure, the CRC-16 and the mandatory objects (format indicator, a 4 digit category code, currency, country, merchant name and city) are checked.
 - One "Merchant Account Information" template (IDs 26 to 51) must carry the `br.gov.bcb.pix` GUI with a key (static) or a PSP URL (dynamic), never both.
-- Objects `01` (Point of Initiation Method) and `62` (Additional Data Field) are optional; `01` must be `11` or `12` when present.
-- An amount (`54`) must be greater than zero, except in a Pix Saque BR Code (8 digit `fss` in sub-object 26-03).
+- The key is written in the DICT form (§2.5.1): the one `getPixKeyInfo` returns unchanged, so `12345678909` passes and `123.456.789-09` does not. Whether it is registered cannot be told from the payload. The PSP URL has at most 77 characters (§2.5.2).
+- The merchant name has at most 25 characters and the city at most 15; the country is `BR` in uppercase.
+- No BCB manual states the case of the CRC or of `BR`: the only case rule they give is for the GUI, and every official example writes both in uppercase. Accepting a lowercase CRC (`1d3d`) and rejecting `br` are choices of this library, as in 2.4.0.
+- Object `01` (Point of Initiation Method) is optional and must be `11` or `12` when present.
+- Object `62` (Additional Data Field) is mandatory and carries the `txid` (62-05), "sempre presente em um BR Code": `***` or 1 to 25 letters and digits (§2.6.2); with a PSP URL any value stands, since §2.7 has the payer ignore it. The `-` of the Manual do BR Code example `RP12345678-2019` is outside the Pix character set of §2.6.2, so that static example is rejected.
+- An amount (`54`) is digits with an optional `.` and at most two decimals (`98.73`, `98` and `98.` are the EMV examples), at most 13 characters, and greater than zero, except in a Pix Saque BR Code (8 digit `fss` in sub-object 26-03) and next to a PSP location, where the Pix API gives it `0.00` (the Manual do BR Code lists `"0"` among its examples).
 - Unreserved Templates (IDs 80 to 99) are ignored.
 
 ```javascript
@@ -485,8 +513,8 @@ Parse a Pix BR Code payload into its fields. Accepts what `isValidPixPayload` ac
 
 - Returns a `PixPayloadInfo`: `merchantName`, `merchantCity`, `pointOfInitiation` and either `key` (static) or `url` (dynamic).
 - `amount`, `txid`, `description` and `withdrawalFacilitator` (the `fss` of a Pix Saque) are present only when the payload carries them. `txid` is absent for the `***` marker.
-- `pointOfInitiation` (`PixPointOfInitiation`) is `"dynamic"` when the payload carries a PSP location or object `01` is `"12"`, `"static"` otherwise.
-- With a PSP location, `amount` and `txid` are ignored, as the manual mandates.
+- `pointOfInitiation` (`PixPointOfInitiation`) is `"dynamic"` when the payload carries a PSP location (a dynamic QR Code in the Pix manual, §2.4.2) or marks itself single use with object `01` = `"12"` (§2.7.2), `"static"` otherwise. A key payload with `01` = `"12"` is therefore `"dynamic"`; `url` and `key` tell the two kinds of QR Code of the manual apart.
+- With a PSP location, `amount` and `txid` are ignored and left out, as §2.7 of the manual mandates ("Se preenchidos, seu conteúdo deve ser ignorado").
 
 ```javascript
 import { getPixPayloadInfo } from '@brazilian-utils/brazilian-utils';
@@ -543,22 +571,25 @@ Source: [Manual do BR Code](https://www.bcb.gov.br/content/estabilidadefinanceir
 
 ### isValidNfeKey
 
-Check if a DF-e access key (chave de acesso) is valid. Covers every DF-e with a 44 digit access key; the CF-e-SAT (59) is out.
+Check if a DF-e access key (chave de acesso) is valid. Covers every DF-e with a 44 character access key; the CF-e-SAT (59) is out.
 
 - Models: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
-- The 44 digits may be grouped in 4 by whitespace, `.`, `-` or `/`. The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
+- Every character is a digit except positions 7 to 18, the root and order of the issuer's CNPJ, which may hold the letters of an alphanumeric CNPJ: the current schemas (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) type the key as `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, in production for the NF-e from 01/07/2026 (NT 2026.004). A letter anywhere else, the CNPJ check digits in positions 19 and 20 included, is rejected. The schema admits upper case only; lower case is read as upper case, as `isValidCnpj` does with `{ version: 2 }`.
+- The 44 characters may be grouped in 4 by whitespace, `.`, `-` or `/`. The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
 - `tpEmis` must be one the MOC of that model assigns (table below).
 - For NF-e and NFC-e the `cNF` must pass rule B03-10 of the MOC (no repeated or sequential values, not the document number).
-- A document number of all zeros is rejected. The check digit is a modulus 11 over the first 43 digits.
+- A document number of all zeros is rejected. The check digit is a modulus 11 over the first 43 characters, each valued at its ASCII code minus 48 (`A` = 17 ... `Z` = 42), as NT Conjunta 2025.001 sets it.
 
 | Model | `tpEmis` accepted |
 | --- | --- |
 | NF-e (55), NFC-e (65) | 1 to 7 and 9 |
 | CT-e (57) | 1, 3, 4, 5, 7, 8 |
 | CT-e OS (67) | 1, 5, 7, 8 |
-| GTV-e (64) | 1, 2, 7, 8 |
+| GTV-e (64) | 1, 2, 7, 8 (see below) |
 | MDF-e (58) | 1, 2, 3 |
 | BP-e (63), NF3e (66), NFCom (62) | 1, 2 |
+
+For the GTV-e, the current CT-e schema package (PL_CTe_400_RTC) enumerates `tpEmis` 1 (normal) and 2 (contingência off-line) only; the earlier PL_CTe_400 also had 7 and 8 (autorização pela SVC-RS and SVC-SP). The key carries no schema version, so the library accepts all four, and the keys of GTV-e authorised under the earlier package keep validating.
 
 ```javascript
 import { isValidNfeKey } from '@brazilian-utils/brazilian-utils';
@@ -568,6 +599,8 @@ isValidNfeKey('NFe35170458716523000119550010000000121000123458'); // true (XML I
 isValidNfeKey('CTe35170458716523000119570010000000128000123452'); // true (CT-e authorised by the SVC-SP)
 isValidNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'); // true (masked)
 isValidNfeKey('3517.0458.7165.2300.0119.5500.1000.0000.1210.0012.3458'); // true (any of the mask characters)
+isValidNfeKey('35260712ABC34501DE35550010000001231102030403'); // true (alphanumeric CNPJ 12ABC34501DE35)
+isValidNfeKey('35260712ABC34501DEA5550010000001231102030408'); // false (a letter in position 19, a CNPJ check digit)
 isValidNfeKey('351 70458716523000119550010000000121000123458'); // false (a separator inside a group of 4)
 isValidNfeKey('99170458716523000119550010000000121000123458'); // false (invalid cUF)
 isValidNfeKey('35170458716523000119010010000000121000123450'); // false (invalid mod)
@@ -575,14 +608,15 @@ isValidNfeKey('35170458716523000119550010000000128000123455'); // false (the NF-
 isValidNfeKey('35170458716523000119550010000000121000000003'); // false (cNF 00000000, rule B03-10)
 ```
 
-Source: [MOC NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), [NF-e schemas](https://dfe-portal.svrs.rs.gov.br/NFE/Documentos) and the MOCs cited in `src/is-valid-nfe-key/is-valid-nfe-key.ts`.
+Source: [MOC NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf), [NF-e schemas](https://dfe-portal.svrs.rs.gov.br/NFE/Documentos), [NT Conjunta 2025.001](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ%3D) (CNPJ alfanumérico) and the MOCs cited in `src/is-valid-nfe-key/is-valid-nfe-key.ts`.
 
 ### formatNfeKey
 
-Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 digits separated by spaces, the form the DANFE, DACTE, DAMDFE, DABPE, DANF3E and DANFE-COM print it in.
+Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 characters separated by spaces, the form the DANFE, DACTE, DAMDFE, DABPE, DANF3E and DANFE-COM print it in.
 
-- **Options** (`FormatNfeKeyOptions`): `pad` left pads the value with zeros up to the 44 digits of a complete access key (default `false`).
-- A masked or partial key is grouped as far as its digits go.
+- **Options** (`FormatNfeKeyOptions`): `pad` left pads the value with zeros up to the 44 characters of a complete access key (default `false`).
+- A masked or partial key is grouped as far as its characters go.
+- The letters of an alphanumeric CNPJ are kept, upper cased, in positions 7 to 18; a letter anywhere else is dropped.
 - Use `isValidNfeKey` to check a key.
 
 ```javascript
@@ -590,6 +624,9 @@ import { formatNfeKey } from '@brazilian-utils/brazilian-utils';
 
 formatNfeKey('35170458716523000119550010000000121000123458');
 // '3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458'
+
+formatNfeKey('35260712abc34501de35550010000001231102030403');
+// '3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403' (alphanumeric CNPJ)
 
 formatNfeKey('12345'); // '1234 5'
 
@@ -599,7 +636,9 @@ formatNfeKey('12345', { pad: true });
 
 ### parseNfeKey
 
-Remove the formatting of a DF-e access key (chave de acesso), keep only digits, and cap the result to 44 digits.
+Remove the formatting of a DF-e access key (chave de acesso), keep only its characters, and cap the result to 44 characters.
+
+- The characters kept are the digits and, in positions 7 to 18, the letters of an alphanumeric CNPJ, upper cased; a letter anywhere else is dropped.
 
 - The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
 
@@ -611,6 +650,9 @@ parseNfeKey('3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458');
 
 parseNfeKey('NFe35170458716523000119550010000000121000123458');
 // '35170458716523000119550010000000121000123458'
+
+parseNfeKey('3526 0712 abc3 4501 de35 5500 1000 0001 2311 0203 0403');
+// '35260712ABC34501DE35550010000001231102030403' (alphanumeric CNPJ)
 ```
 
 ### getNfeKeyInfo
@@ -619,6 +661,7 @@ Parse a DF-e access key into its fields. Accepts the same input forms as `isVali
 
 - Returns an `NfeKeyInfo`: `stateCode`, `year`, `month`, `taxId`, `model` (`NfeKeyModel`), `series`, `number`, `emissionType`, `code` and `checkDigit`.
 - For NFCom and NF3e (models `'62'` and `'66'`) the result also carries `authorizationSite` and `code` is 7 digits instead of 8.
+- `taxId` is the 14 characters of positions 7 to 20 as written: a numeric CNPJ, an alphanumeric CNPJ (upper cased), or a CPF left padded with zeros. A `taxId` with a letter is always an alphanumeric CNPJ; a padded CPF and a CNPJ starting with `000` look alike, so check it with `isValidCpf` or `isValidCnpj` when the type matters.
 
 ```javascript
 import { getNfeKeyInfo } from '@brazilian-utils/brazilian-utils';
@@ -630,6 +673,10 @@ getNfeKeyInfo('35170458716523000119550010000000121000123458');
 getNfeKeyInfo('35170458716523000119620010000000121000123450');
 // { stateCode: 'SP', year: 2017, month: 4, taxId: '58716523000119', model: '62',
 //   series: 1, number: 12, emissionType: 1, code: '0012345', checkDigit: 0, authorizationSite: 0 }
+
+getNfeKeyInfo('35260712ABC34501DE35550010000001231102030403');
+// { stateCode: 'SP', year: 2026, month: 7, taxId: '12ABC34501DE35', model: '55',
+//   series: 1, number: 123, emissionType: 1, code: '10203040', checkDigit: 3 }
 
 getNfeKeyInfo('invalid'); // null
 ```
@@ -646,8 +693,8 @@ Check if the access key (chave de acesso) of a national NFS-e, the Nota Fiscal d
 - The municipality code must start with an IBGE UF code; it is not looked up in the IBGE table.
 - `ambGer` must be `1` (the system of the municipality) or `2` (the Sistema Nacional NFS-e), and the registration type `1` (a CPF, left padded with `000`) or `2` (a CNPJ, numeric or alphanumeric), with a CPF or CNPJ whose own check digits are valid. Letters are accepted in a CNPJ only, and lower case is read as upper case, as `isValidCnpj` with `{ version: 2 }` reads it.
 - `nNFSe` must not be all zeros and the month must be 01 to 12.
-- The check digit is a modulus 11 over the first 49 characters, weights 2 to 9 cycling from the right, where a remainder of 0 or 1 gives 0. A letter counts as its ASCII code minus 48 (`A` is 17): no NFS-e document states it, so it is taken by analogy with the NF-e key of Nota Técnica Conjunta 2025.001 and the CNPJ's own check digits.
-- The letters follow `TSIdNFSe` of the schema bundle of 2026-07-27, in the positions of the Inscrição Federal (10 to 23).
+- The check digit is a modulus 11 over the first 49 characters, weights 2 to 9 cycling from the right, where a remainder of 0 or 1 gives 0. A letter counts as its ASCII code minus 48 (`A` is 17). No official document states it: the NFS-e technical notes 001 to 009, the Anexo I and the Perguntas e Respostas of 08/09/2026 are silent, and Nota Técnica Conjunta 2025.001, whose ASCII minus 48 rule covers the DF-e key, lists the documents it covers (NF-e, NFC-e, CT-e, CT-e OS, GTV-e, MDF-e, BP-e, BP-e TM, NF3e and NFCom) without the NFS-e. The rule is taken by analogy with that NT and the CNPJ's own check digits.
+- The letters follow `TSIdNFSe` of the schema bundle of 2026-07-27, in the positions of the Inscrição Federal (10 to 23). The production bundle of 09/02/2026 still types the key `[0-9]{50}`.
 - The municipal NFS-e models that are not the national standard are out of scope.
 
 ```javascript
@@ -709,7 +756,7 @@ getNfseKeyInfo('35503082212ABC34501DE35000000000001226091357924682');
 getNfseKeyInfo('invalid'); // null
 ```
 
-Source: the [technical documentation of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), whose schema types `TSIdNFSe` and `TSChaveNFSe` and ANEXO I field `NFSe/infNFSe/id` define the layout and the rules E1280 and E1284, the [manual da emissão por decisão administrativa ou judicial](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/manual-contribuintes-emissor-publico-api-emissao-decisao-administrativa-e-judicial.pdf), which names the modulus 11 check digit, [Nota Técnica SE/CGNFS-e 008](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf) (item 2.1.1), which prints the key as a single block, the [schemas updated for the alphanumeric CNPJ](https://www.gov.br/nfse/pt-br/noticias/plataforma-nfs-e-disponibiliza-novas-evolucoes-em-producao-restrita-e-divulga-cronograma-de-implantacao) (bundle v1.01-20260727, in production since 2026-08-10) and [Nota Técnica Conjunta 2025.001](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ=), whose ASCII minus 48 rule for the NF-e key the check digit borrows.
+Source: the [technical documentation of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), whose schema types `TSIdNFSe` and `TSChaveNFSe` and ANEXO I field `NFSe/infNFSe/id` define the layout and the rules E1280 and E1284, the [manual da emissão por decisão administrativa ou judicial](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/manual-contribuintes-emissor-publico-api-emissao-decisao-administrativa-e-judicial.pdf), which names the modulus 11 check digit, [Nota Técnica SE/CGNFS-e 008](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf) (item 2.1.1), which prints the key as a single block, the [schemas updated for the alphanumeric CNPJ](https://www.gov.br/nfse/pt-br/noticias/plataforma-nfs-e-disponibiliza-novas-evolucoes-em-producao-restrita-e-divulga-cronograma-de-implantacao) (the restricted-production bundle v1.01-20260727; the service handles the alphanumeric CNPJ in production since 2026-08-10, while the production bundle of 2026-02-09 is still digits only) and [Nota Técnica Conjunta 2025.001](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ=), whose ASCII minus 48 rule for the NF-e key the check digit borrows.
 
 ## SUFRAMA
 
@@ -718,9 +765,10 @@ Source: the [technical documentation of the Sistema Nacional NFS-e](https://www.
 Check if an Inscrição SUFRAMA is valid. It is the registration number the Superintendência da Zona Franca de Manaus gives to companies with tax incentives, carried by the `ISUF` field of the NF-e recipient.
 
 - The number is `SS.NNNN.LLD`: sector of activity, sequential number, locality of the SUFRAMA unit and check digit.
-- Accepts 8 or 9 digits: an 8 digit value is a number whose sector code lost its leading zero.
+- Accepts 8 or 9 digits. The MOC only says the sector code "pode começar por '0'"; reading an 8 digit value as one whose sector code lost that zero is this library's inference.
 - Returns `false` for a sector code of `00` and for a wrong módulo 11 check digit.
 - The sector and locality codes are not checked against a table, since the manual lists them only as examples.
+- The rule comes from the NF-e Manual de Orientação do Contribuinte (CONFAZ/ENCAT), not from the SUFRAMA, whose Resolução CAS nº 64/2021, art. 5º, only calls the inscrição "um número de identificação e controle" and gives no layout or check digit.
 - Besides the usual mask characters, `(`, `)`, `,` and `*` are also ignored.
 
 ```javascript
@@ -779,6 +827,7 @@ Source: [NF-e Manual de Orientação do Contribuinte 7.0, Visão Geral](https://
 Check if a phone number (mobile or landline) is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`.
 
 - **Options** (`IsValidPhoneOptions`): `accept` (`PhoneType[]`, default `['mobile', 'landline']`) picks which kinds of number count as valid; add `'service'` for the numbers `isValidServicePhone` recognizes. `version` (`PhoneVersion`, default `1`) is forwarded to `isValidMobilePhone`.
+- A mobile number must start with 7, 8 or 9 under both versions (Resolução Anatel 749/2022, art. 12, I, "a"), so a leading 6 is rejected; up to 2.4.0 the default version accepted it.
 
 ```javascript
 import { isValidPhone } from '@brazilian-utils/brazilian-utils';
@@ -786,6 +835,7 @@ import { isValidPhone } from '@brazilian-utils/brazilian-utils';
 isValidPhone('11900000000'); // true
 isValidPhone('11712345678', { version: 2 }); // true (7, 8 and 9 are all SMP)
 isValidPhone('11700123456', { version: 2 }); // false (the 700 series is satellite)
+isValidPhone('11612345678'); // false (6 is not SMP)
 isValidPhone('+55 11 98765-4321'); // true (country code accepted)
 isValidPhone('08001234567'); // false (service numbers rejected by default)
 isValidPhone('08001234567', { accept: ['service'] }); // true
@@ -803,9 +853,10 @@ Format a phone number according to Brazilian patterns. If `value` includes a DDD
 - `"e164"` and `"international"` drop the country code first, as `parsePhone` does, and fall back to `"service"` for a service number.
 - `"service"`: the Códigos Não Geográficos (`0800 123 4567`) and the abbreviated `300X`/`400X` numbers (`4004-1234`).
 - `"auto"`: `"service"` for a service number, `"international"` when `value` carries a country code, otherwise `"nanp"` for more than 9 digits, else `"sn"`.
+- `obfuscate` is a convention of this library, not an official rule: no law, Anatel act or [ANPD guidance](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) sets which digits of a phone number to show ("não há um padrão para o mascaramento"), and the [Banco Central](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) forbids masking a Pix key, a phone number included, when the DICT lookup returns it.
 - `obfuscate` keeps 2 digits, the count the gov.br account shows for a registered mobile, and keeps the prefix that names a region or a service instead of a subscriber: the DDD, the `0800`-like code and the `300X`/`400X` root.
 - The 2 digits are the last ones the mask itself has room for, so under the default `"sn"` a DDD-prefixed value is truncated first, exactly as it is without `obfuscate`, and the visible pair is the 8th and 9th digit rather than the last 2 of `value`.
-- A 3 digit public utility code (`190`) identifies no one and is returned as it is; a value the `"service"` mask does not recognize has every digit replaced by a `*`, which hides the digits but not how many there were. The obfuscated patterns have a fixed number of slots, so under `"e164"` anything past the 11th national digit is dropped.
+- Under the `"service"`, `"auto"`, `"e164"` and `"international"` masks a 3 digit public utility code (`190`) identifies no one and is returned as it is (the other masks read it as an ordinary short number); a value the `"service"` mask does not recognize has every digit replaced by a `*`, which hides the digits but not how many there were. The obfuscated patterns have a fixed number of slots, so under `"e164"` anything past the 11th national digit is dropped.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -869,23 +920,29 @@ generatePhone('service'); // '08001234567' or '40041234'
 
 Check if a mobile phone number is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`.
 
-- **Options** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, default `1`) picks the numbering rule: `1` accepts a first digit of 6, 7, 8 or 9; `2` follows Resolução Anatel 749/2022, accepts only 7, 8 or 9 and rejects the `700` series.
+- **Options** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, default `1`) picks the numbering rule. Both follow Resolução Anatel 749/2022, art. 12, I, "a" (`"7", "8" e "9": Serviço Móvel Pessoal (SMP)`) and accept only a first digit of 7, 8 or 9; `1` also accepts the `700` series, `2` rejects it as satellite (art. 12, II, "a").
+- Up to 2.4.0 version `1` also accepted a first digit of 6, which is not SMP.
+- Scheduled change, not applied yet: Resolução Anatel 777/2025, art. 22, rewrites art. 12 with effect from 1 March 2027. A first digit of `6` becomes SCM (not a mobile), only `8` and `9` stay SMP, the `700` series becomes "SMGS e SMP por Satélite" and any other `7` number becomes reserva técnica. From that date a `version: 2` that follows it will have to accept only `8` and `9`, plus the `700` series as satellite SMP.
 
 ```javascript
 import { isValidMobilePhone } from '@brazilian-utils/brazilian-utils';
 
 isValidMobilePhone('11900000000'); // true
-isValidMobilePhone('11712345678', { version: 1 }); // true (legacy format)
+isValidMobilePhone('11712345678', { version: 1 }); // true
 isValidMobilePhone('11712345678', { version: 2 }); // true (7 is SMP as well)
-isValidMobilePhone('11612345678', { version: 2 }); // false (6 is Reserva Técnica)
+isValidMobilePhone('11612345678'); // false (6 is not SMP, under either version)
+isValidMobilePhone('11700123456'); // true (version 1 keeps the 700 series)
 isValidMobilePhone('11700123456', { version: 2 }); // false (the 700 series is satellite)
 ```
 
-Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749).
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749) and [Resolução Anatel nº 777/2025](https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777), art. 22.
 
 ### isValidLandlinePhone
 
 Check if a landline phone number is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`.
+
+- The number is the DDD plus 8 digits starting with `2` to `6`, the STFC and SCM range of Resolução Anatel 749/2022, art. 11, I, "a".
+- Scheduled change, not applied yet: from 1 March 2027 Resolução Anatel 777/2025, art. 21, leaves only `2` to `5` to the STFC, and the SCM moves to 9 digit numbers starting with `6`. From that date a landline starting with `6` will have to be rejected.
 
 ```javascript
 import { isValidLandlinePhone } from '@brazilian-utils/brazilian-utils';
@@ -894,13 +951,15 @@ isValidLandlinePhone('1130000000'); // true
 isValidLandlinePhone('+55 11 3000-0000'); // true (country code accepted)
 ```
 
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), art. 11, and [Resolução Anatel nº 777/2025](https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777), art. 21.
+
 ### isValidServicePhone
 
 Check if a phone number is a valid Brazilian service number, dialed without a DDD. Only the structure is checked: the number does not have to be assigned to anyone.
 
-- The Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` followed by 7 digits (11 in total).
+- The Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` followed by 7 digits (11 in total): the 10 digit series of Resolução Anatel 749/2022, art. 18, dialed behind the `0` prefix (art. 28).
 - The abbreviated `300X`/`400X` numbers, 8 digits. Other carrier prefixes such as `4020` and `4062` are rejected.
-- The 3 digit public utility codes Anatel has designated (e.g. `190`, `192`). `112` and `911` are not among them and are rejected.
+- The 3 digit public utility codes Anatel has designated (e.g. `190`, `192`), as listed on the [Anatel SUP page](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia) (modified on 22/06/2023) and in the Anexo of Ato 43.151/2004, the last consolidated act. The page lists `112/911` for the Polícia Militar on handsets: `112` is accepted; `911` is rejected, since Resolução 749/2022, art. 13, holds every series outside `1XX` in reserva técnica. Up to 2.4.0 `112` was rejected too.
 
 ```javascript
 import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
@@ -911,12 +970,32 @@ isValidServicePhone('190'); // true
 isValidServicePhone('11987654321'); // false (geographic number)
 ```
 
-Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel SUP page](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais/servicos-de-utilidade-publica-e-de-emergencia), [Ato Anatel nº 43.151/2004](https://informacoes.anatel.gov.br/legislacao/atos-de-numeracao/2004/1648-ato-43151), [Resolução nº 86/1998](https://informacoes.anatel.gov.br/legislacao/resolucoes/1998/336-resolucao-86).
+
+### getAreaCodeByMunicipalityCode
+
+Get the DDD (area code) a Brazilian municipality dials, given its 7-digit IBGE code, from the Anatel table of the Códigos Nacionais in force.
+
+- Accepts the code the way `getMunicipalityByCode` does: a string (any non-digit characters stripped) or a non-negative integer.
+- Returns the DDD as a number, or `null` when the code is not a municipality. Every one of the 5,571 municipalities has exactly one DDD.
+- A DDD mostly follows state lines. The exceptions: 61 also covers 12 municipalities of Goiás around Brasília, and Porto União (SC) dials 42, Rio Negro (PR) 47 and Barracão (PR) 49.
+
+```javascript
+import { getAreaCodeByMunicipalityCode } from '@brazilian-utils/brazilian-utils';
+
+getAreaCodeByMunicipalityCode('3550308'); // 11 (São Paulo/SP)
+getAreaCodeByMunicipalityCode(3304557); // 21 (Rio de Janeiro/RJ)
+getAreaCodeByMunicipalityCode('4122305'); // 47 (Rio Negro/PR)
+getAreaCodeByMunicipalityCode('0000000'); // null
+```
+
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ### getAreaCodeInfo
 
 Get the state and region a Brazilian DDD (area code) belongs to, out of the 67 DDDs in use under the Anatel Plano Geral de Numeração. Accepts a string or a non-negative integer.
 
+- A string has any non-digit characters stripped, so `'(11)'`, `'0xx11'` and `'DDD 11'` are the DDD 11.
 - Returns an `AreaCodeInfo`: `areaCode`, `stateCode`, `stateName`, `regionCode`, `regionName` and `stateCodes`. Returns `null` when the DDD is not in use.
 - `stateCode` is the state the DDD is seated in. For the four DDDs that straddle a border (61, 42, 47 and 49) `stateCodes` also lists the other state, the seat first.
 
@@ -933,11 +1012,12 @@ getAreaCodeInfo('61');
 // { areaCode: 61, stateCode: 'DF', stateName: 'Distrito Federal', regionCode: 'CO', regionName: 'Centro-Oeste', stateCodes: ['DF', 'GO'] }
 
 getAreaCodeInfo('00'); // null
+getAreaCodeInfo('(0xx11)'); // the same as '11'
 getAreaCodeInfo(-11); // null
 getAreaCodeInfo(1.1); // null
 ```
 
-Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais).
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
 
 ### getAreaCodesByState
 
@@ -957,13 +1037,34 @@ getAreaCodesByState('SC'); // [42, 47, 48, 49]
 getAreaCodesByState('XX'); // []
 ```
 
-Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais).
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
+### getMunicipalitiesByAreaCode
+
+List the Brazilian municipalities that dial a given DDD (area code), from the Anatel table of the Códigos Nacionais in force.
+
+- Accepts the DDD the way `getAreaCodeInfo` does: a string (any non-digit characters stripped) or a non-negative integer.
+- Returns an array of `{ code, name, stateCode }` (`Municipality`): the seat state's municipalities first, then those of the other state the DDD crosses into, each state's sorted by name. Returns `[]` when the DDD is not in use.
+
+```javascript
+import { getMunicipalitiesByAreaCode } from '@brazilian-utils/brazilian-utils';
+
+getMunicipalitiesByAreaCode(68).length; // 22 (every municipality of Acre)
+getMunicipalitiesByAreaCode('(61)').length; // 13 (Brasília and 12 municipalities of Goiás)
+getMunicipalitiesByAreaCode('47').at(-1); // { code: '4122305', name: 'Rio Negro', stateCode: 'PR' }
+getMunicipalitiesByAreaCode('20'); // []
+```
+
+Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [Anatel Códigos Nacionais](https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais), [Anatel table of the Códigos Nacionais by municipality (21/09/2026)](https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais).
+
 
 ## License plate
 
 ### isValidLicensePlate
 
 Check if a license plate is valid. Accepts the old Brazilian format (`ABC-1234`) and the Mercosul format (`ABC1D23`), with or without a hyphen or space, in any case.
+
+The optional `format` restricts the check to one of them: `"LLLNNNN"` for the old format or `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. It works like the `type` argument of the Python library's `is_valid`, whose values are named `"old_format"` and `"mercosul"` there. Those names are not formats here: without `format`, or with any other value, a plate in either format is valid.
 
 ```javascript
 import { isValidLicensePlate } from '@brazilian-utils/brazilian-utils';
@@ -974,6 +1075,9 @@ isValidLicensePlate('ABC 1234'); // true (whitespace mask)
 isValidLicensePlate('ABC1D23'); // true (Mercosul format)
 isValidLicensePlate('ABC12D3'); // false (not a Mercosul sequence)
 isValidLicensePlate('ABC1234EXTRA'); // false (too many characters)
+isValidLicensePlate('ABC1D23', { format: 'LLLNLNN' }); // true
+isValidLicensePlate('ABC1234', { format: 'LLLNLNN' }); // false (an old format plate)
+isValidLicensePlate('ABC-1234', { format: 'LLLNNNN' }); // true
 ```
 
 Source: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf), [Anexos](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf).
@@ -1057,6 +1161,7 @@ Source: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/
 Check if a RENAVAM (Registro Nacional de Veículos Automotores) is valid. Accepts the old format (9 digits) and the new format (11 digits).
 
 - Spaces, dots and hyphens are ignored; any other character makes the value invalid.
+- The check digit is the one of Portaria DENATRAN nº 27/2013, art. 1º: "10 dígitos e um dígito verificador, calculado através do módulo 11, peso 9", read as the weights 3, 2, 9, 8, 7, 6, 5, 4, 3 and 2. The portaria gives neither the weights one by one nor the handling of a remainder of 0, 1 or 10, which follow [validation-br](https://github.com/klawdyo/validation-br/blob/main/src/renavam.ts) and [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/renavam.py); padding a 9 digit code to 11 with zeros is market practice.
 
 ```javascript
 import { isValidRenavam } from '@brazilian-utils/brazilian-utils';
@@ -1068,6 +1173,8 @@ isValidRenavam('12345678901'); // false (invalid checksum)
 isValidRenavam('00000000000'); // false (repeated digits)
 isValidRenavam('ab00639884962'); // false (letters are rejected)
 ```
+
+Source: [Portaria DENATRAN nº 27/2013](https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2013/portaria0272013.pdf).
 
 ### generateRenavam
 
@@ -1086,6 +1193,7 @@ generateRenavam(); // '12345678900'
 Check if a PIS is valid. Accepts the value masked or not.
 
 - A value whose digits are all the same is rejected.
+- The check digit uses the weights 3, 2, 9, 8, 7, 6, 5, 4, 3 and 2 and módulo 11. No official document found publishes them: the eSocial and SIRC manuals say only that the number has 11 digits and a módulo 11 check digit, and the Caixa layouts ask for a "Número de PIS/PASEP válido" without saying how it is computed. The weights follow [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/pis.py).
 
 ```javascript
 import { isValidPis } from '@brazilian-utils/brazilian-utils';
@@ -1100,7 +1208,7 @@ Format a PIS.
 
 - **Options** (`FormatPisOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the check digit.
 - `obfuscate` is applied after `pad`.
-- No authority publishes a masking rule for the PIS, so `obfuscate` applies the one Lei nº 12.309/2010, art. 87, § 5º sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure.
+- No authority publishes a masking rule for the PIS, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
@@ -1130,7 +1238,7 @@ import { generatePis } from '@brazilian-utils/brazilian-utils';
 generatePis(); // '91077906857'
 ```
 
-Source: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), the CPF masking rule `obfuscate` borrows.
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the one for 2026, repeats it).
 
 ## Processo jurídico
 
@@ -1151,7 +1259,7 @@ isValidProcessoJuridico('0000100-23.2008.8.28.0000'); // false (no 28th Tribunal
 isValidProcessoJuridico('ab00020802520125150049'); // false (letters are rejected)
 ```
 
-Source: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119).
+Source: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119), art. 1º (layout, `J` and `TR`) and Anexo VIII ("CÁLCULO DO DÍGITO VERIFICADOR"); the TRF da 6ª Região (`4.06`) per [Resolução CNJ nº 477/2022](https://atos.cnj.jus.br/atos/detalhar/4781).
 
 ### formatProcessoJuridico
 
@@ -1204,23 +1312,26 @@ Source: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119)
 Check if a Brazilian bank account is valid. The `bankCode` must be a Banco Central STR participant (the list `getBankByCode` uses).
 
 - **Params** (`IsValidBankAccountParams`, all strings): `bankCode` (3 digits), `agency` (1-5 digits), `account` (1-13 digits) and `digit` (1-2 characters, or `X` for Banco do Brasil and `P` for Bradesco).
-- A listed bank is validated in one of three ways: by its published check digit algorithm, by structure only, or by a generic mod10/mod11 fallback.
+- A listed bank is validated in one of three ways: by a check digit rule, by structure only, or by a generic mod10/mod11 fallback.
+- No act of the Banco Central, of another government body or of Febraban sets these check digit rules. Those of banks 001, 033, 041, 104, 237, 341, 399 and 745 come from the "Regras de Validação de dígito verificador de agência e conta corrente" compendium of Icatu Seguros, a private compilation of each bank's rule. Nubank publishes no rule: its Verhoeff digit is the one open source validators derived from real accounts.
+- Three banks publish their own rule in their layout manuals, and the rules here match them: the [Caixa](https://www.caixa.gov.br/Downloads/cobranca-caixa/Manual_de_Leiaute_de_Arquivo_Eletronico_CNAB_400.pdf) both of its digits over a 12 digit account (notes NE051 and NE052), Santander the account digit ([Débito Automático 150 v08](https://www.santander.com.br/layout-de-arquivos), April 2026), and [Banco do Brasil](https://www.bb.com.br/docs/pub/emp/empl/dwn/Doc5175Bloqueto.pdf) only the agency digit (Anexo XI), its account digit being only "módulo 11".
+- The only official texts on these digits say there is no common rule: the FEBRABAN [Layout Padrão CNAB 240 v11.0](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20padrao%20CNAB240%20V%2011_0%20-%202026_09_11.pdf) (11/09/2026), notes G009, G011 and G012, calls each of them a "código adotado pelo Banco" and gives no algorithm, and the DICT API of the Banco Central takes the account with its digit and computes nothing.
 
-Banks validated by their published check digit algorithm:
+Banks validated by a check digit rule:
 
 | Bank | Code | Agency | Account | Notes |
 | --- | --- | --- | --- | --- |
 | Banco do Brasil | `001` | 4-5 digits | 8-10 digits | mod11 with weights 2..9 cycling from the right; `digit` may be `"X"` |
 | Santander | `033` | 4 digits | 8 digits | weights `9,7,3,1,0,0,9,7,1,3,1,9,7,3` over agency + `"00"` + account, tens discarded |
 | Banrisul | `041` | 4 digits | 9 digits | weights `3,2,4,7,6,5,4,3,2`; remainder 0 gives `0` and remainder 1 gives `6`; `account` is tipo (2 digits) + conta (7 digits) |
-| Caixa Econômica Federal | `104` | 4 digits | 11 digits | mod11 over agency + account; `account` is operação (3 digits) + conta (8 digits) |
+| Caixa Econômica Federal | `104` | 4 digits | 11-12 digits | mod11 with weights 2..9 cycling from the right, a result above 9 giving `0`. A 12 digit `account` (the format of the Caixa layouts, "sem operação") takes either its own digit (over the account) or the agency/account one (over agency + account); an 11 digit one is operação (3 digits) + conta (8 digits), with the digit over agency + account. Up to 2.4.0 a 12 digit account was rejected |
 | Bradesco | `237` | 4 digits | 7 digits | mod11 with weights 2..7 cycling from the right; remainder 0 gives `0` and remainder 1 gives `"P"` |
-| Nubank | `260` | 4 digits | 5-13 digits | Verhoeff check digit over the account, leading zeros dropped |
+| Nubank | `260` | 4 digits | 5-13 digits | Verhoeff check digit over the account, leading zeros dropped (no published rule; see above) |
 | Itaú Unibanco | `341` | 4 digits | 5 digits | mod10 over agency + account |
 | HSBC / Kirton Bank | `399` | 4 digits | 6 digits | weights `8,9,2,3,4,5,6,7,8,9` over agency + account; remainder 10 gives `0` |
 | Citibank | `745` | 4 digits | 10 digits | weights `11..2` over the account; remainder 0 or 1 gives `0` |
 
-Banks validated by structure only (a single numeric `digit` is enough):
+Banks validated by structure only, since no check digit rule of theirs is known (a single numeric `digit` is enough):
 
 | Bank | Code | | Bank | Code |
 | --- | --- | --- | --- | --- |
@@ -1303,7 +1414,7 @@ isValidBankAccount({
 }); // true (Banco ABC Brasil, generic mod10 fallback)
 ```
 
-Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv), [Regras de Validação de dígito verificador](https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf).
+Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv) (official). Based on: the Icatu Seguros compendium [Regras de Validação de dígito verificador de agência e conta corrente](https://github.com/eduardokum/laravel-boleto/blob/master/manuais/Regras%20Validacao%20Conta%20Corrente%20VI_EPS.pdf) and, for Nubank, [bran_checker](https://github.com/Xerpa/bran_checker/tree/master/lib/banks).
 
 ### getBanks
 
@@ -1329,6 +1440,7 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 Look a Brazilian bank up by its compensation code (COMPE), from the Banco Central do Brasil STR participants list. Accepts a `string` or a `number`.
 
+- A string has any non-digit characters stripped before the code is padded to 3 digits.
 - Returns the matching `Bank`, or `null` when no bank has that code.
 
 ```javascript
@@ -1343,7 +1455,9 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 ### getBankByIspb
 
-Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 digit code of every SPB participant. Accepts a `string` or a `number`, with or without leading zeros.
+Look a Brazilian bank up by its ISPB (Identificador do Sistema de Pagamentos Brasileiro), the 8 character code of every SPB participant. Accepts a `string` or a `number`, with or without leading zeros.
+
+- Since Resolução BCB nº 585/2026 an ISPB may hold letters, so a string of 8 letters and digits is looked up as it is, in upper or lower case. Any character that is neither a letter nor a digit is ignored (`'00.000.000'` is `'00000000'`), and a letter is never stripped (`'0000000A'` is not `'00000000'`).
 
 - Returns the matching `Bank`, or `null` when no bank has that ISPB. The base only carries institutions that also have a COMPE code.
 
@@ -1363,7 +1477,8 @@ Source: [STR participants list](https://www.bcb.gov.br/content/estabilidadefinan
 
 Check if a Brazilian IBAN (International Bank Account Number) is valid. Only Brazilian IBANs (country code `BR`) are recognized; any other country returns `false`.
 
-- Layout, 29 characters: `BR`, 2 check digits (ISO 7064 MOD 97-10), 8 digit ISPB, 5 digit branch, 10 digit account, 1 letter account type, 1 owner indicator.
+- Layout, 29 characters (Resolução BCB 585/2026, art. 2º, which revoked Circular BCB 3.625/2013 and kept its layout): `BR`, 2 check digits (ISO 7064 MOD 97-10), 8 character ISPB, 5 digit branch, 10 digit account, 1 letter account type, 1 owner indicator.
+- The ISPB may hold letters: the Resolução makes it "oito caracteres alfanuméricos", where the Circular said "numéricos". Up to 2.4.0 only digits were accepted.
 - Account type: any letter, usually `C` or `P`. Owner: `1` to `9`, then `A` to `Z`.
 - Accepts the compact form or groups of 4 split by one whitespace, `.`, `-` or `/`, in any case.
 
@@ -1373,12 +1488,13 @@ import { isValidIban } from '@brazilian-utils/brazilian-utils';
 isValidIban('BR1500000000000010932840814P2'); // true
 isValidIban('BR15 0000 0000 0000 1093 2840 814P 2'); // true (grouping spaces)
 isValidIban('BR15-0000-0000-0000-1093-2840-814P-2'); // true (any of the mask characters)
+isValidIban('BR1012AB34CD000010932840814P2'); // true (alphanumeric ISPB)
 isValidIban('BR1500000000000010932840814P3'); // false (bad check digits)
 isValidIban('BR15 000 00000 0000 1093 2840 814P 2'); // false (a separator inside a group)
 isValidIban('DE89370400440532013000'); // false (non Brazilian IBAN)
 ```
 
-Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
+Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), which revoked [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
 
 ### formatIban
 
@@ -1431,7 +1547,7 @@ getIbanInfo('DE89370400440532013000'); // null (non Brazilian IBAN)
 getIbanInfo('BR15 000 00000 0000 1093 2840 814P 2'); // null (a separator inside a group)
 ```
 
-Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
+Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), which revoked [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
 
 ## Currency, numbers and dates in words
 
@@ -1618,7 +1734,7 @@ Source: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app
 Get the Brazilian state whose 2-digit IBGE code (`cUF`, the Código da Unidade da Federação) matches the given value.
 
 - This is the UF code in the first field of a DF-e access key (chave de acesso), the one `isValidNfeKey` covers.
-- Accepts a string or a non-negative integer.
+- Accepts a string or a non-negative integer, with any non-digit characters of a string stripped (`'35/SP'` is `35`).
 - Returns `null` when the code matches no state. Exports the `State` type.
 
 ```javascript
@@ -1669,6 +1785,58 @@ getStateNameByCode('  Rj  '); // 'Rio de Janeiro'
 getStateNameByCode('ZZ'); // null
 ```
 
+### getStateCapital
+
+Get the capital of a Brazilian state, as the same `{ code, name, stateCode }` (`Municipality`) that `getMunicipalityByCode` returns for it.
+
+- The match ignores case and surrounding whitespace. Returns `null` when no state matches.
+- For the Distrito Federal, which has no municipalities, the capital is Brasília, with the code the IBGE gives the whole district.
+
+```javascript
+import { getStateCapital } from '@brazilian-utils/brazilian-utils';
+
+getStateCapital('SP'); // { code: '3550308', name: 'São Paulo', stateCode: 'SP' }
+getStateCapital('to'); // { code: '1721000', name: 'Palmas', stateCode: 'TO' }
+getStateCapital('ZZ'); // null
+```
+
+Source: [IBGE, Anuário Estatístico do Brasil, table 1.1.1.2 (state capitals, 2025)](https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html).
+
+### getRegions
+
+Get the five Brazilian regions (Grandes Regiões), each with its code (the same `regionCode` every state carries), name and IBGE identifier, in the order of that identifier. Exports the `Region` and `RegionCode` types.
+
+```javascript
+import { getRegions } from '@brazilian-utils/brazilian-utils';
+
+getRegions();
+// [
+//   { code: 'N', name: 'Norte', ibgeCode: 1 },
+//   { code: 'NE', name: 'Nordeste', ibgeCode: 2 },
+//   { code: 'SE', name: 'Sudeste', ibgeCode: 3 },
+//   { code: 'S', name: 'Sul', ibgeCode: 4 },
+//   { code: 'CO', name: 'Centro-Oeste', ibgeCode: 5 },
+// ]
+```
+
+Source: [IBGE, API de Localidades, `regioes`](https://servicodados.ibge.gov.br/api/v1/localidades/regioes).
+
+### getStatesByRegion
+
+Get the states of a region, given its code (`'N'`, `'NE'`, `'SE'`, `'S'` or `'CO'`), sorted by name the way `getStates` sorts them.
+
+- The match ignores case and surrounding whitespace. Returns `[]` when no region matches.
+
+```javascript
+import { getStatesByRegion } from '@brazilian-utils/brazilian-utils';
+
+getStatesByRegion('S').map((state) => state.code); // ['PR', 'RS', 'SC']
+getStatesByRegion('co').map((state) => state.code); // ['DF', 'GO', 'MT', 'MS']
+getStatesByRegion('X'); // []
+```
+
+Source: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/api/v1/localidades/estados).
+
 ### getTimezoneByState
 
 Get the IANA time zone name (tzdata zone) of a Brazilian state: the zone of its capital.
@@ -1694,8 +1862,8 @@ Get the Brazilian municipalities published by the IBGE: every municipality, or o
 
 - Each municipality (`Municipality`) is `{ code, name, stateCode }`, where `code` is the 7-digit IBGE code. Sorted by name in the "pt-BR" locale.
 - Only an omitted (or `undefined`) `stateCode` asks for the full list: `null` and `''` return `[]`.
-- `stateCode` is case-sensitive: `'sp'`, like an unknown code, returns `[]`.
-- Embeds all 5571 municipalities. See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-municipalities`.
+- `stateCode` ignores letter case and surrounding whitespace: `'sp'` returns the São Paulo municipalities, as `'SP'` does (up to 2.4.0 it returned `[]`).
+- Embeds all 5571 municipalities, the same codes as the IBGE [Divisão Territorial Brasileira 2025](https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip) (data base 31/12/2025). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-municipalities`.
 
 ```javascript
 import { getMunicipalities } from '@brazilian-utils/brazilian-utils';
@@ -1731,7 +1899,7 @@ Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades
 
 Look up a Brazilian municipality by its 7-digit IBGE code.
 
-- Accepts the code as a string or a non-negative integer.
+- Accepts the code as a string or a non-negative integer, with any non-digit characters of a string stripped.
 - Returns `{ code, name, stateCode }` (`Municipality`), or `null` when the code is not 7 digits long or matches no municipality.
 
 ```javascript
@@ -1749,14 +1917,35 @@ getMunicipalityByCode('123'); // null (not 7 digits)
 
 Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 
+### getCodeByMunicipalityName
+
+Look up the 7-digit IBGE code of a Brazilian municipality by its name and the code of its state. It is the offline, synchronous counterpart of `get_code_by_municipality_name` in the Python library, which queries the IBGE API over the network.
+
+- The name ignores accents, the cedilla and letter case. Runs of whitespace collapse and the surrounding whitespace is trimmed, but a name written without a space the IBGE name has does not match (`'saopaulo'`).
+- Takes one object, `{ municipalityName, stateCode }` (`GetCodeByMunicipalityNameParams`), with both fields required. The state code ignores letter case and surrounding whitespace, as every util that takes a state does. It is required, since the same name can belong to municipalities of different states (`'Bom Jesus'` exists in PI, RS and other states).
+- Returns the code as a string, or `null` when the state code is not a state or no municipality of that state has that name.
+- Embeds the 5571 municipalities, the same table as `getMunicipalityByCode`. See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-code-by-municipality-name`.
+
+```javascript
+import { getCodeByMunicipalityName } from '@brazilian-utils/brazilian-utils';
+
+getCodeByMunicipalityName({ municipalityName: 'Conceição do Coité', stateCode: 'Ba' }); // '2908408'
+getCodeByMunicipalityName({ municipalityName: 'sao paulo', stateCode: 'sp' }); // '3550308'
+getCodeByMunicipalityName({ municipalityName: 'Bom Jesus', stateCode: 'RS' }); // '4302303'
+getCodeByMunicipalityName({ municipalityName: 'São Paulo', stateCode: 'RJ' }); // null (no São Paulo in Rio de Janeiro)
+getCodeByMunicipalityName({ municipalityName: 'Município Inexistente', stateCode: 'RS' }); // null
+```
+
+Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
+
 ### getCities
 
 Get the names of Brazilian cities: every city, or only those of one state. **Deprecated:** use `getMunicipalities` instead.
 
 - Sorted in the "pt-BR" locale.
 - Any falsy `state` asks for the full list, where `getMunicipalities` returns `[]`.
-- `state` is case-sensitive: `'sp'`, like an unknown code, returns `[]`.
-- Embeds all 5571 names (~154.2 KB minified, ~49.8 KB gzipped). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities`.
+- `state` ignores letter case and surrounding whitespace: `'sp'` returns the São Paulo cities, as `'SP'` does (up to 2.4.0 it returned `[]`).
+- Embeds all 5571 names (~153.4 KB minified, ~49.2 KB gzipped). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -1798,7 +1987,7 @@ Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades
 
 ### getMunicipality
 
-Get municipality information by IBGE code, or an IBGE code from a municipality name and UF. **Deprecated:** use `getMunicipalityByCode` instead, which is synchronous and offline; matching a municipality by name is up to the application, over `getMunicipalities`.
+Get municipality information by IBGE code, or an IBGE code from a municipality name and UF. **Deprecated:** use `getMunicipalityByCode` for a code and `getCodeByMunicipalityName` for a name instead, which are synchronous and offline.
 
 - One function handles both directions, based on whether `options` has a `code` or a `municipalityName`/`uf`. The lookup is offline: no network request is made.
 - The name match ignores accents and case, and every run of whitespace collapses into one space.
@@ -1855,8 +2044,14 @@ Get the Brazilian holidays of a year: the national ones and, with a `stateCode`,
 
 - Each holiday is a `Holiday` whose `type` (`HolidayType`) is `"national"`, `"state"`, `"optional"` or `"religious"`. Holidays are sorted by date.
 - "Dia da Consciência Negra", Nov 20, is national from 2024 on.
-- Per-state rules (SC's Sunday shift, DF's Corpus Christi, dates that stopped being holidays) follow each state's law; see the source for the list.
-- An unknown or non-string `stateCode` is ignored and only national holidays are returned.
+- The first round of the elections, "Eleições (primeiro turno)", is a national holiday in the even years from 1998 on (Código Eleitoral, art. 380): the first Sunday of October, or Nov 15 in 2020 (EC nº 107/2020). The second round is left out, since it is held only where one is needed. Being a Sunday, it never changes a business day count. Before 1998, Lei nº 1.266/1950 made the day of the general elections a national holiday, so the ones held on a weekday are listed too: Oct 3 of 1955 and 1958 ("Eleições gerais") and of 1990 and 1994 ("Eleições (primeiro turno)"). Oct 3, 1960 is left out, since no official text found dates that year's presidential election, and so is the municipal election of Oct 3, 1996.
+- Each fixed-date national holiday is listed only for the years a federal norm declared it (Sexta-feira Santa, which the federal calendar portarias list as a feriado nacional every year, is listed every year): Nossa Senhora Aparecida from 1980, Natal from 1922, Dia do trabalhador from 1925, Tiradentes up to 1930, from 1933 to 1948 and from 1951, and Finados up to 1948 and from 2003. Lei nº 662/1949 left Finados out of the feriados nacionais that Decreto-lei nº 486/1938 listed, and only Lei nº 10.607/2002 put it back (the Câmara report on its bill: "Só inova ao sugerir o dia de finados"); up to 2.4.0 it was listed every year. The other "festas nacionais" of the first republican calendar (Decreto nº 155-B/1890 and Decreto nº 3/1891: Feb 24, May 3, May 13, Jul 14 and Oct 12) are listed up to 1930, and May 3 (1936 to 1938), Jul 16 and Oct 12 (1936 and 1937) again under Lei nº 108/1935.
+- The `"optional"` entries are the whole-day pontos facultativos of the federal calendar (Portarias MGI nº 8.617/2023, 9.783/2024 and 11.460/2025, for 2024 to 2026, all of which list both Carnaval days as ponto facultativo, never as feriado nacional): Carnaval Monday and Tuesday and Corpus Christi, the same three days the financial market skips (Resolução CMN nº 4.880/2020), plus the state ones a state norm declares (AM's Dec 8, which the state declares for its offices by decree, and PE's Mar 6 in 2008 and 2009). `includeOptional` switches exactly these. The partial ones are left out: Quarta-feira de Cinzas (until 14h), Oct 28 (Dia do Servidor Público) and the Dec 24 and Dec 31 afternoons.
+- Per-state rules (SC's Sunday shift of a date falling Monday to Saturday, as Decreto SC nº 1.460/2018 did with a Saturday Aug 11; PE's data magna on the first Sunday of March from 2010 to 2017; AL's Nov 30 moved to Monday from a Tuesday and to Friday from a Thursday, DF's, MA's (from 2024) and RJ's (from 2026) Corpus Christi and RJ's Carnaval Tuesday typed `"state"`, dates that stopped being holidays) follow each state's law; see the source for the list. AL's Sep 16 is a state holiday from 2011, as the state's calendar decrees label it before Lei AL nº 9.358/2024. A state law the STF struck down has no entry in any year: RO's Jun 18 (ADI 3940) and AP's Jul 25 (ADI 4820).
+- Other shifts are not applied and the statutory date is returned: AC's law moves the feriados falling Tuesday to Thursday to the Friday (Lei AC nº 2.126/2009), but the state's own yearly decrees apply it unevenly (2026 moves Jan 20 and leaves Nov 17, a Tuesday, in place).
+- GO's three dates (Jul 26, Oct 24, Oct 28) are the "feriados estaduais" of the state servants' statute, listed from 1986 (Lei GO nº 9.990/1986, then Lei GO nº 10.460/1988 and Lei GO nº 20.756/2020, art. 269, II); the same statutes made Nov 2 a GO holiday from 1986 to 2002, the years it was not a national one. No Goiás law fixing a data magna as a civil holiday was found. The governor moves Jul 26 by decree every year (2025: Jul 28; 2026: Jul 20), and Oct 28 most years (2025: Oct 27; 2026: Oct 30), so the statutory date returned here is often not the day observed.
+- Each state holiday is listed only from the first year its state law applied (SP's Jul 9 from 1997, RJ's São Jorge from 2008, SC's Aug 11 from 2004), so an older year has fewer state holidays.
+- `stateCode` ignores letter case and surrounding whitespace (`'sp'` is `'SP'`). Only an omitted (or `undefined`) `stateCode` asks for the national holidays alone: any other value that is not a state code (`'XX'`, `''`, a value that is not a string) returns `[]`. Up to 2.4.0 an unknown code was ignored and the national holidays were returned, so a typo such as `'sp'` silently dropped the state's holidays.
 - Returns `[]` when the year is not an integer from 1900 to 2099, or when the argument is neither a number nor an object.
 
 ```javascript
@@ -1866,9 +2061,11 @@ import { getHolidays } from '@brazilian-utils/brazilian-utils';
 getHolidays(2024);
 // [
 //   { name: 'Ano novo', date: Date('2024-01-01'), type: 'national' },
+//   { name: 'Carnaval (segunda-feira)', date: Date('2024-02-12'), type: 'optional' },
 //   { name: 'Carnaval (terça-feira)', date: Date('2024-02-13'), type: 'optional' },
 //   { name: 'Sexta-feira Santa', date: Date('2024-03-29'), type: 'national' },
 //   { name: 'Páscoa', date: Date('2024-03-31'), type: 'religious' },
+//   { name: 'Eleições (primeiro turno)', date: Date('2024-10-06'), type: 'national' },
 //   { name: 'Dia da Consciência Negra', date: Date('2024-11-20'), type: 'national' },
 //   // ... more holidays
 // ]
@@ -1885,8 +2082,8 @@ Source: `src/get-holidays/constants.ts`, [Lei nº 662/1949](https://www.planalto
 Check if a date is a Brazilian holiday. Accepts `{ targetDate, stateCode? }` (`IsHolidayParams`).
 
 - The check uses `targetDate`'s local calendar date, not its UTC instant.
-- `stateCode` also considers that state's holidays. An unknown code is ignored, as in `getHolidays`.
-- Returns `false` when `targetDate` is missing or not a valid `Date`, or when `stateCode` is present and not a string.
+- `stateCode` also considers that state's holidays, read as in `getHolidays` (letter case and surrounding whitespace are ignored).
+- Returns `false` when `targetDate` is missing or not a valid `Date`, or when `stateCode` is present and is not a state code (`'XX'`, `''`, a value that is not a string), even on a national holiday.
 
 ```javascript
 import { isHoliday } from '@brazilian-utils/brazilian-utils';
@@ -1900,11 +2097,11 @@ isHoliday(); // false
 
 Check if a date is a Brazilian business day (dia útil): not a Saturday, a Sunday or a holiday `getHolidays` lists for its local calendar day.
 
-- **Options** (`BusinessDayOptions`, shared by every business day util): `includeOptional` (default `true`) also counts the `"optional"` holidays, Carnaval and Corpus Christi, as non-business days; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also counts that state's holidays.
-- `includeSaturday` off is the Monday to Friday count banks and courts use. On, it is the labour law count of the payroll deadline of CLT art. 459 § 1º, the one labour inspection reads through Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
+- **Options** (`BusinessDayOptions`, shared by every business day util): `includeOptional` (default `true`) also counts the `"optional"` holidays, Carnaval Monday and Tuesday and Corpus Christi, as non-business days; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also counts that state's holidays.
+- `includeSaturday` off is a Monday to Friday count. It is not by itself the calendar of banks or courts: the financial market also skips Carnaval Monday and Tuesday and Corpus Christi (Resolução CMN nº 4.880/2020, art. 6º), which the default `includeOptional` covers, and banks close on local holidays; the federal courts also close from Dec 20 to Jan 6, from Holy Wednesday to Easter, on Carnaval Monday and Tuesday, Aug 11, Nov 1 and 2 and Dec 8 (Lei nº 5.010/1966, art. 62), and procedural deadlines follow each court's calendar (CPC art. 216). On, it is the labour law count of the payroll deadline of CLT art. 459 § 1º, the one labour inspection reads through Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
 - Sunday and holidays are still excluded with `includeSaturday` on, so a holiday that falls on a Saturday is still not a business day.
 - The "inclusive o municipal" part of that rule is not covered: `getHolidays` carries national and state holidays only, so a municipal holiday counts here as an ordinary business day. Remove the municipal holidays yourself when a count has to be exact for one municipality.
-- Returns `false` when `value` is not a valid `Date` or its year is outside 1900 to 2099, or when `stateCode` is present and not a string.
+- Returns `false` when `value` is not a valid `Date` or its year is outside 1900 to 2099, or when `stateCode` is present and is not a state code (`'XX'`, `''`, a value that is not a string). Letter case and surrounding whitespace in `stateCode` are ignored.
 
 ```javascript
 import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
@@ -1915,7 +2112,8 @@ isBusinessDay(new Date(2024, 0, 6)); // false (Saturday)
 isBusinessDay(new Date(2024, 0, 6), { includeSaturday: true }); // true (labour law count)
 isBusinessDay(new Date(2024, 8, 7), { includeSaturday: true }); // false (Independência, a holiday on a Saturday)
 isBusinessDay(new Date(2024, 0, 7), { includeSaturday: true }); // false (Sunday is never included)
-isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, optional holiday, counts by default)
+isBusinessDay(new Date(2024, 1, 12)); // false (Carnaval Monday, optional holiday, counts by default)
+isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval Tuesday, optional holiday, counts by default)
 isBusinessDay(new Date(2024, 1, 13), { includeOptional: false }); // true
 isBusinessDay(new Date(2024, 6, 9), { stateCode: 'SP' }); // false (Revolução Constitucionalista)
 isBusinessDay(new Date(2024, 6, 9)); // true (state holiday ignored without stateCode)
@@ -1926,10 +2124,10 @@ isBusinessDay(new Date('not a date')); // false
 
 Add a number of Brazilian business days (dias úteis) to a date, skipping Saturdays, Sundays and the holidays `isBusinessDay` skips. Signature: `addBusinessDays(date, amount, options?)`, the same as date-fns.
 
-- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
+- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval Monday and Tuesday and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
 - Returns a new `Date`, time of day preserved; `date` is never mutated.
 - An `amount` of `0` returns the same date, even on a weekend or holiday. A negative `amount` walks backwards.
-- Returns `null` when `date` is invalid, `amount` is not a finite integer, `stateCode` is not a string, or the result leaves the years 1900 to 2099.
+- Returns `null` when `date` is invalid, `amount` is not a finite integer, `stateCode` is present and is not a state code, or the result leaves the years 1900 to 2099.
 
 ```javascript
 import { addBusinessDays } from '@brazilian-utils/brazilian-utils';
@@ -1973,14 +2171,14 @@ import { addBusinessDays, subBusinessDays } from '@brazilian-utils/brazilian-uti
 
 // n-th business day of the month: add n from the last day of the month before
 addBusinessDays(new Date(2024, 0, 0), 5); // Date, 2024-01-08 00:00 (5th business day of January 2024)
-addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-15 00:00 (10th of February 2024, Carnaval skipped)
+addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-16 00:00 (10th of February 2024, Carnaval Monday and Tuesday skipped)
 
 // last business day of the month: subtract 1 from the first day of the month after
 subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 is Sexta-feira Santa, then a weekend)
 subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (2nd to last of January 2024)
 
 // payroll deadline of CLT art. 459 § 1º: the 5th business day in the labour law count
-addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, a Saturday, counts; the banking count gives 2024-03-07)
+addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, a Saturday, counts; the Monday to Friday count gives 2024-03-07)
 addBusinessDays(new Date(2024, 10, 0), 5, { includeSaturday: true }); // Date, 2024-11-07 00:00 (2024-11-02 is Finados, a holiday on a Saturday)
 subBusinessDays(new Date(2024, 8, 1), 1, { includeSaturday: true }); // Date, 2024-08-31 00:00 (last business day of August 2024, a Saturday)
 ```
@@ -1993,10 +2191,10 @@ subBusinessDays(new Date(2024, 8, 1), 1, { includeSaturday: true }); // Date, 20
 
 Count the Brazilian business days (dias úteis) between two dates. Signature: `differenceInBusinessDays(laterDate, earlierDate, options?)`, the same as date-fns.
 
-- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
+- **Options** (`BusinessDayOptions`, shared with `isBusinessDay`): `includeOptional` (default `true`) also skips Carnaval Monday and Tuesday and Corpus Christi; `includeSaturday` (default `false`) counts Saturday as a business day; `stateCode` also skips that state's holidays.
 - Counts `earlierDate` when it is a business day and every business day strictly between the two dates; `laterDate` is never counted. The time of day is ignored.
 - The result is negative when `laterDate` is before `earlierDate`, and `0` on the same calendar day.
-- Returns `null` when either date is not a valid `Date` or is outside the years 1900 to 2099, or `stateCode` is not a string.
+- Returns `null` when either date is not a valid `Date` or is outside the years 1900 to 2099, or `stateCode` is present and is not a state code.
 
 ```javascript
 import { differenceInBusinessDays } from '@brazilian-utils/brazilian-utils';
@@ -2005,7 +2203,7 @@ differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 1)); // 0 (Jan 
 differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (Jan 2 counted, a Tuesday; Jan 3 is not)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (the later date comes first, so the count is negative)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (same day)
-differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (banking count, 2024-01-02 to 2024-01-05)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (Monday to Friday count, 2024-01-02 to 2024-01-05)
 differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (2024-01-06, a Saturday, also counts)
 differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (2024-11-02 is Finados, a holiday on a Saturday)
 differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: 'SP' }); // 1 (2024-07-09 is a state holiday in SP)
@@ -2019,6 +2217,7 @@ differenceInBusinessDays(new Date(), new Date('not a date')); // null
 Check if a Brazilian passport number is valid: 2 letters followed by 6 digits.
 
 - There is no check digit, so a well-formed number is not necessarily a real passport.
+- The 2 letters (the "série") and 6 digits come from the Polícia Federal's FAQ; no norm defines the number (neither the Decreto nº 5.978/2006 nor the IN nº 173-DG/PF/2020, as amended up to the IN nº 283/2024), and the FAQ lists no forbidden letter.
 
 ```javascript
 import { isValidPassport } from '@brazilian-utils/brazilian-utils';
@@ -2070,7 +2269,7 @@ generatePassport(); // 'RY393097'
 Check if a CNH is valid. Spaces, dots and hyphens are ignored; any other character makes the value invalid.
 
 - A value whose 11 digits are all the same is rejected, so `'11111111111'` is invalid.
-- The first check digit keeps a remainder of 1 as `1`, as real registry numbers do. Resolução CONTRAN nº 886/2021 says `0`.
+- The first check digit keeps a remainder of 1 as `1`, as real registry numbers do. Resolução CONTRAN nº 886/2021, art. 4º § 1º, whose remainder of 0 or 1 gives `0`, speaks of "O dígito verificador" without naming the number: written in the singular right after the Número do Espelho da CNH (the only number of the article with a single check digit), it reads best as that digit's rule, but it is worded generically and gives no weights, so it is no source for the 2 check digits of the registry number; no official text publishes their weights. Resoluções CONTRAN nº 976/2022, nº 998/2023 and nº 1.006/2024 amend Resolução nº 886/2021, none of them in art. 4º. Resolução CONTRAN nº 1.020/2025, the newer habilitação norm, repeats the layout in its art. 10 ("nove caracteres e dois dígitos verificadores") with no check digit rule and does not revoke the 886 (art. 140).
 
 ```javascript
 import { isValidCnh } from '@brazilian-utils/brazilian-utils';
@@ -2080,7 +2279,7 @@ isValidCnh('000000001-19'); // true (hyphen before the check digits)
 isValidCnh('ab00000000119'); // false (letters are rejected)
 ```
 
-Source: [Resolução CONTRAN nº 886/2021, art. 4º](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf); weights per [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/).
+Source: [Resolução CONTRAN nº 886/2021, art. 4º](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao8862021F.pdf), [Resolução CONTRAN nº 1.020/2025, art. 10](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf); weights per [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-cnh/).
 
 ### formatCnh
 
@@ -2088,7 +2287,7 @@ Format a CNH.
 
 - **Options** (`FormatCnhOptions`): `pad` left-pads the value with zeros to the full 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits.
 - `obfuscate` is applied after `pad`.
-- No authority publishes a masking rule for the CNH, so `obfuscate` applies the one Lei nº 12.309/2010, art. 87, § 5º sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure.
+- No authority publishes a masking rule for the CNH, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
@@ -2118,7 +2317,7 @@ import { generateCnh } from '@brazilian-utils/brazilian-utils';
 generateCnh(); // '02650306461'
 ```
 
-Source: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), the CPF masking rule `obfuscate` borrows.
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the one for 2026, repeats it).
 
 ## Legal nature
 
@@ -2211,7 +2410,8 @@ getLegalNature('2208');
 // }
 getLegalNature('3123')?.currentCode; // null (retired without a successor)
 getLegalNature('206-2')?.code; // '2062'
-getLegalNature(206.2)?.category.description; // 'Entidades Empresariais'
+getLegalNature('206.2')?.category.description; // 'Entidades Empresariais'
+getLegalNature(206.2); // null (a number is only read when it is a non-negative safe integer: write the dotted form as a string)
 getLegalNature('0000'); // null
 ```
 
@@ -2262,10 +2462,12 @@ getLegalNaturesByCategory('9'); // []
 
 ### isValidVoterId
 
-Check if a voter ID number is valid. Accepts the standard 12-digit id and the 13-digit id issued by São Paulo (UF `01`) and Minas Gerais (UF `02`).
+Check if a voter ID number is valid. A voter ID has at most 12 digits, so a 13-digit value is rejected.
 
 - A voter ID is an 8-digit sequential number, a 2-digit federative union code (`01` to `28`) and 2 check digits.
+- The TSE drops the leading zeros of the sequential number when it issues the ID, so a shorter value is read as the ID without them and left padded with zeros to 12 digits before it is checked (`123450159` is checked as `000123450159`). At least one sequential digit is required: the shortest accepted value has 5 digits.
 - Whitespace and dots are accepted around and between the groups. Any other character, a hyphen included, makes the value invalid.
+- Resolução TSE nº 23.659/2021, art. 36, which revoked Resolução TSE nº 21.538/2003 (art. 140), fixes the layout, the federative union table and two check digits "determinados com base no 'Módulo 11'". It gives no weights and no rule per state: the weights, and the rule that turns a remainder of 0 into 1 for São Paulo (`01`) and Minas Gerais (`02`), have no official source and follow the community references below.
 
 ```javascript
 import { generateVoterId, isValidVoterId } from '@brazilian-utils/brazilian-utils';
@@ -2274,46 +2476,48 @@ const voterId = generateVoterId('SP');
 
 isValidVoterId(voterId); // true
 isValidVoterId('102385010671'); // true (12 digits)
-isValidVoterId('1234567880191'); // true (13 digits, São Paulo)
+isValidVoterId('123450159'); // true (000123450159 issued without its leading zeros)
+isValidVoterId('1234567880191'); // false (13 digits, more than the 12 the TSE allows)
 isValidVoterId('123456780124'); // false (invalid check digits)
 ```
 
-Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) and [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
+Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021) ("composto por até 12 algarismos", "os oito primeiros algarismos serão sequenciados, desprezando-se, na emissão, os zeros à esquerda"), [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/voter_id.py) and [siga0984](https://siga0984.wordpress.com/2019/05/01/algoritmos-validacao-de-titulo-de-eleitor/).
 
 ### formatVoterId
 
 Format a voter ID number with the 12-digit grouping `0000 0000 00 00`.
 
-- **Options** (`FormatVoterIdOptions`): `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible.
-- The 13-digit grouping `0000 0000 0 00 00` is used only when the value has more than 12 digits and its UF code (the 10th and 11th digits) is `01` or `02`.
-- Digits past the last slot of the pattern are dropped.
-- No authority publishes a masking rule for the voter ID, so `obfuscate` applies the one Lei nº 12.309/2010, art. 87, § 5º sets for the CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), a number with the same structure.
+- **Options** (`FormatVoterIdOptions`): `pad` left pads the value with zeros up to 12 digits, restoring the leading zeros of a voter ID issued without them; `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible. The mask hides by position, so pass `pad` with `obfuscate` for a voter ID given as a number, which has lost its leading zeros: without it the mask shifts onto the check digits.
+- Without `pad`, a shorter value is formatted from the left, as a partially typed ID.
+- Digits past the 12th are dropped.
+- No authority publishes a masking rule for the voter ID, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
 
 formatVoterId('123456780175'); // '1234 5678 01 75'
 formatVoterId('123456780175', { obfuscate: true }); // '***4 5678 01 **'
-formatVoterId('1234567880191'); // '1234 5678 8 01 91' (13-digit SP/MG voter id)
+formatVoterId('123450159', { pad: true }); // '0001 2345 01 59'
+formatVoterId('123450159'); // '1234 5015 9' (read as a partially typed ID)
 ```
 
 ### parseVoterId
 
-Remove voter ID formatting, keep only digits, and cap the result to 12 digits (13 when the UF digits identify São Paulo or Minas Gerais).
+Remove voter ID formatting, keep only digits, and cap the result to 12 digits. A shorter value is kept as it is, without adding leading zeros.
 
 ```javascript
 import { parseVoterId } from '@brazilian-utils/brazilian-utils';
 
 parseVoterId('1234 5678 01 75'); // '123456780175'
-parseVoterId('1234 5678 8 01 91'); // '1234567880191' (13-digit SP/MG voter id)
+parseVoterId('12345 01 59'); // '123450159'
 ```
 
 ### generateVoterId
 
 Generate a valid random voter ID number. The optional `state` argument (`StateCode`, or `"ZZ"` for a voter ID issued abroad) sets the federative union code.
 
-- An unknown state, or a value that is not a string, falls back to `"ZZ"` (UF `28`).
-- The result always has 12 digits, never the 13-digit São Paulo or Minas Gerais form.
+- `state` ignores letter case and surrounding whitespace (`'sp'` is `'SP'`). An unknown state, or a value that is not a string, falls back to `"ZZ"` (UF `28`).
+- The result always has 12 digits, the leading zeros of the sequential number included; the same ID without them is valid too.
 
 ```javascript
 import { generateVoterId } from '@brazilian-utils/brazilian-utils';
@@ -2323,7 +2527,7 @@ generateVoterId('SP'); // valid random voter ID for Sao Paulo
 generateVoterId('XX'); // falls back to "ZZ" instead of throwing
 ```
 
-Source: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), the CPF masking rule `obfuscate` borrows.
+Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the one for 2026, repeats it).
 
 ## CNS
 
@@ -2332,7 +2536,7 @@ Source: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivi
 Check if a CNS (Cartão Nacional de Saúde) number is valid, the SUS (Sistema Único de Saúde) identifier of a user, health professional or health facility. The value must be the 15 digits, optionally split into the printed groups of 3-4-4-4 by whitespace, `.`, `-` or `/`.
 
 - Definitive cards start with 1 or 2, provisional ones with 7, 8 or 9; each has its own modulus 11 rule.
-- A number starting with 5 is rejected, following ANVISA.
+- A number starting with 5 is rejected. The DATASUS validation routines ([Wayback Machine copy](https://web.archive.org/web/20190106003442/http://cartaonet.datasus.gov.br/Rotina_JavaScript.doc) of the file the cartaonet.datasus.gov.br site published) cover only the numbers that start with 1 or 2 (definitive) and with 7, 8 or 9 (provisional), as ANVISA does; no official document names the prefix 5, which the e-SUS APS page accepts.
 
 ```javascript
 import { isValidCns } from '@brazilian-utils/brazilian-utils';
@@ -2341,12 +2545,13 @@ isValidCns('123456789010000'); // true (definitive)
 isValidCns('100000000060018'); // true (definitive, raw check digit 10, suffix 001)
 isValidCns('700000000000005'); // true (provisional)
 isValidCns('123.4567-8901/0000'); // true (any of the mask characters)
+isValidCns(-123456789010000); // false (not a non-negative safe integer)
 isValidCns('123456789010001'); // false (wrong check digit)
 isValidCns('12345678901'); // false (wrong length)
 isValidCns('abc123456789010000'); // false (not written as a CNS)
 ```
 
-Source: [ANVISA CNS validation page](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/) and the [e-SUS APS page](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html).
+Source: [DATASUS validation routines](https://web.archive.org/web/20190106003442/http://cartaonet.datasus.gov.br/Rotina_JavaScript.doc) (Wayback Machine copy), [ANVISA CNS validation page](https://rni-docs.anvisa.gov.br/docs/regras_gerais/validacoes/validacaoCNS/) and the [e-SUS APS page](https://integracao.esusab.ufsc.br/ledi/documentacao/regras/algoritmo_CNS.html).
 
 ### formatCns
 
@@ -2393,8 +2598,9 @@ The matrícula has 32 digits, printed as `000000 00 00 0000 0 00000 000 0000000 
 | 2 | dígitos verificadores |
 
 - **Options** (`IsValidCertidaoOptions`): `accept` narrows the valid book types (`CertidaoType`) to the listed ones (default: every type).
-- The serviço must be `55`, and the book-type digit must be one of the nine books (`0` is rejected).
+- The serviço must be `55`, and the book-type digit one of the codes 1 to 9: 1 to 7 are the books of art. 473, V (Provimento CNJ nº 149/2023, redação of the Provimento CN nº 182/2024); 8 (`"emancipation"`, Livro E desdobrado for emancipações) and 9 (`"interdiction"`, Livro E desdobrado for interdições) come from the Provimento CNJ nº 3/2009, art. 7º, revoked by the Provimento CNJ nº 63/2017, and are kept so the certidões issued under it from 2010 on still validate. `0` is rejected.
 - Accepts the value masked or not, with whitespace between and around the groups.
+- No official document publishes the check digit algorithm: art. 473, IX only names the two digits, the revoked Provimento CNJ nº 3/2009 had them computed by a program the CNJ handed to the registrars, and the Caixa's Cadastro NIS layout says only "módulo 11". The weights and the remainder rule follow the community references below.
 
 ```javascript
 import { isValidCertidao } from '@brazilian-utils/brazilian-utils';
@@ -2403,6 +2609,8 @@ isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21'); // true
 isValidCertidao('09430001552010100020112000012087'); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 22'); // false (invalid check digits)
 isValidCertidao('09400301542011100110002005191744'); // false (serviço is not 55)
+isValidCertidao('10453901552013900012021000012398'); // true (book code 9, Provimento CNJ nº 3/2009)
+isValidCertidao('10453901552013000012021000012387'); // false (book code 0 names no book)
 isValidCertidao('123456'); // false (wrong length)
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['birth'] }); // true
 isValidCertidao('104539 01 55 2013 1 00012 021 0000123 21', { accept: ['death'] }); // false
@@ -2415,7 +2623,7 @@ Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de 
 Format the matrícula of a certidão de registro civil into the printed mask of art. 473. The 32 digits are grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
 
 - **Options** (`FormatCertidaoOptions`): `pad` left-pads the value with zeros up to 32 digits (default `false`).
-- A number is accepted, but a full 32-digit matrícula has to be a string.
+- A number is accepted when it is a non-negative safe integer, so a full 32-digit matrícula has to be a string. Any other number returns `''`.
 
 ```javascript
 import { formatCertidao } from '@brazilian-utils/brazilian-utils';
@@ -2424,6 +2632,7 @@ formatCertidao('10453901552013100012021000012321'); // 104539 01 55 2013 1 00012
 formatCertidao('104539.01.55.2013.1.00012.021.0000123-21'); // 104539 01 55 2013 1 00012 021 0000123 21
 formatCertidao('1552010100020112000012087', { pad: true }); // 000000 01 55 2010 1 00020 112 0000120 87
 formatCertidao(104539015520); // 104539 01 55 20 (a number is read as the string of its digits)
+formatCertidao(1045390155.2); // '' (not a non-negative safe integer)
 ```
 
 Source: [art. 473 of the Código Nacional de Normas](https://atos.cnj.jus.br/atos/detalhar/5243).
@@ -2443,8 +2652,8 @@ parseCertidao('104539 01 55 2013 1 00012 021 0000123 21');
 
 Parse the matrícula of a certidão de registro civil into its fields. Accepts the same input forms as `isValidCertidao` and returns `null` when the matrícula is not valid.
 
-- Returns `null` also for a serviço other than `55` and for a book code outside 1 to 9.
-- Art. 473, V lists only the book codes 1 to 7. The codes 8 (emancipação) and 9 (interdição) are also accepted.
+- Returns `null` also for a serviço other than `55` and for the book code `0`.
+- Art. 473, V lists the book codes 1 to 7, from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos relativos ao registro civil)". The codes 8 (emancipação) and 9 (interdição) of the Provimento CNJ nº 3/2009, art. 7º, revoked by the Provimento CNJ nº 63/2017, are not in it but are still read, as `"emancipation"` and `"interdiction"`, since the certidões issued under it from 2010 on carry them and remain valid documents.
 
 The `CertidaoInfo` result carries:
 
@@ -2454,7 +2663,7 @@ The `CertidaoInfo` result carries:
 | `acervo` | Acervo the book belongs to: `"01"` the serventia's own, `"02"` and up one per acervo it absorbed. Art. 473, §§ 3º to 5º splits the absorbed ones by the date the origin serventia was extinguished or deactivated. Up to 31/12/2009: the CNS of the incorporating unit and an acervo code from `"02"` up, one per incorporation. From 01/01/2010 on: the CNS of the incorporated unit itself and the code `"01"`, counted as that unit's own acervo. An acervo split between two or more successor serventias gets each successor's own CNS with the code `"02"`. |
 | `service` | Service rendered by the serventia, always `"55"`, the registro civil das pessoas naturais. |
 | `year` | Four digit year the act was recorded. |
-| `type` | The book the act belongs to: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, `"other"`, `"emancipation"` or `"interdiction"`. |
+| `type` | The book the act belongs to: `"birth"`, `"marriage"`, `"religious-marriage"`, `"death"`, `"stillbirth"`, `"banns"`, `"other"`, or, for the codes 8 and 9 of the Provimento CNJ nº 3/2009, `"emancipation"` and `"interdiction"`. |
 | `typeCode` | Raw book code, 1 to 9, as printed in the fifteenth position of the matrícula. |
 | `book` | The 5 digit book (livro) number, zero padded. |
 | `page` | The 3 digit page (folha) number, zero padded. |
@@ -2481,7 +2690,7 @@ getCertidaoInfo('104539 01 55 2013 1 00012 021 0000123 21');
 getCertidaoInfo('invalid'); // null
 ```
 
-Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243); book codes 8 and 9 per [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts).
+Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de Justiça](https://atos.cnj.jus.br/atos/detalhar/5243); book codes 8 and 9 per the revoked [Provimento CNJ nº 3/2009, art. 7º](https://atos.cnj.jus.br/atos/detalhar/1310), still listed by [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [validation-br](https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts).
 
 ## CEI, CNO and CAEPF
 
@@ -2490,6 +2699,7 @@ Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de 
 Check if a CEI (Cadastro Específico do INSS) number is valid. The CEI identifies an employer with no CNPJ, such as a construction work or a rural producer.
 
 - Layout: 12 digits printed as `00.000.00000/00`, 11 base digits and one check digit.
+- Only the 12 digits are official: no norm, layout or manual of the Receita Federal publishes the check digit, which follows the community references below and agrees with the CNO open dataset and with SERPRO's example `000000336854`.
 
 ```javascript
 import { isValidCei } from '@brazilian-utils/brazilian-utils';
@@ -2497,11 +2707,12 @@ import { isValidCei } from '@brazilian-utils/brazilian-utils';
 isValidCei('11.583.00249/85'); // true
 isValidCei('277297118187'); // true
 isValidCei(249859674386); // true
+isValidCei(-249859674386); // false (not a non-negative safe integer)
 isValidCei('24.985.96743/68'); // false (invalid check digit)
 isValidCei('000000000000'); // false (repeated digits)
 ```
 
-Source: [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php), [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
+Source: [SERPRO, CNO cadastro](https://bcadastros.serpro.gov.br/documentacao/cadastro_cno/) (12 positions), [eSocial MOS S-1.3, item 9.1](https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-s-1-3-consolidada-ate-a-no-s-1-3-07-2026.pdf) (the CNO keeps the CEI number); check digit per [yii2-br-validator](https://github.com/yiibr/yii2-br-validator/blob/master/src/CeiValidator.php), [Bigai.Documentos.Brasil](https://github.com/marcos-cruz/Documento/blob/master/src/Bigai.Documentos.Brasil/Cei/Cei.cs) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
 
 ### formatCei
 
@@ -2539,11 +2750,12 @@ import { isValidCno } from '@brazilian-utils/brazilian-utils';
 isValidCno('11.084.01680/62'); // true
 isValidCno('111130137368'); // true
 isValidCno(401800097960); // true
+isValidCno(-401800097960); // false (not a non-negative safe integer)
 isValidCno('110840168063'); // false (invalid check digit)
 isValidCno('000000000000'); // false (repeated digits)
 ```
 
-Source: [CNO page of the Receita Federal](https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
+Source: [CNO page of the Receita Federal](https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cno), [SERPRO, CNO cadastro](https://bcadastros.serpro.gov.br/documentacao/cadastro_cno/), [eSocial MOS S-1.3, item 9.1](https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/mos-s-1-3-consolidada-ate-a-no-s-1-3-07-2026.pdf) and the [CNO open dataset](https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-de-obras-cno).
 
 ### formatCno
 
@@ -2575,6 +2787,7 @@ Check if a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number is 
 
 - Layout: 14 digits printed as `000.000.000/000-00`: the 9-digit CPF base of the holder, a 3-digit sequence and 2 check digits.
 - Both check digits follow the CNPJ's modulus 11; the pair is then shifted by 12, wrapping around 100.
+- Only the 14 positions and the CPF base are official (SERPRO: "9 primeiros números do CPF + número de inscrição resumido" of 5 positions). The split of those 5 into a sequence and 2 check digits, the check digit rule and the shift of 12 come from the community references below; they agree with SERPRO's example `00000002500171`.
 
 ```javascript
 import { isValidCaepf } from '@brazilian-utils/brazilian-utils';
@@ -2582,12 +2795,13 @@ import { isValidCaepf } from '@brazilian-utils/brazilian-utils';
 isValidCaepf('293.118.610/001-84'); // true
 isValidCaepf('41142260000101'); // true
 isValidCaepf(29311861000184); // true
+isValidCaepf(-29311861000184); // false (not a non-negative safe integer)
 isValidCaepf('29311861000185'); // false (invalid check digits)
 isValidCaepf('00000000000000'); // false (repeated base digits)
 isValidCaepf('00000000000012'); // false (repeated base digits)
 ```
 
-Source: [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
+Source: [SERPRO, CAEPF cadastro](https://bcadastros.serpro.gov.br/documentacao/cadastro_caepf/) (14 positions); check digits per [ghiorzi.org](http://ghiorzi.org/DVnew.htm) and [brazilian-values](https://github.com/VitorLuizC/brazilian-values/blob/master/src/validators/isCAEPF.ts).
 
 ### formatCaepf
 
@@ -2636,7 +2850,7 @@ isValidCbo('2124abc05'); // false (not a documented form)
 isValidCbo(-212405); // false (not a non-negative safe integer)
 ```
 
-Source: [CBO 2002 occupation table published by the MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
+Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Up to 2.4.0 the table came from the older gov.br release (06/06/2025): 37 occupations were missing, and 6 the MTE has since dropped (225142, 322105, 322115, 322120, 322125 and 782820) are no longer valid.
 
 ### parseCbo
 
@@ -2666,7 +2880,7 @@ getCbo('000000'); // null
 getCbo('2124abc05'); // null (not a documented form)
 ```
 
-Source: [CBO 2002 occupation table published by the MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/cbo2002-ocupacao.csv).
+Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Up to 2.4.0 the table came from the older gov.br release (06/06/2025): 37 occupations were missing, and 6 the MTE has since dropped (225142, 322105, 322115, 322120, 322125 and 782820) are no longer valid.
 
 ### isValidCnae
 
@@ -2693,7 +2907,7 @@ Source: [CNAE-Subclasses 2.3 at CONCLA/IBGE](https://concla.ibge.gov.br/busca-on
 Format a CNAE (Classificação Nacional de Atividades Econômicas) subclass code. Only the structure changes; use `isValidCnae` to check a code against the table.
 
 - **Options** (`FormatCnaeOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code. Without it the mask is applied as far as the value goes.
-- Characters outside the mask are dropped, and a number is read as the string of its digits. Returns `''` when there is no digit at all.
+- Characters outside the mask are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer: a negative, fractional or unsafe number returns `''`, since its sign and decimal point are not mask characters. Returns `''` when there is no digit at all.
 
 ```javascript
 import { formatCnae } from '@brazilian-utils/brazilian-utils';
@@ -2704,7 +2918,7 @@ formatCnae('62015'); // 6201-5
 formatCnae('62', { pad: true }); // 0000-0/62 (padded to 7 digits first)
 formatCnae(111301, { pad: true }); // 0111-3/01
 formatCnae('abc6201501'); // 6201-5/01 (only the digits are read)
-formatCnae(-6201501); // 6201-5/01
+formatCnae(-6201501); // '' (not a non-negative safe integer)
 ```
 
 ### parseCnae
@@ -2758,7 +2972,7 @@ isValidNcm('abc01012100'); // false (not a documented form)
 isValidNcm(-84713012); // false (not a non-negative safe integer)
 ```
 
-Source: [NCM nomenclature published by the Portal Único Siscomex](https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json).
+Source: [NCM nomenclature published by the Portal Único Siscomex](https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json); the bundled 10,515 codes are those of the file "Vigente em 26/09/2026" (Resolução Gecex nº 926/2026).
 
 ### formatNcm
 
@@ -2775,7 +2989,7 @@ formatNcm('8471'); // 8471 (masked as far as it goes)
 formatNcm('847130'); // 8471.30
 formatNcm('8471', { pad: true }); // 0000.84.71 (padded to 8 digits first)
 formatNcm('abc8471'); // 8471 (only the digits are read)
-formatNcm(-84713012); // 8471.30.12
+formatNcm(-84713012); // '' (not a non-negative safe integer)
 ```
 
 ### parseNcm
@@ -2884,7 +3098,7 @@ getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob enc
 getServiceItem('3.01'); // null (vetoed)
 ```
 
-Source: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm) and the sheet `LISTA.SERV.NAC.` of the [ANEXO B of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), the list in force in machine readable form.
+Source: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm), whose list was last amended by Lei Complementar 183/2021, and the sheet `LISTA.SERV.NAC.` of the [ANEXO B of the Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), the list in force in machine readable form.
 
 ### isValidCfop
 
@@ -3159,6 +3373,7 @@ Check if a GTIN (Global Trade Item Number, the number under an EAN/UPC barcode) 
 - The value must be a string of 8, 12, 13 or 14 digits, surrounding whitespace aside, whose last digit is the GS1 modulo 10 check digit: weights 3 and 1 alternating from the right, the sum subtracted from the nearest equal or higher multiple of ten. That is what rules I03-10 and I12-10 of SEFAZ Nota Técnica 2021.003 check (rejections 611 and 612).
 - Leading zeros count, so a number is never accepted, and a masked value (`'7 890000 000017'`) is rejected instead of having its digits picked out.
 - The `'SEM GTIN'` literal the NF-e uses for a product without a GTIN is not a GTIN, so it is not valid here: test for it before calling.
+- A value of zeros only is rejected, although its check digit is valid. That is a rule of this library, not of the NF-e or GS1: rejection 611 is only the check digit, and the GS1 General Specifications (release 26.0, table 1-4) reserve the GS1 Prefix `0000000` for Restricted Circulation Numbers within a company rather than forbid it. Zeros are rejected as the usual placeholder for a missing GTIN.
 - The prefix does not change the verdict. Restricted Circulation Numbers (prefixes 02, 04 and 20 to 29, the codes a shop prints on its own scale labels) and the ISSN, ISBN and coupon ranges share the structure and the check digit, and the "Tabela Prefixo GS1" SEFAZ validates `cEAN` against lists them as valid; use `getGtinInfo` to tell them apart.
 - The prefix is not checked against the list of GS1 Member Organisations either: GS1 keeps assigning ranges, so a copy of that list would turn down valid numbers as it ages. Whether the number is registered (the Cadastro Centralizado de GTIN lookup SEFAZ runs for the 789 and 790 prefixes) cannot be checked offline.
 
@@ -3174,7 +3389,7 @@ isValidGtin('7890000000018'); // false (wrong check digit)
 isValidGtin('17890000000014', { lengths: [8, 12, 13] }); // false (GTIN-14 not accepted)
 isValidGtin('7 890000 000017'); // false (digits only)
 isValidGtin('SEM GTIN'); // false
-isValidGtin('0000000000000'); // false (zeros only, never allocated by GS1)
+isValidGtin('0000000000000'); // false (zeros only, a rule of this library)
 ```
 
 ### getGtinInfo
@@ -3182,13 +3397,13 @@ isValidGtin('0000000000000'); // false (zeros only, never allocated by GS1)
 Parse a GTIN into its fields, as a `GtinInfo`.
 
 - Returns `null` when the value is not a valid GTIN, under the same rules as `isValidGtin`.
-- The prefix is read the way the "Tabela Prefixo GS1" of the Portal da NF-e tells: the value is left padded with zeros to 14 digits, and the prefix is positions 7 to 9 when positions 2 to 6 are zeros (a GTIN-8, or a GTIN-14 that packs one) and positions 2 to 4 otherwise. The first digit, the padding zero or the indicator digit, is never part of the prefix, so a GTIN-12 has a prefix that starts with `0`, and a GTIN-14 has the prefix of the GTIN it packs.
+- The prefix is read as the GS1 General Specifications (tables 1-4, 1-5 and 1-9) lay the numbers out: the value is left padded with zeros to 14 digits, and the prefix is positions 7 to 9 when positions 2 to 6 are zeros (a GTIN-8, or a GTIN-14 that packs one) and positions 2 to 4 otherwise. The first digit, the padding zero or the indicator digit, is never part of the prefix, so a GTIN-12 has a prefix that starts with `0`, and a GTIN-14 has the prefix of the GTIN it packs.
 
 | Field | Description |
 | --- | --- |
 | `type` | `'GTIN-8'`, `'GTIN-12'`, `'GTIN-13'` or `'GTIN-14'` (`GtinType`), from the length the value was written with |
 | `length` | `8`, `12`, `13` or `14` (`GtinLength`) |
-| `prefix` | The three digit GS1 Prefix, or a GS1-8 Prefix when the first six digits of the 14 digit form are zeros, which covers every GTIN-8 and the GS1 Prefix `0000000`. It names the GS1 Member Organisation that licensed the number, not the country of origin |
+| `prefix` | The three digit GS1 Prefix, or a GS1-8 Prefix when positions 2 to 6 of the 14 digit form are zeros, which covers every GTIN-8, a GTIN-14 that packs one and the GS1 Prefix `0000000`. It names the GS1 Member Organisation that licensed the number, not the country of origin |
 | `isBrazilian` | `true` when the prefix is one of GS1 Brasil, `789` or `790`, what NT 2021.003 calls "prefixo do Brasil" |
 | `isRestrictedCirculation` | `true` when the prefix is in a range GS1 sets aside for Restricted Circulation Numbers (GS1 Prefixes 02, 04 and 20 to 29; GS1-8 Prefixes 000 to 099 and 200 to 299, which is also where the GS1 Prefix `0000000` lands, since its 14 digit form starts with six zeros), so the number is only unique inside a company or region |
 | `checkDigit` | The modulo 10 check digit, the last digit |
@@ -3214,6 +3429,80 @@ getGtinInfo('7890000000018'); // null (wrong check digit)
 
 Source: [GS1 General Specifications](https://ref.gs1.org/standards/genspecs/), [GS1 check digit calculator](https://www.gs1.org/services/how-calculate-check-digit-manually), [SEFAZ Nota Técnica 2021.003](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D) and the [Tabela Prefixo GS1](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D) of the Portal da NF-e.
 
+## ISBN
+
+The ISBN (International Standard Book Number) has 13 digits since 2007: the GS1 prefix (`978`, or `979` for the newer ranges), the registration group (`85` and `65` for Brazil), the registrant (the publisher), the publication and a check digit. The 10 digit ISBN is not accepted: the current ISBN Users' Manual (7th edition) and the Agência Brasileira do ISBN only define the 13 digit form.
+
+### isValidIsbn
+
+Check if an ISBN-13 is valid: the `978` or `979` prefix and the modulus 10 check digit of the ISBN Users' Manual (the first 12 digits weighed alternately 1 and 3, the same rule as a GTIN-13).
+
+- Separators between two digits (space, `.`, `-` or `/`, alone or in a run, as `isValidCpf` reads its mask) and spaces around the value are accepted; anything else, a leading or trailing separator or the `ISBN` label a book prints in front of the number included, makes the value invalid.
+- A `979-0` number is an ISMN (printed music), not an ISBN: the RangeMessage gives that range no ISBN group, so it is rejected.
+- Whether the group and the registrant are assigned is not checked; see `getIsbnInfo`.
+- The printed example of the Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, does not carry the check digit the rule gives (`0`), so it is rejected.
+
+```javascript
+import { isValidIsbn } from '@brazilian-utils/brazilian-utils';
+
+isValidIsbn('9788533302273'); // true
+isValidIsbn('978-65-89999-01-0'); // true
+isValidIsbn('978-85-333-0227-4'); // false (wrong check digit)
+isValidIsbn('8533302276'); // false (the 10 digit form)
+```
+
+### parseIsbn
+
+Remove the hyphens and every other character that is not a digit, keeping at most 13 digits.
+
+```javascript
+import { parseIsbn } from '@brazilian-utils/brazilian-utils';
+
+parseIsbn('978-85-333-0227-3'); // '9788533302273'
+```
+
+### getIsbnInfo
+
+Split a valid ISBN-13 into its elements, as an `IsbnInfo`, following the ranges the International ISBN Agency publishes (the RangeMessage), which give the variable lengths of the group and of the registrant.
+
+- Returns `null` when the value is not valid under `isValidIsbn`, or when its group or registrant falls in a range not assigned yet.
+- The ranges are refreshed by the datasets workflow.
+
+| Field | Description |
+| --- | --- |
+| `isbn` | The 13 digits |
+| `prefix` | `'978'` or `'979'` |
+| `registrationGroup` | The country, region or language area, e.g. `'85'` or `'65'` for Brazil |
+| `registrant` | The publisher or imprint within the group |
+| `publication` | The edition within the registrant |
+| `checkDigit` | The check digit, the last digit |
+| `agency` | The agency the International ISBN Agency lists for the group, e.g. `'Brazil'` or `'English language'` |
+| `isBrazilian` | `true` for the groups of the Agência Brasileira do ISBN, `85` and `65` |
+
+```javascript
+import { getIsbnInfo } from '@brazilian-utils/brazilian-utils';
+
+getIsbnInfo('978-65-89999-01-0');
+// { isbn: '9786589999010', prefix: '978', registrationGroup: '65', registrant: '89999',
+//   publication: '01', checkDigit: 0, agency: 'Brazil', isBrazilian: true }
+
+getIsbnInfo('9780306406157')?.agency; // 'English language'
+```
+
+### formatIsbn
+
+Hyphenate an ISBN-13 by its elements, as `getIsbnInfo` splits it. The element lengths vary, so a partial or invalid value, or one in a range not assigned yet, returns `''`. The `ISBN` label is not added.
+
+```javascript
+import { formatIsbn } from '@brazilian-utils/brazilian-utils';
+
+formatIsbn('9788533302273'); // '978-85-333-0227-3'
+formatIsbn('9780306406157'); // '978-0-306-40615-7'
+formatIsbn('978853330227'); // ''
+```
+
+Source: [ISBN Users' Manual, 7th edition](https://www.isbn-international.org/content/isbn-users-manual/29), [ISBN Ranges (RangeMessage)](https://www.isbn-international.org/range_file_generation) of the International ISBN Agency, and the [Agência Brasileira do ISBN](https://www.cblservicos.org.br/isbn/estrutura/).
+
 ## CID-10
 
 ### isValidCid10
@@ -3222,8 +3511,8 @@ Check if a CID-10 code exists in the tables DATASUS publishes, the Brazilian Por
 
 - Both levels of the classification are valid: the 3 character categories (`A00`) and the 4 character subcategories, written with the dot (`A00.0`) or without it (`A000`).
 - Letter case and surrounding whitespace are ignored. Anything else (another separator, a fifth character, a dagger or asterisk suffix, a value that is not a string) is rejected.
-- The V2008 tables are the only source: a code that is not in them, such as `U07.1` (COVID-19), is not found.
-- Only a table of codes is read (about 27 KB minified), not the descriptions `getCid10` carries.
+- The tables are the DATASUS V2008 ones, plus the `U07` category of the CID-10 table DATASUS keeps for the SIM (`U07`, `U07.0`, `U07.1` COVID-19 virus identified and `U07.2` virus not identified), which the V2008 files predate. A code in neither is not found, such as `U09.9` (post COVID-19 condition) and `U10.9` (multisystem inflammatory syndrome associated with COVID-19). Up to 2.4.0 the `U07` codes were not found either.
+- Only a table of codes is read (about 26 KB minified), not the descriptions `getCid10` carries.
 
 ```javascript
 import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
@@ -3272,7 +3561,8 @@ parseCid10('A00'); // 'A00'
 Look a CID-10 code up and get its official Brazilian Portuguese description. The result is a `Cid10` record: `{ code, description }`.
 
 - Same input rules as `isValidCid10`. `code` is upper case and has no dot. Returns `null` when the code is unknown or the value is not in a documented form.
-- This is the heaviest util of the package: it embeds the 2045 categories and 12188 subcategories with their descriptions, about 1 MB minified (147 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
+- Same table as `isValidCid10`: the DATASUS V2008 one plus the `U07` codes of the SIM table (`getCid10('U07.1')` is `{ code: 'U071', description: 'Infecção pelo novo Coronavírus (COVID-19)' }`); `U09.9` and `U10.9` are not found.
+- This is the heaviest util of the package: it embeds the 2046 categories and 12191 subcategories with their descriptions, about 990 KB minified (124 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
 
 ```javascript
 import { getCid10 } from '@brazilian-utils/brazilian-utils';
@@ -3284,7 +3574,7 @@ getCid10('A00.5'); // null
 getCid10('A00-0'); // null (not a documented form)
 ```
 
-Source: [CID-10 V2008 tables DATASUS publishes as CSV](http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm).
+Source: [CID-10 V2008 tables DATASUS publishes as CSV](http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm) and the [CID-10 table of the SIM](ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/TABELAS/CID10.DBF) for the `U07` codes.
 
 ## Text
 
@@ -3295,7 +3585,7 @@ Capitalize the first letter of each word, the way a Brazilian name, company name
 - **Options** (`CapitalizeOptions`): `lowerCaseWords`, words kept in lower case between two words, by default prepositions and articles such as `de`, `da`, `do`, `e`; `upperCaseWords`, words always in upper case, by default company designations and abbreviations such as `LTDA`, `S.A.`, `ME`, `CNPJ` and roman numerals. A list replaces its default.
 - Words split at whitespace, `-`, `/`, apostrophes and adjoining punctuation; whitespace runs collapse into one space.
 - A lower-case word that is first, last or followed by punctuation is a designator and keeps its capital.
-- `ME` is upper-cased only as a designation (last word, or before another designation); `SA` without dots is left alone (the surname Sá). A state code after a `/` is upper-cased even with `upperCaseWords` given.
+- `ME` is upper-cased only as a designation (last word, or before another designation); `SA` without dots is left alone (the surname Sá). A state code after a `/` is upper-cased even with `upperCaseWords` given, and so is one that ends the value after a spaced `-`, a spaced `–` or a `, `, the Correios' "Cidade – UF".
 
 ```javascript
 import { capitalize } from '@brazilian-utils/brazilian-utils';
@@ -3315,9 +3605,11 @@ capitalize('(empresa) ltda'); // (Empresa) LTDA
 capitalize('luiz von schmidt'); // Luiz von Schmidt
 capitalize('santana/rs'); // Santana/RS ("RS" is a state code right after a "/")
 capitalize('porto alegre/rs'); // Porto Alegre/RS
+capitalize('brasília - df'); // Brasília - DF (a state code as the last word after " - ", " – " or ", ")
 capitalize('santana rs'); // Santana Rs (no "/", so "rs" is just a word)
 capitalize('rua xv de novembro'); // Rua XV de Novembro (roman numeral, "de" stays lower case)
 capitalize('joão paulo ii'); // João Paulo II
+capitalize('rua xxiv de maio'); // Rua XXIV de Maio (roman numerals from II to XXXIX, except VI, the verb "vi")
 capitalize('de'); // De (a preposition keeps its capital when it is the first word)
 capitalize('empresa ltda', { upperCaseWords: [] }); // Empresa Ltda (the list given replaces the default one)
 capitalize('josé Ama MARIA', { lowerCaseWords: ['ama'] }); // José ama Maria
@@ -3349,9 +3641,20 @@ removeAccents(''); // ''
 
 Check if an inscrição estadual (state registration) is valid for a state. **Deprecated:** the positional form `isValidIe(stateCode, ie)` still works but is deprecated; use the object form `isValidIe({ value, stateCode })`.
 
-- Takes a single object (`IsValidIeParams`): `value` is the registration and `stateCode` the state it belongs to (a `StateCode`, case-insensitive).
-- GO, PA, MS, SP, TO, DF, PE, AL and RJ have special cases (extra prefixes or formats, or a deviation from the SINTEGRA page); see the JSDoc in `src/is-valid-ie` for the details.
-- An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it: AM, CE, ES, MG, MT, PB, PE, PI, PR, RJ, RS, SC, SE and SP, plus BA with 8 or 9 digits and TO with 9 digits.
+- Takes a single object (`IsValidIeParams`): `value` is the registration and `stateCode` the state it belongs to (a `StateCode`, case-insensitive, with surrounding whitespace ignored).
+- Some states have special cases, a prefix or format the SINTEGRA page does not print or a deliberate deviation from it (details and sources in the JSDoc in `src/is-valid-ie`):
+  - GO: the prefixes 10, 11, 15 and 20 to 29, the union of sources that disagree: the norm (IN nº 946/09-GSF, art. 39, I, as worded by IN nº 1.535/22-GSE) gives 10, 20 and 11, the SINTEGRA page 10, 11 and 20 to 29, the 2012 roteiro de crítica 10, 11 and 15. The check digit follows the roteiro, as in 2.4.0: a remainder of 1 gives 1 in the range 10103105 to 10119997, and 11094402 takes either digit, special cases the SINTEGRA page (2022) does not have.
+  - MT: 11 digits, or the 9 digits Portaria SEFAZ-MT nº 59/2025 (art. 8º, § 1º) prescribes, read as the 11 digit form padded with two zeros (no official text gives the check digit rule of the 9 digit form).
+  - PA: the prefixes 15 and 75 to 79 the SINTEGRA page lists (SEFA-PA has issued 75 since 07/10/2024). MS: the prefixes 28 and 50 the SINTEGRA page gives (50 is also in a SEFAZ-MS e-CCE communiqué; the only norm, Resolução/SEF nº 1.344/1999, gives 28 alone).
+  - DF: the 13 digit AC rule under the prefixes 07 and 08. The SINTEGRA page does not call 07 fixed; SEFAZ-DF's rule sheet calls it a "campo fixo". DF moved to 08 when the numbers starting with 07 ran out.
+  - RR: the prefix 24, which the SINTEGRA page does not write as a rule: it is read from the page's ten examples.
+  - SP: the produtor rural form `P0MMMSSSSD000`, the zero after the `P` included; the `P` may be written in lower case.
+  - TO: the 9 digits in force (Portaria SEFAZ-TO nº 676/2002, art. 3º; RICMS-TO, Decreto nº 2.912/2006, art. 90), or the old 11 digits the SINTEGRA page documents, with the tipo digits 01, 02, 03 or 99.
+  - AM: the page's check digit rule has two branches and leaves "Resto" undefined; the library reads it as the sum modulo 11 and gives 0 to a sum of 0 or 1, the shared modulus 11 rule.
+  - MG: a first check digit of 10, from a sum that is already a multiple of ten, is read as 0.
+  - PE: the 9 digit eFisco form and the old 14 digit CACEPE form, both on the SINTEGRA page (Portaria SF nº 087/2007 converted the old numbers but set no date after which they are void).
+  - AL: the third digit, the tipo de empresa, must be 0, 3, 5, 7 or 8, the values the SINTEGRA page lists.
+- An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it: AM, CE, ES, MG, PB, PE (9 digits), PI, PR, RJ, RS, SC, SE and SP, plus BA with 8 or 9 digits, MT with 9 or 11 digits and TO with 9 digits.
 
 ```javascript
 import { isValidIe } from '@brazilian-utils/brazilian-utils';
@@ -3360,9 +3663,12 @@ isValidIe({ value: '110042490114', stateCode: 'SP' }); // true
 isValidIe({ value: 'P011004243002', stateCode: 'SP' }); // true (produtor rural)
 isValidIe({ value: '0187634580933', stateCode: 'AC' }); // false
 isValidIe({ value: '109161793', stateCode: 'go' }); // true (case-insensitive)
+isValidIe({ value: '109161793', stateCode: ' GO ' }); // true (surrounding whitespace ignored)
+isValidIe({ value: '200000004', stateCode: 'GO' }); // true (prefix 20)
+isValidIe({ value: '130000019', stateCode: 'MT' }); // true (9 digits)
 ```
 
-Source: [SINTEGRA state pages](http://www.sintegra.gov.br/insc_est.html) and the [SEFAZ-GO roteiro de crítica](https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/).
+Source: [SINTEGRA state pages](http://www.sintegra.gov.br/insc_est.html), the [Goiás roteiro de crítica](https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/) and [IN nº 946/09-GSF](https://appasp.economia.go.gov.br/Legislacao/arquivos/secretario/in/IN_0946_2009.htm).
 
 ## Email
 
@@ -3413,11 +3719,11 @@ Source: [ISO/IEC 7812-1](https://www.iso.org/standard/70484.html).
 
 Check the structure of a professional council registration number (registro/inscrição profissional). Only the digit count and the UF are checked, never a check digit, even for CRC.
 
-- Takes an object (`IsValidRegistroProfissionalParams`): `value`, `council` (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` or `"CRC"`, a `RegistroProfissionalCouncil`) and an optional `stateCode` (expected UF).
-- `"OAB"` and `"CRM"`: 4 to 6 digits plus the UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 to 6 digits (`12345/SP`).
-- `"CRP"`: a 2-digit regional code (`01` to `24`) plus 4 to 6 digits (`06/12345`); `stateCode` is ignored.
-- `"CRC"`: UF, 6 digits, tipo de registro (`O` or `P`) and check digit (`SP-123456/O-3`); a transfer appends `T` or `S` and the destination UF (`SP-123456/O-3 T-MG`). `stateCode` matches the originating UF.
-- The OAB, CRM, CRO and CRP shapes are conventional (no published format). CREA is not covered.
+- Takes an object (`IsValidRegistroProfissionalParams`): `value`, `council` (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` or `"CRC"`, a `RegistroProfissionalCouncil`) and an optional `stateCode` (expected UF, letter case and surrounding whitespace ignored).
+- `"OAB"` and `"CRM"`: 4 to 6 digits plus the UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 to 6 digits (`12345/SP`), or the form of the Consolidação das Normas do CFO (Resolução CFO-63/2005), art. 115, § 1º: the sigla of the Conselho Regional first, joined by a hyphen to the category (`TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV`, `T`) when there is one, then the number, followed by `-IS` for a secundária or `-R` for a remida (`CRO-SP 12345`, `CRO-SP-TPD 1234`, `CRO-SP 12345-IS`). Up to 2.4.0 this form was rejected.
+- `"CRP"`: a 2-digit regional code (`01` to `24`) plus 4 to 6 digits (`06/12345`); `stateCode` is ignored. The CFP system has 24 regionals; the CRP-25 (Amapá) is only a proposal.
+- `"CRC"`: UF, 6 digits, tipo de registro (`O` or `P`) and check digit (`SP-123456/O-3`); a transfer appends `T` or `S` and the destination UF (`SP-123456/O-3 T-MG`). `stateCode` matches the originating UF. This shape and the `P`/`S` registrations come from the Manual de Registro of 2009; Resolução CFC nº 1.707/2023, in force, only sets a numbering "única e sequencial em cada CRC" and the `T` of the transfer, and the check digit algorithm is not published.
+- The digit counts of the OAB, CRM, CRO and CRP numbers are conventional: the OAB and the CFM publish no format, and neither the CFO's art. 115 nor the CFP fixes a digit count. CREA is not covered.
 
 ```javascript
 import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
@@ -3425,30 +3731,35 @@ import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
 isValidRegistroProfissional({ value: '123456/SP', council: 'OAB' }); // true
 isValidRegistroProfissional({ value: '123456-RJ', council: 'OAB', stateCode: 'SP' }); // false (UF mismatch)
 isValidRegistroProfissional({ value: '123456', council: 'OAB' }); // false (no UF)
+isValidRegistroProfissional({ value: 'CRO-SP-TPD 1234', council: 'CRO' }); // true (art. 115 of the CFO norms)
 isValidRegistroProfissional({ value: '06/12345', council: 'CRP' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3', council: 'CRC' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3 T-MG', council: 'CRC' }); // true (registro transferido)
 isValidRegistroProfissional({ value: 'SP-123456/T-3', council: 'CRC' }); // false ("T" is not a tipo de registro)
 ```
 
-Source: [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf), [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), [CFP regional councils](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/).
+Source: [Consolidação das Normas do CFO, art. 115](https://transparencia.cfo.org.br/wp-content/uploads/2023/09/Consolida%C3%A7%C3%A3o-das-Normas-Atualizado-emsetembro-de-2023.pdf), [Manual de Registro do Sistema CFC/CRCs](https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf), [Resolução CFC nº 1.707/2023](https://www1.cfc.org.br/sisweb/SRE/docs/Res_1707.pdf), [CFP regional councils](https://site.cfp.org.br/cfp/sistema-conselhos/conselhos-pelo-brasil/).
 
 ## VIN
 
 ### isValidVin
 
-Check if a VIN (Vehicle Identification Number / chassi) is valid. This is a North-American-style structural check, not a universal validator of Brazilian VINs.
+Check if a VIN (Vehicle Identification Number / chassi) is valid. By default it checks 17 characters in the three sections of Resolução CONTRAN nº 968/2022, art. 3º (the WMI, the VDS and the VIS), each a digit or a capital letter other than `I`, `O` and `Q`.
 
-- Checks the 17-character length, the excluded letters `I`, `O` and `Q`, and the check digit at position 9.
-- Brazilian rules do not mandate the check digit, so many Brazilian-built VINs fail it.
+- The `I`, `O` and `Q` exclusion comes from ISO 3779, not from the resolution: it lists no forbidden character and refers the engraving to ABNT NBR 6066:2022 (art. 5º), a paid standard with no official free copy. The regularization VINs of its Anexo II (WMI `XXX`) are written without those letters, so they pass.
+- **Options** (`IsValidVinOptions`): `checkDigit: true` also enforces the North-American rules of 49 CFR 565.15, the check digit at position 9 and a model year code other than `U`, `Z` or `0` at position 10. Use it for a VIN of a vehicle built for the United States or Canada.
+- Brazilian rules do not mandate the check digit, and many Brazilian-built VINs do not carry one. Up to 2.4.0 it was always enforced; pass `{ checkDigit: true }` to keep that behaviour.
+- Case-insensitive and trims surrounding whitespace; a value of one repeated character is rejected.
 
 ```javascript
 import { isValidVin } from '@brazilian-utils/brazilian-utils';
 
-isValidVin('1HGCM82633A004352'); // true
-isValidVin('1m8gdm9axkp042788'); // true (check digit X, lowercase)
-isValidVin('1HGCM82633A004353'); // false (bad check digit)
-isValidVin('00000000000000000'); // false (every character the same, though the check digit matches)
+isValidVin('9BWZZZ377VT004251'); // true (Brazilian VIN, no check digit)
+isValidVin('9BWZZZ377VT004251', { checkDigit: true }); // false (its 9th character is not the check digit)
+isValidVin('1HGCM82633A004352', { checkDigit: true }); // true
+isValidVin('1m8gdm9axkp042788', { checkDigit: true }); // true (check digit X, lowercase)
+isValidVin('1HGCM82633A004353', { checkDigit: true }); // false (bad check digit)
+isValidVin('00000000000000000'); // false (every character the same)
 isValidVin('1HGCM8263IA004352'); // false (contains the excluded letter I)
 isValidVin('1HGCM82633A00435'); // false (16 characters)
 ```

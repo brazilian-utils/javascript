@@ -18,16 +18,16 @@ describe("parseVoterId", () => {
 		expect(parseVoterId("12345678032499")).toBe("123456780324");
 	});
 
-	it("should keep up to 13 digits for São Paulo (01) voter ids", () => {
-		expect(parseVoterId("1234 5678 8 01 91")).toBe("1234567880191");
+	it("should keep 12 digits at most, São Paulo (01) and Minas Gerais (02) included", () => {
+		// 2.4.0 kept a 13th digit for UF 01/02: the resolution caps the id at 12 digits
+		expect(parseVoterId("1234 5678 8 01 91")).toBe("123456788019");
+		expect(parseVoterId("1234567880299")).toBe("123456788029");
+		expect(parseVoterId("123456788019199")).toBe("123456788019");
 	});
 
-	it("should keep up to 13 digits for Minas Gerais (02) voter ids", () => {
-		expect(parseVoterId("1234567880299")).toBe("1234567880299");
-	});
-
-	it("should ignore digits after the 13-digit voter id length for SP/MG", () => {
-		expect(parseVoterId("123456788019199")).toBe("1234567880191");
+	it("should keep a voter id issued without its leading zeros as it is", () => {
+		expect(parseVoterId("12345 01 59")).toBe("123450159");
+		expect(parseVoterId("0001 2345 01 59")).toBe("000123450159");
 	});
 
 	it("should return an empty string for null or undefined", () => {
@@ -42,8 +42,8 @@ describe("parseVoterId", () => {
 	});
 
 	describe("properties", () => {
-		test("should return at most the digits of the longest voter id", () => {
-			expectMatchesPattern(parseVoterId, /^\d{0,13}$/, anyText);
+		test("should return at most the 12 digits of a voter id", () => {
+			expectMatchesPattern(parseVoterId, /^\d{0,12}$/, anyText);
 		});
 
 		test("should undo the formatting of a 12 digit voter id", () => {
@@ -57,6 +57,18 @@ describe("parseVoterId", () => {
 		test("should never throw and always return a string", () => {
 			expectAlwaysReturnsType(parseVoterId, "string", anyValue);
 		});
+	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseVoterId(-123_456_780_124)).toBe("");
+		expect(parseVoterId(-1)).toBe("");
+		expect(parseVoterId(1.5)).toBe("");
+		expect(parseVoterId(2 ** 53)).toBe("");
+		expect(parseVoterId(Number.MAX_VALUE)).toBe("");
+		expect(parseVoterId(1e21)).toBe("");
+		expect(parseVoterId(Number.NaN)).toBe("");
+		expect(parseVoterId(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseVoterId(Number.NEGATIVE_INFINITY)).toBe("");
 	});
 });
 

@@ -1,5 +1,6 @@
 import { ARRECADACAO_LINE_LENGTH, ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /**
@@ -7,6 +8,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * Bank slips starting with `8` are "arrecadação" (convênio/tributos) slips, whose linha
  * digitável has 48 digits instead of the 47 of a "cobrança bancária" slip.
+ *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
  *
  * @param {string|number} value - The boleto value to be parsed.
  * @returns {string} The boleto value without formatting.
@@ -18,19 +22,25 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *
  * parseBoleto("82630000001-1 09880010070-2 02410202400-0 00020510451-9");
  * // "826300000011098800100702024102024000000205104519"
+ * parseBoleto(1e21); // "" (not a non-negative safe integer)
  * ```
  *
- * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
- * check digit (using 1 for remainders 0, 10 and 1) of the 47 digit cobrança bancária slip,
- * including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
+ * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields, the código de moeda
+ * `9` (real) in position 4 of the barcode and the módulo 11 check digit (1 when 11 minus the
+ * remainder gives 0, 10 or 11, i.e. when the remainder is 0 or 1) of the 47 digit cobrança
+ * bancária slip, including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
  * Arrecadação/Recebimento com Utilização do Código de Barras" and the FEBRABAN layout index
  * cover the arrecadação slip.
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
+ * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const parseBoleto = (value: string | number): string => {
+	if (!isLookupCode(value)) return "";
+
 	const digits = sanitizeToDigits(value);
 
 	return digits.slice(

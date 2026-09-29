@@ -77,8 +77,16 @@ describe("getStateByIbgeCode", () => {
 		expect(getStateByIbgeCode()).toBeNull();
 	});
 
-	it("should ignore non-digit characters around the code", () => {
+	it("should ignore whitespace and hyphens around the code", () => {
 		expect(getStateByIbgeCode(" 35 ")?.code).toBe("SP");
+		expect(getStateByIbgeCode("-35-")?.code).toBe("SP");
+	});
+
+	it("should strip any non-digit character of a string, as up to 2.4.0", () => {
+		expect(getStateByIbgeCode("x11")?.code).toBe("RO");
+		expect(getStateByIbgeCode("35/SP")?.code).toBe("SP");
+		expect(getStateByIbgeCode("R$ 35")?.code).toBe("SP");
+		expect(getStateByIbgeCode("3.5")?.code).toBe("SP");
 	});
 
 	describe("properties", () => {
@@ -86,10 +94,10 @@ describe("getStateByIbgeCode", () => {
 			expectNeverThrows(getStateByIbgeCode, anyGarbage);
 		});
 
-		test("should resolve every known ibgeCode regardless of surrounding non-digit noise", () => {
+		test("should resolve every known ibgeCode regardless of surrounding whitespace and hyphens", () => {
 			const knownIbgeCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.ibgeCode));
 			const noiseArbitrary = fc
-				.array(fc.constantFrom(" ", "-", ".", "/", "R", "$", "a", "Z"))
+				.array(fc.constantFrom(" ", "-", "\t"))
 				.map((characters) => characters.join(""));
 
 			fc.assert(
@@ -101,6 +109,18 @@ describe("getStateByIbgeCode", () => {
 						expect(getStateByIbgeCode(`${prefix}${ibgeCode}${suffix}`)?.ibgeCode).toBe(ibgeCode);
 					},
 				),
+			);
+		});
+
+		test("should find every known ibgeCode next to a letter, stripping it", () => {
+			const knownIbgeCodeArbitrary = fc.constantFrom(...STATES.map((state) => state.ibgeCode));
+			const letterArbitrary = fc.constantFrom("a", "Z", "e", "x");
+
+			fc.assert(
+				fc.property(knownIbgeCodeArbitrary, letterArbitrary, (ibgeCode, letter) => {
+					expect(getStateByIbgeCode(`${letter}${ibgeCode}`)?.ibgeCode).toBe(ibgeCode);
+					expect(getStateByIbgeCode(`${ibgeCode}${letter}`)?.ibgeCode).toBe(ibgeCode);
+				}),
 			);
 		});
 	});

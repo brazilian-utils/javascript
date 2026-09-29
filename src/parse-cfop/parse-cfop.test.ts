@@ -42,6 +42,18 @@ describe("parseCfop", () => {
 			expectAlwaysReturnsType(parseCfop, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCfop(51.02)).toBe("");
+		expect(parseCfop(-1)).toBe("");
+		expect(parseCfop(1.5)).toBe("");
+		expect(parseCfop(2 ** 53)).toBe("");
+		expect(parseCfop(Number.MAX_VALUE)).toBe("");
+		expect(parseCfop(1e21)).toBe("");
+		expect(parseCfop(Number.NaN)).toBe("");
+		expect(parseCfop(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCfop(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCfop types", () => {

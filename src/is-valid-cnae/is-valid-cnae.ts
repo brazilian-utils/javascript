@@ -1,11 +1,16 @@
-import { getCnae } from "../get-cnae/get-cnae";
+import { CNAE_CODES, CNAE_FORMAT_REGEX } from "../_internals/constants/cnae";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
+import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { CNAE_LENGTH } from "./constants";
 
 /**
  * Validates if a CNAE (Classificação Nacional de Atividades Econômicas) subclass code
  * exists in the official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with a single separator (space, `.`, `-` or `/`) between the groups and optional
+ * digits, or the `NNNN-N/NN` mask, with separators (space, `.`, `-` or `/`, alone or in a run) between the groups and optional
  * surrounding whitespace. A number is only read as a code when it is a non-negative safe
  * integer.
  *
@@ -33,4 +38,12 @@ import { getCnae } from "../get-cnae/get-cnae";
  * @see Official: https://concla.ibge.gov.br/busca-online-cnae.html
  * CONCLA's CNAE search and structure browser, which publishes CNAE-Subclasses 2.3.
  */
-export const isValidCnae = (value: string | number): boolean => getCnae(value) !== null;
+export const isValidCnae = (value: string | number): boolean => {
+	if (!isLookupCode(value)) return false;
+
+	const subclass = padLookupCode(value, CNAE_LENGTH);
+
+	if (!CNAE_FORMAT_REGEX.test(subclass)) return false;
+
+	return findCodeIndex(CNAE_CODES, sanitizeToDigits(subclass)) !== -1;
+};

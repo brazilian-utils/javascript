@@ -3,17 +3,21 @@
  * also be the upper case letters of an alphanumeric CNPJ, optionally behind the `NFS` literal the
  * `Id` attribute of `infNFSe` puts in front of it. It follows `TSIdNFSe` of
  * `tiposSimples_v1.01.xsd` (bundle 20260727), `NFS[0-9]{9}[0-9A-Z]{14}[0-9]{27}`, whose letter
- * window is the registration of the key structure. The key has no printed mask (the DANFSe prints it "em
- * único bloco", Nota Técnica SE/CGNFS-e 008, item 2.1.1), so there is no separator to accept.
- * Case-insensitive, as `isValidCnpj` with version 2 is: the callers upper case the key, which is
- * the first capture group. Whether a letter may stand in the registration at all is left to the
- * registration type, since only a CNPJ (type 2) can carry one.
+ * window is the registration of the key structure. The DANFSe prints the key "em único bloco" (Nota Técnica
+ * SE/CGNFS-e 008, item 2.1.1), so it has no printed mask; the boundaries of its fields, `Cód.Mun.(7)
+ * Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9)
+ * DV(1)`, are where a separator is accepted, any run of whitespace, `.`, `-` or `/`, as
+ * `isValidCpf` reads the boundaries of its groups. Case-insensitive, as `isValidCnpj` with version 2
+ * is: `readNfseKey` joins the eight capture groups and upper cases them. Whether a letter may stand
+ * in the registration at all is left to the registration type, since only a CNPJ (type 2) can
+ * carry one.
  */
-export const FORMAT_REGEX = /^(?:nfs)?(\d{9}[\dA-Z]{14}\d{27})$/i;
+export const FORMAT_REGEX =
+	/^(?:nfs)?(\d{7})[\s.\-/]*(\d)[\s.\-/]*(\d)[\s.\-/]*([\dA-Z]{14})[\s.\-/]*(\d{13})[\s.\-/]*(\d{4})[\s.\-/]*(\d{9})[\s.\-/]*(\d)$/i;
 
 /**
- * Characters of the key, type `TSChaveNFSe` of the leiaute. Once `isValidNfseKey` accepts a
- * value, they are the last 50 characters of the trimmed value, after the optional `NFS` prefix.
+ * Characters of the key, type `TSChaveNFSe` of the leiaute, the length `parseNfseKey` caps its
+ * result at.
  */
 export const NFSE_KEY_LENGTH = 50;
 

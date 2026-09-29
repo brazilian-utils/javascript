@@ -4,16 +4,24 @@ import { isValidCertidao } from "../is-valid-certidao/is-valid-certidao";
 import { CERTIDAO_TYPES } from "./constants";
 
 /**
- * The nine books (tipo do livro) a matrícula de registro civil can point to, in the order of the
- * codes 1 to 9. `getCertidaoInfo` names the book of a matrícula with one of these, and
- * `isValidCertidao` accepts a list of them.
+ * The books (tipo do livro) a matrícula de registro civil can point to, codes 1 to 9.
+ * `getCertidaoInfo` names the book of a matrícula with one of them, and `isValidCertidao` accepts
+ * a list of them.
  *
- * The in-force art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça
- * lists only the codes 1 to 7, and no CNJ primary text reachable today publishes the other two:
- * the Anexo IV of the revoked Provimento CNJ nº 63/2017 lists the same seven. The codes 8
- * (`"emancipation"`) and 9 (`"interdiction"`) come from the `Based on:` references below: ghiorzi.org and
- * validation-br both print the nine book list. They are kept because matrículas carrying them
- * circulate.
+ * Art. 473, V of the Código Nacional de Normas da Corregedoria Nacional de Justiça (Provimento
+ * CNJ nº 149/2023, inciso V in the redação of the Provimento CN nº 182/2024), the table in force,
+ * lists the codes 1 to 7, from "1: Livro A (Nascimento)" to "7: Livro E (Demais atos relativos ao
+ * registro civil)". `"emancipation"` (code 8) and `"interdiction"` (code 9) come from the
+ * Provimento CNJ nº 3/2009, art. 7º, V, revoked by the Provimento CNJ nº 63/2017: "8: Livro E
+ * (Desdobrado para registro específico das Emancipações)" and "9: Livro E (Desdobrado para
+ * registro específico das Interdições)". They are kept because the certidões issued under it
+ * from 2010 on carry those matrículas and are still valid documents.
+ *
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
+ * Provimento CNJ nº 149/2023, art. 473, V: "1: Livro A (Nascimento)" to "7: Livro E (Demais atos
+ * relativos ao registro civil)".
+ * @see Official: https://atos.cnj.jus.br/atos/detalhar/1310
+ * Provimento CNJ nº 3/2009, art. 7º, V (revoked): the codes 8 and 9.
  */
 export type CertidaoType =
 	| "birth"
@@ -23,7 +31,9 @@ export type CertidaoType =
 	| "stillbirth"
 	| "banns"
 	| "other"
+	/** Book code 8 of the revoked Provimento CNJ nº 3/2009 (see `CertidaoType`). */
 	| "emancipation"
+	/** Book code 9 of the revoked Provimento CNJ nº 3/2009 (see `CertidaoType`). */
 	| "interdiction";
 
 /** The fields `getCertidaoInfo` reads out of the matrícula of a certidão de registro civil. */
@@ -64,8 +74,9 @@ export type CertidaoInfo = {
  *
  * Accepts the same input forms as `isValidCertidao` and returns `null` when the matrícula is
  * not valid, which includes a serviço other than the `55` art. 473, III fixes for the registro
- * civil das pessoas naturais, and a book code that is not one of the nine books defined by the
- * Provimento, since an unknown book cannot be named.
+ * civil das pessoas naturais, and the book code 0, which names no book: art. 473, V has the codes
+ * 1 to 7 and the revoked Provimento CNJ nº 3/2009 added 8 and 9, which are still read (see
+ * `CertidaoType`).
  *
  * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
  * hold, so a numeric argument always gives `null` instead of being read as a rounded value.
@@ -98,7 +109,12 @@ export type CertidaoInfo = {
  * structure: "a matrícula, de inserção obrigatória nas certidões (primeira e demais vias) emitidas
  * pelos Cartórios de Registro Civil das Pessoas Naturais a partir de 1º de janeiro de 2010, é
  * formada pelos seguintes elementos", incisos I to IX fixing the same 6 + 2 + 2 + 4 + 1 + 5 + 3 +
- * 7 + 2 positions art. 473 carries today (revoked; historical).
+ * 7 + 2 positions art. 473 carries today (revoked by the Provimento CNJ nº 63/2017; historical).
+ * Its inciso V also listed "8: Livro E (Desdobrado para registro específico das Emancipações)"
+ * and "9: Livro E (Desdobrado para registro específico das Interdições)", which art. 473, V no
+ * longer has but which are still accepted, the certidões issued under it carrying them, and its
+ * inciso IX had the check digits "formado automaticamente por meio do programa" the CNJ
+ * Corregedoria handed to the registrars, whose algorithm was never published.
  * @see Based on: http://ghiorzi.org/DVnew.htm
  * Worked example of the two check digits (sums 288 and 309).
  * @see Based on: https://github.com/klawdyo/validation-br/blob/feat-certidao/src/certidao.ts

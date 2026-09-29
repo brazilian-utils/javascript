@@ -1,7 +1,6 @@
 import { AREA_CODE_SECONDARY_STATES, AREA_CODE_STATES } from "../_internals/constants/area-codes";
 import { DATA, type State, type StateCode, type StateName } from "../_internals/constants/states";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 
 export type { State, StateCode, StateName } from "../_internals/constants/states";
 
@@ -38,7 +37,8 @@ export type AreaCodeInfo = {
  * the seat does hold every municipality but the one named.
  *
  * A `areaCode` given as a number must be a non-negative integer: a sign and a decimal point
- * are not digits, so `-11` and `1.1` are rejected instead of being read as `11`.
+ * are not digits, so `-11` and `1.1` are rejected instead of being read as `11`. A string has
+ * any non-digit characters stripped, so `"(11)"`, `"0xx11"` and `"DDD 11"` are the DDD 11.
  *
  * @param {string|number} areaCode - The DDD to look up. Accepts a string or a non-negative
  * integer number, with any non-digit characters stripped before matching.
@@ -47,10 +47,17 @@ export type AreaCodeInfo = {
  *
  * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
  * page below lists the codes actually allocated and links, under "POR MUNICÍPIO", to the Anexo
- * of Resolução Anatel nº 263/2001, which gives the Código Nacional of every municipality.
+ * of Resolução Anatel nº 263/2001, which gives the Código Nacional of every municipality. The
+ * current Anatel table (`Codigos_Nacionais.csv` of the Painel de Áreas Tarifárias, 21/09/2026)
+ * confirms the 67 codes, their states and the four cross-border ones.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Official: https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais
+ * Anatel, Painel de Dados de Áreas Tarifárias, "Códigos Nacionais", the page the Anatel FAQ
+ * points to for the CN of every municipality ("67 (sessenta e sete) áreas de numeração").
+ * @see Official: https://www.anatel.gov.br/dadosabertos/paineis_de_dados/areastarifarias/pgcn.zip
+ * `Codigos_Nacionais.csv` of 21/09/2026, the CN of all 5,571 municipalities in force.
  * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
  * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
  * @see Based on: https://brasilapi.com.br/docs#tag/DDD
@@ -67,13 +74,15 @@ export type AreaCodeInfo = {
  * // { areaCode: 61, stateCode: "DF", stateName: "Distrito Federal", regionCode: "CO", regionName: "Centro-Oeste", stateCodes: ["DF", "GO"] }
  *
  * getAreaCodeInfo("00"); // null
+ * getAreaCodeInfo("(0xx11)"); // the same as "11"
  * getAreaCodeInfo(-11); // null
  * ```
  */
 export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null => {
-	if (!isLookupCode(areaCode)) return null;
+	const digits = readLookupDigits(areaCode);
 
-	const digits = sanitizeToDigits(areaCode);
+	// Stryker disable next-line ConditionalExpression: without this guard a null reads as the DDD 0, which no state has, so the lookup below returns null all the same; the guard only spares it.
+	if (digits === null) return null;
 
 	const numericAreaCode = Number(digits);
 

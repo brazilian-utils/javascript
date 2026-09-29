@@ -85,7 +85,13 @@ describe("getMunicipalityByCode", () => {
 		expect(getMunicipalityByCode(Number.POSITIVE_INFINITY)).toBeNull();
 	});
 
-	it("should ignore non-digit characters before validating the length", () => {
+	it("should strip any non-digit character of a string, as up to 2.4.0", () => {
+		expect(getMunicipalityByCode("3550308 SP")?.name).toBe("São Paulo");
+		expect(getMunicipalityByCode("355.030.8")?.name).toBe("São Paulo");
+		expect(getMunicipalityByCode("3550308/")?.name).toBe("São Paulo");
+	});
+
+	it("should ignore hyphens before validating the length", () => {
 		expect(getMunicipalityByCode("355-030-8")).toEqual({
 			code: "3550308",
 			name: "São Paulo",

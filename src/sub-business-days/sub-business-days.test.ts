@@ -86,12 +86,10 @@ describe("subBusinessDays", () => {
 			expect(subBusinessDays(new Date(2024, 6, 10, 12), 1)).toEqual(new Date(2024, 6, 9, 12));
 		});
 
-		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
-			for (const stateCode of PROTOTYPE_KEYS) {
+		it("should return null for a string that is not a state code, a prototype chain key or an empty one included", () => {
+			for (const stateCode of [...PROTOTYPE_KEYS, "XX", ""]) {
 				// @ts-expect-error: intentionally invalid input
-				expect(subBusinessDays(new Date(2024, 0, 5, 12), 1, { stateCode })).toEqual(
-					new Date(2024, 0, 4, 12),
-				);
+				expect(subBusinessDays(new Date(2024, 0, 5, 12), 1, { stateCode })).toBeNull();
 			}
 		});
 
@@ -102,8 +100,8 @@ describe("subBusinessDays", () => {
 	});
 
 	describe("includeOptional", () => {
-		it("should walk back over Carnaval 2024-02-13 by default (Wed 2024-02-14 - 1 -> Mon 2024-02-12)", () => {
-			expect(subBusinessDays(new Date(2024, 1, 14, 12), 1)).toEqual(new Date(2024, 1, 12, 12));
+		it("should walk back over both Carnaval days, Tue 2024-02-13 and Mon 2024-02-12, by default (Wed 2024-02-14 - 1 -> Fri 2024-02-09)", () => {
+			expect(subBusinessDays(new Date(2024, 1, 14, 12), 1)).toEqual(new Date(2024, 1, 9, 12));
 		});
 
 		it("should stop on Carnaval 2024-02-13 when includeOptional is false", () => {

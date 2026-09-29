@@ -30,29 +30,30 @@ export type IsHolidayOptions = IsHolidayParams;
  * "2024-12-24" in local time, so build `targetDate` from local components
  * (`new Date(2024, 11, 25)`) or from a full ISO datetime when you mean a specific local day.
  *
- * An invalid `stateCode` is treated in two different ways, depending on its type:
+ * `stateCode` is read as `getHolidays` reads it: letter case and surrounding whitespace are
+ * ignored, and a `stateCode` that is present and is not the code of a Brazilian state (an unknown
+ * string such as `"XX"`, an empty string, a prototype-chain key such as `"__proto__"`, a value
+ * that is not a string) is rejected: `isHoliday` returns `false` without looking at the date, even
+ * when that date is a national holiday. `undefined`, or an absent property, is the only value that
+ * stands for "no state".
  *
- * - a string that is not a known state code is ignored, and only national holidays are
- *   considered, the same behavior as `getHolidays`. The lookup is an own-property one, so a
- *   prototype-chain key such as `"__proto__"` or `"constructor"` is an unknown state code like
- *   any other;
- * - a `stateCode` that is present and is not a string at all (a number, `null`, an object) is
- *   rejected rather than ignored: `isHoliday` returns `false` without looking at the date, even
- *   when that date is a national holiday. `undefined`, or an absent property, is the only
- *   non-string value that stands for "no state" instead.
+ * The date a state holiday is checked against is the statutory one, except for Alagoas' 30
+ * November, which `getHolidays` moves back to the Monday from a Tuesday and on to the Friday from a
+ * Thursday (Lei AL nº 7.530/2013, art. 2º parágrafo único), and for Santa Catarina's two holidays, which `getHolidays` moves to the following Sunday when they fall Monday to
+ * Saturday: 11 August from 2005 on, as Lei SC nº 13.408/2005 introduced, and 25 November from 1999
+ * on, as Lei SC nº 11.213/1999 introduced. Lei SC nº 18.531/2022 now carries both.
  *
- * The date a state holiday is checked against is the statutory one, except for Santa Catarina's
- * two holidays, which `getHolidays` moves to the following Sunday when they fall Monday to
- * Friday: 11 August from 2005 on, as Lei SC nº 13.408/2005 introduced, and 25 November from 1999
- * on, as Lei SC nº 11.213/1999 introduced, save for 2004, the year art. 3º of Lei SC nº
- * 12.906/2004 left that date without a transfer clause. Lei SC nº 18.531/2022 now carries both.
+ * The first round of the elections, a feriado nacional under art. 380 of the Código Eleitoral, is
+ * one of the holidays `getHolidays` lists, on the first Sunday of October of every even year from
+ * 1998 on (15 November in 2020), so `isHoliday` is true on that Sunday; the second round is not.
+ * So are the weekday general elections of 1955, 1958, 1990 and 1994, under Lei 1.266/1950.
  *
  * @param {IsHolidayParams} [options] - Options for the check.
  * @param {Date} options.targetDate - The date to check.
  * @param {StateCode} [options.stateCode] - Optional Brazilian state code to also consider state holidays.
  * @returns {boolean} True when the date is a holiday, false otherwise. Bad input also returns
- * false: missing `options`, a `targetDate` that is not a valid `Date`, or a non-string
- * `stateCode`.
+ * false: missing `options`, a `targetDate` that is not a valid `Date`, or a `stateCode` that is
+ * present and is not a state code.
  *
  * @example
  * ```typescript
@@ -70,18 +71,23 @@ export type IsHolidayOptions = IsHolidayParams;
  * Lei 10.607/2002, added Finados (2 November) and folded in Tiradentes (21 April), which had
  * been national since art. 3º of the Lei 1.266/1950 it revoked.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
- * Lei 6.802/1980, declared Nossa Senhora Aparecida a national holiday.
+ * Lei 6.802/1980, declared Nossa Senhora Aparecida a national holiday, listed from 1980 on; each
+ * national holiday is listed only for the years a federal norm declared it (see `getHolidays`).
  * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm
  * Lei 14.759/2023, nationalized Dia da Consciência Negra from 2024.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l9093.htm
  * Lei 9.093/1995, the framework law authorizing state and municipal holidays.
  * @see Official: https://www.in.gov.br/web/dou/-/portaria-mgi-n-11.460-de-29-de-dezembro-de-2025-678388627
  * Portaria MGI nº 11.460/2025, the federal executive's annual calendar of feriados nacionais and
- * pontos facultativos, the source behind three of the four Easter-derived entries: Sexta-feira
- * Santa, Carnaval and Corpus Christi. Páscoa is not one of them; the portaria never mentions
- * Easter Sunday, whose date `getHolidays` derives arithmetically with the Meeus/Jones/Butcher
- * algorithm. See the `getHolidays` JSDoc for why Sexta-feira Santa is typed `national` without a
- * law of its own.
+ * pontos facultativos, the source behind the Easter-derived entries but one: Sexta-feira Santa,
+ * both Carnaval days ("16 de fevereiro Carnaval (ponto facultativo); 17 de fevereiro Carnaval
+ * (ponto facultativo)", emitted as `"Carnaval (segunda-feira)"` and `"Carnaval (terça-feira)"`)
+ * and Corpus Christi. Páscoa is the exception; the portaria never mentions Easter Sunday, whose
+ * date `getHolidays` derives arithmetically with the Meeus/Jones/Butcher algorithm. The
+ * portaria's partial pontos facultativos (the Quarta-feira de Cinzas morning, the Dia do Servidor
+ * Público on 28 October, the 24 and 31 December afternoons) are left out. See the `getHolidays`
+ * JSDoc for why Sexta-feira Santa is typed `national` without a law of its own and for why those
+ * days are left out.
  */
 export const isHoliday = (options?: IsHolidayParams): boolean => {
 	if (isNullish(options) || typeof options !== "object") {
@@ -91,10 +97,6 @@ export const isHoliday = (options?: IsHolidayParams): boolean => {
 	const { targetDate, stateCode } = options;
 
 	if (!isValidDate(targetDate)) return false;
-
-	if (stateCode !== undefined && typeof stateCode !== "string") {
-		return false;
-	}
 
 	const year = targetDate.getFullYear();
 	return getHolidays({ year, stateCode }).some(

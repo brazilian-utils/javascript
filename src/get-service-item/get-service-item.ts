@@ -1,7 +1,6 @@
-import {
-	SERVICE_ITEM_DESCRIPTIONS,
-	SERVICE_ITEM_LENGTH,
-} from "../_internals/constants/service-items";
+import { SERVICE_ITEM_DESCRIPTIONS } from "../_internals/constants/service-item-descriptions";
+import { SERVICE_ITEM_CODES, SERVICE_ITEM_LENGTH } from "../_internals/constants/service-items";
+import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidServiceItem } from "../is-valid-service-item/is-valid-service-item";
 
@@ -48,7 +47,9 @@ export type ServiceItem = {
  * ```
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm
- * Lei Complementar 116/2003, "Lista de serviços anexa".
+ * Lei Complementar 116/2003, "Lista de serviços anexa", last amended by Lei Complementar 183/2021
+ * (subitem 11.05); the later LC 214/2025 and LC 218/2025 changed the body of the law, not the
+ * list.
  * @see Official: https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual
  * Sistema Nacional NFS-e, `ANEXO_B-NBS2-LISTA_SERVICO_NACIONAL`, sheet `LISTA.SERV.NAC.`: the
  * list in force in machine readable form, which `SERVICE_ITEM_DESCRIPTIONS` is generated from,
@@ -62,6 +63,6 @@ export const getServiceItem = (value: string | number): ServiceItem | null => {
 
 	return {
 		code: `${Number(digits.slice(0, ITEM_LENGTH))}.${digits.slice(ITEM_LENGTH)}`,
-		description: SERVICE_ITEM_DESCRIPTIONS[digits],
+		description: SERVICE_ITEM_DESCRIPTIONS[findCodeIndex(SERVICE_ITEM_CODES, digits)],
 	};
 };

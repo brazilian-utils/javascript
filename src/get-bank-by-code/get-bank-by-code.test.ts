@@ -5,6 +5,11 @@ import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime
 import { getBankByCode } from "./get-bank-by-code";
 
 describe("getBankByCode", () => {
+	test("should strip any non-digit character of a string, as up to 2.4.0", () => {
+		expect(getBankByCode("341/")?.code).toBe("341");
+		expect(getBankByCode("0x1")?.code).toBe("001");
+	});
+
 	describe("should return null for a negative or fractional number", () => {
 		test("whose digits would otherwise match a bank", () => {
 			expect(getBankByCode(-1)).toBeNull();
@@ -69,8 +74,14 @@ describe("getBankByCode", () => {
 			expect(getBankByCode("00001")).toBeNull();
 		});
 
-		test("when the code sanitizes to an empty string", () => {
+		test("when the code has no digits", () => {
 			expect(getBankByCode("abc")).toBeNull();
+			expect(getBankByCode(" - ")).toBeNull();
+		});
+
+		test("when the code has no digit", () => {
+			expect(getBankByCode("abc")).toBeNull();
+			expect(getBankByCode(" - ")).toBeNull();
 		});
 
 		test("when the code is an empty string", () => {

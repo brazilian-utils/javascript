@@ -29,9 +29,8 @@ describe("getLegalNature", () => {
 		expect(getLegalNature(2062)).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
 	});
 
-	it("should strip the mask of a number just like the mask of a string", () => {
-		expect(getLegalNature(206.2)).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
-		expect(getLegalNature(206.2)).toEqual(getLegalNature("206.2"));
+	it("should strip the mask of a string, the dot included", () => {
+		expect(getLegalNature("206.2")).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
 	});
 
 	it("should return the legal nature entry for a masked code (206-2)", () => {
@@ -146,6 +145,11 @@ describe("getLegalNature", () => {
 		expect(getLegalNature()).toBeNull();
 	});
 
+	it("should return null for a negative or fractional number", () => {
+		expect(getLegalNature(-2062)).toBeNull();
+		expect(getLegalNature(206.2)).toBeNull();
+	});
+
 	describe("properties", () => {
 		const knownCode = fc.constantFrom(...Object.keys(LEGAL_NATURE));
 
@@ -171,6 +175,30 @@ describe("getLegalNature", () => {
 			fc.assert(
 				fc.property(digitsUpTo(6), (value) => {
 					expect(getLegalNature(value) !== null).toBe(isValidLegalNature(value));
+				}),
+			);
+		});
+
+		const lookupInputs = fc.oneof(
+			knownCode,
+			knownCode.map((code) => `${code.slice(0, 3)}-${code.slice(3)}`),
+			knownCode.map(Number),
+			knownCode.map((code) => Number(code) / 10),
+			digitsUpTo(6),
+			anyValue,
+			fc.anything(),
+		);
+
+		test("should return null exactly when isValidLegalNature rejects the string form of the value, or the value is a number that is not a non-negative safe integer", () => {
+			fc.assert(
+				fc.property(lookupInputs, (value) => {
+					const isRejectedNumber =
+						typeof value === "number" && !(Number.isSafeInteger(value) && value >= 0);
+					const text = typeof value === "number" ? String(value) : value;
+
+					expect(getLegalNature(value as string) === null).toBe(
+						isRejectedNumber || !isValidLegalNature(text as string),
+					);
 				}),
 			);
 		});

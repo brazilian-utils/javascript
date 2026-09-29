@@ -1,6 +1,6 @@
 import { ARRECADACAO_LINE_LENGTH, ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { ARRECADACAO_PATTERN, BANCARIO_PATTERN } from "./constants";
 
@@ -19,6 +19,9 @@ export type FormatBoletoOptions = {
  * *barcode* has no display grouping defined by FEBRABAN (§04 describes positions, not a
  * printed form), so it keeps the published "cobrança bancária" grouping.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The value to be formatted, either as a string or a number.
  * @param {FormatBoletoOptions} [options] - Optional formatting options.
  * @param {boolean} options.pad - Whether to pad the value with leading zeros.
@@ -31,20 +34,24 @@ export type FormatBoletoOptions = {
  *
  * formatBoleto("826300000011098800100702024102024000000205104519");
  * // "82630000001-1 09880010070-2 02410202400-0 00020510451-9"
+ * formatBoleto(1e21); // "" (not a non-negative safe integer)
  * ```
  *
- * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields and the módulo 11
- * check digit (using 1 for remainders 0, 10 and 1) of the 47 digit cobrança bancária slip,
- * including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
+ * Carta-Circular BCB nº 2.926/2000 specifies the linha digitável fields, the código de moeda
+ * `9` (real) in position 4 of the barcode and the módulo 11 check digit (1 when 11 minus the
+ * remainder gives 0, 10 or 11, i.e. when the remainder is 0 or 1) of the 47 digit cobrança
+ * bancária slip, including the position of the fator de vencimento field. The FEBRABAN "Layout Padrão de
  * Arrecadação/Recebimento com Utilização do Código de Barras" and the FEBRABAN layout index
  * cover the arrecadação slip.
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
+ * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
+ * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const formatBoleto = (value: string | number, options?: FormatBoletoOptions): string => {
-	if (isNullish(value)) return "";
+	if (!isLookupCode(value)) return "";
 
 	const digits = sanitizeToDigits(value);
 

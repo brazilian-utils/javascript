@@ -60,6 +60,22 @@ describe("isValidIe", () => {
 		test("should return true for another valid IE", () => {
 			expect(isValidIe({ value: "240000005", stateCode: "AL" })).toBe(true);
 		});
+
+		test("should return true for every tipo de empresa the SINTEGRA page lists: 0, 3, 5, 7 and 8", () => {
+			expect(isValidIe({ value: "240000005", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "243000006", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "245000003", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "247000000", stateCode: "AL" })).toBe(true);
+			expect(isValidIe({ value: "248000004", stateCode: "AL" })).toBe(true);
+		});
+
+		test("should return false for a tipo de empresa the page does not list, even with a matching digit", () => {
+			expect(isValidIe({ value: "241000009", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "242000002", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "244000000", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "246000007", stateCode: "AL" })).toBe(false);
+			expect(isValidIe({ value: "249000008", stateCode: "AL" })).toBe(false);
+		});
 	});
 
 	describe("AP", () => {
@@ -207,8 +223,27 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "0754002000508", stateCode: "DF" })).toBe(true);
 		});
 
-		test("should return false when the IE does not start with 07", () => {
+		test("should return false when the IE does not start with 07 or 08", () => {
 			expect(isValidIe({ value: "0108368143017", stateCode: "DF" })).toBe(false);
+		});
+
+		test("should return true for the prefix 08, which DF moved to when the 07 numbers ran out", () => {
+			// 8 x 3 + 3 x 2 + 1 x 5 + 1 x 2 = 37, 37 % 11 = 4, 11 - 4 = 7
+			// 8 x 4 + 3 x 3 + 1 x 6 + 1 x 3 + 7 x 2 = 64, 64 % 11 = 9, 11 - 9 = 2
+			expect(isValidIe({ value: "0830000100172", stateCode: "DF" })).toBe(true);
+			expect(isValidIe({ value: "08.300001.001-72", stateCode: "DF" })).toBe(true);
+			expect(isValidIe({ value: "0800000000176", stateCode: "DF" })).toBe(true);
+			expect(isValidIe({ value: "0899999900145", stateCode: "DF" })).toBe(true);
+		});
+
+		test("should return false for the prefixes 06 and 09, just outside 07 and 08, even with matching digits", () => {
+			expect(isValidIe({ value: "0630000100129", stateCode: "DF" })).toBe(false);
+			expect(isValidIe({ value: "0930000100144", stateCode: "DF" })).toBe(false);
+		});
+
+		test("should return false for a prefix 08 registration with an incorrect verifier digit", () => {
+			expect(isValidIe({ value: "0830000100173", stateCode: "DF" })).toBe(false);
+			expect(isValidIe({ value: "0830000100182", stateCode: "DF" })).toBe(false);
 		});
 
 		test("should return false when the length is not 13 digits", () => {
@@ -264,12 +299,29 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "109161794", stateCode: "GO" })).toBe(false);
 		});
 
-		test("should return false when the IE does not start with 10, 11 or 15", () => {
+		test("should return false when the IE does not start with 10, 11, 15 or 20 to 29", () => {
 			expect(isValidIe({ value: "121031131", stateCode: "GO" })).toBe(false);
 		});
 
-		test("should return false for prefixes 20 to 29, which the current SEFAZ-GO rule does not accept", () => {
-			expect(isValidIe({ value: "209876549", stateCode: "GO" })).toBe(false);
+		test("should return true for the prefix 20, the one the Secretaria da Economia issues to companies since 13/01/2023", () => {
+			// 2 x 9 = 18, 18 % 11 = 7, 11 - 7 = 4
+			expect(isValidIe({ value: "200000004", stateCode: "GO" })).toBe(true);
+			expect(isValidIe({ value: "209876549", stateCode: "GO" })).toBe(true);
+		});
+
+		test("should return true for every prefix from 20 to 29 the SINTEGRA page lists", () => {
+			expect(isValidIe({ value: "210000007", stateCode: "GO" })).toBe(true);
+			expect(isValidIe({ value: "290000009", stateCode: "GO" })).toBe(true);
+			expect(isValidIe({ value: "299999998", stateCode: "GO" })).toBe(true);
+		});
+
+		test("should return false for the prefixes 19 and 30, just outside 20 to 29, even with a matching digit", () => {
+			expect(isValidIe({ value: "190000007", stateCode: "GO" })).toBe(false);
+			expect(isValidIe({ value: "300000006", stateCode: "GO" })).toBe(false);
+		});
+
+		test("should return false for a prefix 20 registration with an incorrect digit", () => {
+			expect(isValidIe({ value: "200000005", stateCode: "GO" })).toBe(false);
 		});
 
 		test("should return false when the length is different from 9", () => {
@@ -373,8 +425,29 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "12345678901", stateCode: "MT" })).toBe(false);
 		});
 
-		test("should return false when the length is different from 11", () => {
+		test("should return false when the length is different from 9 or 11", () => {
 			expect(isValidIe({ value: "1234567890112", stateCode: "MT" })).toBe(false);
+		});
+
+		test("should return true for the 9 digit form Portaria SEFAZ-MT nº 59/2025 art. 8º § 1º prescribes", () => {
+			// Padded to 00130000019: 9 x 1 + 8 x 3 + 2 x 1 = 35, 35 % 11 = 2, 11 - 2 = 9
+			expect(isValidIe({ value: "130000019", stateCode: "MT" })).toBe(true);
+			expect(isValidIe({ value: "13.000.001-9", stateCode: "MT" })).toBe(true);
+			expect(isValidIe({ value: "00130000019", stateCode: "MT" })).toBe(true);
+		});
+
+		test("should return true for an all zero registration in the 9 digit form, as in the 11 digit one", () => {
+			expect(isValidIe({ value: "000000000", stateCode: "MT" })).toBe(true);
+			expect(isValidIe({ value: "00000000000", stateCode: "MT" })).toBe(true);
+		});
+
+		test("should return false for a 9 digit IE with an incorrect verified digit", () => {
+			expect(isValidIe({ value: "130000010", stateCode: "MT" })).toBe(false);
+		});
+
+		test("should return false for 8 or 10 digits, even though padding them to 11 would give a valid checksum", () => {
+			expect(isValidIe({ value: "30000017", stateCode: "MT" })).toBe(false);
+			expect(isValidIe({ value: "0130000019", stateCode: "MT" })).toBe(false);
 		});
 
 		test("should return false when the length is 12, even though the first ten digits alone would form a valid checksum", () => {
@@ -407,7 +480,7 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "0280000006", stateCode: "MS" })).toBe(false);
 		});
 
-		test("should return false when the IE does not start with 28", () => {
+		test("should return false when the IE does not start with 28 or 50", () => {
 			expect(isValidIe({ value: "853511942", stateCode: "MS" })).toBe(false);
 		});
 	});
@@ -425,15 +498,33 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "150000030", stateCode: "PA" })).toBe(true);
 		});
 
-		test("should return true for IEs with prefixes 75 to 79", () => {
+		test("should return true for the prefix 75, which SEFA-PA has issued since October 2024", () => {
+			// 7 x 9 + 5 x 8 = 103, 103 % 11 = 4, 11 - 4 = 7
+			expect(isValidIe({ value: "750000007", stateCode: "PA" })).toBe(true);
 			expect(isValidIe({ value: "750000023", stateCode: "PA" })).toBe(true);
+			expect(isValidIe({ value: "759999996", stateCode: "PA" })).toBe(true);
+		});
+
+		test("should return true for the prefixes 76 to 79, which the SINTEGRA page lists", () => {
 			expect(isValidIe({ value: "760000000", stateCode: "PA" })).toBe(true);
 			expect(isValidIe({ value: "770000002", stateCode: "PA" })).toBe(true);
 			expect(isValidIe({ value: "780000005", stateCode: "PA" })).toBe(true);
 			expect(isValidIe({ value: "790000008", stateCode: "PA" })).toBe(true);
 		});
 
-		test("should return false when the IE does not start with 15, 75, 76, 77, 78 or 79", () => {
+		test("should return false for a prefix 76 to 79 registration with an incorrect digit", () => {
+			expect(isValidIe({ value: "760000001", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "790000009", stateCode: "PA" })).toBe(false);
+		});
+
+		test("should return false for the prefixes 74, 80, 14 and 16, next to 75 to 79 and 15, even with a matching digit", () => {
+			expect(isValidIe({ value: "740000004", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "800000005", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "140000003", stateCode: "PA" })).toBe(false);
+			expect(isValidIe({ value: "160000009", stateCode: "PA" })).toBe(false);
+		});
+
+		test("should return false when the IE does not start with 15 or 75 to 79", () => {
 			expect(isValidIe({ value: "120000008", stateCode: "PA" })).toBe(false);
 		});
 
@@ -473,8 +564,27 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "288625706", stateCode: "PE" })).toBe(true);
 		});
 
-		test("should return false when the length is different from 9 digits", () => {
+		test("should return false when the length is neither 9 nor 14 digits", () => {
 			expect(isValidIe({ value: "0925870110", stateCode: "PE" })).toBe(false);
+			expect(isValidIe({ value: "1810010000004", stateCode: "PE" })).toBe(false);
+			expect(isValidIe({ value: "181001000000490", stateCode: "PE" })).toBe(false);
+		});
+
+		test("should return true for the old 14 digit CACEPE number, the SINTEGRA page's worked example", () => {
+			// (5 x 1) + (4 x 8) + (3 x 1) + (9 x 1) + (2 x 4) = 57, 57 % 11 = 2, 11 - 2 = 9
+			expect(isValidIe({ value: "18.1.001.0000004-9", stateCode: "PE" })).toBe(true);
+		});
+
+		test("should return false for the old 14 digit CACEPE number with an incorrect digit", () => {
+			expect(isValidIe({ value: "18100100000048", stateCode: "PE" })).toBe(false);
+		});
+
+		test("should subtract 10 from a difference above 9 in the old 14 digit CACEPE number", () => {
+			// remainder 1: 11 - 1 = 10, less 10 = 0
+			expect(isValidIe({ value: "00001000000000", stateCode: "PE" })).toBe(true);
+			// remainder 0: 11 - 0 = 11, less 10 = 1
+			expect(isValidIe({ value: "00000000000001", stateCode: "PE" })).toBe(true);
+			expect(isValidIe({ value: "00000000000000", stateCode: "PE" })).toBe(false);
 		});
 
 		test("should return false when the digit is incorrect", () => {
@@ -699,6 +809,23 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "P011004244002", stateCode: "SP" })).toBe(false);
 		});
 
+		test("should return false for a produtor rural IE whose second character is not the 0 of P0MMMSSSSD000, even with a matching digit", () => {
+			expect(isValidIe({ value: "P790674670712", stateCode: "SP" })).toBe(false);
+			expect(isValidIe({ value: "P111004244002", stateCode: "SP" })).toBe(false);
+			expect(isValidIe({ value: "p790674670712", stateCode: "SP" })).toBe(false);
+		});
+
+		test("should return true for a produtor rural IE starting with P0, the boundary of the rule", () => {
+			// 1 x 3 + 1 x 4 + 4 x 7 + 2 x 8 + 4 x 10 = 91, 91 % 11 = 3
+			expect(isValidIe({ value: "P011004243002", stateCode: "SP" })).toBe(true);
+			expect(isValidIe({ value: "P000000000000", stateCode: "SP" })).toBe(true);
+		});
+
+		test("should return false for the SINTEGRA page's closing line P-011000424.3/002, which has one 0 too many", () => {
+			expect(isValidIe({ value: "P-011000424.3/002", stateCode: "SP" })).toBe(false);
+			expect(isValidIe({ value: "P011004243002", stateCode: "SP" })).toBe(true);
+		});
+
 		test("should return false for a produtor rural IE with a length different from 13", () => {
 			expect(isValidIe({ value: "P01100424300", stateCode: "SP" })).toBe(false);
 		});
@@ -767,6 +894,7 @@ describe("isValidIe", () => {
 			["BA", "612345-57"],
 			["BA", "1000003-06"],
 			["CE", "06000001-5"],
+			["DF", "073.00001.001-09"],
 			["ES", "999999990"],
 			["GO", "10.987.654-7"],
 			["MA", "120000385"],
@@ -776,8 +904,10 @@ describe("isValidIe", () => {
 			["PA", "75000002-3"],
 			["PB", "06000001-5"],
 			["PE", "0321418-40"],
+			["PE", "18.1.001.0000004-9"],
 			["PI", "012345679"],
 			["PR", "123.45678-50"],
+			["RJ", "99.999.99-3"],
 			["RN", "20.040.040-1"],
 			["RN", "20.0.040.040-0"],
 			["RO", "0000000062521-3"],
@@ -797,6 +927,7 @@ describe("isValidIe", () => {
 			["SP", "110.042.490.114"],
 			["SP", "P-01100424.3/002"],
 			["TO", "29010227836"],
+			["TO", "29 022783 6"],
 		];
 
 		test("should accept every worked example the SINTEGRA pages print", () => {
@@ -834,6 +965,17 @@ describe("isValidIe", () => {
 			expect(isValidIe({ value: "110042490114", stateCode: "sp" })).toBe(true);
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidIe({ value: "109161793", stateCode: "go" })).toBe(true);
+		});
+
+		test("should ignore whitespace around the state code, as the other utils that take a state do", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe({ value: "110042490114", stateCode: " sp " })).toBe(true);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe({ value: "109161793", stateCode: "\tGo\n" })).toBe(true);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe(" rj ", "625X45372")).toBe(true);
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidIe({ value: "110042490114", stateCode: " " })).toBe(false);
 		});
 
 		test("should return false for missing arguments", () => {

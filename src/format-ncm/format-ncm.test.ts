@@ -85,10 +85,16 @@ describe("formatNcm", () => {
 		expect(formatNcm("8471.30-12")).toBe("8471.30.12");
 	});
 
-	it("should read a signed or fractional number as the string of its digits, like formatCpf", () => {
-		expect(formatNcm(-84_713_012)).toBe("8471.30.12");
-		expect(formatNcm(8_471_301.2)).toBe("8471.30.12");
-		expect(formatNcm(2 ** 53)).toBe("9007.19.92");
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatNcm(-84_713_012)).toBe("");
+		expect(formatNcm(8_471_301.2)).toBe("");
+		expect(formatNcm(2 ** 53)).toBe("");
+		expect(formatNcm(Number.MAX_VALUE)).toBe("");
+		expect(formatNcm(1e21)).toBe("");
+		expect(formatNcm(Number.NaN)).toBe("");
+		expect(formatNcm(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatNcm(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatNcm(-84_713_012, { pad: true })).toBe("");
 	});
 
 	it("should return an empty string for a null-prototype object", () => {

@@ -52,6 +52,19 @@ describe("formatLegalNature", () => {
 			expectAlwaysReturnsType(formatLegalNature, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatLegalNature(206.2)).toBe("");
+		expect(formatLegalNature(-1)).toBe("");
+		expect(formatLegalNature(1.5)).toBe("");
+		expect(formatLegalNature(2 ** 53)).toBe("");
+		expect(formatLegalNature(Number.MAX_VALUE)).toBe("");
+		expect(formatLegalNature(1e21)).toBe("");
+		expect(formatLegalNature(Number.NaN)).toBe("");
+		expect(formatLegalNature(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatLegalNature(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatLegalNature(206.2, { pad: true })).toBe("");
+	});
 });
 
 describe("formatLegalNature types", () => {

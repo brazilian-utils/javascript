@@ -23,7 +23,10 @@ import { PASSPORT_REGEX } from "./constants";
  * isValidPassport("DC-221345extra") // false
  *
  * The Polícia Federal passport FAQ states the layout: "Ele é composto por duas letras - chamadas
- * de 'série', e por seis dígitos subsequentes. Por exemplo: Passaporte CS265436."
+ * de 'série', e por seis dígitos subsequentes. Por exemplo: Passaporte CS265436." It is the only
+ * official source of the layout: neither the Decreto nº 5.978/2006 (Regulamento de Documentos de
+ * Viagem) nor the IN nº 173-DG/PF/2020, as amended up to the IN nº 283/2024, defines the number,
+ * and the FAQ lists no forbidden letter, so none is rejected.
  *
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e

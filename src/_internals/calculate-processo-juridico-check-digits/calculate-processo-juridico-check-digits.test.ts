@@ -10,6 +10,16 @@ describe("calculateProcessoJuridicoCheckDigits", () => {
 		expect(calculateProcessoJuridicoCheckDigits("000000000000000000")).toBe(98);
 	});
 
+	test("should return 2, the lowest value, when the product by 100 leaves the highest remainder, 96", () => {
+		// 32 · 100 = 3200 = 32 · 97 + 96
+		expect(calculateProcessoJuridicoCheckDigits("000000000000000032")).toBe(2);
+	});
+
+	test("should also check the Anexo II example of Resolução CNJ nº 477/2022 in the J.TR form", () => {
+		// 0000100-DD.2008.4.06.0000: the Anexo prints DD 15, a fictitious value; the check gives 68
+		expect(calculateProcessoJuridicoCheckDigits("000010020084060000")).toBe(68);
+	});
+
 	test("should return 95 for the number 1, whose product by 100 leaves a remainder of 3", () => {
 		expect(calculateProcessoJuridicoCheckDigits("000000000000000001")).toBe(95);
 	});

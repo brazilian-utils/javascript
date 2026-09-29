@@ -50,6 +50,30 @@ describe("formatNfeKey", () => {
 		});
 	});
 
+	describe("with the alphanumeric CNPJ of NT Conjunta 2025.001", () => {
+		test("should keep the letters in positions 7 to 18 instead of dropping them", () => {
+			expect(formatNfeKey("35260712ABC34501DE35550010000001231102030403")).toBe(
+				"3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403",
+			);
+		});
+
+		test("should upper case them", () => {
+			expect(formatNfeKey("35260712abc34501de35550010000001231102030403")).toBe(
+				"3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403",
+			);
+		});
+
+		test("should keep a letter in position 7 and in position 18", () => {
+			expect(formatNfeKey("352607A2ABC34501DZ35")).toBe("3526 07A2 ABC3 4501 DZ35");
+		});
+
+		test("should drop a letter in positions 1 to 6 and from position 19 on", () => {
+			expect(formatNfeKey("35260A")).toBe("3526 0");
+			expect(formatNfeKey("35260712ABC34501DEA5")).toBe("3526 0712 ABC3 4501 DE5");
+			expect(formatNfeKey("35260712ABC34501DE3A5")).toBe("3526 0712 ABC3 4501 DE35");
+		});
+	});
+
 	test("should remove all non numeric characters, including the NFe prefix", () => {
 		expect(formatNfeKey(`NFe${KEY}`)).toBe(FORMATTED);
 		expect(formatNfeKey(FORMATTED)).toBe(FORMATTED);
@@ -93,12 +117,25 @@ describe("formatNfeKey", () => {
 			);
 		});
 
-		test("should keep only the digits of the access key it formats", () => {
+		test("should keep only the digits of the access key it formats when the value has no letter", () => {
 			fc.assert(
-				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+				fc.property(fc.string({ unit: "grapheme" }), (text) => {
+					const value = text.replaceAll(/[A-Za-z]/g, "");
 					const digits = value.replaceAll(/\D/g, "").slice(0, 44);
 
 					expect(formatNfeKey(value).replaceAll(/\D/g, "")).toBe(digits);
+				}),
+			);
+		});
+
+		test("should keep letters only in positions 7 to 18, the characters TChNFe opens to them", () => {
+			fc.assert(
+				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					expect(
+						/^(?:\d{0,6}|\d{6}[0-9A-Z]{1,12}|\d{6}[0-9A-Z]{12}\d{1,26})$/.test(
+							formatNfeKey(value).replaceAll(" ", ""),
+						),
+					).toBe(true);
 				}),
 			);
 		});

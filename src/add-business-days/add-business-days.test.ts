@@ -91,6 +91,13 @@ describe("addBusinessDays", () => {
 			expect(result).toEqual(new Date(2024, 1, 14, 12));
 		});
 
+		it("should skip Carnaval Monday 2024-02-12 and Tuesday 2024-02-13 by default, walking from Fri 2024-02-09 to Wed 2024-02-14", () => {
+			expect(addBusinessDays(new Date(2024, 1, 9, 12), 1)).toEqual(new Date(2024, 1, 14, 12));
+			expect(addBusinessDays(new Date(2024, 1, 9, 12), 1, { includeOptional: false })).toEqual(
+				new Date(2024, 1, 12, 12),
+			);
+		});
+
 		it("should count Carnaval 2024-02-13 as a business day when includeOptional is false", () => {
 			const result = addBusinessDays(new Date(2024, 1, 12, 12), 1, { includeOptional: false });
 
@@ -233,13 +240,18 @@ describe("addBusinessDays", () => {
 			expect(addBusinessDays(new Date(2024, 6, 8, 12), 1, "SP")).toEqual(new Date(2024, 6, 9, 12));
 		});
 
-		it("should treat a prototype chain key as an unknown stateCode instead of throwing", () => {
-			for (const stateCode of PROTOTYPE_KEYS) {
-				expect(
-					// @ts-expect-error: intentionally invalid input
-					addBusinessDays(new Date(2024, 0, 2, 12), 1, { stateCode }),
-				).toEqual(new Date(2024, 0, 3, 12));
+		it("should return null for a string that is not a state code, a prototype chain key or an empty one included", () => {
+			for (const stateCode of [...PROTOTYPE_KEYS, "XX", ""]) {
+				// @ts-expect-error: intentionally invalid input
+				expect(addBusinessDays(new Date(2024, 0, 2, 12), 1, { stateCode })).toBeNull();
 			}
+		});
+
+		it("should read the state code ignoring case and surrounding whitespace", () => {
+			expect(
+				// @ts-expect-error: a lower case state code is read as its upper case form
+				addBusinessDays(new Date(2024, 6, 8, 12), 1, { stateCode: " sp " }),
+			).toEqual(new Date(2024, 6, 10, 12));
 		});
 	});
 
@@ -294,8 +306,8 @@ describe("addBusinessDays", () => {
 			expect(addBusinessDays(new Date(2024, 0, 0), 1)).toEqual(new Date(2024, 0, 2));
 		});
 
-		it("should skip Carnaval for the 10th business day of February 2024 (Thu 2024-02-15), and count it when includeOptional is false (Wed 2024-02-14)", () => {
-			expect(addBusinessDays(new Date(2024, 1, 0), 10)).toEqual(new Date(2024, 1, 15));
+		it("should skip both Carnaval days for the 10th business day of February 2024 (Fri 2024-02-16), and count them when includeOptional is false (Wed 2024-02-14)", () => {
+			expect(addBusinessDays(new Date(2024, 1, 0), 10)).toEqual(new Date(2024, 1, 16));
 			expect(addBusinessDays(new Date(2024, 1, 0), 10, { includeOptional: false })).toEqual(
 				new Date(2024, 1, 14),
 			);

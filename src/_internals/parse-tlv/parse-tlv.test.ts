@@ -15,8 +15,8 @@ describe("parseTlv", () => {
 			});
 		});
 
-		test("when an object has an empty value", () => {
-			expect(parseTlv("0000")).toEqual({ "00": "" });
+		test("when an object has the shortest value, of length 01", () => {
+			expect(parseTlv("0001A")).toEqual({ "00": "A" });
 		});
 
 		test("when the string is empty", () => {
@@ -39,6 +39,12 @@ describe("parseTlv", () => {
 
 		test("when a length is not made of two digits", () => {
 			expect(parseTlv("00A201")).toBeNull();
+		});
+
+		test("when an object declares the length 00, below the 01 to 99 of the EMV specification", () => {
+			expect(parseTlv("0000")).toBeNull();
+			expect(parseTlv("0000530398")).toBeNull();
+			expect(parseTlv("53039860000")).toBeNull();
 		});
 
 		test("when the string is too short to hold an object", () => {

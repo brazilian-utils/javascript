@@ -1,0 +1,53 @@
+import { isValidCnpj } from "../../is-valid-cnpj/is-valid-cnpj";
+import { isValidCpf } from "../../is-valid-cpf/is-valid-cpf";
+import { isValidMobilePhone } from "../../is-valid-mobile-phone/is-valid-mobile-phone";
+import {
+	EMAIL_MAX_LENGTH,
+	EVP_REGEX,
+	PHONE_SYNTAX_REGEX,
+	PIX_EMAIL_REGEX,
+} from "../constants/pix-key";
+import { normalizePhone } from "../normalize-phone/normalize-phone";
+
+/** The kinds of Pix key `getPixKeyInfo` recognizes. */
+export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
+
+/**
+ * Tells which kind of Pix key a value is, without normalizing it. Shared by `isValidPixKey`,
+ * which only needs the kind to apply its `accept` option, and `getPixKeyInfo`, which then
+ * writes the key in its canonical DICT form. `getPixKeyInfo` documents the rules: a value is
+ * read as an EVP, an e-mail address, a CNPJ, a CPF and a mobile phone number, in that order,
+ * and the CPF and the phone number only when written the way those are written. An e-mail key is
+ * checked, once lowercased, against the pattern and the 77 character limit the DICT API
+ * registers, not against `isValidEmail`.
+ *
+ * @param {string} value - The Pix key to be checked.
+ * @returns {PixKeyType|null} The kind of Pix key, or `null` when the value is not a valid one.
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf
+ * Manual de Padrões para Iniciação do Pix, §2.5.1: "A regra para formatação das chaves Pix no BR
+ * Code [...] segue estritamente as regras definidas no Manual Operacional do DICT".
+ * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/pix/API-DICT.html
+ * DICT API 2.12.1, tag "Chave", type `EMAIL`: the pattern and "E-mail deve possuir no máximo 77
+ * caracteres e deve ser em minúsculo".
+ */
+export const detectPixKeyType = (value: string): PixKeyType | null => {
+	if (typeof value !== "string") return null;
+
+	const trimmed = value.trim();
+
+	if (EVP_REGEX.test(trimmed)) return "evp";
+
+	if (trimmed.includes("@")) {
+		const email = trimmed.toLowerCase();
+
+		return PIX_EMAIL_REGEX.test(email) && email.length <= EMAIL_MAX_LENGTH ? "email" : null;
+	}
+
+	if (isValidCnpj(trimmed, { version: 2 })) return "cnpj";
+
+	if (isValidCpf(trimmed)) return "cpf";
+
+	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
+
+	return isValidMobilePhone(normalizePhone(trimmed)) ? "phone" : null;
+};

@@ -29,25 +29,50 @@ describe("resolveStateHolidayDate", () => {
 		);
 	});
 
-	test("should move a fixed date landing Monday to Friday on to the following Sunday", () => {
-		const rule = { day: 11, month: 8, nextSundayWhenWeekday: true };
+	test("should move a fixed date landing Monday to Saturday on to the following Sunday", () => {
+		const rule = { day: 11, month: 8, nextSundayUnlessSunday: true };
 
 		expect(resolveStateHolidayDate(2025, rule)).toEqual(new Date(2025, 7, 17));
 		expect(resolveStateHolidayDate(2026, rule)).toEqual(new Date(2026, 7, 16));
 		expect(resolveStateHolidayDate(2027, rule)).toEqual(new Date(2027, 7, 15));
 		expect(resolveStateHolidayDate(2028, rule)).toEqual(new Date(2028, 7, 13));
+		expect(resolveStateHolidayDate(2018, rule)).toEqual(new Date(2018, 7, 12));
+		expect(
+			resolveStateHolidayDate(2028, { day: 25, month: 11, nextSundayUnlessSunday: true }),
+		).toEqual(new Date(2028, 10, 26));
 	});
 
-	test("should leave a fixed date already falling on a Saturday or a Sunday where it is", () => {
-		const rule = { day: 25, month: 11, nextSundayWhenWeekday: true };
+	test("should leave a fixed date already falling on a Sunday where it is", () => {
+		const rule = { day: 25, month: 11, nextSundayUnlessSunday: true };
 
-		expect(resolveStateHolidayDate(2028, rule)).toEqual(new Date(2028, 10, 25));
 		expect(resolveStateHolidayDate(2029, rule)).toEqual(new Date(2029, 10, 25));
 	});
 
-	test("should move an Easter derived date landing Monday to Friday on to the following Sunday", () => {
+	test("should resolve the first Sunday of a month, the 1st included", () => {
+		expect(resolveStateHolidayDate(2015, { firstSundayOfMonth: 3 })).toEqual(new Date(2015, 2, 1));
+		expect(resolveStateHolidayDate(2017, { firstSundayOfMonth: 3 })).toEqual(new Date(2017, 2, 5));
+		expect(resolveStateHolidayDate(2016, { firstSundayOfMonth: 3 })).toEqual(new Date(2016, 2, 6));
+		expect(resolveStateHolidayDate(2011, { firstSundayOfMonth: 3 })).toEqual(new Date(2011, 2, 6));
+	});
+
+	test("should move a Tuesday back to the Monday and a Thursday on to the Friday, across a month boundary too", () => {
+		const rule = { day: 30, month: 11, tuesdayToMondayThursdayToFriday: true };
+
+		expect(resolveStateHolidayDate(2027, rule)).toEqual(new Date(2027, 10, 29));
+		expect(resolveStateHolidayDate(2023, rule)).toEqual(new Date(2023, 11, 1));
+	});
+
+	test("should leave a Monday, Wednesday, Friday, Saturday or Sunday date where it is under the Tuesday and Thursday rule", () => {
+		const rule = { day: 30, month: 11, tuesdayToMondayThursdayToFriday: true };
+
+		for (const year of [2015, 2022, 2029, 2024, 2025]) {
+			expect(resolveStateHolidayDate(year, rule)).toEqual(new Date(year, 10, 30));
+		}
+	});
+
+	test("should move an Easter derived date landing Monday to Saturday on to the following Sunday", () => {
 		expect(
-			resolveStateHolidayDate(2024, { easterOffset: 60, nextSundayWhenWeekday: true }),
+			resolveStateHolidayDate(2024, { easterOffset: 60, nextSundayUnlessSunday: true }),
 		).toEqual(new Date(2024, 5, 2));
 	});
 });

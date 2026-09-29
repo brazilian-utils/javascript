@@ -79,6 +79,19 @@ describe("formatCaepf", () => {
 			);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(formatCaepf(-41_142_260_000_101)).toBe("");
+		expect(formatCaepf(-1)).toBe("");
+		expect(formatCaepf(1.5)).toBe("");
+		expect(formatCaepf(2 ** 53)).toBe("");
+		expect(formatCaepf(Number.MAX_VALUE)).toBe("");
+		expect(formatCaepf(1e21)).toBe("");
+		expect(formatCaepf(Number.NaN)).toBe("");
+		expect(formatCaepf(Number.POSITIVE_INFINITY)).toBe("");
+		expect(formatCaepf(Number.NEGATIVE_INFINITY)).toBe("");
+		expect(formatCaepf(-41_142_260_000_101, { pad: true })).toBe("");
+	});
 });
 
 describe("formatCaepf with a nullish value under pad", () => {

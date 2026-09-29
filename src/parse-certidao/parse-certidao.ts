@@ -1,5 +1,5 @@
 import { CERTIDAO_LENGTH } from "../_internals/constants/certidao";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /**
@@ -11,6 +11,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * with it. This only takes the mask off: use `isValidCertidao` to check the matrícula and
  * `getCertidaoInfo` to read its fields.
  *
+ * A number is only read when it is a non-negative safe integer; any other number (negative,
+ * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
  * @param {string|number} value - The matrícula value to be parsed.
  * @returns {string} Up to 32 digits, or an empty string when there is no digit at all.
  *
@@ -18,6 +21,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * ```typescript
  * parseCertidao("104539 01 55 2013 1 00012 021 0000123 21");
  * // "10453901552013100012021000012321"
+ * parseCertidao(1045390155.2); // "" (not a non-negative safe integer)
  * ```
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/5243
@@ -29,4 +33,4 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * structure (revoked; historical).
  */
 export const parseCertidao = (value: string | number): string =>
-	isNullish(value) ? "" : sanitizeToDigits(value).slice(0, CERTIDAO_LENGTH);
+	isLookupCode(value) ? sanitizeToDigits(value).slice(0, CERTIDAO_LENGTH) : "";

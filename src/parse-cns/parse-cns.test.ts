@@ -48,6 +48,18 @@ describe("parseCns", () => {
 			expectAlwaysReturnsType(parseCns, "string", anyValue);
 		});
 	});
+
+	test("when it is a negative, fractional or unsafe number", () => {
+		expect(parseCns(-123_456_789_010_000)).toBe("");
+		expect(parseCns(-1)).toBe("");
+		expect(parseCns(1.5)).toBe("");
+		expect(parseCns(2 ** 53)).toBe("");
+		expect(parseCns(Number.MAX_VALUE)).toBe("");
+		expect(parseCns(1e21)).toBe("");
+		expect(parseCns(Number.NaN)).toBe("");
+		expect(parseCns(Number.POSITIVE_INFINITY)).toBe("");
+		expect(parseCns(Number.NEGATIVE_INFINITY)).toBe("");
+	});
 });
 
 describe("parseCns types", () => {
