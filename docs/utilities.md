@@ -968,7 +968,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 ### isValidServicePhone
 
-Check if a phone number is a valid Brazilian service number, dialed without a DDD. Only the structure is checked: the number does not have to be assigned to anyone. Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the value invalid; up to 2.4.0 such characters were dropped.
+Check if a phone number is a valid Brazilian service number, dialed without a DDD. Only the structure is checked: the number does not have to be assigned to anyone. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `isValidPhone` with `accept: ['service']` (up to 2.4.0 `+55 0800 123 4567` was rejected here). Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the value invalid; up to 2.4.0 such characters were dropped.
 
 - The Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` followed by 7 digits (11 in total): the 10 digit series of Resolução Anatel 749/2022, art. 18, dialed behind the `0` prefix (art. 28).
 - The abbreviated `300X`/`400X` numbers, 8 digits. Other carrier prefixes such as `4020` and `4062` are rejected.
@@ -980,6 +980,7 @@ import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
 isValidServicePhone('0800 123 4567'); // true
 isValidServicePhone('4004-1234'); // true
 isValidServicePhone('190'); // true
+isValidServicePhone('+55 0800 123 4567'); // true (country code accepted)
 isValidServicePhone('11987654321'); // false (geographic number)
 ```
 

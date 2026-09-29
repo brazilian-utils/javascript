@@ -8,11 +8,11 @@ import {
 } from "../_internals/constants/service-phone";
 import { format } from "../_internals/format/format";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { isServicePhoneDigits } from "../_internals/is-service-phone-digits/is-service-phone-digits";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { stripPhoneCountryCode } from "../_internals/strip-phone-country-code/strip-phone-country-code";
-import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
 import {
 	DEFAULT_MASK,
 	INTERNATIONAL_PREFIX,
@@ -64,7 +64,7 @@ const formatService = (digits: string, obfuscate: boolean): string => {
 		return format({ value: digits, pattern: masks.abbreviated });
 	}
 
-	return obfuscate && !isValidServicePhone(digits) ? "*".repeat(digits.length) : digits;
+	return obfuscate && !isServicePhoneDigits(digits) ? "*".repeat(digits.length) : digits;
 };
 
 const resolveLinePattern = (national: string, masks: PhoneLineMasks): string =>
@@ -98,7 +98,7 @@ const resolveAutoMask = (
 	national: string,
 	serviceDigits: string,
 ): Exclude<PhoneMask, "auto"> => {
-	if (isValidServicePhone(serviceDigits)) return "service";
+	if (isServicePhoneDigits(serviceDigits)) return "service";
 
 	if (national !== digits) return "international";
 
@@ -230,7 +230,7 @@ export const formatPhone = (value: string | number, options?: FormatPhoneOptions
 	if (mask === "service") return formatService(serviceDigits, obfuscate);
 
 	if (mask === "e164" || mask === "international") {
-		if (isValidServicePhone(serviceDigits)) return formatService(serviceDigits, obfuscate);
+		if (isServicePhoneDigits(serviceDigits)) return formatService(serviceDigits, obfuscate);
 
 		return mask === "e164" ? formatE164(national, obfuscate) : formatInternational(national, masks);
 	}

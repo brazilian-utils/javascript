@@ -56,6 +56,12 @@ describe("isValidServicePhone", () => {
 			expect(isValidServicePhone("400412345")).toBe(false);
 		});
 
+		test("when a bare 55 does not leave a service number behind", () => {
+			expect(isValidServicePhone("55190")).toBe(false);
+			expect(isValidServicePhone("5540041234")).toBe(false);
+			expect(isValidServicePhone("+55 11987654321")).toBe(false);
+		});
+
 		test("when the utility code was never designated", () => {
 			expect(isValidServicePhone("101")).toBe(false);
 			expect(isValidServicePhone("110")).toBe(false);
@@ -70,6 +76,13 @@ describe("isValidServicePhone", () => {
 	});
 
 	describe("should return true", () => {
+		test("when it is written with a country code", () => {
+			expect(isValidServicePhone("+55 0800 123 4567")).toBe(true);
+			expect(isValidServicePhone("+55 190")).toBe(true);
+			expect(isValidServicePhone("0055 4004-1234")).toBe(true);
+			expect(isValidServicePhone("5508001234567")).toBe(true);
+		});
+
 		test("for every non-geographic prefix", () => {
 			expect(isValidServicePhone("03001234567")).toBe(true);
 			expect(isValidServicePhone("03031234567")).toBe(true);

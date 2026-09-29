@@ -968,7 +968,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 ### isValidServicePhone
 
-Valida um número de serviço brasileiro, discado sem DDD. Apenas a estrutura é verificada: o número não precisa estar atribuído a ninguém. Qualquer caractere além de dígitos, espaços e `()+.-/` (uma letra, por exemplo) torna o valor inválido; até a 2.4.0 esses caracteres eram descartados.
+Valida um número de serviço brasileiro, discado sem DDD. Apenas a estrutura é verificada: o número não precisa estar atribuído a ninguém. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `isValidPhone` com `accept: ['service']` (até a 2.4.0 `+55 0800 123 4567` era rejeitado aqui). Qualquer caractere além de dígitos, espaços e `()+.-/` (uma letra, por exemplo) torna o valor inválido; até a 2.4.0 esses caracteres eram descartados.
 
 - Os Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` e `0900` seguidos de 7 dígitos (11 no total): as séries de 10 dígitos da Resolução Anatel 749/2022, art. 18, discadas atrás do prefixo `0` (art. 28).
 - Os números abreviados `300X`/`400X`, com 8 dígitos. Outros prefixos de operadora, como `4020` e `4062`, são rejeitados.
@@ -980,6 +980,7 @@ import { isValidServicePhone } from '@brazilian-utils/brazilian-utils';
 isValidServicePhone('0800 123 4567'); // true
 isValidServicePhone('4004-1234'); // true
 isValidServicePhone('190'); // true
+isValidServicePhone('+55 0800 123 4567'); // true (código de país aceito)
 isValidServicePhone('11987654321'); // false (número geográfico)
 ```
 

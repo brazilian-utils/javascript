@@ -3,11 +3,11 @@ import {
 	PHONE_NATIONAL_MIN_LENGTH,
 } from "../_internals/constants/phone";
 import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
+import { isServicePhoneDigits } from "../_internals/is-service-phone-digits/is-service-phone-digits";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { isValidLandlinePhone } from "../is-valid-landline-phone/is-valid-landline-phone";
 import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-phone";
-import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
 import { DEFAULT_ACCEPT } from "./constants";
 
 /** The Brazilian mobile numbering rule to enforce over the 11 digit number: both take a first number digit of 7, 8 or 9; `1` also takes the `700` series, `2` leaves it out. */
@@ -70,7 +70,7 @@ export const isValidPhone = (value: string, options?: IsValidPhoneOptions): bool
 	const requested = options?.accept;
 	const accept: PhoneType[] = Array.isArray(requested) ? requested : DEFAULT_ACCEPT;
 
-	if (accept.includes("service") && isValidServicePhone(resolveServicePhoneDigits(value)))
+	if (accept.includes("service") && isServicePhoneDigits(resolveServicePhoneDigits(value)))
 		return true;
 
 	const digits = normalizePhone(value);
