@@ -52,8 +52,8 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  */
 export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 	if (stateCode === undefined) {
-		sortedMunicipalities ??= STATE_CODES.flatMap((code) => buildMunicipalities(code)).sort((a, b) =>
-			a.name.localeCompare(b.name, "pt-BR"),
+		sortedMunicipalities ??= STATE_CODES.flatMap((code) => buildMunicipalities(code)).toSorted(
+			(a, b) => a.name.localeCompare(b.name, "pt-BR"),
 		);
 
 		return sortedMunicipalities.map(({ code, name, stateCode: state }) => ({
