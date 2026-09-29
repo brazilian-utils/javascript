@@ -1,7 +1,7 @@
 import { resource, type Signal } from "@angular/core";
 
 /**
- * The states, fetched the first time the select is opened. 2.5 KB that a page whose visitor never
+ * The states, fetched the first time the select is opened. 2.2 KB that a page whose visitor never
  * opens it does not pay for, and the browser keeps the module once it has it. A resource stops
  * with the component that asked and drops an answer it no longer wants.
  */

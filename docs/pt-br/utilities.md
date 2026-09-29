@@ -2007,7 +2007,7 @@ Retorna os nomes das cidades brasileiras: todas as cidades, ou só as de um esta
 - Ordenadas no locale "pt-BR".
 - Qualquer `state` falsy pede a lista completa, enquanto `getMunicipalities` retorna `[]`.
 - `state` ignora maiúsculas/minúsculas e espaços nas pontas: `'sp'` retorna as cidades de São Paulo, como `'SP'` (até a 2.4.0 retornava `[]`).
-- Embute os 5571 nomes (~153,4 KB minificado, ~49,2 KB com gzip). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-cities`.
+- Embute os 5571 nomes (~64,2 KB minificado, ~26,4 KB com gzip). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -3641,7 +3641,7 @@ Valida um código CID-10 contra as tabelas que o DATASUS publica, a edição bra
 - Os dois níveis da classificação são válidos: as categorias de 3 caracteres (`A00`) e as subcategorias de 4 caracteres, escritas com o ponto (`A00.0`) ou sem ele (`A000`).
 - Maiúsculas, minúsculas e espaços em volta são ignorados. Qualquer outra coisa (outro separador, um quinto caractere, um sufixo de cruz ou asterisco, um valor que não é string) é rejeitada.
 - As tabelas são as V2008 do DATASUS, mais a categoria `U07` da tabela da CID-10 que o DATASUS mantém para o SIM (`U07`, `U07.0`, `U07.1` COVID-19 com vírus identificado e `U07.2` vírus não identificado), que as V2008 não têm. Um código que não está em nenhuma delas não é encontrado, como `U09.9` (condição pós-COVID-19) e `U10.9` (síndrome inflamatória multissistêmica associada à COVID-19). Até a 2.4.0 os códigos `U07` também não eram encontrados.
-- Só uma tabela de códigos é lida (cerca de 26 KB minificada), não as descrições que `getCid10` carrega.
+- Só uma tabela de códigos é lida (cerca de 7 KB minificada), não as descrições que `getCid10` carrega.
 
 ```javascript
 import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
@@ -3691,7 +3691,7 @@ Busca um código CID-10 e retorna a sua descrição oficial em português. O res
 
 - Mesmas regras de entrada de `isValidCid10`. O `code` vem em maiúsculas e sem o ponto. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
 - Mesma tabela de `isValidCid10`: a V2008 do DATASUS mais os códigos `U07` da tabela do SIM (`getCid10('U07.1')` é `{ code: 'U071', description: 'Infecção pelo novo Coronavírus (COVID-19)' }`); `U09.9` e `U10.9` não são encontrados.
-- Este é o utilitário mais pesado do pacote: ele embute as 2046 categorias e 12191 subcategorias com suas descrições, cerca de 990 KB minificado (124 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
+- Este é o utilitário mais pesado do pacote: ele embute as 2046 categorias e 12191 subcategorias com suas descrições, cerca de 722 KB minificado (113 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
 
 ```javascript
 import { getCid10 } from '@brazilian-utils/brazilian-utils';

@@ -3,7 +3,7 @@ import type { Municipality, StateCode } from "@brazilian-utils/brazilian-utils";
 
 /**
  * The municipalities of a state, fetched the first time that state's select is opened. The table is
- * 148 KB, so nothing is fetched until someone means to pick a city, and the browser keeps the
+ * 76 KB, so nothing is fetched until someone means to pick a city, and the browser keeps the
  * module once it has it. `import()` takes no signal, so the module is not stopped, only what is
  * done with it: a table that arrives for a state that is no longer picked, or after the component
  * is gone, is dropped. The abort also forgets which state was asked for, so picking a state again

@@ -2007,7 +2007,7 @@ Get the names of Brazilian cities: every city, or only those of one state. **Dep
 - Sorted in the "pt-BR" locale.
 - Any falsy `state` asks for the full list, where `getMunicipalities` returns `[]`.
 - `state` ignores letter case and surrounding whitespace: `'sp'` returns the São Paulo cities, as `'SP'` does (up to 2.4.0 it returned `[]`).
-- Embeds all 5571 names (~153.4 KB minified, ~49.2 KB gzipped). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities`.
+- Embeds all 5571 names (~64.2 KB minified, ~26.4 KB gzipped). See [Bundle size](getting-started.md#bundle-size) to lazy-load it via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -3641,7 +3641,7 @@ Check if a CID-10 code exists in the tables DATASUS publishes, the Brazilian Por
 - Both levels of the classification are valid: the 3 character categories (`A00`) and the 4 character subcategories, written with the dot (`A00.0`) or without it (`A000`).
 - Letter case and surrounding whitespace are ignored. Anything else (another separator, a fifth character, a dagger or asterisk suffix, a value that is not a string) is rejected.
 - The tables are the DATASUS V2008 ones, plus the `U07` category of the CID-10 table DATASUS keeps for the SIM (`U07`, `U07.0`, `U07.1` COVID-19 virus identified and `U07.2` virus not identified), which the V2008 files predate. A code in neither is not found, such as `U09.9` (post COVID-19 condition) and `U10.9` (multisystem inflammatory syndrome associated with COVID-19). Up to 2.4.0 the `U07` codes were not found either.
-- Only a table of codes is read (about 26 KB minified), not the descriptions `getCid10` carries.
+- Only a table of codes is read (about 7 KB minified), not the descriptions `getCid10` carries.
 
 ```javascript
 import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
@@ -3691,7 +3691,7 @@ Look a CID-10 code up and get its official Brazilian Portuguese description. The
 
 - Same input rules as `isValidCid10`. `code` is upper case and has no dot. Returns `null` when the code is unknown or the value is not in a documented form.
 - Same table as `isValidCid10`: the DATASUS V2008 one plus the `U07` codes of the SIM table (`getCid10('U07.1')` is `{ code: 'U071', description: 'Infecção pelo novo Coronavírus (COVID-19)' }`); `U09.9` and `U10.9` are not found.
-- This is the heaviest util of the package: it embeds the 2046 categories and 12191 subcategories with their descriptions, about 990 KB minified (124 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
+- This is the heaviest util of the package: it embeds the 2046 categories and 12191 subcategories with their descriptions, about 722 KB minified (113 KB gzipped). Load it lazily through its subpath, as shown in [Bundle size](getting-started.md#bundle-size), and use `isValidCid10` when the description is not needed.
 
 ```javascript
 import { getCid10 } from '@brazilian-utils/brazilian-utils';

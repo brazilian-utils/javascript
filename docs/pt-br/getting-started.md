@@ -68,25 +68,25 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 
 | Utilitário | Base de dados | Minificado | Gzip |
 | --- | --- | --- | --- |
-| `getCid10` | categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, com as descrições do DATASUS | 988,3 KB | 123,6 KB |
-| `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 municípios do IBGE, com o DDD de cada um (Anatel) | 165,0 - 167,8 KB | 52,1 - 52,8 KB |
-| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 153,6 - 154,2 KB | 49,4 - 49,8 KB |
-| `getCities` | nomes dos 5571 municípios do IBGE | 153,4 KB | 49,2 KB |
-| `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 111,5 KB | 24,0 KB |
-| `getCbo` | títulos das ocupações da CBO 2002 | 107,6 KB | 24,7 KB |
-| `getCnae` | CNAE-Subclasses 2.3 | 86,6 KB | 17,9 KB |
-| `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 75,5 KB | 11,5 KB |
-| `getCfop` | descrições das operações do CFOP | 66,7 KB | 5,2 KB |
+| `getCid10` | categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, com as descrições do DATASUS | 721,5 KB | 113,5 KB |
+| `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 102,2 KB | 24,0 KB |
+| `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 municípios do IBGE, com o DDD de cada um (Anatel) | 23,5 - 90,2 KB | 5,6 - 32,9 KB |
+| `getCbo` | títulos das ocupações da CBO 2002 | 80,6 KB | 24,1 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 76,0 - 76,9 KB | 29,4 - 29,9 KB |
+| `getCnae` | CNAE-Subclasses 2.3 | 66,8 KB | 17,7 KB |
+| `getCities` | nomes dos 5571 municípios do IBGE | 64,2 KB | 26,4 KB |
+| `getCfop` | descrições das operações do CFOP | 56,9 KB | 5,1 KB |
+| `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 51,1 KB | 11,3 KB |
 | `getClassTrib` | nomes e descrições do cClassTrib (IBS/CBS) | 50,0 KB | 9,0 KB |
-| `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 37,6 - 37,8 KB | 9,0 - 9,2 KB |
-| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 29,6 KB | 8,9 KB |
-| `getIsbnInfo` · `formatIsbn` | faixas do ISBN da Agência Internacional do ISBN (RangeMessage) | 27,0 - 27,1 KB | 6,2 KB |
-| `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, sem as descrições | 26,2 KB | 6,8 KB |
-| `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 26,0 KB | 8,0 KB |
-| `isValidCbo` | códigos das ocupações da CBO 2002, sem os títulos | 6,6 KB | 1,7 KB |
-| `isValidCnae` | códigos da CNAE-Subclasses 2.3, sem as descrições | 4,5 KB | 1,9 KB |
-| `isValidCest` | códigos do CEST, sem as descrições | 3,5 KB | 0,8 KB |
-| `isValidNbs` | códigos da NBS 2.0, sem as descrições | 3,4 KB | 1,2 KB |
+| `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 29,6 KB | 9,0 KB |
+| `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 26,2 - 26,5 KB | 7,6 - 7,8 KB |
+| `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 25,5 KB | 8,2 KB |
+| `getIsbnInfo` · `formatIsbn` | faixas do ISBN da Agência Internacional do ISBN (RangeMessage) | 15,1 - 15,3 KB | 5,4 - 5,5 KB |
+| `isValidCbo` | códigos das ocupações da CBO 2002, sem os títulos | 6,7 KB | 1,7 KB |
+| `isValidCid10` | códigos das categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, sem as descrições | 6,7 KB | 2,4 KB |
+| `isValidCnae` | códigos da CNAE-Subclasses 2.3, sem as descrições | 4,6 KB | 1,9 KB |
+| `isValidCest` | códigos do CEST, sem as descrições | 3,6 KB | 0,8 KB |
+| `isValidNbs` | códigos da NBS 2.0, sem as descrições | 3,5 KB | 1,3 KB |
 
 A raiz do pacote é um único módulo ESM, então o bundler não consegue separar uma dessas bases de dados dele: importar um utilitário pesado da raiz coloca a base inteira no seu bundle principal, e um `import()` dinâmico da raiz não ajuda. Para carregar sob demanda, importe do subpath próprio:
 

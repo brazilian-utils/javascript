@@ -3,7 +3,7 @@ import type { StateCode } from "@brazilian-utils/brazilian-utils";
 
 /**
  * The municipalities of a state, fetched the first time that state's select is opened. The table is
- * 148 KB, so nothing is fetched until someone means to pick a city. What it is about is the state
+ * 76 KB, so nothing is fetched until someone means to pick a city. What it is about is the state
  * whose cities were asked for, so picking another state puts the resource back to waiting.
  *
  * A resource aborts a load it no longer wants and drops its answer, which is what the `abortSignal`
