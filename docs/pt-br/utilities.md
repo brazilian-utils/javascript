@@ -1149,7 +1149,7 @@ parseLicensePlate('abc-1234'); // 'ABC1234'
 
 Gera uma placa válida aleatória no formato escolhido.
 
-- `format` (`GenerateLicensePlateFormat`): `'LLLNLNN'` (Mercosul, o padrão) ou `'LLLNNNN'` (o formato antigo brasileiro). Qualquer outro valor cai no padrão.
+- `format` (`GenerateLicensePlateFormat`, um alias de `LicensePlateFormat`): `'LLLNLNN'` (Mercosul, o padrão) ou `'LLLNNNN'` (o formato antigo brasileiro). Qualquer outro valor cai no padrão.
 - A letra da quinta posição de uma placa Mercosul é sorteada de `K` a `Z`: `A` a `J` só são usadas para converter uma placa do formato antigo (Anexo II, item 2, da Resolução CONTRAN nº 969/2022), então uma placa nova nunca as tem.
 
 ```javascript
@@ -2452,7 +2452,7 @@ generateLegalNature(); // '2062'
 Busca um código de natureza jurídica na tabela oficial do IBGE/CONCLA. Retorna `null` para um código desconhecido.
 
 - A entrada (`LegalNature`) também traz a categoria do CONCLA do código, dada pelo seu primeiro dígito.
-- Um código que uma revisão anterior extinguiu retorna com `legacy: true` e o `currentCode` a que corresponde hoje, ou `currentCode: null` quando não há sucessor. Os códigos em vigor têm `legacy: false` e nenhum `currentCode`.
+- Um código que uma revisão anterior extinguiu retorna com `legacy: true` e o `currentCode` a que corresponde hoje, ou `currentCode: null` quando não há sucessor (`2100`, `3050` e `3123`). Os códigos em vigor têm `legacy: false` e nenhum `currentCode`.
 
 | Código extinto | Descrição | Corresponde a |
 | --- | --- | --- |

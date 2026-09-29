@@ -67,8 +67,8 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  * A code a past revision of the table retired is still looked up, because it keeps appearing in
  * records filed while it was in force, and comes back with `legacy: true` and the `currentCode`
  * it corresponds to today per the CONCLA correspondence spreadsheets (`null` when the revision
- * that retired it published no successor). The 92 codes in force have `legacy: false` and no
- * `currentCode`.
+ * that retired it published no successor: 2100, 3050 and 3123). The 92 codes in force have
+ * `legacy: false` and no `currentCode`.
  *
  * The lookup is made on the description table instead of the code list `isValidLegalNature`
  * checks, so that list is not bundled on top of it; both accept exactly the same codes.

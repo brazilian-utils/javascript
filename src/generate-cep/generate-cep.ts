@@ -8,9 +8,9 @@ import { CEP_RANGES } from "../_internals/constants/cep-ranges";
  * A CEP has no check digit, so the CEP is drawn inside the ranges the Correios assign to the
  * states, each CEP with the same chance: it always belongs to a state, so `getStateByCep` never
  * answers `null` for it. `00000-000` to `00999-999` and `78900-000` to `78999-999`, which no state
- * owns, are never generated. Up to 2.4.0 any 8 digit string could come out, about 1 in 80 of them
- * in one of those two ranges. A range is the block a state owns, not a promise that every CEP in
- * it is in use, so the CEP generated may not be the CEP of a real address.
+ * owns, are never generated. Up to 2.4.0 any 8 digit string could come out, about 1 in 90 of them
+ * (1.1%) in one of those two ranges. A range is the block a state owns, not a promise that every
+ * CEP in it is in use, so the CEP generated may not be the CEP of a real address.
  *
  * @returns {string} A random 8 digit CEP without formatting.
  *

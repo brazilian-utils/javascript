@@ -1149,7 +1149,7 @@ parseLicensePlate('abc-1234'); // 'ABC1234'
 
 Generate a valid random license plate in the chosen format.
 
-- `format` (`GenerateLicensePlateFormat`): `'LLLNLNN'` (Mercosul, the default) or `'LLLNNNN'` (the old Brazilian format). Any other value falls back to the default.
+- `format` (`GenerateLicensePlateFormat`, an alias of `LicensePlateFormat`): `'LLLNLNN'` (Mercosul, the default) or `'LLLNNNN'` (the old Brazilian format). Any other value falls back to the default.
 - The letter in the fifth position of a Mercosul plate is drawn from `K` to `Z`: `A` to `J` is used only to convert an old format plate (Anexo II, item 2, of Resolução CONTRAN nº 969/2022), so a new plate never carries it.
 
 ```javascript
@@ -2452,7 +2452,7 @@ generateLegalNature(); // '2062'
 Look a legal nature code up in the official IBGE/CONCLA table. Returns `null` for an unknown code.
 
 - The entry (`LegalNature`) also carries the CONCLA category of the code, given by its first digit.
-- A code a past revision retired comes back with `legacy: true` and the `currentCode` it corresponds to today, or `currentCode: null` when there is no successor. Codes in force have `legacy: false` and no `currentCode`.
+- A code a past revision retired comes back with `legacy: true` and the `currentCode` it corresponds to today, or `currentCode: null` when there is no successor (`2100`, `3050` and `3123`). Codes in force have `legacy: false` and no `currentCode`.
 
 | Retired code | Description | Corresponds to |
 | --- | --- | --- |

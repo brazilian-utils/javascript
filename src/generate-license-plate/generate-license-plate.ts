@@ -10,7 +10,7 @@ const MERCOSUL_LETTER_INDEX = 4;
 
 const DEFAULT_FORMAT = "LLLNLNN";
 
-/** The license plate formats `generateLicensePlate` can generate. */
+/** Alias of `LicensePlateFormat`: the license plate formats `generateLicensePlate` can generate. */
 export type GenerateLicensePlateFormat = LicensePlateFormat;
 
 const randomLetter = (letters: string): string =>
