@@ -856,7 +856,10 @@ Format a phone number according to Brazilian patterns. If `value` includes a DDD
 
 - **Options** (`FormatPhoneOptions`): `mask` (`PhoneMask`, default `"sn"`) picks one of the patterns below. An unknown `mask` falls back to `"sn"`. `obfuscate` (default `false`) hides the subscriber number under every mask.
 - `"sn"`: subscriber number only, 9 digits. `"nanp"`: DDD plus subscriber number, 11 digits for a mobile and 10 for a landline; any other length keeps the 11 digit grouping.
-- `"e164"` and `"international"` drop the country code first, as `parsePhone` does, and fall back to `"service"` for a service number.
+- `"e164"` and `"international"` drop the country code first, as `parsePhone` does, and fall back to `"service"` for a service number. `"e164"` keeps at most the 11 national digits, as `"international"` does (up to 2.4.0 it kept them all).
+- `"sn"` and `"nanp"` drop an explicit `+55` or `0055` too, so `'+5511987654321'` gives `(11) 98765-4321` under `"nanp"` (up to 2.4.0 it gave `(55) 11987-6543`); a bare `55` stays, since it may be the DDD.
+- A number is read when it is a string or a non-negative safe integer; any other number (negative, fractional, not finite or unsafe) gives an empty string.
+- Under the `"service"` mask with `obfuscate`, a value that is only a service prefix so far keeps it (`0800` stays `0800`), since the prefix names a service, not a subscriber; a value too short to be recognized (`080`) is fully hidden (`***`).
 - `"service"`: the Códigos Não Geográficos (`0800 123 4567`) and the abbreviated `300X`/`400X` numbers (`4004-1234`).
 - `"auto"`: `"service"` for a service number, `"international"` when `value` carries a country code, otherwise `"nanp"` for more than 9 digits, else `"sn"`.
 - `obfuscate` is a convention of this library, not an official rule: no law, Anatel act or [ANPD guidance](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) sets which digits of a phone number to show ("não há um padrão para o mascaramento"), and the [Banco Central](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) forbids masking a Pix key, a phone number included, when the DICT lookup returns it.
@@ -874,6 +877,8 @@ formatPhone('1130000000', { mask: 'nanp' }); // (11) 3000-0000 (10 digit landlin
 formatPhone('1130000000', { mask: 'auto' }); // (11) 3000-0000 (10 digit landline)
 formatPhone('11987654321', { mask: 'e164' }); // +5511987654321
 formatPhone('+5511987654321', { mask: 'international' }); // +55 11 98765-4321
+formatPhone('+55 11 9', { mask: 'auto' }); // +55 11 9 (typed after +55, the 55 is not read as a DDD)
+formatPhone('+5511987654321', { mask: 'nanp' }); // (11) 98765-4321
 formatPhone('08001234567', { mask: 'service' }); // 0800 123 4567
 formatPhone('40041234', { mask: 'service' }); // 4004-1234
 formatPhone('+5511987654321', { mask: 'auto' }); // +55 11 98765-4321 ("auto" detects the +55 prefix and picks "international")

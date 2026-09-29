@@ -856,7 +856,10 @@ Formata um número de telefone de acordo com os padrões brasileiros. Se `value`
 
 - **Opções** (`FormatPhoneOptions`): `mask` (`PhoneMask`, padrão `"sn"`) escolhe um dos padrões abaixo. Uma `mask` desconhecida recai para `"sn"`. `obfuscate` (padrão `false`) esconde o número do assinante em todas as máscaras.
 - `"sn"`: apenas o número assinante, 9 dígitos. `"nanp"`: DDD mais número assinante, 11 dígitos para celular e 10 para fixo; outros tamanhos mantêm o agrupamento de 11 dígitos.
-- `"e164"` e `"international"` removem antes o código de país, como `parsePhone`, e recaem para `"service"` para um número de serviço.
+- `"e164"` e `"international"` removem antes o código de país, como `parsePhone`, e recaem para `"service"` para um número de serviço. `"e164"` mantém no máximo os 11 dígitos nacionais, como `"international"` (até a 2.4.0 mantinha todos).
+- `"sn"` e `"nanp"` também removem um `+55` ou `0055` explícito, então `'+5511987654321'` resulta em `(11) 98765-4321` em `"nanp"` (até a 2.4.0 resultava em `(55) 11987-6543`); um `55` isolado permanece, pois pode ser o DDD.
+- Um número é lido quando é string ou inteiro seguro não negativo; qualquer outro número (negativo, fracionário, não finito ou inseguro) resulta em string vazia.
+- Na máscara `"service"` com `obfuscate`, um valor que ainda é só o prefixo de serviço o mantém (`0800` continua `0800`), pois o prefixo indica um serviço, e não um assinante; um valor curto demais para ser reconhecido (`080`) fica todo oculto (`***`).
 - `"service"`: os Códigos Não Geográficos (`0800 123 4567`) e os números abreviados `300X`/`400X` (`4004-1234`).
 - `"auto"`: `"service"` para um número de serviço, `"international"` quando `value` traz código de país, senão `"nanp"` para mais de 9 dígitos, ou `"sn"`.
 - O `obfuscate` é uma convenção desta biblioteca, não uma regra oficial: nenhuma lei, ato da Anatel ou orientação da [ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) define quais dígitos de um telefone mostrar ("não há um padrão para o mascaramento"), e o [Banco Central](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) proíbe mascarar a chave Pix, inclusive telefone, no retorno da consulta ao DICT.
@@ -874,6 +877,8 @@ formatPhone('1130000000', { mask: 'nanp' }); // (11) 3000-0000 (fixo de 10 dígi
 formatPhone('1130000000', { mask: 'auto' }); // (11) 3000-0000 (fixo de 10 dígitos)
 formatPhone('11987654321', { mask: 'e164' }); // +5511987654321
 formatPhone('+5511987654321', { mask: 'international' }); // +55 11 98765-4321
+formatPhone('+55 11 9', { mask: 'auto' }); // +55 11 9 (digitado após o +55, o 55 não é lido como DDD)
+formatPhone('+5511987654321', { mask: 'nanp' }); // (11) 98765-4321
 formatPhone('08001234567', { mask: 'service' }); // 0800 123 4567
 formatPhone('40041234', { mask: 'service' }); // 4004-1234
 formatPhone('+5511987654321', { mask: 'auto' }); // +55 11 98765-4321 ("auto" detecta o prefixo +55 e escolhe "international")

@@ -217,6 +217,11 @@ describe("formatPhone", () => {
 		expect(formatPhone("11988887766", { mask: "service" })).toBe("11988887766");
 	});
 
+	it("should keep a bare service prefix and hide a shorter value under the service mask", () => {
+		expect(formatPhone("0800", { mask: "service", obfuscate: true })).toBe("0800");
+		expect(formatPhone("080", { mask: "service", obfuscate: true })).toBe("***");
+	});
+
 	it("should obfuscate a partial value as far as it goes", () => {
 		expect(formatPhone("1198", { mask: "nanp", obfuscate: true })).toBe("(11) **");
 		expect(formatPhone("11988", { mask: "international", obfuscate: true })).toBe("+55 11 ***");
@@ -230,7 +235,38 @@ describe("formatPhone", () => {
 		expect(formatPhone("119888877660000", { mask: "e164", obfuscate: true })).toBe(
 			"+5511*******66",
 		);
-		expect(formatPhone("119888877660000", { mask: "e164" })).toBe("+55119888877660000");
+	});
+
+	it("should keep at most the 11 national digits under the e164 mask, as international does", () => {
+		expect(formatPhone("119888877660000", { mask: "e164" })).toBe("+5511988887766");
+		expect(formatPhone("119888877660000", { mask: "international" })).toBe("+55 11 98888-7766");
+		expect(formatPhone("+55 11 98888-7766 0000", { mask: "e164" })).toBe("+5511988887766");
+	});
+
+	it("should drop an explicit country code under the sn and nanp masks", () => {
+		expect(formatPhone("+5511988887777")).toBe("11988-8877");
+		expect(formatPhone("+55 55 98888-7777")).toBe("55988-8877");
+		expect(formatPhone("+5511988887777", { mask: "nanp" })).toBe("(11) 98888-7777");
+		expect(formatPhone("+55 11 3000-0000", { mask: "nanp" })).toBe("(11) 3000-0000");
+		expect(formatPhone("0055 11 98888-7777", { mask: "nanp" })).toBe("(11) 98888-7777");
+		expect(formatPhone("+55 11 9", { mask: "nanp" })).toBe("(11) 9");
+		expect(formatPhone("+55", { mask: "sn" })).toBe("");
+	});
+
+	it("should keep a bare 55 under the sn and nanp masks", () => {
+		expect(formatPhone("5511988887777", { mask: "nanp" })).toBe("(55) 11988-8877");
+		expect(formatPhone("55988887777", { mask: "nanp" })).toBe("(55) 98888-7777");
+	});
+
+	it("should format a number still being typed after an explicit country code", () => {
+		expect(formatPhone("+55", { mask: "e164" })).toBe("");
+		expect(formatPhone("+55", { mask: "international" })).toBe("");
+		expect(formatPhone("+55", { mask: "auto" })).toBe("");
+		expect(formatPhone("+55 11 9", { mask: "e164" })).toBe("+55119");
+		expect(formatPhone("+55 11 9", { mask: "international" })).toBe("+55 11 9");
+		expect(formatPhone("+55 11 9", { mask: "auto" })).toBe("+55 11 9");
+		expect(formatPhone("+55 11 98765", { mask: "auto" })).toBe("+55 11 9876-5");
+		expect(formatPhone("+55 11 98765-4321", { mask: "auto" })).toBe("+55 11 98765-4321");
 	});
 
 	it("should obfuscate on any truthy obfuscate value", () => {
@@ -294,6 +330,8 @@ describe("formatPhone", () => {
 		test("should keep the digits a national mask has room for", () => {
 			fc.assert(
 				fc.property(fc.string({ unit: "grapheme" }), (value) => {
+					fc.pre(!/^\s*(?:\+|00)\s*55/.test(value));
+
 					const digits = value.replaceAll(/\D/g, "");
 
 					expect(formatPhone(value).replaceAll(/\D/g, "")).toBe(digits.slice(0, 9));

@@ -1,4 +1,7 @@
-import { PHONE_NATIONAL_MIN_LENGTH } from "../_internals/constants/phone";
+import {
+	PHONE_NATIONAL_MAX_LENGTH,
+	PHONE_NATIONAL_MIN_LENGTH,
+} from "../_internals/constants/phone";
 import {
 	SERVICE_PHONE_ABBREVIATED_ROOTS,
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
@@ -8,6 +11,7 @@ import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { stripPhoneCountryCode } from "../_internals/strip-phone-country-code/strip-phone-country-code";
 import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
 import {
 	DEFAULT_MASK,
@@ -77,7 +81,7 @@ const formatInternational = (national: string, masks: PhoneMasks): string => {
 const formatE164 = (national: string, obfuscate: boolean): string => {
 	if (!national) return "";
 
-	if (!obfuscate) return `${INTERNATIONAL_PREFIX}${national}`;
+	if (!obfuscate) return `${INTERNATIONAL_PREFIX}${national.slice(0, PHONE_NATIONAL_MAX_LENGTH)}`;
 
 	const pattern = resolveLinePattern(national, OBFUSCATED_E164_MASK);
 
@@ -89,10 +93,14 @@ const resolveNationalPattern = (digits: string, mask: NationalMask, masks: Phone
 		? masks.nanpLandline
 		: masks.national[mask];
 
-const resolveAutoMask = (digits: string, serviceDigits: string): Exclude<PhoneMask, "auto"> => {
+const resolveAutoMask = (
+	digits: string,
+	national: string,
+	serviceDigits: string,
+): Exclude<PhoneMask, "auto"> => {
 	if (isValidServicePhone(serviceDigits)) return "service";
 
-	if (normalizePhone(digits) !== digits) return "international";
+	if (national !== digits) return "international";
 
 	return digits.length > SN_LENGTH ? "nanp" : "sn";
 };
@@ -123,7 +131,12 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  *   Anatel specifies no display format for either, so these are the conventional groupings.
  *
  * `"e164"` and `"international"` drop the country code from `value` first, under the rule
- * documented in `parsePhone`. A service number has no E.164 form, it is not reachable from
+ * documented in `parsePhone`, and `"e164"` keeps at most the 11 national digits, as
+ * `"international"` does. `"sn"` and `"nanp"` drop an explicit `+55` or `0055`, so a number typed
+ * with one is formatted from its DDD; a bare `55` stays, since it may be the DDD. Up to 2.4.0
+ * these two masks kept an explicit country code as part of the number, so `"+5511987654321"`
+ * gave `"55119-8765"`, and `"e164"` kept every digit of a value longer than 11 national digits.
+ * A service number has no E.164 form, it is not reachable from
  * abroad, so both international masks fall back to the `"service"` presentation for it, which
  * is how such numbers are printed in Brazil. The service-number check itself reads `value`
  * under the same rule, so `"5508001234567"` is the `0800` number, not a `+55 08` one.
@@ -168,6 +181,8 @@ const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(valu
  * formatPhone("08001234567", { mask: "auto" }); // "0800 123 4567"
  * formatPhone("5508001234567", { mask: "auto" }); // "0800 123 4567"
  * formatPhone("11987654321", { mask: "e164" }); // "+5511987654321"
+ * formatPhone("+55 11 9", { mask: "auto" }); // "+55 11 9"
+ * formatPhone("+5511987654321", { mask: "nanp" }); // "(11) 98765-4321"
  * formatPhone("11987654321", { mask: "international" }); // "+55 11 98765-4321"
  * formatPhone("40041234", { mask: "service" }); // "4004-1234"
  * formatPhone("987654321", { obfuscate: true }); // "*****-**21"
@@ -201,11 +216,13 @@ export const formatPhone = (value: string | number, options?: FormatPhoneOptions
 	if (!isLookupCode(value)) return "";
 
 	const enhancedValue = sanitizeToDigits(value);
+	const national = normalizePhone(value);
 
 	const serviceDigits = resolveServicePhoneDigits(value);
 	const givenMask = options?.mask;
 	const requested: PhoneMask = isPhoneMask(givenMask) ? givenMask : DEFAULT_MASK;
-	const mask = requested === "auto" ? resolveAutoMask(enhancedValue, serviceDigits) : requested;
+	const mask =
+		requested === "auto" ? resolveAutoMask(enhancedValue, national, serviceDigits) : requested;
 
 	const obfuscate = Boolean(options?.obfuscate);
 	const masks = obfuscate ? OBFUSCATED_MASKS : MASKS;
@@ -215,13 +232,10 @@ export const formatPhone = (value: string | number, options?: FormatPhoneOptions
 	if (mask === "e164" || mask === "international") {
 		if (isValidServicePhone(serviceDigits)) return formatService(serviceDigits, obfuscate);
 
-		const national = normalizePhone(enhancedValue);
-
 		return mask === "e164" ? formatE164(national, obfuscate) : formatInternational(national, masks);
 	}
 
-	return format({
-		value: enhancedValue,
-		pattern: resolveNationalPattern(enhancedValue, mask, masks),
-	});
+	const typed = stripPhoneCountryCode(value);
+
+	return format({ value: typed, pattern: resolveNationalPattern(typed, mask, masks) });
 };
