@@ -149,7 +149,7 @@ Each of these builds the document on its own first, so it can be reused wherever
 
 <div class="example" data-name="Standard Schema">
 
-No schema library at all: `toStandardSchema` gives the validator the interface every form library speaks.
+No schema library at all: `toStandardSchema` gives the validator the interface every form library speaks. VeeValidate takes it as `rules` from version 5 on, and Hono validates an object, so its route wraps the validator for the JSON body.
 
 <div class="variant" data-variant="CPF">
 

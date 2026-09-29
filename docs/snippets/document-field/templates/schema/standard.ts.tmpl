@@ -14,7 +14,7 @@ export const @@kind@@Schema = toStandardSchema<string>(isValid, {
 // Everything that speaks the interface takes it as it is, next to a Zod, Valibot or ArkType
 // schema. A few of them, all with the same @@kind@@Schema:
 
-/** VeeValidate: the rules of a field. */
+/** VeeValidate 5 (beta) or later: the rules of a field. Version 4 does not take a Standard Schema here. */
 export const use@@Name@@Field = () => useField("@@kind@@", @@kind@@Schema);
 
 /** TanStack Form: a field's validator, `validators={{ onChange: @@kind@@Schema }}`. */
@@ -30,8 +30,11 @@ export const @@kind@@Procedure = initTRPC
   .procedure.input(@@kind@@Schema)
   .query(({ input }) => input);
 
-/** Hono: what a route takes. */
-export const @@kind@@Route = sValidator("param", @@kind@@Schema);
+/** Hono: what a route takes. The JSON body is an object, so the schema is one of an object. */
+export const @@kind@@Route = sValidator(
+  "json",
+  toStandardSchema<{ @@kind@@: string }>(({ @@kind@@ }) => @@validatorContext@@),
+);
 
 // react-hook-form takes one through `standardSchemaResolver`, once the schema covers the whole
 // form: `useForm({ resolver: standardSchemaResolver(signupSchema) })`.
