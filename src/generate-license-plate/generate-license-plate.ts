@@ -1,5 +1,7 @@
 import { type LicensePlateFormat } from "../get-format-license-plate/get-format-license-plate";
 
+export type { LicensePlateFormat } from "../get-format-license-plate/get-format-license-plate";
+
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const NEW_MERCOSUL_LETTERS = "KLMNOPQRSTUVWXYZ";

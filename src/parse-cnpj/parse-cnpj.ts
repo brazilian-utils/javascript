@@ -3,6 +3,8 @@ import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeCnpj } from "../_internals/sanitize-cnpj/sanitize-cnpj";
 import { type FormatCnpjOptions } from "../format-cnpj/format-cnpj";
 
+export type { FormatCnpjOptions } from "../format-cnpj/format-cnpj";
+
 /** Options of `parseCnpj`. */
 export type ParseCnpjOptions = Pick<FormatCnpjOptions, "version">;
 
