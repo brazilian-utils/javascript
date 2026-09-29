@@ -81,6 +81,7 @@ import {
 	type IsValidCstOptions,
 	type IsValidGtinOptions,
 	type IsValidIeParams,
+	type IsValidLicensePlateOptions,
 	type IsValidMobilePhoneOptions,
 	type IsValidPhoneOptions,
 	type IsValidPixKeyOptions,
@@ -431,6 +432,7 @@ describe("Public API", () => {
 			IsValidCstOptions: IsValidCstOptions;
 			IsValidGtinOptions: IsValidGtinOptions;
 			IsValidIeParams: IsValidIeParams;
+			IsValidLicensePlateOptions: IsValidLicensePlateOptions;
 			IsValidMobilePhoneOptions: IsValidMobilePhoneOptions;
 			IsValidPhoneOptions: IsValidPhoneOptions;
 			IsValidPixKeyOptions: IsValidPixKeyOptions;

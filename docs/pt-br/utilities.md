@@ -1064,7 +1064,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 Valida uma placa de veículo. Aceita o formato antigo brasileiro (`ABC-1234`) e o formato Mercosul (`ABC1D23`), com ou sem hífen ou espaço, em maiúsculas ou minúsculas.
 
-A opção `format` restringe a validação a um deles: `"LLLNNNN"` para o formato antigo ou `"LLLNLNN"` para o Mercosul, os nomes que `getFormatLicensePlate` retorna. Funciona como o argumento `type` do `is_valid` da biblioteca Python. Sem ela, ou com qualquer outro valor, uma placa em qualquer um dos dois formatos é válida.
+A opção `format` restringe a validação a um deles: `"LLLNNNN"` para o formato antigo ou `"LLLNLNN"` para o Mercosul, os nomes que `getFormatLicensePlate` retorna. Funciona como o argumento `type` do `is_valid` da biblioteca Python, cujos valores lá se chamam `"old_format"` e `"mercosul"`. Esses nomes não são formatos aqui: sem `format`, ou com qualquer outro valor, uma placa em qualquer um dos dois formatos é válida.
 
 ```javascript
 import { isValidLicensePlate } from '@brazilian-utils/brazilian-utils';

@@ -23,11 +23,14 @@ export type IsValidLicensePlateOptions = {
  * this returns false.
  *
  * `options.format` restricts the check to one of them, `"LLLNNNN"` or `"LLLNLNN"`, as the
- * `type` argument of the Python library's `is_valid` does. Without it, or with any other value,
- * a plate in either format is valid.
+ * `type` argument of the Python library's `is_valid` does with its own names, `"old_format"` and
+ * `"mercosul"`. Those Python names are not formats here: without `format`, or with any other
+ * value, a plate in either format is valid.
  *
  * @param {string} value - The license plate value to be validated.
- * @param {IsValidLicensePlateOptions} [options] - `format`, the one format to accept.
+ * @param {IsValidLicensePlateOptions} [options] - The validation options.
+ * @param {LicensePlateFormat} [options.format] - The one format to accept, `"LLLNNNN"` (old) or
+ * `"LLLNLNN"` (Mercosul).
  * @returns {boolean} True if the license plate is valid, false otherwise.
  *
  * @example
