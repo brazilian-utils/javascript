@@ -65,9 +65,11 @@ export type NfseKeyInfo = {
  * Cód.Num.(9) DV(1)`, all digits except an alphanumeric CNPJ in the "Inscrição Federal". It is
  * accepted as it is written in the documents (`chNFSe`, `chSubstda`,
  * the DANFSe, which prints it as a single block) or with the `NFS` literal the `Id` attribute
- * of `infNFSe` puts in front of it, surrounding whitespace aside. The key has no printed mask,
- * so a separator anywhere in it is rejected instead of being stripped. The keys of the
- * municipal NFS-e models that are not the national standard are out of scope.
+ * of `infNFSe` puts in front of it, surrounding whitespace aside. The DANFSe prints the key as
+ * a single block, so it has no printed mask; the boundaries between its 8 fields accept the mask
+ * characters `isValidCpf` reads (whitespace, `.`, `-` or `/`, alone or in a run), while a
+ * separator inside a field makes the value invalid. The keys of the municipal NFS-e models that
+ * are not the national standard are out of scope.
  *
  * The key is checked by `isValidNfseKey`, and `null` comes back exactly when it returns false.
  * What it checks: the first two digits of the municipality code are an IBGE UF code, `ambGer`

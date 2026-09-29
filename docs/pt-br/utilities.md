@@ -689,7 +689,7 @@ Verifica se a chave de acesso de uma NFS-e nacional, a Nota Fiscal de Serviço e
 
 - A chave é um bloco único de 50 caracteres, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, todos dígitos exceto um CNPJ alfanumérico na Inscrição Federal.
 - O literal `NFS` que o atributo `Id` de `infNFSe` coloca antes da chave é retirado, junto com os espaços nas extremidades.
-- A chave não tem máscara impressa, já que o DANFSe a imprime em um único bloco, então, diferente do `isValidNfeKey`, um separador em qualquer ponto dela é rejeitado em vez de removido.
+- O DANFSe imprime a chave em um único bloco, então ela não tem máscara impressa. As fronteiras entre os 8 campos aceitam os caracteres de máscara que o `isValidCpf` lê (espaço, `.`, `-` ou `/`, isolados ou em sequência), enquanto um separador dentro de um campo invalida o valor.
 - O código do município precisa começar com um código IBGE de UF; ele não é consultado na tabela do IBGE.
 - O `ambGer` precisa ser `1` (o sistema do município) ou `2` (o Sistema Nacional NFS-e), e o tipo de inscrição `1` (um CPF, preenchido com `000` à esquerda) ou `2` (um CNPJ, numérico ou alfanumérico), com um CPF ou CNPJ cujos próprios dígitos verificadores sejam válidos. Letras só são aceitas em um CNPJ, e minúsculas são lidas como maiúsculas, como o `isValidCnpj` com `{ version: 2 }` as lê.
 - O `nNFSe` não pode ser todo de zeros e o mês precisa estar entre 01 e 12.
@@ -705,7 +705,7 @@ isValidNfseKey('NFS35503082258716523000119000000000001226011357924683'); // true
 isValidNfseKey('43149021100040364478829000000000105725120484407255'); // true (emitente com CPF, RS)
 isValidNfseKey('35503082212ABC34501DE35000000000001226091357924682'); // true (emitente com CNPJ alfanumérico)
 isValidNfseKey('35503082258716523000119000000000001226011357924684'); // false (dígito verificador)
-isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // false (a chave não tem máscara)
+isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // true (separadores entre os campos)
 ```
 
 ### parseNfseKey

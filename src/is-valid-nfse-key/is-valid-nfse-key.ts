@@ -49,9 +49,8 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  * surrounding whitespace. The DANFSe prints the key as a single block, so it has no printed mask;
  * the boundaries of those fields are where the mask characters `isValidCpf` reads are accepted
  * (whitespace, `.`, `-` or `/`, alone or in a run), while one inside a field makes the value
- * invalid. The keys
- * of the municipal NFS-e models that are not the national standard are out of scope, and so is
- * the 44 digit DF-e key, which `isValidNfeKey` covers.
+ * invalid. The keys of the municipal NFS-e models that are not the national standard are out of
+ * scope, and so is the 44 digit DF-e key, which `isValidNfeKey` covers.
  *
  * The municipality code must start with an IBGE UF code, `ambGer` must be 1 (municipality) or 2
  * (Sistema Nacional NFS-e), the registration type 1 (CPF, left padded with `000`) or 2 (CNPJ,

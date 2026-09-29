@@ -689,7 +689,7 @@ Check if the access key (chave de acesso) of a national NFS-e, the Nota Fiscal d
 
 - The key is one block of 50 characters, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, all digits except an alphanumeric CNPJ in the Inscrição Federal.
 - The `NFS` literal the `Id` attribute of `infNFSe` puts in front of the key is stripped, with surrounding whitespace.
-- The key has no printed mask, since the DANFSe prints it as a single block, so, unlike `isValidNfeKey`, a separator anywhere in it is rejected instead of being stripped.
+- The DANFSe prints the key as a single block, so it has no printed mask. The boundaries between its 8 fields accept the mask characters `isValidCpf` reads (whitespace, `.`, `-` or `/`, alone or in a run), while a separator inside a field makes the value invalid.
 - The municipality code must start with an IBGE UF code; it is not looked up in the IBGE table.
 - `ambGer` must be `1` (the system of the municipality) or `2` (the Sistema Nacional NFS-e), and the registration type `1` (a CPF, left padded with `000`) or `2` (a CNPJ, numeric or alphanumeric), with a CPF or CNPJ whose own check digits are valid. Letters are accepted in a CNPJ only, and lower case is read as upper case, as `isValidCnpj` with `{ version: 2 }` reads it.
 - `nNFSe` must not be all zeros and the month must be 01 to 12.
@@ -705,7 +705,7 @@ isValidNfseKey('NFS35503082258716523000119000000000001226011357924683'); // true
 isValidNfseKey('43149021100040364478829000000000105725120484407255'); // true (CPF issuer, RS)
 isValidNfseKey('35503082212ABC34501DE35000000000001226091357924682'); // true (alphanumeric CNPJ issuer)
 isValidNfseKey('35503082258716523000119000000000001226011357924684'); // false (check digit)
-isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // false (the key has no mask)
+isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // true (separators between the fields)
 ```
 
 ### parseNfseKey
