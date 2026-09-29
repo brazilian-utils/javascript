@@ -18,9 +18,17 @@ import { writeFileSync } from "node:fs";
 const DATASETS: Record<string, string> = {
 	"src/_internals/constants/banks.ts": "Banks (Banco Central, STR participants)",
 	"src/_internals/constants/cbo.ts": "CBO 2002 occupations (Ministério do Trabalho e Emprego)",
+	"src/_internals/constants/cest.ts": "CEST codes and segments (CONFAZ, Convênio ICMS 142/18)",
 	"src/_internals/constants/cfop.ts": "CFOP codes (CONFAZ, Convênio SINIEF s/nº 1970)",
-	"src/_internals/constants/cities.ts": "Municipalities (IBGE)",
+	"src/_internals/constants/cid10-descriptions.ts": "CID-10 descriptions (DATASUS)",
+	"src/_internals/constants/cid10.ts": "CID-10 codes (DATASUS)",
 	"src/_internals/constants/cnae.ts": "CNAE subclasses (IBGE/CONCLA)",
+	"src/_internals/constants/ibs-cbs.ts":
+		"CST-IBS/CBS and cClassTrib (Portal Nacional da NF-e, Informe Técnico 2025.002)",
+	"src/_internals/constants/municipalities.ts": "Municipalities (IBGE)",
+	"src/_internals/constants/nbs.ts": "NBS 2.0 descriptions (MDIC)",
+	"src/_internals/constants/service-items.ts":
+		"LC 116/2003 service list (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/states.ts": "States (IBGE)",
 	"src/is-valid-legal-nature/constants.ts": "Legal natures (IBGE/CONCLA)",
 	"src/is-valid-ncm/constants.ts": "NCM codes (Siscomex)",

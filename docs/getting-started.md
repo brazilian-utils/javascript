@@ -11,7 +11,7 @@ Brazilian Utils is a zero-dependency library of small utilities for the day-to-d
 - **Zero runtime dependencies.** Nothing else lands in your `node_modules` or in your bundle.
 - **Tree-shakeable, down to the function.** `import { isValidCpf }` costs about 1.4 KB minified (0.8 KB gzipped). Every util is also its own subpath entry, so the heavy ones can be lazy-loaded.
 - **Runs everywhere.** Node.js `^20.19.0 || >=22.12.0`, Bun, Deno and evergreen browsers, all tested in CI.
-- **Written in TypeScript.** Types ship with the package, and an API report tracks the public API so nothing changes silently.
+- **Written in TypeScript.** Types ship with the package, and every pull request is checked against the last release so the public API never changes silently.
 - **Validated against the official rules.** Every validator cites the specification, law or dataset it implements, and the test suite is mutation-tested, not just covered.
 - **Documented in English and Portuguese**, with an `llms.txt` for AI assistants.
 
@@ -68,13 +68,19 @@ A few utils embed an official dataset and weigh far more than everything else co
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
+| `getCid10` | CID-10 V2008 categories and subcategories, with the DATASUS descriptions | 1030.4 KB | 146.9 KB |
 | `getMunicipalities` · `getMunicipalityByCode` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 154.9 - 156.5 KB | 50.3 - 50.4 KB |
 | `getCities` | 5571 IBGE municipality names | 154.2 KB | 49.8 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 114.2 KB | 24.6 KB |
 | `isValidCbo` · `getCbo` | CBO 2002 occupation titles | 119.1 KB | 30.6 KB |
+| `isValidCest` · `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 116.6 - 117.8 KB | 26.4 - 26.9 KB |
 | `isValidCnae` · `getCnae` | CNAE-Subclasses 2.3 | 93.9 KB | 21.2 KB |
+| `isValidNbs` · `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 81.8 KB | 13.8 KB |
 | `isValidCfop` · `getCfop` | CFOP operation descriptions | 68.9 KB | 6.9 KB |
+| `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.8 KB | 9.6 KB |
 | `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 38.3 - 38.6 KB | 9.5 - 9.7 KB |
+| `isValidServiceItem` · `getServiceItem` | Service list of the Lei Complementar 116/2003 | 27.1 - 27.2 KB | 8.8 - 8.9 KB |
+| `isValidCid10` | CID-10 V2008 category and subcategory codes, without the descriptions | 27.0 KB | 7.4 KB |
 
 The root of the package is a single ESM module, so a bundler cannot split one of these datasets out of it: importing a heavy util from the root puts its whole dataset in your main bundle, and a dynamic `import()` of the root does not help. To lazy-load one, import it from its own subpath:
 

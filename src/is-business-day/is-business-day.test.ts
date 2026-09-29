@@ -2,7 +2,8 @@ import * as fc from "fast-check";
 
 import { type StateCode } from "../_internals/constants/states";
 import {
-	businessDayDates,
+	anyBusinessDayDate,
+	anyBusinessDayOptions,
 	holidayYears,
 	monthDays,
 	monthIndexes,
@@ -18,15 +19,6 @@ const PROTOTYPE_KEYS = Object.getOwnPropertyNames(Object.prototype);
 function getHolidaysFor(year: number, stateCode: StateCode | null): Holiday[] {
 	return stateCode === null ? getHolidays(year) : getHolidays({ year, stateCode });
 }
-
-const anyStateCode = fc.oneof(fc.constantFrom(...PROTOTYPE_KEYS, "SP", "xx"), fc.anything());
-const anyIncludeOptional = fc.oneof(fc.boolean(), fc.anything());
-const hostileOptions = fc.record({
-	stateCode: anyStateCode,
-	includeOptional: anyIncludeOptional,
-});
-const anyValueInput = fc.oneof(fc.anything(), businessDayDates);
-const anyOptionsInput = fc.oneof(fc.anything(), hostileOptions);
 
 describe("isBusinessDay", () => {
 	it("should return true for a plain weekday that is not a holiday (noon, DST-safe)", () => {
@@ -123,6 +115,54 @@ describe("isBusinessDay", () => {
 		});
 	});
 
+	describe("includeSaturday", () => {
+		it("should return true for a plain Saturday when includeSaturday is true (Sat 2024-01-06, IN MTP nº 2/2021 art. 14, I)", () => {
+			expect(isBusinessDay(new Date(2024, 0, 6, 12), { includeSaturday: true })).toBe(true);
+		});
+
+		it("should still return false for a Sunday when includeSaturday is true (Sun 2024-01-07, the article excludes it)", () => {
+			expect(isBusinessDay(new Date(2024, 0, 7, 12), { includeSaturday: true })).toBe(false);
+		});
+
+		it("should still return false for a national holiday that falls on a Saturday (Sat 2024-09-07, Independência)", () => {
+			expect(isBusinessDay(new Date(2024, 8, 7, 12), { includeSaturday: true })).toBe(false);
+		});
+
+		it("should still return false for Finados on Saturday 2024-11-02, and true for the plain Saturday a week later", () => {
+			expect(isBusinessDay(new Date(2024, 10, 2, 12), { includeSaturday: true })).toBe(false);
+			expect(isBusinessDay(new Date(2024, 10, 9, 12), { includeSaturday: true })).toBe(true);
+		});
+
+		it("should still return false for a state holiday that falls on a Saturday (Sat 2024-11-30, Dia do Evangélico in DF)", () => {
+			expect(
+				isBusinessDay(new Date(2024, 10, 30, 12), { stateCode: "DF", includeSaturday: true }),
+			).toBe(false);
+			expect(isBusinessDay(new Date(2024, 10, 30, 12), { includeSaturday: true })).toBe(true);
+		});
+
+		it("should leave Monday to Friday untouched (Tue 2024-01-02 is a business day, Mon 2024-01-01 is Ano novo)", () => {
+			expect(isBusinessDay(new Date(2024, 0, 2, 12), { includeSaturday: true })).toBe(true);
+			expect(isBusinessDay(new Date(2024, 0, 1, 12), { includeSaturday: true })).toBe(false);
+		});
+	});
+
+	describe("no breaking change", () => {
+		it("should keep the Monday to Friday count when includeSaturday is absent, false or undefined (Sat 2024-01-06)", () => {
+			expect(isBusinessDay(new Date(2024, 0, 6, 12))).toBe(false);
+			expect(isBusinessDay(new Date(2024, 0, 6, 12), {})).toBe(false);
+			expect(isBusinessDay(new Date(2024, 0, 6, 12), { includeSaturday: false })).toBe(false);
+			expect(isBusinessDay(new Date(2024, 0, 6, 12), { includeSaturday: undefined })).toBe(false);
+			expect(isBusinessDay(new Date(2024, 0, 6, 12), { stateCode: "SP" })).toBe(false);
+			expect(isBusinessDay(new Date(2024, 0, 6, 12), { includeOptional: false })).toBe(false);
+		});
+
+		it("should keep the Monday to Friday count for every Saturday of January 2024 without the option (6, 13, 20 and 27)", () => {
+			for (const day of [6, 13, 20, 27]) {
+				expect(isBusinessDay(new Date(2024, 0, day, 12))).toBe(false);
+			}
+		});
+	});
+
 	describe("year boundaries", () => {
 		it("should return false for 2024-12-31 only if it were a holiday, but treat it as a business day (Tuesday, no holiday)", () => {
 			expect(isBusinessDay(new Date(2024, 11, 31, 12))).toBe(true);
@@ -168,15 +208,19 @@ describe("isBusinessDay", () => {
 	});
 
 	describe("properties", () => {
-		const stateAndOptionalArbitrary = fc.tuple(fc.option(stateCodes), fc.boolean());
+		const optionsArbitrary = fc.tuple(fc.option(stateCodes), fc.boolean(), fc.boolean());
 
-		test("should return false for every Saturday and Sunday", () => {
+		test("should return false for every Saturday and Sunday, and still for every Sunday when includeSaturday is true", () => {
 			fc.assert(
 				fc.property(holidayYears, monthIndexes, monthDays, (year, month, day) => {
 					const date = new Date(year, month, day);
 
 					if (date.getDay() === 0 || date.getDay() === 6) {
 						expect(isBusinessDay(date)).toBe(false);
+					}
+
+					if (date.getDay() === 0) {
+						expect(isBusinessDay(date, { includeSaturday: true })).toBe(false);
 					}
 				}),
 			);
@@ -188,8 +232,8 @@ describe("isBusinessDay", () => {
 					holidayYears,
 					monthIndexes,
 					monthDays,
-					stateAndOptionalArbitrary,
-					(year, month, day, [stateCode, includeOptional]) => {
+					optionsArbitrary,
+					(year, month, day, [stateCode, includeOptional, includeSaturday]) => {
 						const date = new Date(year, month, day);
 						const holidays = getHolidaysFor(year, stateCode);
 						const isHolidayMatch = holidays.some(
@@ -198,8 +242,12 @@ describe("isBusinessDay", () => {
 								holiday.date.getMonth() === month &&
 								holiday.date.getDate() === day,
 						);
-						const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-						const options = { stateCode: stateCode ?? undefined, includeOptional };
+						const isWeekend = date.getDay() === 0 || (date.getDay() === 6 && !includeSaturday);
+						const options = {
+							stateCode: stateCode ?? undefined,
+							includeOptional,
+							includeSaturday,
+						};
 
 						expect(isBusinessDay(date, options)).toBe(!isWeekend && !isHolidayMatch);
 					},
@@ -208,7 +256,7 @@ describe("isBusinessDay", () => {
 		});
 
 		test("should never throw, regardless of the input, prototype chain state codes included", () => {
-			expectNeverThrowsWithOptions(isBusinessDay, anyValueInput, anyOptionsInput);
+			expectNeverThrowsWithOptions(isBusinessDay, anyBusinessDayDate, anyBusinessDayOptions);
 		});
 	});
 });
@@ -219,6 +267,7 @@ describe("isBusinessDay types", () => {
 		expectTypeOf(isBusinessDay).parameter(1).toEqualTypeOf<BusinessDayOptions | undefined>();
 		expectTypeOf<BusinessDayOptions["stateCode"]>().toEqualTypeOf<StateCode | undefined>();
 		expectTypeOf<BusinessDayOptions["includeOptional"]>().toEqualTypeOf<boolean | undefined>();
+		expectTypeOf<BusinessDayOptions["includeSaturday"]>().toEqualTypeOf<boolean | undefined>();
 		expectTypeOf(isBusinessDay).returns.toEqualTypeOf<boolean>();
 	});
 });

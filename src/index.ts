@@ -10,7 +10,7 @@ import { isValidIe } from "./is-valid-ie/is-valid-ie";
 import { isValidPis } from "./is-valid-pis/is-valid-pis";
 
 export type { Bank } from "./_internals/constants/banks";
-export type { Municipality } from "./_internals/constants/cities";
+export type { Municipality } from "./_internals/constants/municipalities";
 export type { State, StateCode, StateName } from "./_internals/constants/states";
 export type { NumberToWordsGender } from "./_internals/number-to-words/number-to-words";
 export { addBusinessDays } from "./add-business-days/add-business-days";
@@ -31,6 +31,8 @@ export { type FormatCaepfOptions, formatCaepf } from "./format-caepf/format-caep
 export { type FormatCeiOptions, formatCei } from "./format-cei/format-cei";
 export { type FormatCepOptions, formatCep } from "./format-cep/format-cep";
 export { type FormatCertidaoOptions, formatCertidao } from "./format-certidao/format-certidao";
+export { type FormatCestOptions, formatCest } from "./format-cest/format-cest";
+export { formatCid10 } from "./format-cid10/format-cid10";
 export { type FormatCnaeOptions, formatCnae } from "./format-cnae/format-cnae";
 export { type FormatCnhOptions, formatCnh } from "./format-cnh/format-cnh";
 export { type FormatCnoOptions, formatCno } from "./format-cno/format-cno";
@@ -44,6 +46,7 @@ export {
 	formatLegalNature,
 } from "./format-legal-nature/format-legal-nature";
 export { formatLicensePlate } from "./format-license-plate/format-license-plate";
+export { formatNbs } from "./format-nbs/format-nbs";
 export { type FormatNcmOptions, formatNcm } from "./format-ncm/format-ncm";
 export { type FormatNfeKeyOptions, formatNfeKey } from "./format-nfe-key/format-nfe-key";
 export { formatPassport } from "./format-passport/format-passport";
@@ -53,7 +56,8 @@ export {
 	type FormatProcessoJuridicoOptions,
 	formatProcessoJuridico,
 } from "./format-processo-juridico/format-processo-juridico";
-export { formatVoterId } from "./format-voter-id/format-voter-id";
+export { type FormatSuframaOptions, formatSuframa } from "./format-suframa/format-suframa";
+export { type FormatVoterIdOptions, formatVoterId } from "./format-voter-id/format-voter-id";
 export { type GenerateBoletoParams, generateBoleto } from "./generate-boleto/generate-boleto";
 export { generateCep } from "./generate-cep/generate-cep";
 export { generateCnh } from "./generate-cnh/generate-cnh";
@@ -76,6 +80,7 @@ export {
 	generateProcessoJuridico,
 } from "./generate-processo-juridico/generate-processo-juridico";
 export { generateRenavam } from "./generate-renavam/generate-renavam";
+export { generateSuframa } from "./generate-suframa/generate-suframa";
 export { generateVoterId } from "./generate-voter-id/generate-voter-id";
 export {
 	type AddressInfo,
@@ -111,13 +116,25 @@ export {
 	type CertidaoType,
 	getCertidaoInfo,
 } from "./get-certidao-info/get-certidao-info";
+export { type Cest, getCest } from "./get-cest/get-cest";
 export { type Cfop, getCfop } from "./get-cfop/get-cfop";
+export { type Cid10, getCid10 } from "./get-cid10/get-cid10";
 export { getCities } from "./get-cities/get-cities";
+export { type ClassTrib, getClassTrib } from "./get-class-trib/get-class-trib";
 export { type Cnae, getCnae } from "./get-cnae/get-cnae";
+export { type CnpjInfo, getCnpjInfo, type GetCnpjInfoOptions } from "./get-cnpj-info/get-cnpj-info";
+export { type CpfInfo, getCpfInfo } from "./get-cpf-info/get-cpf-info";
+export { type CstIbsCbs, getCstIbsCbs } from "./get-cst-ibs-cbs/get-cst-ibs-cbs";
 export {
 	getFormatLicensePlate,
 	type LicensePlateFormat,
 } from "./get-format-license-plate/get-format-license-plate";
+export {
+	type GtinInfo,
+	type GtinLength,
+	type GtinType,
+	getGtinInfo,
+} from "./get-gtin-info/get-gtin-info";
 export {
 	type GetHolidaysParams,
 	type Holiday,
@@ -143,11 +160,18 @@ export {
 	getMunicipality,
 } from "./get-municipality/get-municipality";
 export { getMunicipalityByCode } from "./get-municipality-by-code/get-municipality-by-code";
+export { type Nbs, getNbs } from "./get-nbs/get-nbs";
 export {
 	type NfeKeyInfo,
 	type NfeKeyModel,
 	getNfeKeyInfo,
 } from "./get-nfe-key-info/get-nfe-key-info";
+export {
+	type NfseKeyGeneratorEnvironment,
+	type NfseKeyInfo,
+	type NfseKeyTaxIdType,
+	getNfseKeyInfo,
+} from "./get-nfse-key-info/get-nfse-key-info";
 export {
 	type PixKeyInfo,
 	type PixKeyType,
@@ -158,6 +182,8 @@ export {
 	type PixPointOfInitiation,
 	getPixPayloadInfo,
 } from "./get-pix-payload-info/get-pix-payload-info";
+export { type ServiceItem, getServiceItem } from "./get-service-item/get-service-item";
+export { getStateByCep } from "./get-state-by-cep/get-state-by-cep";
 export { getStateByIbgeCode } from "./get-state-by-ibge-code/get-state-by-ibge-code";
 export { getStateCodeByName } from "./get-state-code-by-name/get-state-code-by-name";
 export { getStateNameByCode } from "./get-state-name-by-code/get-state-name-by-code";
@@ -178,7 +204,13 @@ export {
 	type IsValidCertidaoOptions,
 	isValidCertidao,
 } from "./is-valid-certidao/is-valid-certidao";
+export { isValidCest } from "./is-valid-cest/is-valid-cest";
 export { isValidCfop } from "./is-valid-cfop/is-valid-cfop";
+export { isValidCid10 } from "./is-valid-cid10/is-valid-cid10";
+export {
+	type IsValidClassTribOptions,
+	isValidClassTrib,
+} from "./is-valid-class-trib/is-valid-class-trib";
 export { isValidCnae } from "./is-valid-cnae/is-valid-cnae";
 export { isValidCnh } from "./is-valid-cnh/is-valid-cnh";
 export { isValidCno } from "./is-valid-cno/is-valid-cno";
@@ -188,7 +220,9 @@ export { isValidCpf } from "./is-valid-cpf/is-valid-cpf";
 export { isValidCreditCard } from "./is-valid-credit-card/is-valid-credit-card";
 export { isValidCsosn } from "./is-valid-csosn/is-valid-csosn";
 export { type IsValidCstOptions, isValidCst } from "./is-valid-cst/is-valid-cst";
+export { isValidCstIbsCbs } from "./is-valid-cst-ibs-cbs/is-valid-cst-ibs-cbs";
 export { isValidEmail } from "./is-valid-email/is-valid-email";
+export { type IsValidGtinOptions, isValidGtin } from "./is-valid-gtin/is-valid-gtin";
 export { isValidIban } from "./is-valid-iban/is-valid-iban";
 export { type IsValidIeParams, isValidIe } from "./is-valid-ie/is-valid-ie";
 export { isValidLandlinePhone } from "./is-valid-landline-phone/is-valid-landline-phone";
@@ -198,8 +232,10 @@ export {
 	type IsValidMobilePhoneOptions,
 	isValidMobilePhone,
 } from "./is-valid-mobile-phone/is-valid-mobile-phone";
+export { isValidNbs } from "./is-valid-nbs/is-valid-nbs";
 export { isValidNcm } from "./is-valid-ncm/is-valid-ncm";
 export { isValidNfeKey } from "./is-valid-nfe-key/is-valid-nfe-key";
+export { isValidNfseKey } from "./is-valid-nfse-key/is-valid-nfse-key";
 export { isValidPassport } from "./is-valid-passport/is-valid-passport";
 export {
 	type IsValidPhoneOptions,
@@ -217,7 +253,9 @@ export {
 	isValidRegistroProfissional,
 } from "./is-valid-registro-profissional/is-valid-registro-profissional";
 export { isValidRenavam } from "./is-valid-renavam/is-valid-renavam";
+export { isValidServiceItem } from "./is-valid-service-item/is-valid-service-item";
 export { isValidServicePhone } from "./is-valid-service-phone/is-valid-service-phone";
+export { isValidSuframa } from "./is-valid-suframa/is-valid-suframa";
 export { isValidVin } from "./is-valid-vin/is-valid-vin";
 export { isValidVoterId } from "./is-valid-voter-id/is-valid-voter-id";
 export { parseBoleto } from "./parse-boleto/parse-boleto";
@@ -226,7 +264,9 @@ export { parseCbo } from "./parse-cbo/parse-cbo";
 export { parseCei } from "./parse-cei/parse-cei";
 export { parseCep } from "./parse-cep/parse-cep";
 export { parseCertidao } from "./parse-certidao/parse-certidao";
+export { parseCest } from "./parse-cest/parse-cest";
 export { parseCfop } from "./parse-cfop/parse-cfop";
+export { parseCid10 } from "./parse-cid10/parse-cid10";
 export { parseCnae } from "./parse-cnae/parse-cnae";
 export { parseCnh } from "./parse-cnh/parse-cnh";
 export { parseCno } from "./parse-cno/parse-cno";
@@ -239,10 +279,12 @@ export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
 export { parseNcm } from "./parse-ncm/parse-ncm";
 export { parseNfeKey } from "./parse-nfe-key/parse-nfe-key";
+export { parseNfseKey } from "./parse-nfse-key/parse-nfse-key";
 export { parsePassport } from "./parse-passport/parse-passport";
 export { parsePhone } from "./parse-phone/parse-phone";
 export { parsePis } from "./parse-pis/parse-pis";
 export { parseProcessoJuridico } from "./parse-processo-juridico/parse-processo-juridico";
+export { parseSuframa } from "./parse-suframa/parse-suframa";
 export { parseVoterId } from "./parse-voter-id/parse-voter-id";
 export { removeAccents } from "./remove-accents/remove-accents";
 export { subBusinessDays } from "./sub-business-days/sub-business-days";

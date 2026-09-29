@@ -145,8 +145,7 @@ const sharedPack = {
 
 export default defineConfig({
 	fmt: {
-		// `reports` holds generated output only, the committed API Extractor baseline included:
-		// reformatting its code block would make every `check:api` run report a changed API.
+		// `reports` holds generated output only (the Stryker mutation reports).
 		// `CHANGELOG.md` is written by release-please (`* ` bullets); formatting it would fail the
 		// Check workflow on every release PR.
 		ignorePatterns: [

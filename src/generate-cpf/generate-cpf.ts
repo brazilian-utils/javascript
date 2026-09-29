@@ -1,8 +1,8 @@
 import { calculateCpfCheckDigit } from "../_internals/calculate-cpf-check-digit/calculate-cpf-check-digit";
+import { CPF_BASE_LENGTH, CPF_FISCAL_REGION_BY_STATE } from "../_internals/constants/cpf";
 import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
-import { BASE_LENGTH, STATE_CODES } from "./constants";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -16,7 +16,10 @@ export type { StateCode } from "../_internals/constants/states";
  * @returns {string} The região fiscal digit of that state, or a random digit.
  */
 const getStateCode = (state?: StateCode): string => {
-	if (typeof state === "string" && Object.hasOwn(STATE_CODES, state)) return STATE_CODES[state];
+	if (typeof state === "string" && Object.hasOwn(CPF_FISCAL_REGION_BY_STATE, state)) {
+		return CPF_FISCAL_REGION_BY_STATE[state];
+	}
+
 	return generateRandomNumber(1);
 };
 
@@ -52,10 +55,10 @@ const getStateCode = (state?: StateCode): string => {
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */
 export const generateCpf = (state?: StateCode): string => {
-	let base = generateRandomNumber(BASE_LENGTH) + getStateCode(state);
+	let base = generateRandomNumber(CPF_BASE_LENGTH) + getStateCode(state);
 
 	while (isRepeatedDigits(base)) {
-		base = generateRandomNumber(BASE_LENGTH) + getStateCode(state);
+		base = generateRandomNumber(CPF_BASE_LENGTH) + getStateCode(state);
 	}
 
 	const firstCheckDigit = String(calculateCpfCheckDigit(base));

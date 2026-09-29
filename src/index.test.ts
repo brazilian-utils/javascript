@@ -11,15 +11,22 @@ import {
 	type CepProvider,
 	type CertidaoInfo,
 	type CertidaoType,
+	type Cest,
 	type Cfop,
+	type Cid10,
+	type ClassTrib,
 	type Cnae,
+	type CnpjInfo,
 	type ConvertDateToWordsOptions,
 	type ConvertNumberToWordsOptions,
+	type CpfInfo,
+	type CstIbsCbs,
 	type FormatBoletoOptions,
 	type FormatCaepfOptions,
 	type FormatCeiOptions,
 	type FormatCepOptions,
 	type FormatCertidaoOptions,
+	type FormatCestOptions,
 	type FormatCnaeOptions,
 	type FormatLegalNatureOptions,
 	type FormatCnhOptions,
@@ -33,6 +40,8 @@ import {
 	type FormatPhoneOptions,
 	type FormatPisOptions,
 	type FormatProcessoJuridicoOptions,
+	type FormatSuframaOptions,
+	type FormatVoterIdOptions,
 	type GenerateBoletoParams,
 	type GenerateCnpjParams,
 	type GenerateLicensePlateFormat,
@@ -44,6 +53,7 @@ import {
 	type GetBoletoInfoOptions,
 	type GetCepInfoByAddressOptions,
 	type GetCepInfoByAddressParams,
+	type GetCnpjInfoOptions,
 	type GetHolidaysOptions,
 	type GetHolidaysParams,
 	type GetLegalNaturesByCategoryOptions,
@@ -54,6 +64,9 @@ import {
 	type GetMunicipalityByNameParams,
 	type GetMunicipalityOptions,
 	type GetMunicipalityParams,
+	type GtinInfo,
+	type GtinLength,
+	type GtinType,
 	type Holiday,
 	type HolidayType,
 	type IbanInfo,
@@ -62,8 +75,10 @@ import {
 	type IsValidBankAccountOptions,
 	type IsValidBankAccountParams,
 	type IsValidCertidaoOptions,
+	type IsValidClassTribOptions,
 	type IsValidCnpjOptions,
 	type IsValidCstOptions,
+	type IsValidGtinOptions,
 	type IsValidIeParams,
 	type IsValidMobilePhoneOptions,
 	type IsValidPhoneOptions,
@@ -73,8 +88,12 @@ import {
 	type LegalNatureCategory,
 	type LicensePlateFormat,
 	type Municipality,
+	type Nbs,
 	type NfeKeyInfo,
 	type NfeKeyModel,
+	type NfseKeyGeneratorEnvironment,
+	type NfseKeyInfo,
+	type NfseKeyTaxIdType,
 	type NumberToWordsGender,
 	type ParseCnpjOptions,
 	type ParseCurrencyOptions,
@@ -86,6 +105,7 @@ import {
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
 	type RegistroProfissionalCouncil,
+	type ServiceItem,
 	type State,
 	type StateCode,
 	type StandardSchemaV1,
@@ -125,6 +145,8 @@ const PUBLIC = [
 	"formatCei",
 	"formatCep",
 	"formatCertidao",
+	"formatCest",
+	"formatCid10",
 	"formatCnae",
 	"formatCnh",
 	"formatCno",
@@ -135,12 +157,14 @@ const PUBLIC = [
 	"formatIban",
 	"formatLegalNature",
 	"formatLicensePlate",
+	"formatNbs",
 	"formatNcm",
 	"formatNfeKey",
 	"formatPassport",
 	"formatPhone",
 	"formatPis",
 	"formatProcessoJuridico",
+	"formatSuframa",
 	"formatVoterId",
 	"generateBoleto",
 	"generateCNPJ",
@@ -157,6 +181,7 @@ const PUBLIC = [
 	"generatePixPayload",
 	"generateProcessoJuridico",
 	"generateRenavam",
+	"generateSuframa",
 	"generateVoterId",
 	"getAddressInfoByCep",
 	"getAreaCodeInfo",
@@ -168,10 +193,17 @@ const PUBLIC = [
 	"getCbo",
 	"getCepInfoByAddress",
 	"getCertidaoInfo",
+	"getCest",
 	"getCfop",
+	"getCid10",
 	"getCities",
+	"getClassTrib",
 	"getCnae",
+	"getCnpjInfo",
+	"getCpfInfo",
+	"getCstIbsCbs",
 	"getFormatLicensePlate",
+	"getGtinInfo",
 	"getHolidays",
 	"getIbanInfo",
 	"getLegalNature",
@@ -180,9 +212,13 @@ const PUBLIC = [
 	"getMunicipalities",
 	"getMunicipality",
 	"getMunicipalityByCode",
+	"getNbs",
 	"getNfeKeyInfo",
+	"getNfseKeyInfo",
 	"getPixKeyInfo",
 	"getPixPayloadInfo",
+	"getServiceItem",
+	"getStateByCep",
 	"getStateByIbgeCode",
 	"getStateCodeByName",
 	"getStateNameByCode",
@@ -200,7 +236,10 @@ const PUBLIC = [
 	"isValidCei",
 	"isValidCep",
 	"isValidCertidao",
+	"isValidCest",
 	"isValidCfop",
+	"isValidCid10",
+	"isValidClassTrib",
 	"isValidCnae",
 	"isValidCnh",
 	"isValidCno",
@@ -210,7 +249,9 @@ const PUBLIC = [
 	"isValidCreditCard",
 	"isValidCsosn",
 	"isValidCst",
+	"isValidCstIbsCbs",
 	"isValidEmail",
+	"isValidGtin",
 	"isValidIE",
 	"isValidIban",
 	"isValidIe",
@@ -218,8 +259,10 @@ const PUBLIC = [
 	"isValidLegalNature",
 	"isValidLicensePlate",
 	"isValidMobilePhone",
+	"isValidNbs",
 	"isValidNcm",
 	"isValidNfeKey",
+	"isValidNfseKey",
 	"isValidPIS",
 	"isValidPassport",
 	"isValidPhone",
@@ -229,7 +272,9 @@ const PUBLIC = [
 	"isValidProcessoJuridico",
 	"isValidRegistroProfissional",
 	"isValidRenavam",
+	"isValidServiceItem",
 	"isValidServicePhone",
+	"isValidSuframa",
 	"isValidVin",
 	"isValidVoterId",
 	"parseBoleto",
@@ -238,7 +283,9 @@ const PUBLIC = [
 	"parseCei",
 	"parseCep",
 	"parseCertidao",
+	"parseCest",
 	"parseCfop",
+	"parseCid10",
 	"parseCnae",
 	"parseCnh",
 	"parseCno",
@@ -251,10 +298,12 @@ const PUBLIC = [
 	"parseLicensePlate",
 	"parseNcm",
 	"parseNfeKey",
+	"parseNfseKey",
 	"parsePassport",
 	"parsePhone",
 	"parsePis",
 	"parseProcessoJuridico",
+	"parseSuframa",
 	"parseVoterId",
 	"removeAccents",
 	"subBusinessDays",
@@ -299,15 +348,22 @@ describe("Public API", () => {
 			CepProvider: CepProvider;
 			CertidaoInfo: CertidaoInfo;
 			CertidaoType: CertidaoType;
+			Cest: Cest;
 			Cfop: Cfop;
+			Cid10: Cid10;
+			ClassTrib: ClassTrib;
 			Cnae: Cnae;
+			CnpjInfo: CnpjInfo;
 			ConvertDateToWordsOptions: ConvertDateToWordsOptions;
 			ConvertNumberToWordsOptions: ConvertNumberToWordsOptions;
+			CpfInfo: CpfInfo;
+			CstIbsCbs: CstIbsCbs;
 			FormatBoletoOptions: FormatBoletoOptions;
 			FormatCaepfOptions: FormatCaepfOptions;
 			FormatCeiOptions: FormatCeiOptions;
 			FormatCepOptions: FormatCepOptions;
 			FormatCertidaoOptions: FormatCertidaoOptions;
+			FormatCestOptions: FormatCestOptions;
 			FormatCnaeOptions: FormatCnaeOptions;
 			FormatLegalNatureOptions: FormatLegalNatureOptions;
 			FormatCnhOptions: FormatCnhOptions;
@@ -321,6 +377,8 @@ describe("Public API", () => {
 			FormatPhoneOptions: FormatPhoneOptions;
 			FormatPisOptions: FormatPisOptions;
 			FormatProcessoJuridicoOptions: FormatProcessoJuridicoOptions;
+			FormatSuframaOptions: FormatSuframaOptions;
+			FormatVoterIdOptions: FormatVoterIdOptions;
 			GenerateBoletoParams: GenerateBoletoParams;
 			GenerateCnpjParams: GenerateCnpjParams;
 			GenerateLicensePlateFormat: GenerateLicensePlateFormat;
@@ -332,6 +390,7 @@ describe("Public API", () => {
 			GetBoletoInfoOptions: GetBoletoInfoOptions;
 			GetCepInfoByAddressOptions: GetCepInfoByAddressOptions;
 			GetCepInfoByAddressParams: GetCepInfoByAddressParams;
+			GetCnpjInfoOptions: GetCnpjInfoOptions;
 			GetHolidaysOptions: GetHolidaysOptions;
 			GetHolidaysParams: GetHolidaysParams;
 			GetLegalNaturesByCategoryOptions: GetLegalNaturesByCategoryOptions;
@@ -342,6 +401,9 @@ describe("Public API", () => {
 			GetMunicipalityByNameParams: GetMunicipalityByNameParams;
 			GetMunicipalityOptions: GetMunicipalityOptions;
 			GetMunicipalityParams: GetMunicipalityParams;
+			GtinInfo: GtinInfo;
+			GtinLength: GtinLength;
+			GtinType: GtinType;
 			Holiday: Holiday;
 			HolidayType: HolidayType;
 			IbanInfo: IbanInfo;
@@ -350,8 +412,10 @@ describe("Public API", () => {
 			IsValidBankAccountOptions: IsValidBankAccountOptions;
 			IsValidBankAccountParams: IsValidBankAccountParams;
 			IsValidCertidaoOptions: IsValidCertidaoOptions;
+			IsValidClassTribOptions: IsValidClassTribOptions;
 			IsValidCnpjOptions: IsValidCnpjOptions;
 			IsValidCstOptions: IsValidCstOptions;
+			IsValidGtinOptions: IsValidGtinOptions;
 			IsValidIeParams: IsValidIeParams;
 			IsValidMobilePhoneOptions: IsValidMobilePhoneOptions;
 			IsValidPhoneOptions: IsValidPhoneOptions;
@@ -361,8 +425,12 @@ describe("Public API", () => {
 			LegalNatureCategory: LegalNatureCategory;
 			LicensePlateFormat: LicensePlateFormat;
 			Municipality: Municipality;
+			Nbs: Nbs;
 			NfeKeyInfo: NfeKeyInfo;
 			NfeKeyModel: NfeKeyModel;
+			NfseKeyGeneratorEnvironment: NfseKeyGeneratorEnvironment;
+			NfseKeyInfo: NfseKeyInfo;
+			NfseKeyTaxIdType: NfseKeyTaxIdType;
 			NumberToWordsGender: NumberToWordsGender;
 			ParseCnpjOptions: ParseCnpjOptions;
 			ParseCurrencyOptions: ParseCurrencyOptions;
@@ -374,6 +442,7 @@ describe("Public API", () => {
 			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
+			ServiceItem: ServiceItem;
 			State: State;
 			StateCode: StateCode;
 			StandardSchemaV1: StandardSchemaV1;

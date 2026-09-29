@@ -1,7 +1,7 @@
-import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/cities";
+import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
 import { DATA, type StateCode } from "../_internals/constants/states";
 
-export type { Municipality } from "../_internals/constants/cities";
+export type { Municipality } from "../_internals/constants/municipalities";
 export type { StateCode } from "../_internals/constants/states";
 
 const buildMunicipalities = (stateCode: StateCode): Municipality[] =>

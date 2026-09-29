@@ -1,4 +1,4 @@
-import { DATA as CITIES_DATA } from "../_internals/constants/cities";
+import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
 import { type StateCode } from "../_internals/constants/states";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { isNullish } from "../_internals/is-nullish/is-nullish";

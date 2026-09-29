@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { type Municipality } from "../_internals/constants/cities";
+import { type Municipality } from "../_internals/constants/municipalities";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getMunicipalities } from "../get-municipalities/get-municipalities";
 import { getMunicipalityByCode } from "./get-municipality-by-code";

@@ -73,6 +73,37 @@ generateCpf('SP'); // o 9º dígito é 8, o código da região fiscal de SP
 generateCpf('MG'); // o 9º dígito é 6, o código da região fiscal de MG
 ```
 
+### getCpfInfo
+
+Lê os campos que um CPF codifica, como um `CpfInfo`: a `base` de 8 dígitos, o dígito `fiscalRegion` (o 9º dígito, a Região Fiscal da Receita Federal em que o CPF foi inscrito, `"1"` a `"9"` e `"0"` para a 10ª), os `states` dessa região (`StateCode[]`, ordenados pelo nome do estado) e os 2 `checkDigits`. Aceita a mesma entrada com ou sem máscara que o `isValidCpf` e retorna `null` para tudo que não for um CPF válido. A região é a do endereço informado na primeira inscrição: ela não diz onde o titular nasceu, onde mora hoje nem onde pediu o número, e uma região com mais de um estado não diz qual deles foi.
+
+| `fiscalRegion` | `states` |
+| --- | --- |
+| `"1"` | DF, GO, MT, MS, TO |
+| `"2"` | AC, AP, AM, PA, RO, RR |
+| `"3"` | CE, MA, PI |
+| `"4"` | AL, PB, PE, RN |
+| `"5"` | BA, SE |
+| `"6"` | MG |
+| `"7"` | ES, RJ |
+| `"8"` | SP |
+| `"9"` | PR, SC |
+| `"0"` | RS |
+
+```javascript
+import { getCpfInfo } from '@brazilian-utils/brazilian-utils';
+
+getCpfInfo('123.456.789-09');
+// {
+//   base: '12345678',
+//   fiscalRegion: '9',
+//   states: ['PR', 'SC'],
+//   checkDigits: '09',
+// }
+
+getCpfInfo('12345678900'); // null (dígitos verificadores inválidos)
+```
+
 Fonte: [Receita Federal, "Cadastros: CPF e CNPJ"](https://www.gov.br/receitafederal/pt-br/assuntos/educacao-fiscal/educacao_fiscal/folhetos-orientativos/cadastros-dig.pdf).
 
 ## CNPJ
@@ -138,6 +169,40 @@ generateCnpj(2); // CNPJ alfanumérico, ex. 'Q0SLFMBD7VX439'
 generateCnpj({ branch: 3 }); // bloco de ordem '0003', ex. '12345678000372'
 generateCnpj({ version: 2, branch: 1 }); // CNPJ alfanumérico cujo bloco de ordem é '0001'
 ```
+
+### getCnpjInfo
+
+Interpreta um CNPJ nos campos que o número codifica. Aceita as mesmas formas de entrada que `isValidCnpj` e retorna `null` sempre que ela retornaria `false` para os mesmos argumentos, então um CNPJ alfanumérico lido na versão `1` é `null`.
+
+- **Opções** (`GetCnpjInfoOptions`): `version` é lida como `isValidCnpj` a lê, `1` (padrão) apenas o formato numérico, `2` tanto o numérico quanto o alfanumérico.
+- Retorna um `CnpjInfo`, as 14 posições como o Anexo XV as dispõe: 8 (`root`, a raiz que identifica a entidade) + 4 (`branch`, o número de ordem do estabelecimento) + 2 (`checkDigits`, os dígitos verificadores, sempre numéricos). O nome `branch` segue o parâmetro `branch` do `generateCnpj`, que preenche as mesmas quatro posições.
+- `isInitialHeadquarters` diz se o número de ordem é `0001`, a que a Receita Federal atribui à matriz quando a raiz é inscrita. Uma filial pode depois se tornar a matriz mantendo o seu número de ordem, então só o cadastro da Receita Federal diz qual é a matriz atual.
+- Os campos de um CNPJ alfanumérico são retornados em maiúsculas.
+
+```javascript
+import { getCnpjInfo } from '@brazilian-utils/brazilian-utils';
+
+getCnpjInfo('12.345.678/0001-95');
+// {
+//   root: '12345678',
+//   branch: '0001',
+//   checkDigits: '95',
+//   isInitialHeadquarters: true
+// }
+
+getCnpjInfo('12.abc.345/01de-35', { version: 2 });
+// {
+//   root: '12ABC345',
+//   branch: '01DE',
+//   checkDigits: '35',
+//   isInitialHeadquarters: false
+// }
+
+getCnpjInfo('12.ABC.345/01DE-35'); // null (alfanumérico, lido na versão 1)
+getCnpjInfo('12.345.678/0001-90'); // null (dígitos verificadores incorretos)
+```
+
+Fonte: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=141102), cujo Anexo Único é o Anexo XV da IN RFB nº 2.119/2022 e dispõe as 14 posições, [Perguntas e Respostas da Receita Federal sobre o CNPJ alfanumérico](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf) (perguntas 21, 23 e 25).
 
 ## CEP e endereço
 
@@ -569,6 +634,144 @@ getNfeKeyInfo('35170458716523000119620010000000121000123450');
 getNfeKeyInfo('invalid'); // null
 ```
 
+## Chave de NFS-e
+
+### isValidNfseKey
+
+Verifica se a chave de acesso de uma NFS-e nacional, a Nota Fiscal de Serviço eletrônica do Sistema Nacional NFS-e, é válida.
+
+- A chave é um bloco único de 50 caracteres, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, todos dígitos exceto um CNPJ alfanumérico na Inscrição Federal.
+- O literal `NFS` que o atributo `Id` de `infNFSe` coloca antes da chave é retirado, junto com os espaços nas extremidades.
+- A chave não tem máscara impressa, já que o DANFSe a imprime em um único bloco, então, diferente do `isValidNfeKey`, um separador em qualquer ponto dela é rejeitado em vez de removido.
+- O código do município precisa começar com um código IBGE de UF; ele não é consultado na tabela do IBGE.
+- O `ambGer` precisa ser `1` (o sistema do município) ou `2` (o Sistema Nacional NFS-e), e o tipo de inscrição `1` (um CPF, preenchido com `000` à esquerda) ou `2` (um CNPJ, numérico ou alfanumérico), com um CPF ou CNPJ cujos próprios dígitos verificadores sejam válidos. Letras só são aceitas em um CNPJ, e minúsculas são lidas como maiúsculas, como o `isValidCnpj` com `{ version: 2 }` as lê.
+- O `nNFSe` não pode ser todo de zeros e o mês precisa estar entre 01 e 12.
+- O dígito verificador é um módulo 11 sobre os 49 primeiros caracteres, pesos de 2 a 9 ciclando a partir da direita, em que resto 0 ou 1 dá 0. Uma letra vale o seu código ASCII menos 48 (`A` vale 17): nenhum documento da NFS-e diz isso, então a regra vem por analogia com a chave da NF-e da Nota Técnica Conjunta 2025.001 e com os próprios dígitos verificadores do CNPJ.
+- As letras seguem o `TSIdNFSe` do pacote de esquemas de 27/07/2026, nas posições da Inscrição Federal (10 a 23).
+- Os modelos municipais de NFS-e que não são o padrão nacional estão fora do escopo.
+
+```javascript
+import { isValidNfseKey } from '@brazilian-utils/brazilian-utils';
+
+isValidNfseKey('35503082258716523000119000000000001226011357924683'); // true (emitente com CNPJ, SP)
+isValidNfseKey('NFS35503082258716523000119000000000001226011357924683'); // true (prefixo Id do XML)
+isValidNfseKey('43149021100040364478829000000000105725120484407255'); // true (emitente com CPF, RS)
+isValidNfseKey('35503082212ABC34501DE35000000000001226091357924682'); // true (emitente com CNPJ alfanumérico)
+isValidNfseKey('35503082258716523000119000000000001226011357924684'); // false (dígito verificador)
+isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // false (a chave não tem máscara)
+```
+
+### parseNfseKey
+
+Remove tudo o que não é dígito ou letra de um CNPJ alfanumérico da chave de acesso de uma NFS-e nacional e limita o resultado a 50 caracteres.
+
+- As letras ficam em maiúsculas, como faz o `parseCnpj` com `{ version: 2 }`, e as letras antes do primeiro dígito são descartadas, inclusive o prefixo `NFS` do atributo `Id` do XML, já que a chave começa com dígitos. O `isValidNfseKey` verifica se as letras que restam estão em um CNPJ.
+
+- Essa é a forma em que o leiaute guarda a chave e a que o DANFSe imprime, um bloco único, e por isso não existe `formatNfseKey`.
+
+```javascript
+import { parseNfseKey } from '@brazilian-utils/brazilian-utils';
+
+parseNfseKey('NFS35503082258716523000119000000000001226011357924683');
+// '35503082258716523000119000000000001226011357924683'
+
+parseNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3');
+// '35503082258716523000119000000000001226011357924683'
+
+parseNfseKey('nfs3550308 2 2 12.abc.345/01de-35 0000000000012 2609 135792468 2');
+// '35503082212ABC34501DE35000000000001226091357924682'
+```
+
+### getNfseKeyInfo
+
+Interpreta a chave de acesso de uma NFS-e nacional e retorna seus campos, como um `NfseKeyInfo`. Aceita as mesmas formas de entrada do `isValidNfseKey`.
+
+- Retorna `municipalityCode`, `stateCode`, `generatorEnvironment`, `taxIdType`, `taxId`, `number`, `year`, `month`, `code` e `checkDigit`.
+- O `generatorEnvironment` é um `NfseKeyGeneratorEnvironment`: `1` o sistema do município, `2` o Sistema Nacional NFS-e.
+- O `taxIdType` é um `NfseKeyTaxIdType`, `'cpf'` ou `'cnpj'`, e o `taxId` é o CPF de 11 dígitos, sem o `000` que o preenche na chave, ou o CNPJ de 14 caracteres, numérico ou alfanumérico, em maiúsculas.
+- Retorna `null` quando a chave não é válida.
+
+```javascript
+import { getNfseKeyInfo } from '@brazilian-utils/brazilian-utils';
+
+getNfseKeyInfo('35503082258716523000119000000000001226011357924683');
+// { municipalityCode: '3550308', stateCode: 'SP', generatorEnvironment: 2, taxIdType: 'cnpj',
+//   taxId: '58716523000119', number: 12, year: 2026, month: 1, code: '135792468', checkDigit: 3 }
+
+getNfseKeyInfo('43149021100040364478829000000000105725120484407255');
+// { municipalityCode: '4314902', stateCode: 'RS', generatorEnvironment: 1, taxIdType: 'cpf',
+//   taxId: '40364478829', number: 1057, year: 2025, month: 12, code: '048440725', checkDigit: 5 }
+
+getNfseKeyInfo('35503082212ABC34501DE35000000000001226091357924682');
+// { municipalityCode: '3550308', stateCode: 'SP', generatorEnvironment: 2, taxIdType: 'cnpj',
+//   taxId: '12ABC34501DE35', number: 12, year: 2026, month: 9, code: '135792468', checkDigit: 2 }
+
+getNfseKeyInfo('invalid'); // null
+```
+
+Fonte: a [documentação técnica do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), cujos tipos de esquema `TSIdNFSe` e `TSChaveNFSe` e o campo `NFSe/infNFSe/id` do ANEXO I definem o leiaute e as regras E1280 e E1284, o [manual da emissão por decisão administrativa ou judicial](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/manual-contribuintes-emissor-publico-api-emissao-decisao-administrativa-e-judicial.pdf), que nomeia o dígito verificador de módulo 11, a [Nota Técnica SE/CGNFS-e 008](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc/nt-008-se-cgnfse-danfse-20260714-v1-02.pdf) (item 2.1.1), que imprime a chave em bloco único, os [esquemas atualizados para o CNPJ alfanumérico](https://www.gov.br/nfse/pt-br/noticias/plataforma-nfs-e-disponibiliza-novas-evolucoes-em-producao-restrita-e-divulga-cronograma-de-implantacao) (pacote v1.01-20260727, em produção desde 10/08/2026) e a [Nota Técnica Conjunta 2025.001](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=5ZkvIZt10mQ=), cuja regra de ASCII menos 48 da chave da NF-e o dígito verificador empresta.
+
+## SUFRAMA
+
+### isValidSuframa
+
+Valida uma Inscrição SUFRAMA. É o número de registro que a Superintendência da Zona Franca de Manaus dá às empresas com incentivo fiscal, informado no campo `ISUF` do destinatário da NF-e.
+
+- O número tem a forma `SS.NNNN.LLD`: setor de atividade, número sequencial, localidade da unidade da SUFRAMA e dígito verificador.
+- Aceita 8 ou 9 dígitos: um valor de 8 dígitos é um número cujo código de setor perdeu o zero à esquerda.
+- Retorna `false` para um código de setor `00` e para um dígito verificador módulo 11 errado.
+- Os códigos de setor e de localidade não são conferidos com uma tabela, pois o manual os lista apenas como exemplos.
+- Além dos caracteres de máscara usuais, `(`, `)`, `,` e `*` também são ignorados.
+
+```javascript
+import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
+
+isValidSuframa('123456789'); // true
+isValidSuframa('12.3456.789'); // true
+isValidSuframa('10001018'); // true (o mesmo que '010001018')
+isValidSuframa('123456780'); // false
+isValidSuframa('001234560'); // false (setor 00)
+```
+
+### formatSuframa
+
+Formata uma Inscrição SUFRAMA.
+
+- **Opções** (`FormatSuframaOptions`): `pad` completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos.
+- A máscara é progressiva, como nas outras funções `format`, então um valor de 8 dígitos sem `pad` é agrupado uma posição antes: use `pad: true` para um valor lido direto do campo `ISUF`, que pode vir com 8 dígitos.
+
+```javascript
+import { formatSuframa } from '@brazilian-utils/brazilian-utils';
+
+formatSuframa('123456789'); // 12.3456.789
+formatSuframa('10001018'); // 10.0010.18 (8 dígitos, a máscara agrupa uma posição antes)
+formatSuframa('10001018', { pad: true }); // 01.0001.018
+```
+
+### parseSuframa
+
+Remove a formatação da Inscrição SUFRAMA, mantém apenas os dígitos e limita o resultado a 9 dígitos.
+
+```javascript
+import { parseSuframa } from '@brazilian-utils/brazilian-utils';
+
+parseSuframa('12.3456.789'); // 123456789
+```
+
+### generateSuframa
+
+Gera uma Inscrição SUFRAMA aleatória válida de 9 dígitos.
+
+- O dígito verificador é válido e o código de setor nunca é `00`. Os códigos de setor e de localidade são aleatórios.
+
+```javascript
+import { generateSuframa } from '@brazilian-utils/brazilian-utils';
+
+generateSuframa(); // '205678106'
+```
+
+Fonte: [Manual de Orientação do Contribuinte da NF-e 7.0, Visão Geral](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-visao-geral.pdf) (seção 8.4), [MOC 7.0, Anexo I](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/moc7-anexo-i-leiaute-e-rv.pdf) (campo 79, `E18` `ISUF`, e regra E18-20).
+
 ## Telefone
 
 ### isValidPhone
@@ -595,11 +798,14 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 Formata um número de telefone de acordo com os padrões brasileiros. Se `value` incluir o DDD, informe `{ mask: 'auto' }` ou `'nanp'`: a máscara padrão `"sn"` assume que não há DDD e o trunca.
 
-- **Opções** (`FormatPhoneOptions`): `mask` (`PhoneMask`, padrão `"sn"`) escolhe um dos padrões abaixo. Uma `mask` desconhecida recai para `"sn"`.
+- **Opções** (`FormatPhoneOptions`): `mask` (`PhoneMask`, padrão `"sn"`) escolhe um dos padrões abaixo. Uma `mask` desconhecida recai para `"sn"`. `obfuscate` (padrão `false`) esconde o número do assinante em todas as máscaras.
 - `"sn"`: apenas o número assinante, 9 dígitos. `"nanp"`: DDD mais número assinante, 11 dígitos para celular e 10 para fixo; outros tamanhos mantêm o agrupamento de 11 dígitos.
 - `"e164"` e `"international"` removem antes o código de país, como `parsePhone`, e recaem para `"service"` para um número de serviço.
 - `"service"`: os Códigos Não Geográficos (`0800 123 4567`) e os números abreviados `300X`/`400X` (`4004-1234`).
 - `"auto"`: `"service"` para um número de serviço, `"international"` quando `value` traz código de país, senão `"nanp"` para mais de 9 dígitos, ou `"sn"`.
+- O `obfuscate` mantém 2 dígitos, a contagem que a conta gov.br usa para o celular cadastrado, e mantém o prefixo que indica uma região ou um serviço, e não um assinante: o DDD, o código do tipo `0800` e a raiz `300X`/`400X`.
+- Os 2 dígitos são os últimos que cabem na própria máscara, então na máscara padrão `"sn"` um valor com DDD é truncado antes, igual ao que acontece sem `obfuscate`, e o par visível é o 8º e o 9º dígito, e não os 2 últimos de `value`.
+- Um código de utilidade pública de 3 dígitos (`190`) não identifica ninguém e é devolvido como está; num valor que a máscara `"service"` não reconhece cada dígito vira um `*`, o que esconde os dígitos, mas não quantos eram. Os padrões ofuscados têm um número fixo de posições, então em `"e164"` o que passa do 11º dígito nacional é descartado.
 
 ```javascript
 import { formatPhone } from '@brazilian-utils/brazilian-utils';
@@ -615,10 +821,19 @@ formatPhone('08001234567', { mask: 'service' }); // 0800 123 4567
 formatPhone('40041234', { mask: 'service' }); // 4004-1234
 formatPhone('+5511987654321', { mask: 'auto' }); // +55 11 98765-4321 ("auto" detecta o prefixo +55 e escolhe "international")
 formatPhone('5508001234567', { mask: 'auto' }); // 0800 123 4567 ("auto" lê o número 0800, não um +55 08)
+formatPhone('987654321', { obfuscate: true }); // *****-**21
+formatPhone('11987654321', { mask: 'auto', obfuscate: true }); // (11) *****-**21
+formatPhone('1130000000', { mask: 'auto', obfuscate: true }); // (11) ****-**00
+formatPhone('+5511987654321', { mask: 'auto', obfuscate: true }); // +55 11 *****-**21
+formatPhone('11987654321', { mask: 'e164', obfuscate: true }); // +5511*******21
+formatPhone('08001234567', { mask: 'service', obfuscate: true }); // 0800 *** **67
+formatPhone('40041234', { mask: 'service', obfuscate: true }); // 4004-**34
+formatPhone('11988887766', { mask: 'service', obfuscate: true }); // *********** (não é número de serviço)
+formatPhone('11987654321', { obfuscate: true }); // *****-**43 (CUIDADO: a "sn" trunca antes, então "43", e não "21")
 formatPhone('11900000000'); // 11900-0000 (CUIDADO: a máscara padrão "sn" trunca um número com DDD)
 ```
 
-Fonte: [ITU-T E.164](https://www.itu.int/rec/T-REC-E.164), [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749).
+Fonte: [ITU-T E.164](https://www.itu.int/rec/T-REC-E.164), [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749), [conta gov.br](https://acesso.gov.br/faq/_perguntasdafaq/formarrecuperarconta.html) para quantos dígitos de um celular ficam visíveis.
 
 ### parsePhone
 
@@ -883,13 +1098,16 @@ isValidPis('12056412547'); // false
 
 Formata um PIS.
 
-- **Opções** (`FormatPisOptions`): `pad` completa o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`).
+- **Opções** (`FormatPisOptions`): `pad` completa o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e o dígito verificador.
+- O `obfuscate` é aplicado depois do `pad`.
+- Nenhuma autoridade publica uma regra de mascaramento para o PIS, então o `obfuscate` usa a que a Lei nº 12.309/2010, art. 87, § 5º define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura.
 
 ```javascript
 import { formatPis } from '@brazilian-utils/brazilian-utils';
 
 formatPis('12345678901'); // 123.45678.90-1
 formatPis('123456789', { pad: true }); // 001.23456.78-9
+formatPis('12345678901', { obfuscate: true }); // ***.45678.90-*
 ```
 
 ### parsePis
@@ -911,6 +1129,8 @@ import { generatePis } from '@brazilian-utils/brazilian-utils';
 
 generatePis(); // '91077906857'
 ```
+
+Fonte: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada.
 
 ## Processo jurídico
 
@@ -1366,6 +1586,33 @@ getStates();
 
 Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 
+### getStateByCep
+
+Retorna o estado brasileiro ao qual um CEP pertence, a partir das faixas de CEP que os Correios atribuem a cada UF (a "Faixa de CEP" de cada UF).
+
+- Funciona offline: nenhuma API de CEP é chamada, então a resposta diz qual estado é dono da faixa, não se o CEP está em uso.
+- Aceita o que o `isValidCep` aceita: 8 dígitos, como string ou número, ignorando espaços, pontos e hifens. Um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado.
+- Amazonas, Distrito Federal e Goiás têm duas faixas cada, e nenhuma faixa estadual cobre `00000-000` a `00999-999` nem `78900-000` a `78999-999`.
+- A faixa é o bloco que pertence ao estado, não uma garantia de que todo CEP dentro dela está em uso: `10000-000` está sem uso dentro da faixa de São Paulo e ainda assim responde São Paulo.
+- Retorna `null` para um CEP inválido ou fora de todas as faixas. Exporta o tipo `State`.
+
+```javascript
+import { getStateByCep } from '@brazilian-utils/brazilian-utils';
+
+getStateByCep('01310-100');
+// { code: 'SP', name: 'São Paulo', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 35 }
+
+getStateByCep(20040020);
+// { code: 'RJ', name: 'Rio de Janeiro', regionCode: 'SE', regionName: 'Sudeste', ibgeCode: 33 }
+
+getStateByCep('69300-000')?.code; // 'RR'
+getStateByCep('72800-000')?.code; // 'GO'
+getStateByCep('00999-999'); // null
+getStateByCep('12345'); // null
+```
+
+Fonte: [Correios, Busca Faixa de CEP](https://buscacepinter.correios.com.br/app/faixa_cep_uf_localidade/index.php)
+
 ### getStateByIbgeCode
 
 Retorna o estado brasileiro cujo código IBGE de 2 dígitos (`cUF`, o Código da Unidade da Federação) corresponde ao valor informado.
@@ -1653,7 +1900,10 @@ isHoliday(); // false
 
 Verifica se uma data é dia útil no Brasil: não é sábado, domingo nem um feriado que `getHolidays` lista para o seu dia de calendário local.
 
-- **Opções** (`BusinessDayOptions`, as mesmas de todos os utilitários de dias úteis): `includeOptional` (padrão `true`) também conta os feriados `"optional"`, Carnaval e Corpus Christi, como dias não úteis; `stateCode` também conta os feriados daquele estado.
+- **Opções** (`BusinessDayOptions`, as mesmas de todos os utilitários de dias úteis): `includeOptional` (padrão `true`) também conta os feriados `"optional"`, Carnaval e Corpus Christi, como dias não úteis; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também conta os feriados daquele estado.
+- Com `includeSaturday` desligado, é a contagem de segunda a sexta usada por bancos e tribunais. Ligado, é a contagem trabalhista do prazo de pagamento do salário do art. 459, § 1º, da CLT, a que a fiscalização do trabalho lê pela Instrução Normativa MTP nº 2/2021, art. 14, I: "na contagem dos dias será incluído o sábado, excluindo-se o domingo e o feriado, inclusive o municipal".
+- Com `includeSaturday` ligado, o domingo e os feriados continuam excluídos, então um feriado que cai em um sábado continua não sendo dia útil.
+- O trecho "inclusive o municipal" dessa regra não é coberto: `getHolidays` tem apenas feriados nacionais e estaduais, então um feriado municipal é contado aqui como dia útil comum. Retire os feriados municipais por conta própria quando a contagem precisar ser exata para um município.
 - Retorna `false` quando `value` não é um `Date` válido ou o seu ano está fora de 1900 a 2099, ou quando `stateCode` está presente e não é string.
 
 ```javascript
@@ -1662,6 +1912,9 @@ import { isBusinessDay } from '@brazilian-utils/brazilian-utils';
 isBusinessDay(new Date(2024, 0, 2)); // true (terça-feira, não é feriado)
 isBusinessDay(new Date(2024, 0, 1)); // false (Ano novo)
 isBusinessDay(new Date(2024, 0, 6)); // false (sábado)
+isBusinessDay(new Date(2024, 0, 6), { includeSaturday: true }); // true (contagem trabalhista)
+isBusinessDay(new Date(2024, 8, 7), { includeSaturday: true }); // false (Independência, feriado em um sábado)
+isBusinessDay(new Date(2024, 0, 7), { includeSaturday: true }); // false (o domingo nunca é incluído)
 isBusinessDay(new Date(2024, 1, 13)); // false (Carnaval, feriado facultativo, conta por padrão)
 isBusinessDay(new Date(2024, 1, 13), { includeOptional: false }); // true
 isBusinessDay(new Date(2024, 6, 9), { stateCode: 'SP' }); // false (Revolução Constitucionalista)
@@ -1673,7 +1926,7 @@ isBusinessDay(new Date('not a date')); // false
 
 Soma dias úteis a uma data, pulando sábados, domingos e os feriados que `isBusinessDay` considera. Assinatura: `addBusinessDays(date, amount, options?)`, a mesma do date-fns.
 
-- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula Carnaval e Corpus Christi; `stateCode` também pula os feriados daquele estado.
+- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula Carnaval e Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
 - Retorna um novo `Date`, com o horário preservado; `date` não é alterado.
 - `amount` igual a `0` retorna a mesma data, mesmo em fim de semana ou feriado. Um `amount` negativo anda para trás.
 - Retorna `null` quando `date` é inválido, `amount` não é um inteiro finito, `stateCode` não é string ou o resultado sai dos anos de 1900 a 2099.
@@ -1685,6 +1938,8 @@ addBusinessDays(new Date(2024, 0, 2, 12), 1); // Date, 2024-01-03 12:00 (o dia s
 addBusinessDays(new Date(2024, 11, 31, 12), 1); // Date, 2025-01-02 12:00 (2025-01-01 é Ano novo, pulado)
 addBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-04 12:00 (anda para trás)
 addBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (sem alteração, mesmo o sábado não sendo dia útil)
+addBusinessDays(new Date(2024, 0, 5, 12), 1, { includeSaturday: true }); // Date, 2024-01-06 12:00 (contagem trabalhista, o sábado conta)
+addBusinessDays(new Date(2024, 10, 1, 12), 1, { includeSaturday: true }); // Date, 2024-11-04 12:00 (2024-11-02 é Finados, feriado em um sábado)
 addBusinessDays(new Date(2024, 6, 8, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-10 12:00 (2024-07-09 é a Revolução Constitucionalista em SP, pulado)
 addBusinessDays(new Date('not a date'), 1); // null
 addBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
@@ -1704,16 +1959,41 @@ subBusinessDays(new Date(2024, 0, 8, 12), 1); // Date, 2024-01-05 12:00 (anda pa
 subBusinessDays(new Date(2025, 0, 2, 12), 1); // Date, 2024-12-31 12:00 (2025-01-01 é Ano novo, pulado)
 subBusinessDays(new Date(2024, 0, 5, 12), -1); // Date, 2024-01-08 12:00 (anda para frente)
 subBusinessDays(new Date(2024, 0, 6, 12), 0); // Date, 2024-01-06 12:00 (sem alteração, mesmo o sábado não sendo dia útil)
+subBusinessDays(new Date(2024, 0, 8, 12), 1, { includeSaturday: true }); // Date, 2024-01-06 12:00 (contagem trabalhista, o sábado conta)
+subBusinessDays(new Date(2024, 10, 4, 12), 1, { includeSaturday: true }); // Date, 2024-11-01 12:00 (2024-11-02 é Finados, feriado em um sábado)
 subBusinessDays(new Date(2024, 6, 10, 12), 1, { stateCode: 'SP' }); // Date, 2024-07-08 12:00 (2024-07-09 é a Revolução Constitucionalista em SP, pulado)
 subBusinessDays(new Date('not a date'), 1); // null
 subBusinessDays(new Date(2024, 0, 2), 1.5); // null (não é um número inteiro)
 ```
 
+Para o n-ésimo dia útil de um mês, ou o último, comece do dia logo fora do mês:
+
+```javascript
+import { addBusinessDays, subBusinessDays } from '@brazilian-utils/brazilian-utils';
+
+// n-ésimo dia útil do mês: some n a partir do último dia do mês anterior
+addBusinessDays(new Date(2024, 0, 0), 5); // Date, 2024-01-08 00:00 (5º dia útil de janeiro de 2024)
+addBusinessDays(new Date(2024, 1, 0), 10); // Date, 2024-02-15 00:00 (10º de fevereiro de 2024, Carnaval pulado)
+
+// último dia útil do mês: subtraia 1 a partir do primeiro dia do mês seguinte
+subBusinessDays(new Date(2024, 3, 1), 1); // Date, 2024-03-28 00:00 (2024-03-29 é Sexta-feira Santa, seguida de um fim de semana)
+subBusinessDays(new Date(2024, 1, 1), 2); // Date, 2024-01-30 00:00 (penúltimo de janeiro de 2024)
+
+// prazo do salário do art. 459, § 1º, da CLT: o 5º dia útil na contagem trabalhista
+addBusinessDays(new Date(2024, 2, 0), 5, { includeSaturday: true }); // Date, 2024-03-06 00:00 (2024-03-02, um sábado, conta; a contagem bancária dá 2024-03-07)
+addBusinessDays(new Date(2024, 10, 0), 5, { includeSaturday: true }); // Date, 2024-11-07 00:00 (2024-11-02 é Finados, um feriado num sábado)
+subBusinessDays(new Date(2024, 8, 1), 1, { includeSaturday: true }); // Date, 2024-08-31 00:00 (último dia útil de agosto de 2024, um sábado)
+```
+
+- Um `n` maior que os dias úteis do mês cai no mês seguinte (`addBusinessDays(new Date(2024, 0, 0), 23)` é 2024-02-01, janeiro de 2024 tem 22); compare `getMonth()` quando isso importar.
+- O "quinto dia útil" do salário, do art. 459, § 1º, da CLT, é a contagem trabalhista: passe `{ includeSaturday: true }`. Os feriados municipais, que essa contagem também exclui, a biblioteca não conhece, então um feriado municipal no começo do mês ainda precisa ser descontado por quem chama.
+- O n-ésimo dia útil de janeiro de 1900 e o último dia útil de dezembro de 2099 retornam `null`, porque a receita parte de um dia fora dos anos suportados (31 de dezembro de 1899 e 1º de janeiro de 2100).
+
 ### differenceInBusinessDays
 
 Conta os dias úteis entre duas datas. Assinatura: `differenceInBusinessDays(laterDate, earlierDate, options?)`, a mesma do date-fns.
 
-- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula Carnaval e Corpus Christi; `stateCode` também pula os feriados daquele estado.
+- **Opções** (`BusinessDayOptions`, as mesmas de `isBusinessDay`): `includeOptional` (padrão `true`) também pula Carnaval e Corpus Christi; `includeSaturday` (padrão `false`) conta o sábado como dia útil; `stateCode` também pula os feriados daquele estado.
 - Conta `earlierDate` quando é dia útil e cada dia útil estritamente entre as duas datas; `laterDate` nunca é contado. O horário é ignorado.
 - O resultado é negativo quando `laterDate` é anterior a `earlierDate`, e `0` no mesmo dia de calendário.
 - Retorna `null` quando uma das datas não é um `Date` válido ou está fora dos anos de 1900 a 2099, ou quando `stateCode` não é string.
@@ -1725,6 +2005,9 @@ differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 1)); // 0 (01/0
 differenceInBusinessDays(new Date(2024, 0, 3), new Date(2024, 0, 2)); // 1 (02/01 contado, uma terça-feira; 03/01 não)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 3)); // -1 (a data posterior vem primeiro, então a contagem é negativa)
 differenceInBusinessDays(new Date(2024, 0, 2), new Date(2024, 0, 2)); // 0 (mesmo dia)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1)); // 4 (contagem bancária, de 2024-01-02 a 2024-01-05)
+differenceInBusinessDays(new Date(2024, 0, 8), new Date(2024, 0, 1), { includeSaturday: true }); // 5 (2024-01-06, um sábado, também conta)
+differenceInBusinessDays(new Date(2024, 10, 4), new Date(2024, 10, 1), { includeSaturday: true }); // 1 (2024-11-02 é Finados, feriado em um sábado)
 differenceInBusinessDays(new Date(2024, 6, 10), new Date(2024, 6, 8), { stateCode: 'SP' }); // 1 (09/07/2024 é feriado estadual em SP)
 differenceInBusinessDays(new Date(), new Date('not a date')); // null
 ```
@@ -1803,13 +2086,16 @@ Fonte: [Resolução CONTRAN nº 886/2021, art. 4º](https://www.gov.br/transport
 
 Formata uma CNH.
 
-- **Opções** (`FormatCnhOptions`): `pad` completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`).
+- **Opções** (`FormatCnhOptions`): `pad` completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores.
+- O `obfuscate` é aplicado depois do `pad`.
+- Nenhuma autoridade publica uma regra de mascaramento para a CNH, então o `obfuscate` usa a que a Lei nº 12.309/2010, art. 87, § 5º define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura.
 
 ```javascript
 import { formatCnh } from '@brazilian-utils/brazilian-utils';
 
 formatCnh('02650306461'); // 026503064-61
 formatCnh('2650306461', { pad: true }); // 026503064-61
+formatCnh('02650306461', { obfuscate: true }); // ***503064-**
 ```
 
 ### parseCnh
@@ -1831,6 +2117,8 @@ import { generateCnh } from '@brazilian-utils/brazilian-utils';
 
 generateCnh(); // '02650306461'
 ```
+
+Fonte: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada.
 
 ## Natureza jurídica
 
@@ -1996,13 +2284,16 @@ Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legisla
 
 Formata um título de eleitor com o agrupamento de 12 dígitos `0000 0000 00 00`.
 
+- **Opções** (`FormatVoterIdOptions`): `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa.
 - O agrupamento de 13 dígitos `0000 0000 0 00 00` só é usado quando o valor tem mais de 12 dígitos e o código da UF (o 10º e o 11º dígitos) é `01` ou `02`.
 - Os dígitos além da última posição do padrão são descartados.
+- Nenhuma autoridade publica uma regra de mascaramento para o título de eleitor, então o `obfuscate` usa a que a Lei nº 12.309/2010, art. 87, § 5º define para o CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores"), um número com a mesma estrutura.
 
 ```javascript
 import { formatVoterId } from '@brazilian-utils/brazilian-utils';
 
 formatVoterId('123456780175'); // '1234 5678 01 75'
+formatVoterId('123456780175', { obfuscate: true }); // '***4 5678 01 **'
 formatVoterId('1234567880191'); // '1234 5678 8 01 91' (título de 13 dígitos SP/MG)
 ```
 
@@ -2031,6 +2322,8 @@ generateVoterId(); // título de eleitor aleatório válido (exterior, "ZZ")
 generateVoterId('SP'); // título de eleitor aleatório válido de São Paulo
 generateVoterId('XX'); // usa "ZZ" em vez de lançar erro
 ```
+
+Fonte: [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada.
 
 ## CNS
 
@@ -2498,6 +2791,101 @@ parseNcm('8471.30.12'); // '84713012'
 parseNcm('8471'); // '8471' (um código parcial é mantido como está)
 ```
 
+### isValidNbs
+
+Valida um código NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) contra a tabela oficial da NBS 2.0, o código que a NFS-e nacional leva em `cNBS`.
+
+- O código tem 9 dígitos, impressos como `N.NNNN.NN.NN`: o algarismo 1, o capítulo, a posição, os dois níveis de subposição, o item e o subitem.
+- Aceita uma string com os 9 dígitos ou com a máscara, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- Só códigos completos são válidos: os títulos de capítulo (`1.01`), posição (`1.0101`) e subposição (`1.0101.1`) não classificam nada por si sós.
+- O ANEXO B do Sistema Nacional NFS-e lista os mesmos 920 códigos menos três (`1.0402.29.00`, `1.0403.29.00` e `1.0904.40.00`), então um código válido aqui ainda pode ser recusado pela NFS-e.
+
+```javascript
+import { isValidNbs } from '@brazilian-utils/brazilian-utils';
+
+isValidNbs('1.0101.11.00'); // true
+isValidNbs('101011100'); // true
+isValidNbs(101011100); // true
+isValidNbs('1.0101'); // false (título de posição, não um código completo)
+isValidNbs('1.9999.99.99'); // false
+isValidNbs('1.0101abc11.00'); // false (não é uma forma documentada)
+```
+
+### formatNbs
+
+Formata um código NBS (Nomenclatura Brasileira de Serviços) na máscara `N.NNNN.NN.NN` em que a nomenclatura o imprime. Só a estrutura muda; use `isValidNbs` para conferir um código com a tabela.
+
+- Todo código NBS começa com 1, então, diferente do `formatNcm`, não há opção `pad`.
+- No resto, mesmas regras de `formatCnae`: a máscara é aplicada até onde o valor vai, os caracteres fora dela são descartados e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
+
+```javascript
+import { formatNbs } from '@brazilian-utils/brazilian-utils';
+
+formatNbs('101011100'); // 1.0101.11.00
+formatNbs(101011100); // 1.0101.11.00
+formatNbs('10101'); // 1.0101 (mascarado até onde vai)
+formatNbs('abc101011100'); // 1.0101.11.00 (só os dígitos são lidos)
+formatNbs(-101011100); // '' (não é um inteiro seguro não negativo)
+```
+
+### getNbs
+
+Consulta um código NBS (Nomenclatura Brasileira de Serviços) e retorna a sua descrição oficial. O resultado é um registro `Nbs`: `{ code, description }`.
+
+- Mesmas regras de `isValidNbs`. `code` são os 9 dígitos, sem a máscara. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+
+```javascript
+import { getNbs } from '@brazilian-utils/brazilian-utils';
+
+getNbs('1.0101.11.00');
+// { code: '101011100', description: 'Serviços de construção de edificações residenciais de um e dois pavimentos' }
+
+getNbs(126050000); // { code: '126050000', description: 'Serviços domésticos' }
+getNbs('1.0101'); // null (título de posição, não um código completo)
+getNbs('1.9999.99.99'); // null
+```
+
+Fonte: [tabela da NBS 2.0 publicada pelo MDIC](https://www.gov.br/mdic/pt-br/assuntos/sdic/comercio-e-servicos/nbs-nomenclatura-brasileira-de-servicos), aprovada pela Portaria Conjunta RFB/SCS 1.429/2018 e alterada pela Portaria Conjunta RFB/SCS 2.000/2018.
+
+### isValidServiceItem
+
+Verifica se um valor é um subitem em vigor da lista de serviços anexa à Lei Complementar 116/2003, a lista dos serviços sobre os quais incide o ISS.
+
+- A lei numera o subitem como o item, um ponto e dois dígitos, de `1.01` a `40.01`.
+- Aceita essa forma, o item preenchido com zero (`'01.01'`) ou os dígitos puros (`'0101'`, `'101'` ou o inteiro `101`), que são os quatro primeiros dígitos do código `cTribNac` da NFS-e nacional, com espaços opcionais nas extremidades.
+- O ponto é o único separador que a lei imprime entre o item e o subitem, então, ao contrário dos códigos com máscara de agrupamento impressa (`isValidCfop`, `isValidNbs`), nada mais é aceito no lugar dele e `'1-01'` é rejeitado.
+- Um número só é lido quando é um inteiro seguro não negativo, então o decimal `1.01` é rejeitado: escreva a forma com ponto como string.
+- Os subitens vetados (`3.01`, `7.14`, `7.15`, `13.01` e `17.07`), os títulos de item, os códigos nacionais de 6 dígitos em que um subitem se desdobra e o item 99 da lista nacional, que não faz parte da lei, não são válidos. Códigos municipais de serviço estão fora do escopo.
+
+```javascript
+import { isValidServiceItem } from '@brazilian-utils/brazilian-utils';
+
+isValidServiceItem('1.01'); // true
+isValidServiceItem('01.01'); // true
+isValidServiceItem('0101'); // true
+isValidServiceItem(101); // true
+isValidServiceItem('3.01'); // false (vetado)
+isValidServiceItem('99.01'); // false (só da lista nacional, não da lei)
+isValidServiceItem(1.01); // false (não é um inteiro seguro não negativo)
+```
+
+### getServiceItem
+
+Consulta um subitem da lista de serviços anexa à Lei Complementar 116/2003 e retorna a sua descrição oficial. O resultado é um registro `ServiceItem`: `{ code, description }`.
+
+- Mesmas regras de `isValidServiceItem`. `code` é a forma em que a lei o imprime (`'1.01'`). Retorna `null` quando o subitem é desconhecido ou o valor não está em uma forma documentada.
+
+```javascript
+import { getServiceItem } from '@brazilian-utils/brazilian-utils';
+
+getServiceItem('1.01'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('0101'); // { code: '1.01', description: 'Análise e desenvolvimento de sistemas.' }
+getServiceItem('40.01'); // { code: '40.01', description: 'Obras de arte sob encomenda.' }
+getServiceItem('3.01'); // null (vetado)
+```
+
+Fonte: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm) e a planilha `LISTA.SERV.NAC.` do [ANEXO B do Sistema Nacional NFS-e](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual), a lista em vigor em formato legível por máquina.
+
 ### isValidCfop
 
 Valida um código CFOP (Código Fiscal de Operações e Prestações) contra a tabela oficial, o Anexo II consolidado do Convênio SINIEF s/nº 1970 em vigor.
@@ -2550,6 +2938,78 @@ getCfop('abc5102'); // null (não é uma forma documentada)
 
 Fonte: [Anexo II consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), última alteração pelo [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25).
 
+### isValidCest
+
+Valida um CEST (Código Especificador da Substituição Tributária) contra os anexos do Convênio ICMS 142/18, no texto consolidado vigente.
+
+- Só os itens em vigor contam: um item que os anexos marcam como revogado é rejeitado.
+- A verificação é só do código: ela não diz se o código combina com um dado NCM, nem se um estado aplica o regime de substituição tributária a ele.
+- Um CEST tem 7 dígitos: os dois primeiros são o segmento, do terceiro ao quinto o item do segmento e os dois últimos a especificação do item (cláusula sexta, IV).
+- Aceita uma string com os 7 dígitos ou com a forma `NN.NNN.NN` que os anexos imprimem, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- O zero à esquerda dos segmentos 01 a 09 faz parte do código, então um valor escrito apenas com dígitos é completado com zeros à esquerda até 7, como string ou como número: `100100`, `'100100'` e `'0100100'` são o mesmo código. Um valor mascarado é lido como foi escrito.
+
+```javascript
+import { isValidCest } from '@brazilian-utils/brazilian-utils';
+
+isValidCest('01.001.00'); // true
+isValidCest('0100100'); // true
+isValidCest(100100); // true (completado para 7 dígitos, ou seja, '0100100')
+isValidCest('03.001.00'); // false (um item revogado)
+isValidCest('0000000'); // false
+isValidCest('abc0100100'); // false (não é uma forma documentada)
+isValidCest(-100100); // false (não é um inteiro seguro não negativo)
+```
+
+### formatCest
+
+Formata um CEST (Código Especificador da Substituição Tributária) na forma `NN.NNN.NN` que os anexos do Convênio ICMS 142/18 imprimem. Só a estrutura muda; use `isValidCest` para conferir um código com os anexos.
+
+- **Opções** (`FormatCestOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 7 dígitos de um código completo.
+- Mesmas regras de `formatNcm`: sem `pad` a máscara é aplicada até onde o valor vai, que é o que um campo sendo digitado precisa, os caracteres fora dela são descartados e um número é lido como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Um número só é lido quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
+
+```javascript
+import { formatCest } from '@brazilian-utils/brazilian-utils';
+
+formatCest('0100100'); // 01.001.00
+formatCest(2899900); // 28.999.00
+formatCest('01001'); // 01.001 (máscara aplicada até onde o valor vai)
+formatCest(100100, { pad: true }); // 01.001.00 (completado até 7 dígitos antes)
+formatCest('abc0100100'); // 01.001.00 (só os dígitos são lidos)
+formatCest(-2899900); // '' (não é um inteiro seguro não negativo)
+```
+
+### parseCest
+
+Remove a formatação do CEST (Código Especificador da Substituição Tributária), mantém apenas os dígitos e limita o resultado aos 7 dígitos de um código completo.
+
+- Mesmas regras de `parseCbo`: nada é completado com zeros à esquerda aqui, então o zero à esquerda dos segmentos 01 a 09 precisa estar escrito. Use `isValidCest` ou `getCest`, que completam um código numérico sem máscara, para consultar um código.
+
+```javascript
+import { parseCest } from '@brazilian-utils/brazilian-utils';
+
+parseCest('01.001.00'); // '0100100'
+parseCest('28.999'); // '28999' (um código parcial é mantido como foi escrito)
+```
+
+### getCest
+
+Consulta um CEST (Código Especificador da Substituição Tributária) e retorna a descrição do bem ou mercadoria e o nome do seu segmento, como os Anexos I a XXVI do Convênio ICMS 142/18 os redigem. O resultado é um registro `Cest`: `{ code, description, segment }`.
+
+- Mesmas regras de `isValidCest`. Retorna `null` para um código desconhecido, revogado ou malformado.
+- Os códigos NCM/SH que os anexos associam a cada CEST não fazem parte do resultado.
+
+```javascript
+import { getCest } from '@brazilian-utils/brazilian-utils';
+
+getCest('05.001.00'); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest(500100); // { code: '0500100', description: 'Cimento', segment: 'Cimentos' }
+getCest('03.001.00'); // null (um item revogado)
+getCest('0000000'); // null
+getCest('abc0500100'); // null (não é uma forma documentada)
+```
+
+Fonte: [Convênio ICMS 142/18 consolidado](https://www.confaz.fazenda.gov.br/legislacao/convenios/2018/CV142_18), alterado por último pelo Convênio ICMS 180/24.
+
 ### isValidCst
 
 Valida um código de CST (Código de Situação Tributária) para um tributo. Informe o tributo em `options.tax`:
@@ -2601,6 +3061,230 @@ isValidCsosn(-101); // false (não é um inteiro seguro não negativo)
 ```
 
 Fonte: [Anexo III-A consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cvsn_70) e [Ajuste SINIEF 03/2010](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2010/aj_003_10).
+
+### isValidCstIbsCbs
+
+Valida um CST-IBS/CBS (Código de Situação Tributária do IBS e da CBS) contra a tabela oficial, o código que o campo `CST` do grupo `IBSCBS` leva nos documentos fiscais eletrônicos da reforma tributária (Lei Complementar nº 214/2025): NF-e, NFC-e, CT-e, NFS-e e os demais.
+
+- Os códigos vigentes são `000`, `010`, `011`, `200`, `220`, `221`, `222`, `400`, `410`, `510`, `515`, `550`, `620`, `800`, `810`, `811`, `820` e `830`.
+- É uma função própria, não um `tax` de `isValidCst`: IBS e CBS compartilham uma única tabela, seus códigos de 3 dígitos colidem com a forma origem + Tabela B do ICMS (`000`, `200`), e `isValidCst` sem `tax` aceita um código de qualquer tabela, então incluir esta mudaria o que esse padrão aceita.
+- Aceita uma string de dígitos puros, com espaços opcionais nas extremidades, ou um inteiro seguro não negativo. O campo é numérico com 3 dígitos e não tem máscara, então qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- Um valor com menos de 3 dígitos é completado com zeros à esquerda, como string ou como número, já que os códigos começam com zeros que um campo numérico descarta: `0`, `'0'` e `'000'` são todos o código `000`.
+
+```javascript
+import { isValidCstIbsCbs } from '@brazilian-utils/brazilian-utils';
+
+isValidCstIbsCbs('000'); // true
+isValidCstIbsCbs(410); // true
+isValidCstIbsCbs(10); // true (completado para '010')
+isValidCstIbsCbs('100'); // false
+isValidCstIbsCbs('cst200'); // false (não é uma forma documentada)
+isValidCstIbsCbs(-200); // false (não é um inteiro seguro não negativo)
+```
+
+### getCstIbsCbs
+
+Busca um CST-IBS/CBS e retorna a descrição que a tabela oficial de CST dá a ele. O resultado é um registro `CstIbsCbs`: `{ code, description }`.
+
+- Valem a mesma tabela e as mesmas regras de entrada de `isValidCstIbsCbs`. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+
+```javascript
+import { getCstIbsCbs } from '@brazilian-utils/brazilian-utils';
+
+getCstIbsCbs('000'); // { code: '000', description: 'Tributação integral' }
+getCstIbsCbs(410); // { code: '410', description: 'Imunidade e não incidência' }
+getCstIbsCbs(10); // { code: '010', description: 'Tributação com alíquotas uniformes' }
+getCstIbsCbs('100'); // null
+getCstIbsCbs('cst200'); // null (não é uma forma documentada)
+```
+
+### isValidClassTrib
+
+Valida um cClassTrib (Código de Classificação Tributária do IBS e da CBS) contra a tabela oficial, o código que o campo `cClassTrib` leva ao lado do CST-IBS/CBS.
+
+- **Opções** (`IsValidClassTribOptions`): `cst` é o CST-IBS/CBS que o documento leva, validado também contra a classificação. Omita-o para validar só o cClassTrib.
+- Toda classificação pertence a exatamente um CST-IBS/CBS, os 3 primeiros dígitos do seu código, e um documento que leva um cClassTrib com outro CST é rejeitado (rejeição 1024, "Classificação Tributária do IBS e da CBS incompatível com o CST informado"). Um `cst` informado que não seja o CST da classificação, seja ele qual for, torna o resultado `false`.
+- Só contam as classificações vigentes: o Informe Técnico 2025.002 exclui uma classificação encerrando sua vigência (`dFimVig`), como a v.1.60 fez com `220001`, `220002` e `220003`, e essas são rejeitadas. São 161 vigentes na versão publicada em 23/06/2026.
+- Aceita uma string de dígitos puros, com espaços opcionais nas extremidades, ou um inteiro seguro não negativo. O campo é numérico com 6 dígitos e não tem máscara, então qualquer outra string é rejeitada.
+- Um valor com menos de 6 dígitos é completado com zeros à esquerda: `1`, `'1'` e `'000001'` são todos o código `000001`. `cst` é lido da mesma forma, completado para 3 dígitos.
+- Só a lista de códigos entra no bundle com esta função, não as descrições que `getClassTrib` retorna.
+
+```javascript
+import { isValidClassTrib } from '@brazilian-utils/brazilian-utils';
+
+isValidClassTrib('200001'); // true
+isValidClassTrib(1); // true (completado para '000001')
+isValidClassTrib('200001', { cst: '200' }); // true
+isValidClassTrib('200001', { cst: '000' }); // false (a classificação pertence ao CST 200)
+isValidClassTrib('999999'); // false
+isValidClassTrib('220001'); // false (excluído pelo Informe Técnico 2025.002 v.1.60)
+isValidClassTrib('c200001'); // false (não é uma forma documentada)
+```
+
+### getClassTrib
+
+Busca um cClassTrib e retorna a sua classificação oficial. O resultado é um registro `ClassTrib`: `{ code, cst, name, description }`.
+
+- Valem a mesma tabela e as mesmas regras de leitura do código de `isValidClassTrib`. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+- A opção `cst` existe só em `isValidClassTrib`, já que o registro retornado aqui já traz o seu CST em `cst`.
+- `cst` é o CST-IBS/CBS a que a classificação pertence, os 3 primeiros dígitos do seu código; `name` é o nome reduzido que a tabela oficial dá para apresentação (a coluna "Nome cClassTrib") e `description` a situação a que se refere (a coluna "Descrição cClassTrib").
+- A redação legal que a planilha também traz em cada linha (o artigo da Lei Complementar nº 214/2025 e dos dois regulamentos) não é distribuída.
+
+```javascript
+import { getClassTrib } from '@brazilian-utils/brazilian-utils';
+
+getClassTrib('000002');
+// {
+//   code: '000002',
+//   cst: '000',
+//   name: 'Exploração de via',
+//   description: 'Exploração de via, observado o art. 11 da Lei Complementar nº 214, de 2025.',
+// }
+getClassTrib(2)?.code; // '000002'
+getClassTrib('999999'); // null
+getClassTrib('220001'); // null (excluído pelo Informe Técnico 2025.002 v.1.60)
+getClassTrib('c200001'); // null (não é uma forma documentada)
+```
+
+Fonte: as abas CST e cClassTrib da planilha "Tabela de Classificação Tributária do IBS e CBS" que o [Portal Nacional da NF-e publica em "Documentos" > "Diversos"](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9nus=) (a versão publicada em 23/06/2026), divulgada pelo [Informe Técnico 2025.002](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=) (v.1.60), e a [Nota Técnica 2025.002-RTC](https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=), campos UB13 e UB14.
+
+## GTIN (código de barras de produto)
+
+### isValidGtin
+
+Verifica se um GTIN (Global Trade Item Number, o número sob um código de barras EAN/UPC) é válido.
+
+- Cobre as quatro estruturas das GS1 General Specifications, as mesmas quatro que a NF-e aceita em `cEAN` e `cEANTrib`: GTIN-8, GTIN-12 (UPC), GTIN-13 (EAN) e GTIN-14 (DUN-14).
+- **Opções** (`IsValidGtinOptions`): `lengths` aceita só alguns dos quatro tamanhos. O padrão são os quatro.
+- O valor deve ser uma string de 8, 12, 13 ou 14 dígitos, fora os espaços em volta, cujo último dígito é o dígito verificador módulo 10 da GS1: pesos 3 e 1 alternados a partir da direita, e a soma subtraída do múltiplo de dez igual ou imediatamente superior. É o que as regras I03-10 e I12-10 da Nota Técnica 2021.003 da SEFAZ verificam (rejeições 611 e 612).
+- Zeros à esquerda contam, então um número nunca é aceito, e um valor com máscara (`'7 890000 000017'`) é rejeitado em vez de ter seus dígitos extraídos.
+- O literal `'SEM GTIN'`, que a NF-e usa para produto sem GTIN, não é um GTIN e portanto não é válido aqui: teste por ele antes de chamar.
+- O prefixo não muda o veredito. Os Números de Circulação Restrita (prefixos 02, 04 e 20 a 29, os códigos que a loja imprime nas etiquetas da própria balança) e as faixas de ISSN, ISBN e cupons têm a mesma estrutura e o mesmo dígito verificador, e a "Tabela Prefixo GS1", contra a qual a SEFAZ valida o `cEAN`, lista essas faixas como válidas; use `getGtinInfo` para distingui-las.
+- O prefixo também não é conferido contra a lista de Organizações Membro da GS1: a GS1 segue atribuindo faixas, e uma cópia dessa lista passaria a recusar números válidos conforme envelhecesse. Se o número está cadastrado (a consulta ao Cadastro Centralizado de GTIN que a SEFAZ faz para os prefixos 789 e 790) não dá para verificar offline.
+
+```javascript
+import { isValidGtin } from '@brazilian-utils/brazilian-utils';
+
+isValidGtin('7890000000017'); // true (GTIN-13, prefixo da GS1 Brasil)
+isValidGtin('6291041500213'); // true (o exemplo da página de dígito verificador da GS1)
+isValidGtin('78912342'); // true (GTIN-8)
+isValidGtin('061414112345'); // true (GTIN-12)
+isValidGtin('17890000000014'); // true (GTIN-14)
+isValidGtin('7890000000018'); // false (dígito verificador errado)
+isValidGtin('17890000000014', { lengths: [8, 12, 13] }); // false (GTIN-14 não aceito)
+isValidGtin('7 890000 000017'); // false (somente dígitos)
+isValidGtin('SEM GTIN'); // false
+isValidGtin('0000000000000'); // false (só zeros, nunca alocado pelo GS1)
+```
+
+### getGtinInfo
+
+Extrai os campos de um GTIN, como um `GtinInfo`.
+
+- Retorna `null` quando o valor não é um GTIN válido, sob as mesmas regras de `isValidGtin`.
+- O prefixo é lido como a "Tabela Prefixo GS1" do Portal da NF-e orienta: o valor é preenchido com zeros à esquerda até 14 dígitos, e o prefixo são as posições 7 a 9 quando as posições 2 a 6 são zeros (um GTIN-8, ou um GTIN-14 que agrupa um) e as posições 2 a 4 caso contrário. O primeiro dígito, o zero de preenchimento ou o dígito indicador, nunca faz parte do prefixo, então um GTIN-12 tem um prefixo que começa com `0`, e um GTIN-14 tem o prefixo do GTIN que ele agrupa.
+
+| Campo | Descrição |
+| --- | --- |
+| `type` | `'GTIN-8'`, `'GTIN-12'`, `'GTIN-13'` ou `'GTIN-14'` (`GtinType`), conforme o tamanho com que o valor foi escrito |
+| `length` | `8`, `12`, `13` ou `14` (`GtinLength`) |
+| `prefix` | O Prefixo GS1 de três dígitos, ou um Prefixo GS1-8 quando os seis primeiros dígitos da forma de 14 dígitos são zeros, o que cobre todo GTIN-8 e o Prefixo GS1 `0000000`. Identifica a Organização Membro da GS1 que licenciou o número, não o país de origem |
+| `isBrazilian` | `true` quando o prefixo é um dos da GS1 Brasil, `789` ou `790`, o que a NT 2021.003 chama de "prefixo do Brasil" |
+| `isRestrictedCirculation` | `true` quando o prefixo está em uma faixa que a GS1 reserva para Números de Circulação Restrita (Prefixos GS1 02, 04 e 20 a 29; Prefixos GS1-8 000 a 099 e 200 a 299, faixa em que também cai o Prefixo GS1 `0000000`, já que sua forma de 14 dígitos começa com seis zeros), ou seja, o número só é único dentro de uma empresa ou região |
+| `checkDigit` | O dígito verificador módulo 10, o último dígito |
+
+```javascript
+import { getGtinInfo } from '@brazilian-utils/brazilian-utils';
+
+getGtinInfo('7890000000017');
+// { type: 'GTIN-13', length: 13, prefix: '789', isBrazilian: true,
+//   isRestrictedCirculation: false, checkDigit: 7 }
+
+getGtinInfo('17890000000014');
+// { type: 'GTIN-14', length: 14, prefix: '789', isBrazilian: true,
+//   isRestrictedCirculation: false, checkDigit: 4 }
+
+getGtinInfo('061414112345');
+// { type: 'GTIN-12', length: 12, prefix: '006', isBrazilian: false,
+//   isRestrictedCirculation: false, checkDigit: 5 }
+
+getGtinInfo('2000000000015')?.isRestrictedCirculation; // true (número interno da loja)
+getGtinInfo('7890000000018'); // null (dígito verificador errado)
+```
+
+Fonte: [GS1 General Specifications](https://ref.gs1.org/standards/genspecs/), [calculadora de dígito verificador da GS1](https://www.gs1.org/services/how-calculate-check-digit-manually), [Nota Técnica 2021.003 da SEFAZ](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D) e [Tabela Prefixo GS1](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D) do Portal da NF-e.
+
+## CID-10
+
+### isValidCid10
+
+Valida um código CID-10 contra as tabelas que o DATASUS publica, a edição brasileira da CID-10 (Classificação Estatística Internacional de Doenças e Problemas Relacionados à Saúde, 10ª revisão), o código que atestados médicos e sistemas de saúde carregam.
+
+- Os dois níveis da classificação são válidos: as categorias de 3 caracteres (`A00`) e as subcategorias de 4 caracteres, escritas com o ponto (`A00.0`) ou sem ele (`A000`).
+- Maiúsculas, minúsculas e espaços em volta são ignorados. Qualquer outra coisa (outro separador, um quinto caractere, um sufixo de cruz ou asterisco, um valor que não é string) é rejeitada.
+- As tabelas da V2008 são a única fonte: um código que não está nelas, como `U07.1` (COVID-19), não é encontrado.
+- Só uma tabela de códigos é lida (cerca de 27 KB minificada), não as descrições que `getCid10` carrega.
+
+```javascript
+import { isValidCid10 } from '@brazilian-utils/brazilian-utils';
+
+isValidCid10('A00.0'); // true
+isValidCid10('a000'); // true
+isValidCid10('A00'); // true (uma categoria)
+isValidCid10('I10'); // true (uma categoria que não é subdividida)
+isValidCid10('A00.5'); // false (A00 não tem a subcategoria 5)
+isValidCid10('I10.0'); // false (I10 não tem subcategorias)
+isValidCid10('A00-0'); // false (não é uma forma documentada)
+```
+
+### formatCid10
+
+Formata um código CID-10 do jeito que ele é impresso: em maiúsculas, com um ponto entre a categoria de 3 caracteres e o quarto caractere da subcategoria. Só a estrutura muda; use `isValidCid10` para conferir um código com as tabelas.
+
+- A máscara é aplicada até onde o valor vai, então uma categoria fica como está e o ponto só aparece com o quarto caractere.
+- Caracteres fora da máscara são descartados e o valor é limitado a 4 caracteres.
+
+```javascript
+import { formatCid10 } from '@brazilian-utils/brazilian-utils';
+
+formatCid10('A000'); // A00.0
+formatCid10('f322'); // F32.2
+formatCid10('A00'); // A00 (uma categoria não tem ponto)
+formatCid10('A00.0'); // A00.0
+```
+
+### parseCid10
+
+Remove a formatação de um código CID-10, mantém apenas letras e dígitos, em maiúsculas, e limita o resultado aos 4 caracteres de uma subcategoria, a forma que as tabelas do DATASUS guardam.
+
+- Um valor mais curto passa até onde ele vai.
+
+```javascript
+import { parseCid10 } from '@brazilian-utils/brazilian-utils';
+
+parseCid10('A00.0'); // 'A000'
+parseCid10('f32.2'); // 'F322'
+parseCid10('A00'); // 'A00'
+```
+
+### getCid10
+
+Busca um código CID-10 e retorna a sua descrição oficial em português. O resultado é um registro `Cid10`: `{ code, description }`.
+
+- Mesmas regras de entrada de `isValidCid10`. O `code` vem em maiúsculas e sem o ponto. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
+- Este é o utilitário mais pesado do pacote: ele embute as 2045 categorias e 12188 subcategorias com suas descrições, cerca de 1 MB minificado (147 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
+
+```javascript
+import { getCid10 } from '@brazilian-utils/brazilian-utils';
+
+getCid10('A00.0'); // { code: 'A000', description: 'Cólera devida a Vibrio cholerae 01, biótipo cholerae' }
+getCid10('a000'); // { code: 'A000', description: 'Cólera devida a Vibrio cholerae 01, biótipo cholerae' }
+getCid10('A00'); // { code: 'A00', description: 'Cólera' }
+getCid10('A00.5'); // null
+getCid10('A00-0'); // null (não é uma forma documentada)
+```
+
+Fonte: [tabelas da CID-10 V2008 que o DATASUS publica em CSV](http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm).
 
 ## Texto
 

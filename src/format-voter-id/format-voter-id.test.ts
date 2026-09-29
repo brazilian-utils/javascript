@@ -3,7 +3,7 @@ import * as fc from "fast-check";
 import { anyValue, digits, digitsUpTo } from "../_internals/test/arbitraries";
 import { expectAlwaysReturnsType } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { formatVoterId } from "./format-voter-id";
+import { type FormatVoterIdOptions, formatVoterId } from "./format-voter-id";
 
 describe("formatVoterId", () => {
 	it("should format voter ids", () => {
@@ -43,6 +43,23 @@ describe("formatVoterId", () => {
 		expect(formatVoterId("123456788019")).toBe("1234 5678 80 19");
 	});
 
+	it("should hide the first 3 digits and the 2 check digits when obfuscate is truthy", () => {
+		expect(formatVoterId("123456780124", { obfuscate: true })).toBe("***4 5678 01 **");
+		expect(formatVoterId(123_456_780_124, { obfuscate: true })).toBe("***4 5678 01 **");
+		expect(formatVoterId("1234567880191", { obfuscate: true })).toBe("***4 5678 8 01 **");
+		expect(formatVoterId("1234567880399", { obfuscate: true })).toBe("***4 5678 80 **");
+		expect(formatVoterId("12345", { obfuscate: true })).toBe("***4 5");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatVoterId("123456780124", { obfuscate: 1 })).toBe("***4 5678 01 **");
+	});
+
+	it("should behave exactly as without the option when obfuscate is falsy", () => {
+		expect(formatVoterId("123456780124", { obfuscate: false })).toBe("1234 5678 01 24");
+		expect(formatVoterId("1234567880191", {})).toBe("1234 5678 8 01 91");
+		// @ts-expect-error: intentionally not a boolean
+		expect(formatVoterId("1234567880191", { obfuscate: 0 })).toBe("1234 5678 8 01 91");
+	});
+
 	it("should return an empty string for null or undefined", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(formatVoterId(null)).toBe("");
@@ -64,8 +81,14 @@ describe("formatVoterId", () => {
 		test("should use the grouping documented for each of the two lengths", () => {
 			fc.assert(
 				fc.property(digits(12), digits(9), fc.constantFrom("01", "02"), (short, sequential, uf) => {
+					const extended = `${sequential}${uf}00`;
+
 					expect(formatVoterId(short)).toMatch(/^\d{4} \d{4} \d{2} \d{2}$/);
-					expect(formatVoterId(`${sequential}${uf}00`)).toMatch(/^\d{4} \d{4} \d \d{2} \d{2}$/);
+					expect(formatVoterId(extended)).toMatch(/^\d{4} \d{4} \d \d{2} \d{2}$/);
+					expect(formatVoterId(short, { obfuscate: true })).toMatch(/^\*{3}\d \d{4} \d{2} \*{2}$/);
+					expect(formatVoterId(extended, { obfuscate: true })).toMatch(
+						/^\*{3}\d \d{4} \d \d{2} \*{2}$/,
+					);
 				}),
 			);
 		});
@@ -85,8 +108,13 @@ describe("formatVoterId", () => {
 });
 
 describe("formatVoterId types", () => {
-	test("should take a string or number value and return a string", () => {
+	test("should take a string or number value and options and return a string", () => {
 		expectTypeOf(formatVoterId).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatVoterId).parameter(1).toEqualTypeOf<FormatVoterIdOptions | undefined>();
 		expectTypeOf(formatVoterId).returns.toEqualTypeOf<string>();
+	});
+
+	test("should type the obfuscate option as an optional boolean", () => {
+		expectTypeOf<FormatVoterIdOptions["obfuscate"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });
