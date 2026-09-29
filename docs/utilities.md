@@ -3711,14 +3711,17 @@ Source: [SINTEGRA state pages](http://www.sintegra.gov.br/insc_est.html), the [G
 
 Check if an email address is valid. A practical subset of the WHATWG HTML definition.
 
-- Local part: letters, digits and `_'+-.`, with no leading or trailing dot and no two dots in a row.
-- Domain: at least one dot, labels of up to 63 characters, final label 2 to 63 letters; quoted local parts and address literals are rejected.
+- Local part: letters, digits and `_'+-.`, with no leading or trailing dot, no trailing apostrophe and no two dots in a row, and at most 64 characters. The whole address is capped at 254 characters (RFC 5321, section 4.5.3.1); up to 2.4.0 there was no cap on either.
+- Domain: at least one dot, labels of up to 63 characters, final label 2 to 63 letters or a punycode label (`xn--`, up to 63 characters, so `user@example.xn--p1ai` is valid).
+- Rejected, although WHATWG allows some of them: quoted local parts, address literals, single label domains such as `user@localhost`, and the local part characters `! # $ % & * = ? ^ { | } ~`, the slash and the backtick.
 
 ```javascript
 import { isValidEmail } from '@brazilian-utils/brazilian-utils';
 
 isValidEmail('john.doe@hotmail.com'); // true
 isValidEmail('invalid.email'); // false
+isValidEmail('user@example.xn--p1ai'); // true (punycode top-level domain)
+isValidEmail('a%b@example.com'); // false (% is outside the accepted local part set)
 ```
 
 Source: [WHATWG HTML, valid e-mail address](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address) and [RFC 5322](https://www.rfc-editor.org/rfc/rfc5322).

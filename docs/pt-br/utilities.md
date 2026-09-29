@@ -3711,14 +3711,17 @@ Fonte: [páginas dos estados no SINTEGRA](http://www.sintegra.gov.br/insc_est.ht
 
 Valida um endereço de e-mail. Um subconjunto prático da definição do HTML da WHATWG.
 
-- Parte local: letras, dígitos e `_'+-.`, sem ponto no início ou no fim e sem dois pontos seguidos.
-- Domínio: pelo menos um ponto, rótulos de até 63 caracteres, rótulo final de 2 a 63 letras; partes locais entre aspas e literais de endereço são rejeitados.
+- Parte local: letras, dígitos e `_'+-.`, sem ponto no início ou no fim, sem apóstrofo no fim e sem dois pontos seguidos, com no máximo 64 caracteres. O endereço todo é limitado a 254 caracteres (RFC 5321, seção 4.5.3.1); até a 2.4.0 não havia limite em nenhum dos dois.
+- Domínio: pelo menos um ponto, rótulos de até 63 caracteres, rótulo final de 2 a 63 letras ou um rótulo punycode (`xn--`, até 63 caracteres, então `user@example.xn--p1ai` é válido).
+- Rejeitados, embora a WHATWG permita alguns: partes locais entre aspas, literais de endereço, domínios de um só rótulo como `user@localhost`, e os caracteres `! # $ % & * = ? ^ { | } ~`, a barra e a crase na parte local.
 
 ```javascript
 import { isValidEmail } from '@brazilian-utils/brazilian-utils';
 
 isValidEmail('john.doe@hotmail.com'); // true
 isValidEmail('invalid.email'); // false
+isValidEmail('user@example.xn--p1ai'); // true (domínio de topo punycode)
+isValidEmail('a%b@example.com'); // false (% fica fora do conjunto aceito na parte local)
 ```
 
 Fonte: [HTML da WHATWG, valid e-mail address](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address) e [RFC 5322](https://www.rfc-editor.org/rfc/rfc5322).
