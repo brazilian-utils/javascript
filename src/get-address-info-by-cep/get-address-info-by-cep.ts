@@ -368,6 +368,9 @@ const raceProviders = async (
  * `GetAddressInfoByCepServiceError`. Up to 2.4.0 it always won, so an outage could be reported
  * as an unknown CEP.
  *
+ * Once the lookup settles, the requests of the providers that lost the race are aborted, so a
+ * slow provider and its retries stop instead of running on in the background.
+ *
  * No request has a time limit of its own. Pass `options.timeoutMs` to bound the whole lookup, or
  * `options.signal` to cancel it.
  *
@@ -447,5 +450,6 @@ export const getAddressInfoByCep = async (
 	} finally {
 		clearTimeout(timer);
 		stopForwarding?.();
+		controller.abort();
 	}
 };

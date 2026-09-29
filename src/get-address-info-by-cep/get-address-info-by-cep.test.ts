@@ -280,6 +280,13 @@ describe("getAddressInfoByCep", () => {
 
 			it("should stop listening to options.signal once the lookup settles", async () => {
 				const controller = new AbortController();
+				const removed: string[] = [];
+				const removeEventListener = controller.signal.removeEventListener.bind(controller.signal);
+
+				controller.signal.removeEventListener = (type: string, ...rest: unknown[]): void => {
+					removed.push(type);
+					Reflect.apply(removeEventListener, undefined, [type, ...rest]);
+				};
 
 				await getAddressInfoByCep(VALID_CEP, {
 					providers: ["viacep"],
@@ -287,16 +294,57 @@ describe("getAddressInfoByCep", () => {
 				});
 				controller.abort(new Error("cancelled after the lookup"));
 
-				expect(requestSignal(0)?.aborted).toBe(false);
+				expect(removed).toEqual(["abort"]);
 			});
 
 			it("should clear the time limit once the lookup settles", async () => {
-				await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"], timeoutMs: 10 });
-				await new Promise((resolve) => {
-					setTimeout(resolve, 30);
+				const originalClearTimeout = globalThis.clearTimeout;
+				let cleared = 0;
+
+				globalThis.clearTimeout = (timer?: Parameters<typeof clearTimeout>[0]): void => {
+					cleared++;
+					originalClearTimeout(timer);
+				};
+
+				try {
+					await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"], timeoutMs: 60_000 });
+				} finally {
+					globalThis.clearTimeout = originalClearTimeout;
+				}
+
+				expect(cleared).toBe(1);
+			});
+
+			it("should abort the requests of the providers that lost the race once it settles", async () => {
+				fetchMock.mockImplementation((input: FetchInput, init?: RequestInit) => {
+					if (requestUrl(input).includes("viacep.com.br")) {
+						return createJsonResponse(viacepPayload);
+					}
+
+					return new Promise((_resolve, reject) => {
+						init?.signal?.addEventListener("abort", () => {
+							reject(new Error("aborted"));
+						});
+					});
 				});
 
-				expect(requestSignal(0)?.aborted).toBe(false);
+				const result = await getAddressInfoByCep(VALID_CEP);
+
+				expectDefaultAddress(result);
+				expect(requestSignal(0)?.aborted).toBe(true);
+				expect(requestSignal(1)?.aborted).toBe(true);
+			});
+
+			it("should abort the requests once the lookup rejects too", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ erro: true }),
+					brasilapi: createJsonResponse({}, 500),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP)).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+				expect(requestSignal(0)?.aborted).toBe(true);
 			});
 
 			it("should set no time limit without timeoutMs", async () => {
