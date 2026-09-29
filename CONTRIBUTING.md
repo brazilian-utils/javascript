@@ -288,9 +288,14 @@ pull request so the CI result is not a surprise.
 - **Mutation testing** (`npm run test:mutation`, [Stryker](https://stryker-mutator.io), config in
   `stryker.config.json`): mutates every source file except tests, constants and the test
   runtime shims, and runs the vitest suite against each mutant. The score must stay at or above
-  the `thresholds.break` value in the config. The `Mutation tests` workflow runs the whole suite on
-  every pull request and on every push to `main`, like the other checks (about 3 minutes); the
-  HTML report is attached to the run as the `mutation-report` artifact. A surviving mutant
+  the `thresholds.break` value in the config. The `Mutation tests` workflow runs on every pull request and on
+  every push to `main`. It uses Stryker's
+  [incremental mode](https://stryker-mutator.io/docs/stryker-js/incremental/): a pull request
+  only tests the mutants whose code or covering tests changed since its last run (or since
+  `main`'s), and `main` tests every mutant again. A change to a constants table, a test helper, a
+  dependency or the config makes every mutant run. Locally, `npm run test:mutation -- --incremental`
+  does the same against your previous run. The HTML report is attached to the run as the
+  `mutation-report` artifact. A surviving mutant
   means a test is missing (add one, with a literal expectation) or the code has a branch that can
   never matter (simplify it). Only when a mutant is truly equivalent, use
   `// Stryker disable next-line <MutatorName>: <reason>` right above the line; that is the one

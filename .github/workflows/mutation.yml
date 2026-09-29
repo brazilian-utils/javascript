@@ -30,17 +30,43 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Mutation test every file
-        if: ${{ github.event_name != 'push' }}
-        run: npm run test:mutation
+      # Incremental mode (https://stryker-mutator.io/docs/stryker-js/incremental/): Stryker keeps
+      # the result of every mutant in reports/stryker-incremental.json and, on the next run, only
+      # tests the mutants whose code or covering tests changed. A pull request starts from its own
+      # last run, or else from main's. Stryker cannot see a change outside the mutated files and the
+      # test files (a constants table, a test helper, a dependency, the config), so those files are
+      # hashed into the key: when one of them changes, no earlier result is reused.
+      - name: Restore the previous mutation results
+        id: incremental
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-incremental-${{ hashFiles('src/**/constants.ts', 'src/_internals/constants/**', 'src/_internals/test/**', 'src/index.ts', 'package-lock.json', 'stryker.config.json', 'vite.config.ts') }}-${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            stryker-incremental-${{ hashFiles('src/**/constants.ts', 'src/_internals/constants/**', 'src/_internals/test/**', 'src/index.ts', 'package-lock.json', 'stryker.config.json', 'vite.config.ts') }}-${{ github.ref }}-
+            stryker-incremental-${{ hashFiles('src/**/constants.ts', 'src/_internals/constants/**', 'src/_internals/test/**', 'src/index.ts', 'package-lock.json', 'stryker.config.json', 'vite.config.ts') }}-refs/heads/main-
 
-      # On `main` the dashboard reporter also publishes the score to dashboard.stryker-mutator.io;
-      # pull requests keep the local reporters only, so a fork never needs the key.
+      - name: Mutation test the changed code
+        if: ${{ github.event_name != 'push' }}
+        run: npm run test:mutation -- --incremental
+
+      # On `main` every mutant is tested again (--force), so the published score and the baseline
+      # the pull requests start from never carry an old result. The dashboard reporter also
+      # publishes the score to dashboard.stryker-mutator.io; pull requests keep the local reporters
+      # only, so a fork never needs the key.
       - name: Mutation test every file and publish the score
         if: ${{ github.event_name == 'push' }}
         env:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-        run: npm run test:mutation -- --reporters clear-text,progress,html,json,dashboard
+        run: npm run test:mutation -- --incremental --force --reporters clear-text,progress,html,json,dashboard
+
+      # Saved even when a mutant survives: the results of the mutants that were tested stay valid.
+      - name: Save the mutation results
+        if: ${{ always() && hashFiles('reports/stryker-incremental.json') != '' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/stryker-incremental.json
+          key: ${{ steps.incremental.outputs.cache-primary-key }}
 
       - name: Upload the mutation report
         if: ${{ always() }}
