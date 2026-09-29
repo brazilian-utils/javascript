@@ -16,7 +16,8 @@ import { writeFileSync } from "node:fs";
 
 /** The source each generated file is rebuilt from, as named in the file's own header. */
 const DATASETS: Record<string, string> = {
-	"src/_internals/constants/banks.ts": "Banks (Banco Central, STR participants)",
+	"src/_internals/constants/bank-codes.ts": "Bank codes (Banco Central, STR participants)",
+	"src/_internals/constants/banks.ts": "Bank ISPBs and names (Banco Central, STR participants)",
 	"src/_internals/constants/cbo-descriptions.ts":
 		"CBO 2002 occupation titles (Ministério do Trabalho e Emprego)",
 	"src/_internals/constants/cbo.ts": "CBO 2002 occupation codes (Ministério do Trabalho e Emprego)",

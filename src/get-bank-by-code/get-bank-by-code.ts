@@ -1,4 +1,5 @@
-import { BANKS, type Bank } from "../_internals/constants/banks";
+import { type Bank } from "../_internals/constants/banks";
+import { readBanks } from "../_internals/read-banks/read-banks";
 import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 
 export type { Bank } from "../_internals/constants/banks";
@@ -34,7 +35,7 @@ export const getBankByCode = (code: string | number): Bank | null => {
 
 	const normalizedCode = digits.padStart(CODE_LENGTH, "0");
 
-	const bank = BANKS.find((candidate) => candidate.code === normalizedCode);
+	const bank = readBanks().find((candidate) => candidate.code === normalizedCode);
 
 	return bank ? { ...bank } : null;
 };

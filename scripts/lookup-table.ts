@@ -110,6 +110,36 @@ export const serializeTexts = (texts: readonly string[]): string => {
 };
 
 /**
+ * Writes lines of text as the source of a single string literal that holds them one per line.
+ * Each sits on a line of its own, ended by a line continuation that adds nothing to the value, so
+ * a refresh diffs to the lines that changed.
+ * @param {readonly string[]} lines - The lines, none of them holding a line break.
+ * @returns {string} The string literal.
+ */
+export const serializeLines = (lines: readonly string[]): string => {
+	const escaped = lines.map((line) => JSON.stringify(line).slice(1, -1));
+
+	return `"${escaped.join("\\n\\\n")}"`;
+};
+
+/**
+ * Writes items of one fixed width as the source of a single string literal that holds them one
+ * after the other. Each sits on a line of its own, ended by a line continuation that adds nothing
+ * to the value, so a refresh diffs to the items that changed.
+ * @param {readonly string[]} items - The items, every one the same number of characters.
+ * @returns {string} The string literal.
+ */
+export const serializeFixedWidth = (items: readonly string[]): string => {
+	const [first = ""] = items;
+
+	if (items.some((item) => item.length !== first.length || /["\\\n]/.test(item))) {
+		throw new Error("fixed width items are not all of one width, or hold a reserved character");
+	}
+
+	return `"${items.join("\\\n")}"`;
+};
+
+/**
  * Writes every generated file of a dataset, relative to the repository root.
  * @param {Record<string, string>} files - The content of each file, by its path.
  */

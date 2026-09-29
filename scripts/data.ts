@@ -39,6 +39,7 @@ const generators = [
 
 const generatedFiles = [
 	"./src/_internals/constants/municipality-area-codes.ts",
+	"./src/_internals/constants/bank-codes.ts",
 	"./src/_internals/constants/banks.ts",
 	"./src/_internals/constants/cbo-descriptions.ts",
 	"./src/_internals/constants/cbo.ts",

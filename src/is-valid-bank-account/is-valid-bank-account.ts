@@ -1,3 +1,4 @@
+import { COMPE_CODES } from "../_internals/constants/bank-codes";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
@@ -7,7 +8,6 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 import {
 	BANRISUL_ACCOUNT_WEIGHTS,
 	CITIBANK_ACCOUNT_WEIGHTS,
-	COMPE_CODES,
 	HSBC_AGENCY_ACCOUNT_WEIGHTS,
 	SANTANDER_WEIGHTS,
 	STRUCTURE_ONLY_BANK_CODES,

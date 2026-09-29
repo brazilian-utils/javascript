@@ -1,5 +1,6 @@
-import { BANKS, type Bank } from "../_internals/constants/banks";
+import { type Bank } from "../_internals/constants/banks";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { readBanks } from "../_internals/read-banks/read-banks";
 
 export type { Bank } from "../_internals/constants/banks";
 
@@ -51,7 +52,7 @@ export const getBankByIspb = (value: string | number): Bank | null => {
 	if (code === "") return null;
 
 	const ispb = code.padStart(ISPB_LENGTH, "0");
-	const bank = BANKS.find((candidate) => candidate.ispb === ispb);
+	const bank = readBanks().find((candidate) => candidate.ispb === ispb);
 
 	return bank ? { ...bank } : null;
 };
