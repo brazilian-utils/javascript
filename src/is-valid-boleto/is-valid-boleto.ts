@@ -1,4 +1,7 @@
+import { ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import {
+	BARCODE_FACTOR_INDEX,
+	BOLETO_BARCODE_LENGTH,
 	BOLETO_LENGTH,
 	CURRENCY_CODE_INDEX,
 	FACTOR_INDEX,
@@ -27,12 +30,13 @@ const isValidPartials = (digits: string): boolean => {
  * Whether position 4 holds the código de moeda `9` or the slip follows the Situação 2 layout
  * (`ISPB_ONLY_PREFIX`, then `ISPB_ONLY_ZEROS` from the factor on), the only place a `0` is
  * assigned.
- * @param {string} digits - The 47 digits of the linha digitável.
+ * @param {string} digits - The 47 digits of the linha digitável or the 44 of the barcode.
+ * @param {number} factorIndex - Where the fator de vencimento starts in `digits`.
  * @returns {boolean} Whether the código de moeda fits the slip.
  */
-const isValidCurrency = (digits: string): boolean =>
+const isValidCurrency = (digits: string, factorIndex: number): boolean =>
 	digits[CURRENCY_CODE_INDEX] === REAL_CURRENCY_CODE ||
-	(digits.startsWith(ISPB_ONLY_PREFIX) && digits.startsWith(ISPB_ONLY_ZEROS, FACTOR_INDEX));
+	(digits.startsWith(ISPB_ONLY_PREFIX) && digits.startsWith(ISPB_ONLY_ZEROS, factorIndex));
 
 const parseToBoleto = (digits: string): string => {
 	let result = "";
@@ -52,9 +56,14 @@ const isValidCheckDigit = (boleto: string): boolean => {
 /**
  * Validates if a Brazilian bank slip (boleto) number is valid.
  *
- * Supports the 47 digit "cobrança bancária" linha digitável and, additionally, the
+ * Supports the 47 digit "cobrança bancária" linha digitável, its 44 digit barcode (código de
+ * barras: bank code, código de moeda, the módulo 11 check digit in position 5, fator de vencimento,
+ * amount and free field, checked by the same rules as the linha digitável) and, additionally, the
  * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
- * barcode, both starting with `8`.
+ * barcode, both starting with `8`. A 44 digit value starting with `8` is only ever an arrecadação
+ * barcode (the `8` is its product identifier), never a cobrança bancária one with a bank code
+ * `8xx`, which the two layouts could not be told apart by. Up to 2.4.0 the cobrança bancária
+ * barcode was rejected.
  *
  * The usual mask characters (whitespace, `.`, `-` and `/`) are accepted between digits, a run of
  * them included, and whitespace around the value; any other character makes the value invalid,
@@ -74,6 +83,7 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * @example
  * ```typescript
  * isValidBoleto("00190000090114971860168524522114675860000102656"); // true
+ * isValidBoleto("00196758600001026560000001149718606852452211"); // true (cobrança bancária barcode)
  * isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656"); // true
  * isValidBoleto("846100000005246100291102005460339004695895061080"); // true (arrecadação)
  * isValidBoleto("00170000010114971860168524522114275860000102656"); // false (código de moeda 7)
@@ -108,9 +118,17 @@ export const isValidBoleto = (value: string): boolean => {
 
 	if (parseArrecadacao(digits)) return true;
 
+	if (digits.length === BOLETO_BARCODE_LENGTH) {
+		return (
+			!digits.startsWith(ARRECADACAO_PRODUCT) &&
+			isValidCurrency(digits, BARCODE_FACTOR_INDEX) &&
+			isValidCheckDigit(digits)
+		);
+	}
+
 	if (digits.length !== BOLETO_LENGTH) return false;
 
-	if (!isValidCurrency(digits)) return false;
+	if (!isValidCurrency(digits, FACTOR_INDEX)) return false;
 
 	if (!isValidPartials(digits)) return false;
 

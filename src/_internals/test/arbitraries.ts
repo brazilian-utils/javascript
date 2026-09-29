@@ -348,6 +348,19 @@ export const processosJuridicos = (): fc.Arbitrary<string> => {
 		});
 };
 
+/**
+ * The 44 digit barcode of a cobrança bancária linha digitável: the fields in barcode order,
+ * without the three field check digits.
+ * @param {string} line - A valid 47 digit linha digitável.
+ * @returns {string} The barcode of the same slip.
+ */
+export const toBoletoBarcode = (line: string): string =>
+	line.slice(0, 4) +
+	line.slice(32, 47) +
+	line.slice(4, 9) +
+	line.slice(10, 20) +
+	line.slice(21, 31);
+
 /** Arbitraries of valid boletos, built the same way as the documents. */
 
 /**

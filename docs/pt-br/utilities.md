@@ -342,7 +342,7 @@ const ceps = await getCepInfoByAddress({
 
 Valida um boleto ([meio de pagamento brasileiro](https://pt.wikipedia.org/wiki/Boleto_banc%C3%A1rio)).
 
-- Aceita a linha digitável de 47 dígitos da "cobrança bancária" e, do "boleto de arrecadação", seja a linha digitável de 48 dígitos, seja o código de barras de 44 dígitos.
+- Aceita a linha digitável de 47 dígitos da "cobrança bancária", o seu código de barras de 44 dígitos (código do banco, código de moeda `9`, o dígito verificador módulo 11 na posição 5, fator de vencimento, valor e campo livre) e, do "boleto de arrecadação", seja a linha digitável de 48 dígitos, seja o código de barras de 44 dígitos. Um valor de 44 dígitos começando por `8` é sempre um código de barras de arrecadação (o `8` é o seu identificador de produto), então o código de barras de cobrança bancária de um código de banco `8xx` não é aceito, pois os dois não se distinguiriam. Até a 2.4.0 o código de barras da cobrança bancária era rejeitado.
 - Os caracteres de máscara usuais (espaço, `.`, `-` e `/`) são aceitos entre os dígitos; qualquer outro caractere invalida o valor, então `abc` + uma linha digitável + `zzz` é rejeitado, não lido como os seus dígitos (até a 2.4.0 todo não dígito era descartado).
 - O código de moeda (posição 4 do código de barras e da linha digitável da cobrança bancária) precisa ser `9` (real), o único código que a Carta-Circular BCB nº 2.926/2000 atribui. A única exceção é o boleto da "Situação 2" da Convenção da Cobrança da FEBRABAN, emitido por instituição identificada apenas pelo ISPB: código de banco `988`, código de moeda `0`, fator de vencimento `0000` e o ISPB, completado com zeros, no lugar do valor. Qualquer outro dígito é rejeitado.
 
@@ -350,6 +350,7 @@ Valida um boleto ([meio de pagamento brasileiro](https://pt.wikipedia.org/wiki/B
 import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
 
 isValidBoleto('00190000090114971860168524522114675860000102656'); // true
+isValidBoleto('00196758600001026560000001149718606852452211'); // true (código de barras da cobrança bancária)
 isValidBoleto('846100000005246100291102005460339004695895061080'); // true (boleto de arrecadação)
 isValidBoleto('00170000010114971860168524522114275860000102656'); // false (código de moeda 7)
 isValidBoleto('abc00190000090114971860168524522114675860000102656zzz'); // false (letras em volta dos dígitos)
@@ -405,6 +406,7 @@ generateBoleto({ type: 'arrecadacao' }); // "84610000000524610029110200546033900
 Extrai informações de um boleto (valor, data de vencimento, código do banco). Retorna `null` quando o valor não é um boleto válido.
 
 - **Opções** (`GetBoletoInfoOptions`): `referenceDate` resolve o ciclo do "fator de vencimento" a partir dessa data em vez de agora.
+- Lê a linha digitável de 47 dígitos e o código de barras de 44 dígitos de um boleto de cobrança bancária, e as formas de arrecadação, do mesmo modo que `isValidBoleto` as aceita.
 - Retorna um `BoletoInfo`: `amount` em centavos, `expirationDate` e o `bankCode` de três dígitos. `expirationDate` é `null` quando o boleto não traz fator de vencimento (um fator abaixo de `1000`).
 - O ciclo do fator de vencimento reiniciou em 22/02/2025, então um fator pode significar uma de duas datas separadas por 9000 dias. Não há comunicado da FEBRABAN publicado sobre o reinício; a regra está em manuais de banco, como o [do Bradesco](https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf) (Versão 17). `referenceDate` escolhe entre elas; informe-a sempre que a resposta precisar ser estável.
 - A janela é de cerca de 8 anos para trás e 15 anos para a frente de `referenceDate`: um boleto que venceu há mais de uns 8 anos dela é lido como o próximo ciclo (uma data no futuro), então, para ler um boleto antigo, informe uma `referenceDate` próxima da data de emissão. Uma `referenceDate` que não seja um `Date` válido é ignorada e usa-se agora.
@@ -416,6 +418,9 @@ import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
 
 getBoletoInfo('00190000090114971860168524522114675860000102656');
 // { amount: 102656, expirationDate: Date, bankCode: '001' }
+
+getBoletoInfo('00196758600001026560000001149718606852452211');
+// o mesmo boleto lido do código de barras de 44 dígitos
 
 getBoletoInfo('00190000090114971860168524522114675860000102656', {
   referenceDate: new Date(2018, 6, 1)

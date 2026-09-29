@@ -342,14 +342,16 @@ const ceps = await getCepInfoByAddress({
 
 Check if a boleto ([brazilian payment method](https://en.wikipedia.org/wiki/Boleto)) is valid.
 
-- Accepts the 47 digit "cobrança bancária" linha digitável and, for the "boleto de arrecadação", either its 48 digit linha digitável or its 44 digit barcode.
+- Accepts the 47 digit "cobrança bancária" linha digitável, its 44 digit barcode (bank code, código de moeda `9`, the módulo 11 check digit in position 5, fator de vencimento, amount and free field) and, for the "boleto de arrecadação", either its 48 digit linha digitável or its 44 digit barcode. A 44 digit value starting with `8` is only ever an arrecadação barcode (the `8` is its product identifier), so a cobrança bancária barcode of a bank code `8xx` is not accepted, as the two could not be told apart. Up to 2.4.0 the cobrança bancária barcode was rejected.
 - The usual mask characters (whitespace, `.`, `-` and `/`) are accepted between digits; any other character makes the value invalid, so `abc` + a linha digitável + `zzz` is rejected, not read as its digits (up to 2.4.0 every non-digit was dropped).
 - The código de moeda (position 4 of the cobrança bancária barcode and linha digitável) must be `9` (real), the only code Carta-Circular BCB nº 2.926/2000 assigns. The one exception is the "Situação 2" slip of the FEBRABAN Convenção da Cobrança, issued by an institution identified only by its ISPB: bank code `988`, código de moeda `0`, fator de vencimento `0000` and the ISPB, padded with zeros, where the amount would be. Any other digit is rejected.
 
 ```javascript
 import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
 
+isValidBoleto('00196758600001026560000001149718606852452211'); // true (cobrança bancária barcode)
 isValidBoleto('00190000090114971860168524522114675860000102656'); // true
+isValidBoleto('00196758600001026560000001149718606852452211'); // true (cobrança bancária barcode)
 isValidBoleto('846100000005246100291102005460339004695895061080'); // true (boleto de arrecadação)
 isValidBoleto('00170000010114971860168524522114275860000102656'); // false (código de moeda 7)
 isValidBoleto('abc00190000090114971860168524522114675860000102656zzz'); // false (letters around the digits)
@@ -405,6 +407,7 @@ generateBoleto({ type: 'arrecadacao' }); // "84610000000524610029110200546033900
 Extract information from a boleto (amount, expiration date, bank code). Returns `null` when the value is not a valid boleto.
 
 - **Options** (`GetBoletoInfoOptions`): `referenceDate` resolves the "fator de vencimento" cycle as of that date instead of now.
+- Reads the 47 digit linha digitável and the 44 digit barcode of a cobrança bancária slip, and the arrecadação forms, the same way as `isValidBoleto` accepts them.
 - Returns a `BoletoInfo`: `amount` in cents, `expirationDate` and the three digit `bankCode`. `expirationDate` is `null` when the slip carries no fator de vencimento (a factor below `1000`).
 - The fator de vencimento cycle reset on 22/02/2025, so a factor can mean either of two dates 9000 days apart. No FEBRABAN communiqué on the reset is published; the rule is in bank manuals, such as [Bradesco's](https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf) (Versão 17). `referenceDate` picks between them; pass it whenever the answer has to stay stable.
 - The window is about 8 years back and 15 years ahead of `referenceDate`: a slip due more than about 8 years before it is read as the next cycle (a date in the future), so to read an old slip pass a `referenceDate` near its issue date. A `referenceDate` that is not a valid `Date` is ignored and now is used.
@@ -416,6 +419,9 @@ import { getBoletoInfo } from '@brazilian-utils/brazilian-utils';
 
 getBoletoInfo('00190000090114971860168524522114675860000102656');
 // { amount: 102656, expirationDate: Date, bankCode: '001' }
+
+getBoletoInfo('00196758600001026560000001149718606852452211');
+// same slip read from its 44 digit barcode
 
 getBoletoInfo('00190000090114971860168524522114675860000102656', {
   referenceDate: new Date(2018, 6, 1)

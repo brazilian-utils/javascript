@@ -1,4 +1,16 @@
-import { ISPB_INDEX, ISPB_ONLY_PREFIX } from "../_internals/constants/boleto";
+import {
+	AMOUNT_INDEX,
+	AMOUNT_LENGTH,
+	BARCODE_AMOUNT_INDEX,
+	BARCODE_FACTOR_INDEX,
+	BARCODE_ISPB_INDEX,
+	BOLETO_BARCODE_LENGTH,
+	FACTOR_INDEX,
+	FACTOR_LENGTH,
+	ISPB_INDEX,
+	ISPB_LENGTH,
+	ISPB_ONLY_PREFIX,
+} from "../_internals/constants/boleto";
 import { parseArrecadacao } from "../_internals/parse-arrecadacao/parse-arrecadacao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
@@ -104,9 +116,10 @@ export type GetBoletoInfoOptions = {
  * than a partial result, the way every other getter of this package answers a lookup it cannot
  * resolve (`getFormatLicensePlate`, `getMunicipality`).
  *
- * Supports the 47 digit "cobrança bancária" linha digitável and, additionally, the
- * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
- * barcode, both starting with `8`. Arrecadação bank slips also return `type`, `segment`,
+ * Supports the 47 digit "cobrança bancária" linha digitável, its 44 digit barcode (read for the
+ * same fields, the amount from positions 10 to 19 and the fator de vencimento from 6 to 9) and,
+ * additionally, the "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or
+ * 44 digit barcode, both starting with `8`. Arrecadação bank slips also return `type`, `segment`,
  * `value` and `hasEffectiveValue`, and, carrying neither a bank code nor a fator de vencimento,
  * come back with `bankCode` set to `""` and `expirationDate` set to `null` rather than with those
  * two keys missing.
@@ -141,6 +154,11 @@ export type GetBoletoInfoOptions = {
  *   referenceDate: new Date(2025, 5, 15),
  * });
  * // { amount: 102656, expirationDate: new Date(2018, 6, 15), bankCode: '001' }
+ *
+ * getBoletoInfo('00196758600001026560000001149718606852452211', {
+ *   referenceDate: new Date(2025, 5, 15),
+ * });
+ * // { amount: 102656, expirationDate: new Date(2018, 6, 15), bankCode: '001' } (the barcode of the same slip)
  *
  * getBoletoInfo('98800000060114971860168524522114100000018236120');
  * // { amount: 0, expirationDate: null, bankCode: '988', ispb: '18236120' }
@@ -191,16 +209,27 @@ export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): Bo
 
 	const bankCode = sanitized.slice(0, 3);
 
+	const isBarcode = sanitized.length === BOLETO_BARCODE_LENGTH;
+	const factorIndex = isBarcode ? BARCODE_FACTOR_INDEX : FACTOR_INDEX;
+	const amountIndex = isBarcode ? BARCODE_AMOUNT_INDEX : AMOUNT_INDEX;
+
 	const expirationDate = getExpirationDate(
-		Number(sanitized.slice(33, 37)),
+		Number(sanitized.slice(factorIndex, factorIndex + FACTOR_LENGTH)),
 		resolveReferenceDate(options?.referenceDate),
 	);
 
 	if (sanitized.startsWith(ISPB_ONLY_PREFIX)) {
-		return { amount: 0, expirationDate, bankCode, ispb: sanitized.slice(ISPB_INDEX) };
+		const ispbIndex = isBarcode ? BARCODE_ISPB_INDEX : ISPB_INDEX;
+
+		return {
+			amount: 0,
+			expirationDate,
+			bankCode,
+			ispb: sanitized.slice(ispbIndex, ispbIndex + ISPB_LENGTH),
+		};
 	}
 
-	const amount = Number(sanitized.slice(37, 47));
+	const amount = Number(sanitized.slice(amountIndex, amountIndex + AMOUNT_LENGTH));
 
 	return { amount, expirationDate, bankCode };
 };
