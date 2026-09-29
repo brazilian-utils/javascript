@@ -343,6 +343,7 @@ const ceps = await getCepInfoByAddress({
 Check if a boleto ([brazilian payment method](https://en.wikipedia.org/wiki/Boleto)) is valid.
 
 - Accepts the 47 digit "cobrança bancária" linha digitável and, for the "boleto de arrecadação", either its 48 digit linha digitável or its 44 digit barcode.
+- The usual mask characters (whitespace, `.`, `-` and `/`) are accepted between digits; any other character makes the value invalid, so `abc` + a linha digitável + `zzz` is rejected, not read as its digits (up to 2.4.0 every non-digit was dropped).
 - The código de moeda (position 4 of the cobrança bancária barcode and linha digitável) must be `9` (real), the only code Carta-Circular BCB nº 2.926/2000 assigns. The one exception is the "Situação 2" slip of the FEBRABAN Convenção da Cobrança, issued by an institution identified only by its ISPB: bank code `988`, código de moeda `0`, fator de vencimento `0000` and the ISPB, padded with zeros, where the amount would be. Any other digit is rejected.
 
 ```javascript
@@ -351,6 +352,7 @@ import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
 isValidBoleto('00190000090114971860168524522114675860000102656'); // true
 isValidBoleto('846100000005246100291102005460339004695895061080'); // true (boleto de arrecadação)
 isValidBoleto('00170000010114971860168524522114275860000102656'); // false (código de moeda 7)
+isValidBoleto('abc00190000090114971860168524522114675860000102656zzz'); // false (letters around the digits)
 isValidBoleto('98800000060114971860168524522114100000018236120'); // true (Situação 2: bank 988, moeda 0, ISPB)
 ```
 

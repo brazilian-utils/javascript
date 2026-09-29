@@ -343,6 +343,7 @@ const ceps = await getCepInfoByAddress({
 Valida um boleto ([meio de pagamento brasileiro](https://pt.wikipedia.org/wiki/Boleto_banc%C3%A1rio)).
 
 - Aceita a linha digitável de 47 dígitos da "cobrança bancária" e, do "boleto de arrecadação", seja a linha digitável de 48 dígitos, seja o código de barras de 44 dígitos.
+- Os caracteres de máscara usuais (espaço, `.`, `-` e `/`) são aceitos entre os dígitos; qualquer outro caractere invalida o valor, então `abc` + uma linha digitável + `zzz` é rejeitado, não lido como os seus dígitos (até a 2.4.0 todo não dígito era descartado).
 - O código de moeda (posição 4 do código de barras e da linha digitável da cobrança bancária) precisa ser `9` (real), o único código que a Carta-Circular BCB nº 2.926/2000 atribui. A única exceção é o boleto da "Situação 2" da Convenção da Cobrança da FEBRABAN, emitido por instituição identificada apenas pelo ISPB: código de banco `988`, código de moeda `0`, fator de vencimento `0000` e o ISPB, completado com zeros, no lugar do valor. Qualquer outro dígito é rejeitado.
 
 ```javascript
@@ -351,6 +352,7 @@ import { isValidBoleto } from '@brazilian-utils/brazilian-utils';
 isValidBoleto('00190000090114971860168524522114675860000102656'); // true
 isValidBoleto('846100000005246100291102005460339004695895061080'); // true (boleto de arrecadação)
 isValidBoleto('00170000010114971860168524522114275860000102656'); // false (código de moeda 7)
+isValidBoleto('abc00190000090114971860168524522114675860000102656zzz'); // false (letras em volta dos dígitos)
 isValidBoleto('98800000060114971860168524522114100000018236120'); // true (Situação 2: banco 988, moeda 0, ISPB)
 ```
 

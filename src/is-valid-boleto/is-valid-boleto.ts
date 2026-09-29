@@ -12,6 +12,8 @@ import { parseArrecadacao } from "../_internals/parse-arrecadacao/parse-arrecada
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CHECK_DIGIT_POSITION, CONVERT_POSITIONS, PARTIALS } from "./constants";
 
+const FORMAT_REGEX = /^\d+(?:[\s.\-/]+\d+)*$/;
+
 const isValidPartials = (digits: string): boolean => {
 	for (const { start, end, checkIndex } of PARTIALS) {
 		const partial = digits.slice(start, end);
@@ -54,6 +56,11 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
  * barcode, both starting with `8`.
  *
+ * The usual mask characters (whitespace, `.`, `-` and `/`) are accepted between digits, a run of
+ * them included, and whitespace around the value; any other character makes the value invalid,
+ * so a linha digitável wrapped in letters is rejected instead of being read as its digits. Up to
+ * 2.4.0 every non-digit was dropped.
+ *
  * The código de moeda in position 4 of the cobrança bancária barcode (and of the linha
  * digitável) must be `9` (real), the only code Carta-Circular BCB nº 2.926/2000 assigns. The one
  * exception is the FEBRABAN Convenção da Cobrança "Situação 2" slip of an institution identified
@@ -70,6 +77,7 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656"); // true
  * isValidBoleto("846100000005246100291102005460339004695895061080"); // true (arrecadação)
  * isValidBoleto("00170000010114971860168524522114275860000102656"); // false (código de moeda 7)
+ * isValidBoleto("abc00190000090114971860168524522114675860000102656zzz"); // false (letters around the digits)
  * isValidBoleto("98800000060114971860168524522114100000018236120"); // true (Situação 2: 988, moeda 0, ISPB)
  * ```
  *
@@ -94,6 +102,8 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const isValidBoleto = (value: string): boolean => {
+	if (typeof value !== "string" || !FORMAT_REGEX.test(value.trim())) return false;
+
 	const digits = sanitizeToDigits(value);
 
 	if (parseArrecadacao(digits)) return true;

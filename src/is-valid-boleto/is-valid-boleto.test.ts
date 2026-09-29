@@ -42,6 +42,27 @@ describe("isValidBoleto", () => {
 			expect(isValidBoleto(false)).toBe(false);
 		});
 
+		test("when letters or other stray characters surround or split an otherwise valid value", () => {
+			expect(isValidBoleto("00190000090114971860168524522114675860000102656")).toBe(true);
+			expect(isValidBoleto("abc00190000090114971860168524522114675860000102656zzz")).toBe(false);
+			expect(isValidBoleto("00190000090114971860168524522114675860000102656x")).toBe(false);
+			expect(isValidBoleto("00190.00009 01149.718601 68524.522114 6 7586000010265,6")).toBe(false);
+			expect(isValidBoleto("(00190000090114971860168524522114675860000102656)")).toBe(false);
+			expect(isValidBoleto("846100000005246100291102005460339004695895061080\n!")).toBe(false);
+			expect(isValidBoleto("8461000000a05246100291102005460339004695895061080")).toBe(false);
+		});
+
+		test("when a mask character leads or trails the digits, or is the whole value", () => {
+			expect(isValidBoleto(".00190000090114971860168524522114675860000102656")).toBe(false);
+			expect(isValidBoleto("00190000090114971860168524522114675860000102656-")).toBe(false);
+			expect(isValidBoleto(" . - / ")).toBe(false);
+		});
+
+		test("when it is an array holding a valid value, not read as its string", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidBoleto(["00190000090114971860168524522114675860000102656"])).toBe(false);
+		});
+
 		test("when check digit mod10 is invalid", () => {
 			expect(isValidBoleto("00190000020114971860168524522114675860000102656")).toBe(false);
 		});
@@ -89,6 +110,13 @@ describe("isValidBoleto", () => {
 
 		test("when is a boleto valid with mask", () => {
 			expect(isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656")).toBe(true);
+		});
+
+		test("when the mask uses any of the mask characters, a run of them or surrounding whitespace", () => {
+			expect(
+				isValidBoleto("  00190.00009 - 01149.718601 / 68524.522114 . 6 - 75860000102656\n"),
+			).toBe(true);
+			expect(isValidBoleto("00190/00009/01149/718601/68524/522114/6/75860000102656")).toBe(true);
 		});
 	});
 
