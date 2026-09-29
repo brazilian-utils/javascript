@@ -3437,7 +3437,7 @@ The ISBN (International Standard Book Number) has 13 digits since 2007: the GS1 
 
 Check if an ISBN-13 is valid: the `978` or `979` prefix and the modulus 10 check digit of the ISBN Users' Manual (the first 12 digits weighed alternately 1 and 3, the same rule as a GTIN-13).
 
-- The value may be printed: an `ISBN` label in front (`ISBN`, `ISBN-13`, optionally followed by a colon) and a single hyphen or space between two digits are accepted; anything else, a run of separators included, makes the value invalid.
+- A single hyphen or space between two digits, and spaces around the value, are accepted; anything else, a run of separators or the `ISBN` label a book prints in front of the number included, makes the value invalid.
 - A `979-0` number is an ISMN (printed music), not an ISBN: the RangeMessage gives that range no ISBN group, so it is rejected.
 - Whether the group and the registrant are assigned is not checked; see `getIsbnInfo`.
 - The printed example of the Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, does not carry the check digit the rule gives (`0`), so it is rejected.
@@ -3446,19 +3446,19 @@ Check if an ISBN-13 is valid: the `978` or `979` prefix and the modulus 10 check
 import { isValidIsbn } from '@brazilian-utils/brazilian-utils';
 
 isValidIsbn('9788533302273'); // true
-isValidIsbn('ISBN 978-65-89999-01-0'); // true
+isValidIsbn('978-65-89999-01-0'); // true
 isValidIsbn('978-85-333-0227-4'); // false (wrong check digit)
 isValidIsbn('8533302276'); // false (the 10 digit form)
 ```
 
 ### parseIsbn
 
-Remove the `ISBN` label, the hyphens and every other character that is not a digit, keeping at most 13 digits. The label goes first, so the `13` of `ISBN-13` is not kept.
+Remove the hyphens and every other character that is not a digit, keeping at most 13 digits.
 
 ```javascript
 import { parseIsbn } from '@brazilian-utils/brazilian-utils';
 
-parseIsbn('ISBN-13: 978-85-333-0227-3'); // '9788533302273'
+parseIsbn('978-85-333-0227-3'); // '9788533302273'
 ```
 
 ### getIsbnInfo
@@ -3482,7 +3482,7 @@ Split a valid ISBN-13 into its elements, as an `IsbnInfo`, following the ranges 
 ```javascript
 import { getIsbnInfo } from '@brazilian-utils/brazilian-utils';
 
-getIsbnInfo('ISBN 978-65-89999-01-0');
+getIsbnInfo('978-65-89999-01-0');
 // { isbn: '9786589999010', prefix: '978', registrationGroup: '65', registrant: '89999',
 //   publication: '01', checkDigit: 0, agency: 'Brazil', isBrazilian: true }
 
