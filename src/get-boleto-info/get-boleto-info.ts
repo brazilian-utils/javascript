@@ -131,10 +131,11 @@ export type GetBoletoInfoOptions = {
  * A `referenceDate` that is not a valid `Date` (an invalid one, a string, a number) is ignored
  * and now is used, so the call never throws.
  *
- * The windows are about 8 years back (3000 days) and 15 years ahead (5500 days) of
- * `referenceDate`: a slip due more than about 8 years before it is read as the next cycle, a date
- * in the future, and one due more than about 15 years after it as the previous cycle. To read an
- * old slip, pass a `referenceDate` near the date it was issued.
+ * The windows are 3000 days back and 5500 days ahead of `referenceDate`, and the nearer candidate
+ * wins when neither falls inside them. So a slip due up to 3499 days (about 9.5 years) before
+ * `referenceDate` keeps its date, and one due 3500 days (about 9.6 years) or more before it is
+ * read as the next cycle, a date in the future. To read an old slip, pass a `referenceDate` near
+ * the date it was issued.
  *
  * A FEBRABAN Convenção da Cobrança "Situação 2" slip, issued by an institution identified only
  * by its ISPB (bank code `988`, código de moeda `0`, see `isValidBoleto`), carries that ISPB where
