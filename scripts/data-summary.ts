@@ -31,8 +31,12 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/cid10.ts": "CID-10 codes (DATASUS)",
 	"src/_internals/constants/cnae-descriptions.ts": "CNAE subclass descriptions (IBGE/CONCLA)",
 	"src/_internals/constants/cnae.ts": "CNAE subclass codes (IBGE/CONCLA)",
+	"src/_internals/constants/class-trib-codes.ts":
+		"cClassTrib codes (Portal Nacional da NF-e, Informe Técnico 2025.002)",
+	"src/_internals/constants/class-trib.ts":
+		"cClassTrib descriptions (Portal Nacional da NF-e, Informe Técnico 2025.002)",
 	"src/_internals/constants/ibs-cbs.ts":
-		"CST-IBS/CBS and cClassTrib (Portal Nacional da NF-e, Informe Técnico 2025.002)",
+		"CST-IBS/CBS (Portal Nacional da NF-e, Informe Técnico 2025.002)",
 	"src/_internals/constants/isbn-ranges.ts": "ISBN ranges (International ISBN Agency)",
 	"src/_internals/constants/municipality-codes.ts": "Municipality codes (IBGE)",
 	"src/_internals/constants/municipality-names.ts": "Municipality names (IBGE)",

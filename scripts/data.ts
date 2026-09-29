@@ -51,6 +51,8 @@ const generatedFiles = [
 	"./src/_internals/constants/cid10.ts",
 	"./src/_internals/constants/cnae-descriptions.ts",
 	"./src/_internals/constants/cnae.ts",
+	"./src/_internals/constants/class-trib-codes.ts",
+	"./src/_internals/constants/class-trib.ts",
 	"./src/_internals/constants/ibs-cbs.ts",
 	"./src/_internals/constants/isbn-ranges.ts",
 	"./src/_internals/constants/municipality-codes.ts",

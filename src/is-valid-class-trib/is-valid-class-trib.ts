@@ -1,5 +1,5 @@
+import { CLASS_TRIB_CODES } from "../_internals/constants/class-trib-codes";
 import {
-	CLASS_TRIB_CODES,
 	CLASS_TRIB_FORMAT_REGEX,
 	CLASS_TRIB_LENGTH,
 	CST_IBS_CBS_LENGTH,

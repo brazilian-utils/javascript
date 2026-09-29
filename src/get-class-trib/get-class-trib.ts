@@ -1,7 +1,7 @@
+import { CLASS_TRIB_TABLE } from "../_internals/constants/class-trib";
 import {
 	CLASS_TRIB_FORMAT_REGEX,
 	CLASS_TRIB_LENGTH,
-	CLASS_TRIB_TABLE,
 	CST_IBS_CBS_LENGTH,
 } from "../_internals/constants/ibs-cbs";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";

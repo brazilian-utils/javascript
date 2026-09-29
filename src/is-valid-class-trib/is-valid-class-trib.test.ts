@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { CLASS_TRIB_CODES } from "../_internals/constants/ibs-cbs";
+import { CLASS_TRIB_CODES } from "../_internals/constants/class-trib-codes";
 import { anyGarbage, digitsOfOtherLength } from "../_internals/test/arbitraries";
 import { expectNeverThrowsWithOptions } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
