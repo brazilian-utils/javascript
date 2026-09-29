@@ -49,6 +49,7 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/service-items.ts":
 		"LC 116/2003 service list subitems (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/states.ts": "States (IBGE)",
+	"src/_internals/constants/legal-nature-codes.ts": "Legal nature codes (IBGE/CONCLA)",
 	"src/is-valid-legal-nature/constants.ts": "Legal natures (IBGE/CONCLA)",
 	"src/is-valid-ncm/constants.ts": "NCM codes (Siscomex)",
 };

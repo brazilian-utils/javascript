@@ -62,6 +62,7 @@ const generatedFiles = [
 	"./src/_internals/constants/service-item-descriptions.ts",
 	"./src/_internals/constants/service-items.ts",
 	"./src/_internals/constants/states.ts",
+	"./src/_internals/constants/legal-nature-codes.ts",
 	"./src/is-valid-legal-nature/constants.ts",
 	"./src/is-valid-ncm/constants.ts",
 ];

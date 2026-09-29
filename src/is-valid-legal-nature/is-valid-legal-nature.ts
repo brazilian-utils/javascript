@@ -1,6 +1,6 @@
+import { LEGAL_NATURE_CODES } from "../_internals/constants/legal-nature-codes";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { readLegalNatureCode } from "../_internals/read-legal-nature-code/read-legal-nature-code";
-import { LEGAL_NATURE_CODES } from "./constants";
 
 /**
  * Validates if a Brazilian legal nature (natureza jurídica) code exists.
