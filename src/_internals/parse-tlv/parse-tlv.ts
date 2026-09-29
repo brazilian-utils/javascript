@@ -2,10 +2,14 @@ export type TlvFields = Record<string, string | undefined>;
 
 const SEGMENT_LENGTH = 2;
 
-// Stryker disable next-line Regex: id and length are always sliced to at most SEGMENT_LENGTH (2) characters, so dropping either anchor cannot change whether this matches
-const SEGMENT_REGEX = /^\d{2}$/;
+const ZERO_CODE = 48;
 
-const EMPTY_LENGTH = "00";
+const readTwoDigits = (value: string, index: number): number => {
+	const tens = value.charCodeAt(index) - ZERO_CODE;
+	const units = value.charCodeAt(index + 1) - ZERO_CODE;
+
+	return tens >= 0 && tens <= 9 && units >= 0 && units <= 9 ? tens * 10 + units : -1;
+};
 
 /**
  * Parses an EMV® style TLV (tag-length-value) string into its objects.
@@ -40,16 +44,16 @@ export const parseTlv = (value: string): TlvFields | null => {
 	let index = 0;
 
 	while (index < value.length) {
-		const id = value.slice(index, index + SEGMENT_LENGTH);
-		const length = value.slice(index + SEGMENT_LENGTH, index + SEGMENT_LENGTH * 2);
+		const length = readTwoDigits(value, index + SEGMENT_LENGTH);
 
-		if (!SEGMENT_REGEX.test(id) || !SEGMENT_REGEX.test(length) || length === EMPTY_LENGTH)
-			return null;
+		if (readTwoDigits(value, index) === -1 || length <= 0) return null;
+
+		const id = value.slice(index, index + SEGMENT_LENGTH);
 
 		if (Object.hasOwn(fields, id)) return null;
 
 		const start = index + SEGMENT_LENGTH * 2;
-		const end = start + Number(length);
+		const end = start + length;
 
 		if (end > value.length) return null;
 

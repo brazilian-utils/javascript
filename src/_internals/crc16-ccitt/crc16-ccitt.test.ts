@@ -1,6 +1,20 @@
 import { describe, expect, test } from "../test/runtime";
 import { crc16Ccitt } from "./crc16-ccitt";
 
+const reference = (value: string): string => {
+	let crc = 0xff_ff;
+
+	for (const byte of new TextEncoder().encode(value)) {
+		crc ^= byte << 8;
+
+		for (let bit = 0; bit < 8; bit++) {
+			crc = (crc & 0x80_00) === 0 ? (crc << 1) & 0xff_ff : ((crc << 1) ^ 0x10_21) & 0xff_ff;
+		}
+	}
+
+	return crc.toString(16).toUpperCase().padStart(4, "0");
+};
+
 describe("crc16Ccitt", () => {
 	test("should match the CRC-16/CCITT-FALSE check value", () => {
 		expect(crc16Ccitt("123456789")).toBe("29B1");
@@ -38,6 +52,12 @@ describe("crc16Ccitt", () => {
 				"00020104141234567890123426580014BR.GOV.BCB.PIX0136123e4567-e12b-12d1-a456-42665544000027300012BR.COM.OUTRO011001234567895204000053039865406123.455802BR5917NOME DO RECEBEDOR6008BRASILIA61087007490062190515RP12345678-201980390012BR.COM.OUTRO01190123.ABCD.3456.WXYZ6304",
 			),
 		).toBe("AD38");
+	});
+
+	test("should checksum the UTF-8 bytes of a value with non-ASCII characters", () => {
+		for (const value of ["é", "abc é", "日本語", "a😀b", "\uD800", "São Paulo"]) {
+			expect(crc16Ccitt(value)).toBe(reference(value));
+		}
 	});
 
 	test("should change when the payload changes", () => {
