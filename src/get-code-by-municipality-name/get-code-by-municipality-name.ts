@@ -20,7 +20,8 @@ export type GetCodeByMunicipalityNameParams = {
  * name written without a space the dataset carries does not match. The casing is folded to upper
  * case, the direction Unicode expands `"ß"` to `"SS"` in. `stateCode` ignores casing
  * and surrounding whitespace, as every util that takes a state does. The same name in another state
- * is another municipality, so the state code is required.
+ * is another municipality, so the state code is required. Missing or malformed `params`, and a
+ * name that is not a string or is empty, give `null`.
  *
  * It is the synchronous, offline counterpart of `get_code_by_municipality_name` of the Python
  * library, which asks the IBGE API over the network.
@@ -46,14 +47,10 @@ export type GetCodeByMunicipalityNameParams = {
 export const getCodeByMunicipalityName = (
 	params: GetCodeByMunicipalityNameParams,
 ): string | null => {
-	// `normalizeStateCode` folds anything that is not a string to `""`, which is no state, so a
-	// missing or malformed `params` needs no check of its own.
 	const normalizedStateCode = normalizeStateCode(params?.stateCode);
 
 	if (!hasOwnKey(CITIES_DATA, normalizedStateCode)) return null;
 
-	// `normalizeMunicipalityName` folds a value that is not a string, or an empty one, down to
-	// `""`, which no municipality name normalizes to, so it needs no check of its own here.
 	const normalizedName = normalizeMunicipalityName(params.municipalityName);
 	const match = CITIES_DATA[normalizedStateCode].find(
 		([name]) => normalizeMunicipalityName(name) === normalizedName,

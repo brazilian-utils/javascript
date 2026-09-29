@@ -33,8 +33,6 @@ export const getMunicipalityByCode = (code: string | number): Municipality | nul
 	// Stryker disable next-line ConditionalExpression: without this guard a null matches no municipality code, all strings, so the loop below returns null all the same; the guard also narrows the type of `digits`.
 	if (digits === null) return null;
 
-	// Every real municipality code is exactly 7 digits, so a `digits` of the wrong length simply
-	// finds no match in the loop below; there is no need to pre-validate its length here first.
 	for (const stateCode of STATE_CODES) {
 		const match = CITIES_DATA[stateCode].find(
 			([, municipalityCode]) => municipalityCode === digits,

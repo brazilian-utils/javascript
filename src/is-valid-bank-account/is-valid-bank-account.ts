@@ -368,7 +368,7 @@ export const isValidBankAccount = (params: IsValidBankAccountParams): boolean =>
 
 	if (agencyDigits.length === 0 || agencyDigits.length > 5) return false;
 	if (accountDigits.length === 0 || accountDigits.length > 13) return false;
-	// Stryker disable next-line ConditionalExpression,LogicalOperator: every path below also rejects a malformed checkDigit on its own — validateWithRule requires digit.length===1 before it ever compares, and validateGeneric compares against 1 or 2 character strings, so a 0, 3+ character checkDigit can never match either way.
+	// Stryker disable next-line ConditionalExpression,LogicalOperator: every path below also rejects a malformed checkDigit on its own: validateWithRule requires digit.length===1 before it ever compares, and validateGeneric compares against 1 or 2 character strings, so a 0, 3+ character checkDigit can never match either way.
 	if (checkDigit.length === 0 || checkDigit.length > 2) return false;
 
 	if (!isListedBankCode(bankCodeDigits)) return false;

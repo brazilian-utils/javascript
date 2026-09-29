@@ -42,18 +42,14 @@ const getErrorCode = (error: unknown): string | undefined => {
 
 	const causeCode = "code" in cause ? cause.code : undefined;
 
-	// Stryker disable next-line ConditionalExpression: the retryable code set only ever
-	// matches an exact string, so a non-string causeCode reaching that check behaves identically to
-	// undefined; the type check below exists only to satisfy the string | undefined return type.
+	// Stryker disable next-line ConditionalExpression: the check only narrows the type
 	return typeof causeCode === "string" ? causeCode : undefined;
 };
 
 const isRetryableFetchError = (error: unknown): boolean => {
 	const code = getErrorCode(error);
 
-	// Stryker disable next-line ConditionalExpression: the retryable code set only ever
-	// matches an exact string, so an undefined code reaching that check behaves identically to
-	// skipping it; the undefined check below exists only to satisfy Set<string>#has's parameter type.
+	// Stryker disable next-line ConditionalExpression: the check only narrows the type
 	if (code !== undefined && readRetryableCodes().has(code)) {
 		return true;
 	}

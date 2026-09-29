@@ -198,12 +198,13 @@ export const PROTOTYPE_KEYS: string[] = Object.getOwnPropertyNames(Object.protot
 /** A date, or anything at all: what a business day util may be handed as its date argument. */
 export const anyBusinessDayDate: fc.Arbitrary<unknown> = fc.oneof(businessDayDates, fc.anything());
 
-/** A number of business days, or anything at all: what a business day util may be asked to walk. */
+/**
+ * A number of business days, or anything at all: what a business day util may be asked to walk.
+ * A huge integer (1e308 passes `Number.isInteger`) walks the whole supported year range before
+ * returning null, so integers beyond 1000 in magnitude are clamped to keep each run bounded.
+ */
 export const anyBusinessDayAmount: fc.Arbitrary<unknown> = fc.oneof(
 	fc.integer({ min: -200, max: 200 }),
-	// A huge integer (1e308 passes Number.isInteger) is valid input that walks the whole supported
-	// year range before returning null, tens of milliseconds each; a hundred of them under Stryker's
-	// instrumented dry run exceed the test timeout, so they are clamped and the walk stays bounded.
 	fc
 		.anything()
 		.map((value) =>
@@ -379,7 +380,6 @@ export const boletos = (type?: "bancario" | "arrecadacao"): fc.Arbitrary<string>
 				.map((parts) => assembleBoletoArrecadacao(parts))
 		: fc
 				.record({
-					// Bank code, the código de moeda 9 (real) and the start of the free field.
 					field1: fc.tuple(digits(3), digits(5)).map(([bank, free]) => `${bank}9${free}`),
 					field2: digits(10),
 					field3: digits(10),

@@ -376,11 +376,6 @@ export type { IsHolidayOptions } from "./is-holiday/is-holiday";
  * @deprecated Use `IsValidBankAccountParams` instead.
  */
 export type { IsValidBankAccountOptions } from "./is-valid-bank-account/is-valid-bank-account";
-// The deprecated aliases below are declared as constants rather than as renamed re-exports
-// (`export { formatCpf as formatCPF }`) so that their `@deprecated` tag survives into the bundled
-// declaration file: the bundler collapses every renamed re-export of the entry point into a single
-// `export { ... }` statement, which carries no documentation, while a `declare const` keeps the
-// comment written right above it.
 /**
  * Formats a CEP, the 1.x name of `formatCep`.
  *

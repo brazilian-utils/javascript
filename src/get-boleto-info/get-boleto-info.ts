@@ -93,7 +93,7 @@ const getExpirationDate = (factor: number, referenceDate: Date): Date | null => 
 
 		const distance = Math.abs(difference);
 
-		// Stryker disable next-line EqualityOperator: the two candidates are always exactly one cycle (9000 days) apart, so their distances can only tie at the cycle's exact midpoint (4500) — a point RANGE_AFTER (5500) already always accepts above via the early return, so a genuine tie can never reach this comparison
+		// Stryker disable next-line EqualityOperator: the two candidates are always exactly one cycle (9000 days) apart, so their distances can only tie at the cycle's exact midpoint (4500), a point RANGE_AFTER (5500) already always accepts above via the early return, so a genuine tie can never reach this comparison
 		if (distance < closestDistance) {
 			closestDistance = distance;
 			closest = days;

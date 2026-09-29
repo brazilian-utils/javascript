@@ -664,8 +664,8 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * alone, which the table does not carry.
  * @see Official: https://sapl.al.ro.leg.br/norma/3003
  * Lei RO nº 1.026, de 20/12/2001, the other law cited for Rondônia, whose art. 1º did create a
- * second feriado estadual — "Fica instituído feriado no Estado de Rondônia, o dia 18 de junho,
- * em homenagem aos evangélicos" — but which the STF struck down, so 18/06 has no entry.
+ * second feriado estadual, "Fica instituído feriado no Estado de Rondônia, o dia 18 de junho,
+ * em homenagem aos evangélicos", but which the STF struck down, so 18/06 has no entry.
  * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=2545186
  * STF ADI 3940, which voided that law. Decisão de julgamento of 20/03/2020, Tribunal Pleno,
  * sessão virtual: "O Tribunal, por unanimidade, julgou procedente o pedido formulado na ação

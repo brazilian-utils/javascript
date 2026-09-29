@@ -147,8 +147,7 @@ const fetchViaCep = async (cep: string, signal: AbortSignal): Promise<AddressInf
 	const response = await fetchWithRetry(`https://viacep.com.br/ws/${cep}/json/`, { signal });
 
 	if (!response.ok) {
-		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
-		// is checked when aggregating provider failures below, so this message is never observable.
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new Error(`ViaCEP request failed with status ${response.status}`);
 	}
 
@@ -156,8 +155,7 @@ const fetchViaCep = async (cep: string, signal: AbortSignal): Promise<AddressInf
 	const cepValue = asString(record["cep"]);
 
 	if (Boolean(record["erro"]) || cepValue === "") {
-		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
-		// is checked when aggregating provider failures below, so this message is never observable.
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
@@ -180,8 +178,7 @@ const fetchWidenet = async (cep: string, signal: AbortSignal): Promise<AddressIn
 	);
 
 	if (!response.ok) {
-		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
-		// is checked when aggregating provider failures below, so this message is never observable.
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new Error(`Widenet request failed with status ${response.status}`);
 	}
 
@@ -189,8 +186,7 @@ const fetchWidenet = async (cep: string, signal: AbortSignal): Promise<AddressIn
 	const codeValue = asString(record["code"]);
 
 	if (record["status"] !== 200 || record["ok"] !== true || codeValue === "") {
-		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
-		// is checked when aggregating provider failures below, so this message is never observable.
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
@@ -210,14 +206,12 @@ const fetchBrasilApi = async (cep: string, signal: AbortSignal): Promise<Address
 	const response = await fetchWithRetry(`https://brasilapi.com.br/api/cep/v1/${cep}`, { signal });
 
 	if (response.status === BRASIL_API_NOT_FOUND_STATUS) {
-		// Stryker disable next-line StringLiteral: only the class of a provider failure is checked
-		// when aggregating provider failures below, so this message is never observable.
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new AmbiguousNotFoundError("CEP não encontrado");
 	}
 
 	if (!response.ok) {
-		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
-		// is checked when aggregating provider failures below, so this message is never observable.
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new Error(`BrasilAPI request failed with status ${response.status}`);
 	}
 
@@ -225,8 +219,7 @@ const fetchBrasilApi = async (cep: string, signal: AbortSignal): Promise<Address
 	const cepValue = asString(record["cep"]);
 
 	if (Boolean(record["errors"]) || cepValue === "") {
-		// Stryker disable next-line StringLiteral: only `instanceof GetAddressInfoByCepNotFoundError`
-		// is checked when aggregating provider failures below, so this message is never observable.
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 

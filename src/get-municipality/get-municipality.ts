@@ -62,8 +62,6 @@ const getMunicipalityByCode = (code: string | number): [string, string] | null =
 		}
 	}
 
-	// `Map#get` never throws and simply misses for a key of the wrong length, so only the
-	// characters `readLookupDigits` turns down have to be checked above.
 	const entry = codeIndex.get(digits);
 
 	return entry ? [...entry] : null;
