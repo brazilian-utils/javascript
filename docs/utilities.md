@@ -689,7 +689,7 @@ Check if the access key (chave de acesso) of a national NFS-e, the Nota Fiscal d
 
 - The key is one block of 50 characters, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, all digits except an alphanumeric CNPJ in the Inscrição Federal.
 - The `NFS` literal the `Id` attribute of `infNFSe` puts in front of the key is stripped, with surrounding whitespace.
-- The DANFSe prints the key as a single block, so it has no printed mask; the mask characters `isValidCpf` reads (space, `.`, `-` or `/`, alone or in a run) are accepted at the boundaries of its fields (7-1-1-14-13-4-9-1), and one inside a field makes the value invalid.
+- The key has no printed mask, since the DANFSe prints it as a single block, so, unlike `isValidNfeKey`, a separator anywhere in it is rejected instead of being stripped.
 - The municipality code must start with an IBGE UF code; it is not looked up in the IBGE table.
 - `ambGer` must be `1` (the system of the municipality) or `2` (the Sistema Nacional NFS-e), and the registration type `1` (a CPF, left padded with `000`) or `2` (a CNPJ, numeric or alphanumeric), with a CPF or CNPJ whose own check digits are valid. Letters are accepted in a CNPJ only, and lower case is read as upper case, as `isValidCnpj` with `{ version: 2 }` reads it.
 - `nNFSe` must not be all zeros and the month must be 01 to 12.
@@ -705,8 +705,7 @@ isValidNfseKey('NFS35503082258716523000119000000000001226011357924683'); // true
 isValidNfseKey('43149021100040364478829000000000105725120484407255'); // true (CPF issuer, RS)
 isValidNfseKey('35503082212ABC34501DE35000000000001226091357924682'); // true (alphanumeric CNPJ issuer)
 isValidNfseKey('35503082258716523000119000000000001226011357924684'); // false (check digit)
-isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // true (split at its fields)
-isValidNfseKey('355030 82258716523000119000000000001226011357924683'); // false (a separator inside a field)
+isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // false (the key has no mask)
 ```
 
 ### parseNfseKey
@@ -770,7 +769,7 @@ Check if an Inscrição SUFRAMA is valid. It is the registration number the Supe
 - Returns `false` for a sector code of `00` and for a wrong módulo 11 check digit.
 - The sector and locality codes are not checked against a table, since the manual lists them only as examples.
 - The rule comes from the NF-e Manual de Orientação do Contribuinte (CONFAZ/ENCAT), not from the SUFRAMA, whose Resolução CAS nº 64/2021, art. 5º, only calls the inscrição "um número de identificação e controle" and gives no layout or check digit.
-- Accepts the mask characters `isValidCpf` reads (space, `.`, `-` and `/`, alone or in a run) between the fields, the check digit included (`20.5678.10-6`), and surrounding whitespace; any other character, or a separator inside a field, makes the value invalid.
+- Besides the usual mask characters, `(`, `)`, `,` and `*` are also ignored.
 
 ```javascript
 import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
@@ -2467,7 +2466,7 @@ Check if a voter ID number is valid. A voter ID has at most 12 digits, so a 13-d
 
 - A voter ID is an 8-digit sequential number, a 2-digit federative union code (`01` to `28`) and 2 check digits.
 - The TSE drops the leading zeros of the sequential number when it issues the ID, so a shorter value is read as the ID without them and left padded with zeros to 12 digits before it is checked (`123450159` is checked as `000123450159`). At least one sequential digit is required: the shortest accepted value has 5 digits.
-- Whitespace, dots, hyphens and slashes (the mask characters `isValidCpf` reads) are accepted around and between the groups. Any other character makes the value invalid.
+- Whitespace and dots are accepted around and between the groups. Any other character, a hyphen included, makes the value invalid.
 - Resolução TSE nº 23.659/2021, art. 36, which revoked Resolução TSE nº 21.538/2003 (art. 140), fixes the layout, the federative union table and two check digits "determinados com base no 'Módulo 11'". It gives no weights and no rule per state: the weights, and the rule that turns a remainder of 0 into 1 for São Paulo (`01`) and Minas Gerais (`02`), have no official source and follow the community references below.
 
 ```javascript
@@ -2835,7 +2834,7 @@ parseCaepf('293.118.610/001-84'); // '29311861000184'
 Check if a CBO (Classificação Brasileira de Ocupações) code exists in the official CBO 2002 table.
 
 - Accepts a string with the 6 digits or with the `NNNN-NN` mask, or a number.
-- A masked string needs separators (space, `.`, `-` or `/`, alone or in a run, as `isValidCpf` reads its mask) between the groups. Any other string is rejected instead of having its digits picked out.
+- A masked string needs a single separator (space, `.`, `-` or `/`) between the groups. Any other string is rejected instead of having its digits picked out.
 - Bare digits are left padded with zeros to 6, as a string or as a number. A masked value is read as written.
 
 ```javascript
@@ -3011,7 +3010,7 @@ parseNcm('8471'); // '8471' (a partial code is kept as written)
 Check if an NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) code exists in the official NBS 2.0 table, the code the national NFS-e carries in `cNBS`.
 
 - A code has 9 digits, printed as `N.NNNN.NN.NN`: the digit 1, the chapter, the position, the two subposition levels, the item and the subitem.
-- Accepts a string with the 9 digits or with the mask, with separators between the groups (alone or in a run) and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
+- Accepts a string with the 9 digits or with the mask, with a single separator between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
 - Only complete codes are valid: the chapter (`1.01`), position (`1.0101`) and subposition (`1.0101.1`) headings classify nothing by themselves.
 - The ANEXO B of the Sistema Nacional NFS-e lists the same 920 codes except three (`1.0402.29.00`, `1.0403.29.00` and `1.0904.40.00`), so a code valid here can still be refused by the NFS-e.
 
@@ -3106,7 +3105,7 @@ Source: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/l
 Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table, the consolidated Anexo II of Convênio SINIEF s/nº 1970 in force.
 
 - Only operable codes count: the group and subgroup headings, the codes ending in `00` and `50`, are rejected.
-- Accepts a string with the 4 digits or with the `N.NNN` form, with separators (space, `.`, `-` or `/`, alone or in a run), or a number. Any other string is rejected.
+- Accepts a string with the 4 digits or with the `N.NNN` form, with a single separator (space, `.`, `-` or `/`), or a number. Any other string is rejected.
 - No CFOP code starts with a zero, so nothing is padded.
 
 ```javascript
@@ -3160,7 +3159,7 @@ Check if a CEST (Código Especificador da Substituição Tributária) is listed 
 - Only the items in force count: an item the annexes mark as revoked is rejected.
 - The check is about the code alone: it does not tell whether the code suits a given NCM, nor whether a state applies the substituição tributária regime to it.
 - A CEST has 7 digits: the first two are the segment, the third to the fifth the item of the segment and the last two the specification of the item (cláusula sexta, IV).
-- Accepts a string with the 7 digits or with the `NN.NNN.NN` form the annexes print, with separators between the groups (alone or in a run) and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
+- Accepts a string with the 7 digits or with the `NN.NNN.NN` form the annexes print, with a single separator between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
 - The leading zero of segments 01 to 09 is part of the code, so a value written as bare digits is left padded with zeros to 7, as a string or as a number: `100100`, `'100100'` and `'0100100'` are the same code. A masked value is read as written.
 
 ```javascript
@@ -3237,7 +3236,7 @@ Check if a CST (Código de Situação Tributária) code is valid for a given tax
 | `cofins` | 2 digits | same table as `pis` |
 
 - **Options** (`IsValidCstOptions`): `tax` picks the table. Omitted, or outside those four values, every table is accepted.
-- Accepts a string with the 2 digits of a Tabela B code or the 3 digits of the ICMS form, or a number. The ICMS form may have separators (space, `.`, `-` or `/`, alone or in a run, as `isValidCpf` reads its mask) after the origin digit.
+- Accepts a string with the 2 digits of a Tabela B code or the 3 digits of the ICMS form, or a number. The ICMS form may have a single separator (space, `.`, `-` or `/`) after the origin digit.
 - A single digit is padded to the 3-digit ICMS form; a 2-digit string is a Tabela B code, while the number `7` is the ICMS code `007`.
 
 ```javascript
@@ -3438,7 +3437,7 @@ The ISBN (International Standard Book Number) has 13 digits since 2007: the GS1 
 
 Check if an ISBN-13 is valid: the `978` or `979` prefix and the modulus 10 check digit of the ISBN Users' Manual (the first 12 digits weighed alternately 1 and 3, the same rule as a GTIN-13).
 
-- The value may be printed: an `ISBN` label in front (`ISBN`, `ISBN-13`, optionally followed by a colon) and separators between two digits (space, `.`, `-` or `/`, alone or in a run, as `isValidCpf` reads its mask) are accepted; anything else, a leading or trailing separator included, makes the value invalid.
+- Separators between two digits (space, `.`, `-` or `/`, alone or in a run, as `isValidCpf` reads its mask) and spaces around the value are accepted; anything else, a leading or trailing separator or the `ISBN` label a book prints in front of the number included, makes the value invalid.
 - A `979-0` number is an ISMN (printed music), not an ISBN: the RangeMessage gives that range no ISBN group, so it is rejected.
 - Whether the group and the registrant are assigned is not checked; see `getIsbnInfo`.
 - The printed example of the Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, does not carry the check digit the rule gives (`0`), so it is rejected.
@@ -3447,19 +3446,19 @@ Check if an ISBN-13 is valid: the `978` or `979` prefix and the modulus 10 check
 import { isValidIsbn } from '@brazilian-utils/brazilian-utils';
 
 isValidIsbn('9788533302273'); // true
-isValidIsbn('ISBN 978-65-89999-01-0'); // true
+isValidIsbn('978-65-89999-01-0'); // true
 isValidIsbn('978-85-333-0227-4'); // false (wrong check digit)
 isValidIsbn('8533302276'); // false (the 10 digit form)
 ```
 
 ### parseIsbn
 
-Remove the `ISBN` label, the hyphens and every other character that is not a digit, keeping at most 13 digits. The label goes first, so the `13` of `ISBN-13` is not kept.
+Remove the hyphens and every other character that is not a digit, keeping at most 13 digits.
 
 ```javascript
 import { parseIsbn } from '@brazilian-utils/brazilian-utils';
 
-parseIsbn('ISBN-13: 978-85-333-0227-3'); // '9788533302273'
+parseIsbn('978-85-333-0227-3'); // '9788533302273'
 ```
 
 ### getIsbnInfo
@@ -3483,7 +3482,7 @@ Split a valid ISBN-13 into its elements, as an `IsbnInfo`, following the ranges 
 ```javascript
 import { getIsbnInfo } from '@brazilian-utils/brazilian-utils';
 
-getIsbnInfo('ISBN 978-65-89999-01-0');
+getIsbnInfo('978-65-89999-01-0');
 // { isbn: '9786589999010', prefix: '978', registrationGroup: '65', registrant: '89999',
 //   publication: '01', checkDigit: 0, agency: 'Brazil', isBrazilian: true }
 

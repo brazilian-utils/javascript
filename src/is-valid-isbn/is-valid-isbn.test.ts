@@ -31,11 +31,14 @@ describe("isValidIsbn", () => {
 		expect(isValidIsbn("979-10-90636-07-1")).toBe(true);
 	});
 
-	it("should accept the ISBN label, with or without -13 and a colon", () => {
-		expect(isValidIsbn("ISBN 978-85-333-0227-3")).toBe(true);
-		expect(isValidIsbn("ISBN-13: 978-85-333-0227-3")).toBe(true);
-		expect(isValidIsbn("isbn 9788533302273")).toBe(true);
-		expect(isValidIsbn(" ISBN:9788533302273 ")).toBe(true);
+	it("should accept whitespace around the value", () => {
+		expect(isValidIsbn(" 9788533302273 ")).toBe(true);
+	});
+
+	it("should reject the ISBN label, which is not part of the number, like any other validator", () => {
+		expect(isValidIsbn("ISBN 978-85-333-0227-3")).toBe(false);
+		expect(isValidIsbn("ISBN-13: 978-85-333-0227-3")).toBe(false);
+		expect(isValidIsbn("isbn 9788533302273")).toBe(false);
 	});
 
 	it("should accept a single whitespace or hyphen between any two digits", () => {
@@ -51,7 +54,7 @@ describe("isValidIsbn", () => {
 
 	it("should reject a wrong check digit, the Agência Brasileira do ISBN example included", () => {
 		expect(isValidIsbn("978-85-333-0227-4")).toBe(false);
-		expect(isValidIsbn("ISBN 978-65-89999-01-3")).toBe(false);
+		expect(isValidIsbn("978-65-89999-01-3")).toBe(false);
 	});
 
 	it("should reject the 10 digit ISBN", () => {
@@ -82,7 +85,6 @@ describe("isValidIsbn", () => {
 		expect(isValidIsbn("978853330227")).toBe(false);
 		expect(isValidIsbn("97885333022730")).toBe(false);
 		expect(isValidIsbn("")).toBe(false);
-		expect(isValidIsbn("ISBN")).toBe(false);
 	});
 
 	it("should reject a value that is not a string", () => {

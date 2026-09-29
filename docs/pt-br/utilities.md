@@ -689,7 +689,7 @@ Verifica se a chave de acesso de uma NFS-e nacional, a Nota Fiscal de Serviço e
 
 - A chave é um bloco único de 50 caracteres, `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, todos dígitos exceto um CNPJ alfanumérico na Inscrição Federal.
 - O literal `NFS` que o atributo `Id` de `infNFSe` coloca antes da chave é retirado, junto com os espaços nas extremidades.
-- O DANFSe imprime a chave em um único bloco, então ela não tem máscara impressa; os caracteres de máscara que o `isValidCpf` lê (espaço, `.`, `-` ou `/`, sozinhos ou em sequência) são aceitos nas divisões dos seus campos (7-1-1-14-13-4-9-1), e um separador dentro de um campo invalida o valor.
+- A chave não tem máscara impressa, já que o DANFSe a imprime em um único bloco, então, diferente do `isValidNfeKey`, um separador em qualquer ponto dela é rejeitado em vez de removido.
 - O código do município precisa começar com um código IBGE de UF; ele não é consultado na tabela do IBGE.
 - O `ambGer` precisa ser `1` (o sistema do município) ou `2` (o Sistema Nacional NFS-e), e o tipo de inscrição `1` (um CPF, preenchido com `000` à esquerda) ou `2` (um CNPJ, numérico ou alfanumérico), com um CPF ou CNPJ cujos próprios dígitos verificadores sejam válidos. Letras só são aceitas em um CNPJ, e minúsculas são lidas como maiúsculas, como o `isValidCnpj` com `{ version: 2 }` as lê.
 - O `nNFSe` não pode ser todo de zeros e o mês precisa estar entre 01 e 12.
@@ -705,8 +705,7 @@ isValidNfseKey('NFS35503082258716523000119000000000001226011357924683'); // true
 isValidNfseKey('43149021100040364478829000000000105725120484407255'); // true (emitente com CPF, RS)
 isValidNfseKey('35503082212ABC34501DE35000000000001226091357924682'); // true (emitente com CNPJ alfanumérico)
 isValidNfseKey('35503082258716523000119000000000001226011357924684'); // false (dígito verificador)
-isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // true (dividida nos campos)
-isValidNfseKey('355030 82258716523000119000000000001226011357924683'); // false (separador dentro de um campo)
+isValidNfseKey('3550308 2 2 58716523000119 0000000000012 2601 135792468 3'); // false (a chave não tem máscara)
 ```
 
 ### parseNfseKey
@@ -770,7 +769,7 @@ Valida uma Inscrição SUFRAMA. É o número de registro que a Superintendência
 - Retorna `false` para um código de setor `00` e para um dígito verificador módulo 11 errado.
 - Os códigos de setor e de localidade não são conferidos com uma tabela, pois o manual os lista apenas como exemplos.
 - A regra vem do Manual de Orientação do Contribuinte da NF-e (CONFAZ/ENCAT), não da SUFRAMA, cuja Resolução CAS nº 64/2021, art. 5º, só chama a inscrição de "um número de identificação e controle" e não traz layout nem dígito verificador.
-- Aceita os caracteres de máscara que o `isValidCpf` lê (espaço, `.`, `-` e `/`, sozinhos ou em sequência) entre os campos, inclusive antes do dígito verificador (`20.5678.10-6`), e espaços nas pontas; qualquer outro caractere, ou um separador dentro de um campo, invalida o valor.
+- Além dos caracteres de máscara usuais, `(`, `)`, `,` e `*` também são ignorados.
 
 ```javascript
 import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
@@ -2467,7 +2466,7 @@ Valida um título de eleitor. Um título tem no máximo 12 dígitos, então um v
 
 - Um título é um número sequencial de 8 dígitos, um código de unidade federativa de 2 dígitos (`01` a `28`) e 2 dígitos verificadores.
 - O TSE despreza os zeros à esquerda do número sequencial na emissão, então um valor mais curto é lido como o título sem eles e completado com zeros à esquerda até 12 dígitos antes da validação (`123450159` é validado como `000123450159`). É preciso ao menos um dígito sequencial: o menor valor aceito tem 5 dígitos.
-- Espaços, pontos, hífens e barras (os caracteres de máscara que o `isValidCpf` lê) são aceitos ao redor e entre os grupos. Qualquer outro caractere invalida o valor.
+- Espaços e pontos são aceitos ao redor e entre os grupos. Qualquer outro caractere, inclusive um hífen, invalida o valor.
 - A Resolução TSE nº 23.659/2021, art. 36, que revogou a Resolução TSE nº 21.538/2003 (art. 140), fixa o layout, a tabela das unidades federativas e dois dígitos verificadores "determinados com base no 'Módulo 11'". Ela não traz pesos nem regra por estado: os pesos e a regra que troca o resto 0 por 1 para São Paulo (`01`) e Minas Gerais (`02`) não têm fonte oficial e seguem as referências da comunidade abaixo.
 
 ```javascript
@@ -2835,7 +2834,7 @@ parseCaepf('293.118.610/001-84'); // '29311861000184'
 Valida um código CBO (Classificação Brasileira de Ocupações) contra a tabela oficial da CBO 2002.
 
 - Aceita uma string com os 6 dígitos ou com a máscara `NNNN-NN`, ou um número.
-- Uma string mascarada precisa de separadores (espaço, `.`, `-` ou `/`, sozinhos ou em sequência, como o `isValidCpf` lê a máscara dele) entre os grupos. Qualquer outra string é rejeitada, em vez de ter seus dígitos extraídos.
+- Uma string mascarada precisa de um único separador (espaço, `.`, `-` ou `/`) entre os grupos. Qualquer outra string é rejeitada, em vez de ter seus dígitos extraídos.
 - Dígitos sem máscara são completados com zeros à esquerda até 6, como string ou como número. Um valor mascarado é lido como foi escrito.
 
 ```javascript
@@ -3011,7 +3010,7 @@ parseNcm('8471'); // '8471' (um código parcial é mantido como está)
 Valida um código NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) contra a tabela oficial da NBS 2.0, o código que a NFS-e nacional leva em `cNBS`.
 
 - O código tem 9 dígitos, impressos como `N.NNNN.NN.NN`: o algarismo 1, o capítulo, a posição, os dois níveis de subposição, o item e o subitem.
-- Aceita uma string com os 9 dígitos ou com a máscara, com separadores entre os grupos (sozinhos ou em sequência) e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- Aceita uma string com os 9 dígitos ou com a máscara, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
 - Só códigos completos são válidos: os títulos de capítulo (`1.01`), posição (`1.0101`) e subposição (`1.0101.1`) não classificam nada por si sós.
 - O ANEXO B do Sistema Nacional NFS-e lista os mesmos 920 códigos menos três (`1.0402.29.00`, `1.0403.29.00` e `1.0904.40.00`), então um código válido aqui ainda pode ser recusado pela NFS-e.
 
@@ -3106,7 +3105,7 @@ Fonte: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lc
 Valida um código CFOP (Código Fiscal de Operações e Prestações) contra a tabela oficial, o Anexo II consolidado do Convênio SINIEF s/nº 1970 em vigor.
 
 - Só os códigos operáveis contam: os títulos de grupo e subgrupo, os códigos terminados em `00` e `50`, são rejeitados.
-- Aceita uma string com os 4 dígitos ou com a forma `N.NNN`, com separadores (espaço, `.`, `-` ou `/`, sozinhos ou em sequência), ou um número. Qualquer outra string é rejeitada.
+- Aceita uma string com os 4 dígitos ou com a forma `N.NNN`, com um único separador (espaço, `.`, `-` ou `/`), ou um número. Qualquer outra string é rejeitada.
 - Nenhum código CFOP começa com zero, então nada é completado.
 
 ```javascript
@@ -3160,7 +3159,7 @@ Valida um CEST (Código Especificador da Substituição Tributária) contra os a
 - Só os itens em vigor contam: um item que os anexos marcam como revogado é rejeitado.
 - A verificação é só do código: ela não diz se o código combina com um dado NCM, nem se um estado aplica o regime de substituição tributária a ele.
 - Um CEST tem 7 dígitos: os dois primeiros são o segmento, do terceiro ao quinto o item do segmento e os dois últimos a especificação do item (cláusula sexta, IV).
-- Aceita uma string com os 7 dígitos ou com a forma `NN.NNN.NN` que os anexos imprimem, com separadores entre os grupos (sozinhos ou em sequência) e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- Aceita uma string com os 7 dígitos ou com a forma `NN.NNN.NN` que os anexos imprimem, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
 - O zero à esquerda dos segmentos 01 a 09 faz parte do código, então um valor escrito apenas com dígitos é completado com zeros à esquerda até 7, como string ou como número: `100100`, `'100100'` e `'0100100'` são o mesmo código. Um valor mascarado é lido como foi escrito.
 
 ```javascript
@@ -3237,7 +3236,7 @@ Valida um código de CST (Código de Situação Tributária) para um tributo. In
 | `cofins` | 2 dígitos | mesma tabela do `pis` |
 
 - **Opções** (`IsValidCstOptions`): `tax` escolhe a tabela. Omitido, ou fora desses quatro valores, todas as tabelas são aceitas.
-- Aceita uma string com os 2 dígitos de um código da Tabela B ou os 3 dígitos da forma do ICMS, ou um número. A forma do ICMS pode ter separadores (espaço, `.`, `-` ou `/`, sozinhos ou em sequência, como o `isValidCpf` lê a máscara dele) depois do dígito de origem.
+- Aceita uma string com os 2 dígitos de um código da Tabela B ou os 3 dígitos da forma do ICMS, ou um número. A forma do ICMS pode ter um único separador (espaço, `.`, `-` ou `/`) depois do dígito de origem.
 - Um único dígito é completado até a forma de 3 dígitos do ICMS; uma string de 2 dígitos é um código da Tabela B, enquanto o número `7` é o código ICMS `007`.
 
 ```javascript
@@ -3438,7 +3437,7 @@ O ISBN (International Standard Book Number) tem 13 dígitos desde 2007: o prefix
 
 Verifica se um ISBN-13 é válido: o prefixo `978` ou `979` e o dígito verificador módulo 10 do Manual do Usuário do ISBN (os 12 primeiros dígitos com pesos alternados 1 e 3, a mesma regra do GTIN-13).
 
-- O valor pode vir impresso: o rótulo `ISBN` na frente (`ISBN`, `ISBN-13`, com ou sem dois-pontos) e separadores entre dois dígitos (espaço, `.`, `-` ou `/`, sozinhos ou em sequência, como o `isValidCpf` lê a máscara dele) são aceitos; qualquer outra coisa, inclusive um separador no começo ou no fim, torna o valor inválido.
+- Separadores entre dois dígitos (espaço, `.`, `-` ou `/`, sozinhos ou em sequência, como o `isValidCpf` lê a máscara dele) e espaços em volta do valor são aceitos; qualquer outra coisa, inclusive um separador no começo ou no fim ou o rótulo `ISBN` que o livro imprime antes do número, torna o valor inválido.
 - Um número `979-0` é um ISMN (partitura impressa), não um ISBN: a RangeMessage não dá grupo de ISBN a essa faixa, então ele é rejeitado.
 - Não verifica se o grupo e o registrante estão atribuídos; veja `getIsbnInfo`.
 - O exemplo impresso da Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, não traz o dígito que a regra dá (`0`), então é rejeitado.
@@ -3447,19 +3446,19 @@ Verifica se um ISBN-13 é válido: o prefixo `978` ou `979` e o dígito verifica
 import { isValidIsbn } from '@brazilian-utils/brazilian-utils';
 
 isValidIsbn('9788533302273'); // true
-isValidIsbn('ISBN 978-65-89999-01-0'); // true
+isValidIsbn('978-65-89999-01-0'); // true
 isValidIsbn('978-85-333-0227-4'); // false (dígito verificador errado)
 isValidIsbn('8533302276'); // false (a forma de 10 dígitos)
 ```
 
 ### parseIsbn
 
-Remove o rótulo `ISBN`, os hífens e todo caractere que não seja dígito, mantendo no máximo 13 dígitos. O rótulo sai primeiro, então o `13` de `ISBN-13` não fica.
+Remove os hífens e todo caractere que não seja dígito, mantendo no máximo 13 dígitos.
 
 ```javascript
 import { parseIsbn } from '@brazilian-utils/brazilian-utils';
 
-parseIsbn('ISBN-13: 978-85-333-0227-3'); // '9788533302273'
+parseIsbn('978-85-333-0227-3'); // '9788533302273'
 ```
 
 ### getIsbnInfo
@@ -3483,7 +3482,7 @@ Divide um ISBN-13 válido nos seus elementos, como um `IsbnInfo`, seguindo as fa
 ```javascript
 import { getIsbnInfo } from '@brazilian-utils/brazilian-utils';
 
-getIsbnInfo('ISBN 978-65-89999-01-0');
+getIsbnInfo('978-65-89999-01-0');
 // { isbn: '9786589999010', prefix: '978', registrationGroup: '65', registrant: '89999',
 //   publication: '01', checkDigit: 0, agency: 'Brazil', isBrazilian: true }
 
