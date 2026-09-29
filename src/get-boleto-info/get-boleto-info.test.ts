@@ -180,6 +180,37 @@ describe("getBoletoInfo", () => {
 
 			expect(getBoletoInfo(withFactor["0000"])?.expirationDate).toBeNull();
 		});
+
+		test("should use now when the reference date is not a valid Date, instead of the 1997 base or a throw", () => {
+			const now = new Date();
+			const expected = getBoletoInfo(withFactor["7586"], { referenceDate: now })?.expirationDate;
+			const invalidDates = [
+				new Date(Number.NaN),
+				"2025-01-01",
+				20_250_101,
+				null,
+				{},
+				{ getTime: () => 0 },
+			];
+
+			for (const invalid of invalidDates) {
+				// @ts-expect-error: intentionally invalid input
+				const info = getBoletoInfo(withFactor["7586"], { referenceDate: invalid });
+
+				expect(info?.expirationDate).toStrictEqual(expected);
+			}
+
+			expect(expected).not.toStrictEqual(new Date(2000, 6, 3));
+		});
+
+		test("should read a factor due more than about 8 years before the reference date as the next cycle", () => {
+			expect(
+				getBoletoInfo(withFactor["5000"], { referenceDate: new Date(2026, 8, 29) })?.expirationDate,
+			).toStrictEqual(new Date(2036, 1, 5));
+			expect(
+				getBoletoInfo(withFactor["5000"], { referenceDate: new Date(2015, 0, 1) })?.expirationDate,
+			).toStrictEqual(new Date(2011, 5, 16));
+		});
 	});
 
 	describe("arrecadação (FEBRABAN Layout Padrão de Arrecadação §11 Formulário Padrão fixture: R$ 24,61, segment 4)", () => {

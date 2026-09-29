@@ -49,6 +49,11 @@ const toDayNumber = (date: Date): number =>
 const getBaseDayNumber = (): number =>
 	Math.floor(Date.UTC(BASE_DATE_YEAR, BASE_DATE_MONTH, BASE_DATE_DAY) / DAY_IN_MS);
 
+const resolveReferenceDate = (referenceDate: unknown): Date =>
+	referenceDate instanceof Date && !Number.isNaN(referenceDate.getTime())
+		? referenceDate
+		: new Date();
+
 const dateFromBase = (days: number): Date =>
 	new Date(BASE_DATE_YEAR, BASE_DATE_MONTH, BASE_DATE_DAY + days);
 
@@ -88,7 +93,7 @@ const getExpirationDate = (factor: number, referenceDate: Date): Date | null => 
 
 /** Options of `getBoletoInfo`. */
 export type GetBoletoInfoOptions = {
-	/** Date used to resolve the 9000 day "fator de vencimento" cycle (default: now). */
+	/** Date used to resolve the 9000 day "fator de vencimento" cycle (default: now, also used when this is not a valid `Date`). */
 	referenceDate?: Date;
 };
 
@@ -113,6 +118,13 @@ export type GetBoletoInfoOptions = {
  * `referenceDate` explicitly whenever the answer has to stay stable. The search never goes below
  * the first cycle, so a `referenceDate` older than the scheme itself still resolves a factor to
  * the oldest date that factor can denote rather than to one before the 07/10/1997 base date.
+ * A `referenceDate` that is not a valid `Date` (an invalid one, a string, a number) is ignored
+ * and now is used, so the call never throws.
+ *
+ * The windows are about 8 years back (3000 days) and 15 years ahead (5500 days) of
+ * `referenceDate`: a slip due more than about 8 years before it is read as the next cycle, a date
+ * in the future, and one due more than about 15 years after it as the previous cycle. To read an
+ * old slip, pass a `referenceDate` near the date it was issued.
  *
  * A FEBRABAN Convenção da Cobrança "Situação 2" slip, issued by an institution identified only
  * by its ISPB (bank code `988`, código de moeda `0`, see `isValidBoleto`), carries that ISPB where
@@ -120,7 +132,7 @@ export type GetBoletoInfoOptions = {
  *
  * @param {string} value - The boleto digitable line (can be with or without mask).
  * @param {GetBoletoInfoOptions} [options] - Optional options.
- * @param {Date} options.referenceDate - Date used to resolve the "fator de vencimento" cycle. Defaults to now.
+ * @param {Date} options.referenceDate - Date used to resolve the "fator de vencimento" cycle. Defaults to now, and so does anything that is not a valid `Date`.
  * @returns {BoletoInfo | null} An object containing amount (in cents), expirationDate, and bankCode, or null if the boleto is invalid.
  *
  * @example
@@ -181,7 +193,7 @@ export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): Bo
 
 	const expirationDate = getExpirationDate(
 		Number(sanitized.slice(33, 37)),
-		options?.referenceDate ?? new Date(),
+		resolveReferenceDate(options?.referenceDate),
 	);
 
 	if (sanitized.startsWith(ISPB_ONLY_PREFIX)) {

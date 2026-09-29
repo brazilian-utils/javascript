@@ -405,6 +405,7 @@ Extrai informações de um boleto (valor, data de vencimento, código do banco).
 - **Opções** (`GetBoletoInfoOptions`): `referenceDate` resolve o ciclo do "fator de vencimento" a partir dessa data em vez de agora.
 - Retorna um `BoletoInfo`: `amount` em centavos, `expirationDate` e o `bankCode` de três dígitos. `expirationDate` é `null` quando o boleto não traz fator de vencimento (um fator abaixo de `1000`).
 - O ciclo do fator de vencimento reiniciou em 22/02/2025, então um fator pode significar uma de duas datas separadas por 9000 dias. Não há comunicado da FEBRABAN publicado sobre o reinício; a regra está em manuais de banco, como o [do Bradesco](https://banco.bradesco/assets/pessoajuridica/pdf/4008-524-0121-layout-cobranca-versao-portugues.pdf) (Versão 17). `referenceDate` escolhe entre elas; informe-a sempre que a resposta precisar ser estável.
+- A janela é de cerca de 8 anos para trás e 15 anos para a frente de `referenceDate`: um boleto que venceu há mais de uns 8 anos dela é lido como o próximo ciclo (uma data no futuro), então, para ler um boleto antigo, informe uma `referenceDate` próxima da data de emissão. Uma `referenceDate` que não seja um `Date` válido é ignorada e usa-se agora.
 - Um boleto de arrecadação tem `bankCode: ''` e `expirationDate: null`, mais `type: 'arrecadacao'`, `segment`, `value` (o valor em reais) e `hasEffectiveValue`.
 - O boleto da "Situação 2" da Convenção da Cobrança da FEBRABAN (código de banco `988`, código de moeda `0`) traz o ISPB do emissor no lugar do valor: ele volta como `ispb`, com `amount: 0`.
 
