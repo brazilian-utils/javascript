@@ -1100,7 +1100,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 Check if a license plate is valid. Accepts the old Brazilian format (`ABC-1234`) and the Mercosul format (`ABC1D23`), with or without a mask, in any case. The mask (whitespace, `.`, `-` or `/`, alone or in a run) is accepted only between the third character and the last four; any other character (`@`, an emoji, a separator anywhere else) makes the plate invalid instead of being stripped.
 
-The optional `format` restricts the check to one of them: `"LLLNNNN"` for the old format or `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. It works like the `type` argument of the Python library's `is_valid`, whose values are named `"old_format"` and `"mercosul"` there. Those names are not formats here: without `format`, or with any other value, a plate in either format is valid.
+The optional `format` of the second argument (`IsValidLicensePlateOptions`) restricts the check to one of them: `"LLLNNNN"` for the old format or `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. It works like the `type` argument of the Python library's `is_valid`, whose values are named `"old_format"` and `"mercosul"` there. Those names are not formats here: without `format`, or with any other value, a plate in either format is valid.
 
 ```javascript
 import { isValidLicensePlate } from '@brazilian-utils/brazilian-utils';
