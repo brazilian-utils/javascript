@@ -2,9 +2,10 @@ import * as fc from "fast-check";
 
 import { DATA, type StateCode } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { type RegistroProfissionalCouncil } from "./constants";
+import { type RegistroProfissionalCouncil as ConstantsCouncil } from "./constants";
 import {
 	isValidRegistroProfissional,
+	type RegistroProfissionalCouncil,
 	type IsValidRegistroProfissionalParams,
 } from "./is-valid-registro-profissional";
 
@@ -398,6 +399,7 @@ describe("isValidRegistroProfissional types", () => {
 		expectTypeOf<IsValidRegistroProfissionalParams["stateCode"]>().toEqualTypeOf<
 			StateCode | undefined
 		>();
+		expectTypeOf<RegistroProfissionalCouncil>().toEqualTypeOf<ConstantsCouncil>();
 		expectTypeOf<RegistroProfissionalCouncil>().toEqualTypeOf<
 			"OAB" | "CRM" | "CRO" | "CRP" | "CRC"
 		>();

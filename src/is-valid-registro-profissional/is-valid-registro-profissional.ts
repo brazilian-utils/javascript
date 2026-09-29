@@ -16,6 +16,7 @@ import {
 } from "./constants";
 
 export type { StateCode } from "../_internals/constants/states";
+export type { RegistroProfissionalCouncil } from "./constants";
 
 /** The registration `isValidRegistroProfissional` checks: the number, the council that issued it and, optionally, the UF it must belong to. */
 export type IsValidRegistroProfissionalParams = {

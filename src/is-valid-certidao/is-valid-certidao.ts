@@ -8,6 +8,8 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 import { CERTIDAO_TYPES } from "../get-certidao-info/constants";
 import { type CertidaoType } from "../get-certidao-info/get-certidao-info";
 
+export type { CertidaoType } from "../get-certidao-info/get-certidao-info";
+
 /** Options of `isValidCertidao`. */
 export type IsValidCertidaoOptions = {
 	/** Kinds of certidão (book types) that count as valid (default: all of them). */
