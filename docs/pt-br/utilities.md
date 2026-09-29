@@ -1118,13 +1118,14 @@ parseLicensePlate('abc-1234'); // 'ABC1234'
 Gera uma placa válida aleatória no formato escolhido.
 
 - `format` (`GenerateLicensePlateFormat`): `'LLLNLNN'` (Mercosul, o padrão) ou `'LLLNNNN'` (o formato antigo brasileiro). Qualquer outro valor cai no padrão.
+- A letra da quinta posição de uma placa Mercosul é sorteada de `K` a `Z`: `A` a `J` só são usadas para converter uma placa do formato antigo (Anexo II, item 2, da Resolução CONTRAN nº 969/2022), então uma placa nova nunca as tem.
 
 ```javascript
 import { generateLicensePlate } from '@brazilian-utils/brazilian-utils';
 
-generateLicensePlate(); // 'ABC1D23' (Mercosul, o padrão)
+generateLicensePlate(); // 'ABC1K23' (Mercosul, o padrão)
 generateLicensePlate('LLLNNNN'); // 'ABC1234'
-generateLicensePlate('LLLNNLN'); // 'ABC1D23' (um formato fora dos dois em circulação cai no padrão)
+generateLicensePlate('LLLNNLN'); // 'ABC1K23' (um formato fora dos dois em circulação cai no padrão)
 ```
 
 Fonte: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf).

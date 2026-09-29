@@ -2,12 +2,17 @@ import { type LicensePlateFormat } from "../get-format-license-plate/get-format-
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+const NEW_MERCOSUL_LETTERS = "KLMNOPQRSTUVWXYZ";
+
+const MERCOSUL_LETTER_INDEX = 4;
+
 const DEFAULT_FORMAT = "LLLNLNN";
 
 /** The license plate formats `generateLicensePlate` can generate. */
 export type GenerateLicensePlateFormat = LicensePlateFormat;
 
-const randomLetter = (): string => LETTERS.charAt(Math.floor(Math.random() * LETTERS.length));
+const randomLetter = (letters: string): string =>
+	letters.charAt(Math.floor(Math.random() * letters.length));
 
 const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
 
@@ -23,6 +28,10 @@ const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
  * reads `L` as a letter and `N` as a numeral. The annexes are published in a PDF of their own,
  * cited below alongside the resolution's text.
  *
+ * The letter in the fifth position of a Mercosul plate is drawn from `K` to `Z`: the range `A` to
+ * `J` is used only to convert an old format plate (Anexo II, item 2, of Resolução CONTRAN nº
+ * 969/2022, see `convertLicensePlateToMercosul`), so a new plate never carries it.
+ *
  * A `format` outside the two supported literals falls back to the default, like every other
  * generator of this package does with an option it does not know, so the result is always a plate
  * `isValidLicensePlate` accepts. (2.3.0 used an unknown string verbatim, so
@@ -36,7 +45,7 @@ const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
  *
  * @example
  * ```typescript
- * generateLicensePlate(); // "ABC1D23" (Mercosul)
+ * generateLicensePlate(); // "ABC1K23" (Mercosul)
  * generateLicensePlate("LLLNNNN"); // "ABC1234" (old Brazilian format)
  * ```
  *
@@ -51,7 +60,15 @@ export const generateLicensePlate = (
 	let plate = "";
 
 	for (let i = 0; i < safeFormat.length; i++) {
-		plate += safeFormat.charAt(i) === "L" ? randomLetter() : randomDigit();
+		if (safeFormat.charAt(i) === "L") {
+			plate += randomLetter(
+				safeFormat === DEFAULT_FORMAT && i === MERCOSUL_LETTER_INDEX
+					? NEW_MERCOSUL_LETTERS
+					: LETTERS,
+			);
+		} else {
+			plate += randomDigit();
+		}
 	}
 
 	return plate;

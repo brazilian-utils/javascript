@@ -1118,13 +1118,14 @@ parseLicensePlate('abc-1234'); // 'ABC1234'
 Generate a valid random license plate in the chosen format.
 
 - `format` (`GenerateLicensePlateFormat`): `'LLLNLNN'` (Mercosul, the default) or `'LLLNNNN'` (the old Brazilian format). Any other value falls back to the default.
+- The letter in the fifth position of a Mercosul plate is drawn from `K` to `Z`: `A` to `J` is used only to convert an old format plate (Anexo II, item 2, of Resolução CONTRAN nº 969/2022), so a new plate never carries it.
 
 ```javascript
 import { generateLicensePlate } from '@brazilian-utils/brazilian-utils';
 
-generateLicensePlate(); // 'ABC1D23' (Mercosul, the default)
+generateLicensePlate(); // 'ABC1K23' (Mercosul, the default)
 generateLicensePlate('LLLNNNN'); // 'ABC1234'
-generateLicensePlate('LLLNNLN'); // 'ABC1D23' (a format outside the two in circulation falls back to the default)
+generateLicensePlate('LLLNNLN'); // 'ABC1K23' (a format outside the two in circulation falls back to the default)
 ```
 
 Source: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf).
