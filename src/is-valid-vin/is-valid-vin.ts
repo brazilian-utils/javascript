@@ -2,6 +2,7 @@ import { generateChecksum } from "../_internals/generate-checksum/generate-check
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import {
 	VIN_CHECK_DIGIT_POSITION,
+	VIN_ASCII_REGEX,
 	VIN_LENGTH,
 	VIN_MODEL_YEAR_EXCLUDED,
 	VIN_MODEL_YEAR_POSITION,
@@ -86,9 +87,11 @@ export type IsValidVinOptions = {
 export const isValidVin = (value: string, options?: IsValidVinOptions): boolean => {
 	if (typeof value !== "string") return false;
 
-	const vin = value.trim().toUpperCase();
+	const trimmed = value.trim();
 
-	if (vin.length !== VIN_LENGTH) return false;
+	if (trimmed.length !== VIN_LENGTH || !VIN_ASCII_REGEX.test(trimmed)) return false;
+
+	const vin = trimmed.toUpperCase();
 
 	if (isRepeatedDigits(vin)) return false;
 

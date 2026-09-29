@@ -131,11 +131,11 @@ const isForbiddenCode = (model: string, key: string): boolean => {
 export const isValidNfeKey = (value: string): boolean => {
 	if (typeof value !== "string") return false;
 
-	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart().toUpperCase();
+	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart();
 
 	if (!FORMAT_REGEX.test(body)) return false;
 
-	const key = sanitizeToAlphanumeric(body);
+	const key = sanitizeToAlphanumeric(body).toUpperCase();
 
 	if (!NFE_KEY_REGEX.test(key)) return false;
 

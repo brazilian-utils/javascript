@@ -574,7 +574,7 @@ Source: [Manual do BR Code](https://www.bcb.gov.br/content/estabilidadefinanceir
 Check if a DF-e access key (chave de acesso) is valid. Covers every DF-e with a 44 character access key; the CF-e-SAT (59) is out.
 
 - Models: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) and NFCom (62).
-- Every character is a digit except positions 7 to 18, the root and order of the issuer's CNPJ, which may hold the letters of an alphanumeric CNPJ: the current schemas (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) type the key as `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, in production for the NF-e from 01/07/2026 (NT 2026.004). A letter anywhere else, the CNPJ check digits in positions 19 and 20 included, is rejected. The schema admits upper case only; lower case is read as upper case, as `isValidCnpj` does with `{ version: 2 }`.
+- Every character is a digit except positions 7 to 18, the root and order of the issuer's CNPJ, which may hold the letters of an alphanumeric CNPJ: the current schemas (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) type the key as `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, in production for the NF-e from 01/07/2026 (NT 2026.004). A letter anywhere else, the CNPJ check digits in positions 19 and 20 included, is rejected. The schema admits upper case only; lower case is read as upper case, as `isValidCnpj` does with `{ version: 2 }`. A non-ASCII letter that upper cases into an ASCII one (`ſ`, `ß`) is rejected.
 - The 44 characters may be grouped in 4 by whitespace, `.`, `-` or `/`. The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
 - `tpEmis` must be one the MOC of that model assigns (table below).
 - For NF-e and NFC-e the `cNF` must pass rule B03-10 of the MOC (no repeated or sequential values, not the document number).
@@ -3774,7 +3774,7 @@ Check if a VIN (Vehicle Identification Number / chassi) is valid. By default it 
 - The `I`, `O` and `Q` exclusion comes from ISO 3779, not from the resolution: it lists no forbidden character and refers the engraving to ABNT NBR 6066:2022 (art. 5º), a paid standard with no official free copy. The regularization VINs of its Anexo II (WMI `XXX`) are written without those letters, so they pass.
 - **Options** (`IsValidVinOptions`): `checkDigit: true` also enforces the North-American rules of 49 CFR 565.15, the check digit at position 9 and a model year code other than `U`, `Z` or `0` at position 10. Use it for a VIN of a vehicle built for the United States or Canada.
 - Brazilian rules do not mandate the check digit, and many Brazilian-built VINs do not carry one. Up to 2.4.0 it was always enforced; pass `{ checkDigit: true }` to keep that behaviour.
-- Case-insensitive and trims surrounding whitespace; a value of one repeated character is rejected.
+- Case-insensitive and trims surrounding whitespace; a value of one repeated character is rejected. Only the ASCII letters and digits count: a non-ASCII letter that upper cases into an ASCII one (`ſ`, `ß`) is rejected.
 
 ```javascript
 import { isValidVin } from '@brazilian-utils/brazilian-utils';

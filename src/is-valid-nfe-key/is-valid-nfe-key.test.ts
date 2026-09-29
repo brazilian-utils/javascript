@@ -265,6 +265,13 @@ describe("isValidNfeKey", () => {
 			expect(isValidNfeKey("35260712abC34501dE35550010000001231102030403")).toBe(true);
 		});
 
+		test("should reject a non-ASCII letter that upper cases into an ASCII one", () => {
+			expect(isValidNfeKey("35260712ABS34501DE35550010000001231102030404")).toBe(true);
+			expect(isValidNfeKey("35260712ABſ34501DE35550010000001231102030404")).toBe(false);
+			expect(isValidNfeKey("35260712ABſ3 4501 DE35 5500 1000 0001 2311 0203 0404")).toBe(false);
+			expect(isValidNfeKey("35260712ABß34501DE35550010000001231102030404")).toBe(false);
+		});
+
 		test("should accept a letter in position 7 and in position 18, the two ends of the CNPJ root and order", () => {
 			// Same fields with A in position 7 and Z in position 18: cDV recalculated to 9.
 			expect(isValidNfeKey("352607A2ABC34501DZ35550010000001231102030409")).toBe(true);

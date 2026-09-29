@@ -92,15 +92,16 @@ export const FORBIDDEN_CODES: readonly string[] = [
 export const FORBIDDEN_CODE_MODELS: readonly string[] = ["55", "65"];
 
 /**
- * Shape the key has to be written in once the prefix is stripped and its letters upper cased:
- * the characters, optionally split into the printed groups of 4 by whitespace or the usual mask
+ * Shape the key has to be written in once the prefix is stripped: the ASCII characters, optionally split into the printed groups of 4 by whitespace or the usual mask
  * characters, a run of them between two groups included, the same rule the CPF, CNPJ, CAEPF and
  * CNS regexes of this library follow. A separator inside a group of 4, or any other character, is
  * rejected instead of being stripped. The groups take letters too, so a key with an alphanumeric
  * CNPJ can be grouped like any other; which positions may hold one, and the 44 character length,
- * are checked against `NFE_KEY_REGEX` once the separators are gone.
+ * are checked against `NFE_KEY_REGEX` once the separators are gone and the letters upper cased.
+ * The letters are tested before they are upper cased, since `toUpperCase` folds some non-ASCII
+ * letters into ASCII ones (`ſ` into `S`).
  */
-export const FORMAT_REGEX = /^[0-9A-Z]{4}(?:[\s.\-/]*[0-9A-Z]{4})*$/;
+export const FORMAT_REGEX = /^[0-9A-Za-z]{4}(?:[\s.\-/]*[0-9A-Za-z]{4})*$/;
 
 /** Position of the model (mod) inside the 44 character key. */
 export const MODEL_START = 20;

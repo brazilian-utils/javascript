@@ -574,7 +574,7 @@ Fonte: [Manual do BR Code](https://www.bcb.gov.br/content/estabilidadefinanceira
 Valida uma chave de acesso de DF-e. Cobre todo DF-e com chave de acesso de 44 caracteres; o CF-e-SAT (59) fica de fora.
 
 - Modelos: NF-e (55), NFC-e (65), CT-e (57), MDF-e (58), CT-e OS (67), GTV-e (64), BP-e (63), NF3e (66) e NFCom (62).
-- Todo caractere é dígito, exceto as posições 7 a 18, a raiz e a ordem do CNPJ do emitente, que podem trazer as letras de um CNPJ alfanumérico: os schemas atuais (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) tipam a chave como `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, em produção na NF-e a partir de 01/07/2026 (NT 2026.004). Uma letra em qualquer outra posição, incluídos os dígitos verificadores do CNPJ nas posições 19 e 20, é rejeitada. O schema só admite maiúsculas; minúsculas são lidas como maiúsculas, como `isValidCnpj` faz com `{ version: 2 }`.
+- Todo caractere é dígito, exceto as posições 7 a 18, a raiz e a ordem do CNPJ do emitente, que podem trazer as letras de um CNPJ alfanumérico: os schemas atuais (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) tipam a chave como `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, em produção na NF-e a partir de 01/07/2026 (NT 2026.004). Uma letra em qualquer outra posição, incluídos os dígitos verificadores do CNPJ nas posições 19 e 20, é rejeitada. O schema só admite maiúsculas; minúsculas são lidas como maiúsculas, como `isValidCnpj` faz com `{ version: 2 }`. Uma letra não ASCII que vira letra ASCII em maiúsculas (`ſ`, `ß`) é rejeitada.
 - Os 44 caracteres podem ser agrupados de 4 em 4 por espaço, `.`, `-` ou `/`. Os prefixos `Id` do XML (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) são removidos antes.
 - `tpEmis` precisa ser um dos que o MOC do modelo atribui (tabela abaixo).
 - Para NF-e e NFC-e o `cNF` precisa passar na regra B03-10 do MOC (sem valores repetidos ou sequenciais, diferente do número do documento).
@@ -3774,7 +3774,7 @@ Valida um VIN (Vehicle Identification Number / chassi). Por padrão confere 17 c
 - A exclusão de `I`, `O` e `Q` vem da ISO 3779, não da resolução: ela não lista caractere proibido e remete a gravação à ABNT NBR 6066:2022 (art. 5º), norma paga sem cópia oficial gratuita. Os VINs de regularização do Anexo II dela (WMI `XXX`) são escritos sem essas letras, então passam.
 - **Opções** (`IsValidVinOptions`): `checkDigit: true` também exige as regras norte-americanas do 49 CFR 565.15, o dígito verificador na 9ª posição e um código de ano-modelo diferente de `U`, `Z` e `0` na 10ª. Use para o VIN de um veículo fabricado para os Estados Unidos ou o Canadá.
 - As normas brasileiras não exigem o dígito verificador, e muitos VINs fabricados no Brasil não o têm. Até a 2.4.0 ele era sempre exigido; passe `{ checkDigit: true }` para manter esse comportamento.
-- Não diferencia maiúsculas de minúsculas e ignora espaços ao redor; um valor de um único caractere repetido é rejeitado.
+- Não diferencia maiúsculas de minúsculas e ignora espaços ao redor; um valor de um único caractere repetido é rejeitado. Só contam letras ASCII e algarismos: uma letra não ASCII que vira letra ASCII em maiúsculas (`ſ`, `ß`) é rejeitada.
 
 ```javascript
 import { isValidVin } from '@brazilian-utils/brazilian-utils';
