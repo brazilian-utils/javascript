@@ -90,8 +90,6 @@ const readAddressPart = (value: unknown): string | null => {
 	return normalized.length < MIN_ADDRESS_PART_LENGTH ? null : normalized;
 };
 
-// The ViaCEP response shape is trusted structurally (as the original implementation always
-// was): every element the array holds is assumed to already match `CepAddressInfo`.
 const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Array.isArray(value);
 
 /**

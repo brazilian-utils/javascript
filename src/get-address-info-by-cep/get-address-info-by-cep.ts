@@ -285,8 +285,6 @@ const readCep = (cep: unknown): string => {
 const readProviders = (providers: GetAddressInfoByCepOptions["providers"]): CepProvider[] => {
 	if (providers === undefined) return [...DEFAULT_PROVIDERS];
 
-	// An empty array also filters down to no provider, which reports the same validation error, so
-	// there is no dedicated check for it here.
 	const known = Array.isArray(providers)
 		? providers.filter((provider) => Object.hasOwn(providerMap, provider))
 		: [];
@@ -368,7 +366,6 @@ const raceProviders = async (
 	try {
 		return await Promise.any(providerPromises);
 	} catch {
-		// Every provider failed, so when none failed to answer, every one of them said "not found".
 		if (notFound || !serviceFailed) {
 			throw new GetAddressInfoByCepNotFoundError("CEP não encontrado em nenhum serviço");
 		}
