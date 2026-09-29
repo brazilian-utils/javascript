@@ -237,7 +237,7 @@ isValidCep('12345'); // false (tamanho inválido)
 
 Formata um CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)).
 
-- **Opções** (`FormatCepOptions`): `pad` preenche o valor com zeros à esquerda até 8 dígitos antes de aplicar a máscara (padrão `false`).
+- **Opções** (`FormatCepOptions`): `pad` preenche o valor com zeros à esquerda até 8 dígitos antes de aplicar a máscara (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Um CEP que começa com `0` passado como número perde esse zero: passe uma string ou use `pad`. Um número só é lido quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
 
 ```javascript
@@ -372,7 +372,7 @@ Fonte: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos
 
 Formata um número de boleto.
 
-- **Opções** (`FormatBoletoOptions`): `pad` preenche o valor com zeros à esquerda até o tamanho do padrão antes de aplicar a máscara (padrão `false`).
+- **Opções** (`FormatBoletoOptions`): `pad` preenche o valor com zeros à esquerda até o tamanho do padrão antes de aplicar a máscara (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Uma linha digitável de 48 dígitos que começa com `8` recebe a máscara de arrecadação: quatro blocos de 11 dígitos, cada um seguido do seu dígito verificador. O código de barras de arrecadação de 44 dígitos mantém a máscara de "cobrança bancária".
 
 ```javascript
@@ -636,7 +636,7 @@ Fonte: [MOC da NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuai
 
 Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 4 caracteres separados por espaço. É a forma em que o DANFE, o DACTE, o DAMDFE, o DABPE, o DANF3E e o DANFE-COM a imprimem.
 
-- **Opções** (`FormatNfeKeyOptions`): `pad` preenche o valor com zeros à esquerda até os 44 caracteres de uma chave de acesso completa (padrão `false`).
+- **Opções** (`FormatNfeKeyOptions`): `pad` preenche o valor com zeros à esquerda até os 44 caracteres de uma chave de acesso completa (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Uma chave com máscara ou parcial é agrupada até onde os caracteres vão.
 - As letras de um CNPJ alfanumérico são mantidas, em maiúsculas, nas posições 7 a 18; uma letra em qualquer outra posição é descartada.
 - Os prefixos `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` e `NFCom` do atributo `Id` do XML são removidos antes, como o `parseNfeKey` os lê.
@@ -1307,7 +1307,7 @@ Fonte: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119),
 
 Formata um número de processo jurídico na máscara do CNJ `NNNNNNN-DD.AAAA.J.TR.OOOO`.
 
-- **Opções** (`FormatProcessoJuridicoOptions`): `pad` completa o valor com zeros à esquerda até 20 dígitos antes de aplicar a máscara (padrão `false`).
+- **Opções** (`FormatProcessoJuridicoOptions`): `pad` completa o valor com zeros à esquerda até 20 dígitos antes de aplicar a máscara (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 
 ```javascript
 import { formatProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -2416,7 +2416,7 @@ Fonte: [CONCLA, Natureza Jurídica 2021](https://concla.ibge.gov.br/estrutura/na
 
 Formata um código de natureza jurídica. Use `isValidLegalNature` para verificar um código.
 
-- **Opções** (`FormatLegalNatureOptions`): `pad` primeiro completa o valor com zeros à esquerda até os 4 dígitos de um código completo (padrão `false`).
+- **Opções** (`FormatLegalNatureOptions`): `pad` primeiro completa o valor com zeros à esquerda até os 4 dígitos de um código completo (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 
 ```javascript
 import { formatLegalNature } from '@brazilian-utils/brazilian-utils';
@@ -2697,7 +2697,7 @@ Fonte: [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justi
 
 Formata a matrícula de uma certidão de registro civil na máscara impressa do art. 473. Os 32 dígitos são agrupados em 6 2 2 4 1 5 3 7 2 e separados por espaços.
 
-- **Opções** (`FormatCertidaoOptions`): `pad` completa o valor com zeros à esquerda até 32 dígitos (padrão `false`).
+- **Opções** (`FormatCertidaoOptions`): `pad` completa o valor com zeros à esquerda até 32 dígitos (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Um número é aceito quando é um inteiro seguro não negativo, então uma matrícula completa de 32 dígitos precisa ser uma string. Qualquer outro número retorna `''`.
 
 ```javascript
@@ -2933,7 +2933,7 @@ Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos
 
 Formata um código CBO (Classificação Brasileira de Ocupações) na máscara `NNNN-NN`. Só a estrutura muda; use `isValidCbo` para conferir um código com a tabela.
 
-- **Opções** (`FormatCboOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 6 dígitos de um código completo. Sem ele a máscara é aplicada até onde o valor vai.
+- **Opções** (`FormatCboOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 6 dígitos de um código completo. Sem ele a máscara é aplicada até onde o valor vai. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Caracteres fora da máscara são descartados, e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo: um número negativo, fracionário ou inseguro retorna `''`. Retorna `''` quando não há dígito algum.
 
 ```javascript
@@ -3002,7 +3002,7 @@ Fonte: [CNAE-Subclasses 2.3 na CONCLA/IBGE](https://concla.ibge.gov.br/busca-onl
 
 Formata um código de subclasse CNAE (Classificação Nacional de Atividades Econômicas). Só a estrutura muda; use `isValidCnae` para conferir um código com a tabela.
 
-- **Opções** (`FormatCnaeOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 7 dígitos de um código completo. Sem ele a máscara é aplicada até onde o valor vai.
+- **Opções** (`FormatCnaeOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 7 dígitos de um código completo. Sem ele a máscara é aplicada até onde o valor vai. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Caracteres fora da máscara são descartados, e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo: um número negativo, fracionário ou inseguro retorna `''`, já que o sinal e o ponto decimal não são caracteres da máscara. Retorna `''` quando não há dígito algum.
 
 ```javascript
@@ -3074,7 +3074,7 @@ Fonte: [nomenclatura NCM publicada pelo Portal Único Siscomex](https://portalun
 
 Formata um código NCM (Nomenclatura Comum do Mercosul). Só a estrutura muda; use `isValidNcm` para conferir um código com a tabela.
 
-- **Opções** (`FormatNcmOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 8 dígitos de um código completo.
+- **Opções** (`FormatNcmOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 8 dígitos de um código completo. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Mesmas regras de `formatCnae`, com a máscara `NNNN.NN.NN`.
 
 ```javascript
@@ -3125,7 +3125,7 @@ isValidNbs('1.0101abc11.00'); // false (não é uma forma documentada)
 
 Formata um código NBS (Nomenclatura Brasileira de Serviços) na máscara `N.NNNN.NN.NN` em que a nomenclatura o imprime. Só a estrutura muda; use `isValidNbs` para conferir um código com a tabela.
 
-- **Opções** (`FormatNbsOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 9 dígitos de um código completo (todo código NBS começa com 1, então só serve para largura fixa).
+- **Opções** (`FormatNbsOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 9 dígitos de um código completo (todo código NBS começa com 1, então só serve para largura fixa). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - No resto, mesmas regras de `formatCnae`: a máscara é aplicada até onde o valor vai, os caracteres fora dela são descartados e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
 
 ```javascript
@@ -3235,7 +3235,7 @@ Fonte: [Anexo II consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.
 
 Formata um código CFOP (Código Fiscal de Operações e Prestações) na forma `N.NNN` que o anexo imprime. Só a estrutura muda; use `isValidCfop` para conferir um código com a tabela.
 
-- **Opções** (`FormatCfopOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 4 dígitos de um código completo (nenhum CFOP começa com zero, então só serve para largura fixa). Sem ele a máscara é aplicada até onde o valor vai.
+- **Opções** (`FormatCfopOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 4 dígitos de um código completo (nenhum CFOP começa com zero, então só serve para largura fixa). Sem ele a máscara é aplicada até onde o valor vai. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Caracteres fora da máscara são descartados, e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo: um número negativo, fracionário ou inseguro retorna `''`. Retorna `''` quando não há dígito algum.
 
 ```javascript
@@ -3306,7 +3306,7 @@ isValidCest(-100100); // false (não é um inteiro seguro não negativo)
 
 Formata um CEST (Código Especificador da Substituição Tributária) na forma `NN.NNN.NN` que os anexos do Convênio ICMS 142/18 imprimem. Só a estrutura muda; use `isValidCest` para conferir um código com os anexos.
 
-- **Opções** (`FormatCestOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 7 dígitos de um código completo.
+- **Opções** (`FormatCestOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 7 dígitos de um código completo. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Mesmas regras de `formatNcm`: sem `pad` a máscara é aplicada até onde o valor vai, que é o que um campo sendo digitado precisa, os caracteres fora dela são descartados e um número é lido como a string dos seus dígitos, ou seja, só é completado com `pad: true`. Um número só é lido quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
 
 ```javascript

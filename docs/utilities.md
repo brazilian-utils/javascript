@@ -237,7 +237,7 @@ isValidCep('12345'); // false (invalid length)
 
 Format a CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)).
 
-- **Options** (`FormatCepOptions`): `pad` left-pads the value with zeros to 8 digits before masking (default `false`).
+- **Options** (`FormatCepOptions`): `pad` left-pads the value with zeros to 8 digits before masking (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 - A CEP that starts with `0` given as a number loses that zero: pass a string or use `pad`. A number is only read when it is a non-negative safe integer; any other number returns `''`.
 
 ```javascript
@@ -373,7 +373,7 @@ Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativo
 
 Format a boleto number.
 
-- **Options** (`FormatBoletoOptions`): `pad` left-pads the value with zeros to the length of the pattern before masking (default `false`).
+- **Options** (`FormatBoletoOptions`): `pad` left-pads the value with zeros to the length of the pattern before masking (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 - A 48 digit linha digitável starting with `8` gets the arrecadação mask: four blocks of 11 digits, each followed by its check digit. The 44 digit arrecadação barcode keeps the "cobrança bancária" mask.
 
 ```javascript
@@ -637,7 +637,7 @@ Source: [MOC NF-e](https://www.confaz.fazenda.gov.br/legislacao/arquivo-manuais/
 
 Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 characters separated by spaces, the form the DANFE, DACTE, DAMDFE, DABPE, DANF3E and DANFE-COM print it in.
 
-- **Options** (`FormatNfeKeyOptions`): `pad` left pads the value with zeros up to the 44 characters of a complete access key (default `false`).
+- **Options** (`FormatNfeKeyOptions`): `pad` left pads the value with zeros up to the 44 characters of a complete access key (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 - A masked or partial key is grouped as far as its characters go.
 - The letters of an alphanumeric CNPJ are kept, upper cased, in positions 7 to 18; a letter anywhere else is dropped.
 - The `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes of the `Id` attribute of the XML are stripped first, as `parseNfeKey` reads them.
@@ -1308,7 +1308,7 @@ Source: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119)
 
 Format a processo jurídico number in the CNJ mask `NNNNNNN-DD.AAAA.J.TR.OOOO`.
 
-- **Options** (`FormatProcessoJuridicoOptions`): `pad` left-pads the value with zeros to 20 digits before masking (default `false`).
+- **Options** (`FormatProcessoJuridicoOptions`): `pad` left-pads the value with zeros to 20 digits before masking (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 
 ```javascript
 import { formatProcessoJuridico } from '@brazilian-utils/brazilian-utils';
@@ -2417,7 +2417,7 @@ Source: [CONCLA, Natureza Jurídica 2021](https://concla.ibge.gov.br/estrutura/n
 
 Format a legal nature code. Use `isValidLegalNature` to check a code.
 
-- **Options** (`FormatLegalNatureOptions`): `pad` first left-pads the value with zeros to the 4 digits of a complete code (default `false`).
+- **Options** (`FormatLegalNatureOptions`): `pad` first left-pads the value with zeros to the 4 digits of a complete code (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 
 ```javascript
 import { formatLegalNature } from '@brazilian-utils/brazilian-utils';
@@ -2698,7 +2698,7 @@ Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de 
 
 Format the matrícula of a certidão de registro civil into the printed mask of art. 473. The 32 digits are grouped as 6 2 2 4 1 5 3 7 2 and separated by spaces.
 
-- **Options** (`FormatCertidaoOptions`): `pad` left-pads the value with zeros up to 32 digits (default `false`).
+- **Options** (`FormatCertidaoOptions`): `pad` left-pads the value with zeros up to 32 digits (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 - A number is accepted when it is a non-negative safe integer, so a full 32-digit matrícula has to be a string. Any other number returns `''`.
 
 ```javascript
@@ -2934,7 +2934,7 @@ Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 1
 
 Format a CBO (Classificação Brasileira de Ocupações) code into the `NNNN-NN` mask. Only the structure changes; use `isValidCbo` to check a code against the table.
 
-- **Options** (`FormatCboOptions`): `pad` (default `false`) first left pads the value with zeros to the 6 digits of a complete code. Without it the mask is applied as far as the value goes.
+- **Options** (`FormatCboOptions`): `pad` (default `false`) first left pads the value with zeros to the 6 digits of a complete code. Without it the mask is applied as far as the value goes. An empty value, or one without digits, gives `''` even with `pad`.
 - Characters outside the mask are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer: a negative, fractional or unsafe number returns `''`. Returns `''` when there is no digit at all.
 
 ```javascript
@@ -3003,7 +3003,7 @@ Source: [CNAE-Subclasses 2.3 at CONCLA/IBGE](https://concla.ibge.gov.br/busca-on
 
 Format a CNAE (Classificação Nacional de Atividades Econômicas) subclass code. Only the structure changes; use `isValidCnae` to check a code against the table.
 
-- **Options** (`FormatCnaeOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code. Without it the mask is applied as far as the value goes.
+- **Options** (`FormatCnaeOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code. Without it the mask is applied as far as the value goes. An empty value, or one without digits, gives `''` even with `pad`.
 - Characters outside the mask are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer: a negative, fractional or unsafe number returns `''`, since its sign and decimal point are not mask characters. Returns `''` when there is no digit at all.
 
 ```javascript
@@ -3075,7 +3075,7 @@ Source: [NCM nomenclature published by the Portal Único Siscomex](https://porta
 
 Format an NCM (Nomenclatura Comum do Mercosul) code. Only the structure changes; use `isValidNcm` to check a code against the table.
 
-- **Options** (`FormatNcmOptions`): `pad` (default `false`) first left pads the value with zeros to the 8 digits of a complete code.
+- **Options** (`FormatNcmOptions`): `pad` (default `false`) first left pads the value with zeros to the 8 digits of a complete code. An empty value, or one without digits, gives `''` even with `pad`.
 - Same rules as `formatCnae`, with the `NNNN.NN.NN` mask.
 
 ```javascript
@@ -3126,7 +3126,7 @@ isValidNbs('1.0101abc11.00'); // false (not a documented form)
 
 Format an NBS (Nomenclatura Brasileira de Serviços) code into the `N.NNNN.NN.NN` mask the nomenclature prints. Only the structure changes; use `isValidNbs` to check a code against the table.
 
-- **Options** (`FormatNbsOptions`): `pad` (default `false`) first left pads the value with zeros to the 9 digits of a complete code (every NBS code starts with 1, so it only serves a fixed width).
+- **Options** (`FormatNbsOptions`): `pad` (default `false`) first left pads the value with zeros to the 9 digits of a complete code (every NBS code starts with 1, so it only serves a fixed width). An empty value, or one without digits, gives `''` even with `pad`.
 - Same rules as `formatCnae` otherwise: the mask is applied as far as the value goes, characters outside it are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer; any other number returns `''`.
 
 ```javascript
@@ -3236,7 +3236,7 @@ Source: [consolidated Anexo II of Convênio SINIEF s/nº 1970](https://www.confa
 
 Format a CFOP (Código Fiscal de Operações e Prestações) code into the `N.NNN` form the annex prints. Only the structure changes; use `isValidCfop` to check a code against the table.
 
-- **Options** (`FormatCfopOptions`): `pad` (default `false`) first left pads the value with zeros to the 4 digits of a complete code (no CFOP starts with a zero, so it only serves a fixed width). Without it the mask is applied as far as the value goes.
+- **Options** (`FormatCfopOptions`): `pad` (default `false`) first left pads the value with zeros to the 4 digits of a complete code (no CFOP starts with a zero, so it only serves a fixed width). Without it the mask is applied as far as the value goes. An empty value, or one without digits, gives `''` even with `pad`.
 - Characters outside the mask are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer: a negative, fractional or unsafe number returns `''`. Returns `''` when there is no digit at all.
 
 ```javascript
@@ -3307,7 +3307,7 @@ isValidCest(-100100); // false (not a non-negative safe integer)
 
 Format a CEST (Código Especificador da Substituição Tributária) in the `NN.NNN.NN` form the annexes of Convênio ICMS 142/18 print. Only the structure changes; use `isValidCest` to check a code against the annexes.
 
-- **Options** (`FormatCestOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code.
+- **Options** (`FormatCestOptions`): `pad` (default `false`) first left pads the value with zeros to the 7 digits of a complete code. An empty value, or one without digits, gives `''` even with `pad`.
 - Same rules as `formatNcm`: without `pad` the mask is applied as far as the value goes, which is what an input being typed into needs, characters outside it are dropped, and a number is read as the string of its digits, so it is only padded under `pad: true`. A number is only read when it is a non-negative safe integer; any other number returns `''`.
 
 ```javascript
