@@ -56,9 +56,9 @@ export const CNAE_CODES = ${serializeCodes(codes)};
 
 /**
  * Shape a CNAE subclass code has to be written in: the 7 digits, optionally split into the
- * printed \`NNNN-N/NN\` groups by a single whitespace or mask character.
+ * printed \`NNNN-N/NN\` groups by any run of whitespace or mask characters.
  */
-export const CNAE_FORMAT_REGEX = /^\\d{4}[\\s.\\-/]?\\d[\\s.\\-/]?\\d{2}$/;
+export const CNAE_FORMAT_REGEX = /^\\d{4}[\\s.\\-/]*\\d[\\s.\\-/]*\\d{2}$/;
 `,
 		"./src/_internals/constants/cnae-descriptions.ts": `/**
  * CNAE-Subclasses 2.3 official subclass descriptions, each at the index of its code in

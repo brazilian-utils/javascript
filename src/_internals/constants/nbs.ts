@@ -941,6 +941,6 @@ rs,\
 
 /**
  * Shape an NBS code has to be written in: the 9 digits, optionally split into the printed
- * groups of 1, 4, 2 and 2 by a single whitespace or mask character.
+ * groups of 1, 4, 2 and 2 by any run of whitespace or mask characters.
  */
 export const NBS_FORMAT_REGEX = /^\d[\s.\-/]*\d{4}[\s.\-/]*\d{2}[\s.\-/]*\d{2}$/;

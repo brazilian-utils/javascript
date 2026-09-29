@@ -119,9 +119,9 @@ export const CFOP_CODES = ${serializeCodes(codes)};
 
 /**
  * Shape a CFOP code has to be written in: the 4 digits, optionally split after the series
- * digit by a single whitespace or mask character, the way the annex prints them ("1.101").
+ * digit by any run of whitespace or mask characters, the way the annex prints them ("1.101").
  */
-export const CFOP_FORMAT_REGEX = /^\\d[\\s.\\-/]?\\d{3}$/;
+export const CFOP_FORMAT_REGEX = /^\\d[\\s.\\-/]*\\d{3}$/;
 `,
 		"./src/_internals/constants/cfop-descriptions.ts": `/**
  * CFOP official operation descriptions, each at the index of its code in \`CFOP_CODES\`
