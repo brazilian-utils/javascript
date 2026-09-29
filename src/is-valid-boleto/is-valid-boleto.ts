@@ -82,7 +82,7 @@ const isValidCheckDigit = (boleto: string): boolean => {
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
  * Carta-Circular BCB nº 2.926/2000, anexo, layout of the barcode: position 04, "Codigo da moeda
- * (9 - real)"; positions 06 to 09, the fator de vencimento counted from 07/10/1997.
+ * (9 - real)"; positions 06 to 09, "Fator de Vencimento".
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf
  * FEBRABAN Convenção da Cobrança (FB-0061/2021), item 2.3.2: "Situação 1", "Código de Moeda = 9
  * (Real)"; "Situação 2", an institution "detentora apenas do ISPB, que será identificada pelo
