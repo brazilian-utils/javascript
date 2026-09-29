@@ -2,9 +2,10 @@ import * as fc from "fast-check";
 
 import { DATA, type StateCode } from "../_internals/constants/states";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { type RegistroProfissionalCouncil } from "./constants";
+import { type RegistroProfissionalCouncil as ConstantsCouncil } from "./constants";
 import {
 	isValidRegistroProfissional,
+	type RegistroProfissionalCouncil,
 	type IsValidRegistroProfissionalParams,
 } from "./is-valid-registro-profissional";
 
@@ -79,6 +80,18 @@ describe("isValidRegistroProfissional", () => {
 		test("when the council is not supported (e.g. CREA)", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidRegistroProfissional({ value: "1234567890", council: "CREA" })).toBe(false);
+		});
+
+		test("when a character outside letters, digits and the mask sits anywhere in the value", () => {
+			expect(isValidRegistroProfissional({ value: "12@3#4$5/SP", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "123456/SP😀", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "123456/S_P", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "123456/ſP", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "CRO-SP 12345!", council: "CRO" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "06/12345#", council: "CRP" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "SP-123456/O-3\u0000", council: "CRC" })).toBe(
+				false,
+			);
 		});
 
 		test("when an OAB number has no UF", () => {
@@ -386,6 +399,7 @@ describe("isValidRegistroProfissional types", () => {
 		expectTypeOf<IsValidRegistroProfissionalParams["stateCode"]>().toEqualTypeOf<
 			StateCode | undefined
 		>();
+		expectTypeOf<RegistroProfissionalCouncil>().toEqualTypeOf<ConstantsCouncil>();
 		expectTypeOf<RegistroProfissionalCouncil>().toEqualTypeOf<
 			"OAB" | "CRM" | "CRO" | "CRP" | "CRC"
 		>();

@@ -25,6 +25,13 @@ describe("isValidPhone", () => {
 	});
 
 	describe("should return false", () => {
+		test("when the value holds a character that is not part of a phone mask", () => {
+			expect(isValidPhone("11 98765-4321x")).toBe(false);
+			expect(isValidPhone("tel 1130000000")).toBe(false);
+			expect(isValidPhone("abc190", { accept: ["service"] })).toBe(false);
+			expect(isValidPhone("0800 123 4567 ramal 1", { accept: ["service"] })).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidPhone("")).toBe(false);
 		});
@@ -169,6 +176,20 @@ describe("isValidPhone with an array of characters", () => {
 	test("should reject it instead of reading it as the joined string", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(isValidPhone("11987654321".match(/\d/g))).toBe(false);
+	});
+});
+
+describe("isValidPhone with a value that is not a string", () => {
+	test("should apply the character check to its string form, like a string", () => {
+		const value = { toString: () => "190x" };
+
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPhone(value, { accept: ["service"] })).toBe(false);
+		expect(isValidPhone("190x", { accept: ["service"] })).toBe(false);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPhone({ toString: () => "190" }, { accept: ["service"] })).toBe(true);
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPhone(190, { accept: ["service"] })).toBe(true);
 	});
 });
 

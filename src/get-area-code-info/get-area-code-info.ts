@@ -16,10 +16,7 @@ export type AreaCodeInfo = {
 	regionCode: State["regionCode"];
 	/** The full name of the region the state belongs to, e.g. `"Sudeste"`. */
 	regionName: State["regionName"];
-	/**
-	 * Every state the DDD serves, the primary `stateCode` first, e.g. `["SP"]` for 11 and
-	 * `["DF", "GO"]` for 61.
-	 */
+	/** Every state the DDD serves, the primary `stateCode` first. */
 	stateCodes: StateCode[];
 };
 
@@ -40,27 +37,16 @@ export type AreaCodeInfo = {
  * are not digits, so `-11` and `1.1` are rejected instead of being read as `11`. A string has
  * any non-digit characters stripped, so `"(11)"`, `"0xx11"` and `"DDD 11"` are the DDD 11.
  *
- * @param {string|number} areaCode - The DDD to look up. Accepts a string or a non-negative
- * integer number, with any non-digit characters stripped before matching.
- * @returns {AreaCodeInfo|null} The area code info, or `null` when `areaCode` is not one of the
- * 67 DDDs in use under the Plano Geral de Numeração.
- *
  * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code); the gov.br
  * page below lists the codes actually allocated and links, under "POR MUNICÍPIO", to the Anexo
  * of Resolução Anatel nº 263/2001, which gives the Código Nacional of every municipality. The
  * current Anatel table (`Codigos_Nacionais.csv` of the Painel de Áreas Tarifárias, 21/09/2026)
  * confirms the 67 codes, their states and the four cross-border ones.
  *
- * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
- * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
- * @see Official: https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais
- * Anatel, Painel de Dados de Áreas Tarifárias, "Códigos Nacionais", the page the Anatel FAQ
- * points to for the CN of every municipality ("67 (sessenta e sete) áreas de numeração").
- * @see Official: https://www.anatel.gov.br/dadosabertos/paineis_de_dados/areastarifarias/pgcn.zip
- * `Codigos_Nacionais.csv` of 21/09/2026, the CN of all 5,571 municipalities in force.
- * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
- * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
- * @see Based on: https://brasilapi.com.br/docs#tag/DDD
+ * @param {string|number} areaCode - The DDD to look up. Accepts a string or a non-negative
+ * integer number, with any non-digit characters stripped before matching.
+ * @returns {AreaCodeInfo|null} The area code info, or `null` when `areaCode` is not one of the
+ * 67 DDDs in use under the Plano Geral de Numeração.
  *
  * @example
  * ```typescript
@@ -77,6 +63,17 @@ export type AreaCodeInfo = {
  * getAreaCodeInfo("(0xx11)"); // the same as "11"
  * getAreaCodeInfo(-11); // null
  * ```
+ *
+ * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
+ * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais
+ * @see Official: https://informacoes.anatel.gov.br/paineis/areas-tarifarias/codigos-nacionais
+ * Anatel, Painel de Dados de Áreas Tarifárias, "Códigos Nacionais", the page the Anatel FAQ
+ * points to for the CN of every municipality ("67 (sessenta e sete) áreas de numeração").
+ * @see Official: https://www.anatel.gov.br/dadosabertos/paineis_de_dados/areastarifarias/pgcn.zip
+ * `Codigos_Nacionais.csv` of 21/09/2026, the CN of all 5,571 municipalities in force.
+ * @see Based on: https://informacoes.anatel.gov.br/legislacao/resolucoes/2001/383-resolucao-263
+ * Anexo of Resolução nº 263/2001 (revoked; still the table Anatel's Códigos Nacionais page links to).
+ * @see Based on: https://brasilapi.com.br/docs#tag/DDD
  */
 export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null => {
 	const digits = readLookupDigits(areaCode);
@@ -88,7 +85,6 @@ export const getAreaCodeInfo = (areaCode: string | number): AreaCodeInfo | null 
 
 	const stateCode = AREA_CODE_STATES[numericAreaCode];
 
-	// An unknown DDD maps to no state code, so the lookup below finds no state for it either.
 	const state = DATA.find((entry) => entry.code === stateCode);
 
 	if (state === undefined) return null;

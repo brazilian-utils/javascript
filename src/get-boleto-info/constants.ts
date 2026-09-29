@@ -1,6 +1,7 @@
 /**
- * The "fator de vencimento" (expiration factor) counts days since the base date 07/10/1997 that
- * Carta-Circular BCB nº 2.926/2000 places in positions 6-9 of the barcode, and cycles every
+ * The "fator de vencimento" (expiration factor), which Carta-Circular BCB nº 2.926/2000 places in
+ * positions 6-9 of the barcode, counts days since the base date 07/10/1997 (from the Bradesco
+ * cobrança layout manual, not from the Carta-Circular) and cycles every
  * `CYCLE_LENGTH` days once it reaches its 4-digit maximum: it reached 9999 on 21/02/2025 and
  * restarted at 1000 on 22/02/2025. No official document with that reset could be found: FEBRABAN
  * publishes no communiqué on it on its site (its search returns none), the Convenção da Cobrança

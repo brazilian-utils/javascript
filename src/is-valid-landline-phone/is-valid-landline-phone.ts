@@ -1,4 +1,5 @@
 import { PHONE_NATIONAL_MIN_LENGTH } from "../_internals/constants/phone";
+import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
 import { isValidDDD } from "../_internals/is-valid-ddd/is-valid-ddd";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { LANDLINE_VALID_FIRST_NUMBERS } from "./constants";
@@ -13,6 +14,9 @@ const isValidLandlineFirstNumber = (value: string): boolean => {
  *
  * A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed before
  * validation, under the rule documented in `parsePhone`.
+ *
+ * Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the
+ * value invalid; up to 2.4.0 such characters were dropped, so `"11 98765-4321x"` was valid.
  *
  * The number is the DDD plus 8 digits, the first of them 2 to 6: art. 11, I, "a" of Resolução
  * Anatel nº 749/2022 destines `"2" a "6"` to the STFC (fixed line) and the SCM. From 1 March 2027
@@ -36,7 +40,7 @@ const isValidLandlineFirstNumber = (value: string): boolean => {
  * Resolução Anatel nº 777/2025, art. 21: the art. 11 in force on 1 March 2027.
  */
 export const isValidLandlinePhone = (value: string): boolean => {
-	if (typeof value !== "string") return false;
+	if (typeof value !== "string" || !hasOnlyPhoneCharacters(value)) return false;
 
 	const digits = normalizePhone(value);
 

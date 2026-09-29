@@ -49,7 +49,7 @@ describe("formatCnae", () => {
 
 	describe("pad option", () => {
 		it("should left pad a short code with zeros up to the full CNAE length", () => {
-			expect(formatCnae("", { pad: true })).toBe("0000-0/00");
+			expect(formatCnae("", { pad: true })).toBe("");
 			expect(formatCnae("1", { pad: true })).toBe("0000-0/01");
 			expect(formatCnae("62", { pad: true })).toBe("0000-0/62");
 			expect(formatCnae("501", { pad: true })).toBe("0000-5/01");
@@ -117,7 +117,7 @@ describe("formatCnae", () => {
 			expectMatchesPattern(
 				(value) => formatCnae(value, { pad: true }),
 				/^\d{4}-\d\/\d{2}$/,
-				digitsUpTo(7),
+				digitsUpTo(7).filter((value) => value !== ""),
 			);
 		});
 

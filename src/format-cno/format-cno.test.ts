@@ -48,6 +48,11 @@ describe("formatCno", () => {
 		expect(formatCno()).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCno("", { pad: true })).toBe("");
+		expect(formatCno("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		test("should print what formatCei prints, since both share the mask", () => {
 			fc.assert(

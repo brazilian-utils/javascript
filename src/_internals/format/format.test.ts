@@ -66,4 +66,9 @@ describe("format", () => {
 	it("should count * as a slot when padding", () => {
 		expect(format({ value: "123", pattern: "***.000.000-**", pad: true })).toBe("***.000.001-**");
 	});
+
+	it("should return an empty string for an empty value even when padding", () => {
+		expect(format({ value: "", pattern: "00-00-00", pad: true })).toBe("");
+		expect(format({ value: "", pattern: "***.000.000-**", pad: true })).toBe("");
+	});
 });

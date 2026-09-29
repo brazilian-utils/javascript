@@ -2,6 +2,7 @@ import { CFOP_CODES } from "../_internals/constants/cfop";
 import { CFOP_DESCRIPTIONS } from "../_internals/constants/cfop-descriptions";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { isValidCfop } from "../is-valid-cfop/is-valid-cfop";
 
 /**
@@ -24,12 +25,12 @@ export type Cfop = {
  * nomenclature, the codes ending in "00" and "50" (1000, 1100, 1150, 5350, ...), are section
  * titles rather than codes a document can carry, so they give `null`.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 4
- * digits, or the `N.NNN` form the annex prints, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask)
- * and optional surrounding whitespace. Anything else (`"abc5102"`) is rejected instead of
- * having its digits picked out. A number is only read as a code when it is a non-negative
- * safe integer, since a sign, a decimal point or a rounded magnitude would otherwise be read
- * as a code the caller never wrote.
+ * A string is only read as a code when it is written in one of the documented forms: the 4 digits,
+ * or the `N.NNN` form the annex prints, with any run of separators (whitespace, `.`, `-` or `/`)
+ * between the groups and optional surrounding whitespace. Anything else (`"abc5102"`) is rejected
+ * instead of having its digits picked out. A number is only read as a code when it is a
+ * non-negative safe integer, since a sign, a decimal point or a rounded magnitude would otherwise
+ * be read as a code the caller never wrote.
  *
  * No CFOP code starts with a zero, its first digit is the operation group (1 to 7), so nothing
  * is ever padded here: a number and the string of the same digits are read identically, and a
@@ -64,5 +65,5 @@ export const getCfop = (value: string | number): Cfop | null => {
 
 	const code = sanitizeToDigits(value);
 
-	return { code, description: CFOP_DESCRIPTIONS[findCodeIndex(CFOP_CODES, code)] };
+	return { code, description: unpackTexts(CFOP_DESCRIPTIONS)[findCodeIndex(CFOP_CODES, code)] };
 };

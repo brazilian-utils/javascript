@@ -648,6 +648,6 @@ j";
 
 /**
  * Shape a CFOP code has to be written in: the 4 digits, optionally split after the series
- * digit by a single whitespace or mask character, the way the annex prints them ("1.101").
+ * digit by any run of whitespace or mask characters, the way the annex prints them ("1.101").
  */
 export const CFOP_FORMAT_REGEX = /^\d[\s.\-/]*\d{3}$/;

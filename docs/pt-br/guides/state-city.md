@@ -1,12 +1,12 @@
 ---
 title: "Estado e cidade"
 description: "Escolha um estado e as cidades dele carregam sob demanda, com Brazilian Utils em React, Angular, Vue e JavaScript puro."
-keywords: ["select de estado e cidade", "cidades do IBGE", "getCities", "import lazy", "code splitting", "municípios de um estado"]
+keywords: ["select de estado e cidade", "municípios do IBGE", "getMunicipalities", "import lazy", "code splitting", "municípios de um estado"]
 ---
 
 Escolha um estado e as cidades dele preenchem o segundo select. Escolha o framework: cada exemplo roda o código logo abaixo dele, que pode ser copiado do jeito que está.
 
-O ponto aqui é quando cada tabela é carregada, e a resposta é: quando alguém abre o select que a mostra. Nem com a página, nem ao escolher um estado — num formulário em que a cidade vem preenchida de outro lugar, ou é deixada em branco, os 154 KB de cidades nunca são buscados. Os estados são 27 linhas, 2,5 KB; as cidades são 5.571, 154 KB. Cada utilitário é um subpath, então `await import("@brazilian-utils/brazilian-utils/get-cities")` busca essa tabela e nada mais. O bundler transforma isso num chunk separado, e o browser busca uma vez e guarda, então só a primeira abertura espera.
+O ponto aqui é quando cada tabela é carregada, e a resposta é: quando alguém abre o select que a mostra. Nem com a página, nem ao escolher um estado. Num formulário em que a cidade vem preenchida de outro lugar, ou é deixada em branco, os 76 KB de municípios nunca são buscados. Os estados são 27 linhas, 2,2 KB; os municípios são 5.571, 76 KB. Cada utilitário é um subpath, então `await import("@brazilian-utils/brazilian-utils/get-municipalities")` busca essa tabela e nada mais. Cada opção usa o `code` IBGE do município como valor e o `name` como rótulo, já que os nomes se repetem entre estados (existem dois "Pau D'Arco"). O bundler transforma isso num chunk separado, e o browser busca uma vez e guarda, então só a primeira abertura espera.
 
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=state-city/react&example=state-city.tsx">
@@ -93,4 +93,4 @@ Sem build: salve como um arquivo `.html` e abra. Cada subpath é um módulo pró
 
 </div>
 
-A [introdução](pt-br/getting-started.md#bundle-size) lista todos os utilitários que embutem uma tabela e valem um subpath próprio.
+A [introdução](pt-br/getting-started.md#tamanho-do-bundle) lista todos os utilitários que embutem uma tabela e valem um subpath próprio.

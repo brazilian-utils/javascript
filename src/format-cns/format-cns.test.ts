@@ -23,8 +23,12 @@ describe("formatCns", () => {
 	});
 
 	it("should pad the value with leading zeros when pad is true", () => {
-		expect(formatCns("", { pad: true })).toBe("000 0000 0000 0000");
 		expect(formatCns("89010001", { pad: true })).toBe("000 0000 8901 0001");
+	});
+
+	it("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCns("", { pad: true })).toBe("");
+		expect(formatCns("abc", { pad: true })).toBe("");
 	});
 
 	it("should not add digits after the CNS length (15)", () => {
@@ -53,7 +57,7 @@ describe("formatCns", () => {
 
 		test("should left pad a shorter value up to the card length", () => {
 			fc.assert(
-				fc.property(fc.stringMatching(/^[0-9]{0,15}$/), (value) => {
+				fc.property(fc.stringMatching(/^[0-9]{1,15}$/), (value) => {
 					const padded = formatCns(value, { pad: true }).replaceAll(" ", "");
 
 					expect(padded).toBe(value.padStart(15, "0"));

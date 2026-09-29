@@ -15,7 +15,6 @@
 export const gs1CheckDigit = (value: string): number => {
 	let sum = 0;
 
-	// `position` counts from the right: the last digit, and every second one from it, weighs 3.
 	for (let position = 0; position < value.length; position++) {
 		const weight = position % 2 === 0 ? 3 : 1;
 

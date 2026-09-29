@@ -2,8 +2,12 @@ import * as fc from "fast-check";
 
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { CERTIDAO_TYPES } from "../get-certidao-info/constants";
-import { type CertidaoType } from "../get-certidao-info/get-certidao-info";
-import { isValidCertidao, type IsValidCertidaoOptions } from "./is-valid-certidao";
+import { type CertidaoType as EntryCertidaoType } from "../get-certidao-info/get-certidao-info";
+import {
+	isValidCertidao,
+	type CertidaoType,
+	type IsValidCertidaoOptions,
+} from "./is-valid-certidao";
 
 const CHECK_DIGIT_PAIRS = Array.from({ length: 100 }, (_, index) => String(index).padStart(2, "0"));
 
@@ -271,6 +275,7 @@ describe("isValidCertidao types", () => {
 		expectTypeOf(isValidCertidao).parameter(0).toEqualTypeOf<string>();
 		expectTypeOf(isValidCertidao).parameter(1).toEqualTypeOf<IsValidCertidaoOptions | undefined>();
 		expectTypeOf<IsValidCertidaoOptions["accept"]>().toEqualTypeOf<CertidaoType[] | undefined>();
+		expectTypeOf<CertidaoType>().toEqualTypeOf<EntryCertidaoType>();
 		expectTypeOf(isValidCertidao).returns.toEqualTypeOf<boolean>();
 	});
 });

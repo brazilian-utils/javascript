@@ -3,6 +3,8 @@ import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeCnpj } from "../_internals/sanitize-cnpj/sanitize-cnpj";
 import { type FormatCnpjOptions } from "../format-cnpj/format-cnpj";
 
+export type { FormatCnpjOptions } from "../format-cnpj/format-cnpj";
+
 /** Options of `parseCnpj`. */
 export type ParseCnpjOptions = Pick<FormatCnpjOptions, "version">;
 
@@ -11,6 +13,9 @@ export type ParseCnpjOptions = Pick<FormatCnpjOptions, "version">;
  *
  * A number is only read when it is a non-negative safe integer; any other number (negative,
  * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
+ *
+ * Since July 2026 new CNPJs may be alphanumeric, so pass `version: 2` to keep their letters: the
+ * default `version: 1` keeps digits only.
  *
  * @param {string|number} value - The CNPJ value to be parsed.
  * @param {ParseCnpjOptions} [options] - Optional parsing options.

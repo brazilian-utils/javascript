@@ -1,6 +1,6 @@
+import { CEP_RANGES } from "../_internals/constants/cep-ranges";
 import { DATA, type State } from "../_internals/constants/states";
 import { findCepRange } from "../_internals/find-cep-range/find-cep-range";
-import { CEP_RANGES } from "./constants";
 
 export type { State } from "../_internals/constants/states";
 
@@ -10,8 +10,9 @@ export type { State } from "../_internals/constants/states";
  * API, so it says which state owns the range and not whether the CEP is in use.
  *
  * The value is accepted under the same rules as `isValidCep`: 8 digits, as a string or a number,
- * with spaces, dots and hyphens ignored. A number cannot carry a leading zero, so a CEP of São
- * Paulo that starts with `0` has to be given as a string. A number must also be a non-negative
+ * with spaces, dots, hyphens and slashes ignored. A number cannot carry a leading zero, so a CEP of
+ * São Paulo that starts with `0` has to be given as a string (`getAddressInfoByCep` and `formatCep`
+ * with `pad: true` left-pad numbers instead). A number must also be a non-negative
  * integer: a sign and a decimal point are not digits, so `-20040020` and `2004002.5` are rejected
  * instead of being read as a CEP.
  *

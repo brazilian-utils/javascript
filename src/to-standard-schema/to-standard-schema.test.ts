@@ -121,6 +121,19 @@ describe("toStandardSchema", () => {
 		});
 	});
 
+	test("should report a validator that throws as an issue", () => {
+		const schema = toStandardSchema(
+			() => {
+				throw new Error("boom");
+			},
+			{ message: "Invalid value" },
+		);
+
+		expect(schema["~standard"].validate("x")).toStrictEqual({
+			issues: [{ message: "Invalid value" }],
+		});
+	});
+
 	describe("properties", () => {
 		test("should agree with the validator it wraps, whatever the value", () => {
 			const schema = toStandardSchema(isValidCpf);

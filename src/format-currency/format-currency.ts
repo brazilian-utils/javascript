@@ -9,16 +9,10 @@ export type FormatCurrencyOptions = {
 	precision?: number;
 };
 
-const formatters = new Map<string, Intl.NumberFormat>();
+let formatters: Map<string, Intl.NumberFormat> | undefined;
 
-const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => {
-	const key = `${symbol}|${precision}`;
-	const cached = formatters.get(key);
-
-	// Stryker disable next-line ConditionalExpression: this is a performance cache; a freshly constructed Intl.NumberFormat with the same options formats identically to a cached one, so skipping the cache never changes the output
-	if (cached) return cached;
-
-	const formatter = new Intl.NumberFormat("pt-BR", {
+const buildFormatter = (symbol: boolean, precision: number): Intl.NumberFormat =>
+	new Intl.NumberFormat("pt-BR", {
 		style: symbol ? "currency" : "decimal",
 		currency: "BRL",
 		currencyDisplay: symbol ? "symbol" : undefined,
@@ -26,10 +20,26 @@ const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => 
 		minimumFractionDigits: precision,
 	});
 
-	// Stryker disable next-line CallExpression: this is a performance cache; not populating it only means the next call rebuilds an equivalent formatter, which formats identically
-	formatters.set(key, formatter);
+const storeFormatter = (
+	cache: Map<string, Intl.NumberFormat>,
+	key: string,
+	symbol: boolean,
+	precision: number,
+): Intl.NumberFormat => {
+	const formatter = buildFormatter(symbol, precision);
+
+	// Stryker disable next-line CallExpression: this is a performance cache; not storing the formatter only means the next call builds an equivalent one, which formats identically.
+	cache.set(key, formatter);
 
 	return formatter;
+};
+
+const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => {
+	formatters ??= new Map();
+
+	const key = `${symbol}|${precision}`;
+
+	return formatters.get(key) ?? storeFormatter(formatters, key, symbol, precision);
 };
 
 const toNumber = (value: unknown, precision: number): number => {
@@ -48,7 +58,8 @@ const toNumber = (value: unknown, precision: number): number => {
  * (or up to `precision` digits, when that is larger) is the decimal separator, every other
  * `,` or `.` is a thousands separator, and a `-` written before the first digit is preserved.
  * So `"1.234,56"` formats as `"1.234,56"`, `"-10.5"` as `"-10,50"` and `"1234"` as
- * `"1.234,00"`.
+ * `"1.234,00"`. A string with no digit reads as `0`, so `"abc"` formats as `"0,00"`, not as
+ * an empty string.
  *
  * A value that is not a finite number, such as `NaN`, `Infinity` or `-Infinity`, formats as
  * an empty string, and so does a value that cannot be coerced to a number at all, such as a

@@ -1,4 +1,7 @@
+import { ARRECADACAO_PRODUCT } from "../_internals/constants/arrecadacao";
 import {
+	BARCODE_FACTOR_INDEX,
+	BOLETO_BARCODE_LENGTH,
 	BOLETO_LENGTH,
 	CURRENCY_CODE_INDEX,
 	FACTOR_INDEX,
@@ -11,6 +14,8 @@ import { mod11 } from "../_internals/mod11/mod11";
 import { parseArrecadacao } from "../_internals/parse-arrecadacao/parse-arrecadacao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { CHECK_DIGIT_POSITION, CONVERT_POSITIONS, PARTIALS } from "./constants";
+
+const FORMAT_REGEX = /^\d+(?:[\s.\-/]+\d+)*$/;
 
 const isValidPartials = (digits: string): boolean => {
 	for (const { start, end, checkIndex } of PARTIALS) {
@@ -25,12 +30,13 @@ const isValidPartials = (digits: string): boolean => {
  * Whether position 4 holds the código de moeda `9` or the slip follows the Situação 2 layout
  * (`ISPB_ONLY_PREFIX`, then `ISPB_ONLY_ZEROS` from the factor on), the only place a `0` is
  * assigned.
- * @param {string} digits - The 47 digits of the linha digitável.
+ * @param {string} digits - The 47 digits of the linha digitável or the 44 of the barcode.
+ * @param {number} factorIndex - Where the fator de vencimento starts in `digits`.
  * @returns {boolean} Whether the código de moeda fits the slip.
  */
-const isValidCurrency = (digits: string): boolean =>
+const isValidCurrency = (digits: string, factorIndex: number): boolean =>
 	digits[CURRENCY_CODE_INDEX] === REAL_CURRENCY_CODE ||
-	(digits.startsWith(ISPB_ONLY_PREFIX) && digits.startsWith(ISPB_ONLY_ZEROS, FACTOR_INDEX));
+	(digits.startsWith(ISPB_ONLY_PREFIX) && digits.startsWith(ISPB_ONLY_ZEROS, factorIndex));
 
 const parseToBoleto = (digits: string): string => {
 	let result = "";
@@ -50,9 +56,20 @@ const isValidCheckDigit = (boleto: string): boolean => {
 /**
  * Validates if a Brazilian bank slip (boleto) number is valid.
  *
- * Supports the 47 digit "cobrança bancária" linha digitável and, additionally, the
+ * Supports the 47 digit "cobrança bancária" linha digitável, its 44 digit barcode (código de
+ * barras: bank code, código de moeda, the módulo 11 check digit in position 5, fator de vencimento,
+ * amount and free field, checked by the same rules as the linha digitável) and, additionally, the
  * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
- * barcode, both starting with `8`.
+ * barcode, both starting with `8`. A 44 digit value starting with `8` is only ever an arrecadação
+ * barcode (the `8` is the FEBRABAN product identifier of the arrecadação), never a cobrança
+ * bancária one with a bank code from `800` to `899` (only `804` exists), which the two layouts
+ * could not be told apart by. That barcode is therefore not accepted, while the 47 digit linha
+ * digitável of the same slip is. Up to 2.4.0 the cobrança bancária barcode was rejected.
+ *
+ * The usual mask characters (whitespace, `.`, `-` and `/`) are accepted between digits, a run of
+ * them included, and whitespace around the value; any other character makes the value invalid,
+ * so a linha digitável wrapped in letters is rejected instead of being read as its digits. Up to
+ * 2.4.0 every non-digit was dropped.
  *
  * The código de moeda in position 4 of the cobrança bancária barcode (and of the linha
  * digitável) must be `9` (real), the only code Carta-Circular BCB nº 2.926/2000 assigns. The one
@@ -67,9 +84,11 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * @example
  * ```typescript
  * isValidBoleto("00190000090114971860168524522114675860000102656"); // true
+ * isValidBoleto("00196758600001026560000001149718606852452211"); // true (cobrança bancária barcode)
  * isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656"); // true
  * isValidBoleto("846100000005246100291102005460339004695895061080"); // true (arrecadação)
  * isValidBoleto("00170000010114971860168524522114275860000102656"); // false (código de moeda 7)
+ * isValidBoleto("abc00190000090114971860168524522114675860000102656zzz"); // false (letters around the digits)
  * isValidBoleto("98800000060114971860168524522114100000018236120"); // true (Situação 2: 988, moeda 0, ISPB)
  * ```
  *
@@ -82,7 +101,7 @@ const isValidCheckDigit = (boleto: string): boolean => {
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
  * Carta-Circular BCB nº 2.926/2000, anexo, layout of the barcode: position 04, "Codigo da moeda
- * (9 - real)"; positions 06 to 09, the fator de vencimento counted from 07/10/1997.
+ * (9 - real)"; positions 06 to 09, "Fator de Vencimento".
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Conven%C3%A7%C3%A3o%20da%20Cobran%C3%A7a%20-%2005_02_2021_f.pdf
  * FEBRABAN Convenção da Cobrança (FB-0061/2021), item 2.3.2: "Situação 1", "Código de Moeda = 9
  * (Real)"; "Situação 2", an institution "detentora apenas do ISPB, que será identificada pelo
@@ -94,13 +113,23 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * @see Official: https://portal.febraban.org.br/pagina/3425/33/pt-br/layout-febraban
  */
 export const isValidBoleto = (value: string): boolean => {
+	if (typeof value !== "string" || !FORMAT_REGEX.test(value.trim())) return false;
+
 	const digits = sanitizeToDigits(value);
 
 	if (parseArrecadacao(digits)) return true;
 
+	if (digits.length === BOLETO_BARCODE_LENGTH) {
+		return (
+			!digits.startsWith(ARRECADACAO_PRODUCT) &&
+			isValidCurrency(digits, BARCODE_FACTOR_INDEX) &&
+			isValidCheckDigit(digits)
+		);
+	}
+
 	if (digits.length !== BOLETO_LENGTH) return false;
 
-	if (!isValidCurrency(digits)) return false;
+	if (!isValidCurrency(digits, FACTOR_INDEX)) return false;
 
 	if (!isValidPartials(digits)) return false;
 

@@ -23,19 +23,9 @@ const VALID_CNPJ_CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
  * The parameters `generateCnpj` accepts, an alternative to passing the version positionally.
  */
 export type GenerateCnpjParams = {
-	/**
-	 * The version of the CNPJ to be generated: `1` for the numeric CNPJ and `2` for the
-	 * alphanumeric one. Defaults to `1`, and any other runtime value also generates a version 1
-	 * (numeric) CNPJ.
-	 */
+	/** The CNPJ version: `1` numeric (default) or `2` alphanumeric. */
 	version?: 1 | 2;
-	/**
-	 * The "número de ordem" (filial) block, positions 9 to 12 of the CNPJ: an integer from 1 to
-	 * 9999, written zero padded to four characters (`3` becomes `"0003"`). Defaults to a random
-	 * block, and an integer outside that range, a fractional number or any other runtime value is
-	 * ignored, so a random block is used for those as well. The block stays numeric on the
-	 * alphanumeric version, which the IN RFB nº 2.229/2024 layout allows.
-	 */
+	/** The branch block (positions 9 to 12), an integer from 1 to 9999; random when left out. */
 	branch?: number;
 };
 
@@ -49,7 +39,11 @@ const generateRandomCnpjCharacters = (length: number): string => {
 	return characters;
 };
 
-// `Number.isInteger` as a type guard, so an out of range `branch` narrows to `number`.
+/**
+ * `Number.isInteger` as a type guard, so an out of range `branch` narrows to `number`.
+ * @param {unknown} value - The value to test.
+ * @returns {boolean} True if the value is an integer.
+ */
 const isInteger = (value: unknown): value is number => Number.isInteger(value);
 
 const isBranchInRange = (branch: number | undefined): branch is number =>
@@ -106,6 +100,9 @@ const isGenerateCnpjParams = (
  * again, the way a base of one repeated character is. Up to 2.4.0 about 1 in 10,000 numeric
  * CNPJs came out with it.
  *
+ * The `branch` block stays numeric on the alphanumeric version, which the IN RFB nº 2.229/2024
+ * layout allows.
+ *
  * @param {1 | 2 | GenerateCnpjParams} [versionOrParams] - The version of the CNPJ to be
  * generated: `1` for the numeric CNPJ and `2` for the alphanumeric one, or an options object.
  * Defaults to `1`, and never throws: `null`, `undefined` and any other runtime value that is
@@ -121,9 +118,9 @@ const isGenerateCnpjParams = (
  * generateCnpj(); // "12345678000195"
  * generateCnpj(2); // "Q0SLFMBD7VX439"
  * generateCnpj({ version: 2 }); // "Q0SLFMBD7VX439"
- * generateCnpj({ branch: 3 }); // "12345678000372", the ordem block is "0003"
- * generateCnpj({ version: 2, branch: 1 }); // "Q0SLFMBD000148", the ordem block is "0001"
- * generateCnpj({ branch: 0 }); // "12345678472695", an out of range branch draws a random block
+ * generateCnpj({ branch: 3 }); // "12345678000357", the ordem block is "0003"
+ * generateCnpj({ version: 2, branch: 1 }); // "Q0SLFMBD000184", the ordem block is "0001"
+ * generateCnpj({ branch: 0 }); // "12345678472607", an out of range branch draws a random block
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj

@@ -6,6 +6,11 @@ import { isValidLandlinePhone } from "./is-valid-landline-phone";
 
 describe("isValidLandlinePhone", () => {
 	describe("should return false", () => {
+		test("when the value holds a character that is not part of a phone mask", () => {
+			expect(isValidLandlinePhone("tel 1130000000")).toBe(false);
+			expect(isValidLandlinePhone("(11) 3000-0000x")).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidLandlinePhone("")).toBe(false);
 		});

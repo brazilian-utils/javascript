@@ -1,14 +1,18 @@
-import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
+import { type Municipality } from "../_internals/constants/municipalities";
+import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
 import { STATE_CODES } from "../_internals/constants/state-codes";
 import { type StateCode } from "../_internals/constants/states";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
+import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 export type { StateCode } from "../_internals/constants/states";
 
+let sortedMunicipalities: Municipality[] | undefined;
+
 const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
-	CITIES_DATA[stateCode].map(([name, code]) => ({ code, name, stateCode }));
+	readMunicipalities(stateCode).map(([name, code]) => ({ code, name, stateCode }));
 
 /**
  * Returns Brazilian municipalities published by the IBGE, optionally filtered by state.
@@ -48,12 +52,18 @@ const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
  */
 export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 	if (stateCode === undefined) {
-		return STATE_CODES.flatMap((code) => buildMunicipalities(code)).sort((a, b) =>
-			a.name.localeCompare(b.name, "pt-BR"),
+		sortedMunicipalities ??= STATE_CODES.flatMap((code) => buildMunicipalities(code)).toSorted(
+			(a, b) => a.name.localeCompare(b.name, "pt-BR"),
 		);
+
+		return sortedMunicipalities.map(({ code, name, stateCode: state }) => ({
+			code,
+			name,
+			stateCode: state,
+		}));
 	}
 
 	const code = normalizeStateCode(stateCode);
 
-	return hasOwnKey(CITIES_DATA, code) ? buildMunicipalities(code) : [];
+	return hasOwnKey(MUNICIPALITY_NAMES, code) ? buildMunicipalities(code) : [];
 };

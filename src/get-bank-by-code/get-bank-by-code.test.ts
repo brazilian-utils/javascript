@@ -1,8 +1,11 @@
 import * as fc from "fast-check";
 
-import { BANKS, type Bank } from "../_internals/constants/banks";
+import { type Bank } from "../_internals/constants/banks";
+import { readBanks } from "../_internals/read-banks/read-banks";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { getBankByCode } from "./get-bank-by-code";
+
+const BANKS = readBanks();
 
 describe("getBankByCode", () => {
 	test("should strip any non-digit character of a string, as up to 2.4.0", () => {

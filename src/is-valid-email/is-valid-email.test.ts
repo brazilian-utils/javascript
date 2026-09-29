@@ -63,9 +63,53 @@ describe("isValidEmail", () => {
 		test("when the final domain label is longer than the 63 characters WHATWG allows", () => {
 			expect(isValidEmail(`user@example.${"a".repeat(64)}`)).toBe(false);
 		});
+
+		test("when the local part is longer than 64 characters", () => {
+			expect(isValidEmail(`${"a".repeat(65)}@example.com`)).toBe(false);
+			expect(isValidEmail(`${"a".repeat(300)}@a.com`)).toBe(false);
+		});
+
+		test("when the whole address is longer than 254 characters", () => {
+			const label = "a".repeat(63);
+
+			expect(isValidEmail(`user@${label}.${label}.${label}.${"a".repeat(54)}.com`)).toBe(false);
+		});
+
+		test("when the punycode final label is malformed", () => {
+			expect(isValidEmail("user@example.xn--")).toBe(false);
+			expect(isValidEmail("user@example.xn---")).toBe(false);
+			expect(isValidEmail("user@example.xn--p1ai-")).toBe(false);
+			expect(isValidEmail(`user@example.xn--${"a".repeat(60)}`)).toBe(false);
+		});
+
+		test("when the local part holds a character outside the accepted set", () => {
+			for (const local of ["a%b", "a=b", "a?b", "a/b", "a!b", "a#b", "a$b", "a&b", "a*b", "x'"]) {
+				expect(isValidEmail(`${local}@a.com`)).toBe(false);
+			}
+		});
+
+		test("when the domain has a single label", () => {
+			expect(isValidEmail("user@localhost")).toBe(false);
+		});
 	});
 
 	describe("should return true", () => {
+		test("when the local part has exactly 64 characters", () => {
+			expect(isValidEmail(`${"a".repeat(64)}@example.com`)).toBe(true);
+		});
+
+		test("when the address has exactly 254 characters", () => {
+			const label = "a".repeat(63);
+
+			expect(isValidEmail(`user@${label}.${label}.${label}.${"a".repeat(53)}.com`)).toBe(true);
+		});
+
+		test("when the final label is punycode", () => {
+			expect(isValidEmail("user@example.xn--p1ai")).toBe(true);
+			expect(isValidEmail("user@example.XN--P1AI")).toBe(true);
+			expect(isValidEmail(`user@example.xn--${"a".repeat(59)}`)).toBe(true);
+		});
+
 		test("when is a valid email", () => {
 			expect(isValidEmail("user@example.com")).toBe(true);
 			expect(isValidEmail("user__@example.com")).toBe(true);

@@ -47,12 +47,7 @@ import {
 export type GeneratePixPayloadParams = {
 	/** The Pix key of the receiver, in any accepted form. Required unless `url` is given. */
 	key?: string;
-	/**
-	 * The PSP location of a dynamic payload (Bacen field 26-25), without a URL scheme, e.g.
-	 * `"pix.example.com/qr/v2/1234"`. When given, the payload is generated as dynamic
-	 * (`pointOfInitiation` `"12"`) and carries this URL instead of a key. Required unless `key`
-	 * is given; giving both `key` and `url` is invalid, just like giving neither.
-	 */
+	/** The PSP location of a dynamic payload, without a URL scheme; required unless `key` is given. */
 	url?: string;
 	/** Name of the receiver, folded to ASCII and truncated to 25 characters. */
 	merchantName: string;
@@ -106,10 +101,6 @@ const resolveFormattedAmount = (
 ): string | null => {
 	if (pointOfInitiation !== undefined && (amount !== undefined || txid !== undefined)) return null;
 
-	// `Number.isFinite` is false for every value that is not a number, so this guard is what keeps
-	// `toFixed` below from being called on something that has no `toFixed`. A negative amount keeps
-	// its sign in `toFixed`, so the amount regex below turns it down, and an amount that is zero or
-	// rounds to zero is turned down by the `Number(formattedAmount)` check.
 	if (amount !== undefined && !Number.isFinite(amount)) return null;
 
 	const formattedAmount = amount === undefined ? "" : amount.toFixed(AMOUNT_DECIMAL_PLACES);
@@ -171,6 +162,10 @@ const resolveFormattedAmount = (
  * Every payload returned here is one `isValidPixPayload` accepts: the key in its DICT form,
  * the name and city within 25 and 15 characters, the 62-05 `txid` always written (`***` when
  * none is given, and always for a dynamic payload) and a non-zero amount.
+ *
+ * The `url` is the PSP location of a dynamic payload (Bacen field 26-25), without a URL scheme,
+ * e.g. `"pix.example.com/qr/v2/1234"`. When given, the payload is dynamic (`pointOfInitiation`
+ * `"12"`) and carries the URL instead of a key.
  *
  * @param {GeneratePixPayloadParams} params - The parameters of the payload.
  * @param {string} [params.key] - The Pix key of the receiver. Required unless `url` is given.

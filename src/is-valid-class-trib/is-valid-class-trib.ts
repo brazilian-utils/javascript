@@ -1,5 +1,5 @@
+import { CLASS_TRIB_CODES } from "../_internals/constants/class-trib-codes";
 import {
-	CLASS_TRIB_CODES,
 	CLASS_TRIB_FORMAT_REGEX,
 	CLASS_TRIB_LENGTH,
 	CST_IBS_CBS_LENGTH,
@@ -11,10 +11,7 @@ import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
  * Options for `isValidClassTrib`.
  */
 export type IsValidClassTribOptions = {
-	/**
-	 * The CST-IBS/CBS the document carries next to the cClassTrib. When given, the classification
-	 * also has to belong to it (its first 3 digits); omit it to check the cClassTrib alone.
-	 */
+	/** The CST-IBS/CBS the classification must belong to; omit it to check the cClassTrib alone. */
 	cst?: string | number;
 };
 
@@ -39,6 +36,7 @@ export type IsValidClassTribOptions = {
  * integer. A value narrower than 6 digits is left padded with zeros, as a string or as a number,
  * since the codes start with zeros a numeric field drops: `1`, `"1"` and `"000001"` are all the
  * code `000001`. `options.cst` is read the same way, padded to 3 digits.
+ * An `options` that is `null` or not an object is read as no options at all.
  *
  * @param {string|number} value - The cClassTrib to be validated, e.g. `"200001"` or `200001`.
  * @param {IsValidClassTribOptions} [options] - The CST-IBS/CBS the code has to belong to.
@@ -60,13 +58,13 @@ export type IsValidClassTribOptions = {
  * "Documentos" > "Diversos" of the Portal Nacional da NF-e, which publishes every version of the
  * "Tabela de Classificação Tributária do IBS e CBS" workbook (sheets CST and cClassTrib).
  * @see Official: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=
- * Informe Técnico 2025.002 (v.1.60 of 22/06/2026), which divulges both tables, defines their
+ * Informe Técnico 2025.002 (v.1.60 of 23/06/2026), which divulges both tables, defines their
  * columns and states that the first three digits of a cClassTrib are its CST-IBS/CBS.
  * @see Official: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=
  * Nota Técnica 2025.002-RTC (v.1.51), fields UB13 `CST` (N, 3 digits) and UB14 `cClassTrib` (N,
  * 6 digits) and the rejections 1020 (unknown CST), 1023 (unknown cClassTrib) and 1024
  * (cClassTrib incompatible with the CST).
- * @see Official: https://dfe-portal.svrs.rs.gov.br/DFE/TabelaClassificacaoTributaria
+ * @see Official: https://dfe-portal.svrs.rs.gov.br/DFE/ClassificacaoTributaria
  * The same tables online, on the Portal dos Documentos Fiscais Eletrônicos (SVRS).
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm
  * Lei Complementar nº 214/2025, which institutes the IBS and the CBS.
@@ -76,7 +74,6 @@ export const isValidClassTrib = (
 	options?: IsValidClassTribOptions,
 ): boolean => {
 	if (!isLookupCode(value)) return false;
-	if (options !== undefined && (options === null || typeof options !== "object")) return false;
 
 	const code = padLookupCode(value, CLASS_TRIB_LENGTH);
 

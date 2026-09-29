@@ -67,6 +67,13 @@ describe("formatLegalNature", () => {
 	});
 });
 
+describe("formatLegalNature with an empty value under pad", () => {
+	test("should return an empty string for an empty value or one without digits", () => {
+		expect(formatLegalNature("", { pad: true })).toBe("");
+		expect(formatLegalNature("abc", { pad: true })).toBe("");
+	});
+});
+
 describe("formatLegalNature types", () => {
 	test("should take a string or number value and return a string", () => {
 		expectTypeOf(formatLegalNature).parameter(0).toEqualTypeOf<string | number>();

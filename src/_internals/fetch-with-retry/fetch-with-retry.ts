@@ -7,7 +7,7 @@ export type FetchWithRetryOptions = RequestInit & {
 	retryDelayMs?: number;
 };
 
-const RETRYABLE_ERROR_CODES = new Set([
+const RETRYABLE_ERROR_CODES = [
 	"UND_ERR_SOCKET",
 	"UND_ERR_CONNECT_TIMEOUT",
 	"UND_ERR_HEADERS_TIMEOUT",
@@ -17,7 +17,15 @@ const RETRYABLE_ERROR_CODES = new Set([
 	"EHOSTUNREACH",
 	"ENETUNREACH",
 	"ETIMEDOUT",
-]);
+] as const;
+
+let retryableCodes: Set<string> | undefined;
+
+const readRetryableCodes = (): Set<string> => {
+	retryableCodes ??= new Set<string>(RETRYABLE_ERROR_CODES);
+
+	return retryableCodes;
+};
 
 const getErrorCode = (error: unknown): string | undefined => {
 	if (isNullish(error) || typeof error !== "object") return undefined;
@@ -34,19 +42,15 @@ const getErrorCode = (error: unknown): string | undefined => {
 
 	const causeCode = "code" in cause ? cause.code : undefined;
 
-	// Stryker disable next-line ConditionalExpression: RETRYABLE_ERROR_CODES.includes() only ever
-	// matches an exact string, so a non-string causeCode reaching that check behaves identically to
-	// undefined; the type check below exists only to satisfy the string | undefined return type.
+	// Stryker disable next-line ConditionalExpression: the check only narrows the type
 	return typeof causeCode === "string" ? causeCode : undefined;
 };
 
 const isRetryableFetchError = (error: unknown): boolean => {
 	const code = getErrorCode(error);
 
-	// Stryker disable next-line ConditionalExpression: RETRYABLE_ERROR_CODES.has() only ever
-	// matches an exact string, so an undefined code reaching that check behaves identically to
-	// skipping it; the undefined check below exists only to satisfy Set<string>#has's parameter type.
-	if (code !== undefined && RETRYABLE_ERROR_CODES.has(code)) {
+	// Stryker disable next-line ConditionalExpression: the check only narrows the type
+	if (code !== undefined && readRetryableCodes().has(code)) {
 		return true;
 	}
 
@@ -99,7 +103,6 @@ const attemptFetch = async (
 		}
 
 		attempt++;
-		// Retries are sequential by definition: each one waits for the previous failure and its backoff.
 		// eslint-disable-next-line no-await-in-loop
 		await wait(retryDelayMs * attempt);
 	}

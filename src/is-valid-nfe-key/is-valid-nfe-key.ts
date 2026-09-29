@@ -72,7 +72,13 @@ const isForbiddenCode = (model: string, key: string): boolean => {
  *
  * For NF-e and NFC-e the numeric code is also checked against rule B03-10 of the NF-e MOC,
  * which forbids the twenty repeated and sequential `cNF` values it lists and a `cNF` equal to
- * the document number.
+ * the document number. The rule has applied to the documents sent after NT 2019.001, and NF-e
+ * software commonly used a `cNF` equal to the document number before it, so a key authorised
+ * earlier can be turned down here.
+ *
+ * The check digits of the issuer's CPF or CNPJ are not checked, only the key's own `cDV`: read
+ * the key with `getNfeKeyInfo` and pass its `taxId` to `isValidCnpj`, or the last 11 digits of a
+ * zero padded `taxId` to `isValidCpf`, to check the issuer as well.
  *
  * @param {string} value - The access key value to be validated.
  * @returns {boolean} True if the access key is valid, false otherwise.
@@ -131,7 +137,7 @@ const isForbiddenCode = (model: string, key: string): boolean => {
 export const isValidNfeKey = (value: string): boolean => {
 	if (typeof value !== "string") return false;
 
-	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart().toUpperCase();
+	const body = value.trim().replace(XML_ID_PREFIX_REGEX, "").trimStart();
 
 	if (!FORMAT_REGEX.test(body)) return false;
 

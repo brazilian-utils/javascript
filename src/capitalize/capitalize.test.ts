@@ -6,6 +6,11 @@ import { capitalize, type CapitalizeOptions } from "./capitalize";
 
 describe("capitalize", () => {
 	describe("should capitalize", () => {
+		test("when the value holds the default upper case words", () => {
+			expect(capitalize("maria da silva ltda")).toBe("Maria da Silva LTDA");
+			expect(capitalize("henrique viii")).toBe("Henrique VIII");
+		});
+
 		test("when the value does not contain preposition", () => {
 			expect(capitalize("esponja vegetal")).toBe("Esponja Vegetal");
 			expect(capitalize("refrigerante 1L")).toBe("Refrigerante 1l");
@@ -16,6 +21,42 @@ describe("capitalize", () => {
 			expect(capitalize("esponja DE aço 60G")).toBe("Esponja de Aço 60g");
 			expect(capitalize("fulano de tal")).toBe("Fulano de Tal");
 			expect(capitalize("pão com manteiga")).toBe("Pão com Manteiga");
+		});
+
+		test("when the value does contain the contracted and the other prepositions", () => {
+			expect(capitalize("casa para todos")).toBe("Casa para Todos");
+			expect(capitalize("ASSOCIAÇÃO AO LADO")).toBe("Associação ao Lado");
+			expect(capitalize("banco às margens")).toBe("Banco às Margens");
+			expect(capitalize("carta pelo correio")).toBe("Carta pelo Correio");
+			expect(capitalize("vista sobre o mar")).toBe("Vista sobre o Mar");
+			expect(capitalize("ponte sob a chuva")).toBe("Ponte sob a Chuva");
+			expect(capitalize("dias até a festa")).toBe("Dias até a Festa");
+			expect(capitalize("mora num sítio")).toBe("Mora num Sítio");
+			expect(capitalize("perante o juiz")).toBe("Perante o Juiz");
+		});
+
+		test("when a preposition is the first word, the last word or is followed by punctuation", () => {
+			expect(capitalize("sobre a mesa")).toBe("Sobre a Mesa");
+			expect(capitalize("até")).toBe("Até");
+			expect(capitalize("rua para, 10")).toBe("Rua Para, 10");
+		});
+
+		test("when the name is a municipality that holds a word of the preposition list", () => {
+			expect(capitalize("desterro de entre rios")).toBe("Desterro de Entre Rios");
+			expect(capitalize("ENTRE RIOS DE MINAS")).toBe("Entre Rios de Minas");
+		});
+
+		test("when the value has a very long run of words", () => {
+			const words = Array.from({ length: 50_000 }, () => "maria da silva").join(" ");
+			const expected = Array.from({ length: 50_000 }, () => "Maria da Silva").join(" ");
+
+			expect(capitalize(words)).toBe(expected);
+		});
+
+		test("when the company designation is written S.A with or without the final dot", () => {
+			expect(capitalize("empresa s.a")).toBe("Empresa S.A");
+			expect(capitalize("empresa s.a.")).toBe("Empresa S.A.");
+			expect(capitalize("empresa sa")).toBe("Empresa Sa");
 		});
 
 		test("when the value does contain short words", () => {

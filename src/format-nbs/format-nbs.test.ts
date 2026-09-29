@@ -1,4 +1,4 @@
-import { anyGarbage, anyValue, digits } from "../_internals/test/arbitraries";
+import { anyGarbage, anyValue, digits, digitsUpTo } from "../_internals/test/arbitraries";
 import {
 	expectAlwaysReturnsType,
 	expectIdempotent,
@@ -6,7 +6,7 @@ import {
 	expectNeverThrows,
 } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { formatNbs } from "./format-nbs";
+import { formatNbs, type FormatNbsOptions } from "./format-nbs";
 
 describe("formatNbs", () => {
 	it("should format an NBS code given as digits", () => {
@@ -39,6 +39,31 @@ describe("formatNbs", () => {
 		expect(formatNbs("1010111009")).toBe("1.0101.11.00");
 	});
 
+	describe("pad option", () => {
+		it("should left pad a short code with zeros up to the full NBS length", () => {
+			expect(formatNbs("", { pad: true })).toBe("");
+			expect(formatNbs("1", { pad: true })).toBe("0.0000.00.01");
+			expect(formatNbs("10101", { pad: true })).toBe("0.0001.01.01");
+			expect(formatNbs("101011100", { pad: true })).toBe("1.0101.11.00");
+		});
+
+		it("should left pad a number the same way as its digits", () => {
+			expect(formatNbs(1, { pad: true })).toBe("0.0000.00.01");
+		});
+
+		it("should mask progressively for an explicit false", () => {
+			expect(formatNbs("10", { pad: false })).toBe("1.0");
+		});
+
+		it("should return an empty string for null and undefined, even under pad", () => {
+			// @ts-expect-error not a string or number
+			expect(formatNbs(null, { pad: true })).toBe("");
+			// @ts-expect-error not a string or number
+			expect(formatNbs(undefined, { pad: true })).toBe("");
+			expect(formatNbs(-1, { pad: true })).toBe("");
+		});
+	});
+
 	it("should return an empty string when there is no digit", () => {
 		expect(formatNbs("")).toBe("");
 		expect(formatNbs("abc")).toBe("");
@@ -66,6 +91,14 @@ describe("formatNbs", () => {
 			expectMatchesPattern(formatNbs, /^\d\.\d{4}\.\d{2}\.\d{2}$/, nineDigits);
 		});
 
+		test("should format every shorter value in the N.NNNN.NN.NN pattern when padding", () => {
+			expectMatchesPattern(
+				(value) => formatNbs(value, { pad: true }),
+				/^\d\.\d{4}\.\d{2}\.\d{2}$/,
+				digitsUpTo(9).filter((value) => value !== ""),
+			);
+		});
+
 		test("should be idempotent on a full 9 digit code", () => {
 			expectIdempotent(formatNbs, nineDigits);
 		});
@@ -86,7 +119,12 @@ describe("formatNbs", () => {
 
 describe("formatNbs types", () => {
 	test("should take a string or number value and return a string", () => {
-		expectTypeOf(formatNbs).parameters.toEqualTypeOf<[value: string | number]>();
+		expectTypeOf(formatNbs).parameter(0).toEqualTypeOf<string | number>();
+		expectTypeOf(formatNbs).parameter(1).toEqualTypeOf<FormatNbsOptions | undefined>();
 		expectTypeOf(formatNbs).returns.toEqualTypeOf<string>();
+	});
+
+	test("should type the pad option as an optional boolean", () => {
+		expectTypeOf<FormatNbsOptions["pad"]>().toEqualTypeOf<boolean | undefined>();
 	});
 });

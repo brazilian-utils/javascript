@@ -1,9 +1,10 @@
 import * as fc from "fast-check";
 
-import { BANKS } from "../_internals/constants/banks";
+import { COMPE_CODES } from "../_internals/constants/bank-codes";
+import { readBanks } from "../_internals/read-banks/read-banks";
 import { unpackCodes } from "../_internals/test/lookup-table";
 import { bench, describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { COMPE_CODES, STRUCTURE_ONLY_BANK_CODES } from "./constants";
+import { STRUCTURE_ONLY_BANK_CODES } from "./constants";
 import {
 	isValidBankAccount,
 	type IsValidBankAccountOptions,
@@ -16,6 +17,8 @@ const BANCO_DO_BRASIL_AGENCY_TOO_LONG_PARAMS = {
 	account: "12345678",
 	digit: "5",
 };
+
+const BANKS = readBanks();
 
 const LISTED_CODES = new Set(unpackCodes(COMPE_CODES));
 

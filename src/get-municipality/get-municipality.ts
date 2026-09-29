@@ -1,7 +1,6 @@
-import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
-import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 import { getCodeByMunicipalityName } from "../get-code-by-municipality-name/get-code-by-municipality-name";
+import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
 
 /** The `getMunicipality` query by IBGE municipality code. */
 export type GetMunicipalityByCodeParams = {
@@ -42,32 +41,6 @@ export type GetMunicipalityByNameOptions = GetMunicipalityByNameParams;
  * @deprecated Use `GetMunicipalityParams` instead.
  */
 export type GetMunicipalityOptions = GetMunicipalityParams;
-
-let codeIndex: Map<string, [string, string]> | undefined;
-
-const getMunicipalityByCode = (code: string | number): [string, string] | null => {
-	const digits = readLookupDigits(code);
-
-	// Stryker disable next-line ConditionalExpression: without this guard a null misses the index, whose keys are all strings, so the lookup below returns null all the same; the guard also narrows the type of `digits`.
-	if (digits === null) return null;
-
-	// Stryker disable next-line ConditionalExpression: this guard only memoizes; CITIES_DATA is a module level constant that is never written to, so rebuilding the index on every call produces the very same entries, and each lookup already returns a fresh copy of the pair, leaving the repeated work unobservable.
-	if (!codeIndex) {
-		codeIndex = new Map();
-
-		for (const [stateCode, municipalities] of Object.entries(CITIES_DATA)) {
-			for (const [name, ibgeCode] of municipalities) {
-				codeIndex.set(ibgeCode, [name, stateCode]);
-			}
-		}
-	}
-
-	// `Map#get` never throws and simply misses for a key of the wrong length, so only the
-	// characters `readLookupDigits` turns down have to be checked above.
-	const entry = codeIndex.get(digits);
-
-	return entry ? [...entry] : null;
-};
 
 /**
  * Looks a Brazilian municipality up by its IBGE code in the offline IBGE "localidades" dataset.
@@ -156,7 +129,9 @@ export function getMunicipality(
 	}
 
 	if ("code" in options) {
-		return Promise.resolve(getMunicipalityByCode(options.code));
+		const municipality = getMunicipalityByCode(options.code);
+
+		return Promise.resolve(municipality && [municipality.name, municipality.stateCode]);
 	}
 
 	return Promise.resolve(

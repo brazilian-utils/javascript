@@ -8,10 +8,10 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio), the code the
  * national NFS-e carries in `cNBS`.
  *
- * Accepts the 9 digits or the `N.NNNN.NN.NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask)
- * and optional surrounding whitespace, or a non-negative safe integer; any other string
- * (`"1.0101abc11.00"`) is not valid. Only complete codes are valid; the chapter, position and
- * subposition headings of the nomenclature are not.
+ * Accepts the 9 digits or the `N.NNNN.NN.NN` mask, with any run of separators (whitespace, `.`, `-`
+ * or `/`) between the groups and optional surrounding whitespace, or a non-negative safe integer;
+ * any other string (`"1.0101abc11.00"`) is not valid. Only complete codes are valid; the chapter,
+ * position and subposition headings of the nomenclature are not.
  *
  * The table is the NBS 2.0 the MDIC publishes. The ANEXO B of the Sistema Nacional NFS-e lists
  * the same codes except three (`1.0402.29.00`, `1.0403.29.00` and `1.0904.40.00`), so a code

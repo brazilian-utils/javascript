@@ -1,3 +1,5 @@
+import * as fc from "fast-check";
+
 import {
 	afterEach,
 	beforeEach,
@@ -15,6 +17,17 @@ import {
 	GetCepInfoByAddressValidationError,
 	getCepInfoByAddress,
 } from "./get-cep-info-by-address";
+
+const rejectionOf = async (params: unknown): Promise<unknown> => {
+	try {
+		// @ts-expect-error: intentionally invalid input
+		await getCepInfoByAddress(params);
+	} catch (error) {
+		return error;
+	}
+
+	throw new Error("expected the lookup to reject");
+};
 
 describe("getCepInfoByAddress", () => {
 	const fetchMock = vi.fn();
@@ -192,6 +205,48 @@ describe("getCepInfoByAddress", () => {
 		).rejects.toThrow("City and street are required");
 	});
 
+	it("should throw GetCepInfoByAddressValidationError for a city or street that is blank, not a string or under 3 characters, without a request", async () => {
+		const hostile = ["   ", "Ru", " ab ", "Ré", 5, {}, [], null, undefined, true];
+
+		await Promise.all(
+			hostile.flatMap((value) => [
+				expect(
+					getCepInfoByAddress({
+						federalUnit: "SP",
+						// @ts-expect-error: intentionally invalid input
+						city: value,
+						street: "Avenida Paulista",
+					}),
+				).rejects.toThrow(GetCepInfoByAddressValidationError),
+				expect(
+					getCepInfoByAddress({
+						federalUnit: "SP",
+						city: "São Paulo",
+						// @ts-expect-error: intentionally invalid input
+						street: value,
+					}),
+				).rejects.toThrow(GetCepInfoByAddressValidationError),
+			]),
+		);
+
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it("should include the 3 character minimum in the message for a short street", async () => {
+		await expect(
+			getCepInfoByAddress({ federalUnit: "SP", city: "São Paulo", street: "Ru" }),
+		).rejects.toThrow("City and street are required, with at least 3 characters each");
+	});
+
+	it("should send a city and street of exactly 3 characters", async () => {
+		mockAddressListOnce([SAMPLE_ADDRESS]);
+
+		await expect(
+			getCepInfoByAddress({ federalUnit: "SP", city: "  Ubá ", street: "Rua" }),
+		).resolves.toEqual([SAMPLE_ADDRESS]);
+		expect(fetchMock.mock.calls[0]?.[0]).toBe("https://viacep.com.br/ws/SP/Uba/Rua/json/");
+	});
+
 	it("should throw specifically GetCepInfoByAddressError (not a subclass) when the response is not ok", async () => {
 		fetchMock.mockResolvedValueOnce({
 			json: () => Promise.resolve({}),
@@ -262,6 +317,49 @@ describe("getCepInfoByAddress", () => {
 			}),
 		).rejects.toThrow(TypeError);
 		expect(fetchMock).toHaveBeenCalledTimes(3);
+	});
+
+	describe("properties", () => {
+		beforeEach(() => {
+			fetchMock.mockResolvedValue({ json: () => Promise.resolve([]), ok: true });
+		});
+
+		const federalUnits = fc.oneof(fc.constant("SP"), fc.anything());
+
+		it("should only ever reject with an error of its own family, whatever the address", async () => {
+			await fc.assert(
+				fc.asyncProperty(
+					federalUnits,
+					fc.anything(),
+					fc.anything(),
+					async (federalUnit, city, street) => {
+						expect(await rejectionOf({ federalUnit, city, street })).toBeInstanceOf(
+							GetCepInfoByAddressError,
+						);
+					},
+				),
+			);
+		});
+
+		it("should make no request for a city or street under 3 characters", async () => {
+			await fc.assert(
+				fc.asyncProperty(
+					fc.string({ maxLength: 2 }),
+					fc.string({ minLength: 3 }),
+					async (short, long) => {
+						fetchMock.mockClear();
+
+						expect(
+							await rejectionOf({ federalUnit: "SP", city: short, street: long }),
+						).toBeInstanceOf(GetCepInfoByAddressValidationError);
+						expect(
+							await rejectionOf({ federalUnit: "SP", city: long, street: short }),
+						).toBeInstanceOf(GetCepInfoByAddressValidationError);
+						expect(fetchMock).not.toHaveBeenCalled();
+					},
+				),
+			);
+		});
 	});
 });
 

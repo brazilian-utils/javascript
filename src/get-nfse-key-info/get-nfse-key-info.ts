@@ -39,10 +39,7 @@ export type NfseKeyInfo = {
 	generatorEnvironment: NfseKeyGeneratorEnvironment;
 	/** Whether the issuer is identified by a CPF or by a CNPJ. */
 	taxIdType: NfseKeyTaxIdType;
-	/**
-	 * The 11 digit CPF (without the `000` padding of the key) or the 14 character CNPJ of the
-	 * issuer, numeric or alphanumeric, its letters in upper case.
-	 */
+	/** The 11 digit issuer CPF or the 14 character issuer CNPJ, letters in upper case. */
 	taxId: string;
 	/** NFS-e number (`nNFSe`), sequential by issuer, 1 to 9999999999999. */
 	number: number;
@@ -60,21 +57,23 @@ export type NfseKeyInfo = {
  * Parses the access key (chave de acesso) of a national NFS-e, the Nota Fiscal de Serviço
  * eletrônica of the Sistema Nacional NFS-e, into its fields.
  *
- * The key is one block of 50 characters:
- * `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1) Inscrição Federal(14) nNFSe(13) AAMM(4)
- * Cód.Num.(9) DV(1)`, all digits except an alphanumeric CNPJ in the "Inscrição Federal". It is
- * accepted as it is written in the documents (`chNFSe`, `chSubstda`,
- * the DANFSe, which prints it as a single block) or with the `NFS` literal the `Id` attribute
- * of `infNFSe` puts in front of it, surrounding whitespace aside. The key has no printed mask,
- * so a separator anywhere in it is rejected instead of being stripped. The keys of the
- * municipal NFS-e models that are not the national standard are out of scope.
+ * The key is one block of 50 characters: `Cód.Mun.(7) Amb.Ger.(1) Tipo de Inscrição Federal(1)
+ * Inscrição Federal(14) nNFSe(13) AAMM(4) Cód.Num.(9) DV(1)`, all digits except an alphanumeric
+ * CNPJ in the "Inscrição Federal". It is accepted as it is written in the documents (`chNFSe`,
+ * `chSubstda`, the DANFSe, which prints it as a single block) or with the `NFS` literal the `Id`
+ * attribute of `infNFSe` puts in front of it, surrounding whitespace aside. The DANFSe prints the
+ * key as a single block, so it has no printed mask; the boundaries between its 8 fields accept the
+ * mask characters `isValidCpf` reads (whitespace, `.`, `-` or `/`, alone or in a run), while a
+ * separator inside a field makes the value invalid. The keys of the municipal NFS-e models that are
+ * not the national standard are out of scope.
  *
- * The key is checked by `isValidNfseKey`, and `null` comes back exactly when it returns false.
- * What it checks: the first two digits of the municipality code are an IBGE UF code, `ambGer`
- * is 1 or 2, the registration type is 1 (CPF, the 11 digits left padded with `000`) or 2
- * (CNPJ, numeric or alphanumeric, as `isValidCnpj` with version 2 reads it) and the CPF or CNPJ has valid check digits of its own (rules E1280 and E1284 of the
- * ANEXO I reject an NFS-e whose issuer fails them), `nNFSe` is not all zeros, the month is 01
- * to 12 and the check digit matches. The municipality code is not looked up in the IBGE table.
+ * The key is checked by `isValidNfseKey`, and `null` comes back exactly when it returns false. What
+ * it checks: the first two digits of the municipality code are an IBGE UF code, `ambGer` is 1 or 2,
+ * the registration type is 1 (CPF, the 11 digits left padded with `000`) or 2 (CNPJ, numeric or
+ * alphanumeric, as `isValidCnpj` with version 2 reads it) and the CPF or CNPJ has valid check
+ * digits of its own (rules E1280 and E1284 of the ANEXO I reject an NFS-e whose issuer fails them),
+ * `nNFSe` is not all zeros, the month is 01 to 12 and the check digit matches. The municipality
+ * code is not looked up in the IBGE table.
  *
  * The check digit is a modulus 11 over the first 49 characters, weights 2 to 9 cycling from the
  * right, where a remainder of 0 or 1 gives 0. The official text only says "algoritmo do módulo
@@ -127,7 +126,6 @@ export type NfseKeyInfo = {
  * ```
  */
 export const getNfseKeyInfo = (value: string): NfseKeyInfo | null => {
-	// The bare key `isValidNfseKey` reads out of the value, whichever of its forms it is written in.
 	const key = typeof value === "string" ? readNfseKey(value) : null;
 
 	// Stryker disable next-line ConditionalExpression: the null check only narrows the type; a value `readNfseKey` cannot read is one `isValidNfseKey` turns down as well.

@@ -1,10 +1,10 @@
 import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-first-digit/calculate-voter-id-first-digit";
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
 import { type StateCode } from "../_internals/constants/states";
+import { UF_TO_VOTER_ID_CODE } from "../_internals/constants/voter-id";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
-import { UF_TO_VOTER_ID_CODE } from "../is-valid-voter-id/constants";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 export type { StateCode } from "../_internals/constants/states";
 

@@ -62,6 +62,7 @@
       // Asking before the CEP is complete is asking for nothing.
       if (!isValidCep(cep.value)) {
         status.textContent = "";
+        cep.removeAttribute("aria-busy");
         return;
       }
 

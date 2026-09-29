@@ -48,7 +48,7 @@ export type IsValidGtinOptions = {
  * @see Official: https://www.gs1.org/services/how-calculate-check-digit-manually
  * GS1, "How to calculate a check digit manually", source of the 6291041500213 example.
  * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=SrQT9ys8ODo%3D
- * SEFAZ Nota Técnica 2021.003 (Validação GTIN, replaces NT 2017.001), v1.50 of September 2026:
+ * SEFAZ Nota Técnica 2021.003 (Validação GTIN, replaces NT 2017.001), v1.30 of December 2023, the version the URL serves:
  * fields I03 `cEAN` and I12 `cEANTrib`, rules I03-10 and I12-10 (rejections 611 and 612, "com
  * dígito de controle inválido").
  * @see Official: https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=Oc+fygAxwmc%3D

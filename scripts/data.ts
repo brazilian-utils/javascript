@@ -39,6 +39,7 @@ const generators = [
 
 const generatedFiles = [
 	"./src/_internals/constants/municipality-area-codes.ts",
+	"./src/_internals/constants/bank-codes.ts",
 	"./src/_internals/constants/banks.ts",
 	"./src/_internals/constants/cbo-descriptions.ts",
 	"./src/_internals/constants/cbo.ts",
@@ -50,14 +51,18 @@ const generatedFiles = [
 	"./src/_internals/constants/cid10.ts",
 	"./src/_internals/constants/cnae-descriptions.ts",
 	"./src/_internals/constants/cnae.ts",
+	"./src/_internals/constants/class-trib-codes.ts",
+	"./src/_internals/constants/class-trib.ts",
 	"./src/_internals/constants/ibs-cbs.ts",
 	"./src/_internals/constants/isbn-ranges.ts",
-	"./src/_internals/constants/municipalities.ts",
+	"./src/_internals/constants/municipality-codes.ts",
+	"./src/_internals/constants/municipality-names.ts",
 	"./src/_internals/constants/nbs-descriptions.ts",
 	"./src/_internals/constants/nbs.ts",
 	"./src/_internals/constants/service-item-descriptions.ts",
 	"./src/_internals/constants/service-items.ts",
 	"./src/_internals/constants/states.ts",
+	"./src/_internals/constants/legal-nature-codes.ts",
 	"./src/is-valid-legal-nature/constants.ts",
 	"./src/is-valid-ncm/constants.ts",
 ];

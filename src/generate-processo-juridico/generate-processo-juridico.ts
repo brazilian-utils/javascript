@@ -36,12 +36,16 @@ const TRIBUNAL_LENGTH = 2;
  *
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
- * @param {GenerateProcessoJuridicoParams} [options] - Optional generation options.
- * @param {number} options.year - The `AAAA` field. Must be an integer between the
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout, its check digits (art. 1º,
+ * § 2º, and the algorithm in its Anexo VIII, "CÁLCULO DO DÍGITO VERIFICADOR"), and
+ * closes the list of órgão (`J`) and tribunal (`TR`) codes in art. 1º, § 4º and § 5º.
+ *
+ * @param {GenerateProcessoJuridicoParams} [params] - Optional generation parameters.
+ * @param {number} [params.year] - The `AAAA` field. Must be an integer between the
  * current year and 9999. Defaults to the current year.
- * @param {number} options.court - The `J` field (segmento do Judiciário). Must be an
+ * @param {number} [params.court] - The `J` field (segmento do Judiciário). Must be an
  * integer between 1 and 9. Defaults to a random value.
- * @returns {string|null} The generated number without formatting, or null when the options are invalid.
+ * @returns {string|null} The generated number without formatting, or null when the parameters are invalid.
  *
  * @example
  * ```typescript
@@ -51,20 +55,16 @@ const TRIBUNAL_LENGTH = 2;
  * generateProcessoJuridico({ court: 10 }); // null (no such órgão)
  * ```
  *
- * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout, its check digits (art. 1º,
- * § 2º, and the algorithm in its Anexo VIII, "CÁLCULO DO DÍGITO VERIFICADOR"), and
- * closes the list of órgão (`J`) and tribunal (`TR`) codes in art. 1º, § 4º and § 5º.
- *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */
 export const generateProcessoJuridico = (
-	options: GenerateProcessoJuridicoParams = {},
+	params: GenerateProcessoJuridicoParams = {},
 ): string | null => {
-	if (isNullish(options) || typeof options !== "object") return null;
+	if (isNullish(params) || typeof params !== "object") return null;
 
 	const currentYear = new Date().getFullYear();
 	const tribunalsByCourt = getProcessoJuridicoTribunals();
-	const { year = currentYear, court = pickRandom([...tribunalsByCourt.keys()]) } = options;
+	const { year = currentYear, court = pickRandom([...tribunalsByCourt.keys()]) } = params;
 	const tribunals = tribunalsByCourt.get(court);
 
 	if (!Number.isInteger(year) || year < currentYear || year > MAX_YEAR || tribunals === undefined) {

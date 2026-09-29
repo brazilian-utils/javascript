@@ -21,18 +21,11 @@ export type GtinInfo = {
 	type: GtinType;
 	/** How many digits the value was written with. */
 	length: GtinLength;
-	/**
-	 * The three digit GS1 Prefix, or a GS1-8 Prefix when digits 2 to 6 of the 14 digit form are
-	 * zeros, which covers every GTIN-8, a GTIN-14 that packs one and the GS1 Prefix 0000000. It names the GS1 Member
-	 * Organisation that licensed the number, not the country of origin.
-	 */
+	/** The GS1 Prefix, the number range of the GS1 Member Organisation that licensed the number. */
 	prefix: string;
 	/** True when the prefix is one of GS1 Brasil (789 or 790). */
 	isBrazilian: boolean;
-	/**
-	 * True when the prefix is in a range GS1 sets aside for Restricted Circulation Numbers, so the
-	 * number is only unique inside a company or region and is not a globally unique GTIN.
-	 */
+	/** True when the prefix is in a GS1 Restricted Circulation Number range. */
 	isRestrictedCirculation: boolean;
 	/** The modulo 10 check digit, the last digit of the value. */
 	checkDigit: number;
@@ -63,13 +56,13 @@ const PREFIX_LENGTH = 3;
  * the indicator digit and is never part of the prefix, so a GTIN-12 has a prefix that starts with
  * `0`, and a GTIN-14 has the prefix of the GTIN it packs.
  *
- * Only the prefixes of GS1 Brasil (789 and 790) and the Restricted Circulation Number ranges of
- * the General Specifications are told apart, since both are fixed by a standard or a rule. The
- * prefix is not checked against the list of Member Organisations: GS1 keeps assigning ranges, so
- * a copy of that list would turn down valid numbers as it ages. SEFAZ does run that check
- * (rules I03-20 and I12-20 of NT 2021.003, against its own "Tabela Prefixo GS1", whose contents
- * could not be read, so which ranges it accepts is not stated here) and, for the 789 and 790 prefixes, looks the number up
- * in the Cadastro Centralizado de GTIN, which no offline check can stand in for.
+ * Only the prefixes of GS1 Brasil (789 and 790) and the Restricted Circulation Number ranges of the
+ * General Specifications are told apart, since both are fixed by a standard or a rule. The prefix
+ * is not checked against the list of Member Organisations: GS1 keeps assigning ranges, so a copy of
+ * that list would turn down valid numbers as it ages. SEFAZ does run that check (rules I03-20 and
+ * I12-20 of NT 2021.003, against its own "Tabela Prefixo GS1", whose contents could not be read, so
+ * which ranges it accepts is not stated here) and, for the 789 and 790 prefixes, looks the number
+ * up in the Cadastro Centralizado de GTIN, which no offline check can stand in for.
  *
  * @param {string} value - The GTIN to be parsed, digits only.
  * @returns {GtinInfo | null} The parsed GTIN, or `null` when it is not valid.
@@ -105,8 +98,6 @@ export const getGtinInfo = (value: string): GtinInfo | null => {
 	if (!isValidGtin(value)) return null;
 
 	const digits = value.trim();
-	// isValidGtin already vouched for the length, so the index always names one of GTIN_LENGTHS: the
-	// lookup only gives back the same number typed as a GtinLength.
 	const length = GTIN_LENGTHS[(GTIN_LENGTHS as readonly number[]).indexOf(digits.length)];
 	const checkDigit = Number(digits.at(-1));
 	const normalized = digits.padStart(NORMALIZED_LENGTH, "0");

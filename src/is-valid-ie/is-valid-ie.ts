@@ -2,7 +2,7 @@ import { type StateCode } from "../_internals/constants/states";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { mod10 } from "../_internals/mod10/mod10";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import {
@@ -140,9 +140,14 @@ const validateAcDfRule = (ie: string, prefixes: readonly string[]): boolean => {
 
 const validateAC: IeValidator = (ie) => validateAcDfRule(ie, AC_PREFIXES);
 
-// AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
-// which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
-// 1 and `11 - remainder` for every other one.
+/**
+ * AL writes its rule as the weighted sum times ten, modulo eleven, with a ten mapped back to 0,
+ * which is the complement the shared modulus 11 rule takes: both give 0 for a remainder of 0 or
+ * 1 and `11 - remainder` for every other one.
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validateAL: IeValidator = (ie) =>
 	AL_COMPANY_TYPES.includes(ie.charAt(2)) && validateMod11Ie(ie, AL_PREFIXES);
 
@@ -238,14 +243,19 @@ const validateGO: IeValidator = (ie: string) => {
 
 const validateMA: IeValidator = (ie) => validateMod11Ie(ie, MA_PREFIXES);
 
+/**
+ * The first digit doubles every second character from the right and adds the digits of each
+ * product, the modulus 10 rule `mod10` implements.
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validateMG: IeValidator = (ie: string) => {
 	if (!checkLength(ie, 13)) return false;
 
 	const body = ie.slice(0, 11);
 	const bodyWithZero = `${body.slice(0, 3)}0${body.slice(3)}`;
 
-	// The first digit doubles every second character from the right and adds the digits of each
-	// product, the modulus 10 rule `mod10` implements.
 	const firstDigit = mod10(bodyWithZero);
 
 	const bodyWithFirst = body + firstDigit;
@@ -263,8 +273,13 @@ const validateMG: IeValidator = (ie: string) => {
 	);
 };
 
-// SEFAZ-MT now issues 9 digits and SINTEGRA prints 11: the 9 digit form is the 11 digit one
-// without its two leading zeros, which add nothing to the weighted sum, so it is padded back.
+/**
+ * SEFAZ-MT now issues 9 digits and SINTEGRA prints 11: the 9 digit form is the 11 digit one
+ * without its two leading zeros, which add nothing to the weighted sum, so it is padded back.
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validateMT: IeValidator = (ie: string) => {
 	if (!checkLength(ie, [9, 11])) return false;
 
@@ -285,8 +300,13 @@ const validateMS: IeValidator = (ie) => validateMod11Ie(ie, MS_PREFIXES);
 
 const validatePA: IeValidator = (ie) => validateMod11Ie(ie, PA_PREFIXES);
 
-// The old 14 digit CACEPE number: 13 principal digits and one check digit, `11 - remainder`,
-// less 10 when that is above 9 (a remainder of 1 gives 0 and a remainder of 0 gives 1).
+/**
+ * The old 14 digit CACEPE number: 13 principal digits and one check digit, `11 - remainder`,
+ * less 10 when that is above 9 (a remainder of 1 gives 0 and a remainder of 0 gives 1).
+ *
+ * @param {string} ie - The registration, digits only.
+ * @returns {boolean} True if the registration is valid.
+ */
 const validatePELegacy = (ie: string): boolean => {
 	const digit = 11 - (sumWithWeights(ie.slice(0, 13), PE_LEGACY_WEIGHTS) % 11);
 
@@ -620,13 +640,6 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: https://ww1.receita.fazenda.df.gov.br/iss/situcao-cadastral
  * Receita DF service portal: its CF/DF validator requires 13 digits and recomputes both check
  * digits (weights 2 to 9 from the right, a remainder of 0 or 1 giving 0), whatever the prefix.
- * @see Based on: https://tdn.totvs.com/pages/viewpage.action?pageId=566472384
- * TOTVS release note DFWKFOUNDATION-4046: DF registrations may start with 07 or 08, the numbers
- * starting with 07 having run out at 07.999.999, and per the DF tax authority the check digit
- * rule did not change.
- * @see Based on: https://github.com/caelum/caelum-stella/issues/267
- * @see Based on: https://github.com/caelum/caelum-stella/issues/269
- * Reports of valid DF registrations starting with 08 being rejected.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
  * Updated 02/09/2022: "8 dígitos (ABCDEFGH) + 1 dígito verificador (I); onde AB pode ser igual a
@@ -649,10 +662,6 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * Resolução/SEF nº 1.344/1999 (DOE 18/05/1999), art. 1º: "I – o primeiro dígito será sempre
  * representado pelo número 2; II - o segundo dígito será sempre representado pelo número 8": the
  * prefix 28 alone; art. 2º: the check digit rule.
- * @see Based on: https://crcms.org.br/sefaz-ms-vai-adotar-novo-sistema-de-cadastro-fiscal-o-e-cce-veja-o-que-vai-mudar-2/
- * CRC-MS (03/09/2025) relaying a SEFAZ-MS communiqué on the e-CCE register: new company (CCIS)
- * registrations "será iniciada com o dígito 50", those of the Cadastro da Agropecuária keep 28,
- * with no range reserved to a registration type. No SEFAZ-MS page carrying that text was found.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
  * "FORMATO: NNNNNNNNNN-D", weights 3, 2 and 9 down to 2, example "0013000001-9": the 11 digit form.
  * @see Official: https://app1.sefaz.mt.gov.br/Sistema/Legislacao/legislacaotribut.nsf/173e6c0d2202fdcb03258b1700659f1e/0d06efc6c2fa7bc303258c6c004c4788
@@ -691,6 +700,9 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * (um), Então o dígito verificador será = 0 (zero)".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RN.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RO.html
+ * The page still prints the formula used before 01/08/2000, 3 digits of municipality, 5 of company
+ * and a check digit (`101.62521-3`). It is not accepted: those numbers were converted to 13
+ * digits plus the check digit (`0000000062521-3`), the 14 digit form checked here.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RR.html
  * "O Número de Inscrição Estadual é composto por 9 Dígitos, sendo os dois primeiros indicativos
  * do Estado da Federação", "Dígito Verificador de módulo 9", examples 24006628-1 to 24001340-7.
@@ -720,10 +732,17 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: https://goias.gov.br/economia/roteiro-de-critica-da-inscricao-estadual-de-goias/
  * The Secretaria da Economia's roteiro de crítica (20/08/2012): "onde AB pode ser igual a 10 ou
  * 11 ou 15", the only source of the prefix 15 and of the special ranges.
- * @see Official: https://goias.gov.br/economia/contribuintes-goianos-passam-a-ter-novo-numero-de-inscricao-estadual/
- * Secretaria da Economia notice (20/01/2023): company (Pessoa Jurídica) registrations made from
- * 13/01/2023 start with 20, "a faixa de numeração iniciada com o dígito 10 se esgotou"; those of
- * Pessoas Físicas still start with 11.
+ * @see Based on: https://tdn.totvs.com/pages/viewpage.action?pageId=566472384
+ * TOTVS release note DFWKFOUNDATION-4046: DF registrations may start with 07 or 08, the numbers
+ * starting with 07 having run out at 07.999.999, and per the DF tax authority the check digit
+ * rule did not change.
+ * @see Based on: https://github.com/caelum/caelum-stella/issues/267
+ * @see Based on: https://github.com/caelum/caelum-stella/issues/269
+ * Reports of valid DF registrations starting with 08 being rejected.
+ * @see Based on: https://crcms.org.br/sefaz-ms-vai-adotar-novo-sistema-de-cadastro-fiscal-o-e-cce-veja-o-que-vai-mudar-2/
+ * CRC-MS (03/09/2025) relaying a SEFAZ-MS communiqué on the e-CCE register: new company (CCIS)
+ * registrations "será iniciada com o dígito 50", those of the Cadastro da Agropecuária keep 28,
+ * with no range reserved to a registration type. No SEFAZ-MS page carrying that text was found.
  */
 export function isValidIe(params: IsValidIeParams): boolean;
 /**
@@ -734,13 +753,14 @@ export function isValidIe(params: IsValidIeParams): boolean;
  * @param {string} ie - The state registration number to validate
  * @returns {boolean} True if the state registration number is valid, false otherwise
  *
+ * The two call forms are told apart by the first argument alone: a string is the state code of
+ * the deprecated `(stateCode, ie)` form, anything else is read as the parameters object of the
+ * current one (a primitive has no `stateCode`, so it fails the validation like any bad input).
+ *
  * @deprecated Use the object form, `isValidIe({ value, stateCode })`.
  */
 export function isValidIe(stateCode: StateCode, ie: string): boolean;
 export function isValidIe(paramsOrStateCode: IsValidIeParams | StateCode, ie?: string): boolean {
-	// The two call forms are told apart by the first argument alone: a string is the state code of
-	// the deprecated `(stateCode, ie)` form, anything else is read as the parameters object of the
-	// current one (a primitive has no `stateCode`, so it fails the validation like any bad input).
 	if (typeof paramsOrStateCode === "string") return validateIe(paramsOrStateCode, ie);
 	if (isNullish(paramsOrStateCode)) return false;
 

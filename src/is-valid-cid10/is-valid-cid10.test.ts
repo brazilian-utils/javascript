@@ -5,6 +5,7 @@ import { anyGarbage, PROTOTYPE_KEYS } from "../_internals/test/arbitraries";
 import { cid10Codes, cid10Table } from "../_internals/test/lookup-table";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { isValidCid10 } from "./is-valid-cid10";
 
 const CID10_DESCRIPTIONS = cid10Table();
@@ -90,7 +91,7 @@ describe("isValidCid10", () => {
 
 	describe("the code table", () => {
 		it("should hold exactly the codes the description table holds", () => {
-			expect(cid10Codes()).toHaveLength(CID10_DESCRIPTION_LIST.length);
+			expect(cid10Codes()).toHaveLength(unpackTexts(CID10_DESCRIPTION_LIST).length);
 		});
 
 		it("should hold the 2045 categories and 12188 subcategories of CID-10 V2008, plus U07 and its 3 subcategories", () => {

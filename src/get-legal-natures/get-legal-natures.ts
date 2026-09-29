@@ -3,10 +3,7 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 /** The object form `getLegalNatures` accepts, saying whether the legacy codes are listed too. */
 export type GetLegalNaturesParams = {
-	/**
-	 * Whether the 8 codes a past revision of the CONCLA table retired are listed alongside the 92
-	 * in force (default: `false`).
-	 */
+	/** Whether the 8 retired codes are listed alongside the 92 in force (default: `false`). */
 	includeLegacy?: boolean;
 };
 
@@ -17,6 +14,10 @@ export type GetLegalNaturesParams = {
  * default. Pass `{ includeLegacy: true }` to add the 8 a past revision of the table retired, which
  * `isValidLegalNature` keeps accepting and `getLegalNature` keeps looking up because they still
  * appear in records filed while they were in force.
+ *
+ * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
+ * normally.
  *
  * @param {GetLegalNaturesParams} [params] - Optional listing options.
  * @param {boolean} [params.includeLegacy] - Whether to add the retired codes. Defaults to `false`.
@@ -30,10 +31,6 @@ export type GetLegalNaturesParams = {
  * getLegalNatures({ includeLegacy: true })["2208"]; // "Entidade Binacional Itaipu"
  * Object.keys(getLegalNatures({ includeLegacy: true })).length; // 100
  * ```
- *
- * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
- * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
- * normally.
  *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf

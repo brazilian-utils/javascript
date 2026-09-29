@@ -71,6 +71,11 @@ describe("formatSuframa", () => {
 		expect(formatSuframa()).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatSuframa("", { pad: true })).toBe("");
+		expect(formatSuframa("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		const upToASuframa = digitsUpTo(9);
 

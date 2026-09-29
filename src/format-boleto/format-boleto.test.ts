@@ -226,6 +226,11 @@ describe("formatBoleto", () => {
 });
 
 describe("formatBoleto with a nullish value under pad", () => {
+	test("should return an empty string for an empty value or one without digits", () => {
+		expect(formatBoleto("", { pad: true })).toBe("");
+		expect(formatBoleto("abc", { pad: true })).toBe("");
+	});
+
 	test("should return an empty string instead of a zero-filled document", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(formatBoleto(null, { pad: true })).toBe("");

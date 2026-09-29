@@ -13,7 +13,7 @@ const WHITESPACE_RUN_REGEX = /\s+/g;
  *
  * `removeAccents` already folds a value that is not a string down to `""`, which no real
  * municipality name normalizes to, so a caller may hand this helper an unvalidated value and
- * simply compare the result.
+ * compare the result.
  *
  * @param {string} value - The municipality name to normalize.
  * @returns {string} The normalized name, or `""` when `value` is not a non-empty string.

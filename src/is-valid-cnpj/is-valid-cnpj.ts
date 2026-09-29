@@ -27,6 +27,8 @@ const isValidChecksum = (cnpj: string): boolean =>
  * Validates if a CNPJ (Cadastro Nacional da Pessoa Jurídica) is valid.
  * Supports both numeric (version 1) and alphanumeric (version 2) CNPJ formats.
  * Accepts the usual mask characters (`.`, `-`, `/`) and whitespace around and between groups.
+ * Since July 2026 new CNPJs may be alphanumeric, which the default `version: 1` rejects: pass
+ * `version: 2` to accept them.
  *
  * @param {string} cnpj - The CNPJ value to be validated.
  * @param {IsValidCnpjOptions} [options] - Optional options.

@@ -5,7 +5,12 @@ import { anyValue, digitsUpTo } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
-import { getLegalNature, type LegalNature, type LegalNatureCategory } from "./get-legal-nature";
+import {
+	buildLegalNature,
+	getLegalNature,
+	type LegalNature,
+	type LegalNatureCategory,
+} from "./get-legal-nature";
 
 const SOCIEDADE_EMPRESARIA_LIMITADA: LegalNature = {
 	code: "2062",
@@ -145,6 +150,15 @@ describe("getLegalNature", () => {
 		expect(getLegalNature()).toBeNull();
 	});
 
+	it("should return null for a separator anywhere but after the third digit, like isValidLegalNature", () => {
+		expect(getLegalNature("-2062")).toBeNull();
+		expect(getLegalNature("2062-")).toBeNull();
+		expect(getLegalNature("-2-0-6-2")).toBeNull();
+		expect(getLegalNature("20.6.2")).toBeNull();
+		expect(getLegalNature("20 62")).toBeNull();
+		expect(getLegalNature("206 - 2")).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
+	});
+
 	it("should return null for a negative or fractional number", () => {
 		expect(getLegalNature(-2062)).toBeNull();
 		expect(getLegalNature(206.2)).toBeNull();
@@ -189,15 +203,11 @@ describe("getLegalNature", () => {
 			fc.anything(),
 		);
 
-		test("should return null exactly when isValidLegalNature rejects the string form of the value, or the value is a number that is not a non-negative safe integer", () => {
+		test("should return null exactly when isValidLegalNature rejects the value", () => {
 			fc.assert(
 				fc.property(lookupInputs, (value) => {
-					const isRejectedNumber =
-						typeof value === "number" && !(Number.isSafeInteger(value) && value >= 0);
-					const text = typeof value === "number" ? String(value) : value;
-
 					expect(getLegalNature(value as string) === null).toBe(
-						isRejectedNumber || !isValidLegalNature(text as string),
+						!isValidLegalNature(value as string),
 					);
 				}),
 			);
@@ -212,6 +222,15 @@ describe("getLegalNature", () => {
 				}),
 			);
 		});
+	});
+});
+
+describe("buildLegalNature (deprecated 2.4.0 export)", () => {
+	it("should still build the entry of a code", () => {
+		// oxlint-disable-next-line typescript/no-deprecated -- the deprecated 2.4.0 export is under test
+		expect(buildLegalNature("2062", "Sociedade Empresária Limitada")).toEqual(
+			SOCIEDADE_EMPRESARIA_LIMITADA,
+		);
 	});
 });
 

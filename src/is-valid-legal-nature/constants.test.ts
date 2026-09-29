@@ -1,6 +1,7 @@
+import { LEGAL_NATURE_CODES } from "../_internals/constants/legal-nature-codes";
 import { unpackCodes } from "../_internals/test/lookup-table";
 import { describe, expect, test } from "../_internals/test/runtime";
-import { LEGAL_NATURE, LEGAL_NATURE_CODES } from "./constants";
+import { LEGAL_NATURE } from "./constants";
 
 describe("LEGAL_NATURE_CODES", () => {
 	test("should hold exactly the codes of LEGAL_NATURE, four digits each, in ascending order", () => {

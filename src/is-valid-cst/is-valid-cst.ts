@@ -13,18 +13,16 @@ const TABELA_B_LENGTH = 2;
  * Options for `isValidCst`.
  */
 export type IsValidCstOptions = {
-	/**
-	 * The tax whose CST (Código de Situação Tributária) table the value is checked against.
-	 * Omit it to accept a code that exists in any of the four tables (`icms`, `ipi`, `pis`,
-	 * `cofins`); a value outside those four falls back to that same default at runtime.
-	 */
+	/** The tax whose CST table the value is checked against; omit it to accept any of the four. */
 	tax?: "icms" | "ipi" | "pis" | "cofins";
 };
 
 type CstTax = NonNullable<IsValidCstOptions["tax"]>;
 
 const isValidIcmsCst = (digits: string): boolean =>
-	digits.charAt(0) <= "8" && (ICMS_CST_CODES as readonly string[]).includes(digits.slice(1));
+	digits.length === TABELA_B_LENGTH
+		? (ICMS_CST_CODES as readonly string[]).includes(digits)
+		: digits.charAt(0) <= "8" && (ICMS_CST_CODES as readonly string[]).includes(digits.slice(1));
 
 const isValidIpiCst = (digits: string): boolean =>
 	(IPI_CST_CODES as readonly string[]).includes(digits);
@@ -45,10 +43,11 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
 /**
  * Validates if a CST (Código de Situação Tributária) code is valid for a given tax.
  *
- * `icms` accepts the 3 digit form used on tax documents (1 origin digit from `0` to `8`
- * followed by 1 of the 15 codes `00, 02, 10, 15, 20, 30, 40, 41, 50, 51, 53, 60, 61, 70, 90`
- * of the Tabela B in force, the one Ajuste SINIEF 39/23 gave and Ajuste SINIEF 20/24 amended;
- * `02`, `15`, `53` and `61` are the monofasia de combustíveis codes it added).
+ * `icms` accepts 1 of the 15 codes `00, 02, 10, 15, 20, 30, 40, 41, 50, 51, 53, 60, 61, 70, 90`
+ * of the Tabela B in force, the one Ajuste SINIEF 39/23 gave and Ajuste SINIEF 20/24 amended
+ * (`02`, `15`, `53` and `61` are the monofasia de combustíveis codes it added), either bare, as
+ * the `CST` field of the NF-e carries it next to the origin, or as the 3 digit form used on tax
+ * documents, with 1 origin digit from `0` to `8` before it.
  *
  * `ipi` accepts 1 of the 14 codes `00, 01, 02, 03, 04, 05, 49, 50, 51, 52, 53, 54, 55, 99`.
  *
@@ -59,7 +58,7 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
  * one of the four tables above; when it is given, only that table is consulted. A `tax` outside
  * the four documented values falls back to that default instead of turning the code down, the
  * way every other scalar option of this library (`version`, `type`, `style`) treats a value it
- * does not know.
+ * does not know. An `options` that is `null` or not an object is read as no options at all.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 2
  * digits of a Tabela B code, or the 3 digits of the ICMS form with optional separators
@@ -75,7 +74,9 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
  * the 3 digits of the ICMS form, whether it comes as a string or as a number: `0`, `"0"` and
  * `"000"` are all the ICMS code `000`. A 2 digit value is already a documented form, a Tabela B
  * code, and is read as written, so `isValidCst("00", { tax: "ipi" })` stays a CST-IPI check and
- * a Tabela B code keeps its own two digits: `"07"`, not `7`, which is the ICMS code `007`.
+ * a Tabela B code keeps its own two digits: `"07"`, not `7`, which is the ICMS code `007`. A 2
+ * digit value is never read as an origin plus a digit, so `isValidCst("10", { tax: "icms" })` is
+ * the Tabela B code `10`.
  *
  * @param {string|number} value - The CST code to be validated, e.g. `"110"`, `"0 10"` or `110`.
  * @param {IsValidCstOptions} [options] - The tax whose table the value is checked against.
@@ -112,6 +113,7 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
  * isValidCst("00", { tax: "ipi" }); // true
  * isValidCst("49", { tax: "pis" }); // true
  * isValidCst("07", { tax: "cofins" }); // true
+ * isValidCst("60", { tax: "icms" }); // true (a bare Tabela B code)
  * isValidCst("99", { tax: "icms" }); // false
  * isValidCst(0, { tax: "icms" }); // true (a single digit is padded to the 3 digit form, "000")
  * isValidCst("0", { tax: "icms" }); // true (padded the same way a number is)
@@ -125,7 +127,6 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
  */
 export const isValidCst = (value: string | number, options?: IsValidCstOptions): boolean => {
 	if (!isLookupCode(value)) return false;
-	if (options !== undefined && (options === null || typeof options !== "object")) return false;
 
 	const trimmed = String(value).trim();
 	const code = trimmed.length < TABELA_B_LENGTH ? padLookupCode(trimmed, CST_LENGTH) : trimmed;

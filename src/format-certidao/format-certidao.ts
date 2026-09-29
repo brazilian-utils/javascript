@@ -23,7 +23,7 @@ export type FormatCertidaoOptions = {
  *
  * @param {string|number} value - The matrícula value to be formatted.
  * @param {FormatCertidaoOptions} [options] - Optional formatting options.
- * @param {boolean} options.pad - If true, pads the value with leading zeros if necessary.
+ * @param {boolean} [options.pad] - If true, pads the value with leading zeros if necessary.
  * @returns {string} The formatted matrícula in the pattern "000000 00 00 0000 0 00000 000 0000000 00".
  *
  * @example

@@ -26,14 +26,13 @@ const isValidChecksum = (cpf: string): boolean =>
  * ```
  *
  * The check digit rule (`REGRA_VALIDA_CPF`) is specified, with the worked example
- * `280012389-38`, in the Receita Federal's Manual de Preenchimento da e-Financeira, Anexo II —
+ * `280012389-38`, in the Receita Federal's Manual de Preenchimento da e-Financeira, Anexo II,
  * Leiautes Gerais, approved by the Ato Declaratório Executivo Cofis nº 10, de 19 de maio de
- * 2026 (DOU de 25/05/2026). The manual states the rule in its mirror form, weights 9 down to 1 "a partir da
- * unidade" with "o resto 10 é considerado 0", which is algebraically the same digit as the
- * weights 10 down to 2 with `11 - resto` implemented above. The manual's own file used to be
- * served from `sped.rfb.gov.br`, a host that no longer answers at all, so the approving act is
- * cited below in its place; its Receita Federal permalink redirects into the norms viewer, which
- * has to be opened in a browser.
+ * 2026 (DOU de 25/05/2026). The manual states the rule in its mirror form, weights 9 down to 1
+ * "a partir da unidade" with "o resto 10 é considerado 0", which is algebraically the same digit
+ * as the weights 10 down to 2 with `11 - resto` implemented above. The approving act is cited
+ * below too; its Receita Federal permalink redirects into the norms viewer, which has to be
+ * opened in a browser.
  *
  * The norm of the CPF itself, Instrução Normativa RFB nº 2.172/2024, says nothing about the check
  * digits. The reserved numbers come from the Receita Federal's DJE arrecadação layout, whose CPF
@@ -46,6 +45,9 @@ const isValidChecksum = (cpf: string): boolean =>
  * @see Official: http://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=36307
  * Receita Federal, leiaute DJE (version DJE/004 of 10/06/2002), field "Número CPF ou CNPJ": the 10
  * CPFs whose 11 digits are all the same are not valid.
+ * @see Official: http://sped.rfb.gov.br/estatico/33/BBD9A14FFF8CB38ECEEC2FC2D3713AE716DB11/Manual%20e-Financeira%20v%202.1.2-%20Anexo%20II%20-%20Leiautes%20Gerais.pdf
+ * Manual de Preenchimento da e-Financeira, Anexo II, Leiautes Gerais: `REGRA_VALIDA_CPF`, with the
+ * worked example `280012389-38`.
  * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=151372
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */

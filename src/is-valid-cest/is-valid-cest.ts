@@ -14,10 +14,10 @@ import { CEST_LENGTH } from "./constants";
  * check is about the code alone, it does not tell whether the code suits a given NCM or whether
  * a state applies the regime to it.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NN.NNN.NN` form the annexes print, with separators (alone or in a run: space, `.`, `-`
- * or `/`) between the groups and optional surrounding whitespace. A number is only read as a
- * code when it is a non-negative safe integer.
+ * A string is only read as a code when it is written in one of the documented forms: the 7 digits,
+ * or the `NN.NNN.NN` form the annexes print, with any run of separators (whitespace, `.`, `-` or
+ * `/`) between the groups and optional surrounding whitespace. A number is only read as a code when
+ * it is a non-negative safe integer.
  *
  * The leading zero of segments 01 to 09 is part of the code, so a value written as bare digits
  * is left padded with zeros to 7 whether it comes as a string or as a number: `100100`,

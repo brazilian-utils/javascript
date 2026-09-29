@@ -23,6 +23,7 @@ import { isValidCeiCnoNumber } from "../_internals/is-valid-cei-cno-number/is-va
  * `"000000336854"`.
  *
  * A number is only read as a CEI when it is a non-negative safe integer.
+ * A number loses its leading zeros, so a CEI that starts with `0` is only accepted as a string.
  *
  * @param {string|number} value - The CEI value to be validated.
  * @returns {boolean} True if the CEI is valid, false otherwise.

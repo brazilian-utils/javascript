@@ -12,9 +12,10 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * 116/2003, the list of the services the ISS is levied on.
  *
  * Accepts the form the law prints (`"1.01"`), a zero padded item (`"01.01"`), the bare digits
- * (`"0101"`, `"101"` or the integer `101`), with optional surrounding whitespace. The dot is the only separator the law ever prints, so `"1-01"` is not
- * valid. Vetoed subitems, item headings, the 6 digit national codes of the NFS-e and item 99 of
- * the national list are not valid.
+ * (`"0101"`, `"101"` or the integer `101`), with optional surrounding whitespace. Any run of
+ * separators (whitespace, `.`, `-` or `/`) is read between the item and the subitem, so `"1-01"`
+ * and `"1 01"` are valid too. Vetoed subitems, item headings, the 6 digit national codes of the
+ * NFS-e and item 99 of the national list are not valid.
  *
  * @param {string|number} value - The subitem to be validated.
  * @returns {boolean} True if the subitem is in the list in force, false otherwise.

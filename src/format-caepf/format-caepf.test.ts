@@ -51,6 +51,11 @@ describe("formatCaepf", () => {
 		expect(formatCaepf()).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCaepf("", { pad: true })).toBe("");
+		expect(formatCaepf("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		test("should print a full registration in the official mask", () => {
 			fc.assert(

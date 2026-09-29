@@ -1,6 +1,7 @@
 import { format } from "../_internals/format/format";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { PATTERN } from "./constants";
 
 /** Options of `formatCns`. */
 export type FormatCnsOptions = {
@@ -50,6 +51,6 @@ export const formatCns = (value: string | number, options?: FormatCnsOptions): s
 		? format({
 				pad: options?.pad,
 				value: sanitizeToDigits(value),
-				pattern: "000 0000 0000 0000",
+				pattern: PATTERN,
 			})
 		: "";

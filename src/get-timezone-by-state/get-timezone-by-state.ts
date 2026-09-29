@@ -1,5 +1,5 @@
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 import { STATE_TIMEZONES } from "./constants";
 
 /**
@@ -20,12 +20,16 @@ import { STATE_TIMEZONES } from "./constants";
  * any Brazilian state.
  *
  * @see Official: https://www.iana.org/time-zones
+ * @see Official: https://www.planalto.gov.br/ccivil_03/decreto/historicos/dpl/dpl2784-1913.htm
+ * Decreto 2.784/1913, which set the legal time of Brazil and its zones.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2008/lei/l11662.htm
+ * Lei 11.662/2008, which moved Acre and part of Amazonas and Pará to another zone, revoked by Lei 12.876/2013.
+ * @see Official: https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12876.htm
+ * Lei 12.876/2013, which amended the decree to restore the zones of Acre and the south-west of Amazonas.
  * @see Based on: https://raw.githubusercontent.com/eggert/tz/main/zone1970.tab
- * (IANA tz
- * database data file, `BR` rows)
+ * IANA tz database data file, `BR` rows.
  * @see Based on: https://en.wikipedia.org/wiki/Time_in_Brazil
- * Used to confirm the state
- * coverage of each zone.
+ * Used to confirm the state coverage of each zone.
  *
  * @example
  * ```typescript

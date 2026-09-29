@@ -224,7 +224,7 @@ export const SERVICE_ITEM_CODES =
 
 /**
  * Shape a subitem has to be written in: one or two digits of the item and the two of the
- * subitem, with the dot the law prints between them or without it.
+ * subitem, with any run of whitespace or mask characters between them, or none.
  */
 export const SERVICE_ITEM_FORMAT_REGEX = /^\d{1,2}[\s.\-/]*\d{2}$/;
 

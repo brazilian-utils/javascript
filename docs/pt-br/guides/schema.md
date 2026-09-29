@@ -149,7 +149,7 @@ O `narrow` recebe ele, e diz o que o valor tem que ser quando recusa:
 
 <div class="example" data-name="Standard Schema">
 
-Sem biblioteca de schema nenhuma: o `toStandardSchema` dá ao validador a interface que toda biblioteca de formulário fala.
+Sem biblioteca de schema nenhuma: o `toStandardSchema` dá ao validador a interface que toda biblioteca de formulário fala. O VeeValidate aceita esse schema em `rules` a partir da versão 5, e o Hono valida um objeto, então a rota embrulha o validador para o corpo JSON.
 
 <div class="variant" data-variant="CPF">
 

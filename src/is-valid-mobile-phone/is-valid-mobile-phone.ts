@@ -1,10 +1,11 @@
 import { PHONE_NATIONAL_MAX_LENGTH } from "../_internals/constants/phone";
+import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
 import { isValidDDD } from "../_internals/is-valid-ddd/is-valid-ddd";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
-import { type PhoneVersion } from "../is-valid-phone/is-valid-phone";
 import { MOBILE_SATELLITE_PREFIX, MOBILE_VALID_FIRST_NUMBERS } from "./constants";
 
-export type { PhoneVersion } from "../is-valid-phone/is-valid-phone";
+/** The Brazilian mobile numbering rule to enforce over the 11 digit number: both take a first number digit of 7, 8 or 9; `1` also takes the `700` series, `2` leaves it out. */
+export type PhoneVersion = 1 | 2;
 
 /** Options of `isValidMobilePhone`. */
 export type IsValidMobilePhoneOptions = {
@@ -26,10 +27,27 @@ const isValidMobileFirstNumber = (value: string, version?: PhoneVersion): boolea
  * A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed before
  * validation, under the rule documented in `parsePhone`.
  *
+ * Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the
+ * value invalid; up to 2.4.0 such characters were dropped, so `"11 98765-4321x"` was valid.
+ *
  * The first number digit (right after the DDD) must be 7, 8 or 9 under both numbering rules.
  * The `version` option only decides the `700` series:
  * - `1` (default): accepts it.
  * - `2`: rejects it, since it belongs to the satellite service.
+ *
+ * Both versions enforce art. 12, I, "a" of Resolução Anatel nº 749/2022, `“7”, "8" e “9”:
+ * Serviço Móvel Pessoal (SMP), ressalvado o disposto no inciso II deste artigo`, so a first
+ * number digit of 6 is rejected. Up to 2.4.0 `version: 1` accepted it, although it is not SMP.
+ *
+ * That ressalva is art. 12, II, "a", `“700”: Serviço Móvel Global por Satélite (SMGS)`: the
+ * `700` series is not SMP, so `version: 2` rejects `isValidMobilePhone("11700123456")`.
+ * `version: 1` does not carve the series out and accepts it, for 2.3.0 compatibility.
+ *
+ * Resolução Anatel nº 777/2025, art. 22, gives art. 12 a new wording in force on 1 March 2027:
+ * "6" SCM, "8" and "9" SMP, `700` "SMGS e SMP por Satélite", and every other first digit,
+ * including a "7" outside `700`, reserva técnica. It is scheduled, not in force, so it is not
+ * applied yet; from that date a `version: 2` that follows it will have to accept only 8 and 9
+ * (plus the `700` series, as satellite SMP) and reject the other `7` numbers.
  *
  * @param {string} value - The phone number to validate.
  * @param {IsValidMobilePhoneOptions} options - Optional validation options.
@@ -49,27 +67,13 @@ const isValidMobileFirstNumber = (value: string, version?: PhoneVersion): boolea
  * isValidMobilePhone("+55 11 98765-4321"); // true
  * ```
  *
- * Both versions enforce art. 12, I, "a" of Resolução Anatel nº 749/2022, `“7”, "8" e “9”:
- * Serviço Móvel Pessoal (SMP), ressalvado o disposto no inciso II deste artigo`, so a first
- * number digit of 6 is rejected. Up to 2.4.0 `version: 1` accepted it, although it is not SMP.
- *
- * That ressalva is art. 12, II, "a", `“700”: Serviço Móvel Global por Satélite (SMGS)`: the
- * `700` series is not SMP, so `version: 2` rejects `isValidMobilePhone("11700123456")`.
- * `version: 1` does not carve the series out and accepts it, for 2.3.0 compatibility.
- *
- * Resolução Anatel nº 777/2025, art. 22, gives art. 12 a new wording in force on 1 March 2027:
- * "6" SCM, "8" and "9" SMP, `700` "SMGS e SMP por Satélite", and every other first digit,
- * including a "7" outside `700`, reserva técnica. It is scheduled, not in force, so it is not
- * applied yet; from that date a `version: 2` that follows it will have to accept only 8 and 9
- * (plus the `700` series, as satellite SMP) and reject the other `7` numbers.
- *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * Resolução Anatel nº 749/2022, art. 12, I, "a": `“7”, "8" e “9”: Serviço Móvel Pessoal (SMP)`.
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2025/2022-resolucao-777
  * Resolução Anatel nº 777/2025, art. 22: the art. 12 in force on 1 March 2027.
  */
 export const isValidMobilePhone = (value: string, options?: IsValidMobilePhoneOptions): boolean => {
-	if (typeof value !== "string") return false;
+	if (typeof value !== "string" || !hasOnlyPhoneCharacters(value)) return false;
 
 	const digits = normalizePhone(value);
 

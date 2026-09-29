@@ -15,6 +15,22 @@ describe("normalizePhone", () => {
 		expect(normalizePhone("+55 55 98765-4321")).toBe("55987654321");
 	});
 
+	test("should remove an explicit country code whatever follows it", () => {
+		expect(normalizePhone("+55")).toBe("");
+		expect(normalizePhone("+55 11 9")).toBe("119");
+		expect(normalizePhone("+55 55")).toBe("55");
+		expect(normalizePhone("0055 11 98765")).toBe("1198765");
+		expect(normalizePhone("  + 55 (11) 3000")).toBe("113000");
+		expect(normalizePhone("+55 190")).toBe("190");
+		expect(normalizePhone("+55 55 98765-4321 12")).toBe("5598765432112");
+	});
+
+	test("should keep a bare 55 while the number is short", () => {
+		expect(normalizePhone("55")).toBe("55");
+		expect(normalizePhone("55 11 9")).toBe("55119");
+		expect(normalizePhone("(00) 55 11 98765")).toBe("00551198765");
+	});
+
 	test("should keep the leading 55 when it is an area code", () => {
 		expect(normalizePhone("55987654321")).toBe("55987654321");
 		expect(normalizePhone("5533334444")).toBe("5533334444");

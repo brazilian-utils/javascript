@@ -1,13 +1,6 @@
-import {
-	SERVICE_PHONE_ABBREVIATED_LENGTH,
-	SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH,
-	SERVICE_PHONE_ABBREVIATED_ROOTS,
-	SERVICE_PHONE_NON_GEOGRAPHIC_LENGTH,
-	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH,
-	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
-	SERVICE_PHONE_UTILITY_CODES,
-} from "../_internals/constants/service-phone";
-import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
+import { isServicePhoneDigits } from "../_internals/is-service-phone-digits/is-service-phone-digits";
+import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 
 /**
  * Validates if a phone number is a valid Brazilian service number.
@@ -31,6 +24,14 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *   749/2022 art. 13 destines to public utility services (every other series is reserva
  *   técnica), a conflict between the two official texts that keeps the 2.4.0 answer.
  *
+ * A Brazilian country code is accepted and removed first, under the rule documented in
+ * `parsePhone`, the same as `isValidPhone` does with `accept: ["service"]`: `+55`, `0055` or a
+ * bare `55` before a number of 10 or 11 digits. Up to 2.4.0 this function rejected it, so
+ * `"+55 0800 123 4567"` and `"+55 190"` were `false`.
+ *
+ * Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the
+ * value invalid; up to 2.4.0 such characters were dropped.
+ *
  * Only the structure is checked: the number does not have to be assigned to anyone, and the
  * `0500` rule that encodes a donation amount in the last two digits is not enforced.
  *
@@ -42,6 +43,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * isValidServicePhone("0800 123 4567"); // true
  * isValidServicePhone("4004-1234"); // true
  * isValidServicePhone("190"); // true
+ * isValidServicePhone("+55 0800 123 4567"); // true
  * isValidServicePhone("11987654321"); // false (geographic number)
  * ```
  *
@@ -54,23 +56,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Ato Anatel nº 43.151/2004, whose Anexo designates the 3-digit public utility codes.
  */
 export const isValidServicePhone = (value: string): boolean => {
-	if (typeof value !== "string") return false;
+	if (typeof value !== "string" || !hasOnlyPhoneCharacters(value)) return false;
 
-	const digits = sanitizeToDigits(value);
-
-	if (digits.length === SERVICE_PHONE_NON_GEOGRAPHIC_LENGTH) {
-		return SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES.includes(
-			digits.slice(0, SERVICE_PHONE_NON_GEOGRAPHIC_PREFIX_LENGTH),
-		);
-	}
-
-	if (digits.length === SERVICE_PHONE_ABBREVIATED_LENGTH) {
-		return SERVICE_PHONE_ABBREVIATED_ROOTS.includes(
-			digits.slice(0, SERVICE_PHONE_ABBREVIATED_ROOT_LENGTH),
-		);
-	}
-
-	// Every public utility code is exactly 3 digits, so a value of any other length that reaches
-	// here matches none of them and is turned down by this very check.
-	return SERVICE_PHONE_UTILITY_CODES.includes(digits);
+	return isServicePhoneDigits(resolveServicePhoneDigits(value));
 };

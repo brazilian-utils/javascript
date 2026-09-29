@@ -29,8 +29,8 @@ import { states } from "./states";
       (focus)="askedForCities.set(state())"
     >
       <option value="">{{ cities.isLoading() ? "Loading the cities…" : "Pick a city" }}</option>
-      @for (city of cityList(); track city) {
-        <option [value]="city">{{ city }}</option>
+      @for (city of cityList(); track city.code) {
+        <option [value]="city.code">{{ city.name }}</option>
       }
     </select>
   `,

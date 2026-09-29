@@ -38,6 +38,11 @@ describe("formatCep", () => {
 		expect(formatCep()).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCep("", { pad: true })).toBe("");
+		expect(formatCep("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		const upToACep = digitsUpTo(8);
 

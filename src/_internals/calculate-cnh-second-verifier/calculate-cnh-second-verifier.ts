@@ -9,6 +9,9 @@ export type CalculateCnhSecondVerifierParams = {
  * Calculates the second verification digit of a Brazilian CNH (Carteira Nacional de Habilitação)
  * from its 9-digit base number and the decrement produced by `calculateCnhFirstVerifier`.
  *
+ * The weighted sum is written out rather than delegated to the shared `generateChecksum`, for the
+ * reason given in `calculateCnhFirstVerifier`.
+ *
  * @param {CalculateCnhSecondVerifierParams} params - The calculation parameters.
  * @param {string} params.base - The 9-digit CNH base number.
  * @param {number} params.decrement - The decrement calculated alongside the first verification digit.
@@ -23,8 +26,6 @@ export const calculateCnhSecondVerifier = ({
 	base,
 	decrement,
 }: CalculateCnhSecondVerifierParams): number => {
-	// Written out rather than delegated to the shared `generateChecksum`, for the reason given in
-	// `calculateCnhFirstVerifier`.
 	let sum = 0;
 
 	for (let i = 0; i < 9; i++) {

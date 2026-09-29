@@ -83,11 +83,17 @@ describe("isValidCep", () => {
 			expect(isValidCep("013 10 100")).toBe(true);
 			expect(isValidCep("01310.100")).toBe(true);
 		});
+
+		test("when is a CEP valid with slashes, which the mask characters include", () => {
+			expect(isValidCep("0131/0100")).toBe(true);
+			expect(isValidCep("--0131 0100")).toBe(true);
+			expect(isValidCep("01310/100/")).toBe(true);
+		});
 	});
 
 	describe("properties", () => {
-		test("should ignore dots, hyphens and spaces wherever they appear", () => {
-			expectAccepted(isValidCep, maskedValues(digits(8), [".", "-", " "], 2));
+		test("should ignore dots, hyphens, spaces and slashes wherever they appear", () => {
+			expectAccepted(isValidCep, maskedValues(digits(8), [".", "-", " ", "/"], 2));
 		});
 
 		test("should reject any digits only value that is not 8 digits long", () => {

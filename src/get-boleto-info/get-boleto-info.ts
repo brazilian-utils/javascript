@@ -1,4 +1,16 @@
-import { ISPB_INDEX, ISPB_ONLY_PREFIX } from "../_internals/constants/boleto";
+import {
+	AMOUNT_INDEX,
+	AMOUNT_LENGTH,
+	BARCODE_AMOUNT_INDEX,
+	BARCODE_FACTOR_INDEX,
+	BARCODE_ISPB_INDEX,
+	BOLETO_BARCODE_LENGTH,
+	FACTOR_INDEX,
+	FACTOR_LENGTH,
+	ISPB_INDEX,
+	ISPB_LENGTH,
+	ISPB_ONLY_PREFIX,
+} from "../_internals/constants/boleto";
 import { parseArrecadacao } from "../_internals/parse-arrecadacao/parse-arrecadacao";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
@@ -22,10 +34,7 @@ export type BoletoInfo = {
 	expirationDate: Date | null;
 	/** Three digit bank code (COMPE), empty for an arrecadação bank slip. */
 	bankCode: string;
-	/**
-	 * The 8 digit ISPB of the institution that issued a FEBRABAN Convenção da Cobrança "Situação 2"
-	 * slip (bank code `988`, código de moeda `0`), present only on such a slip.
-	 */
+	/** The 8 digit ISPB of the institution behind a "Situação 2" slip, present only on such a slip. */
 	ispb?: string;
 	/** Present and set to "arrecadacao" only for convênio/tributos bank slips. */
 	type?: "arrecadacao";
@@ -48,6 +57,11 @@ const toDayNumber = (date: Date): number =>
  */
 const getBaseDayNumber = (): number =>
 	Math.floor(Date.UTC(BASE_DATE_YEAR, BASE_DATE_MONTH, BASE_DATE_DAY) / DAY_IN_MS);
+
+const resolveReferenceDate = (referenceDate: unknown): Date =>
+	referenceDate instanceof Date && !Number.isNaN(referenceDate.getTime())
+		? referenceDate
+		: new Date();
 
 const dateFromBase = (days: number): Date =>
 	new Date(BASE_DATE_YEAR, BASE_DATE_MONTH, BASE_DATE_DAY + days);
@@ -76,7 +90,7 @@ const getExpirationDate = (factor: number, referenceDate: Date): Date | null => 
 
 		const distance = Math.abs(difference);
 
-		// Stryker disable next-line EqualityOperator: the two candidates are always exactly one cycle (9000 days) apart, so their distances can only tie at the cycle's exact midpoint (4500) — a point RANGE_AFTER (5500) already always accepts above via the early return, so a genuine tie can never reach this comparison
+		// Stryker disable next-line EqualityOperator: the two candidates are always exactly one cycle (9000 days) apart, so their distances can only tie at the cycle's exact midpoint (4500), a point RANGE_AFTER (5500) already always accepts above via the early return, so a genuine tie can never reach this comparison
 		if (distance < closestDistance) {
 			closestDistance = distance;
 			closest = days;
@@ -88,7 +102,7 @@ const getExpirationDate = (factor: number, referenceDate: Date): Date | null => 
 
 /** Options of `getBoletoInfo`. */
 export type GetBoletoInfoOptions = {
-	/** Date used to resolve the 9000 day "fator de vencimento" cycle (default: now). */
+	/** Date used to resolve the 9000 day "fator de vencimento" cycle (default: now, also used when this is not a valid `Date`). */
 	referenceDate?: Date;
 };
 
@@ -99,9 +113,10 @@ export type GetBoletoInfoOptions = {
  * than a partial result, the way every other getter of this package answers a lookup it cannot
  * resolve (`getFormatLicensePlate`, `getMunicipality`).
  *
- * Supports the 47 digit "cobrança bancária" linha digitável and, additionally, the
- * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
- * barcode, both starting with `8`. Arrecadação bank slips also return `type`, `segment`,
+ * Supports the 47 digit "cobrança bancária" linha digitável, its 44 digit barcode (read for the
+ * same fields, the amount from positions 10 to 19 and the fator de vencimento from 6 to 9) and,
+ * additionally, the "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or
+ * 44 digit barcode, both starting with `8`. Arrecadação bank slips also return `type`, `segment`,
  * `value` and `hasEffectiveValue`, and, carrying neither a bank code nor a fator de vencimento,
  * come back with `bankCode` set to `""` and `expirationDate` set to `null` rather than with those
  * two keys missing.
@@ -113,6 +128,14 @@ export type GetBoletoInfoOptions = {
  * `referenceDate` explicitly whenever the answer has to stay stable. The search never goes below
  * the first cycle, so a `referenceDate` older than the scheme itself still resolves a factor to
  * the oldest date that factor can denote rather than to one before the 07/10/1997 base date.
+ * A `referenceDate` that is not a valid `Date` (an invalid one, a string, a number) is ignored
+ * and now is used, so the call never throws.
+ *
+ * The windows are 3000 days back and 5500 days ahead of `referenceDate`, and the nearer candidate
+ * wins when neither falls inside them. So a slip due up to 3499 days (about 9.5 years) before
+ * `referenceDate` keeps its date, and one due 3500 days (about 9.6 years) or more before it is
+ * read as the next cycle, a date in the future. To read an old slip, pass a `referenceDate` near
+ * the date it was issued.
  *
  * A FEBRABAN Convenção da Cobrança "Situação 2" slip, issued by an institution identified only
  * by its ISPB (bank code `988`, código de moeda `0`, see `isValidBoleto`), carries that ISPB where
@@ -120,7 +143,7 @@ export type GetBoletoInfoOptions = {
  *
  * @param {string} value - The boleto digitable line (can be with or without mask).
  * @param {GetBoletoInfoOptions} [options] - Optional options.
- * @param {Date} options.referenceDate - Date used to resolve the "fator de vencimento" cycle. Defaults to now.
+ * @param {Date} options.referenceDate - Date used to resolve the "fator de vencimento" cycle. Defaults to now, and so does anything that is not a valid `Date`.
  * @returns {BoletoInfo | null} An object containing amount (in cents), expirationDate, and bankCode, or null if the boleto is invalid.
  *
  * @example
@@ -129,6 +152,11 @@ export type GetBoletoInfoOptions = {
  *   referenceDate: new Date(2025, 5, 15),
  * });
  * // { amount: 102656, expirationDate: new Date(2018, 6, 15), bankCode: '001' }
+ *
+ * getBoletoInfo('00196758600001026560000001149718606852452211', {
+ *   referenceDate: new Date(2025, 5, 15),
+ * });
+ * // { amount: 102656, expirationDate: new Date(2018, 6, 15), bankCode: '001' } (the barcode of the same slip)
  *
  * getBoletoInfo('98800000060114971860168524522114100000018236120');
  * // { amount: 0, expirationDate: null, bankCode: '988', ispb: '18236120' }
@@ -179,16 +207,27 @@ export const getBoletoInfo = (value: string, options?: GetBoletoInfoOptions): Bo
 
 	const bankCode = sanitized.slice(0, 3);
 
+	const isBarcode = sanitized.length === BOLETO_BARCODE_LENGTH;
+	const factorIndex = isBarcode ? BARCODE_FACTOR_INDEX : FACTOR_INDEX;
+	const amountIndex = isBarcode ? BARCODE_AMOUNT_INDEX : AMOUNT_INDEX;
+
 	const expirationDate = getExpirationDate(
-		Number(sanitized.slice(33, 37)),
-		options?.referenceDate ?? new Date(),
+		Number(sanitized.slice(factorIndex, factorIndex + FACTOR_LENGTH)),
+		resolveReferenceDate(options?.referenceDate),
 	);
 
 	if (sanitized.startsWith(ISPB_ONLY_PREFIX)) {
-		return { amount: 0, expirationDate, bankCode, ispb: sanitized.slice(ISPB_INDEX) };
+		const ispbIndex = isBarcode ? BARCODE_ISPB_INDEX : ISPB_INDEX;
+
+		return {
+			amount: 0,
+			expirationDate,
+			bankCode,
+			ispb: sanitized.slice(ispbIndex, ispbIndex + ISPB_LENGTH),
+		};
 	}
 
-	const amount = Number(sanitized.slice(37, 47));
+	const amount = Number(sanitized.slice(amountIndex, amountIndex + AMOUNT_LENGTH));
 
 	return { amount, expirationDate, bankCode };
 };

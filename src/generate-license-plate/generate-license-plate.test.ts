@@ -53,7 +53,23 @@ describe("generateLicensePlate", () => {
 
 	it("should map a forced random value to the hand-computed letter and digit, per position", () => {
 		runWithForcedRandom(0.5, () => {
-			expect(generateLicensePlate("LLLNLNN")).toBe("NNN5N55");
+			expect(generateLicensePlate("LLLNLNN")).toBe("NNN5S55");
+		});
+	});
+
+	it("should draw the fifth letter of a Mercosul plate from K to Z, leaving A to J to converted plates", () => {
+		runWithForcedRandom(0, () => {
+			expect(generateLicensePlate()).toBe("AAA0K00");
+		});
+		runWithForcedRandom(0.999999, () => {
+			expect(generateLicensePlate()).toBe("ZZZ9Z99");
+			expect(generateLicensePlate("LLLNLNN")).toBe("ZZZ9Z99");
+		});
+	});
+
+	it("should keep drawing every letter of the alphabet in the first three positions", () => {
+		runWithForcedRandom(0, () => {
+			expect(generateLicensePlate("LLLNNNN")).toBe("AAA0000");
 		});
 	});
 
@@ -69,6 +85,17 @@ describe("generateLicensePlate", () => {
 					expect(getFormatLicensePlate(plate)).toBe(format);
 					expect(isValidLicensePlate(plate)).toBe(true);
 				}),
+			);
+		});
+
+		test("should never generate a Mercosul plate with A to J in the fifth position", () => {
+			fc.assert(
+				fc.property(
+					fc.constantFrom<GenerateLicensePlateFormat | undefined>("LLLNLNN"),
+					(format) => {
+						expect(generateLicensePlate(format)).toMatch(/^[A-Z]{3}\d[K-Z]\d{2}$/);
+					},
+				),
 			);
 		});
 

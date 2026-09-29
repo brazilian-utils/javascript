@@ -1540,6 +1540,15 @@ describe("getHolidays", () => {
 		).toBe(true);
 	});
 
+	test("should list AM's 8 December only from 1999, the year of Lei Municipal de Manaus nº 496/1999, the earliest norm located", () => {
+		expect(statesHolidaysOn("AM", 11, 8, 1998)).toEqual([]);
+		expect(statesHolidaysOn("AM", 11, 8, 1950)).toEqual([]);
+		expect(statesHolidaysOn("AM", 11, 8, 1999)).toEqual([
+			{ name: "Nossa Senhora da Conceição", date: new Date(1999, 11, 8), type: "optional" },
+		]);
+		expect(isBusinessDay(new Date(1950, 11, 8, 12), { stateCode: "AM" })).toBe(true);
+	});
+
 	test("should list PR's 19 December from 1963 to 2013 under Lei PR nº 4.658/1962, and not after Lei PR nº 18.384/2014 revoked it ('não se constituindo em feriado civil')", () => {
 		expect(statesHolidaysOn("PR", 11, 19, 1962)).toEqual([]);
 		expect(statesHolidaysOn("PR", 11, 19, 1963)).toEqual([

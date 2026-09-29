@@ -7,6 +7,11 @@ import { isValidServicePhone } from "./is-valid-service-phone";
 
 describe("isValidServicePhone", () => {
 	describe("should return false", () => {
+		test("when the value holds a character that is not part of a phone mask", () => {
+			expect(isValidServicePhone("abc190")).toBe(false);
+			expect(isValidServicePhone("0800 123 4567x")).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidServicePhone("")).toBe(false);
 		});
@@ -51,6 +56,12 @@ describe("isValidServicePhone", () => {
 			expect(isValidServicePhone("400412345")).toBe(false);
 		});
 
+		test("when a bare 55 does not leave a service number behind", () => {
+			expect(isValidServicePhone("55190")).toBe(false);
+			expect(isValidServicePhone("5540041234")).toBe(false);
+			expect(isValidServicePhone("+55 11987654321")).toBe(false);
+		});
+
 		test("when the utility code was never designated", () => {
 			expect(isValidServicePhone("101")).toBe(false);
 			expect(isValidServicePhone("110")).toBe(false);
@@ -65,6 +76,13 @@ describe("isValidServicePhone", () => {
 	});
 
 	describe("should return true", () => {
+		test("when it is written with a country code", () => {
+			expect(isValidServicePhone("+55 0800 123 4567")).toBe(true);
+			expect(isValidServicePhone("+55 190")).toBe(true);
+			expect(isValidServicePhone("0055 4004-1234")).toBe(true);
+			expect(isValidServicePhone("5508001234567")).toBe(true);
+		});
+
 		test("for every non-geographic prefix", () => {
 			expect(isValidServicePhone("03001234567")).toBe(true);
 			expect(isValidServicePhone("03031234567")).toBe(true);
@@ -159,6 +177,13 @@ describe("isValidServicePhone with an array of characters", () => {
 	test("should reject it instead of reading it as the joined string", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(isValidServicePhone("08001234567".match(/\d/g))).toBe(false);
+	});
+});
+
+describe("isValidServicePhone with a number", () => {
+	test("should reject the number of a service code, which is not a string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidServicePhone(190)).toBe(false);
 	});
 });
 

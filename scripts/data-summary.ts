@@ -16,7 +16,8 @@ import { writeFileSync } from "node:fs";
 
 /** The source each generated file is rebuilt from, as named in the file's own header. */
 const DATASETS: Record<string, string> = {
-	"src/_internals/constants/banks.ts": "Banks (Banco Central, STR participants)",
+	"src/_internals/constants/bank-codes.ts": "Bank codes (Banco Central, STR participants)",
+	"src/_internals/constants/banks.ts": "Bank ISPBs and names (Banco Central, STR participants)",
 	"src/_internals/constants/cbo-descriptions.ts":
 		"CBO 2002 occupation titles (Ministério do Trabalho e Emprego)",
 	"src/_internals/constants/cbo.ts": "CBO 2002 occupation codes (Ministério do Trabalho e Emprego)",
@@ -30,10 +31,15 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/cid10.ts": "CID-10 codes (DATASUS)",
 	"src/_internals/constants/cnae-descriptions.ts": "CNAE subclass descriptions (IBGE/CONCLA)",
 	"src/_internals/constants/cnae.ts": "CNAE subclass codes (IBGE/CONCLA)",
+	"src/_internals/constants/class-trib-codes.ts":
+		"cClassTrib codes (Portal Nacional da NF-e, Informe Técnico 2025.002)",
+	"src/_internals/constants/class-trib.ts":
+		"cClassTrib descriptions (Portal Nacional da NF-e, Informe Técnico 2025.002)",
 	"src/_internals/constants/ibs-cbs.ts":
-		"CST-IBS/CBS and cClassTrib (Portal Nacional da NF-e, Informe Técnico 2025.002)",
+		"CST-IBS/CBS (Portal Nacional da NF-e, Informe Técnico 2025.002)",
 	"src/_internals/constants/isbn-ranges.ts": "ISBN ranges (International ISBN Agency)",
-	"src/_internals/constants/municipalities.ts": "Municipalities (IBGE)",
+	"src/_internals/constants/municipality-codes.ts": "Municipality codes (IBGE)",
+	"src/_internals/constants/municipality-names.ts": "Municipality names (IBGE)",
 	"src/_internals/constants/municipality-area-codes.ts":
 		"DDD of every municipality (Anatel, Códigos Nacionais)",
 	"src/_internals/constants/nbs-descriptions.ts": "NBS 2.0 descriptions (MDIC)",
@@ -43,6 +49,7 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/service-items.ts":
 		"LC 116/2003 service list subitems (Sistema Nacional NFS-e, ANEXO B)",
 	"src/_internals/constants/states.ts": "States (IBGE)",
+	"src/_internals/constants/legal-nature-codes.ts": "Legal nature codes (IBGE/CONCLA)",
 	"src/is-valid-legal-nature/constants.ts": "Legal natures (IBGE/CONCLA)",
 	"src/is-valid-ncm/constants.ts": "NCM codes (Siscomex)",
 };

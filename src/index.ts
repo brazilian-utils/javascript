@@ -28,10 +28,12 @@ export {
 export { differenceInBusinessDays } from "./difference-in-business-days/difference-in-business-days";
 export { type FormatBoletoOptions, formatBoleto } from "./format-boleto/format-boleto";
 export { type FormatCaepfOptions, formatCaepf } from "./format-caepf/format-caepf";
+export { type FormatCboOptions, formatCbo } from "./format-cbo/format-cbo";
 export { type FormatCeiOptions, formatCei } from "./format-cei/format-cei";
 export { type FormatCepOptions, formatCep } from "./format-cep/format-cep";
 export { type FormatCertidaoOptions, formatCertidao } from "./format-certidao/format-certidao";
 export { type FormatCestOptions, formatCest } from "./format-cest/format-cest";
+export { type FormatCfopOptions, formatCfop } from "./format-cfop/format-cfop";
 export { formatCid10 } from "./format-cid10/format-cid10";
 export { type FormatCnaeOptions, formatCnae } from "./format-cnae/format-cnae";
 export { type FormatCnhOptions, formatCnh } from "./format-cnh/format-cnh";
@@ -47,7 +49,7 @@ export {
 	formatLegalNature,
 } from "./format-legal-nature/format-legal-nature";
 export { formatLicensePlate } from "./format-license-plate/format-license-plate";
-export { formatNbs } from "./format-nbs/format-nbs";
+export { type FormatNbsOptions, formatNbs } from "./format-nbs/format-nbs";
 export { type FormatNcmOptions, formatNcm } from "./format-ncm/format-ncm";
 export { type FormatNfeKeyOptions, formatNfeKey } from "./format-nfe-key/format-nfe-key";
 export { formatPassport } from "./format-passport/format-passport";
@@ -190,6 +192,11 @@ export {
 	type PixPointOfInitiation,
 	getPixPayloadInfo,
 } from "./get-pix-payload-info/get-pix-payload-info";
+export {
+	type ProcessoJuridicoInfo,
+	type ProcessoJuridicoSegment,
+	getProcessoJuridicoInfo,
+} from "./get-processo-juridico-info/get-processo-juridico-info";
 export { type ServiceItem, getServiceItem } from "./get-service-item/get-service-item";
 export { getStateByCep } from "./get-state-by-cep/get-state-by-cep";
 export { type Region, type RegionCode, getRegions } from "./get-regions/get-regions";
@@ -200,6 +207,7 @@ export { getStateCapital } from "./get-state-capital/get-state-capital";
 export { getStates } from "./get-states/get-states";
 export { getStatesByRegion } from "./get-states-by-region/get-states-by-region";
 export { getTimezoneByState } from "./get-timezone-by-state/get-timezone-by-state";
+export { type VoterIdInfo, getVoterIdInfo } from "./get-voter-id-info/get-voter-id-info";
 export { type BusinessDayOptions, isBusinessDay } from "./is-business-day/is-business-day";
 export { type IsHolidayParams, isHoliday } from "./is-holiday/is-holiday";
 export {
@@ -292,6 +300,7 @@ export { type ParseCurrencyOptions, parseCurrency } from "./parse-currency/parse
 export { parseIban } from "./parse-iban/parse-iban";
 export { parseIsbn } from "./parse-isbn/parse-isbn";
 export { parseLegalNature } from "./parse-legal-nature/parse-legal-nature";
+export { parseNbs } from "./parse-nbs/parse-nbs";
 export { parseLicensePlate } from "./parse-license-plate/parse-license-plate";
 export { parseNcm } from "./parse-ncm/parse-ncm";
 export { parseNfeKey } from "./parse-nfe-key/parse-nfe-key";
@@ -373,11 +382,6 @@ export type { IsHolidayOptions } from "./is-holiday/is-holiday";
  * @deprecated Use `IsValidBankAccountParams` instead.
  */
 export type { IsValidBankAccountOptions } from "./is-valid-bank-account/is-valid-bank-account";
-// The deprecated aliases below are declared as constants rather than as renamed re-exports
-// (`export { formatCpf as formatCPF }`) so that their `@deprecated` tag survives into the bundled
-// declaration file: the bundler collapses every renamed re-export of the entry point into a single
-// `export { ... }` statement, which carries no documentation, while a `declare const` keeps the
-// comment written right above it.
 /**
  * Formats a CEP, the 1.x name of `formatCep`.
  *

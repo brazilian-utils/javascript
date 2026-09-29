@@ -16,12 +16,14 @@ const NOON = 12;
  *
  * Both ends are local calendar days written as the number `Date.UTC(year, month, day)` returns
  * for them, so the walk is plain integer arithmetic on days: it always advances, it always stops
- * after `Math.abs(until - from)` days, and no `Date` is ever mutated. That is what makes it safe
- * in every time zone. A walk driven by `date.setDate(date.getDate() + 1)` is not: when the
- * neighbouring local day does not exist (`Pacific/Apia` and `Pacific/Fakaofo` skipped 30 December 2011,
- * `Pacific/Kiritimati` and `Pacific/Enderbury` 31 December 1994, `Pacific/Kwajalein` 21 August 1993, all of them crossing
- * the date line) the runtime re-normalizes onto the same local day, the walk stops advancing and
- * the loop never ends.
+ * after `Math.abs(until - from)` days, and no `Date` a caller sees is ever mutated. The walk
+ * reuses one private scratch `Date`, read only through its UTC getters, and hands out a new
+ * `Date` for each day. That is what makes it safe in every time zone. A walk driven by
+ * `date.setDate(date.getDate() + 1)` is not: when the neighbouring local day does not exist
+ * (`Pacific/Apia` and `Pacific/Fakaofo` skipped 30 December 2011, `Pacific/Kiritimati` and
+ * `Pacific/Enderbury` 31 December 1994, `Pacific/Kwajalein` 21 August 1993, all of them
+ * crossing the date line) the runtime re-normalizes onto the same local day, the walk stops
+ * advancing and the loop never ends.
  *
  * Each day is yielded at **noon**, not at midnight, because noon is a time of day every existing
  * local calendar day has: a transition that moves the clock forward (Brazilian summer time always
@@ -50,8 +52,10 @@ export function* eachLocalDay({ from, until }: EachLocalDayParams): Generator<Da
 	const step = Math.sign(until - from) * DAY_IN_MS;
 	const length = Math.abs(until - from) / DAY_IN_MS;
 
+	const target = new Date(from);
+
 	for (let index = 0; index < length; index += 1) {
-		const target = new Date(from + index * step);
+		target.setTime(from + index * step);
 		const candidate = new Date(
 			target.getUTCFullYear(),
 			target.getUTCMonth(),

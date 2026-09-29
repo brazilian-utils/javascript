@@ -1,4 +1,4 @@
-import { type StateCode } from "../_internals/constants/states";
+import { type StateCode } from "./states";
 
 /** One range of CEPs assigned by the Correios to a state. */
 type CepRange = {
@@ -13,8 +13,9 @@ type CepRange = {
 /**
  * CEP ranges of each state ("Faixa de CEP" per UF), as answered by the Correios "Busca Faixa de
  * CEP" search when only the UF is given, in ascending order. Amazonas, Distrito Federal and Goiás
- * have two ranges each: Roraima sits inside the Amazonas block and the Goiás municipalities
- * around Brasília sit inside the Distrito Federal block. No range covers `00000-000` to
+ * have two ranges each: Roraima (`69300-000` to `69399-999`) sits between the two Amazonas
+ * ranges and a Goiás range (`72800-000` to `72999-999`) sits between the two Distrito Federal
+ * ones. No range covers `00000-000` to
  * `00999-999` nor `78900-000` to `78999-999`. A range is the block the state owns, not a promise
  * that every CEP in it is in use: `10000-000` to `10999-999` sits unused inside the São Paulo one.
  *

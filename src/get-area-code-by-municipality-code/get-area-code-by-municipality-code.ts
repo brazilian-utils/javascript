@@ -1,5 +1,6 @@
+import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
 import { readMunicipalityAreaCode } from "../_internals/read-municipality-area-code/read-municipality-area-code";
-import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipality-by-code";
+import { readMunicipalityStateCode } from "../_internals/read-municipality-state-code/read-municipality-state-code";
 
 /**
  * Looks up the DDD (area code, the Código Nacional of the Plano Geral de Numeração) in force for
@@ -31,9 +32,13 @@ import { getMunicipalityByCode } from "../get-municipality-by-code/get-municipal
  * `Codigos_Nacionais.csv` of 21/09/2026, the Código Nacional of every municipality in force.
  */
 export const getAreaCodeByMunicipalityCode = (code: string | number): number | null => {
-	const municipality = getMunicipalityByCode(code);
+	const digits = readLookupDigits(code);
 
-	if (municipality === null) return null;
+	if (digits === null) return null;
 
-	return readMunicipalityAreaCode(municipality.stateCode, municipality.code);
+	const stateCode = readMunicipalityStateCode(digits);
+
+	if (stateCode === null) return null;
+
+	return readMunicipalityAreaCode(stateCode, digits) ?? null;
 };

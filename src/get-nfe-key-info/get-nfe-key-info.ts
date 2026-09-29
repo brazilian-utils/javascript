@@ -34,10 +34,7 @@ export type NfeKeyInfo = {
 	year: number;
 	/** Issue month, 1 to 12. */
 	month: number;
-	/**
-	 * The 14 character CNPJ of the issuer, numeric or alphanumeric (upper case letters in its
-	 * first 12 characters), or its 11 digit CPF left padded with zeros to 14.
-	 */
+	/** The 14 character issuer CNPJ, or its CPF left padded with zeros to 14. */
 	taxId: string;
 	/** Document model: "55" NF-e, "57" CT-e, "58" MDF-e, "62" NFCom, "63" BP-e, "64" GTV-e, "65" NFC-e, "66" NF3e, "67" CT-e OS. */
 	model: NfeKeyModel;
@@ -47,10 +44,7 @@ export type NfeKeyInfo = {
 	number: number;
 	/** Emission type code (tpEmis), one of the codes the MOC of that model assigns. */
 	emissionType: number;
-	/**
-	 * Site of the authorizer that received the document (`nSiteAutoriz`), 0 to 9. Only NFCom
-	 * (`"62"`) and NF3e (`"66"`) spend a digit of the key on it.
-	 */
+	/** Site of the authorizer (`nSiteAutoriz`), 0 to 9, on NFCom and NF3e keys only. */
 	authorizationSite?: number;
 	/** The numeric code (cNF) drawn by the issuer: 7 digits for NFCom and NF3e, 8 for the rest. */
 	code: string;

@@ -19,6 +19,9 @@ export type FormatCnpjOptions = {
  * A number is only read when it is a non-negative safe integer; any other number (negative,
  * fractional, not finite or past `Number.MAX_SAFE_INTEGER`) gives an empty string.
  *
+ * Since July 2026 new CNPJs may be alphanumeric, so pass `version: 2` to keep their letters: the
+ * default `version: 1` keeps digits only.
+ *
  * @param {string|number} value - The CNPJ value to be formatted. It can be a string or a number.
  * @param {FormatCnpjOptions} [options] - Optional configuration for formatting the CNPJ.
  * @param {boolean} options.pad - If true, the value will be padded with leading zeros if necessary.

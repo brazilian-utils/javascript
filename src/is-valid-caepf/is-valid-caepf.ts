@@ -26,7 +26,7 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * references cited below.
  * Both check digits are the CNPJ's modulus 11 in the formulation of the cited reference: the
  * weights cycle from 9 down to 2 from the right and the check digit is the remainder itself,
- * with a remainder of 10 read as 0 — the same digit the CNPJ's 2-to-9 weights with
+ * with a remainder of 10 read as 0, the same digit the CNPJ's 2-to-9 weights with
  * `11 - remainder` produce. The pair is then shifted by 12, wrapping around 100, so a CAEPF
  * whose plain modulus 11 digits would be 72 is printed with 84.
  *
@@ -41,6 +41,7 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * example found, SERPRO's `"00000002500171"`.
  *
  * A number is only read as a CAEPF when it is a non-negative safe integer.
+ * A number loses its leading zeros, so a CAEPF that starts with `0` is only accepted as a string.
  *
  * @param {string|number} value - The CAEPF value to be validated.
  * @returns {boolean} True if the CAEPF is valid, false otherwise.

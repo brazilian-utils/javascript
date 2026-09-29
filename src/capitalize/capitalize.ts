@@ -24,6 +24,14 @@ export type CapitalizeOptions = {
 	upperCaseWords?: string[];
 };
 
+const foldToLowerCase = (word: string): string => word.toLowerCase();
+
+const foldToUpperCase = (word: string): string => word.toUpperCase();
+
+let defaultLowerCaseSet: Set<string> | undefined;
+
+let defaultUpperCaseSet: Set<string> | undefined;
+
 const toWordSet = (
 	words: unknown,
 	fallback: readonly string[],
@@ -32,6 +40,37 @@ const toWordSet = (
 	const source: readonly unknown[] = Array.isArray(words) ? words : fallback;
 
 	return new Set(source.filter((word) => typeof word === "string").map((word) => fold(word)));
+};
+
+const readLowerCaseSet = (words: unknown): Set<string> => {
+	// Stryker disable next-line ConditionalExpression: for a value that is not an array `toWordSet` falls back to the same default words, so skipping the cache only builds the same set again.
+	if (Array.isArray(words)) return toWordSet(words, PREPOSITIONS, foldToLowerCase);
+
+	defaultLowerCaseSet ??= toWordSet(words, PREPOSITIONS, foldToLowerCase);
+
+	return defaultLowerCaseSet;
+};
+
+/**
+ * The upper case word list in force: the words given, or the default list, which is assembled
+ * here on the first call and kept, not in a module-level constant, so a bundle that never calls
+ * `capitalize` does not keep the spread.
+ *
+ * @param {unknown} words - The `upperCaseWords` option as given.
+ * @returns {Set<string>} The words to keep in upper case, in upper case.
+ */
+const readUpperCaseSet = (words: unknown): Set<string> => {
+	// Stryker disable next-line ArrayDeclaration: `toWordSet` reads its fallback only when `words` is not an array, and here it is one.
+	if (Array.isArray(words)) return toWordSet(words, [], foldToUpperCase);
+
+	defaultUpperCaseSet ??= toWordSet(
+		words,
+		// Stryker disable next-line ArrayDeclaration: the default set is built once, by the first test that reaches it, whatever the order; an emptied list makes that test fail, but the tests that run later never reach the line.
+		[...COMPANY_DESIGNATIONS, ...DOCUMENT_ABBREVIATIONS, ...ROMAN_NUMERALS],
+		foldToUpperCase,
+	);
+
+	return defaultUpperCaseSet;
 };
 
 /**
@@ -59,9 +98,12 @@ const isApostrophe = (token: string): boolean => APOSTROPHE_REGEX.test(token);
  * @returns {number} The index of the next word.
  */
 const nextWordIndex = (tokens: string[], index: number): number => {
-	const offset = tokens.slice(index + 1).findIndex((token) => isWord(token));
+	// Stryker disable next-line EqualityOperator: the extra pass reads `tokens[tokens.length]`, which is `undefined`; `WORD_REGEX.test(undefined)` tests the string "undefined" and matches, so it returns `tokens.length`, the value the function returns when the loop ends.
+	for (let position = index + 1; position < tokens.length; position++) {
+		if (isWord(tokens[position])) return position;
+	}
 
-	return offset === -1 ? tokens.length : index + 1 + offset;
+	return tokens.length;
 };
 
 /**
@@ -136,7 +178,7 @@ const isUpperCasePosition = (
 	if (enclitic) return false;
 	if (ahead.designation === "") return true;
 
-	const designation = ahead.designation.toLocaleUpperCase("pt-BR");
+	const designation = ahead.designation.toUpperCase();
 
 	return (
 		ahead.joined && COMPANY_DESIGNATIONS.includes(designation) && upperCaseSet.has(designation)
@@ -166,6 +208,7 @@ const isStateCodePosition = (
 
 /**
  * A word with its first letter in upper case and the rest in lower case, letter by code point. A
+ * word is never empty (the empty tokens are skipped), and neither is its upper case. A
  * first letter whose upper case is more than one character (`ß` becomes `SS`, the `ﬁ` ligature
  * becomes `FI`) keeps its case: expanding it would drop or add letters, and a second pass over
  * the result would not give the result back. The rest is lower cased on its own, not sliced out
@@ -176,12 +219,11 @@ const isStateCodePosition = (
  * @returns {string} The word, capitalized.
  */
 const capitalizeWord = (word: string): string => {
-	// A word is never empty (the empty tokens are skipped), and neither is its upper case.
 	const [first, ...rest] = word;
-	const [upperFirst, ...expansion] = first.toLocaleUpperCase("pt-BR");
+	const [upperFirst, ...expansion] = first.toUpperCase();
 	const head = expansion.length > 0 ? first : upperFirst;
 
-	return head + rest.join("").toLocaleLowerCase("pt-BR");
+	return head + rest.join("").toLowerCase();
 };
 
 /**
@@ -242,17 +284,17 @@ const capitalizeWord = (word: string): string => {
  * replaces its default list entirely, so `capitalize("empresa ltda", { upperCaseWords: [] })`
  * gives `"Empresa Ltda"`. A `lowerCaseWords`/`upperCaseWords` that is not an array falls back to
  * its default, and a member of either list that is not a string is ignored, so a malformed
- * option never throws.
+ * option never throws. The default `lowerCaseWords` list is the set of prepositions and
+ * conjunctions the Manual de Redação da Presidência da República keeps in lower case inside a
+ * proper name, and the default `upperCaseWords` list is sourced in `constants.ts` from the laws
+ * that create each designation. The default lists are assembled on the first call and kept, not
+ * in a module-level constant, so a bundle that never calls `capitalize` does not keep the spread.
  *
  * @param {string} value - The input string to be capitalized.
  * @param {CapitalizeOptions} [options] - Optional configuration for capitalization.
  * @param {string[]} [options.lowerCaseWords] - Array of words to keep in lower case (default: the Portuguese prepositions).
  * @param {string[]} [options.upperCaseWords] - Array of words to keep in upper case (default: the Brazilian company designations, document abbreviations and roman numerals).
  * @returns {string} The capitalized string according to the specified rules.
- *
- * The default `lowerCaseWords` list is the set of prepositions and conjunctions the Manual de
- * Redação da Presidência da República keeps in lower case inside a proper name, and the default
- * `upperCaseWords` list is sourced in `constants.ts` from the laws that create each designation.
  *
  * @see Official: https://www4.planalto.gov.br/centrodeestudos/assuntos/manual-de-redacao-da-presidencia-da-republica/manual-de-redacao.pdf
  * Manual de Redação da Presidência da República, 3ª edição (Portaria nº 1.369/2018), item 5.1.8
@@ -272,6 +314,8 @@ const capitalizeWord = (word: string): string => {
  * capitalize("não-me-toque"); // "Não-Me-Toque"
  * capitalize("(empresa) ltda"); // "(Empresa) LTDA"
  * capitalize("luiz von schmidt"); // "Luiz von Schmidt"
+ * capitalize("casa para todos"); // "Casa para Todos"
+ * capitalize("empresa s.a"); // "Empresa S.A"
  * capitalize("casa de carnes s/a"); // "Casa de Carnes S/A"
  * capitalize("MOGI-GUAÇU"); // "Mogi-Guaçu"
  * capitalize("santana/rs"); // "Santana/RS"
@@ -287,17 +331,8 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 
 	const { lowerCaseWords, upperCaseWords } = options ?? {};
 
-	const lowerCaseSet = toWordSet(lowerCaseWords, PREPOSITIONS, (word) =>
-		word.toLocaleLowerCase("pt-BR"),
-	);
-
-	// The default list is assembled here, not in a module-level constant, so a bundle that never
-	// calls `capitalize` does not keep the spread.
-	const upperCaseSet = toWordSet(
-		upperCaseWords,
-		[...COMPANY_DESIGNATIONS, ...DOCUMENT_ABBREVIATIONS, ...ROMAN_NUMERALS],
-		(word) => word.toLocaleUpperCase("pt-BR"),
-	);
+	const lowerCaseSet = readLowerCaseSet(lowerCaseWords);
+	const upperCaseSet = readUpperCaseSet(upperCaseWords);
 
 	const tokens = value.trim().split(SEPARATOR_REGEX);
 
@@ -320,9 +355,9 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 			continue;
 		}
 
-		const lowerCaseWord = token.toLocaleLowerCase("pt-BR");
-		const upperCaseWord = token.toLocaleUpperCase("pt-BR");
-		const designation = (output.slice(-2).join("") + upperCaseWord).toLocaleUpperCase("pt-BR");
+		const lowerCaseWord = token.toLowerCase();
+		const upperCaseWord = token.toUpperCase();
+		const designation = (output.slice(-2).join("") + upperCaseWord).toUpperCase();
 		const ahead = lookAhead(tokens, index);
 
 		if (designation !== upperCaseWord && upperCaseSet.has(designation)) {

@@ -27,6 +27,8 @@ const { cities, loading: loadingCities, load: loadCities } = useCitiesOfState(st
     @focus="loadCities"
   >
     <option value="">{{ loadingCities ? "Loading the cities…" : "Pick a city" }}</option>
-    <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+    <option v-for="city in cities" :key="city.code" :value="city.code">
+      {{ city.name }}
+    </option>
   </select>
 </template>

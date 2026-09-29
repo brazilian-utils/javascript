@@ -1,35 +1,4 @@
-/** A packed table read by `readTable`: its code width and every code as a number, ascending. */
-type CodeTable = { width: number; values: number[] };
-
-const tables = new Map<string, CodeTable>();
-
-/**
- * Unpacks a table the first time it is looked up in, and hands back the same arrays after that.
- *
- * @param {string} codes - The packed table.
- * @returns {CodeTable} Its code width and codes.
- */
-const readTable = (codes: string): CodeTable => {
-	const cached = tables.get(codes);
-
-	// Stryker disable next-line ConditionalExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
-	if (cached !== undefined) return cached;
-
-	const separator = codes.indexOf(":");
-	const values: number[] = [];
-	let previous = 0;
-
-	for (const difference of codes.slice(separator + 1).split(",")) {
-		previous += Number.parseInt(difference, 36);
-		values.push(previous);
-	}
-
-	const table = { width: Number(codes.slice(0, separator)), values };
-	// Stryker disable next-line CallExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
-	tables.set(codes, table);
-
-	return table;
-};
+import { readCodeTable } from "../read-code-table/read-code-table";
 
 /**
  * Finds a code in a lookup table packed by the generator (`packCodes` in
@@ -53,7 +22,7 @@ const readTable = (codes: string): CodeTable => {
  * ```
  */
 export const findCodeIndex = (codes: string, code: string): number => {
-	const { width, values } = readTable(codes);
+	const { width, values } = readCodeTable(codes);
 
 	if (code.length !== width || !/^\d+$/.test(code)) return -1;
 
@@ -61,7 +30,6 @@ export const findCodeIndex = (codes: string, code: string): number => {
 	let low = 0;
 	let high = values.length;
 
-	// A bisection over the ascending codes: the first index whose code is not below `value`.
 	while (low < high) {
 		const middle = (low + high) >>> 1;
 

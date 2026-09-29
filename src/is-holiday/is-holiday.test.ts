@@ -27,6 +27,18 @@ describe("isHoliday", () => {
 		expect(isHoliday({ targetDate: new Date(2024, 4, 30) })).toBe(true);
 	});
 
+	it("should count the optional and religious entries", () => {
+		expect(isHoliday({ targetDate: new Date(2024, 1, 12) })).toBe(true);
+		expect(isHoliday({ targetDate: new Date(2024, 2, 31) })).toBe(true);
+	});
+
+	it("should return false outside the supported years 1900 to 2099", () => {
+		expect(isHoliday({ targetDate: new Date(2100, 0, 1) })).toBe(false);
+		expect(isHoliday({ targetDate: new Date(1899, 11, 25) })).toBe(false);
+		expect(isHoliday({ targetDate: new Date(2099, 11, 25) })).toBe(true);
+		expect(isHoliday({ targetDate: new Date(1900, 0, 1) })).toBe(true);
+	});
+
 	it("should return false for a non-holiday date", () => {
 		expect(isHoliday({ targetDate: new Date(2024, 5, 10) })).toBe(false);
 	});

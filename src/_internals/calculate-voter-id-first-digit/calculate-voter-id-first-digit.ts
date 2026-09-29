@@ -19,6 +19,9 @@ export type CalculateVoterIdFirstDigitParams = {
  * only "Módulo 11". They follow the community references the voter id functions cite as
  * `Based on:`.
  *
+ * The weighted sum is written out rather than delegated to the shared `generateChecksum`: its
+ * sanitizer chain costs `isValidVoterId` and `generateVoterId` around 285 B of bundle each.
+ *
  * @param {CalculateVoterIdFirstDigitParams} params - The calculation parameters.
  * @param {string} params.sequentialNumber - The 8 digit sequential number, leading zeros included.
  * @param {string} params.federativeUnion - The 2-digit federative union code.
@@ -33,8 +36,6 @@ export const calculateVoterIdFirstDigit = ({
 	sequentialNumber,
 	federativeUnion,
 }: CalculateVoterIdFirstDigitParams): number => {
-	// The weighted sum is written out rather than delegated to the shared `generateChecksum`: its
-	// sanitizer chain costs `isValidVoterId` and `generateVoterId` around 285 B of bundle each.
 	let sum = 0;
 
 	for (let i = 0; i < SEQUENTIAL_LENGTH; i++) {

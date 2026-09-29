@@ -1,7 +1,7 @@
 import { type Municipality } from "../_internals/constants/municipalities";
 import { STATE_CAPITALS } from "../_internals/constants/state-capitals";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 
@@ -10,8 +10,8 @@ export type { Municipality } from "../_internals/constants/municipalities";
  * `getMunicipalityByCode` returns for it. The match is case-insensitive and ignores leading and
  * trailing whitespace, like `getTimezoneByState`.
  *
- * For the Distrito Federal, which has no municipalities, the capital is Brasília, with the code
- * the IBGE gives the whole district.
+ * The Distrito Federal is not divided into municipalities, but the IBGE codes it as a single one,
+ * Brasília, and that is its capital.
  *
  * @param {string} stateCode - The two-letter state code (sigla).
  * @returns {Municipality|null} A fresh object with the capital's 7 digit IBGE code, its name and

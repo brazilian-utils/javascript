@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import type { StateCode } from "@brazilian-utils/brazilian-utils";
+import type { Municipality, StateCode } from "@brazilian-utils/brazilian-utils";
 
 /**
- * The cities of a state, fetched the first time that state's select is opened. The table is
- * 154 KB, so nothing is fetched until someone means to pick a city, and the browser keeps the
+ * The municipalities of a state, fetched the first time that state's select is opened. The table is
+ * 76 KB, so nothing is fetched until someone means to pick a city, and the browser keeps the
  * module once it has it. `import()` takes no signal, so the module is not stopped, only what is
  * done with it: a table that arrives for a state that is no longer picked, or after the component
- * is gone, is dropped.
+ * is gone, is dropped. The abort also forgets which state was asked for, so picking a state again
+ * after leaving it while its table was on its way asks again instead of waiting for an answer that
+ * was dropped.
  */
 export function useCitiesOfState(state: string) {
-  const [loaded, setLoaded] = useState({ state: "", cities: [] as string[] });
+  const [loaded, setLoaded] = useState({ state: "", cities: [] as Municipality[] });
   const [asked, setAsked] = useState("");
   const pending = useRef<AbortController | null>(null);
 
@@ -19,7 +21,13 @@ export function useCitiesOfState(state: string) {
   const loading = state !== "" && asked === state && cities.length === 0;
 
   // What is on its way is dropped when another state is picked and when the component goes.
-  useEffect(() => () => pending.current?.abort(), [state]);
+  useEffect(
+    () => () => {
+      pending.current?.abort();
+      setAsked("");
+    },
+    [state],
+  );
 
   const load = async () => {
     if (!state || loading || cities.length > 0) return;
@@ -29,11 +37,13 @@ export function useCitiesOfState(state: string) {
     pending.current = controller;
     setAsked(state);
 
-    const { getCities } = await import("@brazilian-utils/brazilian-utils/get-cities");
+    const { getMunicipalities } = await import(
+      "@brazilian-utils/brazilian-utils/get-municipalities"
+    );
 
     if (controller.signal.aborted) return;
 
-    setLoaded({ state, cities: getCities(state as StateCode) });
+    setLoaded({ state, cities: getMunicipalities(state as StateCode) });
   };
 
   return { cities, loading, load };

@@ -1,7 +1,25 @@
-import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
+import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
+import { type StateCode } from "../_internals/constants/states";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
+import { readCached } from "../_internals/read-cached/read-cached";
+import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
+
+let codesByName: Map<StateCode, Map<string, string>> | undefined;
+
+const buildCodesByName = (stateCode: StateCode): Map<string, string> => {
+	const index = new Map<string, string>();
+	const municipalities = readMunicipalities(stateCode);
+
+	for (let position = municipalities.length - 1; position >= 0; position--) {
+		const [name, code] = municipalities[position];
+
+		index.set(normalizeMunicipalityName(name), code);
+	}
+
+	return index;
+};
 
 /** The `getCodeByMunicipalityName` query: a municipality name and the code of its state. */
 export type GetCodeByMunicipalityNameParams = {
@@ -20,7 +38,8 @@ export type GetCodeByMunicipalityNameParams = {
  * name written without a space the dataset carries does not match. The casing is folded to upper
  * case, the direction Unicode expands `"ß"` to `"SS"` in. `stateCode` ignores casing
  * and surrounding whitespace, as every util that takes a state does. The same name in another state
- * is another municipality, so the state code is required.
+ * is another municipality, so the state code is required. Missing or malformed `params`, and a
+ * name that is not a string or is empty, give `null`.
  *
  * It is the synchronous, offline counterpart of `get_code_by_municipality_name` of the Python
  * library, which asks the IBGE API over the network.
@@ -46,18 +65,15 @@ export type GetCodeByMunicipalityNameParams = {
 export const getCodeByMunicipalityName = (
 	params: GetCodeByMunicipalityNameParams,
 ): string | null => {
-	// `normalizeStateCode` folds anything that is not a string to `""`, which is no state, so a
-	// missing or malformed `params` needs no check of its own.
 	const normalizedStateCode = normalizeStateCode(params?.stateCode);
 
-	if (!hasOwnKey(CITIES_DATA, normalizedStateCode)) return null;
+	if (!hasOwnKey(MUNICIPALITY_NAMES, normalizedStateCode)) return null;
 
-	// `normalizeMunicipalityName` folds a value that is not a string, or an empty one, down to
-	// `""`, which no municipality name normalizes to, so it needs no check of its own here.
 	const normalizedName = normalizeMunicipalityName(params.municipalityName);
-	const match = CITIES_DATA[normalizedStateCode].find(
-		([name]) => normalizeMunicipalityName(name) === normalizedName,
-	);
 
-	return match ? match[1] : null;
+	codesByName ??= new Map();
+
+	const index = readCached(codesByName, normalizedStateCode, buildCodesByName);
+
+	return index.get(normalizedName) ?? null;
 };

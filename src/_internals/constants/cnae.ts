@@ -1356,6 +1356,6 @@ m7,\
 
 /**
  * Shape a CNAE subclass code has to be written in: the 7 digits, optionally split into the
- * printed `NNNN-N/NN` groups by a single whitespace or mask character.
+ * printed `NNNN-N/NN` groups by any run of whitespace or mask characters.
  */
 export const CNAE_FORMAT_REGEX = /^\d{4}[\s.\-/]*\d[\s.\-/]*\d{2}$/;

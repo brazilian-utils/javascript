@@ -1064,7 +1064,7 @@ go,\
 
 /**
  * Shape a CEST has to be written in: the 7 digits, optionally split into segment, item and
- * specification by a single whitespace or mask character, the way the annexes print them
+ * specification by any run of whitespace or mask characters, the way the annexes print them
  * ("01.001.00").
  */
 export const CEST_FORMAT_REGEX = /^\d{2}[\s.\-/]*\d{3}[\s.\-/]*\d{2}$/;

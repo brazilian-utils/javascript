@@ -4,8 +4,8 @@ import { cnpjs, cpfs, phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
-import { type PixKeyType, getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
-import { type IsValidPixKeyOptions, isValidPixKey } from "./is-valid-pix-key";
+import { getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
+import { type IsValidPixKeyOptions, type PixKeyType, isValidPixKey } from "./is-valid-pix-key";
 
 describe("isValidPixKey", () => {
 	describe("should return false", () => {
@@ -41,6 +41,15 @@ describe("isValidPixKey", () => {
 		test("when the phone is a landline, since the manual registers a mobile number", () => {
 			expect(isValidPixKey("(11) 3000-0000")).toBe(false);
 			expect(isValidPixKey("1130000000")).toBe(false);
+		});
+
+		test("when the phone repeats the country code", () => {
+			expect(isValidPixKey("+555511987654321")).toBe(false);
+			expect(isValidPixKey("+55+5511987654321")).toBe(false);
+			expect(isValidPixKey("+55+55 11 98765-4321")).toBe(false);
+			expect(isValidPixKey("00555511987654321")).toBe(false);
+			expect(isValidPixKey("0055+5511987654321")).toBe(false);
+			expect(isValidPixKey("+550055 11 98765-4321")).toBe(false);
 		});
 
 		test("when it is not a key of any accepted kind", () => {

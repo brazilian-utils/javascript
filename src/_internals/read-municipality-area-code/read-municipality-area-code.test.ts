@@ -1,4 +1,4 @@
-import { DATA as CITIES_DATA } from "../constants/municipalities";
+import { MUNICIPALITIES as CITIES_DATA } from "../test/municipalities";
 import { describe, expect, test } from "../test/runtime";
 import { readMunicipalityAreaCode } from "./read-municipality-area-code";
 
@@ -19,5 +19,11 @@ describe("readMunicipalityAreaCode", () => {
 	test("should give the same answer on a second lookup of the state", () => {
 		expect(readMunicipalityAreaCode("AC", "1200401")).toBe(68);
 		expect(readMunicipalityAreaCode("AC", "1200401")).toBe(68);
+	});
+
+	test("should find nothing for a key that only exists on Object.prototype", () => {
+		expect(readMunicipalityAreaCode("SP", "constructor")).toBeUndefined();
+		expect(readMunicipalityAreaCode("SP", "__proto__")).toBeUndefined();
+		expect(readMunicipalityAreaCode("SP", "toString")).toBeUndefined();
 	});
 });

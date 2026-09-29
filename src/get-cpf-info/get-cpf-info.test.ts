@@ -86,6 +86,19 @@ describe("getCpfInfo", () => {
 
 			expect(getCpfInfo("12345678909")?.states).toEqual(["PR", "SC"]);
 		});
+
+		test("without the changes made to the states of an earlier result, whichever way it was changed", () => {
+			const first = getCpfInfo("12345678909");
+			const second = getCpfInfo("12345678909");
+
+			expect(first?.states).not.toBe(second?.states);
+
+			first?.states.splice(0, 2, "AC");
+			second?.states.reverse();
+
+			expect(getCpfInfo("12345678909")?.states).toEqual(["PR", "SC"]);
+			expect(getCpfInfo("40152673113")?.states).toEqual(["DF", "GO", "MT", "MS", "TO"]);
+		});
 	});
 
 	describe("should return null", () => {

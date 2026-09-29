@@ -27,6 +27,17 @@ describe("parsePhone", () => {
 		expect(parsePhone("551130000000")).toBe("1130000000");
 	});
 
+	it("should remove an explicit country code from a number still being typed", () => {
+		expect(parsePhone("+55")).toBe("");
+		expect(parsePhone("+55 11 9")).toBe("119");
+		expect(parsePhone("0055 (11) 98888")).toBe("1198888");
+		expect(parsePhone("+55 55 9")).toBe("559");
+	});
+
+	it("should keep a bare 55 that is still short", () => {
+		expect(parsePhone("55 11 9")).toBe("55119");
+	});
+
 	it("should keep a leading 55 that is an area code", () => {
 		expect(parsePhone("55988887777")).toBe("55988887777");
 		expect(parsePhone("(55) 3000-0000")).toBe("5530000000");

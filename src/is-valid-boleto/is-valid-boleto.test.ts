@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { BOLETO_LENGTH } from "../_internals/constants/boleto";
-import { boletos } from "../_internals/test/arbitraries";
+import { boletos, toBoletoBarcode } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidBoleto } from "./is-valid-boleto";
 
@@ -40,6 +40,27 @@ describe("isValidBoleto", () => {
 			expect(isValidBoleto(true)).toBe(false);
 			// @ts-expect-error: intentionally invalid input
 			expect(isValidBoleto(false)).toBe(false);
+		});
+
+		test("when letters or other stray characters surround or split an otherwise valid value", () => {
+			expect(isValidBoleto("00190000090114971860168524522114675860000102656")).toBe(true);
+			expect(isValidBoleto("abc00190000090114971860168524522114675860000102656zzz")).toBe(false);
+			expect(isValidBoleto("00190000090114971860168524522114675860000102656x")).toBe(false);
+			expect(isValidBoleto("00190.00009 01149.718601 68524.522114 6 7586000010265,6")).toBe(false);
+			expect(isValidBoleto("(00190000090114971860168524522114675860000102656)")).toBe(false);
+			expect(isValidBoleto("846100000005246100291102005460339004695895061080\n!")).toBe(false);
+			expect(isValidBoleto("8461000000a05246100291102005460339004695895061080")).toBe(false);
+		});
+
+		test("when a mask character leads or trails the digits, or is the whole value", () => {
+			expect(isValidBoleto(".00190000090114971860168524522114675860000102656")).toBe(false);
+			expect(isValidBoleto("00190000090114971860168524522114675860000102656-")).toBe(false);
+			expect(isValidBoleto(" . - / ")).toBe(false);
+		});
+
+		test("when it is an array holding a valid value, not read as its string", () => {
+			// @ts-expect-error: intentionally invalid input
+			expect(isValidBoleto(["00190000090114971860168524522114675860000102656"])).toBe(false);
 		});
 
 		test("when check digit mod10 is invalid", () => {
@@ -89,6 +110,70 @@ describe("isValidBoleto", () => {
 
 		test("when is a boleto valid with mask", () => {
 			expect(isValidBoleto("0019000009 01149.718601 68524.522114 6 75860000102656")).toBe(true);
+		});
+
+		test("when the mask uses any of the mask characters, a run of them or surrounding whitespace", () => {
+			expect(
+				isValidBoleto("  00190.00009 - 01149.718601 / 68524.522114 . 6 - 75860000102656\n"),
+			).toBe(true);
+			expect(isValidBoleto("00190/00009/01149/718601/68524/522114/6/75860000102656")).toBe(true);
+		});
+	});
+
+	describe("cobrança bancária barcode (44 digits: bank code, moeda 9, check digit in position 5, factor, amount, free field)", () => {
+		const BARCODE = "00196758600001026560000001149718606852452211";
+
+		describe("should return true", () => {
+			test("when it is the barcode of the boleto valid without mask", () => {
+				expect(isValidBoleto(BARCODE)).toBe(true);
+			});
+
+			test("when it has other check digits, from the same fields", () => {
+				expect(isValidBoleto("00192100000001026560000001149718606852452211")).toBe(true);
+				expect(isValidBoleto("00191000000001026560000001149718606852452211")).toBe(true);
+				expect(isValidBoleto("00196758600000000000000001149718606852452211")).toBe(true);
+			});
+
+			test("when it has a mask", () => {
+				expect(isValidBoleto("0019.6 75860000102656 0000001149718606852452211")).toBe(true);
+			});
+
+			test("when it is a Situação 2 barcode (bank 988, moeda 0, factor 0000, ISPB 18236120)", () => {
+				expect(isValidBoleto("98801000000182361200000001149718606852452211")).toBe(true);
+			});
+		});
+
+		describe("should return false", () => {
+			test("when the check digit is wrong", () => {
+				expect(isValidBoleto("00191758600001026560000001149718606852452211")).toBe(false);
+				expect(isValidBoleto("00190758600001026560000001149718606852452211")).toBe(false);
+			});
+
+			test("when a field changed and the check digit did not", () => {
+				expect(isValidBoleto("00196758600001026570000001149718606852452211")).toBe(false);
+				expect(isValidBoleto("00196758600001026560000001149718606852452212")).toBe(false);
+			});
+
+			test("when the código de moeda is not 9 (moeda 7 with its own check digit)", () => {
+				expect(isValidBoleto("00172758600001026560000001149718606852452211")).toBe(false);
+			});
+
+			test("when the Situação 2 layout is broken (the factor is not zeros)", () => {
+				expect(isValidBoleto("98801000100182361200000001149718606852452211")).toBe(false);
+			});
+
+			test("when the length is 43 or 45", () => {
+				expect(isValidBoleto(BARCODE.slice(0, 43))).toBe(false);
+				expect(isValidBoleto(`${BARCODE}0`)).toBe(false);
+			});
+
+			test("when it starts with 8, since a 44 digit value starting with 8 is an arrecadação barcode only (bank 804 with a valid check digit)", () => {
+				expect(isValidBoleto("80491758600001026560000001149718606852452211")).toBe(false);
+			});
+
+			test("when it is a 44 digit value starting with 8 that fits neither layout", () => {
+				expect(isValidBoleto("84610000000246100291100054603390069589506109")).toBe(false);
+			});
 		});
 	});
 
@@ -158,6 +243,18 @@ describe("isValidBoleto", () => {
 			fc.assert(
 				fc.property(fc.gen(), fc.constantFrom(...types), (g, type) => {
 					expect(isValidBoleto(g(boletos, type))).toBe(true);
+				}),
+			);
+		});
+
+		test("should accept the barcode of every generated cobrança bancária slip", () => {
+			fc.assert(
+				fc.property(fc.gen(), (g) => {
+					const line = g(boletos);
+
+					fc.pre(!line.startsWith("8"));
+
+					expect(isValidBoleto(toBoletoBarcode(line))).toBe(true);
 				}),
 			);
 		});

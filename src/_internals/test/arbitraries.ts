@@ -3,7 +3,6 @@ import * as fc from "fast-check";
 import { type GeneratePhoneType } from "../../generate-phone/generate-phone";
 import { type LicensePlateFormat } from "../../get-format-license-plate/get-format-license-plate";
 import { type BusinessDayOptions, isBusinessDay } from "../../is-business-day/is-business-day";
-import { UF_TO_VOTER_ID_CODE } from "../../is-valid-voter-id/constants";
 import { assembleBoletoArrecadacao } from "../assemble-boleto-arrecadacao/assemble-boleto-arrecadacao";
 import { assembleBoletoBancario } from "../assemble-boleto-bancario/assemble-boleto-bancario";
 import { calculateCnhFirstVerifier } from "../calculate-cnh-first-verifier/calculate-cnh-first-verifier";
@@ -28,6 +27,7 @@ import {
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 } from "../constants/service-phone";
 import { DATA as STATES, type StateCode } from "../constants/states";
+import { UF_TO_VOTER_ID_CODE } from "../constants/voter-id";
 
 /**
  * Spreads `separators` around every character of `value`: one before the first character, one
@@ -198,12 +198,13 @@ export const PROTOTYPE_KEYS: string[] = Object.getOwnPropertyNames(Object.protot
 /** A date, or anything at all: what a business day util may be handed as its date argument. */
 export const anyBusinessDayDate: fc.Arbitrary<unknown> = fc.oneof(businessDayDates, fc.anything());
 
-/** A number of business days, or anything at all: what a business day util may be asked to walk. */
+/**
+ * A number of business days, or anything at all: what a business day util may be asked to walk.
+ * A huge integer (1e308 passes `Number.isInteger`) walks the whole supported year range before
+ * returning null, so integers beyond 1000 in magnitude are clamped to keep each run bounded.
+ */
 export const anyBusinessDayAmount: fc.Arbitrary<unknown> = fc.oneof(
 	fc.integer({ min: -200, max: 200 }),
-	// A huge integer (1e308 passes Number.isInteger) is valid input that walks the whole supported
-	// year range before returning null, tens of milliseconds each; a hundred of them under Stryker's
-	// instrumented dry run exceed the test timeout, so they are clamped and the walk stays bounded.
 	fc
 		.anything()
 		.map((value) =>
@@ -348,6 +349,19 @@ export const processosJuridicos = (): fc.Arbitrary<string> => {
 		});
 };
 
+/**
+ * The 44 digit barcode of a cobrança bancária linha digitável: the fields in barcode order,
+ * without the three field check digits.
+ * @param {string} line - A valid 47 digit linha digitável.
+ * @returns {string} The barcode of the same slip.
+ */
+export const toBoletoBarcode = (line: string): string =>
+	line.slice(0, 4) +
+	line.slice(32, 47) +
+	line.slice(4, 9) +
+	line.slice(10, 20) +
+	line.slice(21, 31);
+
 /** Arbitraries of valid boletos, built the same way as the documents. */
 
 /**
@@ -366,7 +380,6 @@ export const boletos = (type?: "bancario" | "arrecadacao"): fc.Arbitrary<string>
 				.map((parts) => assembleBoletoArrecadacao(parts))
 		: fc
 				.record({
-					// Bank code, the código de moeda 9 (real) and the start of the free field.
 					field1: fc.tuple(digits(3), digits(5)).map(([bank, free]) => `${bank}9${free}`),
 					field2: digits(10),
 					field3: digits(10),

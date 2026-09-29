@@ -3,6 +3,7 @@ import { CBO_DESCRIPTIONS } from "../_internals/constants/cbo-descriptions";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { CBO_LENGTH } from "../is-valid-cbo/constants";
 import { isValidCbo } from "../is-valid-cbo/is-valid-cbo";
 
@@ -20,12 +21,12 @@ export type Cbo = {
  * Looks a CBO (Classificação Brasileira de Ocupações) code up in the official CBO 2002
  * table.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 6
- * digits, or the `NNNN-NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
- * surrounding whitespace. Anything else (`"2124abc05"`) is rejected instead of having its
- * digits picked out. A number is only read as a code when it is a non-negative safe integer,
- * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
- * caller never wrote.
+ * A string is only read as a code when it is written in one of the documented forms: the 6 digits,
+ * or the `NNNN-NN` mask, with any run of separators (whitespace, `.`, `-` or `/`) between the
+ * groups and optional surrounding whitespace. Anything else (`"2124abc05"`) is rejected instead of
+ * having its digits picked out. A number is only read as a code when it is a non-negative safe
+ * integer, since a sign, a decimal point or a rounded magnitude would otherwise be read as a code
+ * the caller never wrote.
  *
  * A CBO code is always 6 digits and its leading zeros are part of it, so a value written as
  * bare digits is left padded with zeros to 6 whether it comes as a string or as a number:
@@ -49,18 +50,12 @@ export type Cbo = {
  *
  * @see Official: https://cbo.mte.gov.br/cbosite/pages/downloads.jsf
  * "Estrutura CBO (CSV)", the CBO 2002 tables the Ministério do Trabalho e Emprego publishes (files
- * of 10/07/2026, 2,725 occupations). Up to 2.4.0 the table came from the older gov.br release
- * (06/06/2025), which lacked 37 occupations, among them 782325 (Motorista de transporte por
- * aplicativos), and still listed 6 the MTE has since dropped (225142, 322105, 322115, 322120,
- * 322125 and 782820), which are no longer valid.
- * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
- * Community mirror of the same table, the fallback `CBO_DESCRIPTIONS` was built from before the
- * official CSV was used.
+ * of 10/07/2026, 2,725 occupations).
  */
 export const getCbo = (value: string | number): Cbo | null => {
 	if (!isValidCbo(value)) return null;
 
 	const code = sanitizeToDigits(padLookupCode(value, CBO_LENGTH));
 
-	return { code, description: CBO_DESCRIPTIONS[findCodeIndex(CBO_CODES, code)] };
+	return { code, description: unpackTexts(CBO_DESCRIPTIONS)[findCodeIndex(CBO_CODES, code)] };
 };

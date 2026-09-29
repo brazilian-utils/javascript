@@ -5,7 +5,14 @@
  * also where the councils that publish no number format at all are named.
  */
 
+/** The professional councils `isValidRegistroProfissional` knows the number format of. */
 export type RegistroProfissionalCouncil = "OAB" | "CRM" | "CRO" | "CRP" | "CRC";
+
+/**
+ * The characters a registration number is written with: ASCII letters and digits and the mask
+ * characters whitespace, `.`, `-` and `/`. Any other character makes the value invalid.
+ */
+export const REGISTRATION_CHARACTERS_REGEX = /^[0-9A-Za-z\s.\-/]+$/;
 
 /**
  * Registration number followed by the UF of the seccional (OAB) or of the regional (CRM), the

@@ -40,16 +40,7 @@ export type CertidaoType =
 export type CertidaoInfo = {
 	/** The 6 digit CNS (Código Nacional de Serventia) of the serventia that issued the act. */
 	registryCns: string;
-	/**
-	 * Acervo the book belongs to: `"01"` the serventia's own acervo; `"02"` and up, one per
-	 * incorporated acervo. Art. 473, §§ 3º to 5º splits the incorporated ones by the date the
-	 * origin serventia was extinguished or deactivated: up to 31 December 2009 the matrícula
-	 * carries the CNS of the incorporating unit and an acervo code from `"02"` up, one per
-	 * incorporation in their numeric order; from 1 January 2010 on it carries the CNS of the
-	 * incorporated unit itself and the acervo code `"01"`, counted as that unit's own acervo. When
-	 * one acervo is split between two or more successor serventias, each of them uses its own CNS
-	 * with the acervo code `"02"`.
-	 */
+	/** Acervo the book belongs to, `"01"` for the serventia's own and `"02"` and up for incorporated ones. */
 	acervo: string;
 	/** Service rendered by the serventia, always "55", the registro civil das pessoas naturais. */
 	service: string;
@@ -80,6 +71,15 @@ export type CertidaoInfo = {
  *
  * Only a string is accepted: the 32 digits of a matrícula are more than a JavaScript number can
  * hold, so a numeric argument always gives `null` instead of being read as a rounded value.
+ *
+ * The `acervo` is `"01"` for the serventia's own acervo and `"02"` and up for the incorporated
+ * ones, one per incorporated acervo. Art. 473, §§ 3º to 5º splits the incorporated ones by the
+ * date the origin serventia was extinguished or deactivated: up to 31 December 2009 the
+ * matrícula carries the CNS of the incorporating unit and an acervo code from `"02"` up, one
+ * per incorporation in their numeric order; from 1 January 2010 on it carries the CNS of the
+ * incorporated unit itself and the acervo code `"01"`, counted as that unit's own acervo. When
+ * one acervo is split between two or more successor serventias, each of them uses its own CNS
+ * with the acervo code `"02"`.
  *
  * @param {string} value - The matrícula value to be parsed.
  * @returns {CertidaoInfo | null} The parsed matrícula, or `null` when it is not valid.

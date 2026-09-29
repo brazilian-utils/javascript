@@ -1,7 +1,7 @@
+import { CLASS_TRIB_TABLE } from "../_internals/constants/class-trib";
 import {
 	CLASS_TRIB_FORMAT_REGEX,
 	CLASS_TRIB_LENGTH,
-	CLASS_TRIB_TABLE,
 	CST_IBS_CBS_LENGTH,
 } from "../_internals/constants/ibs-cbs";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
@@ -67,13 +67,13 @@ export type ClassTrib = {
  * "Documentos" > "Diversos" of the Portal Nacional da NF-e, which publishes every version of the
  * "Tabela de Classificação Tributária do IBS e CBS" workbook (sheets CST and cClassTrib).
  * @see Official: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=
- * Informe Técnico 2025.002 (v.1.60 of 22/06/2026), which divulges both tables, defines their
+ * Informe Técnico 2025.002 (v.1.60 of 23/06/2026), which divulges both tables, defines their
  * columns and states that the first three digits of a cClassTrib are its CST-IBS/CBS.
  * @see Official: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=
  * Nota Técnica 2025.002-RTC (v.1.51), fields UB13 `CST` (N, 3 digits) and UB14 `cClassTrib` (N,
  * 6 digits) and the rejections 1020 (unknown CST), 1023 (unknown cClassTrib) and 1024
  * (cClassTrib incompatible with the CST).
- * @see Official: https://dfe-portal.svrs.rs.gov.br/DFE/TabelaClassificacaoTributaria
+ * @see Official: https://dfe-portal.svrs.rs.gov.br/DFE/ClassificacaoTributaria
  * The same tables online, on the Portal dos Documentos Fiscais Eletrônicos (SVRS).
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm
  * Lei Complementar nº 214/2025, which institutes the IBS and the CBS.

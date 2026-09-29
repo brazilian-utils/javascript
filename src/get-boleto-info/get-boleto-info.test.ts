@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { boletos } from "../_internals/test/arbitraries";
+import { boletos, toBoletoBarcode } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { isValidBoleto } from "../is-valid-boleto/is-valid-boleto";
 import { type BoletoInfo, type GetBoletoInfoOptions, getBoletoInfo } from "./get-boleto-info";
@@ -40,6 +40,10 @@ describe("getBoletoInfo", () => {
 			expect(getBoletoInfo("00190000090114971860168524522114775860000102656")).toBeNull();
 		});
 
+		test("when a 44 digit value starting with 8 is not an arrecadação barcode (bank 804 cobrança bancária)", () => {
+			expect(getBoletoInfo("80491758600001026560000001149718606852452211")).toBeNull();
+		});
+
 		test("when boleto is not a string, never undefined, as every other getter answers", () => {
 			// @ts-expect-error: intentionally invalid input
 			expect(getBoletoInfo(null)).toBeNull();
@@ -67,6 +71,41 @@ describe("getBoletoInfo", () => {
 
 		test("when it is a FEBRABAN Convenção da Cobrança Situação 2 slip (bank 988, moeda 0, factor 0000, ISPB 18236120 in positions 10 to 19 of the barcode), reading the ISPB instead of an amount", () => {
 			expect(getBoletoInfo("98800000060114971860168524522114100000018236120")).toStrictEqual({
+				amount: 0,
+				expirationDate: null,
+				bankCode: "988",
+				ispb: "18236120",
+			});
+		});
+
+		test("when it is a cobrança bancária barcode, reading the same fields as the linha digitável", () => {
+			const barcode = "00196758600001026560000001149718606852452211";
+
+			expect(getBoletoInfo(barcode, { referenceDate: REFERENCE_DATE })).toStrictEqual(
+				CANONICAL_INFO,
+			);
+			expect(
+				getBoletoInfo("0019.67586 00001026560000001149718606852452211", {
+					referenceDate: REFERENCE_DATE,
+				}),
+			).toStrictEqual(CANONICAL_INFO);
+		});
+
+		test("when it is a cobrança bancária barcode with no factor or with an all zero amount", () => {
+			expect(getBoletoInfo("00191000000001026560000001149718606852452211")).toStrictEqual({
+				amount: 102_656,
+				expirationDate: null,
+				bankCode: "001",
+			});
+			expect(
+				getBoletoInfo("00196758600000000000000001149718606852452211", {
+					referenceDate: REFERENCE_DATE,
+				}),
+			).toStrictEqual({ ...CANONICAL_INFO, amount: 0 });
+		});
+
+		test("when it is a Situação 2 barcode, reading the ISPB from positions 12 to 19", () => {
+			expect(getBoletoInfo("98801000000182361200000001149718606852452211")).toStrictEqual({
 				amount: 0,
 				expirationDate: null,
 				bankCode: "988",
@@ -180,6 +219,37 @@ describe("getBoletoInfo", () => {
 
 			expect(getBoletoInfo(withFactor["0000"])?.expirationDate).toBeNull();
 		});
+
+		test("should use now when the reference date is not a valid Date, instead of the 1997 base or a throw", () => {
+			const now = new Date();
+			const expected = getBoletoInfo(withFactor["7586"], { referenceDate: now })?.expirationDate;
+			const invalidDates = [
+				new Date(Number.NaN),
+				"2025-01-01",
+				20_250_101,
+				null,
+				{},
+				{ getTime: () => 0 },
+			];
+
+			for (const invalid of invalidDates) {
+				// @ts-expect-error: intentionally invalid input
+				const info = getBoletoInfo(withFactor["7586"], { referenceDate: invalid });
+
+				expect(info?.expirationDate).toStrictEqual(expected);
+			}
+
+			expect(expected).not.toStrictEqual(new Date(2000, 6, 3));
+		});
+
+		test("should read a factor due more than about 8 years before the reference date as the next cycle", () => {
+			expect(
+				getBoletoInfo(withFactor["5000"], { referenceDate: new Date(2026, 8, 29) })?.expirationDate,
+			).toStrictEqual(new Date(2036, 1, 5));
+			expect(
+				getBoletoInfo(withFactor["5000"], { referenceDate: new Date(2015, 0, 1) })?.expirationDate,
+			).toStrictEqual(new Date(2011, 5, 16));
+		});
 	});
 
 	describe("arrecadação (FEBRABAN Layout Padrão de Arrecadação §11 Formulário Padrão fixture: R$ 24,61, segment 4)", () => {
@@ -213,6 +283,12 @@ describe("getBoletoInfo", () => {
 	});
 
 	describe("properties", () => {
+		const supportedReferenceDates = fc.date({
+			min: new Date(1900, 0, 1),
+			max: new Date(2199, 11, 31),
+			noInvalidDate: true,
+		});
+
 		test("should read the bank code and the amount of a generated bank slip", () => {
 			fc.assert(
 				fc.property(fc.gen(), fc.date({ noInvalidDate: true }), (g, referenceDate) => {
@@ -222,6 +298,20 @@ describe("getBoletoInfo", () => {
 					expect(info?.bankCode).toBe(value.slice(0, 3));
 					expect(info?.amount).toBe(Number(value.slice(37, 47)));
 					expect(info?.type).toBeUndefined();
+				}),
+			);
+		});
+
+		test("should read the same fields from the barcode of a generated bank slip as from its linha digitável", () => {
+			fc.assert(
+				fc.property(fc.gen(), supportedReferenceDates, (g, referenceDate) => {
+					const line = g(boletos);
+
+					fc.pre(!line.startsWith("8"));
+
+					expect(getBoletoInfo(toBoletoBarcode(line), { referenceDate })).toStrictEqual(
+						getBoletoInfo(line, { referenceDate }),
+					);
 				}),
 			);
 		});

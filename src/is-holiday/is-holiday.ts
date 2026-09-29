@@ -1,7 +1,9 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
-import { getHolidays } from "../get-holidays/get-holidays";
+import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
+import { readMemoizedHolidays } from "../_internals/read-memoized-holidays/read-memoized-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -48,12 +50,18 @@ export type IsHolidayOptions = IsHolidayParams;
  * 1998 on (15 November in 2020), so `isHoliday` is true on that Sunday; the second round is not.
  * So are the weekday general elections of 1955, 1958, 1990 and 1994, under Lei 1.266/1950.
  *
+ * Every entry of `getHolidays` counts, the `"optional"` and `"religious"` ones included (Carnaval
+ * Monday and Tuesday, Corpus Christi, Páscoa); there is no `includeOptional` here, unlike
+ * `isBusinessDay`. A year outside 1900 to 2099 has no holidays, so `isHoliday` returns `false`
+ * for it. The underlying national holidays are the ones `getHolidays` computes; see its JSDoc
+ * (and `src/get-holidays/constants.ts` for state holidays) for the full set of laws behind them.
+ *
  * @param {IsHolidayParams} [options] - Options for the check.
  * @param {Date} options.targetDate - The date to check.
  * @param {StateCode} [options.stateCode] - Optional Brazilian state code to also consider state holidays.
  * @returns {boolean} True when the date is a holiday, false otherwise. Bad input also returns
  * false: missing `options`, a `targetDate` that is not a valid `Date`, or a `stateCode` that is
- * present and is not a state code.
+ * present and is not a state code, and so does a year outside 1900 to 2099.
  *
  * @example
  * ```typescript
@@ -61,9 +69,6 @@ export type IsHolidayOptions = IsHolidayParams;
  * isHoliday({ targetDate: new Date(2024, 5, 10) }); // false
  * isHoliday(); // false
  * ```
- *
- * The underlying national holidays are the ones `getHolidays` computes; see its JSDoc (and
- * `src/get-holidays/constants.ts` for state holidays) for the full set of laws behind them.
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l0662.htm
  * Lei 662/1949, the base national holidays law.
@@ -99,9 +104,17 @@ export const isHoliday = (options?: IsHolidayParams): boolean => {
 	if (!isValidDate(targetDate)) return false;
 
 	const year = targetDate.getFullYear();
-	return getHolidays({ year, stateCode }).some(
-		(holiday) =>
-			holiday.date.getMonth() === targetDate.getMonth() &&
-			holiday.date.getDate() === targetDate.getDate(),
+
+	if (!isSupportedHolidayYear(year)) return false;
+
+	const normalizedStateCode = readHolidayStateCode(stateCode);
+
+	if (normalizedStateCode === null) return false;
+
+	const month = targetDate.getMonth();
+	const date = targetDate.getDate();
+
+	return readMemoizedHolidays(year, normalizedStateCode).some(
+		(holiday) => holiday.month === month && holiday.day === date,
 	);
 };

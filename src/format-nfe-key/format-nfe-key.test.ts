@@ -96,13 +96,44 @@ describe("formatNfeKey", () => {
 		// @ts-expect-error: intentionally invalid input
 		expect(formatNfeKey(true)).toBe("");
 		// @ts-expect-error: intentionally invalid input
-		expect(formatNfeKey(-11)).toBe("11");
+		expect(formatNfeKey(-11)).toBe("");
 		// @ts-expect-error: intentionally invalid input
-		expect(formatNfeKey(1.1)).toBe("11");
+		expect(formatNfeKey(1.1)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(10n)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(() => 1)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(Number.NaN)).toBe("");
+		// @ts-expect-error: intentionally invalid input
+		expect(formatNfeKey(-11, { pad: true })).toBe("");
+	});
+
+	describe("should strip the XML Id prefix of the document", () => {
+		test("for every prefix, in any letter case", () => {
+			for (const prefix of ["NFe", "nfe", "CTe", "MDFe", "BPe", "NF3e", "nf3e", "NFCom"]) {
+				expect(formatNfeKey(`${prefix}${KEY}`)).toBe(FORMATTED);
+			}
+		});
+
+		test("with whitespace around it and before the first group", () => {
+			expect(formatNfeKey(`  NF3e ${FORMATTED} `)).toBe(FORMATTED);
+		});
+
+		test("and keep the letters of an alphanumeric CNPJ behind it", () => {
+			expect(formatNfeKey("NF3e35260712ABC34501DE35550010000001231102030403")).toBe(
+				"3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403",
+			);
+		});
 	});
 
 	test("should return an empty string for an object with a null prototype, which has no toString", () => {
 		expect(formatNfeKey(Object.create(null))).toBe("");
+	});
+
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatNfeKey("", { pad: true })).toBe("");
+		expect(formatNfeKey("abc", { pad: true })).toBe("");
 	});
 
 	describe("properties", () => {

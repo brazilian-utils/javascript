@@ -27,16 +27,19 @@ export type IsbnInfo = {
  * Reads the length an element takes from the rules of the RangeMessage, given the 7 digits that
  * follow the part already read.
  *
- * @param {string} rules - `end:length` pairs, each range starting where the one before it ended.
+ * @param {string} rules - The ranges as `ISBN_PREFIX_RULES` writes them: each one's last value
+ * without the 9s it ends in, then its length, each range starting where the one before it ended.
  * @param {string} digits - The digits after the part already read, before the check digit.
  * @returns {number} The length of the element, 0 when the range is not assigned.
  */
 const readElementLength = (rules: string, digits: string): number => {
 	const value = Number(digits.padEnd(RANGE_DIGITS, "0").slice(0, RANGE_DIGITS));
-	const rule = rules.split(",").find((pair) => value <= Number(pair.slice(0, RANGE_DIGITS)));
+	const rule = rules
+		.split(",")
+		.find((pair) => value <= Number(pair.slice(0, -1).padEnd(RANGE_DIGITS, "9")));
 
 	// Stryker disable next-line OptionalChaining: every rule list ends at 9999999, the largest value 7 digits hold, so a rule is always found; the chaining only satisfies the type.
-	return Number(rule?.slice(RANGE_DIGITS + 1));
+	return Number(rule?.slice(-1));
 };
 
 /**
@@ -81,7 +84,6 @@ export const getIsbnInfo = (value: string): IsbnInfo | null => {
 	const registrationGroup = body.slice(0, groupLength);
 	const group = ISBN_GROUP_RULES[`${prefix}-${registrationGroup}`];
 
-	// A group of length 0, not assigned, reads as the empty group, which no entry carries either.
 	if (group === undefined) return null;
 
 	const [agency, rules] = group;

@@ -10,6 +10,11 @@ import {
 
 describe("isValidMobilePhone", () => {
 	describe("should return false", () => {
+		test("when the value holds a character that is not part of a phone mask", () => {
+			expect(isValidMobilePhone("11 98765-4321x")).toBe(false);
+			expect(isValidMobilePhone("+55 11 98765-4321 a")).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidMobilePhone("")).toBe(false);
 		});

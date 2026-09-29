@@ -1,8 +1,8 @@
 import * as fc from "fast-check";
 
-import { DATA } from "../_internals/constants/municipalities";
 import { type StateCode } from "../_internals/constants/states";
 import { anyGarbage, stateCodes } from "../_internals/test/arbitraries";
+import { MUNICIPALITIES as DATA } from "../_internals/test/municipalities";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getStates } from "../get-states/get-states";

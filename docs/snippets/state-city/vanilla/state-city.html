@@ -15,7 +15,7 @@
 
   <script type="module">
     // Nothing is imported with the page. Opening a select is what says its list is wanted: the
-    // states are 2.5 KB and the cities 154 KB, and the browser keeps each module once it has it.
+    // states are 2.2 KB and the municipalities 76 KB, and the browser keeps each module once it has it.
     const CDN = "https://cdn.jsdelivr.net/npm/@brazilian-utils/brazilian-utils";
 
     const states = document.getElementById("state");
@@ -64,13 +64,13 @@
       shown = state;
       loading(cities, "Loading the cities…");
 
-      const { getCities } = await import(`${CDN}/get-cities/+esm`);
+      const { getMunicipalities } = await import(`${CDN}/get-municipalities/+esm`);
 
       if (signal.aborted) return;
 
       fill(
         cities,
-        getCities(state).map((city) => ({ label: city, value: city })),
+        getMunicipalities(state).map((city) => ({ label: city.name, value: city.code })),
         "Pick a city",
       );
       cities.removeAttribute("aria-busy");

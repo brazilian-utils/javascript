@@ -7,7 +7,9 @@ import { type HolidayType } from "./get-holidays";
  * absent bound leaves that side open.
  */
 export type HolidayPeriod = {
+	/** First year the entry is in force (inclusive). */
 	since?: number;
+	/** First year the entry is no longer in force (exclusive). */
 	until?: number;
 };
 
@@ -50,9 +52,10 @@ export const ELECTION_SINCE_YEAR = 1998;
  * day]` pairs (month 1 to 12): art. 1º of EC nº 107, de 02/07/2020, "As eleições municipais
  * previstas para outubro de 2020 realizar-se-ão no dia 15 de novembro, em primeiro turno".
  */
-export const ELECTION_DATE_OVERRIDES: ReadonlyMap<number, readonly [number, number]> = new Map([
-	[2020, [11, 15]],
-]);
+export const ELECTION_DATE_OVERRIDES: Readonly<Partial<Record<number, readonly [number, number]>>> =
+	{
+		2020: [11, 15],
+	};
 
 /**
  * The name the 20 November entries are emitted under, national and state alike.
@@ -134,7 +137,7 @@ export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
  * consagrado à comemoração do advento da República; 25 de dezembro, consagrado à comemoração da
  * unidade espiritual dos povos christãos". Its first considerando names Decreto nº 155-B/1890 and
  * the decrees that added to it; the third, "podem e devem ser reduzidos os dias feriados".
- * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%20108-1935?OpenDocument
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/1930-1949/l0108.htm
  * Lei nº 108, de 29/10/1935 (DOU 05/11/1935), art. 1º: "São considerados feriados nacionaes os
  * seguintes dias:" 1 January, 21 April, 1 May, "3 de maio, commemoração da descoberta do Brasil",
  * "16 de julho, commemoração da data em que foi promulgada a Constituição Federal", 7 September,
@@ -155,15 +158,15 @@ export const CONSCIENCIA_NEGRA_HOLIDAY_NAME = "Dia da Consciência Negra";
  * Lei nº 1.266, de 08/12/1950 (DOU 12/12/1950), art. 1º: "Será feriado nacional o dia em que se
  * realizarem eleições gerais em todo o País"; art. 3º: "É feriado nacional o dia 21 de abril,
  * consagrado à glorificação de Tiradentes". Revoked by art. 3º of Lei nº 10.607/2002.
- * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%202.550-1955?OpenDocument
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/1950-1969/l2550.htm
  * Lei nº 2.550, de 25/07/1955, art. 80: "Será feriado nacional o dia 3 de outubro de 1955."
- * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%203.338-1957?OpenDocument
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/1950-1969/l3338.htm
  * Lei nº 3.338/1957, art. 9º: "Para as eleições que se realizarem em 3 de outubro de 1958", a Friday.
- * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%208.214-1991?OpenDocument
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l8214.htm
  * Lei nº 8.214/1991, art. 1º, which counts the parties "que tenham elegido, em 3 de outubro de 1990,
  * [...] representante para o Congresso Nacional", a Wednesday; that date follows from the original
  * wording of arts. 28 and 77 of the Constitution ("noventa dias antes do término do mandato").
- * @see Official: http://legislacao.planalto.gov.br/legisla/legislacao.nsf/Viw_Identificacao/lei%208.713-1993?OpenDocument
+ * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l8713.htm
  * Lei nº 8.713, de 30/09/1993, art. 1º: the general elections "serão realizadas simultaneamente, em
  * todo o País, no dia 3 de outubro de 1994", a Monday.
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6802.htm
@@ -422,8 +425,9 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * is a municipal holiday of the capital. The state declares it a ponto facultativo in its own
  * offices by decree (DOE-AM of 02/12/2025: "DECLARAR ponto facultativo nas repartições públicas,
  * autarquias e fundações do Estado, no dia 08 de dezembro de 2025"), so it is listed as
- * `"optional"`, as in 2.4.0. Only the 2025 decree was located; the other years keep the 2.4.0
- * entry, since no source says otherwise.
+ * `"optional"`. Only the 2025 decree of the state was located, so the entry starts in 1999, the
+ * year of the earliest norm located, the municipal law; up to 2.4.0 it was listed for every year
+ * from 1900.
  * @see Official: https://diario.imprensaoficial.am.gov.br/portal/edicoes/download/17974
  * DOE-AM of 02/12/2025, the decree quoted above.
  * @see Official: https://www.legislabahia.ba.gov.br/documentos/constituicao-do-estado-da-bahia-de-05-de-outubro-de-1989
@@ -640,6 +644,10 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * @see Official: https://ww2.al.rs.gov.br/dal/Legisla%C3%A7%C3%A3o/Constitui%C3%A7%C3%A3oEstadual/tabid/3683/Default.aspx
  * The Assembleia Legislativa do RS page that publishes that compiled text; it is a link hub and
  * carries no article text of its own.
+ * @see Official: https://www.al.rs.gov.br/legis/M010/M0100099.ASP?Hid_IDNorma=11624
+ * Decreto RS nº 36.180, de 18/09/1995, which sets the holiday of the state's data magna on 20
+ * September: "O feriado correspondente à data magna do Estado será comemorado no dia 20 de
+ * setembro".
  * @see Official: https://sapl.al.ro.leg.br/norma/4958
  * Lei RO nº 2.291, de 22/04/2010, Criação do Estado de Rondônia (04/01), listed from 2011: "DECLARA
  * O DIA 4 DE JANEIRO DATA MAGNA E FERIADO CIVIL ESTADUAL". Lei RO nº 3.170/2013, cited here before, is a
@@ -656,8 +664,8 @@ const SC_NEXT_SUNDAY_TRANSFER_SINCE_YEAR = 2005;
  * alone, which the table does not carry.
  * @see Official: https://sapl.al.ro.leg.br/norma/3003
  * Lei RO nº 1.026, de 20/12/2001, the other law cited for Rondônia, whose art. 1º did create a
- * second feriado estadual — "Fica instituído feriado no Estado de Rondônia, o dia 18 de junho,
- * em homenagem aos evangélicos" — but which the STF struck down, so 18/06 has no entry.
+ * second feriado estadual, "Fica instituído feriado no Estado de Rondônia, o dia 18 de junho,
+ * em homenagem aos evangélicos", but which the STF struck down, so 18/06 has no entry.
  * @see Official: https://portal.stf.jus.br/processos/detalhe.asp?incidente=2545186
  * STF ADI 3940, which voided that law. Decisão de julgamento of 20/03/2020, Tribunal Pleno,
  * sessão virtual: "O Tribunal, por unanimidade, julgou procedente o pedido formulado na ação
@@ -805,7 +813,7 @@ export const STATE_HOLIDAYS: Partial<Record<StateCode, StateHolidayEntry[]>> = {
 			since: 2010,
 			until: CONSCIENCIA_NEGRA_NATIONAL_SINCE_YEAR,
 		},
-		{ name: "Nossa Senhora da Conceição", day: 8, month: 12, type: "optional" },
+		{ name: "Nossa Senhora da Conceição", day: 8, month: 12, type: "optional", since: 1999 },
 	],
 	BA: [{ name: "Independência da Bahia", day: 2, month: 7, since: 1990 }],
 	CE: [{ name: "Abolição da Escravidão no Ceará", day: 25, month: 3, since: 2012 }],

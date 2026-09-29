@@ -2,15 +2,10 @@ import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/ho
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
-import { resolveStateHolidayDate } from "../_internals/resolve-state-holiday-date/resolve-state-holiday-date";
 import {
-	ELECTION_DATE_OVERRIDES,
-	ELECTION_HOLIDAY_NAME,
-	ELECTION_SINCE_YEAR,
-	FIXED_HOLIDAYS,
-	type HolidayPeriod,
-	STATE_HOLIDAYS,
-} from "./constants";
+	type MemoizedHoliday,
+	readMemoizedHolidays,
+} from "../_internals/read-memoized-holidays/read-memoized-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -42,158 +37,12 @@ export type GetHolidaysParams = {
  */
 export type GetHolidaysOptions = GetHolidaysParams;
 
-// A holiday is a local calendar day, so the memo keeps the year, month and day rather than the
-// `Date` built from them: a `Date` is an instant, and the same instant falls on another local day
-// once the process time zone changes, which would make a memoized year answer for the wrong days.
-type MemoizedHoliday = {
-	name: string;
-	type: HolidayType;
-	year: number;
-	month: number;
-	day: number;
-};
-
-const cache = new Map<string, MemoizedHoliday[]>();
-
-const memoizeHolidays = (holidays: Holiday[]): MemoizedHoliday[] =>
-	holidays.map(({ name, type, date }) => ({
-		name,
-		type,
-		year: date.getFullYear(),
-		month: date.getMonth(),
-		day: date.getDate(),
-	}));
-
-const buildHolidays = (holidays: MemoizedHoliday[]): Holiday[] =>
+const buildHolidays = (holidays: readonly MemoizedHoliday[]): Holiday[] =>
 	holidays.map(({ name, type, year, month, day }) => ({
 		name,
 		date: new Date(year, month, day),
 		type,
 	}));
-
-/**
- * Whether a holiday entry is in force in `year`: from its `since` (inclusive) up to its `until`
- * (exclusive), an absent bound leaving that side open.
- *
- * @param {number} year - The year being computed.
- * @param {HolidayPeriod} period - The entry's bounds.
- * @returns {boolean} `true` when the entry applies to `year`.
- */
-const isInForce = (year: number, { since, until }: HolidayPeriod): boolean => {
-	// Stryker disable next-line ConditionalExpression: `since` is undefined for most entries, and `year < undefined` is already always false, so the explicit `since !== undefined` guard never changes the outcome
-	if (since !== undefined && year < since) return false;
-	// Stryker disable next-line ConditionalExpression: `until` is undefined for most entries, and `year >= undefined` is already always false, so the explicit `until !== undefined` guard never changes the outcome
-	if (until !== undefined && year >= until) return false;
-
-	return true;
-};
-
-const DAYS_IN_WEEK = 7;
-const OCTOBER = 9;
-
-/**
- * The date of the first round of the elections of `year`: the first Sunday of October, unless
- * `ELECTION_DATE_OVERRIDES` carries another date for that year.
- *
- * @param {number} year - An even year from `ELECTION_SINCE_YEAR` on.
- * @returns {Date} The election day, at local midnight.
- */
-const resolveElectionDate = (year: number): Date => {
-	const override = ELECTION_DATE_OVERRIDES.get(year);
-
-	if (override !== undefined) return new Date(year, override[0] - 1, override[1]);
-
-	// Sunday is weekday 0, so the days from 1 October to the first Sunday are 7 minus its weekday,
-	// or none when 1 October is already a Sunday.
-	const firstOfOctober = new Date(year, OCTOBER, 1).getDay();
-
-	return new Date(year, OCTOBER, 1 + ((DAYS_IN_WEEK - firstOfOctober) % DAYS_IN_WEEK));
-};
-
-const computeHolidays = (year: number, stateCode: StateCode | undefined): Holiday[] => {
-	const holidays: Holiday[] = [];
-
-	for (const entry of FIXED_HOLIDAYS) {
-		if (!isInForce(year, entry)) continue;
-
-		holidays.push({
-			name: entry.name,
-			date: new Date(year, entry.month - 1, entry.day),
-			type: "national",
-		});
-	}
-
-	if (year >= ELECTION_SINCE_YEAR && year % 2 === 0) {
-		holidays.push({
-			name: ELECTION_HOLIDAY_NAME,
-			date: resolveElectionDate(year),
-			type: "national",
-		});
-	}
-
-	const easterDate = resolveStateHolidayDate(year, { easterOffset: 0 });
-
-	holidays.push(
-		{
-			name: "Carnaval (segunda-feira)",
-			date: resolveStateHolidayDate(year, { easterOffset: -48 }),
-			type: "optional",
-		},
-		{
-			name: "Carnaval (terça-feira)",
-			date: resolveStateHolidayDate(year, { easterOffset: -47 }),
-			type: "optional",
-		},
-		{
-			name: "Sexta-feira Santa",
-			date: resolveStateHolidayDate(year, { easterOffset: -2 }),
-			type: "national",
-		},
-		{
-			name: "Páscoa",
-			date: easterDate,
-			type: "religious",
-		},
-		{
-			name: "Corpus Christi",
-			date: resolveStateHolidayDate(year, { easterOffset: 60 }),
-			type: "optional",
-		},
-	);
-
-	// `getHolidays` only passes a state code or `undefined` down here (`readHolidayStateCode`
-	// rejected everything else), so a prototype chain key never reaches this lookup.
-	// Stryker disable next-line ConditionalExpression: `STATE_HOLIDAYS` has no "undefined" key, so indexing it with `undefined` also gives `undefined`; the check only narrows the type.
-	const stateHolidays = stateCode === undefined ? undefined : STATE_HOLIDAYS[stateCode];
-
-	if (stateHolidays) {
-		for (const entry of stateHolidays) {
-			if (!isInForce(year, entry)) continue;
-
-			const { name, type } = entry;
-			const date = resolveStateHolidayDate(year, entry);
-			const stateHoliday: Holiday = { name, date, type: type ?? "state" };
-			// Name and date together are the identity of a holiday here: a state entry only replaces
-			// a national one when both match, so DF's Corpus Christi replaces the national optional
-			// one while its Fundação de Brasília is listed next to Tiradentes, which falls on the
-			// same 21 April under a different name.
-			const stateHolidayKey = `${name}|${date.getTime()}`;
-			const nationalIndex = holidays.findIndex(
-				(holiday) => `${holiday.name}|${holiday.date.getTime()}` === stateHolidayKey,
-			);
-
-			if (nationalIndex === -1) {
-				holidays.push(stateHoliday);
-			} else {
-				holidays[nationalIndex] = stateHoliday;
-			}
-		}
-	}
-
-	holidays.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-	return holidays;
-};
 
 /**
  * Retrieves all Brazilian holidays for a given year.
@@ -408,16 +257,5 @@ export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[
 
 	if (normalizedStateCode === null) return [];
 
-	// Stryker disable next-line StringLiteral: the exact fallback text is never observable outside this module; it only has to be a value no real StateCode equals, which any fixed string satisfies
-	const cacheKey = `${year}|${normalizedStateCode ?? ""}`;
-
-	const cached = cache.get(cacheKey);
-	if (cached) {
-		return buildHolidays(cached);
-	}
-
-	const holidays = computeHolidays(year, normalizedStateCode);
-	cache.set(cacheKey, memoizeHolidays(holidays));
-
-	return holidays;
+	return buildHolidays(readMemoizedHolidays(year, normalizedStateCode));
 }

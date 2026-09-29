@@ -13,944 +13,944 @@ export type Bank = {
 	name: string;
 };
 
-export const BANKS: Bank[] = [
-	{ code: "001", ispb: "00000000", name: "Banco do Brasil S.A." },
-	{ code: "003", ispb: "04902979", name: "BANCO DA AMAZONIA S.A." },
-	{ code: "004", ispb: "07237373", name: "Banco do Nordeste do Brasil S.A." },
-	{ code: "007", ispb: "33657248", name: "BANCO NACIONAL DE DESENVOLVIMENTO ECONOMICO E SOCIAL" },
-	{ code: "010", ispb: "81723108", name: "CREDICOAMO CREDITO RURAL COOPERATIVA" },
-	{ code: "011", ispb: "61809182", name: "UBS (BRASIL) CORRETORA DE VALORES S.A." },
-	{ code: "012", ispb: "04866275", name: "Banco Inbursa S.A." },
-	{ code: "014", ispb: "09274232", name: "STATE STREET BRASIL S.A. - BANCO COMERCIAL" },
-	{
-		code: "015",
-		ispb: "02819125",
-		name: "UBS BB CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{
-		code: "016",
-		ispb: "04715685",
-		name: "COOPERATIVA DE CRÉDITO MÚTUO DOS DESPACHANTES DE TRÂNSITO DE SANTA CATARINA E RIO GRANDE DO SUL - SICOOB CREDITRAN",
-	},
-	{ code: "017", ispb: "42272526", name: "BNY Mellon Banco S.A." },
-	{ code: "018", ispb: "57839805", name: "Banco Tricury S.A." },
-	{ code: "021", ispb: "28127603", name: "BANESTES S.A. BANCO DO ESTADO DO ESPIRITO SANTO" },
-	{ code: "023", ispb: "53720128", name: "CONTA SIMPLES SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "024", ispb: "10866788", name: "Banco Bandepe S.A." },
-	{ code: "025", ispb: "03323840", name: "Banco Alfa S.A." },
-	{ code: "033", ispb: "90400888", name: "BANCO SANTANDER (BRASIL) S.A." },
-	{ code: "036", ispb: "06271464", name: "Banco Bradesco BBI S.A." },
-	{ code: "037", ispb: "04913711", name: "Banco do Estado do Pará S.A." },
-	{ code: "040", ispb: "03609817", name: "Banco Cargill S.A." },
-	{ code: "041", ispb: "92702067", name: "Banco do Estado do Rio Grande do Sul S.A." },
-	{ code: "047", ispb: "13009717", name: "Banco do Estado de Sergipe S.A." },
-	{ code: "060", ispb: "04913129", name: "CONFIDENCE SOCIEDADE CORRETORA DE CAMBIO S.A." },
-	{ code: "063", ispb: "04184779", name: "Banco Bradescard S.A." },
-	{ code: "064", ispb: "04332281", name: "GOLDMAN SACHS DO BRASIL BANCO MULTIPLO S.A." },
-	{ code: "065", ispb: "48795256", name: "Banco AndBank (Brasil) S.A." },
-	{ code: "066", ispb: "02801938", name: "BANCO MORGAN STANLEY S.A." },
-	{ code: "069", ispb: "61033106", name: "Banco Crefisa S.A." },
-	{ code: "070", ispb: "00000208", name: "BRB - BANCO DE BRASILIA S.A." },
-	{ code: "074", ispb: "03017677", name: "Banco J. Safra S.A." },
-	{ code: "075", ispb: "03532415", name: "BANCO ABN AMRO CLEARING S.A." },
-	{ code: "076", ispb: "07656500", name: "Banco KDB do Brasil S.A." },
-	{ code: "077", ispb: "00416968", name: "Banco Inter S.A." },
-	{ code: "078", ispb: "34111187", name: "Haitong Banco de Investimento do Brasil S.A." },
-	{ code: "079", ispb: "09516419", name: "PICPAY BANK - BANCO MÚLTIPLO S.A" },
-	{ code: "080", ispb: "73622748", name: "BT CORRETORA DE CÂMBIO LTDA." },
-	{ code: "081", ispb: "10264663", name: "BancoSeguro S.A." },
-	{ code: "082", ispb: "07679404", name: "BANCO TOPÁZIO S.A." },
-	{ code: "083", ispb: "10690848", name: "Banco da China Brasil S.A." },
-	{ code: "084", ispb: "02398976", name: "SISPRIME DO BRASIL - COOPERATIVA DE CRÉDITO" },
-	{ code: "085", ispb: "05463212", name: "Cooperativa Central de Crédito - Ailos" },
-	{ code: "088", ispb: "11476673", name: "BANCO RANDON S.A." },
-	{ code: "089", ispb: "62109566", name: "CREDISAN COOPERATIVA DE CRÉDITO" },
-	{
-		code: "093",
-		ispb: "07945233",
-		name: "PÓLOCRED   SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.",
-	},
-	{ code: "094", ispb: "11758741", name: "Banco Finaxis S.A." },
-	{ code: "095", ispb: "11703662", name: "BANCO TRAVELEX S.A." },
-	{ code: "096", ispb: "00997185", name: "Banco B3 S.A." },
-	{ code: "097", ispb: "04632856", name: "CREDISIS - CENTRAL DE COOPERATIVAS DE CRÉDITO" },
-	{
-		code: "099",
-		ispb: "03046391",
-		name: "UNIPRIME CENTRAL NACIONAL - CENTRAL NACIONAL DE COOPERATIVA DE CREDITO",
-	},
-	{ code: "100", ispb: "00806535", name: "Planner Corretora de Valores S.A." },
-	{
-		code: "101",
-		ispb: "62287735",
-		name: "WARREN RENA DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{
-		code: "102",
-		ispb: "02332886",
-		name: "XP INVESTIMENTOS CORRETORA DE CÂMBIO,TÍTULOS E VALORES MOBILIÁRIOS S/A",
-	},
-	{ code: "104", ispb: "00360305", name: "CAIXA ECONOMICA FEDERAL" },
-	{ code: "105", ispb: "07652226", name: "Lecca Crédito, Financiamento e Investimento S/A" },
-	{ code: "107", ispb: "15114366", name: "Banco Bocom BBM S.A." },
-	{
-		code: "111",
-		ispb: "36113876",
-		name: "OLIVEIRA TRUST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIARIOS S.A.",
-	},
-	{ code: "113", ispb: "61723847", name: "NEON CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A." },
-	{ code: "119", ispb: "13720915", name: "Banco Western Union do Brasil S.A." },
-	{ code: "120", ispb: "33603457", name: "BANCO RODOBENS S.A." },
-	{ code: "121", ispb: "10664513", name: "Banco Agibank S.A." },
-	{ code: "122", ispb: "33147315", name: "Banco Bradesco BERJ S.A." },
-	{ code: "124", ispb: "15357060", name: "Banco Woori Bank do Brasil S.A." },
-	{ code: "125", ispb: "45246410", name: "BANCO GENIAL S.A." },
-	{ code: "126", ispb: "13220493", name: "BR Partners Banco de Investimento S.A." },
-	{ code: "127", ispb: "09512542", name: "Codepe Corretora de Valores e Câmbio S.A." },
-	{ code: "128", ispb: "19307785", name: "BRAZA BANK S.A. BANCO DE CÂMBIO" },
-	{ code: "129", ispb: "18520834", name: "UBS BB BANCO DE INVESTIMENTO S.A." },
-	{
-		code: "130",
-		ispb: "09313766",
-		name: "CARUANA S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{
-		code: "131",
-		ispb: "61747085",
-		name: "TULLETT PREBON BRASIL CORRETORA DE VALORES E CÂMBIO LTDA",
-	},
-	{ code: "132", ispb: "17453575", name: "ICBC do Brasil Banco Múltiplo S.A." },
-	{
-		code: "133",
-		ispb: "10398952",
-		name: "CONFEDERAÇÃO NACIONAL DAS COOPERATIVAS CENTRAIS DE CRÉDITO E ECONOMIA FAMILIAR E SOLIDÁRIA - CRESOL CONFEDERAÇÃO",
-	},
-	{
-		code: "134",
-		ispb: "33862244",
-		name: "BGC LIQUIDEZ DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{
-		code: "136",
-		ispb: "00315557",
-		name: "COOPERATIVA CENTRAL DE CRÉDITO UNICRED DO BRASIL - UNICRED DO BRASIL",
-	},
-	{ code: "138", ispb: "10853017", name: "GET MONEY SOCIEDADE CORRETORA DE CÂMBIO S.A." },
-	{ code: "139", ispb: "55230916", name: "Intesa Sanpaolo Brasil S.A. - Banco Múltiplo" },
-	{
-		code: "140",
-		ispb: "62169875",
-		name: "NU INVESTIMENTOS S.A. - CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS",
-	},
-	{
-		code: "141",
-		ispb: "09526594",
-		name: "BANCO MASTER DE INVESTIMENTO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "142", ispb: "16944141", name: "Broker Brasil Corretora de Câmbio Ltda." },
-	{ code: "143", ispb: "02992317", name: "INTEX BANK BANCO DE CÂMBIO S.A." },
-	{ code: "144", ispb: "13059145", name: "EBURY BANCO DE CÂMBIO S.A." },
-	{ code: "145", ispb: "50579044", name: "LEVYCAM - CORRETORA DE CAMBIO E VALORES LTDA." },
-	{ code: "146", ispb: "24074692", name: "GUITTA CORRETORA DE CAMBIO LTDA." },
-	{
-		code: "149",
-		ispb: "15581638",
-		name: "Facta Financeira S.A. - Crédito Financiamento e Investimento",
-	},
-	{
-		code: "157",
-		ispb: "09105360",
-		name: "ICAP do Brasil Corretora de Títulos e Valores Mobiliários Ltda.",
-	},
-	{
-		code: "159",
-		ispb: "05442029",
-		name: "Casa do Crédito S.A. Sociedade de Crédito ao Microempreendedor",
-	},
-	{
-		code: "173",
-		ispb: "13486793",
-		name: "APEX GROUP DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "174", ispb: "43180355", name: "PEFISA S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO" },
-	{
-		code: "180",
-		ispb: "02685483",
-		name: "CM CAPITAL MARKETS CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{
-		code: "183",
-		ispb: "09210106",
-		name: "SOCRED S.A. - SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE",
-	},
-	{
-		code: "188",
-		ispb: "33775974",
-		name: "ATIVA INVESTIMENTOS S.A. CORRETORA DE TÍTULOS, CÂMBIO E VALORES",
-	},
-	{
-		code: "189",
-		ispb: "07512441",
-		name: "HS FINANCEIRA S/A CREDITO, FINANCIAMENTO E INVESTIMENTOS",
-	},
-	{
-		code: "190",
-		ispb: "03973814",
-		name: "SERVICOOP - COOPERATIVA DE CRÉDITO DOS SERVIDORES PÚBLICOS ESTADUAIS E MUNICIPAIS DO RIO GRANDE DO SUL",
-	},
-	{
-		code: "191",
-		ispb: "04257795",
-		name: "Nova Futura Corretora de Títulos e Valores Mobiliários Ltda.",
-	},
-	{
-		code: "194",
-		ispb: "20155248",
-		name: "UNIDA DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{
-		code: "195",
-		ispb: "07799277",
-		name: "VALOR S/A SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "196", ispb: "32648370", name: "FAIR SOCIEDADE CORRETORA DE CÂMBIO S.A." },
-	{ code: "197", ispb: "16501555", name: "STONE INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "208", ispb: "30306294", name: "Banco BTG Pactual S.A." },
-	{ code: "212", ispb: "92894922", name: "Banco Original S.A." },
-	{ code: "213", ispb: "54403563", name: "Banco Arbi S.A." },
-	{ code: "217", ispb: "91884981", name: "Banco John Deere S.A." },
-	{ code: "218", ispb: "71027866", name: "Banco BS2 S.A." },
-	{ code: "222", ispb: "75647891", name: "BANCO CRÉDIT AGRICOLE BRASIL S.A." },
-	{ code: "224", ispb: "58616418", name: "Banco Fibra S.A." },
-	{ code: "233", ispb: "62421979", name: "BANCO BMG SOLUÇÕES FINANCEIRAS S.A." },
-	{ code: "237", ispb: "60746948", name: "Banco Bradesco S.A." },
-	{ code: "241", ispb: "31597552", name: "BANCO CLASSICO S.A." },
-	{ code: "243", ispb: "33923798", name: "BANCO MASTER S/A - EM LIQUIDAÇÃO EXTRAJUDICIAL" },
-	{ code: "246", ispb: "28195667", name: "Banco ABC Brasil S.A." },
-	{ code: "249", ispb: "61182408", name: "Banco Investcred Unibanco S.A." },
-	{ code: "250", ispb: "50585090", name: "BANCO BMG CONSIGNADO S.A." },
-	{ code: "254", ispb: "14388334", name: "PARANÁ BANCO S.A." },
-	{ code: "259", ispb: "08609934", name: "MONEYCORP BANCO DE CÂMBIO S.A." },
-	{ code: "260", ispb: "18236120", name: "NU PAGAMENTOS S.A. - INSTITUIÇÃO DE PAGAMENTO" },
-	{ code: "265", ispb: "33644196", name: "Banco Fator S.A." },
-	{ code: "266", ispb: "33132044", name: "BANCO CEDULA S.A." },
-	{ code: "268", ispb: "14511781", name: "BARI COMPANHIA HIPOTECÁRIA" },
-	{ code: "269", ispb: "53518684", name: "BANCO HSBC S.A." },
-	{
-		code: "271",
-		ispb: "27842177",
-		name: "BPY CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "272", ispb: "00250699", name: "AGK CORRETORA DE CAMBIO S.A." },
-	{ code: "273", ispb: "08253539", name: "COOPERATIVA DE CREDITO SULCREDI AMPLEA" },
-	{
-		code: "274",
-		ispb: "11581339",
-		name: "BMP SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E A EMPRESA DE PEQUENO PORTE LTDA.",
-	},
-	{ code: "276", ispb: "11970623", name: "BANCO SENFF S.A." },
-	{
-		code: "278",
-		ispb: "27652684",
-		name: "Genial Investimentos Corretora de Valores Mobiliários S.A.",
-	},
-	{
-		code: "280",
-		ispb: "23862762",
-		name: "WILL FINANCEIRA S.A. CRÉDITO, FINANCIAMENTO E INVESTIMENTO - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "281", ispb: "76461557", name: "Cooperativa de Crédito Rural Coopavel" },
-	{
-		code: "283",
-		ispb: "89960090",
-		name: "RB INVESTIMENTOS DISTRIBUIDORA DE TITULOS E VALORES MOBILIARIOS LIMITADA",
-	},
-	{
-		code: "288",
-		ispb: "62237649",
-		name: "CAROL DISTRIBUIDORA DE TITULOS E VALORES MOBILIARIOS LTDA.",
-	},
-	{ code: "289", ispb: "94968518", name: "EFX CORRETORA DE CÂMBIO LTDA." },
-	{ code: "290", ispb: "08561701", name: "PAGSEGURO INTERNET INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{
-		code: "292",
-		ispb: "28650236",
-		name: "GALAPAGOS CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{
-		code: "293",
-		ispb: "71590442",
-		name: "Lastro RDV Distribuidora de Títulos e Valores Mobiliários Ltda.",
-	},
-	{ code: "296", ispb: "04062902", name: "OZ CORRETORA DE CÂMBIO S.A." },
-	{ code: "298", ispb: "17772370", name: "VIPS CORRETORA DE CÂMBIO S.A." },
-	{ code: "299", ispb: "04814563", name: "BANCO AFINZ S.A. - BANCO MÚLTIPLO" },
-	{ code: "300", ispb: "33042151", name: "Banco de la Nacion Argentina" },
-	{ code: "301", ispb: "13370835", name: "DOCK INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "305", ispb: "40353377", name: "FOURTRADE CORRETORA DE CÂMBIO LTDA." },
-	{
-		code: "307",
-		ispb: "03751794",
-		name: "Terra Investimentos Distribuidora de Títulos e Valores Mobiliários Ltda.",
-	},
-	{
-		code: "310",
-		ispb: "22610500",
-		name: "VORTX DISTRIBUIDORA DE TITULOS E VALORES MOBILIARIOS LTDA.",
-	},
-	{
-		code: "312",
-		ispb: "07693858",
-		name: "HSCM - SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.",
-	},
-	{ code: "318", ispb: "61186680", name: "Banco BMG S.A." },
-	{ code: "319", ispb: "11495073", name: "OM DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA" },
-	{ code: "320", ispb: "07450604", name: "BANK OF CHINA (BRASIL) BANCO MÚLTIPLO S/A" },
-	{
-		code: "321",
-		ispb: "18188384",
-		name: "CREFAZ SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E A EMPRESA DE PEQUENO PORTE S.A.",
-	},
-	{
-		code: "322",
-		ispb: "01073966",
-		name: "Cooperativa de Crédito Rural de Abelardo Luz - Sulcredi/Crediluz",
-	},
-	{ code: "323", ispb: "10573521", name: "MERCADO PAGO INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{ code: "324", ispb: "21332862", name: "CARTOS SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "326",
-		ispb: "03311443",
-		name: "MEUTUDO S.A - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "329", ispb: "32402502", name: "QI Sociedade de Crédito Direto S.A." },
-	{ code: "330", ispb: "00556603", name: "BANCO BARI DE INVESTIMENTOS E FINANCIAMENTOS S.A." },
-	{
-		code: "331",
-		ispb: "13673855",
-		name: "OSLO CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A",
-	},
-	{
-		code: "332",
-		ispb: "13140088",
-		name: "ACESSO SOLUÇÕES DE PAGAMENTO S.A. - INSTITUIÇÃO DE PAGAMENTO",
-	},
-	{ code: "334", ispb: "15124464", name: "BANCO BESA S.A." },
-	{ code: "335", ispb: "27098060", name: "Banco Digio S.A." },
-	{ code: "336", ispb: "31872495", name: "Banco C6 S.A." },
-	{ code: "341", ispb: "60701190", name: "ITAÚ UNIBANCO S.A." },
-	{ code: "342", ispb: "32997490", name: "Creditas Sociedade de Crédito Direto S.A." },
-	{ code: "348", ispb: "33264668", name: "Banco XP S.A." },
-	{
-		code: "349",
-		ispb: "27214112",
-		name: "AL5 S.A. SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "350", ispb: "01330387", name: "COOPERATIVA DE CRÉDITO POPULAR DO BRASIL - CREHNOR" },
-	{
-		code: "352",
-		ispb: "29162769",
-		name: "SANTANDER CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "355", ispb: "34335592", name: "ÓTIMO SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "358",
-		ispb: "09464032",
-		name: "MIDWAY S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "359", ispb: "05351887", name: "ZEMA CRÉDITO, FINANCIAMENTO E INVESTIMENTO S/A" },
-	{
-		code: "360",
-		ispb: "02276653",
-		name: "TRINUS CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "362", ispb: "01027058", name: "CIELO S.A. - INSTITUIÇÃO DE PAGAMENTO" },
-	{ code: "363", ispb: "62285390", name: "QI CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A." },
-	{ code: "364", ispb: "09089356", name: "EFÍ S.A. - INSTITUIÇÃO DE PAGAMENTO" },
-	{
-		code: "365",
-		ispb: "68757681",
-		name: "SIMPAUL CORRETORA DE CAMBIO E VALORES MOBILIARIOS  S.A.",
-	},
-	{ code: "366", ispb: "61533584", name: "BANCO SOCIETE GENERALE BRASIL S.A." },
-	{ code: "368", ispb: "08357240", name: "Banco CSF S.A." },
-	{ code: "370", ispb: "61088183", name: "Banco Mizuho do Brasil S.A." },
-	{ code: "373", ispb: "35977097", name: "UP.P SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A." },
-	{
-		code: "374",
-		ispb: "27351731",
-		name: "REALIZE SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.",
-	},
-	{ code: "376", ispb: "33172537", name: "BANCO J.P. MORGAN S.A." },
-	{ code: "377", ispb: "17826860", name: "BMS SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "378", ispb: "01852137", name: "BANCO BRASILEIRO DE CRÉDITO SOCIEDADE ANÔNIMA" },
-	{
-		code: "379",
-		ispb: "01658426",
-		name: "COOPERFORTE COOPERATIVA DE CRÉDITO E INVESTIMENTOS LTDA",
-	},
-	{ code: "380", ispb: "22896431", name: "PICPAY INSTITUIçãO DE PAGAMENTO S.A." },
-	{ code: "381", ispb: "60814191", name: "BANCO MERCEDES-BENZ DO BRASIL S.A." },
-	{
-		code: "382",
-		ispb: "04307598",
-		name: "FIDÚCIA SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LIMITADA.",
-	},
-	{ code: "383", ispb: "21018182", name: "EBANX INSTITUICAO DE PAGAMENTOS LTDA." },
-	{
-		code: "384",
-		ispb: "11165756",
-		name: "GLOBAL FINANÇAS SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.",
-	},
-	{
-		code: "385",
-		ispb: "03844699",
-		name: "COOPERATIVA DE ECONOMIA E CREDITO MUTUO DOS TRABALHADORES PORTUARIOS DA GRANDE VITORIA - CREDESTIVA.",
-	},
-	{
-		code: "386",
-		ispb: "30680829",
-		name: "NU FINANCEIRA S.A. - Sociedade de Crédito, Financiamento e Investimento",
-	},
-	{ code: "387", ispb: "03215790", name: "Banco Toyota do Brasil S.A." },
-	{ code: "389", ispb: "17184037", name: "Banco Mercantil do Brasil S.A." },
-	{ code: "390", ispb: "59274605", name: "BANCO GM S.A." },
-	{ code: "391", ispb: "08240446", name: "COOPERATIVA DE CREDITO RURAL DE IBIAM - SULCREDI/IBIAM" },
-	{ code: "393", ispb: "59109165", name: "Banco Volkswagen S.A." },
-	{ code: "394", ispb: "07207996", name: "Banco Bradesco Financiamentos S.A." },
-	{
-		code: "395",
-		ispb: "08673569",
-		name: "F.D'GOLD - DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{ code: "396", ispb: "13884775", name: "MAGALUPAY INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "397", ispb: "34088029", name: "LISTO SOCIEDADE DE CREDITO DIRETO S.A." },
-	{ code: "398", ispb: "31749596", name: "IDEAL CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A." },
-	{ code: "399", ispb: "01701201", name: "Kirton Bank S.A. - Banco Múltiplo" },
-	{
-		code: "400",
-		ispb: "05491616",
-		name: "COOPERATIVA DE CRÉDITO, POUPANÇA E SERVIÇOS FINANCEIROS - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "401", ispb: "15111975", name: "IUGU INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{
-		code: "402",
-		ispb: "36947229",
-		name: "COBUCCIO S/A - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTOS",
-	},
-	{
-		code: "403",
-		ispb: "37880206",
-		name: "CORA SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.",
-	},
-	{
-		code: "404",
-		ispb: "37241230",
-		name: "SUMUP SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.",
-	},
-	{ code: "406", ispb: "37715993", name: "ACCREDITO - SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "407",
-		ispb: "00329598",
-		name: "SEFER INVESTIMENTOS DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "408", ispb: "36586946", name: "BONUSPAGO SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "410", ispb: "05684234", name: "PLANNER SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "411",
-		ispb: "05192316",
-		name: "Via Certa Financiadora S.A. - Crédito, Financiamento e Investimentos",
-	},
-	{ code: "412", ispb: "15173776", name: "SOCIAL BANK BANCO MÚLTIPLO S/A" },
-	{ code: "413", ispb: "01858774", name: "BANCO BV S.A." },
-	{ code: "414", ispb: "37526080", name: "LEND SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "415", ispb: "17157777", name: "BANCO NACIONAL S.A." },
-	{ code: "416", ispb: "19324634", name: "LAMARA SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "418",
-		ispb: "37414009",
-		name: "ZIPDIN SOLUÇÕES DIGITAIS SOCIEDADE DE CRÉDITO DIRETO S/A",
-	},
-	{ code: "419", ispb: "38129006", name: "NUMBRS SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "421", ispb: "39343350", name: "LAR COOPERATIVA DE CRÉDITO - LAR CREDI" },
-	{ code: "422", ispb: "58160789", name: "Banco Safra S.A." },
-	{
-		code: "423",
-		ispb: "00460065",
-		name: "COLUNA S/A DISTRIBUIDORA DE TITULOS E VALORES MOBILIÁRIOS",
-	},
-	{ code: "425", ispb: "03881423", name: "SOCINAL S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO" },
-	{
-		code: "426",
-		ispb: "11285104",
-		name: "NEON FINANCEIRA - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A",
-	},
-	{
-		code: "427",
-		ispb: "27302181",
-		name: "COOPERATIVA DE CRÉDITO DOS SERVIDORES DA UNIVERSIDADE FEDERAL DO ESPIRITO SANTO",
-	},
-	{ code: "428", ispb: "39664698", name: "CREDSYSTEM SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "430", ispb: "00204963", name: "COOPERATIVA DE CREDITO RURAL SEARA - CREDISEARA" },
-	{
-		code: "433",
-		ispb: "44077014",
-		name: "BR-CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "435", ispb: "38224857", name: "DELFINANCE SOCIEDADE DE CREDITO DIRETO S.A." },
-	{
-		code: "438",
-		ispb: "67030395",
-		name: "TRUSTEE DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA. - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "439", ispb: "16695922", name: "ID CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A." },
-	{ code: "440", ispb: "82096447", name: "CREDI&GENTE - COOPERATIVA DE CRÉDITO E INVESTIMENTOS" },
-	{
-		code: "443",
-		ispb: "39416705",
-		name: "OCTA SOCIEDADE DE CRÉDITO DIRETO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "444", ispb: "40654622", name: "TRINUS SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "445", ispb: "35551187", name: "PLANTAE S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO" },
-	{
-		code: "447",
-		ispb: "12392983",
-		name: "MIRAE ASSET (BRASIL) CORRETORA DE CÂMBIO, TÍTULOS  E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{
-		code: "448",
-		ispb: "39669186",
-		name: "HEMERA DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{ code: "449", ispb: "37555231", name: "DM SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "450", ispb: "13203354", name: "FITS INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "451", ispb: "40475846", name: "J17 - SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{ code: "452", ispb: "39676772", name: "CREDIFIT SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "454",
-		ispb: "41592532",
-		name: "MÉRITO DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{
-		code: "455",
-		ispb: "38429045",
-		name: "VIS DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{ code: "456", ispb: "60498557", name: "Banco MUFG Brasil S.A." },
-	{ code: "457", ispb: "39587424", name: "UY3 SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{
-		code: "458",
-		ispb: "07253654",
-		name: "HEDGE INVESTMENTS DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{ code: "460", ispb: "42047025", name: "UNAVANTI SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{ code: "461", ispb: "19540550", name: "ASAAS GESTÃO FINANCEIRA INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "462", ispb: "39908427", name: "STARK SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "463",
-		ispb: "40434681",
-		name: "AZUMI DISTRIBUIDORA DE TíTULOS E VALORES MOBILIáRIOS LTDA.",
-	},
-	{ code: "464", ispb: "60518222", name: "Banco Sumitomo Mitsui Brasileiro S.A." },
-	{ code: "465", ispb: "40083667", name: "CAPITAL CONSIG SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "467",
-		ispb: "33886862",
-		name: "MASTER S/A CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "468", ispb: "04862600", name: "PORTOSEG S.A. - CREDITO, FINANCIAMENTO E INVESTIMENTO" },
-	{
-		code: "469",
-		ispb: "07138049",
-		name: "PICPAY INVEST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{ code: "470", ispb: "18394228", name: "CDC SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "473", ispb: "33466988", name: "Banco Caixa Geral - Brasil S.A." },
-	{ code: "475", ispb: "10371492", name: "Banco Yamaha Motor do Brasil S.A." },
-	{ code: "476", ispb: "45860531", name: "IDEA MAKER INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "477", ispb: "33042953", name: "Citibank N.A." },
-	{
-		code: "478",
-		ispb: "11760553",
-		name: "GAZINCRED S.A. SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "479", ispb: "60394079", name: "Banco ItauBank S.A." },
-	{ code: "481", ispb: "43599047", name: "SUPERLÓGICA SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "482", ispb: "42259084", name: "ARTTA SOCIEDADE DE CRÉDITO DIRETO S.A" },
-	{
-		code: "484",
-		ispb: "36864992",
-		name: "APEX DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "487", ispb: "62331228", name: "DEUTSCHE BANK S.A. - BANCO ALEMAO" },
-	{ code: "488", ispb: "46518205", name: "JPMorgan Chase Bank, National Association" },
-	{ code: "495", ispb: "44189447", name: "Banco de La Provincia de Buenos Aires" },
-	{ code: "496", ispb: "45283173", name: "BBVA BRASIL BANCO DE INVESTIMENTO S.A." },
-	{ code: "505", ispb: "32062580", name: "BANCO UBS (BRASIL) S.A." },
-	{ code: "506", ispb: "42066258", name: "RJI CORRETORA DE TITULOS E VALORES MOBILIARIOS LTDA" },
-	{
-		code: "507",
-		ispb: "37229413",
-		name: "SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO EFÍ S.A.",
-	},
-	{ code: "508", ispb: "61384004", name: "AVENUE SECURITIES BANCO DE INVESTIMENTO S.A." },
-	{ code: "509", ispb: "13935893", name: "CELCOIN INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "510", ispb: "39738065", name: "FFCRED SOCIEDADE DE CRÉDITO DIRETO S.A.." },
-	{ code: "511", ispb: "44683140", name: "MAGNUM SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "512",
-		ispb: "36266751",
-		name: "FINVEST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{ code: "513", ispb: "44728700", name: "ATF SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "514", ispb: "73302408", name: "EXIM SOCIEDADE CORRETORA DE CÂMBIO LTDA" },
-	{
-		code: "516",
-		ispb: "36583700",
-		name: "PLACARPAY S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "517", ispb: "03816413", name: "PAGUEVELOZ INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{
-		code: "518",
-		ispb: "37679449",
-		name: "MERCADO CRÉDITO SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.",
-	},
-	{
-		code: "519",
-		ispb: "40768766",
-		name: "LIONS TRUST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{ code: "520", ispb: "44705774", name: "SOMAPAY SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "521", ispb: "44019481", name: "PEAK SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A." },
-	{ code: "522", ispb: "47593544", name: "RED SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "523", ispb: "44292580", name: "HR DIGITAL - SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{
-		code: "524",
-		ispb: "45854066",
-		name: "WNT CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "525", ispb: "34265629", name: "INTERCAM CORRETORA DE CÂMBIO LTDA." },
-	{ code: "526", ispb: "46026562", name: "MONETARIE SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "527", ispb: "44478623", name: "ATICCA - SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "528",
-		ispb: "34829992",
-		name: "CBSF DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.- EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "529", ispb: "17079937", name: "PINBANK BRASIL INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "530", ispb: "47873449", name: "SER FINANCE SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "531", ispb: "34337707", name: "BMP SOCIEDADE DE CRÉDITO DIRETO S.A" },
-	{ code: "532", ispb: "45745537", name: "FUTURO SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "533", ispb: "22575466", name: "SRM BANK INSTITUIÇÃO DE PAGAMENTO S/A" },
-	{ code: "534", ispb: "00714671", name: "EWALLY INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "535", ispb: "39519944", name: "OPEA SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "536", ispb: "20855875", name: "NEON PAGAMENTOS S.A. - INSTITUIÇÃO DE PAGAMENTO" },
-	{
-		code: "537",
-		ispb: "45756448",
-		name: "SELECT CREDIT SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.",
-	},
-	{ code: "538", ispb: "20251847", name: "SUDACRED SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "539",
-		ispb: "00122327",
-		name: "SANTINVEST S.A. - CREDITO, FINANCIAMENTO E INVESTIMENTOS",
-	},
-	{ code: "540", ispb: "04849745", name: "HBI SOCIEDADE DE CRÉDITO DIRETO S/A." },
-	{ code: "541", ispb: "00954288", name: "FUNDO GARANTIDOR DE CREDITOS - FGC" },
-	{ code: "542", ispb: "18189547", name: "CLOUDWALK INSTITUIÇÃO DE PAGAMENTO E SERVICOS LTDA" },
-	{
-		code: "543",
-		ispb: "92825397",
-		name: "COOPERATIVA DE ECONOMIA E CRÉDITO MÚTUO DOS ELETRICITÁRIOS E DOS TRABALHADORES DAS EMPRESAS DO SETOR DE ENERGIA - COOPCRECE",
-	},
-	{ code: "544", ispb: "38593706", name: "MULTICRED SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "546", ispb: "30980539", name: "OKTO INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "547", ispb: "45331622", name: "BNK DIGITAL SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "548",
-		ispb: "06249129",
-		name: "RPW S/A SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "550", ispb: "32074986", name: "BEETELLER INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{
-		code: "551",
-		ispb: "48967968",
-		name: "VERT DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{ code: "552", ispb: "32192325", name: "UZZIPAY INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "553", ispb: "48707451", name: "PERCAPITAL SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "554", ispb: "28811341", name: "BANCO STONEX S.A." },
-	{
-		code: "555",
-		ispb: "02682287",
-		name: "PAN FINANCEIRA S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTOS",
-	},
-	{ code: "556", ispb: "40333582", name: "SAYGO CORRETORA DE CÂMBIO S.A." },
-	{ code: "557", ispb: "30944783", name: "PAGPRIME INSTITUICAO DE PAGAMENTO LTDA" },
-	{
-		code: "559",
-		ispb: "49288113",
-		name: "KANASTRA FINANCEIRA S.A, CREDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "560", ispb: "21995256", name: "MAG INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "561", ispb: "20757199", name: "PAY4FUN INSTITUICAO DE PAGAMENTO S.A." },
-	{
-		code: "562",
-		ispb: "18684408",
-		name: "AZIMUT BRASIL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{ code: "563", ispb: "40276692", name: "PROTEGE CASH INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{
-		code: "564",
-		ispb: "63019146",
-		name: "ANKOR CAPITAL - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S/A",
-	},
-	{ code: "565", ispb: "74014747", name: "ÁGORA CORRETORA DE TITULOS E VALORES MOBILIARIOS S.A." },
-	{ code: "566", ispb: "23114447", name: "FLAGSHIP INSTITUICAO DE PAGAMENTO LTDA" },
-	{
-		code: "567",
-		ispb: "33040601",
-		name: "MERCANTIL FINANCEIRA S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO.",
-	},
-	{ code: "568", ispb: "49933388", name: "BRCONDOS SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "569", ispb: "12473687", name: "CONTA PRONTA INSTITUICAO DE PAGAMENTO LTDA" },
-	{
-		code: "571",
-		ispb: "50489148",
-		name: "MONTE BRAVO CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "572", ispb: "51414521", name: "ALL IN CRED SOCIEDADE DE CREDITO DIRETO S.A." },
-	{ code: "573", ispb: "18282093", name: "OXY COMPANHIA HIPOTECÁRIA" },
-	{ code: "574", ispb: "48756121", name: "A55 SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "575", ispb: "48584954", name: "DGBK CREDIT S.A. - SOCIEDADE DE CRÉDITO DIRETO." },
-	{ code: "576", ispb: "11351086", name: "MERCADO BITCOIN INSTITUICAO DE PAGAMENTO LTDA" },
-	{
-		code: "577",
-		ispb: "10663610",
-		name: "DESENVOLVE SP - AGÊNCIA DE FOMENTO DO ESTADO DE SÃO PAULO S.A.",
-	},
-	{ code: "579", ispb: "49555647", name: "QUADRA SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "585", ispb: "50946592", name: "SETHI SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "586", ispb: "35810871", name: "Z1 INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{
-		code: "587",
-		ispb: "37678915",
-		name: "FIDD DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{ code: "588", ispb: "20308187", name: "AVANCARD PROVER INSTITUIÇÃO DE PAGAMENTO LTDA" },
-	{ code: "589", ispb: "51212088", name: "G5 SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "590",
-		ispb: "40473435",
-		name: "REPASSES FINANCEIROS E SOLUCOES TECNOLOGICAS INSTITUICAO DE PAGAMENTO S.A.",
-	},
-	{
-		code: "591",
-		ispb: "02671743",
-		name: "BANVOX DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "592", ispb: "45548763", name: "INSTITUIÇÃO DE PAGAMENTOS MAPS LTDA." },
-	{ code: "593", ispb: "27084098", name: "TRANSFEERA INSTITUIÇÃO DE PAGAMENTO S.A" },
-	{
-		code: "594",
-		ispb: "48703388",
-		name: "ASA SOCIEDADE DE CRÉDITO FINANCIAMENTO E INVESTIMENTO S.A.",
-	},
-	{ code: "595", ispb: "19468242", name: "IFOOD PAGO INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "596", ispb: "39696395", name: "CACTVS INSTITUICAO DE PAGAMENTO S.A" },
-	{ code: "597", ispb: "34747388", name: "ISSUER INSTITUICAO DE PAGAMENTO LTDA." },
-	{ code: "598", ispb: "50626276", name: "KONECT SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{
-		code: "599",
-		ispb: "36321990",
-		name: "AGORACRED S/A SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "600", ispb: "59118133", name: "Banco Luso Brasileiro S.A." },
-	{ code: "604", ispb: "31895683", name: "Banco Industrial do Brasil S.A." },
-	{ code: "610", ispb: "78626983", name: "Banco VR S.A." },
-	{ code: "611", ispb: "61820817", name: "Banco Paulista S.A." },
-	{ code: "612", ispb: "31880826", name: "Banco Guanabara S.A." },
-	{ code: "613", ispb: "60850229", name: "Omni Banco S.A." },
-	{ code: "614", ispb: "52440987", name: "SANTS SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "615", ispb: "37470405", name: "SMART SOLUTIONS GROUP INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "619", ispb: "49931906", name: "TRIO INSTITUICAO DE PAGAMENTO LTDA." },
-	{ code: "620", ispb: "51342763", name: "REVOLUT SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "623", ispb: "59285411", name: "Banco Pan S.A." },
-	{ code: "626", ispb: "61348538", name: "BANCO C6 CONSIGNADO S.A." },
-	{ code: "630", ispb: "58497702", name: "BANCO LETSBANK S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL" },
-	{ code: "632", ispb: "52586293", name: "Z-ON SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "633", ispb: "68900810", name: "Banco Rendimento S.A." },
-	{ code: "634", ispb: "17351180", name: "BANCO TRIANGULO S.A." },
-	{ code: "636", ispb: "40112555", name: "GIRO - SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{ code: "637", ispb: "60889128", name: "BANCO SOFISA S.A." },
-	{ code: "643", ispb: "62144175", name: "Banco Pine S.A." },
-	{ code: "644", ispb: "54647259", name: "321 SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "646",
-		ispb: "91669747",
-		name: "DM SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A",
-	},
-	{ code: "651", ispb: "25104230", name: "PAGARE INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "653", ispb: "61024352", name: "BANCO PLENO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL" },
-	{ code: "654", ispb: "92874270", name: "BANCO DIGIMAIS S.A." },
-	{ code: "655", ispb: "59588111", name: "Banco Votorantim S.A." },
-	{ code: "659", ispb: "35210410", name: "ONEKEY PAYMENTS INSTITUICAO DE PAGAMENTO SA" },
-	{ code: "660", ispb: "34471744", name: "PAGME INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{ code: "661", ispb: "55428859", name: "FREEX SOCIEDADE CORRETORA DE CÂMBIO S.A." },
-	{ code: "662", ispb: "32708748", name: "WE PAY OUT INSTITUICAO DE PAGAMENTO LTDA." },
-	{
-		code: "663",
-		ispb: "44782130",
-		name: "ACTUAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
-	},
-	{ code: "665", ispb: "20018183", name: "STARK BANK S.A. - INSTITUICAO DE PAGAMENTO" },
-	{ code: "668", ispb: "48632754", name: "CELCOIN SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "669", ispb: "47133056", name: "TRANSFERO INSTITUICAO DE PAGAMENTO LTDA." },
-	{ code: "670", ispb: "11491029", name: "BSN PAGAMENTOS INSTITUIÇÃO DE PAGAMENTO LTDA" },
-	{ code: "671", ispb: "26264220", name: "ZERO INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{
-		code: "672",
-		ispb: "53505601",
-		name: "STONE SOCIEDADE DE CREDITO, FINANCIAMENTO E INVESTIMENTO S.A.",
-	},
-	{
-		code: "673",
-		ispb: "08482873",
-		name: "COOPERATIVA DE CRÉDITO RURAL DO AGRESTE ALAGOANO - COOPERAGRE",
-	},
-	{ code: "674", ispb: "27970567", name: "HINOVA PAY INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "675", ispb: "30723871", name: "CASAS BAHIA PAY INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{
-		code: "676",
-		ispb: "35479592",
-		name: "DUFRIO FINANCEIRA, CRÉDITO, FINANCIAMENTO E INVESTIMENTOS S.A.",
-	},
-	{ code: "677", ispb: "33630661", name: "GOWD INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{ code: "678", ispb: "45716916", name: "FIDEM SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{ code: "679", ispb: "36690516", name: "PAY INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "680", ispb: "55823094", name: "DELTA GLOBAL SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "681", ispb: "50871921", name: "MT INSTITUICAO DE PAGAMENTO SA" },
-	{ code: "682", ispb: "46505612", name: "MONERY INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "683", ispb: "30507541", name: "BRASIL CASH INSTITUICAO DE PAGAMENTO S.A" },
-	{
-		code: "684",
-		ispb: "56392166",
-		name: "HARMOS S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "685", ispb: "26615279", name: "TYCOON TECHNOLOGY INSTITUICAO DE PAGAMENTO S.A" },
-	{ code: "686", ispb: "12481100", name: "BIZ INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "687", ispb: "35340796", name: "INCO SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A." },
-	{ code: "688", ispb: "43978697", name: "KIKAI SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "690", ispb: "16814330", name: "BK INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "691", ispb: "49686505", name: "WASU - WALLET SUPPORT INSTITUIÇÃO DE PAGAMENTO LTDA" },
-	{ code: "692", ispb: "56198117", name: "ZYDI SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "693", ispb: "32820711", name: "EFEX INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "694", ispb: "54811417", name: "WOOVI INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "695", ispb: "35523352", name: "BEES INSTITUICAO DE PAGAMENTO LTDA." },
-	{ code: "696", ispb: "50032584", name: "LOAN BRASIL SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "697", ispb: "45056494", name: "JM CORRETORA DE CÂMBIO LTDA." },
-	{ code: "698", ispb: "58367961", name: "BIT SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "699", ispb: "59396084", name: "BFC SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{ code: "700", ispb: "53822116", name: "MW INSTITUICAO DE PAGAMENTO LTDA" },
-	{
-		code: "701",
-		ispb: "51118615",
-		name: "INTEGRAÇÃO DE CRÉDITO E COBRANÇA SOCIEDADE DE CRÉDITO DIRETO S.A.",
-	},
-	{
-		code: "703",
-		ispb: "10440482",
-		name: "GETNET ADQUIRÊNCIA E SERVIÇOS PARA MEIOS DE PAGAMENTO S.A. INSTITUIÇÃO DE PAGAMENTO",
-	},
-	{ code: "704", ispb: "44663846", name: "FESTOR INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{ code: "707", ispb: "62232889", name: "Banco Daycoval S.A." },
-	{ code: "708", ispb: "33588252", name: "BANCO INDUSCRED DE INVESTIMENTO S.A." },
-	{ code: "712", ispb: "78632767", name: "OURIBANK S.A. BANCO MÚLTIPLO" },
-	{ code: "714", ispb: "00411939", name: "FINAMAX S.A. - CREDITO, FINANCIAMENTO E INVESTIMENTO" },
-	{
-		code: "719",
-		ispb: "33884941",
-		name: "BANCO MASTER MÚLTIPLO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL",
-	},
-	{ code: "741", ispb: "00517645", name: "BANCO RIBEIRAO PRETO S.A." },
-	{ code: "743", ispb: "00795423", name: "Banco Semear S.A." },
-	{ code: "745", ispb: "33479023", name: "Banco Citibank S.A." },
-	{ code: "747", ispb: "01023570", name: "Banco Rabobank International Brasil S.A." },
-	{ code: "748", ispb: "01181521", name: "BANCO COOPERATIVO SICREDI S.A." },
-	{ code: "751", ispb: "29030467", name: "Scotiabank Brasil S.A. Banco Múltiplo" },
-	{ code: "752", ispb: "01522368", name: "Banco BNP Paribas Brasil S.A." },
-	{ code: "753", ispb: "74828799", name: "Novo Banco Continental S.A. - Banco Múltiplo" },
-	{ code: "754", ispb: "76543115", name: "Banco Sistema S.A." },
-	{ code: "755", ispb: "62073200", name: "Bank of America Merrill Lynch Banco Múltiplo S.A." },
-	{ code: "756", ispb: "02038232", name: "BANCO COOPERATIVO SICOOB S.A. - BANCO SICOOB" },
-	{ code: "757", ispb: "02318507", name: "BANCO KEB HANA DO BRASIL S.A." },
-	{ code: "759", ispb: "42963742", name: "BANSUR JM SOCIEDADE DE CRÉDITO DIRETO S/A" },
-	{
-		code: "760",
-		ispb: "34139916",
-		name: "EMCASH SERVIÇOS FINANCEIROS SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A.",
-	},
-	{
-		code: "761",
-		ispb: "53842122",
-		name: "URBANO S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "763", ispb: "56106523", name: "VUE INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{
-		code: "764",
-		ispb: "04306351",
-		name: "INDEPENDÊNCIA COOPERATIVA DE CRÉDITO E INVESTIMENTO - INDEPENDÊNCIA COOPERATIVA DE CRÉDITO",
-	},
-	{ code: "765", ispb: "37753531", name: "PAGSMILE INSTITUIÇÃO DE PAGAMENTO LTDA." },
-	{ code: "766", ispb: "52833288", name: "LB PAY INSTITUIÇÃO DE PAGAMENTO LTDA" },
-	{
-		code: "767",
-		ispb: "62264924",
-		name: "QORE DISTRIBUIDORA DE TITULOS E VALORES MOBILIÁRIOS LTDA",
-	},
-	{
-		code: "768",
-		ispb: "20443996",
-		name: "BECKER FINANCEIRA S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "769", ispb: "24313102", name: "99PAY INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "770", ispb: "38320462", name: "V3 INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "771", ispb: "57824223", name: "WX INSTITUICAO DE PAGAMENTO LTDA" },
-	{
-		code: "772",
-		ispb: "20833992",
-		name: "COOPERATIVA DE CRÉDITO MÚTUO DOS EMPREGADOS DO CENTRO UNIVERSITÁRIO NEWTON PAIVA LTDA. - CREDIPAIVA",
-	},
-	{ code: "773", ispb: "53908413", name: "KIWIFY INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "774", ispb: "33959738", name: "MOVA SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A." },
-	{ code: "775", ispb: "47381104", name: "CONTAAZUL INSTITUICAO DE PAGAMENTO LTDA." },
-	{ code: "778", ispb: "58674454", name: "PB SOCIEDADE DE CREDITO DIRETO S.A." },
-	{ code: "780", ispb: "12102128", name: "SAFETYPAY BRASIL INSTITUICAO DE PAGAMENTO LTDA" },
-	{
-		code: "781",
-		ispb: "58006471",
-		name: "BARU DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.",
-	},
-	{ code: "783", ispb: "31680151", name: "SWAP INSTITUIÇÃO DE PAGAMENTO S.A." },
-	{ code: "785", ispb: "53058329", name: "LA FINTECA INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "786", ispb: "52076716", name: "AWX BRASIL  INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "787", ispb: "10789035", name: "ATTRUS INSTITUIÇÃO DE PAGAMENTO S/A" },
-	{ code: "788", ispb: "35713491", name: "PROTOTYPE INSTITUICAO DE PAGAMENTO S.A." },
-	{ code: "789", ispb: "57654096", name: "APUSDIGITAL INSTITUICAO DE PAGAMENTO LTDA" },
-	{ code: "790", ispb: "54024532", name: "MAX INSTITUIÇÃO DE PAGAMENTO LTDA" },
-	{
-		code: "791",
-		ispb: "62448932",
-		name: "MULTIPLIKE FINANCEIRA S.A. SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO",
-	},
-	{ code: "792", ispb: "44921281", name: "NIXFIN SOCIEDADE DE CRÉDITO DIRETO S.A." },
-	{
-		code: "793",
-		ispb: "61021673",
-		name: "MAGALUPAY - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.",
-	},
-	{ code: "794", ispb: "44323831", name: "ATUAL SOCIEDADE CORRETORA DE CÂMBIO LTDA" },
-	{ code: "795", ispb: "52067630", name: "BANCO TRATON BRASIL S.A." },
-	{ code: "804", ispb: "32343119", name: "MÊNTORE INSTITUIÇÃO DE PAGAMENTO S.A." },
-];
+/**
+ * The ISPB of each bank, 8 characters each, one after the other, in the order of `COMPE_CODES`
+ * (`bank-codes.ts`). Each sits on a line of its own, ended by a line continuation that adds
+ * nothing to the value, so a refresh diffs to the banks that changed.
+ *
+ * Generated by `node ./scripts/banks.ts` from https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv. Do not edit by hand.
+ */
+export const BANK_ISPBS =
+	"00000000\
+04902979\
+07237373\
+33657248\
+81723108\
+61809182\
+04866275\
+09274232\
+02819125\
+04715685\
+42272526\
+57839805\
+28127603\
+53720128\
+10866788\
+03323840\
+90400888\
+06271464\
+04913711\
+03609817\
+92702067\
+13009717\
+04913129\
+04184779\
+04332281\
+48795256\
+02801938\
+61033106\
+00000208\
+03017677\
+03532415\
+07656500\
+00416968\
+34111187\
+09516419\
+73622748\
+10264663\
+07679404\
+10690848\
+02398976\
+05463212\
+11476673\
+62109566\
+07945233\
+11758741\
+11703662\
+00997185\
+04632856\
+03046391\
+00806535\
+62287735\
+02332886\
+00360305\
+07652226\
+15114366\
+36113876\
+61723847\
+13720915\
+33603457\
+10664513\
+33147315\
+15357060\
+45246410\
+13220493\
+09512542\
+19307785\
+18520834\
+09313766\
+61747085\
+17453575\
+10398952\
+33862244\
+00315557\
+10853017\
+55230916\
+62169875\
+09526594\
+16944141\
+02992317\
+13059145\
+50579044\
+24074692\
+15581638\
+09105360\
+05442029\
+13486793\
+43180355\
+02685483\
+09210106\
+33775974\
+07512441\
+03973814\
+04257795\
+20155248\
+07799277\
+32648370\
+16501555\
+30306294\
+92894922\
+54403563\
+91884981\
+71027866\
+75647891\
+58616418\
+62421979\
+60746948\
+31597552\
+33923798\
+28195667\
+61182408\
+50585090\
+14388334\
+08609934\
+18236120\
+33644196\
+33132044\
+14511781\
+53518684\
+27842177\
+00250699\
+08253539\
+11581339\
+11970623\
+27652684\
+23862762\
+76461557\
+89960090\
+62237649\
+94968518\
+08561701\
+28650236\
+71590442\
+04062902\
+17772370\
+04814563\
+33042151\
+13370835\
+40353377\
+03751794\
+22610500\
+07693858\
+61186680\
+11495073\
+07450604\
+18188384\
+01073966\
+10573521\
+21332862\
+03311443\
+32402502\
+00556603\
+13673855\
+13140088\
+15124464\
+27098060\
+31872495\
+60701190\
+32997490\
+33264668\
+27214112\
+01330387\
+29162769\
+34335592\
+09464032\
+05351887\
+02276653\
+01027058\
+62285390\
+09089356\
+68757681\
+61533584\
+08357240\
+61088183\
+35977097\
+27351731\
+33172537\
+17826860\
+01852137\
+01658426\
+22896431\
+60814191\
+04307598\
+21018182\
+11165756\
+03844699\
+30680829\
+03215790\
+17184037\
+59274605\
+08240446\
+59109165\
+07207996\
+08673569\
+13884775\
+34088029\
+31749596\
+01701201\
+05491616\
+15111975\
+36947229\
+37880206\
+37241230\
+37715993\
+00329598\
+36586946\
+05684234\
+05192316\
+15173776\
+01858774\
+37526080\
+17157777\
+19324634\
+37414009\
+38129006\
+39343350\
+58160789\
+00460065\
+03881423\
+11285104\
+27302181\
+39664698\
+00204963\
+44077014\
+38224857\
+67030395\
+16695922\
+82096447\
+39416705\
+40654622\
+35551187\
+12392983\
+39669186\
+37555231\
+13203354\
+40475846\
+39676772\
+41592532\
+38429045\
+60498557\
+39587424\
+07253654\
+42047025\
+19540550\
+39908427\
+40434681\
+60518222\
+40083667\
+33886862\
+04862600\
+07138049\
+18394228\
+33466988\
+10371492\
+45860531\
+33042953\
+11760553\
+60394079\
+43599047\
+42259084\
+36864992\
+62331228\
+46518205\
+44189447\
+45283173\
+32062580\
+42066258\
+37229413\
+61384004\
+13935893\
+39738065\
+44683140\
+36266751\
+44728700\
+73302408\
+36583700\
+03816413\
+37679449\
+40768766\
+44705774\
+44019481\
+47593544\
+44292580\
+45854066\
+34265629\
+46026562\
+44478623\
+34829992\
+17079937\
+47873449\
+34337707\
+45745537\
+22575466\
+00714671\
+39519944\
+20855875\
+45756448\
+20251847\
+00122327\
+04849745\
+00954288\
+18189547\
+92825397\
+38593706\
+30980539\
+45331622\
+06249129\
+32074986\
+48967968\
+32192325\
+48707451\
+28811341\
+02682287\
+40333582\
+30944783\
+49288113\
+21995256\
+20757199\
+18684408\
+40276692\
+63019146\
+74014747\
+23114447\
+33040601\
+49933388\
+12473687\
+50489148\
+51414521\
+18282093\
+48756121\
+48584954\
+11351086\
+10663610\
+49555647\
+50946592\
+35810871\
+37678915\
+20308187\
+51212088\
+40473435\
+02671743\
+45548763\
+27084098\
+48703388\
+19468242\
+39696395\
+34747388\
+50626276\
+36321990\
+59118133\
+31895683\
+78626983\
+61820817\
+31880826\
+60850229\
+52440987\
+37470405\
+49931906\
+51342763\
+59285411\
+61348538\
+58497702\
+52586293\
+68900810\
+17351180\
+40112555\
+60889128\
+62144175\
+54647259\
+91669747\
+25104230\
+61024352\
+92874270\
+59588111\
+35210410\
+34471744\
+55428859\
+32708748\
+44782130\
+20018183\
+48632754\
+47133056\
+11491029\
+26264220\
+53505601\
+08482873\
+27970567\
+30723871\
+35479592\
+33630661\
+45716916\
+36690516\
+55823094\
+50871921\
+46505612\
+30507541\
+56392166\
+26615279\
+12481100\
+35340796\
+43978697\
+16814330\
+49686505\
+56198117\
+32820711\
+54811417\
+35523352\
+50032584\
+45056494\
+58367961\
+59396084\
+53822116\
+51118615\
+10440482\
+44663846\
+62232889\
+33588252\
+78632767\
+00411939\
+33884941\
+00517645\
+00795423\
+33479023\
+01023570\
+01181521\
+29030467\
+01522368\
+74828799\
+76543115\
+62073200\
+02038232\
+02318507\
+42963742\
+34139916\
+53842122\
+56106523\
+04306351\
+37753531\
+52833288\
+62264924\
+20443996\
+24313102\
+38320462\
+57824223\
+20833992\
+53908413\
+33959738\
+47381104\
+58674454\
+12102128\
+58006471\
+31680151\
+53058329\
+52076716\
+10789035\
+35713491\
+57654096\
+54024532\
+62448932\
+44921281\
+61021673\
+44323831\
+52067630\
+32343119";
+
+/**
+ * The name of each bank, one per line, in the order of `COMPE_CODES` (`bank-codes.ts`).
+ *
+ * Generated by `node ./scripts/banks.ts` from https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv. Do not edit by hand.
+ */
+export const BANK_NAMES =
+	"Banco do Brasil S.A.\n\
+BANCO DA AMAZONIA S.A.\n\
+Banco do Nordeste do Brasil S.A.\n\
+BANCO NACIONAL DE DESENVOLVIMENTO ECONOMICO E SOCIAL\n\
+CREDICOAMO CREDITO RURAL COOPERATIVA\n\
+UBS (BRASIL) CORRETORA DE VALORES S.A.\n\
+Banco Inbursa S.A.\n\
+STATE STREET BRASIL S.A. - BANCO COMERCIAL\n\
+UBS BB CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+COOPERATIVA DE CRÉDITO MÚTUO DOS DESPACHANTES DE TRÂNSITO DE SANTA CATARINA E RIO GRANDE DO SUL - SICOOB CREDITRAN\n\
+BNY Mellon Banco S.A.\n\
+Banco Tricury S.A.\n\
+BANESTES S.A. BANCO DO ESTADO DO ESPIRITO SANTO\n\
+CONTA SIMPLES SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+Banco Bandepe S.A.\n\
+Banco Alfa S.A.\n\
+BANCO SANTANDER (BRASIL) S.A.\n\
+Banco Bradesco BBI S.A.\n\
+Banco do Estado do Pará S.A.\n\
+Banco Cargill S.A.\n\
+Banco do Estado do Rio Grande do Sul S.A.\n\
+Banco do Estado de Sergipe S.A.\n\
+CONFIDENCE SOCIEDADE CORRETORA DE CAMBIO S.A.\n\
+Banco Bradescard S.A.\n\
+GOLDMAN SACHS DO BRASIL BANCO MULTIPLO S.A.\n\
+Banco AndBank (Brasil) S.A.\n\
+BANCO MORGAN STANLEY S.A.\n\
+Banco Crefisa S.A.\n\
+BRB - BANCO DE BRASILIA S.A.\n\
+Banco J. Safra S.A.\n\
+BANCO ABN AMRO CLEARING S.A.\n\
+Banco KDB do Brasil S.A.\n\
+Banco Inter S.A.\n\
+Haitong Banco de Investimento do Brasil S.A.\n\
+PICPAY BANK - BANCO MÚLTIPLO S.A\n\
+BT CORRETORA DE CÂMBIO LTDA.\n\
+BancoSeguro S.A.\n\
+BANCO TOPÁZIO S.A.\n\
+Banco da China Brasil S.A.\n\
+SISPRIME DO BRASIL - COOPERATIVA DE CRÉDITO\n\
+Cooperativa Central de Crédito - Ailos\n\
+BANCO RANDON S.A.\n\
+CREDISAN COOPERATIVA DE CRÉDITO\n\
+PÓLOCRED   SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.\n\
+Banco Finaxis S.A.\n\
+BANCO TRAVELEX S.A.\n\
+Banco B3 S.A.\n\
+CREDISIS - CENTRAL DE COOPERATIVAS DE CRÉDITO\n\
+UNIPRIME CENTRAL NACIONAL - CENTRAL NACIONAL DE COOPERATIVA DE CREDITO\n\
+Planner Corretora de Valores S.A.\n\
+WARREN RENA DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+XP INVESTIMENTOS CORRETORA DE CÂMBIO,TÍTULOS E VALORES MOBILIÁRIOS S/A\n\
+CAIXA ECONOMICA FEDERAL\n\
+Lecca Crédito, Financiamento e Investimento S/A\n\
+Banco Bocom BBM S.A.\n\
+OLIVEIRA TRUST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIARIOS S.A.\n\
+NEON CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+Banco Western Union do Brasil S.A.\n\
+BANCO RODOBENS S.A.\n\
+Banco Agibank S.A.\n\
+Banco Bradesco BERJ S.A.\n\
+Banco Woori Bank do Brasil S.A.\n\
+BANCO GENIAL S.A.\n\
+BR Partners Banco de Investimento S.A.\n\
+Codepe Corretora de Valores e Câmbio S.A.\n\
+BRAZA BANK S.A. BANCO DE CÂMBIO\n\
+UBS BB BANCO DE INVESTIMENTO S.A.\n\
+CARUANA S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+TULLETT PREBON BRASIL CORRETORA DE VALORES E CÂMBIO LTDA\n\
+ICBC do Brasil Banco Múltiplo S.A.\n\
+CONFEDERAÇÃO NACIONAL DAS COOPERATIVAS CENTRAIS DE CRÉDITO E ECONOMIA FAMILIAR E SOLIDÁRIA - CRESOL CONFEDERAÇÃO\n\
+BGC LIQUIDEZ DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+COOPERATIVA CENTRAL DE CRÉDITO UNICRED DO BRASIL - UNICRED DO BRASIL\n\
+GET MONEY SOCIEDADE CORRETORA DE CÂMBIO S.A.\n\
+Intesa Sanpaolo Brasil S.A. - Banco Múltiplo\n\
+NU INVESTIMENTOS S.A. - CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS\n\
+BANCO MASTER DE INVESTIMENTO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+Broker Brasil Corretora de Câmbio Ltda.\n\
+INTEX BANK BANCO DE CÂMBIO S.A.\n\
+EBURY BANCO DE CÂMBIO S.A.\n\
+LEVYCAM - CORRETORA DE CAMBIO E VALORES LTDA.\n\
+GUITTA CORRETORA DE CAMBIO LTDA.\n\
+Facta Financeira S.A. - Crédito Financiamento e Investimento\n\
+ICAP do Brasil Corretora de Títulos e Valores Mobiliários Ltda.\n\
+Casa do Crédito S.A. Sociedade de Crédito ao Microempreendedor\n\
+APEX GROUP DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+PEFISA S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+CM CAPITAL MARKETS CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+SOCRED S.A. - SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE\n\
+ATIVA INVESTIMENTOS S.A. CORRETORA DE TÍTULOS, CÂMBIO E VALORES\n\
+HS FINANCEIRA S/A CREDITO, FINANCIAMENTO E INVESTIMENTOS\n\
+SERVICOOP - COOPERATIVA DE CRÉDITO DOS SERVIDORES PÚBLICOS ESTADUAIS E MUNICIPAIS DO RIO GRANDE DO SUL\n\
+Nova Futura Corretora de Títulos e Valores Mobiliários Ltda.\n\
+UNIDA DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+VALOR S/A SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+FAIR SOCIEDADE CORRETORA DE CÂMBIO S.A.\n\
+STONE INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+Banco BTG Pactual S.A.\n\
+Banco Original S.A.\n\
+Banco Arbi S.A.\n\
+Banco John Deere S.A.\n\
+Banco BS2 S.A.\n\
+BANCO CRÉDIT AGRICOLE BRASIL S.A.\n\
+Banco Fibra S.A.\n\
+BANCO BMG SOLUÇÕES FINANCEIRAS S.A.\n\
+Banco Bradesco S.A.\n\
+BANCO CLASSICO S.A.\n\
+BANCO MASTER S/A - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+Banco ABC Brasil S.A.\n\
+Banco Investcred Unibanco S.A.\n\
+BANCO BMG CONSIGNADO S.A.\n\
+PARANÁ BANCO S.A.\n\
+MONEYCORP BANCO DE CÂMBIO S.A.\n\
+NU PAGAMENTOS S.A. - INSTITUIÇÃO DE PAGAMENTO\n\
+Banco Fator S.A.\n\
+BANCO CEDULA S.A.\n\
+BARI COMPANHIA HIPOTECÁRIA\n\
+BANCO HSBC S.A.\n\
+BPY CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+AGK CORRETORA DE CAMBIO S.A.\n\
+COOPERATIVA DE CREDITO SULCREDI AMPLEA\n\
+BMP SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E A EMPRESA DE PEQUENO PORTE LTDA.\n\
+BANCO SENFF S.A.\n\
+Genial Investimentos Corretora de Valores Mobiliários S.A.\n\
+WILL FINANCEIRA S.A. CRÉDITO, FINANCIAMENTO E INVESTIMENTO - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+Cooperativa de Crédito Rural Coopavel\n\
+RB INVESTIMENTOS DISTRIBUIDORA DE TITULOS E VALORES MOBILIARIOS LIMITADA\n\
+CAROL DISTRIBUIDORA DE TITULOS E VALORES MOBILIARIOS LTDA.\n\
+EFX CORRETORA DE CÂMBIO LTDA.\n\
+PAGSEGURO INTERNET INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+GALAPAGOS CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+Lastro RDV Distribuidora de Títulos e Valores Mobiliários Ltda.\n\
+OZ CORRETORA DE CÂMBIO S.A.\n\
+VIPS CORRETORA DE CÂMBIO S.A.\n\
+BANCO AFINZ S.A. - BANCO MÚLTIPLO\n\
+Banco de la Nacion Argentina\n\
+DOCK INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+FOURTRADE CORRETORA DE CÂMBIO LTDA.\n\
+Terra Investimentos Distribuidora de Títulos e Valores Mobiliários Ltda.\n\
+VORTX DISTRIBUIDORA DE TITULOS E VALORES MOBILIARIOS LTDA.\n\
+HSCM - SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.\n\
+Banco BMG S.A.\n\
+OM DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+BANK OF CHINA (BRASIL) BANCO MÚLTIPLO S/A\n\
+CREFAZ SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E A EMPRESA DE PEQUENO PORTE S.A.\n\
+Cooperativa de Crédito Rural de Abelardo Luz - Sulcredi/Crediluz\n\
+MERCADO PAGO INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+CARTOS SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+MEUTUDO S.A - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+QI Sociedade de Crédito Direto S.A.\n\
+BANCO BARI DE INVESTIMENTOS E FINANCIAMENTOS S.A.\n\
+OSLO CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A\n\
+ACESSO SOLUÇÕES DE PAGAMENTO S.A. - INSTITUIÇÃO DE PAGAMENTO\n\
+BANCO BESA S.A.\n\
+Banco Digio S.A.\n\
+Banco C6 S.A.\n\
+ITAÚ UNIBANCO S.A.\n\
+Creditas Sociedade de Crédito Direto S.A.\n\
+Banco XP S.A.\n\
+AL5 S.A. SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+COOPERATIVA DE CRÉDITO POPULAR DO BRASIL - CREHNOR\n\
+SANTANDER CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+ÓTIMO SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+MIDWAY S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+ZEMA CRÉDITO, FINANCIAMENTO E INVESTIMENTO S/A\n\
+TRINUS CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+CIELO S.A. - INSTITUIÇÃO DE PAGAMENTO\n\
+QI CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+EFÍ S.A. - INSTITUIÇÃO DE PAGAMENTO\n\
+SIMPAUL CORRETORA DE CAMBIO E VALORES MOBILIARIOS  S.A.\n\
+BANCO SOCIETE GENERALE BRASIL S.A.\n\
+Banco CSF S.A.\n\
+Banco Mizuho do Brasil S.A.\n\
+UP.P SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A.\n\
+REALIZE SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.\n\
+BANCO J.P. MORGAN S.A.\n\
+BMS SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+BANCO BRASILEIRO DE CRÉDITO SOCIEDADE ANÔNIMA\n\
+COOPERFORTE COOPERATIVA DE CRÉDITO E INVESTIMENTOS LTDA\n\
+PICPAY INSTITUIçãO DE PAGAMENTO S.A.\n\
+BANCO MERCEDES-BENZ DO BRASIL S.A.\n\
+FIDÚCIA SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LIMITADA.\n\
+EBANX INSTITUICAO DE PAGAMENTOS LTDA.\n\
+GLOBAL FINANÇAS SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.\n\
+COOPERATIVA DE ECONOMIA E CREDITO MUTUO DOS TRABALHADORES PORTUARIOS DA GRANDE VITORIA - CREDESTIVA.\n\
+NU FINANCEIRA S.A. - Sociedade de Crédito, Financiamento e Investimento\n\
+Banco Toyota do Brasil S.A.\n\
+Banco Mercantil do Brasil S.A.\n\
+BANCO GM S.A.\n\
+COOPERATIVA DE CREDITO RURAL DE IBIAM - SULCREDI/IBIAM\n\
+Banco Volkswagen S.A.\n\
+Banco Bradesco Financiamentos S.A.\n\
+F.D'GOLD - DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+MAGALUPAY INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+LISTO SOCIEDADE DE CREDITO DIRETO S.A.\n\
+IDEAL CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+Kirton Bank S.A. - Banco Múltiplo\n\
+COOPERATIVA DE CRÉDITO, POUPANÇA E SERVIÇOS FINANCEIROS - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+IUGU INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+COBUCCIO S/A - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTOS\n\
+CORA SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.\n\
+SUMUP SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.\n\
+ACCREDITO - SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+SEFER INVESTIMENTOS DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+BONUSPAGO SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+PLANNER SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+Via Certa Financiadora S.A. - Crédito, Financiamento e Investimentos\n\
+SOCIAL BANK BANCO MÚLTIPLO S/A\n\
+BANCO BV S.A.\n\
+LEND SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+BANCO NACIONAL S.A.\n\
+LAMARA SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+ZIPDIN SOLUÇÕES DIGITAIS SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+NUMBRS SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+LAR COOPERATIVA DE CRÉDITO - LAR CREDI\n\
+Banco Safra S.A.\n\
+COLUNA S/A DISTRIBUIDORA DE TITULOS E VALORES MOBILIÁRIOS\n\
+SOCINAL S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+NEON FINANCEIRA - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A\n\
+COOPERATIVA DE CRÉDITO DOS SERVIDORES DA UNIVERSIDADE FEDERAL DO ESPIRITO SANTO\n\
+CREDSYSTEM SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+COOPERATIVA DE CREDITO RURAL SEARA - CREDISEARA\n\
+BR-CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+DELFINANCE SOCIEDADE DE CREDITO DIRETO S.A.\n\
+TRUSTEE DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA. - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+ID CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+CREDI&GENTE - COOPERATIVA DE CRÉDITO E INVESTIMENTOS\n\
+OCTA SOCIEDADE DE CRÉDITO DIRETO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+TRINUS SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+PLANTAE S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+MIRAE ASSET (BRASIL) CORRETORA DE CÂMBIO, TÍTULOS  E VALORES MOBILIÁRIOS LTDA.\n\
+HEMERA DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+DM SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+FITS INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+J17 - SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+CREDIFIT SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+MÉRITO DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+VIS DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+Banco MUFG Brasil S.A.\n\
+UY3 SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+HEDGE INVESTMENTS DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+UNAVANTI SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+ASAAS GESTÃO FINANCEIRA INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+STARK SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+AZUMI DISTRIBUIDORA DE TíTULOS E VALORES MOBILIáRIOS LTDA.\n\
+Banco Sumitomo Mitsui Brasileiro S.A.\n\
+CAPITAL CONSIG SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+MASTER S/A CORRETORA DE CÂMBIO, TÍTULOS E VALORES MOBILIÁRIOS - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+PORTOSEG S.A. - CREDITO, FINANCIAMENTO E INVESTIMENTO\n\
+PICPAY INVEST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+CDC SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+Banco Caixa Geral - Brasil S.A.\n\
+Banco Yamaha Motor do Brasil S.A.\n\
+IDEA MAKER INSTITUICAO DE PAGAMENTO LTDA\n\
+Citibank N.A.\n\
+GAZINCRED S.A. SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+Banco ItauBank S.A.\n\
+SUPERLÓGICA SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+ARTTA SOCIEDADE DE CRÉDITO DIRETO S.A\n\
+APEX DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+DEUTSCHE BANK S.A. - BANCO ALEMAO\n\
+JPMorgan Chase Bank, National Association\n\
+Banco de La Provincia de Buenos Aires\n\
+BBVA BRASIL BANCO DE INVESTIMENTO S.A.\n\
+BANCO UBS (BRASIL) S.A.\n\
+RJI CORRETORA DE TITULOS E VALORES MOBILIARIOS LTDA\n\
+SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO EFÍ S.A.\n\
+AVENUE SECURITIES BANCO DE INVESTIMENTO S.A.\n\
+CELCOIN INSTITUICAO DE PAGAMENTO S.A.\n\
+FFCRED SOCIEDADE DE CRÉDITO DIRETO S.A..\n\
+MAGNUM SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+FINVEST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+ATF SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+EXIM SOCIEDADE CORRETORA DE CÂMBIO LTDA\n\
+PLACARPAY S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+PAGUEVELOZ INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+MERCADO CRÉDITO SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.\n\
+LIONS TRUST DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+SOMAPAY SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+PEAK SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A.\n\
+RED SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+HR DIGITAL - SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+WNT CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+INTERCAM CORRETORA DE CÂMBIO LTDA.\n\
+MONETARIE SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+ATICCA - SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+CBSF DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.- EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+PINBANK BRASIL INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+SER FINANCE SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+BMP SOCIEDADE DE CRÉDITO DIRETO S.A\n\
+FUTURO SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+SRM BANK INSTITUIÇÃO DE PAGAMENTO S/A\n\
+EWALLY INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+OPEA SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+NEON PAGAMENTOS S.A. - INSTITUIÇÃO DE PAGAMENTO\n\
+SELECT CREDIT SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE LTDA.\n\
+SUDACRED SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+SANTINVEST S.A. - CREDITO, FINANCIAMENTO E INVESTIMENTOS\n\
+HBI SOCIEDADE DE CRÉDITO DIRETO S/A.\n\
+FUNDO GARANTIDOR DE CREDITOS - FGC\n\
+CLOUDWALK INSTITUIÇÃO DE PAGAMENTO E SERVICOS LTDA\n\
+COOPERATIVA DE ECONOMIA E CRÉDITO MÚTUO DOS ELETRICITÁRIOS E DOS TRABALHADORES DAS EMPRESAS DO SETOR DE ENERGIA - COOPCRECE\n\
+MULTICRED SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+OKTO INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+BNK DIGITAL SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+RPW S/A SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+BEETELLER INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+VERT DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+UZZIPAY INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+PERCAPITAL SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+BANCO STONEX S.A.\n\
+PAN FINANCEIRA S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTOS\n\
+SAYGO CORRETORA DE CÂMBIO S.A.\n\
+PAGPRIME INSTITUICAO DE PAGAMENTO LTDA\n\
+KANASTRA FINANCEIRA S.A, CREDITO, FINANCIAMENTO E INVESTIMENTO\n\
+MAG INSTITUICAO DE PAGAMENTO LTDA\n\
+PAY4FUN INSTITUICAO DE PAGAMENTO S.A.\n\
+AZIMUT BRASIL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA\n\
+PROTEGE CASH INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+ANKOR CAPITAL - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S/A\n\
+ÁGORA CORRETORA DE TITULOS E VALORES MOBILIARIOS S.A.\n\
+FLAGSHIP INSTITUICAO DE PAGAMENTO LTDA\n\
+MERCANTIL FINANCEIRA S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO.\n\
+BRCONDOS SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+CONTA PRONTA INSTITUICAO DE PAGAMENTO LTDA\n\
+MONTE BRAVO CORRETORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+ALL IN CRED SOCIEDADE DE CREDITO DIRETO S.A.\n\
+OXY COMPANHIA HIPOTECÁRIA\n\
+A55 SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+DGBK CREDIT S.A. - SOCIEDADE DE CRÉDITO DIRETO.\n\
+MERCADO BITCOIN INSTITUICAO DE PAGAMENTO LTDA\n\
+DESENVOLVE SP - AGÊNCIA DE FOMENTO DO ESTADO DE SÃO PAULO S.A.\n\
+QUADRA SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+SETHI SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+Z1 INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+FIDD DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+AVANCARD PROVER INSTITUIÇÃO DE PAGAMENTO LTDA\n\
+G5 SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+REPASSES FINANCEIROS E SOLUCOES TECNOLOGICAS INSTITUICAO DE PAGAMENTO S.A.\n\
+BANVOX DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+INSTITUIÇÃO DE PAGAMENTOS MAPS LTDA.\n\
+TRANSFEERA INSTITUIÇÃO DE PAGAMENTO S.A\n\
+ASA SOCIEDADE DE CRÉDITO FINANCIAMENTO E INVESTIMENTO S.A.\n\
+IFOOD PAGO INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+CACTVS INSTITUICAO DE PAGAMENTO S.A\n\
+ISSUER INSTITUICAO DE PAGAMENTO LTDA.\n\
+KONECT SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+AGORACRED S/A SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+Banco Luso Brasileiro S.A.\n\
+Banco Industrial do Brasil S.A.\n\
+Banco VR S.A.\n\
+Banco Paulista S.A.\n\
+Banco Guanabara S.A.\n\
+Omni Banco S.A.\n\
+SANTS SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+SMART SOLUTIONS GROUP INSTITUICAO DE PAGAMENTO LTDA\n\
+TRIO INSTITUICAO DE PAGAMENTO LTDA.\n\
+REVOLUT SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+Banco Pan S.A.\n\
+BANCO C6 CONSIGNADO S.A.\n\
+BANCO LETSBANK S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+Z-ON SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+Banco Rendimento S.A.\n\
+BANCO TRIANGULO S.A.\n\
+GIRO - SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+BANCO SOFISA S.A.\n\
+Banco Pine S.A.\n\
+321 SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+DM SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A\n\
+PAGARE INSTITUICAO DE PAGAMENTO S.A.\n\
+BANCO PLENO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+BANCO DIGIMAIS S.A.\n\
+Banco Votorantim S.A.\n\
+ONEKEY PAYMENTS INSTITUICAO DE PAGAMENTO SA\n\
+PAGME INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+FREEX SOCIEDADE CORRETORA DE CÂMBIO S.A.\n\
+WE PAY OUT INSTITUICAO DE PAGAMENTO LTDA.\n\
+ACTUAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.\n\
+STARK BANK S.A. - INSTITUICAO DE PAGAMENTO\n\
+CELCOIN SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+TRANSFERO INSTITUICAO DE PAGAMENTO LTDA.\n\
+BSN PAGAMENTOS INSTITUIÇÃO DE PAGAMENTO LTDA\n\
+ZERO INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+STONE SOCIEDADE DE CREDITO, FINANCIAMENTO E INVESTIMENTO S.A.\n\
+COOPERATIVA DE CRÉDITO RURAL DO AGRESTE ALAGOANO - COOPERAGRE\n\
+HINOVA PAY INSTITUICAO DE PAGAMENTO S.A.\n\
+CASAS BAHIA PAY INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+DUFRIO FINANCEIRA, CRÉDITO, FINANCIAMENTO E INVESTIMENTOS S.A.\n\
+GOWD INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+FIDEM SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+PAY INSTITUICAO DE PAGAMENTO S.A.\n\
+DELTA GLOBAL SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+MT INSTITUICAO DE PAGAMENTO SA\n\
+MONERY INSTITUICAO DE PAGAMENTO S.A.\n\
+BRASIL CASH INSTITUICAO DE PAGAMENTO S.A\n\
+HARMOS S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+TYCOON TECHNOLOGY INSTITUICAO DE PAGAMENTO S.A\n\
+BIZ INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+INCO SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A.\n\
+KIKAI SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+BK INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+WASU - WALLET SUPPORT INSTITUIÇÃO DE PAGAMENTO LTDA\n\
+ZYDI SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+EFEX INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+WOOVI INSTITUICAO DE PAGAMENTO LTDA\n\
+BEES INSTITUICAO DE PAGAMENTO LTDA.\n\
+LOAN BRASIL SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+JM CORRETORA DE CÂMBIO LTDA.\n\
+BIT SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+BFC SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+MW INSTITUICAO DE PAGAMENTO LTDA\n\
+INTEGRAÇÃO DE CRÉDITO E COBRANÇA SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+GETNET ADQUIRÊNCIA E SERVIÇOS PARA MEIOS DE PAGAMENTO S.A. INSTITUIÇÃO DE PAGAMENTO\n\
+FESTOR INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+Banco Daycoval S.A.\n\
+BANCO INDUSCRED DE INVESTIMENTO S.A.\n\
+OURIBANK S.A. BANCO MÚLTIPLO\n\
+FINAMAX S.A. - CREDITO, FINANCIAMENTO E INVESTIMENTO\n\
+BANCO MASTER MÚLTIPLO S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL\n\
+BANCO RIBEIRAO PRETO S.A.\n\
+Banco Semear S.A.\n\
+Banco Citibank S.A.\n\
+Banco Rabobank International Brasil S.A.\n\
+BANCO COOPERATIVO SICREDI S.A.\n\
+Scotiabank Brasil S.A. Banco Múltiplo\n\
+Banco BNP Paribas Brasil S.A.\n\
+Novo Banco Continental S.A. - Banco Múltiplo\n\
+Banco Sistema S.A.\n\
+Bank of America Merrill Lynch Banco Múltiplo S.A.\n\
+BANCO COOPERATIVO SICOOB S.A. - BANCO SICOOB\n\
+BANCO KEB HANA DO BRASIL S.A.\n\
+BANSUR JM SOCIEDADE DE CRÉDITO DIRETO S/A\n\
+EMCASH SERVIÇOS FINANCEIROS SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A.\n\
+URBANO S.A. - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+VUE INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+INDEPENDÊNCIA COOPERATIVA DE CRÉDITO E INVESTIMENTO - INDEPENDÊNCIA COOPERATIVA DE CRÉDITO\n\
+PAGSMILE INSTITUIÇÃO DE PAGAMENTO LTDA.\n\
+LB PAY INSTITUIÇÃO DE PAGAMENTO LTDA\n\
+QORE DISTRIBUIDORA DE TITULOS E VALORES MOBILIÁRIOS LTDA\n\
+BECKER FINANCEIRA S.A. - CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+99PAY INSTITUICAO DE PAGAMENTO S.A.\n\
+V3 INSTITUICAO DE PAGAMENTO S.A.\n\
+WX INSTITUICAO DE PAGAMENTO LTDA\n\
+COOPERATIVA DE CRÉDITO MÚTUO DOS EMPREGADOS DO CENTRO UNIVERSITÁRIO NEWTON PAIVA LTDA. - CREDIPAIVA\n\
+KIWIFY INSTITUICAO DE PAGAMENTO LTDA\n\
+MOVA SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A.\n\
+CONTAAZUL INSTITUICAO DE PAGAMENTO LTDA.\n\
+PB SOCIEDADE DE CREDITO DIRETO S.A.\n\
+SAFETYPAY BRASIL INSTITUICAO DE PAGAMENTO LTDA\n\
+BARU DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS LTDA.\n\
+SWAP INSTITUIÇÃO DE PAGAMENTO S.A.\n\
+LA FINTECA INSTITUICAO DE PAGAMENTO LTDA\n\
+AWX BRASIL  INSTITUICAO DE PAGAMENTO LTDA\n\
+ATTRUS INSTITUIÇÃO DE PAGAMENTO S/A\n\
+PROTOTYPE INSTITUICAO DE PAGAMENTO S.A.\n\
+APUSDIGITAL INSTITUICAO DE PAGAMENTO LTDA\n\
+MAX INSTITUIÇÃO DE PAGAMENTO LTDA\n\
+MULTIPLIKE FINANCEIRA S.A. SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO\n\
+NIXFIN SOCIEDADE DE CRÉDITO DIRETO S.A.\n\
+MAGALUPAY - SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.\n\
+ATUAL SOCIEDADE CORRETORA DE CÂMBIO LTDA\n\
+BANCO TRATON BRASIL S.A.\n\
+MÊNTORE INSTITUIÇÃO DE PAGAMENTO S.A.";

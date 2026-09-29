@@ -21,7 +21,9 @@ const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
  * Spaces, dots, hyphens and slashes are ignored, so every punctuated form of a RENAVAM is accepted, but
  * any other character, a letter in particular, makes the value invalid. A registration whose
  * digits are all the same (`"00000000000"`) is rejected as well, matching both references below.
- * A number is only read as a RENAVAM when it is a non-negative safe integer.
+ * A number is only read as a RENAVAM when it is a non-negative safe integer. A number loses its
+ * leading zeros, so an 11 digit RENAVAM that starts with `0` is only accepted as a string:
+ * `"08794266580"` is valid and `8794266580` is not.
  *
  * @param {string} renavam - The RENAVAM value to be validated.
  * @returns {boolean} True if the RENAVAM is valid, false otherwise.
@@ -30,7 +32,7 @@ const FORMAT_REGEX = /^\d{9}$|^\d{11}$/;
  * ```typescript
  * isValidRenavam("639884962"); // true (9 digits, old format)
  * isValidRenavam("00639884962"); // true (11 digits, new format)
- * isValidRenavam("0063988.4962"); // true (dots and hyphens are ignored)
+ * isValidRenavam("0063988.4962"); // true (the dot is ignored)
  * isValidRenavam("12345678901"); // false (invalid checksum)
  * isValidRenavam("00000000000"); // false (repeated digits)
  * isValidRenavam("ab00639884962"); // false (invalid format)

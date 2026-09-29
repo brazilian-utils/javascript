@@ -41,6 +41,21 @@ describe("isValidVin", () => {
 	});
 
 	describe("should return false", () => {
+		test("when a space or a mask character sits among the 17 characters", () => {
+			expect(isValidVin("1HGCM 82633 A004352")).toBe(false);
+			expect(isValidVin("1HGCM-82633-A004352")).toBe(false);
+			expect(isValidVin("1HGCM 82633A004352", { checkDigit: true })).toBe(false);
+			expect(isValidVin("1HGCM82633A0043 2")).toBe(false);
+			expect(isValidVin("1HGCM.82633A00435")).toBe(false);
+		});
+
+		test("when a non-ASCII letter upper cases into an ASCII one", () => {
+			expect(isValidVin("9BWZZZ377VT004ſ51")).toBe(false);
+			expect(isValidVin("9BWZZZ377VT0042ß")).toBe(false);
+			expect(isValidVin("9BWZZZ377VT00425ß")).toBe(false);
+			expect(isValidVin("9BWZZZ377VT004ſ51", { checkDigit: true })).toBe(false);
+		});
+
 		test("when the check digit does not match and checkDigit is true", () => {
 			expect(isValidVin("1HGCM82633A004353", { checkDigit: true })).toBe(false);
 			expect(isValidVin("9BWZZZ377VT004251", { checkDigit: true })).toBe(false);

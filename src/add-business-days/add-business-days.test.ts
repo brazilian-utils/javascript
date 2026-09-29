@@ -382,7 +382,7 @@ describe("addBusinessDays", () => {
 							const result = addBusinessDays(new Date(year, month, 0), n, options);
 
 							if (n <= businessDays.length) {
-								expect(result).toEqual(businessDays[n - 1]);
+								expect(result?.toDateString()).toBe(businessDays[n - 1]?.toDateString());
 							} else {
 								expect(result?.getMonth()).toBe((month + 1) % 12);
 							}
@@ -395,7 +395,9 @@ describe("addBusinessDays", () => {
 		test("should give the last business day of the month, walking back 1 from the first day of the month after", () => {
 			fc.assert(
 				fc.property(businessDayMonths(), ({ year, month, businessDays }) => {
-					expect(addBusinessDays(new Date(year, month + 1, 1), -1)).toEqual(businessDays.at(-1));
+					expect(addBusinessDays(new Date(year, month + 1, 1), -1)?.toDateString()).toBe(
+						businessDays.at(-1)?.toDateString(),
+					);
 				}),
 			);
 		});

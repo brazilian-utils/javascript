@@ -1,8 +1,11 @@
 import * as fc from "fast-check";
 
-import { BANKS, type Bank } from "../_internals/constants/banks";
+import { type Bank } from "../_internals/constants/banks";
+import { readBanks } from "../_internals/read-banks/read-banks";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { getBankByIspb } from "./get-bank-by-ispb";
+
+const BANKS = readBanks();
 
 describe("getBankByIspb", () => {
 	test("should drop every character that is neither a letter nor a digit, as up to 2.4.0", () => {

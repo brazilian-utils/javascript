@@ -30,7 +30,6 @@ const generateBancario = (): string =>
 		field1: generateRandomNumber(3) + REAL_CURRENCY_CODE + generateRandomNumber(5),
 		field2: generateRandomNumber(10),
 		field3: generateRandomNumber(10),
-		// The first digit is the slot of the DV geral, which assembleBoletoBancario overwrites.
 		tail: `0${drawDueDateFactor()}${generateRandomNumber(10)}`,
 	});
 
@@ -76,7 +75,7 @@ const generateArrecadacao = (): string =>
  *
  * @see Official: https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf
  * Carta-Circular BCB nº 2.926/2000, anexo, layout of the barcode: position 04, "código da
- * moeda", 9 (real); positions 06 to 09, the fator de vencimento counted from 07/10/1997.
+ * moeda", 9 (real); positions 06 to 09, "Fator de Vencimento".
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf
  * FEBRABAN "Layout Padrão de Arrecadação/Recebimento com Utilização do Código de Barras",
  * Versão 08 (file of 11/05/2026), "Vigência: a partir de 01.06.2026".

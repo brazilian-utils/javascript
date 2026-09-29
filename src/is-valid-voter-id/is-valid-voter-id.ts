@@ -1,8 +1,7 @@
 import { calculateVoterIdFirstDigit } from "../_internals/calculate-voter-id-first-digit/calculate-voter-id-first-digit";
 import { calculateVoterIdSecondDigit } from "../_internals/calculate-voter-id-second-digit/calculate-voter-id-second-digit";
+import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import { VOTER_ID_LENGTH } from "../_internals/constants/voter-id";
-
-const SEPARATORS_REGEX = /[\s.\-/]/g;
 
 /**
  * The sequential number is either written in full as "0000 0000" or, without its leading zeros,

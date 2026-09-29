@@ -1,4 +1,5 @@
-import { BANKS, type Bank } from "../_internals/constants/banks";
+import { type Bank } from "../_internals/constants/banks";
+import { findBank } from "../_internals/find-bank/find-bank";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 
 export type { Bank } from "../_internals/constants/banks";
@@ -22,7 +23,7 @@ const NON_ALPHANUMERIC_REGEX = /[^\da-z]/gi;
  * `"00.000.000"`), and a shorter value is left padded with zeros, so `0` is the ISPB `00000000`.
  * A letter is part of the ISPB, so it is never stripped: up to 2.4.0 `"0000000A"` and
  * `"A0000000"` were read as `00000000`, the ISPB of Banco do Brasil, and a value longer than 8
- * characters finds no ISPB.
+ * characters finds no ISPB. An empty value finds no ISPB either, it is not padded to `00000000`.
  *
  * @param {string|number} value - The bank's ISPB, with or without leading zeros.
  * @returns {Bank|null} A fresh copy of the matching bank, or `null` when no bank has that ISPB.
@@ -48,11 +49,10 @@ export const getBankByIspb = (value: string | number): Bank | null => {
 	// Stryker disable next-line MethodExpression: no ISPB in BANKS has a letter yet, so a lower case letter misses the table whether or not it is folded to upper case.
 	const code = String(value).replaceAll(NON_ALPHANUMERIC_REGEX, "").toUpperCase();
 
-	// An empty value would pad to 00000000, the ISPB of Banco do Brasil.
 	if (code === "") return null;
 
 	const ispb = code.padStart(ISPB_LENGTH, "0");
-	const bank = BANKS.find((candidate) => candidate.ispb === ispb);
+	const bank = findBank("ispb", ispb);
 
 	return bank ? { ...bank } : null;
 };

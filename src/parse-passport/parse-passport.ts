@@ -9,11 +9,12 @@ import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/s
  * a string (a number is never a passport number: the series is two letters).
  *
  * @example
- * parsePassport("Ab123456") // "AB123456"
- * parsePassport("Ab-123456") // "AB123456"
- * parsePassport("Ab -. 123456") // "AB123456"
+ * ```typescript
+ * parsePassport("Ab123456"); // "AB123456"
+ * parsePassport("Ab-123456"); // "AB123456"
+ * parsePassport("Ab -. 123456"); // "AB123456"
+ * ```
  *
- * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e
  */
 export const parsePassport = (passport: string): string =>

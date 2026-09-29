@@ -1,5 +1,5 @@
 import { DATA, type StateName } from "../_internals/constants/states";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 export type { StateName } from "../_internals/constants/states";
 

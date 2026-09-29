@@ -3,6 +3,7 @@ import { CNAE_DESCRIPTIONS } from "../_internals/constants/cnae-descriptions";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { CNAE_LENGTH } from "../is-valid-cnae/constants";
 import { isValidCnae } from "../is-valid-cnae/is-valid-cnae";
 
@@ -20,12 +21,12 @@ export type Cnae = {
  * Looks a CNAE (Classificação Nacional de Atividades Econômicas) subclass code up in the
  * official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with separators (space, `.`, `-` or `/`, alone or in a run) between the groups and optional
- * surrounding whitespace. Anything else (`"0111abc301"`) is rejected instead of having its
- * digits picked out. A number is only read as a code when it is a non-negative safe integer,
- * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
- * caller never wrote.
+ * A string is only read as a code when it is written in one of the documented forms: the 7 digits,
+ * or the `NNNN-N/NN` mask, with any run of separators (whitespace, `.`, `-` or `/`) between the
+ * groups and optional surrounding whitespace. Anything else (`"0111abc301"`) is rejected instead of
+ * having its digits picked out. A number is only read as a code when it is a non-negative safe
+ * integer, since a sign, a decimal point or a rounded magnitude would otherwise be read as a code
+ * the caller never wrote.
  *
  * A CNAE subclass code is always 7 digits and its leading zeros are part of it, so a value
  * written as bare digits is left padded with zeros to 7 whether it comes as a string or as a
@@ -60,5 +61,5 @@ export const getCnae = (value: string | number): Cnae | null => {
 
 	const code = sanitizeToDigits(padLookupCode(value, CNAE_LENGTH));
 
-	return { code, description: CNAE_DESCRIPTIONS[findCodeIndex(CNAE_CODES, code)] };
+	return { code, description: unpackTexts(CNAE_DESCRIPTIONS)[findCodeIndex(CNAE_CODES, code)] };
 };

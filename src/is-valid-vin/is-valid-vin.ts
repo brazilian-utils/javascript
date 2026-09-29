@@ -2,6 +2,7 @@ import { generateChecksum } from "../_internals/generate-checksum/generate-check
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
 import {
 	VIN_CHECK_DIGIT_POSITION,
+	VIN_ASCII_REGEX,
 	VIN_LENGTH,
 	VIN_MODEL_YEAR_EXCLUDED,
 	VIN_MODEL_YEAR_POSITION,
@@ -11,11 +12,7 @@ import {
 
 /** Options of `isValidVin`. */
 export type IsValidVinOptions = {
-	/**
-	 * Whether to also enforce the North-American rules of 49 CFR 565.15: the check digit at the 9th
-	 * position and a model year code other than `U`, `Z` or `0` at the 10th (default: `false`, the
-	 * Brazilian rule, which mandates neither; read for truthiness).
-	 */
+	/** Whether to also enforce the North-American check digit and model year rules (default: `false`). */
 	checkDigit?: boolean;
 };
 
@@ -86,9 +83,11 @@ export type IsValidVinOptions = {
 export const isValidVin = (value: string, options?: IsValidVinOptions): boolean => {
 	if (typeof value !== "string") return false;
 
-	const vin = value.trim().toUpperCase();
+	const trimmed = value.trim();
 
-	if (vin.length !== VIN_LENGTH) return false;
+	if (trimmed.length !== VIN_LENGTH || !VIN_ASCII_REGEX.test(trimmed)) return false;
+
+	const vin = trimmed.toUpperCase();
 
 	if (isRepeatedDigits(vin)) return false;
 

@@ -1,8 +1,7 @@
 import { type StateCode } from "../_internals/constants/states";
-import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
+import { isBusinessDayUnderRules } from "../_internals/is-business-day-under-rules/is-business-day-under-rules";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
-import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
-import { getHolidays } from "../get-holidays/get-holidays";
+import { readBusinessDayRules } from "../_internals/read-business-day-rules/read-business-day-rules";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -18,9 +17,6 @@ export type BusinessDayOptions = {
 	/** Whether Saturday counts as a business day, the payroll deadline count of Instrução Normativa MTP nº 2/2021, art. 14, I, "na contagem dos dias será incluído o sábado" (default: `false`, a Monday to Friday count). */
 	includeSaturday?: boolean;
 };
-
-const SUNDAY = 0;
-const SATURDAY = 6;
 
 /**
  * Checks whether a given date is a Brazilian business day (dia útil).
@@ -174,30 +170,9 @@ const SATURDAY = 6;
 export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolean => {
 	if (!isValidDate(value)) return false;
 
-	const stateCode = readHolidayStateCode(options?.stateCode);
+	const rules = readBusinessDayRules(options);
 
-	if (stateCode === null) return false;
+	if (rules === null) return false;
 
-	const year = value.getFullYear();
-
-	if (!isSupportedHolidayYear(year)) return false;
-
-	const day = value.getDay();
-
-	if (day === SUNDAY) return false;
-
-	const includeSaturday = options?.includeSaturday ?? false;
-
-	if (day === SATURDAY && !includeSaturday) return false;
-
-	const includeOptional = options?.includeOptional ?? true;
-
-	const month = value.getMonth();
-	const date = value.getDate();
-
-	return !getHolidays({ year, stateCode }).some((holiday) => {
-		if (!includeOptional && holiday.type === "optional") return false;
-
-		return holiday.date.getMonth() === month && holiday.date.getDate() === date;
-	});
+	return isBusinessDayUnderRules(value, rules);
 };

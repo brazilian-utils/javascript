@@ -47,6 +47,11 @@ describe("formatCei", () => {
 		expect(formatCei()).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCei("", { pad: true })).toBe("");
+		expect(formatCei("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		test("should print a full number in the official mask", () => {
 			fc.assert(
@@ -58,7 +63,7 @@ describe("formatCei", () => {
 
 		test("should left pad a shorter value up to the CEI length", () => {
 			fc.assert(
-				fc.property(fc.stringMatching(/^[0-9]{0,12}$/), (value) => {
+				fc.property(fc.stringMatching(/^[0-9]{1,12}$/), (value) => {
 					const padded = formatCei(value, { pad: true }).replaceAll(/\D/g, "");
 
 					expect(padded).toBe(value.padStart(12, "0"));

@@ -2,15 +2,19 @@ import {
 	PHONE_NATIONAL_MAX_LENGTH,
 	PHONE_NATIONAL_MIN_LENGTH,
 } from "../_internals/constants/phone";
+import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
+import { isServicePhoneDigits } from "../_internals/is-service-phone-digits/is-service-phone-digits";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
+import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
 import { isValidLandlinePhone } from "../is-valid-landline-phone/is-valid-landline-phone";
-import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-phone";
-import { isValidServicePhone } from "../is-valid-service-phone/is-valid-service-phone";
+import {
+	isValidMobilePhone,
+	type PhoneVersion,
+} from "../is-valid-mobile-phone/is-valid-mobile-phone";
 import { DEFAULT_ACCEPT } from "./constants";
 
-/** The Brazilian mobile numbering rule to enforce over the 11 digit number: both take a first number digit of 7, 8 or 9; `1` also takes the `700` series, `2` leaves it out. */
-export type PhoneVersion = 1 | 2;
+export type { PhoneVersion } from "../is-valid-mobile-phone/is-valid-mobile-phone";
 
 /** The kinds of Brazilian phone number `isValidPhone` can accept. */
 export type PhoneType = "mobile" | "landline" | "service";
@@ -28,6 +32,9 @@ export type IsValidPhoneOptions = {
  *
  * A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed before
  * validation, under the rule documented in `parsePhone`.
+ *
+ * Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the
+ * value invalid; up to 2.4.0 such characters were dropped, so `"11 98765-4321x"` was valid.
  *
  * `options.accept` picks which kinds of number count as valid and defaults to
  * `["mobile", "landline"]`, i.e. geographic numbers only. Add `"service"` to also accept the
@@ -61,10 +68,12 @@ export type IsValidPhoneOptions = {
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidPhone = (value: string, options?: IsValidPhoneOptions): boolean => {
+	if (!hasOnlyPhoneCharacters(toStringSafe(value))) return false;
+
 	const requested = options?.accept;
 	const accept: PhoneType[] = Array.isArray(requested) ? requested : DEFAULT_ACCEPT;
 
-	if (accept.includes("service") && isValidServicePhone(resolveServicePhoneDigits(value)))
+	if (accept.includes("service") && isServicePhoneDigits(resolveServicePhoneDigits(value)))
 		return true;
 
 	const digits = normalizePhone(value);

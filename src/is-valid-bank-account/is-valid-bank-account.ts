@@ -1,3 +1,4 @@
+import { COMPE_CODES } from "../_internals/constants/bank-codes";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { generateChecksum } from "../_internals/generate-checksum/generate-checksum";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
@@ -7,7 +8,6 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
 import {
 	BANRISUL_ACCOUNT_WEIGHTS,
 	CITIBANK_ACCOUNT_WEIGHTS,
-	COMPE_CODES,
 	HSBC_AGENCY_ACCOUNT_WEIGHTS,
 	SANTANDER_WEIGHTS,
 	STRUCTURE_ONLY_BANK_CODES,
@@ -24,11 +24,7 @@ export type IsValidBankAccountParams = {
 	agency: string;
 	/** Account number, digits only, without the check digit. */
 	account: string;
-	/**
-	 * The account check digit: one or two characters, or "X" for Banco do Brasil and "P" for
-	 * Bradesco. Banks with a published rule take a single character; the generic fallback also
-	 * accepts two, chaining mod10 and mod11 over the account.
-	 */
+	/** The account check digit: one or two characters, or "X" or "P" for some banks. */
 	digit: string;
 };
 
@@ -215,8 +211,13 @@ const STRUCTURE_ONLY_RULE: BankAccountRule = {
 	digits: null,
 };
 
-// The lookup is a return value, not a condition: the build inlines an imported constant read in a
-// condition, which copied the whole COMPE_CODES literal into the scan a second time.
+/**
+ * Whether the bank code is in the COMPE table. The lookup is a return value, not a condition: the
+ * build inlines an imported constant read in a condition, which copied the whole `COMPE_CODES`
+ * literal into the scan a second time.
+ * @param {string} bankCode - The bank code to look up.
+ * @returns {boolean} Whether the code is listed.
+ */
 const isListedBankCode = (bankCode: string): boolean => findCodeIndex(COMPE_CODES, bankCode) !== -1;
 
 const findRule = (bankCode: string): BankAccountRule | null => {
@@ -278,7 +279,8 @@ const sanitizeCheckDigit = (value: string): string =>
  * agency/account digit 5, is accepted), Santander the account digit (its example, agency 2001
  * and account 01 038237 with digit 7, is accepted), and Banco do Brasil only the agency digit
  * (module 11, weights 9 to 2 from the right, remainder 10 giving "X"), the account digit being
- * "módulo 11" and the rule here the same one. The Caixa layouts describe the account with 12
+ * "módulo 11" and the rule here the same one. The agency digit itself is not checked here: an
+ * agency of 5 digits is only held to the length, whatever its last digit is. The Caixa layouts describe the account with 12
  * digits, "sem operação"; the older operação (3 digits) + conta (8 digits) form keeps the
  * compendium rule. Up to 2.4.0 a 12 digit Caixa account was rejected. Nubank publishes no rule
  * at all; its Verhoeff digit is the one the open source validators listed below derived from
@@ -294,7 +296,10 @@ const sanitizeCheckDigit = (value: string): string =>
  * Cora (403), Pan (623), BV (655), Daycoval (707), Sicredi (748) and Sicoob (756).
  * For those the agency and account only need to match the documented digit lengths.
  *
- * Every other bank of the list falls back to a generic modulus 10 and modulus 11 check.
+ * Every other bank of the list falls back to a generic check that accepts a `digit` passing the
+ * modulus 10, the boleto modulus 11 or the bank modulus 11 of the account, so up to three of the
+ * ten digits pass for a given account. No published rule backs that fallback: `true` for a bank
+ * outside the lists above says the structure is plausible, not that the check digit is proven.
  *
  * @param {IsValidBankAccountParams} params - The bank account parameters.
  * @param {string} params.bankCode - The bank code (3 digits), as published by Banco Central.
@@ -315,6 +320,10 @@ const sanitizeCheckDigit = (value: string): string =>
  * Only bank codes present in the bundled Banco Central participant table are accepted; that table is
  * regenerated weekly by the datasets workflow, so a bank created after the release becomes valid
  * on the next release.
+ *
+ * The `digit` is one or two characters, or "X" for Banco do Brasil and "P" for Bradesco. Banks
+ * with a published rule take a single character; the generic fallback also accepts two,
+ * chaining mod10 and mod11 over the account.
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20padrao%20CNAB240%20V%2011_0%20-%202026_09_11.pdf
@@ -343,7 +352,6 @@ export const isValidBankAccount = (params: IsValidBankAccountParams): boolean =>
 
 	const { bankCode, agency, account, digit } = params;
 
-	// An empty field is left to the length checks below, which reject it once sanitized.
 	if (
 		typeof bankCode !== "string" ||
 		typeof agency !== "string" ||
@@ -360,7 +368,7 @@ export const isValidBankAccount = (params: IsValidBankAccountParams): boolean =>
 
 	if (agencyDigits.length === 0 || agencyDigits.length > 5) return false;
 	if (accountDigits.length === 0 || accountDigits.length > 13) return false;
-	// Stryker disable next-line ConditionalExpression,LogicalOperator: every path below also rejects a malformed checkDigit on its own — validateWithRule requires digit.length===1 before it ever compares, and validateGeneric compares against 1 or 2 character strings, so a 0, 3+ character checkDigit can never match either way.
+	// Stryker disable next-line ConditionalExpression,LogicalOperator: every path below also rejects a malformed checkDigit on its own: validateWithRule requires digit.length===1 before it ever compares, and validateGeneric compares against 1 or 2 character strings, so a 0, 3+ character checkDigit can never match either way.
 	if (checkDigit.length === 0 || checkDigit.length > 2) return false;
 
 	if (!isListedBankCode(bankCodeDigits)) return false;

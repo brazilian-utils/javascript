@@ -78,14 +78,24 @@ export type GetCepInfoByAddressParams = {
  */
 export type GetCepInfoByAddressOptions = GetCepInfoByAddressParams;
 
+const MIN_ADDRESS_PART_LENGTH = 3;
+
 const normalizeAddressPart = (value: string): string => removeAccents(value).trim();
 
-// The ViaCEP response shape is trusted structurally (as the original implementation always
-// was): every element the array holds is assumed to already match `CepAddressInfo`.
+const readAddressPart = (value: unknown): string | null => {
+	// Stryker disable next-line ConditionalExpression: `removeAccents` returns "" for a value that is not a string, which is shorter than MIN_ADDRESS_PART_LENGTH, so the check below returns `null` for it as well.
+	if (typeof value !== "string") return null;
+
+	const normalized = normalizeAddressPart(value);
+
+	return normalized.length < MIN_ADDRESS_PART_LENGTH ? null : normalized;
+};
+
 const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Array.isArray(value);
 
 /**
- * Looks every CEP of a Brazilian street up on the ViaCEP API.
+ * Looks every CEP of a Brazilian street up on the ViaCEP API. ViaCEP caps the list at 50
+ * addresses, so a short street name that matches more streets returns only the first 50.
  *
  * @param {GetCepInfoByAddressParams} params - The address to look up.
  * @param {string} params.federalUnit - The two letter state code (e.g. "SP").
@@ -93,6 +103,8 @@ const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Arr
  * @param {string} params.street - The street name, or part of it.
  * @returns {Promise<CepAddressInfo[]>} Every address matching the query.
  * @throws {GetCepInfoByAddressValidationError} When the UF, city or street is missing or invalid.
+ * A `city` or `street` that is not a string, or has fewer than 3 characters once trimmed and stripped
+ * of accents, is invalid: ViaCEP rejects it, so it is turned down before any request.
  * A `params` that is not an object at all (omitted, `null`, a string) and a `federalUnit` that is
  * not a string reject this way too, rather than with a raw `TypeError`.
  * @throws {GetCepInfoByAddressNotFoundError} When no address matches the query.
@@ -144,12 +156,17 @@ export const getCepInfoByAddress = async (
 		throw new GetCepInfoByAddressValidationError(`Invalid UF: ${federalUnit}`);
 	}
 
-	if (!city || !street) {
-		throw new GetCepInfoByAddressValidationError("City and street are required");
+	const normalizedCity = readAddressPart(city);
+	const normalizedStreet = readAddressPart(street);
+
+	if (normalizedCity === null || normalizedStreet === null) {
+		throw new GetCepInfoByAddressValidationError(
+			"City and street are required, with at least 3 characters each",
+		);
 	}
 
 	const response = await fetchWithRetry(
-		`https://viacep.com.br/ws/${normalizedUf}/${encodeURIComponent(normalizeAddressPart(city))}/${encodeURIComponent(normalizeAddressPart(street))}/json/`,
+		`https://viacep.com.br/ws/${normalizedUf}/${encodeURIComponent(normalizedCity)}/${encodeURIComponent(normalizedStreet)}/json/`,
 	);
 
 	if (!response.ok) {

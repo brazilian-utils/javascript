@@ -34,6 +34,9 @@
  */
 export const VIN_LENGTH = 17;
 
+/** The ASCII letters and digits a VIN is written with, tested before the letters are upper cased. */
+export const VIN_ASCII_REGEX = /^[0-9A-Za-z]+$/;
+
 export const VIN_CHECK_DIGIT_POSITION = 8;
 
 export const VIN_MODEL_YEAR_POSITION = 9;

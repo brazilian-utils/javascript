@@ -1,6 +1,8 @@
 import { sanitizeToAlphanumeric } from "../_internals/sanitize-to-alphanumeric/sanitize-to-alphanumeric";
 import { isValidCnpj, type IsValidCnpjOptions } from "../is-valid-cnpj/is-valid-cnpj";
 
+export type { IsValidCnpjOptions } from "../is-valid-cnpj/is-valid-cnpj";
+
 /** Options of `getCnpjInfo`. */
 export type GetCnpjInfoOptions = Pick<IsValidCnpjOptions, "version">;
 
@@ -12,11 +14,7 @@ export type CnpjInfo = {
 	branch: string;
 	/** The 2 numeric check digits (dígitos verificadores), positions 13 and 14. */
 	checkDigits: string;
-	/**
-	 * Whether the branch is `0001`, the one the Receita Federal gives the headquarters (matriz)
-	 * when the root is registered. A filial that later becomes the headquarters keeps its
-	 * number, so only the Receita Federal registry tells the current headquarters.
-	 */
+	/** Whether the branch is `0001`, the headquarters at registration. */
 	isInitialHeadquarters: boolean;
 };
 

@@ -2,7 +2,7 @@
  * NCM (Nomenclatura Comum do Mercosul) 8 digit codes in force on the generation date, in ascending
  * order, packed as base 36 differences by `packCodes` (scripts/lookup-table.ts) (one per source
  * line, joined by line continuations). A code is included when the generation date falls within its
- * Siscomex `Data_Inicio`/`Data_Fim` range (both inclusive) — this also keeps codes that are valid
+ * Siscomex `Data_Inicio`/`Data_Fim` range (both inclusive), which also keeps codes that are valid
  * today but carry a scheduled future end date, not only the ones with no end date (`Data_Fim:
  * "31/12/9999"`).
  *
@@ -10529,6 +10529,6 @@ m8,\
 
 /**
  * Shape a complete NCM code has to be written in: the 8 digits, optionally split into the
- * printed `NNNN.NN.NN` groups by a single whitespace or mask character.
+ * printed `NNNN.NN.NN` groups by any run of whitespace or mask characters.
  */
 export const NCM_FORMAT_REGEX = /^\d{4}[\s.\-/]*\d{2}[\s.\-/]*\d{2}$/;

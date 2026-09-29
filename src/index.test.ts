@@ -27,8 +27,11 @@ import {
 	type FormatCepOptions,
 	type FormatCertidaoOptions,
 	type FormatCestOptions,
+	type FormatCfopOptions,
+	type FormatCboOptions,
 	type FormatCnaeOptions,
 	type FormatLegalNatureOptions,
+	type FormatNbsOptions,
 	type FormatCnhOptions,
 	type FormatCnoOptions,
 	type FormatCnpjOptions,
@@ -108,6 +111,8 @@ import {
 	type PixKeyType,
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
+	type ProcessoJuridicoInfo,
+	type ProcessoJuridicoSegment,
 	type Region,
 	type RegionCode,
 	type RegistroProfissionalCouncil,
@@ -125,6 +130,7 @@ import {
 	type StandardSchemaV1Types,
 	type StateName,
 	type ToStandardSchemaOptions,
+	type VoterIdInfo,
 } from "./index";
 import * as brazilianUtils from "./index";
 
@@ -148,10 +154,12 @@ const PUBLIC = [
 	"formatCNPJ",
 	"formatCPF",
 	"formatCaepf",
+	"formatCbo",
 	"formatCei",
 	"formatCep",
 	"formatCertidao",
 	"formatCest",
+	"formatCfop",
 	"formatCid10",
 	"formatCnae",
 	"formatCnh",
@@ -228,6 +236,7 @@ const PUBLIC = [
 	"getNfseKeyInfo",
 	"getPixKeyInfo",
 	"getPixPayloadInfo",
+	"getProcessoJuridicoInfo",
 	"getServiceItem",
 	"getStateByCep",
 	"getRegions",
@@ -238,6 +247,7 @@ const PUBLIC = [
 	"getStates",
 	"getStatesByRegion",
 	"getTimezoneByState",
+	"getVoterIdInfo",
 	"isBusinessDay",
 	"isHoliday",
 	"isValidBankAccount",
@@ -311,6 +321,7 @@ const PUBLIC = [
 	"parseIban",
 	"parseIsbn",
 	"parseLegalNature",
+	"parseNbs",
 	"parseLicensePlate",
 	"parseNcm",
 	"parseNfeKey",
@@ -376,10 +387,12 @@ describe("Public API", () => {
 			CstIbsCbs: CstIbsCbs;
 			FormatBoletoOptions: FormatBoletoOptions;
 			FormatCaepfOptions: FormatCaepfOptions;
+			FormatCboOptions: FormatCboOptions;
 			FormatCeiOptions: FormatCeiOptions;
 			FormatCepOptions: FormatCepOptions;
 			FormatCertidaoOptions: FormatCertidaoOptions;
 			FormatCestOptions: FormatCestOptions;
+			FormatCfopOptions: FormatCfopOptions;
 			FormatCnaeOptions: FormatCnaeOptions;
 			FormatLegalNatureOptions: FormatLegalNatureOptions;
 			FormatCnhOptions: FormatCnhOptions;
@@ -388,6 +401,7 @@ describe("Public API", () => {
 			FormatCnsOptions: FormatCnsOptions;
 			FormatCpfOptions: FormatCpfOptions;
 			FormatCurrencyOptions: FormatCurrencyOptions;
+			FormatNbsOptions: FormatNbsOptions;
 			FormatNcmOptions: FormatNcmOptions;
 			FormatNfeKeyOptions: FormatNfeKeyOptions;
 			FormatPhoneOptions: FormatPhoneOptions;
@@ -461,6 +475,8 @@ describe("Public API", () => {
 			PixKeyType: PixKeyType;
 			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
+			ProcessoJuridicoInfo: ProcessoJuridicoInfo;
+			ProcessoJuridicoSegment: ProcessoJuridicoSegment;
 			Region: Region;
 			RegionCode: RegionCode;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;
@@ -478,6 +494,7 @@ describe("Public API", () => {
 			StandardSchemaV1Types: StandardSchemaV1Types;
 			StateName: StateName;
 			ToStandardSchemaOptions: ToStandardSchemaOptions;
+			VoterIdInfo: VoterIdInfo;
 		}> = {};
 
 		expect(publicTypes).toEqual({});

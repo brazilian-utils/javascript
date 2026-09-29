@@ -1,4 +1,4 @@
-import { isValidServicePhone } from "../../is-valid-service-phone/is-valid-service-phone";
+import { isServicePhoneDigits } from "../is-service-phone-digits/is-service-phone-digits";
 import { normalizePhone } from "../normalize-phone/normalize-phone";
 import { stripPhoneCountryCode } from "../strip-phone-country-code/strip-phone-country-code";
 
@@ -17,7 +17,7 @@ import { stripPhoneCountryCode } from "../strip-phone-country-code/strip-phone-c
 export const resolveServicePhoneDigits = (value: string | number): string => {
 	const national = normalizePhone(value);
 
-	if (isValidServicePhone(national)) return national;
+	if (isServicePhoneDigits(national)) return national;
 
 	return stripPhoneCountryCode(value);
 };

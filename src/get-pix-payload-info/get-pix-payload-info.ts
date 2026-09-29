@@ -40,10 +40,7 @@ export type PixPayloadInfo = {
 	url?: string;
 	/** Free text the receiver wrote for the payer. */
 	description?: string;
-	/**
-	 * The 8 digit ISPB of the "facilitador de serviço de saque" (`fss`, sub-object 26-03),
-	 * present only in a Pix Saque BR Code.
-	 */
+	/** The 8 digit ISPB of the withdrawal facilitator, present only in a Pix Saque BR Code. */
 	withdrawalFacilitator?: string;
 	/** Name of the receiver, at most 25 ASCII characters. */
 	merchantName: string;
@@ -53,10 +50,7 @@ export type PixPayloadInfo = {
 	amount?: number;
 	/** Transaction ID, absent when the payload carries the `***` marker. */
 	txid?: string;
-	/**
-	 * `"dynamic"` when the payload carries a PSP location (`url`) or marks itself single use
-	 * with `01` = `"12"`, `"static"` otherwise; see `PixPointOfInitiation`.
-	 */
+	/** `"dynamic"` or `"static"`, see `PixPointOfInitiation`. */
 	pointOfInitiation: PixPointOfInitiation;
 };
 
@@ -157,12 +151,10 @@ export const getPixPayloadInfo = (value: string): PixPayloadInfo | null => {
 	};
 	const url = merchantAccountInformation[PIX_URL_ID];
 	const amount = fields[PIX_TRANSACTION_AMOUNT_ID];
-	// isValidPixPayload has checked that 62 is there and carries 62-05.
 	const txid = String(readTlv(String(fields[PIX_ADDITIONAL_DATA_ID]))[PIX_TXID_ID]);
 	const isDynamic =
 		url !== undefined || fields[PIX_POINT_OF_INITIATION_ID] === PIX_DYNAMIC_POINT_OF_INITIATION;
 	const pix: PixPayloadInfo = {
-		// isValidPixPayload has checked that both are there and not empty.
 		merchantName: String(fields[PIX_MERCHANT_NAME_ID]),
 		merchantCity: String(fields[PIX_MERCHANT_CITY_ID]),
 		pointOfInitiation: isDynamic ? "dynamic" : "static",

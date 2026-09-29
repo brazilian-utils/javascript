@@ -1,8 +1,11 @@
 import * as fc from "fast-check";
 
-import { BANKS, type Bank } from "../_internals/constants/banks";
+import { type Bank } from "../_internals/constants/banks";
+import { readBanks } from "../_internals/read-banks/read-banks";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { getBanks } from "./get-banks";
+
+const BANKS = readBanks();
 
 describe("getBanks", () => {
 	it("should return every bank", () => {
