@@ -283,6 +283,12 @@ describe("getBoletoInfo", () => {
 	});
 
 	describe("properties", () => {
+		const supportedReferenceDates = fc.date({
+			min: new Date(1900, 0, 1),
+			max: new Date(2199, 11, 31),
+			noInvalidDate: true,
+		});
+
 		test("should read the bank code and the amount of a generated bank slip", () => {
 			fc.assert(
 				fc.property(fc.gen(), fc.date({ noInvalidDate: true }), (g, referenceDate) => {
@@ -298,7 +304,7 @@ describe("getBoletoInfo", () => {
 
 		test("should read the same fields from the barcode of a generated bank slip as from its linha digitável", () => {
 			fc.assert(
-				fc.property(fc.gen(), fc.date({ noInvalidDate: true }), (g, referenceDate) => {
+				fc.property(fc.gen(), supportedReferenceDates, (g, referenceDate) => {
 					const line = g(boletos);
 
 					fc.pre(!line.startsWith("8"));
