@@ -221,6 +221,13 @@
 			"avatar_url": "https://github.com/JanderSilv.png",
 			"profile": "https://github.com/JanderSilv",
 			"contributions": ["code"]
+		},
+		{
+			"login": "kwy404",
+			"name": "kwy404",
+			"avatar_url": "https://github.com/kwy404.png",
+			"profile": "https://github.com/kwy404",
+			"contributions": ["code", "test"]
 		}
 	],
 	"repoType": "github",

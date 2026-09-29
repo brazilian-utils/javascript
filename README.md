@@ -143,7 +143,7 @@ Our "thank you" goes to these wonderful people ([emoji key](https://github.com/k
     <td align="center"><a href="https://github.com/vicentevendramin"><img src="https://github.com/vicentevendramin.png?size=100" width="100px;" alt=""/><br /><sub><b>Vicente Vendramin</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=vicentevendramin" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/joaopedroassad"><img src="https://github.com/joaopedroassad.png?size=100" width="100px;" alt=""/><br /><sub><b>Joao Assad</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=joaopedroassad" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/JanderSilv"><img src="https://github.com/JanderSilv.png?size=100" width="100px;" alt=""/><br /><sub><b>Jander Silva</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=JanderSilv" title="Code">💻</a></td>
-    <td></td>
+    <td align="center"><a href="https://github.com/kwy404"><img src="https://github.com/kwy404.png?size=100" width="100px;" alt=""/><br /><sub><b>kwy404</b></sub></a><br /><a href="https://github.com/brazilian-utils/javascript/commits?author=kwy404" title="Code">💻</a> <a href="https://github.com/brazilian-utils/javascript/commits?author=kwy404" title="Tests">⚠️</a></td>
     <td></td>
     <td></td>
     <td></td>
