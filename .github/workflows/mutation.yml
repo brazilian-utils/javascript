@@ -46,8 +46,9 @@ jobs:
             stryker-incremental-${{ hashFiles('src/**/constants.ts', 'src/_internals/constants/**', 'src/_internals/test/**', 'src/index.ts', 'package-lock.json', 'stryker.config.json', 'vite.config.ts') }}-${{ github.ref }}-
             stryker-incremental-${{ hashFiles('src/**/constants.ts', 'src/_internals/constants/**', 'src/_internals/test/**', 'src/index.ts', 'package-lock.json', 'stryker.config.json', 'vite.config.ts') }}-refs/heads/main-
 
-      # Stryker only compares a mutant's own code and its tests: the prune script drops every file
-      # that changed or imports a changed file (a shared helper), so all of their mutants run again.
+      # Stryker only compares a mutant's own code and its tests' source: the prune script drops the
+      # results of every file that changed or imports a changed file (a shared helper), and every
+      # result that came from a test reaching a changed file, so those mutants run again.
       - name: Mutation test the changed code
         if: ${{ github.event_name != 'push' }}
         run: |

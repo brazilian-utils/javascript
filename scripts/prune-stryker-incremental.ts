@@ -1,16 +1,25 @@
 #!/usr/bin/env node
 
 /**
- * Drops from Stryker's incremental report every mutated file that changed, or that imports
- * (directly or through other files) a file that changed, so that `stryker run --incremental`
- * tests all of their mutants again.
+ * Removes from Stryker's incremental report every saved result that a change can have made
+ * stale, so that `stryker run --incremental` tests those mutants again:
  *
- * Stryker reuses a mutant's result when the mutant's own code and its covering tests did not
- * change, and does not look at the files the mutant's code imports: a change to
- * `_internals/format` would keep every `format*` mutant's old result. Removing a file from the
- * report makes Stryker treat its mutants as new. The previous source of every file is in the
- * report itself, so no git history is needed. Constants, test helpers, dependencies and the
- * config are not mutated and are covered by the cache key in the `Mutation tests` workflow.
+ * - every mutant of a mutated file that changed, or that imports (directly or through other
+ *   files) a file that changed;
+ * - every other mutant whose result came from a test in a test file that imports (directly or
+ *   through other files) a file that changed: the test that killed a killed mutant, or any
+ *   covering test of a mutant with another status.
+ *
+ * Stryker reuses a mutant's result when the mutant's own code and the source of its covering
+ * tests did not change, and looks at nothing else. A change to `_internals/format` would keep
+ * every `format*` mutant's old result (the first case), and a change to `format-cpf` that stops
+ * calling a helper would keep that helper's mutants "killed" by the `format-cpf` tests (the
+ * second). A mutant missing from the report is a new one to Stryker. A killed mutant whose
+ * killing test reaches no changed file is still killed, so the tests that only cover it (like
+ * `index.test.ts`, which imports every module) do not send it back. The previous source of
+ * every file is in the report itself, so no git history is needed. Constants, test helpers,
+ * dependencies and the config are not mutated and are covered by the cache key in the
+ * `Mutation tests` workflow.
  *
  * Usage:
  *   node scripts/prune-stryker-incremental.ts
@@ -24,7 +33,11 @@ import { dirname, isAbsolute, join, matchesGlob, relative, resolve } from "node:
 const ROOT = join(import.meta.dirname, "..");
 
 type StrykerConfig = { mutate: string[]; incrementalFile?: string };
-type IncrementalReport = { files: Record<string, { source: string }> };
+type Mutant = { status: string; killedBy?: string[]; coveredBy?: string[] };
+type IncrementalReport = {
+	files: Record<string, { source: string; mutants: Mutant[] }>;
+	testFiles?: Record<string, { tests: { id: string }[] }>;
+};
 
 const isStrykerConfig = (value: unknown): value is StrykerConfig =>
 	typeof value === "object" &&
@@ -45,8 +58,24 @@ const isIncrementalReport = (value: unknown): value is IncrementalReport =>
 			typeof file === "object" &&
 			file !== null &&
 			"source" in file &&
-			typeof file.source === "string",
-	);
+			typeof file.source === "string" &&
+			"mutants" in file &&
+			Array.isArray(file.mutants) &&
+			file.mutants.every(
+				(mutant: unknown) =>
+					typeof mutant === "object" &&
+					mutant !== null &&
+					"status" in mutant &&
+					typeof mutant.status === "string",
+			),
+	) &&
+	(!("testFiles" in value) ||
+		(typeof value.testFiles === "object" &&
+			value.testFiles !== null &&
+			Object.entries(value.testFiles).every(
+				([, file]: [string, unknown]) =>
+					typeof file === "object" && file !== null && "tests" in file && Array.isArray(file.tests),
+			)));
 
 const parsedConfig: unknown = JSON.parse(readFileSync(join(ROOT, "stryker.config.json"), "utf8"));
 if (!isStrykerConfig(parsedConfig)) throw new Error("stryker.config.json has no mutate patterns");
@@ -146,11 +175,33 @@ for (let file = queue.pop(); file !== undefined; file = queue.pop()) {
 	}
 }
 
-const pruned = Object.keys(report.files).filter((file) => stale.has(toRelative(file)));
-for (const file of pruned) delete report.files[file];
+// The tests of every test file that `stale` reached: their source did not change, but what they
+// call did.
+const staleTests = new Set(
+	Object.entries(report.testFiles ?? {})
+		.filter(([file]) => stale.has(toRelative(file)))
+		.flatMap(([, { tests }]) => tests.map(({ id }) => id)),
+);
+const isStaleResult = (mutant: Mutant): boolean =>
+	(mutant.status === "Killed" ? (mutant.killedBy ?? []) : (mutant.coveredBy ?? [])).some((id) =>
+		staleTests.has(id),
+	);
+
+let droppedFiles = 0;
+let droppedMutants = 0;
+for (const [file, entry] of Object.entries(report.files)) {
+	if (stale.has(toRelative(file))) {
+		droppedFiles += 1;
+		droppedMutants += entry.mutants.length;
+		delete report.files[file];
+		continue;
+	}
+	const kept = entry.mutants.filter((mutant) => !isStaleResult(mutant));
+	droppedMutants += entry.mutants.length - kept.length;
+	entry.mutants = kept;
+}
 writeFileSync(reportPath, JSON.stringify(report));
 
 console.log(
-	`${changed.length} mutated file(s) changed; dropped ${pruned.length} file(s) from ${relative(ROOT, reportPath)}.`,
+	`${changed.length} mutated file(s) changed, ${staleTests.size} test(s) reach a change; dropped ${droppedMutants} mutant result(s), ${droppedFiles} whole file(s), from ${relative(ROOT, reportPath)}.`,
 );
-for (const file of pruned.map((name) => toRelative(name)).sort()) console.log(`  ${file}`);

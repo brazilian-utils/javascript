@@ -293,8 +293,9 @@ pull request so the CI result is not a surprise.
   [incremental mode](https://stryker-mutator.io/docs/stryker-js/incremental/): a pull request
   only tests the mutants whose code or covering tests changed since its last run (or since
   `main`'s), and `main` tests every mutant again. Before the run, `scripts/prune-stryker-incremental.ts`
-  drops from the saved results every file that changed or imports a changed file, because Stryker
-  alone would keep the results of a function whose helper changed. A change to a constants table, a
+  drops from the saved results every file that changed or imports a changed file, and every result
+  that came from a test reaching a changed file, because Stryker alone would keep the results of a
+  function whose helper changed. A change to a constants table, a
   test helper, a dependency or the config makes every mutant run. Locally,
   `node scripts/prune-stryker-incremental.ts && npm run test:mutation -- --incremental` does the same
   against your previous run. The HTML report is attached to the run as the
