@@ -11,6 +11,7 @@ import {
 	CRP_MIN_REGION,
 	CRP_REGEX,
 	PROFESSIONAL_NUMBER_UF_REGEX,
+	REGISTRATION_CHARACTERS_REGEX,
 	type RegistroProfissionalCouncil,
 } from "./constants";
 
@@ -100,6 +101,9 @@ const isKnownCroCategory = (category: string, suffix: string | undefined): boole
  * documents a `300` prefixed CRM for foreign-trained physicians and a trailing `P` for inscrição
  * provisória, neither of which the accepted shape can express.
  *
+ * The separators of the mask (whitespace, `.`, `-` and `/`) are ignored wherever they sit, but any
+ * other character, an emoji or `@` for instance, makes the value invalid instead of being stripped.
+ *
  * Everything it needs travels in a single object, the shape `isValidBankAccount` takes: a
  * registration number means nothing without the council that issued it, so the two are read
  * together. A value that is not an object, or one missing `value` or `council`, is `false` like
@@ -124,6 +128,7 @@ const isKnownCroCategory = (category: string, suffix: string | undefined): boole
  * isValidRegistroProfissional({ value: "SP-123456/O-3 T-MG", council: "CRC" }); // true (transferido)
  * isValidRegistroProfissional({ value: "SP-123456/T-3", council: "CRC" }); // false ("T" is not a tipo)
  * isValidRegistroProfissional({ value: "123456", council: "OAB" }); // false (no UF)
+ * isValidRegistroProfissional({ value: "12@3456/SP", council: "OAB" }); // false (a character outside the mask)
  * ```
  *
  * @see Official: https://cfc.org.br/wp-content/uploads/2018/04/1_manual_registro.pdf
@@ -163,7 +168,7 @@ export const isValidRegistroProfissional = (params: IsValidRegistroProfissionalP
 
 	const { value, council, stateCode } = params;
 
-	if (typeof value !== "string") return false;
+	if (typeof value !== "string" || !REGISTRATION_CHARACTERS_REGEX.test(value)) return false;
 
 	if (!Object.hasOwn(REGEX_BY_COUNCIL, council)) return false;
 

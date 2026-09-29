@@ -1067,7 +1067,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 ### isValidLicensePlate
 
-Valida uma placa de veículo. Aceita o formato antigo brasileiro (`ABC-1234`) e o formato Mercosul (`ABC1D23`), com ou sem hífen ou espaço, em maiúsculas ou minúsculas.
+Valida uma placa de veículo. Aceita o formato antigo brasileiro (`ABC-1234`) e o formato Mercosul (`ABC1D23`), com ou sem máscara, em maiúsculas ou minúsculas. A máscara (espaço, `.`, `-` ou `/`, isolados ou em sequência) só é aceita entre o terceiro caractere e os quatro últimos; qualquer outro caractere (`@`, um emoji, um separador em outra posição) invalida a placa em vez de ser removido.
 
 A opção `format` restringe a validação a um deles: `"LLLNNNN"` para o formato antigo ou `"LLLNLNN"` para o Mercosul, os nomes que `getFormatLicensePlate` retorna. Funciona como o argumento `type` do `is_valid` da biblioteca Python, cujos valores lá se chamam `"old_format"` e `"mercosul"`. Esses nomes não são formatos aqui: sem `format`, ou com qualquer outro valor, uma placa em qualquer um dos dois formatos é válida.
 
@@ -1080,6 +1080,8 @@ isValidLicensePlate('ABC 1234'); // true (máscara com espaço)
 isValidLicensePlate('ABC1D23'); // true (formato Mercosul)
 isValidLicensePlate('ABC12D3'); // false (não é uma sequência Mercosul)
 isValidLicensePlate('ABC1234EXTRA'); // false (caracteres em excesso)
+isValidLicensePlate('A-BC1234'); // false (a máscara só fica depois do terceiro caractere)
+isValidLicensePlate('ABC1234!'); // false (qualquer outro caractere é rejeitado)
 isValidLicensePlate('ABC1D23', { format: 'LLLNLNN' }); // true
 isValidLicensePlate('ABC1234', { format: 'LLLNLNN' }); // false (placa no formato antigo)
 isValidLicensePlate('ABC-1234', { format: 'LLLNNNN' }); // true
@@ -3739,6 +3741,8 @@ Fonte: [ISO/IEC 7812-1](https://www.iso.org/standard/70484.html).
 
 Verifica a estrutura de um número de registro em conselho profissional (registro/inscrição profissional). Só a quantidade de dígitos e a UF são conferidas, nunca o dígito verificador, nem no CRC.
 
+- Os separadores da máscara (espaço, `.`, `-` e `/`) são ignorados em qualquer posição; qualquer outro caractere (`@`, um emoji) invalida o valor em vez de ser removido.
+
 - Recebe um objeto (`IsValidRegistroProfissionalParams`): `value`, `council` (`RegistroProfissionalCouncil`: `"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` ou `"CRC"`) e `stateCode` opcional (UF esperada, sem diferenciar maiúsculas/minúsculas e ignorando espaços nas pontas).
 - `"OAB"` e `"CRM"`: 4 a 6 dígitos mais a UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 a 6 dígitos (`12345/SP`), ou a forma da Consolidação das Normas do CFO (Resolução CFO-63/2005), art. 115, § 1º: a sigla do Conselho Regional antes, ligada por hífen à categoria (`TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV`, `T`) quando houver, depois o número, seguido de `-IS` na secundária ou `-R` na remida (`CRO-SP 12345`, `CRO-SP-TPD 1234`, `CRO-SP 12345-IS`). Até a 2.4.0 essa forma era rejeitada.
 - `"CRP"`: código regional de 2 dígitos (`01` a `24`) mais 4 a 6 dígitos (`06/12345`); `stateCode` é ignorado. O sistema CFP tem 24 regionais; o CRP-25 (Amapá) é só uma proposta.
@@ -3751,6 +3755,7 @@ import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
 isValidRegistroProfissional({ value: '123456/SP', council: 'OAB' }); // true
 isValidRegistroProfissional({ value: '123456-RJ', council: 'OAB', stateCode: 'SP' }); // false (UF divergente)
 isValidRegistroProfissional({ value: '123456', council: 'OAB' }); // false (sem UF)
+isValidRegistroProfissional({ value: '12@3456/SP', council: 'OAB' }); // false (um caractere fora da máscara)
 isValidRegistroProfissional({ value: 'CRO-SP-TPD 1234', council: 'CRO' }); // true (art. 115 das normas do CFO)
 isValidRegistroProfissional({ value: '06/12345', council: 'CRP' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3', council: 'CRC' }); // true

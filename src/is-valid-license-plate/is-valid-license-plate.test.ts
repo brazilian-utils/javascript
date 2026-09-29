@@ -83,6 +83,37 @@ describe("isValidLicensePlate", () => {
 		});
 	});
 
+	describe("should return false", () => {
+		it("when a character outside letters, digits and the mask sits anywhere in the plate", () => {
+			expect(isValidLicensePlate("A@BC1234")).toBe(false);
+			expect(isValidLicensePlate("A@B#C1$2%3^4")).toBe(false);
+			expect(isValidLicensePlate("ABC1234!")).toBe(false);
+			expect(isValidLicensePlate("ABC1234😀")).toBe(false);
+			expect(isValidLicensePlate("ABC_1234")).toBe(false);
+			expect(isValidLicensePlate("ABÇ1234")).toBe(false);
+			expect(isValidLicensePlate("ABC1D2ſ")).toBe(false);
+		});
+
+		it("when the mask sits anywhere but after the third character", () => {
+			expect(isValidLicensePlate("A-B-C-1-2-3-4")).toBe(false);
+			expect(isValidLicensePlate("A-BC1234")).toBe(false);
+			expect(isValidLicensePlate("AB-C1234")).toBe(false);
+			expect(isValidLicensePlate("ABC12-34")).toBe(false);
+			expect(isValidLicensePlate("ABC1D-23")).toBe(false);
+			expect(isValidLicensePlate("ABC1234-")).toBe(false);
+			expect(isValidLicensePlate("-ABC1234")).toBe(false);
+		});
+	});
+
+	describe("should return true", () => {
+		it("when the mask after the third character is a run of any mask character", () => {
+			expect(isValidLicensePlate("ABC.1234")).toBe(true);
+			expect(isValidLicensePlate("ABC/1D23")).toBe(true);
+			expect(isValidLicensePlate("ABC - 1234")).toBe(true);
+			expect(isValidLicensePlate("ABC\t1234")).toBe(true);
+		});
+	});
+
 	describe("properties", () => {
 		const formats = ["LLLNNNN", "LLLNLNN"] as const;
 
@@ -103,6 +134,24 @@ describe("isValidLicensePlate", () => {
 					expect(isValidLicensePlate(masked.toLowerCase())).toBe(true);
 					expect(isValidLicensePlate(` ${plate.slice(0, 3)} ${plate.slice(3)} `)).toBe(true);
 				}),
+			);
+		});
+
+		test("should reject a generated plate with a character outside the mask inserted", () => {
+			fc.assert(
+				fc.property(
+					fc.gen(),
+					fc.constantFrom(...formats),
+					fc.integer({ min: 0, max: 7 }),
+					fc.constantFrom("@", "#", "_", "😀", "ç", "ſ", "\u0000"),
+					(g, format, index, character) => {
+						const plate = g(licensePlates, format);
+
+						expect(
+							isValidLicensePlate(`${plate.slice(0, index)}${character}${plate.slice(index)}`),
+						).toBe(false);
+					},
+				),
 			);
 		});
 

@@ -1067,7 +1067,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 ### isValidLicensePlate
 
-Check if a license plate is valid. Accepts the old Brazilian format (`ABC-1234`) and the Mercosul format (`ABC1D23`), with or without a hyphen or space, in any case.
+Check if a license plate is valid. Accepts the old Brazilian format (`ABC-1234`) and the Mercosul format (`ABC1D23`), with or without a mask, in any case. The mask (whitespace, `.`, `-` or `/`, alone or in a run) is accepted only between the third character and the last four; any other character (`@`, an emoji, a separator anywhere else) makes the plate invalid instead of being stripped.
 
 The optional `format` restricts the check to one of them: `"LLLNNNN"` for the old format or `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. It works like the `type` argument of the Python library's `is_valid`, whose values are named `"old_format"` and `"mercosul"` there. Those names are not formats here: without `format`, or with any other value, a plate in either format is valid.
 
@@ -1080,6 +1080,8 @@ isValidLicensePlate('ABC 1234'); // true (whitespace mask)
 isValidLicensePlate('ABC1D23'); // true (Mercosul format)
 isValidLicensePlate('ABC12D3'); // false (not a Mercosul sequence)
 isValidLicensePlate('ABC1234EXTRA'); // false (too many characters)
+isValidLicensePlate('A-BC1234'); // false (the mask sits after the third character only)
+isValidLicensePlate('ABC1234!'); // false (any other character is rejected)
 isValidLicensePlate('ABC1D23', { format: 'LLLNLNN' }); // true
 isValidLicensePlate('ABC1234', { format: 'LLLNLNN' }); // false (an old format plate)
 isValidLicensePlate('ABC-1234', { format: 'LLLNNNN' }); // true
@@ -3739,6 +3741,8 @@ Source: [ISO/IEC 7812-1](https://www.iso.org/standard/70484.html).
 
 Check the structure of a professional council registration number (registro/inscrição profissional). Only the digit count and the UF are checked, never a check digit, even for CRC.
 
+- The separators of the mask (whitespace, `.`, `-` and `/`) are ignored wherever they sit; any other character (`@`, an emoji) makes the value invalid instead of being stripped.
+
 - Takes an object (`IsValidRegistroProfissionalParams`): `value`, `council` (`"OAB"`, `"CRM"`, `"CRO"`, `"CRP"` or `"CRC"`, a `RegistroProfissionalCouncil`) and an optional `stateCode` (expected UF, letter case and surrounding whitespace ignored).
 - `"OAB"` and `"CRM"`: 4 to 6 digits plus the UF (`123456/SP`, `123456-SP`); `"CRO"`: 3 to 6 digits (`12345/SP`), or the form of the Consolidação das Normas do CFO (Resolução CFO-63/2005), art. 115, § 1º: the sigla of the Conselho Regional first, joined by a hyphen to the category (`TPD`, `TSB`, `ASB`, `APD`, `CLM`/`CLF`, `LPM`/`LPF`, `PV`, `T`) when there is one, then the number, followed by `-IS` for a secundária or `-R` for a remida (`CRO-SP 12345`, `CRO-SP-TPD 1234`, `CRO-SP 12345-IS`). Up to 2.4.0 this form was rejected.
 - `"CRP"`: a 2-digit regional code (`01` to `24`) plus 4 to 6 digits (`06/12345`); `stateCode` is ignored. The CFP system has 24 regionals; the CRP-25 (Amapá) is only a proposal.
@@ -3751,6 +3755,7 @@ import { isValidRegistroProfissional } from '@brazilian-utils/brazilian-utils';
 isValidRegistroProfissional({ value: '123456/SP', council: 'OAB' }); // true
 isValidRegistroProfissional({ value: '123456-RJ', council: 'OAB', stateCode: 'SP' }); // false (UF mismatch)
 isValidRegistroProfissional({ value: '123456', council: 'OAB' }); // false (no UF)
+isValidRegistroProfissional({ value: '12@3456/SP', council: 'OAB' }); // false (a character outside the mask)
 isValidRegistroProfissional({ value: 'CRO-SP-TPD 1234', council: 'CRO' }); // true (art. 115 of the CFO norms)
 isValidRegistroProfissional({ value: '06/12345', council: 'CRP' }); // true
 isValidRegistroProfissional({ value: 'SP-123456/O-3', council: 'CRC' }); // true

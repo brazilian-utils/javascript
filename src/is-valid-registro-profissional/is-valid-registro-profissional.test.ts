@@ -81,6 +81,18 @@ describe("isValidRegistroProfissional", () => {
 			expect(isValidRegistroProfissional({ value: "1234567890", council: "CREA" })).toBe(false);
 		});
 
+		test("when a character outside letters, digits and the mask sits anywhere in the value", () => {
+			expect(isValidRegistroProfissional({ value: "12@3#4$5/SP", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "123456/SP😀", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "123456/S_P", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "123456/ſP", council: "OAB" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "CRO-SP 12345!", council: "CRO" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "06/12345#", council: "CRP" })).toBe(false);
+			expect(isValidRegistroProfissional({ value: "SP-123456/O-3\u0000", council: "CRC" })).toBe(
+				false,
+			);
+		});
+
 		test("when an OAB number has no UF", () => {
 			expect(isValidRegistroProfissional({ value: "123456", council: "OAB" })).toBe(false);
 		});
