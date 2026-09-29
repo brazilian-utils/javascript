@@ -1,5 +1,5 @@
 import { AREA_CODE_SECONDARY_STATES, AREA_CODE_STATES } from "../_internals/constants/area-codes";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 /**
  * Retrieves every DDD (area code) that serves a given Brazilian state, under the Plano Geral

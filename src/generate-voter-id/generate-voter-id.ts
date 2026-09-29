@@ -4,7 +4,7 @@ import { type StateCode } from "../_internals/constants/states";
 import { UF_TO_VOTER_ID_CODE } from "../_internals/constants/voter-id";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 export type { StateCode } from "../_internals/constants/states";
 

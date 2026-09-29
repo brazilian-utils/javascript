@@ -1,7 +1,7 @@
 import { type Municipality } from "../_internals/constants/municipalities";
 import { STATE_CAPITALS } from "../_internals/constants/state-capitals";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 

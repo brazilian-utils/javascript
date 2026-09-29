@@ -4,7 +4,7 @@ import { type StateCode } from "../_internals/constants/states";
 import { generateRandomNumber } from "../_internals/generate-random-number/generate-random-number";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { isRepeatedDigits } from "../_internals/is-repeated-digits/is-repeated-digits";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 export type { StateCode } from "../_internals/constants/states";
 

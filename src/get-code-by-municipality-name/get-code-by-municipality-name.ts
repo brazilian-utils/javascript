@@ -1,7 +1,7 @@
 import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
-import { normalizeStateCode } from "../_internals/read-state-code/read-state-code";
+import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
 
 /** The `getCodeByMunicipalityName` query: a municipality name and the code of its state. */
 export type GetCodeByMunicipalityNameParams = {
