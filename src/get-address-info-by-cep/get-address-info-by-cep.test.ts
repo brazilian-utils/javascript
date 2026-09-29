@@ -622,6 +622,16 @@ describe("getAddressInfoByCep", () => {
 				);
 			});
 
+			it("should throw GetAddressInfoByCepNotFoundError when ViaCEP answers without a cep, even for the CEP 00000000", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ localidade: "Lugar", logradouro: "Rua A" }),
+				});
+
+				await expect(getAddressInfoByCep("00000000", { providers: ["viacep"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
 			it("should throw GetAddressInfoByCepNotFoundError when Widenet returns invalid status", async () => {
 				setupFetchMock(fetchMock, {
 					widenet: createJsonResponse({
@@ -641,6 +651,16 @@ describe("getAddressInfoByCep", () => {
 				});
 
 				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when Widenet answers without a code, even for the CEP 00000000", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ ok: true, status: 200, city: "Lugar", address: "Rua A" }),
+				});
+
+				await expect(getAddressInfoByCep("00000000", { providers: ["widenet"] })).rejects.toThrow(
 					GetAddressInfoByCepNotFoundError,
 				);
 			});
@@ -680,6 +700,16 @@ describe("getAddressInfoByCep", () => {
 					brasilapi: createJsonResponse({
 						errors: [{ message: "CEP não encontrado" }],
 					}),
+				});
+
+				await expect(getAddressInfoByCep("00000000", { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should throw GetAddressInfoByCepNotFoundError when BrasilAPI answers without a cep, even for the CEP 00000000", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ city: "Lugar", street: "Rua A" }),
 				});
 
 				await expect(getAddressInfoByCep("00000000", { providers: ["brasilapi"] })).rejects.toThrow(

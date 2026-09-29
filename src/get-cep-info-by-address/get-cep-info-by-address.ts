@@ -83,6 +83,7 @@ const MIN_ADDRESS_PART_LENGTH = 3;
 const normalizeAddressPart = (value: string): string => removeAccents(value).trim();
 
 const readAddressPart = (value: unknown): string | null => {
+	// Stryker disable next-line ConditionalExpression: `removeAccents` returns "" for a value that is not a string, which is shorter than MIN_ADDRESS_PART_LENGTH, so the check below returns `null` for it as well.
 	if (typeof value !== "string") return null;
 
 	const normalized = normalizeAddressPart(value);

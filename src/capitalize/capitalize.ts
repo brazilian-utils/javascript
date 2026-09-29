@@ -59,6 +59,7 @@ const isApostrophe = (token: string): boolean => APOSTROPHE_REGEX.test(token);
  * @returns {number} The index of the next word.
  */
 const nextWordIndex = (tokens: string[], index: number): number => {
+	// Stryker disable next-line EqualityOperator: the extra pass reads `tokens[tokens.length]`, which is `undefined`; `WORD_REGEX.test(undefined)` tests the string "undefined" and matches, so it returns `tokens.length`, the value the function returns when the loop ends.
 	for (let position = index + 1; position < tokens.length; position++) {
 		if (isWord(tokens[position])) return position;
 	}

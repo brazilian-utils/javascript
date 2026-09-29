@@ -71,6 +71,7 @@ export const formatNfeKey = (value: string, options?: FormatNfeKeyOptions): stri
 	isLookupCode(value)
 		? format({
 				pad: options?.pad,
+				// Stryker disable next-line StringLiteral: the prefix sits at the start of the key, where `sanitizeNfeKey` drops every letter, so any digit-free replacement gives the same key as an empty one.
 				value: sanitizeNfeKey(toStringSafe(value).trim().replace(XML_ID_PREFIX_REGEX, "")),
 				pattern: PATTERN,
 			})

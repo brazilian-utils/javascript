@@ -180,6 +180,13 @@ describe("isValidServicePhone with an array of characters", () => {
 	});
 });
 
+describe("isValidServicePhone with a number", () => {
+	test("should reject the number of a service code, which is not a string", () => {
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidServicePhone(190)).toBe(false);
+	});
+});
+
 describe("isValidServicePhone types", () => {
 	test("should take a string and return a boolean", () => {
 		expectTypeOf(isValidServicePhone).parameter(0).toEqualTypeOf<string>();

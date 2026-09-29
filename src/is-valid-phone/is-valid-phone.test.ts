@@ -179,6 +179,16 @@ describe("isValidPhone with an array of characters", () => {
 	});
 });
 
+describe("isValidPhone with a value that is not a string", () => {
+	test("should read it through its string form, without the character check of a string", () => {
+		const value = { toString: () => "190x" };
+
+		// @ts-expect-error: intentionally invalid input
+		expect(isValidPhone(value, { accept: ["service"] })).toBe(true);
+		expect(isValidPhone("190x", { accept: ["service"] })).toBe(false);
+	});
+});
+
 describe("isValidPhone types", () => {
 	test("should take a string, optional options, and return a boolean", () => {
 		expectTypeOf(isValidPhone).parameter(0).toEqualTypeOf<string>();

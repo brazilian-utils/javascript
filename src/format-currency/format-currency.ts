@@ -28,6 +28,7 @@ const getFormatter = (symbol: boolean, precision: number): Intl.NumberFormat => 
 
 	// Stryker disable next-line CallExpression: this is a performance cache; not populating it only means the next call rebuilds an equivalent formatter, which formats identically
 	formatters ??= new Map();
+	// Stryker disable next-line CallExpression: this is a performance cache; not storing the formatter only means the next call builds an equivalent one, which formats identically.
 	formatters.set(key, formatter);
 
 	return formatter;

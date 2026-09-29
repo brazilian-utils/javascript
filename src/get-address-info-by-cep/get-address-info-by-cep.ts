@@ -119,6 +119,7 @@ const confirmAddress = (address: AddressInfo, cep: string): AddressInfo => {
 		address.state.toUpperCase() !== expectedState;
 
 	if (address.cep.padStart(CEP_LENGTH, "0") !== cep || stateDiffers) {
+		// Stryker disable next-line StringLiteral: the message is never observable
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 

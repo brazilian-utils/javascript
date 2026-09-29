@@ -133,8 +133,10 @@ export const toStandardSchema = <Value, Options = undefined>(
 	 * @returns {boolean} `true` when the validator accepts the value; a throw counts as `false`.
 	 */
 	const isValue = (value: unknown): value is Value => {
+		// Stryker disable next-line ConditionalExpression: without this guard `Reflect.apply` throws a `TypeError` for a `validate` that is not a function, and the `catch` below returns `false` as well.
 		if (typeof validate !== "function") return false;
 
+		// Stryker disable BlockStatement: emptying the `catch`, which a comment cannot single out, makes `isValue` return `undefined`, and its only caller reads the result as a condition, where `undefined` and `false` both take the issue branch.
 		try {
 			return Reflect.apply(validate, undefined, [value, options?.options]) === true;
 		} catch {
@@ -142,6 +144,7 @@ export const toStandardSchema = <Value, Options = undefined>(
 		}
 	};
 
+	// Stryker restore BlockStatement
 	return {
 		"~standard": {
 			version: 1,
