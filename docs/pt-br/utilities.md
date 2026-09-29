@@ -1602,6 +1602,7 @@ Escreve um número inteiro por extenso em português do Brasil: `1235` vira `"mi
 - **Opções** (`ConvertNumberToWordsOptions`): `gender` (padrão `"masculine"`) concorda "um/dois" e a centena ("duzentos/duzentas") com o substantivo que o número qualifica.
 - Aceita inteiros de `-999999999999999` a `999999999999999` (999 trilhões). Um valor não inteiro é truncado em direção a zero.
 - Retorna `""` para um valor fora desse intervalo ou não finito.
+- O último grupo leva um "e" antes dele só quando é menor que 100 ou uma centena redonda: `1200` é `"mil e duzentos"` e `1100` é `"mil e cem"`, já `1235` é `"mil duzentos e trinta e cinco"` e `1101` é `"mil cento e um"`.
 
 ```javascript
 import { convertNumberToWords } from '@brazilian-utils/brazilian-utils';
@@ -1621,6 +1622,9 @@ Escreve um valor em reais por extenso, como em cheques e contratos: `1523.45` vi
 
 - O `value` é truncado (não arredondado) para 2 casas decimais.
 - Retorna `""` para uma entrada inválida ou um valor acima de 999 trilhões de reais.
+- O singular vale para exatamente um (`"um real"`, `"um centavo"`), e um milhão, bilhão ou trilhão redondo de reais leva "de": `"um milhão de reais"`.
+- Um valor que trunca para nada é `"zero reais"`, mesmo se negativo (`-0.001`); qualquer outro valor negativo recebe o prefixo `"menos"`.
+- Acima de cerca de 90 trilhões de reais (`Number.MAX_SAFE_INTEGER / 100`) um número não guarda centavos, então o valor é lido como reais inteiros.
 
 ```javascript
 import { convertCurrencyToWords } from '@brazilian-utils/brazilian-utils';

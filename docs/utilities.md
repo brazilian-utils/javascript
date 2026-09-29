@@ -1602,6 +1602,7 @@ Write an integer in Brazilian Portuguese cardinal words ("por extenso"): `1235` 
 - **Options** (`ConvertNumberToWordsOptions`): `gender` (default `"masculine"`) agrees "um/dois" and the hundreds ("duzentos/duzentas") with the noun the number qualifies.
 - Accepts integers from `-999999999999999` to `999999999999999` (999 trillion). A non-integer is truncated toward zero.
 - Returns `""` for a value outside that range or not finite.
+- The last group takes an "e" before it only when it is below 100 or a round hundred: `1200` is `"mil e duzentos"` and `1100` is `"mil e cem"`, while `1235` is `"mil duzentos e trinta e cinco"` and `1101` is `"mil cento e um"`.
 
 ```javascript
 import { convertNumberToWords } from '@brazilian-utils/brazilian-utils';
@@ -1621,6 +1622,9 @@ Write an amount in reais in words ("por extenso"), as on cheques and contracts: 
 
 - `value` is truncated (not rounded) to 2 decimal places.
 - Returns `""` for invalid input or an amount above 999 trillion reais.
+- The singular is used for exactly one (`"um real"`, `"um centavo"`), and a round million, billion or trillion of reais takes "de": `"um milhão de reais"`.
+- An amount that truncates to nothing is `"zero reais"`, even when negative (`-0.001`); any other negative amount is prefixed with `"menos"`.
+- Above about 90 trillion reais (`Number.MAX_SAFE_INTEGER / 100`) a number cannot hold cents, so the amount is read as whole reais.
 
 ```javascript
 import { convertCurrencyToWords } from '@brazilian-utils/brazilian-utils';
