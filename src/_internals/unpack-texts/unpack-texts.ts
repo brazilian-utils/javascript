@@ -1,4 +1,4 @@
-const cache = new Map<string, readonly string[]>();
+let cache: Map<string, readonly string[]> | undefined;
 
 /**
  * Unpacks a list of texts the generator packed (`packTexts` in `scripts/lookup-table.ts`): one
@@ -16,7 +16,7 @@ const cache = new Map<string, readonly string[]>();
  * ```
  */
 export const unpackTexts = (packed: string): readonly string[] => {
-	const cached = cache.get(packed);
+	const cached = cache?.get(packed);
 
 	// Stryker disable next-line ConditionalExpression: the cache only saves unpacking the texts again; the unpacked texts are the same on every read.
 	if (cached !== undefined) return cached;
@@ -29,6 +29,7 @@ export const unpackTexts = (packed: string): readonly string[] => {
 	});
 
 	// Stryker disable next-line CallExpression: the cache only saves unpacking the texts again; the unpacked texts are the same on every read.
+	cache ??= new Map();
 	cache.set(packed, texts);
 
 	return texts;
