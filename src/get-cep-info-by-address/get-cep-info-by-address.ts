@@ -95,7 +95,8 @@ const readAddressPart = (value: unknown): string | null => {
 const isCepAddressInfoArray = (value: unknown): value is CepAddressInfo[] => Array.isArray(value);
 
 /**
- * Looks every CEP of a Brazilian street up on the ViaCEP API.
+ * Looks every CEP of a Brazilian street up on the ViaCEP API. ViaCEP caps the list at 50
+ * addresses, so a short street name that matches more streets returns only the first 50.
  *
  * @param {GetCepInfoByAddressParams} params - The address to look up.
  * @param {string} params.federalUnit - The two letter state code (e.g. "SP").

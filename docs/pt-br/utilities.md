@@ -216,7 +216,8 @@ Fonte: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.
 Valida um CEP ([código de endereçamento postal](https://pt.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)).
 
 - Aceita `string` ou `number`. Um CEP que começa com `0` precisa ser string, já que um número não preserva o zero à esquerda, e um número só é lido quando é um inteiro seguro não negativo.
-- Espaços, pontos e hífens são ignorados. Qualquer outro caractere invalida o valor.
+- Espaços, pontos, hifens e barras são ignorados. Qualquer outro caractere invalida o valor.
+- `getAddressInfoByCep` e `formatCep` com `pad: true` são mais tolerantes com números: preenchem um número com zeros à esquerda até 8 dígitos (`1310100` vira `01310-100`), enquanto `isValidCep` e `getStateByCep` leem `1310100` como 7 dígitos e o rejeitam.
 
 ```javascript
 import { isValidCep } from '@brazilian-utils/brazilian-utils';
@@ -271,7 +272,7 @@ generateCep(); // '92500000'
 Busca o endereço de um CEP em vários provedores ao mesmo tempo e resolve com a primeira resposta bem-sucedida. O resultado é um `AddressInfo`: `cep`, `state`, `city`, `neighborhood` e `street`.
 
 - **Opções** (`GetAddressInfoByCepOptions`):
-  - `providers` (`CepProvider[]`) lista os provedores a disputar (padrão `['viacep', 'brasilapi']`). `'widenet'` está descontinuado e fica fora da lista padrão.
+  - `providers` (`CepProvider[]`) lista os provedores a disputar (padrão `['viacep', 'brasilapi']`). `'widenet'` está descontinuado, fica fora da lista padrão e costuma estar indisponível: seu endpoint agora redireciona para `ws.apicep.com`, que respondia 502 na última verificação, então ele só acrescenta um provedor que falha à disputa.
   - `timeoutMs` (`number`) limita a busca inteira, tentativas incluídas (padrão: sem limite). Quando o tempo acaba, todas as requisições são abortadas e a chamada rejeita com `GetAddressInfoByCepServiceError`.
   - `signal` (`AbortSignal`) cancela a busca; a chamada rejeita com `signal.reason`, como o `fetch`.
 - Aceita string ou número. Uma string tem removido todo caractere que não é dígito (`'CEP 01310-100'` é `01310100`) e precisa sobrar com 8 dígitos. Um número é preenchido com zeros à esquerda até 8 dígitos, já que não carrega o zero inicial de um CEP de São Paulo, mas só a partir de `1000000` (`01000-000`, o menor CEP que os Correios atribuem). Um número menor, negativo ou fracionário é rejeitado com `GetAddressInfoByCepValidationError` antes de qualquer requisição.
@@ -283,16 +284,20 @@ Busca o endereço de um CEP em vários provedores ao mesmo tempo e resolve com a
 - Os três estendem `GetAddressInfoByCepError`, então um único `catch` cobre todos.
 
 ```javascript
-import { getAddressInfoByCep } from '@brazilian-utils/brazilian-utils';
+import { getAddressInfoByCep, GetAddressInfoByCepNotFoundError } from '@brazilian-utils/brazilian-utils';
 
 // Usando os provedores padrão (['viacep', 'brasilapi'])
 const address = await getAddressInfoByCep('01310100');
 // { cep: '01310100', state: 'SP', city: 'São Paulo', neighborhood: 'Bela Vista', street: 'Avenida Paulista' }
 
-// Usando provedores específicos
-const addressFromProviders = await getAddressInfoByCep('01310-100', {
-  providers: ['viacep', 'brasilapi']
-});
+// Usando um provedor específico, e distinguindo um CEP desconhecido de uma falha
+try {
+  await getAddressInfoByCep('01310-100', { providers: ['brasilapi'] });
+} catch (error) {
+  if (error instanceof GetAddressInfoByCepNotFoundError) {
+    // nenhum provedor conhece o CEP
+  }
+}
 
 // Usando número como entrada (será preenchido automaticamente com zeros à esquerda)
 const addressFromNumber = await getAddressInfoByCep(1310100);
@@ -309,6 +314,7 @@ Busca os CEPs de um endereço na ViaCEP. Resolve com um array de `CepAddressInfo
 - Rejeita com `GetCepInfoByAddressValidationError` quando a UF, a cidade ou a rua está ausente ou inválida (um valor em branco, um valor que não é string, ou uma cidade ou rua com menos de 3 caracteres, todos rejeitados antes de qualquer requisição), com `GetCepInfoByAddressNotFoundError` quando nenhum endereço corresponde à busca, e com `GetCepInfoByAddressError` quando a ViaCEP responde com um status de erro HTTP.
 - Repete falhas transitórias de rede, como `getAddressInfoByCep`.
 - Cada item traz a resposta da ViaCEP sem alterações, com os nomes de campo da própria ViaCEP.
+- A ViaCEP limita a lista a 50 endereços, então um nome de rua curto que corresponde a mais ruas retorna só os 50 primeiros.
 
 ```javascript
 import { getCepInfoByAddress } from '@brazilian-utils/brazilian-utils';
@@ -1755,7 +1761,7 @@ Fonte: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades)
 Retorna o estado brasileiro ao qual um CEP pertence, a partir das faixas de CEP que os Correios atribuem a cada UF (a "Faixa de CEP" de cada UF).
 
 - Funciona offline: nenhuma API de CEP é chamada, então a resposta diz qual estado é dono da faixa, não se o CEP está em uso.
-- Aceita o que o `isValidCep` aceita: 8 dígitos, como string ou número, ignorando espaços, pontos e hifens. Um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado.
+- Aceita o que o `isValidCep` aceita: 8 dígitos, como string ou número, ignorando espaços, pontos, hifens e barras. Um CEP que começa com `0` precisa ser uma string, e um número negativo ou fracionário é rejeitado. `getAddressInfoByCep` e `formatCep` com `pad: true` preenchem números com zeros à esquerda (`1310100` vira `01310-100`).
 - Amazonas, Distrito Federal e Goiás têm duas faixas cada, e nenhuma faixa estadual cobre `00000-000` a `00999-999` nem `78900-000` a `78999-999`.
 - A faixa é o bloco que pertence ao estado, não uma garantia de que todo CEP dentro dela está em uso: `10000-000` está sem uso dentro da faixa de São Paulo e ainda assim responde São Paulo.
 - Retorna `null` para um CEP inválido ou fora de todas as faixas. Exporta o tipo `State`.
@@ -1817,6 +1823,8 @@ getStateCodeByName('  Rio de Janeiro  '); // 'RJ'
 getStateCodeByName('Neverland'); // null
 ```
 
+Fonte: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/api/v1/localidades/estados)
+
 ### getStateNameByCode
 
 Retorna o nome completo de um estado brasileiro a partir da sigla.
@@ -1833,22 +1841,25 @@ getStateNameByCode('  Rj  '); // 'Rio de Janeiro'
 getStateNameByCode('ZZ'); // null
 ```
 
+Fonte: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/api/v1/localidades/estados)
+
 ### getStateCapital
 
 Retorna a capital de um estado brasileiro, no mesmo formato `{ code, name, stateCode }` (`Municipality`) que o `getMunicipalityByCode` retorna para ela.
 
 - A busca ignora maiúsculas e minúsculas e os espaços nas pontas. Retorna `null` quando nenhum estado corresponde.
-- Para o Distrito Federal, que não tem municípios, a capital é Brasília, com o código que o IBGE dá ao distrito todo.
+- O Distrito Federal não é dividido em municípios, mas o IBGE o codifica como um só, Brasília, e essa é a sua capital.
 
 ```javascript
 import { getStateCapital } from '@brazilian-utils/brazilian-utils';
 
 getStateCapital('SP'); // { code: '3550308', name: 'São Paulo', stateCode: 'SP' }
 getStateCapital('to'); // { code: '1721000', name: 'Palmas', stateCode: 'TO' }
+getStateCapital('DF'); // { code: '5300108', name: 'Brasília', stateCode: 'DF' }
 getStateCapital('ZZ'); // null
 ```
 
-Fonte: [IBGE, Anuário Estatístico do Brasil, tabela 1.1.1.2 (capitais, 2025)](https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html).
+Fonte: [IBGE, Anuário Estatístico do Brasil, tabela 1.1.1.2 (capitais, 2025)](https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html)
 
 ### getRegions
 

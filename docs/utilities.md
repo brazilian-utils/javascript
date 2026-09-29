@@ -216,7 +216,8 @@ Source: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda
 Check if a CEP ([brazilian postal code](https://en.wikipedia.org/wiki/C%C3%B3digo_de_Endere%C3%A7amento_Postal)) is valid.
 
 - Accepts a `string` or a `number`. A CEP that starts with `0` has to be a string, since a number cannot keep the leading zero, and a number is only read when it is a non-negative safe integer.
-- Spaces, dots and hyphens are ignored. Any other character makes the value invalid.
+- Spaces, dots, hyphens and slashes are ignored. Any other character makes the value invalid.
+- `getAddressInfoByCep` and `formatCep` with `pad: true` are more lenient with numbers: they left-pad a number to 8 digits (`1310100` is `01310-100`), while `isValidCep` and `getStateByCep` read `1310100` as 7 digits and reject it.
 
 ```javascript
 import { isValidCep } from '@brazilian-utils/brazilian-utils';
@@ -271,7 +272,7 @@ generateCep(); // '92500000'
 Fetch the address of a CEP from several providers at once and resolve to the first successful answer. The result is an `AddressInfo`: `cep`, `state`, `city`, `neighborhood` and `street`.
 
 - **Options** (`GetAddressInfoByCepOptions`):
-  - `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated and left out of the default list.
+  - `providers` (`CepProvider[]`) lists the providers to race (default `['viacep', 'brasilapi']`). `'widenet'` is deprecated, left out of the default list and usually unavailable: its endpoint now redirects to `ws.apicep.com`, which answered 502 when last checked, so it only adds a failing provider to the race.
   - `timeoutMs` (`number`) bounds the whole lookup, retries included (default: no limit). When it runs out, every request is aborted and the call rejects with `GetAddressInfoByCepServiceError`.
   - `signal` (`AbortSignal`) cancels the lookup; the call rejects with `signal.reason`, the same as `fetch`.
 - Accepts a string or a number. A string has any non-digit characters stripped (`'CEP 01310-100'` is `01310100`) and has to leave 8 digits. A number is left-padded with zeros to 8 digits, since it cannot carry the leading zero of a São Paulo CEP, but only from `1000000` (`01000-000`, the lowest CEP the Correios assign) up. A smaller, negative or fractional number is rejected with `GetAddressInfoByCepValidationError` before any request is made.
@@ -283,16 +284,20 @@ Fetch the address of a CEP from several providers at once and resolve to the fir
 - All three extend `GetAddressInfoByCepError`, so one `catch` covers them.
 
 ```javascript
-import { getAddressInfoByCep } from '@brazilian-utils/brazilian-utils';
+import { getAddressInfoByCep, GetAddressInfoByCepNotFoundError } from '@brazilian-utils/brazilian-utils';
 
 // Using the default providers (['viacep', 'brasilapi'])
 const address = await getAddressInfoByCep('01310100');
 // { cep: '01310100', state: 'SP', city: 'São Paulo', neighborhood: 'Bela Vista', street: 'Avenida Paulista' }
 
-// Using specific providers
-const addressFromProviders = await getAddressInfoByCep('01310-100', {
-  providers: ['viacep', 'brasilapi']
-});
+// Using a specific provider, and telling an unknown CEP from a failure
+try {
+  await getAddressInfoByCep('01310-100', { providers: ['brasilapi'] });
+} catch (error) {
+  if (error instanceof GetAddressInfoByCepNotFoundError) {
+    // no provider knows the CEP
+  }
+}
 
 // Using number input (will be padded automatically)
 const addressFromNumber = await getAddressInfoByCep(1310100);
@@ -309,6 +314,7 @@ Fetch the CEPs of an address from ViaCEP. Resolves to an array of `CepAddressInf
 - Rejects with `GetCepInfoByAddressValidationError` when the UF, city or street is missing or invalid (a blank value, a value that is not a string, or a city or street under 3 characters, all rejected before any request), with `GetCepInfoByAddressNotFoundError` when no address matches, and with `GetCepInfoByAddressError` when ViaCEP answers with an HTTP error status.
 - Retries transient network failures, as `getAddressInfoByCep` does.
 - Each item carries the ViaCEP payload unchanged, under ViaCEP's own field names.
+- ViaCEP caps the list at 50 addresses, so a short street name that matches more streets returns only the first 50.
 
 ```javascript
 import { getCepInfoByAddress } from '@brazilian-utils/brazilian-utils';
@@ -1756,7 +1762,7 @@ Source: [IBGE Localidades](https://servicodados.ibge.gov.br/api/docs/localidades
 Get the Brazilian state a CEP belongs to, from the CEP ranges the Correios assign to each state (the "Faixa de CEP" of each UF).
 
 - It runs offline: no CEP API is called, so the answer says which state owns the range, not whether the CEP is in use.
-- Accepts what `isValidCep` accepts: 8 digits, as a string or a number, with spaces, dots and hyphens ignored. A CEP that starts with `0` has to be a string, and a negative or fractional number is rejected.
+- Accepts what `isValidCep` accepts: 8 digits, as a string or a number, with spaces, dots, hyphens and slashes ignored. A CEP that starts with `0` has to be a string, and a negative or fractional number is rejected. `getAddressInfoByCep` and `formatCep` with `pad: true` left-pad numbers instead (`1310100` is `01310-100`).
 - Amazonas, Distrito Federal and Goiás have two ranges each, and no state range covers `00000-000` to `00999-999` nor `78900-000` to `78999-999`.
 - A range is the block the state owns, not a promise that every CEP in it is in use: `10000-000` sits unused inside the São Paulo range and still answers São Paulo.
 - Returns `null` for an invalid CEP or one outside every range. Exports the `State` type.
@@ -1818,6 +1824,8 @@ getStateCodeByName('  Rio de Janeiro  '); // 'RJ'
 getStateCodeByName('Neverland'); // null
 ```
 
+Source: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/api/v1/localidades/estados)
+
 ### getStateNameByCode
 
 Get the full name of a Brazilian state from its two-letter code (sigla).
@@ -1834,22 +1842,25 @@ getStateNameByCode('  Rj  '); // 'Rio de Janeiro'
 getStateNameByCode('ZZ'); // null
 ```
 
+Source: [IBGE, API de Localidades, `estados`](https://servicodados.ibge.gov.br/api/v1/localidades/estados)
+
 ### getStateCapital
 
 Get the capital of a Brazilian state, as the same `{ code, name, stateCode }` (`Municipality`) that `getMunicipalityByCode` returns for it.
 
 - The match ignores case and surrounding whitespace. Returns `null` when no state matches.
-- For the Distrito Federal, which has no municipalities, the capital is Brasília, with the code the IBGE gives the whole district.
+- The Distrito Federal is not divided into municipalities, but the IBGE codes it as a single one, Brasília, and that is its capital.
 
 ```javascript
 import { getStateCapital } from '@brazilian-utils/brazilian-utils';
 
 getStateCapital('SP'); // { code: '3550308', name: 'São Paulo', stateCode: 'SP' }
 getStateCapital('to'); // { code: '1721000', name: 'Palmas', stateCode: 'TO' }
+getStateCapital('DF'); // { code: '5300108', name: 'Brasília', stateCode: 'DF' }
 getStateCapital('ZZ'); // null
 ```
 
-Source: [IBGE, Anuário Estatístico do Brasil, table 1.1.1.2 (state capitals, 2025)](https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html).
+Source: [IBGE, Anuário Estatístico do Brasil, table 1.1.1.2 (state capitals, 2025)](https://anuario.ibge.gov.br/2024/territorio/posicao-e-extensao.html)
 
 ### getRegions
 

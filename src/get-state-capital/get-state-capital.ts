@@ -10,8 +10,8 @@ export type { Municipality } from "../_internals/constants/municipalities";
  * `getMunicipalityByCode` returns for it. The match is case-insensitive and ignores leading and
  * trailing whitespace, like `getTimezoneByState`.
  *
- * For the Distrito Federal, which has no municipalities, the capital is Brasília, with the code
- * the IBGE gives the whole district.
+ * The Distrito Federal is not divided into municipalities, but the IBGE codes it as a single one,
+ * Brasília, and that is its capital.
  *
  * @param {string} stateCode - The two-letter state code (sigla).
  * @returns {Municipality|null} A fresh object with the capital's 7 digit IBGE code, its name and

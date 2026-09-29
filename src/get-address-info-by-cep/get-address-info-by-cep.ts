@@ -60,7 +60,8 @@ export type GetAddressInfoByCepOptions = {
 	/**
 	 * Which CEP services to race, in the order given (default: `["viacep", "brasilapi"]`; the
 	 * deprecated `"widenet"` provider is excluded from the default list, but can still be
-	 * requested explicitly).
+	 * requested explicitly; it is usually unavailable, since its endpoint now redirects to
+	 * `ws.apicep.com`, which answered 502 when last checked).
 	 */
 	providers?: CepProvider[];
 	/**
@@ -418,7 +419,7 @@ const raceProviders = async (
  * @param {GetAddressInfoByCepOptions} options - Optional configuration for the function.
  * @param {CepProvider[]} options.providers - List of providers to use. Defaults to `["viacep", "brasilapi"]`
  * if not specified (the deprecated `"widenet"` provider is excluded from the default list, but can still
- * be requested explicitly).
+ * be requested explicitly; it is usually unavailable, see `GetAddressInfoByCepOptions`).
  * @param {AbortSignal} options.signal - Cancels the lookup, rejecting with `signal.reason`.
  * @param {number} options.timeoutMs - Time limit of the whole lookup, in milliseconds.
  * @returns {Promise<AddressInfo>} A promise that resolves to the address information.
@@ -437,13 +438,17 @@ const raceProviders = async (
  * // Using the default providers (["viacep", "brasilapi"])
  * const address = await getAddressInfoByCep("01310100");
  *
- * // Using specific providers
- * const address = await getAddressInfoByCep("01310-100", {
- *   providers: ["viacep", "brasilapi"]
- * });
+ * // Using a specific provider, and telling an unknown CEP from a failure
+ * try {
+ *   await getAddressInfoByCep("01310-100", { providers: ["brasilapi"] });
+ * } catch (error) {
+ *   if (error instanceof GetAddressInfoByCepNotFoundError) {
+ *     // no provider knows the CEP
+ *   }
+ * }
  *
  * // Using number input
- * const address = await getAddressInfoByCep(1310100);
+ * const addressFromNumber = await getAddressInfoByCep(1310100);
  *
  * // A negative or fractional number is rejected
  * await getAddressInfoByCep(-1310100); // throws GetAddressInfoByCepValidationError
@@ -458,6 +463,8 @@ const raceProviders = async (
  * @see Official: https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep
  * @see Based on: https://viacep.com.br/
  * ViaCEP, one of the two default providers. A third-party service, not a Correios one.
+ * @see Based on: https://apps.widenet.com.br/busca-cep/api/cep/01310100.json
+ * Widenet, the deprecated provider. The endpoint redirects to `ws.apicep.com`, which answered 502 when last checked.
  * @see Based on: https://brasilapi.com.br/docs#tag/CEP
  * BrasilAPI, the other default provider. A third-party service, not a Correios one.
  */

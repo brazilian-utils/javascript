@@ -9,7 +9,9 @@ const CEP_REGEX = /^\d{8}$/;
  * Spaces, dots, hyphens and slashes are ignored, so every punctuated form of a CEP is accepted, but
  * any other character, a letter in particular, makes the value invalid.
  *
- * A number is only read as a CEP when it is a non-negative safe integer.
+ * A number is only read as a CEP when it is a non-negative safe integer, and it cannot carry a
+ * leading zero, so `1310100` is 7 digits and invalid. `getAddressInfoByCep` and `formatCep` with
+ * `pad: true` left-pad a number to 8 digits instead.
  *
  * @param {string|number} cep - The CEP value to be validated.
  * @returns {boolean} True if the CEP is valid, false otherwise.

@@ -5,8 +5,9 @@ export type { State } from "../_internals/constants/states";
 /**
  * Retrieves a list of all Brazilian states with their codes and names.
  *
- * Returns an array of state objects containing the two-letter state code
- * and the full state name. The list is sorted by state name with `localeCompare`
+ * Returns an array of state objects: the two-letter state code (`code`), the full state name
+ * (`name`), the region code and name (`regionCode`, `regionName`) and the two-digit IBGE code
+ * (`ibgeCode`). The list is sorted by state name with `localeCompare`
  * in the "pt-BR" locale, so accented names land where a Brazilian reader expects
  * them: Pará, Paraíba, Paraná and Rio de Janeiro, Rio Grande do Norte, Rio Grande do Sul.
  *
