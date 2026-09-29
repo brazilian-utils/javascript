@@ -45,7 +45,7 @@ export const getCities = (state?: StateCode): string[] => {
 	if (!state) {
 		allCitiesCache ??= Object.values(MUNICIPALITY_NAMES)
 			.flatMap((names) => unpackTexts(names))
-			.sort((a, b) => a.localeCompare(b, "pt-BR"));
+			.toSorted((a, b) => a.localeCompare(b, "pt-BR"));
 
 		return [...allCitiesCache];
 	}
