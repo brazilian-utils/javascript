@@ -6,6 +6,7 @@ import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/
 import { isServicePhoneDigits } from "../_internals/is-service-phone-digits/is-service-phone-digits";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
+import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
 import { isValidLandlinePhone } from "../is-valid-landline-phone/is-valid-landline-phone";
 import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-phone";
 import { DEFAULT_ACCEPT } from "./constants";
@@ -65,7 +66,7 @@ export type IsValidPhoneOptions = {
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidPhone = (value: string, options?: IsValidPhoneOptions): boolean => {
-	if (typeof value === "string" && !hasOnlyPhoneCharacters(value)) return false;
+	if (!hasOnlyPhoneCharacters(toStringSafe(value))) return false;
 
 	const requested = options?.accept;
 	const accept: PhoneType[] = Array.isArray(requested) ? requested : DEFAULT_ACCEPT;
