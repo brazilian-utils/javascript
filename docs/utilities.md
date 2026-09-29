@@ -3313,7 +3313,7 @@ Check if a CST (Código de Situação Tributária) code is valid for a given tax
 | `pis` | 2 digits | `01`-`09`, `49`, `50`-`56`, `60`-`67`, `70`-`75`, `98`, `99` |
 | `cofins` | 2 digits | same table as `pis` |
 
-- **Options** (`IsValidCstOptions`): `tax` picks the table. Omitted, or outside those four values, every table is accepted.
+- **Options** (`IsValidCstOptions`): `tax` picks the table. Omitted, or outside those four values, every table is accepted; a `null` or non-object `options` is read as none.
 - Accepts a string with the 2 digits of a Tabela B code or the 3 digits of the ICMS form, or a number. The ICMS form may have any run of separators (space, `.`, `-` or `/`) after the origin digit.
 - A single digit is padded to the 3-digit ICMS form; a 2-digit value is a Tabela B code and is never read as an origin plus a digit (`'10'` is the Tabela B code `10`), while the number `7` is the ICMS code `007`.
 
@@ -3395,7 +3395,7 @@ getCstIbsCbs('cst200'); // null (not a documented form)
 
 Check if a cClassTrib (Código de Classificação Tributária do IBS e da CBS) exists in the official table, the code the field `cClassTrib` carries next to the CST-IBS/CBS.
 
-- **Options** (`IsValidClassTribOptions`): `cst` is the CST-IBS/CBS the document carries, checked against the classification as well. Omit it to check the cClassTrib alone.
+- **Options** (`IsValidClassTribOptions`): `cst` is the CST-IBS/CBS the document carries, checked against the classification as well. Omit it to check the cClassTrib alone; a `null` or non-object `options` is read as none.
 - Every classification belongs to exactly one CST-IBS/CBS, the first 3 digits of its code, and a document that carries a cClassTrib with another CST is rejected (rejection 1024, "Classificação Tributária do IBS e da CBS incompatível com o CST informado"). A `cst` that is given and is not the CST of the classification, whatever it is, makes the result `false`.
 - Only the classifications in force count: the Informe Técnico 2025.002 excludes a classification by closing its validity (`dFimVig`), as v.1.60 did with `220001`, `220002` and `220003`, and those are rejected. 161 are in force in the version published on 23/06/2026.
 - Accepts a string of bare digits with optional surrounding whitespace, or a non-negative safe integer. The field is numeric with 6 digits and has no mask, so any other string is rejected.

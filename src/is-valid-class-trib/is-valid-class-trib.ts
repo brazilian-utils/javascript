@@ -39,6 +39,7 @@ export type IsValidClassTribOptions = {
  * integer. A value narrower than 6 digits is left padded with zeros, as a string or as a number,
  * since the codes start with zeros a numeric field drops: `1`, `"1"` and `"000001"` are all the
  * code `000001`. `options.cst` is read the same way, padded to 3 digits.
+ * An `options` that is `null` or not an object is read as no options at all.
  *
  * @param {string|number} value - The cClassTrib to be validated, e.g. `"200001"` or `200001`.
  * @param {IsValidClassTribOptions} [options] - The CST-IBS/CBS the code has to belong to.
@@ -76,7 +77,6 @@ export const isValidClassTrib = (
 	options?: IsValidClassTribOptions,
 ): boolean => {
 	if (!isLookupCode(value)) return false;
-	if (options !== undefined && (options === null || typeof options !== "object")) return false;
 
 	const code = padLookupCode(value, CLASS_TRIB_LENGTH);
 

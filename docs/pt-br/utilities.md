@@ -3312,7 +3312,7 @@ Valida um código de CST (Código de Situação Tributária) para um tributo. In
 | `pis` | 2 dígitos | `01`-`09`, `49`, `50`-`56`, `60`-`67`, `70`-`75`, `98`, `99` |
 | `cofins` | 2 dígitos | mesma tabela do `pis` |
 
-- **Opções** (`IsValidCstOptions`): `tax` escolhe a tabela. Omitido, ou fora desses quatro valores, todas as tabelas são aceitas.
+- **Opções** (`IsValidCstOptions`): `tax` escolhe a tabela. Omitido, ou fora desses quatro valores, todas as tabelas são aceitas; um `options` `null` ou que não seja objeto é lido como ausente.
 - Aceita uma string com os 2 dígitos de um código da Tabela B ou os 3 dígitos da forma do ICMS, ou um número. A forma do ICMS pode ter qualquer sequência de separadores (espaço, `.`, `-` ou `/`) depois do dígito de origem.
 - Um único dígito é completado até a forma de 3 dígitos do ICMS; um valor de 2 dígitos é um código da Tabela B e nunca é lido como origem mais um dígito (`'10'` é o código da Tabela B `10`), enquanto o número `7` é o código ICMS `007`.
 
@@ -3394,7 +3394,7 @@ getCstIbsCbs('cst200'); // null (não é uma forma documentada)
 
 Valida um cClassTrib (Código de Classificação Tributária do IBS e da CBS) contra a tabela oficial, o código que o campo `cClassTrib` leva ao lado do CST-IBS/CBS.
 
-- **Opções** (`IsValidClassTribOptions`): `cst` é o CST-IBS/CBS que o documento leva, validado também contra a classificação. Omita-o para validar só o cClassTrib.
+- **Opções** (`IsValidClassTribOptions`): `cst` é o CST-IBS/CBS que o documento leva, validado também contra a classificação. Omita-o para validar só o cClassTrib; um `options` `null` ou que não seja objeto é lido como ausente.
 - Toda classificação pertence a exatamente um CST-IBS/CBS, os 3 primeiros dígitos do seu código, e um documento que leva um cClassTrib com outro CST é rejeitado (rejeição 1024, "Classificação Tributária do IBS e da CBS incompatível com o CST informado"). Um `cst` informado que não seja o CST da classificação, seja ele qual for, torna o resultado `false`.
 - Só contam as classificações vigentes: o Informe Técnico 2025.002 exclui uma classificação encerrando sua vigência (`dFimVig`), como a v.1.60 fez com `220001`, `220002` e `220003`, e essas são rejeitadas. São 161 vigentes na versão publicada em 23/06/2026.
 - Aceita uma string de dígitos puros, com espaços opcionais nas extremidades, ou um inteiro seguro não negativo. O campo é numérico com 6 dígitos e não tem máscara, então qualquer outra string é rejeitada.

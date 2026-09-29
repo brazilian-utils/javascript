@@ -62,7 +62,7 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
  * one of the four tables above; when it is given, only that table is consulted. A `tax` outside
  * the four documented values falls back to that default instead of turning the code down, the
  * way every other scalar option of this library (`version`, `type`, `style`) treats a value it
- * does not know.
+ * does not know. An `options` that is `null` or not an object is read as no options at all.
  *
  * A string is only read as a code when it is written in one of the documented forms: the 2
  * digits of a Tabela B code, or the 3 digits of the ICMS form with optional separators
@@ -131,7 +131,6 @@ const isValidForTax = (digits: string, tax: CstTax): boolean => {
  */
 export const isValidCst = (value: string | number, options?: IsValidCstOptions): boolean => {
 	if (!isLookupCode(value)) return false;
-	if (options !== undefined && (options === null || typeof options !== "object")) return false;
 
 	const trimmed = String(value).trim();
 	const code = trimmed.length < TABELA_B_LENGTH ? padLookupCode(trimmed, CST_LENGTH) : trimmed;

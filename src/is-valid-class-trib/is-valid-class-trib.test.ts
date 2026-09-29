@@ -132,11 +132,13 @@ describe("isValidClassTrib", () => {
 		});
 	});
 
-	it("should return false when options is not an object", () => {
+	it("should read null or a non-object options value as none, checking the cClassTrib alone", () => {
 		// @ts-expect-error not an options object
-		expect(isValidClassTrib("200001", null)).toBe(false);
+		expect(isValidClassTrib("200001", null)).toBe(true);
 		// @ts-expect-error not an options object
-		expect(isValidClassTrib("200001", "200")).toBe(false);
+		expect(isValidClassTrib("200001", "200")).toBe(true);
+		// @ts-expect-error not an options object
+		expect(isValidClassTrib("999999", null)).toBe(false);
 	});
 
 	describe("properties", () => {

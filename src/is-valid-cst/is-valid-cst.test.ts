@@ -186,14 +186,20 @@ describe("isValidCst", () => {
 		});
 	});
 
-	it("should return false when options is null", () => {
+	it("should read null options as none, checking every table", () => {
 		// @ts-expect-error not an options object
-		expect(isValidCst("00", null)).toBe(false);
+		expect(isValidCst("00", null)).toBe(true);
+		// @ts-expect-error not an options object
+		expect(isValidCst("999", null)).toBe(false);
 	});
 
-	it("should return false when options is a non-null, non-object value (e.g. a string)", () => {
+	it("should read a non-object options value as none, checking every table", () => {
 		// @ts-expect-error not an options object
-		expect(isValidCst("00", "foo")).toBe(false);
+		expect(isValidCst("06", "foo")).toBe(true);
+		// @ts-expect-error not an options object
+		expect(isValidCst("06", 1)).toBe(true);
+		// @ts-expect-error not an options object
+		expect(isValidCst("999", "foo")).toBe(false);
 	});
 
 	describe("padding", () => {
