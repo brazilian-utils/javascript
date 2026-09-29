@@ -106,10 +106,6 @@ const resolveFormattedAmount = (
 ): string | null => {
 	if (pointOfInitiation !== undefined && (amount !== undefined || txid !== undefined)) return null;
 
-	// `Number.isFinite` is false for every value that is not a number, so this guard is what keeps
-	// `toFixed` below from being called on something that has no `toFixed`. A negative amount keeps
-	// its sign in `toFixed`, so the amount regex below turns it down, and an amount that is zero or
-	// rounds to zero is turned down by the `Number(formattedAmount)` check.
 	if (amount !== undefined && !Number.isFinite(amount)) return null;
 
 	const formattedAmount = amount === undefined ? "" : amount.toFixed(AMOUNT_DECIMAL_PLACES);

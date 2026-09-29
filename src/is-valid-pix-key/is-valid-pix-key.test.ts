@@ -4,8 +4,8 @@ import { cnpjs, cpfs, phones } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
 import { generateCnpj } from "../generate-cnpj/generate-cnpj";
 import { generateCpf } from "../generate-cpf/generate-cpf";
-import { type PixKeyType, getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
-import { type IsValidPixKeyOptions, isValidPixKey } from "./is-valid-pix-key";
+import { getPixKeyInfo } from "../get-pix-key-info/get-pix-key-info";
+import { type IsValidPixKeyOptions, type PixKeyType, isValidPixKey } from "./is-valid-pix-key";
 
 describe("isValidPixKey", () => {
 	describe("should return false", () => {

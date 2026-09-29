@@ -43,8 +43,6 @@ const isValidCrc = (payload: string): boolean => {
 
 	if (payload.slice(-PIX_CRC_FIELD_LENGTH, -PIX_CRC_LENGTH) !== PIX_CRC_TAG) return false;
 
-	// A checksum that is not four uppercase hexadecimal digits can never equal crc16Ccitt's
-	// always-hexadecimal output, so the comparison below turns it down on its own.
 	return crc16Ccitt(payload.slice(0, -PIX_CRC_LENGTH)) === checksum.toUpperCase();
 };
 
@@ -101,7 +99,6 @@ const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): bo
 
 	if (txid === undefined) return false;
 
-	// With a PSP location the payer ignores whatever 62-05 carries (§2.7), so any value stands.
 	return isDynamic || txid === PIX_ABSENT_TXID || PIX_TXID_REGEX.test(txid);
 };
 
@@ -222,7 +219,6 @@ export const isValidPixPayload = (value: string): boolean => {
 	if (!payload.startsWith(PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT)) return false;
 	if (fields[PIX_PAYLOAD_FORMAT_INDICATOR_ID] !== PIX_PAYLOAD_FORMAT_INDICATOR) return false;
 	if (!isValidPointOfInitiation(fields)) return false;
-	// An absent code reads as "undefined", which is not 4 digits either.
 	if (!PIX_MERCHANT_CATEGORY_CODE_REGEX.test(String(fields[PIX_MERCHANT_CATEGORY_CODE_ID])))
 		return false;
 	if (fields[PIX_TRANSACTION_CURRENCY_ID] !== PIX_TRANSACTION_CURRENCY) return false;

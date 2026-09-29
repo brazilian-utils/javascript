@@ -30,7 +30,6 @@ const generateBancario = (): string =>
 		field1: generateRandomNumber(3) + REAL_CURRENCY_CODE + generateRandomNumber(5),
 		field2: generateRandomNumber(10),
 		field3: generateRandomNumber(10),
-		// The first digit is the slot of the DV geral, which assembleBoletoBancario overwrites.
 		tail: `0${drawDueDateFactor()}${generateRandomNumber(10)}`,
 	});
 

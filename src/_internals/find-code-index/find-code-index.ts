@@ -1,7 +1,7 @@
 /** A packed table read by `readTable`: its code width and every code as a number, ascending. */
 type CodeTable = { width: number; values: number[] };
 
-const tables = new Map<string, CodeTable>();
+let tables: Map<string, CodeTable> | undefined;
 
 /**
  * Unpacks a table the first time it is looked up in, and hands back the same arrays after that.
@@ -10,7 +10,7 @@ const tables = new Map<string, CodeTable>();
  * @returns {CodeTable} Its code width and codes.
  */
 const readTable = (codes: string): CodeTable => {
-	const cached = tables.get(codes);
+	const cached = tables?.get(codes);
 
 	// Stryker disable next-line ConditionalExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
 	if (cached !== undefined) return cached;
@@ -26,6 +26,7 @@ const readTable = (codes: string): CodeTable => {
 
 	const table = { width: Number(codes.slice(0, separator)), values };
 	// Stryker disable next-line CallExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
+	tables ??= new Map();
 	tables.set(codes, table);
 
 	return table;
@@ -61,7 +62,6 @@ export const findCodeIndex = (codes: string, code: string): number => {
 	let low = 0;
 	let high = values.length;
 
-	// A bisection over the ascending codes: the first index whose code is not below `value`.
 	while (low < high) {
 		const middle = (low + high) >>> 1;
 

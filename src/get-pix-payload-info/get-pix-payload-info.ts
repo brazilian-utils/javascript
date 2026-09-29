@@ -157,12 +157,10 @@ export const getPixPayloadInfo = (value: string): PixPayloadInfo | null => {
 	};
 	const url = merchantAccountInformation[PIX_URL_ID];
 	const amount = fields[PIX_TRANSACTION_AMOUNT_ID];
-	// isValidPixPayload has checked that 62 is there and carries 62-05.
 	const txid = String(readTlv(String(fields[PIX_ADDITIONAL_DATA_ID]))[PIX_TXID_ID]);
 	const isDynamic =
 		url !== undefined || fields[PIX_POINT_OF_INITIATION_ID] === PIX_DYNAMIC_POINT_OF_INITIATION;
 	const pix: PixPayloadInfo = {
-		// isValidPixPayload has checked that both are there and not empty.
 		merchantName: String(fields[PIX_MERCHANT_NAME_ID]),
 		merchantCity: String(fields[PIX_MERCHANT_CITY_ID]),
 		pointOfInitiation: isDynamic ? "dynamic" : "static",

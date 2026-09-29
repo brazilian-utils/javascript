@@ -215,8 +215,13 @@ const STRUCTURE_ONLY_RULE: BankAccountRule = {
 	digits: null,
 };
 
-// The lookup is a return value, not a condition: the build inlines an imported constant read in a
-// condition, which copied the whole COMPE_CODES literal into the scan a second time.
+/**
+ * Whether the bank code is in the COMPE table. The lookup is a return value, not a condition: the
+ * build inlines an imported constant read in a condition, which copied the whole `COMPE_CODES`
+ * literal into the scan a second time.
+ * @param {string} bankCode - The bank code to look up.
+ * @returns {boolean} Whether the code is listed.
+ */
 const isListedBankCode = (bankCode: string): boolean => findCodeIndex(COMPE_CODES, bankCode) !== -1;
 
 const findRule = (bankCode: string): BankAccountRule | null => {
@@ -343,7 +348,6 @@ export const isValidBankAccount = (params: IsValidBankAccountParams): boolean =>
 
 	const { bankCode, agency, account, digit } = params;
 
-	// An empty field is left to the length checks below, which reject it once sanitized.
 	if (
 		typeof bankCode !== "string" ||
 		typeof agency !== "string" ||

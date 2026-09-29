@@ -3,6 +3,8 @@ import {
 	detectPixKeyType,
 } from "../_internals/detect-pix-key-type/detect-pix-key-type";
 
+export type { PixKeyType } from "../_internals/detect-pix-key-type/detect-pix-key-type";
+
 /** Options of `isValidPixKey`. */
 export type IsValidPixKeyOptions = {
 	/** Kinds of Pix key that count as valid (default: all of them). */
