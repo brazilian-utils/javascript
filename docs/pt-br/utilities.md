@@ -2394,16 +2394,20 @@ Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_at
 
 ### isValidLegalNature
 
-Valida se um código de natureza jurídica existe na lista oficial, a tabela "Natureza Jurídica 2021" do IBGE/CONCLA. Somente hífens, pontos e espaços são tolerados ao redor dos 4 dígitos.
+Valida se um código de natureza jurídica existe na lista oficial, a tabela "Natureza Jurídica 2021" do IBGE/CONCLA. Aceita uma string com os 4 dígitos ou com a máscara `NNN-N`, ou um inteiro seguro não negativo.
 
+- Uma sequência de separadores (espaço, `.`, `-` ou `/`) só é lida entre o terceiro e o quarto dígito, então `'2-0-6-2'` é rejeitado.
 - Os 92 códigos em vigor são aceitos, mais os 8 que uma revisão anterior extinguiu. `getLegalNature` distingue os dois (`legacy: true`).
 
 ```javascript
 import { isValidLegalNature } from '@brazilian-utils/brazilian-utils';
 
 isValidLegalNature('2062'); // true
+isValidLegalNature(2062); // true
+isValidLegalNature('206-2'); // true
 isValidLegalNature('2208'); // true (extinto por uma revisão anterior, ainda aceito)
 isValidLegalNature('9999'); // false
+isValidLegalNature('2-0-6-2'); // false (um separador só cabe depois do terceiro dígito)
 ```
 
 Fonte: [CONCLA, Natureza Jurídica 2021](https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021) e seu [PDF de estrutura detalhada](https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf).

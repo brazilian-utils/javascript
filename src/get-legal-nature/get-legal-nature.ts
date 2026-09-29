@@ -1,7 +1,6 @@
 import { buildLegalNature as buildLegalNatureEntry } from "../_internals/build-legal-nature/build-legal-nature";
 import { type LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
-import { SEPARATORS_REGEX } from "../_internals/constants/separators";
-import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
+import { readLegalNatureCode } from "../_internals/read-legal-nature-code/read-legal-nature-code";
 import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 export type { LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
@@ -51,11 +50,13 @@ export const buildLegalNature = (code: string, description: string): LegalNature
 /**
  * Looks a Brazilian legal nature (natureza jurídica) code up.
  *
- * The usual mask characters (hyphens, dots, slashes, whitespace) are stripped from a string before
- * the lookup, so `getLegalNature("206.2")` resolves like `getLegalNature("206-2")`. A number is
- * only read as a code when it is a non-negative safe integer: its sign and its decimal point are
- * not mask characters, so `getLegalNature(-2062)` and `getLegalNature(206.2)` return `null` instead
- * of being read as `2062`.
+ * A string is only read as a code when it is written in one of the documented forms: the 4
+ * digits, or the `NNN-N` mask, with any run of separators (whitespace, `.`, `-` or `/`) between
+ * the third and the fourth digit and optional surrounding whitespace. `getLegalNature("206.2")`
+ * resolves like `getLegalNature("206-2")`, while a separator anywhere else (`"2-0-6-2"`) or any
+ * other character (`"2062a"`) gives `null`. A number is only read as a code when it is a
+ * non-negative safe integer: its sign and its decimal point are not mask characters, so
+ * `getLegalNature(-2062)` and `getLegalNature(206.2)` return `null` instead of being read as `2062`.
  *
  * No legal nature code starts with a zero, its first digit is the CONCLA category (1 to 5), so
  * nothing is ever padded here: a number and the string of the same digits are read identically,
@@ -81,9 +82,7 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  *
  * @param {string|number} value - The legal nature code to look up, with or without formatting.
  * @returns {LegalNature|null} The matching legal nature entry, or null when the code is unknown
- * or invalid, which is exactly when `isValidLegalNature` returns false for the string form of the
- * value (a number is read as the string it prints as), or when the value is a number that is not
- * a non-negative safe integer.
+ * or invalid, which is exactly when `isValidLegalNature` returns false.
  *
  * @example
  * ```typescript
@@ -105,6 +104,7 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  * getLegalNature("3123")?.legacy; // true (Partido Político, retired without a successor)
  * getLegalNature("206-2")?.code; // "2062"
  * getLegalNature("206.2")?.category.description; // "Entidades Empresariais"
+ * getLegalNature("2-0-6-2"); // null (a separator after the third digit only)
  * getLegalNature("0000"); // null
  * getLegalNature(206.2); // null (not a non-negative safe integer)
  * ```
@@ -113,9 +113,7 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const getLegalNature = (value: string | number): LegalNature | null => {
-	if (!isLookupCode(value)) return null;
-
-	const code = String(value).replace(SEPARATORS_REGEX, "");
+	const code = readLegalNatureCode(value);
 
 	if (!Object.hasOwn(LEGAL_NATURE, code)) return null;
 

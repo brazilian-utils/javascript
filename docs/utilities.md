@@ -2395,16 +2395,20 @@ Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_a
 
 ### isValidLegalNature
 
-Check if a legal nature code exists in the official list, the IBGE/CONCLA "Natureza Jurídica 2021" table. Only hyphens, dots and whitespace are tolerated around the 4 digits.
+Check if a legal nature code exists in the official list, the IBGE/CONCLA "Natureza Jurídica 2021" table. Accepts a string with the 4 digits or with the `NNN-N` mask, or a non-negative safe integer.
 
+- A separator run (space, `.`, `-` or `/`) is only read between the third and the fourth digit, so `'2-0-6-2'` is rejected.
 - The 92 codes in force are accepted, plus the 8 a past revision retired. `getLegalNature` tells them apart (`legacy: true`).
 
 ```javascript
 import { isValidLegalNature } from '@brazilian-utils/brazilian-utils';
 
 isValidLegalNature('2062'); // true
+isValidLegalNature(2062); // true
+isValidLegalNature('206-2'); // true
 isValidLegalNature('2208'); // true (retired by a past revision, still accepted)
 isValidLegalNature('9999'); // false
+isValidLegalNature('2-0-6-2'); // false (a separator only fits after the third digit)
 ```
 
 Source: [CONCLA, Natureza Jurídica 2021](https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021) and its [detailed structure PDF](https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf).

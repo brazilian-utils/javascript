@@ -150,6 +150,15 @@ describe("getLegalNature", () => {
 		expect(getLegalNature()).toBeNull();
 	});
 
+	it("should return null for a separator anywhere but after the third digit, like isValidLegalNature", () => {
+		expect(getLegalNature("-2062")).toBeNull();
+		expect(getLegalNature("2062-")).toBeNull();
+		expect(getLegalNature("-2-0-6-2")).toBeNull();
+		expect(getLegalNature("20.6.2")).toBeNull();
+		expect(getLegalNature("20 62")).toBeNull();
+		expect(getLegalNature("206 - 2")).toEqual(SOCIEDADE_EMPRESARIA_LIMITADA);
+	});
+
 	it("should return null for a negative or fractional number", () => {
 		expect(getLegalNature(-2062)).toBeNull();
 		expect(getLegalNature(206.2)).toBeNull();
@@ -194,15 +203,11 @@ describe("getLegalNature", () => {
 			fc.anything(),
 		);
 
-		test("should return null exactly when isValidLegalNature rejects the string form of the value, or the value is a number that is not a non-negative safe integer", () => {
+		test("should return null exactly when isValidLegalNature rejects the value", () => {
 			fc.assert(
 				fc.property(lookupInputs, (value) => {
-					const isRejectedNumber =
-						typeof value === "number" && !(Number.isSafeInteger(value) && value >= 0);
-					const text = typeof value === "number" ? String(value) : value;
-
 					expect(getLegalNature(value as string) === null).toBe(
-						isRejectedNumber || !isValidLegalNature(text as string),
+						!isValidLegalNature(value as string),
 					);
 				}),
 			);
