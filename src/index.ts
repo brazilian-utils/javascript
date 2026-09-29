@@ -28,6 +28,7 @@ export {
 export { differenceInBusinessDays } from "./difference-in-business-days/difference-in-business-days";
 export { type FormatBoletoOptions, formatBoleto } from "./format-boleto/format-boleto";
 export { type FormatCaepfOptions, formatCaepf } from "./format-caepf/format-caepf";
+export { type FormatCboOptions, formatCbo } from "./format-cbo/format-cbo";
 export { type FormatCeiOptions, formatCei } from "./format-cei/format-cei";
 export { type FormatCepOptions, formatCep } from "./format-cep/format-cep";
 export { type FormatCertidaoOptions, formatCertidao } from "./format-certidao/format-certidao";

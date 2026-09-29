@@ -2929,6 +2929,25 @@ isValidCbo(-212405); // false (não é um inteiro seguro não negativo)
 
 Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos de 10/07/2026, 2.725 ocupações)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf).
 
+### formatCbo
+
+Formata um código CBO (Classificação Brasileira de Ocupações) na máscara `NNNN-NN`. Só a estrutura muda; use `isValidCbo` para conferir um código com a tabela.
+
+- **Opções** (`FormatCboOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 6 dígitos de um código completo. Sem ele a máscara é aplicada até onde o valor vai.
+- Caracteres fora da máscara são descartados, e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo: um número negativo, fracionário ou inseguro retorna `''`. Retorna `''` quando não há dígito algum.
+
+```javascript
+import { formatCbo } from '@brazilian-utils/brazilian-utils';
+
+formatCbo('212405'); // 2124-05
+formatCbo('21240'); // 2124-0 (máscara aplicada até onde o valor vai)
+formatCbo('10205', { pad: true }); // 0102-05 (completado até 6 dígitos antes)
+formatCbo('abc212405'); // 2124-05 (só os dígitos são lidos)
+formatCbo(-212405); // '' (não é um inteiro seguro não negativo)
+```
+
+Fonte: [tabelas da CBO 2002 publicadas pelo MTE](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf), que imprimem os códigos como `NNNN-NN`.
+
 ### parseCbo
 
 Remove a formatação do CBO (Classificação Brasileira de Ocupações), mantém apenas os dígitos e limita o resultado a 6 dígitos.

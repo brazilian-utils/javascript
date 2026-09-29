@@ -13,6 +13,7 @@
 		"./difference-in-business-days": "./src/difference-in-business-days/difference-in-business-days.ts",
 		"./format-boleto": "./src/format-boleto/format-boleto.ts",
 		"./format-caepf": "./src/format-caepf/format-caepf.ts",
+		"./format-cbo": "./src/format-cbo/format-cbo.ts",
 		"./format-cei": "./src/format-cei/format-cei.ts",
 		"./format-cep": "./src/format-cep/format-cep.ts",
 		"./format-certidao": "./src/format-certidao/format-certidao.ts",

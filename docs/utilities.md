@@ -2930,6 +2930,25 @@ isValidCbo(-212405); // false (not a non-negative safe integer)
 
 Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf).
 
+### formatCbo
+
+Format a CBO (Classificação Brasileira de Ocupações) code into the `NNNN-NN` mask. Only the structure changes; use `isValidCbo` to check a code against the table.
+
+- **Options** (`FormatCboOptions`): `pad` (default `false`) first left pads the value with zeros to the 6 digits of a complete code. Without it the mask is applied as far as the value goes.
+- Characters outside the mask are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer: a negative, fractional or unsafe number returns `''`. Returns `''` when there is no digit at all.
+
+```javascript
+import { formatCbo } from '@brazilian-utils/brazilian-utils';
+
+formatCbo('212405'); // 2124-05
+formatCbo('21240'); // 2124-0 (masked as far as it goes)
+formatCbo('10205', { pad: true }); // 0102-05 (padded to 6 digits first)
+formatCbo('abc212405'); // 2124-05 (only the digits are read)
+formatCbo(-212405); // '' (not a non-negative safe integer)
+```
+
+Source: [CBO 2002 tables published by the MTE](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf), which print the codes as `NNNN-NN`.
+
 ### parseCbo
 
 Remove CBO (Classificação Brasileira de Ocupações) formatting, keep only digits, and cap the result to 6 digits.
