@@ -50,8 +50,10 @@ export function* eachLocalDay({ from, until }: EachLocalDayParams): Generator<Da
 	const step = Math.sign(until - from) * DAY_IN_MS;
 	const length = Math.abs(until - from) / DAY_IN_MS;
 
+	const target = new Date(from);
+
 	for (let index = 0; index < length; index += 1) {
-		const target = new Date(from + index * step);
+		target.setTime(from + index * step);
 		const candidate = new Date(
 			target.getUTCFullYear(),
 			target.getUTCMonth(),
