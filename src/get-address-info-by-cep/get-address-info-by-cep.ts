@@ -103,7 +103,7 @@ const asString = (value: unknown): string => (typeof value === "string" ? value 
 
 /**
  * Turns an address a provider answered into `GetAddressInfoByCepNotFoundError` when it contradicts
- * the CEP asked for: its 8 digits differ, or its state differs from the one that owns the CEP
+ * the CEP asked for: its digits, left padded to 8, differ, or its state differs from the one that owns the CEP
  * range (an empty state, and a CEP that no range covers, are not compared).
  *
  * @param {AddressInfo} address - The address a provider answered with.
@@ -118,7 +118,7 @@ const confirmAddress = (address: AddressInfo, cep: string): AddressInfo => {
 		address.state !== "" &&
 		address.state.toUpperCase() !== expectedState;
 
-	if (address.cep !== cep || stateDiffers) {
+	if (address.cep.padStart(CEP_LENGTH, "0") !== cep || stateDiffers) {
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 

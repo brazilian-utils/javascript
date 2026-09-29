@@ -977,6 +977,36 @@ describe("getAddressInfoByCep", () => {
 				);
 			});
 
+			it("should accept a ViaCEP answer that dropped the leading zero of the CEP", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ ...viacepPayload, cep: "1310100" }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] });
+
+				expect(result.city).toBe(viacepPayload.localidade);
+			});
+
+			it("should accept a Widenet answer that dropped the leading zero of the CEP", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ ...widenetPayload, code: "1310-100" }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] });
+
+				expect(result.city).toBe(widenetPayload.city);
+			});
+
+			it("should still reject a shortened CEP that is another CEP", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ ...viacepPayload, cep: "1310101" }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
 			it("should reject a Widenet address of another CEP as not found", async () => {
 				setupFetchMock(fetchMock, {
 					widenet: createJsonResponse({ ...widenetPayload, code: "01310-101" }),

@@ -280,7 +280,7 @@ Busca o endereço de um CEP em vários provedores ao mesmo tempo e resolve com a
 - Repete falhas transitórias de rede por provedor.
 - Rejeita com `GetAddressInfoByCepValidationError` quando o CEP é inválido, `providers` não nomeia nenhum provedor conhecido ou `timeoutMs` não é um número finito positivo, com `GetAddressInfoByCepNotFoundError` quando todos os provedores falharam e pelo menos um informou que o CEP é desconhecido, e com `GetAddressInfoByCepServiceError` quando todos os provedores falharam por outro motivo.
 - A BrasilAPI responde 404 tanto para um CEP desconhecido quanto quando os serviços por trás dela estão fora do ar, então o 404 dela só conta como "CEP desconhecido" quando nenhum outro provedor deixou de responder.
-- Um endereço só é aceito quando concorda com o CEP pedido: seus 8 dígitos precisam ser o CEP e o estado dele, quando informado, precisa ser o estado dono da faixa do CEP (veja `getStateByCep`). Caso contrário, esse provedor conta como não conhecendo o CEP. A BrasilAPI, por exemplo, respondeu o `99999-999`, um CEP do Rio Grande do Sul, com uma cidade do Paraná.
+- Um endereço só é aceito quando concorda com o CEP pedido: seus dígitos, preenchidos com zeros à esquerda até 8 (um provedor que responde `1310100` para `01310-100` quer dizer o mesmo CEP), precisam ser o CEP e o estado dele, quando informado, precisa ser o estado dono da faixa do CEP (veja `getStateByCep`). Caso contrário, esse provedor conta como não conhecendo o CEP. A BrasilAPI, por exemplo, respondeu o `99999-999`, um CEP do Rio Grande do Sul, com uma cidade do Paraná.
 - Quando a busca termina, as requisições dos provedores que perderam a disputa são abortadas.
 - Os três estendem `GetAddressInfoByCepError`, então um único `catch` cobre todos.
 
