@@ -39,7 +39,7 @@ isValidCpf('111 444 777 35'); // true (máscara com espaços)
 
 Formata um CPF.
 
-- **Opções** (`FormatCpfOptions`): `pad` preenche o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores.
+- **Opções** (`FormatCpfOptions`): `pad` preenche o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - `obfuscate` é aplicada após o `pad`. Segue a regra que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), regra criada pela Lei nº 12.309/2010, art. 87, § 5º; a LDO de 2026, [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), a repete).
 
 ```javascript
@@ -132,7 +132,7 @@ Fonte: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.
 
 Formata um CNPJ.
 
-- **Opções** (`FormatCnpjOptions`): `pad` preenche o valor com zeros à esquerda até 14 caracteres antes de aplicar a máscara (padrão `false`); `version` escolhe o formato, `1` (padrão) apenas numérico, `2` alfanumérico; `obfuscate` esconde os 2 primeiros dígitos e os 2 dígitos verificadores.
+- **Opções** (`FormatCnpjOptions`): `pad` preenche o valor com zeros à esquerda até 14 caracteres antes de aplicar a máscara (padrão `false`); `version` escolhe o formato, `1` (padrão) apenas numérico, `2` alfanumérico; `obfuscate` esconde os 2 primeiros dígitos e os 2 dígitos verificadores. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - A versão `2` mantém letras e dígitos, com uma letra minúscula convertida para maiúscula antes, já que o conjunto oficial é de `A` a `Z`; a versão `1` mantém apenas dígitos.
 - `obfuscate` vale para as duas versões e é aplicada após o `pad`. É uma convenção desta biblioteca, não uma regra oficial: nenhuma lei ou ato da Receita Federal define mascaramento para o CNPJ, cujos dados são públicos, a [ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) diz que "não há um padrão para o mascaramento" e as [regras do Pix do Banco Central](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) mostram o CNPJ inteiro onde mascaram o CPF; ela esconde os 2 primeiros caracteres e os 2 dígitos verificadores, à semelhança da regra do CPF.
 
@@ -811,7 +811,7 @@ isValidSuframa('001234560'); // false (setor 00)
 
 Formata uma Inscrição SUFRAMA.
 
-- **Opções** (`FormatSuframaOptions`): `pad` completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos.
+- **Opções** (`FormatSuframaOptions`): `pad` completa o valor com zeros à esquerda até os 9 dígitos antes de aplicar a máscara (padrão `false`), o que devolve o zero à esquerda de um valor de 8 dígitos. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - A máscara é progressiva, como nas outras funções `format`, então um valor de 8 dígitos sem `pad` é agrupado uma posição antes: use `pad: true` para um valor lido direto do campo `ISUF`, que pode vir com 8 dígitos.
 
 ```javascript
@@ -1246,7 +1246,7 @@ isValidPis('12056412547'); // false
 
 Formata um PIS.
 
-- **Opções** (`FormatPisOptions`): `pad` completa o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e o dígito verificador.
+- **Opções** (`FormatPisOptions`): `pad` completa o valor com zeros à esquerda até 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e o dígito verificador. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - O `obfuscate` é aplicado depois do `pad`.
 - Nenhuma autoridade publica uma regra de mascaramento para o PIS, então o `obfuscate` usa a que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, regra criada pela Lei nº 12.309/2010, art. 87, § 5º), um número com a mesma estrutura.
 
@@ -2354,7 +2354,7 @@ Fonte: [Resolução CONTRAN nº 886/2021, art. 4º](https://www.gov.br/transport
 
 Formata uma CNH.
 
-- **Opções** (`FormatCnhOptions`): `pad` completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores.
+- **Opções** (`FormatCnhOptions`): `pad` completa o valor com zeros à esquerda até os 11 dígitos antes de aplicar a máscara (padrão `false`); `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - O `obfuscate` é aplicado depois do `pad`.
 - Nenhuma autoridade publica uma regra de mascaramento para a CNH, então o `obfuscate` usa a que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, regra criada pela Lei nº 12.309/2010, art. 87, § 5º), um número com a mesma estrutura.
 
@@ -2556,7 +2556,7 @@ Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legisla
 
 Formata um título de eleitor com o agrupamento de 12 dígitos `0000 0000 00 00`.
 
-- **Opções** (`FormatVoterIdOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos, restaurando os zeros de um título emitido sem eles; `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa. A máscara esconde por posição, então use `pad` junto com `obfuscate` para um título passado como número, que perdeu os zeros à esquerda: sem ele a máscara cai sobre os dígitos verificadores.
+- **Opções** (`FormatVoterIdOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos, restaurando os zeros de um título emitido sem eles; `obfuscate` esconde os 3 primeiros dígitos e os 2 dígitos verificadores, deixando visível o código da unidade federativa. A máscara esconde por posição, então use `pad` junto com `obfuscate` para um título passado como número, que perdeu os zeros à esquerda: sem ele a máscara cai sobre os dígitos verificadores. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 - Sem `pad`, um valor mais curto é formatado a partir da esquerda, como um título digitado pela metade.
 - Os dígitos além do 12º são descartados.
 - Nenhuma autoridade publica uma regra de mascaramento para o título de eleitor, então o `obfuscate` usa a que as Leis de Diretrizes Orçamentárias definem para a divulgação do CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, regra criada pela Lei nº 12.309/2010, art. 87, § 5º), um número com a mesma estrutura.
@@ -2626,7 +2626,7 @@ Fonte: [rotinas de validação do DATASUS](https://web.archive.org/web/201901060
 
 Formata um número de CNS (Cartão Nacional de Saúde) nos grupos de exibição usuais de 3-4-4-4 dígitos separados por espaço.
 
-- **Opções** (`FormatCnsOptions`): `pad` completa o valor com zeros à esquerda até as 15 posições do padrão antes de aplicar a máscara (padrão `false`).
+- **Opções** (`FormatCnsOptions`): `pad` completa o valor com zeros à esquerda até as 15 posições do padrão antes de aplicar a máscara (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 
 ```javascript
 import { formatCns } from '@brazilian-utils/brazilian-utils';
@@ -2787,7 +2787,7 @@ Fonte: [SERPRO, cadastro CNO](https://bcadastros.serpro.gov.br/documentacao/cada
 
 Formata um número de CEI (Cadastro Específico do INSS) na máscara usual `00.000.00000/00`.
 
-- **Opções** (`FormatCeiOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos (padrão `false`).
+- **Opções** (`FormatCeiOptions`): `pad` completa o valor com zeros à esquerda até 12 dígitos (padrão `false`). Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
 
 ```javascript
 import { formatCei } from '@brazilian-utils/brazilian-utils';

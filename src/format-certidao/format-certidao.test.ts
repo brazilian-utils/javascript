@@ -66,6 +66,11 @@ describe("formatCertidao", () => {
 		});
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCertidao("", { pad: true })).toBe("");
+		expect(formatCertidao("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		test("should print a full matrícula in the groups of the Provimento", () => {
 			fc.assert(
@@ -89,7 +94,7 @@ describe("formatCertidao", () => {
 
 		test("should left pad a shorter value up to the matrícula length", () => {
 			fc.assert(
-				fc.property(fc.stringMatching(/^[0-9]{0,32}$/), (value) => {
+				fc.property(fc.stringMatching(/^[0-9]{1,32}$/), (value) => {
 					const padded = formatCertidao(value, { pad: true }).replaceAll(/\D/g, "");
 
 					expect(padded).toBe(value.padStart(32, "0"));

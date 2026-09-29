@@ -131,6 +131,11 @@ describe("formatNfeKey", () => {
 		expect(formatNfeKey(Object.create(null))).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatNfeKey("", { pad: true })).toBe("");
+		expect(formatNfeKey("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		test("should group a full access key into eleven blocks of four digits", () => {
 			fc.assert(

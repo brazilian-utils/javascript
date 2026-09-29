@@ -67,6 +67,11 @@ describe("formatVoterId", () => {
 		expect(formatVoterId()).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatVoterId("", { pad: true })).toBe("");
+		expect(formatVoterId("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		const upToAVoterId = digitsUpTo(12);
 
@@ -89,12 +94,15 @@ describe("formatVoterId", () => {
 
 		test("should pad any shorter value to the 12-digit grouping, keeping its digits last", () => {
 			fc.assert(
-				fc.property(digitsUpTo(12), (value) => {
-					const formatted = formatVoterId(value, { pad: true });
+				fc.property(
+					digitsUpTo(12).filter((value) => value !== ""),
+					(value) => {
+						const formatted = formatVoterId(value, { pad: true });
 
-					expect(formatted).toMatch(/^\d{4} \d{4} \d{2} \d{2}$/);
-					expect(formatted.replaceAll(" ", "")).toBe(value.padStart(12, "0"));
-				}),
+						expect(formatted).toMatch(/^\d{4} \d{4} \d{2} \d{2}$/);
+						expect(formatted.replaceAll(" ", "")).toBe(value.padStart(12, "0"));
+					},
+				),
 			);
 		});
 

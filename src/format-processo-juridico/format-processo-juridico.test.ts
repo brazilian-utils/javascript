@@ -59,6 +59,11 @@ describe("formatProcessoJuridico", () => {
 		expect(formatProcessoJuridico()).toBe("");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatProcessoJuridico("", { pad: true })).toBe("");
+		expect(formatProcessoJuridico("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		const upToANumber = digitsUpTo(20);
 

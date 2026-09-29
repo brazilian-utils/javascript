@@ -118,6 +118,11 @@ describe("formatPis", () => {
 		expect(formatPis("1205", { pad: true, obfuscate: 0 })).toBe("000.00001.20-5");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatPis("", { pad: true })).toBe("");
+		expect(formatPis("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		const upToAPis = digitsUpTo(11);
 

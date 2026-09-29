@@ -39,7 +39,7 @@ isValidCpf('111 444 777 35'); // true (whitespace mask)
 
 Format a CPF.
 
-- **Options** (`FormatCpfOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits.
+- **Options** (`FormatCpfOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits. An empty value, or one without digits, gives `''` even with `pad`.
 - `obfuscate` is applied after `pad`. It follows the rule the Leis de Diretrizes Orçamentárias set for publishing a CPF: "ocultar os três primeiros dígitos e os dois dígitos verificadores" ([Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), first set by Lei nº 12.309/2010, art. 87, § 5º; [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the LDO for 2026, repeats it).
 
 ```javascript
@@ -132,7 +132,7 @@ Source: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda
 
 Format a CNPJ.
 
-- **Options** (`FormatCnpjOptions`): `pad` left-pads the value with zeros to 14 characters before masking (default `false`); `version` picks the format, `1` (default) numeric only, `2` alphanumeric; `obfuscate` hides the first 2 digits and the 2 check digits.
+- **Options** (`FormatCnpjOptions`): `pad` left-pads the value with zeros to 14 characters before masking (default `false`); `version` picks the format, `1` (default) numeric only, `2` alphanumeric; `obfuscate` hides the first 2 digits and the 2 check digits. An empty value, or one without digits, gives `''` even with `pad`.
 - Version `2` keeps letters and digits, a lower case letter upper-cased first since the official set is `A` to `Z`; version `1` keeps digits only.
 - `obfuscate` works in both versions and is applied after `pad`. It is a convention of this library, not an official rule: no law or Receita Federal act sets a masking rule for the CNPJ, whose data are public, the [ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) says "não há um padrão para o mascaramento", and the [Banco Central's Pix rules](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) show the CNPJ in full where they mask the CPF; it hides the first 2 characters and the 2 check digits, after the CPF rule.
 
@@ -812,7 +812,7 @@ isValidSuframa('001234560'); // false (sector 00)
 
 Format an Inscrição SUFRAMA.
 
-- **Options** (`FormatSuframaOptions`): `pad` left-pads the value with zeros to the full 9 digits before masking (default `false`), which restores the leading zero of an 8 digit value.
+- **Options** (`FormatSuframaOptions`): `pad` left-pads the value with zeros to the full 9 digits before masking (default `false`), which restores the leading zero of an 8 digit value. An empty value, or one without digits, gives `''` even with `pad`.
 - The mask is progressive, as in the other `format` utilities, so an 8 digit value without `pad` is grouped one position early: use `pad: true` for a value read straight out of the `ISUF` field, which may be stored with 8 digits.
 
 ```javascript
@@ -1247,7 +1247,7 @@ isValidPis('12056412547'); // false
 
 Format a PIS.
 
-- **Options** (`FormatPisOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the check digit.
+- **Options** (`FormatPisOptions`): `pad` left-pads the value with zeros to 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the check digit. An empty value, or one without digits, gives `''` even with `pad`.
 - `obfuscate` is applied after `pad`.
 - No authority publishes a masking rule for the PIS, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
@@ -2355,7 +2355,7 @@ Source: [Resolução CONTRAN nº 886/2021, art. 4º](https://www.gov.br/transpor
 
 Format a CNH.
 
-- **Options** (`FormatCnhOptions`): `pad` left-pads the value with zeros to the full 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits.
+- **Options** (`FormatCnhOptions`): `pad` left-pads the value with zeros to the full 11 digits before masking (default `false`); `obfuscate` hides the first 3 digits and the 2 check digits. An empty value, or one without digits, gives `''` even with `pad`.
 - `obfuscate` is applied after `pad`.
 - No authority publishes a masking rule for the CNH, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
 
@@ -2557,7 +2557,7 @@ Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legisl
 
 Format a voter ID number with the 12-digit grouping `0000 0000 00 00`.
 
-- **Options** (`FormatVoterIdOptions`): `pad` left pads the value with zeros up to 12 digits, restoring the leading zeros of a voter ID issued without them; `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible. The mask hides by position, so pass `pad` with `obfuscate` for a voter ID given as a number, which has lost its leading zeros: without it the mask shifts onto the check digits.
+- **Options** (`FormatVoterIdOptions`): `pad` left pads the value with zeros up to 12 digits, restoring the leading zeros of a voter ID issued without them; `obfuscate` hides the first 3 digits and the 2 check digits, leaving the federative union code visible. The mask hides by position, so pass `pad` with `obfuscate` for a voter ID given as a number, which has lost its leading zeros: without it the mask shifts onto the check digits. An empty value, or one without digits, gives `''` even with `pad`.
 - Without `pad`, a shorter value is formatted from the left, as a partially typed ID.
 - Digits past the 12th are dropped.
 - No authority publishes a masking rule for the voter ID, so `obfuscate` applies the one the Leis de Diretrizes Orçamentárias set for publishing a CPF ("ocultar os três primeiros dígitos e os dois dígitos verificadores", Lei nº 14.194/2021, art. 149, first set by Lei nº 12.309/2010, art. 87, § 5º), a number with the same structure.
@@ -2627,7 +2627,7 @@ Source: [DATASUS validation routines](https://web.archive.org/web/20190106003442
 
 Format a CNS (Cartão Nacional de Saúde) number into the common display groups of 3-4-4-4 digits separated by spaces.
 
-- **Options** (`FormatCnsOptions`): `pad` left-pads the value with zeros up to the 15 slots of the pattern before masking (default `false`).
+- **Options** (`FormatCnsOptions`): `pad` left-pads the value with zeros up to the 15 slots of the pattern before masking (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 
 ```javascript
 import { formatCns } from '@brazilian-utils/brazilian-utils';
@@ -2788,7 +2788,7 @@ Source: [SERPRO, CNO cadastro](https://bcadastros.serpro.gov.br/documentacao/cad
 
 Format a CEI (Cadastro Específico do INSS) number with the usual `00.000.00000/00` mask.
 
-- **Options** (`FormatCeiOptions`): `pad` left-pads the value with zeros up to 12 digits (default `false`).
+- **Options** (`FormatCeiOptions`): `pad` left-pads the value with zeros up to 12 digits (default `false`). An empty value, or one without digits, gives `''` even with `pad`.
 
 ```javascript
 import { formatCei } from '@brazilian-utils/brazilian-utils';

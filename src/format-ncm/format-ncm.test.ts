@@ -49,7 +49,7 @@ describe("formatNcm", () => {
 
 	describe("pad option", () => {
 		it("should left pad a short code with zeros up to the full NCM length", () => {
-			expect(formatNcm("", { pad: true })).toBe("0000.00.00");
+			expect(formatNcm("", { pad: true })).toBe("");
 			expect(formatNcm("1", { pad: true })).toBe("0000.00.01");
 			expect(formatNcm("8471", { pad: true })).toBe("0000.84.71");
 			expect(formatNcm("847130", { pad: true })).toBe("0084.71.30");
@@ -116,7 +116,7 @@ describe("formatNcm", () => {
 			expectMatchesPattern(
 				(value) => formatNcm(value, { pad: true }),
 				/^\d{4}\.\d{2}\.\d{2}$/,
-				digitsUpTo(8),
+				digitsUpTo(8).filter((value) => value !== ""),
 			);
 		});
 

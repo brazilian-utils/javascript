@@ -214,7 +214,7 @@ export const expectPadsToLength = (
 		fc.property(arbitrary, (value) => {
 			const padded = format(value, { pad: true });
 
-			expect(parse(padded)).toBe(value.padStart(length, "0"));
+			expect(parse(padded)).toBe(value === "" ? "" : value.padStart(length, "0"));
 		}),
 	);
 };

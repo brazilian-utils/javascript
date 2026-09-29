@@ -55,7 +55,6 @@ describe("formatCnpj", () => {
 	});
 
 	it("should format cnpj with mask filling zeroes", () => {
-		expect(formatCnpj("", { pad: true })).toBe("00.000.000/0000-00");
 		expect(formatCnpj("4", { pad: true })).toBe("00.000.000/0000-04");
 		expect(formatCnpj("46", { pad: true })).toBe("00.000.000/0000-46");
 		expect(formatCnpj("468", { pad: true })).toBe("00.000.000/0004-68");
@@ -156,6 +155,11 @@ describe("formatCnpj", () => {
 		expect(formatCnpj("q0SLFMBD7VX439", { version: 2, obfuscate: false })).toBe(
 			"Q0.SLF.MBD/7VX4-39",
 		);
+	});
+
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCnpj("", { pad: true })).toBe("");
+		expect(formatCnpj("abc", { pad: true })).toBe("");
 	});
 
 	describe("properties", () => {

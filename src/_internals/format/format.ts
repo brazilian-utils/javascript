@@ -16,7 +16,7 @@ export type FormatParams = {
  * - anything else is a literal separator, emitted only while `value` still has characters left.
  *
  * `pad` counts both `0` and `*` as slots, so a value shorter than the pattern is left padded
- * with zeros before it is consumed.
+ * with zeros before it is consumed. An empty `value` gives an empty string, with or without `pad`.
  *
  * @param {FormatParams} params - The parameters for formatting.
  * @param {string} params.value - The value to be formatted.
@@ -29,9 +29,12 @@ export type FormatParams = {
  * format({ value: "123456", pattern: "000-000" }); // "123-456"
  * format({ value: "123", pattern: "0000-000", pad: true }); // "0000-123"
  * format({ value: "12345678909", pattern: "***.000.000-**" }); // "***.456.789-**"
+ * format({ value: "", pattern: "0000-000", pad: true }); // ""
  * ```
  */
 export const format = ({ pad, value, pattern }: FormatParams): string => {
+	if (value === "") return "";
+
 	let formatted = "";
 	let valueIndex = 0;
 	let paddedValue = value;

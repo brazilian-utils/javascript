@@ -51,6 +51,11 @@ describe("formatCnh", () => {
 		expect(formatCnh("9876", { pad: true, obfuscate: "" })).toBe("000000098-76");
 	});
 
+	test("should return an empty string for a value without digits even when padding", () => {
+		expect(formatCnh("", { pad: true })).toBe("");
+		expect(formatCnh("abc", { pad: true })).toBe("");
+	});
+
 	describe("properties", () => {
 		const upToACnh = digitsUpTo(11);
 

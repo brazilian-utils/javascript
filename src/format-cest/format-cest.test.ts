@@ -44,7 +44,7 @@ describe("formatCest", () => {
 
 	describe("pad option", () => {
 		it("should left pad a short value with zeros up to the 7 digits", () => {
-			expect(formatCest("", { pad: true })).toBe("00.000.00");
+			expect(formatCest("", { pad: true })).toBe("");
 			expect(formatCest("1", { pad: true })).toBe("00.000.01");
 			expect(formatCest("100100", { pad: true })).toBe("01.001.00");
 			expect(formatCest("2899900", { pad: true })).toBe("28.999.00");
