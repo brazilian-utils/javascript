@@ -2050,7 +2050,7 @@ Get the Brazilian holidays of a year: the national ones and, with a `stateCode`,
 - "Dia da Consciência Negra", Nov 20, is national from 2024 on.
 - The first round of the elections, "Eleições (primeiro turno)", is a national holiday in the even years from 1998 on (Código Eleitoral, art. 380): the first Sunday of October, or Nov 15 in 2020 (EC nº 107/2020). The second round is left out, since it is held only where one is needed. Being a Sunday, it never changes a business day count. Before 1998, Lei nº 1.266/1950 made the day of the general elections a national holiday, so the ones held on a weekday are listed too: Oct 3 of 1955 and 1958 ("Eleições gerais") and of 1990 and 1994 ("Eleições (primeiro turno)"). Oct 3, 1960 is left out, since no official text found dates that year's presidential election, and so is the municipal election of Oct 3, 1996.
 - Each fixed-date national holiday is listed only for the years a federal norm declared it (Sexta-feira Santa, which the federal calendar portarias list as a feriado nacional every year, is listed every year): Nossa Senhora Aparecida from 1980, Natal from 1922, Dia do trabalhador from 1925, Tiradentes up to 1930, from 1933 to 1948 and from 1951, and Finados up to 1948 and from 2003. Lei nº 662/1949 left Finados out of the feriados nacionais that Decreto-lei nº 486/1938 listed, and only Lei nº 10.607/2002 put it back (the Câmara report on its bill: "Só inova ao sugerir o dia de finados"); up to 2.4.0 it was listed every year. The other "festas nacionais" of the first republican calendar (Decreto nº 155-B/1890 and Decreto nº 3/1891: Feb 24, May 3, May 13, Jul 14 and Oct 12) are listed up to 1930, and May 3 (1936 to 1938), Jul 16 and Oct 12 (1936 and 1937) again under Lei nº 108/1935.
-- The `"optional"` entries are the whole-day pontos facultativos of the federal calendar (Portarias MGI nº 8.617/2023, 9.783/2024 and 11.460/2025, for 2024 to 2026, all of which list both Carnaval days as ponto facultativo, never as feriado nacional): Carnaval Monday and Tuesday and Corpus Christi, the same three days the financial market skips (Resolução CMN nº 4.880/2020), plus the state ones a state norm declares (AM's Dec 8, which the state declares for its offices by decree, and PE's Mar 6 in 2008 and 2009). `includeOptional` switches exactly these. The partial ones are left out: Quarta-feira de Cinzas (until 14h), Oct 28 (Dia do Servidor Público) and the Dec 24 and Dec 31 afternoons.
+- The `"optional"` entries are the whole-day pontos facultativos of the federal calendar (Portarias MGI nº 8.617/2023, 9.783/2024 and 11.460/2025, for 2024 to 2026, all of which list both Carnaval days as ponto facultativo, never as feriado nacional): Carnaval Monday and Tuesday and Corpus Christi, the same three days the financial market skips (Resolução CMN nº 4.880/2020), plus the state ones a state norm declares (AM's Dec 8 from 1999, which the state declares for its offices by decree, and PE's Mar 6 in 2008 and 2009). `includeOptional` switches exactly these. The partial ones are left out: Quarta-feira de Cinzas (until 14h), Oct 28 (Dia do Servidor Público) and the Dec 24 and Dec 31 afternoons.
 - Per-state rules (SC's Sunday shift of a date falling Monday to Saturday, as Decreto SC nº 1.460/2018 did with a Saturday Aug 11; PE's data magna on the first Sunday of March from 2010 to 2017; AL's Nov 30 moved to Monday from a Tuesday and to Friday from a Thursday, DF's, MA's (from 2024) and RJ's (from 2026) Corpus Christi and RJ's Carnaval Tuesday typed `"state"`, dates that stopped being holidays) follow each state's law; see the source for the list. AL's Sep 16 is a state holiday from 2011, as the state's calendar decrees label it before Lei AL nº 9.358/2024. A state law the STF struck down has no entry in any year: RO's Jun 18 (ADI 3940) and AP's Jul 25 (ADI 4820).
 - Other shifts are not applied and the statutory date is returned: AC's law moves the feriados falling Tuesday to Thursday to the Friday (Lei AC nº 2.126/2009), but the state's own yearly decrees apply it unevenly (2026 moves Jan 20 and leaves Nov 17, a Tuesday, in place).
 - GO's three dates (Jul 26, Oct 24, Oct 28) are the "feriados estaduais" of the state servants' statute, listed from 1986 (Lei GO nº 9.990/1986, then Lei GO nº 10.460/1988 and Lei GO nº 20.756/2020, art. 269, II); the same statutes made Nov 2 a GO holiday from 1986 to 2002, the years it was not a national one. No Goiás law fixing a data magna as a civil holiday was found. The governor moves Jul 26 by decree every year (2025: Jul 28; 2026: Jul 20), and Oct 28 most years (2025: Oct 27; 2026: Oct 30), so the statutory date returned here is often not the day observed.
@@ -2061,7 +2061,7 @@ Get the Brazilian holidays of a year: the national ones and, with a `stateCode`,
 ```javascript
 import { getHolidays } from '@brazilian-utils/brazilian-utils';
 
-// Get all national holidays for 2024
+// Get the holidays of 2024, national and optional ones
 getHolidays(2024);
 // [
 //   { name: 'Ano novo', date: Date('2024-01-01'), type: 'national' },
@@ -2069,9 +2069,16 @@ getHolidays(2024);
 //   { name: 'Carnaval (terça-feira)', date: Date('2024-02-13'), type: 'optional' },
 //   { name: 'Sexta-feira Santa', date: Date('2024-03-29'), type: 'national' },
 //   { name: 'Páscoa', date: Date('2024-03-31'), type: 'religious' },
+//   { name: 'Tiradentes', date: Date('2024-04-21'), type: 'national' },
+//   { name: 'Dia do trabalhador', date: Date('2024-05-01'), type: 'national' },
+//   { name: 'Corpus Christi', date: Date('2024-05-30'), type: 'optional' },
+//   { name: 'Independência do Brasil', date: Date('2024-09-07'), type: 'national' },
 //   { name: 'Eleições (primeiro turno)', date: Date('2024-10-06'), type: 'national' },
+//   { name: 'Nossa Senhora Aparecida', date: Date('2024-10-12'), type: 'national' },
+//   { name: 'Finados', date: Date('2024-11-02'), type: 'national' },
+//   { name: 'Proclamação da República', date: Date('2024-11-15'), type: 'national' },
 //   { name: 'Dia da Consciência Negra', date: Date('2024-11-20'), type: 'national' },
-//   // ... more holidays
+//   { name: 'Natal', date: Date('2024-12-25'), type: 'national' },
 // ]
 
 // Get holidays for a specific state
@@ -2088,6 +2095,8 @@ Check if a date is a Brazilian holiday. Accepts `{ targetDate, stateCode? }` (`I
 - The check uses `targetDate`'s local calendar date, not its UTC instant.
 - `stateCode` also considers that state's holidays, read as in `getHolidays` (letter case and surrounding whitespace are ignored).
 - Returns `false` when `targetDate` is missing or not a valid `Date`, or when `stateCode` is present and is not a state code (`'XX'`, `''`, a value that is not a string), even on a national holiday.
+- Returns `false` for a year outside 1900 to 2099, where `getHolidays` lists nothing.
+- The `"optional"` and `"religious"` entries of `getHolidays` count: Carnaval Monday and Tuesday, Corpus Christi and Páscoa make `isHoliday` true. There is no `includeOptional` here, unlike `isBusinessDay`.
 
 ```javascript
 import { isHoliday } from '@brazilian-utils/brazilian-utils';

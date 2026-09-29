@@ -2050,7 +2050,7 @@ Retorna os feriados brasileiros de um ano: os nacionais e, com um `stateCode`, t
 - O "Dia da Consciência Negra", 20/11, é nacional a partir de 2024.
 - O primeiro turno das eleições, "Eleições (primeiro turno)", é feriado nacional nos anos pares a partir de 1998 (Código Eleitoral, art. 380): o primeiro domingo de outubro, ou 15/11 em 2020 (EC nº 107/2020). O segundo turno fica de fora, porque só acontece onde é necessário. Por cair num domingo, nunca muda uma contagem de dias úteis. Antes de 1998, a Lei nº 1.266/1950 fazia do dia das eleições gerais um feriado nacional, então as que caíram num dia de semana também são listadas: 3/10 de 1955 e 1958 ("Eleições gerais") e de 1990 e 1994 ("Eleições (primeiro turno)"). O 3/10/1960 fica de fora, porque nenhum texto oficial encontrado data a eleição presidencial daquele ano, assim como a eleição municipal de 3/10/1996.
 - Cada feriado nacional de data fixa só é listado nos anos em que uma norma federal o declarava (a Sexta-feira Santa, que as portarias do calendário federal listam como feriado nacional todo ano, é listada em todos os anos): Nossa Senhora Aparecida a partir de 1980, Natal a partir de 1922, Dia do trabalhador a partir de 1925, Tiradentes até 1930, de 1933 a 1948 e a partir de 1951, e Finados até 1948 e a partir de 2003. A Lei nº 662/1949 deixou Finados fora dos feriados nacionais que o Decreto-lei nº 486/1938 listava, e só a Lei nº 10.607/2002 o recolocou (o parecer da Câmara sobre o projeto: "Só inova ao sugerir o dia de finados"); até a 2.4.0 ele era listado em todos os anos. As outras "festas nacionais" do primeiro calendário republicano (Decreto nº 155-B/1890 e Decreto nº 3/1891: 24/2, 3/5, 13/5, 14/7 e 12/10) são listadas até 1930, e o 3/5 (de 1936 a 1938), o 16/7 e o 12/10 (em 1936 e 1937) de novo pela Lei nº 108/1935.
-- As entradas `"optional"` são os pontos facultativos de dia inteiro do calendário federal (Portarias MGI nº 8.617/2023, 9.783/2024 e 11.460/2025, de 2024 a 2026, que listam as duas datas de Carnaval como ponto facultativo, nunca como feriado nacional): a segunda e a terça-feira de Carnaval e o Corpus Christi, os mesmos três dias que o mercado financeiro não conta como úteis (Resolução CMN nº 4.880/2020), mais os estaduais que uma norma estadual declara (o 08/12 do AM, que o estado declara para as suas repartições por decreto, e o 06/03 de PE em 2008 e 2009). O `includeOptional` liga e desliga exatamente esses. Os parciais ficam de fora: a Quarta-feira de Cinzas (até as 14h), 28/10 (Dia do Servidor Público) e as tardes de 24/12 e 31/12.
+- As entradas `"optional"` são os pontos facultativos de dia inteiro do calendário federal (Portarias MGI nº 8.617/2023, 9.783/2024 e 11.460/2025, de 2024 a 2026, que listam as duas datas de Carnaval como ponto facultativo, nunca como feriado nacional): a segunda e a terça-feira de Carnaval e o Corpus Christi, os mesmos três dias que o mercado financeiro não conta como úteis (Resolução CMN nº 4.880/2020), mais os estaduais que uma norma estadual declara (o 08/12 do AM a partir de 1999, que o estado declara para as suas repartições por decreto, e o 06/03 de PE em 2008 e 2009). O `includeOptional` liga e desliga exatamente esses. Os parciais ficam de fora: a Quarta-feira de Cinzas (até as 14h), 28/10 (Dia do Servidor Público) e as tardes de 24/12 e 31/12.
 - As regras por estado (o deslocamento para domingo em SC da data que cai de segunda a sábado, como o Decreto SC nº 1.460/2018 fez com o 11/08 que caiu num sábado; a data magna de PE no primeiro domingo de março de 2010 a 2017; o 30/11 de AL antecipado para segunda quando cai na terça e adiado para sexta quando cai na quinta, o Corpus Christi no DF, no MA (desde 2024) e no RJ (desde 2026), e a terça-feira de Carnaval no RJ com tipo `"state"`, datas que deixaram de ser feriado) seguem a lei de cada estado; veja a fonte para a lista. O 16/09 de AL é feriado estadual a partir de 2011, como os decretos de calendário do estado o chamam antes da Lei AL nº 9.358/2024. Uma lei estadual que o STF derrubou não tem entrada em nenhum ano: o 18/06 de RO (ADI 3940) e o 25/07 do AP (ADI 4820).
 - Outros deslocamentos não são aplicados e a data da lei é a retornada: a lei do AC adia para a sexta-feira os feriados que caem de terça a quinta (Lei AC nº 2.126/2009), mas os próprios decretos anuais do estado a aplicam de forma desigual (em 2026 o 20/1 é adiado e o 17/11, uma terça, fica na data).
 - As três datas de GO (26/7, 24/10, 28/10) são os "feriados estaduais" do estatuto dos servidores do estado, listados a partir de 1986 (Lei GO nº 9.990/1986, depois Lei GO nº 10.460/1988 e Lei GO nº 20.756/2020, art. 269, II); os mesmos estatutos faziam do 2/11 feriado em GO de 1986 a 2002, os anos em que ele não era nacional. Não foi achada lei goiana que fixe uma data magna como feriado civil. O governador transfere o 26/7 por decreto todo ano (2025: 28/7; 2026: 20/7), e o 28/10 na maioria dos anos (2025: 27/10; 2026: 30/10), então a data da lei, que é a retornada aqui, muitas vezes não é o dia observado.
@@ -2061,7 +2061,7 @@ Retorna os feriados brasileiros de um ano: os nacionais e, com um `stateCode`, t
 ```javascript
 import { getHolidays } from '@brazilian-utils/brazilian-utils';
 
-// Obtém todos os feriados nacionais de 2024
+// Obtém os feriados de 2024, nacionais e facultativos
 getHolidays(2024);
 // [
 //   { name: 'Ano novo', date: Date('2024-01-01'), type: 'national' },
@@ -2069,9 +2069,16 @@ getHolidays(2024);
 //   { name: 'Carnaval (terça-feira)', date: Date('2024-02-13'), type: 'optional' },
 //   { name: 'Sexta-feira Santa', date: Date('2024-03-29'), type: 'national' },
 //   { name: 'Páscoa', date: Date('2024-03-31'), type: 'religious' },
+//   { name: 'Tiradentes', date: Date('2024-04-21'), type: 'national' },
+//   { name: 'Dia do trabalhador', date: Date('2024-05-01'), type: 'national' },
+//   { name: 'Corpus Christi', date: Date('2024-05-30'), type: 'optional' },
+//   { name: 'Independência do Brasil', date: Date('2024-09-07'), type: 'national' },
 //   { name: 'Eleições (primeiro turno)', date: Date('2024-10-06'), type: 'national' },
+//   { name: 'Nossa Senhora Aparecida', date: Date('2024-10-12'), type: 'national' },
+//   { name: 'Finados', date: Date('2024-11-02'), type: 'national' },
+//   { name: 'Proclamação da República', date: Date('2024-11-15'), type: 'national' },
 //   { name: 'Dia da Consciência Negra', date: Date('2024-11-20'), type: 'national' },
-//   // ... mais feriados
+//   { name: 'Natal', date: Date('2024-12-25'), type: 'national' },
 // ]
 
 // Obtém feriados para um estado específico
@@ -2088,6 +2095,8 @@ Verifica se uma data é feriado brasileiro. Aceita `{ targetDate, stateCode? }` 
 - A verificação usa a data de calendário local de `targetDate`, não o seu instante UTC.
 - `stateCode` também considera os feriados daquele estado, lido como em `getHolidays` (maiúsculas/minúsculas e espaços nas pontas são ignorados).
 - Retorna `false` quando `targetDate` está ausente ou não é um `Date` válido, ou quando `stateCode` está presente e não é uma sigla de estado (`'XX'`, `''`, um valor que não é string), mesmo num feriado nacional.
+- Retorna `false` para um ano fora de 1900 a 2099, em que o `getHolidays` não lista nada.
+- As entradas `"optional"` e `"religious"` do `getHolidays` contam: segunda e terça de Carnaval, Corpus Christi e Páscoa fazem o `isHoliday` retornar true. Aqui não há `includeOptional`, ao contrário do `isBusinessDay`.
 
 ```javascript
 import { isHoliday } from '@brazilian-utils/brazilian-utils';
