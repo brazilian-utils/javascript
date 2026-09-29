@@ -1916,7 +1916,7 @@ getTimezoneByState('PE'); // 'America/Recife'
 getTimezoneByState('ZZ'); // null
 ```
 
-Fonte: [IANA Time Zone Database](https://www.iana.org/time-zones), [Lei 12.876/2013](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12876.htm) e [Decreto 8.112/2013](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d8112.htm).
+Fonte: [IANA Time Zone Database](https://www.iana.org/time-zones), [Decreto 2.784/1913](https://www.planalto.gov.br/ccivil_03/decreto/historicos/dpl/dpl2784-1913.htm), que fixou a hora legal do Brasil, alterado pela [Lei 11.662/2008](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2008/lei/l11662.htm) e pela [Lei 12.876/2013](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12876.htm).
 
 ### getMunicipalities
 
