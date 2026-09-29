@@ -46,9 +46,13 @@ jobs:
             stryker-incremental-${{ hashFiles('src/**/constants.ts', 'src/_internals/constants/**', 'src/_internals/test/**', 'src/index.ts', 'package-lock.json', 'stryker.config.json', 'vite.config.ts') }}-${{ github.ref }}-
             stryker-incremental-${{ hashFiles('src/**/constants.ts', 'src/_internals/constants/**', 'src/_internals/test/**', 'src/index.ts', 'package-lock.json', 'stryker.config.json', 'vite.config.ts') }}-refs/heads/main-
 
+      # Stryker only compares a mutant's own code and its tests: the prune script drops every file
+      # that changed or imports a changed file (a shared helper), so all of their mutants run again.
       - name: Mutation test the changed code
         if: ${{ github.event_name != 'push' }}
-        run: npm run test:mutation -- --incremental
+        run: |
+          node ./scripts/prune-stryker-incremental.ts
+          npm run test:mutation -- --incremental
 
       # On `main` every mutant is tested again (--force), so the published score and the baseline
       # the pull requests start from never carry an old result. The dashboard reporter also

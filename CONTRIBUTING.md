@@ -292,9 +292,12 @@ pull request so the CI result is not a surprise.
   every push to `main`. It uses Stryker's
   [incremental mode](https://stryker-mutator.io/docs/stryker-js/incremental/): a pull request
   only tests the mutants whose code or covering tests changed since its last run (or since
-  `main`'s), and `main` tests every mutant again. A change to a constants table, a test helper, a
-  dependency or the config makes every mutant run. Locally, `npm run test:mutation -- --incremental`
-  does the same against your previous run. The HTML report is attached to the run as the
+  `main`'s), and `main` tests every mutant again. Before the run, `scripts/prune-stryker-incremental.ts`
+  drops from the saved results every file that changed or imports a changed file, because Stryker
+  alone would keep the results of a function whose helper changed. A change to a constants table, a
+  test helper, a dependency or the config makes every mutant run. Locally,
+  `node scripts/prune-stryker-incremental.ts && npm run test:mutation -- --incremental` does the same
+  against your previous run. The HTML report is attached to the run as the
   `mutation-report` artifact. A surviving mutant
   means a test is missing (add one, with a literal expectation) or the code has a branch that can
   never matter (simplify it). Only when a mutant is truly equivalent, use
