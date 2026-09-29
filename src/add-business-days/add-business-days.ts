@@ -1,12 +1,10 @@
 import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/holidays";
 import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
+import { isBusinessDayUnderRules } from "../_internals/is-business-day-under-rules/is-business-day-under-rules";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
-import {
-	type BusinessDayOptions,
-	isBusinessDayUnderRules,
-	readBusinessDayRules,
-} from "../is-business-day/is-business-day";
+import { readBusinessDayRules } from "../_internals/read-business-day-rules/read-business-day-rules";
+import { type BusinessDayOptions } from "../is-business-day/is-business-day";
 
 export type { BusinessDayOptions } from "../is-business-day/is-business-day";
 

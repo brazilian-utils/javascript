@@ -3,7 +3,7 @@ import { isNullish } from "../_internals/is-nullish/is-nullish";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
-import { readMemoizedHolidays } from "../get-holidays/get-holidays";
+import { readMemoizedHolidays } from "../_internals/read-memoized-holidays/read-memoized-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
 
