@@ -59,9 +59,11 @@ const isApostrophe = (token: string): boolean => APOSTROPHE_REGEX.test(token);
  * @returns {number} The index of the next word.
  */
 const nextWordIndex = (tokens: string[], index: number): number => {
-	const offset = tokens.slice(index + 1).findIndex((token) => isWord(token));
+	for (let position = index + 1; position < tokens.length; position++) {
+		if (isWord(tokens[position])) return position;
+	}
 
-	return offset === -1 ? tokens.length : index + 1 + offset;
+	return tokens.length;
 };
 
 /**
@@ -166,6 +168,7 @@ const isStateCodePosition = (
 
 /**
  * A word with its first letter in upper case and the rest in lower case, letter by code point. A
+ * word is never empty (the empty tokens are skipped), and neither is its upper case. A
  * first letter whose upper case is more than one character (`ß` becomes `SS`, the `ﬁ` ligature
  * becomes `FI`) keeps its case: expanding it would drop or add letters, and a second pass over
  * the result would not give the result back. The rest is lower cased on its own, not sliced out
@@ -176,7 +179,6 @@ const isStateCodePosition = (
  * @returns {string} The word, capitalized.
  */
 const capitalizeWord = (word: string): string => {
-	// A word is never empty (the empty tokens are skipped), and neither is its upper case.
 	const [first, ...rest] = word;
 	const [upperFirst, ...expansion] = first.toLocaleUpperCase("pt-BR");
 	const head = expansion.length > 0 ? first : upperFirst;
@@ -242,17 +244,17 @@ const capitalizeWord = (word: string): string => {
  * replaces its default list entirely, so `capitalize("empresa ltda", { upperCaseWords: [] })`
  * gives `"Empresa Ltda"`. A `lowerCaseWords`/`upperCaseWords` that is not an array falls back to
  * its default, and a member of either list that is not a string is ignored, so a malformed
- * option never throws.
+ * option never throws. The default `lowerCaseWords` list is the set of prepositions and
+ * conjunctions the Manual de Redação da Presidência da República keeps in lower case inside a
+ * proper name, and the default `upperCaseWords` list is sourced in `constants.ts` from the laws
+ * that create each designation. The default list is assembled inside the function, not in a
+ * module-level constant, so a bundle that never calls `capitalize` does not keep the spread.
  *
  * @param {string} value - The input string to be capitalized.
  * @param {CapitalizeOptions} [options] - Optional configuration for capitalization.
  * @param {string[]} [options.lowerCaseWords] - Array of words to keep in lower case (default: the Portuguese prepositions).
  * @param {string[]} [options.upperCaseWords] - Array of words to keep in upper case (default: the Brazilian company designations, document abbreviations and roman numerals).
  * @returns {string} The capitalized string according to the specified rules.
- *
- * The default `lowerCaseWords` list is the set of prepositions and conjunctions the Manual de
- * Redação da Presidência da República keeps in lower case inside a proper name, and the default
- * `upperCaseWords` list is sourced in `constants.ts` from the laws that create each designation.
  *
  * @see Official: https://www4.planalto.gov.br/centrodeestudos/assuntos/manual-de-redacao-da-presidencia-da-republica/manual-de-redacao.pdf
  * Manual de Redação da Presidência da República, 3ª edição (Portaria nº 1.369/2018), item 5.1.8
@@ -272,6 +274,8 @@ const capitalizeWord = (word: string): string => {
  * capitalize("não-me-toque"); // "Não-Me-Toque"
  * capitalize("(empresa) ltda"); // "(Empresa) LTDA"
  * capitalize("luiz von schmidt"); // "Luiz von Schmidt"
+ * capitalize("casa para todos"); // "Casa para Todos"
+ * capitalize("empresa s.a"); // "Empresa S.A"
  * capitalize("casa de carnes s/a"); // "Casa de Carnes S/A"
  * capitalize("MOGI-GUAÇU"); // "Mogi-Guaçu"
  * capitalize("santana/rs"); // "Santana/RS"
@@ -291,8 +295,6 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 		word.toLocaleLowerCase("pt-BR"),
 	);
 
-	// The default list is assembled here, not in a module-level constant, so a bundle that never
-	// calls `capitalize` does not keep the spread.
 	const upperCaseSet = toWordSet(
 		upperCaseWords,
 		[...COMPANY_DESIGNATIONS, ...DOCUMENT_ABBREVIATIONS, ...ROMAN_NUMERALS],

@@ -4,7 +4,7 @@
  * states the convention twice: a cargo is "redigido apenas com as iniciais maiúsculas. As
  * preposições que liguem as palavras do cargo devem ser grafadas em minúsculas" (item 5.1.8 b),
  * and a title is written "com inicial maiúscula em todas as palavras, exceto nas de ligação"
- * (item 10.2 a). The same convention is used by the IBGE for the names of municipalities
+ * (item 10.2 a). The IBGE writes most municipality names the same way
  * ("Mogi das Cruzes", "Santa Bárbara d'Oeste"). The elided `d` of "d'Oeste" is not a member of
  * this list: on its own it is a designator ("Rua D", "Quadra D"), so `capitalize` lower-cases it
  * structurally, only when an apostrophe and a word follow it. Applying it to personal and institutional names
@@ -21,6 +21,13 @@
  */
 export const PREPOSITIONS = [
 	"a",
+	"ao",
+	"aos",
+	"à",
+	"às",
+	"ante",
+	"após",
+	"até",
 	"com",
 	"da",
 	"das",
@@ -39,9 +46,19 @@ export const PREPOSITIONS = [
 	"nas",
 	"no",
 	"nos",
+	"num",
+	"numa",
 	"o",
+	"para",
+	"pela",
+	"pelas",
+	"pelo",
+	"pelos",
+	"perante",
 	"por",
 	"sem",
+	"sob",
+	"sobre",
 	"van",
 	"von",
 ];
@@ -50,7 +67,8 @@ export const PREPOSITIONS = [
  * Company designations that are written in upper case in Brazilian names, and the only words a
  * designation of `TRAILING_DESIGNATIONS` is upper case before. "SA" without punctuation is
  * deliberately absent: it is indistinguishable from the surname "Sá" typed without its accent,
- * which would turn "Jose de Sa" into "Jose de SA".
+ * which would turn "Jose de Sa" into "Jose de SA". "S.A" without the final dot is kept, since
+ * the inner dot rules out the surname.
  *
  * @see Official: https://www.planalto.gov.br/ccivil_03/leis/l6404consol.htm
  * Lei nº 6.404/1976, art. 3º: the sociedade anônima is designated by "companhia" or "sociedade
@@ -80,6 +98,7 @@ export const COMPANY_DESIGNATIONS = [
 	"LTDA",
 	"ME",
 	"MEI",
+	"S.A",
 	"S.A.",
 	"S.S.",
 	"S/A",
