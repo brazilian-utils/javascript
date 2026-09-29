@@ -105,8 +105,6 @@ export const getGtinInfo = (value: string): GtinInfo | null => {
 	if (!isValidGtin(value)) return null;
 
 	const digits = value.trim();
-	// isValidGtin already vouched for the length, so the index always names one of GTIN_LENGTHS: the
-	// lookup only gives back the same number typed as a GtinLength.
 	const length = GTIN_LENGTHS[(GTIN_LENGTHS as readonly number[]).indexOf(digits.length)];
 	const checkDigit = Number(digits.at(-1));
 	const normalized = digits.padStart(NORMALIZED_LENGTH, "0");

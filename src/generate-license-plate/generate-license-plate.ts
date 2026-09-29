@@ -46,8 +46,6 @@ const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
 export const generateLicensePlate = (
 	format: GenerateLicensePlateFormat = DEFAULT_FORMAT,
 ): string => {
-	// Only the old sequence needs naming: the Mercosul one is the default, and anything else falls
-	// back to it, as every generator of this package does with an option it does not know.
 	const safeFormat = format === "LLLNNNN" ? format : DEFAULT_FORMAT;
 
 	let plate = "";

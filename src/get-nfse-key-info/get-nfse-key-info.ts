@@ -129,7 +129,6 @@ export type NfseKeyInfo = {
  * ```
  */
 export const getNfseKeyInfo = (value: string): NfseKeyInfo | null => {
-	// The bare key `isValidNfseKey` reads out of the value, whichever of its forms it is written in.
 	const key = typeof value === "string" ? readNfseKey(value) : null;
 
 	// Stryker disable next-line ConditionalExpression: the null check only narrows the type; a value `readNfseKey` cannot read is one `isValidNfseKey` turns down as well.

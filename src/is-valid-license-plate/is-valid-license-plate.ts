@@ -76,7 +76,6 @@ export const isValidLicensePlate = (
 	const parsed = sanitizeToAlphanumeric(value);
 	const format = options?.format;
 
-	// A format of the two excludes the other one; no format, or any other value, excludes neither.
 	return (
 		(format !== "LLLNLNN" && OLD_FORMAT_REGEX.test(parsed)) ||
 		(format !== "LLLNNNN" && MERCOSUL_REGEX.test(parsed))

@@ -81,7 +81,6 @@ export const getIsbnInfo = (value: string): IsbnInfo | null => {
 	const registrationGroup = body.slice(0, groupLength);
 	const group = ISBN_GROUP_RULES[`${prefix}-${registrationGroup}`];
 
-	// A group of length 0, not assigned, reads as the empty group, which no entry carries either.
 	if (group === undefined) return null;
 
 	const [agency, rules] = group;
