@@ -6,7 +6,7 @@ export const DIGITS_REGEX = /^\d+$/;
 /**
  * A GTIN of zeros only, which `isValidGtin` rejects by a rule of this library, not of an official
  * source. Its check digit works out (the GS1 check digit of zeros is zero), so rule I03-10 of the
- * NF-e (rejection 611, "cEAN com dígito de controle inválido", NT 2021.003 v1.50) lets it through,
+ * NF-e (rejection 611, "cEAN com dígito de controle inválido", NT 2021.003 v1.30) lets it through,
  * and no NF-e rule or technical note rejects a GTIN of zeros. The GS1 General Specifications
  * (release 26.0) do not forbid it either: table 1-4 reserves the GS1 Prefix 0000000 "to issue
  * Restricted Circulation Numbers within a company", and table 1-5 the GS1-8 Prefixes 000 to 099,
