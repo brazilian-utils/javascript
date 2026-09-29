@@ -1,6 +1,8 @@
+import { XML_ID_PREFIX_REGEX } from "../_internals/constants/nfe-key";
 import { format } from "../_internals/format/format";
-import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeNfeKey } from "../_internals/sanitize-nfe-key/sanitize-nfe-key";
+import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
 import { PATTERN } from "./constants";
 
 /** Options of `formatNfeKey`. */
@@ -19,10 +21,15 @@ export type FormatNfeKeyOptions = {
  * the key's schema type (`[0-9]{6}[0-9A-Z]{12}[0-9]{26}`) opens to letters; a letter anywhere
  * else is dropped like any other character outside the key, the way `parseNfeKey` reads it.
  *
+ * The `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes of the `Id` attribute of the
+ * document's XML are stripped first, the way `parseNfeKey` reads them, so the digit of `NF3e` does
+ * not end up in the key.
+ *
  * Like every formatter of this package, the value is read for its characters and grouped as far
  * as they go, so a masked or partial key still being typed is grouped progressively and anything
- * without a digit (an object, `true`, an object with a null prototype) gives `""` instead of
- * throwing. Use `isValidNfeKey` to check a key.
+ * that is neither a string nor a non-negative safe integer (an object, `true`, `-1`, `1.5`, a
+ * bigint, an object with a null prototype) gives `""` instead of throwing. Use `isValidNfeKey` to
+ * check a key.
  *
  * With `pad: true` the value is first left padded with zeros to the 44 characters of a complete
  * access key, so it always comes back fully grouped (`"12345"` gives
@@ -45,6 +52,9 @@ export type FormatNfeKeyOptions = {
  * formatNfeKey("35260712abc34501de35550010000001231102030403");
  * // "3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403" (alphanumeric CNPJ)
  *
+ * formatNfeKey("NF3e35170458716523000119550010000000121000123458");
+ * // "3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458" (XML Id prefix)
+ *
  * formatNfeKey("12345"); // "1234 5" (partial values are grouped as far as they go)
  *
  * formatNfeKey("12345", { pad: true });
@@ -58,6 +68,10 @@ export type FormatNfeKeyOptions = {
  * PL_010 (NT 2026.004): `TChNFe`, `<xs:pattern value="[0-9]{6}[0-9A-Z]{12}[0-9]{26}"/>`.
  */
 export const formatNfeKey = (value: string, options?: FormatNfeKeyOptions): string =>
-	isNullish(value)
-		? ""
-		: format({ pad: options?.pad, value: sanitizeNfeKey(value), pattern: PATTERN });
+	isLookupCode(value)
+		? format({
+				pad: options?.pad,
+				value: sanitizeNfeKey(toStringSafe(value).trim().replace(XML_ID_PREFIX_REGEX, "")),
+				pattern: PATTERN,
+			})
+		: "";

@@ -617,6 +617,8 @@ Format a DF-e (Documento Fiscal eletrônico) access key into groups of 4 charact
 - **Options** (`FormatNfeKeyOptions`): `pad` left pads the value with zeros up to the 44 characters of a complete access key (default `false`).
 - A masked or partial key is grouped as far as its characters go.
 - The letters of an alphanumeric CNPJ are kept, upper cased, in positions 7 to 18; a letter anywhere else is dropped.
+- The `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` and `NFCom` prefixes of the `Id` attribute of the XML are stripped first, as `parseNfeKey` reads them.
+- A value that is neither a string nor a non-negative safe integer (`-1`, `1.5`, a bigint, an object) gives `''`.
 - Use `isValidNfeKey` to check a key.
 
 ```javascript
@@ -627,6 +629,9 @@ formatNfeKey('35170458716523000119550010000000121000123458');
 
 formatNfeKey('35260712abc34501de35550010000001231102030403');
 // '3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403' (alphanumeric CNPJ)
+
+formatNfeKey('NF3e35170458716523000119550010000000121000123458');
+// '3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458' (XML Id prefix)
 
 formatNfeKey('12345'); // '1234 5'
 

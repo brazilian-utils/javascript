@@ -617,6 +617,8 @@ Formata uma chave de acesso de DF-e (Documento Fiscal eletrônico) em grupos de 
 - **Opções** (`FormatNfeKeyOptions`): `pad` preenche o valor com zeros à esquerda até os 44 caracteres de uma chave de acesso completa (padrão `false`).
 - Uma chave com máscara ou parcial é agrupada até onde os caracteres vão.
 - As letras de um CNPJ alfanumérico são mantidas, em maiúsculas, nas posições 7 a 18; uma letra em qualquer outra posição é descartada.
+- Os prefixos `NFe`, `CTe`, `MDFe`, `BPe`, `NF3e` e `NFCom` do atributo `Id` do XML são removidos antes, como o `parseNfeKey` os lê.
+- Um valor que não seja string nem inteiro seguro não negativo (`-1`, `1.5`, um bigint, um objeto) resulta em `''`.
 - Use `isValidNfeKey` para verificar uma chave.
 
 ```javascript
@@ -627,6 +629,9 @@ formatNfeKey('35170458716523000119550010000000121000123458');
 
 formatNfeKey('35260712abc34501de35550010000001231102030403');
 // '3526 0712 ABC3 4501 DE35 5500 1000 0001 2311 0203 0403' (CNPJ alfanumérico)
+
+formatNfeKey('NF3e35170458716523000119550010000000121000123458');
+// '3517 0458 7165 2300 0119 5500 1000 0000 1210 0012 3458' (prefixo do Id do XML)
 
 formatNfeKey('12345'); // '1234 5'
 
