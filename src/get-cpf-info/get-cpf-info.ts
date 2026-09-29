@@ -20,6 +20,21 @@ export type CpfInfo = {
 
 const CHECK_DIGITS_START = CPF_BASE_LENGTH + 1;
 
+let statesByFiscalRegion: Map<string, StateCode[]> | undefined;
+
+const readStates = (fiscalRegion: string): StateCode[] => {
+	statesByFiscalRegion ??= new Map();
+
+	let states = statesByFiscalRegion.get(fiscalRegion);
+
+	if (!states) {
+		states = STATE_CODES.filter((state) => CPF_FISCAL_REGION_BY_STATE[state] === fiscalRegion);
+		statesByFiscalRegion.set(fiscalRegion, states);
+	}
+
+	return [...states];
+};
+
 /**
  * Reads the fields a CPF (Cadastro de Pessoas Físicas) encodes: the 8 digit base, the Região
  * Fiscal digit with the states it covers, and the 2 check digits.
@@ -70,7 +85,7 @@ export const getCpfInfo = (value: string): CpfInfo | null => {
 	return {
 		base: digits.slice(0, CPF_BASE_LENGTH),
 		fiscalRegion,
-		states: STATE_CODES.filter((state) => CPF_FISCAL_REGION_BY_STATE[state] === fiscalRegion),
+		states: readStates(fiscalRegion),
 		checkDigits: digits.slice(CHECK_DIGITS_START),
 	};
 };
