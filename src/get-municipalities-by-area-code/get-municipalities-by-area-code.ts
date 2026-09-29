@@ -1,5 +1,6 @@
 import { type Municipality } from "../_internals/constants/municipalities";
 import { type StateCode } from "../_internals/constants/states";
+import { readCached } from "../_internals/read-cached/read-cached";
 import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
 import { readMunicipalityAreaCode } from "../_internals/read-municipality-area-code/read-municipality-area-code";
 import { getAreaCodeInfo } from "../get-area-code-info/get-area-code-info";
@@ -45,18 +46,13 @@ export const getMunicipalitiesByAreaCode = (areaCode: string | number): Municipa
 
 	municipalitiesByAreaCode ??= new Map();
 
-	let entries = municipalitiesByAreaCode.get(info.areaCode);
-
-	// Stryker disable next-line ConditionalExpression: the cache only saves building the entries again; entries built on every call are the same, and the result is a copy either way.
-	if (!entries) {
-		entries = info.stateCodes.flatMap((stateCode) =>
+	const entries = readCached(municipalitiesByAreaCode, info.areaCode, () =>
+		info.stateCodes.flatMap((stateCode) =>
 			readMunicipalities(stateCode)
 				.filter(([, code]) => readMunicipalityAreaCode(stateCode, code) === info.areaCode)
 				.map(([name, code]): [string, string, StateCode] => [name, code, stateCode]),
-		);
-		// Stryker disable next-line CallExpression: the cache only saves building the entries again; not storing them means the next call builds the same entries again.
-		municipalitiesByAreaCode.set(info.areaCode, entries);
-	}
+		),
+	);
 
 	return entries.map(([name, code, stateCode]) => ({ code, name, stateCode }));
 };

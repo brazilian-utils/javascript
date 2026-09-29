@@ -1,10 +1,25 @@
 import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
+import { type StateCode } from "../_internals/constants/states";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
 import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
+import { readCached } from "../_internals/read-cached/read-cached";
 import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
 
-let codesByName: Map<string, Map<string, string>> | undefined;
+let codesByName: Map<StateCode, Map<string, string>> | undefined;
+
+const buildCodesByName = (stateCode: StateCode): Map<string, string> => {
+	const index = new Map<string, string>();
+	const municipalities = readMunicipalities(stateCode);
+
+	for (let position = municipalities.length - 1; position >= 0; position--) {
+		const [name, code] = municipalities[position];
+
+		index.set(normalizeMunicipalityName(name), code);
+	}
+
+	return index;
+};
 
 /** The `getCodeByMunicipalityName` query: a municipality name and the code of its state. */
 export type GetCodeByMunicipalityNameParams = {
@@ -58,22 +73,7 @@ export const getCodeByMunicipalityName = (
 
 	codesByName ??= new Map();
 
-	let index = codesByName.get(normalizedStateCode);
-
-	// Stryker disable next-line ConditionalExpression: the index only saves building it again; an index built on every lookup finds the same code.
-	if (!index) {
-		index = new Map();
-
-		const municipalities = readMunicipalities(normalizedStateCode);
-
-		for (let position = municipalities.length - 1; position >= 0; position--) {
-			const [name, code] = municipalities[position];
-
-			index.set(normalizeMunicipalityName(name), code);
-		}
-
-		codesByName.set(normalizedStateCode, index);
-	}
+	const index = readCached(codesByName, normalizedStateCode, buildCodesByName);
 
 	return index.get(normalizedName) ?? null;
 };

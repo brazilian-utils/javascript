@@ -65,6 +65,7 @@ const readUpperCaseSet = (words: unknown): Set<string> => {
 
 	defaultUpperCaseSet ??= toWordSet(
 		words,
+		// Stryker disable next-line ArrayDeclaration: the default set is built once, by the first test that reaches it, whatever the order; an emptied list makes that test fail, but the tests that run later never reach the line.
 		[...COMPANY_DESIGNATIONS, ...DOCUMENT_ABBREVIATIONS, ...ROMAN_NUMERALS],
 		foldToUpperCase,
 	);

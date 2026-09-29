@@ -5,6 +5,17 @@ type BankKey = "code" | "ispb";
 
 const indexes: Partial<Record<BankKey, Map<string, Bank>>> = {};
 
+const buildBankIndex = (key: BankKey): Map<string, Bank> => {
+	const index = new Map<string, Bank>();
+	const banks = readBanks();
+
+	for (let position = banks.length - 1; position >= 0; position--) {
+		index.set(banks[position][key], banks[position]);
+	}
+
+	return index;
+};
+
 /**
  * Finds the first bank whose `code` or `ispb` equals a value, through an index built on the
  * first lookup of each key.
@@ -14,20 +25,7 @@ const indexes: Partial<Record<BankKey, Map<string, Bank>>> = {};
  * @returns {Bank|undefined} The bank of the table itself, not a copy, or `undefined` when none matches.
  */
 export const findBank = (key: BankKey, value: string): Bank | undefined => {
-	let index = indexes[key];
+	indexes[key] ??= buildBankIndex(key);
 
-	// Stryker disable next-line ConditionalExpression: the index only saves building it again; an index built on every lookup finds the same bank.
-	if (!index) {
-		index = new Map();
-
-		const banks = readBanks();
-
-		for (let position = banks.length - 1; position >= 0; position--) {
-			index.set(banks[position][key], banks[position]);
-		}
-
-		indexes[key] = index;
-	}
-
-	return index.get(value);
+	return indexes[key].get(value);
 };

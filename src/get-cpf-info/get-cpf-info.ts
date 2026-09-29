@@ -1,6 +1,7 @@
 import { CPF_BASE_LENGTH, CPF_FISCAL_REGION_BY_STATE } from "../_internals/constants/cpf";
 import { STATE_CODES } from "../_internals/constants/state-codes";
 import { type StateCode } from "../_internals/constants/states";
+import { readCached } from "../_internals/read-cached/read-cached";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 import { isValidCpf } from "../is-valid-cpf/is-valid-cpf";
 
@@ -22,19 +23,13 @@ const CHECK_DIGITS_START = CPF_BASE_LENGTH + 1;
 
 let statesByFiscalRegion: Map<string, StateCode[]> | undefined;
 
+const filterStates = (fiscalRegion: string): StateCode[] =>
+	STATE_CODES.filter((state) => CPF_FISCAL_REGION_BY_STATE[state] === fiscalRegion);
+
 const readStates = (fiscalRegion: string): StateCode[] => {
 	statesByFiscalRegion ??= new Map();
 
-	let states = statesByFiscalRegion.get(fiscalRegion);
-
-	// Stryker disable next-line ConditionalExpression: the cache only saves filtering the states again, and `readStates` returns a copy either way.
-	if (!states) {
-		states = STATE_CODES.filter((state) => CPF_FISCAL_REGION_BY_STATE[state] === fiscalRegion);
-		// Stryker disable next-line CallExpression: the cache only saves filtering the states again; not storing them means the next call filters the same states again.
-		statesByFiscalRegion.set(fiscalRegion, states);
-	}
-
-	return [...states];
+	return [...readCached(statesByFiscalRegion, fiscalRegion, filterStates)];
 };
 
 /**

@@ -8,6 +8,16 @@ const normalizeName = (value: string): string =>
 
 let codesByName: Map<string, StateCode> | undefined;
 
+const buildCodesByName = (): Map<string, StateCode> => {
+	const index = new Map<string, StateCode>();
+
+	for (let position = DATA.length - 1; position >= 0; position--) {
+		index.set(normalizeName(DATA[position].name), DATA[position].code);
+	}
+
+	return index;
+};
+
 /**
  * Retrieves the two-letter code (sigla) of a Brazilian state given its full name.
  *
@@ -36,14 +46,7 @@ let codesByName: Map<string, StateCode> | undefined;
  * ```
  */
 export const getStateCodeByName = (name: string): StateCode | null => {
-	// Stryker disable next-line ConditionalExpression: the index only saves building it again; an index built on every lookup finds the same code.
-	if (!codesByName) {
-		codesByName = new Map();
-
-		for (let position = DATA.length - 1; position >= 0; position--) {
-			codesByName.set(normalizeName(DATA[position].name), DATA[position].code);
-		}
-	}
+	codesByName ??= buildCodesByName();
 
 	return codesByName.get(normalizeName(name)) ?? null;
 };
