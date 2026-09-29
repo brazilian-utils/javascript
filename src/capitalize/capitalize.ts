@@ -24,6 +24,14 @@ export type CapitalizeOptions = {
 	upperCaseWords?: string[];
 };
 
+const foldToLowerCase = (word: string): string => word.toLowerCase();
+
+const foldToUpperCase = (word: string): string => word.toUpperCase();
+
+let defaultLowerCaseSet: Set<string> | undefined;
+
+let defaultUpperCaseSet: Set<string> | undefined;
+
 const toWordSet = (
 	words: unknown,
 	fallback: readonly string[],
@@ -32,6 +40,34 @@ const toWordSet = (
 	const source: readonly unknown[] = Array.isArray(words) ? words : fallback;
 
 	return new Set(source.filter((word) => typeof word === "string").map((word) => fold(word)));
+};
+
+const readLowerCaseSet = (words: unknown): Set<string> => {
+	if (Array.isArray(words)) return toWordSet(words, PREPOSITIONS, foldToLowerCase);
+
+	defaultLowerCaseSet ??= toWordSet(words, PREPOSITIONS, foldToLowerCase);
+
+	return defaultLowerCaseSet;
+};
+
+/**
+ * The upper case word list in force: the words given, or the default list, which is assembled
+ * here on the first call and kept, not in a module-level constant, so a bundle that never calls
+ * `capitalize` does not keep the spread.
+ *
+ * @param {unknown} words - The `upperCaseWords` option as given.
+ * @returns {Set<string>} The words to keep in upper case, in upper case.
+ */
+const readUpperCaseSet = (words: unknown): Set<string> => {
+	if (Array.isArray(words)) return toWordSet(words, [], foldToUpperCase);
+
+	defaultUpperCaseSet ??= toWordSet(
+		words,
+		[...COMPANY_DESIGNATIONS, ...DOCUMENT_ABBREVIATIONS, ...ROMAN_NUMERALS],
+		foldToUpperCase,
+	);
+
+	return defaultUpperCaseSet;
 };
 
 /**
@@ -139,7 +175,7 @@ const isUpperCasePosition = (
 	if (enclitic) return false;
 	if (ahead.designation === "") return true;
 
-	const designation = ahead.designation.toLocaleUpperCase("pt-BR");
+	const designation = ahead.designation.toUpperCase();
 
 	return (
 		ahead.joined && COMPANY_DESIGNATIONS.includes(designation) && upperCaseSet.has(designation)
@@ -181,10 +217,10 @@ const isStateCodePosition = (
  */
 const capitalizeWord = (word: string): string => {
 	const [first, ...rest] = word;
-	const [upperFirst, ...expansion] = first.toLocaleUpperCase("pt-BR");
+	const [upperFirst, ...expansion] = first.toUpperCase();
 	const head = expansion.length > 0 ? first : upperFirst;
 
-	return head + rest.join("").toLocaleLowerCase("pt-BR");
+	return head + rest.join("").toLowerCase();
 };
 
 /**
@@ -248,8 +284,8 @@ const capitalizeWord = (word: string): string => {
  * option never throws. The default `lowerCaseWords` list is the set of prepositions and
  * conjunctions the Manual de Redação da Presidência da República keeps in lower case inside a
  * proper name, and the default `upperCaseWords` list is sourced in `constants.ts` from the laws
- * that create each designation. The default list is assembled inside the function, not in a
- * module-level constant, so a bundle that never calls `capitalize` does not keep the spread.
+ * that create each designation. The default lists are assembled on the first call and kept, not
+ * in a module-level constant, so a bundle that never calls `capitalize` does not keep the spread.
  *
  * @param {string} value - The input string to be capitalized.
  * @param {CapitalizeOptions} [options] - Optional configuration for capitalization.
@@ -292,15 +328,8 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 
 	const { lowerCaseWords, upperCaseWords } = options ?? {};
 
-	const lowerCaseSet = toWordSet(lowerCaseWords, PREPOSITIONS, (word) =>
-		word.toLocaleLowerCase("pt-BR"),
-	);
-
-	const upperCaseSet = toWordSet(
-		upperCaseWords,
-		[...COMPANY_DESIGNATIONS, ...DOCUMENT_ABBREVIATIONS, ...ROMAN_NUMERALS],
-		(word) => word.toLocaleUpperCase("pt-BR"),
-	);
+	const lowerCaseSet = readLowerCaseSet(lowerCaseWords);
+	const upperCaseSet = readUpperCaseSet(upperCaseWords);
 
 	const tokens = value.trim().split(SEPARATOR_REGEX);
 
@@ -323,9 +352,9 @@ export const capitalize = (value: string, options?: CapitalizeOptions): string =
 			continue;
 		}
 
-		const lowerCaseWord = token.toLocaleLowerCase("pt-BR");
-		const upperCaseWord = token.toLocaleUpperCase("pt-BR");
-		const designation = (output.slice(-2).join("") + upperCaseWord).toLocaleUpperCase("pt-BR");
+		const lowerCaseWord = token.toLowerCase();
+		const upperCaseWord = token.toUpperCase();
+		const designation = (output.slice(-2).join("") + upperCaseWord).toUpperCase();
 		const ahead = lookAhead(tokens, index);
 
 		if (designation !== upperCaseWord && upperCaseSet.has(designation)) {
