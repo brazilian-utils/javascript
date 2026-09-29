@@ -1,6 +1,7 @@
 import { DATA as CITIES_DATA } from "../constants/municipalities";
 import { MUNICIPALITY_AREA_CODES } from "../constants/municipality-area-codes";
 import { type StateCode } from "../constants/states";
+import { hasOwnKey } from "../has-own-key/has-own-key";
 
 const AREA_CODE_LENGTH = 2;
 
@@ -22,11 +23,12 @@ const buildIndex = (stateCode: StateCode): Record<string, number> => {
 /**
  * Reads the DDD of a municipality out of `MUNICIPALITY_AREA_CODES`, which holds the DDDs of each
  * state in ascending order of the municipality code. The DDDs of each state are indexed by
- * municipality code on its first lookup, and the index is kept.
+ * municipality code on its first lookup, and the index is kept. A code that is not an own key
+ * of the index (`"constructor"`, for instance) gives `NaN`, never an inherited member.
  *
  * @param {StateCode} stateCode - The state of the municipality.
  * @param {string} code - The 7 digit IBGE code of a municipality of that state.
- * @returns {number} The DDD of the municipality.
+ * @returns {number} The DDD of the municipality, `NaN` when the code is not listed.
  *
  * @example
  * ```typescript
@@ -36,5 +38,7 @@ const buildIndex = (stateCode: StateCode): Record<string, number> => {
 export const readMunicipalityAreaCode = (stateCode: StateCode, code: string): number => {
 	indexes[stateCode] ??= buildIndex(stateCode);
 
-	return indexes[stateCode][code];
+	const index = indexes[stateCode];
+
+	return hasOwnKey(index, code) ? index[code] : Number.NaN;
 };
