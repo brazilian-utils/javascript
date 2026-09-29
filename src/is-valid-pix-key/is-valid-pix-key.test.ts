@@ -43,6 +43,15 @@ describe("isValidPixKey", () => {
 			expect(isValidPixKey("1130000000")).toBe(false);
 		});
 
+		test("when the phone repeats the country code", () => {
+			expect(isValidPixKey("+555511987654321")).toBe(false);
+			expect(isValidPixKey("+55+5511987654321")).toBe(false);
+			expect(isValidPixKey("+55+55 11 98765-4321")).toBe(false);
+			expect(isValidPixKey("00555511987654321")).toBe(false);
+			expect(isValidPixKey("0055+5511987654321")).toBe(false);
+			expect(isValidPixKey("+550055 11 98765-4321")).toBe(false);
+		});
+
 		test("when it is not a key of any accepted kind", () => {
 			expect(isValidPixKey("chave pix")).toBe(false);
 			expect(isValidPixKey("11257245286")).toBe(false);

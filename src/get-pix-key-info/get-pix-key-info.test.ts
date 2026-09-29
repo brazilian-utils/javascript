@@ -105,6 +105,13 @@ describe("getPixKeyInfo", () => {
 			expect(getPixKeyInfo("1130000000")).toBeNull();
 		});
 
+		test("when the phone repeats the country code", () => {
+			expect(getPixKeyInfo("+555511987654321")).toBeNull();
+			expect(getPixKeyInfo("+55+5511987654321")).toBeNull();
+			expect(getPixKeyInfo("0055+5511987654321")).toBeNull();
+			expect(getPixKeyInfo("+550055 11 98765-4321")).toBeNull();
+		});
+
 		test("when it is free text", () => {
 			expect(getPixKeyInfo("chave pix")).toBeNull();
 			expect(getPixKeyInfo("---")).toBeNull();

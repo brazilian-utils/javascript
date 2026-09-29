@@ -1,6 +1,7 @@
 import { isValidCnpj } from "../../is-valid-cnpj/is-valid-cnpj";
 import { isValidCpf } from "../../is-valid-cpf/is-valid-cpf";
 import { isValidMobilePhone } from "../../is-valid-mobile-phone/is-valid-mobile-phone";
+import { PHONE_NATIONAL_MAX_LENGTH } from "../constants/phone";
 import {
 	EMAIL_MAX_LENGTH,
 	EVP_REGEX,
@@ -17,7 +18,9 @@ export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "evp";
  * which only needs the kind to apply its `accept` option, and `getPixKeyInfo`, which then
  * writes the key in its canonical DICT form. `getPixKeyInfo` documents the rules: a value is
  * read as an EVP, an e-mail address, a CNPJ, a CPF and a mobile phone number, in that order,
- * and the CPF and the phone number only when written the way those are written. An e-mail key is
+ * and the CPF and the phone number only when written the way those are written. A phone key is
+ * `+55` followed by the 11 digit national number exactly once, so a doubled country code
+ * (`+555511987654321`) is not a key. An e-mail key is
  * checked, once lowercased, against the pattern and the 77 character limit the DICT API
  * registers, not against `isValidEmail`.
  *
@@ -49,5 +52,9 @@ export const detectPixKeyType = (value: string): PixKeyType | null => {
 
 	if (!PHONE_SYNTAX_REGEX.test(trimmed)) return null;
 
-	return isValidMobilePhone(normalizePhone(trimmed)) ? "phone" : null;
+	const national = normalizePhone(trimmed);
+
+	return national.length === PHONE_NATIONAL_MAX_LENGTH && isValidMobilePhone(national)
+		? "phone"
+		: null;
 };

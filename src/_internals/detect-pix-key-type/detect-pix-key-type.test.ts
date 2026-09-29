@@ -24,6 +24,11 @@ describe("detectPixKeyType", () => {
 		expect(detectPixKeyType("+5551998259765")).toBe("phone");
 	});
 
+	test("should read the DDD 55 after the country code, and reject the country code twice", () => {
+		expect(detectPixKeyType("+5555987654321")).toBe("phone");
+		expect(detectPixKeyType("+555511987654321")).toBeNull();
+	});
+
 	test("should return null for a value that is no Pix key", () => {
 		expect(detectPixKeyType("")).toBeNull();
 		expect(detectPixKeyType("(11) 3333-4444")).toBeNull();
