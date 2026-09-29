@@ -111,6 +111,8 @@ import {
 	type PixKeyType,
 	type PixPayloadInfo,
 	type PixPointOfInitiation,
+	type ProcessoJuridicoInfo,
+	type ProcessoJuridicoSegment,
 	type Region,
 	type RegionCode,
 	type RegistroProfissionalCouncil,
@@ -233,6 +235,7 @@ const PUBLIC = [
 	"getNfseKeyInfo",
 	"getPixKeyInfo",
 	"getPixPayloadInfo",
+	"getProcessoJuridicoInfo",
 	"getServiceItem",
 	"getStateByCep",
 	"getRegions",
@@ -470,6 +473,8 @@ describe("Public API", () => {
 			PixKeyType: PixKeyType;
 			PixPayloadInfo: PixPayloadInfo;
 			PixPointOfInitiation: PixPointOfInitiation;
+			ProcessoJuridicoInfo: ProcessoJuridicoInfo;
+			ProcessoJuridicoSegment: ProcessoJuridicoSegment;
 			Region: Region;
 			RegionCode: RegionCode;
 			RegistroProfissionalCouncil: RegistroProfissionalCouncil;

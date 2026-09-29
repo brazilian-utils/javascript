@@ -1347,6 +1347,32 @@ generateProcessoJuridico({ court: 10 }); // null (órgão inexistente)
 
 Fonte: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119).
 
+### getProcessoJuridicoInfo
+
+Lê os campos de um número de processo jurídico, como um `ProcessoJuridicoInfo`, ou `null` quando o `isValidProcessoJuridico` retornaria `false`.
+
+- Campos: `sequentialNumber` (`NNNNNNN`), `checkDigits` (`DD`), `year` (`AAAA`, um número), `segment` (um nome para o órgão `J`: `'supreme-federal-court'`, `'national-council-of-justice'`, `'superior-court-of-justice'`, `'federal'`, `'labor'`, `'electoral'`, `'military'`, `'state'` ou `'state-military'`), `segmentCode` (`J`, `'1'` a `'9'`), `tribunalCode` (`TR`, dois dígitos) e `originUnit` (`OOOO`). Os códigos são strings que mantêm os zeros à esquerda.
+- `tribunalCode` é `'00'` para os processos de um tribunal superior ou do STF, do CNJ, do STJ, do TST, do TSE e do STM, `'90'` para o Conselho da Justiça Federal e o Conselho Superior da Justiça do Trabalho, e o número da região ou do estado nos demais casos. A unidade de origem não é verificada: cada tribunal a codifica por conta própria.
+
+```javascript
+import { getProcessoJuridicoInfo } from '@brazilian-utils/brazilian-utils';
+
+getProcessoJuridicoInfo('0002080-25.2012.5.15.0049');
+// {
+//   sequentialNumber: '0002080',
+//   checkDigits: '25',
+//   year: 2012,
+//   segment: 'labor',
+//   segmentCode: '5',
+//   tribunalCode: '15',
+//   originUnit: '0049',
+// }
+
+getProcessoJuridicoInfo('0000100-23.2008.8.28.0000'); // null (não existe o 28º Tribunal de Justiça)
+```
+
+Fonte: [Resolução CNJ nº 65/2008](https://atos.cnj.jus.br/atos/detalhar/119).
+
 ## Contas bancárias e bancos
 
 ### isValidBankAccount

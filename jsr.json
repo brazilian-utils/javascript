@@ -93,6 +93,7 @@
 		"./get-nfse-key-info": "./src/get-nfse-key-info/get-nfse-key-info.ts",
 		"./get-pix-key-info": "./src/get-pix-key-info/get-pix-key-info.ts",
 		"./get-pix-payload-info": "./src/get-pix-payload-info/get-pix-payload-info.ts",
+		"./get-processo-juridico-info": "./src/get-processo-juridico-info/get-processo-juridico-info.ts",
 		"./get-regions": "./src/get-regions/get-regions.ts",
 		"./get-service-item": "./src/get-service-item/get-service-item.ts",
 		"./get-state-by-cep": "./src/get-state-by-cep/get-state-by-cep.ts",

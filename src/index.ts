@@ -192,6 +192,11 @@ export {
 	type PixPointOfInitiation,
 	getPixPayloadInfo,
 } from "./get-pix-payload-info/get-pix-payload-info";
+export {
+	type ProcessoJuridicoInfo,
+	type ProcessoJuridicoSegment,
+	getProcessoJuridicoInfo,
+} from "./get-processo-juridico-info/get-processo-juridico-info";
 export { type ServiceItem, getServiceItem } from "./get-service-item/get-service-item";
 export { getStateByCep } from "./get-state-by-cep/get-state-by-cep";
 export { type Region, type RegionCode, getRegions } from "./get-regions/get-regions";
