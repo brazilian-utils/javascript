@@ -1,27 +1,11 @@
 import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
 import { normalizeCid10 } from "../_internals/normalize-cid10/normalize-cid10";
+import { readCid10CategoryOffsets } from "../_internals/read-cid10-category-offsets/read-cid10-category-offsets";
 import { readCid10Subcategories } from "../_internals/read-cid10-subcategories/read-cid10-subcategories";
 import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
 
 const CATEGORY_LENGTH = 3;
-
-let categoryOffsets: Record<string, number> | undefined;
-
-const readCategoryOffsets = (): Record<string, number> => {
-	if (!categoryOffsets) {
-		categoryOffsets = {};
-
-		let offset = 0;
-
-		for (const [category, subcategories] of Object.entries(readCid10Subcategories())) {
-			categoryOffsets[category] = offset;
-			offset += 1 + subcategories.length;
-		}
-	}
-
-	return categoryOffsets;
-};
 
 /**
  * The index of a listed code in `CID10_DESCRIPTIONS`, which holds every category of
@@ -37,7 +21,7 @@ const findDescriptionIndex = (code: string): number => {
 	const category = code.slice(0, CATEGORY_LENGTH);
 	const subcategory = code.slice(CATEGORY_LENGTH);
 	const subcategories = readCid10Subcategories();
-	const offset = readCategoryOffsets()[category];
+	const offset = readCid10CategoryOffsets()[category];
 
 	return offset + subcategories[category].indexOf(subcategory) + subcategory.length;
 };
