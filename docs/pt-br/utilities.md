@@ -484,10 +484,10 @@ Fonte: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/conte
 Valida um payload de BR Code Pix (a string por trás de um QR Code Pix e do "Pix copia e cola") pelo Manual de Padrões para Iniciação do Pix e, onde ele é omisso, pela especificação EMV de QR Code em que ele se apoia.
 
 - O payload precisa começar pelo format indicator `000201`.
-- A estrutura TLV, o CRC-16 e os objetos obrigatórios (format indicator, category code de 4 dígitos, moeda, país, nome e cidade do recebedor) são verificados.
+- A estrutura TLV, o CRC-16 e os objetos obrigatórios (format indicator, category code de 4 dígitos, moeda, país, nome e cidade do recebedor) são verificados. Um ID de objeto não pode se repetir no mesmo nível, e o CRC (`63`) precisa ser o último objeto do payload, não oito caracteres dentro de outro.
 - Um template "Merchant Account Information" (IDs 26 a 51) precisa trazer o GUI `br.gov.bcb.pix` com uma chave (estático) ou a URL do PSP (dinâmico), nunca os dois.
 - A chave vem na forma do DICT (§2.5.1): a que `getPixKeyInfo` devolve sem mudar, então `12345678909` passa e `123.456.789-09` não. Se ela está registrada não dá para saber pelo payload. A URL do PSP tem no máximo 77 caracteres (§2.5.2).
-- O nome do recebedor tem no máximo 25 caracteres e a cidade no máximo 15; o país é `BR` em maiúsculas.
+- O nome do recebedor tem no máximo 25 caracteres e a cidade no máximo 15; o país é `BR` em maiúsculas. Os caracteres deles não são restritos (nenhum dos manuais restringe, e o EMV os tipa como `ans`), então um nome com acento é aceito, embora `generatePixPayload` reduza os dois a ASCII imprimível.
 - Nenhum manual do BCB diz se o CRC ou o `BR` podem estar em minúsculas: a única regra de caixa que eles dão é a do GUI, e todos os exemplos oficiais escrevem os dois em maiúsculas. Aceitar CRC em minúsculas (`1d3d`) e rejeitar `br` são escolhas desta biblioteca, como na 2.4.0.
 - O objeto `01` (Point of Initiation Method) é opcional e precisa ser `11` ou `12` quando presente.
 - O objeto `62` (Additional Data Field) é obrigatório e traz o `txid` (62-05), "sempre presente em um BR Code": `***` ou de 1 a 25 letras e dígitos (§2.6.2); com URL do PSP qualquer valor vale, já que o §2.7 manda o pagador ignorá-lo. O `-` do exemplo `RP12345678-2019` do Manual do BR Code está fora do conjunto de caracteres do Pix do §2.6.2, então esse exemplo estático é rejeitado.

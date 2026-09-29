@@ -23,12 +23,18 @@ describe("parseTlv", () => {
 			expect(parseTlv("")).toEqual({});
 		});
 
-		test("when an id repeats, keeping the last one", () => {
-			expect(parseTlv("0001A0001B")).toEqual({ "00": "B" });
+		test("when two different ids follow each other", () => {
+			expect(parseTlv("0001A0101B")).toEqual({ "00": "A", "01": "B" });
 		});
 	});
 
 	describe("should return null", () => {
+		test("when an id repeats, whatever the values are", () => {
+			expect(parseTlv("0001A0001B")).toBeNull();
+			expect(parseTlv("0001A0001A")).toBeNull();
+			expect(parseTlv("0001A0101B0001C")).toBeNull();
+		});
+
 		test("when a value runs past the end of the string", () => {
 			expect(parseTlv("0003ab")).toBeNull();
 		});

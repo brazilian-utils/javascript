@@ -14,8 +14,6 @@ import {
 	PIX_MERCHANT_CITY_MAX_LENGTH,
 	PIX_MERCHANT_NAME_ID,
 	PIX_MERCHANT_NAME_MAX_LENGTH,
-	PIX_PAYLOAD_FORMAT_INDICATOR,
-	PIX_PAYLOAD_FORMAT_INDICATOR_ID,
 	PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT,
 	PIX_POINT_OF_INITIATION_ID,
 	PIX_STATIC_POINT_OF_INITIATION,
@@ -108,9 +106,10 @@ const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): bo
  * the EMV® QRCPS-MPM it builds on.
  *
  * The payload is valid when:
- * - it is well-formed TLV (tag-length-value), every length from `01` to `99` (EMV);
+ * - it is well-formed TLV (tag-length-value), every length from `01` to `99` (EMV), with no ID
+ *   repeated at the same level (EMV gives each object one ID per level);
  * - it starts with the payload format indicator `000201` (EMV: "shall be the first data
- *   object"), and no later object `00` says otherwise;
+ *   object"), and no later object `00` follows it;
  * - the "Point of Initiation Method" (`01`), "opcional" in the manual (§2.7.2), is absent,
  *   `"11"` or `"12"` (EMV);
  * - one of the "Merchant Account Information" templates (IDs 26 to 51) carries the
@@ -151,11 +150,17 @@ const isValidTxid = (additionalData: string | undefined, isDynamic: boolean): bo
  *   payload invalid, as in 2.4.0, and the transaction amount is only checked for its format.
  *   The static rule excludes the `-` of the Manual do BR Code v2.0.1 example
  *   (`RP12345678-2019`), whose §2.6.2 character set is the Pix-specific rule for the field;
- * - the CRC-16 (`63`) closes the payload and matches it. No official source states the case of
- *   its hexadecimal digits: the Manual do BR Code only says "4 nibbles do resultado. Exemplo:
+ * - the CRC-16 (`63`) is the last object of the payload, whole, and matches it: eight
+ *   trailing characters that only look like `6304` and a checksum do not count. No official
+ *   source states the case of its hexadecimal digits: the Manual do BR Code only says "4 nibbles do resultado. Exemplo:
  *   0xAC05 => “AC05”", and every example of both BCB manuals is upper case. Reading `"1d3d"` as
  *   `"1D3D"` is a choice of this library, kept from 2.4.0; `generatePixPayload` always writes
  *   upper case.
+ *
+ * The merchant name and city are only checked for their length (up to 25 and 15 characters):
+ * neither Pix manual restricts their characters and EMV types them as `ans`, so a name with
+ * accents or control characters is accepted here, though `generatePixPayload` folds both to
+ * printable ASCII.
  *
  * Whether the key is registered in the DICT is not something a payload can tell: "Um QR Code
  * estático pode potencialmente ser gerado com uma chave inválida, mas será um QR Code
@@ -216,8 +221,9 @@ export const isValidPixPayload = (value: string): boolean => {
 
 	if (!fields) return false;
 
+	if (!parseTlv(payload.slice(0, -PIX_CRC_FIELD_LENGTH))) return false;
+
 	if (!payload.startsWith(PIX_PAYLOAD_FORMAT_INDICATOR_OBJECT)) return false;
-	if (fields[PIX_PAYLOAD_FORMAT_INDICATOR_ID] !== PIX_PAYLOAD_FORMAT_INDICATOR) return false;
 	if (!isValidPointOfInitiation(fields)) return false;
 	if (!PIX_MERCHANT_CATEGORY_CODE_REGEX.test(String(fields[PIX_MERCHANT_CATEGORY_CODE_ID])))
 		return false;

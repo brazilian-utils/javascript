@@ -484,10 +484,10 @@ Source: [Manual de Padrões para Iniciação do Pix](https://www.bcb.gov.br/cont
 Check if a Pix BR Code payload (the string behind a Pix QR Code and behind "Pix copia e cola") is valid under the Manual de Padrões para Iniciação do Pix and, where it is silent, the EMV QR Code specification it builds on.
 
 - The payload must start with the format indicator `000201`.
-- The TLV structure, the CRC-16 and the mandatory objects (format indicator, a 4 digit category code, currency, country, merchant name and city) are checked.
+- The TLV structure, the CRC-16 and the mandatory objects (format indicator, a 4 digit category code, currency, country, merchant name and city) are checked. An object ID may not repeat at the same level, and the CRC (`63`) must be the last object of the payload, not eight characters inside another one.
 - One "Merchant Account Information" template (IDs 26 to 51) must carry the `br.gov.bcb.pix` GUI with a key (static) or a PSP URL (dynamic), never both.
 - The key is written in the DICT form (§2.5.1): the one `getPixKeyInfo` returns unchanged, so `12345678909` passes and `123.456.789-09` does not. Whether it is registered cannot be told from the payload. The PSP URL has at most 77 characters (§2.5.2).
-- The merchant name has at most 25 characters and the city at most 15; the country is `BR` in uppercase.
+- The merchant name has at most 25 characters and the city at most 15; the country is `BR` in uppercase. Their characters are not restricted (neither manual does, and EMV types them as `ans`), so a name with accents is accepted, though `generatePixPayload` folds both to printable ASCII.
 - No BCB manual states the case of the CRC or of `BR`: the only case rule they give is for the GUI, and every official example writes both in uppercase. Accepting a lowercase CRC (`1d3d`) and rejecting `br` are choices of this library, as in 2.4.0.
 - Object `01` (Point of Initiation Method) is optional and must be `11` or `12` when present.
 - Object `62` (Additional Data Field) is mandatory and carries the `txid` (62-05), "sempre presente em um BR Code": `***` or 1 to 25 letters and digits (§2.6.2); with a PSP URL any value stands, since §2.7 has the payer ignore it. The `-` of the Manual do BR Code example `RP12345678-2019` is outside the Pix character set of §2.6.2, so that static example is rejected.

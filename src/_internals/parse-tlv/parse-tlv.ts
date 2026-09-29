@@ -13,8 +13,8 @@ const EMPTY_LENGTH = "00";
  * Every object is a 2 digit ID, a 2 digit length from `01` to `99` and a value of exactly that
  * many characters, laid out back to back. Parsing stops with `null` as soon as the string stops
  * being well-formed, i.e. when an ID or a length is not made of two digits, when a length is
- * `00` or when a value runs past the end of the string. Repeated IDs are not expected at the
- * root of a BR Code; when they do occur, the last one wins.
+ * `00`, when a value runs past the end of the string or when an ID appears twice: EMV gives each
+ * object one ID per level, so a repeated ID is malformed rather than resolved to either value.
  *
  * @param {string} value - The TLV string to parse.
  * @returns {TlvFields|null} The objects keyed by ID, or `null` when the string is malformed.
@@ -25,6 +25,7 @@ const EMPTY_LENGTH = "00";
  * parseTlv("00020153039865802BR"); // { "00": "01", "53": "986", "58": "BR" }
  * parseTlv("0003ab"); // null, the value is shorter than its declared length
  * parseTlv("0000"); // null, a value has at least one character
+ * parseTlv("0001A0001B"); // null, the ID 00 repeats
  * ```
  *
  * @see Official: https://www.emvco.com/terms-of-use/?u=/wp-content/uploads/documents/EMVCo-Merchant-Presented-QR-Specification-v1-1.pdf
@@ -44,6 +45,8 @@ export const parseTlv = (value: string): TlvFields | null => {
 
 		if (!SEGMENT_REGEX.test(id) || !SEGMENT_REGEX.test(length) || length === EMPTY_LENGTH)
 			return null;
+
+		if (Object.hasOwn(fields, id)) return null;
 
 		const start = index + SEGMENT_LENGTH * 2;
 		const end = start + Number(length);

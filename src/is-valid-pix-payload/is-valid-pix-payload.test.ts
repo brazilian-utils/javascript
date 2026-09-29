@@ -251,6 +251,19 @@ describe("isValidPixPayload", () => {
 			expect(isValidPixPayload(BACEN_STATIC.slice(0, -8))).toBe(false);
 		});
 
+		test("when the last 8 characters only look like a CRC object inside another object", () => {
+			const crafted =
+				"00020126360014br.gov.bcb.pix0114+55119876543215204000053039865802BR5906Fulano6008BRASILIA62130509A6304872F";
+
+			expect(isValidPixPayload(crafted)).toBe(false);
+		});
+
+		test("when an object ID appears twice, even with a CRC that matches", () => {
+			expect(isValidPixPayload(withCrc(`${STATIC_BODY}5903abc`))).toBe(false);
+			expect(isValidPixPayload(withCrc(`${STATIC_BODY}5913Fulano de Tal`))).toBe(false);
+			expect(isValidPixPayload(withCrc(`${STATIC_BODY}6304AAAA`))).toBe(false);
+		});
+
 		test("when the TLV structure is malformed", () => {
 			expect(isValidPixPayload("00020126990014br.gov.bcb.pix6304BEFF")).toBe(false);
 			expect(isValidPixPayload("000X016304EAB2")).toBe(false);
