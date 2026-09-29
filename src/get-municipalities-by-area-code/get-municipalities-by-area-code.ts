@@ -1,4 +1,5 @@
-import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
+import { type Municipality } from "../_internals/constants/municipalities";
+import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
 import { readMunicipalityAreaCode } from "../_internals/read-municipality-area-code/read-municipality-area-code";
 import { getAreaCodeInfo } from "../get-area-code-info/get-area-code-info";
 
@@ -38,7 +39,7 @@ export const getMunicipalitiesByAreaCode = (areaCode: string | number): Municipa
 	if (info === null) return [];
 
 	return info.stateCodes.flatMap((stateCode) =>
-		CITIES_DATA[stateCode]
+		readMunicipalities(stateCode)
 			.filter(([, code]) => readMunicipalityAreaCode(stateCode, code) === info.areaCode)
 			.map(([name, code]) => ({ code, name, stateCode })),
 	);

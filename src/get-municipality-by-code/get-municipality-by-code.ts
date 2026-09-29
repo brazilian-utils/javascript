@@ -1,6 +1,8 @@
-import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
-import { STATE_CODES } from "../_internals/constants/state-codes";
+import { type Municipality } from "../_internals/constants/municipalities";
+import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
 import { readLookupDigits } from "../_internals/read-lookup-digits/read-lookup-digits";
+import { readMunicipalityCodes } from "../_internals/read-municipality-codes/read-municipality-codes";
+import { readMunicipalityStateCode } from "../_internals/read-municipality-state-code/read-municipality-state-code";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 
@@ -33,13 +35,13 @@ export const getMunicipalityByCode = (code: string | number): Municipality | nul
 	// Stryker disable next-line ConditionalExpression: without this guard a null matches no municipality code, all strings, so the loop below returns null all the same; the guard also narrows the type of `digits`.
 	if (digits === null) return null;
 
-	for (const stateCode of STATE_CODES) {
-		const match = CITIES_DATA[stateCode].find(
-			([, municipalityCode]) => municipalityCode === digits,
-		);
+	const stateCode = readMunicipalityStateCode(digits);
 
-		if (match) return { code: digits, name: match[0], stateCode };
-	}
+	if (stateCode === null) return null;
 
-	return null;
+	const index = readMunicipalityCodes(stateCode).indexOf(digits);
+
+	return index === -1
+		? null
+		: { code: digits, name: MUNICIPALITY_NAMES[stateCode].split("|")[index], stateCode };
 };

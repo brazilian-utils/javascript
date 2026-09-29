@@ -1,7 +1,8 @@
-import { DATA as CITIES_DATA } from "../_internals/constants/municipalities";
+import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeMunicipalityName } from "../_internals/normalize-municipality-name/normalize-municipality-name";
 import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
+import { readMunicipalityCodes } from "../_internals/read-municipality-codes/read-municipality-codes";
 
 /** The `getCodeByMunicipalityName` query: a municipality name and the code of its state. */
 export type GetCodeByMunicipalityNameParams = {
@@ -49,12 +50,12 @@ export const getCodeByMunicipalityName = (
 ): string | null => {
 	const normalizedStateCode = normalizeStateCode(params?.stateCode);
 
-	if (!hasOwnKey(CITIES_DATA, normalizedStateCode)) return null;
+	if (!hasOwnKey(MUNICIPALITY_NAMES, normalizedStateCode)) return null;
 
 	const normalizedName = normalizeMunicipalityName(params.municipalityName);
-	const match = CITIES_DATA[normalizedStateCode].find(
-		([name]) => normalizeMunicipalityName(name) === normalizedName,
-	);
+	const index = MUNICIPALITY_NAMES[normalizedStateCode]
+		.split("|")
+		.findIndex((name) => normalizeMunicipalityName(name) === normalizedName);
 
-	return match ? match[1] : null;
+	return index === -1 ? null : readMunicipalityCodes(normalizedStateCode)[index];
 };

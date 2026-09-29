@@ -33,7 +33,8 @@ const DATASETS: Record<string, string> = {
 	"src/_internals/constants/ibs-cbs.ts":
 		"CST-IBS/CBS and cClassTrib (Portal Nacional da NF-e, Informe Técnico 2025.002)",
 	"src/_internals/constants/isbn-ranges.ts": "ISBN ranges (International ISBN Agency)",
-	"src/_internals/constants/municipalities.ts": "Municipalities (IBGE)",
+	"src/_internals/constants/municipality-codes.ts": "Municipality codes (IBGE)",
+	"src/_internals/constants/municipality-names.ts": "Municipality names (IBGE)",
 	"src/_internals/constants/municipality-area-codes.ts":
 		"DDD of every municipality (Anatel, Códigos Nacionais)",
 	"src/_internals/constants/nbs-descriptions.ts": "NBS 2.0 descriptions (MDIC)",

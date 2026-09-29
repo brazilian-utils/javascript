@@ -1,6 +1,6 @@
+import { MUNICIPALITIES as CITIES_DATA } from "../test/municipalities";
 import { describe, expect, test } from "../test/runtime";
 import { AREA_CODE_SECONDARY_STATES, AREA_CODE_STATES, VALID_AREA_CODES } from "./area-codes";
-import { DATA as CITIES_DATA } from "./municipalities";
 import { MUNICIPALITY_AREA_CODES } from "./municipality-area-codes";
 import { type StateCode } from "./states";
 

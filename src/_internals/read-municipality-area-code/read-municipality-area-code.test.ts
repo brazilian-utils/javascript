@@ -1,4 +1,4 @@
-import { DATA as CITIES_DATA } from "../constants/municipalities";
+import { MUNICIPALITIES as CITIES_DATA } from "../test/municipalities";
 import { describe, expect, test } from "../test/runtime";
 import { readMunicipalityAreaCode } from "./read-municipality-area-code";
 
@@ -21,9 +21,9 @@ describe("readMunicipalityAreaCode", () => {
 		expect(readMunicipalityAreaCode("AC", "1200401")).toBe(68);
 	});
 
-	test("should give NaN for a key that only exists on Object.prototype", () => {
-		expect(Number.isNaN(readMunicipalityAreaCode("SP", "constructor"))).toBe(true);
-		expect(Number.isNaN(readMunicipalityAreaCode("SP", "__proto__"))).toBe(true);
-		expect(Number.isNaN(readMunicipalityAreaCode("SP", "toString"))).toBe(true);
+	test("should find nothing for a key that only exists on Object.prototype", () => {
+		expect(readMunicipalityAreaCode("SP", "constructor")).toBeUndefined();
+		expect(readMunicipalityAreaCode("SP", "__proto__")).toBeUndefined();
+		expect(readMunicipalityAreaCode("SP", "toString")).toBeUndefined();
 	});
 });

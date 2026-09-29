@@ -1,14 +1,16 @@
-import { DATA as CITIES_DATA, type Municipality } from "../_internals/constants/municipalities";
+import { type Municipality } from "../_internals/constants/municipalities";
+import { MUNICIPALITY_NAMES } from "../_internals/constants/municipality-names";
 import { STATE_CODES } from "../_internals/constants/state-codes";
 import { type StateCode } from "../_internals/constants/states";
 import { hasOwnKey } from "../_internals/has-own-key/has-own-key";
 import { normalizeStateCode } from "../_internals/normalize-state-code/normalize-state-code";
+import { readMunicipalities } from "../_internals/read-municipalities/read-municipalities";
 
 export type { Municipality } from "../_internals/constants/municipalities";
 export type { StateCode } from "../_internals/constants/states";
 
 const buildMunicipalities = (stateCode: StateCode): Municipality[] =>
-	CITIES_DATA[stateCode].map(([name, code]) => ({ code, name, stateCode }));
+	readMunicipalities(stateCode).map(([name, code]) => ({ code, name, stateCode }));
 
 /**
  * Returns Brazilian municipalities published by the IBGE, optionally filtered by state.
@@ -55,5 +57,5 @@ export const getMunicipalities = (stateCode?: StateCode): Municipality[] => {
 
 	const code = normalizeStateCode(stateCode);
 
-	return hasOwnKey(CITIES_DATA, code) ? buildMunicipalities(code) : [];
+	return hasOwnKey(MUNICIPALITY_NAMES, code) ? buildMunicipalities(code) : [];
 };
