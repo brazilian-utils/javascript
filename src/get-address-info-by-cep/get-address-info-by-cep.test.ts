@@ -1,3 +1,5 @@
+import * as fc from "fast-check";
+
 import {
 	afterEach,
 	beforeEach,
@@ -1149,6 +1151,84 @@ describe("getAddressInfoByCep", () => {
 			},
 			LIVE_TEST_TIMEOUT,
 		);
+	});
+});
+
+const outcome = async (cep: unknown, options?: unknown): Promise<unknown> => {
+	try {
+		// @ts-expect-error: intentionally invalid input
+		return await getAddressInfoByCep(cep, options);
+	} catch (error) {
+		return error;
+	}
+};
+
+describe("getAddressInfoByCep properties", () => {
+	describe("properties", () => {
+		const fetchMock = vi.fn();
+		const originalFetch = globalThis.fetch;
+		let answer: unknown;
+
+		beforeEach(() => {
+			globalThis.fetch = fetchMock as typeof fetch;
+			fetchMock.mockReset();
+			fetchMock.mockImplementation(() =>
+				answer instanceof Error
+					? Promise.reject(answer)
+					: Promise.resolve(createJsonResponse(answer)),
+			);
+		});
+
+		afterEach(() => {
+			globalThis.fetch = originalFetch;
+			vi.restoreAllMocks();
+		});
+
+		const ceps = fc.oneof(fc.anything(), fc.stringMatching(/^[0-9]{8}$/), fc.integer());
+		const providerLists = fc.oneof(fc.anything(), fc.constantFrom(["viacep"], ["brasilapi"]));
+		const timeouts = fc.oneof(fc.double({ max: 0 }), fc.string(), fc.constant(Number.NaN));
+		const optionRecords = fc.record(
+			{ providers: providerLists, timeoutMs: timeouts },
+			{ requiredKeys: [] },
+		);
+		const optionValues = fc.oneof(optionRecords, fc.anything());
+		const answers = fc.oneof(fc.anything(), fc.constant(new Error("connection lost")));
+
+		it("should resolve an address or reject with an error of its own family, whatever the input and the answers", async () => {
+			await fc.assert(
+				fc.asyncProperty(ceps, optionValues, answers, async (cep, options, providerAnswer) => {
+					answer = providerAnswer;
+
+					const result = await outcome(cep, options);
+
+					if (result instanceof Error) {
+						expect(result).toBeInstanceOf(GetAddressInfoByCepError);
+					} else {
+						expect(Object.keys(result as object)).toEqual([
+							"cep",
+							"state",
+							"city",
+							"neighborhood",
+							"street",
+						]);
+					}
+				}),
+				{ numRuns: 200 },
+			);
+		});
+
+		it("should make no request for a CEP that is not 8 digits, and reject with the validation error", async () => {
+			answer = viacepPayload;
+
+			await fc.assert(
+				fc.asyncProperty(fc.stringMatching(/^[0-9]{0,7}$/), async (cep) => {
+					fetchMock.mockClear();
+
+					expect(await outcome(cep)).toBeInstanceOf(GetAddressInfoByCepValidationError);
+					expect(fetchMock).not.toHaveBeenCalled();
+				}),
+			);
+		});
 	});
 });
 
