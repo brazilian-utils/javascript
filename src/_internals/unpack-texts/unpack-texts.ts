@@ -1,5 +1,23 @@
 let cache: Map<string, readonly string[]> | undefined;
 
+const unpack = (packed: string): readonly string[] => {
+	let previous = "";
+
+	return packed.split("\n").map((line) => {
+		previous = previous.slice(0, Number.parseInt(line.charAt(0), 36)) + line.slice(1);
+
+		return previous;
+	});
+};
+
+const store = (texts: Map<string, readonly string[]>, packed: string): readonly string[] => {
+	const unpacked = unpack(packed);
+
+	texts.set(packed, unpacked);
+
+	return unpacked;
+};
+
 /**
  * Unpacks a list of texts the generator packed (`packTexts` in `scripts/lookup-table.ts`): one
  * text per line, each written as the number of leading characters it shares with the text before
@@ -16,21 +34,7 @@ let cache: Map<string, readonly string[]> | undefined;
  * ```
  */
 export const unpackTexts = (packed: string): readonly string[] => {
-	const cached = cache?.get(packed);
-
-	// Stryker disable next-line ConditionalExpression: the cache only saves unpacking the texts again; the unpacked texts are the same on every read.
-	if (cached !== undefined) return cached;
-
-	let previous = "";
-	const texts = packed.split("\n").map((line) => {
-		previous = previous.slice(0, Number.parseInt(line.charAt(0), 36)) + line.slice(1);
-
-		return previous;
-	});
-
-	// Stryker disable next-line CallExpression: the cache only saves unpacking the texts again; the unpacked texts are the same on every read.
 	cache ??= new Map();
-	cache.set(packed, texts);
 
-	return texts;
+	return cache.get(packed) ?? store(cache, packed);
 };

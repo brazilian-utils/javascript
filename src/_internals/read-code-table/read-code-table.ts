@@ -3,18 +3,7 @@ export type CodeTable = { width: number; values: number[] };
 
 let tables: Map<string, CodeTable> | undefined;
 
-/**
- * Unpacks a table the first time it is looked up in, and hands back the same arrays after that.
- *
- * @param {string} codes - The packed table.
- * @returns {CodeTable} Its code width and codes.
- */
-export const readCodeTable = (codes: string): CodeTable => {
-	const cached = tables?.get(codes);
-
-	// Stryker disable next-line ConditionalExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
-	if (cached !== undefined) return cached;
-
+const unpack = (codes: string): CodeTable => {
 	const separator = codes.indexOf(":");
 	const values: number[] = [];
 	let previous = 0;
@@ -24,11 +13,25 @@ export const readCodeTable = (codes: string): CodeTable => {
 		values.push(previous);
 	}
 
-	const table = { width: Number(codes.slice(0, separator)), values };
-	// Stryker disable next-line CallExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
-	tables ??= new Map();
-	// Stryker disable next-line CallExpression: the cache only saves unpacking the table again; not storing it means the next lookup unpacks the same table again, which reads the same codes.
-	tables.set(codes, table);
+	return { width: Number(codes.slice(0, separator)), values };
+};
+
+const store = (cache: Map<string, CodeTable>, codes: string): CodeTable => {
+	const table = unpack(codes);
+
+	cache.set(codes, table);
 
 	return table;
+};
+
+/**
+ * Unpacks a table the first time it is looked up in, and hands back the same arrays after that.
+ *
+ * @param {string} codes - The packed table.
+ * @returns {CodeTable} Its code width and codes.
+ */
+export const readCodeTable = (codes: string): CodeTable => {
+	tables ??= new Map();
+
+	return tables.get(codes) ?? store(tables, codes);
 };
