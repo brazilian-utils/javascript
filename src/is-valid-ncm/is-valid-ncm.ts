@@ -9,12 +9,12 @@ const NCM_LENGTH = 8;
 /**
  * Validates if a NCM (Nomenclatura Comum do Mercosul) code exists in the official table.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 8
- * digits, or the `NNNN.NN.NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
- * surrounding whitespace. Anything else (`"abc01012100"`) is rejected instead of having its
- * digits picked out. A number is only read as a code when it is a non-negative safe integer,
- * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
- * caller never wrote.
+ * A string is only read as a code when it is written in one of the documented forms: the 8 digits,
+ * or the `NNNN.NN.NN` mask, with any run of separators (whitespace, `.`, `-` or `/`) between the
+ * groups and optional surrounding whitespace. Anything else (`"abc01012100"`) is rejected instead
+ * of having its digits picked out. A number is only read as a code when it is a non-negative safe
+ * integer, since a sign, a decimal point or a rounded magnitude would otherwise be read as a code
+ * the caller never wrote.
  *
  * An NCM code is always 8 digits and its leading zeros are part of it, so a value written as
  * bare digits is left padded with zeros to 8 whether it comes as a string or as a number:

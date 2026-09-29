@@ -9,10 +9,10 @@ import { CBO_LENGTH } from "./constants";
  * Validates if a CBO (Classificação Brasileira de Ocupações) code exists in the official
  * CBO 2002 table.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 6
- * digits, or the `NNNN-NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
- * surrounding whitespace. A number is only read as a code when it is a non-negative safe
- * integer.
+ * A string is only read as a code when it is written in one of the documented forms: the 6 digits,
+ * or the `NNNN-NN` mask, with any run of separators (whitespace, `.`, `-` or `/`) between the
+ * groups and optional surrounding whitespace. A number is only read as a code when it is a
+ * non-negative safe integer.
  *
  * A CBO code is always 6 digits and its leading zeros are part of it, so a value written as
  * bare digits is left padded with zeros to 6 whether it comes as a string or as a number:
@@ -36,13 +36,7 @@ import { CBO_LENGTH } from "./constants";
  *
  * @see Official: https://cbo.mte.gov.br/cbosite/pages/downloads.jsf
  * "Estrutura CBO (CSV)", the CBO 2002 tables the Ministério do Trabalho e Emprego publishes (files
- * of 10/07/2026, 2,725 occupations). Up to 2.4.0 the table came from the older gov.br release
- * (06/06/2025), which lacked 37 occupations, among them 782325 (Motorista de transporte por
- * aplicativos), and still listed 6 the MTE has since dropped (225142, 322105, 322115, 322120,
- * 322125 and 782820), which are no longer valid.
- * @see Based on: https://raw.githubusercontent.com/lucaashoff/lista-cbo-json/main/cbos.json
- * Community mirror of the same table, the fallback `CBO_CODES` was built from before the
- * official CSV was used.
+ * of 10/07/2026, 2,725 occupations).
  */
 export const isValidCbo = (value: string | number): boolean => {
 	if (!isLookupCode(value)) return false;

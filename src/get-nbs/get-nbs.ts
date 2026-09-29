@@ -25,11 +25,11 @@ export type Nbs = {
  * are in the table; the chapter (`1.01`), position (`1.0101`) and subposition (`1.0101.1`)
  * headings classify nothing by themselves and give `null`.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 9
- * digits, or the `N.NNNN.NN.NN` mask, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
- * surrounding whitespace. Anything else (`"1.0101abc11.00"`) is rejected instead of having its
- * digits picked out. A number is only read as a code when it is a non-negative safe integer.
- * Every code starts with 1, so nothing is padded.
+ * A string is only read as a code when it is written in one of the documented forms: the 9 digits,
+ * or the `N.NNNN.NN.NN` mask, with any run of separators (whitespace, `.`, `-` or `/`) between the
+ * groups and optional surrounding whitespace. Anything else (`"1.0101abc11.00"`) is rejected
+ * instead of having its digits picked out. A number is only read as a code when it is a
+ * non-negative safe integer. Every code starts with 1, so nothing is padded.
  *
  * @param {string|number} value - The NBS code to look up, with or without the mask, e.g.
  * `"1.0101.11.00"`, `"101011100"` or `101011100`.

@@ -25,10 +25,7 @@ import { LENGTH } from "./constants";
  *
  * @see Official: https://cbo.mte.gov.br/cbosite/pages/downloads.jsf
  * "Estrutura CBO (CSV)", the CBO 2002 tables the Ministério do Trabalho e Emprego publishes (files
- * of 10/07/2026, 2,725 occupations). Up to 2.4.0 the table came from the older gov.br release
- * (06/06/2025), which lacked 37 occupations, among them 782325 (Motorista de transporte por
- * aplicativos), and still listed 6 the MTE has since dropped (225142, 322105, 322115, 322120,
- * 322125 and 782820), which are no longer valid.
+ * of 10/07/2026, 2,725 occupations).
  */
 export const parseCbo = (value: string | number): string =>
 	isLookupCode(value) ? sanitizeToDigits(value).slice(0, LENGTH) : "";

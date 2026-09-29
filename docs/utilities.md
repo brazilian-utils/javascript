@@ -2908,7 +2908,7 @@ parseCaepf('293.118.610/001-84'); // '29311861000184'
 Check if a CBO (Classificação Brasileira de Ocupações) code exists in the official CBO 2002 table.
 
 - Accepts a string with the 6 digits or with the `NNNN-NN` mask, or a number.
-- A masked string needs a single separator (space, `.`, `-` or `/`) between the groups. Any other string is rejected instead of having its digits picked out.
+- A masked string may have any run of separators (space, `.`, `-` or `/`) between the groups. Any other string is rejected instead of having its digits picked out.
 - Bare digits are left padded with zeros to 6, as a string or as a number. A masked value is read as written.
 
 ```javascript
@@ -2924,7 +2924,7 @@ isValidCbo('2124abc05'); // false (not a documented form)
 isValidCbo(-212405); // false (not a non-negative safe integer)
 ```
 
-Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Up to 2.4.0 the table came from the older gov.br release (06/06/2025): 37 occupations were missing, and 6 the MTE has since dropped (225142, 322105, 322115, 322120, 322125 and 782820) are no longer valid.
+Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf).
 
 ### parseCbo
 
@@ -2954,7 +2954,7 @@ getCbo('000000'); // null
 getCbo('2124abc05'); // null (not a documented form)
 ```
 
-Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Up to 2.4.0 the table came from the older gov.br release (06/06/2025): 37 occupations were missing, and 6 the MTE has since dropped (225142, 322105, 322115, 322120, 322125 and 782820) are no longer valid.
+Source: [CBO 2002 tables published by the MTE ("Estrutura CBO (CSV)", files of 10/07/2026, 2,725 occupations)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf).
 
 ### isValidCnae
 
@@ -3084,7 +3084,7 @@ parseNcm('8471'); // '8471' (a partial code is kept as written)
 Check if an NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) code exists in the official NBS 2.0 table, the code the national NFS-e carries in `cNBS`.
 
 - A code has 9 digits, printed as `N.NNNN.NN.NN`: the digit 1, the chapter, the position, the two subposition levels, the item and the subitem.
-- Accepts a string with the 9 digits or with the mask, with a single separator between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
+- Accepts a string with the 9 digits or with the mask, with any run of separators (space, `.`, `-` or `/`) between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
 - Only complete codes are valid: the chapter (`1.01`), position (`1.0101`) and subposition (`1.0101.1`) headings classify nothing by themselves.
 - The ANEXO B of the Sistema Nacional NFS-e lists the same 920 codes except three (`1.0402.29.00`, `1.0403.29.00` and `1.0904.40.00`), so a code valid here can still be refused by the NFS-e.
 
@@ -3141,7 +3141,7 @@ Check if a value is a subitem in force of the service list annexed to the Lei Co
 
 - The law numbers a subitem as the item, a dot and two digits, `1.01` to `40.01`.
 - Accepts that form, a zero padded item (`'01.01'`) or the bare digits (`'0101'`, `'101'` or the integer `101`), which are the first four digits of the `cTribNac` code of the national NFS-e, with optional surrounding whitespace.
-- The dot is the only separator the law ever prints between the item and the subitem, so, unlike the codes with a printed grouping mask (`isValidCfop`, `isValidNbs`), nothing else is accepted in its place and `'1-01'` is rejected.
+- Any run of separators (space, `.`, `-` or `/`) is accepted between the item and the subitem, as in the other codes with a printed grouping mask (`isValidCfop`, `isValidNbs`), so `'1-01'` and `'1 01'` are valid too.
 - A number is only read when it is a non-negative safe integer, so the float `1.01` is rejected: write the dotted form as a string.
 - The vetoed subitems (`3.01`, `7.14`, `7.15`, `13.01` and `17.07`), the item headings, the 6 digit national codes a subitem is split into and item 99 of the national list, which is not part of the law, are not valid. Municipal service codes are out of scope.
 
@@ -3179,7 +3179,7 @@ Source: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/l
 Check if a CFOP (Código Fiscal de Operações e Prestações) code exists in the official table, the consolidated Anexo II of Convênio SINIEF s/nº 1970 in force.
 
 - Only operable codes count: the group and subgroup headings, the codes ending in `00` and `50`, are rejected.
-- Accepts a string with the 4 digits or with the `N.NNN` form, with a single separator (space, `.`, `-` or `/`), or a number. Any other string is rejected.
+- Accepts a string with the 4 digits or with the `N.NNN` form, with any run of separators (space, `.`, `-` or `/`) between the groups, or a number. Any other string is rejected.
 - No CFOP code starts with a zero, so nothing is padded.
 
 ```javascript
@@ -3233,7 +3233,7 @@ Check if a CEST (Código Especificador da Substituição Tributária) is listed 
 - Only the items in force count: an item the annexes mark as revoked is rejected.
 - The check is about the code alone: it does not tell whether the code suits a given NCM, nor whether a state applies the substituição tributária regime to it.
 - A CEST has 7 digits: the first two are the segment, the third to the fifth the item of the segment and the last two the specification of the item (cláusula sexta, IV).
-- Accepts a string with the 7 digits or with the `NN.NNN.NN` form the annexes print, with a single separator between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
+- Accepts a string with the 7 digits or with the `NN.NNN.NN` form the annexes print, with any run of separators (space, `.`, `-` or `/`) between the groups and optional surrounding whitespace, or a non-negative safe integer. Any other string is rejected instead of having its digits picked out.
 - The leading zero of segments 01 to 09 is part of the code, so a value written as bare digits is left padded with zeros to 7, as a string or as a number: `100100`, `'100100'` and `'0100100'` are the same code. A masked value is read as written.
 
 ```javascript
@@ -3310,7 +3310,7 @@ Check if a CST (Código de Situação Tributária) code is valid for a given tax
 | `cofins` | 2 digits | same table as `pis` |
 
 - **Options** (`IsValidCstOptions`): `tax` picks the table. Omitted, or outside those four values, every table is accepted.
-- Accepts a string with the 2 digits of a Tabela B code or the 3 digits of the ICMS form, or a number. The ICMS form may have a single separator (space, `.`, `-` or `/`) after the origin digit.
+- Accepts a string with the 2 digits of a Tabela B code or the 3 digits of the ICMS form, or a number. The ICMS form may have any run of separators (space, `.`, `-` or `/`) after the origin digit.
 - A single digit is padded to the 3-digit ICMS form; a 2-digit string is a Tabela B code, while the number `7` is the ICMS code `007`.
 
 ```javascript

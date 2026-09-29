@@ -31,11 +31,11 @@ export type Cest = {
  * A CEST has 7 digits: the first two are the segment, the third to the fifth the item of the
  * segment and the last two the specification of the item (cláusula sexta, IV). A string is only
  * read as a code when it is written in one of the documented forms: the 7 digits, or the
- * `NN.NNN.NN` form the annexes print, with separators between the groups (alone or in a run, as `isValidCpf` reads its mask) and optional
- * surrounding whitespace. Anything else (`"abc0500100"`) is rejected instead of having its
- * digits picked out. A number is only read as a code when it is a non-negative safe integer,
- * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
- * caller never wrote.
+ * `NN.NNN.NN` form the annexes print, with any run of separators (whitespace, `.`, `-` or `/`)
+ * between the groups and optional surrounding whitespace. Anything else (`"abc0500100"`) is
+ * rejected instead of having its digits picked out. A number is only read as a code when it is a
+ * non-negative safe integer, since a sign, a decimal point or a rounded magnitude would otherwise
+ * be read as a code the caller never wrote.
  *
  * The leading zero of segments 01 to 09 is part of the code, so a value written as bare digits
  * is left padded with zeros to 7 whether it comes as a string or as a number: `500100`,

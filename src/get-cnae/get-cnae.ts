@@ -20,12 +20,12 @@ export type Cnae = {
  * Looks a CNAE (Classificação Nacional de Atividades Econômicas) subclass code up in the
  * official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with separators (space, `.`, `-` or `/`, alone or in a run) between the groups and optional
- * surrounding whitespace. Anything else (`"0111abc301"`) is rejected instead of having its
- * digits picked out. A number is only read as a code when it is a non-negative safe integer,
- * since a sign, a decimal point or a rounded magnitude would otherwise be read as a code the
- * caller never wrote.
+ * A string is only read as a code when it is written in one of the documented forms: the 7 digits,
+ * or the `NNNN-N/NN` mask, with any run of separators (whitespace, `.`, `-` or `/`) between the
+ * groups and optional surrounding whitespace. Anything else (`"0111abc301"`) is rejected instead of
+ * having its digits picked out. A number is only read as a code when it is a non-negative safe
+ * integer, since a sign, a decimal point or a rounded magnitude would otherwise be read as a code
+ * the caller never wrote.
  *
  * A CNAE subclass code is always 7 digits and its leading zeros are part of it, so a value
  * written as bare digits is left padded with zeros to 7 whether it comes as a string or as a

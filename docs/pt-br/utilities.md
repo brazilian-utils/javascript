@@ -2907,7 +2907,7 @@ parseCaepf('293.118.610/001-84'); // '29311861000184'
 Valida um código CBO (Classificação Brasileira de Ocupações) contra a tabela oficial da CBO 2002.
 
 - Aceita uma string com os 6 dígitos ou com a máscara `NNNN-NN`, ou um número.
-- Uma string mascarada precisa de um único separador (espaço, `.`, `-` ou `/`) entre os grupos. Qualquer outra string é rejeitada, em vez de ter seus dígitos extraídos.
+- Uma string mascarada pode ter qualquer sequência de separadores (espaço, `.`, `-` ou `/`) entre os grupos. Qualquer outra string é rejeitada, em vez de ter seus dígitos extraídos.
 - Dígitos sem máscara são completados com zeros à esquerda até 6, como string ou como número. Um valor mascarado é lido como foi escrito.
 
 ```javascript
@@ -2923,7 +2923,7 @@ isValidCbo('2124abc05'); // false (não é uma forma documentada)
 isValidCbo(-212405); // false (não é um inteiro seguro não negativo)
 ```
 
-Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos de 10/07/2026, 2.725 ocupações)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Até a 2.4.0 a tabela vinha da versão mais antiga do gov.br (06/06/2025): faltavam 37 ocupações, e 6 que o MTE retirou depois (225142, 322105, 322115, 322120, 322125 e 782820) deixam de ser válidas.
+Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos de 10/07/2026, 2.725 ocupações)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf).
 
 ### parseCbo
 
@@ -2953,7 +2953,7 @@ getCbo('000000'); // null
 getCbo('2124abc05'); // null (não é uma forma documentada)
 ```
 
-Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos de 10/07/2026, 2.725 ocupações)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf). Até a 2.4.0 a tabela vinha da versão mais antiga do gov.br (06/06/2025): faltavam 37 ocupações, e 6 que o MTE retirou depois (225142, 322105, 322115, 322120, 322125 e 782820) deixam de ser válidas.
+Fonte: [tabelas da CBO 2002 publicadas pelo MTE ("Estrutura CBO (CSV)", arquivos de 10/07/2026, 2.725 ocupações)](https://cbo.mte.gov.br/cbosite/pages/downloads.jsf).
 
 ### isValidCnae
 
@@ -3083,7 +3083,7 @@ parseNcm('8471'); // '8471' (um código parcial é mantido como está)
 Valida um código NBS (Nomenclatura Brasileira de Serviços, Intangíveis e Outras Operações que Produzam Variações no Patrimônio) contra a tabela oficial da NBS 2.0, o código que a NFS-e nacional leva em `cNBS`.
 
 - O código tem 9 dígitos, impressos como `N.NNNN.NN.NN`: o algarismo 1, o capítulo, a posição, os dois níveis de subposição, o item e o subitem.
-- Aceita uma string com os 9 dígitos ou com a máscara, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- Aceita uma string com os 9 dígitos ou com a máscara, com qualquer sequência de separadores (espaço, `.`, `-` ou `/`) entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
 - Só códigos completos são válidos: os títulos de capítulo (`1.01`), posição (`1.0101`) e subposição (`1.0101.1`) não classificam nada por si sós.
 - O ANEXO B do Sistema Nacional NFS-e lista os mesmos 920 códigos menos três (`1.0402.29.00`, `1.0403.29.00` e `1.0904.40.00`), então um código válido aqui ainda pode ser recusado pela NFS-e.
 
@@ -3140,7 +3140,7 @@ Verifica se um valor é um subitem em vigor da lista de serviços anexa à Lei C
 
 - A lei numera o subitem como o item, um ponto e dois dígitos, de `1.01` a `40.01`.
 - Aceita essa forma, o item preenchido com zero (`'01.01'`) ou os dígitos puros (`'0101'`, `'101'` ou o inteiro `101`), que são os quatro primeiros dígitos do código `cTribNac` da NFS-e nacional, com espaços opcionais nas extremidades.
-- O ponto é o único separador que a lei imprime entre o item e o subitem, então, ao contrário dos códigos com máscara de agrupamento impressa (`isValidCfop`, `isValidNbs`), nada mais é aceito no lugar dele e `'1-01'` é rejeitado.
+- Qualquer sequência de separadores (espaço, `.`, `-` ou `/`) é aceita entre o item e o subitem, como nos outros códigos com máscara de agrupamento impressa (`isValidCfop`, `isValidNbs`), então `'1-01'` e `'1 01'` também são válidos.
 - Um número só é lido quando é um inteiro seguro não negativo, então o decimal `1.01` é rejeitado: escreva a forma com ponto como string.
 - Os subitens vetados (`3.01`, `7.14`, `7.15`, `13.01` e `17.07`), os títulos de item, os códigos nacionais de 6 dígitos em que um subitem se desdobra e o item 99 da lista nacional, que não faz parte da lei, não são válidos. Códigos municipais de serviço estão fora do escopo.
 
@@ -3178,7 +3178,7 @@ Fonte: [Lei Complementar 116/2003](https://www.planalto.gov.br/ccivil_03/leis/lc
 Valida um código CFOP (Código Fiscal de Operações e Prestações) contra a tabela oficial, o Anexo II consolidado do Convênio SINIEF s/nº 1970 em vigor.
 
 - Só os códigos operáveis contam: os títulos de grupo e subgrupo, os códigos terminados em `00` e `50`, são rejeitados.
-- Aceita uma string com os 4 dígitos ou com a forma `N.NNN`, com um único separador (espaço, `.`, `-` ou `/`), ou um número. Qualquer outra string é rejeitada.
+- Aceita uma string com os 4 dígitos ou com a forma `N.NNN`, com qualquer sequência de separadores (espaço, `.`, `-` ou `/`) entre os grupos, ou um número. Qualquer outra string é rejeitada.
 - Nenhum código CFOP começa com zero, então nada é completado.
 
 ```javascript
@@ -3232,7 +3232,7 @@ Valida um CEST (Código Especificador da Substituição Tributária) contra os a
 - Só os itens em vigor contam: um item que os anexos marcam como revogado é rejeitado.
 - A verificação é só do código: ela não diz se o código combina com um dado NCM, nem se um estado aplica o regime de substituição tributária a ele.
 - Um CEST tem 7 dígitos: os dois primeiros são o segmento, do terceiro ao quinto o item do segmento e os dois últimos a especificação do item (cláusula sexta, IV).
-- Aceita uma string com os 7 dígitos ou com a forma `NN.NNN.NN` que os anexos imprimem, com um único separador entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
+- Aceita uma string com os 7 dígitos ou com a forma `NN.NNN.NN` que os anexos imprimem, com qualquer sequência de separadores (espaço, `.`, `-` ou `/`) entre os grupos e espaços opcionais nas extremidades, ou um inteiro seguro não negativo. Qualquer outra string é rejeitada em vez de ter os dígitos pinçados.
 - O zero à esquerda dos segmentos 01 a 09 faz parte do código, então um valor escrito apenas com dígitos é completado com zeros à esquerda até 7, como string ou como número: `100100`, `'100100'` e `'0100100'` são o mesmo código. Um valor mascarado é lido como foi escrito.
 
 ```javascript
@@ -3309,7 +3309,7 @@ Valida um código de CST (Código de Situação Tributária) para um tributo. In
 | `cofins` | 2 dígitos | mesma tabela do `pis` |
 
 - **Opções** (`IsValidCstOptions`): `tax` escolhe a tabela. Omitido, ou fora desses quatro valores, todas as tabelas são aceitas.
-- Aceita uma string com os 2 dígitos de um código da Tabela B ou os 3 dígitos da forma do ICMS, ou um número. A forma do ICMS pode ter um único separador (espaço, `.`, `-` ou `/`) depois do dígito de origem.
+- Aceita uma string com os 2 dígitos de um código da Tabela B ou os 3 dígitos da forma do ICMS, ou um número. A forma do ICMS pode ter qualquer sequência de separadores (espaço, `.`, `-` ou `/`) depois do dígito de origem.
 - Um único dígito é completado até a forma de 3 dígitos do ICMS; uma string de 2 dígitos é um código da Tabela B, enquanto o número `7` é o código ICMS `007`.
 
 ```javascript

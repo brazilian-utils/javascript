@@ -9,10 +9,10 @@ import { CNAE_LENGTH } from "./constants";
  * Validates if a CNAE (Classificação Nacional de Atividades Econômicas) subclass code
  * exists in the official CNAE-Subclasses 2.3 table, the current subclass revision of CNAE 2.0.
  *
- * A string is only read as a code when it is written in one of the documented forms: the 7
- * digits, or the `NNNN-N/NN` mask, with separators (space, `.`, `-` or `/`, alone or in a run) between the groups and optional
- * surrounding whitespace. A number is only read as a code when it is a non-negative safe
- * integer.
+ * A string is only read as a code when it is written in one of the documented forms: the 7 digits,
+ * or the `NNNN-N/NN` mask, with any run of separators (whitespace, `.`, `-` or `/`) between the
+ * groups and optional surrounding whitespace. A number is only read as a code when it is a
+ * non-negative safe integer.
  *
  * A CNAE subclass code is always 7 digits and its leading zeros are part of it, so a value
  * written as bare digits is left padded with zeros to 7 whether it comes as a string or as a
