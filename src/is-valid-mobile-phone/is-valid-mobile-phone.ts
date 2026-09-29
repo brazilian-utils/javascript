@@ -2,10 +2,10 @@ import { PHONE_NATIONAL_MAX_LENGTH } from "../_internals/constants/phone";
 import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
 import { isValidDDD } from "../_internals/is-valid-ddd/is-valid-ddd";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
-import { type PhoneVersion } from "../is-valid-phone/is-valid-phone";
 import { MOBILE_SATELLITE_PREFIX, MOBILE_VALID_FIRST_NUMBERS } from "./constants";
 
-export type { PhoneVersion } from "../is-valid-phone/is-valid-phone";
+/** The Brazilian mobile numbering rule to enforce over the 11 digit number: both take a first number digit of 7, 8 or 9; `1` also takes the `700` series, `2` leaves it out. */
+export type PhoneVersion = 1 | 2;
 
 /** Options of `isValidMobilePhone`. */
 export type IsValidMobilePhoneOptions = {

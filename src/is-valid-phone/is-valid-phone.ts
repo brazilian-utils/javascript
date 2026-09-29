@@ -8,11 +8,13 @@ import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { toStringSafe } from "../_internals/to-string-safe/to-string-safe";
 import { isValidLandlinePhone } from "../is-valid-landline-phone/is-valid-landline-phone";
-import { isValidMobilePhone } from "../is-valid-mobile-phone/is-valid-mobile-phone";
+import {
+	isValidMobilePhone,
+	type PhoneVersion,
+} from "../is-valid-mobile-phone/is-valid-mobile-phone";
 import { DEFAULT_ACCEPT } from "./constants";
 
-/** The Brazilian mobile numbering rule to enforce over the 11 digit number: both take a first number digit of 7, 8 or 9; `1` also takes the `700` series, `2` leaves it out. */
-export type PhoneVersion = 1 | 2;
+export type { PhoneVersion } from "../is-valid-mobile-phone/is-valid-mobile-phone";
 
 /** The kinds of Brazilian phone number `isValidPhone` can accept. */
 export type PhoneType = "mobile" | "landline" | "service";

@@ -1,3 +1,1 @@
-import { type PhoneType } from "./is-valid-phone";
-
-export const DEFAULT_ACCEPT: PhoneType[] = ["mobile", "landline"];
+export const DEFAULT_ACCEPT: ("mobile" | "landline")[] = ["mobile", "landline"];
