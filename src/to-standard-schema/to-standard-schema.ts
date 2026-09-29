@@ -93,9 +93,9 @@ const DEFAULT_MESSAGE = "Invalid value";
  * TanStack Form, tRPC, Hono and the rest, next to schemas made with Zod, Valibot or ArkType.
  *
  * The schema validates synchronously and does not transform: a valid value is returned as it was
- * given, and an invalid one yields a single issue. It never throws, like the validators it wraps:
- * a first argument that is not a function gives a schema that rejects everything, and a `message`
- * that is not a string falls back to the default.
+ * given, and an invalid one yields a single issue. It never throws: a validator that throws
+ * counts as rejecting the value, a first argument that is not a function gives a schema that
+ * rejects everything, and a `message` that is not a string falls back to the default.
  *
  * Validators that take a single object (`isValidIe`, `isValidBankAccount`,
  * `isValidRegistroProfissional`) work the same way, the object being the value under validation;
@@ -103,9 +103,9 @@ const DEFAULT_MESSAGE = "Invalid value";
  * `toStandardSchema((params: IsValidIeParams) => isValidIe(params))`.
  *
  * @param {(value: Value, options?: Options) => boolean} validate - The validator to wrap.
- * @param {ToStandardSchemaOptions<Options>} [config] - Optional configuration.
- * @param {Options} [config.options] - The options handed to the validator on every call.
- * @param {string} [config.message] - The message of the issue reported for an invalid value.
+ * @param {ToStandardSchemaOptions<Options>} [options] - Optional configuration.
+ * @param {Options} [options.options] - The options handed to the validator on every call.
+ * @param {string} [options.message] - The message of the issue reported for an invalid value.
  * @returns {StandardSchemaV1<Value>} A Standard Schema whose input and output are the validator's value.
  *
  * @example
@@ -122,14 +122,25 @@ const DEFAULT_MESSAGE = "Invalid value";
  */
 export const toStandardSchema = <Value, Options = undefined>(
 	validate: (value: Value, options?: Options) => boolean,
-	config?: ToStandardSchemaOptions<Options>,
+	options?: ToStandardSchemaOptions<Options>,
 ): StandardSchemaV1<Value> => {
-	const message = typeof config?.message === "string" ? config.message : DEFAULT_MESSAGE;
+	const message = typeof options?.message === "string" ? options.message : DEFAULT_MESSAGE;
 
-	// A predicate, so that an accepted `unknown` is returned as the validator's value type.
-	const isValue = (value: unknown): value is Value =>
-		typeof validate === "function" &&
-		Reflect.apply(validate, undefined, [value, config?.options]) === true;
+	/**
+	 * A predicate, so that an accepted `unknown` is returned as the validator's value type.
+	 *
+	 * @param {unknown} value - The value under validation.
+	 * @returns {boolean} `true` when the validator accepts the value; a throw counts as `false`.
+	 */
+	const isValue = (value: unknown): value is Value => {
+		if (typeof validate !== "function") return false;
+
+		try {
+			return Reflect.apply(validate, undefined, [value, options?.options]) === true;
+		} catch {
+			return false;
+		}
+	};
 
 	return {
 		"~standard": {

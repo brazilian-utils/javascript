@@ -3774,8 +3774,8 @@ Fonte: [ISO 3779:2009](https://www.iso.org/standard/52200.html), [49 CFR 565.15]
 
 Embrulha um utilitário `isValid*` em um [Standard Schema](https://standardschema.dev), o formato de validador que bibliotecas de formulário, roteadores e frameworks de API aceitam: TanStack Form, react-hook-form, tRPC, Hono e outros.
 
-- `config.options` é repassado ao validador a cada chamada, e `config.message` é a mensagem da issue (padrão `'Invalid value'`). Os dois fazem parte de `ToStandardSchemaOptions`.
-- Valida de forma síncrona e não transforma: um valor válido volta como foi passado, um inválido gera uma única issue.
+- O segundo argumento (`ToStandardSchemaOptions`) recebe `options`, repassado ao validador a cada chamada, e `message`, a mensagem da issue (padrão `'Invalid value'`).
+- Valida de forma síncrona e não transforma: um valor válido volta como foi passado, um inválido gera uma única issue, e um validador que lança um erro conta como inválido.
 - Validadores que recebem um objeto (`isValidBankAccount`, `isValidRegistroProfissional`, `isValidIe`) funcionam do mesmo jeito. Embrulhe o `isValidIe`, que tem sobrecarga, em uma arrow function: `toStandardSchema((params) => isValidIe(params))`.
 - Os tipos da especificação (`StandardSchemaV1`, `StandardSchemaV1Result`, `StandardSchemaV1Issue` e os demais) também são exportados, então nada mais é instalado.
 
