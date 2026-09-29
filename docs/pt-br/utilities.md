@@ -3218,6 +3218,25 @@ isValidCfop(-5102); // false (não é um inteiro seguro não negativo)
 
 Fonte: [Anexo II consolidado do Convênio SINIEF s/nº 1970](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), última alteração pelo [Ajuste SINIEF 39/25](https://www.confaz.fazenda.gov.br/legislacao/ajustes/2025/AJ039_25).
 
+### formatCfop
+
+Formata um código CFOP (Código Fiscal de Operações e Prestações) na forma `N.NNN` que o anexo imprime. Só a estrutura muda; use `isValidCfop` para conferir um código com a tabela.
+
+- **Opções** (`FormatCfopOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 4 dígitos de um código completo (nenhum CFOP começa com zero, então só serve para largura fixa). Sem ele a máscara é aplicada até onde o valor vai.
+- Caracteres fora da máscara são descartados, e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo: um número negativo, fracionário ou inseguro retorna `''`. Retorna `''` quando não há dígito algum.
+
+```javascript
+import { formatCfop } from '@brazilian-utils/brazilian-utils';
+
+formatCfop('5102'); // 5.102
+formatCfop('51'); // 5.1 (máscara aplicada até onde o valor vai)
+formatCfop('102', { pad: true }); // 0.102 (completado até 4 dígitos antes)
+formatCfop('abc5102'); // 5.102 (só os dígitos são lidos)
+formatCfop(-5102); // '' (não é um inteiro seguro não negativo)
+```
+
+Fonte: [Convênio SINIEF s/nº 1970, Anexo II](https://www.confaz.fazenda.gov.br/legislacao/ajustes/sinief/cfop_cvsn_1-6.24), que imprime os códigos como `N.NNN`.
+
 ### parseCfop
 
 Remove a formatação do CFOP (Código Fiscal de Operações e Prestações), mantém apenas os dígitos e limita o resultado a 4 dígitos.

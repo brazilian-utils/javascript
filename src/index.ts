@@ -33,6 +33,7 @@ export { type FormatCeiOptions, formatCei } from "./format-cei/format-cei";
 export { type FormatCepOptions, formatCep } from "./format-cep/format-cep";
 export { type FormatCertidaoOptions, formatCertidao } from "./format-certidao/format-certidao";
 export { type FormatCestOptions, formatCest } from "./format-cest/format-cest";
+export { type FormatCfopOptions, formatCfop } from "./format-cfop/format-cfop";
 export { formatCid10 } from "./format-cid10/format-cid10";
 export { type FormatCnaeOptions, formatCnae } from "./format-cnae/format-cnae";
 export { type FormatCnhOptions, formatCnh } from "./format-cnh/format-cnh";

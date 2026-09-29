@@ -27,6 +27,7 @@ import {
 	type FormatCepOptions,
 	type FormatCertidaoOptions,
 	type FormatCestOptions,
+	type FormatCfopOptions,
 	type FormatCboOptions,
 	type FormatCnaeOptions,
 	type FormatLegalNatureOptions,
@@ -154,6 +155,7 @@ const PUBLIC = [
 	"formatCep",
 	"formatCertidao",
 	"formatCest",
+	"formatCfop",
 	"formatCid10",
 	"formatCnae",
 	"formatCnh",
@@ -383,6 +385,7 @@ describe("Public API", () => {
 			FormatCepOptions: FormatCepOptions;
 			FormatCertidaoOptions: FormatCertidaoOptions;
 			FormatCestOptions: FormatCestOptions;
+			FormatCfopOptions: FormatCfopOptions;
 			FormatCnaeOptions: FormatCnaeOptions;
 			FormatLegalNatureOptions: FormatLegalNatureOptions;
 			FormatCnhOptions: FormatCnhOptions;
