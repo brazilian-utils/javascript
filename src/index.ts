@@ -49,7 +49,7 @@ export {
 	formatLegalNature,
 } from "./format-legal-nature/format-legal-nature";
 export { formatLicensePlate } from "./format-license-plate/format-license-plate";
-export { formatNbs } from "./format-nbs/format-nbs";
+export { type FormatNbsOptions, formatNbs } from "./format-nbs/format-nbs";
 export { type FormatNcmOptions, formatNcm } from "./format-ncm/format-ncm";
 export { type FormatNfeKeyOptions, formatNfeKey } from "./format-nfe-key/format-nfe-key";
 export { formatPassport } from "./format-passport/format-passport";

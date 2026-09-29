@@ -3126,7 +3126,7 @@ isValidNbs('1.0101abc11.00'); // false (not a documented form)
 
 Format an NBS (Nomenclatura Brasileira de Serviços) code into the `N.NNNN.NN.NN` mask the nomenclature prints. Only the structure changes; use `isValidNbs` to check a code against the table.
 
-- Every NBS code starts with 1, so, unlike `formatNcm`, there is no `pad` option.
+- **Options** (`FormatNbsOptions`): `pad` (default `false`) first left pads the value with zeros to the 9 digits of a complete code (every NBS code starts with 1, so it only serves a fixed width).
 - Same rules as `formatCnae` otherwise: the mask is applied as far as the value goes, characters outside it are dropped, and a number is read as the string of its digits only when it is a non-negative safe integer; any other number returns `''`.
 
 ```javascript
@@ -3135,6 +3135,7 @@ import { formatNbs } from '@brazilian-utils/brazilian-utils';
 formatNbs('101011100'); // 1.0101.11.00
 formatNbs(101011100); // 1.0101.11.00
 formatNbs('10101'); // 1.0101 (masked as far as it goes)
+formatNbs('1', { pad: true }); // 0.0000.00.01 (padded to 9 digits first)
 formatNbs('abc101011100'); // 1.0101.11.00 (only the digits are read)
 formatNbs(-101011100); // '' (not a non-negative safe integer)
 ```

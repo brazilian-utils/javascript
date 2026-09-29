@@ -3125,7 +3125,7 @@ isValidNbs('1.0101abc11.00'); // false (não é uma forma documentada)
 
 Formata um código NBS (Nomenclatura Brasileira de Serviços) na máscara `N.NNNN.NN.NN` em que a nomenclatura o imprime. Só a estrutura muda; use `isValidNbs` para conferir um código com a tabela.
 
-- Todo código NBS começa com 1, então, diferente do `formatNcm`, não há opção `pad`.
+- **Opções** (`FormatNbsOptions`): `pad` (padrão `false`) completa antes o valor com zeros à esquerda até os 9 dígitos de um código completo (todo código NBS começa com 1, então só serve para largura fixa).
 - No resto, mesmas regras de `formatCnae`: a máscara é aplicada até onde o valor vai, os caracteres fora dela são descartados e um número só é lido como a string dos seus dígitos quando é um inteiro seguro não negativo; qualquer outro número retorna `''`.
 
 ```javascript
@@ -3134,6 +3134,7 @@ import { formatNbs } from '@brazilian-utils/brazilian-utils';
 formatNbs('101011100'); // 1.0101.11.00
 formatNbs(101011100); // 1.0101.11.00
 formatNbs('10101'); // 1.0101 (mascarado até onde vai)
+formatNbs('1', { pad: true }); // 0.0000.00.01 (completado até 9 dígitos antes)
 formatNbs('abc101011100'); // 1.0101.11.00 (só os dígitos são lidos)
 formatNbs(-101011100); // '' (não é um inteiro seguro não negativo)
 ```

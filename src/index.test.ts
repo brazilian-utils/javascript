@@ -31,6 +31,7 @@ import {
 	type FormatCboOptions,
 	type FormatCnaeOptions,
 	type FormatLegalNatureOptions,
+	type FormatNbsOptions,
 	type FormatCnhOptions,
 	type FormatCnoOptions,
 	type FormatCnpjOptions,
@@ -395,6 +396,7 @@ describe("Public API", () => {
 			FormatCnsOptions: FormatCnsOptions;
 			FormatCpfOptions: FormatCpfOptions;
 			FormatCurrencyOptions: FormatCurrencyOptions;
+			FormatNbsOptions: FormatNbsOptions;
 			FormatNcmOptions: FormatNcmOptions;
 			FormatNfeKeyOptions: FormatNfeKeyOptions;
 			FormatPhoneOptions: FormatPhoneOptions;
