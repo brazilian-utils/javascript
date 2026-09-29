@@ -1,8 +1,9 @@
 import { CEP_LENGTH } from "../_internals/constants/cep";
+import { CEP_RANGES } from "../_internals/constants/cep-ranges";
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
+import { findCepRange } from "../_internals/find-cep-range/find-cep-range";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
-import { getStateByCep } from "../get-state-by-cep/get-state-by-cep";
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
 import { parseCep } from "../parse-cep/parse-cep";
 
@@ -111,7 +112,7 @@ const asString = (value: unknown): string => (typeof value === "string" ? value 
  * @throws {GetAddressInfoByCepNotFoundError} When it contradicts the CEP.
  */
 const confirmAddress = (address: AddressInfo, cep: string): AddressInfo => {
-	const expectedState = getStateByCep(cep)?.code;
+	const expectedState = findCepRange(cep, CEP_RANGES)?.state;
 	const stateDiffers =
 		expectedState !== undefined &&
 		address.state !== "" &&
