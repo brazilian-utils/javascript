@@ -68,18 +68,18 @@ Alguns utilitários embutem uma base de dados oficial e pesam muito mais que tod
 
 | Utilitário | Base de dados | Minificado | Gzip |
 | --- | --- | --- | --- |
-| `getCid10` | categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, com as descrições do DATASUS | 721,5 KB | 113,5 KB |
+| `getCid10` | categorias e subcategorias da CID-10 V2008 mais os códigos `U07` do SIM, com as descrições do DATASUS | 721,6 KB | 113,5 KB |
 | `getCest` | descrições e segmentos do CEST (Convênio ICMS 142/18) | 102,3 KB | 24,1 KB |
-| `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 municípios do IBGE, com o DDD de cada um (Anatel) | 23,6 - 90,3 KB | 5,6 - 33,0 KB |
+| `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 municípios do IBGE, com o DDD de cada um (Anatel) | 23,6 - 90,4 KB | 5,6 - 33,0 KB |
 | `getCbo` | títulos das ocupações da CBO 2002 | 80,6 KB | 24,1 KB |
-| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 76,0 - 76,9 KB | 29,4 - 29,9 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 municípios do IBGE, com nomes e códigos | 76,3 - 77,2 KB | 29,5 - 30,1 KB |
 | `getCnae` | CNAE-Subclasses 2.3 | 66,8 KB | 17,7 KB |
 | `getCities` | nomes dos 5571 municípios do IBGE | 64,2 KB | 26,4 KB |
 | `getCfop` | descrições das operações do CFOP | 56,9 KB | 5,1 KB |
 | `getNbs` | descrições da NBS 2.0 (Nomenclatura Brasileira de Serviços) | 51,1 KB | 11,3 KB |
 | `getClassTrib` | nomes e descrições do cClassTrib (IBS/CBS) | 50,0 KB | 9,0 KB |
 | `isValidNcm` | códigos NCM (Nomenclatura Comum do Mercosul) | 29,6 KB | 9,0 KB |
-| `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 26,2 - 26,5 KB | 7,6 - 7,8 KB |
+| `getBanks` · `getBankByCode` · `getBankByIspb` | participantes do STR do Banco Central (COMPE + ISPB) | 26,2 - 26,6 KB | 7,6 - 7,9 KB |
 | `getServiceItem` | lista de serviços da Lei Complementar 116/2003 | 25,5 KB | 8,2 KB |
 | `getIsbnInfo` · `formatIsbn` | faixas do ISBN da Agência Internacional do ISBN (RangeMessage) | 15,1 - 15,3 KB | 5,4 - 5,5 KB |
 | `isValidCbo` | códigos das ocupações da CBO 2002, sem os títulos | 6,7 KB | 1,7 KB |

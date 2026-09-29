@@ -68,18 +68,18 @@ A few utils embed an official dataset and weigh far more than everything else co
 
 | Util | Dataset | Minified | Gzipped |
 | --- | --- | --- | --- |
-| `getCid10` | CID-10 V2008 categories and subcategories plus the SIM `U07` codes, with the DATASUS descriptions | 721.5 KB | 113.5 KB |
+| `getCid10` | CID-10 V2008 categories and subcategories plus the SIM `U07` codes, with the DATASUS descriptions | 721.6 KB | 113.5 KB |
 | `getCest` | CEST descriptions and segments (Convênio ICMS 142/18) | 102.3 KB | 24.1 KB |
-| `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 IBGE municipalities, with the DDD of each (Anatel) | 23.6 - 90.3 KB | 5.6 - 33.0 KB |
+| `getMunicipalitiesByAreaCode` · `getAreaCodeByMunicipalityCode` | 5571 IBGE municipalities, with the DDD of each (Anatel) | 23.6 - 90.4 KB | 5.6 - 33.0 KB |
 | `getCbo` | CBO 2002 occupation titles | 80.6 KB | 24.1 KB |
-| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 76.0 - 76.9 KB | 29.4 - 29.9 KB |
+| `getMunicipalities` · `getMunicipalityByCode` · `getCodeByMunicipalityName` · `getMunicipality` | 5571 IBGE municipalities, with names and codes | 76.3 - 77.2 KB | 29.5 - 30.1 KB |
 | `getCnae` | CNAE-Subclasses 2.3 | 66.8 KB | 17.7 KB |
 | `getCities` | 5571 IBGE municipality names | 64.2 KB | 26.4 KB |
 | `getCfop` | CFOP operation descriptions | 56.9 KB | 5.1 KB |
 | `getNbs` | NBS 2.0 (Nomenclatura Brasileira de Serviços) descriptions | 51.1 KB | 11.3 KB |
 | `getClassTrib` | cClassTrib (IBS/CBS) names and descriptions | 50.0 KB | 9.0 KB |
 | `isValidNcm` | NCM (Nomenclatura Comum do Mercosul) codes | 29.6 KB | 9.0 KB |
-| `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 26.2 - 26.5 KB | 7.6 - 7.8 KB |
+| `getBanks` · `getBankByCode` · `getBankByIspb` | Banco Central STR participants (COMPE + ISPB) | 26.2 - 26.6 KB | 7.6 - 7.9 KB |
 | `getServiceItem` | Service list of the Lei Complementar 116/2003 | 25.5 KB | 8.2 KB |
 | `getIsbnInfo` · `formatIsbn` | ISBN ranges of the International ISBN Agency (RangeMessage) | 15.1 - 15.3 KB | 5.4 - 5.5 KB |
 | `isValidCbo` | CBO 2002 occupation codes, without the titles | 6.7 KB | 1.7 KB |
