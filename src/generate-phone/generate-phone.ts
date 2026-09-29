@@ -59,7 +59,6 @@ export const generatePhone = (type?: GeneratePhoneType): string => {
 	}
 
 	const areaCode = randomAreaCode();
-	// Without a type, a coin flip picks the line; no self-call, so the choice is made once here.
 	const isLandline = type === "landline" || (type !== "mobile" && Math.random() < 0.5);
 
 	if (isLandline) {

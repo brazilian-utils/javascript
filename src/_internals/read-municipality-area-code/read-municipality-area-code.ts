@@ -4,7 +4,20 @@ import { type StateCode } from "../constants/states";
 
 const AREA_CODE_LENGTH = 2;
 
-const indexes = new Map<StateCode, Record<string, number>>();
+const indexes: Partial<Record<StateCode, Record<string, number>>> = {};
+
+const buildIndex = (stateCode: StateCode): Record<string, number> => {
+	const areaCodes = MUNICIPALITY_AREA_CODES[stateCode];
+	const codes = CITIES_DATA[stateCode].map(([, municipalityCode]) => municipalityCode).sort();
+
+	return Object.fromEntries(
+		codes.map((municipalityCode, position) => {
+			const start = position * AREA_CODE_LENGTH;
+
+			return [municipalityCode, Number(areaCodes.slice(start, start + AREA_CODE_LENGTH))];
+		}),
+	);
+};
 
 /**
  * Reads the DDD of a municipality out of `MUNICIPALITY_AREA_CODES`, which holds the DDDs of each
@@ -21,22 +34,7 @@ const indexes = new Map<StateCode, Record<string, number>>();
  * ```
  */
 export const readMunicipalityAreaCode = (stateCode: StateCode, code: string): number => {
-	let index = indexes.get(stateCode);
+	indexes[stateCode] ??= buildIndex(stateCode);
 
-	// Stryker disable next-line ConditionalExpression: this guard only memoizes; CITIES_DATA and MUNICIPALITY_AREA_CODES are module level constants that are never written to, so rebuilding the index on every lookup gives the same entries, and the repeated work is unobservable.
-	if (index === undefined) {
-		const areaCodes = MUNICIPALITY_AREA_CODES[stateCode];
-		const codes = CITIES_DATA[stateCode].map(([, municipalityCode]) => municipalityCode).sort();
-
-		index = Object.fromEntries(
-			codes.map((municipalityCode, position) => {
-				const start = position * AREA_CODE_LENGTH;
-
-				return [municipalityCode, Number(areaCodes.slice(start, start + AREA_CODE_LENGTH))];
-			}),
-		);
-		indexes.set(stateCode, index);
-	}
-
-	return index[code];
+	return indexes[stateCode][code];
 };

@@ -14,6 +14,12 @@ import { normalizeStateCode } from "../_internals/read-state-code/read-state-cod
  * and Porto União (SC), 47, shared by Santa Catarina and Rio Negro (PR), and 49, shared by
  * Santa Catarina and Barracão (PR).
  *
+ * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code). The Anexo the
+ * gov.br page below links to, giving the Código Nacional of every municipality, is the one this
+ * inverse lookup was derived from and is no longer in force; the current Anatel table
+ * (`Codigos_Nacionais.csv` of the Painel de Áreas Tarifárias, 21/09/2026) gives the same result
+ * for every state.
+ *
  * @param {string} stateCode - The two-letter code (sigla) of the state.
  * @returns {number[]} The DDDs of the state, sorted ascending, or an empty array when
  * `stateCode` does not match any Brazilian state.
@@ -27,12 +33,6 @@ import { normalizeStateCode } from "../_internals/read-state-code/read-state-cod
  * getAreaCodesByState("GO"); // [61, 62, 64]
  * getAreaCodesByState("XX"); // []
  * ```
- *
- * Resolução Anatel nº 749/2022, art. 15, defines the Código Nacional (area code). The Anexo the
- * gov.br page below links to, giving the Código Nacional of every municipality, is the one this
- * inverse lookup was derived from and is no longer in force; the current Anatel table
- * (`Codigos_Nacionais.csv` of the Painel de Áreas Tarifárias, 21/09/2026) gives the same result
- * for every state.
  *
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  * @see Official: https://www.gov.br/anatel/pt-br/regulado/numeracao/codigos-nacionais

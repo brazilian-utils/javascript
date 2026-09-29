@@ -105,7 +105,7 @@ const resolveAutoMask = (
 	return digits.length > SN_LENGTH ? "nanp" : "sn";
 };
 
-const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.has(value);
+const isPhoneMask = (value: unknown): value is PhoneMask => PHONE_MASKS.includes(value);
 
 /**
  * Formats a phone number according to Brazilian phone number patterns.

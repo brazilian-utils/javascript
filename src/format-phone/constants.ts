@@ -1,18 +1,18 @@
 export type NationalMask = "sn" | "nanp";
 
 /**
- * Every value the `PhoneMask` union of `format-phone.ts` allows, as the set `formatPhone` checks
+ * Every value the `PhoneMask` union of `format-phone.ts` allows, as the list `formatPhone` checks
  * `options.mask` against before it uses it; anything else is not a mask and resolves to
  * `DEFAULT_MASK`. Kept here, out of the mutated sources, next to the masks themselves.
  */
-export const PHONE_MASKS: ReadonlySet<unknown> = new Set([
+export const PHONE_MASKS: readonly unknown[] = [
 	"auto",
 	"e164",
 	"international",
 	"nanp",
 	"service",
 	"sn",
-]);
+];
 
 /** The mask `formatPhone` applies when `options.mask` is missing or is not a `PhoneMask`. */
 export const DEFAULT_MASK = "sn";
