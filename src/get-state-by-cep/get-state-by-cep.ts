@@ -1,6 +1,6 @@
+import { CEP_RANGES } from "../_internals/constants/cep-ranges";
 import { DATA, type State } from "../_internals/constants/states";
 import { findCepRange } from "../_internals/find-cep-range/find-cep-range";
-import { CEP_RANGES } from "./constants";
 
 export type { State } from "../_internals/constants/states";
 

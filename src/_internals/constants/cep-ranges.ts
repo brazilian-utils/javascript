@@ -1,4 +1,4 @@
-import { type StateCode } from "../_internals/constants/states";
+import { type StateCode } from "./states";
 
 /** One range of CEPs assigned by the Correios to a state. */
 type CepRange = {

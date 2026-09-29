@@ -1,10 +1,10 @@
 import * as fc from "fast-check";
 
+import { CEP_RANGES } from "../_internals/constants/cep-ranges";
 import { type State } from "../_internals/constants/states";
 import { anyGarbage, digits, digitsOfOtherLength } from "../_internals/test/arbitraries";
 import { expectNeverThrows } from "../_internals/test/properties";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
-import { CEP_RANGES } from "./constants";
 import { getStateByCep } from "./get-state-by-cep";
 
 const RANGE_BOUNDARIES: [string, string, string][] = [

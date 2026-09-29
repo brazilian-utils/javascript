@@ -258,7 +258,7 @@ parseCep('92500-000'); // 92500000
 
 ### generateCep
 
-Gera um CEP aleatório. Um CEP não tem dígito verificador, então toda string de 8 dígitos é estruturalmente válida.
+Gera um CEP aleatório. Um CEP não tem dígito verificador, então o CEP é sorteado dentro das faixas que os Correios atribuem aos estados, com a mesma chance para cada CEP. Ele sempre pertence a um estado, então `getStateByCep` nunca responde `null` para ele; `00000-000` a `00999-999` e `78900-000` a `78999-999`, que nenhum estado possui, nunca são gerados. Uma faixa é o bloco que um estado possui, não uma garantia de que todo CEP dela está em uso, então o CEP pode não ser o de um endereço real.
 
 ```javascript
 import { generateCep } from '@brazilian-utils/brazilian-utils';

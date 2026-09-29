@@ -258,7 +258,7 @@ parseCep('92500-000'); // 92500000
 
 ### generateCep
 
-Generate a random CEP. A CEP has no check digit, so every 8 digit string is structurally valid.
+Generate a random CEP. A CEP has no check digit, so the CEP is drawn inside the ranges the Correios assign to the states, each CEP with the same chance. It always belongs to a state, so `getStateByCep` never answers `null` for it; `00000-000` to `00999-999` and `78900-000` to `78999-999`, which no state owns, are never generated. A range is the block a state owns, not a promise that every CEP in it is in use, so the CEP may not be the CEP of a real address.
 
 ```javascript
 import { generateCep } from '@brazilian-utils/brazilian-utils';
