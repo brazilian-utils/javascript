@@ -1,4 +1,5 @@
 import { PHONE_NATIONAL_MAX_LENGTH } from "../_internals/constants/phone";
+import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
 import { isValidDDD } from "../_internals/is-valid-ddd/is-valid-ddd";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { type PhoneVersion } from "../is-valid-phone/is-valid-phone";
@@ -25,6 +26,9 @@ const isValidMobileFirstNumber = (value: string, version?: PhoneVersion): boolea
  *
  * A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed before
  * validation, under the rule documented in `parsePhone`.
+ *
+ * Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the
+ * value invalid; up to 2.4.0 such characters were dropped, so `"11 98765-4321x"` was valid.
  *
  * The first number digit (right after the DDD) must be 7, 8 or 9 under both numbering rules.
  * The `version` option only decides the `700` series:
@@ -69,7 +73,7 @@ const isValidMobileFirstNumber = (value: string, version?: PhoneVersion): boolea
  * Resolução Anatel nº 777/2025, art. 22: the art. 12 in force on 1 March 2027.
  */
 export const isValidMobilePhone = (value: string, options?: IsValidMobilePhoneOptions): boolean => {
-	if (typeof value !== "string") return false;
+	if (typeof value !== "string" || !hasOnlyPhoneCharacters(value)) return false;
 
 	const digits = normalizePhone(value);
 

@@ -830,7 +830,7 @@ Source: [NF-e Manual de Orientação do Contribuinte 7.0, Visão Geral](https://
 
 ### isValidPhone
 
-Check if a phone number (mobile or landline) is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`.
+Check if a phone number (mobile or landline) is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`. Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the value invalid; up to 2.4.0 such characters were dropped.
 
 - **Options** (`IsValidPhoneOptions`): `accept` (`PhoneType[]`, default `['mobile', 'landline']`) picks which kinds of number count as valid; add `'service'` for the numbers `isValidServicePhone` recognizes. `version` (`PhoneVersion`, default `1`) is forwarded to `isValidMobilePhone`.
 - A mobile number must start with 7, 8 or 9 under both versions (Resolução Anatel 749/2022, art. 12, I, "a"), so a leading 6 is rejected; up to 2.4.0 the default version accepted it.
@@ -924,7 +924,7 @@ generatePhone('service'); // '08001234567' or '40041234'
 
 ### isValidMobilePhone
 
-Check if a mobile phone number is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`.
+Check if a mobile phone number is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`. Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the value invalid; up to 2.4.0 such characters were dropped.
 
 - **Options** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, default `1`) picks the numbering rule. Both follow Resolução Anatel 749/2022, art. 12, I, "a" (`"7", "8" e "9": Serviço Móvel Pessoal (SMP)`) and accept only a first digit of 7, 8 or 9; `1` also accepts the `700` series, `2` rejects it as satellite (art. 12, II, "a").
 - Up to 2.4.0 version `1` also accepted a first digit of 6, which is not SMP.
@@ -945,7 +945,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 ### isValidLandlinePhone
 
-Check if a landline phone number is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`.
+Check if a landline phone number is valid. A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed first, as in `parsePhone`. Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the value invalid; up to 2.4.0 such characters were dropped.
 
 - The number is the DDD plus 8 digits starting with `2` to `6`, the STFC and SCM range of Resolução Anatel 749/2022, art. 11, I, "a".
 - Scheduled change, not applied yet: from 1 March 2027 Resolução Anatel 777/2025, art. 21, leaves only `2` to `5` to the STFC, and the SCM moves to 9 digit numbers starting with `6`. From that date a landline starting with `6` will have to be rejected.
@@ -961,7 +961,7 @@ Source: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legi
 
 ### isValidServicePhone
 
-Check if a phone number is a valid Brazilian service number, dialed without a DDD. Only the structure is checked: the number does not have to be assigned to anyone.
+Check if a phone number is a valid Brazilian service number, dialed without a DDD. Only the structure is checked: the number does not have to be assigned to anyone. Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the value invalid; up to 2.4.0 such characters were dropped.
 
 - The Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` and `0900` followed by 7 digits (11 in total): the 10 digit series of Resolução Anatel 749/2022, art. 18, dialed behind the `0` prefix (art. 28).
 - The abbreviated `300X`/`400X` numbers, 8 digits. Other carrier prefixes such as `4020` and `4062` are rejected.

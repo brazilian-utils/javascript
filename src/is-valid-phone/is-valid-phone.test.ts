@@ -25,6 +25,13 @@ describe("isValidPhone", () => {
 	});
 
 	describe("should return false", () => {
+		test("when the value holds a character that is not part of a phone mask", () => {
+			expect(isValidPhone("11 98765-4321x")).toBe(false);
+			expect(isValidPhone("tel 1130000000")).toBe(false);
+			expect(isValidPhone("abc190", { accept: ["service"] })).toBe(false);
+			expect(isValidPhone("0800 123 4567 ramal 1", { accept: ["service"] })).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidPhone("")).toBe(false);
 		});

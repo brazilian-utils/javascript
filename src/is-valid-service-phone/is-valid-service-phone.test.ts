@@ -7,6 +7,11 @@ import { isValidServicePhone } from "./is-valid-service-phone";
 
 describe("isValidServicePhone", () => {
 	describe("should return false", () => {
+		test("when the value holds a character that is not part of a phone mask", () => {
+			expect(isValidServicePhone("abc190")).toBe(false);
+			expect(isValidServicePhone("0800 123 4567x")).toBe(false);
+		});
+
 		test("when it is an empty string", () => {
 			expect(isValidServicePhone("")).toBe(false);
 		});

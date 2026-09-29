@@ -7,6 +7,7 @@ import {
 	SERVICE_PHONE_NON_GEOGRAPHIC_PREFIXES,
 	SERVICE_PHONE_UTILITY_CODES,
 } from "../_internals/constants/service-phone";
+import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
 
 /**
@@ -31,6 +32,9 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  *   749/2022 art. 13 destines to public utility services (every other series is reserva
  *   técnica), a conflict between the two official texts that keeps the 2.4.0 answer.
  *
+ * Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the
+ * value invalid; up to 2.4.0 such characters were dropped.
+ *
  * Only the structure is checked: the number does not have to be assigned to anyone, and the
  * `0500` rule that encodes a donation amount in the last two digits is not enforced.
  *
@@ -54,7 +58,7 @@ import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-d
  * Ato Anatel nº 43.151/2004, whose Anexo designates the 3-digit public utility codes.
  */
 export const isValidServicePhone = (value: string): boolean => {
-	if (typeof value !== "string") return false;
+	if (typeof value !== "string" || !hasOnlyPhoneCharacters(value)) return false;
 
 	const digits = sanitizeToDigits(value);
 

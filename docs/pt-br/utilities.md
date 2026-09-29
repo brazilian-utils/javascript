@@ -830,7 +830,7 @@ Fonte: [Manual de Orientação do Contribuinte da NF-e 7.0, Visão Geral](https:
 
 ### isValidPhone
 
-Valida um número de telefone (celular ou fixo). Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`.
+Valida um número de telefone (celular ou fixo). Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`. Qualquer caractere além de dígitos, espaços e `()+.-/` (uma letra, por exemplo) torna o valor inválido; até a 2.4.0 esses caracteres eram descartados.
 
 - **Opções** (`IsValidPhoneOptions`): `accept` (`PhoneType[]`, padrão `['mobile', 'landline']`) define quais tipos de número são aceitos; inclua `'service'` para os números que `isValidServicePhone` reconhece. `version` (`PhoneVersion`, padrão `1`) é repassado a `isValidMobilePhone`.
 - Um celular precisa começar com 7, 8 ou 9 nas duas versões (Resolução Anatel 749/2022, art. 12, I, "a"), então um 6 inicial é rejeitado; até a 2.4.0 a versão padrão o aceitava.
@@ -924,7 +924,7 @@ generatePhone('service'); // '08001234567' ou '40041234'
 
 ### isValidMobilePhone
 
-Valida um número de telefone celular. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`.
+Valida um número de telefone celular. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`. Qualquer caractere além de dígitos, espaços e `()+.-/` (uma letra, por exemplo) torna o valor inválido; até a 2.4.0 esses caracteres eram descartados.
 
 - **Opções** (`IsValidMobilePhoneOptions`): `version` (`PhoneVersion`, padrão `1`) escolhe a regra de numeração. As duas seguem a Resolução Anatel 749/2022, art. 12, I, "a" (`"7", "8" e "9": Serviço Móvel Pessoal (SMP)`) e aceitam só 7, 8 ou 9 como primeiro dígito; `1` também aceita a série `700`, `2` a rejeita por ser de satélite (art. 12, II, "a").
 - Até a 2.4.0 a versão `1` também aceitava 6 como primeiro dígito, que não é SMP.
@@ -945,7 +945,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 ### isValidLandlinePhone
 
-Valida um número de telefone fixo. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`.
+Valida um número de telefone fixo. Um código de país brasileiro (`+55`, `0055` ou um `55` isolado) é aceito e removido antes, como em `parsePhone`. Qualquer caractere além de dígitos, espaços e `()+.-/` (uma letra, por exemplo) torna o valor inválido; até a 2.4.0 esses caracteres eram descartados.
 
 - O número é o DDD mais 8 dígitos começando com `2` a `6`, a faixa de STFC e SCM da Resolução Anatel 749/2022, art. 11, I, "a".
 - Mudança agendada, ainda não aplicada: a partir de 1º de março de 2027 a Resolução Anatel 777/2025, art. 21, deixa só `2` a `5` para o STFC, e o SCM passa para números de 9 dígitos começando com `6`. A partir dessa data, um fixo começando com `6` terá de ser rejeitado.
@@ -961,7 +961,7 @@ Fonte: [Resolução Anatel nº 749/2022](https://informacoes.anatel.gov.br/legis
 
 ### isValidServicePhone
 
-Valida um número de serviço brasileiro, discado sem DDD. Apenas a estrutura é verificada: o número não precisa estar atribuído a ninguém.
+Valida um número de serviço brasileiro, discado sem DDD. Apenas a estrutura é verificada: o número não precisa estar atribuído a ninguém. Qualquer caractere além de dígitos, espaços e `()+.-/` (uma letra, por exemplo) torna o valor inválido; até a 2.4.0 esses caracteres eram descartados.
 
 - Os Códigos Não Geográficos `0300`, `0303`, `0500`, `0800` e `0900` seguidos de 7 dígitos (11 no total): as séries de 10 dígitos da Resolução Anatel 749/2022, art. 18, discadas atrás do prefixo `0` (art. 28).
 - Os números abreviados `300X`/`400X`, com 8 dígitos. Outros prefixos de operadora, como `4020` e `4062`, são rejeitados.

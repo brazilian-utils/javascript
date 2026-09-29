@@ -2,6 +2,7 @@ import {
 	PHONE_NATIONAL_MAX_LENGTH,
 	PHONE_NATIONAL_MIN_LENGTH,
 } from "../_internals/constants/phone";
+import { hasOnlyPhoneCharacters } from "../_internals/has-only-phone-characters/has-only-phone-characters";
 import { normalizePhone } from "../_internals/normalize-phone/normalize-phone";
 import { resolveServicePhoneDigits } from "../_internals/resolve-service-phone-digits/resolve-service-phone-digits";
 import { isValidLandlinePhone } from "../is-valid-landline-phone/is-valid-landline-phone";
@@ -28,6 +29,9 @@ export type IsValidPhoneOptions = {
  *
  * A Brazilian country code (`+55`, `0055` or a bare `55`) is accepted and removed before
  * validation, under the rule documented in `parsePhone`.
+ *
+ * Any character other than digits, whitespace and `()+.-/` (a letter, for instance) makes the
+ * value invalid; up to 2.4.0 such characters were dropped, so `"11 98765-4321x"` was valid.
  *
  * `options.accept` picks which kinds of number count as valid and defaults to
  * `["mobile", "landline"]`, i.e. geographic numbers only. Add `"service"` to also accept the
@@ -61,6 +65,8 @@ export type IsValidPhoneOptions = {
  * @see Official: https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1641-resolucao-749
  */
 export const isValidPhone = (value: string, options?: IsValidPhoneOptions): boolean => {
+	if (typeof value === "string" && !hasOnlyPhoneCharacters(value)) return false;
+
 	const requested = options?.accept;
 	const accept: PhoneType[] = Array.isArray(requested) ? requested : DEFAULT_ACCEPT;
 
