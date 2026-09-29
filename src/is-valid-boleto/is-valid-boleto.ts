@@ -61,9 +61,10 @@ const isValidCheckDigit = (boleto: string): boolean => {
  * amount and free field, checked by the same rules as the linha digitável) and, additionally, the
  * "arrecadação" (convênio/tributos) bank slip: 48 digit linha digitável or 44 digit
  * barcode, both starting with `8`. A 44 digit value starting with `8` is only ever an arrecadação
- * barcode (the `8` is its product identifier), never a cobrança bancária one with a bank code
- * `8xx`, which the two layouts could not be told apart by. Up to 2.4.0 the cobrança bancária
- * barcode was rejected.
+ * barcode (the `8` is the FEBRABAN product identifier of the arrecadação), never a cobrança
+ * bancária one with a bank code from `800` to `899` (only `804` exists), which the two layouts
+ * could not be told apart by. That barcode is therefore not accepted, while the 47 digit linha
+ * digitável of the same slip is. Up to 2.4.0 the cobrança bancária barcode was rejected.
  *
  * The usual mask characters (whitespace, `.`, `-` and `/`) are accepted between digits, a run of
  * them included, and whitespace around the value; any other character makes the value invalid,
