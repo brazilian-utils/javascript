@@ -26,7 +26,7 @@ Estas regras valem para todas as funções, a não ser que a seção diga o cont
 Valida um CPF.
 
 - Retorna `false` para um número reservado (todos os dígitos iguais, como `00000000000`) e para um dígito verificador errado.
-- Os números reservados são os que o [leiaute DJE](http://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=36307) da Receita Federal lista como inválidos. A norma do CPF, a [IN RFB nº 2.172/2024](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=135611), não traz regra de dígito verificador; a regra é a do manual da e-Financeira da Receita Federal (Anexo II, `REGRA_VALIDA_CPF`, aprovado pelo Ato Declaratório Executivo Cofis nº 10/2026).
+- Os números reservados são os que o [leiaute DJE](http://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=36307) da Receita Federal lista como inválidos. A norma do CPF, a [IN RFB nº 2.172/2024](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=135611), não traz regra de dígito verificador; a regra é a do [manual da e-Financeira](http://sped.rfb.gov.br/estatico/33/BBD9A14FFF8CB38ECEEC2FC2D3713AE716DB11/Manual%20e-Financeira%20v%202.1.2-%20Anexo%20II%20-%20Leiautes%20Gerais.pdf) da Receita Federal (Anexo II, `REGRA_VALIDA_CPF`, aprovado pelo Ato Declaratório Executivo Cofis nº 10/2026).
 
 ```javascript
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';

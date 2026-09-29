@@ -26,7 +26,7 @@ These rules hold for every function unless its section says otherwise.
 Check if a CPF is valid.
 
 - Returns `false` for a reserved number (all digits the same, such as `00000000000`) and for a wrong check digit.
-- The reserved numbers are the ones the Receita Federal's [DJE layout](http://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=36307) lists as not valid. The CPF's own norm, [IN RFB nº 2.172/2024](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=135611), has no check digit rule; the rule is the one of the Receita Federal's e-Financeira manual (Anexo II, `REGRA_VALIDA_CPF`, approved by the Ato Declaratório Executivo Cofis nº 10/2026).
+- The reserved numbers are the ones the Receita Federal's [DJE layout](http://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=36307) lists as not valid. The CPF's own norm, [IN RFB nº 2.172/2024](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=135611), has no check digit rule; the rule is the one of the Receita Federal's [e-Financeira manual](http://sped.rfb.gov.br/estatico/33/BBD9A14FFF8CB38ECEEC2FC2D3713AE716DB11/Manual%20e-Financeira%20v%202.1.2-%20Anexo%20II%20-%20Leiautes%20Gerais.pdf) (Anexo II, `REGRA_VALIDA_CPF`, approved by the Ato Declaratório Executivo Cofis nº 10/2026).
 
 ```javascript
 import { isValidCpf } from '@brazilian-utils/brazilian-utils';

@@ -11,7 +11,7 @@ export type FormatCaepfOptions = {
 
 /**
  * Formats a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number according to the
- * official mask.
+ * usual mask.
  *
  * Formats progressively, as far as the digits given go, so it can also be used as an input
  * mask while the user is still typing.

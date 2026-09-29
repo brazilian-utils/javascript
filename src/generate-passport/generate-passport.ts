@@ -9,8 +9,10 @@ import { ALPHABET_LENGTH, CHAR_CODE_A, DIGITS_LENGTH, LETTERS_LENGTH } from "./c
  * @returns {string} A random valid passport number string (e.g. "RY393097").
  *
  * @example
- * generatePassport() // "RY393097"
- * generatePassport() // "ZS840088"
+ * ```typescript
+ * generatePassport(); // "RY393097"
+ * generatePassport(); // "ZS840088"
+ * ```
  *
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e

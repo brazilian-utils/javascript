@@ -10,7 +10,7 @@ export type FormatCnoOptions = {
 };
 
 /**
- * Formats a CNO (Cadastro Nacional de Obras) number according to the official mask.
+ * Formats a CNO (Cadastro Nacional de Obras) number according to the usual mask.
  *
  * The CNO replaced the CEI for construction works and kept its numbering, so both share the
  * same 12 digit, "00.000.00000/00" mask.

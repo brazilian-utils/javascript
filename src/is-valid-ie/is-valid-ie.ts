@@ -620,13 +620,6 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * @see Official: https://ww1.receita.fazenda.df.gov.br/iss/situcao-cadastral
  * Receita DF service portal: its CF/DF validator requires 13 digits and recomputes both check
  * digits (weights 2 to 9 from the right, a remainder of 0 or 1 giving 0), whatever the prefix.
- * @see Based on: https://tdn.totvs.com/pages/viewpage.action?pageId=566472384
- * TOTVS release note DFWKFOUNDATION-4046: DF registrations may start with 07 or 08, the numbers
- * starting with 07 having run out at 07.999.999, and per the DF tax authority the check digit
- * rule did not change.
- * @see Based on: https://github.com/caelum/caelum-stella/issues/267
- * @see Based on: https://github.com/caelum/caelum-stella/issues/269
- * Reports of valid DF registrations starting with 08 being rejected.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_ES.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_GO.html
  * Updated 02/09/2022: "8 dígitos (ABCDEFGH) + 1 dígito verificador (I); onde AB pode ser igual a
@@ -649,10 +642,6 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * Resolução/SEF nº 1.344/1999 (DOE 18/05/1999), art. 1º: "I – o primeiro dígito será sempre
  * representado pelo número 2; II - o segundo dígito será sempre representado pelo número 8": the
  * prefix 28 alone; art. 2º: the check digit rule.
- * @see Based on: https://crcms.org.br/sefaz-ms-vai-adotar-novo-sistema-de-cadastro-fiscal-o-e-cce-veja-o-que-vai-mudar-2/
- * CRC-MS (03/09/2025) relaying a SEFAZ-MS communiqué on the e-CCE register: new company (CCIS)
- * registrations "será iniciada com o dígito 50", those of the Cadastro da Agropecuária keep 28,
- * with no range reserved to a registration type. No SEFAZ-MS page carrying that text was found.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_MT.html
  * "FORMATO: NNNNNNNNNN-D", weights 3, 2 and 9 down to 2, example "0013000001-9": the 11 digit form.
  * @see Official: https://app1.sefaz.mt.gov.br/Sistema/Legislacao/legislacaotribut.nsf/173e6c0d2202fdcb03258b1700659f1e/0d06efc6c2fa7bc303258c6c004c4788
@@ -727,6 +716,17 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * Secretaria da Economia notice (20/01/2023): company (Pessoa Jurídica) registrations made from
  * 13/01/2023 start with 20, "a faixa de numeração iniciada com o dígito 10 se esgotou"; those of
  * Pessoas Físicas still start with 11.
+ * @see Based on: https://tdn.totvs.com/pages/viewpage.action?pageId=566472384
+ * TOTVS release note DFWKFOUNDATION-4046: DF registrations may start with 07 or 08, the numbers
+ * starting with 07 having run out at 07.999.999, and per the DF tax authority the check digit
+ * rule did not change.
+ * @see Based on: https://github.com/caelum/caelum-stella/issues/267
+ * @see Based on: https://github.com/caelum/caelum-stella/issues/269
+ * Reports of valid DF registrations starting with 08 being rejected.
+ * @see Based on: https://crcms.org.br/sefaz-ms-vai-adotar-novo-sistema-de-cadastro-fiscal-o-e-cce-veja-o-que-vai-mudar-2/
+ * CRC-MS (03/09/2025) relaying a SEFAZ-MS communiqué on the e-CCE register: new company (CCIS)
+ * registrations "será iniciada com o dígito 50", those of the Cadastro da Agropecuária keep 28,
+ * with no range reserved to a registration type. No SEFAZ-MS page carrying that text was found.
  */
 export function isValidIe(params: IsValidIeParams): boolean;
 /**

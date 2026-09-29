@@ -26,7 +26,7 @@ const getCheckDigit = (base: string, weights: number[]): number =>
  * references cited below.
  * Both check digits are the CNPJ's modulus 11 in the formulation of the cited reference: the
  * weights cycle from 9 down to 2 from the right and the check digit is the remainder itself,
- * with a remainder of 10 read as 0 — the same digit the CNPJ's 2-to-9 weights with
+ * with a remainder of 10 read as 0, the same digit the CNPJ's 2-to-9 weights with
  * `11 - remainder` produce. The pair is then shifted by 12, wrapping around 100, so a CAEPF
  * whose plain modulus 11 digits would be 72 is printed with 84.
  *

@@ -9,9 +9,11 @@ import { parsePassport } from "../parse-passport/parse-passport";
  * string for a non-string input (a number is never a passport number: the series is two letters).
  *
  * @example
- * formatPassport("ab123456") // "AB123456"
- * formatPassport("AB-123.456") // "AB123456"
- * formatPassport("") // ""
+ * ```typescript
+ * formatPassport("ab123456"); // "AB123456"
+ * formatPassport("AB-123.456"); // "AB123456"
+ * formatPassport(""); // ""
+ * ```
  *
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte
  * @see Official: https://www.gov.br/pf/pt-br/assuntos/passaporte/ajuda/duvidas_/caderneta/caderneta-numero-onde-fica-e

@@ -45,15 +45,15 @@ const getStateCode = (state?: StateCode): string => {
  * The região fiscal digit in the 9th position comes from the Receita Federal's folheto
  * "Cadastros: CPF e CNPJ"; the check digit rule (`REGRA_VALIDA_CPF`) is specified, with the
  * worked example `280012389-38`, in the Receita Federal's Manual de Preenchimento da
- * e-Financeira, Anexo II — Leiautes Gerais, approved by the Ato Declaratório Executivo Cofis
- * nº 10, de 19 de maio de 2026 (DOU de 25/05/2026). The manual's own file used to be served from
- * `sped.rfb.gov.br`,
- * a host that no longer answers at all, so the approving act is cited below in its place; its
+ * e-Financeira, Anexo II, Leiautes Gerais, approved by the Ato Declaratório Executivo Cofis
+ * nº 10, de 19 de maio de 2026 (DOU de 25/05/2026). The approving act is cited below too; its
  * Receita Federal permalink redirects into the norms viewer, which has to be opened in a
  * browser.
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/educacao-fiscal/educacao_fiscal/folhetos-orientativos/cadastros-dig.pdf
+ * @see Official: http://sped.rfb.gov.br/estatico/33/BBD9A14FFF8CB38ECEEC2FC2D3713AE716DB11/Manual%20e-Financeira%20v%202.1.2-%20Anexo%20II%20-%20Leiautes%20Gerais.pdf
+ * Manual de Preenchimento da e-Financeira, Anexo II, Leiautes Gerais: `REGRA_VALIDA_CPF`.
  * @see Official: https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=151372
  * @see Based on: https://github.com/brazilian-utils/python/blob/main/brutils/cpf.py
  */

@@ -16,11 +16,13 @@ import { PASSPORT_REGEX } from "./constants";
  * @returns {boolean} True if the passport number is valid (2 letters followed by 6 digits).
  *
  * @example
- * isValidPassport("AB123456") // true
- * isValidPassport("ab123456") // true (case-insensitive)
- * isValidPassport("AB-123.456") // true (symbols are ignored)
- * isValidPassport("12345678") // false
- * isValidPassport("DC-221345extra") // false
+ * ```typescript
+ * isValidPassport("AB123456"); // true
+ * isValidPassport("ab123456"); // true (case-insensitive)
+ * isValidPassport("AB-123.456"); // true (symbols are ignored)
+ * isValidPassport("12345678"); // false
+ * isValidPassport("DC-221345extra"); // false
+ * ```
  *
  * The Polícia Federal passport FAQ states the layout: "Ele é composto por duas letras - chamadas
  * de 'série', e por seis dígitos subsequentes. Por exemplo: Passaporte CS265436." It is the only
