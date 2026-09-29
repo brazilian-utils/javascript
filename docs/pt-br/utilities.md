@@ -918,7 +918,7 @@ parsePhone('55987654321'); // 55987654321 (DDD 55, não confundido com o código
 
 Gera um telefone brasileiro aleatório. Aceita `'mobile'`, `'landline'` ou `'service'` (`GeneratePhoneType`); sem o tipo, gera um celular ou um fixo ao acaso, nunca um número de serviço.
 
-- Um celular começa com 9 depois do DDD (válido nas duas versões de `isValidMobilePhone`); um fixo tem 8 dígitos depois do DDD, começando com 2 a 6; um número de serviço não tem DDD.
+- Um celular começa com 9 depois do DDD (válido nas duas versões de `isValidMobilePhone`); um fixo tem 8 dígitos depois do DDD, começando com 2 a 5 (a faixa que continua válida depois que a Resolução Anatel 777/2025 a reduz em 1º de março de 2027; até a 2.4.0 podia sair um 6); um número de serviço não tem DDD.
 
 ```javascript
 import { generatePhone } from '@brazilian-utils/brazilian-utils';

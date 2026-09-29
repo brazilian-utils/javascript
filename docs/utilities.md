@@ -918,7 +918,7 @@ parsePhone('55987654321'); // 55987654321 (area code 55, not mistaken for the +5
 
 Generate a random Brazilian phone number. Accepts `'mobile'`, `'landline'` or `'service'` (`GeneratePhoneType`); when omitted, it generates a mobile or a landline at random, never a service number.
 
-- A mobile starts with 9 after the DDD (valid under both `isValidMobilePhone` versions); a landline has 8 digits after the DDD, starting with 2 to 6; a service number has no DDD.
+- A mobile starts with 9 after the DDD (valid under both `isValidMobilePhone` versions); a landline has 8 digits after the DDD, starting with 2 to 5 (the range that stays valid after Resolução Anatel 777/2025 narrows it on 1 March 2027; up to 2.4.0 a 6 could be drawn); a service number has no DDD.
 
 ```javascript
 import { generatePhone } from '@brazilian-utils/brazilian-utils';

@@ -63,7 +63,7 @@ describe("generatePhone", () => {
 		expect(areaCodes.size).toBeGreaterThan(1);
 	});
 
-	it("should vary the landline's first number digit (2-6) across many draws, retrying with extra draws on the astronomically unlikely case they all collide", () => {
+	it("should vary the landline's first number digit (2-5) across many draws, retrying with extra draws on the astronomically unlikely case they all collide", () => {
 		let firstDigits = new Set(Array.from({ length: 200 }, drawLandlineFirstDigit));
 
 		if (firstDigits.size === 1) {
@@ -71,6 +71,20 @@ describe("generatePhone", () => {
 		}
 
 		expect(firstDigits.size).toBeGreaterThan(1);
+	});
+
+	it("should draw the landline's first number digit from 2 to 5 only", () => {
+		const originalRandom = Math.random;
+
+		try {
+			Math.random = () => 0;
+			expect(generatePhone("landline").charAt(2)).toBe("2");
+
+			Math.random = () => 0.999999;
+			expect(generatePhone("landline").charAt(2)).toBe("5");
+		} finally {
+			Math.random = originalRandom;
+		}
 	});
 
 	it("should pick the non-geographic or the abbreviated service family from the Math.random() < 0.5 boundary", () => {
@@ -132,7 +146,7 @@ describe("generatePhone", () => {
 					const areaCode = Number(phone.slice(0, 2));
 
 					expect(phone.length).toBe(10);
-					expect(/^[2-6]$/.test(phone.charAt(2))).toBe(true);
+					expect(/^[2-5]$/.test(phone.charAt(2))).toBe(true);
 					expect(VALID_AREA_CODES.includes(areaCode)).toBe(true);
 					expect(isValidLandlinePhone(phone)).toBe(true);
 				}),

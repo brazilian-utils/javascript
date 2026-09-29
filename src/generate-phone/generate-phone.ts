@@ -36,8 +36,9 @@ const randomServicePhone = (): string => {
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for security purposes.
  *
  * @param {GeneratePhoneType} [type] - `"mobile"` (9-digit number starting with 9),
- * `"landline"` (8-digit number starting with 2-6) or `"service"` (a non-geographic number,
- * either an 11-digit `0X00` one or an 8-digit `300X`/`400X` one, with no DDD). When omitted,
+ * `"landline"` (8-digit number starting with 2-5, the range that stays valid after Resolução
+ * Anatel nº 777/2025, art. 21 narrows it from 1 March 2027; up to 2.4.0 a 6 could be drawn) or
+ * `"service"` (a non-geographic number, either an 11-digit `0X00` one or an 8-digit `300X`/`400X` one, with no DDD). When omitted,
  * randomly generates a mobile or a landline, never a service number, since those are not
  * accepted by `isValidPhone` unless asked for.
  * @returns {string} A randomly generated phone number as a string of digits (DDD included,
@@ -62,7 +63,7 @@ export const generatePhone = (type?: GeneratePhoneType): string => {
 	const isLandline = type === "landline" || (type !== "mobile" && Math.random() < 0.5);
 
 	if (isLandline) {
-		return `${areaCode}${2 + Math.floor(Math.random() * 5)}${generateRandomNumber(7)}`;
+		return `${areaCode}${2 + Math.floor(Math.random() * 4)}${generateRandomNumber(7)}`;
 	}
 
 	return `${areaCode}9${generateRandomNumber(8)}`;
