@@ -18,6 +18,10 @@ export type GetLegalNaturesParams = {
  * `isValidLegalNature` keeps accepting and `getLegalNature` keeps looking up because they still
  * appear in records filed while they were in force.
  *
+ * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
+ * normally.
+ *
  * @param {GetLegalNaturesParams} [params] - Optional listing options.
  * @param {boolean} [params.includeLegacy] - Whether to add the retired codes. Defaults to `false`.
  * @returns {Record<string, string>} A fresh object mapping each 4 digit code to its description.
@@ -30,10 +34,6 @@ export type GetLegalNaturesParams = {
  * getLegalNatures({ includeLegacy: true })["2208"]; // "Entidade Binacional Itaipu"
  * Object.keys(getLegalNatures({ includeLegacy: true })).length; // 100
  * ```
- *
- * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
- * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
- * normally.
  *
  * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
  * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf

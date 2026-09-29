@@ -5,7 +5,12 @@ import { anyValue, digitsUpTo } from "../_internals/test/arbitraries";
 import { describe, expect, expectTypeOf, it, test } from "../_internals/test/runtime";
 import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 import { isValidLegalNature } from "../is-valid-legal-nature/is-valid-legal-nature";
-import { getLegalNature, type LegalNature, type LegalNatureCategory } from "./get-legal-nature";
+import {
+	buildLegalNature,
+	getLegalNature,
+	type LegalNature,
+	type LegalNatureCategory,
+} from "./get-legal-nature";
 
 const SOCIEDADE_EMPRESARIA_LIMITADA: LegalNature = {
 	code: "2062",
@@ -212,6 +217,15 @@ describe("getLegalNature", () => {
 				}),
 			);
 		});
+	});
+});
+
+describe("buildLegalNature (deprecated 2.4.0 export)", () => {
+	it("should still build the entry of a code", () => {
+		// oxlint-disable-next-line typescript/no-deprecated -- the deprecated 2.4.0 export is under test
+		expect(buildLegalNature("2062", "Sociedade Empresária Limitada")).toEqual(
+			SOCIEDADE_EMPRESARIA_LIMITADA,
+		);
 	});
 });
 

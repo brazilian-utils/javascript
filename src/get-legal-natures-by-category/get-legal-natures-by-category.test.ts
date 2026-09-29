@@ -9,6 +9,7 @@ import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/cons
 import {
 	type GetLegalNaturesByCategoryOptions,
 	getLegalNaturesByCategory,
+	type LegalNature as ReexportedLegalNature,
 } from "./get-legal-natures-by-category";
 
 const PESSOAS_FISICAS: LegalNature[] = [
@@ -386,6 +387,10 @@ describe("getLegalNaturesByCategory types", () => {
 	test("should take a string or number category and return an array of legal natures", () => {
 		expectTypeOf(getLegalNaturesByCategory).parameter(0).toEqualTypeOf<string | number>();
 		expectTypeOf(getLegalNaturesByCategory).returns.toEqualTypeOf<LegalNature[]>();
+	});
+
+	test("should re-export the LegalNature type its signature returns", () => {
+		expectTypeOf<ReexportedLegalNature>().toEqualTypeOf<LegalNature>();
 	});
 
 	test("should take the listing options as an optional second parameter", () => {

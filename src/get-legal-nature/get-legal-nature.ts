@@ -1,10 +1,8 @@
-import {
-	LEGAL_NATURE_CATEGORIES,
-	type LegalNatureCategory,
-} from "../_internals/constants/legal-nature-categories";
+import { buildLegalNature as buildLegalNatureEntry } from "../_internals/build-legal-nature/build-legal-nature";
+import { type LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
 import { SEPARATORS_REGEX } from "../_internals/constants/separators";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
-import { LEGACY_LEGAL_NATURE, LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 export type { LegalNatureCategory } from "../_internals/constants/legal-nature-categories";
 
@@ -39,32 +37,24 @@ export type LegalNature = {
 );
 
 /**
- * Builds the entry of a code known to be in `LEGAL_NATURE`, tagging it as legacy, with the code it
- * corresponds to today, when a past revision of the CONCLA table retired it.
+ * Builds the entry of a code known to be in `LEGAL_NATURE`.
  *
+ * @deprecated An implementation detail that shipped by accident in 2.4.0. It is not part of the
+ * API and goes away in v3.
  * @param {string} code - The 4 digit legal nature code, without formatting.
  * @param {string} description - The description `LEGAL_NATURE` holds for the code.
  * @returns {LegalNature} The legal nature entry of the code.
  */
-export const buildLegalNature = (code: string, description: string): LegalNature => {
-	const entry = {
-		code,
-		description,
-		category: { ...LEGAL_NATURE_CATEGORIES[code[0]] },
-	};
-
-	return Object.hasOwn(LEGACY_LEGAL_NATURE, code)
-		? { ...entry, legacy: true, currentCode: LEGACY_LEGAL_NATURE[code] }
-		: { ...entry, legacy: false };
-};
+export const buildLegalNature = (code: string, description: string): LegalNature =>
+	buildLegalNatureEntry(code, description);
 
 /**
  * Looks a Brazilian legal nature (natureza jurídica) code up.
  *
- * The usual mask characters (hyphens, dots, slashes, whitespace) are stripped from a string before the
- * lookup, so `getLegalNature("206.2")` resolves like `getLegalNature("206-2")`. A number is only
- * read as a code when it is a non-negative safe integer: its sign and its decimal point are not
- * mask characters, so `getLegalNature(-2062)` and `getLegalNature(206.2)` return `null` instead
+ * The usual mask characters (hyphens, dots, slashes, whitespace) are stripped from a string before
+ * the lookup, so `getLegalNature("206.2")` resolves like `getLegalNature("206-2")`. A number is
+ * only read as a code when it is a non-negative safe integer: its sign and its decimal point are
+ * not mask characters, so `getLegalNature(-2062)` and `getLegalNature(206.2)` return `null` instead
  * of being read as `2062`.
  *
  * No legal nature code starts with a zero, its first digit is the CONCLA category (1 to 5), so
@@ -82,18 +72,18 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  * that retired it published no successor). The 92 codes in force have `legacy: false` and no
  * `currentCode`.
  *
- * @param {string|number} value - The legal nature code to look up, with or without formatting.
- * @returns {LegalNature|null} The matching legal nature entry, or null when the code is unknown
- * or invalid, which is exactly when `isValidLegalNature` returns false for the string form of the
- * value (a number is read as the string it prints as), or when the value is a number that is not
- * a non-negative safe integer.
+ * The lookup is made on the description table instead of the code list `isValidLegalNature`
+ * checks, so that list is not bundled on top of it; both accept exactly the same codes.
  *
  * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
  * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
  * normally.
  *
- * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
- * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
+ * @param {string|number} value - The legal nature code to look up, with or without formatting.
+ * @returns {LegalNature|null} The matching legal nature entry, or null when the code is unknown
+ * or invalid, which is exactly when `isValidLegalNature` returns false for the string form of the
+ * value (a number is read as the string it prints as), or when the value is a number that is not
+ * a non-negative safe integer.
  *
  * @example
  * ```typescript
@@ -118,15 +108,16 @@ export const buildLegalNature = (code: string, description: string): LegalNature
  * getLegalNature("0000"); // null
  * getLegalNature(206.2); // null (not a non-negative safe integer)
  * ```
+ *
+ * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
+ * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const getLegalNature = (value: string | number): LegalNature | null => {
 	if (!isLookupCode(value)) return null;
 
-	// The same check as isValidLegalNature, made on the description table this lookup reads anyway,
-	// so the code list isValidLegalNature is checked against is not bundled on top of it.
 	const code = String(value).replace(SEPARATORS_REGEX, "");
 
 	if (!Object.hasOwn(LEGAL_NATURE, code)) return null;
 
-	return buildLegalNature(code, LEGAL_NATURE[code]);
+	return buildLegalNatureEntry(code, LEGAL_NATURE[code]);
 };

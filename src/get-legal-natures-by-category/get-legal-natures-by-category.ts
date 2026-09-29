@@ -1,7 +1,10 @@
+import { buildLegalNature } from "../_internals/build-legal-nature/build-legal-nature";
 import { LEGAL_NATURE_CATEGORIES } from "../_internals/constants/legal-nature-categories";
 import { isLegacyLegalNature } from "../_internals/is-legacy-legal-nature/is-legacy-legal-nature";
-import { buildLegalNature, type LegalNature } from "../get-legal-nature/get-legal-nature";
+import { type LegalNature } from "../get-legal-nature/get-legal-nature";
 import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
+
+export type { LegalNature } from "../get-legal-nature/get-legal-nature";
 
 /**
  * The options `getLegalNaturesByCategory` accepts, saying whether the legacy codes of the category
@@ -29,18 +32,15 @@ export type GetLegalNaturesByCategoryOptions = {
  * they correspond to today. The result is in ascending code order, since the table is keyed by the
  * codes themselves, and is a fresh array of fresh entries on every call.
  *
+ * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
+ * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
+ * normally.
+ *
  * @param {string|number} category - The category code, `"1"` through `"5"` or 1 through 5.
  * @param {GetLegalNaturesByCategoryOptions} [options] - Optional listing options.
  * @param {boolean} [options.includeLegacy] - Whether to add the retired codes. Defaults to `false`.
  * @returns {LegalNature[]} The legal natures of the category, sorted by code, or an empty array
  * when the category is unknown or the input is invalid.
- *
- * The CONCLA table page sits behind a bot filter and answers HTTP 403 to every non-browser
- * client, so it has to be opened in a browser; the detailed structure PDF next to it is served
- * normally.
- *
- * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
- * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  *
  * @example
  * ```typescript
@@ -56,6 +56,9 @@ export type GetLegalNaturesByCategoryOptions = {
  * getLegalNaturesByCategory("2", { includeLegacy: true }).length; // 33
  * getLegalNaturesByCategory("9"); // []
  * ```
+ *
+ * @see Official: https://concla.ibge.gov.br/estrutura/natjur-estrutura/natureza-juridica-2021
+ * @see Official: https://concla.ibge.gov.br/images/concla/documentacao/CONCLA-TNJ2021-EstruturaDetalhada.pdf
  */
 export const getLegalNaturesByCategory = (
 	category: string | number,
