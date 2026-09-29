@@ -577,7 +577,8 @@ Check if a DF-e access key (chave de acesso) is valid. Covers every DF-e with a 
 - Every character is a digit except positions 7 to 18, the root and order of the issuer's CNPJ, which may hold the letters of an alphanumeric CNPJ: the current schemas (NF-e PL_010 `TChNFe`, CT-e PL_CTe_400_RTC, MDF-e 3.00b, NFCom) type the key as `[0-9]{6}[0-9A-Z]{12}[0-9]{26}`, in production for the NF-e from 01/07/2026 (NT 2026.004). A letter anywhere else, the CNPJ check digits in positions 19 and 20 included, is rejected. The schema admits upper case only; lower case is read as upper case, as `isValidCnpj` does with `{ version: 2 }`. A non-ASCII letter that upper cases into an ASCII one (`ſ`, `ß`) is rejected.
 - The 44 characters may be grouped in 4 by whitespace, `.`, `-` or `/`. The XML `Id` prefixes (`NFe`, `CTe`, `MDFe`, `BPe`, `NF3e`, `NFCom`) are stripped first.
 - `tpEmis` must be one the MOC of that model assigns (table below).
-- For NF-e and NFC-e the `cNF` must pass rule B03-10 of the MOC (no repeated or sequential values, not the document number).
+- For NF-e and NFC-e the `cNF` must pass rule B03-10 of the MOC (no repeated or sequential values, not the document number). The rule applies to the documents sent after NT 2019.001, and NF-e software commonly used a `cNF` equal to the document number before it, so a key authorised earlier can be turned down.
+- The check digits of the issuer's CPF or CNPJ are not checked, only the key's own check digit. Read the key with `getNfeKeyInfo` and pass its `taxId` to `isValidCnpj`, or the last 11 digits of a zero padded `taxId` to `isValidCpf`, to check the issuer as well.
 - A document number of all zeros is rejected. The check digit is a modulus 11 over the first 43 characters, each valued at its ASCII code minus 48 (`A` = 17 ... `Z` = 42), as NT Conjunta 2025.001 sets it.
 
 | Model | `tpEmis` accepted |
