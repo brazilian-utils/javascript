@@ -15,6 +15,10 @@ describe("unpackTexts", () => {
 		expect(unpackTexts("0abc\n3\n0")).toEqual(["abc", "abc", ""]);
 	});
 
+	test("should read the first text whole, even when it claims to share a start", () => {
+		expect(unpackTexts("5abc\n1x")).toEqual(["abc", "ax"]);
+	});
+
 	test("should read a start of more than nine characters", () => {
 		const start = "0123456789abcdefghijklmnopqrstuvwxyz";
 

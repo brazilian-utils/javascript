@@ -27,6 +27,7 @@ export const readCodeTable = (codes: string): CodeTable => {
 	const table = { width: Number(codes.slice(0, separator)), values };
 	// Stryker disable next-line CallExpression: the cache only saves unpacking the table again; an unpacked table is the same on every lookup.
 	tables ??= new Map();
+	// Stryker disable next-line CallExpression: the cache only saves unpacking the table again; not storing it means the next lookup unpacks the same table again, which reads the same codes.
 	tables.set(codes, table);
 
 	return table;

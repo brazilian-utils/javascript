@@ -15,6 +15,7 @@
 export const calculateMunicipalityCheckDigit = (code: string): number => {
 	let sum = 0;
 
+	// Stryker disable next-line EqualityOperator: the extra pass reads `code.charAt(code.length)`, which is "", and `Number("")` is 0, so it adds 0 to the sum.
 	for (let index = 0; index < code.length; index += 1) {
 		const product = Number(code.charAt(index)) * (index % 2 === 0 ? 1 : 2);
 
