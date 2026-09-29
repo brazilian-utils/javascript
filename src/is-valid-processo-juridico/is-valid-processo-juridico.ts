@@ -44,9 +44,13 @@ const verifyCourtAndTribunal = (value: string): boolean => {
  * only read as four digits: art. 1º, § 6º leaves its codification to each tribunal, so there is
  * no central list to check it against.
  *
- * The CNJ mask separators (whitespace, `.` and `-`), and `/` as `isValidCpf` reads it, are accepted between the
- * `NNNNNNN-DD.AAAA.J.TR.OOOO` fields, and whitespace around the value is ignored, but any other
- * character, a letter in particular, makes the value invalid.
+ * The CNJ mask separators (whitespace, `.` and `-`), and `/` as `isValidCpf` reads it, are accepted
+ * between the `NNNNNNN-DD.AAAA.J.TR.OOOO` fields, and whitespace around the value is ignored, but
+ * any other character, a letter in particular, makes the value invalid.
+ *
+ * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout, its check digits (art. 1º,
+ * § 2º, and the algorithm in its Anexo VIII, "CÁLCULO DO DÍGITO VERIFICADOR"), and
+ * closes the list of órgão (`J`) and tribunal (`TR`) codes in art. 1º, § 4º and § 5º.
  *
  * @param {string} value - The Processo Jurídico number to validate.
  * @returns {boolean} True if the Processo Jurídico number is valid, false otherwise.
@@ -59,10 +63,6 @@ const verifyCourtAndTribunal = (value: string): boolean => {
  * isValidProcessoJuridico("0000100-23.2008.8.28.0000"); // false (there is no 28th Tribunal de Justiça)
  * isValidProcessoJuridico("ab00020802520125150049"); // false (invalid format)
  * ```
- *
- * Resolução CNJ nº 65/2008 defines this Número Único de Processo layout, its check digits (art. 1º,
- * § 2º, and the algorithm in its Anexo VIII, "CÁLCULO DO DÍGITO VERIFICADOR"), and
- * closes the list of órgão (`J`) and tribunal (`TR`) codes in art. 1º, § 4º and § 5º.
  *
  * @see Official: https://atos.cnj.jus.br/atos/detalhar/119
  */

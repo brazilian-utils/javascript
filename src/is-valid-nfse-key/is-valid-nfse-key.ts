@@ -61,16 +61,16 @@ const isValidTaxId = (typeDigit: string, registration: string): boolean => {
  *
  * An alphanumeric CNPJ is accepted since the restricted-production (RTC) schema bundle of
  * 2026-07-27 widened the key to it. The service has handled the alphanumeric CNPJ in production
- * since 2026-08-10 ("Atualizações e Implantações"), while the production bundle of the "Documentação
- * atual" page (2026-02-09) still types the key as digits only. Letters are read in upper case, lower case input included,
- * as `isValidCnpj` with version 2 reads them. No official document states how a letter enters
- * the check digit of the key: none of the NFS-e technical notes (001 to 009), the Anexo I v1.01
- * nor the Perguntas e Respostas v1.00 of 08/09/2026 (which still calls the key "50 dígitos
- * numéricos") does, and NT Conjunta 2025.001, whose ASCII minus 48 rule covers the DF-e key,
- * lists its scope as "NFe, NFCe, CTe, CTe OS, GTVe, MDFe, BPe, BPe TM, NF3e e NFCom", leaving the
- * NFS-e out. The rule used here is an analogy with that NT and with the CNPJ's own check digits,
- * not an official rule: each character counts as its ASCII code minus 48, `A` as 17. For a key
- * of digits only it gives the same digit as before.
+ * since 2026-08-10 ("Atualizações e Implantações"), while the production bundle of the
+ * "Documentação atual" page (2026-02-09) still types the key as digits only. Letters are read in
+ * upper case, lower case input included, as `isValidCnpj` with version 2 reads them. No official
+ * document states how a letter enters the check digit of the key: none of the NFS-e technical notes
+ * (001 to 009), the Anexo I v1.01 nor the Perguntas e Respostas v1.00 of 08/09/2026 (which still
+ * calls the key "50 dígitos numéricos") does, and NT Conjunta 2025.001, whose ASCII minus 48 rule
+ * covers the DF-e key, lists its scope as "NFe, NFCe, CTe, CTe OS, GTVe, MDFe, BPe, BPe TM, NF3e e
+ * NFCom", leaving the NFS-e out. The rule used here is an analogy with that NT and with the CNPJ's
+ * own check digits, not an official rule: each character counts as its ASCII code minus 48, `A` as
+ * 17. For a key of digits only it gives the same digit as before.
  *
  * @param {string} value - The access key value to be validated.
  * @returns {boolean} True if the access key is valid, false otherwise.

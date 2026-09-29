@@ -34,6 +34,14 @@ export type IsValidLicensePlateOptions = {
  * `"mercosul"`. Those Python names are not formats here: without `format`, or with any other
  * value, a plate in either format is valid.
  *
+ * The resolution's own text does not spell the sequence out: art. 2º § 2º delegates the
+ * technical specification to Anexo I, whose item 1.2 reads "O padrão de estampagem é composto de
+ * 7 (sete) caracteres alfanuméricos, em alto relevo, na sequência LLLNLNN" and whose item 1.2.1
+ * reads `L` as a letter and `N` as a numeral. Art. 2º § 1º puts a single rear plate of that same
+ * standard on motorcycles and similar vehicles, and art. 2º § 3º describes the old `AAA-1111`
+ * PNU it coexists with. The annexes are published in a PDF of their own, cited below alongside
+ * the resolution's text.
+ *
  * @param {string} value - The license plate value to be validated.
  * @param {IsValidLicensePlateOptions} [options] - The validation options.
  * @param {LicensePlateFormat} [options.format] - The one format to accept, `"LLLNNNN"` (old) or
@@ -55,14 +63,6 @@ export type IsValidLicensePlateOptions = {
  * isValidLicensePlate("ABC1234!"); // false (any other character is rejected)
  * isValidLicensePlate("invalid"); // false
  * ```
- *
- * The resolution's own text does not spell the sequence out: art. 2º § 2º delegates the
- * technical specification to Anexo I, whose item 1.2 reads "O padrão de estampagem é composto de
- * 7 (sete) caracteres alfanuméricos, em alto relevo, na sequência LLLNLNN" and whose item 1.2.1
- * reads `L` as a letter and `N` as a numeral. Art. 2º § 1º puts a single rear plate of that same
- * standard on motorcycles and similar vehicles, and art. 2º § 3º describes the old `AAA-1111`
- * PNU it coexists with. The annexes are published in a PDF of their own, cited below alongside
- * the resolution's text.
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf

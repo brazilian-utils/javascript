@@ -63,13 +63,13 @@ const PREFIX_LENGTH = 3;
  * the indicator digit and is never part of the prefix, so a GTIN-12 has a prefix that starts with
  * `0`, and a GTIN-14 has the prefix of the GTIN it packs.
  *
- * Only the prefixes of GS1 Brasil (789 and 790) and the Restricted Circulation Number ranges of
- * the General Specifications are told apart, since both are fixed by a standard or a rule. The
- * prefix is not checked against the list of Member Organisations: GS1 keeps assigning ranges, so
- * a copy of that list would turn down valid numbers as it ages. SEFAZ does run that check
- * (rules I03-20 and I12-20 of NT 2021.003, against its own "Tabela Prefixo GS1", whose contents
- * could not be read, so which ranges it accepts is not stated here) and, for the 789 and 790 prefixes, looks the number up
- * in the Cadastro Centralizado de GTIN, which no offline check can stand in for.
+ * Only the prefixes of GS1 Brasil (789 and 790) and the Restricted Circulation Number ranges of the
+ * General Specifications are told apart, since both are fixed by a standard or a rule. The prefix
+ * is not checked against the list of Member Organisations: GS1 keeps assigning ranges, so a copy of
+ * that list would turn down valid numbers as it ages. SEFAZ does run that check (rules I03-20 and
+ * I12-20 of NT 2021.003, against its own "Tabela Prefixo GS1", whose contents could not be read, so
+ * which ranges it accepts is not stated here) and, for the 789 and 790 prefixes, looks the number
+ * up in the Cadastro Centralizado de GTIN, which no offline check can stand in for.
  *
  * @param {string} value - The GTIN to be parsed, digits only.
  * @returns {GtinInfo | null} The parsed GTIN, or `null` when it is not valid.

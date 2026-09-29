@@ -17,17 +17,6 @@ const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
  * Uses `Math.random()` internally, so it is not cryptographically secure, do not use for
  * security purposes.
  *
- * @param {GenerateLicensePlateFormat} [format] - The format to generate. Defaults to the
- * Mercosul format ("LLLNLNN"), the single sequence Resolução CONTRAN nº 969/2022 defines for
- * every vehicle, motorcycles included.
- * @returns {string} A randomly generated license plate matching the requested format.
- *
- * @example
- * ```typescript
- * generateLicensePlate(); // "ABC1D23" (Mercosul)
- * generateLicensePlate("LLLNNNN"); // "ABC1234" (old Brazilian format)
- * ```
- *
  * The resolution's own text does not spell the sequence out: art. 2º § 2º delegates the
  * technical specification to Anexo I, whose item 1.2 reads "O padrão de estampagem é composto de
  * 7 (sete) caracteres alfanuméricos, em alto relevo, na sequência LLLNLNN" and whose item 1.2.1
@@ -39,6 +28,17 @@ const randomDigit = (): string => Math.floor(Math.random() * 10).toString();
  * `isValidLicensePlate` accepts. (2.3.0 used an unknown string verbatim, so
  * `generateLicensePlate("LLLNNLN")` produced the withdrawn motorcycle sequence and
  * `generateLicensePlate("bogus")` five digits; neither is a plate.)
+ *
+ * @param {GenerateLicensePlateFormat} [format] - The format to generate. Defaults to the
+ * Mercosul format ("LLLNLNN"), the single sequence Resolução CONTRAN nº 969/2022 defines for
+ * every vehicle, motorcycles included.
+ * @returns {string} A randomly generated license plate matching the requested format.
+ *
+ * @example
+ * ```typescript
+ * generateLicensePlate(); // "ABC1D23" (Mercosul)
+ * generateLicensePlate("LLLNNNN"); // "ABC1234" (old Brazilian format)
+ * ```
  *
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022.pdf
  * @see Official: https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/resolucao9692022anexos.pdf
