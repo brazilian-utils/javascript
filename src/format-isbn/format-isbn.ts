@@ -9,13 +9,13 @@ import { getIsbnInfo } from "../get-isbn-info/get-isbn-info";
  * `formatCpf` does: it returns `""`, and so does a valid ISBN whose group or registrant falls in a
  * range not assigned yet. The "ISBN" label is not added.
  *
- * @param {string} value - The ISBN, printed or not.
+ * @param {string} value - The ISBN, with or without hyphens.
  * @returns {string} The hyphenated ISBN, or `""` when `getIsbnInfo` returns `null` for it.
  *
  * @example
  * ```typescript
  * formatIsbn("9786589999010"); // "978-65-89999-01-0"
- * formatIsbn("ISBN 9788533302273"); // "978-85-333-0227-3"
+ * formatIsbn("978 85 333 0227 3"); // "978-85-333-0227-3"
  * formatIsbn("978658999901"); // "" (12 digits)
  * ```
  *

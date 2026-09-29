@@ -3359,7 +3359,7 @@ O ISBN (International Standard Book Number) tem 13 dígitos desde 2007: o prefix
 
 Verifica se um ISBN-13 é válido: o prefixo `978` ou `979` e o dígito verificador módulo 10 do Manual do Usuário do ISBN (os 12 primeiros dígitos com pesos alternados 1 e 3, a mesma regra do GTIN-13).
 
-- O valor pode vir impresso: o rótulo `ISBN` na frente (`ISBN`, `ISBN-13`, com ou sem dois-pontos) e um único hífen ou espaço entre dois dígitos são aceitos; qualquer outra coisa, inclusive separadores seguidos, torna o valor inválido.
+- Um único hífen ou espaço entre dois dígitos, e espaços em volta do valor, são aceitos; qualquer outra coisa, inclusive separadores seguidos ou o rótulo `ISBN` que o livro imprime antes do número, torna o valor inválido.
 - Um número `979-0` é um ISMN (partitura impressa), não um ISBN: a RangeMessage não dá grupo de ISBN a essa faixa, então ele é rejeitado.
 - Não verifica se o grupo e o registrante estão atribuídos; veja `getIsbnInfo`.
 - O exemplo impresso da Agência Brasileira do ISBN, `ISBN 978-65-89999-01-3`, não traz o dígito que a regra dá (`0`), então é rejeitado.
@@ -3368,19 +3368,19 @@ Verifica se um ISBN-13 é válido: o prefixo `978` ou `979` e o dígito verifica
 import { isValidIsbn } from '@brazilian-utils/brazilian-utils';
 
 isValidIsbn('9788533302273'); // true
-isValidIsbn('ISBN 978-65-89999-01-0'); // true
+isValidIsbn('978-65-89999-01-0'); // true
 isValidIsbn('978-85-333-0227-4'); // false (dígito verificador errado)
 isValidIsbn('8533302276'); // false (a forma de 10 dígitos)
 ```
 
 ### parseIsbn
 
-Remove o rótulo `ISBN`, os hífens e todo caractere que não seja dígito, mantendo no máximo 13 dígitos. O rótulo sai primeiro, então o `13` de `ISBN-13` não fica.
+Remove os hífens e todo caractere que não seja dígito, mantendo no máximo 13 dígitos.
 
 ```javascript
 import { parseIsbn } from '@brazilian-utils/brazilian-utils';
 
-parseIsbn('ISBN-13: 978-85-333-0227-3'); // '9788533302273'
+parseIsbn('978-85-333-0227-3'); // '9788533302273'
 ```
 
 ### getIsbnInfo
@@ -3404,7 +3404,7 @@ Divide um ISBN-13 válido nos seus elementos, como um `IsbnInfo`, seguindo as fa
 ```javascript
 import { getIsbnInfo } from '@brazilian-utils/brazilian-utils';
 
-getIsbnInfo('ISBN 978-65-89999-01-0');
+getIsbnInfo('978-65-89999-01-0');
 // { isbn: '9786589999010', prefix: '978', registrationGroup: '65', registrant: '89999',
 //   publication: '01', checkDigit: 0, agency: 'Brazil', isBrazilian: true }
 

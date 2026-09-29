@@ -11,8 +11,8 @@ describe("formatIsbn", () => {
 		expect(formatIsbn("9789295055124")).toBe("978-92-95055-12-4");
 	});
 
-	it("should read a printed value, label included, and give back the hyphenated form without it", () => {
-		expect(formatIsbn("ISBN 978 85 333 0227 3")).toBe("978-85-333-0227-3");
+	it("should read a value with other separators and give back the hyphenated form", () => {
+		expect(formatIsbn("978 85 333 0227 3")).toBe("978-85-333-0227-3");
 	});
 
 	it("should return an empty string for a partial or invalid value, or a range not assigned yet", () => {
