@@ -3,6 +3,7 @@ import { CNAE_DESCRIPTIONS } from "../_internals/constants/cnae-descriptions";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { CNAE_LENGTH } from "../is-valid-cnae/constants";
 import { isValidCnae } from "../is-valid-cnae/is-valid-cnae";
 
@@ -60,5 +61,5 @@ export const getCnae = (value: string | number): Cnae | null => {
 
 	const code = sanitizeToDigits(padLookupCode(value, CNAE_LENGTH));
 
-	return { code, description: CNAE_DESCRIPTIONS[findCodeIndex(CNAE_CODES, code)] };
+	return { code, description: unpackTexts(CNAE_DESCRIPTIONS)[findCodeIndex(CNAE_CODES, code)] };
 };

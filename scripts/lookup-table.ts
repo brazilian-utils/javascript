@@ -68,6 +68,48 @@ export const serializeCodes = (codes: readonly string[]): string =>
 	`"${packCodes(codes).replaceAll(",", ",\\\n")}"`;
 
 /**
+ * Packs texts into the text `unpackTexts` reads (`src/_internals/unpack-texts`): one text per
+ * line, each written as the number of leading characters it shares with the text before it, in
+ * base 36 and capped at 35 (`0` for the first), then the rest of it. The descriptions of a
+ * lookup table often start like the one before, so the start is written once.
+ * @param {readonly string[]} texts - The texts, in the order they are read back in.
+ * @returns {string} The packed texts.
+ */
+export const packTexts = (texts: readonly string[]): string => {
+	let previous = "";
+
+	return texts
+		.map((text) => {
+			if (text.includes("\n")) throw new Error(`text ${JSON.stringify(text)} has a line break`);
+
+			let shared = 0;
+
+			while (shared < 35 && shared < text.length && text[shared] === previous[shared]) shared += 1;
+
+			previous = text;
+
+			return `${shared.toString(36)}${text.slice(shared)}`;
+		})
+		.join("\n");
+};
+
+/**
+ * Writes texts as the source of a single string literal that holds them packed by `packTexts`,
+ * which `unpackTexts` reads. Each text sits on a line of its own, ended by a line continuation
+ * that adds nothing to the value, so a refresh diffs to the texts that changed (and the one after
+ * each).
+ * @param {readonly string[]} texts - The texts.
+ * @returns {string} The string literal.
+ */
+export const serializeTexts = (texts: readonly string[]): string => {
+	const lines = packTexts(texts)
+		.split("\n")
+		.map((line) => JSON.stringify(line).slice(1, -1));
+
+	return `"${lines.join("\\n\\\n")}"`;
+};
+
+/**
  * Writes every generated file of a dataset, relative to the repository root.
  * @param {Record<string, string>} files - The content of each file, by its path.
  */

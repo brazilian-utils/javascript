@@ -1,6 +1,7 @@
 import { CID10_SUBCATEGORIES } from "../_internals/constants/cid10";
 import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
 import { normalizeCid10 } from "../_internals/normalize-cid10/normalize-cid10";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
 
 const CATEGORY_LENGTH = 3;
@@ -81,5 +82,5 @@ export const getCid10 = (value: string): Cid10 | null => {
 
 	const code = normalizeCid10(value);
 
-	return { code, description: CID10_DESCRIPTIONS[findDescriptionIndex(code)] };
+	return { code, description: unpackTexts(CID10_DESCRIPTIONS)[findDescriptionIndex(code)] };
 };

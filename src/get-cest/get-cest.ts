@@ -3,6 +3,7 @@ import { CEST_DESCRIPTIONS, CEST_SEGMENTS } from "../_internals/constants/cest-d
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { CEST_LENGTH } from "../is-valid-cest/constants";
 import { isValidCest } from "../is-valid-cest/is-valid-cest";
 
@@ -68,7 +69,7 @@ export const getCest = (value: string | number): Cest | null => {
 
 	return {
 		code,
-		description: CEST_DESCRIPTIONS[findCodeIndex(CEST_CODES, code)],
+		description: unpackTexts(CEST_DESCRIPTIONS)[findCodeIndex(CEST_CODES, code)],
 		segment: CEST_SEGMENTS[code.slice(0, SEGMENT_LENGTH)],
 	};
 };

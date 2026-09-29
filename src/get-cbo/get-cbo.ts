@@ -3,6 +3,7 @@ import { CBO_DESCRIPTIONS } from "../_internals/constants/cbo-descriptions";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { CBO_LENGTH } from "../is-valid-cbo/constants";
 import { isValidCbo } from "../is-valid-cbo/is-valid-cbo";
 
@@ -56,5 +57,5 @@ export const getCbo = (value: string | number): Cbo | null => {
 
 	const code = sanitizeToDigits(padLookupCode(value, CBO_LENGTH));
 
-	return { code, description: CBO_DESCRIPTIONS[findCodeIndex(CBO_CODES, code)] };
+	return { code, description: unpackTexts(CBO_DESCRIPTIONS)[findCodeIndex(CBO_CODES, code)] };
 };

@@ -2,6 +2,7 @@ import { CFOP_CODES } from "../_internals/constants/cfop";
 import { CFOP_DESCRIPTIONS } from "../_internals/constants/cfop-descriptions";
 import { findCodeIndex } from "../_internals/find-code-index/find-code-index";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { isValidCfop } from "../is-valid-cfop/is-valid-cfop";
 
 /**
@@ -64,5 +65,5 @@ export const getCfop = (value: string | number): Cfop | null => {
 
 	const code = sanitizeToDigits(value);
 
-	return { code, description: CFOP_DESCRIPTIONS[findCodeIndex(CFOP_CODES, code)] };
+	return { code, description: unpackTexts(CFOP_DESCRIPTIONS)[findCodeIndex(CFOP_CODES, code)] };
 };

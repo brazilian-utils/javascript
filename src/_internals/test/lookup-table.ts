@@ -1,5 +1,6 @@
 import { CID10_SUBCATEGORIES } from "../constants/cid10";
 import { CID10_DESCRIPTIONS } from "../constants/cid10-descriptions";
+import { unpackTexts } from "../unpack-texts/unpack-texts";
 import { expect } from "./runtime";
 
 /**
@@ -27,19 +28,24 @@ export const unpackCodes = (codes: string): string[] => {
  *
  * @param {string} codes - The codes of the table, packed by `packCodes`.
  * @param {number} width - The width of every code.
- * @param {readonly T[]} descriptions - The description of each code, at the index of that code.
+ * @param {string | readonly T[]} descriptions - The description of each code, at the index of that
+ * code: the array, or the texts packed by `packTexts`.
  * @returns {Record<string, T>} The descriptions, keyed by code.
  */
-export const lookupTable = <T>(
+export const lookupTable = <T = string>(
 	codes: string,
 	width: number,
-	descriptions: readonly T[],
+	descriptions: string | readonly T[],
 ): Record<string, T> => {
 	const list = unpackCodes(codes);
 
 	expect(list.every((code) => code.length === width)).toBe(true);
 
-	return Object.fromEntries(descriptions.map((description, index) => [list[index], description]));
+	const texts = (
+		typeof descriptions === "string" ? unpackTexts(descriptions) : descriptions
+	) as readonly T[];
+
+	return Object.fromEntries(texts.map((description, index) => [list[index], description]));
 };
 
 /**
@@ -49,14 +55,16 @@ export const lookupTable = <T>(
  *
  * @param {string} codes - The codes of the table, packed by `packCodes`.
  * @param {number} width - The width of every code.
- * @param {readonly unknown[]} descriptions - The description of each code, at the index of that code.
+ * @param {string | readonly unknown[]} descriptions - The description of each code, at the index of
+ * that code: the array, or the texts packed by `packTexts`.
  */
 export const expectAlignedLookupTable = (
 	codes: string,
 	width: number,
-	descriptions: readonly unknown[],
+	packedOrList: string | readonly unknown[],
 ): void => {
 	const list = unpackCodes(codes);
+	const descriptions = typeof packedOrList === "string" ? unpackTexts(packedOrList) : packedOrList;
 
 	expect(list.every((code) => code.length === width && /^\d+$/.test(code))).toBe(true);
 	expect(list).toHaveLength(descriptions.length);
@@ -92,4 +100,6 @@ export const cid10Codes = (): string[] => {
  * @returns {Record<string, string>} The description of every code, without the dot.
  */
 export const cid10Table = (): Record<string, string> =>
-	Object.fromEntries(cid10Codes().map((code, index) => [code, CID10_DESCRIPTIONS[index]]));
+	Object.fromEntries(
+		cid10Codes().map((code, index) => [code, unpackTexts(CID10_DESCRIPTIONS)[index]]),
+	);
