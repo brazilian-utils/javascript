@@ -2,8 +2,11 @@ import { HOLIDAYS_MAX_YEAR, HOLIDAYS_MIN_YEAR } from "../_internals/constants/ho
 import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
-import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
-import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
+import {
+	type BusinessDayOptions,
+	isBusinessDayUnderRules,
+	readBusinessDayRules,
+} from "../is-business-day/is-business-day";
 
 export type { BusinessDayOptions } from "../is-business-day/is-business-day";
 
@@ -86,7 +89,9 @@ export const addBusinessDays = (
 
 	if (!Number.isInteger(amount)) return null;
 
-	if (readHolidayStateCode(options?.stateCode) === null) return null;
+	const rules = readBusinessDayRules(options);
+
+	if (rules === null) return null;
 
 	if (!isSupportedHolidayYear(date.getFullYear())) return null;
 
@@ -103,7 +108,7 @@ export const addBusinessDays = (
 	});
 
 	for (const candidate of walk) {
-		if (isBusinessDay(candidate, options)) {
+		if (isBusinessDayUnderRules(candidate, rules)) {
 			remaining -= 1;
 
 			if (remaining === 0) {

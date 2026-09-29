@@ -1,8 +1,11 @@
 import { eachLocalDay } from "../_internals/each-local-day/each-local-day";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
-import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
-import { type BusinessDayOptions, isBusinessDay } from "../is-business-day/is-business-day";
+import {
+	type BusinessDayOptions,
+	isBusinessDayUnderRules,
+	readBusinessDayRules,
+} from "../is-business-day/is-business-day";
 
 export type { BusinessDayOptions } from "../is-business-day/is-business-day";
 
@@ -82,7 +85,9 @@ export const differenceInBusinessDays = (
 	if (!isValidDate(laterDate)) return null;
 	if (!isValidDate(earlierDate)) return null;
 
-	if (readHolidayStateCode(options?.stateCode) === null) return null;
+	const rules = readBusinessDayRules(options);
+
+	if (rules === null) return null;
 
 	if (!isSupportedHolidayYear(laterDate.getFullYear())) return null;
 	if (!isSupportedHolidayYear(earlierDate.getFullYear())) return null;
@@ -94,7 +99,7 @@ export const differenceInBusinessDays = (
 	let result = 0;
 
 	for (const candidate of eachLocalDay({ from: earlierDay, until: laterDay })) {
-		if (isBusinessDay(candidate, options)) result += step;
+		if (isBusinessDayUnderRules(candidate, rules)) result += step;
 	}
 
 	return result;

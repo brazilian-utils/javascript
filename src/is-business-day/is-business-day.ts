@@ -2,7 +2,7 @@ import { type StateCode } from "../_internals/constants/states";
 import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
 import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
-import { getHolidays } from "../get-holidays/get-holidays";
+import { readMemoizedHolidays } from "../get-holidays/get-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -21,6 +21,61 @@ export type BusinessDayOptions = {
 
 const SUNDAY = 0;
 const SATURDAY = 6;
+
+export type BusinessDayRules = {
+	stateCode: StateCode | undefined;
+	includeOptional: boolean;
+	includeSaturday: boolean;
+};
+
+/**
+ * Reads the options once into the rules a business day walk applies to every day.
+ *
+ * @param {BusinessDayOptions|undefined} options - The options given to the business day util.
+ * @returns {BusinessDayRules|null} The rules, or `null` when the state code is not a state.
+ */
+export const readBusinessDayRules = (
+	options: BusinessDayOptions | undefined,
+): BusinessDayRules | null => {
+	const stateCode = readHolidayStateCode(options?.stateCode);
+
+	if (stateCode === null) return null;
+
+	return {
+		stateCode,
+		includeOptional: options?.includeOptional ?? true,
+		includeSaturday: options?.includeSaturday ?? false,
+	};
+};
+
+/**
+ * Tells whether a valid date is a business day under rules already read.
+ *
+ * @param {Date} value - A valid date.
+ * @param {BusinessDayRules} rules - The rules read from the options.
+ * @returns {boolean} `true` when the date is a business day.
+ */
+export const isBusinessDayUnderRules = (value: Date, rules: BusinessDayRules): boolean => {
+	const year = value.getFullYear();
+
+	if (!isSupportedHolidayYear(year)) return false;
+
+	const day = value.getDay();
+
+	if (day === SUNDAY) return false;
+
+	if (day === SATURDAY && !rules.includeSaturday) return false;
+
+	const month = value.getMonth();
+	const date = value.getDate();
+	const { includeOptional } = rules;
+
+	return !readMemoizedHolidays(year, rules.stateCode).some((holiday) => {
+		if (!includeOptional && holiday.type === "optional") return false;
+
+		return holiday.month === month && holiday.day === date;
+	});
+};
 
 /**
  * Checks whether a given date is a Brazilian business day (dia útil).
@@ -174,30 +229,9 @@ const SATURDAY = 6;
 export const isBusinessDay = (value: Date, options?: BusinessDayOptions): boolean => {
 	if (!isValidDate(value)) return false;
 
-	const stateCode = readHolidayStateCode(options?.stateCode);
+	const rules = readBusinessDayRules(options);
 
-	if (stateCode === null) return false;
+	if (rules === null) return false;
 
-	const year = value.getFullYear();
-
-	if (!isSupportedHolidayYear(year)) return false;
-
-	const day = value.getDay();
-
-	if (day === SUNDAY) return false;
-
-	const includeSaturday = options?.includeSaturday ?? false;
-
-	if (day === SATURDAY && !includeSaturday) return false;
-
-	const includeOptional = options?.includeOptional ?? true;
-
-	const month = value.getMonth();
-	const date = value.getDate();
-
-	return !getHolidays({ year, stateCode }).some((holiday) => {
-		if (!includeOptional && holiday.type === "optional") return false;
-
-		return holiday.date.getMonth() === month && holiday.date.getDate() === date;
-	});
+	return isBusinessDayUnderRules(value, rules);
 };

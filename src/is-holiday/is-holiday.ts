@@ -1,7 +1,9 @@
 import { type StateCode } from "../_internals/constants/states";
 import { isNullish } from "../_internals/is-nullish/is-nullish";
+import { isSupportedHolidayYear } from "../_internals/is-supported-holiday-year/is-supported-holiday-year";
 import { isValidDate } from "../_internals/is-valid-date/is-valid-date";
-import { getHolidays } from "../get-holidays/get-holidays";
+import { readHolidayStateCode } from "../_internals/read-holiday-state-code/read-holiday-state-code";
+import { readMemoizedHolidays } from "../get-holidays/get-holidays";
 
 export type { StateCode } from "../_internals/constants/states";
 
@@ -102,9 +104,17 @@ export const isHoliday = (options?: IsHolidayParams): boolean => {
 	if (!isValidDate(targetDate)) return false;
 
 	const year = targetDate.getFullYear();
-	return getHolidays({ year, stateCode }).some(
-		(holiday) =>
-			holiday.date.getMonth() === targetDate.getMonth() &&
-			holiday.date.getDate() === targetDate.getDate(),
+
+	if (!isSupportedHolidayYear(year)) return false;
+
+	const normalizedStateCode = readHolidayStateCode(stateCode);
+
+	if (normalizedStateCode === null) return false;
+
+	const month = targetDate.getMonth();
+	const date = targetDate.getDate();
+
+	return readMemoizedHolidays(year, normalizedStateCode).some(
+		(holiday) => holiday.month === month && holiday.day === date,
 	);
 };

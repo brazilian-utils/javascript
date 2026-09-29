@@ -48,7 +48,7 @@ export type GetHolidaysOptions = GetHolidaysParams;
  * instant falls on another local day once the process time zone changes, which would make a
  * memoized year answer for the wrong days.
  */
-type MemoizedHoliday = {
+export type MemoizedHoliday = {
 	name: string;
 	type: HolidayType;
 	year: number;
@@ -67,7 +67,7 @@ const memoizeHolidays = (holidays: Holiday[]): MemoizedHoliday[] =>
 		day: date.getDate(),
 	}));
 
-const buildHolidays = (holidays: MemoizedHoliday[]): Holiday[] =>
+const buildHolidays = (holidays: readonly MemoizedHoliday[]): Holiday[] =>
 	holidays.map(({ name, type, year, month, day }) => ({
 		name,
 		date: new Date(year, month, day),
@@ -202,6 +202,26 @@ const computeHolidays = (year: number, stateCode: StateCode | undefined): Holida
 	holidays.sort((a, b) => a.date.getTime() - b.date.getTime());
 
 	return holidays;
+};
+
+/**
+ * Reads the memoized holidays of a supported year, computing them on first use. The entries are
+ * shared between calls, so a caller must only read them.
+ *
+ * @param {number} year - A year the holiday tables cover.
+ * @param {StateCode|undefined} stateCode - A state code already read, or `undefined` for the national list.
+ * @returns {readonly MemoizedHoliday[]} The shared holidays of the year, in date order.
+ */
+export const readMemoizedHolidays = (
+	year: number,
+	stateCode: StateCode | undefined,
+): readonly MemoizedHoliday[] => {
+	// Stryker disable next-line StringLiteral: the exact fallback text is never observable outside this module; it only has to be a value no real StateCode equals, which any fixed string satisfies
+	const cacheKey = `${year}|${stateCode ?? ""}`;
+
+	cache[cacheKey] ??= memoizeHolidays(computeHolidays(year, stateCode));
+
+	return cache[cacheKey];
 };
 
 /**
@@ -417,16 +437,5 @@ export function getHolidays(yearOrOptions: number | GetHolidaysParams): Holiday[
 
 	if (normalizedStateCode === null) return [];
 
-	// Stryker disable next-line StringLiteral: the exact fallback text is never observable outside this module; it only has to be a value no real StateCode equals, which any fixed string satisfies
-	const cacheKey = `${year}|${normalizedStateCode ?? ""}`;
-
-	const cached = cache[cacheKey];
-	if (cached) {
-		return buildHolidays(cached);
-	}
-
-	const holidays = computeHolidays(year, normalizedStateCode);
-	cache[cacheKey] = memoizeHolidays(holidays);
-
-	return holidays;
+	return buildHolidays(readMemoizedHolidays(year, normalizedStateCode));
 }
