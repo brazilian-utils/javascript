@@ -121,9 +121,9 @@ const isGenerateCnpjParams = (
  * generateCnpj(); // "12345678000195"
  * generateCnpj(2); // "Q0SLFMBD7VX439"
  * generateCnpj({ version: 2 }); // "Q0SLFMBD7VX439"
- * generateCnpj({ branch: 3 }); // "12345678000372", the ordem block is "0003"
- * generateCnpj({ version: 2, branch: 1 }); // "Q0SLFMBD000148", the ordem block is "0001"
- * generateCnpj({ branch: 0 }); // "12345678472695", an out of range branch draws a random block
+ * generateCnpj({ branch: 3 }); // "12345678000357", the ordem block is "0003"
+ * generateCnpj({ version: 2, branch: 1 }); // "Q0SLFMBD000184", the ordem block is "0001"
+ * generateCnpj({ branch: 0 }); // "12345678472607", an out of range branch draws a random block
  * ```
  *
  * @see Official: https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj

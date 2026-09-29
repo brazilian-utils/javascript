@@ -115,6 +115,7 @@ Fonte: [Receita Federal, "Cadastros: CPF e CNPJ"](https://www.gov.br/receitafede
 Valida um CNPJ.
 
 - **Opções** (`IsValidCnpjOptions`): `version` escolhe o formato aceito: `1` (padrão) apenas numérico, `2` numérico e alfanumérico. Qualquer outro valor é lido como `1`.
+- Desde julho de 2026 os CNPJs novos podem ser alfanuméricos, e a `version: 1` padrão os rejeita: passe `version: 2` para aceitá-los.
 - Um número reservado (todos os dígitos iguais) é rejeitado nas duas versões; a versão `2` não tem lista de reservados para letras.
 - O conjunto oficial de caracteres do CNPJ alfanumérico são as letras maiúsculas de `A` a `Z` e os algarismos (os 2 dígitos verificadores são sempre algarismos). Uma letra minúscula só é aceita como normalização da entrada, como um caractere de máscara: a entrada é convertida para maiúsculas antes.
 - O Ex1 da pergunta 23 do perguntas e respostas da Receita Federal sobre o CNPJ alfanumérico, `AA345678/0003-29`, tem erro de impressão: os dígitos verificadores dele são `86`, então ele é rejeitado.
@@ -133,7 +134,7 @@ Fonte: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda.
 Formata um CNPJ.
 
 - **Opções** (`FormatCnpjOptions`): `pad` preenche o valor com zeros à esquerda até 14 caracteres antes de aplicar a máscara (padrão `false`); `version` escolhe o formato, `1` (padrão) apenas numérico, `2` alfanumérico; `obfuscate` esconde os 2 primeiros dígitos e os 2 dígitos verificadores. Um valor vazio, ou sem dígitos, devolve `''` mesmo com `pad`.
-- A versão `2` mantém letras e dígitos, com uma letra minúscula convertida para maiúscula antes, já que o conjunto oficial é de `A` a `Z`; a versão `1` mantém apenas dígitos.
+- A versão `2` mantém letras e dígitos, com uma letra minúscula convertida para maiúscula antes, já que o conjunto oficial é de `A` a `Z`; a versão `1` mantém apenas dígitos. Desde julho de 2026 os CNPJs novos podem ser alfanuméricos, então passe `version: 2` para manter as letras deles.
 - `obfuscate` vale para as duas versões e é aplicada após o `pad`. É uma convenção desta biblioteca, não uma regra oficial: nenhuma lei ou ato da Receita Federal define mascaramento para o CNPJ, cujos dados são públicos, a [ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) diz que "não há um padrão para o mascaramento" e as [regras do Pix do Banco Central](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) mostram o CNPJ inteiro onde mascaram o CPF; ela esconde os 2 primeiros caracteres e os 2 dígitos verificadores, à semelhança da regra do CPF.
 
 ```javascript
@@ -149,7 +150,7 @@ formatCnpj('12345678000195', { obfuscate: true }); // **.345.678/0001-**
 
 Remove a formatação do CNPJ, retorna um valor normalizado e limita o resultado a 14 caracteres.
 
-- **Opções** (`ParseCnpjOptions`): `version` escolhe o formato: `1` (padrão) mantém apenas dígitos, `2` mantém letras e dígitos, com uma letra minúscula convertida para maiúscula, já que o conjunto oficial é de `A` a `Z` (`parseCnpj('12.abc.345/01de-35', { version: 2 })` retorna `'12ABC34501DE35'`).
+- **Opções** (`ParseCnpjOptions`): `version` escolhe o formato: `1` (padrão) mantém apenas dígitos, `2` mantém letras e dígitos, com uma letra minúscula convertida para maiúscula, já que o conjunto oficial é de `A` a `Z` (`parseCnpj('12.abc.345/01de-35', { version: 2 })` retorna `'12ABC34501DE35'`). Desde julho de 2026 os CNPJs novos podem ser alfanuméricos, então o padrão descarta as letras deles: passe `version: 2` para mantê-las.
 
 ```javascript
 import { parseCnpj } from '@brazilian-utils/brazilian-utils';
@@ -171,7 +172,7 @@ import { generateCnpj } from '@brazilian-utils/brazilian-utils'
 
 generateCnpj();
 generateCnpj(2); // CNPJ alfanumérico, ex. 'Q0SLFMBD7VX439'
-generateCnpj({ branch: 3 }); // bloco de ordem '0003', ex. '12345678000372'
+generateCnpj({ branch: 3 }); // bloco de ordem '0003', ex. '12345678000357'
 generateCnpj({ version: 2, branch: 1 }); // CNPJ alfanumérico cujo bloco de ordem é '0001'
 ```
 
@@ -795,7 +796,7 @@ Valida uma Inscrição SUFRAMA. É o número de registro que a Superintendência
 - Retorna `false` para um código de setor `00` e para um dígito verificador módulo 11 errado.
 - Os códigos de setor e de localidade não são conferidos com uma tabela, pois o manual os lista apenas como exemplos.
 - A regra vem do Manual de Orientação do Contribuinte da NF-e (CONFAZ/ENCAT), não da SUFRAMA, cuja Resolução CAS nº 64/2021, art. 5º, só chama a inscrição de "um número de identificação e controle" e não traz layout nem dígito verificador.
-- Além dos caracteres de máscara usuais, `(`, `)`, `,` e `*` também são ignorados.
+- Espaços, `.`, `-` e `/` são aceitos entre os campos, como em `isValidCpf`. Qualquer outro caractere invalida o valor.
 
 ```javascript
 import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
@@ -1200,7 +1201,8 @@ Fonte: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/a
 
 Valida um RENAVAM (Registro Nacional de Veículos Automotores). Aceita o formato antigo (9 dígitos) e o formato novo (11 dígitos).
 
-- Espaços, pontos e hífens são ignorados; qualquer outro caractere invalida o valor.
+- Espaços, pontos, hífens e barras são ignorados; qualquer outro caractere invalida o valor.
+- Um número perde os zeros à esquerda, então um RENAVAM de 11 dígitos que começa com `0` só é aceito como string: `isValidRenavam('08794266580')` é `true` e `isValidRenavam(8794266580)` é `false`.
 - O dígito verificador é o da Portaria DENATRAN nº 27/2013, art. 1º: "10 dígitos e um dígito verificador, calculado através do módulo 11, peso 9", lido como os pesos 3, 2, 9, 8, 7, 6, 5, 4, 3 e 2. A portaria não escreve os pesos um a um nem diz o que fazer com resto 0, 1 ou 10, o que segue o [validation-br](https://github.com/klawdyo/validation-br/blob/main/src/renavam.ts) e o [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/renavam.py); completar com zeros um código de 9 dígitos até 11 é prática de mercado.
 
 ```javascript
@@ -1208,7 +1210,7 @@ import { isValidRenavam } from '@brazilian-utils/brazilian-utils';
 
 isValidRenavam('639884962'); // true (9 dígitos, formato antigo)
 isValidRenavam('00639884962'); // true (11 dígitos, formato novo)
-isValidRenavam('0063988.4962'); // true (pontos e hífens são ignorados)
+isValidRenavam('0063988.4962'); // true (o ponto é ignorado)
 isValidRenavam('12345678901'); // false (checksum inválido)
 isValidRenavam('00000000000'); // false (dígitos repetidos)
 isValidRenavam('ab00639884962'); // false (letras são rejeitadas)
@@ -2335,7 +2337,7 @@ generatePassport(); // 'RY393097'
 
 ### isValidCnh
 
-Valida uma CNH. Espaços, pontos e hífens são ignorados; qualquer outro caractere invalida o valor.
+Valida uma CNH. Espaços, pontos, hífens e barras são ignorados; qualquer outro caractere invalida o valor.
 
 - Um valor cujos 11 dígitos são todos iguais é rejeitado, então `'11111111111'` é inválido.
 - O primeiro dígito verificador mantém o resto 1 como `1`, como nos números reais de registro. O art. 4º, § 1º, da Resolução CONTRAN nº 886/2021, em que o resto 0 ou 1 dá `0`, fala em "O dígito verificador" sem dizer de qual número: escrito no singular logo depois do Número do Espelho da CNH (o único número do artigo com um só dígito verificador), ele se lê melhor como a regra desse dígito, mas a redação é genérica e não traz pesos, então não serve de fonte para os 2 dígitos verificadores do número de registro; nenhum texto oficial publica os pesos deles. As Resoluções CONTRAN nº 976/2022, nº 998/2023 e nº 1.006/2024 alteram a Resolução nº 886/2021, nenhuma delas no art. 4º. A Resolução CONTRAN nº 1.020/2025, a norma de habilitação mais nova, repete o layout no art. 10 ("nove caracteres e dois dígitos verificadores") sem regra de dígito verificador e não revoga a 886 (art. 140).
@@ -2535,7 +2537,7 @@ Valida um título de eleitor. Um título tem no máximo 12 dígitos, então um v
 
 - Um título é um número sequencial de 8 dígitos, um código de unidade federativa de 2 dígitos (`01` a `28`) e 2 dígitos verificadores.
 - O TSE despreza os zeros à esquerda do número sequencial na emissão, então um valor mais curto é lido como o título sem eles e completado com zeros à esquerda até 12 dígitos antes da validação (`123450159` é validado como `000123450159`). É preciso ao menos um dígito sequencial: o menor valor aceito tem 5 dígitos.
-- Espaços e pontos são aceitos ao redor e entre os grupos. Qualquer outro caractere, inclusive um hífen, invalida o valor.
+- Espaços, pontos, hífens e barras são aceitos ao redor e entre os grupos. Qualquer outro caractere invalida o valor.
 - A Resolução TSE nº 23.659/2021, art. 36, que revogou a Resolução TSE nº 21.538/2003 (art. 140), fixa o layout, a tabela das unidades federativas e dois dígitos verificadores "determinados com base no 'Módulo 11'". Ela não traz pesos nem regra por estado: os pesos e a regra que troca o resto 0 por 1 para São Paulo (`01`) e Minas Gerais (`02`) não têm fonte oficial e seguem as referências da comunidade abaixo.
 
 ```javascript
@@ -2768,6 +2770,7 @@ Fonte: [art. 473 do Código Nacional de Normas da Corregedoria Nacional de Justi
 Valida um número de CEI (Cadastro Específico do INSS). O CEI identifica o empregador sem CNPJ, como uma obra ou um produtor rural.
 
 - Layout: 12 dígitos impressos como `00.000.00000/00`, 11 dígitos de base e um dígito verificador.
+- Um número perde os zeros à esquerda, então um valor que começa com `0` só é aceito como string: `isValidCei('000000336854')` é `true` e `isValidCei(336854)` é `false`.
 - Só os 12 dígitos são oficiais: nenhuma norma, leiaute ou manual da Receita Federal publica o dígito verificador, que segue as referências da comunidade abaixo e confere com a base aberta do CNO e com o exemplo `000000336854` do SERPRO.
 
 ```javascript
@@ -2811,7 +2814,7 @@ parseCei('27.729.71181/87'); // '277297118187'
 
 Valida um número de CNO (Cadastro Nacional de Obras). O CNO substituiu o CEI para obras e manteve a mesma numeração.
 
-- Mesmas regras de `isValidCei`.
+- Mesmas regras de `isValidCei`, inclusive os zeros à esquerda de um número.
 
 ```javascript
 import { isValidCno } from '@brazilian-utils/brazilian-utils';
@@ -2856,6 +2859,7 @@ Valida um número de CAEPF (Cadastro de Atividade Econômica da Pessoa Física).
 
 - Layout: 14 dígitos impressos como `000.000.000/000-00`: a base de 9 dígitos do CPF do titular, um número de ordem de 3 dígitos e 2 dígitos verificadores.
 - Os dois dígitos verificadores seguem o módulo 11 do CNPJ; o par é então somado a 12, com retorno a zero acima de 99.
+- Um número perde os zeros à esquerda, então um valor que começa com `0` só é aceito como string: `isValidCaepf('00000002500171')` é `true` e `isValidCaepf(2500171)` é `false`.
 - Só as 14 posições e a base do CPF são oficiais (SERPRO: "9 primeiros números do CPF + número de inscrição resumido" de 5 posições). A divisão dessas 5 em número de ordem e 2 dígitos verificadores, a regra do dígito e a soma de 12 vêm das referências da comunidade abaixo; elas conferem com o exemplo `00000002500171` do SERPRO.
 
 ```javascript
@@ -3724,6 +3728,7 @@ Valida uma inscrição estadual para um estado. **Descontinuada:** a forma posic
   - AM: a regra do dígito verificador da página tem dois ramos e não define "Resto"; a biblioteca o lê como a soma módulo 11 e dá 0 a uma soma 0 ou 1, a regra comum de módulo 11.
   - MG: um primeiro dígito verificador 10, de uma soma que já é múltiplo de dez, é lido como 0.
   - PE: o formato eFisco de 9 dígitos e o antigo formato CACEPE de 14 dígitos, ambos na página do SINTEGRA (a Portaria SF nº 087/2007 converteu os números antigos, mas não fixou data a partir da qual deixam de valer).
+  - RO: o formato de 14 dígitos que a página do SINTEGRA dá para as inscrições desde 01/08/2000. O formato de 9 dígitos que ela ainda imprime para a fórmula anterior (`101.62521-3`) é rejeitado: esses números foram convertidos para 13 dígitos mais o dígito verificador (`0000000062521-3`).
   - AL: o terceiro dígito, o tipo de empresa, deve ser 0, 3, 5, 7 ou 8, os valores que a página do SINTEGRA lista.
 - Uma inscrição só de zeros é aceita em todo estado cuja fórmula publicada produz dígito verificador 0 para ela: AM, CE, ES, MG, PB, PE (9 dígitos), PI, PR, RJ, RS, SC, SE e SP, mais BA com 8 ou 9 dígitos, MT com 9 ou 11 dígitos e TO com 9 dígitos.
 

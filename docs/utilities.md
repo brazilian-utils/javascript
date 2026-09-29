@@ -115,6 +115,7 @@ Source: [Receita Federal, "Cadastros: CPF e CNPJ"](https://www.gov.br/receitafed
 Check if a CNPJ is valid.
 
 - **Options** (`IsValidCnpjOptions`): `version` picks the accepted format: `1` (default) numeric only, `2` numeric and alphanumeric. Any other value is read as `1`.
+- Since July 2026 new CNPJs may be alphanumeric, which the default `version: 1` rejects: pass `version: 2` to accept them.
 - A reserved number (all digits the same) is rejected under both versions; version `2` has no reserved list for letters.
 - The official character set of the alphanumeric CNPJ is the capital letters `A` to `Z` and the digits (the 2 check digits are always digits). A lower case letter is accepted only as input normalization, like a mask character: the input is upper-cased first.
 - The Ex1 of question 23 of the Receita Federal's Q&A on the alphanumeric CNPJ, `AA345678/0003-29`, is a misprint: its check digits are `86`, so it is rejected.
@@ -133,7 +134,7 @@ Source: [Instrução Normativa RFB nº 2.229/2024](http://normas.receita.fazenda
 Format a CNPJ.
 
 - **Options** (`FormatCnpjOptions`): `pad` left-pads the value with zeros to 14 characters before masking (default `false`); `version` picks the format, `1` (default) numeric only, `2` alphanumeric; `obfuscate` hides the first 2 digits and the 2 check digits. An empty value, or one without digits, gives `''` even with `pad`.
-- Version `2` keeps letters and digits, a lower case letter upper-cased first since the official set is `A` to `Z`; version `1` keeps digits only.
+- Version `2` keeps letters and digits, a lower case letter upper-cased first since the official set is `A` to `Z`; version `1` keeps digits only. Since July 2026 new CNPJs may be alphanumeric, so pass `version: 2` to keep their letters.
 - `obfuscate` works in both versions and is applied after `pad`. It is a convention of this library, not an official rule: no law or Receita Federal act sets a masking rule for the CNPJ, whose data are public, the [ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo_tecnico_sobre_anonimizacao_de_dados_na_lgpd_uma_visao_de_processo_baseado_em_risco_e_tecnicas_computacionais.pdf) says "não há um padrão para o mascaramento", and the [Banco Central's Pix rules](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/IV_RequisitosMinimosparaExperienciadoUsuario.pdf) show the CNPJ in full where they mask the CPF; it hides the first 2 characters and the 2 check digits, after the CPF rule.
 
 ```javascript
@@ -149,7 +150,7 @@ formatCnpj('12345678000195', { obfuscate: true }); // **.345.678/0001-**
 
 Remove CNPJ formatting, return a normalized value, and cap the result to 14 characters.
 
-- **Options** (`ParseCnpjOptions`): `version` picks the format: `1` (default) keeps digits only, `2` keeps letters and digits, a lower case letter upper-cased since the official set is `A` to `Z` (`parseCnpj('12.abc.345/01de-35', { version: 2 })` returns `'12ABC34501DE35'`).
+- **Options** (`ParseCnpjOptions`): `version` picks the format: `1` (default) keeps digits only, `2` keeps letters and digits, a lower case letter upper-cased since the official set is `A` to `Z` (`parseCnpj('12.abc.345/01de-35', { version: 2 })` returns `'12ABC34501DE35'`). Since July 2026 new CNPJs may be alphanumeric, so the default drops their letters: pass `version: 2` to keep them.
 
 ```javascript
 import { parseCnpj } from '@brazilian-utils/brazilian-utils';
@@ -171,7 +172,7 @@ import { generateCnpj } from '@brazilian-utils/brazilian-utils'
 
 generateCnpj();
 generateCnpj(2); // alphanumeric CNPJ, e.g. 'Q0SLFMBD7VX439'
-generateCnpj({ branch: 3 }); // ordem block '0003', e.g. '12345678000372'
+generateCnpj({ branch: 3 }); // ordem block '0003', e.g. '12345678000357'
 generateCnpj({ version: 2, branch: 1 }); // alphanumeric CNPJ whose ordem block is '0001'
 ```
 
@@ -796,7 +797,7 @@ Check if an Inscrição SUFRAMA is valid. It is the registration number the Supe
 - Returns `false` for a sector code of `00` and for a wrong módulo 11 check digit.
 - The sector and locality codes are not checked against a table, since the manual lists them only as examples.
 - The rule comes from the NF-e Manual de Orientação do Contribuinte (CONFAZ/ENCAT), not from the SUFRAMA, whose Resolução CAS nº 64/2021, art. 5º, only calls the inscrição "um número de identificação e controle" and gives no layout or check digit.
-- Besides the usual mask characters, `(`, `)`, `,` and `*` are also ignored.
+- Whitespace, `.`, `-` and `/` are accepted between the fields, as in `isValidCpf`. Any other character makes the value invalid.
 
 ```javascript
 import { isValidSuframa } from '@brazilian-utils/brazilian-utils';
@@ -1201,7 +1202,8 @@ Source: [Resolução CONTRAN nº 969/2022](https://www.gov.br/transportes/pt-br/
 
 Check if a RENAVAM (Registro Nacional de Veículos Automotores) is valid. Accepts the old format (9 digits) and the new format (11 digits).
 
-- Spaces, dots and hyphens are ignored; any other character makes the value invalid.
+- Spaces, dots, hyphens and slashes are ignored; any other character makes the value invalid.
+- A number loses its leading zeros, so an 11 digit RENAVAM that starts with `0` is only accepted as a string: `isValidRenavam('08794266580')` is `true` and `isValidRenavam(8794266580)` is `false`.
 - The check digit is the one of Portaria DENATRAN nº 27/2013, art. 1º: "10 dígitos e um dígito verificador, calculado através do módulo 11, peso 9", read as the weights 3, 2, 9, 8, 7, 6, 5, 4, 3 and 2. The portaria gives neither the weights one by one nor the handling of a remainder of 0, 1 or 10, which follow [validation-br](https://github.com/klawdyo/validation-br/blob/main/src/renavam.ts) and [brutils](https://github.com/brazilian-utils/python/blob/main/brutils/renavam.py); padding a 9 digit code to 11 with zeros is market practice.
 
 ```javascript
@@ -1209,7 +1211,7 @@ import { isValidRenavam } from '@brazilian-utils/brazilian-utils';
 
 isValidRenavam('639884962'); // true (9 digits, old format)
 isValidRenavam('00639884962'); // true (11 digits, new format)
-isValidRenavam('0063988.4962'); // true (dots and hyphens are ignored)
+isValidRenavam('0063988.4962'); // true (the dot is ignored)
 isValidRenavam('12345678901'); // false (invalid checksum)
 isValidRenavam('00000000000'); // false (repeated digits)
 isValidRenavam('ab00639884962'); // false (letters are rejected)
@@ -2336,7 +2338,7 @@ generatePassport(); // 'RY393097'
 
 ### isValidCnh
 
-Check if a CNH is valid. Spaces, dots and hyphens are ignored; any other character makes the value invalid.
+Check if a CNH is valid. Spaces, dots, hyphens and slashes are ignored; any other character makes the value invalid.
 
 - A value whose 11 digits are all the same is rejected, so `'11111111111'` is invalid.
 - The first check digit keeps a remainder of 1 as `1`, as real registry numbers do. Resolução CONTRAN nº 886/2021, art. 4º § 1º, whose remainder of 0 or 1 gives `0`, speaks of "O dígito verificador" without naming the number: written in the singular right after the Número do Espelho da CNH (the only number of the article with a single check digit), it reads best as that digit's rule, but it is worded generically and gives no weights, so it is no source for the 2 check digits of the registry number; no official text publishes their weights. Resoluções CONTRAN nº 976/2022, nº 998/2023 and nº 1.006/2024 amend Resolução nº 886/2021, none of them in art. 4º. Resolução CONTRAN nº 1.020/2025, the newer habilitação norm, repeats the layout in its art. 10 ("nove caracteres e dois dígitos verificadores") with no check digit rule and does not revoke the 886 (art. 140).
@@ -2536,7 +2538,7 @@ Check if a voter ID number is valid. A voter ID has at most 12 digits, so a 13-d
 
 - A voter ID is an 8-digit sequential number, a 2-digit federative union code (`01` to `28`) and 2 check digits.
 - The TSE drops the leading zeros of the sequential number when it issues the ID, so a shorter value is read as the ID without them and left padded with zeros to 12 digits before it is checked (`123450159` is checked as `000123450159`). At least one sequential digit is required: the shortest accepted value has 5 digits.
-- Whitespace and dots are accepted around and between the groups. Any other character, a hyphen included, makes the value invalid.
+- Whitespace, dots, hyphens and slashes are accepted around and between the groups. Any other character makes the value invalid.
 - Resolução TSE nº 23.659/2021, art. 36, which revoked Resolução TSE nº 21.538/2003 (art. 140), fixes the layout, the federative union table and two check digits "determinados com base no 'Módulo 11'". It gives no weights and no rule per state: the weights, and the rule that turns a remainder of 0 into 1 for São Paulo (`01`) and Minas Gerais (`02`), have no official source and follow the community references below.
 
 ```javascript
@@ -2769,6 +2771,7 @@ Source: [art. 473 of the Código Nacional de Normas da Corregedoria Nacional de 
 Check if a CEI (Cadastro Específico do INSS) number is valid. The CEI identifies an employer with no CNPJ, such as a construction work or a rural producer.
 
 - Layout: 12 digits printed as `00.000.00000/00`, 11 base digits and one check digit.
+- A number loses its leading zeros, so a value that starts with `0` is only accepted as a string: `isValidCei('000000336854')` is `true` and `isValidCei(336854)` is `false`.
 - Only the 12 digits are official: no norm, layout or manual of the Receita Federal publishes the check digit, which follows the community references below and agrees with the CNO open dataset and with SERPRO's example `000000336854`.
 
 ```javascript
@@ -2812,7 +2815,7 @@ parseCei('27.729.71181/87'); // '277297118187'
 
 Check if a CNO (Cadastro Nacional de Obras) number is valid. The CNO replaced the CEI for construction works and kept its numbering.
 
-- Same rules as `isValidCei`.
+- Same rules as `isValidCei`, the leading zeros of a number included.
 
 ```javascript
 import { isValidCno } from '@brazilian-utils/brazilian-utils';
@@ -2857,6 +2860,7 @@ Check if a CAEPF (Cadastro de Atividade Econômica da Pessoa Física) number is 
 
 - Layout: 14 digits printed as `000.000.000/000-00`: the 9-digit CPF base of the holder, a 3-digit sequence and 2 check digits.
 - Both check digits follow the CNPJ's modulus 11; the pair is then shifted by 12, wrapping around 100.
+- A number loses its leading zeros, so a value that starts with `0` is only accepted as a string: `isValidCaepf('00000002500171')` is `true` and `isValidCaepf(2500171)` is `false`.
 - Only the 14 positions and the CPF base are official (SERPRO: "9 primeiros números do CPF + número de inscrição resumido" of 5 positions). The split of those 5 into a sequence and 2 check digits, the check digit rule and the shift of 12 come from the community references below; they agree with SERPRO's example `00000002500171`.
 
 ```javascript
@@ -3725,6 +3729,7 @@ Check if an inscrição estadual (state registration) is valid for a state. **De
   - AM: the page's check digit rule has two branches and leaves "Resto" undefined; the library reads it as the sum modulo 11 and gives 0 to a sum of 0 or 1, the shared modulus 11 rule.
   - MG: a first check digit of 10, from a sum that is already a multiple of ten, is read as 0.
   - PE: the 9 digit eFisco form and the old 14 digit CACEPE form, both on the SINTEGRA page (Portaria SF nº 087/2007 converted the old numbers but set no date after which they are void).
+  - RO: the 14 digit form the SINTEGRA page gives for registrations since 01/08/2000. The 9 digit form it still prints for the earlier formula (`101.62521-3`) is rejected: those numbers were converted to 13 digits plus the check digit (`0000000062521-3`).
   - AL: the third digit, the tipo de empresa, must be 0, 3, 5, 7 or 8, the values the SINTEGRA page lists.
 - An all-zero registration is accepted wherever the published formula yields a check digit of 0 for it: AM, CE, ES, MG, PB, PE (9 digits), PI, PR, RJ, RS, SC, SE and SP, plus BA with 8 or 9 digits, MT with 9 or 11 digits and TO with 9 digits.
 

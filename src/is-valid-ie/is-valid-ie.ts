@@ -691,6 +691,9 @@ const validateIe = (stateCode: unknown, value: unknown): boolean => {
  * (um), Então o dígito verificador será = 0 (zero)".
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RN.html
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RO.html
+ * The page still prints the formula used before 01/08/2000, 3 digits of municipality, 5 of company
+ * and a check digit (`101.62521-3`). It is not accepted: those numbers were converted to 13
+ * digits plus the check digit (`0000000062521-3`), the 14 digit form checked here.
  * @see Official: http://www.sintegra.gov.br/Cad_Estados/cad_RR.html
  * "O Número de Inscrição Estadual é composto por 9 Dígitos, sendo os dois primeiros indicativos
  * do Estado da Federação", "Dígito Verificador de módulo 9", examples 24006628-1 to 24001340-7.
