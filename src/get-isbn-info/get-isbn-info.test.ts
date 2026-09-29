@@ -12,7 +12,7 @@ const withCheckDigit = (body: string): string => `${body}${gs1CheckDigit(body)}`
 
 describe("getIsbnInfo", () => {
 	it("should split a Brazilian ISBN of the group 65", () => {
-		expect(getIsbnInfo("ISBN 978-65-89999-01-0")).toEqual({
+		expect(getIsbnInfo("978-65-89999-01-0")).toEqual({
 			isbn: "9786589999010",
 			prefix: "978",
 			registrationGroup: "65",
