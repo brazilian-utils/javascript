@@ -1,4 +1,5 @@
 import { STATE_CODES } from "../constants/state-codes";
+import { readMunicipalityStateCode } from "../read-municipality-state-code/read-municipality-state-code";
 import { describe, expect, test } from "../test/runtime";
 import { readMunicipalityCodes } from "./read-municipality-codes";
 
@@ -40,6 +41,14 @@ describe("readMunicipalityCodes", () => {
 
 		for (const code of codes) {
 			expect(code).toMatch(/^\d{7}$/);
+		}
+	});
+
+	test("should read codes whose first two digits are the state they are listed under", () => {
+		for (const stateCode of STATE_CODES) {
+			for (const code of readMunicipalityCodes(stateCode)) {
+				expect(readMunicipalityStateCode(code)).toBe(stateCode);
+			}
 		}
 	});
 
