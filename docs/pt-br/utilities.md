@@ -3307,14 +3307,14 @@ Valida um código de CST (Código de Situação Tributária) para um tributo. In
 
 | Tributo | Formato | Códigos aceitos |
 | --- | --- | --- |
-| `icms` | 3 dígitos (origem + CST) | origem `0`-`8` + um de `00`, `02`, `10`, `15`, `20`, `30`, `40`, `41`, `50`, `51`, `53`, `60`, `61`, `70`, `90` |
+| `icms` | 2 dígitos (Tabela B) ou 3 dígitos (origem + CST) | o código da Tabela B sozinho, ou origem `0`-`8` + um de `00`, `02`, `10`, `15`, `20`, `30`, `40`, `41`, `50`, `51`, `53`, `60`, `61`, `70`, `90` |
 | `ipi` | 2 dígitos | `00`, `01`, `02`, `03`, `04`, `05`, `49`, `50`, `51`, `52`, `53`, `54`, `55`, `99` |
 | `pis` | 2 dígitos | `01`-`09`, `49`, `50`-`56`, `60`-`67`, `70`-`75`, `98`, `99` |
 | `cofins` | 2 dígitos | mesma tabela do `pis` |
 
 - **Opções** (`IsValidCstOptions`): `tax` escolhe a tabela. Omitido, ou fora desses quatro valores, todas as tabelas são aceitas.
 - Aceita uma string com os 2 dígitos de um código da Tabela B ou os 3 dígitos da forma do ICMS, ou um número. A forma do ICMS pode ter qualquer sequência de separadores (espaço, `.`, `-` ou `/`) depois do dígito de origem.
-- Um único dígito é completado até a forma de 3 dígitos do ICMS; uma string de 2 dígitos é um código da Tabela B, enquanto o número `7` é o código ICMS `007`.
+- Um único dígito é completado até a forma de 3 dígitos do ICMS; um valor de 2 dígitos é um código da Tabela B e nunca é lido como origem mais um dígito (`'10'` é o código da Tabela B `10`), enquanto o número `7` é o código ICMS `007`.
 
 ```javascript
 import { isValidCst } from '@brazilian-utils/brazilian-utils';
@@ -3324,6 +3324,7 @@ isValidCst(0, { tax: 'icms' }); // true (um único dígito é completado até a 
 isValidCst('0', { tax: 'icms' }); // true (completado do mesmo jeito que um número)
 isValidCst('110', { tax: 'icms' }); // true
 isValidCst('002', { tax: 'icms' }); // true (monofasia de combustíveis)
+isValidCst('60', { tax: 'icms' }); // true (um código da Tabela B sozinho, como o campo CST da NF-e o traz)
 isValidCst('06', { tax: 'pis' }); // true
 isValidCst('99', { tax: 'ipi' }); // true
 isValidCst('110'); // true (encontrado na tabela icms, tax omitido)

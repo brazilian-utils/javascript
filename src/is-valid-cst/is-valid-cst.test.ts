@@ -41,9 +41,39 @@ describe("isValidCst", () => {
 			expect(isValidCst("074", { tax: "icms" })).toBe(false);
 		});
 
-		it("should return false for a length different from 3", () => {
-			expect(isValidCst("10", { tax: "icms" })).toBe(false);
+		it("should return true for the bare 2 digit Tabela B codes, the NF-e CST field next to the origin", () => {
+			for (const code of [
+				"00",
+				"02",
+				"10",
+				"15",
+				"20",
+				"30",
+				"40",
+				"41",
+				"50",
+				"51",
+				"53",
+				"60",
+				"61",
+				"70",
+				"90",
+			]) {
+				expect(isValidCst(code, { tax: "icms" })).toBe(true);
+			}
+		});
+
+		it("should return false for a 2 digit value that is not a Tabela B code", () => {
+			expect(isValidCst("01", { tax: "icms" })).toBe(false);
+			expect(isValidCst("07", { tax: "icms" })).toBe(false);
+			expect(isValidCst("12", { tax: "icms" })).toBe(false);
+			expect(isValidCst("49", { tax: "icms" })).toBe(false);
+			expect(isValidCst("99", { tax: "icms" })).toBe(false);
+		});
+
+		it("should return false for a length other than 2 or 3", () => {
 			expect(isValidCst("1020", { tax: "icms" })).toBe(false);
+			expect(isValidCst("10200", { tax: "icms" })).toBe(false);
 		});
 	});
 
@@ -111,7 +141,7 @@ describe("isValidCst", () => {
 	});
 
 	it("should consult only the given table, never the other three", () => {
-		expect(isValidCst("00", { tax: "icms" })).toBe(false);
+		expect(isValidCst("07", { tax: "icms" })).toBe(false);
 		expect(isValidCst("06", { tax: "ipi" })).toBe(false);
 		expect(isValidCst("00", { tax: "pis" })).toBe(false);
 		expect(isValidCst("00", { tax: "cofins" })).toBe(false);
@@ -124,12 +154,19 @@ describe("isValidCst", () => {
 			expect(isValidCst("110")).toBe(true);
 		});
 
-		it("should return true when the code exists only in the ipi table", () => {
+		it("should return true when the code exists in the ipi table", () => {
 			expect(isValidCst("00")).toBe(true);
 		});
 
 		it("should return true when the code exists only in the pis/cofins table", () => {
 			expect(isValidCst("07")).toBe(true);
+		});
+
+		it("should return true when the code exists only in the icms Tabela B", () => {
+			expect(isValidCst("10")).toBe(true);
+			expect(isValidCst("15")).toBe(true);
+			expect(isValidCst("41")).toBe(true);
+			expect(isValidCst("90")).toBe(true);
 		});
 
 		it("should return true when the code exists in both the ipi and pis/cofins tables", () => {
@@ -179,6 +216,9 @@ describe("isValidCst", () => {
 			expect(isValidCst(49, { tax: "ipi" })).toBe(true);
 			expect(isValidCst("49", { tax: "ipi" })).toBe(true);
 			expect(isValidCst(49, { tax: "icms" })).toBe(false);
+			expect(isValidCst(60, { tax: "icms" })).toBe(true);
+			expect(isValidCst(90, { tax: "icms" })).toBe(true);
+			expect(isValidCst(7, { tax: "icms" })).toBe(false);
 			expect(isValidCst("00", { tax: "ipi" })).toBe(true);
 		});
 
@@ -255,6 +295,14 @@ describe("isValidCst", () => {
 						expect(isValidCst(`${origin}${code}`, { tax: "icms" })).toBe(true);
 					},
 				),
+			);
+		});
+
+		test("should validate every bare Tabela B code for icms", () => {
+			fc.assert(
+				fc.property(fc.constantFrom(...ICMS_CST_CODES), (code) => {
+					expect(isValidCst(code, { tax: "icms" })).toBe(true);
+				}),
 			);
 		});
 

@@ -3308,14 +3308,14 @@ Check if a CST (Código de Situação Tributária) code is valid for a given tax
 
 | Tax | Format | Accepted codes |
 | --- | --- | --- |
-| `icms` | 3 digits (origem + CST) | origem `0`-`8` + one of `00`, `02`, `10`, `15`, `20`, `30`, `40`, `41`, `50`, `51`, `53`, `60`, `61`, `70`, `90` |
+| `icms` | 2 digits (Tabela B) or 3 digits (origem + CST) | the Tabela B code alone, or origem `0`-`8` + one of `00`, `02`, `10`, `15`, `20`, `30`, `40`, `41`, `50`, `51`, `53`, `60`, `61`, `70`, `90` |
 | `ipi` | 2 digits | `00`, `01`, `02`, `03`, `04`, `05`, `49`, `50`, `51`, `52`, `53`, `54`, `55`, `99` |
 | `pis` | 2 digits | `01`-`09`, `49`, `50`-`56`, `60`-`67`, `70`-`75`, `98`, `99` |
 | `cofins` | 2 digits | same table as `pis` |
 
 - **Options** (`IsValidCstOptions`): `tax` picks the table. Omitted, or outside those four values, every table is accepted.
 - Accepts a string with the 2 digits of a Tabela B code or the 3 digits of the ICMS form, or a number. The ICMS form may have any run of separators (space, `.`, `-` or `/`) after the origin digit.
-- A single digit is padded to the 3-digit ICMS form; a 2-digit string is a Tabela B code, while the number `7` is the ICMS code `007`.
+- A single digit is padded to the 3-digit ICMS form; a 2-digit value is a Tabela B code and is never read as an origin plus a digit (`'10'` is the Tabela B code `10`), while the number `7` is the ICMS code `007`.
 
 ```javascript
 import { isValidCst } from '@brazilian-utils/brazilian-utils';
@@ -3325,6 +3325,7 @@ isValidCst(0, { tax: 'icms' }); // true (a single digit is padded to the 3 digit
 isValidCst('0', { tax: 'icms' }); // true (padded the same way a number is)
 isValidCst('110', { tax: 'icms' }); // true
 isValidCst('002', { tax: 'icms' }); // true (monofasia de combustíveis)
+isValidCst('60', { tax: 'icms' }); // true (a bare Tabela B code, as the NF-e CST field carries it)
 isValidCst('06', { tax: 'pis' }); // true
 isValidCst('99', { tax: 'ipi' }); // true
 isValidCst('110'); // true (found in the icms table, tax omitted)
