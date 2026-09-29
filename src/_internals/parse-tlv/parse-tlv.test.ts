@@ -43,6 +43,15 @@ describe("parseTlv", () => {
 			expect(parseTlv("0A0201")).toBeNull();
 		});
 
+		test("when a character of an id is just outside the range of the digits", () => {
+			expect(parseTlv("/10201")).toBeNull();
+			expect(parseTlv(":10201")).toBeNull();
+			expect(parseTlv("1/0201")).toBeNull();
+			expect(parseTlv("1:0201")).toBeNull();
+			expect(parseTlv("A10201")).toBeNull();
+			expect(parseTlv("1A0201")).toBeNull();
+		});
+
 		test("when a length is not made of two digits", () => {
 			expect(parseTlv("00A201")).toBeNull();
 		});

@@ -6,6 +6,11 @@ import { capitalize, type CapitalizeOptions } from "./capitalize";
 
 describe("capitalize", () => {
 	describe("should capitalize", () => {
+		test("when the value holds the default upper case words, on the first call of the module", () => {
+			expect(capitalize("maria da silva ltda")).toBe("Maria da Silva LTDA");
+			expect(capitalize("henrique viii")).toBe("Henrique VIII");
+		});
+
 		test("when the value does not contain preposition", () => {
 			expect(capitalize("esponja vegetal")).toBe("Esponja Vegetal");
 			expect(capitalize("refrigerante 1L")).toBe("Refrigerante 1l");

@@ -27,8 +27,10 @@ const readStates = (fiscalRegion: string): StateCode[] => {
 
 	let states = statesByFiscalRegion.get(fiscalRegion);
 
+	// Stryker disable next-line ConditionalExpression: the cache only saves filtering the states again, and `readStates` returns a copy either way.
 	if (!states) {
 		states = STATE_CODES.filter((state) => CPF_FISCAL_REGION_BY_STATE[state] === fiscalRegion);
+		// Stryker disable next-line CallExpression: the cache only saves filtering the states again; not storing them means the next call filters the same states again.
 		statesByFiscalRegion.set(fiscalRegion, states);
 	}
 

@@ -47,12 +47,14 @@ export const getMunicipalitiesByAreaCode = (areaCode: string | number): Municipa
 
 	let entries = municipalitiesByAreaCode.get(info.areaCode);
 
+	// Stryker disable next-line ConditionalExpression: the cache only saves building the entries again; entries built on every call are the same, and the result is a copy either way.
 	if (!entries) {
 		entries = info.stateCodes.flatMap((stateCode) =>
 			readMunicipalities(stateCode)
 				.filter(([, code]) => readMunicipalityAreaCode(stateCode, code) === info.areaCode)
 				.map(([name, code]): [string, string, StateCode] => [name, code, stateCode]),
 		);
+		// Stryker disable next-line CallExpression: the cache only saves building the entries again; not storing them means the next call builds the same entries again.
 		municipalitiesByAreaCode.set(info.areaCode, entries);
 	}
 

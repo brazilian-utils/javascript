@@ -60,6 +60,7 @@ export const getCodeByMunicipalityName = (
 
 	let index = codesByName.get(normalizedStateCode);
 
+	// Stryker disable next-line ConditionalExpression: the index only saves building it again; an index built on every lookup finds the same code.
 	if (!index) {
 		index = new Map();
 

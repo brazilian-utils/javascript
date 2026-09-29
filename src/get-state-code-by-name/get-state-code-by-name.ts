@@ -36,6 +36,7 @@ let codesByName: Map<string, StateCode> | undefined;
  * ```
  */
 export const getStateCodeByName = (name: string): StateCode | null => {
+	// Stryker disable next-line ConditionalExpression: the index only saves building it again; an index built on every lookup finds the same code.
 	if (!codesByName) {
 		codesByName = new Map();
 

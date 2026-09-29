@@ -16,6 +16,7 @@ const indexes: Partial<Record<BankKey, Map<string, Bank>>> = {};
 export const findBank = (key: BankKey, value: string): Bank | undefined => {
 	let index = indexes[key];
 
+	// Stryker disable next-line ConditionalExpression: the index only saves building it again; an index built on every lookup finds the same bank.
 	if (!index) {
 		index = new Map();
 

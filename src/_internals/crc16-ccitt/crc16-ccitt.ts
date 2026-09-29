@@ -15,6 +15,7 @@ let table: Uint16Array | undefined;
 const buildTable = (): Uint16Array => {
 	const entries = new Uint16Array(BYTE_VALUES);
 
+	// Stryker disable next-line EqualityOperator: the extra pass writes `entries[BYTE_VALUES]`, past the end of the typed array, and a write there is dropped.
 	for (let byte = 0; byte < BYTE_VALUES; byte++) {
 		let crc = byte << 8;
 
@@ -52,11 +53,13 @@ export const crc16Ccitt = (value: string): string => {
 	table ??= buildTable();
 
 	let crc = INITIAL_VALUE;
+	// Stryker disable next-line BooleanLiteral: starting at `false` sends every value to the UTF-8 pass below, which gives the checksum the ASCII pass gives for a string of ASCII characters.
 	let ascii = true;
 
 	for (let index = 0; index < value.length; index++) {
 		const code = value.charCodeAt(index);
 
+		// Stryker disable next-line ConditionalExpression: leaving for the UTF-8 pass at the first character gives the checksum the ASCII pass gives for a string of ASCII characters.
 		if (code >= ASCII_LIMIT) {
 			ascii = false;
 			break;
@@ -65,6 +68,7 @@ export const crc16Ccitt = (value: string): string => {
 		crc = update(crc, code, table);
 	}
 
+	// Stryker disable next-line ConditionalExpression: running the UTF-8 pass for an ASCII string restarts from the initial value and feeds the same bytes, so it gives the same checksum.
 	if (!ascii) {
 		crc = INITIAL_VALUE;
 

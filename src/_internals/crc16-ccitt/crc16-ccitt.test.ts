@@ -20,6 +20,12 @@ describe("crc16Ccitt", () => {
 		expect(crc16Ccitt("123456789")).toBe("29B1");
 	});
 
+	test("should checksum the UTF-8 bytes of a character from U+0080 up, not its code", () => {
+		expect(crc16Ccitt("\u0080")).toBe("FCB1");
+		expect(crc16Ccitt("a\u0080b")).toBe("B44D");
+		expect(crc16Ccitt("\u007F")).toBe("6E88");
+	});
+
 	test("should return the initial value for an empty string", () => {
 		expect(crc16Ccitt("")).toBe("FFFF");
 	});

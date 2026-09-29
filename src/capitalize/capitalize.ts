@@ -43,6 +43,7 @@ const toWordSet = (
 };
 
 const readLowerCaseSet = (words: unknown): Set<string> => {
+	// Stryker disable next-line ConditionalExpression: for a value that is not an array `toWordSet` falls back to the same default words, so skipping the cache only builds the same set again.
 	if (Array.isArray(words)) return toWordSet(words, PREPOSITIONS, foldToLowerCase);
 
 	defaultLowerCaseSet ??= toWordSet(words, PREPOSITIONS, foldToLowerCase);
@@ -59,6 +60,7 @@ const readLowerCaseSet = (words: unknown): Set<string> => {
  * @returns {Set<string>} The words to keep in upper case, in upper case.
  */
 const readUpperCaseSet = (words: unknown): Set<string> => {
+	// Stryker disable next-line ArrayDeclaration: `toWordSet` reads its fallback only when `words` is not an array, and here it is one.
 	if (Array.isArray(words)) return toWordSet(words, [], foldToUpperCase);
 
 	defaultUpperCaseSet ??= toWordSet(
