@@ -104,6 +104,7 @@
 		"./get-states": "./src/get-states/get-states.ts",
 		"./get-states-by-region": "./src/get-states-by-region/get-states-by-region.ts",
 		"./get-timezone-by-state": "./src/get-timezone-by-state/get-timezone-by-state.ts",
+		"./get-voter-id-info": "./src/get-voter-id-info/get-voter-id-info.ts",
 		"./is-business-day": "./src/is-business-day/is-business-day.ts",
 		"./is-holiday": "./src/is-holiday/is-holiday.ts",
 		"./is-valid-bank-account": "./src/is-valid-bank-account/is-valid-bank-account.ts",

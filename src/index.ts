@@ -207,6 +207,7 @@ export { getStateCapital } from "./get-state-capital/get-state-capital";
 export { getStates } from "./get-states/get-states";
 export { getStatesByRegion } from "./get-states-by-region/get-states-by-region";
 export { getTimezoneByState } from "./get-timezone-by-state/get-timezone-by-state";
+export { type VoterIdInfo, getVoterIdInfo } from "./get-voter-id-info/get-voter-id-info";
 export { type BusinessDayOptions, isBusinessDay } from "./is-business-day/is-business-day";
 export { type IsHolidayParams, isHoliday } from "./is-holiday/is-holiday";
 export {

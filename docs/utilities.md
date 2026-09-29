@@ -2630,6 +2630,31 @@ generateVoterId('XX'); // falls back to "ZZ" instead of throwing
 
 Source: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), the CPF masking rule `obfuscate` borrows, first set by [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) and repeated by the later LDOs ([Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), the one for 2026, repeats it).
 
+### getVoterIdInfo
+
+Read the fields of a voter ID, as a `VoterIdInfo`, or `null` when `isValidVoterId` would return `false`.
+
+- Fields: `sequentialNumber` (8 digits), `federativeUnion` (the code `'01'` to `'28'`), `stateCode` (a `StateCode`, or `null` for `'28'`, the voters abroad) and `checkDigits` (2 digits). Codes are strings that keep their leading zeros.
+- A voter ID issued without the leading zeros of its sequential number is read as `isValidVoterId` reads it, left padded with zeros to 12 digits: `'123450159'` gives the `sequentialNumber` `'00012345'`.
+- The `stateCode` is the federative union of the registration, not necessarily where the voter lives today.
+
+```javascript
+import { getVoterIdInfo } from '@brazilian-utils/brazilian-utils';
+
+getVoterIdInfo('1023 8501 06 71');
+// {
+//   sequentialNumber: '10238501',
+//   federativeUnion: '06',
+//   stateCode: 'PR',
+//   checkDigits: '71',
+// }
+
+getVoterIdInfo('000000002801'); // { sequentialNumber: '00000000', federativeUnion: '28', stateCode: null, checkDigits: '01' }
+getVoterIdInfo('123456780124'); // null (invalid check digits)
+```
+
+Source: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021).
+
 ## CNS
 
 ### isValidCns

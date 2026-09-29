@@ -2630,6 +2630,31 @@ generateVoterId('XX'); // usa "ZZ" em vez de lançar erro
 
 Fonte: [Lei nº 14.194/2021, art. 149](https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/L14194.htm), a regra de mascaramento do CPF que o `obfuscate` toma emprestada, criada pela [Lei nº 12.309/2010, art. 87, § 5º](https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2010/lei/l12309.htm) e repetida pelas LDOs seguintes (a de 2026, [Lei nº 15.321/2025, art. 163](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/L15321.htm#art163), a repete).
 
+### getVoterIdInfo
+
+Lê os campos de um título de eleitor, como um `VoterIdInfo`, ou `null` quando o `isValidVoterId` retornaria `false`.
+
+- Campos: `sequentialNumber` (8 dígitos), `federativeUnion` (o código `'01'` a `'28'`), `stateCode` (um `StateCode`, ou `null` para `'28'`, os eleitores no exterior) e `checkDigits` (2 dígitos). Os códigos são strings que mantêm os zeros à esquerda.
+- Um título expedido sem os zeros à esquerda do número sequencial é lido como o `isValidVoterId` o lê, preenchido com zeros à esquerda até 12 dígitos: `'123450159'` dá o `sequentialNumber` `'00012345'`.
+- O `stateCode` é a unidade federativa da inscrição, não necessariamente onde o eleitor mora hoje.
+
+```javascript
+import { getVoterIdInfo } from '@brazilian-utils/brazilian-utils';
+
+getVoterIdInfo('1023 8501 06 71');
+// {
+//   sequentialNumber: '10238501',
+//   federativeUnion: '06',
+//   stateCode: 'PR',
+//   checkDigits: '71',
+// }
+
+getVoterIdInfo('000000002801'); // { sequentialNumber: '00000000', federativeUnion: '28', stateCode: null, checkDigits: '01' }
+getVoterIdInfo('123456780124'); // null (dígitos verificadores inválidos)
+```
+
+Fonte: [Resolução TSE nº 23.659/2021, art. 36](https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-659-de-26-de-outubro-de-2021).
+
 ## CNS
 
 ### isValidCns

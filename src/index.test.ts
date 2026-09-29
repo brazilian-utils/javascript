@@ -130,6 +130,7 @@ import {
 	type StandardSchemaV1Types,
 	type StateName,
 	type ToStandardSchemaOptions,
+	type VoterIdInfo,
 } from "./index";
 import * as brazilianUtils from "./index";
 
@@ -246,6 +247,7 @@ const PUBLIC = [
 	"getStates",
 	"getStatesByRegion",
 	"getTimezoneByState",
+	"getVoterIdInfo",
 	"isBusinessDay",
 	"isHoliday",
 	"isValidBankAccount",
@@ -492,6 +494,7 @@ describe("Public API", () => {
 			StandardSchemaV1Types: StandardSchemaV1Types;
 			StateName: StateName;
 			ToStandardSchemaOptions: ToStandardSchemaOptions;
+			VoterIdInfo: VoterIdInfo;
 		}> = {};
 
 		expect(publicTypes).toEqual({});
