@@ -1,5 +1,5 @@
-import { CID10_SUBCATEGORIES } from "../_internals/constants/cid10";
 import { normalizeCid10 } from "../_internals/normalize-cid10/normalize-cid10";
+import { readCid10Subcategories } from "../_internals/read-cid10-subcategories/read-cid10-subcategories";
 
 const CATEGORY_LENGTH = 3;
 
@@ -45,8 +45,10 @@ export const isValidCid10 = (value: string): boolean => {
 	const code = normalizeCid10(value);
 	const category = code.slice(0, CATEGORY_LENGTH);
 
+	const subcategories = readCid10Subcategories();
+
 	return (
-		Object.hasOwn(CID10_SUBCATEGORIES, category) &&
-		CID10_SUBCATEGORIES[category].includes(code.slice(CATEGORY_LENGTH))
+		Object.hasOwn(subcategories, category) &&
+		subcategories[category].includes(code.slice(CATEGORY_LENGTH))
 	);
 };

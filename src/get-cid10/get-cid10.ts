@@ -1,6 +1,6 @@
-import { CID10_SUBCATEGORIES } from "../_internals/constants/cid10";
 import { CID10_DESCRIPTIONS } from "../_internals/constants/cid10-descriptions";
 import { normalizeCid10 } from "../_internals/normalize-cid10/normalize-cid10";
+import { readCid10Subcategories } from "../_internals/read-cid10-subcategories/read-cid10-subcategories";
 import { unpackTexts } from "../_internals/unpack-texts/unpack-texts";
 import { isValidCid10 } from "../is-valid-cid10/is-valid-cid10";
 
@@ -19,14 +19,12 @@ const CATEGORY_LENGTH = 3;
 const findDescriptionIndex = (code: string): number => {
 	const category = code.slice(0, CATEGORY_LENGTH);
 	const subcategory = code.slice(CATEGORY_LENGTH);
-	const categories = Object.keys(CID10_SUBCATEGORIES);
+	const subcategories = readCid10Subcategories();
+	const categories = Object.keys(subcategories);
 	const preceding = categories.slice(0, categories.indexOf(category));
-	const offset = preceding.reduce(
-		(index, listed) => index + 1 + CID10_SUBCATEGORIES[listed].length,
-		0,
-	);
+	const offset = preceding.reduce((index, listed) => index + 1 + subcategories[listed].length, 0);
 
-	return offset + CID10_SUBCATEGORIES[category].indexOf(subcategory) + subcategory.length;
+	return offset + subcategories[category].indexOf(subcategory) + subcategory.length;
 };
 
 /**

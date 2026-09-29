@@ -1,5 +1,5 @@
-import { CID10_SUBCATEGORIES } from "../constants/cid10";
 import { CID10_DESCRIPTIONS } from "../constants/cid10-descriptions";
+import { readCid10Subcategories } from "../read-cid10-subcategories/read-cid10-subcategories";
 import { unpackTexts } from "../unpack-texts/unpack-texts";
 import { expect } from "./runtime";
 
@@ -84,7 +84,7 @@ export const expectAlignedLookupTable = (
 export const cid10Codes = (): string[] => {
 	const codes: string[] = [];
 
-	for (const [category, subcategories] of Object.entries(CID10_SUBCATEGORIES)) {
+	for (const [category, subcategories] of Object.entries(readCid10Subcategories())) {
 		codes.push(category);
 
 		for (const subcategory of subcategories) codes.push(category + subcategory);
