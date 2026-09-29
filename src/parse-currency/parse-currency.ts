@@ -15,7 +15,9 @@ export type ParseCurrencyOptions = {
  * `"R$ 1.234,56"` parses to 1234.56 and `"R$ 1.234"` to 1234. A value written without any
  * separator keeps the cents convention and is divided by `10 ** precision`, so `"1234"`
  * parses to 12.34. A `-` written before the first digit is preserved, so `"-R$ 1,00"` parses
- * to -1.
+ * to -1. Only that leading `-` makes a value negative: an accounting negative such as
+ * `"(R$ 1,00)"` or a trailing sign as in `"1,00-"` parses to 1, and every character that is
+ * not a digit or a separator is dropped, so `"1e5"` reads as the digits `15` and parses to 0.15.
  *
  * The precision is clamped to `0-20`, and a precision that is not a finite number falls back
  * to 2.

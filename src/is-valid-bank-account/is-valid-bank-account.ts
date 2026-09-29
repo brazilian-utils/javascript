@@ -283,7 +283,8 @@ const sanitizeCheckDigit = (value: string): string =>
  * agency/account digit 5, is accepted), Santander the account digit (its example, agency 2001
  * and account 01 038237 with digit 7, is accepted), and Banco do Brasil only the agency digit
  * (module 11, weights 9 to 2 from the right, remainder 10 giving "X"), the account digit being
- * "módulo 11" and the rule here the same one. The Caixa layouts describe the account with 12
+ * "módulo 11" and the rule here the same one. The agency digit itself is not checked here: an
+ * agency of 5 digits is only held to the length, whatever its last digit is. The Caixa layouts describe the account with 12
  * digits, "sem operação"; the older operação (3 digits) + conta (8 digits) form keeps the
  * compendium rule. Up to 2.4.0 a 12 digit Caixa account was rejected. Nubank publishes no rule
  * at all; its Verhoeff digit is the one the open source validators listed below derived from
@@ -299,7 +300,10 @@ const sanitizeCheckDigit = (value: string): string =>
  * Cora (403), Pan (623), BV (655), Daycoval (707), Sicredi (748) and Sicoob (756).
  * For those the agency and account only need to match the documented digit lengths.
  *
- * Every other bank of the list falls back to a generic modulus 10 and modulus 11 check.
+ * Every other bank of the list falls back to a generic check that accepts a `digit` passing the
+ * modulus 10, the boleto modulus 11 or the bank modulus 11 of the account, so up to three of the
+ * ten digits pass for a given account. No published rule backs that fallback: `true` for a bank
+ * outside the lists above says the structure is plausible, not that the check digit is proven.
  *
  * @param {IsValidBankAccountParams} params - The bank account parameters.
  * @param {string} params.bankCode - The bank code (3 digits), as published by Banco Central.

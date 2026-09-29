@@ -387,6 +387,8 @@ import { parseBoleto } from '@brazilian-utils/brazilian-utils';
 parseBoleto('00190.00009 01149.718601 68524.522114 6 75860000102656'); // 00190000090114971860168524522114675860000102656
 ```
 
+Fonte: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (vigente desde 01/06/2026).
+
 ### generateBoleto
 
 Gera um boleto válido aleatório.
@@ -400,6 +402,8 @@ import { generateBoleto } from '@brazilian-utils/brazilian-utils';
 generateBoleto(); // "00190000090114971860168524522114675860000102656"
 generateBoleto({ type: 'arrecadacao' }); // "846100000005246100291102005460339004695895061080"
 ```
+
+Fonte: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (vigente desde 01/06/2026).
 
 ### getBoletoInfo
 
@@ -1373,7 +1377,8 @@ Bancos validados apenas pela estrutura, já que não se conhece regra de dígito
 | PagBank | `290` | | Sicredi | `748` |
 | BMG | `318` | | Sicoob | `756` |
 
-- Todo outro banco da lista usa o fallback genérico: `digit` precisa bater com mod10 ou mod11 sobre a conta. Um `digit` de 2 caracteres encadeia mod10 e depois mod11.
+- Todo outro banco da lista usa o fallback genérico: `digit` precisa bater com mod10 ou mod11 sobre a conta. Um `digit` de 2 caracteres encadeia mod10 e depois mod11. Nenhuma regra publicada o sustenta e até três dos dez dígitos passam para uma mesma conta, então `true` para um banco fora das tabelas acima diz que a estrutura é plausível, não que o dígito verificador foi comprovado.
+- Para o Banco do Brasil o dígito da agência não é verificado: uma agência de 5 dígitos (`1584-9`) só é conferida no tamanho, seja qual for o último dígito.
 
 ```javascript
 import { isValidBankAccount } from '@brazilian-utils/brazilian-utils';
@@ -1539,6 +1544,8 @@ formatIban('BR15'); // 'BR15'
 formatIban('BR15 0000-0000.0000/1093 2840 814P-2'); // 'BR15 0000 0000 0000 1093 2840 814P 2' (só letras e dígitos são lidos)
 ```
 
+Fonte: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), que revogou a [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
+
 ### parseIban
 
 Remove a formatação do IBAN, mantém as letras e os dígitos, coloca o resultado em maiúsculas e o limita aos 29 caracteres de um IBAN brasileiro.
@@ -1549,6 +1556,8 @@ import { parseIban } from '@brazilian-utils/brazilian-utils';
 parseIban('BR15 0000 0000 0000 1093 2840 814P 2'); // 'BR1500000000000010932840814P2'
 parseIban('br15-0000.0000/0000 1093 2840 814p-2'); // 'BR1500000000000010932840814P2'
 ```
+
+Fonte: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), que revogou a [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
 
 ### getIbanInfo
 
@@ -1585,7 +1594,7 @@ Formata um número ou uma string numérica no padrão BRL (`1.234,56`). Um `numb
 
 - **Opções** (`FormatCurrencyOptions`): `symbol` (padrão `false`) prefixa o resultado com `R$`; `precision` (padrão 2) define as casas decimais, limitada de 0 a 20.
 - Uma `string` é lida como `parseCurrency` a lê, com uma diferença: um valor sem nenhum separador permanece em unidades inteiras, então `'1234'` vira `1.234,00`.
-- Retorna `''` para um valor não finito ou que não pode ser convertido em número.
+- Retorna `''` para um valor não finito ou que não pode ser convertido em número. Uma string é lida por `parseCurrency`, então uma string sem nenhum dígito é lida como `0` e formata como `0,00` (`'abc'`), e `null` também dá `0,00`.
 
 ```javascript
 import { formatCurrency } from '@brazilian-utils/brazilian-utils';
@@ -1601,6 +1610,8 @@ formatCurrency('-10.5'); // -10,50 (o "-" inicial é preservado)
 formatCurrency(Number.NaN); // "" (números não finitos viram string vazia)
 ```
 
+Fonte: [Lei nº 9.069/1995, art. 1º](https://www.planalto.gov.br/ccivil_03/leis/l9069.htm), que define o símbolo `R$` e a vírgula antes dos centavos. Baseado em: os dados de locale pt-BR do [CLDR](https://cldr.unicode.org/) por trás do `Intl.NumberFormat`, para o agrupamento com `.`.
+
 ### parseCurrency
 
 Converte uma string de moeda no padrão BRL em número.
@@ -1608,6 +1619,7 @@ Converte uma string de moeda no padrão BRL em número.
 - **Opções** (`ParseCurrencyOptions`): `precision` (padrão 2) é a quantidade de dígitos lidos como subunidades monetárias, limitada de 0 a 20.
 - O último `,` ou `.` seguido de 1 a 2 dígitos (até `precision`, quando maior) é o separador decimal; todo outro `,` ou `.` é separador de milhar.
 - Um valor sem nenhum separador é lido como centavos e dividido por `10 ** precision`.
+- Só um `-` antes do primeiro dígito torna o resultado negativo: `'(R$ 1,00)'` e `'1,00-'` viram `1`, e os caracteres que não são dígitos nem separadores são descartados, então `'1e5'` vira `0.15`.
 
 ```javascript
 import { parseCurrency } from '@brazilian-utils/brazilian-utils';
@@ -1622,6 +1634,8 @@ parseCurrency('-R$ 1,00'); // -1 (o "-" inicial é preservado)
 parseCurrency('R$ 1,001', { precision: 3 }); // 1.001
 parseCurrency(''); // 0
 ```
+
+Fonte: [Lei nº 9.069/1995, art. 1º](https://www.planalto.gov.br/ccivil_03/leis/l9069.htm), que define o símbolo `R$` e a vírgula antes dos centavos. Baseado em: os dados de locale pt-BR do [CLDR](https://cldr.unicode.org/) por trás do `Intl.NumberFormat`, para o agrupamento com `.`.
 
 ### convertNumberToWords
 

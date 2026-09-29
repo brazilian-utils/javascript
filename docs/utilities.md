@@ -388,6 +388,8 @@ import { parseBoleto } from '@brazilian-utils/brazilian-utils';
 parseBoleto('00190.00009 01149.718601 68524.522114 6 75860000102656'); // 00190000090114971860168524522114675860000102656
 ```
 
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026).
+
 ### generateBoleto
 
 Generate a valid random boleto.
@@ -401,6 +403,8 @@ import { generateBoleto } from '@brazilian-utils/brazilian-utils';
 generateBoleto(); // "00190000090114971860168524522114675860000102656"
 generateBoleto({ type: 'arrecadacao' }); // "846100000005246100291102005460339004695895061080"
 ```
+
+Source: [Carta-Circular BCB nº 2.926/2000](https://www.bcb.gov.br/pre/normativos/c_circ/2000/pdf/c_circ_2926_v1_O.pdf), [FEBRABAN, Layout Padrão de Arrecadação, Versão 08](https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20-%20Vers%C3%A3o%208%20-%2011_05_2026.pdf) (in force from 01/06/2026).
 
 ### getBoletoInfo
 
@@ -1374,7 +1378,8 @@ Banks validated by structure only, since no check digit rule of theirs is known 
 | PagBank | `290` | | Sicredi | `748` |
 | BMG | `318` | | Sicoob | `756` |
 
-- Every other listed bank uses the generic fallback: `digit` must match mod10 or mod11 over the account. A 2 character `digit` chains mod10 then mod11.
+- Every other listed bank uses the generic fallback: `digit` must match mod10 or mod11 over the account. A 2 character `digit` chains mod10 then mod11. No published rule backs it and up to three of the ten digits pass for a given account, so `true` for a bank outside the tables above says the structure is plausible, not that the check digit is proven.
+- For Banco do Brasil the agency digit is not checked: a 5 digit agency (`1584-9`) is only held to the length, whatever its last digit is.
 
 ```javascript
 import { isValidBankAccount } from '@brazilian-utils/brazilian-utils';
@@ -1540,6 +1545,8 @@ formatIban('BR15'); // 'BR15'
 formatIban('BR15 0000-0000.0000/1093 2840 814P-2'); // 'BR15 0000 0000 0000 1093 2840 814P 2' (only letters and digits are read)
 ```
 
+Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), which revoked [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
+
 ### parseIban
 
 Remove IBAN formatting, keep the letters and digits, uppercase the result, and cap it to the 29 characters of a Brazilian IBAN.
@@ -1550,6 +1557,8 @@ import { parseIban } from '@brazilian-utils/brazilian-utils';
 parseIban('BR15 0000 0000 0000 1093 2840 814P 2'); // 'BR1500000000000010932840814P2'
 parseIban('br15-0000.0000/0000 1093 2840 814p-2'); // 'BR1500000000000010932840814P2'
 ```
+
+Source: [Diretrizes de Implementação do IBAN no Brasil](https://www.bcb.gov.br/content/estabilidadefinanceira/Documents/sistema_pagamentos_brasileiro/IBAN-Guidelines_%20port.pdf), [Resolução BCB nº 585/2026](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=585), which revoked [Circular BCB nº 3.625/2013](https://www.bcb.gov.br/pre/normativos/circ/2013/pdf/circ_3625_v1_O.pdf), [ISO 13616-1:2020](https://www.iso.org/standard/81090.html).
 
 ### getIbanInfo
 
@@ -1586,7 +1595,7 @@ Format a number or a numeric string in the BRL pattern (`1.234,56`). A `number` 
 
 - **Options** (`FormatCurrencyOptions`): `symbol` (default `false`) prefixes the result with `R$`; `precision` (default 2) sets the decimal places, clamped to 0 to 20.
 - A `string` is read as `parseCurrency` reads it, except that a value without any separator stays in whole units: `'1234'` formats as `1.234,00`.
-- Returns `''` for a non-finite value or one that cannot be coerced to a number.
+- Returns `''` for a non-finite value or one that cannot be coerced to a number. A string is read by `parseCurrency`, so a string with no digit reads as `0` and formats as `0,00` (`'abc'`), and `null` also gives `0,00`.
 
 ```javascript
 import { formatCurrency } from '@brazilian-utils/brazilian-utils';
@@ -1602,6 +1611,8 @@ formatCurrency('-10.5'); // -10,50 (a leading "-" is preserved)
 formatCurrency(Number.NaN); // "" (non finite numbers format as an empty string)
 ```
 
+Source: [Lei nº 9.069/1995, art. 1º](https://www.planalto.gov.br/ccivil_03/leis/l9069.htm), which sets the `R$` symbol and the comma before the centavos. Based on: the [CLDR](https://cldr.unicode.org/) pt-BR locale data behind `Intl.NumberFormat`, for the `.` grouping.
+
 ### parseCurrency
 
 Parse a BRL currency string into a number.
@@ -1609,6 +1620,7 @@ Parse a BRL currency string into a number.
 - **Options** (`ParseCurrencyOptions`): `precision` (default 2) is the number of digits read as minor units, clamped to 0 to 20.
 - The last `,` or `.` followed by 1 to 2 digits (up to `precision`, when larger) is the decimal separator; every other `,` or `.` is a thousands separator.
 - A value without any separator is read as cents and divided by `10 ** precision`.
+- Only a `-` before the first digit makes the result negative: `'(R$ 1,00)'` and `'1,00-'` parse to `1`, and characters that are not digits or separators are dropped, so `'1e5'` parses to `0.15`.
 
 ```javascript
 import { parseCurrency } from '@brazilian-utils/brazilian-utils';
@@ -1623,6 +1635,8 @@ parseCurrency('-R$ 1,00'); // -1 (a leading "-" is preserved)
 parseCurrency('R$ 1,001', { precision: 3 }); // 1.001
 parseCurrency(''); // 0
 ```
+
+Source: [Lei nº 9.069/1995, art. 1º](https://www.planalto.gov.br/ccivil_03/leis/l9069.htm), which sets the `R$` symbol and the comma before the centavos. Based on: the [CLDR](https://cldr.unicode.org/) pt-BR locale data behind `Intl.NumberFormat`, for the `.` grouping.
 
 ### convertNumberToWords
 

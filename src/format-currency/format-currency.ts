@@ -49,7 +49,8 @@ const toNumber = (value: unknown, precision: number): number => {
  * (or up to `precision` digits, when that is larger) is the decimal separator, every other
  * `,` or `.` is a thousands separator, and a `-` written before the first digit is preserved.
  * So `"1.234,56"` formats as `"1.234,56"`, `"-10.5"` as `"-10,50"` and `"1234"` as
- * `"1.234,00"`.
+ * `"1.234,00"`. A string with no digit reads as `0`, so `"abc"` formats as `"0,00"`, not as
+ * an empty string.
  *
  * A value that is not a finite number, such as `NaN`, `Infinity` or `-Infinity`, formats as
  * an empty string, and so does a value that cannot be coerced to a number at all, such as a
