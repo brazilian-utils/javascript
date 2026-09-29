@@ -455,6 +455,10 @@ describe("getAddressInfoByCep", () => {
 			});
 
 			it("should pad 1000000, the lowest CEP the Correios assign, to 01000-000", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ ...viacepPayload, cep: "01000-000" }),
+				});
+
 				await getAddressInfoByCep(1_000_000, { providers: ["viacep"] });
 
 				expect(requestUrl(fetchMock.mock.calls[0]?.[0] as FetchInput)).toBe(
@@ -957,6 +961,108 @@ describe("getAddressInfoByCep", () => {
 				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] });
 
 				expectEmptyAddressFields(result);
+			});
+		});
+
+		describe("answers that contradict the CEP", () => {
+			it("should reject a ViaCEP address of another CEP as not found", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ ...viacepPayload, cep: "01310-101" }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should reject a Widenet address of another CEP as not found", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ ...widenetPayload, code: "01310-101" }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should reject a BrasilAPI address of another CEP as not found", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({ ...brasilApiPayload, cep: "01310101" }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["brasilapi"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should reject a ViaCEP address of another state as not found", async () => {
+				setupFetchMock(fetchMock, { viacep: createJsonResponse({ ...viacepPayload, uf: "PR" }) });
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should reject a Widenet address of another state as not found", async () => {
+				setupFetchMock(fetchMock, {
+					widenet: createJsonResponse({ ...widenetPayload, state: "PR" }),
+				});
+
+				await expect(getAddressInfoByCep(VALID_CEP, { providers: ["widenet"] })).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should reject the made up BrasilAPI address of 99999-999, a Rio Grande do Sul CEP, in Paraná", async () => {
+				setupFetchMock(fetchMock, {
+					brasilapi: createJsonResponse({
+						cep: "99999999",
+						city: "Sarandi",
+						neighborhood: "",
+						state: "PR",
+						street: "",
+					}),
+					viacep: createJsonResponse({ erro: "true" }),
+				});
+
+				await expect(getAddressInfoByCep("99999999")).rejects.toThrow(
+					GetAddressInfoByCepNotFoundError,
+				);
+			});
+
+			it("should resolve with the provider that agrees when another contradicts the CEP", async () => {
+				setupFetchMock(fetchMock, { viacep: createJsonResponse({ ...viacepPayload, uf: "RJ" }) });
+
+				expectDefaultAddress(await getAddressInfoByCep(VALID_CEP));
+			});
+
+			it("should accept a state in another case, since the state is compared as a state code", async () => {
+				setupFetchMock(fetchMock, { viacep: createJsonResponse({ ...viacepPayload, uf: "sp" }) });
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] });
+
+				expect(result.state).toBe("sp");
+			});
+
+			it("should accept an address that names no state", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ ...viacepPayload, uf: undefined }),
+				});
+
+				const result = await getAddressInfoByCep(VALID_CEP, { providers: ["viacep"] });
+
+				expect(result.state).toBe("");
+			});
+
+			it("should not compare the state of a CEP that no state range covers", async () => {
+				setupFetchMock(fetchMock, {
+					viacep: createJsonResponse({ ...viacepPayload, cep: "00500-000", uf: "SP" }),
+				});
+
+				const result = await getAddressInfoByCep("00500000", { providers: ["viacep"] });
+
+				expect(result.cep).toBe("00500000");
+				expect(result.state).toBe("SP");
 			});
 		});
 

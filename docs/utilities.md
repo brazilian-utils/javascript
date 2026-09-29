@@ -278,6 +278,8 @@ Fetch the address of a CEP from several providers at once and resolve to the fir
 - Retries transient network failures per provider.
 - Rejects with `GetAddressInfoByCepValidationError` when the CEP is invalid, `providers` names no known provider or `timeoutMs` is not a positive finite number, with `GetAddressInfoByCepNotFoundError` when every provider failed and at least one reported the CEP as unknown, and with `GetAddressInfoByCepServiceError` when every provider failed for another reason.
 - BrasilAPI answers 404 both for an unknown CEP and when the services behind it are down, so its 404 only counts as "unknown CEP" when no other provider failed to answer.
+- An address is only accepted when it agrees with the CEP asked for: its 8 digits must be the CEP, and its state, when it names one, must be the state that owns the CEP range (see `getStateByCep`). Otherwise that provider counts as not knowing the CEP. BrasilAPI, for instance, answered `99999-999`, a Rio Grande do Sul CEP, with a city of Paraná.
+- Once the lookup settles, the requests of the providers that lost the race are aborted.
 - All three extend `GetAddressInfoByCepError`, so one `catch` covers them.
 
 ```javascript

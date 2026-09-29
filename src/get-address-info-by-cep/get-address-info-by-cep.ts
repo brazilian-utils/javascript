@@ -2,6 +2,7 @@ import { CEP_LENGTH } from "../_internals/constants/cep";
 import { fetchWithRetry } from "../_internals/fetch-with-retry/fetch-with-retry";
 import { isLookupCode } from "../_internals/is-lookup-code/is-lookup-code";
 import { sanitizeToDigits } from "../_internals/sanitize-to-digits/sanitize-to-digits";
+import { getStateByCep } from "../get-state-by-cep/get-state-by-cep";
 import { isValidCep } from "../is-valid-cep/is-valid-cep";
 import { parseCep } from "../parse-cep/parse-cep";
 
@@ -111,6 +112,30 @@ class AmbiguousNotFoundError extends GetAddressInfoByCepNotFoundError {}
 
 const asString = (value: unknown): string => (typeof value === "string" ? value : "");
 
+/**
+ * Turns an address a provider answered into `GetAddressInfoByCepNotFoundError` when it contradicts
+ * the CEP asked for: its 8 digits differ, or its state differs from the one that owns the CEP
+ * range (an empty state, and a CEP that no range covers, are not compared).
+ *
+ * @param {AddressInfo} address - The address a provider answered with.
+ * @param {string} cep - The 8 digits of the CEP asked for.
+ * @returns {AddressInfo} The same address, when it agrees with the CEP.
+ * @throws {GetAddressInfoByCepNotFoundError} When it contradicts the CEP.
+ */
+const confirmAddress = (address: AddressInfo, cep: string): AddressInfo => {
+	const expectedState = getStateByCep(cep)?.code;
+	const stateDiffers =
+		expectedState !== undefined &&
+		address.state !== "" &&
+		address.state.toUpperCase() !== expectedState;
+
+	if (address.cep !== cep || stateDiffers) {
+		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
+	}
+
+	return address;
+};
+
 const readPayload = async (response: Response): Promise<ProviderPayload> => {
 	const data: unknown = await response.json();
 
@@ -135,13 +160,16 @@ const fetchViaCep = async (cep: string, signal: AbortSignal): Promise<AddressInf
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
-	return {
-		cep: cepValue.replaceAll(/\D/g, ""),
-		state: asString(record["uf"]),
-		city: asString(record["localidade"]),
-		neighborhood: asString(record["bairro"]),
-		street: asString(record["logradouro"]),
-	};
+	return confirmAddress(
+		{
+			cep: cepValue.replaceAll(/\D/g, ""),
+			state: asString(record["uf"]),
+			city: asString(record["localidade"]),
+			neighborhood: asString(record["bairro"]),
+			street: asString(record["logradouro"]),
+		},
+		cep,
+	);
 };
 
 const fetchWidenet = async (cep: string, signal: AbortSignal): Promise<AddressInfo> => {
@@ -165,13 +193,16 @@ const fetchWidenet = async (cep: string, signal: AbortSignal): Promise<AddressIn
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
-	return {
-		cep: codeValue.replaceAll(/\D/g, ""),
-		state: asString(record["state"]),
-		city: asString(record["city"]),
-		neighborhood: asString(record["district"]),
-		street: asString(record["address"]),
-	};
+	return confirmAddress(
+		{
+			cep: codeValue.replaceAll(/\D/g, ""),
+			state: asString(record["state"]),
+			city: asString(record["city"]),
+			neighborhood: asString(record["district"]),
+			street: asString(record["address"]),
+		},
+		cep,
+	);
 };
 
 const fetchBrasilApi = async (cep: string, signal: AbortSignal): Promise<AddressInfo> => {
@@ -198,13 +229,16 @@ const fetchBrasilApi = async (cep: string, signal: AbortSignal): Promise<Address
 		throw new GetAddressInfoByCepNotFoundError("CEP não encontrado");
 	}
 
-	return {
-		cep: cepValue.replaceAll(/\D/g, ""),
-		state: asString(record["state"]),
-		city: asString(record["city"]),
-		neighborhood: asString(record["neighborhood"]),
-		street: asString(record["street"]),
-	};
+	return confirmAddress(
+		{
+			cep: cepValue.replaceAll(/\D/g, ""),
+			state: asString(record["state"]),
+			city: asString(record["city"]),
+			neighborhood: asString(record["neighborhood"]),
+			street: asString(record["street"]),
+		},
+		cep,
+	);
 };
 
 const providerMap: Record<CepProvider, (cep: string, signal: AbortSignal) => Promise<AddressInfo>> =
@@ -360,6 +394,12 @@ const raceProviders = async (
  * cannot carry the leading zero of a São Paulo CEP, so it is left padded to 8 digits, but only
  * from `1000000` (`01000-000`, the lowest CEP the Correios assign) up: a smaller number is
  * rejected instead of being looked up as a CEP starting with `00`, as it was up to 2.4.0.
+ *
+ * An address a provider answers with is only accepted when it agrees with the CEP asked for: its
+ * 8 digits must be the CEP, and its state, when it names one, must be the state that owns the CEP
+ * range (see `getStateByCep`). Otherwise it counts as that provider not knowing the CEP. Some
+ * services answer a CEP no city uses with a made up address: BrasilAPI answered `99999-999`, a
+ * Rio Grande do Sul CEP, with a city of Paraná. Up to 2.4.0 such an address was returned.
  *
  * A "not found" answer only wins over a service failure when it is reliable: ViaCEP's and
  * Widenet's are, but BrasilAPI answers 404 both for an unknown CEP and when the services behind
