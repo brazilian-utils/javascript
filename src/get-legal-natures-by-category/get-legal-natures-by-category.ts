@@ -11,10 +11,7 @@ export type { LegalNature } from "../get-legal-nature/get-legal-nature";
  * are listed too.
  */
 export type GetLegalNaturesByCategoryOptions = {
-	/**
-	 * Whether the codes of the category that a past revision of the CONCLA table retired are listed
-	 * alongside the ones in force (default: `false`).
-	 */
+	/** Whether the retired codes of the category are listed too (default: `false`). */
 	includeLegacy?: boolean;
 };
 

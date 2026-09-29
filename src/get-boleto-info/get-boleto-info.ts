@@ -34,10 +34,7 @@ export type BoletoInfo = {
 	expirationDate: Date | null;
 	/** Three digit bank code (COMPE), empty for an arrecadação bank slip. */
 	bankCode: string;
-	/**
-	 * The 8 digit ISPB of the institution that issued a FEBRABAN Convenção da Cobrança "Situação 2"
-	 * slip (bank code `988`, código de moeda `0`), present only on such a slip.
-	 */
+	/** The 8 digit ISPB of the institution behind a "Situação 2" slip, present only on such a slip. */
 	ispb?: string;
 	/** Present and set to "arrecadacao" only for convênio/tributos bank slips. */
 	type?: "arrecadacao";

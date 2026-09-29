@@ -39,10 +39,7 @@ export type NfseKeyInfo = {
 	generatorEnvironment: NfseKeyGeneratorEnvironment;
 	/** Whether the issuer is identified by a CPF or by a CNPJ. */
 	taxIdType: NfseKeyTaxIdType;
-	/**
-	 * The 11 digit CPF (without the `000` padding of the key) or the 14 character CNPJ of the
-	 * issuer, numeric or alphanumeric, its letters in upper case.
-	 */
+	/** The 11 digit issuer CPF or the 14 character issuer CNPJ, letters in upper case. */
 	taxId: string;
 	/** NFS-e number (`nNFSe`), sequential by issuer, 1 to 9999999999999. */
 	number: number;

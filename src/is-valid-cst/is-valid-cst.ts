@@ -13,11 +13,7 @@ const TABELA_B_LENGTH = 2;
  * Options for `isValidCst`.
  */
 export type IsValidCstOptions = {
-	/**
-	 * The tax whose CST (Código de Situação Tributária) table the value is checked against.
-	 * Omit it to accept a code that exists in any of the four tables (`icms`, `ipi`, `pis`,
-	 * `cofins`); a value outside those four falls back to that same default at runtime.
-	 */
+	/** The tax whose CST table the value is checked against; omit it to accept any of the four. */
 	tax?: "icms" | "ipi" | "pis" | "cofins";
 };
 

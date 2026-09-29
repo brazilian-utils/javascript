@@ -40,10 +40,7 @@ export type PixPayloadInfo = {
 	url?: string;
 	/** Free text the receiver wrote for the payer. */
 	description?: string;
-	/**
-	 * The 8 digit ISPB of the "facilitador de serviço de saque" (`fss`, sub-object 26-03),
-	 * present only in a Pix Saque BR Code.
-	 */
+	/** The 8 digit ISPB of the withdrawal facilitator, present only in a Pix Saque BR Code. */
 	withdrawalFacilitator?: string;
 	/** Name of the receiver, at most 25 ASCII characters. */
 	merchantName: string;
@@ -53,10 +50,7 @@ export type PixPayloadInfo = {
 	amount?: number;
 	/** Transaction ID, absent when the payload carries the `***` marker. */
 	txid?: string;
-	/**
-	 * `"dynamic"` when the payload carries a PSP location (`url`) or marks itself single use
-	 * with `01` = `"12"`, `"static"` otherwise; see `PixPointOfInitiation`.
-	 */
+	/** `"dynamic"` or `"static"`, see `PixPointOfInitiation`. */
 	pointOfInitiation: PixPointOfInitiation;
 };
 

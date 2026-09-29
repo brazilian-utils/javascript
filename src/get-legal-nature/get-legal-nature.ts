@@ -27,10 +27,7 @@ export type LegalNature = {
 	| {
 			/** `true` when a past revision of the CONCLA table retired the code. */
 			legacy: true;
-			/**
-			 * The code this legacy one corresponds to today, per the CONCLA correspondence
-			 * spreadsheets, or `null` when the revision that retired it published no successor.
-			 */
+			/** The code this legacy one corresponds to today, or `null` when it has no successor. */
 			currentCode: string | null;
 	  }
 );

@@ -24,11 +24,7 @@ export type IsValidBankAccountParams = {
 	agency: string;
 	/** Account number, digits only, without the check digit. */
 	account: string;
-	/**
-	 * The account check digit: one or two characters, or "X" for Banco do Brasil and "P" for
-	 * Bradesco. Banks with a published rule take a single character; the generic fallback also
-	 * accepts two, chaining mod10 and mod11 over the account.
-	 */
+	/** The account check digit: one or two characters, or "X" or "P" for some banks. */
 	digit: string;
 };
 
@@ -324,6 +320,10 @@ const sanitizeCheckDigit = (value: string): string =>
  * Only bank codes present in the bundled Banco Central participant table are accepted; that table is
  * regenerated weekly by the datasets workflow, so a bank created after the release becomes valid
  * on the next release.
+ *
+ * The `digit` is one or two characters, or "X" for Banco do Brasil and "P" for Bradesco. Banks
+ * with a published rule take a single character; the generic fallback also accepts two,
+ * chaining mod10 and mod11 over the account.
  *
  * @see Official: https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv
  * @see Official: https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20padrao%20CNAB240%20V%2011_0%20-%202026_09_11.pdf

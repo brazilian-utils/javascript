@@ -16,10 +16,7 @@ export type AreaCodeInfo = {
 	regionCode: State["regionCode"];
 	/** The full name of the region the state belongs to, e.g. `"Sudeste"`. */
 	regionName: State["regionName"];
-	/**
-	 * Every state the DDD serves, the primary `stateCode` first, e.g. `["SP"]` for 11 and
-	 * `["DF", "GO"]` for 61.
-	 */
+	/** Every state the DDD serves, the primary `stateCode` first. */
 	stateCodes: StateCode[];
 };
 

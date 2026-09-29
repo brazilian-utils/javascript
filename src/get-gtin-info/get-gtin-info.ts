@@ -21,18 +21,11 @@ export type GtinInfo = {
 	type: GtinType;
 	/** How many digits the value was written with. */
 	length: GtinLength;
-	/**
-	 * The three digit GS1 Prefix, or a GS1-8 Prefix when digits 2 to 6 of the 14 digit form are
-	 * zeros, which covers every GTIN-8, a GTIN-14 that packs one and the GS1 Prefix 0000000. It names the GS1 Member
-	 * Organisation that licensed the number, not the country of origin.
-	 */
+	/** The GS1 Prefix, the number range of the GS1 Member Organisation that licensed the number. */
 	prefix: string;
 	/** True when the prefix is one of GS1 Brasil (789 or 790). */
 	isBrazilian: boolean;
-	/**
-	 * True when the prefix is in a range GS1 sets aside for Restricted Circulation Numbers, so the
-	 * number is only unique inside a company or region and is not a globally unique GTIN.
-	 */
+	/** True when the prefix is in a GS1 Restricted Circulation Number range. */
 	isRestrictedCirculation: boolean;
 	/** The modulo 10 check digit, the last digit of the value. */
 	checkDigit: number;

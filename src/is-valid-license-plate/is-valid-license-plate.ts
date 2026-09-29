@@ -10,11 +10,7 @@ export type { LicensePlateFormat } from "./constants";
 
 /** Options for `isValidLicensePlate`. */
 export type IsValidLicensePlateOptions = {
-	/**
-	 * The one format the plate must follow: `"LLLNNNN"` for the old Brazilian format or
-	 * `"LLLNLNN"` for the Mercosul one, the names `getFormatLicensePlate` returns. Left out, or
-	 * any other value, and either format is accepted.
-	 */
+	/** The one format the plate must follow, `"LLLNNNN"` or `"LLLNLNN"`; omit it to accept both. */
 	format?: LicensePlateFormat;
 };
 

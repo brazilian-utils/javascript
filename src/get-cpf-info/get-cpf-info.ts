@@ -10,10 +10,7 @@ export type { StateCode } from "../_internals/constants/states";
 export type CpfInfo = {
 	/** The first 8 digits, the ones ahead of the Região Fiscal digit. */
 	base: string;
-	/**
-	 * The 9th digit, the Região Fiscal of the Receita Federal the CPF was registered in: `"1"` to
-	 * `"9"` for the 1ª to the 9ª Região Fiscal and `"0"` for the 10ª.
-	 */
+	/** The 9th digit, the Região Fiscal the CPF was registered in. */
 	fiscalRegion: string;
 	/** The two letter codes of the states of that Região Fiscal, sorted by state name. */
 	states: StateCode[];
@@ -34,6 +31,9 @@ const CHECK_DIGITS_START = CPF_BASE_LENGTH + 1;
  *
  * Accepts the same input forms as `isValidCpf`, masked or not, with whitespace around and between
  * the groups, and returns `null` whenever `isValidCpf` would return `false`.
+ *
+ * The `fiscalRegion` is the 9th digit: `"1"` to `"9"` for the 1ª to the 9ª Região Fiscal and
+ * `"0"` for the 10ª.
  *
  * @param {string} value - The CPF to be read.
  * @returns {CpfInfo|null} The fields of the CPF, or `null` when it is not a valid CPF.

@@ -18,16 +18,9 @@ export type HolidayDateRule = (
 			firstSundayOfMonth: number;
 	  }
 ) & {
-	/**
-	 * Whether the holiday is observed on the following Sunday when the date the rule resolves to
-	 * is not a Sunday (Monday to Saturday), as Santa Catarina's two state holidays are.
-	 */
+	/** Whether the date moves on to the following Sunday when it is not already a Sunday. */
 	nextSundayUnlessSunday?: boolean;
-	/**
-	 * Whether the holiday is observed on the Monday before when the date the rule resolves to falls
-	 * on a Tuesday, and on the Friday after when it falls on a Thursday, as Alagoas' 30 November
-	 * does.
-	 */
+	/** Whether a Tuesday moves back to the Monday and a Thursday on to the Friday. */
 	tuesdayToMondayThursdayToFriday?: boolean;
 };
 
@@ -106,6 +99,9 @@ function moveTuesdayToMondayThursdayToFriday(date: Date): Date {
  * on to the following Sunday; when
  * it sets `tuesdayToMondayThursdayToFriday`, a Tuesday is moved back to the Monday and a Thursday
  * on to the Friday.
+ *
+ * `nextSundayUnlessSunday` is how Santa Catarina's two state holidays are observed, and
+ * `tuesdayToMondayThursdayToFriday` is how Alagoas' 30 November is.
  *
  * @param {number} year - The four digit year.
  * @param {HolidayDateRule} rule - The fixed date, the Easter offset or the month of the holiday.

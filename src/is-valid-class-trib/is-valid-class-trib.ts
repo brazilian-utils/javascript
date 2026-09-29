@@ -11,10 +11,7 @@ import { padLookupCode } from "../_internals/pad-lookup-code/pad-lookup-code";
  * Options for `isValidClassTrib`.
  */
 export type IsValidClassTribOptions = {
-	/**
-	 * The CST-IBS/CBS the document carries next to the cClassTrib. When given, the classification
-	 * also has to belong to it (its first 3 digits); omit it to check the cClassTrib alone.
-	 */
+	/** The CST-IBS/CBS the classification must belong to; omit it to check the cClassTrib alone. */
 	cst?: string | number;
 };
 

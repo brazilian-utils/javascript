@@ -57,24 +57,11 @@ export type CepProvider = "viacep" | "widenet" | "brasilapi";
 
 /** Options of `getAddressInfoByCep`. */
 export type GetAddressInfoByCepOptions = {
-	/**
-	 * Which CEP services to race, in the order given (default: `["viacep", "brasilapi"]`; the
-	 * deprecated `"widenet"` provider is excluded from the default list, but can still be
-	 * requested explicitly; it is usually unavailable, since its endpoint now redirects to
-	 * `ws.apicep.com`, which answered 502 when last checked).
-	 */
+	/** Which CEP services to race, in the order given (default: `["viacep", "brasilapi"]`). */
 	providers?: CepProvider[];
-	/**
-	 * Cancels the lookup: every request in flight is aborted and the promise rejects with
-	 * `signal.reason`, the same as `fetch` does. A signal that is already aborted rejects before
-	 * any request is made.
-	 */
+	/** Cancels the lookup: requests in flight are aborted and the promise rejects with `signal.reason`. */
 	signal?: AbortSignal;
-	/**
-	 * How long, in milliseconds, the whole lookup may take, retries included, before every request
-	 * in flight is aborted and the promise rejects with `GetAddressInfoByCepServiceError` (default:
-	 * no limit). Must be a positive finite number.
-	 */
+	/** Time limit in milliseconds for the whole lookup, retries included (default: no limit). */
 	timeoutMs?: number;
 };
 
@@ -404,6 +391,10 @@ const raceProviders = async (
  *
  * No request has a time limit of its own. Pass `options.timeoutMs` to bound the whole lookup, or
  * `options.signal` to cancel it.
+ *
+ * The default `providers` are `["viacep", "brasilapi"]`. The deprecated `"widenet"` provider is
+ * left out of that list but can still be requested explicitly; it is usually unavailable, since
+ * its endpoint now redirects to `ws.apicep.com`, which answered 502 when last checked.
  *
  * @param {string|number} cep - The CEP (Brazilian postal code) to search for. Can be a string or number.
  * @param {GetAddressInfoByCepOptions} options - Optional configuration for the function.

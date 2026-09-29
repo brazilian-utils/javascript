@@ -3,10 +3,7 @@ import { LEGAL_NATURE } from "../is-valid-legal-nature/constants";
 
 /** The object form `getLegalNatures` accepts, saying whether the legacy codes are listed too. */
 export type GetLegalNaturesParams = {
-	/**
-	 * Whether the 8 codes a past revision of the CONCLA table retired are listed alongside the 92
-	 * in force (default: `false`).
-	 */
+	/** Whether the 8 retired codes are listed alongside the 92 in force (default: `false`). */
 	includeLegacy?: boolean;
 };
 

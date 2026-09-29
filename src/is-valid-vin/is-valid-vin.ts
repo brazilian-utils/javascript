@@ -12,11 +12,7 @@ import {
 
 /** Options of `isValidVin`. */
 export type IsValidVinOptions = {
-	/**
-	 * Whether to also enforce the North-American rules of 49 CFR 565.15: the check digit at the 9th
-	 * position and a model year code other than `U`, `Z` or `0` at the 10th (default: `false`, the
-	 * Brazilian rule, which mandates neither; read for truthiness).
-	 */
+	/** Whether to also enforce the North-American check digit and model year rules (default: `false`). */
 	checkDigit?: boolean;
 };
 

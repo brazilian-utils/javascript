@@ -7,25 +7,15 @@ export type IbanInfo = {
 	countryCode: "BR";
 	/** The 2 digit ISO 7064 MOD 97-10 check digits. */
 	checkDigits: string;
-	/**
-	 * The 8 character ISPB (Identificador do Sistema de Pagamentos Brasileiro) of the institution,
-	 * digits or, since Resolução BCB nº 585/2026, upper case letters too.
-	 */
+	/** The 8 character ISPB of the institution. */
 	bankIspb: string;
 	/** The 5 digit branch (agência) number, zero-padded. */
 	branch: string;
 	/** The 10 digit account (conta) number, zero-padded. */
 	account: string;
-	/**
-	 * The 1 letter account type, as published in the "dicionário de tipos" of the Catálogo de
-	 * Serviços do Sistema Financeiro Nacional. `"C"` (conta corrente) and `"P"` (conta poupança) are the
-	 * usual values, but any letter is allowed.
-	 */
+	/** The 1 letter account type, usually `"C"` or `"P"`. */
 	accountType: string;
-	/**
-	 * The 1 character owner indicator, distinguishing co-owners of the same account: `"1"` for
-	 * the first or only holder up to `"9"` for the ninth, then `"A"` to `"Z"` from the tenth.
-	 */
+	/** The 1 character owner indicator, `"1"` to `"9"` then `"A"` to `"Z"`. */
 	owner: string;
 };
 
