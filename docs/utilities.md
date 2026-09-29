@@ -305,8 +305,8 @@ const addressWithinFiveSeconds = await getAddressInfoByCep('01310100', { timeout
 
 Fetch the CEPs of an address from ViaCEP. Resolves to an array of `CepAddressInfo`.
 
-- The argument (`GetCepInfoByAddressParams`) carries `federalUnit`, `city` and `street`. `federalUnit` may be lowercase; `city` and `street` are trimmed and stripped of accents before the query.
-- Rejects with `GetCepInfoByAddressValidationError` when the UF, city or street is missing or invalid, with `GetCepInfoByAddressNotFoundError` when no address matches, and with `GetCepInfoByAddressError` when ViaCEP answers with an HTTP error status.
+- The argument (`GetCepInfoByAddressParams`) carries `federalUnit`, `city` and `street`. `federalUnit` may be lowercase; `city` and `street` are trimmed and stripped of accents before the query, and each must be a string of at least 3 characters after that, the minimum ViaCEP accepts.
+- Rejects with `GetCepInfoByAddressValidationError` when the UF, city or street is missing or invalid (a blank value, a value that is not a string, or a city or street under 3 characters, all rejected before any request), with `GetCepInfoByAddressNotFoundError` when no address matches, and with `GetCepInfoByAddressError` when ViaCEP answers with an HTTP error status.
 - Retries transient network failures, as `getAddressInfoByCep` does.
 - Each item carries the ViaCEP payload unchanged, under ViaCEP's own field names.
 
