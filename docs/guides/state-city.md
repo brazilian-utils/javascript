@@ -1,12 +1,12 @@
 ---
 title: "State and city"
 description: "Pick a state and the cities of that state load on demand, with Brazilian Utils in React, Angular, Vue and plain JavaScript."
-keywords: ["state and city select", "IBGE cities", "getCities", "lazy import", "code splitting", "municipalities of a state"]
+keywords: ["state and city select", "IBGE municipalities", "getMunicipalities", "lazy import", "code splitting", "municipalities of a state"]
 ---
 
 Pick a state and its cities fill the second select. Pick the framework: each example runs the code below it, which you can copy as is.
 
-The point of this one is when each table is loaded, and the answer is: when someone opens the select that shows it. Not with the page, and not when a state is picked either — a form where the city is filled in by something else, or left alone, never fetches 154 KB of cities. The states are 27 rows, 2.5 KB; the cities are 5,571 of them, 154 KB. Each util is its own subpath, so `await import("@brazilian-utils/brazilian-utils/get-cities")` fetches that table and nothing else. A bundler makes it a chunk of its own; the browser fetches it once and keeps it, so only the first opening waits.
+The point of this one is when each table is loaded, and the answer is: when someone opens the select that shows it. Not with the page, and not when a state is picked either. A form where the city is filled in by something else, or left alone, never fetches 148 KB of municipalities. The states are 27 rows, 2.5 KB; the municipalities are 5,571 of them, 148 KB. Each util is its own subpath, so `await import("@brazilian-utils/brazilian-utils/get-municipalities")` fetches that table and nothing else. Each option takes the IBGE `code` of the municipality as its value and the `name` as its label, since names repeat across states (there are two "Pau D'Arco"). A bundler makes it a chunk of its own; the browser fetches it once and keeps it, so only the first opening waits.
 
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=state-city/react&example=state-city.tsx">

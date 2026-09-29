@@ -31,8 +31,8 @@ export function StateCity() {
       <select id={`${id}-city`} disabled={!state} aria-busy={loadingCities} onFocus={loadCities}>
         <option value="">{loadingCities ? "Loading the cities…" : "Pick a city"}</option>
         {cities.map((city) => (
-          <option key={city} value={city}>
-            {city}
+          <option key={city.code} value={city.code}>
+            {city.name}
           </option>
         ))}
       </select>

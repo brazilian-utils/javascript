@@ -17,7 +17,7 @@
     imports: {
       "@brazilian-utils/brazilian-utils": CDN + "@brazilian-utils/brazilian-utils/+esm",
       "@brazilian-utils/brazilian-utils/get-states": CDN + "@brazilian-utils/brazilian-utils/get-states/+esm",
-      "@brazilian-utils/brazilian-utils/get-cities": CDN + "@brazilian-utils/brazilian-utils/get-cities/+esm",
+      "@brazilian-utils/brazilian-utils/get-municipalities": CDN + "@brazilian-utils/brazilian-utils/get-municipalities/+esm",
       // esm.sh, not jsDelivr, for React: jsDelivr's react-dom imports its own copy of react.
       react: "https://esm.sh/react@19.3.0",
       "react/jsx-runtime": "https://esm.sh/react@19.3.0/jsx-runtime",
