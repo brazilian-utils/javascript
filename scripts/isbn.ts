@@ -44,9 +44,19 @@ const readEntries = (xml: string, tag: string): RangeEntry[] =>
 	}));
 
 /**
- * Writes the rules of one entry as `end:length` pairs, each range starting where the one before it
- * ended. A span the RangeMessage leaves out is not assigned, the same as a rule of length 0, so it
- * is written as one.
+ * Writes one rule as the end of its range without the 9s it ends in (`9999999` is nothing left),
+ * followed by its length, one digit: `1999999` and a length of 2 is `12`.
+ * @param {number} end - The last value of the range.
+ * @param {number | string} length - The length of the element the range gives.
+ * @returns {string} The rule.
+ */
+const serializeRule = (end: number, length: number | string): string =>
+	`${String(end).padStart(RANGE_DIGITS, "0").replace(/9+$/, "")}${length}`;
+
+/**
+ * Writes the rules of one entry as `end` and `length` pairs, each range starting where the one
+ * before it ended. A span the RangeMessage leaves out is not assigned, the same as a rule of
+ * length 0, so it is written as one.
  * @param {RangeEntry} entry - The entry.
  * @returns {string} The rules, comma separated.
  */
@@ -56,13 +66,13 @@ const serializeRules = ({ prefix, rules }: RangeEntry): string => {
 
 	for (const { start, end, length } of rules) {
 		if (start < next || end < start) throw new Error(`RangeMessage ranges of ${prefix} overlap`);
-		if (start > next) pairs.push(`${String(start - 1).padStart(RANGE_DIGITS, "0")}:0`);
+		if (start > next) pairs.push(serializeRule(start - 1, 0));
 
-		pairs.push(`${String(end).padStart(RANGE_DIGITS, "0")}:${length}`);
+		pairs.push(serializeRule(end, length));
 		next = end + 1;
 	}
 
-	if (next <= LAST_RANGE_END) pairs.push(`${LAST_RANGE_END}:0`);
+	if (next <= LAST_RANGE_END) pairs.push(serializeRule(LAST_RANGE_END, 0));
 
 	return pairs.join(",");
 };
@@ -88,9 +98,10 @@ export const renderIsbnRanges = (xml: string): Record<string, string> => {
 	return {
 		"./src/_internals/constants/isbn-ranges.ts": `/**
  * The ISBN ranges of the International ISBN Agency RangeMessage, which say how long each element
- * of an ISBN-13 is. Each value lists \`end:length\` pairs over the 7 digits that follow the part
- * already read, a range starting where the one before it ended, from \`0000000\` to \`9999999\`;
- * a length of 0 marks a range not assigned yet.
+ * of an ISBN-13 is. Each value lists ranges over the 7 digits that follow the part already read, a
+ * range starting where the one before it ended, from \`0000000\` to \`9999999\`, each written as
+ * its last value without the 9s it ends in, then the length as one digit (\`12\` is a length of 2
+ * up to \`1999999\`); a length of 0 marks a range not assigned yet.
  *
  * RangeMessage of ${date}.
  *
