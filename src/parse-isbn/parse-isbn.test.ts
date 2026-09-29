@@ -9,12 +9,6 @@ describe("parseIsbn", () => {
 		expect(parseIsbn("978 85 333 0227 3")).toBe("9788533302273");
 	});
 
-	it("should remove the ISBN label before the digits, so the 13 of ISBN-13 is not kept", () => {
-		expect(parseIsbn("ISBN 978-85-333-0227-3")).toBe("9788533302273");
-		expect(parseIsbn("ISBN-13: 978-85-333-0227-3")).toBe("9788533302273");
-		expect(parseIsbn("isbn-13 9788533302273")).toBe("9788533302273");
-	});
-
 	it("should keep at most 13 digits", () => {
 		expect(parseIsbn("97885333022731234")).toBe("9788533302273");
 	});

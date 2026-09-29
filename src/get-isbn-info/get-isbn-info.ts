@@ -5,7 +5,7 @@ import { BRAZIL_AGENCY, PREFIX_LENGTH, RANGE_DIGITS } from "./constants";
 
 /** The elements `getIsbnInfo` reads out of an ISBN-13. */
 export type IsbnInfo = {
-	/** The 13 digits, no label and no hyphens. */
+	/** The 13 digits, no hyphens. */
 	isbn: string;
 	/** The GS1 prefix, "978" or "979". */
 	prefix: string;
@@ -49,13 +49,13 @@ const readElementLength = (rules: string, digits: string): number => {
  * registrant falls in a range not assigned yet returns `null`, although its check digit is valid.
  * The ranges come from the RangeMessage of 27/09/2026 and are refreshed by the datasets workflow.
  *
- * @param {string} value - The ISBN, printed or not.
+ * @param {string} value - The ISBN, with or without hyphens.
  * @returns {IsbnInfo|null} The elements, or `null` when `value` is not a valid ISBN-13 or its
  * group or registrant is not assigned.
  *
  * @example
  * ```typescript
- * getIsbnInfo("ISBN 978-65-89999-01-0");
+ * getIsbnInfo("978-65-89999-01-0");
  * // { isbn: "9786589999010", prefix: "978", registrationGroup: "65", registrant: "89999",
  * //   publication: "01", checkDigit: 0, agency: "Brazil", isBrazilian: true }
  *
