@@ -5,7 +5,11 @@ import {
 	type NumberToWordsGender,
 } from "../_internals/number-to-words/number-to-words";
 import { describe, expect, expectTypeOf, test } from "../_internals/test/runtime";
-import { convertNumberToWords, type ConvertNumberToWordsOptions } from "./convert-number-to-words";
+import {
+	convertNumberToWords,
+	type ConvertNumberToWordsOptions,
+	type NumberToWordsGender as SubpathNumberToWordsGender,
+} from "./convert-number-to-words";
 
 function expectWords(
 	cases: readonly (readonly [number, string])[],
@@ -602,5 +606,9 @@ describe("convertNumberToWords types", () => {
 			NumberToWordsGender | undefined
 		>();
 		expectTypeOf(convertNumberToWords).returns.toEqualTypeOf<string>();
+	});
+
+	test("should export the gender type from the subpath entry", () => {
+		expectTypeOf<SubpathNumberToWordsGender>().toEqualTypeOf<NumberToWordsGender>();
 	});
 });

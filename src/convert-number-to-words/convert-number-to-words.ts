@@ -4,6 +4,8 @@ import {
 	numberToWords,
 } from "../_internals/number-to-words/number-to-words";
 
+export type { NumberToWordsGender } from "../_internals/number-to-words/number-to-words";
+
 /** Options of `convertNumberToWords`. */
 export type ConvertNumberToWordsOptions = {
 	/** Grammatical gender used to agree "um/dois" and the hundreds group ("duzentos/duzentas", etc.) with the noun the number qualifies. Defaults to `"masculine"`. */
@@ -40,9 +42,9 @@ export type ConvertNumberToWordsOptions = {
  * ```
  *
  * @see Based on: https://github.com/savoirfairelinux/num2words
- * `brutils` itself has no dedicated
- * number-to-words module (its `currency.py` delegates the Portuguese numeral text to this
- * library's `pt_BR` locale); this is the reference for the numeral-word tables reproduced here.
+ * The reference for the numeral-word tables reproduced here. The Python `brutils` has no
+ * dedicated number-to-words module: its `currency.py` delegates the Portuguese numeral text to
+ * the `pt_BR` locale of this library.
  */
 export const convertNumberToWords = (
 	value: number,
