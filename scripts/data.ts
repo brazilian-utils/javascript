@@ -1,5 +1,15 @@
 #!/usr/bin/env node
 
+/**
+ * Rebuilds the embedded datasets from their official sources, then lints and formats the
+ * generated files.
+ *
+ * Usage:
+ *   node scripts/data.ts [dataset...]
+ *     Rebuild every dataset, or only the named ones (`ncm`, `cbo`, ..., the generator file names
+ *     without `.ts`). A generator that fails is named on stderr and makes the script exit with 1.
+ */
+
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
@@ -67,9 +77,29 @@ const generatedFiles = [
 	"./src/is-valid-ncm/constants.ts",
 ];
 
+const requested = process.argv.slice(2).map((name) => name.replace(/\.ts$/, ""));
+const known = generators.map((generator) => generator.replace(/\.ts$/, ""));
+const unknown = requested.filter((name) => !known.includes(name));
+
+if (unknown.length > 0) {
+	console.error(`Unknown datasets: ${unknown.join(", ")}. Known: ${known.join(", ")}.`);
+	process.exit(1);
+}
+
+const selected =
+	requested.length === 0
+		? generators
+		: generators.filter((_, index) => requested.includes(known[index]));
+
 const results = await Promise.all(
-	generators.map((generator) => run("node", [resolve(scriptsDirectory, generator)])),
+	selected.map((generator) => run("node", [resolve(scriptsDirectory, generator)])),
 );
+
+const failed = selected.filter((_, index) => results[index] !== 0);
+
+if (failed.length > 0) {
+	console.error(`Failed to rebuild: ${failed.join(", ")}`);
+}
 
 // Lint and format before checking the generators, so a failing generator never leaves
 // unformatted files behind in the working tree. `vp fmt` runs last because `vp lint --fix`

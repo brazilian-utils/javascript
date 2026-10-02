@@ -5,6 +5,12 @@ on:
     # Every Monday at 09:00 America/Sao_Paulo (12:00 UTC), same day as Dependabot.
     - cron: "0 12 * * 1"
   workflow_dispatch:
+    inputs:
+      datasets:
+        description: "Datasets to rebuild, separated by spaces (e.g. `ncm cbo`). Empty rebuilds all of them."
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -29,7 +35,11 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Rebuild datasets
-        run: npm run build:data
+        env:
+          DATASETS: ${{ inputs.datasets }}
+        run: |
+          read -ra datasets <<< "$DATASETS"
+          npm run build:data -- "${datasets[@]}"
 
       - name: Validate the regenerated datasets
         run: npm run check && npx vp test --run
