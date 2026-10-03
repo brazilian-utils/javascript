@@ -6,11 +6,16 @@ inputs:
     description: Node.js version to install via actions/setup-node. Reads .nvmrc when omitted.
     required: false
     default: ""
+  setup-node:
+    description: Set to "false" when the job installs Node.js itself, as the npm publish job does.
+    required: false
+    default: "true"
 
 runs:
   using: composite
   steps:
     - name: Setup Node.js
+      if: ${{ inputs.setup-node != 'false' }}
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: ${{ inputs.node-version }}

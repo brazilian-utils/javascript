@@ -385,11 +385,12 @@ public signatures are pinned by the `describe("<name> types")` blocks in the tes
   permissions, branch protection, code review, dependency updates, SAST) rather than the code,
   publishes the score and uploads the findings to the Security tab.
 - Every release ships `brazilian-utils.cdx.json` inside the package, a CycloneDX SBOM generated
-  with `npm sbom` from the release tag right before staging on npm, and keeps the same file as a
-  workflow artifact (`sbom-<tag>`); releases are immutable here, so the file cannot be attached to
-  the release itself. The package has no
-  runtime dependencies, so the document describes the package itself; it exists for consumers
-  whose supply-chain policy requires one.
+  with `npm sbom` from the release tag right before staging on npm, and attaches the same file to
+  the GitHub Release. The package has no runtime dependencies, so the document describes the
+  package itself; it exists for consumers whose supply-chain policy requires one.
+- Releases are immutable here, so release-please creates each one as a draft: the
+  `release-assets` job attaches the packed tarball, its signed build provenance (a Sigstore bundle
+  and the same DSSE envelope as `.intoto.jsonl`) and the SBOM, then publishes the release.
 - Commit messages are checked with commitlint on every pull request, since release-please derives
   the version bump and the changelog from them.
 - The URLs cited in the Markdown files and in the `@see` tags of the source are checked by hand
@@ -520,8 +521,9 @@ There are no local release commands to run.
    hidden.
 2. A maintainer reviews the release PR (version bump, changelog) and merges it. **Merging the
    release PR is the first confirmation.** Nothing is published yet at this point.
-3. Merging tags the release and publishes a GitHub Release, which triggers the `publish-npm` job in
-   `.github/workflows/release.yml`. That job builds and validates the package and **stages** it on
+3. Merging tags the release and creates a draft GitHub Release, which triggers the
+   `release-assets` and `publish-npm` jobs in `.github/workflows/release.yml`. The first attaches
+   the signed tarball and the SBOM to the draft and publishes it; the second builds and validates the package and **stages** it on
    npm with `npm stage publish --provenance` (npm Trusted Publishing/OIDC; no npm token is stored
    in the repository). A staged version is not installable yet.
 4. A maintainer approves the staged version with 2FA, on npmjs.com (package → Staged versions) or
