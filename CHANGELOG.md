@@ -24,16 +24,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **processo-juridico:** add getProcessoJuridicoInfo ([3640237](https://github.com/brazilian-utils/javascript/commit/3640237c4f926565ab3fb148223d2d1d8b41cc10))
 * **registro-profissional:** accept the CRO number form of art. 115 of the CFO norms ([e60fe5a](https://github.com/brazilian-utils/javascript/commit/e60fe5ab0d5c918b9e9a8abd0e61a0769d21ee5d))
 * **states:** add getStateCapital, getRegions and getStatesByRegion ([6e62985](https://github.com/brazilian-utils/javascript/commit/6e62985f9c783c61a2a42b5d5d84b16823f84d5e))
-* **states:** add the capital and the region IBGE code to State ([5df7084](https://github.com/brazilian-utils/javascript/commit/5df70842795676f6f01367efdff8eb3837f2711e))
 * **voter-id:** add getVoterIdInfo ([16d51e8](https://github.com/brazilian-utils/javascript/commit/16d51e83f8ade9e94819cc27ddc1ff8686ad9ca1))
 
 
 ### Bug Fixes
 
-* **api:** check every subpath entry point and run npm without a shell ([c7f2379](https://github.com/brazilian-utils/javascript/commit/c7f23791a50b4a13b73aeba26fa146937a4a5a1a))
-* **api:** fail when the generated check does not compile at all ([cd8e683](https://github.com/brazilian-utils/javascript/commit/cd8e683b62f5bfbaa712eddd6a29969541b352ae))
-* **api:** report a removed subpath as a breaking change instead of aborting ([ecfc8ea](https://github.com/brazilian-utils/javascript/commit/ecfc8ea29c899ebf9cae9af2164f12e64a6066ba))
-* **api:** run npm through a shell on Windows, and say what the docs check does ([4c32ec6](https://github.com/brazilian-utils/javascript/commit/4c32ec68f2a827917affd0654f52fa3e18697acb))
 * **area-codes:** read codes by their digits, as getAreaCodeInfo and getMunicipalityByCode do ([feeabca](https://github.com/brazilian-utils/javascript/commit/feeabca9203812ce056e98025c385f7b4f421e0b))
 * **boleto:** accept only the código de moeda 9 and the 988 layout, and generate dated factors ([035a04e](https://github.com/brazilian-utils/javascript/commit/035a04e328edcd87e52f7e3948d10fc5d636d290))
 * **boleto:** accept the 44 digit cobranca bancaria barcode ([7334fba](https://github.com/brazilian-utils/javascript/commit/7334fba0fbafaeb7c2dedc9f4ae672336fed7821))
@@ -51,13 +46,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **cei:** read a number only when it is a non-negative safe integer ([88f5bda](https://github.com/brazilian-utils/javascript/commit/88f5bda12be0be1ad20ad596c3d6b0f8ca091834))
 * **cep:** read a number only when it is a non-negative safe integer ([040b530](https://github.com/brazilian-utils/javascript/commit/040b530e5ba6fd89b324c75594bd7f9882f92acd))
 * **cep:** reject negative and fractional numbers ([97969c0](https://github.com/brazilian-utils/javascript/commit/97969c0f169e97153445ca90bae38c360a728c22))
-* **certidao:** accept again the book codes 8 and 9 of Prov. CNJ 3/2009 ([3d96c65](https://github.com/brazilian-utils/javascript/commit/3d96c654760f5c691ac7437bb744a24b32283b8b))
 * **certidao:** read a number only when it is a non-negative safe integer ([90592af](https://github.com/brazilian-utils/javascript/commit/90592af3810e2f140e69e927b9955b5e5c8b251d))
-* **certidao:** reject the book codes 8 and 9, which art. 473, V does not list ([59bafec](https://github.com/brazilian-utils/javascript/commit/59bafec9ca9543b60a799b63cfeeec54bd249de2))
 * **cest:** read a number only when it is a non-negative safe integer ([4ae9a5d](https://github.com/brazilian-utils/javascript/commit/4ae9a5de41f474f6562bb45ce3a21f8731da0e79))
 * **cfop:** read a number only when it is a non-negative safe integer ([a590084](https://github.com/brazilian-utils/javascript/commit/a590084cab1c4adb4b292a66dba8f52f7da4c830))
 * **cid10:** add the U07 codes of the DATASUS SIM table the V2008 files lack ([196985e](https://github.com/brazilian-utils/javascript/commit/196985e2b6d8c0f99411c2eae8f45a35af9a6e90))
-* **cid10:** retry a busy DATASUS and keep a __proto__ key while sorting ([ceb0ce3](https://github.com/brazilian-utils/javascript/commit/ceb0ce31cb846b6f8161fdbd17cfb8e9ed9bff37))
 * **classifications:** read null options as none in isValidCst and isValidClassTrib ([840604f](https://github.com/brazilian-utils/javascript/commit/840604fa131a6c48a98a7d4fbfe095a0f81eceaa))
 * **cnae:** read a number only when it is a non-negative safe integer ([72a5de6](https://github.com/brazilian-utils/javascript/commit/72a5de60052108ae531aa5755df1f5096c59230d))
 * **cnh:** read a number only when it is a non-negative safe integer ([3215bb6](https://github.com/brazilian-utils/javascript/commit/3215bb64f7073f9a5f0c05e0c1eaa370ba46d11a))
@@ -69,7 +61,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **convert-number-to-words:** export NumberToWordsGender from the subpath entry ([7fbabbf](https://github.com/brazilian-utils/javascript/commit/7fbabbf517f539fa3b7347cde507389759493eb5))
 * **cpf:** read a number only when it is a non-negative safe integer ([e484f4e](https://github.com/brazilian-utils/javascript/commit/e484f4ed2f9fe6b2cf2d202e04966373efcafdd8))
 * **cst:** accept the bare 2 digit Tabela B codes for tax icms ([f2f1aff](https://github.com/brazilian-utils/javascript/commit/f2f1aff6e5fd9ee124353de073b38ae0656c43c4))
-* **datasets:** emit the committed mask regexes from the generator templates ([a39dc8c](https://github.com/brazilian-utils/javascript/commit/a39dc8c8aa6bd2d11c8d6b434122b765a84f9cb0))
 * **email:** cap the address length and accept a punycode final label ([aafdabd](https://github.com/brazilian-utils/javascript/commit/aafdabd86797ed308ed664a0e4c085cb1a84abf2))
 * **format:** return an empty string when the value has no digits, even with pad ([960d9bb](https://github.com/brazilian-utils/javascript/commit/960d9bbe834869bbf6d0bcd9ffacc2795712c5ef))
 * **generate-cep:** draw the CEP inside the ranges the states own ([54bb018](https://github.com/brazilian-utils/javascript/commit/54bb0185592ec5220651c891325f17821266f043))
@@ -101,7 +92,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **holidays:** read stateCode like the other state utils and reject a non-state ([9225f30](https://github.com/brazilian-utils/javascript/commit/9225f306c8a26dbeddd0b253c2fd79d23952959c))
 * **iban:** accept an alphanumeric ISPB and cite Resolução BCB nº 585/2026 ([8c91543](https://github.com/brazilian-utils/javascript/commit/8c915436bfd2c22f7e70167f13b62e16c7ef6b6b))
 * **iban:** read a number only when it is a non-negative safe integer ([3f0a860](https://github.com/brazilian-utils/javascript/commit/3f0a8608a0649c90fd30233925770f916dcebddd))
-* **ibs-cbs:** fail on a validity date the workbook does not write as a number ([761cac4](https://github.com/brazilian-utils/javascript/commit/761cac45c91b18d07a1671de9082a6d03913b5db))
 * **ie:** accept only the Alagoas tipo de empresa digits 0, 3, 5, 7 and 8 ([b8b3c3f](https://github.com/brazilian-utils/javascript/commit/b8b3c3f9e52c56b5fc17ad7c6c5e558d16cd3bc0))
 * **ie:** accept only the Pará prefixes 15 and 75 ([a942d8f](https://github.com/brazilian-utils/javascript/commit/a942d8fe6c35092aaafa335f95c3b6ae537bcd51))
 * **ie:** accept the 9 digit Mato Grosso registration ([0a854c8](https://github.com/brazilian-utils/javascript/commit/0a854c8e65a3db31bbdc44c9daa62e8ac8d98d6f))
@@ -118,8 +108,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **legal-nature:** reject negative and fractional numbers in getLegalNature ([ee00e23](https://github.com/brazilian-utils/javascript/commit/ee00e236aa2fcb39f5c5ab78bb6ec29416422a6d))
 * **license-plate:** draw the fifth letter of a generated Mercosul plate from K to Z ([345450e](https://github.com/brazilian-utils/javascript/commit/345450e652fec7acddc759da6ce54a3251ea5aa7))
 * **license-plate:** reject characters outside the mask, in isValidRegistroProfissional too ([6fce860](https://github.com/brazilian-utils/javascript/commit/6fce860a108798d228ea9b2f6622fde8867fefeb))
-* **lookups:** stop reading letters and stray symbols out of bank, DDD and IBGE codes ([90df7a1](https://github.com/brazilian-utils/javascript/commit/90df7a1dd20ca998de506aa65219e8fcab0866e7))
-* **lookups:** strip non-digit characters again, as the 2.4.0 contract says ([d179683](https://github.com/brazilian-utils/javascript/commit/d1796835eed2d67a51f1be1c3349b33155656d1e))
 * **ncm:** read a number only when it is a non-negative safe integer ([cf0aeb0](https://github.com/brazilian-utils/javascript/commit/cf0aeb0a2a7c8fef03d1b014242bff18ff1f4950))
 * **nfe-key:** accept the alphanumeric CNPJ in positions 7 to 18 of the access key ([32ebc70](https://github.com/brazilian-utils/javascript/commit/32ebc7031ff52ecd6af018c5652536259b44d50e))
 * **nfe-key:** read a number only when it is a non-negative safe integer ([0de7184](https://github.com/brazilian-utils/javascript/commit/0de7184bb938043ffed1e91362a6e71336100899))
@@ -145,18 +133,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **processo-juridico:** read a number only when it is a non-negative safe integer ([a22a8d2](https://github.com/brazilian-utils/javascript/commit/a22a8d25e62520a84692e508ddf70d8494407bf4))
 * **read-municipality-area-code:** read the index by own key only ([99f3c20](https://github.com/brazilian-utils/javascript/commit/99f3c202d79a4472bb8c0a8f68b2470f3ddcd7b5))
 * **renavam:** reject negative and fractional numbers ([82d8395](https://github.com/brazilian-utils/javascript/commit/82d8395320d7658343dfae25f662b525d8416fcc))
-* **scripts:** guard Anexo I of the CEST page against a pending amendment too ([6e0602a](https://github.com/brazilian-utils/javascript/commit/6e0602aa1112acaab751e36d98319cce8480e6e1))
-* **scripts:** name the failed generators and rebuild only the requested datasets ([83bcd34](https://github.com/brazilian-utils/javascript/commit/83bcd34b8aad5889fbeb4133849dba5fba6942b8))
-* **scripts:** strip the CEST page markup until stable and read the row classes as classes ([78df240](https://github.com/brazilian-utils/javascript/commit/78df2406b97cbc6af2f9923319df6a22feb308e8))
-* **scripts:** summarize the CEST table in the dataset refresh ([fb8b975](https://github.com/brazilian-utils/javascript/commit/fb8b97559d5388b9c2b7b448659a8b0060c40ad9))
-* **scripts:** summarize the CID-10 tables in the dataset refresh ([4764215](https://github.com/brazilian-utils/javascript/commit/47642155356b60fe3b225659504bce5b3acd026a))
-* **scripts:** summarize the IBS/CBS table and say which Informe the header names ([1bc85a4](https://github.com/brazilian-utils/javascript/commit/1bc85a40758eecf05438582f5ed519ab69454534))
 * **service-phone:** take the SUP codes from the current Anatel list and accept 112 ([52a904f](https://github.com/brazilian-utils/javascript/commit/52a904fdb2654392c2e27f461c8fd7fd13a2199a))
 * **states:** read the state code ignoring case in every state-taking util ([764c484](https://github.com/brazilian-utils/javascript/commit/764c4846ab3b6386d9ad5acf1be91e6260334f5d))
 * **to-standard-schema:** report a throwing validator as an issue ([74484c1](https://github.com/brazilian-utils/javascript/commit/74484c1b65ffcad4657c83edb1b40ea1e0c85417))
 * **types:** re-export option types from the cnpj and license plate subpaths ([ee75fa0](https://github.com/brazilian-utils/javascript/commit/ee75fa0b18deadd36476f8035e9c2bf5a6c6ac95))
 * **validators:** read the mask of every identifier the way isValidCpf does ([1f82b56](https://github.com/brazilian-utils/javascript/commit/1f82b5663c14f5a208d8329be09514e0e627f966))
-* **validators:** read the mask of every identifier the way isValidCpf does ([9e40382](https://github.com/brazilian-utils/javascript/commit/9e40382448c97063dc18541e0d8e105f00b880ec))
 * **vin:** check a VIN by the Brazilian rule, the 49 CFR check digit on request ([38a2194](https://github.com/brazilian-utils/javascript/commit/38a21944f0a0ef4dfa61f34456a237cfc5f914dc))
 * **vin:** test for ASCII letters before upper casing in isValidVin and isValidNfeKey ([b46084c](https://github.com/brazilian-utils/javascript/commit/b46084c1c4ad4d57ce992119fcdae03aee8dadbc))
 * **voter-id:** read a number only when it is a non-negative safe integer ([f26cd3e](https://github.com/brazilian-utils/javascript/commit/f26cd3e89c6e551872fbaecbc1a06d05a84781f2))
@@ -201,12 +182,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **root:** drop the module-level statements every root import kept ([e133d57](https://github.com/brazilian-utils/javascript/commit/e133d57fb3daf9641d341fc0a1fc9d947d0c2ee0))
 * **service-item:** check a subitem without bundling the service descriptions ([cc9b6b7](https://github.com/brazilian-utils/javascript/commit/cc9b6b7f89cd713df639231e0d9f7488c4e00d69))
 * **states:** check a state code against the util's own table ([c947d54](https://github.com/brazilian-utils/javascript/commit/c947d541d7654030aaf9540448370977b8d29e43))
-* **states:** keep the capitals out of the shared state table ([a45dbbd](https://github.com/brazilian-utils/javascript/commit/a45dbbd6ab5bc7deb0e8ec8fc3c0f961b118ed93))
-
-
-### Reverts
-
-* **states:** keep State as published, the capital stays in getStateCapital ([5c97620](https://github.com/brazilian-utils/javascript/commit/5c976201b6d9dda60ed8128d4b2849477e5c9492))
 
 
 ### Documentation
@@ -239,9 +214,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * **cns:** cite the DATASUS validation routines and say that no official source names prefix 5 ([8cf60b3](https://github.com/brazilian-utils/javascript/commit/8cf60b3bb91ab508a45e93ab00560286c3658a35))
 * **context7:** list every dataset-backed subpath in the lazy-load rule ([c585777](https://github.com/brazilian-utils/javascript/commit/c5857779f068946ad7774ae27b5488cf3687ca98))
 * **context7:** list isValidCid10 among the dataset-backed utils to lazy-load ([6aa8f00](https://github.com/brazilian-utils/javascript/commit/6aa8f0006bdced3303ea9de196c3a6567cd10600))
-* **contributing:** list state-capitals.ts with the state tables ([e8516e8](https://github.com/brazilian-utils/javascript/commit/e8516e874e8e719ece077db9e30699419090ff80))
 * **contributors:** add kwy404 for the RENAVAM number fix ([bcb3e75](https://github.com/brazilian-utils/javascript/commit/bcb3e75609266713732e42f577558320a3ed0f25))
-* **contributors:** add kwy404 for the RENAVAM number fix ([8aa3115](https://github.com/brazilian-utils/javascript/commit/8aa311580f5a0051fed73793f71f6d70882e4f29))
 * correct the CEP ranges wording, the legal nature successors and the plate format alias ([425bc30](https://github.com/brazilian-utils/javascript/commit/425bc309ddede420e237569094bdad8880b5d3b6))
 * **cpf:** cite the DJE layout for the reserved numbers and say IN RFB 2.172/2024 sets no DV rule ([1b28890](https://github.com/brazilian-utils/javascript/commit/1b28890feeec277b7f2aee31dc30a78374b12ec4))
 * **datasets:** name the official versions the NCM, LC 116 and municipality tables match ([a603dfb](https://github.com/brazilian-utils/javascript/commit/a603dfb2102be27003d80bb8f26f833f148075be))
