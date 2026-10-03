@@ -146,7 +146,8 @@ const sharedPack = {
 export default defineConfig({
 	fmt: {
 		// `reports` holds generated output only (the Stryker mutation reports).
-		// `CHANGELOG.md` is written by release-please (`* ` bullets); formatting it would fail the
+		// `CHANGELOG.md` and `jsr.json` are written by release-please (`* ` bullets in the first, every
+		// array expanded in the second when it bumps the version); formatting them would fail the
 		// Check workflow on every release PR.
 		ignorePatterns: [
 			"dist",
@@ -156,6 +157,7 @@ export default defineConfig({
 			".stryker-tmp",
 			".claude",
 			"CHANGELOG.md",
+			"jsr.json",
 		],
 		singleQuote: false,
 		sortImports: true,
