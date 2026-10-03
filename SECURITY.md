@@ -110,9 +110,13 @@ It verifies the registry signature and the provenance attestation of every insta
 The attestation, with the commit and the workflow run that built the version, is also shown on the
 ["Provenance" panel of the version on npmjs.com](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils?activeTab=versions).
 A CycloneDX SBOM of each version ships inside the package as `brazilian-utils.cdx.json` (so it
-sits in `node_modules/@brazilian-utils/brazilian-utils/` after install) and is also kept as the
-`sbom-<tag>` artifact of its release run under
-[Actions → Release](https://github.com/brazilian-utils/javascript/actions/workflows/release.yml).
+sits in `node_modules/@brazilian-utils/brazilian-utils/` after install) and is also attached to
+its [GitHub Release](https://github.com/brazilian-utils/javascript/releases), next to the packed
+tarball and its signed build provenance. To check a tarball downloaded from the release:
+
+```bash
+gh attestation verify brazilian-utils-brazilian-utils-<version>.tgz --repo brazilian-utils/javascript
+```
 
 ## Secrets and credentials
 

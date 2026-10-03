@@ -4,6 +4,8 @@
 	"include-v-in-tag": false,
 	"include-component-in-tag": false,
 	"changelog-path": "CHANGELOG.md",
+	"draft": true,
+	"force-tag-creation": true,
 	"bump-minor-pre-major": false,
 	"changelog-sections": [
 		{ "type": "feat", "section": "Features" },
