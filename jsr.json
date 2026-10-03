@@ -189,15 +189,7 @@
 		"./to-standard-schema": "./src/to-standard-schema/to-standard-schema.ts"
 	},
 	"publish": {
-		"include": [
-			"LICENSE",
-			"README.md",
-			"jsr.json",
-			"src/**/*.ts"
-		],
-		"exclude": [
-			"src/**/*.test.ts",
-			"src/_internals/test/**"
-		]
+		"include": ["LICENSE", "README.md", "jsr.json", "src/**/*.ts"],
+		"exclude": ["src/**/*.test.ts", "src/_internals/test/**"]
 	}
 }
