@@ -1,9 +1,8 @@
 /*
- * The live demos of the guides: the site's own stylesheet, so a demo looks like the page around it
- * (docsify already styles the controls), plus the layout of a form and the state of its fields.
- * The examples themselves carry no classes: everything here is addressed by element.
+ * The live demos of the guides: the layout of a form and the state of its fields. The docs site
+ * that embeds a demo gives it its palette, fonts and the look of the controls. The examples
+ * themselves carry no classes: everything here is addressed by element.
  */
-@import url("../styles.css");
 
 :root {
   --invalid-color: #e5534b;

@@ -193,4 +193,4 @@ Sem biblioteca de schema nenhuma: o `toStandardSchema` dá ao validador a interf
 
 </div>
 
-A [referência de utilitários](pt-br/utilities.md#tostandardschema) documenta o `toStandardSchema` e os tipos da especificação.
+A [referência de utilitários](../utilities.md#tostandardschema) documenta o `toStandardSchema` e os tipos da especificação.

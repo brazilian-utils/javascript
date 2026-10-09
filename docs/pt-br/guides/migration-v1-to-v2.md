@@ -23,12 +23,12 @@ Quatro helpers da v1 eram internos e não têm alias. Substitua-os antes de atua
 ## O que mudou
 
 - **Os nomes são camelCase.** Veja [Funções renomeadas](#funções-renomeadas).
-- **O tree-shaking funciona até a função**, e cada utilitário também é um subpath próprio (`@brazilian-utils/brazilian-utils/is-valid-cpf`), então os pesados podem ser carregados sob demanda. Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle).
+- **O tree-shaking funciona até a função**, e cada utilitário também é um subpath próprio (`@brazilian-utils/brazilian-utils/is-valid-cpf`), então os pesados podem ser carregados sob demanda. Veja [Tamanho do bundle](../getting-started.md#tamanho-do-bundle).
 - **CNPJ alfanumérico.** `isValidCnpj` e `generateCnpj` aceitam o novo formato alfanumérico com `{ version: 2 }`. O numérico (versão 1) continua sendo o padrão. Veja [`generateCnpj` e a versão](#generatecnpj-e-a-versão).
 - **`getAddressInfoByCep`** aceita a opção `providers`, completa com zeros um CEP numérico e lança erros tipados: `GetAddressInfoByCepValidationError`, `GetAddressInfoByCepNotFoundError` e `GetAddressInfoByCepServiceError`. Chamadas sem opções funcionam como na v1.
 - **`getCities`** retorna a lista em ordem alfabética. Desde a 2.4.0 está descontinuada: `getMunicipalities('SP')` retorna os mesmos municípios com seus códigos IBGE, e `getMunicipalityByCode('3550308')` busca um deles offline.
 - **`isValidIe`** recebe um único objeto desde a 2.4.0, `isValidIe({ value, stateCode })`. A forma posicional está descontinuada.
-- **Muitos utilitários novos** desde a v2: feriados e dias úteis, Pix, chave de NF-e, leitura de boleto, formatação de telefone, contas bancárias e consulta de bancos, códigos de classificação (CBO, CNAE, NCM, CFOP), municípios offline, números por extenso e mais. Todos estão na [referência de utilitários](pt-br/utilities.md).
+- **Muitos utilitários novos** desde a v2: feriados e dias úteis, Pix, chave de NF-e, leitura de boleto, formatação de telefone, contas bancárias e consulta de bancos, códigos de classificação (CBO, CNAE, NCM, CFOP), municípios offline, números por extenso e mais. Todos estão na [referência de utilitários](../utilities.md).
 - **As ferramentas** mudaram para Vite+ e Vitest, com testes em navegador no CI. Isso só importa para quem contribui; veja o [CONTRIBUTING.md](https://github.com/brazilian-utils/javascript/blob/main/CONTRIBUTING.md).
 
 ## Funções renomeadas

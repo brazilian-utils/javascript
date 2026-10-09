@@ -58,7 +58,7 @@ Validate a CNPJ with Brazilian Utils. use library /brazilian-utils/javascript
 
 To stop repeating it, add a rule to the agent's instructions file (`CLAUDE.md`, Cursor rules or the equivalent): "For Brazilian document utils, use the Context7 library /brazilian-utils/javascript".
 
-Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.br/llms.txt), which lists every util with a one-line description, or at [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), the whole English documentation in one Markdown file.
+Without Context7, point the assistant at [llms.txt](https://brazilian-utils.com.br/llms.txt), which lists every utility page of the documentation site, or at [utilities.md](https://raw.githubusercontent.com/brazilian-utils/javascript/main/docs/utilities.md), the whole English reference in one Markdown file.
 
 ## Bundle size
 

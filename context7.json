@@ -13,14 +13,7 @@
 		"SECURITY.md",
 		"SUPPORT.md",
 		"MAINTAINERS.md",
-		"index.html",
-		"CNAME",
-		"_sidebar.md",
-		"_navbar.md",
-		"_coverpage.md",
-		"llms.txt",
-		"llms-full.txt",
-		"robots.txt"
+		"index.html"
 	],
 	"previousVersions": [
 		{
