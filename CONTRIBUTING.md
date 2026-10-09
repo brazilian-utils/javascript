@@ -42,11 +42,8 @@ and is invoked through the `npm` scripts below, so you don't need to install any
 | `npm run test:chrome-browser`, `npm run test:firefox-browser`, `npm run test:edge-browser`, `npm run test:safari-browser` | Runs the test suite in real browsers via `vp test --browser.enabled`.                                                                                                                                                                                                    |
 | `npm run build`                                                                                                           | Builds the library for publishing with `vp pack` (also runs attw and publint over the built output).                                                                                                                                                                     |
 | `npm run build:data`                                                                                                      | Regenerates the datasets under `src/_internals/constants` from the IBGE/CONCLA sources (`scripts/data.ts`); run by the scheduled `Update datasets` workflow.                                                                                                             |
-| `npm run build:llms`                                                                                                      | Regenerates `docs/llms.txt` and `docs/llms-full.txt` from the docs (`scripts/llms.ts`). Generated at deploy time, not kept in the repository.                                                                                                                            |
-| `npm run build:site`                                                                                                      | Regenerates the per-page copies of `docs/index.html`, `docs/404.html` and `docs/sitemap.xml` from the sidebars (`scripts/site.ts`). Generated at deploy time, not kept in the repository.                                                                                |
 | `npm run build:jsr`                                                                                                       | Regenerates the `exports` of `jsr.json`, one per utility folder (`scripts/jsr.ts`); CI fails if they're out of date.                                                                                                                                                     |
-| `npm run build:docs`                                                                                                      | Runs the three generators of the site above, which is what the Docs workflow deploys and what a Vercel preview builds.                                                                                                                                                   |
-| `npm run build:examples`                                                                                                  | Regenerates the examples of the document field page from their templates (`scripts/examples.ts`). Generated at deploy time, not kept in the repository.                                                                                                                  |
+| `npm run build:examples`                                                                                                  | Regenerates the examples of the guides from their templates (`scripts/examples.ts`); the docs site runs it before reading `docs/`. Generated, not kept in the repository.                                                                                                |
 | `npm run check:dependencies`                                                                                              | Fails if `package.json` declares any runtime `dependencies` (this package ships zero by design).                                                                                                                                                                         |
 | `npm run check:tree-shaking`                                                                                              | Builds nothing; measures the single-import size of every export against `dist` (`scripts/tree-shaking.ts`). Run it after `npm run build` when you change a dataset, and update the bundle-size table in `docs/getting-started.md` / `docs/pt-br/getting-started.md`.     |
 | `npm run check:duplication`                                                                                               | Runs [jscpd](https://jscpd.dev) over `src` and `scripts`; any copy-pasted block of 5+ lines / 50+ tokens fails.                                                                                                                                                          |
@@ -179,18 +176,14 @@ example `formatSomething`):
    - `docs/pt-br/utilities.md` (Portuguese translation)
 
    Follow the existing format: a `###` heading with the function name under the `##` family it
-   belongs to, one sentence saying what it does (`llms.txt` indexes that sentence), a few short
+   belongs to (the docs site maps that heading to the utility's page, see
+   [Documentation](#documentation)), one sentence saying what it does, a few short
    bullets for the options and the return rules, a `javascript` code block showing example
    input/output, and a one-line `Source:` (`Fonte:` in Portuguese) with the official reference when
    there is one. Do not repeat what the Conventions section at the top of the file already says
    (nothing throws, masked input is accepted, generators use `Math.random()`); the JSDoc is the place
    for every edge case, the reference is the place for what a caller needs. Keep both files in the
    same order.
-
-   After editing `docs/getting-started.md` or `docs/utilities.md`, run `npm run build:llms` to
-   regenerate `docs/llms.txt` and `docs/llms-full.txt` (see [llms.txt](https://llmstxt.org/)) and
-   check the result. The two files are built at deploy time and never committed; CI runs the
-   generator, which fails only when a docs file it reads is missing.
 
 6. If the utility is based on an official Brazilian specification/document (e.g. a government
    validation algorithm), link to the authoritative source in the code comment (`@see`) or PR
@@ -417,54 +410,48 @@ Every utility must keep working across all the runtimes this library targets:
 Avoid Node-specific APIs unless they are polyfilled/guarded, and prefer standard, widely available
 JavaScript/TypeScript features.
 
-## Documentation site
+## Documentation
 
-`docs/` is the source of [brazilian-utils.com.br](https://brazilian-utils.com.br), served by GitHub
-Pages with [docsify](https://docsify.js.org): `docs/index.html` renders the Markdown in the
-browser, with `_sidebar.md`, `_navbar.md` and `_coverpage.md` as its navigation.
+`docs/` holds the library's documentation as Markdown: `getting-started.md`, the `utilities.md`
+reference, the `guides/` and their Portuguese translations under `pt-br/`. It is not a site of its
+own anymore: [brazilian-utils.com.br](https://brazilian-utils.com.br), the documentation of every
+Brazilian Utils library, is built from it by the
+[brazilian-utils/docs](https://github.com/brazilian-utils/docs) repository, which reads:
 
-- Only what a person writes lives in `docs/`: the `Docs` workflow runs `npm run build:docs` and
-  publishes the result to GitHub Pages, so the page shells, `sitemap.xml`, `llms.txt`,
-  `llms-full.txt` and the generated examples are never committed (and never stale). Run
-  `npm run build:docs` to see the site as it is published; a pull request that touches `docs/` or
-  `scripts/` gets the same build as a Vercel preview.
-- docsify runs in history mode, so every page is a real URL (`/getting-started`,
-  `/pt-br/utilities`) that search engines index on its own. GitHub Pages serves each one from a
-  copy of `index.html` next to the page (`getting-started.html`) that carries the page's own
-  title, description, canonical URL and hreflang pair, and `npm run build:site`
-  (`scripts/site.ts`) writes those copies, `404.html` and `sitemap.xml` from the sidebars and the
-  pages' front matter. Links from the hash-router era (`/#/getting-started?id=usage`) are
-  rewritten on load, so nothing out there breaks.
-- Every page starts with a front matter block with a quoted `title` and `description` (and
-  `keywords`), and has no `#` heading of its own: the plugin in `docs/index.html` turns the title
-  into the page's heading and the block feeds the page's metadata (a small wrapper there hands
-  the search plugin the same view, so the block never shows up in search results). Scripts read
-  the block through `scripts/front-matter.ts`.
-- The site's own CSS is `docs/styles.css`, linked by every shell: styles go there, not in a
-  `<style>` block of `index.html`.
-- The pages under `docs/examples/` show the files of `docs/snippets/`, one tab per framework and
-  one variant per document. Each example is complete on its own, so it can be copied as is, and
-  the live demo of the pair on screen runs that same file: `docs/snippets/live/index.html` takes
-  the files to compile in its query string and `run.js` compiles them in the browser. The demos
-  take their look from `docs/snippets/styles.css`.
-- The examples of the document field page are generated: `npm run build:examples`
-  (`scripts/examples.ts`) fills the templates of `docs/snippets/document-field/templates` from a
-  table of documents, so the shared mask is written once. Edit a template or the table: the files
-  under `generated/` are written by the build and are not in the repository. A template ends in
-  `.tmpl` (`schema/zod.ts.tmpl`) because its `@@placeholder@@` markers do not parse as the language
-  its name says: the suffix keeps it out of everything that walks the repository for source files.
-- `scripts/llms.ts` reads the title back out of the front matter, so `docs/llms.txt` and
-  `docs/llms-full.txt` keep their headings.
+- `docs/utilities.md` and `docs/pt-br/utilities.md`, the reference: each `###` heading is a symbol
+  of the package (`### isValidCpf`), shown on the page of the contract function it implements
+  ([/utils/cpf/](https://brazilian-utils.com.br/utils/cpf/)) and on
+  [/libs/javascript/](https://brazilian-utils.com.br/libs/javascript/). Keep the headings the
+  exported names, so the site can map them.
+- `docs/guides/` and `docs/pt-br/guides/`, one page per guide
+  ([/guides/javascript/document-field/](https://brazilian-utils.com.br/guides/javascript/document-field/)).
+  A guide starts with a front matter block with a quoted `title` and `description` (and an
+  optional `order`) and has no `#` heading of its own. Its examples are
+  `<div class="example" data-name="React">` blocks, one per framework, optionally split into
+  `<div class="variant">`, each file a `<div class="file" data-file="…">` that includes a file of
+  `docs/snippets/` (`[cpf-field.tsx](../snippets/… ':include :type=code tsx')`); the site shows
+  them as tabs. A relative link to another guide becomes that guide on the site, a link to a
+  reference heading (`utilities.md#isvalidcpf`) the matching utility page, and any other relative
+  link the file on GitHub, so `getting-started.md` is linked as a file.
+- `docs/snippets/`, copied as it is: the files the guides include, and the live demos.
+  `docs/snippets/live/index.html` takes the files to compile in its query string and `run.js`
+  compiles them in the browser, so a demo runs exactly the code its page shows.
+  `docs/snippets/styles.css` lays a demo out; the site gives it its look.
+- The examples of the document field and address form guides are generated:
+  `npm run build:examples` (`scripts/examples.ts`) fills the templates of
+  `docs/snippets/document-field/templates` from a table of documents, so the shared mask is
+  written once, and the site runs it before reading `docs/`. Edit a template or the table: the
+  generated files are listed in `.gitignore` and are not in the repository. A template ends in
+  `.tmpl` (`schema/zod.ts.tmpl`) because its `@@placeholder@@` markers do not parse as the
+  language its name says: the suffix keeps it out of everything that walks the repository for
+  source files. The Check workflow runs the generator, so a broken template fails CI here.
 - Context7 indexes `docs/` as `/brazilian-utils/javascript`; `context7.json` says what it reads,
   and `.github/workflows/context7.yml` asks for a refresh when the docs change on `main`.
 
-Every pull request that touches `docs/` or `scripts/` gets a preview deployment on Vercel
-(`vercel.json`), with the URL posted as a comment. The file builds the site the way the Docs
-workflow does (`npm run build:docs`), serves
-`/getting-started` from `getting-started.html` like GitHub Pages does (`cleanUrls`), marks every
-response `noindex` and turns deployments of `main` off: production stays on GitHub Pages. To
-preview the site locally, point a static file server that resolves `/page` to `page.html`, the way
-GitHub Pages does, at `docs/`.
+The site reads the `main` branch of this repository, so a change shows there once it is merged and
+the site is built again. To see it before that, run the brazilian-utils/docs site with
+`USAGE_SOURCE=local`, which reads the checkouts under its `.repos/` folder instead (see its
+`site/README.md`).
 
 ## Commit messages
 
@@ -566,7 +553,7 @@ formatting, lint and types (`vp check`), the tests on every runtime, 100% covera
 score, duplicated code (jscpd), unused files and exports (knip), the public API check, bundle size
 per export (the tree-shaking report), the lockfile, known vulnerabilities (`audit-ci`,
 OSV-Scanner), CodeQL, the workflow linters, stale committed generated files (`jsr.json`), the
-`llms.txt` generator running and the commit messages.
+generator of the guides' examples running and the commit messages.
 
 **What the reviewer checks**, in this order:
 

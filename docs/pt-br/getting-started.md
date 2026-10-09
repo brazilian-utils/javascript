@@ -46,7 +46,7 @@ import { isValidCpf } from '@brazilian-utils/brazilian-utils';
 isValidCpf('1232454233345'); // false
 ```
 
-A [referência de utilitários](pt-br/utilities.md) lista todas as funções, agrupadas por família, com opções e exemplos. Os [guias](pt-br/guides/document-field.md) mostram um campo de CPF em React, Angular, Vue e JavaScript puro.
+A [referência de utilitários](utilities.md) lista todas as funções, agrupadas por família, com opções e exemplos. Os [guias](guides/document-field.md) mostram um campo de CPF em React, Angular, Vue e JavaScript puro.
 
 ## Assistentes de IA
 
@@ -58,7 +58,7 @@ Valide um CNPJ com o Brazilian Utils. use library /brazilian-utils/javascript
 
 Para não repetir isso a cada prompt, coloque uma regra no arquivo de instruções do agente (`CLAUDE.md`, regras do Cursor ou equivalente): "Para utilitários de documentos brasileiros, use a biblioteca /brazilian-utils/javascript do Context7".
 
-Sem o Context7, aponte o assistente para o [llms.txt](https://brazilian-utils.com.br/llms.txt), que lista todos os utilitários com uma descrição de uma linha, ou para o [llms-full.txt](https://brazilian-utils.com.br/llms-full.txt), a documentação completa em inglês em um único arquivo Markdown.
+Sem o Context7, aponte o assistente para o [llms.txt](https://brazilian-utils.com.br/llms.txt), que lista todas as páginas de utilitários do site de documentação, ou para o [utilities.md](https://raw.githubusercontent.com/brazilian-utils/javascript/main/docs/pt-br/utilities.md), a referência completa em português em um único arquivo Markdown.
 
 ## Tamanho do bundle
 

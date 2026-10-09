@@ -3,7 +3,7 @@
 
 <p>Utilities for Brazilian data: CPF, CNPJ, CEP, boleto, Pix, holidays and more.</p>
 
-[📖 Documentation](https://brazilian-utils.com.br/getting-started)
+[📖 Documentation](https://brazilian-utils.com.br/libs/javascript/)
 
 [![npm version](https://img.shields.io/npm/v/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![Downloads per month](https://img.shields.io/npm/dm/@brazilian-utils/brazilian-utils.svg)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils) [![License: MIT](https://img.shields.io/github/license/brazilian-utils/javascript.svg)](https://github.com/brazilian-utils/javascript/blob/main/LICENSE)
 [![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/brazilian-utils/javascript/blob/main/CONTRIBUTING.md#zero-runtime-dependencies) [![TypeScript](https://img.shields.io/npm/types/@brazilian-utils/brazilian-utils)](https://www.npmjs.com/package/@brazilian-utils/brazilian-utils)
@@ -73,10 +73,10 @@ import { isValidCpf } from "@brazilian-utils/brazilian-utils";
 isValidCpf("1232454233345"); // false
 ```
 
-The [utilities reference](https://brazilian-utils.com.br/utilities) lists every function, grouped by family, with its options and examples.
+The [utilities reference](https://brazilian-utils.com.br/libs/javascript/) lists every function, grouped by family, with its options and examples.
 
-- Using an AI coding assistant? The docs are indexed on Context7 as [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript), and [llms.txt](https://brazilian-utils.com.br/llms.txt) lists every util for other tools. See [AI assistants](https://brazilian-utils.com.br/getting-started?id=ai-assistants).
-- The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](https://brazilian-utils.com.br/getting-started?id=bundle-size).
+- Using an AI coding assistant? The docs are indexed on Context7 as [`/brazilian-utils/javascript`](https://context7.com/brazilian-utils/javascript), and [llms.txt](https://brazilian-utils.com.br/llms.txt) lists every util for other tools. See [AI assistants](https://github.com/brazilian-utils/javascript/blob/main/docs/getting-started.md#ai-assistants).
+- The package is tree-shakeable. Every util is also available as its own subpath (e.g. `@brazilian-utils/brazilian-utils/get-cities`) so you can lazy-load the few heavy ones. See [Bundle size](https://github.com/brazilian-utils/javascript/blob/main/docs/getting-started.md#bundle-size).
 
 ## Development
 

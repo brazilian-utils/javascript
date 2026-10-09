@@ -6,12 +6,12 @@ keywords: ["consulta de CEP", "endereço pelo CEP", "preencher endereço", "getA
 
 Digite um CEP e o resto do endereço se preenche. Escolha o framework: cada exemplo roda o código logo abaixo dele, que pode ser copiado do jeito que está.
 
-O `getAddressInfoByCep` pergunta aos provedores de CEP e devolve rua, bairro, cidade e estado, ou lança quando ninguém tem aquele CEP. Ele só é chamado quando o `isValidCep` diz que o CEP está completo, então não sai uma requisição a cada tecla, e o que volta continua editável: a consulta preenche o formulário, não toma conta dele. O [guia do campo de documento](pt-br/guides/document-field.md) tem a máscara que mantém o cursor no lugar.
+O `getAddressInfoByCep` pergunta aos provedores de CEP e devolve rua, bairro, cidade e estado, ou lança quando ninguém tem aquele CEP. Ele só é chamado quando o `isValidCep` diz que o CEP está completo, então não sai uma requisição a cada tecla, e o que volta continua editável: a consulta preenche o formulário, não toma conta dele. O [guia do campo de documento](document-field.md) tem a máscara que mantém o cursor no lugar.
 
 
 <div class="example" data-name="React" data-demo="/snippets/live/?dir=address-form/react&example=address-form.tsx">
 
-Um hook recebe o CEP e devolve o que se sabe sobre ele; o formulário desenha isso. O campo de CEP é o que o [guia do campo de documento](pt-br/guides/document-field.md) constrói:
+Um hook recebe o CEP e devolve o que se sabe sobre ele; o formulário desenha isso. O campo de CEP é o que o [guia do campo de documento](document-field.md) constrói:
 
 <div class="file" data-file="address-form.tsx">
 
@@ -29,7 +29,7 @@ Um hook recebe o CEP e devolve o que se sabe sobre ele; o formulário desenha is
 
 <div class="example" data-name="Angular" data-demo="/snippets/live/?dir=address-form/angular&example=address-form.ts">
 
-Um `resource` recebe o CEP e devolve o que se sabe sobre ele, recarregando quando ele muda. O campo de CEP é o que o [guia do campo de documento](pt-br/guides/document-field.md) constrói:
+Um `resource` recebe o CEP e devolve o que se sabe sobre ele, recarregando quando ele muda. O campo de CEP é o que o [guia do campo de documento](document-field.md) constrói:
 
 <div class="file" data-file="address-form.ts">
 
@@ -47,7 +47,7 @@ Um `resource` recebe o CEP e devolve o que se sabe sobre ele, recarregando quand
 
 <div class="example" data-name="Vue" data-demo="/snippets/live/?dir=address-form/vue&example=address-form.vue">
 
-Um composable recebe o CEP e devolve o que se sabe sobre ele; o formulário desenha isso. O campo de CEP é o que o [guia do campo de documento](pt-br/guides/document-field.md) constrói:
+Um composable recebe o CEP e devolve o que se sabe sobre ele; o formulário desenha isso. O campo de CEP é o que o [guia do campo de documento](document-field.md) constrói:
 
 <div class="file" data-file="address-form.vue">
 
@@ -75,4 +75,4 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN 
 
 </div>
 
-A [referência de utilitários](pt-br/utilities.md) documenta o `getAddressInfoByCep`, os provedores e o que ele lança.
+A [referência de utilitários](../utilities.md) documenta o `getAddressInfoByCep`, os provedores e o que ele lança.

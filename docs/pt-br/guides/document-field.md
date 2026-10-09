@@ -408,4 +408,4 @@ Sem build: salve como um arquivo `.html` e abra. Ele importa o pacote de um CDN,
 
 </div>
 
-A [referência de utilitários](pt-br/utilities.md) lista todas as funções.
+A [referência de utilitários](../utilities.md) lista todas as funções.

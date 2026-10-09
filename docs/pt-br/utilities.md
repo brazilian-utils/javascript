@@ -1951,7 +1951,7 @@ Retorna os municípios brasileiros publicados pelo IBGE: todos os municípios, o
 - Cada município (`Municipality`) é `{ code, name, stateCode }`, onde `code` é o código IBGE de 7 dígitos. Ordenados por nome no locale "pt-BR".
 - Só um `stateCode` omitido (ou `undefined`) pede a lista completa: `null` e `''` retornam `[]`.
 - `stateCode` ignora maiúsculas/minúsculas e espaços nas pontas: `'sp'` retorna os municípios de São Paulo, como `'SP'` (até a 2.4.0 retornava `[]`).
-- Embute todos os 5571 municípios, os mesmos códigos da [Divisão Territorial Brasileira 2025](https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip) do IBGE (data base 31/12/2025). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-municipalities`.
+- Embute todos os 5571 municípios, os mesmos códigos da [Divisão Territorial Brasileira 2025](https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/divisao_territorial/2025/DTB_2025.zip) do IBGE (data base 31/12/2025). Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para carregá-lo sob demanda via `@brazilian-utils/brazilian-utils/get-municipalities`.
 
 ```javascript
 import { getMunicipalities } from '@brazilian-utils/brazilian-utils';
@@ -2012,7 +2012,7 @@ Busca o código IBGE de 7 dígitos de um município brasileiro pelo nome e pela 
 - O nome ignora acentos, cedilha e maiúsculas/minúsculas. Sequências de espaços viram um só e os espaços em volta são removidos, mas um nome escrito sem um espaço que o nome do IBGE tem não é encontrado (`'saopaulo'`).
 - Recebe um único objeto, `{ municipalityName, stateCode }` (`GetCodeByMunicipalityNameParams`), com os dois campos obrigatórios. A sigla do estado ignora maiúsculas/minúsculas e espaços em volta, como em todo util que recebe UF. Ela é obrigatória, porque o mesmo nome pode ser de municípios de estados diferentes (`'Bom Jesus'` existe no PI, no RS e em outros estados).
 - Retorna o código como string, ou `null` quando a sigla não é de um estado ou nenhum município daquele estado tem esse nome.
-- Embute os 5571 municípios, a mesma tabela de `getMunicipalityByCode`. Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-code-by-municipality-name`.
+- Embute os 5571 municípios, a mesma tabela de `getMunicipalityByCode`. Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-code-by-municipality-name`.
 
 ```javascript
 import { getCodeByMunicipalityName } from '@brazilian-utils/brazilian-utils';
@@ -2033,7 +2033,7 @@ Retorna os nomes das cidades brasileiras: todas as cidades, ou só as de um esta
 - Ordenadas no locale "pt-BR".
 - Qualquer `state` falsy pede a lista completa, enquanto `getMunicipalities` retorna `[]`.
 - `state` ignora maiúsculas/minúsculas e espaços nas pontas: `'sp'` retorna as cidades de São Paulo, como `'SP'` (até a 2.4.0 retornava `[]`).
-- Embute os 5571 nomes (~64,2 KB minificado, ~26,4 KB com gzip). Veja [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-cities`.
+- Embute os 5571 nomes (~64,2 KB minificado, ~26,4 KB com gzip). Veja [Tamanho do bundle](getting-started.md#tamanho-do-bundle) para carregá-la sob demanda via `@brazilian-utils/brazilian-utils/get-cities`.
 
 ```javascript
 import { getCities } from '@brazilian-utils/brazilian-utils';
@@ -3742,7 +3742,7 @@ Busca um código CID-10 e retorna a sua descrição oficial em português. O res
 
 - Mesmas regras de entrada de `isValidCid10`. O `code` vem em maiúsculas e sem o ponto. Retorna `null` quando o código é desconhecido ou o valor não está em uma forma documentada.
 - Mesma tabela de `isValidCid10`: a V2008 do DATASUS mais os códigos `U07` da tabela do SIM (`getCid10('U07.1')` é `{ code: 'U071', description: 'Infecção pelo novo Coronavírus (COVID-19)' }`); `U09.9` e `U10.9` não são encontrados.
-- Este é o utilitário mais pesado do pacote: ele embute as 2046 categorias e 12191 subcategorias com suas descrições, cerca de 722 KB minificado (113 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](pt-br/getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
+- Este é o utilitário mais pesado do pacote: ele embute as 2046 categorias e 12191 subcategorias com suas descrições, cerca de 722 KB minificado (113 KB com gzip). Carregue-o sob demanda pelo seu subpath, como mostrado em [Tamanho do bundle](getting-started.md#tamanho-do-bundle), e use `isValidCid10` quando a descrição não for necessária.
 
 ```javascript
 import { getCid10 } from '@brazilian-utils/brazilian-utils';

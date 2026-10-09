@@ -53,16 +53,13 @@ jobs:
       - name: Validate the public API
         run: npm run check:api
 
-      - name: Check llms.txt/llms-full.txt build from the docs
-        run: npm run build:llms
-
       - name: Check the JSR exports are up to date
         run: npm run build:jsr && git diff --exit-code -- jsr.json
 
-      - name: Build the documentation site
-        # The site is generated at deploy time (the Docs workflow), so nothing here can be stale;
-        # this only has to fail when a generator does.
-        run: npm run build:docs
+      - name: Generate the examples of the guides
+        # The docs site (brazilian-utils/docs) runs this before it reads `docs/`; the generated files
+        # are not committed, so this only has to fail when the generator does.
+        run: npm run build:examples
 
       - name: Check the VEX statements against the suppressed advisories
         run: npm run check:vex
