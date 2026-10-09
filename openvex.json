@@ -3,8 +3,8 @@
 	"@id": "https://github.com/brazilian-utils/javascript/blob/main/openvex.json",
 	"author": "Hyan Mandian",
 	"role": "Maintainer of @brazilian-utils/brazilian-utils, see MAINTAINERS.md",
-	"timestamp": "2026-09-18T04:45:00Z",
-	"version": 1,
+	"timestamp": "2026-10-09T06:30:00Z",
+	"version": 2,
 	"statements": [
 		{
 			"vulnerability": {
@@ -47,6 +47,27 @@
 			"status": "not_affected",
 			"justification": "component_not_present",
 			"impact_statement": "extract-zip is a development-only transitive dependency (webdriverio -> @wdio/utils -> @puppeteer/browsers -> extract-zip) used by the browser test runner to unpack browser builds downloaded from the vendors in CI. The published package has zero runtime dependencies, so extract-zip is not present in any released asset and never runs on user input. No patched release of extract-zip exists; the statement is withdrawn when webdriverio drops the dependency."
+		},
+		{
+			"vulnerability": {
+				"@id": "https://github.com/advisories/GHSA-hp3w-g68c-fv3c",
+				"name": "GHSA-hp3w-g68c-fv3c",
+				"description": "sprintf-js denial of service through unbounded precision specifiers"
+			},
+			"timestamp": "2026-10-09T06:30:00Z",
+			"products": [
+				{
+					"@id": "pkg:npm/%40brazilian-utils/brazilian-utils",
+					"subcomponents": [
+						{
+							"@id": "pkg:npm/sprintf-js@1.0.3"
+						}
+					]
+				}
+			],
+			"status": "not_affected",
+			"justification": "component_not_present",
+			"impact_statement": "sprintf-js is a development-only transitive dependency (@microsoft/api-extractor -> @rushstack/ts-command-line -> argparse -> sprintf-js) that formats the tool's own messages while the API report is built in CI. The published package has zero runtime dependencies, so sprintf-js is not present in any released asset and never formats user input. No patched release of sprintf-js exists; the statement is withdrawn when argparse drops the dependency."
 		}
 	]
 }

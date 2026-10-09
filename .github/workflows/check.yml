@@ -65,4 +65,4 @@ jobs:
         run: npm run check:vex
 
       - name: Audit dependencies
-        run: npx --yes audit-ci@7.1.0 --high --allowlist GHSA-jmr9-qjv8-65gv GHSA-7pqw-9j4j-h8q3
+        run: npx --yes audit-ci@7.1.0 --high --allowlist GHSA-jmr9-qjv8-65gv GHSA-7pqw-9j4j-h8q3 GHSA-hp3w-g68c-fv3c
