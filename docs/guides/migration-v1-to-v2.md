@@ -2,6 +2,7 @@
 title: "Migration Guide: v1 to v2"
 description: "How to move a project from Brazilian Utils v1.x to v2: the renamed exports, the deprecated aliases that still work and a checklist to follow."
 keywords: ["migration", "v1", "v2", "deprecated", "renamed exports", "upgrade"]
+order: 1
 ---
 
 This guide covers moving a project from Brazilian Utils v1.x to v2.
@@ -22,12 +23,12 @@ Four v1 helpers were internal and have no alias. Replace them before upgrading:
 ## What changed
 
 - **Names are camelCase.** See [Renamed functions](#renamed-functions).
-- **Tree-shaking works down to the function**, and every util is also its own subpath (`@brazilian-utils/brazilian-utils/is-valid-cpf`), so the heavy ones can be lazy-loaded. See [Bundle size](getting-started.md#bundle-size).
+- **Tree-shaking works down to the function**, and every util is also its own subpath (`@brazilian-utils/brazilian-utils/is-valid-cpf`), so the heavy ones can be lazy-loaded. See [Bundle size](../getting-started.md#bundle-size).
 - **Alphanumeric CNPJ.** `isValidCnpj` and `generateCnpj` accept the new alphanumeric format with `{ version: 2 }`. Numeric (version 1) stays the default. See [`generateCnpj` and the version](#generatecnpj-and-the-version).
 - **`getAddressInfoByCep`** accepts a `providers` option, pads a numeric CEP, and throws typed errors: `GetAddressInfoByCepValidationError`, `GetAddressInfoByCepNotFoundError` and `GetAddressInfoByCepServiceError`. Calls without options work as in v1.
 - **`getCities`** returns the list sorted alphabetically. Since 2.4.0 it is deprecated: `getMunicipalities('SP')` returns the same municipalities with their IBGE codes, and `getMunicipalityByCode('3550308')` looks one up offline.
 - **`isValidIe`** takes one object since 2.4.0, `isValidIe({ value, stateCode })`. The positional form is deprecated.
-- **Many new utilities** since v2: holidays and business days, Pix, NF-e keys, boleto parsing, phone formatting, bank accounts and lookups, classification codes (CBO, CNAE, NCM, CFOP), municipalities offline, numbers in words and more. They are all in the [utilities reference](utilities.md).
+- **Many new utilities** since v2: holidays and business days, Pix, NF-e keys, boleto parsing, phone formatting, bank accounts and lookups, classification codes (CBO, CNAE, NCM, CFOP), municipalities offline, numbers in words and more. They are all in the [utilities reference](../utilities.md).
 - **Tooling** moved to Vite+ and Vitest, with browser tests in CI. This only matters if you contribute; see [CONTRIBUTING.md](https://github.com/brazilian-utils/javascript/blob/main/CONTRIBUTING.md).
 
 ## Renamed functions
