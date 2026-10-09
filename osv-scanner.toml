@@ -5,3 +5,7 @@ reason = "extract-zip is a development-only transitive dependency of webdriverio
 [[IgnoredVulns]]
 id = "GHSA-7pqw-9j4j-h8q3"
 reason = "extract-zip is a development-only transitive dependency of webdriverio (browser tests); no patched release exists and it never runs on user input"
+
+[[IgnoredVulns]]
+id = "GHSA-hp3w-g68c-fv3c"
+reason = "sprintf-js is a development-only transitive dependency of @microsoft/api-extractor (through argparse); no patched release exists and it only formats the tool's own messages, never user input"
