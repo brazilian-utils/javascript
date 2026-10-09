@@ -5,4 +5,4 @@
   * [Address from a CEP](guides/address-form.md)
   * [State and city](guides/state-city.md)
   * [Schema libraries](guides/schema.md)
-* [Migration v1 to v2](migration-v1-to-v2.md)
+* [Migration v1 to v2](guides/migration-v1-to-v2.md)

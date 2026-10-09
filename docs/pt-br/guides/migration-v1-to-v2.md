@@ -2,6 +2,7 @@
 title: "Guia de migração: v1 para v2"
 description: "Como migrar um projeto do Brazilian Utils v1.x para a v2: os exports renomeados, os aliases descontinuados que ainda funcionam e um checklist para seguir."
 keywords: ["migração", "v1", "v2", "descontinuado", "exports renomeados", "atualização"]
+order: 1
 ---
 
 Este guia mostra como migrar um projeto do Brazilian Utils v1.x para a v2.
