@@ -150,7 +150,7 @@
 		"lockfile-lint": "5.0.1",
 		"publint": "0.3.24",
 		"typescript": "7.0.2",
-		"vite-plus": "0.3.2",
+		"vite-plus": "1.4.0",
 		"webdriverio": "9.31.9"
 	},
 	"overrides": {
